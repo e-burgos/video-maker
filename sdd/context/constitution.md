@@ -59,6 +59,7 @@ Para el detalle técnico de cada subproyecto, ver su constitución específica:
 | ----------- | ---- | ----------------- | ----------------------- |
 | `libs/timeline-core` | lib de dominio TS | Contratos de datos del motor de video y cálculos puros de edición | `sdd/context/libs/timeline-core/constitution.md` |
 | `libs/media-local` | lib Node TS | Wrappers de ffprobe/ffmpeg/whisper-cli y parsers hacia los contratos del motor | `sdd/context/libs/media-local/constitution.md` |
+| `libs/composition-remotion` | lib React + Remotion | Renderiza una Timeline en frames: pistas, transiciones, captions y render headless | `sdd/context/libs/composition-remotion/constitution.md` |
 
 > Todavía no hay apps/libs/tools generadas en Nx. Al generar la primera, sumar una fila por subproyecto (solo agregar filas — nunca reformatear la tabla completa).
 > Las constituciones de subproyecto son la **fuente de verdad** del stack y las convenciones técnicas.
@@ -81,6 +82,7 @@ Para el detalle técnico de cada subproyecto, ver su constitución específica:
 | ----------- | ---------- | -------------------- |
 | `libs/timeline-core` | TypeScript estricto + Zod 4.5 + Vitest 4 + `@swc-node/register` (JSON Schema) | cycle-01 \| 2026-09-07 |
 | `libs/media-local` | TypeScript estricto + execa 10 + Zod 4.5 + Vitest 4 (fixtures grabadas, cero binarios) | cycle-02 \| 2026-09-07 |
+| `libs/composition-remotion` | React 19 + Remotion 4 + Vitest/jsdom | cycle-03 en curso (2026-09-07) |
 
 ---
 

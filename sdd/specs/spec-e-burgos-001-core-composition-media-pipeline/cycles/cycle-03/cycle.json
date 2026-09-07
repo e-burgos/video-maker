@@ -1,0 +1,36 @@
+{
+  "$schema": "../../../../schemas/cycle.schema.json",
+  "cycle": 3,
+  "module": "core-composition-media-pipeline",
+  "spec": "spec-e-burgos-001-core-composition-media-pipeline",
+  "apps": ["libs/composition-remotion"],
+  "phase": "composition-remotion-base",
+  "flow": "full",
+  "objectives": [
+    "Crear libs/composition-remotion (React 19 + Remotion 4) que renderiza una Timeline de timeline-core",
+    "Helpers puros testeables sin render (sequence props, transition timing, punch-in style, caption layout)",
+    "ArollSeries con TransitionSeries (fade, slide, whip-pan) y entrada Node renderTimeline con smoke manual",
+    "Dejar CA-023 a CA-027 de la spec en verde"
+  ],
+  "status": "in-progress",
+  "started_at": "2026-09-07",
+  "completed_at": null,
+  "documents": {
+    "brief": "sdd/specs/spec-e-burgos-001-core-composition-media-pipeline/cycles/cycle-03/brief.yaml"
+  },
+  "artifacts": [],
+  "metrics": {
+    "tasks_total": 0,
+    "tasks_completed": 0,
+    "story_points": 0,
+    "files_created": [],
+    "files_modified": [],
+    "files_deleted": [],
+    "usage": { "tokens_in": 0, "tokens_out": 0, "by_agent": [] }
+  },
+  "tables_created": [],
+  "endpoints_implemented": [],
+  "components_created": [],
+  "issues_found": [],
+  "reviewer_report": null
+}
