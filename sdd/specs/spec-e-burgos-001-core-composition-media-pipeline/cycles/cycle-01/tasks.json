@@ -110,14 +110,26 @@
       "depends_on": [
         "TASK-002"
       ],
-      "status": "pending",
+      "status": "done",
       "files": [
         "libs/timeline-core/src/schemas/edit-decision-list.schema.ts",
         "libs/timeline-core/src/schemas/audio-mix-plan.schema.ts",
         "libs/timeline-core/src/schemas/timeline.schema.ts",
         "libs/timeline-core/src/schemas/schemas.spec.ts",
-        "libs/timeline-core/src/__fixtures__/edl.fixture.ts"
-      ]
+        "libs/timeline-core/src/__fixtures__/edl.ts",
+        "libs/timeline-core/src/index.ts"
+      ],
+      "usage": {
+        "provider_model": "claude/sonnet",
+        "effort": "medium",
+        "tokens_in": 172357,
+        "tokens_out": 30416,
+        "tokens_total": 202773,
+        "approx": false,
+        "source": "agent-usage-notification",
+        "recorded_at": "2026-09-07",
+        "agent": "implementor-back"
+      }
     },
     {
       "id": "TASK-004",

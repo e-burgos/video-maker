@@ -1,10 +1,49 @@
 import { describe, expect, it } from 'vitest';
 
 import { arollAsset, brollAsset, musicAsset } from '../__fixtures__/assets';
+import { ca013Edl, ca013Format, invalidPunchInEdl } from '../__fixtures__/edl';
 import { overlappingWords, spanishTranscription } from '../__fixtures__/transcription';
+import { AudioMixPlanSchema, GainKeyframeSchema } from './audio-mix-plan.schema';
+import type { EditDecisionList } from './edit-decision-list.schema';
+import { EditDecisionSchema, EditDecisionListSchema } from './edit-decision-list.schema';
 import { MediaAssetSchema } from './media-asset.schema';
 import { OutputFormatSchema, SafeZoneSchema } from './output-format.schema';
+import type { Timeline } from './timeline.schema';
+import { TimelineSchema, TransitionTimingSchema } from './timeline.schema';
 import { SegmentSchema, TranscriptionSchema, WordSchema } from './transcription.schema';
+
+const minimalTimeline: Timeline = {
+  schemaVersion: 1,
+  id: 'timeline-aroll-cam-01',
+  format: ca013Format,
+  durationFrames: 300,
+  assets: [arollAsset],
+  tracks: {
+    aroll: [
+      {
+        id: 'aroll-0001',
+        assetId: 'aroll-cam-01',
+        from: 0,
+        durationFrames: 300,
+        trimStartMs: 0,
+        transform: { scale: 1, translateX: 0, translateY: 0 },
+      },
+    ],
+    broll: [],
+    voice: [],
+    music: [],
+    captions: [],
+  },
+  audioMix: {
+    voice: { integratedLufs: -14, truePeakDbtp: -1, loudnessRange: 11 },
+    music: { baseGainDb: -12, duckedGainDb: -24, attackMs: 150, releaseMs: 400, holdMs: 250 },
+    automation: [],
+  },
+};
+
+function withDecisions(edl: EditDecisionList, decisions: EditDecisionList['decisions']): EditDecisionList {
+  return { ...edl, decisions };
+}
 
 describe('OutputFormatSchema', () => {
   it('acepta un formato reels-9x16 válido', () => {
@@ -292,5 +331,461 @@ describe('TranscriptionSchema', () => {
     if (!result.success) {
       expect(result.error.issues.some((issue) => issue.path.join('.') === 'segments.0.wordRange')).toBe(true);
     }
+  });
+});
+
+describe('EditDecisionSchema', () => {
+  it('acepta cada variante de decisión', () => {
+    const decisions: unknown[] = [
+      { id: 'keep-0001', type: 'keep', startMs: 0, endMs: 100 },
+      { id: 'cut-0001', type: 'cut', startMs: 100, endMs: 200, reason: 'silence' },
+      { id: 'punch-0001', type: 'punch-in', startMs: 0, endMs: 100, scale: 1.1 },
+      {
+        id: 'broll-0001',
+        type: 'broll-overlay',
+        startMs: 0,
+        endMs: 100,
+        assetId: 'broll-shot-01',
+        fit: 'cover',
+      },
+      { id: 'trans-0001', type: 'transition', atMs: 100, kind: 'fade', durationMs: 300 },
+      {
+        id: 'cap-0001',
+        type: 'caption-group',
+        startMs: 0,
+        endMs: 100,
+        words: [{ text: 'hola', startMs: 0, endMs: 100 }],
+      },
+      { id: 'duck-0001', type: 'duck', startMs: 0, endMs: 100, gainDb: -12 },
+    ];
+
+    decisions.forEach((decision) => {
+      expect(EditDecisionSchema.safeParse(decision).success).toBe(true);
+    });
+  });
+
+  it('rechaza un tipo de decisión desconocido', () => {
+    const result = EditDecisionSchema.safeParse({
+      id: 'unknown-0001',
+      type: 'zoom',
+      startMs: 0,
+      endMs: 100,
+    });
+
+    expect(result.success).toBe(false);
+  });
+});
+
+describe('EditDecisionListSchema', () => {
+  it('acepta el fixture ca013Edl', () => {
+    expect(EditDecisionListSchema.safeParse(ca013Edl).success).toBe(true);
+  });
+
+  it('rechaza propiedades adicionales en el documento', () => {
+    const result = EditDecisionListSchema.safeParse({ ...ca013Edl, extra: true });
+
+    expect(result.success).toBe(false);
+  });
+
+  it('rechaza un punch-in dentro de un cut (CA-015, E4)', () => {
+    const result = EditDecisionListSchema.safeParse(invalidPunchInEdl);
+
+    expect(result.success).toBe(false);
+    if (!result.success) {
+      expect(result.error.issues.some((issue) => issue.path.join('.') === 'decisions.3')).toBe(true);
+    }
+  });
+
+  it('rechaza ids de decisión duplicados (E1)', () => {
+    const decisions = withDecisions(
+      ca013Edl,
+      ca013Edl.decisions.map((decision) =>
+        decision.id === 'cap-0003' ? { ...decision, id: 'keep-0001' } : decision,
+      ),
+    );
+
+    const result = EditDecisionListSchema.safeParse(decisions);
+
+    expect(result.success).toBe(false);
+    if (!result.success) {
+      expect(
+        result.error.issues.some((issue) => issue.path.join('.').endsWith('.id')),
+      ).toBe(true);
+    }
+  });
+
+  it('rechaza endMs menor o igual que startMs (E2)', () => {
+    const decisions = withDecisions(ca013Edl, [
+      { id: 'keep-0001', type: 'keep', startMs: 100, endMs: 100 },
+    ]);
+
+    const result = EditDecisionListSchema.safeParse(decisions);
+
+    expect(result.success).toBe(false);
+    if (!result.success) {
+      expect(result.error.issues.some((issue) => issue.path.join('.') === 'decisions.0.endMs')).toBe(true);
+    }
+  });
+
+  it('rechaza un hueco entre keep y cut (E3)', () => {
+    const decisions = withDecisions(ca013Edl, [
+      { id: 'keep-0001', type: 'keep', startMs: 0, endMs: 4080 },
+      { id: 'cut-0001', type: 'cut', startMs: 4200, endMs: 4920, reason: 'silence' },
+      { id: 'keep-0002', type: 'keep', startMs: 4920, endMs: 10_000 },
+    ]);
+
+    const result = EditDecisionListSchema.safeParse(decisions);
+
+    expect(result.success).toBe(false);
+    if (!result.success) {
+      expect(result.error.issues.some((issue) => issue.path.join('.') === 'decisions.1.startMs')).toBe(true);
+    }
+  });
+
+  it('rechaza un solape entre keep y cut (E3)', () => {
+    const decisions = withDecisions(ca013Edl, [
+      { id: 'keep-0001', type: 'keep', startMs: 0, endMs: 4080 },
+      { id: 'cut-0001', type: 'cut', startMs: 4000, endMs: 4920, reason: 'silence' },
+      { id: 'keep-0002', type: 'keep', startMs: 4920, endMs: 10_000 },
+    ]);
+
+    const result = EditDecisionListSchema.safeParse(decisions);
+
+    expect(result.success).toBe(false);
+    if (!result.success) {
+      expect(result.error.issues.some((issue) => issue.path.join('.') === 'decisions.1.startMs')).toBe(true);
+    }
+  });
+
+  it('rechaza una decisión de partición que no arranca en 0 (E3)', () => {
+    const decisions = withDecisions(ca013Edl, [{ id: 'keep-0001', type: 'keep', startMs: 10, endMs: 4080 }]);
+
+    const result = EditDecisionListSchema.safeParse(decisions);
+
+    expect(result.success).toBe(false);
+    if (!result.success) {
+      expect(result.error.issues.some((issue) => issue.path.join('.') === 'decisions.0.startMs')).toBe(true);
+    }
+  });
+
+  it('rechaza un broll-overlay fuera de todo keep (E4)', () => {
+    const decisions = withDecisions(ca013Edl, [
+      ...ca013Edl.decisions,
+      { id: 'broll-0002', type: 'broll-overlay', startMs: 4200, endMs: 4500, assetId: 'broll-shot-01', fit: 'cover' },
+    ]);
+
+    const result = EditDecisionListSchema.safeParse(decisions);
+
+    expect(result.success).toBe(false);
+    if (!result.success) {
+      expect(result.error.issues.some((issue) => issue.path.join('.') === 'decisions.9')).toBe(true);
+    }
+  });
+
+  it('rechaza un caption-group fuera de todo keep (E4)', () => {
+    const decisions = withDecisions(ca013Edl, [
+      ...ca013Edl.decisions,
+      {
+        id: 'cap-0004',
+        type: 'caption-group',
+        startMs: 4200,
+        endMs: 4400,
+        words: [{ text: 'silencio', startMs: 4200, endMs: 4400 }],
+      },
+    ]);
+
+    const result = EditDecisionListSchema.safeParse(decisions);
+
+    expect(result.success).toBe(false);
+    if (!result.success) {
+      expect(result.error.issues.some((issue) => issue.path.join('.') === 'decisions.9')).toBe(true);
+    }
+  });
+
+  it('rechaza un duck fuera de todo keep (E4)', () => {
+    const decisions = withDecisions(ca013Edl, [
+      ...ca013Edl.decisions,
+      { id: 'duck-0001', type: 'duck', startMs: 4200, endMs: 4400, gainDb: -12 },
+    ]);
+
+    const result = EditDecisionListSchema.safeParse(decisions);
+
+    expect(result.success).toBe(false);
+    if (!result.success) {
+      expect(result.error.issues.some((issue) => issue.path.join('.') === 'decisions.9')).toBe(true);
+    }
+  });
+
+  it('rechaza un transition.atMs que no coincide con el borde de un keep posterior (E5)', () => {
+    const decisions = withDecisions(
+      ca013Edl,
+      ca013Edl.decisions.map((decision) =>
+        decision.type === 'transition' ? { ...decision, atMs: 1000 } : decision,
+      ),
+    );
+
+    const result = EditDecisionListSchema.safeParse(decisions);
+
+    expect(result.success).toBe(false);
+    if (!result.success) {
+      expect(result.error.issues.some((issue) => issue.path.join('.') === 'decisions.5.atMs')).toBe(true);
+    }
+  });
+
+  it('rechaza un transition.atMs que coincide con el primer keep (E5)', () => {
+    const decisions = withDecisions(
+      ca013Edl,
+      ca013Edl.decisions.map((decision) =>
+        decision.type === 'transition' ? { ...decision, atMs: 0 } : decision,
+      ),
+    );
+
+    const result = EditDecisionListSchema.safeParse(decisions);
+
+    expect(result.success).toBe(false);
+    if (!result.success) {
+      expect(result.error.issues.some((issue) => issue.path.join('.') === 'decisions.5.atMs')).toBe(true);
+    }
+  });
+
+  it('rechaza dos punch-in solapados (E6)', () => {
+    const decisions = withDecisions(ca013Edl, [
+      { id: 'keep-0001', type: 'keep', startMs: 0, endMs: 10_000 },
+      { id: 'punch-0001', type: 'punch-in', startMs: 0, endMs: 500, scale: 1.1 },
+      { id: 'punch-0002', type: 'punch-in', startMs: 300, endMs: 800, scale: 1.15 },
+    ]);
+
+    const result = EditDecisionListSchema.safeParse(decisions);
+
+    expect(result.success).toBe(false);
+    if (!result.success) {
+      expect(result.error.issues.some((issue) => issue.path.join('.') === 'decisions.2.startMs')).toBe(true);
+    }
+  });
+
+  it('rechaza un emphasisIndex fuera de rango (E7)', () => {
+    const decisions = withDecisions(
+      ca013Edl,
+      ca013Edl.decisions.map((decision) =>
+        decision.id === 'cap-0003' ? { ...decision, emphasisIndex: 5 } : decision,
+      ),
+    );
+
+    const result = EditDecisionListSchema.safeParse(decisions);
+
+    expect(result.success).toBe(false);
+    if (!result.success) {
+      expect(result.error.issues.some((issue) => issue.path.join('.') === 'decisions.8.emphasisIndex')).toBe(true);
+    }
+  });
+
+  it('rechaza palabras de caption-group desordenadas (E8)', () => {
+    const decisions = withDecisions(
+      ca013Edl,
+      ca013Edl.decisions.map((decision) =>
+        decision.id === 'cap-0003' && decision.type === 'caption-group'
+          ? {
+              ...decision,
+              words: [
+                { text: 'totalmente', startMs: 5320, endMs: 6000 },
+                { text: 'nada', startMs: 5000, endMs: 5300 },
+              ],
+            }
+          : decision,
+      ),
+    );
+
+    const result = EditDecisionListSchema.safeParse(decisions);
+
+    expect(result.success).toBe(false);
+    if (!result.success) {
+      expect(
+        result.error.issues.some((issue) => issue.path.join('.') === 'decisions.8.words.1.startMs'),
+      ).toBe(true);
+    }
+  });
+
+  it('rechaza palabras de caption-group fuera del rango de la decisión (E8)', () => {
+    const decisions = withDecisions(
+      ca013Edl,
+      ca013Edl.decisions.map((decision) =>
+        decision.id === 'cap-0003' && decision.type === 'caption-group'
+          ? {
+              ...decision,
+              words: [
+                { text: 'nada', startMs: 5000, endMs: decision.endMs + 500 },
+                { text: 'totalmente', startMs: 5320, endMs: 6000 },
+              ],
+            }
+          : decision,
+      ),
+    );
+
+    const result = EditDecisionListSchema.safeParse(decisions);
+
+    expect(result.success).toBe(false);
+    if (!result.success) {
+      expect(
+        result.error.issues.some((issue) => issue.path.join('.') === 'decisions.8.words.0.startMs'),
+      ).toBe(true);
+    }
+  });
+});
+
+describe('AudioMixPlanSchema', () => {
+  it('aplica los defaults de voice y music', () => {
+    const result = AudioMixPlanSchema.safeParse({ voice: {}, music: {}, automation: [] });
+
+    expect(result.success).toBe(true);
+    if (result.success) {
+      expect(result.data.voice).toEqual({ integratedLufs: -14, truePeakDbtp: -1, loudnessRange: 11 });
+      expect(result.data.music).toEqual({
+        baseGainDb: -12,
+        duckedGainDb: -24,
+        attackMs: 150,
+        releaseMs: 400,
+        holdMs: 250,
+      });
+    }
+  });
+
+  it('acepta valores explícitos que sobreescriben los defaults', () => {
+    const result = AudioMixPlanSchema.safeParse({
+      voice: { integratedLufs: -16, truePeakDbtp: -2, loudnessRange: 9 },
+      music: { baseGainDb: -10, duckedGainDb: -20, attackMs: 100, releaseMs: 300, holdMs: 200 },
+      automation: [{ frame: 0, gainDb: -12 }],
+    });
+
+    expect(result.success).toBe(true);
+    if (result.success) {
+      expect(result.data.voice.integratedLufs).toBe(-16);
+      expect(result.data.music.baseGainDb).toBe(-10);
+    }
+  });
+
+  it('rechaza propiedades adicionales en el documento', () => {
+    const result = AudioMixPlanSchema.safeParse({ voice: {}, music: {}, automation: [], extra: true });
+
+    expect(result.success).toBe(false);
+  });
+
+  it('rechaza un keyframe con frame negativo', () => {
+    const result = GainKeyframeSchema.safeParse({ frame: -1, gainDb: -12 });
+
+    expect(result.success).toBe(false);
+  });
+});
+
+describe('TransitionTimingSchema', () => {
+  it('acepta la variante linear', () => {
+    expect(TransitionTimingSchema.safeParse({ type: 'linear' }).success).toBe(true);
+  });
+
+  it('acepta la variante spring completa', () => {
+    const result = TransitionTimingSchema.safeParse({
+      type: 'spring',
+      damping: 10,
+      stiffness: 100,
+      mass: 1,
+    });
+
+    expect(result.success).toBe(true);
+  });
+
+  it('rechaza una variante spring incompleta', () => {
+    const result = TransitionTimingSchema.safeParse({ type: 'spring', damping: 10 });
+
+    expect(result.success).toBe(false);
+  });
+});
+
+describe('TimelineSchema', () => {
+  it('acepta una timeline mínima válida', () => {
+    expect(TimelineSchema.safeParse(minimalTimeline).success).toBe(true);
+  });
+
+  it('acepta un captionClip con box y sin box', () => {
+    const withBox: Timeline = {
+      ...minimalTimeline,
+      tracks: {
+        ...minimalTimeline.tracks,
+        captions: [
+          {
+            id: 'caption-0001',
+            from: 0,
+            durationFrames: 30,
+            words: [{ text: 'hola', fromFrame: 0, durationFrames: 30 }],
+            box: { x: 60, y: 220, width: 960, height: 1300 },
+          },
+        ],
+      },
+    };
+    const withoutBox: Timeline = {
+      ...minimalTimeline,
+      tracks: {
+        ...minimalTimeline.tracks,
+        captions: [{ id: 'caption-0002', from: 0, durationFrames: 30, words: [{ text: 'hola', fromFrame: 0, durationFrames: 30 }] }],
+      },
+    };
+
+    expect(TimelineSchema.safeParse(withBox).success).toBe(true);
+    expect(TimelineSchema.safeParse(withoutBox).success).toBe(true);
+  });
+
+  it('rechaza durationFrames menor que 1', () => {
+    const result = TimelineSchema.safeParse({ ...minimalTimeline, durationFrames: 0 });
+
+    expect(result.success).toBe(false);
+    if (!result.success) {
+      expect(result.error.issues.some((issue) => issue.path.join('.') === 'durationFrames')).toBe(true);
+    }
+  });
+
+  it('rechaza propiedades adicionales en el documento', () => {
+    const result = TimelineSchema.safeParse({ ...minimalTimeline, extra: true });
+
+    expect(result.success).toBe(false);
+  });
+
+  it('rechaza ids de clip duplicados entre tracks', () => {
+    const duplicated: Timeline = {
+      ...minimalTimeline,
+      tracks: {
+        ...minimalTimeline.tracks,
+        broll: [
+          {
+            id: 'aroll-0001',
+            assetId: 'broll-shot-01',
+            from: 0,
+            durationFrames: 30,
+            trimStartMs: 0,
+            transform: { scale: 1, translateX: 0, translateY: 0 },
+          },
+        ],
+      },
+    };
+
+    const result = TimelineSchema.safeParse(duplicated);
+
+    expect(result.success).toBe(false);
+    if (!result.success) {
+      expect(result.error.issues.some((issue) => issue.path.join('.') === 'tracks.broll.0.id')).toBe(true);
+    }
+  });
+
+  it('acepta transiciones y assetId de assets referenciados', () => {
+    const withTransition: Timeline = {
+      ...minimalTimeline,
+      transitions: [
+        {
+          betweenClipIds: ['aroll-0001', 'aroll-0002'],
+          kind: 'fade',
+          durationFrames: 9,
+          timing: { type: 'spring', damping: 10, stiffness: 100, mass: 1 },
+        },
+      ],
+    };
+
+    expect(TimelineSchema.safeParse(withTransition).success).toBe(true);
   });
 });
