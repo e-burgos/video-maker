@@ -183,7 +183,7 @@ describe('renderTimeline', () => {
     }
   });
 
-  it('usa remotionRenderDeps por default sin cargar los paquetes nativos de Remotion (CA-018, RNF-3)', async () => {
+  it('usa remotionRenderDeps por default sin cargar los paquetes nativos de Remotion (CA-18, RNF-3)', async () => {
     const timeline = buildExampleTimeline('reels-9x16');
     const bundleProject = vi.spyOn(remotionRenderDeps, 'bundleProject').mockResolvedValue('file:///serve/');
     const selectTimelineComposition = vi

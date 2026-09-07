@@ -40,4 +40,17 @@ describe('transitionTiming', () => {
 
     expect(timing.getDurationInFrames({ fps: 30 })).toBe(9);
   });
+
+  it('acota la duración de la transición a 2 s de la Timeline (clamp por fps)', () => {
+    const longTransition: TimelineTransition = { ...springTransition, durationFrames: 240 };
+
+    expect(transitionTiming(longTransition, 30).getDurationInFrames({ fps: 30 })).toBe(60);
+    expect(transitionTiming(longTransition, 60).getDurationInFrames({ fps: 60 })).toBe(120);
+  });
+
+  it('nunca devuelve una transición de menos de 1 frame', () => {
+    const emptyTransition: TimelineTransition = { ...springTransition, durationFrames: 0 };
+
+    expect(transitionTiming(emptyTransition, 30).getDurationInFrames({ fps: 30 })).toBe(1);
+  });
 });

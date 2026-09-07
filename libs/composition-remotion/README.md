@@ -94,7 +94,7 @@ material, así que sobra de sobra en ambos casos.
 `renderTimeline` (el `renderMedia` real de `@remotion/renderer`) **nunca** corre en CI: ningún
 `*.spec.ts` de esta lib llega a `bundle`/`selectComposition`/`renderMedia` — los specs de
 `render.spec.ts` inyectan dobles de `RenderTimelineDeps` y verifican los argumentos, sin renderizar
-un solo frame (CA-018, RNF-3). El único camino a un render real es este procedimiento, manual:
+un solo frame (CA-18, RNF-3). El único camino a un render real es este procedimiento, manual:
 
 1. Generar los tres assets de `public/example/` con los comandos de arriba.
 2. **Terminar cualquier transcripción antes de renderizar, nunca en paralelo** (RN-14, CA-15): en

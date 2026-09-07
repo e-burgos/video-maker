@@ -14,9 +14,9 @@
     "ArollSeries con TransitionSeries (fade, slide, whip-pan) y entrada Node renderTimeline con smoke manual",
     "Dejar CA-023 a CA-027 de la spec en verde"
   ],
-  "status": "in-progress",
+  "status": "completed",
   "started_at": "2026-09-07",
-  "completed_at": null,
+  "completed_at": "2026-09-07",
   "documents": {
     "brief": "sdd/specs/spec-e-burgos-001-core-composition-media-pipeline/cycles/cycle-03/brief.yaml",
     "functional": "sdd/specs/spec-e-burgos-001-core-composition-media-pipeline/cycles/cycle-03/functional.md",
@@ -37,12 +37,85 @@
     "tasks_total": 7,
     "tasks_completed": 7,
     "story_points": 33,
-    "files_created": [],
-    "files_modified": [],
+    "files_created": [
+      "libs/composition-remotion/README.md",
+      "libs/composition-remotion/eslint.config.mjs",
+      "libs/composition-remotion/package.json",
+      "libs/composition-remotion/project.json",
+      "libs/composition-remotion/public/example/.gitignore",
+      "libs/composition-remotion/remotion.config.ts",
+      "libs/composition-remotion/src/Root.tsx",
+      "libs/composition-remotion/src/__fixtures__/example-edl.ts",
+      "libs/composition-remotion/src/__fixtures__/example-timeline.spec.ts",
+      "libs/composition-remotion/src/__fixtures__/example-timeline.ts",
+      "libs/composition-remotion/src/components/aroll-series.tsx",
+      "libs/composition-remotion/src/components/audio-track.tsx",
+      "libs/composition-remotion/src/components/broll-track.tsx",
+      "libs/composition-remotion/src/components/caption-track.tsx",
+      "libs/composition-remotion/src/components/timeline-composition.tsx",
+      "libs/composition-remotion/src/helpers/asset-src.spec.ts",
+      "libs/composition-remotion/src/helpers/asset-src.ts",
+      "libs/composition-remotion/src/helpers/audio-gain.spec.ts",
+      "libs/composition-remotion/src/helpers/audio-gain.ts",
+      "libs/composition-remotion/src/helpers/caption-layout.spec.ts",
+      "libs/composition-remotion/src/helpers/caption-layout.ts",
+      "libs/composition-remotion/src/helpers/punch-in-style.spec.ts",
+      "libs/composition-remotion/src/helpers/punch-in-style.ts",
+      "libs/composition-remotion/src/helpers/sequence-props.spec.ts",
+      "libs/composition-remotion/src/helpers/timeline-metadata.spec.ts",
+      "libs/composition-remotion/src/helpers/timeline-metadata.ts",
+      "libs/composition-remotion/src/helpers/timeline-to-sequence-props.ts",
+      "libs/composition-remotion/src/helpers/timeline-types.ts",
+      "libs/composition-remotion/src/helpers/transition-timing.spec.ts",
+      "libs/composition-remotion/src/helpers/transition-timing.ts",
+      "libs/composition-remotion/src/index.ts",
+      "libs/composition-remotion/src/remotion-entry.ts",
+      "libs/composition-remotion/src/render.spec.ts",
+      "libs/composition-remotion/src/render.ts",
+      "libs/composition-remotion/src/smoke.ts",
+      "libs/composition-remotion/src/transitions/presentation-for.spec.ts",
+      "libs/composition-remotion/src/transitions/presentation-for.ts",
+      "libs/composition-remotion/src/transitions/whip-pan-style.spec.ts",
+      "libs/composition-remotion/src/transitions/whip-pan-style.ts",
+      "libs/composition-remotion/src/transitions/whip-pan.tsx",
+      "libs/composition-remotion/tsconfig.json",
+      "libs/composition-remotion/tsconfig.lib.json",
+      "libs/composition-remotion/tsconfig.spec.json",
+      "libs/composition-remotion/vite.config.ts"
+    ],
+    "files_modified": [
+      "eslint.config.mjs",
+      "package.json",
+      "pnpm-lock.yaml",
+      "tsconfig.base.json"
+    ],
     "files_deleted": [],
     "usage": {
-      "tokens_in": 0,
-      "tokens_out": 0,
+      "tokens_in": 1723129,
+      "tokens_out": 299139,
+      "duration_minutes": 165,
+      "approx": true,
+      "source": "declared-estimate",
+      "by_tier": {
+        "claude/sonnet": {
+          "tokens_in": 1257680,
+          "tokens_out": 221942,
+          "approx": true,
+          "source": "declared-estimate"
+        },
+        "claude/opus": {
+          "tokens_in": 335449,
+          "tokens_out": 59197,
+          "approx": false,
+          "source": "agent-usage-notification"
+        },
+        "fable": {
+          "tokens_in": 130000,
+          "tokens_out": 18000,
+          "approx": true,
+          "source": "declared-estimate"
+        }
+      },
       "by_agent": [
         {
           "agent": "functional",
@@ -192,13 +265,73 @@
           "recorded_at": "2026-09-07",
           "tool_uses": 57,
           "duration_minutes": 11
+        },
+        {
+          "agent": "reviewer",
+          "label": "cycle-03 review + gates de cierre (CA-023..CA-027, contexto, memoria, telemetría, cierre de spec)",
+          "provider_model": "claude/opus",
+          "effort": "high",
+          "tokens_in": 148492,
+          "tokens_out": 26205,
+          "approx": false,
+          "source": "agent-usage-notification",
+          "recorded_at": "2026-09-07",
+          "duration_minutes": 9.4,
+          "tokens_total": 174697,
+          "tool_uses": 51
         }
       ]
     }
   },
   "tables_created": [],
   "endpoints_implemented": [],
-  "components_created": [],
-  "issues_found": [],
-  "reviewer_report": null
+  "components_created": [
+    "COMP-001",
+    "COMP-002",
+    "COMP-003",
+    "COMP-004",
+    "COMP-005",
+    "COMP-006"
+  ],
+  "issues_found": [
+    "Planner: el límite de sesión de la API cortó la corrida a mitad y dejó `planner.md` completo pero SIN `tasks.json`, es decir el ciclo con documento revisable y sin nada ejecutable (SPEC GATE pregunta 9 en NO). Resuelto dentro del ciclo con una segunda corrida del planner que solo emitió `tasks.json`; por eso la entrada `planner` de `by_agent` queda `approx: true` (mezcla un run no medido con uno medido). Lección registrada en el journal: el planner escribe `tasks.json` primero y `planner.md` después.",
+    "TASK-002: `timeline-to-sequence-props.ts` duplicó la fórmula de ganancia bajo el nombre `gainDbToLinearVolume` porque `audio-gain.ts` (su dueño, TASK-003) todavía no existía al cerrar la task. Resuelto dentro del ciclo por el orquestador: el módulo importa `gainDbToVolume` de `./audio-gain` y la fórmula vive en un solo lugar.",
+    "TASK-003: `transitionTiming(transition, fps)` no usaba su parámetro `fps` (la firma de architect.md §3.2 lo pide, la implementación no lo necesitaba), lo que dejaba un warning de parámetro sin uso. Resuelto dentro del ciclo por el orquestador con `clampTransitionFrames`, que acota la transición a 2 s de la Timeline y a un mínimo de 1 frame — identidad para los 9 frames @30 de CA-024.",
+    "TASK-005: `ArollSeries` nunca se registró en `sdd/components.json` (la sección de la lib saltaba de COMP-001 a COMP-003). Detectado por TASK-006 y resuelto dentro del ciclo por TASK-007, que lo registró como COMP-006.",
+    "TASK-007: auditoría del barrel — a `src/index.ts` le faltaban los re-exports de `CaptionBox` y `TransitionDirection` que exige D-06, y conservaba un `export {};` residual del generador `@nx/react:lib` que había sobrevivido desde el scaffold. Ambos resueltos dentro del ciclo.",
+    "Reviewer: el clamp de 2 s que el orquestador agregó a `transitionTiming` no tenía ningún test — los cuatro casos existentes usan 9 frames @30, donde el clamp es identidad, así que la rama nueva pasaba sin verificar. Corregido en la revisión con dos casos (`durationFrames: 240` → 60 frames @30 y 120 @60; `durationFrames: 0` → 1 frame). Suite: 67 → 69 tests.",
+    "Reviewer: el README de la lib y el título de un caso de `render.spec.ts` citaban «CA-018» refiriéndose al CA-18 del `functional.md` de este ciclo (ninguna prueba descarga ni ejecuta el navegador), pero CA-018 en la spec es el silencedetect de ffmpeg cerrado en cycle-02 — dos criterios distintos con el mismo id escrito. Corregido a «CA-18», que es además la forma que usa `architect.md` §8."
+  ],
+  "reviewer_report": {
+    "approved": true,
+    "date": "2026-09-07",
+    "ca_results": {
+      "CA-023": "PASS — `src/helpers/sequence-props.spec.ts`, describe `timelineToSequenceProps` sobre la Timeline de ejemplo (la de CA-013 reconstruida con `buildTimeline`): «mapea cada clip de A-roll con su from/durationInFrames tal cual» compara clip por clip contra `timeline.tracks.aroll` sin recalcular, «conserva la suma de frames de la serie de A-roll contra la Timeline» fija el total, «asocia la transición al par de clipIds exacto que emite buildTimeline» verifica `betweenClipIds` como tupla ordenada [saliente, entrante], y «calcula trimBefore desde trimStartMs con msToFrames» cubre la única conversión permitida. Completado con B-roll, voz/música (ganancia sin la automation), captions, el caso CE-1 de `assetId` sin resolver → `unresolvedAssetIds`, y la Timeline sin broll/música/captions.",
+      "CA-024": "PASS — `src/helpers/transition-timing.spec.ts`: «devuelve un springTiming cuya duración exacta es transition.durationFrames» con `{timing: {type: spring, damping: 200, stiffness: 100, mass: 1}, durationFrames: 9}` y fps 30 → `getDurationInFrames({fps: 30}) === 9`; «devuelve un linearTiming de progreso constante para timing.type linear» asserta además `getProgress({frame: 4.5}) ≈ 0.5`. Cubierto también `light-leak` y un `kind` desconocido (ambos siguen dando un timing válido de 9 frames) y, agregado en esta revisión, el clamp a 2 s de la Timeline y el piso de 1 frame.",
+      "CA-025": "PASS — `src/helpers/caption-layout.spec.ts`: «calcula la caja dentro del safe zone para 9:16» y «... para 16:9» verifican `x/y/width/height` contra `[left, width−right] × [top, height−bottom]` de `safeZoneFor(format)`, y «da el mismo resultado que el box de la Timeline de ejemplo» ancla el helper al `box` que ya emite `buildTimeline`. `CaptionTrack` consume exactamente este helper cuando el clip no trae `box` propio.",
+      "CA-026": "PASS — `src/helpers/punch-in-style.spec.ts`: «devuelve el transform y transformOrigin exactos para el anchor default (center)» produce `transform: \"scale(1.15) translate(0px, 0px)\"` + `transformOrigin: \"50% 50%\"`; los otros dos anchors dan `\"50% 0%\"` (top) y `\"50% 33%\"` (face-hint), y «no redondea ni normaliza escalas y traslados con decimales o negativos» fija que el helper copia la Timeline sin tocarla.",
+      "CA-027": "PASS (manual) — target + README, no ejecutado. El target `smoke` existe en `libs/composition-remotion/project.json` (`node -r @swc-node/register ./src/smoke.ts`, fuera de `lint test build`) y `src/smoke.ts` renderea `buildExampleTimeline('reels-9x16')` a `out/example-9x16.mp4` con `DEFAULT_RENDER_CONCURRENCY = 4`. El README documenta el comando (`pnpm nx run composition-remotion:smoke`), la expectativa verificable (`renderTimeline` devuelve `{width: 1080, height: 1920, fps: 30, durationInFrames: 265}` y `ffprobe` confirma 1080×1920@30 ≈ 8,83 s), los comandos `ffmpeg` exactos que generan los tres assets de `public/example/` (gitignoreado), el orden transcripción → render (CA-15) y el tope de concurrencia (CA-16). No se ejecutó el smoke ni `remotion studio` en la revisión: descargan Chrome Headless Shell. RNF-3 verificado por otra vía (ver `tests.rnf-3`).",
+      "CA-13..CA-18 (functional.md)": "PASS — CA-13/CA-14 son la cara de negocio de CA-027 (MP4 con el formato exacto de la Timeline, verificado por un procedimiento manual documentado que nunca corre en CI); CA-15 y CA-16 están escritos textualmente en los pasos 2 y 5 del README; CA-17 son los cuatro helpers con test sin montar la composición (CA-023..CA-026); CA-18 es la ausencia total de render en la suite."
+    },
+    "tests": {
+      "sdd:validate": "OK — 14 files valid, cross-checks passed (corrido antes de revisar y después del cierre)",
+      "suite": "69/69 PASS en 11 archivos de composition-remotion (67 al recibir el ciclo + 2 agregados en la revisión para el clamp de transitionTiming); nx run-many -t lint test build sobre los 5 proyectos del workspace en verde",
+      "coverage": "94% statements / 87.87% branches / 96.42% functions / 93.87% lines sobre src/helpers/** + src/transitions/** — supera el umbral de 80% que fija vite.config.ts (RNF-2, que pide ≥ 80% en los helpers de composición)",
+      "lint": "nx run-many -t lint: verde. La lib lintea con sus reglas propias de confinamiento: node:*/fs/path/child_process/os y @remotion/bundler|renderer prohibidos en todo src/** salvo render.ts y smoke.ts; Date, process y Math.random prohibidos en el barrel; boundaries Nx type:ui → type:domain",
+      "build": "nx run-many -t build: verde (composition-remotion = tsc -p tsconfig.lib.json con strict, noUncheckedIndexedAccess y exactOptionalPropertyTypes)",
+      "rnf-3": "PASS — la suite corre sin Chrome ni ffmpeg. `render.spec.ts` prueba el contrato completo de renderTimeline con dobles de RenderTimelineDeps (argumentos exactos de bundle/selectComposition/renderMedia, propagación de concurrency/entryPoint/publicDir/onProgress y los cuatro RenderTimelineError) y el caso «usa remotionRenderDeps por default sin cargar los paquetes nativos de Remotion (CA-18, RNF-3)» cubre incluso el default: remotionRenderDeps resuelve @remotion/bundler y @remotion/renderer con `await import()` DENTRO de cada método, así que importar render.ts no toca un paquete nativo. Ningún *.spec.ts monta Remotion ni escribe un archivo de video",
+      "superficie-publica": "PASS — `src/index.ts` exporta exactamente lo que listan architect.md §3/§4 (helpers, transiciones, los cinco componentes, metadata) más `CaptionBox`/`TransitionDirection` por D-06, y `src/render.ts` es el segundo entry point (alias `@video-maker/composition-remotion/render`). Fuera del barrel, como manda la regla 3 de §9: `__fixtures__/**`, el resto de `timeline-types.ts`, `remotion-entry.ts`, `Root.tsx` y `smoke.ts`. `registerRoot` aparece una sola vez en todo el árbol, en `remotion-entry.ts`; `Root.tsx` no tiene efectos de módulo",
+      "codigo-sin-comentarios": "PASS — grep de `//` y `/*` sobre src/**/*.ts(x) excluyendo specs no devuelve un solo comentario (el único match es el literal de una expresión regular de URL en asset-src.ts). Cero `// TODO`, cero código muerto comentado, cero referencias a task/ciclo en el código. Cero `any`: el único cast de la lib es `widenPresentation` (aroll-series.tsx), aislado en una función con nombre y anotado como follow-up",
+      "sin-efectos-en-componentes": "PASS — ningún useState, useEffect, fetch, Date ni Math.random en la lib (regla 4 de architect.md §9): los cinco componentes son funciones de props a JSX"
+    },
+    "notes": "Ciclo aprobado y último de la spec. 7/7 tasks done (33 SP), 0 skipped. CA-023..CA-026 en verde con test nombrado por criterio; CA-027 aprobado como criterio manual (target + README), no ejecutado en la revisión porque descarga Chrome Headless Shell — el README deja el procedimiento verificable paso a paso, con la expectativa numérica exacta (1080×1920@30, 265 frames) y los comandos ffmpeg que generan los assets, que es lo que el propio CA pide. Los cuatro desvíos que los implementadores declararon en artifacts/ se revisaron uno por uno y los cuatro son correctos: `TimelineCompositionProps`/`TimelineInputProps` como `type` en vez de `interface` (una interface nunca satisface `Record<string, unknown>`), `toTimelineTransition` para reconciliar los nombres de campo entre ArollTransitionPlan y TimelineTransition, `trimBefore` en vez del `startFrom` deprecado (D-15 gana sobre el resumen de la task), y `RemotionRoot` fuera del barrel (regla 3 de architect.md §9 gana sobre el resumen de la task) — el componente igual quedó registrado como COMP-005 y es consumible por ruta relativa. Las dos correcciones del orquestador también se validaron: la deduplicación de la fórmula de ganancia deja `gainDbToVolume` como única fuente, y el clamp a 2 s de `transitionTiming` no altera CA-024 (identidad en 9 frames @30) — pero llegó sin tests, así que la revisión agregó los dos casos que faltaban. Se corrigió además una cita de CA equivocada en el README y en un título de `render.spec.ts` (ver issues_found). Vale registrar que la lección de cycle-02 sobre el alias de Vitest se aplicó sola: TASK-001 dejó un spec que importa un VALOR de timeline-core dentro del scaffold, justamente para que un alias faltante falle ahí y no cuatro tasks después. Cierre de spec: `core-composition-media-pipeline` pasa a completed_modules con 3 ciclos y la spec a status completed.",
+    "follow_ups": [
+      "Correr el smoke real (`pnpm nx run composition-remotion:smoke`) en una máquina con ffmpeg y salida a internet, después de generar los tres assets de public/example/ con los comandos del README. Es la única parte de CA-027 que en este entorno solo pudo verificarse como procedimiento documentado: confirma de una sola vez el MP4 1080×1920@30 de 265 frames, que Chrome Headless Shell se descarga sin fricción y que la Timeline de ejemplo se ve como se espera en `remotion studio`.",
+      "`spec-006` (web-studio): esta lib usa `OffthreadVideo` en ArollSeries y BrollTrack porque es lo que optimiza el render a MP4, y ese componente NO es equivalente dentro de un `<Player>` de browser. Montar la composición en apps/web va a requerir un componente de video conmutable (Video para el Player, OffthreadVideo para el render). Deliberadamente no resuelto acá (R-2 de architect.md): el consumidor todavía no existe.",
+      "La rama `file://` de `assetSrc` (rutas absolutas, pensada para que spec-005/tools/render-cli rendericen el metraje real sin copiarlo a public/) está cubierta por tests unitarios pero nunca se ejercitó en un render real. Si Chrome bloqueara sub-recursos file://, el fallback ya previsto es RenderTimelineOptions.publicDir + rutas relativas. Verificarlo junto con el smoke.",
+      "`widenPresentation` (aroll-series.tsx) castea el tipo unión ArollPresentation a TransitionPresentation<Record<string, unknown>>: TransitionSeries.Transition es genérico en un único PresentationProps y con exactOptionalPropertyTypes rechaza la unión. Es el único cast de la lib, no usa `any` y está aislado en una función con nombre — aceptable para este ciclo. Revisarlo cuando spec-003 agregue presentaciones nuevas: si la unión crece, conviene un mapa tipado kind → presentación con el genérico resuelto en el punto de construcción.",
+      "El `include` de cobertura de vite.config.ts es `src/helpers/**/*.ts` + `src/transitions/**/*.ts` (sin .tsx, D-08), pero el provider v8 igual reporta whip-pan.tsx al 33% porque se importa transitivamente desde presentation-for.spec.ts. No baja ningún umbral; conviene hacerlo explícito con un exclude en vez de depender de la extensión del include.",
+      "El `anchor` del punch-in no viaja en la Timeline (D-16): punchInStyle lo acepta como parámetro y ArollSeries usa siempre el default `center`, así que los anchors `top`/`face-hint` están implementados y testeados pero son inalcanzables desde una Timeline real. Corresponde a spec-002 extender el contrato de timeline-core."
+    ]
+  }
 }

@@ -3,9 +3,9 @@
 > spec-id: spec-e-burgos-001-core-composition-media-pipeline
 > slug: core-composition-media-pipeline
 > módulo: core-composition-media-pipeline
-> estado: activo
+> estado: completado
 > fecha: 2026-09-07
-> Estado: **draft** — el sdd-orchestrator la pasa a `in-progress` al abrir `cycle-01`.
+> Estado: **completado** — 3 ciclos cerrados el 2026-09-07
 
 ## Resumen Ejecutivo
 

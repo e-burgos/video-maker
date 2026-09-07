@@ -82,7 +82,7 @@ Para el detalle técnico de cada subproyecto, ver su constitución específica:
 | ----------- | ---------- | -------------------- |
 | `libs/timeline-core` | TypeScript estricto + Zod 4.5 + Vitest 4 + `@swc-node/register` (JSON Schema) | cycle-01 \| 2026-09-07 |
 | `libs/media-local` | TypeScript estricto + execa 10 + Zod 4.5 + Vitest 4 (fixtures grabadas, cero binarios) | cycle-02 \| 2026-09-07 |
-| `libs/composition-remotion` | React 19 + Remotion 4 + Vitest/jsdom | cycle-03 en curso (2026-09-07) |
+| `libs/composition-remotion` | React 19 + Remotion 4.0.522 (`transitions`/`bundler`/`renderer`/`cli`) + Vitest 4/jsdom (cero render en CI) | cycle-03 \| 2026-09-07 |
 
 ---
 
