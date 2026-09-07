@@ -3,7 +3,9 @@
   "cycle": 2,
   "module": "core-composition-media-pipeline",
   "spec": "spec-e-burgos-001-core-composition-media-pipeline",
-  "apps": ["libs/media-local"],
+  "apps": [
+    "libs/media-local"
+  ],
   "phase": "media-local-wrappers-and-parsers",
   "flow": "full",
   "objectives": [
@@ -15,7 +17,8 @@
   "started_at": "2026-09-07",
   "completed_at": null,
   "documents": {
-    "brief": "sdd/specs/spec-e-burgos-001-core-composition-media-pipeline/cycles/cycle-02/brief.yaml"
+    "brief": "sdd/specs/spec-e-burgos-001-core-composition-media-pipeline/cycles/cycle-02/brief.yaml",
+    "functional": "sdd/specs/spec-e-burgos-001-core-composition-media-pipeline/cycles/cycle-02/functional.md"
   },
   "artifacts": [],
   "metrics": {
@@ -25,7 +28,25 @@
     "files_created": [],
     "files_modified": [],
     "files_deleted": [],
-    "usage": { "tokens_in": 0, "tokens_out": 0, "by_agent": [] }
+    "usage": {
+      "tokens_in": 9000,
+      "tokens_out": 4300,
+      "by_agent": [
+        {
+          "agent": "functional",
+          "provider_model": "claude/sonnet",
+          "effort": "medium",
+          "tokens_in": 89145,
+          "tokens_out": 15732,
+          "approx": false,
+          "source": "agent-usage-notification",
+          "recorded_at": "2026-09-07",
+          "tokens_total": 104877,
+          "tool_uses": 18,
+          "duration_minutes": 3.5
+        }
+      ]
+    }
   },
   "tables_created": [],
   "endpoints_implemented": [],
