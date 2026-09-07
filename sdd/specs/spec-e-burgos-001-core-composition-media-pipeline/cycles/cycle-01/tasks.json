@@ -175,15 +175,28 @@
       "depends_on": [
         "TASK-003"
       ],
-      "status": "pending",
+      "status": "done",
       "files": [
         "libs/timeline-core/src/silence/detect-silences.ts",
         "libs/timeline-core/src/silence/merge-silences.ts",
         "libs/timeline-core/src/silence/prune-silences.ts",
         "libs/timeline-core/src/silence/silence.spec.ts",
         "libs/timeline-core/src/silence/prune.spec.ts",
-        "libs/timeline-core/src/__fixtures__/silence.fixture.ts"
-      ]
+        "libs/timeline-core/src/__fixtures__/silence.fixture.ts",
+        "libs/timeline-core/src/timeline/ids.ts",
+        "libs/timeline-core/src/index.ts"
+      ],
+      "usage": {
+        "provider_model": "claude/sonnet",
+        "effort": "medium",
+        "tokens_in": 147869,
+        "tokens_out": 26094,
+        "tokens_total": 173963,
+        "approx": false,
+        "source": "agent-usage-notification",
+        "recorded_at": "2026-09-07",
+        "agent": "implementor-back"
+      }
     },
     {
       "id": "TASK-006",

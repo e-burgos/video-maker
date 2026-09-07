@@ -22,6 +22,7 @@ export type {
   BrollOverlayDecision,
   CaptionGroupDecision,
   CutDecision,
+  CutReason,
   DuckDecision,
   EditDecision,
   EditDecisionList,
@@ -53,3 +54,16 @@ export type { AssetId, ClipId, DecisionId, Db, Fps, Frame, Lufs, Ms, Rounding, S
 export { framesToMs, msToFrames } from './units/units';
 
 export { DEFAULT_SAFE_ZONES, defaultFormat, safeZoneFor } from './format/format';
+
+export { detectSilencesFromWords } from './silence/detect-silences';
+export type { DetectSilencesOptions, SilenceRange } from './silence/detect-silences';
+
+export { mergeSilences } from './silence/merge-silences';
+
+export { pruneSilences } from './silence/prune-silences';
+export type {
+  CutRange,
+  KeepRange,
+  PruneSilencesOptions,
+  PruneSilencesResult,
+} from './silence/prune-silences';
