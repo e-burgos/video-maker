@@ -245,8 +245,33 @@
         "TASK-002",
         "TASK-006"
       ],
-      "status": "pending",
-      "files": []
+      "status": "done",
+      "files": [
+        "libs/media-local/src/fs/read-text-file.ts",
+        "libs/media-local/src/fs/fs-ports.spec.ts",
+        "libs/media-local/src/whisper/whisper-cpp-output.schema.ts",
+        "libs/media-local/src/whisper/faster-whisper-output.schema.ts",
+        "libs/media-local/src/whisper/build-transcription.ts",
+        "libs/media-local/src/whisper/parse-whisper-cpp-json.ts",
+        "libs/media-local/src/whisper/parse-faster-whisper-json.ts",
+        "libs/media-local/src/whisper/transcribe-with-whisper-cpp.ts",
+        "libs/media-local/src/whisper/whisper-parsers.spec.ts",
+        "libs/media-local/src/whisper/transcribe.spec.ts",
+        "libs/media-local/src/__fixtures__/whisper/whisper-cpp.json",
+        "libs/media-local/src/__fixtures__/whisper/faster-whisper.json",
+        "libs/media-local/src/index.ts"
+      ],
+      "usage": {
+        "provider_model": "claude/sonnet",
+        "effort": "medium",
+        "tokens_in": 159240,
+        "tokens_out": 28101,
+        "tokens_total": 187341,
+        "approx": false,
+        "source": "agent-usage-notification",
+        "recorded_at": "2026-09-07",
+        "agent": "implementor-back"
+      }
     },
     {
       "id": "TASK-008",

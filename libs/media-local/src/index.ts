@@ -59,3 +59,15 @@ export { normalizeVoice } from './ffmpeg/normalize-voice';
 export type { NormalizeVoiceOptions, NormalizeVoiceResult } from './ffmpeg/normalize-voice';
 export { extractTrailingJsonObject, parseLoudnormJson } from './ffmpeg/parse-loudnorm-json';
 export type { LoudnessMeasurement } from './ffmpeg/parse-loudnorm-json';
+
+export { nodeReadTextFile } from './fs/read-text-file';
+export type { ReadTextFile } from './fs/read-text-file';
+
+export { groupTokensIntoWords, parseWhisperCppJson } from './whisper/parse-whisper-cpp-json';
+export type { ParseTranscriptionOptions } from './whisper/parse-whisper-cpp-json';
+export { parseFasterWhisperJson } from './whisper/parse-faster-whisper-json';
+export {
+  DEFAULT_WHISPER_LANGUAGE,
+  transcribeWithWhisperCpp,
+} from './whisper/transcribe-with-whisper-cpp';
+export type { TranscribeWithWhisperCppOptions } from './whisper/transcribe-with-whisper-cpp';

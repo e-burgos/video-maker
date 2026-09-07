@@ -1,0 +1,22 @@
+{
+  "language": "es",
+  "duration": 3.7,
+  "segments": [
+    {
+      "id": 0,
+      "start": 0.0,
+      "end": 3.695,
+      "text": " Hoy te muestro cómo editar un video completo.",
+      "words": [
+        { "word": " Hoy", "start": 0.0, "end": 0.31, "probability": 0.982 },
+        { "word": " te", "start": 0.35, "end": 0.49, "probability": 0.991 },
+        { "word": " muestro", "start": 0.518, "end": 0.905, "probability": 0.977 },
+        { "word": " cómo", "start": 1.2, "end": 1.56, "probability": 0.968 },
+        { "word": " editar", "start": 1.575, "end": 2.04, "probability": 0.985 },
+        { "word": " un", "start": 2.07, "end": 2.19, "probability": 0.994 },
+        { "word": " video", "start": 2.68, "end": 3.11, "probability": 0.989 },
+        { "word": " completo.", "start": 3.12, "end": 3.695, "probability": 0.973 }
+      ]
+    }
+  ]
+}

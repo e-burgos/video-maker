@@ -1,0 +1,18 @@
+{
+  "params": { "model": "/models/ggml-large-v3-turbo.bin", "language": "es" },
+  "result": { "language": "es" },
+  "transcription": [
+    { "timestamps": { "from": "00:00:00,000", "to": "00:00:00,000" }, "offsets": { "from": 0, "to": 0 }, "text": "[_BEG_]" },
+    { "timestamps": { "from": "00:00:00,000", "to": "00:00:00,300" }, "offsets": { "from": 0, "to": 300 }, "text": " Hoy" },
+    { "timestamps": { "from": "00:00:00,350", "to": "00:00:00,500" }, "offsets": { "from": 350, "to": 500 }, "text": " te" },
+    { "timestamps": { "from": "00:00:00,520", "to": "00:00:00,700" }, "offsets": { "from": 520, "to": 700 }, "text": " mues" },
+    { "timestamps": { "from": "00:00:00,700", "to": "00:00:00,900" }, "offsets": { "from": 700, "to": 900 }, "text": "tro" },
+    { "timestamps": { "from": "00:00:01,200", "to": "00:00:01,550" }, "offsets": { "from": 1200, "to": 1550 }, "text": " cómo" },
+    { "timestamps": { "from": "00:00:01,570", "to": "00:00:01,800" }, "offsets": { "from": 1570, "to": 1800 }, "text": " edit" },
+    { "timestamps": { "from": "00:00:01,800", "to": "00:00:02,050" }, "offsets": { "from": 1800, "to": 2050 }, "text": "ar" },
+    { "timestamps": { "from": "00:00:02,070", "to": "00:00:02,180" }, "offsets": { "from": 2070, "to": 2180 }, "text": " un" },
+    { "timestamps": { "from": "00:00:02,680", "to": "00:00:03,100" }, "offsets": { "from": 2680, "to": 3100 }, "text": " video" },
+    { "timestamps": { "from": "00:00:03,120", "to": "00:00:03,620" }, "offsets": { "from": 3120, "to": 3620 }, "text": " completo" },
+    { "timestamps": { "from": "00:00:03,620", "to": "00:00:03,700" }, "offsets": { "from": 3620, "to": 3700 }, "text": "." }
+  ]
+}

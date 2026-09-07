@@ -3,6 +3,7 @@ import { fileURLToPath } from 'node:url';
 import { describe, expect, it } from 'vitest';
 
 import { nodeBinaryLookup } from './binary-lookup';
+import { nodeReadTextFile } from './read-text-file';
 
 const thisFile = fileURLToPath(import.meta.url);
 const thisDir = fileURLToPath(new URL('.', import.meta.url));
@@ -30,5 +31,15 @@ describe('nodeBinaryLookup', () => {
 
   it('isReadableFile es false para un archivo inexistente', async () => {
     await expect(nodeBinaryLookup.isReadableFile('/no/existe/archivo.json')).resolves.toBe(false);
+  });
+});
+
+describe('nodeReadTextFile', () => {
+  it('lee el contenido de un archivo de texto del propio repo', async () => {
+    await expect(nodeReadTextFile(thisFile)).resolves.toContain('nodeReadTextFile');
+  });
+
+  it('rechaza cuando el archivo no existe', async () => {
+    await expect(nodeReadTextFile('/no/existe/archivo.json')).rejects.toThrow();
   });
 });
