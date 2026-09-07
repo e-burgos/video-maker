@@ -28,3 +28,19 @@ export {
   resolveBinary,
 } from './binaries/resolve-binaries';
 export type { BinaryName, ResolvedBinaries, ResolveBinariesOptions } from './binaries/resolve-binaries';
+
+export { parseSilenceDetect } from './ffmpeg/parse-silence-detect';
+export type { ParseSilenceDetectContext } from './ffmpeg/parse-silence-detect';
+export {
+  DEFAULT_SILENCE_MIN_MS,
+  DEFAULT_SILENCE_NOISE_DB,
+  detectSilencesWithFfmpeg,
+} from './ffmpeg/detect-silences';
+export type { DetectSilencesWithFfmpegOptions } from './ffmpeg/detect-silences';
+
+export { systemClock } from './clock';
+export type { Clock } from './clock';
+export { FFPROBE_ARGS, probeMedia } from './ffprobe/probe-media';
+export type { ProbeMediaOptions } from './ffprobe/probe-media';
+export { parseFfprobeJson } from './ffprobe/parse-ffprobe-json';
+export type { ParseFfprobeContext } from './ffprobe/parse-ffprobe-json';

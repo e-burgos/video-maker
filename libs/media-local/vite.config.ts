@@ -1,7 +1,16 @@
+import { fileURLToPath } from 'node:url';
+
 import { defineConfig } from 'vitest/config';
 
 export default defineConfig({
   cacheDir: '../../node_modules/.vite/media-local',
+  resolve: {
+    alias: {
+      '@video-maker/timeline-core': fileURLToPath(
+        new URL('../timeline-core/src/index.ts', import.meta.url),
+      ),
+    },
+  },
   test: {
     globals: false,
     environment: 'node',

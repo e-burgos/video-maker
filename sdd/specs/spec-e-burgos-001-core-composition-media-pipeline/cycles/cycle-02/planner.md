@@ -271,3 +271,4 @@ referencia de sus fixtures). El camino crítico es
 TASK-001 → TASK-002 → TASK-006 → TASK-007 → TASK-008.
 
 > IDs `TASK-[NNN]` — el scope es el `tasks.json` del ciclo; los mismos IDs van en ambos archivos.
+

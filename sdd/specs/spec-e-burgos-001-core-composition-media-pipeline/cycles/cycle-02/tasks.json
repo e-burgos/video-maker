@@ -110,8 +110,32 @@
       "depends_on": [
         "TASK-002"
       ],
-      "status": "pending",
-      "files": []
+      "status": "done",
+      "files": [
+        "libs/media-local/src/clock.ts",
+        "libs/media-local/src/clock.spec.ts",
+        "libs/media-local/src/__fixtures__/load-fixture.ts",
+        "libs/media-local/src/__fixtures__/ffprobe/video-rotated.json",
+        "libs/media-local/src/__fixtures__/ffprobe/image.json",
+        "libs/media-local/src/__fixtures__/ffprobe/audio.json",
+        "libs/media-local/src/ffprobe/ffprobe-output.schema.ts",
+        "libs/media-local/src/ffprobe/parse-ffprobe-json.ts",
+        "libs/media-local/src/ffprobe/probe-media.ts",
+        "libs/media-local/src/ffprobe/ffprobe.spec.ts",
+        "libs/media-local/vite.config.ts",
+        "libs/media-local/src/index.ts"
+      ],
+      "usage": {
+        "provider_model": "claude/sonnet",
+        "effort": "medium",
+        "tokens_in": 167880,
+        "tokens_out": 29626,
+        "tokens_total": 197506,
+        "approx": false,
+        "source": "agent-usage-notification",
+        "recorded_at": "2026-09-07",
+        "agent": "implementor-back"
+      }
     },
     {
       "id": "TASK-004",
@@ -124,8 +148,25 @@
       "depends_on": [
         "TASK-002"
       ],
-      "status": "pending",
-      "files": []
+      "status": "done",
+      "files": [
+        "libs/media-local/src/ffmpeg/parse-silence-detect.ts",
+        "libs/media-local/src/ffmpeg/detect-silences.ts",
+        "libs/media-local/src/ffmpeg/silencedetect.spec.ts",
+        "libs/media-local/src/__fixtures__/ffmpeg/silencedetect.stderr.txt",
+        "libs/media-local/src/index.ts"
+      ],
+      "usage": {
+        "provider_model": "claude/sonnet",
+        "effort": "medium",
+        "tokens_in": 118708,
+        "tokens_out": 20948,
+        "tokens_total": 139656,
+        "approx": false,
+        "source": "agent-usage-notification",
+        "recorded_at": "2026-09-07",
+        "agent": "implementor-back"
+      }
     },
     {
       "id": "TASK-005",
