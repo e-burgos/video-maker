@@ -30,5 +30,54 @@
         }
       ]
     }
+  },
+  "libs/composition-remotion": {
+    "components": [
+      {
+        "id": "COMP-001",
+        "name": "BrollTrack",
+        "type": "component",
+        "module": "core-composition-media-pipeline",
+        "spec": "sdd/specs/spec-e-burgos-001-core-composition-media-pipeline",
+        "path": "src/components/broll-track.tsx",
+        "status": "implemented",
+        "created_in_cycle": 3,
+        "updated_in_cycle": null,
+        "description": "Renderiza los clips de B-roll (video/imagen) en Sequences posicionadas por from/durationInFrames, con fit cover/contain/pip.",
+        "consumes": [],
+        "created_at": "2026-09-07",
+        "changelog": []
+      },
+      {
+        "id": "COMP-002",
+        "name": "AudioTrack",
+        "type": "component",
+        "module": "core-composition-media-pipeline",
+        "spec": "sdd/specs/spec-e-burgos-001-core-composition-media-pipeline",
+        "path": "src/components/audio-track.tsx",
+        "status": "implemented",
+        "created_in_cycle": 3,
+        "updated_in_cycle": null,
+        "description": "Renderiza las pistas de voz y música con Audio; la música usa la automatización de ganancia (volumeAtFrame) cuando existe, ignorando clip.gainDb.",
+        "consumes": [],
+        "created_at": "2026-09-07",
+        "changelog": []
+      },
+      {
+        "id": "COMP-003",
+        "name": "CaptionTrack",
+        "type": "component",
+        "module": "core-composition-media-pipeline",
+        "spec": "sdd/specs/spec-e-burgos-001-core-composition-media-pipeline",
+        "path": "src/components/caption-track.tsx",
+        "status": "implemented",
+        "created_in_cycle": 3,
+        "updated_in_cycle": null,
+        "description": "Renderiza subtítulos mínimos en texto plano dentro de la caja del safe zone (clip.box o captionLayout), con la palabra emphasisIndex en negrita.",
+        "consumes": [],
+        "created_at": "2026-09-07",
+        "changelog": []
+      }
+    ]
   }
 }

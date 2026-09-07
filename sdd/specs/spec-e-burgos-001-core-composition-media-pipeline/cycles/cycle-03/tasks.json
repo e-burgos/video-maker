@@ -144,12 +144,24 @@
         "TASK-001",
         "TASK-003"
       ],
-      "status": "pending",
+      "status": "done",
       "files": [
         "libs/composition-remotion/src/components/broll-track.tsx",
         "libs/composition-remotion/src/components/audio-track.tsx",
-        "libs/composition-remotion/src/components/caption-track.tsx"
-      ]
+        "libs/composition-remotion/src/components/caption-track.tsx",
+        "sdd/components.json"
+      ],
+      "usage": {
+        "provider_model": "claude/sonnet",
+        "effort": "medium",
+        "tokens_in": 131175,
+        "tokens_out": 23148,
+        "tokens_total": 154323,
+        "approx": false,
+        "source": "agent-usage-notification",
+        "recorded_at": "2026-09-07",
+        "agent": "implementor-front"
+      }
     },
     {
       "id": "TASK-005",
@@ -164,7 +176,7 @@
         "TASK-002",
         "TASK-003"
       ],
-      "status": "pending",
+      "status": "done",
       "files": [
         "libs/composition-remotion/src/transitions/whip-pan-style.ts",
         "libs/composition-remotion/src/transitions/whip-pan-style.spec.ts",
@@ -172,7 +184,18 @@
         "libs/composition-remotion/src/transitions/presentation-for.ts",
         "libs/composition-remotion/src/transitions/presentation-for.spec.ts",
         "libs/composition-remotion/src/components/aroll-series.tsx"
-      ]
+      ],
+      "usage": {
+        "provider_model": "claude/sonnet",
+        "effort": "high",
+        "tokens_in": 125180,
+        "tokens_out": 22090,
+        "tokens_total": 147270,
+        "approx": false,
+        "source": "agent-usage-notification",
+        "recorded_at": "2026-09-07",
+        "agent": "implementor-front"
+      }
     },
     {
       "id": "TASK-006",
