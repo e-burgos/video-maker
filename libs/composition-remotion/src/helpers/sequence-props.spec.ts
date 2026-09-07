@@ -1,0 +1,116 @@
+import { describe, expect, it } from 'vitest';
+import { buildExampleTimeline } from '../__fixtures__/example-timeline';
+import { timelineToSequenceProps } from './timeline-to-sequence-props';
+
+describe('timelineToSequenceProps', () => {
+  const timeline = buildExampleTimeline('reels-9x16');
+  const plan = timelineToSequenceProps(timeline);
+
+  it('expone el formato y la duración de la Timeline sin recalcular', () => {
+    expect(plan.durationInFrames).toBe(265);
+    expect(plan.fps).toBe(30);
+    expect(plan.width).toBe(1080);
+    expect(plan.height).toBe(1920);
+  });
+
+  it('mapea cada clip de A-roll con su from/durationInFrames tal cual', () => {
+    expect(plan.aroll).toHaveLength(2);
+
+    expect(plan.aroll[0]).toMatchObject({
+      from: 0,
+      durationInFrames: 122,
+      trimStartMs: 0,
+      trimBefore: 0,
+      muted: true,
+    });
+    expect(plan.aroll[0]?.transform.scale).toBe(1);
+
+    expect(plan.aroll[1]).toMatchObject({
+      from: 113,
+      durationInFrames: 152,
+      trimStartMs: 4920,
+      trimBefore: 148,
+    });
+    expect(plan.aroll[1]?.transform.scale).toBe(1.15);
+  });
+
+  it('calcula trimBefore desde trimStartMs con msToFrames', () => {
+    expect(plan.aroll[1]?.trimBefore).toBe(148);
+  });
+
+  it('conserva la suma de frames de la serie de A-roll contra la Timeline', () => {
+    const [first, second] = plan.aroll;
+    const [transition] = plan.arollTransitions;
+
+    expect(first).toBeDefined();
+    expect(second).toBeDefined();
+    expect(transition).toBeDefined();
+    expect(
+      (first?.durationInFrames ?? 0) + (second?.durationInFrames ?? 0) - (transition?.durationInFrames ?? 0),
+    ).toBe(timeline.durationFrames);
+  });
+
+  it('asocia la transición al par de clipIds exacto que emite buildTimeline', () => {
+    expect(plan.arollTransitions).toHaveLength(1);
+    expect(plan.arollTransitions[0]).toMatchObject({
+      betweenClipIds: ['aroll-0001', 'aroll-0002'],
+      kind: 'fade',
+      durationInFrames: 9,
+    });
+    expect(plan.arollTransitions[0]?.timing.type).toBe('spring');
+  });
+
+  it('mapea B-roll', () => {
+    expect(plan.broll).toHaveLength(1);
+    expect(plan.broll[0]).toMatchObject({
+      from: 121,
+      durationInFrames: 60,
+      kind: 'image',
+    });
+  });
+
+  it('mapea voz y música, con la ganancia de la música sin la automatización', () => {
+    expect(plan.voice).toHaveLength(2);
+    expect(plan.music).toHaveLength(1);
+
+    expect(plan.music[0]).toMatchObject({ from: 0, durationInFrames: 265, gainDb: -12 });
+    expect(plan.music[0]?.volume).toBeCloseTo(0.2512, 4);
+    expect(plan.voice[0]?.volume).toBe(1);
+  });
+
+  it('mapea captions con from/durationInFrames relativos a la Sequence', () => {
+    expect(plan.captions).toHaveLength(3);
+    expect(plan.captions[0]).toMatchObject({ from: 15, durationInFrames: 33 });
+    expect(plan.captions[1]).toMatchObject({ from: 51, durationInFrames: 33 });
+    expect(plan.captions[2]).toMatchObject({ from: 115, durationInFrames: 30 });
+    expect(plan.captions[0]?.words[0]?.fromFrame).toBe(0);
+    expect(plan.captions[0]?.box).not.toBeNull();
+  });
+
+  it('CE-1: un assetId sin resolver se omite de su pista y se acumula en unresolvedAssetIds', () => {
+    const timelineWithMissingBrollAsset = {
+      ...timeline,
+      assets: timeline.assets.filter((asset) => asset.id !== 'broll-shot-01'),
+    };
+
+    const planWithMissingAsset = timelineToSequenceProps(timelineWithMissingBrollAsset);
+
+    expect(planWithMissingAsset.broll).toEqual([]);
+    expect(planWithMissingAsset.unresolvedAssetIds).toEqual(['broll-shot-01']);
+    expect(planWithMissingAsset.aroll).toHaveLength(2);
+  });
+
+  it('una Timeline sin broll, música ni captions produce arrays vacíos', () => {
+    const timelineWithoutOptionalTracks = {
+      ...timeline,
+      tracks: { ...timeline.tracks, broll: [], music: [], captions: [] },
+    };
+
+    const minimalPlan = timelineToSequenceProps(timelineWithoutOptionalTracks);
+
+    expect(minimalPlan.broll).toEqual([]);
+    expect(minimalPlan.music).toEqual([]);
+    expect(minimalPlan.captions).toEqual([]);
+    expect(minimalPlan.aroll).toHaveLength(2);
+  });
+});

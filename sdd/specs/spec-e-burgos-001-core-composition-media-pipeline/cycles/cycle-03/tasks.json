@@ -75,13 +75,24 @@
       "depends_on": [
         "TASK-001"
       ],
-      "status": "pending",
+      "status": "done",
       "files": [
         "libs/composition-remotion/src/helpers/asset-src.ts",
         "libs/composition-remotion/src/helpers/asset-src.spec.ts",
         "libs/composition-remotion/src/helpers/timeline-to-sequence-props.ts",
         "libs/composition-remotion/src/helpers/sequence-props.spec.ts"
-      ]
+      ],
+      "usage": {
+        "provider_model": "claude/sonnet",
+        "effort": "medium",
+        "tokens_in": 136278,
+        "tokens_out": 24049,
+        "tokens_total": 160327,
+        "approx": false,
+        "source": "agent-usage-notification",
+        "recorded_at": "2026-09-07",
+        "agent": "implementor-back"
+      }
     },
     {
       "id": "TASK-003",
@@ -97,7 +108,7 @@
       "depends_on": [
         "TASK-001"
       ],
-      "status": "pending",
+      "status": "done",
       "files": [
         "libs/composition-remotion/src/helpers/transition-timing.ts",
         "libs/composition-remotion/src/helpers/transition-timing.spec.ts",
@@ -107,7 +118,18 @@
         "libs/composition-remotion/src/helpers/caption-layout.spec.ts",
         "libs/composition-remotion/src/helpers/audio-gain.ts",
         "libs/composition-remotion/src/helpers/audio-gain.spec.ts"
-      ]
+      ],
+      "usage": {
+        "provider_model": "claude/sonnet",
+        "effort": "medium",
+        "tokens_in": 115410,
+        "tokens_out": 20366,
+        "tokens_total": 135776,
+        "approx": false,
+        "source": "agent-usage-notification",
+        "recorded_at": "2026-09-07",
+        "agent": "implementor-back"
+      }
     },
     {
       "id": "TASK-004",
