@@ -44,3 +44,18 @@ export { FFPROBE_ARGS, probeMedia } from './ffprobe/probe-media';
 export type { ProbeMediaOptions } from './ffprobe/probe-media';
 export { parseFfprobeJson } from './ffprobe/parse-ffprobe-json';
 export type { ParseFfprobeContext } from './ffprobe/parse-ffprobe-json';
+
+export {
+  DEFAULT_EXTRACT_AUDIO_CHANNELS,
+  DEFAULT_EXTRACT_AUDIO_SAMPLE_RATE,
+  extractAudioForTranscription,
+} from './ffmpeg/extract-audio';
+export type { ExtractAudioOptions } from './ffmpeg/extract-audio';
+
+export { DEFAULT_VOICE_TARGET, measureLoudness } from './ffmpeg/measure-loudness';
+export type { MeasureLoudnessOptions } from './ffmpeg/measure-loudness';
+export { buildLoudnormFilter } from './ffmpeg/build-loudnorm-filter';
+export { normalizeVoice } from './ffmpeg/normalize-voice';
+export type { NormalizeVoiceOptions, NormalizeVoiceResult } from './ffmpeg/normalize-voice';
+export { extractTrailingJsonObject, parseLoudnormJson } from './ffmpeg/parse-loudnorm-json';
+export type { LoudnessMeasurement } from './ffmpeg/parse-loudnorm-json';

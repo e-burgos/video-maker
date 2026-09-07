@@ -179,8 +179,29 @@
       "depends_on": [
         "TASK-002"
       ],
-      "status": "pending",
-      "files": []
+      "status": "done",
+      "files": [
+        "libs/media-local/src/ffmpeg/loudnorm-output.schema.ts",
+        "libs/media-local/src/ffmpeg/parse-loudnorm-json.ts",
+        "libs/media-local/src/ffmpeg/build-loudnorm-filter.ts",
+        "libs/media-local/src/ffmpeg/measure-loudness.ts",
+        "libs/media-local/src/ffmpeg/normalize-voice.ts",
+        "libs/media-local/src/ffmpeg/loudnorm.spec.ts",
+        "libs/media-local/src/__fixtures__/ffmpeg/loudnorm.json",
+        "libs/media-local/src/__fixtures__/ffmpeg/loudnorm.stderr.txt",
+        "libs/media-local/src/index.ts"
+      ],
+      "usage": {
+        "provider_model": "claude/sonnet",
+        "effort": "medium",
+        "tokens_in": 117336,
+        "tokens_out": 20706,
+        "tokens_total": 138042,
+        "approx": false,
+        "source": "agent-usage-notification",
+        "recorded_at": "2026-09-07",
+        "agent": "implementor-back"
+      }
     },
     {
       "id": "TASK-006",
@@ -193,8 +214,23 @@
       "depends_on": [
         "TASK-002"
       ],
-      "status": "pending",
-      "files": []
+      "status": "done",
+      "files": [
+        "libs/media-local/src/ffmpeg/extract-audio.ts",
+        "libs/media-local/src/ffmpeg/extract-audio.spec.ts",
+        "libs/media-local/src/index.ts"
+      ],
+      "usage": {
+        "provider_model": "claude/sonnet",
+        "effort": "medium",
+        "tokens_in": 80158,
+        "tokens_out": 14145,
+        "tokens_total": 94303,
+        "approx": false,
+        "source": "agent-usage-notification",
+        "recorded_at": "2026-09-07",
+        "agent": "implementor-back"
+      }
     },
     {
       "id": "TASK-007",
