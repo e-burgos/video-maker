@@ -1,0 +1,16 @@
+{
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"$CLAUDE_PROJECT_DIR/sdd/scripts/rtk-hook.mjs\" claude",
+            "timeout": 10
+          }
+        ]
+      }
+    ]
+  }
+}

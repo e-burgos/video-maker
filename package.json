@@ -17,7 +17,9 @@
     "web": "nx serve web",
     "build:web": "nx build web",
     "test:web": "nx test web",
-    "lint:web": "nx lint web"
+    "lint:web": "nx lint web",
+    "sdd:rtk": "node sdd/scripts/setup-rtk.mjs",
+    "postinstall": "node sdd/scripts/setup-rtk.mjs"
   },
   "dependencies": {
     "react": "^19.0.0",
