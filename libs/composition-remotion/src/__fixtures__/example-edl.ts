@@ -1,0 +1,110 @@
+import type { EditDecisionList, MediaAsset } from '@video-maker/timeline-core';
+import { defaultFormat } from '@video-maker/timeline-core';
+
+export const exampleAssets: readonly MediaAsset[] = [
+  {
+    id: 'aroll-cam-01',
+    kind: 'video',
+    path: 'example/aroll.mp4',
+    durationMs: 10_000,
+    fps: 30,
+    width: 1080,
+    height: 1920,
+    rotation: 0,
+    hasAudio: true,
+    audio: { sampleRate: 48_000, channels: 2, codec: 'aac' },
+    videoCodec: 'h264',
+    probedAt: '2026-09-07T00:00:00.000Z',
+  },
+  {
+    id: 'broll-shot-01',
+    kind: 'image',
+    path: 'example/broll.jpg',
+    durationMs: 0,
+    width: 1080,
+    height: 1920,
+    probedAt: '2026-09-07T00:00:00.000Z',
+  },
+  {
+    id: 'music-bed-01',
+    kind: 'audio',
+    path: 'example/music.mp3',
+    durationMs: 120_000,
+    hasAudio: true,
+    audio: { sampleRate: 44_100, channels: 2, codec: 'mp3', integratedLufs: -16 },
+    probedAt: '2026-09-07T00:00:00.000Z',
+  },
+];
+
+export const exampleEdl: EditDecisionList = {
+  schemaVersion: 1,
+  sourceAssetId: 'aroll-cam-01',
+  format: defaultFormat('reels-9x16'),
+  generatedBy: { tool: 'composition-remotion-fixture', params: {} },
+  decisions: [
+    { id: 'keep-0001', type: 'keep', startMs: 0, endMs: 4080 },
+    { id: 'cut-0001', type: 'cut', startMs: 4080, endMs: 4920, reason: 'silence' },
+    { id: 'keep-0002', type: 'keep', startMs: 4920, endMs: 10_000 },
+    {
+      id: 'punch-0001',
+      type: 'punch-in',
+      startMs: 4920,
+      endMs: 10_000,
+      scale: 1.15,
+      anchor: 'center',
+    },
+    {
+      id: 'broll-0001',
+      type: 'broll-overlay',
+      startMs: 5200,
+      endMs: 7200,
+      assetId: 'broll-shot-01',
+      fit: 'cover',
+      keepVoice: true,
+    },
+    {
+      id: 'trans-0001',
+      type: 'transition',
+      atMs: 4920,
+      kind: 'fade',
+      durationMs: 300,
+      timing: 'spring',
+    },
+    {
+      id: 'cap-0001',
+      type: 'caption-group',
+      startMs: 500,
+      endMs: 1600,
+      words: [
+        { text: 'te', startMs: 500, endMs: 700 },
+        { text: 'muestro', startMs: 720, endMs: 1100 },
+        { text: 'cómo', startMs: 1120, endMs: 1600 },
+      ],
+      emphasisIndex: 1,
+    },
+    {
+      id: 'cap-0002',
+      type: 'caption-group',
+      startMs: 1700,
+      endMs: 2800,
+      words: [
+        { text: 'editar', startMs: 1700, endMs: 2050 },
+        { text: 'un', startMs: 2070, endMs: 2180 },
+        { text: 'video', startMs: 2200, endMs: 2800 },
+      ],
+      emphasisIndex: 2,
+    },
+    {
+      id: 'cap-0003',
+      type: 'caption-group',
+      startMs: 5000,
+      endMs: 6000,
+      words: [
+        { text: 'nada', startMs: 5000, endMs: 5300 },
+        { text: 'totalmente', startMs: 5320, endMs: 6000 },
+      ],
+      emphasisIndex: 0,
+    },
+    { id: 'duck-0001', type: 'duck', startMs: 1000, endMs: 3000, gainDb: -24 },
+  ],
+};

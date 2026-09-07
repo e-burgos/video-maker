@@ -17,6 +17,7 @@ export default [
           depConstraints: [
             { sourceTag: 'type:domain', onlyDependOnLibsWithTags: [] },
             { sourceTag: 'type:util', onlyDependOnLibsWithTags: ['type:domain'] },
+            { sourceTag: 'type:ui', onlyDependOnLibsWithTags: ['type:domain'] },
             { sourceTag: '*', onlyDependOnLibsWithTags: ['*'] },
           ],
         },

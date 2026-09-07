@@ -29,7 +29,7 @@
       "estimation_hours": 4,
       "story_points": 5,
       "depends_on": [],
-      "status": "pending",
+      "status": "done",
       "files": [
         "libs/composition-remotion/package.json",
         "libs/composition-remotion/project.json",
@@ -44,11 +44,24 @@
         "libs/composition-remotion/src/render.ts",
         "libs/composition-remotion/src/__fixtures__/example-edl.ts",
         "libs/composition-remotion/src/__fixtures__/example-timeline.ts",
+        "libs/composition-remotion/src/__fixtures__/example-timeline.spec.ts",
         "libs/composition-remotion/src/helpers/timeline-types.ts",
         "tsconfig.base.json",
         "eslint.config.mjs",
-        "package.json"
-      ]
+        "package.json",
+        "pnpm-lock.yaml"
+      ],
+      "usage": {
+        "provider_model": "claude/sonnet",
+        "effort": "medium",
+        "tokens_in": 171445,
+        "tokens_out": 30255,
+        "tokens_total": 201700,
+        "approx": false,
+        "source": "agent-usage-notification",
+        "recorded_at": "2026-09-07",
+        "agent": "implementor-back"
+      }
     },
     {
       "id": "TASK-002",
