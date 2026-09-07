@@ -248,15 +248,27 @@
       "depends_on": [
         "TASK-006"
       ],
-      "status": "pending",
+      "status": "done",
       "files": [
         "libs/composition-remotion/src/render.ts",
         "libs/composition-remotion/src/render.spec.ts",
         "libs/composition-remotion/src/smoke.ts",
         "libs/composition-remotion/src/index.ts",
         "libs/composition-remotion/project.json",
-        "libs/composition-remotion/README.md"
-      ]
+        "libs/composition-remotion/README.md",
+        "sdd/components.json"
+      ],
+      "usage": {
+        "provider_model": "claude/sonnet",
+        "effort": "high",
+        "tokens_in": 188917,
+        "tokens_out": 33338,
+        "tokens_total": 222255,
+        "approx": false,
+        "source": "agent-usage-notification",
+        "recorded_at": "2026-09-07",
+        "agent": "implementor-back"
+      }
     }
   ]
 }

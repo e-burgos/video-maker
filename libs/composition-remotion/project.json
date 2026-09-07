@@ -29,6 +29,13 @@
         "command": "remotion studio src/remotion-entry.ts",
         "cwd": "libs/composition-remotion"
       }
+    },
+    "smoke": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "node -r @swc-node/register ./src/smoke.ts",
+        "cwd": "libs/composition-remotion"
+      }
     }
   }
 }

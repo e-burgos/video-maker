@@ -1,5 +1,3 @@
-export {};
-
 export { assetSrc } from './helpers/asset-src';
 export { timelineToSequenceProps } from './helpers/timeline-to-sequence-props';
 export type {
@@ -9,6 +7,7 @@ export type {
   SequencePropsPlan,
   VideoSequenceProps,
 } from './helpers/timeline-to-sequence-props';
+export type { CaptionBox, TransitionDirection } from './helpers/timeline-types';
 export { transitionTiming } from './helpers/transition-timing';
 export { punchInStyle } from './helpers/punch-in-style';
 export { captionLayout } from './helpers/caption-layout';

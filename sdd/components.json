@@ -107,6 +107,21 @@
         "consumes": [],
         "created_at": "2026-09-07",
         "changelog": []
+      },
+      {
+        "id": "COMP-006",
+        "name": "ArollSeries",
+        "type": "component",
+        "module": "core-composition-media-pipeline",
+        "spec": "sdd/specs/spec-e-burgos-001-core-composition-media-pipeline",
+        "path": "src/components/aroll-series.tsx",
+        "status": "implemented",
+        "created_in_cycle": 3,
+        "updated_in_cycle": null,
+        "description": "Serie de A-roll sobre TransitionSeries: intercala OffthreadVideo/Img por escena y una TransitionSeries.Transition (fade/slide/whip-pan propia) entre el par de clipIds exacto que emite buildTimeline, con punchInStyle aplicado a cada escena.",
+        "consumes": [],
+        "created_at": "2026-09-07",
+        "changelog": []
       }
     ]
   }

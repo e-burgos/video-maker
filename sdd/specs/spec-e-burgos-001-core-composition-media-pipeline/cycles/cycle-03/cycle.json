@@ -30,11 +30,12 @@
     "sdd/specs/spec-e-burgos-001-core-composition-media-pipeline/cycles/cycle-03/artifacts/task-003-notes.md",
     "sdd/specs/spec-e-burgos-001-core-composition-media-pipeline/cycles/cycle-03/artifacts/task-004-notes.md",
     "sdd/specs/spec-e-burgos-001-core-composition-media-pipeline/cycles/cycle-03/artifacts/task-005-notes.md",
-    "sdd/specs/spec-e-burgos-001-core-composition-media-pipeline/cycles/cycle-03/artifacts/task-006-notes.md"
+    "sdd/specs/spec-e-burgos-001-core-composition-media-pipeline/cycles/cycle-03/artifacts/task-006-notes.md",
+    "sdd/specs/spec-e-burgos-001-core-composition-media-pipeline/cycles/cycle-03/artifacts/task-007-notes.md"
   ],
   "metrics": {
     "tasks_total": 7,
-    "tasks_completed": 6,
+    "tasks_completed": 7,
     "story_points": 33,
     "files_created": [],
     "files_modified": [],
@@ -166,6 +167,31 @@
           "recorded_at": "2026-09-07",
           "tool_uses": 54,
           "duration_minutes": 7.1
+        },
+        {
+          "agent": "orchestrator",
+          "label": "cycle-03 coordination (brief, gates, barrel wiring, usage bookkeeping, rate-limit recovery, commits)",
+          "provider_model": "fable",
+          "effort": "medium",
+          "tokens_in": 130000,
+          "tokens_out": 18000,
+          "approx": true,
+          "source": "declared-estimate",
+          "recorded_at": "2026-09-07"
+        },
+        {
+          "agent": "implementor-back",
+          "label": "TASK-007",
+          "provider_model": "claude/sonnet",
+          "effort": "high",
+          "tokens_in": 188917,
+          "tokens_out": 33338,
+          "tokens_total": 222255,
+          "approx": false,
+          "source": "agent-usage-notification",
+          "recorded_at": "2026-09-07",
+          "tool_uses": 57,
+          "duration_minutes": 11
         }
       ]
     }
