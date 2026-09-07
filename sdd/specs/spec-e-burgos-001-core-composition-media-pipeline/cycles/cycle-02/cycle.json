@@ -1,0 +1,35 @@
+{
+  "$schema": "../../../../schemas/cycle.schema.json",
+  "cycle": 2,
+  "module": "core-composition-media-pipeline",
+  "spec": "spec-e-burgos-001-core-composition-media-pipeline",
+  "apps": ["libs/media-local"],
+  "phase": "media-local-wrappers-and-parsers",
+  "flow": "full",
+  "objectives": [
+    "Crear libs/media-local con CommandRunner inyectable y errores tipados",
+    "Wrappers y parsers de ffprobe, ffmpeg (silencedetect, loudnorm, extracción de audio) y whisper.cpp / Faster-Whisper hacia los contratos de timeline-core",
+    "Dejar CA-017 a CA-022 de la spec en verde con fixtures grabadas, sin binarios en CI"
+  ],
+  "status": "in-progress",
+  "started_at": "2026-09-07",
+  "completed_at": null,
+  "documents": {
+    "brief": "sdd/specs/spec-e-burgos-001-core-composition-media-pipeline/cycles/cycle-02/brief.yaml"
+  },
+  "artifacts": [],
+  "metrics": {
+    "tasks_total": 0,
+    "tasks_completed": 0,
+    "story_points": 0,
+    "files_created": [],
+    "files_modified": [],
+    "files_deleted": [],
+    "usage": { "tokens_in": 0, "tokens_out": 0, "by_agent": [] }
+  },
+  "tables_created": [],
+  "endpoints_implemented": [],
+  "components_created": [],
+  "issues_found": [],
+  "reviewer_report": null
+}
