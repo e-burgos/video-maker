@@ -3,7 +3,9 @@
   "spec": "spec-e-burgos-001-core-composition-media-pipeline",
   "cycle": 2,
   "module": "core-composition-media-pipeline",
-  "apps": ["libs/media-local"],
+  "apps": [
+    "libs/media-local"
+  ],
   "flow": "full",
   "user_stories_generated": true,
   "prerequisites": {
@@ -27,66 +29,118 @@
       "estimation_hours": 2,
       "story_points": 2,
       "depends_on": [],
-      "status": "pending",
-      "files": []
+      "status": "done",
+      "files": [
+        "libs/media-local/project.json",
+        "libs/media-local/eslint.config.mjs",
+        "libs/media-local/vite.config.ts",
+        "libs/media-local/tsconfig.json",
+        "libs/media-local/tsconfig.lib.json",
+        "libs/media-local/tsconfig.spec.json",
+        "libs/media-local/src/index.ts",
+        "libs/media-local/README.md",
+        "tsconfig.base.json",
+        "eslint.config.mjs",
+        "package.json",
+        "pnpm-lock.yaml"
+      ],
+      "usage": {
+        "provider_model": "claude/sonnet",
+        "effort": "medium",
+        "tokens_in": 98603,
+        "tokens_out": 17401,
+        "tokens_total": 116004,
+        "approx": false,
+        "source": "agent-usage-notification",
+        "recorded_at": "2026-09-07",
+        "agent": "implementor-back"
+      }
     },
     {
       "id": "TASK-002",
       "title": "CommandRunner, ExecaCommandRunner, FixtureCommandRunner, errores tipados y resolveBinaries",
-      "user_stories": ["US-2-008", "US-2-009"],
+      "user_stories": [
+        "US-2-008",
+        "US-2-009"
+      ],
       "estimation_hours": 4,
       "story_points": 5,
-      "depends_on": ["TASK-001"],
+      "depends_on": [
+        "TASK-001"
+      ],
       "status": "pending",
       "files": []
     },
     {
       "id": "TASK-003",
       "title": "probeMedia + parseFfprobeJson con fixtures de video rotado, imagen y audio",
-      "user_stories": ["US-2-001", "US-2-002"],
+      "user_stories": [
+        "US-2-001",
+        "US-2-002"
+      ],
       "estimation_hours": 4,
       "story_points": 5,
-      "depends_on": ["TASK-002"],
+      "depends_on": [
+        "TASK-002"
+      ],
       "status": "pending",
       "files": []
     },
     {
       "id": "TASK-004",
       "title": "detectSilencesWithFfmpeg + parseSilenceDetect con fixture de 3 silencios",
-      "user_stories": ["US-2-003"],
+      "user_stories": [
+        "US-2-003"
+      ],
       "estimation_hours": 3,
       "story_points": 3,
-      "depends_on": ["TASK-002"],
+      "depends_on": [
+        "TASK-002"
+      ],
       "status": "pending",
       "files": []
     },
     {
       "id": "TASK-005",
       "title": "measureLoudness + normalizeVoice en dos pasadas con fixture de loudnorm",
-      "user_stories": ["US-2-004"],
+      "user_stories": [
+        "US-2-004"
+      ],
       "estimation_hours": 4,
       "story_points": 5,
-      "depends_on": ["TASK-002"],
+      "depends_on": [
+        "TASK-002"
+      ],
       "status": "pending",
       "files": []
     },
     {
       "id": "TASK-006",
       "title": "extractAudioForTranscription (wav mono 16 kHz)",
-      "user_stories": ["US-2-005"],
+      "user_stories": [
+        "US-2-005"
+      ],
       "estimation_hours": 2,
       "story_points": 2,
-      "depends_on": ["TASK-002"],
+      "depends_on": [
+        "TASK-002"
+      ],
       "status": "pending",
       "files": []
     },
     {
       "id": "TASK-007",
       "title": "transcribeWithWhisperCpp + parseWhisperCppJson + parseFasterWhisperJson",
-      "user_stories": ["US-2-006", "US-2-007"],
+      "user_stories": [
+        "US-2-006",
+        "US-2-007"
+      ],
       "estimation_hours": 4,
       "story_points": 5,
-      "depends_on": ["TASK-002", "TASK-006"],
+      "depends_on": [
+        "TASK-002",
+        "TASK-006"
+      ],
       "status": "pending",
       "files": []
     },
@@ -106,7 +160,13 @@
       ],
       "estimation_hours": 3,
       "story_points": 3,
-      "depends_on": ["TASK-003", "TASK-004", "TASK-005", "TASK-006", "TASK-007"],
+      "depends_on": [
+        "TASK-003",
+        "TASK-004",
+        "TASK-005",
+        "TASK-006",
+        "TASK-007"
+      ],
       "status": "pending",
       "files": []
     }

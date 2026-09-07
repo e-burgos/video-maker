@@ -15,7 +15,8 @@
     "skipDefaultLibCheck": true,
     "paths": {
       "@shared-utils": ["./libs/shared-utils/src/index.ts"],
-      "@video-maker/timeline-core": ["./libs/timeline-core/src/index.ts"]
+      "@video-maker/timeline-core": ["./libs/timeline-core/src/index.ts"],
+      "@video-maker/media-local": ["./libs/media-local/src/index.ts"]
     }
   },
   "exclude": ["node_modules", "tmp"]
