@@ -14,6 +14,16 @@
           "status": "completed",
           "tasks_total": 11,
           "tasks_done": 11
+        },
+        "cycle-02": {
+          "file": "sdd/specs/spec-e-burgos-001-core-composition-media-pipeline/cycles/cycle-02/tasks.json",
+          "module": "core-composition-media-pipeline",
+          "apps": [
+            "libs/media-local"
+          ],
+          "status": "in-progress",
+          "tasks_total": 8,
+          "tasks_done": 0
         }
       }
     }
