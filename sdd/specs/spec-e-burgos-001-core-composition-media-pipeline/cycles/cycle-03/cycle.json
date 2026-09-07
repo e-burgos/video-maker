@@ -19,13 +19,16 @@
   "completed_at": null,
   "documents": {
     "brief": "sdd/specs/spec-e-burgos-001-core-composition-media-pipeline/cycles/cycle-03/brief.yaml",
-    "functional": "sdd/specs/spec-e-burgos-001-core-composition-media-pipeline/cycles/cycle-03/functional.md"
+    "functional": "sdd/specs/spec-e-burgos-001-core-composition-media-pipeline/cycles/cycle-03/functional.md",
+    "planner": "sdd/specs/spec-e-burgos-001-core-composition-media-pipeline/cycles/cycle-03/planner.md",
+    "tasks": "sdd/specs/spec-e-burgos-001-core-composition-media-pipeline/cycles/cycle-03/tasks.json",
+    "architect": "sdd/specs/spec-e-burgos-001-core-composition-media-pipeline/cycles/cycle-03/architect.md"
   },
   "artifacts": [],
   "metrics": {
-    "tasks_total": 0,
+    "tasks_total": 7,
     "tasks_completed": 0,
-    "story_points": 0,
+    "story_points": 33,
     "files_created": [],
     "files_modified": [],
     "files_deleted": [],
@@ -45,6 +48,33 @@
           "tokens_total": 98633,
           "tool_uses": 16,
           "duration_minutes": 2.5
+        },
+        {
+          "agent": "planner",
+          "provider_model": "claude/sonnet",
+          "effort": "medium",
+          "tokens_in": 164348,
+          "tokens_out": 29003,
+          "approx": true,
+          "source": "declared-estimate",
+          "recorded_at": "2026-09-07",
+          "tokens_total": 193351,
+          "tool_uses": 9,
+          "duration_minutes": 1,
+          "label": "two runs: planner.md (cut by rate limit, not measured) + tasks.json (measured)"
+        },
+        {
+          "agent": "architect",
+          "provider_model": "claude/opus",
+          "effort": "high",
+          "tokens_in": 186957,
+          "tokens_out": 32992,
+          "approx": false,
+          "source": "agent-usage-notification",
+          "recorded_at": "2026-09-07",
+          "tokens_total": 219949,
+          "tool_uses": 47,
+          "duration_minutes": 14.5
         }
       ]
     }

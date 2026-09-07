@@ -1,0 +1,188 @@
+{
+  "$schema": "../../../../schemas/cycle-tasks.schema.json",
+  "spec": "spec-e-burgos-001-core-composition-media-pipeline",
+  "cycle": 3,
+  "module": "core-composition-media-pipeline",
+  "apps": [
+    "libs/composition-remotion"
+  ],
+  "flow": "full",
+  "user_stories_generated": true,
+  "prerequisites": {
+    "tasks_generated": true
+  },
+  "tasks": [
+    {
+      "id": "TASK-001",
+      "title": "[BE] Scaffold de libs/composition-remotion + dependencias Remotion + fixture de Timeline",
+      "user_stories": [
+        "US-3-001",
+        "US-3-002",
+        "US-3-003",
+        "US-3-004",
+        "US-3-005",
+        "US-3-006",
+        "US-3-007",
+        "US-3-008",
+        "US-3-009"
+      ],
+      "estimation_hours": 4,
+      "story_points": 5,
+      "depends_on": [],
+      "status": "pending",
+      "files": [
+        "libs/composition-remotion/package.json",
+        "libs/composition-remotion/project.json",
+        "libs/composition-remotion/tsconfig.json",
+        "libs/composition-remotion/tsconfig.lib.json",
+        "libs/composition-remotion/tsconfig.spec.json",
+        "libs/composition-remotion/vite.config.ts",
+        "libs/composition-remotion/eslint.config.mjs",
+        "libs/composition-remotion/README.md",
+        "libs/composition-remotion/public/example/.gitignore",
+        "libs/composition-remotion/src/index.ts",
+        "libs/composition-remotion/src/render.ts",
+        "libs/composition-remotion/src/__fixtures__/example-edl.ts",
+        "libs/composition-remotion/src/__fixtures__/example-timeline.ts",
+        "libs/composition-remotion/src/helpers/timeline-types.ts",
+        "tsconfig.base.json",
+        "eslint.config.mjs",
+        "package.json"
+      ]
+    },
+    {
+      "id": "TASK-002",
+      "title": "[BE] timelineToSequenceProps + tests (CA-023)",
+      "user_stories": [
+        "US-3-001",
+        "US-3-009"
+      ],
+      "estimation_hours": 3,
+      "story_points": 3,
+      "depends_on": [
+        "TASK-001"
+      ],
+      "status": "pending",
+      "files": [
+        "libs/composition-remotion/src/helpers/asset-src.ts",
+        "libs/composition-remotion/src/helpers/asset-src.spec.ts",
+        "libs/composition-remotion/src/helpers/timeline-to-sequence-props.ts",
+        "libs/composition-remotion/src/helpers/sequence-props.spec.ts"
+      ]
+    },
+    {
+      "id": "TASK-003",
+      "title": "[BE] transitionTiming + punchInStyle + captionLayout + tests (CA-024, CA-025, CA-026)",
+      "user_stories": [
+        "US-3-002",
+        "US-3-003",
+        "US-3-004",
+        "US-3-009"
+      ],
+      "estimation_hours": 4,
+      "story_points": 5,
+      "depends_on": [
+        "TASK-001"
+      ],
+      "status": "pending",
+      "files": [
+        "libs/composition-remotion/src/helpers/transition-timing.ts",
+        "libs/composition-remotion/src/helpers/transition-timing.spec.ts",
+        "libs/composition-remotion/src/helpers/punch-in-style.ts",
+        "libs/composition-remotion/src/helpers/punch-in-style.spec.ts",
+        "libs/composition-remotion/src/helpers/caption-layout.ts",
+        "libs/composition-remotion/src/helpers/caption-layout.spec.ts",
+        "libs/composition-remotion/src/helpers/audio-gain.ts",
+        "libs/composition-remotion/src/helpers/audio-gain.spec.ts"
+      ]
+    },
+    {
+      "id": "TASK-004",
+      "title": "[FE] BrollTrack, AudioTrack (automation de ganancia) y CaptionTrack mínimo",
+      "user_stories": [
+        "US-3-001",
+        "US-3-005"
+      ],
+      "estimation_hours": 4,
+      "story_points": 5,
+      "depends_on": [
+        "TASK-001",
+        "TASK-003"
+      ],
+      "status": "pending",
+      "files": [
+        "libs/composition-remotion/src/components/broll-track.tsx",
+        "libs/composition-remotion/src/components/audio-track.tsx",
+        "libs/composition-remotion/src/components/caption-track.tsx"
+      ]
+    },
+    {
+      "id": "TASK-005",
+      "title": "[FE] ArollSeries con TransitionSeries (fade, slide, whip-pan propia) y light-leak→fade",
+      "user_stories": [
+        "US-3-002",
+        "US-3-003"
+      ],
+      "estimation_hours": 4,
+      "story_points": 5,
+      "depends_on": [
+        "TASK-002",
+        "TASK-003"
+      ],
+      "status": "pending",
+      "files": [
+        "libs/composition-remotion/src/transitions/whip-pan-style.ts",
+        "libs/composition-remotion/src/transitions/whip-pan-style.spec.ts",
+        "libs/composition-remotion/src/transitions/whip-pan.tsx",
+        "libs/composition-remotion/src/transitions/presentation-for.ts",
+        "libs/composition-remotion/src/transitions/presentation-for.spec.ts",
+        "libs/composition-remotion/src/components/aroll-series.tsx"
+      ]
+    },
+    {
+      "id": "TASK-006",
+      "title": "[FE] TimelineComposition + calculateMetadata + Root.tsx (9:16 y 16:9) + remotion.config.ts",
+      "user_stories": [
+        "US-3-001",
+        "US-3-006"
+      ],
+      "estimation_hours": 4,
+      "story_points": 5,
+      "depends_on": [
+        "TASK-004",
+        "TASK-005"
+      ],
+      "status": "pending",
+      "files": [
+        "libs/composition-remotion/src/components/timeline-composition.tsx",
+        "libs/composition-remotion/src/Root.tsx",
+        "libs/composition-remotion/src/remotion-entry.ts",
+        "libs/composition-remotion/remotion.config.ts",
+        "libs/composition-remotion/src/__fixtures__/example-timeline.ts"
+      ]
+    },
+    {
+      "id": "TASK-007",
+      "title": "[BE] renderTimeline + target smoke + README (CA-027) + export final + cobertura ≥ 80 %",
+      "user_stories": [
+        "US-3-007",
+        "US-3-008",
+        "US-3-009"
+      ],
+      "estimation_hours": 4,
+      "story_points": 5,
+      "depends_on": [
+        "TASK-006"
+      ],
+      "status": "pending",
+      "files": [
+        "libs/composition-remotion/src/render.ts",
+        "libs/composition-remotion/src/render.spec.ts",
+        "libs/composition-remotion/src/smoke.ts",
+        "libs/composition-remotion/src/index.ts",
+        "libs/composition-remotion/project.json",
+        "libs/composition-remotion/README.md"
+      ]
+    }
+  ]
+}
