@@ -271,11 +271,23 @@
       "depends_on": [
         "TASK-004"
       ],
-      "status": "pending",
+      "status": "done",
       "files": [
         "libs/timeline-core/src/ducking/plan-ducking.ts",
-        "libs/timeline-core/src/ducking/ducking.spec.ts"
-      ]
+        "libs/timeline-core/src/ducking/ducking.spec.ts",
+        "libs/timeline-core/src/index.ts"
+      ],
+      "usage": {
+        "provider_model": "claude/sonnet",
+        "effort": "medium",
+        "tokens_in": 103669,
+        "tokens_out": 18295,
+        "tokens_total": 121964,
+        "approx": false,
+        "source": "agent-usage-notification",
+        "recorded_at": "2026-09-07",
+        "agent": "implementor-back"
+      }
     },
     {
       "id": "TASK-009",

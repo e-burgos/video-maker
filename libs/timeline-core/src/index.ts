@@ -79,3 +79,11 @@ export type {
   CaptionGroupPlan,
   TranscriptWord,
 } from './captions/group-words-for-captions';
+
+export {
+  DEFAULT_AUDIO_MIX_PLAN,
+  DEFAULT_MUSIC_MIX,
+  mergeVoiceRanges,
+  planDucking,
+} from './ducking/plan-ducking';
+export type { DuckDecisionPlan, DuckingPlanResult, VoiceRange } from './ducking/plan-ducking';
