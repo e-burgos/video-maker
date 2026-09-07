@@ -55,5 +55,5 @@
     "vite": "^8.0.0",
     "vitest": "^4.1.10"
   },
-  "description": "Video maker: plataforma para crear y editar videos"
+  "description": "Motor y plataforma local de edición y postproducción de video para redes sociales (Reels/TikTok 9:16 y YouTube 16:9): pipeline declarativo en TypeScript sobre FFmpeg + Whisper local y Remotion, que ensambla clips reales, fotos de apoyo, locución y música sin depender de APIs externas pagas."
 }

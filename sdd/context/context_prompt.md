@@ -13,15 +13,15 @@
 
 Estamos construyendo el proyecto declarado en `sdd/global.json` → `project`, descrito en `description`.
 
-**Rol arquitectónico:** [Describir el rol del sistema: qué expone, qué transforma, qué delega y qué nunca hace.]
+**Rol arquitectónico:** expone una UI web y una API local para operar un motor de edición de video social; transforma material crudo + transcripción en una `Timeline` declarativa y la renderiza a MP4; delega el procesamiento pesado en binarios locales (FFmpeg, whisper.cpp) y en Remotion; nunca llama APIs externas pagas ni saca el material de la máquina del usuario.
 
-El sistema vive en un monorepo Nx con metodología Spec-Driven Development (SDD). [Ajustar: stack de backend, frontend y herramientas reales del proyecto.]
+El sistema vive en un monorepo Nx con metodología Spec-Driven Development (SDD). Stack: TypeScript estricto en todo el repo; libs de dominio y de procesamiento (Zod, execa sobre FFmpeg/ffprobe/whisper-cli), composición y render con Remotion 4, frontend React 19 + Vite + Tailwind en `apps/web`, servicio local Node para assets (MinIO vía docker-compose) y jobs de render. El desglose de módulos y su orden vive en `sdd/global.json` → `pending_modules` y en `sdd/specs/index.json` (`depends_on`).
 
 ---
 
 ## 2. Estructura del Monorepo
 
-El proyecto usa **Nx** como monorepo manager con **pnpm** como package manager. [Ajustar a las herramientas reales.]
+El proyecto usa **Nx** como monorepo manager con **pnpm** como package manager (Vitest para tests, ESLint 9 flat config, Prettier).
 
 ```
 <repo-root>/                 → nombre del proyecto en sdd/global.json → project

@@ -2,5 +2,102 @@
   "$schema": "../schemas/specs-index.schema.json",
   "_comment": "Central SDD spec registry. Append-only — never edit existing entries, only add new ones. Updated when a spec branch is merged to master.",
   "_convention": "Folder/ID format: spec-[gh-user]-[NNN]-[slug] where NNN is the author's own counter (not global). Each developer maintains their own sequence.",
-  "specs": []
+  "specs": [
+    {
+      "id": "spec-e-burgos-001-core-composition-media-pipeline",
+      "author": "e-burgos",
+      "slug": "core-composition-media-pipeline",
+      "folder": "sdd/specs/spec-e-burgos-001-core-composition-media-pipeline",
+      "file": "sdd/specs/spec-e-burgos-001-core-composition-media-pipeline/spec-e-burgos-001-core-composition-media-pipeline.spec.md",
+      "module": "core-composition-media-pipeline",
+      "app": "libs/timeline-core",
+      "status": "draft",
+      "title": "Core Composition & Media Pipeline Engine",
+      "created_at": "2026-09-07",
+      "completed_at": null,
+      "depends_on": []
+    },
+    {
+      "id": "spec-e-burgos-002-auto-montage-pipeline",
+      "author": "e-burgos",
+      "slug": "auto-montage-pipeline",
+      "folder": "sdd/specs/spec-e-burgos-002-auto-montage-pipeline",
+      "file": "sdd/specs/spec-e-burgos-002-auto-montage-pipeline/spec-e-burgos-002-auto-montage-pipeline.spec.md",
+      "module": "auto-montage-pipeline",
+      "app": "libs/auto-montage",
+      "status": "draft",
+      "title": "Auto-Montage A-Roll / B-Roll Pipeline",
+      "created_at": "2026-09-07",
+      "completed_at": null,
+      "depends_on": [
+        "spec-e-burgos-001-core-composition-media-pipeline"
+      ]
+    },
+    {
+      "id": "spec-e-burgos-003-kinetic-captions",
+      "author": "e-burgos",
+      "slug": "kinetic-captions",
+      "folder": "sdd/specs/spec-e-burgos-003-kinetic-captions",
+      "file": "sdd/specs/spec-e-burgos-003-kinetic-captions/spec-e-burgos-003-kinetic-captions.spec.md",
+      "module": "kinetic-captions",
+      "app": "libs/composition-remotion",
+      "status": "draft",
+      "title": "Kinetic Captions & Safe Zones",
+      "created_at": "2026-09-07",
+      "completed_at": null,
+      "depends_on": [
+        "spec-e-burgos-001-core-composition-media-pipeline"
+      ]
+    },
+    {
+      "id": "spec-e-burgos-004-audio-mix-mastering",
+      "author": "e-burgos",
+      "slug": "audio-mix-mastering",
+      "folder": "sdd/specs/spec-e-burgos-004-audio-mix-mastering",
+      "file": "sdd/specs/spec-e-burgos-004-audio-mix-mastering/spec-e-burgos-004-audio-mix-mastering.spec.md",
+      "module": "audio-mix-mastering",
+      "app": "libs/media-local",
+      "status": "draft",
+      "title": "Multi-Track Audio Mix & Mastering",
+      "created_at": "2026-09-07",
+      "completed_at": null,
+      "depends_on": [
+        "spec-e-burgos-001-core-composition-media-pipeline"
+      ]
+    },
+    {
+      "id": "spec-e-burgos-005-render-service",
+      "author": "e-burgos",
+      "slug": "render-service",
+      "folder": "sdd/specs/spec-e-burgos-005-render-service",
+      "file": "sdd/specs/spec-e-burgos-005-render-service/spec-e-burgos-005-render-service.spec.md",
+      "module": "render-service",
+      "app": "apps/render-api",
+      "status": "draft",
+      "title": "Local Render Service & Asset Storage",
+      "created_at": "2026-09-07",
+      "completed_at": null,
+      "depends_on": [
+        "spec-e-burgos-001-core-composition-media-pipeline",
+        "spec-e-burgos-002-auto-montage-pipeline"
+      ]
+    },
+    {
+      "id": "spec-e-burgos-006-web-studio",
+      "author": "e-burgos",
+      "slug": "web-studio",
+      "folder": "sdd/specs/spec-e-burgos-006-web-studio",
+      "file": "sdd/specs/spec-e-burgos-006-web-studio/spec-e-burgos-006-web-studio.spec.md",
+      "module": "web-studio",
+      "app": "apps/web",
+      "status": "draft",
+      "title": "Web Studio: Preview, Assets & Render",
+      "created_at": "2026-09-07",
+      "completed_at": null,
+      "depends_on": [
+        "spec-e-burgos-003-kinetic-captions",
+        "spec-e-burgos-005-render-service"
+      ]
+    }
+  ]
 }
