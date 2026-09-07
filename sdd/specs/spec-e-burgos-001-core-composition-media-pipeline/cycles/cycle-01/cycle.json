@@ -24,11 +24,12 @@
     "architect": "sdd/specs/spec-e-burgos-001-core-composition-media-pipeline/cycles/cycle-01/architect.md"
   },
   "artifacts": [
-    "sdd/specs/spec-e-burgos-001-core-composition-media-pipeline/cycles/cycle-01/artifacts/task-001-scaffold-notes.md"
+    "sdd/specs/spec-e-burgos-001-core-composition-media-pipeline/cycles/cycle-01/artifacts/task-001-scaffold-notes.md",
+    "sdd/specs/spec-e-burgos-001-core-composition-media-pipeline/cycles/cycle-01/artifacts/task-002-notes.md"
   ],
   "metrics": {
     "tasks_total": 11,
-    "tasks_completed": 1,
+    "tasks_completed": 2,
     "story_points": 46,
     "files_created": [],
     "files_modified": [],
@@ -89,6 +90,20 @@
           "tool_uses": 58,
           "duration_minutes": 7.8,
           "recorded_at": "2026-09-07"
+        },
+        {
+          "agent": "implementor-back",
+          "label": "TASK-002",
+          "provider_model": "claude/sonnet",
+          "effort": "medium",
+          "tokens_in": 141580,
+          "tokens_out": 24985,
+          "tokens_total": 166565,
+          "approx": false,
+          "source": "agent-usage-notification",
+          "recorded_at": "2026-09-07",
+          "tool_uses": 41,
+          "duration_minutes": 7.2
         }
       ]
     }
