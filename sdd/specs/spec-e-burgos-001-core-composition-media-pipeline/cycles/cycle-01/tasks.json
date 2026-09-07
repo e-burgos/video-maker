@@ -143,14 +143,25 @@
       "depends_on": [
         "TASK-002"
       ],
-      "status": "pending",
+      "status": "done",
       "files": [
-        "libs/timeline-core/src/units/convert-time.ts",
-        "libs/timeline-core/src/units/convert-time.spec.ts",
-        "libs/timeline-core/src/format/default-format.ts",
-        "libs/timeline-core/src/format/safe-zone.ts",
-        "libs/timeline-core/src/format/format.spec.ts"
-      ]
+        "libs/timeline-core/src/units/units.ts",
+        "libs/timeline-core/src/units/units.spec.ts",
+        "libs/timeline-core/src/format/format.ts",
+        "libs/timeline-core/src/format/format.spec.ts",
+        "libs/timeline-core/src/index.ts"
+      ],
+      "usage": {
+        "provider_model": "claude/sonnet",
+        "effort": "medium",
+        "tokens_in": 77659,
+        "tokens_out": 13704,
+        "tokens_total": 91363,
+        "approx": false,
+        "source": "agent-usage-notification",
+        "recorded_at": "2026-09-07",
+        "agent": "implementor-back"
+      }
     },
     {
       "id": "TASK-005",
