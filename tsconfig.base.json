@@ -17,6 +17,7 @@
       "@shared-utils": ["./libs/shared-utils/src/index.ts"],
       "@video-maker/timeline-core": ["./libs/timeline-core/src/index.ts"],
       "@video-maker/media-local": ["./libs/media-local/src/index.ts"],
+      "@video-maker/auto-montage": ["./libs/auto-montage/src/index.ts"],
       "@video-maker/composition-remotion": ["./libs/composition-remotion/src/index.ts"],
       "@video-maker/composition-remotion/render": ["./libs/composition-remotion/src/render.ts"]
     }

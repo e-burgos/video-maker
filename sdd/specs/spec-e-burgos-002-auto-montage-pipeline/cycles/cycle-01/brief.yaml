@@ -1,0 +1,122 @@
+# sdd/specs/spec-e-burgos-002-auto-montage-pipeline/cycles/cycle-01/brief.yaml
+# Generado por: sdd-orchestrator
+# Al: iniciar el ciclo
+
+cycle: 1
+module: auto-montage-pipeline
+phase: media-project-ingest
+date: 2026-09-07
+app_context: sdd/context/libs/auto-montage/context_prompt.md
+
+objective: |
+  Crear libs/auto-montage y dejar operativa la ingesta de un proyecto de medios: dado un árbol
+  media/<project-slug>/raw/, descubrir y clasificar los assets, sondearlos con probeMedia,
+  transcribir el A-roll con whisper-cli de forma incremental y persistir un catálogo con rutas
+  relativas en work/. Al cerrar, `ingerir una carpeta de material real` es una operación
+  reproducible y testeada, sin binarios en CI.
+
+scope:
+  - Scaffold de libs/auto-montage con la skill scaffold-nx (targets explícitos lint/test/build, alias @video-maker/auto-montage en tsconfig.base.json Y resolve.alias en vite.config.ts)
+  - Contrato del proyecto de medios: resolución de media/<project-slug>/{raw,work,out}, invariante de raw/ como solo lectura (error tipado ante cualquier escritura)
+  - Descubrimiento y clasificación de assets por subcarpeta (aroll/broll/images/audio), ignorando ocultos y extensiones no soportadas
+  - Probe de cada asset vía probeMedia de media-local, tolerante a fallos individuales
+  - Transcripción incremental del A-roll vía transcribeWithWhisperCpp, persistida en work/transcripts/ y no repetida si el material no cambió
+  - Catálogo work/catalog.json con schema Zod propio y rutas SIEMPRE relativas a la raíz del proyecto de medios
+  - Puertos inyectables de I/O (CommandRunner + puerto de filesystem) para que la suite corra sin binarios
+  - Target de smoke manual documentado en el README que ingiere un proyecto real con los binarios de la máquina
+  - Contexto del subproyecto: fragmento aditivo en sdd/context/libs/auto-montage/updates/
+
+out_of_scope:
+  - Keyword spotting, planificador de B-roll, presets y autoMontage() → cycle-02
+  - tools/render-cli y cualquier render → cycle-03 (su contexto ya quedó sembrado, no se toca la lib)
+  - Mezcla de audio y mux final → spec-e-burgos-004
+  - Cualquier matching semántico con embeddings o LLM (fuera de la spec entera)
+  - Modificar libs/timeline-core, libs/media-local o libs/composition-remotion (specs ya cerradas; si hiciera falta, se registra como decisión, no se toca de prepo)
+
+dependencies_required:
+  - spec-e-burgos-001-core-composition-media-pipeline (completed — 3 ciclos, 2026-09-07)
+  - libs/timeline-core (contratos MediaAsset/Transcription)
+  - libs/media-local (probeMedia, transcribeWithWhisperCpp, CommandRunner)
+
+agent_contexts:
+  functional:
+    goal: >
+      Convertir la ingesta del proyecto de medios en historias de usuario y criterios de aceptación
+      verificables. El actor es el propio dev operando su máquina: no hay multiusuario ni UI en este
+      ciclo. Prestar atención especial al comportamiento ante material parcialmente ilegible y a la
+      incrementalidad (qué significa exactamente "el material no cambió").
+    business_context: >
+      El creador tiene una carpeta con el material crudo de un video (clips de cámara o pantalla con
+      locución, clips de apoyo, fotos, música). Hoy, para editar, tiene que mirar todo el material y
+      decidir a mano. Este ciclo entrega el primer paso automático: que el sistema lea esa carpeta y
+      sepa qué hay adentro y qué se dijo. La transcripción es cara (minutos de whisper-cli sobre un
+      modelo de 574 MB): re-transcribir material que no cambió es el desperdicio que este ciclo debe
+      evitar.
+    relevant_spec_sections:
+      - 'Contexto de Negocio → Contrato de entrada: layout de media/'
+      - 'Alcance → punto 1 (Proyecto de medios y catálogo)'
+      - 'Requisitos Funcionales → RF-1 a RF-4'
+      - 'Requisitos No-Funcionales → RNF-3, RNF-4, RNF-5'
+      - 'Criterios de Aceptación → CA-001 a CA-007'
+    output_file: sdd/specs/spec-e-burgos-002-auto-montage-pipeline/cycles/cycle-01/functional.md
+
+  planner:
+    goal: >
+      Descomponer en tasks técnicas ordenadas y estimadas (estimation_hours + story_points
+      obligatorios en cada una). La primera task es el scaffold con scaffold-nx. Separar
+      explícitamente las tasks de lógica pura (testeables con fixtures) de las de I/O (puertos
+      inyectables). Recibe el output del Funcional, no la spec completa.
+    note: 'Ciclo sin frontend: todas las tasks son de implementor-back.'
+    output_file: sdd/specs/spec-e-burgos-002-auto-montage-pipeline/cycles/cycle-01/planner.md
+    tasks_file: sdd/specs/spec-e-burgos-002-auto-montage-pipeline/cycles/cycle-01/tasks.json
+
+  architect:
+    goal: >
+      Definir la estructura de libs/auto-montage, el schema Zod del catálogo y los puertos de I/O.
+      Resolver D-1 (única decisión abierta de este ciclo) y aplicar D-2/D-3, ya cerradas por el dev.
+      No hay tablas de BD ni endpoints en este ciclo: sdd/schema.json y sdd/api.json no se tocan.
+    existing_tables: []
+    existing_endpoints: []
+    must_decide:
+      - >
+        D-1 — Tag Nx de libs/auto-montage. Es la primera lib que depende de type:domain
+        (timeline-core) Y type:util (media-local) a la vez. Las boundaries actuales del
+        eslint.config.mjs raíz (type:domain → [], type:util → ['type:domain'], type:ui →
+        ['type:domain']) no lo contemplan. Definir el tag nuevo y su onlyDependOnLibsWithTags; es un
+        cambio en config raíz que afecta a todo el repo, así que justificarlo.
+      - >
+        D-2 — RESUELTA por el dev el 2026-09-07, NO se re-litiga: publicDir = media/<project-slug>
+        (raíz del proyecto de medios, no raw/) y rutas del catálogo relativas a esa raíz
+        (raw/aroll/clip01.mp4, work/audio/voice-14lufs.wav). Motivo: los medios derivados (voz
+        normalizada de spec-004, audio extraído para transcribir) viven en work/ y con publicDir en
+        raw/ habrían caído en la rama file:// no verificada de assetSrc. El arquitecto la aplica al
+        schema del catálogo y documenta cómo se materializa; no la vuelve a decidir.
+    decided_upstream:
+      - 'D-3 (dev, 2026-09-07): media/ es el store canónico en disco; el MinIO de spec-005 es una vista que render-api expone sobre él, nunca un segundo lugar donde vivan los archivos. Registrarla en architect.md porque spec-005 la hereda.'
+      - 'D-4 (anchor del punch-in): diferida a cycle-02 por decisión del dev. Fuera de alcance acá.'
+    output_file: sdd/specs/spec-e-burgos-002-auto-montage-pipeline/cycles/cycle-01/architect.md
+
+  implementor_back:
+    goal: 'Implementar una task a la vez de tasks.json, respetando los puertos inyectables y el estilo sin comentarios.'
+    app: 'libs/auto-montage'
+    app_context: sdd/context/libs/auto-montage/context_prompt.md
+    upstream_contexts:
+      - sdd/context/libs/timeline-core/context_prompt.md
+      - sdd/context/libs/timeline-core/updates/2026-09-07-spec-e-burgos-001-cycle-01.md
+      - sdd/context/libs/media-local/context_prompt.md
+      - sdd/context/libs/media-local/updates/2026-09-07-spec-e-burgos-001-cycle-02.md
+    known_traps:
+      - 'vite.config.ts necesita resolve.alias de CADA alias @video-maker/* que la lib importe: tsc resuelve por tsconfig.base.json → paths, Vitest/Vite NO. Sin eso, lint y build quedan verdes y los tests revientan con ERR_MODULE_NOT_FOUND.'
+      - 'Verificar NX_WORKSPACE_ROOT_PATH antes de cualquier nx: si apunta a otro repo, corre los targets de ESE repo sin error visible.'
+      - 'No agregar plugins inferidos a nx.json: @nx/vitest infiere test en modo watch y cuelga nx run-many -t test.'
+
+  reviewer:
+    goal: 'Validar todo el output del ciclo y ejecutar los gates de cierre.'
+    checklist: sdd/skills/sdd-reviewer/checklist.md
+    output_file: sdd/specs/spec-e-burgos-002-auto-montage-pipeline/cycles/cycle-01/cycle.json
+    closing_gates:
+      - 'pnpm sdd:validate en verde'
+      - 'pnpm exec nx run-many -t lint test build en verde'
+      - 'Fragmento aditivo en sdd/context/libs/auto-montage/updates/2026-09-07-spec-e-burgos-002-cycle-01.md'
+      - 'Fila del subproyecto en la tabla-snapshot de sdd/context/constitution.md sección 3 (las filas de las tablas de sección 2/2.1 ya las agregó el orquestador)'
+      - 'metrics.usage.by_agent completo: una entrada por task done + una por documento + orquestador + reviewer'

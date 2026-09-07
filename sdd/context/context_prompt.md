@@ -52,6 +52,8 @@ El proyecto usa **Nx** como monorepo manager con **pnpm** como package manager (
 | `libs/timeline-core` | `sdd/context/libs/timeline-core/context_prompt.md` | `sdd/context/libs/timeline-core/constitution.md` |
 | `libs/media-local` | `sdd/context/libs/media-local/context_prompt.md` | `sdd/context/libs/media-local/constitution.md` |
 | `libs/composition-remotion` | `sdd/context/libs/composition-remotion/context_prompt.md` | `sdd/context/libs/composition-remotion/constitution.md` |
+| `libs/auto-montage` | `sdd/context/libs/auto-montage/context_prompt.md` | `sdd/context/libs/auto-montage/constitution.md` |
+| `tools/render-cli` | `sdd/context/tools/render-cli/context_prompt.md` | `sdd/context/tools/render-cli/constitution.md` |
 
 > Todavía no hay apps/libs/tools generadas en Nx. Al generar la primera, sumar una fila por subproyecto (solo agregar filas — nunca reformatear la tabla completa).
 

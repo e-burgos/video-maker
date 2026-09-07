@@ -25,7 +25,7 @@
       "file": "sdd/specs/spec-e-burgos-002-auto-montage-pipeline/spec-e-burgos-002-auto-montage-pipeline.spec.md",
       "module": "auto-montage-pipeline",
       "app": "libs/auto-montage",
-      "status": "draft",
+      "status": "in-progress",
       "title": "Auto-Montage A-Roll / B-Roll Pipeline",
       "created_at": "2026-09-07",
       "completed_at": null,

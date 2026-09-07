@@ -1,0 +1,389 @@
+{
+  "$schema": "../../../../schemas/cycle-tasks.schema.json",
+  "spec": "spec-e-burgos-002-auto-montage-pipeline",
+  "cycle": 1,
+  "module": "auto-montage-pipeline",
+  "apps": [
+    "libs/auto-montage"
+  ],
+  "flow": "full",
+  "user_stories_generated": true,
+  "prerequisites": {
+    "tasks_generated": true
+  },
+  "tasks": [
+    {
+      "id": "TASK-001",
+      "title": "Scaffold de libs/auto-montage con scaffold-nx",
+      "user_stories": [
+        "HU-01",
+        "HU-02",
+        "HU-03",
+        "HU-04",
+        "HU-05",
+        "HU-06"
+      ],
+      "estimation_hours": 2,
+      "story_points": 2,
+      "depends_on": [],
+      "status": "done",
+      "files": [
+        "libs/auto-montage/project.json",
+        "libs/auto-montage/eslint.config.mjs",
+        "libs/auto-montage/vite.config.ts",
+        "libs/auto-montage/tsconfig.json",
+        "libs/auto-montage/tsconfig.lib.json",
+        "libs/auto-montage/tsconfig.spec.json",
+        "libs/auto-montage/src/index.ts",
+        "tsconfig.base.json",
+        "eslint.config.mjs"
+      ],
+      "usage": {
+        "tokens_in": 103872,
+        "tokens_out": 18330,
+        "tokens_total": 122202,
+        "provider_model": "claude/sonnet",
+        "effort": "medium",
+        "agent": "implementor-back",
+        "approx": false,
+        "source": "agent-usage-notification",
+        "recorded_at": "2026-09-07"
+      }
+    },
+    {
+      "id": "TASK-002",
+      "title": "Contrato del proyecto de medios: tipos y resolución de rutas raw/work/out",
+      "user_stories": [
+        "HU-03",
+        "HU-05"
+      ],
+      "estimation_hours": 1.5,
+      "story_points": 2,
+      "depends_on": [
+        "TASK-001"
+      ],
+      "status": "done",
+      "files": [
+        "libs/auto-montage/src/index.ts",
+        "libs/auto-montage/src/errors/auto-montage-error.ts",
+        "libs/auto-montage/src/errors/auto-montage-error.spec.ts",
+        "libs/auto-montage/src/errors/project-layout-error.ts",
+        "libs/auto-montage/src/errors/path-escapes-project-error.ts",
+        "libs/auto-montage/src/project/media-project.ts",
+        "libs/auto-montage/src/project/media-project.spec.ts",
+        "libs/auto-montage/src/project/project-paths.ts",
+        "libs/auto-montage/src/project/project-paths.spec.ts"
+      ],
+      "usage": {
+        "tokens_in": 37345,
+        "tokens_out": 6590,
+        "tokens_total": 43935,
+        "provider_model": "claude/sonnet",
+        "effort": "medium",
+        "agent": "implementor-back",
+        "approx": false,
+        "source": "agent-usage-notification",
+        "recorded_at": "2026-09-07"
+      }
+    },
+    {
+      "id": "TASK-003",
+      "title": "Puerto de filesystem inyectable con invariante de solo-lectura en raw/",
+      "user_stories": [
+        "HU-05"
+      ],
+      "estimation_hours": 3,
+      "story_points": 3,
+      "depends_on": [
+        "TASK-002"
+      ],
+      "status": "done",
+      "files": [
+        "libs/auto-montage/src/index.ts",
+        "libs/auto-montage/src/errors/auto-montage-error.ts",
+        "libs/auto-montage/src/errors/read-only-raw-path-error.ts",
+        "libs/auto-montage/src/fs/directory-reader.ts",
+        "libs/auto-montage/src/fs/directory-reader.spec.ts",
+        "libs/auto-montage/src/fs/file-stat-reader.ts",
+        "libs/auto-montage/src/fs/file-stat-reader.spec.ts",
+        "libs/auto-montage/src/fs/write-text-file.ts",
+        "libs/auto-montage/src/fs/write-text-file.spec.ts",
+        "libs/auto-montage/src/fs/ensure-directory.ts",
+        "libs/auto-montage/src/fs/ensure-directory.spec.ts",
+        "libs/auto-montage/src/fs/guard-raw-writes.ts",
+        "libs/auto-montage/src/fs/guard-raw-writes.spec.ts",
+        "libs/auto-montage/src/__fixtures__/fake-file-system.ts"
+      ],
+      "usage": {
+        "tokens_in": 38348,
+        "tokens_out": 6767,
+        "tokens_total": 45115,
+        "provider_model": "claude/sonnet",
+        "effort": "medium",
+        "agent": "implementor-back",
+        "approx": false,
+        "source": "agent-usage-notification",
+        "recorded_at": "2026-09-07"
+      }
+    },
+    {
+      "id": "TASK-004",
+      "title": "Descubrimiento y clasificación de assets en raw/ por subcarpeta",
+      "user_stories": [
+        "HU-01"
+      ],
+      "estimation_hours": 3,
+      "story_points": 3,
+      "depends_on": [
+        "TASK-003"
+      ],
+      "status": "done",
+      "files": [
+        "libs/auto-montage/src/ingest/supported-extensions.ts",
+        "libs/auto-montage/src/ingest/supported-extensions.spec.ts",
+        "libs/auto-montage/src/ingest/classify-entry.ts",
+        "libs/auto-montage/src/ingest/classify-entry.spec.ts",
+        "libs/auto-montage/src/ingest/discover-assets.ts",
+        "libs/auto-montage/src/ingest/discover-assets.spec.ts",
+        "libs/auto-montage/src/__fixtures__/fake-file-system.ts"
+      ],
+      "usage": {
+        "tokens_in": 50463,
+        "tokens_out": 8905,
+        "tokens_total": 59368,
+        "provider_model": "claude/sonnet",
+        "effort": "medium",
+        "agent": "implementor-back",
+        "approx": false,
+        "source": "agent-usage-notification",
+        "recorded_at": "2026-09-07"
+      }
+    },
+    {
+      "id": "TASK-005",
+      "title": "Probe de assets descubiertos vía probeMedia, tolerante a fallos individuales",
+      "user_stories": [
+        "HU-02"
+      ],
+      "estimation_hours": 3,
+      "story_points": 3,
+      "depends_on": [
+        "TASK-004"
+      ],
+      "status": "done",
+      "files": [
+        "libs/auto-montage/src/ingest/probe-assets.ts",
+        "libs/auto-montage/src/ingest/probe-assets.spec.ts"
+      ],
+      "usage": {
+        "tokens_in": 45735,
+        "tokens_out": 8071,
+        "tokens_total": 53806,
+        "provider_model": "claude/sonnet",
+        "effort": "medium",
+        "agent": "implementor-back",
+        "approx": false,
+        "source": "agent-usage-notification",
+        "recorded_at": "2026-09-07"
+      }
+    },
+    {
+      "id": "TASK-006",
+      "title": "Schema Zod del catálogo con rutas siempre relativas a la raíz del proyecto de medios",
+      "user_stories": [
+        "HU-03"
+      ],
+      "estimation_hours": 2,
+      "story_points": 2,
+      "depends_on": [
+        "TASK-005"
+      ],
+      "status": "done",
+      "files": [
+        "libs/auto-montage/src/catalog/catalog.schema.ts",
+        "libs/auto-montage/src/catalog/catalog.schema.spec.ts",
+        "libs/auto-montage/src/index.ts"
+      ],
+      "usage": {
+        "tokens_in": 38228,
+        "tokens_out": 6746,
+        "tokens_total": 44974,
+        "provider_model": "claude/sonnet",
+        "effort": "medium",
+        "agent": "implementor-back",
+        "approx": false,
+        "source": "agent-usage-notification",
+        "recorded_at": "2026-09-07"
+      }
+    },
+    {
+      "id": "TASK-007",
+      "title": "Persistencia y lectura de work/catalog.json vía el puerto de filesystem",
+      "user_stories": [
+        "HU-03",
+        "HU-05"
+      ],
+      "estimation_hours": 2,
+      "story_points": 2,
+      "depends_on": [
+        "TASK-003",
+        "TASK-006"
+      ],
+      "status": "done",
+      "files": [
+        "libs/auto-montage/src/catalog/read-catalog.ts",
+        "libs/auto-montage/src/catalog/read-catalog.spec.ts",
+        "libs/auto-montage/src/catalog/write-catalog.ts",
+        "libs/auto-montage/src/catalog/write-catalog.spec.ts",
+        "libs/auto-montage/src/errors/catalog-unreadable-error.ts",
+        "libs/auto-montage/src/errors/auto-montage-error.ts",
+        "libs/auto-montage/src/__fixtures__/fake-file-system.ts",
+        "libs/auto-montage/src/index.ts"
+      ],
+      "usage": {
+        "tokens_in": 29548,
+        "tokens_out": 5214,
+        "tokens_total": 34762,
+        "provider_model": "claude/sonnet",
+        "effort": "medium",
+        "agent": "implementor-back",
+        "approx": false,
+        "source": "agent-usage-notification",
+        "recorded_at": "2026-09-07"
+      }
+    },
+    {
+      "id": "TASK-008",
+      "title": "Lógica de invalidación incremental de transcripciones por tamaño y fecha de modificación",
+      "user_stories": [
+        "HU-04"
+      ],
+      "estimation_hours": 2,
+      "story_points": 2,
+      "depends_on": [
+        "TASK-007"
+      ],
+      "status": "done",
+      "files": [
+        "libs/auto-montage/src/ingest/transcription-key.ts",
+        "libs/auto-montage/src/ingest/transcription-key.spec.ts",
+        "libs/auto-montage/src/ingest/plan-ingest-work.ts",
+        "libs/auto-montage/src/ingest/plan-ingest-work.spec.ts"
+      ],
+      "usage": {
+        "tokens_in": 22857,
+        "tokens_out": 4034,
+        "tokens_total": 26891,
+        "provider_model": "claude/sonnet",
+        "effort": "medium",
+        "agent": "implementor-back",
+        "approx": false,
+        "source": "agent-usage-notification",
+        "recorded_at": "2026-09-07"
+      }
+    },
+    {
+      "id": "TASK-009",
+      "title": "Transcripción incremental del A-roll vía transcribeWithWhisperCpp y persistencia en work/transcripts/",
+      "user_stories": [
+        "HU-04"
+      ],
+      "estimation_hours": 3,
+      "story_points": 3,
+      "depends_on": [
+        "TASK-008"
+      ],
+      "status": "done",
+      "files": [
+        "libs/auto-montage/src/ingest/transcribe-assets.ts",
+        "libs/auto-montage/src/ingest/transcribe-assets.spec.ts",
+        "libs/auto-montage/src/ingest/plan-ingest-work.ts",
+        "libs/auto-montage/src/ingest/plan-ingest-work.spec.ts",
+        "libs/auto-montage/src/errors/transcription-failed-error.ts",
+        "libs/auto-montage/src/errors/auto-montage-error.ts",
+        "libs/auto-montage/src/index.ts"
+      ],
+      "usage": {
+        "tokens_in": 56913,
+        "tokens_out": 10044,
+        "tokens_total": 66957,
+        "provider_model": "claude/sonnet",
+        "effort": "medium",
+        "agent": "implementor-back",
+        "approx": false,
+        "source": "agent-usage-notification",
+        "recorded_at": "2026-09-07"
+      }
+    },
+    {
+      "id": "TASK-010",
+      "title": "Integración end-to-end: función pública de ingesta del proyecto de medios",
+      "user_stories": [
+        "HU-01",
+        "HU-02",
+        "HU-03",
+        "HU-04",
+        "HU-05"
+      ],
+      "estimation_hours": 2,
+      "story_points": 2,
+      "depends_on": [
+        "TASK-009"
+      ],
+      "status": "done",
+      "files": [
+        "libs/auto-montage/src/ingest/ingest-project.ts",
+        "libs/auto-montage/src/ingest/ingest-project.spec.ts",
+        "libs/auto-montage/src/ingest/probe-assets.ts",
+        "libs/auto-montage/src/errors/asset-probe-failed-error.ts",
+        "libs/auto-montage/src/errors/auto-montage-error.ts",
+        "libs/auto-montage/src/index.ts"
+      ],
+      "usage": {
+        "tokens_in": 45026,
+        "tokens_out": 7946,
+        "tokens_total": 52972,
+        "provider_model": "claude/sonnet",
+        "effort": "medium",
+        "agent": "implementor-back",
+        "approx": false,
+        "source": "agent-usage-notification",
+        "recorded_at": "2026-09-07"
+      }
+    },
+    {
+      "id": "TASK-011",
+      "title": "Target de smoke manual sobre un proyecto real, documentado en el README",
+      "user_stories": [
+        "HU-06"
+      ],
+      "estimation_hours": 1,
+      "story_points": 1,
+      "depends_on": [
+        "TASK-010"
+      ],
+      "status": "done",
+      "files": [
+        "libs/auto-montage/project.json",
+        "libs/auto-montage/eslint.config.mjs",
+        "libs/auto-montage/vite.config.ts",
+        "libs/auto-montage/src/smoke.ts",
+        "libs/auto-montage/src/ingest/transcribe-assets.ts",
+        "libs/auto-montage/src/ingest/transcribe-assets.spec.ts",
+        "libs/auto-montage/src/ingest/ingest-project.ts",
+        "libs/auto-montage/README.md"
+      ],
+      "usage": {
+        "tokens_in": 76792,
+        "tokens_out": 13551,
+        "tokens_total": 90343,
+        "provider_model": "claude/sonnet",
+        "effort": "medium",
+        "agent": "implementor-back",
+        "approx": false,
+        "source": "agent-usage-notification",
+        "recorded_at": "2026-09-07"
+      }
+    }
+  ]
+}
