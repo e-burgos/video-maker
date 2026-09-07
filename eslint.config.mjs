@@ -4,7 +4,7 @@ export default [
   ...nx.configs['flat/base'],
   ...nx.configs['flat/typescript'],
   {
-    ignores: ['**/dist'],
+    ignores: ['**/dist', '**/vitest.config.*.timestamp*'],
   },
   {
     files: ['**/*.ts', '**/*.tsx', '**/*.js', '**/*.jsx'],
@@ -15,6 +15,7 @@ export default [
           enforceBuildableLibDependency: true,
           allow: ['^.*/eslint(\\.base)?\\.config\\.[cm]?js$'],
           depConstraints: [
+            { sourceTag: 'type:domain', onlyDependOnLibsWithTags: [] },
             { sourceTag: '*', onlyDependOnLibsWithTags: ['*'] },
           ],
         },

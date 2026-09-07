@@ -24,7 +24,8 @@
   "dependencies": {
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
-    "react-router-dom": "^7.18.2"
+    "react-router-dom": "^7.18.2",
+    "zod": "^4.5"
   },
   "devDependencies": {
     "@nx/devkit": "23.1.1",
@@ -33,6 +34,7 @@
     "@nx/js": "23.1.1",
     "@nx/react": "23.1.1",
     "@nx/vite": "23.1.1",
+    "@nx/vitest": "23.1.1",
     "@nx/workspace": "23.1.1",
     "@swc-node/register": "~1.11.1",
     "@swc/core": "~1.15.5",

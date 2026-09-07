@@ -265,3 +265,4 @@ TASK-003/TASK-005/TASK-006 una vez cerrado TASK-002. El camino crítico es
 TASK-001 → TASK-002 → TASK-003 → TASK-005 → TASK-006 → TASK-009 → TASK-010 → TASK-011.
 
 > IDs `TASK-[NNN]` — el scope es el `tasks.json` del ciclo; los mismos IDs van en ambos archivos.
+
