@@ -210,13 +210,25 @@
       "depends_on": [
         "TASK-005"
       ],
-      "status": "pending",
+      "status": "done",
       "files": [
         "libs/timeline-core/src/punch-in/plan-punch-ins.ts",
         "libs/timeline-core/src/punch-in/punch-in.spec.ts",
         "libs/timeline-core/src/timeline/remap-ms-after-cuts.ts",
-        "libs/timeline-core/src/timeline/remap.spec.ts"
-      ]
+        "libs/timeline-core/src/timeline/remap.spec.ts",
+        "libs/timeline-core/src/index.ts"
+      ],
+      "usage": {
+        "provider_model": "claude/sonnet",
+        "effort": "medium",
+        "tokens_in": 120680,
+        "tokens_out": 21296,
+        "tokens_total": 141976,
+        "approx": false,
+        "source": "agent-usage-notification",
+        "recorded_at": "2026-09-07",
+        "agent": "implementor-back"
+      }
     },
     {
       "id": "TASK-007",

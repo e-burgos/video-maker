@@ -67,3 +67,8 @@ export type {
   PruneSilencesOptions,
   PruneSilencesResult,
 } from './silence/prune-silences';
+
+export { planPunchIns } from './punch-in/plan-punch-ins';
+export type { PunchInAnchor, PunchInOptions, PunchInPlan } from './punch-in/plan-punch-ins';
+
+export { remapMsAfterCuts } from './timeline/remap-ms-after-cuts';
