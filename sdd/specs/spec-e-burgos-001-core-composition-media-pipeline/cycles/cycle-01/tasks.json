@@ -1,0 +1,185 @@
+{
+  "$schema": "../../../../schemas/cycle-tasks.schema.json",
+  "spec": "spec-e-burgos-001-core-composition-media-pipeline",
+  "cycle": 1,
+  "module": "core-composition-media-pipeline",
+  "apps": ["libs/timeline-core"],
+  "flow": "full",
+  "user_stories_generated": true,
+  "prerequisites": { "tasks_generated": true },
+  "tasks": [
+    {
+      "id": "TASK-001",
+      "title": "Scaffold de libs/timeline-core con scaffold-nx",
+      "user_stories": ["US-1-001", "US-1-002", "US-1-003", "US-1-004", "US-1-005", "US-1-006", "US-1-007", "US-1-008", "US-1-009", "US-1-010", "US-1-011", "US-1-012"],
+      "estimation_hours": 2,
+      "story_points": 2,
+      "depends_on": [],
+      "status": "pending",
+      "files": [
+        "libs/timeline-core/project.json",
+        "libs/timeline-core/package.json",
+        "libs/timeline-core/tsconfig.json",
+        "libs/timeline-core/tsconfig.lib.json",
+        "libs/timeline-core/vite.config.ts",
+        "libs/timeline-core/src/index.ts",
+        "libs/timeline-core/README.md",
+        "tsconfig.base.json"
+      ]
+    },
+    {
+      "id": "TASK-002",
+      "title": "Schemas Zod OutputFormat, MediaAsset y Transcription con invariantes",
+      "user_stories": ["US-1-001"],
+      "estimation_hours": 3,
+      "story_points": 3,
+      "depends_on": ["TASK-001"],
+      "status": "pending",
+      "files": [
+        "libs/timeline-core/src/schemas/output-format.schema.ts",
+        "libs/timeline-core/src/schemas/media-asset.schema.ts",
+        "libs/timeline-core/src/schemas/transcription.schema.ts",
+        "libs/timeline-core/src/schemas/schemas.spec.ts",
+        "libs/timeline-core/src/__fixtures__/transcription.fixture.ts"
+      ]
+    },
+    {
+      "id": "TASK-003",
+      "title": "Schemas Zod EditDecisionList, AudioMixPlan y Timeline con invariantes",
+      "user_stories": ["US-1-011"],
+      "estimation_hours": 4,
+      "story_points": 5,
+      "depends_on": ["TASK-002"],
+      "status": "pending",
+      "files": [
+        "libs/timeline-core/src/schemas/edit-decision-list.schema.ts",
+        "libs/timeline-core/src/schemas/audio-mix-plan.schema.ts",
+        "libs/timeline-core/src/schemas/timeline.schema.ts",
+        "libs/timeline-core/src/schemas/schemas.spec.ts",
+        "libs/timeline-core/src/__fixtures__/edl.fixture.ts"
+      ]
+    },
+    {
+      "id": "TASK-004",
+      "title": "Conversión de unidades (msToFrames/framesToMs), defaultFormat y safeZoneFor",
+      "user_stories": ["US-1-001", "US-1-002"],
+      "estimation_hours": 3,
+      "story_points": 3,
+      "depends_on": ["TASK-002"],
+      "status": "pending",
+      "files": [
+        "libs/timeline-core/src/units/convert-time.ts",
+        "libs/timeline-core/src/units/convert-time.spec.ts",
+        "libs/timeline-core/src/format/default-format.ts",
+        "libs/timeline-core/src/format/safe-zone.ts",
+        "libs/timeline-core/src/format/format.spec.ts"
+      ]
+    },
+    {
+      "id": "TASK-005",
+      "title": "Detección, fusión y poda de silencios (keep/cut)",
+      "user_stories": ["US-1-003", "US-1-004"],
+      "estimation_hours": 4,
+      "story_points": 5,
+      "depends_on": ["TASK-003"],
+      "status": "pending",
+      "files": [
+        "libs/timeline-core/src/silence/detect-silences.ts",
+        "libs/timeline-core/src/silence/merge-silences.ts",
+        "libs/timeline-core/src/silence/prune-silences.ts",
+        "libs/timeline-core/src/silence/silence.spec.ts",
+        "libs/timeline-core/src/silence/prune.spec.ts",
+        "libs/timeline-core/src/__fixtures__/silence.fixture.ts"
+      ]
+    },
+    {
+      "id": "TASK-006",
+      "title": "Planificación de punch-ins deterministas y remapeo de tiempos tras cortes",
+      "user_stories": ["US-1-005", "US-1-008"],
+      "estimation_hours": 3,
+      "story_points": 3,
+      "depends_on": ["TASK-005"],
+      "status": "pending",
+      "files": [
+        "libs/timeline-core/src/punch-in/plan-punch-ins.ts",
+        "libs/timeline-core/src/punch-in/punch-in.spec.ts",
+        "libs/timeline-core/src/timeline/remap-ms-after-cuts.ts",
+        "libs/timeline-core/src/timeline/remap.spec.ts"
+      ]
+    },
+    {
+      "id": "TASK-007",
+      "title": "Agrupado de palabras en captions con palabra de énfasis",
+      "user_stories": ["US-1-006"],
+      "estimation_hours": 4,
+      "story_points": 5,
+      "depends_on": ["TASK-002"],
+      "status": "pending",
+      "files": [
+        "libs/timeline-core/src/captions/group-words-for-captions.ts",
+        "libs/timeline-core/src/captions/captions.spec.ts",
+        "libs/timeline-core/src/__fixtures__/captions.fixture.ts"
+      ]
+    },
+    {
+      "id": "TASK-008",
+      "title": "Planificación de ducking de música (automation de ganancia)",
+      "user_stories": ["US-1-007"],
+      "estimation_hours": 4,
+      "story_points": 5,
+      "depends_on": ["TASK-004"],
+      "status": "pending",
+      "files": [
+        "libs/timeline-core/src/ducking/plan-ducking.ts",
+        "libs/timeline-core/src/ducking/ducking.spec.ts"
+      ]
+    },
+    {
+      "id": "TASK-009",
+      "title": "buildTimeline: EDL + assets → Timeline completa",
+      "user_stories": ["US-1-009"],
+      "estimation_hours": 4,
+      "story_points": 5,
+      "depends_on": ["TASK-003", "TASK-006", "TASK-007", "TASK-008"],
+      "status": "pending",
+      "files": [
+        "libs/timeline-core/src/timeline/build-timeline.ts",
+        "libs/timeline-core/src/timeline/build-timeline.spec.ts",
+        "libs/timeline-core/src/__fixtures__/edl-reference.fixture.ts"
+      ]
+    },
+    {
+      "id": "TASK-010",
+      "title": "validateTimeline y refuerzo de invariantes de schema (EDL/Timeline)",
+      "user_stories": ["US-1-010", "US-1-011"],
+      "estimation_hours": 4,
+      "story_points": 5,
+      "depends_on": ["TASK-009"],
+      "status": "pending",
+      "files": [
+        "libs/timeline-core/src/timeline/validate-timeline.ts",
+        "libs/timeline-core/src/timeline/validate-timeline.spec.ts"
+      ]
+    },
+    {
+      "id": "TASK-011",
+      "title": "Generación de JSON Schema commiteado, test anti-drift, export público final y cobertura ≥ 85 %",
+      "user_stories": ["US-1-012"],
+      "estimation_hours": 4,
+      "story_points": 5,
+      "depends_on": ["TASK-010"],
+      "status": "pending",
+      "files": [
+        "libs/timeline-core/schemas/output-format.schema.json",
+        "libs/timeline-core/schemas/media-asset.schema.json",
+        "libs/timeline-core/schemas/transcription.schema.json",
+        "libs/timeline-core/schemas/edit-decision-list.schema.json",
+        "libs/timeline-core/schemas/audio-mix-plan.schema.json",
+        "libs/timeline-core/schemas/timeline.schema.json",
+        "libs/timeline-core/src/schemas/schemas.spec.ts",
+        "libs/timeline-core/src/index.ts",
+        "libs/timeline-core/README.md"
+      ]
+    }
+  ]
+}
