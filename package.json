@@ -19,7 +19,7 @@
     "test:web": "nx test web",
     "lint:web": "nx lint web",
     "sdd:rtk": "node sdd/scripts/setup-rtk.mjs",
-    "postinstall": "node sdd/scripts/setup-rtk.mjs"
+    "postinstall": "node -e \"const f='sdd/scripts/setup-rtk.mjs';if(require('fs').existsSync(f)){require('child_process').execFileSync(process.execPath,[f],{stdio:'inherit'})}\""
   },
   "dependencies": {
     "react": "^19.0.0",

@@ -1,5 +1,5 @@
 {
-  "kit_version": "0.12.0",
+  "kit_version": "0.12.1",
   "installed_at": "2026-09-07",
   "files": {
     "README.md": "2d8f71b319260460530f780059599f4fb736fb1c9e6bc9222219a48a502f917e",
@@ -142,7 +142,7 @@
     "templates/nx-workspace/gitignore": "ee386e7ce2d22b1ae594a2ae056acb74c542fa325aa5a202610849be2ea61cc3",
     "templates/nx-workspace/npmrc": "0d38f14df5ddec35093c5150123f97db6c7404e2e5eb999fa8066e2395b9300c",
     "templates/nx-workspace/nx.json": "ca52c29e25ef37fee03c8d4a3e7c469bd1296c27b91845b7f6dc2713347c5a2b",
-    "templates/nx-workspace/package.json": "9c920527caad7984d7dc55edde792ea79ae58ff643a1aed52b88fab25201ecc6",
+    "templates/nx-workspace/package.json": "ef077548a6490b7bf928822fd3165786c3166bf33345bc86a995761a8e3aed5b",
     "templates/nx-workspace/pnpm-workspace.yaml": "d68578e5273b7a3ecd6e098a1a61b52bc8f9aa16c2eb5c0aa19c32286ef87793",
     "templates/nx-workspace/tsconfig.base.json": "75556d7331f3d9741bc22f0dcb9d9e0c78fad0378ef87974b6d409086351ae9c"
   }
