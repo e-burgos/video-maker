@@ -135,6 +135,19 @@ describe('buildTimeline (CA-013)', () => {
     expect(timeline.audioMix).toEqual(DEFAULT_AUDIO_MIX_PLAN);
   });
 
+  it('no comparte estado entre llamadas: safeZone y audioMix son objetos propios de cada Timeline', () => {
+    const first = buildTimeline(ca013Edl, ca013Assets);
+    first.safeZone.top = 0;
+    first.audioMix.music.baseGainDb = 0;
+    first.audioMix.voice.integratedLufs = 0;
+
+    const second = buildTimeline(ca013Edl, ca013Assets);
+
+    expect(second.safeZone).toEqual({ top: 220, bottom: 400, left: 60, right: 140 });
+    expect(second.audioMix).toEqual(DEFAULT_AUDIO_MIX_PLAN);
+    expect(DEFAULT_AUDIO_MIX_PLAN.music).toEqual(DEFAULT_MUSIC_MIX);
+  });
+
   it('propaga el formato y el safeZone del EDL', () => {
     const timeline = buildTimeline(ca013Edl, ca013Assets);
 

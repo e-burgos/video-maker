@@ -78,7 +78,7 @@ Para el detalle técnico de cada subproyecto, ver su constitución específica:
 
 | Subproyecto | Stack base | Última actualización |
 | ----------- | ---------- | -------------------- |
-| `libs/timeline-core` | TypeScript estricto + Zod 4 + Vitest | cycle-01 en curso (2026-09-07) |
+| `libs/timeline-core` | TypeScript estricto + Zod 4.5 + Vitest 4 + `@swc-node/register` (JSON Schema) | cycle-01 \| 2026-09-07 |
 
 ---
 

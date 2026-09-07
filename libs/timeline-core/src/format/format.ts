@@ -25,5 +25,5 @@ export function defaultFormat(preset: OutputPreset): OutputFormat {
 }
 
 export function safeZoneFor(format: OutputFormat): SafeZone {
-  return DEFAULT_SAFE_ZONES[format.preset];
+  return { ...DEFAULT_SAFE_ZONES[format.preset] };
 }

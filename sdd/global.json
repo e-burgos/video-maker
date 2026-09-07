@@ -13,7 +13,7 @@
         "libs/media-local",
         "libs/composition-remotion"
       ],
-      "cycles_completed": 0,
+      "cycles_completed": 1,
       "description": "Contratos Timeline/EDL, cálculos de edición (silencios, ducking, punch-in, captions), wrappers FFmpeg/Whisper locales y composición Remotion base"
     }
   ],
@@ -73,7 +73,8 @@
       "web": "apps/web — react"
     },
     "libs": {
-      "shared-utils": "libs/shared-utils — shared-utils"
+      "shared-utils": "libs/shared-utils — shared-utils",
+      "timeline-core": "libs/timeline-core — contratos Timeline/EDL y cálculos puros de edición (TypeScript + Zod)"
     }
   }
 }

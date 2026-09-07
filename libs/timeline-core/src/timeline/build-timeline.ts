@@ -391,7 +391,11 @@ export function buildTimeline(
   const duckRanges = buildDuckVoiceRanges(duckDecisions, arollTrack.placements, fps);
   const automation =
     music !== undefined ? planDucking(duckRanges, DEFAULT_MUSIC_MIX, fps).automation : [];
-  const audioMix = { ...DEFAULT_AUDIO_MIX_PLAN, automation };
+  const audioMix = {
+    voice: { ...DEFAULT_AUDIO_MIX_PLAN.voice },
+    music: { ...DEFAULT_AUDIO_MIX_PLAN.music },
+    automation,
+  };
   const musicClips =
     music !== undefined
       ? [buildMusicClip(music, audioMix.music.baseGainDb, arollTrack.durationFrames)]

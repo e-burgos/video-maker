@@ -21,6 +21,14 @@ describe('safeZoneFor', () => {
     expect(safeZoneFor(defaultFormat('youtube-16x9'))).toEqual({ top: 60, bottom: 60, left: 60, right: 60 });
   });
 
+  it('devuelve una copia nueva en cada llamada, sin compartir estado', () => {
+    const first = safeZoneFor(defaultFormat('reels-9x16'));
+    first.top = 0;
+
+    expect(safeZoneFor(defaultFormat('reels-9x16'))).toEqual({ top: 220, bottom: 400, left: 60, right: 140 });
+    expect(safeZoneFor(defaultFormat('tiktok-9x16'))).not.toBe(safeZoneFor(defaultFormat('tiktok-9x16')));
+  });
+
   it('decide por el preset y no por las dimensiones del formato', () => {
     const customPortraitYoutube = { preset: 'youtube-16x9' as const, width: 1080, height: 1920, fps: 30 };
     expect(safeZoneFor(customPortraitYoutube)).toEqual({ top: 60, bottom: 60, left: 60, right: 60 });
