@@ -57,6 +57,7 @@ Para el detalle técnico de cada subproyecto, ver su constitución específica:
 
 | Subproyecto | Tipo | Rol en el sistema | Constitución específica |
 | ----------- | ---- | ----------------- | ----------------------- |
+| `libs/timeline-core` | lib de dominio TS | Contratos de datos del motor de video y cálculos puros de edición | `sdd/context/libs/timeline-core/constitution.md` |
 
 > Todavía no hay apps/libs/tools generadas en Nx. Al generar la primera, sumar una fila por subproyecto (solo agregar filas — nunca reformatear la tabla completa).
 > Las constituciones de subproyecto son la **fuente de verdad** del stack y las convenciones técnicas.
@@ -77,6 +78,7 @@ Para el detalle técnico de cada subproyecto, ver su constitución específica:
 
 | Subproyecto | Stack base | Última actualización |
 | ----------- | ---------- | -------------------- |
+| `libs/timeline-core` | TypeScript estricto + Zod 4 + Vitest | cycle-01 en curso (2026-09-07) |
 
 ---
 

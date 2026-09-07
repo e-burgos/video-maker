@@ -1,0 +1,65 @@
+# sdd/specs/spec-e-burgos-001-core-composition-media-pipeline/cycles/cycle-01/brief.yaml
+# Generado por: sdd-orchestrator
+# Al: iniciar el ciclo
+
+cycle: 1
+module: core-composition-media-pipeline
+phase: timeline-core-contracts-and-calculations
+date: 2026-09-07
+app_context: sdd/context/libs/timeline-core/context_prompt.md
+
+objective: |
+  Al cerrar el ciclo existe `libs/timeline-core`: la lib de dominio del motor con los contratos
+  Zod + JSON Schema (Timeline, EditDecisionList, Transcription, MediaAsset, AudioMixPlan,
+  OutputFormat) y todas las funciones puras de edición (conversión de unidades, safe zones,
+  detección y poda de silencios, punch-ins, agrupado de captions, ducking, remapeo de tiempos,
+  construcción y validación de la Timeline), verificadas con Vitest sin renderizar video.
+
+scope:
+  - Scaffold de `libs/timeline-core` con la skill `scaffold-nx` (`@nx/js:lib`, vitest, tags scope:engine/type:domain)
+  - Schemas Zod de los seis contratos de la spec y JSON Schema generado y commiteado en `libs/timeline-core/schemas/`
+  - Funciones puras: msToFrames/framesToMs, defaultFormat, safeZoneFor, detectSilencesFromWords, mergeSilences, pruneSilences, planPunchIns, groupWordsForCaptions, planDucking, remapMsAfterCuts, buildTimeline, validateTimeline
+  - Fixtures de EDL/Transcription para tests y test anti-drift de JSON Schema
+  - Criterios de aceptación CA-001 a CA-016 de la spec en verde con cobertura ≥ 85 %
+  - Contexto SDD de la lib (`sdd/context/libs/timeline-core/`) completado por el reviewer vía fragmento aditivo
+
+out_of_scope:
+  - Wrappers de FFmpeg/ffprobe/whisper (cycle-02, `libs/media-local`)
+  - Componentes Remotion y render headless (cycle-03, `libs/composition-remotion`)
+  - Matching de B-roll, componente visual de captions, mezcla final, API local y UI (specs 002–006)
+  - Cualquier I/O: la lib no lee archivos ni ejecuta binarios
+
+dependencies_required:
+  - ninguna (primera spec y primer ciclo del proyecto)
+
+agent_contexts:
+  functional:
+    goal: Convertir el alcance de este ciclo en historias de usuario del creador/operador del motor y en reglas de negocio verificables (silencios, punch-ins, captions, ducking, formatos), sin bajar a detalle de implementación
+    business_context: El usuario es el creador que edita Reels/TikTok/YouTube en su propia máquina. Quiere que el sistema tome su clip hablado y su transcripción y decida automáticamente qué cortar, dónde hacer zoom, cómo agrupar subtítulos y cómo bajar la música mientras habla, de forma predecible y revisable antes de renderizar
+    relevant_spec_sections:
+      - Resumen Ejecutivo
+      - Contexto de Negocio
+      - Evidencia y decisiones
+      - Alcance (solo lo asignado a cycle-01)
+      - Cálculos del motor (libs/timeline-core) — API pública
+      - Requisitos Funcionales RF-1 a RF-7
+      - Criterios de Aceptación CA-001 a CA-016
+
+  planner:
+    goal: Descomponer las historias en tasks técnicas ordenadas por dependencia para construir `libs/timeline-core` task por task (scaffold, schemas, cada grupo de funciones con sus tests, JSON Schema + anti-drift, README), estimadas en horas y story points
+    output_file: sdd/specs/spec-e-burgos-001-core-composition-media-pipeline/cycles/cycle-01/planner.md
+
+  architect:
+    goal: Fijar la estructura interna de la lib (carpetas, módulos, nombres exportados, tipos TypeScript derivados de Zod), los algoritmos con sus casos borde, la estrategia de fixtures y de generación de JSON Schema, y las reglas de boundaries Nx. No hay base de datos ni endpoints en este ciclo
+    existing_tables: []
+    existing_endpoints: []
+    output_file: sdd/specs/spec-e-burgos-001-core-composition-media-pipeline/cycles/cycle-01/architect.md
+
+  implementor_back:
+    goal: Implementar una task a la vez en `libs/timeline-core` siguiendo architect.md, con tests Vitest por función y sin comentarios en el código
+    app: libs/timeline-core
+    app_context: sdd/context/libs/timeline-core/context_prompt.md
+
+  reviewer:
+    goal: Validar todo el output del ciclo (CA-001..CA-016, cobertura, lint/test/build, cero comentarios, JSON Schema sincronizado), escribir el fragmento de contexto y cerrar cycle.json
+    output_file: sdd/specs/spec-e-burgos-001-core-composition-media-pipeline/cycles/cycle-01/cycle.json

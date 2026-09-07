@@ -61,6 +61,13 @@ salida del material del equipo local.
   de impacto y safe zones de Instagram/TikTok (2026-09-07).
 - Decisión (arquitecto, 2026-09-07): los cálculos de timeline se prueban con Vitest **sin render**;
   el render real se verifica con un script manual de smoke, fuera de CI.
+- Evidencia: hardware del dev → MacBook Pro M2, 16 GB de RAM unificada (2026-09-07).
+- Decisión del dev (2026-09-07): whisper.cpp como motor de transcripción por defecto, compilado con
+  Metal; modelo recomendado `ggml-large-v3-turbo-q5_0` (~550 MB, entra holgado en 16 GB), fallback
+  `ggml-small`. Faster-Whisper queda solo como formato de entrada JSON.
+- Decisión del dev (2026-09-07): el `-24 dB` de la música es ganancia relativa bajo la voz, con base
+  `-12 dB` cuando no hay locución (confirma el default del `AudioMixPlan`).
+- Decisión del dev (2026-09-07): el producto es de uso personal → licencia gratuita de Remotion.
 
 ## Alcance
 
@@ -640,13 +647,12 @@ Los tres ciclos son secuenciales (regla "un ciclo a la vez"). Cada uno cierra co
 
 ## Riesgos y decisiones abiertas
 
-- **Licencia de Remotion:** gratuita para individuos y equipos de hasta 3 personas; empresas
-  mayores requieren licencia. Hoy aplica el uso individual; revisar si el producto se comercializa.
-- **Motor Whisper por defecto:** se elige whisper.cpp por ser binario nativo sin Python; Faster-Whisper
-  queda como formato de entrada. Confirmar con el dev según su hardware (GPU/CPU) antes de `cycle-02`.
-- **Ducking "-24 dB":** se interpreta como ganancia de la música bajo la voz (relativa a 0 dBFS del
-  archivo), con base `-12 dB` cuando no hay voz. Si el dev quería `-24 LUFS` absolutos, se ajusta el
-  `AudioMixPlan` sin tocar el algoritmo.
+- **Resueltas el 2026-09-07** (ver "Evidencia y decisiones"): motor Whisper = whisper.cpp con Metal en
+  Apple Silicon; ducking = ganancia relativa `-24 dB` con base `-12 dB`; Remotion en licencia
+  gratuita por uso personal (revisar solo si el producto se comercializa).
+- **Memoria en el render:** 16 GB compartidos entre Chrome Headless Shell (Remotion), ffmpeg y el
+  modelo Whisper. Regla operativa: transcribir **antes** de renderizar, nunca en paralelo, y renderizar
+  con `concurrency` acotada (Remotion elige por CPU; el smoke fija `--concurrency=4`).
 - **Safe zones:** los márgenes por preset son aproximaciones de las UIs actuales de Instagram/TikTok;
   se dejan configurables y se validan visualmente en 003.
 - **Alias de imports:** el repo hoy usa `@shared-utils` en `tsconfig.base.json`; `scaffold-nx` define

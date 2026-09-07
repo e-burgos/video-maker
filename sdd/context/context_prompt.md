@@ -49,6 +49,7 @@ El proyecto usa **Nx** como monorepo manager con **pnpm** como package manager (
 
 | Subproyecto | Context prompt | Constitución |
 | ----------- | -------------- | ------------ |
+| `libs/timeline-core` | `sdd/context/libs/timeline-core/context_prompt.md` | `sdd/context/libs/timeline-core/constitution.md` |
 
 > Todavía no hay apps/libs/tools generadas en Nx. Al generar la primera, sumar una fila por subproyecto (solo agregar filas — nunca reformatear la tabla completa).
 

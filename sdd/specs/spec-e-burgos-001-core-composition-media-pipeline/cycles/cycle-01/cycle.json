@@ -1,0 +1,35 @@
+{
+  "$schema": "../../../../schemas/cycle.schema.json",
+  "cycle": 1,
+  "module": "core-composition-media-pipeline",
+  "spec": "spec-e-burgos-001-core-composition-media-pipeline",
+  "apps": ["libs/timeline-core"],
+  "phase": "timeline-core-contracts-and-calculations",
+  "flow": "full",
+  "objectives": [
+    "Crear libs/timeline-core con los contratos Zod + JSON Schema del motor",
+    "Implementar las funciones puras de edición (silencios, punch-ins, captions, ducking, timeline) con Vitest",
+    "Dejar CA-001 a CA-016 de la spec en verde sin renderizar video"
+  ],
+  "status": "in-progress",
+  "started_at": "2026-09-07",
+  "completed_at": null,
+  "documents": {
+    "brief": "sdd/specs/spec-e-burgos-001-core-composition-media-pipeline/cycles/cycle-01/brief.yaml"
+  },
+  "artifacts": [],
+  "metrics": {
+    "tasks_total": 0,
+    "tasks_completed": 0,
+    "story_points": 0,
+    "files_created": [],
+    "files_modified": [],
+    "files_deleted": [],
+    "usage": { "tokens_in": 0, "tokens_out": 0, "by_agent": [] }
+  },
+  "tables_created": [],
+  "endpoints_implemented": [],
+  "components_created": [],
+  "issues_found": [],
+  "reviewer_report": null
+}
