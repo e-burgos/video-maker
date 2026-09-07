@@ -303,12 +303,23 @@
         "TASK-007",
         "TASK-008"
       ],
-      "status": "pending",
+      "status": "done",
       "files": [
         "libs/timeline-core/src/timeline/build-timeline.ts",
         "libs/timeline-core/src/timeline/build-timeline.spec.ts",
-        "libs/timeline-core/src/__fixtures__/edl-reference.fixture.ts"
-      ]
+        "libs/timeline-core/src/index.ts"
+      ],
+      "usage": {
+        "provider_model": "claude/sonnet",
+        "effort": "medium",
+        "tokens_in": 155669,
+        "tokens_out": 27471,
+        "tokens_total": 183140,
+        "approx": false,
+        "source": "agent-usage-notification",
+        "recorded_at": "2026-09-07",
+        "agent": "implementor-back"
+      }
     },
     {
       "id": "TASK-010",

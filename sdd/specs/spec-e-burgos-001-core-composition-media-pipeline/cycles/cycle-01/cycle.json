@@ -29,11 +29,12 @@
     "sdd/specs/spec-e-burgos-001-core-composition-media-pipeline/cycles/cycle-01/artifacts/task-003-notes.md",
     "sdd/specs/spec-e-burgos-001-core-composition-media-pipeline/cycles/cycle-01/artifacts/task-004-notes.md",
     "sdd/specs/spec-e-burgos-001-core-composition-media-pipeline/cycles/cycle-01/artifacts/task-005-notes.md",
-    "sdd/specs/spec-e-burgos-001-core-composition-media-pipeline/cycles/cycle-01/artifacts/task-006-notes.md"
+    "sdd/specs/spec-e-burgos-001-core-composition-media-pipeline/cycles/cycle-01/artifacts/task-006-notes.md",
+    "sdd/specs/spec-e-burgos-001-core-composition-media-pipeline/cycles/cycle-01/artifacts/task-009-notes.md"
   ],
   "metrics": {
     "tasks_total": 11,
-    "tasks_completed": 8,
+    "tasks_completed": 9,
     "story_points": 46,
     "files_created": [],
     "files_modified": [],
@@ -192,6 +193,20 @@
           "recorded_at": "2026-09-07",
           "tool_uses": 36,
           "duration_minutes": 5.6
+        },
+        {
+          "agent": "implementor-back",
+          "label": "TASK-009",
+          "provider_model": "claude/sonnet",
+          "effort": "medium",
+          "tokens_in": 155669,
+          "tokens_out": 27471,
+          "tokens_total": 183140,
+          "approx": false,
+          "source": "agent-usage-notification",
+          "recorded_at": "2026-09-07",
+          "tool_uses": 44,
+          "duration_minutes": 9.9
         }
       ]
     }

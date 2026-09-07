@@ -73,6 +73,9 @@ export type { PunchInAnchor, PunchInOptions, PunchInPlan } from './punch-in/plan
 
 export { remapMsAfterCuts } from './timeline/remap-ms-after-cuts';
 
+export { TimelineBuildError, buildTimeline } from './timeline/build-timeline';
+export type { MusicInput, TimelineBuildErrorCode } from './timeline/build-timeline';
+
 export { groupWordsForCaptions, pickEmphasisIndex } from './captions/group-words-for-captions';
 export type {
   CaptionGroupOptions,
