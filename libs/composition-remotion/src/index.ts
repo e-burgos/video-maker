@@ -36,3 +36,43 @@ export {
   calculateTimelineMetadata,
 } from './components/timeline-composition';
 export type { TimelineCompositionProps } from './components/timeline-composition';
+
+export {
+  CAPTION_PRESETS,
+  CAPTION_PRESET_IDS,
+  DEFAULT_CAPTION_PRESET_ID,
+  captionPreset,
+} from './helpers/caption-preset';
+export type {
+  CaptionPill,
+  CaptionPreset,
+  CaptionPresetId,
+  CaptionStroke,
+  CaptionTextTransform,
+} from './helpers/caption-preset';
+
+export {
+  CAPTION_PLATFORMS,
+  captionChromeInsets,
+  captionSafeZone,
+} from './helpers/caption-safe-zone';
+export type {
+  CaptionChromeInsets,
+  CaptionChromeReference,
+  CaptionPlatform,
+} from './helpers/caption-safe-zone';
+
+export { captionBoxFor } from './helpers/caption-box';
+export type { CaptionAnchor } from './helpers/caption-box';
+
+export { fitCaptionFontSize } from './helpers/caption-font-size';
+
+export { captionWordStyle } from './helpers/caption-word-style';
+export type { CaptionWordState } from './helpers/caption-word-style';
+
+export { captionFontFaceCss } from './helpers/caption-font-face';
+export type {
+  CaptionFontDisplay,
+  CaptionFontFace,
+  CaptionFontFormat,
+} from './helpers/caption-font-face';

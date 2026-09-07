@@ -1,0 +1,221 @@
+{
+  "$schema": "../../../../schemas/cycle-tasks.schema.json",
+  "spec": "spec-e-burgos-003-kinetic-captions",
+  "cycle": 1,
+  "module": "kinetic-captions",
+  "apps": [
+    "libs/composition-remotion"
+  ],
+  "flow": "full",
+  "user_stories_generated": true,
+  "prerequisites": {
+    "tasks_generated": true
+  },
+  "tasks": [
+    {
+      "id": "TASK-001",
+      "title": "[BE] Registro de presets de captions (CaptionPreset, CAPTION_PRESETS) + tests (CA-004)",
+      "user_stories": [
+        "HU-1-01",
+        "HU-1-05",
+        "HU-1-06"
+      ],
+      "estimation_hours": 3,
+      "story_points": 3,
+      "depends_on": [],
+      "status": "done",
+      "files": [
+        "libs/composition-remotion/src/helpers/caption-preset.ts",
+        "libs/composition-remotion/src/helpers/caption-preset.spec.ts"
+      ],
+      "usage": {
+        "agent": "implementor-back",
+        "provider_model": "claude/sonnet",
+        "effort": "medium",
+        "tokens_in": 111215,
+        "tokens_out": 19626,
+        "tokens_total": 130841,
+        "approx": false,
+        "source": "agent-usage-notification",
+        "recorded_at": "2026-09-07"
+      }
+    },
+    {
+      "id": "TASK-002",
+      "title": "[BE] Safe zone aditiva por plataforma (captionSafeZone, insets de chrome) + tests (CA-001, CA-002)",
+      "user_stories": [
+        "HU-1-02",
+        "HU-1-06"
+      ],
+      "estimation_hours": 3,
+      "story_points": 3,
+      "depends_on": [],
+      "status": "done",
+      "files": [
+        "libs/composition-remotion/src/helpers/caption-safe-zone.ts",
+        "libs/composition-remotion/src/helpers/caption-safe-zone.spec.ts"
+      ],
+      "usage": {
+        "agent": "implementor-back",
+        "provider_model": "claude/sonnet",
+        "effort": "medium",
+        "tokens_in": 28291,
+        "tokens_out": 4993,
+        "tokens_total": 33284,
+        "approx": false,
+        "source": "agent-usage-notification",
+        "recorded_at": "2026-09-07"
+      }
+    },
+    {
+      "id": "TASK-003",
+      "title": "[BE] Caja de captions con anclaje (captionBoxFor) + tests (CA-003, CA-002)",
+      "user_stories": [
+        "HU-1-03",
+        "HU-1-06"
+      ],
+      "estimation_hours": 3,
+      "story_points": 3,
+      "depends_on": [
+        "TASK-001",
+        "TASK-002"
+      ],
+      "status": "done",
+      "files": [
+        "libs/composition-remotion/src/helpers/caption-box.ts",
+        "libs/composition-remotion/src/helpers/caption-box.spec.ts"
+      ],
+      "usage": {
+        "agent": "implementor-back",
+        "provider_model": "claude/sonnet",
+        "effort": "medium",
+        "tokens_in": 24172,
+        "tokens_out": 4266,
+        "tokens_total": 28438,
+        "approx": false,
+        "source": "agent-usage-notification",
+        "recorded_at": "2026-09-07"
+      }
+    },
+    {
+      "id": "TASK-004",
+      "title": "[BE] Ajuste determinista de tamaño de fuente (fitCaptionFontSize) + tests (CA-005)",
+      "user_stories": [
+        "HU-1-04",
+        "HU-1-06"
+      ],
+      "estimation_hours": 3,
+      "story_points": 3,
+      "depends_on": [
+        "TASK-001"
+      ],
+      "status": "done",
+      "files": [
+        "libs/composition-remotion/src/helpers/caption-font-size.ts",
+        "libs/composition-remotion/src/helpers/caption-font-size.spec.ts"
+      ],
+      "usage": {
+        "agent": "implementor-back",
+        "provider_model": "claude/sonnet",
+        "effort": "medium",
+        "tokens_in": 17881,
+        "tokens_out": 3156,
+        "tokens_total": 21037,
+        "approx": false,
+        "source": "agent-usage-notification",
+        "recorded_at": "2026-09-07"
+      }
+    },
+    {
+      "id": "TASK-005",
+      "title": "[BE] Estilo por palabra normal/impacto/activa (captionWordStyle) + tests (CA-004)",
+      "user_stories": [
+        "HU-1-05",
+        "HU-1-06"
+      ],
+      "estimation_hours": 3,
+      "story_points": 3,
+      "depends_on": [
+        "TASK-001"
+      ],
+      "status": "done",
+      "files": [
+        "libs/composition-remotion/src/helpers/caption-word-style.ts",
+        "libs/composition-remotion/src/helpers/caption-word-style.spec.ts"
+      ],
+      "usage": {
+        "agent": "implementor-back",
+        "provider_model": "claude/sonnet",
+        "effort": "medium",
+        "tokens_in": 28071,
+        "tokens_out": 4954,
+        "tokens_total": 33025,
+        "approx": false,
+        "source": "agent-usage-notification",
+        "recorded_at": "2026-09-07"
+      }
+    },
+    {
+      "id": "TASK-006",
+      "title": "[BE] CSS de fuente local (captionFontFaceCss) + public/fonts/.gitignore + tests",
+      "user_stories": [
+        "HU-1-07",
+        "HU-1-06"
+      ],
+      "estimation_hours": 2,
+      "story_points": 2,
+      "depends_on": [],
+      "status": "done",
+      "files": [
+        "libs/composition-remotion/src/helpers/caption-font-face.ts",
+        "libs/composition-remotion/src/helpers/caption-font-face.spec.ts",
+        "libs/composition-remotion/public/fonts/.gitignore"
+      ],
+      "usage": {
+        "agent": "implementor-back",
+        "provider_model": "claude/sonnet",
+        "effort": "medium",
+        "tokens_in": 11651,
+        "tokens_out": 2056,
+        "tokens_total": 13707,
+        "approx": false,
+        "source": "agent-usage-notification",
+        "recorded_at": "2026-09-07"
+      }
+    },
+    {
+      "id": "TASK-007",
+      "title": "[BE] Barrel público, README de fuentes locales y verificación de cierre (lint/test/build/cobertura)",
+      "user_stories": [
+        "HU-1-06",
+        "HU-1-07"
+      ],
+      "estimation_hours": 2,
+      "story_points": 2,
+      "depends_on": [
+        "TASK-001",
+        "TASK-002",
+        "TASK-003",
+        "TASK-004",
+        "TASK-005",
+        "TASK-006"
+      ],
+      "status": "done",
+      "files": [
+        "libs/composition-remotion/src/index.ts",
+        "libs/composition-remotion/README.md"
+      ],
+      "usage": {
+        "agent": "implementor-back",
+        "provider_model": "claude/sonnet",
+        "effort": "medium",
+        "tokens_in": 34694,
+        "tokens_out": 6123,
+        "tokens_total": 40817,
+        "approx": false,
+        "source": "agent-usage-notification",
+        "recorded_at": "2026-09-07"
+      }
+    }
+  ]
+}
