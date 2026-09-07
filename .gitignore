@@ -43,3 +43,5 @@ pnpm-debug.log*
 .claude/worktrees
 .claude/settings.local.json
 __pycache__/
+
+vitest.config.*.timestamp*

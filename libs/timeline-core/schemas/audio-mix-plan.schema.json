@@ -1,0 +1,96 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://video-maker.local/schemas/audio-mix-plan.schema.json",
+  "type": "object",
+  "properties": {
+    "voice": {
+      "type": "object",
+      "properties": {
+        "integratedLufs": {
+          "default": -14,
+          "type": "number"
+        },
+        "truePeakDbtp": {
+          "default": -1,
+          "type": "number"
+        },
+        "loudnessRange": {
+          "default": 11,
+          "type": "number"
+        }
+      },
+      "required": [
+        "integratedLufs",
+        "truePeakDbtp",
+        "loudnessRange"
+      ],
+      "additionalProperties": false
+    },
+    "music": {
+      "type": "object",
+      "properties": {
+        "baseGainDb": {
+          "default": -12,
+          "type": "number"
+        },
+        "duckedGainDb": {
+          "default": -24,
+          "type": "number"
+        },
+        "attackMs": {
+          "default": 150,
+          "type": "integer",
+          "minimum": -9007199254740991,
+          "maximum": 9007199254740991
+        },
+        "releaseMs": {
+          "default": 400,
+          "type": "integer",
+          "minimum": -9007199254740991,
+          "maximum": 9007199254740991
+        },
+        "holdMs": {
+          "default": 250,
+          "type": "integer",
+          "minimum": -9007199254740991,
+          "maximum": 9007199254740991
+        }
+      },
+      "required": [
+        "baseGainDb",
+        "duckedGainDb",
+        "attackMs",
+        "releaseMs",
+        "holdMs"
+      ],
+      "additionalProperties": false
+    },
+    "automation": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "frame": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          },
+          "gainDb": {
+            "type": "number"
+          }
+        },
+        "required": [
+          "frame",
+          "gainDb"
+        ],
+        "additionalProperties": false
+      }
+    }
+  },
+  "required": [
+    "voice",
+    "music",
+    "automation"
+  ],
+  "additionalProperties": false
+}

@@ -1,0 +1,44 @@
+name: SDD validate
+
+on:
+  pull_request:
+    paths:
+      - 'sdd/**'
+      - 'package.json'
+      - 'pnpm-lock.yaml'
+      - '.github/workflows/sdd-validate.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'sdd/**'
+
+concurrency:
+  group: sdd-validate-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  validate:
+    name: pnpm sdd:validate
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Validate every SDD record against its JSON Schema and cross-rules
+        run: pnpm sdd:validate
+
+      - name: Ensure generated indexes are committed
+        run: |
+          pnpm sdd:rebuild-tasks-index
+          pnpm sdd:rebuild-catalog
+          git diff --exit-code -- sdd/tasks.json sdd/catalog.json

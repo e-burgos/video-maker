@@ -1,0 +1,77 @@
+# sdd/specs/spec-e-burgos-001-core-composition-media-pipeline/cycles/cycle-03/brief.yaml
+# Generado por: sdd-orchestrator
+# Al: iniciar el ciclo
+
+cycle: 3
+module: core-composition-media-pipeline
+phase: composition-remotion-base
+date: 2026-09-07
+app_context: sdd/context/libs/composition-remotion/context_prompt.md
+
+objective: |
+  Al cerrar el ciclo existe `libs/composition-remotion`: la lib React 19 + Remotion 4 que
+  renderiza una `Timeline` de `@video-maker/timeline-core` (pistas A-roll, B-roll, voz, música y
+  captions mínimos) con `TransitionSeries` y timings `spring`/`linear` (fade, slide, whip-pan;
+  light-leak degradado a fade), expone helpers puros testeables sin montar Remotion
+  (`timelineToSequenceProps`, `transitionTiming`, `punchInStyle`, `captionLayout`) y una entrada
+  Node `renderTimeline` para render headless, verificada con un smoke manual fuera de CI.
+
+scope:
+  - Scaffold de `libs/composition-remotion` con `scaffold-nx` (`@nx/react:lib`, vitest + jsdom, tags scope:engine/type:ui; targets explícitos lint/test/build=tsc; sin plugins inferidos)
+  - Dependencias: `remotion`, `@remotion/transitions`, `@remotion/bundler`, `@remotion/renderer`, `@remotion/cli` en versión exacta única (4.0.521 o la vigente al instalar); `@testing-library/react` + `jsdom` en dev
+  - Helpers puros: `timelineToSequenceProps`, `transitionTiming`, `punchInStyle`, `captionLayout` con tests sin render (CA-023..CA-026)
+  - Componentes: `TimelineComposition` (con `calculateMetadata`), `ArollSeries` (TransitionSeries + presentaciones fade/slide/whip-pan propia), `BrollTrack`, `AudioTrack` (voz + música con automation de ganancia), `CaptionTrack` mínimo dentro del safe zone
+  - `Root.tsx` con composiciones de ejemplo 9:16 y 16:9 para `remotion studio` (uso local)
+  - `renderTimeline(timeline, { outPath, codec })` en Node vía `@remotion/bundler` + `@remotion/renderer`
+  - Target `smoke` (manual, fuera de CI) documentado en README (CA-027) con `--concurrency=4`
+  - Fixture propia: la Timeline de CA-013 construida con `buildTimeline` desde una EDL local (la API pública de timeline-core no expone fixtures; decisión de este brief)
+  - Contexto SDD de la lib vía fragmento aditivo
+
+out_of_scope:
+  - Kinetic typography visual, fuentes y presets de estilo (spec-003)
+  - Mezcla final y mastering con FFmpeg (spec-004)
+  - Matching de B-roll y presets por caso de uso (spec-002)
+  - Player/preview en apps/web (spec-006)
+  - Ejecutar render real o descargar Chrome Headless Shell en tests o CI
+
+dependencies_required:
+  - cycle-01 y cycle-02 de esta spec (completed) — contratos de timeline-core; media-local no se consume en este ciclo
+
+agent_contexts:
+  functional:
+    goal: Historias del creador y del desarrollador integrador para renderizar una Timeline a MP4 con transiciones y pistas, previsualizar en remotion studio y confiar en los helpers puros, con reglas de negocio verificables y sin detalle de implementación
+    business_context: El creador ya tiene su Timeline (decisiones de corte, punch-ins, B-roll, captions y ducking calculados). Quiere verla en pantalla y obtener un MP4 en el formato de la red social elegida, con transiciones que se sientan físicas (spring), sin que nada del pipeline dependa de servicios externos. En su MacBook M2 de 16 GB el render debe correr después de transcribir, nunca en paralelo, con concurrencia acotada
+    relevant_spec_sections:
+      - Resumen Ejecutivo
+      - Evidencia y decisiones
+      - Alcance (solo lo asignado a cycle-03)
+      - Composición (libs/composition-remotion) — API pública
+      - Dependencias (paquetes Remotion, Chrome Headless Shell)
+      - Requisitos Funcionales RF-11, RF-12
+      - Requisitos No-Funcionales RNF-2, RNF-3, RNF-6
+      - Criterios de Aceptación CA-023 a CA-027
+      - Riesgos y decisiones abiertas (memoria en el render)
+
+  planner:
+    goal: Descomponer en tasks ordenadas para construir libs/composition-remotion task por task (scaffold + deps Remotion, helpers puros con tests, componentes de pistas, ArollSeries con transiciones, TimelineComposition + Root, renderTimeline + smoke + README), estimadas en horas y story points
+    output_file: sdd/specs/spec-e-burgos-001-core-composition-media-pipeline/cycles/cycle-03/planner.md
+
+  architect:
+    goal: Fijar estructura interna, firmas TypeScript de helpers y props de componentes, cómo se mapea cada pista de la Timeline a Sequence/OffthreadVideo/Img/Audio, cómo se aplica la automation de ganancia con interpolate, la presentación whip-pan propia, calculateMetadata, la separación browser/Node (entry de render separado del barrel React), versiones exactas de Remotion, config de vitest+jsdom sin montar Remotion en CI, y el target smoke. No hay DB ni endpoints
+    existing_tables: []
+    existing_endpoints: []
+    output_file: sdd/specs/spec-e-burgos-001-core-composition-media-pipeline/cycles/cycle-03/architect.md
+
+  implementor_back:
+    goal: Implementar las tasks de infraestructura y helpers puros (scaffold, deps, helpers, renderTimeline) siguiendo architect.md, sin comentarios
+    app: libs/composition-remotion
+    app_context: sdd/context/libs/composition-remotion/context_prompt.md
+
+  implementor_front:
+    goal: Implementar los componentes React/Remotion (pistas, ArollSeries, TimelineComposition, Root) siguiendo architect.md, sin comentarios, con tests de helpers/layout sin render
+    app: libs/composition-remotion
+    app_context: sdd/context/libs/composition-remotion/context_prompt.md
+
+  reviewer:
+    goal: Validar todo el output del ciclo (CA-023..CA-027, cobertura de helpers, lint/test/build, cero comentarios, cero render en CI), escribir el fragmento de contexto, cerrar cycle.json y — al ser el último ciclo planificado — mover el módulo a completed_modules y la spec a completed
+    output_file: sdd/specs/spec-e-burgos-001-core-composition-media-pipeline/cycles/cycle-03/cycle.json

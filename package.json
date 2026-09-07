@@ -22,9 +22,16 @@
     "postinstall": "node -e \"const f='sdd/scripts/setup-rtk.mjs';if(require('fs').existsSync(f)){require('child_process').execFileSync(process.execPath,[f],{stdio:'inherit'})}\""
   },
   "dependencies": {
+    "@remotion/bundler": "4.0.522",
+    "@remotion/cli": "4.0.522",
+    "@remotion/renderer": "4.0.522",
+    "@remotion/transitions": "4.0.522",
+    "execa": "^10.0.1",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
-    "react-router-dom": "^7.18.2"
+    "react-router-dom": "^7.18.2",
+    "remotion": "4.0.522",
+    "zod": "^4.5"
   },
   "devDependencies": {
     "@nx/devkit": "23.1.1",
@@ -33,11 +40,14 @@
     "@nx/js": "23.1.1",
     "@nx/react": "23.1.1",
     "@nx/vite": "23.1.1",
+    "@nx/vitest": "23.1.1",
     "@nx/workspace": "23.1.1",
     "@swc-node/register": "~1.11.1",
     "@swc/core": "~1.15.5",
     "@swc/helpers": "~0.5.18",
     "@tailwindcss/vite": "^4.3.3",
+    "@testing-library/dom": "^10.4.0",
+    "@testing-library/react": "^16.3.0",
     "@types/node": "^22.0.0",
     "@types/react": "^19.0.0",
     "@types/react-dom": "^19.0.0",
@@ -46,6 +56,7 @@
     "ajv": "^8.20.0",
     "ajv-formats": "^3.0.1",
     "eslint": "^9.8.0",
+    "jsdom": "^27.1.0",
     "nx": "23.1.1",
     "prettier": "^3.9.6",
     "tailwindcss": "^4.3.3",
@@ -55,5 +66,5 @@
     "vite": "^8.0.0",
     "vitest": "^4.1.10"
   },
-  "description": "Video maker: plataforma para crear y editar videos"
+  "description": "Motor y plataforma local de edición y postproducción de video para redes sociales (Reels/TikTok 9:16 y YouTube 16:9): pipeline declarativo en TypeScript sobre FFmpeg + Whisper local y Remotion, que ensambla clips reales, fotos de apoyo, locución y música sin depender de APIs externas pagas."
 }

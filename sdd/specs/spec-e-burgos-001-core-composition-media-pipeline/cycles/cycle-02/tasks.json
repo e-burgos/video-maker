@@ -1,0 +1,322 @@
+{
+  "$schema": "../../../../schemas/cycle-tasks.schema.json",
+  "spec": "spec-e-burgos-001-core-composition-media-pipeline",
+  "cycle": 2,
+  "module": "core-composition-media-pipeline",
+  "apps": [
+    "libs/media-local"
+  ],
+  "flow": "full",
+  "user_stories_generated": true,
+  "prerequisites": {
+    "tasks_generated": true
+  },
+  "tasks": [
+    {
+      "id": "TASK-001",
+      "title": "Scaffold de libs/media-local con scaffold-nx",
+      "user_stories": [
+        "US-2-001",
+        "US-2-002",
+        "US-2-003",
+        "US-2-004",
+        "US-2-005",
+        "US-2-006",
+        "US-2-007",
+        "US-2-008",
+        "US-2-009"
+      ],
+      "estimation_hours": 2,
+      "story_points": 2,
+      "depends_on": [],
+      "status": "done",
+      "files": [
+        "libs/media-local/project.json",
+        "libs/media-local/eslint.config.mjs",
+        "libs/media-local/vite.config.ts",
+        "libs/media-local/tsconfig.json",
+        "libs/media-local/tsconfig.lib.json",
+        "libs/media-local/tsconfig.spec.json",
+        "libs/media-local/src/index.ts",
+        "libs/media-local/README.md",
+        "tsconfig.base.json",
+        "eslint.config.mjs",
+        "package.json",
+        "pnpm-lock.yaml"
+      ],
+      "usage": {
+        "provider_model": "claude/sonnet",
+        "effort": "medium",
+        "tokens_in": 98603,
+        "tokens_out": 17401,
+        "tokens_total": 116004,
+        "approx": false,
+        "source": "agent-usage-notification",
+        "recorded_at": "2026-09-07",
+        "agent": "implementor-back"
+      }
+    },
+    {
+      "id": "TASK-002",
+      "title": "CommandRunner, ExecaCommandRunner, FixtureCommandRunner, errores tipados y resolveBinaries",
+      "user_stories": [
+        "US-2-008",
+        "US-2-009"
+      ],
+      "estimation_hours": 4,
+      "story_points": 5,
+      "depends_on": [
+        "TASK-001"
+      ],
+      "status": "done",
+      "files": [
+        "libs/media-local/src/errors/media-local-error.ts",
+        "libs/media-local/src/errors/binary-not-found-error.ts",
+        "libs/media-local/src/errors/command-failed-error.ts",
+        "libs/media-local/src/errors/unparseable-output-error.ts",
+        "libs/media-local/src/errors/errors.spec.ts",
+        "libs/media-local/src/runner/command-runner.ts",
+        "libs/media-local/src/runner/execa-command-runner.ts",
+        "libs/media-local/src/runner/fixture-command-runner.ts",
+        "libs/media-local/src/runner/runner.spec.ts",
+        "libs/media-local/src/fs/binary-lookup.ts",
+        "libs/media-local/src/fs/fs-ports.spec.ts",
+        "libs/media-local/src/binaries/resolve-binaries.ts",
+        "libs/media-local/src/binaries/binaries.spec.ts",
+        "libs/media-local/src/index.ts",
+        "libs/media-local/tsconfig.lib.json"
+      ],
+      "usage": {
+        "provider_model": "claude/sonnet",
+        "effort": "medium",
+        "tokens_in": 189245,
+        "tokens_out": 33396,
+        "tokens_total": 222641,
+        "approx": false,
+        "source": "agent-usage-notification",
+        "recorded_at": "2026-09-07",
+        "agent": "implementor-back"
+      }
+    },
+    {
+      "id": "TASK-003",
+      "title": "probeMedia + parseFfprobeJson con fixtures de video rotado, imagen y audio",
+      "user_stories": [
+        "US-2-001",
+        "US-2-002"
+      ],
+      "estimation_hours": 4,
+      "story_points": 5,
+      "depends_on": [
+        "TASK-002"
+      ],
+      "status": "done",
+      "files": [
+        "libs/media-local/src/clock.ts",
+        "libs/media-local/src/clock.spec.ts",
+        "libs/media-local/src/__fixtures__/load-fixture.ts",
+        "libs/media-local/src/__fixtures__/ffprobe/video-rotated.json",
+        "libs/media-local/src/__fixtures__/ffprobe/image.json",
+        "libs/media-local/src/__fixtures__/ffprobe/audio.json",
+        "libs/media-local/src/ffprobe/ffprobe-output.schema.ts",
+        "libs/media-local/src/ffprobe/parse-ffprobe-json.ts",
+        "libs/media-local/src/ffprobe/probe-media.ts",
+        "libs/media-local/src/ffprobe/ffprobe.spec.ts",
+        "libs/media-local/vite.config.ts",
+        "libs/media-local/src/index.ts"
+      ],
+      "usage": {
+        "provider_model": "claude/sonnet",
+        "effort": "medium",
+        "tokens_in": 167880,
+        "tokens_out": 29626,
+        "tokens_total": 197506,
+        "approx": false,
+        "source": "agent-usage-notification",
+        "recorded_at": "2026-09-07",
+        "agent": "implementor-back"
+      }
+    },
+    {
+      "id": "TASK-004",
+      "title": "detectSilencesWithFfmpeg + parseSilenceDetect con fixture de 3 silencios",
+      "user_stories": [
+        "US-2-003"
+      ],
+      "estimation_hours": 3,
+      "story_points": 3,
+      "depends_on": [
+        "TASK-002"
+      ],
+      "status": "done",
+      "files": [
+        "libs/media-local/src/ffmpeg/parse-silence-detect.ts",
+        "libs/media-local/src/ffmpeg/detect-silences.ts",
+        "libs/media-local/src/ffmpeg/silencedetect.spec.ts",
+        "libs/media-local/src/__fixtures__/ffmpeg/silencedetect.stderr.txt",
+        "libs/media-local/src/index.ts"
+      ],
+      "usage": {
+        "provider_model": "claude/sonnet",
+        "effort": "medium",
+        "tokens_in": 118708,
+        "tokens_out": 20948,
+        "tokens_total": 139656,
+        "approx": false,
+        "source": "agent-usage-notification",
+        "recorded_at": "2026-09-07",
+        "agent": "implementor-back"
+      }
+    },
+    {
+      "id": "TASK-005",
+      "title": "measureLoudness + normalizeVoice en dos pasadas con fixture de loudnorm",
+      "user_stories": [
+        "US-2-004"
+      ],
+      "estimation_hours": 4,
+      "story_points": 5,
+      "depends_on": [
+        "TASK-002"
+      ],
+      "status": "done",
+      "files": [
+        "libs/media-local/src/ffmpeg/loudnorm-output.schema.ts",
+        "libs/media-local/src/ffmpeg/parse-loudnorm-json.ts",
+        "libs/media-local/src/ffmpeg/build-loudnorm-filter.ts",
+        "libs/media-local/src/ffmpeg/measure-loudness.ts",
+        "libs/media-local/src/ffmpeg/normalize-voice.ts",
+        "libs/media-local/src/ffmpeg/loudnorm.spec.ts",
+        "libs/media-local/src/__fixtures__/ffmpeg/loudnorm.json",
+        "libs/media-local/src/__fixtures__/ffmpeg/loudnorm.stderr.txt",
+        "libs/media-local/src/index.ts"
+      ],
+      "usage": {
+        "provider_model": "claude/sonnet",
+        "effort": "medium",
+        "tokens_in": 117336,
+        "tokens_out": 20706,
+        "tokens_total": 138042,
+        "approx": false,
+        "source": "agent-usage-notification",
+        "recorded_at": "2026-09-07",
+        "agent": "implementor-back"
+      }
+    },
+    {
+      "id": "TASK-006",
+      "title": "extractAudioForTranscription (wav mono 16 kHz)",
+      "user_stories": [
+        "US-2-005"
+      ],
+      "estimation_hours": 2,
+      "story_points": 2,
+      "depends_on": [
+        "TASK-002"
+      ],
+      "status": "done",
+      "files": [
+        "libs/media-local/src/ffmpeg/extract-audio.ts",
+        "libs/media-local/src/ffmpeg/extract-audio.spec.ts",
+        "libs/media-local/src/index.ts"
+      ],
+      "usage": {
+        "provider_model": "claude/sonnet",
+        "effort": "medium",
+        "tokens_in": 80158,
+        "tokens_out": 14145,
+        "tokens_total": 94303,
+        "approx": false,
+        "source": "agent-usage-notification",
+        "recorded_at": "2026-09-07",
+        "agent": "implementor-back"
+      }
+    },
+    {
+      "id": "TASK-007",
+      "title": "transcribeWithWhisperCpp + parseWhisperCppJson + parseFasterWhisperJson",
+      "user_stories": [
+        "US-2-006",
+        "US-2-007"
+      ],
+      "estimation_hours": 4,
+      "story_points": 5,
+      "depends_on": [
+        "TASK-002",
+        "TASK-006"
+      ],
+      "status": "done",
+      "files": [
+        "libs/media-local/src/fs/read-text-file.ts",
+        "libs/media-local/src/fs/fs-ports.spec.ts",
+        "libs/media-local/src/whisper/whisper-cpp-output.schema.ts",
+        "libs/media-local/src/whisper/faster-whisper-output.schema.ts",
+        "libs/media-local/src/whisper/build-transcription.ts",
+        "libs/media-local/src/whisper/parse-whisper-cpp-json.ts",
+        "libs/media-local/src/whisper/parse-faster-whisper-json.ts",
+        "libs/media-local/src/whisper/transcribe-with-whisper-cpp.ts",
+        "libs/media-local/src/whisper/whisper-parsers.spec.ts",
+        "libs/media-local/src/whisper/transcribe.spec.ts",
+        "libs/media-local/src/__fixtures__/whisper/whisper-cpp.json",
+        "libs/media-local/src/__fixtures__/whisper/faster-whisper.json",
+        "libs/media-local/src/index.ts"
+      ],
+      "usage": {
+        "provider_model": "claude/sonnet",
+        "effort": "medium",
+        "tokens_in": 159240,
+        "tokens_out": 28101,
+        "tokens_total": 187341,
+        "approx": false,
+        "source": "agent-usage-notification",
+        "recorded_at": "2026-09-07",
+        "agent": "implementor-back"
+      }
+    },
+    {
+      "id": "TASK-008",
+      "title": "README con matriz de binarios/env vars, export público final y cobertura >= 80%",
+      "user_stories": [
+        "US-2-001",
+        "US-2-002",
+        "US-2-003",
+        "US-2-004",
+        "US-2-005",
+        "US-2-006",
+        "US-2-007",
+        "US-2-008",
+        "US-2-009"
+      ],
+      "estimation_hours": 3,
+      "story_points": 3,
+      "depends_on": [
+        "TASK-003",
+        "TASK-004",
+        "TASK-005",
+        "TASK-006",
+        "TASK-007"
+      ],
+      "status": "done",
+      "files": [
+        "libs/media-local/README.md",
+        "libs/media-local/src/index.ts",
+        "libs/media-local/src/ffprobe/ffprobe.spec.ts",
+        "libs/media-local/src/whisper/whisper-parsers.spec.ts",
+        "libs/media-local/src/whisper/transcribe.spec.ts",
+        "libs/media-local/src/binaries/binaries.spec.ts",
+        "libs/media-local/src/ffmpeg/loudnorm.spec.ts"
+      ],
+      "usage": {
+        "provider_model": "claude/sonnet",
+        "effort": "medium",
+        "tokens_in": 208992,
+        "tokens_out": 36881,
+        "tokens_total": 245873,
+        "approx": false,
+        "source": "agent-usage-notification",
+        "recorded_at": "2026-09-07",
+        "agent": "implementor-back"
+      }
+    }
+  ]
+}

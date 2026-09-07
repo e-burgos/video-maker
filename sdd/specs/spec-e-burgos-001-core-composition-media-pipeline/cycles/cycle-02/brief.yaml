@@ -1,0 +1,72 @@
+# sdd/specs/spec-e-burgos-001-core-composition-media-pipeline/cycles/cycle-02/brief.yaml
+# Generado por: sdd-orchestrator
+# Al: iniciar el ciclo
+
+cycle: 2
+module: core-composition-media-pipeline
+phase: media-local-wrappers-and-parsers
+date: 2026-09-07
+app_context: sdd/context/libs/media-local/context_prompt.md
+
+objective: |
+  Al cerrar el ciclo existe `libs/media-local`: la lib Node que envuelve los binarios locales
+  (ffprobe, ffmpeg, whisper-cli) con un `CommandRunner` inyectable, parsea su salida con
+  funciones puras hacia los contratos de `@video-maker/timeline-core` (`MediaAsset`,
+  `SilenceRange`, `Transcription`, mediciones de loudness) y se prueba con fixtures grabadas,
+  sin ningún binario instalado en CI.
+
+scope:
+  - Scaffold de `libs/media-local` con `scaffold-nx` (`@nx/js:lib`, vitest, tags scope:engine/type:util; targets explícitos lint/test/build=tsc como en timeline-core; sin plugins inferidos en nx.json)
+  - `CommandRunner` (interfaz) + `ExecaCommandRunner` (real, sobre `execa`) + `FixtureCommandRunner` (tests) + errores tipados `BinaryNotFoundError`, `CommandFailedError` (stderr truncado a 2 KB), `UnparseableOutputError`
+  - `resolveBinaries(env)`: FFMPEG_PATH / FFPROBE_PATH / WHISPER_CPP_PATH / WHISPER_MODEL_PATH con fallback al PATH
+  - `probeMedia` + `parseFfprobeJson` (video con rotación de celular, imagen, audio) → `MediaAsset`
+  - `detectSilencesWithFfmpeg` + `parseSilenceDetect` (silencio abierto al final cerrado en durationMs)
+  - `measureLoudness` (loudnorm print_format=json) y `normalizeVoice` (dos pasadas con measured_*) hacia AudioMixPlan.voice
+  - `extractAudioForTranscription` (wav 16 kHz mono pcm_s16le)
+  - `transcribeWithWhisperCpp` (whisper-cli -oj -ml 1) + `parseWhisperCppJson` + `parseFasterWhisperJson` → `Transcription` normalizada
+  - Fixtures reales grabadas en `src/__fixtures__/` (ffprobe JSON ×3, silencedetect stderr, loudnorm JSON, whisper.cpp JSON, faster-whisper JSON del mismo audio)
+  - Criterios de aceptación CA-017 a CA-022 de la spec en verde con cobertura ≥ 80 %
+  - README con matriz de binarios, versiones mínimas y variables de entorno; contexto SDD de la lib vía fragmento aditivo
+
+out_of_scope:
+  - Render de video y componentes Remotion (cycle-03)
+  - Mezcla final multi-pista, filtergraphs de ducking y mux (spec-004)
+  - Descarga o instalación automática de binarios o modelos
+  - Invocar Faster-Whisper (solo se parsea su JSON)
+  - Cualquier ejecución real de ffmpeg/whisper en tests o CI
+
+dependencies_required:
+  - cycle-01 de esta spec (completed) — `@video-maker/timeline-core` provee los contratos y `SilenceRange`
+
+agent_contexts:
+  functional:
+    goal: Historias del creador/operador y del desarrollador integrador para sondear medios, detectar silencios, medir y normalizar loudness, extraer audio y transcribir localmente, con reglas de negocio verificables y sin detalle de implementación
+    business_context: El creador tiene una carpeta con clips de cámara o pantalla, fotos y locución grabada en su MacBook Pro M2 (16 GB). Quiere que el sistema reconozca cada archivo (duración, fps, orientación, si tiene audio), encuentre los silencios, deje la voz a volumen de plataforma (-14 LUFS) y obtenga una transcripción palabra por palabra usando whisper.cpp con Metal, todo local, sin subir nada y sin depender de que los binarios estén en CI
+    relevant_spec_sections:
+      - Resumen Ejecutivo
+      - Evidencia y decisiones (hardware, whisper.cpp, Metal)
+      - Alcance (solo lo asignado a cycle-02)
+      - Wrappers locales (libs/media-local) — API pública
+      - Dependencias (binarios locales)
+      - Requisitos Funcionales RF-3, RF-8, RF-9, RF-10
+      - Requisitos No-Funcionales RNF-3, RNF-8
+      - Criterios de Aceptación CA-017 a CA-022
+
+  planner:
+    goal: Descomponer en tasks ordenadas para construir libs/media-local task por task (scaffold, runner+errores+binaries, ffprobe, silencedetect, loudness+normalize, extract audio, whisper wrappers+parsers, README+cobertura), estimadas en horas y story points
+    output_file: sdd/specs/spec-e-burgos-001-core-composition-media-pipeline/cycles/cycle-02/planner.md
+
+  architect:
+    goal: Fijar estructura interna, firmas TypeScript completas, forma exacta de los argumentos de cada comando (ffprobe/ffmpeg/whisper-cli), formato de las fixtures grabadas y del FixtureCommandRunner, estrategia de errores, reglas de boundaries (solo depende de timeline-core y execa) y el mismo esquema de targets/scripts que dejó cycle-01 (build=tsc, registro CJS para scripts). No hay base de datos ni endpoints
+    existing_tables: []
+    existing_endpoints: []
+    output_file: sdd/specs/spec-e-burgos-001-core-composition-media-pipeline/cycles/cycle-02/architect.md
+
+  implementor_back:
+    goal: Implementar una task a la vez en libs/media-local siguiendo architect.md, con tests Vitest sobre fixtures y sin comentarios en el código
+    app: libs/media-local
+    app_context: sdd/context/libs/media-local/context_prompt.md
+
+  reviewer:
+    goal: Validar todo el output del ciclo (CA-017..CA-022, cobertura, lint/test/build, cero comentarios, cero binarios en CI), escribir el fragmento de contexto y cerrar cycle.json
+    output_file: sdd/specs/spec-e-burgos-001-core-composition-media-pipeline/cycles/cycle-02/cycle.json

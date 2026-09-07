@@ -30,5 +30,99 @@
         }
       ]
     }
+  },
+  "libs/composition-remotion": {
+    "components": [
+      {
+        "id": "COMP-001",
+        "name": "BrollTrack",
+        "type": "component",
+        "module": "core-composition-media-pipeline",
+        "spec": "sdd/specs/spec-e-burgos-001-core-composition-media-pipeline",
+        "path": "src/components/broll-track.tsx",
+        "status": "implemented",
+        "created_in_cycle": 3,
+        "updated_in_cycle": null,
+        "description": "Renderiza los clips de B-roll (video/imagen) en Sequences posicionadas por from/durationInFrames, con fit cover/contain/pip.",
+        "consumes": [],
+        "created_at": "2026-09-07",
+        "changelog": []
+      },
+      {
+        "id": "COMP-002",
+        "name": "AudioTrack",
+        "type": "component",
+        "module": "core-composition-media-pipeline",
+        "spec": "sdd/specs/spec-e-burgos-001-core-composition-media-pipeline",
+        "path": "src/components/audio-track.tsx",
+        "status": "implemented",
+        "created_in_cycle": 3,
+        "updated_in_cycle": null,
+        "description": "Renderiza las pistas de voz y música con Audio; la música usa la automatización de ganancia (volumeAtFrame) cuando existe, ignorando clip.gainDb.",
+        "consumes": [],
+        "created_at": "2026-09-07",
+        "changelog": []
+      },
+      {
+        "id": "COMP-003",
+        "name": "CaptionTrack",
+        "type": "component",
+        "module": "core-composition-media-pipeline",
+        "spec": "sdd/specs/spec-e-burgos-001-core-composition-media-pipeline",
+        "path": "src/components/caption-track.tsx",
+        "status": "implemented",
+        "created_in_cycle": 3,
+        "updated_in_cycle": null,
+        "description": "Renderiza subtítulos mínimos en texto plano dentro de la caja del safe zone (clip.box o captionLayout), con la palabra emphasisIndex en negrita.",
+        "consumes": [],
+        "created_at": "2026-09-07",
+        "changelog": []
+      },
+      {
+        "id": "COMP-004",
+        "name": "TimelineComposition",
+        "type": "component",
+        "module": "core-composition-media-pipeline",
+        "spec": "sdd/specs/spec-e-burgos-001-core-composition-media-pipeline",
+        "path": "src/components/timeline-composition.tsx",
+        "status": "implemented",
+        "created_in_cycle": 3,
+        "updated_in_cycle": null,
+        "description": "Composición raíz de una Timeline: calculateTimelineMetadata deriva durationInFrames/fps/width/height validando con TimelineSchema, y el componente arma ArollSeries + BrollTrack + AudioTrack + CaptionTrack a partir de timelineToSequenceProps.",
+        "consumes": [],
+        "created_at": "2026-09-07",
+        "changelog": []
+      },
+      {
+        "id": "COMP-005",
+        "name": "RemotionRoot",
+        "type": "component",
+        "module": "core-composition-media-pipeline",
+        "spec": "sdd/specs/spec-e-burgos-001-core-composition-media-pipeline",
+        "path": "src/Root.tsx",
+        "status": "implemented",
+        "created_in_cycle": 3,
+        "updated_in_cycle": null,
+        "description": "Registra las dos Composition de Remotion Studio (TimelineComposition 9:16 y TimelineCompositionLandscape 16:9) con calculateTimelineMetadata y defaultProps de buildExampleTimeline; no se exporta desde el barrel (D-05/regla 3 de architect.md).",
+        "consumes": [],
+        "created_at": "2026-09-07",
+        "changelog": []
+      },
+      {
+        "id": "COMP-006",
+        "name": "ArollSeries",
+        "type": "component",
+        "module": "core-composition-media-pipeline",
+        "spec": "sdd/specs/spec-e-burgos-001-core-composition-media-pipeline",
+        "path": "src/components/aroll-series.tsx",
+        "status": "implemented",
+        "created_in_cycle": 3,
+        "updated_in_cycle": null,
+        "description": "Serie de A-roll sobre TransitionSeries: intercala OffthreadVideo/Img por escena y una TransitionSeries.Transition (fade/slide/whip-pan propia) entre el par de clipIds exacto que emite buildTimeline, con punchInStyle aplicado a cada escena.",
+        "consumes": [],
+        "created_at": "2026-09-07",
+        "changelog": []
+      }
+    ]
   }
 }

@@ -2,17 +2,27 @@
   "mode": "nx",
   "project": {
     "name": "video-maker",
-    "description": "Video maker: plataforma para crear y editar videos",
+    "description": "Motor y plataforma local de edición y postproducción de video para redes sociales (Reels/TikTok 9:16 y YouTube 16:9): pipeline declarativo en TypeScript sobre FFmpeg + Whisper local y Remotion, que ensambla clips reales, fotos de apoyo, locución y música sin depender de APIs externas pagas.",
     "packageScope": "@video-maker"
   },
   "apps": [
-    { "name": "web", "type": "react", "port": 4200, "features": [] }
+    {
+      "name": "web",
+      "type": "react",
+      "port": 4200,
+      "features": []
+    }
   ],
   "libs": [
-    { "name": "shared-utils", "type": "shared-utils" }
+    {
+      "name": "shared-utils",
+      "type": "shared-utils"
+    }
   ],
   "services": [
-    { "type": "minio" }
+    {
+      "type": "minio"
+    }
   ],
   "sdd": {
     "enabled": true,

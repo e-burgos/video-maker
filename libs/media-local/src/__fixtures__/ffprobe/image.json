@@ -1,0 +1,9 @@
+{
+  "streams": [
+    { "index": 0, "codec_name": "mjpeg", "codec_type": "video",
+      "width": 1290, "height": 1720,
+      "r_frame_rate": "25/1", "avg_frame_rate": "0/0",
+      "nb_frames": "1", "disposition": { "attached_pic": 0 } }
+  ],
+  "format": { "filename": "broll-shot-01.jpg", "format_name": "jpeg_pipe", "duration": "0.040000" }
+}

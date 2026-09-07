@@ -1,0 +1,39 @@
+{
+  "name": "timeline-core",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "libs/timeline-core/src",
+  "projectType": "library",
+  "tags": [
+    "scope:engine",
+    "type:domain"
+  ],
+  "targets": {
+    "lint": {
+      "executor": "@nx/eslint:lint"
+    },
+    "test": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "vitest run --coverage --passWithNoTests",
+        "cwd": "libs/timeline-core"
+      }
+    },
+    "build": {
+      "executor": "nx:run-commands",
+      "outputs": [
+        "{workspaceRoot}/dist/out-tsc/libs/timeline-core"
+      ],
+      "options": {
+        "command": "tsc -p tsconfig.lib.json",
+        "cwd": "libs/timeline-core"
+      }
+    },
+    "schemas": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "node -r @swc-node/register ./tools/generate-schemas.ts",
+        "cwd": "libs/timeline-core"
+      }
+    }
+  }
+}

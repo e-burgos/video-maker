@@ -1,0 +1,39 @@
+Input #0, wav, from 'voice-take-01.wav':
+  Duration: 00:00:12.34, bitrate: 768 kb/s
+  Stream #0:0: Audio: pcm_s16le ([1][0][0][0] / 0x0001), 48000 Hz, 1 channels, s16, 768 kb/s
+Stream mapping:
+  Stream #0:0 -> #0:0 (pcm_s16le (native) -> pcm_s16le (native))
+Press [q] to stop, [?] for help
+Output #0, null, to 'pipe:':
+  Metadata:
+    encoder         : Lavf60.3.100
+  Stream #0:0: Audio: pcm_s16le, 48000 Hz, 1 channels, s16, 768 kb/s
+    Metadata:
+      encoder         : Lavc60.3.100 pcm_s16le
+[Parsed_loudnorm_0 @ 0x7f8a3b504a80]
+
+Input Integrated:    -23.4 LUFS
+Input True Peak:      -5.2 dBTP
+Input LRA:             7.6 LU
+Input Threshold:     -34.0 LUFS
+
+Output Integrated:   -14.0 LUFS
+Output True Peak:     -1.5 dBTP
+Output LRA:            7.2 LU
+Output Threshold:    -24.5 LUFS
+
+Normalization Type:   Dynamic
+Target Offset:        -0.0 LU
+[Parsed_loudnorm_0 @ 0x7f8a3b504a80]
+{
+	"input_i" : "-23.45",
+	"input_tp" : "-5.20",
+	"input_lra" : "7.60",
+	"input_thresh" : "-33.99",
+	"output_i" : "-14.03",
+	"output_tp" : "-1.49",
+	"output_lra" : "7.20",
+	"output_thresh" : "-24.51",
+	"normalization_type" : "dynamic",
+	"target_offset" : "-0.03"
+}

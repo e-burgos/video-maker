@@ -1,0 +1,41 @@
+{
+  "name": "composition-remotion",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "libs/composition-remotion/src",
+  "projectType": "library",
+  "tags": ["scope:engine", "type:ui"],
+  "targets": {
+    "lint": {
+      "executor": "@nx/eslint:lint"
+    },
+    "test": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "vitest run --coverage --passWithNoTests",
+        "cwd": "libs/composition-remotion"
+      }
+    },
+    "build": {
+      "executor": "nx:run-commands",
+      "outputs": ["{workspaceRoot}/dist/out-tsc/libs/composition-remotion"],
+      "options": {
+        "command": "tsc -p tsconfig.lib.json",
+        "cwd": "libs/composition-remotion"
+      }
+    },
+    "studio": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "remotion studio src/remotion-entry.ts",
+        "cwd": "libs/composition-remotion"
+      }
+    },
+    "smoke": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "node -r @swc-node/register ./src/smoke.ts",
+        "cwd": "libs/composition-remotion"
+      }
+    }
+  }
+}

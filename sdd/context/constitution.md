@@ -14,26 +14,31 @@
 ### 1.1 Propósito del Sistema
 
 - **Nombre:** ver `sdd/global.json` → `project`
-- **Rol arquitectónico:** [Describir el rol del sistema en el ecosistema: qué problema resuelve y para quién.]
+- **Rol arquitectónico:** motor local y autónomo de edición/postproducción de video para redes sociales (Reels/TikTok 9:16 y YouTube 16:9). Recibe material real (clips de cámara o pantalla, fotos de apoyo, locución y música), lo describe como datos (`Timeline` + `EditDecisionList`), calcula la edición (poda de silencios, punch-ins, captions, ducking) y la materializa con FFmpeg, Whisper local y Remotion. Sirve al creador que opera el sistema en su propia máquina, sin costo por minuto ni salida del material a la nube.
 - **Descripción:** ver `sdd/global.json` → `description`
 
 ### 1.2 Responsabilidades del Sistema
 
 **Sí hacemos:**
 
-- [Responsabilidad 1]
-- [Responsabilidad 2]
+- Representar cualquier video de salida como un documento de datos validable contra JSON Schema.
+- Calcular las decisiones de edición de forma determinista y testeable sin renderizar.
+- Sondear, transcribir, normalizar y renderizar con herramientas 100% locales (FFmpeg, whisper.cpp, Remotion).
+- Ofrecer previsualización, gestión de assets y disparo de renders locales desde una UI web.
 
 **No hacemos:**
 
-- [Anti-responsabilidad 1]
-- [Anti-responsabilidad 2]
+- No dependemos de APIs externas pagas (transcripción, IA generativa, render en la nube).
+- No subimos material del usuario a servicios de terceros; el almacenamiento es local (filesystem / MinIO en dev).
+- No somos un editor no-lineal genérico: cubrimos los cuatro casos de uso declarados en la spec 001.
 
 ### 1.3 Principios de Diseño
 
-1. [Principio 1 — ej.: fuente de verdad declarada para cada dato expuesto]
-2. [Principio 2 — ej.: contrato conservador: mejor campo faltante que campo falso]
-3. [Principio 3]
+1. Motor declarativo: la edición es un documento (`Timeline`), nunca código imperativo por video.
+2. Determinismo: misma entrada y mismo `seed` producen la misma salida; ningún cálculo lee reloj, entorno ni aleatoriedad.
+3. Contrato conservador: toda entrada externa (ffprobe, Whisper, timelines guardadas) se valida con Zod y se rechaza con error tipado; nunca se completa con valores inventados.
+4. Sin binarios en CI: los wrappers reciben un runner inyectable y los tests usan fixtures grabadas.
+5. Unidades explícitas: milisegundos en el dominio de medios, frames en la timeline, una sola función de conversión.
 
 ### 1.4 Objetivos de Desarrollo
 
@@ -52,6 +57,9 @@ Para el detalle técnico de cada subproyecto, ver su constitución específica:
 
 | Subproyecto | Tipo | Rol en el sistema | Constitución específica |
 | ----------- | ---- | ----------------- | ----------------------- |
+| `libs/timeline-core` | lib de dominio TS | Contratos de datos del motor de video y cálculos puros de edición | `sdd/context/libs/timeline-core/constitution.md` |
+| `libs/media-local` | lib Node TS | Wrappers de ffprobe/ffmpeg/whisper-cli y parsers hacia los contratos del motor | `sdd/context/libs/media-local/constitution.md` |
+| `libs/composition-remotion` | lib React + Remotion | Renderiza una Timeline en frames: pistas, transiciones, captions y render headless | `sdd/context/libs/composition-remotion/constitution.md` |
 
 > Todavía no hay apps/libs/tools generadas en Nx. Al generar la primera, sumar una fila por subproyecto (solo agregar filas — nunca reformatear la tabla completa).
 > Las constituciones de subproyecto son la **fuente de verdad** del stack y las convenciones técnicas.
@@ -72,6 +80,9 @@ Para el detalle técnico de cada subproyecto, ver su constitución específica:
 
 | Subproyecto | Stack base | Última actualización |
 | ----------- | ---------- | -------------------- |
+| `libs/timeline-core` | TypeScript estricto + Zod 4.5 + Vitest 4 + `@swc-node/register` (JSON Schema) | cycle-01 \| 2026-09-07 |
+| `libs/media-local` | TypeScript estricto + execa 10 + Zod 4.5 + Vitest 4 (fixtures grabadas, cero binarios) | cycle-02 \| 2026-09-07 |
+| `libs/composition-remotion` | React 19 + Remotion 4.0.522 (`transitions`/`bundler`/`renderer`/`cli`) + Vitest 4/jsdom (cero render en CI) | cycle-03 \| 2026-09-07 |
 
 ---
 

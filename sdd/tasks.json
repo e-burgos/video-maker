@@ -2,5 +2,40 @@
   "$schema": "./schemas/tasks-index.schema.json",
   "_comment": "Lightweight index over per-cycle task files. Canonical task data lives in each sdd/specs/{spec-id}/cycles/cycle-XX/tasks.json. Do not edit task detail here. Regenerate with: pnpm sdd:rebuild-tasks-index",
   "sdd_version": "4.0",
-  "specs": {}
+  "specs": {
+    "spec-e-burgos-001-core-composition-media-pipeline": {
+      "cycles": {
+        "cycle-01": {
+          "file": "sdd/specs/spec-e-burgos-001-core-composition-media-pipeline/cycles/cycle-01/tasks.json",
+          "module": "core-composition-media-pipeline",
+          "apps": [
+            "libs/timeline-core"
+          ],
+          "status": "completed",
+          "tasks_total": 11,
+          "tasks_done": 11
+        },
+        "cycle-02": {
+          "file": "sdd/specs/spec-e-burgos-001-core-composition-media-pipeline/cycles/cycle-02/tasks.json",
+          "module": "core-composition-media-pipeline",
+          "apps": [
+            "libs/media-local"
+          ],
+          "status": "completed",
+          "tasks_total": 8,
+          "tasks_done": 8
+        },
+        "cycle-03": {
+          "file": "sdd/specs/spec-e-burgos-001-core-composition-media-pipeline/cycles/cycle-03/tasks.json",
+          "module": "core-composition-media-pipeline",
+          "apps": [
+            "libs/composition-remotion"
+          ],
+          "status": "completed",
+          "tasks_total": 7,
+          "tasks_done": 7
+        }
+      }
+    }
+  }
 }
