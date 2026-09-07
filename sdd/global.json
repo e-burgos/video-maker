@@ -1,0 +1,19 @@
+{
+  "$schema": "./schemas/global.schema.json",
+  "project": "video-maker",
+  "description": "Video maker: plataforma para crear y editar videos",
+  "version": "0.1.0",
+  "completed_modules": [],
+  "in_progress_modules": [],
+  "pending_modules": [],
+  "monorepo": {
+    "tool": "Nx",
+    "package_manager": "pnpm",
+    "apps": {
+      "web": "apps/web — react"
+    },
+    "libs": {
+      "shared-utils": "libs/shared-utils — shared-utils"
+    }
+  }
+}

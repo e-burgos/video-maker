@@ -1,0 +1,22 @@
+{
+  "mode": "nx",
+  "project": {
+    "name": "video-maker",
+    "description": "Video maker: plataforma para crear y editar videos",
+    "packageScope": "@video-maker"
+  },
+  "apps": [
+    { "name": "web", "type": "react", "port": 4200, "features": [] }
+  ],
+  "libs": [
+    { "name": "shared-utils", "type": "shared-utils" }
+  ],
+  "services": [
+    { "type": "minio" }
+  ],
+  "sdd": {
+    "enabled": true,
+    "author": "e-burgos",
+    "modules": []
+  }
+}
