@@ -7,7 +7,8 @@ import { CommandFailedError } from '../errors/command-failed-error';
 import { UnparseableOutputError } from '../errors/unparseable-output-error';
 import { FixtureCommandRunner } from '../runner/fixture-command-runner';
 import { DEFAULT_VOICE_TARGET, measureLoudness } from './measure-loudness';
-import { buildLoudnormFilter, normalizeVoice } from './normalize-voice';
+import { buildLoudnormFilter } from './build-loudnorm-filter';
+import { normalizeVoice } from './normalize-voice';
 import { extractTrailingJsonObject, parseLoudnormJson } from './parse-loudnorm-json';
 
 const loudnormStderr = readFixture('ffmpeg/loudnorm.stderr.txt');

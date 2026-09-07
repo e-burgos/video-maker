@@ -1,6 +1,6 @@
-import { readFileSync } from 'node:fs';
 import { describe, expect, it } from 'vitest';
 
+import { readFixture } from '../__fixtures__/load-fixture';
 import { CommandFailedError } from '../errors/command-failed-error';
 import { FixtureCommandRunner } from '../runner/fixture-command-runner';
 import {
@@ -10,10 +10,7 @@ import {
 } from './detect-silences';
 import { parseSilenceDetect } from './parse-silence-detect';
 
-const silencedetectFixture = readFileSync(
-  new URL('../__fixtures__/ffmpeg/silencedetect.stderr.txt', import.meta.url),
-  'utf8',
-);
+const silencedetectFixture = readFixture('ffmpeg/silencedetect.stderr.txt');
 
 const DURATION_MS = 10_000;
 

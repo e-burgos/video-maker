@@ -8,8 +8,6 @@ import type { LoudnessMeasurement } from './parse-loudnorm-json';
 
 const DEFAULT_SAMPLE_RATE = 48000;
 
-export { buildLoudnormFilter };
-
 export interface NormalizeVoiceResult {
   outputPath: string;
   measured: LoudnessMeasurement;

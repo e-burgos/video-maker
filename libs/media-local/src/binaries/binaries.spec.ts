@@ -12,7 +12,7 @@ function fakeLookup(existingPaths: readonly string[]): BinaryLookup {
   };
 }
 
-describe('resolveBinary', () => {
+describe('resolveBinary (CA-021)', () => {
   it('la variable de entorno gana sobre el PATH', async () => {
     const lookup = fakeLookup(['/opt/custom/ffprobe', '/usr/bin/ffprobe']);
     const env = { FFPROBE_PATH: '/opt/custom/ffprobe', PATH: '/usr/bin' };
@@ -99,7 +99,7 @@ describe('resolveBinary', () => {
   });
 });
 
-describe('resolveBinaries', () => {
+describe('resolveBinaries (CA-021)', () => {
   it('resuelve los cuatro binarios', async () => {
     const lookup = fakeLookup([
       '/usr/bin/ffprobe',

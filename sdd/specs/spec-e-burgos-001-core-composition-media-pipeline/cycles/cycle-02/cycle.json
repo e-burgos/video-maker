@@ -13,9 +13,9 @@
     "Wrappers y parsers de ffprobe, ffmpeg (silencedetect, loudnorm, extracción de audio) y whisper.cpp / Faster-Whisper hacia los contratos de timeline-core",
     "Dejar CA-017 a CA-022 de la spec en verde con fixtures grabadas, sin binarios en CI"
   ],
-  "status": "in-progress",
+  "status": "completed",
   "started_at": "2026-09-07",
-  "completed_at": null,
+  "completed_at": "2026-09-07",
   "documents": {
     "brief": "sdd/specs/spec-e-burgos-001-core-composition-media-pipeline/cycles/cycle-02/brief.yaml",
     "functional": "sdd/specs/spec-e-burgos-001-core-composition-media-pipeline/cycles/cycle-02/functional.md",
@@ -24,8 +24,8 @@
     "tasks": "sdd/specs/spec-e-burgos-001-core-composition-media-pipeline/cycles/cycle-02/tasks.json"
   },
   "artifacts": [
-    "sdd/specs/spec-e-burgos-001-core-composition-media-pipeline/cycles/cycle-02/artifacts/task-004-notes.md",
     "sdd/specs/spec-e-burgos-001-core-composition-media-pipeline/cycles/cycle-02/artifacts/task-003-notes.md",
+    "sdd/specs/spec-e-burgos-001-core-composition-media-pipeline/cycles/cycle-02/artifacts/task-004-notes.md",
     "sdd/specs/spec-e-burgos-001-core-composition-media-pipeline/cycles/cycle-02/artifacts/task-005-notes.md",
     "sdd/specs/spec-e-burgos-001-core-composition-media-pipeline/cycles/cycle-02/artifacts/task-007-notes.md",
     "sdd/specs/spec-e-burgos-001-core-composition-media-pipeline/cycles/cycle-02/artifacts/task-008-notes.md"
@@ -34,12 +34,97 @@
     "tasks_total": 8,
     "tasks_completed": 8,
     "story_points": 30,
-    "files_created": [],
-    "files_modified": [],
+    "files_created": [
+      "libs/media-local/README.md",
+      "libs/media-local/eslint.config.mjs",
+      "libs/media-local/project.json",
+      "libs/media-local/src/__fixtures__/ffmpeg/loudnorm.json",
+      "libs/media-local/src/__fixtures__/ffmpeg/loudnorm.stderr.txt",
+      "libs/media-local/src/__fixtures__/ffmpeg/silencedetect.stderr.txt",
+      "libs/media-local/src/__fixtures__/ffprobe/audio.json",
+      "libs/media-local/src/__fixtures__/ffprobe/image.json",
+      "libs/media-local/src/__fixtures__/ffprobe/video-rotated.json",
+      "libs/media-local/src/__fixtures__/load-fixture.ts",
+      "libs/media-local/src/__fixtures__/whisper/faster-whisper.json",
+      "libs/media-local/src/__fixtures__/whisper/whisper-cpp.json",
+      "libs/media-local/src/binaries/binaries.spec.ts",
+      "libs/media-local/src/binaries/resolve-binaries.ts",
+      "libs/media-local/src/clock.spec.ts",
+      "libs/media-local/src/clock.ts",
+      "libs/media-local/src/errors/binary-not-found-error.ts",
+      "libs/media-local/src/errors/command-failed-error.ts",
+      "libs/media-local/src/errors/errors.spec.ts",
+      "libs/media-local/src/errors/media-local-error.ts",
+      "libs/media-local/src/errors/unparseable-output-error.ts",
+      "libs/media-local/src/ffmpeg/build-loudnorm-filter.ts",
+      "libs/media-local/src/ffmpeg/detect-silences.ts",
+      "libs/media-local/src/ffmpeg/extract-audio.spec.ts",
+      "libs/media-local/src/ffmpeg/extract-audio.ts",
+      "libs/media-local/src/ffmpeg/loudnorm-output.schema.ts",
+      "libs/media-local/src/ffmpeg/loudnorm.spec.ts",
+      "libs/media-local/src/ffmpeg/measure-loudness.ts",
+      "libs/media-local/src/ffmpeg/normalize-voice.ts",
+      "libs/media-local/src/ffmpeg/parse-loudnorm-json.ts",
+      "libs/media-local/src/ffmpeg/parse-silence-detect.ts",
+      "libs/media-local/src/ffmpeg/silencedetect.spec.ts",
+      "libs/media-local/src/ffprobe/ffprobe-output.schema.ts",
+      "libs/media-local/src/ffprobe/ffprobe.spec.ts",
+      "libs/media-local/src/ffprobe/parse-ffprobe-json.ts",
+      "libs/media-local/src/ffprobe/probe-media.ts",
+      "libs/media-local/src/fs/binary-lookup.ts",
+      "libs/media-local/src/fs/fs-ports.spec.ts",
+      "libs/media-local/src/fs/read-text-file.ts",
+      "libs/media-local/src/index.ts",
+      "libs/media-local/src/runner/command-runner.ts",
+      "libs/media-local/src/runner/execa-command-runner.ts",
+      "libs/media-local/src/runner/fixture-command-runner.ts",
+      "libs/media-local/src/runner/runner.spec.ts",
+      "libs/media-local/src/whisper/build-transcription.ts",
+      "libs/media-local/src/whisper/faster-whisper-output.schema.ts",
+      "libs/media-local/src/whisper/parse-faster-whisper-json.ts",
+      "libs/media-local/src/whisper/parse-whisper-cpp-json.ts",
+      "libs/media-local/src/whisper/transcribe-with-whisper-cpp.ts",
+      "libs/media-local/src/whisper/transcribe.spec.ts",
+      "libs/media-local/src/whisper/whisper-cpp-output.schema.ts",
+      "libs/media-local/src/whisper/whisper-parsers.spec.ts",
+      "libs/media-local/tsconfig.json",
+      "libs/media-local/tsconfig.lib.json",
+      "libs/media-local/tsconfig.spec.json",
+      "libs/media-local/vite.config.ts"
+    ],
+    "files_modified": [
+      "eslint.config.mjs",
+      "package.json",
+      "pnpm-lock.yaml",
+      "tsconfig.base.json"
+    ],
     "files_deleted": [],
     "usage": {
-      "tokens_in": 9000,
-      "tokens_out": 4300,
+      "tokens_in": 1803867,
+      "tokens_out": 313152,
+      "duration_minutes": 150,
+      "approx": true,
+      "source": "declared-estimate",
+      "by_tier": {
+        "claude/sonnet": {
+          "tokens_in": 1331761,
+          "tokens_out": 235016,
+          "approx": false,
+          "source": "agent-usage-notification"
+        },
+        "claude/opus": {
+          "tokens_in": 352106,
+          "tokens_out": 62136,
+          "approx": false,
+          "source": "agent-usage-notification"
+        },
+        "fable": {
+          "tokens_in": 120000,
+          "tokens_out": 16000,
+          "approx": true,
+          "source": "declared-estimate"
+        }
+      },
       "by_agent": [
         {
           "agent": "functional",
@@ -110,20 +195,6 @@
         },
         {
           "agent": "implementor-back",
-          "label": "TASK-004",
-          "provider_model": "claude/sonnet",
-          "effort": "medium",
-          "tokens_in": 118708,
-          "tokens_out": 20948,
-          "tokens_total": 139656,
-          "approx": false,
-          "source": "agent-usage-notification",
-          "recorded_at": "2026-09-07",
-          "tool_uses": 51,
-          "duration_minutes": 8.7
-        },
-        {
-          "agent": "implementor-back",
           "label": "TASK-003",
           "provider_model": "claude/sonnet",
           "effort": "medium",
@@ -138,17 +209,17 @@
         },
         {
           "agent": "implementor-back",
-          "label": "TASK-006",
+          "label": "TASK-004",
           "provider_model": "claude/sonnet",
           "effort": "medium",
-          "tokens_in": 80158,
-          "tokens_out": 14145,
-          "tokens_total": 94303,
+          "tokens_in": 118708,
+          "tokens_out": 20948,
+          "tokens_total": 139656,
           "approx": false,
           "source": "agent-usage-notification",
           "recorded_at": "2026-09-07",
-          "tool_uses": 26,
-          "duration_minutes": 2.2
+          "tool_uses": 51,
+          "duration_minutes": 8.7
         },
         {
           "agent": "implementor-back",
@@ -166,6 +237,20 @@
         },
         {
           "agent": "implementor-back",
+          "label": "TASK-006",
+          "provider_model": "claude/sonnet",
+          "effort": "medium",
+          "tokens_in": 80158,
+          "tokens_out": 14145,
+          "tokens_total": 94303,
+          "approx": false,
+          "source": "agent-usage-notification",
+          "recorded_at": "2026-09-07",
+          "tool_uses": 26,
+          "duration_minutes": 2.2
+        },
+        {
+          "agent": "implementor-back",
           "label": "TASK-007",
           "provider_model": "claude/sonnet",
           "effort": "high",
@@ -177,17 +262,6 @@
           "recorded_at": "2026-09-07",
           "tool_uses": 59,
           "duration_minutes": 6.5
-        },
-        {
-          "agent": "orchestrator",
-          "label": "cycle-02 coordination (brief, gates, barrel wiring, usage bookkeeping, commits)",
-          "provider_model": "fable",
-          "effort": "medium",
-          "tokens_in": 120000,
-          "tokens_out": 16000,
-          "approx": true,
-          "source": "declared-estimate",
-          "recorded_at": "2026-09-07"
         },
         {
           "agent": "implementor-back",
@@ -202,6 +276,31 @@
           "recorded_at": "2026-09-07",
           "tool_uses": 79,
           "duration_minutes": 15.2
+        },
+        {
+          "agent": "orchestrator",
+          "label": "cycle-02 coordination (brief, gates, barrel wiring, usage bookkeeping, commits)",
+          "provider_model": "fable",
+          "effort": "medium",
+          "tokens_in": 120000,
+          "tokens_out": 16000,
+          "approx": true,
+          "source": "declared-estimate",
+          "recorded_at": "2026-09-07"
+        },
+        {
+          "agent": "reviewer",
+          "label": "cycle-02 review + gates de cierre",
+          "provider_model": "claude/opus",
+          "effort": "high",
+          "tokens_in": 181381,
+          "tokens_out": 32008,
+          "approx": false,
+          "source": "agent-usage-notification",
+          "recorded_at": "2026-09-07",
+          "tokens_total": 213389,
+          "tool_uses": 62,
+          "duration_minutes": 9.3
         }
       ]
     }
@@ -209,6 +308,42 @@
   "tables_created": [],
   "endpoints_implemented": [],
   "components_created": [],
-  "issues_found": [],
-  "reviewer_report": null
+  "issues_found": [
+    "TASK-003: Vitest no resuelve los `paths` de `tsconfig.base.json`. `libs/media-local` es el primer proyecto del repo que importa un VALOR (no solo un `type`) desde otra lib, y todo spec que lo hacía fallaba en runtime con ERR_MODULE_NOT_FOUND con `lint` y `build` en verde. Resuelto dentro del ciclo con `resolve.alias` en `libs/media-local/vite.config.ts` apuntando a `../timeline-core/src/index.ts`.",
+    "TASK-005: ubicar `buildLoudnormFilter` en `normalize-voice.ts` como fija architect.md §2 creaba un ciclo de imports `measure-loudness ↔ normalize-voice`. Resuelto dentro del ciclo por el orquestador moviéndolo a `src/ffmpeg/build-loudnorm-filter.ts`.",
+    "TASK-007: reenviar literalmente `language: 'auto'` a `parseWhisperCppJson` —como escribe la firma de architect.md §4.6— habría roto SIEMPRE el wrapper con su propio default: `'auto'` no matchea el regex de `TranscriptionSchema.language`. Resuelto dentro del ciclo: el sentinel solo se reenvía cuando difiere de `'auto'`, y con el default el idioma sale del JSON, que es lo que describe la segunda oración del mismo apartado.",
+    "TASK-008: el barrel había acumulado 7 símbolos internos que architect.md §3 no lista (`FFPROBE_ARGS`, `truncateStderr`, `groupTokensIntoWords`, `extractTrailingJsonObject`, `DEFAULT_WHISPER_LANGUAGE`, `DEFAULT_EXTRACT_AUDIO_*`) y le faltaba el bloque de re-exports de tipos de §3.8. Resuelto dentro del ciclo auditando `src/index.ts` contra §3.",
+    "TASK-004/TASK-003 en paralelo: el helper compartido `readFixture()` (D-15) caía en zona común entre dos implementadores simultáneos, así que `silencedetect.spec.ts` duplicó la carga de fixtures con `readFileSync` inline y dejó la deuda anotada para el cierre. Migrado a `readFixture()` por el reviewer.",
+    "Reviewer: `normalize-voice.ts` conservaba un re-export `export { buildLoudnormFilter }` —shim del movimiento de archivo de TASK-005— que solo mantenía vivo `loudnorm.spec.ts` importando el símbolo desde el módulo equivocado. Eliminado, con el spec apuntando a `./build-loudnorm-filter`.",
+    "Reviewer: las fixtures de `ffmpeg/` y `whisper/` no son capturas reales (el entorno de implementación no tiene los binarios). Dos diferencias concretas contra una corrida real quedan registradas como follow_up: `loudnorm.stderr.txt` incluye el resumen legible que `print_format=json` no emite, y `ffprobe/image.json` declara `format_name: \"jpeg_pipe\"` donde `ffprobe foo.jpg` sobre archivo suele reportar `image2`."
+  ],
+  "reviewer_report": {
+    "approved": true,
+    "date": "2026-09-07",
+    "ca_results": {
+      "CA-017": "PASS — ffprobe/ffprobe.spec.ts: describe 'parseFfprobeJson — video rotado (CA-017)' sobre la fixture `ffprobe/video-rotated.json` compara el MediaAsset completo con toEqual (kind video, durationMs 10000, fps 30, width 1080 / height 1920 ya intercambiados, rotation 90, hasAudio true, audio {48000, 2, aac}) más 3 variantes de la fuente de rotación (solo side_data_list, solo tags.rotate, sin ninguna → 1920x1080/rotation 0); 'parseFfprobeJson — imagen (CA-017)' (kind image, sin fps, durationMs 0, hasAudio false) y '— audio (CA-017)' (kind audio, 8400 ms, audio {48000,1,pcm_s16le}, sin width). 'probeMedia (CA-017)' verifica además los args exactos de FFPROBE_ARGS con FixtureCommandRunner",
+      "CA-018": "PASS — ffmpeg/silencedetect.spec.ts: describe 'parseSilenceDetect (CA-018)' / 'devuelve 3 rangos sobre la fixture, el ultimo cerrado en durationMs' — sobre `ffmpeg/silencedetect.stderr.txt` (3 silence_start, el tercero sin silence_end) devuelve [2180,2680], [3860,4660], [8720,10000] con ranges[2].endMs === durationMs; más clamp de start negativo, redondeo de fracciones, stderr sin líneas → [], silence_start huérfano y rango degenerado. 'detectSilencesWithFfmpeg (CA-018)' asserta el filtro `silencedetect=noise=-35dB:d=0.5` y los args exactos",
+      "CA-019": "PASS — whisper/whisper-parsers.spec.ts: describe 'CA-019 — equivalencia entre whisper.cpp y faster-whisper' / 'misma cantidad de palabras y diferencia de tiempo por palabra <= 20 ms' — parsea las dos fixtures del mismo audio y compara length, texto por índice y |Δ startMs| / |Δ endMs| <= 20. Complementado por 'produce 8 palabras sin fragmentos a partir de 12 tokens' (RN-6: ' mues'+'tro' → 'muestro', ' completo'+'.' → 'completo.', [_BEG_] descartado) y 'produce 8 palabras con confidence a partir del MISMO audio'",
+      "CA-020": "PASS — ffmpeg/loudnorm.spec.ts: describe 'normalizeVoice (CA-020)' / 'la segunda pasada usa measured_I/TP/LRA/thresh de la primera pasada y el target' — el filtro de la 2.ª pasada es exactamente `loudnorm=I=-14:TP=-1:LRA=11:measured_I=-23.45:measured_TP=-5.20:measured_LRA=7.60:measured_thresh=-33.99:offset=-0.03:linear=true:print_format=json`, con los measured_* saliendo del parseo del stderr de la 1.ª pasada; 'ejecuta exactamente dos pasadas (RN-4)' fija runner.calls.length === 2 y 'la primera pasada usa exactamente los argumentos de la tabla 4.3' los args de la medición. 'parseLoudnormJson (CA-020)' cubre el stderr completo y el JSON pelado",
+      "CA-021": "PASS — binaries/binaries.spec.ts: describe 'resolveBinary (CA-021)' / 'la variable de entorno gana sobre el PATH' (FFPROBE_PATH=/opt/custom/ffprobe con /usr/bin/ffprobe también presente), 'sin variable de entorno cae al PATH respetando su orden', 'una variable de entorno apuntando a una ruta inexistente no cae al PATH' y 'nada configurado y nada en el PATH lanza BinaryNotFoundError con todos los candidatos' → BinaryNotFoundError con binary='whisper-cli' y searchedPaths completo. 'resolveBinaries (CA-021)' resuelve los cuatro y falla en el primero que falta sin ejecutar ningún binario real",
+      "CA-022": "PASS — runner/runner.spec.ts: describe 'CommandFailedError vía la política de exit code del wrapper (CA-022)' / 'expone command, args, exitCode y trunca stderr a 2048 bytes como sufijo' — con un stderr de 5000 bytes verifica command, args (toEqual), exitCode, Buffer.byteLength(stderr) === 2048, stderrTruncated === true y que lo conservado es el SUFIJO (longStderr.endsWith(error.stderr)); más el caso corto sin truncar y el message con binario + args + exit code"
+    },
+    "tests": {
+      "sdd:validate": "OK — 12 files valid, cross-checks passed (corrido antes de revisar y después del cierre)",
+      "suite": "155/155 PASS en 11 archivos de media-local; nx run-many -t lint test build sobre los 4 proyectos del workspace en verde (9.0 s con --skipNxCache)",
+      "coverage": "98.03% statements / 94.77% branches / 97.67% functions / 97.99% lines en media-local — supera el umbral de 80% de vite.config.ts y el >= 85% que el DoD de cycle-01 fijó como estándar de la spec",
+      "lint": "nx run-many -t lint: verde. media-local lintea limpio con sus reglas propias de confinamiento de I/O (execa, node:fs, child_process, Date, process, Math.random) y con el nuevo depConstraint type:util → type:domain",
+      "build": "nx run-many -t build: verde (media-local = tsc -p tsconfig.lib.json con noUncheckedIndexedAccess y exactOptionalPropertyTypes)",
+      "rnf-3": "PASS — `which ffmpeg ffprobe whisper-cli` no resuelve ninguno en el entorno de revisión y la suite pasa igual: ningún *.spec.ts instancia ExecaCommandRunner (solo importa mapExecaResult) y no hay un solo import de child_process en la lib. Duración de la suite de media-local: 1.57 s, muy por debajo de los 20 s del RNF",
+      "rnf-8": "PASS — CommandFailedError lleva command, args, exitCode y stderr truncado a STDERR_MAX_BYTES = 2048 conservando el sufijo (el final del stderr, que es donde ffmpeg escribe la causa), con stderrTruncated como bandera; los 6 wrappers lo lanzan ante exitCode != 0"
+    },
+    "notes": "Ciclo aprobado. 8/8 tasks done (30 SP), 0 skipped. CA-017..CA-022 en verde con test nombrado por criterio y DoD de cycle-02 cumplido: README con matriz de binarios (versión mínima + variable de entorno + instalación en macOS), tabla de las cuatro variables con su precedencia env > PATH, procedencia de cada fixture con el comando exacto para regrabarla y smoke manual fuera de CI. RNF-3 verificado en un entorno sin ffmpeg/ffprobe/whisper-cli instalados; RNF-8 verificado en el error tipado. Código conforme a las reglas del repo y del architect: cero comentarios narrativos en src/ (grep de // y /* sin resultados fuera de specs y fixtures), cero `any`, cero TODO, superficie pública exactamente la de architect.md §3 y boundaries Nx type:util → type:domain (depConstraint agregado al eslint raíz en este ciclo). El confinamiento de I/O no es una convención escrita sino una regla de lint por directorio: execa solo en execa-command-runner.ts, node:fs solo en src/fs/**, __fixtures__/** y specs, child_process prohibido en todos lados, Date solo en clock.ts. Los desvíos de artifacts/task-00*-notes.md se revisaron uno por uno y se aceptan: la fixture de silencedetect sin banner sigue architect.md §4 (-hide_banner -nostats), la ausencia de un caso 'línea corrupta' sigue §5.2 (el scanner ignora sin error toda línea que no matchee, y un stderr sin líneas es [] válido), y el no reenvío del sentinel language 'auto' evita romper el wrapper con su propio default. Defectos corregidos por el reviewer, ambos de higiene y sin cambio de comportamiento: (1) silencedetect.spec.ts era el único spec que cargaba su fixture con readFileSync inline en vez del helper compartido readFixture() de D-15 — deuda que TASK-004 dejó anotada para el cierre porque el helper caía en zona común con TASK-003 en paralelo; (2) normalize-voice.ts conservaba un re-export de buildLoudnormFilter, shim del movimiento de archivo que resolvió el ciclo de imports, mantenido vivo solo porque loudnorm.spec.ts importaba el símbolo desde ahí. Se agregaron además las etiquetas (CA-017) y (CA-021) a los describes correspondientes, que eran los dos únicos criterios sin traza por nombre de test. Suite y cobertura sin cambios tras las tres correcciones: 155/155, 98.03% statements. Telemetría: by_agent llegó completo desde tasks y documentos (11 entradas exactas por agent-usage-notification + la coordinación estimada del orquestador); el reviewer solo agregó la suya y derivó by_tier — el tier claude/opus queda approx: true por mezclar la medición del architect con la estimación de esta revisión, y el total de nivel superior hereda esa mezcla.",
+    "follow_ups": [
+      "Regrabar con binarios reales las fixtures de src/__fixtures__/ffmpeg/ y src/__fixtures__/whisper/ (los comandos exactos están en el README de la lib). Fueron reconstruidas a mano desde el formato documentado en architect.md §6 porque el entorno de implementación no tiene ffmpeg ni whisper-cli. Dos diferencias concretas a verificar al hacerlo: loudnorm.stderr.txt incluye el resumen legible (Input Integrated: …) que print_format=json NO emite —es lo que emite print_format=summary—, y ffprobe/image.json declara format_name 'jpeg_pipe' cuando `ffprobe foo.jpg` sobre un archivo suele reportar 'image2' (el parser acepta ambos, así que el test pasa igual). Mantener los mismos valores numéricos: son los que arrastran los toEqual exactos de CA-018/CA-019/CA-020.",
+      "Coherencia menor entre fixtures: ffprobe/audio.json y ffmpeg/loudnorm.stderr.txt describen ambas 'voice-take-01.wav' pero con duraciones distintas (8.4 s vs 00:00:12.34). Unificarlas al regrabar, o renombrar el archivo de una de las dos para que no se lean como el mismo asset.",
+      "ExecaCommandRunner.run() queda sin cobertura (40% de ramas de su archivo): ejercitarlo exige ejecutar un proceso real, prohibido por RNF-3 y por la regla 7 de architect.md. mapExecaResult, que concentra toda la traducción de resultados y errores de execa (exitCode numérico, ENOENT → BinaryNotFoundError, fallo de spawn → CommandFailedError), sí está cubierto al 100% con dobles. Definir en el ciclo que integre binarios reales (spec-002 / spec-004) si esto se cubre con un test de integración opt-in fuera de CI o si el smoke manual del README alcanza.",
+      "Al despachar implementadores en paralelo en próximos ciclos: crear la infraestructura compartida (helpers, ports, fixtures comunes) en una task serializada previa, y no poner el umbral de cobertura GLOBAL de la lib en el criterio de done de una task que corre en paralelo — TASK-004 midió 79.03% de ramas por archivos de una task ajena en vuelo y no tenía forma de verificar su propio gate.",
+      "Advertencia de lint preexistente en apps/web/src/main.tsx (no-non-null-assertion), heredada del scaffold inicial del workspace y ya registrada al cerrar cycle-01: sigue abierta, limpiarla cuando se abra el ciclo de web-studio (spec-006)."
+    ]
+  }
 }

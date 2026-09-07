@@ -80,7 +80,7 @@ Para el detalle técnico de cada subproyecto, ver su constitución específica:
 | Subproyecto | Stack base | Última actualización |
 | ----------- | ---------- | -------------------- |
 | `libs/timeline-core` | TypeScript estricto + Zod 4.5 + Vitest 4 + `@swc-node/register` (JSON Schema) | cycle-01 \| 2026-09-07 |
-| `libs/media-local` | TypeScript estricto + execa + Zod + Vitest (fixtures) | cycle-02 en curso (2026-09-07) |
+| `libs/media-local` | TypeScript estricto + execa 10 + Zod 4.5 + Vitest 4 (fixtures grabadas, cero binarios) | cycle-02 \| 2026-09-07 |
 
 ---
 

@@ -48,7 +48,7 @@ function withSideDataMissingRotation(raw: string): string {
   return JSON.stringify({ ...parsed, streams: [patchedVideoStream, ...rest] });
 }
 
-describe('parseFfprobeJson — video rotado', () => {
+describe('parseFfprobeJson — video rotado (CA-017)', () => {
   const expectedAsset: MediaAsset = {
     id: 'aroll-cam-01.mp4',
     kind: 'video',
@@ -92,7 +92,7 @@ describe('parseFfprobeJson — video rotado', () => {
   });
 });
 
-describe('parseFfprobeJson — imagen', () => {
+describe('parseFfprobeJson — imagen (CA-017)', () => {
   it('reporta kind image sin durationMs ni fps', () => {
     const asset = parseFfprobeJson(imageRaw, { path: '/fixtures/broll-shot-01.jpg', probedAt: PROBED_AT });
 
@@ -105,7 +105,7 @@ describe('parseFfprobeJson — imagen', () => {
   });
 });
 
-describe('parseFfprobeJson — audio', () => {
+describe('parseFfprobeJson — audio (CA-017)', () => {
   it('reporta kind audio con sus datos de sonido y sin campos de video', () => {
     const asset = parseFfprobeJson(audioRaw, { path: '/fixtures/voice-take-01.wav', probedAt: PROBED_AT });
 
@@ -296,7 +296,7 @@ describe('parseRational', () => {
   });
 });
 
-describe('probeMedia', () => {
+describe('probeMedia (CA-017)', () => {
   it('ejecuta ffprobe con los argumentos exactos y devuelve el MediaAsset validado', async () => {
     const runner = new FixtureCommandRunner([
       { bin: 'ffprobe', response: { stdout: videoRotatedRaw, exitCode: 0 } },
