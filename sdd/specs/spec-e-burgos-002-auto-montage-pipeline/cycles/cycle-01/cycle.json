@@ -91,8 +91,8 @@
     ],
     "files_deleted": [],
     "usage": {
-      "tokens_in": 649828,
-      "tokens_out": 111499,
+      "tokens_in": 624478,
+      "tokens_out": 110202,
       "by_agent": [
         {
           "agent": "orchestrator",
@@ -156,20 +156,20 @@
           "label": "revisión y cierre de cycle-01 (gates de contexto, memoria, telemetría y registros)",
           "provider_model": "claude/opus",
           "effort": "high",
-          "tokens_in": 120000,
-          "tokens_out": 18000,
-          "tokens_total": 138000,
-          "approx": true,
-          "source": "declared-estimate",
+          "tokens_in": 94650,
+          "tokens_out": 16703,
+          "tokens_total": 111353,
+          "approx": false,
+          "source": "agent-usage-notification",
           "recorded_at": "2026-09-07"
         }
       ],
       "by_tier": {
         "claude/opus": {
-          "tokens_in": 481815,
-          "tokens_out": 81849,
-          "approx": true,
-          "source": "declared-estimate"
+          "tokens_in": 456465,
+          "tokens_out": 80552,
+          "approx": false,
+          "source": "agent-usage-notification"
         },
         "claude/sonnet": {
           "tokens_in": 168013,
