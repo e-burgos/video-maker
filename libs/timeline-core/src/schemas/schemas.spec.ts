@@ -1,16 +1,75 @@
+import { readFileSync } from 'node:fs';
+import { join } from 'node:path';
+
 import { describe, expect, it } from 'vitest';
 
 import { arollAsset, brollAsset, musicAsset } from '../__fixtures__/assets';
 import { ca013Edl, ca013Format, invalidPunchInEdl } from '../__fixtures__/edl';
 import { overlappingWords, spanishTranscription } from '../__fixtures__/transcription';
+import * as publicApi from '../index';
 import { AudioMixPlanSchema, GainKeyframeSchema } from './audio-mix-plan.schema';
 import type { EditDecisionList } from './edit-decision-list.schema';
 import { EditDecisionSchema, EditDecisionListSchema } from './edit-decision-list.schema';
+import { buildJsonSchemaBundle, serializeJsonSchemaFile, timelineToJsonSchema } from './json-schema';
 import { MediaAssetSchema } from './media-asset.schema';
 import { OutputFormatSchema, SafeZoneSchema } from './output-format.schema';
+import { SCHEMA_FILE_NAMES } from './registry';
 import type { Timeline } from './timeline.schema';
 import { TimelineSchema, TransitionTimingSchema } from './timeline.schema';
-import { SegmentSchema, TranscriptionSchema, WordSchema } from './transcription.schema';
+import { SegmentSchema, TranscriptionSchema, WordSchema, normalizeTranscriptionWords } from './transcription.schema';
+
+const SCHEMAS_DIR = join(__dirname, '..', '..', 'schemas');
+
+const PUBLIC_VALUE_EXPORTS = [
+  'OutputFormatSchema',
+  'OutputPresetSchema',
+  'SafeZoneSchema',
+  'MediaAssetSchema',
+  'MediaKindSchema',
+  'SegmentSchema',
+  'TranscriptionEngineSchema',
+  'TranscriptionSchema',
+  'WordSchema',
+  'normalizeTranscriptionWords',
+  'BrollOverlayDecisionSchema',
+  'CaptionGroupDecisionSchema',
+  'CutDecisionSchema',
+  'DuckDecisionSchema',
+  'EditDecisionListSchema',
+  'EditDecisionSchema',
+  'KeepDecisionSchema',
+  'PunchInDecisionSchema',
+  'TransitionDecisionSchema',
+  'AudioMixPlanSchema',
+  'GainKeyframeSchema',
+  'MusicMixSettingsSchema',
+  'VoiceTargetSchema',
+  'AudioClipSchema',
+  'CaptionClipSchema',
+  'TimelineSchema',
+  'TimelineTransitionSchema',
+  'VideoClipSchema',
+  'framesToMs',
+  'msToFrames',
+  'defaultFormat',
+  'safeZoneFor',
+  'detectSilencesFromWords',
+  'mergeSilences',
+  'pruneSilences',
+  'planPunchIns',
+  'remapMsAfterCuts',
+  'TimelineBuildError',
+  'buildTimeline',
+  'validateTimeline',
+  'groupWordsForCaptions',
+  'pickEmphasisIndex',
+  'DEFAULT_AUDIO_MIX_PLAN',
+  'DEFAULT_MUSIC_MIX',
+  'planDucking',
+  'buildJsonSchemaBundle',
+  'serializeJsonSchemaFile',
+  'timelineToJsonSchema',
+].sort();
 
 const minimalTimeline: Timeline = {
   schemaVersion: 1,
@@ -787,5 +846,69 @@ describe('TimelineSchema', () => {
     };
 
     expect(TimelineSchema.safeParse(withTransition).success).toBe(true);
+  });
+});
+
+describe('superficie pública de src/index.ts', () => {
+  it('exporta exactamente los valores de la API pública del architect (CA-016)', () => {
+    const actualExports = Object.keys(publicApi).sort();
+
+    expect(actualExports).toEqual(PUBLIC_VALUE_EXPORTS);
+  });
+});
+
+describe('JSON Schema commiteado vs generado (CA-016)', () => {
+  const bundle = buildJsonSchemaBundle();
+
+  it.each(SCHEMA_FILE_NAMES)('%s.schema.json coincide byte a byte con el generador', (id) => {
+    const committedPath = join(SCHEMAS_DIR, `${id}.schema.json`);
+    const committed = readFileSync(committedPath, 'utf8');
+    const generated = serializeJsonSchemaFile(bundle[id]);
+
+    expect(committed, 'correr `pnpm nx run timeline-core:schemas`').toBe(generated);
+  });
+
+  it('timelineToJsonSchema() devuelve el mismo documento que el bundle completo', () => {
+    expect(timelineToJsonSchema()).toEqual(bundle.timeline);
+    expect(timelineToJsonSchema().$id).toBe('https://video-maker.local/schemas/timeline.schema.json');
+  });
+});
+
+describe('normalizeTranscriptionWords (D-08)', () => {
+  it('recorta el endMs de una palabra al startMs de la siguiente cuando se solapan', () => {
+    const words = [
+      { text: 'hola', startMs: 0, endMs: 600 },
+      { text: 'mundo', startMs: 500, endMs: 900 },
+    ];
+
+    expect(normalizeTranscriptionWords(words)).toEqual([
+      { text: 'hola', startMs: 0, endMs: 500 },
+      { text: 'mundo', startMs: 500, endMs: 900 },
+    ]);
+  });
+
+  it('no modifica palabras ya contiguas o sin solape', () => {
+    const words = [
+      { text: 'hola', startMs: 0, endMs: 400 },
+      { text: 'mundo', startMs: 500, endMs: 900 },
+    ];
+
+    expect(normalizeTranscriptionWords(words)).toEqual(words);
+  });
+
+  it('no muta el arreglo de entrada', () => {
+    const words = [
+      { text: 'hola', startMs: 0, endMs: 600 },
+      { text: 'mundo', startMs: 500, endMs: 900 },
+    ];
+    const original = structuredClone(words);
+
+    normalizeTranscriptionWords(words);
+
+    expect(words).toEqual(original);
+  });
+
+  it('devuelve [] para una lista vacía', () => {
+    expect(normalizeTranscriptionWords([])).toEqual([]);
   });
 });

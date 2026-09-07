@@ -77,3 +77,13 @@ export type TranscriptionEngine = z.infer<typeof TranscriptionEngineSchema>;
 export type Word = z.infer<typeof WordSchema>;
 export type Segment = z.infer<typeof SegmentSchema>;
 export type Transcription = z.infer<typeof TranscriptionSchema>;
+
+export function normalizeTranscriptionWords(words: readonly Word[]): Word[] {
+  return words.map((word, index) => {
+    const nextWord = words[index + 1];
+    if (nextWord === undefined || word.endMs <= nextWord.startMs) {
+      return word;
+    }
+    return { ...word, endMs: nextWord.startMs };
+  });
+}

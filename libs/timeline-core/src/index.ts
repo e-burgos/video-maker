@@ -4,7 +4,13 @@ export type { OutputFormat, OutputPreset, SafeZone } from './schemas/output-form
 export { MediaAssetSchema, MediaKindSchema } from './schemas/media-asset.schema';
 export type { MediaAsset, MediaAssetAudio, MediaKind } from './schemas/media-asset.schema';
 
-export { SegmentSchema, TranscriptionEngineSchema, TranscriptionSchema, WordSchema } from './schemas/transcription.schema';
+export {
+  SegmentSchema,
+  TranscriptionEngineSchema,
+  TranscriptionSchema,
+  WordSchema,
+  normalizeTranscriptionWords,
+} from './schemas/transcription.schema';
 export type { Segment, Transcription, TranscriptionEngine, Word } from './schemas/transcription.schema';
 
 export {
@@ -31,8 +37,13 @@ export type {
   TransitionDecision,
 } from './schemas/edit-decision-list.schema';
 
-export { AudioMixPlanSchema, GainKeyframeSchema } from './schemas/audio-mix-plan.schema';
-export type { AudioMixPlan, GainKeyframe } from './schemas/audio-mix-plan.schema';
+export {
+  AudioMixPlanSchema,
+  GainKeyframeSchema,
+  MusicMixSettingsSchema,
+  VoiceTargetSchema,
+} from './schemas/audio-mix-plan.schema';
+export type { AudioMixPlan, GainKeyframe, MusicMixSettings, VoiceTarget } from './schemas/audio-mix-plan.schema';
 
 export {
   AudioClipSchema,
@@ -53,7 +64,7 @@ export type { AssetId, ClipId, DecisionId, Db, Fps, Frame, Lufs, Ms, Rounding, S
 
 export { framesToMs, msToFrames } from './units/units';
 
-export { DEFAULT_SAFE_ZONES, defaultFormat, safeZoneFor } from './format/format';
+export { defaultFormat, safeZoneFor } from './format/format';
 
 export { detectSilencesFromWords } from './silence/detect-silences';
 export type { DetectSilencesOptions, SilenceRange } from './silence/detect-silences';
@@ -86,10 +97,9 @@ export type {
   TranscriptWord,
 } from './captions/group-words-for-captions';
 
-export {
-  DEFAULT_AUDIO_MIX_PLAN,
-  DEFAULT_MUSIC_MIX,
-  mergeVoiceRanges,
-  planDucking,
-} from './ducking/plan-ducking';
+export { DEFAULT_AUDIO_MIX_PLAN, DEFAULT_MUSIC_MIX, planDucking } from './ducking/plan-ducking';
 export type { DuckDecisionPlan, DuckingPlanResult, VoiceRange } from './ducking/plan-ducking';
+
+export { buildJsonSchemaBundle, serializeJsonSchemaFile, timelineToJsonSchema } from './schemas/json-schema';
+export type { JsonObject, JsonValue } from './schemas/json-schema';
+export type { SchemaFileName } from './schemas/registry';

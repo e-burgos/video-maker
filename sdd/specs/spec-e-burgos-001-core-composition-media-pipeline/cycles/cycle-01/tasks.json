@@ -362,7 +362,7 @@
       "depends_on": [
         "TASK-010"
       ],
-      "status": "pending",
+      "status": "done",
       "files": [
         "libs/timeline-core/schemas/output-format.schema.json",
         "libs/timeline-core/schemas/media-asset.schema.json",
@@ -370,10 +370,27 @@
         "libs/timeline-core/schemas/edit-decision-list.schema.json",
         "libs/timeline-core/schemas/audio-mix-plan.schema.json",
         "libs/timeline-core/schemas/timeline.schema.json",
+        "libs/timeline-core/src/schemas/registry.ts",
+        "libs/timeline-core/src/schemas/json-schema.ts",
+        "libs/timeline-core/src/schemas/transcription.schema.ts",
         "libs/timeline-core/src/schemas/schemas.spec.ts",
+        "libs/timeline-core/tools/generate-schemas.ts",
+        "libs/timeline-core/tsconfig.tools.json",
+        "libs/timeline-core/project.json",
         "libs/timeline-core/src/index.ts",
         "libs/timeline-core/README.md"
-      ]
+      ],
+      "usage": {
+        "provider_model": "claude/sonnet",
+        "effort": "medium",
+        "tokens_in": 202390,
+        "tokens_out": 35716,
+        "tokens_total": 238106,
+        "approx": false,
+        "source": "agent-usage-notification",
+        "recorded_at": "2026-09-07",
+        "agent": "implementor-back"
+      }
     }
   ]
 }

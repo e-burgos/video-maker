@@ -1,0 +1,43 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://video-maker.local/schemas/output-format.schema.json",
+  "type": "object",
+  "properties": {
+    "preset": {
+      "type": "string",
+      "enum": [
+        "reels-9x16",
+        "tiktok-9x16",
+        "shorts-9x16",
+        "youtube-16x9"
+      ]
+    },
+    "width": {
+      "type": "integer",
+      "minimum": 240,
+      "maximum": 9007199254740991
+    },
+    "height": {
+      "type": "integer",
+      "minimum": 240,
+      "maximum": 9007199254740991
+    },
+    "fps": {
+      "type": "number",
+      "enum": [
+        24,
+        25,
+        30,
+        50,
+        60
+      ]
+    }
+  },
+  "required": [
+    "preset",
+    "width",
+    "height",
+    "fps"
+  ],
+  "additionalProperties": false
+}
