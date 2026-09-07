@@ -68,8 +68,35 @@
       "depends_on": [
         "TASK-001"
       ],
-      "status": "pending",
-      "files": []
+      "status": "done",
+      "files": [
+        "libs/media-local/src/errors/media-local-error.ts",
+        "libs/media-local/src/errors/binary-not-found-error.ts",
+        "libs/media-local/src/errors/command-failed-error.ts",
+        "libs/media-local/src/errors/unparseable-output-error.ts",
+        "libs/media-local/src/errors/errors.spec.ts",
+        "libs/media-local/src/runner/command-runner.ts",
+        "libs/media-local/src/runner/execa-command-runner.ts",
+        "libs/media-local/src/runner/fixture-command-runner.ts",
+        "libs/media-local/src/runner/runner.spec.ts",
+        "libs/media-local/src/fs/binary-lookup.ts",
+        "libs/media-local/src/fs/fs-ports.spec.ts",
+        "libs/media-local/src/binaries/resolve-binaries.ts",
+        "libs/media-local/src/binaries/binaries.spec.ts",
+        "libs/media-local/src/index.ts",
+        "libs/media-local/tsconfig.lib.json"
+      ],
+      "usage": {
+        "provider_model": "claude/sonnet",
+        "effort": "medium",
+        "tokens_in": 189245,
+        "tokens_out": 33396,
+        "tokens_total": 222641,
+        "approx": false,
+        "source": "agent-usage-notification",
+        "recorded_at": "2026-09-07",
+        "agent": "implementor-back"
+      }
     },
     {
       "id": "TASK-003",
