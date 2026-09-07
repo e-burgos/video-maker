@@ -296,8 +296,27 @@
         "TASK-006",
         "TASK-007"
       ],
-      "status": "pending",
-      "files": []
+      "status": "done",
+      "files": [
+        "libs/media-local/README.md",
+        "libs/media-local/src/index.ts",
+        "libs/media-local/src/ffprobe/ffprobe.spec.ts",
+        "libs/media-local/src/whisper/whisper-parsers.spec.ts",
+        "libs/media-local/src/whisper/transcribe.spec.ts",
+        "libs/media-local/src/binaries/binaries.spec.ts",
+        "libs/media-local/src/ffmpeg/loudnorm.spec.ts"
+      ],
+      "usage": {
+        "provider_model": "claude/sonnet",
+        "effort": "medium",
+        "tokens_in": 208992,
+        "tokens_out": 36881,
+        "tokens_total": 245873,
+        "approx": false,
+        "source": "agent-usage-notification",
+        "recorded_at": "2026-09-07",
+        "agent": "implementor-back"
+      }
     }
   ]
 }

@@ -80,6 +80,23 @@ describe('resolveBinary', () => {
       '/models/ggml-large-v3-turbo.bin',
     );
   });
+
+  it('sin PATH en el entorno no hay directorios donde buscar y lanza BinaryNotFoundError', async () => {
+    const lookup = fakeLookup([]);
+
+    const error = await resolveBinary('ffmpeg', {}, { lookup }).catch((err: unknown) => err);
+
+    expect(error).toBeInstanceOf(BinaryNotFoundError);
+    expect((error as BinaryNotFoundError).searchedPaths).toEqual([]);
+  });
+
+  it('sin opts usa nodeBinaryLookup por default y no encuentra nada sobre un PATH inexistente', async () => {
+    const env = { PATH: '/this/path/does/not/exist-media-local-test' };
+
+    const error = await resolveBinary('ffprobe', env).catch((err: unknown) => err);
+
+    expect(error).toBeInstanceOf(BinaryNotFoundError);
+  });
 });
 
 describe('resolveBinaries', () => {

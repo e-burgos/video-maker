@@ -1,3 +1,7 @@
+import { mkdtemp, rm, writeFile } from 'node:fs/promises';
+import { tmpdir } from 'node:os';
+import { join } from 'node:path';
+
 import { describe, expect, it, vi } from 'vitest';
 
 import { readFixture } from '../__fixtures__/load-fixture';
@@ -135,5 +139,24 @@ describe('transcribeWithWhisperCpp', () => {
 
     expect(runner.calls).toHaveLength(1);
     expect(readTextFile).toHaveBeenCalledTimes(1);
+  });
+
+  it('usa nodeReadTextFile por default cuando no se inyecta readTextFile', async () => {
+    const runner = new FixtureCommandRunner([{ bin: 'whisper-cli', response: { exitCode: 0 } }]);
+    const dir = await mkdtemp(join(tmpdir(), 'media-local-whisper-'));
+    const outBase = join(dir, 'out');
+    await writeFile(`${outBase}.json`, whisperCppRaw, 'utf8');
+
+    try {
+      const result = await transcribeWithWhisperCpp('input.wav', {
+        modelPath: MODEL_PATH,
+        outBase,
+        assetId: ASSET_ID,
+      }, runner);
+
+      expect(result.words).toHaveLength(8);
+    } finally {
+      await rm(dir, { recursive: true, force: true });
+    }
   });
 });

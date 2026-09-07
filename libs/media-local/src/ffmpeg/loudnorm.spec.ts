@@ -281,6 +281,17 @@ describe('normalizeVoice (CA-020)', () => {
     expect(runner.calls[1]?.args).toContain('44100');
   });
 
+  it('reenvia runOptions a ambas pasadas', async () => {
+    const runner = buildTwoPassRunner();
+
+    await normalizeVoice('voice-take-01.wav', 'voice-take-01.norm.wav', DEFAULT_VOICE_TARGET, runner, {
+      runOptions: { timeoutMs: 5000 },
+    });
+
+    expect(runner.calls[0]?.opts).toEqual({ timeoutMs: 5000 });
+    expect(runner.calls[1]?.opts).toEqual({ timeoutMs: 5000 });
+  });
+
   it('propaga CommandFailedError cuando la primera pasada falla', async () => {
     const runner = new FixtureCommandRunner([
       { bin: 'ffmpeg', response: { stderr: 'Invalid data found', exitCode: 1 } },
