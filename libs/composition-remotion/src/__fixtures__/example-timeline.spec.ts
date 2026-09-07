@@ -8,5 +8,14 @@ describe('buildExampleTimeline', () => {
 
     expect(validateTimeline(timeline)).toEqual({ ok: true });
     expect(timeline.durationFrames).toBe(265);
+    expect(timeline.format).toMatchObject({ width: 1080, height: 1920, fps: 30 });
+  });
+
+  it('produce una Timeline 16:9 válida de 265 frames', () => {
+    const timeline = buildExampleTimeline('youtube-16x9');
+
+    expect(validateTimeline(timeline)).toEqual({ ok: true });
+    expect(timeline.durationFrames).toBe(265);
+    expect(timeline.format).toMatchObject({ width: 1920, height: 1080, fps: 30 });
   });
 });

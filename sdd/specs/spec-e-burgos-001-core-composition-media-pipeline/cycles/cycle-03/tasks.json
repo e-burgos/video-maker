@@ -210,14 +210,30 @@
         "TASK-004",
         "TASK-005"
       ],
-      "status": "pending",
+      "status": "done",
       "files": [
         "libs/composition-remotion/src/components/timeline-composition.tsx",
         "libs/composition-remotion/src/Root.tsx",
         "libs/composition-remotion/src/remotion-entry.ts",
         "libs/composition-remotion/remotion.config.ts",
-        "libs/composition-remotion/src/__fixtures__/example-timeline.ts"
-      ]
+        "libs/composition-remotion/src/__fixtures__/example-timeline.ts",
+        "libs/composition-remotion/src/helpers/timeline-metadata.ts",
+        "libs/composition-remotion/src/helpers/timeline-metadata.spec.ts",
+        "libs/composition-remotion/src/__fixtures__/example-timeline.spec.ts",
+        "libs/composition-remotion/src/index.ts",
+        "sdd/components.json"
+      ],
+      "usage": {
+        "provider_model": "claude/sonnet",
+        "effort": "medium",
+        "tokens_in": 141089,
+        "tokens_out": 24898,
+        "tokens_total": 165987,
+        "approx": false,
+        "source": "agent-usage-notification",
+        "recorded_at": "2026-09-07",
+        "agent": "implementor-front"
+      }
     },
     {
       "id": "TASK-007",

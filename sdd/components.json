@@ -77,6 +77,36 @@
         "consumes": [],
         "created_at": "2026-09-07",
         "changelog": []
+      },
+      {
+        "id": "COMP-004",
+        "name": "TimelineComposition",
+        "type": "component",
+        "module": "core-composition-media-pipeline",
+        "spec": "sdd/specs/spec-e-burgos-001-core-composition-media-pipeline",
+        "path": "src/components/timeline-composition.tsx",
+        "status": "implemented",
+        "created_in_cycle": 3,
+        "updated_in_cycle": null,
+        "description": "Composición raíz de una Timeline: calculateTimelineMetadata deriva durationInFrames/fps/width/height validando con TimelineSchema, y el componente arma ArollSeries + BrollTrack + AudioTrack + CaptionTrack a partir de timelineToSequenceProps.",
+        "consumes": [],
+        "created_at": "2026-09-07",
+        "changelog": []
+      },
+      {
+        "id": "COMP-005",
+        "name": "RemotionRoot",
+        "type": "component",
+        "module": "core-composition-media-pipeline",
+        "spec": "sdd/specs/spec-e-burgos-001-core-composition-media-pipeline",
+        "path": "src/Root.tsx",
+        "status": "implemented",
+        "created_in_cycle": 3,
+        "updated_in_cycle": null,
+        "description": "Registra las dos Composition de Remotion Studio (TimelineComposition 9:16 y TimelineCompositionLandscape 16:9) con calculateTimelineMetadata y defaultProps de buildExampleTimeline; no se exporta desde el barrel (D-05/regla 3 de architect.md).",
+        "consumes": [],
+        "created_at": "2026-09-07",
+        "changelog": []
       }
     ]
   }

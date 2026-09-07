@@ -28,3 +28,12 @@ export { AudioTrack } from './components/audio-track';
 export type { AudioTrackProps } from './components/audio-track';
 export { CaptionTrack } from './components/caption-track';
 export type { CaptionTrackProps } from './components/caption-track';
+
+export { computeTimelineMetadata } from './helpers/timeline-metadata';
+export type { TimelineMetadata } from './helpers/timeline-metadata';
+export {
+  TIMELINE_COMPOSITION_ID,
+  TimelineComposition,
+  calculateTimelineMetadata,
+} from './components/timeline-composition';
+export type { TimelineCompositionProps } from './components/timeline-composition';
