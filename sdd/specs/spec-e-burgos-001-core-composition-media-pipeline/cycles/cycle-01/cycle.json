@@ -33,7 +33,7 @@
   ],
   "metrics": {
     "tasks_total": 11,
-    "tasks_completed": 6,
+    "tasks_completed": 7,
     "story_points": 46,
     "files_created": [],
     "files_modified": [],
@@ -164,6 +164,20 @@
           "recorded_at": "2026-09-07",
           "tool_uses": 36,
           "duration_minutes": 4.9
+        },
+        {
+          "agent": "implementor-back",
+          "label": "TASK-007",
+          "provider_model": "claude/sonnet",
+          "effort": "medium",
+          "tokens_in": 132053,
+          "tokens_out": 23304,
+          "tokens_total": 155357,
+          "approx": false,
+          "source": "agent-usage-notification",
+          "recorded_at": "2026-09-07",
+          "tool_uses": 37,
+          "duration_minutes": 6.4
         }
       ]
     }

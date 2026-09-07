@@ -241,12 +241,24 @@
       "depends_on": [
         "TASK-002"
       ],
-      "status": "pending",
+      "status": "done",
       "files": [
         "libs/timeline-core/src/captions/group-words-for-captions.ts",
         "libs/timeline-core/src/captions/captions.spec.ts",
-        "libs/timeline-core/src/__fixtures__/captions.fixture.ts"
-      ]
+        "libs/timeline-core/src/__fixtures__/captions.fixture.ts",
+        "libs/timeline-core/src/index.ts"
+      ],
+      "usage": {
+        "provider_model": "claude/sonnet",
+        "effort": "medium",
+        "tokens_in": 132053,
+        "tokens_out": 23304,
+        "tokens_total": 155357,
+        "approx": false,
+        "source": "agent-usage-notification",
+        "recorded_at": "2026-09-07",
+        "agent": "implementor-back"
+      }
     },
     {
       "id": "TASK-008",

@@ -72,3 +72,10 @@ export { planPunchIns } from './punch-in/plan-punch-ins';
 export type { PunchInAnchor, PunchInOptions, PunchInPlan } from './punch-in/plan-punch-ins';
 
 export { remapMsAfterCuts } from './timeline/remap-ms-after-cuts';
+
+export { groupWordsForCaptions, pickEmphasisIndex } from './captions/group-words-for-captions';
+export type {
+  CaptionGroupOptions,
+  CaptionGroupPlan,
+  TranscriptWord,
+} from './captions/group-words-for-captions';
