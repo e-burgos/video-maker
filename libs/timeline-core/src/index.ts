@@ -76,6 +76,9 @@ export { remapMsAfterCuts } from './timeline/remap-ms-after-cuts';
 export { TimelineBuildError, buildTimeline } from './timeline/build-timeline';
 export type { MusicInput, TimelineBuildErrorCode } from './timeline/build-timeline';
 
+export { validateTimeline } from './timeline/validate-timeline';
+export type { TimelineIssue, TimelineIssueCode, TimelineValidationResult } from './timeline/validate-timeline';
+
 export { groupWordsForCaptions, pickEmphasisIndex } from './captions/group-words-for-captions';
 export type {
   CaptionGroupOptions,

@@ -333,11 +333,23 @@
       "depends_on": [
         "TASK-009"
       ],
-      "status": "pending",
+      "status": "done",
       "files": [
         "libs/timeline-core/src/timeline/validate-timeline.ts",
-        "libs/timeline-core/src/timeline/validate-timeline.spec.ts"
-      ]
+        "libs/timeline-core/src/timeline/validate-timeline.spec.ts",
+        "libs/timeline-core/src/index.ts"
+      ],
+      "usage": {
+        "provider_model": "claude/sonnet",
+        "effort": "medium",
+        "tokens_in": 148464,
+        "tokens_out": 26200,
+        "tokens_total": 174664,
+        "approx": false,
+        "source": "agent-usage-notification",
+        "recorded_at": "2026-09-07",
+        "agent": "implementor-back"
+      }
     },
     {
       "id": "TASK-011",
