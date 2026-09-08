@@ -79,6 +79,75 @@ los ports de reloj y filesystem que los wrappers usan por default.
 Los tests nunca importan desde este barrel: cada uno prueba su módulo por ruta relativa (mismo
 criterio que `timeline-core`).
 
+## Mezcla de audio (`src/mix/`)
+
+`cycle-01` de `spec-e-burgos-004-audio-mix-mastering` agrega la traducción pura de un
+`AudioMixPlan` (más la `Timeline`) a un `FilterGraph` de ffmpeg — `buildAudioMixGraph` →
+`serializeFilterGraph`/`audioMixFfmpegArgs`. Es solo composición de argumentos: **no ejecuta
+ffmpeg**, no usa `CommandRunner`; el wrapper que sí lo ejecuta (`mixTimelineAudio`) es de
+`cycle-02`.
+
+- **Un solo nodo de ganancia en la música (D-05).** Los keyframes de `planDucking` son ganancias
+  **absolutas** (en reposo valen `baseGainDb`, no un delta), y `audio-track.tsx` de Remotion usa la
+  curva en lugar de `clip.volume`. Encadenar `baseGainDb` y después la automatización deja el
+  master 12 dB por debajo del preview. Por eso `buildMusicBedChain` emite la automatización cuando
+  existe o la ganancia estática del clip cuando no — nunca las dos.
+- **`gainDbToVolume` está duplicada a propósito** entre esta lib y
+  `libs/composition-remotion/src/helpers/audio-gain.ts`: los boundaries Nx (`type:util` → solo
+  `type:domain`) impiden que `media-local` importe `composition-remotion`. La tabla de paridad de
+  `architect.md` §7.2 es el contrato entre ambas copias y `gain-automation-curve.parity.spec.ts` la
+  verifica contra `planDucking` real. Tocar una sin la otra rompe CA-002.
+- **La paridad con el preview se promete para la curva de ducking de la música, no para el nivel
+  absoluto de la voz**: la voz pasa por `loudnorm` en el master y el preview no tiene `loudnorm`.
+
+## Ejecución de la mezcla (`cycle-02`): `mixTimelineAudio`, `verifyMixLoudness`, `muxAudioIntoVideo`
+
+Los tres wrappers que sí ejecutan `ffmpeg`/`ffprobe` sobre el `FilterGraph` de `src/mix/`. Viven en
+`src/ffmpeg/`, junto a `measureLoudness`.
+
+| Wrapper | Qué hace | Invocaciones |
+| --- | --- | --- |
+| `mixTimelineAudio` | Mide una vez cada asset de voz **distinto** (`measureLoudness` con `-map 0:a:0`, sirve igual para un WAV que para el contenedor de video que en el pipeline real trae la voz), arma el `FilterGraph` de segunda pasada (`measured_*`, `linear=true`), le apenda el master bus y ejecuta el mix | N (mediciones) + 1 (mix); `N = 1` en toda `Timeline` de `buildTimeline` |
+| `verifyMixLoudness` | Mide un archivo ya mezclado (WAV intermedio o MP4 final) y calcula si queda dentro de tolerancia | 1 |
+| `muxAudioIntoVideo` | Verifica con `probeMedia` que el video de entrada tiene stream de video, copia el video sin reencodear (`-c:v copy`) y muxea el audio como AAC | 1 `ffprobe` + 1 `ffmpeg` |
+
+**Master bus (`withMasterBusLimiter`, detalle interno, no exportado):** después del `amix`,
+`mixTimelineAudio` apenda siempre un `alimiter` con `level=disabled` (solo atenúa, nunca sube el
+volumen) al techo `target.truePeakDbtp - MASTER_BUS_TRUE_PEAK_MARGIN_DB`. El margen existe porque
+`alimiter` limita **sample peak**, y el true peak (dBTP, BS.1770, 4× oversampling) siempre es ≥
+sample peak: limitar exactamente a `truePeakDbtp` no garantizaría el techo real. Por eso
+`MASTER_BUS_TRUE_PEAK_MARGIN_DB` es el único símbolo del master bus que sí se exporta — un
+consumidor que mida por debajo del objetivo tiene que poder entender por qué sin leer el código.
+
+**`verifyMixLoudness` nunca lanza por estar fuera de tolerancia** (sí propaga `CommandFailedError`
+si el binario falla): devuelve `{ measured, withinTolerance, integratedDeltaLu, truePeakDeltaDb }`
+y quien la llama decide qué hacer con el resultado. Tolerancias, constantes nombradas y
+exportadas, no configurables: `MIX_INTEGRATED_TOLERANCE_LU = 1` (banda simétrica e inclusiva
+alrededor del integrado objetivo) y `MIX_TRUE_PEAK_TOLERANCE_DB = 0` (techo, no banda: por encima
+de `truePeakDbtp` siempre es fuera, por debajo nunca es un fallo).
+
+**`render → mix → mux` en una sola llamada no vive en esta lib.** Los boundaries Nx
+(`media-local` es `type:util`, `composition-remotion` es `type:ui`; ninguna puede depender de la
+otra) y `eslint.config.mjs` raíz protegido lo impiden. Es entrada obligatoria de
+`spec-e-burgos-005`, en `apps/render-api` (`type:app`, que sí puede depender de las dos).
+
+## Procedimiento encadenado: render mudo → mix → verify → mux → verify
+
+No hay una función única que lo encadene (ver nota de boundaries arriba); son cinco pasos, el
+primero manual y ajeno a esta lib, el resto con las funciones de más arriba:
+
+1. Renderizar el video **sin audio** con `renderTimeline(timeline, { audio: 'muted' })` de
+   `@video-maker/composition-remotion/render` (manual, fuera de esta lib).
+2. `mixTimelineAudio(timeline, masterPath, runner)` → WAV intermedio.
+3. `verifyMixLoudness(masterPath, timeline.audioMix.voice, runner)` sobre el WAV — control temprano
+   antes de tocar el mux.
+4. `muxAudioIntoVideo(renderMudoPath, masterPath, finalPath, runner)` → entregable final.
+5. `verifyMixLoudness(finalPath, timeline.audioMix.voice, runner)` sobre el **entregable** —la
+   medición que importa, después del AAC.
+
+`smoke-audio` (más abajo) ejercita los cinco pasos con un `render-muted.mp4` fabricado a mano en
+vez del paso 1 real, porque esta lib no puede importar `composition-remotion` (boundaries).
+
 ## Inyección en tests
 
 Todo I/O externo entra por parámetro, nunca se instancia adentro de un wrapper:
@@ -142,11 +211,27 @@ ffmpeg -hide_banner -nostats -i locucion.wav \
 # whisper/whisper-cpp.json — mismos argumentos que transcribeWithWhisperCpp
 whisper-cli -m "$WHISPER_MODEL_PATH" -f locucion-16k-mono.wav \
   -oj -ml 1 -l auto -of src/__fixtures__/whisper/whisper-cpp
+
+# ffmpeg/loudnorm-mix-*.stderr.txt — la medición que hace verifyMixLoudness
+# (el -map 0:a:0 es lo que la distingue de loudnorm.stderr.txt: sirve igual para un WAV y para el MP4 final)
+ffmpeg -hide_banner -nostats -i master.wav -map 0:a:0 \
+  -af loudnorm=I=-14:TP=-1:LRA=11:print_format=json -f null - \
+  2> src/__fixtures__/ffmpeg/loudnorm-mix-in-tolerance.stderr.txt
 ```
 
 `whisper/faster-whisper.json` no sale de un binario que esta lib invoque: es la salida JSON de
 correr Faster-Whisper (`word_timestamps=True`) sobre el **mismo audio** que generó
 `whisper-cpp.json`, para que CA-019 compare de verdad dos motores sobre la misma locución.
+
+**Las 5 `ffmpeg/loudnorm-mix-*.stderr.txt` de `cycle-02` (CA-009) están reconstruidas a mano, no
+son capturas** — mismo criterio que el resto de `ffmpeg/` y `whisper/`: mismo formato y misma
+indentación con tabs que `loudnorm.stderr.txt`, cambiando únicamente los valores numéricos por los
+de la tabla de casos de `architect.md` §7.3 (`in-tolerance`, `at-boundary`, `integrated-out`,
+`true-peak-out`, `both-out`). El comando de arriba regrabaría `in-tolerance`; los otros cuatro son
+el mismo comando sobre un master con niveles distintos. **Si algún día se graban corridas reales,
+los valores numéricos no se pueden cambiar sin actualizar el spec**: los `toEqual` de
+`verify-mix-loudness.spec.ts` dependen de ellos, y el caso `at-boundary` en particular solo prueba
+lo que tiene que probar si vale exactamente `-15.00`/`-1.00` (restas exactas en IEEE-754).
 
 ## Smoke manual (fuera de CI)
 
@@ -166,3 +251,28 @@ console.log(asset, silences);
 Confirmar a mano que `asset.kind`/`width`/`height`/`rotation` coinciden con lo que dice
 `ffprobe -show_streams` sobre el mismo archivo, y que los rangos de `silences` caen donde
 efectivamente hay silencio al reproducir el clip.
+
+## Smoke manual: `smoke-audio` (`cycle-02`, fuera de CI)
+
+```bash
+pnpm nx run media-local:smoke-audio
+```
+
+Target manual, **no** en `nx run-many -t lint test build` ni en CI (igual que
+`composition-remotion:smoke`/`:studio`). Vive fuera de `src/` en `smoke/` (no lo typechequea
+`nx build`; el propio target corre `tsc -p tsconfig.smoke.json --noEmit` antes de ejecutar, así no
+queda en deriva silenciosa respecto de las firmas de la lib) y solo importa desde el barrel
+público (`@video-maker/media-local`), nunca de un módulo interno.
+
+Es **autocontenido**: genera con `ffmpeg` real sus propias señales de prueba en
+`libs/media-local/tmp/smoke-audio/` (ya cubierto por el `tmp/` del `.gitignore` raíz, sin líneas
+nuevas) — un `aroll.mp4` con video y audio (el caso real: `buildVoiceTrack` le da a la voz el
+`assetId` del aroll), una `music.wav`, y un `render-muted.mp4` que funciona de stand-in del render
+mudo de Remotion (esta lib no puede importar `composition-remotion`, ver nota de boundaries más
+arriba) — arma una `Timeline` real con `buildTimeline` y corre los cinco pasos del procedimiento
+encadenado de arriba. Imprime las mediciones de voz, master y entregable, y **sale con código 1**
+si `verifyMixLoudness` del entregable da `withinTolerance: false` o si el chequeo de CE-3
+(`muxAudioIntoVideo` contra un archivo sin stream de video) no lanza `MissingMediaStreamError`.
+
+Requiere Node ≥ 22.12: `ExecaCommandRunner` importa `execa` v10 (ESM puro) y el smoke corre bajo
+`@swc-node/register` en contexto CJS (`require(esm)`).

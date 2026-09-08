@@ -22,6 +22,18 @@
         "command": "tsc -p tsconfig.lib.json",
         "cwd": "libs/media-local"
       }
+    },
+    "smoke-audio": {
+      "executor": "nx:run-commands",
+      "options": {
+        "cwd": "libs/media-local",
+        "parallel": false,
+        "commands": [
+          "tsc -p tsconfig.smoke.json --noEmit",
+          "node -r ./smoke/smoke-register.cjs ./smoke/smoke-audio.ts"
+        ],
+        "env": { "SWC_NODE_PROJECT": "./tsconfig.smoke.json" }
+      }
     }
   }
 }

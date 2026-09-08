@@ -1,5 +1,5 @@
 import type { Clock, CommandRunner } from '@video-maker/media-local';
-import { BinaryNotFoundError, FixtureCommandRunner } from '@video-maker/media-local';
+import { BinaryNotFoundError, FixtureCommandRunner, MissingMediaStreamError } from '@video-maker/media-local';
 import { describe, expect, it } from 'vitest';
 
 import { resolveMediaProject } from '../project/media-project';
@@ -147,6 +147,21 @@ describe('probeAssets', () => {
 
     expect(result.failures).toEqual([
       { path: 'raw/aroll/clip01.mp4', errorCode: 'UNKNOWN', message: 'algo inesperado' },
+    ]);
+  });
+
+  it('mapea un MediaLocalError con codigo ajeno al probe a errorCode UNKNOWN', async () => {
+    const runner: CommandRunner = {
+      run: () => Promise.reject(new MissingMediaStreamError({ path: 'raw/aroll/clip01.mp4', stream: 'audio' })),
+    };
+
+    const result = await probeAssets(project, [finding('raw/aroll/clip01.mp4', 'aroll')], {
+      runner,
+      clock: fixedClock,
+    });
+
+    expect(result.failures).toEqual([
+      { path: 'raw/aroll/clip01.mp4', errorCode: 'UNKNOWN', message: expect.any(String) },
     ]);
   });
 

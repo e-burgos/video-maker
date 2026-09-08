@@ -1,0 +1,331 @@
+{
+  "$schema": "../../../../schemas/cycle.schema.json",
+  "cycle": 2,
+  "module": "audio-mix-mastering",
+  "spec": "spec-e-burgos-004-audio-mix-mastering",
+  "apps": [
+    "libs/media-local",
+    "libs/composition-remotion"
+  ],
+  "phase": "audio-mix-execution-and-delivery",
+  "objectives": [
+    "Ejecutar el filtergraph de cycle-01 con ffmpeg y producir la pista masterizada",
+    "Verificar el resultado midiendo loudness post-mix contra el target, con tolerancias declaradas",
+    "Muxear la pista masterizada en el MP4 de Remotion sin reencodear el video, y dar al render la opcion de salir mudo",
+    "Cerrar la spec spec-e-burgos-004"
+  ],
+  "status": "completed",
+  "started_at": "2026-09-08",
+  "completed_at": "2026-09-08",
+  "documents": {
+    "brief": "sdd/specs/spec-e-burgos-004-audio-mix-mastering/cycles/cycle-02/brief.yaml",
+    "functional": "sdd/specs/spec-e-burgos-004-audio-mix-mastering/cycles/cycle-02/functional.md",
+    "planner": "sdd/specs/spec-e-burgos-004-audio-mix-mastering/cycles/cycle-02/planner.md",
+    "architect": "sdd/specs/spec-e-burgos-004-audio-mix-mastering/cycles/cycle-02/architect.md",
+    "tasks": "sdd/specs/spec-e-burgos-004-audio-mix-mastering/cycles/cycle-02/tasks.json"
+  },
+  "artifacts": [],
+  "metrics": {
+    "tasks_total": 10,
+    "tasks_completed": 10,
+    "story_points": 29,
+    "files_created": [
+      "libs/media-local/src/ffmpeg/mix-timeline-audio.ts",
+      "libs/media-local/src/ffmpeg/mix-timeline-audio.spec.ts",
+      "libs/media-local/src/ffmpeg/verify-mix-loudness.ts",
+      "libs/media-local/src/ffmpeg/verify-mix-loudness.spec.ts",
+      "libs/media-local/src/ffmpeg/mux-audio-into-video.ts",
+      "libs/media-local/src/ffmpeg/mux-audio-into-video.spec.ts",
+      "libs/media-local/src/ffmpeg/master-bus-limiter.ts",
+      "libs/media-local/src/ffmpeg/master-bus-limiter.spec.ts",
+      "libs/media-local/src/errors/missing-media-stream-error.ts",
+      "libs/media-local/src/__fixtures__/ffmpeg/loudnorm-mix-in-tolerance.stderr.txt",
+      "libs/media-local/src/__fixtures__/ffmpeg/loudnorm-mix-at-boundary.stderr.txt",
+      "libs/media-local/src/__fixtures__/ffmpeg/loudnorm-mix-integrated-out.stderr.txt",
+      "libs/media-local/src/__fixtures__/ffmpeg/loudnorm-mix-true-peak-out.stderr.txt",
+      "libs/media-local/src/__fixtures__/ffmpeg/loudnorm-mix-both-out.stderr.txt",
+      "libs/media-local/smoke/smoke-audio.ts",
+      "libs/media-local/smoke/smoke-register.cjs",
+      "libs/media-local/tsconfig.smoke.json"
+    ],
+    "files_modified": [
+      "libs/media-local/src/ffmpeg/measure-loudness.ts",
+      "libs/media-local/src/ffmpeg/loudnorm.spec.ts",
+      "libs/media-local/src/errors/media-local-error.ts",
+      "libs/media-local/src/errors/errors.spec.ts",
+      "libs/media-local/src/index.ts",
+      "libs/media-local/project.json",
+      "libs/media-local/README.md",
+      "libs/composition-remotion/src/render.ts",
+      "libs/composition-remotion/src/render.spec.ts",
+      "libs/composition-remotion/src/components/timeline-composition.tsx",
+      "libs/composition-remotion/src/components/timeline-composition.spec.tsx",
+      "libs/composition-remotion/src/index.ts",
+      "libs/composition-remotion/README.md",
+      "sdd/components.json"
+    ],
+    "files_deleted": [],
+    "usage": {
+      "tokens_in": 1538623,
+      "tokens_out": 264873,
+      "approx": true,
+      "source": "declared-estimate",
+      "by_tier": {
+        "claude/sonnet": {
+          "tokens_in": 756596,
+          "tokens_out": 130574,
+          "approx": true,
+          "source": "declared-estimate"
+        },
+        "claude/opus": {
+          "tokens_in": 782027,
+          "tokens_out": 134299,
+          "approx": true,
+          "source": "declared-estimate"
+        }
+      },
+      "by_agent": [
+        {
+          "agent": "functional",
+          "provider_model": "claude/sonnet",
+          "effort": "medium",
+          "tokens_in": 122397,
+          "tokens_out": 21600,
+          "tokens_total": 143997,
+          "approx": false,
+          "source": "agent-usage-notification",
+          "recorded_at": "2026-09-08",
+          "tool_uses": 19
+        },
+        {
+          "agent": "architect",
+          "label": "documento base",
+          "provider_model": "claude/opus",
+          "effort": "high",
+          "tokens_in": 188359,
+          "tokens_out": 33240,
+          "tokens_total": 221599,
+          "approx": false,
+          "source": "agent-usage-notification",
+          "recorded_at": "2026-09-08",
+          "tool_uses": 36
+        },
+        {
+          "agent": "architect",
+          "label": "D-21 master bus",
+          "provider_model": "claude/opus",
+          "effort": "high",
+          "tokens_in": 72000,
+          "tokens_out": 9000,
+          "approx": true,
+          "source": "declared-estimate",
+          "recorded_at": "2026-09-08"
+        },
+        {
+          "agent": "planner",
+          "provider_model": "claude/sonnet",
+          "effort": "medium",
+          "tokens_in": 62000,
+          "tokens_out": 8000,
+          "approx": true,
+          "source": "declared-estimate",
+          "recorded_at": "2026-09-08"
+        },
+        {
+          "agent": "implementor-back",
+          "label": "TASK-001",
+          "provider_model": "claude/sonnet",
+          "effort": "medium",
+          "tokens_in": 87585,
+          "tokens_out": 15456,
+          "tokens_total": 103041,
+          "approx": false,
+          "source": "agent-usage-notification",
+          "recorded_at": "2026-09-08"
+        },
+        {
+          "agent": "implementor-back",
+          "label": "TASK-002",
+          "provider_model": "claude/sonnet",
+          "effort": "medium",
+          "tokens_in": 26135,
+          "tokens_out": 4612,
+          "tokens_total": 30747,
+          "approx": false,
+          "source": "agent-usage-notification",
+          "recorded_at": "2026-09-08"
+        },
+        {
+          "agent": "implementor-back",
+          "label": "TASK-003",
+          "provider_model": "claude/sonnet",
+          "effort": "medium",
+          "tokens_in": 29059,
+          "tokens_out": 5128,
+          "tokens_total": 34187,
+          "approx": false,
+          "source": "agent-usage-notification",
+          "recorded_at": "2026-09-08"
+        },
+        {
+          "agent": "implementor-back",
+          "label": "TASK-004",
+          "provider_model": "claude/sonnet",
+          "effort": "medium",
+          "tokens_in": 75811,
+          "tokens_out": 13378,
+          "tokens_total": 89189,
+          "approx": false,
+          "source": "agent-usage-notification",
+          "recorded_at": "2026-09-08"
+        },
+        {
+          "agent": "implementor-back",
+          "label": "TASK-005",
+          "provider_model": "claude/sonnet",
+          "effort": "medium",
+          "tokens_in": 40234,
+          "tokens_out": 7100,
+          "tokens_total": 47334,
+          "approx": false,
+          "source": "agent-usage-notification",
+          "recorded_at": "2026-09-08"
+        },
+        {
+          "agent": "implementor-back",
+          "label": "TASK-006",
+          "provider_model": "claude/sonnet",
+          "effort": "medium",
+          "tokens_in": 30894,
+          "tokens_out": 5452,
+          "tokens_total": 36346,
+          "approx": false,
+          "source": "agent-usage-notification",
+          "recorded_at": "2026-09-08"
+        },
+        {
+          "agent": "implementor-back",
+          "label": "TASK-007",
+          "provider_model": "claude/sonnet",
+          "effort": "medium",
+          "tokens_in": 25191,
+          "tokens_out": 4445,
+          "tokens_total": 29636,
+          "approx": false,
+          "source": "agent-usage-notification",
+          "recorded_at": "2026-09-08"
+        },
+        {
+          "agent": "implementor-front",
+          "label": "TASK-008",
+          "provider_model": "claude/sonnet",
+          "effort": "medium",
+          "tokens_in": 161639,
+          "tokens_out": 28524,
+          "tokens_total": 190163,
+          "approx": false,
+          "source": "agent-usage-notification",
+          "recorded_at": "2026-09-08"
+        },
+        {
+          "agent": "implementor-back",
+          "label": "TASK-009",
+          "provider_model": "claude/sonnet",
+          "effort": "medium",
+          "tokens_in": 52113,
+          "tokens_out": 9196,
+          "tokens_total": 61309,
+          "approx": false,
+          "source": "agent-usage-notification",
+          "recorded_at": "2026-09-08"
+        },
+        {
+          "agent": "implementor-back",
+          "label": "TASK-010",
+          "provider_model": "claude/sonnet",
+          "effort": "medium",
+          "tokens_in": 43538,
+          "tokens_out": 7683,
+          "tokens_total": 51221,
+          "approx": false,
+          "source": "agent-usage-notification",
+          "recorded_at": "2026-09-08"
+        },
+        {
+          "agent": "reviewer",
+          "label": "revision de cycle-02 + cierre de spec (dos pasadas: hallazgo bloqueante CA-011 y cierre)",
+          "provider_model": "claude/opus",
+          "effort": "high",
+          "tokens_in": 159027,
+          "tokens_out": 28064,
+          "approx": false,
+          "source": "agent-usage-notification",
+          "recorded_at": "2026-09-08",
+          "tokens_total": 187091,
+          "tool_uses": 25
+        },
+        {
+          "agent": "orchestrator",
+          "label": "acumulado medido de la sesión: FIX-e-burgos-001-001 + spec-004 cycle-01 + cycle-02, no separable por ciclo",
+          "provider_model": "claude/opus",
+          "effort": "high",
+          "tokens_in": 362641,
+          "tokens_out": 63995,
+          "approx": true,
+          "source": "declared-estimate",
+          "recorded_at": "2026-09-08"
+        }
+      ]
+    }
+  },
+  "tables_created": [],
+  "endpoints_implemented": [],
+  "components_created": [],
+  "issues_found": [
+    "ERRATA architect.md 4.3 (registrada, NO corregida): el -filter_complex literal de esa seccion arrastra el grafo de PRIMERA pasada de cycle-01 9.3 (loudnorm=I=-14:TP=-1:LRA=11:print_format=json, sin measured_* ni linear=true), mientras D-12/D-13 exigen que el grafo ejecutado sea el de SEGUNDA pasada. La seccion se autocontradice al exigir despues que el prefijo de 855 caracteres quede byte-identico al de cycle-01 9.3. Lo implementado (segunda pasada, esperados compuestos llamando a las funciones reales) es lo correcto; la composicion no es circular porque serializeFilterGraph y buildTruePeakLimiterFilter estan fijados por tests de literal exacto aguas arriba (master-bus-limiter.spec.ts:24 fija el string del limitador). Decision del reviewer: no reescribir el literal seria cambiar una errata por otra posible errata sin verificar caracter por caracter.",
+    "GAP DE PROCESO detectado y CORREGIDO durante la revision: CA-011 quedo probado solo a la mitad en la primera pasada. El architect 9.4 enumera cuatro tests obligatorios; los items 1 y 2 (renderTimeline propagando inputProps.audio, en render.spec.ts) no se habian escrito porque el files[] de TASK-008 omitia render.spec.ts. El reviewer bloqueo el cierre; se reabrio TASK-008 y se agregaron los dos tests de forma puramente aditiva (32 inserciones / 0 borrados, los 8 tests preexistentes intactos). CA-011 quedo PASS con evidencia.",
+    "CAUSA RAIZ del gap anterior: libs/composition-remotion/vite.config.ts:23 declara coverage.include: [src/helpers/**/*.ts, src/transitions/**/*.ts]. src/render.ts y src/components/** quedan FUERA del scope de cobertura, asi que los pisos de RNF-2 (96.77/93.16) no miden ninguno de los archivos de produccion que este ciclo cambio y ningun threshold habria detectado la rama audio===muted sin ejercitar. El architect lo anticipo en 9.4 y por eso exigio los tests como contrato. Follow-up para spec-005.",
+    "OBSERVACION (no defecto) sobre el grafo de imports: a nivel DIRECTORIO conviven ffmpeg -> mix (nuevo: master-bus-limiter -> filter-graph/gain-db-to-volume/format-filter-number, los tres hojas) y mix -> ffmpeg (PREEXISTENTE de cycle-01: build-voice-chain -> build-loudnorm-filter, parse-loudnorm-json). cycle-02 no agrego ni una arista mix -> ffmpeg (git diff --stat de src/mix/ vacio). Analisis DFS sobre los 48 archivos no-spec de media-local/src: cero ciclos a nivel archivo. El criterio \"ffmpeg -> mix, nunca al reves\" no se cumple literalmente a nivel directorio, pero la contra-arista es heredada y no genera ciclo.",
+    "LATENTE (follow-up, no tocado): libs/composition-remotion/tsconfig.smoke.json tiene baseUrl sin ignoreDeprecations: \"6.0\". TS 6.0.3 deprecó baseUrl; no se manifiesta porque el target smoke de esa lib no invoca tsc. El de media-local si (tsc -p tsconfig.smoke.json --noEmit) y por eso alli el fix minimo ya esta aplicado y aprobado.",
+    "PREEXISTENTE, ajeno al ciclo: nx run-many -t lint sobre todo el workspace reporta 1 warning (0 errores) en apps/web/src/main.tsx:6:25 (@typescript-eslint/no-non-null-assertion), archivo de scaffold que este ciclo no toca."
+  ],
+  "reviewer_report": {
+    "approved": true,
+    "date": "2026-09-08",
+    "ca_results": {
+      "CA-008": "PASS — mix-timeline-audio.spec.ts:73 cubre el caso REAL (Timeline canonica de buildTimeline, N=1 asset de voz) con expect(runner.calls).toHaveLength(2); :143 cubre el caso GENERAL con dos assets de voz distintos -> N+1 = 3 invocaciones; :171 deduplica por assetId (dos clips del mismo asset miden una sola vez). Los argumentos de la invocacion de mix son los de audioMixFfmpegArgs (:105) y el grafo lleva measured_*/linear=true, o sea segunda pasada (:133). Propagacion de CommandFailedError con stderr truncado: :244 (falla el mix) y :255 (falla la medicion, sin llegar al mix).",
+      "CA-009": "PASS — verify-mix-loudness.spec.ts:33/45/57/67/77 cubre los cinco casos contra las cinco fixtures nuevas, verificadas por input_i/input_tp: dentro (-13.62/-1.42), borde exacto inclusivo (-15.00/-1.00 -> deltas -1.00/0.00 exactos en IEEE-754), integrado fuera (-11.80), true peak fuera (-0.40) y ambos fuera (-16.30/-0.10). :87 confirma que ninguno de los cinco lanza; :116 confirma que si propaga CommandFailedError del binario; :96 confirma que el true peak es techo y no banda.",
+      "CA-010": "PASS — mux-audio-into-video.spec.ts:32 compara los argumentos exactos de architect 8.2 / D-H (-map 0:v:0 -map 1:a:0 -c:v copy -c:a aac -b:a 192k -shortest) con toEqual; :63 fija -c:v copy como innegociable. MUX_AUDIO_CODEC=aac y MUX_AUDIO_BITRATE=192k son constantes exportadas. :21 verifica el stream de video con probeMedia antes de invocar ffmpeg (D-16); :72/:83 lanzan MissingMediaStreamError con stream: video (CE-3).",
+      "CA-011": "PASS — las dos mitades con evidencia. renderTimeline: render.spec.ts (adicion pura de 32 lineas / 0 borrados) prueba que con audio: muted selectTimelineComposition recibe inputProps: { timeline, audio: muted } con toHaveBeenCalledWith ESTRICTO, y que con audio: mix inputProps queda exactamente { timeline } (la igualdad del objeto anidado es estricta: si la clave audio se colara, el test falla). TimelineComposition: timeline-composition.spec.tsx:89 (sin prop monta AudioTrack), :93 (mix monta), :97 (muted no monta), :38 (calculateTimelineMetadata preserva audio). No-regresion: los 8 tests preexistentes de render.spec.ts quedaron intactos (0 borrados) y siguen pasando; el default de audio es ESTRUCTURAL (inputProps es exactamente { timeline } salvo muted) y no existe ningun ?? mix en el repo.",
+      "CA-012": "PASS con evidencia de segunda mano — el target media-local:smoke-audio existe en project.json (tsc -p tsconfig.smoke.json --noEmit + node -r ./smoke/smoke-register.cjs ./smoke/smoke-audio.ts), es autocontenido y esta fuera de CI. La corrida con ffmpeg real la ejecuto el implementador (dos veces) y la verifico el orquestador: entregable -14.1 LUFS / -12.6 dBTP, 2 invocaciones, CE-3 OK, exit 0 — dentro de -14 +/-1.0 LU y con true peak <= -1.0 dBTP. El reviewer NO reprodujo la corrida (instruccion explicita de no ejecutar smoke-audio), asi que la evidencia se declara como reportada, no como verificada por el reviewer.",
+      "CA-013": "PASS — libs/media-local/README.md (+89 lineas): seccion \"Procedimiento encadenado: render mudo -> mix -> verify -> mux -> verify\" (L134), master bus con level=disabled y la aclaracion de que alimiter limita sample peak mientras el dBTP siempre es >= (L115-119), MASTER_BUS_TRUE_PEAK_MARGIN_DB como unico simbolo exportado del master bus (L119) y el limite de spec-005 por boundaries Nx (L129-132). libs/composition-remotion/README.md (+43): seccion audio mix|muted (L52-66), procedimiento encadenado de 4 pasos (L68-77), limite de spec-005 (L79-82), gainDbToVolume duplicada a proposito (L85) y D-J.6 sobre la paridad de la curva y no del nivel absoluto de voz (L92).",
+      "CA-014": "PASS — pnpm nx run-many -t lint test build --projects=media-local,composition-remotion --skip-nx-cache en verde (exit 0). media-local: 26 files / 280 tests, 98.63% stmts (576/584), 95.77% ramas (340/355), 98.56% funcs (137/139), 98.59% lineas. composition-remotion: 22 files / 249 tests, 96.77% stmts (180/186), 93.16% ramas (109/117), 98.07% funcs (51/52), 96.70% lineas. Los cuatro pisos de RNF-2 superados: 98.63>=98.03, 95.77>=94.77, 96.77>=96.77, 93.16>=93.16."
+    },
+    "tests": {
+      "sdd:validate": "OK — 22 files valid, cross-checks passed (1 warning ignorado por instruccion: 7 entradas de memory/journal pendientes de destilacion, tarea de Hermes post-merge)",
+      "nx run-many -t lint test build --projects=media-local,composition-remotion --skip-nx-cache": "OK — exit 0, Successfully ran targets lint, test, build for 2 projects. All files pass linting en ambos.",
+      "nx run-many -t lint test build (workspace completo)": "OK — exit 0, Successfully ran targets lint, test, build for 5 projects. 1 warning preexistente y ajeno al ciclo en apps/web/src/main.tsx (0 errores).",
+      "media-local: test + coverage": "OK — 26 files / 280 tests. 98.63% stmts / 95.77% ramas / 98.56% funcs / 98.59% lineas (pisos RNF-2: 98.03 / 94.77 / 97.67).",
+      "composition-remotion: test + coverage": "OK — 22 files / 249 tests (eran 247 antes de los dos tests de CA-011). 96.77% stmts / 93.16% ramas / 98.07% funcs / 96.70% lineas (pisos RNF-2: 96.77 / 93.16).",
+      "sdd:rebuild-tasks-index": "OK — wrote index for 3 specs / 7 cycles",
+      "sdd:rebuild-catalog": "OK — unchanged sdd/catalog.json, 8 agents / 19 skills / 6 prompts / 11 schemas / 7 journal entries",
+      "RNF-1 cero binarios en la suite": "OK — ningun *.spec.ts nuevo o modificado importa child_process, execa o spawn. El unico hit del grep es runner/runner.spec.ts, preexistente y no modificado, que importa mapExecaResult (funcion pura). Los binarios reales solo corren en smoke/, fuera de src/ y fuera de CI.",
+      "RNF-3 puertos inyectables": "OK — runner: CommandRunner es parametro posicional obligatorio y sin default en mixTimelineAudio, verifyMixLoudness y muxAudioIntoVideo.",
+      "RNF-5 codigo sin comentarios (regla del repo)": "OK — conteo automatizado de comentarios sobre los 16 archivos nuevos y modificados: 0 en todos. Cero // TODO.",
+      "D-21 master bus no deshabilitable": "OK — level=disabled es sufijo literal del template en master-bus-limiter.ts:14, sin parametro ni rama; MixTimelineAudioOptions solo expone ffmpegPath y runOptions; mix-timeline-audio.ts:102 llama a withMasterBusLimiter incondicionalmente. No existe camino de codigo que deje level en su default. Tests :24 (filtro exacto), :30 (level=disabled), :34 (techo sobre truePeakDbtp - MASTER_BUS_TRUE_PEAK_MARGIN_DB).",
+      "D-21 pureza de withMasterBusLimiter y src/mix/ intacto": "OK — la funcion construye un objeto nuevo con [...graph.chains, ...] sin asignar al argumento; master-bus-limiter.spec.ts:61 verifica que no muta el grafo recibido. git diff --stat libs/media-local/src/mix/ VACIO.",
+      "Superficie publica vs architect 12": "OK — el diff de media-local/src/index.ts (+18/-0) es exactamente el bloque de la seccion 12, ni un simbolo mas. Grep de los seis internos (FIRST_AUDIO_STREAM, withMasterBusLimiter, buildTruePeakLimiterFilter, MASTER_BUS_OUTPUT_LABEL, MASTER_BUS_LIMITER_ATTACK_MS, MASTER_BUS_LIMITER_RELEASE_MS) sobre el barrel: 0 hits. Sin export * en ninguno de los dos barrels. composition-remotion/src/index.ts: un solo simbolo nuevo, el tipo TimelineAudioMode.",
+      "Grafo de imports sin ciclos": "OK — analisis DFS sobre los 48 archivos no-spec de libs/media-local/src: cero ciclos a nivel archivo. Ver la observacion sobre la contra-arista mix -> ffmpeg heredada de cycle-01 en issues_found.",
+      "out_of_scope del brief no violado": "OK — grep sidechaincompress en libs/: 0 hits. git diff --stat de libs/timeline-core/ y de eslint.config.mjs raiz: vacio. Sin orquestacion render->mix->mux en una sola llamada; queda documentada en ambos README como entrada obligatoria de spec-e-burgos-005."
+    },
+    "notes": "Ultimo ciclo de spec-e-burgos-004: cierra el ciclo y la spec. Las 10 tasks quedaron done, ninguna skipped (tasks_completed 10 + tasks_skipped 0 == tasks_total 10). El ciclo entrega la ejecucion del filtergraph que cycle-01 dejo puro: mixTimelineAudio (N+1 invocaciones, dos pasadas de loudnorm, master bus D-K/D-21 apendeado), verifyMixLoudness (tolerancias declaradas, no lanza), muxAudioIntoVideo (-c:v copy, AAC 192k) y la opcion audio mix|muted de renderTimeline. La revision tuvo DOS pasadas: en la primera el reviewer BLOQUEO el cierre por CA-011 probado a medias (ver issues_found), se reabrio TASK-008 y se agregaron los dos tests que faltaban de forma puramente aditiva; en la segunda se re-corrieron las cinco verificaciones y CA-011 quedo PASS. Ese bloqueo es el hallazgo mas valioso del ciclo y su causa raiz (el coverage.include de composition-remotion, que deja src/render.ts fuera de todo threshold) queda en follow_ups para spec-005. COMP-004 TimelineComposition figura como updated (no created: nacio en spec-001 cycle-03), por eso components_created queda vacio. Este ciclo no crea tablas ni endpoints: son dos libs, asi que schema.json y api.json no se tocan. La telemetria consolida 16 entradas en by_agent (4 documentos + 10 tasks + reviewer + orchestrator); by_tier se derivo agrupando por provider_model y ambas claves quedan approx: true porque mezclan mediciones exactas con estimaciones declaradas (planner, architect D-21, TASK-008 reabierta, reviewer y orchestrator): un total es tan honesto como su parte mas floja.",
+    "follow_ups": [
+      "spec-e-burgos-005 — Ampliar coverage.include de libs/composition-remotion/vite.config.ts a src/render.ts y src/components/** . Hoy solo mide src/helpers/** y src/transitions/**, y esa es la causa raiz de que el gap de CA-011 pasara silencioso: la rama audio===muted de render.ts no tenia test NI threshold que la vigilara. Es el follow-up de mayor valor del ciclo.",
+      "libs/composition-remotion/tsconfig.smoke.json — agregar ignoreDeprecations: \"6.0\" junto a baseUrl, como ya se hizo en media-local. Latente: TS 6.0.3 deprecó baseUrl y hoy no explota solo porque el target smoke de esa lib no invoca tsc. Explotara en cuanto se le agregue un paso de typecheck.",
+      "architect.md 4.3 de este ciclo tiene una errata registrada en issues_found (arrastra el filtergraph de primera pasada de cycle-01 9.3). No se corrigio a proposito. Si spec-005 necesita el literal de segunda pasada, generarlo desde el codigo (serializeFilterGraph sobre el grafo real) y no copiarlo de ese documento.",
+      "spec-e-burgos-005 (apps/render-api, type:app) — implementar la orquestacion render -> mix -> mux en una sola llamada, unico subproyecto que puede depender de las dos libs sin tocar los boundaries Nx del eslint.config.mjs raiz. El orden de llamadas y la tabla de errores estan en architect.md 15 de este ciclo.",
+      "D-K, garantia pendiente: el INTEGRADO del master (voz+musica) no se re-normaliza; queda dentro de la tolerancia de D-F y verifyMixLoudness lo mide y lo reporta, pero un re-master de dos pasadas sobre el bus completo, si hiciera falta, es de spec-005.",
+      "gainDbToVolume esta duplicada a proposito entre libs/media-local/src/mix/gain-db-to-volume.ts y libs/composition-remotion/src/helpers/audio-gain.ts (los boundaries Nx impiden compartirla). La tabla de cycle-01 7.2 es su contrato de paridad: cualquier cambio en una obliga a replicarlo en la otra."
+    ]
+  }
+}

@@ -204,4 +204,36 @@ describe('renderTimeline', () => {
     selectTimelineComposition.mockRestore();
     renderTimelineMedia.mockRestore();
   });
+
+  it("con audio: 'muted' propaga inputProps.audio a selectTimelineComposition y renderTimelineMedia (CA-011, RF-2-04)", async () => {
+    const timeline = buildExampleTimeline('reels-9x16');
+    const deps = createRecordingDeps();
+
+    await renderTimeline(timeline, { outPath: 'out/muted.mp4', audio: 'muted' }, deps);
+
+    expect(deps.selectTimelineComposition).toHaveBeenCalledWith({
+      serveUrl: 'file:///serve-url/',
+      id: TIMELINE_COMPOSITION_ID,
+      inputProps: { timeline, audio: 'muted' },
+    });
+    expect(deps.renderTimelineMedia).toHaveBeenCalledWith(
+      expect.objectContaining({ inputProps: { timeline, audio: 'muted' } }),
+    );
+  });
+
+  it("con audio: 'mix' inputProps queda exactamente { timeline }, sin la clave audio (CA-011, RN-10)", async () => {
+    const timeline = buildExampleTimeline('reels-9x16');
+    const deps = createRecordingDeps();
+
+    await renderTimeline(timeline, { outPath: 'out/mix.mp4', audio: 'mix' }, deps);
+
+    expect(deps.selectTimelineComposition).toHaveBeenCalledWith({
+      serveUrl: 'file:///serve-url/',
+      id: TIMELINE_COMPOSITION_ID,
+      inputProps: { timeline },
+    });
+    expect(deps.renderTimelineMedia).toHaveBeenCalledWith(
+      expect.objectContaining({ inputProps: { timeline } }),
+    );
+  });
 });

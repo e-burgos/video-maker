@@ -1,0 +1,39 @@
+Input #0, wav, from 'master.wav':
+  Duration: 00:00:07.00, bitrate: 1536 kb/s
+  Stream #0:0: Audio: pcm_s16le ([1][0][0][0] / 0x0001), 48000 Hz, 2 channels, s16, 1536 kb/s
+Stream mapping:
+  Stream #0:0 (0:a:0) -> #0:0 (pcm_s16le (native) -> pcm_s16le (native))
+Press [q] to stop, [?] for help
+Output #0, null, to 'pipe:':
+  Metadata:
+    encoder         : Lavf60.3.100
+  Stream #0:0: Audio: pcm_s16le, 48000 Hz, 2 channels, s16, 1536 kb/s
+    Metadata:
+      encoder         : Lavc60.3.100 pcm_s16le
+[Parsed_loudnorm_0 @ 0x7f8a3b504a80]
+
+Input Integrated:   -14.1 LUFS
+Input True Peak:      -0.4 dBTP
+Input LRA:            10.2 LU
+Input Threshold:     -24.6 LUFS
+
+Output Integrated:   -14.0 LUFS
+Output True Peak:     -1.0 dBTP
+Output LRA:            8.9 LU
+Output Threshold:    -24.5 LUFS
+
+Normalization Type:   Dynamic
+Target Offset:         0.1 LU
+[Parsed_loudnorm_0 @ 0x7f8a3b504a80]
+{
+	"input_i" : "-14.10",
+	"input_tp" : "-0.40",
+	"input_lra" : "10.20",
+	"input_thresh" : "-24.60",
+	"output_i" : "-14.00",
+	"output_tp" : "-0.98",
+	"output_lra" : "8.90",
+	"output_thresh" : "-24.50",
+	"normalization_type" : "dynamic",
+	"target_offset" : "0.10"
+}

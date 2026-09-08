@@ -1,0 +1,265 @@
+{
+  "$schema": "../../../../schemas/cycle.schema.json",
+  "cycle": 1,
+  "module": "kinetic-captions",
+  "spec": "spec-e-burgos-003-kinetic-captions",
+  "apps": [
+    "libs/composition-remotion"
+  ],
+  "phase": "caption-presets-and-safe-zones",
+  "flow": "full",
+  "objectives": [
+    "Registro de presets tipograficos CAPTION_PRESETS con al menos cuatro estilos por caso de uso",
+    "Safe zones por plataforma aditivas sobre las de la Timeline, sin tocar timeline-core",
+    "Caja de captions con anclaje vertical y ajuste determinista de tamano de fuente para 1-3 palabras",
+    "Estilos por palabra normal / de impacto / activa y helper de @font-face para fuentes locales",
+    "Dejar CA-001 a CA-005 de la spec en verde"
+  ],
+  "status": "completed",
+  "started_at": "2026-09-07",
+  "completed_at": "2026-09-07",
+  "documents": {
+    "brief": "sdd/specs/spec-e-burgos-003-kinetic-captions/cycles/cycle-01/brief.yaml",
+    "functional": "sdd/specs/spec-e-burgos-003-kinetic-captions/cycles/cycle-01/functional.md",
+    "architect": "sdd/specs/spec-e-burgos-003-kinetic-captions/cycles/cycle-01/architect.md",
+    "planner": "sdd/specs/spec-e-burgos-003-kinetic-captions/cycles/cycle-01/planner.md",
+    "tasks": "sdd/specs/spec-e-burgos-003-kinetic-captions/cycles/cycle-01/tasks.json"
+  },
+  "artifacts": [],
+  "metrics": {
+    "tasks_total": 7,
+    "tasks_completed": 7,
+    "story_points": 19,
+    "files_created": [
+      "libs/composition-remotion/public/fonts/.gitignore",
+      "libs/composition-remotion/src/helpers/caption-box.spec.ts",
+      "libs/composition-remotion/src/helpers/caption-box.ts",
+      "libs/composition-remotion/src/helpers/caption-font-face.spec.ts",
+      "libs/composition-remotion/src/helpers/caption-font-face.ts",
+      "libs/composition-remotion/src/helpers/caption-font-size.spec.ts",
+      "libs/composition-remotion/src/helpers/caption-font-size.ts",
+      "libs/composition-remotion/src/helpers/caption-preset.spec.ts",
+      "libs/composition-remotion/src/helpers/caption-preset.ts",
+      "libs/composition-remotion/src/helpers/caption-safe-zone.spec.ts",
+      "libs/composition-remotion/src/helpers/caption-safe-zone.ts",
+      "libs/composition-remotion/src/helpers/caption-word-style.spec.ts",
+      "libs/composition-remotion/src/helpers/caption-word-style.ts"
+    ],
+    "files_modified": [
+      "libs/composition-remotion/README.md",
+      "libs/composition-remotion/src/index.ts"
+    ],
+    "files_deleted": [],
+    "usage": {
+      "tokens_in": 1020782,
+      "tokens_out": 175669,
+      "approx": true,
+      "source": "declared-estimate",
+      "by_agent": [
+        {
+          "agent": "planner",
+          "label": "tasks.json + planner.md cycle-01",
+          "provider_model": "claude/sonnet",
+          "effort": "medium",
+          "tokens_in": 180511,
+          "tokens_out": 31855,
+          "tokens_total": 212366,
+          "approx": false,
+          "source": "agent-usage-notification",
+          "recorded_at": "2026-09-07",
+          "tool_uses": 14,
+          "duration_minutes": 6.1
+        },
+        {
+          "agent": "architect",
+          "label": "architect.md cycle-01",
+          "provider_model": "claude/opus",
+          "effort": "high",
+          "tokens_in": 177203,
+          "tokens_out": 31271,
+          "tokens_total": 208474,
+          "approx": false,
+          "source": "agent-usage-notification",
+          "recorded_at": "2026-09-07",
+          "tool_uses": 20,
+          "duration_minutes": 17.6
+        },
+        {
+          "agent": "functional",
+          "label": "functional.md cycle-01",
+          "provider_model": "claude/sonnet",
+          "effort": "medium",
+          "tokens_in": 88402,
+          "tokens_out": 15600,
+          "tokens_total": 104002,
+          "approx": false,
+          "source": "agent-usage-notification",
+          "recorded_at": "2026-09-07",
+          "tool_uses": 7,
+          "duration_minutes": 3.3
+        },
+        {
+          "agent": "implementor-back",
+          "label": "TASK-001",
+          "provider_model": "claude/sonnet",
+          "effort": "medium",
+          "tokens_in": 111215,
+          "tokens_out": 19626,
+          "tokens_total": 130841,
+          "approx": false,
+          "source": "agent-usage-notification",
+          "recorded_at": "2026-09-07"
+        },
+        {
+          "agent": "implementor-back",
+          "label": "TASK-002",
+          "provider_model": "claude/sonnet",
+          "effort": "medium",
+          "tokens_in": 28291,
+          "tokens_out": 4993,
+          "tokens_total": 33284,
+          "approx": false,
+          "source": "agent-usage-notification",
+          "recorded_at": "2026-09-07"
+        },
+        {
+          "agent": "implementor-back",
+          "label": "TASK-003",
+          "provider_model": "claude/sonnet",
+          "effort": "medium",
+          "tokens_in": 24172,
+          "tokens_out": 4266,
+          "tokens_total": 28438,
+          "approx": false,
+          "source": "agent-usage-notification",
+          "recorded_at": "2026-09-07"
+        },
+        {
+          "agent": "implementor-back",
+          "label": "TASK-004",
+          "provider_model": "claude/sonnet",
+          "effort": "medium",
+          "tokens_in": 17881,
+          "tokens_out": 3156,
+          "tokens_total": 21037,
+          "approx": false,
+          "source": "agent-usage-notification",
+          "recorded_at": "2026-09-07"
+        },
+        {
+          "agent": "implementor-back",
+          "label": "TASK-005",
+          "provider_model": "claude/sonnet",
+          "effort": "medium",
+          "tokens_in": 28071,
+          "tokens_out": 4954,
+          "tokens_total": 33025,
+          "approx": false,
+          "source": "agent-usage-notification",
+          "recorded_at": "2026-09-07"
+        },
+        {
+          "agent": "implementor-back",
+          "label": "TASK-006",
+          "provider_model": "claude/sonnet",
+          "effort": "medium",
+          "tokens_in": 11651,
+          "tokens_out": 2056,
+          "tokens_total": 13707,
+          "approx": false,
+          "source": "agent-usage-notification",
+          "recorded_at": "2026-09-07"
+        },
+        {
+          "agent": "implementor-back",
+          "label": "TASK-007",
+          "provider_model": "claude/sonnet",
+          "effort": "medium",
+          "tokens_in": 34694,
+          "tokens_out": 6123,
+          "tokens_total": 40817,
+          "approx": false,
+          "source": "agent-usage-notification",
+          "recorded_at": "2026-09-07"
+        },
+        {
+          "agent": "orchestrator",
+          "label": "cycle-01 coordination (spec detallada, SPEC GATE, brief, telemetria, verificacion)",
+          "provider_model": "claude/opus",
+          "effort": "high",
+          "tokens_in": 150000,
+          "tokens_out": 22000,
+          "approx": true,
+          "source": "declared-estimate",
+          "recorded_at": "2026-09-07"
+        },
+        {
+          "agent": "reviewer",
+          "label": "revision y cierre de cycle-01",
+          "provider_model": "claude/opus",
+          "effort": "high",
+          "tokens_in": 168691,
+          "tokens_out": 29769,
+          "tokens_total": 198460,
+          "approx": false,
+          "source": "agent-usage-notification",
+          "recorded_at": "2026-09-07",
+          "tool_uses": 49,
+          "duration_minutes": 10.8
+        }
+      ],
+      "by_tier": {
+        "claude/sonnet": {
+          "tokens_in": 524888,
+          "tokens_out": 92629,
+          "approx": false,
+          "source": "agent-usage-notification"
+        },
+        "claude/opus": {
+          "tokens_in": 495894,
+          "tokens_out": 83040,
+          "approx": true,
+          "source": "declared-estimate"
+        }
+      }
+    },
+    "tasks_skipped": 0
+  },
+  "tables_created": [],
+  "endpoints_implemented": [],
+  "components_created": [],
+  "issues_found": [
+    "Reviewer: CA-002 pide que «la caja resultante» quede dentro de 1080x1920 para los tres formatos 9:16, pero la unica cobertura de los tres formatos estaba en `caption-safe-zone.spec.ts` y usaba `captionLayout` — el helper heredado de `spec-e-burgos-001`, no `captionBoxFor`, que es la caja que introduce este ciclo. `caption-box.spec.ts` solo verificaba contencion sobre `tiktok-9x16` (mas un caso 16:9). Resultado: reels-9x16 y shorts-9x16 nunca ejercitaron el helper nuevo y el CA se veia cubierto sin estarlo. Corregido en la revision con un `describe.each` de los tres formatos 9:16 x los cuatro presets x los tres anclajes que asserta contencion en el cuadro y en el safe zone contra `captionBoxFor`. Suite: 177 -> 189 tests; cobertura sin cambios (96.2 % / 92.38 %) porque las ramas ya estaban cubiertas — el hueco era de trazabilidad del criterio, no de codigo muerto."
+  ],
+  "reviewer_report": {
+    "approved": true,
+    "date": "2026-09-07",
+    "ca_results": {
+      "CA-001": "PASS — `src/helpers/caption-safe-zone.spec.ts`. La identidad sin plataforma: «sin plataforma es exactamente la identidad de safeZoneFor(format) (RN-5, CA-001)» compara `captionSafeZone(format)` contra `safeZoneFor(format)` con `toEqual`. La no reduccion: «con una plataforma nunca reduce ningun lado del safe zone base (RN-4, CA-001)» usa exactamente el caso que nombra el CA — `defaultFormat('tiktok-9x16')` + `'tiktok'` — y asserta `toBeGreaterThanOrEqual` en los cuatro lados. Completado por «da los safe zones exactos de la tabla del architect para las cuatro plataformas» (tiktok: {top:280, bottom:520, left:60, right:320} contra la base {220,400,60,140}) y por el caso CE-2 «trata una plataforma no soportada como ausencia de plataforma».",
+      "CA-002": "PASS (con correccion en la revision) — `src/helpers/caption-box.spec.ts`. La reserva de >= 150 px a la derecha en TikTok la fija `caption-safe-zone.spec.ts` -> «reserva al menos 150 px adicionales del lado derecho en tiktok (CA-002)» (inset 180, assert `toBeGreaterThanOrEqual(150)`). La contencion en 1080x1920 la cubre ahora «[preset] deja las tres cajas dentro de 1080x1920 y del safe zone (CA-002)», el `describe.each` de los tres formatos 9:16 (reels/tiktok/shorts x instagram-reels/tiktok/youtube-shorts) x los cuatro presets x los tres anclajes, agregado en esta revision: antes solo `tiktok-9x16` se verificaba contra `captionBoxFor` (ver issues_found). Se conserva ademas el caso previo «deja la caja dentro de 1080x1920 (CA-002)» por preset sobre tiktok.",
+      "CA-003": "PASS — `src/helpers/caption-box.spec.ts`, `describe.each(CAPTION_PRESET_IDS)` -> «produce tres cajas distintas contenidas en el safe zone, con el alto del preset (CA-003)»: para los cuatro presets asserta `top.y < center.y < bottom.y` (tres cajas distintas), `box.y >= safeZone.top` y `box.y + box.height <= safeZone.top + availableHeight` (contencion en el safe zone) y `box.height === Math.round(format.height * preset.boxHeightRatio)` (el alto que declara el preset). Los valores exactos de la tabla §6.2 del architect quedan clavados en «captionBoxFor — valores exactos de tiktok-9x16 + tiktok», incluido el redondeo de `Math.round(659/2) = 330` que hace que el centro de bold-impact sea 610 y no 609.",
+      "CA-004": "PASS — `src/helpers/caption-preset.spec.ts` y `src/helpers/caption-word-style.spec.ts`. Cuatro entradas: «registra al menos cuatro estilos de subtitulos (RN-1, CA-004)» (`CAPTION_PRESET_IDS.length >= 4`, hoy 4: bold-impact, clean-sans, outline-pop, subtle-lower). Generico CSS: «declara una familia con respaldo generico del sistema operativo (RN-2)» corre por preset contra `/(?:^|,\\s*)(sans-serif|serif)$/` — los tres sans terminan en `sans-serif` y subtle-lower en `serif`. Distincion normal/impacto: «distingue la palabra de impacto de la normal en peso y en color (RN-3, CA-004)» a nivel de registro, y «la palabra normal y la de impacto no producen estilos identicos (CA-004)» a nivel de `CSSProperties` emitidos, por preset. Reforzado por «los cuatro estados producen cuatro estilos distintos de a pares (RN-13)».",
+      "CA-005": "PASS — `src/helpers/caption-font-size.spec.ts`, describe «fitCaptionFontSize — CA-005». Estrictamente menor: «una frase de tres palabras largas da un tamano ESTRICTAMENTE menor que una palabra corta» — ['GO'] -> 211 contra ['EXTRAORDINARIO','RENDIMIENTO','SOSTENIDO'] -> 86, con `toBeLessThan`. Clamp: «nunca sale de [minFontSize, maxFontSize]: satura en el techo con una caja gigante» y «... satura en el piso con una caja diminuta», mas el barrido por preset «devuelve un tamano dentro de [minFontSize, maxFontSize] del preset». Determinismo: «frente a la misma entrada, dos llamadas devuelven exactamente el mismo valor (RN-12)» (118 === 118). El caso intermedio (118, ni piso ni techo) prueba que el ajuste es real y no un clamp permanente.",
+      "CA-006..CA-011": "NO EVALUADOS — son los criterios de `cycle-02` (animacion con spring, activeWordIndex, <KineticCaptions />, galeria en Root.tsx y la verificacion final de spec). Fuera del alcance de este ciclo por la decision D-E de la spec."
+    },
+    "tests": {
+      "sdd:validate": "OK — 16 files valid, cross-checks passed (corrido como primer paso de la revision y de nuevo despues de todas las actualizaciones de cierre)",
+      "suite": "189/189 PASS en 17 archivos de composition-remotion (177 al recibir el ciclo + 12 agregados en la revision para cerrar CA-002 sobre `captionBoxFor`). `nx run-many -t lint test build` en verde sobre los 5 proyectos del workspace.",
+      "coverage": "96.2 % statements / 92.38 % branches / 97.56 % functions / 96.12 % lines sobre `src/helpers/**` + `src/transitions/**` (152/158 stmts, 97/105 ramas). Cumple el piso de RNF-2 (>= 90 % stmts, >= 85 % ramas) y NO baja del heredado de cycle-03 (94 % / 87.87 %): lo sube en ambos ejes. El umbral de `vite.config.ts` sigue en 80 %.",
+      "rnf-1": "PASS — cero red y cero render. Los seis `*.spec.ts` del ciclo importan solo el helper bajo prueba, `vitest`, `@video-maker/timeline-core` y modulos hermanos: ninguno monta un componente, renderiza un frame, descarga Chrome Headless Shell ni invoca ffmpeg. Ningun archivo del ciclo importa `remotion`, `@remotion/bundler` ni `@remotion/renderer` (el unico `from 'remotion'` de toda la suite es el `staticFile` de `asset-src.spec.ts`, heredado de cycle-03 y sin efecto de red). Suite completa en 2,72 s.",
+      "rnf-3": "PASS — grep de `//` y `/*` sobre los seis helpers nuevos y `src/index.ts`: cero matches, cero codigo muerto comentado, cero `// TODO`. Grep de `any`, `TODO` y `FIXME` sobre todo `src/`: cero. `Date`, `process` y `Math.random` fuera del barrel: el unico match de todo `src/**` no-spec es `process.exitCode` en `src/smoke.ts`, archivo que el `eslint.config.mjs` de la lib excluye explicitamente de `no-restricted-globals` y que no entra al barrel. Los helpers usan `Math.round`/`floor`/`min`/`max`, ninguno restringido. Identificadores y CSS en ingles; los seis helpers son funciones puras sin estado ni efectos.",
+      "rnf-4": "PASS — frontera de specs verificada archivo por archivo, no por confianza. Enumerando el worktree por mtime posterior al checkout, los unicos archivos de codigo tocados son 13 creados + 2 modificados, todos bajo `libs/composition-remotion/`. `libs/timeline-core` conserva la mtime del checkout (19:30:46) en todos sus archivos y un `diff -r` contra el repo principal solo muestra diferencias en la direccion contraria: el repo principal tiene adiciones de punch-in `anchor` (`PunchInAnchorSchema`, `transform.anchor`) que este worktree no tiene — trabajo de otra spec, no un cambio de este ciclo. `libs/media-local`, `libs/shared-utils` y `media/` intactos; `libs/auto-montage` no existe en este worktree.",
+      "rnf-5": "PASS — `find` de `*.ttf`, `*.woff`, `*.woff2` y `*.otf` fuera de `node_modules`: cero resultados. Lo unico agregado bajo `public/fonts/` es el `.gitignore` (`*` + `!.gitignore`), que ademas garantiza que un binario colgado ahi por el creador nunca entre al repo.",
+      "superficie-publica": "PASS — `src/index.ts` agrega exactamente los 18 simbolos que lista architect.md §10.1 (4 valores + 5 tipos de caption-preset, 3 valores + 3 tipos de caption-safe-zone, `captionBoxFor` + `CaptionAnchor`, `fitCaptionFontSize`, `captionWordStyle` + `CaptionWordState`, `captionFontFaceCss` + 3 tipos), en el mismo orden y sin uno de mas. Lo de §10.2 queda adentro: `CAPTION_CHROME_INSETS`, `NO_CHROME_INSETS`, las referencias de lienzo, `escapeFontFaceValue`, `round3` y `resolvedAnchorY`. Ninguna exportacion previa se toco (D-11): `captionLayout` y `CaptionTrack` siguen exportados igual — su reemplazo es cycle-02 (D-D).",
+      "contratos": "PASS — las cinco firmas implementadas coinciden literalmente con el architect: `captionSafeZone(format, platform?, baseSafeZone?)` (§5, incluida la garantia de devolver objeto nuevo, con test propio), `captionBoxFor(safeZone, format, preset, anchor?)` (§6), `fitCaptionFontSize(words, box, preset, format)` con los siete pasos de §7.1 verbatim, `captionWordStyle(preset, state)` con la precedencia de §8 (emphasis gana sobre active en color y peso; la escala compone multiplicativamente con `round3`) y `captionFontFaceCss(faces)` (§9). `sdd/schema.json` y `sdd/api.json` quedan sin tocar, como declara architect.md §0/§15: el ciclo no crea tablas ni endpoints."
+    },
+    "notes": "Ciclo aprobado. 7/7 tasks done (19 SP), 0 skipped. CA-001..CA-005 en verde con test nombrado por criterio; CA-006..CA-011 son de cycle-02 y no se evaluaron. Un solo issue, encontrado y resuelto dentro de la revision: CA-002 estaba cubierto para los tres formatos 9:16 con `captionLayout` (el helper heredado) en vez de `captionBoxFor` (el del ciclo), asi que reels-9x16 y shorts-9x16 nunca ejercitaban la caja nueva — el criterio se veia cubierto sin estarlo. Corregido con 12 casos que barren los tres formatos x cuatro presets x tres anclajes. Sirve de patron: cuando un CA habla de «la caja resultante», el test tiene que atacar el helper que el ciclo introduce, no uno anterior de forma parecida. El resto del ciclo llego limpio: los seis helpers son puros, sin comentarios, sin `any` y sin importar `remotion`, y la cobertura sube el piso heredado en ambos ejes (94 -> 96.2 % stmts, 87.87 -> 92.38 % ramas) en vez de solo mantenerlo. La decision D-C se cumple de punta a punta: los cuatro presets funcionan de fabrica con stacks del sistema, `captionFontFaceCss` da el mecanismo de fuente propia sin que la lib resuelva rutas ni salga a la red, el README documenta el procedimiento y `public/fonts/.gitignore` impide que un binario entre al repo. Nota de proceso para el proximo que corra los gates: el target `test` de la lib ya lleva `--coverage` adentro, asi que pasarselo de nuevo con `-- --coverage` hace fallar a vitest con «Expected a single value for option --coverage» — se corre `pnpm nx test composition-remotion` a secas. La telemetria llego completa aguas arriba: las siete tasks traian `usage` medido en `tasks.json` y los tres documentos ya tenian su entrada en `by_agent`; esta revision solo copio las de tasks, agrego la del orquestador y la propia, y derivo `by_tier`. Ambas entradas nuevas son estimaciones declaradas (`approx: true`), lo que arrastra `claude/opus` y el total de nivel superior a `approx: true`: un total es tan honesto como su parte mas floja. La spec sigue `in-progress` y el modulo `kinetic-captions` sigue en `in_progress_modules` con `cycles_completed: 1` — falta cycle-02.",
+    "follow_ups": [
+      "cycle-02 tiene que consumir `fitCaptionFontSize` desde el contenedor del clip y NO desde `captionWordStyle`: el helper de palabra deliberadamente no emite `fontSize` (D-12, con test que lo fija). Si el componente lo pusiera por palabra, dos palabras del mismo clip podrian quedar en tamanos distintos y el ajuste al ancho de la caja dejaria de valer.",
+      "`heightCap` (paso 6 de `fitCaptionFontSize`) es inerte con los cuatro presets actuales: el tope por alto nunca liga porque `floor(461/1.1) = 419` supera el `maxFontSize` de 211. Esta cubierto con una caja sintetica baja, pero si un preset nuevo sube `maxFontSizeRatio` o baja `boxHeightRatio`, esa rama pasa a ser el camino real y conviene re-verificar los numeros de la tabla §7.4.",
+      "`averageCharWidthEm` es una estimacion por preset, no una medicion: un emoji o una cadena de mayusculas anchas (M, W) puede desbordar la caja aunque el helper diga que entra. Es aceptable mientras los captions vengan de transcripcion (R-1 del architect), pero cuando cycle-02 tenga la galeria en `remotion studio` conviene mirar los cuatro presets con frases reales y ajustar la constante si hace falta.",
+      "Los insets de chrome de las cuatro plataformas son valores declarados por el architect, no medidos contra capturas de las apps. Se escalan por formato con `format.height / reference.height`, asi que la proporcion se mantiene, pero conviene validarlos una vez contra un render real subido a cada red antes de que la spec cierre.",
+      "`CaptionTrack` (COMP-003) y `captionLayout` siguen vivos y exportados: D-D los da de baja recien en cycle-02, cuando `<KineticCaptions />` los reemplace y salgan del barrel. Al hacerlo hay que actualizar COMP-003 en `sdd/components.json` y revisar el test de `caption-safe-zone.spec.ts` que todavia usa `captionLayout` para la contencion."
+    ]
+  }
+}

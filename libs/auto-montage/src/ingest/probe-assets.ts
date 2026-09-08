@@ -6,7 +6,9 @@ import type { MediaProject } from '../project/media-project';
 import { toAbsolutePath } from '../project/project-paths';
 import type { AssetFinding } from './discover-assets';
 
-export type ProbeFailureErrorCode = 'BINARY_NOT_FOUND' | 'COMMAND_FAILED' | 'UNPARSEABLE_OUTPUT' | 'UNKNOWN';
+const PROBE_FAILURE_ERROR_CODES = ['BINARY_NOT_FOUND', 'COMMAND_FAILED', 'UNPARSEABLE_OUTPUT', 'UNKNOWN'] as const;
+
+export type ProbeFailureErrorCode = (typeof PROBE_FAILURE_ERROR_CODES)[number];
 
 export interface ProbedAsset {
   readonly role: AssetFinding['role'];
@@ -41,8 +43,12 @@ function compareByString(left: string, right: string): number {
   return left > right ? 1 : 0;
 }
 
+function isProbeFailureErrorCode(code: string): code is ProbeFailureErrorCode {
+  return (PROBE_FAILURE_ERROR_CODES as readonly string[]).includes(code);
+}
+
 function errorCodeOf(error: unknown): ProbeFailureErrorCode {
-  return isMediaLocalError(error) ? error.code : 'UNKNOWN';
+  return isMediaLocalError(error) && isProbeFailureErrorCode(error.code) ? error.code : 'UNKNOWN';
 }
 
 function messageOf(error: unknown): string {

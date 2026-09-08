@@ -1,0 +1,84 @@
+# sdd/specs/spec-e-burgos-004-audio-mix-mastering/cycles/cycle-02/brief.yaml
+# Generado por: sdd-orchestrator
+# Al: iniciar el ciclo
+
+cycle: 2
+module: audio-mix-mastering
+phase: audio-mix-execution-and-delivery
+date: 2026-09-08
+app_context: sdd/context/libs/media-local/context_prompt.md
+
+objective: |
+  Ejecutar el filtergraph que cycle-01 dejo listo: producir la pista masterizada con ffmpeg,
+  medir el resultado contra el target de loudness, muxearla en el MP4 de Remotion y dar al render
+  la opcion de salir mudo. Cierra la spec spec-e-burgos-004.
+
+scope:
+  - mixTimelineAudio - ejecuta el mix con CommandRunner, dos pasadas de loudnorm (RF-6, CA-008)
+  - verifyMixLoudness - medicion post-mix con tolerancias declaradas, no lanza (RF-7, CA-009)
+  - muxAudioIntoVideo - mux final -c:v copy, AAC 192k (RF-8, CA-010)
+  - renderTimeline audio mix o muted, aditivo y sin romper consumidores (RF-9, CA-011)
+  - Target manual media-local smoke-audio, autocontenido, fuera de CI (RF-10, CA-012)
+  - Documentacion en los dos README del procedimiento encadenado y del limite de spec-005 (RF-11, CA-013)
+
+out_of_scope:
+  - Orquestacion render mix mux en una sola llamada - entrada obligatoria de spec-e-burgos-005 (D-G)
+  - Cambios a libs/timeline-core, a AudioMixPlan o a planDucking (D-A)
+  - sidechaincompress y cualquier ducking adaptativo (D-C)
+  - EQ, de-esser, compresion de voz, reduccion de ruido, SFX y mas de dos pistas logicas
+  - Reescribir nada de src/mix/ - cycle-01 esta cerrado y sus contratos son fijos
+  - Tocar eslint.config.mjs raiz o cualquier config protegida por hook (RNF-6)
+
+dependencies_required:
+  - spec-e-burgos-001-core-composition-media-pipeline (completed)
+  - spec-e-burgos-004 cycle-01 (completed) - src/mix/ y su superficie publica
+  - FIX-e-burgos-001-001 - el target smoke de composition-remotion funciona desde 2026-09-08
+
+agent_contexts:
+  functional:
+    goal: >
+      Convertir RF-6..RF-11 y CA-008..CA-014 en historias y requisitos verificables. Es el ciclo
+      donde el valor de negocio se materializa - audio publicable a -14 LUFS / -1 dBTP - asi que
+      las historias vuelven al creador de contenido, no solo al consumidor tecnico.
+    business_context: >
+      cycle-01 dejo la traduccion pura del AudioMixPlan a filtergraph. Este ciclo la ejecuta y
+      entrega el MP4 final con audio masterizado y medido. Sin la medicion post-mix la promesa de
+      -14 LUFS no es verificable; sin el render mudo la pista de Remotion se sumaria a la
+      masterizada y el entregable tendria el audio duplicado.
+    relevant_spec_sections:
+      - Requisitos Funcionales - Ciclo 02
+      - Criterios de Aceptacion - Ciclo 02
+      - Decisiones del orquestador D-B, D-F, D-G, D-H, D-J
+
+  planner:
+    goal: >
+      Tasks ordenadas por dependencia, una por funcion publica, con su spec hermano. El target
+      smoke-audio y la opcion de render mudo son tasks propias. Estimar y explicitar el orden.
+    output_file: sdd/specs/spec-e-burgos-004-audio-mix-mastering/cycles/cycle-02/planner.md
+
+  architect:
+    goal: >
+      Definir las firmas de mixTimelineAudio, verifyMixLoudness y muxAudioIntoVideo, donde viven
+      (src/ffmpeg/, nunca src/mix/ - la direccion ffmpeg a mix es de un solo sentido, D-01 de
+      cycle-01), como se encadenan las dos pasadas de loudnorm reusando buildAudioMixGraph, que
+      fixtures nuevas necesita FixtureCommandRunner, el contrato exacto de tolerancias de
+      verifyMixLoudness, y como se implementa la opcion audio muted en composition-remotion sin
+      cambiar la firma publica de renderTimeline. Debe tambien especificar el target smoke-audio -
+      que senales genera con ffmpeg y que imprime.
+    existing_tables: []
+    existing_endpoints: []
+    output_file: sdd/specs/spec-e-burgos-004-audio-mix-mastering/cycles/cycle-02/architect.md
+
+  implementor_back:
+    goal: Implementar una task por vez segun el contrato del arquitecto, con su spec hermano.
+    app: libs/media-local
+    app_context: sdd/context/libs/media-local/context_prompt.md
+
+  implementor_front:
+    goal: Opcion audio mix o muted en renderTimeline y TimelineComposition (RF-9, CA-011).
+    app: libs/composition-remotion
+    app_context: sdd/context/libs/composition-remotion/context_prompt.md
+
+  reviewer:
+    goal: Validar todo el output del ciclo y cerrar la spec spec-e-burgos-004
+    output_file: sdd/specs/spec-e-burgos-004-audio-mix-mastering/cycles/cycle-02/cycle.json

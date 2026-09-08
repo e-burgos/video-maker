@@ -1,0 +1,89 @@
+# sdd/specs/spec-e-burgos-003-kinetic-captions/cycles/cycle-01/brief.yaml
+# Generado por: sdd-orchestrator
+# Al: iniciar el ciclo
+
+cycle: 1
+module: kinetic-captions
+phase: caption-presets-and-safe-zones
+date: 2026-09-07
+app_context: sdd/context/libs/composition-remotion/context_prompt.md
+
+objective: |
+  Al cerrar el ciclo, `libs/composition-remotion` expone la capa de decisión tipográfica de los
+  captions como helpers puros, testeables sin montar Remotion: un registro de presets
+  (`CAPTION_PRESETS`) con al menos cuatro estilos por caso de uso, safe zones específicas por
+  plataforma (`captionSafeZone`) que se suman a las de la `Timeline` sin contradecirlas, la caja de
+  dibujo con anclaje vertical (`captionBoxFor`), el ajuste determinista de tamaño de fuente para 1-3
+  palabras (`fitCaptionFontSize`) y los estilos por palabra normal / de impacto / activa
+  (`captionWordStyle`). El componente visual y las animaciones son de `cycle-02`: en este ciclo
+  `CaptionTrack` sigue siendo el que estaba.
+
+scope:
+  - `src/captions/preset.ts` — tipo `CaptionPreset` y registro `CAPTION_PRESETS` con `bold-impact`, `clean-sans`, `outline-pop`, `subtle-lower` (RF-1, CA-004)
+  - `src/helpers/caption-safe-zone.ts` — `captionSafeZone(format, platform?)` aditivo sobre `safeZoneFor` / el `safeZone` de la Timeline, con insets de chrome por plataforma (RF-2, CA-001, CA-002)
+  - `src/helpers/caption-box.ts` — `captionBoxFor(safeZone, format, anchor)` con anclaje top/center/bottom (RF-3, CA-003)
+  - `src/helpers/caption-font-size.ts` — `fitCaptionFontSize(words, box, preset, format)` con estimación determinista de ancho por carácter, sin medir DOM (RF-4, CA-005)
+  - `src/helpers/caption-word-style.ts` — `captionWordStyle(preset, { isEmphasis, isActive })` (RF-5)
+  - `captionFontFaceCss()` — helper que genera el `@font-face` para una fuente colgada en `public/fonts/`, sin commitear ningún binario (D-C, RNF-5)
+  - Tests unitarios por criterio de aceptación; barrel `src/index.ts` re-exportando lo público
+  - Fragmento aditivo de contexto en `sdd/context/libs/composition-remotion/updates/`
+
+out_of_scope:
+  - El componente `<KineticCaptions />`, las animaciones con `spring` y el reemplazo de `CaptionTrack` (cycle-02)
+  - Cualquier cambio en `libs/timeline-core` o en el contrato `Timeline` (D-A, RNF-4)
+  - Composiciones nuevas de `remotion studio`, smoke render, descarga de Chrome (cycle-02)
+  - Consumo desde `apps/web` (spec-006) y `OffthreadVideo` vs `Video` (spec-006)
+  - Commitear archivos de fuente tipográfica (RNF-5)
+
+dependencies_required:
+  - spec-e-burgos-001-core-composition-media-pipeline (completed) — `Timeline`, `CaptionClip`, `safeZoneFor`, `defaultFormat`, `CaptionSequenceProps`
+
+agent_contexts:
+  functional:
+    goal: Escribir las historias del creador de contenido y del desarrollador integrador para que los subtítulos se lean sin taparse con el chrome de cada red y puedan elegirse por preset, con reglas de negocio verificables y sin detalle de implementación
+    business_context: |
+      El creador ya tiene su Timeline con los captions agrupados de a 1-3 palabras y la palabra de
+      impacto elegida. Lo que le falta es que se vean bien: que no queden debajo del botón de
+      "Seguir" de TikTok ni tapados por el título de Shorts, que el texto entre en pantalla aunque
+      la frase sea larga, y poder elegir entre unos pocos looks preparados (impacto grande, limpio,
+      con contorno, discreto abajo) sin tener que tocar CSS. Las fuentes tienen que funcionar sin
+      internet: la máquina del creador rendea local y el CI del repo no tiene salida.
+    relevant_spec_sections:
+      - Resumen Ejecutivo
+      - Contexto de Negocio
+      - Evidencia y decisiones (D-A, D-B, D-C)
+      - Requisitos Funcionales RF-1 a RF-5
+      - Requisitos No-Funcionales RNF-1 a RNF-5
+      - Criterios de Aceptación CA-001 a CA-005
+
+  planner:
+    goal: Descomponer en tasks ordenadas y estimadas (horas + story points) la construcción de los helpers puros de captions — tipo y registro de presets, safe zones por plataforma, caja con anclaje, ajuste de tamaño de fuente, estilos por palabra, helper de @font-face y auditoría del barrel — cada una con sus tests y su CA asociado
+    output_file: sdd/specs/spec-e-burgos-003-kinetic-captions/cycles/cycle-01/planner.md
+    note: Recibe el output del Funcional; no necesita la spec completa
+
+  architect:
+    goal: |
+      Fijar las firmas TypeScript exactas y la estructura de archivos: el tipo `CaptionPreset`
+      (campos, unidades — px absolutos vs fracción del alto del formato —, valores por defecto), el
+      tipo `CaptionPlatform`, la tabla de insets de chrome por plataforma con su justificación
+      numérica, el contrato de `captionSafeZone` como suma sobre el safe zone base, `captionBoxFor`
+      con anclaje, el algoritmo determinista de `fitCaptionFontSize` (estimación de ancho por
+      carácter, redondeo, clamp), `captionWordStyle` y su precedencia entre `isEmphasis` e
+      `isActive`, y `captionFontFaceCss`. Decidir dónde viven los archivos respetando que la
+      cobertura de `vite.config.ts` cubre `src/helpers/**` + `src/transitions/**` (si `presets` va en
+      `src/captions/`, decidir explícitamente si se amplía el `include` de cobertura o si el registro
+      se declara sin lógica). No hay DB ni endpoints en este ciclo.
+    existing_tables: []
+    existing_endpoints: []
+    output_file: sdd/specs/spec-e-burgos-003-kinetic-captions/cycles/cycle-01/architect.md
+
+  implementor_front:
+    goal: Implementar una task por vez siguiendo architect.md — helpers puros de captions con sus tests, sin comentarios, sin `any`, identificadores en inglés
+    app: libs/composition-remotion
+    app_context: sdd/context/libs/composition-remotion/context_prompt.md
+    note: Recibe una task a la vez del Planner
+
+  reviewer:
+    goal: Validar todo el output del ciclo (CA-001..CA-005, cobertura no menor a 90% stmts / 85% branches, lint/test/build, cero comentarios, cero render ni red en la suite, `timeline-core` intacto), escribir el fragmento aditivo de contexto y la entrada de journal si hubo lección, consolidar la telemetría y cerrar cycle.json
+    output_file: sdd/specs/spec-e-burgos-003-kinetic-captions/cycles/cycle-01/cycle.json
+    checklist: sdd/skills/sdd-reviewer/checklist.md

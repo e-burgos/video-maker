@@ -1,0 +1,225 @@
+{
+  "$schema": "../../../../schemas/cycle-tasks.schema.json",
+  "spec": "spec-e-burgos-003-kinetic-captions",
+  "cycle": 2,
+  "module": "kinetic-captions",
+  "apps": [
+    "libs/composition-remotion"
+  ],
+  "flow": "full",
+  "user_stories_generated": true,
+  "prerequisites": {
+    "tasks_generated": true
+  },
+  "tasks": [
+    {
+      "id": "TASK-001",
+      "title": "[FE] Animación de entrada/salida del clip (captionClipAnimation) + campo animation en CaptionPreset (CA-006)",
+      "user_stories": [
+        "HU-2-01"
+      ],
+      "estimation_hours": 4,
+      "story_points": 5,
+      "depends_on": [],
+      "status": "done",
+      "files": [
+        "libs/composition-remotion/src/helpers/caption-animation.ts",
+        "libs/composition-remotion/src/helpers/caption-animation.spec.ts",
+        "libs/composition-remotion/src/helpers/caption-preset.ts",
+        "libs/composition-remotion/src/helpers/caption-preset.spec.ts"
+      ],
+      "usage": {
+        "agent": "implementor-front",
+        "provider_model": "claude/sonnet",
+        "effort": "medium",
+        "tokens_in": 113336,
+        "tokens_out": 20000,
+        "tokens_total": 133336,
+        "approx": false,
+        "source": "agent-usage-notification",
+        "recorded_at": "2026-09-07"
+      }
+    },
+    {
+      "id": "TASK-002",
+      "title": "[BE] Palabra activa y estado de impacto por frame (activeWordIndex, captionWordRenders) (CA-007, CA-008)",
+      "user_stories": [
+        "HU-2-02",
+        "HU-2-03"
+      ],
+      "estimation_hours": 3,
+      "story_points": 3,
+      "depends_on": [],
+      "status": "done",
+      "files": [
+        "libs/composition-remotion/src/helpers/caption-active-word.ts",
+        "libs/composition-remotion/src/helpers/caption-active-word.spec.ts"
+      ],
+      "usage": {
+        "agent": "implementor-front",
+        "provider_model": "claude/sonnet",
+        "effort": "medium",
+        "tokens_in": 29262,
+        "tokens_out": 5164,
+        "tokens_total": 34426,
+        "approx": false,
+        "source": "agent-usage-notification",
+        "recorded_at": "2026-09-07"
+      }
+    },
+    {
+      "id": "TASK-003",
+      "title": "[BE] Plan de caja y precedencia boxSource (captionClipPlan) + fix deuda caption-safe-zone.spec.ts (CA-009 parcial, CA-002)",
+      "user_stories": [
+        "HU-2-04"
+      ],
+      "estimation_hours": 4,
+      "story_points": 5,
+      "depends_on": [],
+      "status": "done",
+      "files": [
+        "libs/composition-remotion/src/helpers/caption-clip-plan.ts",
+        "libs/composition-remotion/src/helpers/caption-clip-plan.spec.ts",
+        "libs/composition-remotion/src/helpers/caption-safe-zone.spec.ts"
+      ],
+      "usage": {
+        "agent": "implementor-front",
+        "provider_model": "claude/sonnet",
+        "effort": "medium",
+        "tokens_in": 44558,
+        "tokens_out": 7863,
+        "tokens_total": 52421,
+        "approx": false,
+        "source": "agent-usage-notification",
+        "recorded_at": "2026-09-07"
+      }
+    },
+    {
+      "id": "TASK-004",
+      "title": "[FE] Componente KineticCaptions + test de estructura sin montar (CA-009)",
+      "user_stories": [
+        "HU-2-04"
+      ],
+      "estimation_hours": 4,
+      "story_points": 5,
+      "depends_on": [
+        "TASK-001",
+        "TASK-002",
+        "TASK-003"
+      ],
+      "status": "done",
+      "files": [
+        "libs/composition-remotion/src/components/kinetic-captions.tsx",
+        "libs/composition-remotion/src/components/kinetic-captions.spec.tsx"
+      ],
+      "usage": {
+        "agent": "implementor-front",
+        "provider_model": "claude/sonnet",
+        "effort": "medium",
+        "tokens_in": 34301,
+        "tokens_out": 6053,
+        "tokens_total": 40354,
+        "approx": false,
+        "source": "agent-usage-notification",
+        "recorded_at": "2026-09-07"
+      }
+    },
+    {
+      "id": "TASK-005",
+      "title": "[FE] Cableado en TimelineComposition, baja de CaptionTrack/captionLayout y barrel (CA-009, D-23)",
+      "user_stories": [
+        "HU-2-04"
+      ],
+      "estimation_hours": 3,
+      "story_points": 3,
+      "depends_on": [
+        "TASK-001",
+        "TASK-002",
+        "TASK-003",
+        "TASK-004"
+      ],
+      "status": "done",
+      "files": [
+        "libs/composition-remotion/src/components/timeline-composition.tsx",
+        "libs/composition-remotion/src/components/timeline-composition.spec.tsx",
+        "libs/composition-remotion/src/index.ts",
+        "libs/composition-remotion/src/components/caption-track.tsx",
+        "libs/composition-remotion/src/helpers/caption-layout.ts",
+        "libs/composition-remotion/src/helpers/caption-layout.spec.ts"
+      ],
+      "usage": {
+        "agent": "implementor-front",
+        "provider_model": "claude/sonnet",
+        "effort": "medium",
+        "tokens_in": 44383,
+        "tokens_out": 7832,
+        "tokens_total": 52215,
+        "approx": false,
+        "source": "agent-usage-notification",
+        "recorded_at": "2026-09-07"
+      }
+    },
+    {
+      "id": "TASK-006",
+      "title": "[FE] Galería de presets (CaptionPresetGallery) + composición en Root.tsx (CA-010)",
+      "user_stories": [
+        "HU-2-05"
+      ],
+      "estimation_hours": 3,
+      "story_points": 3,
+      "depends_on": [
+        "TASK-004"
+      ],
+      "status": "done",
+      "files": [
+        "libs/composition-remotion/src/components/caption-preset-gallery.tsx",
+        "libs/composition-remotion/src/Root.tsx"
+      ],
+      "usage": {
+        "agent": "implementor-front",
+        "provider_model": "claude/sonnet",
+        "effort": "medium",
+        "tokens_in": 56136,
+        "tokens_out": 9906,
+        "tokens_total": 66042,
+        "approx": false,
+        "source": "agent-usage-notification",
+        "recorded_at": "2026-09-07"
+      }
+    },
+    {
+      "id": "TASK-007",
+      "title": "[BE] Delta de components.json, README, verificación de cierre y smoke manual (CA-011)",
+      "user_stories": [
+        "HU-2-06",
+        "HU-2-07"
+      ],
+      "estimation_hours": 2,
+      "story_points": 2,
+      "depends_on": [
+        "TASK-001",
+        "TASK-002",
+        "TASK-003",
+        "TASK-004",
+        "TASK-005",
+        "TASK-006"
+      ],
+      "status": "done",
+      "files": [
+        "sdd/components.json",
+        "libs/composition-remotion/README.md"
+      ],
+      "usage": {
+        "agent": "implementor-front",
+        "provider_model": "claude/sonnet",
+        "effort": "medium",
+        "tokens_in": 54056,
+        "tokens_out": 9539,
+        "tokens_total": 63595,
+        "approx": false,
+        "source": "agent-usage-notification",
+        "recorded_at": "2026-09-07"
+      }
+    }
+  ]
+}

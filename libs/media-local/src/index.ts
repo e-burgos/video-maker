@@ -60,6 +60,46 @@ export type { NormalizeVoiceOptions, NormalizeVoiceResult } from './ffmpeg/norma
 export { extractAudioForTranscription } from './ffmpeg/extract-audio';
 export type { ExtractAudioOptions } from './ffmpeg/extract-audio';
 
+export { gainDbToVolume } from './mix/gain-db-to-volume';
+export {
+  buildGainAutomationCurve,
+  evaluateGainAutomationCurve,
+} from './mix/gain-automation-curve';
+export type { GainAutomationCurve, GainAutomationSegment } from './mix/gain-automation-curve';
+export { buildGainAutomationExpression } from './mix/build-gain-automation-expression';
+export { buildVoiceChain } from './mix/build-voice-chain';
+export { buildMusicBedChain } from './mix/build-music-bed-chain';
+export type { MusicBedChainOptions } from './mix/build-music-bed-chain';
+export { buildAudioMixGraph } from './mix/build-audio-mix-graph';
+export type { AudioMixGraphSpec } from './mix/build-audio-mix-graph';
+export { serializeFilterGraph } from './mix/serialize-filter-graph';
+export type { FilterChain, FilterGraph } from './mix/filter-graph';
+export { audioMixFfmpegArgs } from './mix/audio-mix-ffmpeg-args';
+export {
+  AUDIO_MIX_CHANNELS,
+  AUDIO_MIX_CODEC,
+  AUDIO_MIX_SAMPLE_RATE,
+} from './mix/audio-mix-format';
+export { UnresolvedAudioAssetError } from './errors/unresolved-audio-asset-error';
+
+export { mixTimelineAudio } from './ffmpeg/mix-timeline-audio';
+export type { MixTimelineAudioOptions, MixTimelineAudioResult } from './ffmpeg/mix-timeline-audio';
+
+export {
+  MIX_INTEGRATED_TOLERANCE_LU,
+  MIX_TRUE_PEAK_TOLERANCE_DB,
+  verifyMixLoudness,
+} from './ffmpeg/verify-mix-loudness';
+export type { MixLoudnessVerification, VerifyMixLoudnessOptions } from './ffmpeg/verify-mix-loudness';
+
+export { MUX_AUDIO_BITRATE, MUX_AUDIO_CODEC, muxAudioIntoVideo } from './ffmpeg/mux-audio-into-video';
+export type { MuxAudioIntoVideoOptions, MuxAudioIntoVideoResult } from './ffmpeg/mux-audio-into-video';
+
+export { MissingMediaStreamError } from './errors/missing-media-stream-error';
+export type { MissingStreamKind } from './errors/missing-media-stream-error';
+
+export { MASTER_BUS_TRUE_PEAK_MARGIN_DB } from './ffmpeg/master-bus-limiter';
+
 export { parseWhisperCppJson } from './whisper/parse-whisper-cpp-json';
 export type { ParseTranscriptionOptions } from './whisper/parse-whisper-cpp-json';
 export { parseFasterWhisperJson } from './whisper/parse-faster-whisper-json';

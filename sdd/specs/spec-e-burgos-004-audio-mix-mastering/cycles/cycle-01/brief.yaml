@@ -1,0 +1,83 @@
+# sdd/specs/spec-e-burgos-004-audio-mix-mastering/cycles/cycle-01/brief.yaml
+# Generado por: sdd-orchestrator
+# Al: iniciar el ciclo
+
+cycle: 1
+module: audio-mix-mastering
+phase: audio-filtergraph-builders
+date: 2026-09-08
+app_context: sdd/context/libs/media-local/context_prompt.md
+
+objective: |
+  Entregar en libs/media-local, como funciones puras, la traduccion completa de un AudioMixPlan a
+  un filtergraph FFmpeg tipado y a los argumentos de invocacion, sin ejecutar un solo binario y sin
+  tocar timeline-core ni composition-remotion.
+
+scope:
+  - buildGainAutomationExpression - GainKeyframe[] a expresion volume, interpolacion lineal en dB (RF-1)
+  - buildMusicBedChain - baseGainDb, automatizacion de ducking, afade in/out, atrim/apad (RF-2)
+  - buildVoiceChain - loudnorm 1a/2a pasada reusando buildLoudnormFilter + aresample=48000 (RF-3)
+  - buildAudioMixGraph - FilterGraph tipado, atrim/adelay por AudioClip, amix normalize=0 (RF-4)
+  - serializeFilterGraph y audioMixFfmpegArgs - string -filter_complex y args completos (RF-5)
+  - Paridad numerica de la curva contra volumeAtFrame de composition-remotion (CA-002, D-E)
+  - Error tipado nuevo para assetId no resuelto, en la jerarquia MediaLocalError existente
+
+out_of_scope:
+  - Ejecutar ffmpeg - ningun wrapper con CommandRunner en este ciclo (es cycle-02)
+  - verifyMixLoudness, muxAudioIntoVideo y el target smoke-audio (cycle-02)
+  - renderTimeline con audio muted y cualquier cambio en libs/composition-remotion (cycle-02)
+  - Cambios a libs/timeline-core, a AudioMixPlan o a planDucking (D-A, spec completed)
+  - sidechaincompress y cualquier ducking adaptativo (D-C)
+  - Orquestacion render mix mux en una llamada - es entrada obligatoria de spec-e-burgos-005 (D-G)
+  - Tocar eslint.config.mjs raiz o cualquier config protegida por hook (RNF-6)
+
+dependencies_required:
+  - spec-e-burgos-001-core-composition-media-pipeline (completed)
+
+agent_contexts:
+  functional:
+    goal: >
+      Convertir RF-1..RF-5 y CA-001..CA-007 de la spec en historias de usuario y requisitos
+      funcionales verificables para el creador de contenido, dejando explicito que el entregable de
+      este ciclo es una capa pura y que el valor de negocio (audio publicable a -14 LUFS) recien se
+      materializa en cycle-02.
+    business_context: >
+      El motor ya produce video publicable y audio no publicable. Remotion mezcla voz y musica por
+      ganancia por frame pero nadie mide LUFS ni true peak. Un Reel por debajo de -14 LUFS suena mas
+      bajo que el resto del feed y un true peak sobre -1 dBTP clippea al recodificar. Este ciclo
+      construye la traduccion determinista del plan de mezcla que ya existe (AudioMixPlan) a un
+      filtergraph FFmpeg, para que cycle-02 solo tenga que ejecutarlo y medirlo.
+    relevant_spec_sections:
+      - Resumen Ejecutivo
+      - Contexto de Negocio
+      - Requisitos Funcionales - Ciclo 01
+      - Criterios de Aceptacion - Ciclo 01
+      - Decisiones del orquestador D-A, D-C, D-D, D-E, D-I
+
+  planner:
+    goal: >
+      Convertir el functional en tasks tecnicas ordenadas por dependencia, una por funcion pura,
+      cada una con su archivo hermano *.spec.ts. La paridad de curva (CA-002) es una task propia,
+      no un agregado a la task de la expresion. Estimar y dejar el orden de ejecucion explicito.
+    output_file: sdd/specs/spec-e-burgos-004-audio-mix-mastering/cycles/cycle-01/planner.md
+
+  architect:
+    goal: >
+      Definir las firmas exactas de las cinco funciones, el tipo FilterGraph y sus tipos auxiliares,
+      donde vive cada archivo dentro de src/ffmpeg/ (o un subdirectorio nuevo), que se exporta desde
+      src/index.ts y que queda como detalle de implementacion, el error tipado nuevo y su lugar en
+      la jerarquia MediaLocalError, y la forma exacta de la expresion volume de FFmpeg incluyendo
+      como se serializa la interpolacion lineal en dB. Debe fijar la tabla de valores esperados de
+      la paridad con volumeAtFrame (CA-002) porque las libs no pueden importarse entre si.
+    existing_tables: []
+    existing_endpoints: []
+    output_file: sdd/specs/spec-e-burgos-004-audio-mix-mastering/cycles/cycle-01/architect.md
+
+  implementor_back:
+    goal: Implementar una task por vez segun el contrato del arquitecto, con su spec hermano.
+    app: libs/media-local
+    app_context: sdd/context/libs/media-local/context_prompt.md
+
+  reviewer:
+    goal: Validar todo el output del ciclo
+    output_file: sdd/specs/spec-e-burgos-004-audio-mix-mastering/cycles/cycle-01/cycle.json
