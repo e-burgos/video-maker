@@ -94,8 +94,8 @@
     ],
     "files_deleted": [],
     "usage": {
-      "tokens_in": 2346193,
-      "tokens_out": 259447,
+      "tokens_in": 1181303,
+      "tokens_out": 208467,
       "by_agent": [
         {
           "agent": "functional",
@@ -138,11 +138,12 @@
           "label": "apertura del ciclo (spec detallada, brief, cycle.json, contextos de apps/render-api), coordinacion de 15 tasks task-a-task con verificacion propia, y la ejecucion real independiente de CA-002",
           "provider_model": "claude/opus",
           "effort": "high",
-          "tokens_in": 1420000,
-          "tokens_out": 96000,
-          "approx": true,
-          "source": "declared-estimate",
-          "recorded_at": "2026-09-08"
+          "tokens_in": 255110,
+          "tokens_out": 45020,
+          "approx": false,
+          "source": "agent-usage-notification",
+          "recorded_at": "2026-09-08",
+          "tokens_total": 300130
         },
         {
           "agent": "implementor-back",
@@ -349,10 +350,10 @@
           "source": "declared-estimate"
         },
         "claude/opus": {
-          "tokens_in": 1722987,
-          "tokens_out": 149468,
-          "approx": true,
-          "source": "declared-estimate"
+          "tokens_in": 558097,
+          "tokens_out": 98488,
+          "approx": false,
+          "source": "agent-usage-notification"
         }
       }
     }
