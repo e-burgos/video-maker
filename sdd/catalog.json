@@ -160,5 +160,9 @@
       "file": "tools.schema.json"
     }
   ],
-  "memory": []
+  "memory": [
+    {
+      "file": "2026-09-08-spec-e-burgos-005-render-service-cycle-01.md"
+    }
+  ]
 }

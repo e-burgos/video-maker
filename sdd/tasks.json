@@ -120,6 +120,20 @@
           "tasks_done": 10
         }
       }
+    },
+    "spec-e-burgos-005-render-service": {
+      "cycles": {
+        "cycle-01": {
+          "file": "sdd/specs/spec-e-burgos-005-render-service/cycles/cycle-01/tasks.json",
+          "module": "render-service",
+          "apps": [
+            "apps/render-api"
+          ],
+          "status": "completed",
+          "tasks_total": 15,
+          "tasks_done": 15
+        }
+      }
     }
   }
 }

@@ -19,8 +19,12 @@
       "created_in_cycle": "número de ciclo donde se definió por primera vez",
       "updated_in_cycle": "número del último ciclo que lo modificó (null si nunca se actualizó)",
       "description": "qué hace el endpoint",
-      "path_params": ["param1"],
-      "required_headers": ["Header-Name"],
+      "path_params": [
+        "param1"
+      ],
+      "required_headers": [
+        "Header-Name"
+      ],
       "request_body": {},
       "responses": {
         "200": "descripción"
@@ -33,5 +37,29 @@
         }
       ]
     }
+  },
+  "apps/render-api": {
+    "endpoints": [
+      {
+        "id": "EP-001",
+        "method": "GET",
+        "path": "/health",
+        "module": "render-service",
+        "spec": "sdd/specs/spec-e-burgos-005-render-service",
+        "status": "implemented",
+        "created_in_cycle": 1,
+        "updated_in_cycle": null,
+        "description": "Service health probe. Reports the resolved state of the two engine modules loaded via dynamic import (media-local, composition-remotion/render), the resolution state of the media binaries (ffmpeg, ffprobe) by logical name and env var — never their resolved host path — and the capabilities enabled in this cycle. Answers 200 in both the ok and degraded states.",
+        "path_params": [],
+        "required_headers": [],
+        "request_body": {},
+        "responses": {
+          "200": "application/json: { status: 'ok' | 'degraded', service: 'render-api', cycle: number, time: ISO-8601 string, engine: [{ name, loaded }], binaries: [{ name, envVar, resolved }], capabilities: { renderPipeline, assetStore, jobQueue } }. status is ok only when every engine module loaded and every binary resolved.",
+          "405": "application/json: { error: { code: 'METHOD_NOT_ALLOWED', stage: null, message, resource, expected } } with an Allow header, for any method other than GET on this path.",
+          "500": "application/json: { error: { code: 'INTERNAL_ERROR', stage: null, message } } from the central error handler."
+        },
+        "changelog": []
+      }
+    ]
   }
 }

@@ -62,8 +62,9 @@ Para el detalle técnico de cada subproyecto, ver su constitución específica:
 | `libs/composition-remotion` | lib React + Remotion | Renderiza una Timeline en frames: pistas, transiciones, captions y render headless | `sdd/context/libs/composition-remotion/constitution.md` |
 | `libs/auto-montage` | lib Node TS | Ingesta de un proyecto de medios, keyword spotting, planificador de B-roll y armado automático de la Timeline | `sdd/context/libs/auto-montage/constitution.md` |
 | `tools/render-cli` | tool Node ejecutable | CLI headless: de carpeta de assets a MP4 | `sdd/context/tools/render-cli/constitution.md` |
+| `apps/render-api` | app Node (servicio HTTP local) | Puerta HTTP del motor: orquesta render mudo → mezcla → mux → verificación de loudness en una sola llamada | `sdd/context/apps/render-api/constitution.md` |
 
-> Todavía no hay apps/libs/tools generadas en Nx. Al generar la primera, sumar una fila por subproyecto (solo agregar filas — nunca reformatear la tabla completa).
+> Al generar un subproyecto nuevo, sumar una fila a esta tabla (solo agregar filas — nunca reformatear la tabla completa).
 > Las constituciones de subproyecto son la **fuente de verdad** del stack y las convenciones técnicas.
 > La sección 3 de este documento es un resumen de alto nivel — siempre leer el subproyecto para detalles.
 
@@ -87,6 +88,7 @@ Para el detalle técnico de cada subproyecto, ver su constitución específica:
 | `tools/render-cli` | TypeScript estricto (ESM, Node >= 22) + `node:util parseArgs` + Vitest 4 (puertos inyectables, cero binarios en CI; render real solo en el target `smoke`) — cero dependencias npm propias | cycle-03 \| 2026-09-08 |
 | `libs/media-local` | TypeScript estricto + execa 10 + Zod 4.5 + Vitest 4 (fixtures de ffprobe grabadas, fixtures de ffmpeg/whisper reconstruidas a mano, cero binarios en CI) + capa pura de mezcla de audio en `src/mix/`: `AudioMixPlan`/`Timeline` → `FilterGraph` tipado → `-filter_complex` y args de ffmpeg, sin ejecutar el binario (paridad de la curva de ducking con el preview de Remotion fijada por tabla) + capa de ejecución en `src/ffmpeg/`: `mixTimelineAudio` (N+1 pasadas, master bus `alimiter level=disabled`), `verifyMixLoudness` (tolerancias declaradas) y `muxAudioIntoVideo` (`-c:v copy`, AAC 192k); target manual `smoke-audio` con ffmpeg real, fuera de CI | spec-004 cycle-02 \| 2026-09-08 |
 | `libs/composition-remotion` | React 19 + Remotion 4.0.522 (`transitions`/`bundler`/`renderer`/`cli`) + Vitest 4/jsdom (cero render en CI) + kinetic captions completos: presets con animación `spring`, safe zones por plataforma, plan de caja por clip y `<KineticCaptions />` cableado en `TimelineComposition` (helpers puros, sin binarios de fuente); target `smoke` funcional desde FIX-e-burgos-001-001; `renderTimeline`/`TimelineComposition` aceptan `audio: 'mix' \| 'muted'` (default estructural, render mudo para el mux de `media-local`) | spec-004 cycle-02 \| 2026-09-08 |
+| `apps/render-api` | TypeScript estricto (ESM, Node >= 22) + `node:http` + Vitest 4 — cero dependencias npm propias; servidor loopback con `GET /health`, superficie de errores propia (15 códigos, 5 etapas, payload de máquina en inglés sin `.stack` ni rutas de host) y `runRenderPipeline` (render mudo → mezcla → mux → verificación de loudness) sobre siete puertos inyectables; las dos libs pesadas entran sólo por `await import()` en el único adaptador de producción, así que la suite corre sin ffmpeg ni Chrome; sin `eslint.config.mjs` propio (D-9), lintea contra el flat config de la raíz | spec-005 cycle-01 \| 2026-09-08 |
 
 ---
 

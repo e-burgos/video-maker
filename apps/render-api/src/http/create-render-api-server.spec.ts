@@ -1,0 +1,71 @@
+import { afterEach, describe, expect, it } from 'vitest';
+
+import { createCallLog } from '../__fixtures__/call-log';
+import { createFakeRenderApiDependencies } from '../__fixtures__/fake-render-api-dependencies';
+import { createRenderApiServer } from './create-render-api-server';
+import type { RenderApiServer } from './create-render-api-server';
+
+describe('createRenderApiServer', () => {
+  let server: RenderApiServer | undefined;
+
+  afterEach(async () => {
+    if (server !== undefined) {
+      await server.close();
+      server = undefined;
+    }
+  });
+
+  it('serves GET /health over a real loopback socket on an ephemeral port and closes', async () => {
+    const callLog = createCallLog();
+    const deps = createFakeRenderApiDependencies(callLog);
+    server = createRenderApiServer(deps, { host: '127.0.0.1', port: 0 });
+
+    const address = await server.listen();
+    expect(address.host).toBe('127.0.0.1');
+    expect(address.port).toBeGreaterThan(0);
+
+    const response = await fetch(`http://${address.host}:${address.port}/health`);
+    const body: unknown = await response.json();
+
+    expect(response.status).toBe(200);
+    expect(response.headers.get('content-type')).toContain('application/json');
+    expect((body as { status: string }).status).toBe('ok');
+
+    await server.close();
+    server = undefined;
+
+    await expect(fetch(`http://${address.host}:${address.port}/health`)).rejects.toThrow();
+  });
+
+  it('falls back to its own last-resort 500 when handleRequest itself throws', async () => {
+    const callLog = createCallLog();
+    const deps = createFakeRenderApiDependencies(callLog, {
+      logger: {
+        info: () => undefined,
+        error: () => {
+          throw new Error('logger is broken');
+        },
+      },
+    });
+    server = createRenderApiServer(deps, { host: '127.0.0.1', port: 0 });
+
+    const address = await server.listen();
+    const response = await fetch(`http://${address.host}:${address.port}/unknown-path`);
+    const body: unknown = await response.json();
+
+    expect(response.status).toBe(500);
+    expect((body as { error: { code: string } }).error.code).toBe('INTERNAL_ERROR');
+  });
+
+  it('rejects a second close call because the server is no longer running', async () => {
+    const callLog = createCallLog();
+    const deps = createFakeRenderApiDependencies(callLog);
+    server = createRenderApiServer(deps, { host: '127.0.0.1', port: 0 });
+
+    await server.listen();
+    await server.close();
+
+    await expect(server.close()).rejects.toThrow();
+    server = undefined;
+  });
+});

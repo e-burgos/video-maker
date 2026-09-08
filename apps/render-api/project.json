@@ -1,0 +1,34 @@
+{
+  "name": "render-api",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "apps/render-api/src",
+  "projectType": "application",
+  "tags": ["scope:engine", "type:app"],
+  "targets": {
+    "lint": {
+      "executor": "@nx/eslint:lint"
+    },
+    "test": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "vitest run --coverage",
+        "cwd": "apps/render-api"
+      }
+    },
+    "build": {
+      "executor": "nx:run-commands",
+      "outputs": ["{workspaceRoot}/dist/out-tsc/apps/render-api"],
+      "options": {
+        "command": "tsc -p tsconfig.lib.json",
+        "cwd": "apps/render-api"
+      }
+    },
+    "serve": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "node -r ./apps/render-api/src/server-register.cjs apps/render-api/src/main.ts",
+        "env": { "SWC_NODE_PROJECT": "tsconfig.base.json" }
+      }
+    }
+  }
+}

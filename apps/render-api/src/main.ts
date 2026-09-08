@@ -1,0 +1,37 @@
+import { readServerConfig } from './config/server-config';
+import { createNodeRenderApiDependencies } from './deps/node-render-api-dependencies';
+import { toErrorPayload } from './errors/to-error-payload';
+import { isRenderApiError } from './errors/render-api-error';
+import { createRenderApiServer } from './http/create-render-api-server';
+
+const SHUTDOWN_SIGNALS = ['SIGINT', 'SIGTERM'] as const;
+const CONFIG_EXIT_CODE = 78;
+
+function isServerConfigError(cause: unknown): boolean {
+  return isRenderApiError(cause) && cause.code === 'SERVER_CONFIG_INVALID';
+}
+
+async function main(): Promise<void> {
+  const config = readServerConfig(process.env);
+  const deps = createNodeRenderApiDependencies(process.env);
+
+  await deps.preloadEngineModules();
+
+  const server = createRenderApiServer(deps, config);
+  const address = await server.listen();
+
+  process.stdout.write(`${JSON.stringify({ event: 'listening', host: address.host, port: address.port })}\n`);
+
+  for (const signal of SHUTDOWN_SIGNALS) {
+    process.once(signal, () => {
+      void server.close().then(() => {
+        process.exitCode = 0;
+      });
+    });
+  }
+}
+
+void main().catch((cause: unknown) => {
+  process.stderr.write(`${JSON.stringify({ event: 'startup-failed', error: toErrorPayload(cause) })}\n`);
+  process.exitCode = isServerConfigError(cause) ? CONFIG_EXIT_CODE : 1;
+});

@@ -25,8 +25,8 @@ El proyecto usa **Nx** como monorepo manager con **pnpm** como package manager (
 
 ```
 <repo-root>/                 → nombre del proyecto en sdd/global.json → project
-  apps/                      → Una carpeta por app generada con Nx (todavía ninguna)
-  libs/                      → Una carpeta por lib generada con Nx (todavía ninguna)
+  apps/                      → Una carpeta por app generada con Nx (`render-api`: servicio HTTP local del motor)
+  libs/                      → Una carpeta por lib generada con Nx (`timeline-core`, `media-local`, `composition-remotion`, `auto-montage`, `shared-utils`)
   tools/                     → Herramientas del workspace (`render-cli`: CLI headless del motor)
   sdd/                       → Sistema SDD (NO modificar manualmente)
     context/
@@ -54,8 +54,9 @@ El proyecto usa **Nx** como monorepo manager con **pnpm** como package manager (
 | `libs/composition-remotion` | `sdd/context/libs/composition-remotion/context_prompt.md` | `sdd/context/libs/composition-remotion/constitution.md` |
 | `libs/auto-montage` | `sdd/context/libs/auto-montage/context_prompt.md` | `sdd/context/libs/auto-montage/constitution.md` |
 | `tools/render-cli` | `sdd/context/tools/render-cli/context_prompt.md` | `sdd/context/tools/render-cli/constitution.md` |
+| `apps/render-api` | `sdd/context/apps/render-api/context_prompt.md` | `sdd/context/apps/render-api/constitution.md` |
 
-> Todavía no hay apps/libs/tools generadas en Nx. Al generar la primera, sumar una fila por subproyecto (solo agregar filas — nunca reformatear la tabla completa).
+> Al generar un subproyecto nuevo, sumar una fila a esta tabla (solo agregar filas — nunca reformatear la tabla completa).
 
 ---
 

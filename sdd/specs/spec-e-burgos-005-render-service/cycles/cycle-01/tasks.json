@@ -1,0 +1,460 @@
+{
+  "$schema": "../../../../schemas/cycle-tasks.schema.json",
+  "spec": "spec-e-burgos-005-render-service",
+  "cycle": 1,
+  "module": "render-service",
+  "apps": [
+    "apps/render-api"
+  ],
+  "flow": "full",
+  "user_stories_generated": true,
+  "prerequisites": {
+    "tasks_generated": true
+  },
+  "tasks": [
+    {
+      "id": "TASK-001",
+      "title": "[BE] HU-1-01: Scaffold de apps/render-api + auditoria del generador + prueba de arranque real del harness",
+      "user_stories": [
+        "HU-1-01"
+      ],
+      "estimation_hours": 4,
+      "story_points": 5,
+      "depends_on": [],
+      "status": "done",
+      "files": [
+        "apps/render-api/project.json",
+        "apps/render-api/tsconfig.json",
+        "apps/render-api/tsconfig.lib.json",
+        "apps/render-api/tsconfig.spec.json",
+        "apps/render-api/vite.config.ts",
+        "apps/render-api/src/server-register.cjs"
+      ],
+      "usage": {
+        "agent": "implementor-back",
+        "provider_model": "claude/sonnet",
+        "effort": "medium",
+        "tokens_in": 85134,
+        "tokens_out": 15024,
+        "tokens_total": 100158,
+        "approx": false,
+        "source": "agent-usage-notification",
+        "recorded_at": "2026-09-08"
+      }
+    },
+    {
+      "id": "TASK-002",
+      "title": "[BE] HU-1-08: Tipos de puertos, tipos de motor y fixtures de test compartidas",
+      "user_stories": [
+        "HU-1-08"
+      ],
+      "estimation_hours": 3,
+      "story_points": 3,
+      "depends_on": [
+        "TASK-001"
+      ],
+      "status": "done",
+      "files": [
+        "apps/render-api/src/deps/render-api-dependencies.ts",
+        "apps/render-api/src/engine/engine-modules.ts",
+        "apps/render-api/src/engine/media-binaries.ts",
+        "apps/render-api/src/__fixtures__/call-log.ts",
+        "apps/render-api/src/__fixtures__/fake-render-api-dependencies.ts",
+        "apps/render-api/src/__fixtures__/minimal-timeline.ts"
+      ],
+      "usage": {
+        "agent": "implementor-back",
+        "provider_model": "claude/sonnet",
+        "effort": "medium",
+        "tokens_in": 47707,
+        "tokens_out": 8419,
+        "tokens_total": 56126,
+        "approx": false,
+        "source": "agent-usage-notification",
+        "recorded_at": "2026-09-08"
+      }
+    },
+    {
+      "id": "TASK-003",
+      "title": "[BE] HU-1-02: Configuracion del servidor por variables de entorno",
+      "user_stories": [
+        "HU-1-02"
+      ],
+      "estimation_hours": 1,
+      "story_points": 1,
+      "depends_on": [
+        "TASK-001",
+        "TASK-004"
+      ],
+      "status": "done",
+      "files": [
+        "apps/render-api/src/config/server-config.ts",
+        "apps/render-api/src/config/server-config.spec.ts"
+      ],
+      "usage": {
+        "agent": "implementor-back",
+        "provider_model": "claude/sonnet",
+        "effort": "medium",
+        "tokens_in": 28677,
+        "tokens_out": 5061,
+        "tokens_total": 33738,
+        "approx": false,
+        "source": "agent-usage-notification",
+        "recorded_at": "2026-09-08"
+      }
+    },
+    {
+      "id": "TASK-004",
+      "title": "[BE] HU-1-06: Superficie de errores propia (codigos, etapas y subclase concreta)",
+      "user_stories": [
+        "HU-1-06"
+      ],
+      "estimation_hours": 2,
+      "story_points": 2,
+      "depends_on": [
+        "TASK-001"
+      ],
+      "status": "done",
+      "files": [
+        "apps/render-api/src/errors/render-api-error.ts",
+        "apps/render-api/src/errors/render-api-error.spec.ts",
+        "apps/render-api/src/errors/pipeline-stage-error.ts"
+      ],
+      "usage": {
+        "agent": "implementor-back",
+        "provider_model": "claude/sonnet",
+        "effort": "medium",
+        "tokens_in": 11336,
+        "tokens_out": 2001,
+        "tokens_total": 13337,
+        "approx": false,
+        "source": "agent-usage-notification",
+        "recorded_at": "2026-09-08"
+      }
+    },
+    {
+      "id": "TASK-005",
+      "title": "[BE] HU-1-06: Traduccion de errores del motor a la superficie propia (tabla 5.5)",
+      "user_stories": [
+        "HU-1-06"
+      ],
+      "estimation_hours": 3,
+      "story_points": 3,
+      "depends_on": [
+        "TASK-004"
+      ],
+      "status": "done",
+      "files": [
+        "apps/render-api/src/errors/translate-engine-error.ts",
+        "apps/render-api/src/errors/translate-engine-error.spec.ts"
+      ],
+      "usage": {
+        "agent": "implementor-back",
+        "provider_model": "claude/sonnet",
+        "effort": "medium",
+        "tokens_in": 26754,
+        "tokens_out": 4721,
+        "tokens_total": 31475,
+        "approx": false,
+        "source": "agent-usage-notification",
+        "recorded_at": "2026-09-08"
+      }
+    },
+    {
+      "id": "TASK-006",
+      "title": "[BE] HU-1-06: Mapeo codigo->status HTTP y payload de maquina en ingles",
+      "user_stories": [
+        "HU-1-06"
+      ],
+      "estimation_hours": 2,
+      "story_points": 2,
+      "depends_on": [
+        "TASK-005"
+      ],
+      "status": "done",
+      "files": [
+        "apps/render-api/src/errors/http-status-for.ts",
+        "apps/render-api/src/errors/http-status-for.spec.ts",
+        "apps/render-api/src/errors/to-error-payload.ts",
+        "apps/render-api/src/errors/to-error-payload.spec.ts"
+      ],
+      "usage": {
+        "agent": "implementor-back",
+        "provider_model": "claude/sonnet",
+        "effort": "medium",
+        "tokens_in": 25682,
+        "tokens_out": 4532,
+        "tokens_total": 30214,
+        "approx": false,
+        "source": "agent-usage-notification",
+        "recorded_at": "2026-09-08"
+      }
+    },
+    {
+      "id": "TASK-007",
+      "title": "[BE] HU-1-05: Rutas de trabajo del pipeline (work/renders/<renderId> y out/)",
+      "user_stories": [
+        "HU-1-05"
+      ],
+      "estimation_hours": 1,
+      "story_points": 1,
+      "depends_on": [
+        "TASK-001"
+      ],
+      "status": "done",
+      "files": [
+        "apps/render-api/src/pipeline/render-pipeline-paths.ts",
+        "apps/render-api/src/pipeline/render-pipeline-paths.spec.ts"
+      ],
+      "usage": {
+        "agent": "implementor-back",
+        "provider_model": "claude/sonnet",
+        "effort": "medium",
+        "tokens_in": 20852,
+        "tokens_out": 3680,
+        "tokens_total": 24532,
+        "approx": false,
+        "source": "agent-usage-notification",
+        "recorded_at": "2026-09-08"
+      }
+    },
+    {
+      "id": "TASK-008",
+      "title": "[BE] HU-1-04, HU-1-05, HU-1-07: runRenderPipeline (orden fijo, mkdir previo, intermedios conservados, tolerancia)",
+      "user_stories": [
+        "HU-1-04",
+        "HU-1-05",
+        "HU-1-07"
+      ],
+      "estimation_hours": 4,
+      "story_points": 5,
+      "depends_on": [
+        "TASK-002",
+        "TASK-005",
+        "TASK-007"
+      ],
+      "status": "done",
+      "files": [
+        "apps/render-api/src/pipeline/run-render-pipeline.ts",
+        "apps/render-api/src/pipeline/run-render-pipeline.spec.ts"
+      ],
+      "usage": {
+        "agent": "implementor-back",
+        "provider_model": "claude/sonnet",
+        "effort": "medium",
+        "tokens_in": 27221,
+        "tokens_out": 4804,
+        "tokens_total": 32025,
+        "approx": false,
+        "source": "agent-usage-notification",
+        "recorded_at": "2026-09-08"
+      }
+    },
+    {
+      "id": "TASK-009",
+      "title": "[BE] HU-1-03: Transporte HTTP agnostico de node:http y router con 404/405 explicitos",
+      "user_stories": [
+        "HU-1-03"
+      ],
+      "estimation_hours": 2,
+      "story_points": 2,
+      "depends_on": [
+        "TASK-001"
+      ],
+      "status": "done",
+      "files": [
+        "apps/render-api/src/http/http-message.ts",
+        "apps/render-api/src/http/routes.ts",
+        "apps/render-api/src/http/router.ts",
+        "apps/render-api/src/http/router.spec.ts"
+      ],
+      "usage": {
+        "agent": "implementor-back",
+        "provider_model": "claude/sonnet",
+        "effort": "medium",
+        "tokens_in": 15501,
+        "tokens_out": 2735,
+        "tokens_total": 18236,
+        "approx": false,
+        "source": "agent-usage-notification",
+        "recorded_at": "2026-09-08"
+      }
+    },
+    {
+      "id": "TASK-010",
+      "title": "[BE] HU-1-03: Handler de GET /health (status ok/degraded, sin rutas resueltas en el payload)",
+      "user_stories": [
+        "HU-1-03"
+      ],
+      "estimation_hours": 2,
+      "story_points": 2,
+      "depends_on": [
+        "TASK-002",
+        "TASK-009"
+      ],
+      "status": "done",
+      "files": [
+        "apps/render-api/src/http/health-handler.ts",
+        "apps/render-api/src/http/health-handler.spec.ts"
+      ],
+      "usage": {
+        "agent": "implementor-back",
+        "provider_model": "claude/sonnet",
+        "effort": "medium",
+        "tokens_in": 13705,
+        "tokens_out": 2419,
+        "tokens_total": 16124,
+        "approx": true,
+        "source": "declared-estimate",
+        "recorded_at": "2026-09-08"
+      }
+    },
+    {
+      "id": "TASK-011",
+      "title": "[BE] HU-1-03, HU-1-06: Manejador central de errores HTTP (router + health + sobre de error unico)",
+      "user_stories": [
+        "HU-1-03",
+        "HU-1-06"
+      ],
+      "estimation_hours": 2,
+      "story_points": 2,
+      "depends_on": [
+        "TASK-006",
+        "TASK-009",
+        "TASK-010"
+      ],
+      "status": "done",
+      "files": [
+        "apps/render-api/src/http/handle-request.ts",
+        "apps/render-api/src/http/handle-request.spec.ts"
+      ],
+      "usage": {
+        "agent": "implementor-back",
+        "provider_model": "claude/sonnet",
+        "effort": "medium",
+        "tokens_in": 13706,
+        "tokens_out": 2419,
+        "tokens_total": 16125,
+        "approx": true,
+        "source": "declared-estimate",
+        "recorded_at": "2026-09-08"
+      }
+    },
+    {
+      "id": "TASK-012",
+      "title": "[BE] HU-1-02, HU-1-03: Servidor node:http real sobre socket loopback",
+      "user_stories": [
+        "HU-1-02",
+        "HU-1-03"
+      ],
+      "estimation_hours": 2,
+      "story_points": 2,
+      "depends_on": [
+        "TASK-011"
+      ],
+      "status": "done",
+      "files": [
+        "apps/render-api/src/http/create-render-api-server.ts",
+        "apps/render-api/src/http/create-render-api-server.spec.ts"
+      ],
+      "usage": {
+        "agent": "implementor-back",
+        "provider_model": "claude/sonnet",
+        "effort": "medium",
+        "tokens_in": 23704,
+        "tokens_out": 4183,
+        "tokens_total": 27887,
+        "approx": true,
+        "source": "declared-estimate",
+        "recorded_at": "2026-09-08"
+      }
+    },
+    {
+      "id": "TASK-013",
+      "title": "[BE] HU-1-02, HU-1-04: Adaptador de produccion (await import() dinamico de las dos libs pesadas)",
+      "user_stories": [
+        "HU-1-02",
+        "HU-1-04"
+      ],
+      "estimation_hours": 4,
+      "story_points": 3,
+      "depends_on": [
+        "TASK-002",
+        "TASK-008"
+      ],
+      "status": "done",
+      "files": [
+        "apps/render-api/src/deps/node-render-api-dependencies.ts",
+        "apps/render-api/src/deps/node-render-api-dependencies.spec.ts"
+      ],
+      "usage": {
+        "agent": "implementor-back",
+        "provider_model": "claude/sonnet",
+        "effort": "medium",
+        "tokens_in": 35556,
+        "tokens_out": 6275,
+        "tokens_total": 41831,
+        "approx": true,
+        "source": "declared-estimate",
+        "recorded_at": "2026-09-08"
+      }
+    },
+    {
+      "id": "TASK-014",
+      "title": "[BE] HU-1-02, HU-1-03: main.ts (frontera de proceso) + verificacion de ejecucion real de CA-002",
+      "user_stories": [
+        "HU-1-02",
+        "HU-1-03"
+      ],
+      "estimation_hours": 3,
+      "story_points": 3,
+      "depends_on": [
+        "TASK-003",
+        "TASK-012",
+        "TASK-013"
+      ],
+      "status": "done",
+      "files": [
+        "apps/render-api/src/main.ts"
+      ],
+      "usage": {
+        "agent": "implementor-back",
+        "provider_model": "claude/sonnet",
+        "effort": "medium",
+        "tokens_in": 15552,
+        "tokens_out": 2745,
+        "tokens_total": 18297,
+        "approx": false,
+        "source": "agent-usage-notification",
+        "recorded_at": "2026-09-08"
+      }
+    },
+    {
+      "id": "TASK-015",
+      "title": "[BE] HU-1-09: README del subproyecto (comandos, variables de entorno, alcance descopado)",
+      "user_stories": [
+        "HU-1-09"
+      ],
+      "estimation_hours": 1,
+      "story_points": 1,
+      "depends_on": [
+        "TASK-014"
+      ],
+      "status": "done",
+      "files": [
+        "apps/render-api/README.md"
+      ],
+      "usage": {
+        "agent": "implementor-back",
+        "provider_model": "claude/sonnet",
+        "effort": "medium",
+        "tokens_in": 19145,
+        "tokens_out": 3378,
+        "tokens_total": 22523,
+        "approx": false,
+        "source": "agent-usage-notification",
+        "recorded_at": "2026-09-08"
+      }
+    }
+  ]
+}

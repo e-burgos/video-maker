@@ -1,0 +1,138 @@
+# sdd/specs/spec-e-burgos-005-render-service/cycles/cycle-01/brief.yaml
+# Generado por: sdd-orchestrator
+# Al: iniciar el ciclo
+
+cycle: 1
+module: render-service
+spec: spec-e-burgos-005-render-service
+flow: full
+phase: render-service-foundation
+date: 2026-09-08
+app_context: sdd/context/apps/render-api/context_prompt.md
+
+objective: |
+  Poner de pie la app apps/render-api y darle la unica capacidad que ningun otro subproyecto del
+  monorepo puede tener: orquestar render -> mix -> mux -> verify en una sola llamada. El ciclo
+  entrega la app ejecutable, sus puertos inyectables, el pipeline orquestador, la superficie de
+  errores tipada en ingles con su mapeo a HTTP y un servidor node:http con GET /health. No entrega
+  cola de jobs, ni endpoints de assets, ni MinIO: esos son cycle-02 y cycle-03.
+
+scope:
+  - Scaffold de apps/render-api con generador Nx, auditado en la misma task (package.json, nx.json, placeholders de src/) y verificado con una ejecucion real (RF-1, CA-001, CA-002)
+  - Puertos inyectables del servicio y su unico adaptador de produccion, con await import() dinamico de las dos libs pesadas (RF-2)
+  - runRenderPipeline - render audio muted -> mixTimelineAudio -> muxAudioIntoVideo -> verifyMixLoudness, mkdir previo, intermedios conservados (RF-3, CA-003, CA-005)
+  - Superficie de errores tipada propia que traduce la tabla de spec-004 architect 15.2 a codigo + etapa + status HTTP, payload en ingles (RF-4, CA-004, D-4)
+  - Servidor node:http con router, GET /health, JSON en todos los caminos y manejador central de errores (RF-5)
+  - Politica ante withinTolerance false - publicar y reportar el delta, sin reintento ni excepcion (RF-6, CA-006, D-7)
+  - README del subproyecto con comandos, variables de entorno y alcance descopado (RF-7, CA-008)
+
+out_of_scope:
+  - Cola de jobs, concurrencia, progreso y cancelacion - cycle-03
+  - Endpoints de assets, upload, probe y persistencia de Timeline/EDL - cycle-02
+  - MinIO, docker-compose y cualquier cliente S3 - cycle-02 (D-3)
+  - Dependencias npm nuevas de cualquier tipo (RNF-1, D-2)
+  - Crear apps/render-api/eslint.config.mjs - descopado por el hook config-protection (D-9)
+  - Tocar tsconfig.base.json - una app no necesita alias propio; si hiciera falta se escala con el diff (RNF-5)
+  - Tocar tools/render-cli - N-2 y su salida bilingue se agendan para cycle-03 (D-5)
+  - Tocar coverage.include de libs/composition-remotion - se amplia en cycle-03 (D-6)
+  - Bundlear Remotion con webpack - se ejercita en el smoke E2E de cycle-03, declarado no verificado en este ciclo (D-10)
+  - Re-master del integrado del bus completo - fuera del alcance de la spec por ahora (spec-004 D-K)
+
+dependencies_required:
+  - spec-e-burgos-001-core-composition-media-pipeline (completed)
+  - spec-e-burgos-002-auto-montage-pipeline (completed)
+  - spec-e-burgos-004-audio-mix-mastering (completed) - la API publica de architect.md 15
+
+inherited_inputs:
+  api_publica_a_consumir: |
+    composition-remotion/render: renderTimeline(timeline, options, deps) con options.audio = 'muted'
+      (TimelineAudioMode). Errores: RenderTimelineError con INVALID_TIMELINE | BUNDLE_FAILED |
+      COMPOSITION_NOT_FOUND | RENDER_FAILED.
+    media-local: ExecaCommandRunner, resolveBinary, mixTimelineAudio, verifyMixLoudness,
+      muxAudioIntoVideo, MissingMediaStreamError, isMediaLocalError.
+    Orden de llamadas y tabla de errores completa:
+      sdd/specs/spec-e-burgos-004-audio-mix-mastering/cycles/cycle-02/architect.md seccion 15.
+      Leer esa seccion entera antes de disenar; NO copiar de ella ningun literal de filtergraph
+      (la seccion 4.3 de ese documento tiene una errata registrada).
+  reglas_operativas_del_repo: |
+    - publicDir = raiz del proyecto de medios, nunca raw/ (rama verificada de assetSrc).
+    - Todo alias @video-maker/* se declara en CADA resolvedor (tsconfig, vite, webpack de Remotion).
+    - Cualquier runner Node de un .ts que llegue a bundlear Remotion usa el patron cli-register.cjs
+      de tools/render-cli (preserva el loader nativo de .js).
+    - SWC_NODE_PROJECT apunta a un tsconfig con baseUrl en la raiz del workspace en todo target
+      nx:run-commands con cwd de proyecto.
+    - Verificar un exit code exacto invocando el binario, nunca via nx run.
+    - Nunca render y transcripcion a la vez; gate de memoria antes de cualquier render.
+
+agent_contexts:
+  functional:
+    goal: >
+      Convertir RF-1..RF-7 y CA-001..CA-008 en historias de usuario y requisitos verificables. El
+      usuario de este ciclo NO es el creador de contenido: es el frontend de spec-006 y el propio
+      dev operando el servicio. Las historias tienen que hablar de contrato observable (que
+      responde el servicio, que dice cuando algo falla, que queda en disco), no de estructura
+      interna. Cada CA tiene que quedar atado al simbolo que lo verifica.
+    business_context: >
+      Cuatro libs ya resuelven el motor completo, y tools/render-cli las encadena para un solo caso
+      headless. Falta la pieza que permite operarlo desde afuera: un servicio local que reciba una
+      Timeline y devuelva un MP4 masterizado. apps/render-api es ademas el unico subproyecto que
+      los boundaries Nx dejan depender de media-local y composition-remotion a la vez, asi que la
+      orquestacion de las cuatro llamadas vive aca o no vive en ningun lado. Este primer ciclo no
+      encola nada: prueba que la app existe, arranca, orquesta el pipeline y traduce cualquier
+      fallo del motor a un payload de maquina en ingles.
+    relevant_spec_sections:
+      - Requisitos Funcionales - Ciclo 01 (RF-1..RF-7)
+      - Requisitos No-Funcionales (RNF-1..RNF-6)
+      - Criterios de Aceptacion - Ciclo 01 (CA-001..CA-008)
+      - Decisiones del orquestador D-2, D-4, D-7, D-8, D-10
+    output_file: sdd/specs/spec-e-burgos-005-render-service/cycles/cycle-01/functional.md
+
+  architect:
+    goal: >
+      Cerrar las firmas antes de que nazcan las tasks. Definir: (1) el arbol de apps/render-api y
+      que archivo es la unica frontera de proceso; (2) el objeto de puertos inyectables completo
+      con sus tipos y su adaptador de produccion; (3) la firma exacta de runRenderPipeline, su
+      resultado tipado y las rutas de trabajo que produce; (4) la superficie de errores propia -
+      union de codigos as const, la funcion de traduccion desde la tabla de spec-004 15.2 y la
+      tabla codigo -> status HTTP; (5) el contrato de GET /health; (6) el router y el manejador
+      central de errores; (7) el project.json completo (targets lint/test/build/serve), el
+      package.json, los tsconfig y el vite.config.ts con coverage.include; (8) el contenido
+      propuesto de apps/render-api/eslint.config.mjs, que NO se crea (D-9) y queda documentado
+      aqui; (9) la lista cerrada de tests obligatorios por CA, con archivo y simbolo. Estrechar en
+      la frontera los codigos de error de las dos libs con un type guard sobre una lista propia
+      as const o con import type - nunca copiar el union ajeno.
+    existing_tables: []
+    existing_endpoints: []
+    must_read:
+      - sdd/specs/spec-e-burgos-004-audio-mix-mastering/cycles/cycle-02/architect.md (seccion 15 completa)
+      - sdd/context/libs/media-local/constitution.md
+      - sdd/context/libs/composition-remotion/constitution.md
+      - sdd/context/tools/render-cli/constitution.md
+      - tools/render-cli/project.json, package.json, tsconfig*.json y src/cli-register.cjs como modelo de scaffold
+    output_file: sdd/specs/spec-e-burgos-005-render-service/cycles/cycle-01/architect.md
+
+  planner:
+    goal: >
+      Convertir las historias y el contrato del arquitecto en tasks ordenadas por dependencia, una
+      por unidad de contrato, cada una con su spec hermano en files[]. La task de scaffold es la
+      primera y audita en el mismo paso package.json, nx.json y los placeholders de src/. Ninguna
+      task en paralelo: hay un solo implementador. El registro de maquina (tasks.json) se emite
+      antes que este documento.
+    note: 'Recibe el output del Funcional y del Arquitecto; tasks.json ya existe cuando escribe.'
+    output_file: sdd/specs/spec-e-burgos-005-render-service/cycles/cycle-01/planner.md
+
+  implementor_back:
+    goal: >
+      Implementar una task por vez segun el contrato del arquitecto, con su spec hermano. Sin
+      comentarios en el codigo. Un test que falla se reporta, nunca se ajusta para que pase.
+    app: apps/render-api
+    app_context: sdd/context/apps/render-api/context_prompt.md
+    note: 'Un solo implementador por ciclo, reanudado task tras task.'
+
+  reviewer:
+    goal: >
+      Validar todo el output del ciclo contra CA-001..CA-008, contrastar el diff contra la lista de
+      tests obligatorios del arquitecto uno por uno, verificar que coverage.include mide los
+      archivos del ciclo, correr los gates de cierre y pasar el ciclo a completed.
+    checklist: sdd/skills/sdd-reviewer/checklist.md
+    output_file: sdd/specs/spec-e-burgos-005-render-service/cycles/cycle-01/cycle.json
