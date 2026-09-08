@@ -32,7 +32,7 @@ export {
   TimelineComposition,
   calculateTimelineMetadata,
 } from './components/timeline-composition';
-export type { TimelineCompositionProps } from './components/timeline-composition';
+export type { TimelineAudioMode, TimelineCompositionProps } from './components/timeline-composition';
 
 export {
   CAPTION_PRESETS,

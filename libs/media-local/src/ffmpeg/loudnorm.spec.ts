@@ -6,7 +6,7 @@ import { readFixture } from '../__fixtures__/load-fixture';
 import { CommandFailedError } from '../errors/command-failed-error';
 import { UnparseableOutputError } from '../errors/unparseable-output-error';
 import { FixtureCommandRunner } from '../runner/fixture-command-runner';
-import { DEFAULT_VOICE_TARGET, measureLoudness } from './measure-loudness';
+import { DEFAULT_VOICE_TARGET, FIRST_AUDIO_STREAM, measureLoudness } from './measure-loudness';
 import { buildLoudnormFilter } from './build-loudnorm-filter';
 import { normalizeVoice } from './normalize-voice';
 import { extractTrailingJsonObject, parseLoudnormJson } from './parse-loudnorm-json';
@@ -149,6 +149,32 @@ describe('measureLoudness (CA-020)', () => {
     const runner = new FixtureCommandRunner([{ bin: 'ffmpeg', response: { stderr: silentStderr, exitCode: 0 } }]);
 
     await expect(measureLoudness('silence.wav', runner)).rejects.toThrow(UnparseableOutputError);
+  });
+
+  it('agrega -map entre -i y -af cuando se pasa audioStreamSpecifier', async () => {
+    const runner = new FixtureCommandRunner([
+      { bin: 'ffmpeg', response: { stderr: loudnormStderr, exitCode: 0 } },
+    ]);
+
+    await measureLoudness('aroll-01.mp4', runner, { audioStreamSpecifier: FIRST_AUDIO_STREAM });
+
+    expect(runner.calls[0]?.args).toEqual([
+      '-hide_banner',
+      '-nostats',
+      '-i',
+      'aroll-01.mp4',
+      '-map',
+      FIRST_AUDIO_STREAM,
+      '-af',
+      'loudnorm=I=-14:TP=-1:LRA=11:print_format=json',
+      '-f',
+      'null',
+      '-',
+    ]);
+  });
+
+  it('FIRST_AUDIO_STREAM vale "0:a:0"', () => {
+    expect(FIRST_AUDIO_STREAM).toBe('0:a:0');
   });
 
   it('respeta ffmpegPath y runOptions', async () => {

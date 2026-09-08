@@ -158,9 +158,12 @@ el entregable final.
 
 ### Ciclo 02 — Ejecución, verificación, mux y render mudo
 
-- **RF-6:** `mixTimelineAudio(timeline, assets, out, runner, opts)` (media-local) ejecuta el mix:
-  arma el grafo (RF-4), corre la primera pasada de medición de la voz, arma la segunda pasada y
-  produce el WAV masterizado. Devuelve `{ outputPath, filterComplex, voiceMeasured, args }`.
+- **RF-6:** `mixTimelineAudio(timeline, out, runner, opts?)` (media-local) ejecuta el mix: mide la
+  voz por **asset distinto** (no por clip), arma el grafo con esas mediciones (RF-4), le **agrega la
+  etapa de master bus** de D-K y produce el WAV masterizado. Devuelve
+  `{ outputPath, filterComplex, voiceMeasured, args }`. No recibe `assets` por separado:
+  `Timeline.assets` ya los lleva y `buildAudioMixGraph` resuelve solo contra ellos — un canal
+  paralelo permitiría desincronizarlos (misma razón que D-J.3).
 - **RF-7:** `verifyMixLoudness(path, target, runner, opts)` mide el resultado con `measureLoudness`
   y devuelve `{ measured, withinTolerance, integratedDeltaLu, truePeakDeltaDb }` según las
   tolerancias de D-F. No lanza por estar fuera de tolerancia; sí por fallo del binario.
@@ -229,9 +232,12 @@ el entregable final.
 
 ### Ciclo 02
 
-- **CA-008:** `mixTimelineAudio` con `FixtureCommandRunner` ejecuta exactamente dos invocaciones de
-  ffmpeg (medición + mix), con los argumentos que produce `audioMixFfmpegArgs`, y propaga
-  `CommandFailedError` con el `stderr` truncado si el binario falla.
+- **CA-008:** `mixTimelineAudio` con `FixtureCommandRunner` ejecuta **N+1** invocaciones de ffmpeg
+  —una medición por asset de voz distinto, más el mix— con los argumentos que produce
+  `audioMixFfmpegArgs`, y propaga `CommandFailedError` con el `stderr` truncado si el binario falla.
+  **En toda `Timeline` construida con `buildTimeline`, `N` es 1 por construcción** (un EDL tiene un
+  solo `sourceAssetId` y `buildVoiceTrack` lo copia a todos los clips de voz), así que en el
+  pipeline real son exactamente dos; el test cubre igual el caso general con dos assets de voz.
 - **CA-009:** `verifyMixLoudness` devuelve `withinTolerance: true` para una medición dentro de
   -14 ±1.0 LU con true peak ≤ -1.0 dBTP, y `false` con los deltas correctos fuera de ese rango, en
   los cuatro casos borde. No lanza en ninguno.
@@ -247,6 +253,23 @@ el entregable final.
   (RF-11, D-G).
 - **CA-014:** `pnpm nx run-many -t lint test build --projects=media-local,composition-remotion` en
   verde con cobertura ≥ los cuatro pisos de RNF-2.
+
+- **D-K — Etapa de master bus: limitador de true peak (2026-09-08).** El arquitecto de `cycle-02`
+  detectó que el grafo de `cycle-01` **no tiene nada después del `amix`**: `loudnorm` se aplica por
+  clip de voz y la música se suma en paralelo con `normalize=0`, así que el true peak del master
+  puede superar `-1 dBTP` aunque cada clip esté limitado — escenario realista con voz real (crest
+  factor 12–18 dB), no con las sinusoides del smoke. Sin corregirlo, `-1 dBTP` sería un objetivo
+  medido y no una garantía, y el entregable clippearía al recodificar: justo el problema que esta
+  spec existe para resolver.
+  **Corrección:** `mixTimelineAudio` **agrega** al `FilterGraph` una cadena de master bus —un
+  limitador al `truePeakDbtp` del `AudioMixPlan`— entre el `outputLabel` de `buildAudioMixGraph` y
+  la salida real. Es **aditivo sobre el dato**: `buildAudioMixGraph`, `serializeFilterGraph` y sus
+  fixtures exactas de `cycle-01` **no se tocan** (esa capa está cerrada y sus contratos son fijos);
+  el grafo es una estructura y `cycle-02` le apendea una cadena antes de serializarlo.
+  **Lo que sigue sin garantizarse:** el **integrado** del master es voz+música y no se re-normaliza
+  (+0,2 LU con los defaults, más con cama fuerte). Queda dentro de la tolerancia de D-F y
+  `verifyMixLoudness` lo mide y lo reporta. Un re-master de dos pasadas sobre el bus completo, si
+  hiciera falta, pertenece a `spec-e-burgos-005`, que es la dueña de la orquestación.
 
 ## Fuera de alcance
 

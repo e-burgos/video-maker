@@ -3,6 +3,7 @@ import { describe, expect, it } from 'vitest';
 import { BinaryNotFoundError } from './binary-not-found-error';
 import { CommandFailedError, STDERR_MAX_BYTES, truncateStderr } from './command-failed-error';
 import { isMediaLocalError, MediaLocalError } from './media-local-error';
+import { MissingMediaStreamError } from './missing-media-stream-error';
 import { SAMPLE_MAX_CHARS, UnparseableOutputError } from './unparseable-output-error';
 import { UnresolvedAudioAssetError } from './unresolved-audio-asset-error';
 
@@ -117,5 +118,33 @@ describe('UnresolvedAudioAssetError', () => {
     const error = new UnresolvedAudioAssetError({ assetId: 'voice-1', clipId: 'voice-0', track: 'voice' });
 
     expect(error.track).toBe('voice');
+  });
+});
+
+describe('MissingMediaStreamError', () => {
+  it('expone path, stream y assetId, con mensaje distinto para stream audio', () => {
+    const error = new MissingMediaStreamError({ path: '/tmp/voice.wav', stream: 'audio', assetId: 'aroll-1' });
+
+    expect(error.code).toBe('MISSING_MEDIA_STREAM');
+    expect(error.path).toBe('/tmp/voice.wav');
+    expect(error.stream).toBe('audio');
+    expect(error.assetId).toBe('aroll-1');
+    expect(error.message).toBe(
+      'El archivo "/tmp/voice.wav" no tiene stream de audio: no se puede medir ni mezclar.',
+    );
+    expect(error).toBeInstanceOf(MediaLocalError);
+  });
+
+  it('usa el mensaje de stream de video y deja assetId indefinido por default', () => {
+    const error = new MissingMediaStreamError({ path: '/tmp/input.mp4', stream: 'video' });
+
+    expect(error.message).toBe(
+      'El archivo "/tmp/input.mp4" no tiene stream de video: no se puede muxear con -c:v copy.',
+    );
+    expect(error.assetId).toBeUndefined();
+  });
+
+  it('isMediaLocalError lo reconoce', () => {
+    expect(isMediaLocalError(new MissingMediaStreamError({ path: '/tmp/x.mp4', stream: 'video' }))).toBe(true);
   });
 });

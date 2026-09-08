@@ -13,8 +13,11 @@ import { BrollTrack } from './broll-track';
 import { AudioTrack } from './audio-track';
 import { KineticCaptions } from './kinetic-captions';
 
+export type TimelineAudioMode = 'mix' | 'muted';
+
 export type TimelineCompositionProps = {
   timeline: Timeline;
+  audio?: TimelineAudioMode | undefined;
   captionPreset?: CaptionPresetId | undefined;
   captionPlatform?: CaptionPlatform | undefined;
   captionAnchor?: CaptionAnchor | undefined;
@@ -38,6 +41,7 @@ export const calculateTimelineMetadata: CalculateMetadataFunction<TimelineCompos
 
 export const TimelineComposition: FC<TimelineCompositionProps> = ({
   timeline,
+  audio,
   captionPreset,
   captionPlatform,
   captionAnchor,
@@ -49,7 +53,9 @@ export const TimelineComposition: FC<TimelineCompositionProps> = ({
     <AbsoluteFill>
       <ArollSeries scenes={plan.aroll} transitions={plan.arollTransitions} fps={plan.fps} />
       <BrollTrack clips={plan.broll} />
-      <AudioTrack voice={plan.voice} music={plan.music} automation={timeline.audioMix.automation} />
+      {audio === 'muted' ? null : (
+        <AudioTrack voice={plan.voice} music={plan.music} automation={timeline.audioMix.automation} />
+      )}
       <KineticCaptions
         clips={plan.captions}
         format={timeline.format}

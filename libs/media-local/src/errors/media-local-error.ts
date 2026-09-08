@@ -2,7 +2,8 @@ export type MediaLocalErrorCode =
   | 'BINARY_NOT_FOUND'
   | 'COMMAND_FAILED'
   | 'UNPARSEABLE_OUTPUT'
-  | 'UNRESOLVED_AUDIO_ASSET';
+  | 'UNRESOLVED_AUDIO_ASSET'
+  | 'MISSING_MEDIA_STREAM';
 
 export abstract class MediaLocalError extends Error {
   abstract readonly code: MediaLocalErrorCode;

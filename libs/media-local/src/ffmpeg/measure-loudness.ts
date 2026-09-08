@@ -12,10 +12,13 @@ export const DEFAULT_VOICE_TARGET: VoiceTarget = {
   loudnessRange: 11,
 };
 
+export const FIRST_AUDIO_STREAM = '0:a:0';
+
 export interface MeasureLoudnessOptions {
   target?: VoiceTarget;
   ffmpegPath?: string;
   runOptions?: CommandOptions;
+  audioStreamSpecifier?: string;
 }
 
 export async function measureLoudness(
@@ -30,6 +33,7 @@ export async function measureLoudness(
     '-nostats',
     '-i',
     path,
+    ...(opts?.audioStreamSpecifier !== undefined ? ['-map', opts.audioStreamSpecifier] : []),
     '-af',
     buildLoudnormFilter(target),
     '-f',

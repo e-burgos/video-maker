@@ -4,6 +4,7 @@ import { validateTimeline } from '@video-maker/timeline-core';
 import type { WebpackConfiguration } from '@remotion/bundler';
 import type { VideoConfig } from 'remotion/no-react';
 import { TIMELINE_COMPOSITION_ID } from './components/timeline-composition';
+import type { TimelineAudioMode } from './components/timeline-composition';
 
 export const DEFAULT_RENDER_CONCURRENCY = 4;
 
@@ -23,12 +24,13 @@ function withWorkspaceAliases(config: WebpackConfiguration): WebpackConfiguratio
   };
 }
 
-export type TimelineInputProps = { timeline: Timeline };
+export type TimelineInputProps = { timeline: Timeline; audio?: TimelineAudioMode };
 
 export type CompositionMetadata = VideoConfig;
 
 export interface RenderTimelineOptions {
   outPath: string;
+  audio?: TimelineAudioMode;
   codec?: 'h264';
   concurrency?: number;
   compositionId?: string;
@@ -147,7 +149,10 @@ export async function renderTimeline(
   const compositionId = options.compositionId ?? TIMELINE_COMPOSITION_ID;
   const concurrency = options.concurrency ?? DEFAULT_RENDER_CONCURRENCY;
   const codec = options.codec ?? 'h264';
-  const inputProps: TimelineInputProps = { timeline };
+  const inputProps: TimelineInputProps = {
+    timeline,
+    ...(options.audio === 'muted' ? { audio: options.audio } : {}),
+  };
 
   const serveUrl = await runStage('BUNDLE_FAILED', () => deps.bundleProject({ entryPoint, publicDir }));
 

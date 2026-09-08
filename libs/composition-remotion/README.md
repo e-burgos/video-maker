@@ -49,6 +49,49 @@ Todo lo exportado vive en `src/index.ts` (firmas completas en `architect.md` §3
 Los tests nunca importan desde el barrel: cada uno prueba su módulo por ruta relativa, mismo
 criterio que `timeline-core` y `media-local`.
 
+## Audio: `mix` | `muted` (`cycle-02` de `spec-e-burgos-004-audio-mix-mastering`)
+
+`renderTimeline(timeline, { outPath, audio: 'muted' })` y `TimelineComposition` aceptan una opción
+`audio?: TimelineAudioMode` (`'mix' | 'muted'`, tipo exportado del barrel). Omitida o en `'mix'` el
+comportamiento es **idéntico byte a byte** al de antes de este ciclo (incluida la Timeline de
+`inputProps`, ver `render.spec.ts`): sigue montando `<AudioTrack>` y aplicando la mezcla en vivo
+que hace Remotion para el preview. Solo con `audio: 'muted'` la composición **no monta
+`<AudioTrack>`** y el render sale mudo.
+
+**Por qué existe:** el pipeline real necesita un video **sin** audio para muxearle después la
+mezcla masterizada de `mixTimelineAudio`/`muxAudioIntoVideo` (`libs/media-local`). Si Remotion
+renderizara su propia mezcla en vivo y encima se le muxeara la masterizada, el entregable saldría
+con el audio **duplicado** — la voz y la música sonando dos veces, una sin `loudnorm` y otra con.
+`audio: 'muted'` es lo que usa ese pipeline; el `<Player>`/`remotion studio` siguen usando el
+default (`'mix'`) porque ahí no hay masterización que muxear después.
+
+## Procedimiento encadenado: render mudo → mix → verify → mux → verify
+
+Visto desde esta lib, el primer paso de la cadena que documenta `libs/media-local/README.md`:
+
+1. **Esta lib**, manual: `renderTimeline(timeline, { outPath, audio: 'muted' })` → video sin audio.
+2. `mixTimelineAudio` (`media-local`) → WAV intermedio masterizado.
+3. `verifyMixLoudness` (`media-local`) sobre el WAV — control temprano.
+4. `muxAudioIntoVideo` (`media-local`) → entregable final (el video mudo del paso 1 + el WAV
+   masterizado, `-c:v copy`).
+5. `verifyMixLoudness` (`media-local`) sobre el **entregable**.
+
+**`render → mix → mux` en una sola llamada no vive en ninguna de las dos libs.** Los boundaries Nx
+(`composition-remotion` es `type:ui`, `media-local` es `type:util`; ninguna puede depender de la
+otra) y `eslint.config.mjs` raíz protegido lo impiden. Es entrada obligatoria de
+`spec-e-burgos-005`, en `apps/render-api` (`type:app`, que sí puede depender de las dos).
+
+**`gainDbToVolume` está duplicada a propósito** entre `src/helpers/audio-gain.ts` (esta lib) y
+`libs/media-local/src/mix/gain-db-to-volume.ts`, por el mismo motivo de boundaries. La tabla de
+`architect.md` §7.2 de `cycle-01` de esta spec es el contrato entre las dos copias y
+`gain-automation-curve.parity.spec.ts` la verifica contra `planDucking` real. **Tocar una de las
+dos copias sin la otra rompe CA-002** y hace que el master deje de sonar como el preview.
+
+**La paridad con el preview es de la curva de ducking de la música, no del nivel absoluto de la
+voz.** El `<Player>`/preview no aplica `loudnorm` (solo la automatización de ganancia de la
+música); el master de `mixTimelineAudio` sí. Lo que tiene que sonar igual entre preview y master es
+cómo sube y baja la música alrededor de la voz, no el nivel LUFS final de la voz.
+
 ## Kinetic captions: presets y safe zones (cycle-01)
 
 `captionPreset(id)` resuelve uno de cuatro looks ya calibrados. Ninguno declara un píxel: todo está

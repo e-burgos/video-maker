@@ -1,0 +1,312 @@
+{
+  "$schema": "../../../../schemas/cycle-tasks.schema.json",
+  "spec": "spec-e-burgos-004-audio-mix-mastering",
+  "cycle": 2,
+  "module": "audio-mix-mastering",
+  "apps": [
+    "libs/media-local",
+    "libs/composition-remotion"
+  ],
+  "flow": "full",
+  "user_stories_generated": true,
+  "prerequisites": {
+    "tasks_generated": true
+  },
+  "tasks": [
+    {
+      "id": "TASK-001",
+      "title": "[BE] MissingMediaStreamError (D-14, CE-3) + extension de MediaLocalErrorCode",
+      "user_stories": [
+        "HU-2-01",
+        "HU-2-03"
+      ],
+      "estimation_hours": 2,
+      "story_points": 2,
+      "depends_on": [],
+      "status": "done",
+      "files": [
+        "libs/media-local/src/errors/missing-media-stream-error.ts",
+        "libs/media-local/src/errors/media-local-error.ts",
+        "libs/media-local/src/errors/errors.spec.ts"
+      ],
+      "usage": {
+        "provider_model": "claude/sonnet",
+        "effort": "medium",
+        "agent": "implementor-back",
+        "tokens_in": 87585,
+        "tokens_out": 15456,
+        "tokens_total": 103041,
+        "approx": false,
+        "source": "agent-usage-notification",
+        "recorded_at": "2026-09-08"
+      }
+    },
+    {
+      "id": "TASK-002",
+      "title": "[BE] measureLoudness aditivo: audioStreamSpecifier + FIRST_AUDIO_STREAM (D-15, §3.4)",
+      "user_stories": [
+        "HU-2-01",
+        "HU-2-02"
+      ],
+      "estimation_hours": 1,
+      "story_points": 1,
+      "depends_on": [],
+      "status": "done",
+      "files": [
+        "libs/media-local/src/ffmpeg/measure-loudness.ts",
+        "libs/media-local/src/ffmpeg/loudnorm.spec.ts"
+      ],
+      "usage": {
+        "provider_model": "claude/sonnet",
+        "effort": "medium",
+        "agent": "implementor-back",
+        "tokens_in": 26135,
+        "tokens_out": 4612,
+        "tokens_total": 30747,
+        "approx": false,
+        "source": "agent-usage-notification",
+        "recorded_at": "2026-09-08"
+      }
+    },
+    {
+      "id": "TASK-003",
+      "title": "[BE] Master bus limiter: withMasterBusLimiter + buildTruePeakLimiterFilter (D-21/D-K)",
+      "user_stories": [
+        "HU-2-01"
+      ],
+      "estimation_hours": 2,
+      "story_points": 2,
+      "depends_on": [],
+      "status": "done",
+      "files": [
+        "libs/media-local/src/ffmpeg/master-bus-limiter.ts",
+        "libs/media-local/src/ffmpeg/master-bus-limiter.spec.ts"
+      ],
+      "usage": {
+        "provider_model": "claude/sonnet",
+        "effort": "medium",
+        "agent": "implementor-back",
+        "tokens_in": 29059,
+        "tokens_out": 5128,
+        "tokens_total": 34187,
+        "approx": false,
+        "source": "agent-usage-notification",
+        "recorded_at": "2026-09-08"
+      }
+    },
+    {
+      "id": "TASK-004",
+      "title": "[BE] mixTimelineAudio — dos pasadas de loudnorm + master bus (RF-2-01, CA-008)",
+      "user_stories": [
+        "HU-2-01"
+      ],
+      "estimation_hours": 6,
+      "story_points": 8,
+      "depends_on": [
+        "TASK-001",
+        "TASK-002",
+        "TASK-003"
+      ],
+      "status": "done",
+      "files": [
+        "libs/media-local/src/ffmpeg/mix-timeline-audio.ts",
+        "libs/media-local/src/ffmpeg/mix-timeline-audio.spec.ts"
+      ],
+      "usage": {
+        "provider_model": "claude/sonnet",
+        "effort": "medium",
+        "agent": "implementor-back",
+        "tokens_in": 75811,
+        "tokens_out": 13378,
+        "tokens_total": 89189,
+        "approx": false,
+        "source": "agent-usage-notification",
+        "recorded_at": "2026-09-08"
+      }
+    },
+    {
+      "id": "TASK-005",
+      "title": "[BE] verifyMixLoudness + 5 fixtures nuevas de loudnorm (RF-2-02, CA-009)",
+      "user_stories": [
+        "HU-2-02"
+      ],
+      "estimation_hours": 3,
+      "story_points": 3,
+      "depends_on": [
+        "TASK-002"
+      ],
+      "status": "done",
+      "files": [
+        "libs/media-local/src/ffmpeg/verify-mix-loudness.ts",
+        "libs/media-local/src/ffmpeg/verify-mix-loudness.spec.ts",
+        "libs/media-local/src/__fixtures__/ffmpeg/loudnorm-mix-in-tolerance.stderr.txt",
+        "libs/media-local/src/__fixtures__/ffmpeg/loudnorm-mix-at-boundary.stderr.txt",
+        "libs/media-local/src/__fixtures__/ffmpeg/loudnorm-mix-integrated-out.stderr.txt",
+        "libs/media-local/src/__fixtures__/ffmpeg/loudnorm-mix-true-peak-out.stderr.txt",
+        "libs/media-local/src/__fixtures__/ffmpeg/loudnorm-mix-both-out.stderr.txt"
+      ],
+      "usage": {
+        "provider_model": "claude/sonnet",
+        "effort": "medium",
+        "agent": "implementor-back",
+        "tokens_in": 40234,
+        "tokens_out": 7100,
+        "tokens_total": 47334,
+        "approx": false,
+        "source": "agent-usage-notification",
+        "recorded_at": "2026-09-08"
+      }
+    },
+    {
+      "id": "TASK-006",
+      "title": "[BE] muxAudioIntoVideo — verificacion de stream de video vía probeMedia (RF-2-03, CA-010)",
+      "user_stories": [
+        "HU-2-03"
+      ],
+      "estimation_hours": 2.5,
+      "story_points": 3,
+      "depends_on": [
+        "TASK-001"
+      ],
+      "status": "done",
+      "files": [
+        "libs/media-local/src/ffmpeg/mux-audio-into-video.ts",
+        "libs/media-local/src/ffmpeg/mux-audio-into-video.spec.ts"
+      ],
+      "usage": {
+        "provider_model": "claude/sonnet",
+        "effort": "medium",
+        "agent": "implementor-back",
+        "tokens_in": 30894,
+        "tokens_out": 5452,
+        "tokens_total": 36346,
+        "approx": false,
+        "source": "agent-usage-notification",
+        "recorded_at": "2026-09-08"
+      }
+    },
+    {
+      "id": "TASK-007",
+      "title": "[BE] Barrel publico de media-local (§12: mixTimelineAudio, verifyMixLoudness, muxAudioIntoVideo, MissingMediaStreamError)",
+      "user_stories": [
+        "HU-2-01",
+        "HU-2-02",
+        "HU-2-03"
+      ],
+      "estimation_hours": 1,
+      "story_points": 1,
+      "depends_on": [
+        "TASK-001",
+        "TASK-004",
+        "TASK-005",
+        "TASK-006"
+      ],
+      "status": "done",
+      "files": [
+        "libs/media-local/src/index.ts"
+      ],
+      "usage": {
+        "provider_model": "claude/sonnet",
+        "effort": "medium",
+        "agent": "implementor-back",
+        "tokens_in": 25191,
+        "tokens_out": 4445,
+        "tokens_total": 29636,
+        "approx": false,
+        "source": "agent-usage-notification",
+        "recorded_at": "2026-09-08"
+      }
+    },
+    {
+      "id": "TASK-008",
+      "title": "[FE] Opcion audio: 'mix' | 'muted' en renderTimeline y TimelineComposition (RF-2-04, CA-011)",
+      "user_stories": [
+        "HU-2-04"
+      ],
+      "estimation_hours": 3,
+      "story_points": 3,
+      "depends_on": [],
+      "status": "done",
+      "files": [
+        "libs/composition-remotion/src/components/timeline-composition.tsx",
+        "libs/composition-remotion/src/components/timeline-composition.spec.tsx",
+        "libs/composition-remotion/src/render.ts",
+        "libs/composition-remotion/src/index.ts",
+        "sdd/components.json",
+        "libs/composition-remotion/src/render.spec.ts"
+      ],
+      "usage": {
+        "provider_model": "claude/sonnet",
+        "effort": "medium",
+        "agent": "implementor-front",
+        "tokens_in": 161639,
+        "tokens_out": 28524,
+        "tokens_total": 190163,
+        "approx": false,
+        "source": "agent-usage-notification",
+        "recorded_at": "2026-09-08"
+      }
+    },
+    {
+      "id": "TASK-009",
+      "title": "[BE] Target manual media-local:smoke-audio, autocontenido con ffmpeg real (RF-2-05, CA-012)",
+      "user_stories": [
+        "HU-2-05"
+      ],
+      "estimation_hours": 3,
+      "story_points": 3,
+      "depends_on": [
+        "TASK-007"
+      ],
+      "status": "done",
+      "files": [
+        "libs/media-local/smoke/smoke-audio.ts",
+        "libs/media-local/smoke/smoke-register.cjs",
+        "libs/media-local/tsconfig.smoke.json",
+        "libs/media-local/project.json"
+      ],
+      "usage": {
+        "provider_model": "claude/sonnet",
+        "effort": "medium",
+        "agent": "implementor-back",
+        "tokens_in": 52113,
+        "tokens_out": 9196,
+        "tokens_total": 61309,
+        "approx": false,
+        "source": "agent-usage-notification",
+        "recorded_at": "2026-09-08"
+      }
+    },
+    {
+      "id": "TASK-010",
+      "title": "[BE] READMEs (RF-2-06, CA-013) y verificacion de cierre lint/test/build/cobertura (CA-014)",
+      "user_stories": [
+        "HU-2-06",
+        "HU-2-07"
+      ],
+      "estimation_hours": 2.5,
+      "story_points": 3,
+      "depends_on": [
+        "TASK-007",
+        "TASK-008",
+        "TASK-009"
+      ],
+      "status": "done",
+      "files": [
+        "libs/media-local/README.md",
+        "libs/composition-remotion/README.md"
+      ],
+      "usage": {
+        "provider_model": "claude/sonnet",
+        "effort": "medium",
+        "agent": "implementor-back",
+        "tokens_in": 43538,
+        "tokens_out": 7683,
+        "tokens_total": 51221,
+        "approx": false,
+        "source": "agent-usage-notification",
+        "recorded_at": "2026-09-08"
+      }
+    }
+  ]
+}
