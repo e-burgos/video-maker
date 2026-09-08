@@ -1,0 +1,310 @@
+{
+  "$schema": "../../../../schemas/cycle.schema.json",
+  "cycle": 1,
+  "module": "audio-mix-mastering",
+  "spec": "spec-e-burgos-004-audio-mix-mastering",
+  "apps": [
+    "libs/media-local"
+  ],
+  "phase": "audio-filtergraph-builders",
+  "objectives": [
+    "Traducir un AudioMixPlan a un filtergraph FFmpeg tipado, con funciones puras y sin ejecutar el binario",
+    "Garantizar que la curva de ducking generada es numericamente identica a la que ve el preview de Remotion",
+    "Dejar listos el -filter_complex serializado y los argumentos de invocacion para que cycle-02 solo los ejecute"
+  ],
+  "status": "completed",
+  "started_at": "2026-09-08",
+  "completed_at": "2026-09-08",
+  "documents": {
+    "brief": "sdd/specs/spec-e-burgos-004-audio-mix-mastering/cycles/cycle-01/brief.yaml",
+    "functional": "sdd/specs/spec-e-burgos-004-audio-mix-mastering/cycles/cycle-01/functional.md",
+    "planner": "sdd/specs/spec-e-burgos-004-audio-mix-mastering/cycles/cycle-01/planner.md",
+    "architect": "sdd/specs/spec-e-burgos-004-audio-mix-mastering/cycles/cycle-01/architect.md",
+    "tasks": "sdd/specs/spec-e-burgos-004-audio-mix-mastering/cycles/cycle-01/tasks.json"
+  },
+  "artifacts": [],
+  "metrics": {
+    "tasks_total": 10,
+    "tasks_completed": 10,
+    "story_points": 31,
+    "files_created": [
+      "libs/media-local/src/errors/unresolved-audio-asset-error.ts",
+      "libs/media-local/src/mix/audio-mix-ffmpeg-args.spec.ts",
+      "libs/media-local/src/mix/audio-mix-ffmpeg-args.ts",
+      "libs/media-local/src/mix/audio-mix-format.ts",
+      "libs/media-local/src/mix/build-audio-mix-graph.spec.ts",
+      "libs/media-local/src/mix/build-audio-mix-graph.ts",
+      "libs/media-local/src/mix/build-gain-automation-expression.spec.ts",
+      "libs/media-local/src/mix/build-gain-automation-expression.ts",
+      "libs/media-local/src/mix/build-music-bed-chain.spec.ts",
+      "libs/media-local/src/mix/build-music-bed-chain.ts",
+      "libs/media-local/src/mix/build-voice-chain.spec.ts",
+      "libs/media-local/src/mix/build-voice-chain.ts",
+      "libs/media-local/src/mix/filter-graph.ts",
+      "libs/media-local/src/mix/format-filter-number.spec.ts",
+      "libs/media-local/src/mix/format-filter-number.ts",
+      "libs/media-local/src/mix/gain-automation-curve.parity.spec.ts",
+      "libs/media-local/src/mix/gain-automation-curve.spec.ts",
+      "libs/media-local/src/mix/gain-automation-curve.ts",
+      "libs/media-local/src/mix/gain-db-to-volume.spec.ts",
+      "libs/media-local/src/mix/gain-db-to-volume.ts",
+      "libs/media-local/src/mix/serialize-filter-graph.spec.ts",
+      "libs/media-local/src/mix/serialize-filter-graph.ts",
+      "libs/media-local/src/mix/serialize-gain-automation-curve.spec.ts",
+      "libs/media-local/src/mix/serialize-gain-automation-curve.ts",
+      "sdd/context/libs/media-local/updates/2026-09-08-spec-e-burgos-004-cycle-01.md",
+      "sdd/memory/journal/2026-09-08-spec-e-burgos-004-cycle-01.md"
+    ],
+    "files_modified": [
+      "libs/media-local/README.md",
+      "libs/media-local/src/errors/errors.spec.ts",
+      "libs/media-local/src/errors/media-local-error.ts",
+      "libs/media-local/src/index.ts",
+      "sdd/context/constitution.md",
+      "sdd/global.json"
+    ],
+    "files_deleted": [],
+    "usage": {
+      "tokens_in": 1241812,
+      "tokens_out": 200675,
+      "approx": true,
+      "source": "declared-estimate",
+      "by_agent": [
+        {
+          "agent": "functional",
+          "provider_model": "claude/sonnet",
+          "effort": "medium",
+          "tokens_in": 101859,
+          "tokens_out": 17975,
+          "tokens_total": 119834,
+          "approx": false,
+          "source": "agent-usage-notification",
+          "recorded_at": "2026-09-08",
+          "tool_uses": 20
+        },
+        {
+          "agent": "planner",
+          "provider_model": "claude/sonnet",
+          "effort": "medium",
+          "tokens_in": 155823,
+          "tokens_out": 27498,
+          "tokens_total": 183321,
+          "approx": false,
+          "source": "agent-usage-notification",
+          "recorded_at": "2026-09-08",
+          "tool_uses": 18
+        },
+        {
+          "agent": "architect",
+          "provider_model": "claude/opus",
+          "effort": "high",
+          "tokens_in": 150057,
+          "tokens_out": 26481,
+          "tokens_total": 176538,
+          "approx": false,
+          "source": "agent-usage-notification",
+          "recorded_at": "2026-09-08",
+          "tool_uses": 28
+        },
+        {
+          "agent": "implementor-back",
+          "label": "TASK-001",
+          "provider_model": "claude/sonnet",
+          "effort": "medium",
+          "tokens_in": 116923,
+          "tokens_out": 20634,
+          "tokens_total": 137557,
+          "approx": false,
+          "source": "agent-usage-notification",
+          "recorded_at": "2026-09-08"
+        },
+        {
+          "agent": "implementor-back",
+          "label": "TASK-002",
+          "provider_model": "claude/sonnet",
+          "effort": "medium",
+          "tokens_in": 49314,
+          "tokens_out": 8703,
+          "tokens_total": 58017,
+          "approx": false,
+          "source": "agent-usage-notification",
+          "recorded_at": "2026-09-08"
+        },
+        {
+          "agent": "implementor-back",
+          "label": "TASK-003",
+          "provider_model": "claude/sonnet",
+          "effort": "medium",
+          "tokens_in": 21550,
+          "tokens_out": 3803,
+          "tokens_total": 25353,
+          "approx": false,
+          "source": "agent-usage-notification",
+          "recorded_at": "2026-09-08"
+        },
+        {
+          "agent": "implementor-back",
+          "label": "TASK-004",
+          "provider_model": "claude/sonnet",
+          "effort": "medium",
+          "tokens_in": 20427,
+          "tokens_out": 3605,
+          "tokens_total": 24032,
+          "approx": false,
+          "source": "agent-usage-notification",
+          "recorded_at": "2026-09-08"
+        },
+        {
+          "agent": "implementor-back",
+          "label": "TASK-005",
+          "provider_model": "claude/sonnet",
+          "effort": "medium",
+          "tokens_in": 14726,
+          "tokens_out": 2599,
+          "tokens_total": 17325,
+          "approx": false,
+          "source": "agent-usage-notification",
+          "recorded_at": "2026-09-08"
+        },
+        {
+          "agent": "implementor-back",
+          "label": "TASK-006",
+          "provider_model": "claude/sonnet",
+          "effort": "medium",
+          "tokens_in": 38871,
+          "tokens_out": 6859,
+          "tokens_total": 45730,
+          "approx": false,
+          "source": "agent-usage-notification",
+          "recorded_at": "2026-09-08"
+        },
+        {
+          "agent": "implementor-back",
+          "label": "TASK-007",
+          "provider_model": "claude/sonnet",
+          "effort": "medium",
+          "tokens_in": 25871,
+          "tokens_out": 4566,
+          "tokens_total": 30437,
+          "approx": false,
+          "source": "agent-usage-notification",
+          "recorded_at": "2026-09-08"
+        },
+        {
+          "agent": "implementor-back",
+          "label": "TASK-008",
+          "provider_model": "claude/sonnet",
+          "effort": "medium",
+          "tokens_in": 45475,
+          "tokens_out": 8025,
+          "tokens_total": 53500,
+          "approx": true,
+          "source": "declared-estimate",
+          "recorded_at": "2026-09-08"
+        },
+        {
+          "agent": "implementor-back",
+          "label": "TASK-009",
+          "provider_model": "claude/sonnet",
+          "effort": "medium",
+          "tokens_in": 16023,
+          "tokens_out": 2828,
+          "tokens_total": 18851,
+          "approx": true,
+          "source": "declared-estimate",
+          "recorded_at": "2026-09-08"
+        },
+        {
+          "agent": "implementor-back",
+          "label": "TASK-010",
+          "provider_model": "claude/sonnet",
+          "effort": "medium",
+          "tokens_in": 27486,
+          "tokens_out": 4851,
+          "tokens_total": 32337,
+          "approx": false,
+          "source": "agent-usage-notification",
+          "recorded_at": "2026-09-08"
+        },
+        {
+          "agent": "reviewer",
+          "provider_model": "claude/opus",
+          "effort": "high",
+          "tokens_in": 137407,
+          "tokens_out": 24248,
+          "tokens_total": 161655,
+          "approx": false,
+          "source": "agent-usage-notification",
+          "recorded_at": "2026-09-08",
+          "tool_uses": 56
+        },
+        {
+          "agent": "orchestrator",
+          "provider_model": "claude/opus",
+          "effort": "high",
+          "tokens_in": 320000,
+          "tokens_out": 38000,
+          "approx": true,
+          "source": "declared-estimate",
+          "recorded_at": "2026-09-08"
+        }
+      ],
+      "by_tier": {
+        "claude/sonnet": {
+          "tokens_in": 634348,
+          "tokens_out": 111946,
+          "approx": true
+        },
+        "claude/opus": {
+          "tokens_in": 607464,
+          "tokens_out": 88729,
+          "approx": true
+        }
+      }
+    },
+    "tasks_skipped": 0
+  },
+  "tables_created": [],
+  "endpoints_implemented": [],
+  "components_created": [],
+  "issues_found": [
+    "Reviewer (NO BLOQUEANTE, deuda de test): todos los fixtures de `src/mix/` usan clips con `from: 0` y `trimStartMs: 0`. Consecuencia: las 9 apariciones de `adelay` en la suite son `adelay=0:all=1`, asi que la clausula de CA-005 «`adelay` igual al `from` en ms» esta verificada solo en el valor degenerado 0, que no distingue `framesToMs(clip.from, fps)` de casi ninguna formula incorrecta. Lo mismo aplica a los `st` absolutos de los `afade` (D-06, `clip.from / fps`) y al `atrim=start` (`trimStartMs / 1000`). La implementacion es correcta por inspeccion de codigo; el riesgo es de REGRESION, no de defecto actual: un cambio que rompiera el posicionamiento pasaria lint, tipos y el piso de cobertura. Se cierra el ciclo con esto como follow-up de `cycle-02` (un fixture con `from > 0`), no como request de cambios.",
+    "Reviewer (documentacion del arnes, ajeno al codigo del ciclo): el brief de revision referencia `sdd/skills/sdd-reviewer/checklist.md`, que NO existe — el directorio solo contiene `SKILL.md`. La revision se corrio contra el checklist de cierre de `SKILL.md` y las reglas de `CLAUDE.md`. Conviene crear el archivo o corregir la referencia para que el proximo reviewer no lo busque.",
+    "Reviewer (herencia, sin accion en este ciclo): `sdd/fixes.json` tiene `FIX-e-burgos-001-001` en `status: \"implemented\"`. Pertenece a `spec-e-burgos-001` (target `composition-remotion:smoke`), NO a este ciclo: no lo valide ni lo toque. Lo cierra quien cierre un ciclo de esa spec o de `composition-remotion`."
+  ],
+  "reviewer_report": {
+    "approved": true,
+    "date": "2026-09-08",
+    "ca_results": {
+      "CA-001": "PASS — `buildGainAutomationExpression([], 30)` devuelve exactamente `'volume=1'` (`src/mix/build-gain-automation-expression.spec.ts:7`), porque `buildGainAutomationCurve` con `automation.length < 2` cae en `{kind:'constant', volume: gainDbToVolume(0)} = 1`. Y la segunda mitad del CA («no aparece ningun `volume` redundante en el grafo») se prueba en los dos niveles: `buildMusicBedChain` con `automation: []` y `gainDb: 0` devuelve `toEqual(['apad','atrim=end=7'])` — cero nodos de ganancia — via el guard `isIdentityGainCurve` (`build-music-bed-chain.spec.ts`, caso «identidad, D-05»); y sobre el grafo completo, `build-audio-mix-graph.spec.ts` caso «la identidad de la curva no produce un nodo volume redundante en el grafo (CA-001)» arma una Timeline real con `EDL_WITHOUT_DUCKING` + `MUSIC_IDENTITY` y afirma `musicChain.filters.some(f => f.startsWith('volume=')) === false`.",
+      "CA-002": "PASS — `src/mix/gain-automation-curve.parity.spec.ts`. Cumple las tres condiciones exigidas: (1) PRIMERA asercion del archivo = `expect(automation).toEqual(EXPECTED_KEYFRAMES)` sobre el resultado de `planDucking([{1000,3000},{5000,6000}], DEFAULT_MUSIC_MIX, 30)` llamado de verdad, contra los 9 keyframes literales de `architect.md` §7.1 (frames 0/26/30/98/110/146/150/188/200, -12/-24 dB); (2) compara contra la tabla de §7.2 — las 26 filas estan en `EXPECTED_FACTOR_BY_FRAME` y se recorren con `it.each`, evaluando `evaluateGainAutomationCurve(buildGainAutomationCurve(automation, 30), frame/30)` con `Math.abs(factor - esperado) < 1e-6`; (3) NO importa `volumeAtFrame` ni pasa por la expresion FFmpeg — el unico import cross-lib es `planDucking`/`DEFAULT_MUSIC_MIX` de `@video-maker/timeline-core` (`type:domain`, permitido), de modo que el boundary `type:util` -/-> `type:ui` queda intacto. Ademas fija el discriminador de RN-1 (interpolacion en dB, no en amplitud): frame 102 da `0.1` con `toBeCloseTo(0.1, 9)` MAS la asercion negativa `Math.abs(factor - 0.125793) > 1e-3`, que es el valor que daria interpolar en amplitud; y RN-3 (extension plana) en los frames 0 y 210.",
+      "CA-003": "PASS — regla D-05 fijada por test en las tres ramas y con red de seguridad. `src/mix/build-music-bed-chain.spec.ts`: (a) `automation` no vacia + `clip.gainDb: -6` → `chain[0]` es la expresion de automatizacion y `chain.filter(f => f.startsWith('volume=')).toHaveLength(1)` — un solo nodo, y el `gainDb` del clip se ignora; (b) `automation: []` + `gainDb: -12` → `chain[0] === 'volume=0.251188643'` y de nuevo `toHaveLength(1)`; (c) `automation: []` + `gainDb: 0` → `toEqual(['apad','atrim=end=7'])`, ningun nodo. Mas el test negativo explicito «nunca encadena la ganancia constante despues de la automatizacion», que con `gainDb: -18` afirma `not.toContain('volume=0.125892541')` (el factor de -18 dB), o sea prueba que el nodo constante NO aparece junto al de automatizacion. La implementacion no puede degradar a dos nodos: `buildGainFilters` elige UNA curva con un ternario y devuelve `isIdentityGainCurve(curve) ? [] : [serializeGainAutomationCurve(curve)]` — un array de longitud <= 1 por construccion; emitir dos nodos exige reescribir la funcion, no basta con un cambio de condicion. Fades: con `fadeInFrames: 15`/`fadeOutFrames: 30` emite `afade=t=in:st=0:d=0.5` y `afade=t=out:st=6:d=1` (los valores de §9.2), y con ambos ausentes `toEqual(['volume=0.251188643','apad','atrim=end=7'])` — ningun `afade`.",
+      "CA-004": "PASS — `src/mix/build-voice-chain.spec.ts` verifica la delegacion por IGUALDAD con la salida directa de `buildLoudnormFilter`, como pide el CA: sin `measured`, `buildVoiceChain(TARGET)` `toEqual([buildLoudnormFilter(TARGET), 'aresample=48000'])` (primera pasada); con `measured`, `toEqual([buildLoudnormFilter(TARGET, MEASURED), 'aresample=48000'])` (segunda pasada). No reimplementa el filtro: `build-voice-chain.ts` es literalmente `[buildLoudnormFilter(target, measured), \\`aresample=${AUDIO_MIX_SAMPLE_RATE}\\`]`, reusando el modulo de `src/ffmpeg/`. El tercer test fija que el sample rate sale de la constante compartida (`'aresample=48000'`, D-10). La segunda pasada tambien queda probada end-to-end en el grafo: `build-audio-mix-graph.spec.ts` caso «con voiceMeasuredByAssetId usa buildLoudnormFilter de segunda pasada indexado por assetId».",
+      "CA-005": "PASS (con la deuda de test de `issues_found[0]`) — `src/mix/build-audio-mix-graph.spec.ts` construye la Timeline con `buildTimeline(EDL_WITH_DUCKING, [VOICE_ASSET, MUSIC_ASSET], MUSIC_WITH_FADES)`, es decir una Timeline REAL, no un literal, y afirma con `toEqual` el `FilterGraph` completo de `architect.md` §9.2: una entrada por clip (`inputs: ['/assets/voice.wav','/assets/music.mp3']`, chains con `inputLabels: ['0:a']` y `['1:a']` → `outputLabels: ['voice0']` y `['music0']`) y UNA sola etiqueta de salida (`outputLabel: 'mix'`, con el test dedicado «el amix final siempre lleva normalize=0 con un unico outputLabel» que fija `amix=inputs=2:duration=longest:normalize=0`). El error tipado: dos tests borran respectivamente `voice-1` y `music-1` de `timeline.assets` y verifican `toThrow(UnresolvedAudioAssetError)`, `error.assetId === 'voice-1'`, `error.track === 'voice'`/`'music'` y `error.message` conteniendo el id — el mensaje de `unresolved-audio-asset-error.ts` interpola `clipId`, `track` y `assetId`. D-09 tambien probado: Timeline sin clips de audio → `toThrow(ZodError)`, no el error tipado. CAVEAT registrado en `issues_found[0]`: la clausula «`adelay` igual al `from` en ms» solo se ejerce con `from: 0` (`adelay=0:all=1`), asi que esa sub-clausula esta verificada de forma degenerada; el codigo (`adelay=${formatFilterNumber(framesToMs(clip.from, fps))}:all=1`) es correcto por lectura.",
+      "CA-006": "PASS — los dos artefactos se comparan con el literal exacto del `architect.md`, sin ejecutar ffmpeg. `src/mix/serialize-filter-graph.spec.ts`: `serializeFilterGraph(FIXTURE_GRAPH)` `toBe(FIXTURE_STRING)` y `toHaveLength(855)` — verifique caracter por caracter que `FIXTURE_STRING` es identico al bloque de §9.3 del architect (incluida la expresion `volume=volume='min(1,pow(10,(...)/20))':eval=frame` con los 9 keyframes y los `0.866666667`/`3.266666667` de 9 decimales), y los 855 caracteres coinciden con el numero que el architect declara en el titulo de la seccion. Mas un test de gramatica minima: una chain de un input y un filtro serializa `'[0:a]anull[out]'`, sin separadores de mas. `src/mix/audio-mix-ffmpeg-args.spec.ts`: `audioMixFfmpegArgs(FIXTURE_GRAPH, '/out/master.wav')` `toEqual` el array de 18 elementos de §9.4, con `-hide_banner -nostats -y`, un `-i` por input, `-filter_complex <string de §9.3>`, `-map [mix]`, `-c:a pcm_s16le`, `-ar 48000`, `-ac 2` y el outputPath al final; y un segundo test que fija la firma de dos parametros de D-10. Cero invocaciones de binario en toda la suite (ver `tests.pureza`).",
+      "CA-007": "PASS — `NX_WORKSPACE_ROOT_PATH=\"$PWD\" pnpm nx run-many -t lint test build --projects=media-local` → «Successfully ran targets lint, test, build for project media-local», exit 0, 10.0 s. Lint: «All files pass linting» (0 errores, 0 warnings). Test: 234/234 PASS en 22 archivos. Cobertura 98.44 % stmts (508/516) / 95.35 % branches (308/323) / 98.38 % funcs (122/124) / 98.41 % lines (496/504) — por encima del piso de RNF-2 (>= 98.03 / 94.77 / 97.67) en los tres ejes, y exactamente los valores esperados al cierre. `src/mix/` no figura en la tabla de faltantes del reporte v8: esta al 100 %; los unicos huecos son preexistentes (`src/runner/execa-command-runner.ts`, `parse-ffprobe-json.ts`, parsers de whisper)."
+    },
+    "tests": {
+      "sdd:validate": "OK — «20 files valid, cross-checks passed». Corrido como PRIMER paso de la revision, donde devolvio 1 error esperado (`tasks.json: index is stale vs per-cycle files`) por las 10 tasks pasadas a `done`, resuelto en el cierre con `pnpm sdd:rebuild-tasks-index`; y de nuevo como ULTIMO paso, ya en verde. Unico warning tolerado por instruccion explicita: `memory/journal: N journal entries accumulated (>= 5) — due for distillation` (6 al abrir la revision, 7 despues de agregar la entrada de este ciclo). La destilacion es operacion de un solo actor y la ejecuta el orquestador del carril A; este cierre NO toco `sdd/memory/lessons.md` y solo AGREGO su entrada episodica al journal.",
+      "run-many:media-local": "OK — `pnpm nx run-many -t lint test build --projects=media-local`: «Successfully ran targets lint, test, build for project media-local», exit 0, 10.0 s, 0/3 cache hits. `tsc -p tsconfig.lib.json` sin errores; lint «All files pass linting».",
+      "run-many:workspace": "OK — `pnpm nx run-many -t lint test build`: «Successfully ran targets lint, test, build for 5 projects» (timeline-core, media-local, composition-remotion, shared-utils, web), exit 0, 42.1 s, 0/13 cache hits. Sin regresiones en las libs vecinas: este ciclo no toco ninguna.",
+      "suite": "234/234 PASS en 22 archivos de `media-local`. `src/mix/` aporta 10 archivos de spec nuevos; `src/errors/errors.spec.ts` suma 2 tests de `UnresolvedAudioAssetError` mas la asercion de `isMediaLocalError`.",
+      "coverage": "98.44 % stmts (508/516) / 95.35 % branches (308/323) / 98.38 % funcs (122/124) / 98.41 % lines (496/504). Piso RNF-2 = 98.03 / 94.77 / 97.67: cumplido y superado en los tres ejes, con los valores exactos que anticipaba el cierre. `src/mix/` al 100 % (ausente de la tabla de faltantes de v8).",
+      "sdd:rebuild-tasks-index": "OK — regenerado `sdd/tasks.json` desde los `tasks.json` per-cycle; `sdd:validate` en verde despues.",
+      "sdd:rebuild-catalog": "OK — `sdd/catalog.json` regenerado desde el filesystem de `sdd/` para absorber los documentos de `cycle-01`, el fragmento de contexto y la entrada de journal nuevos.",
+      "superficie-publica": "PASS — `src/index.ts` exporta EXACTAMENTE el bloque de `architect.md` §8, en el mismo orden y ubicado donde el architect lo pide (despues del bloque de `ffmpeg/`, antes del de `whisper/`): 9 valores (`gainDbToVolume`, `buildGainAutomationCurve`, `evaluateGainAutomationCurve`, `buildGainAutomationExpression`, `buildVoiceChain`, `buildMusicBedChain`, `buildAudioMixGraph`, `serializeFilterGraph`, `audioMixFfmpegArgs`), las 3 constantes `AUDIO_MIX_*`, `UnresolvedAudioAssetError` y 6 tipos (`GainAutomationCurve`, `GainAutomationSegment`, `MusicBedChainOptions`, `AudioMixGraphSpec`, `FilterChain`, `FilterGraph`). Grep dirigido de los 6 simbolos que §8 prohibe exportar (`formatFilterNumber`, `FILTER_NUMBER_DECIMALS`, `serializeGainAutomationCurve`, `isIdentityGainCurve`, `audioStreamLabel`, `AudioMixTimelineSchema`): 0 matches en `src/index.ts`. Ni un simbolo de mas ni de menos.",
+      "pureza": "PASS — grep de `Date|process|Math.random|child_process|execa|node:fs|CommandRunner|ffmpeg(` sobre TODO `src/mix/` (implementacion + specs): un unico match, `new Date('2026-01-01T00:00:00.000Z').toISOString()` en `build-audio-mix-graph.spec.ts:12`, que es un timestamp de fixture FIJO (`probedAt` de un `MediaAsset`) — determinista y en un spec, no una lectura de reloj en implementacion. Cero archivos de implementacion de `src/mix/` tocan reloj, azar, filesystem, procesos o `CommandRunner`; ninguno ejecuta ffmpeg. Toda la suite corre sin binarios, coherente con RNF-1.",
+      "grafo-de-imports": "PASS — `src/mix/` importa hacia afuera solo `../ffmpeg/build-loudnorm-filter`, `../ffmpeg/parse-loudnorm-json` (tipo) y `../errors/unresolved-audio-asset-error`: las dos aristas permitidas, `mix -> ffmpeg` y `mix -> errors`. Grep de `from '../mix|from './mix` sobre `src/ffmpeg/`, `src/errors/`, `src/ffprobe/`, `src/whisper/` y `src/runner/`: 0 matches — ninguna arista inversa, sin ciclos. `tsc` en verde lo confirma.",
+      "sin-comentarios": "PASS (regla ✍️) — barrido de comentarios sobre los 23 archivos de `src/mix/` mas los 4 archivos de `media-local` modificados: CERO matches de `//`, `/*` o `*` en posicion de comentario. No hay comentarios narrativos, ni codigo muerto comentado, ni un solo `// TODO`/`FIXME`. Toda la documentacion del ciclo vive en `architect.md`, en el README de la lib y en el fragmento de contexto. Notablemente, las decisiones mas contraintuitivas (D-05 ganancia absoluta, D-07 dos unidades de tiempo, el regex de D-08) estan documentadas en el README y no como comentarios en el codigo, que es exactamente lo que la regla pide.",
+      "out-of-scope": "PASS — `git status --porcelain` limpio respecto del `out_of_scope` del brief: los cambios son 24 archivos nuevos de codigo bajo `libs/media-local/` (23 en `src/mix/` + el error tipado), 4 modificados de la misma lib (`README.md`, `src/index.ts`, `src/errors/media-local-error.ts`, `src/errors/errors.spec.ts`) y registros de `sdd/`. `libs/timeline-core`, `libs/composition-remotion` y `eslint.config.mjs` raiz: SIN cambios (`git diff --stat` vacio). Grep de `renderTimeline|muxAudio|smoke-audio|verifyMixLoudness|mixTimelineAudio` sobre `libs/media-local/src/`: 0 matches — nada de `cycle-02` se adelanto. `libs/media-local/project.json` sin tocar: no se agrego el target `smoke-audio`. Ningun `sidechaincompress`. `AudioMixPlan` y `planDucking` intactos."
+    },
+    "notes": "Ciclo aprobado. 10/10 tasks `done` (31 story points, 0 skipped), CA-001..CA-007 los siete en PASS con evidencia por test citado, workspace completo en verde y cobertura de `media-local` en 98.44/95.35/98.38 — por encima del piso de RNF-2 y con `src/mix/` al 100 %. La entrega es lo que el brief pedia: una capa estrictamente pura, sin ejecucion de binarios, verificada como tal por grep (ver `tests.pureza`).\n\nLo que mas valor tiene del ciclo es D-05, y esta bien resuelto. El arquitecto detecto CONTRA EL CODIGO de `composition-remotion` que los keyframes de `planDucking` son ganancias ABSOLUTAS y que la letra de la spec (emitir `baseGainDb` y despues la automatizacion) habria dejado el master 12 dB por debajo del preview en todos los tramos de reposo — rompiendo justo el CA que declaraba el valor del ciclo. La correccion no solo esta implementada: esta fijada por cuatro tests, incluido uno negativo, y la implementacion es estructuralmente incapaz de degradar a dos nodos encadenados (`buildGainFilters` devuelve un array de longitud <= 1 por construccion, no por condicion). Lo mismo vale para la paridad de CA-002: el test compara contra la tabla de 26 filas de §7.2 usando el modelo tipado (`buildGainAutomationCurve`/`evaluateGainAutomationCurve`), llamando a `planDucking` de verdad y verificando primero sus 9 keyframes, sin importar `volumeAtFrame` — el boundary Nx `type:util` -/-> `type:ui` queda intacto y la duplicacion deliberada de `gainDbToVolume` queda cubierta por contrato en vez de por import.\n\nUn solo hallazgo con contenido, no bloqueante y registrado en `issues_found[0]` y en `follow_ups`: toda la familia de fixtures de `src/mix/` usa `from: 0` y `trimStartMs: 0`, de modo que las 9 apariciones de `adelay` en la suite son `adelay=0:all=1`. La sub-clausula de CA-005 «`adelay` igual al `from` en ms» queda verificada en el valor degenerado 0, que no discrimina la formula correcta de casi ninguna incorrecta; igual pasa con los `st` absolutos de los `afade` (D-06) y el `atrim=start`. El codigo es correcto por inspeccion (`framesToMs(clip.from, fps)`), asi que no es un defecto presente sino un hueco de red de seguridad frente a regresiones — y justamente el posicionamiento es lo que D-06 senala como la parte facil de romper. No amerita devolver el ciclo; amerita un fixture con `from > 0` en `cycle-02`.\n\nRegistros SDD: no se toco `sdd/api.json` ni `sdd/schema.json` (siguen sin apps: el ciclo no agrega endpoints ni tablas) ni `sdd/components.json` (no hay componentes de UI: `media-local` es `type:util` y el ciclo entrega funciones puras). `sdd/specs/index.json` queda en `in-progress` a proposito — `cycle-02` de esta spec sigue pendiente (CA-008..CA-014) — y por la misma razon el modulo `audio-mix-mastering` NO se movio a `completed_modules`: se le subio `cycles_completed` a 1 dentro de `in_progress_modules`. `FIX-e-burgos-001-001` sigue en `implemented` porque pertenece a `spec-e-burgos-001`, no a este ciclo (ver `issues_found[2]`).\n\nTelemetria: `by_agent` con 14 entradas (3 documentos + 10 tasks + esta revision), `by_tier` derivado agrupando por `provider_model` y el top-level como suma exacta de `by_agent` — 1.049.405 in / 172.427 out. Las 3 entradas de documentos y las 8 tasks con contador exacto conservan `approx: false` / `agent-usage-notification`; TASK-008, TASK-009 y esta revision son estimaciones declaradas (`approx: true`), y por eso los dos tiers y el total quedan marcados `approx: true`: un total es tan honesto como su parte mas floja. FALTA la entrada `orchestrator`, que agrega el dev al reajustar los totales.",
+    "follow_ups": [
+      "cycle-02 / test: agregar al menos un fixture de `src/mix/` con `from > 0` y `trimStartMs > 0` para que `adelay` (CA-005), los `st` absolutos de los `afade` (D-06) y el `atrim=start` queden verificados fuera del valor degenerado 0. Hoy las 9 apariciones de `adelay` en la suite son `adelay=0:all=1`.",
+      "cycle-02: verificar antes de implementar `measureLoudness` que la voz NO tiene `assetId` propio — `buildVoiceTrack` de `timeline-core` le asigna el `assetId` del clip de aroll (`sourceAssetId` del EDL). No hay colision (mismo id por construccion, y §3.4 indexa por `assetId`), pero la medicion puede tener que leer el stream de audio de un CONTENEDOR DE VIDEO y no un WAV aislado.",
+      "spec-e-burgos-005 (`apps/render-api`, `type:app`): la orquestacion `render -> mix -> mux` en una sola llamada es entrada OBLIGATORIA de esa spec. No puede vivir en ninguna de las dos libs (`media-local` es `type:util`, `composition-remotion` es `type:ui`, no se pueden importar entre si) y `eslint.config.mjs` raiz esta protegido por hook, asi que relajar el boundary no es opcion dentro de un ciclo.",
+      "Mantenimiento permanente: `gainDbToVolume` esta duplicada a proposito entre `libs/media-local/src/mix/gain-db-to-volume.ts` y `libs/composition-remotion/src/helpers/audio-gain.ts`. El contrato entre las copias es la tabla de `architect.md` §7.2 y lo verifica `gain-automation-curve.parity.spec.ts`. Tocar una sin la otra rompe CA-002.",
+      "Arnes SDD: crear `sdd/skills/sdd-reviewer/checklist.md` o corregir la referencia — el directorio solo tiene `SKILL.md` (ver `issues_found[1]`)."
+    ]
+  }
+}

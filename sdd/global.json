@@ -27,7 +27,18 @@
       "completed_at": "2026-09-08"
     }
   ],
-  "in_progress_modules": [],
+  "in_progress_modules": [
+    {
+      "module": "audio-mix-mastering",
+      "spec": "spec-e-burgos-004-audio-mix-mastering",
+      "apps": [
+        "libs/media-local",
+        "libs/composition-remotion"
+      ],
+      "cycles_completed": 1,
+      "description": "Normalización de locución a -14 LUFS, ducking automático de música a -24 dB, filtergraphs FFmpeg y mux final multi-pista"
+    }
+  ],
   "pending_modules": [
     {
       "module": "auto-montage-pipeline",
@@ -38,16 +49,6 @@
       ],
       "cycles_completed": 0,
       "description": "Ingesta de clips crudos, poda de silencios sobre material real, matching de B-roll e imágenes por conceptos clave de la locución, presets por caso de uso y CLI headless"
-    },
-    {
-      "module": "audio-mix-mastering",
-      "spec": "spec-e-burgos-004-audio-mix-mastering",
-      "apps": [
-        "libs/media-local",
-        "libs/composition-remotion"
-      ],
-      "cycles_completed": 0,
-      "description": "Normalización de locución a -14 LUFS, ducking automático de música a -24 dB, filtergraphs FFmpeg y mux final multi-pista"
     },
     {
       "module": "render-service",

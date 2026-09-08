@@ -81,7 +81,7 @@ Para el detalle técnico de cada subproyecto, ver su constitución específica:
 | Subproyecto | Stack base | Última actualización |
 | ----------- | ---------- | -------------------- |
 | `libs/timeline-core` | TypeScript estricto + Zod 4.5 + Vitest 4 + `@swc-node/register` (JSON Schema) | cycle-01 \| 2026-09-07 |
-| `libs/media-local` | TypeScript estricto + execa 10 + Zod 4.5 + Vitest 4 (fixtures de ffprobe grabadas, fixtures de ffmpeg/whisper reconstruidas a mano, cero binarios en CI) | cycle-02 \| 2026-09-07 |
+| `libs/media-local` | TypeScript estricto + execa 10 + Zod 4.5 + Vitest 4 (fixtures de ffprobe grabadas, fixtures de ffmpeg/whisper reconstruidas a mano, cero binarios en CI) + capa pura de mezcla de audio en `src/mix/`: `AudioMixPlan`/`Timeline` → `FilterGraph` tipado → `-filter_complex` y args de ffmpeg, sin ejecutar el binario (paridad de la curva de ducking con el preview de Remotion fijada por tabla) | spec-004 cycle-01 \| 2026-09-08 |
 | `libs/composition-remotion` | React 19 + Remotion 4.0.522 (`transitions`/`bundler`/`renderer`/`cli`) + Vitest 4/jsdom (cero render en CI) + kinetic captions completos: presets con animación `spring`, safe zones por plataforma, plan de caja por clip y `<KineticCaptions />` cableado en `TimelineComposition` (helpers puros, sin binarios de fuente); target `smoke` funcional desde FIX-e-burgos-001-001 | spec-003 cycle-02 + FIX-e-burgos-001-001 \| 2026-09-08 |
 
 ---

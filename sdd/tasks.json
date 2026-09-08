@@ -60,6 +60,20 @@
           "tasks_done": 7
         }
       }
+    },
+    "spec-e-burgos-004-audio-mix-mastering": {
+      "cycles": {
+        "cycle-01": {
+          "file": "sdd/specs/spec-e-burgos-004-audio-mix-mastering/cycles/cycle-01/tasks.json",
+          "module": "audio-mix-mastering",
+          "apps": [
+            "libs/media-local"
+          ],
+          "status": "completed",
+          "tasks_total": 10,
+          "tasks_done": 10
+        }
+      }
     }
   }
 }

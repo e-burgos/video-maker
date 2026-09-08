@@ -79,6 +79,27 @@ los ports de reloj y filesystem que los wrappers usan por default.
 Los tests nunca importan desde este barrel: cada uno prueba su módulo por ruta relativa (mismo
 criterio que `timeline-core`).
 
+## Mezcla de audio (`src/mix/`)
+
+`cycle-01` de `spec-e-burgos-004-audio-mix-mastering` agrega la traducción pura de un
+`AudioMixPlan` (más la `Timeline`) a un `FilterGraph` de ffmpeg — `buildAudioMixGraph` →
+`serializeFilterGraph`/`audioMixFfmpegArgs`. Es solo composición de argumentos: **no ejecuta
+ffmpeg**, no usa `CommandRunner`; el wrapper que sí lo ejecuta (`mixTimelineAudio`) es de
+`cycle-02`.
+
+- **Un solo nodo de ganancia en la música (D-05).** Los keyframes de `planDucking` son ganancias
+  **absolutas** (en reposo valen `baseGainDb`, no un delta), y `audio-track.tsx` de Remotion usa la
+  curva en lugar de `clip.volume`. Encadenar `baseGainDb` y después la automatización deja el
+  master 12 dB por debajo del preview. Por eso `buildMusicBedChain` emite la automatización cuando
+  existe o la ganancia estática del clip cuando no — nunca las dos.
+- **`gainDbToVolume` está duplicada a propósito** entre esta lib y
+  `libs/composition-remotion/src/helpers/audio-gain.ts`: los boundaries Nx (`type:util` → solo
+  `type:domain`) impiden que `media-local` importe `composition-remotion`. La tabla de paridad de
+  `architect.md` §7.2 es el contrato entre ambas copias y `gain-automation-curve.parity.spec.ts` la
+  verifica contra `planDucking` real. Tocar una sin la otra rompe CA-002.
+- **La paridad con el preview se promete para la curva de ducking de la música, no para el nivel
+  absoluto de la voz**: la voz pasa por `loudnorm` en el master y el preview no tiene `loudnorm`.
+
 ## Inyección en tests
 
 Todo I/O externo entra por parámetro, nunca se instancia adentro de un wrapper:

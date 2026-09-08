@@ -1,0 +1,314 @@
+{
+  "$schema": "../../../../schemas/cycle-tasks.schema.json",
+  "spec": "spec-e-burgos-004-audio-mix-mastering",
+  "cycle": 1,
+  "module": "audio-mix-mastering",
+  "apps": [
+    "libs/media-local"
+  ],
+  "flow": "full",
+  "user_stories_generated": true,
+  "prerequisites": {
+    "tasks_generated": true
+  },
+  "tasks": [
+    {
+      "id": "TASK-001",
+      "title": "[BE] Piezas leaf sin dependencias (gainDbToVolume, formatFilterNumber, tipos FilterGraph, constantes AUDIO_MIX_*)",
+      "user_stories": [
+        "HU-1-01",
+        "HU-1-04",
+        "HU-1-05"
+      ],
+      "estimation_hours": 3,
+      "story_points": 3,
+      "depends_on": [],
+      "status": "done",
+      "files": [
+        "libs/media-local/src/mix/gain-db-to-volume.ts",
+        "libs/media-local/src/mix/gain-db-to-volume.spec.ts",
+        "libs/media-local/src/mix/format-filter-number.ts",
+        "libs/media-local/src/mix/format-filter-number.spec.ts",
+        "libs/media-local/src/mix/filter-graph.ts",
+        "libs/media-local/src/mix/audio-mix-format.ts"
+      ],
+      "usage": {
+        "provider_model": "claude/sonnet",
+        "effort": "medium",
+        "agent": "implementor-back",
+        "tokens_in": 116923,
+        "tokens_out": 20634,
+        "tokens_total": 137557,
+        "approx": false,
+        "source": "agent-usage-notification",
+        "recorded_at": "2026-09-08"
+      }
+    },
+    {
+      "id": "TASK-002",
+      "title": "[BE] Modelo tipado de la curva de automatizacion (buildGainAutomationCurve, evaluateGainAutomationCurve, serializeGainAutomationCurve)",
+      "user_stories": [
+        "HU-1-01"
+      ],
+      "estimation_hours": 4,
+      "story_points": 5,
+      "depends_on": [
+        "TASK-001"
+      ],
+      "status": "done",
+      "files": [
+        "libs/media-local/src/mix/gain-automation-curve.ts",
+        "libs/media-local/src/mix/gain-automation-curve.spec.ts",
+        "libs/media-local/src/mix/serialize-gain-automation-curve.ts",
+        "libs/media-local/src/mix/serialize-gain-automation-curve.spec.ts"
+      ],
+      "usage": {
+        "provider_model": "claude/sonnet",
+        "effort": "medium",
+        "agent": "implementor-back",
+        "tokens_in": 49314,
+        "tokens_out": 8703,
+        "tokens_total": 58017,
+        "approx": false,
+        "source": "agent-usage-notification",
+        "recorded_at": "2026-09-08"
+      }
+    },
+    {
+      "id": "TASK-003",
+      "title": "[BE] buildGainAutomationExpression (RF-1, CA-001)",
+      "user_stories": [
+        "HU-1-01"
+      ],
+      "estimation_hours": 2,
+      "story_points": 2,
+      "depends_on": [
+        "TASK-002"
+      ],
+      "status": "done",
+      "files": [
+        "libs/media-local/src/mix/build-gain-automation-expression.ts",
+        "libs/media-local/src/mix/build-gain-automation-expression.spec.ts"
+      ],
+      "usage": {
+        "provider_model": "claude/sonnet",
+        "effort": "medium",
+        "agent": "implementor-back",
+        "tokens_in": 21550,
+        "tokens_out": 3803,
+        "tokens_total": 25353,
+        "approx": false,
+        "source": "agent-usage-notification",
+        "recorded_at": "2026-09-08"
+      }
+    },
+    {
+      "id": "TASK-004",
+      "title": "[BE] Paridad numerica de la curva contra volumeAtFrame (CA-002, tabla de 26 filas del architect.md)",
+      "user_stories": [
+        "HU-1-06"
+      ],
+      "estimation_hours": 3,
+      "story_points": 3,
+      "depends_on": [
+        "TASK-002"
+      ],
+      "status": "done",
+      "files": [
+        "libs/media-local/src/mix/gain-automation-curve.parity.spec.ts"
+      ],
+      "usage": {
+        "provider_model": "claude/sonnet",
+        "effort": "medium",
+        "agent": "implementor-back",
+        "tokens_in": 20427,
+        "tokens_out": 3605,
+        "tokens_total": 24032,
+        "approx": false,
+        "source": "agent-usage-notification",
+        "recorded_at": "2026-09-08"
+      }
+    },
+    {
+      "id": "TASK-005",
+      "title": "[BE] buildVoiceChain reusando buildLoudnormFilter (RF-3, CA-004)",
+      "user_stories": [
+        "HU-1-03"
+      ],
+      "estimation_hours": 2,
+      "story_points": 2,
+      "depends_on": [
+        "TASK-001"
+      ],
+      "status": "done",
+      "files": [
+        "libs/media-local/src/mix/build-voice-chain.ts",
+        "libs/media-local/src/mix/build-voice-chain.spec.ts"
+      ],
+      "usage": {
+        "provider_model": "claude/sonnet",
+        "effort": "medium",
+        "agent": "implementor-back",
+        "tokens_in": 14726,
+        "tokens_out": 2599,
+        "tokens_total": 17325,
+        "approx": false,
+        "source": "agent-usage-notification",
+        "recorded_at": "2026-09-08"
+      }
+    },
+    {
+      "id": "TASK-006",
+      "title": "[BE] buildMusicBedChain con un solo nodo de ganancia (RF-2, CA-003 corregido por D-05)",
+      "user_stories": [
+        "HU-1-02"
+      ],
+      "estimation_hours": 4,
+      "story_points": 5,
+      "depends_on": [
+        "TASK-001",
+        "TASK-002"
+      ],
+      "status": "done",
+      "files": [
+        "libs/media-local/src/mix/build-music-bed-chain.ts",
+        "libs/media-local/src/mix/build-music-bed-chain.spec.ts"
+      ],
+      "usage": {
+        "provider_model": "claude/sonnet",
+        "effort": "medium",
+        "agent": "implementor-back",
+        "tokens_in": 38871,
+        "tokens_out": 6859,
+        "tokens_total": 45730,
+        "approx": false,
+        "source": "agent-usage-notification",
+        "recorded_at": "2026-09-08"
+      }
+    },
+    {
+      "id": "TASK-007",
+      "title": "[BE] Error tipado nuevo UnresolvedAudioAssetError (CE-4)",
+      "user_stories": [
+        "HU-1-04"
+      ],
+      "estimation_hours": 1,
+      "story_points": 1,
+      "depends_on": [],
+      "status": "done",
+      "files": [
+        "libs/media-local/src/errors/unresolved-audio-asset-error.ts",
+        "libs/media-local/src/errors/media-local-error.ts",
+        "libs/media-local/src/errors/errors.spec.ts"
+      ],
+      "usage": {
+        "provider_model": "claude/sonnet",
+        "effort": "medium",
+        "agent": "implementor-back",
+        "tokens_in": 25871,
+        "tokens_out": 4566,
+        "tokens_total": 30437,
+        "approx": false,
+        "source": "agent-usage-notification",
+        "recorded_at": "2026-09-08"
+      }
+    },
+    {
+      "id": "TASK-008",
+      "title": "[BE] buildAudioMixGraph — filtergraph completo (RF-4, CA-005)",
+      "user_stories": [
+        "HU-1-04"
+      ],
+      "estimation_hours": 5,
+      "story_points": 5,
+      "depends_on": [
+        "TASK-001",
+        "TASK-005",
+        "TASK-006",
+        "TASK-007"
+      ],
+      "status": "done",
+      "files": [
+        "libs/media-local/src/mix/build-audio-mix-graph.ts",
+        "libs/media-local/src/mix/build-audio-mix-graph.spec.ts"
+      ],
+      "usage": {
+        "provider_model": "claude/sonnet",
+        "effort": "medium",
+        "agent": "implementor-back",
+        "tokens_in": 45475,
+        "tokens_out": 8025,
+        "tokens_total": 53500,
+        "approx": true,
+        "source": "declared-estimate",
+        "recorded_at": "2026-09-08"
+      }
+    },
+    {
+      "id": "TASK-009",
+      "title": "[BE] serializeFilterGraph + audioMixFfmpegArgs (RF-5, CA-006)",
+      "user_stories": [
+        "HU-1-05"
+      ],
+      "estimation_hours": 3,
+      "story_points": 3,
+      "depends_on": [
+        "TASK-001"
+      ],
+      "status": "done",
+      "files": [
+        "libs/media-local/src/mix/serialize-filter-graph.ts",
+        "libs/media-local/src/mix/serialize-filter-graph.spec.ts",
+        "libs/media-local/src/mix/audio-mix-ffmpeg-args.ts",
+        "libs/media-local/src/mix/audio-mix-ffmpeg-args.spec.ts"
+      ],
+      "usage": {
+        "provider_model": "claude/sonnet",
+        "effort": "medium",
+        "agent": "implementor-back",
+        "tokens_in": 16023,
+        "tokens_out": 2828,
+        "tokens_total": 18851,
+        "approx": true,
+        "source": "declared-estimate",
+        "recorded_at": "2026-09-08"
+      }
+    },
+    {
+      "id": "TASK-010",
+      "title": "[BE] Barrel publico, README y verificacion de cierre (lint/test/build/cobertura, CA-007)",
+      "user_stories": [
+        "HU-1-07"
+      ],
+      "estimation_hours": 2,
+      "story_points": 2,
+      "depends_on": [
+        "TASK-001",
+        "TASK-002",
+        "TASK-003",
+        "TASK-004",
+        "TASK-005",
+        "TASK-006",
+        "TASK-007",
+        "TASK-008",
+        "TASK-009"
+      ],
+      "status": "done",
+      "files": [
+        "libs/media-local/src/index.ts",
+        "libs/media-local/README.md"
+      ],
+      "usage": {
+        "provider_model": "claude/sonnet",
+        "effort": "medium",
+        "agent": "implementor-back",
+        "tokens_in": 27486,
+        "tokens_out": 4851,
+        "tokens_total": 32337,
+        "approx": false,
+        "source": "agent-usage-notification",
+        "recorded_at": "2026-09-08"
+      }
+    }
+  ]
+}

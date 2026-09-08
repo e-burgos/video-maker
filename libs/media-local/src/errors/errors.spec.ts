@@ -4,6 +4,7 @@ import { BinaryNotFoundError } from './binary-not-found-error';
 import { CommandFailedError, STDERR_MAX_BYTES, truncateStderr } from './command-failed-error';
 import { isMediaLocalError, MediaLocalError } from './media-local-error';
 import { SAMPLE_MAX_CHARS, UnparseableOutputError } from './unparseable-output-error';
+import { UnresolvedAudioAssetError } from './unresolved-audio-asset-error';
 
 describe('truncateStderr', () => {
   it('no trunca un texto de exactamente 2048 bytes (límite inclusivo)', () => {
@@ -47,6 +48,9 @@ describe('isMediaLocalError', () => {
     expect(isMediaLocalError(new CommandFailedError({ command: 'ffmpeg', args: [], exitCode: 1, stderr: '' }))).toBe(
       true,
     );
+    expect(
+      isMediaLocalError(new UnresolvedAudioAssetError({ assetId: 'voice-1', clipId: 'voice-0', track: 'voice' })),
+    ).toBe(true);
     expect(isMediaLocalError(new Error('no'))).toBe(false);
     expect(isMediaLocalError('no')).toBe(false);
     expect(isMediaLocalError(undefined)).toBe(false);
@@ -94,5 +98,24 @@ describe('UnparseableOutputError', () => {
     const error = new UnparseableOutputError({ command: 'ffprobe', reason: 'r', sample: 's', cause });
 
     expect(error.cause).toBe(cause);
+  });
+});
+
+describe('UnresolvedAudioAssetError', () => {
+  it('expone assetId, clipId y track, e incluye el assetId en el mensaje (CA-005)', () => {
+    const error = new UnresolvedAudioAssetError({ assetId: 'music-1', clipId: 'music-0', track: 'music' });
+
+    expect(error.code).toBe('UNRESOLVED_AUDIO_ASSET');
+    expect(error.assetId).toBe('music-1');
+    expect(error.clipId).toBe('music-0');
+    expect(error.track).toBe('music');
+    expect(error.message).toContain('music-1');
+    expect(error).toBeInstanceOf(MediaLocalError);
+  });
+
+  it('distingue la pista voice de la pista music', () => {
+    const error = new UnresolvedAudioAssetError({ assetId: 'voice-1', clipId: 'voice-0', track: 'voice' });
+
+    expect(error.track).toBe('voice');
   });
 });
