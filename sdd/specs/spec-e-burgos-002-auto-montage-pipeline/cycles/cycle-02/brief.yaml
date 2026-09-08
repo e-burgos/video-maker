@@ -1,0 +1,187 @@
+# sdd/specs/spec-e-burgos-002-auto-montage-pipeline/cycles/cycle-02/brief.yaml
+# Generado por: sdd-orchestrator
+# Al: iniciar el ciclo
+
+cycle: 2
+module: auto-montage-pipeline
+phase: concept-spotting-and-montage
+date: 2026-09-07
+app_context: sdd/context/libs/auto-montage/context_prompt.md
+
+objective: |
+  Cerrar el salto de "sé qué hay en la carpeta y qué se dijo" a "tengo una Timeline armada":
+  extraer conceptos clave de la Transcription de forma determinista, planificar la superposición
+  de B-roll e imágenes por concepto sin repetir dentro de la ventana del preset ni solapar
+  punch-ins, definir los 4 presets con parámetros propios, y componer todo en
+  autoMontage(project, preset) -> EditDecisionList + Timeline que pasa validateTimeline sin
+  issues. Al cerrar, el mismo proyecto con el mismo preset y el mismo seed produce un
+  timeline.json byte a byte idéntico.
+
+scope:
+  - Keyword spotting sobre Transcription (frecuencia + stopwords + diccionario del preset), con rangos temporales y sin modelos externos (CA-008)
+  - Planificador de B-roll: matching lexico de conceptos contra assets de broll/ e images/ por nombre de archivo y metadatos del catalogo, con duracion minima/maxima, ventana de no-repeticion y no-solape con punch-ins (CA-009)
+  - Los 4 presets software-demo | hardware | recipe | educational, cada uno con parametros distintos de poda, punch-in, transiciones, densidad de B-roll y vocabulario de conceptos (CA-010)
+  - autoMontage(project, preset, seed) que compone pruneSilences, planPunchIns, groupWordsForCaptions, planDucking y buildTimeline de timeline-core en un EditDecisionList valido y una Timeline que pasa validateTimeline sin issues (CA-011)
+  - Determinismo por seed verificado a nivel bytes sobre la serializacion de timeline.json (CA-012)
+  - Persistencia de work/edl.json y work/timeline.json con el mismo patron de puertos inyectables y guard de raw/ del cycle-01
+  - Resolucion documentada de D-4 (anchor del punch-in) con su razonamiento
+  - Subir la cobertura de branches de auto-montage con margen real sobre el umbral 85
+  - Fragmento aditivo de contexto en sdd/context/libs/auto-montage/updates/ (y en libs/timeline-core/updates/ si D-4 termina tocando esa lib)
+
+out_of_scope:
+  - tools/render-cli, comandos ingest/plan/render/run y cualquier render real -> cycle-03 (CA-013..CA-016)
+  - Estilo visual de los captions y kinetic typography -> spec-e-burgos-003 (este ciclo produce CaptionGroup, no su estilo)
+  - Mux final multi-pista y mastering de audio -> spec-e-burgos-004 (este ciclo produce el AudioMixPlan que ya arma buildTimeline)
+  - Matching semantico con embeddings o LLM (fuera de la spec entera)
+  - Re-litigar D-1, D-2, D-3, D-5, D-6, D-7, D-8, D-9: cerradas en cycle-01, se aplican tal cual
+  - Cambiar el flujo de ingesta del cycle-01 salvo extension estrictamente aditiva
+
+dependencies_required:
+  - spec-e-burgos-001-core-composition-media-pipeline (completed — 3 ciclos, 2026-09-07)
+  - spec-e-burgos-002 cycle-01 (completed — ingesta, catalogo y transcripcion incremental)
+  - libs/timeline-core (pruneSilences, planPunchIns, groupWordsForCaptions, planDucking, buildTimeline, validateTimeline)
+  - libs/media-local (ya cableada por cycle-01; este ciclo no agrega binarios nuevos)
+
+agent_contexts:
+  functional:
+    goal: >
+      Convertir el armado automatico del montaje en historias de usuario y criterios de aceptacion
+      verificables sobre fixtures, sin binarios. Definir con precision que significa "concepto
+      clave", que hace distinto a cada uno de los 4 presets desde el punto de vista del creador, y
+      que garantiza el determinismo por seed. El actor sigue siendo el dev operando su maquina: no
+      hay multiusuario ni UI.
+    business_context: >
+      El cycle-01 dejo al sistema sabiendo que hay en la carpeta y que se dijo. Lo que falta es la
+      decision editorial: cuando cortar, cuando acercar la camara, y sobre todo cuando tapar la cara
+      con un clip de apoyo o una foto que ilustra lo que se esta diciendo. Hoy eso lo hace el creador
+      mirando el material entero; este ciclo lo automatiza. La regla de oro del formato es que el
+      B-roll ilustra la palabra: si el creador dice "compilador", el clip de apoyo del compilador
+      tiene que aparecer ahi y no veinte segundos despues. Y cuatro tipos de video distintos
+      (demo de software, review de hardware, receta, explicacion educativa) tienen ritmos
+      completamente distintos: la receta corta mucho y tapa mucho; la explicacion educativa deja
+      respirar la cara. Eso es lo que los presets codifican.
+    relevant_spec_sections:
+      - 'Alcance -> puntos 2 (Keyword spotting), 3 (Planificador de B-roll), 4 (Presets) y 5 (Orquestacion)'
+      - 'Requisitos Funcionales -> RF-5 a RF-9'
+      - 'Requisitos No-Funcionales -> RNF-2, RNF-3, RNF-4, RNF-5'
+      - 'Criterios de Aceptacion -> CA-008 a CA-012'
+      - 'Riesgos y decisiones abiertas -> D-4 y "Matching lexico"'
+    output_file: sdd/specs/spec-e-burgos-002-auto-montage-pipeline/cycles/cycle-02/functional.md
+
+  planner:
+    goal: >
+      Descomponer en tasks tecnicas ordenadas y estimadas (estimation_hours + story_points
+      obligatorios en cada una). Separar la logica pura por familia (conceptos, matching, presets,
+      composicion) de la persistencia de work/edl.json y work/timeline.json. Reservar una task
+      explicita para tests de rama que suban la cobertura de branches con margen sobre 85, y otra
+      para el CA-012 (determinismo byte a byte). Recibe el output del Funcional, no la spec completa.
+    note: 'Ciclo sin frontend: todas las tasks son de implementor-back.'
+    output_file: sdd/specs/spec-e-burgos-002-auto-montage-pipeline/cycles/cycle-02/planner.md
+    tasks_file: sdd/specs/spec-e-burgos-002-auto-montage-pipeline/cycles/cycle-02/tasks.json
+
+  architect:
+    goal: >
+      Definir la estructura de src/concepts/, src/broll/, src/presets/ y src/auto-montage.ts, el
+      contrato de cada funcion pura, la forma del Preset, el algoritmo de matching y el orden de
+      composicion de los calculos de timeline-core. Resolver D-4 con razonamiento escrito. No hay
+      tablas de BD ni endpoints: sdd/schema.json y sdd/api.json no se tocan; sdd/components.json
+      tampoco (no hay UI).
+    existing_tables: []
+    existing_endpoints: []
+    must_decide:
+      - >
+        D-4 — anchor del punch-in. Estado verificado en el codigo antes de abrir el ciclo:
+        PunchInDecisionSchema.anchor YA existe (opcional, enum center|top|face-hint) y planPunchIns
+        lo emite en su PunchInPlan; el corte esta en buildTimeline, que descarta punch.anchor y
+        escribe transform: { scale, translateX: 0, translateY: 0 } — ClipTransformSchema no tiene
+        anchor ni forma de expresarlo. Es decir: el anchor viaja hasta el EDL y muere al construir
+        la Timeline, asi que composition-remotion no puede renderizarlo. Opciones a evaluar y
+        justificar:
+        (a) extender timeline-core de forma ADITIVA y retrocompatible (campo opcional en
+            ClipTransformSchema/VideoClipSchema, o derivar translateX/translateY del anchor dentro
+            de buildTimeline) — implica tocar una lib de una spec CERRADA, regenerar los JSON Schema
+            commiteados con `pnpm nx run timeline-core:schemas` (schemas.spec.ts compara byte a byte)
+            y escribir su propio fragmento en sdd/context/libs/timeline-core/updates/;
+        (b) resolverlo dentro de auto-montage: el preset fija el anchor, se persiste en el EDL y NO
+            llega a la Timeline — hay que decir explicitamente que se pierde y quien lo recupera.
+        Cualquiera sea la eleccion, dejar escrito el razonamiento y el impacto en cycle-03 y en
+        spec-003. Si la opcion es (a), el alcance del cambio en timeline-core queda acotado a lo
+        estrictamente necesario para el anchor: nada mas entra en ese diff.
+      - >
+        Forma del Preset: que parametros lleva, cuales son obligatorios y como se garantiza que los
+        4 presets producen parametros DISTINTOS de forma verificable (CA-010), sin que el test se
+        vuelva una copia del literal.
+      - >
+        Determinismo (CA-012): definir la funcion de serializacion de timeline.json y COMO se
+        verifica el orden de claves. Leccion registrada de cycle-01: el orden de claves de
+        JSON.stringify despues de un .parse() de Zod NO es el del literal de entrada — se verifica
+        con test, no se asume. Vale igual para edl.json.
+      - >
+        Fuente de aleatoriedad: planPunchIns ya usa mulberry32 sembrado por seed. Definir si el
+        matching de B-roll y la seleccion de transiciones comparten ese generador, usan uno propio
+        derivado del mismo seed, o son totalmente deterministas sin azar. Debe quedar imposible que
+        el orden de iteracion del catalogo cambie la salida.
+    upstream_ambiguities:
+      - >
+        A-1 (RN-11, abierta) — "metadatos del catalogo" para el matching: MediaAssetSchema y
+        CatalogAssetSchema NO tienen ningun campo semantico (ni tags, ni titulo, ni descripcion):
+        solo path, role, datos tecnicos de probe y fingerprint. Hoy la unica senal aprovechable para
+        matching lexico es el NOMBRE DE ARCHIVO. Decidi si alcanza (y lo declaras como contrato de
+        nombrado del B-roll) o si hace falta mas senal, por ejemplo un archivo de tags por asset.
+        Si agregas una fuente nueva, tiene que respetar D-6: nada de timestamps ni datos de entorno.
+      - >
+        A-2 (RN-11, abierta) — prioridad entre broll/ e images/ cuando ambos matchean igual de bien
+        un concepto. RF-6 no la fija. El functional NO invento la regla: la decidis vos y la
+        justificas (puede depender del preset).
+      - >
+        A-3 (RN-08, resuelta por el functional) — multi-palabra: un concepto puede ser frase fija
+        SOLO si esta literal en el diccionario del preset; los conceptos extraidos por frecuencia son
+        de una sola palabra. Sin inferencia de n-gramas (indefinible de forma determinista).
+      - >
+        A-4 (RN-09, resuelta por el functional) — ocurrencias multiples: un concepto puede tener
+        varias menciones y el planificador decide en cuales ilustra, sujeto solo a la ventana de
+        no-repeticion y al no-solape con punch-in. NO es "una sola vez en toda la timeline".
+      - >
+        A-5 (abierta, sin RN) — stopwords para un idioma sin lista propia: definir el comportamiento
+        cuando Transcription.language no tiene lista de stopwords en la lib. Degradar, fallar tipado
+        o caer a una lista por defecto: decidilo y dejalo escrito.
+    decided_upstream:
+      - 'D-1 (cycle-01): tag Nx type:feature con onlyDependOnLibsWithTags: [type:domain, type:util]. Ya aplicado en eslint.config.mjs raiz. No se vuelve a tocar esa config.'
+      - 'D-2 (dev, 2026-09-07): rutas relativas a la raiz del proyecto de medios, publicDir = media/<project-slug>. Vinculante para los assetId que escribe la Timeline.'
+      - 'D-5 (cycle-01): assetId === asset.path === ruta relativa POSIX del asset. Los MediaAsset que reciba buildTimeline usan ese id.'
+      - 'D-6/D-7 (cycle-01): el catalogo es funcion pura de (raw/ + catalogo anterior) y no lleva generatedAt. Aplicar el mismo criterio a edl.json y timeline.json: nada de timestamps ni datos de entorno adentro.'
+      - 'D-9 (cycle-01): cero dependencias npm nuevas. Si el arquitecto cree necesitar una, la justifica explicitamente o no entra.'
+    output_file: sdd/specs/spec-e-burgos-002-auto-montage-pipeline/cycles/cycle-02/architect.md
+
+  implementor_back:
+    goal: 'Implementar una task a la vez de tasks.json, respetando los puertos inyectables, el determinismo y el estilo sin comentarios.'
+    app: 'libs/auto-montage'
+    app_context: sdd/context/libs/auto-montage/context_prompt.md
+    upstream_contexts:
+      - sdd/context/libs/auto-montage/constitution.md
+      - sdd/context/libs/auto-montage/updates/2026-09-07-spec-e-burgos-002-cycle-01.md
+      - sdd/context/libs/timeline-core/context_prompt.md
+      - sdd/context/libs/timeline-core/updates/2026-09-07-spec-e-burgos-001-cycle-01.md
+    known_traps:
+      - 'Cobertura de branches en 85,25 % contra umbral 85: cualquier rama nueva sin test lo pone en rojo. Sumar tests de rama en la misma task que agrega la rama, no al final.'
+      - 'El orden de claves de JSON.stringify tras un .parse() de Zod no es el del literal: si un CA depende de bytes identicos, se verifica con test.'
+      - 'ESLint de la lib prohibe Date, process y Math.random fuera de src/smoke.ts: toda variacion entra por seed.'
+      - 'vite.config.ts necesita resolve.alias de CADA alias @video-maker/* que la lib importe: tsc resuelve por tsconfig.base.json -> paths, Vitest NO.'
+      - 'Verificar NX_WORKSPACE_ROOT_PATH antes de cualquier nx: si apunta a otro repo, corre los targets de ESE repo sin error visible.'
+      - 'Si un hook bloquea Write|Edit sobre una config raiz (eslint.config.mjs, tsconfig.base.json): PARAR y reportar el diff exacto al orquestador. NO rodearlo con Bash — incidente abierto de cycle-01.'
+      - 'Si D-4 se resuelve tocando timeline-core: regenerar los JSON Schema con pnpm nx run timeline-core:schemas y commitear el resultado, porque schemas.spec.ts los compara byte a byte.'
+
+  reviewer:
+    goal: 'Validar todo el output del ciclo y ejecutar los gates de cierre.'
+    checklist: sdd/skills/sdd-reviewer/checklist.md
+    output_file: sdd/specs/spec-e-burgos-002-auto-montage-pipeline/cycles/cycle-02/cycle.json
+    closing_gates:
+      - 'pnpm sdd:validate en verde'
+      - 'pnpm exec nx run-many -t lint test build en verde'
+      - 'CA-008 a CA-012 con evidencia de test citada archivo por archivo'
+      - 'Cobertura de branches de auto-montage con margen real sobre 85 (cycle-01 cerro en 85,25 %)'
+      - 'Fragmento aditivo en sdd/context/libs/auto-montage/updates/2026-09-07-spec-e-burgos-002-cycle-02.md'
+      - 'Si D-4 toco timeline-core: fragmento en sdd/context/libs/timeline-core/updates/2026-09-07-spec-e-burgos-002-cycle-02.md'
+      - 'Actualizar sdd/global.json: cycles_completed del modulo a 2'
+      - 'metrics.usage.by_agent completo: una entrada por task done + una por documento + orquestador + reviewer; by_tier derivado (sin tokens_total, additionalProperties false)'
+      - 'pnpm sdd:rebuild-catalog si sdd/catalog.json quedo stale'

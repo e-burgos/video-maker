@@ -1,9 +1,13 @@
 # auto-montage
 
-Lib Node que ingiere un **proyecto de medios** (`media/<project-slug>/`): descubre y clasifica el
-material crudo en `raw/`, lo sondea con `probeMedia` de `media-local`, transcribe el A-roll con
-`transcribeWithWhisperCpp` de forma incremental, y persiste todo en `work/catalog.json` con rutas
-siempre relativas a la raíz del proyecto. Sin base de datos, sin endpoints HTTP, sin UI.
+Lib Node que ingiere un **proyecto de medios** (`media/<project-slug>/`) y arma el **auto-montaje**
+sobre ese material: descubre y clasifica el crudo en `raw/`, lo sondea con `probeMedia` de
+`media-local`, transcribe el A-roll con `transcribeWithWhisperCpp` de forma incremental y persiste
+todo en `work/catalog.json` (cycle-01) — y, sobre ese catálogo ya ingerido, `autoMontage` poda
+silencios, detecta conceptos clave en la locución, elige B-roll por matching léxico contra el
+nombre de archivo, arma captions y ducking, y produce un `EditDecisionList`/`Timeline` válidos que
+persiste en `work/edl.json`/`work/timeline.json` (cycle-02). Todas las rutas son siempre relativas
+a la raíz del proyecto. Sin base de datos, sin endpoints HTTP, sin UI.
 
 Se importa por source vía el alias `@video-maker/auto-montage`.
 
@@ -19,12 +23,19 @@ Se importa por source vía el alias `@video-maker/auto-montage`.
 - **No renderiza.** `auto-montage` no importa `@video-maker/composition-remotion`, `remotion` ni
   React — quien cablea el motor con el render es `tools/render-cli` (`cycle-03`).
 - `discoverAssets`, `probeAssets`, `transcribeAssets`, `planIngestWork`, `buildTranscriptionKey`,
-  el álgebra de `project/project-paths.ts`, los guards de `fs/guard-raw-writes.ts` y todo
-  `src/__fixtures__/` son detalle de implementación: no se exportan desde `src/index.ts`.
+  el álgebra de `project/project-paths.ts`, los guards de `fs/guard-raw-writes.ts`,
+  `spotConcepts`/`normalizeTerm`/`resolveStopwords`, `assetTokens`/`buildBrollIndex`/
+  `selectBrollAsset`/`planBrollOverlays`, `planTransitions`/`planCaptionGroups`/`planDuckRanges`,
+  `buildEditDecisionList`, `findEnclosingKeep`, los dos `assertValid*` y todo `src/__fixtures__/`
+  son detalle de implementación: no se exportan desde `src/index.ts`.
+- **El auto-montaje es determinista por `seed`.** La única fuente de azar de todo el pipeline es
+  el `mulberry32` que siembra `planPunchIns`; keyword spotting, matching de B-roll, transiciones y
+  ducking son funciones totales sin azar (D-13).
 
 ## API pública
 
-Todo lo exportado vive en `src/index.ts` (firmas completas en `architect.md` §7/§8).
+Todo lo exportado vive en `src/index.ts` (firmas completas en `architect.md` §7/§8 de cycle-01 y
+§9 de cycle-02).
 
 | Área | Exports principales |
 | --- | --- |
@@ -32,11 +43,24 @@ Todo lo exportado vive en `src/index.ts` (firmas completas en `architect.md` §7
 | Catálogo (schema Zod) | `CatalogSchema`, `CatalogAssetSchema`, `AssetFingerprintSchema`, `AssetRoleSchema`, `IgnoredEntrySchema`, `ProbeFailureSchema`, `ProjectRelativePathSchema`, `TranscriptRefSchema`, `CATALOG_SCHEMA_VERSION`, y los tipos derivados |
 | Persistencia del catálogo | `readCatalog`, `writeCatalog` |
 | Ingesta end-to-end | `ingestProject`, tipos `IngestOptions`, `IngestDependencies`, `IngestResult` |
-| Errores tipados | `AutoMontageError`, `isAutoMontageError`, `AssetProbeFailedError`, `CatalogUnreadableError`, `PathEscapesProjectError`, `ProjectLayoutError`, `ReadOnlyRawPathError`, `TranscriptionFailedError` |
+| Auto-montaje end-to-end | `autoMontage`, tipos `AutoMontageOptions`, `AutoMontageResult`, `MontageDependencies` |
+| Presets editoriales | `MONTAGE_PRESETS`, `resolveMontagePreset`, tipos `MontagePreset`, `MontagePresetName`, `BrollRolePriority` |
+| Conceptos y B-roll (resultado) | Tipos `Concept`, `ConceptOccurrence`, `BrollOverlayPlan`, `BrollRejection`, `BrollRejectionReason` |
+| Persistencia del montaje | `serializeMontageDocument`, `writeEditDecisionList`, `writeTimeline` |
+| Errores tipados | `AutoMontageError`, `isAutoMontageError`, `AssetProbeFailedError`, `CatalogUnreadableError`, `PathEscapesProjectError`, `ProjectLayoutError`, `ReadOnlyRawPathError`, `TranscriptionFailedError`, `MontageInputError` (+ tipo `MontageInputReason`), `EditDecisionListInvalidError`, `TimelineInvalidError` |
 | Puertos de filesystem | `nodeDirectoryReader`, `nodeFileStatReader`, `nodeWriteTextFile`, `nodeEnsureDirectory`, y sus tipos |
 
+`autoMontage(project, options, deps?)` recibe el `MediaProject` ya resuelto, un `options.preset`
+(nombre de uno de los cuatro presets o un `MontagePreset` completo) y un `seed`; lee
+`work/catalog.json` y la transcripción del A-roll elegido (con degradación a transcripción vacía
+si falta o no parsea — nunca lanza por eso), compone el EDL y la Timeline, y — salvo
+`options.persist === false` — persiste ambos en `work/edl.json`/`work/timeline.json`. Es lo que
+`tools/render-cli` va a consumir en `cycle-03`.
+
 Los tests nunca importan desde el barrel: cada uno prueba su módulo por ruta relativa, mismo
-criterio que `timeline-core` y `media-local`.
+criterio que `timeline-core` y `media-local`. La excepción es `src/end-to-end.spec.ts`, que
+ejercita a propósito el camino público completo (`resolveMediaProject` → `ingestProject` →
+`autoMontage`) con puertos fake, para probar que las dos etapas encastran.
 
 ## Comandos
 

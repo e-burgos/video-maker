@@ -75,6 +75,14 @@
                   },
                   "translateY": {
                     "type": "number"
+                  },
+                  "anchor": {
+                    "type": "string",
+                    "enum": [
+                      "center",
+                      "top",
+                      "face-hint"
+                    ]
                   }
                 },
                 "required": [
@@ -146,6 +154,14 @@
                   },
                   "translateY": {
                     "type": "number"
+                  },
+                  "anchor": {
+                    "type": "string",
+                    "enum": [
+                      "center",
+                      "top",
+                      "face-hint"
+                    ]
                   }
                 },
                 "required": [

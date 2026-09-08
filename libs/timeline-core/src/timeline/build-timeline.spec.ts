@@ -157,6 +157,57 @@ describe('buildTimeline (CA-013)', () => {
   });
 });
 
+describe('buildTimeline — anchor del punch-in (D-4)', () => {
+  it('propaga punch.anchor al sub-rango con zoom y no al que lo precede ni al que lo sigue', () => {
+    const anchorEdl: EditDecisionList = {
+      schemaVersion: 1,
+      sourceAssetId: 'aroll-cam-01',
+      format: ca013Format,
+      generatedBy: { tool: 'fixture', params: {} },
+      decisions: [
+        { id: 'keep-0001', type: 'keep', startMs: 0, endMs: 5000 },
+        {
+          id: 'punch-0001',
+          type: 'punch-in',
+          startMs: 2000,
+          endMs: 4000,
+          scale: 1.2,
+          anchor: 'top',
+        },
+      ],
+    };
+
+    const timeline = buildTimeline(anchorEdl, [arollAsset]);
+
+    expect(timeline.tracks.aroll).toHaveLength(3);
+    expect(timeline.tracks.aroll[0]?.transform).not.toHaveProperty('anchor');
+    expect(timeline.tracks.aroll[1]?.transform).toMatchObject({ scale: 1.2, anchor: 'top' });
+    expect(timeline.tracks.aroll[2]?.transform).not.toHaveProperty('anchor');
+  });
+
+  it('un punch-in sin anchor produce un transform sin la clave anchor (retrocompatibilidad)', () => {
+    const noAnchorEdl: EditDecisionList = {
+      schemaVersion: 1,
+      sourceAssetId: 'aroll-cam-01',
+      format: ca013Format,
+      generatedBy: { tool: 'fixture', params: {} },
+      decisions: [
+        { id: 'keep-0001', type: 'keep', startMs: 0, endMs: 5000 },
+        { id: 'punch-0001', type: 'punch-in', startMs: 1000, endMs: 3000, scale: 1.3 },
+      ],
+    };
+
+    const timeline = buildTimeline(noAnchorEdl, [arollAsset]);
+
+    expect(timeline.tracks.aroll).toHaveLength(3);
+    expect(timeline.tracks.aroll[1]?.transform).toEqual({
+      scale: 1.3,
+      translateX: 0,
+      translateY: 0,
+    });
+  });
+});
+
 describe('buildTimeline — música y ducking', () => {
   const duckEdl: EditDecisionList = {
     schemaVersion: 1,

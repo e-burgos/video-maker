@@ -4,9 +4,11 @@ import { PathEscapesProjectError } from '../errors/path-escapes-project-error';
 import { resolveMediaProject } from './media-project';
 import {
   catalogPath,
+  editDecisionListPath,
   extractedAudioPath,
   isInsideRaw,
   rawAssetMirror,
+  timelinePath,
   toAbsolutePath,
   toProjectRelativePath,
   transcriptPath,
@@ -90,5 +92,13 @@ describe('rutas canónicas de work/', () => {
 
   it('whisperOutBase preserva el mirror sin extensión', () => {
     expect(whisperOutBase('aroll/clip01')).toBe('work/whisper/aroll/clip01');
+  });
+
+  it('editDecisionListPath', () => {
+    expect(editDecisionListPath()).toBe('work/edl.json');
+  });
+
+  it('timelinePath', () => {
+    expect(timelinePath()).toBe('work/timeline.json');
   });
 });

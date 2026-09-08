@@ -48,6 +48,16 @@
           "status": "completed",
           "tasks_total": 11,
           "tasks_done": 11
+        },
+        "cycle-02": {
+          "file": "sdd/specs/spec-e-burgos-002-auto-montage-pipeline/cycles/cycle-02/tasks.json",
+          "module": "auto-montage-pipeline",
+          "apps": [
+            "libs/auto-montage"
+          ],
+          "status": "completed",
+          "tasks_total": 12,
+          "tasks_done": 12
         }
       }
     }

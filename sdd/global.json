@@ -25,7 +25,7 @@
         "libs/auto-montage",
         "tools/render-cli"
       ],
-      "cycles_completed": 1,
+      "cycles_completed": 2,
       "description": "Ingesta de clips crudos, poda de silencios sobre material real, matching de B-roll e imágenes por conceptos clave de la locución, presets por caso de uso y CLI headless"
     }
   ],

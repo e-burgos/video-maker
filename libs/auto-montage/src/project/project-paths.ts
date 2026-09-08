@@ -74,3 +74,11 @@ export function extractedAudioPath(mirror: string): ProjectRelativePath {
 export function whisperOutBase(mirror: string): ProjectRelativePath {
   return workPath('whisper', mirror);
 }
+
+export function editDecisionListPath(): ProjectRelativePath {
+  return workPath('edl.json');
+}
+
+export function timelinePath(): ProjectRelativePath {
+  return workPath('timeline.json');
+}

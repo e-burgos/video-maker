@@ -1,6 +1,7 @@
 import { z } from 'zod';
 
 import { AudioMixPlanSchema } from './audio-mix-plan.schema';
+import { PunchInAnchorSchema } from './edit-decision-list.schema';
 import { MediaAssetSchema } from './media-asset.schema';
 import { OutputFormatSchema, SafeZoneSchema } from './output-format.schema';
 import { DbSchema, FrameSchema, IdSchema, MsSchema } from './primitives';
@@ -20,6 +21,7 @@ export const ClipTransformSchema = z.object({
   scale: z.number(),
   translateX: z.number(),
   translateY: z.number(),
+  anchor: PunchInAnchorSchema.optional(),
 });
 
 export const VideoClipSchema = z.object({

@@ -4,7 +4,10 @@ export type AutoMontageErrorCode =
   | 'READ_ONLY_RAW_PATH'
   | 'CATALOG_UNREADABLE'
   | 'TRANSCRIPTION_FAILED'
-  | 'ASSET_PROBE_FAILED';
+  | 'ASSET_PROBE_FAILED'
+  | 'MONTAGE_INPUT_INVALID'
+  | 'EDL_INVALID'
+  | 'TIMELINE_INVALID';
 
 export abstract class AutoMontageError extends Error {
   abstract readonly code: AutoMontageErrorCode;

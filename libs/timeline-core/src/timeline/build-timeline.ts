@@ -25,6 +25,7 @@ import { framesToMs, msToFrames } from '../units/units';
 import { pickEmphasisIndex } from '../captions/group-words-for-captions';
 import { DEFAULT_AUDIO_MIX_PLAN, DEFAULT_MUSIC_MIX, planDucking } from '../ducking/plan-ducking';
 import type { VoiceRange } from '../ducking/plan-ducking';
+import type { PunchInAnchor } from '../punch-in/plan-punch-ins';
 import { sequentialId } from './ids';
 
 export interface MusicInput {
@@ -51,6 +52,7 @@ interface KeepSubRange {
   startMs: Ms;
   endMs: Ms;
   scale: Scale;
+  anchor?: PunchInAnchor;
 }
 
 interface KeepPlacement {
@@ -119,7 +121,12 @@ function splitKeepByPunchIns(
     if (punch.startMs > cursorMs) {
       subRanges.push({ startMs: cursorMs, endMs: punch.startMs, scale: 1 });
     }
-    subRanges.push({ startMs: punch.startMs, endMs: punch.endMs, scale: punch.scale });
+    subRanges.push({
+      startMs: punch.startMs,
+      endMs: punch.endMs,
+      scale: punch.scale,
+      ...optionalField('anchor', punch.anchor),
+    });
     cursorMs = punch.endMs;
   }
 
@@ -163,7 +170,12 @@ function buildArollTrack(
         durationFrames,
         trimStartMs: subRange.startMs,
         muted: true,
-        transform: { scale: subRange.scale, translateX: 0, translateY: 0 },
+        transform: {
+          scale: subRange.scale,
+          translateX: 0,
+          translateY: 0,
+          ...optionalField('anchor', subRange.anchor),
+        },
       };
       clips.push(clip);
       clipIds.push(clip.id);

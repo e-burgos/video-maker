@@ -1,0 +1,401 @@
+{
+  "$schema": "../../../../schemas/cycle-tasks.schema.json",
+  "spec": "spec-e-burgos-002-auto-montage-pipeline",
+  "cycle": 2,
+  "module": "auto-montage-pipeline",
+  "apps": [
+    "libs/auto-montage"
+  ],
+  "flow": "full",
+  "user_stories_generated": true,
+  "prerequisites": {
+    "tasks_generated": true
+  },
+  "tasks": [
+    {
+      "id": "TASK-001",
+      "title": "Tipo Preset y los 4 presets (software-demo, hardware, recipe, educational)",
+      "user_stories": [
+        "HU-09"
+      ],
+      "estimation_hours": 3,
+      "story_points": 3,
+      "depends_on": [],
+      "status": "done",
+      "files": [
+        "libs/auto-montage/src/presets/montage-preset.ts",
+        "libs/auto-montage/src/presets/software-demo.preset.ts",
+        "libs/auto-montage/src/presets/hardware.preset.ts",
+        "libs/auto-montage/src/presets/recipe.preset.ts",
+        "libs/auto-montage/src/presets/educational.preset.ts",
+        "libs/auto-montage/src/presets/preset-registry.ts",
+        "libs/auto-montage/src/presets/preset-registry.spec.ts",
+        "libs/auto-montage/src/index.ts",
+        "sdd/specs/spec-e-burgos-002-auto-montage-pipeline/cycles/cycle-02/planner.md"
+      ],
+      "usage": {
+        "tokens_in": 58435,
+        "tokens_out": 10312,
+        "tokens_total": 68747,
+        "provider_model": "claude/sonnet",
+        "effort": "medium",
+        "agent": "implementor-back",
+        "approx": false,
+        "source": "agent-usage-notification",
+        "recorded_at": "2026-09-07"
+      }
+    },
+    {
+      "id": "TASK-002",
+      "title": "Normalización léxica y stopwords por idioma, con fallback para idiomas sin lista (A-5)",
+      "user_stories": [
+        "HU-07"
+      ],
+      "estimation_hours": 2,
+      "story_points": 2,
+      "depends_on": [],
+      "status": "done",
+      "files": [
+        "libs/auto-montage/src/concepts/normalize-term.ts",
+        "libs/auto-montage/src/concepts/normalize-term.spec.ts",
+        "libs/auto-montage/src/concepts/stopwords.ts",
+        "libs/auto-montage/src/concepts/stopwords.spec.ts"
+      ],
+      "usage": {
+        "tokens_in": 18528,
+        "tokens_out": 3270,
+        "tokens_total": 21798,
+        "provider_model": "claude/sonnet",
+        "effort": "medium",
+        "agent": "implementor-back",
+        "approx": true,
+        "source": "agent-usage-notification",
+        "recorded_at": "2026-09-07"
+      }
+    },
+    {
+      "id": "TASK-003",
+      "title": "Keyword spotting: conceptos clave con sus ocurrencias temporales",
+      "user_stories": [
+        "HU-07"
+      ],
+      "estimation_hours": 4,
+      "story_points": 5,
+      "depends_on": [
+        "TASK-001",
+        "TASK-002"
+      ],
+      "status": "done",
+      "files": [
+        "libs/auto-montage/src/concepts/concept.ts",
+        "libs/auto-montage/src/concepts/spot-concepts.ts",
+        "libs/auto-montage/src/concepts/spot-concepts.spec.ts",
+        "libs/auto-montage/src/index.ts"
+      ],
+      "usage": {
+        "tokens_in": 46322,
+        "tokens_out": 8174,
+        "tokens_total": 54496,
+        "provider_model": "claude/sonnet",
+        "effort": "medium",
+        "agent": "implementor-back",
+        "approx": true,
+        "source": "agent-usage-notification",
+        "recorded_at": "2026-09-07"
+      }
+    },
+    {
+      "id": "TASK-004",
+      "title": "Candidatos de B-roll por concepto: matching léxico contra broll/ e images/",
+      "user_stories": [
+        "HU-08"
+      ],
+      "estimation_hours": 3,
+      "story_points": 3,
+      "depends_on": [
+        "TASK-002",
+        "TASK-003"
+      ],
+      "status": "done",
+      "files": [
+        "libs/auto-montage/src/broll/asset-tokens.ts",
+        "libs/auto-montage/src/broll/asset-tokens.spec.ts",
+        "libs/auto-montage/src/broll/build-broll-index.ts",
+        "libs/auto-montage/src/broll/build-broll-index.spec.ts"
+      ],
+      "usage": {
+        "tokens_in": 30980,
+        "tokens_out": 5467,
+        "tokens_total": 36447,
+        "provider_model": "claude/sonnet",
+        "effort": "medium",
+        "agent": "implementor-back",
+        "approx": true,
+        "source": "agent-usage-notification",
+        "recorded_at": "2026-09-07"
+      }
+    },
+    {
+      "id": "TASK-005",
+      "title": "Selección con ventana de no-repetición y desempate determinista entre conceptos",
+      "user_stories": [
+        "HU-08"
+      ],
+      "estimation_hours": 4,
+      "story_points": 5,
+      "depends_on": [
+        "TASK-004"
+      ],
+      "status": "done",
+      "files": [
+        "libs/auto-montage/src/broll/select-broll-asset.ts",
+        "libs/auto-montage/src/broll/select-broll-asset.spec.ts",
+        "libs/auto-montage/src/index.ts"
+      ],
+      "usage": {
+        "tokens_in": 51633,
+        "tokens_out": 9112,
+        "tokens_total": 60745,
+        "provider_model": "claude/sonnet",
+        "effort": "medium",
+        "agent": "implementor-back",
+        "approx": true,
+        "source": "agent-usage-notification",
+        "recorded_at": "2026-09-07"
+      }
+    },
+    {
+      "id": "TASK-006",
+      "title": "No-solape con punch-ins, duración mín/máx del overlay y concepto sin candidato",
+      "user_stories": [
+        "HU-08"
+      ],
+      "estimation_hours": 3,
+      "story_points": 3,
+      "depends_on": [
+        "TASK-005"
+      ],
+      "status": "done",
+      "files": [
+        "libs/auto-montage/src/montage/keep-window.ts",
+        "libs/auto-montage/src/montage/keep-window.spec.ts",
+        "libs/auto-montage/src/broll/plan-broll-overlays.ts",
+        "libs/auto-montage/src/broll/plan-broll-overlays.spec.ts",
+        "libs/auto-montage/src/index.ts"
+      ],
+      "usage": {
+        "tokens_in": 30980,
+        "tokens_out": 5467,
+        "tokens_total": 36447,
+        "provider_model": "claude/sonnet",
+        "effort": "medium",
+        "agent": "implementor-back",
+        "approx": true,
+        "source": "agent-usage-notification",
+        "recorded_at": "2026-09-07"
+      }
+    },
+    {
+      "id": "TASK-007",
+      "title": "Composición: autoMontage orquesta timeline-core, conceptos y B-roll",
+      "user_stories": [
+        "HU-10"
+      ],
+      "estimation_hours": 5,
+      "story_points": 8,
+      "depends_on": [
+        "TASK-001",
+        "TASK-006",
+        "TASK-012"
+      ],
+      "status": "done",
+      "files": [
+        "libs/auto-montage/src/auto-montage.ts",
+        "libs/auto-montage/src/auto-montage.spec.ts",
+        "libs/auto-montage/src/errors/montage-input-error.ts",
+        "libs/auto-montage/src/errors/edit-decision-list-invalid-error.ts",
+        "libs/auto-montage/src/errors/timeline-invalid-error.ts",
+        "libs/auto-montage/src/errors/auto-montage-error.ts",
+        "libs/auto-montage/src/presets/preset-registry.ts",
+        "libs/auto-montage/src/presets/preset-registry.spec.ts",
+        "libs/auto-montage/src/montage/plan-transitions.ts",
+        "libs/auto-montage/src/montage/plan-transitions.spec.ts",
+        "libs/auto-montage/src/montage/plan-caption-groups.ts",
+        "libs/auto-montage/src/montage/plan-caption-groups.spec.ts",
+        "libs/auto-montage/src/montage/plan-duck-ranges.ts",
+        "libs/auto-montage/src/montage/plan-duck-ranges.spec.ts",
+        "libs/auto-montage/src/montage/resolve-montage-inputs.ts",
+        "libs/auto-montage/src/montage/resolve-montage-inputs.spec.ts",
+        "libs/auto-montage/src/montage/prune-silences-with-frame-margin.ts",
+        "libs/auto-montage/src/montage/build-edit-decision-list.ts",
+        "libs/auto-montage/src/montage/build-edit-decision-list.spec.ts",
+        "libs/auto-montage/src/montage/assert-valid-edl.ts",
+        "libs/auto-montage/src/montage/assert-valid-edl.spec.ts",
+        "libs/auto-montage/src/montage/assert-valid-timeline.ts",
+        "libs/auto-montage/src/montage/assert-valid-timeline.spec.ts",
+        "libs/auto-montage/src/project/project-paths.ts",
+        "libs/auto-montage/src/project/project-paths.spec.ts",
+        "libs/auto-montage/src/index.ts"
+      ],
+      "usage": {
+        "tokens_in": 172584,
+        "tokens_out": 30456,
+        "tokens_total": 203040,
+        "provider_model": "claude/sonnet",
+        "effort": "medium",
+        "agent": "implementor-back",
+        "approx": false,
+        "source": "agent-usage-notification",
+        "recorded_at": "2026-09-07"
+      }
+    },
+    {
+      "id": "TASK-008",
+      "title": "Persistencia de work/edl.json y work/timeline.json vía puertos inyectables",
+      "user_stories": [
+        "HU-10"
+      ],
+      "estimation_hours": 2,
+      "story_points": 2,
+      "depends_on": [
+        "TASK-007"
+      ],
+      "status": "done",
+      "files": [
+        "libs/auto-montage/src/montage/serialize-montage-document.ts",
+        "libs/auto-montage/src/montage/write-edit-decision-list.ts",
+        "libs/auto-montage/src/montage/write-edit-decision-list.spec.ts",
+        "libs/auto-montage/src/montage/write-timeline.ts",
+        "libs/auto-montage/src/montage/write-timeline.spec.ts",
+        "libs/auto-montage/src/auto-montage.ts",
+        "libs/auto-montage/src/auto-montage.spec.ts",
+        "libs/auto-montage/src/index.ts"
+      ],
+      "usage": {
+        "tokens_in": 38933,
+        "tokens_out": 6870,
+        "tokens_total": 45803,
+        "provider_model": "claude/sonnet",
+        "effort": "medium",
+        "agent": "implementor-back",
+        "approx": false,
+        "source": "agent-usage-notification",
+        "recorded_at": "2026-09-07"
+      }
+    },
+    {
+      "id": "TASK-009",
+      "title": "Integración end-to-end: función pública del auto-montaje",
+      "user_stories": [
+        "HU-07",
+        "HU-08",
+        "HU-09",
+        "HU-10"
+      ],
+      "estimation_hours": 3,
+      "story_points": 3,
+      "depends_on": [
+        "TASK-008"
+      ],
+      "status": "done",
+      "files": [
+        "libs/auto-montage/src/end-to-end.spec.ts",
+        "libs/auto-montage/README.md"
+      ],
+      "usage": {
+        "tokens_in": 31504,
+        "tokens_out": 5560,
+        "tokens_total": 37064,
+        "provider_model": "claude/sonnet",
+        "effort": "medium",
+        "agent": "implementor-back",
+        "approx": false,
+        "source": "agent-usage-notification",
+        "recorded_at": "2026-09-07"
+      }
+    },
+    {
+      "id": "TASK-010",
+      "title": "CA-012: determinismo byte a byte de edl.json y timeline.json",
+      "user_stories": [
+        "HU-11"
+      ],
+      "estimation_hours": 2,
+      "story_points": 2,
+      "depends_on": [
+        "TASK-009"
+      ],
+      "status": "done",
+      "files": [
+        "libs/auto-montage/src/determinism.spec.ts"
+      ],
+      "usage": {
+        "tokens_in": 24944,
+        "tokens_out": 4402,
+        "tokens_total": 29346,
+        "provider_model": "claude/sonnet",
+        "effort": "medium",
+        "agent": "implementor-back",
+        "approx": false,
+        "source": "agent-usage-notification",
+        "recorded_at": "2026-09-07"
+      }
+    },
+    {
+      "id": "TASK-011",
+      "title": "Cobertura de branches con margen real y casos degenerados (RN-17)",
+      "user_stories": [
+        "HU-10"
+      ],
+      "estimation_hours": 3,
+      "story_points": 3,
+      "depends_on": [
+        "TASK-009"
+      ],
+      "status": "done",
+      "files": [
+        "libs/auto-montage/src/auto-montage.spec.ts"
+      ],
+      "usage": {
+        "tokens_in": 24683,
+        "tokens_out": 4356,
+        "tokens_total": 29039,
+        "provider_model": "claude/sonnet",
+        "effort": "medium",
+        "agent": "implementor-back",
+        "approx": false,
+        "source": "agent-usage-notification",
+        "recorded_at": "2026-09-07"
+      }
+    },
+    {
+      "id": "TASK-012",
+      "title": "D-4 CONFIRMADA (opcion a): extension aditiva de libs/timeline-core para que el anchor del punch-in llegue a la Timeline",
+      "user_stories": [
+        "HU-10"
+      ],
+      "estimation_hours": 3,
+      "story_points": 3,
+      "depends_on": [],
+      "status": "done",
+      "files": [
+        "libs/timeline-core/src/schemas/timeline.schema.ts",
+        "libs/timeline-core/src/timeline/build-timeline.ts",
+        "libs/timeline-core/src/timeline/build-timeline.spec.ts",
+        "libs/timeline-core/schemas/timeline.schema.json",
+        "sdd/context/libs/timeline-core/updates/2026-09-07-spec-e-burgos-002-cycle-02.md"
+      ],
+      "usage": {
+        "tokens_in": 108440,
+        "tokens_out": 19137,
+        "tokens_total": 127577,
+        "provider_model": "claude/sonnet",
+        "effort": "medium",
+        "agent": "implementor-back",
+        "approx": false,
+        "source": "agent-usage-notification",
+        "recorded_at": "2026-09-07"
+      }
+    }
+  ]
+}
