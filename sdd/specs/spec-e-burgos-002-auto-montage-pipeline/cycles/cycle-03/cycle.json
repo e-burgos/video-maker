@@ -93,8 +93,8 @@
     ],
     "files_deleted": [],
     "usage": {
-      "tokens_in": 1484998,
-      "tokens_out": 262058,
+      "tokens_in": 1488519,
+      "tokens_out": 262679,
       "tokens_total": 1769172,
       "duration_minutes": 620,
       "approx": true,
@@ -309,11 +309,11 @@
           "label": "coordinacion de cycle-03: brief, despacho y reanudacion del implementador, addendum §10 del architect, cherry-pick de fe5aa00",
           "provider_model": "claude/opus",
           "effort": "high",
-          "tokens_in": 212500,
-          "tokens_out": 37500,
-          "tokens_total": 250000,
-          "approx": true,
-          "source": "declared-estimate",
+          "tokens_in": 216021,
+          "tokens_out": 38121,
+          "tokens_total": 254142,
+          "approx": false,
+          "source": "agent-usage-notification",
           "recorded_at": "2026-09-08"
         },
         {
@@ -333,12 +333,14 @@
         "claude/sonnet": {
           "tokens_in": 850015,
           "tokens_out": 150002,
-          "approx": false
+          "approx": false,
+          "source": "agent-usage-notification"
         },
         "claude/opus": {
-          "tokens_in": 634983,
-          "tokens_out": 112056,
-          "approx": true
+          "tokens_in": 638504,
+          "tokens_out": 112677,
+          "approx": true,
+          "source": "declared-estimate"
         }
       }
     }
