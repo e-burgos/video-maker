@@ -3,6 +3,7 @@
   "project": "video-maker",
   "description": "Motor y plataforma local de edición y postproducción de video para redes sociales (Reels/TikTok 9:16 y YouTube 16:9): pipeline declarativo en TypeScript sobre FFmpeg + Whisper local y Remotion, que ensambla clips reales, fotos de apoyo, locución y música sin depender de APIs externas pagas.",
   "version": "0.1.0",
+  "profile": "solo",
   "completed_modules": [
     {
       "module": "core-composition-media-pipeline",
