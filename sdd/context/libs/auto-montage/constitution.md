@@ -1,6 +1,6 @@
 # Constitución — libs/auto-montage
 
-> Versión 1.1 | Última actualización: cycle-02 | Fecha: 2026-09-07
+> Versión 1.1 | Última actualización: cycle-03 | Fecha: 2026-09-08
 > Las actualizaciones por ciclo/fix van como fragmentos aditivos en `updates/`.
 
 ## 1. Propósito
@@ -51,6 +51,10 @@
   podar), `resolveMontageInputs`, `planCaptionGroups`, `planDuckRanges`, `planTransitions`,
   `keepWindow`, `buildEditDecisionList`, `assertValidEditDecisionList` / `assertValidTimeline`,
   `serializeMontageDocument` y los writers `writeEditDecisionList` / `writeTimeline`.
+  `buildEditDecisionList` arma el único array `decisions` discriminado por `type`
+  (`keep | cut | punch-in | transition | caption-group | duck`) que define `EditDecisionList` en
+  `timeline-core` — no hay arrays separados por tipo (`keeps`, `punchIns`, ...); confirmado
+  consumiendo la lib desde `tools/render-cli` (cycle-03 de spec-002).
 - `src/errors/` — `AutoMontageError` como raíz + errores tipados con `code` estable:
   `CatalogUnreadableError`, `MontageInputError` (`MONTAGE_INPUT_INVALID`, con `reason`),
   `EditDecisionListInvalidError`, `TimelineInvalidError`.
@@ -68,6 +72,11 @@
 - **Rutas relativas a la raíz del proyecto de medios**, nunca absolutas: es lo que mantiene el render
   en la rama `staticFile()` verificada de `assetSrc` (D-2 de la spec).
   `ProjectRelativePathSchema` rechaza rutas absolutas (CA-003 / RN-05).
+  `IngestResult.catalogPath` y `probeFailures[].path` ya vienen relativos al proyecto (los producen
+  `catalogPath()` y `finding.relativePath`): no hay que relativizarlos de nuevo aguas abajo. La
+  asimetría con `RenderOutcome.outPath` de `composition-remotion` (que sí es absoluto y hay que
+  relativizar contra la raíz del proyecto) no es obvia para quien consume el barrel — confirmado
+  construyendo `tools/render-cli` (cycle-03 de spec-002).
 - **Determinismo**: sin `Date`, `process` ni `Math.random` en `src/` fuera de `smoke.ts`; el `seed`
   entra por parámetro. ESLint lo impone mecánicamente. Todo test que compare bytes entre dos
   corridas completas del pipeline debe inyectar un `Clock` fijo a `ingestProject` — si no, falso
@@ -98,8 +107,8 @@
 - **D-5** — `assetId` === `asset.path` === ruta relativa POSIX del asset (validado por el schema).
 - **D-6/D-7/D-8** — ver Idempotencia arriba.
 - **D-4** — `ClipTransform.anchor` (cambio aditivo en `timeline-core`) llega hasta
-  `work/timeline.json`; el cableado al render (`punchInStyle` en `composition-remotion`) es de
-  `cycle-03`.
+  `work/timeline.json`; el cableado al render (`punchInStyle` en `composition-remotion`) se
+  completó en cycle-03 (`aroll-series.tsx` de `composition-remotion`, fuera de esta lib).
 - La clave de invalidación de transcripción incluye el modelo de whisper y el idioma solicitado.
 - `ignored[]` tiene 5 motivos; `extension-role-mismatch` compara extensión contra **rol de carpeta**,
   no el `MediaKind` sondeado.
@@ -107,3 +116,7 @@
 - Binarios externos (solo en el smoke): `ffmpeg`, `ffprobe`, `whisper-cli` + modelo `ggml-*.bin`,
   resueltos por `media-local` desde `.env`. La lib nunca lee `process.env` (ESLint lo prohíbe salvo
   en `src/smoke.ts`).
+- **`resolveBinaries(env)` de `media-local` es asíncrona** (`=> Promise<ResolvedBinaries>`), aunque
+  parte de la documentación de la spec la anota como si devolviera el objeto directo — quien la
+  consuma desde acá o desde un consumidor de esta lib no debe asumir el valor sincrónico
+  (confirmado construyendo `tools/render-cli` en cycle-03 de spec-002).
