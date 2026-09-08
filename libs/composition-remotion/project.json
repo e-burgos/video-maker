@@ -33,8 +33,11 @@
     "smoke": {
       "executor": "nx:run-commands",
       "options": {
-        "command": "node -r @swc-node/register ./src/smoke.ts",
-        "cwd": "libs/composition-remotion"
+        "command": "node -r ./src/smoke-register.cjs ./src/smoke.ts",
+        "cwd": "libs/composition-remotion",
+        "env": {
+          "SWC_NODE_PROJECT": "./tsconfig.smoke.json"
+        }
       }
     }
   }

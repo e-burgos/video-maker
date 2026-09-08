@@ -222,6 +222,27 @@ un solo frame (CA-18, RNF-3). El único camino a un render real es este procedim
    ```bash
    pnpm nx run composition-remotion:smoke
    ```
+   El target resuelve tres causas encadenadas (FIX-e-burgos-001-001):
+   - `SWC_NODE_PROJECT=./tsconfig.smoke.json` (ver `project.json`): ese tsconfig extiende
+     `tsconfig.lib.json` con `baseUrl` apuntando a la raíz del workspace, para que
+     `@swc-node/register` resuelva los alias `@video-maker/*` igual que `tsc` — sin esto,
+     `@swc-node/register` toma `libs/composition-remotion` como `baseUrl` y reescribe cada
+     `@video-maker/*` a una ruta que no existe.
+   - `-r ./src/smoke-register.cjs` en vez de `-r @swc-node/register` directo: `@swc-node/register`
+     registra un loader para `.js` además de `.ts`/`.tsx`, y ese loader intercepta *cualquier*
+     `require()` del proceso — incluido el build hook que la extensión Console Ninja de VSCode
+     inyecta en `Module._extensions['.js']`. Compilar ese `.js` de terceros con swc lo hace
+     panicar (`miette`, "Formatting argument out of range") apenas arranca el bundler de Remotion.
+     `smoke-register.cjs` carga `@swc-node/register` y de inmediato le devuelve a Node su loader
+     nativo de `.js`, dejando swc acotado a TypeScript — que es todo lo que esta lib tiene. Lección
+     general: cualquier target `nx:run-commands` que combine `@swc-node/register` con un bundler
+     debe acotar el registro a `.ts`/`.tsx`, nunca dejarlo interceptar `.js`.
+   - `src/render.ts` aplica `withWorkspaceAliases` en el `webpackOverride` de `bundleProject`: el
+     webpack que arma `@remotion/bundler` no conoce los `paths` del workspace por sí solo (su
+     `getResolveConfig()` solo remapea React/Remotion), así que sin este alias explícito
+     `@video-maker/timeline-core` no resuelve dentro del bundle. Lección general: un alias de
+     workspace hay que declararlo en **cada** resolvedor del stack (`tsconfig`, Vite, y acá el
+     webpack de Remotion) — no alcanza con `tsconfig.base.json`.
    La primera corrida descarga Chrome Headless Shell (nunca pasa en CI: ningún target
    automatizado llama a `renderMedia`). Si el binario no puede descargarse, el error de Remotion lo
    nombra tal cual (CE-7); la lib no intenta instalarlo por su cuenta.
