@@ -61,8 +61,8 @@
       "libs/composition-remotion/src/helpers/caption-layout.ts"
     ],
     "usage": {
-      "tokens_in": 1119317,
-      "tokens_out": 197525,
+      "tokens_in": 1084860,
+      "tokens_out": 191444,
       "approx": true,
       "source": "declared-estimate",
       "by_agent": [
@@ -209,11 +209,11 @@
           "label": "revision y cierre de cycle-02 + cierre de la spec",
           "provider_model": "claude/opus",
           "effort": "high",
-          "tokens_in": 170000,
-          "tokens_out": 30000,
-          "tokens_total": 200000,
-          "approx": true,
-          "source": "declared-estimate",
+          "tokens_in": 135543,
+          "tokens_out": 23919,
+          "tokens_total": 159462,
+          "approx": false,
+          "source": "agent-usage-notification",
           "recorded_at": "2026-09-08"
         }
       ],
@@ -225,8 +225,8 @@
           "source": "agent-usage-notification"
         },
         "claude/opus": {
-          "tokens_in": 502635,
-          "tokens_out": 88700,
+          "tokens_in": 468178,
+          "tokens_out": 82619,
           "approx": true,
           "source": "declared-estimate"
         }
