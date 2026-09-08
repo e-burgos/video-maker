@@ -19,7 +19,7 @@
       "severity": "high",
       "created_at": "2026-09-08",
       "resolved_at": "2026-09-08",
-      "validated_at": null,
+      "validated_at": "2026-09-08",
       "title": "composition-remotion:smoke target cannot resolve workspace TS path aliases",
       "estimation_hours": 1.5,
       "description": "nx run composition-remotion:smoke fails in ~400 ms, before bundling, with \"Cannot find module '../../libs/timeline-core/src'\" (require stack: src/__fixtures__/example-timeline.ts <- src/smoke.ts). The target runs `node -r @swc-node/register ./src/smoke.ts` with cwd libs/composition-remotion, so @swc-node/register picks up libs/composition-remotion/tsconfig.json and takes that directory as baseUrl, while the paths mappings inherited from tsconfig.base.json are written relative to the workspace root (./libs/<lib>/src/index.ts). Every @video-maker/* specifier is therefore rewritten to a path under libs/composition-remotion/libs/. Broken since spec-001 cycle-03, when the target was added: it has never produced a render.",
@@ -36,7 +36,7 @@
         "libs/composition-remotion/.gitignore"
       ],
       "test_reference": "libs/composition-remotion/README.md#smoke-manual--ca-027-fuera-de-ci — manual target, never in CI (RNF-3). Executed once for real on 2026-09-08: `pnpm nx run composition-remotion:smoke` returned { outPath: \"out/example-9x16.mp4\", compositionId: \"TimelineComposition\", width: 1080, height: 1920, fps: 30, durationInFrames: 265 } in 53.2 s, and `ffprobe` on the output reports h264 1080x1920 @ 30/1, nb_frames=265, duration 8.833333 s, aac 48000 Hz stereo.",
-      "status": "implemented",
+      "status": "validated",
       "cycle": null,
       "usage": {
         "provider_model": "claude/sonnet",

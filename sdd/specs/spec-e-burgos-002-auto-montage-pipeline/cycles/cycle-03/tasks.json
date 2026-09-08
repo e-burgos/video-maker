@@ -1,0 +1,430 @@
+{
+  "$schema": "../../../../schemas/cycle-tasks.schema.json",
+  "spec": "spec-e-burgos-002-auto-montage-pipeline",
+  "cycle": 3,
+  "module": "auto-montage-pipeline",
+  "apps": [
+    "tools/render-cli",
+    "libs/composition-remotion"
+  ],
+  "flow": "full",
+  "user_stories_generated": true,
+  "prerequisites": {
+    "tasks_generated": true
+  },
+  "tasks": [
+    {
+      "id": "TASK-001",
+      "title": "Scaffold de tools/render-cli: dry-run del generador, auditoria y verificacion de ejecucion real",
+      "user_stories": [
+        "HU-12"
+      ],
+      "estimation_hours": 4,
+      "story_points": 5,
+      "depends_on": [],
+      "status": "done",
+      "files": [
+        "tools/render-cli/project.json",
+        "tools/render-cli/tsconfig.json",
+        "tools/render-cli/tsconfig.lib.json",
+        "tools/render-cli/tsconfig.spec.json",
+        "tools/render-cli/vite.config.ts",
+        "tools/render-cli/README.md",
+        "tools/render-cli/src/main.ts"
+      ],
+      "usage": {
+        "provider_model": "claude/sonnet",
+        "effort": "medium",
+        "agent": "implementor-back",
+        "tokens_in": 140463,
+        "tokens_out": 24787,
+        "approx": false,
+        "source": "agent-usage-notification",
+        "recorded_at": "2026-09-08",
+        "tokens_total": 165250
+      }
+    },
+    {
+      "id": "TASK-002",
+      "title": "Jerarquia de errores propia, tabla de exit codes y formato normativo de error",
+      "user_stories": [
+        "HU-17"
+      ],
+      "estimation_hours": 4,
+      "story_points": 5,
+      "depends_on": [
+        "TASK-001"
+      ],
+      "status": "done",
+      "files": [
+        "tools/render-cli/src/errors/render-cli-error.ts",
+        "tools/render-cli/src/errors/render-cli-error.spec.ts",
+        "tools/render-cli/src/errors/cli-usage-error.ts",
+        "tools/render-cli/src/errors/cli-argument-error.ts",
+        "tools/render-cli/src/errors/stage-input-missing-error.ts",
+        "tools/render-cli/src/errors/stage-failed-error.ts",
+        "tools/render-cli/src/errors/translate-lib-error.ts",
+        "tools/render-cli/src/errors/translate-lib-error.spec.ts",
+        "tools/render-cli/src/errors/exit-code-for.ts",
+        "tools/render-cli/src/errors/exit-code-for.spec.ts",
+        "tools/render-cli/src/errors/format-cli-error.ts",
+        "tools/render-cli/src/errors/format-cli-error.spec.ts"
+      ],
+      "usage": {
+        "provider_model": "claude/sonnet",
+        "effort": "medium",
+        "agent": "implementor-back",
+        "tokens_in": 51768,
+        "tokens_out": 9136,
+        "approx": false,
+        "source": "agent-usage-notification",
+        "recorded_at": "2026-09-08",
+        "tokens_total": 60904
+      }
+    },
+    {
+      "id": "TASK-003",
+      "title": "Parseo y validacion de argumentos: PRESET_NAMES, parseCliArgs y stageForArgument",
+      "user_stories": [
+        "HU-16",
+        "HU-12"
+      ],
+      "estimation_hours": 3,
+      "story_points": 3,
+      "depends_on": [
+        "TASK-002"
+      ],
+      "status": "done",
+      "files": [
+        "tools/render-cli/src/args/preset-names.ts",
+        "tools/render-cli/src/args/preset-names.spec.ts",
+        "tools/render-cli/src/args/parse-cli-args.ts",
+        "tools/render-cli/src/args/parse-cli-args.spec.ts",
+        "tools/render-cli/src/args/stage-for-argument.ts",
+        "tools/render-cli/src/args/stage-for-argument.spec.ts"
+      ],
+      "usage": {
+        "provider_model": "claude/sonnet",
+        "effort": "medium",
+        "agent": "implementor-back",
+        "tokens_in": 54841,
+        "tokens_out": 9678,
+        "approx": false,
+        "source": "agent-usage-notification",
+        "recorded_at": "2026-09-08",
+        "tokens_total": 64519
+      }
+    },
+    {
+      "id": "TASK-004",
+      "title": "Precondiciones por etapa y resolucion de rutas: assertProjectIsIngestable, assertCatalogExists, assertTimelineExists, resolveRenderTarget, readTimelineDocument",
+      "user_stories": [
+        "HU-12",
+        "HU-13",
+        "HU-14"
+      ],
+      "estimation_hours": 3,
+      "story_points": 3,
+      "depends_on": [
+        "TASK-002"
+      ],
+      "status": "done",
+      "files": [
+        "tools/render-cli/src/pipeline/assert-project-preconditions.ts",
+        "tools/render-cli/src/pipeline/assert-project-preconditions.spec.ts",
+        "tools/render-cli/src/pipeline/resolve-render-target.ts",
+        "tools/render-cli/src/pipeline/resolve-render-target.spec.ts",
+        "tools/render-cli/src/pipeline/read-timeline-document.ts",
+        "tools/render-cli/src/pipeline/read-timeline-document.spec.ts",
+        "tools/render-cli/src/__fixtures__/media-project.ts"
+      ],
+      "usage": {
+        "provider_model": "claude/sonnet",
+        "effort": "medium",
+        "agent": "implementor-back",
+        "tokens_in": 46385,
+        "tokens_out": 8185,
+        "approx": false,
+        "source": "agent-usage-notification",
+        "recorded_at": "2026-09-08",
+        "tokens_total": 54570
+      }
+    },
+    {
+      "id": "TASK-005",
+      "title": "Puerto TimelineRenderer, CliDependencies y wiring real de Node (resolveBinaries perezoso, await import de composition-remotion)",
+      "user_stories": [
+        "HU-14"
+      ],
+      "estimation_hours": 3,
+      "story_points": 3,
+      "depends_on": [
+        "TASK-002"
+      ],
+      "status": "done",
+      "files": [
+        "tools/render-cli/src/deps/timeline-renderer.ts",
+        "tools/render-cli/src/deps/cli-dependencies.ts",
+        "tools/render-cli/src/deps/node-cli-dependencies.ts",
+        "tools/render-cli/src/cli-register.cjs",
+        "tools/render-cli/project.json"
+      ],
+      "usage": {
+        "provider_model": "claude/sonnet",
+        "effort": "medium",
+        "agent": "implementor-back",
+        "tokens_in": 23772,
+        "tokens_out": 4195,
+        "approx": false,
+        "source": "agent-usage-notification",
+        "recorded_at": "2026-09-08",
+        "tokens_total": 27967
+      }
+    },
+    {
+      "id": "TASK-006",
+      "title": "Tipos de reporte, mappers to*Report y formatReport con formato normativo",
+      "user_stories": [
+        "HU-19"
+      ],
+      "estimation_hours": 3,
+      "story_points": 3,
+      "depends_on": [
+        "TASK-001"
+      ],
+      "status": "done",
+      "files": [
+        "tools/render-cli/src/report/cli-report.ts",
+        "tools/render-cli/src/report/to-reports.ts",
+        "tools/render-cli/src/report/to-reports.spec.ts",
+        "tools/render-cli/src/report/format-report.ts",
+        "tools/render-cli/src/report/format-report.spec.ts"
+      ],
+      "usage": {
+        "provider_model": "claude/sonnet",
+        "effort": "medium",
+        "agent": "implementor-back",
+        "tokens_in": 38766,
+        "tokens_out": 6841,
+        "approx": false,
+        "source": "agent-usage-notification",
+        "recorded_at": "2026-09-08",
+        "tokens_total": 45607
+      }
+    },
+    {
+      "id": "TASK-007",
+      "title": "Comandos ingest, plan y render: precondicion, llamada a la lib, traduccion de error y reporte",
+      "user_stories": [
+        "HU-12",
+        "HU-13",
+        "HU-14"
+      ],
+      "estimation_hours": 5,
+      "story_points": 8,
+      "depends_on": [
+        "TASK-004",
+        "TASK-005",
+        "TASK-006"
+      ],
+      "status": "done",
+      "files": [
+        "tools/render-cli/src/commands/ingest-command.ts",
+        "tools/render-cli/src/commands/ingest-command.spec.ts",
+        "tools/render-cli/src/commands/plan-command.ts",
+        "tools/render-cli/src/commands/plan-command.spec.ts",
+        "tools/render-cli/src/commands/render-command.ts",
+        "tools/render-cli/src/commands/render-command.spec.ts",
+        "tools/render-cli/src/__fixtures__/fake-cli-dependencies.ts",
+        "tools/render-cli/src/report/to-reports.ts",
+        "tools/render-cli/src/report/to-reports.spec.ts"
+      ],
+      "usage": {
+        "provider_model": "claude/sonnet",
+        "effort": "medium",
+        "agent": "implementor-back",
+        "tokens_in": 72792,
+        "tokens_out": 12846,
+        "approx": false,
+        "source": "agent-usage-notification",
+        "recorded_at": "2026-09-08",
+        "tokens_total": 85638
+      }
+    },
+    {
+      "id": "TASK-008",
+      "title": "Comando run: composicion secuencial estricta de ingest, plan y render",
+      "user_stories": [
+        "HU-15",
+        "HU-18"
+      ],
+      "estimation_hours": 2,
+      "story_points": 2,
+      "depends_on": [
+        "TASK-007"
+      ],
+      "status": "done",
+      "files": [
+        "tools/render-cli/src/commands/run-command.ts",
+        "tools/render-cli/src/commands/run-command.spec.ts",
+        "tools/render-cli/src/__fixtures__/fake-cli-dependencies.ts"
+      ],
+      "usage": {
+        "provider_model": "claude/sonnet",
+        "effort": "medium",
+        "agent": "implementor-back",
+        "tokens_in": 22862,
+        "tokens_out": 4034,
+        "approx": false,
+        "source": "agent-usage-notification",
+        "recorded_at": "2026-09-08",
+        "tokens_total": 26896
+      }
+    },
+    {
+      "id": "TASK-009",
+      "title": "runCli: parseo, despacho y CliOutcome sin lanzar nunca, con contrato punta a punta",
+      "user_stories": [
+        "HU-15",
+        "HU-17",
+        "HU-19"
+      ],
+      "estimation_hours": 4,
+      "story_points": 5,
+      "depends_on": [
+        "TASK-003",
+        "TASK-008"
+      ],
+      "status": "done",
+      "files": [
+        "tools/render-cli/src/cli.ts",
+        "tools/render-cli/src/cli.spec.ts"
+      ],
+      "usage": {
+        "provider_model": "claude/sonnet",
+        "effort": "medium",
+        "agent": "implementor-back",
+        "tokens_in": 18107,
+        "tokens_out": 3195,
+        "approx": false,
+        "source": "agent-usage-notification",
+        "recorded_at": "2026-09-08",
+        "tokens_total": 21302
+      }
+    },
+    {
+      "id": "TASK-010",
+      "title": "main.ts como unica frontera de proceso y verificacion de ejecucion real de los 4 comandos",
+      "user_stories": [
+        "HU-12",
+        "HU-13",
+        "HU-14",
+        "HU-15"
+      ],
+      "estimation_hours": 2,
+      "story_points": 2,
+      "depends_on": [
+        "TASK-009"
+      ],
+      "status": "done",
+      "files": [
+        "tools/render-cli/src/main.ts"
+      ],
+      "usage": {
+        "provider_model": "claude/sonnet",
+        "effort": "medium",
+        "agent": "implementor-back",
+        "tokens_in": 20406,
+        "tokens_out": 3601,
+        "approx": false,
+        "source": "agent-usage-notification",
+        "recorded_at": "2026-09-08",
+        "tokens_total": 24007
+      }
+    },
+    {
+      "id": "TASK-011",
+      "title": "Cableado de D-4 en aroll-series.tsx: propagar scene.transform.anchor a punchInStyle",
+      "user_stories": [
+        "HU-20"
+      ],
+      "estimation_hours": 1,
+      "story_points": 1,
+      "depends_on": [],
+      "status": "done",
+      "files": [
+        "libs/composition-remotion/src/components/aroll-series.tsx"
+      ],
+      "usage": {
+        "provider_model": "claude/sonnet",
+        "effort": "medium",
+        "agent": "implementor-back",
+        "tokens_in": 9125,
+        "tokens_out": 1610,
+        "approx": false,
+        "source": "agent-usage-notification",
+        "recorded_at": "2026-09-08",
+        "tokens_total": 10735
+      }
+    },
+    {
+      "id": "TASK-012",
+      "title": "Preparar material de smoke (regenerar clip01.mp4 con silencios) y documentar invocacion en README",
+      "user_stories": [
+        "HU-20"
+      ],
+      "estimation_hours": 2,
+      "story_points": 2,
+      "depends_on": [
+        "TASK-010",
+        "TASK-011"
+      ],
+      "status": "done",
+      "files": [
+        "tools/render-cli/README.md",
+        "media/smoke-ingest/raw/aroll/clip01.mp4",
+        "media/smoke-ingest/raw/audio/music01.mp3"
+      ],
+      "usage": {
+        "provider_model": "claude/sonnet",
+        "effort": "medium",
+        "agent": "implementor-back",
+        "tokens_in": 26995,
+        "tokens_out": 4764,
+        "approx": false,
+        "source": "agent-usage-notification",
+        "recorded_at": "2026-09-08",
+        "tokens_total": 31759
+      }
+    },
+    {
+      "id": "TASK-013",
+      "title": "Smoke manual end-to-end: render real (CA-015) y repeticion idempotente (CA-016)",
+      "user_stories": [
+        "HU-20",
+        "HU-18"
+      ],
+      "estimation_hours": 3,
+      "story_points": 3,
+      "depends_on": [
+        "TASK-012"
+      ],
+      "status": "done",
+      "files": [
+        "sdd/specs/spec-e-burgos-002-auto-montage-pipeline/cycles/cycle-03/artifacts/smoke-ca015-ca016.md",
+        "sdd/specs/spec-e-burgos-002-auto-montage-pipeline/cycles/cycle-03/cycle.json"
+      ],
+      "usage": {
+        "provider_model": "claude/sonnet",
+        "effort": "medium",
+        "agent": "implementor-back",
+        "tokens_in": 29818,
+        "tokens_out": 5262,
+        "approx": false,
+        "source": "agent-usage-notification",
+        "recorded_at": "2026-09-08",
+        "tokens_total": 35080
+      }
+    }
+  ]
+}

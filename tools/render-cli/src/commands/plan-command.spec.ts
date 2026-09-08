@@ -1,0 +1,117 @@
+import type { Catalog, CatalogAsset, MontagePresetName } from '@video-maker/auto-montage';
+import { CATALOG_SCHEMA_VERSION } from '@video-maker/auto-montage';
+import type { MediaAsset } from '@video-maker/timeline-core';
+import { describe, expect, it } from 'vitest';
+
+import { createFakeCliDependencies, createFakeFileSystem } from '../__fixtures__/fake-cli-dependencies';
+import { fixtureMediaProject } from '../__fixtures__/media-project';
+import { StageFailedError } from '../errors/stage-failed-error';
+import { StageInputMissingError } from '../errors/stage-input-missing-error';
+
+import { planCommand } from './plan-command';
+
+function videoAsset(init: Partial<MediaAsset> & Pick<MediaAsset, 'id' | 'path'>): MediaAsset {
+  return {
+    kind: 'video',
+    durationMs: 12_000,
+    fps: 30,
+    width: 1080,
+    height: 1920,
+    hasAudio: true,
+    probedAt: '2026-01-01T00:00:00.000Z',
+    ...init,
+  };
+}
+
+function word(text: string, startMs: number, endMs: number) {
+  return { text, startMs, endMs };
+}
+
+function buildPlannableFileSystem() {
+  const arollAsset = videoAsset({ id: 'raw/aroll/demo.mp4', path: 'raw/aroll/demo.mp4' });
+  const catalogAsset: CatalogAsset = {
+    role: 'aroll',
+    fingerprint: { sizeBytes: 1000, modifiedAtMs: 0 },
+    asset: arollAsset,
+  };
+  const catalog: Catalog = {
+    schemaVersion: CATALOG_SCHEMA_VERSION,
+    projectSlug: fixtureMediaProject.slug,
+    assets: [catalogAsset],
+    transcripts: [
+      {
+        assetId: arollAsset.id,
+        transcriptPath: 'work/transcripts/aroll/demo.json',
+        fingerprint: { sizeBytes: 1000, modifiedAtMs: 0 },
+        engine: 'whisper.cpp',
+        model: 'base',
+        language: 'es',
+      },
+    ],
+    ignored: [],
+    probeFailures: [],
+  };
+  const transcription = {
+    assetId: arollAsset.id,
+    engine: 'whisper.cpp' as const,
+    language: 'es',
+    words: [
+      word('hola', 0, 300),
+      word('vamos', 300, 600),
+      word('a', 600, 700),
+      word('abrir', 700, 1000),
+      word('la', 1600, 1700),
+      word('terminal', 1700, 2200),
+      word('y', 2200, 2300),
+      word('ejecutamos', 2300, 2800),
+      word('el', 2900, 3000),
+      word('comando', 3000, 3500),
+      word('listo', 3500, 3800),
+    ],
+    segments: [],
+  };
+
+  return createFakeFileSystem([
+    { path: `${fixtureMediaProject.workDir}/catalog.json`, contents: JSON.stringify(catalog) },
+    {
+      path: `${fixtureMediaProject.workDir}/transcripts/aroll/demo.json`,
+      contents: JSON.stringify(transcription),
+    },
+  ]);
+}
+
+describe('planCommand', () => {
+  it('propagates assertCatalogExists when work/catalog.json is missing', async () => {
+    const deps = createFakeCliDependencies({ fileSystem: createFakeFileSystem([]) });
+
+    await expect(
+      planCommand(fixtureMediaProject, { preset: 'software-demo', seed: 0 }, deps),
+    ).rejects.toBeInstanceOf(StageInputMissingError);
+  });
+
+  it('runs autoMontage for real and maps the result to a PlanReport, resolving even with broll rejections (RN-28)', async () => {
+    const deps = createFakeCliDependencies({ fileSystem: buildPlannableFileSystem() });
+
+    const report = await planCommand(fixtureMediaProject, { preset: 'software-demo', seed: 42 }, deps);
+
+    expect(report.kind).toBe('plan');
+    expect(report.timelinePath).toBe('work/timeline.json');
+    expect(report.edlPath).toBe('work/edl.json');
+    expect(report.editedDurationMs).toBeGreaterThan(0);
+    expect(Array.isArray(report.brollRejections)).toBe(true);
+  });
+
+  it('translates a thrown MontageInputError to a StageFailedError with stage plan (RN-26)', async () => {
+    const deps = createFakeCliDependencies({ fileSystem: buildPlannableFileSystem() });
+
+    const error = await planCommand(
+      fixtureMediaProject,
+      { preset: 'unknown-preset-value' as MontagePresetName, seed: 0 },
+      deps,
+    ).catch((caught: unknown) => caught);
+
+    expect(error).toBeInstanceOf(StageFailedError);
+    expect((error as StageFailedError).stage).toBe('plan');
+    expect((error as StageFailedError).reason).toBe('MONTAGE_INPUT_INVALID');
+  });
+});

@@ -86,6 +86,7 @@ Para el detalle técnico de cada subproyecto, ver su constitución específica:
 | `libs/media-local` | TypeScript estricto + execa 10 + Zod 4.5 + Vitest 4 (fixtures grabadas, cero binarios) | cycle-02 \| 2026-09-07 |
 | `libs/composition-remotion` | React 19 + Remotion 4.0.522 (`transitions`/`bundler`/`renderer`/`cli`) + Vitest 4/jsdom (cero render en CI) | cycle-03 \| 2026-09-07 |
 | `libs/auto-montage` | TypeScript estricto + Zod 4.5 + Vitest 4 (puertos de I/O inyectables, cero binarios en CI; montaje determinista por seed, smoke manual aparte) | cycle-02 \| 2026-09-07 |
+| `tools/render-cli` | TypeScript estricto (ESM, Node >= 22) + `node:util parseArgs` + Vitest 4 (puertos inyectables, cero binarios en CI; render real solo en el target `smoke`) — cero dependencias npm propias | cycle-03 \| 2026-09-08 |
 
 ---
 

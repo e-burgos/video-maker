@@ -1,0 +1,42 @@
+{
+  "name": "render-cli",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "tools/render-cli/src",
+  "projectType": "application",
+  "tags": ["scope:engine", "type:tool"],
+  "targets": {
+    "lint": {
+      "executor": "@nx/eslint:lint"
+    },
+    "test": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "vitest run --coverage --passWithNoTests",
+        "cwd": "tools/render-cli"
+      }
+    },
+    "build": {
+      "executor": "nx:run-commands",
+      "outputs": ["{workspaceRoot}/dist/out-tsc/tools/render-cli"],
+      "options": {
+        "command": "tsc -p tsconfig.lib.json",
+        "cwd": "tools/render-cli"
+      }
+    },
+    "cli": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "node -r ./tools/render-cli/src/cli-register.cjs tools/render-cli/src/main.ts",
+        "env": { "SWC_NODE_PROJECT": "tsconfig.base.json" }
+      }
+    },
+    "smoke": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "node -r ./tools/render-cli/src/cli-register.cjs tools/render-cli/src/main.ts run media/smoke-ingest --preset software-demo --seed 0",
+        "forwardAllArgs": false,
+        "env": { "SWC_NODE_PROJECT": "tsconfig.base.json" }
+      }
+    }
+  }
+}

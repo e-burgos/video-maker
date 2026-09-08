@@ -1,0 +1,204 @@
+cycle: 3
+module: auto-montage-pipeline
+spec: spec-e-burgos-002-auto-montage-pipeline
+phase: headless-render-cli
+date: '2026-09-07'
+app_context: sdd/context/tools/render-cli/context_prompt.md
+estimated_weeks: 1
+
+objective: |
+  Cerrar la spec-002 con `tools/render-cli`: la CLI headless que va de una carpeta de assets
+  (`media/<slug>/raw/`) a un MP4 en `media/<slug>/out/`, encadenando `ingest -> plan -> render`
+  mas el comando `run` que ejecuta los tres. La CLI no contiene logica de montaje propia: compone
+  `ingestProject` / `autoMontage` de `@video-maker/auto-montage` y `renderTimeline` de
+  `@video-maker/composition-remotion/render`. Al cerrar este ciclo la spec-002 pasa a `completed`.
+
+scope:
+  - Scaffold de `tools/render-cli` con la skill `scaffold-nx` (primer proyecto bajo `tools/` del repo)
+  - Parseo y validacion de argumentos puro y testeable (`node:util parseArgs`, cero dependencias nuevas)
+  - Comandos `ingest`, `plan`, `render` y `run` con exit codes y errores que identifican etapa/asset/causa
+  - Flag de preset (`software-demo | hardware | recipe | educational`) y flag `--seed`
+  - `render` invoca `renderTimeline` con `publicDir` = raiz del proyecto de medios y `outPath` dentro de `out/`
+  - Cableado de D-4: `punchInStyle(scene.transform, scene.transform.anchor)` en `libs/composition-remotion/src/aroll-series.tsx`
+  - Smoke manual end-to-end con binarios reales, incluido un render real (CA-015) y la repeticion idempotente (CA-016)
+  - Cierre de spec: `index.json`, `global.json`, tablas globales de contexto, fragmentos de contexto
+
+out_of_scope:
+  - Cualquier cambio de logica de montaje en `libs/auto-montage` (cycle-02 la dejo cerrada)
+  - Cualquier archivo de `libs/composition-remotion` que no sea `aroll-series.tsx` (ver restriccion dura abajo)
+  - Kinetic captions, `CaptionTrack`, `captionLayout` (son de spec-003, carril paralelo)
+  - Mezcla de audio / normalizacion LUFS (spec-004) y la API de render (spec-005)
+  - Publicar el tool como paquete npm; se consume desde el repo
+
+dependencies_required:
+  - spec-e-burgos-001-core-composition-media-pipeline (completed, 3 ciclos)
+  - cycle-01 de esta spec (ingesta, catalogo) — completed
+  - cycle-02 de esta spec (autoMontage, presets, writers) — completed
+
+acceptance_criteria:
+  CA-013: '`ingest`, `plan`, `render` y `run` existen, validan sus argumentos y devuelven exit code != 0 ante error'
+  CA-014: '`render` invoca `renderTimeline` con `publicDir` = raiz del proyecto y `outPath` dentro de `out/`'
+  CA-015: 'Smoke manual end-to-end: `run` sobre un proyecto real produce un MP4 reproducible con las dimensiones del formato'
+  CA-016: 'Borrar `work/` y `out/` y repetir `run` -> mismo MP4, `raw/` intacto'
+
+hard_constraints:
+  - id: HC-1
+    rule: |
+      D-2 es vinculante y ya esta resuelta: `publicDir` = `media/<slug>` (raiz del proyecto de medios),
+      NUNCA `media/<slug>/raw`. Las rutas de la Timeline son relativas a esa raiz (`raw/aroll/...`,
+      `work/...`) y asi caen en la rama `staticFile()` de `assetSrc`, la unica verificada con un render
+      real. Una ruta absoluta cae en la rama `file://`, no verificada, con riesgo de que Chrome bloquee
+      sub-recursos.
+  - id: HC-2
+    rule: |
+      CARRIL PARALELO. Otra rama esta modificando `libs/composition-remotion` (spec-003, kinetic
+      captions; su cycle-02 QUITA `CaptionTrack` y `captionLayout` del barrel). En esa lib se toca
+      UNICAMENTE `src/components/aroll-series.tsx`. Ni el barrel (`src/index.ts`), ni el README, ni
+      `vite.config.ts`, ni ningun otro archivo. `render-cli` NO debe depender de `CaptionTrack` ni de
+      `captionLayout`: consume la lib solo por `@video-maker/composition-remotion/render`.
+  - id: HC-3
+    rule: |
+      Boundaries de ESLint. `eslint.config.mjs` de la raiz ya tiene la regla fallback
+      `{ sourceTag: '*', onlyDependOnLibsWithTags: ['*'] }`. Taguear `tools/render-cli` con un tag que
+      NO tenga regla restrictiva propia (ej. `type:tool`) para caer en el fallback y NO tener que editar
+      la config raiz. Si aun asi hiciera falta tocarla: el hook `config-protection` la bloquea y NADIE la
+      rodea con `Bash` (leccion destilada en `sdd/memory/lessons.md`) — se para y se reporta el diff.
+  - id: HC-4
+    rule: |
+      RN-14 / memoria. La maquina tiene 16 GB compartidos entre Chrome Headless Shell, ffmpeg y el modelo
+      Whisper. Nunca render y transcripcion en paralelo. Antes del render real de CA-015: correr
+      `memory_pressure` y esperar si no dice `normal`. El smoke real se corre UNA sola vez, al final del
+      ciclo.
+  - id: HC-5
+    rule: |
+      Material de smoke: `media/smoke-ingest/` (regenerable, ver README de `auto-montage`).
+      `media/video-01` y `media/video-02` son del dev — NO TOCAR.
+  - id: HC-6
+    rule: |
+      RNF-3 se mantiene: la suite de `render-cli` corre sin ffmpeg, whisper ni Chrome. Todo binario y todo
+      render entra por dependencias inyectables; el render real vive en un target `smoke` fuera de
+      `lint test build` y de CI.
+  - id: HC-7
+    rule: |
+      Codigo sin comentarios; identificadores, mensajes de commit y docs tecnicos en ingles. Sin `any`.
+      ESM, Node >= 22. Cobertura: no bajar de lo heredado.
+
+known_surface:
+  auto_montage_barrel: |
+    resolveMediaProject(projectRoot) -> MediaProject
+    ingestProject(project, { binaries, language?, transcribeRoles? }, { runner, readDirectory?, statFile?,
+      readTextFile?, writeTextFile?, ensureDirectory?, clock? }) -> IngestResult
+      { catalog, catalogPath, probeFailures, transcriptionFailures, transcribedAssetIds,
+        reusedTranscriptionAssetIds, reusedProbeAssetIds, staleCatalogReplaced }
+    autoMontage(project, { preset, seed, outputPreset?, arollAssetId?, musicAssetId?, persist? }, deps?)
+      -> { edl, timeline, concepts, brollOverlays, brollRejections, transcriptionSource, stopwordLanguage,
+           editedDurationMs, edlPath, timelinePath }
+    MONTAGE_PRESETS, resolveMontagePreset, serializeMontageDocument, writeEditDecisionList, writeTimeline
+    Errores: AutoMontageError (raiz), MontageInputError, EditDecisionListInvalidError, TimelineInvalidError,
+      CatalogUnreadableError, AssetProbeFailedError, TranscriptionFailedError, ReadOnlyRawPathError,
+      ProjectLayoutError, PathEscapesProjectError; isAutoMontageError
+  render_surface: |
+    @video-maker/composition-remotion/render ->
+      renderTimeline(options: RenderTimelineOptions, deps = remotionRenderDeps) -> RenderTimelineResult
+      RenderTimelineOptions incluye `outPath` y `publicDir?: string | null`
+      RenderTimelineError con RenderTimelineErrorCode (BUNDLE_FAILED, ...)
+      `remotionRenderDeps` carga @remotion/bundler y @remotion/renderer con `await import()` DENTRO de
+      cada metodo — ese es el mecanismo que mantiene Chrome fuera de CI. No romperlo.
+  media_local: |
+    resolveBinaries(process.env) -> { ffmpeg, ffprobe, whisperCli, whisperModel }
+    ExecaCommandRunner implementa CommandRunner
+    El `.env` raiz lo carga Nx en el proceso de cada task (verificado).
+  d4_wiring: |
+    `libs/composition-remotion/src/helpers/punch-in-style.ts` ya expone
+    `punchInStyle(transform, anchor?: PunchInAnchor)`.
+    `ClipTransform` = `VideoClip['transform']`, que desde cycle-02 YA incluye `anchor` opcional.
+    `aroll-series.tsx:44` hoy llama `punchInStyle(scene.transform)` — falta pasarle el anchor.
+    La cobertura de `composition-remotion` incluye SOLO `src/helpers/**` y `src/transitions/**`: los
+    componentes no estan en el `include` y hoy NO tienen `.spec`. No crear infraestructura de test nueva
+    para el componente (obligaria a tocar `vite.config.ts`, prohibido por HC-2): D-4 se verifica en el
+    render real de CA-015.
+
+agent_contexts:
+  functional:
+    goal: |
+      Escribir `functional.md` de cycle-03: historias de usuario y requisitos funcionales de la CLI
+      (RF-10, RF-11, RF-12) y sus reglas de negocio. Foco en el contrato de uso: comandos, argumentos,
+      valores por defecto, mensajes de error por etapa, exit codes, y que significa exactamente
+      "idempotente" para `run` (CA-016).
+    business_context: |
+      El usuario es el dev en su propia maquina. Quiere pasar de una carpeta con clips crudos a un MP4
+      publicable sin abrir ninguna UI y sin recordar el orden interno del pipeline. La CLI es la primera
+      superficie usable del motor: hasta ahora todo era libs. Debe fallar ruidosamente y con causa
+      identificable (RNF-7: etapa + asset + causa, nunca un stack pelado), y debe poder re-correrse tras
+      `rm -rf media/<slug>/work media/<slug>/out` reproduciendo el mismo MP4 sin tocar `raw/`.
+    relevant_spec_sections:
+      - 'Contrato de entrada: layout de media/'
+      - 'Etapas del pipeline'
+      - 'RF-10, RF-11, RF-12'
+      - 'RNF-7'
+      - 'CA-013 a CA-016'
+    output_file: sdd/specs/spec-e-burgos-002-auto-montage-pipeline/cycles/cycle-03/functional.md
+    model_tier: estandar
+
+  planner:
+    goal: |
+      Escribir `tasks.json` PRIMERO y `planner.md` DESPUES (leccion destilada: el registro de maquina es
+      lo que desbloquea el ciclo). Descomponer en tasks secuenciales para UN solo implementador backend
+      reanudado task tras task. La primera task es el scaffold con `scaffold-nx` e incluye, en la MISMA
+      task, la auditoria de `package.json` (deps que nada importa), `nx.json` (plugins inferidos:
+      `@nx/vitest` deja `test` en modo watch y cuelga `run-many`) y `src/` (placeholders, `export {};`).
+      La ultima task es el smoke real (CA-015/CA-016), que se corre una sola vez.
+    note: 'Recibe el output del Funcional y el del Arquitecto; no necesita la spec completa.'
+    output_file: sdd/specs/spec-e-burgos-002-auto-montage-pipeline/cycles/cycle-03/planner.md
+    tasks_file: sdd/specs/spec-e-burgos-002-auto-montage-pipeline/cycles/cycle-03/tasks.json
+    model_tier: estandar
+
+  architect:
+    goal: |
+      Escribir `architect.md`: arbol de `tools/render-cli`, contrato de cada comando, forma del parseo de
+      argumentos, mapa etapa -> error -> exit code, tags Nx y targets explicitos, y como se inyectan las
+      dependencias para que la suite corra sin binarios (HC-6). Decidir y justificar:
+      (a) si `run` reusa los comandos individuales o comparte una capa de pipeline;
+      (b) donde vive la resolucion de `publicDir`/`outPath` y como se testea sin render real (CA-014);
+      (c) el nombre del target de smoke y su forma de invocacion;
+      (d) el cableado de D-4 en `aroll-series.tsx` y como se verifica dado que los componentes no estan
+          en el `include` de cobertura y no se puede crear infra de test nueva (HC-2).
+      Cero dependencias npm nuevas salvo justificacion explicita; `node:util parseArgs` es la via preferida.
+    existing_tables: []
+    existing_endpoints: []
+    existing_surface_ref: 'seccion `known_surface` de este brief'
+    output_file: sdd/specs/spec-e-burgos-002-auto-montage-pipeline/cycles/cycle-03/architect.md
+    model_tier: alto
+
+  implementor_back:
+    goal: 'Implementar una task a la vez del `tasks.json` de cycle-03.'
+    app: tools/render-cli
+    app_context: sdd/context/tools/render-cli/context_prompt.md
+    also_touches:
+      - 'libs/composition-remotion/src/components/aroll-series.tsx (SOLO ese archivo — HC-2)'
+    note: |
+      Un solo implementador, reanudado con SendMessage task tras task. Al cerrar cada task: registrar
+      `usage` en `tasks.json`, correr `pnpm exec nx run-many -t lint test build` y `pnpm sdd:validate`.
+      Si un test de determinismo o de smoke falla, NO se ajusta el test para que pase: se reporta.
+    model_tier: estandar
+
+  reviewer:
+    goal: |
+      Validar todo el output del ciclo, ejecutar los gates de cierre y cerrar la spec-002:
+      `cycle.json` -> completed con `by_agent` completo y suma consistente; `index.json` spec-002 ->
+      completed + completed_at; `global.json` modulo -> completed_modules con cycles_completed: 3,
+      completed_at y `apps` incluyendo `tools/render-cli`; fila propia en `sdd/context/context_prompt.md`
+      §2 y en el snapshot §3 de `sdd/context/constitution.md`; fragmento de contexto en
+      `sdd/context/libs/auto-montage/updates/` Y en `sdd/context/tools/render-cli/updates/`; entrada de
+      journal solo si hubo leccion real.
+    checklist: sdd/skills/sdd-reviewer/checklist.md
+    output_file: sdd/specs/spec-e-burgos-002-auto-montage-pipeline/cycles/cycle-03/cycle.json
+    model_tier: alto
+
+open_notes:
+  - id: N-1
+    note: |
+      `sdd/schemas/global.schema.json` -> `monorepo` tiene `additionalProperties: false` y solo acepta
+      `apps` y `libs`. NO existe slot para `tools`. No inventarlo: `tools/render-cli` queda registrado en
+      `completed_modules[].apps` (que si es un array de rutas) y no aparece en el mapa `monorepo`.
+      Consecuencia conocida: el visor `sdd:docs` no lo lista. Se reporta al dev, no se parchea el schema.

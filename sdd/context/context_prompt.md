@@ -27,7 +27,7 @@ El proyecto usa **Nx** como monorepo manager con **pnpm** como package manager (
 <repo-root>/                 → nombre del proyecto en sdd/global.json → project
   apps/                      → Una carpeta por app generada con Nx (todavía ninguna)
   libs/                      → Una carpeta por lib generada con Nx (todavía ninguna)
-  tools/                     → Herramientas del workspace (todavía ninguna)
+  tools/                     → Herramientas del workspace (`render-cli`: CLI headless del motor)
   sdd/                       → Sistema SDD (NO modificar manualmente)
     context/
       constitution.md        → Constitución GLOBAL (reglas, arquitectura, snapshot)

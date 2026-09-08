@@ -41,7 +41,7 @@ function widenPresentation(presentation: ArollPresentation): TransitionPresentat
 }
 
 function ArollScene({ scene }: { scene: VideoSequenceProps }) {
-  const style = punchInStyle(scene.transform);
+  const style = punchInStyle(scene.transform, scene.transform.anchor);
 
   if (scene.kind !== 'video') {
     return <Img src={scene.src} style={style} />;

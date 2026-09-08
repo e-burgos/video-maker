@@ -15,9 +15,7 @@
       "cycles_completed": 3,
       "description": "Contratos Timeline/EDL, cálculos de edición (silencios, ducking, punch-in, captions), wrappers FFmpeg/Whisper locales y composición Remotion base",
       "completed_at": "2026-09-07"
-    }
-  ],
-  "in_progress_modules": [
+    },
     {
       "module": "auto-montage-pipeline",
       "spec": "spec-e-burgos-002-auto-montage-pipeline",
@@ -25,10 +23,12 @@
         "libs/auto-montage",
         "tools/render-cli"
       ],
-      "cycles_completed": 2,
-      "description": "Ingesta de clips crudos, poda de silencios sobre material real, matching de B-roll e imágenes por conceptos clave de la locución, presets por caso de uso y CLI headless"
+      "cycles_completed": 3,
+      "description": "Ingesta de clips crudos, poda de silencios sobre material real, matching de B-roll e imágenes por conceptos clave de la locución, presets por caso de uso y CLI headless",
+      "completed_at": "2026-09-08"
     }
   ],
+  "in_progress_modules": [],
   "pending_modules": [
     {
       "module": "kinetic-captions",
