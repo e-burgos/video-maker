@@ -1,0 +1,281 @@
+{
+  "$schema": "../../../../schemas/cycle.schema.json",
+  "cycle": 2,
+  "module": "kinetic-captions",
+  "spec": "spec-e-burgos-003-kinetic-captions",
+  "apps": [
+    "libs/composition-remotion"
+  ],
+  "phase": "kinetic-captions-component",
+  "flow": "full",
+  "objectives": [
+    "captionClipAnimation con spring y activeWordIndex como helpers puros",
+    "Componente KineticCaptions montando una Sequence por clip de tracks.captions",
+    "TimelineComposition monta KineticCaptions y CaptionTrack sale del barrel",
+    "Galeria de presets en Root.tsx para remotion studio y smoke manual al cierre",
+    "Dejar CA-006 a CA-011 de la spec en verde y cerrar la spec"
+  ],
+  "status": "completed",
+  "started_at": "2026-09-07",
+  "completed_at": "2026-09-08",
+  "documents": {
+    "brief": "sdd/specs/spec-e-burgos-003-kinetic-captions/cycles/cycle-02/brief.yaml",
+    "functional": "sdd/specs/spec-e-burgos-003-kinetic-captions/cycles/cycle-02/functional.md",
+    "architect": "sdd/specs/spec-e-burgos-003-kinetic-captions/cycles/cycle-02/architect.md",
+    "planner": "sdd/specs/spec-e-burgos-003-kinetic-captions/cycles/cycle-02/planner.md",
+    "tasks": "sdd/specs/spec-e-burgos-003-kinetic-captions/cycles/cycle-02/tasks.json"
+  },
+  "artifacts": [
+    "sdd/specs/spec-e-burgos-003-kinetic-captions/cycles/cycle-02/artifacts/task-006-notes.md"
+  ],
+  "metrics": {
+    "tasks_total": 7,
+    "tasks_completed": 7,
+    "story_points": 26,
+    "files_created": [
+      "libs/composition-remotion/src/Root.spec.tsx",
+      "libs/composition-remotion/src/components/caption-preset-gallery.tsx",
+      "libs/composition-remotion/src/components/kinetic-captions.spec.tsx",
+      "libs/composition-remotion/src/components/kinetic-captions.tsx",
+      "libs/composition-remotion/src/components/timeline-composition.spec.tsx",
+      "libs/composition-remotion/src/helpers/caption-active-word.spec.ts",
+      "libs/composition-remotion/src/helpers/caption-active-word.ts",
+      "libs/composition-remotion/src/helpers/caption-animation.spec.ts",
+      "libs/composition-remotion/src/helpers/caption-animation.ts",
+      "libs/composition-remotion/src/helpers/caption-clip-plan.spec.ts",
+      "libs/composition-remotion/src/helpers/caption-clip-plan.ts"
+    ],
+    "files_modified": [
+      "libs/composition-remotion/README.md",
+      "libs/composition-remotion/src/Root.tsx",
+      "libs/composition-remotion/src/components/timeline-composition.tsx",
+      "libs/composition-remotion/src/helpers/caption-preset.spec.ts",
+      "libs/composition-remotion/src/helpers/caption-preset.ts",
+      "libs/composition-remotion/src/helpers/caption-safe-zone.spec.ts",
+      "libs/composition-remotion/src/index.ts",
+      "sdd/components.json"
+    ],
+    "files_deleted": [
+      "libs/composition-remotion/src/components/caption-track.tsx",
+      "libs/composition-remotion/src/helpers/caption-layout.spec.ts",
+      "libs/composition-remotion/src/helpers/caption-layout.ts"
+    ],
+    "usage": {
+      "tokens_in": 1119317,
+      "tokens_out": 197525,
+      "approx": true,
+      "source": "declared-estimate",
+      "by_agent": [
+        {
+          "agent": "planner",
+          "label": "tasks.json + planner.md cycle-02",
+          "provider_model": "claude/sonnet",
+          "effort": "medium",
+          "tokens_in": 156282,
+          "tokens_out": 27579,
+          "tokens_total": 183861,
+          "approx": false,
+          "source": "agent-usage-notification",
+          "recorded_at": "2026-09-07",
+          "tool_uses": 13,
+          "duration_minutes": 6
+        },
+        {
+          "agent": "architect",
+          "label": "architect.md cycle-02",
+          "provider_model": "claude/opus",
+          "effort": "high",
+          "tokens_in": 222203,
+          "tokens_out": 39212,
+          "tokens_total": 261415,
+          "approx": false,
+          "source": "agent-usage-notification",
+          "recorded_at": "2026-09-07",
+          "tool_uses": 38,
+          "duration_minutes": 25.6
+        },
+        {
+          "agent": "functional",
+          "label": "functional.md cycle-02",
+          "provider_model": "claude/sonnet",
+          "effort": "medium",
+          "tokens_in": 84368,
+          "tokens_out": 14889,
+          "tokens_total": 99257,
+          "approx": false,
+          "source": "agent-usage-notification",
+          "recorded_at": "2026-09-07",
+          "tool_uses": 9,
+          "duration_minutes": 2.7
+        },
+        {
+          "agent": "implementor-front",
+          "label": "TASK-001",
+          "provider_model": "claude/sonnet",
+          "effort": "medium",
+          "tokens_in": 113336,
+          "tokens_out": 20000,
+          "tokens_total": 133336,
+          "approx": false,
+          "source": "agent-usage-notification",
+          "recorded_at": "2026-09-07"
+        },
+        {
+          "agent": "implementor-front",
+          "label": "TASK-002",
+          "provider_model": "claude/sonnet",
+          "effort": "medium",
+          "tokens_in": 29262,
+          "tokens_out": 5164,
+          "tokens_total": 34426,
+          "approx": false,
+          "source": "agent-usage-notification",
+          "recorded_at": "2026-09-07"
+        },
+        {
+          "agent": "implementor-front",
+          "label": "TASK-003",
+          "provider_model": "claude/sonnet",
+          "effort": "medium",
+          "tokens_in": 44558,
+          "tokens_out": 7863,
+          "tokens_total": 52421,
+          "approx": false,
+          "source": "agent-usage-notification",
+          "recorded_at": "2026-09-07"
+        },
+        {
+          "agent": "implementor-front",
+          "label": "TASK-004",
+          "provider_model": "claude/sonnet",
+          "effort": "medium",
+          "tokens_in": 34301,
+          "tokens_out": 6053,
+          "tokens_total": 40354,
+          "approx": false,
+          "source": "agent-usage-notification",
+          "recorded_at": "2026-09-07"
+        },
+        {
+          "agent": "implementor-front",
+          "label": "TASK-005",
+          "provider_model": "claude/sonnet",
+          "effort": "medium",
+          "tokens_in": 44383,
+          "tokens_out": 7832,
+          "tokens_total": 52215,
+          "approx": false,
+          "source": "agent-usage-notification",
+          "recorded_at": "2026-09-07"
+        },
+        {
+          "agent": "implementor-front",
+          "label": "TASK-006",
+          "provider_model": "claude/sonnet",
+          "effort": "medium",
+          "tokens_in": 56136,
+          "tokens_out": 9906,
+          "tokens_total": 66042,
+          "approx": false,
+          "source": "agent-usage-notification",
+          "recorded_at": "2026-09-07"
+        },
+        {
+          "agent": "implementor-front",
+          "label": "TASK-007",
+          "provider_model": "claude/sonnet",
+          "effort": "medium",
+          "tokens_in": 54056,
+          "tokens_out": 9539,
+          "tokens_total": 63595,
+          "approx": false,
+          "source": "agent-usage-notification",
+          "recorded_at": "2026-09-07"
+        },
+        {
+          "agent": "orchestrator",
+          "label": "remanente del acumulado medido 301.920 menos los 172.000 registrados en cycle-01",
+          "provider_model": "claude/opus",
+          "effort": "high",
+          "tokens_in": 110432,
+          "tokens_out": 19488,
+          "tokens_total": 129920,
+          "approx": true,
+          "source": "declared-estimate",
+          "recorded_at": "2026-09-08"
+        },
+        {
+          "agent": "reviewer",
+          "label": "revision y cierre de cycle-02 + cierre de la spec",
+          "provider_model": "claude/opus",
+          "effort": "high",
+          "tokens_in": 170000,
+          "tokens_out": 30000,
+          "tokens_total": 200000,
+          "approx": true,
+          "source": "declared-estimate",
+          "recorded_at": "2026-09-08"
+        }
+      ],
+      "by_tier": {
+        "claude/sonnet": {
+          "tokens_in": 616682,
+          "tokens_out": 108825,
+          "approx": false,
+          "source": "agent-usage-notification"
+        },
+        "claude/opus": {
+          "tokens_in": 502635,
+          "tokens_out": 88700,
+          "approx": true,
+          "source": "declared-estimate"
+        }
+      }
+    },
+    "tasks_skipped": 0
+  },
+  "tables_created": [],
+  "endpoints_implemented": [],
+  "components_created": [
+    "COMP-007",
+    "COMP-008"
+  ],
+  "issues_found": [
+    "Reviewer (BLOQUEANTE PARA EL SMOKE, NO PARA EL CICLO): el target `nx run composition-remotion:smoke` esta roto desde `spec-e-burgos-001 cycle-03` y por eso el render real de verificacion de HU-2-06 NO pudo ejecutarse. Falla en 400 ms, antes de bundlear nada: `Error: Cannot find module '../../libs/timeline-core/src'` al resolver `@video-maker/timeline-core` desde `src/__fixtures__/example-timeline.ts`. Causa: el target corre `node -r @swc-node/register ./src/smoke.ts` sin `tsconfig-paths`, y `@swc-node/register` resuelve el path mapping de `tsconfig.base.json` al directorio `libs/timeline-core/src` sin agregarle el `/index.ts` que el mapping declara. NO es una regresion de este ciclo: ni `src/smoke.ts` ni `project.json` fueron tocados por cycle-02. Verificado por el reviewer al cierre (2026-09-08) con la maquina libre (40 % de memoria libre, swap en 0, sin transcripcion en curso), reproduciendo el mismo error que el implementador habia registrado en dos intentos previos. Requiere FIX GATE a nivel repo (toca `project.json` o `tsconfig.base.json`), fuera de la frontera de esta spec (RNF-4).",
+    "Reviewer (menor, corregido en la revision): la `description` de COMP-004 (`TimelineComposition`) en `sdd/components.json` seguia diciendo que el componente arma «ArollSeries + BrollTrack + AudioTrack + CaptionTrack», estado que el propio ciclo dejo obsoleto. El changelog de la entrada si estaba correcto. Corregido a `KineticCaptions` + los tres props de caption.",
+    "Reviewer (menor, corregido en la revision): el fragmento de contexto de la lib afirmaba un «leve descenso de stmts contra cycle-01 (96.79 %)». El numero de cierre registrado de cycle-01 es 96.2 % / 92.38 %, asi que cycle-02 (96.77 % / 93.16 %) SUBE en ambos ejes. Corregido en el fragmento."
+  ],
+  "reviewer_report": {
+    "approved": true,
+    "date": "2026-09-08",
+    "ca_results": {
+      "CA-006": "PASS — `src/helpers/caption-animation.spec.ts`. «en frame 0 la opacidad arranca por debajo de 1 y, en modo pop, la escala tambien (CA-006)» cubre el arranque; «pasada la duracion de entrada del preset, llega a opacidad y escala plenas (CA-006)» cubre la meseta (opacity === 1, scale === 1), reforzado por «se mantiene en meseta durante todo el tramo intermedio»; «vuelve a bajar en el ultimo frame, simetrico a la entrada (RN-2)» cubre la salida; y «dos llamadas con el mismo frame devuelven exactamente el mismo resultado (determinismo, RN-4)» cubre el determinismo que pide el CA. Los tres modos tienen `describe` propio (`pop` anima escala sin translate, `rise` anima translateYEm sin escala, `fade` solo opacidad), y `describe('R-12: clips de 1 a 3 frames')` fija el degradado determinista de los clips ultracortos. El campo `animation` obligatorio de `CaptionPreset` lo fija ademas `caption-preset.spec.ts` (CA-006).",
+      "CA-007": "PASS — `src/helpers/caption-active-word.spec.ts`. El rango semiabierto `[fromFrame, fromFrame + durationFrames)` esta fijado por un `it.each` de bordes y por «el extremo superior de un rango queda excluido». El `-1` tiene tres casos: «devuelve -1 despues de la ultima palabra y en un frame negativo (CA-007)», «devuelve -1 en un hueco entre dos palabras (RN-6)» y «devuelve -1 cuando no hay palabras». La precedencia en solapamiento (gana el menor indice, RN-5) tambien esta fijada.",
+      "CA-008": "PASS — `src/helpers/caption-active-word.spec.ts`. «en cada frame del clip hay como maximo una palabra activa (RN-5) y la de emphasisIndex conserva el impacto en todos (CA-008, RN-7)» recorre TODOS los frames del clip y asserta el impacto en cada uno, que es literalmente lo que pide el CA («en todo el clip»). Completado por «la palabra de emphasisIndex mantiene el impacto aun en frames donde la palabra activa es otra», «es isEmphasis e isActive a la vez cuando tambien le toca sonar» (RN-8) y «con emphasisIndex null, ninguna palabra queda marcada de impacto».",
+      "CA-009": "PASS — dos mitades, ambas verificadas. (a) `src/components/kinetic-captions.spec.tsx`: «monta una Sequence por clip, con from/durationInFrames exactos (CA-009)» inspecciona el arbol de elementos sin montar Remotion; mas «con clips: [] no produce ningun hijo, sin lanzar» y los dos casos de `boxSource` sobre el arbol real. (b) La baja de `CaptionTrack`: `src/components/caption-track.tsx`, `src/helpers/caption-layout.ts` y `caption-layout.spec.ts` estan borrados; `src/index.ts` ya no exporta `CaptionTrack`, `CaptionTrackProps` ni `captionLayout`; `timeline-composition.tsx` importa y monta `KineticCaptions`. Grep de `CaptionTrack|captionLayout` sobre `libs/`, `apps/` y `tools/`: cero consumidores vivos — los unicos matches de codigo son la funcion privada `buildCaptionTrack` de `libs/timeline-core/src/timeline/build-timeline.ts` (homonimia, no un import) y artefactos de `dist/` y `coverage/`, ambos gitignoreados. La baja esta justificada en architect.md §8 y D-26 y documentada como breaking en el fragmento de contexto.",
+      "CA-010": "PASS — `src/Root.spec.tsx` (nuevo): «registra la composicion de galeria de presets con el componente CaptionPresetGallery (CA-010)», «la galeria mide cuatro paneles de 1080x1920 lado a lado, sin calculateMetadata (CA-010)» y «la galeria se suma a las composiciones de Timeline preexistentes, sin reemplazarlas». La segunda mitad del CA (studio y smoke fuera de lint/test/build) se verifica en `libs/composition-remotion/project.json`: `studio` y `smoke` son targets propios y `nx run-many -t lint test build` no los invoca — confirmado en la corrida de cierre, que ejecuto exactamente lint, test y build sobre los 5 proyectos.",
+      "CA-011": "PASS en sus tres componentes. (a) `nx run-many -t lint test build --skip-nx-cache`: «Successfully ran targets lint, test, build for 5 projects», exit 0, 9.1 s; el unico ruido es 1 warning preexistente en `apps/web/src/main.tsx` (non-null assertion) y el aviso de deprecacion del executor `@nx/eslint:lint`, ninguno de este ciclo. (b) `pnpm sdd:validate`: OK, 18 files valid. (c) Cobertura de `composition-remotion`: 96.77 % stmts / 93.16 % branches / 98.07 % funcs / 96.7 % lines sobre 244 tests en 22 archivos — cumple el piso de RNF-2 (>= 90 % / >= 85 %) y SUBE en ambos ejes contra el cierre de cycle-01 (96.2 % / 92.38 %).",
+      "HU-2-06 / CA-11 (functional)": "FAIL — NO VERIFICADO POR RENDER. El render real de verificacion del ciclo no pudo ejecutarse: `nx run composition-remotion:smoke` esta roto desde `spec-e-burgos-001 cycle-03` (ver `issues_found`) y falla en 400 ms con `Cannot find module '../../libs/timeline-core/src'`, antes de bundlear ni descargar Chrome. No es una regresion de cycle-02: ni `src/smoke.ts` ni `project.json` fueron tocados por este ciclo. Se cierra el ciclo con este CA explicitamente NO verificado y con follow-up de FIX GATE a nivel repo, en vez de darlo por bueno: un CA aceptado como «procedimiento documentado, nunca ejecutado» fue justamente lo que dejo el defecto latente tres ciclos. La verificacion visual disponible mientras tanto es `nx run composition-remotion:studio`.",
+      "HU-2-06 / CA-12 (functional)": "PASS — la guarda de maquina compartida se respeto. Antes del unico intento del reviewer se verifico el estado de la notebook: 40 % de memoria libre, `vm.swapusage` en 0.00M usado y ningun proceso de whisper ni de ffmpeg corriendo (solo Chrome del usuario y los procesos del propio harness). Es decir, el render NO se pospuso por RN-18 — las condiciones se cumplian; fallo por el defecto de resolucion de modulos, que es otra cosa.",
+      "HU-2-07 / CA-13 (functional)": "PASS — RNF-1 (cero red, cero render) se sostiene. Los tests de animacion y de palabra activa son de funciones puras y no montan nada; los tres `.spec.tsx` del ciclo (`kinetic-captions`, `timeline-composition`, `Root`) inspeccionan el arbol de elementos React sin montarlo ni renderizar un frame. Ninguno descarga Chrome Headless Shell ni invoca ffmpeg: la suite de los 5 proyectos completa en 9.1 s."
+    },
+    "tests": {
+      "sdd:validate": "OK — 18 files valid. Corrido como PRIMER paso de la revision (donde devolvio 1 error: `catalog.json: memory is stale vs sdd/ filesystem`, resuelto con `pnpm sdd:rebuild-catalog` en el cierre) y de nuevo como ULTIMO paso, ya en verde. Unico warning tolerado y esperado: `memory/journal: 5 journal entries accumulated (>= 5) — due for distillation`; la destilacion es operacion de un solo actor y la ejecuta el orquestador del carril A en el repo principal, NO este cierre.",
+      "run-many": "`pnpm nx run-many -t lint test build --skip-nx-cache` → «Successfully ran targets lint, test, build for 5 projects» (composition-remotion, timeline-core, shared-utils, media-local, web), exit 0, 9.1 s, cache saltada. 0 errores de lint; 1 warning preexistente en `apps/web/src/main.tsx` (`@typescript-eslint/no-non-null-assertion`), ajeno a este ciclo.",
+      "suite": "244/244 PASS en 22 archivos de `composition-remotion` (189 al cerrar cycle-01 → +55 en este ciclo). Los 5 proyectos del workspace en verde.",
+      "coverage": "96.77 % statements (180/186) / 93.16 % branches (109/117) / 98.07 % functions (51/52) / 96.7 % lines (176/182) sobre `src/helpers/**` + `src/transitions/**`. Cumple el piso de RNF-2 (>= 90 % stmts, >= 85 % ramas) y NO baja del cierre de cycle-01 (96.2 % / 92.38 %): lo sube en ambos ejes. El umbral duro de `vite.config.ts` sigue en 80 %.",
+      "smoke": "FAIL — `pnpm nx run composition-remotion:smoke` falla en 400 ms con `Error: Cannot find module '../../libs/timeline-core/src'` (MODULE_NOT_FOUND, requireStack: `src/__fixtures__/example-timeline.ts` ← `src/smoke.ts`). No se genero `libs/composition-remotion/out/`. Defecto heredado de `spec-e-burgos-001 cycle-03`, no una regresion de cycle-02. Un unico intento del reviewer, con la maquina verificada libre. Ver `issues_found` y `follow_ups`.",
+      "rnf-3": "PASS — estilo. Grep de `//` y `/*` sobre todo `src/**` no-spec: los dos unicos matches son el literal de regex `/^[a-z][a-z0-9+.-]*:\\/\\//i` y el template `file:///` de `helpers/asset-src.ts`, heredados y no comentarios. Cero comentarios narrativos, cero codigo muerto comentado, cero `// TODO`/`FIXME` (los matches de `todo` son la palabra española «todo/todos» dentro de titulos de tests). Grep de `any` sobre `src/**` no-spec: cero. Identificadores y CSS en ingles; los tres helpers nuevos son funciones puras y los componentes no tienen estado ni efectos (`useCurrentFrame`/`useVideoConfig` son las lecturas de frame que autoriza D-F).",
+      "rnf-4": "PASS — frontera de specs. Los 21 archivos tocados por el ciclo (11 creados, 7 modificados, 3 borrados) viven todos bajo `libs/composition-remotion/`, mas `sdd/components.json` y la fila propia de la tabla global. `libs/timeline-core`, `libs/media-local`, `libs/shared-utils` y `apps/web` sin cambios en el working tree.",
+      "rnf-5": "PASS — sin binarios. No se agrego ningun `.ttf`/`.woff`/`.woff2`/`.otf`; `public/fonts/` sigue con solo su `.gitignore`.",
+      "superficie-publica": "PASS — `src/index.ts` agrega los 11 simbolos de cycle-02 (`captionBlockStyle`, `captionClipAnimation` + 4 tipos; `activeWordIndex`, `captionWordRenders` + `CaptionWordRender`; `captionBoxStyle`, `captionClipPlan` + 2 tipos; `KineticCaptions` + `KineticCaptionsProps`) y quita exactamente los 3 que declara architect.md §8.3 (`CaptionTrack`, `CaptionTrackProps`, `captionLayout`). `CaptionPresetGallery` queda deliberadamente fuera del barrel (herramienta de studio, no superficie de produccion). Los specs importan por ruta relativa, nunca desde el barrel."
+    },
+    "notes": "Ciclo aprobado y ULTIMO de la spec: `spec-e-burgos-003-kinetic-captions` queda `completed` y el modulo `kinetic-captions` pasa a `completed_modules` con `cycles_completed: 2`. Las 7 tasks quedaron `done`, ninguna `skipped` (7 + 0 = 7). Calidad del ciclo: alta — la logica vive en tres helpers puros y los componentes son cableado sin decisiones, que es exactamente lo que pedia D-E/D-F; los CA tienen tests nominados uno por uno y el arbol de `KineticCaptions` se verifica sin montar Remotion. Dos aciertos que vale la pena registrar: (1) el default `boxSource: 'preset'` — el architect lo decidio leyendo el PRODUCTOR del dato (`buildTimeline` siempre rellena `CaptionClip.box`), y con el default contrario todo el trabajo de safe zones de cycle-01 habria quedado inalcanzable en produccion con la suite igual de verde; el test lo fija contra la Timeline real, no contra un fixture; (2) el follow-up de cycle-01 sobre `fitCaptionFontSize` se respeto: el `fontSize` lo pone `captionBoxStyle` una vez por clip y `captionWordStyle` sigue sin emitirlo. LO QUE NO QUEDA VERIFICADO: el render real (HU-2-06 / CA-11) — el target `smoke` esta roto desde `spec-001 cycle-03` y se cierra con el CA en FAIL explicito y follow-up de FIX GATE, no dandolo por bueno. Se corrigieron en la revision dos inexactitudes de registro (descripcion de COMP-004 y la afirmacion de descenso de cobertura del fragmento de contexto), ambas anotadas en `issues_found`. Telemetria: `by_agent` con 12 entradas — 3 documentos y 7 tasks medidas (`agent-usage-notification`), mas orquestador y reviewer estimados (`declared-estimate`, `approx: true`); `by_tier` derivado agrupando por `provider_model`, con `claude/opus` marcado `approx: true` por mezclar medido (architect) con estimado. La entrada del orquestador es el remanente del acumulado medido de la spec (301.920 menos los 172.000 ya registrados en cycle-01).",
+    "follow_ups": [
+      "FIX GATE a nivel repo (BUGFIX): `nx run composition-remotion:smoke` nunca funciono. `node -r @swc-node/register ./src/smoke.ts` no resuelve los path mappings de `tsconfig.base.json` (le falta el `/index.ts`), asi que falla con `Cannot find module '../../libs/timeline-core/src'`. Arreglo probable: agregar `-r tsconfig-paths/register` (o equivalente de swc) al comando del target, o apuntar el mapping al directorio. Toca `project.json` y/o `tsconfig.base.json` → repo-level, fuera de la frontera de spec-003 (RNF-4). Hasta que se resuelva, NINGUN render real del motor esta verificado de punta a punta y `spec-e-burgos-005-render-service` lo va a necesitar antes de construir la cola de jobs.",
+      "Una vez arreglado el smoke, ejecutar el render real de `spec-e-burgos-003 cycle-02` pendiente (HU-2-06 / CA-11) para cerrar la verificacion visual de kinetic captions, respetando la guarda de maquina compartida (RN-17/RN-18).",
+      "`sdd/context/libs/composition-remotion/updates/` acumula 3 fragmentos (spec-001 cycle-03, spec-003 cycle-01, spec-003 cycle-02) y `constitution.md` de la lib todavia describe `CaptionTrack`/`captionLayout` como superficie viva. Aun no se llega al umbral de >= 5 fragmentos, pero el proximo ciclo sobre esta lib (spec-004 o spec-006) deberia consolidar y aplicar la regla de eliminacion sobre esas menciones, que ya son obsoletas.",
+      "`sdd/memory/journal/` llego a 5 entradas: `pnpm sdd:validate` ya pide la destilacion a `lessons.md`. La ejecuta el orquestador (un solo actor) en el repo principal; este cierre deliberadamente NO la hizo para no chocar con el carril de spec-002."
+    ]
+  }
+}

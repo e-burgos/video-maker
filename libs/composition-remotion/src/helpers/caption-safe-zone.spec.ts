@@ -3,7 +3,8 @@ import { defaultFormat, safeZoneFor } from '@video-maker/timeline-core';
 import type { SafeZone } from '@video-maker/timeline-core';
 import type { CaptionPlatform } from './caption-safe-zone';
 import { CAPTION_PLATFORMS, captionChromeInsets, captionSafeZone } from './caption-safe-zone';
-import { captionLayout } from './caption-layout';
+import { captionBoxFor } from './caption-box';
+import { CAPTION_PRESET_IDS, captionPreset } from './caption-preset';
 
 describe('captionChromeInsets', () => {
   it('sin plataforma da los cuatro insets en cero', () => {
@@ -117,15 +118,18 @@ describe('captionSafeZone', () => {
     ['shorts-9x16', 'youtube-shorts'],
   ])(
     'deja la caja de captions dentro de 1080x1920 para %s / %s (CA-002)',
-    (preset, platform) => {
-      const format = defaultFormat(preset as Parameters<typeof defaultFormat>[0]);
+    (outputPreset, platform) => {
+      const format = defaultFormat(outputPreset as Parameters<typeof defaultFormat>[0]);
       const safeZone = captionSafeZone(format, platform);
-      const box = captionLayout(safeZone, format);
 
-      expect(box.x).toBeGreaterThanOrEqual(0);
-      expect(box.y).toBeGreaterThanOrEqual(0);
-      expect(box.x + box.width).toBeLessThanOrEqual(format.width);
-      expect(box.y + box.height).toBeLessThanOrEqual(format.height);
+      for (const presetId of CAPTION_PRESET_IDS) {
+        const box = captionBoxFor(safeZone, format, captionPreset(presetId));
+
+        expect(box.x).toBeGreaterThanOrEqual(0);
+        expect(box.y).toBeGreaterThanOrEqual(0);
+        expect(box.x + box.width).toBeLessThanOrEqual(format.width);
+        expect(box.y + box.height).toBeLessThanOrEqual(format.height);
+      }
     },
   );
 

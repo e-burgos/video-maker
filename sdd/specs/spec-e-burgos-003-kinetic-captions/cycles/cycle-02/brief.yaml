@@ -1,0 +1,89 @@
+# sdd/specs/spec-e-burgos-003-kinetic-captions/cycles/cycle-02/brief.yaml
+# Generado por: sdd-orchestrator
+# Al: iniciar el ciclo
+
+cycle: 2
+module: kinetic-captions
+phase: kinetic-captions-component
+date: 2026-09-07
+app_context: sdd/context/libs/composition-remotion/context_prompt.md
+
+objective: |
+  Al cerrar el ciclo, `libs/composition-remotion` renderiza kinetic typography de verdad: el
+  componente `<KineticCaptions />` monta una `Sequence` por clip de `tracks.captions`, anima la
+  entrada y la salida del bloque de palabras con `spring`, resalta la palabra activa según el
+  timing por palabra y mantiene el estilo de impacto en `emphasisIndex` durante todo el clip.
+  `TimelineComposition` pasa a montarlo y `CaptionTrack` desaparece del barrel. `Root.tsx` gana
+  una composición de galería para inspeccionar los cuatro presets en `remotion studio`. Con esto
+  la spec `spec-e-burgos-003` queda completa.
+
+scope:
+  - `src/helpers/caption-animation.ts` — `captionClipAnimation({ frame, durationInFrames, fps, preset })` con `spring()`/`interpolate()` de `remotion` como funciones puras (RF-6, CA-006)
+  - `src/helpers/caption-active-word.ts` — `activeWordIndex(frame, words)` sobre `word.fromFrame` / `word.durationFrames` (RF-7, CA-007)
+  - `src/components/kinetic-captions.tsx` — `<KineticCaptions />` consumiendo `readonly CaptionSequenceProps[]` + `preset`, `platform` y `anchor` opcionales (RF-8, CA-008, CA-009)
+  - `TimelineComposition` monta `KineticCaptions`; `CaptionTrack` se elimina del barrel y su registro COMP-003 se actualiza en `sdd/components.json` (D-D)
+  - Resolver R-9 del architect de cycle-01: dos fuentes para la caja (`clip.box` de la Timeline vs `captionBoxFor`) — fijar la precedencia y testearla
+  - Resolver R-8: el `transform` de `captionWordStyle` (solo `scale`) tiene que componer con el transform del contenedor animado, sin pisarse
+  - Reemplazar en `caption-safe-zone.spec.ts` el uso de `captionLayout` por `captionBoxFor` para verificar contención (deuda declarada en el fragmento de cycle-01)
+  - `Root.tsx`: composición de galería de presets para `remotion studio` (RF-9, CA-010)
+  - Smoke render manual UNA sola vez al final del ciclo, con chequeo previo de `memory_pressure`
+  - Fragmento aditivo de contexto y cierre de la spec
+
+out_of_scope:
+  - Cualquier cambio en `libs/timeline-core` o en el contrato `Timeline` (D-A, RNF-4)
+  - `OffthreadVideo` vs `Video` para el `<Player>` de browser — es de `spec-006`
+  - Consumo desde `apps/web` (spec-006), mezcla de audio (spec-004)
+  - Commitear archivos de fuente tipográfica (RNF-5)
+  - Medir `averageCharWidthEm` o los insets de chrome contra capturas reales de las apps (queda como follow-up)
+
+dependencies_required:
+  - cycle-01 de esta spec (completed) — `CAPTION_PRESETS`, `captionSafeZone`, `captionBoxFor`, `fitCaptionFontSize`, `captionWordStyle`, `captionFontFaceCss`
+  - spec-e-burgos-001 (completed) — `CaptionSequenceProps`, `timelineToSequenceProps`, `TimelineComposition`
+
+agent_contexts:
+  functional:
+    goal: Escribir las historias del creador y del desarrollador integrador para que los subtítulos se muevan — aparezcan y salgan con energía, sigan la voz palabra por palabra y destaquen la palabra clave — con reglas de negocio verificables y sin detalle de implementación
+    business_context: |
+      El creador ya tiene los subtítulos bien puestos y bien vestidos (cycle-01), pero quietos: un
+      bloque de texto que aparece y desaparece de golpe. Lo que hace que un Reel retenga es el
+      movimiento — la palabra entra con un rebote, la palabra que se está diciendo se ilumina, la
+      palabra clave queda destacada toda la frase. Además quiere poder mirar los cuatro looks lado
+      a lado antes de elegir, sin renderizar un video entero.
+    relevant_spec_sections:
+      - Resumen Ejecutivo
+      - Evidencia y decisiones (D-D, D-F)
+      - Requisitos Funcionales RF-6 a RF-9
+      - Requisitos No-Funcionales RNF-1 a RNF-5
+      - Criterios de Aceptación CA-006 a CA-011
+
+  planner:
+    goal: Descomponer en tasks ordenadas y estimadas la construcción de la animación y el componente — helper de animación del clip, helper de palabra activa, el componente `KineticCaptions`, el cableado en `TimelineComposition` con la baja de `CaptionTrack`, la galería en `Root.tsx` y la verificación de cierre con smoke manual — cada una con sus tests y su CA
+    output_file: sdd/specs/spec-e-burgos-003-kinetic-captions/cycles/cycle-02/planner.md
+    note: Recibe el output del Funcional; no necesita la spec completa
+
+  architect:
+    goal: |
+      Fijar firmas y estructura: `captionClipAnimation` (entrada/salida, los tres modos `pop`/`rise`/`fade`,
+      parámetros de `spring` por preset, qué devuelve exactamente y en qué unidades), `activeWordIndex`
+      (semántica del rango semiabierto y del `-1`), las props de `<KineticCaptions />` y cómo se
+      compone el árbol `Sequence` → contenedor animado → palabras. Resolver explícitamente **R-8**
+      (composición del `transform` del contenedor con el `scale` que emite `captionWordStyle`, que
+      por D-12 no trae `fontSize`) y **R-9** (precedencia entre `clip.box` de la Timeline y
+      `captionBoxFor`). Definir cómo se testea el componente sin montar un render (los helpers
+      cubren la lógica; el componente se verifica por su estructura de `Sequence` y por sus
+      helpers), y cómo queda la baja de `CaptionTrack` en el barrel y en `sdd/components.json`.
+      No hay DB ni endpoints.
+    existing_tables: []
+    existing_endpoints: []
+    output_file: sdd/specs/spec-e-burgos-003-kinetic-captions/cycles/cycle-02/architect.md
+
+  implementor_front:
+    goal: Implementar una task por vez siguiendo architect.md — helpers de animación, el componente React/Remotion, el cableado en TimelineComposition y la galería de Root.tsx, con sus tests, sin comentarios
+    app: libs/composition-remotion
+    app_context: sdd/context/libs/composition-remotion/context_prompt.md
+    note: Recibe una task a la vez del Planner
+
+  reviewer:
+    goal: Validar todo el output del ciclo (CA-006..CA-011, cobertura no menor a 90% stmts / 85% branches, lint/test/build, cero comentarios, cero red ni render en la suite, `timeline-core` intacto), escribir el fragmento aditivo de contexto y el journal si hubo lección, consolidar la telemetría, cerrar cycle.json y — al ser el último ciclo de la spec — mover el módulo a completed_modules y la spec a completed
+    output_file: sdd/specs/spec-e-burgos-003-kinetic-captions/cycles/cycle-02/cycle.json
+    checklist: sdd/skills/sdd-reviewer/checklist.md

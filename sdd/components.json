@@ -70,13 +70,19 @@
         "module": "core-composition-media-pipeline",
         "spec": "sdd/specs/spec-e-burgos-001-core-composition-media-pipeline",
         "path": "src/components/caption-track.tsx",
-        "status": "implemented",
+        "status": "deprecated",
         "created_in_cycle": 3,
-        "updated_in_cycle": null,
+        "updated_in_cycle": 2,
         "description": "Renderiza subtítulos mínimos en texto plano dentro de la caja del safe zone (clip.box o captionLayout), con la palabra emphasisIndex en negrita.",
         "consumes": [],
         "created_at": "2026-09-07",
-        "changelog": []
+        "changelog": [
+          {
+            "cycle": 2,
+            "date": "2026-09-07",
+            "change": "deprecated — reemplazado por KineticCaptions (COMP-007); el archivo src/components/caption-track.tsx y el helper captionLayout se eliminaron y salieron del barrel (D-D de spec-e-burgos-003, D-26 del architect de cycle-02)"
+          }
+        ]
       },
       {
         "id": "COMP-004",
@@ -85,13 +91,19 @@
         "module": "core-composition-media-pipeline",
         "spec": "sdd/specs/spec-e-burgos-001-core-composition-media-pipeline",
         "path": "src/components/timeline-composition.tsx",
-        "status": "implemented",
+        "status": "updated",
         "created_in_cycle": 3,
-        "updated_in_cycle": null,
-        "description": "Composición raíz de una Timeline: calculateTimelineMetadata deriva durationInFrames/fps/width/height validando con TimelineSchema, y el componente arma ArollSeries + BrollTrack + AudioTrack + CaptionTrack a partir de timelineToSequenceProps.",
+        "updated_in_cycle": 2,
+        "description": "Composición raíz de una Timeline: calculateTimelineMetadata deriva durationInFrames/fps/width/height validando con TimelineSchema, y el componente arma ArollSeries + BrollTrack + AudioTrack + KineticCaptions a partir de timelineToSequenceProps, reenviando captionPreset / captionPlatform / captionAnchor.",
         "consumes": [],
         "created_at": "2026-09-07",
-        "changelog": []
+        "changelog": [
+          {
+            "cycle": 2,
+            "date": "2026-09-07",
+            "change": "monta KineticCaptions en lugar de CaptionTrack y acepta captionPreset / captionPlatform / captionAnchor por props; calculateTimelineMetadata preserva las props que no calcula"
+          }
+        ]
       },
       {
         "id": "COMP-005",
@@ -100,13 +112,19 @@
         "module": "core-composition-media-pipeline",
         "spec": "sdd/specs/spec-e-burgos-001-core-composition-media-pipeline",
         "path": "src/Root.tsx",
-        "status": "implemented",
+        "status": "updated",
         "created_in_cycle": 3,
-        "updated_in_cycle": null,
-        "description": "Registra las dos Composition de Remotion Studio (TimelineComposition 9:16 y TimelineCompositionLandscape 16:9) con calculateTimelineMetadata y defaultProps de buildExampleTimeline; no se exporta desde el barrel (D-05/regla 3 de architect.md).",
+        "updated_in_cycle": 2,
+        "description": "Registra las tres Composition de Remotion Studio: TimelineComposition 9:16 y TimelineCompositionLandscape 16:9 (con calculateTimelineMetadata y defaultProps de buildExampleTimeline) y CaptionPresetGallery 4320x1920 (sin calculateMetadata, dimensiones fijas); no se exporta desde el barrel (D-05/regla 3 de architect.md).",
         "consumes": [],
         "created_at": "2026-09-07",
-        "changelog": []
+        "changelog": [
+          {
+            "cycle": 2,
+            "date": "2026-09-07",
+            "change": "registra la composición CaptionPresetGallery (4 paneles 1080x1920 lado a lado) para inspección visual de los presets en remotion studio"
+          }
+        ]
       },
       {
         "id": "COMP-006",
@@ -119,6 +137,36 @@
         "created_in_cycle": 3,
         "updated_in_cycle": null,
         "description": "Serie de A-roll sobre TransitionSeries: intercala OffthreadVideo/Img por escena y una TransitionSeries.Transition (fade/slide/whip-pan propia) entre el par de clipIds exacto que emite buildTimeline, con punchInStyle aplicado a cada escena.",
+        "consumes": [],
+        "created_at": "2026-09-07",
+        "changelog": []
+      },
+      {
+        "id": "COMP-007",
+        "name": "KineticCaptions",
+        "type": "component",
+        "module": "kinetic-captions",
+        "spec": "sdd/specs/spec-e-burgos-003-kinetic-captions",
+        "path": "src/components/kinetic-captions.tsx",
+        "status": "implemented",
+        "created_in_cycle": 2,
+        "updated_in_cycle": null,
+        "description": "Monta una Sequence por clip de captions con el from/durationInFrames exactos del plan; anima la entrada y la salida del bloque con spring (captionClipAnimation), resalta la palabra activa por frame (captionWordRenders) y mantiene el estilo de impacto de emphasisIndex durante todo el clip. La caja sale del preset y la plataforma; clip.box solo con boxSource='clip'.",
+        "consumes": [],
+        "created_at": "2026-09-07",
+        "changelog": []
+      },
+      {
+        "id": "COMP-008",
+        "name": "CaptionPresetGallery",
+        "type": "component",
+        "module": "kinetic-captions",
+        "spec": "sdd/specs/spec-e-burgos-003-kinetic-captions",
+        "path": "src/components/caption-preset-gallery.tsx",
+        "status": "implemented",
+        "created_in_cycle": 2,
+        "updated_in_cycle": null,
+        "description": "Galería de inspección visual para remotion studio: cuatro paneles de 1080x1920 lado a lado, uno por preset de CAPTION_PRESETS, cada uno con KineticCaptions animando los mismos clips sobre fondo plano. No entra al barrel ni al denominador de cobertura (coverage.include cubre solo src/helpers y src/transitions, y no tiene spec propia), pero sí la verifican nx lint y nx build (tsconfig.lib.json incluye src/**/*.tsx). No genera ningún archivo de video.",
         "consumes": [],
         "created_at": "2026-09-07",
         "changelog": []

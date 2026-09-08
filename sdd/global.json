@@ -15,19 +15,19 @@
       "cycles_completed": 3,
       "description": "Contratos Timeline/EDL, cálculos de edición (silencios, ducking, punch-in, captions), wrappers FFmpeg/Whisper locales y composición Remotion base",
       "completed_at": "2026-09-07"
-    }
-  ],
-  "in_progress_modules": [
+    },
     {
       "module": "kinetic-captions",
       "spec": "spec-e-burgos-003-kinetic-captions",
       "apps": [
         "libs/composition-remotion"
       ],
-      "cycles_completed": 1,
-      "description": "Componente de kinetic typography (1-3 palabras por pantalla, resaltado de impacto), safe zones Instagram/TikTok/YouTube y presets tipográficos"
+      "cycles_completed": 2,
+      "description": "Componente de kinetic typography (1-3 palabras por pantalla, resaltado de impacto), safe zones Instagram/TikTok/YouTube y presets tipográficos",
+      "completed_at": "2026-09-08"
     }
   ],
+  "in_progress_modules": [],
   "pending_modules": [
     {
       "module": "auto-montage-pipeline",

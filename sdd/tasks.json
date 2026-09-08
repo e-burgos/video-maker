@@ -48,6 +48,16 @@
           "status": "completed",
           "tasks_total": 7,
           "tasks_done": 7
+        },
+        "cycle-02": {
+          "file": "sdd/specs/spec-e-burgos-003-kinetic-captions/cycles/cycle-02/tasks.json",
+          "module": "kinetic-captions",
+          "apps": [
+            "libs/composition-remotion"
+          ],
+          "status": "completed",
+          "tasks_total": 7,
+          "tasks_done": 7
         }
       }
     }

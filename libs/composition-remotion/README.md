@@ -30,16 +30,20 @@ Todo lo exportado vive en `src/index.ts` (firmas completas en `architect.md` §3
 | --- | --- |
 | Assets | `assetSrc` |
 | Plan de secuencia | `timelineToSequenceProps`, tipos `SequencePropsPlan`, `VideoSequenceProps`, `AudioSequenceProps`, `CaptionSequenceProps`, `ArollTransitionPlan` |
-| Timing y estilo | `transitionTiming`, `punchInStyle`, `captionLayout` |
+| Timing y estilo | `transitionTiming`, `punchInStyle` |
 | Audio | `gainDbToVolume`, `volumeAtFrame` |
 | Transiciones | `whipPanStyle`, `whipPan`, `presentationFor`, tipos `WhipPanProps`, `ArollPresentation`, `PresentationDirection` |
-| Componentes | `ArollSeries`, `BrollTrack`, `AudioTrack`, `CaptionTrack`, `TimelineComposition` |
+| Componentes | `ArollSeries`, `BrollTrack`, `AudioTrack`, `KineticCaptions`, `TimelineComposition` |
 | Metadata / composición raíz | `computeTimelineMetadata`, `calculateTimelineMetadata`, `TIMELINE_COMPOSITION_ID` |
 | Tipos derivados públicos | `CaptionBox`, `TransitionDirection` (el resto de `timeline-types.ts` es interno) |
 | Kinetic captions — presets | `CAPTION_PRESETS`, `CAPTION_PRESET_IDS`, `DEFAULT_CAPTION_PRESET_ID`, `captionPreset`, tipos `CaptionPreset`, `CaptionPresetId`, `CaptionStroke`, `CaptionPill`, `CaptionTextTransform` |
 | Kinetic captions — safe zone | `CAPTION_PLATFORMS`, `captionChromeInsets`, `captionSafeZone`, tipos `CaptionPlatform`, `CaptionChromeInsets`, `CaptionChromeReference` |
 | Kinetic captions — layout y tipografía | `captionBoxFor` (tipo `CaptionAnchor`), `fitCaptionFontSize`, `captionWordStyle` (tipo `CaptionWordState`) |
 | Kinetic captions — fuente propia | `captionFontFaceCss`, tipos `CaptionFontFace`, `CaptionFontFormat`, `CaptionFontDisplay` |
+| Kinetic captions — animación de entrada/salida | `captionClipAnimation`, `captionBlockStyle`, tipos `CaptionAnimation`, `CaptionAnimationMode`, `CaptionClipAnimation`, `CaptionSpring` |
+| Kinetic captions — palabra activa | `activeWordIndex`, `captionWordRenders`, tipo `CaptionWordRender` |
+| Kinetic captions — plan de clip (caja + fontSize + `boxSource`) | `captionBoxStyle`, `captionClipPlan`, tipos `CaptionBoxSource`, `CaptionClipPlan` |
+| Kinetic captions — componente | `KineticCaptions`, tipo `KineticCaptionsProps` |
 | Render (Node, `.../render`) | `renderTimeline`, `RenderTimelineError`, `remotionRenderDeps`, `DEFAULT_RENDER_CONCURRENCY`, tipos `RenderTimelineOptions`, `RenderTimelineResult`, `RenderTimelineDeps`, `RenderTimelineErrorCode` |
 
 Los tests nunca importan desde el barrel: cada uno prueba su módulo por ruta relativa, mismo
@@ -73,6 +77,48 @@ default `preset.anchor`) contenida en el safe zone, y `fitCaptionFontSize(words,
 ajusta el tamaño de letra sin medir el DOM, con clamp a `[minFontSize, maxFontSize]` del preset.
 `captionWordStyle(preset, { isEmphasis, isActive })` da el `CSSProperties` de una palabra — sin
 `fontSize`: lo pone el contenedor del clip una sola vez por frase (`cycle-02`).
+
+## Kinetic captions: animación, palabra activa y `boxSource` (cycle-02)
+
+`<KineticCaptions />` reemplaza a `CaptionTrack` (dado de baja, ver más abajo) dentro de
+`TimelineComposition`. Monta una `<Sequence>` por clip con el `from`/`durationInFrames` exactos del
+plan; toda la lógica vive en tres helpers nuevos, el componente es cableado sin decisiones:
+
+- **`captionClipAnimation({ frame, durationInFrames, fps, preset })`** anima la entrada y la salida
+  del bloque completo con `spring()`/`interpolate()` de Remotion, según el campo `animation` que
+  cada preset declara ahora (`CaptionPreset.animation`, requerido). Tres modos:
+  - `pop` (`bold-impact`, `outline-pop`): entra con rebote de escala.
+  - `rise` (`clean-sans`): entra subiendo desde abajo (`translateY` en `em`).
+  - `fade` (`subtle-lower`): solo anima opacidad, sin rebote (sobreamortiguado).
+  La curva de presencia es simétrica en entrada y salida; un clip de 1-3 frames degrada a
+  opacidad casi nula de forma determinista (no es un bug).
+- **`activeWordIndex(frame, words)`** / **`captionWordRenders(frame, words, emphasisIndex)`**
+  resuelven qué palabra suena en cada frame (rango semiabierto `[fromFrame, fromFrame +
+  durationFrames)`, `-1` si ninguna) y arman el estado de cada palabra para `captionWordStyle`. La
+  palabra de `emphasisIndex` mantiene el estilo de impacto durante **todo** el clip, sea o no la
+  activa en ese frame.
+- **`captionClipPlan({ clips, format, preset, safeZone?, platform?, anchor?, boxSource? })`**
+  resuelve la caja y el `fontSize` de cada clip. `boxSource` decide la precedencia entre el preset y
+  `clip.box`:
+  - `'preset'` (**default**): siempre la caja calculada por `captionBoxFor` + `captionSafeZone` +
+    el preset; `clip.box` se ignora. Es lo que usa `TimelineComposition`.
+  - `'clip'`: `clip.box ?? presetBox` — el comportamiento histórico, para una `Timeline` con cajas
+    puestas a mano. **Importante:** `buildTimeline` de `timeline-core` siempre rellena
+    `CaptionClip.box` con un rectángulo genérico (el mismo para todos los clips); si `boxSource` se
+    dejara en `'clip'` por error, el safe zone de plataforma, el `anchor` y el alto del preset
+    quedarían sin efecto visual aunque sus tests pasen.
+
+`TimelineComposition` acepta `captionPreset?`, `captionPlatform?` y `captionAnchor?` (los tres
+opcionales, reenviados tal cual a `KineticCaptions`) y usa siempre `boxSource: 'preset'` — no lo
+expone como prop.
+
+### Galería de presets en `remotion studio`
+
+`CaptionPresetGallery` (no exportada del barrel: es una herramienta de inspección visual, no
+superficie de producción) registra una tercera composición, `CaptionPresetGallery`, con los cuatro
+presets lado a lado sobre la misma frase de ejemplo — ver la sección de `remotion studio` más abajo
+para cómo abrirla. `nx build`/`nx lint` sí la typechequean y lintean; no tiene spec propio ni cuenta
+para cobertura (la lógica que usa ya está cubierta por los helpers).
 
 ## Fuente propia en `public/fonts/`
 
@@ -119,11 +165,19 @@ pnpm nx build composition-remotion   # tsc -p tsconfig.lib.json — typecheck + 
 pnpm exec remotion studio libs/composition-remotion/src/remotion-entry.ts
 ```
 
-o, equivalentemente, `pnpm nx run composition-remotion:studio` desde la raíz del repo. Lista
-`TimelineComposition` (9:16, 1080×1920@30) y `TimelineCompositionLandscape` (16:9, 1920×1080@30)
-sobre la Timeline de ejemplo. Abrir el studio no genera ningún MP4 ni descarga nada además de lo ya
-instalado — sí puede descargar Chrome Headless Shell la primera vez que Remotion necesita
-previsualizar un frame, igual que el smoke de abajo.
+o, equivalentemente, `pnpm nx run composition-remotion:studio` desde la raíz del repo. Lista tres
+composiciones:
+
+- `TimelineComposition` (9:16, 1080×1920@30) y `TimelineCompositionLandscape` (16:9, 1920×1080@30),
+  ambas sobre la Timeline de ejemplo.
+- `CaptionPresetGallery` (4320×1920@30, cuatro paneles de 1080×1920 lado a lado — Remotion hace
+  zoom-to-fit solo): compara los cuatro presets de kinetic captions animando la misma frase de
+  ejemplo, sin renderizar ningún video. Es la forma de mirar `bold-impact`/`clean-sans`/
+  `outline-pop`/`subtle-lower` uno al lado del otro antes de elegir cuál usar.
+
+Abrir el studio no genera ningún MP4 ni descarga nada además de lo ya instalado — sí puede
+descargar Chrome Headless Shell la primera vez que Remotion necesita previsualizar un frame, igual
+que el smoke de abajo.
 
 ## Generar los assets de ejemplo (requiere `ffmpeg`)
 

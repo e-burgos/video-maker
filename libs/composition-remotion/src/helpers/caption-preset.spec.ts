@@ -52,6 +52,35 @@ describe.each(CAPTION_PRESET_IDS)('CAPTION_PRESETS[%s]', (id) => {
     expect(preset.boxHeightRatio).toBeGreaterThan(0);
     expect(preset.boxHeightRatio).toBeLessThanOrEqual(1);
   });
+
+  it('declara una animación con spring y duración de entrada válidos (D-14, CA-006)', () => {
+    expect(['pop', 'rise', 'fade']).toContain(preset.animation.mode);
+    expect(preset.animation.spring.damping).toBeGreaterThan(0);
+    expect(preset.animation.spring.mass).toBeGreaterThan(0);
+    expect(preset.animation.spring.stiffness).toBeGreaterThan(0);
+    expect(preset.animation.enterDurationFrames).toBeGreaterThan(0);
+  });
+
+  it('declara los campos propios de su modo, y solo esos (D-15)', () => {
+    if (preset.animation.mode === 'pop') {
+      expect(preset.animation.enterScale).toBeGreaterThan(0);
+      expect(preset.animation.enterScale).toBeLessThan(1);
+    }
+
+    if (preset.animation.mode === 'rise') {
+      expect(preset.animation.riseDistanceEm).toBeGreaterThan(0);
+    }
+  });
+});
+
+describe('animation de CAPTION_PRESETS', () => {
+  it('cubre los tres modos, con al menos un pop, un rise y un fade (§3.3)', () => {
+    const modes = CAPTION_PRESET_IDS.map((id) => CAPTION_PRESETS[id].animation.mode);
+
+    expect(modes).toContain('pop');
+    expect(modes).toContain('rise');
+    expect(modes).toContain('fade');
+  });
 });
 
 describe('captionPreset', () => {

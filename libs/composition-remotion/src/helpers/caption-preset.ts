@@ -1,4 +1,5 @@
 import type { CaptionAnchor } from './caption-box';
+import type { CaptionAnimation } from './caption-animation';
 
 export type CaptionPresetId = 'bold-impact' | 'clean-sans' | 'outline-pop' | 'subtle-lower';
 
@@ -40,6 +41,7 @@ export interface CaptionPreset {
   stroke: CaptionStroke | null;
   shadow: string | null;
   pill: CaptionPill | null;
+  animation: CaptionAnimation;
 }
 
 export const CAPTION_PRESETS: Record<CaptionPresetId, CaptionPreset> = {
@@ -66,6 +68,12 @@ export const CAPTION_PRESETS: Record<CaptionPresetId, CaptionPreset> = {
     stroke: { widthEm: 0.02, color: '#000000' },
     shadow: '0 0.04em 0.12em rgba(0, 0, 0, 0.85)',
     pill: null,
+    animation: {
+      mode: 'pop',
+      spring: { damping: 9, mass: 0.6, stiffness: 140 },
+      enterDurationFrames: 8,
+      enterScale: 0.72,
+    },
   },
   'clean-sans': {
     id: 'clean-sans',
@@ -90,6 +98,12 @@ export const CAPTION_PRESETS: Record<CaptionPresetId, CaptionPreset> = {
     stroke: null,
     shadow: '0 0.03em 0.1em rgba(0, 0, 0, 0.7)',
     pill: null,
+    animation: {
+      mode: 'rise',
+      spring: { damping: 14, mass: 0.8, stiffness: 120 },
+      enterDurationFrames: 10,
+      riseDistanceEm: 0.55,
+    },
   },
   'outline-pop': {
     id: 'outline-pop',
@@ -114,6 +128,12 @@ export const CAPTION_PRESETS: Record<CaptionPresetId, CaptionPreset> = {
     stroke: { widthEm: 0.045, color: '#101010' },
     shadow: '0 0.05em 0.14em rgba(0, 0, 0, 0.6)',
     pill: null,
+    animation: {
+      mode: 'pop',
+      spring: { damping: 10, mass: 0.7, stiffness: 160 },
+      enterDurationFrames: 9,
+      enterScale: 0.66,
+    },
   },
   'subtle-lower': {
     id: 'subtle-lower',
@@ -143,6 +163,11 @@ export const CAPTION_PRESETS: Record<CaptionPresetId, CaptionPreset> = {
       paddingXEm: 0.35,
       paddingYEm: 0.12,
       radiusEm: 0.35,
+    },
+    animation: {
+      mode: 'fade',
+      spring: { damping: 30, mass: 1.0, stiffness: 100 },
+      enterDurationFrames: 12,
     },
   },
 };
