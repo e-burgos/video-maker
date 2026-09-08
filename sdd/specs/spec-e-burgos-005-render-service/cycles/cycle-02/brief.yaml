@@ -1,0 +1,127 @@
+# sdd/specs/spec-e-burgos-005-render-service/cycles/cycle-02/brief.yaml
+# Generado por: sdd-orchestrator
+# Al: iniciar el ciclo
+
+cycle: 2
+module: render-service
+phase: asset-store-and-project-persistence
+date: 2026-09-08
+flow: full
+app_context: sdd/context/apps/render-api/context_prompt.md
+
+objective: |
+  `apps/render-api` deja de ser un servicio con un solo `GET /health` y pasa a exponer por HTTP el
+  store de medios sobre `media/`: crear y listar proyectos, listar y subir assets crudos manteniendo
+  `work/catalog.json` consistente, leer y escribir `Timeline` y `EditDecisionList` con los mismos
+  bytes que la CLI, y descargar los artefactos del proyecto como bytes con soporte de `Range`.
+  Al cerrar, un dev puede alternar `tools/render-cli` y `render-api` sobre la misma carpeta de
+  medios sin que ninguna de las dos vea un layout distinto del de la otra.
+
+scope:
+  - Raíz de medios configurable (`RENDER_API_MEDIA_ROOT`, default `media`) y reintroducción del
+    `projectRoot`/media root en `createNodeRenderApiDependencies` (pendiente declarado en cycle-01).
+  - Router con parámetros de path y segmento comodín (hoy `routeRequest` sólo hace match exacto).
+  - Puerto `ObjectStorage` con **un solo** adaptador (`fs`) sobre `media/`, y los puertos de
+    proyecto/catálogo (resolver proyecto, listar directorio, leer/escribir catálogo, probe).
+  - `POST /projects` (crear layout), `GET /projects`, `GET /projects/:slug`.
+  - `GET /projects/:slug/assets` (catálogo como fuente de verdad; fallback a recorrido de `raw/`
+    declarado en el payload).
+  - `PUT /projects/:slug/assets/:role/:filename` — body binario crudo, temporal + `rename`, límite
+    de tamaño por env, probe + merge en `work/catalog.json` en la misma request.
+  - `GET`/`PUT` de `work/timeline.json` y `work/edl.json`, validando con los schemas de
+    `@video-maker/timeline-core` y serializando con los helpers de `@video-maker/auto-montage`.
+  - `GET` de artefactos como bytes, con `content-type` por tabla propia de extensiones y `Range`
+    de un solo rango (200 / 206 / 416).
+  - Ampliación de la superficie de errores (códigos, etapas, status HTTP) y `capabilities.assetStore: true`
+    en `GET /health`.
+  - README del subproyecto: endpoints, variables de entorno y la decisión D-11 sobre MinIO.
+
+out_of_scope:
+  - Cola de jobs, `POST /jobs`, progreso, cancelación y cualquier ruta que dispare `runRenderPipeline`
+    (es cycle-03; `runRenderPipeline` sigue sin disparador HTTP al cerrar este ciclo).
+  - Smoke E2E con binarios reales y verificación del bundle webpack de Remotion (D-10, cycle-03).
+  - Adaptador MinIO (D-11). `docker-compose.yml` no se toca.
+  - `FIX-e-burgos-001-001` → `validated`, los `[IMPROVEMENT]` de D-5 (N-2 y bilingüismo de
+    `render-cli`) y de D-6 (`coverage.include` de `composition-remotion`): todos son cycle-03.
+  - `apps/render-api/eslint.config.mjs` (D-9 sigue vigente: el hook `config-protection` lo bloquea).
+  - Autenticación, multiusuario, despliegue cloud, transcodificación o thumbnails de assets.
+  - Dependencias npm nuevas (RNF-7).
+
+dependencies_required:
+  - cycle-01 de spec-e-burgos-005-render-service (completed)
+  - spec-e-burgos-002-auto-montage-pipeline (completed) — `libs/auto-montage` aporta el layout
+  - spec-e-burgos-001-core-composition-media-pipeline (completed) — `probeMedia` y los schemas
+
+decisions_in_force:
+  - D-2 / RNF-7 — cero dependencias npm nuevas, también en este ciclo.
+  - D-3 — `media/` es el store canónico; nunca una segunda copia del material.
+  - D-4 — todo payload de máquina en inglés, sin `.stack` ni rutas absolutas del host.
+  - D-9 — `apps/render-api/eslint.config.mjs` no existe; si hiciera falta, el diff se escala al dev.
+  - D-11 — MinIO descopado con fundamento; queda el puerto `ObjectStorage` con adaptador `fs`.
+  - D-12 — la API es el único escritor legítimo de `raw/`, y sólo dentro de `raw/<role>/` y `work/`.
+  - D-13 — el layout se reusa de `libs/auto-montage`, no se reimplementa.
+  - D-14 — upload por `PUT` binario crudo, temporal + `rename`; nunca multipart.
+  - D-15 — el catálogo queda consistente en la misma request del upload.
+  - D-16 — `Timeline`/`EDL` con los mismos bytes que la CLI (helpers de `auto-montage`).
+  - D-17 — descarga servida por el propio proceso con `Range`, en lugar de URL firmada.
+
+inherited_constraints:
+  - '`publicDir` = raíz del proyecto de medios, nunca `raw/`.'
+  - 'Todo alias `@video-maker/*` que se use como valor va declarado en los tres resolvedores:
+    `tsconfig.base.json → paths`, `resolve.alias` del `vite.config.ts` del proyecto y el
+    `webpackOverride` de Remotion. `auto-montage` es alias nuevo para `render-api` en Vitest.'
+  - 'Código, identificadores, payloads, commits y README en inglés; documentos SDD en español.'
+  - 'Sin comentarios en el código de implementación.'
+  - 'Un exit code exacto se verifica invocando el binario, nunca `nx run`.'
+
+agent_contexts:
+  functional:
+    goal: >
+      Convertir RF-8..RF-17 y CA-009..CA-020 en historias de usuario y requisitos funcionales
+      concretos desde la perspectiva del dev que opera el servicio y del futuro `apps/web`
+      (spec-006). Definir explícitamente el comportamiento observable de cada camino de error del
+      store (proyecto inexistente, slug inválido, rol inválido, asset duplicado, body demasiado
+      grande, artefacto ausente, rango no satisfacible, documento que no valida).
+    business_context: >
+      Servicio local mono-usuario en la máquina del dev. El store no es un backend cloud: es la
+      puerta HTTP sobre la carpeta `media/<slug>/` que `tools/render-cli` ya lee y escribe. El
+      criterio de éxito es que el dev pueda alternar CLI y API sobre la misma carpeta sin que
+      ninguna de las dos rompa lo que escribió la otra.
+    relevant_spec_sections:
+      - 'Requisitos Funcionales → Ciclo 02 (RF-8..RF-17)'
+      - 'Criterios de Aceptación → Ciclo 02 (CA-009..CA-020)'
+      - 'Decisiones del orquestador → D-3, D-11, D-12, D-13, D-14, D-15, D-16, D-17'
+    output_file: sdd/specs/spec-e-burgos-005-render-service/cycles/cycle-02/functional.md
+
+  architect:
+    goal: >
+      Cerrar los contratos antes de que exista una sola task: firma de cada endpoint nuevo
+      (request, response, status y códigos de error), tipos de los puertos nuevos, forma del router
+      con parámetros, tabla de códigos de error → etapa → status HTTP, tabla de extensiones →
+      content-type, y la lista de tests obligatorios por CA con su archivo destino.
+    existing_tables: []
+    existing_endpoints:
+      - 'EP-001 GET /health (implemented, cycle-01) — sólo se amplía `capabilities.assetStore`'
+    output_file: sdd/specs/spec-e-burgos-005-render-service/cycles/cycle-02/architect.md
+
+  planner:
+    goal: >
+      Convertir el contrato del arquitecto en tasks técnicas ordenadas, serializando primero la
+      infraestructura compartida (router con parámetros, puertos y fixtures) antes de las tasks de
+      endpoint. El `files[]` de cada task es checklist de cierre: todo test que el arquitecto exija
+      por CA tiene que estar en el `files[]` de alguna task.
+    output_file: sdd/specs/spec-e-burgos-005-render-service/cycles/cycle-02/planner.md
+    note: 'El `tasks.json` lo emite el orquestador antes del `planner.md` (registro de máquina primero).'
+
+  implementor_back:
+    goal: >
+      Implementar el store de assets y la persistencia de proyecto en `apps/render-api`, una task
+      a la vez, respetando los puertos inyectables y sin tocar configs protegidas.
+    app: apps/render-api
+    app_context: sdd/context/apps/render-api/context_prompt.md
+    note: 'Un solo implementador por ciclo, reanudado task tras task.'
+
+  reviewer:
+    goal: Validar todo el output del ciclo y ejecutar los gates de cierre.
+    checklist: sdd/skills/sdd-reviewer/checklist.md
+    output_file: sdd/specs/spec-e-burgos-005-render-service/cycles/cycle-02/cycle.json

@@ -1,0 +1,37 @@
+{
+  "$schema": "../../../../schemas/cycle.schema.json",
+  "cycle": 2,
+  "module": "render-service",
+  "spec": "spec-e-burgos-005-render-service",
+  "apps": ["apps/render-api"],
+  "phase": "asset-store-and-project-persistence",
+  "flow": "full",
+  "objectives": [
+    "Exponer el store de medios sobre media/ por HTTP: crear y listar proyectos, listar y subir assets crudos",
+    "Mantener work/catalog.json consistente en la misma request del upload, con probeMedia y writeCatalog",
+    "Persistir y releer Timeline y EditDecisionList con los mismos bytes que tools/render-cli",
+    "Servir los artefactos del proyecto como bytes con soporte de Range, en lugar de una URL firmada de MinIO",
+    "Descopar MinIO con fundamento (D-11) dejando el puerto ObjectStorage con un solo adaptador fs"
+  ],
+  "status": "in-progress",
+  "started_at": "2026-09-08",
+  "completed_at": null,
+  "documents": {
+    "brief": "sdd/specs/spec-e-burgos-005-render-service/cycles/cycle-02/brief.yaml"
+  },
+  "artifacts": [],
+  "metrics": {
+    "tasks_total": 0,
+    "tasks_completed": 0,
+    "story_points": 0,
+    "files_created": [],
+    "files_modified": [],
+    "files_deleted": [],
+    "usage": { "tokens_in": 0, "tokens_out": 0, "by_agent": [] }
+  },
+  "tables_created": [],
+  "endpoints_implemented": [],
+  "components_created": [],
+  "issues_found": [],
+  "reviewer_report": null
+}

@@ -1,6 +1,7 @@
 # SPEC-e-burgos-005: Local Render Service & Asset Storage
 
-> Estado: **in-progress** — detallada por el sdd-orchestrator al abrir `cycle-01` (2026-09-08).
+> Estado: **in-progress** — detallada por el sdd-orchestrator al abrir `cycle-01` y ampliada al abrir
+> `cycle-02` (2026-09-08).
 
 ## Resumen Ejecutivo
 
@@ -56,13 +57,20 @@ Ver contexto de negocio y casos de uso en `spec-e-burgos-001-core-composition-me
 | **D-8** | **Los intermedios se conservan**: el pipeline crea el workdir y no borra `video-muted.mp4` ni `master.wav`. | `spec-004` §15.3.6 los deja al llamador y ffmpeg no crea el directorio de salida. Conservarlos hace baratos el re-mux y la depuración, y habilita reinyectar `mix.voiceMeasured` (§15.3.7) para re-mezclar con **una** invocación de ffmpeg en vez de dos. |
 | **D-9** | **`apps/render-api/eslint.config.mjs` queda descopado**: no se crea. El lint cae al flat config raíz y los boundaries se cumplen por el fallback `type:app` → `*`. El contenido propuesto queda en `architect.md`. | El hook `config-protection` del harness del dev bloquea `Write|Edit` sobre cualquier archivo de basename `eslint.config.mjs`, sin distinguir raíz de proyecto, y rodearlo con `Bash` anularía el guardrail. Mismo tratamiento ya aplicado en `tools/render-cli`. Reversible en un paso. |
 | **D-10** | **`cycle-01` verifica compilar + ejecutar + resolver ambas libs en un proceso real**; el bundle webpack de Remotion se ejercita en el smoke E2E de `cycle-03`. Se declara explícitamente como **no verificado** en `cycle-01`. | Bundlear Remotion sin renderizar cuesta el mismo tiempo y memoria que el render entero, y `cycle-01` no tiene todavía un job que lo dispare. Declararlo como pendiente evita el defecto de `FIX-e-burgos-001-001` (un smoke roto durante dos specs sin que nadie lo supiera). |
+| **D-11** | **MinIO queda descopado como backend de objetos.** Se conserva el **puerto** `ObjectStorage` con un único adaptador `fs` sobre `media/`, y la variable `RENDER_API_OBJECT_STORE` (hoy solo acepta `fs`) como punto de extensión documentado. `docker-compose.yml` no se toca y el README declara que `render-api` no lo consume. | "MinIO como vista sobre `media/`" (D-3) es **técnicamente imposible** en las versiones vigentes: MinIO eliminó el modo FS/gateway legacy en `RELEASE.2022-10-29T06-21-33Z` y desde `RELEASE.2022-06-02` un despliegue single-node single-drive usa un backend erasure-coded de paridad cero con `.xl.meta` — los archivos que ya están en disco **no** son objetos, y los objetos que MinIO escribe **no** son archivos legibles fuera de MinIO. La única forma de tener el bucket sería `mc mirror`, es decir la segunda copia que D-3 prohíbe. Además el único consumidor de URLs firmadas (`apps/web`, `spec-006`) todavía no existe y el servicio escucha en `127.0.0.1`, donde una URL firmada no aporta ninguna garantía que el proceso mismo no dé ya. Reversible en un paso: implementar `MinioObjectStorage` detrás del mismo puerto cuando `spec-006` traiga un consumidor real. Con esto **D-2 (cero dependencias npm) se sostiene también en `cycle-02`**. |
+| **D-12** | **`apps/render-api` es el único escritor legítimo de `raw/`**, y escribe exclusivamente dentro de `raw/<role>/` y `work/`. | `libs/auto-montage` trata `raw/` como entrada inmutable (`guardWriteTextFile` → `ReadOnlyRawPathError`): para ella el material crudo ya existe. El upload de assets es justamente el acto de **crear** ese material, así que ese guard no aplica al store de la API. La otra mitad del guard sí aplica y se replica: ninguna ruta recibida por HTTP puede escapar del proyecto (`toProjectRelativePath` + `ProjectRelativePathSchema`). |
+| **D-13** | **El store reusa la capa de proyecto de `libs/auto-montage`** (`resolveMediaProject`, `readCatalog`, `writeCatalog`, `writeTimeline`, `writeEditDecisionList`, `ProjectRelativePathSchema` y los helpers de `project-paths`); no reimplementa el layout `media/<slug>/`. | El dev alterna `tools/render-cli` y `render-api` sobre la misma carpeta. Dos definiciones del layout divergen en el primer cambio y el síntoma aparece recién cuando el catálogo escrito por una herramienta no valida en la otra. `apps/render-api` (`type:app`) ya puede depender de `auto-montage` por el fallback de los `depConstraints`. |
+| **D-14** | **Upload por `PUT` con body binario crudo**, nunca multipart. `content-type` y `content-length` obligatorios, límite de tamaño por variable de entorno, escritura a archivo temporal dentro del mismo proyecto y `rename` atómico al destino final. | Es la alternativa que D-2 ya declaró preferida. Un parser multipart propio es superficie de ataque y de bugs sin ningún consumidor que lo pida (`fetch` con un `File` como body hace `PUT` binario en una línea). El temporal + `rename` evita que un upload cortado deje medio asset en `raw/`, que es material del dev y no un intermedio descartable. |
+| **D-15** | **El upload deja `work/catalog.json` consistente en la misma request**: escribe el asset, lo sondea con `probeMedia` y funde su entrada en el catálogo con `writeCatalog`. Si el probe falla, el asset **no se borra** y la falla se registra en `probeFailures` del catálogo; la respuesta es el error tipado correspondiente. | Un asset en `raw/` sin entrada en el catálogo es invisible para `autoMontage`, y un catálogo que quedó viejo porque el `POST /probe` opcional nunca se llamó miente en silencio. El `CatalogSchema` ya tiene `probeFailures` para expresar exactamente ese estado, así que no hace falta inventar nada. Borrar el archivo ante un probe fallido destruiría material del dev por un problema de herramienta. |
+| **D-16** | **`Timeline` y `EDL` se persisten con los mismos paths y los mismos bytes que la CLI**, reusando `writeTimeline`/`writeEditDecisionList` de `auto-montage` y validando en el `PUT` con `TimelineSchema`/`EditDecisionListSchema`. | Lección medida del repo: el orden de claves de `JSON.stringify` tras un `.parse()` de Zod es el del schema, no el del literal. Si la API serializara por su cuenta, alternar CLI y API sobre el mismo proyecto produciría un diff espurio en cada `PUT` y nadie sabría cuál de las dos escribió mal. |
+| **D-17** | **La descarga de artefactos se sirve desde el propio proceso** (`GET` de bytes con soporte de `Range` de un solo rango y `content-type` derivado por una tabla propia de extensiones). Es lo que reemplaza a la URL firmada de MinIO. | Sin `Range` un `<video>` no puede hacer seek (Safari directamente no reproduce), y el consumidor previsto de `spec-006` es exactamente un `<video>` y el Remotion Player. Servirlo desde el proceso mantiene `media/` como única copia (D-3) y cero dependencias (D-2). |
 
 ## Plan de ciclos
 
 | Ciclo | Fase | Qué entrega | Estado |
 | --- | --- | --- | --- |
-| **cycle-01** | `render-service-foundation` | La app `apps/render-api` existente y ejecutable; puertos inyectables; la orquestación `render → mix → mux → verify` en una sola llamada; la superficie de errores tipada en inglés con su mapeo a HTTP; servidor `node:http` con `GET /health`. Sin cola, sin MinIO, sin endpoints de assets. | en curso |
-| **cycle-02** | `asset-store-and-project-persistence` | Store de assets sobre `media/` (D-3): listar proyectos y assets, subir un asset, sondearlo con `probeMedia`; persistencia de `Timeline`/`EditDecisionList` como JSON en `work/`; la vista MinIO sobre el store canónico (o su descope explícito con fundamento). | pendiente |
+| **cycle-01** | `render-service-foundation` | La app `apps/render-api` existente y ejecutable; puertos inyectables; la orquestación `render → mix → mux → verify` en una sola llamada; la superficie de errores tipada en inglés con su mapeo a HTTP; servidor `node:http` con `GET /health`. Sin cola, sin MinIO, sin endpoints de assets. | **completed** |
+| **cycle-02** | `asset-store-and-project-persistence` | Store de assets sobre `media/` (D-3): listar proyectos y assets, subir un asset, sondearlo con `probeMedia`; persistencia de `Timeline`/`EditDecisionList` como JSON en `work/`; descarga de artefactos por HTTP. La vista MinIO queda **descopada con fundamento** (D-11): el puerto `ObjectStorage` queda con un solo adaptador `fs`. | en curso |
 | **cycle-03** | `render-job-queue-and-delivery` | Cola en proceso con concurrencia 1; `POST /jobs`, `GET /jobs/:id`, `DELETE /jobs/:id`; progreso por etapa y por frame; **smoke real E2E obligatorio** (job disparado por HTTP que termina en un MP4 verificado con `ffprobe` contra el stream de video); `FIX-e-burgos-001-001` → `validated`; los `[IMPROVEMENT]` de D-5 y D-6; cierre de la spec. | pendiente |
 
 ## Requisitos Funcionales (RF)
@@ -92,9 +100,44 @@ Ver contexto de negocio y casos de uso en `spec-e-burgos-001-core-composition-me
 - **RF-7:** El README del subproyecto documenta el procedimiento, los comandos, las variables de
   entorno y qué quedó explícitamente fuera de `cycle-01` (MinIO, cola, assets, bundle de Remotion).
 
-### Ciclo 02 y 03
+### Ciclo 02 — `asset-store-and-project-persistence`
 
-Se detallan al abrir cada ciclo, sobre el plan de la tabla anterior.
+- **RF-8:** El servicio resuelve una **raíz de medios** configurable (`RENDER_API_MEDIA_ROOT`, default
+  `media`) y expone los proyectos que viven bajo ella. Listar proyectos devuelve, por cada uno, su
+  slug y la presencia de los artefactos del layout (`raw/`, `work/catalog.json`, `work/timeline.json`,
+  `work/edl.json`, `out/`); el detalle de un proyecto agrega el conteo de assets por rol.
+- **RF-9:** Se puede **crear** un proyecto vacío por HTTP: la API materializa el layout canónico
+  (`raw/aroll`, `raw/broll`, `raw/images`, `raw/audio`, `work/`, `out/`) y falla con un error tipado
+  si el slug ya existe o no es un segmento de path portable.
+- **RF-10:** Se pueden **listar los assets** de un proyecto. La fuente de verdad es
+  `work/catalog.json` cuando existe; si no existe, la respuesta se arma recorriendo `raw/` y lo
+  declara explícitamente en el payload, sin escribir nada.
+- **RF-11:** Se puede **subir un asset** con `PUT` y body binario crudo (D-14) a `raw/<role>/<filename>`.
+  El rol y el nombre de archivo se validan antes de tocar el filesystem; la escritura es a temporal
+  + `rename`; el tamaño máximo es configurable por variable de entorno.
+- **RF-12:** El upload **sondea el asset con `probeMedia` y actualiza `work/catalog.json` en la misma
+  request** (D-15), manteniendo el orden ascendente por `asset.id` que exige `CatalogSchema` y
+  registrando la falla en `probeFailures` si el probe no pudo completarse.
+- **RF-13:** Se pueden **leer y escribir la `Timeline` y la `EditDecisionList`** del proyecto
+  (`work/timeline.json`, `work/edl.json`). El `PUT` valida contra los schemas de
+  `@video-maker/timeline-core` antes de escribir y serializa con los helpers de `auto-montage`
+  (D-16); el `GET` de un artefacto ausente es un error tipado, nunca un `null`.
+- **RF-14:** Se pueden **descargar los artefactos** del proyecto (`out/**` y `work/**`) como bytes,
+  con `content-type` derivado de la extensión y soporte de `Range` de un solo rango (D-17). El
+  acceso a `raw/**` por esta vía se sirve igual (es material del proyecto), pero ninguna ruta puede
+  escapar del proyecto ni de la raíz de medios.
+- **RF-15:** Todo el I/O nuevo entra por puertos inyectables sumados a `RenderApiDependencies`
+  (`ObjectStorage` y los puertos de proyecto/catálogo), armados únicamente en el adaptador de
+  producción, que vuelve a recibir la raíz de medios además del `env`.
+- **RF-16:** La superficie de errores se amplía con los códigos del store, cada uno con su etapa
+  (`null` para los de transporte) y su status HTTP, en inglés y sin `.stack` ni rutas absolutas.
+  `GET /health` refleja `capabilities.assetStore: true`.
+- **RF-17:** El README del subproyecto documenta los endpoints nuevos, las variables de entorno
+  nuevas, la decisión D-11 (por qué no hay MinIO y cómo se agregaría) y qué sigue fuera de alcance.
+
+### Ciclo 03
+
+Se detalla al abrir el ciclo, sobre el plan de la tabla anterior.
 
 ## Requisitos No-Funcionales (RNF)
 
@@ -111,6 +154,16 @@ Se detallan al abrir cada ciclo, sobre el plan de la tabla anterior.
   con el diff y se sigue con lo que no dependa de eso.
 - **RNF-6:** El servicio no escucha fuera de `127.0.0.1` por default y no expone rutas absolutas del
   host en ningún payload.
+- **RNF-7:** **Cero dependencias npm nuevas también en `cycle-02`** (D-11 lo hace posible). Sólo
+  módulos nativos de Node y paquetes `@video-maker/*` ya existentes.
+- **RNF-8:** Ninguna ruta recibida por HTTP puede escapar del proyecto ni de la raíz de medios: la
+  validación ocurre **antes** de cualquier llamada al filesystem, y el payload de salida usa siempre
+  rutas relativas al proyecto (extiende RNF-6 al store).
+- **RNF-9:** La suite sigue corriendo sin ffmpeg, ffprobe, whisper-cli ni Chrome (RNF-3): el
+  filesystem entra por el puerto `ObjectStorage` y los tests que necesitan disco real usan un
+  directorio temporal, nunca `media/`.
+- **RNF-10:** Cobertura ≥ 80 % de statements sobre `src/**` de `apps/render-api` sostenida, sin
+  reducir el `coverage.include` vigente para lograrlo.
 
 ## Dependencias
 
@@ -144,3 +197,38 @@ Se detallan al abrir cada ciclo, sobre el plan de la tabla anterior.
   `include` declarado en el `vite.config.ts` del proyecto.
 - **CA-008:** `apps/render-api/README.md` documenta comandos, variables de entorno y el alcance
   descopado de `cycle-01` (MinIO, cola, assets, bundle webpack de Remotion, `eslint.config.mjs`).
+
+### Ciclo 02
+
+- **CA-009:** `pnpm nx run-many -t lint test build` termina en verde con `render-api` incluido, y
+  `pnpm sdd:validate` en verde, sin dependencias npm nuevas (`package.json` y `pnpm-lock.yaml` sin
+  cambios en todo el ciclo).
+- **CA-010:** Un test verifica que una ruta con `..`, absoluta, con separador de Windows o con
+  esquema de URI es rechazada **antes** de que se invoque ningún puerto de filesystem, comprobado
+  sobre el registro de llamadas (no por el título del test).
+- **CA-011:** Un test verifica que el upload escribe a un temporal y renombra: ante un fallo de
+  escritura a mitad de camino no queda ningún archivo en el destino final de `raw/`.
+- **CA-012:** Un test verifica que tras un upload exitoso `work/catalog.json` contiene la entrada del
+  asset nuevo, ordenada ascendentemente por `asset.id` junto a las preexistentes, y que el resultado
+  vuelve a validar contra `CatalogSchema`.
+- **CA-013:** Un test verifica que ante `probeMedia` fallido el asset **sigue escrito** y la falla
+  quedó en `probeFailures` del catálogo, con el `errorCode` correspondiente.
+- **CA-014:** Un test verifica que el `PUT` de `Timeline` rechaza con error tipado un documento que
+  no valida contra `TimelineSchema` y que **no escribe nada**; y que un documento válido produce
+  exactamente los mismos bytes que escribe `writeTimeline` de `auto-montage` (comparación de bytes,
+  no de objeto). Idéntico para la `EditDecisionList`.
+- **CA-015:** Un test verifica el `Range` de la descarga: un rango válido devuelve 206 con
+  `content-range` y exactamente los bytes pedidos; un rango no satisfacible devuelve 416; sin
+  cabecera `Range` devuelve 200 con el archivo completo y su `content-length`.
+- **CA-016:** Cada código de error nuevo tiene un test que lo mapea a su status HTTP y verifica que
+  su payload no contiene castellano, `.stack` ni ninguna ruta absoluta del host.
+- **CA-017:** Una **ejecución real del proceso** (no un test) arranca el servidor contra un
+  directorio de medios temporal, crea un proyecto, sube un asset, lee el listado de assets, escribe
+  y relee la `Timeline`, descarga un artefacto con y sin `Range`, y termina con exit code 0 ante
+  `SIGTERM`. El exit code se observa invocando el proceso, nunca `nx run`.
+- **CA-018:** `GET /health` responde `capabilities.assetStore: true` y sigue respondiendo 200 en los
+  dos estados (`ok` y `degraded`).
+- **CA-019:** Cobertura de `apps/render-api` ≥ 80 % de statements sobre su `src/**`, con el
+  `coverage.include` vigente **sin recortar** respecto de `cycle-01`.
+- **CA-020:** `apps/render-api/README.md` documenta los endpoints nuevos, las variables de entorno
+  nuevas y la decisión D-11 (por qué no hay MinIO hoy y cómo se agregaría detrás del puerto).
