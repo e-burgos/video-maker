@@ -91,8 +91,8 @@
     ],
     "files_deleted": [],
     "usage": {
-      "tokens_in": 624478,
-      "tokens_out": 110202,
+      "tokens_in": 1169605,
+      "tokens_out": 206400,
       "by_agent": [
         {
           "agent": "orchestrator",
@@ -162,6 +162,138 @@
           "approx": false,
           "source": "agent-usage-notification",
           "recorded_at": "2026-09-07"
+        },
+        {
+          "agent": "implementor-back",
+          "label": "TASK-001 Scaffold de libs/auto-montage con scaffold-nx",
+          "provider_model": "claude/sonnet",
+          "effort": "medium",
+          "tokens_in": 103872,
+          "tokens_out": 18330,
+          "tokens_total": 122202,
+          "approx": false,
+          "source": "agent-usage-notification",
+          "recorded_at": "2026-09-07"
+        },
+        {
+          "agent": "implementor-back",
+          "label": "TASK-002 Contrato del proyecto de medios: tipos y resolución de rutas",
+          "provider_model": "claude/sonnet",
+          "effort": "medium",
+          "tokens_in": 37345,
+          "tokens_out": 6590,
+          "tokens_total": 43935,
+          "approx": false,
+          "source": "agent-usage-notification",
+          "recorded_at": "2026-09-07"
+        },
+        {
+          "agent": "implementor-back",
+          "label": "TASK-003 Puerto de filesystem inyectable con invariante de solo-lectu",
+          "provider_model": "claude/sonnet",
+          "effort": "medium",
+          "tokens_in": 38348,
+          "tokens_out": 6767,
+          "tokens_total": 45115,
+          "approx": false,
+          "source": "agent-usage-notification",
+          "recorded_at": "2026-09-07"
+        },
+        {
+          "agent": "implementor-back",
+          "label": "TASK-004 Descubrimiento y clasificación de assets en raw/ por subcarp",
+          "provider_model": "claude/sonnet",
+          "effort": "medium",
+          "tokens_in": 50463,
+          "tokens_out": 8905,
+          "tokens_total": 59368,
+          "approx": false,
+          "source": "agent-usage-notification",
+          "recorded_at": "2026-09-07"
+        },
+        {
+          "agent": "implementor-back",
+          "label": "TASK-005 Probe de assets descubiertos vía probeMedia, tolerante a fal",
+          "provider_model": "claude/sonnet",
+          "effort": "medium",
+          "tokens_in": 45735,
+          "tokens_out": 8071,
+          "tokens_total": 53806,
+          "approx": false,
+          "source": "agent-usage-notification",
+          "recorded_at": "2026-09-07"
+        },
+        {
+          "agent": "implementor-back",
+          "label": "TASK-006 Schema Zod del catálogo con rutas siempre relativas a la raí",
+          "provider_model": "claude/sonnet",
+          "effort": "medium",
+          "tokens_in": 38228,
+          "tokens_out": 6746,
+          "tokens_total": 44974,
+          "approx": false,
+          "source": "agent-usage-notification",
+          "recorded_at": "2026-09-07"
+        },
+        {
+          "agent": "implementor-back",
+          "label": "TASK-007 Persistencia y lectura de work/catalog.json vía el puerto de",
+          "provider_model": "claude/sonnet",
+          "effort": "medium",
+          "tokens_in": 29548,
+          "tokens_out": 5214,
+          "tokens_total": 34762,
+          "approx": false,
+          "source": "agent-usage-notification",
+          "recorded_at": "2026-09-07"
+        },
+        {
+          "agent": "implementor-back",
+          "label": "TASK-008 Lógica de invalidación incremental de transcripciones por ta",
+          "provider_model": "claude/sonnet",
+          "effort": "medium",
+          "tokens_in": 22857,
+          "tokens_out": 4034,
+          "tokens_total": 26891,
+          "approx": false,
+          "source": "agent-usage-notification",
+          "recorded_at": "2026-09-07"
+        },
+        {
+          "agent": "implementor-back",
+          "label": "TASK-009 Transcripción incremental del A-roll vía transcribeWithWhisp",
+          "provider_model": "claude/sonnet",
+          "effort": "medium",
+          "tokens_in": 56913,
+          "tokens_out": 10044,
+          "tokens_total": 66957,
+          "approx": false,
+          "source": "agent-usage-notification",
+          "recorded_at": "2026-09-07"
+        },
+        {
+          "agent": "implementor-back",
+          "label": "TASK-010 Integración end-to-end: función pública de ingesta del proye",
+          "provider_model": "claude/sonnet",
+          "effort": "medium",
+          "tokens_in": 45026,
+          "tokens_out": 7946,
+          "tokens_total": 52972,
+          "approx": false,
+          "source": "agent-usage-notification",
+          "recorded_at": "2026-09-07"
+        },
+        {
+          "agent": "implementor-back",
+          "label": "TASK-011 Target de smoke manual sobre un proyecto real, documentado e",
+          "provider_model": "claude/sonnet",
+          "effort": "medium",
+          "tokens_in": 76792,
+          "tokens_out": 13551,
+          "tokens_total": 90343,
+          "approx": false,
+          "source": "agent-usage-notification",
+          "recorded_at": "2026-09-07"
         }
       ],
       "by_tier": {
@@ -172,8 +304,8 @@
           "source": "agent-usage-notification"
         },
         "claude/sonnet": {
-          "tokens_in": 168013,
-          "tokens_out": 29650,
+          "tokens_in": 713140,
+          "tokens_out": 125848,
           "approx": false,
           "source": "agent-usage-notification"
         }
