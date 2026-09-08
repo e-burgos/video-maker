@@ -1,12 +1,27 @@
 import { resolve } from 'node:path';
 import type { Timeline, TimelineIssue } from '@video-maker/timeline-core';
 import { validateTimeline } from '@video-maker/timeline-core';
+import type { WebpackConfiguration } from '@remotion/bundler';
 import type { VideoConfig } from 'remotion/no-react';
 import { TIMELINE_COMPOSITION_ID } from './components/timeline-composition';
 
 export const DEFAULT_RENDER_CONCURRENCY = 4;
 
 const DEFAULT_ENTRY_POINT = resolve(__dirname, 'remotion-entry.ts');
+
+const WORKSPACE_ALIASES: Record<string, string> = {
+  '@video-maker/timeline-core': resolve(__dirname, '../../timeline-core/src/index.ts'),
+};
+
+function withWorkspaceAliases(config: WebpackConfiguration): WebpackConfiguration {
+  return {
+    ...config,
+    resolve: {
+      ...config.resolve,
+      alias: { ...config.resolve?.alias, ...WORKSPACE_ALIASES },
+    },
+  };
+}
 
 export type TimelineInputProps = { timeline: Timeline };
 
@@ -81,7 +96,7 @@ export interface RenderTimelineDeps {
 export const remotionRenderDeps: RenderTimelineDeps = {
   async bundleProject({ entryPoint, publicDir }) {
     const { bundle } = await import('@remotion/bundler');
-    return bundle({ entryPoint, webpackOverride: (config) => config, publicDir });
+    return bundle({ entryPoint, webpackOverride: withWorkspaceAliases, publicDir });
   },
 
   async selectTimelineComposition({ serveUrl, id, inputProps }) {

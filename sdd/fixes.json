@@ -3,6 +3,91 @@
   "_description": "Global fixes index. Each fix maps to its owning spec via spec_id. Fixes not tied to a spec have spec_id: null and live in sdd/fixes.md. Spec-scoped fixes live in sdd/specs/{spec-id}/fixes.md. Maintained by: sdd-orchestrator.",
   "_version": "3.0.0",
   "_convention": "Fix ID format: FIX-[gh-user]-[spec-NNN]-[seq] for spec-scoped fixes. FIX-[gh-user]-[seq] for repo-level fixes.",
-  "_keywords": ["[FIX]", "[BUGFIX]", "[HOTFIX]", "[IMPROVEMENT]"],
-  "fixes": []
+  "_keywords": [
+    "[FIX]",
+    "[BUGFIX]",
+    "[HOTFIX]",
+    "[IMPROVEMENT]"
+  ],
+  "fixes": [
+    {
+      "id": "FIX-e-burgos-001-001",
+      "author": "e-burgos",
+      "spec_id": "spec-e-burgos-001-core-composition-media-pipeline",
+      "fix_document": "sdd/specs/spec-e-burgos-001-core-composition-media-pipeline/fixes/fix-e-burgos-001-001.md",
+      "type": "BUGFIX",
+      "severity": "high",
+      "created_at": "2026-09-08",
+      "resolved_at": "2026-09-08",
+      "validated_at": null,
+      "title": "composition-remotion:smoke target cannot resolve workspace TS path aliases",
+      "estimation_hours": 1.5,
+      "description": "nx run composition-remotion:smoke fails in ~400 ms, before bundling, with \"Cannot find module '../../libs/timeline-core/src'\" (require stack: src/__fixtures__/example-timeline.ts <- src/smoke.ts). The target runs `node -r @swc-node/register ./src/smoke.ts` with cwd libs/composition-remotion, so @swc-node/register picks up libs/composition-remotion/tsconfig.json and takes that directory as baseUrl, while the paths mappings inherited from tsconfig.base.json are written relative to the workspace root (./libs/<lib>/src/index.ts). Every @video-maker/* specifier is therefore rewritten to a path under libs/composition-remotion/libs/. Broken since spec-001 cycle-03, when the target was added: it has never produced a render.",
+      "justification": "The smoke target is the only path to a real end-to-end Remotion render (CA-027 of spec-001); every automated target stubs renderMedia. With it broken there is no way to verify that a Timeline actually renders, spec-004 needs it to validate the final audio mux and spec-005 will build the render service on top of it. The fix is a target/tooling defect in an already-completed spec, not new functionality: it changes no public API, no domain module and no API contract, so opening a full SDD cycle for it is disproportionate.",
+      "related_modules": [
+        "core-composition-media-pipeline"
+      ],
+      "affected_files": [
+        "libs/composition-remotion/project.json",
+        "libs/composition-remotion/tsconfig.smoke.json",
+        "libs/composition-remotion/src/smoke-register.cjs",
+        "libs/composition-remotion/src/render.ts",
+        "libs/composition-remotion/README.md",
+        "libs/composition-remotion/.gitignore"
+      ],
+      "test_reference": "libs/composition-remotion/README.md#smoke-manual--ca-027-fuera-de-ci — manual target, never in CI (RNF-3). Executed once for real on 2026-09-08: `pnpm nx run composition-remotion:smoke` returned { outPath: \"out/example-9x16.mp4\", compositionId: \"TimelineComposition\", width: 1080, height: 1920, fps: 30, durationInFrames: 265 } in 53.2 s, and `ffprobe` on the output reports h264 1080x1920 @ 30/1, nb_frames=265, duration 8.833333 s, aac 48000 Hz stereo.",
+      "status": "implemented",
+      "cycle": null,
+      "usage": {
+        "provider_model": "claude/sonnet",
+        "effort": "medium",
+        "tokens_in": 359141,
+        "tokens_out": 51731,
+        "approx": true,
+        "source": "declared-estimate",
+        "recorded_at": "2026-09-08",
+        "by_agent": [
+          {
+            "agent": "implementor-back",
+            "provider_model": "claude/sonnet",
+            "effort": "medium",
+            "tokens_in": 86609,
+            "tokens_out": 15284,
+            "tokens_total": 101893,
+            "approx": false,
+            "source": "agent-usage-notification",
+            "recorded_at": "2026-09-08",
+            "tool_uses": 35,
+            "duration_minutes": 3.9,
+            "label": "causa 1"
+          },
+          {
+            "agent": "implementor-back",
+            "label": "causas 2 y 3",
+            "provider_model": "claude/sonnet",
+            "effort": "medium",
+            "tokens_in": 87532,
+            "tokens_out": 15447,
+            "approx": false,
+            "source": "agent-usage-notification",
+            "recorded_at": "2026-09-08",
+            "tokens_total": 102979,
+            "tool_uses": 23,
+            "duration_minutes": 7
+          },
+          {
+            "agent": "orchestrator",
+            "provider_model": "claude/opus",
+            "effort": "high",
+            "tokens_in": 185000,
+            "tokens_out": 21000,
+            "approx": true,
+            "source": "declared-estimate",
+            "recorded_at": "2026-09-08"
+          }
+        ]
+      },
+      "process_note": "Six files instead of the five the FIX GATE allows: the sixth is libs/composition-remotion/.gitignore with a single `out/` line. The fix made the smoke produce a 9.2 MB MP4 for the first time, so the artifact had nowhere to be ignored; leaving it untracked-but-visible was worse than the extra file. No code, no contract and no third file of logic were added by it."
+    }
+  ]
 }
