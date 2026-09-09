@@ -87,16 +87,16 @@
       "sdd/context/apps/web/updates/2026-09-09-spec-e-burgos-006-web-studio-cycle-01.md"
     ],
     "usage": {
-      "tokens_in": 137000,
-      "tokens_out": 29300,
-      "approx": true,
-      "source": "declared-estimate",
+      "tokens_in": 285862,
+      "tokens_out": 50446,
+      "approx": false,
+      "source": "agent-usage-notification",
       "by_tier": {
         "claude/opus": {
-          "tokens_in": 137000,
-          "tokens_out": 29300,
-          "approx": true,
-          "source": "declared-estimate"
+          "tokens_in": 285862,
+          "tokens_out": 50446,
+          "approx": false,
+          "source": "agent-usage-notification"
         }
       },
       "by_agent": [
@@ -105,12 +105,12 @@
           "label": "solo",
           "provider_model": "claude/opus",
           "effort": "high",
-          "tokens_in": 137000,
-          "tokens_out": 29300,
-          "approx": true,
-          "source": "declared-estimate",
+          "tokens_in": 285862,
+          "tokens_out": 50446,
+          "approx": false,
+          "source": "agent-usage-notification",
           "recorded_at": "2026-09-09",
-          "tokens_total": 166300
+          "tokens_total": 336308
         }
       ]
     }
