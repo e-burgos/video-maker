@@ -1,12 +1,21 @@
 import { BrowserRouter, Route, Routes } from 'react-router-dom';
-import { HomePage } from '../pages/HomePage';
+
+import { RenderApiProvider } from '../api/render-api-context';
+import { StudioLayout } from '../components/studio-layout';
+import { AssetLibraryPage } from '../pages/asset-library-page';
+import { ProjectsPage } from '../pages/projects-page';
 
 export function App() {
   return (
     <BrowserRouter basename={import.meta.env.BASE_URL}>
-      <Routes>
-        <Route path="/" element={<HomePage />} />
-      </Routes>
+      <RenderApiProvider>
+        <Routes>
+          <Route element={<StudioLayout />}>
+            <Route path="/" element={<ProjectsPage />} />
+            <Route path="/projects/:slug" element={<AssetLibraryPage />} />
+          </Route>
+        </Routes>
+      </RenderApiProvider>
     </BrowserRouter>
   );
 }

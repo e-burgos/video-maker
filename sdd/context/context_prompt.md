@@ -55,6 +55,7 @@ El proyecto usa **Nx** como monorepo manager con **pnpm** como package manager (
 | `libs/auto-montage` | `sdd/context/libs/auto-montage/context_prompt.md` | `sdd/context/libs/auto-montage/constitution.md` |
 | `tools/render-cli` | `sdd/context/tools/render-cli/context_prompt.md` | `sdd/context/tools/render-cli/constitution.md` |
 | `apps/render-api` | `sdd/context/apps/render-api/context_prompt.md` | `sdd/context/apps/render-api/constitution.md` |
+| `apps/web` | `sdd/context/apps/web/context_prompt.md` | `sdd/context/apps/web/constitution.md` |
 
 > Al generar un subproyecto nuevo, sumar una fila a esta tabla (solo agregar filas — nunca reformatear la tabla completa).
 

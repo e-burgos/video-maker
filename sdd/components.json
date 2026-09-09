@@ -185,5 +185,186 @@
         "changelog": []
       }
     ]
+  },
+  "apps/web": {
+    "components": [
+      {
+        "id": "COMP-001",
+        "name": "StudioLayout",
+        "type": "layout",
+        "module": "web-studio",
+        "spec": "sdd/specs/spec-e-burgos-006-web-studio",
+        "path": "src/components/studio-layout.tsx",
+        "status": "implemented",
+        "created_in_cycle": 1,
+        "updated_in_cycle": null,
+        "description": "Shell del studio: header con el nombre, el link a proyectos y el badge de salud, y el Outlet de la pagina ruteada.",
+        "consumes": [],
+        "created_at": "2026-09-09",
+        "changelog": []
+      },
+      {
+        "id": "COMP-002",
+        "name": "ServiceHealthBadge",
+        "type": "component",
+        "module": "web-studio",
+        "spec": "sdd/specs/spec-e-burgos-006-web-studio",
+        "path": "src/components/service-health-badge.tsx",
+        "status": "implemented",
+        "created_in_cycle": 1,
+        "updated_in_cycle": null,
+        "description": "Estado permanente del servicio: ok con su cycle, degraded nombrando el modulo de motor o el binario que falta, o inalcanzable con el codigo de transporte. Re-consulta al hacer click.",
+        "consumes": [
+          "EP-001"
+        ],
+        "created_at": "2026-09-09",
+        "changelog": []
+      },
+      {
+        "id": "COMP-003",
+        "name": "ErrorNotice",
+        "type": "component",
+        "module": "web-studio",
+        "spec": "sdd/specs/spec-e-burgos-006-web-studio",
+        "path": "src/components/error-notice.tsx",
+        "status": "implemented",
+        "created_in_cycle": 1,
+        "updated_in_cycle": null,
+        "description": "Render unico de un RenderApiError: el code del servicio, su message y las lineas de detalle (resource/expected/hint/stage) que el payload traiga, con reintento opcional.",
+        "consumes": [],
+        "created_at": "2026-09-09",
+        "changelog": []
+      },
+      {
+        "id": "COMP-004",
+        "name": "ProjectsPage",
+        "type": "page",
+        "module": "web-studio",
+        "spec": "sdd/specs/spec-e-burgos-006-web-studio",
+        "path": "src/pages/projects-page.tsx",
+        "status": "implemented",
+        "created_in_cycle": 1,
+        "updated_in_cycle": null,
+        "description": "Listado de los proyectos del media root con sus cinco flags de layout y link a la biblioteca de assets de cada uno.",
+        "consumes": [
+          "EP-002"
+        ],
+        "created_at": "2026-09-09",
+        "changelog": []
+      },
+      {
+        "id": "COMP-005",
+        "name": "CreateProjectForm",
+        "type": "component",
+        "module": "web-studio",
+        "spec": "sdd/specs/spec-e-burgos-006-web-studio",
+        "path": "src/components/create-project-form.tsx",
+        "status": "implemented",
+        "created_in_cycle": 1,
+        "updated_in_cycle": null,
+        "description": "Alta de un proyecto por slug, con la validacion kebab-case en el cliente espejo de PROJECT_SLUG_INVALID antes de emitir el request.",
+        "consumes": [
+          "EP-003"
+        ],
+        "created_at": "2026-09-09",
+        "changelog": []
+      },
+      {
+        "id": "COMP-006",
+        "name": "AssetLibraryPage",
+        "type": "page",
+        "module": "web-studio",
+        "spec": "sdd/specs/spec-e-burgos-006-web-studio",
+        "path": "src/pages/asset-library-page.tsx",
+        "status": "implemented",
+        "created_in_cycle": 1,
+        "updated_in_cycle": null,
+        "description": "Biblioteca de assets crudos de un proyecto agrupada por los cuatro roles, con el source del listado (catalog | raw-scan) y las probeFailures del catalogo.",
+        "consumes": [
+          "EP-005"
+        ],
+        "created_at": "2026-09-09",
+        "changelog": []
+      },
+      {
+        "id": "COMP-007",
+        "name": "AssetCard",
+        "type": "component",
+        "module": "web-studio",
+        "spec": "sdd/specs/spec-e-burgos-006-web-studio",
+        "path": "src/components/asset-card.tsx",
+        "status": "implemented",
+        "created_in_cycle": 1,
+        "updated_in_cycle": null,
+        "description": "Tarjeta de un asset: preview, path y los datos de media del catalogo (tamano, kind, dimensiones, duracion, fps, audio).",
+        "consumes": [],
+        "created_at": "2026-09-09",
+        "changelog": []
+      },
+      {
+        "id": "COMP-008",
+        "name": "AssetPreview",
+        "type": "component",
+        "module": "web-studio",
+        "spec": "sdd/specs/spec-e-burgos-006-web-studio",
+        "path": "src/components/asset-preview.tsx",
+        "status": "implemented",
+        "created_in_cycle": 1,
+        "updated_in_cycle": null,
+        "description": "Elige video, audio, img o link de descarga por extension y sirve el asset desde el endpoint de artefactos del servicio.",
+        "consumes": [
+          "EP-011"
+        ],
+        "created_at": "2026-09-09",
+        "changelog": []
+      },
+      {
+        "id": "COMP-009",
+        "name": "AssetUploader",
+        "type": "component",
+        "module": "web-studio",
+        "spec": "sdd/specs/spec-e-burgos-006-web-studio",
+        "path": "src/components/asset-uploader.tsx",
+        "status": "implemented",
+        "created_in_cycle": 1,
+        "updated_in_cycle": null,
+        "description": "Sube un archivo al rol elegido como body binario crudo con su content-type, refresca el listado al exito y muestra el code tipado al fallar.",
+        "consumes": [
+          "EP-006"
+        ],
+        "created_at": "2026-09-09",
+        "changelog": []
+      },
+      {
+        "id": "COMP-010",
+        "name": "RenderApiProvider",
+        "type": "component",
+        "module": "web-studio",
+        "spec": "sdd/specs/spec-e-burgos-006-web-studio",
+        "path": "src/api/render-api-context.tsx",
+        "status": "implemented",
+        "created_in_cycle": 1,
+        "updated_in_cycle": null,
+        "description": "Inyecta el cliente HTTP de render-api en el arbol; sin cliente explicito arma uno sobre el fetch global.",
+        "consumes": [],
+        "created_at": "2026-09-09",
+        "changelog": []
+      },
+      {
+        "id": "COMP-011",
+        "name": "useAsyncResource",
+        "type": "hook",
+        "module": "web-studio",
+        "spec": "sdd/specs/spec-e-burgos-006-web-studio",
+        "path": "src/hooks/use-async-resource.ts",
+        "status": "implemented",
+        "created_in_cycle": 1,
+        "updated_in_cycle": null,
+        "description": "Unico primitivo de estado de servidor: loading/ready/error con reload y descarte de la respuesta de un request obsoleto.",
+        "consumes": [],
+        "created_at": "2026-09-09",
+        "changelog": []
+      }
+    ]
   }
 }

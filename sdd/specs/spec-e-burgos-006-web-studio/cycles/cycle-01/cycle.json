@@ -1,0 +1,175 @@
+{
+  "$schema": "../../../../schemas/cycle.schema.json",
+  "cycle": 1,
+  "module": "web-studio",
+  "spec": "spec-e-burgos-006-web-studio",
+  "apps": [
+    "apps/web"
+  ],
+  "phase": "studio-shell-and-asset-library",
+  "flow": "lite",
+  "objectives": [
+    "Dejar apps/web sin restos del generador Nx, con suite propia en jsdom y sin warnings de lint",
+    "Cliente HTTP tipado de render-api (EP-001..EP-006, EP-011) con superficie de errores por code, contra el proxy /api del dev-server",
+    "Shell del studio con indicador de salud, listado y creacion de proyectos, y biblioteca de assets por rol con reproduccion por EP-011 y upload binario",
+    "Verificacion visual real con Playwright contra un render-api corriendo, con capturas en artifacts/"
+  ],
+  "status": "completed",
+  "started_at": "2026-09-09",
+  "completed_at": "2026-09-09",
+  "documents": {
+    "plan": "sdd/specs/spec-e-burgos-006-web-studio/cycles/cycle-01/plan.md",
+    "tasks": "sdd/specs/spec-e-burgos-006-web-studio/cycles/cycle-01/tasks.json"
+  },
+  "artifacts": [
+    "sdd/specs/spec-e-burgos-006-web-studio/cycles/cycle-01/artifacts/visual-verification.md",
+    "sdd/specs/spec-e-burgos-006-web-studio/cycles/cycle-01/artifacts/projects-page.png",
+    "sdd/specs/spec-e-burgos-006-web-studio/cycles/cycle-01/artifacts/asset-library-smoke-ingest.png",
+    "sdd/specs/spec-e-burgos-006-web-studio/cycles/cycle-01/artifacts/asset-upload-studio-smoke.png"
+  ],
+  "metrics": {
+    "tasks_total": 6,
+    "tasks_completed": 6,
+    "story_points": 23,
+    "files_created": [
+      "apps/web/README.md",
+      "apps/web/src/api/artifact-url.spec.ts",
+      "apps/web/src/api/artifact-url.ts",
+      "apps/web/src/api/asset-media-kind.spec.ts",
+      "apps/web/src/api/asset-media-kind.ts",
+      "apps/web/src/api/project-slug.spec.ts",
+      "apps/web/src/api/project-slug.ts",
+      "apps/web/src/api/render-api-client.spec.ts",
+      "apps/web/src/api/render-api-client.ts",
+      "apps/web/src/api/render-api-context.tsx",
+      "apps/web/src/api/render-api-error.spec.ts",
+      "apps/web/src/api/render-api-error.ts",
+      "apps/web/src/api/render-api-types.ts",
+      "apps/web/src/components/asset-card.spec.tsx",
+      "apps/web/src/components/asset-card.tsx",
+      "apps/web/src/components/asset-preview.tsx",
+      "apps/web/src/components/asset-uploader.spec.tsx",
+      "apps/web/src/components/asset-uploader.tsx",
+      "apps/web/src/components/create-project-form.spec.tsx",
+      "apps/web/src/components/create-project-form.tsx",
+      "apps/web/src/components/error-notice.spec.tsx",
+      "apps/web/src/components/error-notice.tsx",
+      "apps/web/src/components/service-health-badge.spec.tsx",
+      "apps/web/src/components/service-health-badge.tsx",
+      "apps/web/src/components/studio-layout.spec.tsx",
+      "apps/web/src/components/studio-layout.tsx",
+      "apps/web/src/hooks/use-async-resource.spec.ts",
+      "apps/web/src/hooks/use-async-resource.ts",
+      "apps/web/src/pages/asset-library-page.spec.tsx",
+      "apps/web/src/pages/asset-library-page.tsx",
+      "apps/web/src/pages/projects-page.spec.tsx",
+      "apps/web/src/pages/projects-page.tsx",
+      "apps/web/src/test-environment.spec.ts",
+      "apps/web/src/test-setup.ts",
+      "sdd/context/apps/web/updates/2026-09-09-spec-e-burgos-006-web-studio-cycle-01.md",
+      "sdd/memory/journal/2026-09-09-spec-e-burgos-006-web-studio-cycle-01.md",
+      "sdd/specs/spec-e-burgos-006-web-studio/cycles/cycle-01/artifacts/asset-library-smoke-ingest.png",
+      "sdd/specs/spec-e-burgos-006-web-studio/cycles/cycle-01/artifacts/asset-upload-studio-smoke.png",
+      "sdd/specs/spec-e-burgos-006-web-studio/cycles/cycle-01/artifacts/projects-page.png",
+      "sdd/specs/spec-e-burgos-006-web-studio/cycles/cycle-01/artifacts/visual-verification.md",
+      "sdd/specs/spec-e-burgos-006-web-studio/cycles/cycle-01/cycle.json",
+      "sdd/specs/spec-e-burgos-006-web-studio/cycles/cycle-01/plan.md",
+      "sdd/specs/spec-e-burgos-006-web-studio/cycles/cycle-01/tasks.json"
+    ],
+    "files_modified": [
+      "apps/web/index.html",
+      "apps/web/project.json",
+      "apps/web/src/app/app.tsx",
+      "apps/web/src/index.css",
+      "apps/web/src/main.tsx",
+      "apps/web/vite.config.ts",
+      "sdd/catalog.json",
+      "sdd/components.json",
+      "sdd/context/constitution.md",
+      "sdd/context/context_prompt.md",
+      "sdd/global.json",
+      "sdd/specs/index.json",
+      "sdd/specs/spec-e-burgos-006-web-studio/spec-e-burgos-006-web-studio.spec.md",
+      "sdd/tasks.json"
+    ],
+    "files_deleted": [
+      "apps/web/Dockerfile",
+      "apps/web/nginx.conf",
+      "apps/web/src/pages/HomePage.tsx"
+    ],
+    "usage": {
+      "tokens_in": 270000,
+      "tokens_out": 60200,
+      "approx": true,
+      "source": "declared-estimate",
+      "by_tier": {
+        "claude/opus": {
+          "tokens_in": 270000,
+          "tokens_out": 60200,
+          "approx": true,
+          "source": "declared-estimate"
+        }
+      },
+      "by_agent": [
+        {
+          "agent": "orchestrator",
+          "label": "solo",
+          "provider_model": "claude/opus",
+          "effort": "high",
+          "tokens_in": 270000,
+          "tokens_out": 60200,
+          "approx": true,
+          "source": "declared-estimate",
+          "recorded_at": "2026-09-09"
+        }
+      ]
+    }
+  },
+  "tables_created": [],
+  "endpoints_implemented": [],
+  "components_created": [
+    "COMP-001",
+    "COMP-002",
+    "COMP-003",
+    "COMP-004",
+    "COMP-005",
+    "COMP-006",
+    "COMP-007",
+    "COMP-008",
+    "COMP-009",
+    "COMP-010",
+    "COMP-011"
+  ],
+  "issues_found": [],
+  "reviewer_report": {
+    "approved": true,
+    "date": "2026-09-09",
+    "ca_results": {
+      "CA-001": "OK — Dockerfile y nginx.conf borrados; git ls-files apps/web no deja archivos del generador sin uso.",
+      "CA-002": "OK — nx run-many -t lint test build verde en los 8 proyectos; web:lint dice \"All files pass linting\" (el warning no-non-null-assertion de main.tsx:6 quedo resuelto con un guard explicito).",
+      "CA-003": "OK — web:test corre \"vitest run --coverage\" (sin --passWithNoTests) en jsdom: 15 archivos / 73 tests, 99,14 % stmts sobre un piso de 80 %.",
+      "CA-004": "OK — git diff --stat package.json pnpm-lock.yaml vacio.",
+      "CA-005": "OK — render-api-client.spec.ts cubre EP-001..EP-006 (metodo, path, headers, body y parseo) y las tres formas de error: payload tipado del servicio, status de error sin JSON y fetch rechazado.",
+      "CA-006": "OK — artifact-url.spec.ts: espacios percent-encodeados por segmento, slug encodeado, y los segmentos . y .. descartados para que la URL no pueda salir del proyecto.",
+      "CA-007": "OK — project-slug.spec.ts contrasta el validador contra el patron real de apps/render-api/src/store/project-slug.ts; verificado ademas en el navegador (Not_A_Slug rechazado sin request).",
+      "CA-008": "OK — asset-library-page.spec.tsx agrupa por los cuatro roles y muestra el source; asset-card.spec.tsx verifica video/audio/img/descarga con src bajo /api/projects/<slug>/files/.",
+      "CA-009": "OK — asset-uploader.spec.tsx: ASSET_ALREADY_EXISTS en pantalla, onUploaded nunca invocado y sin mensaje de exito. Reproducido contra el servicio real (409 PUT en la corrida de Playwright).",
+      "CA-010": "OK — tres capturas reales en artifacts/ contra render-api vivo. Medido en el navegador: los dos <video> de EP-011 llegan a readyState 4 con duration 22,5 s y 5 s y 1280x720. El MCP de Playwright del arnes no sirve en esta maquina (falta la extension Bridge): se uso el Playwright cacheado en ~/.npm/_npx con channel chrome, sin tocar package.json. Guion en artifacts/visual-verification.md.",
+      "CA-011": "OK — 11 componentes en sdd/components.json bajo apps/web (COMP-001..COMP-011) con su consumes; pnpm sdd:validate en verde."
+    },
+    "tests": {
+      "apps/web": "15 archivos / 73 tests — 99,14 % stmts · 95,78 % branch · 97,53 % funcs · 99,55 % lines (piso 80 %, coverage.include src/**/*.{ts,tsx} sin recortar).",
+      "workspace": "pnpm nx run-many -t lint test build: Successfully ran targets lint, test, build for 8 projects, sin warnings de lint.",
+      "real": "Verificacion de proceso real: render-api en 4399 contra media/ (status ok) + vite en 4207; lectura (EP-001/002/005/011) sobre media/ real y escritura (EP-003/006) sobre un RENDER_API_MEDIA_ROOT temporal borrado al terminar. media/ del dev intacto."
+    },
+    "notes": "Ciclo lite: un solo actor abrio, implemento y cerro. Cero dependencias npm nuevas (D-2). El transporte es el proxy /api del dev-server porque render-api no emite CORS (medido) — decision D-4, y deja las URLs de EP-011 same-origin para el <Player> de cycle-02. Un console.error 404 sin URL aparecio en la primera corrida de captura y no se reprodujo: una segunda corrida con listener de response no registro ninguna respuesta >= 400 fuera del 409 deliberado; hipotesis favicon.ico. Los archivos base de sdd/context/apps/web/ siguen siendo la plantilla del generador: la regla anti-merge-conflict prohibe editarlos durante el ciclo, el delta esta en updates/ y lo consolida quien abra cycle-02.",
+    "follow_ups": [
+      "cycle-02 es el ciclo de riesgo (D-8): componente de video conmutable en libs/composition-remotion mas @remotion/player. Si el cambio altera el contrato que apps/render-api o tools/render-cli consumen, abrirlo [FULL], no lite.",
+      "Al abrir cycle-02: consolidar el fragmento de sdd/context/apps/web/updates/ en constitution.md y context_prompt.md del subproyecto, que hoy siguen siendo la plantilla vacia del generador.",
+      "apps/web/src/api/asset-media-kind.ts y apps/render-api/src/http/content-type-for.ts son la misma tabla cerrada de extensiones en dos lugares, sin ningun test que las ate. Si una cambia, cambiar la otra.",
+      "El upload no reporta progreso (fetch no lo expone sin XMLHttpRequest). Decidir en cycle-03 si un asset grande lo justifica.",
+      "D-3 (sin libreria de queries) se revisa en cycle-03 con el polling de jobs como consumidor real de useAsyncResource.",
+      "Verificar al abrir cualquier ciclo de UI que el arnes puede abrir un navegador antes de comprometer una verificacion visual con el MCP de Playwright: en esta maquina falta la extension Bridge."
+    ]
+  }
+}

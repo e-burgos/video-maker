@@ -154,6 +154,20 @@
           "tasks_done": 22
         }
       }
+    },
+    "spec-e-burgos-006-web-studio": {
+      "cycles": {
+        "cycle-01": {
+          "file": "sdd/specs/spec-e-burgos-006-web-studio/cycles/cycle-01/tasks.json",
+          "module": "web-studio",
+          "apps": [
+            "apps/web"
+          ],
+          "status": "completed",
+          "tasks_total": 6,
+          "tasks_done": 6
+        }
+      }
     }
   }
 }
