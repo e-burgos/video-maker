@@ -101,8 +101,8 @@
     ],
     "files_deleted": [],
     "usage": {
-      "tokens_in": 2051792,
-      "tokens_out": 280670,
+      "tokens_in": 1522648,
+      "tokens_out": 268703,
       "by_agent": [
         {
           "agent": "functional",
@@ -164,11 +164,11 @@
           "agent": "orchestrator",
           "provider_model": "claude/opus",
           "effort": "high",
-          "tokens_in": 790000,
-          "tokens_out": 58000,
-          "tokens_total": 848000,
-          "approx": true,
-          "source": "declared-estimate",
+          "tokens_in": 260856,
+          "tokens_out": 46033,
+          "tokens_total": 306889,
+          "approx": false,
+          "source": "agent-usage-notification",
           "recorded_at": "2026-09-08",
           "label": "GATE A/B, brief, cycle.json, despacho y verificacion de las 22 tasks, FIX GATE de dos IMPROVEMENT, diagnostico de D-30, ejecucion del smoke real y del aislamiento del exit code"
         },
@@ -187,8 +187,22 @@
           "label": "revision de las 54 filas de tests de 12.1/12.2/18.2, gates de contexto y memoria, cierre de registros y dos commits"
         }
       ],
-      "approx": true,
-      "source": "agent-usage-notification"
+      "approx": false,
+      "source": "agent-usage-notification",
+      "by_tier": {
+        "claude/sonnet": {
+          "tokens_in": 835568,
+          "tokens_out": 147454,
+          "approx": false,
+          "source": "agent-usage-notification"
+        },
+        "claude/opus": {
+          "tokens_in": 687080,
+          "tokens_out": 121249,
+          "approx": false,
+          "source": "agent-usage-notification"
+        }
+      }
     },
     "tasks_skipped": 0
   },
