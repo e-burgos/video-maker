@@ -8,6 +8,7 @@ export type AsyncResource<T> = {
   status: AsyncResourceStatus;
   data: T | null;
   error: RenderApiError | null;
+  isRefreshing: boolean;
   reload: () => void;
 };
 
@@ -15,6 +16,7 @@ type ResourceState<T> = {
   status: AsyncResourceStatus;
   data: T | null;
   error: RenderApiError | null;
+  isRefreshing: boolean;
 };
 
 function toRenderApiError(cause: unknown): RenderApiError {
@@ -26,28 +28,41 @@ export function useAsyncResource<T>(load: () => Promise<T>, key: string): AsyncR
     status: 'loading',
     data: null,
     error: null,
+    isRefreshing: false,
   });
   const [reloadToken, setReloadToken] = useState(0);
   const loadRef = useRef(load);
   const requestSequence = useRef(0);
+  const previousKeyRef = useRef(key);
 
   loadRef.current = load;
 
   useEffect(() => {
     requestSequence.current += 1;
     const sequence = requestSequence.current;
-    setState({ status: 'loading', data: null, error: null });
+    const keyChanged = previousKeyRef.current !== key;
+    previousKeyRef.current = key;
+
+    setState((current) =>
+      keyChanged || current.data === null
+        ? { status: 'loading', data: null, error: null, isRefreshing: false }
+        : { status: 'ready', data: current.data, error: null, isRefreshing: true },
+    );
 
     loadRef
       .current()
       .then((data) => {
         if (sequence === requestSequence.current) {
-          setState({ status: 'ready', data, error: null });
+          setState({ status: 'ready', data, error: null, isRefreshing: false });
         }
       })
       .catch((cause: unknown) => {
         if (sequence === requestSequence.current) {
-          setState({ status: 'error', data: null, error: toRenderApiError(cause) });
+          setState((current) =>
+            current.data === null
+              ? { status: 'error', data: null, error: toRenderApiError(cause), isRefreshing: false }
+              : { status: 'ready', data: current.data, error: toRenderApiError(cause), isRefreshing: false },
+          );
         }
       });
 
@@ -60,5 +75,11 @@ export function useAsyncResource<T>(load: () => Promise<T>, key: string): AsyncR
     setReloadToken((token) => token + 1);
   }, []);
 
-  return { status: state.status, data: state.data, error: state.error, reload };
+  return {
+    status: state.status,
+    data: state.data,
+    error: state.error,
+    isRefreshing: state.isRefreshing,
+    reload,
+  };
 }

@@ -333,16 +333,51 @@ escucha la voz al `gainDb` de cada clip y la música por la curva de `audioMix.a
 `loudnorm` a -14 LUFS no existe en el navegador** — vive en `libs/media-local` y sólo corre en el
 pipeline del entregable. La paridad prometida es la curva de ducking, no el nivel absoluto de voz.
 
-### Lo que el componente conmutable NO resuelve: el encuadre
+### Framing — D-12 (`spec-006` cycle-03): the Player now matches the render, it does not fix it
 
-Medido en `spec-006` cycle-02: en el navegador el `<video>` queda `object-fit: contain` sobre el
-lienzo, así que un clip 16:9 en una composición 9:16 se ve con bandas negras; **el render llena el
-cuadro**. No lo causa el conmutador — forzar el backend `render` dentro del mismo Player da el
-mismo letterbox. Alinearlos exige un estilo explícito en `ArollScene` (espejo del
-`COVER_MEDIA_STYLE` de `BrollTrack`), y eso **cambia la salida del render**: probado, el
-`video-muted.mp4` pasó de `c1b9fd9f…` a `2ed415d8…`. Es una decisión de spec, no un ajuste;
-pendiente para `spec-006` cycle-03 (`[FULL]`), con un clip de prueba de contenido no uniforme —
-`smoke-ingest` es azul casi plano y no distingue `cover` de `fill`.
+*(Note: this subsection is in English per the cycle-03 orchestrator's explicit instruction — every
+other section of this README stays in Spanish, its established language; do not take this as
+license to translate the rest of the file.)*
+
+Measured in `spec-006` cycle-02: in the browser the `<video>` stayed `object-fit: contain` on the
+canvas (letterboxed when a clip's aspect ratio didn't match the composition), while **the render
+fills the frame**. The switchable component wasn't the cause — forcing the `render` backend inside
+the same Player produced the same letterbox.
+
+`cycle-03` (D-12) closed that discrepancy **on the Player side only**:
+
+```diff
++const PLAYER_MEDIA_STYLE: CSSProperties = { objectFit: 'fill' };
++
+ export const TimelineVideo: FC<TimelineVideoProps> = ({ src, trimBefore, style }) => {
+   const backend = useVideoBackend();
+   if (backend === 'player') {
+-    return <Video src={src} trimBefore={trimBefore} muted style={style} />;
++    return <Video src={src} trimBefore={trimBefore} muted style={{ ...PLAYER_MEDIA_STYLE, ...style }} />;
+   }
+   return <OffthreadVideo src={src} trimBefore={trimBefore} muted style={style} />;
+ };
+```
+
+`PLAYER_MEDIA_STYLE` is the default and the caller's `style` overrides it (`cover`/`contain` are
+still available per clip); **the `render` branch is untouched, byte for byte** — verified with
+`git diff` (+3/-1, the single `render`-branch line unchanged) and by reproducing the `sha256` from
+`render-non-regression.md` against unedited `media/smoke-ingest` (`c1b9fd9f…`, identical to the
+cycle-02 baseline, TASK-028 of cycle-03).
+
+**This is NOT "fixing the framing" — it is making the Player stop lying about what the render is
+going to do.** The render **fills the frame by stretching** a clip whose aspect ratio doesn't match
+the output (`object-fit: fill`, anamorphic: the image is distorted, never cropped or letterboxed).
+That stretch is, strictly speaking, **the behavior that is wrong** — a `cover` with centered
+cropping would be correct for most assets — but fixing it changes the render's output (measured in
+cycle-02: `video-muted.mp4` went from `c1b9fd9f…` to `2ed415d8…` when the Player was aligned to its
+own `cover`), and is a spec decision, not a tweak to this component. **It was deliberately left out
+of `cycle-03`'s scope** — D-12 only asked for the Player to stop hiding the problem behind a
+letterbox the render never had, so whoever edits the timeline sees in the preview exactly what
+they're going to get. The real fix (`cover` with cropping? a real letterbox in the render, changing
+the `format` contract?) is a pending `[FIX]` — **do not "fix" it after reading only the diff above
+without reading this paragraph first**: the `fill` default is intentional and documented, not an
+oversight.
 
 ## `file://` para assets absolutos (no verificado en este ciclo)
 

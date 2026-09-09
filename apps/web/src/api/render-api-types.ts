@@ -116,3 +116,89 @@ export type RenderApiErrorPayload = {
   assetPersisted?: boolean;
   catalogUpdated?: boolean;
 };
+
+export const RENDER_JOB_STATES = [
+  'queued',
+  'running',
+  'canceling',
+  'succeeded',
+  'failed',
+  'canceled',
+] as const;
+
+export type RenderJobState = (typeof RENDER_JOB_STATES)[number];
+
+export const TERMINAL_RENDER_JOB_STATES = ['succeeded', 'failed', 'canceled'] as const;
+
+export const RENDER_PIPELINE_STAGES = ['prepare', 'render', 'mix', 'mux', 'verify'] as const;
+
+export type RenderPipelineStage = (typeof RENDER_PIPELINE_STAGES)[number];
+
+export type RenderJobProgress = {
+  stage: RenderPipelineStage;
+  renderedFrames: number | null;
+  totalFrames: number | null;
+  percent: number | null;
+};
+
+export type RenderDeliverableReport = {
+  resource: string;
+  width: number;
+  height: number;
+  fps: number;
+  durationInFrames: number;
+};
+
+export type RenderIntermediatesReport = {
+  mutedVideoResource: string;
+  masterAudioResource: string;
+};
+
+export type RenderLoudnessReport = {
+  withinTolerance: boolean;
+  integratedLufs: number;
+  truePeakDbtp: number;
+  integratedDeltaLu: number;
+  truePeakDeltaDb: number;
+};
+
+export type RenderPipelineReport = {
+  renderId: string;
+  startedAt: string;
+  finishedAt: string;
+  deliverable: RenderDeliverableReport;
+  intermediates: RenderIntermediatesReport;
+  loudness: RenderLoudnessReport;
+};
+
+export type RenderJob = {
+  id: string;
+  slug: string;
+  state: RenderJobState;
+  createdAt: string;
+  startedAt: string | null;
+  finishedAt: string | null;
+  progress: RenderJobProgress | null;
+  report: RenderPipelineReport | null;
+  error: RenderApiErrorPayload | null;
+};
+
+export type RenderJobSummary = {
+  id: string;
+  state: RenderJobState;
+  stage: RenderPipelineStage | null;
+  errorCode: string | null;
+  createdAt: string;
+  startedAt: string | null;
+  finishedAt: string | null;
+};
+
+export type RenderJobListing = {
+  slug: string;
+  jobs: RenderJobSummary[];
+};
+
+export type TimelineWriteResult = {
+  slug: string;
+  path: string;
+};

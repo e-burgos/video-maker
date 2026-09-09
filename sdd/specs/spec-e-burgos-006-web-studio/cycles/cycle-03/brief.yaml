@@ -1,0 +1,305 @@
+cycle: 3
+module: web-studio
+spec: spec-e-burgos-006-web-studio
+phase: timeline-editing-and-render-jobs
+flow: full
+date: 2026-09-09
+app_context: sdd/context/apps/web/context_prompt.md
+
+objective: |
+  Cerrar la spec y el backlog del producto: que el dev pueda ajustar la Timeline persistida desde
+  la UI (EP-007/EP-008, y EP-009/EP-010 para el EDL) viendo el cambio en el preview del Player
+  antes de guardar, disparar un render (EP-012), seguir su progreso y cancelarlo (EP-013..EP-015)
+  y descargar el MP4 (EP-011) — todo verificado por un smoke E2E real de punta a punta con
+  Playwright contra render-api y apps/web vivos.
+
+flow_rationale: |
+  El pedido llega con prefijo [FULL] y la fila cycle-03 del plan de la spec + el follow-up del
+  reviewer de cycle-02 lo exigen: el ciclo toma una decision que afecta la salida del render
+  (encuadre preview vs render) y es el primero que consume escrituras del servicio (EP-008/EP-010)
+  y la cola de jobs. Un ciclo lite (un solo actor, plan.md) no da la separacion de roles que una
+  decision de spec sobre el entregable necesita.
+
+scope:
+  - Edicion de la Timeline persistida desde la UI sobre el documento completo (PUT byte-identico al
+    que escribe tools/render-cli), con validacion cliente espejo de los codigos de error del
+    servicio y el preview del Player reflejando el cambio ANTES de guardar.
+  - Edicion del EDL (EP-009/EP-010) en la medida en que el functional demuestre que aporta al
+    producto por encima de la edicion de la Timeline; si no aporta, se descopa por escrito.
+  - Disparo de render (EP-012), seguimiento de progreso por etapa y frame y cancelacion
+    (EP-013..EP-015) con polling, y descarga del MP4 por EP-011.
+  - Revision de D-3 (sin libreria de queries) con el polling de jobs como consumidor real:
+    mantener useAsyncResource o revertir la decision, en los dos casos por escrito.
+  - Decision de spec sobre el encuadre preview vs render (hallazgo abierto de cycle-02).
+  - Smoke E2E de punta a punta con Playwright: crear/abrir proyecto -> biblioteca -> preview ->
+    editar y guardar timeline (PUT verificado contra el archivo en disco) -> render -> progreso ->
+    succeeded -> descarga del MP4 + ffprobe.
+  - Cierre de la spec y del backlog: specs/index.json, global.json, components.json, cycle.json.
+
+out_of_scope:
+  - Cambiar la salida binaria del render. El render es la fuente de verdad del producto: el sha256
+    de video-muted.mp4 sobre media/smoke-ingest debe seguir siendo c1b9fd9f... (criterio de
+    aceptacion, no aspiracion). Cualquier evidencia de que el render este mal encuadrado se
+    escribe y se descopa a un [FIX] posterior.
+  - Endpoints nuevos o cambios en apps/render-api, tools/render-cli y los contratos publicos de
+    libs/composition-remotion (el arbol `render` queda intacto).
+  - Progreso de upload (XMLHttpRequest), auth, despliegue, multiusuario, undo/redo, edicion
+    por drag & drop sobre una linea de tiempo grafica.
+  - Corregir el par asset-media-kind.ts / content-type-for.ts (follow-up abierto, no de este ciclo).
+  - Reemplazar la evidencia real por procedimientos documentados: un CA que no se ejecuto no cierra.
+
+dependencies_required:
+  - spec-e-burgos-003-kinetic-captions (completed)
+  - spec-e-burgos-005-render-service (completed, EP-001..EP-015 implementados)
+  - cycle-01 (completed) — cliente HTTP tipado, shell, biblioteca de assets
+  - cycle-02 (completed) — TimelinePlayer sobre la composicion real, VideoBackendProvider
+
+decisions_pending:
+  D-12_encuadre:
+    pregunta: |
+      El <Player> muestra el clip con object-fit: contain (letterbox) mientras el render llena el
+      cuadro. No lo causa el conmutador (forzar el backend `render` dentro del Player da el mismo
+      letterbox). Aplicar objectFit: cover en ArollScene cambia los bytes del render
+      (sha256 2ed415d8... vs c1b9fd9f...), asi que se revirtio en cycle-02.
+    recomendacion_del_orquestador: |
+      El render es la fuente de verdad del producto y NO se toca. El backend 'player' de
+      TimelineVideo reproduce el encuadre del render aplicando los estilos (objectFit/dimensiones)
+      SOLO en la rama `player`; el arbol `render` queda literalmente intacto y el sha256 del render
+      byte-identico es criterio de aceptacion del ciclo. Se verifica comparando el frame del render
+      a los 8 s (artifacts/render-frame-reference-8s.png de cycle-02) contra una captura del Player
+      en el mismo instante, con una medida numerica simple (diferencia media de pixeles bajo un
+      umbral declarado, o como minimo misma region de contenido visible sin bandas).
+    quien_decide: |
+      El architect, con evidencia. Si encuentra que el mal encuadrado es el render y no el preview,
+      lo escribe y lo descopa a un [FIX] posterior: la salida del render no se cambia en esta spec.
+  D-3_estado_de_servidor:
+    pregunta: |
+      D-3 (sin libreria de data-fetching ni store global) quedo declarada "a revisar en cycle-03
+      cuando el polling de jobs sea un consumidor real".
+    quien_decide: |
+      El architect, con el contrato de polling ya diseniado. Mantener useAsyncResource o revertir
+      D-3 (cero deps npm nuevas salvo justificacion escrita); la decision queda en architect.md y
+      la ejecuta el reviewer sobre el contexto del subproyecto.
+
+constraints:
+  - Cero dependencias npm nuevas salvo justificacion escrita en architect.md aprobada por el
+    orquestador. La unica dep npm de apps/web es @remotion/player@4.0.522.
+  - apps/web no toca el filesystem ni conoce host/puerto: todo I/O es fetch contra /api (RNF-4),
+    y src/api/ es el unico lugar que sabe que el servicio existe.
+  - Codigo sin comentarios; copy, identificadores, payloads, commits y README en ingles; los
+    documentos SDD en espaniol (D-7, RNF-6).
+  - apps/web/eslint.config.mjs NO se crea (D-9). El hook config-protection bloquea Write|Edit sobre
+    eslint.config.mjs y tsconfig.base.json y no se rodea con Bash: se escala el diff.
+  - @nx/enforce-module-boundaries prohibe mezclar import estatico y await import() de la misma lib
+    del workspace (leccion de cycle-02).
+  - pnpm nx run-many -t lint test build en verde y SIN warnings; cobertura de apps/web sobre el
+    piso declarado con coverage.include src/**/*.{ts,tsx} sin recortar (RNF-2, RNF-3).
+  - Gate de memoria antes de cualquier render real: pgrep -fl 'ffmpeg|whisper-cli|chrome-headless'
+    vacio, >=35 % libre (memory_pressure), npx remotion browser ensure. Nunca dos renders a la vez.
+  - El smoke E2E corre sobre un RENDER_API_MEDIA_ROOT temporal copiado de media/smoke-ingest,
+    NUNCA sobre media/ del dev, porque escribe work/timeline.json por EP-008.
+  - El MCP de Playwright de este arnes no abre navegador: se usa el Playwright cacheado en
+    ~/.npm/_npx con chromium.launch({ channel: 'chrome' }) (guion de cycle-01/02).
+
+acceptance_gates:
+  - sha256 de media/<slug>/work/renders/<job>/video-muted.mp4 == c1b9fd9f... (no-regresion del render)
+  - El PUT de EP-008 verificado contra el archivo en disco, no contra la respuesta HTTP.
+  - Job real llevado a succeeded con progreso observado, y MP4 descargado y verificado con ffprobe
+    contra el stream de video (nb_frames / r_frame_rate), nunca contra format.duration.
+  - Capturas + guion literal + salidas de ffprobe en cycles/cycle-03/artifacts/.
+  - pnpm sdd:validate sin warnings y pnpm nx run-many -t lint test build en verde.
+
+agent_contexts:
+  functional:
+    model: claude/sonnet
+    goal: |
+      Definir el alcance exacto de la edicion (que se puede editar y que no) como historias de
+      usuario con criterios de aceptacion verificables, para los tres ejes del ciclo: ajuste del
+      timeline, jobs de render y el smoke E2E de cierre de la spec.
+    business_context: |
+      Producto local mono-usuario. El dev ya puede ver el montaje automatico en el Player pero no
+      puede corregirlo ni producir el entregable desde la UI: hoy tiene que editar work/timeline.json
+      a mano y usar tools/render-cli. Este ciclo cierra ese hueco y con el, el backlog del producto.
+      El minimo que aporta valor real segun la fila cycle-03 del plan de la spec: recortes/orden de
+      escenas, textos de captions, volumen/ducking de musica y formato.
+    relevant_spec_sections:
+      - Resumen Ejecutivo y Contexto de Negocio
+      - Decisiones del orquestador D-3, D-5, D-6, D-7, D-10 y la fila cycle-03 del Plan de ciclos
+      - Requisitos No-Funcionales RNF-1..RNF-6
+    output_file: sdd/specs/spec-e-burgos-006-web-studio/cycles/cycle-03/functional.md
+    numbering: US-3-0NN para historias, CA-201.. para criterios de aceptacion
+
+  architect:
+    model: claude/opus
+    goal: |
+      Cerrar el contrato de estado local <-> PUT (documento completo, byte-identico a lo que escribe
+      la CLI), el contrato de polling de jobs, y tomar por escrito las dos decisiones pendientes
+      (encuadre preview vs render con el sha256 del render como criterio; D-3 mantener o revertir).
+      Emitir la lista cerrada de tests obligatorios por CA, con el archivo que EMITE cada valor.
+    existing_endpoints:
+      - EP-007 GET /projects/:slug/timeline (200 documento | 404 TIMELINE_NOT_FOUND | 422 TIMELINE_INVALID)
+      - EP-008 PUT /projects/:slug/timeline (200 {slug,path} | 400 REQUEST_BODY_INVALID_JSON | 404 | 413 | 422 TIMELINE_INVALID, nada se escribe)
+      - EP-009 GET /projects/:slug/edl · EP-010 PUT /projects/:slug/edl (mismo patron con EDL_*)
+      - EP-011 GET /projects/:slug/files/*path (Range de un rango; sirve tambien out/<jobId>.mp4)
+      - EP-012 POST /projects/:slug/jobs (202 RenderJob + location; snapshotea la Timeline al crear)
+      - EP-013 GET /projects/:slug/jobs (200 {slug, jobs:[summary]})
+      - EP-014 GET /jobs/:jobId (200 RenderJob completo, tambien para state failed)
+      - EP-015 DELETE /jobs/:jobId (200 canceled | 202 canceling | 404 | 409 RENDER_JOB_NOT_CANCELABLE)
+    existing_tables: []
+    output_file: sdd/specs/spec-e-burgos-006-web-studio/cycles/cycle-03/architect.md
+
+  planner:
+    model: claude/sonnet
+    goal: |
+      Convertir historias + contrato en tasks tecnicas ordenadas, con files[] que sea checklist de
+      cierre (todo test exigido por un CA del architect vive en el files[] de alguna task) y
+      depends_on derivado de los imports de las firmas del architect, no del agrupamiento por
+      historia.
+    note: Recibe functional.md y architect.md ya cerrados; emite tasks.json ANTES que planner.md.
+    output_file: sdd/specs/spec-e-burgos-006-web-studio/cycles/cycle-03/planner.md
+
+  implementor_front:
+    model: claude/sonnet
+    goal: Implementar una task por vez sobre el contrato del architect.
+    app: apps/web
+    app_context: sdd/context/apps/web/context_prompt.md
+    note: |
+      Unico implementador del ciclo, reanudado con SendMessage task tras task. No hay implementor
+      backend: apps/render-api no se toca. Si una task toca libs/composition-remotion, la rama
+      `render` del arbol queda literalmente intacta.
+
+  reviewer:
+    model: claude/opus
+    goal: |
+      Validar todo el output del ciclo, ejecutar el CONTEXTO GATE y la MEMORIA GATE, cerrar el
+      ciclo, la spec y el backlog del producto.
+    checklist: sdd/skills/sdd-reviewer/checklist.md
+    output_file: sdd/specs/spec-e-burgos-006-web-studio/cycles/cycle-03/cycle.json
+
+# ---------------------------------------------------------------------------
+# Addendum del orquestador — aprobaciones posteriores al architect.md (2026-09-09)
+# ---------------------------------------------------------------------------
+orchestrator_approvals:
+  - id: APR-01
+    pedido_por: architect.md (resolucion del riesgo (a) del functional)
+    decision: APROBADO
+    que: |
+      Endurecimiento de US-3-006/CA-205: el cliente corre validateTimeline (ya exportado por
+      libs/composition-remotion, cero deps nuevas) y clasifica sus codigos. SCHEMA_INVALID bloquea
+      el guardado; los otros nueve dejan guardar con advertencia pero **deshabilitan el disparo de
+      render**, nombrando los `code` en pantalla.
+    fundamento: |
+      Medido por el architect: apps/render-api NO corre validateTimeline ni en EP-008 ni en EP-012,
+      pero libs/composition-remotion/src/render.ts:142 si lo corre. Un documento con
+      CLIP_EXCEEDS_ASSET se acepta con 200, el job se crea con 202 y **falla siempre**. Habilitar
+      un boton que garantiza un job fallido (y un render real de minutos) es peor producto que
+      deshabilitarlo diciendo por que. No cambia ningun contrato del servicio ni la salida del
+      render: es validacion de cliente, exactamente el patron "espejo" que la spec ya usa para
+      PROJECT_SLUG_INVALID (CA-007 de cycle-01).
+  - id: APR-02
+    pedido_por: architect.md § D-12
+    decision: APROBADO
+    que: |
+      El encuadre se alinea aplicando objectFit: 'fill' SOLO en la rama `player` de TimelineVideo,
+      con el estilo del llamador ganando por orden de spread. El arbol `render` queda intacto y el
+      sha256 c1b9fd9f... del render de no-regresion es criterio de aceptacion.
+      El hallazgo de que el encuadre defectuoso es el del **render** (estirado anamorfico de 16:9
+      en 9:16) queda escrito y **descopado a un [FIX] posterior** (CA-240, alcance ya redactado en
+      architect.md §4.2): la salida del render no se cambia en esta spec.
+    fundamento: |
+      Es exactamente lo que el brief recomendaba y el architect lo sostuvo con evidencia medida
+      (la clase __remotion_objectfitcontain la inyecta solo @remotion/player; las cuatro esquinas
+      de la referencia son 1b448a, lo que descarta tamanio intrinseco). El producto no puede
+      cambiar su entregable en el ciclo que cierra la spec.
+  - id: APR-03
+    pedido_por: architect.md § riesgos abiertos
+    decision: APROBADO
+    que: |
+      El smoke E2E renderiza un documento **editado** y acortado a ~90-150 frames. Su MP4 tendra un
+      sha256 distinto del de no-regresion, y eso NO es una regresion: son dos evidencias distintas.
+      El artefacto tiene que decirlo explicitamente. El render de no-regresion (documento sin
+      editar, sha256 c1b9fd9f...) y el del E2E son dos corridas **nunca simultaneas** (gate de
+      memoria antes de cada una).
+    fundamento: |
+      Un render real de 538 frames por cada corrida del E2E es caro y no agrega evidencia sobre uno
+      corto: lo que el E2E prueba es el recorrido completo y que el MP4 existe y es valido
+      (ffprobe contra el stream de video), no la fidelidad binaria, que la prueba el otro render.
+  - id: APR-04
+    pedido_por: implementador, al cerrar TASK-009
+    decision: APROBADO
+    que: |
+      `VOICE_TRACK_NOT_MIRRORED` NO viaja en `TimelineEditState.issues`. `TimelineIssue.code` de
+      libs/timeline-core es un union CERRADO de los diez codigos de validateTimeline y ese codigo no
+      es uno de ellos. Se mantiene el sensor separado `voiceMirrorIssue(tracks): VoiceMirrorIssue |
+      null` con su tipo propio en aroll-layout.ts, y `mirrorVoiceFromAroll` conserva la firma literal
+      del contrato (tracks -> tracks). TASK-013 (reducer) declara un tipo de issue de UI mas ancho
+      —union del TimelineIssue de la lib y del VoiceMirrorIssue propio— o un campo aparte; TASK-012
+      (issue-severity) y TASK-018 (timeline-issue-list) tienen que contemplar ese codigo extra.
+    fundamento: |
+      Es exactamente la leccion vigente del repo: "nunca copiar el union de codigos de error de otra
+      lib: derivarlo con import type o estrechar en la frontera con un type guard sobre una lista
+      propia as const". Ensanchar el tipo de la lib seria tocar timeline-core (fuera de alcance) y
+      castear seria mentirle al tipo. El architect describio el issue sin advertir que el union
+      estaba cerrado; la correccion no cambia el comportamiento observable, solo donde vive el dato.
+
+# ---------------------------------------------------------------------------
+# Hallazgos descopados (no se arreglan en este ciclo; van al reviewer)
+# ---------------------------------------------------------------------------
+descoped_findings:
+  - id: FIND-01
+    origen: implementador, al cerrar TASK-010 (medido, no razonado)
+    donde: libs/timeline-core/src/ducking/plan-ducking.ts
+    que: |
+      El keyframe fraccionario de cola que produce `resolveReleaseTail` **nunca sobrevive** cuando
+      dos valles estan cerca: el frame en que cae la cola truncada
+      (`Math.max(0, nextValley.startMs - attackMs)`) es identico al frame del attack-start del valle
+      siguiente, y `dedupeKeyframesByFrame` (un Map con `.set()` en orden de push) conserva el
+      ULTIMO valor escrito, que es el `baseGainDb` del attack-start. Medido instrumentando
+      planDucking con un gap de 600 ms: el keyframe real es {frame:74, gainDb:-12}, no el -18
+      fraccionario que la formula de cola calcula.
+    consecuencia: |
+      La curva de ducking pierde silenciosamente su cola de release en cualquier documento con
+      valles cercanos. Afecta al render y al preview por igual (los dos leen automation).
+    por_que_no_se_toca_aca: |
+      Es libs/timeline-core, fuera del files[] de toda task de este ciclo y fuera del alcance de
+      spec-006 (que no toca el motor). Cambiarlo alteraria la salida del render, que es criterio de
+      aceptacion invertido de este ciclo. `rescaleMusicAutomation` es correcta para cualquier
+      automation que reciba, ocurra o no el caso limite.
+    accion: |
+      El reviewer lo deja en `issues_found` y en `follow_ups` para que el dev decida si abre un
+      [FIX] contra libs/timeline-core.
+  - id: APR-05
+    pedido_por: implementador, al cerrar TASK-013
+    decision: APROBADO
+    que: |
+      `TimelineEditState.rejections` se REEMPLAZA en cada dispatch (vacio si la accion fue aceptada,
+      un solo elemento si fue rechazada), nunca acumula; y `reset` tambien la limpia, no solo
+      revierte el draft.
+    fundamento: |
+      El contrato solo decia que 'saved' limpia rejections. Con acumulacion, un unico valor mal
+      tipeado dejaria `canSaveTimeline` en false para siempre hasta guardar: el dev corrige el
+      valor, la accion se acepta, y el guardado sigue bloqueado por un rechazo muerto. Es un
+      defecto de producto observable, no una preferencia de estilo. Cubierto por el test "clears a
+      stale rejection once a subsequent action is accepted".
+  - id: APR-06
+    pedido_por: implementador, al cerrar parcialmente TASK-030
+    decision: APROBADO (las dos cosas)
+    que: |
+      1) Se amplia el files[] de TASK-030 con apps/web/src/hooks/use-api-action.ts y su spec para
+         arreglar un defecto REAL nacido en TASK-003: `mountedRef = useRef(true)` mas un cleanup que
+         lo pone en false, sin volver a ponerlo en true en el cuerpo del efecto. Bajo el
+         doble-invoke de efectos de React StrictMode (activo en apps/web/src/main.tsx) queda en
+         false para siempre y el boton Save se traba en "Saving..." tras el primer guardado.
+      2) Se autoriza UNA corrida mas del guion E2E (tercer y ultimo render real del ciclo, corto:
+         147 frames) para completar descarga del MP4 + ffprobe + sha256.
+    fundamento: |
+      (1) Es deuda del propio ciclo, no del repo: misma regla que aplico a los warnings de lint —
+      la task que invalida el trabajo de otra ya cerrada lo corrige ella. Verificado por el
+      orquestador leyendo el hook: `useAsyncResource` y `useRenderJobPoll` usan flags locales por
+      efecto (patron correcto, inmunes); el defecto es exclusivo de useApiAction. Afecta al
+      dev-server, que es como se corre este producto local. Arreglarlo ademas elimina el
+      workaround `page.reload()` del guion, que enmascaraba el bug en la evidencia.
+      (2) La descarga del MP4 con ffprobe es criterio de cierre EXPLICITO y no negociable de la
+      spec: aceptar la evidencia sin el ffprobe seria cerrar el backlog con el ultimo eslabon del
+      producto (el entregable en manos del dev) sin verificar. El render es de 147 frames y el
+      gate de memoria esta en verde, asi que el costo es bajo y el beneficio es el cierre real.

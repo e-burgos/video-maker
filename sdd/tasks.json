@@ -177,6 +177,17 @@
           "status": "completed",
           "tasks_total": 5,
           "tasks_done": 5
+        },
+        "cycle-03": {
+          "file": "sdd/specs/spec-e-burgos-006-web-studio/cycles/cycle-03/tasks.json",
+          "module": "web-studio",
+          "apps": [
+            "apps/web",
+            "libs/composition-remotion"
+          ],
+          "status": "completed",
+          "tasks_total": 32,
+          "tasks_done": 32
         }
       }
     }

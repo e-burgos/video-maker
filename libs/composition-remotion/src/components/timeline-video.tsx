@@ -9,11 +9,13 @@ export type TimelineVideoProps = {
   style: CSSProperties;
 };
 
+const PLAYER_MEDIA_STYLE: CSSProperties = { objectFit: 'fill' };
+
 export const TimelineVideo: FC<TimelineVideoProps> = ({ src, trimBefore, style }) => {
   const backend = useVideoBackend();
 
   if (backend === 'player') {
-    return <Video src={src} trimBefore={trimBefore} muted style={style} />;
+    return <Video src={src} trimBefore={trimBefore} muted style={{ ...PLAYER_MEDIA_STYLE, ...style }} />;
   }
 
   return <OffthreadVideo src={src} trimBefore={trimBefore} muted style={style} />;

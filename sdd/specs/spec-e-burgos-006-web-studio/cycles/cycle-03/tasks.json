@@ -1,0 +1,968 @@
+{
+  "$schema": "../../../../schemas/cycle-tasks.schema.json",
+  "spec": "spec-e-burgos-006-web-studio",
+  "cycle": 3,
+  "module": "web-studio",
+  "apps": [
+    "apps/web",
+    "libs/composition-remotion"
+  ],
+  "flow": "full",
+  "user_stories_generated": true,
+  "prerequisites": {
+    "tasks_generated": true
+  },
+  "tasks": [
+    {
+      "id": "TASK-001",
+      "title": "Add render job types, structural parsing and the deliverable URL helper",
+      "user_stories": [
+        "US-3-007",
+        "US-3-010"
+      ],
+      "estimation_hours": 3,
+      "story_points": 3,
+      "depends_on": [],
+      "status": "done",
+      "files": [
+        "apps/web/src/api/render-api-types.ts",
+        "apps/web/src/api/parse-render-job.ts",
+        "apps/web/src/api/parse-render-job.spec.ts",
+        "apps/web/src/api/render-job-artifact.ts",
+        "apps/web/src/api/render-job-artifact.spec.ts"
+      ],
+      "usage": {
+        "provider_model": "claude/sonnet",
+        "effort": "medium",
+        "agent": "implementor-front",
+        "tokens_in": 147631,
+        "tokens_out": 26053,
+        "tokens_total": 173684,
+        "approx": false,
+        "source": "agent-usage-notification",
+        "recorded_at": "2026-09-09"
+      }
+    },
+    {
+      "id": "TASK-002",
+      "title": "Amend useAsyncResource to keep the previous value while refreshing (D-3)",
+      "user_stories": [
+        "US-3-009"
+      ],
+      "estimation_hours": 2,
+      "story_points": 2,
+      "depends_on": [],
+      "status": "done",
+      "files": [
+        "apps/web/src/hooks/use-async-resource.ts",
+        "apps/web/src/hooks/use-async-resource.spec.ts"
+      ],
+      "usage": {
+        "provider_model": "claude/sonnet",
+        "effort": "medium",
+        "agent": "implementor-front",
+        "tokens_in": 106934,
+        "tokens_out": 18871,
+        "tokens_total": 125805,
+        "approx": false,
+        "source": "agent-usage-notification",
+        "recorded_at": "2026-09-09"
+      }
+    },
+    {
+      "id": "TASK-003",
+      "title": "Add useApiAction for imperative writes that never throw",
+      "user_stories": [
+        "US-3-005",
+        "US-3-006"
+      ],
+      "estimation_hours": 2,
+      "story_points": 2,
+      "depends_on": [],
+      "status": "done",
+      "files": [
+        "apps/web/src/hooks/use-api-action.ts",
+        "apps/web/src/hooks/use-api-action.spec.ts"
+      ],
+      "usage": {
+        "provider_model": "claude/sonnet",
+        "effort": "medium",
+        "agent": "implementor-front",
+        "tokens_in": 29055,
+        "tokens_out": 5127,
+        "tokens_total": 34182,
+        "approx": false,
+        "source": "agent-usage-notification",
+        "recorded_at": "2026-09-09"
+      }
+    },
+    {
+      "id": "TASK-004",
+      "title": "Add the render job poll plan and the useRenderJobPoll hook",
+      "user_stories": [
+        "US-3-007"
+      ],
+      "estimation_hours": 3,
+      "story_points": 3,
+      "depends_on": [
+        "TASK-001"
+      ],
+      "status": "done",
+      "files": [
+        "apps/web/src/api/render-job-poll-plan.ts",
+        "apps/web/src/api/render-job-poll-plan.spec.ts",
+        "apps/web/src/hooks/use-render-job-poll.ts",
+        "apps/web/src/hooks/use-render-job-poll.spec.ts"
+      ],
+      "usage": {
+        "provider_model": "claude/sonnet",
+        "effort": "medium",
+        "agent": "implementor-front",
+        "tokens_in": 30199,
+        "tokens_out": 5329,
+        "tokens_total": 35528,
+        "approx": false,
+        "source": "agent-usage-notification",
+        "recorded_at": "2026-09-09"
+      }
+    },
+    {
+      "id": "TASK-005",
+      "title": "Extend the render API client with timeline write and job endpoints",
+      "user_stories": [
+        "US-3-005",
+        "US-3-006",
+        "US-3-007",
+        "US-3-008",
+        "US-3-009"
+      ],
+      "estimation_hours": 4,
+      "story_points": 5,
+      "depends_on": [
+        "TASK-001"
+      ],
+      "status": "done",
+      "files": [
+        "apps/web/src/api/render-api-types.ts",
+        "apps/web/src/api/render-api-client.ts",
+        "apps/web/src/api/render-api-client.spec.ts"
+      ],
+      "usage": {
+        "provider_model": "claude/sonnet",
+        "effort": "medium",
+        "agent": "implementor-front",
+        "tokens_in": 39525,
+        "tokens_out": 6975,
+        "tokens_total": 46500,
+        "approx": false,
+        "source": "agent-usage-notification",
+        "recorded_at": "2026-09-09"
+      }
+    },
+    {
+      "id": "TASK-006",
+      "title": "Generate the editable timeline fixture with buildTimeline",
+      "user_stories": [
+        "US-3-001",
+        "US-3-002",
+        "US-3-003",
+        "US-3-004"
+      ],
+      "estimation_hours": 3,
+      "story_points": 3,
+      "depends_on": [],
+      "status": "done",
+      "files": [
+        "apps/web/src/api/__fixtures__/editable-timeline.ts",
+        "apps/web/src/api/__fixtures__/editable-timeline.spec.ts"
+      ],
+      "usage": {
+        "provider_model": "claude/sonnet",
+        "effort": "medium",
+        "agent": "implementor-front",
+        "tokens_in": 48486,
+        "tokens_out": 8556,
+        "tokens_total": 57042,
+        "approx": false,
+        "source": "agent-usage-notification",
+        "recorded_at": "2026-09-09"
+      }
+    },
+    {
+      "id": "TASK-007",
+      "title": "Add canonicalTimelineJson and timelineDocumentsEqual for byte-identity",
+      "user_stories": [
+        "US-3-005"
+      ],
+      "estimation_hours": 2,
+      "story_points": 2,
+      "depends_on": [
+        "TASK-006"
+      ],
+      "status": "done",
+      "files": [
+        "apps/web/src/api/timeline-edit/timeline-document.ts",
+        "apps/web/src/api/timeline-edit/timeline-document.spec.ts"
+      ],
+      "usage": {
+        "provider_model": "claude/sonnet",
+        "effort": "medium",
+        "agent": "implementor-front",
+        "tokens_in": 12748,
+        "tokens_out": 2250,
+        "tokens_total": 14998,
+        "approx": false,
+        "source": "agent-usage-notification",
+        "recorded_at": "2026-09-09"
+      }
+    },
+    {
+      "id": "TASK-008",
+      "title": "Add client-side mirror rejection rules for trim, duration and caption text",
+      "user_stories": [
+        "US-3-001",
+        "US-3-002"
+      ],
+      "estimation_hours": 3,
+      "story_points": 3,
+      "depends_on": [
+        "TASK-006"
+      ],
+      "status": "done",
+      "files": [
+        "apps/web/src/api/timeline-edit/timeline-edit-rules.ts",
+        "apps/web/src/api/timeline-edit/timeline-edit-rules.spec.ts"
+      ],
+      "usage": {
+        "provider_model": "claude/sonnet",
+        "effort": "medium",
+        "agent": "implementor-front",
+        "tokens_in": 17262,
+        "tokens_out": 3046,
+        "tokens_total": 20308,
+        "approx": false,
+        "source": "agent-usage-notification",
+        "recorded_at": "2026-09-09"
+      }
+    },
+    {
+      "id": "TASK-009",
+      "title": "Add a-roll relayout, voice mirroring and track clamping",
+      "user_stories": [
+        "US-3-001"
+      ],
+      "estimation_hours": 4,
+      "story_points": 5,
+      "depends_on": [
+        "TASK-006"
+      ],
+      "status": "done",
+      "files": [
+        "apps/web/src/api/timeline-edit/aroll-layout.ts",
+        "apps/web/src/api/timeline-edit/aroll-layout.spec.ts"
+      ],
+      "usage": {
+        "provider_model": "claude/sonnet",
+        "effort": "medium",
+        "agent": "implementor-front",
+        "tokens_in": 25304,
+        "tokens_out": 4466,
+        "tokens_total": 29770,
+        "approx": false,
+        "source": "agent-usage-notification",
+        "recorded_at": "2026-09-09"
+      }
+    },
+    {
+      "id": "TASK-010",
+      "title": "Add music automation rescaling against the real ducking producer",
+      "user_stories": [
+        "US-3-003"
+      ],
+      "estimation_hours": 3,
+      "story_points": 3,
+      "depends_on": [],
+      "status": "done",
+      "files": [
+        "apps/web/src/api/timeline-edit/rescale-music-automation.ts",
+        "apps/web/src/api/timeline-edit/rescale-music-automation.spec.ts"
+      ],
+      "usage": {
+        "provider_model": "claude/sonnet",
+        "effort": "medium",
+        "agent": "implementor-front",
+        "tokens_in": 35541,
+        "tokens_out": 6272,
+        "tokens_total": 41813,
+        "approx": false,
+        "source": "agent-usage-notification",
+        "recorded_at": "2026-09-09"
+      }
+    },
+    {
+      "id": "TASK-011",
+      "title": "Add applyOutputPreset with safe caption box omission",
+      "user_stories": [
+        "US-3-004"
+      ],
+      "estimation_hours": 2,
+      "story_points": 2,
+      "depends_on": [
+        "TASK-006"
+      ],
+      "status": "done",
+      "files": [
+        "apps/web/src/api/timeline-edit/apply-output-preset.ts",
+        "apps/web/src/api/timeline-edit/apply-output-preset.spec.ts"
+      ],
+      "usage": {
+        "provider_model": "claude/sonnet",
+        "effort": "medium",
+        "agent": "implementor-front",
+        "tokens_in": 21700,
+        "tokens_out": 3830,
+        "tokens_total": 25530,
+        "approx": false,
+        "source": "agent-usage-notification",
+        "recorded_at": "2026-09-09"
+      }
+    },
+    {
+      "id": "TASK-012",
+      "title": "Classify validateTimeline issue codes by save/render-blocking severity",
+      "user_stories": [
+        "US-3-001",
+        "US-3-006"
+      ],
+      "estimation_hours": 1,
+      "story_points": 1,
+      "depends_on": [],
+      "status": "done",
+      "files": [
+        "apps/web/src/api/timeline-edit/issue-severity.ts",
+        "apps/web/src/api/timeline-edit/issue-severity.spec.ts"
+      ],
+      "usage": {
+        "provider_model": "claude/sonnet",
+        "effort": "medium",
+        "agent": "implementor-front",
+        "tokens_in": 13079,
+        "tokens_out": 2308,
+        "tokens_total": 15387,
+        "approx": false,
+        "source": "agent-usage-notification",
+        "recorded_at": "2026-09-09"
+      }
+    },
+    {
+      "id": "TASK-013",
+      "title": "Add the timeline edit reducer wiring documents, rules and severity",
+      "user_stories": [
+        "US-3-001",
+        "US-3-002",
+        "US-3-003",
+        "US-3-004",
+        "US-3-005",
+        "US-3-006"
+      ],
+      "estimation_hours": 4,
+      "story_points": 5,
+      "depends_on": [
+        "TASK-006",
+        "TASK-007",
+        "TASK-008",
+        "TASK-009",
+        "TASK-010",
+        "TASK-011",
+        "TASK-012"
+      ],
+      "status": "done",
+      "files": [
+        "apps/web/src/api/timeline-edit/timeline-edit-state.ts",
+        "apps/web/src/api/timeline-edit/timeline-edit-state.spec.ts"
+      ],
+      "usage": {
+        "provider_model": "claude/sonnet",
+        "effort": "medium",
+        "agent": "implementor-front",
+        "tokens_in": 42354,
+        "tokens_out": 7474,
+        "tokens_total": 49828,
+        "approx": false,
+        "source": "agent-usage-notification",
+        "recorded_at": "2026-09-09"
+      }
+    },
+    {
+      "id": "TASK-014",
+      "title": "Add the clip track editor for trim and reorder controls",
+      "user_stories": [
+        "US-3-001"
+      ],
+      "estimation_hours": 2,
+      "story_points": 2,
+      "depends_on": [
+        "TASK-006"
+      ],
+      "status": "done",
+      "files": [
+        "apps/web/src/components/clip-track-editor.tsx",
+        "apps/web/src/components/clip-track-editor.spec.tsx"
+      ],
+      "usage": {
+        "provider_model": "claude/sonnet",
+        "effort": "medium",
+        "agent": "implementor-front",
+        "tokens_in": 21827,
+        "tokens_out": 3852,
+        "tokens_total": 25679,
+        "approx": false,
+        "source": "agent-usage-notification",
+        "recorded_at": "2026-09-09"
+      }
+    },
+    {
+      "id": "TASK-015",
+      "title": "Add the caption editor for per-word text correction",
+      "user_stories": [
+        "US-3-002"
+      ],
+      "estimation_hours": 2,
+      "story_points": 2,
+      "depends_on": [
+        "TASK-006"
+      ],
+      "status": "done",
+      "files": [
+        "apps/web/src/components/caption-editor.tsx",
+        "apps/web/src/components/caption-editor.spec.tsx"
+      ],
+      "usage": {
+        "provider_model": "claude/sonnet",
+        "effort": "medium",
+        "agent": "implementor-front",
+        "tokens_in": 7534,
+        "tokens_out": 1329,
+        "tokens_total": 8863,
+        "approx": false,
+        "source": "agent-usage-notification",
+        "recorded_at": "2026-09-09"
+      }
+    },
+    {
+      "id": "TASK-016",
+      "title": "Add the music mix editor for base and ducked gain controls",
+      "user_stories": [
+        "US-3-003"
+      ],
+      "estimation_hours": 1,
+      "story_points": 1,
+      "depends_on": [],
+      "status": "done",
+      "files": [
+        "apps/web/src/components/music-mix-editor.tsx",
+        "apps/web/src/components/music-mix-editor.spec.tsx"
+      ],
+      "usage": {
+        "provider_model": "claude/sonnet",
+        "effort": "medium",
+        "agent": "implementor-front",
+        "tokens_in": 7284,
+        "tokens_out": 1285,
+        "tokens_total": 8569,
+        "approx": false,
+        "source": "agent-usage-notification",
+        "recorded_at": "2026-09-09"
+      }
+    },
+    {
+      "id": "TASK-017",
+      "title": "Add the output preset selector for the persisted format",
+      "user_stories": [
+        "US-3-004"
+      ],
+      "estimation_hours": 2,
+      "story_points": 2,
+      "depends_on": [],
+      "status": "done",
+      "files": [
+        "apps/web/src/components/output-preset-selector.tsx",
+        "apps/web/src/components/output-preset-selector.spec.tsx",
+        "apps/web/src/api/preview-format.spec.ts"
+      ],
+      "usage": {
+        "provider_model": "claude/sonnet",
+        "effort": "medium",
+        "agent": "implementor-front",
+        "tokens_in": 14130,
+        "tokens_out": 2493,
+        "tokens_total": 16623,
+        "approx": false,
+        "source": "agent-usage-notification",
+        "recorded_at": "2026-09-09"
+      }
+    },
+    {
+      "id": "TASK-018",
+      "title": "Add the timeline issue list for render-blocking and save-blocking warnings",
+      "user_stories": [
+        "US-3-001"
+      ],
+      "estimation_hours": 2,
+      "story_points": 2,
+      "depends_on": [
+        "TASK-012"
+      ],
+      "status": "done",
+      "files": [
+        "apps/web/src/components/timeline-issue-list.tsx",
+        "apps/web/src/components/timeline-issue-list.spec.tsx"
+      ],
+      "usage": {
+        "provider_model": "claude/sonnet",
+        "effort": "medium",
+        "agent": "implementor-front",
+        "tokens_in": 10469,
+        "tokens_out": 1847,
+        "tokens_total": 12316,
+        "approx": false,
+        "source": "agent-usage-notification",
+        "recorded_at": "2026-09-09"
+      }
+    },
+    {
+      "id": "TASK-019",
+      "title": "Add the timeline save bar wired to PUT and dirty state",
+      "user_stories": [
+        "US-3-005"
+      ],
+      "estimation_hours": 2,
+      "story_points": 2,
+      "depends_on": [
+        "TASK-003",
+        "TASK-005",
+        "TASK-013"
+      ],
+      "status": "done",
+      "files": [
+        "apps/web/src/components/timeline-save-bar.tsx",
+        "apps/web/src/components/timeline-save-bar.spec.tsx"
+      ],
+      "usage": {
+        "provider_model": "claude/sonnet",
+        "effort": "medium",
+        "agent": "implementor-front",
+        "tokens_in": 11688,
+        "tokens_out": 2062,
+        "tokens_total": 13750,
+        "approx": false,
+        "source": "agent-usage-notification",
+        "recorded_at": "2026-09-09"
+      }
+    },
+    {
+      "id": "TASK-020",
+      "title": "Add the render trigger gated by dirty state and blocking issues",
+      "user_stories": [
+        "US-3-006"
+      ],
+      "estimation_hours": 3,
+      "story_points": 3,
+      "depends_on": [
+        "TASK-003",
+        "TASK-005",
+        "TASK-012",
+        "TASK-013"
+      ],
+      "status": "done",
+      "files": [
+        "apps/web/src/components/render-trigger.tsx",
+        "apps/web/src/components/render-trigger.spec.tsx"
+      ],
+      "usage": {
+        "provider_model": "claude/sonnet",
+        "effort": "medium",
+        "agent": "implementor-front",
+        "tokens_in": 8664,
+        "tokens_out": 1529,
+        "tokens_total": 10193,
+        "approx": false,
+        "source": "agent-usage-notification",
+        "recorded_at": "2026-09-09"
+      }
+    },
+    {
+      "id": "TASK-021",
+      "title": "Add the render job list backed by the jobs listing endpoint",
+      "user_stories": [
+        "US-3-009"
+      ],
+      "estimation_hours": 2,
+      "story_points": 2,
+      "depends_on": [
+        "TASK-002",
+        "TASK-005"
+      ],
+      "status": "done",
+      "files": [
+        "apps/web/src/components/render-job-list.tsx",
+        "apps/web/src/components/render-job-list.spec.tsx"
+      ],
+      "usage": {
+        "provider_model": "claude/sonnet",
+        "effort": "medium",
+        "agent": "implementor-front",
+        "tokens_in": 12426,
+        "tokens_out": 2193,
+        "tokens_total": 14619,
+        "approx": false,
+        "source": "agent-usage-notification",
+        "recorded_at": "2026-09-09"
+      }
+    },
+    {
+      "id": "TASK-022",
+      "title": "Add the render job panel with progress, failure, cancel and download",
+      "user_stories": [
+        "US-3-007",
+        "US-3-008",
+        "US-3-010"
+      ],
+      "estimation_hours": 4,
+      "story_points": 5,
+      "depends_on": [
+        "TASK-001",
+        "TASK-004",
+        "TASK-005"
+      ],
+      "status": "done",
+      "files": [
+        "apps/web/src/components/render-job-panel.tsx",
+        "apps/web/src/components/render-job-panel.spec.tsx"
+      ],
+      "usage": {
+        "provider_model": "claude/sonnet",
+        "effort": "medium",
+        "agent": "implementor-front",
+        "tokens_in": 19627,
+        "tokens_out": 3464,
+        "tokens_total": 23091,
+        "approx": false,
+        "source": "agent-usage-notification",
+        "recorded_at": "2026-09-09"
+      }
+    },
+    {
+      "id": "TASK-023",
+      "title": "Align the Player object-fit with the render output (D-12) and cover the music automation emitter",
+      "user_stories": [
+        "US-3-011",
+        "US-3-003"
+      ],
+      "estimation_hours": 3,
+      "story_points": 3,
+      "depends_on": [],
+      "status": "done",
+      "files": [
+        "libs/composition-remotion/src/components/timeline-video.tsx",
+        "libs/composition-remotion/src/components/timeline-video.spec.tsx",
+        "libs/composition-remotion/src/components/audio-track.spec.tsx",
+        "libs/composition-remotion/vite.config.ts"
+      ],
+      "usage": {
+        "provider_model": "claude/sonnet",
+        "effort": "medium",
+        "agent": "implementor-front",
+        "tokens_in": 25009,
+        "tokens_out": 4413,
+        "tokens_total": 29422,
+        "approx": false,
+        "source": "agent-usage-notification",
+        "recorded_at": "2026-09-09"
+      }
+    },
+    {
+      "id": "TASK-024",
+      "title": "Make TimelinePlayer capture-ready with initialFrame and controls",
+      "user_stories": [
+        "US-3-011"
+      ],
+      "estimation_hours": 2,
+      "story_points": 2,
+      "depends_on": [
+        "TASK-023"
+      ],
+      "status": "done",
+      "files": [
+        "apps/web/src/components/timeline-player.tsx",
+        "apps/web/src/components/timeline-player.spec.tsx",
+        "apps/web/src/pages/project-preview-page.tsx"
+      ],
+      "usage": {
+        "provider_model": "claude/sonnet",
+        "effort": "medium",
+        "agent": "implementor-front",
+        "tokens_in": 20896,
+        "tokens_out": 3687,
+        "tokens_total": 24583,
+        "approx": false,
+        "source": "agent-usage-notification",
+        "recorded_at": "2026-09-09"
+      }
+    },
+    {
+      "id": "TASK-025",
+      "title": "Wire scene trim/reorder and caption editing into the studio page",
+      "user_stories": [
+        "US-3-001",
+        "US-3-002"
+      ],
+      "estimation_hours": 3,
+      "story_points": 3,
+      "depends_on": [
+        "TASK-013",
+        "TASK-014",
+        "TASK-015",
+        "TASK-024"
+      ],
+      "status": "done",
+      "files": [
+        "apps/web/src/pages/project-preview-page.tsx",
+        "apps/web/src/pages/project-preview-page.spec.tsx"
+      ],
+      "usage": {
+        "provider_model": "claude/sonnet",
+        "effort": "medium",
+        "agent": "implementor-front",
+        "tokens_in": 23868,
+        "tokens_out": 4212,
+        "tokens_total": 28080,
+        "approx": false,
+        "source": "agent-usage-notification",
+        "recorded_at": "2026-09-09"
+      }
+    },
+    {
+      "id": "TASK-026",
+      "title": "Wire music levels, output preset and the save bar into the studio page",
+      "user_stories": [
+        "US-3-003",
+        "US-3-004",
+        "US-3-005"
+      ],
+      "estimation_hours": 4,
+      "story_points": 5,
+      "depends_on": [
+        "TASK-025",
+        "TASK-016",
+        "TASK-017",
+        "TASK-018",
+        "TASK-019"
+      ],
+      "status": "done",
+      "files": [
+        "apps/web/src/pages/project-preview-page.tsx",
+        "apps/web/src/pages/project-preview-page.spec.tsx"
+      ],
+      "usage": {
+        "provider_model": "claude/sonnet",
+        "effort": "medium",
+        "agent": "implementor-front",
+        "tokens_in": 35210,
+        "tokens_out": 6214,
+        "tokens_total": 41424,
+        "approx": false,
+        "source": "agent-usage-notification",
+        "recorded_at": "2026-09-09"
+      }
+    },
+    {
+      "id": "TASK-027",
+      "title": "Wire render trigger, job list and job panel into the studio page",
+      "user_stories": [
+        "US-3-006",
+        "US-3-007",
+        "US-3-008",
+        "US-3-009",
+        "US-3-010"
+      ],
+      "estimation_hours": 4,
+      "story_points": 5,
+      "depends_on": [
+        "TASK-026",
+        "TASK-020",
+        "TASK-021",
+        "TASK-022"
+      ],
+      "status": "done",
+      "files": [
+        "apps/web/src/pages/project-preview-page.tsx",
+        "apps/web/src/pages/project-preview-page.spec.tsx"
+      ],
+      "usage": {
+        "provider_model": "claude/sonnet",
+        "effort": "medium",
+        "agent": "implementor-front",
+        "tokens_in": 40145,
+        "tokens_out": 7084,
+        "tokens_total": 47229,
+        "approx": false,
+        "source": "agent-usage-notification",
+        "recorded_at": "2026-09-09"
+      }
+    },
+    {
+      "id": "TASK-028",
+      "title": "Measure frame parity at 8s and reproduce the render non-regression sha256",
+      "user_stories": [
+        "US-3-011"
+      ],
+      "estimation_hours": 3,
+      "story_points": 3,
+      "depends_on": [
+        "TASK-023",
+        "TASK-024"
+      ],
+      "status": "done",
+      "files": [
+        "sdd/specs/spec-e-burgos-006-web-studio/cycles/cycle-03/artifacts/frame-parity-8s.md",
+        "sdd/specs/spec-e-burgos-006-web-studio/cycles/cycle-03/artifacts/render-non-regression.md"
+      ],
+      "usage": {
+        "provider_model": "claude/sonnet",
+        "effort": "medium",
+        "agent": "implementor-front",
+        "tokens_in": 34065,
+        "tokens_out": 6012,
+        "tokens_total": 40077,
+        "approx": false,
+        "source": "agent-usage-notification",
+        "recorded_at": "2026-09-09"
+      }
+    },
+    {
+      "id": "TASK-029",
+      "title": "Author and run the E2E smoke through timeline save verified on disk",
+      "user_stories": [
+        "US-3-012",
+        "US-3-001",
+        "US-3-002",
+        "US-3-003",
+        "US-3-004"
+      ],
+      "estimation_hours": 4,
+      "story_points": 5,
+      "depends_on": [
+        "TASK-027"
+      ],
+      "status": "done",
+      "files": [
+        "apps/web/e2e/studio-smoke.mjs",
+        "sdd/specs/spec-e-burgos-006-web-studio/cycles/cycle-03/artifacts/studio-smoke.md"
+      ],
+      "usage": {
+        "provider_model": "claude/sonnet",
+        "effort": "medium",
+        "agent": "implementor-front",
+        "tokens_in": 39689,
+        "tokens_out": 7004,
+        "tokens_total": 46693,
+        "approx": false,
+        "source": "agent-usage-notification",
+        "recorded_at": "2026-09-09"
+      }
+    },
+    {
+      "id": "TASK-030",
+      "title": "Extend the E2E smoke through render, progress, download and ffprobe verification",
+      "user_stories": [
+        "US-3-012"
+      ],
+      "estimation_hours": 4,
+      "story_points": 5,
+      "depends_on": [
+        "TASK-029",
+        "TASK-028"
+      ],
+      "status": "done",
+      "files": [
+        "apps/web/e2e/studio-smoke.mjs",
+        "sdd/specs/spec-e-burgos-006-web-studio/cycles/cycle-03/artifacts/studio-smoke.md",
+        "apps/web/src/hooks/use-api-action.ts",
+        "apps/web/src/hooks/use-api-action.spec.ts"
+      ],
+      "usage": {
+        "provider_model": "claude/sonnet",
+        "effort": "medium",
+        "agent": "implementor-front",
+        "tokens_in": 253737,
+        "tokens_out": 44777,
+        "tokens_total": 298514,
+        "approx": false,
+        "source": "agent-usage-notification",
+        "recorded_at": "2026-09-09"
+      }
+    },
+    {
+      "id": "TASK-031",
+      "title": "Register new components in components.json and update app READMEs",
+      "user_stories": [
+        "US-3-012"
+      ],
+      "estimation_hours": 2,
+      "story_points": 2,
+      "depends_on": [
+        "TASK-030"
+      ],
+      "status": "done",
+      "files": [
+        "sdd/components.json",
+        "apps/web/README.md",
+        "libs/composition-remotion/README.md"
+      ],
+      "usage": {
+        "provider_model": "claude/sonnet",
+        "effort": "medium",
+        "agent": "implementor-front",
+        "tokens_in": 50825,
+        "tokens_out": 8969,
+        "tokens_total": 59794,
+        "approx": false,
+        "source": "agent-usage-notification",
+        "recorded_at": "2026-09-09"
+      }
+    },
+    {
+      "id": "TASK-032",
+      "title": "Close the three verification gaps found in review (CA-211 page assertion, committed frame-capture script, T-48 data-* guard)",
+      "user_stories": [
+        "US-3-003",
+        "US-3-011",
+        "US-3-007"
+      ],
+      "estimation_hours": 2,
+      "story_points": 2,
+      "depends_on": [
+        "TASK-031"
+      ],
+      "status": "done",
+      "files": [
+        "apps/web/src/pages/project-preview-page.spec.tsx",
+        "apps/web/e2e/capture-frame-240.mjs",
+        "apps/web/src/components/timeline-player.spec.tsx",
+        "sdd/specs/spec-e-burgos-006-web-studio/cycles/cycle-03/artifacts/frame-parity-8s.md"
+      ],
+      "usage": {
+        "provider_model": "claude/sonnet",
+        "effort": "medium",
+        "agent": "implementor-front",
+        "tokens_in": 45631,
+        "tokens_out": 8052,
+        "tokens_total": 53683,
+        "approx": false,
+        "source": "agent-usage-notification",
+        "recorded_at": "2026-09-09"
+      }
+    }
+  ]
+}

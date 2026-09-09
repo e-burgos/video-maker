@@ -1,4 +1,5 @@
 import { describe, expect, it } from 'vitest';
+import type { Timeline } from '@video-maker/timeline-core';
 
 import { previewTimelineFixture } from './__fixtures__/timeline';
 import { PREVIEW_PRESETS, previewFormat, previewPresetFor } from './preview-format';
@@ -37,5 +38,27 @@ describe('previewFormat', () => {
 
     expect(previewPresetFor(timeline)).toBe('reels-9x16');
     expect(previewPresetFor(previewFormat(timeline, 'youtube-16x9'))).toBe('youtube-16x9');
+  });
+
+  it('T-20 (regresión, CA-215): sigue en exactamente dos presets y nunca omite el box de un caption, a diferencia del preset persistido de output-preset-selector', () => {
+    expect(PREVIEW_PRESETS).toHaveLength(2);
+
+    const timeline = previewTimelineFixture();
+    const withBox: Timeline = {
+      ...timeline,
+      tracks: {
+        ...timeline.tracks,
+        captions: timeline.tracks.captions.map((caption) => ({
+          ...caption,
+          box: { x: 60, y: 220, width: 880, height: 1300 },
+        })),
+      },
+    };
+
+    const landscape = previewFormat(withBox, 'youtube-16x9');
+
+    landscape.tracks.captions.forEach((caption, index) => {
+      expect(caption.box).toEqual(withBox.tracks.captions[index]?.box);
+    });
   });
 });

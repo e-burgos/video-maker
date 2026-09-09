@@ -26,6 +26,7 @@ export default defineConfig({
         'src/render.ts',
         'src/components/timeline-video.tsx',
         'src/components/video-backend.tsx',
+        'src/components/audio-track.tsx',
       ],
       exclude: ['src/**/*.spec.ts'],
       thresholds: { lines: 80, functions: 80, branches: 80, statements: 80 },

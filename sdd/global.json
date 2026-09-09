@@ -58,19 +58,19 @@
       "cycles_completed": 3,
       "description": "API local Node para gestionar los proyectos de medios sobre el filesystem (`media/<slug>/`, MinIO descopado con fundamento por D-11), cola de jobs de render headless (Remotion + FFmpeg) con concurrencia 1, reporte de progreso por etapa y por frame, y cancelación cooperativa",
       "completed_at": "2026-09-08"
-    }
-  ],
-  "in_progress_modules": [
+    },
     {
       "module": "web-studio",
       "spec": "spec-e-burgos-006-web-studio",
       "apps": [
         "apps/web"
       ],
-      "cycles_completed": 2,
-      "description": "UI React 19 (Web Studio): shell con salud del servicio, alta y listado de proyectos, biblioteca de assets crudos por rol reproducidos desde render-api, y preview de la Timeline persistida montada en el Player de Remotion con la composicion real; edicion de timeline y disparo de renders llegan en cycle-03"
+      "cycles_completed": 3,
+      "description": "UI React 19 (Web Studio), producto completo de punta a punta: shell con salud del servicio, alta y listado de proyectos, biblioteca de assets crudos por rol reproducidos desde render-api, preview de la Timeline persistida montada en el Player de Remotion con la composicion real y en paridad de encuadre con el render, edicion del documento persistido (trim y orden de escenas, texto de captions, niveles de musica con reescritura de la automation, preset de salida) reflejada en el Player antes de guardar y persistida con un unico PUT completo, y jobs de render con polling, cancelacion y descarga del MP4",
+      "completed_at": "2026-09-09"
     }
   ],
+  "in_progress_modules": [],
   "pending_modules": [],
   "monorepo": {
     "tool": "Nx",

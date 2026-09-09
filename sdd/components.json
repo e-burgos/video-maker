@@ -191,13 +191,19 @@
         "module": "web-studio",
         "spec": "sdd/specs/spec-e-burgos-006-web-studio",
         "path": "src/components/timeline-video.tsx",
-        "status": "implemented",
+        "status": "updated",
         "created_in_cycle": 2,
-        "updated_in_cycle": null,
-        "description": "Componente de video conmutable de la composicion: monta OffthreadVideo cuando el backend es render (default sin proveedor, deja la salida del render byte-identica) y Video cuando es player, con los mismos props src/trimBefore/muted/style. Lo usan ArollScene y BrollMedia.",
+        "updated_in_cycle": 3,
+        "description": "Componente de video conmutable de la composicion: monta OffthreadVideo cuando el backend es render (default sin proveedor, deja la salida del render byte-identica, sin cambios de D-12) y Video cuando es player, con PLAYER_MEDIA_STYLE = { objectFit: 'fill' } como default bajo el style del caller (D-12, para igualar el encuadre del Player al del render; el caller puede pisarlo con cover/contain). Lo usan ArollScene y BrollMedia.",
         "consumes": [],
         "created_at": "2026-09-09",
-        "changelog": []
+        "changelog": [
+          {
+            "cycle": 3,
+            "date": "2026-09-09",
+            "change": "D-12: la rama player agrega PLAYER_MEDIA_STYLE = { objectFit: 'fill' } bajo el style del caller (fill como default, el caller puede pisarlo con cover/contain); la rama render queda byte-identica — verificado con git diff (+3/-1) y con la no-regresion de sha256 del render real contra media/smoke-ingest sin editar (render-non-regression.md, TASK-028). El encuadre del RENDER en si (estirado anamorfico cuando el aspect ratio del asset no coincide con el de salida) queda deliberadamente fuera de alcance de este ciclo — ver nota en libs/composition-remotion/README.md, no 'arreglar' sin leerla."
+          }
+        ]
       },
       {
         "id": "COMP-010",
@@ -393,13 +399,19 @@
         "module": "web-studio",
         "spec": "sdd/specs/spec-e-burgos-006-web-studio",
         "path": "src/hooks/use-async-resource.ts",
-        "status": "implemented",
+        "status": "updated",
         "created_in_cycle": 1,
-        "updated_in_cycle": null,
-        "description": "Unico primitivo de estado de servidor: loading/ready/error con reload y descarte de la respuesta de un request obsoleto.",
+        "updated_in_cycle": 3,
+        "description": "Primitivo de estado de servidor: loading/ready/error con reload, descarte de la respuesta de un request obsoleto, e isRefreshing para distinguir un reload en curso (dato stale, dirty) de la carga inicial o un cambio de key.",
         "consumes": [],
         "created_at": "2026-09-09",
-        "changelog": []
+        "changelog": [
+          {
+            "cycle": 3,
+            "date": "2026-09-09",
+            "change": "agrega isRefreshing al resultado, distinguiendo un reload en curso de la carga inicial o un cambio de key (D-3 de architect.md); RenderJobList lo consume para mostrar 'Refreshing...' en el boton"
+          }
+        ]
       },
       {
         "id": "COMP-012",
@@ -408,15 +420,21 @@
         "module": "web-studio",
         "spec": "sdd/specs/spec-e-burgos-006-web-studio",
         "path": "src/components/timeline-player.tsx",
-        "status": "implemented",
+        "status": "updated",
         "created_in_cycle": 2,
-        "updated_in_cycle": null,
-        "description": "Monta la TimelineComposition real dentro del Player de Remotion bajo VideoBackendProvider backend=player, derivando durationInFrames, fps y el tamano de composicion de computeTimelineMetadata, con los controles de transporte del Player.",
+        "updated_in_cycle": 3,
+        "description": "Monta la TimelineComposition real dentro del Player de Remotion bajo VideoBackendProvider backend=player, derivando durationInFrames, fps y el tamano de composicion de computeTimelineMetadata, con los controles de transporte del Player (controls, default true) y un frame inicial opcional (initialFrame) para capturas puntuales.",
         "consumes": [
           "EP-011"
         ],
         "created_at": "2026-09-09",
-        "changelog": []
+        "changelog": [
+          {
+            "cycle": 3,
+            "date": "2026-09-09",
+            "change": "agrega initialFrame y controls (default true), ambos opcionales, sin cambiar el comportamiento por defecto existente"
+          }
+        ]
       },
       {
         "id": "COMP-013",
@@ -425,14 +443,195 @@
         "module": "web-studio",
         "spec": "sdd/specs/spec-e-burgos-006-web-studio",
         "path": "src/pages/project-preview-page.tsx",
-        "status": "implemented",
+        "status": "updated",
         "created_in_cycle": 2,
-        "updated_in_cycle": null,
-        "description": "Pagina de preview del proyecto: lee la Timeline persistida por EP-007, la valida contra TimelineSchema, reescribe los assets a URLs same-origin de EP-011, ofrece el override de formato 9:16 / 16:9 (solo preview, nunca escribe) y monta el TimelinePlayer con el resumen de lienzo, duracion y pistas.",
+        "updated_in_cycle": 3,
+        "description": "Pagina del estudio: lee la Timeline persistida (EP-007), la valida contra TimelineSchema, reescribe los assets a URLs same-origin de EP-011, y ofrece el editor completo sobre un reducer de edicion (timelineEditReducer) — clips, captions, musica, preset de salida, issues y guardado — montando el TimelinePlayer con el draft vigente y cableando el disparo de render, el listado de jobs y el panel de detalle en vivo del job seleccionado.",
         "consumes": [
           "EP-007",
           "EP-011"
         ],
+        "created_at": "2026-09-09",
+        "changelog": [
+          {
+            "cycle": 3,
+            "date": "2026-09-09",
+            "change": "extrae StudioView (montado solo con la timeline cargada, key={slug}) con timelineEditReducer; cablea ClipTrackEditor/CaptionEditor/OutputPresetSelector/TimelineIssueList/TimelineSaveBar/MusicMixEditor/RenderTrigger/RenderJobList/RenderJobPanel sobre un unico dispatch; agrega captureFrameFromLocation via URLSearchParams nativo (no useSearchParams de react-router, por tamano de bundle) y selectedJobId (RenderTrigger.onCreated -> RenderJobList.onSelect -> RenderJobPanel.jobId)"
+          }
+        ]
+      },
+      {
+        "id": "COMP-014",
+        "name": "ClipTrackEditor",
+        "type": "component",
+        "module": "web-studio",
+        "spec": "sdd/specs/spec-e-burgos-006-web-studio",
+        "path": "src/components/clip-track-editor.tsx",
+        "status": "implemented",
+        "created_in_cycle": 3,
+        "updated_in_cycle": null,
+        "description": "Editor de una pista de clips (aroll o broll): inputs de trim start (ms) y duration (frames) por clip, y mover un clip de a-roll una posicion arriba/abajo, todo via un unico callback dispatch de TimelineEditAction.",
+        "consumes": [],
+        "created_at": "2026-09-09",
+        "changelog": []
+      },
+      {
+        "id": "COMP-015",
+        "name": "CaptionEditor",
+        "type": "component",
+        "module": "web-studio",
+        "spec": "sdd/specs/spec-e-burgos-006-web-studio",
+        "path": "src/components/caption-editor.tsx",
+        "status": "implemented",
+        "created_in_cycle": 3,
+        "updated_in_cycle": null,
+        "description": "Editor de las palabras de un caption: un input de texto por palabra, dispatch de caption-word-text por cada cambio.",
+        "consumes": [],
+        "created_at": "2026-09-09",
+        "changelog": []
+      },
+      {
+        "id": "COMP-016",
+        "name": "MusicMixEditor",
+        "type": "component",
+        "module": "web-studio",
+        "spec": "sdd/specs/spec-e-burgos-006-web-studio",
+        "path": "src/components/music-mix-editor.tsx",
+        "status": "implemented",
+        "created_in_cycle": 3,
+        "updated_in_cycle": null,
+        "description": "Editor de los niveles de musica (base y ducked, en dB), dispatch de music-levels.",
+        "consumes": [],
+        "created_at": "2026-09-09",
+        "changelog": []
+      },
+      {
+        "id": "COMP-017",
+        "name": "OutputPresetSelector",
+        "type": "component",
+        "module": "web-studio",
+        "spec": "sdd/specs/spec-e-burgos-006-web-studio",
+        "path": "src/components/output-preset-selector.tsx",
+        "status": "implemented",
+        "created_in_cycle": 3,
+        "updated_in_cycle": null,
+        "description": "Selector del preset de salida (reels-9x16, tiktok-9x16, youtube-16x9...) sobre la lista OUTPUT_PRESETS local (satisfies readonly OutputPreset[], sin importar Zod), dispatch de output-preset.",
+        "consumes": [],
+        "created_at": "2026-09-09",
+        "changelog": []
+      },
+      {
+        "id": "COMP-018",
+        "name": "TimelineIssueList",
+        "type": "component",
+        "module": "web-studio",
+        "spec": "sdd/specs/spec-e-burgos-006-web-studio",
+        "path": "src/components/timeline-issue-list.tsx",
+        "status": "implemented",
+        "created_in_cycle": 3,
+        "updated_in_cycle": null,
+        "description": "Lista los issues del TimelineEditState (incluido VOICE_TRACK_NOT_MIRRORED, codigo client-only fuera del union cerrado de timeline-core) con su severidad (save-blocking | render-blocking).",
+        "consumes": [],
+        "created_at": "2026-09-09",
+        "changelog": []
+      },
+      {
+        "id": "COMP-019",
+        "name": "TimelineSaveBar",
+        "type": "component",
+        "module": "web-studio",
+        "spec": "sdd/specs/spec-e-burgos-006-web-studio",
+        "path": "src/components/timeline-save-bar.tsx",
+        "status": "implemented",
+        "created_in_cycle": 3,
+        "updated_in_cycle": null,
+        "description": "Boton Save (data-testid=timeline-save-bar, data-timeline-dirty) e indicador Unsaved changes / Saved: deshabilitado si canSaveTimeline es falso o hay un guardado en curso; al confirmar el PUT despacha saved.",
+        "consumes": [
+          "EP-008"
+        ],
+        "created_at": "2026-09-09",
+        "changelog": []
+      },
+      {
+        "id": "COMP-020",
+        "name": "RenderTrigger",
+        "type": "component",
+        "module": "web-studio",
+        "spec": "sdd/specs/spec-e-burgos-006-web-studio",
+        "path": "src/components/render-trigger.tsx",
+        "status": "implemented",
+        "created_in_cycle": 3,
+        "updated_in_cycle": null,
+        "description": "Boton Render: deshabilitado si canStartRender es falso o hay una creacion en curso, listando las razones de bloqueo (dirty o issues render-blocking); al crear el job notifica el RenderJob completo via onCreated.",
+        "consumes": [
+          "EP-012"
+        ],
+        "created_at": "2026-09-09",
+        "changelog": []
+      },
+      {
+        "id": "COMP-021",
+        "name": "RenderJobList",
+        "type": "component",
+        "module": "web-studio",
+        "spec": "sdd/specs/spec-e-burgos-006-web-studio",
+        "path": "src/components/render-job-list.tsx",
+        "status": "implemented",
+        "created_in_cycle": 3,
+        "updated_in_cycle": null,
+        "description": "Tabla de los render jobs del proyecto (id, state, stage, error, fechas) con boton Refresh (isRefreshing de useAsyncResource) y seleccion de un job por id via onSelect.",
+        "consumes": [
+          "EP-013"
+        ],
+        "created_at": "2026-09-09",
+        "changelog": []
+      },
+      {
+        "id": "COMP-022",
+        "name": "RenderJobPanel",
+        "type": "component",
+        "module": "web-studio",
+        "spec": "sdd/specs/spec-e-burgos-006-web-studio",
+        "path": "src/components/render-job-panel.tsx",
+        "status": "implemented",
+        "created_in_cycle": 3,
+        "updated_in_cycle": null,
+        "description": "Detalle en vivo de un render job (data-testid=render-job-panel) via polling: estado, etapa, renderedFrames/totalFrames solo en la etapa render, error.code si failed, link de descarga si succeeded, y boton Cancel mientras el estado no sea terminal.",
+        "consumes": [
+          "EP-011",
+          "EP-014",
+          "EP-015"
+        ],
+        "created_at": "2026-09-09",
+        "changelog": []
+      },
+      {
+        "id": "COMP-023",
+        "name": "useApiAction",
+        "type": "hook",
+        "module": "web-studio",
+        "spec": "sdd/specs/spec-e-burgos-006-web-studio",
+        "path": "src/hooks/use-api-action.ts",
+        "status": "implemented",
+        "created_in_cycle": 3,
+        "updated_in_cycle": null,
+        "description": "Hook generico para una accion imperativa (POST/PUT/DELETE) que nunca lanza: expone status idle|pending|ok|error, error tipado y run(), descartando el resultado de una invocacion obsoleta por numero de secuencia. mountedRef se resetea a true en el cuerpo del efecto de mount (fix de cycle-03: antes solo el cleanup lo ponia en false, y bajo React 18 StrictMode el doble-invoke de efectos lo dejaba en false para siempre, trabando status en pending tras la primera accion exitosa de la sesion — no afectaba produccion, solo el dev server).",
+        "consumes": [],
+        "created_at": "2026-09-09",
+        "changelog": []
+      },
+      {
+        "id": "COMP-024",
+        "name": "useRenderJobPoll",
+        "type": "hook",
+        "module": "web-studio",
+        "spec": "sdd/specs/spec-e-burgos-006-web-studio",
+        "path": "src/hooks/use-render-job-poll.ts",
+        "status": "implemented",
+        "created_in_cycle": 3,
+        "updated_in_cycle": null,
+        "description": "Hook de polling de un render job por setTimeout (nunca setInterval) hasta un estado terminal, con guardas de secuencia para descartar respuestas obsoletas si el jobId cambia a mitad de un poll en vuelo.",
+        "consumes": [],
         "created_at": "2026-09-09",
         "changelog": []
       }

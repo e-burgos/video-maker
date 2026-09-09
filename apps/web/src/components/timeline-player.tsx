@@ -11,6 +11,8 @@ import type { TimelineCompositionProps } from '@video-maker/composition-remotion
 
 export type TimelinePlayerProps = {
   timeline: Timeline;
+  initialFrame?: number;
+  controls?: boolean;
 };
 
 const PlayerComposition: FC<TimelineCompositionProps> = (props) => (
@@ -19,7 +21,7 @@ const PlayerComposition: FC<TimelineCompositionProps> = (props) => (
   </VideoBackendProvider>
 );
 
-export function TimelinePlayer({ timeline }: TimelinePlayerProps) {
+export function TimelinePlayer({ timeline, initialFrame, controls = true }: TimelinePlayerProps) {
   const metadata = useMemo(() => computeTimelineMetadata(timeline), [timeline]);
   const inputProps = useMemo<TimelineCompositionProps>(
     () => ({ timeline: metadata.timeline }),
@@ -43,8 +45,9 @@ export function TimelinePlayer({ timeline }: TimelinePlayerProps) {
         compositionWidth={metadata.width}
         compositionHeight={metadata.height}
         style={{ width: '100%' }}
-        controls
+        controls={controls}
         acknowledgeRemotionLicense
+        {...(initialFrame !== undefined ? { initialFrame } : {})}
       />
     </div>
   );

@@ -1,5 +1,6 @@
 import type { Timeline } from '@video-maker/timeline-core';
 import { RENDER_API_BASE_PATH } from './artifact-url';
+import { parseRenderJob, parseRenderJobListing } from './parse-render-job';
 import {
   RenderApiError,
   fromErrorResponse,
@@ -12,10 +13,15 @@ import type {
   AssetRole,
   ProjectDetail,
   ProjectSummary,
+  RenderJob,
+  RenderJobListing,
   ServiceHealth,
+  TimelineWriteResult,
 } from './render-api-types';
 
 export type FetchLike = (input: string, init?: RequestInit) => Promise<Response>;
+
+export type RenderJobCancelOutcome = { status: 200 | 202; job: RenderJob };
 
 export type RenderApiClient = {
   getHealth: () => Promise<ServiceHealth>;
@@ -25,6 +31,11 @@ export type RenderApiClient = {
   listAssets: (slug: string) => Promise<AssetListing>;
   getTimeline: (slug: string) => Promise<Timeline>;
   uploadAsset: (input: UploadAssetInput) => Promise<AssetListEntry>;
+  putTimeline: (slug: string, timeline: Timeline) => Promise<TimelineWriteResult>;
+  createRenderJob: (slug: string) => Promise<RenderJob>;
+  listRenderJobs: (slug: string) => Promise<RenderJobListing>;
+  getRenderJob: (jobId: string) => Promise<RenderJob>;
+  cancelRenderJob: (jobId: string) => Promise<RenderJobCancelOutcome>;
 };
 
 export type UploadAssetInput = {
@@ -74,6 +85,26 @@ export function createRenderApiClient(fetchImpl: FetchLike): RenderApiClient {
     }
 
     return body;
+  }
+
+  async function requestJsonWithStatus(
+    path: string,
+    init: RequestInit | undefined,
+    expected: string,
+    accept: (body: unknown) => boolean,
+  ): Promise<{ status: number; body: unknown }> {
+    const response = await send(path, init);
+    const body = await readJson(response);
+
+    if (!response.ok) {
+      throw fromErrorResponse(response.status, body);
+    }
+
+    if (!accept(body)) {
+      throw responseShapeUnexpected(response.status, expected);
+    }
+
+    return { status: response.status, body };
   }
 
   return {
@@ -151,6 +182,60 @@ export function createRenderApiClient(fetchImpl: FetchLike): RenderApiClient {
         (value) => isRecord(value) && typeof value['path'] === 'string',
       );
       return body as AssetListEntry;
+    },
+
+    async putTimeline(slug: string, timeline: Timeline): Promise<TimelineWriteResult> {
+      const body = await requestJson(
+        `/projects/${encodeURIComponent(slug)}/timeline`,
+        {
+          method: 'PUT',
+          headers: { 'content-type': 'application/json' },
+          body: JSON.stringify(timeline),
+        },
+        'a timeline write result',
+        (value) => isRecord(value) && typeof value['slug'] === 'string' && typeof value['path'] === 'string',
+      );
+      return body as TimelineWriteResult;
+    },
+
+    async createRenderJob(slug: string): Promise<RenderJob> {
+      const body = await requestJson(
+        `/projects/${encodeURIComponent(slug)}/jobs`,
+        { method: 'POST' },
+        'a render job document',
+        (value) => isRecord(value),
+      );
+      return parseRenderJob(body);
+    },
+
+    async listRenderJobs(slug: string): Promise<RenderJobListing> {
+      const body = await requestJson(
+        `/projects/${encodeURIComponent(slug)}/jobs`,
+        undefined,
+        'a render job listing',
+        (value) => isRecord(value) && Array.isArray(value['jobs']),
+      );
+      return parseRenderJobListing(body);
+    },
+
+    async getRenderJob(jobId: string): Promise<RenderJob> {
+      const body = await requestJson(
+        `/jobs/${encodeURIComponent(jobId)}`,
+        undefined,
+        'a render job document',
+        (value) => isRecord(value),
+      );
+      return parseRenderJob(body);
+    },
+
+    async cancelRenderJob(jobId: string): Promise<RenderJobCancelOutcome> {
+      const { status, body } = await requestJsonWithStatus(
+        `/jobs/${encodeURIComponent(jobId)}`,
+        { method: 'DELETE' },
+        'a render job document',
+        (value) => isRecord(value),
+      );
+      return { status: status as 200 | 202, job: parseRenderJob(body) };
     },
   };
 }

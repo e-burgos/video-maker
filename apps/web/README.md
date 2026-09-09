@@ -2,8 +2,9 @@
 
 The Video Maker Studio: a local React 19 UI that operates the engine through `apps/render-api`.
 `cycle-01` of `spec-e-burgos-006-web-studio` delivers the studio shell, the project list and the
-raw asset library. The Remotion `<Player>` preview (`cycle-02`) and timeline editing plus render
-jobs (`cycle-03`) are not here yet.
+raw asset library. `cycle-02` adds the Remotion `<Player>` preview. `cycle-03` adds timeline
+editing (clips, captions, music mix, output preset), the save bar, and the full render job flow —
+trigger, live progress, and the MP4 download.
 
 **This app has no engine logic and never touches the filesystem.** Everything it shows and
 everything it writes goes through the HTTP contract in `sdd/api.json` (`EP-001`..`EP-015`).
@@ -43,11 +44,15 @@ WEB_PORT=4207 RENDER_API_URL=http://127.0.0.1:4399 pnpm exec vite --config apps/
 
 ```
 src/
-  api/          the render-api boundary: contract types, typed client, error surface, URL builders
-  hooks/        useAsyncResource — the only server-state primitive (no query library)
-  components/   studio layout, health badge, error notice, asset card/preview/uploader, create form
-  pages/        projects-page, asset-library-page, project-preview-page
-  app/app.tsx   router and provider wiring
+  api/                the render-api boundary: contract types, typed client, error surface, URL builders
+  api/timeline-edit/  the timeline-editing rules, the reducer and its state (lazy-only, see below)
+  hooks/              useAsyncResource, useApiAction, useRenderJobPoll — the only server-state
+                       primitives in this app (no query library)
+  components/         studio layout, health badge, error notice, asset card/preview/uploader,
+                       create form, timeline editors (clip track, caption, music mix, output
+                       preset), issue list, save bar, render trigger, job list, job panel
+  pages/              projects-page, asset-library-page, project-preview-page (the studio itself)
+  app/app.tsx         router and provider wiring
 ```
 
 - **`src/api/` is the only place that knows the service exists.** No component builds a URL or
@@ -104,19 +109,91 @@ one source of truth.
   `TimelineSchema` is likewise only imported by `src/api/parse-timeline.ts`, which is reached from
   this chunk.
 
+## Timeline editing (cycle-03)
+
+The studio page (`project-preview-page.tsx`) owns one `timelineEditReducer` (`useReducer`,
+`src/api/timeline-edit/timeline-edit-state.ts`) that every editor dispatches into through a single
+callback — no editor talks to the API directly:
+
+- **`ClipTrackEditor`** edits trim start (ms) and duration (frames) per clip, and reorders a-roll
+  clips. Duration edits are rejected client-side if they would leave a clip shorter than the
+  transitions touching it (`rejectDurationAgainstTransitions`).
+- **`CaptionEditor`** edits caption words.
+- **`MusicMixEditor`** edits the music's base/ducked gain (dB); the ducking automation is rescaled
+  to the new levels, not just the two numbers.
+- **`OutputPresetSelector`** switches the output preset (`applyOutputPreset`); it never imports Zod
+  and never reads `TimelineSchema` — a preset switch does not need the lazy `timeline-edit` chunk to
+  stay cheap to switch back and forth.
+- **`TimelineIssueList`** shows every issue on the draft, including `VOICE_TRACK_NOT_MIRRORED` — a
+  client-only code outside `timeline-core`'s closed `TimelineIssueCode` union, added when the voice
+  track can't be safely re-derived from a-roll (mismatched clip counts). Each issue's severity
+  (`save-blocking` | `render-blocking`) decides what it blocks: a render-blocking issue still lets
+  you save, it only blocks the render trigger.
+- **`TimelineSaveBar`** is the only component that calls `PUT /projects/:slug/timeline` (`EP-008`).
+  It is disabled while there are no changes, a save-blocking issue exists, or a save is already in
+  flight (`data-testid="timeline-save-bar"`, `data-timeline-dirty` for tests and the E2E smoke).
+
+A-roll edits go through `relayoutArollTrack`: it recomputes every clip's `from` from durations and
+the transitions between them, mirrors the voice track onto the new a-roll layout, and clamps b-roll
+and music clips to the new total duration. **It does not clamp captions** — shortening a-roll a lot
+without also shortening or removing the captions scheduled past the new duration is a real gap; see
+`apps/web/e2e/studio-smoke.mjs` for how the cycle-03 smoke works around it (it shortens every a-roll
+clip, not just the first, before rendering).
+
+## Render jobs (cycle-03)
+
+- **`RenderTrigger`** calls `POST /projects/:slug/jobs` (`EP-012`). Disabled unless the timeline is
+  clean and issue-free (`canStartRender`); on success it hands the created `RenderJob` up so the
+  page can select it.
+- **`RenderJobList`** calls `GET /projects/:slug/jobs` (`EP-013`) via `useAsyncResource`, with an
+  explicit `Refresh` button; selecting a row's id feeds `RenderJobPanel`.
+- **`RenderJobPanel`** polls `GET /jobs/:jobId` (`EP-014`) via `useRenderJobPoll` — `setTimeout`,
+  never `setInterval`, with a sequence guard so a stale response can't overwrite a newer job
+  selection. It shows `renderedFrames`/`totalFrames` only while `progress.stage === 'render'`
+  (`showsFrameProgress`), the terminal `error.code` on `failed`, a `Download` link to `EP-011`
+  (`GET /projects/:slug/files/out/:jobId.mp4`) on `succeeded`, and a `Cancel` button
+  (`DELETE /jobs/:jobId`, `EP-015`) while the job isn't in a terminal state.
+- **`useApiAction`** is the one hook every imperative action (save, create job, cancel job) is built
+  on: it never throws, exposes a typed `error` and a sequence-guarded `status`, and resets
+  `mountedRef` to `true` on every mount — not just `false` on unmount — so it recovers correctly
+  from React 18 `StrictMode`'s development-only double-invoke of effects (fixed in cycle-03; see
+  `use-api-action.spec.ts`'s `StrictMode` regression test).
+
+## Running the E2E smoke
+
+`apps/web/e2e/studio-smoke.mjs` drives the whole flow above against a **real** `render-api` and a
+**real** Chrome, on a temporary copy of `media/smoke-ingest` (never the dev's own `media/`):
+create/open a project → asset library → preview → edit all four editors → save → shorten the a-roll
+further → save again → trigger a real render → observe live progress → download the MP4 → `ffprobe`
+its video and audio streams. It is never run by CI or by `nx test` — it needs a real render-api, a
+real browser and, for the render step, real `ffmpeg`/Remotion rendering, so it stays a manual,
+deliberately-run script:
+
+```bash
+node apps/web/e2e/studio-smoke.mjs
+```
+
+It resolves Playwright from `~/.npm/_npx/*/node_modules/playwright` at runtime (never added to
+`package.json`) and cleans up after itself unconditionally (`try`/`finally`): browser closed, both
+child processes killed, temp directory removed. See
+`sdd/specs/spec-e-burgos-006-web-studio/cycles/cycle-03/artifacts/studio-smoke.md` for the full
+literal output, screenshots, and the two tooling bugs it caught (documented there so nobody has to
+rediscover them: a `Page.waitForFunction` argument-order mistake, and Vite's dev-server dependency
+optimizer firing a full page reload mid-poll).
+
 ## Known limits
 
-- **The preview framing is not the render framing.** In the browser the clip is letterboxed
-  (`object-fit: contain`); the render fills the canvas. It is a Remotion preview/render difference,
-  not a bug of the switchable component — forcing the `render` backend inside the Player reproduces
-  the same letterbox. Aligning them changes the render output (measured) and needs a spec decision;
-  see `cycles/cycle-02/artifacts/visual-verification.md`.
-- **No rendering from the UI yet.** `EP-008`..`EP-010` and `EP-012`..`EP-015` are not called by any
-  screen; timeline editing, job triggering and MP4 download arrive in `cycle-03`.
+- **The Player's default framing now matches the render's** (`PLAYER_MEDIA_STYLE = { objectFit:
+  'fill' }`, `libs/composition-remotion`, D-12) — the preview/render mismatch this bullet used to
+  describe is gone. What is **not** fixed: `fill` stretches a clip whose aspect ratio doesn't match
+  the output canvas anamorphically, in both the Player and the render — that is the render's actual
+  framing bug, deliberately left out of this cycle's scope. See
+  `libs/composition-remotion/README.md`'s D-12 note before touching this.
 - **The upload has no progress bar.** `fetch` reports no upload progress without `XMLHttpRequest`;
-  a large asset shows `Uploading…` and nothing else. Revisit in `cycle-03` if it hurts.
-- **No polling.** The listings refresh on an explicit action (create, upload, retry, health click).
-  Job polling arrives in `cycle-03` and is what will decide whether `useAsyncResource` is enough.
+  a large asset shows `Uploading…` and nothing else.
+- **`vite.config.ts` prints a Vite deprecation warning** (`ESM syntax in a file loaded as
+  CommonJS`) shared by every project in this workspace. Not addressed here: it is a workspace-wide
+  change, not a change of this app.
 - **`vite.config.ts` prints a Vite deprecation warning** (`ESM syntax in a file loaded as
   CommonJS`) shared by every project in this workspace. Not addressed here: it is a workspace-wide
   change, not a change of this app.
