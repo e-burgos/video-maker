@@ -160,21 +160,5 @@
       "file": "tools.schema.json"
     }
   ],
-  "memory": [
-    {
-      "file": "2026-09-09-spec-e-burgos-006-web-studio-cycle-02.md"
-    },
-    {
-      "file": "2026-09-09-spec-e-burgos-006-web-studio-cycle-01.md"
-    },
-    {
-      "file": "2026-09-08-spec-e-burgos-005-render-service-cycle-03.md"
-    },
-    {
-      "file": "2026-09-08-spec-e-burgos-005-render-service-cycle-02.md"
-    },
-    {
-      "file": "2026-09-08-spec-e-burgos-005-render-service-cycle-01.md"
-    }
-  ]
+  "memory": []
 }
