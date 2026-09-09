@@ -108,8 +108,8 @@
     ],
     "files_deleted": [],
     "usage": {
-      "tokens_in": 1184011,
-      "tokens_out": 208946,
+      "tokens_in": 1192663,
+      "tokens_out": 210473,
       "by_agent": [
         {
           "agent": "functional",
@@ -430,11 +430,11 @@
           "label": "coordinacion de cycle-02 en esta sesion: registro de §17 en api.json, GATE B, planner, 20 tasks task-a-task con verificacion propia (run-many + sdd:validate por task), ejecucion real de architect §13 y los dos defectos que encontro, y despacho del reviewer",
           "provider_model": "claude/opus",
           "effort": "high",
-          "tokens_in": 182750,
-          "tokens_out": 32250,
-          "tokens_total": 215000,
-          "approx": true,
-          "source": "declared-estimate",
+          "tokens_in": 191402,
+          "tokens_out": 33777,
+          "tokens_total": 225179,
+          "approx": false,
+          "source": "agent-usage-notification",
           "recorded_at": "2026-09-08"
         }
       ],
@@ -448,8 +448,8 @@
           "source": "declared-estimate"
         },
         "claude/opus": {
-          "tokens_in": 400474,
-          "tokens_out": 70672,
+          "tokens_in": 409126,
+          "tokens_out": 72199,
           "approx": true,
           "source": "declared-estimate"
         }
