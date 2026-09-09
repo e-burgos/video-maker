@@ -24,6 +24,8 @@ export default defineConfig({
         'src/helpers/**/*.ts',
         'src/transitions/**/*.ts',
         'src/render.ts',
+        'src/components/timeline-video.tsx',
+        'src/components/video-backend.tsx',
       ],
       exclude: ['src/**/*.spec.ts'],
       thresholds: { lines: 80, functions: 80, branches: 80, statements: 80 },

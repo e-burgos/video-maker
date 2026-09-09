@@ -1,0 +1,179 @@
+{
+  "$schema": "../../../../schemas/cycle-tasks.schema.json",
+  "spec": "spec-e-burgos-006-web-studio",
+  "cycle": 2,
+  "module": "web-studio",
+  "apps": [
+    "apps/web",
+    "libs/composition-remotion"
+  ],
+  "flow": "lite",
+  "user_stories_generated": true,
+  "prerequisites": {
+    "tasks_generated": true
+  },
+  "tasks": [
+    {
+      "id": "TASK-001",
+      "title": "Add the switchable video component to composition-remotion behind an explicit backend context",
+      "user_stories": [
+        "US-2-001"
+      ],
+      "estimation_hours": 2,
+      "story_points": 3,
+      "depends_on": [],
+      "status": "done",
+      "files": [
+        "libs/composition-remotion/src/components/video-backend.tsx",
+        "libs/composition-remotion/src/components/video-backend.spec.tsx",
+        "libs/composition-remotion/src/components/timeline-video.tsx",
+        "libs/composition-remotion/src/components/timeline-video.spec.tsx",
+        "libs/composition-remotion/src/components/aroll-series.tsx",
+        "libs/composition-remotion/src/components/broll-track.tsx",
+        "libs/composition-remotion/src/index.ts",
+        "libs/composition-remotion/vite.config.ts"
+      ],
+      "usage": {
+        "provider_model": "claude/opus",
+        "effort": "high",
+        "agent": "orchestrator",
+        "tokens_in": 26000,
+        "tokens_out": 4200,
+        "approx": true,
+        "source": "declared-estimate",
+        "recorded_at": "2026-09-09"
+      }
+    },
+    {
+      "id": "TASK-002",
+      "title": "Prove the render output did not change with a real render-api job over media/smoke-ingest",
+      "user_stories": [
+        "US-2-001"
+      ],
+      "estimation_hours": 1,
+      "story_points": 2,
+      "depends_on": [
+        "TASK-001"
+      ],
+      "status": "done",
+      "files": [
+        "sdd/specs/spec-e-burgos-006-web-studio/cycles/cycle-02/artifacts/render-non-regression.md"
+      ],
+      "usage": {
+        "provider_model": "claude/opus",
+        "effort": "high",
+        "agent": "orchestrator",
+        "tokens_in": 14000,
+        "tokens_out": 2600,
+        "approx": true,
+        "source": "declared-estimate",
+        "recorded_at": "2026-09-09"
+      }
+    },
+    {
+      "id": "TASK-003",
+      "title": "Wire the web app to the library and to EP-007: player dependency, aliases, timeline client and preview helpers",
+      "user_stories": [
+        "US-2-002",
+        "US-2-003",
+        "US-2-005"
+      ],
+      "estimation_hours": 2.5,
+      "story_points": 3,
+      "depends_on": [
+        "TASK-001"
+      ],
+      "status": "done",
+      "files": [
+        "package.json",
+        "pnpm-lock.yaml",
+        "apps/web/vite.config.ts",
+        "apps/web/src/api/render-api-client.ts",
+        "apps/web/src/api/render-api-client.spec.ts",
+        "apps/web/src/api/parse-timeline.ts",
+        "apps/web/src/api/parse-timeline.spec.ts",
+        "apps/web/src/api/player-timeline.ts",
+        "apps/web/src/api/player-timeline.spec.ts",
+        "apps/web/src/api/preview-format.ts",
+        "apps/web/src/api/preview-format.spec.ts",
+        "apps/web/src/api/__fixtures__/timeline.ts"
+      ],
+      "usage": {
+        "provider_model": "claude/opus",
+        "effort": "high",
+        "agent": "orchestrator",
+        "tokens_in": 31000,
+        "tokens_out": 6800,
+        "approx": true,
+        "source": "declared-estimate",
+        "recorded_at": "2026-09-09"
+      }
+    },
+    {
+      "id": "TASK-004",
+      "title": "Build the project preview page mounting the real composition in a Remotion Player",
+      "user_stories": [
+        "US-2-002",
+        "US-2-004",
+        "US-2-005"
+      ],
+      "estimation_hours": 3,
+      "story_points": 5,
+      "depends_on": [
+        "TASK-003"
+      ],
+      "status": "done",
+      "files": [
+        "apps/web/src/components/timeline-player.tsx",
+        "apps/web/src/components/timeline-player.spec.tsx",
+        "apps/web/src/pages/project-preview-page.tsx",
+        "apps/web/src/pages/project-preview-page.spec.tsx",
+        "apps/web/src/pages/asset-library-page.tsx",
+        "apps/web/src/app/app.tsx"
+      ],
+      "usage": {
+        "provider_model": "claude/opus",
+        "effort": "high",
+        "agent": "orchestrator",
+        "tokens_in": 29000,
+        "tokens_out": 6200,
+        "approx": true,
+        "source": "declared-estimate",
+        "recorded_at": "2026-09-09"
+      }
+    },
+    {
+      "id": "TASK-005",
+      "title": "Verify the Player in a real browser, register the components and document the preview contract",
+      "user_stories": [
+        "US-2-006",
+        "US-2-004"
+      ],
+      "estimation_hours": 2,
+      "story_points": 3,
+      "depends_on": [
+        "TASK-004"
+      ],
+      "status": "done",
+      "files": [
+        "sdd/specs/spec-e-burgos-006-web-studio/cycles/cycle-02/artifacts/visual-verification.md",
+        "sdd/specs/spec-e-burgos-006-web-studio/cycles/cycle-02/artifacts/preview-player-9x16.png",
+        "sdd/specs/spec-e-burgos-006-web-studio/cycles/cycle-02/artifacts/preview-player-16x9.png",
+        "sdd/specs/spec-e-burgos-006-web-studio/cycles/cycle-02/artifacts/render-frame-reference-8s.png",
+        "sdd/components.json",
+        "apps/web/README.md",
+        "libs/composition-remotion/README.md"
+      ],
+      "usage": {
+        "provider_model": "claude/opus",
+        "effort": "high",
+        "agent": "orchestrator",
+        "tokens_in": 37000,
+        "tokens_out": 9500,
+        "approx": true,
+        "source": "declared-estimate",
+        "recorded_at": "2026-09-09"
+      }
+    }
+  ]
+}

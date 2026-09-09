@@ -25,7 +25,15 @@ export function AssetLibraryPage() {
         <Link to="/" className="text-xs text-slate-500 hover:text-slate-300">
           ← all projects
         </Link>
-        <h1 className="mt-2 font-mono text-2xl font-semibold tracking-tight">{slug}</h1>
+        <div className="mt-2 flex flex-wrap items-center gap-3">
+          <h1 className="font-mono text-2xl font-semibold tracking-tight">{slug}</h1>
+          <Link
+            to={`/projects/${slug}/preview`}
+            className="rounded-md border border-slate-700 px-3 py-1 font-mono text-xs text-slate-300 hover:border-slate-500"
+          >
+            open preview
+          </Link>
+        </div>
         {listing.status === 'ready' && listing.data !== null && (
           <p className="mt-1 text-sm text-slate-400">
             {listing.data.assets.length} raw assets · source{' '}

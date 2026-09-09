@@ -1,6 +1,7 @@
 import type { CSSProperties, FC } from 'react';
-import { AbsoluteFill, Img, OffthreadVideo, Sequence } from 'remotion';
+import { AbsoluteFill, Img, Sequence } from 'remotion';
 import type { VideoSequenceProps } from '../helpers/timeline-to-sequence-props';
+import { TimelineVideo } from './timeline-video';
 
 export interface BrollTrackProps {
   clips: readonly VideoSequenceProps[];
@@ -34,7 +35,7 @@ function mediaStyleFor(fit: VideoSequenceProps['fit']): CSSProperties {
 
 const BrollMedia: FC<{ clip: VideoSequenceProps; style: CSSProperties }> = ({ clip, style }) => {
   if (clip.kind === 'video') {
-    return <OffthreadVideo src={clip.src} trimBefore={clip.trimBefore} muted style={style} />;
+    return <TimelineVideo src={clip.src} trimBefore={clip.trimBefore} style={style} />;
   }
   if (clip.kind === 'image') {
     return <Img src={clip.src} style={style} />;

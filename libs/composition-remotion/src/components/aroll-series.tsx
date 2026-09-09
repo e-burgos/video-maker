@@ -1,5 +1,5 @@
 import { Fragment } from 'react';
-import { Img, OffthreadVideo } from 'remotion';
+import { Img } from 'remotion';
 import { TransitionSeries } from '@remotion/transitions';
 import type { TransitionPresentation } from '@remotion/transitions';
 import type { Fps, TimelineTransition } from '@video-maker/timeline-core';
@@ -8,6 +8,7 @@ import type { ArollTransitionPlan, VideoSequenceProps } from '../helpers/timelin
 import { punchInStyle } from '../helpers/punch-in-style';
 import { transitionTiming } from '../helpers/transition-timing';
 import { presentationFor } from '../transitions/presentation-for';
+import { TimelineVideo } from './timeline-video';
 
 export interface ArollSeriesProps {
   scenes: readonly VideoSequenceProps[];
@@ -47,7 +48,7 @@ function ArollScene({ scene }: { scene: VideoSequenceProps }) {
     return <Img src={scene.src} style={style} />;
   }
 
-  return <OffthreadVideo src={scene.src} trimBefore={scene.trimBefore} muted style={style} />;
+  return <TimelineVideo src={scene.src} trimBefore={scene.trimBefore} style={style} />;
 }
 
 export function ArollSeries({ scenes, transitions, fps }: ArollSeriesProps) {

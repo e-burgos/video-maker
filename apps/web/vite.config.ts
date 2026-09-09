@@ -1,3 +1,4 @@
+import { resolve } from 'node:path';
 import { defineConfig } from 'vitest/config';
 import react from '@vitejs/plugin-react';
 import tailwindcss from '@tailwindcss/vite';
@@ -10,6 +11,15 @@ export default defineConfig({
   cacheDir: '../../node_modules/.vite/web',
   base: process.env['VITE_BASE_PATH'] ?? '/',
   plugins: [tailwindcss(), react()],
+  resolve: {
+    alias: {
+      '@video-maker/composition-remotion': resolve(
+        projectRoot,
+        '../../libs/composition-remotion/src/index.ts',
+      ),
+      '@video-maker/timeline-core': resolve(projectRoot, '../../libs/timeline-core/src/index.ts'),
+    },
+  },
   server: {
     port: Number(process.env['WEB_PORT'] ?? process.env['PORT'] ?? 4200),
     host: 'localhost',

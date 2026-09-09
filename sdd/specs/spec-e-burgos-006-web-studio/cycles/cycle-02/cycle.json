@@ -1,0 +1,159 @@
+{
+  "$schema": "../../../../schemas/cycle.schema.json",
+  "cycle": 2,
+  "module": "web-studio",
+  "spec": "spec-e-burgos-006-web-studio",
+  "apps": [
+    "apps/web",
+    "libs/composition-remotion"
+  ],
+  "phase": "timeline-preview-player",
+  "flow": "lite",
+  "objectives": [
+    "Componente de video conmutable en libs/composition-remotion (Video en Player, OffthreadVideo en render) sin cambiar ningun contrato publico ni la salida del render",
+    "Pagina de preview en apps/web que lee la Timeline persistida por EP-007 y la monta en el Player de Remotion con la composicion real",
+    "Assets del Player resueltos por URL same-origin de EP-011, captions de spec-003 visibles y audio de la timeline reproducido en el navegador",
+    "Evidencia real: render de no-regresion verificado por hash y ffprobe, y verificacion visual con Playwright midiendo el Player en el navegador"
+  ],
+  "status": "completed",
+  "started_at": "2026-09-09",
+  "completed_at": "2026-09-09",
+  "documents": {
+    "plan": "sdd/specs/spec-e-burgos-006-web-studio/cycles/cycle-02/plan.md",
+    "tasks": "sdd/specs/spec-e-burgos-006-web-studio/cycles/cycle-02/tasks.json"
+  },
+  "artifacts": [
+    "sdd/specs/spec-e-burgos-006-web-studio/cycles/cycle-02/artifacts/render-non-regression.md",
+    "sdd/specs/spec-e-burgos-006-web-studio/cycles/cycle-02/artifacts/visual-verification.md",
+    "sdd/specs/spec-e-burgos-006-web-studio/cycles/cycle-02/artifacts/preview-player-9x16.png",
+    "sdd/specs/spec-e-burgos-006-web-studio/cycles/cycle-02/artifacts/preview-player-16x9.png",
+    "sdd/specs/spec-e-burgos-006-web-studio/cycles/cycle-02/artifacts/render-frame-reference-8s.png"
+  ],
+  "metrics": {
+    "tasks_total": 5,
+    "tasks_completed": 5,
+    "story_points": 16,
+    "files_created": [
+      "apps/web/src/api/__fixtures__/timeline.ts",
+      "apps/web/src/api/parse-timeline.spec.ts",
+      "apps/web/src/api/parse-timeline.ts",
+      "apps/web/src/api/player-timeline.spec.ts",
+      "apps/web/src/api/player-timeline.ts",
+      "apps/web/src/api/preview-format.spec.ts",
+      "apps/web/src/api/preview-format.ts",
+      "apps/web/src/components/timeline-player.spec.tsx",
+      "apps/web/src/components/timeline-player.tsx",
+      "apps/web/src/pages/project-preview-page.spec.tsx",
+      "apps/web/src/pages/project-preview-page.tsx",
+      "libs/composition-remotion/src/components/timeline-video.spec.tsx",
+      "libs/composition-remotion/src/components/timeline-video.tsx",
+      "libs/composition-remotion/src/components/video-backend.spec.tsx",
+      "libs/composition-remotion/src/components/video-backend.tsx",
+      "sdd/context/apps/web/updates/2026-09-09-spec-e-burgos-006-web-studio-cycle-02.md",
+      "sdd/context/libs/composition-remotion/updates/2026-09-09-spec-e-burgos-006-web-studio-cycle-02.md",
+      "sdd/memory/journal/2026-09-09-spec-e-burgos-006-web-studio-cycle-02.md",
+      "sdd/specs/spec-e-burgos-006-web-studio/cycles/cycle-02/artifacts/preview-player-16x9.png",
+      "sdd/specs/spec-e-burgos-006-web-studio/cycles/cycle-02/artifacts/preview-player-9x16.png",
+      "sdd/specs/spec-e-burgos-006-web-studio/cycles/cycle-02/artifacts/render-frame-reference-8s.png",
+      "sdd/specs/spec-e-burgos-006-web-studio/cycles/cycle-02/artifacts/render-non-regression.md",
+      "sdd/specs/spec-e-burgos-006-web-studio/cycles/cycle-02/artifacts/visual-verification.md",
+      "sdd/specs/spec-e-burgos-006-web-studio/cycles/cycle-02/cycle.json",
+      "sdd/specs/spec-e-burgos-006-web-studio/cycles/cycle-02/plan.md",
+      "sdd/specs/spec-e-burgos-006-web-studio/cycles/cycle-02/tasks.json"
+    ],
+    "files_modified": [
+      "apps/web/README.md",
+      "apps/web/src/api/render-api-client.spec.ts",
+      "apps/web/src/api/render-api-client.ts",
+      "apps/web/src/app/app.tsx",
+      "apps/web/src/pages/asset-library-page.tsx",
+      "apps/web/vite.config.ts",
+      "libs/composition-remotion/README.md",
+      "libs/composition-remotion/src/components/aroll-series.tsx",
+      "libs/composition-remotion/src/components/broll-track.tsx",
+      "libs/composition-remotion/src/index.ts",
+      "libs/composition-remotion/vite.config.ts",
+      "package.json",
+      "pnpm-lock.yaml",
+      "sdd/catalog.json",
+      "sdd/components.json",
+      "sdd/context/apps/web/constitution.md",
+      "sdd/context/apps/web/context_prompt.md",
+      "sdd/context/constitution.md",
+      "sdd/global.json",
+      "sdd/tasks.json"
+    ],
+    "files_deleted": [
+      "sdd/context/apps/web/updates/2026-09-09-spec-e-burgos-006-web-studio-cycle-01.md"
+    ],
+    "usage": {
+      "tokens_in": 137000,
+      "tokens_out": 29300,
+      "approx": true,
+      "source": "declared-estimate",
+      "by_tier": {
+        "claude/opus": {
+          "tokens_in": 137000,
+          "tokens_out": 29300,
+          "approx": true,
+          "source": "declared-estimate"
+        }
+      },
+      "by_agent": [
+        {
+          "agent": "orchestrator",
+          "label": "solo",
+          "provider_model": "claude/opus",
+          "effort": "high",
+          "tokens_in": 137000,
+          "tokens_out": 29300,
+          "approx": true,
+          "source": "declared-estimate",
+          "recorded_at": "2026-09-09",
+          "tokens_total": 166300
+        }
+      ]
+    }
+  },
+  "tables_created": [],
+  "endpoints_implemented": [],
+  "components_created": [
+    "COMP-009",
+    "COMP-010",
+    "COMP-012",
+    "COMP-013"
+  ],
+  "issues_found": [],
+  "reviewer_report": {
+    "approved": true,
+    "date": "2026-09-09",
+    "ca_results": {
+      "CA-101": "OK — TimelineVideo elige OffthreadVideo sin proveedor y con backend render, y Video con backend player; timeline-video.spec.tsx y video-backend.spec.tsx lo verifican con react-dom/server y remotion mockeado. El default DEFAULT_VIDEO_BACKEND es render.",
+      "CA-102": "OK — la salida del render es byte-identica: job real de render-api sobre media/smoke-ingest (d58734fa) con sha256 c1b9fd9f... en video-muted.mp4 y 4bfe9f7b... en out/<job>.mp4, los mismos de las cuatro corridas previas al cambio. ffprobe del stream de video: h264 1080x1920 30/1, nb_frames 538. Evidencia en artifacts/render-non-regression.md.",
+      "CA-103": "OK — /projects/:slug/preview lee EP-007, valida con TimelineSchema y monta el Player con la metadata de computeTimelineMetadata (538 frames, 30 fps, 1080x1920 medidos en el navegador). Controles de transporte visibles en las dos capturas.",
+      "CA-104": "OK — cada src del Player apunta a http://localhost:4207/api/projects/smoke-ingest/files/... (same-origin, EP-011). player-timeline.spec.ts verifica el percent-encode por segmento y la no-mutacion; media/ no se copio a public/.",
+      "CA-105": "OK — AudioTrack montado en modo mix: 5 <audio> en readyState 4, musica a volume 0.0631 = 10^(-24/20), es decir el gainDb -24 de audioMix.automation. Captions de spec-003 en el DOM (Discarga / Los) y visibles en la captura. La ausencia de loudnorm en el Player quedo escrita en pantalla, en el README de apps/web y en el de la lib.",
+      "CA-106": "OK — ningun contrato publico cambio: renderTimeline, RenderTimelineOptions, RenderTimelineError, TimelineAudioMode y TimelineCompositionProps intactos; render.spec.ts sigue verificando inputProps { timeline } por igualdad estructural. Los exports del barrel son aditivos. apps/render-api y tools/render-cli no se tocaron: el ciclo se mantuvo lite.",
+      "CA-107": "OK — project-preview-page.spec.tsx cubre carga, error tipado (TIMELINE_NOT_FOUND en pantalla sin montar el player) y el resumen de lienzo/duracion/pistas; timeline-player.spec.tsx cubre el wiring del backend y la metadata.",
+      "CA-108": "OK — previewFormat cambia format y safeZone juntos (9:16 top 220 -> 16:9 top 60), no toca pistas ni assets, devuelve la misma referencia si el preset ya coincide y no emite ningun request (getTimeline llamado una sola vez tras el toggle). Verificado tambien en el navegador: 1920x1080 con el <video> en readyState 4 y reproduciendo.",
+      "CA-109": "OK — dos capturas reales en artifacts/ contra render-api vivo. Medido en el navegador, no en la captura: readyState 4, paused false y currentTime 2.499 -> 4.661 s en 1,5 s (tres corridas consistentes). Cero respuestas >= 400 de la aplicacion. El MCP de Playwright del arnes sigue sin servir en esta maquina: Playwright cacheado en ~/.npm/_npx con channel chrome. Guion en artifacts/visual-verification.md.",
+      "CA-110": "OK — COMP-009/COMP-010 (libs/composition-remotion) y COMP-012/COMP-013 (apps/web) en sdd/components.json con su consumes; AssetLibraryPage marcada updated por el link a la preview. pnpm sdd:validate en verde."
+    },
+    "tests": {
+      "apps/web": "21 archivos / 95 tests — 98,56 % stmts · 96,29 % branch · 97,02 % funcs · 99,25 % lines (piso 80 %, coverage.include src/**/*.{ts,tsx} sin recortar).",
+      "libs/composition-remotion": "24 archivos / 256 tests — 93,61 % stmts · 92,3 % branch · 90,9 % funcs · 93,47 % lines (piso 80 %; coverage.include suma timeline-video.tsx y video-backend.tsx, los dos al 100 %).",
+      "workspace": "pnpm nx run-many -t lint test build --skip-nx-cache: Successfully ran targets lint, test, build for 8 projects, sin warnings de lint y sin el aviso de chunk > 500 kB (la ruta de preview quedo code-split: 450 kB inicial + 441 kB perezosos).",
+      "real": "Tres jobs reales de render-api sobre media/smoke-ingest (ebf1b38d, 0ec6d97a, d58734fa) con gate de memoria previo, y tres corridas de Playwright contra el servicio vivo en 4399 + vite en 4207. media/ del dev intacto salvo los artefactos de los propios jobs (gitignorado)."
+    },
+    "notes": "Ciclo lite: un solo actor abrio, implemento y cerro. El mecanismo del video conmutable es un contexto React explicito con default render, elegido sobre getRemotionEnvironment().isRendering por evidencia medida en el codigo instalado de remotion@4.0.522 (esa funcion se apoya en globals internos no simulables en jsdom, y OffthreadVideo ya hace ese branch por dentro). Una unica dependencia npm nueva: @remotion/player@4.0.522, version exacta de remotion (D-2). Se descubrio y midio que el encuadre del preview no es el del render (browser: object-fit contain; render: llena el cuadro); NO lo causa el conmutador —forzar el backend render dentro del Player da el mismo letterbox— y el arreglo obvio (objectFit cover en ArollScene) cambia la salida del render (sha256 2ed415d8 vs c1b9fd9f), asi que se revirtio y quedo como decision de spec. Los dos 404 de consola de cycle-01 quedaron confirmados como /favicon.ico.",
+    "follow_ups": [
+      "cycle-03 se abre [FULL], no lite: el encuadre del preview vs el del render cambia el entregable y necesita decision de spec, ademas de las escrituras de EP-008/EP-010 y los jobs.",
+      "Para decidir el encuadre hace falta un clip de prueba con contenido no uniforme: media/smoke-ingest/raw/aroll/clip01.mp4 es azul casi plano y no distingue cover de fill.",
+      "ArollScene es el unico punto de la lib donde el estilo del clip sale solo de punchInStyle, sin width/height/objectFit, a diferencia de BrollTrack que los declara explicitos. Esa asimetria es la raiz del hallazgo.",
+      "Los data-* de timeline-player.tsx (data-duration-in-frames, data-fps, data-composition-width/height) son el contrato que lee el guion de Playwright: si se renombran, actualizar artifacts/visual-verification.md.",
+      "@nx/enforce-module-boundaries prohibe mezclar import estatico y await import() de la misma lib del workspace. Si alguien vuelve a mover TimelineSchema al cliente, web:lint se pone en rojo.",
+      "apps/web/src/api/asset-media-kind.ts y apps/render-api/src/http/content-type-for.ts siguen siendo la misma tabla en dos lugares, sin test que las ate.",
+      "El journal llego a 5 entradas: quien abra cycle-03 destila sdd/memory/journal/ en lessons.md antes del brief."
+    ]
+  }
+}

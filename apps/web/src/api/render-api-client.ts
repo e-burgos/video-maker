@@ -1,3 +1,4 @@
+import type { Timeline } from '@video-maker/timeline-core';
 import { RENDER_API_BASE_PATH } from './artifact-url';
 import {
   RenderApiError,
@@ -22,6 +23,7 @@ export type RenderApiClient = {
   createProject: (slug: string) => Promise<ProjectDetail>;
   getProject: (slug: string) => Promise<ProjectDetail>;
   listAssets: (slug: string) => Promise<AssetListing>;
+  getTimeline: (slug: string) => Promise<Timeline>;
   uploadAsset: (input: UploadAssetInput) => Promise<AssetListEntry>;
 };
 
@@ -121,6 +123,16 @@ export function createRenderApiClient(fetchImpl: FetchLike): RenderApiClient {
         (value) => isRecord(value) && Array.isArray(value['assets']),
       );
       return body as AssetListing;
+    },
+
+    async getTimeline(slug: string): Promise<Timeline> {
+      const body = await requestJson(
+        `/projects/${encodeURIComponent(slug)}/timeline`,
+        undefined,
+        'a timeline document',
+        (value) => isRecord(value) && value['schemaVersion'] === 1 && isRecord(value['tracks']),
+      );
+      return body as Timeline;
     },
 
     async uploadAsset(input: UploadAssetInput): Promise<AssetListEntry> {

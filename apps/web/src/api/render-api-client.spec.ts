@@ -1,5 +1,6 @@
 import { describe, expect, it, vi } from 'vitest';
 
+import { RAW_PREVIEW_TIMELINE, previewTimelineFixture } from './__fixtures__/timeline';
 import { createRenderApiClient } from './render-api-client';
 import { RenderApiError } from './render-api-error';
 import type { FetchLike } from './render-api-client';
@@ -125,6 +126,26 @@ describe('createRenderApiClient', () => {
     expect(calls[0]?.init?.headers).toEqual({ 'content-type': 'video/mp4' });
     expect(calls[0]?.init?.body).toBe(body);
     expect(result.path).toBe('raw/aroll/clip01.mp4');
+  });
+
+  it('reads the persisted timeline from EP-007 with the slug encoded', async () => {
+    const { fetchImpl, calls } = recordingFetch(() => jsonResponse(RAW_PREVIEW_TIMELINE));
+
+    const result = await createRenderApiClient(fetchImpl).getTimeline('smoke ingest');
+
+    expect(calls[0]?.url).toBe('/api/projects/smoke%20ingest/timeline');
+    expect(calls[0]?.init).toBeUndefined();
+    expect(result).toEqual(previewTimelineFixture());
+  });
+
+  it('rejects a body that is not a timeline document as RESPONSE_SHAPE_UNEXPECTED', async () => {
+    const client = createRenderApiClient(
+      recordingFetch(() => jsonResponse({ schemaVersion: 2, tracks: {} })).fetchImpl,
+    );
+
+    await expect(client.getTimeline('demo')).rejects.toMatchObject({
+      code: 'RESPONSE_SHAPE_UNEXPECTED',
+    });
   });
 
   it('turns a typed service error into a RenderApiError that keeps the code', async () => {

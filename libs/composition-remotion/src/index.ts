@@ -22,6 +22,10 @@ export { ArollSeries } from './components/aroll-series';
 export type { ArollSeriesProps } from './components/aroll-series';
 export { BrollTrack } from './components/broll-track';
 export type { BrollTrackProps } from './components/broll-track';
+export { TimelineVideo } from './components/timeline-video';
+export type { TimelineVideoProps } from './components/timeline-video';
+export { DEFAULT_VIDEO_BACKEND, VideoBackendProvider, useVideoBackend } from './components/video-backend';
+export type { VideoBackend, VideoBackendProviderProps } from './components/video-backend';
 export { AudioTrack } from './components/audio-track';
 export type { AudioTrackProps } from './components/audio-track';
 

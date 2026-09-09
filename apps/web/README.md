@@ -46,7 +46,7 @@ src/
   api/          the render-api boundary: contract types, typed client, error surface, URL builders
   hooks/        useAsyncResource — the only server-state primitive (no query library)
   components/   studio layout, health badge, error notice, asset card/preview/uploader, create form
-  pages/        projects-page, asset-library-page
+  pages/        projects-page, asset-library-page, project-preview-page
   app/app.tsx   router and provider wiring
 ```
 
@@ -59,7 +59,7 @@ src/
   transport codes this app owns: `SERVICE_UNREACHABLE`, `RESPONSE_NOT_JSON` and
   `RESPONSE_SHAPE_UNEXPECTED`.
 - **`media/` is never copied into `public/`.** Assets are read from `EP-011`, which supports
-  `Range` — that is what a `<video>` needs to seek, and what the `<Player>` will need next cycle.
+  `Range` — that is what a `<video>` needs to seek, and what the Remotion `<Player>` uses.
 - No comments in the implementation code; UI copy, identifiers and this README are in English.
 
 ## Assets the browser can render
@@ -76,9 +76,43 @@ real Playwright captures against a live `render-api`, in
 `sdd/specs/spec-e-burgos-006-web-studio/cycles/cycle-XX/artifacts/`. The literal script, and why
 the harness' Playwright MCP could not be used, are in that directory's `visual-verification.md`.
 
-## Known limits (cycle-01)
+## Timeline preview (Remotion Player)
 
-- **No preview and no rendering yet.** `EP-007`..`EP-015` are not called by any screen.
+`/projects/:slug/preview` reads the persisted timeline from `EP-007` and mounts it in a Remotion
+`<Player>` with **the same composition the render uses** (`TimelineComposition` from
+`@video-maker/composition-remotion`), so a-roll, b-roll, transitions and kinetic captions come from
+one source of truth.
+
+- **`@remotion/player` is pinned to the exact `remotion` version** (`4.0.522`). It shares Remotion's
+  internal context; a different version breaks at runtime with no type error.
+- **The composition is wrapped in `<VideoBackendProvider backend="player">`**, which is what makes
+  the tree mount `<Video>` instead of `<OffthreadVideo>`. The provider is never mounted by the
+  render, whose default stays `render` — the render output is unchanged, byte for byte.
+- **Assets are rewritten to absolute same-origin `EP-011` URLs** before mounting
+  (`src/api/player-timeline.ts`). The library's `assetSrc` would otherwise call `staticFile()` for a
+  relative path — resolving against this app's empty `public/` — or build a `file://` URL the
+  browser cannot load. Same-origin is what makes `Range` work without CORS (D-4).
+- **Audio: the player mixes, it does not master.** The composition mounts `AudioTrack` in its
+  default `mix` mode, so the preview plays the voice at each clip's `gainDb` and the music through
+  the timeline's ducking automation (measured: `volume 0.0631` = -24 dB). The `-14 LUFS`
+  `loudnorm` of the deliverable runs in `libs/media-local` and is **not** reproduced in the browser.
+- **The 9:16 / 16:9 selector is preview-only.** `previewFormat()` swaps `format` **and** `safeZone`
+  together and never writes: the persisted 9:16 safe zone on a 16:9 canvas would push the captions
+  out of frame. Nothing is sent to `EP-008`.
+- **The route is code-split** (`React.lazy`): the Player, Remotion and the composition are a 441 kB
+  chunk that only this route loads, so the projects and asset screens keep their original bundle.
+  `TimelineSchema` is likewise only imported by `src/api/parse-timeline.ts`, which is reached from
+  this chunk.
+
+## Known limits
+
+- **The preview framing is not the render framing.** In the browser the clip is letterboxed
+  (`object-fit: contain`); the render fills the canvas. It is a Remotion preview/render difference,
+  not a bug of the switchable component — forcing the `render` backend inside the Player reproduces
+  the same letterbox. Aligning them changes the render output (measured) and needs a spec decision;
+  see `cycles/cycle-02/artifacts/visual-verification.md`.
+- **No rendering from the UI yet.** `EP-008`..`EP-010` and `EP-012`..`EP-015` are not called by any
+  screen; timeline editing, job triggering and MP4 download arrive in `cycle-03`.
 - **The upload has no progress bar.** `fetch` reports no upload progress without `XMLHttpRequest`;
   a large asset shows `Uploading…` and nothing else. Revisit in `cycle-03` if it hurts.
 - **No polling.** The listings refresh on an explicit action (create, upload, retry, health click).

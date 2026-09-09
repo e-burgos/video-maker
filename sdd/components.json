@@ -183,6 +183,36 @@
         "consumes": [],
         "created_at": "2026-09-07",
         "changelog": []
+      },
+      {
+        "id": "COMP-009",
+        "name": "TimelineVideo",
+        "type": "component",
+        "module": "web-studio",
+        "spec": "sdd/specs/spec-e-burgos-006-web-studio",
+        "path": "src/components/timeline-video.tsx",
+        "status": "implemented",
+        "created_in_cycle": 2,
+        "updated_in_cycle": null,
+        "description": "Componente de video conmutable de la composicion: monta OffthreadVideo cuando el backend es render (default sin proveedor, deja la salida del render byte-identica) y Video cuando es player, con los mismos props src/trimBefore/muted/style. Lo usan ArollScene y BrollMedia.",
+        "consumes": [],
+        "created_at": "2026-09-09",
+        "changelog": []
+      },
+      {
+        "id": "COMP-010",
+        "name": "VideoBackendProvider",
+        "type": "component",
+        "module": "web-studio",
+        "spec": "sdd/specs/spec-e-burgos-006-web-studio",
+        "path": "src/components/video-backend.tsx",
+        "status": "implemented",
+        "created_in_cycle": 2,
+        "updated_in_cycle": null,
+        "description": "Contexto que declara el backend de video del arbol (render | player) con default render, mas el hook useVideoBackend. El render no lo monta nunca; solo el Player de apps/web lo envuelve con backend player.",
+        "consumes": [],
+        "created_at": "2026-09-09",
+        "changelog": []
       }
     ]
   },
@@ -276,15 +306,21 @@
         "module": "web-studio",
         "spec": "sdd/specs/spec-e-burgos-006-web-studio",
         "path": "src/pages/asset-library-page.tsx",
-        "status": "implemented",
+        "status": "updated",
         "created_in_cycle": 1,
-        "updated_in_cycle": null,
+        "updated_in_cycle": 2,
         "description": "Biblioteca de assets crudos de un proyecto agrupada por los cuatro roles, con el source del listado (catalog | raw-scan) y las probeFailures del catalogo.",
         "consumes": [
           "EP-005"
         ],
         "created_at": "2026-09-09",
-        "changelog": []
+        "changelog": [
+          {
+            "cycle": 2,
+            "date": "2026-09-09",
+            "change": "adds the open preview link to /projects/:slug/preview"
+          }
+        ]
       },
       {
         "id": "COMP-007",
@@ -362,6 +398,41 @@
         "updated_in_cycle": null,
         "description": "Unico primitivo de estado de servidor: loading/ready/error con reload y descarte de la respuesta de un request obsoleto.",
         "consumes": [],
+        "created_at": "2026-09-09",
+        "changelog": []
+      },
+      {
+        "id": "COMP-012",
+        "name": "TimelinePlayer",
+        "type": "component",
+        "module": "web-studio",
+        "spec": "sdd/specs/spec-e-burgos-006-web-studio",
+        "path": "src/components/timeline-player.tsx",
+        "status": "implemented",
+        "created_in_cycle": 2,
+        "updated_in_cycle": null,
+        "description": "Monta la TimelineComposition real dentro del Player de Remotion bajo VideoBackendProvider backend=player, derivando durationInFrames, fps y el tamano de composicion de computeTimelineMetadata, con los controles de transporte del Player.",
+        "consumes": [
+          "EP-011"
+        ],
+        "created_at": "2026-09-09",
+        "changelog": []
+      },
+      {
+        "id": "COMP-013",
+        "name": "ProjectPreviewPage",
+        "type": "page",
+        "module": "web-studio",
+        "spec": "sdd/specs/spec-e-burgos-006-web-studio",
+        "path": "src/pages/project-preview-page.tsx",
+        "status": "implemented",
+        "created_in_cycle": 2,
+        "updated_in_cycle": null,
+        "description": "Pagina de preview del proyecto: lee la Timeline persistida por EP-007, la valida contra TimelineSchema, reescribe los assets a URLs same-origin de EP-011, ofrece el override de formato 9:16 / 16:9 (solo preview, nunca escribe) y monta el TimelinePlayer con el resumen de lienzo, duracion y pistas.",
+        "consumes": [
+          "EP-007",
+          "EP-011"
+        ],
         "created_at": "2026-09-09",
         "changelog": []
       }

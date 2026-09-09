@@ -34,6 +34,7 @@ Todo lo exportado vive en `src/index.ts` (firmas completas en `architect.md` §3
 | Audio | `gainDbToVolume`, `volumeAtFrame` |
 | Transiciones | `whipPanStyle`, `whipPan`, `presentationFor`, tipos `WhipPanProps`, `ArollPresentation`, `PresentationDirection` |
 | Componentes | `ArollSeries`, `BrollTrack`, `AudioTrack`, `KineticCaptions`, `TimelineComposition` |
+| Backend de video (Player vs render) | `TimelineVideo`, `VideoBackendProvider`, `useVideoBackend`, `DEFAULT_VIDEO_BACKEND`, tipos `TimelineVideoProps`, `VideoBackend`, `VideoBackendProviderProps` |
 | Metadata / composición raíz | `computeTimelineMetadata`, `calculateTimelineMetadata`, `TIMELINE_COMPOSITION_ID` |
 | Tipos derivados públicos | `CaptionBox`, `TransitionDirection` (el resto de `timeline-types.ts` es interno) |
 | Kinetic captions — presets | `CAPTION_PRESETS`, `CAPTION_PRESET_IDS`, `DEFAULT_CAPTION_PRESET_ID`, `captionPreset`, tipos `CaptionPreset`, `CaptionPresetId`, `CaptionStroke`, `CaptionPill`, `CaptionTextTransform` |
@@ -296,15 +297,52 @@ un solo frame (CA-18, RNF-3). El único camino a un render real es este procedim
 5. Límite de concurrencia del ejemplo: **4** (`DEFAULT_RENDER_CONCURRENCY`, CA-16) — nunca "lo que
    la CPU permita".
 
-## `OffthreadVideo` vs `Video` (nota para `spec-006`)
+## `OffthreadVideo` vs `Video` — componente conmutable (resuelto en `spec-006` cycle-02)
 
-Esta lib usa `OffthreadVideo` en `ArollSeries` y `BrollTrack` porque extrae frames vía el renderer
-de Remotion y eso es lo que optimiza el render a MP4 (RF-12, el objetivo de este ciclo). Ese mismo
-componente **no es equivalente** dentro de un `<Player>` embebido en el navegador (cae a un
-`<video>` en preview, sin garantía de comportamiento idéntico). `spec-006`, que monta esta
-composición en un `<Player>` de `apps/web`, va a necesitar un componente de video conmutable
-(`<Video>` para el Player, `<OffthreadVideo>` para el render) — no resuelto en este ciclo para no
-diseñar a ciegas contra un consumidor que todavía no existe (R-2 de `architect.md`).
+`ArollSeries` y `BrollTrack` ya no montan `<OffthreadVideo>` directamente: montan `TimelineVideo`,
+que elige el componente según el **backend de video** declarado por contexto.
+
+```tsx
+import { TimelineComposition, VideoBackendProvider } from '@video-maker/composition-remotion';
+
+// en un <Player> del navegador
+<VideoBackendProvider backend="player">
+  <TimelineComposition timeline={timeline} />
+</VideoBackendProvider>
+```
+
+- **El default es `'render'` y no hay que declararlo nunca en el camino del render.** Sin proveedor,
+  `TimelineVideo` monta `<OffthreadVideo>` con exactamente los props de antes
+  (`src`, `trimBefore`, `muted`, `style`). Verificado byte a byte: un job real de `render-api` sobre
+  `media/smoke-ingest` después del cambio reprodujo el `sha256` de la línea base
+  (`video-muted.mp4` `c1b9fd9f…`, `out/<job>.mp4` `4bfe9f7b…`).
+- **Se eligió un contexto explícito y no `getRemotionEnvironment().isRendering`.** Esa función se
+  apoya en globals internos (`window.process.env.NODE_ENV`, `window.remotion_puppeteerTimeout`) que
+  no son contrato y no se pueden simular en jsdom sin falsificarlos; además `OffthreadVideo` ya hace
+  ese branch por dentro. Declarar el backend deja el árbol del render idéntico por construcción y
+  testeable sin globals.
+- **Ningún contrato público cambió**: `renderTimeline`, `RenderTimelineOptions`,
+  `RenderTimelineError`, `TimelineAudioMode` y `TimelineCompositionProps` son los de antes. Los
+  exports nuevos del barrel (`TimelineVideo`, `VideoBackendProvider`, `useVideoBackend`,
+  `DEFAULT_VIDEO_BACKEND`, tipos `VideoBackend` / `VideoBackendProviderProps`) son aditivos.
+
+### El audio del Player no es el del entregable
+
+Dentro de un `<Player>`, `TimelineComposition` monta `AudioTrack` (modo `mix`, el default): se
+escucha la voz al `gainDb` de cada clip y la música por la curva de `audioMix.automation`. **El
+`loudnorm` a -14 LUFS no existe en el navegador** — vive en `libs/media-local` y sólo corre en el
+pipeline del entregable. La paridad prometida es la curva de ducking, no el nivel absoluto de voz.
+
+### Lo que el componente conmutable NO resuelve: el encuadre
+
+Medido en `spec-006` cycle-02: en el navegador el `<video>` queda `object-fit: contain` sobre el
+lienzo, así que un clip 16:9 en una composición 9:16 se ve con bandas negras; **el render llena el
+cuadro**. No lo causa el conmutador — forzar el backend `render` dentro del mismo Player da el
+mismo letterbox. Alinearlos exige un estilo explícito en `ArollScene` (espejo del
+`COVER_MEDIA_STYLE` de `BrollTrack`), y eso **cambia la salida del render**: probado, el
+`video-muted.mp4` pasó de `c1b9fd9f…` a `2ed415d8…`. Es una decisión de spec, no un ajuste;
+pendiente para `spec-006` cycle-03 (`[FULL]`), con un clip de prueba de contenido no uniforme —
+`smoke-ingest` es azul casi plano y no distingue `cover` de `fill`.
 
 ## `file://` para assets absolutos (no verificado en este ciclo)
 
