@@ -141,8 +141,8 @@
     ],
     "files_deleted": [],
     "usage": {
-      "tokens_in": 2730686,
-      "tokens_out": 481884,
+      "tokens_in": 2756813,
+      "tokens_out": 486495,
       "by_agent": [
         {
           "agent": "functional",
@@ -185,11 +185,11 @@
           "label": "coordinacion cycle-03",
           "provider_model": "claude/opus",
           "effort": "high",
-          "tokens_in": 306000,
-          "tokens_out": 54000,
-          "tokens_total": 360000,
-          "approx": true,
-          "source": "declared-estimate",
+          "tokens_in": 332127,
+          "tokens_out": 58611,
+          "tokens_total": 390738,
+          "approx": false,
+          "source": "agent-usage-notification",
           "recorded_at": "2026-09-09"
         },
         {
@@ -237,15 +237,15 @@
           "source": "agent-usage-notification"
         },
         "claude/opus": {
-          "tokens_in": 768689,
-          "tokens_out": 135651,
-          "approx": true,
-          "source": "declared-estimate"
+          "tokens_in": 794816,
+          "tokens_out": 140262,
+          "approx": false,
+          "source": "agent-usage-notification"
         }
       },
       "tokens_total": 3468978,
-      "approx": true,
-      "source": "declared-estimate",
+      "approx": false,
+      "source": "agent-usage-notification",
       "duration_minutes": 460
     },
     "tasks_skipped": 0
