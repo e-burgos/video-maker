@@ -46,9 +46,9 @@
         "path": "/health",
         "module": "render-service",
         "spec": "sdd/specs/spec-e-burgos-005-render-service",
-        "status": "implemented",
+        "status": "updated",
         "created_in_cycle": 1,
-        "updated_in_cycle": null,
+        "updated_in_cycle": 2,
         "description": "Service health probe. Reports the resolved state of the two engine modules loaded via dynamic import (media-local, composition-remotion/render), the resolution state of the media binaries (ffmpeg, ffprobe) by logical name and env var — never their resolved host path — and the capabilities enabled in this cycle. Answers 200 in both the ok and degraded states.",
         "path_params": [],
         "required_headers": [],
@@ -57,6 +57,261 @@
           "200": "application/json: { status: 'ok' | 'degraded', service: 'render-api', cycle: number, time: ISO-8601 string, engine: [{ name, loaded }], binaries: [{ name, envVar, resolved }], capabilities: { renderPipeline, assetStore, jobQueue } }. status is ok only when every engine module loaded and every binary resolved.",
           "405": "application/json: { error: { code: 'METHOD_NOT_ALLOWED', stage: null, message, resource, expected } } with an Allow header, for any method other than GET on this path.",
           "500": "application/json: { error: { code: 'INTERNAL_ERROR', stage: null, message } } from the central error handler."
+        },
+        "changelog": [
+          {
+            "cycle": 2,
+            "date": "2026-09-08",
+            "change": "capabilities.assetStore now reports true and cycle now reports 2; the asset store shipped in this cycle does not affect the ok/degraded calculation."
+          }
+        ]
+      },
+      {
+        "id": "EP-002",
+        "method": "GET",
+        "path": "/projects",
+        "module": "render-service",
+        "spec": "sdd/specs/spec-e-burgos-005-render-service",
+        "status": "implemented",
+        "created_in_cycle": 2,
+        "updated_in_cycle": null,
+        "description": "Lists every project directory under the configured media root, ascending by slug, with the five layout flags (raw, catalog, timeline, edl, out). Files and non-portable directory names are ignored silently; a missing media root answers an empty array.",
+        "path_params": [],
+        "required_headers": [],
+        "request_body": {},
+        "responses": {
+          "200": "application/json: ProjectSummary[] = [{ slug, layout: { raw, catalog, timeline, edl, out } }] sorted ascending by slug. Empty array when the media root does not exist.",
+          "500": "INTERNAL_ERROR from the central error handler on a real storage failure. application/json: { error: { code, stage: null, message, resource?, expected?, hint?, assetPersisted?, catalogUpdated? } }."
+        },
+        "changelog": []
+      },
+      {
+        "id": "EP-003",
+        "method": "POST",
+        "path": "/projects",
+        "module": "render-service",
+        "spec": "sdd/specs/spec-e-burgos-005-render-service",
+        "status": "implemented",
+        "created_in_cycle": 2,
+        "updated_in_cycle": null,
+        "description": "Creates the canonical media project layout for a slug: raw/aroll, raw/broll, raw/images, raw/audio, work and out, in that order. Never touches an existing project.",
+        "path_params": [],
+        "required_headers": [],
+        "request_body": {
+          "content-type": "application/json (not required, DT-12)",
+          "schema": "{ slug: string } — unknown keys ignored, capped by RENDER_API_MAX_JSON_BODY_BYTES"
+        },
+        "responses": {
+          "201": "application/json ProjectDetail with layout.catalog/timeline/edl false and assetCounts all zero, plus a location: /projects/<slug> header.",
+          "400": "REQUEST_BODY_INVALID_JSON — body is not a JSON object or slug is not a string. application/json: { error: { code, stage: null, message, resource?, expected?, hint?, assetPersisted?, catalogUpdated? } }.",
+          "409": "PROJECT_ALREADY_EXISTS — the directory already exists. application/json: { error: { code, stage: null, message, resource?, expected?, hint?, assetPersisted?, catalogUpdated? } }.",
+          "413": "REQUEST_BODY_TOO_LARGE. application/json: { error: { code, stage: null, message, resource?, expected?, hint?, assetPersisted?, catalogUpdated? } }.",
+          "422": "PROJECT_SLUG_INVALID — slug breaks RN-2; no storage port was invoked. application/json: { error: { code, stage: null, message, resource?, expected?, hint?, assetPersisted?, catalogUpdated? } }."
+        },
+        "changelog": []
+      },
+      {
+        "id": "EP-004",
+        "method": "GET",
+        "path": "/projects/:slug",
+        "module": "render-service",
+        "spec": "sdd/specs/spec-e-burgos-005-render-service",
+        "status": "implemented",
+        "created_in_cycle": 2,
+        "updated_in_cycle": null,
+        "description": "Project detail: layout flags plus assetSource (catalog | raw-scan) and assetCounts by role, both derived from the same resolveProjectAssets used by EP-005.",
+        "path_params": [
+          "slug"
+        ],
+        "required_headers": [],
+        "request_body": {},
+        "responses": {
+          "200": "application/json: { slug, layout, assetSource: 'catalog' | 'raw-scan', assetCounts: { aroll, broll, image, audio } } — the four roles are always present.",
+          "404": "PROJECT_NOT_FOUND. application/json: { error: { code, stage: null, message, resource?, expected?, hint?, assetPersisted?, catalogUpdated? } }.",
+          "422": "PROJECT_SLUG_INVALID. application/json: { error: { code, stage: null, message, resource?, expected?, hint?, assetPersisted?, catalogUpdated? } }.",
+          "500": "CATALOG_UNREADABLE or PROJECT_LAYOUT_INVALID. application/json: { error: { code, stage: null, message, resource?, expected?, hint?, assetPersisted?, catalogUpdated? } }."
+        },
+        "changelog": []
+      },
+      {
+        "id": "EP-005",
+        "method": "GET",
+        "path": "/projects/:slug/assets",
+        "module": "render-service",
+        "spec": "sdd/specs/spec-e-burgos-005-render-service",
+        "status": "implemented",
+        "created_in_cycle": 2,
+        "updated_in_cycle": null,
+        "description": "Lists the raw assets of a project. work/catalog.json is the source of truth when it exists and validates (source: catalog, media from the catalog entry); otherwise a raw scan of raw/ answers with media null and probes nothing. A corrupt catalog never falls back to the raw scan.",
+        "path_params": [
+          "slug"
+        ],
+        "required_headers": [],
+        "request_body": {},
+        "responses": {
+          "200": "application/json: { slug, source: 'catalog' | 'raw-scan', assets: [{ path, role, fingerprint: { sizeBytes, modifiedAtMs }, media: MediaAsset | null }], probeFailures: [{ path, errorCode }] } — probeFailures never carries the engine message.",
+          "404": "PROJECT_NOT_FOUND. application/json: { error: { code, stage: null, message, resource?, expected?, hint?, assetPersisted?, catalogUpdated? } }.",
+          "422": "PROJECT_SLUG_INVALID. application/json: { error: { code, stage: null, message, resource?, expected?, hint?, assetPersisted?, catalogUpdated? } }.",
+          "500": "CATALOG_UNREADABLE (catalog present but unreadable) or PROJECT_LAYOUT_INVALID (raw/ missing on a raw scan). application/json: { error: { code, stage: null, message, resource?, expected?, hint?, assetPersisted?, catalogUpdated? } }."
+        },
+        "changelog": []
+      },
+      {
+        "id": "EP-006",
+        "method": "PUT",
+        "path": "/projects/:slug/assets/:role/:filename",
+        "module": "render-service",
+        "spec": "sdd/specs/spec-e-burgos-005-render-service",
+        "status": "implemented",
+        "created_in_cycle": 2,
+        "updated_in_cycle": null,
+        "description": "Uploads one raw asset as a raw binary body (never multipart) into raw/<rawDirectoryForRole(role)>/<filename>, writing to work/.uploads and promoting it with a rename, then probing it and merging the entry into work/catalog.json within the same request. A failed probe keeps the file and records the failure in the catalog.",
+        "path_params": [
+          "slug",
+          "role",
+          "filename"
+        ],
+        "required_headers": [
+          "content-length",
+          "content-type"
+        ],
+        "request_body": {
+          "content-type": "the asset media type",
+          "schema": "raw binary body, capped by RENDER_API_MAX_UPLOAD_BYTES"
+        },
+        "responses": {
+          "201": "application/json: the catalog entry just written { path, role, fingerprint, media } plus a location: /projects/<slug>/files/raw/<dir>/<filename> header.",
+          "400": "ASSET_CONTENT_TYPE_REQUIRED or ASSET_UPLOAD_ABORTED — nothing was promoted. application/json: { error: { code, stage: null, message, resource?, expected?, hint?, assetPersisted?, catalogUpdated? } }.",
+          "404": "PROJECT_NOT_FOUND. application/json: { error: { code, stage: null, message, resource?, expected?, hint?, assetPersisted?, catalogUpdated? } }.",
+          "409": "ASSET_ALREADY_EXISTS — the destination exists; the temporary is removed. application/json: { error: { code, stage: null, message, resource?, expected?, hint?, assetPersisted?, catalogUpdated? } }.",
+          "411": "ASSET_CONTENT_LENGTH_REQUIRED. application/json: { error: { code, stage: null, message, resource?, expected?, hint?, assetPersisted?, catalogUpdated? } }.",
+          "413": "ASSET_TOO_LARGE — rejected from the content-length header before the first byte. application/json: { error: { code, stage: null, message, resource?, expected?, hint?, assetPersisted?, catalogUpdated? } }.",
+          "422": "PROJECT_SLUG_INVALID, ASSET_ROLE_INVALID or ASSET_PATH_INVALID — no storage port was invoked. application/json: { error: { code, stage: null, message, resource?, expected?, hint?, assetPersisted?, catalogUpdated? } }.",
+          "500": "CATALOG_UNREADABLE (assetPersisted true, catalogUpdated false), MEDIA_COMMAND_FAILED or MEDIA_OUTPUT_UNPARSEABLE (assetPersisted true, catalogUpdated true). application/json: { error: { code, stage: null, message, resource?, expected?, hint?, assetPersisted?, catalogUpdated? } }.",
+          "503": "MEDIA_BINARY_NOT_FOUND with assetPersisted true and catalogUpdated true. application/json: { error: { code, stage: null, message, resource?, expected?, hint?, assetPersisted?, catalogUpdated? } }."
+        },
+        "changelog": []
+      },
+      {
+        "id": "EP-007",
+        "method": "GET",
+        "path": "/projects/:slug/timeline",
+        "module": "render-service",
+        "spec": "sdd/specs/spec-e-burgos-005-render-service",
+        "status": "implemented",
+        "created_in_cycle": 2,
+        "updated_in_cycle": null,
+        "description": "Reads work/timeline.json and answers the parsed document validated against TimelineSchema, with no envelope. An absent file is a 404, never a null body.",
+        "path_params": [
+          "slug"
+        ],
+        "required_headers": [],
+        "request_body": {},
+        "responses": {
+          "200": "application/json: the Timeline document as stored.",
+          "404": "PROJECT_NOT_FOUND or TIMELINE_NOT_FOUND. application/json: { error: { code, stage: null, message, resource?, expected?, hint?, assetPersisted?, catalogUpdated? } }.",
+          "422": "PROJECT_SLUG_INVALID or TIMELINE_INVALID (the stored document does not parse or does not validate). application/json: { error: { code, stage: null, message, resource?, expected?, hint?, assetPersisted?, catalogUpdated? } }."
+        },
+        "changelog": []
+      },
+      {
+        "id": "EP-008",
+        "method": "PUT",
+        "path": "/projects/:slug/timeline",
+        "module": "render-service",
+        "spec": "sdd/specs/spec-e-burgos-005-render-service",
+        "status": "implemented",
+        "created_in_cycle": 2,
+        "updated_in_cycle": null,
+        "description": "Full replacement of work/timeline.json. The body is validated with TimelineSchema before any write port is invoked and the bytes are produced by writeTimeline of @video-maker/auto-montage, so they are byte-identical to what tools/render-cli writes.",
+        "path_params": [
+          "slug"
+        ],
+        "required_headers": [],
+        "request_body": {
+          "content-type": "application/json (not required, DT-12)",
+          "schema": "a complete Timeline document, capped by RENDER_API_MAX_JSON_BODY_BYTES"
+        },
+        "responses": {
+          "200": "application/json: { slug, path: 'work/timeline.json' } — 200 both on create and on replace.",
+          "400": "REQUEST_BODY_INVALID_JSON. application/json: { error: { code, stage: null, message, resource?, expected?, hint?, assetPersisted?, catalogUpdated? } }.",
+          "404": "PROJECT_NOT_FOUND. application/json: { error: { code, stage: null, message, resource?, expected?, hint?, assetPersisted?, catalogUpdated? } }.",
+          "413": "REQUEST_BODY_TOO_LARGE. application/json: { error: { code, stage: null, message, resource?, expected?, hint?, assetPersisted?, catalogUpdated? } }.",
+          "422": "PROJECT_SLUG_INVALID or TIMELINE_INVALID — nothing was written. application/json: { error: { code, stage: null, message, resource?, expected?, hint?, assetPersisted?, catalogUpdated? } }."
+        },
+        "changelog": []
+      },
+      {
+        "id": "EP-009",
+        "method": "GET",
+        "path": "/projects/:slug/edl",
+        "module": "render-service",
+        "spec": "sdd/specs/spec-e-burgos-005-render-service",
+        "status": "implemented",
+        "created_in_cycle": 2,
+        "updated_in_cycle": null,
+        "description": "Reads work/edl.json and answers the parsed document validated against EditDecisionListSchema, with no envelope. An absent file is a 404, never a null body.",
+        "path_params": [
+          "slug"
+        ],
+        "required_headers": [],
+        "request_body": {},
+        "responses": {
+          "200": "application/json: the EditDecisionList document as stored.",
+          "404": "PROJECT_NOT_FOUND or EDL_NOT_FOUND. application/json: { error: { code, stage: null, message, resource?, expected?, hint?, assetPersisted?, catalogUpdated? } }.",
+          "422": "PROJECT_SLUG_INVALID or EDL_INVALID. application/json: { error: { code, stage: null, message, resource?, expected?, hint?, assetPersisted?, catalogUpdated? } }."
+        },
+        "changelog": []
+      },
+      {
+        "id": "EP-010",
+        "method": "PUT",
+        "path": "/projects/:slug/edl",
+        "module": "render-service",
+        "spec": "sdd/specs/spec-e-burgos-005-render-service",
+        "status": "implemented",
+        "created_in_cycle": 2,
+        "updated_in_cycle": null,
+        "description": "Full replacement of work/edl.json. Validated with EditDecisionListSchema before any write port is invoked; the bytes come from writeEditDecisionList of @video-maker/auto-montage.",
+        "path_params": [
+          "slug"
+        ],
+        "required_headers": [],
+        "request_body": {
+          "content-type": "application/json (not required, DT-12)",
+          "schema": "a complete EditDecisionList document, capped by RENDER_API_MAX_JSON_BODY_BYTES"
+        },
+        "responses": {
+          "200": "application/json: { slug, path: 'work/edl.json' }.",
+          "400": "REQUEST_BODY_INVALID_JSON. application/json: { error: { code, stage: null, message, resource?, expected?, hint?, assetPersisted?, catalogUpdated? } }.",
+          "404": "PROJECT_NOT_FOUND. application/json: { error: { code, stage: null, message, resource?, expected?, hint?, assetPersisted?, catalogUpdated? } }.",
+          "413": "REQUEST_BODY_TOO_LARGE. application/json: { error: { code, stage: null, message, resource?, expected?, hint?, assetPersisted?, catalogUpdated? } }.",
+          "422": "PROJECT_SLUG_INVALID or EDL_INVALID — nothing was written. application/json: { error: { code, stage: null, message, resource?, expected?, hint?, assetPersisted?, catalogUpdated? } }."
+        },
+        "changelog": []
+      },
+      {
+        "id": "EP-011",
+        "method": "GET",
+        "path": "/projects/:slug/files/*path",
+        "module": "render-service",
+        "spec": "sdd/specs/spec-e-burgos-005-render-service",
+        "status": "implemented",
+        "created_in_cycle": 2,
+        "updated_in_cycle": null,
+        "description": "Streams any project artifact under raw/, work/ or out/ as raw bytes, served by the process itself instead of a signed URL. Content type comes from a closed extension table and a single-range Range header is honoured. This route never parses the file content.",
+        "path_params": [
+          "slug",
+          "path"
+        ],
+        "required_headers": [],
+        "request_body": {},
+        "responses": {
+          "200": "the file bytes with content-type from the extension table, content-length and accept-ranges: bytes — also for a malformed or multi-range Range header.",
+          "206": "the requested bytes with content-range: bytes <start>-<end>/<size> and the narrowed content-length.",
+          "404": "PROJECT_NOT_FOUND, or ARTIFACT_NOT_FOUND when the path is absent or is a directory (no directory listing). application/json: { error: { code, stage: null, message, resource?, expected?, hint?, assetPersisted?, catalogUpdated? } }.",
+          "416": "RANGE_NOT_SATISFIABLE with a content-range: bytes */<size> header. application/json: { error: { code, stage: null, message, resource?, expected?, hint?, assetPersisted?, catalogUpdated? } }.",
+          "422": "PROJECT_SLUG_INVALID, or ASSET_PATH_INVALID for a non-portable path or one outside raw/, work/ and out/. application/json: { error: { code, stage: null, message, resource?, expected?, hint?, assetPersisted?, catalogUpdated? } }."
         },
         "changelog": []
       }

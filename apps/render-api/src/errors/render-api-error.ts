@@ -18,9 +18,34 @@ export const RENDER_API_ERROR_CODES = [
   'METHOD_NOT_ALLOWED',
   'SERVER_CONFIG_INVALID',
   'INTERNAL_ERROR',
+  'PROJECT_NOT_FOUND',
+  'PROJECT_SLUG_INVALID',
+  'PROJECT_ALREADY_EXISTS',
+  'PROJECT_LAYOUT_INVALID',
+  'ASSET_ROLE_INVALID',
+  'ASSET_PATH_INVALID',
+  'ASSET_ALREADY_EXISTS',
+  'ASSET_CONTENT_LENGTH_REQUIRED',
+  'ASSET_CONTENT_TYPE_REQUIRED',
+  'ASSET_TOO_LARGE',
+  'ASSET_UPLOAD_ABORTED',
+  'TIMELINE_NOT_FOUND',
+  'TIMELINE_INVALID',
+  'EDL_NOT_FOUND',
+  'EDL_INVALID',
+  'ARTIFACT_NOT_FOUND',
+  'RANGE_NOT_SATISFIABLE',
+  'CATALOG_UNREADABLE',
+  'REQUEST_BODY_INVALID_JSON',
+  'REQUEST_BODY_TOO_LARGE',
 ] as const;
 
 export type RenderApiErrorCode = (typeof RENDER_API_ERROR_CODES)[number];
+
+export interface RenderApiErrorDetails {
+  readonly assetPersisted?: boolean;
+  readonly catalogUpdated?: boolean;
+}
 
 export interface RenderApiErrorPayload {
   readonly code: RenderApiErrorCode;
@@ -29,6 +54,8 @@ export interface RenderApiErrorPayload {
   readonly resource?: string;
   readonly expected?: string;
   readonly hint?: string;
+  readonly assetPersisted?: boolean;
+  readonly catalogUpdated?: boolean;
 }
 
 export abstract class RenderApiError extends Error {
@@ -37,6 +64,7 @@ export abstract class RenderApiError extends Error {
   abstract readonly resource: string | null;
   abstract readonly expected: string | null;
   abstract readonly hint: string | null;
+  abstract readonly details: RenderApiErrorDetails | null;
 }
 
 export function isRenderApiError(value: unknown): value is RenderApiError {

@@ -67,7 +67,7 @@ const MEDIA_LOCAL_CODE_MAP: Readonly<
 
 export function translateEngineError(
   cause: unknown,
-  stage: RenderPipelineStage,
+  stage: RenderPipelineStage | null,
   resource: string,
   fallbackCode: RenderApiErrorCode = 'INTERNAL_ERROR',
 ): RenderApiError {

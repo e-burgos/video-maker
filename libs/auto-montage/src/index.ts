@@ -2,6 +2,25 @@ export { resolveMediaProject } from './project/media-project';
 export type { MediaProject } from './project/media-project';
 
 export {
+  buildProjectSubdirectories,
+  catalogPath,
+  editDecisionListPath,
+  isInsideRaw,
+  timelinePath,
+  toAbsolutePath,
+  toProjectRelativePath,
+  workPath,
+} from './project/project-paths';
+
+export { discoverAssets } from './ingest/discover-assets';
+export type {
+  AssetFinding,
+  DiscoverAssetsDependencies,
+  DiscoverAssetsResult,
+  IgnoredFinding,
+} from './ingest/discover-assets';
+
+export {
   CATALOG_SCHEMA_VERSION,
   AssetFingerprintSchema,
   AssetRoleSchema,

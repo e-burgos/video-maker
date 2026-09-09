@@ -1,9 +1,10 @@
-import { mkdtemp, rm, stat } from 'node:fs/promises';
+import { mkdtemp, readFile, rm, stat } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
+import type { StoreConfig } from '../config/store-config';
 import { buildMinimalTimeline } from '../__fixtures__/minimal-timeline';
 import { createNodeRenderApiDependencies } from './node-render-api-dependencies';
 
@@ -27,6 +28,7 @@ vi.mock('@video-maker/media-local', () => ({
 
 const ENV: NodeJS.ProcessEnv = {};
 const CWD = '/var/data/media/acme-launch';
+const STORE: StoreConfig = { mediaRoot: '/var/data/media', maxUploadBytes: 2_147_483_648, objectStore: 'fs' };
 
 async function loadMocks() {
   const render = await import('@video-maker/composition-remotion/render');
@@ -66,7 +68,7 @@ describe('createNodeRenderApiDependencies', () => {
       compositionId: 'timeline-composition',
     });
 
-    const deps = createNodeRenderApiDependencies(ENV);
+    const deps = createNodeRenderApiDependencies(ENV, STORE);
     const timeline = buildMinimalTimeline();
 
     const result = await deps.renderMutedVideo({
@@ -95,7 +97,7 @@ describe('createNodeRenderApiDependencies', () => {
       filterComplex: '[0:a]anull[out]',
     });
 
-    const deps = createNodeRenderApiDependencies(ENV);
+    const deps = createNodeRenderApiDependencies(ENV, STORE);
     const timeline = buildMinimalTimeline();
 
     const result = await deps.mixTimelineAudio({ timeline, outPath: '/work/renders/r1/master.wav' });
@@ -112,7 +114,7 @@ describe('createNodeRenderApiDependencies', () => {
   it('feeds muxAudioIntoVideo with the flattened video, audio and out paths plus the resolved binaries', async () => {
     mocks.muxAudioIntoVideoMock.mockResolvedValue({ outputPath: '/out/r1.mp4' });
 
-    const deps = createNodeRenderApiDependencies(ENV);
+    const deps = createNodeRenderApiDependencies(ENV, STORE);
     const result = await deps.muxAudioIntoVideo({
       videoPath: '/work/renders/r1/video-muted.mp4',
       audioPath: '/work/renders/r1/master.wav',
@@ -138,7 +140,7 @@ describe('createNodeRenderApiDependencies', () => {
     };
     mocks.verifyMixLoudnessMock.mockResolvedValue(verification);
 
-    const deps = createNodeRenderApiDependencies(ENV);
+    const deps = createNodeRenderApiDependencies(ENV, STORE);
     const timeline = buildMinimalTimeline();
 
     const result = await deps.verifyMixLoudness({ path: '/out/r1.mp4', target: timeline.audioMix.voice });
@@ -159,7 +161,7 @@ describe('createNodeRenderApiDependencies', () => {
     });
     mocks.muxAudioIntoVideoMock.mockResolvedValue({ outputPath: '/out/r1.mp4' });
 
-    const deps = createNodeRenderApiDependencies(ENV);
+    const deps = createNodeRenderApiDependencies(ENV, STORE);
     const timeline = buildMinimalTimeline();
 
     await deps.mixTimelineAudio({ timeline, outPath: '/work/renders/r1/master.wav' });
@@ -182,7 +184,7 @@ describe('createNodeRenderApiDependencies', () => {
       return `/opt/homebrew/bin/${name}`;
     });
 
-    const deps = createNodeRenderApiDependencies(ENV);
+    const deps = createNodeRenderApiDependencies(ENV, STORE);
     const statuses = await deps.probeMediaBinaries();
 
     expect(statuses).toEqual([
@@ -192,7 +194,7 @@ describe('createNodeRenderApiDependencies', () => {
   });
 
   it('reports both engine modules as loaded once the dynamic imports resolve', async () => {
-    const deps = createNodeRenderApiDependencies(ENV);
+    const deps = createNodeRenderApiDependencies(ENV, STORE);
     const statuses = await deps.preloadEngineModules();
 
     expect(statuses).toEqual([
@@ -206,7 +208,7 @@ describe('createNodeRenderApiDependencies', () => {
     const nested = join(base, 'a', 'b', 'c');
 
     try {
-      const deps = createNodeRenderApiDependencies(ENV);
+      const deps = createNodeRenderApiDependencies(ENV, STORE);
       await deps.ensureDirectory(nested);
 
       const info = await stat(nested);
@@ -217,7 +219,7 @@ describe('createNodeRenderApiDependencies', () => {
   });
 
   it('produces an ISO timestamp from the system clock', () => {
-    const deps = createNodeRenderApiDependencies(ENV);
+    const deps = createNodeRenderApiDependencies(ENV, STORE);
     const before = Date.now();
     const iso = deps.clock.nowIso();
     const after = Date.now();
@@ -228,9 +230,100 @@ describe('createNodeRenderApiDependencies', () => {
   });
 
   it('keeps the logger as a no-op in this cycle', () => {
-    const deps = createNodeRenderApiDependencies(ENV);
+    const deps = createNodeRenderApiDependencies(ENV, STORE);
 
     expect(deps.logger.info({ event: 'anything' })).toBeUndefined();
     expect(deps.logger.error({ event: 'anything' })).toBeUndefined();
+  });
+
+  it('confines every storage operation to the configured media root', async () => {
+    const deps = createNodeRenderApiDependencies(ENV, STORE);
+    const outsidePath = '/etc/passwd';
+
+    const emptySource: AsyncIterable<Uint8Array> = {
+      [Symbol.asyncIterator]: () => ({
+        next: () => Promise.resolve({ value: undefined, done: true as const }),
+      }),
+    };
+
+    await expect(deps.storage.stat(outsidePath)).rejects.toMatchObject({ code: 'ASSET_PATH_INVALID' });
+    await expect(deps.storage.listDirectory(outsidePath)).rejects.toMatchObject({
+      code: 'ASSET_PATH_INVALID',
+    });
+    await expect(deps.storage.ensureDirectory(outsidePath)).rejects.toMatchObject({
+      code: 'ASSET_PATH_INVALID',
+    });
+    await expect(deps.storage.readTextFile(outsidePath)).rejects.toMatchObject({
+      code: 'ASSET_PATH_INVALID',
+    });
+    await expect(deps.storage.writeTextFile(outsidePath, 'x')).rejects.toMatchObject({
+      code: 'ASSET_PATH_INVALID',
+    });
+    expect(() => deps.storage.openReadStream(outsidePath)).toThrow();
+    await expect(
+      deps.storage.writeTemporary({
+        directory: outsidePath,
+        source: emptySource,
+        expectedBytes: 0,
+        limitBytes: 10,
+      }),
+    ).rejects.toMatchObject({ code: 'ASSET_PATH_INVALID' });
+    await expect(
+      deps.storage.promoteTemporary(outsidePath, `${STORE.mediaRoot}/x`),
+    ).rejects.toMatchObject({ code: 'ASSET_PATH_INVALID' });
+    await expect(deps.storage.removeTemporary(outsidePath)).rejects.toMatchObject({
+      code: 'ASSET_PATH_INVALID',
+    });
+  });
+
+  it('writes into work/.uploads and renames onto the final path against a real temporary directory', async () => {
+    const base = await mkdtemp(join(tmpdir(), 'render-api-store-'));
+
+    try {
+      const store: StoreConfig = { mediaRoot: base, maxUploadBytes: 1024, objectStore: 'fs' };
+      const deps = createNodeRenderApiDependencies(ENV, store);
+      const uploadsDir = join(base, 'work', '.uploads');
+      const finalDir = join(base, 'raw', 'aroll');
+      const finalPath = join(finalDir, 'clip01.mp4');
+
+      await deps.storage.ensureDirectory(uploadsDir);
+      await deps.storage.ensureDirectory(finalDir);
+
+      async function* body(): AsyncGenerator<Uint8Array> {
+        yield new TextEncoder().encode('hello ');
+        yield new TextEncoder().encode('world');
+      }
+
+      const outcome = await deps.storage.writeTemporary({
+        directory: uploadsDir,
+        source: body(),
+        expectedBytes: 11,
+        limitBytes: 1024,
+      });
+
+      if (outcome.kind !== 'written') {
+        throw new Error(`expected a written outcome, got ${outcome.kind}`);
+      }
+      expect(outcome.bytesWritten).toBe(11);
+      expect(outcome.temporaryPath.startsWith(uploadsDir)).toBe(true);
+
+      const temporaryExistsBeforePromotion = await stat(outcome.temporaryPath).then(
+        () => true,
+        () => false,
+      );
+      expect(temporaryExistsBeforePromotion).toBe(true);
+
+      await deps.storage.promoteTemporary(outcome.temporaryPath, finalPath);
+
+      expect(await readFile(finalPath, 'utf8')).toBe('hello world');
+
+      const temporaryExistsAfterPromotion = await stat(outcome.temporaryPath).then(
+        () => true,
+        () => false,
+      );
+      expect(temporaryExistsAfterPromotion).toBe(false);
+    } finally {
+      await rm(base, { recursive: true, force: true });
+    }
   });
 });

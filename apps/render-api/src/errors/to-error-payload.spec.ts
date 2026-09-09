@@ -22,6 +22,24 @@ const ENGINE_DERIVED_RESOURCES = [
   { code: 'MEDIA_COMMAND_FAILED', resource: 'ffmpeg' },
   { code: 'MEDIA_OUTPUT_UNPARSEABLE', resource: 'ffprobe' },
   { code: 'MEDIA_BINARY_NOT_FOUND', resource: 'ffmpeg' },
+  { code: 'PROJECT_NOT_FOUND', resource: 'smoke-ingest' },
+  { code: 'PROJECT_SLUG_INVALID', resource: 'Not_A_Slug' },
+  { code: 'PROJECT_ALREADY_EXISTS', resource: 'smoke-ingest' },
+  { code: 'PROJECT_LAYOUT_INVALID', resource: 'raw' },
+  { code: 'ASSET_ROLE_INVALID', resource: 'video' },
+  { code: 'ASSET_PATH_INVALID', resource: '../escape.mp4' },
+  { code: 'ASSET_ALREADY_EXISTS', resource: 'raw/aroll/clip01.mp4' },
+  { code: 'ASSET_CONTENT_LENGTH_REQUIRED', resource: 'content-length' },
+  { code: 'ASSET_CONTENT_TYPE_REQUIRED', resource: 'content-type' },
+  { code: 'ASSET_TOO_LARGE', resource: 'raw/aroll/clip01.mp4' },
+  { code: 'ASSET_UPLOAD_ABORTED', resource: 'raw/aroll/clip01.mp4' },
+  { code: 'TIMELINE_NOT_FOUND', resource: 'work/timeline.json' },
+  { code: 'TIMELINE_INVALID', resource: 'work/timeline.json' },
+  { code: 'EDL_NOT_FOUND', resource: 'work/edl.json' },
+  { code: 'EDL_INVALID', resource: 'work/edl.json' },
+  { code: 'ARTIFACT_NOT_FOUND', resource: 'raw/aroll/clip01.mp4' },
+  { code: 'RANGE_NOT_SATISFIABLE', resource: 'out/render-1.mp4' },
+  { code: 'CATALOG_UNREADABLE', resource: 'work/catalog.json' },
 ] as const satisfies readonly { code: RenderApiErrorCode; resource: string }[];
 
 describe('toErrorPayload', () => {
@@ -81,6 +99,24 @@ describe('toErrorPayload', () => {
 
     expect(payload.expected).toBe('a timeline accepted by validateTimeline');
     expect(payload.hint).toBe('set FFMPEG_PATH and FFPROBE_PATH or install ffmpeg in PATH');
+  });
+
+  it('spreads assetPersisted and catalogUpdated at the top level and omits details when null', () => {
+    const withDetails = new PipelineStageError({
+      code: 'MEDIA_BINARY_NOT_FOUND',
+      stage: null,
+      details: { assetPersisted: true, catalogUpdated: true },
+    });
+
+    const payloadWithDetails = toErrorPayload(withDetails);
+    expect(payloadWithDetails.assetPersisted).toBe(true);
+    expect(payloadWithDetails.catalogUpdated).toBe(true);
+
+    const withoutDetails = new PipelineStageError({ code: 'MEDIA_BINARY_NOT_FOUND', stage: null });
+    const payloadWithoutDetails = toErrorPayload(withoutDetails);
+
+    expect('assetPersisted' in payloadWithoutDetails).toBe(false);
+    expect('catalogUpdated' in payloadWithoutDetails).toBe(false);
   });
 
   it('falls back to the INTERNAL_ERROR payload without reading .stack or exposing a resource for a value outside its own hierarchy', () => {

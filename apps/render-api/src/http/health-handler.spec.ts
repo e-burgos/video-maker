@@ -25,7 +25,7 @@ describe('handleHealth', () => {
     expect(body.time).toBe(FIXED_NOW_ISO);
     expect(body.engine).toHaveLength(ENGINE_MODULE_NAMES.length);
     expect(body.binaries).toHaveLength(MEDIA_BINARY_NAMES.length);
-    expect(body.capabilities).toEqual({ renderPipeline: true, assetStore: false, jobQueue: false });
+    expect(body.capabilities).toEqual({ renderPipeline: true, assetStore: true, jobQueue: false });
   });
 
   it('answers 200 with status degraded when a media binary does not resolve', async () => {
@@ -42,6 +42,34 @@ describe('handleHealth', () => {
 
     expect(response.status).toBe(200);
     expect(body.status).toBe('degraded');
+  });
+
+  it('answers capabilities.assetStore true and cycle 2', async () => {
+    const callLog = createCallLog();
+    const deps = createFakeRenderApiDependencies(callLog);
+
+    const response = await handleHealth(deps);
+    const body = response.body as HealthBody;
+
+    expect(body.capabilities.assetStore).toBe(true);
+    expect(body.cycle).toBe(2);
+  });
+
+  it('keeps answering 200 in the degraded state with assetStore still true', async () => {
+    const callLog = createCallLog();
+    const deps = createFakeRenderApiDependencies(callLog, {
+      preloadEngineModules: async () => [
+        { name: 'media-local', loaded: false },
+        { name: 'composition-remotion/render', loaded: true },
+      ],
+    });
+
+    const response = await handleHealth(deps);
+    const body = response.body as HealthBody;
+
+    expect(response.status).toBe(200);
+    expect(body.status).toBe('degraded');
+    expect(body.capabilities.assetStore).toBe(true);
   });
 
   it('never exposes a resolved binary path', async () => {

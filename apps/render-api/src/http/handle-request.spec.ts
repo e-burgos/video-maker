@@ -2,16 +2,40 @@ import { describe, expect, it } from 'vitest';
 
 import { createCallLog } from '../__fixtures__/call-log';
 import { createFakeRenderApiDependencies } from '../__fixtures__/fake-render-api-dependencies';
+import { requestLine } from '../__fixtures__/http-request';
+import type { StoreConfig } from '../config/store-config';
 import { PipelineStageError } from '../errors/pipeline-stage-error';
 import { handleRequest } from './handle-request';
 import { JSON_CONTENT_TYPE } from './http-message';
+import { ROUTES } from './routes';
+
+const STORE: StoreConfig = { mediaRoot: '/media', maxUploadBytes: 2_147_483_648, objectStore: 'fs' };
+
+function canonicalPathFor(pattern: string): string {
+  return pattern
+    .split('/')
+    .map((segment) => {
+      if (segment.startsWith('*')) {
+        return 'a/b/c';
+      }
+      if (segment.startsWith(':')) {
+        return 'example';
+      }
+      return segment;
+    })
+    .join('/');
+}
+
+async function* emptyJsonBody(): AsyncGenerator<Uint8Array> {
+  yield new TextEncoder().encode('{}');
+}
 
 describe('handleRequest', () => {
   it('answers 404 with a JSON ROUTE_NOT_FOUND envelope for an unknown path', async () => {
     const callLog = createCallLog();
     const deps = createFakeRenderApiDependencies(callLog);
 
-    const response = await handleRequest({ method: 'GET', path: '/unknown-path' }, deps);
+    const response = await handleRequest({ method: 'GET', path: '/unknown-path' }, deps, STORE);
 
     expect(response.status).toBe(404);
     expect(response.headers['content-type']).toBe(JSON_CONTENT_TYPE);
@@ -29,7 +53,7 @@ describe('handleRequest', () => {
     const callLog = createCallLog();
     const deps = createFakeRenderApiDependencies(callLog);
 
-    const response = await handleRequest({ method: 'POST', path: '/health' }, deps);
+    const response = await handleRequest({ method: 'POST', path: '/health' }, deps, STORE);
 
     expect(response.status).toBe(405);
     expect(response.headers['content-type']).toBe(JSON_CONTENT_TYPE);
@@ -53,7 +77,7 @@ describe('handleRequest', () => {
       },
     });
 
-    const response = await handleRequest({ method: 'GET', path: '/health' }, deps);
+    const response = await handleRequest({ method: 'GET', path: '/health' }, deps, STORE);
 
     expect(response.status).toBe(503);
     expect(response.headers['content-type']).toBe(JSON_CONTENT_TYPE);
@@ -75,7 +99,7 @@ describe('handleRequest', () => {
       },
     });
 
-    const response = await handleRequest({ method: 'GET', path: '/health' }, deps);
+    const response = await handleRequest({ method: 'GET', path: '/health' }, deps, STORE);
 
     expect(response.status).toBe(500);
     expect(response.headers['content-type']).toBe(JSON_CONTENT_TYPE);
@@ -86,5 +110,19 @@ describe('handleRequest', () => {
         message: 'The service failed for an unexpected reason.',
       },
     });
+  });
+
+  it('dispatches every RouteId to its handler', async () => {
+    for (const route of ROUTES) {
+      const callLog = createCallLog();
+      const deps = createFakeRenderApiDependencies(callLog);
+      const path = canonicalPathFor(route.pattern);
+      const request = requestLine({ method: route.method, path, body: emptyJsonBody() });
+
+      const response = await handleRequest(request, deps, STORE);
+      const body = response.body as { error?: { code?: string } };
+
+      expect(body.error?.code).not.toBe('ROUTE_NOT_FOUND');
+    }
   });
 });

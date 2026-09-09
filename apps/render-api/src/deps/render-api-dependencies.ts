@@ -1,8 +1,9 @@
 import type { MixLoudnessVerification } from '@video-maker/media-local';
-import type { Timeline, VoiceTarget } from '@video-maker/timeline-core';
+import type { MediaAsset, Timeline, VoiceTarget } from '@video-maker/timeline-core';
 
 import type { EngineModuleStatus } from '../engine/engine-modules';
 import type { BinaryStatus } from '../engine/media-binaries';
+import type { ObjectStorage } from './object-storage';
 
 export interface RenderMutedVideoInput {
   readonly timeline: Timeline;
@@ -57,6 +58,13 @@ export type ProbeMediaBinariesPort = () => Promise<readonly BinaryStatus[]>;
 
 export type PreloadEngineModulesPort = () => Promise<readonly EngineModuleStatus[]>;
 
+export interface ProbeAssetInput {
+  readonly path: string;
+  readonly assetId: string;
+}
+
+export type ProbeAssetPort = (input: ProbeAssetInput) => Promise<MediaAsset>;
+
 export interface Clock {
   nowIso(): string;
 }
@@ -79,6 +87,8 @@ export interface RenderApiDependencies {
   readonly ensureDirectory: EnsureDirectoryPort;
   readonly probeMediaBinaries: ProbeMediaBinariesPort;
   readonly preloadEngineModules: PreloadEngineModulesPort;
+  readonly storage: ObjectStorage;
+  readonly probeAsset: ProbeAssetPort;
   readonly clock: Clock;
   readonly logger: Logger;
 }

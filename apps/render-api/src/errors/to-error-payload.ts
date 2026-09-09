@@ -17,6 +17,26 @@ const MESSAGE_BY_CODE: Readonly<Record<RenderApiErrorCode, string>> = {
   METHOD_NOT_ALLOWED: 'The requested method is not allowed on this path.',
   SERVER_CONFIG_INVALID: 'The server configuration is invalid.',
   INTERNAL_ERROR: 'The service failed for an unexpected reason.',
+  PROJECT_NOT_FOUND: 'The requested project does not exist.',
+  PROJECT_SLUG_INVALID: 'The project slug is not a valid kebab-case path segment.',
+  PROJECT_ALREADY_EXISTS: 'A project with this slug already exists.',
+  PROJECT_LAYOUT_INVALID: 'The project does not have the canonical raw layout.',
+  ASSET_ROLE_INVALID: 'The asset role is not one of aroll, broll, image or audio.',
+  ASSET_PATH_INVALID: 'The path is not a portable, project-relative path.',
+  ASSET_ALREADY_EXISTS: 'An asset already exists at the requested destination.',
+  ASSET_CONTENT_LENGTH_REQUIRED: 'The content-length header is required for an asset upload.',
+  ASSET_CONTENT_TYPE_REQUIRED: 'The content-type header is required for an asset upload.',
+  ASSET_TOO_LARGE: 'The asset exceeds the configured upload size limit.',
+  ASSET_UPLOAD_ABORTED: 'The asset upload was aborted before it completed.',
+  TIMELINE_NOT_FOUND: 'The project has no stored timeline.',
+  TIMELINE_INVALID: 'The timeline document does not pass validation.',
+  EDL_NOT_FOUND: 'The project has no stored edit decision list.',
+  EDL_INVALID: 'The edit decision list document does not pass validation.',
+  ARTIFACT_NOT_FOUND: 'The requested artifact does not exist.',
+  RANGE_NOT_SATISFIABLE: 'The requested byte range cannot be satisfied.',
+  CATALOG_UNREADABLE: 'The project catalog exists but could not be read.',
+  REQUEST_BODY_INVALID_JSON: 'The request body is not a valid JSON object.',
+  REQUEST_BODY_TOO_LARGE: 'The request body exceeds the configured size limit.',
 };
 
 export function toErrorPayload(value: unknown): RenderApiErrorPayload {
@@ -31,5 +51,6 @@ export function toErrorPayload(value: unknown): RenderApiErrorPayload {
     ...(value.resource === null ? {} : { resource: value.resource }),
     ...(value.expected === null ? {} : { expected: value.expected }),
     ...(value.hint === null ? {} : { hint: value.hint }),
+    ...(value.details === null ? {} : value.details),
   };
 }

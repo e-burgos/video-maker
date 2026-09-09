@@ -1,0 +1,641 @@
+{
+  "$schema": "../../../../schemas/cycle-tasks.schema.json",
+  "spec": "spec-e-burgos-005-render-service",
+  "cycle": 2,
+  "module": "render-service",
+  "apps": [
+    "apps/render-api"
+  ],
+  "flow": "full",
+  "user_stories_generated": true,
+  "prerequisites": {
+    "tasks_generated": true
+  },
+  "tasks": [
+    {
+      "id": "TASK-001",
+      "title": "[BE] HU-02-01: Config compartida - diff de vite.config.ts, re-exports aditivos de auto-montage y store-config",
+      "user_stories": [
+        "HU-02-01"
+      ],
+      "estimation_hours": 3,
+      "story_points": 3,
+      "depends_on": [],
+      "status": "done",
+      "files": [
+        "apps/render-api/vite.config.ts",
+        "libs/auto-montage/src/index.ts",
+        "apps/render-api/src/config/store-config.ts",
+        "apps/render-api/src/config/store-config.spec.ts"
+      ],
+      "usage": {
+        "agent": "implementor-back",
+        "provider_model": "claude/sonnet",
+        "effort": "medium",
+        "tokens_in": 121678,
+        "tokens_out": 21473,
+        "tokens_total": 143151,
+        "approx": false,
+        "source": "agent-usage-notification",
+        "recorded_at": "2026-09-08"
+      }
+    },
+    {
+      "id": "TASK-002",
+      "title": "[BE] HU-02-05, HU-02-09: Puerto ObjectStorage, tipos de transporte y fixtures compartidas",
+      "user_stories": [
+        "HU-02-05",
+        "HU-02-09"
+      ],
+      "estimation_hours": 4,
+      "story_points": 5,
+      "depends_on": [
+        "TASK-001"
+      ],
+      "status": "done",
+      "files": [
+        "apps/render-api/src/deps/object-storage.ts",
+        "apps/render-api/src/http/http-message.ts",
+        "apps/render-api/src/deps/render-api-dependencies.ts",
+        "apps/render-api/src/__fixtures__/fake-object-storage.ts",
+        "apps/render-api/src/__fixtures__/fake-render-api-dependencies.ts",
+        "apps/render-api/src/__fixtures__/http-request.ts",
+        "apps/render-api/src/deps/node-render-api-dependencies.ts",
+        "apps/render-api/src/http/create-render-api-server.ts"
+      ],
+      "usage": {
+        "agent": "implementor-back",
+        "provider_model": "claude/sonnet",
+        "effort": "medium",
+        "tokens_in": 64073,
+        "tokens_out": 11307,
+        "tokens_total": 75380,
+        "approx": false,
+        "source": "agent-usage-notification",
+        "recorded_at": "2026-09-08"
+      }
+    },
+    {
+      "id": "TASK-003",
+      "title": "[BE] HU-02-03, HU-02-05, HU-02-09: Helpers puros de validacion de slug, rol y paths",
+      "user_stories": [
+        "HU-02-03",
+        "HU-02-05",
+        "HU-02-09"
+      ],
+      "estimation_hours": 3,
+      "story_points": 3,
+      "depends_on": [
+        "TASK-001"
+      ],
+      "status": "done",
+      "files": [
+        "apps/render-api/src/store/project-slug.ts",
+        "apps/render-api/src/store/project-slug.spec.ts",
+        "apps/render-api/src/store/asset-path.ts",
+        "apps/render-api/src/store/asset-path.spec.ts",
+        "apps/render-api/src/store/project-layout.ts",
+        "apps/render-api/src/store/project-layout.spec.ts"
+      ],
+      "usage": {
+        "agent": "implementor-back",
+        "provider_model": "claude/sonnet",
+        "effort": "medium",
+        "tokens_in": 41420,
+        "tokens_out": 7310,
+        "tokens_total": 48730,
+        "approx": false,
+        "source": "agent-usage-notification",
+        "recorded_at": "2026-09-08"
+      }
+    },
+    {
+      "id": "TASK-004",
+      "title": "[BE] HU-02-11: Superficie de errores ampliada (35 codigos, details, status HTTP)",
+      "user_stories": [
+        "HU-02-11"
+      ],
+      "estimation_hours": 4,
+      "story_points": 5,
+      "depends_on": [
+        "TASK-001"
+      ],
+      "status": "done",
+      "files": [
+        "apps/render-api/src/errors/render-api-error.ts",
+        "apps/render-api/src/errors/pipeline-stage-error.ts",
+        "apps/render-api/src/errors/http-status-for.ts",
+        "apps/render-api/src/errors/http-status-for.spec.ts",
+        "apps/render-api/src/errors/to-error-payload.ts",
+        "apps/render-api/src/errors/to-error-payload.spec.ts",
+        "apps/render-api/src/errors/translate-engine-error.ts"
+      ],
+      "usage": {
+        "agent": "implementor-back",
+        "provider_model": "claude/sonnet",
+        "effort": "medium",
+        "tokens_in": 29336,
+        "tokens_out": 5177,
+        "tokens_total": 34513,
+        "approx": true,
+        "source": "declared-estimate",
+        "recorded_at": "2026-09-08"
+      }
+    },
+    {
+      "id": "TASK-005",
+      "title": "[BE] HU-02-11: Traduccion de errores de libs/auto-montage a la superficie propia",
+      "user_stories": [
+        "HU-02-11"
+      ],
+      "estimation_hours": 2,
+      "story_points": 2,
+      "depends_on": [
+        "TASK-001",
+        "TASK-004"
+      ],
+      "status": "done",
+      "files": [
+        "apps/render-api/src/errors/translate-store-error.ts",
+        "apps/render-api/src/errors/translate-store-error.spec.ts"
+      ],
+      "usage": {
+        "agent": "implementor-back",
+        "provider_model": "claude/sonnet",
+        "effort": "medium",
+        "tokens_in": 11734,
+        "tokens_out": 2071,
+        "tokens_total": 13805,
+        "approx": true,
+        "source": "declared-estimate",
+        "recorded_at": "2026-09-08"
+      }
+    },
+    {
+      "id": "TASK-006",
+      "title": "[BE] HU-02-05, HU-02-09: Router con parametros y comodin (11 rutas)",
+      "user_stories": [
+        "HU-02-05",
+        "HU-02-09"
+      ],
+      "estimation_hours": 4,
+      "story_points": 5,
+      "depends_on": [
+        "TASK-001"
+      ],
+      "status": "done",
+      "files": [
+        "apps/render-api/src/http/routes.ts",
+        "apps/render-api/src/http/router.ts",
+        "apps/render-api/src/http/router.spec.ts"
+      ],
+      "usage": {
+        "agent": "implementor-back",
+        "provider_model": "claude/sonnet",
+        "effort": "medium",
+        "tokens_in": 25081,
+        "tokens_out": 4426,
+        "tokens_total": 29507,
+        "approx": true,
+        "source": "declared-estimate",
+        "recorded_at": "2026-09-08"
+      }
+    },
+    {
+      "id": "TASK-007",
+      "title": "[BE] HU-02-03, HU-02-09: Lectura de body JSON, parseo de Range y content-type por extension",
+      "user_stories": [
+        "HU-02-03",
+        "HU-02-09"
+      ],
+      "estimation_hours": 3,
+      "story_points": 3,
+      "depends_on": [
+        "TASK-001"
+      ],
+      "status": "done",
+      "files": [
+        "apps/render-api/src/http/read-json-body.ts",
+        "apps/render-api/src/http/read-json-body.spec.ts",
+        "apps/render-api/src/http/byte-range.ts",
+        "apps/render-api/src/http/byte-range.spec.ts",
+        "apps/render-api/src/http/content-type-for.ts",
+        "apps/render-api/src/http/content-type-for.spec.ts"
+      ],
+      "usage": {
+        "agent": "implementor-back",
+        "provider_model": "claude/sonnet",
+        "effort": "medium",
+        "tokens_in": 15048,
+        "tokens_out": 2656,
+        "tokens_total": 17704,
+        "approx": true,
+        "source": "declared-estimate",
+        "recorded_at": "2026-09-08"
+      }
+    },
+    {
+      "id": "TASK-008",
+      "title": "[BE] HU-02-06: Fusion de catalogo tras un upload (catalog-merge)",
+      "user_stories": [
+        "HU-02-06"
+      ],
+      "estimation_hours": 4,
+      "story_points": 5,
+      "depends_on": [
+        "TASK-001"
+      ],
+      "status": "done",
+      "files": [
+        "apps/render-api/src/store/catalog-merge.ts",
+        "apps/render-api/src/store/catalog-merge.spec.ts",
+        "apps/render-api/src/__fixtures__/catalog-fixtures.ts"
+      ],
+      "usage": {
+        "agent": "implementor-back",
+        "provider_model": "claude/sonnet",
+        "effort": "medium",
+        "tokens_in": 25080,
+        "tokens_out": 4426,
+        "tokens_total": 29506,
+        "approx": true,
+        "source": "declared-estimate",
+        "recorded_at": "2026-09-08"
+      }
+    },
+    {
+      "id": "TASK-009",
+      "title": "[BE] HU-02-02, HU-02-04: Resolucion de assets del proyecto (catalogo vs raw-scan) y serializacion por clave",
+      "user_stories": [
+        "HU-02-02",
+        "HU-02-04"
+      ],
+      "estimation_hours": 4,
+      "story_points": 5,
+      "depends_on": [
+        "TASK-002",
+        "TASK-008"
+      ],
+      "status": "done",
+      "files": [
+        "apps/render-api/src/store/project-assets.ts",
+        "apps/render-api/src/store/project-assets.spec.ts",
+        "apps/render-api/src/store/serialize-by-key.ts",
+        "apps/render-api/src/store/serialize-by-key.spec.ts"
+      ],
+      "usage": {
+        "agent": "implementor-back",
+        "provider_model": "claude/sonnet",
+        "effort": "medium",
+        "tokens_in": 29999,
+        "tokens_out": 5294,
+        "tokens_total": 35293,
+        "approx": true,
+        "source": "declared-estimate",
+        "recorded_at": "2026-09-08"
+      }
+    },
+    {
+      "id": "TASK-010",
+      "title": "[BE] HU-02-05, HU-02-09: Adaptador de produccion del ObjectStorage confinado a la raiz de medios",
+      "user_stories": [
+        "HU-02-05",
+        "HU-02-09"
+      ],
+      "estimation_hours": 4,
+      "story_points": 5,
+      "depends_on": [
+        "TASK-001",
+        "TASK-002"
+      ],
+      "status": "done",
+      "files": [
+        "apps/render-api/src/deps/node-render-api-dependencies.ts",
+        "apps/render-api/src/deps/node-render-api-dependencies.spec.ts",
+        "apps/render-api/src/main.ts"
+      ],
+      "usage": {
+        "agent": "implementor-back",
+        "provider_model": "claude/sonnet",
+        "effort": "medium",
+        "tokens_in": 29999,
+        "tokens_out": 5294,
+        "tokens_total": 35293,
+        "approx": true,
+        "source": "declared-estimate",
+        "recorded_at": "2026-09-08"
+      }
+    },
+    {
+      "id": "TASK-011",
+      "title": "[BE] HU-02-10: GET /health declara capabilities.assetStore y cycle 2",
+      "user_stories": [
+        "HU-02-10"
+      ],
+      "estimation_hours": 1,
+      "story_points": 1,
+      "depends_on": [
+        "TASK-004"
+      ],
+      "status": "done",
+      "files": [
+        "apps/render-api/src/http/health-handler.ts",
+        "apps/render-api/src/http/health-handler.spec.ts"
+      ],
+      "usage": {
+        "agent": "implementor-back",
+        "provider_model": "claude/sonnet",
+        "effort": "medium",
+        "tokens_in": 6000,
+        "tokens_out": 1059,
+        "tokens_total": 7059,
+        "approx": true,
+        "source": "declared-estimate",
+        "recorded_at": "2026-09-08"
+      }
+    },
+    {
+      "id": "TASK-012",
+      "title": "[BE] HU-02-01, HU-02-02, HU-02-03: Handlers de proyectos (listar, crear, detalle)",
+      "user_stories": [
+        "HU-02-01",
+        "HU-02-02",
+        "HU-02-03"
+      ],
+      "estimation_hours": 4,
+      "story_points": 5,
+      "depends_on": [
+        "TASK-002",
+        "TASK-003",
+        "TASK-004",
+        "TASK-007",
+        "TASK-009"
+      ],
+      "status": "done",
+      "files": [
+        "apps/render-api/src/http/handlers/projects-handler.ts",
+        "apps/render-api/src/http/handlers/projects-handler.spec.ts"
+      ],
+      "usage": {
+        "agent": "implementor-back",
+        "provider_model": "claude/sonnet",
+        "effort": "medium",
+        "tokens_in": 27282,
+        "tokens_out": 4815,
+        "tokens_total": 32097,
+        "approx": true,
+        "source": "declared-estimate",
+        "recorded_at": "2026-09-08"
+      }
+    },
+    {
+      "id": "TASK-013",
+      "title": "[BE] HU-02-04: Handler de listado de assets del proyecto",
+      "user_stories": [
+        "HU-02-04"
+      ],
+      "estimation_hours": 2,
+      "story_points": 2,
+      "depends_on": [
+        "TASK-002",
+        "TASK-003",
+        "TASK-004",
+        "TASK-009"
+      ],
+      "status": "done",
+      "files": [
+        "apps/render-api/src/http/handlers/assets-handler.ts",
+        "apps/render-api/src/http/handlers/assets-handler.spec.ts"
+      ],
+      "usage": {
+        "agent": "implementor-back",
+        "provider_model": "claude/sonnet",
+        "effort": "medium",
+        "tokens_in": 10913,
+        "tokens_out": 1926,
+        "tokens_total": 12839,
+        "approx": true,
+        "source": "declared-estimate",
+        "recorded_at": "2026-09-08"
+      }
+    },
+    {
+      "id": "TASK-014",
+      "title": "[BE] HU-02-05, HU-02-06: Handler de subida de asset (upload binario + catalogo consistente)",
+      "user_stories": [
+        "HU-02-05",
+        "HU-02-06"
+      ],
+      "estimation_hours": 4,
+      "story_points": 5,
+      "depends_on": [
+        "TASK-013",
+        "TASK-004",
+        "TASK-005",
+        "TASK-008",
+        "TASK-009"
+      ],
+      "status": "done",
+      "files": [
+        "apps/render-api/src/http/handlers/assets-handler.ts",
+        "apps/render-api/src/http/handlers/assets-handler.spec.ts"
+      ],
+      "usage": {
+        "agent": "implementor-back",
+        "provider_model": "claude/sonnet",
+        "effort": "medium",
+        "tokens_in": 27282,
+        "tokens_out": 4814,
+        "tokens_total": 32096,
+        "approx": true,
+        "source": "declared-estimate",
+        "recorded_at": "2026-09-08"
+      }
+    },
+    {
+      "id": "TASK-015",
+      "title": "[BE] HU-02-07, HU-02-08: Handlers de Timeline y EditDecisionList (GET/PUT)",
+      "user_stories": [
+        "HU-02-07",
+        "HU-02-08"
+      ],
+      "estimation_hours": 4,
+      "story_points": 5,
+      "depends_on": [
+        "TASK-002",
+        "TASK-004",
+        "TASK-007"
+      ],
+      "status": "done",
+      "files": [
+        "apps/render-api/src/http/handlers/montage-handler.ts",
+        "apps/render-api/src/http/handlers/montage-handler.spec.ts",
+        "apps/render-api/src/__fixtures__/minimal-edit-decision-list.ts"
+      ],
+      "usage": {
+        "agent": "implementor-back",
+        "provider_model": "claude/sonnet",
+        "effort": "medium",
+        "tokens_in": 21357,
+        "tokens_out": 3769,
+        "tokens_total": 25126,
+        "approx": true,
+        "source": "declared-estimate",
+        "recorded_at": "2026-09-08"
+      }
+    },
+    {
+      "id": "TASK-016",
+      "title": "[BE] HU-02-09: Handler de descarga de artefactos con soporte de Range",
+      "user_stories": [
+        "HU-02-09"
+      ],
+      "estimation_hours": 4,
+      "story_points": 5,
+      "depends_on": [
+        "TASK-002",
+        "TASK-003",
+        "TASK-004",
+        "TASK-007"
+      ],
+      "status": "done",
+      "files": [
+        "apps/render-api/src/http/handlers/artifact-handler.ts",
+        "apps/render-api/src/http/handlers/artifact-handler.spec.ts"
+      ],
+      "usage": {
+        "agent": "implementor-back",
+        "provider_model": "claude/sonnet",
+        "effort": "medium",
+        "tokens_in": 21357,
+        "tokens_out": 3769,
+        "tokens_total": 25126,
+        "approx": true,
+        "source": "declared-estimate",
+        "recorded_at": "2026-09-08"
+      }
+    },
+    {
+      "id": "TASK-017",
+      "title": "[BE] HU-02-01, HU-02-05, HU-02-09: Dispatch exhaustivo de las 11 rutas en handle-request",
+      "user_stories": [
+        "HU-02-01",
+        "HU-02-05",
+        "HU-02-09"
+      ],
+      "estimation_hours": 3,
+      "story_points": 3,
+      "depends_on": [
+        "TASK-006",
+        "TASK-011",
+        "TASK-012",
+        "TASK-014",
+        "TASK-015",
+        "TASK-016"
+      ],
+      "status": "done",
+      "files": [
+        "apps/render-api/src/http/handle-request.ts",
+        "apps/render-api/src/http/handle-request.spec.ts"
+      ],
+      "usage": {
+        "agent": "implementor-back",
+        "provider_model": "claude/sonnet",
+        "effort": "medium",
+        "tokens_in": 12815,
+        "tokens_out": 2261,
+        "tokens_total": 15076,
+        "approx": true,
+        "source": "declared-estimate",
+        "recorded_at": "2026-09-08"
+      }
+    },
+    {
+      "id": "TASK-018",
+      "title": "[BE] HU-02-09: Streaming con backpressure en create-render-api-server",
+      "user_stories": [
+        "HU-02-09"
+      ],
+      "estimation_hours": 3,
+      "story_points": 3,
+      "depends_on": [
+        "TASK-002",
+        "TASK-017"
+      ],
+      "status": "done",
+      "files": [
+        "apps/render-api/src/http/create-render-api-server.ts",
+        "apps/render-api/src/http/create-render-api-server.spec.ts",
+        "apps/render-api/src/main.ts"
+      ],
+      "usage": {
+        "agent": "implementor-back",
+        "provider_model": "claude/sonnet",
+        "effort": "medium",
+        "tokens_in": 12815,
+        "tokens_out": 2261,
+        "tokens_total": 15076,
+        "approx": true,
+        "source": "declared-estimate",
+        "recorded_at": "2026-09-08"
+      }
+    },
+    {
+      "id": "TASK-019",
+      "title": "[BE] HU-02-01: Wiring de main.ts con readStoreConfig",
+      "user_stories": [
+        "HU-02-01"
+      ],
+      "estimation_hours": 1,
+      "story_points": 1,
+      "depends_on": [
+        "TASK-001",
+        "TASK-010",
+        "TASK-018"
+      ],
+      "status": "done",
+      "files": [
+        "apps/render-api/src/main.ts"
+      ],
+      "usage": {
+        "agent": "implementor-back",
+        "provider_model": "claude/sonnet",
+        "effort": "medium",
+        "tokens_in": 10304,
+        "tokens_out": 1818,
+        "tokens_total": 12122,
+        "approx": true,
+        "source": "declared-estimate",
+        "recorded_at": "2026-09-08"
+      }
+    },
+    {
+      "id": "TASK-020",
+      "title": "[BE] HU-02-12: README del subproyecto y actualizacion de sdd/api.json",
+      "user_stories": [
+        "HU-02-12"
+      ],
+      "estimation_hours": 2,
+      "story_points": 2,
+      "depends_on": [
+        "TASK-019"
+      ],
+      "status": "done",
+      "files": [
+        "apps/render-api/README.md",
+        "sdd/api.json"
+      ],
+      "usage": {
+        "agent": "implementor-back",
+        "provider_model": "claude/sonnet",
+        "effort": "medium",
+        "tokens_in": 20607,
+        "tokens_out": 3637,
+        "tokens_total": 24244,
+        "approx": true,
+        "source": "declared-estimate",
+        "recorded_at": "2026-09-08"
+      }
+    }
+  ]
+}

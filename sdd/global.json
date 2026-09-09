@@ -57,7 +57,7 @@
       "apps": [
         "apps/render-api"
       ],
-      "cycles_completed": 1,
+      "cycles_completed": 2,
       "description": "API local Node para gestionar assets crudos en MinIO, cola de jobs de render headless (Remotion + FFmpeg) y reporte de progreso"
     }
   ],

@@ -1,4 +1,5 @@
 import { readServerConfig } from './config/server-config';
+import { readStoreConfig } from './config/store-config';
 import { createNodeRenderApiDependencies } from './deps/node-render-api-dependencies';
 import { toErrorPayload } from './errors/to-error-payload';
 import { isRenderApiError } from './errors/render-api-error';
@@ -13,11 +14,12 @@ function isServerConfigError(cause: unknown): boolean {
 
 async function main(): Promise<void> {
   const config = readServerConfig(process.env);
-  const deps = createNodeRenderApiDependencies(process.env);
+  const store = readStoreConfig(process.env, process.cwd());
+  const deps = createNodeRenderApiDependencies(process.env, store);
 
   await deps.preloadEngineModules();
 
-  const server = createRenderApiServer(deps, config);
+  const server = createRenderApiServer(deps, config, store);
   const address = await server.listen();
 
   process.stdout.write(`${JSON.stringify({ event: 'listening', host: address.host, port: address.port })}\n`);

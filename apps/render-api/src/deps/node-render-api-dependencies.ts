@@ -1,12 +1,153 @@
-import { mkdir } from 'node:fs/promises';
+import { once } from 'node:events';
+import { createReadStream, createWriteStream } from 'node:fs';
+import { mkdir, readFile, readdir, rename, stat, unlink, writeFile } from 'node:fs/promises';
+import { randomUUID } from 'node:crypto';
+import { isAbsolute, join, relative } from 'node:path/posix';
 
+import type { StoreConfig } from '../config/store-config';
 import { ENGINE_MODULE_NAMES } from '../engine/engine-modules';
 import type { EngineModuleStatus } from '../engine/engine-modules';
 import { MEDIA_BINARY_NAMES } from '../engine/media-binaries';
 import type { BinaryStatus, ResolvedMediaBinaries } from '../engine/media-binaries';
+import { PipelineStageError } from '../errors/pipeline-stage-error';
+import type { ByteRange, ObjectStorage, WriteTemporaryInput, WriteTemporaryOutcome } from './object-storage';
 import type { RenderApiDependencies } from './render-api-dependencies';
 
-export function createNodeRenderApiDependencies(env: NodeJS.ProcessEnv): RenderApiDependencies {
+function isEnoent(error: unknown): boolean {
+  return typeof error === 'object' && error !== null && (error as NodeJS.ErrnoException).code === 'ENOENT';
+}
+
+function assertInsideMediaRoot(store: StoreConfig, path: string): string {
+  const relativePath = relative(store.mediaRoot, path);
+  if (relativePath.startsWith('..') || isAbsolute(relativePath)) {
+    throw new PipelineStageError({
+      code: 'ASSET_PATH_INVALID',
+      stage: null,
+      resource: relativePath,
+      expected: 'a path inside the configured media root',
+    });
+  }
+  return path;
+}
+
+async function statPath(path: string): ReturnType<ObjectStorage['stat']> {
+  try {
+    const info = await stat(path);
+    return {
+      kind: info.isDirectory() ? 'directory' : 'file',
+      sizeBytes: info.size,
+      modifiedAtMs: Math.trunc(info.mtimeMs),
+    };
+  } catch (error) {
+    if (isEnoent(error)) {
+      return null;
+    }
+    throw error;
+  }
+}
+
+async function listDirectoryEntries(path: string): ReturnType<ObjectStorage['listDirectory']> {
+  try {
+    const entries = await readdir(path, { withFileTypes: true });
+    return entries.map((entry) => ({
+      name: entry.name,
+      isDirectory: entry.isDirectory(),
+      isFile: entry.isFile(),
+    }));
+  } catch (error) {
+    if (isEnoent(error)) {
+      return null;
+    }
+    throw error;
+  }
+}
+
+async function* readFileRange(path: string, range?: ByteRange): AsyncGenerator<Uint8Array> {
+  const options = range ? { start: range.start, end: range.end } : {};
+  for await (const chunk of createReadStream(path, options)) {
+    yield chunk as Uint8Array;
+  }
+}
+
+async function removeTemporaryTolerant(path: string): Promise<void> {
+  try {
+    await unlink(path);
+  } catch (error) {
+    if (!isEnoent(error)) {
+      throw error;
+    }
+  }
+}
+
+async function writeTemporaryStreaming(input: WriteTemporaryInput): Promise<WriteTemporaryOutcome> {
+  const temporaryPath = join(input.directory, `upload-${randomUUID()}.part`);
+  const outgoing = createWriteStream(temporaryPath);
+  let bytesWritten = 0;
+
+  try {
+    for await (const chunk of input.source) {
+      bytesWritten += chunk.length;
+      if (bytesWritten > input.limitBytes) {
+        outgoing.destroy();
+        await removeTemporaryTolerant(temporaryPath);
+        return { kind: 'limit-exceeded', limitBytes: input.limitBytes };
+      }
+
+      if (!outgoing.write(chunk)) {
+        await once(outgoing, 'drain');
+      }
+    }
+  } catch {
+    outgoing.destroy();
+    await removeTemporaryTolerant(temporaryPath);
+    return { kind: 'aborted' };
+  }
+
+  await new Promise<void>((resolve, reject) => {
+    outgoing.end((error?: Error | null) => {
+      if (error) {
+        reject(error);
+        return;
+      }
+      resolve();
+    });
+  });
+
+  if (bytesWritten !== input.expectedBytes) {
+    await removeTemporaryTolerant(temporaryPath);
+    return { kind: 'aborted' };
+  }
+
+  return { kind: 'written', temporaryPath, bytesWritten };
+}
+
+function createConfinedNodeObjectStorage(store: StoreConfig): ObjectStorage {
+  const confine = (path: string): string => assertInsideMediaRoot(store, path);
+
+  return {
+    stat: async (path) => statPath(confine(path)),
+    listDirectory: async (path) => listDirectoryEntries(confine(path)),
+    ensureDirectory: async (path) => {
+      await mkdir(confine(path), { recursive: true });
+    },
+    readTextFile: async (path) => readFile(confine(path), 'utf8'),
+    writeTextFile: async (path, contents) => {
+      await writeFile(confine(path), contents, 'utf8');
+    },
+    openReadStream: (path, range) => readFileRange(confine(path), range),
+    writeTemporary: async (input) =>
+      writeTemporaryStreaming({ ...input, directory: confine(input.directory) }),
+    promoteTemporary: async (temporaryPath, finalPath) => {
+      await rename(confine(temporaryPath), confine(finalPath));
+    },
+    removeTemporary: async (path) => removeTemporaryTolerant(confine(path)),
+  };
+}
+
+export function createNodeRenderApiDependencies(
+  env: NodeJS.ProcessEnv,
+  store: StoreConfig,
+): RenderApiDependencies {
   let mediaLocalModule: Promise<typeof import('@video-maker/media-local')> | null = null;
   let renderModule: Promise<typeof import('@video-maker/composition-remotion/render')> | null = null;
   let binaries: Promise<ResolvedMediaBinaries> | null = null;
@@ -103,6 +244,14 @@ export function createNodeRenderApiDependencies(env: NodeJS.ProcessEnv): RenderA
         }
       }
       return statuses;
+    },
+
+    storage: createConfinedNodeObjectStorage(store),
+
+    probeAsset: async ({ path }) => {
+      const { ExecaCommandRunner, probeMedia } = await loadMediaLocal();
+      const { ffprobe } = await loadBinaries();
+      return probeMedia(path, new ExecaCommandRunner(), { ffprobePath: ffprobe });
     },
 
     clock: { nowIso: () => new Date().toISOString() },

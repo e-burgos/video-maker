@@ -7,6 +7,9 @@ export default defineConfig({
   cacheDir: '../../node_modules/.vite/render-api',
   resolve: {
     alias: {
+      '@video-maker/auto-montage': fileURLToPath(
+        new URL('../../libs/auto-montage/src/index.ts', import.meta.url),
+      ),
       '@video-maker/composition-remotion/render': fileURLToPath(
         new URL('../../libs/composition-remotion/src/render.ts', import.meta.url),
       ),

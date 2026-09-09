@@ -1,10 +1,12 @@
 import type { LoudnessMeasurement } from '@video-maker/media-local';
+import type { MediaAsset } from '@video-maker/timeline-core';
 
 import type {
   RenderApiDependencies,
   RenderMutedVideoOutput,
 } from '../deps/render-api-dependencies';
 import type { CallLog } from './call-log';
+import { createFakeObjectStorage } from './fake-object-storage';
 
 const DEFAULT_RENDER_OUTPUT: Omit<RenderMutedVideoOutput, 'outPath'> = {
   width: 1080,
@@ -86,6 +88,27 @@ export function createFakeRenderApiDependencies(
         { name: 'media-local', loaded: true },
         { name: 'composition-remotion/render', loaded: true },
       ];
+    },
+
+    storage: overrides?.storage ?? createFakeObjectStorage(callLog),
+
+    probeAsset: async (input) => {
+      callLog.record('probeAsset', input);
+      if (overrides?.probeAsset) {
+        return overrides.probeAsset(input);
+      }
+      const asset: MediaAsset = {
+        id: input.assetId,
+        kind: 'video',
+        path: input.assetId,
+        durationMs: 12000,
+        fps: 30,
+        width: 1080,
+        height: 1920,
+        hasAudio: true,
+        probedAt: FIXED_NOW_ISO,
+      };
+      return asset;
     },
 
     clock: overrides?.clock ?? { nowIso: () => FIXED_NOW_ISO },

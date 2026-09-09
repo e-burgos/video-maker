@@ -1,7 +1,17 @@
+import type { StoreConfig } from '../config/store-config';
 import type { RenderApiDependencies } from '../deps/render-api-dependencies';
 import { httpStatusFor } from '../errors/http-status-for';
 import { PipelineStageError } from '../errors/pipeline-stage-error';
 import { toErrorPayload } from '../errors/to-error-payload';
+import { handleGetArtifact } from './handlers/artifact-handler';
+import { handleListAssets, handleUploadAsset } from './handlers/assets-handler';
+import {
+  handleGetEditDecisionList,
+  handleGetTimeline,
+  handlePutEditDecisionList,
+  handlePutTimeline,
+} from './handlers/montage-handler';
+import { handleCreateProject, handleGetProject, handleListProjects } from './handlers/projects-handler';
 import { handleHealth } from './health-handler';
 import { JSON_CONTENT_TYPE } from './http-message';
 import type { HttpRequestLine, HttpResponse } from './http-message';
@@ -10,6 +20,7 @@ import { normalizePath, routeRequest } from './router';
 export async function handleRequest(
   request: HttpRequestLine,
   deps: RenderApiDependencies,
+  store: StoreConfig,
 ): Promise<HttpResponse> {
   try {
     const match = routeRequest(request.method, normalizePath(request.path));
@@ -31,7 +42,34 @@ export async function handleRequest(
       });
     }
 
-    return await handleHealth(deps);
+    const params = match.params ?? {};
+
+    switch (match.id) {
+      case 'health':
+        return await handleHealth(deps);
+      case 'projects.list':
+        return await handleListProjects(deps, store);
+      case 'projects.create':
+        return await handleCreateProject(deps, store, params, request);
+      case 'projects.detail':
+        return await handleGetProject(deps, store, params);
+      case 'projects.assets.list':
+        return await handleListAssets(deps, store, params);
+      case 'projects.assets.upload':
+        return await handleUploadAsset(deps, store, params, request);
+      case 'projects.timeline.get':
+        return await handleGetTimeline(deps, store, params);
+      case 'projects.timeline.put':
+        return await handlePutTimeline(deps, store, params, request);
+      case 'projects.edl.get':
+        return await handleGetEditDecisionList(deps, store, params);
+      case 'projects.edl.put':
+        return await handlePutEditDecisionList(deps, store, params, request);
+      case 'projects.files.get':
+        return await handleGetArtifact(deps, store, params, request);
+      default:
+        return match.id satisfies never;
+    }
   } catch (cause) {
     return toErrorResponse(cause, deps);
   }

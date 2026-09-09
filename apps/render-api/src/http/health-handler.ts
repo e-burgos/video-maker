@@ -5,7 +5,7 @@ import { JSON_CONTENT_TYPE } from './http-message';
 import type { HttpResponse } from './http-message';
 
 const SERVICE_NAME = 'render-api';
-const SERVICE_CYCLE = 1;
+const SERVICE_CYCLE = 2;
 
 export interface HealthBody {
   readonly status: 'ok' | 'degraded';
@@ -39,7 +39,7 @@ export async function handleHealth(deps: RenderApiDependencies): Promise<HttpRes
     binaries,
     capabilities: {
       renderPipeline: true,
-      assetStore: false,
+      assetStore: true,
       jobQueue: false,
     },
   };
