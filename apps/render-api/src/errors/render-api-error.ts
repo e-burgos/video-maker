@@ -1,6 +1,10 @@
+import type { MontageStage } from '../jobs/render-job';
+
 export const RENDER_PIPELINE_STAGES = ['prepare', 'render', 'mix', 'mux', 'verify'] as const;
 
 export type RenderPipelineStage = (typeof RENDER_PIPELINE_STAGES)[number];
+
+export type RenderApiErrorStage = RenderPipelineStage | MontageStage;
 
 export const RENDER_API_ERROR_CODES = [
   'INVALID_TIMELINE',
@@ -40,6 +44,14 @@ export const RENDER_API_ERROR_CODES = [
   'REQUEST_BODY_TOO_LARGE',
   'RENDER_JOB_NOT_FOUND',
   'RENDER_JOB_NOT_CANCELABLE',
+  'JOB_KIND_INVALID',
+  'MONTAGE_PRESET_INVALID',
+  'MONTAGE_SEED_INVALID',
+  'MONTAGE_OVERWRITE_INVALID',
+  'TIMELINE_ALREADY_EXISTS',
+  'MONTAGE_RAW_MISSING',
+  'MONTAGE_INPUT_INVALID',
+  'MONTAGE_FAILED',
 ] as const;
 
 export type RenderApiErrorCode = (typeof RENDER_API_ERROR_CODES)[number];
@@ -51,7 +63,7 @@ export interface RenderApiErrorDetails {
 
 export interface RenderApiErrorPayload {
   readonly code: RenderApiErrorCode;
-  readonly stage: RenderPipelineStage | null;
+  readonly stage: RenderApiErrorStage | null;
   readonly message: string;
   readonly resource?: string;
   readonly expected?: string;
@@ -62,7 +74,7 @@ export interface RenderApiErrorPayload {
 
 export abstract class RenderApiError extends Error {
   abstract readonly code: RenderApiErrorCode;
-  abstract readonly stage: RenderPipelineStage | null;
+  abstract readonly stage: RenderApiErrorStage | null;
   abstract readonly resource: string | null;
   abstract readonly expected: string | null;
   abstract readonly hint: string | null;

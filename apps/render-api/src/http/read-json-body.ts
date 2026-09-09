@@ -3,7 +3,8 @@ export const MAX_JSON_BODY_BYTES = 16_777_216;
 export type JsonBodyResult =
   | { readonly kind: 'parsed'; readonly value: unknown }
   | { readonly kind: 'invalid-json' }
-  | { readonly kind: 'too-large' };
+  | { readonly kind: 'too-large' }
+  | { readonly kind: 'empty' };
 
 export async function readJsonBody(
   source: AsyncIterable<Uint8Array>,
@@ -18,6 +19,10 @@ export async function readJsonBody(
       return { kind: 'too-large' };
     }
     chunks.push(chunk);
+  }
+
+  if (totalBytes === 0) {
+    return { kind: 'empty' };
   }
 
   const merged = new Uint8Array(totalBytes);

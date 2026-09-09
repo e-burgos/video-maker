@@ -1,9 +1,9 @@
 import { RenderApiError } from './render-api-error';
-import type { RenderApiErrorCode, RenderApiErrorDetails, RenderPipelineStage } from './render-api-error';
+import type { RenderApiErrorCode, RenderApiErrorDetails, RenderApiErrorStage } from './render-api-error';
 
 export class PipelineStageError extends RenderApiError {
   readonly code: RenderApiErrorCode;
-  readonly stage: RenderPipelineStage | null;
+  readonly stage: RenderApiErrorStage | null;
   readonly resource: string | null;
   readonly expected: string | null;
   readonly hint: string | null;
@@ -11,7 +11,7 @@ export class PipelineStageError extends RenderApiError {
 
   constructor(init: {
     code: RenderApiErrorCode;
-    stage: RenderPipelineStage | null;
+    stage: RenderApiErrorStage | null;
     resource?: string | null;
     expected?: string | null;
     hint?: string | null;

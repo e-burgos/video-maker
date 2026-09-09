@@ -70,8 +70,7 @@
       "completed_at": "2026-09-09"
     }
   ],
-  "in_progress_modules": [],
-  "pending_modules": [
+  "in_progress_modules": [
     {
       "module": "web-montage",
       "spec": "spec-e-burgos-007-web-montage",
@@ -82,6 +81,7 @@
       "description": "Disparo del pipeline de ingesta y auto-montaje desde la web: un segundo tipo de job en la cola de apps/render-api (kind: montage) que ejecuta el equivalente exacto de render-cli ingest + plan sobre media/<slug>/ con salida byte-identica a la de la CLI, y su consumo desde la biblioteca de assets del Web Studio"
     }
   ],
+  "pending_modules": [],
   "monorepo": {
     "tool": "Nx",
     "package_manager": "pnpm",

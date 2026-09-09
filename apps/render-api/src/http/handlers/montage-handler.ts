@@ -95,7 +95,7 @@ export async function handlePutTimeline(
       expected: `at most ${MAX_JSON_BODY_BYTES} bytes`,
     });
   }
-  if (bodyResult.kind === 'invalid-json') {
+  if (bodyResult.kind === 'invalid-json' || bodyResult.kind === 'empty') {
     throw new PipelineStageError({
       code: 'REQUEST_BODY_INVALID_JSON',
       stage: null,
@@ -139,7 +139,7 @@ export async function handlePutEditDecisionList(
       expected: `at most ${MAX_JSON_BODY_BYTES} bytes`,
     });
   }
-  if (bodyResult.kind === 'invalid-json') {
+  if (bodyResult.kind === 'invalid-json' || bodyResult.kind === 'empty') {
     throw new PipelineStageError({
       code: 'REQUEST_BODY_INVALID_JSON',
       stage: null,

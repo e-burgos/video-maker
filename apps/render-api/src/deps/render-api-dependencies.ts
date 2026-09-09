@@ -1,4 +1,5 @@
-import type { MixLoudnessVerification } from '@video-maker/media-local';
+import type { DirectoryReader, FileStatReader } from '@video-maker/auto-montage';
+import type { CommandRunner, MixLoudnessVerification, ResolvedBinaries } from '@video-maker/media-local';
 import type { MediaAsset, Timeline, VoiceTarget } from '@video-maker/timeline-core';
 
 import type { EngineModuleStatus } from '../engine/engine-modules';
@@ -69,6 +70,10 @@ export interface ProbeAssetInput {
 
 export type ProbeAssetPort = (input: ProbeAssetInput) => Promise<MediaAsset>;
 
+export type CreateCommandRunnerPort = () => Promise<CommandRunner>;
+
+export type ResolveMontageBinariesPort = () => Promise<ResolvedBinaries>;
+
 export type RandomIdPort = () => string;
 
 export interface Clock {
@@ -98,4 +103,8 @@ export interface RenderApiDependencies {
   readonly randomId: RandomIdPort;
   readonly clock: Clock;
   readonly logger: Logger;
+  readonly readDirectory: DirectoryReader;
+  readonly statFile: FileStatReader;
+  readonly createCommandRunner: CreateCommandRunnerPort;
+  readonly resolveMontageBinaries: ResolveMontageBinariesPort;
 }

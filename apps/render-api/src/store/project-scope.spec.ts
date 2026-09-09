@@ -6,7 +6,7 @@ import { createFakeObjectStorage } from '../__fixtures__/fake-object-storage';
 import { createFakeRenderApiDependencies } from '../__fixtures__/fake-render-api-dependencies';
 import { buildMinimalTimeline } from '../__fixtures__/minimal-timeline';
 import type { StoreConfig } from '../config/store-config';
-import { readStoredTimeline, resolveExistingProject } from './project-scope';
+import { assertTimelineNotPersisted, readStoredTimeline, resolveExistingProject } from './project-scope';
 
 const MEDIA_ROOT = '/media';
 const SLUG = 'smoke-ingest';
@@ -64,5 +64,79 @@ describe('resolveExistingProject', () => {
     await expect(resolveExistingProject(deps, STORE, SLUG)).rejects.toMatchObject({
       code: 'PROJECT_NOT_FOUND',
     });
+  });
+});
+
+describe('assertTimelineNotPersisted', () => {
+  it('does not throw when overwrite is false and no timeline is stored yet', async () => {
+    const callLog = createCallLog();
+    const storage = createFakeObjectStorage(callLog, { directories: [PROJECT_ROOT] });
+    const deps = createFakeRenderApiDependencies(callLog, { storage });
+    const project = resolveMediaProject(PROJECT_ROOT);
+
+    await expect(assertTimelineNotPersisted(deps, project, false)).resolves.toBeUndefined();
+    expect(callLog.ports()).toEqual(['stat']);
+  });
+
+  it('throws TIMELINE_ALREADY_EXISTS with the project-relative resource when a valid timeline is already stored', async () => {
+    const callLog = createCallLog();
+    const timeline = buildMinimalTimeline();
+    const storage = createFakeObjectStorage(callLog, {
+      directories: [PROJECT_ROOT],
+      files: [{ path: `${PROJECT_ROOT}/work/timeline.json`, contents: JSON.stringify(timeline) }],
+    });
+    const deps = createFakeRenderApiDependencies(callLog, { storage });
+    const project = resolveMediaProject(PROJECT_ROOT);
+
+    await expect(assertTimelineNotPersisted(deps, project, false)).rejects.toMatchObject({
+      code: 'TIMELINE_ALREADY_EXISTS',
+      resource: 'work/timeline.json',
+    });
+  });
+
+  it('throws TIMELINE_ALREADY_EXISTS even when the stored document is corrupt, because it never parses it', async () => {
+    const callLog = createCallLog();
+    const storage = createFakeObjectStorage(callLog, {
+      directories: [PROJECT_ROOT],
+      files: [{ path: `${PROJECT_ROOT}/work/timeline.json`, contents: '{ this is not valid json' }],
+    });
+    const deps = createFakeRenderApiDependencies(callLog, { storage });
+    const project = resolveMediaProject(PROJECT_ROOT);
+
+    await expect(assertTimelineNotPersisted(deps, project, false)).rejects.toMatchObject({
+      code: 'TIMELINE_ALREADY_EXISTS',
+      resource: 'work/timeline.json',
+    });
+    expect(callLog.ports()).toEqual(['stat']);
+  });
+
+  it('never calls readTextFile: it answers the existence question with a stat alone', async () => {
+    const callLog = createCallLog();
+    const timeline = buildMinimalTimeline();
+    const storage = createFakeObjectStorage(callLog, {
+      directories: [PROJECT_ROOT],
+      files: [{ path: `${PROJECT_ROOT}/work/timeline.json`, contents: JSON.stringify(timeline) }],
+    });
+    const deps = createFakeRenderApiDependencies(callLog, { storage });
+    const project = resolveMediaProject(PROJECT_ROOT);
+
+    await expect(assertTimelineNotPersisted(deps, project, false)).rejects.toMatchObject({
+      code: 'TIMELINE_ALREADY_EXISTS',
+    });
+    expect(callLog.ports()).not.toContain('readTextFile');
+  });
+
+  it('never calls stat when overwrite is true, regardless of whether a timeline is already stored', async () => {
+    const callLog = createCallLog();
+    const timeline = buildMinimalTimeline();
+    const storage = createFakeObjectStorage(callLog, {
+      directories: [PROJECT_ROOT],
+      files: [{ path: `${PROJECT_ROOT}/work/timeline.json`, contents: JSON.stringify(timeline) }],
+    });
+    const deps = createFakeRenderApiDependencies(callLog, { storage });
+    const project = resolveMediaProject(PROJECT_ROOT);
+
+    await expect(assertTimelineNotPersisted(deps, project, true)).resolves.toBeUndefined();
+    expect(callLog.ports()).toEqual([]);
   });
 });

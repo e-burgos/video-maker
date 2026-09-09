@@ -14,6 +14,13 @@ import { createRenderApiRuntime } from './render-api-runtime';
 const FIXED_NOW_ISO = '2026-09-08T00:00:00.000Z';
 const PROJECT_ROOT = '/var/data/media/acme-launch';
 
+const ALL_BINARIES_RESOLVED = [
+  { name: 'ffmpeg', envVar: 'FFMPEG_PATH', resolved: true },
+  { name: 'ffprobe', envVar: 'FFPROBE_PATH', resolved: true },
+  { name: 'whisperCli', envVar: 'WHISPER_CPP_PATH', resolved: true },
+  { name: 'whisperModel', envVar: 'WHISPER_MODEL_PATH', resolved: true },
+] as const;
+
 function emptyRuntime() {
   return createRenderApiRuntime(createFakeRenderApiDependencies(createCallLog()));
 }
@@ -21,7 +28,9 @@ function emptyRuntime() {
 describe('handleHealth', () => {
   it('answers 200 with status ok, the service name, the clock time and one entry per engine module and media binary', async () => {
     const callLog = createCallLog();
-    const deps = createFakeRenderApiDependencies(callLog);
+    const deps = createFakeRenderApiDependencies(callLog, {
+      probeMediaBinaries: async () => ALL_BINARIES_RESOLVED,
+    });
     const runtime = emptyRuntime();
 
     const response = await handleHealth(deps, runtime);
@@ -34,15 +43,22 @@ describe('handleHealth', () => {
     expect(body.time).toBe(FIXED_NOW_ISO);
     expect(body.engine).toHaveLength(ENGINE_MODULE_NAMES.length);
     expect(body.binaries).toHaveLength(MEDIA_BINARY_NAMES.length);
-    expect(body.capabilities).toEqual({ renderPipeline: true, assetStore: true, jobQueue: true });
+    expect(body.capabilities).toEqual({
+      renderPipeline: true,
+      assetStore: true,
+      jobQueue: true,
+      montageQueue: true,
+    });
   });
 
-  it('answers 200 with status degraded when a media binary does not resolve', async () => {
+  it('answers 200 with status degraded when the whisper model does not resolve, keeping the other three binaries resolved', async () => {
     const callLog = createCallLog();
     const deps = createFakeRenderApiDependencies(callLog, {
       probeMediaBinaries: async () => [
         { name: 'ffmpeg', envVar: 'FFMPEG_PATH', resolved: true },
-        { name: 'ffprobe', envVar: 'FFPROBE_PATH', resolved: false },
+        { name: 'ffprobe', envVar: 'FFPROBE_PATH', resolved: true },
+        { name: 'whisperCli', envVar: 'WHISPER_CPP_PATH', resolved: true },
+        { name: 'whisperModel', envVar: 'WHISPER_MODEL_PATH', resolved: false },
       ],
     });
     const runtime = emptyRuntime();
@@ -52,6 +68,34 @@ describe('handleHealth', () => {
 
     expect(response.status).toBe(200);
     expect(body.status).toBe('degraded');
+
+    const byName = new Map(body.binaries.map((binary) => [binary.name, binary.resolved]));
+    expect(byName.get('ffmpeg')).toBe(true);
+    expect(byName.get('ffprobe')).toBe(true);
+    expect(byName.get('whisperCli')).toBe(true);
+    expect(byName.get('whisperModel')).toBe(false);
+  });
+
+  it('serializes exactly the eight top-level HealthBody keys', async () => {
+    const callLog = createCallLog();
+    const deps = createFakeRenderApiDependencies(callLog, {
+      probeMediaBinaries: async () => ALL_BINARIES_RESOLVED,
+    });
+    const runtime = emptyRuntime();
+
+    const response = await handleHealth(deps, runtime);
+    const body = response.body as HealthBody;
+
+    expect(Object.keys(body).sort()).toEqual([
+      'binaries',
+      'capabilities',
+      'cycle',
+      'engine',
+      'jobs',
+      'service',
+      'status',
+      'time',
+    ]);
   });
 
   it('answers capabilities.jobQueue true and cycle 3', async () => {
@@ -107,7 +151,9 @@ describe('handleHealth', () => {
 
   it('never exposes a resolved binary path', async () => {
     const callLog = createCallLog();
-    const deps = createFakeRenderApiDependencies(callLog);
+    const deps = createFakeRenderApiDependencies(callLog, {
+      probeMediaBinaries: async () => ALL_BINARIES_RESOLVED,
+    });
     const runtime = emptyRuntime();
 
     const response = await handleHealth(deps, runtime);
@@ -117,6 +163,7 @@ describe('handleHealth', () => {
     expect(serialized).not.toContain('/opt/');
     expect(serialized).not.toContain('/usr/');
     expect(serialized).not.toContain(':\\');
+    expect(body.binaries).toHaveLength(MEDIA_BINARY_NAMES.length);
 
     for (const binary of body.binaries) {
       expect(Object.keys(binary).sort()).toEqual(['envVar', 'name', 'resolved']);

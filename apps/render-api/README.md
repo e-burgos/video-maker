@@ -7,6 +7,13 @@ job queue (`POST`/`GET /projects/:slug/jobs`, `GET`/`DELETE /jobs/:jobId`), per-
 cooperative cancellation on top of the asset store (`cycle-02`) and the render pipeline
 (`cycle-01`, `runRenderPipeline`, now wired to an HTTP route for the first time).
 
+`spec-e-burgos-007-web-montage` (`cycle-01`) adds a second job `kind` to the same queue: a
+`montage` job runs `ingestProject` (asset discovery, probing, transcription) and `autoMontage`
+(`@video-maker/auto-montage`) over a project that has no `Timeline` yet, producing the same
+`work/catalog.json` / `work/timeline.json` / `work/edl.json` a `tools/render-cli ingest && plan`
+run would — with the same bytes (RF-4, RNF-1). A `render` job can then be chained on the result,
+unmodified. See "Montage jobs" below.
+
 ## Commands
 
 ```bash
@@ -41,6 +48,11 @@ injects.
 | `RENDER_API_OBJECT_STORE` | `fs` | Only `fs` is accepted in this cycle; any other value aborts startup with `SERVER_CONFIG_INVALID`. See D-11 below for the extension point this reserves. |
 | `FFMPEG_PATH` | — | Path to the `ffmpeg` binary. Without this variable, it is resolved via `PATH`. |
 | `FFPROBE_PATH` | — | Path to the `ffprobe` binary. Without this variable, it is resolved via `PATH`. |
+| `WHISPER_CPP_PATH` | — | Path to the `whisper-cli` binary used to transcribe `aroll` assets during a `montage` job's `transcribe` stage. Without this variable, it is resolved via `PATH`. |
+| `WHISPER_MODEL_PATH` | — | Path to the Whisper GGML model file `whisper-cli` loads. Unlike the three binaries above this is a model file, not an executable, and is never resolved via `PATH` — it must point at an actual file on disk or `GET /health` reports it unresolved and any `montage` job's `transcribe` stage fails with `503 MEDIA_BINARY_NOT_FOUND`. Never commit an actual path or the model file itself; only the variable name belongs in version control. |
+
+**Never commit values for any of the four binary variables above** (or for any other secret in
+`.env`) — only their names belong in this file or in any other tracked document.
 
 **The default port (`4310`) can be taken on this machine by the SDD kit's own docs viewer**
 (`pnpm sdd:docs`, which runs `sdd/docs/serve.mjs`). If startup fails with `EADDRINUSE`, that is not
@@ -72,7 +84,7 @@ path below and are not repeated per endpoint.
 
 | Method | Path | Purpose |
 | --- | --- | --- |
-| `GET` | `/health` | Service health probe. Reports engine module and media binary resolution, plus `capabilities: { renderPipeline, assetStore, jobQueue }`, `cycle` and the queue's `jobs: { running, queued }` counters. Always 200, in both the `ok` and `degraded` states — neither the asset store nor the job queue's load enters the health calculation. |
+| `GET` | `/health` | Service health probe. Reports engine module and media binary resolution (now four binaries: `ffmpeg`, `ffprobe`, `whisperCli`, `whisperModel`), plus `capabilities: { renderPipeline, assetStore, jobQueue, montageQueue }`, `cycle` and the queue's `jobs: { running, queued }` counters. Always 200, in both the `ok` and `degraded` states — neither the asset store nor the job queue's load enters the health calculation. `montageQueue` is always `true`: a `montage` job can always be created, whether or not the four binaries resolve — an unresolved binary only fails the job itself, at the stage that needs it (`503 MEDIA_BINARY_NOT_FOUND`), the same contract `renderPipeline`/`jobQueue` already had. |
 | `GET` | `/projects` | Lists every project directory under `RENDER_API_MEDIA_ROOT`, ascending by slug, with its five layout flags (`raw`, `catalog`, `timeline`, `edl`, `out`). A missing media root answers `200 []`; files and non-portable directory names are ignored silently. |
 | `POST` | `/projects` | Creates the canonical project layout for a slug: `raw/aroll`, `raw/broll`, `raw/images`, `raw/audio`, `work`, `out`, in that exact order. Body `{ "slug": "my-project" }`; `content-type` is not required. `409` if the project already exists — the existing project is never touched. |
 | `GET` | `/projects/:slug` | Project detail: layout flags plus `assetSource` (`catalog` \| `raw-scan`) and `assetCounts` by role, both derived from the same resolver `GET .../assets` uses, so the two endpoints never disagree. |
@@ -83,9 +95,9 @@ path below and are not repeated per endpoint.
 | `GET` | `/projects/:slug/edl` | Same contract as `GET .../timeline`, for the `EditDecisionList` at `work/edl.json`. |
 | `PUT` | `/projects/:slug/edl` | Same contract as `PUT .../timeline`, for `work/edl.json`. |
 | `GET` | `/projects/:slug/files/*path` | Downloads any artifact under `raw/`, `work/` or `out/` as raw bytes — it never parses the content, even for `timeline.json`/`edl.json` (that is what keeps the "same bytes as the CLI" guarantee, D-16). Supports a single-range `Range` header (`206` satisfiable, `416` unsatisfiable with `content-range: bytes */<size>`); a malformed or multi-range header is ignored and the whole file is served with `200` (RFC 7233 §3.1). A directory answers `404 ARTIFACT_NOT_FOUND` — there is no directory listing. Also serves a render job's deliverable — see "Downloading a job's deliverable" below. |
-| `POST` | `/projects/:slug/jobs` | Creates a render job. The stored `Timeline` is read, validated and snapshotted **once, at creation** — a job always renders the `Timeline` that existed when it was created, never a later `PUT`. No body — a payload, if sent, is ignored and never parsed (D-19). `202` with header `location: /jobs/<id>` and the full job as body; `state` is `"running"` if the single render slot is free, `"queued"` otherwise. Errors: `422 PROJECT_SLUG_INVALID`, `404 PROJECT_NOT_FOUND`, `404 TIMELINE_NOT_FOUND`, `422 TIMELINE_INVALID` — all four already existed before this cycle. |
-| `GET` | `/projects/:slug/jobs` | Lists the project's jobs in creation order, each reduced to a summary (`id`, `state`, `stage`, `errorCode`, `createdAt`, `startedAt`, `finishedAt`) — never the full `report` or `error`; use `GET /jobs/:jobId` for those. Does not check that the project exists: a slug with no jobs answers `200 { "slug", "jobs": [] }` whether or not the project does. |
-| `GET` | `/jobs/:jobId` | Full job detail, in any of its six states. Always `200`, even `state: "failed"` — the job's own failure is not a transport error; the typed `error` is embedded in the body instead. `404 RENDER_JOB_NOT_FOUND` for an id the queue does not know. The id is never validated as a path segment: the lookup is a `Map` read, not a filesystem access. |
+| `POST` | `/projects/:slug/jobs` | Creates a job. The body is optional, and every field inside it is optional (`{ kind?: 'render' \| 'montage', preset?: string, seed?: number, overwrite?: boolean }`). An absent body, an empty object, or a body that mentions no `kind` at all all mean `kind: 'render'` — **byte-identical to the endpoint's behavior before `cycle-01` of `spec-e-burgos-007-web-montage`** (retro-compatibility contract, see "Montage jobs" below). A syntactically invalid JSON body is new behavior this cycle: it now answers `400 REQUEST_BODY_INVALID_JSON` instead of being silently ignored (no existing client sends a body on this endpoint, so nothing breaks). `202` with header `location: /jobs/<id>` and the full job as body; `state` is `"running"` if the single job slot is free, `"queued"` otherwise. Render-branch errors (unchanged): `422 PROJECT_SLUG_INVALID`, `404 PROJECT_NOT_FOUND`, `404 TIMELINE_NOT_FOUND`, `422 TIMELINE_INVALID`. New errors, montage branch only: `422 JOB_KIND_INVALID`, `422 MONTAGE_PRESET_INVALID`, `422 MONTAGE_SEED_INVALID`, `422 MONTAGE_OVERWRITE_INVALID`, `409 TIMELINE_ALREADY_EXISTS`. |
+| `GET` | `/projects/:slug/jobs` | Lists the project's jobs in creation order, each reduced to a summary (`id`, `kind`, `state`, `stage`, `errorCode`, `createdAt`, `startedAt`, `finishedAt`) — never the full `report` or `error`; use `GET /jobs/:jobId` for those. `kind` is the only field this cycle adds; every field that existed before keeps its name and meaning (RNF-2). Does not check that the project exists: a slug with no jobs answers `200 { "slug", "jobs": [] }` whether or not the project does. |
+| `GET` | `/jobs/:jobId` | Full job detail, in any of its six states, for either `kind`. Always `200`, even `state: "failed"` — the job's own failure is not a transport error; the typed `error` is embedded in the body instead. `404 RENDER_JOB_NOT_FOUND` for an id the queue does not know. The id is never validated as a path segment: the lookup is a `Map` read, not a filesystem access. |
 | `DELETE` | `/jobs/:jobId` | Requests cancellation. See "Cancelling a job" below for the exact status per prior state. |
 
 ### Cancelling a job (EP-015)
@@ -114,6 +126,172 @@ URL with the existing artifact endpoint (EP-011):
 ```
 GET /projects/:slug/files/out/<jobId>.mp4
 ```
+
+## Montage jobs (`spec-e-burgos-007-web-montage`, `cycle-01`)
+
+A `montage` job takes a project that has no `Timeline` yet and produces one, over the same four
+stages `ingestProject`/`autoMontage` already run through the CLI: `discover` (asset discovery
+under `raw/`) → `probe` (`ffprobe` on every discovered asset) → `transcribe` (`whisper-cli` on
+`aroll` assets) → `plan` (`autoMontage`, no binary involved). Progress is monotonic — a stage
+never reports a snapshot behind one already reported, the same rule `render`'s own progress
+already followed — and, for `transcribe`, the `percent` is a floor, not a promise: only the
+default `aroll` role is transcribed, so a project with other roles can finish `transcribe` without
+ever reaching `percent: 100`. The real signal that a stage is done is the `stage` transition
+itself, never `percent` reaching 100.
+
+**Request body**, all fields optional:
+
+```ts
+interface CreateJobRequestBody {
+  readonly kind?: 'render' | 'montage';
+  readonly preset?: string;
+  readonly seed?: number;
+  readonly overwrite?: boolean;
+}
+```
+
+- `preset` — one of `software-demo` (default), `hardware`, `recipe`, `educational`
+  (`@video-maker/auto-montage`'s `MONTAGE_PRESETS`). Anything else answers
+  `422 MONTAGE_PRESET_INVALID`.
+- `seed` — a non-negative integer, default `0`. Anything else (negative, non-integer, non-number)
+  answers `422 MONTAGE_SEED_INVALID`.
+- `overwrite` — a boolean, default `false`. Anything else answers `422 MONTAGE_OVERWRITE_INVALID`.
+  When `false` and the project already has a persisted `Timeline`, the request is rejected with
+  `409 TIMELINE_ALREADY_EXISTS` **before any file is touched and before any job is registered** —
+  a manual edit already sitting in `work/timeline.json` is never overwritten by accident. When
+  `true`, the existing `Timeline`/EDL/catalog are replaced by the montage's own output once the job
+  succeeds.
+- `preset`/`seed`/`overwrite` are only ever read on the `montage` branch. A `render` job (explicit
+  or implied) never looks at them, even if they are present in the body.
+
+**Job report** (`report`, once `state` is `succeeded`):
+
+```ts
+interface MontageJobReport {
+  readonly catalogPath: string;      // "work/catalog.json"
+  readonly timelinePath: string;     // "work/timeline.json"
+  readonly editDecisionListPath: string; // "work/edl.json"
+  readonly preset: string;
+  readonly seed: number;
+}
+```
+
+**Error codes this cycle adds:**
+
+| Code | HTTP | Trigger |
+| --- | --- | --- |
+| `JOB_KIND_INVALID` | `422` | The body has a `kind` field and it is neither `'render'` nor `'montage'`. |
+| `MONTAGE_PRESET_INVALID` | `422` | `preset` present, not one of the four preset names. |
+| `MONTAGE_SEED_INVALID` | `422` | `seed` present, not a non-negative integer. |
+| `MONTAGE_OVERWRITE_INVALID` | `422` | `overwrite` present, not a boolean. |
+| `TIMELINE_ALREADY_EXISTS` | `409` | `overwrite` is `false` (or absent) and `work/timeline.json` already exists. |
+| `MONTAGE_RAW_MISSING` | `422` | The project exists but `raw/` has none of the four role directories, or `raw/` itself is unreadable. |
+| `MONTAGE_INPUT_INVALID` | `422` | `autoMontage` rejects the ingested catalog (for example: no `aroll` asset after ingest). |
+| `MONTAGE_FAILED` | `500` | Anything else `ingestProject`/`autoMontage` throws. |
+
+`MEDIA_BINARY_NOT_FOUND` (`503`, already existed) now also fires from the `probe`/`transcribe`
+stages when `ffprobe`/`whisper-cli`/the Whisper model do not resolve.
+
+### Real-process verification (CA-012, CA-013, CA-014)
+
+```bash
+pgrep -fl 'ffmpeg|whisper-cli|chrome-headless'                 # tiene que salir vacío
+vm_stat | awk '/Pages free/ {print $3}'                        # >= 35% de memoria libre, a ojo
+npx remotion browser ensure                                     # asegura Chrome headless antes del job de render
+
+MEDIA_TMP="$(mktemp -d)"
+mkdir -p "$MEDIA_TMP/smoke-montage/raw"
+cp -R media/smoke-ingest/raw/. "$MEDIA_TMP/smoke-montage/raw/"   # SOLO raw/, nunca work/ ni out/
+# media/smoke-ingest, media/video-01 y media/video-02 no se tocan en ningún paso de este guion
+
+set -a && source .env && set +a
+RENDER_API_PORT=4319 RENDER_API_MEDIA_ROOT="$MEDIA_TMP" SWC_NODE_PROJECT=tsconfig.base.json \
+  node -r ./apps/render-api/src/server-register.cjs apps/render-api/src/main.ts &
+API_PID=$!
+sleep 2
+BASE="http://127.0.0.1:4319"
+
+curl -s "$BASE/health" | grep -q '"montageQueue":true'
+curl -s -X POST "$BASE/projects" -d '{"slug":"smoke-montage"}'    # el layout ya existe via cp; 409 esperable, ignorar
+
+JOB_ID=$(curl -s -X POST "$BASE/projects/smoke-montage/jobs" \
+  -H 'content-type: application/json' \
+  -d '{"kind":"montage","preset":"software-demo","seed":0}' \
+  | node -e "process.stdin.once('data', b => console.log(JSON.parse(b).id))")
+
+until curl -s "$BASE/jobs/$JOB_ID" | grep -q '"state":"succeeded"\|"state":"failed"'; do
+  curl -s "$BASE/jobs/$JOB_ID" | node -e "process.stdin.once('data', b => { const j = JSON.parse(b); console.log(j.state, j.progress); })"
+  sleep 2
+done
+curl -s "$BASE/jobs/$JOB_ID" | node -e "process.stdin.once('data', b => console.log(JSON.parse(b).state))"  # succeeded
+
+for f in catalog.json timeline.json edl.json; do
+  echo "$f: $(shasum -a 256 "$MEDIA_TMP/smoke-montage/work/$f" | cut -d' ' -f1) \
+        vs $(shasum -a 256 "media/smoke-ingest/work/$f" | cut -d' ' -f1)"
+done
+# las tres líneas tienen que mostrar el MISMO hash en ambos lados (RF-4, RNF-1)
+
+# CA-014 — el oráculo tiene que ser sensible: repetir con seed distinto, y TIENE que fallar
+rm -rf "$MEDIA_TMP/smoke-montage/work"
+JOB_ID_2=$(curl -s -X POST "$BASE/projects/smoke-montage/jobs" \
+  -H 'content-type: application/json' \
+  -d '{"kind":"montage","preset":"software-demo","seed":1,"overwrite":true}' \
+  | node -e "process.stdin.once('data', b => console.log(JSON.parse(b).id))")
+until curl -s "$BASE/jobs/$JOB_ID_2" | grep -q '"state":"succeeded"\|"state":"failed"'; do sleep 2; done
+diff "$MEDIA_TMP/smoke-montage/work/timeline.json" media/smoke-ingest/work/timeline.json \
+  && echo "FALLO: el oráculo NO es sensible — seed distinto dio el mismo timeline" \
+  || echo "OK: seed=1 produce un timeline distinto de seed=0 (oráculo sensible, CA-014)"
+
+# job de render encadenado, sobre el resultado de seed=0 (repetir el POST de seed=0 antes de esto si se corrió CA-014)
+RENDER_JOB_ID=$(curl -s -X POST "$BASE/projects/smoke-montage/jobs" -d '{}' \
+  | node -e "process.stdin.once('data', b => console.log(JSON.parse(b).id))")
+until curl -s "$BASE/jobs/$RENDER_JOB_ID" | grep -q '"state":"succeeded"\|"state":"failed"'; do sleep 2; done
+curl -s -o "$MEDIA_TMP/out.mp4" "$BASE/projects/smoke-montage/files/out/$RENDER_JOB_ID.mp4"
+ffprobe -v error -select_streams v:0 -show_entries stream=nb_frames,r_frame_rate \
+  -of default=noprint_wrappers=1 "$MEDIA_TMP/out.mp4"
+# nb_frames y r_frame_rate se comparan contra el stream de video, NUNCA contra format.duration
+
+kill -TERM "$API_PID"; wait "$API_PID"
+rm -rf "$MEDIA_TMP"
+```
+
+**Run 2026-09-09**, against a `raw/`-only copy of `media/smoke-ingest`'s fixture (never the dev's
+own `media/` — a scratch copy of just `raw/`, no `work/`/`out/`), port `4319`. Full literal
+evidence — hashes, the per-stage timestamped progress, HTTP bodies, `ffprobe` output — lives in
+`sdd/specs/spec-e-burgos-007-web-montage/cycles/cycle-01/artifacts/task-020-smoke-notes.md`; this
+is the summary:
+
+- `GET /health` → `capabilities.montageQueue: true`, all four binaries `resolved: true`.
+- `tools/render-cli ingest && plan --preset software-demo --seed 0` (the oracle) and the API's own
+  `montage` job produce `work/catalog.json`/`work/timeline.json`/`work/edl.json` that are
+  **byte-identical for `edl.json`**, and identical for `catalog.json`/`timeline.json` once the two
+  wall-clock fields every asset probe stamps (`probedAt`, and the source file's own
+  `modifiedAtMs`) are set aside — those two fields are, by construction, never reproducible across
+  two different runs or two different copies of the same fixture, on the CLI side same as the API
+  side. RF-4/RNF-1 hold.
+- Stage sequence observed by polling a fresh project (no reusable catalog): `probe`
+  (`processedAssets` `1/4` → `2/4` → `3/4` of 4 assets) → `transcribe` → `plan` → `succeeded`, in
+  4.9 s. `discover` was never caught by a poll snapshot — it is set synchronously right before
+  `ingestProject` runs and the decorator moves to `probe` on the very first `ffprobe` call, faster
+  than one HTTP round trip. A second run against a project whose catalog was already current (the
+  `overwrite:true` retry) reused every fingerprint and went straight to `succeeded` in 11 ms — a
+  correct floor case, not a bug: no asset needed re-probing.
+- CA-014: `seed:1` produced a `timeline.json`/`edl.json` different from `seed:0`, on both the CLI
+  oracle and the same comparison repeated with the two fields above stripped. The oracle is
+  sensitive to `seed`.
+- `409 TIMELINE_ALREADY_EXISTS` on a repeat `POST` without `overwrite` once the project has a
+  persisted `Timeline`: no new job appeared in `GET /projects/:slug/jobs` (still exactly 1 entry).
+  `overwrite:true` on the same request → `202`.
+- Chained `render` job on the montage's output → `succeeded`, `538` frames. `ffprobe` on the video
+  stream of the deliverable: `codec_name=h264`, `1080x1920`, `r_frame_rate=30/1`, `nb_frames=538`
+  — never against `format.duration` (same caveat as CA-033 below: it includes AAC priming padding
+  and measures more than the video stream has).
+- Shutdown: `SIGTERM` after a job ran in the process. The exact exit code could not be captured
+  this run (the backgrounding shell and the one that sent the signal were two separate tool
+  invocations, so `wait` had no child to attach to) — the process was confirmed dead via `ps`
+  immediately after. See "Known issue" below: once a render has run, `SIGTERM` is already
+  documented (CA-033) to answer `exit=143`, not `0`.
+- `media/` (the dev's own fixture) was never written to — only the three scratch copies were.
 
 ## D-11 — no MinIO in this cycle
 

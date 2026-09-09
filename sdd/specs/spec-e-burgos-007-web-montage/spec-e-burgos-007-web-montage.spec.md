@@ -1,6 +1,8 @@
 # SPEC-e-burgos-007: Web Montage: Ingest & Auto-Montage from the Studio
 
-> Estado: **draft** — redactada por el orquestador al registrar la spec (2026-09-09).
+> Estado: **in-progress** — redactada por el orquestador al registrar la spec (2026-09-09);
+> `cycle-01` abierto el mismo dia con flow `full` (pedido `[FULL]`: crea un contrato HTTP que
+> `apps/web` consume en `cycle-02`).
 > `cycle-01` detalla y ejecuta la parte de API; `cycle-02` amplía las secciones de `apps/web`.
 
 ## Resumen Ejecutivo
@@ -111,7 +113,7 @@ confirmación de sobreescritura y estado vacío accionable en la página de prev
 
 | Ciclo | Fase | Flow | Qué entrega | Estado |
 | --- | --- | --- | --- | --- |
-| **cycle-01** | `montage-job-api` | `full` | En `apps/render-api`, un segundo tipo de job en la misma cola (`kind: 'montage'`) que ejecuta sobre `media/<slug>/` el equivalente exacto de `render-cli ingest` + `plan` usando la API pública de `libs/auto-montage`, con `preset` (default `software-demo`) y `seed` (default `0`), progreso por etapa `discover\|probe\|transcribe\|plan`, `overwrite` explícito (409 sin él), errores tipados y mapeo HTTP, los cuatro binarios resueltos desde el `.env` raíz, y `sha256` de `catalog.json`/`timeline.json`/`edl.json` idéntico al de la CLI. Contrato registrado en `sdd/api.json`. Smoke real: job `montage` sobre una copia de `media/smoke-ingest` sin `work/`, y un job `render` encadenado que termina en MP4 verificado con `ffprobe`. | **pending** |
+| **cycle-01** | `montage-job-api` | `full` | En `apps/render-api`, un segundo tipo de job en la misma cola (`kind: 'montage'`) que ejecuta sobre `media/<slug>/` el equivalente exacto de `render-cli ingest` + `plan` usando la API pública de `libs/auto-montage`, con `preset` (default `software-demo`) y `seed` (default `0`), progreso por etapa `discover\|probe\|transcribe\|plan`, `overwrite` explícito (409 sin él), errores tipados y mapeo HTTP, los cuatro binarios resueltos desde el `.env` raíz, y `sha256` de `catalog.json`/`timeline.json`/`edl.json` idéntico al de la CLI. Contrato registrado en `sdd/api.json`. Smoke real: job `montage` sobre una copia de `media/smoke-ingest` sin `work/`, y un job `render` encadenado que termina en MP4 verificado con `ffprobe`. | **in-progress** |
 | **cycle-02** | `montage-from-the-studio` | `lite` | En `apps/web`, botón "Generate montage" en la biblioteca de assets con selector de preset y seed, progreso del job por etapa (la transcripción es la etapa lenta), salto al preview al terminar, confirmación explícita antes de regenerar sobre un proyecto ya editado (D-6), y estado vacío accionable en la página de preview cuando el servicio responde `TIMELINE_NOT_FOUND`. E2E con Playwright desde `raw/` hasta el MP4. Cierra la spec. | **pending** |
 
 ## Requisitos Funcionales (RF)

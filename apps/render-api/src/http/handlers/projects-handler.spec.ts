@@ -5,6 +5,7 @@ import { createFakeObjectStorage } from '../../__fixtures__/fake-object-storage'
 import { createFakeRenderApiDependencies } from '../../__fixtures__/fake-render-api-dependencies';
 import { requestLine } from '../../__fixtures__/http-request';
 import type { StoreConfig } from '../../config/store-config';
+import { toErrorPayload } from '../../errors/to-error-payload';
 import { MAX_JSON_BODY_BYTES } from '../read-json-body';
 import { handleCreateProject, handleGetProject, handleListProjects } from './projects-handler';
 
@@ -16,6 +17,15 @@ async function* textBody(text: string): AsyncGenerator<Uint8Array> {
 
 function jsonBody(value: unknown): AsyncGenerator<Uint8Array> {
   return textBody(JSON.stringify(value));
+}
+
+async function caughtErrorPayload(promise: Promise<unknown>): Promise<ReturnType<typeof toErrorPayload>> {
+  return promise.then(
+    () => {
+      throw new Error('expected the handler to reject');
+    },
+    (error: unknown) => toErrorPayload(error),
+  );
 }
 
 describe('handleListProjects', () => {
@@ -186,6 +196,25 @@ describe('handleCreateProject', () => {
     await expect(handleCreateProject(deps, STORE, undefined, tooLargeRequest)).rejects.toMatchObject({
       code: 'REQUEST_BODY_TOO_LARGE',
     });
+  });
+
+  it('answers the exact same error for an empty body as for a syntactically invalid one', async () => {
+    const callLog = createCallLog();
+    const deps = createFakeRenderApiDependencies(callLog);
+
+    const invalidJsonRequest = requestLine({ method: 'POST', path: '/projects', body: textBody('not json') });
+    const emptyBodyRequest = requestLine({ method: 'POST', path: '/projects' });
+
+    const invalidJsonPayload = await caughtErrorPayload(
+      handleCreateProject(deps, STORE, undefined, invalidJsonRequest),
+    );
+    const emptyBodyPayload = await caughtErrorPayload(
+      handleCreateProject(deps, STORE, undefined, emptyBodyRequest),
+    );
+
+    expect(Object.keys(emptyBodyPayload).sort()).toEqual(Object.keys(invalidJsonPayload).sort());
+    expect(emptyBodyPayload).toEqual(invalidJsonPayload);
+    expect(emptyBodyPayload.code).toBe('REQUEST_BODY_INVALID_JSON');
   });
 });
 

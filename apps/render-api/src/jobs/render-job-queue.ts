@@ -1,27 +1,27 @@
+import { resolveMediaProject } from '@video-maker/auto-montage';
+import type { MontagePresetName } from '@video-maker/auto-montage';
 import type { Timeline } from '@video-maker/timeline-core';
 
 import type { RenderApiDependencies } from '../deps/render-api-dependencies';
 import type { RenderApiErrorPayload } from '../errors/render-api-error';
 import { toErrorPayload } from '../errors/to-error-payload';
+import { mergeMontageJobProgress, startMontageJobStage } from './montage-job-progress';
+import { isMontagePipelineCanceled } from './montage-pipeline-observer';
+import type { MontagePipelineObserver } from './montage-pipeline-observer';
 import type { RenderPipelineObserver } from '../pipeline/render-pipeline-observer';
 import { isRenderPipelineCanceled } from '../pipeline/render-pipeline-observer';
 import type { RenderPipelineReport } from '../pipeline/run-render-pipeline';
 import { runRenderPipeline } from '../pipeline/run-render-pipeline';
 import { mergeRenderProgress, startRenderJobStage } from './render-job-progress';
 import { applyRenderJobEvent } from './render-job-state';
-import type { RenderJob, RenderJobProgress, RenderJobState } from './render-job';
-import { toRenderJob } from './render-job';
-
-export interface CreateRenderJobInput {
-  readonly slug: string;
-  readonly projectRoot: string;
-  readonly timeline: Timeline;
-}
+import type { CreateJobInput, Job, MontageJobProgress, MontageJobReport, RenderJobProgress, RenderJobState } from './render-job';
+import { toJob } from './render-job';
+import { runMontagePipeline } from './run-montage-pipeline';
 
 export type CancelRenderJobResult =
-  | { readonly kind: 'canceled'; readonly job: RenderJob }
-  | { readonly kind: 'canceling'; readonly job: RenderJob }
-  | { readonly kind: 'not-cancelable'; readonly job: RenderJob }
+  | { readonly kind: 'canceled'; readonly job: Job }
+  | { readonly kind: 'canceling'; readonly job: Job }
+  | { readonly kind: 'not-cancelable'; readonly job: Job }
   | { readonly kind: 'not-found' };
 
 export interface RenderJobQueueSize {
@@ -30,35 +30,49 @@ export interface RenderJobQueueSize {
 }
 
 export interface RenderJobQueue {
-  readonly create: (input: CreateRenderJobInput) => RenderJob;
-  readonly get: (jobId: string) => RenderJob | null;
-  readonly listBySlug: (slug: string) => readonly RenderJob[];
+  readonly create: (input: CreateJobInput) => Job;
+  readonly get: (jobId: string) => Job | null;
+  readonly listBySlug: (slug: string) => readonly Job[];
   readonly cancel: (jobId: string) => CancelRenderJobResult;
   readonly size: () => RenderJobQueueSize;
   readonly whenIdle: () => Promise<void>;
 }
 
-interface RenderJobRecord {
+interface JobRecordBase {
   readonly id: string;
   readonly slug: string;
   readonly projectRoot: string;
-  readonly timeline: Timeline;
   readonly createdAt: string;
   state: RenderJobState;
   startedAt: string | null;
   finishedAt: string | null;
-  progress: RenderJobProgress | null;
-  report: RenderPipelineReport | null;
   error: RenderApiErrorPayload | null;
 }
 
+interface RenderJobRecord extends JobRecordBase {
+  readonly kind: 'render';
+  readonly timeline: Timeline;
+  progress: RenderJobProgress | null;
+  report: RenderPipelineReport | null;
+}
+
+interface MontageJobRecord extends JobRecordBase {
+  readonly kind: 'montage';
+  readonly preset: MontagePresetName;
+  readonly seed: number;
+  progress: MontageJobProgress | null;
+  report: MontageJobReport | null;
+}
+
+type JobRecord = RenderJobRecord | MontageJobRecord;
+
 export function createRenderJobQueue(deps: RenderApiDependencies): RenderJobQueue {
-  const records = new Map<string, RenderJobRecord>();
+  const records = new Map<string, JobRecord>();
   const pending: string[] = [];
   const idleResolvers: Array<() => void> = [];
   let activeId: string | null = null;
 
-  function logTransition(record: RenderJobRecord, from: RenderJobState, to: RenderJobState): void {
+  function logTransition(record: JobRecord, from: RenderJobState, to: RenderJobState): void {
     deps.logger.info({
       event: 'render-job-transition',
       detail: { jobId: record.id, slug: record.slug, from, to },
@@ -72,11 +86,7 @@ export function createRenderJobQueue(deps: RenderApiDependencies): RenderJobQueu
     }
   }
 
-  function settle(
-    record: RenderJobRecord,
-    report: RenderPipelineReport | null,
-    failure: RenderApiErrorPayload | null,
-  ): void {
+  function settle<T extends JobRecord>(record: T, report: T['report'], failure: RenderApiErrorPayload | null): void {
     const from = record.state;
     const transition = applyRenderJobEvent(from, { kind: 'settle', failed: failure !== null });
 
@@ -91,7 +101,7 @@ export function createRenderJobQueue(deps: RenderApiDependencies): RenderJobQueu
     logTransition(record, from, record.state);
   }
 
-  async function runJob(record: RenderJobRecord): Promise<void> {
+  async function runRenderJob(record: RenderJobRecord): Promise<void> {
     const observer: RenderPipelineObserver = {
       stageStarted: (stage) => {
         record.progress = startRenderJobStage(record.progress, stage);
@@ -116,6 +126,42 @@ export function createRenderJobQueue(deps: RenderApiDependencies): RenderJobQueu
     }
 
     settle(record, report, failure);
+  }
+
+  async function runMontageJob(record: MontageJobRecord): Promise<void> {
+    const observer: MontagePipelineObserver = {
+      stageStarted: (stage) => {
+        record.progress = startMontageJobStage(record.progress, stage);
+      },
+      assetProcessed: (stage, totalAssets) => {
+        record.progress = mergeMontageJobProgress(record.progress, stage, totalAssets);
+      },
+      cancellationRequested: () => record.state === 'canceling',
+    };
+
+    let report: MontageJobReport | null = null;
+    let failure: RenderApiErrorPayload | null = null;
+
+    try {
+      report = await runMontagePipeline(
+        { project: resolveMediaProject(record.projectRoot), preset: record.preset, seed: record.seed },
+        deps,
+        observer,
+      );
+    } catch (cause) {
+      failure = isMontagePipelineCanceled(cause) ? null : toErrorPayload(cause);
+    }
+
+    settle(record, report, failure);
+  }
+
+  async function runJob(record: JobRecord): Promise<void> {
+    if (record.kind === 'render') {
+      await runRenderJob(record);
+    } else {
+      await runMontageJob(record);
+    }
+
     activeId = null;
     dispatchNext();
   }
@@ -151,39 +197,41 @@ export function createRenderJobQueue(deps: RenderApiDependencies): RenderJobQueu
     resolveIdle();
   }
 
-  function create(input: CreateRenderJobInput): RenderJob {
+  function create(input: CreateJobInput): Job {
     const id = deps.randomId();
-    const record: RenderJobRecord = {
+    const base = {
       id,
       slug: input.slug,
       projectRoot: input.projectRoot,
-      timeline: input.timeline,
       createdAt: deps.clock.nowIso(),
-      state: 'queued',
+      state: 'queued' as const,
       startedAt: null,
       finishedAt: null,
-      progress: null,
-      report: null,
       error: null,
     };
+
+    const record: JobRecord =
+      input.kind === 'render'
+        ? { ...base, kind: 'render', timeline: input.timeline, progress: null, report: null }
+        : { ...base, kind: 'montage', preset: input.preset, seed: input.seed, progress: null, report: null };
 
     records.set(id, record);
     pending.push(id);
     dispatchNext();
 
-    return toRenderJob(record);
+    return toJob(record);
   }
 
-  function get(jobId: string): RenderJob | null {
+  function get(jobId: string): Job | null {
     const record = records.get(jobId);
-    return record === undefined ? null : toRenderJob(record);
+    return record === undefined ? null : toJob(record);
   }
 
-  function listBySlug(slug: string): readonly RenderJob[] {
-    const jobs: RenderJob[] = [];
+  function listBySlug(slug: string): readonly Job[] {
+    const jobs: Job[] = [];
     for (const record of records.values()) {
       if (record.slug === slug) {
-        jobs.push(toRenderJob(record));
+        jobs.push(toJob(record));
       }
     }
     return jobs;
@@ -199,11 +247,11 @@ export function createRenderJobQueue(deps: RenderApiDependencies): RenderJobQueu
     const transition = applyRenderJobEvent(previousState, { kind: 'cancel' });
 
     if (transition.kind === 'rejected') {
-      return { kind: 'not-cancelable', job: toRenderJob(record) };
+      return { kind: 'not-cancelable', job: toJob(record) };
     }
 
     if (previousState === transition.state) {
-      return { kind: 'canceling', job: toRenderJob(record) };
+      return { kind: 'canceling', job: toJob(record) };
     }
 
     record.state = transition.state;
@@ -220,7 +268,7 @@ export function createRenderJobQueue(deps: RenderApiDependencies): RenderJobQueu
 
     return {
       kind: transition.state === 'canceled' ? 'canceled' : 'canceling',
-      job: toRenderJob(record),
+      job: toJob(record),
     };
   }
 

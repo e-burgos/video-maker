@@ -1,0 +1,635 @@
+{
+  "$schema": "../../../../schemas/cycle-tasks.schema.json",
+  "spec": "spec-e-burgos-007-web-montage",
+  "cycle": 1,
+  "module": "web-montage",
+  "apps": [
+    "apps/render-api"
+  ],
+  "flow": "full",
+  "user_stories_generated": true,
+  "prerequisites": {
+    "tasks_generated": true
+  },
+  "tasks": [
+    {
+      "id": "TASK-001",
+      "title": "[BE] HU-01/HU-05: Modelo de datos de la cola — union discriminada Job/JobKind",
+      "user_stories": [
+        "HU-01",
+        "HU-05"
+      ],
+      "estimation_hours": 4,
+      "story_points": 5,
+      "depends_on": [],
+      "status": "done",
+      "files": [
+        "apps/render-api/src/jobs/render-job.ts",
+        "apps/render-api/src/jobs/render-job.spec.ts"
+      ],
+      "usage": {
+        "agent": "implementor-back",
+        "provider_model": "sonnet",
+        "effort": "medium",
+        "tokens_in": 145890,
+        "tokens_out": 25745,
+        "tokens_total": 171635,
+        "approx": false,
+        "source": "agent-usage-notification",
+        "recorded_at": "2026-09-09",
+        "duration_minutes": 7.4
+      }
+    },
+    {
+      "id": "TASK-002",
+      "title": "[BE] HU-03/HU-07: Codigos de error nuevos (JOB_KIND_INVALID, MONTAGE_*, TIMELINE_ALREADY_EXISTS) y su mapeo HTTP",
+      "user_stories": [
+        "HU-03",
+        "HU-07"
+      ],
+      "estimation_hours": 4,
+      "story_points": 5,
+      "depends_on": [
+        "TASK-001"
+      ],
+      "status": "done",
+      "files": [
+        "apps/render-api/src/errors/render-api-error.ts",
+        "apps/render-api/src/errors/render-api-error.spec.ts",
+        "apps/render-api/src/errors/http-status-for.ts",
+        "apps/render-api/src/errors/http-status-for.spec.ts",
+        "apps/render-api/src/errors/to-error-payload.ts",
+        "apps/render-api/src/errors/to-error-payload.spec.ts"
+      ],
+      "usage": {
+        "agent": "implementor-back",
+        "provider_model": "sonnet",
+        "effort": "medium",
+        "tokens_in": 40556,
+        "tokens_out": 7157,
+        "tokens_total": 47713,
+        "approx": false,
+        "source": "agent-usage-notification",
+        "recorded_at": "2026-09-09",
+        "duration_minutes": 6.0
+      }
+    },
+    {
+      "id": "TASK-003",
+      "title": "[BE] HU-09: Cuarto binario de media — MEDIA_BINARY_NAMES a los cuatro nombres",
+      "user_stories": [
+        "HU-09"
+      ],
+      "estimation_hours": 1,
+      "story_points": 1,
+      "depends_on": [],
+      "status": "done",
+      "files": [
+        "apps/render-api/src/engine/media-binaries.ts"
+      ],
+      "usage": {
+        "agent": "implementor-back",
+        "provider_model": "sonnet",
+        "effort": "medium",
+        "tokens_in": 19658,
+        "tokens_out": 3469,
+        "tokens_total": 23127,
+        "approx": false,
+        "source": "agent-usage-notification",
+        "recorded_at": "2026-09-09",
+        "duration_minutes": 10.6
+      }
+    },
+    {
+      "id": "TASK-004",
+      "title": "[BE] HU-02: Puertos nuevos en RenderApiDependencies (readDirectory, statFile, createCommandRunner, resolveMontageBinaries)",
+      "user_stories": [
+        "HU-02",
+        "HU-04",
+        "HU-09"
+      ],
+      "estimation_hours": 1,
+      "story_points": 1,
+      "depends_on": [],
+      "status": "done",
+      "files": [
+        "apps/render-api/src/deps/render-api-dependencies.ts"
+      ],
+      "usage": {
+        "agent": "implementor-back",
+        "provider_model": "sonnet",
+        "effort": "medium",
+        "tokens_in": 10995,
+        "tokens_out": 1940,
+        "tokens_total": 12935,
+        "approx": false,
+        "source": "agent-usage-notification",
+        "recorded_at": "2026-09-09",
+        "duration_minutes": 13.9
+      }
+    },
+    {
+      "id": "TASK-005",
+      "title": "[BE] HU-09: Adaptador de produccion de los cuatro puertos nuevos",
+      "user_stories": [
+        "HU-09"
+      ],
+      "estimation_hours": 3,
+      "story_points": 3,
+      "depends_on": [
+        "TASK-003",
+        "TASK-004"
+      ],
+      "status": "done",
+      "files": [
+        "apps/render-api/src/deps/node-render-api-dependencies.ts",
+        "apps/render-api/src/deps/node-render-api-dependencies.spec.ts"
+      ],
+      "usage": {
+        "agent": "implementor-back",
+        "provider_model": "sonnet",
+        "effort": "medium",
+        "tokens_in": 26523,
+        "tokens_out": 4681,
+        "tokens_total": 31204,
+        "approx": false,
+        "source": "agent-usage-notification",
+        "recorded_at": "2026-09-09",
+        "duration_minutes": 22.6
+      }
+    },
+    {
+      "id": "TASK-006",
+      "title": "[BE] HU-02/HU-04: Dobles de test — fake-command-runner y fake-render-api-dependencies",
+      "user_stories": [
+        "HU-02",
+        "HU-04"
+      ],
+      "estimation_hours": 2,
+      "story_points": 2,
+      "depends_on": [
+        "TASK-004"
+      ],
+      "status": "done",
+      "files": [
+        "apps/render-api/src/__fixtures__/fake-command-runner.ts",
+        "apps/render-api/src/__fixtures__/fake-render-api-dependencies.ts"
+      ],
+      "usage": {
+        "agent": "implementor-back",
+        "provider_model": "sonnet",
+        "effort": "medium",
+        "tokens_in": 20258,
+        "tokens_out": 3575,
+        "tokens_total": 23833,
+        "approx": false,
+        "source": "agent-usage-notification",
+        "recorded_at": "2026-09-09",
+        "duration_minutes": 18.0
+      }
+    },
+    {
+      "id": "TASK-007",
+      "title": "[BE] HU-02/HU-07: Validadores puros de preset/seed/overwrite",
+      "user_stories": [
+        "HU-02",
+        "HU-07"
+      ],
+      "estimation_hours": 2,
+      "story_points": 2,
+      "depends_on": [],
+      "status": "done",
+      "files": [
+        "apps/render-api/src/jobs/montage-job-params.ts",
+        "apps/render-api/src/jobs/montage-job-params.spec.ts"
+      ],
+      "usage": {
+        "agent": "implementor-back",
+        "provider_model": "sonnet",
+        "effort": "medium",
+        "tokens_in": 21771,
+        "tokens_out": 3842,
+        "tokens_total": 25613,
+        "approx": false,
+        "source": "agent-usage-notification",
+        "recorded_at": "2026-09-09",
+        "duration_minutes": 31.1
+      }
+    },
+    {
+      "id": "TASK-008",
+      "title": "[BE] HU-04: Formula de porcentaje de progreso del montaje",
+      "user_stories": [
+        "HU-04"
+      ],
+      "estimation_hours": 1,
+      "story_points": 1,
+      "depends_on": [],
+      "status": "done",
+      "files": [
+        "apps/render-api/src/jobs/montage-job-progress.ts",
+        "apps/render-api/src/jobs/montage-job-progress.spec.ts"
+      ],
+      "usage": {
+        "agent": "implementor-back",
+        "provider_model": "sonnet",
+        "effort": "medium",
+        "tokens_in": 15159,
+        "tokens_out": 2675,
+        "tokens_total": 17834,
+        "approx": false,
+        "source": "agent-usage-notification",
+        "recorded_at": "2026-09-09",
+        "duration_minutes": 34.7
+      }
+    },
+    {
+      "id": "TASK-009",
+      "title": "[BE] HU-04/HU-06: Tipos de observador de progreso y cancelacion del pipeline de montaje",
+      "user_stories": [
+        "HU-04",
+        "HU-06"
+      ],
+      "estimation_hours": 2,
+      "story_points": 2,
+      "depends_on": [
+        "TASK-001"
+      ],
+      "status": "done",
+      "files": [
+        "apps/render-api/src/jobs/montage-pipeline-observer.ts",
+        "apps/render-api/src/jobs/montage-pipeline-observer.spec.ts"
+      ],
+      "usage": {
+        "agent": "implementor-back",
+        "provider_model": "sonnet",
+        "effort": "medium",
+        "tokens_in": 11268,
+        "tokens_out": 1989,
+        "tokens_total": 13257,
+        "approx": false,
+        "source": "agent-usage-notification",
+        "recorded_at": "2026-09-09",
+        "duration_minutes": 37.5
+      }
+    },
+    {
+      "id": "TASK-010",
+      "title": "[BE] HU-04: Decorador del CommandRunner que observa discover/probe/transcribe/plan",
+      "user_stories": [
+        "HU-04"
+      ],
+      "estimation_hours": 3,
+      "story_points": 3,
+      "depends_on": [
+        "TASK-001",
+        "TASK-006"
+      ],
+      "status": "done",
+      "files": [
+        "apps/render-api/src/jobs/montage-command-runner-decorator.ts",
+        "apps/render-api/src/jobs/montage-command-runner-decorator.spec.ts"
+      ],
+      "usage": {
+        "agent": "implementor-back",
+        "provider_model": "sonnet",
+        "effort": "medium",
+        "tokens_in": 12450,
+        "tokens_out": 2197,
+        "tokens_total": 14647,
+        "approx": false,
+        "source": "agent-usage-notification",
+        "recorded_at": "2026-09-09",
+        "duration_minutes": 40.7
+      }
+    },
+    {
+      "id": "TASK-011",
+      "title": "[BE] HU-03: project-scope expone la precondicion de sobreescritura (assertTimelineNotPersisted)",
+      "user_stories": [
+        "HU-03"
+      ],
+      "estimation_hours": 2,
+      "story_points": 2,
+      "depends_on": [
+        "TASK-002"
+      ],
+      "status": "done",
+      "files": [
+        "apps/render-api/src/store/project-scope.ts",
+        "apps/render-api/src/store/project-scope.spec.ts"
+      ],
+      "usage": {
+        "agent": "implementor-back",
+        "provider_model": "sonnet",
+        "effort": "medium",
+        "tokens_in": 13841,
+        "tokens_out": 2443,
+        "tokens_total": 16284,
+        "approx": false,
+        "source": "agent-usage-notification",
+        "recorded_at": "2026-09-09",
+        "duration_minutes": 43.6
+      }
+    },
+    {
+      "id": "TASK-012",
+      "title": "[BE] HU-02/HU-03: Precondiciones de montaje — proyecto ingestable y timeline no persistida",
+      "user_stories": [
+        "HU-02",
+        "HU-03",
+        "HU-07"
+      ],
+      "estimation_hours": 3,
+      "story_points": 3,
+      "depends_on": [
+        "TASK-002",
+        "TASK-004",
+        "TASK-006",
+        "TASK-011"
+      ],
+      "status": "done",
+      "files": [
+        "apps/render-api/src/store/montage-preconditions.ts",
+        "apps/render-api/src/store/montage-preconditions.spec.ts"
+      ],
+      "usage": {
+        "agent": "implementor-back",
+        "provider_model": "sonnet",
+        "effort": "medium",
+        "tokens_in": 17281,
+        "tokens_out": 3050,
+        "tokens_total": 20331,
+        "approx": false,
+        "source": "agent-usage-notification",
+        "recorded_at": "2026-09-09",
+        "duration_minutes": 47.3
+      }
+    },
+    {
+      "id": "TASK-013",
+      "title": "[BE] HU-07: Traductor de errores del motor de montaje",
+      "user_stories": [
+        "HU-07"
+      ],
+      "estimation_hours": 3,
+      "story_points": 3,
+      "depends_on": [
+        "TASK-002"
+      ],
+      "status": "done",
+      "files": [
+        "apps/render-api/src/errors/pipeline-stage-error.ts",
+        "apps/render-api/src/errors/translate-montage-error.ts",
+        "apps/render-api/src/errors/translate-montage-error.spec.ts"
+      ],
+      "usage": {
+        "agent": "implementor-back",
+        "provider_model": "sonnet",
+        "effort": "medium",
+        "tokens_in": 35597,
+        "tokens_out": 6282,
+        "tokens_total": 41879,
+        "approx": false,
+        "source": "agent-usage-notification",
+        "recorded_at": "2026-09-09",
+        "duration_minutes": 54.1
+      }
+    },
+    {
+      "id": "TASK-014",
+      "title": "[BE] HU-02/HU-06: Orquestacion del pipeline de montaje (run-montage-pipeline) con cancelacion cooperativa",
+      "user_stories": [
+        "HU-02",
+        "HU-04",
+        "HU-06"
+      ],
+      "estimation_hours": 6,
+      "story_points": 8,
+      "depends_on": [
+        "TASK-001",
+        "TASK-004",
+        "TASK-006",
+        "TASK-009",
+        "TASK-010",
+        "TASK-012",
+        "TASK-013"
+      ],
+      "status": "done",
+      "files": [
+        "apps/render-api/src/jobs/run-montage-pipeline.ts",
+        "apps/render-api/src/jobs/run-montage-pipeline.spec.ts"
+      ],
+      "usage": {
+        "agent": "implementor-back",
+        "provider_model": "sonnet",
+        "effort": "medium",
+        "tokens_in": 78424,
+        "tokens_out": 13839,
+        "tokens_total": 92263,
+        "approx": false,
+        "source": "agent-usage-notification",
+        "recorded_at": "2026-09-09",
+        "duration_minutes": 68.4
+      }
+    },
+    {
+      "id": "TASK-015",
+      "title": "[BE] HU-06/HU-08: La cola despacha jobs de montaje (dispatch por kind, cancelacion, FIFO unica)",
+      "user_stories": [
+        "HU-06",
+        "HU-08"
+      ],
+      "estimation_hours": 4,
+      "story_points": 5,
+      "depends_on": [
+        "TASK-001",
+        "TASK-014"
+      ],
+      "status": "done",
+      "files": [
+        "apps/render-api/src/jobs/run-montage-pipeline.ts",
+        "apps/render-api/src/jobs/montage-pipeline-observer.spec.ts",
+        "apps/render-api/src/jobs/montage-pipeline-observer.ts",
+        "apps/render-api/src/jobs/render-job-queue.ts",
+        "apps/render-api/src/jobs/render-job-queue.spec.ts"
+      ],
+      "usage": {
+        "agent": "implementor-back",
+        "provider_model": "sonnet",
+        "effort": "medium",
+        "tokens_in": 38250,
+        "tokens_out": 6750,
+        "tokens_total": 45000,
+        "approx": true,
+        "source": "declared-estimate",
+        "recorded_at": "2026-09-09"
+      }
+    },
+    {
+      "id": "TASK-016",
+      "title": "[BE] HU-01: Variante 'empty' de la lectura del body JSON",
+      "user_stories": [
+        "HU-01"
+      ],
+      "estimation_hours": 2,
+      "story_points": 2,
+      "depends_on": [],
+      "status": "done",
+      "files": [
+        "apps/render-api/src/http/read-json-body.ts",
+        "apps/render-api/src/http/read-json-body.spec.ts"
+      ],
+      "usage": {
+        "agent": "implementor-back",
+        "provider_model": "sonnet",
+        "effort": "medium",
+        "tokens_in": 72205,
+        "tokens_out": 12742,
+        "tokens_total": 84947,
+        "approx": false,
+        "source": "agent-usage-notification",
+        "recorded_at": "2026-09-09",
+        "duration_minutes": 3.3
+      }
+    },
+    {
+      "id": "TASK-017",
+      "title": "[BE] HU-01: montage-handler preserva el rechazo de body vacio en PUT timeline/EDL",
+      "user_stories": [
+        "HU-01"
+      ],
+      "estimation_hours": 2,
+      "story_points": 2,
+      "depends_on": [
+        "TASK-016"
+      ],
+      "status": "done",
+      "files": [
+        "apps/render-api/src/http/handlers/montage-handler.ts",
+        "apps/render-api/src/http/handlers/montage-handler.spec.ts",
+        "apps/render-api/src/http/handlers/projects-handler.ts",
+        "apps/render-api/src/http/handlers/projects-handler.spec.ts"
+      ],
+      "usage": {
+        "agent": "implementor-back",
+        "provider_model": "sonnet",
+        "effort": "medium",
+        "tokens_in": 34876,
+        "tokens_out": 6154,
+        "tokens_total": 41030,
+        "approx": false,
+        "source": "agent-usage-notification",
+        "recorded_at": "2026-09-09",
+        "duration_minutes": 4.0
+      }
+    },
+    {
+      "id": "TASK-018",
+      "title": "[BE] HU-02: Handler de jobs con discriminante kind — POST/GET, validacion de parametros y 409",
+      "user_stories": [
+        "HU-01",
+        "HU-02",
+        "HU-03",
+        "HU-05",
+        "HU-07"
+      ],
+      "estimation_hours": 6,
+      "story_points": 8,
+      "depends_on": [
+        "TASK-001",
+        "TASK-002",
+        "TASK-006",
+        "TASK-007",
+        "TASK-011",
+        "TASK-012",
+        "TASK-015",
+        "TASK-016"
+      ],
+      "status": "done",
+      "files": [
+        "apps/render-api/src/http/handlers/jobs-handler.ts",
+        "apps/render-api/src/http/handlers/jobs-handler.spec.ts",
+        "apps/render-api/src/http/handle-request.ts"
+      ],
+      "usage": {
+        "tokens_in": 172281,
+        "tokens_out": 30402,
+        "tokens_total": 202683,
+        "provider_model": "sonnet",
+        "effort": "medium",
+        "agent": "implementor-back",
+        "approx": false,
+        "source": "agent-usage-notification",
+        "recorded_at": "2026-09-09",
+        "duration_minutes": 16.3
+      }
+    },
+    {
+      "id": "TASK-019",
+      "title": "[BE] HU-09: GET /health reporta los cuatro binarios y capabilities.montageQueue",
+      "user_stories": [
+        "HU-09"
+      ],
+      "estimation_hours": 2,
+      "story_points": 2,
+      "depends_on": [
+        "TASK-003",
+        "TASK-004",
+        "TASK-006"
+      ],
+      "status": "done",
+      "files": [
+        "apps/render-api/src/http/health-handler.ts",
+        "apps/render-api/src/http/health-handler.spec.ts"
+      ],
+      "usage": {
+        "agent": "implementor-back",
+        "provider_model": "sonnet",
+        "effort": "medium",
+        "tokens_in": 22039,
+        "tokens_out": 3889,
+        "tokens_total": 25928,
+        "approx": false,
+        "source": "agent-usage-notification",
+        "recorded_at": "2026-09-09",
+        "duration_minutes": 26.4
+      }
+    },
+    {
+      "id": "TASK-020",
+      "title": "[BE] HU-02: README + SMOKE REAL end-to-end (binario arrancable con el job de montaje)",
+      "user_stories": [
+        "HU-02",
+        "HU-04",
+        "HU-06",
+        "HU-07",
+        "HU-09"
+      ],
+      "estimation_hours": 4,
+      "story_points": 5,
+      "depends_on": [
+        "TASK-005",
+        "TASK-018",
+        "TASK-019"
+      ],
+      "status": "done",
+      "files": [
+        "apps/render-api/README.md",
+        "sdd/specs/spec-e-burgos-007-web-montage/cycles/cycle-01/artifacts/task-020-smoke-notes.md"
+      ],
+      "usage": {
+        "tokens_in": 80321,
+        "tokens_out": 14174,
+        "tokens_total": 94495,
+        "provider_model": "sonnet",
+        "effort": "medium",
+        "agent": "implementor-back",
+        "approx": false,
+        "source": "agent-usage-notification",
+        "recorded_at": "2026-09-09",
+        "duration_minutes": 18.7
+      }
+    }
+  ]
+}

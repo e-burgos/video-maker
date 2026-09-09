@@ -1,19 +1,140 @@
+import type { DirectoryReader, FileStatReader } from '@video-maker/auto-montage';
+import type { ResolvedBinaries } from '@video-maker/media-local';
 import { describe, expect, it } from 'vitest';
 
 import { createCallLog } from '../__fixtures__/call-log';
+import type { CallLog } from '../__fixtures__/call-log';
 import { createControllableRenderMutedVideo } from '../__fixtures__/controllable-render';
+import type { FakeCommandResponse } from '../__fixtures__/fake-command-runner';
+import { createFakeCommandRunner } from '../__fixtures__/fake-command-runner';
+import { createFakeObjectStorage } from '../__fixtures__/fake-object-storage';
 import { createFakeRenderApiDependencies } from '../__fixtures__/fake-render-api-dependencies';
 import { buildMinimalTimeline } from '../__fixtures__/minimal-timeline';
 import { createRecordingLogger } from '../__fixtures__/recording-logger';
+import type { ObjectStorage } from '../deps/object-storage';
 import type { RenderApiDependencies } from '../deps/render-api-dependencies';
 import type { RenderPipelineStage } from '../errors/render-api-error';
-import type { CreateRenderJobInput } from './render-job-queue';
+import type { CreateMontageJobInput, CreateRenderJobInput } from './render-job';
 import { createRenderJobQueue } from './render-job-queue';
 
 const PROJECT_ROOT = '/var/data/media/acme-launch';
+const MONTAGE_PROJECT_ROOT = '/var/data/media/montage-project';
 
 function createInput(slug: string): CreateRenderJobInput {
-  return { slug, projectRoot: PROJECT_ROOT, timeline: buildMinimalTimeline() };
+  return { kind: 'render', slug, projectRoot: PROJECT_ROOT, timeline: buildMinimalTimeline() };
+}
+
+function createMontageInput(slug: string): CreateMontageJobInput {
+  return { kind: 'montage', slug, projectRoot: MONTAGE_PROJECT_ROOT, preset: 'software-demo', seed: 0 };
+}
+
+const MONTAGE_BINARIES: ResolvedBinaries = {
+  ffmpeg: '/opt/media-tools/bin/ffmpeg',
+  ffprobe: '/opt/media-tools/bin/ffprobe',
+  whisperCli: '/opt/media-tools/bin/whisper-cli',
+  whisperModel: '/opt/media-tools/share/ggml-model.bin',
+};
+
+const VIDEO_PROBE_STDOUT = JSON.stringify({
+  streams: [
+    {
+      index: 0,
+      codec_name: 'h264',
+      codec_type: 'video',
+      width: 1280,
+      height: 720,
+      r_frame_rate: '30/1',
+      avg_frame_rate: '30/1',
+      duration: '8.000000',
+    },
+  ],
+  format: { filename: 'clip01.mp4', format_name: 'mov,mp4,m4a,3gp,3g2,mj2', duration: '8.000000' },
+});
+
+const WHISPER_RAW_OUTPUT = JSON.stringify({
+  transcription: [
+    { offsets: { from: 0, to: 300 }, text: ' hola' },
+    { offsets: { from: 300, to: 600 }, text: ' vamos' },
+  ],
+});
+
+function toDirectoryReader(storage: ObjectStorage): DirectoryReader {
+  return {
+    readDirectory: async (path) => {
+      const entries = await storage.listDirectory(path);
+      if (entries === null) {
+        throw new Error(`ENOENT: ${path}`);
+      }
+      return entries;
+    },
+  };
+}
+
+function toFileStatReader(storage: ObjectStorage): FileStatReader {
+  return {
+    statFile: async (path) => {
+      const stat = await storage.stat(path);
+      if (stat === null) {
+        throw new Error(`ENOENT: ${path}`);
+      }
+      return { sizeBytes: stat.sizeBytes, modifiedAtMs: stat.modifiedAtMs };
+    },
+  };
+}
+
+function createControllableResponse(): {
+  readonly started: Promise<void>;
+  readonly respond: (response: FakeCommandResponse) => void;
+  readonly factory: () => Promise<FakeCommandResponse>;
+} {
+  let resolveStarted!: () => void;
+  const started = new Promise<void>((resolve) => {
+    resolveStarted = resolve;
+  });
+  let resolveResponse!: (response: FakeCommandResponse) => void;
+  const promise = new Promise<FakeCommandResponse>((resolve) => {
+    resolveResponse = resolve;
+  });
+  return {
+    started,
+    respond: (response) => resolveResponse(response),
+    factory: () => {
+      resolveStarted();
+      return promise;
+    },
+  };
+}
+
+function buildMontageDeps(
+  callLog: CallLog,
+  options?: { readonly controllableProbe?: ReturnType<typeof createControllableResponse> },
+): RenderApiDependencies {
+  const storage = createFakeObjectStorage(callLog, {
+    files: [
+      { path: `${MONTAGE_PROJECT_ROOT}/raw/aroll/clip01.mp4`, contents: 'clip-bytes', modifiedAtMs: 1_700_000_000_000 },
+      { path: `${MONTAGE_PROJECT_ROOT}/work/whisper/aroll/clip01.json`, contents: WHISPER_RAW_OUTPUT },
+    ],
+  });
+
+  return createFakeRenderApiDependencies(callLog, {
+    storage,
+    readDirectory: toDirectoryReader(storage),
+    statFile: toFileStatReader(storage),
+    ensureDirectory: storage.ensureDirectory,
+    resolveMontageBinaries: async () => MONTAGE_BINARIES,
+    createCommandRunner: async () =>
+      createFakeCommandRunner(
+        [
+          {
+            bin: MONTAGE_BINARIES.ffprobe,
+            response: options?.controllableProbe?.factory ?? { stdout: VIDEO_PROBE_STDOUT, exitCode: 0 },
+          },
+          { bin: MONTAGE_BINARIES.ffmpeg, response: { exitCode: 0 } },
+          { bin: MONTAGE_BINARIES.whisperCli, response: { exitCode: 0 } },
+        ],
+        callLog,
+      ),
+  });
 }
 
 const DEFAULT_RENDER_OUTPUT = {
@@ -366,5 +487,141 @@ describe('createRenderJobQueue', () => {
     canceledControllable.resolve(DEFAULT_RENDER_OUTPUT);
     await canceledQueue.whenIdle();
     expect(canceledCallLog.ports()).not.toContain('removeTemporary');
+  });
+});
+
+describe('createRenderJobQueue — montage jobs', () => {
+  it('never lets a render and a montage job run at the same time (single FIFO across kinds)', async () => {
+    const callLog = createCallLog();
+    const renderControllable = createControllableRenderMutedVideo();
+    const deps = {
+      ...buildMontageDeps(callLog),
+      renderMutedVideo: renderControllable.port,
+    };
+    const queue = createRenderJobQueue(deps);
+
+    const renderJob = queue.create(createInput('acme-launch'));
+    const montageJob = queue.create(createMontageInput('montage-project'));
+
+    expect(renderJob.state).toBe('running');
+    expect(montageJob.state).toBe('queued');
+    expect(queue.size()).toEqual({ running: 1, queued: 1 });
+
+    renderControllable.resolve(DEFAULT_RENDER_OUTPUT);
+    await queue.whenIdle();
+
+    expect(queue.get(renderJob.id)?.state).toBe('succeeded');
+    expect(queue.get(montageJob.id)?.state).toBe('succeeded');
+  });
+
+  it('keeps a render job queued while a montage job is running', async () => {
+    const callLog = createCallLog();
+    const controllableProbe = createControllableResponse();
+    const deps = buildMontageDeps(callLog, { controllableProbe });
+    const queue = createRenderJobQueue(deps);
+
+    const montageJob = queue.create(createMontageInput('montage-project'));
+    const renderJob = queue.create(createInput('acme-launch'));
+
+    expect(montageJob.state).toBe('running');
+    expect(renderJob.state).toBe('queued');
+
+    controllableProbe.respond({ stdout: VIDEO_PROBE_STDOUT, exitCode: 0 });
+    await queue.whenIdle();
+
+    expect(queue.get(montageJob.id)?.state).toBe('succeeded');
+    expect(queue.get(renderJob.id)?.state).toBe('succeeded');
+  });
+
+  it('cancels a queued montage job without invoking a single pipeline port', async () => {
+    const callLog = createCallLog();
+    const controllableProbe = createControllableResponse();
+    const deps = buildMontageDeps(callLog, { controllableProbe });
+    const queue = createRenderJobQueue(deps);
+
+    queue.create(createMontageInput('montage-project'));
+    const second = queue.create(createMontageInput('montage-project'));
+    expect(second.state).toBe('queued');
+
+    const portsBeforeCancel = callLog.ports();
+    const result = queue.cancel(second.id);
+
+    expect(result).toEqual({
+      kind: 'canceled',
+      job: expect.objectContaining({ id: second.id, state: 'canceled', kind: 'montage' }),
+    });
+    expect(callLog.ports()).toEqual(portsBeforeCancel);
+
+    controllableProbe.respond({ stdout: VIDEO_PROBE_STDOUT, exitCode: 0 });
+    await queue.whenIdle();
+  });
+
+  it('moves a running montage job to canceling and settles it as canceled with report null at the plan checkpoint', async () => {
+    const callLog = createCallLog();
+    const controllableProbe = createControllableResponse();
+    const deps = buildMontageDeps(callLog, { controllableProbe });
+    const queue = createRenderJobQueue(deps);
+
+    const job = queue.create(createMontageInput('montage-project'));
+    await controllableProbe.started;
+    expect(queue.get(job.id)?.state).toBe('running');
+
+    const result = queue.cancel(job.id);
+    expect(result).toEqual({
+      kind: 'canceling',
+      job: expect.objectContaining({ id: job.id, state: 'canceling', kind: 'montage' }),
+    });
+
+    controllableProbe.respond({ stdout: VIDEO_PROBE_STDOUT, exitCode: 0 });
+    await queue.whenIdle();
+
+    const finished = queue.get(job.id);
+    expect(finished?.state).toBe('canceled');
+    expect(finished?.report).toBeNull();
+    expect(finished?.error).toBeNull();
+    expect(finished?.finishedAt).not.toBeNull();
+
+    const writes = callLog
+      .entries()
+      .filter((entry) => entry.port === 'writeTextFile')
+      .map((entry) => (entry.input as { path: string }).path);
+    expect(writes.some((path) => path.endsWith('work/catalog.json'))).toBe(true);
+    expect(writes.some((path) => path.endsWith('work/timeline.json'))).toBe(false);
+  });
+
+  it('exposes a montage-shaped progress, never a render-shaped one', async () => {
+    const callLog = createCallLog();
+    const deps = buildMontageDeps(callLog);
+    const queue = createRenderJobQueue(deps);
+
+    const job = queue.create(createMontageInput('montage-project'));
+    await queue.whenIdle();
+
+    const finished = queue.get(job.id);
+    expect(finished?.kind).toBe('montage');
+    if (finished?.progress) {
+      expect(Object.keys(finished.progress).sort()).toEqual(['percent', 'processedAssets', 'stage', 'totalAssets']);
+      expect(finished.progress).not.toHaveProperty('renderedFrames');
+      expect(finished.progress).not.toHaveProperty('totalFrames');
+    }
+  });
+
+  it('reports the montage job with its own report shape once succeeded', async () => {
+    const callLog = createCallLog();
+    const deps = buildMontageDeps(callLog);
+    const queue = createRenderJobQueue(deps);
+
+    const job = queue.create(createMontageInput('montage-project'));
+    await queue.whenIdle();
+
+    const finished = queue.get(job.id);
+    expect(finished?.state).toBe('succeeded');
+    expect(finished?.report).toEqual({
+      catalogPath: 'work/catalog.json',
+      timelinePath: 'work/timeline.json',
+      editDecisionListPath: 'work/edl.json',
+      preset: 'software-demo',
+      seed: 0,
+    });
   });
 });

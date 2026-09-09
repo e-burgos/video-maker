@@ -190,6 +190,20 @@
           "tasks_done": 32
         }
       }
+    },
+    "spec-e-burgos-007-web-montage": {
+      "cycles": {
+        "cycle-01": {
+          "file": "sdd/specs/spec-e-burgos-007-web-montage/cycles/cycle-01/tasks.json",
+          "module": "web-montage",
+          "apps": [
+            "apps/render-api"
+          ],
+          "status": "completed",
+          "tasks_total": 20,
+          "tasks_done": 20
+        }
+      }
     }
   }
 }

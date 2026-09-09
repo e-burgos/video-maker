@@ -68,3 +68,21 @@ export async function readStoredTimeline(deps: RenderApiDependencies, project: M
 
   return result.data;
 }
+
+export async function assertTimelineNotPersisted(
+  deps: RenderApiDependencies,
+  project: MediaProject,
+  overwrite: boolean,
+): Promise<void> {
+  if (overwrite) {
+    return;
+  }
+
+  const relativePath = timelinePath();
+  const absolutePath = toAbsolutePath(project, relativePath);
+
+  const fileStat = await deps.storage.stat(absolutePath);
+  if (fileStat !== null) {
+    throw new PipelineStageError({ code: 'TIMELINE_ALREADY_EXISTS', stage: null, resource: relativePath });
+  }
+}

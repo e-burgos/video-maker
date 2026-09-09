@@ -1,0 +1,166 @@
+# sdd/specs/spec-e-burgos-007-web-montage/cycles/cycle-01/brief.yaml
+# Generado por: sdd-orchestrator
+# Al: iniciar el ciclo
+
+cycle: 1
+module: web-montage
+phase: montage-job-api
+date: 2026-09-09
+flow: full
+app_context: sdd/context/apps/render-api/context_prompt.md
+
+objective: |
+  apps/render-api gana un segundo tipo de job en la MISMA cola (kind: 'montage') que ejecuta
+  sobre media/<slug>/ el equivalente exacto de `render-cli ingest` + `render-cli plan` llamando a
+  la API pública de libs/auto-montage, con progreso por etapa, overwrite explícito y errores
+  tipados, y produce work/catalog.json, work/timeline.json y work/edl.json con el MISMO sha256
+  que la CLI. Al cerrar el ciclo, un proyecto creado desde apps/web puede pasar de raw/ a un MP4
+  sin tocar la terminal — el disparo desde la UI es cycle-02.
+
+scope:
+  - Discriminante `kind: 'render' | 'montage'` en el body de POST /projects/:slug/jobs, con
+    `render` por default cuando el body está ausente, vacío o sin `kind` (retro-compatibilidad
+    literal con lo que apps/web manda hoy).
+  - Parámetros del job de montaje: `preset` (presets de libs/auto-montage, default
+    `software-demo`), `seed` (entero no negativo, default 0) y `overwrite` (boolean, default false).
+  - Ejecución de la secuencia del CLI: precondición de proyecto ingestable → resolución de los
+    cuatro binarios → ingestProject → precondición de catálogo → autoMontage.
+  - Progreso por etapa `discover | probe | transcribe | plan` por el mismo mecanismo que el job de
+    render (GET /jobs/:jobId → progress), con contadores de assets cuando el total es conocido.
+  - Rechazo 409 con código tipado propio si el proyecto ya tiene work/timeline.json y el pedido no
+    trae `overwrite: true`, sin registrar job y sin tocar disco.
+  - `kind` visible en GET /jobs/:jobId y en GET /projects/:slug/jobs; cancelación cooperativa de un
+    job de montaje con la semántica ya vigente.
+  - Los cuatro binarios (ffmpeg, ffprobe, whisper-cli y el modelo de Whisper) resueltos por el
+    adaptador de producción y reportados por GET /health, más capabilities.montageQueue.
+  - Registro del contrato en sdd/api.json (endpoints tocados → status "updated" + changelog).
+  - README de apps/render-api: tipo de job, parámetros, etapas, códigos, cómo el binario recibe las
+    variables del .env raíz, y el guion copiable del smoke real.
+  - Smoke real ejecutado: job montage sobre una copia temporal de media/smoke-ingest SIN work/,
+    comparación de sha256 contra los artefactos de la CLI, prueba de que el oráculo es sensible, y
+    un job render encadenado verificado con ffprobe contra el stream de video.
+
+out_of_scope:
+  - Cualquier archivo de apps/web (es cycle-02). `git diff --stat apps/web` vacío al cerrar.
+  - Modificar libs/auto-montage, libs/media-local, libs/timeline-core o
+    libs/composition-remotion. Se consumen tal como están.
+  - Un endpoint HTTP nuevo, si el arquitecto ratifica D-2 (un solo endpoint de jobs con
+    discriminante).
+  - Persistencia de la cola entre reinicios, cap de historial, concurrencia > 1 y workers en
+    procesos separados (D-12, descopados con fundamento desde spec-005).
+  - Lock entre procesos para el store (riesgo conocido y documentado; este ciclo no lo empeora).
+  - Tocar el campo `cycle` de GET /health (D-8) y crear apps/render-api/eslint.config.mjs (D-11).
+  - Editar sdd/tasks.json a mano (se regenera con pnpm sdd:rebuild-tasks-index).
+
+dependencies_required:
+  - spec-e-burgos-002-auto-montage-pipeline (completed) — ingestProject, autoMontage, presets
+  - spec-e-burgos-005-render-service (completed) — cola de jobs, store, EP-001..EP-015
+  - spec-e-burgos-006-web-studio (completed) — el consumidor de cycle-02
+
+agent_contexts:
+  functional:
+    goal: |
+      Convertir el objetivo del ciclo en historias de usuario y reglas de negocio para UN actor
+      (el dev en su máquina, operando por HTTP) más UN consumidor de máquina (apps/web en
+      cycle-02). Tiene que dejar explícitas: la regla de default (`render` sin `kind`), la regla de
+      sobreescritura (409 sin `overwrite`), la semántica de las cuatro etapas (monotónicas y
+      SALTEABLES) y qué se observa en cada estado del job. NO decide forma de payload ni rutas:
+      eso es del arquitecto.
+    business_context: |
+      El producto es local y mono-usuario. Hoy el Web Studio puede crear un proyecto y subir
+      material, pero la Timeline sólo la produce tools/render-cli, así que un proyecto creado desde
+      la web no tiene preview, ni edición, ni render (POST de un job de render responde 404
+      TIMELINE_NOT_FOUND). El pedido del dev es "usar web-studio para todo". La etapa lenta es la
+      transcripción con Whisper: por eso el progreso por etapa es requisito, no adorno. Regenerar
+      un montaje sobre un proyecto ya editado a mano DESTRUYE ese trabajo: de ahí el overwrite
+      explícito.
+    relevant_spec_sections:
+      - Resumen Ejecutivo
+      - Evidencia y decisiones (las cuatro primeras entradas)
+      - Decisiones del orquestador D-2, D-5, D-6
+      - Requisitos Funcionales · Ciclo 01 (RF-1..RF-13)
+    output_file: sdd/specs/spec-e-burgos-007-web-montage/cycles/cycle-01/functional.md
+
+  architect:
+    goal: |
+      Definir el contrato completo y la lista cerrada de archivos. Decisiones que le toca ratificar
+      o rebatir con evidencia: (1) D-2, un solo endpoint de jobs con discriminante `kind` frente a
+      un endpoint nuevo; (2) D-5, observar las etapas decorando el CommandRunner inyectado (clasificar
+      por la ruta de binario YA resuelta, nunca por substring del nombre del comando) frente a
+      cualquier alternativa que toque libs/auto-montage o que reimplemente la secuencia; (3) los
+      códigos de error nuevos y su mapeo HTTP (incluido el 409 de D-6); (4) cómo entra el
+      montaje al modelo de la cola sin romper ningún campo ya publicado de RenderJob; (5) qué
+      puertos nuevos entran a RenderApiDependencies (CommandRunner, resolución de los cuatro
+      binarios, lectores de directorio/stat/texto y escritores que ingestProject y autoMontage
+      exigen) sin dejar estado de módulo. Tiene que emitir la LISTA DE TESTS OBLIGATORIOS POR CA
+      y el guion literal del smoke real. Corre ANTES del planner.
+    existing_tables: []
+    existing_endpoints:
+      - EP-001 GET /health (updated en cycle-03 de spec-005; suma binarios y capabilities.montageQueue)
+      - EP-012 POST /projects/:slug/jobs (hoy documenta que el body NUNCA se lee — base de la
+        retro-compatibilidad de D-2)
+      - EP-013 GET /projects/:slug/jobs (summary por job; suma `kind`)
+      - EP-014 GET /jobs/:jobId (detalle completo; suma `kind` y las etapas de montaje)
+      - EP-015 DELETE /jobs/:jobId (cancelación cooperativa; vale igual para montage)
+    must_read:
+      - apps/render-api/src/http/routes.ts, handle-request.ts, handlers/jobs-handler.ts
+      - apps/render-api/src/jobs/ (render-job.ts, render-job-state.ts, render-job-progress.ts,
+        render-job-queue.ts) — la cola es el punto de extensión
+      - apps/render-api/src/deps/render-api-dependencies.ts y
+        src/deps/node-render-api-dependencies.ts (adaptador; loadBinaries resuelve HOY sólo
+        ffmpeg y ffprobe)
+      - apps/render-api/src/engine/media-binaries.ts (MEDIA_BINARY_NAMES son HOY dos)
+      - apps/render-api/src/errors/render-api-error.ts y src/errors/http-status-for.ts
+      - apps/render-api/src/store/project-scope.ts (assertValidProjectSlug, resolveExistingProject,
+        readStoredTimeline)
+      - tools/render-cli/src/commands/{ingest,plan,run}-command.ts,
+        src/pipeline/assert-project-preconditions.ts, src/deps/node-cli-dependencies.ts
+      - libs/auto-montage/src/index.ts (superficie pública), src/ingest/ingest-project.ts,
+        src/auto-montage.ts, src/presets/preset-registry.ts
+      - libs/media-local/src/binaries/resolve-binaries.ts (cuatro nombres, cuatro variables;
+        whisperModel NO tiene fallback por PATH)
+      - apps/render-api/README.md (§ jobs, § CA-033, § Known limits, § Known risk, § exit code)
+    output_file: sdd/specs/spec-e-burgos-007-web-montage/cycles/cycle-01/architect.md
+
+  planner:
+    goal: |
+      Convertir historias + contrato en tasks técnicas ordenadas para UN implementador backend
+      reanudado task tras task. Reglas duras: la infraestructura compartida (tipos del job, puertos
+      nuevos, dobles de test) va en una task PREVIA a las que la consumen; el `depends_on` de cada
+      task se deriva de los imports que el architect ya escribió en las firmas, no del agrupamiento
+      por historia; el `files[]` de cada task es la checklist de cierre y tiene que incluir el
+      `*.spec.ts` hermano de cada archivo que emite un valor citado por un CA. La task que deja el
+      binario arrancable con el job de montaje tiene que correr el smoke real EN ESA task, no al
+      cerrar. Recibe el output del funcional y del arquitecto, no la spec completa.
+    note: 'tasks.json se emite ANTES que planner.md'
+    output_file: sdd/specs/spec-e-burgos-007-web-montage/cycles/cycle-01/planner.md
+
+  implementor_back:
+    goal: |
+      Implementar una task a la vez del tasks.json del ciclo, respetando el contrato del arquitecto
+      al pie de la letra. Cero comentarios; identificadores, payloads y README en inglés. Todo I/O
+      nuevo por puertos inyectables: la suite tiene que seguir corriendo sin ffmpeg, ffprobe,
+      whisper-cli ni Chrome. Ningún archivo de apps/web. Tests rojos no se ajustan: se reportan.
+    app: apps/render-api
+    app_context: sdd/context/apps/render-api/context_prompt.md
+    constitution: sdd/context/apps/render-api/constitution.md
+    hard_rules:
+      - El hook `config-protection` bloquea Write|Edit sobre eslint.config.mjs y
+        tsconfig.base.json; NO se rodea con Bash: se reporta el diff y se sigue.
+      - Nunca tocar media/smoke-ingest, media/video-01 ni media/video-02: toda verificación real
+        corre sobre copias en un RENDER_API_MEDIA_ROOT temporal.
+      - Antes de cualquier binario real: `pgrep -fl 'ffmpeg|whisper-cli|chrome-headless'` vacío y
+        ≥ 35 % de memoria libre. Nunca render y transcripción a la vez.
+      - Invocar el binario directo (nunca `nx run`) con `SWC_NODE_PROJECT=tsconfig.base.json` y con
+        las variables del .env raíz cargadas (`set -a && source .env && set +a`).
+      - Registrar `usage` al cerrar cada task.
+
+  reviewer:
+    goal: |
+      Validar todo el output del ciclo contra la lista de tests obligatorios del architect, CA por
+      CA y `files[]` por `files[]`; verificar cada CA por el SÍMBOLO que invoca su test, no por el
+      título del `it`; leer `coverage.include` antes de confiar en un piso; ejecutar los gates de
+      cierre (CONTEXTO GATE con fragmento aditivo, MEMORIA GATE si hubo lección real,
+      `pnpm sdd:validate` y `pnpm sdd:rebuild-tasks-index`) y recién ahí pasar cycle.json a
+      completed con su reviewer_report y el usage consolidado.
+    output_file: sdd/specs/spec-e-burgos-007-web-montage/cycles/cycle-01/cycle.json

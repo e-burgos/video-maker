@@ -31,4 +31,17 @@ describe('readJsonBody', () => {
     expect(tooLarge).toEqual({ kind: 'too-large' });
     expect(pulledChunks).toBe(3);
   });
+
+  it('reports empty for a zero-byte body without attempting to parse it', async () => {
+    const noChunks = await readJsonBody(toChunks([]), 1024);
+    expect(noChunks).toEqual({ kind: 'empty' });
+
+    const emptyChunk = await readJsonBody(toChunks(['']), 1024);
+    expect(emptyChunk).toEqual({ kind: 'empty' });
+  });
+
+  it('still reports invalid-json for a non-empty, syntactically invalid body', async () => {
+    const invalid = await readJsonBody(toChunks(['{"a":']), 1024);
+    expect(invalid).toEqual({ kind: 'invalid-json' });
+  });
 });

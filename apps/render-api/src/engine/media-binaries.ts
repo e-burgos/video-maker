@@ -1,4 +1,11 @@
-export const MEDIA_BINARY_NAMES = ['ffmpeg', 'ffprobe'] as const;
+import type { BinaryName } from '@video-maker/media-local';
+
+export const MEDIA_BINARY_NAMES = [
+  'ffmpeg',
+  'ffprobe',
+  'whisperCli',
+  'whisperModel',
+] as const satisfies readonly BinaryName[];
 
 export type MediaBinaryName = (typeof MEDIA_BINARY_NAMES)[number];
 

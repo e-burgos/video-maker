@@ -8,6 +8,7 @@ import { requestLine } from '../../__fixtures__/http-request';
 import { buildMinimalEditDecisionList } from '../../__fixtures__/minimal-edit-decision-list';
 import { buildMinimalTimeline } from '../../__fixtures__/minimal-timeline';
 import type { StoreConfig } from '../../config/store-config';
+import { toErrorPayload } from '../../errors/to-error-payload';
 import {
   handleGetEditDecisionList,
   handleGetTimeline,
@@ -19,6 +20,19 @@ const STORE: StoreConfig = { mediaRoot: '/media', maxUploadBytes: 2_147_483_648,
 
 async function* jsonBody(value: unknown): AsyncGenerator<Uint8Array> {
   yield new TextEncoder().encode(JSON.stringify(value));
+}
+
+async function* textBody(value: string): AsyncGenerator<Uint8Array> {
+  yield new TextEncoder().encode(value);
+}
+
+async function caughtErrorPayload(promise: Promise<unknown>): Promise<ReturnType<typeof toErrorPayload>> {
+  return promise.then(
+    () => {
+      throw new Error('expected the handler to reject');
+    },
+    (error: unknown) => toErrorPayload(error),
+  );
 }
 
 describe('handlePutTimeline', () => {
@@ -74,6 +88,30 @@ describe('handlePutTimeline', () => {
     expect(callLog.ports()).not.toContain('writeTextFile');
     expect(callLog.ports()).not.toContain('ensureDirectory');
   });
+
+  it('answers the exact same error for an empty body as for a syntactically invalid one', async () => {
+    const callLog = createCallLog();
+    const storage = createFakeObjectStorage(callLog, { directories: [`${STORE.mediaRoot}/smoke-ingest`] });
+    const deps = createFakeRenderApiDependencies(callLog, { storage });
+
+    const invalidJsonRequest = requestLine({
+      method: 'PUT',
+      path: '/projects/smoke-ingest/timeline',
+      body: textBody('not json'),
+    });
+    const emptyBodyRequest = requestLine({ method: 'PUT', path: '/projects/smoke-ingest/timeline' });
+
+    const invalidJsonPayload = await caughtErrorPayload(
+      handlePutTimeline(deps, STORE, { slug: 'smoke-ingest' }, invalidJsonRequest),
+    );
+    const emptyBodyPayload = await caughtErrorPayload(
+      handlePutTimeline(deps, STORE, { slug: 'smoke-ingest' }, emptyBodyRequest),
+    );
+
+    expect(Object.keys(emptyBodyPayload).sort()).toEqual(Object.keys(invalidJsonPayload).sort());
+    expect(emptyBodyPayload).toEqual(invalidJsonPayload);
+    expect(emptyBodyPayload.code).toBe('REQUEST_BODY_INVALID_JSON');
+  });
 });
 
 describe('handlePutEditDecisionList', () => {
@@ -128,6 +166,30 @@ describe('handlePutEditDecisionList', () => {
     });
     expect(callLog.ports()).not.toContain('writeTextFile');
     expect(callLog.ports()).not.toContain('ensureDirectory');
+  });
+
+  it('answers the exact same error for an empty body as for a syntactically invalid one', async () => {
+    const callLog = createCallLog();
+    const storage = createFakeObjectStorage(callLog, { directories: [`${STORE.mediaRoot}/smoke-ingest`] });
+    const deps = createFakeRenderApiDependencies(callLog, { storage });
+
+    const invalidJsonRequest = requestLine({
+      method: 'PUT',
+      path: '/projects/smoke-ingest/edl',
+      body: textBody('not json'),
+    });
+    const emptyBodyRequest = requestLine({ method: 'PUT', path: '/projects/smoke-ingest/edl' });
+
+    const invalidJsonPayload = await caughtErrorPayload(
+      handlePutEditDecisionList(deps, STORE, { slug: 'smoke-ingest' }, invalidJsonRequest),
+    );
+    const emptyBodyPayload = await caughtErrorPayload(
+      handlePutEditDecisionList(deps, STORE, { slug: 'smoke-ingest' }, emptyBodyRequest),
+    );
+
+    expect(Object.keys(emptyBodyPayload).sort()).toEqual(Object.keys(invalidJsonPayload).sort());
+    expect(emptyBodyPayload).toEqual(invalidJsonPayload);
+    expect(emptyBodyPayload.code).toBe('REQUEST_BODY_INVALID_JSON');
   });
 });
 

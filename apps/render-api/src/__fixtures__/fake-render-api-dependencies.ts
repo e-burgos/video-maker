@@ -1,12 +1,35 @@
-import type { LoudnessMeasurement } from '@video-maker/media-local';
+import type { LoudnessMeasurement, ResolvedBinaries } from '@video-maker/media-local';
 import type { MediaAsset } from '@video-maker/timeline-core';
 
 import type {
   RenderApiDependencies,
   RenderMutedVideoOutput,
 } from '../deps/render-api-dependencies';
+import { MEDIA_BINARY_NAMES } from '../engine/media-binaries';
+import type { BinaryStatus, MediaBinaryName } from '../engine/media-binaries';
 import type { CallLog } from './call-log';
+import { createFakeCommandRunner } from './fake-command-runner';
 import { createFakeObjectStorage } from './fake-object-storage';
+
+const DEFAULT_RESOLVED_BINARIES: ResolvedBinaries = {
+  ffmpeg: '/usr/bin/ffmpeg',
+  ffprobe: '/usr/bin/ffprobe',
+  whisperCli: '/usr/bin/whisper-cli',
+  whisperModel: '/usr/share/whisper/model.bin',
+};
+
+const BINARY_ENV_VAR_NAMES: Readonly<Record<MediaBinaryName, string>> = {
+  ffmpeg: 'FFMPEG_PATH',
+  ffprobe: 'FFPROBE_PATH',
+  whisperCli: 'WHISPER_CPP_PATH',
+  whisperModel: 'WHISPER_MODEL_PATH',
+};
+
+const DEFAULT_MEDIA_BINARY_STATUSES: readonly BinaryStatus[] = MEDIA_BINARY_NAMES.map((name) => ({
+  name,
+  envVar: BINARY_ENV_VAR_NAMES[name],
+  resolved: true,
+}));
 
 const DEFAULT_RENDER_OUTPUT: Omit<RenderMutedVideoOutput, 'outPath'> = {
   width: 1080,
@@ -81,10 +104,7 @@ export function createFakeRenderApiDependencies(
       if (overrides?.probeMediaBinaries) {
         return overrides.probeMediaBinaries();
       }
-      return [
-        { name: 'ffmpeg', envVar: 'FFMPEG_PATH', resolved: true },
-        { name: 'ffprobe', envVar: 'FFPROBE_PATH', resolved: true },
-      ];
+      return DEFAULT_MEDIA_BINARY_STATUSES;
     },
 
     preloadEngineModules: async () => {
@@ -126,6 +146,42 @@ export function createFakeRenderApiDependencies(
     logger: overrides?.logger ?? {
       info: () => undefined,
       error: () => undefined,
+    },
+
+    readDirectory: {
+      readDirectory: async (path) => {
+        callLog.record('readDirectory', path);
+        if (overrides?.readDirectory) {
+          return overrides.readDirectory.readDirectory(path);
+        }
+        return [];
+      },
+    },
+
+    statFile: {
+      statFile: async (path) => {
+        callLog.record('statFile', path);
+        if (overrides?.statFile) {
+          return overrides.statFile.statFile(path);
+        }
+        return { sizeBytes: 0, modifiedAtMs: 0 };
+      },
+    },
+
+    createCommandRunner: async () => {
+      callLog.record('createCommandRunner', undefined);
+      if (overrides?.createCommandRunner) {
+        return overrides.createCommandRunner();
+      }
+      return createFakeCommandRunner([]);
+    },
+
+    resolveMontageBinaries: async () => {
+      callLog.record('resolveMontageBinaries', undefined);
+      if (overrides?.resolveMontageBinaries) {
+        return overrides.resolveMontageBinaries();
+      }
+      return DEFAULT_RESOLVED_BINARIES;
     },
   };
 }

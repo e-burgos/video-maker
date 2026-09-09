@@ -39,6 +39,14 @@ const MESSAGE_BY_CODE: Readonly<Record<RenderApiErrorCode, string>> = {
   REQUEST_BODY_TOO_LARGE: 'The request body exceeds the configured size limit.',
   RENDER_JOB_NOT_FOUND: 'The requested render job does not exist.',
   RENDER_JOB_NOT_CANCELABLE: 'The render job has already finished and cannot be canceled.',
+  JOB_KIND_INVALID: 'The job kind is not render or montage.',
+  MONTAGE_PRESET_INVALID: 'The montage preset is not one of the known preset names.',
+  MONTAGE_SEED_INVALID: 'The montage seed is not a non-negative integer.',
+  MONTAGE_OVERWRITE_INVALID: 'The overwrite flag is not a boolean.',
+  TIMELINE_ALREADY_EXISTS: 'A timeline already exists for this project.',
+  MONTAGE_RAW_MISSING: 'The project has no raw asset role directories to ingest.',
+  MONTAGE_INPUT_INVALID: 'The montage input does not have enough usable assets to build a timeline.',
+  MONTAGE_FAILED: 'The montage engine failed while producing the timeline.',
 };
 
 export function toErrorPayload(value: unknown): RenderApiErrorPayload {

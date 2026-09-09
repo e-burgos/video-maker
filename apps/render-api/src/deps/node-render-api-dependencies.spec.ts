@@ -1,4 +1,4 @@
-import { mkdtemp, readFile, rm, stat } from 'node:fs/promises';
+import { mkdir, mkdtemp, readFile, rm, stat, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 
@@ -21,6 +21,7 @@ vi.mock('@video-maker/media-local', () => ({
     whisperModel: 'WHISPER_MODEL_PATH',
   },
   resolveBinary: vi.fn(),
+  resolveBinaries: vi.fn(),
   mixTimelineAudio: vi.fn(),
   muxAudioIntoVideo: vi.fn(),
   verifyMixLoudness: vi.fn(),
@@ -37,6 +38,7 @@ async function loadMocks() {
   return {
     renderTimelineMock: vi.mocked(render.renderTimeline),
     resolveBinaryMock: vi.mocked(mediaLocal.resolveBinary),
+    resolveBinariesMock: vi.mocked(mediaLocal.resolveBinaries),
     mixTimelineAudioMock: vi.mocked(mediaLocal.mixTimelineAudio),
     muxAudioIntoVideoMock: vi.mocked(mediaLocal.muxAudioIntoVideo),
     verifyMixLoudnessMock: vi.mocked(mediaLocal.verifyMixLoudness),
@@ -50,6 +52,7 @@ beforeEach(async () => {
   mocks = await loadMocks();
   mocks.renderTimelineMock.mockReset();
   mocks.resolveBinaryMock.mockReset();
+  mocks.resolveBinariesMock.mockReset();
   mocks.mixTimelineAudioMock.mockReset();
   mocks.muxAudioIntoVideoMock.mockReset();
   mocks.verifyMixLoudnessMock.mockReset();
@@ -209,7 +212,7 @@ describe('createNodeRenderApiDependencies', () => {
     expect(mocks.resolveBinaryMock).toHaveBeenCalledWith('ffprobe', ENV);
   });
 
-  it('reports each binary by logical name and env var, live-checking without reusing the memoized resolution', async () => {
+  it('reports each of the four binaries by logical name and env var, live-checking without reusing the memoized resolution', async () => {
     mocks.resolveBinaryMock.mockImplementation(async (name: string) => {
       if (name === 'ffprobe') {
         throw new Error('not found');
@@ -223,7 +226,13 @@ describe('createNodeRenderApiDependencies', () => {
     expect(statuses).toEqual([
       { name: 'ffmpeg', envVar: 'FFMPEG_PATH', resolved: true },
       { name: 'ffprobe', envVar: 'FFPROBE_PATH', resolved: false },
+      { name: 'whisperCli', envVar: 'WHISPER_CPP_PATH', resolved: true },
+      { name: 'whisperModel', envVar: 'WHISPER_MODEL_PATH', resolved: true },
     ]);
+    for (const status of statuses) {
+      expect(status).not.toHaveProperty('path');
+      expect(status).not.toHaveProperty('resolvedPath');
+    }
   });
 
   it('reports both engine modules as loaded once the dynamic imports resolve', async () => {
@@ -234,6 +243,68 @@ describe('createNodeRenderApiDependencies', () => {
       { name: 'media-local', loaded: true },
       { name: 'composition-remotion/render', loaded: true },
     ]);
+  });
+
+  it('resolves the four montage binaries via resolveBinaries(env)', async () => {
+    const resolved = {
+      ffmpeg: '/opt/homebrew/bin/ffmpeg',
+      ffprobe: '/opt/homebrew/bin/ffprobe',
+      whisperCli: '/opt/homebrew/bin/whisper-cli',
+      whisperModel: '/opt/homebrew/share/whisper/ggml-model.bin',
+    };
+    mocks.resolveBinariesMock.mockResolvedValue(resolved);
+
+    const deps = createNodeRenderApiDependencies(ENV, STORE);
+    const binaries = await deps.resolveMontageBinaries();
+
+    expect(mocks.resolveBinariesMock).toHaveBeenCalledWith(ENV);
+    expect(binaries).toBe(resolved);
+  });
+
+  it('creates a fresh command runner instance on every createCommandRunner call', async () => {
+    const deps = createNodeRenderApiDependencies(ENV, STORE);
+
+    const first = await deps.createCommandRunner();
+    const second = await deps.createCommandRunner();
+
+    expect(first).toBeInstanceOf(mocks.ExecaCommandRunner);
+    expect(second).toBeInstanceOf(mocks.ExecaCommandRunner);
+    expect(first).not.toBe(second);
+  });
+
+  it('reads directory entries from a real temporary directory via readDirectory', async () => {
+    const base = await mkdtemp(join(tmpdir(), 'render-api-readdir-'));
+
+    try {
+      await mkdir(join(base, 'aroll'), { recursive: true });
+      await writeFile(join(base, 'notes.txt'), 'x', 'utf8');
+
+      const deps = createNodeRenderApiDependencies(ENV, STORE);
+      const entries = await deps.readDirectory.readDirectory(base);
+
+      const byName = new Map(entries.map((entry) => [entry.name, entry]));
+      expect(byName.get('aroll')).toEqual({ name: 'aroll', isDirectory: true, isFile: false });
+      expect(byName.get('notes.txt')).toEqual({ name: 'notes.txt', isDirectory: false, isFile: true });
+    } finally {
+      await rm(base, { recursive: true, force: true });
+    }
+  });
+
+  it('reads file stats from a real temporary file via statFile', async () => {
+    const base = await mkdtemp(join(tmpdir(), 'render-api-statfile-'));
+
+    try {
+      const filePath = join(base, 'clip.mp4');
+      await writeFile(filePath, 'hello world', 'utf8');
+
+      const deps = createNodeRenderApiDependencies(ENV, STORE);
+      const stats = await deps.statFile.statFile(filePath);
+
+      expect(stats.sizeBytes).toBe(11);
+      expect(typeof stats.modifiedAtMs).toBe('number');
+    } finally {
+      await rm(base, { recursive: true, force: true });
+    }
   });
 
   it('creates the directory recursively via ensureDirectory', async () => {

@@ -76,7 +76,7 @@ export async function handleRequest(
       case 'projects.files.get':
         return await handleGetArtifact(deps, store, params, request);
       case 'projects.jobs.create':
-        return await handleCreateRenderJob(deps, store, params, runtime);
+        return await handleCreateRenderJob(deps, store, params, request, runtime);
       case 'projects.jobs.list':
         return await handleListRenderJobs(params, runtime);
       case 'jobs.detail':

@@ -4,6 +4,8 @@ import { mkdir, readFile, readdir, rename, stat, unlink, writeFile } from 'node:
 import { randomUUID } from 'node:crypto';
 import { isAbsolute, join, relative } from 'node:path/posix';
 
+import { nodeDirectoryReader, nodeFileStatReader } from '@video-maker/auto-montage';
+
 import type { StoreConfig } from '../config/store-config';
 import { ENGINE_MODULE_NAMES } from '../engine/engine-modules';
 import type { EngineModuleStatus } from '../engine/engine-modules';
@@ -269,6 +271,19 @@ export function createNodeRenderApiDependencies(
     logger: {
       info: () => undefined,
       error: () => undefined,
+    },
+
+    readDirectory: nodeDirectoryReader,
+    statFile: nodeFileStatReader,
+
+    createCommandRunner: async () => {
+      const { ExecaCommandRunner } = await loadMediaLocal();
+      return new ExecaCommandRunner();
+    },
+
+    resolveMontageBinaries: async () => {
+      const { resolveBinaries } = await loadMediaLocal();
+      return resolveBinaries(env);
     },
   };
 }

@@ -42,7 +42,20 @@ const ENGINE_DERIVED_RESOURCES = [
   { code: 'CATALOG_UNREADABLE', resource: 'work/catalog.json' },
   { code: 'RENDER_JOB_NOT_FOUND', resource: 'render-0001' },
   { code: 'RENDER_JOB_NOT_CANCELABLE', resource: 'render-0001' },
+  { code: 'TIMELINE_ALREADY_EXISTS', resource: 'work/timeline.json' },
+  { code: 'MONTAGE_RAW_MISSING', resource: 'raw' },
 ] as const satisfies readonly { code: RenderApiErrorCode; resource: string }[];
+
+const NEW_MONTAGE_ERROR_CODES = [
+  'JOB_KIND_INVALID',
+  'MONTAGE_PRESET_INVALID',
+  'MONTAGE_SEED_INVALID',
+  'MONTAGE_OVERWRITE_INVALID',
+  'TIMELINE_ALREADY_EXISTS',
+  'MONTAGE_RAW_MISSING',
+  'MONTAGE_INPUT_INVALID',
+  'MONTAGE_FAILED',
+] as const satisfies readonly RenderApiErrorCode[];
 
 describe('toErrorPayload', () => {
   it('never reads .stack', () => {
@@ -137,5 +150,29 @@ describe('toErrorPayload', () => {
     const payloadFromNonError = toErrorPayload('not-an-error-value');
     expect(payloadFromNonError).toEqual({ code: 'INTERNAL_ERROR', stage: null, message: referenceMessage });
     expect('resource' in payloadFromNonError).toBe(false);
+  });
+
+  it.each(NEW_MONTAGE_ERROR_CODES.map((code) => ({ code })))(
+    'emits a distinct static ASCII message for $code with no leaked resource path',
+    ({ code }) => {
+      const error = new PipelineStageError({ code, stage: null });
+
+      const payload = toErrorPayload(error);
+
+      expect(payload.code).toBe(code);
+      expect(payload.message.length).toBeGreaterThan(0);
+      expect(isAsciiOnly(payload.message)).toBe(true);
+      if (payload.resource !== undefined) {
+        expect(payload.resource.startsWith('/')).toBe(false);
+      }
+    },
+  );
+
+  it('never reuses a montage message for a different montage code', () => {
+    const messages = NEW_MONTAGE_ERROR_CODES.map(
+      (code) => toErrorPayload(new PipelineStageError({ code, stage: null })).message,
+    );
+
+    expect(new Set(messages).size).toBe(NEW_MONTAGE_ERROR_CODES.length);
   });
 });

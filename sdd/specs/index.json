@@ -107,7 +107,7 @@
       "file": "sdd/specs/spec-e-burgos-007-web-montage/spec-e-burgos-007-web-montage.spec.md",
       "module": "web-montage",
       "app": "apps/render-api",
-      "status": "draft",
+      "status": "in-progress",
       "title": "Web Montage: Ingest & Auto-Montage from the Studio",
       "created_at": "2026-09-09",
       "completed_at": null,
