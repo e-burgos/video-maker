@@ -56,36 +56,41 @@ describe('parseCliArgs — the 8-step validation order of §4.1', () => {
     expect((error as CliUsageError).stage).toBeNull();
   });
 
-  it('step 2: unknown command -> unknown-command, carrying the offending token', () => {
+  it('step 2: unknown command -> unknown-command, carrying the offending token and no stage', () => {
     const error = captureThrown(() => parseCliArgs(['rnder', 'media/p']));
     expect(error).toBeInstanceOf(CliUsageError);
     expect((error as CliUsageError).reason).toBe('unknown-command');
     expect((error as CliUsageError).resource).toBe('rnder');
+    expect((error as CliUsageError).stage).toBeNull();
   });
 
-  it('step 3: an unknown option surfaces node:util parseArgs ERR_PARSE_ARGS_UNKNOWN_OPTION as unknown-option', () => {
+  it('step 3: an unknown option surfaces node:util parseArgs ERR_PARSE_ARGS_UNKNOWN_OPTION as unknown-option, carrying the recognized command stage', () => {
     const error = captureThrown(() => parseCliArgs(['ingest', 'media/p', '--bogus']));
     expect(error).toBeInstanceOf(CliUsageError);
     expect((error as CliUsageError).reason).toBe('unknown-option');
+    expect((error as CliUsageError).stage).toBe('ingest');
   });
 
-  it('step 3: a string option without a value surfaces ERR_PARSE_ARGS_INVALID_OPTION_VALUE', () => {
+  it('step 3: a string option without a value surfaces ERR_PARSE_ARGS_INVALID_OPTION_VALUE, carrying the recognized command stage', () => {
     const error = captureThrown(() => parseCliArgs(['plan', 'media/p', '--preset']));
     expect(error).toBeInstanceOf(CliUsageError);
     expect((error as CliUsageError).reason).toBe('invalid-option-value');
+    expect((error as CliUsageError).stage).toBe('plan');
   });
 
-  it('step 4: missing the project root positional -> missing-project-root', () => {
+  it('step 4: missing the project root positional -> missing-project-root, carrying the recognized command stage', () => {
     const error = captureThrown(() => parseCliArgs(['ingest']));
     expect(error).toBeInstanceOf(CliUsageError);
     expect((error as CliUsageError).reason).toBe('missing-project-root');
+    expect((error as CliUsageError).stage).toBe('ingest');
   });
 
-  it('step 4: an extra positional -> unexpected-positional, before the preset/seed checks', () => {
+  it('step 4: an extra positional -> unexpected-positional, before the preset/seed checks, carrying the recognized command stage', () => {
     const error = captureThrown(() => parseCliArgs(['plan', 'media/p', 'extra']));
     expect(error).toBeInstanceOf(CliUsageError);
     expect((error as CliUsageError).reason).toBe('unexpected-positional');
     expect((error as CliUsageError).resource).toBe('extra');
+    expect((error as CliUsageError).stage).toBe('plan');
   });
 
   it('step 4 wins over step 5: an extra positional beats an unexpected --preset on ingest', () => {
@@ -93,18 +98,28 @@ describe('parseCliArgs — the 8-step validation order of §4.1', () => {
     expect((error as CliUsageError).reason).toBe('unexpected-positional');
   });
 
-  it('step 5: --preset on ingest is unexpected-option, not a CliArgumentError', () => {
+  it('step 5: --preset on ingest is unexpected-option, not a CliArgumentError, and carries stage ingest (not the generic usage token)', () => {
     const error = captureThrown(() => parseCliArgs(['ingest', 'media/p', '--preset', 'hardware']));
     expect(error).toBeInstanceOf(CliUsageError);
     expect((error as CliUsageError).reason).toBe('unexpected-option');
     expect((error as CliUsageError).resource).toBe('--preset');
+    expect((error as CliUsageError).stage).toBe('ingest');
   });
 
-  it('step 5: --seed on render is unexpected-option, not a CliArgumentError', () => {
+  it('step 5: --preset on render is unexpected-option, not a CliArgumentError, and carries stage render (not the generic usage token)', () => {
+    const error = captureThrown(() => parseCliArgs(['render', 'media/p', '--preset', 'hardware']));
+    expect(error).toBeInstanceOf(CliUsageError);
+    expect((error as CliUsageError).reason).toBe('unexpected-option');
+    expect((error as CliUsageError).resource).toBe('--preset');
+    expect((error as CliUsageError).stage).toBe('render');
+  });
+
+  it('step 5: --seed on render is unexpected-option, not a CliArgumentError, and carries stage render', () => {
     const error = captureThrown(() => parseCliArgs(['render', 'media/p', '--seed', '3']));
     expect(error).toBeInstanceOf(CliUsageError);
     expect((error as CliUsageError).reason).toBe('unexpected-option');
     expect((error as CliUsageError).resource).toBe('--seed');
+    expect((error as CliUsageError).stage).toBe('render');
   });
 
   it('step 6: missing --preset on plan -> CliArgumentError with stage plan', () => {
@@ -147,10 +162,18 @@ describe('parseCliArgs — the 8-step validation order of §4.1', () => {
     expect((error as CliArgumentError).stage).toBe('plan');
   });
 
-  it('step 3: --seed -1 (space-separated) is ambiguous to node:util parseArgs and surfaces as CliUsageError', () => {
+  it('step 3: --seed -1 (space-separated) is ambiguous to node:util parseArgs and surfaces as CliUsageError, carrying the recognized command stage', () => {
     const error = captureThrown(() => parseCliArgs(['plan', 'media/p', '--preset', 'hardware', '--seed', '-1']));
     expect(error).toBeInstanceOf(CliUsageError);
     expect((error as CliUsageError).reason).toBe('invalid-option-value');
+    expect((error as CliUsageError).stage).toBe('plan');
+  });
+
+  it('run maps missing-project-root to stage ingest, not the generic usage token (D-27)', () => {
+    const error = captureThrown(() => parseCliArgs(['run']));
+    expect(error).toBeInstanceOf(CliUsageError);
+    expect((error as CliUsageError).reason).toBe('missing-project-root');
+    expect((error as CliUsageError).stage).toBe('ingest');
   });
 
   it('step 8: seed 0 is valid', () => {

@@ -53,23 +53,24 @@ function extractQuotedToken(message: string): string | null {
   return match === null ? null : (match[1] ?? null);
 }
 
-function translateParseArgsError(error: unknown): CliUsageError {
+function translateParseArgsError(command: CommandName, error: unknown): CliUsageError {
   const code = parseArgsErrorCode(error);
   const resource = extractQuotedToken(parseArgsErrorMessage(error));
+  const stage = stageForArgument(command, 'project-root');
 
   switch (code) {
     case 'ERR_PARSE_ARGS_UNKNOWN_OPTION':
-      return new CliUsageError({ reason: 'unknown-option', resource });
+      return new CliUsageError({ stage, reason: 'unknown-option', resource });
     case 'ERR_PARSE_ARGS_INVALID_OPTION_VALUE':
-      return new CliUsageError({ reason: 'invalid-option-value', resource });
+      return new CliUsageError({ stage, reason: 'invalid-option-value', resource });
     case 'ERR_PARSE_ARGS_UNEXPECTED_POSITIONAL':
-      return new CliUsageError({ reason: 'unexpected-positional', resource });
+      return new CliUsageError({ stage, reason: 'unexpected-positional', resource });
     default:
       throw error;
   }
 }
 
-function parseNodeArgs(rest: readonly string[]) {
+function parseNodeArgs(command: CommandName, rest: readonly string[]) {
   try {
     return parseArgs({
       args: rest,
@@ -78,7 +79,7 @@ function parseNodeArgs(rest: readonly string[]) {
       strict: true,
     });
   } catch (error) {
-    throw translateParseArgsError(error);
+    throw translateParseArgsError(command, error);
   }
 }
 
@@ -109,7 +110,7 @@ function parsePresetAndSeed(command: 'plan' | 'run', rawPreset: string | undefin
       stage: stageForArgument(command, 'seed'),
       reason: 'invalid-seed',
       resource: `--seed=${rawSeed}`,
-      expected: 'entero no negativo',
+      expected: 'non-negative integer',
     });
   }
 
@@ -125,14 +126,18 @@ export function parseCliArgs(argv: readonly string[]): ParsedCommand {
     throw new CliUsageError({ reason: 'unknown-command', resource: rawCommand, expected: COMMAND_LIST });
   }
 
-  const parsed = parseNodeArgs(rest);
+  const parsed = parseNodeArgs(rawCommand, rest);
 
   const [projectRoot, extraPositional] = parsed.positionals;
   if (projectRoot === undefined) {
-    throw new CliUsageError({ reason: 'missing-project-root' });
+    throw new CliUsageError({ stage: stageForArgument(rawCommand, 'project-root'), reason: 'missing-project-root' });
   }
   if (extraPositional !== undefined) {
-    throw new CliUsageError({ reason: 'unexpected-positional', resource: extraPositional });
+    throw new CliUsageError({
+      stage: stageForArgument(rawCommand, 'project-root'),
+      reason: 'unexpected-positional',
+      resource: extraPositional,
+    });
   }
 
   const { preset: rawPreset, seed: rawSeed } = parsed.values;
@@ -140,16 +145,18 @@ export function parseCliArgs(argv: readonly string[]): ParsedCommand {
   if (rawCommand === 'ingest' || rawCommand === 'render') {
     if (rawPreset !== undefined) {
       throw new CliUsageError({
+        stage: stageForArgument(rawCommand, 'preset'),
         reason: 'unexpected-option',
         resource: '--preset',
-        expected: `${rawCommand} no recibe --preset ni --seed`,
+        expected: `${rawCommand} takes no --preset and no --seed`,
       });
     }
     if (rawSeed !== undefined) {
       throw new CliUsageError({
+        stage: stageForArgument(rawCommand, 'seed'),
         reason: 'unexpected-option',
         resource: '--seed',
-        expected: `${rawCommand} no recibe --preset ni --seed`,
+        expected: `${rawCommand} takes no --preset and no --seed`,
       });
     }
     return { command: rawCommand, projectRoot };

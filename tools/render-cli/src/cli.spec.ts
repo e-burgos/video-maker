@@ -113,26 +113,26 @@ describe('runCli — success', () => {
 });
 
 describe('runCli — exit 2, CLI_USAGE / CLI_ARGUMENT', () => {
-  it('missing-command with no argv at all', async () => {
+  it('missing-command with no argv at all reports the generic usage token: no command was recognized', async () => {
     const deps = createFakeCliDependencies();
 
     const outcome = await runCli([], identityResolveProjectRoot, deps);
 
     expect(outcome.exitCode).toBe(2);
     expect(outcome.stdout).toEqual([]);
-    expect(outcome.stderr[0]).toBe('error [uso] missing-command');
+    expect(outcome.stderr[0]).toBe('error [usage] missing-command');
   });
 
-  it('unknown-command', async () => {
+  it('unknown-command reports the generic usage token: no command was recognized', async () => {
     const deps = createFakeCliDependencies();
 
     const outcome = await runCli(['rnder', fixtureMediaProject.root], identityResolveProjectRoot, deps);
 
     expect(outcome.exitCode).toBe(2);
-    expect(outcome.stderr[0]).toBe('error [uso] unknown-command');
+    expect(outcome.stderr[0]).toBe('error [usage] unknown-command');
   });
 
-  it('unexpected-option: --preset on ingest', async () => {
+  it('unexpected-option: --preset on ingest reports the ingest stage, not the generic usage token', async () => {
     const deps = createFakeCliDependencies();
 
     const outcome = await runCli(
@@ -142,7 +142,20 @@ describe('runCli — exit 2, CLI_USAGE / CLI_ARGUMENT', () => {
     );
 
     expect(outcome.exitCode).toBe(2);
-    expect(outcome.stderr[0]).toBe('error [uso] unexpected-option');
+    expect(outcome.stderr[0]).toBe('error [ingest] unexpected-option');
+  });
+
+  it('unexpected-option: --preset on render reports the render stage, not the generic usage token', async () => {
+    const deps = createFakeCliDependencies();
+
+    const outcome = await runCli(
+      ['render', fixtureMediaProject.root, '--preset', 'hardware'],
+      identityResolveProjectRoot,
+      deps,
+    );
+
+    expect(outcome.exitCode).toBe(2);
+    expect(outcome.stderr[0]).toBe('error [render] unexpected-option');
   });
 
   it('missing-preset on plan', async () => {
@@ -262,7 +275,7 @@ describe('runCli — exit 6, STAGE_FAILED stage render', () => {
 });
 
 describe('runCli — exit 1, untyped error', () => {
-  it('never prints a stack, only [interno] <name>: <message>', async () => {
+  it('never prints a stack, only [internal] <name>: <message>', async () => {
     const validTimeline = {
       schemaVersion: 1,
       id: 'timeline-1',
@@ -286,7 +299,7 @@ describe('runCli — exit 1, untyped error', () => {
     expect(outcome.exitCode).toBe(1);
     expect(outcome.stdout).toEqual([]);
     expect(outcome.stderr).toEqual([
-      "error [interno] TypeError: Cannot read properties of undefined (reading 'assets')",
+      "error [internal] TypeError: Cannot read properties of undefined (reading 'assets')",
     ]);
     outcome.stderr.forEach((line) => expect(line).not.toMatch(/^\s*at /));
   });

@@ -61,7 +61,7 @@ export async function assertCatalogExists(project: MediaProject, deps: StageInpu
       stage: 'plan',
       resource: 'work/catalog.json',
       reason: 'catalog-missing',
-      hint: 'corré `ingest` antes de `plan`',
+      hint: 'run `ingest` before `plan`',
     });
   }
 }
@@ -75,7 +75,7 @@ export async function assertTimelineExists(project: MediaProject, deps: StageInp
       stage: 'render',
       resource: 'work/timeline.json',
       reason: 'timeline-missing',
-      hint: 'corré `plan` antes de `render`',
+      hint: 'run `plan` before `render`',
     });
   }
 }

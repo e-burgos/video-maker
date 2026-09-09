@@ -2,13 +2,13 @@ import { isRenderCliError } from './render-cli-error';
 
 function headerFor(error: unknown): string {
   if (isRenderCliError(error)) {
-    const stageToken = error.stage === null ? 'uso' : error.stage;
+    const stageToken = error.stage === null ? 'usage' : error.stage;
     return `error [${stageToken}] ${error.reason}`;
   }
 
   const name = error instanceof Error ? error.name : 'Error';
   const message = error instanceof Error ? error.message : String(error);
-  return `error [interno] ${name}: ${message}`;
+  return `error [internal] ${name}: ${message}`;
 }
 
 function causeMessageOf(error: unknown): string | null {
@@ -28,16 +28,16 @@ export function formatCliError(error: unknown): readonly string[] {
 
   const lines: string[] = [headerFor(error)];
   if (resource !== null) {
-    lines.push(`  recurso: ${resource}`);
+    lines.push(`  resource: ${resource}`);
   }
   if (expected !== null) {
-    lines.push(`  esperado: ${expected}`);
+    lines.push(`  expected: ${expected}`);
   }
   if (causeMessage !== null) {
-    lines.push(`  causa: ${causeMessage}`);
+    lines.push(`  cause: ${causeMessage}`);
   }
   if (hint !== null) {
-    lines.push(`  sugerencia: ${hint}`);
+    lines.push(`  hint: ${hint}`);
   }
   return lines;
 }

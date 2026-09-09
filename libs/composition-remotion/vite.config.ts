@@ -20,7 +20,11 @@ export default defineConfig({
       provider: 'v8',
       reporter: ['text', 'lcov'],
       reportsDirectory: '../../coverage/libs/composition-remotion',
-      include: ['src/helpers/**/*.ts', 'src/transitions/**/*.ts'],
+      include: [
+        'src/helpers/**/*.ts',
+        'src/transitions/**/*.ts',
+        'src/render.ts',
+      ],
       exclude: ['src/**/*.spec.ts'],
       thresholds: { lines: 80, functions: 80, branches: 80, statements: 80 },
     },

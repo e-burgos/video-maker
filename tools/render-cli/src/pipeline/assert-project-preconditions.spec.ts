@@ -125,7 +125,7 @@ describe('assertCatalogExists', () => {
     expect((error as StageInputMissingError).reason).toBe('catalog-missing');
     expect((error as StageInputMissingError).stage).toBe('plan');
     expect((error as StageInputMissingError).resource).toBe('work/catalog.json');
-    expect((error as StageInputMissingError).hint).toBe('corré `ingest` antes de `plan`');
+    expect((error as StageInputMissingError).hint).toBe('run `ingest` before `plan`');
   });
 
   it('resolves when work/catalog.json exists', async () => {
@@ -145,7 +145,7 @@ describe('assertTimelineExists', () => {
     expect((error as StageInputMissingError).reason).toBe('timeline-missing');
     expect((error as StageInputMissingError).stage).toBe('render');
     expect((error as StageInputMissingError).resource).toBe('work/timeline.json');
-    expect((error as StageInputMissingError).hint).toBe('corré `plan` antes de `render`');
+    expect((error as StageInputMissingError).hint).toBe('run `plan` before `render`');
   });
 
   it('resolves when work/timeline.json exists', async () => {

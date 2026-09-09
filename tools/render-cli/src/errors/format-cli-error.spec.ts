@@ -3,8 +3,24 @@ import { describe, expect, it, vi } from 'vitest';
 import { CliArgumentError } from './cli-argument-error';
 import { CliUsageError } from './cli-usage-error';
 import { formatCliError } from './format-cli-error';
+import { RenderCliError } from './render-cli-error';
+import type { RenderCliErrorCode, Stage } from './render-cli-error';
 import { StageFailedError } from './stage-failed-error';
 import { StageInputMissingError } from './stage-input-missing-error';
+
+class FullRenderCliError extends RenderCliError {
+  readonly code: RenderCliErrorCode = 'CLI_ARGUMENT';
+  readonly stage: Stage | null = 'render';
+  readonly resource: string | null = 'work/timeline.json';
+  readonly reason = 'demo-reason';
+  readonly expected: string | null = 'demo-expected';
+  readonly hint: string | null = 'demo-hint';
+
+  constructor() {
+    super('demo-reason', { cause: new Error('demo-cause') });
+    this.name = 'FullRenderCliError';
+  }
+}
 
 describe('formatCliError', () => {
   it('formats an unknown-command CliUsageError', () => {
@@ -15,9 +31,9 @@ describe('formatCliError', () => {
     });
 
     expect(formatCliError(error)).toEqual([
-      'error [uso] unknown-command',
-      '  recurso: rnder',
-      '  esperado: ingest | plan | render | run',
+      'error [usage] unknown-command',
+      '  resource: rnder',
+      '  expected: ingest | plan | render | run',
     ]);
   });
 
@@ -25,13 +41,13 @@ describe('formatCliError', () => {
     const error = new CliUsageError({
       reason: 'unexpected-option',
       resource: '--preset',
-      expected: 'render no recibe --preset ni --seed',
+      expected: 'render takes no --preset and no --seed',
     });
 
     expect(formatCliError(error)).toEqual([
-      'error [uso] unexpected-option',
-      '  recurso: --preset',
-      '  esperado: render no recibe --preset ni --seed',
+      'error [usage] unexpected-option',
+      '  resource: --preset',
+      '  expected: render takes no --preset and no --seed',
     ]);
   });
 
@@ -45,8 +61,8 @@ describe('formatCliError', () => {
 
     expect(formatCliError(error)).toEqual([
       'error [plan] unknown-preset',
-      '  recurso: --preset=fast',
-      '  esperado: software-demo | hardware | recipe | educational',
+      '  resource: --preset=fast',
+      '  expected: software-demo | hardware | recipe | educational',
     ]);
   });
 
@@ -55,13 +71,13 @@ describe('formatCliError', () => {
       stage: 'plan',
       reason: 'invalid-seed',
       resource: '--seed=-1',
-      expected: 'entero no negativo',
+      expected: 'non-negative integer',
     });
 
     expect(formatCliError(error)).toEqual([
       'error [plan] invalid-seed',
-      '  recurso: --seed=-1',
-      '  esperado: entero no negativo',
+      '  resource: --seed=-1',
+      '  expected: non-negative integer',
     ]);
   });
 
@@ -70,13 +86,13 @@ describe('formatCliError', () => {
       stage: 'plan',
       resource: 'work/catalog.json',
       reason: 'catalog-missing',
-      hint: 'corré `ingest` antes de `plan`',
+      hint: 'run `ingest` before `plan`',
     });
 
     expect(formatCliError(error)).toEqual([
       'error [plan] catalog-missing',
-      '  recurso: work/catalog.json',
-      '  sugerencia: corré `ingest` antes de `plan`',
+      '  resource: work/catalog.json',
+      '  hint: run `ingest` before `plan`',
     ]);
   });
 
@@ -85,13 +101,13 @@ describe('formatCliError', () => {
       stage: 'render',
       resource: 'work/timeline.json',
       reason: 'timeline-missing',
-      hint: 'corré `plan` antes de `render`',
+      hint: 'run `plan` before `render`',
     });
 
     expect(formatCliError(error)).toEqual([
       'error [render] timeline-missing',
-      '  recurso: work/timeline.json',
-      '  sugerencia: corré `plan` antes de `render`',
+      '  resource: work/timeline.json',
+      '  hint: run `plan` before `render`',
     ]);
   });
 
@@ -106,8 +122,8 @@ describe('formatCliError', () => {
 
     expect(formatCliError(error)).toEqual([
       'error [ingest] BINARY_NOT_FOUND',
-      '  recurso: whisper-cli',
-      '  causa: No se encontró el binario "whisper-cli".',
+      '  resource: whisper-cli',
+      '  cause: No se encontró el binario "whisper-cli".',
     ]);
   });
 
@@ -122,27 +138,39 @@ describe('formatCliError', () => {
 
     expect(formatCliError(error)).toEqual([
       'error [render] BUNDLE_FAILED',
-      '  recurso: out/smoke-ingest.mp4',
-      '  causa: Remotion no pudo bundlear el entry point.',
+      '  resource: out/smoke-ingest.mp4',
+      '  cause: Remotion no pudo bundlear el entry point.',
     ]);
   });
 
-  it('formats an untyped error as [interno] with its name and message', () => {
+  it('formats an untyped error as [internal] with its name and message', () => {
     const error = new TypeError("Cannot read properties of undefined (reading 'assets')");
 
     expect(formatCliError(error)).toEqual([
-      "error [interno] TypeError: Cannot read properties of undefined (reading 'assets')",
+      "error [internal] TypeError: Cannot read properties of undefined (reading 'assets')",
     ]);
   });
 
   it('formats an untyped error carrying a cause', () => {
     const error = new Error('outer', { cause: new Error('inner reason') });
 
-    expect(formatCliError(error)).toEqual(['error [interno] Error: outer', '  causa: inner reason']);
+    expect(formatCliError(error)).toEqual(['error [internal] Error: outer', '  cause: inner reason']);
   });
 
   it('formats a non-Error thrown value', () => {
-    expect(formatCliError('just-a-string')).toEqual(['error [interno] Error: just-a-string']);
+    expect(formatCliError('just-a-string')).toEqual(['error [internal] Error: just-a-string']);
+  });
+
+  it('uses English labels for all six data tags: usage, internal, resource, expected, cause, hint', () => {
+    expect(formatCliError(new FullRenderCliError())).toEqual([
+      'error [render] demo-reason',
+      '  resource: work/timeline.json',
+      '  expected: demo-expected',
+      '  cause: demo-cause',
+      '  hint: demo-hint',
+    ]);
+    expect(formatCliError(new CliUsageError({ reason: 'missing-command' }))[0]).toBe('error [usage] missing-command');
+    expect(formatCliError(new TypeError('boom'))[0]).toBe('error [internal] TypeError: boom');
   });
 
   it('never accesses .stack', () => {
