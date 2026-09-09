@@ -84,8 +84,8 @@
     ],
     "files_deleted": [],
     "usage": {
-      "tokens_in": 1785766,
-      "tokens_out": 315134,
+      "tokens_in": 1792178,
+      "tokens_out": 316265,
       "by_agent": [
         {
           "agent": "functional",
@@ -409,11 +409,11 @@
           "label": "cycle-01 resume + cierre",
           "provider_model": "opus",
           "effort": "high",
-          "tokens_in": 144500,
-          "tokens_out": 25500,
-          "tokens_total": 170000,
-          "approx": true,
-          "source": "declared-estimate",
+          "tokens_in": 150912,
+          "tokens_out": 26631,
+          "tokens_total": 177543,
+          "approx": false,
+          "source": "agent-usage-notification",
           "recorded_at": "2026-09-09"
         },
         {
@@ -450,10 +450,10 @@
           "source": "declared-estimate"
         },
         "opus": {
-          "tokens_in": 278225,
-          "tokens_out": 49099,
-          "approx": true,
-          "source": "declared-estimate"
+          "tokens_in": 284637,
+          "tokens_out": 50230,
+          "approx": false,
+          "source": "agent-usage-notification"
         }
       },
       "duration_minutes": 245,
