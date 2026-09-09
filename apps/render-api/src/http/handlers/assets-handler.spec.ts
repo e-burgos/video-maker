@@ -8,6 +8,7 @@ import { requestLine } from '../../__fixtures__/http-request';
 import type { StoreConfig } from '../../config/store-config';
 import { httpStatusFor } from '../../errors/http-status-for';
 import type { RenderApiErrorCode } from '../../errors/render-api-error';
+import { createRenderApiRuntime } from '../render-api-runtime';
 import { handleListAssets, handleUploadAsset } from './assets-handler';
 
 const STORE: StoreConfig = { mediaRoot: '/media', maxUploadBytes: 2_147_483_648, objectStore: 'fs' };
@@ -92,11 +93,12 @@ describe('handleUploadAsset', () => {
   it('rejects an invalid role with ASSET_ROLE_INVALID before invoking any storage port', async () => {
     const callLog = createCallLog();
     const deps = createFakeRenderApiDependencies(callLog);
+    const runtime = createRenderApiRuntime(deps);
     const bytes = new TextEncoder().encode('hello');
     const request = uploadRequest('/projects/smoke-ingest/assets/video/clip.mp4', bytes);
 
     await expect(
-      handleUploadAsset(deps, STORE, { slug: 'smoke-ingest', role: 'video', filename: 'clip.mp4' }, request),
+      handleUploadAsset(deps, STORE, { slug: 'smoke-ingest', role: 'video', filename: 'clip.mp4' }, request, runtime),
     ).rejects.toMatchObject({ code: 'ASSET_ROLE_INVALID' });
     expect(callLog.ports()).toEqual([]);
   });
@@ -105,11 +107,12 @@ describe('handleUploadAsset', () => {
     for (const filename of ['../escape.mp4', 'sub/dir.mp4']) {
       const callLog = createCallLog();
       const deps = createFakeRenderApiDependencies(callLog);
+      const runtime = createRenderApiRuntime(deps);
       const bytes = new TextEncoder().encode('hello');
       const request = uploadRequest(`/projects/smoke-ingest/assets/aroll/${filename}`, bytes);
 
       await expect(
-        handleUploadAsset(deps, STORE, { slug: 'smoke-ingest', role: 'aroll', filename }, request),
+        handleUploadAsset(deps, STORE, { slug: 'smoke-ingest', role: 'aroll', filename }, request, runtime),
       ).rejects.toMatchObject({ code: 'ASSET_PATH_INVALID' });
       expect(callLog.ports()).toEqual([]);
     }
@@ -121,6 +124,7 @@ describe('handleUploadAsset', () => {
       directories: [`${STORE.mediaRoot}/smoke-ingest`],
     });
     const deps = createFakeRenderApiDependencies(callLog, { storage });
+    const runtime = createRenderApiRuntime(deps);
     const bytes = new TextEncoder().encode('hello world');
     const request = uploadRequest('/projects/smoke-ingest/assets/aroll/clip01.mp4', bytes);
 
@@ -129,6 +133,7 @@ describe('handleUploadAsset', () => {
       STORE,
       { slug: 'smoke-ingest', role: 'aroll', filename: 'clip01.mp4' },
       request,
+      runtime,
     );
 
     expect(response.status).toBe(201);
@@ -153,11 +158,12 @@ describe('handleUploadAsset', () => {
     });
     storage.control.queueWriteOutcome({ kind: 'limit-exceeded', limitBytes: 5 });
     const deps = createFakeRenderApiDependencies(callLog, { storage });
+    const runtime = createRenderApiRuntime(deps);
     const bytes = new TextEncoder().encode('hello world');
     const request = uploadRequest('/projects/smoke-ingest/assets/aroll/clip01.mp4', bytes);
 
     await expect(
-      handleUploadAsset(deps, STORE, { slug: 'smoke-ingest', role: 'aroll', filename: 'clip01.mp4' }, request),
+      handleUploadAsset(deps, STORE, { slug: 'smoke-ingest', role: 'aroll', filename: 'clip01.mp4' }, request, runtime),
     ).rejects.toMatchObject({ code: 'ASSET_TOO_LARGE' });
 
     expect(callLog.ports()).not.toContain('promoteTemporary');
@@ -171,11 +177,12 @@ describe('handleUploadAsset', () => {
     });
     storage.control.queueWriteOutcome({ kind: 'aborted' });
     const deps = createFakeRenderApiDependencies(callLog, { storage });
+    const runtime = createRenderApiRuntime(deps);
     const bytes = new TextEncoder().encode('hello world');
     const request = uploadRequest('/projects/smoke-ingest/assets/aroll/clip01.mp4', bytes);
 
     await expect(
-      handleUploadAsset(deps, STORE, { slug: 'smoke-ingest', role: 'aroll', filename: 'clip01.mp4' }, request),
+      handleUploadAsset(deps, STORE, { slug: 'smoke-ingest', role: 'aroll', filename: 'clip01.mp4' }, request, runtime),
     ).rejects.toMatchObject({ code: 'ASSET_UPLOAD_ABORTED' });
 
     expect(callLog.ports()).not.toContain('promoteTemporary');
@@ -190,11 +197,12 @@ describe('handleUploadAsset', () => {
     const destination = `${STORE.mediaRoot}/smoke-ingest/raw/aroll/clip01.mp4`;
     storage.control.queueStat(destination, null, { kind: 'file', sizeBytes: 1, modifiedAtMs: 0 });
     const deps = createFakeRenderApiDependencies(callLog, { storage });
+    const runtime = createRenderApiRuntime(deps);
     const bytes = new TextEncoder().encode('hello world');
     const request = uploadRequest('/projects/smoke-ingest/assets/aroll/clip01.mp4', bytes);
 
     await expect(
-      handleUploadAsset(deps, STORE, { slug: 'smoke-ingest', role: 'aroll', filename: 'clip01.mp4' }, request),
+      handleUploadAsset(deps, STORE, { slug: 'smoke-ingest', role: 'aroll', filename: 'clip01.mp4' }, request, runtime),
     ).rejects.toMatchObject({ code: 'ASSET_ALREADY_EXISTS' });
 
     expect(callLog.ports()).toContain('removeTemporary');
@@ -215,6 +223,7 @@ describe('handleUploadAsset', () => {
       ],
     });
     const deps = createFakeRenderApiDependencies(callLog, { storage });
+    const runtime = createRenderApiRuntime(deps);
     const bytes = new TextEncoder().encode('hello world');
     const request = uploadRequest('/projects/smoke-ingest/assets/broll/new.mp4', bytes);
 
@@ -223,6 +232,7 @@ describe('handleUploadAsset', () => {
       STORE,
       { slug: 'smoke-ingest', role: 'broll', filename: 'new.mp4' },
       request,
+      runtime,
     );
 
     expect(Object.keys(response.body as object).sort()).toEqual(['fingerprint', 'media', 'path', 'role']);
@@ -253,11 +263,12 @@ describe('handleUploadAsset', () => {
       files: [{ path: `${STORE.mediaRoot}/smoke-ingest/work/catalog.json`, contents: 'not valid json' }],
     });
     const deps = createFakeRenderApiDependencies(callLog, { storage });
+    const runtime = createRenderApiRuntime(deps);
     const bytes = new TextEncoder().encode('hello world');
     const request = uploadRequest('/projects/smoke-ingest/assets/aroll/clip01.mp4', bytes);
 
     await expect(
-      handleUploadAsset(deps, STORE, { slug: 'smoke-ingest', role: 'aroll', filename: 'clip01.mp4' }, request),
+      handleUploadAsset(deps, STORE, { slug: 'smoke-ingest', role: 'aroll', filename: 'clip01.mp4' }, request, runtime),
     ).rejects.toMatchObject({
       code: 'CATALOG_UNREADABLE',
       details: { assetPersisted: true, catalogUpdated: false },
@@ -280,11 +291,12 @@ describe('handleUploadAsset', () => {
         });
       },
     });
+    const runtime = createRenderApiRuntime(deps);
     const bytes = new TextEncoder().encode('hello world');
     const request = uploadRequest('/projects/smoke-ingest/assets/aroll/clip01.mp4', bytes);
 
     await expect(
-      handleUploadAsset(deps, STORE, { slug: 'smoke-ingest', role: 'aroll', filename: 'clip01.mp4' }, request),
+      handleUploadAsset(deps, STORE, { slug: 'smoke-ingest', role: 'aroll', filename: 'clip01.mp4' }, request, runtime),
     ).rejects.toMatchObject({
       code: 'MEDIA_COMMAND_FAILED',
       details: { assetPersisted: true, catalogUpdated: true },
@@ -314,11 +326,12 @@ describe('handleUploadAsset', () => {
           throw Object.assign(new Error('boom'), { code: errorCode });
         },
       });
+      const runtime = createRenderApiRuntime(deps);
       const bytes = new TextEncoder().encode('hello world');
       const request = uploadRequest('/projects/smoke-ingest/assets/aroll/clip01.mp4', bytes);
 
       await expect(
-        handleUploadAsset(deps, STORE, { slug: 'smoke-ingest', role: 'aroll', filename: 'clip01.mp4' }, request),
+        handleUploadAsset(deps, STORE, { slug: 'smoke-ingest', role: 'aroll', filename: 'clip01.mp4' }, request, runtime),
       ).rejects.toMatchObject({
         code: ownCode,
         details: { assetPersisted: true, catalogUpdated: true },
@@ -330,6 +343,7 @@ describe('handleUploadAsset', () => {
   it('answers 411 without content-length and 400 without content-type', async () => {
     const callLog = createCallLog();
     const deps = createFakeRenderApiDependencies(callLog);
+    const runtime = createRenderApiRuntime(deps);
     const bytes = new TextEncoder().encode('hello');
 
     const noLengthRequest = requestLine({
@@ -344,6 +358,7 @@ describe('handleUploadAsset', () => {
         STORE,
         { slug: 'smoke-ingest', role: 'aroll', filename: 'clip01.mp4' },
         noLengthRequest,
+        runtime,
       ),
     ).rejects.toMatchObject({ code: 'ASSET_CONTENT_LENGTH_REQUIRED' });
 
@@ -359,6 +374,7 @@ describe('handleUploadAsset', () => {
         STORE,
         { slug: 'smoke-ingest', role: 'aroll', filename: 'clip01.mp4' },
         noTypeRequest,
+        runtime,
       ),
     ).rejects.toMatchObject({ code: 'ASSET_CONTENT_TYPE_REQUIRED' });
   });
@@ -366,6 +382,7 @@ describe('handleUploadAsset', () => {
   it('answers 413 ASSET_TOO_LARGE from the content-length header before touching any port', async () => {
     const callLog = createCallLog();
     const deps = createFakeRenderApiDependencies(callLog);
+    const runtime = createRenderApiRuntime(deps);
     const request = uploadRequest(
       '/projects/smoke-ingest/assets/aroll/clip01.mp4',
       new TextEncoder().encode('x'),
@@ -373,7 +390,7 @@ describe('handleUploadAsset', () => {
     );
 
     await expect(
-      handleUploadAsset(deps, STORE, { slug: 'smoke-ingest', role: 'aroll', filename: 'clip01.mp4' }, request),
+      handleUploadAsset(deps, STORE, { slug: 'smoke-ingest', role: 'aroll', filename: 'clip01.mp4' }, request, runtime),
     ).rejects.toMatchObject({ code: 'ASSET_TOO_LARGE' });
     expect(callLog.ports()).toEqual([]);
   });
@@ -385,11 +402,12 @@ describe('handleUploadAsset', () => {
       files: [{ path: `${STORE.mediaRoot}/smoke-ingest/raw/aroll/clip01.mp4`, contents: 'existing bytes' }],
     });
     const deps = createFakeRenderApiDependencies(callLog, { storage });
+    const runtime = createRenderApiRuntime(deps);
     const bytes = new TextEncoder().encode('hello world');
     const request = uploadRequest('/projects/smoke-ingest/assets/aroll/clip01.mp4', bytes);
 
     await expect(
-      handleUploadAsset(deps, STORE, { slug: 'smoke-ingest', role: 'aroll', filename: 'clip01.mp4' }, request),
+      handleUploadAsset(deps, STORE, { slug: 'smoke-ingest', role: 'aroll', filename: 'clip01.mp4' }, request, runtime),
     ).rejects.toMatchObject({ code: 'ASSET_ALREADY_EXISTS' });
     expect(callLog.ports()).not.toContain('writeTemporary');
   });

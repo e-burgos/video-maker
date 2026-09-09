@@ -6,6 +6,12 @@ import { toErrorPayload } from '../errors/to-error-payload';
 import { handleGetArtifact } from './handlers/artifact-handler';
 import { handleListAssets, handleUploadAsset } from './handlers/assets-handler';
 import {
+  handleCancelRenderJob,
+  handleCreateRenderJob,
+  handleGetRenderJob,
+  handleListRenderJobs,
+} from './handlers/jobs-handler';
+import {
   handleGetEditDecisionList,
   handleGetTimeline,
   handlePutEditDecisionList,
@@ -15,12 +21,14 @@ import { handleCreateProject, handleGetProject, handleListProjects } from './han
 import { handleHealth } from './health-handler';
 import { JSON_CONTENT_TYPE } from './http-message';
 import type { HttpRequestLine, HttpResponse } from './http-message';
+import type { RenderApiRuntime } from './render-api-runtime';
 import { normalizePath, routeRequest } from './router';
 
 export async function handleRequest(
   request: HttpRequestLine,
   deps: RenderApiDependencies,
   store: StoreConfig,
+  runtime: RenderApiRuntime,
 ): Promise<HttpResponse> {
   try {
     const match = routeRequest(request.method, normalizePath(request.path));
@@ -46,7 +54,7 @@ export async function handleRequest(
 
     switch (match.id) {
       case 'health':
-        return await handleHealth(deps);
+        return await handleHealth(deps, runtime);
       case 'projects.list':
         return await handleListProjects(deps, store);
       case 'projects.create':
@@ -56,7 +64,7 @@ export async function handleRequest(
       case 'projects.assets.list':
         return await handleListAssets(deps, store, params);
       case 'projects.assets.upload':
-        return await handleUploadAsset(deps, store, params, request);
+        return await handleUploadAsset(deps, store, params, request, runtime);
       case 'projects.timeline.get':
         return await handleGetTimeline(deps, store, params);
       case 'projects.timeline.put':
@@ -67,6 +75,14 @@ export async function handleRequest(
         return await handlePutEditDecisionList(deps, store, params, request);
       case 'projects.files.get':
         return await handleGetArtifact(deps, store, params, request);
+      case 'projects.jobs.create':
+        return await handleCreateRenderJob(deps, store, params, runtime);
+      case 'projects.jobs.list':
+        return await handleListRenderJobs(params, runtime);
+      case 'jobs.detail':
+        return await handleGetRenderJob(params, runtime);
+      case 'jobs.cancel':
+        return await handleCancelRenderJob(params, runtime);
       default:
         return match.id satisfies never;
     }

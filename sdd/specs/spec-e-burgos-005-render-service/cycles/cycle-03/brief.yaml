@@ -1,0 +1,125 @@
+# sdd/specs/spec-e-burgos-005-render-service/cycles/cycle-03/brief.yaml
+# Generado por: sdd-orchestrator
+# Al: iniciar el ciclo
+
+cycle: 3
+module: render-service
+phase: render-job-queue-and-delivery
+date: 2026-09-08
+flow: full
+app_context: sdd/context/apps/render-api/context_prompt.md
+
+objective: |
+  `runRenderPipeline` deja de ser una función sin llamador: `apps/render-api` expone una cola de
+  jobs de render en proceso con concurrencia 1, con creación, consulta de estado con progreso por
+  etapa y por frame, listado y cancelación. El entregable y los intermedios quedan bajo
+  `media/<slug>/out/` y `media/<slug>/work/renders/<renderId>/` (D-8) y se descargan por el
+  endpoint de artefactos ya existente (EP-011). El ciclo cierra la spec: incluye el **smoke real
+  E2E obligatorio** (job disparado por HTTP sobre un proyecto real de `media/`, MP4 verificado con
+  `ffprobe` contra el stream de video), que es además la primera verificación de que el bundle
+  webpack de Remotion bundlea (D-10, declarado no verificado desde `cycle-01`).
+
+scope:
+  - Cola en proceso, concurrencia 1, sin dependencias npm nuevas: registro de jobs en memoria,
+    despacho FIFO, un único job `running` a la vez.
+  - Endpoints nuevos de jobs: crear un render sobre un proyecto, consultar uno por id, listar los
+    del proyecto y cancelar. Rutas y verbos exactos los fija el architect (EP-012..EP-0NN).
+  - Progreso: etapa vigente (`prepare|render|mix|mux|verify`) y porcentaje del render vía el
+    callback `onProgress(renderedFrames, totalFrames)` que `renderTimeline` ya expone y que el
+    puerto `RenderMutedVideoPort` de `render-api` todavía **no** propaga.
+  - Cancelación con semántica explícita decidida por el architect (al menos: un job `queued` se
+    cancela de verdad; un job `running` no se puede interrumpir a mitad de un binario, así que la
+    semántica tiene que estar escrita y testeada, no implícita).
+  - El job lee la `Timeline` del proyecto desde el store (`work/timeline.json`) por el puerto
+    `ObjectStorage`, no por un body arbitrario, salvo que el architect justifique lo contrario.
+  - Superficie de errores ampliada con los códigos de la cola, cada uno con su etapa y status HTTP,
+    payload en inglés (D-4), sin `.stack` ni rutas absolutas (RNF-6).
+  - `GET /health` refleja la capacidad nueva de la cola.
+  - Smoke real E2E ejecutado y con su salida literal guardada en `cycles/cycle-03/artifacts/`.
+  - `FIX-e-burgos-001-001` pasa a `validated` en `sdd/fixes.json` una vez que el render real por job
+    pasó (es el fix que hizo posible cualquier render real en este repo).
+  - Ampliación de `coverage.include` de `libs/composition-remotion/vite.config.ts` a `src/render.ts`
+    y `src/components/**` (D-6), vía FIX GATE `[IMPROVEMENT]`.
+  - Follow-ups heredados de `tools/render-cli` (N-2 token genérico `[uso]`, salida bilingüe), vía
+    FIX GATE `[IMPROVEMENT]` con `profile: solo`; lo que no entre queda descopado por escrito.
+  - README de `apps/render-api` actualizado y cierre de la spec en los registros SDD.
+
+out_of_scope:
+  - MinIO / S3 y URLs firmadas: siguen descopados con fundamento (D-11). El puerto `ObjectStorage`
+    conserva su único adaptador `fs`.
+  - Concurrencia > 1, workers en procesos separados y cualquier lock entre procesos. El riesgo ya
+    está documentado en el README de `cycle-02` ("Known risk"); subirlo es otra spec.
+  - Persistencia de los jobs en disco entre reinicios: la cola es en memoria y el README lo declara.
+  - `apps/render-api/eslint.config.mjs` (D-9): sigue sin crearse; el hook `config-protection` lo
+    bloquea y rodearlo con `Bash` anularía el guardrail.
+  - Cualquier UI: `apps/web` es `spec-e-burgos-006`, que no se abre en este ciclo.
+  - Re-master del integrado y reintentos ante `withinTolerance: false`: D-7 sigue vigente (se
+    publica el entregable y se reporta el delta).
+
+dependencies_required:
+  - spec-e-burgos-005-render-service cycle-01 (completed) — `runRenderPipeline`, superficie de
+    errores, servidor `node:http`, puertos inyectables.
+  - spec-e-burgos-005-render-service cycle-02 (completed) — store sobre `media/`, router con
+    parámetros, `ObjectStorage`, persistencia de `Timeline`/`EDL`, descarga con `Range`.
+  - spec-e-burgos-001 / 002 / 004 (completed) — `renderTimeline`, `mixTimelineAudio`,
+    `muxAudioIntoVideo`, `verifyMixLoudness` y la capa de proyecto de `auto-montage`.
+  - FIX-e-burgos-001-001 (implemented) — sin él no hay render real posible; este ciclo lo valida.
+
+agent_contexts:
+  functional:
+    goal: |
+      Escribir las historias de usuario y los requisitos funcionales (RF-18 en adelante) y los
+      criterios de aceptación (CA-021 en adelante) de la cola de jobs, el progreso, la cancelación
+      y el smoke real E2E. Numeración continua sobre la spec; nada de renumerar lo existente.
+    business_context: |
+      El dev quiere disparar un render desde HTTP sobre un proyecto que ya tiene su Timeline en
+      `media/<slug>/work/timeline.json`, ver en qué etapa va y qué porcentaje del render lleva sin
+      quedarse mirando un proceso mudo, y bajarse el MP4 cuando termina. Un render de 1080x1920
+      dura minutos: el progreso no es cosmético, es lo que distingue "está trabajando" de "se colgó".
+      Concurrencia 1 es decisión del dev: la máquina no soporta dos renders simultáneos.
+    relevant_spec_sections:
+      - "Plan de ciclos → fila cycle-03"
+      - "Decisiones del orquestador → D-4, D-5, D-6, D-7, D-8, D-10, D-11, D-13, D-17"
+      - "RNF-1..RNF-10 (los de cycle-02 se extienden a cycle-03)"
+    output_file: sdd/specs/spec-e-burgos-005-render-service/cycles/cycle-03/functional.md
+
+  architect:
+    goal: |
+      Cerrar el contrato de la cola antes de que existan tasks: forma del `RenderJob` y de sus
+      estados, rutas y payloads de los endpoints nuevos, semántica exacta de la cancelación,
+      propagación de `onProgress` por el puerto `RenderMutedVideoPort`, códigos de error nuevos con
+      su status HTTP, decisiones técnicas numeradas continuando D-17 (D-18 en adelante), lista
+      cerrada de archivos nuevos/modificados y **lista explícita de tests obligatorios por CA**
+      (el orquestador la contrasta contra los `files[]` de las tasks).
+      Decidir también, con fundamento escrito, la deuda heredada `uploadSerializer` (singleton de
+      módulo en `assets-handler.ts`) y el guion del smoke real.
+    existing_tables: []
+    existing_endpoints:
+      - "EP-001 GET /health"
+      - "EP-002..EP-011 (proyectos, assets, timeline, edl, files) — ver architect.md de cycle-02"
+    output_file: sdd/specs/spec-e-burgos-005-render-service/cycles/cycle-03/architect.md
+
+  planner:
+    goal: |
+      Convertir el functional y el architect (ya cerrado) en tasks técnicas ordenadas y
+      secuenciales para **un solo implementador**, con `files[]` completo por task (código + test,
+      incluyendo cada test obligatorio del architect) y criterios de done verificables.
+      La infraestructura compartida (tipos del job, registro, puerto de progreso) va en tasks
+      previas a las que la consumen.
+    note: "El registro de máquina (tasks.json) se emite ANTES que planner.md."
+    output_file: sdd/specs/spec-e-burgos-005-render-service/cycles/cycle-03/planner.md
+
+  implementor_back:
+    goal: "Implementar una task a la vez, con tests, sin comentarios y sin dependencias npm nuevas."
+    app: apps/render-api
+    app_context: sdd/context/apps/render-api/context_prompt.md
+    note: |
+      Un solo implementador por ciclo, reanudado con SendMessage task tras task. Después de cada
+      task el orquestador corre `pnpm nx run-many -t lint test build` y `pnpm sdd:validate`.
+
+  reviewer:
+    goal: |
+      Validar todo el output del ciclo, ejecutar el smoke real E2E como evidencia independiente,
+      correr CONTEXTO GATE y MEMORIA GATE, cerrar el ciclo, la spec y el módulo.
+    checklist: sdd/skills/sdd-reviewer/checklist.md
+    output_file: sdd/specs/spec-e-burgos-005-render-service/cycles/cycle-03/cycle.json

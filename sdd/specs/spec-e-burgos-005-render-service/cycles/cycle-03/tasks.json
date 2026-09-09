@@ -1,0 +1,687 @@
+{
+  "$schema": "../../../../schemas/cycle-tasks.schema.json",
+  "spec": "spec-e-burgos-005-render-service",
+  "cycle": 3,
+  "module": "render-service",
+  "apps": [
+    "apps/render-api"
+  ],
+  "flow": "full",
+  "user_stories_generated": true,
+  "prerequisites": {
+    "tasks_generated": true
+  },
+  "tasks": [
+    {
+      "id": "TASK-001",
+      "title": "[BE] HU-03-02, HU-03-03: Tipo del job, estados y proyecciones puras (RenderJob, toRenderJob, toRenderJobSummary)",
+      "user_stories": [
+        "HU-03-02",
+        "HU-03-03"
+      ],
+      "estimation_hours": 2,
+      "story_points": 2,
+      "depends_on": [],
+      "status": "done",
+      "files": [
+        "apps/render-api/src/jobs/render-job.ts",
+        "apps/render-api/src/jobs/render-job.spec.ts"
+      ],
+      "usage": {
+        "provider_model": "claude/sonnet",
+        "effort": "medium",
+        "agent": "implementor-back",
+        "tokens_in": 109488,
+        "tokens_out": 19321,
+        "tokens_total": 128809,
+        "duration_minutes": 4,
+        "approx": false,
+        "source": "agent-usage-notification",
+        "recorded_at": "2026-09-08"
+      }
+    },
+    {
+      "id": "TASK-002",
+      "title": "[BE] HU-03-01, HU-03-04: Maquina de estados del job (applyRenderJobEvent)",
+      "user_stories": [
+        "HU-03-01",
+        "HU-03-04"
+      ],
+      "estimation_hours": 3,
+      "story_points": 3,
+      "depends_on": [
+        "TASK-001"
+      ],
+      "status": "done",
+      "files": [
+        "apps/render-api/src/jobs/render-job-state.ts",
+        "apps/render-api/src/jobs/render-job-state.spec.ts"
+      ],
+      "usage": {
+        "provider_model": "claude/sonnet",
+        "effort": "medium",
+        "agent": "implementor-back",
+        "tokens_in": 15116,
+        "tokens_out": 2668,
+        "tokens_total": 17784,
+        "duration_minutes": 2.3,
+        "approx": false,
+        "source": "agent-usage-notification",
+        "recorded_at": "2026-09-08"
+      }
+    },
+    {
+      "id": "TASK-003",
+      "title": "[BE] HU-03-02: Progreso del render (mergeRenderProgress, progressPercent, startRenderJobStage)",
+      "user_stories": [
+        "HU-03-02"
+      ],
+      "estimation_hours": 3,
+      "story_points": 3,
+      "depends_on": [
+        "TASK-001"
+      ],
+      "status": "done",
+      "files": [
+        "apps/render-api/src/jobs/render-job-progress.ts",
+        "apps/render-api/src/jobs/render-job-progress.spec.ts"
+      ],
+      "usage": {
+        "provider_model": "claude/sonnet",
+        "effort": "medium",
+        "agent": "implementor-back",
+        "tokens_in": 16750,
+        "tokens_out": 2956,
+        "tokens_total": 19706,
+        "duration_minutes": 6.2,
+        "approx": false,
+        "source": "agent-usage-notification",
+        "recorded_at": "2026-09-08"
+      }
+    },
+    {
+      "id": "TASK-004",
+      "title": "[BE] HU-03-02: Puerto randomId y extension de onProgress en RenderMutedVideoInput",
+      "user_stories": [
+        "HU-03-02"
+      ],
+      "estimation_hours": 1,
+      "story_points": 1,
+      "depends_on": [],
+      "status": "done",
+      "files": [
+        "apps/render-api/src/deps/render-api-dependencies.ts"
+      ],
+      "usage": {
+        "provider_model": "claude/sonnet",
+        "effort": "medium",
+        "agent": "implementor-back",
+        "tokens_in": 17632,
+        "tokens_out": 3111,
+        "tokens_total": 20743,
+        "duration_minutes": 4.8,
+        "approx": false,
+        "source": "agent-usage-notification",
+        "recorded_at": "2026-09-08"
+      }
+    },
+    {
+      "id": "TASK-005",
+      "title": "[BE] HU-03-02, HU-03-04: Fixtures de test - doble controlable de render, logger que graba y randomId determinista",
+      "user_stories": [
+        "HU-03-02",
+        "HU-03-04"
+      ],
+      "estimation_hours": 3,
+      "story_points": 3,
+      "depends_on": [
+        "TASK-004"
+      ],
+      "status": "done",
+      "files": [
+        "apps/render-api/src/__fixtures__/fake-render-api-dependencies.ts",
+        "apps/render-api/src/__fixtures__/controllable-render.ts",
+        "apps/render-api/src/__fixtures__/recording-logger.ts",
+        "apps/render-api/src/deps/node-render-api-dependencies.ts"
+      ],
+      "usage": {
+        "provider_model": "claude/sonnet",
+        "effort": "medium",
+        "agent": "implementor-back",
+        "tokens_in": 17632,
+        "tokens_out": 3111,
+        "tokens_total": 20743,
+        "duration_minutes": 4.8,
+        "approx": false,
+        "source": "agent-usage-notification",
+        "recorded_at": "2026-09-08"
+      }
+    },
+    {
+      "id": "TASK-006",
+      "title": "[BE] HU-03-04: Observador del pipeline (RenderPipelineObserver, RenderPipelineCanceledError)",
+      "user_stories": [
+        "HU-03-04"
+      ],
+      "estimation_hours": 2,
+      "story_points": 2,
+      "depends_on": [
+        "TASK-004"
+      ],
+      "status": "done",
+      "files": [
+        "apps/render-api/src/pipeline/render-pipeline-observer.ts",
+        "apps/render-api/src/pipeline/render-pipeline-observer.spec.ts"
+      ],
+      "usage": {
+        "provider_model": "claude/sonnet",
+        "effort": "medium",
+        "agent": "implementor-back",
+        "tokens_in": 18629,
+        "tokens_out": 3288,
+        "tokens_total": 21917,
+        "duration_minutes": 6.2,
+        "approx": false,
+        "source": "agent-usage-notification",
+        "recorded_at": "2026-09-08"
+      }
+    },
+    {
+      "id": "TASK-007",
+      "title": "[BE] HU-03-02, HU-03-04: Checkpoints de cancelacion y propagacion del observer en runRenderPipeline",
+      "user_stories": [
+        "HU-03-02",
+        "HU-03-04"
+      ],
+      "estimation_hours": 4,
+      "story_points": 5,
+      "depends_on": [
+        "TASK-005",
+        "TASK-006"
+      ],
+      "status": "done",
+      "files": [
+        "apps/render-api/src/pipeline/run-render-pipeline.ts",
+        "apps/render-api/src/pipeline/run-render-pipeline.spec.ts"
+      ],
+      "usage": {
+        "provider_model": "claude/sonnet",
+        "effort": "medium",
+        "agent": "implementor-back",
+        "tokens_in": 18629,
+        "tokens_out": 3288,
+        "tokens_total": 21917,
+        "duration_minutes": 6.2,
+        "approx": false,
+        "source": "agent-usage-notification",
+        "recorded_at": "2026-09-08"
+      }
+    },
+    {
+      "id": "TASK-008",
+      "title": "[BE] HU-03-02: Adaptador de produccion - reenvio de onProgress y randomId=randomUUID",
+      "user_stories": [
+        "HU-03-02"
+      ],
+      "estimation_hours": 3,
+      "story_points": 3,
+      "depends_on": [
+        "TASK-004"
+      ],
+      "status": "done",
+      "files": [
+        "apps/render-api/src/deps/node-render-api-dependencies.ts",
+        "apps/render-api/src/deps/node-render-api-dependencies.spec.ts"
+      ],
+      "usage": {
+        "provider_model": "claude/sonnet",
+        "effort": "medium",
+        "agent": "implementor-back",
+        "tokens_in": 18629,
+        "tokens_out": 3288,
+        "tokens_total": 21917,
+        "duration_minutes": 6.2,
+        "approx": false,
+        "source": "agent-usage-notification",
+        "recorded_at": "2026-09-08"
+      }
+    },
+    {
+      "id": "TASK-009",
+      "title": "[BE] HU-03-01, HU-03-03: Cola de render - creacion, despacho FIFO y listado (createRenderJobQueue, parte 1)",
+      "user_stories": [
+        "HU-03-01",
+        "HU-03-03"
+      ],
+      "estimation_hours": 4,
+      "story_points": 5,
+      "depends_on": [
+        "TASK-001",
+        "TASK-002",
+        "TASK-003",
+        "TASK-005",
+        "TASK-007"
+      ],
+      "status": "done",
+      "files": [
+        "apps/render-api/src/jobs/render-job-queue.ts",
+        "apps/render-api/src/jobs/render-job-queue.spec.ts"
+      ],
+      "usage": {
+        "provider_model": "claude/sonnet",
+        "effort": "medium",
+        "agent": "implementor-back",
+        "tokens_in": 18631,
+        "tokens_out": 3288,
+        "tokens_total": 21919,
+        "duration_minutes": 6.2,
+        "approx": false,
+        "source": "agent-usage-notification",
+        "recorded_at": "2026-09-08"
+      }
+    },
+    {
+      "id": "TASK-010",
+      "title": "[BE] HU-03-01, HU-03-02, HU-03-04: Cola de render - progreso, cancelacion y liquidacion (createRenderJobQueue, parte 2)",
+      "user_stories": [
+        "HU-03-01",
+        "HU-03-02",
+        "HU-03-04"
+      ],
+      "estimation_hours": 4,
+      "story_points": 5,
+      "depends_on": [
+        "TASK-009"
+      ],
+      "status": "done",
+      "files": [
+        "apps/render-api/src/jobs/render-job-queue.ts",
+        "apps/render-api/src/jobs/render-job-queue.spec.ts"
+      ],
+      "usage": {
+        "provider_model": "claude/sonnet",
+        "effort": "medium",
+        "agent": "implementor-back",
+        "tokens_in": 21808,
+        "tokens_out": 3848,
+        "tokens_total": 25656,
+        "duration_minutes": 6.1000000000000005,
+        "approx": false,
+        "source": "agent-usage-notification",
+        "recorded_at": "2026-09-08"
+      }
+    },
+    {
+      "id": "TASK-011",
+      "title": "[BE] HU-03-06: Superficie de errores - dos codigos nuevos de la cola (RENDER_JOB_NOT_FOUND, RENDER_JOB_NOT_CANCELABLE)",
+      "user_stories": [
+        "HU-03-06"
+      ],
+      "estimation_hours": 3,
+      "story_points": 3,
+      "depends_on": [],
+      "status": "done",
+      "files": [
+        "apps/render-api/src/errors/render-api-error.ts",
+        "apps/render-api/src/errors/http-status-for.ts",
+        "apps/render-api/src/errors/http-status-for.spec.ts",
+        "apps/render-api/src/errors/to-error-payload.ts",
+        "apps/render-api/src/errors/to-error-payload.spec.ts"
+      ],
+      "usage": {
+        "provider_model": "claude/sonnet",
+        "effort": "medium",
+        "agent": "implementor-back",
+        "tokens_in": 21808,
+        "tokens_out": 3848,
+        "tokens_total": 25656,
+        "duration_minutes": 6.1000000000000005,
+        "approx": false,
+        "source": "agent-usage-notification",
+        "recorded_at": "2026-09-08"
+      }
+    },
+    {
+      "id": "TASK-012",
+      "title": "[BE] HU-03-01: project-scope.ts (assertValidProjectSlug, resolveExistingProject, readStoredTimeline) y migracion de montage/artifact handlers",
+      "user_stories": [
+        "HU-03-01"
+      ],
+      "estimation_hours": 4,
+      "story_points": 5,
+      "depends_on": [],
+      "status": "done",
+      "files": [
+        "apps/render-api/src/store/project-scope.ts",
+        "apps/render-api/src/store/project-scope.spec.ts",
+        "apps/render-api/src/http/handlers/montage-handler.ts",
+        "apps/render-api/src/http/handlers/artifact-handler.ts"
+      ],
+      "usage": {
+        "provider_model": "claude/sonnet",
+        "effort": "medium",
+        "agent": "implementor-back",
+        "tokens_in": 21808,
+        "tokens_out": 3848,
+        "tokens_total": 25656,
+        "duration_minutes": 6.1000000000000005,
+        "approx": false,
+        "source": "agent-usage-notification",
+        "recorded_at": "2026-09-08"
+      }
+    },
+    {
+      "id": "TASK-013",
+      "title": "[BE] HU-03-01: RenderApiRuntime - cola y uploadSerializer por servidor",
+      "user_stories": [
+        "HU-03-01"
+      ],
+      "estimation_hours": 3,
+      "story_points": 3,
+      "depends_on": [
+        "TASK-010"
+      ],
+      "status": "done",
+      "files": [
+        "apps/render-api/src/http/render-api-runtime.ts",
+        "apps/render-api/src/http/render-api-runtime.spec.ts"
+      ],
+      "usage": {
+        "provider_model": "claude/sonnet",
+        "effort": "medium",
+        "agent": "implementor-back",
+        "tokens_in": 22826,
+        "tokens_out": 4028,
+        "tokens_total": 26854,
+        "duration_minutes": 2.45,
+        "approx": false,
+        "source": "agent-usage-notification",
+        "recorded_at": "2026-09-08"
+      }
+    },
+    {
+      "id": "TASK-014",
+      "title": "[BE] HU-03-01: Cableado del runtime en assets-handler (fin del singleton uploadSerializer)",
+      "user_stories": [
+        "HU-03-01"
+      ],
+      "estimation_hours": 3,
+      "story_points": 3,
+      "depends_on": [
+        "TASK-012",
+        "TASK-013"
+      ],
+      "status": "done",
+      "files": [
+        "apps/render-api/src/http/handlers/assets-handler.ts",
+        "apps/render-api/src/http/handlers/assets-handler.spec.ts",
+        "apps/render-api/src/http/handle-request.ts",
+        "apps/render-api/src/http/handle-request.spec.ts",
+        "apps/render-api/src/http/create-render-api-server.ts"
+      ],
+      "usage": {
+        "provider_model": "claude/sonnet",
+        "effort": "medium",
+        "agent": "implementor-back",
+        "tokens_in": 22826,
+        "tokens_out": 4028,
+        "tokens_total": 26854,
+        "duration_minutes": 2.45,
+        "approx": false,
+        "source": "agent-usage-notification",
+        "recorded_at": "2026-09-08"
+      }
+    },
+    {
+      "id": "TASK-015",
+      "title": "[BE] HU-03-01, HU-03-02, HU-03-03, HU-03-04: Rutas nuevas de jobs y verificacion de disyuncion",
+      "user_stories": [
+        "HU-03-01",
+        "HU-03-02",
+        "HU-03-03",
+        "HU-03-04"
+      ],
+      "estimation_hours": 2,
+      "story_points": 2,
+      "depends_on": [],
+      "status": "done",
+      "files": [
+        "apps/render-api/src/http/routes.ts",
+        "apps/render-api/src/http/router.spec.ts",
+        "apps/render-api/src/http/handle-request.ts"
+      ],
+      "usage": {
+        "provider_model": "claude/sonnet",
+        "effort": "medium",
+        "agent": "implementor-back",
+        "tokens_in": 22826,
+        "tokens_out": 4028,
+        "tokens_total": 26854,
+        "duration_minutes": 2.45,
+        "approx": false,
+        "source": "agent-usage-notification",
+        "recorded_at": "2026-09-08"
+      }
+    },
+    {
+      "id": "TASK-016",
+      "title": "[BE] HU-03-05: GET /health declara capabilities.jobQueue, cycle 3 y el bloque jobs",
+      "user_stories": [
+        "HU-03-05"
+      ],
+      "estimation_hours": 2,
+      "story_points": 2,
+      "depends_on": [
+        "TASK-013"
+      ],
+      "status": "done",
+      "files": [
+        "apps/render-api/src/http/health-handler.ts",
+        "apps/render-api/src/http/health-handler.spec.ts",
+        "apps/render-api/src/http/handle-request.ts"
+      ],
+      "usage": {
+        "provider_model": "claude/sonnet",
+        "effort": "medium",
+        "agent": "implementor-back",
+        "tokens_in": 22827,
+        "tokens_out": 4028,
+        "tokens_total": 26855,
+        "duration_minutes": 2.45,
+        "approx": false,
+        "source": "agent-usage-notification",
+        "recorded_at": "2026-09-08"
+      }
+    },
+    {
+      "id": "TASK-017",
+      "title": "[BE] HU-03-01, HU-03-03: Handlers de creacion y listado de jobs (handleCreateRenderJob, handleListRenderJobs)",
+      "user_stories": [
+        "HU-03-01",
+        "HU-03-03"
+      ],
+      "estimation_hours": 4,
+      "story_points": 5,
+      "depends_on": [
+        "TASK-011",
+        "TASK-012",
+        "TASK-013"
+      ],
+      "status": "done",
+      "files": [
+        "apps/render-api/src/http/handlers/jobs-handler.ts",
+        "apps/render-api/src/http/handlers/jobs-handler.spec.ts"
+      ],
+      "usage": {
+        "provider_model": "claude/sonnet",
+        "effort": "medium",
+        "agent": "implementor-back",
+        "tokens_in": 10690,
+        "tokens_out": 1887,
+        "tokens_total": 12577,
+        "duration_minutes": 4.075,
+        "approx": false,
+        "source": "agent-usage-notification",
+        "recorded_at": "2026-09-08"
+      }
+    },
+    {
+      "id": "TASK-018",
+      "title": "[BE] HU-03-02, HU-03-04: Handlers de consulta y cancelacion de jobs (handleGetRenderJob, handleCancelRenderJob)",
+      "user_stories": [
+        "HU-03-02",
+        "HU-03-04"
+      ],
+      "estimation_hours": 4,
+      "story_points": 5,
+      "depends_on": [
+        "TASK-011",
+        "TASK-017"
+      ],
+      "status": "done",
+      "files": [
+        "apps/render-api/src/http/handlers/jobs-handler.ts",
+        "apps/render-api/src/http/handlers/jobs-handler.spec.ts"
+      ],
+      "usage": {
+        "provider_model": "claude/sonnet",
+        "effort": "medium",
+        "agent": "implementor-back",
+        "tokens_in": 10690,
+        "tokens_out": 1887,
+        "tokens_total": 12577,
+        "duration_minutes": 4.075,
+        "approx": false,
+        "source": "agent-usage-notification",
+        "recorded_at": "2026-09-08"
+      }
+    },
+    {
+      "id": "TASK-019",
+      "title": "[BE] HU-03-01, HU-03-02, HU-03-03, HU-03-04, HU-03-05: Dispatch de las cuatro rutas nuevas en handle-request",
+      "user_stories": [
+        "HU-03-01",
+        "HU-03-02",
+        "HU-03-03",
+        "HU-03-04",
+        "HU-03-05"
+      ],
+      "estimation_hours": 3,
+      "story_points": 3,
+      "depends_on": [
+        "TASK-014",
+        "TASK-015",
+        "TASK-016",
+        "TASK-018"
+      ],
+      "status": "done",
+      "files": [
+        "apps/render-api/src/http/handle-request.ts",
+        "apps/render-api/src/http/handle-request.spec.ts"
+      ],
+      "usage": {
+        "provider_model": "claude/sonnet",
+        "effort": "medium",
+        "agent": "implementor-back",
+        "tokens_in": 10690,
+        "tokens_out": 1887,
+        "tokens_total": 12577,
+        "duration_minutes": 4.075,
+        "approx": false,
+        "source": "agent-usage-notification",
+        "recorded_at": "2026-09-08"
+      }
+    },
+    {
+      "id": "TASK-020",
+      "title": "[BE] HU-03-01: RenderApiRuntime cableado en create-render-api-server",
+      "user_stories": [
+        "HU-03-01"
+      ],
+      "estimation_hours": 3,
+      "story_points": 3,
+      "depends_on": [
+        "TASK-019"
+      ],
+      "status": "done",
+      "files": [
+        "apps/render-api/src/http/create-render-api-server.ts",
+        "apps/render-api/src/http/create-render-api-server.spec.ts"
+      ],
+      "usage": {
+        "provider_model": "claude/sonnet",
+        "effort": "medium",
+        "agent": "implementor-back",
+        "tokens_in": 10690,
+        "tokens_out": 1887,
+        "tokens_total": 12577,
+        "duration_minutes": 4.075,
+        "approx": false,
+        "source": "agent-usage-notification",
+        "recorded_at": "2026-09-08"
+      }
+    },
+    {
+      "id": "TASK-021",
+      "title": "[BE] HU-03-08: README del subproyecto - endpoints de la cola, cancelacion y limites conocidos",
+      "user_stories": [
+        "HU-03-08"
+      ],
+      "estimation_hours": 2,
+      "story_points": 2,
+      "depends_on": [
+        "TASK-020"
+      ],
+      "status": "done",
+      "files": [
+        "apps/render-api/README.md"
+      ],
+      "usage": {
+        "provider_model": "claude/sonnet",
+        "effort": "medium",
+        "agent": "implementor-back",
+        "tokens_in": 29861,
+        "tokens_out": 5270,
+        "tokens_total": 35131,
+        "duration_minutes": 8.2,
+        "approx": false,
+        "source": "agent-usage-notification",
+        "recorded_at": "2026-09-08"
+      }
+    },
+    {
+      "id": "TASK-022",
+      "title": "[BE] HU-03-02: mixTimelineAudio resolves project-relative asset paths against the project root (D-30, found by the CA-033 smoke)",
+      "user_stories": [
+        "HU-03-02"
+      ],
+      "estimation_hours": 2,
+      "story_points": 3,
+      "depends_on": [
+        "TASK-007",
+        "TASK-008"
+      ],
+      "status": "done",
+      "files": [
+        "apps/render-api/src/deps/render-api-dependencies.ts",
+        "apps/render-api/src/pipeline/run-render-pipeline.ts",
+        "apps/render-api/src/pipeline/run-render-pipeline.spec.ts",
+        "apps/render-api/src/deps/node-render-api-dependencies.ts",
+        "apps/render-api/src/deps/node-render-api-dependencies.spec.ts",
+        "apps/render-api/src/__fixtures__/fake-render-api-dependencies.ts"
+      ],
+      "usage": {
+        "provider_model": "claude/sonnet",
+        "effort": "medium",
+        "agent": "implementor-back",
+        "tokens_in": 22172,
+        "tokens_out": 3913,
+        "tokens_total": 26085,
+        "duration_minutes": 6.9,
+        "approx": false,
+        "source": "agent-usage-notification",
+        "recorded_at": "2026-09-08"
+      }
+    }
+  ]
+}

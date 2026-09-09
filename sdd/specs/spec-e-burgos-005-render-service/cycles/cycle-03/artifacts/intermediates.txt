@@ -1,0 +1,2 @@
+-rw-r--r--@ 1 macbookprom2  staff  3443278 Sep  8 23:41 media/smoke-ingest/work/renders/ac9647bb-28cd-42c7-bd1c-8522b7a45d7a/master.wav
+-rw-r--r--@ 1 macbookprom2  staff  2415500 Sep  8 23:41 media/smoke-ingest/work/renders/ac9647bb-28cd-42c7-bd1c-8522b7a45d7a/video-muted.mp4

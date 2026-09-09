@@ -142,6 +142,16 @@
           "status": "completed",
           "tasks_total": 20,
           "tasks_done": 20
+        },
+        "cycle-03": {
+          "file": "sdd/specs/spec-e-burgos-005-render-service/cycles/cycle-03/tasks.json",
+          "module": "render-service",
+          "apps": [
+            "apps/render-api"
+          ],
+          "status": "completed",
+          "tasks_total": 22,
+          "tasks_done": 22
         }
       }
     }

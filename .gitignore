@@ -40,6 +40,11 @@ graphify-out
 npm-debug.log*
 pnpm-debug.log*
 
+# SDD cycle evidence is never a stray log: artifacts/ under a cycle is the literal
+# output a CA is verified against, and it has to travel with the repo.
+!sdd/specs/**/artifacts/*.log
+!sdd/fixes/**/artifacts/*.log
+
 .claude/worktrees
 .claude/settings.local.json
 __pycache__/

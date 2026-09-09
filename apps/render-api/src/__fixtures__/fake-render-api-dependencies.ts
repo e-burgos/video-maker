@@ -17,6 +17,14 @@ const DEFAULT_RENDER_OUTPUT: Omit<RenderMutedVideoOutput, 'outPath'> = {
 
 const FIXED_NOW_ISO = '2026-09-08T00:00:00.000Z';
 
+function createDeterministicRandomId(): () => string {
+  let counter = 0;
+  return () => {
+    counter += 1;
+    return `render-${String(counter).padStart(4, '0')}`;
+  };
+}
+
 export function createFakeRenderApiDependencies(
   callLog: CallLog,
   overrides?: Partial<RenderApiDependencies>,
@@ -110,6 +118,8 @@ export function createFakeRenderApiDependencies(
       };
       return asset;
     },
+
+    randomId: overrides?.randomId ?? createDeterministicRandomId(),
 
     clock: overrides?.clock ?? { nowIso: () => FIXED_NOW_ISO },
 

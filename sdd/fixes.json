@@ -19,7 +19,7 @@
       "severity": "high",
       "created_at": "2026-09-08",
       "resolved_at": "2026-09-08",
-      "validated_at": null,
+      "validated_at": "2026-09-08",
       "title": "composition-remotion:smoke target cannot resolve workspace TS path aliases",
       "estimation_hours": 1.5,
       "description": "nx run composition-remotion:smoke fails in ~400 ms, before bundling, with \"Cannot find module '../../libs/timeline-core/src'\" (require stack: src/__fixtures__/example-timeline.ts <- src/smoke.ts). The target runs `node -r @swc-node/register ./src/smoke.ts` with cwd libs/composition-remotion, so @swc-node/register picks up libs/composition-remotion/tsconfig.json and takes that directory as baseUrl, while the paths mappings inherited from tsconfig.base.json are written relative to the workspace root (./libs/<lib>/src/index.ts). Every @video-maker/* specifier is therefore rewritten to a path under libs/composition-remotion/libs/. Broken since spec-001 cycle-03, when the target was added: it has never produced a render.",
@@ -35,8 +35,8 @@
         "libs/composition-remotion/README.md",
         "libs/composition-remotion/.gitignore"
       ],
-      "test_reference": "libs/composition-remotion/README.md#smoke-manual--ca-027-fuera-de-ci — manual target, never in CI (RNF-3). Executed once for real on 2026-09-08: `pnpm nx run composition-remotion:smoke` returned { outPath: \"out/example-9x16.mp4\", compositionId: \"TimelineComposition\", width: 1080, height: 1920, fps: 30, durationInFrames: 265 } in 53.2 s, and `ffprobe` on the output reports h264 1080x1920 @ 30/1, nb_frames=265, duration 8.833333 s, aac 48000 Hz stereo.",
-      "status": "implemented",
+      "test_reference": "libs/composition-remotion/README.md#smoke-manual--ca-027-fuera-de-ci — manual target, never in CI (RNF-3). Executed once for real on 2026-09-08: `pnpm nx run composition-remotion:smoke` returned { outPath: \"out/example-9x16.mp4\", compositionId: \"TimelineComposition\", width: 1080, height: 1920, fps: 30, durationInFrames: 265 } in 53.2 s, and `ffprobe` on the output reports h264 1080x1920 @ 30/1, nb_frames=265, duration 8.833333 s, aac 48000 Hz stereo. VALIDATED on 2026-09-09 by the cycle-03 E2E smoke of spec-e-burgos-005-render-service: a render job created over HTTP against media/smoke-ingest bundled Remotion with webpack in the render-api process and produced out/ac9647bb-28cd-42c7-bd1c-8522b7a45d7a.mp4 (2133176 bytes), which ffprobe reports as h264 1080x1920 r_frame_rate 30/1 with nb_frames 538 (17.9333 s derived from the video stream, frameDelta 0) plus an aac 48000 Hz stereo stream. Evidence: sdd/specs/spec-e-burgos-005-render-service/cycles/cycle-03/artifacts/.",
+      "status": "validated",
       "cycle": null,
       "usage": {
         "provider_model": "claude/sonnet",
@@ -137,6 +137,97 @@
         ]
       },
       "process_note": "Applied by Hermes (main loop) during the merge of the spec-003/004 branch, as part of the merge commit so that every commit on main builds. Integration fix only: no contract, no new dependency."
+    },
+    {
+      "id": "FIX-e-burgos-001-002",
+      "author": "e-burgos",
+      "spec_id": "spec-e-burgos-001-core-composition-media-pipeline",
+      "fix_document": "sdd/specs/spec-e-burgos-001-core-composition-media-pipeline/fixes/fix-e-burgos-001-002.md",
+      "type": "IMPROVEMENT",
+      "severity": "medium",
+      "created_at": "2026-09-08",
+      "resolved_at": "2026-09-08",
+      "validated_at": null,
+      "title": "composition-remotion coverage.include does not measure src/render.ts nor src/components/**",
+      "estimation_hours": 0.5,
+      "description": "libs/composition-remotion/vite.config.ts declares coverage.include as [src/helpers/**/*.ts, src/transitions/**/*.ts] with an 80% global threshold. src/render.ts (bundle + renderMedia, the most expensive and most fragile file of the lib) and src/components/** are excluded: they neither count towards the floor nor appear in the report. The lib kept a green coverage report for two specs while its only real render path was broken (FIX-e-burgos-001-001).",
+      "justification": "Measurement-config change on an already completed spec: no production code, no public API, no contract and no dependency changes. Scheduled by D-6 of spec-e-burgos-005-render-service for cycle-03, which is the first cycle that exercises render.ts for real (E2E smoke with real binaries) and therefore the first one that can raise the coverage and the floor at the same time.",
+      "related_modules": [
+        "core-composition-media-pipeline",
+        "kinetic-captions"
+      ],
+      "affected_files": [
+        "libs/composition-remotion/vite.config.ts"
+      ],
+      "test_reference": "pnpm nx run composition-remotion:test green with the widened include (2026-09-08): 93.33% stmts / 92.19% branch / 90.47% funcs / 93.18% lines, global 80% floor untouched, and src/render.ts now listed in the report at 76.92% stmts with lines 18, 100-121 and 131 uncovered.",
+      "status": "implemented",
+      "cycle": null,
+      "process_note": "src/components/** stays out of coverage.include, descoped with a written recommendation in the fix document: including it drops the lib to 68.53% funcs / 79.64% branch, and Vitest 4.1.11 per-glob thresholds did not take effect here (three key shapes tried), so the only way to include it was lowering the GLOBAL floor to ~68%, which hides the debt instead of registering it. The honest coverage of those Remotion components comes from rendering them through the Player in spec-e-burgos-006-web-studio. Registered under the FIX GATE while spec-e-burgos-005-render-service cycle-03 was open (D-5 / D-6 scheduled it there); cycle stays null because the fix belongs to a different spec than the cycle that triggers it.",
+      "usage": {
+        "provider_model": "claude/opus",
+        "effort": "high",
+        "agent": "orchestrator",
+        "tokens_in": 26000,
+        "tokens_out": 4000,
+        "approx": true,
+        "source": "declared-estimate",
+        "recorded_at": "2026-09-08"
+      }
+    },
+    {
+      "id": "FIX-e-burgos-002-002",
+      "author": "e-burgos",
+      "spec_id": "spec-e-burgos-002-auto-montage-pipeline",
+      "fix_document": "sdd/specs/spec-e-burgos-002-auto-montage-pipeline/fixes/fix-e-burgos-002-002.md",
+      "type": "IMPROVEMENT",
+      "severity": "low",
+      "created_at": "2026-09-08",
+      "resolved_at": "2026-09-08",
+      "validated_at": null,
+      "title": "render-cli reports a generic [uso] stage token and formats its error surface in Spanish",
+      "estimation_hours": 1,
+      "description": "Two follow-ups declared when spec-002 cycle-03 closed and explicitly deferred to spec-005. (1) N-2: formatCliError derives the header stage token as uso whenever error.stage is null, so usage errors about an already recognized command (invalid --preset/--seed on ingest|plan|render, missing <project-root>, extra positional) lose the command stage; stageForArgument exists, is tested and has no production caller. (2) The error surface mixes Spanish labels (recurso, esperado, causa, sugerencia, uso, interno) with English data tokens, contradicting D-4 of spec-005 and the repo rule that machine payloads are English.",
+      "justification": "Cosmetic and traceability change on an already completed spec, no new contracts or entities, no dependencies and no exit-code change (CLI_USAGE and CLI_ARGUMENT keep mapping to 2). The substantive decision is already taken and written down as D-4 of spec-e-burgos-005-render-service; D-5 scheduled the application for cycle-03, the first cycle where the API and the CLI share the translation of library errors.",
+      "related_modules": [
+        "auto-montage-pipeline",
+        "render-service"
+      ],
+      "affected_files": [
+        "tools/render-cli/src/errors/cli-usage-error.ts",
+        "tools/render-cli/src/errors/format-cli-error.ts",
+        "tools/render-cli/src/errors/format-cli-error.spec.ts",
+        "tools/render-cli/src/args/parse-cli-args.ts",
+        "tools/render-cli/src/args/parse-cli-args.spec.ts",
+        "tools/render-cli/src/pipeline/assert-project-preconditions.ts",
+        "tools/render-cli/src/pipeline/assert-project-preconditions.spec.ts",
+        "tools/render-cli/src/cli.spec.ts"
+      ],
+      "test_reference": "pnpm nx run-many -t lint test build -p render-cli green (2026-09-08): 17 files / 155 tests. New cases: an invalid --preset on render reports stage render instead of the generic token; an unknown command keeps the generic token; a dedicated case asserts the six formatting labels are English in a single formatCliError call; run with a missing project root reports stage ingest.",
+      "status": "implemented",
+      "cycle": null,
+      "process_note": "Eight files instead of the five the fix document first listed: cli-usage-error.ts had to accept an optional stage for the N-2 wiring to be possible at all, and assert-project-preconditions(.spec).ts turned up in the explicit Spanish sweep of point 2 with two hint literals. No exit code changed (exit-code-for.ts untouched), no contract and no dependency. The third inherited follow-up (exact exit code only observable by invoking the binary, never nx run) is explicitly descoped with a written recommendation in the fix document: it is Nx behaviour, not a render-cli defect, and it is already captured as measured evidence in the spec, as a distilled lesson in sdd/memory/lessons.md and as a copyable procedure in the render-api README. Registered under the FIX GATE while spec-e-burgos-005-render-service cycle-03 was open (D-5 / D-6 scheduled it there); cycle stays null because the fix belongs to a different spec than the cycle that triggers it.",
+      "usage": {
+        "provider_model": "claude/sonnet",
+        "effort": "medium",
+        "tokens_in": 107665,
+        "tokens_out": 19000,
+        "approx": false,
+        "source": "agent-usage-notification",
+        "recorded_at": "2026-09-08",
+        "by_agent": [
+          {
+            "agent": "implementor-back",
+            "provider_model": "claude/sonnet",
+            "effort": "medium",
+            "tokens_in": 107665,
+            "tokens_out": 19000,
+            "tokens_total": 126665,
+            "approx": false,
+            "source": "agent-usage-notification",
+            "recorded_at": "2026-09-08"
+          }
+        ]
+      }
     }
   ]
 }

@@ -3,6 +3,7 @@ import { afterEach, describe, expect, it } from 'vitest';
 import { createCallLog } from '../__fixtures__/call-log';
 import { createFakeObjectStorage } from '../__fixtures__/fake-object-storage';
 import { createFakeRenderApiDependencies } from '../__fixtures__/fake-render-api-dependencies';
+import { buildMinimalTimeline } from '../__fixtures__/minimal-timeline';
 import type { StoreConfig } from '../config/store-config';
 import { createRenderApiServer } from './create-render-api-server';
 import type { RenderApiServer } from './create-render-api-server';
@@ -92,5 +93,37 @@ describe('createRenderApiServer', () => {
     expect(response.status).toBe(206);
     expect(response.headers.get('content-range')).toBe('bytes 0-4/11');
     expect(text).toBe('hello');
+  });
+
+  it('creates a job and reads it back over a real loopback socket', async () => {
+    const callLog = createCallLog();
+    const timeline = buildMinimalTimeline();
+    const storage = createFakeObjectStorage(callLog, {
+      directories: [`${STORE.mediaRoot}/smoke-ingest`],
+      files: [{ path: `${STORE.mediaRoot}/smoke-ingest/work/timeline.json`, contents: JSON.stringify(timeline) }],
+    });
+    const deps = createFakeRenderApiDependencies(callLog, { storage });
+    server = createRenderApiServer(deps, { host: '127.0.0.1', port: 0 }, STORE);
+
+    const address = await server.listen();
+
+    const createResponse = await fetch(`http://${address.host}:${address.port}/projects/smoke-ingest/jobs`, {
+      method: 'POST',
+    });
+    const createdJob = (await createResponse.json()) as { id: string; slug: string; state: string };
+
+    expect(createResponse.status).toBe(202);
+    expect(createResponse.headers.get('location')).toBe(`/jobs/${createdJob.id}`);
+    expect(createdJob.slug).toBe('smoke-ingest');
+
+    let job: { id: string; state: string } = createdJob;
+    for (let attempt = 0; attempt < 20 && job.state !== 'succeeded'; attempt += 1) {
+      await new Promise((resolve) => setTimeout(resolve, 10));
+      const getResponse = await fetch(`http://${address.host}:${address.port}/jobs/${createdJob.id}`);
+      job = (await getResponse.json()) as { id: string; state: string };
+    }
+
+    expect(job.id).toBe(createdJob.id);
+    expect(job.state).toBe('succeeded');
   });
 });

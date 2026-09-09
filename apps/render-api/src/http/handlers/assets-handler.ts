@@ -13,12 +13,10 @@ import { isAssetRole, isPortableFileName, rawDirectoryForRole } from '../../stor
 import { mergeProbeFailure, mergeUploadedAsset, toCatalogAsset } from '../../store/catalog-merge';
 import { isValidProjectSlug } from '../../store/project-slug';
 import { resolveProjectAssets, toAssetListEntry } from '../../store/project-assets';
-import { createKeyedSerializer } from '../../store/serialize-by-key';
 import { JSON_CONTENT_TYPE } from '../http-message';
 import type { HttpRequestLine, HttpResponse } from '../http-message';
+import type { RenderApiRuntime } from '../render-api-runtime';
 import type { RouteParams } from '../router';
-
-const uploadSerializer = createKeyedSerializer();
 
 const PROBE_FAILURE_CODE_BY_OWN_CODE: Readonly<Partial<Record<RenderApiErrorCode, 'BINARY_NOT_FOUND' | 'COMMAND_FAILED' | 'UNPARSEABLE_OUTPUT'>>> = {
   MEDIA_BINARY_NOT_FOUND: 'BINARY_NOT_FOUND',
@@ -90,6 +88,7 @@ export async function handleUploadAsset(
   store: StoreConfig,
   params: RouteParams,
   request: HttpRequestLine,
+  runtime: RenderApiRuntime,
 ): Promise<HttpResponse> {
   const slug = params.slug ?? '';
   const role = params.role ?? '';
@@ -153,7 +152,7 @@ export async function handleUploadAsset(
     throw new PipelineStageError({ code: 'PROJECT_NOT_FOUND', stage: null, resource: slug });
   }
 
-  return uploadSerializer.run(slug, async () => {
+  return runtime.uploadSerializer.run(slug, async () => {
     const existing = await deps.storage.stat(absoluteDestination);
     if (existing !== null) {
       throw new PipelineStageError({ code: 'ASSET_ALREADY_EXISTS', stage: null, resource: assetId });

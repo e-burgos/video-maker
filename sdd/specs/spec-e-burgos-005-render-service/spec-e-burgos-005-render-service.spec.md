@@ -1,11 +1,16 @@
 # SPEC-e-burgos-005: Local Render Service & Asset Storage
 
-> Estado: **in-progress** — detallada por el sdd-orchestrator al abrir `cycle-01` y ampliada al abrir
-> `cycle-02` (2026-09-08).
+> Estado: **completed** — detallada por el sdd-orchestrator al abrir `cycle-01`, ampliada al abrir
+> `cycle-02` y `cycle-03`, y cerrada por el sdd-reviewer al cerrar `cycle-03` (2026-09-08).
 
 ## Resumen Ejecutivo
 
 Servicio local Node (`apps/render-api`) que expone una API REST para gestionar assets crudos en MinIO (docker-compose del repo), encolar jobs de render headless (Remotion + FFmpeg) con progreso y cancelación, y persistir timelines/EDL generadas. Corre en la máquina del dev; no tiene autenticación multiusuario ni despliegue cloud en su alcance inicial.
+
+> **Corrección (D-11, `cycle-02`):** MinIO quedó **descopado con fundamento** y nunca se implementó.
+> El store del servicio es el filesystem sobre `media/<project-slug>/`, detrás del puerto
+> `ObjectStorage` con un único adaptador `fs`. El párrafo de arriba es el alcance **previsto** al
+> abrir la spec; el vigente es el de D-11.
 
 `apps/render-api` es además **el único subproyecto del monorepo que puede depender a la vez de
 `libs/media-local` (`type:util`) y `libs/composition-remotion` (`type:ui`)**: los `depConstraints`
@@ -70,8 +75,8 @@ Ver contexto de negocio y casos de uso en `spec-e-burgos-001-core-composition-me
 | Ciclo | Fase | Qué entrega | Estado |
 | --- | --- | --- | --- |
 | **cycle-01** | `render-service-foundation` | La app `apps/render-api` existente y ejecutable; puertos inyectables; la orquestación `render → mix → mux → verify` en una sola llamada; la superficie de errores tipada en inglés con su mapeo a HTTP; servidor `node:http` con `GET /health`. Sin cola, sin MinIO, sin endpoints de assets. | **completed** |
-| **cycle-02** | `asset-store-and-project-persistence` | Store de assets sobre `media/` (D-3): listar proyectos y assets, subir un asset, sondearlo con `probeMedia`; persistencia de `Timeline`/`EditDecisionList` como JSON en `work/`; descarga de artefactos por HTTP. La vista MinIO queda **descopada con fundamento** (D-11): el puerto `ObjectStorage` queda con un solo adaptador `fs`. | en curso |
-| **cycle-03** | `render-job-queue-and-delivery` | Cola en proceso con concurrencia 1; `POST /jobs`, `GET /jobs/:id`, `DELETE /jobs/:id`; progreso por etapa y por frame; **smoke real E2E obligatorio** (job disparado por HTTP que termina en un MP4 verificado con `ffprobe` contra el stream de video); `FIX-e-burgos-001-001` → `validated`; los `[IMPROVEMENT]` de D-5 y D-6; cierre de la spec. | pendiente |
+| **cycle-02** | `asset-store-and-project-persistence` | Store de assets sobre `media/` (D-3): listar proyectos y assets, subir un asset, sondearlo con `probeMedia`; persistencia de `Timeline`/`EditDecisionList` como JSON en `work/`; descarga de artefactos por HTTP. La vista MinIO queda **descopada con fundamento** (D-11): el puerto `ObjectStorage` queda con un solo adaptador `fs`. | **completed** |
+| **cycle-03** | `render-job-queue-and-delivery` | Cola en proceso con concurrencia 1; `POST /jobs`, `GET /jobs/:id`, `DELETE /jobs/:id`; progreso por etapa y por frame; **smoke real E2E obligatorio** (job disparado por HTTP que termina en un MP4 verificado con `ffprobe` contra el stream de video); `FIX-e-burgos-001-001` → `validated`; los `[IMPROVEMENT]` de D-5 y D-6; cierre de la spec. | **completed** |
 
 ## Requisitos Funcionales (RF)
 
@@ -135,9 +140,47 @@ Ver contexto de negocio y casos de uso en `spec-e-burgos-001-core-composition-me
 - **RF-17:** El README del subproyecto documenta los endpoints nuevos, las variables de entorno
   nuevas, la decisión D-11 (por qué no hay MinIO y cómo se agregaría) y qué sigue fuera de alcance.
 
-### Ciclo 03
+### Ciclo 03 — `render-job-queue-and-delivery`
 
-Se detalla al abrir el ciclo, sobre el plan de la tabla anterior.
+- **RF-18:** Existe una cola de jobs de render en proceso, en memoria, con concurrencia 1: un único
+  job en estado `running` a la vez en todo el proceso, sin importar de qué proyecto sea; el resto
+  queda `queued` en orden de llegada (FIFO).
+- **RF-19:** Se puede crear un job de render sobre un proyecto identificándolo sólo por su slug. El
+  job lee la `Timeline` del proyecto desde `work/timeline.json` a través del store existente
+  (D-13) en el momento en que la necesita; nunca la acepta por body. Si el proyecto no existe, o su
+  `Timeline` no existe o no valida, la respuesta es un error tipado y ningún job queda registrado.
+- **RF-20:** Se puede consultar un job por su identificador: expone su estado (`queued` | `running`
+  | `succeeded` | `failed` | `canceled`), la etapa vigente del pipeline (`prepare` | `render` |
+  `mix` | `mux` | `verify`) cuando está `running`, y — durante la etapa `render` — el progreso por
+  frame. Un job `failed` embebe el error tipado completo (código, etapa, recurso) de la falla, y la
+  consulta en sí sigue respondiendo con éxito de transporte.
+- **RF-21:** Se pueden listar los jobs de un proyecto puntual, en el orden en que se crearon; el
+  listado nunca incluye jobs de otro proyecto.
+- **RF-22:** Se puede cancelar un job, con semántica explícita y distinta según su estado: un job
+  `queued` se cancela de verdad (nunca llega a ejecutarse); un job `running` no se interrumpe a
+  mitad de la invocación de un binario, pero termina en un estado observable y distinguible de
+  `succeeded`/`failed`; cancelar un job ya finalizado es un error tipado que no cambia su estado
+  final.
+- **RF-23:** El puerto `RenderMutedVideoPort` se extiende para aceptar y propagar, sin alterarlo, el
+  callback `onProgress(renderedFrames, totalFrames)` que `renderTimeline` ya expone, de modo que el
+  progreso por frame de la etapa `render` llegue al estado del job.
+- **RF-24:** El entregable de un job se publica en `out/<renderId>.mp4` y sus intermedios se
+  conservan en `work/renders/<renderId>/` (D-8), con la misma política de conservación que la
+  llamada directa a `runRenderPipeline` (`cycle-01`): ningún resultado del job borra un intermedio.
+- **RF-25:** La superficie de errores se amplía con los códigos propios de la cola (job inexistente,
+  cancelación no permitida por estado, etc.), cada uno con su etapa (`null` si no aplica) y su
+  status HTTP, en inglés y sin `.stack` ni rutas absolutas del host (D-4).
+- **RF-26:** `GET /health` refleja la capacidad de la cola de jobs en `capabilities`, sin alterar el
+  cálculo de `status` (`ok`/`degraded`), que sigue dependiendo únicamente de motores y binarios.
+- **RF-27:** Existe un smoke real E2E obligatorio: un job disparado por HTTP sobre un proyecto real
+  de `media/` produce un MP4 cuya duración se verifica con `ffprobe` contra el **stream de video**
+  (`nb_frames` dividido por `r_frame_rate` parseado como fracción), nunca contra `format.duration`;
+  la salida literal del smoke queda guardada como artefacto del ciclo.
+- **RF-28:** El smoke real E2E de RF-27 es la evidencia que permite marcar
+  `FIX-e-burgos-001-001` como `validated` en `sdd/fixes.json` al cerrar el ciclo.
+- **RF-29:** El README del subproyecto documenta los endpoints nuevos de la cola, la semántica de
+  cancelación por estado, las limitaciones conocidas (concurrencia 1, cola en memoria sin
+  persistencia entre reinicios) y el resultado del smoke E2E.
 
 ## Requisitos No-Funcionales (RNF)
 
@@ -164,6 +207,13 @@ Se detalla al abrir el ciclo, sobre el plan de la tabla anterior.
   directorio temporal, nunca `media/`.
 - **RNF-10:** Cobertura ≥ 80 % de statements sobre `src/**` de `apps/render-api` sostenida, sin
   reducir el `coverage.include` vigente para lograrlo.
+- **RNF-11:** **Cero dependencias npm nuevas también en `cycle-03`** (D-2). Sólo módulos nativos de
+  Node y paquetes `@video-maker/*` ya existentes.
+- **RNF-12:** La cola de jobs vive únicamente en memoria del proceso: no persiste entre reinicios
+  del servicio, y el README lo declara explícitamente como límite conocido.
+- **RNF-13:** El smoke real E2E (RF-27) corre con binarios reales (ffmpeg, ffprobe, Chrome headless)
+  fuera de la suite de tests habitual, que sigue corriendo sin ellos (RNF-3/RNF-9); la salida
+  literal del smoke se guarda como artefacto del ciclo, no sólo se relata en el reporte de cierre.
 
 ## Dependencias
 
@@ -232,3 +282,60 @@ Se detalla al abrir el ciclo, sobre el plan de la tabla anterior.
   `coverage.include` vigente **sin recortar** respecto de `cycle-01`.
 - **CA-020:** `apps/render-api/README.md` documenta los endpoints nuevos, las variables de entorno
   nuevas y la decisión D-11 (por qué no hay MinIO hoy y cómo se agregaría detrás del puerto).
+
+### Ciclo 03
+
+- **CA-021:** Un test verifica que crear un job invoca el store para leer `work/timeline.json` del
+  proyecto exactamente una vez antes de encolar, y que un `Timeline` ausente o inválida responde con
+  el error tipado correspondiente (`TIMELINE_NOT_FOUND` / `TIMELINE_INVALID`) sin crear ningún job,
+  verificado sobre el registro de jobs (no por el título del test).
+- **CA-022:** Un test verifica que nunca hay dos jobs `running` a la vez: un job creado mientras
+  otro está `running` queda `queued`, y pasa a `running` recién cuando el anterior alcanza un
+  estado terminal (`succeeded`, `failed` o `canceled`) — verificado sobre el registro de
+  transiciones de estado de la cola.
+- **CA-023:** Un test verifica que consultar un job en la etapa `render` expone `stage: "render"` y
+  un progreso que crece conforme el doble de `renderMutedVideo` invoca su callback `onProgress` con
+  valores crecientes de `renderedFrames`, nunca decreciente entre dos consultas sucesivas.
+- **CA-024:** Un test verifica que el tipo `RenderMutedVideoPort` acepta un `onProgress` opcional y
+  que el adaptador de producción se lo reenvía a `renderTimeline` sin alterar los valores recibidos.
+- **CA-025:** Un test verifica que listar los jobs de un proyecto devuelve únicamente los jobs de
+  ese slug, en el mismo orden en que fueron creados, y que un proyecto sin jobs devuelve una lista
+  vacía.
+- **CA-026:** Un test verifica que cancelar un job `queued` lo deja en estado `canceled` sin que se
+  haya invocado ningún puerto del pipeline (`renderMutedVideo`, `mixTimelineAudio`,
+  `muxAudioIntoVideo`, `verifyMixLoudness`), comprobado sobre el registro de llamadas.
+- **CA-027:** Un test verifica que cancelar un job `running` produce un estado terminal distinto de
+  `succeeded` y de `failed`, y que cancelar un job ya `succeeded`/`failed`/`canceled` responde 409
+  `RENDER_JOB_NOT_CANCELABLE` sin cambiar su estado final.
+- **CA-028:** Un test verifica que consultar o cancelar un identificador de job que nunca existió
+  responde 404 `RENDER_JOB_NOT_FOUND`.
+- **CA-029:** Un test verifica que un job cuyo pipeline lanza en cualquier etapa
+  (`prepare`/`render`/`mix`/`mux`/`verify`) queda en estado `failed` con el error tipado completo
+  (código, etapa, recurso) embebido en su estado, y que la consulta de ese job sigue respondiendo
+  con éxito de transporte.
+- **CA-030:** Un test verifica que, tras un job exitoso, el entregable queda en
+  `out/<renderId>.mp4` y que `work/renders/<renderId>/video-muted.mp4` y `master.wav` siguen
+  existiendo (los intermedios no se borran), igual que D-8 para la llamada directa al pipeline.
+- **CA-031:** `GET /health` responde `capabilities.jobQueue` con la capacidad habilitada y sigue
+  respondiendo 200 en los dos estados de `status` conocidos (`ok`/`degraded`), sin relación con la
+  cola de jobs.
+- **CA-032:** Cada código de error nuevo de la cola tiene un test que lo mapea a su status HTTP y
+  verifica que su payload no contiene castellano, `.stack`, ni ninguna ruta absoluta del host.
+- **CA-033:** Una **ejecución real del proceso** (no un test) arranca el servidor, dispara un job de
+  render por HTTP sobre un proyecto real de `media/` con `Timeline` y assets ya presentes, hace
+  polling del estado del job hasta observar `succeeded`, descarga el MP4 resultante por el endpoint
+  de artefactos existente (`EP-011`), y ejecuta `ffprobe` sobre el archivo descargado comparando la
+  duración esperada contra el **stream de video** (`nb_frames` dividido por `r_frame_rate` parseado
+  como fracción), **nunca** contra `format.duration`, dentro de la tolerancia que fije el
+  architect; el resultado y la salida literal de `ffprobe` quedan guardados en
+  `cycles/cycle-03/artifacts/`.
+- **CA-034:** `apps/render-api/README.md` documenta los endpoints nuevos de la cola (método, path,
+  propósito), la semántica de cancelación por estado, las limitaciones conocidas (concurrencia 1,
+  cola en memoria sin persistencia entre reinicios) y referencia el resultado del smoke E2E
+  (CA-033).
+- **CA-035:** `pnpm nx run-many -t lint test build` termina en verde con `render-api` incluido, y
+  `pnpm sdd:validate` en verde, sin dependencias npm nuevas (`package.json` y `pnpm-lock.yaml` sin
+  cambios en todo el ciclo).
+- **CA-036:** Cobertura de `apps/render-api` ≥ 80 % de statements sobre su `src/**` sostenida,
+  incluyendo los archivos nuevos de la cola, con el `coverage.include` vigente **sin recortar**
+  respecto de `cycle-02`.

@@ -40,6 +40,8 @@ const ENGINE_DERIVED_RESOURCES = [
   { code: 'ARTIFACT_NOT_FOUND', resource: 'raw/aroll/clip01.mp4' },
   { code: 'RANGE_NOT_SATISFIABLE', resource: 'out/render-1.mp4' },
   { code: 'CATALOG_UNREADABLE', resource: 'work/catalog.json' },
+  { code: 'RENDER_JOB_NOT_FOUND', resource: 'render-0001' },
+  { code: 'RENDER_JOB_NOT_CANCELABLE', resource: 'render-0001' },
 ] as const satisfies readonly { code: RenderApiErrorCode; resource: string }[];
 
 describe('toErrorPayload', () => {

@@ -10,6 +10,7 @@ import { toErrorPayload } from '../errors/to-error-payload';
 import { handleRequest } from './handle-request';
 import { JSON_CONTENT_TYPE } from './http-message';
 import type { HttpRequestLine, HttpResponse } from './http-message';
+import { createRenderApiRuntime } from './render-api-runtime';
 
 const PATH_PARSE_BASE = 'http://render-api.invalid';
 
@@ -65,10 +66,11 @@ export function createRenderApiServer(
   config: ServerConfig,
   store: StoreConfig,
 ): RenderApiServer {
+  const runtime = createRenderApiRuntime(deps);
   const server = createServer((incoming, outgoing) => {
     void (async () => {
       try {
-        const response = await handleRequest(toRequestLine(incoming), deps, store);
+        const response = await handleRequest(toRequestLine(incoming), deps, store, runtime);
         await writeResponse(response, outgoing);
       } catch (cause) {
         const error = toErrorPayload(cause);

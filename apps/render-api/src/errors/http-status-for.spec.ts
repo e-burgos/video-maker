@@ -40,6 +40,8 @@ const EXPECTED_STATUS_BY_CODE: Readonly<Record<RenderApiErrorCode, number>> = {
   CATALOG_UNREADABLE: 500,
   REQUEST_BODY_INVALID_JSON: 400,
   REQUEST_BODY_TOO_LARGE: 413,
+  RENDER_JOB_NOT_FOUND: 404,
+  RENDER_JOB_NOT_CANCELABLE: 409,
 };
 
 describe('httpStatusFor', () => {

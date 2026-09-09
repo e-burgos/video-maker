@@ -1,0 +1,60 @@
+        {
+            "codec_name": "h264",
+            "width": 1080,
+            "height": 1920,
+            "r_frame_rate": "30/1",
+            "avg_frame_rate": "30/1",
+            "nb_frames": "538",
+            "side_data_list": [
+                {
+                }
+            ]
+        }
+    ]
+}
+{
+    "programs": [
+    ],
+    "stream_groups": [
+    ],
+    "streams": [
+        {
+            "codec_name": "aac",
+            "sample_rate": "48000",
+            "channels": 2,
+            "duration": "17.933333"
+        }
+    ]
+}
+{
+  "frames": 538,
+  "expectedFrames": 538,
+  "rFrameRate": "30/1",
+  "fps": 30,
+  "seconds": 17.933333333333334,
+  "expectedSeconds": 17.933333333333334,
+  "frameDelta": 0,
+  "secondsDelta": 0,
+  "withinTolerance": true
+}
+    encoder         : Lavf63.1.101
+  Stream #0:0(und): Audio: pcm_s16le, 192000 Hz, stereo, s16, 6144 kb/s (default)
+    Metadata:
+      encoder         : Lavc63.1.101 pcm_s16le
+      handler_name    : SoundHandler
+size=N/A time=00:00:10.90 bitrate=N/A speed=21.4x elapsed=0:00:00.51    [Parsed_loudnorm_0 @ 0x9c2c05140] 
+{
+	"input_i" : "-17.59",
+	"input_tp" : "-4.03",
+	"input_lra" : "3.80",
+	"input_thresh" : "-28.29",
+	"output_i" : "-14.11",
+	"output_tp" : "-1.00",
+	"output_lra" : "1.90",
+	"output_thresh" : "-24.49",
+	"normalization_type" : "dynamic",
+	"target_offset" : "0.11"
+}
+[out#0/null @ 0x9c2c04900] video:0KiB audio:13450KiB subtitle:0KiB other streams:0KiB global headers:0KiB muxing overhead: unknown
+size=N/A time=00:00:18.00 bitrate=N/A speed=24.1x elapsed=0:00:00.74    
+exit=143

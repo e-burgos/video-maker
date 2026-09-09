@@ -3,6 +3,8 @@ import type { Timeline } from '@video-maker/timeline-core';
 import type { RenderApiDependencies } from '../deps/render-api-dependencies';
 import { translateEngineError } from '../errors/translate-engine-error';
 import type { RenderPipelineStage } from '../errors/render-api-error';
+import { RenderPipelineCanceledError } from './render-pipeline-observer';
+import type { RenderPipelineObserver } from './render-pipeline-observer';
 import { resolveRenderPipelinePaths } from './render-pipeline-paths';
 
 export interface RenderPipelineRequest {
@@ -55,30 +57,49 @@ async function runStage<T>(
   }
 }
 
+function checkpoint(observer: RenderPipelineObserver | undefined, stage: RenderPipelineStage): void {
+  if (observer?.cancellationRequested() === true) {
+    throw new RenderPipelineCanceledError(stage);
+  }
+}
+
 export async function runRenderPipeline(
   request: RenderPipelineRequest,
   deps: RenderApiDependencies,
+  observer?: RenderPipelineObserver,
 ): Promise<RenderPipelineReport> {
   const paths = resolveRenderPipelinePaths(request.projectRoot, request.renderId);
   const startedAt = deps.clock.nowIso();
 
+  observer?.stageStarted('prepare');
   await runStage('prepare', paths.workDir.resource, async () => {
     await deps.ensureDirectory(paths.workDir.path);
     await deps.ensureDirectory(paths.outDir.path);
   });
 
+  checkpoint(observer, 'render');
+  observer?.stageStarted('render');
   const rendered = await runStage('render', paths.mutedVideo.resource, () =>
     deps.renderMutedVideo({
       timeline: request.timeline,
       outPath: paths.mutedVideo.path,
       publicDir: paths.publicDir,
+      ...(observer === undefined ? {} : { onProgress: observer.renderProgressed }),
     }),
   );
 
+  checkpoint(observer, 'mix');
+  observer?.stageStarted('mix');
   await runStage('mix', paths.masterAudio.resource, () =>
-    deps.mixTimelineAudio({ timeline: request.timeline, outPath: paths.masterAudio.path }),
+    deps.mixTimelineAudio({
+      timeline: request.timeline,
+      outPath: paths.masterAudio.path,
+      projectRoot: paths.publicDir,
+    }),
   );
 
+  checkpoint(observer, 'mux');
+  observer?.stageStarted('mux');
   await runStage('mux', paths.deliverable.resource, () =>
     deps.muxAudioIntoVideo({
       videoPath: rendered.outPath,
@@ -87,6 +108,8 @@ export async function runRenderPipeline(
     }),
   );
 
+  checkpoint(observer, 'verify');
+  observer?.stageStarted('verify');
   const verified = await runStage('verify', paths.deliverable.resource, () =>
     deps.verifyMixLoudness({ path: paths.deliverable.path, target: request.timeline.audioMix.voice }),
   );

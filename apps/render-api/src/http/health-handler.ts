@@ -1,11 +1,13 @@
 import type { RenderApiDependencies } from '../deps/render-api-dependencies';
 import type { EngineModuleStatus } from '../engine/engine-modules';
 import type { BinaryStatus } from '../engine/media-binaries';
+import type { RenderJobQueueSize } from '../jobs/render-job-queue';
 import { JSON_CONTENT_TYPE } from './http-message';
 import type { HttpResponse } from './http-message';
+import type { RenderApiRuntime } from './render-api-runtime';
 
 const SERVICE_NAME = 'render-api';
-const SERVICE_CYCLE = 2;
+const SERVICE_CYCLE = 3;
 
 export interface HealthBody {
   readonly status: 'ok' | 'degraded';
@@ -19,9 +21,13 @@ export interface HealthBody {
     readonly assetStore: boolean;
     readonly jobQueue: boolean;
   };
+  readonly jobs: RenderJobQueueSize;
 }
 
-export async function handleHealth(deps: RenderApiDependencies): Promise<HttpResponse> {
+export async function handleHealth(
+  deps: RenderApiDependencies,
+  runtime: RenderApiRuntime,
+): Promise<HttpResponse> {
   const engine = await deps.preloadEngineModules();
   const binaries = await deps.probeMediaBinaries();
 
@@ -40,8 +46,9 @@ export async function handleHealth(deps: RenderApiDependencies): Promise<HttpRes
     capabilities: {
       renderPipeline: true,
       assetStore: true,
-      jobQueue: false,
+      jobQueue: true,
     },
+    jobs: runtime.jobs.size(),
   };
 
   return {

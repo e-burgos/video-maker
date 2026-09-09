@@ -1,0 +1,11 @@
+{
+  "frames": 538,
+  "expectedFrames": 538,
+  "rFrameRate": "30/1",
+  "fps": 30,
+  "seconds": 17.933333333333334,
+  "expectedSeconds": 17.933333333333334,
+  "frameDelta": 0,
+  "secondsDelta": 0,
+  "withinTolerance": true
+}

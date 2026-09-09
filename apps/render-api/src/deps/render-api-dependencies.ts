@@ -5,10 +5,13 @@ import type { EngineModuleStatus } from '../engine/engine-modules';
 import type { BinaryStatus } from '../engine/media-binaries';
 import type { ObjectStorage } from './object-storage';
 
+export type RenderProgressListener = (renderedFrames: number, totalFrames: number) => void;
+
 export interface RenderMutedVideoInput {
   readonly timeline: Timeline;
   readonly outPath: string;
   readonly publicDir: string;
+  readonly onProgress?: RenderProgressListener;
 }
 
 export interface RenderMutedVideoOutput {
@@ -24,6 +27,7 @@ export type RenderMutedVideoPort = (input: RenderMutedVideoInput) => Promise<Ren
 export interface MixTimelineAudioInput {
   readonly timeline: Timeline;
   readonly outPath: string;
+  readonly projectRoot: string;
 }
 
 export interface MixTimelineAudioOutput {
@@ -65,6 +69,8 @@ export interface ProbeAssetInput {
 
 export type ProbeAssetPort = (input: ProbeAssetInput) => Promise<MediaAsset>;
 
+export type RandomIdPort = () => string;
+
 export interface Clock {
   nowIso(): string;
 }
@@ -89,6 +95,7 @@ export interface RenderApiDependencies {
   readonly preloadEngineModules: PreloadEngineModulesPort;
   readonly storage: ObjectStorage;
   readonly probeAsset: ProbeAssetPort;
+  readonly randomId: RandomIdPort;
   readonly clock: Clock;
   readonly logger: Logger;
 }

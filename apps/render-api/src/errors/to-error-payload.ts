@@ -37,6 +37,8 @@ const MESSAGE_BY_CODE: Readonly<Record<RenderApiErrorCode, string>> = {
   CATALOG_UNREADABLE: 'The project catalog exists but could not be read.',
   REQUEST_BODY_INVALID_JSON: 'The request body is not a valid JSON object.',
   REQUEST_BODY_TOO_LARGE: 'The request body exceeds the configured size limit.',
+  RENDER_JOB_NOT_FOUND: 'The requested render job does not exist.',
+  RENDER_JOB_NOT_CANCELABLE: 'The render job has already finished and cannot be canceled.',
 };
 
 export function toErrorPayload(value: unknown): RenderApiErrorPayload {

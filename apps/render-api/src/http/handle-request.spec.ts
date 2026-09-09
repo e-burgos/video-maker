@@ -7,6 +7,7 @@ import type { StoreConfig } from '../config/store-config';
 import { PipelineStageError } from '../errors/pipeline-stage-error';
 import { handleRequest } from './handle-request';
 import { JSON_CONTENT_TYPE } from './http-message';
+import { createRenderApiRuntime } from './render-api-runtime';
 import { ROUTES } from './routes';
 
 const STORE: StoreConfig = { mediaRoot: '/media', maxUploadBytes: 2_147_483_648, objectStore: 'fs' };
@@ -34,8 +35,9 @@ describe('handleRequest', () => {
   it('answers 404 with a JSON ROUTE_NOT_FOUND envelope for an unknown path', async () => {
     const callLog = createCallLog();
     const deps = createFakeRenderApiDependencies(callLog);
+    const runtime = createRenderApiRuntime(deps);
 
-    const response = await handleRequest({ method: 'GET', path: '/unknown-path' }, deps, STORE);
+    const response = await handleRequest({ method: 'GET', path: '/unknown-path' }, deps, STORE, runtime);
 
     expect(response.status).toBe(404);
     expect(response.headers['content-type']).toBe(JSON_CONTENT_TYPE);
@@ -52,8 +54,9 @@ describe('handleRequest', () => {
   it('answers 405 with a JSON METHOD_NOT_ALLOWED envelope and an Allow header', async () => {
     const callLog = createCallLog();
     const deps = createFakeRenderApiDependencies(callLog);
+    const runtime = createRenderApiRuntime(deps);
 
-    const response = await handleRequest({ method: 'POST', path: '/health' }, deps, STORE);
+    const response = await handleRequest({ method: 'POST', path: '/health' }, deps, STORE, runtime);
 
     expect(response.status).toBe(405);
     expect(response.headers['content-type']).toBe(JSON_CONTENT_TYPE);
@@ -76,8 +79,9 @@ describe('handleRequest', () => {
         throw new PipelineStageError({ code: 'MEDIA_BINARY_NOT_FOUND', stage: 'mix', resource: 'ffmpeg' });
       },
     });
+    const runtime = createRenderApiRuntime(deps);
 
-    const response = await handleRequest({ method: 'GET', path: '/health' }, deps, STORE);
+    const response = await handleRequest({ method: 'GET', path: '/health' }, deps, STORE, runtime);
 
     expect(response.status).toBe(503);
     expect(response.headers['content-type']).toBe(JSON_CONTENT_TYPE);
@@ -98,8 +102,9 @@ describe('handleRequest', () => {
         throw new Error('unexpected crash');
       },
     });
+    const runtime = createRenderApiRuntime(deps);
 
-    const response = await handleRequest({ method: 'GET', path: '/health' }, deps, STORE);
+    const response = await handleRequest({ method: 'GET', path: '/health' }, deps, STORE, runtime);
 
     expect(response.status).toBe(500);
     expect(response.headers['content-type']).toBe(JSON_CONTENT_TYPE);
@@ -116,10 +121,11 @@ describe('handleRequest', () => {
     for (const route of ROUTES) {
       const callLog = createCallLog();
       const deps = createFakeRenderApiDependencies(callLog);
+      const runtime = createRenderApiRuntime(deps);
       const path = canonicalPathFor(route.pattern);
       const request = requestLine({ method: route.method, path, body: emptyJsonBody() });
 
-      const response = await handleRequest(request, deps, STORE);
+      const response = await handleRequest(request, deps, STORE, runtime);
       const body = response.body as { error?: { code?: string } };
 
       expect(body.error?.code).not.toBe('ROUTE_NOT_FOUND');

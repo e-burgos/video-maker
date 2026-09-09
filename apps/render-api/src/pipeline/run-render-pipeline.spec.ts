@@ -3,6 +3,10 @@ import { describe, expect, it } from 'vitest';
 import { createCallLog } from '../__fixtures__/call-log';
 import { createFakeRenderApiDependencies } from '../__fixtures__/fake-render-api-dependencies';
 import { buildMinimalTimeline } from '../__fixtures__/minimal-timeline';
+import type { MixTimelineAudioInput, RenderMutedVideoInput } from '../deps/render-api-dependencies';
+import type { RenderPipelineStage } from '../errors/render-api-error';
+import { isRenderPipelineCanceled, RenderPipelineCanceledError } from './render-pipeline-observer';
+import type { RenderPipelineObserver } from './render-pipeline-observer';
 import { runRenderPipeline } from './run-render-pipeline';
 
 const PROJECT_ROOT = '/var/data/media/acme-launch';
@@ -75,6 +79,24 @@ describe('runRenderPipeline', () => {
       audioPath: MASTER_AUDIO_PATH,
       outPath: DELIVERABLE_PATH,
     });
+  });
+
+  it('passes mixTimelineAudio the same project root that renderMutedVideo receives as publicDir', async () => {
+    const callLog = createCallLog();
+    const deps = createFakeRenderApiDependencies(callLog);
+
+    await runRenderPipeline({ renderId: RENDER_ID, projectRoot: PROJECT_ROOT, timeline: buildMinimalTimeline() }, deps);
+
+    const renderCall = callLog.entries().find((entry) => entry.port === 'renderMutedVideo');
+    const mixCall = callLog.entries().find((entry) => entry.port === 'mixTimelineAudio');
+    if (renderCall === undefined || mixCall === undefined) {
+      throw new Error('expected both a renderMutedVideo and a mixTimelineAudio call');
+    }
+
+    const renderInput = renderCall.input as RenderMutedVideoInput;
+    const mixInput = mixCall.input as MixTimelineAudioInput;
+
+    expect(mixInput.projectRoot).toBe(renderInput.publicDir);
   });
 
   it('creates the work directory and the out directory before the first stage', async () => {
@@ -172,4 +194,100 @@ describe('runRenderPipeline', () => {
 
     expect(callLog.ports().filter((port) => port === 'renderMutedVideo')).toHaveLength(1);
   });
+
+  it('reports the five stages in order through the observer', async () => {
+    const callLog = createCallLog();
+    const deps = createFakeRenderApiDependencies(callLog);
+    const stagesStarted: RenderPipelineStage[] = [];
+    const observer: RenderPipelineObserver = {
+      stageStarted: (stage) => {
+        stagesStarted.push(stage);
+      },
+      renderProgressed: () => undefined,
+      cancellationRequested: () => false,
+    };
+
+    await runRenderPipeline(
+      { renderId: RENDER_ID, projectRoot: PROJECT_ROOT, timeline: buildMinimalTimeline() },
+      deps,
+      observer,
+    );
+
+    expect(stagesStarted).toEqual(['prepare', 'render', 'mix', 'mux', 'verify']);
+  });
+
+  it('passes the observer progress listener to renderMutedVideo and omits the key when there is no observer', async () => {
+    const callLog = createCallLog();
+    const deps = createFakeRenderApiDependencies(callLog);
+    const observer: RenderPipelineObserver = {
+      stageStarted: () => undefined,
+      renderProgressed: () => undefined,
+      cancellationRequested: () => false,
+    };
+
+    await runRenderPipeline(
+      { renderId: RENDER_ID, projectRoot: PROJECT_ROOT, timeline: buildMinimalTimeline() },
+      deps,
+      observer,
+    );
+
+    const withObserver = callLog.entries().find((entry) => entry.port === 'renderMutedVideo');
+    if (withObserver === undefined) {
+      throw new Error('expected a renderMutedVideo call');
+    }
+    expect((withObserver.input as RenderMutedVideoInput).onProgress).toBe(observer.renderProgressed);
+
+    const callLogWithoutObserver = createCallLog();
+    const depsWithoutObserver = createFakeRenderApiDependencies(callLogWithoutObserver);
+
+    await runRenderPipeline(
+      { renderId: RENDER_ID, projectRoot: PROJECT_ROOT, timeline: buildMinimalTimeline() },
+      depsWithoutObserver,
+    );
+
+    const withoutObserver = callLogWithoutObserver.entries().find((entry) => entry.port === 'renderMutedVideo');
+    if (withoutObserver === undefined) {
+      throw new Error('expected a renderMutedVideo call');
+    }
+    expect('onProgress' in (withoutObserver.input as object)).toBe(false);
+  });
+
+  const CHECKPOINT_CASES: ReadonlyArray<{
+    readonly stage: RenderPipelineStage;
+    readonly triggerStage: RenderPipelineStage;
+    readonly port: string;
+  }> = [
+    { stage: 'render', triggerStage: 'prepare', port: 'renderMutedVideo' },
+    { stage: 'mix', triggerStage: 'render', port: 'mixTimelineAudio' },
+    { stage: 'mux', triggerStage: 'mix', port: 'muxAudioIntoVideo' },
+    { stage: 'verify', triggerStage: 'mux', port: 'verifyMixLoudness' },
+  ];
+
+  it.each(CHECKPOINT_CASES)(
+    'throws RenderPipelineCanceledError before $stage and never invokes its port',
+    async ({ stage, triggerStage, port }) => {
+      const callLog = createCallLog();
+      const deps = createFakeRenderApiDependencies(callLog);
+      let canceled = false;
+      const observer: RenderPipelineObserver = {
+        stageStarted: (started) => {
+          if (started === triggerStage) {
+            canceled = true;
+          }
+        },
+        renderProgressed: () => undefined,
+        cancellationRequested: () => canceled,
+      };
+
+      const failure: unknown = await runRenderPipeline(
+        { renderId: RENDER_ID, projectRoot: PROJECT_ROOT, timeline: buildMinimalTimeline() },
+        deps,
+        observer,
+      ).catch((error: unknown) => error);
+
+      expect(isRenderPipelineCanceled(failure)).toBe(true);
+      expect((failure as RenderPipelineCanceledError).stage).toBe(stage);
+      expect(callLog.ports()).not.toContain(port);
+    },
+  );
 });

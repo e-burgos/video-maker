@@ -92,6 +92,39 @@ describe('routeRequest', () => {
     });
   });
 
+  it('routes the four job patterns with their params', () => {
+    expect(routeRequest('POST', '/projects/acme-launch/jobs')).toEqual({
+      kind: 'matched',
+      id: 'projects.jobs.create',
+      params: { slug: 'acme-launch' },
+    });
+
+    expect(routeRequest('GET', '/projects/acme-launch/jobs')).toEqual({
+      kind: 'matched',
+      id: 'projects.jobs.list',
+      params: { slug: 'acme-launch' },
+    });
+
+    expect(routeRequest('GET', '/jobs/render-0001')).toEqual({
+      kind: 'matched',
+      id: 'jobs.detail',
+      params: { jobId: 'render-0001' },
+    });
+
+    expect(routeRequest('DELETE', '/jobs/render-0001')).toEqual({
+      kind: 'matched',
+      id: 'jobs.cancel',
+      params: { jobId: 'render-0001' },
+    });
+  });
+
+  it('answers method-not-allowed with GET and DELETE for a job path', () => {
+    expect(routeRequest('PATCH', '/jobs/render-0001')).toEqual({
+      kind: 'method-not-allowed',
+      allow: ['GET', 'DELETE'],
+    });
+  });
+
   it('no two ROUTES patterns match the same concrete path', () => {
     for (const route of ROUTES) {
       const path = canonicalPathFor(route.pattern);

@@ -38,6 +38,8 @@ export const RENDER_API_ERROR_CODES = [
   'CATALOG_UNREADABLE',
   'REQUEST_BODY_INVALID_JSON',
   'REQUEST_BODY_TOO_LARGE',
+  'RENDER_JOB_NOT_FOUND',
+  'RENDER_JOB_NOT_CANCELABLE',
 ] as const;
 
 export type RenderApiErrorCode = (typeof RENDER_API_ERROR_CODES)[number];

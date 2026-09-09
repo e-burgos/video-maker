@@ -91,6 +91,35 @@ describe('createNodeRenderApiDependencies', () => {
     });
   });
 
+  it('forwards onProgress to renderTimeline without altering renderedFrames or totalFrames', async () => {
+    mocks.renderTimelineMock.mockImplementation(async (timeline, options) => {
+      options.onProgress?.(120, 538);
+      return {
+        outPath: '/work/renders/r1/video-muted.mp4',
+        width: 1080,
+        height: 1920,
+        fps: 30,
+        durationInFrames: 538,
+        compositionId: 'timeline-composition',
+      };
+    });
+
+    const deps = createNodeRenderApiDependencies(ENV, STORE);
+    const timeline = buildMinimalTimeline();
+    const received: Array<readonly [number, number]> = [];
+
+    await deps.renderMutedVideo({
+      timeline,
+      outPath: '/work/renders/r1/video-muted.mp4',
+      publicDir: CWD,
+      onProgress: (renderedFrames, totalFrames) => {
+        received.push([renderedFrames, totalFrames]);
+      },
+    });
+
+    expect(received).toEqual([[120, 538]]);
+  });
+
   it('feeds mixTimelineAudio with the timeline, the out path and the resolved ffmpeg binary', async () => {
     mocks.mixTimelineAudioMock.mockResolvedValue({
       outputPath: '/work/renders/r1/master.wav',
@@ -100,13 +129,17 @@ describe('createNodeRenderApiDependencies', () => {
     const deps = createNodeRenderApiDependencies(ENV, STORE);
     const timeline = buildMinimalTimeline();
 
-    const result = await deps.mixTimelineAudio({ timeline, outPath: '/work/renders/r1/master.wav' });
+    const result = await deps.mixTimelineAudio({
+      timeline,
+      outPath: '/work/renders/r1/master.wav',
+      projectRoot: CWD,
+    });
 
     expect(mocks.mixTimelineAudioMock).toHaveBeenCalledWith(
       timeline,
       '/work/renders/r1/master.wav',
       expect.any(mocks.ExecaCommandRunner),
-      { ffmpegPath: '/opt/homebrew/bin/ffmpeg' },
+      { ffmpegPath: '/opt/homebrew/bin/ffmpeg', runOptions: { cwd: CWD } },
     );
     expect(result).toEqual({ outputPath: '/work/renders/r1/master.wav', filterComplex: '[0:a]anull[out]' });
   });
@@ -164,7 +197,7 @@ describe('createNodeRenderApiDependencies', () => {
     const deps = createNodeRenderApiDependencies(ENV, STORE);
     const timeline = buildMinimalTimeline();
 
-    await deps.mixTimelineAudio({ timeline, outPath: '/work/renders/r1/master.wav' });
+    await deps.mixTimelineAudio({ timeline, outPath: '/work/renders/r1/master.wav', projectRoot: CWD });
     await deps.muxAudioIntoVideo({
       videoPath: '/work/renders/r1/video-muted.mp4',
       audioPath: '/work/renders/r1/master.wav',

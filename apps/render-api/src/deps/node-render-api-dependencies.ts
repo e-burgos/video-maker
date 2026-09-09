@@ -175,9 +175,14 @@ export function createNodeRenderApiDependencies(
   };
 
   return {
-    renderMutedVideo: async ({ timeline, outPath, publicDir }) => {
+    renderMutedVideo: async ({ timeline, outPath, publicDir, onProgress }) => {
       const { renderTimeline } = await loadRender();
-      const result = await renderTimeline(timeline, { outPath, publicDir, audio: 'muted' });
+      const result = await renderTimeline(timeline, {
+        outPath,
+        publicDir,
+        audio: 'muted',
+        ...(onProgress === undefined ? {} : { onProgress }),
+      });
       return {
         outPath: result.outPath,
         width: result.width,
@@ -187,10 +192,13 @@ export function createNodeRenderApiDependencies(
       };
     },
 
-    mixTimelineAudio: async ({ timeline, outPath }) => {
+    mixTimelineAudio: async ({ timeline, outPath, projectRoot }) => {
       const { ExecaCommandRunner, mixTimelineAudio } = await loadMediaLocal();
       const { ffmpeg } = await loadBinaries();
-      const result = await mixTimelineAudio(timeline, outPath, new ExecaCommandRunner(), { ffmpegPath: ffmpeg });
+      const result = await mixTimelineAudio(timeline, outPath, new ExecaCommandRunner(), {
+        ffmpegPath: ffmpeg,
+        runOptions: { cwd: projectRoot },
+      });
       return { outputPath: result.outputPath, filterComplex: result.filterComplex };
     },
 
@@ -253,6 +261,8 @@ export function createNodeRenderApiDependencies(
       const { ffprobe } = await loadBinaries();
       return probeMedia(path, new ExecaCommandRunner(), { ffprobePath: ffprobe });
     },
+
+    randomId: () => randomUUID(),
 
     clock: { nowIso: () => new Date().toISOString() },
 

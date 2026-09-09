@@ -1,20 +1,17 @@
 import {
   editDecisionListPath,
-  resolveMediaProject,
   timelinePath,
   toAbsolutePath,
   writeEditDecisionList,
   writeTimeline,
 } from '@video-maker/auto-montage';
-import type { MediaProject } from '@video-maker/auto-montage';
 import { EditDecisionListSchema, TimelineSchema } from '@video-maker/timeline-core';
-import { join } from 'node:path/posix';
 
 import type { StoreConfig } from '../../config/store-config';
 import type { RenderApiDependencies } from '../../deps/render-api-dependencies';
 import { PipelineStageError } from '../../errors/pipeline-stage-error';
 import type { RenderApiErrorCode } from '../../errors/render-api-error';
-import { isValidProjectSlug } from '../../store/project-slug';
+import { assertValidProjectSlug, readStoredTimeline, resolveExistingProject } from '../../store/project-scope';
 import { JSON_CONTENT_TYPE } from '../http-message';
 import type { HttpRequestLine, HttpResponse } from '../http-message';
 import { MAX_JSON_BODY_BYTES, readJsonBody } from '../read-json-body';
@@ -22,30 +19,6 @@ import type { RouteParams } from '../router';
 
 function jsonResponse(status: number, body: unknown): HttpResponse {
   return { status, headers: { 'content-type': JSON_CONTENT_TYPE }, body };
-}
-
-function assertValidProjectSlug(slug: string): void {
-  if (!isValidProjectSlug(slug)) {
-    throw new PipelineStageError({
-      code: 'PROJECT_SLUG_INVALID',
-      stage: null,
-      resource: slug,
-      expected: 'a single kebab-case path segment',
-    });
-  }
-}
-
-async function resolveExistingProject(
-  deps: RenderApiDependencies,
-  store: StoreConfig,
-  slug: string,
-): Promise<MediaProject> {
-  const project = resolveMediaProject(join(store.mediaRoot, slug));
-  const projectStat = await deps.storage.stat(project.root);
-  if (projectStat === null || projectStat.kind !== 'directory') {
-    throw new PipelineStageError({ code: 'PROJECT_NOT_FOUND', stage: null, resource: slug });
-  }
-  return project;
 }
 
 function parseJsonOrThrow(raw: string, invalidCode: RenderApiErrorCode, resource: string, expected: string): unknown {
@@ -64,32 +37,9 @@ export async function handleGetTimeline(
   const slug = params.slug ?? '';
   assertValidProjectSlug(slug);
   const project = await resolveExistingProject(deps, store, slug);
+  const timeline = await readStoredTimeline(deps, project);
 
-  const relativePath = timelinePath();
-  const absolutePath = toAbsolutePath(project, relativePath);
-  const fileStat = await deps.storage.stat(absolutePath);
-  if (fileStat === null) {
-    throw new PipelineStageError({ code: 'TIMELINE_NOT_FOUND', stage: null, resource: relativePath });
-  }
-
-  const raw = await deps.storage.readTextFile(absolutePath);
-  const parsedJson = parseJsonOrThrow(
-    raw,
-    'TIMELINE_INVALID',
-    relativePath,
-    'a document accepted by TimelineSchema',
-  );
-  const result = TimelineSchema.safeParse(parsedJson);
-  if (!result.success) {
-    throw new PipelineStageError({
-      code: 'TIMELINE_INVALID',
-      stage: null,
-      resource: relativePath,
-      expected: 'a document accepted by TimelineSchema',
-    });
-  }
-
-  return jsonResponse(200, result.data);
+  return jsonResponse(200, timeline);
 }
 
 export async function handleGetEditDecisionList(

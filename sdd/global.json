@@ -48,19 +48,19 @@
       "cycles_completed": 2,
       "description": "Normalización de locución a -14 LUFS, ducking automático de música a -24 dB, filtergraphs FFmpeg y mux final multi-pista",
       "completed_at": "2026-09-08"
-    }
-  ],
-  "in_progress_modules": [
+    },
     {
       "module": "render-service",
       "spec": "spec-e-burgos-005-render-service",
       "apps": [
         "apps/render-api"
       ],
-      "cycles_completed": 2,
-      "description": "API local Node para gestionar assets crudos en MinIO, cola de jobs de render headless (Remotion + FFmpeg) y reporte de progreso"
+      "cycles_completed": 3,
+      "description": "API local Node para gestionar los proyectos de medios sobre el filesystem (`media/<slug>/`, MinIO descopado con fundamento por D-11), cola de jobs de render headless (Remotion + FFmpeg) con concurrencia 1, reporte de progreso por etapa y por frame, y cancelación cooperativa",
+      "completed_at": "2026-09-08"
     }
   ],
+  "in_progress_modules": [],
   "pending_modules": [
     {
       "module": "web-studio",
@@ -77,7 +77,7 @@
     "package_manager": "pnpm",
     "apps": {
       "web": "apps/web — react",
-      "render-api": "apps/render-api — servicio HTTP local del motor: GET /health y orquestación render mudo → mezcla → mux → verificación de loudness sobre puertos inyectables (TypeScript + node:http, cero dependencias npm propias)"
+      "render-api": "apps/render-api — servicio HTTP local del motor: 15 endpoints sobre `media/` (proyectos, assets, Timeline/EDL, descarga con Range) más la cola de jobs de render que orquesta render mudo → mezcla → mux → verificación de loudness, con progreso por frame y cancelación cooperativa, sobre puertos inyectables (TypeScript + node:http, cero dependencias npm propias)"
     },
     "libs": {
       "shared-utils": "libs/shared-utils — shared-utils",
