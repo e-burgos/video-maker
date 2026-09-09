@@ -1,11 +1,11 @@
 import { isTerminalRenderJobState } from './parse-render-job';
 import type { RenderApiError } from './render-api-error';
-import type { RenderJob } from './render-api-types';
+import type { Job } from './render-api-types';
 
 export const RENDER_JOB_POLL_INTERVAL_MS = 1000;
 export const RENDER_JOB_POLL_TRANSPORT_RETRY_LIMIT = 3;
 
-export type PollOutcome = { kind: 'job'; job: RenderJob } | { kind: 'error'; error: RenderApiError };
+export type PollOutcome = { kind: 'job'; job: Job } | { kind: 'error'; error: RenderApiError };
 
 export type PollStopReason = 'terminal' | 'not-found' | 'unreachable';
 

@@ -12,6 +12,7 @@ import type { RenderJob, RenderJobState } from '../api/render-api-types';
 function job(overrides: Partial<RenderJob> = {}): RenderJob {
   return {
     id: 'job-0001',
+    kind: 'render',
     slug: 'smoke-ingest',
     state: 'running',
     createdAt: '2026-09-09T10:00:00.000Z',

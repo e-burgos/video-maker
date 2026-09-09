@@ -1,6 +1,6 @@
 import type { Timeline } from '@video-maker/timeline-core';
 import { RENDER_API_BASE_PATH } from './artifact-url';
-import { parseRenderJob, parseRenderJobListing } from './parse-render-job';
+import { parseJob, parseMontageJob, parseRenderJob, parseRenderJobListing } from './parse-render-job';
 import {
   RenderApiError,
   fromErrorResponse,
@@ -11,6 +11,9 @@ import type {
   AssetListEntry,
   AssetListing,
   AssetRole,
+  Job,
+  MontageJob,
+  MontagePresetName,
   ProjectDetail,
   ProjectSummary,
   RenderJob,
@@ -21,7 +24,13 @@ import type {
 
 export type FetchLike = (input: string, init?: RequestInit) => Promise<Response>;
 
-export type RenderJobCancelOutcome = { status: 200 | 202; job: RenderJob };
+export type RenderJobCancelOutcome = { status: 200 | 202; job: Job };
+
+export type CreateMontageJobInput = {
+  preset: MontagePresetName;
+  seed: number;
+  overwrite: boolean;
+};
 
 export type RenderApiClient = {
   getHealth: () => Promise<ServiceHealth>;
@@ -33,8 +42,9 @@ export type RenderApiClient = {
   uploadAsset: (input: UploadAssetInput) => Promise<AssetListEntry>;
   putTimeline: (slug: string, timeline: Timeline) => Promise<TimelineWriteResult>;
   createRenderJob: (slug: string) => Promise<RenderJob>;
+  createMontageJob: (slug: string, input: CreateMontageJobInput) => Promise<MontageJob>;
   listRenderJobs: (slug: string) => Promise<RenderJobListing>;
-  getRenderJob: (jobId: string) => Promise<RenderJob>;
+  getRenderJob: (jobId: string) => Promise<Job>;
   cancelRenderJob: (jobId: string) => Promise<RenderJobCancelOutcome>;
 };
 
@@ -208,6 +218,25 @@ export function createRenderApiClient(fetchImpl: FetchLike): RenderApiClient {
       return parseRenderJob(body);
     },
 
+    async createMontageJob(slug: string, input: CreateMontageJobInput): Promise<MontageJob> {
+      const body = await requestJson(
+        `/projects/${encodeURIComponent(slug)}/jobs`,
+        {
+          method: 'POST',
+          headers: { 'content-type': 'application/json' },
+          body: JSON.stringify({
+            kind: 'montage',
+            preset: input.preset,
+            seed: input.seed,
+            overwrite: input.overwrite,
+          }),
+        },
+        'a montage job document',
+        (value) => isRecord(value),
+      );
+      return parseMontageJob(body);
+    },
+
     async listRenderJobs(slug: string): Promise<RenderJobListing> {
       const body = await requestJson(
         `/projects/${encodeURIComponent(slug)}/jobs`,
@@ -218,24 +247,24 @@ export function createRenderApiClient(fetchImpl: FetchLike): RenderApiClient {
       return parseRenderJobListing(body);
     },
 
-    async getRenderJob(jobId: string): Promise<RenderJob> {
+    async getRenderJob(jobId: string): Promise<Job> {
       const body = await requestJson(
         `/jobs/${encodeURIComponent(jobId)}`,
         undefined,
-        'a render job document',
+        'a job document',
         (value) => isRecord(value),
       );
-      return parseRenderJob(body);
+      return parseJob(body);
     },
 
     async cancelRenderJob(jobId: string): Promise<RenderJobCancelOutcome> {
       const { status, body } = await requestJsonWithStatus(
         `/jobs/${encodeURIComponent(jobId)}`,
         { method: 'DELETE' },
-        'a render job document',
+        'a job document',
         (value) => isRecord(value),
       );
-      return { status: status as 200 | 202, job: parseRenderJob(body) };
+      return { status: status as 200 | 202, job: parseJob(body) };
     },
   };
 }

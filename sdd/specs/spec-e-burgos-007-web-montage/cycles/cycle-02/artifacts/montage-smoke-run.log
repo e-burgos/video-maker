@@ -1,0 +1,95 @@
+[0] memory gate
+[assert] ok — no ffmpeg/whisper-cli/chrome-headless process alive (found: none)
+[0] System-wide memory free percentage: 48%
+[env] filled from the root .env (names only, never values): FFMPEG_PATH, FFPROBE_PATH, WHISPER_CPP_PATH
+[assert] ok — the four media env vars are present in the environment (missing: none)
+[1] copying ONLY raw/ from media/smoke-ingest into a temporary media root
+[1] temp media root: /var/folders/lw/gy7lfk_52gq0fv1yvph2fb100000gn/T/montage-smoke-ppARP2 (no work/, no out/ — the studio has to produce them)
+[1] CLI baselines — catalog 0a7dcf531163… timeline f50ba97cc2c4… edl f96256aaddba…
+[2] starting apps/render-api against the temporary media root
+[render-api] {"event":"listening","host":"127.0.0.1","port":4398}
+[2] render-api health: status=ok capabilities={"renderPipeline":true,"assetStore":true,"jobQueue":true,"montageQueue":true}
+[assert] ok — the service exposes capabilities.montageQueue
+[assert] ok — the four media binaries resolve (ffmpeg:true ffprobe:true whisperCli:true whisperModel:true)
+[3] starting apps/web with its proxy pointed at render-api
+[web] [32m✔[0m [33mConsole Ninja[0m extension is connected to [33mVite[0m, see [36mhttps://tinyurl.com/2vt8jxzw[0m
+[web] (!) Your Vite config uses features that are unsupported by `configLoader: 'native'`, which is planned to become the default in a future major version of Vite:
+  - ESM syntax in a file loaded as CommonJS (apps/web/vite.config.ts:1:1). Use a `.mjs` extension or set `"type": "module"` in the closest package.json
+Set `VITE_CONFIG_NATIVE_IGNORE_WARNING=true` to suppress this warning.
+[web] 
+  VITE v8.2.2  ready in 700 ms
+
+[web]   ➜  Local:   http://localhost:4208/
+[3] web is up and the proxy reaches render-api
+[4] opening the projects list and the asset library of a project that has ONLY raw/
+[console-error] Failed to load resource: the server responded with a status of 404 (Not Found)
+[4] asset listing source: raw-scan
+[assert] ok — the library lists the raw material by scanning raw/, with no catalog yet
+[4] asset cards visible: aroll=1 broll=1 image=1 audio=1
+[assert] ok — the a-roll material is visible in the library before any montage exists
+[5] checking the montage trigger is enabled because the service can montage
+[assert] ok — Generate montage is enabled with a healthy service
+[6] clicking Generate montage (EP-012 kind: montage, preset software-demo, seed 0)
+[assert] ok — the montage job was accepted with 202 (got 202)
+[assert] ok — the created job is kind: "montage" (got montage)
+[6] montage job created: dca002c1-ecf4-4162-bc0d-9cd209d3f3a0 (state=running)
+[6] API progress: stage=probe assets=—/— percent=—
+[6] UI progress: stage: probe
+[6] API progress: stage=transcribe assets=—/— percent=—
+[6] UI progress: stage: transcribe
+[6] API progress: stage=plan assets=—/— percent=—
+[assert] ok — the montage job reached a terminal state inside the deadline
+[assert] ok — the montage job succeeded (got succeeded)
+[6] montage finished in 4.7s; API stages observed: probe → transcribe → plan
+[6] UI stages observed: stage: probe | stage: transcribe
+[assert] ok — the UI showed at least one montage stage while the job was running
+[assert] ok — the transcribe stage was reported by the job
+[7] the studio navigates to the preview once the montage succeeds
+[assert] ok — the app navigated to the preview (http://localhost:4208/projects/smoke-ingest/preview)
+[7] web-produced sha256 — catalog 7202b9a23bdc… timeline c892519df012… edl f96256aaddba…
+[assert] ok — work/edl.json produced from the studio is byte-identical to the CLI baseline
+[assert] ok — work/timeline.json matches the CLI baseline once probedAt/modifiedAtMs are stripped (cycle-01 measured those two as the only difference)
+[assert] ok — work/catalog.json matches the CLI baseline once probedAt/modifiedAtMs are stripped
+[assert] ok — the raw sha256 of timeline.json is allowed to differ: it embeds the ingest timestamps
+[8] going back to the library and asking for a second montage: the service must answer 409
+[assert] ok — the second montage was refused with 409 (got 409)
+[console-error] Failed to load resource: the server responded with a status of 409 (Conflict)
+[assert] ok — the refusal carries TIMELINE_ALREADY_EXISTS (got TIMELINE_ALREADY_EXISTS)
+[8] confirmation shown: This project already has a timeline. Regenerating it overwrites the edited timeline and every change saved from the stud…
+[assert] ok — dismissing the confirmation left work/timeline.json untouched on disk
+[9] back to the preview to edit the generated timeline
+[9] aroll-0001.durationFrames 89 -> 30
+[9] aroll-0002.durationFrames 94 -> 25
+[9] aroll-0003.durationFrames 66 -> 20
+[9] aroll-0004.durationFrames 75 -> 20
+[9] aroll-0005.durationFrames 83 -> 20
+[9] aroll-0006.durationFrames 138 -> 25
+[assert] ok — Save is enabled after editing the generated timeline
+[9] save confirmed in the UI: data-timeline-dirty="false"
+[9] edited timeline.durationFrames on disk: 133
+[10] triggering the render of the edited timeline (EP-012 kind: render)
+[assert] ok — Render is enabled after a clean save
+[assert] ok — the created job is kind: "render" (got render)
+[10] render job created: 377fc9f4-c79b-4c61-9ef1-2b9a2f707f91
+[render-api] [32m✔[0m [33mConsole Ninja[0m extension is connected to [33mWebpack[0m, see [36mhttps://tinyurl.com/2vt8jxzw[0m
+[10] API progress: stage=render
+[web] 5:42:22 PM [vite] (client) page reload index.html
+[render-api] [32m✔[0m [33mConsole Ninja[0m extension has disconnected from [33mWebpack[0m
+[10] API progress: stage=mix
+[10] API progress: stage=mux
+[10] API progress: stage=verify
+[assert] ok — the render job reached a terminal state inside the deadline
+[assert] ok — the render job succeeded (got succeeded)
+[assert] ok — per-frame progress was observed while the render stage ran
+[10] render finished in 11.7s; stages: render → mix → mux → verify
+[11] downloading the MP4 (EP-011) and probing its streams
+[assert] ok — GET http://127.0.0.1:4398/projects/smoke-ingest/files/out/377fc9f4-c79b-4c61-9ef1-2b9a2f707f91.mp4 returned ok (status 200)
+[11] downloaded 626568 bytes to /var/folders/lw/gy7lfk_52gq0fv1yvph2fb100000gn/T/montage-smoke-377fc9f4-c79b-4c61-9ef1-2b9a2f707f91.mp4
+[11] video stream: {"codec_name":"h264","width":1080,"height":1920,"pix_fmt":"yuvj420p","r_frame_rate":"30/1","nb_frames":"133","side_data_list":[{}]}
+[11] audio stream: {"codec_name":"aac","sample_rate":"48000","channels":2,"duration":"4.433333"}
+[11] derived from the VIDEO stream (never format.duration): nb_frames=133 r_frame_rate=30/1 duration=4.433s
+[assert] ok — video stream nb_frames (133) matches the edited timeline.durationFrames (133)
+[assert] ok — the deliverable carries an audio stream
+[assert] ok — the audio stream has a positive sample_rate (48000)
+[done] spec-007 cycle-02 E2E complete: raw/ → montage (4.7s) → preview → 409 → edit → save → render (11.7s) → download → ffprobe
+[cleanup] temp media root removed: /var/folders/lw/gy7lfk_52gq0fv1yvph2fb100000gn/T/montage-smoke-ppARP2

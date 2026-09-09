@@ -4,7 +4,7 @@ import { RAW_PREVIEW_TIMELINE, previewTimelineFixture } from './__fixtures__/tim
 import { createRenderApiClient } from './render-api-client';
 import { RenderApiError } from './render-api-error';
 import type { FetchLike } from './render-api-client';
-import type { RenderJob } from './render-api-types';
+import type { MontageJob, RenderJob } from './render-api-types';
 
 type Call = { url: string; init: RequestInit | undefined };
 
@@ -30,12 +30,28 @@ function jsonResponse(body: unknown, status = 200): Response {
 function jobWithState(state: RenderJob['state']): RenderJob {
   return {
     id: 'job-0001',
+    kind: 'render',
     slug: 'smoke-ingest',
     state,
     createdAt: '2026-09-09T10:00:00.000Z',
     startedAt: '2026-09-09T10:00:01.000Z',
     finishedAt: null,
     progress: null,
+    report: null,
+    error: null,
+  };
+}
+
+function montageJob(): MontageJob {
+  return {
+    id: 'job-0002',
+    kind: 'montage',
+    slug: 'smoke-ingest',
+    state: 'running',
+    createdAt: '2026-09-09T10:00:00.000Z',
+    startedAt: '2026-09-09T10:00:01.000Z',
+    finishedAt: null,
+    progress: { stage: 'transcribe', processedAssets: 2, totalAssets: 6, percent: 33.3 },
     report: null,
     error: null,
   };
@@ -48,7 +64,7 @@ const health = {
   time: '2026-09-09T00:00:00.000Z',
   engine: [{ name: 'media-local', loaded: true }],
   binaries: [{ name: 'ffmpeg', envVar: 'FFMPEG_PATH', resolved: true }],
-  capabilities: { renderPipeline: true, assetStore: true, jobQueue: true },
+  capabilities: { renderPipeline: true, assetStore: true, jobQueue: true, montageQueue: true },
   jobs: { running: 0, queued: 0 },
 };
 
@@ -310,12 +326,93 @@ describe('createRenderApiClient', () => {
     expect((error as RenderApiError).code).toBe('TIMELINE_NOT_FOUND');
   });
 
+  it('creates a montage job on EP-012 with the kind discriminant and its three parameters', async () => {
+    const { fetchImpl, calls } = recordingFetch(() => jsonResponse(montageJob(), 202));
+
+    const result = await createRenderApiClient(fetchImpl).createMontageJob('smoke-ingest', {
+      preset: 'software-demo',
+      seed: 7,
+      overwrite: false,
+    });
+
+    expect(calls[0]?.url).toBe('/api/projects/smoke-ingest/jobs');
+    expect(calls[0]?.init?.method).toBe('POST');
+    expect(calls[0]?.init?.headers).toEqual({ 'content-type': 'application/json' });
+    expect(JSON.parse(String(calls[0]?.init?.body))).toEqual({
+      kind: 'montage',
+      preset: 'software-demo',
+      seed: 7,
+      overwrite: false,
+    });
+    expect(result.kind).toBe('montage');
+  });
+
+  it('sends overwrite: true when the caller confirms the regeneration', async () => {
+    const { fetchImpl, calls } = recordingFetch(() => jsonResponse(montageJob(), 202));
+
+    await createRenderApiClient(fetchImpl).createMontageJob('smoke-ingest', {
+      preset: 'educational',
+      seed: 0,
+      overwrite: true,
+    });
+
+    expect(JSON.parse(String(calls[0]?.init?.body))).toMatchObject({ overwrite: true });
+  });
+
+  it('maps TIMELINE_ALREADY_EXISTS from EP-012 with its code and 409 status', async () => {
+    const { fetchImpl } = recordingFetch(() =>
+      jsonResponse(
+        {
+          error: {
+            code: 'TIMELINE_ALREADY_EXISTS',
+            stage: null,
+            message: 'The project already has a timeline.',
+          },
+        },
+        409,
+      ),
+    );
+
+    const error = await createRenderApiClient(fetchImpl)
+      .createMontageJob('smoke-ingest', { preset: 'software-demo', seed: 0, overwrite: false })
+      .catch((caught: unknown) => caught);
+
+    expect((error as RenderApiError).code).toBe('TIMELINE_ALREADY_EXISTS');
+    expect((error as RenderApiError).status).toBe(409);
+  });
+
+  it('refuses a render job document where a montage job was requested', async () => {
+    const { fetchImpl } = recordingFetch(() => jsonResponse(jobWithState('queued'), 202));
+
+    const error = await createRenderApiClient(fetchImpl)
+      .createMontageJob('smoke-ingest', { preset: 'software-demo', seed: 0, overwrite: false })
+      .catch((caught: unknown) => caught);
+
+    expect((error as RenderApiError).code).toBe('RESPONSE_SHAPE_UNEXPECTED');
+  });
+
+  it('reads a montage job from EP-014 through the same job endpoint as a render job', async () => {
+    const { fetchImpl, calls } = recordingFetch(() => jsonResponse(montageJob()));
+
+    const result = await createRenderApiClient(fetchImpl).getRenderJob('job-0002');
+
+    expect(calls[0]?.url).toBe('/api/jobs/job-0002');
+    expect(result.kind).toBe('montage');
+    expect(result.progress).toEqual({
+      stage: 'transcribe',
+      processedAssets: 2,
+      totalAssets: 6,
+      percent: 33.3,
+    });
+  });
+
   it('lists render jobs from EP-013 as summaries only, never the full report or error', async () => {
     const listing = {
       slug: 'smoke-ingest',
       jobs: [
         {
           id: 'job-0001',
+          kind: 'render',
           state: 'succeeded',
           stage: null,
           errorCode: null,
@@ -336,6 +433,7 @@ describe('createRenderApiClient', () => {
       'errorCode',
       'finishedAt',
       'id',
+      'kind',
       'stage',
       'startedAt',
       'state',

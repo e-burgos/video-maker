@@ -24,9 +24,29 @@ const listing: AssetListing = {
   probeFailures: [],
 };
 
+const HEALTHY_SERVICE = {
+  status: 'ok' as const,
+  service: 'render-api',
+  cycle: 3,
+  time: '2026-09-09T10:00:00.000Z',
+  engine: [{ name: 'media-local', loaded: true }],
+  binaries: [
+    { name: 'ffmpeg', envVar: 'FFMPEG_PATH', resolved: true },
+    { name: 'ffprobe', envVar: 'FFPROBE_PATH', resolved: true },
+    { name: 'whisperCli', envVar: 'WHISPER_CPP_PATH', resolved: true },
+    { name: 'whisperModel', envVar: 'WHISPER_MODEL_PATH', resolved: true },
+  ],
+  capabilities: { renderPipeline: true, assetStore: true, jobQueue: true, montageQueue: true },
+  jobs: { running: 0, queued: 0 },
+};
+
 function renderPage(client: Partial<RenderApiClient>) {
+  const withHealth: Partial<RenderApiClient> = {
+    getHealth: vi.fn().mockResolvedValue(HEALTHY_SERVICE),
+    ...client,
+  };
   render(
-    <RenderApiProvider client={client as RenderApiClient}>
+    <RenderApiProvider client={withHealth as RenderApiClient}>
       <MemoryRouter initialEntries={['/projects/smoke-ingest']}>
         <Routes>
           <Route path="/projects/:slug" element={<AssetLibraryPage />} />
@@ -106,5 +126,80 @@ describe('AssetLibraryPage', () => {
     });
 
     await waitFor(() => expect(listAssets).toHaveBeenCalledTimes(2));
+  });
+});
+
+describe('AssetLibraryPage montage', () => {
+  function renderWithPreviewRoute(client: Partial<RenderApiClient>) {
+    render(
+      <RenderApiProvider
+        client={
+          {
+            getHealth: vi.fn().mockResolvedValue(HEALTHY_SERVICE),
+            listAssets: vi.fn().mockResolvedValue(listing),
+            ...client,
+          } as RenderApiClient
+        }
+      >
+        <MemoryRouter initialEntries={['/projects/smoke-ingest']}>
+          <Routes>
+            <Route path="/projects/:slug" element={<AssetLibraryPage />} />
+            <Route path="/projects/:slug/preview" element={<p>preview route</p>} />
+          </Routes>
+        </MemoryRouter>
+      </RenderApiProvider>,
+    );
+  }
+
+  it('offers the montage trigger next to the asset library', async () => {
+    renderWithPreviewRoute({});
+
+    await waitFor(() => expect(screen.getByTestId('montage-trigger')).toBeTruthy());
+    expect(screen.getByRole('button', { name: 'Generate montage' })).toBeTruthy();
+  });
+
+  it('follows the created job and jumps to the preview once the montage succeeds', async () => {
+    const createMontageJob = vi.fn().mockResolvedValue({
+      id: 'job-0002',
+      kind: 'montage',
+      slug: 'smoke-ingest',
+      state: 'queued',
+      createdAt: '2026-09-09T10:00:00.000Z',
+      startedAt: null,
+      finishedAt: null,
+      progress: null,
+      report: null,
+      error: null,
+    });
+    const getRenderJob = vi.fn().mockResolvedValue({
+      id: 'job-0002',
+      kind: 'montage',
+      slug: 'smoke-ingest',
+      state: 'succeeded',
+      createdAt: '2026-09-09T10:00:00.000Z',
+      startedAt: '2026-09-09T10:00:01.000Z',
+      finishedAt: '2026-09-09T10:00:06.000Z',
+      progress: null,
+      report: {
+        catalogPath: 'work/catalog.json',
+        timelinePath: 'work/timeline.json',
+        editDecisionListPath: 'work/edl.json',
+        preset: 'software-demo',
+        seed: 0,
+      },
+      error: null,
+    });
+
+    renderWithPreviewRoute({ createMontageJob, getRenderJob });
+
+    await waitFor(() =>
+      expect((screen.getByRole('button', { name: 'Generate montage' }) as HTMLButtonElement).disabled).toBe(
+        false,
+      ),
+    );
+    fireEvent.click(screen.getByRole('button', { name: 'Generate montage' }));
+
+    await waitFor(() => expect(screen.getByText('preview route')).toBeTruthy());
+    expect(getRenderJob).toHaveBeenCalledWith('job-0002');
   });
 });

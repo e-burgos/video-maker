@@ -21,6 +21,7 @@ export type ServiceCapabilities = {
   renderPipeline: boolean;
   assetStore: boolean;
   jobQueue: boolean;
+  montageQueue: boolean;
 };
 
 export type ServiceJobCounters = {
@@ -134,6 +135,18 @@ export const RENDER_PIPELINE_STAGES = ['prepare', 'render', 'mix', 'mux', 'verif
 
 export type RenderPipelineStage = (typeof RENDER_PIPELINE_STAGES)[number];
 
+export const JOB_KINDS = ['render', 'montage'] as const;
+
+export type JobKind = (typeof JOB_KINDS)[number];
+
+export const MONTAGE_PRESETS = ['software-demo', 'hardware', 'recipe', 'educational'] as const;
+
+export type MontagePresetName = (typeof MONTAGE_PRESETS)[number];
+
+export const MONTAGE_STAGES = ['discover', 'probe', 'transcribe', 'plan'] as const;
+
+export type MontageStage = (typeof MONTAGE_STAGES)[number];
+
 export type RenderJobProgress = {
   stage: RenderPipelineStage;
   renderedFrames: number | null;
@@ -171,8 +184,24 @@ export type RenderPipelineReport = {
   loudness: RenderLoudnessReport;
 };
 
+export type MontageJobProgress = {
+  stage: MontageStage;
+  processedAssets: number | null;
+  totalAssets: number | null;
+  percent: number | null;
+};
+
+export type MontageJobReport = {
+  catalogPath: string;
+  timelinePath: string;
+  editDecisionListPath: string;
+  preset: MontagePresetName;
+  seed: number;
+};
+
 export type RenderJob = {
   id: string;
+  kind: 'render';
   slug: string;
   state: RenderJobState;
   createdAt: string;
@@ -183,10 +212,26 @@ export type RenderJob = {
   error: RenderApiErrorPayload | null;
 };
 
+export type MontageJob = {
+  id: string;
+  kind: 'montage';
+  slug: string;
+  state: RenderJobState;
+  createdAt: string;
+  startedAt: string | null;
+  finishedAt: string | null;
+  progress: MontageJobProgress | null;
+  report: MontageJobReport | null;
+  error: RenderApiErrorPayload | null;
+};
+
+export type Job = RenderJob | MontageJob;
+
 export type RenderJobSummary = {
   id: string;
+  kind: JobKind;
   state: RenderJobState;
-  stage: RenderPipelineStage | null;
+  stage: RenderPipelineStage | MontageStage | null;
   errorCode: string | null;
   createdAt: string;
   startedAt: string | null;

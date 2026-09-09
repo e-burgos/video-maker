@@ -3,10 +3,10 @@ import { useEffect, useRef, useState } from 'react';
 import { RenderApiError, serviceUnreachable } from '../api/render-api-error';
 import { RENDER_JOB_POLL_INTERVAL_MS, nextPollPlan } from '../api/render-job-poll-plan';
 import type { PollStopReason } from '../api/render-job-poll-plan';
-import type { RenderJob } from '../api/render-api-types';
+import type { Job } from '../api/render-api-types';
 
 export type RenderJobPoll = {
-  job: RenderJob | null;
+  job: Job | null;
   error: RenderApiError | null;
   polling: boolean;
   stopReason: PollStopReason | null;
@@ -18,9 +18,9 @@ function toRenderApiError(cause: unknown): RenderApiError {
 
 export function useRenderJobPoll(
   jobId: string | null,
-  load: (jobId: string) => Promise<RenderJob>,
+  load: (jobId: string) => Promise<Job>,
 ): RenderJobPoll {
-  const [job, setJob] = useState<RenderJob | null>(null);
+  const [job, setJob] = useState<Job | null>(null);
   const [error, setError] = useState<RenderApiError | null>(null);
   const [polling, setPolling] = useState(false);
   const [stopReason, setStopReason] = useState<PollStopReason | null>(null);

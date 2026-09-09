@@ -1,16 +1,22 @@
-import { execSync, spawn } from 'node:child_process';
+import { execSync } from 'node:child_process';
 import { createHash } from 'node:crypto';
 import { cp, mkdtemp, mkdir, readFile, rm, writeFile } from 'node:fs/promises';
-import { homedir, tmpdir } from 'node:os';
-import { dirname, join } from 'node:path';
-import { fileURLToPath } from 'node:url';
-import { readdir } from 'node:fs/promises';
+import { tmpdir } from 'node:os';
+import { join } from 'node:path';
+
+import {
+  REPO_ROOT,
+  assert,
+  log,
+  memoryGate,
+  resolvePlaywright,
+  spawnLogged,
+  waitForHttp,
+} from './smoke-helpers.mjs';
 
 const NON_REGRESSION_BASELINE_SHA256 =
   'c1b9fd9f33ba69263d9806acd02b212d44adb3951e1927d9b64f44d04c8527cb';
 
-const HERE = dirname(fileURLToPath(import.meta.url));
-const REPO_ROOT = join(HERE, '..', '..', '..');
 const ARTIFACTS_DIR = join(
   REPO_ROOT,
   'sdd/specs/spec-e-burgos-006-web-studio/cycles/cycle-03/artifacts',
@@ -19,92 +25,6 @@ const ARTIFACTS_DIR = join(
 const RENDER_API_PORT = 4399;
 const WEB_PORT = 4207;
 const SLUG = 'smoke-ingest';
-
-function log(step, message) {
-  console.log(`[${step}] ${message}`);
-}
-
-function assert(condition, message) {
-  if (!condition) {
-    throw new Error(`ASSERTION FAILED: ${message}`);
-  }
-  log('assert', `ok — ${message}`);
-}
-
-async function memoryGate() {
-  log('0', 'memory gate');
-  let heavyProcesses = '';
-  try {
-    heavyProcesses = execSync("pgrep -fl 'ffmpeg|whisper-cli|chrome-headless' || true", {
-      encoding: 'utf8',
-    }).trim();
-  } catch {
-    heavyProcesses = '';
-  }
-  assert(heavyProcesses === '', `no ffmpeg/whisper-cli/chrome-headless process alive (found: ${heavyProcesses || 'none'})`);
-
-  try {
-    const pressure = execSync('memory_pressure | tail -2', { encoding: 'utf8' }).trim();
-    log('0', pressure);
-  } catch {
-    log('0', 'memory_pressure not available on this platform, continuing');
-  }
-}
-
-async function resolvePlaywright() {
-  try {
-    return await import('playwright');
-  } catch {
-    // fall through to the npx cache below — playwright is never a package.json dependency here
-  }
-
-  const npxRoot = join(homedir(), '.npm', '_npx');
-  let entries = [];
-  try {
-    entries = await readdir(npxRoot);
-  } catch {
-    entries = [];
-  }
-
-  for (const entry of entries) {
-    const candidate = join(npxRoot, entry, 'node_modules', 'playwright', 'index.mjs');
-    try {
-      return await import(candidate);
-    } catch {
-      continue;
-    }
-  }
-
-  throw new Error(
-    'playwright not found. Run `npx playwright install` once on this machine (never add it to ' +
-      'package.json) so this script can find it under ~/.npm/_npx/*/node_modules/playwright.',
-  );
-}
-
-async function waitForHttp(url, timeoutMs) {
-  const deadline = Date.now() + timeoutMs;
-  let lastError;
-  while (Date.now() < deadline) {
-    try {
-      const response = await fetch(url);
-      if (response.ok) {
-        return response;
-      }
-      lastError = new Error(`HTTP ${response.status}`);
-    } catch (cause) {
-      lastError = cause;
-    }
-    await new Promise((resolve) => setTimeout(resolve, 300));
-  }
-  throw new Error(`Timed out waiting for ${url}: ${lastError?.message ?? 'unknown error'}`);
-}
-
-function spawnLogged(label, command, args, env) {
-  const child = spawn(command, args, { cwd: REPO_ROOT, env, stdio: ['ignore', 'pipe', 'pipe'] });
-  child.stdout.on('data', (chunk) => process.stdout.write(`[${label}] ${chunk}`));
-  child.stderr.on('data', (chunk) => process.stderr.write(`[${label}] ${chunk}`));
-  return child;
-}
 
 async function main() {
   await memoryGate();

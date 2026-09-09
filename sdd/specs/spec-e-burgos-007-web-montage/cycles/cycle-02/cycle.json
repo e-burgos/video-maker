@@ -1,0 +1,153 @@
+{
+  "$schema": "../../../../schemas/cycle.schema.json",
+  "cycle": 2,
+  "module": "web-montage",
+  "spec": "spec-e-burgos-007-web-montage",
+  "apps": [
+    "apps/web"
+  ],
+  "phase": "montage-from-the-studio",
+  "flow": "lite",
+  "objectives": [
+    "Boton Generate montage en la biblioteca de assets que crea el job kind: 'montage' con preset y seed",
+    "Progreso del montaje por etapa (discover/probe/transcribe/plan) con el mismo polling de los jobs de render",
+    "Confirmacion explicita ante 409 TIMELINE_ALREADY_EXISTS y reintento con overwrite: true",
+    "Estado vacio accionable en el preview cuando el servicio responde TIMELINE_NOT_FOUND",
+    "Panel de salud con los cuatro binarios y capabilities.montageQueue, que deshabilita el montaje cuando el servicio no puede montar",
+    "E2E Playwright de punta a punta desde raw/ hasta el MP4 verificado con ffprobe, que cierra la spec"
+  ],
+  "status": "completed",
+  "started_at": "2026-09-09",
+  "completed_at": "2026-09-09",
+  "documents": {
+    "plan": "sdd/specs/spec-e-burgos-007-web-montage/cycles/cycle-02/plan.md",
+    "tasks": "sdd/specs/spec-e-burgos-007-web-montage/cycles/cycle-02/tasks.json"
+  },
+  "artifacts": [
+    "sdd/specs/spec-e-burgos-007-web-montage/cycles/cycle-02/artifacts/montage-smoke.md",
+    "sdd/specs/spec-e-burgos-007-web-montage/cycles/cycle-02/artifacts/montage-smoke-run.log",
+    "sdd/specs/spec-e-burgos-007-web-montage/cycles/cycle-02/artifacts/montage-smoke-01-raw-library.png",
+    "sdd/specs/spec-e-burgos-007-web-montage/cycles/cycle-02/artifacts/montage-smoke-02-preview-after-montage.png",
+    "sdd/specs/spec-e-burgos-007-web-montage/cycles/cycle-02/artifacts/montage-smoke-03-overwrite-confirmation.png",
+    "sdd/specs/spec-e-burgos-007-web-montage/cycles/cycle-02/artifacts/montage-smoke-04-edited-and-saved.png",
+    "sdd/specs/spec-e-burgos-007-web-montage/cycles/cycle-02/artifacts/montage-smoke-05-render-succeeded.png"
+  ],
+  "metrics": {
+    "tasks_total": 8,
+    "tasks_completed": 8,
+    "story_points": 35,
+    "files_created": [
+      "apps/web/e2e/montage-smoke.mjs",
+      "apps/web/e2e/smoke-helpers.mjs",
+      "apps/web/src/api/montage-capability.spec.ts",
+      "apps/web/src/api/montage-capability.ts",
+      "apps/web/src/components/montage-job-panel.spec.tsx",
+      "apps/web/src/components/montage-job-panel.tsx",
+      "apps/web/src/components/montage-trigger.spec.tsx",
+      "apps/web/src/components/montage-trigger.tsx",
+      "sdd/context/apps/web/updates/2026-09-09-spec-e-burgos-007-web-montage-cycle-02.md",
+      "sdd/memory/journal/2026-09-09-spec-e-burgos-007-web-montage-cycle-02.md",
+      "sdd/specs/spec-e-burgos-007-web-montage/cycles/cycle-02/plan.md",
+      "sdd/specs/spec-e-burgos-007-web-montage/cycles/cycle-02/tasks.json",
+      "sdd/specs/spec-e-burgos-007-web-montage/cycles/cycle-02/cycle.json",
+      "sdd/specs/spec-e-burgos-007-web-montage/cycles/cycle-02/artifacts/montage-smoke.md",
+      "sdd/specs/spec-e-burgos-007-web-montage/cycles/cycle-02/artifacts/montage-smoke-run.log"
+    ],
+    "files_modified": [
+      "apps/web/README.md",
+      "apps/web/e2e/studio-smoke.mjs",
+      "apps/web/src/api/parse-render-job.spec.ts",
+      "apps/web/src/api/parse-render-job.ts",
+      "apps/web/src/api/render-api-client.spec.ts",
+      "apps/web/src/api/render-api-client.ts",
+      "apps/web/src/api/render-api-types.ts",
+      "apps/web/src/api/render-job-artifact.spec.ts",
+      "apps/web/src/api/render-job-poll-plan.spec.ts",
+      "apps/web/src/api/render-job-poll-plan.ts",
+      "apps/web/src/components/render-job-panel.spec.tsx",
+      "apps/web/src/components/render-job-panel.tsx",
+      "apps/web/src/components/render-trigger.spec.tsx",
+      "apps/web/src/components/service-health-badge.spec.tsx",
+      "apps/web/src/components/service-health-badge.tsx",
+      "apps/web/src/hooks/use-render-job-poll.spec.ts",
+      "apps/web/src/hooks/use-render-job-poll.ts",
+      "apps/web/src/pages/asset-library-page.spec.tsx",
+      "apps/web/src/pages/asset-library-page.tsx",
+      "apps/web/src/pages/project-preview-page.spec.tsx",
+      "apps/web/src/pages/project-preview-page.tsx",
+      "sdd/components.json",
+      "sdd/context/constitution.md",
+      "sdd/global.json",
+      "sdd/specs/index.json",
+      "sdd/tasks.json"
+    ],
+    "files_deleted": [],
+    "usage": {
+      "tokens_in": 481000,
+      "tokens_out": 111000,
+      "duration_minutes": 58,
+      "approx": true,
+      "source": "declared-estimate",
+      "by_agent": [
+        {
+          "agent": "orchestrator",
+          "label": "solo",
+          "provider_model": "claude/opus",
+          "effort": "high",
+          "tokens_in": 481000,
+          "tokens_out": 111000,
+          "tokens_total": 592000,
+          "approx": true,
+          "source": "declared-estimate",
+          "recorded_at": "2026-09-09",
+          "duration_minutes": 58
+        }
+      ],
+      "by_tier": {
+        "claude/opus": {
+          "tokens_in": 481000,
+          "tokens_out": 111000,
+          "approx": true,
+          "source": "declared-estimate"
+        }
+      }
+    }
+  },
+  "tables_created": [],
+  "endpoints_implemented": [],
+  "components_created": [
+    "COMP-025",
+    "COMP-026"
+  ],
+  "issues_found": [
+    "processedAssets/totalAssets del job de montaje llegan siempre en null (medido en dos corridas E2E): apps/web ya los muestra, el decorador del CommandRunner de apps/render-api no los emite. Candidato a [FIX] contra apps/render-api; ningun CA de la spec exige el contador poblado.",
+    "El oraculo de byte-identidad sobre work/timeline.json y work/catalog.json no puede ser el sha256 crudo: los dos documentos embeben probedAt y modifiedAtMs. Corregido en el E2E comparando el documento sin campos volatiles; work/edl.json si es byte-identico."
+  ],
+  "reviewer_report": {
+    "approved": true,
+    "date": "2026-09-09",
+    "ca_results": {
+      "US-2-001": "cumplido — MontageTrigger crea el job kind: montage con el preset y el seed elegidos (montage-trigger.spec.tsx) y el E2E lo confirmó contra el servicio real: 202 con kind montage.",
+      "US-2-002": "cumplido — MontageJobPanel muestra stage y, en probe/transcribe, processedAssets/totalAssets/percent; en el E2E la UI mostró 'stage: probe' y 'stage: transcribe' mientras el job corría. El contador llega en null desde el servicio (issue registrado).",
+      "US-2-003": "cumplido — al pasar a succeeded la app navega a /projects/:slug/preview (test de integración de asset-library-page.spec.tsx y E2E paso 7).",
+      "US-2-004": "cumplido — 409 TIMELINE_ALREADY_EXISTS abre la confirmación y sólo al confirmar se reintenta con overwrite: true; el E2E verificó además que descartar deja work/timeline.json intacto en disco.",
+      "US-2-005": "cumplido — un job failed muestra error.code y error.message literales y cualquier MONTAGE_* de request-time se muestra por ErrorNotice sin traducción.",
+      "US-2-006": "cumplido — TIMELINE_NOT_FOUND rinde el estado vacío con link a la biblioteca y sin role=alert; TIMELINE_INVALID sigue rindiendo el ErrorNotice.",
+      "US-2-007": "cumplido — el disclosure del badge lista los 4 binarios con envVar y las 4 capabilities; montageBlockers deshabilita el botón con el motivo cuando falta Whisper o montageQueue es false.",
+      "US-2-008": "cumplido y EJECUTADO — apps/web/e2e/montage-smoke.mjs corrió de raw/ al MP4 (exit 0): montaje 4,7 s, render 11,7 s, ffprobe nb_frames=133 == timeline.durationFrames=133, 5 capturas y log literal en artifacts/."
+    },
+    "tests": {
+      "lint test build": "pnpm nx run-many -t lint test build — Successfully ran targets lint, test, build for 8 projects, sin warnings nuevos.",
+      "apps/web": "45 archivos / 357 tests en verde; cobertura 99,2 % stmts · 95,01 % branch · 98,88 % funcs · 99,45 % lines contra el piso de 80 %, con coverage.include sin recortar.",
+      "e2e": "node apps/web/e2e/montage-smoke.mjs — exit 0, gate de memoria previo en verde (47 % libre, sin procesos pesados), sobre un RENDER_API_MEDIA_ROOT temporal con sólo raw/; media/ del dev intacto.",
+      "sdd": "pnpm sdd:validate en verde y pnpm sdd:rebuild-tasks-index corrido."
+    },
+    "notes": "Ciclo lite: un solo actor escribió plan.md y tasks.json, corrió el GATE B, implementó las 8 tasks y cerró. Cero dependencias npm nuevas (package.json y pnpm-lock.yaml sin tocar) y ninguna config protegida por el hook config-protection. Dos cambios de contrato en apps/web que rompieron tests existentes y se actualizaron a propósito, no para tapar un fallo: el discriminante kind pasó a ser obligatorio en RenderJob (fixtures) y el preview dejó de mostrar el ErrorNotice de TIMELINE_NOT_FOUND (US-2-006). El oráculo de byte-identidad del E2E se corrigió tras su primera corrida: work/edl.json se compara byte a byte, work/timeline.json y work/catalog.json con probedAt/modifiedAtMs removidos, porque esos dos documentos embeben marcas de la ingesta (medido en cycle-01 y reconfirmado acá).",
+    "follow_ups": [
+      "[FIX] apps/render-api: el decorador del CommandRunner nunca puebla processedAssets/totalAssets; la UI ya los muestra.",
+      "RenderJobList no distingue montajes de renders aunque el summary ya trae kind (cosmético, ningún CA lo pide).",
+      "MontageJobPanel no ofrece cancelar el job de montaje, aunque EP-015 lo soporta con la misma semántica cooperativa.",
+      "La biblioteca no se refresca antes de navegar al preview: el assetSource pasa de raw-scan a catalog y sólo se ve al volver."
+    ]
+  }
+}

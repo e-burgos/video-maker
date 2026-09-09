@@ -4,7 +4,12 @@ The Video Maker Studio: a local React 19 UI that operates the engine through `ap
 `cycle-01` of `spec-e-burgos-006-web-studio` delivers the studio shell, the project list and the
 raw asset library. `cycle-02` adds the Remotion `<Player>` preview. `cycle-03` adds timeline
 editing (clips, captions, music mix, output preset), the save bar, and the full render job flow —
-trigger, live progress, and the MP4 download.
+trigger, live progress, and the MP4 download. `cycle-02` of `spec-e-burgos-007-web-montage` closes
+the loop: the studio can now **produce** the timeline it used to only consume.
+
+**The whole product is reachable from the browser:** upload the raw material → generate the montage
+→ adjust it → render → download the MP4. `tools/render-cli` is still valid and still supported, but
+it is no longer required to reach an MP4.
 
 **This app has no engine logic and never touches the filesystem.** Everything it shows and
 everything it writes goes through the HTTP contract in `sdd/api.json` (`EP-001`..`EP-015`).
@@ -173,6 +178,26 @@ deliberately-run script:
 node apps/web/e2e/studio-smoke.mjs
 ```
 
+`apps/web/e2e/montage-smoke.mjs` is its sibling for the montage flow and the one that proves the
+product end to end **from raw material**: it copies only `media/smoke-ingest/raw/` into a temporary
+media root (no `work/`, no `out/`), then drives library → "Generate montage" → live stage progress →
+automatic jump to the preview → a second montage refused with `409` and confirmed in the UI → edit →
+save → render → download → `ffprobe`.
+
+```bash
+pgrep -fl 'ffmpeg|whisper-cli|chrome-headless' || echo "no heavy"   # memory gate, ≥35% free
+node apps/web/e2e/montage-smoke.mjs
+```
+
+Both scripts share `apps/web/e2e/smoke-helpers.mjs`. The montage script additionally calls
+`loadRootEnv()`, which fills **only** `FFMPEG_PATH`, `FFPROBE_PATH`, `WHISPER_CPP_PATH` and
+`WHISPER_MODEL_PATH` from the repo-root `.env` when they are absent from the environment (a prior
+`set -a && source .env && set +a` still wins, and no other key is read). Whisper's model has no
+`PATH` fallback, so without that variable the montage job fails and `GET /health` reports
+`degraded`. Measured on this machine: montage 4,7 s, render 11,7 s. Full literal output, the
+screenshots and the byte-identity oracle are in
+`sdd/specs/spec-e-burgos-007-web-montage/cycles/cycle-02/artifacts/montage-smoke.md`.
+
 It resolves Playwright from `~/.npm/_npx/*/node_modules/playwright` at runtime (never added to
 `package.json`) and cleans up after itself unconditionally (`try`/`finally`): browser closed, both
 child processes killed, temp directory removed. See
@@ -180,6 +205,36 @@ child processes killed, temp directory removed. See
 literal output, screenshots, and the two tooling bugs it caught (documented there so nobody has to
 rediscover them: a `Page.waitForFunction` argument-order mistake, and Vite's dev-server dependency
 optimizer firing a full page reload mid-poll).
+
+## Montage (spec-007 cycle-02)
+
+The asset library owns the montage. `MontageTrigger` calls the same `POST /projects/:slug/jobs`
+(`EP-012`) the render uses, with `{"kind":"montage","preset","seed","overwrite"}`; the service runs
+`ingestProject` + `autoMontage` and writes `work/catalog.json`, `work/timeline.json` and
+`work/edl.json`.
+
+- **Preset and seed are picked in the UI.** The four preset names (`software-demo`, `hardware`,
+  `recipe`, `educational`) are declared in `src/api/render-api-types.ts`, derived from
+  `MONTAGE_PRESETS` of `libs/auto-montage` — that library is a Node library and must never enter a
+  browser bundle. The seed must be a non-negative integer, checked before the request is sent.
+- **The 409 is handled, not prevented.** The button never inspects `layout.timeline` to decide
+  whether a timeline already exists: it sends the job and treats `409 TIMELINE_ALREADY_EXISTS` as
+  the confirmation prompt ("this overwrites the edited timeline"), retrying with `overwrite: true`
+  only after the dev confirms. The service guarantees no job is registered and no byte is touched
+  in that case, so the disk is the source of truth, never a stale client-side flag.
+- **`MontageJobPanel` polls the same `useRenderJobPoll`** as the render, now typed on the
+  discriminated union `Job = RenderJob | MontageJob`. A montage job reports the stages
+  `discover | probe | transcribe | plan` and the counters `processedAssets`/`totalAssets` — never
+  `renderedFrames`/`totalFrames`, which is why the union is discriminated rather than one type with
+  optional fields. When the job settles as `succeeded` the studio navigates to the preview.
+- **Health gates the button.** `montageBlockers()` (`src/api/montage-capability.ts`) disables
+  "Generate montage" and names the reason when the service reports `capabilities.montageQueue:
+  false` or leaves any of the four media binaries unresolved. The health badge's `details`
+  disclosure lists the engine modules, the four binaries with their env var (never a resolved host
+  path) and every capability.
+- **A project with no timeline shows an empty state, not an error.** `/projects/:slug/preview`
+  answers `TIMELINE_NOT_FOUND` with a panel that links back to the library to generate the montage;
+  every other read failure still renders the `ErrorNotice` with its code.
 
 ## Known limits
 
@@ -194,6 +249,7 @@ optimizer firing a full page reload mid-poll).
 - **`vite.config.ts` prints a Vite deprecation warning** (`ESM syntax in a file loaded as
   CommonJS`) shared by every project in this workspace. Not addressed here: it is a workspace-wide
   change, not a change of this app.
-- **`vite.config.ts` prints a Vite deprecation warning** (`ESM syntax in a file loaded as
-  CommonJS`) shared by every project in this workspace. Not addressed here: it is a workspace-wide
-  change, not a change of this app.
+- **The montage asset counter is never populated in practice.** `processedAssets`/`totalAssets`
+  arrive as `null` in every stage of the two measured runs, so the panel shows the stage but no
+  counter. The UI renders it as soon as the service sends it; the gap is in `apps/render-api`'s
+  `CommandRunner` decorator, not here. No acceptance criterion of the spec requires the counter.

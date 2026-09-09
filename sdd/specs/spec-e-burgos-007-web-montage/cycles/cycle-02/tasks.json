@@ -1,0 +1,257 @@
+{
+  "$schema": "../../../../schemas/cycle-tasks.schema.json",
+  "spec": "spec-e-burgos-007-web-montage",
+  "cycle": 2,
+  "module": "web-montage",
+  "apps": [
+    "apps/web"
+  ],
+  "flow": "lite",
+  "user_stories_generated": true,
+  "prerequisites": {
+    "tasks_generated": true
+  },
+  "tasks": [
+    {
+      "id": "TASK-001",
+      "title": "[FE] US-2-001/US-2-002: discriminante kind en los tipos del contrato y en el parser de jobs",
+      "user_stories": [
+        "US-2-001",
+        "US-2-002"
+      ],
+      "estimation_hours": 3,
+      "story_points": 5,
+      "depends_on": [],
+      "status": "done",
+      "files": [
+        "apps/web/src/api/render-api-types.ts",
+        "apps/web/src/api/parse-render-job.ts",
+        "apps/web/src/api/parse-render-job.spec.ts",
+        "apps/web/src/api/render-job-poll-plan.ts",
+        "apps/web/src/api/render-job-poll-plan.spec.ts",
+        "apps/web/src/hooks/use-render-job-poll.ts",
+        "apps/web/src/hooks/use-render-job-poll.spec.ts"
+      ],
+      "usage": {
+        "agent": "orchestrator",
+        "provider_model": "claude/opus",
+        "effort": "high",
+        "tokens_in": 96000,
+        "tokens_out": 13000,
+        "tokens_total": 109000,
+        "approx": true,
+        "source": "declared-estimate",
+        "recorded_at": "2026-09-09"
+      }
+    },
+    {
+      "id": "TASK-002",
+      "title": "[FE] US-2-001/US-2-007: createMontageJob en el cliente y montageBlockers sobre el health",
+      "user_stories": [
+        "US-2-001",
+        "US-2-007"
+      ],
+      "estimation_hours": 2,
+      "story_points": 3,
+      "depends_on": [
+        "TASK-001"
+      ],
+      "status": "done",
+      "files": [
+        "apps/web/src/api/render-api-client.ts",
+        "apps/web/src/api/render-api-client.spec.ts",
+        "apps/web/src/api/montage-capability.ts",
+        "apps/web/src/api/montage-capability.spec.ts"
+      ],
+      "usage": {
+        "agent": "orchestrator",
+        "provider_model": "claude/opus",
+        "effort": "high",
+        "tokens_in": 42000,
+        "tokens_out": 9000,
+        "tokens_total": 51000,
+        "approx": true,
+        "source": "declared-estimate",
+        "recorded_at": "2026-09-09"
+      }
+    },
+    {
+      "id": "TASK-003",
+      "title": "[FE] US-2-001/US-2-004/US-2-007: MontageTrigger con preset, seed, gating por salud y confirmacion de overwrite",
+      "user_stories": [
+        "US-2-001",
+        "US-2-004",
+        "US-2-007"
+      ],
+      "estimation_hours": 4,
+      "story_points": 5,
+      "depends_on": [
+        "TASK-002"
+      ],
+      "status": "done",
+      "files": [
+        "apps/web/src/components/montage-trigger.tsx",
+        "apps/web/src/components/montage-trigger.spec.tsx"
+      ],
+      "usage": {
+        "agent": "orchestrator",
+        "provider_model": "claude/opus",
+        "effort": "high",
+        "tokens_in": 55000,
+        "tokens_out": 14000,
+        "tokens_total": 69000,
+        "approx": true,
+        "source": "declared-estimate",
+        "recorded_at": "2026-09-09"
+      }
+    },
+    {
+      "id": "TASK-004",
+      "title": "[FE] US-2-002/US-2-003/US-2-005: MontageJobPanel y cableado en la biblioteca con salto al preview",
+      "user_stories": [
+        "US-2-002",
+        "US-2-003",
+        "US-2-005"
+      ],
+      "estimation_hours": 4,
+      "story_points": 5,
+      "depends_on": [
+        "TASK-003"
+      ],
+      "status": "done",
+      "files": [
+        "apps/web/src/components/montage-job-panel.tsx",
+        "apps/web/src/components/montage-job-panel.spec.tsx",
+        "apps/web/src/pages/asset-library-page.tsx",
+        "apps/web/src/pages/asset-library-page.spec.tsx"
+      ],
+      "usage": {
+        "agent": "orchestrator",
+        "provider_model": "claude/opus",
+        "effort": "high",
+        "tokens_in": 60000,
+        "tokens_out": 15000,
+        "tokens_total": 75000,
+        "approx": true,
+        "source": "declared-estimate",
+        "recorded_at": "2026-09-09"
+      }
+    },
+    {
+      "id": "TASK-005",
+      "title": "[FE] US-2-006: estado vacio accionable del preview ante TIMELINE_NOT_FOUND",
+      "user_stories": [
+        "US-2-006"
+      ],
+      "estimation_hours": 2,
+      "story_points": 3,
+      "depends_on": [
+        "TASK-001"
+      ],
+      "status": "done",
+      "files": [
+        "apps/web/src/pages/project-preview-page.tsx",
+        "apps/web/src/pages/project-preview-page.spec.tsx"
+      ],
+      "usage": {
+        "agent": "orchestrator",
+        "provider_model": "claude/opus",
+        "effort": "high",
+        "tokens_in": 30000,
+        "tokens_out": 7000,
+        "tokens_total": 37000,
+        "approx": true,
+        "source": "declared-estimate",
+        "recorded_at": "2026-09-09"
+      }
+    },
+    {
+      "id": "TASK-006",
+      "title": "[FE] US-2-007: panel de salud con los cuatro binarios y las capabilities incluida montageQueue",
+      "user_stories": [
+        "US-2-007"
+      ],
+      "estimation_hours": 2,
+      "story_points": 3,
+      "depends_on": [
+        "TASK-002"
+      ],
+      "status": "done",
+      "files": [
+        "apps/web/src/components/service-health-badge.tsx",
+        "apps/web/src/components/service-health-badge.spec.tsx"
+      ],
+      "usage": {
+        "agent": "orchestrator",
+        "provider_model": "claude/opus",
+        "effort": "high",
+        "tokens_in": 34000,
+        "tokens_out": 9000,
+        "tokens_total": 43000,
+        "approx": true,
+        "source": "declared-estimate",
+        "recorded_at": "2026-09-09"
+      }
+    },
+    {
+      "id": "TASK-007",
+      "title": "[FE] US-2-008: E2E Playwright de raw/ al MP4 por la web, ejecutado con capturas y ffprobe",
+      "user_stories": [
+        "US-2-008"
+      ],
+      "estimation_hours": 6,
+      "story_points": 8,
+      "depends_on": [
+        "TASK-004",
+        "TASK-005",
+        "TASK-006"
+      ],
+      "status": "done",
+      "files": [
+        "apps/web/e2e/smoke-helpers.mjs",
+        "apps/web/e2e/montage-smoke.mjs",
+        "apps/web/e2e/studio-smoke.mjs",
+        "sdd/specs/spec-e-burgos-007-web-montage/cycles/cycle-02/artifacts/montage-smoke.md"
+      ],
+      "usage": {
+        "agent": "orchestrator",
+        "provider_model": "claude/opus",
+        "effort": "high",
+        "tokens_in": 78000,
+        "tokens_out": 20000,
+        "tokens_total": 98000,
+        "approx": true,
+        "source": "declared-estimate",
+        "recorded_at": "2026-09-09"
+      }
+    },
+    {
+      "id": "TASK-008",
+      "title": "[FE] Cierre: README del flujo completo por la web y registros del ciclo",
+      "user_stories": [
+        "US-2-008"
+      ],
+      "estimation_hours": 2,
+      "story_points": 3,
+      "depends_on": [
+        "TASK-007"
+      ],
+      "status": "done",
+      "files": [
+        "apps/web/README.md",
+        "sdd/components.json"
+      ],
+      "usage": {
+        "agent": "orchestrator",
+        "provider_model": "claude/opus",
+        "effort": "high",
+        "tokens_in": 26000,
+        "tokens_out": 8000,
+        "tokens_total": 34000,
+        "approx": true,
+        "source": "declared-estimate",
+        "recorded_at": "2026-09-09"
+      }
+    }
+  ]
+}

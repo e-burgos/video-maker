@@ -1,5 +1,5 @@
-import { useCallback } from 'react';
-import { Link, useParams } from 'react-router-dom';
+import { useCallback, useState } from 'react';
+import { Link, useNavigate, useParams } from 'react-router-dom';
 
 import { ASSET_ROLES } from '../api/render-api-types';
 import { useRenderApi } from '../api/render-api-context';
@@ -7,6 +7,8 @@ import { useAsyncResource } from '../hooks/use-async-resource';
 import { AssetCard } from '../components/asset-card';
 import { AssetUploader } from '../components/asset-uploader';
 import { ErrorNotice } from '../components/error-notice';
+import { MontageJobPanel } from '../components/montage-job-panel';
+import { MontageTrigger } from '../components/montage-trigger';
 import type { AssetListing, AssetRole } from '../api/render-api-types';
 
 function assetsOfRole(listing: AssetListing, role: AssetRole) {
@@ -15,9 +17,15 @@ function assetsOfRole(listing: AssetListing, role: AssetRole) {
 
 export function AssetLibraryPage() {
   const client = useRenderApi();
+  const navigate = useNavigate();
   const { slug = '' } = useParams<{ slug: string }>();
   const load = useCallback(() => client.listAssets(slug), [client, slug]);
   const listing = useAsyncResource<AssetListing>(load, `assets:${slug}`);
+  const [montageJobId, setMontageJobId] = useState<string | null>(null);
+
+  const openPreview = useCallback(() => {
+    navigate(`/projects/${slug}/preview`);
+  }, [navigate, slug]);
 
   return (
     <section className="space-y-6">
@@ -45,6 +53,10 @@ export function AssetLibraryPage() {
       </div>
 
       <AssetUploader slug={slug} onUploaded={listing.reload} />
+
+      <MontageTrigger slug={slug} onCreated={(job) => setMontageJobId(job.id)} />
+
+      <MontageJobPanel jobId={montageJobId} onSucceeded={openPreview} />
 
       {listing.status === 'loading' && <p className="text-sm text-slate-500">Loading assets…</p>}
       {listing.status === 'error' && listing.error !== null && (

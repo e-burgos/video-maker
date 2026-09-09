@@ -5,6 +5,7 @@ import type { RenderJob } from './render-api-types';
 
 const SUCCEEDED_JOB: RenderJob = {
   id: 'job-0001',
+  kind: 'render',
   slug: 'smoke-ingest',
   state: 'succeeded',
   createdAt: '2026-09-09T10:00:00.000Z',

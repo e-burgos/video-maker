@@ -1,17 +1,28 @@
 import { describe, expect, it } from 'vitest';
 
 import {
+  isJobKind,
+  isMontageStage,
   isRenderJobState,
   isRenderPipelineStage,
   isTerminalRenderJobState,
+  parseJob,
+  parseMontageJob,
   parseRenderJob,
   parseRenderJobListing,
+  showsAssetProgress,
   showsFrameProgress,
 } from './parse-render-job';
-import type { RenderJob, RenderJobProgress } from './render-api-types';
+import type {
+  MontageJob,
+  MontageJobProgress,
+  RenderJob,
+  RenderJobProgress,
+} from './render-api-types';
 
 const BASE_JOB: RenderJob = {
   id: 'job-0001',
+  kind: 'render',
   slug: 'smoke-ingest',
   state: 'running',
   createdAt: '2026-09-09T10:00:00.000Z',
@@ -136,7 +147,7 @@ describe('parseRenderJob', () => {
   });
 
   it('rejects a body outside the contract as RESPONSE_SHAPE_UNEXPECTED, not a thrown TypeError', () => {
-    expect(() => parseRenderJob({ id: 'job-0001' })).toThrow(/a render job document/);
+    expect(() => parseRenderJob({ id: 'job-0001' })).toThrow(/a job document/);
 
     try {
       parseRenderJob(null);
@@ -153,6 +164,7 @@ describe('parseRenderJobListing', () => {
       jobs: [
         {
           id: 'job-0001',
+          kind: 'render' as const,
           state: 'queued' as const,
           stage: null,
           errorCode: null,
@@ -162,8 +174,9 @@ describe('parseRenderJobListing', () => {
         },
         {
           id: 'job-0002',
+          kind: 'montage' as const,
           state: 'running' as const,
-          stage: 'render' as const,
+          stage: 'transcribe' as const,
           errorCode: null,
           createdAt: '2026-09-09T10:05:00.000Z',
           startedAt: '2026-09-09T10:05:01.000Z',
@@ -186,5 +199,150 @@ describe('parseRenderJobListing', () => {
     expect(() => parseRenderJobListing({ slug: 'smoke-ingest', jobs: [{ id: 'job-0001' }] })).toThrow(
       /a render job listing/,
     );
+  });
+});
+
+const BASE_MONTAGE_JOB: MontageJob = {
+  id: 'job-0002',
+  kind: 'montage',
+  slug: 'smoke-ingest',
+  state: 'running',
+  createdAt: '2026-09-09T10:00:00.000Z',
+  startedAt: '2026-09-09T10:00:01.000Z',
+  finishedAt: null,
+  progress: { stage: 'transcribe', processedAssets: 2, totalAssets: 6, percent: 33.3 },
+  report: null,
+  error: null,
+};
+
+function montageProgressAt(stage: MontageJobProgress['stage']): MontageJobProgress {
+  return { stage, processedAssets: null, totalAssets: null, percent: null };
+}
+
+describe('isJobKind', () => {
+  it('accepts the two kinds the queue publishes', () => {
+    expect(isJobKind('render')).toBe(true);
+    expect(isJobKind('montage')).toBe(true);
+  });
+
+  it('rejects anything else', () => {
+    expect(isJobKind('ingest')).toBe(false);
+    expect(isJobKind(null)).toBe(false);
+  });
+});
+
+describe('isMontageStage', () => {
+  it('accepts the four montage stages and no render stage', () => {
+    for (const stage of ['discover', 'probe', 'transcribe', 'plan']) {
+      expect(isMontageStage(stage)).toBe(true);
+    }
+    expect(isMontageStage('render')).toBe(false);
+    expect(isMontageStage('mux')).toBe(false);
+  });
+});
+
+describe('showsAssetProgress', () => {
+  it('is true only for the two stages that carry a counter (EP-014)', () => {
+    expect(showsAssetProgress(montageProgressAt('probe'))).toBe(true);
+    expect(showsAssetProgress(montageProgressAt('transcribe'))).toBe(true);
+  });
+
+  it('is false for discover and plan, which never carry a count', () => {
+    expect(showsAssetProgress(montageProgressAt('discover'))).toBe(false);
+    expect(showsAssetProgress(montageProgressAt('plan'))).toBe(false);
+    expect(showsAssetProgress(null)).toBe(false);
+  });
+});
+
+describe('parseJob', () => {
+  it('narrows a render job and a montage job through the same entry point', () => {
+    expect(parseJob(BASE_JOB)).toEqual(BASE_JOB);
+    expect(parseJob(BASE_MONTAGE_JOB)).toEqual(BASE_MONTAGE_JOB);
+  });
+
+  it('publishes exactly the keys EP-014 documents, for both kinds', () => {
+    const documented = [
+      'createdAt',
+      'error',
+      'finishedAt',
+      'id',
+      'kind',
+      'progress',
+      'report',
+      'slug',
+      'startedAt',
+      'state',
+    ];
+
+    expect(Object.keys(parseJob(BASE_JOB)).sort()).toEqual(documented);
+    expect(Object.keys(parseJob(BASE_MONTAGE_JOB)).sort()).toEqual(documented);
+  });
+
+  it('publishes the montage progress counters EP-014 documents, never the render ones', () => {
+    const progress = parseMontageJob(BASE_MONTAGE_JOB).progress as MontageJobProgress;
+
+    expect(Object.keys(progress).sort()).toEqual([
+      'percent',
+      'processedAssets',
+      'stage',
+      'totalAssets',
+    ]);
+  });
+
+  it('rejects a job whose kind is unknown', () => {
+    expect(() => parseJob({ ...BASE_JOB, kind: 'ingest' })).toThrow(/a job document/);
+  });
+
+  it('rejects a montage job carrying the render counter names', () => {
+    expect(() =>
+      parseJob({
+        ...BASE_MONTAGE_JOB,
+        progress: { stage: 'probe', renderedFrames: 1, totalFrames: 6, percent: 16 },
+      }),
+    ).toThrow(/a job document/);
+  });
+
+  it('rejects a render job carrying a montage stage', () => {
+    expect(() =>
+      parseJob({
+        ...BASE_JOB,
+        progress: { stage: 'transcribe', renderedFrames: null, totalFrames: null, percent: null },
+      }),
+    ).toThrow(/a job document/);
+  });
+});
+
+describe('parseMontageJob', () => {
+  it('narrows a succeeded montage job carrying its report', () => {
+    const succeeded: MontageJob = {
+      ...BASE_MONTAGE_JOB,
+      state: 'succeeded',
+      progress: null,
+      finishedAt: '2026-09-09T10:00:06.000Z',
+      report: {
+        catalogPath: 'work/catalog.json',
+        timelinePath: 'work/timeline.json',
+        editDecisionListPath: 'work/edl.json',
+        preset: 'software-demo',
+        seed: 0,
+      },
+    };
+
+    expect(parseMontageJob(succeeded)).toEqual(succeeded);
+    expect(Object.keys(succeeded.report ?? {}).sort()).toEqual([
+      'catalogPath',
+      'editDecisionListPath',
+      'preset',
+      'seed',
+      'timelinePath',
+    ]);
+  });
+
+  it('refuses a render job, so a caller cannot read montage fields off it', () => {
+    expect(() => parseMontageJob(BASE_JOB)).toThrow(/a montage job document/);
+  });
+
+  it('refuses a montage job where a render job is expected', () => {
+    expect(() => parseRenderJob(BASE_MONTAGE_JOB)).toThrow(/a render job document/);
   });
 });

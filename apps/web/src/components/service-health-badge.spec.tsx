@@ -20,8 +20,10 @@ function health(overrides: Partial<ServiceHealth> = {}): ServiceHealth {
     binaries: [
       { name: 'ffmpeg', envVar: 'FFMPEG_PATH', resolved: true },
       { name: 'ffprobe', envVar: 'FFPROBE_PATH', resolved: true },
+      { name: 'whisperCli', envVar: 'WHISPER_CPP_PATH', resolved: true },
+      { name: 'whisperModel', envVar: 'WHISPER_MODEL_PATH', resolved: true },
     ],
-    capabilities: { renderPipeline: true, assetStore: true, jobQueue: true },
+    capabilities: { renderPipeline: true, assetStore: true, jobQueue: true, montageQueue: true },
     jobs: { running: 0, queued: 0 },
     ...overrides,
   };
@@ -99,9 +101,82 @@ describe('ServiceHealthBadge', () => {
     await waitFor(() =>
       expect(screen.getByTestId('service-health-label').textContent).toContain('degraded'),
     );
-    fireEvent.click(screen.getByRole('button'));
+    fireEvent.click(screen.getByTitle('Re-check the render service'));
     await waitFor(() =>
       expect(screen.getByTestId('service-health-label').textContent).toBe('service ok · cycle 3'),
+    );
+  });
+
+  it('lists the four media binaries with their env var and resolution state (US-2-007)', async () => {
+    renderBadge(clientWith(() => Promise.resolve(health())));
+
+    await waitFor(() => expect(screen.getByTestId('service-health-binaries')).toBeTruthy());
+    const rows = Array.from(screen.getByTestId('service-health-binaries').children).map(
+      (row) => row.textContent,
+    );
+
+    expect(rows).toEqual([
+      'ffmpeg · FFMPEG_PATH · resolved',
+      'ffprobe · FFPROBE_PATH · resolved',
+      'whisperCli · WHISPER_CPP_PATH · resolved',
+      'whisperModel · WHISPER_MODEL_PATH · resolved',
+    ]);
+  });
+
+  it('reports montageQueue among the capabilities (US-2-007)', async () => {
+    renderBadge(clientWith(() => Promise.resolve(health())));
+
+    await waitFor(() => expect(screen.getByTestId('service-health-capabilities')).toBeTruthy());
+    const rows = Array.from(screen.getByTestId('service-health-capabilities').children).map(
+      (row) => row.textContent,
+    );
+
+    expect(rows).toEqual([
+      'renderPipeline · on',
+      'assetStore · on',
+      'jobQueue · on',
+      'montageQueue · on',
+    ]);
+  });
+
+  it('marks a missing binary and a disabled capability, never a resolved host path', async () => {
+    renderBadge(
+      clientWith(() =>
+        Promise.resolve(
+          health({
+            status: 'degraded',
+            binaries: [{ name: 'whisperModel', envVar: 'WHISPER_MODEL_PATH', resolved: false }],
+            capabilities: {
+              renderPipeline: true,
+              assetStore: true,
+              jobQueue: true,
+              montageQueue: false,
+            },
+          }),
+        ),
+      ),
+    );
+
+    await waitFor(() => expect(screen.getByTestId('service-health-binaries')).toBeTruthy());
+    expect(screen.getByTestId('service-health-binaries').textContent).toBe(
+      'whisperModel · WHISPER_MODEL_PATH · missing',
+    );
+    expect(screen.getByTestId('service-health-capabilities').textContent).toContain(
+      'montageQueue · off',
+    );
+  });
+
+  it('says so when no health document could be read', async () => {
+    renderBadge(
+      clientWith(() =>
+        Promise.reject(new RenderApiError('SERVICE_UNREACHABLE', 'down', null, null)),
+      ),
+    );
+
+    await waitFor(() =>
+      expect(screen.getByTestId('service-health-details').textContent).toBe(
+        'No health document read yet.',
+      ),
     );
   });
 });

@@ -246,15 +246,21 @@
         "module": "web-studio",
         "spec": "sdd/specs/spec-e-burgos-006-web-studio",
         "path": "src/components/service-health-badge.tsx",
-        "status": "implemented",
+        "status": "updated",
         "created_in_cycle": 1,
-        "updated_in_cycle": null,
+        "updated_in_cycle": 2,
         "description": "Estado permanente del servicio: ok con su cycle, degraded nombrando el modulo de motor o el binario que falta, o inalcanzable con el codigo de transporte. Re-consulta al hacer click.",
         "consumes": [
           "EP-001"
         ],
         "created_at": "2026-09-09",
-        "changelog": []
+        "changelog": [
+          {
+            "cycle": 2,
+            "date": "2026-09-09",
+            "change": "Adds a details disclosure listing the engine modules, the four media binaries with their env var (never a resolved host path) and every capability, montageQueue included (spec-e-burgos-007 cycle-02)."
+          }
+        ]
       },
       {
         "id": "COMP-003",
@@ -325,6 +331,11 @@
             "cycle": 2,
             "date": "2026-09-09",
             "change": "adds the open preview link to /projects/:slug/preview"
+          },
+          {
+            "cycle": 2,
+            "date": "2026-09-09",
+            "change": "Hosts the montage: mounts MontageTrigger and MontageJobPanel under the uploader and navigates to /projects/:slug/preview once the montage job settles as succeeded (spec-e-burgos-007 cycle-02)."
           }
         ]
       },
@@ -445,7 +456,7 @@
         "path": "src/pages/project-preview-page.tsx",
         "status": "updated",
         "created_in_cycle": 2,
-        "updated_in_cycle": 3,
+        "updated_in_cycle": 2,
         "description": "Pagina del estudio: lee la Timeline persistida (EP-007), la valida contra TimelineSchema, reescribe los assets a URLs same-origin de EP-011, y ofrece el editor completo sobre un reducer de edicion (timelineEditReducer) — clips, captions, musica, preset de salida, issues y guardado — montando el TimelinePlayer con el draft vigente y cableando el disparo de render, el listado de jobs y el panel de detalle en vivo del job seleccionado.",
         "consumes": [
           "EP-007",
@@ -457,6 +468,11 @@
             "cycle": 3,
             "date": "2026-09-09",
             "change": "extrae StudioView (montado solo con la timeline cargada, key={slug}) con timelineEditReducer; cablea ClipTrackEditor/CaptionEditor/OutputPresetSelector/TimelineIssueList/TimelineSaveBar/MusicMixEditor/RenderTrigger/RenderJobList/RenderJobPanel sobre un unico dispatch; agrega captureFrameFromLocation via URLSearchParams nativo (no useSearchParams de react-router, por tamano de bundle) y selectedJobId (RenderTrigger.onCreated -> RenderJobList.onSelect -> RenderJobPanel.jobId)"
+          },
+          {
+            "cycle": 2,
+            "date": "2026-09-09",
+            "change": "Answers TIMELINE_NOT_FOUND with an actionable empty state that links back to the asset library to generate the montage, instead of an ErrorNotice; every other read failure keeps the ErrorNotice with its code (spec-e-burgos-007 cycle-02)."
           }
         ]
       },
@@ -593,9 +609,9 @@
         "module": "web-studio",
         "spec": "sdd/specs/spec-e-burgos-006-web-studio",
         "path": "src/components/render-job-panel.tsx",
-        "status": "implemented",
+        "status": "updated",
         "created_in_cycle": 3,
-        "updated_in_cycle": null,
+        "updated_in_cycle": 2,
         "description": "Detalle en vivo de un render job (data-testid=render-job-panel) via polling: estado, etapa, renderedFrames/totalFrames solo en la etapa render, error.code si failed, link de descarga si succeeded, y boton Cancel mientras el estado no sea terminal.",
         "consumes": [
           "EP-011",
@@ -603,7 +619,13 @@
           "EP-015"
         ],
         "created_at": "2026-09-09",
-        "changelog": []
+        "changelog": [
+          {
+            "cycle": 2,
+            "date": "2026-09-09",
+            "change": "Narrows on the new kind discriminant: frame counters and the MP4 download render only for kind: render, and a montage job selected from the listing shows its asset counters instead (spec-e-burgos-007 cycle-02)."
+          }
+        ]
       },
       {
         "id": "COMP-023",
@@ -627,11 +649,52 @@
         "module": "web-studio",
         "spec": "sdd/specs/spec-e-burgos-006-web-studio",
         "path": "src/hooks/use-render-job-poll.ts",
-        "status": "implemented",
+        "status": "updated",
         "created_in_cycle": 3,
-        "updated_in_cycle": null,
+        "updated_in_cycle": 2,
         "description": "Hook de polling de un render job por setTimeout (nunca setInterval) hasta un estado terminal, con guardas de secuencia para descartar respuestas obsoletas si el jobId cambia a mitad de un poll en vuelo.",
         "consumes": [],
+        "created_at": "2026-09-09",
+        "changelog": [
+          {
+            "cycle": 2,
+            "date": "2026-09-09",
+            "change": "Polls Job = RenderJob | MontageJob instead of RenderJob, so the same hook follows both kinds of job with no change to the render flow (spec-e-burgos-007 cycle-02)."
+          }
+        ]
+      },
+      {
+        "id": "COMP-025",
+        "name": "MontageTrigger",
+        "type": "component",
+        "module": "web-montage",
+        "spec": "sdd/specs/spec-e-burgos-007-web-montage",
+        "path": "src/components/montage-trigger.tsx",
+        "status": "implemented",
+        "created_in_cycle": 2,
+        "updated_in_cycle": null,
+        "description": "Disparo del montaje desde la biblioteca de assets: selector de preset y seed, gating por la salud del servicio (montageBlockers) y confirmacion explicita ante 409 TIMELINE_ALREADY_EXISTS que reintenta con overwrite: true.",
+        "consumes": [
+          "EP-001",
+          "EP-012"
+        ],
+        "created_at": "2026-09-09",
+        "changelog": []
+      },
+      {
+        "id": "COMP-026",
+        "name": "MontageJobPanel",
+        "type": "component",
+        "module": "web-montage",
+        "spec": "sdd/specs/spec-e-burgos-007-web-montage",
+        "path": "src/components/montage-job-panel.tsx",
+        "status": "implemented",
+        "created_in_cycle": 2,
+        "updated_in_cycle": null,
+        "description": "Seguimiento del job de montaje sobre useRenderJobPoll: etapa (discover/probe/transcribe/plan), contador de assets en probe y transcribe, codigo del error tipado al fallar y callback unico al pasar a succeeded.",
+        "consumes": [
+          "EP-014"
+        ],
         "created_at": "2026-09-09",
         "changelog": []
       }

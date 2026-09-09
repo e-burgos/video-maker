@@ -47,6 +47,43 @@ function trackSummary(timeline: Timeline): string {
   ].join(' · ');
 }
 
+export const TIMELINE_NOT_FOUND = 'TIMELINE_NOT_FOUND';
+
+type TimelineEmptyStateProps = {
+  slug: string;
+  onRetry: () => void;
+};
+
+function TimelineEmptyState({ slug, onRetry }: TimelineEmptyStateProps) {
+  return (
+    <div
+      data-testid="timeline-empty-state"
+      className="space-y-3 rounded-lg border border-slate-700 bg-slate-900/40 p-6"
+    >
+      <p className="text-sm font-medium text-slate-200">This project has no timeline yet.</p>
+      <p className="text-sm text-slate-400">
+        Generate the montage from the asset library: the service ingests the raw material and builds
+        the timeline this page plays.
+      </p>
+      <div className="flex flex-wrap gap-2">
+        <Link
+          to={`/projects/${slug}`}
+          className="rounded-md border border-sky-500/50 bg-sky-500/10 px-3 py-1.5 text-sm text-sky-100"
+        >
+          Generate montage
+        </Link>
+        <button
+          type="button"
+          onClick={onRetry}
+          className="rounded-md border border-slate-700 px-3 py-1.5 text-sm text-slate-300"
+        >
+          Retry
+        </button>
+      </div>
+    </div>
+  );
+}
+
 type StudioViewProps = {
   slug: string;
   initialTimeline: Timeline;
@@ -175,9 +212,13 @@ export function ProjectPreviewPage() {
       </div>
 
       {timeline.status === 'loading' && <p className="text-sm text-slate-500">Loading timeline…</p>}
-      {timeline.status === 'error' && timeline.error !== null && (
-        <ErrorNotice error={timeline.error} onRetry={timeline.reload} />
-      )}
+      {timeline.status === 'error' &&
+        timeline.error !== null &&
+        (timeline.error.code === TIMELINE_NOT_FOUND ? (
+          <TimelineEmptyState slug={slug} onRetry={timeline.reload} />
+        ) : (
+          <ErrorNotice error={timeline.error} onRetry={timeline.reload} />
+        ))}
 
       {timeline.data !== null && (
         <StudioView key={slug} slug={slug} initialTimeline={timeline.data} />

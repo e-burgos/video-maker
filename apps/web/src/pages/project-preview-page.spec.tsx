@@ -107,17 +107,45 @@ describe('ProjectPreviewPage', () => {
     expect(getTimeline).toHaveBeenCalledTimes(1);
   });
 
-  it('muestra el code del servicio cuando el proyecto no tiene timeline y no monta el player', async () => {
+  it('ofrece generar el montaje, no un error, cuando el proyecto no tiene timeline (US-2-006)', async () => {
+    const getTimeline = vi
+      .fn()
+      .mockRejectedValue(new RenderApiError('TIMELINE_NOT_FOUND', 'no timeline stored', 404, null));
+    renderPage({ getTimeline });
+
+    await waitFor(() => expect(screen.getByTestId('timeline-empty-state')).toBeTruthy());
+    expect(screen.queryByTestId('timeline-player')).toBeNull();
+    expect(screen.queryByRole('alert')).toBeNull();
+
+    const link = screen.getByRole('link', { name: 'Generate montage' }) as HTMLAnchorElement;
+    expect(link.getAttribute('href')).toBe('/projects/smoke-ingest');
+  });
+
+  it('reintenta la lectura del timeline desde el estado vacio (US-2-006)', async () => {
+    const getTimeline = vi
+      .fn()
+      .mockRejectedValueOnce(
+        new RenderApiError('TIMELINE_NOT_FOUND', 'no timeline stored', 404, null),
+      )
+      .mockResolvedValue(previewTimelineFixture());
+    renderPage({ getTimeline });
+
+    await waitFor(() => expect(screen.getByTestId('timeline-empty-state')).toBeTruthy());
+    fireEvent.click(screen.getByRole('button', { name: 'Retry' }));
+
+    await waitFor(() => expect(screen.getByTestId('timeline-player')).toBeTruthy());
+    expect(getTimeline).toHaveBeenCalledTimes(2);
+  });
+
+  it('sigue mostrando el ErrorNotice con su code para cualquier otro fallo de lectura (US-2-006)', async () => {
     renderPage({
       getTimeline: vi
         .fn()
-        .mockRejectedValue(
-          new RenderApiError('TIMELINE_NOT_FOUND', 'no timeline stored', 404, null),
-        ),
+        .mockRejectedValue(new RenderApiError('TIMELINE_INVALID', 'not a timeline', 422, null)),
     });
 
-    await waitFor(() => expect(screen.getByText(/TIMELINE_NOT_FOUND/)).toBeTruthy());
-    expect(screen.queryByTestId('timeline-player')).toBeNull();
+    await waitFor(() => expect(screen.getByText('TIMELINE_INVALID')).toBeTruthy());
+    expect(screen.queryByTestId('timeline-empty-state')).toBeNull();
   });
 
   it('tras una accion de trim, el TimelinePlayer recibe el draft (no el saved) y no se emite ningun request de escritura (T-07 / CA-204)', async () => {
@@ -257,6 +285,7 @@ describe('ProjectPreviewPage', () => {
     const getTimeline = vi.fn().mockResolvedValue(previewTimelineFixture());
     const job = {
       id: 'job-0001',
+      kind: 'render',
       slug: 'smoke-ingest',
       state: 'queued' as const,
       createdAt: '2026-09-09T10:00:00.000Z',

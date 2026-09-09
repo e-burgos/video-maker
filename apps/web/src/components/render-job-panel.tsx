@@ -1,4 +1,8 @@
-import { isTerminalRenderJobState, showsFrameProgress } from '../api/parse-render-job';
+import {
+  isTerminalRenderJobState,
+  showsAssetProgress,
+  showsFrameProgress,
+} from '../api/parse-render-job';
 import { useRenderApi } from '../api/render-api-context';
 import { renderJobDeliverableUrl } from '../api/render-job-artifact';
 import { useApiAction } from '../hooks/use-api-action';
@@ -48,9 +52,16 @@ export function RenderJobPanel({ slug, jobId }: RenderJobPanelProps) {
 
       {job.progress !== null && <p className="text-sm text-slate-400">stage: {job.progress.stage}</p>}
 
-      {showsFrameProgress(job.progress) && (
+      {job.kind === 'render' && showsFrameProgress(job.progress) && (
         <p className="font-mono text-xs text-slate-400">
           {job.progress.renderedFrames ?? '—'}/{job.progress.totalFrames ?? '—'} frames (
+          {job.progress.percent ?? '—'}%)
+        </p>
+      )}
+
+      {job.kind === 'montage' && showsAssetProgress(job.progress) && (
+        <p className="font-mono text-xs text-slate-400">
+          {job.progress.processedAssets ?? '—'}/{job.progress.totalAssets ?? '—'} assets (
           {job.progress.percent ?? '—'}%)
         </p>
       )}
@@ -61,7 +72,7 @@ export function RenderJobPanel({ slug, jobId }: RenderJobPanelProps) {
         </p>
       )}
 
-      {job.state === 'succeeded' && (
+      {job.kind === 'render' && job.state === 'succeeded' && (
         <a
           href={renderJobDeliverableUrl(slug, job.id)}
           className="inline-block rounded-md border border-emerald-500/50 px-3 py-1 text-sm text-emerald-100"

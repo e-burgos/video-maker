@@ -1,10 +1,18 @@
 import { responseShapeUnexpected } from './render-api-error';
 import {
+  JOB_KINDS,
+  MONTAGE_STAGES,
   RENDER_JOB_STATES,
   RENDER_PIPELINE_STAGES,
   TERMINAL_RENDER_JOB_STATES,
 } from './render-api-types';
 import type {
+  Job,
+  JobKind,
+  MontageJob,
+  MontageJobProgress,
+  MontageJobReport,
+  MontageStage,
   RenderApiErrorPayload,
   RenderDeliverableReport,
   RenderIntermediatesReport,
@@ -38,6 +46,14 @@ export function isRenderPipelineStage(value: unknown): value is RenderPipelineSt
   return typeof value === 'string' && (RENDER_PIPELINE_STAGES as readonly string[]).includes(value);
 }
 
+export function isJobKind(value: unknown): value is JobKind {
+  return typeof value === 'string' && (JOB_KINDS as readonly string[]).includes(value);
+}
+
+export function isMontageStage(value: unknown): value is MontageStage {
+  return typeof value === 'string' && (MONTAGE_STAGES as readonly string[]).includes(value);
+}
+
 export function isTerminalRenderJobState(state: RenderJobState): boolean {
   return (TERMINAL_RENDER_JOB_STATES as readonly RenderJobState[]).includes(state);
 }
@@ -46,6 +62,33 @@ export function showsFrameProgress(
   progress: RenderJobProgress | null,
 ): progress is RenderJobProgress & { stage: 'render' } {
   return progress !== null && progress.stage === 'render';
+}
+
+export function showsAssetProgress(
+  progress: MontageJobProgress | null,
+): progress is MontageJobProgress {
+  return progress !== null && (progress.stage === 'probe' || progress.stage === 'transcribe');
+}
+
+function isMontageJobProgress(value: unknown): value is MontageJobProgress {
+  return (
+    isRecord(value) &&
+    isMontageStage(value['stage']) &&
+    isNumberOrNull(value['processedAssets']) &&
+    isNumberOrNull(value['totalAssets']) &&
+    isNumberOrNull(value['percent'])
+  );
+}
+
+function isMontageJobReport(value: unknown): value is MontageJobReport {
+  return (
+    isRecord(value) &&
+    typeof value['catalogPath'] === 'string' &&
+    typeof value['timelinePath'] === 'string' &&
+    typeof value['editDecisionListPath'] === 'string' &&
+    typeof value['preset'] === 'string' &&
+    typeof value['seed'] === 'number'
+  );
 }
 
 function isRenderJobProgress(value: unknown): value is RenderJobProgress {
@@ -104,35 +147,73 @@ function isRenderApiErrorPayload(value: unknown): value is RenderApiErrorPayload
   return isRecord(value) && typeof value['code'] === 'string' && typeof value['message'] === 'string';
 }
 
-function isRenderJob(value: unknown): value is RenderJob {
+function hasJobBaseShape(value: unknown): value is Record<string, unknown> {
   return (
     isRecord(value) &&
     typeof value['id'] === 'string' &&
+    isJobKind(value['kind']) &&
     typeof value['slug'] === 'string' &&
     isRenderJobState(value['state']) &&
     typeof value['createdAt'] === 'string' &&
     isStringOrNull(value['startedAt']) &&
     isStringOrNull(value['finishedAt']) &&
-    (value['progress'] === null || isRenderJobProgress(value['progress'])) &&
-    (value['report'] === null || isRenderPipelineReport(value['report'])) &&
     (value['error'] === null || isRenderApiErrorPayload(value['error']))
   );
 }
 
-export function parseRenderJob(value: unknown): RenderJob {
-  if (!isRenderJob(value)) {
-    throw responseShapeUnexpected(200, 'a render job document');
+function isJob(value: unknown): value is Job {
+  if (!hasJobBaseShape(value)) {
+    return false;
+  }
+
+  if (value['kind'] === 'montage') {
+    return (
+      (value['progress'] === null || isMontageJobProgress(value['progress'])) &&
+      (value['report'] === null || isMontageJobReport(value['report']))
+    );
+  }
+
+  return (
+    (value['progress'] === null || isRenderJobProgress(value['progress'])) &&
+    (value['report'] === null || isRenderPipelineReport(value['report']))
+  );
+}
+
+export function parseJob(value: unknown): Job {
+  if (!isJob(value)) {
+    throw responseShapeUnexpected(200, 'a job document');
   }
 
   return value;
+}
+
+export function parseRenderJob(value: unknown): RenderJob {
+  const job = parseJob(value);
+  if (job.kind !== 'render') {
+    throw responseShapeUnexpected(200, 'a render job document');
+  }
+
+  return job;
+}
+
+export function parseMontageJob(value: unknown): MontageJob {
+  const job = parseJob(value);
+  if (job.kind !== 'montage') {
+    throw responseShapeUnexpected(200, 'a montage job document');
+  }
+
+  return job;
 }
 
 function isRenderJobSummary(value: unknown): value is RenderJobSummary {
   return (
     isRecord(value) &&
     typeof value['id'] === 'string' &&
+    isJobKind(value['kind']) &&
     isRenderJobState(value['state']) &&
-    (value['stage'] === null || isRenderPipelineStage(value['stage'])) &&
+    (value['stage'] === null ||
+      isRenderPipelineStage(value['stage']) ||
+      isMontageStage(value['stage'])) &&
     isStringOrNull(value['errorCode']) &&
     typeof value['createdAt'] === 'string' &&
     isStringOrNull(value['startedAt']) &&

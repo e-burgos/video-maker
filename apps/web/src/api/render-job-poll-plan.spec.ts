@@ -10,6 +10,7 @@ import type { RenderJob, RenderJobState } from './render-api-types';
 function jobWithState(state: RenderJobState): RenderJob {
   return {
     id: 'job-0001',
+    kind: 'render',
     slug: 'smoke-ingest',
     state,
     createdAt: '2026-09-09T10:00:00.000Z',

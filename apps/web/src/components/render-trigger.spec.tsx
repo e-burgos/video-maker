@@ -26,6 +26,7 @@ function renderTrigger(
 function renderJob(overrides: Partial<RenderJob> = {}): RenderJob {
   return {
     id: 'job-0001',
+    kind: 'render',
     slug: 'smoke-ingest',
     state: 'queued',
     createdAt: '2026-09-09T10:00:00.000Z',
