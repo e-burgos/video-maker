@@ -18,6 +18,11 @@ import {
   handlePutTimeline,
 } from './handlers/montage-handler';
 import { handleCreateProject, handleGetProject, handleListProjects } from './handlers/projects-handler';
+import {
+  handleGetStoryboard,
+  handleGetStoryboardPrompts,
+  handlePutStoryboard,
+} from './handlers/storyboard-handler';
 import { handleHealth } from './health-handler';
 import { JSON_CONTENT_TYPE } from './http-message';
 import type { HttpRequestLine, HttpResponse } from './http-message';
@@ -75,6 +80,12 @@ export async function handleRequest(
         return await handlePutEditDecisionList(deps, store, params, request);
       case 'projects.files.get':
         return await handleGetArtifact(deps, store, params, request);
+      case 'projects.storyboard.get':
+        return await handleGetStoryboard(deps, store, params);
+      case 'projects.storyboard.put':
+        return await handlePutStoryboard(deps, store, params, request);
+      case 'projects.storyboard.prompts':
+        return await handleGetStoryboardPrompts(deps, store, params);
       case 'projects.jobs.create':
         return await handleCreateRenderJob(deps, store, params, request, runtime);
       case 'projects.jobs.list':

@@ -1,0 +1,170 @@
+{
+  "type": "result",
+  "subtype": "success",
+  "is_error": false,
+  "api_error_status": null,
+  "duration_ms": 81663,
+  "duration_api_ms": 80635,
+  "num_turns": 2,
+  "result": "",
+  "stop_reason": "end_turn",
+  "session_id": "60f01523-5505-4fca-8c85-3d92be0adf80",
+  "total_cost_usd": 0.21137775000000003,
+  "usage": {
+    "input_tokens": 4,
+    "cache_creation_input_tokens": 34927,
+    "cache_read_input_tokens": 25915,
+    "output_tokens": 4841,
+    "server_tool_use": {
+      "web_search_requests": 0,
+      "web_fetch_requests": 0
+    },
+    "service_tier": "standard",
+    "cache_creation": {
+      "ephemeral_1h_input_tokens": 34927,
+      "ephemeral_5m_input_tokens": 0
+    },
+    "inference_geo": "",
+    "iterations": [
+      {
+        "input_tokens": 1,
+        "output_tokens": 2,
+        "cache_read_input_tokens": 25915,
+        "cache_creation_input_tokens": 7415,
+        "cache_creation": {
+          "ephemeral_5m_input_tokens": 0,
+          "ephemeral_1h_input_tokens": 7415
+        },
+        "type": "message"
+      }
+    ],
+    "speed": "standard"
+  },
+  "modelUsage": {
+    "claude-sonnet-4-6": {
+      "inputTokens": 4,
+      "outputTokens": 4841,
+      "cacheReadInputTokens": 25915,
+      "cacheCreationInputTokens": 34927,
+      "webSearchRequests": 0,
+      "costUSD": 0.21137775000000003,
+      "contextWindow": 200000,
+      "maxOutputTokens": 32000
+    }
+  },
+  "permission_denials": [],
+  "structured_output": {
+    "title": "3 Trampas Caras · Nx + pnpm",
+    "language": "es-AR",
+    "format": "9:16",
+    "captionsStyle": "bold white text, black drop-shadow, bottom-centered, 36px, all-caps",
+    "musicTags": [
+      "lo-fi",
+      "tech",
+      "hip-hop",
+      "instrumental",
+      "chill"
+    ],
+    "characters": [],
+    "scenes": [
+      {
+        "narration": "Abrís la terminal, corrés pnpm install, y ya ahí pueden estar pasando tres cosas que te van a arruinar el día.",
+        "visualPrompt": "Developer hands typing 'pnpm install' in a dark terminal window. Green dependency output scrolling fast. Shot from above, moody blue desk lighting, mechanical keyboard visible.",
+        "visualSource": "asset",
+        "assetId": "raw/aroll/clip01.mp4",
+        "estimatedDurationMs": 6000,
+        "musicTags": [
+          "lo-fi",
+          "tech",
+          "hip-hop"
+        ],
+        "sfxTags": [
+          "keyboard",
+          "typing",
+          "whoosh"
+        ]
+      },
+      {
+        "narration": "Trampa uno: dos package managers conviviendo. pnpm-lock y yarn.lock en el mismo repo. El cache de Nx se vuelve una lotería.",
+        "visualPrompt": "Split terminal view showing both pnpm-lock.yaml and yarn.lock files highlighted in red in the project root. Dark code editor, red warning icons next to each lockfile.",
+        "visualSource": "remotion-scene",
+        "remotionScene": {
+          "kind": "code",
+          "code": "# ❌ TRAMPA 1: dos package managers conviviendo\n\n monorepo/\n ├── pnpm-lock.yaml   ← pnpm\n ├── yarn.lock        ← ¿quién lo metió?\n └── package.json\n\n# El cache de Nx lee el hash del lockfile.\n# Con dos lockfiles, nunca sabe qué cambió.\n\n# ✅ Solo uno. Borrá el que sobra.",
+          "codeLanguage": "bash"
+        },
+        "estimatedDurationMs": 9000,
+        "musicTags": [
+          "lo-fi",
+          "tech"
+        ],
+        "sfxTags": [
+          "error",
+          "glitch",
+          "buzz"
+        ]
+      },
+      {
+        "narration": "Trampa dos: creaste un proyecto fuera de apps o libs. Nx no lo detecta, el grafo queda roto y los affected te mienten.",
+        "visualPrompt": "Code editor file tree showing a 'packages/mi-util' folder dimmed and disconnected from the Nx project graph, while 'apps/' and 'libs/' are highlighted in green. Dark UI, terminal in background.",
+        "visualSource": "remotion-scene",
+        "remotionScene": {
+          "kind": "code",
+          "code": "# ❌ TRAMPA 2: proyecto fuera del layout de Nx\n\n monorepo/\n ├── apps/\n ├── libs/\n └── packages/mi-util/   ← Nx no lo ve\n\n# nx.json define appsDir y libsDir.\n# Lo que esté afuera no existe en el grafo.\n\n# ✅ Mové todo a apps/ o libs/\n#    o declaralo en nx.json → workspaceLayout",
+          "codeLanguage": "bash"
+        },
+        "estimatedDurationMs": 9000,
+        "musicTags": [
+          "lo-fi",
+          "tech"
+        ],
+        "sfxTags": [
+          "error",
+          "glitch",
+          "buzz"
+        ]
+      },
+      {
+        "narration": "Trampa tres: el alias declarado solo en tsconfig. Vite y Jest lo ignoran. Build verde, tests en llamas.",
+        "visualPrompt": "Code editor split in three panels: tsconfig.base.json showing path alias in green, vite.config.ts showing empty resolve.alias in red, jest.config.ts showing moduleNameMapper missing in red. Dark theme.",
+        "visualSource": "remotion-scene",
+        "remotionScene": {
+          "kind": "code",
+          "code": "// ❌ TRAMPA 3: alias solo en tsconfig\n\n// tsconfig.base.json ✅\n\"paths\": { \"@mi/ui\": [\"libs/ui/src/index.ts\"] }\n\n// vite.config.ts ❌\nresolve: { alias: {} }  // vacío → runtime explota\n\n// jest.config.ts ❌\nmoduleNameMapper: {}    // vacío → tests explotan\n\n// ✅ Declaralo en los tres resolventes.",
+          "codeLanguage": "typescript"
+        },
+        "estimatedDurationMs": 9000,
+        "musicTags": [
+          "lo-fi",
+          "tech"
+        ],
+        "sfxTags": [
+          "error",
+          "glitch",
+          "buzz"
+        ]
+      },
+      {
+        "narration": "Tres trampas, horas perdidas. ¿Cuál te quemó? Comentá abajo.",
+        "visualPrompt": "Bold text card on dark background: '3 trampas, horas perdidas.' with a fire emoji. Minimalist style, developer aesthetic, neon accent color.",
+        "visualSource": "remotion-scene",
+        "remotionScene": {
+          "kind": "text",
+          "text": "¿Cuál de las tres te quemó? 🔥\nComentá abajo 👇"
+        },
+        "estimatedDurationMs": 5000,
+        "musicTags": [
+          "lo-fi",
+          "chill"
+        ],
+        "sfxTags": [
+          "chime",
+          "success"
+        ]
+      }
+    ]
+  },
+  "terminal_reason": "completed",
+  "fast_mode_state": "off",
+  "uuid": "7d5b2ee6-3bcf-41b4-bf60-ea0640f28a20"
+}

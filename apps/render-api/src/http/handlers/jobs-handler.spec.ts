@@ -4,9 +4,11 @@ import { createCallLog } from '../../__fixtures__/call-log';
 import { createControllableRenderMutedVideo } from '../../__fixtures__/controllable-render';
 import type { FakeObjectStorageSeed } from '../../__fixtures__/fake-object-storage';
 import { createFakeObjectStorage } from '../../__fixtures__/fake-object-storage';
+import { createFakeAiAgent } from '../../__fixtures__/fake-ai-agent';
 import { createFakeRenderApiDependencies } from '../../__fixtures__/fake-render-api-dependencies';
 import { requestLine } from '../../__fixtures__/http-request';
 import { buildMinimalTimeline } from '../../__fixtures__/minimal-timeline';
+import { buildStoryboardDocument, buildStoryboardProposal } from '../../__fixtures__/storyboard-fixtures';
 import type { StoreConfig } from '../../config/store-config';
 import { toErrorPayload } from '../../errors/to-error-payload';
 import type { Job, RenderJob } from '../../jobs/render-job';
@@ -355,6 +357,204 @@ describe('handleCreateRenderJob', () => {
       expect(runtime.jobs.listBySlug('acme-launch')).toHaveLength(1);
 
       await runtime.jobs.whenIdle();
+    });
+  });
+
+  describe('storyboard job creation', () => {
+    const STORYBOARD_KEYS = RENDER_JOB_RESPONSE_KEYS;
+
+    function storyboardHarness(seed?: FakeObjectStorageSeed) {
+      const callLog = createCallLog();
+      const storage = createFakeObjectStorage(callLog, {
+        directories: [`${STORE.mediaRoot}/smoke-ingest`, `${STORE.mediaRoot}/smoke-ingest/work`],
+        ...(seed ?? {}),
+      });
+      const fakeAgent = createFakeAiAgent(buildStoryboardProposal(), callLog);
+      const deps = createFakeRenderApiDependencies(callLog, { storage, aiAgent: fakeAgent.agent });
+      return { deps, storage, runtime: createRenderApiRuntime(deps) };
+    }
+
+    it('answers 202 with kind storyboard and the same job envelope as the other kinds', async () => {
+      const { deps, runtime } = storyboardHarness();
+
+      const response = await handleCreateRenderJob(
+        deps,
+        STORE,
+        { slug: 'smoke-ingest' },
+        jsonBodyRequest('smoke-ingest', { kind: 'storyboard', brief: 'Un video sobre Nx.' }),
+        runtime,
+      );
+      const body = response.body as Job;
+
+      expect(response.status).toBe(202);
+      expect(response.headers.location).toBe(`/jobs/${body.id}`);
+      expect(body.kind).toBe('storyboard');
+      expect(Object.keys(body).sort()).toEqual(STORYBOARD_KEYS);
+      expect(runtime.jobs.listBySlug('smoke-ingest')).toHaveLength(1);
+
+      await runtime.jobs.whenIdle();
+    });
+
+    it('accepts scriptText as the alternative input', async () => {
+      const { deps, runtime } = storyboardHarness();
+
+      const response = await handleCreateRenderJob(
+        deps,
+        STORE,
+        { slug: 'smoke-ingest' },
+        jsonBodyRequest('smoke-ingest', { kind: 'storyboard', scriptText: 'Hola. Hoy vemos Nx.' }),
+        runtime,
+      );
+
+      expect(response.status).toBe(202);
+
+      await runtime.jobs.whenIdle();
+    });
+
+    interface StoryboardRejectionCase {
+      readonly title: string;
+      readonly code: string;
+      readonly body: Record<string, unknown>;
+    }
+
+    const STORYBOARD_REJECTIONS: readonly StoryboardRejectionCase[] = [
+      { title: 'no input at all', code: 'STORYBOARD_INPUT_INVALID', body: { kind: 'storyboard' } },
+      {
+        title: 'both brief and scriptText',
+        code: 'STORYBOARD_INPUT_INVALID',
+        body: { kind: 'storyboard', brief: 'idea', scriptText: 'guion' },
+      },
+      {
+        title: 'a blank brief',
+        code: 'STORYBOARD_INPUT_INVALID',
+        body: { kind: 'storyboard', brief: '   ' },
+      },
+      {
+        title: 'a non-boolean overwrite',
+        code: 'STORYBOARD_OVERWRITE_INVALID',
+        body: { kind: 'storyboard', brief: 'idea', overwrite: 'yes' },
+      },
+    ];
+
+    it.each(STORYBOARD_REJECTIONS)('rejects $title with $code and registers no job', async ({ code, body }) => {
+      const { deps, runtime } = storyboardHarness();
+
+      await expect(
+        handleCreateRenderJob(deps, STORE, { slug: 'smoke-ingest' }, jsonBodyRequest('smoke-ingest', body), runtime),
+      ).rejects.toMatchObject({ code });
+      expect(runtime.jobs.listBySlug('smoke-ingest')).toEqual([]);
+    });
+
+    it('rejects an unknown kind and names the three valid ones', async () => {
+      const { deps, runtime } = storyboardHarness();
+
+      await expect(
+        handleCreateRenderJob(
+          deps,
+          STORE,
+          { slug: 'smoke-ingest' },
+          jsonBodyRequest('smoke-ingest', { kind: 'voice' }),
+          runtime,
+        ),
+      ).rejects.toMatchObject({ code: 'JOB_KIND_INVALID', expected: "'render', 'montage' or 'storyboard'" });
+      expect(runtime.jobs.listBySlug('smoke-ingest')).toEqual([]);
+    });
+
+    it('answers 409 STORYBOARD_ALREADY_EXISTS without overwrite and registers no job', async () => {
+      const { deps, runtime } = storyboardHarness({
+        files: [
+          {
+            path: `${STORE.mediaRoot}/smoke-ingest/work/storyboard.json`,
+            contents: JSON.stringify(buildStoryboardDocument()),
+          },
+        ],
+      });
+
+      await expect(
+        handleCreateRenderJob(
+          deps,
+          STORE,
+          { slug: 'smoke-ingest' },
+          jsonBodyRequest('smoke-ingest', { kind: 'storyboard', brief: 'idea' }),
+          runtime,
+        ),
+      ).rejects.toMatchObject({ code: 'STORYBOARD_ALREADY_EXISTS', resource: 'work/storyboard.json' });
+      expect(runtime.jobs.listBySlug('smoke-ingest')).toEqual([]);
+    });
+
+    it('answers 202 with overwrite true over an existing storyboard', async () => {
+      const { deps, runtime } = storyboardHarness({
+        files: [
+          {
+            path: `${STORE.mediaRoot}/smoke-ingest/work/storyboard.json`,
+            contents: JSON.stringify(buildStoryboardDocument()),
+          },
+        ],
+      });
+
+      const response = await handleCreateRenderJob(
+        deps,
+        STORE,
+        { slug: 'smoke-ingest' },
+        jsonBodyRequest('smoke-ingest', { kind: 'storyboard', brief: 'idea', overwrite: true }),
+        runtime,
+      );
+
+      expect(response.status).toBe(202);
+
+      await runtime.jobs.whenIdle();
+    });
+
+    it('runs the job to succeeded and reports the storyboard it wrote', async () => {
+      const { deps, runtime, storage } = storyboardHarness();
+
+      const response = await handleCreateRenderJob(
+        deps,
+        STORE,
+        { slug: 'smoke-ingest' },
+        jsonBodyRequest('smoke-ingest', { kind: 'storyboard', brief: 'Un video sobre Nx.' }),
+        runtime,
+      );
+      const created = response.body as Job;
+
+      await runtime.jobs.whenIdle();
+      const finished = runtime.jobs.get(created.id);
+
+      expect(finished?.state).toBe('succeeded');
+      expect(finished?.report).toMatchObject({ storyboardPath: 'work/storyboard.json', sceneCount: 3 });
+      expect(await storage.stat(`${STORE.mediaRoot}/smoke-ingest/work/storyboard.json`)).not.toBeNull();
+    });
+
+    it('cancels a queued storyboard job with 200 and canceled', async () => {
+      const { deps, runtime } = storyboardHarness();
+
+      const first = (
+        await handleCreateRenderJob(
+          deps,
+          STORE,
+          { slug: 'smoke-ingest' },
+          jsonBodyRequest('smoke-ingest', { kind: 'storyboard', brief: 'primero' }),
+          runtime,
+        )
+      ).body as Job;
+      const second = (
+        await handleCreateRenderJob(
+          deps,
+          STORE,
+          { slug: 'smoke-ingest' },
+          jsonBodyRequest('smoke-ingest', { kind: 'storyboard', brief: 'segundo', overwrite: true }),
+          runtime,
+        )
+      ).body as Job;
+
+      const cancellation = await handleCancelRenderJob({ jobId: second.id }, runtime);
+
+      expect(cancellation.status).toBe(200);
+      expect((cancellation.body as Job).state).toBe('canceled');
+      expect((cancellation.body as Job).report).toBeNull();
+
+      await runtime.jobs.whenIdle();
+      expect(runtime.jobs.get(first.id)?.state).toBe('succeeded');
     });
   });
 });

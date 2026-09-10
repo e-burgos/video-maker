@@ -1,0 +1,203 @@
+{
+  "type": "object",
+  "properties": {
+    "title": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Title of the video."
+    },
+    "language": {
+      "type": "string",
+      "minLength": 2,
+      "description": "BCP-47 language tag the narration is written in, for example es-AR or en-US."
+    },
+    "format": {
+      "type": "string",
+      "enum": [
+        "9:16",
+        "16:9",
+        "1:1"
+      ],
+      "description": "Aspect ratio of the deliverable."
+    },
+    "captionsStyle": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Caption style applied to every scene that does not override it."
+    },
+    "musicTags": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      },
+      "description": "Mood tags for the music bed of the whole video."
+    },
+    "characters": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "minLength": 1,
+            "description": "Short name used to refer to the character across scenes."
+          },
+          "visualDescription": {
+            "type": "string",
+            "minLength": 1,
+            "description": "Self-contained physical description repeated in every visual prompt so the character stays consistent across separately generated shots."
+          }
+        },
+        "required": [
+          "name",
+          "visualDescription"
+        ],
+        "additionalProperties": false
+      },
+      "description": "Every recurring character shown in the video."
+    },
+    "scenes": {
+      "minItems": 1,
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "narration": {
+            "type": "string",
+            "minLength": 1,
+            "description": "Spoken voice-over text for this scene, in the storyboard language."
+          },
+          "visualPrompt": {
+            "type": "string",
+            "minLength": 1,
+            "description": "Prompt the user pastes into an external image or video generator. Self-contained: it repeats the description of every character it shows."
+          },
+          "visualSource": {
+            "type": "string",
+            "enum": [
+              "upload",
+              "asset",
+              "remotion-scene"
+            ],
+            "description": "upload: the user brings generated footage. asset: an existing catalog asset is reused. remotion-scene: no footage is needed and remotionScene must be filled."
+          },
+          "assetId": {
+            "description": "Required when visualSource is asset. Id of the catalog asset to reuse.",
+            "type": "string",
+            "minLength": 1
+          },
+          "remotionScene": {
+            "description": "Required when visualSource is remotion-scene.",
+            "type": "object",
+            "properties": {
+              "kind": {
+                "type": "string",
+                "enum": [
+                  "title",
+                  "text",
+                  "code",
+                  "image-kenburns"
+                ],
+                "description": "Which native Remotion scene renders this beat when no generated footage is used."
+              },
+              "title": {
+                "description": "Required for kind=title. Headline shown on screen.",
+                "type": "string",
+                "minLength": 1
+              },
+              "subtitle": {
+                "description": "Optional second line, only for kind=title.",
+                "type": "string",
+                "minLength": 1
+              },
+              "text": {
+                "description": "Required for kind=text. Body copy shown on screen.",
+                "type": "string",
+                "minLength": 1
+              },
+              "code": {
+                "description": "Required for kind=code. Source snippet shown on screen.",
+                "type": "string",
+                "minLength": 1
+              },
+              "codeLanguage": {
+                "description": "Required for kind=code. Language name used for highlighting, lowercase.",
+                "type": "string",
+                "minLength": 1
+              },
+              "assetId": {
+                "description": "Optional catalog asset id for kind=image-kenburns.",
+                "type": "string",
+                "minLength": 1
+              },
+              "zoomFrom": {
+                "description": "Required for kind=image-kenburns. Starting zoom factor, 1 means no zoom.",
+                "type": "number",
+                "minimum": 1,
+                "maximum": 3
+              },
+              "zoomTo": {
+                "description": "Required for kind=image-kenburns. Ending zoom factor, 1 means no zoom.",
+                "type": "number",
+                "minimum": 1,
+                "maximum": 3
+              }
+            },
+            "required": [
+              "kind"
+            ],
+            "additionalProperties": false
+          },
+          "estimatedDurationMs": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991,
+            "description": "Rough duration of the scene in milliseconds. The real duration is later taken from the voice track."
+          },
+          "captionsStyle": {
+            "description": "Overrides the storyboard caption style for this scene only.",
+            "type": "string",
+            "minLength": 1
+          },
+          "musicTags": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "minLength": 1
+            },
+            "description": "Mood tags used to pick a music bed, lowercase english words."
+          },
+          "sfxTags": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "minLength": 1
+            },
+            "description": "Sound effect tags for this scene, lowercase english words."
+          }
+        },
+        "required": [
+          "narration",
+          "visualPrompt",
+          "visualSource",
+          "estimatedDurationMs",
+          "musicTags",
+          "sfxTags"
+        ],
+        "additionalProperties": false
+      },
+      "description": "Scenes in playback order."
+    }
+  },
+  "required": [
+    "title",
+    "language",
+    "format",
+    "captionsStyle",
+    "musicTags",
+    "characters",
+    "scenes"
+  ],
+  "additionalProperties": false
+}

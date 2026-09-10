@@ -1,5 +1,5 @@
 import type { MontagePresetName } from '@video-maker/auto-montage';
-import type { Timeline } from '@video-maker/timeline-core';
+import type { StoryboardSource, Timeline } from '@video-maker/timeline-core';
 
 import type { RenderApiErrorCode, RenderApiErrorPayload, RenderPipelineStage } from '../errors/render-api-error';
 import type { RenderPipelineReport } from '../pipeline/run-render-pipeline';
@@ -21,10 +21,13 @@ export function isTerminalRenderJobState(state: RenderJobState): boolean {
   return TERMINAL_RENDER_JOB_STATES.some((terminal) => terminal === state);
 }
 
-export type JobKind = 'render' | 'montage';
+export type JobKind = 'render' | 'montage' | 'storyboard';
 
 export const MONTAGE_STAGES = ['discover', 'probe', 'transcribe', 'plan'] as const;
 export type MontageStage = (typeof MONTAGE_STAGES)[number];
+
+export const STORYBOARD_STAGES = ['collect', 'propose', 'persist'] as const;
+export type StoryboardStage = (typeof STORYBOARD_STAGES)[number];
 
 export interface RenderJobProgress {
   readonly stage: RenderPipelineStage;
@@ -38,6 +41,27 @@ export interface MontageJobProgress {
   readonly processedAssets: number | null;
   readonly totalAssets: number | null;
   readonly percent: number | null;
+}
+
+export interface StoryboardJobProgress {
+  readonly stage: StoryboardStage;
+  readonly percent: number | null;
+}
+
+export interface StoryboardJobUsage {
+  readonly tokensIn: number;
+  readonly tokensOut: number;
+  readonly costUsd: number | null;
+  readonly model: string | null;
+}
+
+export interface StoryboardJobReport {
+  readonly storyboardPath: string;
+  readonly storyboardId: string;
+  readonly source: StoryboardSource;
+  readonly language: string;
+  readonly sceneCount: number;
+  readonly usage: StoryboardJobUsage;
 }
 
 export interface MontageJobReport {
@@ -70,13 +94,19 @@ export type MontageJob = JobBase & {
   readonly report: MontageJobReport | null;
 };
 
-export type Job = RenderJob | MontageJob;
+export type StoryboardJob = JobBase & {
+  readonly kind: 'storyboard';
+  readonly progress: StoryboardJobProgress | null;
+  readonly report: StoryboardJobReport | null;
+};
+
+export type Job = RenderJob | MontageJob | StoryboardJob;
 
 export interface JobSummary {
   readonly id: string;
   readonly kind: JobKind;
   readonly state: RenderJobState;
-  readonly stage: RenderPipelineStage | MontageStage | null;
+  readonly stage: RenderPipelineStage | MontageStage | StoryboardStage | null;
   readonly errorCode: RenderApiErrorCode | null;
   readonly createdAt: string;
   readonly startedAt: string | null;
@@ -85,7 +115,7 @@ export interface JobSummary {
 
 export type RenderJobSummary = JobSummary;
 
-export type CreateJobInput = CreateRenderJobInput | CreateMontageJobInput;
+export type CreateJobInput = CreateRenderJobInput | CreateMontageJobInput | CreateStoryboardJobInput;
 
 export interface CreateRenderJobInput {
   readonly kind: 'render';
@@ -102,8 +132,17 @@ export interface CreateMontageJobInput {
   readonly seed: number;
 }
 
+export interface CreateStoryboardJobInput {
+  readonly kind: 'storyboard';
+  readonly slug: string;
+  readonly projectRoot: string;
+  readonly brief: string | null;
+  readonly scriptText: string | null;
+}
+
 export function toJob(record: RenderJob): RenderJob;
 export function toJob(record: MontageJob): MontageJob;
+export function toJob(record: StoryboardJob): StoryboardJob;
 export function toJob(record: Job): Job;
 export function toJob(record: Job): Job {
   switch (record.kind) {
@@ -125,6 +164,19 @@ export function toJob(record: Job): Job {
         id: record.id,
         slug: record.slug,
         kind: 'montage',
+        state: record.state,
+        createdAt: record.createdAt,
+        startedAt: record.startedAt,
+        finishedAt: record.finishedAt,
+        progress: record.progress,
+        report: record.report,
+        error: record.error,
+      };
+    case 'storyboard':
+      return {
+        id: record.id,
+        slug: record.slug,
+        kind: 'storyboard',
         state: record.state,
         createdAt: record.createdAt,
         startedAt: record.startedAt,

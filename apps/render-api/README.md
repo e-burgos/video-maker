@@ -51,6 +51,11 @@ injects.
 | `WHISPER_CPP_PATH` | — | Path to the `whisper-cli` binary used to transcribe `aroll` assets during a `montage` job's `transcribe` stage. Without this variable, it is resolved via `PATH`. |
 | `WHISPER_MODEL_PATH` | — | Path to the Whisper GGML model file `whisper-cli` loads. Unlike the three binaries above this is a model file, not an executable, and is never resolved via `PATH` — it must point at an actual file on disk or `GET /health` reports it unresolved and any `montage` job's `transcribe` stage fails with `503 MEDIA_BINARY_NOT_FOUND`. Never commit an actual path or the model file itself; only the variable name belongs in version control. |
 
+| `CLAUDE_CLI_PATH` | `claude` | Path to the Claude Code CLI used as the AI agent of a `storyboard` job. Without this variable it is resolved via `PATH`. **No API key is involved**: the CLI authenticates with the subscription already installed on the machine. If it cannot be started, a `storyboard` job fails with `503 AI_AGENT_UNAVAILABLE`. |
+| `CLAUDE_CLI_CWD` | the OS temporary directory | Working directory the agent process runs in. The default is deliberately **outside this repository**: from the repo root the CLI would load this project's `CLAUDE.md` and settings and answer as an SDD orchestrator instead of a storyboard writer. Point it somewhere else only if you know why. |
+| `CLAUDE_CLI_TIMEOUT_MS` | `600000` (10 min) | Positive integer. Zero, negative or non-numeric makes the `storyboard` job fail with `SERVER_CONFIG_INVALID`. A real call took 70-100 s on this machine. |
+| `CLAUDE_CLI_MODEL` | — | Model alias passed to the CLI (`sonnet`, `opus`, …). Unset lets the CLI pick its own default. |
+
 **Never commit values for any of the four binary variables above** (or for any other secret in
 `.env`) — only their names belong in this file or in any other tracked document.
 
@@ -84,7 +89,7 @@ path below and are not repeated per endpoint.
 
 | Method | Path | Purpose |
 | --- | --- | --- |
-| `GET` | `/health` | Service health probe. Reports engine module and media binary resolution (now four binaries: `ffmpeg`, `ffprobe`, `whisperCli`, `whisperModel`), plus `capabilities: { renderPipeline, assetStore, jobQueue, montageQueue }`, `cycle` and the queue's `jobs: { running, queued }` counters. Always 200, in both the `ok` and `degraded` states — neither the asset store nor the job queue's load enters the health calculation. `montageQueue` is always `true`: a `montage` job can always be created, whether or not the four binaries resolve — an unresolved binary only fails the job itself, at the stage that needs it (`503 MEDIA_BINARY_NOT_FOUND`), the same contract `renderPipeline`/`jobQueue` already had. |
+| `GET` | `/health` | Service health probe. Reports engine module and media binary resolution (now four binaries: `ffmpeg`, `ffprobe`, `whisperCli`, `whisperModel`), plus `capabilities: { renderPipeline, assetStore, jobQueue, montageQueue, storyboardQueue }`, `cycle` and the queue's `jobs: { running, queued }` counters. Always 200, in both the `ok` and `degraded` states — neither the asset store nor the job queue's load enters the health calculation. The `claude` CLI is deliberately **not** in `binaries`: that list is resolved by `@video-maker/media-local`, and adding it would report `degraded` on every machine without Claude Code installed, CI included. `montageQueue` is always `true`: a `montage` job can always be created, whether or not the four binaries resolve — an unresolved binary only fails the job itself, at the stage that needs it (`503 MEDIA_BINARY_NOT_FOUND`), the same contract `renderPipeline`/`jobQueue` already had. |
 | `GET` | `/projects` | Lists every project directory under `RENDER_API_MEDIA_ROOT`, ascending by slug, with its five layout flags (`raw`, `catalog`, `timeline`, `edl`, `out`). A missing media root answers `200 []`; files and non-portable directory names are ignored silently. |
 | `POST` | `/projects` | Creates the canonical project layout for a slug: `raw/aroll`, `raw/broll`, `raw/images`, `raw/audio`, `work`, `out`, in that exact order. Body `{ "slug": "my-project" }`; `content-type` is not required. `409` if the project already exists — the existing project is never touched. |
 | `GET` | `/projects/:slug` | Project detail: layout flags plus `assetSource` (`catalog` \| `raw-scan`) and `assetCounts` by role, both derived from the same resolver `GET .../assets` uses, so the two endpoints never disagree. |
@@ -96,6 +101,9 @@ path below and are not repeated per endpoint.
 | `PUT` | `/projects/:slug/edl` | Same contract as `PUT .../timeline`, for `work/edl.json`. |
 | `GET` | `/projects/:slug/files/*path` | Downloads any artifact under `raw/`, `work/` or `out/` as raw bytes — it never parses the content, even for `timeline.json`/`edl.json` (that is what keeps the "same bytes as the CLI" guarantee, D-16). Supports a single-range `Range` header (`206` satisfiable, `416` unsatisfiable with `content-range: bytes */<size>`); a malformed or multi-range header is ignored and the whole file is served with `200` (RFC 7233 §3.1). A directory answers `404 ARTIFACT_NOT_FOUND` — there is no directory listing. Also serves a render job's deliverable — see "Downloading a job's deliverable" below. |
 | `POST` | `/projects/:slug/jobs` | Creates a job. The body is optional, and every field inside it is optional (`{ kind?: 'render' \| 'montage', preset?: string, seed?: number, overwrite?: boolean }`). An absent body, an empty object, or a body that mentions no `kind` at all all mean `kind: 'render'` — **byte-identical to the endpoint's behavior before `cycle-01` of `spec-e-burgos-007-web-montage`** (retro-compatibility contract, see "Montage jobs" below). A syntactically invalid JSON body is new behavior this cycle: it now answers `400 REQUEST_BODY_INVALID_JSON` instead of being silently ignored (no existing client sends a body on this endpoint, so nothing breaks). `202` with header `location: /jobs/<id>` and the full job as body; `state` is `"running"` if the single job slot is free, `"queued"` otherwise. Render-branch errors (unchanged): `422 PROJECT_SLUG_INVALID`, `404 PROJECT_NOT_FOUND`, `404 TIMELINE_NOT_FOUND`, `422 TIMELINE_INVALID`. New errors, montage branch only: `422 JOB_KIND_INVALID`, `422 MONTAGE_PRESET_INVALID`, `422 MONTAGE_SEED_INVALID`, `422 MONTAGE_OVERWRITE_INVALID`, `409 TIMELINE_ALREADY_EXISTS`. |
+| `GET` | `/projects/:slug/storyboard` | Returns the stored `StoryboardDocument` from `work/storyboard.json`, parsed and schema-validated. `404 STORYBOARD_NOT_FOUND` when absent; `422 STORYBOARD_INVALID` when the stored document does not validate. Same contract shape as `GET .../timeline`. |
+| `PUT` | `/projects/:slug/storyboard` | Replaces the stored `StoryboardDocument` (full document, not a patch). Validated **before** the project is resolved, so an invalid document never touches the filesystem, and written with the same serializer as `timeline.json`/`edl.json`. This is how a hand edit survives: a `storyboard` job refuses to overwrite an existing document without `overwrite: true`. |
+| `GET` | `/projects/:slug/storyboard/prompts` | The visual prompts as `text/plain; charset=utf-8` with an explicit `content-length`: the character sheet first, then one block per scene **numbered from `01`** and annotated with its visual source. Scenes that need no external footage are listed too — skipping them would break the numbering the batch import relies on (`01.mp4` → scene 1). |
 | `GET` | `/projects/:slug/jobs` | Lists the project's jobs in creation order, each reduced to a summary (`id`, `kind`, `state`, `stage`, `errorCode`, `createdAt`, `startedAt`, `finishedAt`) — never the full `report` or `error`; use `GET /jobs/:jobId` for those. `kind` is the only field this cycle adds; every field that existed before keeps its name and meaning (RNF-2). Does not check that the project exists: a slug with no jobs answers `200 { "slug", "jobs": [] }` whether or not the project does. |
 | `GET` | `/jobs/:jobId` | Full job detail, in any of its six states, for either `kind`. Always `200`, even `state: "failed"` — the job's own failure is not a transport error; the typed `error` is embedded in the body instead. `404 RENDER_JOB_NOT_FOUND` for an id the queue does not know. The id is never validated as a path segment: the lookup is a `Map` read, not a filesystem access. |
 | `DELETE` | `/jobs/:jobId` | Requests cancellation. See "Cancelling a job" below for the exact status per prior state. |
@@ -292,6 +300,122 @@ is the summary:
   immediately after. See "Known issue" below: once a render has run, `SIGTERM` is already
   documented (CA-033) to answer `exit=143`, not `0`.
 - `media/` (the dev's own fixture) was never written to — only the three scratch copies were.
+
+## Storyboard jobs (`spec-e-burgos-008-ai-storyboard`, `cycle-01`)
+
+A third `kind` in the **same** queue turns an idea, or an already written script, into
+`work/storyboard.json`: the document that governs the generative mode of the studio. The AI is not
+a service and not an SDK — it is **a local binary invoked through the same injectable
+`CommandRunner`** the engine uses for `ffmpeg`, `ffprobe` and `whisper-cli`. There is **no API
+key**: `claude -p` authenticates with the subscription installed on the machine.
+
+```bash
+# an idea to turn into a storyboard
+curl -sS -X POST http://127.0.0.1:4401/projects/my-project/jobs \
+  -H 'content-type: application/json' \
+  -d '{"kind":"storyboard","brief":"A 40s vertical video about the three costliest Nx monorepo traps."}'
+
+# an already written script to split into scenes, replacing an existing storyboard
+curl -sS -X POST http://127.0.0.1:4401/projects/my-project/jobs \
+  -H 'content-type: application/json' \
+  -d '{"kind":"storyboard","scriptText":"Hola, soy Esteban. Hoy te muestro...","overwrite":true}'
+```
+
+**Exactly one of `brief` or `scriptText`.** Neither, both, or a blank string is
+`422 STORYBOARD_INPUT_INVALID`, evaluated **before** any job is registered. `overwrite` defaults to
+`false`; without it, a project that already has `work/storyboard.json` answers
+`409 STORYBOARD_ALREADY_EXISTS` and no job appears in the listing. The storyboard is the one thing
+the user edits by hand (`PUT .../storyboard`): regenerating it silently would throw that work away.
+
+**Stages** (`GET /jobs/:jobId → progress`, monotonic, same mechanism as the other two kinds):
+
+| Stage | What runs | Percent |
+| --- | --- | --- |
+| `collect` | Project inventory: catalog assets (role, kind, duration), the A-roll transcript if one exists, and the previous storyboard if one exists. All three go into the prompt. | 33 |
+| `propose` | One `claude -p` call. This is the slow stage: 70-100 s on this machine. | 66 |
+| `persist` | The proposal is re-validated against `StoryboardProposalSchema`, ids and 1-based indexes are assigned by the service (never by the model), and the document is written. | 100 |
+
+Cancellation is cooperative and identical to the other kinds: checkpoints sit **between** stages,
+never inside the agent call.
+
+**How the agent is invoked** (`src/ai/claude-cli-ai-agent.ts`): `--print <userPrompt>
+--system-prompt <systemPrompt> --output-format json --json-schema <derived schema> --tools ""
+--permission-mode dontAsk --disable-slash-commands`, in `CLAUDE_CLI_CWD`. `--tools ""` disables
+every tool, so the subprocess cannot read or write anything: it is a text-to-JSON transformer, not
+an agent. The neutral `cwd` keeps it from loading this repo's `CLAUDE.md`. `dontAsk` keeps a
+permission prompt from hanging the job until the timeout.
+
+> **The JSON Schema must not declare `$schema`.** Measured on `claude` 2.1.123: with a
+> `"$schema"` key present, `--json-schema` is **ignored in silence** — the response comes back
+> `is_error: false`, `subtype: "success"` and **without `structured_output`**, carrying prose in
+> `result`. `storyboardProposalJsonSchema()` strips `$schema` and `$id` for that reason, and a test
+> holds the line.
+
+**Typed errors** (never leak `stderr`, absolute host paths or `.stack`):
+
+| Code | HTTP | When |
+| --- | --- | --- |
+| `AI_AGENT_UNAVAILABLE` | 503 | The CLI could not be started. Install it, sign it in, or set `CLAUDE_CLI_PATH`. |
+| `AI_AGENT_RATE_LIMITED` | 429 | The account plan limit was reached. Wait for the window to reset. |
+| `AI_AGENT_FAILED` | 502 | The CLI ran but did not complete the request. |
+| `AI_AGENT_INVALID_OUTPUT` | 502 | The answer had no `structured_output`, or it did not pass `StoryboardProposalSchema`. |
+| `STORYBOARD_INPUT_INVALID` | 422 | `brief`/`scriptText`: neither, both, or not a non-empty string. |
+| `STORYBOARD_OVERWRITE_INVALID` | 422 | `overwrite` is not a boolean. |
+| `STORYBOARD_ALREADY_EXISTS` | 409 | A storyboard exists and `overwrite` is not `true`. |
+| `STORYBOARD_NOT_FOUND` | 404 | `GET`/`prompts` on a project with no storyboard. |
+| `STORYBOARD_INVALID` | 422 | The document does not pass `StoryboardDocumentSchema`. |
+
+### Real-process verification — the storyboard job (CA-013, CA-014, CA-015)
+
+Copy-paste. It calls the real `claude` binary and spends real subscription quota.
+
+```bash
+# 0. preconditions
+pgrep -fl 'ffmpeg|whisper-cli|chrome-headless'   # must print nothing
+
+# 1. a temporary media root: never verify against media/ itself
+SMOKE=$(mktemp -d)
+cp -R media/smoke-ingest "$SMOKE/smoke-ingest"
+rm -f "$SMOKE/smoke-ingest/work/storyboard.json"
+
+# 2. the binary, with the root .env loaded and SWC_NODE_PROJECT set
+set -a && source .env && set +a
+SWC_NODE_PROJECT=tsconfig.base.json \
+RENDER_API_MEDIA_ROOT="$SMOKE" RENDER_API_PORT=4401 CLAUDE_CLI_MODEL=sonnet \
+  node -r ./apps/render-api/src/server-register.cjs apps/render-api/src/main.ts &
+
+# 3. VERIFY YOU ARE TALKING TO YOUR OWN BUILD, not to a leftover server on that port.
+#    A stale render-api from another cycle answers 200 to /health and the smoke goes on lying.
+curl -sS --retry 30 --retry-delay 1 --retry-all-errors http://127.0.0.1:4401/health \
+  | grep -q '"storyboardQueue":true' && echo "own build OK" || echo "WRONG SERVER — change the port"
+
+# 4. the job, from a brief
+JOB=$(curl -sS -X POST http://127.0.0.1:4401/projects/smoke-ingest/jobs \
+  -H 'content-type: application/json' \
+  -d '{"kind":"storyboard","brief":"Un video vertical de 40 segundos sobre las tres trampas mas caras de un monorepo Nx con pnpm."}' \
+  | python3 -c 'import json,sys; print(json.load(sys.stdin)["id"])')
+
+until curl -sS "http://127.0.0.1:4401/jobs/$JOB" \
+  | python3 -c 'import json,sys; sys.exit(0 if json.load(sys.stdin)["state"] in ("succeeded","failed","canceled") else 1)'; do sleep 3; done
+curl -sS "http://127.0.0.1:4401/jobs/$JOB"
+
+# 5. the document and the numbered prompt sheet
+curl -sS http://127.0.0.1:4401/projects/smoke-ingest/storyboard
+curl -sS -D - http://127.0.0.1:4401/projects/smoke-ingest/storyboard/prompts
+
+# 6. the guard, then the script branch
+curl -sS -o /dev/null -w '%{http_code}\n' -X POST http://127.0.0.1:4401/projects/smoke-ingest/jobs \
+  -H 'content-type: application/json' -d '{"kind":"storyboard","brief":"otra idea"}'   # 409
+curl -sS -X POST http://127.0.0.1:4401/projects/smoke-ingest/jobs \
+  -H 'content-type: application/json' \
+  -d '{"kind":"storyboard","scriptText":"Hola. Hoy vemos tres trampas.","overwrite":true}'
+```
+
+A `429` is a legitimate outcome, not a defect: the subscription is shared with whatever else is
+running on the machine. Record it and retry when the window resets.
+
+Evidence of the executed run, with the literal prompt and the literal CLI response:
+`sdd/specs/spec-e-burgos-008-ai-storyboard/cycles/cycle-01/artifacts/`.
 
 ## D-11 — no MinIO in this cycle
 

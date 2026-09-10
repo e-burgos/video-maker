@@ -14,6 +14,7 @@ describe('createRenderApiRuntime', () => {
     const second = createRenderApiRuntime(deps);
 
     const job = first.jobs.create({
+      kind: 'render',
       slug: 'acme-launch',
       projectRoot: '/var/data/media/acme-launch',
       timeline: buildMinimalTimeline(),

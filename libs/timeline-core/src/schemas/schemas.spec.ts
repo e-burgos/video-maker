@@ -69,6 +69,20 @@ const PUBLIC_VALUE_EXPORTS = [
   'buildJsonSchemaBundle',
   'serializeJsonSchemaFile',
   'timelineToJsonSchema',
+  'RemotionSceneKindSchema',
+  'RemotionSceneSchema',
+  'STORYBOARD_SCHEMA_VERSION',
+  'StoryboardCharacterProposalSchema',
+  'StoryboardCharacterSchema',
+  'StoryboardDocumentSchema',
+  'StoryboardFormatSchema',
+  'StoryboardProposalSchema',
+  'StoryboardSceneProposalSchema',
+  'StoryboardSceneSchema',
+  'StoryboardSourceSchema',
+  'VisualSourceSchema',
+  'storyboardProposalJsonSchema',
+  'toStoryboardDocument',
 ].sort();
 
 const minimalTimeline: Timeline = {

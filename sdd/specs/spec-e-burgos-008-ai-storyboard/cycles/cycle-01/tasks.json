@@ -1,0 +1,232 @@
+{
+  "$schema": "../../../../schemas/cycle-tasks.schema.json",
+  "spec": "spec-e-burgos-008-ai-storyboard",
+  "cycle": 1,
+  "module": "ai-storyboard",
+  "apps": [
+    "apps/render-api",
+    "libs/timeline-core"
+  ],
+  "flow": "lite",
+  "user_stories_generated": true,
+  "prerequisites": {
+    "tasks_generated": true
+  },
+  "tasks": [
+    {
+      "id": "TASK-001",
+      "title": "Define the StoryboardDocument contract and its derived JSON Schema in libs/timeline-core",
+      "user_stories": [
+        "US-08-001",
+        "US-08-004"
+      ],
+      "estimation_hours": 4,
+      "story_points": 5,
+      "depends_on": [],
+      "status": "done",
+      "files": [
+        "libs/timeline-core/src/schemas/storyboard.schema.ts",
+        "libs/timeline-core/src/schemas/storyboard.schema.spec.ts",
+        "libs/timeline-core/src/__fixtures__/storyboard.ts",
+        "libs/timeline-core/src/index.ts",
+        "libs/timeline-core/src/schemas/schemas.spec.ts"
+      ],
+      "usage": {
+        "provider_model": "claude/opus",
+        "effort": "high",
+        "agent": "implementor-back",
+        "tokens_in": 92000,
+        "tokens_out": 13000,
+        "approx": true,
+        "source": "declared-estimate",
+        "recorded_at": "2026-09-09"
+      }
+    },
+    {
+      "id": "TASK-002",
+      "title": "Add the AiAgent port, the ClaudeCliAiAgent adapter over the CommandRunner and its typed errors",
+      "user_stories": [
+        "US-08-001",
+        "US-08-005"
+      ],
+      "estimation_hours": 5,
+      "story_points": 5,
+      "depends_on": [
+        "TASK-001"
+      ],
+      "status": "done",
+      "files": [
+        "apps/render-api/src/ai/claude-cli-ai-agent.ts",
+        "apps/render-api/src/ai/claude-cli-ai-agent.spec.ts",
+        "apps/render-api/src/config/ai-agent-config.ts",
+        "apps/render-api/src/config/ai-agent-config.spec.ts",
+        "apps/render-api/src/__fixtures__/fake-ai-agent.ts",
+        "apps/render-api/src/deps/render-api-dependencies.ts",
+        "apps/render-api/src/deps/node-render-api-dependencies.ts",
+        "apps/render-api/src/errors/render-api-error.ts",
+        "apps/render-api/src/errors/http-status-for.ts",
+        "apps/render-api/src/errors/http-status-for.spec.ts",
+        "apps/render-api/src/errors/to-error-payload.ts",
+        "apps/render-api/src/__fixtures__/fake-render-api-dependencies.ts"
+      ],
+      "usage": {
+        "provider_model": "claude/opus",
+        "effort": "high",
+        "agent": "implementor-back",
+        "tokens_in": 78000,
+        "tokens_out": 11000,
+        "approx": true,
+        "source": "declared-estimate",
+        "recorded_at": "2026-09-09"
+      }
+    },
+    {
+      "id": "TASK-003",
+      "title": "Build the project inventory, the model prompts and the plain-text prompt export",
+      "user_stories": [
+        "US-08-001",
+        "US-08-002",
+        "US-08-003"
+      ],
+      "estimation_hours": 3,
+      "story_points": 3,
+      "depends_on": [
+        "TASK-001"
+      ],
+      "status": "done",
+      "files": [
+        "apps/render-api/src/storyboard/storyboard-paths.ts",
+        "apps/render-api/src/storyboard/storyboard-store.ts",
+        "apps/render-api/src/storyboard/storyboard-store.spec.ts",
+        "apps/render-api/src/storyboard/collect-storyboard-inventory.ts",
+        "apps/render-api/src/storyboard/collect-storyboard-inventory.spec.ts",
+        "apps/render-api/src/storyboard/build-storyboard-prompt.ts",
+        "apps/render-api/src/storyboard/build-storyboard-prompt.spec.ts",
+        "apps/render-api/src/storyboard/render-storyboard-prompts.ts",
+        "apps/render-api/src/storyboard/render-storyboard-prompts.spec.ts",
+        "apps/render-api/src/__fixtures__/storyboard-fixtures.ts"
+      ],
+      "usage": {
+        "provider_model": "claude/opus",
+        "effort": "high",
+        "agent": "implementor-back",
+        "tokens_in": 71000,
+        "tokens_out": 14000,
+        "approx": true,
+        "source": "declared-estimate",
+        "recorded_at": "2026-09-09"
+      }
+    },
+    {
+      "id": "TASK-004",
+      "title": "Add the storyboard job kind to the queue with its params, stages and cancellation",
+      "user_stories": [
+        "US-08-001",
+        "US-08-002",
+        "US-08-004"
+      ],
+      "estimation_hours": 4,
+      "story_points": 5,
+      "depends_on": [
+        "TASK-002",
+        "TASK-003"
+      ],
+      "status": "done",
+      "files": [
+        "apps/render-api/src/jobs/render-job.ts",
+        "apps/render-api/src/jobs/render-job-queue.ts",
+        "apps/render-api/src/jobs/storyboard-job-params.ts",
+        "apps/render-api/src/jobs/storyboard-job-params.spec.ts",
+        "apps/render-api/src/jobs/storyboard-job-progress.ts",
+        "apps/render-api/src/jobs/storyboard-job-progress.spec.ts",
+        "apps/render-api/src/jobs/storyboard-pipeline-observer.ts",
+        "apps/render-api/src/jobs/storyboard-pipeline-observer.spec.ts",
+        "apps/render-api/src/jobs/run-storyboard-pipeline.ts",
+        "apps/render-api/src/jobs/run-storyboard-pipeline.spec.ts",
+        "apps/render-api/src/http/handlers/jobs-handler.ts",
+        "apps/render-api/src/http/handlers/jobs-handler.spec.ts",
+        "apps/render-api/src/errors/render-api-error.ts",
+        "apps/render-api/src/errors/http-status-for.ts",
+        "apps/render-api/src/errors/http-status-for.spec.ts",
+        "apps/render-api/src/errors/to-error-payload.ts",
+        "apps/render-api/src/http/render-api-runtime.spec.ts",
+        "apps/render-api/src/http/health-handler.spec.ts"
+      ],
+      "usage": {
+        "provider_model": "claude/opus",
+        "effort": "high",
+        "agent": "implementor-back",
+        "tokens_in": 96000,
+        "tokens_out": 18000,
+        "approx": true,
+        "source": "declared-estimate",
+        "recorded_at": "2026-09-09"
+      }
+    },
+    {
+      "id": "TASK-005",
+      "title": "Expose the storyboard endpoints, the prompt export route and the health capability",
+      "user_stories": [
+        "US-08-003",
+        "US-08-004"
+      ],
+      "estimation_hours": 3,
+      "story_points": 3,
+      "depends_on": [
+        "TASK-004"
+      ],
+      "status": "done",
+      "files": [
+        "apps/render-api/src/http/handlers/storyboard-handler.ts",
+        "apps/render-api/src/http/handlers/storyboard-handler.spec.ts",
+        "apps/render-api/src/http/routes.ts",
+        "apps/render-api/src/http/handle-request.ts",
+        "apps/render-api/src/http/http-message.ts",
+        "apps/render-api/src/http/health-handler.ts",
+        "apps/render-api/src/http/health-handler.spec.ts"
+      ],
+      "usage": {
+        "provider_model": "claude/opus",
+        "effort": "high",
+        "agent": "implementor-back",
+        "tokens_in": 62000,
+        "tokens_out": 12000,
+        "approx": true,
+        "source": "declared-estimate",
+        "recorded_at": "2026-09-09"
+      }
+    },
+    {
+      "id": "TASK-006",
+      "title": "Register the contract in api.json, document the README script and run the real claude -p smoke",
+      "user_stories": [
+        "US-08-001",
+        "US-08-002",
+        "US-08-003"
+      ],
+      "estimation_hours": 3,
+      "story_points": 3,
+      "depends_on": [
+        "TASK-005"
+      ],
+      "status": "done",
+      "files": [
+        "sdd/api.json",
+        "apps/render-api/README.md",
+        "libs/timeline-core/src/schemas/storyboard.schema.ts",
+        "libs/timeline-core/src/schemas/storyboard.schema.spec.ts",
+        "sdd/specs/spec-e-burgos-008-ai-storyboard/cycles/cycle-01/artifacts/smoke-real.md"
+      ],
+      "usage": {
+        "provider_model": "claude/opus",
+        "effort": "high",
+        "agent": "implementor-back",
+        "tokens_in": 84000,
+        "tokens_out": 16000,
+        "approx": true,
+        "source": "declared-estimate",
+        "recorded_at": "2026-09-09"
+      }
+    }
+  ]
+}

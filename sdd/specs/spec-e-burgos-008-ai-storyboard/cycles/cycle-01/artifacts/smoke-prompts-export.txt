@@ -1,0 +1,29 @@
+# 3 Trampas Nx + pnpm que te van a costar caro
+Language: es-AR · Format: 9:16 · Scenes: 8
+
+## Visual prompts
+Save each generated file with the number of its scene, for example 01.mp4 or 03.png.
+
+01. [remotion-scene: title — no footage needed]
+Pantalla de terminal oscura en formato vertical. Texto grande en fuente monoespaciada verde sobre fondo negro: '3 TRAMPAS — Nx + pnpm'. Estética hacker minimalista.
+
+02. [asset: raw/aroll/clip01.mp4 — already in the project]
+Desarrollador frente a una terminal oscura escribiendo comandos. Plano cerrado en pantalla y teclado. Ambiente real, oficina con luz tenue.
+
+03. [remotion-scene: code — no footage needed]
+Terminal mostrando el archivo .npmrc con las líneas only-allow=pnpm y package-manager-strict=true. Fondo negro, fuente monoespaciada verde.
+
+04. [asset: raw/broll/clip01.mp4 — already in the project]
+Footage de pantalla mostrando múltiples terminales abiertas con un grafo de dependencias Nx incompleto, nodos sin conectar. Tono técnico y desordenado.
+
+05. [remotion-scene: code — no footage needed]
+Editor de código mostrando nx.json con la configuración de workspaceLayout. Tema oscuro, resaltado de sintaxis JSON.
+
+06. [asset: raw/aroll/clip01.mp4 — already in the project]
+Desarrollador frente a una terminal oscura escribiendo comandos. Plano cerrado en pantalla y teclado. Ambiente real, oficina con luz tenue.
+
+07. [remotion-scene: code — no footage needed]
+Editor de código con dos bloques visibles: vite.config.ts con resolve.alias y jest.config.ts con moduleNameMapper. Tema oscuro, resaltado TypeScript.
+
+08. [remotion-scene: title — no footage needed]
+Pantalla de terminal oscura en formato vertical con texto en negrita: '¿Ya caíste?' y debajo '💸 Guardalo antes de que te pase factura'. Fondo negro, tipografía monoespaciada verde.

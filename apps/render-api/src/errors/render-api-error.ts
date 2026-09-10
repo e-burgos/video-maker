@@ -1,10 +1,10 @@
-import type { MontageStage } from '../jobs/render-job';
+import type { MontageStage, StoryboardStage } from '../jobs/render-job';
 
 export const RENDER_PIPELINE_STAGES = ['prepare', 'render', 'mix', 'mux', 'verify'] as const;
 
 export type RenderPipelineStage = (typeof RENDER_PIPELINE_STAGES)[number];
 
-export type RenderApiErrorStage = RenderPipelineStage | MontageStage;
+export type RenderApiErrorStage = RenderPipelineStage | MontageStage | StoryboardStage;
 
 export const RENDER_API_ERROR_CODES = [
   'INVALID_TIMELINE',
@@ -52,6 +52,15 @@ export const RENDER_API_ERROR_CODES = [
   'MONTAGE_RAW_MISSING',
   'MONTAGE_INPUT_INVALID',
   'MONTAGE_FAILED',
+  'AI_AGENT_UNAVAILABLE',
+  'AI_AGENT_RATE_LIMITED',
+  'AI_AGENT_FAILED',
+  'AI_AGENT_INVALID_OUTPUT',
+  'STORYBOARD_NOT_FOUND',
+  'STORYBOARD_INVALID',
+  'STORYBOARD_ALREADY_EXISTS',
+  'STORYBOARD_INPUT_INVALID',
+  'STORYBOARD_OVERWRITE_INVALID',
 ] as const;
 
 export type RenderApiErrorCode = (typeof RENDER_API_ERROR_CODES)[number];

@@ -2,10 +2,13 @@ import { once } from 'node:events';
 import { createReadStream, createWriteStream } from 'node:fs';
 import { mkdir, readFile, readdir, rename, stat, unlink, writeFile } from 'node:fs/promises';
 import { randomUUID } from 'node:crypto';
+import { tmpdir } from 'node:os';
 import { isAbsolute, join, relative } from 'node:path/posix';
 
 import { nodeDirectoryReader, nodeFileStatReader } from '@video-maker/auto-montage';
 
+import { createClaudeCliAiAgent } from '../ai/claude-cli-ai-agent';
+import { readAiAgentConfig } from '../config/ai-agent-config';
 import type { StoreConfig } from '../config/store-config';
 import { ENGINE_MODULE_NAMES } from '../engine/engine-modules';
 import type { EngineModuleStatus } from '../engine/engine-modules';
@@ -284,6 +287,12 @@ export function createNodeRenderApiDependencies(
     resolveMontageBinaries: async () => {
       const { resolveBinaries } = await loadMediaLocal();
       return resolveBinaries(env);
+    },
+
+    aiAgent: async (request) => {
+      const { ExecaCommandRunner } = await loadMediaLocal();
+      const config = readAiAgentConfig(env, tmpdir());
+      return createClaudeCliAiAgent(new ExecaCommandRunner(), config)(request);
     },
   };
 }

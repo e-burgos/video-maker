@@ -74,6 +74,27 @@ export type CreateCommandRunnerPort = () => Promise<CommandRunner>;
 
 export type ResolveMontageBinariesPort = () => Promise<ResolvedBinaries>;
 
+export interface AiAgentRequest {
+  readonly systemPrompt: string;
+  readonly userPrompt: string;
+  readonly jsonSchema: unknown;
+}
+
+export interface AiAgentUsage {
+  readonly tokensIn: number;
+  readonly tokensOut: number;
+  readonly costUsd: number | null;
+  readonly durationMs: number | null;
+  readonly model: string | null;
+}
+
+export interface AiAgentResponse {
+  readonly json: unknown;
+  readonly usage: AiAgentUsage;
+}
+
+export type AiAgentPort = (request: AiAgentRequest) => Promise<AiAgentResponse>;
+
 export type RandomIdPort = () => string;
 
 export interface Clock {
@@ -107,4 +128,5 @@ export interface RenderApiDependencies {
   readonly statFile: FileStatReader;
   readonly createCommandRunner: CreateCommandRunnerPort;
   readonly resolveMontageBinaries: ResolveMontageBinariesPort;
+  readonly aiAgent: AiAgentPort;
 }

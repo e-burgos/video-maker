@@ -125,7 +125,7 @@
       "file": "sdd/specs/spec-e-burgos-008-ai-storyboard/spec-e-burgos-008-ai-storyboard.spec.md",
       "module": "ai-storyboard",
       "app": "apps/render-api",
-      "status": "draft",
+      "status": "in-progress",
       "title": "AI Storyboard: Guion, Escenas y Prompts Visuales",
       "created_at": "2026-09-09",
       "completed_at": null,

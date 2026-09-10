@@ -1,0 +1,16 @@
+# Task
+Write a storyboard for the idea below. Write it in the language the idea is written in.
+
+# Idea
+Un video vertical de 40 segundos para Instagram explicando las tres trampas mas caras de un monorepo Nx con pnpm: dos package managers conviviendo, proyectos fuera de apps y libs, y el alias declarado en un solo resolvedor. Tono directo, rioplatense, para devs.
+
+# Project inventory
+Assets already available in this project. Only these ids may be used with visualSource asset.
+- raw/aroll/clip01.mp4 (role: aroll, kind: video, duration: 22500 ms)
+- raw/audio/music01.mp3 (role: audio, kind: audio, duration: 40183 ms)
+- raw/broll/clip01.mp4 (role: broll, kind: video, duration: 5000 ms)
+- raw/images/photo01.jpg (role: image, kind: image, duration: 0 ms)
+
+# Transcript of the footage already recorded
+Use it to stay consistent with what the presenter already said.
+Abrimas LA Terminal Y Ascribimus L Primer Commando. L Commando D Installation Discarga Los Dependentius. Ahura Karemis L Script D Deploy. L Deploy Public A LA Version on L Servitor. Volvimus LA Terminal Y Repetimus L Commando. L Deploy Termina Sin Errors on LA Consala.

@@ -81,8 +81,7 @@
       "completed_at": "2026-09-09"
     }
   ],
-  "in_progress_modules": [],
-  "pending_modules": [
+  "in_progress_modules": [
     {
       "module": "ai-storyboard",
       "spec": "spec-e-burgos-008-ai-storyboard",
@@ -91,8 +90,11 @@
         "libs/timeline-core",
         "apps/web"
       ],
-      "description": "Storyboard generativo: puerto AiAgent sobre `claude -p` local (sin API key), documento work/storyboard.json con hoja de personajes, escenas ordenadas con narración y prompt visual por escena, fuente del visual (subida, asset del catálogo o escena nativa de Remotion), job kind: 'storyboard', endpoints GET/PUT del documento y export de prompts numerado para las herramientas generativas externas"
-    },
+      "description": "Storyboard generativo: puerto AiAgent sobre `claude -p` local (sin API key), documento work/storyboard.json con hoja de personajes, escenas ordenadas con narración y prompt visual por escena, fuente del visual (subida, asset del catálogo o escena nativa de Remotion), job kind: 'storyboard', endpoints GET/PUT del documento y export de prompts numerado para las herramientas generativas externas",
+      "cycles_completed": 1
+    }
+  ],
+  "pending_modules": [
     {
       "module": "voice-over",
       "spec": "spec-e-burgos-009-voice-over",

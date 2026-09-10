@@ -1,0 +1,178 @@
+{
+  "$schema": "../../../../schemas/cycle.schema.json",
+  "cycle": 1,
+  "module": "ai-storyboard",
+  "spec": "spec-e-burgos-008-ai-storyboard",
+  "apps": [
+    "apps/render-api",
+    "libs/timeline-core"
+  ],
+  "phase": "storyboard-backend",
+  "flow": "lite",
+  "objectives": [
+    "Define the StoryboardDocument contract and derive its JSON Schema from the same Zod schema",
+    "Invoke the AI as a local binary through an injectable port, with no API key and no network of our own",
+    "Produce, persist and publish the storyboard from a brief or from a pasted script",
+    "Export the visual prompts as a numbered plain-text list for the external generative tools"
+  ],
+  "status": "completed",
+  "started_at": "2026-09-09",
+  "completed_at": "2026-09-09",
+  "documents": {
+    "plan": "sdd/specs/spec-e-burgos-008-ai-storyboard/cycles/cycle-01/plan.md",
+    "tasks": "sdd/specs/spec-e-burgos-008-ai-storyboard/cycles/cycle-01/tasks.json"
+  },
+  "artifacts": [
+    "sdd/specs/spec-e-burgos-008-ai-storyboard/cycles/cycle-01/artifacts/smoke-real.md",
+    "sdd/specs/spec-e-burgos-008-ai-storyboard/cycles/cycle-01/artifacts/claude-cli-system-prompt.txt",
+    "sdd/specs/spec-e-burgos-008-ai-storyboard/cycles/cycle-01/artifacts/claude-cli-user-prompt.txt",
+    "sdd/specs/spec-e-burgos-008-ai-storyboard/cycles/cycle-01/artifacts/claude-cli-response.json",
+    "sdd/specs/spec-e-burgos-008-ai-storyboard/cycles/cycle-01/artifacts/storyboard-proposal.schema.json",
+    "sdd/specs/spec-e-burgos-008-ai-storyboard/cycles/cycle-01/artifacts/smoke-storyboard-from-brief.json",
+    "sdd/specs/spec-e-burgos-008-ai-storyboard/cycles/cycle-01/artifacts/smoke-storyboard-from-script.json",
+    "sdd/specs/spec-e-burgos-008-ai-storyboard/cycles/cycle-01/artifacts/smoke-prompts-export.txt"
+  ],
+  "metrics": {
+    "tasks_total": 6,
+    "tasks_completed": 6,
+    "story_points": 24,
+    "files_created": [
+      "libs/timeline-core/src/schemas/storyboard.schema.ts",
+      "libs/timeline-core/src/schemas/storyboard.schema.spec.ts",
+      "libs/timeline-core/src/__fixtures__/storyboard.ts",
+      "apps/render-api/src/ai/claude-cli-ai-agent.ts",
+      "apps/render-api/src/ai/claude-cli-ai-agent.spec.ts",
+      "apps/render-api/src/config/ai-agent-config.ts",
+      "apps/render-api/src/config/ai-agent-config.spec.ts",
+      "apps/render-api/src/storyboard/storyboard-paths.ts",
+      "apps/render-api/src/storyboard/storyboard-store.ts",
+      "apps/render-api/src/storyboard/storyboard-store.spec.ts",
+      "apps/render-api/src/storyboard/collect-storyboard-inventory.ts",
+      "apps/render-api/src/storyboard/collect-storyboard-inventory.spec.ts",
+      "apps/render-api/src/storyboard/build-storyboard-prompt.ts",
+      "apps/render-api/src/storyboard/build-storyboard-prompt.spec.ts",
+      "apps/render-api/src/storyboard/render-storyboard-prompts.ts",
+      "apps/render-api/src/storyboard/render-storyboard-prompts.spec.ts",
+      "apps/render-api/src/jobs/storyboard-job-params.ts",
+      "apps/render-api/src/jobs/storyboard-job-params.spec.ts",
+      "apps/render-api/src/jobs/storyboard-job-progress.ts",
+      "apps/render-api/src/jobs/storyboard-job-progress.spec.ts",
+      "apps/render-api/src/jobs/storyboard-pipeline-observer.ts",
+      "apps/render-api/src/jobs/storyboard-pipeline-observer.spec.ts",
+      "apps/render-api/src/jobs/run-storyboard-pipeline.ts",
+      "apps/render-api/src/jobs/run-storyboard-pipeline.spec.ts",
+      "apps/render-api/src/http/handlers/storyboard-handler.ts",
+      "apps/render-api/src/http/handlers/storyboard-handler.spec.ts",
+      "apps/render-api/src/__fixtures__/fake-ai-agent.ts",
+      "apps/render-api/src/__fixtures__/storyboard-fixtures.ts",
+      "sdd/context/apps/render-api/updates/2026-09-09-spec-e-burgos-008-ai-storyboard-cycle-01.md",
+      "sdd/context/libs/timeline-core/updates/2026-09-09-spec-e-burgos-008-ai-storyboard-cycle-01.md",
+      "sdd/memory/journal/2026-09-09-spec-e-burgos-008-ai-storyboard-cycle-01.md"
+    ],
+    "files_modified": [
+      "libs/timeline-core/src/index.ts",
+      "libs/timeline-core/src/schemas/schemas.spec.ts",
+      "apps/render-api/src/deps/render-api-dependencies.ts",
+      "apps/render-api/src/deps/node-render-api-dependencies.ts",
+      "apps/render-api/src/__fixtures__/fake-render-api-dependencies.ts",
+      "apps/render-api/src/errors/render-api-error.ts",
+      "apps/render-api/src/errors/http-status-for.ts",
+      "apps/render-api/src/errors/http-status-for.spec.ts",
+      "apps/render-api/src/errors/to-error-payload.ts",
+      "apps/render-api/src/jobs/render-job.ts",
+      "apps/render-api/src/jobs/render-job-queue.ts",
+      "apps/render-api/src/http/routes.ts",
+      "apps/render-api/src/http/handle-request.ts",
+      "apps/render-api/src/http/http-message.ts",
+      "apps/render-api/src/http/health-handler.ts",
+      "apps/render-api/src/http/health-handler.spec.ts",
+      "apps/render-api/src/http/render-api-runtime.spec.ts",
+      "apps/render-api/src/http/handlers/jobs-handler.ts",
+      "apps/render-api/src/http/handlers/jobs-handler.spec.ts",
+      "apps/render-api/README.md",
+      "sdd/api.json",
+      "sdd/context/constitution.md",
+      "sdd/global.json",
+      "sdd/specs/index.json"
+    ],
+    "files_deleted": [],
+    "usage": {
+      "tokens_in": 560000,
+      "tokens_out": 98000,
+      "approx": true,
+      "source": "declared-estimate",
+      "by_tier": {
+        "claude/opus": {
+          "tokens_in": 560000,
+          "tokens_out": 98000,
+          "approx": true,
+          "source": "declared-estimate"
+        }
+      },
+      "by_agent": [
+        {
+          "agent": "orchestrator",
+          "label": "solo",
+          "provider_model": "claude/opus",
+          "effort": "high",
+          "tokens_in": 560000,
+          "tokens_out": 98000,
+          "approx": true,
+          "source": "declared-estimate",
+          "recorded_at": "2026-09-09"
+        }
+      ]
+    }
+  },
+  "tables_created": [],
+  "endpoints_implemented": [
+    "EP-001",
+    "EP-012",
+    "EP-016",
+    "EP-017",
+    "EP-018"
+  ],
+  "components_created": [],
+  "issues_found": [
+    "Un JSON Schema con la clave $schema desactiva en silencio --json-schema de claude 2.1.123: la respuesta vuelve is_error: false, subtype: success y SIN structured_output, con el JSON en prosa dentro de result. Corregido en el origen (storyboardProposalJsonSchema descarta $schema y $id) y sostenido por un test.",
+    "El smoke arrancó contra un render-api de otro ciclo que seguía vivo en el puerto 4399: GET /health respondió 200 con un capabilities sin storyboardQueue y el guion siguió contra el binario equivocado. El guion del README ahora exige verificar una capacidad que sólo existe en el build bajo prueba.",
+    "Dos tests de spec-005/spec-007 creaban un job sin kind y pasaban porque el ternario anterior los mandaba a la rama montage. Los specs de apps/render-api no se typechequean (tsconfig.lib.json los excluye y Vitest no tipa). Corregidos al contrato declarado; la brecha de typecheck de los specs queda como deuda del subproyecto."
+  ],
+  "reviewer_report": {
+    "approved": true,
+    "date": "2026-09-09",
+    "ca_results": {
+      "CA-001": "PASS — storyboard.schema.spec.ts: documento mínimo y completo parsean; rechazos por visualSource/remotionScene incoherentes, props de otro kind, index fuera de posición e ids repetidos.",
+      "CA-002": "PASS — el JSON Schema se deriva del schema Zod (las claves requeridas de una escena se comparan contra el shape de Zod) y las propuestas de ejemplo validan contra él con Ajv 2020.",
+      "CA-003": "PASS — claude-cli-ai-agent.spec.ts: un test por código (UNAVAILABLE, RATE_LIMITED, FAILED, INVALID_OUTPUT) desde una salida real del CLI, más un test de que el payload no contiene stderr, rutas del host ni stack. Los cuatro status verificados en http-status-for.spec.ts.",
+      "CA-004": "PASS — se asertan los argumentos exactos: --tools \"\", --permission-mode dontAsk, --output-format json, --json-schema con el schema derivado, y un cwd que no es process.cwd().",
+      "CA-005": "PASS — build-storyboard-prompt.spec.ts y collect-storyboard-inventory.spec.ts cubren con y sin catálogo, con y sin transcripción, con y sin storyboard previo. Verificado además en el prompt literal del smoke.",
+      "CA-006": "PASS — storyboard-job-params.spec.ts y jobs-handler.spec.ts: cada entrada inválida da su código y runtime.jobs.listBySlug queda vacío.",
+      "CA-007": "PASS — 409 STORYBOARD_ALREADY_EXISTS sin overwrite (sin job registrado) y 202 con overwrite: true, en test y sobre HTTP real en el smoke.",
+      "CA-008": "PASS — storyboard-handler.spec.ts aserta el set completo de claves con Object.keys(body).sort() sobre el payload del PUT y el envelope del job.",
+      "CA-009": "PASS — render-storyboard-prompts.spec.ts y el smoke: text/plain con content-length, numerado desde 01, hoja de personajes, y las escenas que no se generan afuera también numeradas.",
+      "CA-010": "PASS — storyboard-job-progress.spec.ts (monotonía), storyboard-pipeline-observer.spec.ts y jobs-handler.spec.ts (queued → canceled 200 con report null).",
+      "CA-011": "PASS — health-handler.spec.ts compara el objeto capabilities completo; cycle sigue en 3.",
+      "CA-012": "PASS — git diff --stat package.json pnpm-lock.yaml vacío; pnpm nx run-many -t lint test build verde sin warnings para los 8 proyectos.",
+      "CA-013": "PASS — smoke real ejecutado contra claude -p: job storyboard desde un brief a succeeded en 100,6 s, 8 escenas, es-AR, documento validado al leerlo por GET. Sin 429.",
+      "CA-014": "PASS — rama scriptText con overwrite: succeeded en 70,2 s, source script, 5 escenas cuya narración es el texto del guion sin reescribir.",
+      "CA-015": "PASS — GET /projects/:slug/storyboard/prompts sobre el resultado del smoke: 200, text/plain, content-length 1834, lista numerada guardada en artifacts/.",
+      "CA-016": "PASS — sdd/api.json con EP-016/EP-017/EP-018 nuevos y EP-001/EP-012 en updated con su changelog; pnpm sdd:validate en verde."
+    },
+    "tests": {
+      "sdd:validate": "OK",
+      "render-api": "580/580 PASS — 97,58 % stmts · 91,30 % branch · 99,61 % funcs · 97,55 % lines (piso 80 %)",
+      "timeline-core": "233/233 PASS — 97,62 % stmts · 91,92 % branch · 99,46 % funcs · 97,53 % lines (piso 85 %)",
+      "workspace": "pnpm nx run-many -t lint test build: 8 proyectos verdes sin warnings",
+      "smoke-real": "4 llamadas reales a claude -p: brief (100,6 s, 8 escenas), scriptText (70,2 s, 5 escenas), captura literal de prompt y respuesta (90,6 s), más la corrida de bisección del hallazgo de $schema"
+    },
+    "notes": "El ciclo mete un modelo en el producto sin API key, sin SDK y sin dependencias npm nuevas: la IA es un binario detrás del mismo CommandRunner inyectable que ffmpeg y whisper, con las tools deshabilitadas y cwd neutro fuera del repo. El contrato del documento quedó en libs/timeline-core porque spec-010 produce la Timeline desde él dentro de las libs. El hallazgo caro del ciclo fue que un JSON Schema con la clave $schema desactiva la salida estructurada del CLI en silencio, con is_error: false; lo detectó el smoke real, no la suite, y está corregido en el origen y sostenido por un test.",
+    "follow_ups": [
+      "claude no entra a binaries de GET /health (D-12): una sonda propia del agente que no vuelva degraded a toda máquina sin Claude Code es decisión de un ciclo futuro.",
+      "captionsStyle sale del modelo como frase libre (en el smoke, una descripción en español) en vez de un nombre de estilo: al cerrar spec-012 hay que cerrarlo a un enum en el prompt y en el schema; ídem musicTags/sfxTags con spec-011.",
+      "StoryboardDocumentSchema no está en timelineSchemaRegistry, así que no genera su .schema.json versionado en libs/timeline-core/schemas/. Sumarlo obliga a regenerar el bundle.",
+      "Los *.spec.ts de apps/render-api y libs/timeline-core no se typechequean (tsconfig.lib.json los excluye, Vitest no tipa): un test puede violar el contrato declarado durante ciclos. Un target de typecheck de specs es deuda del subproyecto.",
+      "cycle-02 de esta spec: la UI en apps/web (panel de brief, storyboard editable, botón copiar prompts)."
+    ]
+  }
+}

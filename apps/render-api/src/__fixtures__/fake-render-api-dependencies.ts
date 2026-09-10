@@ -183,5 +183,13 @@ export function createFakeRenderApiDependencies(
       }
       return DEFAULT_RESOLVED_BINARIES;
     },
+
+    aiAgent: async (request) => {
+      callLog.record('aiAgent', request);
+      if (overrides?.aiAgent) {
+        return overrides.aiAgent(request);
+      }
+      throw new Error('createFakeRenderApiDependencies: no aiAgent override configured');
+    },
   };
 }

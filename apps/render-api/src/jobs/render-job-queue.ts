@@ -6,6 +6,10 @@ import type { RenderApiDependencies } from '../deps/render-api-dependencies';
 import type { RenderApiErrorPayload } from '../errors/render-api-error';
 import { toErrorPayload } from '../errors/to-error-payload';
 import { mergeMontageJobProgress, startMontageJobStage } from './montage-job-progress';
+import { startStoryboardJobStage } from './storyboard-job-progress';
+import { isStoryboardPipelineCanceled } from './storyboard-pipeline-observer';
+import type { StoryboardPipelineObserver } from './storyboard-pipeline-observer';
+import { runStoryboardPipeline } from './run-storyboard-pipeline';
 import { isMontagePipelineCanceled } from './montage-pipeline-observer';
 import type { MontagePipelineObserver } from './montage-pipeline-observer';
 import type { RenderPipelineObserver } from '../pipeline/render-pipeline-observer';
@@ -14,7 +18,16 @@ import type { RenderPipelineReport } from '../pipeline/run-render-pipeline';
 import { runRenderPipeline } from '../pipeline/run-render-pipeline';
 import { mergeRenderProgress, startRenderJobStage } from './render-job-progress';
 import { applyRenderJobEvent } from './render-job-state';
-import type { CreateJobInput, Job, MontageJobProgress, MontageJobReport, RenderJobProgress, RenderJobState } from './render-job';
+import type {
+  CreateJobInput,
+  Job,
+  MontageJobProgress,
+  MontageJobReport,
+  RenderJobProgress,
+  RenderJobState,
+  StoryboardJobProgress,
+  StoryboardJobReport,
+} from './render-job';
 import { toJob } from './render-job';
 import { runMontagePipeline } from './run-montage-pipeline';
 
@@ -64,7 +77,15 @@ interface MontageJobRecord extends JobRecordBase {
   report: MontageJobReport | null;
 }
 
-type JobRecord = RenderJobRecord | MontageJobRecord;
+interface StoryboardJobRecord extends JobRecordBase {
+  readonly kind: 'storyboard';
+  readonly brief: string | null;
+  readonly scriptText: string | null;
+  progress: StoryboardJobProgress | null;
+  report: StoryboardJobReport | null;
+}
+
+type JobRecord = RenderJobRecord | MontageJobRecord | StoryboardJobRecord;
 
 export function createRenderJobQueue(deps: RenderApiDependencies): RenderJobQueue {
   const records = new Map<string, JobRecord>();
@@ -155,11 +176,46 @@ export function createRenderJobQueue(deps: RenderApiDependencies): RenderJobQueu
     settle(record, report, failure);
   }
 
+  async function runStoryboardJob(record: StoryboardJobRecord): Promise<void> {
+    const observer: StoryboardPipelineObserver = {
+      stageStarted: (stage) => {
+        record.progress = startStoryboardJobStage(record.progress, stage);
+      },
+      cancellationRequested: () => record.state === 'canceling',
+    };
+
+    let report: StoryboardJobReport | null = null;
+    let failure: RenderApiErrorPayload | null = null;
+
+    try {
+      report = await runStoryboardPipeline(
+        {
+          project: resolveMediaProject(record.projectRoot),
+          storyboardId: record.id,
+          brief: record.brief,
+          scriptText: record.scriptText,
+        },
+        deps,
+        observer,
+      );
+    } catch (cause) {
+      failure = isStoryboardPipelineCanceled(cause) ? null : toErrorPayload(cause);
+    }
+
+    settle(record, report, failure);
+  }
+
   async function runJob(record: JobRecord): Promise<void> {
-    if (record.kind === 'render') {
-      await runRenderJob(record);
-    } else {
-      await runMontageJob(record);
+    switch (record.kind) {
+      case 'render':
+        await runRenderJob(record);
+        break;
+      case 'montage':
+        await runMontageJob(record);
+        break;
+      case 'storyboard':
+        await runStoryboardJob(record);
+        break;
     }
 
     activeId = null;
@@ -197,6 +253,24 @@ export function createRenderJobQueue(deps: RenderApiDependencies): RenderJobQueu
     resolveIdle();
   }
 
+  function createJobRecord(base: Omit<JobRecordBase, never>, input: CreateJobInput): JobRecord {
+    switch (input.kind) {
+      case 'render':
+        return { ...base, kind: 'render', timeline: input.timeline, progress: null, report: null };
+      case 'montage':
+        return { ...base, kind: 'montage', preset: input.preset, seed: input.seed, progress: null, report: null };
+      case 'storyboard':
+        return {
+          ...base,
+          kind: 'storyboard',
+          brief: input.brief,
+          scriptText: input.scriptText,
+          progress: null,
+          report: null,
+        };
+    }
+  }
+
   function create(input: CreateJobInput): Job {
     const id = deps.randomId();
     const base = {
@@ -210,10 +284,7 @@ export function createRenderJobQueue(deps: RenderApiDependencies): RenderJobQueu
       error: null,
     };
 
-    const record: JobRecord =
-      input.kind === 'render'
-        ? { ...base, kind: 'render', timeline: input.timeline, progress: null, report: null }
-        : { ...base, kind: 'montage', preset: input.preset, seed: input.seed, progress: null, report: null };
+    const record = createJobRecord(base, input);
 
     records.set(id, record);
     pending.push(id);

@@ -48,6 +48,7 @@ describe('handleHealth', () => {
       assetStore: true,
       jobQueue: true,
       montageQueue: true,
+      storyboardQueue: true,
     });
   });
 
@@ -118,8 +119,8 @@ describe('handleHealth', () => {
       createFakeRenderApiDependencies(createCallLog(), { renderMutedVideo: controllable.port }),
     );
 
-    runtime.jobs.create({ slug: 'acme-launch', projectRoot: PROJECT_ROOT, timeline: buildMinimalTimeline() });
-    runtime.jobs.create({ slug: 'acme-launch', projectRoot: PROJECT_ROOT, timeline: buildMinimalTimeline() });
+    runtime.jobs.create({ kind: 'render', slug: 'acme-launch', projectRoot: PROJECT_ROOT, timeline: buildMinimalTimeline() });
+    runtime.jobs.create({ kind: 'render', slug: 'acme-launch', projectRoot: PROJECT_ROOT, timeline: buildMinimalTimeline() });
 
     const response = await handleHealth(deps, runtime);
     const body = response.body as HealthBody;

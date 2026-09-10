@@ -214,6 +214,21 @@
           "tasks_done": 8
         }
       }
+    },
+    "spec-e-burgos-008-ai-storyboard": {
+      "cycles": {
+        "cycle-01": {
+          "file": "sdd/specs/spec-e-burgos-008-ai-storyboard/cycles/cycle-01/tasks.json",
+          "module": "ai-storyboard",
+          "apps": [
+            "apps/render-api",
+            "libs/timeline-core"
+          ],
+          "status": "completed",
+          "tasks_total": 6,
+          "tasks_done": 6
+        }
+      }
     }
   }
 }

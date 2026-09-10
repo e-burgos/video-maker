@@ -103,3 +103,32 @@ export type { DuckDecisionPlan, DuckingPlanResult, VoiceRange } from './ducking/
 export { buildJsonSchemaBundle, serializeJsonSchemaFile, timelineToJsonSchema } from './schemas/json-schema';
 export type { JsonObject, JsonValue } from './schemas/json-schema';
 export type { SchemaFileName } from './schemas/registry';
+
+export {
+  RemotionSceneKindSchema,
+  RemotionSceneSchema,
+  STORYBOARD_SCHEMA_VERSION,
+  StoryboardCharacterProposalSchema,
+  StoryboardCharacterSchema,
+  StoryboardDocumentSchema,
+  StoryboardFormatSchema,
+  StoryboardProposalSchema,
+  StoryboardSceneProposalSchema,
+  StoryboardSceneSchema,
+  StoryboardSourceSchema,
+  VisualSourceSchema,
+  storyboardProposalJsonSchema,
+  toStoryboardDocument,
+} from './schemas/storyboard.schema';
+export type {
+  RemotionScene,
+  RemotionSceneKind,
+  StoryboardCharacter,
+  StoryboardDocument,
+  StoryboardFormat,
+  StoryboardIdentity,
+  StoryboardProposal,
+  StoryboardScene,
+  StoryboardSource,
+  VisualSource,
+} from './schemas/storyboard.schema';

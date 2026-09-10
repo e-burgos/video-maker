@@ -19,3 +19,17 @@ export interface HttpResponse {
 }
 
 export const JSON_CONTENT_TYPE = 'application/json; charset=utf-8';
+export const PLAIN_TEXT_CONTENT_TYPE = 'text/plain; charset=utf-8';
+
+export function plainTextResponse(status: number, text: string): HttpResponse {
+  const bytes = new TextEncoder().encode(text);
+
+  return {
+    status,
+    headers: { 'content-type': PLAIN_TEXT_CONTENT_TYPE, 'content-length': String(bytes.byteLength) },
+    body: text,
+    stream: async function* stream() {
+      yield bytes;
+    },
+  };
+}

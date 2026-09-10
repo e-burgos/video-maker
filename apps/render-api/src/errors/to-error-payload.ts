@@ -39,7 +39,7 @@ const MESSAGE_BY_CODE: Readonly<Record<RenderApiErrorCode, string>> = {
   REQUEST_BODY_TOO_LARGE: 'The request body exceeds the configured size limit.',
   RENDER_JOB_NOT_FOUND: 'The requested render job does not exist.',
   RENDER_JOB_NOT_CANCELABLE: 'The render job has already finished and cannot be canceled.',
-  JOB_KIND_INVALID: 'The job kind is not render or montage.',
+  JOB_KIND_INVALID: 'The job kind is not render, montage or storyboard.',
   MONTAGE_PRESET_INVALID: 'The montage preset is not one of the known preset names.',
   MONTAGE_SEED_INVALID: 'The montage seed is not a non-negative integer.',
   MONTAGE_OVERWRITE_INVALID: 'The overwrite flag is not a boolean.',
@@ -47,6 +47,15 @@ const MESSAGE_BY_CODE: Readonly<Record<RenderApiErrorCode, string>> = {
   MONTAGE_RAW_MISSING: 'The project has no raw asset role directories to ingest.',
   MONTAGE_INPUT_INVALID: 'The montage input does not have enough usable assets to build a timeline.',
   MONTAGE_FAILED: 'The montage engine failed while producing the timeline.',
+  AI_AGENT_UNAVAILABLE: 'The AI agent command line tool could not be started.',
+  AI_AGENT_RATE_LIMITED: 'The AI agent refused the request because the account plan limit was reached.',
+  AI_AGENT_FAILED: 'The AI agent ran but did not complete the request.',
+  AI_AGENT_INVALID_OUTPUT: 'The AI agent answered with a payload the service could not use.',
+  STORYBOARD_NOT_FOUND: 'The project has no stored storyboard.',
+  STORYBOARD_INVALID: 'The storyboard document does not pass validation.',
+  STORYBOARD_ALREADY_EXISTS: 'A storyboard already exists for this project.',
+  STORYBOARD_INPUT_INVALID: 'A storyboard job needs exactly one of brief or scriptText.',
+  STORYBOARD_OVERWRITE_INVALID: 'The overwrite flag is not a boolean.',
 };
 
 export function toErrorPayload(value: unknown): RenderApiErrorPayload {

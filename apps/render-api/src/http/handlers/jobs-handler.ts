@@ -2,6 +2,9 @@ import type { StoreConfig } from '../../config/store-config';
 import type { RenderApiDependencies } from '../../deps/render-api-dependencies';
 import { PipelineStageError } from '../../errors/pipeline-stage-error';
 import { parseMontageOverwrite, parseMontagePreset, parseMontageSeed } from '../../jobs/montage-job-params';
+import { parseStoryboardInput, parseStoryboardOverwrite } from '../../jobs/storyboard-job-params';
+import { storyboardPath } from '../../storyboard/storyboard-paths';
+import { storyboardExists } from '../../storyboard/storyboard-store';
 import type { JobKind, RenderJobSummary } from '../../jobs/render-job';
 import { toJobSummary } from '../../jobs/render-job';
 import { assertTimelineNotPersisted, assertValidProjectSlug, readStoredTimeline, resolveExistingProject } from '../../store/project-scope';
@@ -28,7 +31,7 @@ function resolveJobKind(value: unknown): JobKind | 'invalid' {
   if (raw === undefined) {
     return 'render';
   }
-  if (raw === 'render' || raw === 'montage') {
+  if (raw === 'render' || raw === 'montage' || raw === 'storyboard') {
     return raw;
   }
   return 'invalid';
@@ -66,7 +69,7 @@ export async function handleCreateRenderJob(
     throw new PipelineStageError({
       code: 'JOB_KIND_INVALID',
       stage: null,
-      expected: "'render' or 'montage'",
+      expected: "'render', 'montage' or 'storyboard'",
     });
   }
 
@@ -85,6 +88,34 @@ export async function handleCreateRenderJob(
   }
 
   const bodyObject = value as Record<string, unknown>;
+
+  if (jobKind === 'storyboard') {
+    const input = parseStoryboardInput(bodyObject);
+    const overwrite = parseStoryboardOverwrite(bodyObject.overwrite);
+
+    if (!overwrite && (await storyboardExists(deps, project))) {
+      throw new PipelineStageError({
+        code: 'STORYBOARD_ALREADY_EXISTS',
+        stage: null,
+        resource: storyboardPath(),
+      });
+    }
+
+    const storyboardJob = runtime.jobs.create({
+      kind: 'storyboard',
+      slug,
+      projectRoot: project.root,
+      brief: input.brief,
+      scriptText: input.scriptText,
+    });
+
+    return {
+      status: 202,
+      headers: { 'content-type': JSON_CONTENT_TYPE, location: `/jobs/${storyboardJob.id}` },
+      body: storyboardJob,
+    };
+  }
+
   const preset = parseMontagePreset(bodyObject.preset);
   const seed = parseMontageSeed(bodyObject.seed);
   const overwrite = parseMontageOverwrite(bodyObject.overwrite);
