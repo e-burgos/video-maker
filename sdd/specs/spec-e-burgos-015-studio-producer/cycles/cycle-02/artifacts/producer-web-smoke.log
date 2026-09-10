@@ -1,0 +1,191 @@
+[0] memory gate
+[assert] ok — no ffmpeg/whisper-cli/piper/chrome-headless process alive (found: none)
+[0] free memory ratio: 45.0%
+[assert] ok — at least 35% of the memory is free (measured 45.0%)
+[assert] ok — no orphan claude -p process from a previous run (found: none)
+[env] filled from the root .env (names only, never values): FFMPEG_PATH, FFPROBE_PATH, WHISPER_CPP_PATH, PIPER_PATH, PIPER_MODEL_PATH
+[assert] ok — the 6 media env vars are present in the environment (missing: none)
+[1] copying raw/ and work/producer/ of media/demo-01 into a temporary media root
+[1] temp media root: /var/folders/lw/gy7lfk_52gq0fv1yvph2fb100000gn/T/producer-smoke-Hkkk13 (no out/, no catalog, no timeline)
+[2] starting apps/render-api against the temporary media root
+[web] [32m✔[0m [33mConsole Ninja[0m extension is connected to [33mVite[0m, see [36mhttps://tinyurl.com/2vt8jxzw[0m
+[render-api] {"event":"listening","host":"127.0.0.1","port":4398}
+[web] (!) Your Vite config uses features that are unsupported by `configLoader: 'native'`, which is planned to become the default in a future major version of Vite:
+  - ESM syntax in a file loaded as CommonJS (apps/web/vite.config.ts:1:1). Use a `.mjs` extension or set `"type": "module"` in the closest package.json
+Set `VITE_CONFIG_NATIVE_IGNORE_WARNING=true` to suppress this warning.
+[2] render-api health: ok · capabilities {"renderPipeline":true,"assetStore":true,"jobQueue":true,"montageQueue":true,"storyboardQueue":true,"voiceQueue":true,"producer":true}
+[assert] ok — the service under test exposes capabilities.producer (a stale server on another port answers 200 too)
+[web] 
+  VITE v8.2.2  ready in 685 ms
+
+[web]   ➜  Local:   http://localhost:4210/
+[3] web is up and its /api proxy reaches render-api
+[4] opening the project: the studio lands on the producer page
+[console-error] Failed to load resource: the server responded with a status of 404 (Not Found)
+[assert] ok — the projects list opens each project on the producer (http://localhost:4210/projects/demo-01/producer)
+[4] inventory on screen: material in this projectaroll · 1broll · 3image · 8audio · 1logo · 1
+[assert] ok — the empty state lists the real material of the project
+[assert] ok — the logo of raw/logo/ is part of the inventory
+[5] turn 1 — sending: "Contame qué material hay y proponeme un video de 30 segundos, sin nombrar la marca."
+[5] POST /producer/messages -> 202 {"slug":"demo-01","turnId":"e7cc23b8-0948-4ab7-8b0a-bfa6598b9b09","startedAt":"2026-09-10T22:07:19.091Z","status":"running"}
+[5] live events on screen after 12 s: started
+[assert] ok — the UI shows the events of the turn while it runs
+[5] event 1: started
+[5] event 2: Voy a medir todos los archivos y extraer frames para ver qué muestra cada uno.
+[5] event 3: Bash - ffprobe raw/aroll/clip01.mp4
+[5] event 4: Bash - ffprobe raw/audio/music01.mp3
+[5] event 5: Bash - ffprobe raw/broll/lentes.mp4
+[5] event 6: Bash - ffprobe raw/broll/siochana6.mp4
+[5] event 7: Bash - ffprobe raw/broll/siochana7.mp4
+[5] event 8: Ahora extraigo frames de todos los videos e imágenes para ver qué muestran.
+[5] event 9: Bash - ffmpeg raw/aroll/frame_3s.jpg
+[5] event 10: Bash - ffmpeg raw/aroll/frame_10s.jpg
+[5] event 11: Bash - ffmpeg raw/broll/lentes_frame.jpg
+[5] event 12: Bash - ffmpeg raw/broll/siochana6_frame.jpg
+[5] event 13: Bash - ffmpeg raw/broll/siochana7_frame.jpg
+[5] event 14: Ahora veo los frames extraídos y las fotos.
+[5] event 15: Read - Read raw/aroll/frame_3s.jpg
+[5] event 16: Read - Read raw/aroll/frame_10s.jpg
+[5] event 17: Read - Read raw/broll/lentes_frame.jpg
+[5] event 18: Read - Read raw/broll/siochana6_frame.jpg
+[5] event 19: Read - Read raw/broll/siochana7_frame.jpg
+[5] event 20: Read - Read raw/images/estilo.jpg
+[5] event 21: Veo las imágenes restantes.
+[5] event 22: Read - Read raw/images/estilo-2.jpg
+[5] event 23: Read - Read raw/images/mirada.jpg
+[5] event 24: Read - Read raw/images/lentes.jpg
+[5] event 25: Read - Read raw/images/siochana1.jpeg
+[5] event 26: Read - Read raw/images/siochana2.jpeg
+[5] event 27: Read - Read raw/images/siochana3.jpeg
+[5] event 28: Read - Read raw/images/siochana4.jpeg
+[5] event 29: Tengo todo el material. Acá está el inventario y mi propuesta. --- ## Inventario | Archivo | Qué muestra | Duración / Res | |---|---|---| | **A-roll** `clip01.m
+[assert] ok — turn 1 reached a terminal state inside the deadline
+[assert] ok — turn 1 succeeded (got succeeded)
+[5] turn 1: 147.3s · 29 events · 4 suggestions
+[5] chips on screen: ["Dale, producí este video","Cambiá el tono del guion","Usá otro preset","Ajustá el guion"]
+[assert] ok — the answer of the producer arrived with clickable quick replies
+[6] turn 2 — answering with a chip so the producer makes the video
+[6] clicking the chip: "Dale, producí este video"
+[6] POST /producer/messages -> 202 {"slug":"demo-01","turnId":"54293bdd-aeb1-4ff1-addd-90e7ce88c4a8","startedAt":"2026-09-10T22:10:00.062Z","status":"running"}
+[6] event 1: started
+[6] event 2: Empiezo a producir. Primero escribo el plan y el guion, después genero la voz frase por frase con Piper.
+[6] event 3: Write - Write work/producer/plan.md
+[6] event 4: tool-failed
+[6] event 5: Write - Write work/producer/script.txt
+[6] event 6: tool-failed
+[6] event 7: Read - Read work/producer/plan.md
+[6] event 8: Read - Read work/producer/script.txt
+[6] event 9: Hay trabajo previo. Dejo que investigue el estado actual del proyecto antes de arrancar.
+[6] event 10: Bash - ls work
+[6] event 11: Bash - ls work/producer
+[6] event 12: Bash - ls raw/aroll
+[6] event 13: Hay trabajo previo extenso. Voy a medir el estado real antes de continuar.
+[6] event 14: Bash - ffprobe work/producer/voice.wav
+[6] event 15: Bash - ffprobe raw/aroll/clip01.mp4
+[6] event 16: Bash - ls /var/folders/lw/gy7lfk_52gq0fv1yvph2fb100000gn/T/producer-smoke-Hkkk13/demo-01/
+[6] event 17: Bash - ffprobe raw/aroll/clip01.mp4
+[6] event 18: Bash - ls out
+[6] event 19: Bash - ls work/producer/voice
+[6] event 20: El A-roll ya tiene audio muxeado. Voy a ver qué más hizo la sesión anterior.
+[6] event 21: Bash - ls work
+[6] event 22: Bash - ls work/producer/turns
+[6] event 23: Bash - ls work/producer
+[6] event 24: Bash - find */raw/*
+[6] event 25: tool-failed
+[6] event 26: El A-roll ya tiene voz muxeada (AAC, 25.9s — idéntico a la voice.wav). La sesión anterior completó la voz + mux. Ahora toca ingest → plan → render. Verifico que
+[6] event 27: Bash - curl http://127.0.0.1:4398/projects/demo-01
+[6] event 28: API activa, catálogo vacío — hay que correr ingest + plan (job `montage`), luego render. Lanzo el montage.
+[6] event 29: Bash - queued montage job
+[6] job b8f133d1-a33e-4c7e-96e0-f7f4e88f5e50 montage -> running (transcribe)
+[6] event 30: Bash - curl http://127.0.0.1:4398/jobs/b8f133d1-a33e-4c7e-96e0-f7f4e88f5e50
+[6] event 31: Transcribiendo con Whisper. Voy a seguir polineando hasta que termine.
+[6] event 32: Bash - curl http://127.0.0.1:4398/jobs/b8f133d1-a33e-4c7e-96e0-f7f4e88f5e50
+[6] event 33: Bash - curl http://127.0.0.1:4398/jobs/b8f133d1-a33e-4c7e-96e0-f7f4e88f5e50
+[6] job b8f133d1-a33e-4c7e-96e0-f7f4e88f5e50 montage -> succeeded (plan)
+[6] event 34: Montage exitoso en 14s. Script alineado (7 correcciones Whisper). Reviso el timeline antes de renderizar.
+[6] event 35: Read - Read work/timeline.json
+[6] event 36: Timeline perfecto: 778 frames (26s), 3 B-roll overlays (mirada, estilo, lentes), captions sync, logo bottom-right, música con ducking -12 dB. Lanzo el render.
+[6] event 37: Bash - queued render job
+[render-api] [32m✔[0m [33mConsole Ninja[0m extension is connected to [33mWebpack[0m, see [36mhttps://tinyurl.com/2vt8jxzw[0m
+[web] 7:15:41 PM [vite] (client) page reload index.html
+[render-api] [32m✔[0m [33mConsole Ninja[0m extension has disconnected from [33mWebpack[0m
+[6] job 047f5e6b-1650-4aa5-b4ce-adce83cd347f render -> running (render)
+[6] event 38: Bash - curl http://127.0.0.1:4398/jobs/047f5e6b-1650-4aa5-b4ce-adce83cd347f
+[6] event 39: 10% — renderizando. Sigo polineando.
+[6] event 40: Bash - curl http://127.0.0.1:4398/jobs/047f5e6b-1650-4aa5-b4ce-adce83cd347f
+[6] event 41: Bash - curl http://127.0.0.1:4398/jobs/047f5e6b-1650-4aa5-b4ce-adce83cd347f
+[6] event 42: Bash - curl http://127.0.0.1:4398/jobs/047f5e6b-1650-4aa5-b4ce-adce83cd347f
+[6] event 43: Bash - curl http://127.0.0.1:4398/jobs/047f5e6b-1650-4aa5-b4ce-adce83cd347f
+[6] event 44: Bash - curl http://127.0.0.1:4398/jobs/047f5e6b-1650-4aa5-b4ce-adce83cd347f
+[6] job 047f5e6b-1650-4aa5-b4ce-adce83cd347f render -> succeeded (verify)
+[6] event 45: Bash - curl http://127.0.0.1:4398/jobs/047f5e6b-1650-4aa5-b4ce-adce83cd347f
+[6] event 46: Render exitoso en 39s. Verifico el MP4 con ffprobe y extraigo 3 frames.
+[6] event 47: Bash - ffprobe out/047f5e6b-1650-4aa5-b4ce-adce83cd347f.mp4
+[6] event 48: Bash - ffmpeg work/producer/preview_2s.jpg
+[6] event 49: Bash - ffmpeg work/producer/preview_10s.jpg
+[6] event 50: Bash - ffmpeg work/producer/preview_20s.jpg
+[6] event 51: Read - Read work/producer/preview_2s.jpg
+[6] event 52: Read - Read work/producer/preview_10s.jpg
+[6] event 53: Read - Read work/producer/preview_20s.jpg
+[6] event 54: **El video está listo.** Verificación completa: | Check | Resultado | |---|---| | Resolución | 1080×1920 (9:16) ✓ | | Duración | 778 frames · 26 s ✓ | | Loudnes
+[assert] ok — turn 2 reached a terminal state inside the deadline
+[6] turn 2: 442.0s · 54 events · jobs seen: ["b8f133d1-a33e-4c7e-96e0-f7f4e88f5e50:running","b8f133d1-a33e-4c7e-96e0-f7f4e88f5e50:succeeded","047f5e6b-1650-4aa5-b4ce-adce83cd347f:running","047f5e6b-1650-4aa5-b4ce-adce83cd347f:succeeded"]
+[assert] ok — turn 2 succeeded (got succeeded)
+[6] jobs of the project after turn 2: ["montage:succeeded","render:succeeded"]
+[assert] ok — the agent enqueued a montage job on this same API
+[7] checking the deliverable the producer left in out/
+[7] out/047f5e6b-1650-4aa5-b4ce-adce83cd347f.mp4: 1080x1920 · 778 frames @ 30/1 · audio aac 48000 Hz
+[assert] ok — the MP4 has real video frames
+[assert] ok — the MP4 carries an audio stream
+[8] preview refreshed: the timeline the producer built is on screen
+[web] 7:17:23 PM [vite] (client) [console.warn] EncodingError: The source image cannot be decoded.
+[8] preview tracks: 1 a-roll · 3 b-roll · 1 voice · 1 music · 28 captions
+[9] logo: driving timeline.logo from the preview and saving it
+[assert] ok — the logo control is enabled because raw/logo/ is in the catalog of the project
+[9] the montage already drew the logo (logo: auto): taking it off first
+[assert] ok — logo off: the timeline PUT was accepted (got 200)
+[9] work/timeline.json without the logo: logo=undefined
+[assert] ok — unchecking the box removed the logo from the document on disk
+[assert] ok — logo on: the timeline PUT was accepted (got 200)
+[9] work/timeline.json on disk now carries logo: {"assetId":"raw/logo/Logo-ancho-transparente.png","position":"bottom-right","widthRatio":0.32,"marginRatio":0.035,"opacity":1}
+[assert] ok — the logo reached work/timeline.json on disk, not just the screen
+[assert] ok — the position saved is the one chosen on screen
+[assert] ok — the logo asset travelled into timeline.assets, so validateTimeline accepts the document
+[10] cancellation: a third short turn is killed from the UI
+[10] POST /producer/messages -> 202 {"slug":"demo-01","turnId":"eec57139-06ec-4c4c-8276-5f3ddace442e","startedAt":"2026-09-10T22:17:25.391Z","status":"running"}
+[10] the third turn settled as canceled on screen
+[10] claude processes alive after the cancellation: none
+[done] spec-015 cycle-02 E2E complete
+
+[timeline]
+2026-09-10T22:07:14.335Z [1] copying raw/ and work/producer/ of media/demo-01 into a temporary media root
+2026-09-10T22:07:14.452Z [1] temp media root: /var/folders/lw/gy7lfk_52gq0fv1yvph2fb100000gn/T/producer-smoke-Hkkk13 (no out/, no catalog, no timeline)
+2026-09-10T22:07:14.453Z [2] starting apps/render-api against the temporary media root
+2026-09-10T22:07:15.392Z [2] render-api health: ok · capabilities {"renderPipeline":true,"assetStore":true,"jobQueue":true,"montageQueue":true,"storyboardQueue":true,"voiceQueue":true,"producer":true}
+2026-09-10T22:07:15.714Z [3] web is up and its /api proxy reaches render-api
+2026-09-10T22:07:17.224Z [4] opening the project: the studio lands on the producer page
+2026-09-10T22:07:18.968Z [4] inventory on screen: material in this projectaroll · 1broll · 3image · 8audio · 1logo · 1
+2026-09-10T22:07:19.023Z [5] turn 1 — sending: "Contame qué material hay y proponeme un video de 30 segundos, sin nombrar la marca."
+2026-09-10T22:07:19.120Z [5] POST /producer/messages -> 202 {"slug":"demo-01","turnId":"e7cc23b8-0948-4ab7-8b0a-bfa6598b9b09","startedAt":"2026-09-10T22:07:19.091Z","status":"running"}
+2026-09-10T22:07:31.146Z [5] live events on screen after 12 s: started
+2026-09-10T22:09:58.473Z [5] turn 1: 147.3s · 29 events · 4 suggestions
+2026-09-10T22:09:59.298Z [5] chips on screen: ["Dale, producí este video","Cambiá el tono del guion","Usá otro preset","Ajustá el guion"]
+2026-09-10T22:10:00.011Z [6] turn 2 — answering with a chip so the producer makes the video
+2026-09-10T22:10:00.012Z [6] clicking the chip: "Dale, producí este video"
+2026-09-10T22:10:00.076Z [6] POST /producer/messages -> 202 {"slug":"demo-01","turnId":"54293bdd-aeb1-4ff1-addd-90e7ce88c4a8","startedAt":"2026-09-10T22:10:00.062Z","status":"running"}
+2026-09-10T22:17:22.143Z [6] turn 2: 442.0s · 54 events · jobs seen: ["b8f133d1-a33e-4c7e-96e0-f7f4e88f5e50:running","b8f133d1-a33e-4c7e-96e0-f7f4e88f5e50:succeeded","047f5e6b-1650-4aa5-b4ce-adce83cd347f:running","047f5e6b-1650-4aa5-b4ce-adce83cd347f:succeeded"]
+2026-09-10T22:17:22.144Z [6] jobs of the project after turn 2: ["montage:succeeded","render:succeeded"]
+2026-09-10T22:17:22.267Z [7] checking the deliverable the producer left in out/
+2026-09-10T22:17:22.404Z [7] out/047f5e6b-1650-4aa5-b4ce-adce83cd347f.mp4: 1080x1920 · 778 frames @ 30/1 · audio aac 48000 Hz
+2026-09-10T22:17:22.405Z [8] preview refreshed: the timeline the producer built is on screen
+2026-09-10T22:17:24.251Z [8] preview tracks: 1 a-roll · 3 b-roll · 1 voice · 1 music · 28 captions
+2026-09-10T22:17:24.832Z [9] logo: driving timeline.logo from the preview and saving it
+2026-09-10T22:17:24.839Z [9] the montage already drew the logo (logo: auto): taking it off first
+2026-09-10T22:17:24.986Z [9] work/timeline.json without the logo: logo=undefined
+2026-09-10T22:17:25.128Z [9] work/timeline.json on disk now carries logo: {"assetId":"raw/logo/Logo-ancho-transparente.png","position":"bottom-right","widthRatio":0.32,"marginRatio":0.035,"opacity":1}
+2026-09-10T22:17:25.266Z [10] cancellation: a third short turn is killed from the UI
+2026-09-10T22:17:25.408Z [10] POST /producer/messages -> 202 {"slug":"demo-01","turnId":"eec57139-06ec-4c4c-8276-5f3ddace442e","startedAt":"2026-09-10T22:17:25.391Z","status":"running"}
+2026-09-10T22:17:35.461Z [10] the third turn settled as canceled on screen
+2026-09-10T22:17:35.502Z [10] claude processes alive after the cancellation: none
+2026-09-10T22:17:35.590Z [done] spec-015 cycle-02 E2E complete
+[cleanup] the temporary media root was kept for inspection: /var/folders/lw/gy7lfk_52gq0fv1yvph2fb100000gn/T/producer-smoke-Hkkk13

@@ -16,6 +16,7 @@ import { useAsyncResource } from '../hooks/use-async-resource';
 import { CaptionEditor } from '../components/caption-editor';
 import { ClipTrackEditor } from '../components/clip-track-editor';
 import { ErrorNotice } from '../components/error-notice';
+import { LogoOverlayEditor } from '../components/logo-overlay-editor';
 import { MusicMixEditor } from '../components/music-mix-editor';
 import { OutputPresetSelector } from '../components/output-preset-selector';
 import { RenderJobList } from '../components/render-job-list';
@@ -158,6 +159,15 @@ function StudioView({ slug, initialTimeline }: StudioViewProps) {
       <TimelineIssueList issues={editState.issues} />
 
       <TimelineSaveBar slug={slug} state={editState} dispatch={dispatchAction} />
+
+      <div className="space-y-2">
+        <h2 className="font-mono text-xs uppercase tracking-wide text-slate-500">logo</h2>
+        <LogoOverlayEditor
+          slug={slug}
+          {...(editState.draft.logo === undefined ? {} : { logo: editState.draft.logo })}
+          dispatch={dispatchAction}
+        />
+      </div>
 
       <div className="space-y-2">
         <h2 className="font-mono text-xs uppercase tracking-wide text-slate-500">music</h2>

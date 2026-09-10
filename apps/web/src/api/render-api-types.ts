@@ -1,4 +1,4 @@
-export const ASSET_ROLES = ['aroll', 'broll', 'image', 'audio', 'voice'] as const;
+export const ASSET_ROLES = ['aroll', 'broll', 'image', 'audio', 'voice', 'logo'] as const;
 
 export type AssetRole = (typeof ASSET_ROLES)[number];
 
@@ -24,6 +24,7 @@ export type ServiceCapabilities = {
   montageQueue: boolean;
   storyboardQueue: boolean;
   voiceQueue: boolean;
+  producer: boolean;
 };
 
 export type ServiceJobCounters = {
@@ -388,4 +389,78 @@ export type VoiceSceneWriteResult = {
   slug: string;
   path: string;
   track: VoiceTrack;
+};
+
+export const PRODUCER_MESSAGE_ROLES = ['user', 'assistant'] as const;
+
+export type ProducerMessageRole = (typeof PRODUCER_MESSAGE_ROLES)[number];
+
+export type ProducerMessage = {
+  id: string;
+  role: ProducerMessageRole;
+  text: string;
+  createdAt: string;
+  suggestions?: string[];
+  turnId?: string;
+};
+
+export type ProducerSession = {
+  sessionId: string;
+  model: string;
+  createdAt: string;
+  lastTurnAt: string;
+};
+
+export const PRODUCER_TURN_STATUSES = ['running', 'succeeded', 'failed', 'canceled'] as const;
+
+export type ProducerTurnStatus = (typeof PRODUCER_TURN_STATUSES)[number];
+
+export const TERMINAL_PRODUCER_TURN_STATUSES = ['succeeded', 'failed', 'canceled'] as const;
+
+export const PRODUCER_EVENT_TYPES = ['text', 'tool', 'status'] as const;
+
+export type ProducerEventType = (typeof PRODUCER_EVENT_TYPES)[number];
+
+export type ProducerTextEvent = {
+  type: 'text';
+  text: string;
+};
+
+export type ProducerToolEvent = {
+  type: 'tool';
+  name: string;
+  summary: string;
+};
+
+export type ProducerStatusEvent = {
+  type: 'status';
+  status: string;
+};
+
+export type ProducerEvent = ProducerTextEvent | ProducerToolEvent | ProducerStatusEvent;
+
+export type ProducerTurn = {
+  turnId: string;
+  slug: string;
+  status: ProducerTurnStatus;
+  startedAt: string;
+  finishedAt: string | null;
+  events: ProducerEvent[];
+  assistantMessage: string | null;
+  suggestions: string[];
+  error: RenderApiErrorPayload | null;
+};
+
+export type ProducerConversation = {
+  slug: string;
+  messages: ProducerMessage[];
+  session: ProducerSession | null;
+  activeTurn: ProducerTurn | null;
+};
+
+export type ProducerTurnAccepted = {
+  slug: string;
+  turnId: string;
+  startedAt: string;
+  status: 'running';
 };

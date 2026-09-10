@@ -246,10 +246,10 @@
       "file": "sdd/specs/spec-e-burgos-015-studio-producer/spec-e-burgos-015-studio-producer.spec.md",
       "module": "studio-producer",
       "app": "apps/render-api",
-      "status": "in-progress",
+      "status": "completed",
       "title": "Studio Producer: el productor conversacional dentro de la app",
       "created_at": "2026-09-10",
-      "completed_at": null,
+      "completed_at": "2026-09-10",
       "depends_on": [
         "spec-e-burgos-005-render-service",
         "spec-e-burgos-006-web-studio",

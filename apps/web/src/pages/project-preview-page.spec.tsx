@@ -43,6 +43,9 @@ const { ProjectPreviewPage } = await import('./project-preview-page');
 function renderPage(client: Partial<RenderApiClient>) {
   const merged: Partial<RenderApiClient> = {
     listRenderJobs: vi.fn().mockResolvedValue({ slug: 'smoke-ingest', jobs: [] }),
+    listAssets: vi
+      .fn()
+      .mockResolvedValue({ slug: 'smoke-ingest', source: 'catalog', assets: [], probeFailures: [] }),
     ...client,
   };
 

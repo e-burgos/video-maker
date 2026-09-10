@@ -1,0 +1,967 @@
+{
+  "schemaVersion": 1,
+  "id": "timeline-raw/aroll/clip01.mp4",
+  "format": {
+    "preset": "reels-9x16",
+    "width": 1080,
+    "height": 1920,
+    "fps": 30
+  },
+  "durationFrames": 778,
+  "assets": [
+    {
+      "id": "raw/aroll/clip01.mp4",
+      "kind": "video",
+      "path": "raw/aroll/clip01.mp4",
+      "durationMs": 25962,
+      "fps": 30,
+      "width": 576,
+      "height": 1024,
+      "rotation": 0,
+      "hasAudio": true,
+      "audio": {
+        "sampleRate": 48000,
+        "channels": 1,
+        "codec": "aac"
+      },
+      "videoCodec": "h264",
+      "probedAt": "2026-09-10T22:15:02.148Z"
+    },
+    {
+      "id": "raw/images/estilo-2.jpg",
+      "kind": "image",
+      "path": "raw/images/estilo-2.jpg",
+      "durationMs": 0,
+      "width": 1086,
+      "height": 1448,
+      "hasAudio": false,
+      "probedAt": "2026-09-10T22:15:12.482Z"
+    },
+    {
+      "id": "raw/images/lentes.jpg",
+      "kind": "image",
+      "path": "raw/images/lentes.jpg",
+      "durationMs": 0,
+      "width": 1200,
+      "height": 1600,
+      "hasAudio": false,
+      "probedAt": "2026-09-10T22:15:12.555Z"
+    },
+    {
+      "id": "raw/images/mirada.jpg",
+      "kind": "image",
+      "path": "raw/images/mirada.jpg",
+      "durationMs": 0,
+      "width": 1024,
+      "height": 1024,
+      "hasAudio": false,
+      "probedAt": "2026-09-10T22:15:12.591Z"
+    },
+    {
+      "id": "raw/audio/music01.mp3",
+      "kind": "audio",
+      "path": "raw/audio/music01.mp3",
+      "durationMs": 228101,
+      "hasAudio": true,
+      "audio": {
+        "sampleRate": 44100,
+        "channels": 2,
+        "codec": "mp3",
+        "integratedLufs": -22.3
+      },
+      "probedAt": "2026-09-10T22:15:02.190Z"
+    },
+    {
+      "id": "raw/logo/Logo-ancho-transparente.png",
+      "kind": "image",
+      "path": "raw/logo/Logo-ancho-transparente.png",
+      "durationMs": 0,
+      "width": 1200,
+      "height": 240,
+      "hasAudio": false,
+      "probedAt": "2026-09-10T22:15:12.773Z"
+    }
+  ],
+  "tracks": {
+    "aroll": [
+      {
+        "id": "aroll-0001",
+        "assetId": "raw/aroll/clip01.mp4",
+        "from": 0,
+        "durationFrames": 778,
+        "trimStartMs": 0,
+        "transform": {
+          "scale": 1,
+          "translateX": 0,
+          "translateY": 0
+        },
+        "muted": true
+      }
+    ],
+    "broll": [
+      {
+        "id": "broll-0001",
+        "assetId": "raw/images/mirada.jpg",
+        "from": 4,
+        "durationFrames": 90,
+        "trimStartMs": 0,
+        "fit": "cover",
+        "transform": {
+          "scale": 1,
+          "translateX": 0,
+          "translateY": 0
+        },
+        "muted": true
+      },
+      {
+        "id": "broll-0002",
+        "assetId": "raw/images/estilo-2.jpg",
+        "from": 267,
+        "durationFrames": 90,
+        "trimStartMs": 0,
+        "fit": "cover",
+        "transform": {
+          "scale": 1,
+          "translateX": 0,
+          "translateY": 0
+        },
+        "muted": true
+      },
+      {
+        "id": "broll-0003",
+        "assetId": "raw/images/lentes.jpg",
+        "from": 644,
+        "durationFrames": 90,
+        "trimStartMs": 0,
+        "fit": "cover",
+        "transform": {
+          "scale": 1,
+          "translateX": 0,
+          "translateY": 0
+        },
+        "muted": true
+      }
+    ],
+    "voice": [
+      {
+        "id": "voice-0001",
+        "assetId": "raw/aroll/clip01.mp4",
+        "from": 0,
+        "durationFrames": 778,
+        "trimStartMs": 0,
+        "gainDb": 0
+      }
+    ],
+    "music": [
+      {
+        "id": "music-0001",
+        "assetId": "raw/audio/music01.mp3",
+        "from": 0,
+        "durationFrames": 778,
+        "trimStartMs": 0,
+        "gainDb": -4
+      }
+    ],
+    "captions": [
+      {
+        "id": "caption-0001",
+        "from": 2,
+        "durationFrames": 21,
+        "words": [
+          {
+            "text": "Tu",
+            "fromFrame": 0,
+            "durationFrames": 2
+          },
+          {
+            "text": "mirada",
+            "fromFrame": 2,
+            "durationFrames": 11
+          },
+          {
+            "text": "dice",
+            "fromFrame": 13,
+            "durationFrames": 8
+          }
+        ],
+        "emphasisIndex": 1,
+        "box": {
+          "x": 60,
+          "y": 220,
+          "width": 880,
+          "height": 1300
+        }
+      },
+      {
+        "id": "caption-0002",
+        "from": 23,
+        "durationFrames": 25,
+        "words": [
+          {
+            "text": "mucho",
+            "fromFrame": 0,
+            "durationFrames": 10
+          },
+          {
+            "text": "antes",
+            "fromFrame": 10,
+            "durationFrames": 10
+          },
+          {
+            "text": "que",
+            "fromFrame": 19,
+            "durationFrames": 6
+          }
+        ],
+        "emphasisIndex": 1,
+        "box": {
+          "x": 60,
+          "y": 220,
+          "width": 880,
+          "height": 1300
+        }
+      },
+      {
+        "id": "caption-0003",
+        "from": 48,
+        "durationFrames": 34,
+        "words": [
+          {
+            "text": "vos.",
+            "fromFrame": 0,
+            "durationFrames": 34
+          }
+        ],
+        "emphasisIndex": 0,
+        "box": {
+          "x": 60,
+          "y": 220,
+          "width": 880,
+          "height": 1300
+        }
+      },
+      {
+        "id": "caption-0004",
+        "from": 82,
+        "durationFrames": 33,
+        "words": [
+          {
+            "text": "En",
+            "fromFrame": 0,
+            "durationFrames": 4
+          },
+          {
+            "text": "nuestra",
+            "fromFrame": 4,
+            "durationFrames": 15
+          },
+          {
+            "text": "óptica,",
+            "fromFrame": 19,
+            "durationFrames": 15
+          }
+        ],
+        "emphasisIndex": 2,
+        "box": {
+          "x": 60,
+          "y": 220,
+          "width": 880,
+          "height": 1300
+        }
+      },
+      {
+        "id": "caption-0005",
+        "from": 115,
+        "durationFrames": 28,
+        "words": [
+          {
+            "text": "los",
+            "fromFrame": 0,
+            "durationFrames": 8
+          },
+          {
+            "text": "lentes",
+            "fromFrame": 8,
+            "durationFrames": 10
+          },
+          {
+            "text": "se",
+            "fromFrame": 18,
+            "durationFrames": 10
+          }
+        ],
+        "emphasisIndex": 1,
+        "box": {
+          "x": 60,
+          "y": 220,
+          "width": 880,
+          "height": 1300
+        }
+      },
+      {
+        "id": "caption-0006",
+        "from": 143,
+        "durationFrames": 23,
+        "words": [
+          {
+            "text": "eligen",
+            "fromFrame": 0,
+            "durationFrames": 23
+          },
+          {
+            "text": "con",
+            "fromFrame": 22,
+            "durationFrames": 1
+          }
+        ],
+        "emphasisIndex": 0,
+        "box": {
+          "x": 60,
+          "y": 220,
+          "width": 880,
+          "height": 1300
+        }
+      },
+      {
+        "id": "caption-0007",
+        "from": 166,
+        "durationFrames": 21,
+        "words": [
+          {
+            "text": "calma.",
+            "fromFrame": 0,
+            "durationFrames": 20
+          }
+        ],
+        "emphasisIndex": 0,
+        "box": {
+          "x": 60,
+          "y": 220,
+          "width": 880,
+          "height": 1300
+        }
+      },
+      {
+        "id": "caption-0008",
+        "from": 187,
+        "durationFrames": 26,
+        "words": [
+          {
+            "text": "Armazones",
+            "fromFrame": 0,
+            "durationFrames": 21
+          },
+          {
+            "text": "de",
+            "fromFrame": 20,
+            "durationFrames": 5
+          }
+        ],
+        "emphasisIndex": 0,
+        "box": {
+          "x": 60,
+          "y": 220,
+          "width": 880,
+          "height": 1300
+        }
+      },
+      {
+        "id": "caption-0009",
+        "from": 213,
+        "durationFrames": 35,
+        "words": [
+          {
+            "text": "colores,",
+            "fromFrame": 0,
+            "durationFrames": 20
+          },
+          {
+            "text": "formas",
+            "fromFrame": 20,
+            "durationFrames": 16
+          }
+        ],
+        "emphasisIndex": 0,
+        "box": {
+          "x": 60,
+          "y": 220,
+          "width": 880,
+          "height": 1300
+        }
+      },
+      {
+        "id": "caption-0010",
+        "from": 255,
+        "durationFrames": 21,
+        "words": [
+          {
+            "text": "y",
+            "fromFrame": 0,
+            "durationFrames": 6
+          },
+          {
+            "text": "estilo",
+            "fromFrame": 12,
+            "durationFrames": 4
+          },
+          {
+            "text": "para",
+            "fromFrame": 16,
+            "durationFrames": 5
+          }
+        ],
+        "emphasisIndex": 1,
+        "box": {
+          "x": 60,
+          "y": 220,
+          "width": 880,
+          "height": 1300
+        }
+      },
+      {
+        "id": "caption-0011",
+        "from": 276,
+        "durationFrames": 22,
+        "words": [
+          {
+            "text": "cada",
+            "fromFrame": 0,
+            "durationFrames": 9
+          },
+          {
+            "text": "cara.",
+            "fromFrame": 9,
+            "durationFrames": 13
+          }
+        ],
+        "emphasisIndex": 1,
+        "box": {
+          "x": 60,
+          "y": 220,
+          "width": 880,
+          "height": 1300
+        }
+      },
+      {
+        "id": "caption-0012",
+        "from": 298,
+        "durationFrames": 26,
+        "words": [
+          {
+            "text": "Lentes",
+            "fromFrame": 0,
+            "durationFrames": 15
+          },
+          {
+            "text": "de",
+            "fromFrame": 14,
+            "durationFrames": 5
+          },
+          {
+            "text": "sol",
+            "fromFrame": 19,
+            "durationFrames": 7
+          }
+        ],
+        "emphasisIndex": 0,
+        "box": {
+          "x": 60,
+          "y": 220,
+          "width": 880,
+          "height": 1300
+        }
+      },
+      {
+        "id": "caption-0013",
+        "from": 324,
+        "durationFrames": 24,
+        "words": [
+          {
+            "text": "que",
+            "fromFrame": 0,
+            "durationFrames": 8
+          },
+          {
+            "text": "cuidan",
+            "fromFrame": 9,
+            "durationFrames": 13
+          },
+          {
+            "text": "tus",
+            "fromFrame": 22,
+            "durationFrames": 2
+          }
+        ],
+        "emphasisIndex": 1,
+        "box": {
+          "x": 60,
+          "y": 220,
+          "width": 880,
+          "height": 1300
+        }
+      },
+      {
+        "id": "caption-0014",
+        "from": 348,
+        "durationFrames": 38,
+        "words": [
+          {
+            "text": "ojos",
+            "fromFrame": 0,
+            "durationFrames": 14
+          },
+          {
+            "text": "con",
+            "fromFrame": 15,
+            "durationFrames": 19
+          },
+          {
+            "text": "estilo.",
+            "fromFrame": 34,
+            "durationFrames": 5
+          }
+        ],
+        "emphasisIndex": 2,
+        "box": {
+          "x": 60,
+          "y": 220,
+          "width": 880,
+          "height": 1300
+        }
+      },
+      {
+        "id": "caption-0015",
+        "from": 386,
+        "durationFrames": 36,
+        "words": [
+          {
+            "text": "Lentes",
+            "fromFrame": 0,
+            "durationFrames": 13
+          },
+          {
+            "text": "de",
+            "fromFrame": 14,
+            "durationFrames": 5
+          },
+          {
+            "text": "contacto,",
+            "fromFrame": 19,
+            "durationFrames": 17
+          }
+        ],
+        "emphasisIndex": 0,
+        "box": {
+          "x": 60,
+          "y": 220,
+          "width": 880,
+          "height": 1300
+        }
+      },
+      {
+        "id": "caption-0016",
+        "from": 422,
+        "durationFrames": 16,
+        "words": [
+          {
+            "text": "con",
+            "fromFrame": 0,
+            "durationFrames": 7
+          },
+          {
+            "text": "todo",
+            "fromFrame": 6,
+            "durationFrames": 9
+          },
+          {
+            "text": "lo",
+            "fromFrame": 15,
+            "durationFrames": 1
+          }
+        ],
+        "emphasisIndex": 1,
+        "box": {
+          "x": 60,
+          "y": 220,
+          "width": 880,
+          "height": 1300
+        }
+      },
+      {
+        "id": "caption-0017",
+        "from": 438,
+        "durationFrames": 32,
+        "words": [
+          {
+            "text": "que",
+            "fromFrame": 0,
+            "durationFrames": 11
+          },
+          {
+            "text": "necesitás",
+            "fromFrame": 11,
+            "durationFrames": 22
+          }
+        ],
+        "emphasisIndex": 1,
+        "box": {
+          "x": 60,
+          "y": 220,
+          "width": 880,
+          "height": 1300
+        }
+      },
+      {
+        "id": "caption-0018",
+        "from": 470,
+        "durationFrames": 19,
+        "words": [
+          {
+            "text": "para",
+            "fromFrame": 0,
+            "durationFrames": 9
+          },
+          {
+            "text": "el",
+            "fromFrame": 10,
+            "durationFrames": 2
+          },
+          {
+            "text": "día",
+            "fromFrame": 12,
+            "durationFrames": 7
+          }
+        ],
+        "emphasisIndex": 0,
+        "box": {
+          "x": 60,
+          "y": 220,
+          "width": 880,
+          "height": 1300
+        }
+      },
+      {
+        "id": "caption-0019",
+        "from": 489,
+        "durationFrames": 11,
+        "words": [
+          {
+            "text": "a",
+            "fromFrame": 0,
+            "durationFrames": 2
+          },
+          {
+            "text": "día.",
+            "fromFrame": 2,
+            "durationFrames": 10
+          }
+        ],
+        "emphasisIndex": 1,
+        "box": {
+          "x": 60,
+          "y": 220,
+          "width": 880,
+          "height": 1300
+        }
+      },
+      {
+        "id": "caption-0020",
+        "from": 500,
+        "durationFrames": 34,
+        "words": [
+          {
+            "text": "Te",
+            "fromFrame": 0,
+            "durationFrames": 4
+          },
+          {
+            "text": "asesoramos",
+            "fromFrame": 5,
+            "durationFrames": 22
+          },
+          {
+            "text": "para",
+            "fromFrame": 27,
+            "durationFrames": 8
+          }
+        ],
+        "emphasisIndex": 1,
+        "box": {
+          "x": 60,
+          "y": 220,
+          "width": 880,
+          "height": 1300
+        }
+      },
+      {
+        "id": "caption-0021",
+        "from": 534,
+        "durationFrames": 27,
+        "words": [
+          {
+            "text": "que",
+            "fromFrame": 0,
+            "durationFrames": 7
+          },
+          {
+            "text": "tu",
+            "fromFrame": 7,
+            "durationFrames": 4
+          },
+          {
+            "text": "mirada",
+            "fromFrame": 11,
+            "durationFrames": 17
+          }
+        ],
+        "emphasisIndex": 2,
+        "box": {
+          "x": 60,
+          "y": 220,
+          "width": 880,
+          "height": 1300
+        }
+      },
+      {
+        "id": "caption-0022",
+        "from": 562,
+        "durationFrames": 25,
+        "words": [
+          {
+            "text": "se",
+            "fromFrame": 0,
+            "durationFrames": 6
+          },
+          {
+            "text": "sienta",
+            "fromFrame": 6,
+            "durationFrames": 6
+          },
+          {
+            "text": "cómoda",
+            "fromFrame": 12,
+            "durationFrames": 13
+          }
+        ],
+        "emphasisIndex": 2,
+        "box": {
+          "x": 60,
+          "y": 220,
+          "width": 880,
+          "height": 1300
+        }
+      },
+      {
+        "id": "caption-0023",
+        "from": 587,
+        "durationFrames": 24,
+        "words": [
+          {
+            "text": "y",
+            "fromFrame": 0,
+            "durationFrames": 2
+          },
+          {
+            "text": "segura.",
+            "fromFrame": 2,
+            "durationFrames": 22
+          }
+        ],
+        "emphasisIndex": 1,
+        "box": {
+          "x": 60,
+          "y": 220,
+          "width": 880,
+          "height": 1300
+        }
+      },
+      {
+        "id": "caption-0024",
+        "from": 611,
+        "durationFrames": 33,
+        "words": [
+          {
+            "text": "Porque",
+            "fromFrame": 0,
+            "durationFrames": 13
+          },
+          {
+            "text": "cambiar",
+            "fromFrame": 13,
+            "durationFrames": 15
+          },
+          {
+            "text": "de",
+            "fromFrame": 28,
+            "durationFrames": 4
+          }
+        ],
+        "emphasisIndex": 1,
+        "box": {
+          "x": 60,
+          "y": 220,
+          "width": 880,
+          "height": 1300
+        }
+      },
+      {
+        "id": "caption-0025",
+        "from": 644,
+        "durationFrames": 32,
+        "words": [
+          {
+            "text": "lentes",
+            "fromFrame": 0,
+            "durationFrames": 13
+          },
+          {
+            "text": "es",
+            "fromFrame": 12,
+            "durationFrames": 5
+          },
+          {
+            "text": "cambiar",
+            "fromFrame": 17,
+            "durationFrames": 15
+          }
+        ],
+        "emphasisIndex": 0,
+        "box": {
+          "x": 60,
+          "y": 220,
+          "width": 880,
+          "height": 1300
+        }
+      },
+      {
+        "id": "caption-0026",
+        "from": 676,
+        "durationFrames": 26,
+        "words": [
+          {
+            "text": "de",
+            "fromFrame": 0,
+            "durationFrames": 4
+          },
+          {
+            "text": "mirada.",
+            "fromFrame": 4,
+            "durationFrames": 22
+          }
+        ],
+        "emphasisIndex": 1,
+        "box": {
+          "x": 60,
+          "y": 220,
+          "width": 880,
+          "height": 1300
+        }
+      },
+      {
+        "id": "caption-0027",
+        "from": 702,
+        "durationFrames": 36,
+        "words": [
+          {
+            "text": "Vení",
+            "fromFrame": 0,
+            "durationFrames": 11
+          },
+          {
+            "text": "a",
+            "fromFrame": 11,
+            "durationFrames": 3
+          },
+          {
+            "text": "probarte",
+            "fromFrame": 14,
+            "durationFrames": 22
+          }
+        ],
+        "emphasisIndex": 2,
+        "box": {
+          "x": 60,
+          "y": 220,
+          "width": 880,
+          "height": 1300
+        }
+      },
+      {
+        "id": "caption-0028",
+        "from": 738,
+        "durationFrames": 37,
+        "words": [
+          {
+            "text": "tu",
+            "fromFrame": 0,
+            "durationFrames": 5
+          },
+          {
+            "text": "nuevo",
+            "fromFrame": 5,
+            "durationFrames": 10
+          },
+          {
+            "text": "estilo.",
+            "fromFrame": 15,
+            "durationFrames": 22
+          }
+        ],
+        "emphasisIndex": 2,
+        "box": {
+          "x": 60,
+          "y": 220,
+          "width": 880,
+          "height": 1300
+        }
+      }
+    ]
+  },
+  "transitions": [],
+  "audioMix": {
+    "voice": {
+      "integratedLufs": -14,
+      "truePeakDbtp": -1,
+      "loudnessRange": 11
+    },
+    "music": {
+      "baseGainDb": -4,
+      "duckedGainDb": -12,
+      "referenceLufs": -16,
+      "attackMs": 150,
+      "releaseMs": 400,
+      "holdMs": 250
+    },
+    "automation": [
+      {
+        "frame": 0,
+        "gainDb": -4
+      },
+      {
+        "frame": 2,
+        "gainDb": -12
+      },
+      {
+        "frame": 782,
+        "gainDb": -12
+      },
+      {
+        "frame": 794,
+        "gainDb": -4
+      }
+    ]
+  },
+  "logo": {
+    "assetId": "raw/logo/Logo-ancho-transparente.png",
+    "position": "bottom-right",
+    "widthRatio": 0.32,
+    "marginRatio": 0.035,
+    "opacity": 1
+  },
+  "safeZone": {
+    "top": 220,
+    "bottom": 400,
+    "left": 60,
+    "right": 140
+  }
+}

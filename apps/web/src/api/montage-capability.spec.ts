@@ -26,6 +26,7 @@ function health(overrides: Partial<ServiceHealth> = {}): ServiceHealth {
       montageQueue: true,
       storyboardQueue: true,
       voiceQueue: true,
+      producer: true,
     },
     jobs: { running: 0, queued: 0 },
     ...overrides,
@@ -55,6 +56,7 @@ describe('montageBlockers', () => {
           montageQueue: false,
           storyboardQueue: true,
           voiceQueue: true,
+          producer: true,
         },
       }),
     );
@@ -107,6 +109,7 @@ describe('montageBlockers', () => {
           montageQueue: false,
           storyboardQueue: true,
           voiceQueue: true,
+          producer: true,
         },
         binaries: [
           { name: 'ffmpeg', envVar: 'FFMPEG_PATH', resolved: true },

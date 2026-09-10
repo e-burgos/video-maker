@@ -118,8 +118,8 @@
         "spec": "sdd/specs/spec-e-burgos-005-render-service",
         "status": "updated",
         "created_in_cycle": 2,
-        "updated_in_cycle": 1,
-        "description": "Creates the canonical media project layout for a slug: raw/aroll, raw/broll, raw/images, raw/audio, work and out, in that order. Never touches an existing project.",
+        "updated_in_cycle": 2,
+        "description": "Creates the canonical media project layout for a slug: raw/aroll, raw/broll, raw/images, raw/audio, raw/voice, raw/logo, work and out, in that order. Never touches an existing project.",
         "path_params": [],
         "required_headers": [],
         "request_body": {
@@ -138,6 +138,11 @@
             "cycle": 1,
             "date": "2026-09-09",
             "change": "Updated in spec-e-burgos-009 cycle-01: project creation now makes seven directories instead of six, adding raw/voice for the user's own locution. assetCounts gained the voice key."
+          },
+          {
+            "cycle": 2,
+            "date": "2026-09-10",
+            "change": "spec-e-burgos-015 cycle-02: the layout gains raw/logo/, so a fresh project already has the directory the logo role uploads into and the producer skill writes to. Eight directories instead of seven."
           }
         ]
       },
@@ -149,7 +154,7 @@
         "spec": "sdd/specs/spec-e-burgos-005-render-service",
         "status": "updated",
         "created_in_cycle": 2,
-        "updated_in_cycle": 1,
+        "updated_in_cycle": 2,
         "description": "Project detail: layout flags plus assetSource (catalog | raw-scan) and assetCounts by role, both derived from the same resolveProjectAssets used by EP-005.",
         "path_params": [
           "slug"
@@ -157,7 +162,7 @@
         "required_headers": [],
         "request_body": {},
         "responses": {
-          "200": "application/json: { slug, layout, assetSource: 'catalog' | 'raw-scan', assetCounts: { aroll, broll, image, audio } } — the four roles are always present.",
+          "200": "application/json: { slug, layout, assetSource: 'catalog' | 'raw-scan', assetCounts: { aroll, broll, image, audio, voice, logo } } — the six roles are always present.",
           "404": "PROJECT_NOT_FOUND. application/json: { error: { code, stage: null, message, resource?, expected?, hint?, assetPersisted?, catalogUpdated? } }.",
           "422": "PROJECT_SLUG_INVALID. application/json: { error: { code, stage: null, message, resource?, expected?, hint?, assetPersisted?, catalogUpdated? } }.",
           "500": "CATALOG_UNREADABLE or PROJECT_LAYOUT_INVALID. application/json: { error: { code, stage: null, message, resource?, expected?, hint?, assetPersisted?, catalogUpdated? } }."
@@ -167,6 +172,11 @@
             "cycle": 1,
             "date": "2026-09-09",
             "change": "Updated in spec-e-burgos-009 cycle-01: assetCounts gained the voice key."
+          },
+          {
+            "cycle": 2,
+            "date": "2026-09-10",
+            "change": "spec-e-burgos-015 cycle-02: assetCounts gains the logo key (additive). The catalog of @video-maker/auto-montage already classified raw/logo/ as role logo; countAssetsByRole was dropping it silently."
           }
         ]
       },
@@ -201,8 +211,8 @@
         "spec": "sdd/specs/spec-e-burgos-005-render-service",
         "status": "updated",
         "created_in_cycle": 2,
-        "updated_in_cycle": 1,
-        "description": "Uploads one raw asset as a raw binary body (never multipart) into raw/<rawDirectoryForRole(role)>/<filename>, writing to work/.uploads and promoting it with a rename, then probing it and merging the entry into work/catalog.json within the same request. A failed probe keeps the file and records the failure in the catalog.",
+        "updated_in_cycle": 2,
+        "description": "Uploads one raw asset as a raw binary body (never multipart) into raw/<rawDirectoryForRole(role)>/<filename>, writing to work/.uploads and promoting it with a rename, then probing it and merging the entry into work/catalog.json within the same request. A failed probe keeps the file and records the failure in the catalog. The role segment accepts the six roles of the catalog: aroll, broll, image, audio, voice and logo.",
         "path_params": [
           "slug",
           "role",
@@ -223,7 +233,7 @@
           "409": "ASSET_ALREADY_EXISTS — the destination exists; the temporary is removed. application/json: { error: { code, stage: null, message, resource?, expected?, hint?, assetPersisted?, catalogUpdated? } }.",
           "411": "ASSET_CONTENT_LENGTH_REQUIRED. application/json: { error: { code, stage: null, message, resource?, expected?, hint?, assetPersisted?, catalogUpdated? } }.",
           "413": "ASSET_TOO_LARGE — rejected from the content-length header before the first byte. application/json: { error: { code, stage: null, message, resource?, expected?, hint?, assetPersisted?, catalogUpdated? } }.",
-          "422": "PROJECT_SLUG_INVALID, ASSET_ROLE_INVALID or ASSET_PATH_INVALID — no storage port was invoked. application/json: { error: { code, stage: null, message, resource?, expected?, hint?, assetPersisted?, catalogUpdated? } }.",
+          "422": "PROJECT_SLUG_INVALID, ASSET_ROLE_INVALID (expected: 'aroll, broll, image, audio, voice or logo') or ASSET_PATH_INVALID — no storage port was invoked. application/json: { error: { code, stage: null, message, resource?, expected?, hint?, assetPersisted?, catalogUpdated? } }.",
           "500": "CATALOG_UNREADABLE (assetPersisted true, catalogUpdated false), MEDIA_COMMAND_FAILED or MEDIA_OUTPUT_UNPARSEABLE (assetPersisted true, catalogUpdated true). application/json: { error: { code, stage: null, message, resource?, expected?, hint?, assetPersisted?, catalogUpdated? } }.",
           "503": "MEDIA_BINARY_NOT_FOUND with assetPersisted true and catalogUpdated true. application/json: { error: { code, stage: null, message, resource?, expected?, hint?, assetPersisted?, catalogUpdated? } }."
         },
@@ -232,6 +242,11 @@
             "cycle": 1,
             "date": "2026-09-09",
             "change": "Updated in spec-e-burgos-009 cycle-01: the role path segment accepts 'voice', which stores under raw/voice/ and only admits audio extensions; a video uploaded with that role is ignored by the catalog as extension-role-mismatch."
+          },
+          {
+            "cycle": 2,
+            "date": "2026-09-10",
+            "change": "spec-e-burgos-015 cycle-02: the role path segment accepts 'logo', which stores under raw/logo/ and only admits image extensions (extension-role-mismatch otherwise). Without it the Show logo control of the Web Studio would have no way to get a logo into the project."
           }
         ]
       },

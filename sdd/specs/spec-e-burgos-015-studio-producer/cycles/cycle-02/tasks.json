@@ -1,0 +1,266 @@
+{
+  "$schema": "../../../../schemas/cycle-tasks.schema.json",
+  "spec": "spec-e-burgos-015-studio-producer",
+  "cycle": 2,
+  "module": "studio-producer",
+  "apps": [
+    "apps/web",
+    "apps/render-api"
+  ],
+  "flow": "lite",
+  "user_stories_generated": true,
+  "prerequisites": {
+    "tasks_generated": true
+  },
+  "tasks": [
+    {
+      "id": "TASK-001",
+      "title": "Declare the producer contract in src/api/ and reach it from the typed client",
+      "user_stories": [
+        "US-15-011",
+        "US-15-012",
+        "US-15-016"
+      ],
+      "estimation_hours": 4,
+      "story_points": 5,
+      "depends_on": [],
+      "status": "done",
+      "files": [
+        "apps/web/src/api/__fixtures__/producer.ts",
+        "apps/web/src/api/__fixtures__/voice.ts",
+        "apps/web/src/api/montage-capability.spec.ts",
+        "apps/web/src/api/parse-producer.spec.ts",
+        "apps/web/src/api/parse-producer.ts",
+        "apps/web/src/api/producer-capability.spec.ts",
+        "apps/web/src/api/producer-capability.ts",
+        "apps/web/src/api/producer-turn-poll-plan.spec.ts",
+        "apps/web/src/api/producer-turn-poll-plan.ts",
+        "apps/web/src/api/render-api-client.spec.ts",
+        "apps/web/src/api/render-api-client.ts",
+        "apps/web/src/api/render-api-types.ts",
+        "apps/web/src/api/storyboard-capability.spec.ts"
+      ],
+      "usage": {
+        "provider_model": "claude/opus",
+        "effort": "high",
+        "agent": "orchestrator",
+        "tokens_in": 74000,
+        "tokens_out": 11000,
+        "approx": true,
+        "source": "declared-estimate",
+        "recorded_at": "2026-09-10"
+      }
+    },
+    {
+      "id": "TASK-002",
+      "title": "Render the producer conversation: minimal markdown, suggestion chips and numbered quick replies",
+      "user_stories": [
+        "US-15-011",
+        "US-15-013"
+      ],
+      "estimation_hours": 4,
+      "story_points": 5,
+      "depends_on": [
+        "TASK-001"
+      ],
+      "files": [
+        "apps/web/src/api/producer-markdown.ts",
+        "apps/web/src/api/producer-markdown.spec.ts",
+        "apps/web/src/components/producer-message-list.tsx",
+        "apps/web/src/components/producer-message-list.spec.tsx",
+        "apps/web/src/components/producer-composer.tsx",
+        "apps/web/src/components/producer-composer.spec.tsx"
+      ],
+      "status": "done",
+      "usage": {
+        "provider_model": "claude/opus",
+        "effort": "high",
+        "agent": "orchestrator",
+        "tokens_in": 52000,
+        "tokens_out": 9000,
+        "approx": true,
+        "source": "declared-estimate",
+        "recorded_at": "2026-09-10"
+      }
+    },
+    {
+      "id": "TASK-003",
+      "title": "Show the running turn live: events, elapsed time, cancel and the jobs the agent enqueues",
+      "user_stories": [
+        "US-15-012",
+        "US-15-014",
+        "US-15-016"
+      ],
+      "estimation_hours": 4,
+      "story_points": 5,
+      "depends_on": [
+        "TASK-001"
+      ],
+      "files": [
+        "apps/web/src/hooks/use-producer-turn-poll.ts",
+        "apps/web/src/hooks/use-producer-turn-poll.spec.ts",
+        "apps/web/src/components/producer-turn-activity.tsx",
+        "apps/web/src/components/producer-turn-activity.spec.tsx"
+      ],
+      "status": "done",
+      "usage": {
+        "provider_model": "claude/opus",
+        "effort": "high",
+        "agent": "orchestrator",
+        "tokens_in": 48000,
+        "tokens_out": 9000,
+        "approx": true,
+        "source": "declared-estimate",
+        "recorded_at": "2026-09-10"
+      }
+    },
+    {
+      "id": "TASK-004",
+      "title": "Assemble the producer page, make it the first stop of a project and refresh the studio when a turn ends",
+      "user_stories": [
+        "US-15-011",
+        "US-15-014",
+        "US-15-015",
+        "US-15-016"
+      ],
+      "estimation_hours": 5,
+      "story_points": 8,
+      "depends_on": [
+        "TASK-002",
+        "TASK-003"
+      ],
+      "files": [
+        "apps/web/src/components/producer-welcome.tsx",
+        "apps/web/src/components/producer-welcome.spec.tsx",
+        "apps/web/src/pages/producer-page.tsx",
+        "apps/web/src/pages/producer-page.spec.tsx",
+        "apps/web/src/app/app.tsx",
+        "apps/web/src/components/studio-layout.tsx",
+        "apps/web/src/components/studio-layout.spec.tsx",
+        "apps/web/src/pages/projects-page.tsx",
+        "apps/web/src/pages/projects-page.spec.tsx"
+      ],
+      "status": "done",
+      "usage": {
+        "provider_model": "claude/opus",
+        "effort": "high",
+        "agent": "orchestrator",
+        "tokens_in": 66000,
+        "tokens_out": 13000,
+        "approx": true,
+        "source": "declared-estimate",
+        "recorded_at": "2026-09-10"
+      }
+    },
+    {
+      "id": "TASK-005",
+      "title": "Put the logo in the hands of the user: logo role end to end and the overlay editor on the preview",
+      "user_stories": [
+        "US-15-017"
+      ],
+      "estimation_hours": 5,
+      "story_points": 8,
+      "depends_on": [
+        "TASK-001"
+      ],
+      "files": [
+        "apps/render-api/README.md",
+        "apps/render-api/src/http/handlers/assets-handler.ts",
+        "apps/render-api/src/http/handlers/projects-handler.spec.ts",
+        "apps/render-api/src/http/handlers/projects-handler.ts",
+        "apps/render-api/src/store/asset-path.ts",
+        "apps/render-api/src/store/project-assets.spec.ts",
+        "apps/render-api/src/store/project-assets.ts",
+        "apps/web/src/api/render-api-types.ts",
+        "apps/web/src/api/timeline-edit/logo-overlay.spec.ts",
+        "apps/web/src/api/timeline-edit/logo-overlay.ts",
+        "apps/web/src/api/timeline-edit/timeline-edit-state.ts",
+        "apps/web/src/components/logo-overlay-editor.spec.tsx",
+        "apps/web/src/components/logo-overlay-editor.tsx",
+        "apps/web/src/pages/project-preview-page.spec.tsx",
+        "apps/web/src/pages/project-preview-page.tsx",
+        "sdd/api.json"
+      ],
+      "status": "done",
+      "usage": {
+        "provider_model": "claude/opus",
+        "effort": "high",
+        "agent": "orchestrator",
+        "tokens_in": 71000,
+        "tokens_out": 12000,
+        "approx": true,
+        "source": "declared-estimate",
+        "recorded_at": "2026-09-10"
+      }
+    },
+    {
+      "id": "TASK-006",
+      "title": "Name the montage presets in the language of the user without touching their contract ids",
+      "user_stories": [
+        "US-15-018"
+      ],
+      "estimation_hours": 2,
+      "story_points": 2,
+      "depends_on": [],
+      "files": [
+        "apps/web/src/api/montage-presets.ts",
+        "apps/web/src/api/montage-presets.spec.ts",
+        "apps/web/src/components/montage-trigger.tsx",
+        "apps/web/src/components/montage-trigger.spec.tsx"
+      ],
+      "status": "done",
+      "usage": {
+        "provider_model": "claude/opus",
+        "effort": "high",
+        "agent": "orchestrator",
+        "tokens_in": 21000,
+        "tokens_out": 4000,
+        "approx": true,
+        "source": "declared-estimate",
+        "recorded_at": "2026-09-10"
+      }
+    },
+    {
+      "id": "TASK-007",
+      "title": "Run the real producer E2E from the browser and close the spec",
+      "user_stories": [
+        "US-15-011",
+        "US-15-012",
+        "US-15-014",
+        "US-15-017",
+        "US-15-019"
+      ],
+      "estimation_hours": 6,
+      "story_points": 8,
+      "depends_on": [
+        "TASK-004",
+        "TASK-005",
+        "TASK-006"
+      ],
+      "files": [
+        "apps/web/README.md",
+        "apps/web/e2e/producer-smoke.mjs",
+        "sdd/components.json",
+        "sdd/context/apps/web/updates/2026-09-10-spec-e-burgos-015-studio-producer-cycle-02.md",
+        "sdd/context/constitution.md",
+        "sdd/global.json",
+        "sdd/memory/journal/2026-09-10-spec-e-burgos-015-studio-producer-cycle-02.md",
+        "sdd/skills/video-producer/SKILL.md",
+        "sdd/specs/index.json",
+        "sdd/specs/spec-e-burgos-015-studio-producer/cycles/cycle-02/artifacts/capture-logo-and-markdown.mjs",
+        "sdd/specs/spec-e-burgos-015-studio-producer/cycles/cycle-02/artifacts/producer-web-smoke.md"
+      ],
+      "status": "done",
+      "usage": {
+        "provider_model": "claude/opus",
+        "effort": "high",
+        "agent": "orchestrator",
+        "tokens_in": 118000,
+        "tokens_out": 22000,
+        "approx": true,
+        "source": "declared-estimate",
+        "recorded_at": "2026-09-10"
+      }
+    }
+  ]
+}

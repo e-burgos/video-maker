@@ -3,6 +3,7 @@ import { NavLink, Outlet, useLocation } from 'react-router-dom';
 import { ServiceHealthBadge } from './service-health-badge';
 
 const PROJECT_SECTIONS = [
+  { path: '/producer', label: 'producer' },
   { path: '', label: 'library' },
   { path: '/storyboard', label: 'storyboard' },
   { path: '/voice', label: 'voice' },

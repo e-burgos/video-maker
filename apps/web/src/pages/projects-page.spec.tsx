@@ -26,14 +26,14 @@ function renderPage(client: Partial<RenderApiClient>) {
 }
 
 describe('ProjectsPage', () => {
-  it('lists the projects with their layout flags and links to the asset library', async () => {
+  it('lists the projects with their layout flags and opens each one on the producer', async () => {
     renderPage({
       listProjects: vi.fn().mockResolvedValue([project('smoke-ingest', { catalog: true, timeline: true })]),
     });
 
     await waitFor(() => expect(screen.getByText('smoke-ingest')).toBeTruthy());
     const link = screen.getByRole('link', { name: /smoke-ingest/u });
-    expect(link.getAttribute('href')).toBe('/projects/smoke-ingest');
+    expect(link.getAttribute('href')).toBe('/projects/smoke-ingest/producer');
     expect(screen.getByText('catalog').getAttribute('data-present')).toBe('true');
     expect(screen.getByText('edl').getAttribute('data-present')).toBe('false');
   });

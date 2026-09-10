@@ -9,6 +9,11 @@ import {
   parseVoiceJob,
 } from './parse-render-job';
 import {
+  parseProducerConversation,
+  parseProducerTurn,
+  parseProducerTurnAccepted,
+} from './parse-producer';
+import {
   parseVoiceDocument,
   parseVoiceListing,
   parseVoiceSceneWriteResult,
@@ -26,6 +31,9 @@ import type {
   Job,
   MontageJob,
   MontagePresetName,
+  ProducerConversation,
+  ProducerTurn,
+  ProducerTurnAccepted,
   ProjectDetail,
   ProjectSummary,
   RenderJob,
@@ -83,6 +91,10 @@ export type RenderApiClient = {
     sceneId: string,
     fileName: string,
   ) => Promise<VoiceSceneWriteResult>;
+  getProducer: (slug: string) => Promise<ProducerConversation>;
+  sendProducerMessage: (slug: string, text: string) => Promise<ProducerTurnAccepted>;
+  getProducerTurn: (slug: string, turnId: string) => Promise<ProducerTurn>;
+  cancelProducerTurn: (slug: string, turnId: string) => Promise<ProducerTurn>;
   listRenderJobs: (slug: string) => Promise<RenderJobListing>;
   getRenderJob: (jobId: string) => Promise<Job>;
   cancelRenderJob: (jobId: string) => Promise<RenderJobCancelOutcome>;
@@ -387,6 +399,50 @@ export function createRenderApiClient(fetchImpl: FetchLike): RenderApiClient {
         (value) => isRecord(value),
       );
       return parseVoiceSceneWriteResult(body);
+    },
+
+    async getProducer(slug: string): Promise<ProducerConversation> {
+      const body = await requestJson(
+        `/projects/${encodeURIComponent(slug)}/producer`,
+        undefined,
+        'a producer conversation',
+        (value) => isRecord(value),
+      );
+      return parseProducerConversation(body);
+    },
+
+    async sendProducerMessage(slug: string, text: string): Promise<ProducerTurnAccepted> {
+      const body = await requestJson(
+        `/projects/${encodeURIComponent(slug)}/producer/messages`,
+        {
+          method: 'POST',
+          headers: { 'content-type': 'application/json' },
+          body: JSON.stringify({ text }),
+        },
+        'an accepted producer turn',
+        (value) => isRecord(value),
+      );
+      return parseProducerTurnAccepted(body);
+    },
+
+    async getProducerTurn(slug: string, turnId: string): Promise<ProducerTurn> {
+      const body = await requestJson(
+        `/projects/${encodeURIComponent(slug)}/producer/turns/${encodeURIComponent(turnId)}`,
+        undefined,
+        'a producer turn',
+        (value) => isRecord(value),
+      );
+      return parseProducerTurn(body);
+    },
+
+    async cancelProducerTurn(slug: string, turnId: string): Promise<ProducerTurn> {
+      const body = await requestJson(
+        `/projects/${encodeURIComponent(slug)}/producer/turns/${encodeURIComponent(turnId)}`,
+        { method: 'DELETE' },
+        'a producer turn',
+        (value) => isRecord(value),
+      );
+      return parseProducerTurn(body);
     },
 
     async listRenderJobs(slug: string): Promise<RenderJobListing> {

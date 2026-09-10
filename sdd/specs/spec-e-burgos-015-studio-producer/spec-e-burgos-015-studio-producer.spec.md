@@ -1,7 +1,8 @@
 # SPEC-e-burgos-015: Studio Producer: el productor conversacional dentro de la app
 
-> Estado: **in-progress** — registrada el 2026-09-10. Dos ciclos, flow `lite`.
-> `cycle-01` (backend, `apps/render-api` + fix de `tools/render-cli`) · `cycle-02` (pantalla en `apps/web`).
+> Estado: **completed** — registrada y cerrada el 2026-09-10. Dos ciclos, flow `lite`.
+> `cycle-01` (backend, `apps/render-api` + fix de `tools/render-cli`) · `cycle-02` (pantalla en `apps/web`,
+> más el rol `logo` de `EP-006` que la pantalla necesitaba).
 
 ## Resumen Ejecutivo
 

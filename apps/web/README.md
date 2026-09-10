@@ -281,10 +281,75 @@ script verifies the failure branch on screen, screenshots it and stops there ins
 silently. Artifacts (the produced document, the copied sheet and five screenshots) land in
 `sdd/specs/spec-e-burgos-008-ai-storyboard/cycles/cycle-02/artifacts/`.
 
+## Producer (spec-015 cycle-02)
+
+`/projects/:slug/producer` is **the first stop of a project**: the projects list opens every card
+here and the project nav starts with it (`producer · library · storyboard · voice · preview`). It is
+the chat where you say what video you want, the producer agrees the plan with you and then does the
+work — reads the material, writes the script, voices it, runs the montage and renders the MP4 — on
+this machine, with the local Claude subscription and no API key.
+
+```bash
+# 1. the service (it is what runs the producer; RENDER_API_URL is also what the agent calls back)
+RENDER_API_PORT=4399 RENDER_API_MEDIA_ROOT=media RENDER_API_URL=http://127.0.0.1:4399 \
+  SWC_NODE_PROJECT=tsconfig.base.json PRODUCER_MODEL=sonnet \
+  node -r ./apps/render-api/src/server-register.cjs apps/render-api/src/main.ts &
+
+# 2. the studio
+WEB_PORT=4207 RENDER_API_URL=http://127.0.0.1:4399 pnpm exec vite --config apps/web/vite.config.ts
+
+# 3. open http://localhost:4207/projects/<slug>/producer
+```
+
+- **A turn takes minutes, not seconds.** The page polls `EP-024` every 2.5 s (its own
+  `useProducerTurnPoll`, a `setTimeout` re-armed after each answer — never a `setInterval`) and
+  shows every event the agent emits with its readable summary (`ffprobe raw/broll/lentes.mp4`,
+  `queued montage job`), the elapsed clock and a **Cancel** button that kills the child process
+  (`EP-025`) and keeps polling until the turn really settles as `canceled`.
+- **The turn is not a job.** It has no `kind`, no `state` and no `progress`, so it never entered the
+  `Job` union: forcing it in would have brought back the optional-fields anti-pattern the studio
+  banned. The jobs the agent enqueues **are** read from the real job listing and shown while the
+  turn runs.
+- **Answering is one click.** The `suggestions` of the answer become chips, and if the producer
+  wrote numbered options (`1. … 2. …`) those become chips too. Clicking one sends that exact text.
+  Only the last answer offers chips — an old turn is history, not a menu.
+- **Markdown is ours and it is small**: paragraphs, ordered and unordered lists and bold, parsed by
+  `src/api/producer-markdown.ts`. No npm dependency was added and nothing is rendered as HTML.
+- **An empty conversation is a briefing, not a blank page.** `ProducerWelcome` lists the real
+  inventory of the project by role (from `EP-005`) and offers starters that land in the composer so
+  you can finish them in your own words. With no material at all it points at the library instead.
+- **Every producer failure is shown with its code and a sentence.** `429 PRODUCER_RATE_LIMITED`
+  says the Claude subscription ran out of quota **and that the conversation is saved on disk**;
+  `503 PRODUCER_UNAVAILABLE` blocks the composer with the reason written, driven by
+  `capabilities.producer` of `EP-001`.
+- **The studio refreshes itself when a turn ends**: conversation, asset listing and job listing are
+  reloaded, so the preview shows the timeline the producer just built without a manual reload.
+
+### The producer E2E
+
+`node apps/web/e2e/producer-smoke.mjs` runs the whole thing against a real `claude -p` over a
+**temporary copy** of `media/demo-01` (`raw/` and `work/producer/`, never the developer's own
+project): empty state → turn 1 → chips → turn 2 with the montage and render jobs → the MP4 in
+`out/` probed with `ffprobe` → the logo saved from the preview → a third turn canceled from the UI.
+It costs two real turns of several minutes each, so run one E2E at a time and never with another
+render alive. `PRODUCER_SMOKE_STOP_AFTER=4` stops right after the empty state: it exercises the copy,
+both servers, the navigation and the inventory assertions **without spending a single token**, which
+is the cheap way to check the script before paying for it.
+
+## Logo overlay (spec-015 cycle-02)
+
+The preview page owns the logo, because that is where the timeline-editing machine already lives
+(reducer, dirty flag, issue severity and the single full `PUT`). "Show logo" and the position
+selector write `timeline.logo` **and** push the logo `MediaAsset` into `timeline.assets` —
+`validateTimeline` rejects a logo whose `assetId` is not among the assets or is not an image. The
+control is enabled only when the catalog has a **probed** logo (`role: "logo"`, `media !== null`);
+with a project that only has a raw scan it says so instead of failing silently, and the same panel
+uploads a logo with the role already fixed (`EP-006` accepts `logo` since this cycle).
+
 ## Voice-over (spec-009 cycle-02)
 
 `/projects/:slug/voice` is where the storyboard gets a voice, reached from the project nav
-(`library · storyboard · voice · preview`) or from the asset library's "open voice" link. It is a
+(`producer · library · storyboard · voice · preview`) or from the asset library's "open voice" link. It is a
 page of its own and not a panel of the storyboard: the two documents have different lifecycles —
 one is edited by hand, the other is produced by a job — and the storyboard page was already full.
 

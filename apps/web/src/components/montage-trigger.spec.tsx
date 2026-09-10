@@ -106,6 +106,26 @@ describe('MontageTrigger', () => {
       .map((option) => (option as HTMLOptionElement).value);
 
     expect(options).toEqual(['software-demo', 'hardware', 'recipe', 'educational']);
+    expect(
+      screen.getAllByRole('option').map((option) => (option as HTMLOptionElement).textContent),
+    ).toEqual(['Software tutorial', 'Product ad', 'Step by step', 'Explainer or class']);
+  });
+
+  it('explains what the selected preset does with the material, without hiding its contract id', async () => {
+    renderTrigger(vi.fn());
+
+    await waitFor(() => expect(generateButton().disabled).toBe(false));
+    expect(screen.getByTestId('montage-preset-description').textContent).toContain('software-demo');
+    expect(screen.getByTestId('montage-preset-description').textContent).toContain(
+      'Screen recording',
+    );
+
+    fireEvent.change(screen.getByLabelText('Montage preset'), { target: { value: 'recipe' } });
+
+    expect(screen.getByTestId('montage-preset-description').textContent).toContain('recipe');
+    expect(screen.getByTestId('montage-preset-description').textContent).toContain(
+      'one step per shot',
+    );
   });
 
   it('refuses a seed that is not a non-negative integer, without calling the service', async () => {

@@ -100,6 +100,7 @@ export function healthyVoiceService(overrides: Partial<ServiceHealth> = {}): Ser
       montageQueue: true,
       storyboardQueue: true,
       voiceQueue: true,
+      producer: true,
     },
     jobs: { running: 0, queued: 0 },
     ...overrides,

@@ -6,6 +6,10 @@ import { StudioLayout } from '../components/studio-layout';
 import { AssetLibraryPage } from '../pages/asset-library-page';
 import { ProjectsPage } from '../pages/projects-page';
 
+const ProducerPage = lazy(async () => ({
+  default: (await import('../pages/producer-page')).ProducerPage,
+}));
+
 const ProjectPreviewPage = lazy(async () => ({
   default: (await import('../pages/project-preview-page')).ProjectPreviewPage,
 }));
@@ -26,6 +30,14 @@ export function App() {
           <Route element={<StudioLayout />}>
             <Route path="/" element={<ProjectsPage />} />
             <Route path="/projects/:slug" element={<AssetLibraryPage />} />
+            <Route
+              path="/projects/:slug/producer"
+              element={
+                <Suspense fallback={<p className="text-sm text-slate-500">Loading producer…</p>}>
+                  <ProducerPage />
+                </Suspense>
+              }
+            />
             <Route
               path="/projects/:slug/storyboard"
               element={

@@ -1,10 +1,17 @@
-import type { OutputPreset, Timeline, TimelineIssue } from '@video-maker/timeline-core';
+import type {
+  LogoPosition,
+  MediaAsset,
+  OutputPreset,
+  Timeline,
+  TimelineIssue,
+} from '@video-maker/timeline-core';
 import { validateTimeline } from '@video-maker/timeline-core';
 
 import { relayoutArollTrack, voiceMirrorIssue } from './aroll-layout';
 import type { VoiceMirrorIssue } from './aroll-layout';
 import { applyOutputPreset } from './apply-output-preset';
 import { issueSeverity } from './issue-severity';
+import { clearTimelineLogo, setTimelineLogo } from './logo-overlay';
 import { rescaleMusicAutomation } from './rescale-music-automation';
 import {
   rejectCaptionWordText,
@@ -24,6 +31,8 @@ export type TimelineEditAction =
   | { type: 'caption-word-text'; clipId: string; wordIndex: number; text: string }
   | { type: 'music-levels'; baseGainDb: number; duckedGainDb: number }
   | { type: 'output-preset'; preset: OutputPreset }
+  | { type: 'logo-set'; asset: MediaAsset; position: LogoPosition }
+  | { type: 'logo-clear' }
   | { type: 'saved'; timeline: Timeline }
   | { type: 'reset' };
 
@@ -212,6 +221,16 @@ export function timelineEditReducer(state: TimelineEditState, action: TimelineEd
 
     case 'output-preset':
       return settle(state.saved, applyOutputPreset(state.draft, action.preset), null);
+
+    case 'logo-set':
+      return settle(
+        state.saved,
+        setTimelineLogo(state.draft, action.asset, action.position),
+        null,
+      );
+
+    case 'logo-clear':
+      return settle(state.saved, clearTimelineLogo(state.draft), null);
   }
 }
 

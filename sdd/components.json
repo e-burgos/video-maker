@@ -231,7 +231,7 @@
         "module": "web-studio",
         "spec": "sdd/specs/spec-e-burgos-006-web-studio",
         "path": "src/components/studio-layout.tsx",
-        "status": "implemented",
+        "status": "updated",
         "created_in_cycle": 1,
         "updated_in_cycle": 2,
         "description": "Shell del studio: header con el nombre, el link a proyectos y el badge de salud, y el Outlet de la pagina ruteada.",
@@ -242,6 +242,11 @@
             "cycle": 2,
             "date": "2026-09-10",
             "change": "Actualizado en spec-e-burgos-009 cycle-02: el nav por proyecto suma la seccion voice, en el orden del pipeline library · storyboard · voice · preview."
+          },
+          {
+            "cycle": 2,
+            "date": "2026-09-10",
+            "change": "spec-e-burgos-015 cycle-02: el nav por proyecto pasa a cinco secciones con producer primero (producer, library, storyboard, voice, preview)."
           }
         ]
       },
@@ -290,15 +295,21 @@
         "module": "web-studio",
         "spec": "sdd/specs/spec-e-burgos-006-web-studio",
         "path": "src/pages/projects-page.tsx",
-        "status": "implemented",
+        "status": "updated",
         "created_in_cycle": 1,
-        "updated_in_cycle": null,
-        "description": "Listado de los proyectos del media root con sus cinco flags de layout y link a la biblioteca de assets de cada uno.",
+        "updated_in_cycle": 2,
+        "description": "Listado de los proyectos del media root con sus cinco flags de layout; cada tarjeta abre el proyecto en la pagina del productor.",
         "consumes": [
           "EP-002"
         ],
         "created_at": "2026-09-09",
-        "changelog": []
+        "changelog": [
+          {
+            "cycle": 2,
+            "date": "2026-09-10",
+            "change": "spec-e-burgos-015 cycle-02: cada proyecto abre en /projects/:slug/producer en vez de la biblioteca — el productor es el punto de partida del proyecto."
+          }
+        ]
       },
       {
         "id": "COMP-005",
@@ -471,6 +482,7 @@
         "updated_in_cycle": 2,
         "description": "Pagina del estudio: lee la Timeline persistida (EP-007), la valida contra TimelineSchema, reescribe los assets a URLs same-origin de EP-011, y ofrece el editor completo sobre un reducer de edicion (timelineEditReducer) — clips, captions, musica, preset de salida, issues y guardado — montando el TimelinePlayer con el draft vigente y cableando el disparo de render, el listado de jobs y el panel de detalle en vivo del job seleccionado.",
         "consumes": [
+          "EP-005",
           "EP-007",
           "EP-011"
         ],
@@ -485,6 +497,11 @@
             "cycle": 2,
             "date": "2026-09-09",
             "change": "Answers TIMELINE_NOT_FOUND with an actionable empty state that links back to the asset library to generate the montage, instead of an ErrorNotice; every other read failure keeps the ErrorNotice with its code (spec-e-burgos-007 cycle-02)."
+          },
+          {
+            "cycle": 2,
+            "date": "2026-09-10",
+            "change": "spec-e-burgos-015 cycle-02: suma el panel de logo (LogoOverlayEditor) entre el guardado y la musica, que edita timeline.logo con el mismo PUT completo."
           }
         ]
       },
@@ -682,16 +699,22 @@
         "module": "web-montage",
         "spec": "sdd/specs/spec-e-burgos-007-web-montage",
         "path": "src/components/montage-trigger.tsx",
-        "status": "implemented",
+        "status": "updated",
         "created_in_cycle": 2,
-        "updated_in_cycle": null,
+        "updated_in_cycle": 2,
         "description": "Disparo del montaje desde la biblioteca de assets: selector de preset y seed, gating por la salud del servicio (montageBlockers) y confirmacion explicita ante 409 TIMELINE_ALREADY_EXISTS que reintenta con overwrite: true.",
         "consumes": [
           "EP-001",
           "EP-012"
         ],
         "created_at": "2026-09-09",
-        "changelog": []
+        "changelog": [
+          {
+            "cycle": 2,
+            "date": "2026-09-10",
+            "change": "spec-e-burgos-015 cycle-02: el selector muestra etiqueta y descripcion legibles de cada preset (montage-presets.ts) manteniendo el id del contrato como value, y el panel explica que hace el preset elegido."
+          }
+        ]
       },
       {
         "id": "COMP-026",
@@ -911,6 +934,112 @@
           "EP-012",
           "EP-016",
           "EP-020"
+        ],
+        "created_at": "2026-09-10",
+        "changelog": []
+      },
+      {
+        "id": "COMP-039",
+        "name": "ProducerMessageList",
+        "type": "component",
+        "module": "studio-producer",
+        "spec": "sdd/specs/spec-e-burgos-015-studio-producer",
+        "path": "src/components/producer-message-list.tsx",
+        "status": "implemented",
+        "created_in_cycle": 2,
+        "updated_in_cycle": null,
+        "description": "Conversacion del productor en pantalla: markdown minimo propio (parrafos, listas ordenadas y no ordenadas, negritas) sin dependencia npm, rol de cada mensaje en un data-role, y chips de respuesta rapida del ULTIMO mensaje del asistente (sus suggestions mas las opciones numeradas de su texto, sin repetir).",
+        "consumes": [],
+        "created_at": "2026-09-10",
+        "changelog": []
+      },
+      {
+        "id": "COMP-040",
+        "name": "ProducerComposer",
+        "type": "component",
+        "module": "studio-producer",
+        "spec": "sdd/specs/spec-e-burgos-015-studio-producer",
+        "path": "src/components/producer-composer.tsx",
+        "status": "implemented",
+        "created_in_cycle": 2,
+        "updated_in_cycle": null,
+        "description": "Campo multilinea del chat: Enter envia y Shift+Enter agrega linea, el borrador vive en la pagina (controlado), y los blockers de capabilities.producer deshabilitan el campo con el motivo escrito.",
+        "consumes": [],
+        "created_at": "2026-09-10",
+        "changelog": []
+      },
+      {
+        "id": "COMP-041",
+        "name": "ProducerTurnActivity",
+        "type": "component",
+        "module": "studio-producer",
+        "spec": "sdd/specs/spec-e-burgos-015-studio-producer",
+        "path": "src/components/producer-turn-activity.tsx",
+        "status": "implemented",
+        "created_in_cycle": 2,
+        "updated_in_cycle": null,
+        "description": "Actividad en vivo del turno: eventos text/tool/status con su resumen legible y auto-scroll, reloj de tiempo transcurrido, boton Cancel mientras corre, y el error tipado del turno traducido a lenguaje de usuario junto a su code.",
+        "consumes": [
+          "EP-024",
+          "EP-025"
+        ],
+        "created_at": "2026-09-10",
+        "changelog": []
+      },
+      {
+        "id": "COMP-042",
+        "name": "ProducerWelcome",
+        "type": "component",
+        "module": "studio-producer",
+        "spec": "sdd/specs/spec-e-burgos-015-studio-producer",
+        "path": "src/components/producer-welcome.tsx",
+        "status": "implemented",
+        "created_in_cycle": 2,
+        "updated_in_cycle": null,
+        "description": "Estado vacio accionable del productor: inventario real del proyecto por rol derivado del listado de assets, sugerencias iniciales que caen en el compositor para editarlas, y link a la biblioteca cuando el proyecto no tiene material.",
+        "consumes": [
+          "EP-005"
+        ],
+        "created_at": "2026-09-10",
+        "changelog": []
+      },
+      {
+        "id": "COMP-043",
+        "name": "ProducerPage",
+        "type": "page",
+        "module": "studio-producer",
+        "spec": "sdd/specs/spec-e-burgos-015-studio-producer",
+        "path": "src/pages/producer-page.tsx",
+        "status": "implemented",
+        "created_in_cycle": 2,
+        "updated_in_cycle": null,
+        "description": "Pagina /projects/:slug/producer, montada perezosamente y primera parada de un proyecto: carga la conversacion persistida, adopta un turno que ya estaba corriendo, envia mensajes, sigue el turno con su propio poll (2,5 s), muestra los jobs que el agente encola y refresca conversacion, assets y jobs cuando el turno termina.",
+        "consumes": [
+          "EP-001",
+          "EP-005",
+          "EP-013",
+          "EP-022",
+          "EP-023",
+          "EP-024",
+          "EP-025"
+        ],
+        "created_at": "2026-09-10",
+        "changelog": []
+      },
+      {
+        "id": "COMP-044",
+        "name": "LogoOverlayEditor",
+        "type": "component",
+        "module": "studio-producer",
+        "spec": "sdd/specs/spec-e-burgos-015-studio-producer",
+        "path": "src/components/logo-overlay-editor.tsx",
+        "status": "implemented",
+        "created_in_cycle": 2,
+        "updated_in_cycle": null,
+        "description": "Control del logo en la pagina de preview: check Show logo y selector de posicion que escriben timeline.logo y el MediaAsset que referencia, deshabilitado con el motivo escrito si el catalogo no tiene un logo probado, con subida del logo en el mismo panel (rol fijo).",
+        "consumes": [
+          "EP-005",
+          "EP-006"
         ],
         "created_at": "2026-09-10",
         "changelog": []

@@ -56,7 +56,7 @@ export function ProjectsPage() {
           {projects.data.map((project) => (
             <li key={project.slug}>
               <Link
-                to={`/projects/${encodeURIComponent(project.slug)}`}
+                to={`/projects/${encodeURIComponent(project.slug)}/producer`}
                 className="block rounded-lg border border-slate-800 bg-slate-900/60 p-4 hover:border-slate-600"
               >
                 <p className="font-mono text-sm font-medium text-slate-100">{project.slug}</p>

@@ -88,6 +88,7 @@ describe('StudioLayout project nav', () => {
             <Route element={<StudioLayout />}>
               <Route path="/" element={<p>projects</p>} />
               <Route path="/projects/:slug" element={<p>library</p>} />
+              <Route path="/projects/:slug/producer" element={<p>producer</p>} />
               <Route path="/projects/:slug/storyboard" element={<p>storyboard</p>} />
               <Route path="/projects/:slug/voice" element={<p>voice</p>} />
               <Route path="/projects/:slug/preview" element={<p>preview</p>} />
@@ -104,16 +105,24 @@ describe('StudioLayout project nav', () => {
     expect(screen.queryByTestId('project-nav')).toBeNull();
   });
 
-  it('links the four sections of the project from any of them, in pipeline order', () => {
+  it('links the five sections of the project from any of them, producer first', () => {
     renderAt('/projects/smoke-ingest/storyboard');
 
     const nav = screen.getByTestId('project-nav');
     expect(Array.from(nav.querySelectorAll('a')).map((link) => link.getAttribute('href'))).toEqual([
+      '/projects/smoke-ingest/producer',
       '/projects/smoke-ingest',
       '/projects/smoke-ingest/storyboard',
       '/projects/smoke-ingest/voice',
       '/projects/smoke-ingest/preview',
     ]);
+  });
+
+  it('marks the producer section as the current one while it is open', () => {
+    renderAt('/projects/smoke-ingest/producer');
+
+    expect(screen.getByRole('link', { name: 'producer' }).getAttribute('aria-current')).toBe('page');
+    expect(screen.getByRole('link', { name: 'library' }).getAttribute('aria-current')).toBeNull();
   });
 
   it('marks the voice section as the current one while it is open', () => {

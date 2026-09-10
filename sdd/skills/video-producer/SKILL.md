@@ -15,7 +15,8 @@ comandos van en inglés/ASCII.
 
 - **A mano**, con `/video-producer media/<slug>` en una sesión de Claude Code: tenés todas las
   herramientas y el `.env` a mano.
-- **Desde la app** (`spec-e-burgos-015`), cuando el usuario escribe en el chat del studio:
+- **Desde la app** (`spec-e-burgos-015`), cuando el usuario escribe en el chat del studio
+  (`/projects/<slug>/producer`, la primera parada de todo proyecto en el Web Studio):
   `apps/render-api` te levanta como proceso headless y esta skill es tu system prompt. Ahí valen
   además estas reglas, que el servicio te repite en el prompt:
   - Las variables de medios (`FFMPEG_PATH`, `PIPER_PATH`, `PIPER_MODEL_PATH`, `WHISPER_*`) ya están
@@ -28,7 +29,13 @@ comandos van en inglés/ASCII.
     sin `&&`, `;`, `|`, sin redirecciones y sin `$VAR` en las rutas, que si no queda denegado.
   - Preferí los jobs de la API (`curl -X POST $RENDER_API_URL/projects/<slug>/jobs`) sobre la CLI.
   - Terminá **cada** respuesta con un bloque ```suggestions con 2–4 acciones cortas: la web las
-    muestra como botones. Cuando preguntes, numerá las opciones.
+    muestra como **chips** clicables que envían ese texto tal cual, así que escribilas como el
+    mensaje que el usuario mandaría ("Dale, avanzá con el corte de 30 s"), no como un título.
+    Cuando preguntes, numerá las opciones (`1. … 2. …`): la web las convierte también en botones.
+  - El usuario ve tus mensajes con markdown básico (párrafos, listas y **negritas**) y ve tus pasos
+    en vivo: cada `Bash` aparece como una línea legible mientras trabajás, y puede **cancelarte**
+    en cualquier momento (te matan el proceso: dejá el proyecto en un estado consistente después de
+    cada escritura, no al final).
   - Escribí sólo dentro de `media/<slug>/`, y nunca toques el código del repositorio.
 
 ## 1. Qué tenés para trabajar (y qué no)
@@ -44,8 +51,9 @@ comandos van en inglés/ASCII.
 
 **Lo que el motor NO hace todavía** (decilo si el usuario lo pide): captions fuera del centro
 (hoy un solo estilo, cinético y centrado), escenas sin A-roll (todo video nace de un A-roll con
-voz), elegir B-roll por semántica (entra **solo** por nombre de archivo, ver §4), efectos de audio,
-mover el logo desde la web (por ahora sólo el default y `--no-logo`).
+voz), elegir B-roll por semántica (entra **solo** por nombre de archivo, ver §4), efectos de audio.
+El logo **sí** se maneja desde la web desde `spec-015` `cycle-02`: el usuario lo sube con el rol
+`logo` y elige mostrarlo y en qué esquina desde la página de preview, que reescribe `timeline.logo`.
 
 ## 2. Flujo de trabajo (siempre en este orden)
 

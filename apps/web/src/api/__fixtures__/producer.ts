@@ -1,0 +1,86 @@
+import type {
+  ProducerConversation,
+  ProducerEvent,
+  ProducerMessage,
+  ProducerTurn,
+} from '../render-api-types';
+
+export const ASSISTANT_ANSWER = [
+  'Tengo **3 clips** de a-roll y una locución de 32 segundos.',
+  '',
+  'Te propongo:',
+  '',
+  '1. Un corte de 30 segundos con la música de fondo.',
+  '2. Un corte de 45 segundos con más B-roll.',
+].join('\n');
+
+export function producerMessage(overrides: Partial<ProducerMessage> = {}): ProducerMessage {
+  return {
+    id: 'msg-0001',
+    role: 'user',
+    text: 'Contame qué material hay.',
+    createdAt: '2026-09-10T10:00:00.000Z',
+    ...overrides,
+  };
+}
+
+export function producerEvents(): ProducerEvent[] {
+  return [
+    { type: 'status', status: 'started' },
+    { type: 'tool', name: 'Bash', summary: 'ffprobe raw/aroll/clip01.mp4' },
+    { type: 'text', text: 'Reviso el material que subiste.' },
+    { type: 'tool', name: 'Bash', summary: 'queued montage job' },
+  ];
+}
+
+export function producerTurn(overrides: Partial<ProducerTurn> = {}): ProducerTurn {
+  return {
+    turnId: 'turn-0001',
+    slug: 'demo-01',
+    status: 'running',
+    startedAt: '2026-09-10T10:00:01.000Z',
+    finishedAt: null,
+    events: producerEvents(),
+    assistantMessage: null,
+    suggestions: [],
+    error: null,
+    ...overrides,
+  };
+}
+
+export function succeededTurn(overrides: Partial<ProducerTurn> = {}): ProducerTurn {
+  return producerTurn({
+    status: 'succeeded',
+    finishedAt: '2026-09-10T10:04:01.000Z',
+    assistantMessage: ASSISTANT_ANSWER,
+    suggestions: ['Dale, avanzá con el corte de 30 segundos', 'Mostrame el guion primero'],
+    ...overrides,
+  });
+}
+
+export function producerConversation(
+  overrides: Partial<ProducerConversation> = {},
+): ProducerConversation {
+  return {
+    slug: 'demo-01',
+    messages: [
+      producerMessage(),
+      producerMessage({
+        id: 'msg-0002',
+        role: 'assistant',
+        text: ASSISTANT_ANSWER,
+        createdAt: '2026-09-10T10:04:01.000Z',
+        suggestions: ['Dale, avanzá con el corte de 30 segundos'],
+        turnId: 'turn-0001',
+      }),
+    ],
+    session: {
+      sessionId: 'session-0001',
+      model: 'sonnet',
+      createdAt: '2026-09-10T10:00:01.000Z',
+      lastTurnAt: '2026-09-10T10:04:01.000Z',
+    },
+    activeTurn: null,
+    ...overrides,
+  };
+}

@@ -298,6 +298,17 @@
           "status": "completed",
           "tasks_total": 7,
           "tasks_done": 7
+        },
+        "cycle-02": {
+          "file": "sdd/specs/spec-e-burgos-015-studio-producer/cycles/cycle-02/tasks.json",
+          "module": "studio-producer",
+          "apps": [
+            "apps/web",
+            "apps/render-api"
+          ],
+          "status": "completed",
+          "tasks_total": 7,
+          "tasks_done": 7
         }
       }
     }

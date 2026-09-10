@@ -129,7 +129,7 @@ export async function resolveProjectAssets(
 export function countAssetsByRole(
   entries: readonly { readonly role: CatalogAssetRole }[],
 ): Readonly<Record<AssetRole, number>> {
-  const counts: Record<AssetRole, number> = { aroll: 0, broll: 0, image: 0, audio: 0, voice: 0 };
+  const counts: Record<AssetRole, number> = { aroll: 0, broll: 0, image: 0, audio: 0, voice: 0, logo: 0 };
   for (const entry of entries) {
     if (isAssetRole(entry.role)) {
       counts[entry.role] += 1;

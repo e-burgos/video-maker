@@ -101,7 +101,7 @@ export async function handleUploadAsset(
       code: 'ASSET_ROLE_INVALID',
       stage: null,
       resource: role,
-      expected: 'aroll, broll, image or audio',
+      expected: 'aroll, broll, image, audio, voice or logo',
     });
   }
 

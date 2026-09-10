@@ -1,0 +1,205 @@
+{
+  "$schema": "../../../../schemas/cycle.schema.json",
+  "cycle": 2,
+  "module": "studio-producer",
+  "spec": "spec-e-burgos-015-studio-producer",
+  "apps": [
+    "apps/web",
+    "apps/render-api"
+  ],
+  "phase": "studio-producer",
+  "flow": "lite",
+  "objectives": [
+    "Que el Web Studio tenga la pantalla del productor: chat con la conversacion persistida, actividad del turno en vivo con cancelacion, sugerencias como chips y errores del productor en lenguaje de usuario",
+    "Que la pantalla sea el punto de partida del proyecto: estado vacio con el inventario real del material y sugerencias iniciales, y refresco de assets, timeline, jobs y voz cuando el turno termina",
+    "Que el usuario controle el logo desde la app y entienda que hace cada preset de montaje, cerrando la spec del productor"
+  ],
+  "status": "completed",
+  "started_at": "2026-09-10",
+  "completed_at": "2026-09-10",
+  "documents": {
+    "plan": "sdd/specs/spec-e-burgos-015-studio-producer/cycles/cycle-02/plan.md",
+    "tasks": "sdd/specs/spec-e-burgos-015-studio-producer/cycles/cycle-02/tasks.json"
+  },
+  "artifacts": [
+    "sdd/specs/spec-e-burgos-015-studio-producer/cycles/cycle-02/artifacts/capture-logo-and-markdown.mjs",
+    "sdd/specs/spec-e-burgos-015-studio-producer/cycles/cycle-02/artifacts/producer-smoke-01-empty-state.png",
+    "sdd/specs/spec-e-burgos-015-studio-producer/cycles/cycle-02/artifacts/producer-smoke-02-turn-running.png",
+    "sdd/specs/spec-e-burgos-015-studio-producer/cycles/cycle-02/artifacts/producer-smoke-03-answer-and-chips.png",
+    "sdd/specs/spec-e-burgos-015-studio-producer/cycles/cycle-02/artifacts/producer-smoke-04-turn-two-done.png",
+    "sdd/specs/spec-e-burgos-015-studio-producer/cycles/cycle-02/artifacts/producer-smoke-05-preview.png",
+    "sdd/specs/spec-e-burgos-015-studio-producer/cycles/cycle-02/artifacts/producer-smoke-06-logo.png",
+    "sdd/specs/spec-e-burgos-015-studio-producer/cycles/cycle-02/artifacts/producer-smoke-07-canceled.png",
+    "sdd/specs/spec-e-burgos-015-studio-producer/cycles/cycle-02/artifacts/producer-smoke-08-logo-off.png",
+    "sdd/specs/spec-e-burgos-015-studio-producer/cycles/cycle-02/artifacts/producer-smoke-09-logo-top-left.png",
+    "sdd/specs/spec-e-burgos-015-studio-producer/cycles/cycle-02/artifacts/producer-smoke-10-player-logo-top-left.png",
+    "sdd/specs/spec-e-burgos-015-studio-producer/cycles/cycle-02/artifacts/producer-smoke-11-rich-markdown.png",
+    "sdd/specs/spec-e-burgos-015-studio-producer/cycles/cycle-02/artifacts/producer-web-smoke-conversation.md",
+    "sdd/specs/spec-e-burgos-015-studio-producer/cycles/cycle-02/artifacts/producer-web-smoke-timeline.json",
+    "sdd/specs/spec-e-burgos-015-studio-producer/cycles/cycle-02/artifacts/producer-web-smoke.log",
+    "sdd/specs/spec-e-burgos-015-studio-producer/cycles/cycle-02/artifacts/producer-web-smoke.md"
+  ],
+  "metrics": {
+    "tasks_total": 7,
+    "tasks_completed": 7,
+    "story_points": 41,
+    "files_created": [
+      "apps/web/e2e/producer-smoke.mjs",
+      "apps/web/src/api/__fixtures__/producer.ts",
+      "apps/web/src/api/montage-presets.spec.ts",
+      "apps/web/src/api/montage-presets.ts",
+      "apps/web/src/api/parse-producer.spec.ts",
+      "apps/web/src/api/parse-producer.ts",
+      "apps/web/src/api/producer-capability.spec.ts",
+      "apps/web/src/api/producer-capability.ts",
+      "apps/web/src/api/producer-markdown.spec.ts",
+      "apps/web/src/api/producer-markdown.ts",
+      "apps/web/src/api/producer-turn-poll-plan.spec.ts",
+      "apps/web/src/api/producer-turn-poll-plan.ts",
+      "apps/web/src/api/timeline-edit/logo-overlay.spec.ts",
+      "apps/web/src/api/timeline-edit/logo-overlay.ts",
+      "apps/web/src/components/logo-overlay-editor.spec.tsx",
+      "apps/web/src/components/logo-overlay-editor.tsx",
+      "apps/web/src/components/producer-composer.spec.tsx",
+      "apps/web/src/components/producer-composer.tsx",
+      "apps/web/src/components/producer-message-list.spec.tsx",
+      "apps/web/src/components/producer-message-list.tsx",
+      "apps/web/src/components/producer-turn-activity.spec.tsx",
+      "apps/web/src/components/producer-turn-activity.tsx",
+      "apps/web/src/components/producer-welcome.spec.tsx",
+      "apps/web/src/components/producer-welcome.tsx",
+      "apps/web/src/hooks/use-producer-turn-poll.spec.ts",
+      "apps/web/src/hooks/use-producer-turn-poll.ts",
+      "apps/web/src/pages/producer-page.spec.tsx",
+      "apps/web/src/pages/producer-page.tsx",
+      "sdd/context/apps/web/updates/2026-09-10-spec-e-burgos-015-studio-producer-cycle-02.md",
+      "sdd/memory/journal/2026-09-10-spec-e-burgos-015-studio-producer-cycle-02.md",
+      "sdd/specs/spec-e-burgos-015-studio-producer/cycles/cycle-02/artifacts/capture-logo-and-markdown.mjs",
+      "sdd/specs/spec-e-burgos-015-studio-producer/cycles/cycle-02/artifacts/producer-web-smoke-conversation.md",
+      "sdd/specs/spec-e-burgos-015-studio-producer/cycles/cycle-02/artifacts/producer-web-smoke-timeline.json",
+      "sdd/specs/spec-e-burgos-015-studio-producer/cycles/cycle-02/artifacts/producer-web-smoke.log",
+      "sdd/specs/spec-e-burgos-015-studio-producer/cycles/cycle-02/artifacts/producer-web-smoke.md",
+      "sdd/specs/spec-e-burgos-015-studio-producer/cycles/cycle-02/cycle.json",
+      "sdd/specs/spec-e-burgos-015-studio-producer/cycles/cycle-02/plan.md",
+      "sdd/specs/spec-e-burgos-015-studio-producer/cycles/cycle-02/tasks.json"
+    ],
+    "files_modified": [
+      "apps/render-api/README.md",
+      "apps/render-api/src/http/handlers/assets-handler.ts",
+      "apps/render-api/src/http/handlers/projects-handler.spec.ts",
+      "apps/render-api/src/http/handlers/projects-handler.ts",
+      "apps/render-api/src/store/asset-path.ts",
+      "apps/render-api/src/store/project-assets.spec.ts",
+      "apps/render-api/src/store/project-assets.ts",
+      "apps/web/README.md",
+      "apps/web/src/api/__fixtures__/voice.ts",
+      "apps/web/src/api/montage-capability.spec.ts",
+      "apps/web/src/api/render-api-client.spec.ts",
+      "apps/web/src/api/render-api-client.ts",
+      "apps/web/src/api/render-api-types.ts",
+      "apps/web/src/api/storyboard-capability.spec.ts",
+      "apps/web/src/api/timeline-edit/timeline-edit-state.ts",
+      "apps/web/src/app/app.tsx",
+      "apps/web/src/components/montage-trigger.spec.tsx",
+      "apps/web/src/components/montage-trigger.tsx",
+      "apps/web/src/components/studio-layout.spec.tsx",
+      "apps/web/src/components/studio-layout.tsx",
+      "apps/web/src/pages/project-preview-page.spec.tsx",
+      "apps/web/src/pages/project-preview-page.tsx",
+      "apps/web/src/pages/projects-page.spec.tsx",
+      "apps/web/src/pages/projects-page.tsx",
+      "sdd/api.json",
+      "sdd/catalog.json",
+      "sdd/components.json",
+      "sdd/context/constitution.md",
+      "sdd/global.json",
+      "sdd/skills/video-producer/SKILL.md",
+      "sdd/specs/index.json",
+      "sdd/specs/spec-e-burgos-015-studio-producer/spec-e-burgos-015-studio-producer.spec.md",
+      "sdd/tasks.json"
+    ],
+    "files_deleted": [],
+    "usage": {
+      "tokens_in": 450000,
+      "tokens_out": 80000,
+      "approx": true,
+      "source": "declared-estimate",
+      "by_tier": {
+        "claude/opus": {
+          "tokens_in": 450000,
+          "tokens_out": 80000,
+          "approx": true,
+          "source": "declared-estimate"
+        }
+      },
+      "by_agent": [
+        {
+          "agent": "orchestrator",
+          "label": "solo",
+          "provider_model": "claude/opus",
+          "effort": "high",
+          "tokens_in": 450000,
+          "tokens_out": 80000,
+          "approx": true,
+          "source": "declared-estimate",
+          "recorded_at": "2026-09-10",
+          "tokens_total": 530000
+        }
+      ]
+    }
+  },
+  "tables_created": [],
+  "endpoints_implemented": [
+    "EP-003",
+    "EP-004",
+    "EP-006"
+  ],
+  "components_created": [
+    "COMP-039",
+    "COMP-040",
+    "COMP-041",
+    "COMP-042",
+    "COMP-043",
+    "COMP-044"
+  ],
+  "issues_found": [
+    "El renderer de markdown de la primera version solo tenia parrafos, listas y negritas: la captura del E2E real mostro que el productor contesta con TABLAS, encabezados ##, reglas --- y bloques cercados, y todo eso se imprimia crudo (una pared de pipes). Se extendio producer-markdown.ts y se verifico sobre la conversacion real (2 tablas, 2 bloques de codigo, 2 reglas).",
+    "EP-006 no aceptaba el rol logo aunque el catalogo de auto-montage ya clasificaba raw/logo/ como rol logo y EP-005 lo devolvia: sin agregar el sexto rol al servicio, el check Show logo era decorativo porque no habia forma de meter un logo desde la app.",
+    "El montaje deja timeline.logo puesto por defecto (logo: auto), asi que 'activar el logo' en un proyecto recien producido no ensucia el documento y el guardado queda deshabilitado: el E2E tuvo que apagarlo primero para probar los dos sentidos.",
+    "Las capturas 05 y 06 del E2E salieron byte-identicas y no prueban el toggle: el estado final del panel coincide con el inicial. La evidencia visual del logo se produjo aparte, sobre la misma copia ya producida y sin gastar tokens (capture-logo-and-markdown.mjs).",
+    "Una edicion scriptada con str.replace() no matcheo la definicion de una funcion pero si sus call sites: node --check y eslint pasaron y el fallo aparecio como ReferenceError recien con un turno real de claude -p ya pagado.",
+    "El agente intento escribir work/producer/plan.md y script.txt con Write y recibio tool-failed dos veces (el smoke copia work/producer/ de demo-01 y Claude Code exige leer antes de sobrescribir). Se recupero solo leyendolos; los dos fallos quedaron visibles en el feed de actividad de la UI."
+  ],
+  "reviewer_report": {
+    "approved": true,
+    "date": "2026-09-10",
+    "ca_results": {
+      "US-15-011": "PASS - /projects/:slug/producer carga EP-022 y muestra cada mensaje con su data-role y su markdown renderizado (encabezados, listas, tablas, reglas, bloques de codigo y negritas); el compositor envia con Enter y con el boton, y el E2E real vio la conversacion completa en pantalla tras el 202.",
+      "US-15-012": "PASS - con un turno activo la pagina pollea EP-024 cada 2,5 s: en la corrida real la UI ya mostraba eventos a los 12 s y acumulo 29 y 54 eventos en los dos turnos, con reloj de transcurrido y auto-scroll.",
+      "US-15-013": "PASS - el turno 1 cerro con 4 chips ([Dale, produci este video, Cambia el tono del guion, Usa otro preset, Ajusta el guion]) y el turno 2 se disparo con un CLIC en la primera; numberedOptions agrega ademas las opciones numeradas del texto sin repetir las suggestions.",
+      "US-15-014": "PASS - el tercer turno se canceló desde la UI: data-status quedo en canceled en pantalla y pgrep no encontro ningun proceso claude vivo. PRODUCER_TURN_NOT_CANCELABLE esta cubierto por test.",
+      "US-15-015": "PASS - el estado vacio mostro el inventario real del proyecto (aroll 1, broll 3, image 8, audio 1, logo 1) y sus sugerencias iniciales, que caen en el compositor para editarlas; sin material la tarjeta enlaza a la biblioteca.",
+      "US-15-016": "PASS - los ocho codigos tienen frase de usuario probada uno por uno (producer-capability.spec.ts), 429 dice explicitamente que la cuota se agoto y que la conversacion queda guardada, y con capabilities.producer false el compositor queda deshabilitado con el motivo escrito.",
+      "US-15-017": "PASS - en la corrida real el logo se apago (logo=undefined en work/timeline.json), se volvio a encender en bottom-right y quedo en disco con su MediaAsset dentro de timeline.assets; capturas 08-10 muestran el panel en los dos estados y el Player con el logo movido a top-left. AssetUploader ofrece el rol logo y EP-006 lo acepta.",
+      "US-15-018": "PASS - el selector muestra las cuatro etiquetas legibles (Software tutorial, Product ad, Step by step, Explainer or class) manteniendo los ids del contrato como value, y el panel describe el preset elegido sin ocultar su id.",
+      "US-15-019": "PASS - producer-smoke.mjs corrio de punta a punta contra claude -p real sobre una copia temporal de media/demo-01: turno 1 147,3 s, turno 2 442,0 s con montage y render encolados por el agente, MP4 de 778 frames a 1080x1920 con audio aac verificado por ffprobe, y 11 capturas en artifacts/."
+    },
+    "tests": {
+      "nx run-many -t lint test build": "VERDE en los 8 proyectos.",
+      "pnpm sdd:validate": "OK - 58 files valid, cross-checks passed.",
+      "coverage apps/web": "98,71 % stmts / 95,89 % branch / 98,67 % funcs / 98,98 % lines (piso 80), 76 archivos / 703 tests, coverage.include sin recortar.",
+      "coverage apps/render-api": "831 tests en verde tras el sexto rol de assets.",
+      "chunk inicial de Vite": "478,34 kB (producer-page 23,09 kB perezoso), sin el aviso de 500 kB.",
+      "E2E real del productor": "apps/web/e2e/producer-smoke.mjs, 2026-09-10 22:04-22:17 UTC. Evidencia literal en artifacts/producer-web-smoke.md y el log completo en producer-web-smoke.log."
+    },
+    "notes": "Cero dependencias npm nuevas y ningun coverage.include recortado. El ciclo es lite por el prefijo [LITE] del dev y NO cae en la excepcion de contratos: consume el contrato de cycle-01 sin crear endpoints. Si entro un cambio aditivo del servicio (rol logo en EP-006, assetCounts.logo en EP-004, raw/logo/ en EP-003), declarado en plan.md como extension de alcance: sin el, el control del logo era decorativo. El markdown enriquecido (tablas, encabezados, reglas, codigo) se agrego DESPUES de ver la corrida real, que es lo que expuso que el productor contesta en ese formato.",
+    "follow_ups": [
+      "La conversacion no se puede borrar ni reiniciar desde la UI: el servicio no expone un DELETE de work/producer/, asi que un hilo largo solo se corta a mano en disco.",
+      "El registro de turnos sigue siendo in-memory: un reinicio del servicio deja la conversacion en disco pero el turno en vuelo da PRODUCER_TURN_NOT_FOUND y la pagina no puede reengancharlo.",
+      "El chat no sube archivos: el material sigue entrando por la biblioteca o por el panel del logo. Un adjunto en el chat es el candidato natural de la proxima spec de apps/web.",
+      "widthRatio, marginRatio y opacity del logo no se editan desde la UI: solo mostrar/ocultar y las cuatro esquinas.",
+      "El costo del turno (tokens del agente) no llega al contrato del turno ni a la pantalla: misma laguna que el usage del storyboard.",
+      "El agente sigue perdiendo turnos con comandos compuestos y dejando archivos auxiliares en work/producer/ (heredado de cycle-01): la solucion de fondo es una herramienta propia del studio en vez de Bash."
+    ]
+  }
+}

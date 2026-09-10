@@ -1,8 +1,8 @@
 import { useCallback, useState } from 'react';
 
 import { montageBlockers } from '../api/montage-capability';
+import { MONTAGE_PRESET_DETAILS, montagePresetDetail } from '../api/montage-presets';
 import { useRenderApi } from '../api/render-api-context';
-import { MONTAGE_PRESETS } from '../api/render-api-types';
 import { useApiAction } from '../hooks/use-api-action';
 import { useAsyncResource } from '../hooks/use-async-resource';
 import type { MontageJob, MontagePresetName, ServiceHealth } from '../api/render-api-types';
@@ -58,13 +58,14 @@ export function MontageTrigger({ slug, onCreated }: MontageTriggerProps) {
         <label className="flex flex-col gap-1 text-xs text-slate-400">
           Montage preset
           <select
+            aria-label="Montage preset"
             value={preset}
             onChange={(event) => setPreset(event.target.value as MontagePresetName)}
-            className="rounded-md border border-slate-700 bg-slate-900 px-2 py-1 font-mono text-xs text-slate-200"
+            className="rounded-md border border-slate-700 bg-slate-900 px-2 py-1 text-xs text-slate-200"
           >
-            {MONTAGE_PRESETS.map((candidate) => (
-              <option key={candidate} value={candidate}>
-                {candidate}
+            {MONTAGE_PRESET_DETAILS.map((candidate) => (
+              <option key={candidate.name} value={candidate.name}>
+                {candidate.label}
               </option>
             ))}
           </select>
@@ -89,6 +90,11 @@ export function MontageTrigger({ slug, onCreated }: MontageTriggerProps) {
           {createAction.status === 'pending' ? 'Starting montage…' : 'Generate montage'}
         </button>
       </div>
+
+      <p data-testid="montage-preset-description" className="text-xs text-slate-400">
+        <span className="font-mono text-slate-500">{preset}</span> ·{' '}
+        {montagePresetDetail(preset).description}
+      </p>
 
       {!seedValid && (
         <p className="font-mono text-xs text-amber-300">

@@ -2,6 +2,7 @@ import { describe, expect, it, vi } from 'vitest';
 
 import { RAW_PREVIEW_TIMELINE, previewTimelineFixture } from './__fixtures__/timeline';
 import { RAW_STORYBOARD, storyboardFixture } from './__fixtures__/storyboard';
+import { producerConversation, producerTurn, succeededTurn } from './__fixtures__/producer';
 import { VOICE_MODELS, voiceDocument, voiceJob, voiceTrack } from './__fixtures__/voice';
 import { createRenderApiClient } from './render-api-client';
 import { RenderApiError } from './render-api-error';
@@ -66,7 +67,7 @@ const health = {
   time: '2026-09-09T00:00:00.000Z',
   engine: [{ name: 'media-local', loaded: true }],
   binaries: [{ name: 'ffmpeg', envVar: 'FFMPEG_PATH', resolved: true }],
-  capabilities: { renderPipeline: true, assetStore: true, jobQueue: true, montageQueue: true, storyboardQueue: true, voiceQueue: true },
+  capabilities: { renderPipeline: true, assetStore: true, jobQueue: true, montageQueue: true, storyboardQueue: true, voiceQueue: true, producer: true },
   jobs: { running: 0, queued: 0 },
 };
 
@@ -849,5 +850,97 @@ describe('createRenderApiClient · voice', () => {
       .catch((caught: unknown) => caught);
 
     expect((error as RenderApiError).code).toBe('VOICE_ASSET_NOT_FOUND');
+  });
+});
+
+describe('createRenderApiClient — producer', () => {
+  it('reads the whole conversation from EP-022', async () => {
+    const { fetchImpl, calls } = recordingFetch(() => jsonResponse(producerConversation()));
+
+    const conversation = await createRenderApiClient(fetchImpl).getProducer('demo-01');
+
+    expect(calls[0]?.url).toBe('/api/projects/demo-01/producer');
+    expect(calls[0]?.init).toBeUndefined();
+    expect(conversation.messages).toHaveLength(2);
+    expect(conversation.session?.model).toBe('sonnet');
+  });
+
+  it('sends a message as JSON and returns the accepted turn of EP-023', async () => {
+    const { fetchImpl, calls } = recordingFetch(() =>
+      jsonResponse(
+        { slug: 'demo-01', turnId: 'turn-0002', startedAt: '2026-09-10T10:10:00.000Z', status: 'running' },
+        202,
+      ),
+    );
+
+    const accepted = await createRenderApiClient(fetchImpl).sendProducerMessage(
+      'demo-01',
+      'Proponeme un video de 30 segundos',
+    );
+
+    expect(calls[0]?.url).toBe('/api/projects/demo-01/producer/messages');
+    expect(calls[0]?.init?.method).toBe('POST');
+    expect(JSON.parse(String(calls[0]?.init?.body))).toEqual({
+      text: 'Proponeme un video de 30 segundos',
+    });
+    expect(accepted.turnId).toBe('turn-0002');
+  });
+
+  it('surfaces PRODUCER_TURN_ACTIVE from EP-023 with its code intact', async () => {
+    const { fetchImpl } = recordingFetch(() =>
+      jsonResponse(
+        {
+          error: {
+            code: 'PRODUCER_TURN_ACTIVE',
+            stage: null,
+            message: 'a turn is running',
+            resource: 'turn-0001',
+          },
+        },
+        409,
+      ),
+    );
+
+    const error = await createRenderApiClient(fetchImpl)
+      .sendProducerMessage('demo-01', 'otra cosa')
+      .catch((caught: unknown) => caught);
+
+    expect((error as RenderApiError).code).toBe('PRODUCER_TURN_ACTIVE');
+    expect((error as RenderApiError).payload?.resource).toBe('turn-0001');
+  });
+
+  it('reads one turn from EP-024 with its events and suggestions', async () => {
+    const { fetchImpl, calls } = recordingFetch(() => jsonResponse(succeededTurn()));
+
+    const turn = await createRenderApiClient(fetchImpl).getProducerTurn('demo-01', 'turn 1');
+
+    expect(calls[0]?.url).toBe('/api/projects/demo-01/producer/turns/turn%201');
+    expect(turn.suggestions).toHaveLength(2);
+    expect(turn.events.filter((event) => event.type === 'tool')).toHaveLength(2);
+  });
+
+  it('cancels a turn with DELETE on EP-025 and returns the record it answers', async () => {
+    const { fetchImpl, calls } = recordingFetch(() => jsonResponse(producerTurn(), 202));
+
+    const turn = await createRenderApiClient(fetchImpl).cancelProducerTurn('demo-01', 'turn-0001');
+
+    expect(calls[0]?.url).toBe('/api/projects/demo-01/producer/turns/turn-0001');
+    expect(calls[0]?.init?.method).toBe('DELETE');
+    expect(turn.status).toBe('running');
+  });
+
+  it('surfaces PRODUCER_TURN_NOT_CANCELABLE from EP-025', async () => {
+    const { fetchImpl } = recordingFetch(() =>
+      jsonResponse(
+        { error: { code: 'PRODUCER_TURN_NOT_CANCELABLE', stage: null, message: 'already finished' } },
+        409,
+      ),
+    );
+
+    const error = await createRenderApiClient(fetchImpl)
+      .cancelProducerTurn('demo-01', 'turn-0001')
+      .catch((caught: unknown) => caught);
+
+    expect((error as RenderApiError).code).toBe('PRODUCER_TURN_NOT_CANCELABLE');
   });
 });
