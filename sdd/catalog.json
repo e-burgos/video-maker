@@ -160,21 +160,5 @@
       "file": "tools.schema.json"
     }
   ],
-  "memory": [
-    {
-      "file": "2026-09-09-spec-e-burgos-008-ai-storyboard-cycle-02.md"
-    },
-    {
-      "file": "2026-09-09-spec-e-burgos-008-ai-storyboard-cycle-01.md"
-    },
-    {
-      "file": "2026-09-09-spec-e-burgos-007-web-montage-cycle-02.md"
-    },
-    {
-      "file": "2026-09-09-spec-e-burgos-007-web-montage-cycle-01.md"
-    },
-    {
-      "file": "2026-09-09-spec-e-burgos-006-web-studio-cycle-03.md"
-    }
-  ]
+  "memory": []
 }
