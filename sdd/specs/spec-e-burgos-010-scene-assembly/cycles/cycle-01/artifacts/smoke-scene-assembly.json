@@ -1,0 +1,264 @@
+{
+  "ranAt": "2026-09-10T11:39:12.642Z",
+  "disk": {
+    "before": "/dev/disk3s1s1   460Gi    16Gi   2.7Gi    86%    458k   28M    2%   /",
+    "after": "/dev/disk3s1s1   460Gi    16Gi   2.6Gi    87%    458k   27M    2%   /",
+    "temporaryFootprint": "33M\t/var/folders/lw/gy7lfk_52gq0fv1yvph2fb100000gn/T/scene-assembly-smoke"
+  },
+  "assembly": {
+    "mediaRoot": "/var/folders/lw/gy7lfk_52gq0fv1yvph2fb100000gn/T/scene-assembly-smoke/assembly",
+    "health": {
+      "status": "ok",
+      "capabilities": {
+        "renderPipeline": true,
+        "assetStore": true,
+        "jobQueue": true,
+        "montageQueue": true,
+        "storyboardQueue": true,
+        "voiceQueue": true,
+        "assembleQueue": true
+      }
+    },
+    "montage": {
+      "catalogPath": "work/catalog.json",
+      "timelinePath": "work/timeline.json",
+      "editDecisionListPath": "work/edl.json",
+      "preset": "software-demo",
+      "seed": 0
+    },
+    "voice": {
+      "stages": [
+        "synthesize",
+        "transcribe",
+        "persist"
+      ],
+      "scenes": [
+        {
+          "sceneId": "scene-01",
+          "durationMs": 3053,
+          "source": "generated"
+        },
+        {
+          "sceneId": "scene-02",
+          "durationMs": 5526,
+          "source": "generated"
+        },
+        {
+          "sceneId": "scene-03",
+          "durationMs": 5352,
+          "source": "generated"
+        },
+        {
+          "sceneId": "scene-04",
+          "durationMs": 5631,
+          "source": "generated"
+        },
+        {
+          "sceneId": "scene-05",
+          "durationMs": 3460,
+          "source": "generated"
+        }
+      ]
+    },
+    "sceneImport": {
+      "imported": 2,
+      "assignments": [
+        {
+          "sceneId": "scene-01",
+          "assetId": "raw/images/01.jpg"
+        },
+        {
+          "sceneId": "scene-04",
+          "assetId": "raw/broll/04.mp4"
+        }
+      ],
+      "skipped": [
+        {
+          "assetId": "raw/aroll/clip01.mp4",
+          "reason": "no-leading-number"
+        },
+        {
+          "assetId": "raw/broll/notes.txt",
+          "reason": "no-leading-number"
+        }
+      ],
+      "slots": [
+        {
+          "sceneId": "scene-01",
+          "visualSource": "upload",
+          "assetId": "raw/images/01.jpg"
+        },
+        {
+          "sceneId": "scene-02",
+          "visualSource": "remotion-scene",
+          "assetId": null
+        },
+        {
+          "sceneId": "scene-03",
+          "visualSource": "remotion-scene",
+          "assetId": null
+        },
+        {
+          "sceneId": "scene-04",
+          "visualSource": "upload",
+          "assetId": "raw/broll/04.mp4"
+        },
+        {
+          "sceneId": "scene-05",
+          "visualSource": "upload",
+          "assetId": null
+        }
+      ]
+    },
+    "assemble": {
+      "stages": [
+        "collect",
+        "persist"
+      ],
+      "report": {
+        "timelinePath": "work/timeline.json",
+        "editDecisionListPath": null,
+        "storyboardId": "5861fd3e-f065-4e9f-abc2-868b4a4acc64",
+        "outputPreset": "reels-9x16",
+        "durationFrames": 727,
+        "sceneCount": 5,
+        "scenesWithVoice": 5,
+        "scenesWithoutVoice": [],
+        "scenesWithoutVisual": [
+          "scene-05"
+        ]
+      }
+    },
+    "durations": {
+      "voiceMsPlusPadding": 24272,
+      "expectedFrames": 727,
+      "timelineDurationFrames": 727,
+      "fps": 30
+    },
+    "render": {
+      "stages": [
+        "render",
+        "mix",
+        "mux",
+        "verify"
+      ],
+      "deliverable": "out/d4658865-4614-437e-a6e0-22d4d2cdb046.mp4",
+      "loudness": {
+        "withinTolerance": true,
+        "integratedLufs": -14.35,
+        "truePeakDbtp": -3.96,
+        "integratedDeltaLu": -0.34999999999999964,
+        "truePeakDeltaDb": -2.96
+      }
+    },
+    "ffprobe": {
+      "video": {
+        "codec_name": "h264",
+        "width": 1080,
+        "height": 1920,
+        "r_frame_rate": "30/1",
+        "nb_frames": "727",
+        "side_data_list": [
+          {}
+        ]
+      },
+      "audio": {
+        "codec_name": "aac",
+        "sample_rate": "48000",
+        "channels": 2
+      },
+      "videoSeconds": 24.233
+    },
+    "frames": [
+      {
+        "sceneId": "scene-01",
+        "visualSource": "upload",
+        "visual": "asset",
+        "atSeconds": 1.65,
+        "file": "artifacts/smoke-frame-scene-01-asset.png"
+      },
+      {
+        "sceneId": "scene-02",
+        "visualSource": "remotion-scene",
+        "visual": "remotion-title",
+        "atSeconds": 6.183,
+        "file": "artifacts/smoke-frame-scene-02-remotion-title.png"
+      },
+      {
+        "sceneId": "scene-03",
+        "visualSource": "remotion-scene",
+        "visual": "remotion-code",
+        "atSeconds": 11.867,
+        "file": "artifacts/smoke-frame-scene-03-remotion-code.png"
+      },
+      {
+        "sceneId": "scene-04",
+        "visualSource": "upload",
+        "visual": "asset",
+        "atSeconds": 17.6,
+        "file": "artifacts/smoke-frame-scene-04-asset.png"
+      },
+      {
+        "sceneId": "scene-05",
+        "visualSource": "upload",
+        "visual": "placeholder",
+        "atSeconds": 22.383,
+        "file": "artifacts/smoke-frame-scene-05-placeholder.png"
+      }
+    ],
+    "captionFrame": {
+      "clipId": "caption-0019",
+      "words": "anterior al instante,",
+      "atSeconds": 17.367,
+      "file": "artifacts/smoke-frame-captions.png"
+    },
+    "timeline": {
+      "durationFrames": 727,
+      "format": {
+        "preset": "reels-9x16",
+        "width": 1080,
+        "height": 1920,
+        "fps": 30
+      },
+      "scenes": [
+        {
+          "sceneId": "scene-01",
+          "from": 0,
+          "durationFrames": 99,
+          "visual": "asset"
+        },
+        {
+          "sceneId": "scene-02",
+          "from": 99,
+          "durationFrames": 173,
+          "visual": "remotion:title"
+        },
+        {
+          "sceneId": "scene-03",
+          "from": 272,
+          "durationFrames": 168,
+          "visual": "remotion:code"
+        },
+        {
+          "sceneId": "scene-04",
+          "from": 440,
+          "durationFrames": 176,
+          "visual": "asset"
+        },
+        {
+          "sceneId": "scene-05",
+          "from": 616,
+          "durationFrames": 111,
+          "visual": "placeholder"
+        }
+      ],
+      "voiceClips": 5,
+      "captionClips": 26
+    }
+  },
+  "nonRegression": {
+    "mutedVideo": "work/renders/b9bc9cb4-034d-48cb-a00e-6a63b1b109d8/video-muted.mp4",
+    "sha256": "c1b9fd9f33ba69263d9806acd02b212d44adb3951e1927d9b64f44d04c8527cb",
+    "oracle": "c1b9fd9f33ba69263d9806acd02b212d44adb3951e1927d9b64f44d04c8527cb"
+  }
+}

@@ -103,9 +103,15 @@ export function buildAudioMixGraph(spec: AudioMixGraphSpec): FilterGraph {
     buildClipChain(entry, timeline, spec.voiceMeasuredByAssetId, audioStreamLabel(index)),
   );
 
+  const mixDurationSeconds = formatFilterNumber(timeline.durationFrames / timeline.format.fps);
   const amixChain: FilterChain = {
     inputLabels: entries.map((entry) => entry.label),
-    filters: [`amix=inputs=${entries.length}:duration=longest:normalize=0`],
+    filters: [
+      `amix=inputs=${entries.length}:duration=longest:normalize=0`,
+      'asetpts=N/SR/TB',
+      `apad=whole_dur=${mixDurationSeconds}`,
+      `atrim=end=${mixDurationSeconds}`,
+    ],
     outputLabels: ['mix'],
   };
 

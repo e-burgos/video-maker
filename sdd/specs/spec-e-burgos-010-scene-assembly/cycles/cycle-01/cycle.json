@@ -1,0 +1,48 @@
+{
+  "$schema": "../../../../schemas/cycle.schema.json",
+  "cycle": 1,
+  "module": "scene-assembly",
+  "spec": "spec-e-burgos-010-scene-assembly",
+  "apps": [
+    "libs/timeline-core",
+    "libs/composition-remotion",
+    "libs/auto-montage",
+    "apps/render-api",
+    "libs/media-local"
+  ],
+  "phase": "remotion-scenes-and-timeline-from-storyboard",
+  "flow": "lite",
+  "objectives": [
+    "Modelar en la Timeline una escena cuyo visual es un asset del catalogo o una escena nativa de Remotion, sin tocar el modo A-roll",
+    "Entregar las cuatro escenas nativas de Remotion y la tarjeta de placeholder en libs/composition-remotion",
+    "Producir work/timeline.json desde el storyboard con la duracion real de la voz de cada escena",
+    "Exponer la asignacion de visuales por escena y la importacion numerada en lote sobre apps/render-api",
+    "Ejecutar el ensamblado como job kind: 'assemble' en la misma cola de concurrencia 1"
+  ],
+  "status": "in-progress",
+  "started_at": "2026-09-10",
+  "completed_at": null,
+  "documents": {
+    "plan": "sdd/specs/spec-e-burgos-010-scene-assembly/cycles/cycle-01/plan.md",
+    "tasks": "sdd/specs/spec-e-burgos-010-scene-assembly/cycles/cycle-01/tasks.json"
+  },
+  "artifacts": [],
+  "metrics": {
+    "tasks_total": 7,
+    "tasks_completed": 0,
+    "story_points": 41,
+    "files_created": [],
+    "files_modified": [],
+    "files_deleted": [],
+    "usage": {
+      "tokens_in": 0,
+      "tokens_out": 0,
+      "by_agent": []
+    }
+  },
+  "tables_created": [],
+  "endpoints_implemented": [],
+  "components_created": [],
+  "issues_found": [],
+  "reviewer_report": null
+}

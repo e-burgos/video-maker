@@ -82,3 +82,15 @@ export function editDecisionListPath(): ProjectRelativePath {
 export function timelinePath(): ProjectRelativePath {
   return workPath('timeline.json');
 }
+
+export function storyboardDocumentPath(): ProjectRelativePath {
+  return workPath('storyboard.json');
+}
+
+export function voiceManifestPath(): ProjectRelativePath {
+  return workPath('voice', 'manifest.json');
+}
+
+export function sceneAssignmentPath(): ProjectRelativePath {
+  return workPath('scenes.json');
+}

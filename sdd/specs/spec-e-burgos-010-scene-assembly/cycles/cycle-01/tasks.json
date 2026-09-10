@@ -1,0 +1,250 @@
+{
+  "$schema": "../../../../schemas/cycle-tasks.schema.json",
+  "spec": "spec-e-burgos-010-scene-assembly",
+  "cycle": 1,
+  "module": "scene-assembly",
+  "apps": [
+    "libs/timeline-core",
+    "libs/composition-remotion",
+    "libs/auto-montage",
+    "apps/render-api",
+    "libs/media-local"
+  ],
+  "flow": "lite",
+  "user_stories_generated": true,
+  "prerequisites": {
+    "tasks_generated": true
+  },
+  "tasks": [
+    {
+      "id": "TASK-001",
+      "title": "Model generative scenes in the Timeline: optional scenes track, scene assignment document and validation",
+      "user_stories": [
+        "US-10-001",
+        "US-10-004"
+      ],
+      "estimation_hours": 4,
+      "story_points": 5,
+      "depends_on": [],
+      "status": "done",
+      "files": [
+        "libs/timeline-core/src/schemas/timeline.schema.ts",
+        "libs/timeline-core/src/schemas/timeline.schema.spec.ts",
+        "libs/timeline-core/src/schemas/scene-assignment.schema.ts",
+        "libs/timeline-core/src/schemas/scene-assignment.schema.spec.ts",
+        "libs/timeline-core/src/timeline/validate-timeline.ts",
+        "libs/timeline-core/src/timeline/validate-timeline.spec.ts",
+        "libs/timeline-core/src/index.ts",
+        "libs/timeline-core/schemas/timeline.schema.json"
+      ],
+      "usage": {
+        "provider_model": "claude/opus",
+        "effort": "high",
+        "agent": "orchestrator",
+        "tokens_in": 96000,
+        "tokens_out": 13000,
+        "approx": true,
+        "source": "declared-estimate",
+        "recorded_at": "2026-09-10"
+      }
+    },
+    {
+      "id": "TASK-002",
+      "title": "Render the four native Remotion scenes and the placeholder card from the scenes track",
+      "user_stories": [
+        "US-10-001"
+      ],
+      "estimation_hours": 6,
+      "story_points": 8,
+      "depends_on": [
+        "TASK-001"
+      ],
+      "status": "done",
+      "files": [
+        "libs/composition-remotion/src/helpers/scene-theme.ts",
+        "libs/composition-remotion/src/helpers/scene-theme.spec.ts",
+        "libs/composition-remotion/src/helpers/ken-burns.ts",
+        "libs/composition-remotion/src/helpers/ken-burns.spec.ts",
+        "libs/composition-remotion/src/helpers/code-lines.ts",
+        "libs/composition-remotion/src/helpers/code-lines.spec.ts",
+        "libs/composition-remotion/src/helpers/timeline-to-sequence-props.ts",
+        "libs/composition-remotion/src/helpers/timeline-to-sequence-props.spec.ts",
+        "libs/composition-remotion/src/components/scenes/title-scene.tsx",
+        "libs/composition-remotion/src/components/scenes/text-scene.tsx",
+        "libs/composition-remotion/src/components/scenes/code-scene.tsx",
+        "libs/composition-remotion/src/components/scenes/image-ken-burns-scene.tsx",
+        "libs/composition-remotion/src/components/scenes/placeholder-scene.tsx",
+        "libs/composition-remotion/src/components/scenes/scenes.spec.tsx",
+        "libs/composition-remotion/src/components/scene-track.tsx",
+        "libs/composition-remotion/src/components/timeline-composition.tsx",
+        "libs/composition-remotion/src/index.ts"
+      ],
+      "usage": {
+        "provider_model": "claude/opus",
+        "effort": "high",
+        "agent": "orchestrator",
+        "tokens_in": 88000,
+        "tokens_out": 22000,
+        "approx": true,
+        "source": "declared-estimate",
+        "recorded_at": "2026-09-10"
+      }
+    },
+    {
+      "id": "TASK-003",
+      "title": "Build the Timeline from the storyboard with the real voice duration of every scene",
+      "user_stories": [
+        "US-10-004",
+        "US-10-005"
+      ],
+      "estimation_hours": 6,
+      "story_points": 8,
+      "depends_on": [
+        "TASK-001"
+      ],
+      "status": "done",
+      "files": [
+        "libs/timeline-core/src/timeline/build-timeline-from-storyboard.ts",
+        "libs/timeline-core/src/timeline/build-timeline-from-storyboard.spec.ts",
+        "libs/timeline-core/src/__fixtures__/storyboard.ts",
+        "libs/timeline-core/src/index.ts"
+      ],
+      "usage": {
+        "provider_model": "claude/opus",
+        "effort": "high",
+        "agent": "orchestrator",
+        "tokens_in": 74000,
+        "tokens_out": 20000,
+        "approx": true,
+        "source": "declared-estimate",
+        "recorded_at": "2026-09-10"
+      }
+    },
+    {
+      "id": "TASK-004",
+      "title": "Assemble the project from disk with the montage writers and map numbered files onto scenes",
+      "user_stories": [
+        "US-10-002",
+        "US-10-005"
+      ],
+      "estimation_hours": 5,
+      "story_points": 5,
+      "depends_on": [
+        "TASK-003"
+      ],
+      "status": "done",
+      "files": [
+        "libs/auto-montage/src/assemble/assemble-from-storyboard.ts",
+        "libs/auto-montage/src/assemble/assemble-from-storyboard.spec.ts",
+        "libs/auto-montage/src/assemble/map-numbered-scene-files.ts",
+        "libs/auto-montage/src/assemble/map-numbered-scene-files.spec.ts",
+        "libs/auto-montage/src/errors/assemble-input-error.ts",
+        "libs/auto-montage/src/project/project-paths.ts",
+        "libs/auto-montage/src/index.ts"
+      ],
+      "usage": {
+        "provider_model": "claude/opus",
+        "effort": "high",
+        "agent": "orchestrator",
+        "tokens_in": 82000,
+        "tokens_out": 24000,
+        "approx": true,
+        "source": "declared-estimate",
+        "recorded_at": "2026-09-10"
+      }
+    },
+    {
+      "id": "TASK-005",
+      "title": "Expose the scene assignment over HTTP: read, replace and numbered batch import",
+      "user_stories": [
+        "US-10-002",
+        "US-10-003"
+      ],
+      "estimation_hours": 5,
+      "story_points": 5,
+      "depends_on": [
+        "TASK-004"
+      ],
+      "status": "done",
+      "files": [
+        "apps/render-api/src/scenes/scenes-store.ts",
+        "apps/render-api/src/scenes/scenes-store.spec.ts",
+        "apps/render-api/src/scenes/scene-import.ts",
+        "apps/render-api/src/scenes/scene-import.spec.ts",
+        "apps/render-api/src/http/handlers/scenes-handler.ts",
+        "apps/render-api/src/http/handlers/scenes-handler.spec.ts",
+        "apps/render-api/src/http/routes.ts",
+        "apps/render-api/src/http/handle-request.ts",
+        "apps/render-api/src/errors/render-api-error.ts",
+        "apps/render-api/src/errors/http-status-for.ts",
+        "sdd/api.json"
+      ],
+      "usage": {
+        "provider_model": "claude/opus",
+        "effort": "high",
+        "agent": "orchestrator",
+        "tokens_in": 78000,
+        "tokens_out": 26000,
+        "approx": true,
+        "source": "declared-estimate",
+        "recorded_at": "2026-09-10"
+      }
+    },
+    {
+      "id": "TASK-006",
+      "title": "Run the assembly as a fifth job kind in the same queue",
+      "user_stories": [
+        "US-10-005",
+        "US-10-006"
+      ],
+      "estimation_hours": 5,
+      "story_points": 5,
+      "depends_on": [
+        "TASK-005"
+      ],
+      "status": "done",
+      "files": [
+        "apps/render-api/src/jobs/render-job.ts",
+        "apps/render-api/src/jobs/assemble-job-params.ts",
+        "apps/render-api/src/jobs/assemble-job-params.spec.ts",
+        "apps/render-api/src/jobs/assemble-job-progress.ts",
+        "apps/render-api/src/jobs/assemble-job-progress.spec.ts",
+        "apps/render-api/src/jobs/assemble-pipeline-observer.ts",
+        "apps/render-api/src/jobs/run-assemble-pipeline.ts",
+        "apps/render-api/src/jobs/run-assemble-pipeline.spec.ts",
+        "apps/render-api/src/jobs/render-job-queue.ts",
+        "apps/render-api/src/http/handlers/jobs-handler.ts",
+        "apps/render-api/src/http/health-handler.ts",
+        "sdd/api.json"
+      ],
+      "usage": {
+        "provider_model": "claude/opus",
+        "effort": "high",
+        "agent": "orchestrator",
+        "tokens_in": 92000,
+        "tokens_out": 30000,
+        "approx": true,
+        "source": "declared-estimate",
+        "recorded_at": "2026-09-10"
+      }
+    },
+    {
+      "id": "TASK-007",
+      "title": "Prove the assembly end to end on a real project and prove the A-roll render did not move",
+      "user_stories": [
+        "US-10-005",
+        "US-10-006"
+      ],
+      "estimation_hours": 5,
+      "story_points": 5,
+      "depends_on": [
+        "TASK-006"
+      ],
+      "status": "pending",
+      "files": [
+        "tools/scene-assembly-smoke/run-scene-assembly-smoke.mjs",
+        "sdd/specs/spec-e-burgos-010-scene-assembly/cycles/cycle-01/artifacts/smoke-real.md"
+      ]
+    }
+  ]
+}

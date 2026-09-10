@@ -17,6 +17,10 @@ const TIMELINE_ISSUE_SEVERITY: Record<TimelineIssueCode, TimelineIssueSeverity> 
   CLIP_OUT_OF_TIMELINE: 'render-blocking',
   TRANSITION_CLIP_NOT_FOUND: 'render-blocking',
   CAPTION_OUT_OF_SAFE_ZONE: 'render-blocking',
+  SCENES_AND_AROLL: 'save-blocking',
+  SCENE_ASSET_NOT_FOUND: 'render-blocking',
+  SCENE_OVERLAP: 'render-blocking',
+  SCENE_GAP: 'render-blocking',
 };
 
 export function issueSeverity(code: UiIssueCode): TimelineIssueSeverity {

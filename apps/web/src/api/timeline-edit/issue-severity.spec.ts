@@ -15,9 +15,13 @@ const ALL_TIMELINE_ISSUE_CODES: readonly TimelineIssueCode[] = [
   'CLIP_OUT_OF_TIMELINE',
   'TRANSITION_CLIP_NOT_FOUND',
   'CAPTION_OUT_OF_SAFE_ZONE',
+  'SCENES_AND_AROLL',
+  'SCENE_ASSET_NOT_FOUND',
+  'SCENE_OVERLAP',
+  'SCENE_GAP',
 ];
 
-const SAVE_BLOCKING_CODES: readonly TimelineIssueCode[] = ['SCHEMA_INVALID'];
+const SAVE_BLOCKING_CODES: readonly TimelineIssueCode[] = ['SCHEMA_INVALID', 'SCENES_AND_AROLL'];
 
 describe('issueSeverity', () => {
   it('classifies SCHEMA_INVALID as save-blocking and CLIP_EXCEEDS_ASSET as render-blocking', () => {
@@ -25,8 +29,8 @@ describe('issueSeverity', () => {
     expect(issueSeverity('CLIP_EXCEEDS_ASSET')).toBe('render-blocking');
   });
 
-  it('covers all ten real TimelineIssueCode values, not a sample', () => {
-    expect(ALL_TIMELINE_ISSUE_CODES).toHaveLength(10);
+  it('covers all fourteen real TimelineIssueCode values, not a sample', () => {
+    expect(ALL_TIMELINE_ISSUE_CODES).toHaveLength(14);
 
     ALL_TIMELINE_ISSUE_CODES.forEach((code) => {
       const expected = SAVE_BLOCKING_CODES.includes(code) ? 'save-blocking' : 'render-blocking';
@@ -34,10 +38,10 @@ describe('issueSeverity', () => {
     });
   });
 
-  it('classifies only SCHEMA_INVALID as save-blocking; every other real code is render-blocking', () => {
+  it('classifies the two structural codes as save-blocking; every other real code is render-blocking', () => {
     const renderBlockingCodes = ALL_TIMELINE_ISSUE_CODES.filter((code) => !SAVE_BLOCKING_CODES.includes(code));
 
-    expect(renderBlockingCodes).toHaveLength(9);
+    expect(renderBlockingCodes).toHaveLength(12);
     renderBlockingCodes.forEach((code) => {
       expect(issueSeverity(code)).toBe('render-blocking');
     });

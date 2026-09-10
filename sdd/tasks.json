@@ -266,6 +266,24 @@
           "tasks_done": 6
         }
       }
+    },
+    "spec-e-burgos-010-scene-assembly": {
+      "cycles": {
+        "cycle-01": {
+          "file": "sdd/specs/spec-e-burgos-010-scene-assembly/cycles/cycle-01/tasks.json",
+          "module": "scene-assembly",
+          "apps": [
+            "libs/timeline-core",
+            "libs/composition-remotion",
+            "libs/auto-montage",
+            "apps/render-api",
+            "libs/media-local"
+          ],
+          "status": "in-progress",
+          "tasks_total": 7,
+          "tasks_done": 6
+        }
+      }
     }
   }
 }

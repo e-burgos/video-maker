@@ -1,4 +1,5 @@
 import type { MontagePresetName } from '@video-maker/auto-montage';
+import type { OutputPreset } from '@video-maker/timeline-core';
 import type { StoryboardSource, Timeline, VoiceTrackSource } from '@video-maker/timeline-core';
 
 import type { RenderApiErrorCode, RenderApiErrorPayload, RenderPipelineStage } from '../errors/render-api-error';
@@ -21,7 +22,7 @@ export function isTerminalRenderJobState(state: RenderJobState): boolean {
   return TERMINAL_RENDER_JOB_STATES.some((terminal) => terminal === state);
 }
 
-export type JobKind = 'render' | 'montage' | 'storyboard' | 'voice';
+export type JobKind = 'render' | 'montage' | 'storyboard' | 'voice' | 'assemble';
 
 export const MONTAGE_STAGES = ['discover', 'probe', 'transcribe', 'plan'] as const;
 export type MontageStage = (typeof MONTAGE_STAGES)[number];
@@ -31,6 +32,9 @@ export type StoryboardStage = (typeof STORYBOARD_STAGES)[number];
 
 export const VOICE_STAGES = ['synthesize', 'transcribe', 'persist'] as const;
 export type VoiceStage = (typeof VOICE_STAGES)[number];
+
+export const ASSEMBLE_STAGES = ['collect', 'build', 'persist'] as const;
+export type AssembleStage = (typeof ASSEMBLE_STAGES)[number];
 
 export interface RenderJobProgress {
   readonly stage: RenderPipelineStage;
@@ -56,6 +60,23 @@ export interface VoiceJobProgress {
   readonly processedScenes: number | null;
   readonly totalScenes: number | null;
   readonly percent: number | null;
+}
+
+export interface AssembleJobProgress {
+  readonly stage: AssembleStage;
+  readonly percent: number | null;
+}
+
+export interface AssembleJobReport {
+  readonly timelinePath: string;
+  readonly editDecisionListPath: null;
+  readonly storyboardId: string;
+  readonly outputPreset: OutputPreset;
+  readonly durationFrames: number;
+  readonly sceneCount: number;
+  readonly scenesWithVoice: number;
+  readonly scenesWithoutVoice: readonly string[];
+  readonly scenesWithoutVisual: readonly string[];
 }
 
 export interface VoiceJobSceneReport {
@@ -132,13 +153,19 @@ export type VoiceJob = JobBase & {
   readonly report: VoiceJobReport | null;
 };
 
-export type Job = RenderJob | MontageJob | StoryboardJob | VoiceJob;
+export type AssembleJob = JobBase & {
+  readonly kind: 'assemble';
+  readonly progress: AssembleJobProgress | null;
+  readonly report: AssembleJobReport | null;
+};
+
+export type Job = RenderJob | MontageJob | StoryboardJob | VoiceJob | AssembleJob;
 
 export interface JobSummary {
   readonly id: string;
   readonly kind: JobKind;
   readonly state: RenderJobState;
-  readonly stage: RenderPipelineStage | MontageStage | StoryboardStage | VoiceStage | null;
+  readonly stage: RenderPipelineStage | MontageStage | StoryboardStage | VoiceStage | AssembleStage | null;
   readonly errorCode: RenderApiErrorCode | null;
   readonly createdAt: string;
   readonly startedAt: string | null;
@@ -151,7 +178,8 @@ export type CreateJobInput =
   | CreateRenderJobInput
   | CreateMontageJobInput
   | CreateStoryboardJobInput
-  | CreateVoiceJobInput;
+  | CreateVoiceJobInput
+  | CreateAssembleJobInput;
 
 export interface CreateRenderJobInput {
   readonly kind: 'render';
@@ -184,10 +212,19 @@ export interface CreateVoiceJobInput {
   readonly sceneIds: readonly string[] | null;
 }
 
+export interface CreateAssembleJobInput {
+  readonly kind: 'assemble';
+  readonly slug: string;
+  readonly projectRoot: string;
+  readonly musicAssetId: string | null;
+  readonly scenePaddingMs: number | null;
+}
+
 export function toJob(record: RenderJob): RenderJob;
 export function toJob(record: MontageJob): MontageJob;
 export function toJob(record: StoryboardJob): StoryboardJob;
 export function toJob(record: VoiceJob): VoiceJob;
+export function toJob(record: AssembleJob): AssembleJob;
 export function toJob(record: Job): Job;
 export function toJob(record: Job): Job {
   switch (record.kind) {
@@ -235,6 +272,19 @@ export function toJob(record: Job): Job {
         id: record.id,
         slug: record.slug,
         kind: 'voice',
+        state: record.state,
+        createdAt: record.createdAt,
+        startedAt: record.startedAt,
+        finishedAt: record.finishedAt,
+        progress: record.progress,
+        report: record.report,
+        error: record.error,
+      };
+    case 'assemble':
+      return {
+        id: record.id,
+        slug: record.slug,
+        kind: 'assemble',
         state: record.state,
         createdAt: record.createdAt,
         startedAt: record.startedAt,

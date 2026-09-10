@@ -52,6 +52,7 @@ describe('handleHealth', () => {
       montageQueue: true,
       storyboardQueue: true,
       voiceQueue: true,
+      assembleQueue: true,
     });
   });
 

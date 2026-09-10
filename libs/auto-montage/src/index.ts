@@ -6,9 +6,12 @@ export {
   catalogPath,
   editDecisionListPath,
   isInsideRaw,
+  sceneAssignmentPath,
+  storyboardDocumentPath,
   timelinePath,
   toAbsolutePath,
   toProjectRelativePath,
+  voiceManifestPath,
   workPath,
 } from './project/project-paths';
 
@@ -80,6 +83,29 @@ export type { BrollOverlayPlan, BrollRejection, BrollRejectionReason } from './b
 
 export { autoMontage } from './auto-montage';
 export type { AutoMontageOptions, AutoMontageResult, MontageDependencies } from './auto-montage';
+
+export {
+  assembleFromStoryboard,
+  buildAssembledTimeline,
+  collectAssembleInputs,
+  persistAssembledTimeline,
+} from './assemble/assemble-from-storyboard';
+export type {
+  AssembleDependencies,
+  AssembleInputs,
+  AssembleOptions,
+  AssembleResult,
+} from './assemble/assemble-from-storyboard';
+export { leadingSceneNumber, mapNumberedSceneFiles } from './assemble/map-numbered-scene-files';
+export type {
+  NumberedSceneMapping,
+  NumberedSceneMatch,
+  NumberedSceneSkip,
+  NumberedSceneSkipReason,
+} from './assemble/map-numbered-scene-files';
+export { outputPresetFor } from './assemble/storyboard-format';
+export { AssembleInputError } from './errors/assemble-input-error';
+export type { AssembleInputReason } from './errors/assemble-input-error';
 
 export { serializeMontageDocument } from './montage/serialize-montage-document';
 export { writeEditDecisionList } from './montage/write-edit-decision-list';

@@ -10,6 +10,7 @@ import { computeTimelineMetadata } from '../helpers/timeline-metadata';
 import { timelineToSequenceProps } from '../helpers/timeline-to-sequence-props';
 import { ArollSeries } from './aroll-series';
 import { BrollTrack } from './broll-track';
+import { SceneTrack } from './scene-track';
 import { AudioTrack } from './audio-track';
 import { KineticCaptions } from './kinetic-captions';
 
@@ -52,6 +53,7 @@ export const TimelineComposition: FC<TimelineCompositionProps> = ({
   return (
     <AbsoluteFill>
       <ArollSeries scenes={plan.aroll} transitions={plan.arollTransitions} fps={plan.fps} />
+      <SceneTrack scenes={plan.scenes} format={timeline.format} />
       <BrollTrack clips={plan.broll} />
       {audio === 'muted' ? null : (
         <AudioTrack voice={plan.voice} music={plan.music} automation={timeline.audioMix.automation} />

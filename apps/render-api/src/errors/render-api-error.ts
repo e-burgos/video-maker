@@ -1,10 +1,15 @@
-import type { MontageStage, StoryboardStage, VoiceStage } from '../jobs/render-job';
+import type { AssembleStage, MontageStage, StoryboardStage, VoiceStage } from '../jobs/render-job';
 
 export const RENDER_PIPELINE_STAGES = ['prepare', 'render', 'mix', 'mux', 'verify'] as const;
 
 export type RenderPipelineStage = (typeof RENDER_PIPELINE_STAGES)[number];
 
-export type RenderApiErrorStage = RenderPipelineStage | MontageStage | StoryboardStage | VoiceStage;
+export type RenderApiErrorStage =
+  | RenderPipelineStage
+  | MontageStage
+  | StoryboardStage
+  | VoiceStage
+  | AssembleStage;
 
 export const RENDER_API_ERROR_CODES = [
   'INVALID_TIMELINE',
@@ -72,6 +77,15 @@ export const RENDER_API_ERROR_CODES = [
   'VOICE_SCENE_IDS_INVALID',
   'VOICE_OVERWRITE_INVALID',
   'VOICE_ASSET_NOT_FOUND',
+  'SCENES_INVALID',
+  'SCENE_NOT_FOUND',
+  'SCENE_IMPORT_ROLES_INVALID',
+  'SCENE_IMPORT_REPLACE_INVALID',
+  'ASSEMBLE_INPUT_INVALID',
+  'ASSEMBLE_FAILED',
+  'ASSEMBLE_MUSIC_INVALID',
+  'ASSEMBLE_PADDING_INVALID',
+  'ASSEMBLE_OVERWRITE_INVALID',
 ] as const;
 
 export type RenderApiErrorCode = (typeof RENDER_API_ERROR_CODES)[number];

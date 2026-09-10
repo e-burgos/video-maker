@@ -88,14 +88,19 @@ describe('buildAudioMixGraph', () => {
             EXPECTED_MUSIC_EXPRESSION,
             'afade=t=in:st=0:d=0.5',
             'afade=t=out:st=6:d=1',
-            'apad',
+            'apad=whole_dur=7',
             'atrim=end=7',
           ],
           outputLabels: ['music0'],
         },
         {
           inputLabels: ['voice0', 'music0'],
-          filters: ['amix=inputs=2:duration=longest:normalize=0'],
+          filters: [
+            'amix=inputs=2:duration=longest:normalize=0',
+            'asetpts=N/SR/TB',
+            'apad=whole_dur=7',
+            'atrim=end=7',
+          ],
           outputLabels: ['mix'],
         },
       ],
@@ -109,8 +114,56 @@ describe('buildAudioMixGraph', () => {
     const graph = buildAudioMixGraph({ timeline });
     const amixChain = graph.chains.at(-1);
 
-    expect(amixChain?.filters).toEqual(['amix=inputs=2:duration=longest:normalize=0']);
+    expect(amixChain?.filters[0]).toBe('amix=inputs=2:duration=longest:normalize=0');
     expect(graph.outputLabel).toBe('mix');
+  });
+
+  it('estira la mezcla hasta durationFrames para que el mux con -shortest no recorte el video', () => {
+    const timeline = buildFixtureTimeline();
+    const shorterVoice = {
+      ...timeline,
+      durationFrames: timeline.durationFrames + 30,
+      tracks: { ...timeline.tracks, music: [] },
+    };
+
+    const graph = buildAudioMixGraph({ timeline: shorterVoice });
+    const targetSeconds = (timeline.durationFrames + 30) / timeline.format.fps;
+
+    expect(graph.chains.at(-1)?.filters).toEqual([
+      'amix=inputs=1:duration=longest:normalize=0',
+      'asetpts=N/SR/TB',
+      `apad=whole_dur=${targetSeconds}`,
+      `atrim=end=${targetSeconds}`,
+    ]);
+  });
+
+  it('reconstruye el reloj de la mezcla antes de rellenar, porque loudnorm desfasa el PTS', () => {
+    const graph = buildAudioMixGraph({ timeline: buildFixtureTimeline() });
+    const filters = graph.chains.at(-1)?.filters ?? [];
+
+    expect(filters.indexOf('asetpts=N/SR/TB')).toBeGreaterThan(0);
+    expect(filters.findIndex((filter) => filter.startsWith('apad'))).toBe(
+      filters.indexOf('asetpts=N/SR/TB') + 1,
+    );
+  });
+
+  it('acota TODO apad del grafo con whole_dur: un apad sin límite genera silencio infinito', () => {
+    const timeline = buildFixtureTimeline();
+    const targetSeconds = timeline.durationFrames / timeline.format.fps;
+
+    for (const graph of [
+      buildAudioMixGraph({ timeline }),
+      buildAudioMixGraph({ timeline: { ...timeline, tracks: { ...timeline.tracks, music: [] } } }),
+    ]) {
+      const padFilters = graph.chains.flatMap((chain) =>
+        chain.filters.filter((filter) => filter.startsWith('apad')),
+      );
+
+      expect(padFilters.length).toBeGreaterThan(0);
+      padFilters.forEach((filter) => {
+        expect(filter).toBe(`apad=whole_dur=${targetSeconds}`);
+      });
+    }
   });
 
   it('con voiceMeasuredByAssetId usa buildLoudnormFilter de segunda pasada indexado por assetId', () => {

@@ -23,6 +23,7 @@ import {
   handleGetStoryboardPrompts,
   handlePutStoryboard,
 } from './handlers/storyboard-handler';
+import { handleGetScenes, handleImportScenes, handlePutScenes } from './handlers/scenes-handler';
 import { handleGetVoice, handlePutVoiceScene } from './handlers/voice-handler';
 import { handleListVoices } from './handlers/voices-handler';
 import { handleHealth } from './health-handler';
@@ -94,6 +95,12 @@ export async function handleRequest(
         return await handleGetVoice(deps, store, params);
       case 'projects.voice.scene.put':
         return await handlePutVoiceScene(deps, store, params, request);
+      case 'projects.scenes.get':
+        return await handleGetScenes(deps, store, params);
+      case 'projects.scenes.put':
+        return await handlePutScenes(deps, store, params, request);
+      case 'projects.scenes.import':
+        return await handleImportScenes(deps, store, params, request);
       case 'projects.jobs.create':
         return await handleCreateRenderJob(deps, store, params, request, runtime);
       case 'projects.jobs.list':

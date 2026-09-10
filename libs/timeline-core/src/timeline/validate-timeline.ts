@@ -5,9 +5,9 @@ import type { OutputFormat, SafeZone } from '../schemas/output-format.schema';
 import type {
   CaptionClip,
   CaptionClipBox,
+  SceneClip,
   Timeline,
   TimelineTransition,
-  VideoClip,
 } from '../schemas/timeline.schema';
 import { TimelineSchema } from '../schemas/timeline.schema';
 import type { AssetId, ClipId, Fps, Frame, Ms } from '../types/units';
@@ -24,7 +24,11 @@ export type TimelineIssueCode =
   | 'DURATION_MISMATCH'
   | 'CLIP_OUT_OF_TIMELINE'
   | 'TRANSITION_CLIP_NOT_FOUND'
-  | 'CAPTION_OUT_OF_SAFE_ZONE';
+  | 'CAPTION_OUT_OF_SAFE_ZONE'
+  | 'SCENES_AND_AROLL'
+  | 'SCENE_ASSET_NOT_FOUND'
+  | 'SCENE_OVERLAP'
+  | 'SCENE_GAP';
 
 export interface TimelineIssue {
   code: TimelineIssueCode;
@@ -163,7 +167,7 @@ function transitionFramesBetween(
   return transition?.durationFrames ?? 0;
 }
 
-function arollOverlapIssue(index: number, clip: VideoClip): TimelineIssue {
+function arollOverlapIssue(index: number, clip: { readonly id: ClipId }): TimelineIssue {
   return {
     code: 'AROLL_OVERLAP',
     path: clipPath('aroll', index, 'from'),
@@ -171,7 +175,7 @@ function arollOverlapIssue(index: number, clip: VideoClip): TimelineIssue {
   };
 }
 
-function arollGapIssue(index: number, clip: VideoClip): TimelineIssue {
+function arollGapIssue(index: number, clip: { readonly id: ClipId }): TimelineIssue {
   return {
     code: 'AROLL_GAP',
     path: clipPath('aroll', index, 'from'),
@@ -179,7 +183,7 @@ function arollGapIssue(index: number, clip: VideoClip): TimelineIssue {
   };
 }
 
-function durationMismatchIssue(lastClip: VideoClip, durationFrames: Frame): TimelineIssue {
+function durationMismatchIssue(lastClip: { readonly id: ClipId }, durationFrames: Frame): TimelineIssue {
   return {
     code: 'DURATION_MISMATCH',
     path: 'durationFrames',
@@ -187,20 +191,72 @@ function durationMismatchIssue(lastClip: VideoClip, durationFrames: Frame): Time
   };
 }
 
-function collectArollOrderIssues(timeline: Timeline): TimelineIssue[] {
-  const issues: TimelineIssue[] = [];
-  const aroll = [...timeline.tracks.aroll].sort((left, right) => left.from - right.from);
+interface PrimaryVisualClip {
+  readonly id: ClipId;
+  readonly from: Frame;
+  readonly durationFrames: Frame;
+}
 
-  if (aroll.length === 0) {
+interface PrimaryVisualTrack {
+  readonly name: 'aroll' | 'scenes';
+  readonly clips: readonly PrimaryVisualClip[];
+}
+
+export function primaryVisualTrackOf(timeline: Timeline): PrimaryVisualTrack {
+  const scenes = timeline.tracks.scenes ?? [];
+  return scenes.length > 0
+    ? { name: 'scenes', clips: scenes }
+    : { name: 'aroll', clips: timeline.tracks.aroll };
+}
+
+function primaryOverlapIssue(track: PrimaryVisualTrack, index: number, clip: PrimaryVisualClip): TimelineIssue {
+  return track.name === 'aroll'
+    ? arollOverlapIssue(index, clip)
+    : {
+        code: 'SCENE_OVERLAP',
+        path: `tracks.scenes[${index}].from`,
+        message: `La escena "${clip.id}" se solapa con la anterior.`,
+      };
+}
+
+function primaryGapIssue(track: PrimaryVisualTrack, index: number, clip: PrimaryVisualClip): TimelineIssue {
+  return track.name === 'aroll'
+    ? arollGapIssue(index, clip)
+    : {
+        code: 'SCENE_GAP',
+        path: `tracks.scenes[${index}].from`,
+        message: `Hay un hueco antes de la escena "${clip.id}".`,
+      };
+}
+
+function scenesAndArollIssue(): TimelineIssue {
+  return {
+    code: 'SCENES_AND_AROLL',
+    path: 'tracks.scenes',
+    message: 'Una Timeline usa la pista scenes o la pista aroll como visual primaria, nunca las dos.',
+  };
+}
+
+function collectPrimaryVisualOrderIssues(timeline: Timeline): TimelineIssue[] {
+  const issues: TimelineIssue[] = [];
+  const track = primaryVisualTrackOf(timeline);
+
+  if (track.name === 'scenes' && timeline.tracks.aroll.length > 0) {
+    issues.push(scenesAndArollIssue());
+  }
+
+  const ordered = [...track.clips].sort((left, right) => left.from - right.from);
+
+  if (ordered.length === 0) {
     issues.push(emptyArollIssue());
     return issues;
   }
 
   const transitions = timeline.transitions ?? [];
 
-  for (let index = 1; index < aroll.length; index += 1) {
-    const previousClip = aroll[index - 1];
-    const currentClip = aroll[index];
+  for (let index = 1; index < ordered.length; index += 1) {
+    const previousClip = ordered[index - 1];
+    const currentClip = ordered[index];
     if (previousClip === undefined || currentClip === undefined) {
       continue;
     }
@@ -210,16 +266,55 @@ function collectArollOrderIssues(timeline: Timeline): TimelineIssue[] {
     const expectedFromFrame = previousEndFrame - overlapFrames;
 
     if (currentClip.from < expectedFromFrame) {
-      issues.push(arollOverlapIssue(index, currentClip));
+      issues.push(primaryOverlapIssue(track, index, currentClip));
     } else if (currentClip.from > expectedFromFrame) {
-      issues.push(arollGapIssue(index, currentClip));
+      issues.push(primaryGapIssue(track, index, currentClip));
     }
   }
 
-  const lastClip = aroll[aroll.length - 1];
+  const lastClip = ordered[ordered.length - 1];
   if (lastClip !== undefined && lastClip.from + lastClip.durationFrames !== timeline.durationFrames) {
     issues.push(durationMismatchIssue(lastClip, timeline.durationFrames));
   }
+
+  return issues;
+}
+
+function sceneAssetIds(clip: SceneClip): readonly AssetId[] {
+  if (clip.visual.kind === 'asset') {
+    return [clip.visual.assetId];
+  }
+  if (clip.visual.kind === 'remotion' && clip.visual.scene.assetId !== undefined) {
+    return [clip.visual.scene.assetId];
+  }
+  return [];
+}
+
+function collectSceneTrackIssues(
+  timeline: Timeline,
+  assetsById: ReadonlyMap<AssetId, MediaAsset>,
+): TimelineIssue[] {
+  const issues: TimelineIssue[] = [];
+
+  (timeline.tracks.scenes ?? []).forEach((clip, index) => {
+    for (const assetId of sceneAssetIds(clip)) {
+      if (!assetsById.has(assetId)) {
+        issues.push({
+          code: 'SCENE_ASSET_NOT_FOUND',
+          path: `tracks.scenes[${index}].visual`,
+          message: `La escena "${clip.id}" referencia el asset "${assetId}", que no existe en assets.`,
+        });
+      }
+    }
+
+    if (clip.from < 0 || clip.from + clip.durationFrames > timeline.durationFrames) {
+      issues.push({
+        code: 'CLIP_OUT_OF_TIMELINE',
+        path: `tracks.scenes[${index}].from`,
+        message: `La escena "${clip.id}" queda fuera del rango [0, ${timeline.durationFrames}) de la Timeline.`,
+      });
+    }
+  });
 
   return issues;
 }
@@ -231,6 +326,7 @@ function collectAllClipIds(timeline: Timeline): Set<ClipId> {
     timeline.tracks[trackName].forEach((clip) => clipIds.add(clip.id));
   });
   timeline.tracks.captions.forEach((caption) => clipIds.add(caption.id));
+  (timeline.tracks.scenes ?? []).forEach((scene) => clipIds.add(scene.id));
 
   return clipIds;
 }
@@ -297,7 +393,8 @@ export function validateTimeline(timeline: Timeline): TimelineValidationResult {
   const assetsById = new Map(parsed.data.assets.map((asset) => [asset.id, asset] as const));
   const issues: TimelineIssue[] = [
     ...collectAssetBackedTrackIssues(parsed.data, assetsById),
-    ...collectArollOrderIssues(parsed.data),
+    ...collectSceneTrackIssues(parsed.data, assetsById),
+    ...collectPrimaryVisualOrderIssues(parsed.data),
     ...collectTransitionIssues(parsed.data),
     ...collectCaptionSafeZoneIssues(parsed.data),
   ];

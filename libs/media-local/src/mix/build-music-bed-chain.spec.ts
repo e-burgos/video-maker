@@ -66,7 +66,7 @@ describe('buildMusicBedChain', () => {
       videoDurationFrames: VIDEO_DURATION_FRAMES,
     });
 
-    expect(chain).toEqual(['apad', 'atrim=end=7']);
+    expect(chain).toEqual(['apad=whole_dur=7', 'atrim=end=7']);
   });
 
   it('nunca encadena la ganancia constante despues de la automatizacion', () => {
@@ -89,7 +89,7 @@ describe('buildMusicBedChain', () => {
     expect(chain).toEqual([
       'afade=t=in:st=0:d=0.5',
       'afade=t=out:st=6:d=1',
-      'apad',
+      'apad=whole_dur=7',
       'atrim=end=7',
     ]);
   });
@@ -101,7 +101,7 @@ describe('buildMusicBedChain', () => {
       videoDurationFrames: VIDEO_DURATION_FRAMES,
     });
 
-    expect(chain).toEqual(['volume=0.251188643', 'apad', 'atrim=end=7']);
+    expect(chain).toEqual(['volume=0.251188643', 'apad=whole_dur=7', 'atrim=end=7']);
   });
 
   it('el fixture completo de §9.2 del architect.md da la cadena exacta', () => {
@@ -125,7 +125,7 @@ describe('buildMusicBedChain', () => {
 
     expect(chain[1]).toBe('afade=t=in:st=0:d=0.5');
     expect(chain[2]).toBe('afade=t=out:st=6:d=1');
-    expect(chain[3]).toBe('apad');
+    expect(chain[3]).toBe('apad=whole_dur=7');
     expect(chain[4]).toBe('atrim=end=7');
     expect(chain).toHaveLength(5);
   });

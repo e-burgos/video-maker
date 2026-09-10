@@ -1,11 +1,11 @@
 import { describe, expect, it } from 'vitest';
 
-import { ca013Assets } from '../__fixtures__/assets';
+import { brollAsset, ca013Assets } from '../__fixtures__/assets';
 import { ca013Edl } from '../__fixtures__/edl';
-import type { CaptionClip, Timeline, TimelineTransition, VideoClip } from '../schemas/timeline.schema';
+import type { CaptionClip, SceneClip, Timeline, TimelineTransition, VideoClip } from '../schemas/timeline.schema';
 import { buildTimeline } from './build-timeline';
 import type { TimelineIssueCode } from './validate-timeline';
-import { validateTimeline } from './validate-timeline';
+import { primaryVisualTrackOf, validateTimeline } from './validate-timeline';
 
 function referenceTimeline(): Timeline {
   return buildTimeline(ca013Edl, ca013Assets);
@@ -184,5 +184,170 @@ describe('validateTimeline (CA-014)', () => {
         ]),
       );
     }
+  });
+});
+
+describe('validateTimeline sobre la pista visual primaria scenes', () => {
+  function sceneTimeline(scenes: readonly SceneClip[], durationFrames: number): Timeline {
+    const base = referenceTimeline();
+    return {
+      ...base,
+      durationFrames,
+      tracks: { aroll: [], broll: [], voice: [], music: [], captions: [], scenes: [...scenes] },
+      transitions: [],
+    };
+  }
+
+  function placeholderScene(id: string, from: number, durationFrames: number): SceneClip {
+    return {
+      id,
+      sceneId: id.replace('clip', 'scene'),
+      from,
+      durationFrames,
+      visual: { kind: 'placeholder', prompt: 'A kitchen at dawn' },
+    };
+  }
+
+  it('acepta una Timeline cuyas escenas son contiguas y cubren durationFrames', () => {
+    const timeline = sceneTimeline([placeholderScene('clip-01', 0, 60), placeholderScene('clip-02', 60, 30)], 90);
+
+    expect(validateTimeline(timeline)).toEqual({ ok: true });
+  });
+
+  it('toma la duración del final de la última escena, no del A-roll vacío', () => {
+    const timeline = sceneTimeline([placeholderScene('clip-01', 0, 60)], 90);
+
+    expectSingleIssue(validateTimeline(timeline), 'DURATION_MISMATCH', 'durationFrames');
+  });
+
+  it('reporta SCENE_GAP cuando una escena arranca después del final de la anterior', () => {
+    const timeline = sceneTimeline([placeholderScene('clip-01', 0, 60), placeholderScene('clip-02', 70, 20)], 90);
+
+    expectSingleIssue(validateTimeline(timeline), 'SCENE_GAP', 'tracks.scenes[1].from');
+  });
+
+  it('reporta SCENE_OVERLAP cuando una escena pisa a la anterior', () => {
+    const timeline = sceneTimeline([placeholderScene('clip-01', 0, 60), placeholderScene('clip-02', 50, 40)], 90);
+
+    expectSingleIssue(validateTimeline(timeline), 'SCENE_OVERLAP', 'tracks.scenes[1].from');
+  });
+
+  it('reporta SCENES_AND_AROLL cuando las dos pistas visuales vienen cargadas', () => {
+    const base = referenceTimeline();
+    const timeline: Timeline = {
+      ...base,
+      tracks: { ...base.tracks, scenes: [placeholderScene('clip-01', 0, base.durationFrames)] },
+    };
+
+    const result = validateTimeline(timeline);
+
+    expect(issueCodes(result)).toContain('SCENES_AND_AROLL');
+  });
+
+  it('reporta SCENE_ASSET_NOT_FOUND cuando el visual de la escena apunta a un asset ausente', () => {
+    const timeline = sceneTimeline(
+      [
+        {
+          id: 'clip-01',
+          sceneId: 'scene-01',
+          from: 0,
+          durationFrames: 90,
+          visual: {
+            kind: 'asset',
+            assetId: 'raw/images/does-not-exist.png',
+            trimStartMs: 0,
+            transform: { scale: 1, translateX: 0, translateY: 0 },
+          },
+        },
+      ],
+      90,
+    );
+
+    expectSingleIssue(validateTimeline(timeline), 'SCENE_ASSET_NOT_FOUND', 'tracks.scenes[0].visual');
+  });
+
+  it('reporta SCENE_ASSET_NOT_FOUND cuando la imagen de una escena image-kenburns no está en assets', () => {
+    const timeline = sceneTimeline(
+      [
+        {
+          id: 'clip-01',
+          sceneId: 'scene-01',
+          from: 0,
+          durationFrames: 90,
+          visual: {
+            kind: 'remotion',
+            scene: { kind: 'image-kenburns', zoomFrom: 1, zoomTo: 1.2, assetId: 'raw/images/ghost.png' },
+          },
+        },
+      ],
+      90,
+    );
+
+    expectSingleIssue(validateTimeline(timeline), 'SCENE_ASSET_NOT_FOUND', 'tracks.scenes[0].visual');
+  });
+
+  it('acepta el asset del catálogo que la escena sí declara y no exige que lo cubra entero', () => {
+    const timeline = sceneTimeline(
+      [
+        {
+          id: 'clip-01',
+          sceneId: 'scene-01',
+          from: 0,
+          durationFrames: 900,
+          visual: {
+            kind: 'asset',
+            assetId: brollAsset.id,
+            trimStartMs: 0,
+            kenBurns: { zoomFrom: 1, zoomTo: 1.1 },
+            transform: { scale: 1, translateX: 0, translateY: 0 },
+          },
+        },
+      ],
+      900,
+    );
+
+    expect(validateTimeline(timeline)).toEqual({ ok: true });
+  });
+
+  it('reporta CLIP_OUT_OF_TIMELINE cuando una escena se pasa del final de la Timeline', () => {
+    const timeline = sceneTimeline([placeholderScene('clip-01', 0, 120)], 90);
+
+    const result = validateTimeline(timeline);
+
+    expect(issueCodes(result)).toContain('CLIP_OUT_OF_TIMELINE');
+  });
+
+  it('reporta EMPTY_AROLL cuando no hay ninguna pista visual primaria', () => {
+    const timeline = sceneTimeline([], 90);
+
+    expectSingleIssue(validateTimeline(timeline), 'EMPTY_AROLL', 'tracks.aroll');
+  });
+});
+
+describe('primaryVisualTrackOf', () => {
+  it('elige aroll cuando la Timeline no trae escenas', () => {
+    expect(primaryVisualTrackOf(referenceTimeline()).name).toBe('aroll');
+  });
+
+  it('elige scenes cuando la pista de escenas no está vacía', () => {
+    const base = referenceTimeline();
+    const timeline: Timeline = {
+      ...base,
+      tracks: {
+        ...base.tracks,
+        aroll: [],
+        scenes: [
+          {
+            id: 'clip-01',
+            sceneId: 'scene-01',
+            from: 0,
+            durationFrames: base.durationFrames,
+            visual: { kind: 'placeholder', prompt: 'A kitchen at dawn' },
+          },
+        ],
+      },
+    };
+
+    expect(primaryVisualTrackOf(timeline).name).toBe('scenes');
   });
 });

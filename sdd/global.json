@@ -105,8 +105,7 @@
       "completed_at": "2026-09-10"
     }
   ],
-  "in_progress_modules": [],
-  "pending_modules": [
+  "in_progress_modules": [
     {
       "module": "scene-assembly",
       "spec": "spec-e-burgos-010-scene-assembly",
@@ -115,10 +114,13 @@
         "libs/composition-remotion",
         "libs/timeline-core",
         "libs/auto-montage",
-        "apps/render-api"
+        "apps/render-api",
+        "libs/media-local"
       ],
       "description": "Ensamblado de escenas: huecos por escena con drag&drop e importación numerada en lote, cuatro escenas nativas de Remotion (título, texto, código, imagen con Ken Burns) y el segundo productor de Timeline `buildTimelineFromStoryboard`, expuesto como job kind: 'assemble'"
-    },
+    }
+  ],
+  "pending_modules": [
     {
       "module": "audio-library",
       "spec": "spec-e-burgos-011-audio-library",

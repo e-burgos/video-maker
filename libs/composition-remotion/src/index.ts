@@ -7,7 +7,34 @@ export type {
   SequencePropsPlan,
   VideoSequenceProps,
 } from './helpers/timeline-to-sequence-props';
+export type {
+  SceneAssetPlan,
+  ScenePlaceholderPlan,
+  SceneRemotionPlan,
+  SceneSequenceProps,
+  SceneVisualPlan,
+} from './helpers/timeline-to-sequence-props';
 export type { CaptionBox, TransitionDirection } from './helpers/timeline-types';
+
+export { captionBandTop, sceneTheme } from './helpers/scene-theme';
+export type { SceneTheme, SceneThemeRole } from './helpers/scene-theme';
+export { DEFAULT_IMAGE_KEN_BURNS, kenBurnsCss, kenBurnsProgress, kenBurnsTransform } from './helpers/ken-burns';
+export type { KenBurnsInput, KenBurnsTransform } from './helpers/ken-burns';
+export { MONOSPACE_ADVANCE_EM, codeLayout, columnsThatFit } from './helpers/code-lines';
+export type { CodeLayout, CodeLayoutOptions } from './helpers/code-lines';
+
+export { SceneTrack, sceneLoopFrames } from './components/scene-track';
+export type { SceneTrackProps } from './components/scene-track';
+export { TitleScene } from './components/scenes/title-scene';
+export type { TitleSceneProps } from './components/scenes/title-scene';
+export { TextScene } from './components/scenes/text-scene';
+export type { TextSceneProps } from './components/scenes/text-scene';
+export { CodeScene } from './components/scenes/code-scene';
+export type { CodeSceneProps } from './components/scenes/code-scene';
+export { ImageKenBurnsScene } from './components/scenes/image-ken-burns-scene';
+export type { ImageKenBurnsSceneProps } from './components/scenes/image-ken-burns-scene';
+export { PlaceholderScene } from './components/scenes/placeholder-scene';
+export type { PlaceholderSceneProps } from './components/scenes/placeholder-scene';
 export { transitionTiming } from './helpers/transition-timing';
 export { punchInStyle } from './helpers/punch-in-style';
 export { gainDbToVolume, volumeAtFrame } from './helpers/audio-gain';

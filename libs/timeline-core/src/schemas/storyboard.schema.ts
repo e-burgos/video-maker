@@ -166,6 +166,10 @@ function refineScene(scene: RefinableScene, ctx: z.RefinementCtx, path: (string 
   }
 }
 
+export const RemotionSceneDocumentSchema = RemotionSceneSchema.superRefine((scene, ctx) => {
+  refineRemotionScene(scene, ctx, []);
+});
+
 export const StoryboardProposalSchema = StoryboardProposalObjectSchema.superRefine((proposal, ctx) => {
   proposal.scenes.forEach((scene, position) => refineScene(scene, ctx, ['scenes', position]));
 });

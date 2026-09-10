@@ -1,3 +1,4 @@
+import { serializeMontageDocument } from '@video-maker/auto-montage';
 import { describe, expect, it } from 'vitest';
 
 import { createCallLog } from '../../__fixtures__/call-log';
@@ -445,7 +446,7 @@ describe('handleCreateRenderJob', () => {
       expect(runtime.jobs.listBySlug('smoke-ingest')).toEqual([]);
     });
 
-    it('rejects an unknown kind and names the four valid ones', async () => {
+    it('rejects an unknown kind and names the five valid ones', async () => {
       const { deps, runtime } = storyboardHarness();
 
       await expect(
@@ -453,12 +454,12 @@ describe('handleCreateRenderJob', () => {
           deps,
           STORE,
           { slug: 'smoke-ingest' },
-          jsonBodyRequest('smoke-ingest', { kind: 'assemble' }),
+          jsonBodyRequest('smoke-ingest', { kind: 'transcode' }),
           runtime,
         ),
       ).rejects.toMatchObject({
         code: 'JOB_KIND_INVALID',
-        expected: "'render', 'montage', 'storyboard' or 'voice'",
+        expected: "'render', 'montage', 'storyboard', 'voice' or 'assemble'",
       });
       expect(runtime.jobs.listBySlug('smoke-ingest')).toEqual([]);
     });
@@ -898,5 +899,114 @@ describe('handleCancelRenderJob', () => {
     expect(isAsciiOnly(notCancelablePayload.message)).toBe(true);
     expect('stack' in notCancelablePayload).toBe(false);
     expect(notCancelablePayload.resource?.startsWith('/')).toBe(false);
+  });
+});
+
+describe('handleCreateRenderJob assemble jobs (US-10-006)', () => {
+  const DOCUMENT = buildStoryboardDocument();
+  const PROJECT_ROOT = `${STORE.mediaRoot}/smoke-ingest`;
+
+  function assembleHarness(options?: { readonly withTimeline?: boolean; readonly withStoryboard?: boolean }) {
+    const callLog = createCallLog();
+    const files = [
+      ...(options?.withStoryboard === false
+        ? []
+        : [
+            {
+              path: `${PROJECT_ROOT}/work/storyboard.json`,
+              contents: serializeMontageDocument(DOCUMENT),
+            },
+          ]),
+      ...(options?.withTimeline === true
+        ? [{ path: `${PROJECT_ROOT}/work/timeline.json`, contents: '{}' }]
+        : []),
+    ];
+    const storage = createFakeObjectStorage(callLog, {
+      directories: [PROJECT_ROOT, `${PROJECT_ROOT}/work`],
+      files,
+    });
+    const deps = createFakeRenderApiDependencies(callLog, { storage });
+    return { deps, storage, runtime: createRenderApiRuntime(deps) };
+  }
+
+  it('answers 202 with kind assemble and the same job envelope as the other kinds', async () => {
+    const { deps, runtime } = assembleHarness();
+
+    const response = await handleCreateRenderJob(
+      deps,
+      STORE,
+      { slug: 'smoke-ingest' },
+      jsonBodyRequest('smoke-ingest', { kind: 'assemble' }),
+      runtime,
+    );
+    const body = response.body as Job;
+
+    expect(response.status).toBe(202);
+    expect(response.headers.location).toBe(`/jobs/${body.id}`);
+    expect(body.kind).toBe('assemble');
+    expect(Object.keys(body).sort()).toEqual(RENDER_JOB_RESPONSE_KEYS);
+
+    await runtime.jobs.whenIdle();
+  });
+
+  it('rejects the job with 409 when a timeline is already persisted and overwrite was not asked for', async () => {
+    const { deps, runtime } = assembleHarness({ withTimeline: true });
+
+    await expect(
+      handleCreateRenderJob(
+        deps,
+        STORE,
+        { slug: 'smoke-ingest' },
+        jsonBodyRequest('smoke-ingest', { kind: 'assemble' }),
+        runtime,
+      ),
+    ).rejects.toMatchObject({ code: 'TIMELINE_ALREADY_EXISTS' });
+    expect(runtime.jobs.listBySlug('smoke-ingest')).toEqual([]);
+  });
+
+  it('accepts the job over an existing timeline when overwrite is true', async () => {
+    const { deps, runtime } = assembleHarness({ withTimeline: true });
+
+    const response = await handleCreateRenderJob(
+      deps,
+      STORE,
+      { slug: 'smoke-ingest' },
+      jsonBodyRequest('smoke-ingest', { kind: 'assemble', overwrite: true }),
+      runtime,
+    );
+
+    expect(response.status).toBe(202);
+
+    await runtime.jobs.whenIdle();
+  });
+
+  it('refuses to queue an assemble job for a project without a storyboard', async () => {
+    const { deps, runtime } = assembleHarness({ withStoryboard: false });
+
+    await expect(
+      handleCreateRenderJob(
+        deps,
+        STORE,
+        { slug: 'smoke-ingest' },
+        jsonBodyRequest('smoke-ingest', { kind: 'assemble' }),
+        runtime,
+      ),
+    ).rejects.toMatchObject({ code: 'STORYBOARD_NOT_FOUND' });
+    expect(runtime.jobs.listBySlug('smoke-ingest')).toEqual([]);
+  });
+
+  it('rejects an invalid scenePaddingMs before creating the job', async () => {
+    const { deps, runtime } = assembleHarness();
+
+    await expect(
+      handleCreateRenderJob(
+        deps,
+        STORE,
+        { slug: 'smoke-ingest' },
+        jsonBodyRequest('smoke-ingest', { kind: 'assemble', scenePaddingMs: -5 }),
+        runtime,
+      ),
+    ).rejects.toMatchObject({ code: 'ASSEMBLE_PADDING_INVALID' });
+    expect(runtime.jobs.listBySlug('smoke-ingest')).toEqual([]);
   });
 });

@@ -48,6 +48,12 @@ export type { AudioMixPlan, GainKeyframe, MusicMixSettings, VoiceTarget } from '
 export {
   AudioClipSchema,
   CaptionClipSchema,
+  SceneAssetVisualSchema,
+  SceneClipSchema,
+  SceneKenBurnsSchema,
+  ScenePlaceholderVisualSchema,
+  SceneRemotionVisualSchema,
+  SceneVisualSchema,
   TimelineSchema,
   TimelineTransitionSchema,
   VideoClipSchema,
@@ -55,10 +61,26 @@ export {
 export type {
   AudioClip,
   CaptionClip,
+  SceneAssetVisual,
+  SceneClip,
+  SceneKenBurns,
+  ScenePlaceholderVisual,
+  SceneRemotionVisual,
+  SceneVisual,
   Timeline,
+  TimelineTracks,
   TimelineTransition,
   VideoClip,
 } from './schemas/timeline.schema';
+
+export {
+  SCENE_ASSIGNMENT_SCHEMA_VERSION,
+  SceneAssignmentEntrySchema,
+  SceneAssignmentSchema,
+  emptySceneAssignment,
+  findSceneAssignment,
+} from './schemas/scene-assignment.schema';
+export type { SceneAssignment, SceneAssignmentEntry } from './schemas/scene-assignment.schema';
 
 export type { AssetId, ClipId, DecisionId, Db, Fps, Frame, Lufs, Ms, Rounding, Scale } from './types/units';
 
@@ -87,7 +109,20 @@ export { remapMsAfterCuts } from './timeline/remap-ms-after-cuts';
 export { TimelineBuildError, buildTimeline } from './timeline/build-timeline';
 export type { MusicInput, TimelineBuildErrorCode } from './timeline/build-timeline';
 
-export { validateTimeline } from './timeline/validate-timeline';
+export {
+  DEFAULT_SCENE_PADDING_MS,
+  StoryboardTimelineError,
+  buildTimelineFromStoryboard,
+} from './timeline/build-timeline-from-storyboard';
+export type {
+  BuildTimelineFromStoryboardInput,
+  BuildTimelineFromStoryboardResult,
+  ScenePlacement,
+  SceneWords,
+  StoryboardTimelineErrorCode,
+} from './timeline/build-timeline-from-storyboard';
+
+export { primaryVisualTrackOf, validateTimeline } from './timeline/validate-timeline';
 export type { TimelineIssue, TimelineIssueCode, TimelineValidationResult } from './timeline/validate-timeline';
 
 export { groupWordsForCaptions, pickEmphasisIndex } from './captions/group-words-for-captions';
@@ -105,6 +140,7 @@ export type { JsonObject, JsonValue } from './schemas/json-schema';
 export type { SchemaFileName } from './schemas/registry';
 
 export {
+  RemotionSceneDocumentSchema,
   RemotionSceneKindSchema,
   RemotionSceneSchema,
   STORYBOARD_SCHEMA_VERSION,

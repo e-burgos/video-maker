@@ -5,6 +5,10 @@ import type { Timeline } from '@video-maker/timeline-core';
 import type { RenderApiDependencies } from '../deps/render-api-dependencies';
 import type { RenderApiErrorPayload } from '../errors/render-api-error';
 import { toErrorPayload } from '../errors/to-error-payload';
+import { startAssembleJobStage } from './assemble-job-progress';
+import { isAssemblePipelineCanceled } from './assemble-pipeline-observer';
+import type { AssemblePipelineObserver } from './assemble-pipeline-observer';
+import { runAssemblePipeline } from './run-assemble-pipeline';
 import { mergeMontageJobProgress, startMontageJobStage } from './montage-job-progress';
 import { startStoryboardJobStage } from './storyboard-job-progress';
 import { isStoryboardPipelineCanceled } from './storyboard-pipeline-observer';
@@ -23,6 +27,8 @@ import { runRenderPipeline } from '../pipeline/run-render-pipeline';
 import { mergeRenderProgress, startRenderJobStage } from './render-job-progress';
 import { applyRenderJobEvent } from './render-job-state';
 import type {
+  AssembleJobProgress,
+  AssembleJobReport,
   CreateJobInput,
   Job,
   MontageJobProgress,
@@ -99,7 +105,20 @@ interface VoiceJobRecord extends JobRecordBase {
   report: VoiceJobReport | null;
 }
 
-type JobRecord = RenderJobRecord | MontageJobRecord | StoryboardJobRecord | VoiceJobRecord;
+interface AssembleJobRecord extends JobRecordBase {
+  readonly kind: 'assemble';
+  readonly musicAssetId: string | null;
+  readonly scenePaddingMs: number | null;
+  progress: AssembleJobProgress | null;
+  report: AssembleJobReport | null;
+}
+
+type JobRecord =
+  | RenderJobRecord
+  | MontageJobRecord
+  | StoryboardJobRecord
+  | VoiceJobRecord
+  | AssembleJobRecord;
 
 export function createRenderJobQueue(deps: RenderApiDependencies): RenderJobQueue {
   const records = new Map<string, JobRecord>();
@@ -250,6 +269,34 @@ export function createRenderJobQueue(deps: RenderApiDependencies): RenderJobQueu
     settle(record, report, failure);
   }
 
+  async function runAssembleJob(record: AssembleJobRecord): Promise<void> {
+    const observer: AssemblePipelineObserver = {
+      stageStarted: (stage) => {
+        record.progress = startAssembleJobStage(record.progress, stage);
+      },
+      cancellationRequested: () => record.state === 'canceling',
+    };
+
+    let report: AssembleJobReport | null = null;
+    let failure: RenderApiErrorPayload | null = null;
+
+    try {
+      report = await runAssemblePipeline(
+        {
+          project: resolveMediaProject(record.projectRoot),
+          musicAssetId: record.musicAssetId,
+          scenePaddingMs: record.scenePaddingMs,
+        },
+        deps,
+        observer,
+      );
+    } catch (cause) {
+      failure = isAssemblePipelineCanceled(cause) ? null : toErrorPayload(cause);
+    }
+
+    settle(record, report, failure);
+  }
+
   async function runJob(record: JobRecord): Promise<void> {
     switch (record.kind) {
       case 'render':
@@ -263,6 +310,9 @@ export function createRenderJobQueue(deps: RenderApiDependencies): RenderJobQueu
         break;
       case 'voice':
         await runVoiceJob(record);
+        break;
+      case 'assemble':
+        await runAssembleJob(record);
         break;
     }
 
@@ -322,6 +372,15 @@ export function createRenderJobQueue(deps: RenderApiDependencies): RenderJobQueu
           kind: 'voice',
           voiceId: input.voiceId,
           sceneIds: input.sceneIds,
+          progress: null,
+          report: null,
+        };
+      case 'assemble':
+        return {
+          ...base,
+          kind: 'assemble',
+          musicAssetId: input.musicAssetId,
+          scenePaddingMs: input.scenePaddingMs,
           progress: null,
           report: null,
         };

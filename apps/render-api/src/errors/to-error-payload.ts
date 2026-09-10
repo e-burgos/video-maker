@@ -67,6 +67,15 @@ const MESSAGE_BY_CODE: Readonly<Record<RenderApiErrorCode, string>> = {
   VOICE_SCENE_IDS_INVALID: 'The sceneIds parameter is not a non-empty array of scene ids.',
   VOICE_OVERWRITE_INVALID: 'The overwrite flag is not a boolean.',
   VOICE_ASSET_NOT_FOUND: 'The referenced locution file is not under the raw voice directory.',
+  SCENES_INVALID: 'The scene assignment document does not match its schema.',
+  SCENE_NOT_FOUND: 'The scene is not part of the stored storyboard.',
+  SCENE_IMPORT_ROLES_INVALID: 'The roles to import from are not a valid asset role list.',
+  SCENE_IMPORT_REPLACE_INVALID: 'The replace flag of the numbered import is not a boolean.',
+  ASSEMBLE_INPUT_INVALID: 'The project cannot be assembled from its storyboard with the documents it has.',
+  ASSEMBLE_FAILED: 'The assemble pipeline failed while building the timeline from the storyboard.',
+  ASSEMBLE_MUSIC_INVALID: 'The music asset id of the assemble job is not a non-empty string.',
+  ASSEMBLE_PADDING_INVALID: 'The scene padding of the assemble job is not a non-negative integer.',
+  ASSEMBLE_OVERWRITE_INVALID: 'The overwrite flag of the assemble job is not a boolean.',
 };
 
 export function toErrorPayload(value: unknown): RenderApiErrorPayload {

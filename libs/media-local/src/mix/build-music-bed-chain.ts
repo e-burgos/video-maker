@@ -46,10 +46,12 @@ function buildFadeFilters(clip: AudioClip, fps: Fps): string[] {
 export function buildMusicBedChain(plan: AudioMixPlan, opts: MusicBedChainOptions): string[] {
   const { clip, fps, videoDurationFrames } = opts;
 
+  const bedDurationSeconds = formatFilterNumber(videoDurationFrames / fps);
+
   return [
     ...buildGainFilters(plan, clip, fps),
     ...buildFadeFilters(clip, fps),
-    'apad',
-    `atrim=end=${formatFilterNumber(videoDurationFrames / fps)}`,
+    `apad=whole_dur=${bedDurationSeconds}`,
+    `atrim=end=${bedDurationSeconds}`,
   ];
 }

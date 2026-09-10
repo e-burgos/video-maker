@@ -3,6 +3,7 @@ import type { RenderApiDependencies } from '../../deps/render-api-dependencies';
 import { PipelineStageError } from '../../errors/pipeline-stage-error';
 import { parseMontageOverwrite, parseMontagePreset, parseMontageSeed } from '../../jobs/montage-job-params';
 import { parseStoryboardInput, parseStoryboardOverwrite } from '../../jobs/storyboard-job-params';
+import { parseAssembleJobInput } from '../../jobs/assemble-job-params';
 import { parseVoiceJobInput } from '../../jobs/voice-job-params';
 import { assertVoiceTracksNotPersisted, selectVoiceScenes } from '../../voice/select-voice-scenes';
 import { readVoiceManifestIfUsable } from '../../voice/voice-store';
@@ -35,7 +36,13 @@ function resolveJobKind(value: unknown): JobKind | 'invalid' {
   if (raw === undefined) {
     return 'render';
   }
-  if (raw === 'render' || raw === 'montage' || raw === 'storyboard' || raw === 'voice') {
+  if (
+    raw === 'render' ||
+    raw === 'montage' ||
+    raw === 'storyboard' ||
+    raw === 'voice' ||
+    raw === 'assemble'
+  ) {
     return raw;
   }
   return 'invalid';
@@ -73,7 +80,7 @@ export async function handleCreateRenderJob(
     throw new PipelineStageError({
       code: 'JOB_KIND_INVALID',
       stage: null,
-      expected: "'render', 'montage', 'storyboard' or 'voice'",
+      expected: "'render', 'montage', 'storyboard', 'voice' or 'assemble'",
     });
   }
 
@@ -140,6 +147,26 @@ export async function handleCreateRenderJob(
       status: 202,
       headers: { 'content-type': JSON_CONTENT_TYPE, location: `/jobs/${voiceJob.id}` },
       body: voiceJob,
+    };
+  }
+
+  if (jobKind === 'assemble') {
+    const input = parseAssembleJobInput(bodyObject);
+    await readStoredStoryboard(deps, project);
+    await assertTimelineNotPersisted(deps, project, input.overwrite);
+
+    const assembleJob = runtime.jobs.create({
+      kind: 'assemble',
+      slug,
+      projectRoot: project.root,
+      musicAssetId: input.musicAssetId,
+      scenePaddingMs: input.scenePaddingMs,
+    });
+
+    return {
+      status: 202,
+      headers: { 'content-type': JSON_CONTENT_TYPE, location: `/jobs/${assembleJob.id}` },
+      body: assembleJob,
     };
   }
 

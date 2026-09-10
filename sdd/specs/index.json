@@ -159,7 +159,7 @@
       "file": "sdd/specs/spec-e-burgos-010-scene-assembly/spec-e-burgos-010-scene-assembly.spec.md",
       "module": "scene-assembly",
       "app": "apps/web",
-      "status": "draft",
+      "status": "in-progress",
       "title": "Scene Assembly: Huecos, Escenas Remotion y Timeline desde el Storyboard",
       "created_at": "2026-09-09",
       "completed_at": null,
