@@ -123,6 +123,16 @@
   "in_progress_modules": [],
   "pending_modules": [
     {
+      "module": "studio-producer",
+      "spec": "spec-e-burgos-015-studio-producer",
+      "apps": [
+        "apps/render-api",
+        "apps/web",
+        "tools/render-cli"
+      ],
+      "description": "Productor conversacional dentro de la app: la skill video-producer corriendo detras de render-api como agente Claude Code headless sobre la suscripcion local, con conversacion persistida por proyecto en work/producer/, turnos fuera de la cola de jobs, eventos legibles y sugerencias de accion, mas la pantalla de chat del Web Studio y la paridad de audio del entregable de render-cli con la mezcla masterizada de la API"
+    },
+    {
       "module": "scene-assembly",
       "spec": "spec-e-burgos-010-scene-assembly",
       "apps": [
