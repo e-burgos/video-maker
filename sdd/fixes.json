@@ -228,6 +228,56 @@
           }
         ]
       }
+    },
+    {
+      "id": "FIX-e-burgos-002-003",
+      "author": "e-burgos",
+      "spec_id": "spec-e-burgos-002-auto-montage-pipeline",
+      "fix_document": "sdd/specs/spec-e-burgos-002-auto-montage-pipeline/fixes/fix-e-burgos-002-003.md",
+      "type": "BUGFIX",
+      "severity": "high",
+      "created_at": "2026-09-10",
+      "resolved_at": "2026-09-10",
+      "validated_at": null,
+      "title": "plan fails with EDL_INVALID on real material: whisper.cpp emits zero-duration words at segment starts",
+      "estimation_hours": 1,
+      "description": "Running render-cli run on a real 43 s Spanish voice-over (Piper voice muxed over NASA footage, media/demo-espacio) fails at the plan stage with EDL_INVALID: decisions cap-0024 and cap-0029 have endMs <= startMs. whisper.cpp (ggml-large-v3-turbo) assigns from == to offsets to the first tokens of every segment (e.g. 'Hoy' and 'te' both at 3980..3980). groupWordsForCaptions extends such a group to minDurationMs, planCaptionGroups then clamps its end to the enclosing keep, and when the keep ends exactly at the word start the clamp yields endMs == startMs. The word repair belongs at the source (the whisper.cpp parser) and the planner needs a guard so it never emits a degenerate caption group.",
+      "justification": "Confirmed defect that blocks every real project whose transcription contains segment-initial zero-duration words (all of them with this model); no new contract, no new entity, two pure functions and their tests. Registered under the solo-profile FIX GATE while no cycle is open.",
+      "related_modules": [
+        "auto-montage-pipeline",
+        "core-composition-media-pipeline"
+      ],
+      "affected_files": [
+        "libs/media-local/src/whisper/parse-whisper-cpp-json.ts",
+        "libs/media-local/src/whisper/parse-whisper-cpp-json.spec.ts",
+        "libs/auto-montage/src/montage/plan-caption-groups.ts",
+        "libs/auto-montage/src/montage/plan-caption-groups.spec.ts"
+      ],
+      "test_reference": "pnpm nx run-many -t lint test build -p media-local auto-montage green (2026-09-10): media-local 303 tests, auto-montage 311. New cases: a same-start run of zero-duration words is spread monotonically up to the next word start; a trailing zero-duration word gets 200 ms; a caption group whose keep ends at its startMs yields no decision. Real run: render-cli run media/demo-espacio --preset software-demo --seed 0 → 129 words, 0 zero-duration, 5 concepts, 4 b-roll overlays, out/demo-espacio.mp4 1029 frames 1080x1920@30 with AAC audio.",
+      "status": "implemented",
+      "cycle": null,
+      "process_note": "Found by rendering a real 43 s Piper voice-over over NASA footage (media/demo-espacio, gitignored). Resolved by the steward in the main loop (no cycle open, solo profile FIX GATE) because the defect blocked the only real demo of the product; the whisper repair lives at the source so every consumer of Transcription benefits, and the planner guard keeps the EDL valid even if another transcriber emits degenerate words.",
+      "usage": {
+        "provider_model": "claude/fable",
+        "effort": "medium",
+        "tokens_in": 70000,
+        "tokens_out": 9000,
+        "approx": true,
+        "source": "declared-estimate",
+        "recorded_at": "2026-09-10",
+        "by_agent": [
+          {
+            "agent": "steward",
+            "provider_model": "claude/fable",
+            "effort": "medium",
+            "tokens_in": 70000,
+            "tokens_out": 9000,
+            "approx": true,
+            "source": "declared-estimate",
+            "recorded_at": "2026-09-10"
+          }
+        ]
+      }
     }
   ]
 }

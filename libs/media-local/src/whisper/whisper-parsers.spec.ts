@@ -1,3 +1,4 @@
+import type { Word } from '@video-maker/timeline-core';
 import { describe, expect, it } from 'vitest';
 
 import { TranscriptionSchema } from '@video-maker/timeline-core';
@@ -48,6 +49,46 @@ describe('groupTokensIntoWords', () => {
     const words = groupTokensIntoWords([{ offsets: { from: 0, to: 300 }, text: 'Hoy' }]);
 
     expect(words).toEqual([{ text: 'Hoy', startMs: 0, endMs: 300 }]);
+  });
+
+  it('reparte una corrida de palabras sin duracion hasta la siguiente palabra con tiempo real (FIX-e-burgos-002-003)', () => {
+    const words = groupTokensIntoWords([
+      { offsets: { from: 3980, to: 3980 }, text: ' Hoy' },
+      { offsets: { from: 3980, to: 3980 }, text: ' te' },
+      { offsets: { from: 4380, to: 4700 }, text: ' cuento' },
+    ]);
+
+    expect(words).toEqual([
+      { text: 'Hoy', startMs: 3980, endMs: 4180 },
+      { text: 'te', startMs: 4180, endMs: 4380 },
+      { text: 'cuento', startMs: 4380, endMs: 4700 },
+    ]);
+  });
+
+  it('incluye en la corrida las palabras que comparten el mismo inicio y termina exactamente donde empieza la siguiente', () => {
+    const words = groupTokensIntoWords([
+      { offsets: { from: 39520, to: 39520 }, text: ' Séime' },
+      { offsets: { from: 39520, to: 39520 }, text: ' para' },
+      { offsets: { from: 39520, to: 39530 }, text: ' más' },
+      { offsets: { from: 39530, to: 39600 }, text: ' datos' },
+    ]);
+
+    expect(words.map((word) => [word.startMs, word.endMs])).toEqual([
+      [39520, 39523],
+      [39523, 39527],
+      [39527, 39530],
+      [39530, 39600],
+    ]);
+    words.slice(1).forEach((word, index) => expect(word.startMs).toBeGreaterThanOrEqual((words[index] as Word).endMs));
+  });
+
+  it('una palabra final sin duracion recibe 200 ms por defecto', () => {
+    const words = groupTokensIntoWords([
+      { offsets: { from: 100, to: 400 }, text: ' Chau' },
+      { offsets: { from: 400, to: 400 }, text: ' ya' },
+    ]);
+
+    expect(words[1]).toEqual({ text: 'ya', startMs: 400, endMs: 600 });
   });
 });
 

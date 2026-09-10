@@ -59,11 +59,16 @@ export function planCaptionGroups(
       continue;
     }
 
+    const clampedEndMs = Math.min(group.endMs, enclosingKeep.endMs);
+    if (clampedEndMs <= group.startMs) {
+      continue;
+    }
+
     decisions.push({
       id: sequentialId('cap', decisions.length),
       type: 'caption-group',
       startMs: group.startMs,
-      endMs: Math.min(group.endMs, enclosingKeep.endMs),
+      endMs: clampedEndMs,
       words: group.words.map(toCaptionGroupWord),
       emphasisIndex: group.emphasisIndex,
     });

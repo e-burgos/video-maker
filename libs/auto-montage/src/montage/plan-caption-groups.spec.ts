@@ -54,6 +54,15 @@ describe('planCaptionGroups (§6 paso 5)', () => {
     ]);
   });
 
+  it('descarta un grupo cuyo fin recortado al keep no supera su inicio (FIX-e-burgos-002-003)', () => {
+    const words = [word('Hoy', 3980, 3980), word('te', 3980, 3980)];
+    const keeps = [keep('keep-0001', 0, 3980), keep('keep-0002', 4300, 9000)];
+
+    const decisions = planCaptionGroups(words, keeps, [], softwareDemoPreset);
+
+    expect(decisions).toEqual([]);
+  });
+
   it('descarta un grupo cuyas palabras caen fuera de todo keep (D-11/RN-14)', () => {
     const words = [word('fuera', 800, 900)];
     const keeps = [keep('keep-0001', 0, 500), keep('keep-0002', 2000, 3000)];

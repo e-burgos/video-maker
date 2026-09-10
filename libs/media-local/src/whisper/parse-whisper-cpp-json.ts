@@ -49,7 +49,51 @@ export function groupTokensIntoWords(tokens: readonly WhisperCppSegment[]): Word
     }
   }
 
-  return words.filter((word) => word.text !== '');
+  return repairZeroDurationWords(words.filter((word) => word.text !== ''));
+}
+
+const FALLBACK_WORD_DURATION_MS = 200;
+
+function hasNoDuration(word: Word): boolean {
+  return word.endMs <= word.startMs;
+}
+
+function sameStartBlockLength(words: readonly Word[], startIndex: number): number {
+  const blockStartMs = (words[startIndex] as Word).startMs;
+  let length = 0;
+  while (startIndex + length < words.length && (words[startIndex + length] as Word).startMs <= blockStartMs) {
+    length += 1;
+  }
+  return length;
+}
+
+function spreadBlockUntil(words: Word[], startIndex: number, blockLength: number, spanEndMs: number): void {
+  const blockStartMs = (words[startIndex] as Word).startMs;
+  const stepMs = (spanEndMs - blockStartMs) / blockLength;
+  for (let offset = 0; offset < blockLength; offset += 1) {
+    const word = words[startIndex + offset] as Word;
+    word.startMs = Math.round(blockStartMs + offset * stepMs);
+    word.endMs = offset === blockLength - 1 ? spanEndMs : Math.round(blockStartMs + (offset + 1) * stepMs);
+  }
+}
+
+export function repairZeroDurationWords(words: readonly Word[]): Word[] {
+  const repaired = words.map((word) => ({ ...word }));
+  let index = 0;
+  while (index < repaired.length) {
+    if (!hasNoDuration(repaired[index] as Word)) {
+      index += 1;
+      continue;
+    }
+    const blockLength = sameStartBlockLength(repaired, index);
+    const blockStartMs = (repaired[index] as Word).startMs;
+    const nextWord = repaired[index + blockLength];
+    const spanEndMs =
+      nextWord !== undefined ? nextWord.startMs : blockStartMs + FALLBACK_WORD_DURATION_MS * blockLength;
+    spreadBlockUntil(repaired, index, blockLength, spanEndMs);
+    index += blockLength;
+  }
+  return repaired;
 }
 
 function buildSingleSegment(words: readonly Word[]): Segment[] {
