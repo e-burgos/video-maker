@@ -26,7 +26,16 @@ function resolveScale(preset: CaptionPreset, state: CaptionWordState): number {
   return 1;
 }
 
-export function captionWordStyle(preset: CaptionPreset, state: CaptionWordState): CSSProperties {
+function scaledWidthReserveEm(preset: CaptionPreset, scale: number, characterCount: number): number {
+  const wordWidthEm = characterCount * (preset.averageCharWidthEm + preset.letterSpacingEm);
+  return round3(((scale - 1) / 2) * wordWidthEm);
+}
+
+export function captionWordStyle(
+  preset: CaptionPreset,
+  state: CaptionWordState,
+  characterCount = 0,
+): CSSProperties {
   const fontWeight = state.isEmphasis ? preset.emphasisFontWeight : preset.fontWeight;
   const color = state.isEmphasis
     ? preset.emphasisColor
@@ -34,8 +43,10 @@ export function captionWordStyle(preset: CaptionPreset, state: CaptionWordState)
       ? preset.activeColor
       : preset.color;
   const scale = resolveScale(preset, state);
+  const reserveEm = scaledWidthReserveEm(preset, scale, characterCount);
 
   return {
+    ...(reserveEm > 0 ? { marginLeft: `${reserveEm}em`, marginRight: `${reserveEm}em` } : {}),
     fontFamily: preset.fontFamily,
     fontWeight,
     color,

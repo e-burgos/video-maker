@@ -38,7 +38,7 @@ const CaptionClipBlock: FC<{ plan: CaptionClipPlan; preset: CaptionPreset }> = (
   return (
     <div style={captionBlockStyle(animation, preset)}>
       {captionWordRenders(frame, plan.words, plan.emphasisIndex).map((render, index) => (
-        <span key={`${plan.clipId}-${index}`} style={captionWordStyle(preset, render.state)}>
+        <span key={`${plan.clipId}-${index}`} style={captionWordStyle(preset, render.state, [...render.text].length)}>
           {render.text}
         </span>
       ))}

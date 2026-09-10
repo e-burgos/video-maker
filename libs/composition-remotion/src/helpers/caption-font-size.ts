@@ -7,15 +7,22 @@ export function fitCaptionFontSize(
   box: CaptionBox,
   preset: CaptionPreset,
   format: OutputFormat,
+  emphasisIndex?: number | null,
 ): number {
   const minFontSize = Math.round(format.height * preset.minFontSizeRatio);
   const maxFontSize = Math.round(format.height * preset.maxFontSizeRatio);
 
-  const characterCount = words.reduce((total, word) => total + [...word.text].length, 0);
   const wordGaps = Math.max(0, words.length - 1);
+  const wordWidthsEm = words.map((word, index) => {
+    const baseWidthEm = [...word.text].length * (preset.averageCharWidthEm + preset.letterSpacingEm);
+    return index === emphasisIndex ? baseWidthEm * preset.emphasisScale : baseWidthEm;
+  });
+  const activeReserveEm =
+    emphasisIndex === undefined ? 0 : Math.max(0, ...wordWidthsEm) * (preset.activeScale - 1);
   const widthEm =
-    characterCount * (preset.averageCharWidthEm + preset.letterSpacingEm) +
-    wordGaps * preset.wordGapEm;
+    wordWidthsEm.reduce((total, widthEm) => total + widthEm, 0) +
+    wordGaps * preset.wordGapEm +
+    activeReserveEm;
 
   if (widthEm <= 0) {
     return maxFontSize;

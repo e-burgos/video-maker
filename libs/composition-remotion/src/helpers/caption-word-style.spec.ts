@@ -58,6 +58,23 @@ describe.each(CAPTION_PRESET_IDS)('captionWordStyle — %s', (id) => {
     expect(scaleOf(both)).toBeGreaterThan(scaleOf(active));
   });
 
+  it('reserva en el layout el ancho extra del escalado: margenes proporcionales a la escala y al largo de la palabra (FIX-e-burgos-003-001)', () => {
+    const preset = captionPreset('bold-impact');
+    const normal = captionWordStyle(preset, { isEmphasis: false, isActive: false }, 8);
+    const emphasis = captionWordStyle(preset, { isEmphasis: true, isActive: false }, 8);
+    const longer = captionWordStyle(preset, { isEmphasis: true, isActive: false }, 12);
+    const both = captionWordStyle(preset, { isEmphasis: true, isActive: true }, 8);
+    const marginOf = (style: ReturnType<typeof captionWordStyle>): number =>
+      Number(String(style.marginLeft ?? '0em').replace('em', ''));
+
+    expect('marginLeft' in normal).toBe(false);
+    expect(marginOf(emphasis)).toBeGreaterThan(0);
+    expect(emphasis.marginRight).toBe(emphasis.marginLeft);
+    expect(marginOf(longer)).toBeGreaterThan(marginOf(emphasis));
+    expect(marginOf(both)).toBeGreaterThan(marginOf(emphasis));
+    expect(marginOf(emphasis)).toBeCloseTo(((preset.emphasisScale - 1) / 2) * 8 * (preset.averageCharWidthEm + preset.letterSpacingEm), 3);
+  });
+
   it('nunca emite fontSize (D-12): lo pone el contenedor del clip', () => {
     for (const state of STATES) {
       const style = captionWordStyle(preset, state);

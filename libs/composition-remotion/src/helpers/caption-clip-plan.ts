@@ -46,7 +46,7 @@ export function captionClipPlan(input: CaptionClipPlanInput): readonly CaptionCl
 
   return input.clips.map((clip) => {
     const box = boxFor(clip, source, presetBox);
-    const fontSize = fitCaptionFontSize(clip.words, box, input.preset, input.format);
+    const fontSize = fitCaptionFontSize(clip.words, box, input.preset, input.format, clip.emphasisIndex);
 
     return {
       clipId: clip.clipId,

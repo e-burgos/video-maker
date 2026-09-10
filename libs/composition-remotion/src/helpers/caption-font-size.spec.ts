@@ -34,6 +34,18 @@ describe('fitCaptionFontSize — CA-005', () => {
     expect(longResult).toBeLessThan(shortResult);
   });
 
+  it('con emphasisIndex reserva el escalado de la palabra enfatizada y de la activa: tamaño estrictamente menor (FIX-e-burgos-003-001)', () => {
+    const words = [word('HOY'), word('MISMO')];
+    const preset = captionPreset('bold-impact');
+    const legacy = fitCaptionFontSize(words, TIKTOK_BOX, preset, TIKTOK_FORMAT);
+    const withEmphasis = fitCaptionFontSize(words, TIKTOK_BOX, preset, TIKTOK_FORMAT, 1);
+    const withoutEmphasisWord = fitCaptionFontSize(words, TIKTOK_BOX, preset, TIKTOK_FORMAT, null);
+
+    expect(withEmphasis).toBeLessThan(legacy);
+    expect(withoutEmphasisWord).toBeLessThan(legacy);
+    expect(withEmphasis).toBeLessThan(withoutEmphasisWord);
+  });
+
   it('nunca sale de [minFontSize, maxFontSize]: satura en el techo con una caja gigante', () => {
     const giantBox = { x: 0, y: 0, width: 100000, height: 100000 };
 
