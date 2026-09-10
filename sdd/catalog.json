@@ -103,6 +103,10 @@
     {
       "dir": "setup-graphify",
       "file": "SKILL.md"
+    },
+    {
+      "dir": "video-producer",
+      "file": "SKILL.md"
     }
   ],
   "prompts": [
