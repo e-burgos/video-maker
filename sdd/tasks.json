@@ -239,6 +239,23 @@
           "tasks_done": 6
         }
       }
+    },
+    "spec-e-burgos-009-voice-over": {
+      "cycles": {
+        "cycle-01": {
+          "file": "sdd/specs/spec-e-burgos-009-voice-over/cycles/cycle-01/tasks.json",
+          "module": "voice-over",
+          "apps": [
+            "apps/render-api",
+            "libs/media-local",
+            "libs/timeline-core",
+            "libs/auto-montage"
+          ],
+          "status": "completed",
+          "tasks_total": 8,
+          "tasks_done": 8
+        }
+      }
     }
   }
 }

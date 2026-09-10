@@ -83,6 +83,16 @@ const PUBLIC_VALUE_EXPORTS = [
   'VisualSourceSchema',
   'storyboardProposalJsonSchema',
   'toStoryboardDocument',
+  'VOICE_MANIFEST_SCHEMA_VERSION',
+  'VoiceManifestSchema',
+  'VoiceTrackSchema',
+  'VoiceTrackSourceSchema',
+  'emptyVoiceManifest',
+  'hashNarration',
+  'dropVoiceTracksOutsideScenes',
+  'findVoiceTrack',
+  'isVoiceTrackStale',
+  'upsertVoiceTrack',
 ].sort();
 
 const minimalTimeline: Timeline = {

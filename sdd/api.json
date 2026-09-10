@@ -78,6 +78,11 @@
             "cycle": 1,
             "date": "2026-09-09",
             "change": "spec-e-burgos-008 cycle-01: capabilities.storyboardQueue: true. No other field changed; cycle stays at 3."
+          },
+          {
+            "cycle": 1,
+            "date": "2026-09-09",
+            "change": "Updated in spec-e-burgos-009 cycle-01: binaries now reports six entries (piperCli/PIPER_PATH and piperModel/PIPER_MODEL_PATH joined the four media binaries), so a machine without Piper reports degraded exactly like one without the Whisper model; capabilities gained voiceQueue."
           }
         ]
       },
@@ -106,9 +111,9 @@
         "path": "/projects",
         "module": "render-service",
         "spec": "sdd/specs/spec-e-burgos-005-render-service",
-        "status": "implemented",
+        "status": "updated",
         "created_in_cycle": 2,
-        "updated_in_cycle": null,
+        "updated_in_cycle": 1,
         "description": "Creates the canonical media project layout for a slug: raw/aroll, raw/broll, raw/images, raw/audio, work and out, in that order. Never touches an existing project.",
         "path_params": [],
         "required_headers": [],
@@ -123,7 +128,13 @@
           "413": "REQUEST_BODY_TOO_LARGE. application/json: { error: { code, stage: null, message, resource?, expected?, hint?, assetPersisted?, catalogUpdated? } }.",
           "422": "PROJECT_SLUG_INVALID — slug breaks RN-2; no storage port was invoked. application/json: { error: { code, stage: null, message, resource?, expected?, hint?, assetPersisted?, catalogUpdated? } }."
         },
-        "changelog": []
+        "changelog": [
+          {
+            "cycle": 1,
+            "date": "2026-09-09",
+            "change": "Updated in spec-e-burgos-009 cycle-01: project creation now makes seven directories instead of six, adding raw/voice for the user's own locution. assetCounts gained the voice key."
+          }
+        ]
       },
       {
         "id": "EP-004",
@@ -131,9 +142,9 @@
         "path": "/projects/:slug",
         "module": "render-service",
         "spec": "sdd/specs/spec-e-burgos-005-render-service",
-        "status": "implemented",
+        "status": "updated",
         "created_in_cycle": 2,
-        "updated_in_cycle": null,
+        "updated_in_cycle": 1,
         "description": "Project detail: layout flags plus assetSource (catalog | raw-scan) and assetCounts by role, both derived from the same resolveProjectAssets used by EP-005.",
         "path_params": [
           "slug"
@@ -146,7 +157,13 @@
           "422": "PROJECT_SLUG_INVALID. application/json: { error: { code, stage: null, message, resource?, expected?, hint?, assetPersisted?, catalogUpdated? } }.",
           "500": "CATALOG_UNREADABLE or PROJECT_LAYOUT_INVALID. application/json: { error: { code, stage: null, message, resource?, expected?, hint?, assetPersisted?, catalogUpdated? } }."
         },
-        "changelog": []
+        "changelog": [
+          {
+            "cycle": 1,
+            "date": "2026-09-09",
+            "change": "Updated in spec-e-burgos-009 cycle-01: assetCounts gained the voice key."
+          }
+        ]
       },
       {
         "id": "EP-005",
@@ -177,9 +194,9 @@
         "path": "/projects/:slug/assets/:role/:filename",
         "module": "render-service",
         "spec": "sdd/specs/spec-e-burgos-005-render-service",
-        "status": "implemented",
+        "status": "updated",
         "created_in_cycle": 2,
-        "updated_in_cycle": null,
+        "updated_in_cycle": 1,
         "description": "Uploads one raw asset as a raw binary body (never multipart) into raw/<rawDirectoryForRole(role)>/<filename>, writing to work/.uploads and promoting it with a rename, then probing it and merging the entry into work/catalog.json within the same request. A failed probe keeps the file and records the failure in the catalog.",
         "path_params": [
           "slug",
@@ -205,7 +222,13 @@
           "500": "CATALOG_UNREADABLE (assetPersisted true, catalogUpdated false), MEDIA_COMMAND_FAILED or MEDIA_OUTPUT_UNPARSEABLE (assetPersisted true, catalogUpdated true). application/json: { error: { code, stage: null, message, resource?, expected?, hint?, assetPersisted?, catalogUpdated? } }.",
           "503": "MEDIA_BINARY_NOT_FOUND with assetPersisted true and catalogUpdated true. application/json: { error: { code, stage: null, message, resource?, expected?, hint?, assetPersisted?, catalogUpdated? } }."
         },
-        "changelog": []
+        "changelog": [
+          {
+            "cycle": 1,
+            "date": "2026-09-09",
+            "change": "Updated in spec-e-burgos-009 cycle-01: the role path segment accepts 'voice', which stores under raw/voice/ and only admits audio extensions; a video uploaded with that role is ignored by the catalog as extension-role-mismatch."
+          }
+        ]
       },
       {
         "id": "EP-007",
@@ -367,6 +390,11 @@
             "cycle": 1,
             "date": "2026-09-09",
             "change": "spec-e-burgos-008 cycle-01: third job kind 'storyboard' with brief XOR scriptText and overwrite; new 409 STORYBOARD_ALREADY_EXISTS and 422 STORYBOARD_INPUT_INVALID / STORYBOARD_OVERWRITE_INVALID. Every field already published keeps its name, type and meaning."
+          },
+          {
+            "cycle": 1,
+            "date": "2026-09-09",
+            "change": "Updated in spec-e-burgos-009 cycle-01: accepts kind: 'voice' with the optional parameters voice (a voice id from GET /voices), sceneIds (regenerate only those scenes) and overwrite. The storyboard must exist (404 STORYBOARD_NOT_FOUND), every sceneId must be one of its scenes (404 VOICE_SCENE_NOT_FOUND) and a scene that already has a track needs overwrite: true (409 VOICE_ALREADY_EXISTS); the three are evaluated before the job is registered. Stages are synthesize | transcribe | persist with a per-scene counter. JOB_KIND_INVALID now names the four valid kinds."
           }
         ]
       },
@@ -548,6 +576,101 @@
             "cycle": 1,
             "date": "2026-09-09",
             "change": "Created in spec-e-burgos-008 cycle-01: storyboard document endpoints of the generative mode."
+          }
+        ]
+      },
+      {
+        "id": "EP-019",
+        "method": "GET",
+        "path": "/voices",
+        "module": "voice-over",
+        "spec": "sdd/specs/spec-e-burgos-009-voice-over",
+        "status": "implemented",
+        "created_in_cycle": 1,
+        "updated_in_cycle": 1,
+        "description": "Lists the Piper voice models installed on the machine. The list is derived from the .onnx files sitting next to the model configured in PIPER_MODEL_PATH, so dropping a new voice in that directory is enough to make it selectable; the .onnx.json config files are not voices and are filtered out. It is a resource of its own and not a field of GET /health because health is polled and must not pay a directory read per call. The route is not project-scoped: voices belong to the machine, not to a project.",
+        "path_params": [],
+        "required_headers": [],
+        "request_body": {
+          "content-type": "none",
+          "schema": "Takes no request body."
+        },
+        "responses": {
+          "200": "application/json: { voices: [{ id, fileName, isDefault }] } sorted by id. id is the file name without its .onnx extension and is what a voice job accepts in its voice parameter. isDefault marks the model configured in PIPER_MODEL_PATH. An empty array means the directory has no .onnx model.",
+          "503": "VOICE_MODEL_UNAVAILABLE when PIPER_MODEL_PATH is not set or does not point at a readable file. Answering an empty list there would be a lie: the difference between 'no voices installed' and 'Piper not configured' is what the studio needs to explain. The payload never carries the resolved path of the voice directory. application/json: { error: { code, stage, message, resource?, expected?, hint?, assetPersisted?, catalogUpdated? } }."
+        },
+        "changelog": [
+          {
+            "cycle": 1,
+            "date": "2026-09-09",
+            "change": "Created in spec-e-burgos-009 cycle-01: catalog of locally installed Piper voices."
+          }
+        ]
+      },
+      {
+        "id": "EP-020",
+        "method": "GET",
+        "path": "/projects/:slug/voice",
+        "module": "voice-over",
+        "spec": "sdd/specs/spec-e-burgos-009-voice-over",
+        "status": "implemented",
+        "created_in_cycle": 1,
+        "updated_in_cycle": 1,
+        "description": "Returns the voice manifest of the project (work/voice/manifest.json) plus a per-track staleness view computed against the stored storyboard. The manifest is the source of truth for the real duration of every scene: durationMs is measured with ffprobe on the mixable wav and supersedes the estimatedDurationMs the model proposed. The wav and the words document of each track are served by EP-011 under their project-relative paths.",
+        "path_params": [
+          "slug"
+        ],
+        "required_headers": [],
+        "request_body": {
+          "content-type": "none",
+          "schema": "Takes no request body."
+        },
+        "responses": {
+          "200": "application/json: { slug, manifest, scenes }. manifest is a document accepted by VoiceManifestSchema: { schemaVersion, storyboardId, language, tracks: [{ sceneId, index, source, path, wordsPath, durationMs, sampleRate, voiceId, narrationHash, updatedAt }] }, tracks ordered by scene index. scenes carries one { sceneId, index, source, stale } per track: stale is true when the narration of that scene changed after the track was produced, and null when the scene is no longer in the storyboard or the storyboard is unreadable.",
+          "404": "PROJECT_NOT_FOUND, or VOICE_NOT_FOUND when the project has no manifest yet (no voice job has run and no locution was attached). application/json: { error: { code, stage, message, resource?, expected?, hint?, assetPersisted?, catalogUpdated? } }.",
+          "422": "PROJECT_SLUG_INVALID, or VOICE_INVALID when the stored manifest does not pass VoiceManifestSchema. application/json: { error: { code, stage, message, resource?, expected?, hint?, assetPersisted?, catalogUpdated? } }."
+        },
+        "changelog": [
+          {
+            "cycle": 1,
+            "date": "2026-09-09",
+            "change": "Created in spec-e-burgos-009 cycle-01: voice manifest of the generative mode."
+          }
+        ]
+      },
+      {
+        "id": "EP-021",
+        "method": "PUT",
+        "path": "/projects/:slug/voice/scenes/:sceneId",
+        "module": "voice-over",
+        "spec": "sdd/specs/spec-e-burgos-009-voice-over",
+        "status": "implemented",
+        "created_in_cycle": 1,
+        "updated_in_cycle": 1,
+        "description": "Attaches a locution the user recorded to one scene of the storyboard. The file must already be under raw/voice/ (uploaded with EP-006 and the voice role); this endpoint only names it. The file is normalized to the sample rate of the mix and transcribed with the same Whisper the ingest uses, so an uploaded track carries word timings exactly like a synthesized one, and its entry lands in the manifest with source: 'uploaded' and voiceId: null. A later voice job never replaces an uploaded track, which is how RF-7 is enforced: the recorded locution wins over the synthesized one. The call is synchronous and runs ffmpeg and whisper-cli inline, so a long take holds the connection: turning it into a fourth job kind is a decision left to a future cycle.",
+        "path_params": [
+          "slug",
+          "sceneId"
+        ],
+        "required_headers": [],
+        "request_body": {
+          "content-type": "application/json",
+          "schema": "{ fileName } where fileName is a portable file name (no separators, no parent segments) already present under raw/voice/ of this project."
+        },
+        "responses": {
+          "200": "application/json: { slug, path, track } where path is the project-relative work/voice/manifest.json and track is the VoiceTrack that was stored, with source 'uploaded', voiceId null and the durationMs measured with ffprobe.",
+          "400": "REQUEST_BODY_INVALID_JSON when the body is absent, empty, not valid JSON or not a JSON object. application/json: { error: { code, stage, message, resource?, expected?, hint?, assetPersisted?, catalogUpdated? } }.",
+          "404": "PROJECT_NOT_FOUND, STORYBOARD_NOT_FOUND when there is no storyboard to attach the locution to, VOICE_SCENE_NOT_FOUND when the sceneId is not one of its scenes, or VOICE_ASSET_NOT_FOUND when the named file is not a file under raw/voice/. application/json: { error: { code, stage, message, resource?, expected?, hint?, assetPersisted?, catalogUpdated? } }.",
+          "413": "REQUEST_BODY_TOO_LARGE when the body exceeds the shared JSON body limit. application/json: { error: { code, stage, message, resource?, expected?, hint?, assetPersisted?, catalogUpdated? } }.",
+          "422": "PROJECT_SLUG_INVALID, or ASSET_PATH_INVALID when fileName is missing, is not a string or would escape raw/voice/. application/json: { error: { code, stage, message, resource?, expected?, hint?, assetPersisted?, catalogUpdated? } }.",
+          "500": "VOICE_TRANSCRIPTION_FAILED when ffmpeg or whisper-cli fails while normalizing or aligning the take. The manifest is left untouched. application/json: { error: { code, stage, message, resource?, expected?, hint?, assetPersisted?, catalogUpdated? } }.",
+          "503": "VOICE_MODEL_UNAVAILABLE when the whisper binary or its model does not resolve. application/json: { error: { code, stage, message, resource?, expected?, hint?, assetPersisted?, catalogUpdated? } }."
+        },
+        "changelog": [
+          {
+            "cycle": 1,
+            "date": "2026-09-09",
+            "change": "Created in spec-e-burgos-009 cycle-01: attach an uploaded locution to a storyboard scene."
           }
         ]
       }

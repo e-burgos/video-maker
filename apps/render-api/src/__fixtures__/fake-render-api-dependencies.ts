@@ -1,5 +1,10 @@
-import type { LoudnessMeasurement, ResolvedBinaries } from '@video-maker/media-local';
-import type { MediaAsset } from '@video-maker/timeline-core';
+import type {
+  LoudnessMeasurement,
+  ResolvedBinaries,
+  ResolvedVoiceBinaries,
+  VoiceModel,
+} from '@video-maker/media-local';
+import type { MediaAsset, Transcription } from '@video-maker/timeline-core';
 
 import type {
   RenderApiDependencies,
@@ -18,11 +23,24 @@ const DEFAULT_RESOLVED_BINARIES: ResolvedBinaries = {
   whisperModel: '/usr/share/whisper/model.bin',
 };
 
+const DEFAULT_RESOLVED_VOICE_BINARIES: ResolvedVoiceBinaries = {
+  ...DEFAULT_RESOLVED_BINARIES,
+  piperCli: '/usr/bin/piper',
+  piperModel: '/usr/share/piper/es_AR-daniela-high.onnx',
+};
+
+const DEFAULT_VOICE_MODELS: readonly VoiceModel[] = [
+  { id: 'es_AR-daniela-high', fileName: 'es_AR-daniela-high.onnx', isDefault: true },
+  { id: 'es_ES-sharvard-medium', fileName: 'es_ES-sharvard-medium.onnx', isDefault: false },
+];
+
 const BINARY_ENV_VAR_NAMES: Readonly<Record<MediaBinaryName, string>> = {
   ffmpeg: 'FFMPEG_PATH',
   ffprobe: 'FFPROBE_PATH',
   whisperCli: 'WHISPER_CPP_PATH',
   whisperModel: 'WHISPER_MODEL_PATH',
+  piperCli: 'PIPER_PATH',
+  piperModel: 'PIPER_MODEL_PATH',
 };
 
 const DEFAULT_MEDIA_BINARY_STATUSES: readonly BinaryStatus[] = MEDIA_BINARY_NAMES.map((name) => ({
@@ -190,6 +208,54 @@ export function createFakeRenderApiDependencies(
         return overrides.aiAgent(request);
       }
       throw new Error('createFakeRenderApiDependencies: no aiAgent override configured');
+    },
+
+    resolveVoiceBinaries: async () => {
+      callLog.record('resolveVoiceBinaries', undefined);
+      if (overrides?.resolveVoiceBinaries) {
+        return overrides.resolveVoiceBinaries();
+      }
+      return DEFAULT_RESOLVED_VOICE_BINARIES;
+    },
+
+    listVoiceModels: async () => {
+      callLog.record('listVoiceModels', undefined);
+      if (overrides?.listVoiceModels) {
+        return overrides.listVoiceModels();
+      }
+      return DEFAULT_VOICE_MODELS;
+    },
+
+    synthesizeVoice: async (input) => {
+      callLog.record('synthesizeVoice', input);
+      if (overrides?.synthesizeVoice) {
+        await overrides.synthesizeVoice(input);
+      }
+    },
+
+    extractVoiceAudio: async (input) => {
+      callLog.record('extractVoiceAudio', input);
+      if (overrides?.extractVoiceAudio) {
+        await overrides.extractVoiceAudio(input);
+      }
+    },
+
+    transcribeVoice: async (input) => {
+      callLog.record('transcribeVoice', input);
+      if (overrides?.transcribeVoice) {
+        return overrides.transcribeVoice(input);
+      }
+      const transcription: Transcription = {
+        assetId: input.assetId,
+        engine: 'whisper.cpp',
+        language: input.language,
+        words: [
+          { text: 'hola', startMs: 0, endMs: 400 },
+          { text: 'mundo', startMs: 400, endMs: 900 },
+        ],
+        segments: [{ startMs: 0, endMs: 900, text: 'hola mundo', wordRange: [0, 2] }],
+      };
+      return transcription;
     },
   };
 }

@@ -9,7 +9,7 @@ import {
 } from './asset-path';
 
 describe('isAssetRole', () => {
-  it('accepts the four asset roles and rejects any other value', () => {
+  it('accepts the five asset roles and rejects any other value', () => {
     for (const role of ASSET_ROLES) {
       expect(isAssetRole(role)).toBe(true);
     }
@@ -26,6 +26,12 @@ describe('rawDirectoryForRole', () => {
     expect(rawDirectoryForRole('aroll')).toBe('aroll');
     expect(rawDirectoryForRole('broll')).toBe('broll');
     expect(rawDirectoryForRole('audio')).toBe('audio');
+    expect(rawDirectoryForRole('voice')).toBe('voice');
+  });
+
+  it('exposes voice as an uploadable role so a recorded locution lands in raw/voice (US-09-001)', () => {
+    expect(ASSET_ROLES).toContain('voice');
+    expect(isAssetRole('voice')).toBe(true);
   });
 });
 

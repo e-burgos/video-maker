@@ -1,6 +1,12 @@
 import type { DirectoryReader, FileStatReader } from '@video-maker/auto-montage';
-import type { CommandRunner, MixLoudnessVerification, ResolvedBinaries } from '@video-maker/media-local';
-import type { MediaAsset, Timeline, VoiceTarget } from '@video-maker/timeline-core';
+import type {
+  CommandRunner,
+  MixLoudnessVerification,
+  ResolvedBinaries,
+  ResolvedVoiceBinaries,
+  VoiceModel,
+} from '@video-maker/media-local';
+import type { MediaAsset, Timeline, Transcription, VoiceTarget } from '@video-maker/timeline-core';
 
 import type { EngineModuleStatus } from '../engine/engine-modules';
 import type { BinaryStatus } from '../engine/media-binaries';
@@ -95,6 +101,39 @@ export interface AiAgentResponse {
 
 export type AiAgentPort = (request: AiAgentRequest) => Promise<AiAgentResponse>;
 
+export type ResolveVoiceBinariesPort = () => Promise<ResolvedVoiceBinaries>;
+
+export type ListVoiceModelsPort = () => Promise<readonly VoiceModel[]>;
+
+export interface SynthesizeVoiceInput {
+  readonly textPath: string;
+  readonly outPath: string;
+  readonly modelPath: string;
+  readonly projectRoot: string;
+}
+
+export type SynthesizeVoicePort = (input: SynthesizeVoiceInput) => Promise<void>;
+
+export interface ExtractVoiceAudioInput {
+  readonly inputPath: string;
+  readonly outPath: string;
+  readonly sampleRate: number;
+  readonly channels: number;
+  readonly projectRoot: string;
+}
+
+export type ExtractVoiceAudioPort = (input: ExtractVoiceAudioInput) => Promise<void>;
+
+export interface TranscribeVoiceInput {
+  readonly wavPath: string;
+  readonly outBase: string;
+  readonly assetId: string;
+  readonly language: string;
+  readonly projectRoot: string;
+}
+
+export type TranscribeVoicePort = (input: TranscribeVoiceInput) => Promise<Transcription>;
+
 export type RandomIdPort = () => string;
 
 export interface Clock {
@@ -129,4 +168,9 @@ export interface RenderApiDependencies {
   readonly createCommandRunner: CreateCommandRunnerPort;
   readonly resolveMontageBinaries: ResolveMontageBinariesPort;
   readonly aiAgent: AiAgentPort;
+  readonly resolveVoiceBinaries: ResolveVoiceBinariesPort;
+  readonly listVoiceModels: ListVoiceModelsPort;
+  readonly synthesizeVoice: SynthesizeVoicePort;
+  readonly extractVoiceAudio: ExtractVoiceAudioPort;
+  readonly transcribeVoice: TranscribeVoicePort;
 }

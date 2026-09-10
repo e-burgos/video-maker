@@ -160,5 +160,9 @@
       "file": "tools.schema.json"
     }
   ],
-  "memory": []
+  "memory": [
+    {
+      "file": "2026-09-09-spec-e-burgos-009-voice-over-cycle-01.md"
+    }
+  ]
 }

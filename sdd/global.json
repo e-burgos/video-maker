@@ -93,8 +93,7 @@
       "completed_at": "2026-09-09"
     }
   ],
-  "in_progress_modules": [],
-  "pending_modules": [
+  "in_progress_modules": [
     {
       "module": "voice-over",
       "spec": "spec-e-burgos-009-voice-over",
@@ -104,7 +103,9 @@
         "libs/media-local"
       ],
       "description": "Voz en off del modo generativo: rol `voice` para subir locución propia y Piper TTS local como binario configurable, job kind: 'voice' que sintetiza una pista por escena desde el storyboard, la transcribe con Whisper para alinear captions y fija la duración real de cada escena"
-    },
+    }
+  ],
+  "pending_modules": [
     {
       "module": "scene-assembly",
       "spec": "spec-e-burgos-010-scene-assembly",

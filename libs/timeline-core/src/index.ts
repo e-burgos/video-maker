@@ -132,3 +132,21 @@ export type {
   StoryboardSource,
   VisualSource,
 } from './schemas/storyboard.schema';
+
+export {
+  emptyVoiceManifest,
+  VOICE_MANIFEST_SCHEMA_VERSION,
+  VoiceManifestSchema,
+  VoiceTrackSchema,
+  VoiceTrackSourceSchema,
+} from './schemas/voice-manifest.schema';
+export type { VoiceManifest, VoiceTrack, VoiceTrackSource } from './schemas/voice-manifest.schema';
+
+export { hashNarration } from './voice/hash-narration';
+export {
+  dropVoiceTracksOutsideScenes,
+  findVoiceTrack,
+  isVoiceTrackStale,
+  upsertVoiceTrack,
+} from './voice/merge-voice-manifest';
+

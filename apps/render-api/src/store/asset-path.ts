@@ -1,4 +1,4 @@
-export const ASSET_ROLES = ['aroll', 'broll', 'image', 'audio'] as const;
+export const ASSET_ROLES = ['aroll', 'broll', 'image', 'audio', 'voice'] as const;
 
 export type AssetRole = (typeof ASSET_ROLES)[number];
 
@@ -9,6 +9,7 @@ const RAW_DIRECTORY_BY_ROLE: Readonly<Record<AssetRole, string>> = {
   broll: 'broll',
   image: 'images',
   audio: 'audio',
+  voice: 'voice',
 };
 
 const WINDOWS_DRIVE_LETTER_PATTERN = /^[A-Za-z]:[\\/]/u;

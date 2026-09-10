@@ -104,7 +104,7 @@ describe('handleCreateProject', () => {
     expect(callLog.ports()).toEqual([]);
   });
 
-  it('creates the six layout directories in order and answers 201 with catalog, timeline and edl false', async () => {
+  it('creates the seven layout directories in order and answers 201 with catalog, timeline and edl false', async () => {
     const callLog = createCallLog();
     const storage = createFakeObjectStorage(callLog);
     const deps = createFakeRenderApiDependencies(callLog, { storage });
@@ -122,7 +122,7 @@ describe('handleCreateProject', () => {
       slug: 'smoke-ingest',
       layout: { raw: true, catalog: false, timeline: false, edl: false, out: true },
       assetSource: 'raw-scan',
-      assetCounts: { aroll: 0, broll: 0, image: 0, audio: 0 },
+      assetCounts: { aroll: 0, broll: 0, image: 0, audio: 0, voice: 0 },
     });
 
     const ensureDirectoryCalls = callLog
@@ -134,6 +134,7 @@ describe('handleCreateProject', () => {
       `${STORE.mediaRoot}/smoke-ingest/raw/broll`,
       `${STORE.mediaRoot}/smoke-ingest/raw/images`,
       `${STORE.mediaRoot}/smoke-ingest/raw/audio`,
+      `${STORE.mediaRoot}/smoke-ingest/raw/voice`,
       `${STORE.mediaRoot}/smoke-ingest/work`,
       `${STORE.mediaRoot}/smoke-ingest/out`,
     ]);
@@ -245,7 +246,7 @@ describe('handleGetProject', () => {
     expect(response.body).toMatchObject({
       slug: 'smoke-ingest',
       assetSource: 'raw-scan',
-      assetCounts: { aroll: 1, broll: 0, image: 0, audio: 0 },
+      assetCounts: { aroll: 1, broll: 0, image: 0, audio: 0, voice: 0 },
     });
   });
 });

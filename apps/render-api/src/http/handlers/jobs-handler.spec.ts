@@ -445,7 +445,52 @@ describe('handleCreateRenderJob', () => {
       expect(runtime.jobs.listBySlug('smoke-ingest')).toEqual([]);
     });
 
-    it('rejects an unknown kind and names the three valid ones', async () => {
+    it('rejects an unknown kind and names the four valid ones', async () => {
+      const { deps, runtime } = storyboardHarness();
+
+      await expect(
+        handleCreateRenderJob(
+          deps,
+          STORE,
+          { slug: 'smoke-ingest' },
+          jsonBodyRequest('smoke-ingest', { kind: 'assemble' }),
+          runtime,
+        ),
+      ).rejects.toMatchObject({
+        code: 'JOB_KIND_INVALID',
+        expected: "'render', 'montage', 'storyboard' or 'voice'",
+      });
+      expect(runtime.jobs.listBySlug('smoke-ingest')).toEqual([]);
+    });
+
+    it('answers 202 with kind voice and registers the job with the requested scenes (US-09-004)', async () => {
+      const { deps, runtime } = storyboardHarness({
+        files: [
+          {
+            path: `${STORE.mediaRoot}/smoke-ingest/work/storyboard.json`,
+            contents: JSON.stringify(buildStoryboardDocument()),
+          },
+        ],
+      });
+
+      const response = await handleCreateRenderJob(
+        deps,
+        STORE,
+        { slug: 'smoke-ingest' },
+        jsonBodyRequest('smoke-ingest', { kind: 'voice', sceneIds: ['scene-02'] }),
+        runtime,
+      );
+      const body = response.body as Job;
+
+      expect(response.status).toBe(202);
+      expect(response.headers.location).toBe(`/jobs/${body.id}`);
+      expect(body.kind).toBe('voice');
+      expect(Object.keys(body).sort()).toEqual(STORYBOARD_KEYS);
+
+      await runtime.jobs.whenIdle();
+    });
+
+    it('a voice job without a stored storyboard is 404 STORYBOARD_NOT_FOUND and registers no job (US-09-004)', async () => {
       const { deps, runtime } = storyboardHarness();
 
       await expect(
@@ -456,8 +501,86 @@ describe('handleCreateRenderJob', () => {
           jsonBodyRequest('smoke-ingest', { kind: 'voice' }),
           runtime,
         ),
-      ).rejects.toMatchObject({ code: 'JOB_KIND_INVALID', expected: "'render', 'montage' or 'storyboard'" });
+      ).rejects.toMatchObject({ code: 'STORYBOARD_NOT_FOUND' });
       expect(runtime.jobs.listBySlug('smoke-ingest')).toEqual([]);
+    });
+
+    it('a voice job naming a scene outside the storyboard is 404 and registers no job (US-09-005)', async () => {
+      const { deps, runtime } = storyboardHarness({
+        files: [
+          {
+            path: `${STORE.mediaRoot}/smoke-ingest/work/storyboard.json`,
+            contents: JSON.stringify(buildStoryboardDocument()),
+          },
+        ],
+      });
+
+      await expect(
+        handleCreateRenderJob(
+          deps,
+          STORE,
+          { slug: 'smoke-ingest' },
+          jsonBodyRequest('smoke-ingest', { kind: 'voice', sceneIds: ['scene-09'] }),
+          runtime,
+        ),
+      ).rejects.toMatchObject({ code: 'VOICE_SCENE_NOT_FOUND', resource: 'scene-09' });
+      expect(runtime.jobs.listBySlug('smoke-ingest')).toEqual([]);
+    });
+
+    it('answers 409 VOICE_ALREADY_EXISTS without overwrite and registers no job (US-09-005)', async () => {
+      const manifest = {
+        schemaVersion: 1,
+        storyboardId: 'storyboard-0001',
+        language: 'es-AR',
+        tracks: [
+          {
+            sceneId: 'scene-01',
+            index: 1,
+            source: 'generated',
+            path: 'work/voice/scene-01.wav',
+            wordsPath: 'work/voice/scene-01.words.json',
+            durationMs: 4200,
+            sampleRate: 48000,
+            voiceId: 'es_AR-daniela-high',
+            narrationHash: 'abcdef0123456789',
+            updatedAt: '2026-09-09T12:00:00.000Z',
+          },
+        ],
+      };
+      const { deps, runtime } = storyboardHarness({
+        files: [
+          {
+            path: `${STORE.mediaRoot}/smoke-ingest/work/storyboard.json`,
+            contents: JSON.stringify(buildStoryboardDocument()),
+          },
+          {
+            path: `${STORE.mediaRoot}/smoke-ingest/work/voice/manifest.json`,
+            contents: JSON.stringify(manifest),
+          },
+        ],
+      });
+
+      await expect(
+        handleCreateRenderJob(
+          deps,
+          STORE,
+          { slug: 'smoke-ingest' },
+          jsonBodyRequest('smoke-ingest', { kind: 'voice' }),
+          runtime,
+        ),
+      ).rejects.toMatchObject({ code: 'VOICE_ALREADY_EXISTS' });
+      expect(runtime.jobs.listBySlug('smoke-ingest')).toEqual([]);
+
+      const accepted = await handleCreateRenderJob(
+        deps,
+        STORE,
+        { slug: 'smoke-ingest' },
+        jsonBodyRequest('smoke-ingest', { kind: 'voice', overwrite: true }),
+        runtime,
+      );
+
+      expect(accepted.status).toBe(202);
+      await runtime.jobs.whenIdle();
     });
 
     it('answers 409 STORYBOARD_ALREADY_EXISTS without overwrite and registers no job', async () => {

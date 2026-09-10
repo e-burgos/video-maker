@@ -3,6 +3,10 @@ import type { RenderApiDependencies } from '../../deps/render-api-dependencies';
 import { PipelineStageError } from '../../errors/pipeline-stage-error';
 import { parseMontageOverwrite, parseMontagePreset, parseMontageSeed } from '../../jobs/montage-job-params';
 import { parseStoryboardInput, parseStoryboardOverwrite } from '../../jobs/storyboard-job-params';
+import { parseVoiceJobInput } from '../../jobs/voice-job-params';
+import { assertVoiceTracksNotPersisted, selectVoiceScenes } from '../../voice/select-voice-scenes';
+import { readVoiceManifestIfUsable } from '../../voice/voice-store';
+import { readStoredStoryboard } from '../../storyboard/storyboard-store';
 import { storyboardPath } from '../../storyboard/storyboard-paths';
 import { storyboardExists } from '../../storyboard/storyboard-store';
 import type { JobKind, RenderJobSummary } from '../../jobs/render-job';
@@ -31,7 +35,7 @@ function resolveJobKind(value: unknown): JobKind | 'invalid' {
   if (raw === undefined) {
     return 'render';
   }
-  if (raw === 'render' || raw === 'montage' || raw === 'storyboard') {
+  if (raw === 'render' || raw === 'montage' || raw === 'storyboard' || raw === 'voice') {
     return raw;
   }
   return 'invalid';
@@ -69,7 +73,7 @@ export async function handleCreateRenderJob(
     throw new PipelineStageError({
       code: 'JOB_KIND_INVALID',
       stage: null,
-      expected: "'render', 'montage' or 'storyboard'",
+      expected: "'render', 'montage', 'storyboard' or 'voice'",
     });
   }
 
@@ -113,6 +117,29 @@ export async function handleCreateRenderJob(
       status: 202,
       headers: { 'content-type': JSON_CONTENT_TYPE, location: `/jobs/${storyboardJob.id}` },
       body: storyboardJob,
+    };
+  }
+
+  if (jobKind === 'voice') {
+    const input = parseVoiceJobInput(bodyObject);
+    const document = await readStoredStoryboard(deps, project);
+    const scenes = selectVoiceScenes(document, input.sceneIds);
+    const manifest = await readVoiceManifestIfUsable(deps, project);
+
+    assertVoiceTracksNotPersisted(manifest, scenes, input.overwrite);
+
+    const voiceJob = runtime.jobs.create({
+      kind: 'voice',
+      slug,
+      projectRoot: project.root,
+      voiceId: input.voiceId,
+      sceneIds: input.sceneIds,
+    });
+
+    return {
+      status: 202,
+      headers: { 'content-type': JSON_CONTENT_TYPE, location: `/jobs/${voiceJob.id}` },
+      body: voiceJob,
     };
   }
 

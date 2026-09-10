@@ -19,6 +19,8 @@ const ALL_BINARIES_RESOLVED = [
   { name: 'ffprobe', envVar: 'FFPROBE_PATH', resolved: true },
   { name: 'whisperCli', envVar: 'WHISPER_CPP_PATH', resolved: true },
   { name: 'whisperModel', envVar: 'WHISPER_MODEL_PATH', resolved: true },
+  { name: 'piperCli', envVar: 'PIPER_PATH', resolved: true },
+  { name: 'piperModel', envVar: 'PIPER_MODEL_PATH', resolved: true },
 ] as const;
 
 function emptyRuntime() {
@@ -49,7 +51,38 @@ describe('handleHealth', () => {
       jobQueue: true,
       montageQueue: true,
       storyboardQueue: true,
+      voiceQueue: true,
     });
+  });
+
+  it('degrada el servicio cuando falta la voz de Piper, con los otros cinco binarios resueltos (US-09-002)', async () => {
+    const callLog = createCallLog();
+    const deps = createFakeRenderApiDependencies(callLog, {
+      probeMediaBinaries: async () => [
+        ...ALL_BINARIES_RESOLVED.slice(0, 5),
+        { name: 'piperModel', envVar: 'PIPER_MODEL_PATH', resolved: false },
+      ],
+    });
+
+    const response = await handleHealth(deps, emptyRuntime());
+    const body = response.body as HealthBody;
+
+    expect(body.status).toBe('degraded');
+    expect(body.binaries.filter((binary) => !binary.resolved)).toEqual([
+      { name: 'piperModel', envVar: 'PIPER_MODEL_PATH', resolved: false },
+    ]);
+  });
+
+  it('reporta los binarios de Piper por nombre lógico y env var, nunca por la ruta resuelta (US-09-002)', async () => {
+    const response = await handleHealth(
+      createFakeRenderApiDependencies(createCallLog()),
+      emptyRuntime(),
+    );
+    const body = response.body as HealthBody;
+
+    expect(body.binaries.map((binary) => binary.name)).toEqual([...MEDIA_BINARY_NAMES]);
+    expect(JSON.stringify(body)).not.toContain('/usr/bin/piper');
+    expect(JSON.stringify(body)).not.toContain('.onnx');
   });
 
   it('answers 200 with status degraded when the whisper model does not resolve, keeping the other three binaries resolved', async () => {

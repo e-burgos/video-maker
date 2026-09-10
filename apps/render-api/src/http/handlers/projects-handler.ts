@@ -147,6 +147,7 @@ export async function handleCreateProject(
     join(project.rawDir, 'broll'),
     join(project.rawDir, 'images'),
     join(project.rawDir, 'audio'),
+    join(project.rawDir, 'voice'),
     project.workDir,
     project.outDir,
   ];

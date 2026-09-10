@@ -51,12 +51,14 @@ injects.
 | `WHISPER_CPP_PATH` | — | Path to the `whisper-cli` binary used to transcribe `aroll` assets during a `montage` job's `transcribe` stage. Without this variable, it is resolved via `PATH`. |
 | `WHISPER_MODEL_PATH` | — | Path to the Whisper GGML model file `whisper-cli` loads. Unlike the three binaries above this is a model file, not an executable, and is never resolved via `PATH` — it must point at an actual file on disk or `GET /health` reports it unresolved and any `montage` job's `transcribe` stage fails with `503 MEDIA_BINARY_NOT_FOUND`. Never commit an actual path or the model file itself; only the variable name belongs in version control. |
 
+| `PIPER_PATH` | — | Path to the [Piper](https://github.com/OHF-Voice/piper1-gpl) TTS executable used by a `voice` job's `synthesize` stage. Without this variable it is resolved via `PATH`. Installed outside this repository with `python3 -m pip install --user piper-tts` (the binary lands in `~/Library/Python/3.11/bin/piper` on macOS, like `yt-dlp`). |
+| `PIPER_MODEL_PATH` | — | Path to the `.onnx` Piper voice model. Like `WHISPER_MODEL_PATH` this is a model file, not an executable, and is **never** resolved via `PATH`: it must point at a readable file or `GET /health` reports it unresolved and any `voice` job fails with `503 VOICE_MODEL_UNAVAILABLE`. Its **directory** is also the voice catalog served by `GET /voices`, so every `.onnx` next to it becomes selectable. Voices are downloaded from [`rhasspy/piper-voices`](https://huggingface.co/rhasspy/piper-voices); the Rioplatense one used to verify this cycle is `es/es_AR/daniela/high/es_AR-daniela-high.onnx` (114 199 011 bytes, `sha256 7ceb1fc0dab349418c5b54a639ae9ee595212d7c9ea422220d8419163d5cc985`) plus its `.onnx.json` config (7 248 bytes), which must sit next to the model. Never commit a path or the model itself. |
 | `CLAUDE_CLI_PATH` | `claude` | Path to the Claude Code CLI used as the AI agent of a `storyboard` job. Without this variable it is resolved via `PATH`. **No API key is involved**: the CLI authenticates with the subscription already installed on the machine. If it cannot be started, a `storyboard` job fails with `503 AI_AGENT_UNAVAILABLE`. |
 | `CLAUDE_CLI_CWD` | the OS temporary directory | Working directory the agent process runs in. The default is deliberately **outside this repository**: from the repo root the CLI would load this project's `CLAUDE.md` and settings and answer as an SDD orchestrator instead of a storyboard writer. Point it somewhere else only if you know why. |
 | `CLAUDE_CLI_TIMEOUT_MS` | `600000` (10 min) | Positive integer. Zero, negative or non-numeric makes the `storyboard` job fail with `SERVER_CONFIG_INVALID`. A real call took 70-100 s on this machine. |
 | `CLAUDE_CLI_MODEL` | — | Model alias passed to the CLI (`sonnet`, `opus`, …). Unset lets the CLI pick its own default. |
 
-**Never commit values for any of the four binary variables above** (or for any other secret in
+**Never commit values for any of the six binary variables above** (or for any other secret in
 `.env`) — only their names belong in this file or in any other tracked document.
 
 **The default port (`4310`) can be taken on this machine by the SDD kit's own docs viewer**
@@ -416,6 +418,132 @@ running on the machine. Record it and retry when the window resets.
 
 Evidence of the executed run, with the literal prompt and the literal CLI response:
 `sdd/specs/spec-e-burgos-008-ai-storyboard/cycles/cycle-01/artifacts/`.
+
+## Voice jobs (`spec-e-burgos-009-voice-over`, `cycle-01`)
+
+In the generative mode nobody spoke to camera, so the voice is the clock of the video: the real
+duration of every scene comes from its audio, not from the `estimatedDurationMs` the model
+proposed. A `voice` job turns the `narration` of each scene of `work/storyboard.json` into one wav
+and aligns it word by word with the same Whisper the ingest uses.
+
+```bash
+# every scene, with the voice configured in PIPER_MODEL_PATH
+curl -sS -X POST http://127.0.0.1:4310/projects/<slug>/jobs \
+  -H 'content-type: application/json' -d '{"kind":"voice"}'
+
+# only two scenes, with an explicit voice, replacing what is already there
+curl -sS -X POST http://127.0.0.1:4310/projects/<slug>/jobs \
+  -H 'content-type: application/json' \
+  -d '{"kind":"voice","voice":"es_AR-daniela-high","sceneIds":["scene-02","scene-04"],"overwrite":true}'
+
+curl -sS http://127.0.0.1:4310/voices                      # what is installed
+curl -sS http://127.0.0.1:4310/projects/<slug>/voice       # the manifest + staleness per scene
+```
+
+What lands in `work/voice/`:
+
+| Path | What it is |
+| --- | --- |
+| `scene-NN.wav` | The deliverable: mono `pcm_s16le` at 48 kHz, the sample rate `mixTimelineAudio` expects. This is the file the Timeline points at. |
+| `scene-NN.words.json` | A `Transcription` document, the same shape the ingest writes under `work/transcripts/`, so `spec-012` can drive the captions from it. |
+| `manifest.json` | A `VoiceManifest`: per scene the file, the real `durationMs` measured with `ffprobe`, the `sampleRate`, the voice used, a `narrationHash` and `source`. |
+| `sources/scene-NN.txt` · `sources/scene-NN.wav` | The narration collapsed to a single line (Piper treats every line of the input file as a separate utterance) and Piper's raw 22 050 Hz output. |
+| `whisper/scene-NN.wav` · `whisper/scene-NN.json` | The 16 kHz mono input `whisper-cli` requires, and its own output. |
+
+Rules worth knowing before calling it:
+
+- **The storyboard must exist.** No `work/storyboard.json` is `404 STORYBOARD_NOT_FOUND`, checked
+  before the job is registered — as are an unknown `sceneIds` entry (`404 VOICE_SCENE_NOT_FOUND`)
+  and a scene that already has a track without `overwrite: true` (`409 VOICE_ALREADY_EXISTS`).
+- **An uploaded locution always wins.** A track with `source: 'uploaded'` is skipped by every
+  `voice` job, `overwrite` included. To go back to a synthesized take, remove that entry first.
+- **`narrationHash` is change detection, not a checksum.** `GET /projects/<slug>/voice` reports
+  `stale: true` for a scene whose narration was edited after its track was produced, `null` for a
+  track whose scene no longer exists.
+- **Stages are `synthesize | transcribe | persist`** with a per-scene counter, monotonic, and
+  cancellation is cooperative between scenes: `manifest.json` is written once, at the end, so a
+  canceled or failed job never leaves a half-written manifest.
+
+### Attaching your own locution (EP-021)
+
+```bash
+# 1. upload the take with the voice role (EP-006) — it lands in raw/voice/
+curl -sS -X PUT --data-binary @take-02.wav \
+  -H 'content-type: audio/wav' \
+  http://127.0.0.1:4310/projects/<slug>/assets/voice/take-02.wav
+
+# 2. name it for a scene: it is normalized and transcribed exactly like a synthesized track
+curl -sS -X PUT http://127.0.0.1:4310/projects/<slug>/voice/scenes/scene-02 \
+  -H 'content-type: application/json' -d '{"fileName":"take-02.wav"}'
+```
+
+The call is synchronous and runs `ffmpeg` and `whisper-cli` inline, so a long take holds the
+connection open. Making it a fourth job kind is a decision left to a future cycle.
+
+### Real-process verification — the voice job (CA-001, CA-002, CA-003, CA-005)
+
+Copy-paste. It calls the real `piper` and `whisper-cli`.
+
+```bash
+# 0. preconditions: no heavy process alive, >= 35% memory free
+pgrep -fl 'ffmpeg|whisper-cli|chrome-headless|piper'   # must print nothing
+memory_pressure | tail -1
+
+# 1. a temporary media root seeded with a REAL storyboard: never verify against media/ itself
+SMOKE=$(mktemp -d)
+mkdir -p "$SMOKE/voice-smoke/work"
+cp -R media/smoke-ingest/raw "$SMOKE/voice-smoke/raw"
+mkdir -p "$SMOKE/voice-smoke/raw/voice" "$SMOKE/voice-smoke/out"
+cp sdd/specs/spec-e-burgos-008-ai-storyboard/cycles/cycle-02/artifacts/smoke-storyboard-from-web.json \
+   "$SMOKE/voice-smoke/work/storyboard.json"
+
+# 2. the binary, with the root .env loaded and SWC_NODE_PROJECT set
+set -a && source .env && set +a
+SWC_NODE_PROJECT=tsconfig.base.json \
+RENDER_API_MEDIA_ROOT="$SMOKE" RENDER_API_PORT=4411 \
+  node -r ./apps/render-api/src/server-register.cjs apps/render-api/src/main.ts &
+
+# 3. VERIFY YOU ARE TALKING TO YOUR OWN BUILD. Port 4399 already holds a render-api from spec-007
+#    on this machine, and a stale server answers 200 to /health while lying about everything else.
+curl -sS --retry 30 --retry-delay 1 --retry-all-errors http://127.0.0.1:4411/health \
+  | grep -q '"voiceQueue":true' && echo "own build OK" || echo "WRONG SERVER — change the port"
+
+curl -sS http://127.0.0.1:4411/voices
+
+# 4. the job over every scene
+JOB=$(curl -sS -X POST http://127.0.0.1:4411/projects/voice-smoke/jobs \
+  -H 'content-type: application/json' -d '{"kind":"voice"}' \
+  | python3 -c 'import json,sys; print(json.load(sys.stdin)["id"])')
+until curl -sS "http://127.0.0.1:4411/jobs/$JOB" \
+  | python3 -c 'import json,sys; sys.exit(0 if json.load(sys.stdin)["state"] in ("succeeded","failed","canceled") else 1)'; do sleep 3; done
+curl -sS "http://127.0.0.1:4411/jobs/$JOB"
+
+# 5. the audio is real: duration > 0 and the sample rate the mix expects
+for f in "$SMOKE"/voice-smoke/work/voice/scene-*.wav; do
+  ffprobe -v error -show_entries stream=codec_name,sample_rate,channels \
+          -show_entries format=duration -of default=noprint_wrappers=1 "$f"
+done
+
+# 6. the words carry timings, and the manifest agrees with the files on disk
+python3 -c "
+import json,glob,os
+for p in sorted(glob.glob('$SMOKE/voice-smoke/work/voice/scene-*.words.json')):
+    d=json.load(open(p)); print(os.path.basename(p), len(d['words']), d['words'][0], d['words'][-1])
+"
+curl -sS http://127.0.0.1:4411/projects/voice-smoke/voice
+
+# 7. partial regeneration: only that scene is touched
+curl -sS -X POST http://127.0.0.1:4411/projects/voice-smoke/jobs \
+  -H 'content-type: application/json' \
+  -d '{"kind":"voice","sceneIds":["scene-02"],"overwrite":true}'
+
+# 8. the uploaded branch: a take under raw/voice wins over the synthesized one
+curl -sS -X PUT http://127.0.0.1:4411/projects/voice-smoke/voice/scenes/scene-03 \
+  -H 'content-type: application/json' -d '{"fileName":"take-03.wav"}'
+```
+
+Evidence of the executed run:
+`sdd/specs/spec-e-burgos-009-voice-over/cycles/cycle-01/artifacts/`.
 
 ## D-11 — no MinIO in this cycle
 

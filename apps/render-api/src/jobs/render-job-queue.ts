@@ -10,6 +10,10 @@ import { startStoryboardJobStage } from './storyboard-job-progress';
 import { isStoryboardPipelineCanceled } from './storyboard-pipeline-observer';
 import type { StoryboardPipelineObserver } from './storyboard-pipeline-observer';
 import { runStoryboardPipeline } from './run-storyboard-pipeline';
+import { runVoicePipeline } from './run-voice-pipeline';
+import { mergeVoiceJobProgress, startVoiceJobStage } from './voice-job-progress';
+import { isVoicePipelineCanceled } from './voice-pipeline-observer';
+import type { VoicePipelineObserver } from './voice-pipeline-observer';
 import { isMontagePipelineCanceled } from './montage-pipeline-observer';
 import type { MontagePipelineObserver } from './montage-pipeline-observer';
 import type { RenderPipelineObserver } from '../pipeline/render-pipeline-observer';
@@ -27,6 +31,8 @@ import type {
   RenderJobState,
   StoryboardJobProgress,
   StoryboardJobReport,
+  VoiceJobProgress,
+  VoiceJobReport,
 } from './render-job';
 import { toJob } from './render-job';
 import { runMontagePipeline } from './run-montage-pipeline';
@@ -85,7 +91,15 @@ interface StoryboardJobRecord extends JobRecordBase {
   report: StoryboardJobReport | null;
 }
 
-type JobRecord = RenderJobRecord | MontageJobRecord | StoryboardJobRecord;
+interface VoiceJobRecord extends JobRecordBase {
+  readonly kind: 'voice';
+  readonly voiceId: string | null;
+  readonly sceneIds: readonly string[] | null;
+  progress: VoiceJobProgress | null;
+  report: VoiceJobReport | null;
+}
+
+type JobRecord = RenderJobRecord | MontageJobRecord | StoryboardJobRecord | VoiceJobRecord;
 
 export function createRenderJobQueue(deps: RenderApiDependencies): RenderJobQueue {
   const records = new Map<string, JobRecord>();
@@ -205,6 +219,37 @@ export function createRenderJobQueue(deps: RenderApiDependencies): RenderJobQueu
     settle(record, report, failure);
   }
 
+  async function runVoiceJob(record: VoiceJobRecord): Promise<void> {
+    const observer: VoicePipelineObserver = {
+      stageStarted: (stage) => {
+        record.progress = startVoiceJobStage(record.progress, stage);
+      },
+      sceneProcessed: (stage, processedScenes, totalScenes) => {
+        record.progress = mergeVoiceJobProgress(record.progress, stage, processedScenes, totalScenes);
+      },
+      cancellationRequested: () => record.state === 'canceling',
+    };
+
+    let report: VoiceJobReport | null = null;
+    let failure: RenderApiErrorPayload | null = null;
+
+    try {
+      report = await runVoicePipeline(
+        {
+          project: resolveMediaProject(record.projectRoot),
+          voiceId: record.voiceId,
+          sceneIds: record.sceneIds,
+        },
+        deps,
+        observer,
+      );
+    } catch (cause) {
+      failure = isVoicePipelineCanceled(cause) ? null : toErrorPayload(cause);
+    }
+
+    settle(record, report, failure);
+  }
+
   async function runJob(record: JobRecord): Promise<void> {
     switch (record.kind) {
       case 'render':
@@ -215,6 +260,9 @@ export function createRenderJobQueue(deps: RenderApiDependencies): RenderJobQueu
         break;
       case 'storyboard':
         await runStoryboardJob(record);
+        break;
+      case 'voice':
+        await runVoiceJob(record);
         break;
     }
 
@@ -265,6 +313,15 @@ export function createRenderJobQueue(deps: RenderApiDependencies): RenderJobQueu
           kind: 'storyboard',
           brief: input.brief,
           scriptText: input.scriptText,
+          progress: null,
+          report: null,
+        };
+      case 'voice':
+        return {
+          ...base,
+          kind: 'voice',
+          voiceId: input.voiceId,
+          sceneIds: input.sceneIds,
           progress: null,
           report: null,
         };

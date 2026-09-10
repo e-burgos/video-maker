@@ -1,0 +1,89 @@
+{
+  "assetId": "work/voice/scene-02.wav",
+  "engine": "whisper.cpp",
+  "model": "ggml-large-v3-turbo-q5_0.bin",
+  "language": "es",
+  "words": [
+    {
+      "text": "Primero,",
+      "startMs": 60,
+      "endMs": 960
+    },
+    {
+      "text": "CTRL+R,",
+      "startMs": 960,
+      "endMs": 1800
+    },
+    {
+      "text": "buscas",
+      "startMs": 1800,
+      "endMs": 2040
+    },
+    {
+      "text": "en",
+      "startMs": 2040,
+      "endMs": 2140
+    },
+    {
+      "text": "tu",
+      "startMs": 2140,
+      "endMs": 2240
+    },
+    {
+      "text": "historial",
+      "startMs": 2240,
+      "endMs": 2690
+    },
+    {
+      "text": "mientras",
+      "startMs": 2690,
+      "endMs": 3110
+    },
+    {
+      "text": "escribís,",
+      "startMs": 3110,
+      "endMs": 3610
+    },
+    {
+      "text": "nunca",
+      "startMs": 3610,
+      "endMs": 3900
+    },
+    {
+      "text": "más",
+      "startMs": 3900,
+      "endMs": 4170
+    },
+    {
+      "text": "frollear",
+      "startMs": 4170,
+      "endMs": 4580
+    },
+    {
+      "text": "cientos",
+      "startMs": 4580,
+      "endMs": 5020
+    },
+    {
+      "text": "de",
+      "startMs": 5020,
+      "endMs": 5140
+    },
+    {
+      "text": "líneas.",
+      "startMs": 5140,
+      "endMs": 5560
+    }
+  ],
+  "segments": [
+    {
+      "startMs": 60,
+      "endMs": 5560,
+      "text": "Primero, CTRL+R, buscas en tu historial mientras escribís, nunca más frollear cientos de líneas.",
+      "wordRange": [
+        0,
+        13
+      ]
+    }
+  ]
+}

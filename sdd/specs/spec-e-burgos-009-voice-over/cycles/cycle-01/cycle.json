@@ -1,0 +1,190 @@
+{
+  "$schema": "../../../../schemas/cycle.schema.json",
+  "cycle": 1,
+  "module": "voice-over",
+  "spec": "spec-e-burgos-009-voice-over",
+  "apps": [
+    "apps/render-api",
+    "libs/media-local",
+    "libs/timeline-core",
+    "libs/auto-montage"
+  ],
+  "phase": "voice-backend",
+  "flow": "lite",
+  "objectives": [
+    "Accept the developer's own locution under the new voice asset role",
+    "Resolve Piper TTS as a configurable binary with the same contract as whisper-cli",
+    "Synthesize one voice track per storyboard scene and align it word by word with Whisper",
+    "Publish the real duration and origin of every scene track in a manifest the rest of the pipeline can read"
+  ],
+  "status": "completed",
+  "started_at": "2026-09-09",
+  "completed_at": "2026-09-09",
+  "documents": {
+    "plan": "sdd/specs/spec-e-burgos-009-voice-over/cycles/cycle-01/plan.md",
+    "tasks": "sdd/specs/spec-e-burgos-009-voice-over/cycles/cycle-01/tasks.json"
+  },
+  "artifacts": [
+    "sdd/specs/spec-e-burgos-009-voice-over/cycles/cycle-01/artifacts/smoke-real.md",
+    "sdd/specs/spec-e-burgos-009-voice-over/cycles/cycle-01/artifacts/smoke-voice-job.json",
+    "sdd/specs/spec-e-burgos-009-voice-over/cycles/cycle-01/artifacts/smoke-voice-manifest.json",
+    "sdd/specs/spec-e-burgos-009-voice-over/cycles/cycle-01/artifacts/smoke-voice-scene-02.words.json",
+    "sdd/specs/spec-e-burgos-009-voice-over/cycles/cycle-01/artifacts/smoke-voice-ffprobe.txt",
+    "sdd/specs/spec-e-burgos-009-voice-over/cycles/cycle-01/artifacts/smoke-voices.json"
+  ],
+  "metrics": {
+    "tasks_total": 8,
+    "tasks_completed": 8,
+    "story_points": 55,
+    "files_created": [
+      "apps/render-api/src/errors/translate-voice-error.spec.ts",
+      "apps/render-api/src/errors/translate-voice-error.ts",
+      "apps/render-api/src/http/handlers/voice-handler.spec.ts",
+      "apps/render-api/src/http/handlers/voice-handler.ts",
+      "apps/render-api/src/http/handlers/voices-handler.spec.ts",
+      "apps/render-api/src/http/handlers/voices-handler.ts",
+      "apps/render-api/src/jobs/run-voice-pipeline.spec.ts",
+      "apps/render-api/src/jobs/run-voice-pipeline.ts",
+      "apps/render-api/src/jobs/voice-job-params.ts",
+      "apps/render-api/src/jobs/voice-job-progress.ts",
+      "apps/render-api/src/jobs/voice-job.spec.ts",
+      "apps/render-api/src/jobs/voice-pipeline-observer.ts",
+      "apps/render-api/src/voice/select-voice-scenes.ts",
+      "apps/render-api/src/voice/voice-format.ts",
+      "apps/render-api/src/voice/voice-language.ts",
+      "apps/render-api/src/voice/voice-paths.ts",
+      "apps/render-api/src/voice/voice-scenes.spec.ts",
+      "apps/render-api/src/voice/voice-store.ts",
+      "libs/media-local/src/piper/build-voice-catalog.ts",
+      "libs/media-local/src/piper/piper.spec.ts",
+      "libs/media-local/src/piper/synthesize-speech.ts",
+      "libs/timeline-core/src/schemas/voice-manifest.schema.ts",
+      "libs/timeline-core/src/voice/hash-narration.ts",
+      "libs/timeline-core/src/voice/merge-voice-manifest.ts",
+      "libs/timeline-core/src/voice/voice-manifest.spec.ts",
+      "sdd/context/apps/render-api/updates/2026-09-09-spec-e-burgos-009-voice-over-cycle-01.md",
+      "sdd/context/libs/auto-montage/updates/2026-09-09-spec-e-burgos-009-voice-over-cycle-01.md",
+      "sdd/context/libs/media-local/updates/2026-09-09-spec-e-burgos-009-voice-over-cycle-01.md",
+      "sdd/context/libs/timeline-core/updates/2026-09-09-spec-e-burgos-009-voice-over-cycle-01.md",
+      "sdd/memory/journal/2026-09-09-spec-e-burgos-009-voice-over-cycle-01.md",
+      "sdd/specs/spec-e-burgos-009-voice-over/cycles/cycle-01/artifacts/smoke-real.md",
+      "sdd/specs/spec-e-burgos-009-voice-over/cycles/cycle-01/artifacts/smoke-voice-ffprobe.txt",
+      "sdd/specs/spec-e-burgos-009-voice-over/cycles/cycle-01/artifacts/smoke-voice-job.json",
+      "sdd/specs/spec-e-burgos-009-voice-over/cycles/cycle-01/artifacts/smoke-voice-manifest.json",
+      "sdd/specs/spec-e-burgos-009-voice-over/cycles/cycle-01/artifacts/smoke-voice-scene-02.words.json",
+      "sdd/specs/spec-e-burgos-009-voice-over/cycles/cycle-01/artifacts/smoke-voices.json",
+      "sdd/specs/spec-e-burgos-009-voice-over/cycles/cycle-01/cycle.json",
+      "sdd/specs/spec-e-burgos-009-voice-over/cycles/cycle-01/plan.md",
+      "sdd/specs/spec-e-burgos-009-voice-over/cycles/cycle-01/tasks.json"
+    ],
+    "files_modified": [
+      "apps/render-api/README.md",
+      "apps/render-api/src/__fixtures__/fake-render-api-dependencies.ts",
+      "apps/render-api/src/deps/node-render-api-dependencies.spec.ts",
+      "apps/render-api/src/deps/node-render-api-dependencies.ts",
+      "apps/render-api/src/deps/render-api-dependencies.ts",
+      "apps/render-api/src/engine/media-binaries.ts",
+      "apps/render-api/src/errors/http-status-for.spec.ts",
+      "apps/render-api/src/errors/http-status-for.ts",
+      "apps/render-api/src/errors/render-api-error.ts",
+      "apps/render-api/src/errors/to-error-payload.ts",
+      "apps/render-api/src/http/handle-request.ts",
+      "apps/render-api/src/http/handlers/jobs-handler.spec.ts",
+      "apps/render-api/src/http/handlers/jobs-handler.ts",
+      "apps/render-api/src/http/handlers/projects-handler.spec.ts",
+      "apps/render-api/src/http/handlers/projects-handler.ts",
+      "apps/render-api/src/http/health-handler.spec.ts",
+      "apps/render-api/src/http/health-handler.ts",
+      "apps/render-api/src/http/routes.ts",
+      "apps/render-api/src/jobs/render-job-queue.ts",
+      "apps/render-api/src/jobs/render-job.ts",
+      "apps/render-api/src/store/asset-path.spec.ts",
+      "apps/render-api/src/store/asset-path.ts",
+      "apps/render-api/src/store/project-assets.spec.ts",
+      "apps/render-api/src/store/project-assets.ts",
+      "libs/auto-montage/src/catalog/catalog.schema.ts",
+      "libs/auto-montage/src/ingest/classify-entry.spec.ts",
+      "libs/auto-montage/src/ingest/classify-entry.ts",
+      "libs/media-local/src/binaries/resolve-binaries.ts",
+      "libs/media-local/src/index.ts",
+      "libs/timeline-core/src/index.ts",
+      "libs/timeline-core/src/schemas/schemas.spec.ts",
+      "sdd/api.json",
+      "sdd/context/constitution.md",
+      "sdd/global.json",
+      "sdd/specs/index.json",
+      "sdd/tasks.json"
+    ],
+    "files_deleted": [],
+    "usage": {
+      "tokens_in": 760000,
+      "tokens_out": 147000,
+      "approx": true,
+      "source": "declared-estimate",
+      "by_tier": {
+        "claude/opus": {
+          "tokens_in": 760000,
+          "tokens_out": 147000,
+          "approx": true,
+          "source": "declared-estimate"
+        }
+      },
+      "by_agent": [
+        {
+          "agent": "orchestrator",
+          "label": "solo",
+          "provider_model": "claude/opus",
+          "effort": "high",
+          "tokens_in": 760000,
+          "tokens_out": 147000,
+          "approx": true,
+          "source": "declared-estimate",
+          "recorded_at": "2026-09-09",
+          "tokens_total": 907000
+        }
+      ]
+    }
+  },
+  "tables_created": [],
+  "endpoints_implemented": [
+    "EP-019",
+    "EP-020",
+    "EP-021"
+  ],
+  "components_created": [],
+  "issues_found": [
+    "El primer smoke real fallo con VOICE_TRANSCRIPTION_FAILED tras sintetizar las cinco pistas: el pipeline pasaba paths RELATIVOS a los puertos de media con projectRoot como cwd. El binario los resuelve (corre con ese cwd) pero transcribeWithWhisperCpp lee su JSON de salida con readTextFile, que resuelve contra el cwd del proceso de la API. libs/auto-montage ya pasaba toAbsolutePath por esta razon. Los 15 tests del pipeline estaban en verde porque el doble del puerto no resuelve ningun path: el test afirmaba los relativos como correctos. Corregido pasando absolutos en las tres llamadas, con un test de regresion que exige que todo path que cruza a un binario empiece por la raiz del proyecto.",
+    "El puerto 4399 del guion de spec-007 sigue ocupado por un render-api vivo de otro ciclo en esta maquina. La sonda de capabilities.voiceQueue que dejo escrita la leccion de spec-008 lo detecto antes de la primera llamada; el smoke uso 4411.",
+    "Un test preexistente de jobs-handler usaba kind: 'voice' como ejemplo de kind desconocido. Al volverse valido habria pasado por la razon equivocada: se cambio a 'assemble' y se actualizo el mensaje esperado a los cuatro kinds.",
+    "apps/web arrastra 4 warnings de lint (@typescript-eslint/no-unused-vars en storyboard-document.ts) de spec-008 cycle-02. Fuera del alcance de este ciclo; git diff --stat apps/web vacio."
+  ],
+  "reviewer_report": {
+    "approved": true,
+    "date": "2026-09-09",
+    "ca_results": {
+      "US-09-001": "PASS — classify-entry.spec.ts (directorio voice -> rol, .mp4 en voice -> extension-role-mismatch), asset-path.spec.ts y el smoke real: PUT /projects/voice-smoke/assets/voice/take-03.wav devolvio 201 con role 'voice' y el catalogo la sondeo como audio 22050 Hz.",
+      "US-09-002": "PASS — piper.spec.ts (PIPER_PATH gana sobre PATH, PIPER_MODEL_PATH sin fallback y validado como archivo legible), health-handler.spec.ts (degrada si falta la voz, reporta por nombre logico y env var, nunca la ruta) y el smoke: /health con los seis binarios resueltos y status ok.",
+      "US-09-003": "PASS — build-voice-catalog en piper.spec.ts (descarta .onnx.json, ordena por id, marca el default), voices-handler.spec.ts (503 VOICE_MODEL_UNAVAILABLE en vez de lista vacia, sin filtrar la ruta) y el smoke: GET /voices devolvio es_AR-daniela-high con isDefault true.",
+      "US-09-004": "PASS — run-voice-pipeline.spec.ts (una pista por escena con el texto de esa escena y de ninguna otra, saltos de linea colapsados, 48 kHz para la mezcla y 16 kHz para whisper en ese orden, progreso monotono synthesize 1..3/3 -> transcribe 1..3/3 -> persist, cancelacion cooperativa que no deja manifest a medias) y el smoke real: job succeeded en 22 s sobre 5 escenas, ffprobe pcm_s16le/48000/1 con duracion > 0 en las cinco.",
+      "US-09-005": "PASS — select-voice-scenes en voice-scenes.spec.ts, voice-job.spec.ts (sceneIds vacio/duplicado/no-array rechazados) y el smoke: sceneIds=['scene-02'] con overwrite regenero solo scene-02 (sha256 06f6377c -> 591e4239) y dejo las otras cuatro BYTE-IDENTICAS. El oraculo es sensible por construccion: Piper mete ruido por corrida, asi que un hash igual prueba que el archivo no se reescribio.",
+      "US-09-006": "PASS — voice-handler.spec.ts (source uploaded, voiceId null, reemplaza solo esa escena, VOICE_ASSET_NOT_FOUND, ASSET_PATH_INVALID ante ../) y el smoke: la toma subida quedo con source uploaded y durationMs 3135; un job posterior CON overwrite:true reporto ['scene-01','scene-02','scene-04','scene-05'] y el sha256 de scene-03 quedo identico. 409 VOICE_ALREADY_EXISTS verificado sobre HTTP real.",
+      "US-09-007": "PASS — voice-manifest.spec.ts (schema estricto, una pista por escena, orden por index, voiceId ssi generated; hashNarration determinista y sensible a un acento) y el smoke: cinco words.json en formato Transcription con 10-17 palabras y timings, y manifest coherente con ffprobe AL MILISEGUNDO en las cinco pistas. La duracion real difiere de estimatedDurationMs en las cinco escenas, hasta 1958 ms."
+    },
+    "tests": {
+      "sdd:validate": "OK — 50 archivos validos, cross-checks pasados",
+      "render-api": "671/671 PASS en 59 archivos — 97,83 % stmts · 91,62 % branch · 99,69 % funcs · 97,83 % lines (piso 80 %, coverage.include sin recortar)",
+      "workspace": "pnpm nx run-many -t lint test build: 8 proyectos verdes (los 4 warnings de apps/web son preexistentes de spec-008 cycle-02)",
+      "smoke-voice": "Corrida real con Piper 1.8.0 y whisper-cli: job de 5 escenas succeeded en 22 s, rama sceneIds parcial, rama de locucion subida, 409 sin overwrite y deteccion de stale tras editar la narracion. Evidencia literal en artifacts/smoke-real.md."
+    },
+    "notes": "El ciclo le da voz al storyboard sin ninguna API paga: Piper entra como binario configurable por el mismo CommandRunner que ya usaban ffmpeg, whisper y claude, y la suite jamas lo invoca. La decision de fondo fue que la voz es el reloj del video: durationMs se mide con ffprobe y el manifest la publica como fuente de verdad, con el storyboard conservando su estimacion. Piper si entra a binaries de /health (a diferencia de claude en spec-008) porque whisperModel ya fija ese precedente y el modo generativo no puede prometer voz sin el binario. El flow quedo en lite por decision explicita del dev pese al aviso del validador: el ciclo SI crea tres endpoints que apps/web va a consumir en cycle-02, y se compenso registrandolos en sdd/api.json campo a campo con el detalle de un architect.md. TASK-005 y TASK-006 cerraron juntas: la union discriminada de jobs no compila hasta que existe runVoicePipeline.",
+    "follow_ups": [
+      "cycle-02: la UI en apps/web (selector de voz, regeneracion por escena, reproduccion de cada pista, uso de la locucion subida). El backend esta cerrado y estable.",
+      "PUT /projects/:slug/voice/scenes/:sceneId corre ffmpeg y whisper inline y retiene la conexion: una toma larga pide convertirlo en un quinto kind de job.",
+      "No hay forma de volver de una pista uploaded a una generada sin editar el manifest a mano: falta un DELETE de la pista de una escena.",
+      "RF-5 se cumple publicando durationMs en el manifest; nadie lo consume todavia. buildTimelineFromStoryboard (spec-010) tiene que leer el manifest y no estimatedDurationMs del storyboard.",
+      "GET /voices no distingue idioma ni calidad de la voz mas alla del id: si el catalogo crece conviene parsear el .onnx.json (trae language.code, name_english y quality).",
+      "synthesizeSpeech no expone --length-scale ni --speaker: control de velocidad y voces multi-speaker quedan para cuando la UI los pida.",
+      "El aviso de sdd:validate sobre flow lite ahora se va a disparar tambien por esta spec (3 endpoints en cycle-01). Es informativo y esta aceptado por escrito en plan.md."
+    ]
+  }
+}

@@ -23,8 +23,19 @@ export {
   BINARY_ENV_VARS,
   resolveBinaries,
   resolveBinary,
+  resolveVoiceBinaries,
 } from './binaries/resolve-binaries';
-export type { BinaryName, ResolvedBinaries, ResolveBinariesOptions } from './binaries/resolve-binaries';
+export type {
+  BinaryName,
+  ResolvedBinaries,
+  ResolvedVoiceBinaries,
+  ResolveBinariesOptions,
+} from './binaries/resolve-binaries';
+
+export { narrationToSingleLine, synthesizeSpeech } from './piper/synthesize-speech';
+export type { SynthesizeSpeechOptions } from './piper/synthesize-speech';
+export { buildVoiceCatalog, VOICE_MODEL_EXTENSION, voiceModelId } from './piper/build-voice-catalog';
+export type { VoiceModel } from './piper/build-voice-catalog';
 
 export { nodeBinaryLookup } from './fs/binary-lookup';
 export type { BinaryLookup } from './fs/binary-lookup';

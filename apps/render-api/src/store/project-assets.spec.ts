@@ -87,8 +87,13 @@ describe('resolveProjectAssets', () => {
 
 describe('countAssetsByRole', () => {
   it('counts assets by role including the roles with zero', () => {
-    const counts = countAssetsByRole([{ role: 'aroll' }, { role: 'aroll' }, { role: 'broll' }]);
+    const counts = countAssetsByRole([
+      { role: 'aroll' },
+      { role: 'aroll' },
+      { role: 'broll' },
+      { role: 'voice' },
+    ]);
 
-    expect(counts).toEqual({ aroll: 2, broll: 1, image: 0, audio: 0 });
+    expect(counts).toEqual({ aroll: 2, broll: 1, image: 0, audio: 0, voice: 1 });
   });
 });

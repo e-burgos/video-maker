@@ -56,6 +56,17 @@ const MESSAGE_BY_CODE: Readonly<Record<RenderApiErrorCode, string>> = {
   STORYBOARD_ALREADY_EXISTS: 'A storyboard already exists for this project.',
   STORYBOARD_INPUT_INVALID: 'A storyboard job needs exactly one of brief or scriptText.',
   STORYBOARD_OVERWRITE_INVALID: 'The overwrite flag is not a boolean.',
+  VOICE_MODEL_UNAVAILABLE: 'The local speech synthesizer or its voice model is not available.',
+  VOICE_SYNTHESIS_FAILED: 'The speech synthesizer failed while producing a scene track.',
+  VOICE_TRANSCRIPTION_FAILED: 'The transcriber failed while aligning a scene track.',
+  VOICE_NOT_FOUND: 'The project has no stored voice manifest.',
+  VOICE_INVALID: 'The voice manifest does not pass validation.',
+  VOICE_ALREADY_EXISTS: 'A voice track already exists for one of the requested scenes.',
+  VOICE_SCENE_NOT_FOUND: 'The requested scene is not part of the stored storyboard.',
+  VOICE_ID_INVALID: 'The voice parameter is not a known voice model id.',
+  VOICE_SCENE_IDS_INVALID: 'The sceneIds parameter is not a non-empty array of scene ids.',
+  VOICE_OVERWRITE_INVALID: 'The overwrite flag is not a boolean.',
+  VOICE_ASSET_NOT_FOUND: 'The referenced locution file is not under the raw voice directory.',
 };
 
 export function toErrorPayload(value: unknown): RenderApiErrorPayload {

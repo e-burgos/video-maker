@@ -3,7 +3,7 @@ import type { MediaKind } from '@video-maker/timeline-core';
 import type { DirectoryEntry } from '../fs/directory-reader';
 import { mediaKindForExtension } from './supported-extensions';
 
-export type AssetRole = 'aroll' | 'broll' | 'image' | 'audio';
+export type AssetRole = 'aroll' | 'broll' | 'image' | 'audio' | 'voice';
 
 export type IgnoredReason =
   | 'hidden'
@@ -17,6 +17,7 @@ const ROLE_BY_DIRECTORY_NAME: Readonly<Record<string, AssetRole>> = {
   broll: 'broll',
   images: 'image',
   audio: 'audio',
+  voice: 'voice',
 };
 
 const EXPECTED_KIND_BY_ROLE: Readonly<Record<AssetRole, MediaKind>> = {
@@ -24,6 +25,7 @@ const EXPECTED_KIND_BY_ROLE: Readonly<Record<AssetRole, MediaKind>> = {
   broll: 'video',
   image: 'image',
   audio: 'audio',
+  voice: 'audio',
 };
 
 export type TopLevelClassification =

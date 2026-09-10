@@ -23,6 +23,8 @@ import {
   handleGetStoryboardPrompts,
   handlePutStoryboard,
 } from './handlers/storyboard-handler';
+import { handleGetVoice, handlePutVoiceScene } from './handlers/voice-handler';
+import { handleListVoices } from './handlers/voices-handler';
 import { handleHealth } from './health-handler';
 import { JSON_CONTENT_TYPE } from './http-message';
 import type { HttpRequestLine, HttpResponse } from './http-message';
@@ -60,6 +62,8 @@ export async function handleRequest(
     switch (match.id) {
       case 'health':
         return await handleHealth(deps, runtime);
+      case 'voices.list':
+        return await handleListVoices(deps);
       case 'projects.list':
         return await handleListProjects(deps, store);
       case 'projects.create':
@@ -86,6 +90,10 @@ export async function handleRequest(
         return await handlePutStoryboard(deps, store, params, request);
       case 'projects.storyboard.prompts':
         return await handleGetStoryboardPrompts(deps, store, params);
+      case 'projects.voice.get':
+        return await handleGetVoice(deps, store, params);
+      case 'projects.voice.scene.put':
+        return await handlePutVoiceScene(deps, store, params, request);
       case 'projects.jobs.create':
         return await handleCreateRenderJob(deps, store, params, request, runtime);
       case 'projects.jobs.list':

@@ -17,6 +17,13 @@ describe('classifyTopLevelEntry', () => {
     });
   });
 
+  it('asigna el role voice a la carpeta voice/ de la locución propia (US-09-001)', () => {
+    expect(classifyTopLevelEntry({ name: 'voice', isDirectory: true, isFile: false })).toEqual({
+      kind: 'role',
+      role: 'voice',
+    });
+  });
+
   it('ignora una carpeta con nombre desconocido con reason unknown-directory', () => {
     expect(classifyTopLevelEntry({ name: 'unknown-role', isDirectory: true, isFile: false })).toEqual({
       kind: 'ignored',
@@ -51,6 +58,14 @@ describe('classifyFileEntry', () => {
     expect(classifyFileEntry('clip01.mov', 'broll')).toEqual({ kind: 'asset' });
     expect(classifyFileEntry('photo01.jpg', 'image')).toEqual({ kind: 'asset' });
     expect(classifyFileEntry('music01.mp3', 'audio')).toEqual({ kind: 'asset' });
+    expect(classifyFileEntry('scene-01.wav', 'voice')).toEqual({ kind: 'asset' });
+  });
+
+  it('ignora un video dentro de voice/ con reason extension-role-mismatch (US-09-001)', () => {
+    expect(classifyFileEntry('toma.mp4', 'voice')).toEqual({
+      kind: 'ignored',
+      reason: 'extension-role-mismatch',
+    });
   });
 
   it('ignora un archivo oculto con reason hidden', () => {

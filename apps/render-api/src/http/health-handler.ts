@@ -22,6 +22,7 @@ export interface HealthBody {
     readonly jobQueue: boolean;
     readonly montageQueue: boolean;
     readonly storyboardQueue: boolean;
+    readonly voiceQueue: boolean;
   };
   readonly jobs: RenderJobQueueSize;
 }
@@ -51,6 +52,7 @@ export async function handleHealth(
       jobQueue: true,
       montageQueue: true,
       storyboardQueue: true,
+      voiceQueue: true,
     },
     jobs: runtime.jobs.size(),
   };

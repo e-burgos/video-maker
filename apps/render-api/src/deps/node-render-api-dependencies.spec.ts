@@ -19,9 +19,16 @@ vi.mock('@video-maker/media-local', () => ({
     ffprobe: 'FFPROBE_PATH',
     whisperCli: 'WHISPER_CPP_PATH',
     whisperModel: 'WHISPER_MODEL_PATH',
+    piperCli: 'PIPER_PATH',
+    piperModel: 'PIPER_MODEL_PATH',
   },
   resolveBinary: vi.fn(),
   resolveBinaries: vi.fn(),
+  resolveVoiceBinaries: vi.fn(),
+  synthesizeSpeech: vi.fn(),
+  extractAudioForTranscription: vi.fn(),
+  transcribeWithWhisperCpp: vi.fn(),
+  buildVoiceCatalog: vi.fn(),
   mixTimelineAudio: vi.fn(),
   muxAudioIntoVideo: vi.fn(),
   verifyMixLoudness: vi.fn(),
@@ -42,6 +49,11 @@ async function loadMocks() {
     mixTimelineAudioMock: vi.mocked(mediaLocal.mixTimelineAudio),
     muxAudioIntoVideoMock: vi.mocked(mediaLocal.muxAudioIntoVideo),
     verifyMixLoudnessMock: vi.mocked(mediaLocal.verifyMixLoudness),
+    resolveVoiceBinariesMock: vi.mocked(mediaLocal.resolveVoiceBinaries),
+    synthesizeSpeechMock: vi.mocked(mediaLocal.synthesizeSpeech),
+    extractAudioForTranscriptionMock: vi.mocked(mediaLocal.extractAudioForTranscription),
+    transcribeWithWhisperCppMock: vi.mocked(mediaLocal.transcribeWithWhisperCpp),
+    buildVoiceCatalogMock: vi.mocked(mediaLocal.buildVoiceCatalog),
     ExecaCommandRunner: mediaLocal.ExecaCommandRunner,
   };
 }
@@ -56,8 +68,21 @@ beforeEach(async () => {
   mocks.mixTimelineAudioMock.mockReset();
   mocks.muxAudioIntoVideoMock.mockReset();
   mocks.verifyMixLoudnessMock.mockReset();
+  mocks.resolveVoiceBinariesMock.mockReset();
+  mocks.synthesizeSpeechMock.mockReset();
+  mocks.extractAudioForTranscriptionMock.mockReset();
+  mocks.transcribeWithWhisperCppMock.mockReset();
+  mocks.buildVoiceCatalogMock.mockReset();
 
   mocks.resolveBinaryMock.mockImplementation(async (name: string) => `/opt/homebrew/bin/${name}`);
+  mocks.resolveVoiceBinariesMock.mockResolvedValue({
+    ffmpeg: '/opt/homebrew/bin/ffmpeg',
+    ffprobe: '/opt/homebrew/bin/ffprobe',
+    whisperCli: '/opt/homebrew/bin/whisper-cli',
+    whisperModel: '/models/ggml.bin',
+    piperCli: '/opt/python/bin/piper',
+    piperModel: '/voices/es_AR-daniela-high.onnx',
+  });
 });
 
 describe('createNodeRenderApiDependencies', () => {
@@ -212,7 +237,7 @@ describe('createNodeRenderApiDependencies', () => {
     expect(mocks.resolveBinaryMock).toHaveBeenCalledWith('ffprobe', ENV);
   });
 
-  it('reports each of the four binaries by logical name and env var, live-checking without reusing the memoized resolution', async () => {
+  it('reports each of the six binaries by logical name and env var, live-checking without reusing the memoized resolution', async () => {
     mocks.resolveBinaryMock.mockImplementation(async (name: string) => {
       if (name === 'ffprobe') {
         throw new Error('not found');
@@ -228,11 +253,129 @@ describe('createNodeRenderApiDependencies', () => {
       { name: 'ffprobe', envVar: 'FFPROBE_PATH', resolved: false },
       { name: 'whisperCli', envVar: 'WHISPER_CPP_PATH', resolved: true },
       { name: 'whisperModel', envVar: 'WHISPER_MODEL_PATH', resolved: true },
+      { name: 'piperCli', envVar: 'PIPER_PATH', resolved: true },
+      { name: 'piperModel', envVar: 'PIPER_MODEL_PATH', resolved: true },
     ]);
     for (const status of statuses) {
       expect(status).not.toHaveProperty('path');
       expect(status).not.toHaveProperty('resolvedPath');
     }
+  });
+
+  it('synthesizeVoice invoca a piper con el binario resuelto y el cwd del proyecto (US-09-004)', async () => {
+    const deps = createNodeRenderApiDependencies(ENV, STORE);
+
+    await deps.synthesizeVoice({
+      textPath: 'work/voice/sources/scene-01.txt',
+      outPath: 'work/voice/sources/scene-01.wav',
+      modelPath: '/voices/es_AR-daniela-high.onnx',
+      projectRoot: CWD,
+    });
+
+    expect(mocks.synthesizeSpeechMock).toHaveBeenCalledWith(
+      'work/voice/sources/scene-01.wav',
+      {
+        modelPath: '/voices/es_AR-daniela-high.onnx',
+        textPath: 'work/voice/sources/scene-01.txt',
+        piperPath: '/opt/python/bin/piper',
+        runOptions: { cwd: CWD },
+      },
+      expect.any(mocks.ExecaCommandRunner),
+    );
+  });
+
+  it('extractVoiceAudio pasa el sample rate, los canales y la raíz del proyecto a ffmpeg (US-09-004)', async () => {
+    const deps = createNodeRenderApiDependencies(ENV, STORE);
+
+    await deps.extractVoiceAudio({
+      inputPath: 'work/voice/sources/scene-01.wav',
+      outPath: 'work/voice/scene-01.wav',
+      sampleRate: 48000,
+      channels: 1,
+      projectRoot: CWD,
+    });
+
+    expect(mocks.extractAudioForTranscriptionMock).toHaveBeenCalledWith(
+      'work/voice/sources/scene-01.wav',
+      'work/voice/scene-01.wav',
+      expect.any(mocks.ExecaCommandRunner),
+      {
+        sampleRate: 48000,
+        channels: 1,
+        ffmpegPath: '/opt/homebrew/bin/ffmpeg',
+        runOptions: { cwd: CWD },
+      },
+    );
+  });
+
+  it('transcribeVoice usa el modelo de whisper resuelto y devuelve la transcripción (US-09-007)', async () => {
+    mocks.transcribeWithWhisperCppMock.mockResolvedValue({
+      assetId: 'work/voice/scene-01.wav',
+      engine: 'whisper.cpp',
+      language: 'es',
+      words: [],
+      segments: [],
+    });
+    const deps = createNodeRenderApiDependencies(ENV, STORE);
+
+    const transcription = await deps.transcribeVoice({
+      wavPath: 'work/voice/whisper/scene-01.wav',
+      outBase: 'work/voice/whisper/scene-01',
+      assetId: 'work/voice/scene-01.wav',
+      language: 'es',
+      projectRoot: CWD,
+    });
+
+    expect(transcription.engine).toBe('whisper.cpp');
+    expect(mocks.transcribeWithWhisperCppMock).toHaveBeenCalledWith(
+      'work/voice/whisper/scene-01.wav',
+      {
+        modelPath: '/models/ggml.bin',
+        outBase: 'work/voice/whisper/scene-01',
+        assetId: 'work/voice/scene-01.wav',
+        language: 'es',
+        whisperPath: '/opt/homebrew/bin/whisper-cli',
+        runOptions: { cwd: CWD },
+      },
+      expect.any(mocks.ExecaCommandRunner),
+    );
+  });
+
+  it('resolveVoiceBinaries delega en media-local con el entorno del proceso (US-09-002)', async () => {
+    const deps = createNodeRenderApiDependencies(ENV, STORE);
+
+    await deps.resolveVoiceBinaries();
+
+    expect(mocks.resolveVoiceBinariesMock).toHaveBeenCalledWith(ENV);
+  });
+
+  it('listVoiceModels lee el directorio del modelo configurado y descarta lo que no es archivo (US-09-003)', async () => {
+    const voicesDir = await mkdtemp(join(tmpdir(), 'piper-voices-'));
+    await writeFile(join(voicesDir, 'es_AR-daniela-high.onnx'), 'model');
+    await writeFile(join(voicesDir, 'es_AR-daniela-high.onnx.json'), '{}');
+    await mkdir(join(voicesDir, 'nested.onnx'));
+    const modelPath = join(voicesDir, 'es_AR-daniela-high.onnx');
+    mocks.resolveBinaryMock.mockImplementation(async (name: string) =>
+      name === 'piperModel' ? modelPath : `/opt/homebrew/bin/${name}`,
+    );
+    mocks.buildVoiceCatalogMock.mockReturnValue([
+      { id: 'es_AR-daniela-high', fileName: 'es_AR-daniela-high.onnx', isDefault: true },
+    ]);
+
+    const deps = createNodeRenderApiDependencies(ENV, STORE);
+    const voices = await deps.listVoiceModels();
+
+    expect(voices).toEqual([
+      { id: 'es_AR-daniela-high', fileName: 'es_AR-daniela-high.onnx', isDefault: true },
+    ]);
+    const [fileNames, configured] = mocks.buildVoiceCatalogMock.mock.calls[0] ?? [];
+    expect([...(fileNames ?? [])].sort()).toEqual([
+      'es_AR-daniela-high.onnx',
+      'es_AR-daniela-high.onnx.json',
+    ]);
+    expect(configured).toBe(modelPath);
+
+    await rm(voicesDir, { recursive: true, force: true });
   });
 
   it('reports both engine modules as loaded once the dynamic imports resolve', async () => {

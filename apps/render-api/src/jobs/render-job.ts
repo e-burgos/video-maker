@@ -1,5 +1,5 @@
 import type { MontagePresetName } from '@video-maker/auto-montage';
-import type { StoryboardSource, Timeline } from '@video-maker/timeline-core';
+import type { StoryboardSource, Timeline, VoiceTrackSource } from '@video-maker/timeline-core';
 
 import type { RenderApiErrorCode, RenderApiErrorPayload, RenderPipelineStage } from '../errors/render-api-error';
 import type { RenderPipelineReport } from '../pipeline/run-render-pipeline';
@@ -21,13 +21,16 @@ export function isTerminalRenderJobState(state: RenderJobState): boolean {
   return TERMINAL_RENDER_JOB_STATES.some((terminal) => terminal === state);
 }
 
-export type JobKind = 'render' | 'montage' | 'storyboard';
+export type JobKind = 'render' | 'montage' | 'storyboard' | 'voice';
 
 export const MONTAGE_STAGES = ['discover', 'probe', 'transcribe', 'plan'] as const;
 export type MontageStage = (typeof MONTAGE_STAGES)[number];
 
 export const STORYBOARD_STAGES = ['collect', 'propose', 'persist'] as const;
 export type StoryboardStage = (typeof STORYBOARD_STAGES)[number];
+
+export const VOICE_STAGES = ['synthesize', 'transcribe', 'persist'] as const;
+export type VoiceStage = (typeof VOICE_STAGES)[number];
 
 export interface RenderJobProgress {
   readonly stage: RenderPipelineStage;
@@ -46,6 +49,29 @@ export interface MontageJobProgress {
 export interface StoryboardJobProgress {
   readonly stage: StoryboardStage;
   readonly percent: number | null;
+}
+
+export interface VoiceJobProgress {
+  readonly stage: VoiceStage;
+  readonly processedScenes: number | null;
+  readonly totalScenes: number | null;
+  readonly percent: number | null;
+}
+
+export interface VoiceJobSceneReport {
+  readonly sceneId: string;
+  readonly path: string;
+  readonly wordsPath: string;
+  readonly durationMs: number;
+  readonly source: VoiceTrackSource;
+}
+
+export interface VoiceJobReport {
+  readonly manifestPath: string;
+  readonly storyboardId: string;
+  readonly voiceId: string;
+  readonly language: string;
+  readonly scenes: readonly VoiceJobSceneReport[];
 }
 
 export interface StoryboardJobUsage {
@@ -100,13 +126,19 @@ export type StoryboardJob = JobBase & {
   readonly report: StoryboardJobReport | null;
 };
 
-export type Job = RenderJob | MontageJob | StoryboardJob;
+export type VoiceJob = JobBase & {
+  readonly kind: 'voice';
+  readonly progress: VoiceJobProgress | null;
+  readonly report: VoiceJobReport | null;
+};
+
+export type Job = RenderJob | MontageJob | StoryboardJob | VoiceJob;
 
 export interface JobSummary {
   readonly id: string;
   readonly kind: JobKind;
   readonly state: RenderJobState;
-  readonly stage: RenderPipelineStage | MontageStage | StoryboardStage | null;
+  readonly stage: RenderPipelineStage | MontageStage | StoryboardStage | VoiceStage | null;
   readonly errorCode: RenderApiErrorCode | null;
   readonly createdAt: string;
   readonly startedAt: string | null;
@@ -115,7 +147,11 @@ export interface JobSummary {
 
 export type RenderJobSummary = JobSummary;
 
-export type CreateJobInput = CreateRenderJobInput | CreateMontageJobInput | CreateStoryboardJobInput;
+export type CreateJobInput =
+  | CreateRenderJobInput
+  | CreateMontageJobInput
+  | CreateStoryboardJobInput
+  | CreateVoiceJobInput;
 
 export interface CreateRenderJobInput {
   readonly kind: 'render';
@@ -140,9 +176,18 @@ export interface CreateStoryboardJobInput {
   readonly scriptText: string | null;
 }
 
+export interface CreateVoiceJobInput {
+  readonly kind: 'voice';
+  readonly slug: string;
+  readonly projectRoot: string;
+  readonly voiceId: string | null;
+  readonly sceneIds: readonly string[] | null;
+}
+
 export function toJob(record: RenderJob): RenderJob;
 export function toJob(record: MontageJob): MontageJob;
 export function toJob(record: StoryboardJob): StoryboardJob;
+export function toJob(record: VoiceJob): VoiceJob;
 export function toJob(record: Job): Job;
 export function toJob(record: Job): Job {
   switch (record.kind) {
@@ -177,6 +222,19 @@ export function toJob(record: Job): Job {
         id: record.id,
         slug: record.slug,
         kind: 'storyboard',
+        state: record.state,
+        createdAt: record.createdAt,
+        startedAt: record.startedAt,
+        finishedAt: record.finishedAt,
+        progress: record.progress,
+        report: record.report,
+        error: record.error,
+      };
+    case 'voice':
+      return {
+        id: record.id,
+        slug: record.slug,
+        kind: 'voice',
         state: record.state,
         createdAt: record.createdAt,
         startedAt: record.startedAt,

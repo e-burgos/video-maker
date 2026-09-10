@@ -3,7 +3,7 @@ import { createReadStream, createWriteStream } from 'node:fs';
 import { mkdir, readFile, readdir, rename, stat, unlink, writeFile } from 'node:fs/promises';
 import { randomUUID } from 'node:crypto';
 import { tmpdir } from 'node:os';
-import { isAbsolute, join, relative } from 'node:path/posix';
+import { dirname, isAbsolute, join, relative } from 'node:path/posix';
 
 import { nodeDirectoryReader, nodeFileStatReader } from '@video-maker/auto-montage';
 
@@ -15,6 +15,8 @@ import type { EngineModuleStatus } from '../engine/engine-modules';
 import { MEDIA_BINARY_NAMES } from '../engine/media-binaries';
 import type { BinaryStatus, ResolvedMediaBinaries } from '../engine/media-binaries';
 import { PipelineStageError } from '../errors/pipeline-stage-error';
+import type { ResolvedVoiceBinaries } from '@video-maker/media-local';
+
 import type { ByteRange, ObjectStorage, WriteTemporaryInput, WriteTemporaryOutcome } from './object-storage';
 import type { RenderApiDependencies } from './render-api-dependencies';
 
@@ -156,6 +158,7 @@ export function createNodeRenderApiDependencies(
   let mediaLocalModule: Promise<typeof import('@video-maker/media-local')> | null = null;
   let renderModule: Promise<typeof import('@video-maker/composition-remotion/render')> | null = null;
   let binaries: Promise<ResolvedMediaBinaries> | null = null;
+  let voiceBinaries: Promise<ResolvedVoiceBinaries> | null = null;
 
   const loadMediaLocal = (): Promise<typeof import('@video-maker/media-local')> => {
     mediaLocalModule ??= import('@video-maker/media-local');
@@ -165,6 +168,14 @@ export function createNodeRenderApiDependencies(
   const loadRender = (): Promise<typeof import('@video-maker/composition-remotion/render')> => {
     renderModule ??= import('@video-maker/composition-remotion/render');
     return renderModule;
+  };
+
+  const loadVoiceBinaries = (): Promise<ResolvedVoiceBinaries> => {
+    voiceBinaries ??= (async () => {
+      const { resolveVoiceBinaries } = await loadMediaLocal();
+      return resolveVoiceBinaries(env);
+    })();
+    return voiceBinaries;
   };
 
   const loadBinaries = (): Promise<ResolvedMediaBinaries> => {
@@ -293,6 +304,59 @@ export function createNodeRenderApiDependencies(
       const { ExecaCommandRunner } = await loadMediaLocal();
       const config = readAiAgentConfig(env, tmpdir());
       return createClaudeCliAiAgent(new ExecaCommandRunner(), config)(request);
+    },
+
+    resolveVoiceBinaries: async () => {
+      const { resolveVoiceBinaries } = await loadMediaLocal();
+      return resolveVoiceBinaries(env);
+    },
+
+    listVoiceModels: async () => {
+      const { buildVoiceCatalog, resolveBinary } = await loadMediaLocal();
+      const modelPath = await resolveBinary('piperModel', env);
+      const entries = await readdir(dirname(modelPath), { withFileTypes: true });
+      return buildVoiceCatalog(
+        entries.filter((entry) => entry.isFile()).map((entry) => entry.name),
+        modelPath,
+      );
+    },
+
+    synthesizeVoice: async ({ textPath, outPath, modelPath, projectRoot }) => {
+      const { ExecaCommandRunner, synthesizeSpeech } = await loadMediaLocal();
+      const { piperCli } = await loadVoiceBinaries();
+      await synthesizeSpeech(
+        outPath,
+        { modelPath, textPath, piperPath: piperCli, runOptions: { cwd: projectRoot } },
+        new ExecaCommandRunner(),
+      );
+    },
+
+    extractVoiceAudio: async ({ inputPath, outPath, sampleRate, channels, projectRoot }) => {
+      const { ExecaCommandRunner, extractAudioForTranscription } = await loadMediaLocal();
+      const { ffmpeg } = await loadBinaries();
+      await extractAudioForTranscription(inputPath, outPath, new ExecaCommandRunner(), {
+        sampleRate,
+        channels,
+        ffmpegPath: ffmpeg,
+        runOptions: { cwd: projectRoot },
+      });
+    },
+
+    transcribeVoice: async ({ wavPath, outBase, assetId, language, projectRoot }) => {
+      const { ExecaCommandRunner, transcribeWithWhisperCpp } = await loadMediaLocal();
+      const { whisperCli, whisperModel } = await loadVoiceBinaries();
+      return transcribeWithWhisperCpp(
+        wavPath,
+        {
+          modelPath: whisperModel,
+          outBase,
+          assetId,
+          language,
+          whisperPath: whisperCli,
+          runOptions: { cwd: projectRoot },
+        },
+        new ExecaCommandRunner(),
+      );
     },
   };
 }
