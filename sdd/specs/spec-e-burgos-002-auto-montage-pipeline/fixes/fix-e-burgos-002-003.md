@@ -23,9 +23,12 @@ grupo hasta `minDurationMs`, `planCaptionGroups` recorta el fin al `keep` que lo
 
 ## Solución
 
-1. **En el origen** (`libs/media-local`, parser de whisper.cpp): `repairZeroDurationWords` reparte
-   cada corrida de palabras sin duración entre su inicio y el inicio de la siguiente palabra con
-   tiempo real; sin siguiente, 200 ms por palabra.
+1. **En el origen** (`libs/media-local`, parser de whisper.cpp): `repairZeroDurationWords` empaqueta
+   cada corrida de palabras sin duración **al final** del hueco que va hasta la siguiente palabra con
+   tiempo real (200 ms por palabra como máximo), dejando la pausa previa sin palabras: whisper.cpp
+   arranca cada segmento donde terminó el anterior, y estirar la primera palabra sobre el silencio
+   hacía que el agrupador de captions la pegara a la frase anterior ("VOS. EN", visto en `demo-01`).
+   Sin palabra siguiente, 200 ms por palabra desde su inicio.
 2. **Red de seguridad** (`libs/auto-montage`, `planCaptionGroups`): un grupo cuyo fin recortado no
    supera su inicio se descarta en vez de emitirse.
 

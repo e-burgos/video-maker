@@ -166,4 +166,20 @@ describe('groupWordsForCaptions + EditDecisionListSchema', () => {
 
     expect(result.success).toBe(true);
   });
+  it('una palabra que termina una oracion cierra el grupo aunque la siguiente arranque sin hueco (FIX-e-burgos-003-002)', () => {
+    const groups = groupWordsForCaptions(
+      [
+        { text: 'que', startMs: 1410, endMs: 1600 },
+        { text: 'vos.', startMs: 1600, endMs: 2740 },
+        { text: 'En', startMs: 2740, endMs: 2860 },
+        { text: 'nuestra', startMs: 2860, endMs: 3350 },
+      ],
+      { maxWords: 3, maxGapMs: 500, maxDurationMs: 2000 },
+    );
+
+    expect(groups.map((group) => group.words.map((word) => word.text))).toEqual([
+      ['que', 'vos.'],
+      ['En', 'nuestra'],
+    ]);
+  });
 });

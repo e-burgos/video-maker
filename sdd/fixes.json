@@ -329,6 +329,54 @@
           }
         ]
       }
+    },
+    {
+      "id": "FIX-e-burgos-003-002",
+      "author": "e-burgos",
+      "spec_id": "spec-e-burgos-003-kinetic-captions",
+      "fix_document": "sdd/specs/spec-e-burgos-003-kinetic-captions/fixes/fix-e-burgos-003-002.md",
+      "type": "BUGFIX",
+      "severity": "medium",
+      "created_at": "2026-09-10",
+      "resolved_at": "2026-09-10",
+      "validated_at": null,
+      "title": "caption groups run across sentence boundaries because whisper.cpp assigns the pause to the previous word",
+      "estimation_hours": 1,
+      "description": "On the real optics ad (media/demo-01) the caption 'VOS. EN' mixed the end of one sentence with the start of the next. whisper.cpp -ml 1 gives the token before a pause the whole pause duration ('vos' 1600..2740 ms for a ~350 ms word) and starts the next token right at its end, so the gap between sentences is 0 ms and the gap-based groupWordsForCaptions cannot split them. Sentence punctuation is a timing-independent cue: a word ending in . ! ? or the ellipsis now closes the group.",
+      "justification": "Confirmed on real material with the default model; one pure function in timeline-core plus its test, no contract change, backward compatible for transcripts without punctuation. Solo-profile FIX GATE, no cycle open.",
+      "related_modules": [
+        "kinetic-captions",
+        "core-composition-media-pipeline"
+      ],
+      "affected_files": [
+        "libs/timeline-core/src/captions/group-words-for-captions.ts",
+        "libs/timeline-core/src/captions/captions.spec.ts"
+      ],
+      "test_reference": "pnpm nx run-many -t lint test build -p timeline-core auto-montage composition-remotion green (2026-09-10). New case: 'que vos.' | 'En nuestra' split at the period with a 0 ms gap. Real re-plan of media/demo-01: the first caption groups no longer cross the sentence boundary.",
+      "status": "implemented",
+      "cycle": null,
+      "process_note": "Found while producing demo-01 with the video-producer skill. Resolved by the steward in the main loop.",
+      "usage": {
+        "provider_model": "claude/fable",
+        "effort": "medium",
+        "tokens_in": 30000,
+        "tokens_out": 4000,
+        "approx": true,
+        "source": "declared-estimate",
+        "recorded_at": "2026-09-10",
+        "by_agent": [
+          {
+            "agent": "steward",
+            "provider_model": "claude/fable",
+            "effort": "medium",
+            "tokens_in": 30000,
+            "tokens_out": 4000,
+            "approx": true,
+            "source": "declared-estimate",
+            "recorded_at": "2026-09-10"
+          }
+        ]
+      }
     }
   ]
 }

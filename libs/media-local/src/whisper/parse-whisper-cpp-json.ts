@@ -67,13 +67,14 @@ function sameStartBlockLength(words: readonly Word[], startIndex: number): numbe
   return length;
 }
 
-function spreadBlockUntil(words: Word[], startIndex: number, blockLength: number, spanEndMs: number): void {
+function packBlockBefore(words: Word[], startIndex: number, blockLength: number, spanEndMs: number): void {
   const blockStartMs = (words[startIndex] as Word).startMs;
-  const stepMs = (spanEndMs - blockStartMs) / blockLength;
+  const stepMs = Math.min(FALLBACK_WORD_DURATION_MS, (spanEndMs - blockStartMs) / blockLength);
   for (let offset = 0; offset < blockLength; offset += 1) {
     const word = words[startIndex + offset] as Word;
-    word.startMs = Math.round(blockStartMs + offset * stepMs);
-    word.endMs = offset === blockLength - 1 ? spanEndMs : Math.round(blockStartMs + (offset + 1) * stepMs);
+    const remaining = blockLength - offset;
+    word.startMs = Math.round(spanEndMs - remaining * stepMs);
+    word.endMs = offset === blockLength - 1 ? spanEndMs : Math.round(spanEndMs - (remaining - 1) * stepMs);
   }
 }
 
@@ -90,7 +91,7 @@ export function repairZeroDurationWords(words: readonly Word[]): Word[] {
     const nextWord = repaired[index + blockLength];
     const spanEndMs =
       nextWord !== undefined ? nextWord.startMs : blockStartMs + FALLBACK_WORD_DURATION_MS * blockLength;
-    spreadBlockUntil(repaired, index, blockLength, spanEndMs);
+    packBlockBefore(repaired, index, blockLength, spanEndMs);
     index += blockLength;
   }
   return repaired;

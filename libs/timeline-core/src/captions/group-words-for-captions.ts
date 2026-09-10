@@ -35,6 +35,11 @@ const MIN_MAX_WORDS = 1;
 const DEFAULT_MAX_DURATION_MS: Ms = 1200;
 const DEFAULT_MIN_DURATION_MS: Ms = 300;
 const DEFAULT_MAX_GAP_MS: Ms = 500;
+const SENTENCE_END_PATTERN = /[.!?…]["»)]?$/u;
+
+function endsSentence(word: TranscriptWord): boolean {
+  return SENTENCE_END_PATTERN.test(word.text.trim());
+}
 
 function wordDurationMs(word: TranscriptWord): Ms {
   return word.endMs - word.startMs;
@@ -108,7 +113,10 @@ function shouldStartNewGroup(
   const candidateDurationMs = candidateWord.endMs - current.firstWord.startMs;
 
   return (
-    gapMs >= maxGapMs || current.words.length >= maxWords || candidateDurationMs > maxDurationMs
+    endsSentence(current.lastWord) ||
+    gapMs >= maxGapMs ||
+    current.words.length >= maxWords ||
+    candidateDurationMs > maxDurationMs
   );
 }
 

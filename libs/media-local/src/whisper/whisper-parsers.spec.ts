@@ -82,6 +82,16 @@ describe('groupTokensIntoWords', () => {
     words.slice(1).forEach((word, index) => expect(word.startMs).toBeGreaterThanOrEqual((words[index] as Word).endMs));
   });
 
+  it('empaqueta la corrida al final del hueco: la pausa previa queda sin palabras (una palabra no debe cubrir el silencio)', () => {
+    const words = groupTokensIntoWords([
+      { offsets: { from: 3000, to: 3900 }, text: ' vos.' },
+      { offsets: { from: 3980, to: 3980 }, text: ' En' },
+      { offsets: { from: 4900, to: 5200 }, text: ' nuestra' },
+    ]);
+
+    expect(words[1]).toEqual({ text: 'En', startMs: 4700, endMs: 4900 });
+  });
+
   it('una palabra final sin duracion recibe 200 ms por defecto', () => {
     const words = groupTokensIntoWords([
       { offsets: { from: 100, to: 400 }, text: ' Chau' },
