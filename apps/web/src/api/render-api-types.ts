@@ -22,6 +22,7 @@ export type ServiceCapabilities = {
   assetStore: boolean;
   jobQueue: boolean;
   montageQueue: boolean;
+  storyboardQueue: boolean;
 };
 
 export type ServiceJobCounters = {
@@ -135,7 +136,7 @@ export const RENDER_PIPELINE_STAGES = ['prepare', 'render', 'mix', 'mux', 'verif
 
 export type RenderPipelineStage = (typeof RENDER_PIPELINE_STAGES)[number];
 
-export const JOB_KINDS = ['render', 'montage'] as const;
+export const JOB_KINDS = ['render', 'montage', 'storyboard'] as const;
 
 export type JobKind = (typeof JOB_KINDS)[number];
 
@@ -146,6 +147,14 @@ export type MontagePresetName = (typeof MONTAGE_PRESETS)[number];
 export const MONTAGE_STAGES = ['discover', 'probe', 'transcribe', 'plan'] as const;
 
 export type MontageStage = (typeof MONTAGE_STAGES)[number];
+
+export const STORYBOARD_STAGES = ['collect', 'propose', 'persist'] as const;
+
+export type StoryboardStage = (typeof STORYBOARD_STAGES)[number];
+
+export const STORYBOARD_SOURCES = ['brief', 'script'] as const;
+
+export type StoryboardJobSource = (typeof STORYBOARD_SOURCES)[number];
 
 export type RenderJobProgress = {
   stage: RenderPipelineStage;
@@ -225,13 +234,47 @@ export type MontageJob = {
   error: RenderApiErrorPayload | null;
 };
 
-export type Job = RenderJob | MontageJob;
+export type StoryboardJobProgress = {
+  stage: StoryboardStage;
+  percent: number | null;
+};
+
+export type StoryboardJobUsage = {
+  tokensIn: number;
+  tokensOut: number;
+  costUsd: number | null;
+  model: string | null;
+};
+
+export type StoryboardJobReport = {
+  storyboardPath: string;
+  storyboardId: string;
+  source: StoryboardJobSource;
+  language: string;
+  sceneCount: number;
+  usage: StoryboardJobUsage;
+};
+
+export type StoryboardJob = {
+  id: string;
+  kind: 'storyboard';
+  slug: string;
+  state: RenderJobState;
+  createdAt: string;
+  startedAt: string | null;
+  finishedAt: string | null;
+  progress: StoryboardJobProgress | null;
+  report: StoryboardJobReport | null;
+  error: RenderApiErrorPayload | null;
+};
+
+export type Job = RenderJob | MontageJob | StoryboardJob;
 
 export type RenderJobSummary = {
   id: string;
   kind: JobKind;
   state: RenderJobState;
-  stage: RenderPipelineStage | MontageStage | null;
+  stage: RenderPipelineStage | MontageStage | StoryboardStage | null;
   errorCode: string | null;
   createdAt: string;
   startedAt: string | null;
@@ -244,6 +287,11 @@ export type RenderJobListing = {
 };
 
 export type TimelineWriteResult = {
+  slug: string;
+  path: string;
+};
+
+export type StoryboardWriteResult = {
   slug: string;
   path: string;
 };

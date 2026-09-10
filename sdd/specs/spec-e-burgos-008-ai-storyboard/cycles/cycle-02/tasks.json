@@ -1,0 +1,218 @@
+{
+  "$schema": "../../../../schemas/cycle-tasks.schema.json",
+  "spec": "spec-e-burgos-008-ai-storyboard",
+  "cycle": 2,
+  "module": "ai-storyboard",
+  "apps": [
+    "apps/web"
+  ],
+  "flow": "lite",
+  "user_stories_generated": true,
+  "prerequisites": {
+    "tasks_generated": true
+  },
+  "tasks": [
+    {
+      "id": "TASK-001",
+      "title": "Declare the storyboard HTTP contract in the web api boundary",
+      "user_stories": [
+        "US-08-006",
+        "US-08-008",
+        "US-08-009",
+        "US-08-010"
+      ],
+      "estimation_hours": 4,
+      "story_points": 5,
+      "depends_on": [],
+      "status": "done",
+      "files": [
+        "apps/web/src/api/render-api-types.ts",
+        "apps/web/src/api/parse-render-job.ts",
+        "apps/web/src/api/parse-render-job.spec.ts",
+        "apps/web/src/api/parse-storyboard.ts",
+        "apps/web/src/api/parse-storyboard.spec.ts",
+        "apps/web/src/api/storyboard-capability.ts",
+        "apps/web/src/api/storyboard-capability.spec.ts",
+        "apps/web/src/api/__fixtures__/storyboard.ts",
+        "apps/web/src/api/render-api-client.ts",
+        "apps/web/src/api/render-api-client.spec.ts"
+      ],
+      "usage": {
+        "provider_model": "claude/opus",
+        "effort": "high",
+        "agent": "orchestrator",
+        "tokens_in": 120000,
+        "tokens_out": 14000,
+        "approx": true,
+        "source": "declared-estimate",
+        "recorded_at": "2026-09-09"
+      }
+    },
+    {
+      "id": "TASK-002",
+      "title": "Build the pure storyboard editing model mirroring the server validation",
+      "user_stories": [
+        "US-08-007"
+      ],
+      "estimation_hours": 4,
+      "story_points": 5,
+      "depends_on": [
+        "TASK-001"
+      ],
+      "status": "done",
+      "files": [
+        "apps/web/src/api/storyboard-edit/storyboard-document.ts",
+        "apps/web/src/api/storyboard-edit/storyboard-document.spec.ts"
+      ],
+      "usage": {
+        "provider_model": "claude/opus",
+        "effort": "high",
+        "agent": "orchestrator",
+        "tokens_in": 55000,
+        "tokens_out": 12000,
+        "approx": true,
+        "source": "declared-estimate",
+        "recorded_at": "2026-09-09"
+      }
+    },
+    {
+      "id": "TASK-003",
+      "title": "Trigger the storyboard job and follow it with its stages and typed failures",
+      "user_stories": [
+        "US-08-006",
+        "US-08-009",
+        "US-08-010"
+      ],
+      "estimation_hours": 5,
+      "story_points": 5,
+      "depends_on": [
+        "TASK-001"
+      ],
+      "status": "done",
+      "files": [
+        "apps/web/src/components/storyboard-trigger.tsx",
+        "apps/web/src/components/storyboard-trigger.spec.tsx",
+        "apps/web/src/components/storyboard-job-panel.tsx",
+        "apps/web/src/components/storyboard-job-panel.spec.tsx"
+      ],
+      "usage": {
+        "provider_model": "claude/opus",
+        "effort": "high",
+        "agent": "orchestrator",
+        "tokens_in": 70000,
+        "tokens_out": 16000,
+        "approx": true,
+        "source": "declared-estimate",
+        "recorded_at": "2026-09-09"
+      }
+    },
+    {
+      "id": "TASK-004",
+      "title": "Edit the storyboard document and export its numbered prompt sheet",
+      "user_stories": [
+        "US-08-007",
+        "US-08-008"
+      ],
+      "estimation_hours": 6,
+      "story_points": 8,
+      "depends_on": [
+        "TASK-002"
+      ],
+      "status": "done",
+      "files": [
+        "apps/web/src/api/clipboard.ts",
+        "apps/web/src/api/clipboard.spec.ts",
+        "apps/web/src/components/storyboard-header-editor.tsx",
+        "apps/web/src/components/storyboard-header-editor.spec.tsx",
+        "apps/web/src/components/storyboard-character-sheet.tsx",
+        "apps/web/src/components/storyboard-character-sheet.spec.tsx",
+        "apps/web/src/components/storyboard-scene-editor.tsx",
+        "apps/web/src/components/storyboard-scene-editor.spec.tsx",
+        "apps/web/src/components/storyboard-save-bar.tsx",
+        "apps/web/src/components/storyboard-save-bar.spec.tsx",
+        "apps/web/src/components/storyboard-prompt-sheet.tsx",
+        "apps/web/src/components/storyboard-prompt-sheet.spec.tsx"
+      ],
+      "usage": {
+        "provider_model": "claude/opus",
+        "effort": "high",
+        "agent": "orchestrator",
+        "tokens_in": 95000,
+        "tokens_out": 24000,
+        "approx": true,
+        "source": "declared-estimate",
+        "recorded_at": "2026-09-09"
+      }
+    },
+    {
+      "id": "TASK-005",
+      "title": "Mount the storyboard page lazily and reach it from the layout and the library",
+      "user_stories": [
+        "US-08-006",
+        "US-08-007",
+        "US-08-008"
+      ],
+      "estimation_hours": 4,
+      "story_points": 5,
+      "depends_on": [
+        "TASK-003",
+        "TASK-004"
+      ],
+      "status": "done",
+      "files": [
+        "apps/web/src/pages/storyboard-page.tsx",
+        "apps/web/src/pages/storyboard-page.spec.tsx",
+        "apps/web/src/app/app.tsx",
+        "apps/web/src/components/studio-layout.tsx",
+        "apps/web/src/components/studio-layout.spec.tsx",
+        "apps/web/src/pages/asset-library-page.tsx",
+        "apps/web/src/pages/asset-library-page.spec.tsx"
+      ],
+      "usage": {
+        "provider_model": "claude/opus",
+        "effort": "high",
+        "agent": "orchestrator",
+        "tokens_in": 85000,
+        "tokens_out": 20000,
+        "approx": true,
+        "source": "declared-estimate",
+        "recorded_at": "2026-09-09"
+      }
+    },
+    {
+      "id": "TASK-006",
+      "title": "Run the real end-to-end storyboard smoke and close the cycle registries",
+      "user_stories": [
+        "US-08-006",
+        "US-08-007",
+        "US-08-008",
+        "US-08-009"
+      ],
+      "estimation_hours": 5,
+      "story_points": 5,
+      "depends_on": [
+        "TASK-005"
+      ],
+      "status": "done",
+      "files": [
+        "apps/web/e2e/storyboard-smoke.mjs",
+        "apps/web/README.md",
+        "sdd/components.json",
+        "sdd/context/apps/web/updates/2026-09-09-spec-e-burgos-008-ai-storyboard-cycle-02.md",
+        "sdd/context/constitution.md",
+        "sdd/global.json",
+        "sdd/specs/index.json"
+      ],
+      "usage": {
+        "provider_model": "claude/opus",
+        "effort": "high",
+        "agent": "orchestrator",
+        "tokens_in": 130000,
+        "tokens_out": 30000,
+        "approx": true,
+        "source": "declared-estimate",
+        "recorded_at": "2026-09-09"
+      }
+    }
+  ]
+}

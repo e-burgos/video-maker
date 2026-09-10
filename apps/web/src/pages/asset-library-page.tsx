@@ -36,6 +36,12 @@ export function AssetLibraryPage() {
         <div className="mt-2 flex flex-wrap items-center gap-3">
           <h1 className="font-mono text-2xl font-semibold tracking-tight">{slug}</h1>
           <Link
+            to={`/projects/${slug}/storyboard`}
+            className="rounded-md border border-slate-700 px-3 py-1 font-mono text-xs text-slate-300 hover:border-slate-500"
+          >
+            open storyboard
+          </Link>
+          <Link
             to={`/projects/${slug}/preview`}
             className="rounded-md border border-slate-700 px-3 py-1 font-mono text-xs text-slate-300 hover:border-slate-500"
           >

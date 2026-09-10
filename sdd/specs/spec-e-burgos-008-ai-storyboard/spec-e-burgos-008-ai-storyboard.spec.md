@@ -1,8 +1,10 @@
 # SPEC-e-burgos-008: AI Storyboard: Guion, Escenas y Prompts Visuales
 
-> Estado: **in-progress** — redactada por el actor del ciclo al registrar el backlog generativo
-> (2026-09-09); `cycle-01` abierto el mismo día con flow `lite` (perfil `solo`, pedido `[LITE]`).
-> `cycle-01` entrega el backend completo; `cycle-02` amplía las secciones de `apps/web`.
+> Estado: **completed** (2026-09-09) — redactada por el actor del ciclo al registrar el backlog
+> generativo (2026-09-09); los dos ciclos corrieron con flow `lite` (perfil `solo`, pedido
+> `[LITE]`; en `cycle-02` el dev forzó `lite` pese a la sugerencia del validador, que se refería a
+> los endpoints creados por `cycle-01`). `cycle-01` entregó el backend completo; `cycle-02` cerró
+> la spec con el modo generativo en `apps/web`.
 
 ## Resumen Ejecutivo
 
@@ -122,8 +124,8 @@ modo "grabé a cámara". Esta spec agrega un segundo modo, no reemplaza el prime
 
 | Ciclo | Fase | Flow | Qué entrega | Estado |
 | --- | --- | --- | --- | --- |
-| **cycle-01** | `storyboard-backend` | `lite` | El contrato `StoryboardDocument` (Zod, en `libs/timeline-core`) con su JSON Schema derivado; el puerto `AiAgent` con adaptador `ClaudeCliAiAgent` sobre `claude -p` y `FakeAiAgent` para la suite; el inventario del proyecto (catálogo, transcripción del A-roll, storyboard previo) que alimenta el prompt; el job `kind: 'storyboard'` con `brief` **o** `scriptText` y `overwrite`; `GET`/`PUT /projects/:slug/storyboard` y `GET /projects/:slug/storyboard/prompts` (texto plano numerado); errores tipados con mapeo HTTP; contrato en `sdd/api.json`; README con el guion copiable; **smoke real ejecutado** contra `claude -p`. | **in-progress** |
-| **cycle-02** | `storyboard-studio` | `lite` | En `apps/web`: panel de brief (idea o guion pegado, idioma, formato), storyboard editable escena por escena (narración, prompt visual, fuente del visual, escena Remotion y sus props, duración estimada), hoja de personajes, progreso del job y botón **copiar prompts** que entrega la lista numerada lista para pegar en Meta AI / Google Flow. Cierra la spec. | **pending** |
+| **cycle-01** | `storyboard-backend` | `lite` | El contrato `StoryboardDocument` (Zod, en `libs/timeline-core`) con su JSON Schema derivado; el puerto `AiAgent` con adaptador `ClaudeCliAiAgent` sobre `claude -p` y `FakeAiAgent` para la suite; el inventario del proyecto (catálogo, transcripción del A-roll, storyboard previo) que alimenta el prompt; el job `kind: 'storyboard'` con `brief` **o** `scriptText` y `overwrite`; `GET`/`PUT /projects/:slug/storyboard` y `GET /projects/:slug/storyboard/prompts` (texto plano numerado); errores tipados con mapeo HTTP; contrato en `sdd/api.json`; README con el guion copiable; **smoke real ejecutado** contra `claude -p`. | **completed** |
+| **cycle-02** | `storyboard-studio` | `lite` | En `apps/web`: panel de brief (idea o guion pegado, idioma, formato), storyboard editable escena por escena (narración, prompt visual, fuente del visual, escena Remotion y sus props, duración estimada), hoja de personajes, progreso del job y botón **copiar prompts** que entrega la lista numerada lista para pegar en Meta AI / Google Flow. Cierra la spec. | **completed** |
 
 ## Requisitos Funcionales (RF)
 

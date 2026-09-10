@@ -3,7 +3,7 @@ import { MemoryRouter, Route, Routes } from 'react-router-dom';
 import { describe, expect, it, vi } from 'vitest';
 
 import { RenderApiProvider, useRenderApi } from '../api/render-api-context';
-import { StudioLayout } from './studio-layout';
+import { StudioLayout, projectSlugFromPathname } from './studio-layout';
 import type { RenderApiClient } from '../api/render-api-client';
 
 function ClientProbe() {
@@ -57,5 +57,73 @@ describe('StudioLayout', () => {
 
   it('refuses to hand out a client outside the provider', () => {
     expect(() => render(<ClientProbe />)).toThrow('useRenderApi must be used inside');
+  });
+});
+
+describe('projectSlugFromPathname', () => {
+  it('reads the slug of every project route and nothing else', () => {
+    expect(projectSlugFromPathname('/projects/smoke-ingest')).toBe('smoke-ingest');
+    expect(projectSlugFromPathname('/projects/smoke-ingest/storyboard')).toBe('smoke-ingest');
+    expect(projectSlugFromPathname('/projects/smoke-ingest/preview')).toBe('smoke-ingest');
+    expect(projectSlugFromPathname('/')).toBeNull();
+    expect(projectSlugFromPathname('/projects')).toBeNull();
+  });
+
+  it('decodes a slug that travelled percent-encoded in the url', () => {
+    expect(projectSlugFromPathname('/projects/a%20b/preview')).toBe('a b');
+  });
+});
+
+describe('StudioLayout project nav', () => {
+  function renderAt(pathname: string) {
+    const client = {
+      getHealth: vi.fn().mockRejectedValue(new Error('not needed here')),
+    } as unknown as RenderApiClient;
+
+    render(
+      <RenderApiProvider client={client}>
+        <MemoryRouter initialEntries={[pathname]}>
+          <Routes>
+            <Route element={<StudioLayout />}>
+              <Route path="/" element={<p>projects</p>} />
+              <Route path="/projects/:slug" element={<p>library</p>} />
+              <Route path="/projects/:slug/storyboard" element={<p>storyboard</p>} />
+              <Route path="/projects/:slug/preview" element={<p>preview</p>} />
+            </Route>
+          </Routes>
+        </MemoryRouter>
+      </RenderApiProvider>,
+    );
+  }
+
+  it('shows no project nav outside a project', () => {
+    renderAt('/');
+
+    expect(screen.queryByTestId('project-nav')).toBeNull();
+  });
+
+  it('links the three sections of the project from any of them', () => {
+    renderAt('/projects/smoke-ingest/storyboard');
+
+    const nav = screen.getByTestId('project-nav');
+    expect(Array.from(nav.querySelectorAll('a')).map((link) => link.getAttribute('href'))).toEqual([
+      '/projects/smoke-ingest',
+      '/projects/smoke-ingest/storyboard',
+      '/projects/smoke-ingest/preview',
+    ]);
+  });
+
+  it('marks the storyboard section as the current one while it is open', () => {
+    renderAt('/projects/smoke-ingest/storyboard');
+
+    const current = screen.getByRole('link', { name: 'storyboard' });
+    expect(current.getAttribute('aria-current')).toBe('page');
+    expect(screen.getByRole('link', { name: 'library' }).getAttribute('aria-current')).toBeNull();
+  });
+
+  it('marks the library as the current section only on the library route itself', () => {
+    renderAt('/projects/smoke-ingest');
+
+    expect(screen.getByRole('link', { name: 'library' }).getAttribute('aria-current')).toBe('page');
   });
 });

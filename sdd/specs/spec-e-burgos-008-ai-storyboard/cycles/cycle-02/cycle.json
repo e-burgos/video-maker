@@ -1,0 +1,166 @@
+{
+  "$schema": "../../../../schemas/cycle.schema.json",
+  "cycle": 2,
+  "module": "ai-storyboard",
+  "spec": "spec-e-burgos-008-ai-storyboard",
+  "apps": [
+    "apps/web"
+  ],
+  "phase": "storyboard-studio",
+  "flow": "lite",
+  "objectives": [
+    "Propose a storyboard from a brief or a pasted script without leaving the browser",
+    "Edit the storyboard scene by scene and persist it with a single full PUT",
+    "Hand the numbered visual prompt sheet to the external generative tools",
+    "Explain every agent failure in the user's language and never overwrite a storyboard silently"
+  ],
+  "status": "completed",
+  "started_at": "2026-09-09",
+  "completed_at": "2026-09-09",
+  "documents": {
+    "plan": "sdd/specs/spec-e-burgos-008-ai-storyboard/cycles/cycle-02/plan.md",
+    "tasks": "sdd/specs/spec-e-burgos-008-ai-storyboard/cycles/cycle-02/tasks.json"
+  },
+  "artifacts": [
+    "sdd/specs/spec-e-burgos-008-ai-storyboard/cycles/cycle-02/artifacts/smoke-storyboard-from-web.json",
+    "sdd/specs/spec-e-burgos-008-ai-storyboard/cycles/cycle-02/artifacts/smoke-prompts-copied-from-web.txt",
+    "sdd/specs/spec-e-burgos-008-ai-storyboard/cycles/cycle-02/artifacts/storyboard-smoke-01-empty-state.png",
+    "sdd/specs/spec-e-burgos-008-ai-storyboard/cycles/cycle-02/artifacts/storyboard-smoke-02-storyboard-rendered.png",
+    "sdd/specs/spec-e-burgos-008-ai-storyboard/cycles/cycle-02/artifacts/storyboard-smoke-03-edited-and-saved.png",
+    "sdd/specs/spec-e-burgos-008-ai-storyboard/cycles/cycle-02/artifacts/storyboard-smoke-04-prompts-copied.png",
+    "sdd/specs/spec-e-burgos-008-ai-storyboard/cycles/cycle-02/artifacts/storyboard-smoke-05-overwrite-confirmation.png"
+  ],
+  "metrics": {
+    "tasks_total": 6,
+    "tasks_completed": 6,
+    "story_points": 33,
+    "files_created": [
+      "apps/web/src/api/parse-storyboard.ts",
+      "apps/web/src/api/parse-storyboard.spec.ts",
+      "apps/web/src/api/storyboard-capability.ts",
+      "apps/web/src/api/storyboard-capability.spec.ts",
+      "apps/web/src/api/clipboard.ts",
+      "apps/web/src/api/clipboard.spec.ts",
+      "apps/web/src/api/__fixtures__/storyboard.ts",
+      "apps/web/src/api/storyboard-edit/storyboard-document.ts",
+      "apps/web/src/api/storyboard-edit/storyboard-document.spec.ts",
+      "apps/web/src/components/storyboard-trigger.tsx",
+      "apps/web/src/components/storyboard-trigger.spec.tsx",
+      "apps/web/src/components/storyboard-job-panel.tsx",
+      "apps/web/src/components/storyboard-job-panel.spec.tsx",
+      "apps/web/src/components/storyboard-header-editor.tsx",
+      "apps/web/src/components/storyboard-header-editor.spec.tsx",
+      "apps/web/src/components/storyboard-character-sheet.tsx",
+      "apps/web/src/components/storyboard-character-sheet.spec.tsx",
+      "apps/web/src/components/storyboard-scene-editor.tsx",
+      "apps/web/src/components/storyboard-scene-editor.spec.tsx",
+      "apps/web/src/components/storyboard-save-bar.tsx",
+      "apps/web/src/components/storyboard-save-bar.spec.tsx",
+      "apps/web/src/components/storyboard-prompt-sheet.tsx",
+      "apps/web/src/components/storyboard-prompt-sheet.spec.tsx",
+      "apps/web/src/pages/storyboard-page.tsx",
+      "apps/web/src/pages/storyboard-page.spec.tsx",
+      "apps/web/e2e/storyboard-smoke.mjs",
+      "sdd/context/apps/web/updates/2026-09-09-spec-e-burgos-008-ai-storyboard-cycle-02.md",
+      "sdd/memory/journal/2026-09-09-spec-e-burgos-008-ai-storyboard-cycle-02.md"
+    ],
+    "files_modified": [
+      "apps/web/src/api/render-api-types.ts",
+      "apps/web/src/api/parse-render-job.ts",
+      "apps/web/src/api/parse-render-job.spec.ts",
+      "apps/web/src/api/render-api-client.ts",
+      "apps/web/src/api/render-api-client.spec.ts",
+      "apps/web/src/api/montage-capability.spec.ts",
+      "apps/web/src/app/app.tsx",
+      "apps/web/src/components/studio-layout.tsx",
+      "apps/web/src/components/studio-layout.spec.tsx",
+      "apps/web/src/components/montage-trigger.spec.tsx",
+      "apps/web/src/components/service-health-badge.spec.tsx",
+      "apps/web/src/pages/asset-library-page.tsx",
+      "apps/web/src/pages/asset-library-page.spec.tsx",
+      "apps/web/README.md",
+      "sdd/components.json",
+      "sdd/context/constitution.md",
+      "sdd/context/apps/web/constitution.md",
+      "sdd/context/apps/web/context_prompt.md",
+      "sdd/global.json",
+      "sdd/specs/index.json",
+      "sdd/specs/spec-e-burgos-008-ai-storyboard/spec-e-burgos-008-ai-storyboard.spec.md"
+    ],
+    "files_deleted": [
+      "sdd/context/apps/web/updates/2026-09-09-spec-e-burgos-007-web-montage-cycle-02.md"
+    ],
+    "usage": {
+      "tokens_in": 555000,
+      "tokens_out": 116000,
+      "approx": true,
+      "source": "declared-estimate",
+      "by_tier": {
+        "claude/opus": {
+          "tokens_in": 555000,
+          "tokens_out": 116000,
+          "approx": true,
+          "source": "declared-estimate"
+        }
+      },
+      "by_agent": [
+        {
+          "agent": "orchestrator",
+          "label": "solo",
+          "provider_model": "claude/opus",
+          "effort": "high",
+          "tokens_in": 555000,
+          "tokens_out": 116000,
+          "approx": true,
+          "source": "declared-estimate",
+          "recorded_at": "2026-09-09",
+          "tokens_total": 671000
+        }
+      ]
+    }
+  },
+  "tables_created": [],
+  "endpoints_implemented": [],
+  "components_created": [
+    "COMP-027",
+    "COMP-028",
+    "COMP-029",
+    "COMP-030",
+    "COMP-031",
+    "COMP-032",
+    "COMP-033",
+    "COMP-034"
+  ],
+  "issues_found": [
+    "Importar StoryboardDocumentSchema desde render-api-client.ts (que vive en el shell) mudo Zod y todo timeline-core al chunk inicial: 466 kB -> 580 kB y reaparecio el aviso de Vite de chunks > 500 kB, con lint, test y build de los 8 proyectos en verde. Corregido copiando el patron ya existente de getTimeline: chequeo superficial en el cliente y validacion con Zod dentro de la ruta perezosa.",
+    "React renderiza el valor de un textarea y las option de un select como hijos del <label> que los envuelve, asi que el nombre accesible es la etiqueta MAS el valor. Los tests jsdom pasaron y el E2E de Playwright fallo dos veces (primero por ambiguedad, despues por no encontrar nada). Corregido con aria-label explicito en cada control; los data-testid y esos aria-label son ahora contrato del guion E2E.",
+    "jsdom no implementa File.prototype.text(): la carga de un guion desde archivo se resolvio con FileReader, que ademas es el camino compatible mas amplio en navegador."
+  ],
+  "reviewer_report": {
+    "approved": true,
+    "date": "2026-09-09",
+    "ca_results": {
+      "US-08-006": "PASS — storyboard-trigger.spec.tsx (brief y scriptText enviados por separado, nunca los dos), storyboard-job-panel.spec.tsx (las tres etapas con su descripcion) y el E2E real: job creado con 202, etapas propose -> persist observadas por API y por UI, 65,5 s. El aviso de que propose tarda mas de un minuto esta en el trigger y en el panel.",
+      "US-08-007": "PASS — storyboard-document.spec.ts (editores inmutables y espejo del 422), storyboard-page.spec.tsx (dirty al primer cambio, limpio tras el PUT, y limpio otra vez si se vuelve al valor guardado) y el E2E: narracion editada, PUT 200 y work/storyboard.json releido DEL DISCO con la narracion nueva y las 5 escenas intactas.",
+      "US-08-008": "PASS — storyboard-prompt-sheet.spec.tsx (copia el text/plain sin recomponerlo, fallback en pantalla si el navegador niega el portapapeles) y el E2E: 200 text/plain; charset=utf-8, portapapeles leido con navigator.clipboard.readText() e igual byte a byte al cuerpo servido (1813 chars), numerado desde 01, mas la copia por escena comparada con su visualPrompt.",
+      "US-08-009": "PASS — storyboard-trigger.spec.tsx (409 -> alertdialog, reintento con overwrite: true solo al confirmar, descarte que no vuelve a pedir) y el E2E: segunda propuesta refusada con 409 STORYBOARD_ALREADY_EXISTS, confirmacion en pantalla, y el documento en disco intacto tras descartarla. Los cuatro codigos del agente tienen su explicacion verificada por test, y el E2E cubre la rama de fallo con captura si la cuota responde 429.",
+      "US-08-010": "PASS — storyboard-capability.spec.ts (bloquea sin health y sin storyboardQueue; NO bloquea por binarios de media, que el agente no usa), service-health-badge.spec.tsx (storyboardQueue listada entre las capabilities) y el E2E, que exige capabilities.storyboardQueue en el servicio bajo prueba antes de seguir."
+    },
+    "tests": {
+      "sdd:validate": "OK — 48 archivos validos, cross-checks pasados",
+      "web": "468/468 PASS en 57 archivos — 99,19 % stmts · 95,46 % branch · 98,96 % funcs · 99,48 % lines (piso 80 %, coverage.include sin recortar)",
+      "workspace": "pnpm nx run-many -t lint test build: 8 proyectos verdes",
+      "vite build": "chunk inicial 470,22 kB · storyboard-page 32,76 kB · project-preview-page 364,46 kB · 109,75 kB compartidos; sin aviso de chunks > 500 kB (baseline previo al ciclo: inicial 466,76 kB)",
+      "e2e-storyboard-smoke": "Corrida real completa: propose 65,5 s con claude -p (5 escenas, es-AR, 60579/3497 tokens), PUT verificado en disco, portapapeles comparado byte a byte, 409 confirmado. Sin 429."
+    },
+    "notes": "El ciclo cierra la spec y le da al producto su segundo punto de partida: ya no hace falta haber grabado nada para empezar un video. La decision de fondo fue no replicar StoryboardDocumentSchema en apps/web: D-5 prohibe importar de otra app o de una lib Node, pero timeline-core es Zod puro y ya era la fuente de Timeline, asi que el espejo de cliente del 422 corre literalmente el mismo schema que el servidor. El costo de esa decision es que Zod no puede tocar el chunk inicial, y el ciclo pago ese costo una vez antes de verlo. El flow quedo en lite por pedido explicito del dev pese a la sugerencia del validador; se sostiene porque cycle-02 no crea ni modifica ningun contrato: sdd/api.json no se toco.",
+    "follow_ups": [
+      "captionsStyle, musicTags y sfxTags se editan como texto libre: spec-011 y spec-012 los cierran a un enum, en el prompt del agente y en la UI a la vez.",
+      "No se pueden agregar, borrar ni reordenar escenas desde la UI: el index es la posicion y el schema lo verifica, asi que cualquiera de las tres obliga a reindexar el documento. Trabajo de spec-010 o spec-013.",
+      "La hoja de prompts se lee del documento guardado: con cambios sin guardar copia los prompts previos. La UI lo avisa en vez de guardar sola.",
+      "StoryboardJobPanel no cancela el job (EP-015 lo soporta), y una llamada al agente en curso sigue corriendo aunque se abandone la pagina.",
+      "El usage del reporte (tokens y costo del agente) llega a la UI y no se muestra: candidato a una vista de costos por proyecto.",
+      "El aviso de sdd:validate sobre flow lite se dispara por los endpoints de cycle-01 y va a seguir apareciendo mientras la spec exista; es informativo, no un error."
+    ]
+  }
+}

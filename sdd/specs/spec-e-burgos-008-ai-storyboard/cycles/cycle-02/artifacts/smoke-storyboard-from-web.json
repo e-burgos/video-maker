@@ -1,0 +1,127 @@
+{
+  "schemaVersion": 1,
+  "id": "5861fd3e-f065-4e9f-abc2-868b4a4acc64",
+  "source": "brief",
+  "createdAt": "2026-09-10T01:35:06.733Z",
+  "title": "Tres trucos de terminal que te devuelven una hora por semana",
+  "language": "es-AR",
+  "format": "9:16",
+  "captionsStyle": "Texto en negrita blanca con borde negro, centrado en el tercio inferior de la pantalla.",
+  "musicTags": [
+    "energetic",
+    "upbeat",
+    "electronic",
+    "tech",
+    "punchy"
+  ],
+  "characters": [
+    {
+      "id": "character-01",
+      "name": "El Host",
+      "visualDescription": "Hombre argentino de unos 28 años, cabello oscuro corto y ondulado, ropa casual — remera azul marino ajustada. Habla directo a cámara con gestos expresivos y energía alta. Home office moderno de fondo: dos monitores encendidos, luz de estudio suave. Plano medio corto, encuadre vertical 9:16."
+    }
+  ],
+  "scenes": [
+    {
+      "id": "scene-01",
+      "index": 1,
+      "narration": "Narración editada desde el Web Studio para verificar el PUT.",
+      "visualPrompt": "Hombre argentino de unos 28 años, cabello oscuro corto y ondulado, remera azul marino ajustada. Habla directo a cámara con gesto sorprendido y energético, levantando tres dedos. Home office moderno de fondo: dos monitores encendidos, luz de estudio suave. Plano medio corto, encuadre vertical 9:16.",
+      "visualSource": "upload",
+      "estimatedDurationMs": 5000,
+      "musicTags": [
+        "energetic",
+        "punchy",
+        "electronic"
+      ],
+      "sfxTags": [
+        "whoosh",
+        "intro",
+        "impact"
+      ]
+    },
+    {
+      "id": "scene-02",
+      "index": 2,
+      "narration": "Primero: Ctrl+R. Buscás en tu historial mientras escribís. Nunca más scrollear cientos de líneas.",
+      "visualPrompt": "Pantalla de terminal oscura mostrando el modo reverse-i-search de bash resaltando un comando del historial.",
+      "visualSource": "remotion-scene",
+      "remotionScene": {
+        "kind": "code",
+        "code": "# Presioná Ctrl+R y empezá a escribir\n(reverse-i-search)`docker`: docker compose up -d\n\n# Enter para ejecutar ↵",
+        "codeLanguage": "bash"
+      },
+      "estimatedDurationMs": 6000,
+      "musicTags": [
+        "energetic",
+        "upbeat"
+      ],
+      "sfxTags": [
+        "keyboard typing",
+        "click",
+        "whoosh"
+      ]
+    },
+    {
+      "id": "scene-03",
+      "index": 3,
+      "narration": "Segundo: sudo doble exclamación. Ejecutaste un comando sin permisos? Lo repite con sudo al toque.",
+      "visualPrompt": "Pantalla de terminal oscura mostrando un error de permisos seguido del comando sudo !! que lo corrige.",
+      "visualSource": "remotion-scene",
+      "remotionScene": {
+        "kind": "code",
+        "code": "$ apt-get update\nE: Could not open lock file... Permission denied\n\n$ sudo !!\nsudo apt-get update  # ← mismo comando, con sudo",
+        "codeLanguage": "bash"
+      },
+      "estimatedDurationMs": 6500,
+      "musicTags": [
+        "energetic",
+        "punchy"
+      ],
+      "sfxTags": [
+        "keyboard typing",
+        "error beep",
+        "success chime"
+      ]
+    },
+    {
+      "id": "scene-04",
+      "index": 4,
+      "narration": "Tercero: cd guión. Saltás al directorio anterior al instante. Perfecto para ir y volver entre dos carpetas.",
+      "visualPrompt": "Pantalla de terminal oscura mostrando el comando cd - alternando entre dos directorios de proyecto.",
+      "visualSource": "remotion-scene",
+      "remotionScene": {
+        "kind": "code",
+        "code": "$ cd ~/projects/backend\n$ cd ~/projects/frontend\n\n$ cd -\n~/projects/backend   # ← volvés al instante\n\n$ cd -\n~/projects/frontend  # ← y de vuelta",
+        "codeLanguage": "bash"
+      },
+      "estimatedDurationMs": 7000,
+      "musicTags": [
+        "upbeat",
+        "electronic"
+      ],
+      "sfxTags": [
+        "keyboard typing",
+        "swoosh"
+      ]
+    },
+    {
+      "id": "scene-05",
+      "index": 5,
+      "narration": "Tres trucos, una hora por semana. Probálos hoy y seguime para más.",
+      "visualPrompt": "Hombre argentino de unos 28 años, cabello oscuro corto y ondulado, remera azul marino ajustada. Sonríe a cámara con pulgar arriba, señalando hacia el botón de seguir con gesto cómplice. Home office moderno de fondo: dos monitores encendidos, luz de estudio suave. Plano medio corto, encuadre vertical 9:16.",
+      "visualSource": "upload",
+      "estimatedDurationMs": 4500,
+      "musicTags": [
+        "upbeat",
+        "punchy",
+        "outro"
+      ],
+      "sfxTags": [
+        "chime",
+        "outro",
+        "impact"
+      ]
+    }
+  ]
+}

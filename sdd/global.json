@@ -79,9 +79,7 @@
       "cycles_completed": 2,
       "description": "Disparo del pipeline de ingesta y auto-montaje desde la web: un segundo tipo de job en la cola de apps/render-api (kind: montage) que ejecuta el equivalente exacto de render-cli ingest + plan sobre media/<slug>/ con salida byte-identica a la de la CLI, y su consumo desde la biblioteca de assets del Web Studio (preset, seed, progreso por etapa, confirmacion de sobreescritura, estado vacio accionable del preview y salud del servicio), verificado con un E2E Playwright que va de raw/ al MP4 por la web",
       "completed_at": "2026-09-09"
-    }
-  ],
-  "in_progress_modules": [
+    },
     {
       "module": "ai-storyboard",
       "spec": "spec-e-burgos-008-ai-storyboard",
@@ -90,10 +88,12 @@
         "libs/timeline-core",
         "apps/web"
       ],
-      "description": "Storyboard generativo: puerto AiAgent sobre `claude -p` local (sin API key), documento work/storyboard.json con hoja de personajes, escenas ordenadas con narración y prompt visual por escena, fuente del visual (subida, asset del catálogo o escena nativa de Remotion), job kind: 'storyboard', endpoints GET/PUT del documento y export de prompts numerado para las herramientas generativas externas",
-      "cycles_completed": 1
+      "cycles_completed": 2,
+      "description": "Storyboard generativo de punta a punta: puerto AiAgent sobre `claude -p` local (sin API key), documento work/storyboard.json con hoja de personajes y escenas ordenadas con narracion, prompt visual y fuente del visual, job kind: 'storyboard', endpoints GET/PUT del documento y export numerado de prompts, y su consumo completo en el Web Studio: pagina de storyboard con brief o guion, progreso por etapa, edicion escena por escena con espejo de cliente de la validacion, guardado con un unico PUT y copia de la hoja de prompts para las herramientas generativas externas",
+      "completed_at": "2026-09-09"
     }
   ],
+  "in_progress_modules": [],
   "pending_modules": [
     {
       "module": "voice-over",

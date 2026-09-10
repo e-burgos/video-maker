@@ -20,7 +20,7 @@ function healthyService(overrides: Partial<ServiceHealth> = {}): ServiceHealth {
       { name: 'whisperCli', envVar: 'WHISPER_CPP_PATH', resolved: true },
       { name: 'whisperModel', envVar: 'WHISPER_MODEL_PATH', resolved: true },
     ],
-    capabilities: { renderPipeline: true, assetStore: true, jobQueue: true, montageQueue: true },
+    capabilities: { renderPipeline: true, assetStore: true, jobQueue: true, montageQueue: true, storyboardQueue: true },
     jobs: { running: 0, queued: 0 },
     ...overrides,
   };
@@ -149,6 +149,7 @@ describe('MontageTrigger', () => {
           assetStore: true,
           jobQueue: true,
           montageQueue: false,
+          storyboardQueue: true,
         },
       }),
     );

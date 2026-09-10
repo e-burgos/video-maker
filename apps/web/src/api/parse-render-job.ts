@@ -4,6 +4,8 @@ import {
   MONTAGE_STAGES,
   RENDER_JOB_STATES,
   RENDER_PIPELINE_STAGES,
+  STORYBOARD_SOURCES,
+  STORYBOARD_STAGES,
   TERMINAL_RENDER_JOB_STATES,
 } from './render-api-types';
 import type {
@@ -24,6 +26,12 @@ import type {
   RenderLoudnessReport,
   RenderPipelineReport,
   RenderPipelineStage,
+  StoryboardJob,
+  StoryboardJobProgress,
+  StoryboardJobReport,
+  StoryboardJobSource,
+  StoryboardJobUsage,
+  StoryboardStage,
 } from './render-api-types';
 
 function isRecord(value: unknown): value is Record<string, unknown> {
@@ -54,6 +62,14 @@ export function isMontageStage(value: unknown): value is MontageStage {
   return typeof value === 'string' && (MONTAGE_STAGES as readonly string[]).includes(value);
 }
 
+export function isStoryboardStage(value: unknown): value is StoryboardStage {
+  return typeof value === 'string' && (STORYBOARD_STAGES as readonly string[]).includes(value);
+}
+
+export function isStoryboardJobSource(value: unknown): value is StoryboardJobSource {
+  return typeof value === 'string' && (STORYBOARD_SOURCES as readonly string[]).includes(value);
+}
+
 export function isTerminalRenderJobState(state: RenderJobState): boolean {
   return (TERMINAL_RENDER_JOB_STATES as readonly RenderJobState[]).includes(state);
 }
@@ -68,6 +84,32 @@ export function showsAssetProgress(
   progress: MontageJobProgress | null,
 ): progress is MontageJobProgress {
   return progress !== null && (progress.stage === 'probe' || progress.stage === 'transcribe');
+}
+
+function isStoryboardJobProgress(value: unknown): value is StoryboardJobProgress {
+  return isRecord(value) && isStoryboardStage(value['stage']) && isNumberOrNull(value['percent']);
+}
+
+function isStoryboardJobUsage(value: unknown): value is StoryboardJobUsage {
+  return (
+    isRecord(value) &&
+    typeof value['tokensIn'] === 'number' &&
+    typeof value['tokensOut'] === 'number' &&
+    isNumberOrNull(value['costUsd']) &&
+    isStringOrNull(value['model'])
+  );
+}
+
+function isStoryboardJobReport(value: unknown): value is StoryboardJobReport {
+  return (
+    isRecord(value) &&
+    typeof value['storyboardPath'] === 'string' &&
+    typeof value['storyboardId'] === 'string' &&
+    isStoryboardJobSource(value['source']) &&
+    typeof value['language'] === 'string' &&
+    typeof value['sceneCount'] === 'number' &&
+    isStoryboardJobUsage(value['usage'])
+  );
 }
 
 function isMontageJobProgress(value: unknown): value is MontageJobProgress {
@@ -173,6 +215,13 @@ function isJob(value: unknown): value is Job {
     );
   }
 
+  if (value['kind'] === 'storyboard') {
+    return (
+      (value['progress'] === null || isStoryboardJobProgress(value['progress'])) &&
+      (value['report'] === null || isStoryboardJobReport(value['report']))
+    );
+  }
+
   return (
     (value['progress'] === null || isRenderJobProgress(value['progress'])) &&
     (value['report'] === null || isRenderPipelineReport(value['report']))
@@ -205,6 +254,15 @@ export function parseMontageJob(value: unknown): MontageJob {
   return job;
 }
 
+export function parseStoryboardJob(value: unknown): StoryboardJob {
+  const job = parseJob(value);
+  if (job.kind !== 'storyboard') {
+    throw responseShapeUnexpected(200, 'a storyboard job document');
+  }
+
+  return job;
+}
+
 function isRenderJobSummary(value: unknown): value is RenderJobSummary {
   return (
     isRecord(value) &&
@@ -213,7 +271,8 @@ function isRenderJobSummary(value: unknown): value is RenderJobSummary {
     isRenderJobState(value['state']) &&
     (value['stage'] === null ||
       isRenderPipelineStage(value['stage']) ||
-      isMontageStage(value['stage'])) &&
+      isMontageStage(value['stage']) ||
+      isStoryboardStage(value['stage'])) &&
     isStringOrNull(value['errorCode']) &&
     typeof value['createdAt'] === 'string' &&
     isStringOrNull(value['startedAt']) &&

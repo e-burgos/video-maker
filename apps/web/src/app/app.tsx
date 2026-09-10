@@ -10,6 +10,10 @@ const ProjectPreviewPage = lazy(async () => ({
   default: (await import('../pages/project-preview-page')).ProjectPreviewPage,
 }));
 
+const StoryboardPage = lazy(async () => ({
+  default: (await import('../pages/storyboard-page')).StoryboardPage,
+}));
+
 export function App() {
   return (
     <BrowserRouter basename={import.meta.env.BASE_URL}>
@@ -18,6 +22,14 @@ export function App() {
           <Route element={<StudioLayout />}>
             <Route path="/" element={<ProjectsPage />} />
             <Route path="/projects/:slug" element={<AssetLibraryPage />} />
+            <Route
+              path="/projects/:slug/storyboard"
+              element={
+                <Suspense fallback={<p className="text-sm text-slate-500">Loading storyboard…</p>}>
+                  <StoryboardPage />
+                </Suspense>
+              }
+            />
             <Route
               path="/projects/:slug/preview"
               element={

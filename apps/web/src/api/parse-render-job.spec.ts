@@ -10,6 +10,9 @@ import {
   parseMontageJob,
   parseRenderJob,
   parseRenderJobListing,
+  parseStoryboardJob,
+  isStoryboardJobSource,
+  isStoryboardStage,
   showsAssetProgress,
   showsFrameProgress,
 } from './parse-render-job';
@@ -18,6 +21,7 @@ import type {
   MontageJobProgress,
   RenderJob,
   RenderJobProgress,
+  StoryboardJob,
 } from './render-api-types';
 
 const BASE_JOB: RenderJob = {
@@ -344,5 +348,110 @@ describe('parseMontageJob', () => {
 
   it('refuses a montage job where a render job is expected', () => {
     expect(() => parseRenderJob(BASE_MONTAGE_JOB)).toThrow(/a render job document/);
+  });
+});
+
+const BASE_STORYBOARD_JOB: StoryboardJob = {
+  id: 'job-0009',
+  kind: 'storyboard',
+  slug: 'smoke-ingest',
+  state: 'running',
+  createdAt: '2026-09-09T12:00:00.000Z',
+  startedAt: '2026-09-09T12:00:00.500Z',
+  finishedAt: null,
+  progress: { stage: 'propose', percent: 66 },
+  report: null,
+  error: null,
+};
+
+describe('parseStoryboardJob', () => {
+  it('names the three stages of the storyboard pipeline and nothing else', () => {
+    expect(['collect', 'propose', 'persist'].every(isStoryboardStage)).toBe(true);
+    expect(isStoryboardStage('transcribe')).toBe(false);
+    expect(isStoryboardStage('render')).toBe(false);
+  });
+
+  it('accepts storyboard as a third job kind of the shared union', () => {
+    expect(isJobKind('storyboard')).toBe(true);
+    expect(parseJob(BASE_STORYBOARD_JOB)).toEqual(BASE_STORYBOARD_JOB);
+    expect(parseStoryboardJob(BASE_STORYBOARD_JOB)).toEqual(BASE_STORYBOARD_JOB);
+  });
+
+  it('accepts the full report with every key of the contract and both sources', () => {
+    const succeeded: StoryboardJob = {
+      ...BASE_STORYBOARD_JOB,
+      state: 'succeeded',
+      finishedAt: '2026-09-09T12:01:40.000Z',
+      progress: { stage: 'persist', percent: 100 },
+      report: {
+        storyboardPath: 'work/storyboard.json',
+        storyboardId: 'storyboard-0001',
+        source: 'brief',
+        language: 'es-AR',
+        sceneCount: 8,
+        usage: { tokensIn: 4200, tokensOut: 3100, costUsd: 0.31, model: 'claude-opus-4' },
+      },
+    };
+
+    expect(parseStoryboardJob(succeeded)).toEqual(succeeded);
+    expect(Object.keys(succeeded.report ?? {}).sort()).toEqual([
+      'language',
+      'sceneCount',
+      'source',
+      'storyboardId',
+      'storyboardPath',
+      'usage',
+    ]);
+    expect(isStoryboardJobSource('script')).toBe(true);
+    expect(isStoryboardJobSource('montage')).toBe(false);
+  });
+
+  it('accepts a usage block whose cost and model the CLI did not report', () => {
+    const withoutCost: StoryboardJob = {
+      ...BASE_STORYBOARD_JOB,
+      state: 'succeeded',
+      report: {
+        storyboardPath: 'work/storyboard.json',
+        storyboardId: 'storyboard-0001',
+        source: 'script',
+        language: 'en-US',
+        sceneCount: 5,
+        usage: { tokensIn: 10, tokensOut: 20, costUsd: null, model: null },
+      },
+    };
+
+    expect(parseStoryboardJob(withoutCost)).toEqual(withoutCost);
+  });
+
+  it('rejects a storyboard job whose progress carries a montage stage', () => {
+    expect(() =>
+      parseJob({ ...BASE_STORYBOARD_JOB, progress: { stage: 'transcribe', percent: 50 } }),
+    ).toThrow(/a job document/);
+  });
+
+  it('refuses the other two kinds, so a caller cannot read storyboard fields off them', () => {
+    expect(() => parseStoryboardJob(BASE_JOB)).toThrow(/a storyboard job document/);
+    expect(() => parseRenderJob(BASE_STORYBOARD_JOB)).toThrow(/a render job document/);
+    expect(() => parseMontageJob(BASE_STORYBOARD_JOB)).toThrow(/a montage job document/);
+  });
+
+  it('accepts a storyboard stage in a job summary of the listing', () => {
+    const listing = {
+      slug: 'smoke-ingest',
+      jobs: [
+        {
+          id: 'job-0009',
+          kind: 'storyboard',
+          state: 'running',
+          stage: 'propose',
+          errorCode: null,
+          createdAt: '2026-09-09T12:00:00.000Z',
+          startedAt: '2026-09-09T12:00:00.500Z',
+          finishedAt: null,
+        },
+      ],
+    };
+
+    expect(parseRenderJobListing(listing)).toEqual(listing);
   });
 });

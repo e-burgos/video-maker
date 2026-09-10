@@ -697,6 +697,137 @@
         ],
         "created_at": "2026-09-09",
         "changelog": []
+      },
+      {
+        "id": "COMP-027",
+        "name": "StoryboardTrigger",
+        "type": "component",
+        "module": "ai-storyboard",
+        "spec": "sdd/specs/spec-e-burgos-008-ai-storyboard",
+        "path": "src/components/storyboard-trigger.tsx",
+        "status": "implemented",
+        "created_in_cycle": 2,
+        "updated_in_cycle": null,
+        "description": "Disparo del storyboard generativo: brief o guion (pegado o subido como archivo de texto), gating por storyboardBlockers, aviso de que la etapa propose tarda mas de un minuto, confirmacion explicita ante 409 STORYBOARD_ALREADY_EXISTS que reintenta con overwrite: true y traduccion de los codigos del agente a lenguaje de usuario.",
+        "consumes": [
+          "EP-001",
+          "EP-012"
+        ],
+        "created_at": "2026-09-09",
+        "changelog": []
+      },
+      {
+        "id": "COMP-028",
+        "name": "StoryboardJobPanel",
+        "type": "component",
+        "module": "ai-storyboard",
+        "spec": "sdd/specs/spec-e-burgos-008-ai-storyboard",
+        "path": "src/components/storyboard-job-panel.tsx",
+        "status": "implemented",
+        "created_in_cycle": 2,
+        "updated_in_cycle": null,
+        "description": "Seguimiento del job de storyboard sobre useRenderJobPoll: etapas collect/propose/persist con su descripcion, reporte final (escenas, idioma, origen), y explicacion en lenguaje de usuario del codigo tipado cuando el agente falla.",
+        "consumes": [
+          "EP-014"
+        ],
+        "created_at": "2026-09-09",
+        "changelog": []
+      },
+      {
+        "id": "COMP-029",
+        "name": "StoryboardHeaderEditor",
+        "type": "component",
+        "module": "ai-storyboard",
+        "spec": "sdd/specs/spec-e-burgos-008-ai-storyboard",
+        "path": "src/components/storyboard-header-editor.tsx",
+        "status": "implemented",
+        "created_in_cycle": 2,
+        "updated_in_cycle": null,
+        "description": "Edicion del encabezado del documento: titulo, idioma, formato (9:16, 16:9, 1:1), estilo de captions y etiquetas de musica como lista separada por comas.",
+        "consumes": [],
+        "created_at": "2026-09-09",
+        "changelog": []
+      },
+      {
+        "id": "COMP-030",
+        "name": "StoryboardCharacterSheet",
+        "type": "component",
+        "module": "ai-storyboard",
+        "spec": "sdd/specs/spec-e-burgos-008-ai-storyboard",
+        "path": "src/components/storyboard-character-sheet.tsx",
+        "status": "implemented",
+        "created_in_cycle": 2,
+        "updated_in_cycle": null,
+        "description": "Hoja de personajes editable: nombre y descripcion visual autocontenida que cada prompt repite para sostener la consistencia entre tomas generadas por separado.",
+        "consumes": [],
+        "created_at": "2026-09-09",
+        "changelog": []
+      },
+      {
+        "id": "COMP-031",
+        "name": "StoryboardSceneEditor",
+        "type": "component",
+        "module": "ai-storyboard",
+        "spec": "sdd/specs/spec-e-burgos-008-ai-storyboard",
+        "path": "src/components/storyboard-scene-editor.tsx",
+        "status": "implemented",
+        "created_in_cycle": 2,
+        "updated_in_cycle": null,
+        "description": "Edicion de una escena: narracion, prompt visual, fuente del visual (upload/asset/remotion-scene) con su assetId o su escena Remotion y las props que exige su kind, duracion estimada, estilo de captions propio, etiquetas de musica y sfx, y copia del prompt de esa sola escena.",
+        "consumes": [],
+        "created_at": "2026-09-09",
+        "changelog": []
+      },
+      {
+        "id": "COMP-032",
+        "name": "StoryboardSaveBar",
+        "type": "component",
+        "module": "ai-storyboard",
+        "spec": "sdd/specs/spec-e-burgos-008-ai-storyboard",
+        "path": "src/components/storyboard-save-bar.tsx",
+        "status": "implemented",
+        "created_in_cycle": 2,
+        "updated_in_cycle": null,
+        "description": "Guardado del documento completo con un unico PUT, estado dirty publicado como data-storyboard-dirty y bloqueo por el espejo de cliente del 422 (storyboardIssues) con el path del problema escrito en pantalla.",
+        "consumes": [
+          "EP-017"
+        ],
+        "created_at": "2026-09-09",
+        "changelog": []
+      },
+      {
+        "id": "COMP-033",
+        "name": "StoryboardPromptSheet",
+        "type": "component",
+        "module": "ai-storyboard",
+        "spec": "sdd/specs/spec-e-burgos-008-ai-storyboard",
+        "path": "src/components/storyboard-prompt-sheet.tsx",
+        "status": "implemented",
+        "created_in_cycle": 2,
+        "updated_in_cycle": null,
+        "description": "Hoja numerada de prompts visuales: copia al portapapeles el text/plain de EP-018 tal cual lo emite el servicio, lo muestra en pantalla como alternativa cuando el navegador niega el portapapeles, y explica como usarla en Meta AI o Google Flow.",
+        "consumes": [
+          "EP-018"
+        ],
+        "created_at": "2026-09-09",
+        "changelog": []
+      },
+      {
+        "id": "COMP-034",
+        "name": "StoryboardPage",
+        "type": "component",
+        "module": "ai-storyboard",
+        "spec": "sdd/specs/spec-e-burgos-008-ai-storyboard",
+        "path": "src/pages/storyboard-page.tsx",
+        "status": "implemented",
+        "created_in_cycle": 2,
+        "updated_in_cycle": null,
+        "description": "Pagina /projects/:slug/storyboard, montada perezosamente para que Zod y timeline-core no entren al chunk inicial: estado vacio accionable ante STORYBOARD_NOT_FOUND, ciclo completo trigger -> job -> editor -> prompts, estado dirty derivado del documento guardado y copia del prompt de una escena.",
+        "consumes": [
+          "EP-016"
+        ],
+        "created_at": "2026-09-09",
+        "changelog": []
       }
     ]
   }

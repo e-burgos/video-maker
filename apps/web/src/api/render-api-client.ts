@@ -1,6 +1,12 @@
-import type { Timeline } from '@video-maker/timeline-core';
+import type { StoryboardDocument, Timeline } from '@video-maker/timeline-core';
 import { RENDER_API_BASE_PATH } from './artifact-url';
-import { parseJob, parseMontageJob, parseRenderJob, parseRenderJobListing } from './parse-render-job';
+import {
+  parseJob,
+  parseMontageJob,
+  parseRenderJob,
+  parseRenderJobListing,
+  parseStoryboardJob,
+} from './parse-render-job';
 import {
   RenderApiError,
   fromErrorResponse,
@@ -19,6 +25,8 @@ import type {
   RenderJob,
   RenderJobListing,
   ServiceHealth,
+  StoryboardJob,
+  StoryboardWriteResult,
   TimelineWriteResult,
 } from './render-api-types';
 
@@ -32,6 +40,10 @@ export type CreateMontageJobInput = {
   overwrite: boolean;
 };
 
+export type CreateStoryboardJobInput =
+  | { brief: string; overwrite: boolean }
+  | { scriptText: string; overwrite: boolean };
+
 export type RenderApiClient = {
   getHealth: () => Promise<ServiceHealth>;
   listProjects: () => Promise<ProjectSummary[]>;
@@ -43,6 +55,10 @@ export type RenderApiClient = {
   putTimeline: (slug: string, timeline: Timeline) => Promise<TimelineWriteResult>;
   createRenderJob: (slug: string) => Promise<RenderJob>;
   createMontageJob: (slug: string, input: CreateMontageJobInput) => Promise<MontageJob>;
+  createStoryboardJob: (slug: string, input: CreateStoryboardJobInput) => Promise<StoryboardJob>;
+  getStoryboard: (slug: string) => Promise<StoryboardDocument>;
+  putStoryboard: (slug: string, storyboard: StoryboardDocument) => Promise<StoryboardWriteResult>;
+  getStoryboardPrompts: (slug: string) => Promise<string>;
   listRenderJobs: (slug: string) => Promise<RenderJobListing>;
   getRenderJob: (jobId: string) => Promise<Job>;
   cancelRenderJob: (jobId: string) => Promise<RenderJobCancelOutcome>;
@@ -95,6 +111,16 @@ export function createRenderApiClient(fetchImpl: FetchLike): RenderApiClient {
     }
 
     return body;
+  }
+
+  async function requestText(path: string): Promise<string> {
+    const response = await send(path, undefined);
+
+    if (!response.ok) {
+      throw fromErrorResponse(response.status, await readJson(response));
+    }
+
+    return response.text();
   }
 
   async function requestJsonWithStatus(
@@ -235,6 +261,54 @@ export function createRenderApiClient(fetchImpl: FetchLike): RenderApiClient {
         (value) => isRecord(value),
       );
       return parseMontageJob(body);
+    },
+
+    async createStoryboardJob(
+      slug: string,
+      input: CreateStoryboardJobInput,
+    ): Promise<StoryboardJob> {
+      const body = await requestJson(
+        `/projects/${encodeURIComponent(slug)}/jobs`,
+        {
+          method: 'POST',
+          headers: { 'content-type': 'application/json' },
+          body: JSON.stringify({ kind: 'storyboard', ...input }),
+        },
+        'a storyboard job document',
+        (value) => isRecord(value),
+      );
+      return parseStoryboardJob(body);
+    },
+
+    async getStoryboard(slug: string): Promise<StoryboardDocument> {
+      const body = await requestJson(
+        `/projects/${encodeURIComponent(slug)}/storyboard`,
+        undefined,
+        'a storyboard document',
+        (value) => isRecord(value) && value['schemaVersion'] === 1 && Array.isArray(value['scenes']),
+      );
+      return body as StoryboardDocument;
+    },
+
+    async putStoryboard(
+      slug: string,
+      storyboard: StoryboardDocument,
+    ): Promise<StoryboardWriteResult> {
+      const body = await requestJson(
+        `/projects/${encodeURIComponent(slug)}/storyboard`,
+        {
+          method: 'PUT',
+          headers: { 'content-type': 'application/json' },
+          body: JSON.stringify(storyboard),
+        },
+        'a storyboard write result',
+        (value) => isRecord(value) && typeof value['slug'] === 'string' && typeof value['path'] === 'string',
+      );
+      return body as StoryboardWriteResult;
+    },
+
+    async getStoryboardPrompts(slug: string): Promise<string> {
+      return requestText(`/projects/${encodeURIComponent(slug)}/storyboard/prompts`);
     },
 
     async listRenderJobs(slug: string): Promise<RenderJobListing> {

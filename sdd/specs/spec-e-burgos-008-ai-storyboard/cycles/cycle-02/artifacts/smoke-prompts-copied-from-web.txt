@@ -1,0 +1,24 @@
+# Tres trucos de terminal que te devuelven una hora por semana
+Language: es-AR · Format: 9:16 · Scenes: 5
+
+## Characters
+Paste the description of every character that appears in a shot together with its prompt.
+- El Host: Hombre argentino de unos 28 años, cabello oscuro corto y ondulado, ropa casual — remera azul marino ajustada. Habla directo a cámara con gestos expresivos y energía alta. Home office moderno de fondo: dos monitores encendidos, luz de estudio suave. Plano medio corto, encuadre vertical 9:16.
+
+## Visual prompts
+Save each generated file with the number of its scene, for example 01.mp4 or 03.png.
+
+01. [upload — generate this one and save it as the numbered file]
+Hombre argentino de unos 28 años, cabello oscuro corto y ondulado, remera azul marino ajustada. Habla directo a cámara con gesto sorprendido y energético, levantando tres dedos. Home office moderno de fondo: dos monitores encendidos, luz de estudio suave. Plano medio corto, encuadre vertical 9:16.
+
+02. [remotion-scene: code — no footage needed]
+Pantalla de terminal oscura mostrando el modo reverse-i-search de bash resaltando un comando del historial.
+
+03. [remotion-scene: code — no footage needed]
+Pantalla de terminal oscura mostrando un error de permisos seguido del comando sudo !! que lo corrige.
+
+04. [remotion-scene: code — no footage needed]
+Pantalla de terminal oscura mostrando el comando cd - alternando entre dos directorios de proyecto.
+
+05. [upload — generate this one and save it as the numbered file]
+Hombre argentino de unos 28 años, cabello oscuro corto y ondulado, remera azul marino ajustada. Sonríe a cámara con pulgar arriba, señalando hacia el botón de seguir con gesto cómplice. Home office moderno de fondo: dos monitores encendidos, luz de estudio suave. Plano medio corto, encuadre vertical 9:16.

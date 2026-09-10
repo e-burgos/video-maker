@@ -23,7 +23,7 @@ function health(overrides: Partial<ServiceHealth> = {}): ServiceHealth {
       { name: 'whisperCli', envVar: 'WHISPER_CPP_PATH', resolved: true },
       { name: 'whisperModel', envVar: 'WHISPER_MODEL_PATH', resolved: true },
     ],
-    capabilities: { renderPipeline: true, assetStore: true, jobQueue: true, montageQueue: true },
+    capabilities: { renderPipeline: true, assetStore: true, jobQueue: true, montageQueue: true, storyboardQueue: true },
     jobs: { running: 0, queued: 0 },
     ...overrides,
   };
@@ -123,7 +123,7 @@ describe('ServiceHealthBadge', () => {
     ]);
   });
 
-  it('reports montageQueue among the capabilities (US-2-007)', async () => {
+  it('reports montageQueue and storyboardQueue among the capabilities (US-2-007, US-08-010)', async () => {
     renderBadge(clientWith(() => Promise.resolve(health())));
 
     await waitFor(() => expect(screen.getByTestId('service-health-capabilities')).toBeTruthy());
@@ -136,6 +136,7 @@ describe('ServiceHealthBadge', () => {
       'assetStore · on',
       'jobQueue · on',
       'montageQueue · on',
+      'storyboardQueue · on',
     ]);
   });
 
@@ -151,6 +152,7 @@ describe('ServiceHealthBadge', () => {
               assetStore: true,
               jobQueue: true,
               montageQueue: false,
+              storyboardQueue: true,
             },
           }),
         ),

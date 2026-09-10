@@ -1,10 +1,11 @@
 import { describe, expect, it, vi } from 'vitest';
 
 import { RAW_PREVIEW_TIMELINE, previewTimelineFixture } from './__fixtures__/timeline';
+import { RAW_STORYBOARD, storyboardFixture } from './__fixtures__/storyboard';
 import { createRenderApiClient } from './render-api-client';
 import { RenderApiError } from './render-api-error';
 import type { FetchLike } from './render-api-client';
-import type { MontageJob, RenderJob } from './render-api-types';
+import type { MontageJob, RenderJob, StoryboardJob } from './render-api-types';
 
 type Call = { url: string; init: RequestInit | undefined };
 
@@ -64,7 +65,7 @@ const health = {
   time: '2026-09-09T00:00:00.000Z',
   engine: [{ name: 'media-local', loaded: true }],
   binaries: [{ name: 'ffmpeg', envVar: 'FFMPEG_PATH', resolved: true }],
-  capabilities: { renderPipeline: true, assetStore: true, jobQueue: true, montageQueue: true },
+  capabilities: { renderPipeline: true, assetStore: true, jobQueue: true, montageQueue: true, storyboardQueue: true },
   jobs: { running: 0, queued: 0 },
 };
 
@@ -510,5 +511,214 @@ describe('createRenderApiClient', () => {
       .catch((caught: unknown) => caught);
 
     expect((error as RenderApiError).code).toBe('RESPONSE_SHAPE_UNEXPECTED');
+  });
+});
+
+function storyboardJob(): StoryboardJob {
+  return {
+    id: 'job-0009',
+    kind: 'storyboard',
+    slug: 'smoke-ingest',
+    state: 'running',
+    createdAt: '2026-09-09T12:00:00.000Z',
+    startedAt: '2026-09-09T12:00:00.500Z',
+    finishedAt: null,
+    progress: { stage: 'propose', percent: 66 },
+    report: null,
+    error: null,
+  };
+}
+
+function textResponse(body: string): Response {
+  return new Response(body, {
+    status: 200,
+    headers: { 'content-type': 'text/plain; charset=utf-8' },
+  });
+}
+
+describe('createRenderApiClient · storyboard', () => {
+  it('creates a storyboard job from a brief with exactly the contract keys of EP-012', async () => {
+    const { fetchImpl, calls } = recordingFetch(() => jsonResponse(storyboardJob(), 202));
+
+    const job = await createRenderApiClient(fetchImpl).createStoryboardJob('smoke-ingest', {
+      brief: 'Tres trucos de terminal',
+      overwrite: false,
+    });
+
+    expect(job.kind).toBe('storyboard');
+    expect(calls[0]?.url).toBe('/api/projects/smoke-ingest/jobs');
+    expect(calls[0]?.init?.method).toBe('POST');
+    const body = JSON.parse(String(calls[0]?.init?.body)) as Record<string, unknown>;
+    expect(Object.keys(body).sort()).toEqual(['brief', 'kind', 'overwrite']);
+    expect(body['kind']).toBe('storyboard');
+  });
+
+  it('sends scriptText instead of brief when the user pasted a script, never both', async () => {
+    const { fetchImpl, calls } = recordingFetch(() => jsonResponse(storyboardJob(), 202));
+
+    await createRenderApiClient(fetchImpl).createStoryboardJob('smoke-ingest', {
+      scriptText: 'Escena 1. Nina mira a cámara.',
+      overwrite: true,
+    });
+
+    const body = JSON.parse(String(calls[0]?.init?.body)) as Record<string, unknown>;
+    expect(Object.keys(body).sort()).toEqual(['kind', 'overwrite', 'scriptText']);
+    expect(body['overwrite']).toBe(true);
+  });
+
+  it('maps STORYBOARD_ALREADY_EXISTS from EP-012 with its code and 409 status', async () => {
+    const { fetchImpl } = recordingFetch(() =>
+      jsonResponse(
+        {
+          error: {
+            code: 'STORYBOARD_ALREADY_EXISTS',
+            stage: null,
+            message: 'the project already has a storyboard',
+          },
+        },
+        409,
+      ),
+    );
+
+    const error = await createRenderApiClient(fetchImpl)
+      .createStoryboardJob('smoke-ingest', { brief: 'idea', overwrite: false })
+      .catch((caught: unknown) => caught);
+
+    expect((error as RenderApiError).code).toBe('STORYBOARD_ALREADY_EXISTS');
+    expect((error as RenderApiError).status).toBe(409);
+  });
+
+  it('keeps each typed agent failure code the job creation can answer', async () => {
+    for (const [status, code] of [
+      [503, 'AI_AGENT_UNAVAILABLE'],
+      [429, 'AI_AGENT_RATE_LIMITED'],
+      [502, 'AI_AGENT_FAILED'],
+      [502, 'AI_AGENT_INVALID_OUTPUT'],
+      [422, 'STORYBOARD_INPUT_INVALID'],
+    ] as const) {
+      const { fetchImpl } = recordingFetch(() =>
+        jsonResponse({ error: { code, stage: null, message: code } }, status),
+      );
+
+      const error = await createRenderApiClient(fetchImpl)
+        .createStoryboardJob('smoke-ingest', { brief: 'idea', overwrite: false })
+        .catch((caught: unknown) => caught);
+
+      expect((error as RenderApiError).code).toBe(code);
+      expect((error as RenderApiError).status).toBe(status);
+    }
+  });
+
+  it('refuses a montage job document where a storyboard job was requested', async () => {
+    const { fetchImpl } = recordingFetch(() => jsonResponse(montageJob(), 202));
+
+    const error = await createRenderApiClient(fetchImpl)
+      .createStoryboardJob('smoke-ingest', { brief: 'idea', overwrite: false })
+      .catch((caught: unknown) => caught);
+
+    expect((error as RenderApiError).code).toBe('RESPONSE_SHAPE_UNEXPECTED');
+  });
+
+  it('reads the storyboard document from EP-016 with the same shallow shape check as the timeline', async () => {
+    const { fetchImpl, calls } = recordingFetch(() => jsonResponse(RAW_STORYBOARD));
+
+    const document = await createRenderApiClient(fetchImpl).getStoryboard('smoke-ingest');
+
+    expect(calls[0]?.url).toBe('/api/projects/smoke-ingest/storyboard');
+    expect(calls[0]?.init).toBeUndefined();
+    expect(document.scenes).toHaveLength(3);
+  });
+
+  it('rejects a 200 that is not a storyboard document at all, before any page sees it', async () => {
+    const { fetchImpl } = recordingFetch(() => jsonResponse({ schemaVersion: 1 }));
+
+    const error = await createRenderApiClient(fetchImpl)
+      .getStoryboard('smoke-ingest')
+      .catch((caught: unknown) => caught);
+
+    expect((error as RenderApiError).code).toBe('RESPONSE_SHAPE_UNEXPECTED');
+  });
+
+  it('maps STORYBOARD_NOT_FOUND from EP-016 with its code', async () => {
+    const { fetchImpl } = recordingFetch(() =>
+      jsonResponse(
+        { error: { code: 'STORYBOARD_NOT_FOUND', stage: null, message: 'no storyboard yet' } },
+        404,
+      ),
+    );
+
+    const error = await createRenderApiClient(fetchImpl)
+      .getStoryboard('smoke-ingest')
+      .catch((caught: unknown) => caught);
+
+    expect((error as RenderApiError).code).toBe('STORYBOARD_NOT_FOUND');
+  });
+
+  it('writes the full storyboard document in a single PUT on EP-017', async () => {
+    const { fetchImpl, calls } = recordingFetch(() =>
+      jsonResponse({ slug: 'smoke-ingest', path: 'work/storyboard.json' }),
+    );
+
+    const result = await createRenderApiClient(fetchImpl).putStoryboard(
+      'smoke-ingest',
+      storyboardFixture(),
+    );
+
+    expect(result).toEqual({ slug: 'smoke-ingest', path: 'work/storyboard.json' });
+    expect(calls[0]?.init?.method).toBe('PUT');
+    const body = JSON.parse(String(calls[0]?.init?.body)) as Record<string, unknown>;
+    expect(Object.keys(body).sort()).toEqual([
+      'captionsStyle',
+      'characters',
+      'createdAt',
+      'format',
+      'id',
+      'language',
+      'musicTags',
+      'scenes',
+      'schemaVersion',
+      'source',
+      'title',
+    ]);
+  });
+
+  it('maps STORYBOARD_INVALID from EP-017 without touching the request shape', async () => {
+    const { fetchImpl } = recordingFetch(() =>
+      jsonResponse(
+        { error: { code: 'STORYBOARD_INVALID', stage: null, message: 'does not validate' } },
+        422,
+      ),
+    );
+
+    const error = await createRenderApiClient(fetchImpl)
+      .putStoryboard('smoke-ingest', storyboardFixture())
+      .catch((caught: unknown) => caught);
+
+    expect((error as RenderApiError).code).toBe('STORYBOARD_INVALID');
+  });
+
+  it('reads the prompt sheet of EP-018 as plain text, exactly as the service emitted it', async () => {
+    const sheet = '# CHARACTERS\n\n01. Nina — mustard hoodie\n\n# SCENES\n\n01. upload — a prompt\n';
+    const { fetchImpl, calls } = recordingFetch(() => textResponse(sheet));
+
+    const text = await createRenderApiClient(fetchImpl).getStoryboardPrompts('smoke-ingest');
+
+    expect(text).toBe(sheet);
+    expect(calls[0]?.url).toBe('/api/projects/smoke-ingest/storyboard/prompts');
+  });
+
+  it('still reads the typed JSON error of EP-018 even though the success body is text', async () => {
+    const { fetchImpl } = recordingFetch(() =>
+      jsonResponse(
+        { error: { code: 'STORYBOARD_NOT_FOUND', stage: null, message: 'nothing to export' } },
+        404,
+      ),
+    );
+
+    const error = await createRenderApiClient(fetchImpl)
+      .getStoryboardPrompts('smoke-ingest')
+      .catch((caught: unknown) => caught);
+
+    expect((error as RenderApiError).code).toBe('STORYBOARD_NOT_FOUND');
   });
 });

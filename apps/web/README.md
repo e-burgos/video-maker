@@ -5,14 +5,17 @@ The Video Maker Studio: a local React 19 UI that operates the engine through `ap
 raw asset library. `cycle-02` adds the Remotion `<Player>` preview. `cycle-03` adds timeline
 editing (clips, captions, music mix, output preset), the save bar, and the full render job flow —
 trigger, live progress, and the MP4 download. `cycle-02` of `spec-e-burgos-007-web-montage` closes
-the loop: the studio can now **produce** the timeline it used to only consume.
+the loop: the studio can now **produce** the timeline it used to only consume. `cycle-02` of
+`spec-e-burgos-008-ai-storyboard` opens the second way in: a storyboard written by a local AI agent
+from an idea or a pasted script, editable scene by scene, with a numbered visual prompt sheet for
+the external generative tools.
 
 **The whole product is reachable from the browser:** upload the raw material → generate the montage
 → adjust it → render → download the MP4. `tools/render-cli` is still valid and still supported, but
 it is no longer required to reach an MP4.
 
 **This app has no engine logic and never touches the filesystem.** Everything it shows and
-everything it writes goes through the HTTP contract in `sdd/api.json` (`EP-001`..`EP-015`).
+everything it writes goes through the HTTP contract in `sdd/api.json` (`EP-001`..`EP-018`).
 
 ## Commands
 
@@ -51,12 +54,15 @@ WEB_PORT=4207 RENDER_API_URL=http://127.0.0.1:4399 pnpm exec vite --config apps/
 src/
   api/                the render-api boundary: contract types, typed client, error surface, URL builders
   api/timeline-edit/  the timeline-editing rules, the reducer and its state (lazy-only, see below)
+  api/storyboard-edit/ the immutable storyboard editors and the client mirror of its 422 (lazy-only)
   hooks/              useAsyncResource, useApiAction, useRenderJobPoll — the only server-state
                        primitives in this app (no query library)
   components/         studio layout, health badge, error notice, asset card/preview/uploader,
                        create form, timeline editors (clip track, caption, music mix, output
-                       preset), issue list, save bar, render trigger, job list, job panel
-  pages/              projects-page, asset-library-page, project-preview-page (the studio itself)
+                       preset), issue list, save bar, render trigger, job list, job panel,
+                       montage trigger/panel, storyboard trigger/panel and the storyboard editors
+                       (header, character sheet, scene, save bar, prompt sheet)
+  pages/              projects-page, asset-library-page, project-preview-page, storyboard-page
   app/app.tsx         router and provider wiring
 ```
 
@@ -205,6 +211,70 @@ child processes killed, temp directory removed. See
 literal output, screenshots, and the two tooling bugs it caught (documented there so nobody has to
 rediscover them: a `Page.waitForFunction` argument-order mistake, and Vite's dev-server dependency
 optimizer firing a full page reload mid-poll).
+
+## Storyboard (spec-008 cycle-02)
+
+`/projects/:slug/storyboard` is the generative mode: the project's second way in, next to the
+montage. It is reached from the project nav in the studio header (`library · storyboard · preview`)
+and from the asset library.
+
+- **One panel proposes, one panel follows.** `StoryboardTrigger` sends the same
+  `POST /projects/:slug/jobs` (`EP-012`) with `{"kind":"storyboard","brief"|"scriptText","overwrite"}`
+  — exactly one of `brief` (an idea) or `scriptText` (a script already written, typed, pasted or
+  loaded from a `.txt`/`.md` file). `StoryboardJobPanel` polls it on the same `useRenderJobPoll` and
+  names the three stages `collect | propose | persist`. **`propose` is a real model call and takes
+  more than a minute** (measured 62-79 s on this machine); the panel says so on screen, before and
+  during the wait, so the wait never looks like a hang.
+- **Agent failures are translated, not dumped.** `storyboardFailureExplanation()`
+  (`src/api/storyboard-capability.ts`) pairs each typed code with a sentence in the user's language:
+  `AI_AGENT_UNAVAILABLE` (install Claude Code), `AI_AGENT_RATE_LIMITED` (the subscription quota
+  reset, nothing was lost), `AI_AGENT_FAILED` and `AI_AGENT_INVALID_OUTPUT` (transient, propose
+  again). The code itself stays on screen next to it.
+- **The 409 is handled, not prevented**, exactly as the montage does: the job is sent, and
+  `409 STORYBOARD_ALREADY_EXISTS` becomes the overwrite confirmation. The storyboard is the one
+  document the user edits by hand, so replacing it is always an explicit act.
+- **The document is edited in place and saved with one full `PUT`** (`EP-017`): title, language,
+  format, caption style and music tags; the character sheet; and per scene the narration, the
+  visual prompt, the visual source (`upload | asset | remotion-scene`), its `assetId` or native
+  Remotion scene with the props its `kind` requires, the estimated duration, the per-scene caption
+  style and the tag lists. `storyboardIssues()` is the **client mirror of the server's 422**: it
+  runs the very same `StoryboardDocumentSchema` from `libs/timeline-core` and blocks the save with
+  the offending path written on screen. Switching a visual source drops the fields the new one does
+  not declare, and changing a Remotion scene kind replaces the whole scene, so no prop of the old
+  kind survives.
+- **The prompt sheet is copied, never rebuilt.** "Copy prompts" fetches `EP-018` and puts the
+  `text/plain` body on the clipboard byte for byte; "Show prompts" renders the same text, which is
+  also the fallback when the browser refuses clipboard access. Each scene has its own `copy prompt`
+  button for its `visualPrompt` alone. The numbering from `01` is the service's, because it is what
+  the batch import of `spec-e-burgos-010` will read back (`01.mp4` → scene 1).
+- **Health gates the button.** `storyboardBlockers()` disables "Propose storyboard" and names the
+  reason when the service reports `capabilities.storyboardQueue: false`. It deliberately ignores the
+  four media binaries: the agent uses none of them (D-12 of `spec-008`).
+- **The page is lazy, like the preview.** Zod and `@video-maker/timeline-core` must not enter the
+  shell chunk. Measured with `vite build` in this cycle: initial chunk 470 kB (466 kB before it),
+  `storyboard-page` 33 kB, `project-preview-page` 364 kB and a 110 kB chunk shared by the two lazy
+  routes, with no "chunks larger than 500 kB" warning. The client's `getStoryboard` therefore uses
+  the same shallow shape check as `getTimeline` and the page validates the document itself.
+- **Every control carries an explicit `aria-label`.** React renders a `<textarea>`'s value and a
+  `<select>`'s options as children of the wrapping `<label>`, so without it the accessible name is
+  the label text **plus the current value** — which silently breaks exact selectors in Playwright.
+
+### The storyboard E2E
+
+```bash
+pgrep -fl 'ffmpeg|whisper-cli|chrome-headless' || echo "no heavy"   # memory gate
+node apps/web/e2e/storyboard-smoke.mjs
+```
+
+`apps/web/e2e/storyboard-smoke.mjs` runs against a real `render-api`, a real Chrome and a **real
+`claude -p` call** on a temporary copy of `media/smoke-ingest/raw/`: project nav → empty state →
+brief → job with live stages → the storyboard rendered on screen → one narration edited → the `PUT`
+verified by reading `work/storyboard.json` **on disk** → the prompt sheet copied and read back from
+the clipboard and compared byte for byte with the served text → the per-scene copy → a second
+proposal refused with `409` and confirmed in the UI. If the subscription quota answers `429`, the
+script verifies the failure branch on screen, screenshots it and stops there instead of failing
+silently. Artifacts (the produced document, the copied sheet and five screenshots) land in
+`sdd/specs/spec-e-burgos-008-ai-storyboard/cycles/cycle-02/artifacts/`.
 
 ## Montage (spec-007 cycle-02)
 

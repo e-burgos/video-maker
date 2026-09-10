@@ -227,6 +227,16 @@
           "status": "completed",
           "tasks_total": 6,
           "tasks_done": 6
+        },
+        "cycle-02": {
+          "file": "sdd/specs/spec-e-burgos-008-ai-storyboard/cycles/cycle-02/tasks.json",
+          "module": "ai-storyboard",
+          "apps": [
+            "apps/web"
+          ],
+          "status": "completed",
+          "tasks_total": 6,
+          "tasks_done": 6
         }
       }
     }
