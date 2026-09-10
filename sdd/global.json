@@ -148,6 +148,19 @@
         "apps/web"
       ],
       "description": "Timeline multipista visual: las cinco pistas en escala de tiempo, recorte y reordenamiento por drag, playhead sincronizado en los dos sentidos con el Player de Remotion, inspector por escena y subida drag&drop multi-archivo"
+    },
+    {
+      "module": "production-quality",
+      "spec": "spec-e-burgos-014-production-quality",
+      "apps": [
+        "libs/media-local",
+        "libs/auto-montage",
+        "libs/timeline-core",
+        "libs/composition-remotion",
+        "tools/render-cli",
+        "apps/render-api"
+      ],
+      "description": "Calidad de produccion sobre el feedback del primer video real: cama musical normalizada a una referencia de loudness antes de las ganancias del preset y niveles de publicidad por preset, captions alineadas al guion del productor (--script / scriptPath) conservando los tiempos de Whisper, y capa de logo opcional en la Timeline con default en el margen inferior derecho, ingestada desde raw/logo/ y dibujada por Remotion"
     }
   ],
   "monorepo": {
