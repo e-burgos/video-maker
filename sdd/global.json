@@ -82,7 +82,70 @@
     }
   ],
   "in_progress_modules": [],
-  "pending_modules": [],
+  "pending_modules": [
+    {
+      "module": "ai-storyboard",
+      "spec": "spec-e-burgos-008-ai-storyboard",
+      "apps": [
+        "apps/render-api",
+        "libs/timeline-core",
+        "apps/web"
+      ],
+      "description": "Storyboard generativo: puerto AiAgent sobre `claude -p` local (sin API key), documento work/storyboard.json con hoja de personajes, escenas ordenadas con narración y prompt visual por escena, fuente del visual (subida, asset del catálogo o escena nativa de Remotion), job kind: 'storyboard', endpoints GET/PUT del documento y export de prompts numerado para las herramientas generativas externas"
+    },
+    {
+      "module": "voice-over",
+      "spec": "spec-e-burgos-009-voice-over",
+      "apps": [
+        "apps/render-api",
+        "apps/web",
+        "libs/media-local"
+      ],
+      "description": "Voz en off del modo generativo: rol `voice` para subir locución propia y Piper TTS local como binario configurable, job kind: 'voice' que sintetiza una pista por escena desde el storyboard, la transcribe con Whisper para alinear captions y fija la duración real de cada escena"
+    },
+    {
+      "module": "scene-assembly",
+      "spec": "spec-e-burgos-010-scene-assembly",
+      "apps": [
+        "apps/web",
+        "libs/composition-remotion",
+        "libs/timeline-core",
+        "libs/auto-montage",
+        "apps/render-api"
+      ],
+      "description": "Ensamblado de escenas: huecos por escena con drag&drop e importación numerada en lote, cuatro escenas nativas de Remotion (título, texto, código, imagen con Ken Burns) y el segundo productor de Timeline `buildTimelineFromStoryboard`, expuesto como job kind: 'assemble'"
+    },
+    {
+      "module": "audio-library",
+      "spec": "spec-e-burgos-011-audio-library",
+      "apps": [
+        "libs/timeline-core",
+        "libs/media-local",
+        "libs/composition-remotion",
+        "apps/render-api",
+        "apps/web"
+      ],
+      "description": "Biblioteca de audio compartida en media/_library/audio/ con índice etiquetado y sincronización desde Pixabay, pista `sfx` nueva en Timeline, composición y mezcla, selección automática por las etiquetas del storyboard y decisión final del usuario (fijar o vetar)"
+    },
+    {
+      "module": "caption-styles",
+      "spec": "spec-e-burgos-012-caption-styles",
+      "apps": [
+        "libs/composition-remotion",
+        "libs/timeline-core",
+        "apps/web"
+      ],
+      "description": "Catálogo de 4-5 estilos de captions cinéticas sobre spec-003 más `off`, elegible por proyecto y sobrescribible por escena, propuesto por el storyboard y editable desde la UI"
+    },
+    {
+      "module": "premium-timeline",
+      "spec": "spec-e-burgos-013-premium-timeline",
+      "apps": [
+        "apps/web"
+      ],
+      "description": "Timeline multipista visual: las cinco pistas en escala de tiempo, recorte y reordenamiento por drag, playhead sincronizado en los dos sentidos con el Player de Remotion, inspector por escena y subida drag&drop multi-archivo"
+    }
+  ],
   "monorepo": {
     "tool": "Nx",
     "package_manager": "pnpm",

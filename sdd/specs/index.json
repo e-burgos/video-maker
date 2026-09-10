@@ -116,6 +116,108 @@
         "spec-e-burgos-005-render-service",
         "spec-e-burgos-006-web-studio"
       ]
+    },
+    {
+      "id": "spec-e-burgos-008-ai-storyboard",
+      "author": "e-burgos",
+      "slug": "ai-storyboard",
+      "folder": "sdd/specs/spec-e-burgos-008-ai-storyboard",
+      "file": "sdd/specs/spec-e-burgos-008-ai-storyboard/spec-e-burgos-008-ai-storyboard.spec.md",
+      "module": "ai-storyboard",
+      "app": "apps/render-api",
+      "status": "draft",
+      "title": "AI Storyboard: Guion, Escenas y Prompts Visuales",
+      "created_at": "2026-09-09",
+      "completed_at": null,
+      "depends_on": [
+        "spec-e-burgos-005-render-service",
+        "spec-e-burgos-006-web-studio",
+        "spec-e-burgos-007-web-montage"
+      ]
+    },
+    {
+      "id": "spec-e-burgos-009-voice-over",
+      "author": "e-burgos",
+      "slug": "voice-over",
+      "folder": "sdd/specs/spec-e-burgos-009-voice-over",
+      "file": "sdd/specs/spec-e-burgos-009-voice-over/spec-e-burgos-009-voice-over.spec.md",
+      "module": "voice-over",
+      "app": "apps/render-api",
+      "status": "draft",
+      "title": "Voice Over: Locución Propia y Síntesis Local",
+      "created_at": "2026-09-09",
+      "completed_at": null,
+      "depends_on": [
+        "spec-e-burgos-008-ai-storyboard"
+      ]
+    },
+    {
+      "id": "spec-e-burgos-010-scene-assembly",
+      "author": "e-burgos",
+      "slug": "scene-assembly",
+      "folder": "sdd/specs/spec-e-burgos-010-scene-assembly",
+      "file": "sdd/specs/spec-e-burgos-010-scene-assembly/spec-e-burgos-010-scene-assembly.spec.md",
+      "module": "scene-assembly",
+      "app": "apps/web",
+      "status": "draft",
+      "title": "Scene Assembly: Huecos, Escenas Remotion y Timeline desde el Storyboard",
+      "created_at": "2026-09-09",
+      "completed_at": null,
+      "depends_on": [
+        "spec-e-burgos-008-ai-storyboard",
+        "spec-e-burgos-009-voice-over"
+      ]
+    },
+    {
+      "id": "spec-e-burgos-011-audio-library",
+      "author": "e-burgos",
+      "slug": "audio-library",
+      "folder": "sdd/specs/spec-e-burgos-011-audio-library",
+      "file": "sdd/specs/spec-e-burgos-011-audio-library/spec-e-burgos-011-audio-library.spec.md",
+      "module": "audio-library",
+      "app": "libs/timeline-core",
+      "status": "draft",
+      "title": "Audio Library: Música y Efectos de Banco Libre",
+      "created_at": "2026-09-09",
+      "completed_at": null,
+      "depends_on": [
+        "spec-e-burgos-010-scene-assembly"
+      ]
+    },
+    {
+      "id": "spec-e-burgos-012-caption-styles",
+      "author": "e-burgos",
+      "slug": "caption-styles",
+      "folder": "sdd/specs/spec-e-burgos-012-caption-styles",
+      "file": "sdd/specs/spec-e-burgos-012-caption-styles/spec-e-burgos-012-caption-styles.spec.md",
+      "module": "caption-styles",
+      "app": "libs/composition-remotion",
+      "status": "draft",
+      "title": "Caption Styles: Catálogo de Estilos por Proyecto y por Escena",
+      "created_at": "2026-09-09",
+      "completed_at": null,
+      "depends_on": [
+        "spec-e-burgos-003-kinetic-captions",
+        "spec-e-burgos-008-ai-storyboard"
+      ]
+    },
+    {
+      "id": "spec-e-burgos-013-premium-timeline",
+      "author": "e-burgos",
+      "slug": "premium-timeline",
+      "folder": "sdd/specs/spec-e-burgos-013-premium-timeline",
+      "file": "sdd/specs/spec-e-burgos-013-premium-timeline/spec-e-burgos-013-premium-timeline.spec.md",
+      "module": "premium-timeline",
+      "app": "apps/web",
+      "status": "draft",
+      "title": "Premium Timeline: Edición Multipista Visual",
+      "created_at": "2026-09-09",
+      "completed_at": null,
+      "depends_on": [
+        "spec-e-burgos-010-scene-assembly",
+        "spec-e-burgos-011-audio-library",
+        "spec-e-burgos-012-caption-styles"
+      ]
     }
   ]
 }
