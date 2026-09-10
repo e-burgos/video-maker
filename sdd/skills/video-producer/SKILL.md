@@ -15,7 +15,7 @@ comandos van en inglés/ASCII.
 
 | Herramienta                                             | Para qué                                                                                        |
 | ------------------------------------------------------- | ----------------------------------------------------------------------------------------------- |
-| `pnpm nx run render-cli:cli -- ingest\|plan\|render\|run <proyecto> --preset <p> --seed <n>` | Transcribir (Whisper), planificar el montaje (cortes por silencio, punch-ins, B-roll por concepto, captions, ducking) y renderizar (Remotion + mix + mux). `run` encadena los tres. |
+| `pnpm nx run render-cli:cli -- ingest\|plan\|render\|run <proyecto> --preset <p> --seed <n> [--script <guion>] [--no-logo]` | Transcribir (Whisper), planificar el montaje (cortes por silencio, punch-ins, B-roll por concepto, captions, ducking) y renderizar (Remotion + mix + mux). `run` encadena los tres. `--script` alinea las captions al guion; `--no-logo` ignora `raw/logo/`. |
 | `apps/render-api` (`POST /projects/:slug/jobs`)         | Lo mismo por HTTP, con jobs `montage`, `render`, `storyboard`, `voice`. Úsalo si el studio está corriendo; si no, la CLI. |
 | Piper (`$PIPER_PATH`, `$PIPER_MODEL_PATH` del `.env`)   | Voz en off en español rioplatense. Receta en §6.                                                |
 | `ffmpeg` / `ffprobe` (`$FFMPEG_PATH`, `$FFPROBE_PATH`)  | Recortar, muxear voz sobre video, medir duraciones y verificar el resultado.                    |
@@ -24,7 +24,8 @@ comandos van en inglés/ASCII.
 
 **Lo que el motor NO hace todavía** (decilo si el usuario lo pide): captions fuera del centro
 (hoy un solo estilo, cinético y centrado), escenas sin A-roll (todo video nace de un A-roll con
-voz), elegir B-roll por semántica (entra **solo** por nombre de archivo, ver §4), efectos de audio.
+voz), elegir B-roll por semántica (entra **solo** por nombre de archivo, ver §4), efectos de audio,
+mover el logo desde la web (por ahora sólo el default y `--no-logo`).
 
 ## 2. Flujo de trabajo (siempre en este orden)
 
@@ -60,6 +61,11 @@ voz), elegir B-roll por semántica (entra **solo** por nombre de archivo, ver §
   nombre de la marca es clave, repetilo igual pero no lo uses como concepto de B-roll.
 - Cerrá con un llamado a la acción corto. Guardá el guion en `work/producer/script.txt`, una
   frase por línea.
+- **Pasá siempre ese archivo con `--script`** al planificar: Whisper transcribe mal las tildes, los
+  nombres propios y las palabras poco frecuentes, y sin el guion esas palabras llegan literales a
+  las captions. Con `--script`, el motor reemplaza el texto de las palabras mal oídas por las del
+  guion **conservando los tiempos** de Whisper, borra las que Whisper inventó y reparte las que
+  omitió. El reporte de `plan` dice cuántas corrigió (`script-corrections`).
 
 ## 4. El material (dónde va cada cosa y cómo se llama)
 
@@ -68,7 +74,8 @@ voz), elegir B-roll por semántica (entra **solo** por nombre de archivo, ver §
 | A-roll     | `raw/aroll/clip01.mp4` | **Obligatorio y único**: el video con la voz. Manda los cortes, la duración y las captions. Si el usuario trae una grabación hablada (pantalla, cámara), es el A-roll tal cual. Si trae locución + video mudo, o voz generada: se muxea (§6). Si no trae video base, usá una imagen con Ken Burns o un clip libre como fondo. |
 | B-roll     | `raw/broll/<concepto>.mp4` | Clips de apoyo **sin voz** (`-an`), 5–30 s. El nombre es el concepto (`lentes.mp4`, `lentes-2.mp4` también vale: el número se ignora). Copiá o renombrá los archivos del usuario según lo que muestran. |
 | Imágenes   | `raw/images/<concepto>.jpg` | Igual que B-roll; el preset decide si prefiere clips o fotos.                                    |
-| Música     | `raw/audio/music01.mp3` | **Más larga que el edit** (si no, `CLIP_EXCEEDS_ASSET`). El mix aplica ducking bajo la voz.        |
+| Música     | `raw/audio/music01.mp3` | **Más larga que el edit** (si no, `CLIP_EXCEEDS_ASSET`). El ingest la mide y el motor la normaliza a -16 LUFS antes de aplicar los niveles del preset, así que da igual si la pista viene fuerte o floja. |
+| Logo       | `raw/logo/<archivo>.png` | Opcional, png/jpg/webp (svg no). Entra solo, en el **margen inferior derecho**, al 32 % del ancho. Si el proyecto tiene varios, gana el primero por orden alfabético. `--no-logo` lo apaga. |
 | Locución   | `raw/voice/*.wav\|mp3`  | Voz del usuario para muxear sobre el video base.                                                   |
 
 Nunca borres el material original del usuario: copiá o renombrá copias. No toques otros
@@ -76,12 +83,16 @@ proyectos de `media/`.
 
 ## 5. Presets (cuál para qué)
 
-| Preset          | Úsalo para                                   | Rasgos                                                                   |
-| --------------- | -------------------------------------------- | ------------------------------------------------------------------------ |
-| `software-demo` | tutoriales de software, pantallas grabadas, reels dinámicos | cortes por silencios ≥400 ms, punch-in cada 3, B-roll a pantalla completa hasta 35 %, captions de 3 palabras, whip-pan |
-| `educational`   | explicaciones, clases, publicidad sobria     | silencios ≥600 ms, B-roll picture-in-picture hasta 20 %, prefiere fotos, fades lentos |
-| `recipe`        | paso a paso con muchas tomas de apoyo        | más B-roll, cortes medios                                                |
-| `hardware`      | producto físico, unboxing                    | punch-ins fuertes, B-roll de producto                                    |
+| Preset          | Úsalo para                                   | Rasgos                                                                   | Música |
+| --------------- | -------------------------------------------- | ------------------------------------------------------------------------ | ------ |
+| `software-demo` | tutoriales de software, pantallas grabadas, reels dinámicos | cortes por silencios ≥400 ms, punch-in cada 3, B-roll a pantalla completa hasta 35 %, captions de 3 palabras, whip-pan | -8 / -18 dB |
+| `educational`   | explicaciones, clases, publicidad sobria     | silencios ≥600 ms, B-roll picture-in-picture hasta 20 %, prefiere fotos, fades lentos | -8 / -18 dB |
+| `recipe`        | paso a paso con muchas tomas de apoyo        | más B-roll, cortes medios                                                | -8 / -18 dB |
+| `hardware`      | producto físico, unboxing, **publicidad**    | punch-ins fuertes, B-roll de producto                                    | **-4 / -12 dB** |
+
+La columna de música es `baseGainDb / duckedGainDb` sobre la cama ya normalizada a -16 LUFS.
+`hardware` es el preset de publicidad: la música se escucha ~13 dB bajo la voz. Los otros tres
+la dejan más discreta, que es lo que quiere un tutorial.
 
 `--seed N` cambia qué B-roll y qué transición se eligen sin cambiar las reglas.
 
@@ -120,8 +131,10 @@ corto que la voz, concatená o loopeá clips (`-stream_loop`) antes de muxear.
 
 - Gate antes de transcribir o renderizar: `pgrep -fl 'ffmpeg|whisper-cli|chrome-headless|piper'`
   vacío, `memory_pressure` con ≥35 % libre, `df -h /` con ≥2 GB. Nunca dos jobs pesados a la vez.
-- `pnpm nx run render-cli:cli -- run media/<slug> --preset <p> --seed 0`. Leé el reporte:
-  `transcription-failures` debe ser 0, `concepts` debe listar tus conceptos, `broll-overlays > 0`.
+- `pnpm nx run render-cli:cli -- run media/<slug> --preset <p> --seed 0 --script media/<slug>/work/producer/script.txt`.
+  Leé el reporte: `transcription-failures` debe ser 0, `concepts` debe listar tus conceptos,
+  `broll-overlays > 0`, `logo` debe nombrar el archivo si el proyecto tiene uno, y
+  `script-corrections` te dice cuántas palabras se arreglaron contra el guion.
   Si un concepto no aparece: revisá la transcripción en `work/transcripts/` (¿Whisper lo escribió
   distinto?) y ajustá guion o nombre de archivo.
 - Verificá el MP4 con `ffprobe` sobre el **stream de video** (`nb_frames`, `r_frame_rate`, nunca

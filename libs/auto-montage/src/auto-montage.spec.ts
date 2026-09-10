@@ -33,7 +33,7 @@ function word(text: string, startMs: number, endMs: number) {
   return { text, startMs, endMs };
 }
 
-function buildFixtureFileSystem() {
+function buildFixtureFileSystem(extraAssets: readonly CatalogAsset[] = []) {
   const arollAsset = videoAsset({
     id: 'raw/aroll/demo.mp4',
     path: 'raw/aroll/demo.mp4',
@@ -61,6 +61,7 @@ function buildFixtureFileSystem() {
       catalogAsset('aroll', arollAsset),
       catalogAsset('audio', audioAsset),
       catalogAsset('broll', brollAsset),
+      ...extraAssets,
     ],
     transcripts: [
       {
@@ -390,5 +391,147 @@ describe('autoMontage (CA-011)', () => {
     await expect(
       autoMontage(emptyProject, { preset: 'software-demo', seed: 1 }),
     ).rejects.toMatchObject({ reason: 'catalog-missing' });
+  });
+});
+
+describe('autoMontage — niveles del preset y logo (spec-014)', () => {
+  const logoAsset: MediaAsset = {
+    id: 'raw/logo/brand.png',
+    kind: 'image',
+    path: 'raw/logo/brand.png',
+    durationMs: 0,
+    width: 1200,
+    height: 240,
+    hasAudio: false,
+    probedAt: '2026-01-01T00:00:00.000Z',
+  };
+
+  async function run(
+    fileSystem: ReturnType<typeof buildFixtureFileSystem>,
+    options: Parameters<typeof autoMontage>[1],
+  ) {
+    return autoMontage(project, options, {
+      readTextFile: fileSystem.readTextFile,
+      writeTextFile: fileSystem.writeTextFile,
+      ensureDirectory: fileSystem.ensureDirectory,
+    });
+  }
+
+  it('lleva los niveles del preset hardware a audioMix.music y a la automation', async () => {
+    const fileSystem = buildFixtureFileSystem();
+
+    const result = await run(fileSystem, { preset: 'hardware', seed: 0 });
+
+    expect(result.timeline.audioMix.music.baseGainDb).toBe(-4);
+    expect(result.timeline.audioMix.music.duckedGainDb).toBe(-12);
+    expect(result.timeline.audioMix.music.referenceLufs).toBe(-16);
+    expect(result.timeline.tracks.music[0]?.gainDb).toBe(-4);
+    expect(result.timeline.audioMix.automation.some((keyframe) => keyframe.gainDb === -12)).toBe(true);
+    expect(result.timeline.audioMix.automation.some((keyframe) => keyframe.gainDb === -24)).toBe(false);
+  });
+
+  it('software-demo usa los niveles de tutorial', async () => {
+    const fileSystem = buildFixtureFileSystem();
+
+    const result = await run(fileSystem, { preset: 'software-demo', seed: 0 });
+
+    expect(result.timeline.audioMix.music.baseGainDb).toBe(-8);
+    expect(result.timeline.audioMix.music.duckedGainDb).toBe(-18);
+  });
+
+  it('incorpora el logo del proyecto por defecto y lo agrega a assets', async () => {
+    const fileSystem = buildFixtureFileSystem([catalogAsset('logo', logoAsset)]);
+
+    const result = await run(fileSystem, { preset: 'hardware', seed: 0 });
+
+    expect(result.logoAssetId).toBe('raw/logo/brand.png');
+    expect(result.timeline.logo).toEqual({
+      assetId: 'raw/logo/brand.png',
+      position: 'bottom-right',
+      widthRatio: 0.32,
+      marginRatio: 0.035,
+      opacity: 1,
+    });
+    expect(result.timeline.assets.map((asset) => asset.id)).toContain('raw/logo/brand.png');
+    const validation = validateTimeline(result.timeline);
+    expect(validation.ok ? [] : validation.issues).toEqual([]);
+  });
+
+  it('con logo: "off" no incorpora el logo aunque el proyecto tenga uno', async () => {
+    const fileSystem = buildFixtureFileSystem([catalogAsset('logo', logoAsset)]);
+
+    const result = await run(fileSystem, { preset: 'hardware', seed: 0, logo: 'off' });
+
+    expect(result.logoAssetId).toBeNull();
+    expect(result.timeline).not.toHaveProperty('logo');
+    expect(result.timeline.assets.map((asset) => asset.id)).not.toContain('raw/logo/brand.png');
+  });
+
+  it('sin logo en el proyecto la Timeline no declara la capa', async () => {
+    const fileSystem = buildFixtureFileSystem();
+
+    const result = await run(fileSystem, { preset: 'hardware', seed: 0 });
+
+    expect(result.logoAssetId).toBeNull();
+    expect(result.timeline).not.toHaveProperty('logo');
+  });
+
+  it('MontageInputError("logo-asset-not-found") con un logoAssetId que no existe', async () => {
+    const fileSystem = buildFixtureFileSystem([catalogAsset('logo', logoAsset)]);
+
+    await expect(
+      run(fileSystem, { preset: 'hardware', seed: 0, logoAssetId: 'raw/logo/otro.png' }),
+    ).rejects.toBeInstanceOf(MontageInputError);
+  });
+});
+
+describe('autoMontage — captions alineadas al guion (spec-014)', () => {
+  const SCRIPT = 'hola vamos a abrir la terminal y ejecutamos el comando listo';
+
+  async function run(scriptText?: string) {
+    const fileSystem = buildFixtureFileSystem();
+
+    return autoMontage(
+      project,
+      { preset: 'software-demo', seed: 42, ...(scriptText === undefined ? {} : { scriptText }) },
+      {
+        readTextFile: fileSystem.readTextFile,
+        writeTextFile: fileSystem.writeTextFile,
+        ensureDirectory: fileSystem.ensureDirectory,
+      },
+    );
+  }
+
+  it('sin guion no reporta alineación', async () => {
+    const result = await run();
+
+    expect(result.scriptAlignment).toBeNull();
+  });
+
+  it('con un guion idéntico a la transcripción no corrige nada', async () => {
+    const result = await run(SCRIPT);
+
+    expect(result.scriptAlignment).toEqual({
+      replaced: 0,
+      removed: 0,
+      inserted: 0,
+      dropped: 0,
+      corrected: 0,
+    });
+  });
+
+  it('corrige la palabra mal oída en las captions y sigue detectando el concepto', async () => {
+    const result = await run('hola vamos a abrir la terminal y ejecutamos el cómputo listo');
+
+    const captionWords = result.timeline.tracks.captions.flatMap((caption) =>
+      caption.words.map((entry) => entry.text),
+    );
+
+    expect(captionWords).toContain('cómputo');
+    expect(captionWords).not.toContain('comando');
+    expect(result.scriptAlignment?.replaced).toBe(1);
+    expect(result.concepts.some((concept) => concept.term === 'terminal')).toBe(true);
+    const validation = validateTimeline(result.timeline);
+    expect(validation.ok ? [] : validation.issues).toEqual([]);
   });
 });

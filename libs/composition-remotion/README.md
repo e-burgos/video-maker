@@ -29,11 +29,12 @@ Todo lo exportado vive en `src/index.ts` (firmas completas en `architect.md` §3
 | Área | Exports principales |
 | --- | --- |
 | Assets | `assetSrc` |
-| Plan de secuencia | `timelineToSequenceProps`, tipos `SequencePropsPlan`, `VideoSequenceProps`, `AudioSequenceProps`, `CaptionSequenceProps`, `ArollTransitionPlan` |
+| Plan de secuencia | `timelineToSequenceProps`, tipos `SequencePropsPlan`, `VideoSequenceProps`, `AudioSequenceProps`, `CaptionSequenceProps`, `LogoSequenceProps`, `ArollTransitionPlan` |
 | Timing y estilo | `transitionTiming`, `punchInStyle` |
 | Audio | `gainDbToVolume`, `volumeAtFrame` |
 | Transiciones | `whipPanStyle`, `whipPan`, `presentationFor`, tipos `WhipPanProps`, `ArollPresentation`, `PresentationDirection` |
-| Componentes | `ArollSeries`, `BrollTrack`, `AudioTrack`, `KineticCaptions`, `TimelineComposition` |
+| Componentes | `ArollSeries`, `BrollTrack`, `AudioTrack`, `LogoOverlay`, `KineticCaptions`, `TimelineComposition` |
+| Logo | `logoOverlayBox`, `logoOverlayStyle`, tipos `LogoOverlayBox`, `LogoOverlayProps` |
 | Backend de video (Player vs render) | `TimelineVideo`, `VideoBackendProvider`, `useVideoBackend`, `DEFAULT_VIDEO_BACKEND`, tipos `TimelineVideoProps`, `VideoBackend`, `VideoBackendProviderProps` |
 | Metadata / composición raíz | `computeTimelineMetadata`, `calculateTimelineMetadata`, `TIMELINE_COMPOSITION_ID` |
 | Tipos derivados públicos | `CaptionBox`, `TransitionDirection` (el resto de `timeline-types.ts` es interno) |
@@ -58,6 +59,24 @@ comportamiento es **idéntico byte a byte** al de antes de este ciclo (incluida 
 `inputProps`, ver `render.spec.ts`): sigue montando `<AudioTrack>` y aplicando la mezcla en vivo
 que hace Remotion para el preview. Solo con `audio: 'muted'` la composición **no monta
 `<AudioTrack>`** y el render sale mudo.
+
+## Capa de logo (spec-014)
+
+`TimelineComposition` monta `LogoOverlay` cuando la `Timeline` trae `logo`, **entre el B-roll y las
+captions**: el logo nunca puede tapar texto. La geometría es pura y vive en `logoOverlayBox` —
+ancho `widthRatio × format.width` recortado al espacio entre márgenes, margen `marginRatio ×
+format.width` **igual en los dos ejes**, y la esquina que dicta `position` (default
+`bottom-right`). El logo se dibuja también con `audio: 'muted'`, porque el video mudo es el que
+después se muxea.
+
+## Normalización de la cama musical (spec-014)
+
+`timelineToSequenceProps` deriva `normalizationGainDb` de `asset.audio.integratedLufs` y de
+`audioMix.music.referenceLufs` con `musicNormalizationGainDb` de `timeline-core` — la **misma**
+función que usa el grafo de ffmpeg de `media-local`, así que el preview y el master parten del
+mismo número. `volumeAtFrame(automation, frame, offsetDb)` lo suma en dB antes de convertir a
+volumen; el clamp a 1 de `gainDbToVolume` sigue aplicando, así que en el preview la cama nunca
+pasa de fondo de escala (en el master ese techo lo pone el `alimiter` del bus).
 
 **Por qué existe:** el pipeline real necesita un video **sin** audio para muxearle después la
 mezcla masterizada de `mixTimelineAudio`/`muxAudioIntoVideo` (`libs/media-local`). Si Remotion

@@ -1,4 +1,4 @@
-import type { AssetRole } from '@video-maker/auto-montage';
+import type { AssetRole, ScriptAlignmentCounts } from '@video-maker/auto-montage';
 
 export interface AssetRoleCount {
   readonly role: AssetRole;
@@ -36,6 +36,8 @@ export interface PlanReport {
   readonly conceptTerms: readonly string[];
   readonly brollOverlayCount: number;
   readonly brollRejections: readonly PlanBrollRejectionReport[];
+  readonly logoAssetId: string | null;
+  readonly scriptAlignment: ScriptAlignmentCounts | null;
 }
 
 export interface RenderReport {

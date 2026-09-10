@@ -157,6 +157,9 @@ interface CreateJobRequestBody {
   readonly preset?: string;
   readonly seed?: number;
   readonly overwrite?: boolean;
+  readonly scriptPath?: string;
+  readonly scriptText?: string;
+  readonly logo?: 'auto' | 'off';
 }
 ```
 
@@ -171,7 +174,18 @@ interface CreateJobRequestBody {
   a manual edit already sitting in `work/timeline.json` is never overwritten by accident. When
   `true`, the existing `Timeline`/EDL/catalog are replaced by the montage's own output once the job
   succeeds.
-- `preset`/`seed`/`overwrite` are only ever read on the `montage` branch. A `render` job (explicit
+- `scriptPath` / `scriptText` (spec-014) — the script the voice reads, as a project-relative path
+  or inline. **At most one of the two**; sending both, or either as an empty/non-string value,
+  answers `422 MONTAGE_SCRIPT_INVALID` before registering the job. With a script, the captions are
+  aligned against it: the words whisper misheard get the script's text while keeping whisper's
+  timings, the words whisper invented are dropped and the ones it omitted are spread into the
+  neighbouring gap. A `scriptPath` that does not resolve to a readable file surfaces as
+  `404 MONTAGE_SCRIPT_NOT_FOUND` when the job settles (stage `plan`), not at request time.
+- `logo` (spec-014) — `'auto'` (default) or `'off'`. With `'auto'`, if the project has an image in
+  `raw/logo/` it becomes the Timeline's logo layer, bottom-right. Anything else answers
+  `422 MONTAGE_LOGO_INVALID`.
+- `preset`/`seed`/`overwrite`/`scriptPath`/`scriptText`/`logo` are only ever read on the `montage`
+  branch. A `render` job (explicit
   or implied) never looks at them, even if they are present in the body.
 
 **Job report** (`report`, once `state` is `succeeded`):
@@ -183,6 +197,14 @@ interface MontageJobReport {
   readonly editDecisionListPath: string; // "work/edl.json"
   readonly preset: string;
   readonly seed: number;
+  readonly logoAssetId: string | null;       // spec-014
+  readonly scriptAlignment: {                // spec-014, null without a script
+    readonly replaced: number;
+    readonly removed: number;
+    readonly inserted: number;
+    readonly dropped: number;
+    readonly corrected: number;
+  } | null;
 }
 ```
 
@@ -194,6 +216,9 @@ interface MontageJobReport {
 | `MONTAGE_PRESET_INVALID` | `422` | `preset` present, not one of the four preset names. |
 | `MONTAGE_SEED_INVALID` | `422` | `seed` present, not a non-negative integer. |
 | `MONTAGE_OVERWRITE_INVALID` | `422` | `overwrite` present, not a boolean. |
+| `MONTAGE_SCRIPT_INVALID` | `422` | `scriptPath` and `scriptText` both present, or either is not a non-empty string. |
+| `MONTAGE_SCRIPT_NOT_FOUND` | `404` | `scriptPath` does not resolve to a readable file in the project (surfaced when the job settles). |
+| `MONTAGE_LOGO_INVALID` | `422` | `logo` present, neither `'auto'` nor `'off'`. |
 | `TIMELINE_ALREADY_EXISTS` | `409` | `overwrite` is `false` (or absent) and `work/timeline.json` already exists. |
 | `MONTAGE_RAW_MISSING` | `422` | The project exists but `raw/` has none of the four role directories, or `raw/` itself is unreadable. |
 | `MONTAGE_INPUT_INVALID` | `422` | `autoMontage` rejects the ingested catalog (for example: no `aroll` asset after ingest). |

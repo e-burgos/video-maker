@@ -26,5 +26,5 @@ export const hardwarePreset: MontagePreset = {
     kinds: ['slide', 'fade'],
     timing: 'spring',
   },
-  audio: { baseGainDb: -12, duckedGainDb: -22, attackMs: 150, releaseMs: 400, holdMs: 250 },
+  audio: { baseGainDb: -4, duckedGainDb: -12, referenceLufs: -16, attackMs: 150, releaseMs: 400, holdMs: 250 },
 };

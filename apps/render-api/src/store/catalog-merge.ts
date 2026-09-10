@@ -1,8 +1,12 @@
 import { CATALOG_SCHEMA_VERSION } from '@video-maker/auto-montage';
-import type { Catalog, CatalogAsset, ProbeFailure, ProjectRelativePath } from '@video-maker/auto-montage';
+import type {
+  AssetRole as CatalogAssetRole,
+  Catalog,
+  CatalogAsset,
+  ProbeFailure,
+  ProjectRelativePath,
+} from '@video-maker/auto-montage';
 import type { MediaAsset } from '@video-maker/timeline-core';
-
-import type { AssetRole } from './asset-path';
 
 const MESSAGE_BY_PROBE_FAILURE_CODE: Readonly<Record<ProbeFailure['errorCode'], string>> = {
   BINARY_NOT_FOUND: 'A required media binary could not be resolved.',
@@ -14,7 +18,7 @@ const MESSAGE_BY_PROBE_FAILURE_CODE: Readonly<Record<ProbeFailure['errorCode'], 
 export interface ToCatalogAssetInput {
   readonly asset: MediaAsset;
   readonly assetId: ProjectRelativePath;
-  readonly role: AssetRole;
+  readonly role: CatalogAssetRole;
   readonly fingerprint: { readonly sizeBytes: number; readonly modifiedAtMs: number };
 }
 

@@ -243,6 +243,59 @@ describe('handleCreateRenderJob', () => {
       expect(runtime.jobs.listBySlug('acme-launch')).toEqual([]);
     });
 
+    it('answers 422 MONTAGE_SCRIPT_INVALID when scriptPath and scriptText are both sent (spec-014)', async () => {
+      const { deps, runtime } = createMontageDeps();
+
+      await expect(
+        handleCreateRenderJob(
+          deps,
+          STORE,
+          { slug: 'acme-launch' },
+          jsonBodyRequest('acme-launch', {
+            kind: 'montage',
+            scriptPath: 'work/producer/script.txt',
+            scriptText: 'hola',
+          }),
+          runtime,
+        ),
+      ).rejects.toMatchObject({ code: 'MONTAGE_SCRIPT_INVALID' });
+      expect(runtime.jobs.listBySlug('acme-launch')).toEqual([]);
+    });
+
+    it('answers 422 MONTAGE_LOGO_INVALID and registers no job (spec-014)', async () => {
+      const { deps, runtime } = createMontageDeps();
+
+      await expect(
+        handleCreateRenderJob(
+          deps,
+          STORE,
+          { slug: 'acme-launch' },
+          jsonBodyRequest('acme-launch', { kind: 'montage', logo: 'maybe' }),
+          runtime,
+        ),
+      ).rejects.toMatchObject({ code: 'MONTAGE_LOGO_INVALID' });
+      expect(runtime.jobs.listBySlug('acme-launch')).toEqual([]);
+    });
+
+    it('registers the montage job with the script and the logo mode it received (spec-014)', async () => {
+      const { deps, runtime } = createMontageDeps();
+
+      const response = await handleCreateRenderJob(
+        deps,
+        STORE,
+        { slug: 'acme-launch' },
+        jsonBodyRequest('acme-launch', {
+          kind: 'montage',
+          scriptPath: 'work/producer/script.txt',
+          logo: 'off',
+        }),
+        runtime,
+      );
+
+      expect(response.status).toBe(202);
+      expect(runtime.jobs.listBySlug('acme-launch')).toHaveLength(1);
+    });
+
     it('answers 422 MONTAGE_OVERWRITE_INVALID and registers no job', async () => {
       const { deps, runtime } = createMontageDeps();
 

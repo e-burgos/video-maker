@@ -37,6 +37,11 @@
           "default": -24,
           "type": "number"
         },
+        "referenceLufs": {
+          "default": -16,
+          "type": "number",
+          "maximum": 0
+        },
         "attackMs": {
           "default": 150,
           "type": "integer",
@@ -59,6 +64,7 @@
       "required": [
         "baseGainDb",
         "duckedGainDb",
+        "referenceLufs",
         "attackMs",
         "releaseMs",
         "holdMs"

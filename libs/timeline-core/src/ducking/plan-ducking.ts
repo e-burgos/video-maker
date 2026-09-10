@@ -1,3 +1,4 @@
+import { DEFAULT_MUSIC_REFERENCE_LUFS } from '../audio/music-normalization';
 import type { AudioMixPlan, GainKeyframe, MusicMixSettings } from '../schemas/audio-mix-plan.schema';
 import { sequentialId } from '../timeline/ids';
 import type { DecisionId, Db, Fps, Ms } from '../types/units';
@@ -25,6 +26,7 @@ const DUCK_DECISION_PREFIX = 'duck';
 export const DEFAULT_MUSIC_MIX: MusicMixSettings = {
   baseGainDb: -12,
   duckedGainDb: -24,
+  referenceLufs: DEFAULT_MUSIC_REFERENCE_LUFS,
   attackMs: 150,
   releaseMs: 400,
   holdMs: 250,

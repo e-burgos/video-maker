@@ -1,0 +1,307 @@
+{
+  "$schema": "../../../../schemas/cycle-tasks.schema.json",
+  "spec": "spec-e-burgos-014-production-quality",
+  "cycle": 1,
+  "module": "production-quality",
+  "apps": [
+    "libs/timeline-core",
+    "libs/media-local",
+    "libs/auto-montage",
+    "libs/composition-remotion",
+    "tools/render-cli",
+    "apps/render-api"
+  ],
+  "flow": "lite",
+  "user_stories_generated": true,
+  "prerequisites": {
+    "tasks_generated": true
+  },
+  "tasks": [
+    {
+      "id": "TASK-001",
+      "title": "Declare the music loudness reference and the logo layer in the Timeline contract",
+      "user_stories": [
+        "US-14-001",
+        "US-14-005"
+      ],
+      "estimation_hours": 4,
+      "story_points": 5,
+      "depends_on": [],
+      "status": "done",
+      "files": [
+        "libs/timeline-core/src/schemas/audio-mix-plan.schema.ts",
+        "libs/timeline-core/src/schemas/timeline.schema.ts",
+        "libs/timeline-core/src/audio/music-normalization.ts",
+        "libs/timeline-core/src/audio/music-normalization.spec.ts",
+        "libs/timeline-core/src/ducking/plan-ducking.ts",
+        "libs/timeline-core/src/timeline/build-timeline.ts",
+        "libs/timeline-core/src/timeline/build-timeline.spec.ts",
+        "libs/timeline-core/src/timeline/validate-timeline.ts",
+        "libs/timeline-core/src/timeline/validate-timeline.spec.ts",
+        "libs/timeline-core/src/schemas/schemas.spec.ts",
+        "libs/timeline-core/src/index.ts",
+        "libs/timeline-core/schemas/timeline.schema.json",
+        "libs/timeline-core/schemas/audio-mix-plan.schema.json"
+      ],
+      "usage": {
+        "provider_model": "claude/opus",
+        "effort": "high",
+        "agent": "orchestrator",
+        "tokens_in": 120000,
+        "tokens_out": 14000,
+        "approx": true,
+        "source": "declared-estimate",
+        "recorded_at": "2026-09-10"
+      }
+    },
+    {
+      "id": "TASK-002",
+      "title": "Normalize the music bed in the ffmpeg mix graph before the preset gains",
+      "user_stories": [
+        "US-14-001"
+      ],
+      "estimation_hours": 3,
+      "story_points": 3,
+      "depends_on": [
+        "TASK-001"
+      ],
+      "status": "done",
+      "files": [
+        "libs/media-local/src/mix/build-music-bed-chain.ts",
+        "libs/media-local/src/mix/build-music-bed-chain.spec.ts",
+        "libs/media-local/src/mix/build-audio-mix-graph.ts",
+        "libs/media-local/src/mix/build-audio-mix-graph.spec.ts",
+        "libs/media-local/src/ffmpeg/mix-timeline-audio.spec.ts",
+        "libs/media-local/README.md"
+      ],
+      "usage": {
+        "provider_model": "claude/opus",
+        "effort": "high",
+        "agent": "orchestrator",
+        "tokens_in": 45000,
+        "tokens_out": 6000,
+        "approx": true,
+        "source": "declared-estimate",
+        "recorded_at": "2026-09-10"
+      }
+    },
+    {
+      "id": "TASK-003",
+      "title": "Measure audio loudness at ingest, add the logo role and the advertising levels per preset",
+      "user_stories": [
+        "US-14-001",
+        "US-14-002",
+        "US-14-005"
+      ],
+      "estimation_hours": 5,
+      "story_points": 8,
+      "depends_on": [
+        "TASK-001"
+      ],
+      "status": "done",
+      "files": [
+        "libs/auto-montage/src/ingest/probe-assets.ts",
+        "libs/auto-montage/src/ingest/probe-assets.spec.ts",
+        "libs/auto-montage/src/ingest/plan-ingest-work.ts",
+        "libs/auto-montage/src/ingest/plan-ingest-work.spec.ts",
+        "libs/auto-montage/src/ingest/ingest-project.ts",
+        "libs/auto-montage/src/ingest/classify-entry.ts",
+        "libs/auto-montage/src/ingest/classify-entry.spec.ts",
+        "libs/auto-montage/src/catalog/catalog.schema.ts",
+        "libs/auto-montage/src/presets/hardware.preset.ts",
+        "libs/auto-montage/src/presets/software-demo.preset.ts",
+        "libs/auto-montage/src/presets/educational.preset.ts",
+        "libs/auto-montage/src/presets/recipe.preset.ts",
+        "libs/auto-montage/src/montage/resolve-montage-inputs.ts",
+        "libs/auto-montage/src/montage/resolve-montage-inputs.spec.ts",
+        "libs/auto-montage/src/auto-montage.ts",
+        "libs/auto-montage/src/auto-montage.spec.ts",
+        "libs/auto-montage/README.md"
+      ],
+      "usage": {
+        "provider_model": "claude/opus",
+        "effort": "high",
+        "agent": "orchestrator",
+        "tokens_in": 95000,
+        "tokens_out": 13000,
+        "approx": true,
+        "source": "declared-estimate",
+        "recorded_at": "2026-09-10"
+      }
+    },
+    {
+      "id": "TASK-004",
+      "title": "Align the transcript to the producer script keeping the whisper timings",
+      "user_stories": [
+        "US-14-003"
+      ],
+      "estimation_hours": 5,
+      "story_points": 8,
+      "depends_on": [
+        "TASK-003"
+      ],
+      "status": "done",
+      "files": [
+        "libs/auto-montage/src/transcript/align-transcript-to-script.ts",
+        "libs/auto-montage/src/transcript/align-transcript-to-script.spec.ts",
+        "libs/auto-montage/src/transcript/script-tokens.ts",
+        "libs/auto-montage/src/transcript/script-tokens.spec.ts",
+        "libs/auto-montage/src/auto-montage.ts",
+        "libs/auto-montage/src/auto-montage.spec.ts",
+        "libs/auto-montage/src/index.ts",
+        "libs/auto-montage/README.md"
+      ],
+      "usage": {
+        "provider_model": "claude/opus",
+        "effort": "high",
+        "agent": "orchestrator",
+        "tokens_in": 70000,
+        "tokens_out": 12000,
+        "approx": true,
+        "source": "declared-estimate",
+        "recorded_at": "2026-09-10"
+      }
+    },
+    {
+      "id": "TASK-005",
+      "title": "Draw the logo and honour the music reference in the Remotion composition",
+      "user_stories": [
+        "US-14-001",
+        "US-14-006"
+      ],
+      "estimation_hours": 4,
+      "story_points": 5,
+      "depends_on": [
+        "TASK-001"
+      ],
+      "status": "done",
+      "files": [
+        "libs/composition-remotion/src/helpers/logo-overlay-style.ts",
+        "libs/composition-remotion/src/helpers/logo-overlay-style.spec.ts",
+        "libs/composition-remotion/src/components/logo-overlay.tsx",
+        "libs/composition-remotion/src/components/timeline-composition.tsx",
+        "libs/composition-remotion/src/components/timeline-composition.spec.tsx",
+        "libs/composition-remotion/src/helpers/timeline-to-sequence-props.ts",
+        "libs/composition-remotion/src/helpers/sequence-props.spec.ts",
+        "libs/composition-remotion/src/components/audio-track.tsx",
+        "libs/composition-remotion/src/components/audio-track.spec.tsx",
+        "libs/composition-remotion/src/index.ts",
+        "libs/composition-remotion/README.md"
+      ],
+      "usage": {
+        "provider_model": "claude/opus",
+        "effort": "high",
+        "agent": "orchestrator",
+        "tokens_in": 65000,
+        "tokens_out": 11000,
+        "approx": true,
+        "source": "declared-estimate",
+        "recorded_at": "2026-09-10"
+      }
+    },
+    {
+      "id": "TASK-006",
+      "title": "Expose --script and --no-logo in render-cli and report the corrections",
+      "user_stories": [
+        "US-14-004"
+      ],
+      "estimation_hours": 3,
+      "story_points": 5,
+      "depends_on": [
+        "TASK-004",
+        "TASK-005"
+      ],
+      "status": "done",
+      "files": [
+        "tools/render-cli/src/args/parse-cli-args.ts",
+        "tools/render-cli/src/args/parse-cli-args.spec.ts",
+        "tools/render-cli/src/commands/plan-command.ts",
+        "tools/render-cli/src/commands/plan-command.spec.ts",
+        "tools/render-cli/src/report/cli-report.ts",
+        "tools/render-cli/src/report/to-reports.ts",
+        "tools/render-cli/src/report/to-reports.spec.ts",
+        "tools/render-cli/src/report/format-report.ts",
+        "tools/render-cli/src/report/format-report.spec.ts",
+        "tools/render-cli/README.md"
+      ],
+      "usage": {
+        "provider_model": "claude/opus",
+        "effort": "high",
+        "agent": "orchestrator",
+        "tokens_in": 60000,
+        "tokens_out": 10000,
+        "approx": true,
+        "source": "declared-estimate",
+        "recorded_at": "2026-09-10"
+      }
+    },
+    {
+      "id": "TASK-007",
+      "title": "Accept scriptPath, scriptText and logo in the montage job of render-api",
+      "user_stories": [
+        "US-14-004"
+      ],
+      "estimation_hours": 3,
+      "story_points": 5,
+      "depends_on": [
+        "TASK-006"
+      ],
+      "status": "done",
+      "files": [
+        "apps/render-api/src/jobs/montage-job-params.ts",
+        "apps/render-api/src/jobs/montage-job-params.spec.ts",
+        "apps/render-api/src/jobs/run-montage-pipeline.ts",
+        "apps/render-api/src/jobs/run-montage-pipeline.spec.ts",
+        "apps/render-api/src/jobs/render-job-queue.ts",
+        "apps/render-api/src/errors/render-api-error.ts",
+        "apps/render-api/src/errors/http-status-for.ts",
+        "apps/render-api/src/http/handlers/jobs-handler.ts",
+        "apps/render-api/src/http/handlers/jobs-handler.spec.ts",
+        "apps/render-api/README.md",
+        "sdd/api.json"
+      ],
+      "usage": {
+        "provider_model": "claude/opus",
+        "effort": "high",
+        "agent": "orchestrator",
+        "tokens_in": 70000,
+        "tokens_out": 11000,
+        "approx": true,
+        "source": "declared-estimate",
+        "recorded_at": "2026-09-10"
+      }
+    },
+    {
+      "id": "TASK-008",
+      "title": "Accept the three improvements on media/demo-01 and prove the smoke-ingest video is unchanged",
+      "user_stories": [
+        "US-14-001",
+        "US-14-002",
+        "US-14-003",
+        "US-14-005",
+        "US-14-006"
+      ],
+      "estimation_hours": 4,
+      "story_points": 5,
+      "depends_on": [
+        "TASK-007"
+      ],
+      "status": "done",
+      "files": [
+        "sdd/specs/spec-e-burgos-014-production-quality/cycles/cycle-01/artifacts/measure-music-bed.ts",
+        "sdd/specs/spec-e-burgos-014-production-quality/cycles/cycle-01/artifacts/acceptance-demo-01.md",
+        "sdd/skills/video-producer/SKILL.md"
+      ],
+      "usage": {
+        "provider_model": "claude/opus",
+        "effort": "high",
+        "agent": "orchestrator",
+        "tokens_in": 85000,
+        "tokens_out": 12000,
+        "approx": true,
+        "source": "declared-estimate",
+        "recorded_at": "2026-09-10"
+      }
+    }
+  ]
+}

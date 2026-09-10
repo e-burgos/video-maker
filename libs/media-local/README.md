@@ -92,6 +92,17 @@ ffmpeg**, no usa `CommandRunner`; el wrapper que sí lo ejecuta (`mixTimelineAud
   curva en lugar de `clip.volume`. Encadenar `baseGainDb` y después la automatización deja el
   master 12 dB por debajo del preview. Por eso `buildMusicBedChain` emite la automatización cuando
   existe o la ganancia estática del clip cuando no — nunca las dos.
+- **La cama musical se normaliza antes de la ganancia (spec-014 D-2).** `buildMusicBedChain`
+  antepone `volume=<g>dB` con `g = musicNormalizationGainDb(asset.audio.integratedLufs,
+  audioMix.music.referenceLufs)` (referencia por defecto -16 LUFS, clamp ±18 dB). La medición sale
+  del catálogo (la escribe el ingest de `auto-montage`), no de una pasada extra de ffmpeg en el
+  mix: así el grafo y el `<Audio>` de Remotion derivan **la misma** ganancia de la misma función
+  pura. Se eligió `volume=NdB` y no un segundo `loudnorm` porque es una ganancia lineal invariante
+  en el tiempo, determinista y sin el resampleo a 192 kHz. Sin `integratedLufs` en el asset no se
+  emite ningún nodo.
+- **`apad` siempre lleva `whole_dur`** (`apad=whole_dur=<duración del video en s>`): sin él el
+  stream es infinito y sólo lo acota el `atrim` siguiente. El `atrim=end` se conserva porque
+  también recorta una música más larga que el edit.
 - **`gainDbToVolume` está duplicada a propósito** entre esta lib y
   `libs/composition-remotion/src/helpers/audio-gain.ts`: los boundaries Nx (`type:util` → solo
   `type:domain`) impiden que `media-local` importe `composition-remotion`. La tabla de paridad de

@@ -17,6 +17,8 @@ const TIMELINE_ISSUE_SEVERITY: Record<TimelineIssueCode, TimelineIssueSeverity> 
   CLIP_OUT_OF_TIMELINE: 'render-blocking',
   TRANSITION_CLIP_NOT_FOUND: 'render-blocking',
   CAPTION_OUT_OF_SAFE_ZONE: 'render-blocking',
+  LOGO_ASSET_NOT_FOUND: 'render-blocking',
+  LOGO_ASSET_NOT_IMAGE: 'render-blocking',
 };
 
 export function issueSeverity(code: UiIssueCode): TimelineIssueSeverity {

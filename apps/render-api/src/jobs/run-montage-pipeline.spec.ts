@@ -275,3 +275,77 @@ describe('runMontagePipeline', () => {
     expect(writes.some((path) => path.endsWith('work/catalog.json'))).toBe(true);
   });
 });
+
+describe('runMontagePipeline — guion y logo (spec-014)', () => {
+  it('sin guion el reporte no trae alineación ni logo', async () => {
+    const callLog = createCallLog();
+    const deps = buildIngestibleProjectDeps(callLog);
+    const { observer } = createRecordingObserver();
+
+    const report = await runMontagePipeline(REQUEST, deps, observer);
+
+    expect(report.scriptAlignment).toBeNull();
+    expect(report.logoAssetId).toBeNull();
+  });
+
+  it('con scriptText corrige las palabras y lo reporta', async () => {
+    const callLog = createCallLog();
+    const deps = buildIngestibleProjectDeps(callLog);
+    const { observer } = createRecordingObserver();
+
+    const report = await runMontagePipeline(
+      { ...REQUEST, scriptText: 'hola vamos abrir terminal listo' },
+      deps,
+      observer,
+    );
+
+    expect(report.scriptAlignment).toEqual({
+      replaced: 0,
+      removed: 0,
+      inserted: 0,
+      dropped: 0,
+      corrected: 0,
+    });
+  });
+
+  it('lee el guion del proyecto cuando llega scriptPath', async () => {
+    const callLog = createCallLog();
+    const storage = createFakeObjectStorage(callLog, {
+      files: [
+        { path: `${PROJECT_ROOT}/raw/aroll/clip01.mp4`, contents: 'clip-bytes', modifiedAtMs: 1_700_000_000_000 },
+        { path: `${PROJECT_ROOT}/work/whisper/aroll/clip01.json`, contents: WHISPER_RAW_OUTPUT },
+        {
+          path: `${PROJECT_ROOT}/work/producer/script.txt`,
+          contents: 'hola vamos abrir consola listo',
+        },
+      ],
+    });
+    const deps = createFakeRenderApiDependencies(callLog, {
+      storage,
+      readDirectory: toDirectoryReader(storage),
+      statFile: toFileStatReader(storage),
+      ensureDirectory: storage.ensureDirectory,
+      createCommandRunner: activeCommandRunnerFactory(callLog),
+      resolveMontageBinaries: async () => BINARIES,
+    });
+    const { observer } = createRecordingObserver();
+
+    const report = await runMontagePipeline(
+      { ...REQUEST, scriptPath: 'work/producer/script.txt' },
+      deps,
+      observer,
+    );
+
+    expect(report.scriptAlignment?.replaced).toBe(1);
+  });
+
+  it('MONTAGE_SCRIPT_NOT_FOUND cuando el scriptPath no existe', async () => {
+    const callLog = createCallLog();
+    const deps = buildIngestibleProjectDeps(callLog);
+    const { observer } = createRecordingObserver();
+
+    await expect(
+      runMontagePipeline({ ...REQUEST, scriptPath: 'work/producer/no-existe.txt' }, deps, observer),
+    ).rejects.toMatchObject({ code: 'MONTAGE_SCRIPT_NOT_FOUND', stage: 'plan' });
+  });
+});

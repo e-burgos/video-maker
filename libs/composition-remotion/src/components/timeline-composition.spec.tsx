@@ -2,6 +2,8 @@ import { Children, isValidElement } from 'react';
 import { describe, expect, it } from 'vitest';
 import { buildExampleTimeline } from '../__fixtures__/example-timeline';
 import { AudioTrack } from './audio-track';
+import { KineticCaptions } from './kinetic-captions';
+import { LogoOverlay } from './logo-overlay';
 import {
   TIMELINE_COMPOSITION_ID,
   TimelineComposition,
@@ -19,6 +21,19 @@ function metadataOptionsFor(props: TimelineCompositionProps) {
     compositionId: TIMELINE_COMPOSITION_ID,
     isRendering: false,
   };
+}
+
+function childTypes(props: TimelineCompositionProps): unknown[] {
+  const tree = TimelineComposition(props);
+
+  if (!isValidElement(tree)) {
+    throw new Error('expected TimelineComposition to return an AbsoluteFill element');
+  }
+
+  const fragmentProps = tree.props as { children?: unknown };
+  return Children.toArray(fragmentProps.children)
+    .filter((child) => isValidElement(child))
+    .map((child) => (child as { type: unknown }).type);
 }
 
 function mountsAudioTrack(props: TimelineCompositionProps): boolean {
@@ -96,5 +111,35 @@ describe('TimelineComposition', () => {
 
   it("con audio: 'muted' no monta AudioTrack (CA-011)", () => {
     expect(mountsAudioTrack({ timeline: TIMELINE, audio: 'muted' })).toBe(false);
+  });
+});
+
+describe('TimelineComposition — capa de logo (spec-014)', () => {
+  const withLogo: TimelineCompositionProps = {
+    timeline: {
+      ...TIMELINE,
+      logo: {
+        assetId: 'broll-shot-01',
+        position: 'bottom-right',
+        widthRatio: 0.32,
+        marginRatio: 0.035,
+        opacity: 1,
+      },
+    },
+  };
+
+  it('sin logo en la Timeline no monta LogoOverlay', () => {
+    expect(childTypes({ timeline: TIMELINE })).not.toContain(LogoOverlay);
+  });
+
+  it('con logo monta LogoOverlay debajo de las captions y encima del B-roll', () => {
+    const types = childTypes(withLogo);
+
+    expect(types).toContain(LogoOverlay);
+    expect(types.indexOf(LogoOverlay)).toBeLessThan(types.indexOf(KineticCaptions));
+  });
+
+  it('el logo se monta también con el audio muteado', () => {
+    expect(childTypes({ ...withLogo, audio: 'muted' })).toContain(LogoOverlay);
   });
 });

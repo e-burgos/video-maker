@@ -4,9 +4,14 @@ export type {
   ArollTransitionPlan,
   AudioSequenceProps,
   CaptionSequenceProps,
+  LogoSequenceProps,
   SequencePropsPlan,
   VideoSequenceProps,
 } from './helpers/timeline-to-sequence-props';
+export { logoOverlayBox, logoOverlayStyle } from './helpers/logo-overlay-style';
+export type { LogoOverlayBox } from './helpers/logo-overlay-style';
+export { LogoOverlay } from './components/logo-overlay';
+export type { LogoOverlayProps } from './components/logo-overlay';
 export type { CaptionBox, TransitionDirection } from './helpers/timeline-types';
 export { transitionTiming } from './helpers/transition-timing';
 export { punchInStyle } from './helpers/punch-in-style';

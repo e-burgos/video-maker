@@ -48,6 +48,8 @@ export type { AudioMixPlan, GainKeyframe, MusicMixSettings, VoiceTarget } from '
 export {
   AudioClipSchema,
   CaptionClipSchema,
+  LogoOverlaySchema,
+  LogoPositionSchema,
   TimelineSchema,
   TimelineTransitionSchema,
   VideoClipSchema,
@@ -55,10 +57,18 @@ export {
 export type {
   AudioClip,
   CaptionClip,
+  LogoOverlay,
+  LogoPosition,
   Timeline,
   TimelineTransition,
   VideoClip,
 } from './schemas/timeline.schema';
+
+export {
+  DEFAULT_MUSIC_REFERENCE_LUFS,
+  MUSIC_NORMALIZATION_MAX_GAIN_DB,
+  musicNormalizationGainDb,
+} from './audio/music-normalization';
 
 export type { AssetId, ClipId, DecisionId, Db, Fps, Frame, Lufs, Ms, Rounding, Scale } from './types/units';
 
@@ -85,7 +95,7 @@ export type { PunchInAnchor, PunchInOptions, PunchInPlan } from './punch-in/plan
 export { remapMsAfterCuts } from './timeline/remap-ms-after-cuts';
 
 export { TimelineBuildError, buildTimeline } from './timeline/build-timeline';
-export type { MusicInput, TimelineBuildErrorCode } from './timeline/build-timeline';
+export type { LogoInput, MusicInput, TimelineBuildErrorCode } from './timeline/build-timeline';
 
 export { validateTimeline } from './timeline/validate-timeline';
 export type { TimelineIssue, TimelineIssueCode, TimelineValidationResult } from './timeline/validate-timeline';

@@ -71,10 +71,14 @@ function buildClipBodyFilters(
     return buildVoiceChain(timeline.audioMix.voice, voiceMeasuredByAssetId?.get(entry.clip.assetId));
   }
 
+  const measuredLufs = timeline.assets.find((asset) => asset.id === entry.clip.assetId)?.audio
+    ?.integratedLufs;
+
   return buildMusicBedChain(timeline.audioMix, {
     clip: entry.clip,
     fps: timeline.format.fps,
     videoDurationFrames: timeline.durationFrames,
+    ...(measuredLufs === undefined ? {} : { measuredLufs }),
   });
 }
 

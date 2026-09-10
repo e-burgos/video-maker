@@ -1,4 +1,5 @@
 import type { AudioClip, AudioMixPlan, Fps, Frame } from '@video-maker/timeline-core';
+import { musicNormalizationGainDb } from '@video-maker/timeline-core';
 
 import { formatFilterNumber } from './format-filter-number';
 import { gainDbToVolume } from './gain-db-to-volume';
@@ -12,6 +13,13 @@ export interface MusicBedChainOptions {
   readonly clip: AudioClip;
   readonly fps: Fps;
   readonly videoDurationFrames: Frame;
+  readonly measuredLufs?: number;
+}
+
+function buildNormalizationFilters(plan: AudioMixPlan, measuredLufs: number | undefined): string[] {
+  const gainDb = musicNormalizationGainDb(measuredLufs, plan.music.referenceLufs);
+
+  return gainDb === 0 ? [] : [`volume=${formatFilterNumber(gainDb)}dB`];
 }
 
 function buildGainFilters(plan: AudioMixPlan, clip: AudioClip, fps: Fps): string[] {
@@ -45,11 +53,13 @@ function buildFadeFilters(clip: AudioClip, fps: Fps): string[] {
 
 export function buildMusicBedChain(plan: AudioMixPlan, opts: MusicBedChainOptions): string[] {
   const { clip, fps, videoDurationFrames } = opts;
+  const videoDurationSeconds = formatFilterNumber(videoDurationFrames / fps);
 
   return [
+    ...buildNormalizationFilters(plan, opts.measuredLufs),
     ...buildGainFilters(plan, clip, fps),
     ...buildFadeFilters(clip, fps),
-    'apad',
-    `atrim=end=${formatFilterNumber(videoDurationFrames / fps)}`,
+    `apad=whole_dur=${videoDurationSeconds}`,
+    `atrim=end=${videoDurationSeconds}`,
   ];
 }

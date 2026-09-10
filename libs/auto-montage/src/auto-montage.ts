@@ -1,4 +1,11 @@
-import type { EditDecisionList, MediaAsset, MusicInput, OutputPreset, Timeline } from '@video-maker/timeline-core';
+import type {
+  EditDecisionList,
+  LogoInput,
+  MediaAsset,
+  MusicInput,
+  OutputPreset,
+  Timeline,
+} from '@video-maker/timeline-core';
 import { buildTimeline, planPunchIns, remapMsAfterCuts } from '@video-maker/timeline-core';
 import type { ReadTextFile } from '@video-maker/media-local';
 import { nodeReadTextFile } from '@video-maker/media-local';
@@ -26,10 +33,14 @@ import { resolveMontagePreset } from './presets/preset-registry';
 import type { MediaProject } from './project/media-project';
 import { editDecisionListPath, timelinePath } from './project/project-paths';
 import { pruneSilencesWithFrameMargin } from './montage/prune-silences-with-frame-margin';
+import type { ScriptAlignmentCounts, ScriptAlignmentResult } from './transcript/align-transcript-to-script';
+import { alignTranscriptToScript } from './transcript/align-transcript-to-script';
 import type { EnsureDirectory } from './fs/ensure-directory';
 import { nodeEnsureDirectory } from './fs/ensure-directory';
 import type { WriteTextFile } from './fs/write-text-file';
 import { nodeWriteTextFile } from './fs/write-text-file';
+
+export type LogoMode = 'auto' | 'off';
 
 export interface AutoMontageOptions {
   readonly preset: MontagePresetName | MontagePreset;
@@ -37,6 +48,9 @@ export interface AutoMontageOptions {
   readonly outputPreset?: OutputPreset;
   readonly arollAssetId?: string;
   readonly musicAssetId?: string;
+  readonly logoAssetId?: string;
+  readonly logo?: LogoMode;
+  readonly scriptText?: string;
   readonly persist?: boolean;
 }
 
@@ -54,6 +68,8 @@ export interface AutoMontageResult {
   readonly brollRejections: readonly BrollRejection[];
   readonly transcriptionSource: TranscriptionSource;
   readonly stopwordLanguage: string | null;
+  readonly logoAssetId: string | null;
+  readonly scriptAlignment: ScriptAlignmentCounts | null;
   readonly editedDurationMs: number;
   readonly edlPath: ProjectRelativePath;
   readonly timelinePath: ProjectRelativePath;
@@ -69,8 +85,25 @@ function brollAssetsUsedBy(
     .filter((asset) => usedAssetIds.has(asset.id));
 }
 
-function toMusicInput(musicAsset: MediaAsset | undefined): MusicInput | undefined {
-  return musicAsset === undefined ? undefined : { assetId: musicAsset.id };
+function toMusicInput(
+  musicAsset: MediaAsset | undefined,
+  preset: MontagePreset,
+): MusicInput | undefined {
+  return musicAsset === undefined ? undefined : { assetId: musicAsset.id, mix: { ...preset.audio } };
+}
+
+function toAlignmentCounts(alignment: ScriptAlignmentResult): ScriptAlignmentCounts {
+  return {
+    replaced: alignment.replaced,
+    removed: alignment.removed,
+    inserted: alignment.inserted,
+    dropped: alignment.dropped,
+    corrected: alignment.corrected,
+  };
+}
+
+function toLogoInput(logoAsset: MediaAsset | undefined): LogoInput | undefined {
+  return logoAsset === undefined ? undefined : { assetId: logoAsset.id };
 }
 
 export async function autoMontage(
@@ -87,23 +120,32 @@ export async function autoMontage(
 
   const preset = resolveMontagePreset(options.preset, project.root);
 
-  const { arollAsset, musicAsset, transcription, transcriptionSource, format } =
+  const { arollAsset, musicAsset, logoAsset, transcription, transcriptionSource, format } =
     await resolveMontageInputs(
       project,
       catalog,
       {
         ...(options.arollAssetId !== undefined ? { arollAssetId: options.arollAssetId } : {}),
         ...(options.musicAssetId !== undefined ? { musicAssetId: options.musicAssetId } : {}),
+        ...(options.logoAssetId !== undefined ? { logoAssetId: options.logoAssetId } : {}),
+        includeLogo: options.logo !== 'off',
         ...(options.outputPreset !== undefined ? { outputPreset: options.outputPreset } : {}),
       },
       { readTextFile },
     );
 
+  const alignment =
+    options.scriptText === undefined
+      ? null
+      : alignTranscriptToScript(transcription.words, options.scriptText);
+  const alignedTranscription =
+    alignment === null ? transcription : { ...transcription, words: [...alignment.words], segments: [] };
+
   const fps = format.fps;
   const { pruneDurationMs, keeps, cuts } = pruneSilencesWithFrameMargin(
     project.root,
     arollAsset,
-    transcription,
+    alignedTranscription,
     preset,
     fps,
   );
@@ -115,7 +157,7 @@ export async function autoMontage(
     anchor: preset.punchIn.anchor,
   });
 
-  const { concepts, stopwordLanguage } = spotConcepts(transcription, preset);
+  const { concepts, stopwordLanguage } = spotConcepts(alignedTranscription, preset);
 
   const brollIndex = buildBrollIndex(catalog, preset);
   const { overlays, rejections } = planBrollOverlays({
@@ -127,8 +169,8 @@ export async function autoMontage(
     fps,
   });
 
-  const captionGroups = planCaptionGroups(transcription.words, keeps, concepts, preset);
-  const duckDecisions = planDuckRanges(transcription.words, keeps, preset, fps);
+  const captionGroups = planCaptionGroups(alignedTranscription.words, keeps, concepts, preset);
+  const duckDecisions = planDuckRanges(alignedTranscription.words, keeps, preset, fps);
   const transitions = planTransitions(keeps, preset, fps);
 
   const edl = assertValidEditDecisionList(
@@ -151,8 +193,13 @@ export async function autoMontage(
   if (musicAsset !== undefined) {
     assets.push(musicAsset);
   }
+  if (logoAsset !== undefined) {
+    assets.push(logoAsset);
+  }
 
-  const timeline = assertValidTimeline(buildTimeline(edl, assets, toMusicInput(musicAsset)));
+  const timeline = assertValidTimeline(
+    buildTimeline(edl, assets, toMusicInput(musicAsset, preset), toLogoInput(logoAsset)),
+  );
 
   if (options.persist !== false) {
     const writeTextFile = deps.writeTextFile ?? nodeWriteTextFile;
@@ -169,6 +216,8 @@ export async function autoMontage(
     brollRejections: rejections,
     transcriptionSource,
     stopwordLanguage,
+    logoAssetId: logoAsset?.id ?? null,
+    scriptAlignment: alignment === null ? null : toAlignmentCounts(alignment),
     editedDurationMs: remapMsAfterCuts(pruneDurationMs, keeps),
     edlPath: editDecisionListPath(),
     timelinePath: timelinePath(),

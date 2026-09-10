@@ -12,6 +12,7 @@ import { ArollSeries } from './aroll-series';
 import { BrollTrack } from './broll-track';
 import { AudioTrack } from './audio-track';
 import { KineticCaptions } from './kinetic-captions';
+import { LogoOverlay } from './logo-overlay';
 
 export type TimelineAudioMode = 'mix' | 'muted';
 
@@ -56,6 +57,7 @@ export const TimelineComposition: FC<TimelineCompositionProps> = ({
       {audio === 'muted' ? null : (
         <AudioTrack voice={plan.voice} music={plan.music} automation={timeline.audioMix.automation} />
       )}
+      {plan.logo === null ? null : <LogoOverlay logo={plan.logo} />}
       <KineticCaptions
         clips={plan.captions}
         format={timeline.format}

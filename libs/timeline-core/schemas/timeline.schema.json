@@ -490,6 +490,51 @@
     "audioMix": {
       "$ref": "audio-mix-plan.schema.json"
     },
+    "logo": {
+      "type": "object",
+      "properties": {
+        "assetId": {
+          "type": "string",
+          "minLength": 1
+        },
+        "position": {
+          "default": "bottom-right",
+          "type": "string",
+          "enum": [
+            "bottom-right",
+            "bottom-left",
+            "top-right",
+            "top-left"
+          ]
+        },
+        "widthRatio": {
+          "default": 0.32,
+          "type": "number",
+          "exclusiveMinimum": 0,
+          "maximum": 1
+        },
+        "marginRatio": {
+          "default": 0.035,
+          "type": "number",
+          "minimum": 0,
+          "maximum": 0.5
+        },
+        "opacity": {
+          "default": 1,
+          "type": "number",
+          "exclusiveMinimum": 0,
+          "maximum": 1
+        }
+      },
+      "required": [
+        "assetId",
+        "position",
+        "widthRatio",
+        "marginRatio",
+        "opacity"
+      ],
+      "additionalProperties": false
+    },
     "safeZone": {
       "type": "object",
       "properties": {

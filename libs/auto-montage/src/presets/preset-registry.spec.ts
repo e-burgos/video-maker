@@ -106,3 +106,23 @@ describe('resolveMontagePreset (D-20)', () => {
     }
   });
 });
+
+describe('niveles de música por preset (spec-014)', () => {
+  it('hardware es el preset de publicidad: música presente bajo la voz', () => {
+    expect(MONTAGE_PRESETS.hardware.audio.baseGainDb).toBe(-4);
+    expect(MONTAGE_PRESETS.hardware.audio.duckedGainDb).toBe(-12);
+  });
+
+  it('los presets de tutorial dejan la música más discreta', () => {
+    for (const name of ['software-demo', 'educational', 'recipe'] as const) {
+      expect(MONTAGE_PRESETS[name].audio.baseGainDb).toBe(-8);
+      expect(MONTAGE_PRESETS[name].audio.duckedGainDb).toBe(-18);
+    }
+  });
+
+  it('todos los presets normalizan la cama a -16 LUFS', () => {
+    for (const preset of Object.values(MONTAGE_PRESETS)) {
+      expect(preset.audio.referenceLufs).toBe(-16);
+    }
+  });
+});

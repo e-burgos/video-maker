@@ -1,5 +1,5 @@
 import type { Clock, CommandRunner } from '@video-maker/media-local';
-import { isMediaLocalError, probeMedia } from '@video-maker/media-local';
+import { FIRST_AUDIO_STREAM, isMediaLocalError, measureLoudness, probeMedia } from '@video-maker/media-local';
 import type { MediaAsset } from '@video-maker/timeline-core';
 
 import type { MediaProject } from '../project/media-project';
@@ -34,6 +34,34 @@ export interface ProbeAssetsDependencies {
 
 export interface ProbeAssetsOptions {
   readonly ffprobePath?: string;
+  readonly ffmpegPath?: string;
+}
+
+export const LOUDNESS_MEASURED_ROLES: readonly AssetFinding['role'][] = ['audio'];
+
+async function measureIntegratedLufs(
+  absolutePath: string,
+  deps: ProbeAssetsDependencies,
+  options: ProbeAssetsOptions,
+): Promise<number | undefined> {
+  try {
+    const measurement = await measureLoudness(absolutePath, deps.runner, {
+      audioStreamSpecifier: FIRST_AUDIO_STREAM,
+      ...(options.ffmpegPath !== undefined ? { ffmpegPath: options.ffmpegPath } : {}),
+    });
+
+    return Number.isFinite(measurement.integratedLufs) ? measurement.integratedLufs : undefined;
+  } catch {
+    return undefined;
+  }
+}
+
+function withIntegratedLufs(asset: MediaAsset, integratedLufs: number | undefined): MediaAsset {
+  if (integratedLufs === undefined || asset.audio === undefined) {
+    return asset;
+  }
+
+  return { ...asset, audio: { ...asset.audio, integratedLufs } };
 }
 
 function compareByString(left: string, right: string): number {
@@ -70,10 +98,18 @@ async function probeFinding(
     ...(options.ffprobePath !== undefined ? { ffprobePath: options.ffprobePath } : {}),
   });
 
+  const asset: MediaAsset = { ...probedAsset, path: finding.relativePath };
+
+  if (!LOUDNESS_MEASURED_ROLES.includes(finding.role)) {
+    return { role: finding.role, fingerprint: finding.fingerprint, asset };
+  }
+
+  const integratedLufs = await measureIntegratedLufs(absolutePath, deps, options);
+
   return {
     role: finding.role,
     fingerprint: finding.fingerprint,
-    asset: { ...probedAsset, path: finding.relativePath },
+    asset: withIntegratedLufs(asset, integratedLufs),
   };
 }
 

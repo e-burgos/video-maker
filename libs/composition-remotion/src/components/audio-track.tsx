@@ -14,7 +14,8 @@ function musicVolume(clip: AudioSequenceProps, automation: readonly GainKeyframe
   if (automation.length === 0) {
     return clip.volume;
   }
-  return (frameInClip: number) => volumeAtFrame(automation, frameInClip + clip.from);
+  return (frameInClip: number) =>
+    volumeAtFrame(automation, frameInClip + clip.from, clip.normalizationGainDb);
 }
 
 export const AudioTrack: FC<AudioTrackProps> = ({ voice, music, automation }) => (

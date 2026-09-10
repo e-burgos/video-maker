@@ -85,14 +85,14 @@ describe('planCommand', () => {
     const deps = createFakeCliDependencies({ fileSystem: createFakeFileSystem([]) });
 
     await expect(
-      planCommand(fixtureMediaProject, { preset: 'software-demo', seed: 0 }, deps),
+      planCommand(fixtureMediaProject, { preset: 'software-demo', seed: 0, scriptPath: null, logo: 'auto' }, deps),
     ).rejects.toBeInstanceOf(StageInputMissingError);
   });
 
   it('runs autoMontage for real and maps the result to a PlanReport, resolving even with broll rejections (RN-28)', async () => {
     const deps = createFakeCliDependencies({ fileSystem: buildPlannableFileSystem() });
 
-    const report = await planCommand(fixtureMediaProject, { preset: 'software-demo', seed: 42 }, deps);
+    const report = await planCommand(fixtureMediaProject, { preset: 'software-demo', seed: 42, scriptPath: null, logo: 'auto' }, deps);
 
     expect(report.kind).toBe('plan');
     expect(report.timelinePath).toBe('work/timeline.json');
@@ -106,12 +106,62 @@ describe('planCommand', () => {
 
     const error = await planCommand(
       fixtureMediaProject,
-      { preset: 'unknown-preset-value' as MontagePresetName, seed: 0 },
+      { preset: 'unknown-preset-value' as MontagePresetName, seed: 0, scriptPath: null, logo: 'auto' },
       deps,
     ).catch((caught: unknown) => caught);
 
     expect(error).toBeInstanceOf(StageFailedError);
     expect((error as StageFailedError).stage).toBe('plan');
     expect((error as StageFailedError).reason).toBe('MONTAGE_INPUT_INVALID');
+  });
+
+  it('con --script corrige las captions contra el guion y lo reporta (spec-014)', async () => {
+    const fileSystem = buildPlannableFileSystem();
+    await fileSystem.writeTextFile(
+      '/tmp/script.txt',
+      'hola vamos a abrir la terminal y ejecutamos el cómputo listo',
+    );
+    const deps = createFakeCliDependencies({ fileSystem });
+
+    const report = await planCommand(
+      fixtureMediaProject,
+      { preset: 'software-demo', seed: 42, scriptPath: '/tmp/script.txt', logo: 'auto' },
+      deps,
+    );
+
+    expect(report.scriptAlignment).toEqual({
+      replaced: 1,
+      removed: 0,
+      inserted: 0,
+      dropped: 0,
+      corrected: 1,
+    });
+    expect(report.logoAssetId).toBeNull();
+  });
+
+  it('sin --script no hay reporte de alineación', async () => {
+    const deps = createFakeCliDependencies({ fileSystem: buildPlannableFileSystem() });
+
+    const report = await planCommand(
+      fixtureMediaProject,
+      { preset: 'software-demo', seed: 42, scriptPath: null, logo: 'auto' },
+      deps,
+    );
+
+    expect(report.scriptAlignment).toBeNull();
+  });
+
+  it('un --script que no se puede leer es STAGE_INPUT_MISSING en la etapa plan', async () => {
+    const deps = createFakeCliDependencies({ fileSystem: buildPlannableFileSystem() });
+
+    const error = await planCommand(
+      fixtureMediaProject,
+      { preset: 'software-demo', seed: 0, scriptPath: '/tmp/no-existe.txt', logo: 'auto' },
+      deps,
+    ).catch((caught: unknown) => caught);
+
+    expect(error).toBeInstanceOf(StageInputMissingError);
+    expect((error as StageInputMissingError).stage).toBe('plan');
+    expect((error as StageInputMissingError).reason).toBe('script-missing');
   });
 });

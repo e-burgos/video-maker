@@ -75,7 +75,7 @@ const RAW_TIMELINE = {
   },
   audioMix: {
     voice: { integratedLufs: -14, truePeakDbtp: -1, loudnessRange: 11 },
-    music: { baseGainDb: -12, duckedGainDb: -24, attackMs: 150, releaseMs: 400, holdMs: 250 },
+    music: { baseGainDb: -12, duckedGainDb: -24, referenceLufs: -16, attackMs: 150, releaseMs: 400, holdMs: 250 },
     automation: [{ frame: 0, gainDb: -24 }],
   },
   safeZone: { top: 220, bottom: 400, left: 60, right: 140 },

@@ -195,3 +195,55 @@ describe('planIngestWork — reuso de transcripción', () => {
     expect(result.assetPlans).toEqual([{ finding: brollFinding, reuse: undefined }]);
   });
 });
+
+describe('planIngestWork — medición de loudness faltante (spec-014)', () => {
+  const musicFinding = finding({ relativePath: 'raw/audio/music01.mp3', role: 'audio' });
+
+  function musicAsset(integratedLufs?: number): MediaAsset {
+    return {
+      id: 'raw/audio/music01.mp3',
+      kind: 'audio',
+      path: 'raw/audio/music01.mp3',
+      durationMs: 228_000,
+      hasAudio: true,
+      audio: {
+        sampleRate: 44_100,
+        channels: 2,
+        codec: 'mp3',
+        ...(integratedLufs === undefined ? {} : { integratedLufs }),
+      },
+      probedAt: '2026-01-01T00:00:00.000Z',
+    };
+  }
+
+  function catalogWithMusic(integratedLufs?: number): Catalog {
+    return catalogWith({
+      assets: [
+        {
+          role: 'audio',
+          fingerprint: { sizeBytes: 1_000, modifiedAtMs: 1_000 },
+          asset: musicAsset(integratedLufs),
+        },
+      ],
+      transcripts: [],
+    });
+  }
+
+  it('no reusa un asset de audio cuyo catálogo previo no trae integratedLufs', () => {
+    const result = planIngestWork([musicFinding], catalogWithMusic(), options);
+
+    expect(result.assetPlans[0]?.reuse).toBeUndefined();
+  });
+
+  it('reusa el asset de audio cuando la medición ya está en el catálogo', () => {
+    const result = planIngestWork([musicFinding], catalogWithMusic(-22.3), options);
+
+    expect(result.assetPlans[0]?.reuse?.asset.audio?.integratedLufs).toBe(-22.3);
+  });
+
+  it('un asset que no es de audio se reusa aunque no tenga medición', () => {
+    const result = planIngestWork([finding()], catalogWith(), options);
+
+    expect(result.assetPlans[0]?.reuse).toBeDefined();
+  });
+});

@@ -1,5 +1,6 @@
 import { z } from 'zod';
 
+import { DEFAULT_MUSIC_REFERENCE_LUFS } from '../audio/music-normalization';
 import { DbSchema, FrameSchema } from './primitives';
 
 export const VoiceTargetSchema = z.object({
@@ -11,6 +12,7 @@ export const VoiceTargetSchema = z.object({
 export const MusicMixSettingsSchema = z.object({
   baseGainDb: z.number().default(-12),
   duckedGainDb: z.number().default(-24),
+  referenceLufs: z.number().max(0).default(DEFAULT_MUSIC_REFERENCE_LUFS),
   attackMs: z.number().int().default(150),
   releaseMs: z.number().int().default(400),
   holdMs: z.number().int().default(250),

@@ -1,6 +1,13 @@
 import { describe, expect, it } from 'vitest';
 
-import { parseMontageOverwrite, parseMontagePreset, parseMontageSeed } from './montage-job-params';
+import {
+  parseMontageLogo,
+  parseMontageOverwrite,
+  parseMontagePreset,
+  parseMontageScript,
+  parseMontageSeed,
+} from './montage-job-params';
+import { PipelineStageError } from '../errors/pipeline-stage-error';
 
 function captureError(run: () => unknown): unknown {
   try {
@@ -106,5 +113,65 @@ describe('parseMontageOverwrite', () => {
 
   it('rejects null', () => {
     expect(captureError(() => parseMontageOverwrite(null))).toMatchObject({ code: 'MONTAGE_OVERWRITE_INVALID' });
+  });
+});
+
+describe('parseMontageScript', () => {
+  it('defaults both to null when neither is sent', () => {
+    expect(parseMontageScript(undefined, undefined)).toEqual({ scriptPath: null, scriptText: null });
+  });
+
+  it('accepts a project-relative path', () => {
+    expect(parseMontageScript('work/producer/script.txt', undefined)).toEqual({
+      scriptPath: 'work/producer/script.txt',
+      scriptText: null,
+    });
+  });
+
+  it('accepts the script inline', () => {
+    expect(parseMontageScript(undefined, 'hola mundo')).toEqual({
+      scriptPath: null,
+      scriptText: 'hola mundo',
+    });
+  });
+
+  it('rejects sending both', () => {
+    const error = captureError(() => parseMontageScript('a.txt', 'hola'));
+
+    expect(error).toBeInstanceOf(PipelineStageError);
+    expect((error as PipelineStageError).code).toBe('MONTAGE_SCRIPT_INVALID');
+  });
+
+  it('rejects an empty or non-string scriptPath', () => {
+    expect((captureError(() => parseMontageScript('   ', undefined)) as PipelineStageError).code).toBe(
+      'MONTAGE_SCRIPT_INVALID',
+    );
+    expect((captureError(() => parseMontageScript(7, undefined)) as PipelineStageError).code).toBe(
+      'MONTAGE_SCRIPT_INVALID',
+    );
+  });
+
+  it('rejects an empty scriptText', () => {
+    expect((captureError(() => parseMontageScript(undefined, '')) as PipelineStageError).code).toBe(
+      'MONTAGE_SCRIPT_INVALID',
+    );
+  });
+});
+
+describe('parseMontageLogo', () => {
+  it('defaults to auto', () => {
+    expect(parseMontageLogo(undefined)).toBe('auto');
+  });
+
+  it('accepts auto and off', () => {
+    expect(parseMontageLogo('auto')).toBe('auto');
+    expect(parseMontageLogo('off')).toBe('off');
+  });
+
+  it('rejects anything else with MONTAGE_LOGO_INVALID', () => {
+    const error = captureError(() => parseMontageLogo('maybe'));
+
+    expect(error).toBeInstanceOf(PipelineStageError);
+    expect((error as PipelineStageError).code).toBe('MONTAGE_LOGO_INVALID');
   });
 });

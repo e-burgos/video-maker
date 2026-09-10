@@ -48,6 +48,8 @@ export function toPlanReport(result: AutoMontageResult): PlanReport {
       startMs: rejection.startMs,
       reason: rejection.reason,
     })),
+    logoAssetId: result.logoAssetId,
+    scriptAlignment: result.scriptAlignment,
   };
 }
 

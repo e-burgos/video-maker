@@ -31,7 +31,14 @@ function musicClip(overrides: Partial<AudioClip> = {}): AudioClip {
 function musicPlan(automation: AudioMixPlan['automation'] = []): AudioMixPlan {
   return {
     voice: { integratedLufs: -14, truePeakDbtp: -1, loudnessRange: 11 },
-    music: { baseGainDb: -12, duckedGainDb: -24, attackMs: 150, releaseMs: 400, holdMs: 250 },
+    music: {
+      baseGainDb: -12,
+      duckedGainDb: -24,
+      referenceLufs: -16,
+      attackMs: 150,
+      releaseMs: 400,
+      holdMs: 250,
+    },
     automation,
   };
 }
@@ -66,7 +73,7 @@ describe('buildMusicBedChain', () => {
       videoDurationFrames: VIDEO_DURATION_FRAMES,
     });
 
-    expect(chain).toEqual(['apad', 'atrim=end=7']);
+    expect(chain).toEqual(['apad=whole_dur=7', 'atrim=end=7']);
   });
 
   it('nunca encadena la ganancia constante despues de la automatizacion', () => {
@@ -89,7 +96,7 @@ describe('buildMusicBedChain', () => {
     expect(chain).toEqual([
       'afade=t=in:st=0:d=0.5',
       'afade=t=out:st=6:d=1',
-      'apad',
+      'apad=whole_dur=7',
       'atrim=end=7',
     ]);
   });
@@ -101,7 +108,7 @@ describe('buildMusicBedChain', () => {
       videoDurationFrames: VIDEO_DURATION_FRAMES,
     });
 
-    expect(chain).toEqual(['volume=0.251188643', 'apad', 'atrim=end=7']);
+    expect(chain).toEqual(['volume=0.251188643', 'apad=whole_dur=7', 'atrim=end=7']);
   });
 
   it('el fixture completo de §9.2 del architect.md da la cadena exacta', () => {
@@ -125,8 +132,54 @@ describe('buildMusicBedChain', () => {
 
     expect(chain[1]).toBe('afade=t=in:st=0:d=0.5');
     expect(chain[2]).toBe('afade=t=out:st=6:d=1');
-    expect(chain[3]).toBe('apad');
+    expect(chain[3]).toBe('apad=whole_dur=7');
     expect(chain[4]).toBe('atrim=end=7');
     expect(chain).toHaveLength(5);
+  });
+});
+
+describe('buildMusicBedChain — normalización de la cama (spec-014 D-2)', () => {
+  it('antepone volume=<g>dB con la diferencia contra referenceLufs, antes de la ganancia', () => {
+    const chain = buildMusicBedChain(musicPlan(THREE_KEYFRAME_AUTOMATION), {
+      clip: musicClip({ gainDb: -4 }),
+      fps: FPS,
+      videoDurationFrames: VIDEO_DURATION_FRAMES,
+      measuredLufs: -22.3,
+    });
+
+    expect(chain[0]).toBe('volume=6.3dB');
+    expect(chain[1]).toBe(THREE_KEYFRAME_EXPRESSION);
+  });
+
+  it('atenúa una pista más fuerte que la referencia', () => {
+    const chain = buildMusicBedChain(musicPlan([]), {
+      clip: musicClip({ gainDb: 0 }),
+      fps: FPS,
+      videoDurationFrames: VIDEO_DURATION_FRAMES,
+      measuredLufs: -9,
+    });
+
+    expect(chain).toEqual(['volume=-7dB', 'apad=whole_dur=7', 'atrim=end=7']);
+  });
+
+  it('sin medición no emite ningún nodo de normalización', () => {
+    const chain = buildMusicBedChain(musicPlan([]), {
+      clip: musicClip({ gainDb: 0 }),
+      fps: FPS,
+      videoDurationFrames: VIDEO_DURATION_FRAMES,
+    });
+
+    expect(chain).toEqual(['apad=whole_dur=7', 'atrim=end=7']);
+  });
+
+  it('una pista ya en la referencia no emite nodo de normalización', () => {
+    const chain = buildMusicBedChain(musicPlan([]), {
+      clip: musicClip({ gainDb: 0 }),
+      fps: FPS,
+      videoDurationFrames: VIDEO_DURATION_FRAMES,
+      measuredLufs: -16,
+    });
+
+    expect(chain).toEqual(['apad=whole_dur=7', 'atrim=end=7']);
   });
 });

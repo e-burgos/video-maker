@@ -182,4 +182,66 @@ describe('probeAssets', () => {
       'raw/audio/music01.mp3',
     ]);
   });
+
+  it('mide el loudness integrado de un asset de rol audio y lo guarda en asset.audio (spec-014)', async () => {
+    const runner = new FixtureCommandRunner([
+      { bin: 'ffprobe', argsPattern: [/music01\.mp3$/u], response: { stdout: AUDIO_STDOUT, exitCode: 0 } },
+      {
+        bin: 'ffmpeg',
+        argsPattern: [/music01\.mp3$/u],
+        response: {
+          stderr: `{
+  "input_i" : "-22.30",
+  "input_tp" : "-0.80",
+  "input_lra" : "8.10",
+  "input_thresh" : "-32.40",
+  "target_offset" : "0.10"
+}`,
+          exitCode: 0,
+        },
+      },
+    ]);
+
+    const result = await probeAssets(project, [finding('raw/audio/music01.mp3', 'audio')], {
+      runner,
+      clock: fixedClock,
+    });
+
+    expect(result.assets[0]?.asset.audio?.integratedLufs).toBe(-22.3);
+    expect(result.failures).toEqual([]);
+  });
+
+  it('no mide loudness para roles que no son audio', async () => {
+    const runner = new FixtureCommandRunner([
+      { bin: 'ffprobe', argsPattern: [/clip01\.mp4$/u], response: { stdout: VIDEO_STDOUT, exitCode: 0 } },
+    ]);
+
+    const result = await probeAssets(project, [finding('raw/aroll/clip01.mp4', 'aroll')], {
+      runner,
+      clock: fixedClock,
+    });
+
+    expect(result.assets[0]?.asset.audio?.integratedLufs).toBeUndefined();
+    expect(runner.calls.every((call) => !call.bin.includes('ffmpeg'))).toBe(true);
+  });
+
+  it('una medición de loudness fallida no pierde el asset ni lo cuenta como probe failure', async () => {
+    const runner = new FixtureCommandRunner([
+      { bin: 'ffprobe', argsPattern: [/music01\.mp3$/u], response: { stdout: AUDIO_STDOUT, exitCode: 0 } },
+      {
+        bin: 'ffmpeg',
+        argsPattern: [/music01\.mp3$/u],
+        response: { stderr: 'ffmpeg exploded', exitCode: 1 },
+      },
+    ]);
+
+    const result = await probeAssets(project, [finding('raw/audio/music01.mp3', 'audio')], {
+      runner,
+      clock: fixedClock,
+    });
+
+    expect(result.assets.map((probed) => probed.asset.id)).toEqual(['raw/audio/music01.mp3']);
+    expect(result.assets[0]?.asset.audio?.integratedLufs).toBeUndefined();
+    expect(result.failures).toEqual([]);
+  });
 });

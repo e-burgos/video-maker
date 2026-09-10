@@ -27,7 +27,7 @@ describe('parseCliArgs — success paths', () => {
     expect(parseCliArgs(['plan', 'media/p', '--preset', 'hardware'])).toEqual({
       command: 'plan',
       projectRoot: 'media/p',
-      options: { preset: 'hardware', seed: 0 },
+      options: { preset: 'hardware', seed: 0, scriptPath: null, logo: 'auto' },
     });
   });
 
@@ -35,7 +35,7 @@ describe('parseCliArgs — success paths', () => {
     expect(parseCliArgs(['plan', 'media/p', '--preset', 'recipe', '--seed', '42'])).toEqual({
       command: 'plan',
       projectRoot: 'media/p',
-      options: { preset: 'recipe', seed: 42 },
+      options: { preset: 'recipe', seed: 42, scriptPath: null, logo: 'auto' },
     });
   });
 
@@ -43,7 +43,7 @@ describe('parseCliArgs — success paths', () => {
     expect(parseCliArgs(['run', 'media/p', '--preset', 'educational', '--seed', '3'])).toEqual({
       command: 'run',
       projectRoot: 'media/p',
-      options: { preset: 'educational', seed: 3 },
+      options: { preset: 'educational', seed: 3, scriptPath: null, logo: 'auto' },
     });
   });
 });
@@ -180,7 +180,50 @@ describe('parseCliArgs — the 8-step validation order of §4.1', () => {
     expect(parseCliArgs(['plan', 'media/p', '--preset', 'hardware', '--seed', '0'])).toEqual({
       command: 'plan',
       projectRoot: 'media/p',
-      options: { preset: 'hardware', seed: 0 },
+      options: { preset: 'hardware', seed: 0, scriptPath: null, logo: 'auto' },
     });
+  });
+});
+
+describe('parseCliArgs — --script y --no-logo (spec-014)', () => {
+  it('plan acepta --script con la ruta del guion', () => {
+    expect(parseCliArgs(['plan', 'media/demo-01', '--preset=hardware', '--script=media/demo-01/work/producer/script.txt'])).toEqual({
+      command: 'plan',
+      projectRoot: 'media/demo-01',
+      options: {
+        preset: 'hardware',
+        seed: 0,
+        scriptPath: 'media/demo-01/work/producer/script.txt',
+        logo: 'auto',
+      },
+    });
+  });
+
+  it('run acepta --script y --no-logo juntos', () => {
+    expect(parseCliArgs(['run', 'media/demo-01', '--preset=hardware', '--seed=3', '--script=guion.txt', '--no-logo'])).toEqual({
+      command: 'run',
+      projectRoot: 'media/demo-01',
+      options: { preset: 'hardware', seed: 3, scriptPath: 'guion.txt', logo: 'off' },
+    });
+  });
+
+  it('sin --no-logo el logo queda en auto', () => {
+    const parsed = parseCliArgs(['plan', 'media/demo-01', '--preset=hardware']);
+
+    expect(parsed.command === 'plan' ? parsed.options.logo : null).toBe('auto');
+  });
+
+  it('rechaza --script vacío', () => {
+    expect(() => parseCliArgs(['plan', 'p', '--preset=hardware', '--script='])).toThrow(CliArgumentError);
+  });
+
+  it('ingest y render rechazan --script', () => {
+    expect(() => parseCliArgs(['ingest', 'p', '--script=guion.txt'])).toThrow(CliUsageError);
+    expect(() => parseCliArgs(['render', 'p', '--script=guion.txt'])).toThrow(CliUsageError);
+  });
+
+  it('ingest y render rechazan --no-logo', () => {
+    expect(() => parseCliArgs(['ingest', 'p', '--no-logo'])).toThrow(CliUsageError);
+    expect(() => parseCliArgs(['render', 'p', '--no-logo'])).toThrow(CliUsageError);
   });
 });

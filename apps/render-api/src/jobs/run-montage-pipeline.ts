@@ -1,5 +1,7 @@
-import type { MediaProject, MontagePresetName } from '@video-maker/auto-montage';
-import { autoMontage, discoverAssets, ingestProject } from '@video-maker/auto-montage';
+import type { LogoMode, MediaProject, MontagePresetName } from '@video-maker/auto-montage';
+import { autoMontage, discoverAssets, ingestProject, toAbsolutePath } from '@video-maker/auto-montage';
+
+import { PipelineStageError } from '../errors/pipeline-stage-error';
 
 import type { RenderApiDependencies } from '../deps/render-api-dependencies';
 import { translateMontageError } from '../errors/translate-montage-error';
@@ -13,6 +15,33 @@ export interface MontagePipelineRequest {
   readonly project: MediaProject;
   readonly preset: MontagePresetName;
   readonly seed: number;
+  readonly scriptPath?: string | null;
+  readonly scriptText?: string | null;
+  readonly logo?: LogoMode;
+}
+
+async function resolveScriptText(
+  request: MontagePipelineRequest,
+  deps: RenderApiDependencies,
+): Promise<string | undefined> {
+  if (request.scriptText !== null && request.scriptText !== undefined) {
+    return request.scriptText;
+  }
+
+  if (request.scriptPath === null || request.scriptPath === undefined) {
+    return undefined;
+  }
+
+  try {
+    return await deps.storage.readTextFile(toAbsolutePath(request.project, request.scriptPath));
+  } catch {
+    throw new PipelineStageError({
+      code: 'MONTAGE_SCRIPT_NOT_FOUND',
+      stage: 'plan',
+      resource: request.scriptPath,
+      expected: 'a readable project-relative path to the script the voice reads',
+    });
+  }
 }
 
 async function runMontageStage<T>(stage: MontageStage, fn: () => Promise<T>): Promise<T> {
@@ -71,10 +100,17 @@ export async function runMontagePipeline(
   checkpoint(observer, 'plan');
   observer.stageStarted('plan');
 
+  const scriptText = await resolveScriptText(request, deps);
+
   const montageResult = await runMontageStage('plan', () =>
     autoMontage(
       request.project,
-      { preset: request.preset, seed: request.seed },
+      {
+        preset: request.preset,
+        seed: request.seed,
+        logo: request.logo ?? 'auto',
+        ...(scriptText === undefined ? {} : { scriptText }),
+      },
       {
         readTextFile: deps.storage.readTextFile,
         writeTextFile: deps.storage.writeTextFile,
@@ -89,5 +125,7 @@ export async function runMontagePipeline(
     editDecisionListPath: montageResult.edlPath,
     preset: request.preset,
     seed: request.seed,
+    logoAssetId: montageResult.logoAssetId,
+    scriptAlignment: montageResult.scriptAlignment,
   };
 }

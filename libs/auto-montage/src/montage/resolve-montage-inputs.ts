@@ -12,6 +12,8 @@ export type TranscriptionSource = 'catalog' | 'missing' | 'unreadable';
 export interface ResolveMontageInputsOptions {
   readonly arollAssetId?: string;
   readonly musicAssetId?: string;
+  readonly logoAssetId?: string;
+  readonly includeLogo?: boolean;
   readonly outputPreset?: OutputPreset;
 }
 
@@ -22,6 +24,7 @@ export interface ResolveMontageInputsDependencies {
 export interface ResolvedMontageInputs {
   readonly arollAsset: MediaAsset;
   readonly musicAsset: MediaAsset | undefined;
+  readonly logoAsset: MediaAsset | undefined;
   readonly transcription: Transcription;
   readonly transcriptionSource: TranscriptionSource;
   readonly format: OutputFormat;
@@ -83,6 +86,26 @@ function resolveMusicAsset(
   return firstAssetByRole(catalog, 'audio');
 }
 
+function resolveLogoAsset(
+  project: MediaProject,
+  catalog: Catalog,
+  options: ResolveMontageInputsOptions,
+): MediaAsset | undefined {
+  if (options.includeLogo === false) {
+    return undefined;
+  }
+
+  if (options.logoAssetId !== undefined) {
+    const found = findAsset(catalog, 'logo', options.logoAssetId);
+    if (found === undefined) {
+      throw new MontageInputError({ projectRoot: project.root, reason: 'logo-asset-not-found' });
+    }
+    return found;
+  }
+
+  return firstAssetByRole(catalog, 'logo');
+}
+
 function emptyTranscription(arollAssetId: string): Transcription {
   return {
     assetId: arollAssetId,
@@ -134,6 +157,7 @@ export async function resolveMontageInputs(
 ): Promise<ResolvedMontageInputs> {
   const arollAsset = resolveArollAsset(project, catalog, options.arollAssetId);
   const musicAsset = resolveMusicAsset(project, catalog, options.musicAssetId);
+  const logoAsset = resolveLogoAsset(project, catalog, options);
   const { transcription, source } = await readTranscription(
     project,
     catalog,
@@ -144,6 +168,7 @@ export async function resolveMontageInputs(
   return {
     arollAsset,
     musicAsset,
+    logoAsset,
     transcription,
     transcriptionSource: source,
     format: defaultFormat(options.outputPreset ?? 'reels-9x16'),

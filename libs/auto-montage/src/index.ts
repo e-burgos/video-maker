@@ -78,8 +78,11 @@ export type { Concept, ConceptOccurrence } from './concepts/concept';
 
 export type { BrollOverlayPlan, BrollRejection, BrollRejectionReason } from './broll/plan-broll-overlays';
 
+export { alignTranscriptToScript } from './transcript/align-transcript-to-script';
+export type { ScriptAlignmentCounts, ScriptAlignmentResult } from './transcript/align-transcript-to-script';
+
 export { autoMontage } from './auto-montage';
-export type { AutoMontageOptions, AutoMontageResult, MontageDependencies } from './auto-montage';
+export type { AutoMontageOptions, AutoMontageResult, LogoMode, MontageDependencies } from './auto-montage';
 
 export { serializeMontageDocument } from './montage/serialize-montage-document';
 export { writeEditDecisionList } from './montage/write-edit-decision-list';

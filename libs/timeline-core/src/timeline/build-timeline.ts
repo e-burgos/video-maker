@@ -14,11 +14,14 @@ import type {
   AudioClip,
   CaptionClip,
   CaptionClipBox,
+  LogoOverlay,
   Timeline,
   TimelineTransition,
   TransitionTiming,
   VideoClip,
 } from '../schemas/timeline.schema';
+import { LogoOverlaySchema } from '../schemas/timeline.schema';
+import type { MusicMixSettings } from '../schemas/audio-mix-plan.schema';
 import type { AssetId, ClipId, DecisionId, Db, Frame, Fps, Ms, Scale } from '../types/units';
 import { safeZoneFor } from '../format/format';
 import { framesToMs, msToFrames } from '../units/units';
@@ -30,10 +33,19 @@ import { sequentialId } from './ids';
 
 export interface MusicInput {
   assetId: AssetId;
+  mix?: MusicMixSettings;
   trimStartMs?: Ms;
   gainDb?: Db;
   fadeInFrames?: Frame;
   fadeOutFrames?: Frame;
+}
+
+export interface LogoInput {
+  assetId: AssetId;
+  position?: LogoOverlay['position'];
+  widthRatio?: number;
+  marginRatio?: number;
+  opacity?: number;
 }
 
 export type TimelineBuildErrorCode = 'EMPTY_AROLL';
@@ -369,10 +381,21 @@ function buildMusicClip(music: MusicInput, musicBaseGainDb: Db, durationFrames: 
   };
 }
 
+function buildLogoOverlay(logo: LogoInput): LogoOverlay {
+  return LogoOverlaySchema.parse({
+    assetId: logo.assetId,
+    ...optionalField('position', logo.position),
+    ...optionalField('widthRatio', logo.widthRatio),
+    ...optionalField('marginRatio', logo.marginRatio),
+    ...optionalField('opacity', logo.opacity),
+  });
+}
+
 export function buildTimeline(
   edl: EditDecisionList,
   assets: readonly MediaAsset[],
   music?: MusicInput,
+  logo?: LogoInput,
 ): Timeline {
   const fps = edl.format.fps;
   const keeps = decisionsOfType(edl.decisions, 'keep').sort(byStartMs);
@@ -401,11 +424,12 @@ export function buildTimeline(
   );
 
   const duckRanges = buildDuckVoiceRanges(duckDecisions, arollTrack.placements, fps);
+  const musicMix = { ...(music?.mix ?? DEFAULT_MUSIC_MIX) };
   const automation =
-    music !== undefined ? planDucking(duckRanges, DEFAULT_MUSIC_MIX, fps).automation : [];
+    music !== undefined ? planDucking(duckRanges, musicMix, fps).automation : [];
   const audioMix = {
     voice: { ...DEFAULT_AUDIO_MIX_PLAN.voice },
-    music: { ...DEFAULT_AUDIO_MIX_PLAN.music },
+    music: musicMix,
     automation,
   };
   const musicClips =
@@ -428,6 +452,7 @@ export function buildTimeline(
     },
     transitions: timelineTransitions,
     audioMix,
+    ...optionalField('logo', logo === undefined ? undefined : buildLogoOverlay(logo)),
     safeZone: safeZoneFor(edl.format),
   };
 }

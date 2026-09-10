@@ -127,7 +127,7 @@ export async function ingestProject(
     project,
     findingsToProbe,
     { runner: deps.runner, clock },
-    { ffprobePath: opts.binaries.ffprobe },
+    { ffprobePath: opts.binaries.ffprobe, ffmpegPath: opts.binaries.ffmpeg },
   );
 
   const assets: CatalogAsset[] = [...reusedCatalogAssets, ...probeResult.assets].sort((left, right) =>

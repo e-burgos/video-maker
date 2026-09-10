@@ -44,6 +44,8 @@ const PLAN_REPORT: PlanReport = {
   conceptTerms: ['comando', 'deploy'],
   brollOverlayCount: 3,
   brollRejections: [{ conceptTerm: 'deploy', startMs: 12400, reason: 'punch-in-overlap' }],
+  logoAssetId: null,
+  scriptAlignment: null,
 };
 
 const RENDER_REPORT: RenderReport = {
@@ -103,7 +105,20 @@ describe('formatReport — plan', () => {
       '  broll-overlays: 3',
       '  broll-rejections: 1',
       '    deploy@12400ms punch-in-overlap',
+      '  logo: none',
     ]);
+  });
+
+  it('nombra el logo y las correcciones del guion cuando el plan las trae (spec-014)', () => {
+    const lines = formatReport({
+      ...PLAN_REPORT,
+      logoAssetId: 'raw/logo/brand.png',
+      scriptAlignment: { replaced: 4, removed: 2, inserted: 1, dropped: 0, corrected: 7 },
+    });
+
+    expect(lines).toContain('  logo: raw/logo/brand.png');
+    expect(lines).toContain('  script-corrections: 7');
+    expect(lines).toContain('    replaced: 4 removed: 2 inserted: 1 dropped: 0');
   });
 });
 

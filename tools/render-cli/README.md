@@ -11,6 +11,8 @@ pnpm nx run render-cli:cli -- ingest media/smoke-ingest
 pnpm nx run render-cli:cli -- plan media/smoke-ingest --preset software-demo --seed 0
 pnpm nx run render-cli:cli -- render media/smoke-ingest
 pnpm nx run render-cli:cli -- run media/smoke-ingest --preset software-demo --seed 0
+pnpm nx run render-cli:cli -- run media/demo-01 --preset hardware --script media/demo-01/work/producer/script.txt
+pnpm nx run render-cli:cli -- plan media/demo-01 --preset hardware --no-logo
 
 pnpm nx run render-cli:smoke        # invocación fija sobre media/smoke-ingest
 ```
@@ -20,6 +22,19 @@ corren sin `cwd`), no contra el directorio donde se invoca `pnpm`.
 
 Presets disponibles: `software-demo`, `hardware`, `recipe`, `educational`. `--seed` es un entero
 no negativo, default `0`.
+
+`plan` y `run` aceptan además (spec-014):
+
+- `--script <ruta>`: el guion que la voz lee. Alinea las captions contra él —reemplaza las palabras
+  que Whisper oyó mal conservando sus tiempos, borra las que inventó y reparte las que omitió— y el
+  reporte agrega `script-corrections: N` con el desglose `replaced/removed/inserted/dropped`. La
+  ruta se resuelve igual que `<project-root>`, contra la raíz del workspace; si no se puede leer,
+  el error es `STAGE_INPUT_MISSING` en la etapa `plan`.
+- `--no-logo`: ignora `raw/logo/`. Por defecto, si el proyecto tiene un logo, entra en la Timeline
+  en el margen inferior derecho. El reporte de `plan` siempre nombra el logo usado (`logo: none`
+  cuando no hay).
+
+`ingest` y `render` rechazan las cuatro opciones (`--preset`, `--seed`, `--script`, `--no-logo`).
 
 ## Regenerar el material de `media/smoke-ingest`
 

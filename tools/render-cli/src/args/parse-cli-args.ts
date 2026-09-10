@@ -1,5 +1,5 @@
 import { parseArgs } from 'node:util';
-import type { MontagePresetName } from '@video-maker/auto-montage';
+import type { LogoMode, MontagePresetName } from '@video-maker/auto-montage';
 
 import { CliArgumentError } from '../errors/cli-argument-error';
 import { CliUsageError } from '../errors/cli-usage-error';
@@ -10,6 +10,8 @@ import { stageForArgument } from './stage-for-argument';
 export interface PlanOptions {
   readonly preset: MontagePresetName;
   readonly seed: number;
+  readonly scriptPath: string | null;
+  readonly logo: LogoMode;
 }
 
 export type ParsedCommand =
@@ -74,7 +76,12 @@ function parseNodeArgs(command: CommandName, rest: readonly string[]) {
   try {
     return parseArgs({
       args: rest,
-      options: { preset: { type: 'string' }, seed: { type: 'string' } },
+      options: {
+        preset: { type: 'string' },
+        seed: { type: 'string' },
+        script: { type: 'string' },
+        'no-logo': { type: 'boolean' },
+      },
       allowPositionals: true,
       strict: true,
     });
@@ -83,7 +90,33 @@ function parseNodeArgs(command: CommandName, rest: readonly string[]) {
   }
 }
 
-function parsePresetAndSeed(command: 'plan' | 'run', rawPreset: string | undefined, rawSeed: string | undefined): PlanOptions {
+interface RawPlanValues {
+  readonly preset: string | undefined;
+  readonly seed: string | undefined;
+  readonly script: string | undefined;
+  readonly noLogo: boolean | undefined;
+}
+
+function parseScriptPath(command: 'plan' | 'run', rawScript: string | undefined): string | null {
+  if (rawScript === undefined) {
+    return null;
+  }
+
+  if (rawScript.trim().length === 0) {
+    throw new CliArgumentError({
+      stage: stageForArgument(command, 'script'),
+      reason: 'invalid-script',
+      resource: '--script=',
+      expected: 'a readable path to the script the voice reads',
+    });
+  }
+
+  return rawScript;
+}
+
+function parsePresetAndSeed(command: 'plan' | 'run', values: RawPlanValues): PlanOptions {
+  const rawPreset = values.preset;
+  const rawSeed = values.seed;
   if (rawPreset === undefined) {
     throw new CliArgumentError({
       stage: stageForArgument(command, 'preset'),
@@ -101,8 +134,11 @@ function parsePresetAndSeed(command: 'plan' | 'run', rawPreset: string | undefin
     });
   }
 
+  const scriptPath = parseScriptPath(command, values.script);
+  const logo: LogoMode = values.noLogo === true ? 'off' : 'auto';
+
   if (rawSeed === undefined) {
-    return { preset: rawPreset, seed: DEFAULT_SEED };
+    return { preset: rawPreset, seed: DEFAULT_SEED, scriptPath, logo };
   }
 
   if (!SEED_PATTERN.test(rawSeed) || !Number.isSafeInteger(Number(rawSeed))) {
@@ -114,7 +150,29 @@ function parsePresetAndSeed(command: 'plan' | 'run', rawPreset: string | undefin
     });
   }
 
-  return { preset: rawPreset, seed: Number(rawSeed) };
+  return { preset: rawPreset, seed: Number(rawSeed), scriptPath, logo };
+}
+
+const PLAN_ONLY_OPTIONS = ['preset', 'seed', 'script', 'no-logo'] as const;
+
+function assertNoPlanOptions(command: 'ingest' | 'render', values: RawPlanValues): void {
+  const present: readonly [(typeof PLAN_ONLY_OPTIONS)[number], unknown][] = [
+    ['preset', values.preset],
+    ['seed', values.seed],
+    ['script', values.script],
+    ['no-logo', values.noLogo],
+  ];
+
+  for (const [name, value] of present) {
+    if (value !== undefined) {
+      throw new CliUsageError({
+        stage: stageForArgument(command, name === 'no-logo' ? 'logo' : name),
+        reason: 'unexpected-option',
+        resource: `--${name}`,
+        expected: `${command} takes none of ${PLAN_ONLY_OPTIONS.map((option) => `--${option}`).join(', ')}`,
+      });
+    }
+  }
 }
 
 export function parseCliArgs(argv: readonly string[]): ParsedCommand {
@@ -140,28 +198,23 @@ export function parseCliArgs(argv: readonly string[]): ParsedCommand {
     });
   }
 
-  const { preset: rawPreset, seed: rawSeed } = parsed.values;
+  const {
+    preset: rawPreset,
+    seed: rawSeed,
+    script: rawScript,
+    'no-logo': rawNoLogo,
+  } = parsed.values;
 
   if (rawCommand === 'ingest' || rawCommand === 'render') {
-    if (rawPreset !== undefined) {
-      throw new CliUsageError({
-        stage: stageForArgument(rawCommand, 'preset'),
-        reason: 'unexpected-option',
-        resource: '--preset',
-        expected: `${rawCommand} takes no --preset and no --seed`,
-      });
-    }
-    if (rawSeed !== undefined) {
-      throw new CliUsageError({
-        stage: stageForArgument(rawCommand, 'seed'),
-        reason: 'unexpected-option',
-        resource: '--seed',
-        expected: `${rawCommand} takes no --preset and no --seed`,
-      });
-    }
+    assertNoPlanOptions(rawCommand, { preset: rawPreset, seed: rawSeed, script: rawScript, noLogo: rawNoLogo });
     return { command: rawCommand, projectRoot };
   }
 
-  const options = parsePresetAndSeed(rawCommand, rawPreset, rawSeed);
+  const options = parsePresetAndSeed(rawCommand, {
+    preset: rawPreset,
+    seed: rawSeed,
+    script: rawScript,
+    noLogo: rawNoLogo,
+  });
   return { command: rawCommand, projectRoot, options };
 }

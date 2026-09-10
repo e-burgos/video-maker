@@ -26,5 +26,5 @@ export const recipePreset: MontagePreset = {
     kinds: ['light-leak', 'whip-pan'],
     timing: 'spring',
   },
-  audio: { baseGainDb: -12, duckedGainDb: -20, attackMs: 100, releaseMs: 300, holdMs: 180 },
+  audio: { baseGainDb: -8, duckedGainDb: -18, referenceLufs: -16, attackMs: 100, releaseMs: 300, holdMs: 180 },
 };

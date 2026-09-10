@@ -25,7 +25,16 @@ function createInput(slug: string): CreateRenderJobInput {
 }
 
 function createMontageInput(slug: string): CreateMontageJobInput {
-  return { kind: 'montage', slug, projectRoot: MONTAGE_PROJECT_ROOT, preset: 'software-demo', seed: 0 };
+  return {
+    kind: 'montage',
+    slug,
+    projectRoot: MONTAGE_PROJECT_ROOT,
+    preset: 'software-demo',
+    seed: 0,
+    scriptPath: null,
+    scriptText: null,
+    logo: 'auto',
+  };
 }
 
 const MONTAGE_BINARIES: ResolvedBinaries = {
@@ -622,6 +631,8 @@ describe('createRenderJobQueue — montage jobs', () => {
       editDecisionListPath: 'work/edl.json',
       preset: 'software-demo',
       seed: 0,
+      logoAssetId: null,
+      scriptAlignment: null,
     });
   });
 });

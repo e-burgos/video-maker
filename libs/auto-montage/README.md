@@ -20,6 +20,29 @@ Se importa por source vía el alias `@video-maker/auto-montage`.
   `ReadTextFile`, `WriteTextFile`, `EnsureDirectory`, `Clock`). Ningún test de `*.spec.ts` toca un
   binario real ni el filesystem real: el único camino a I/O real es el target `smoke`, manual y
   fuera de `lint test build`.
+- **Roles del crudo: `aroll`, `broll`, `image`, `audio`, `voice` y `logo`.** `raw/logo/` acepta
+  png/jpg/webp (un `.mp4` ahí es `extension-role-mismatch`; un `.svg`, `unsupported-extension`).
+  Si el proyecto tiene un logo, `autoMontage` lo incorpora a `timeline.logo` con los defaults del
+  schema (abajo a la derecha); `logo: 'off'` lo omite.
+- **El ingest mide el loudness de los assets de rol `audio` (spec-014).** Tras el `ffprobe`,
+  `probeAssets` corre `measureLoudness` y guarda `asset.audio.integratedLufs` en el catálogo: es la
+  única medición de la que dependen el grafo del mix de `media-local` y el `<Audio>` de Remotion
+  para normalizar la cama. Un catálogo previo cuyo asset de audio no la trae **no se reusa**, así
+  que los proyectos ya ingestados se actualizan solos. Una medición fallida no pierde el asset ni
+  cuenta como `probeFailure`.
+- **Los niveles de música los fija el preset y llegan a la Timeline.** `preset.audio` viaja como
+  `MusicInput.mix` a `buildTimeline`, que antes hardcodeaba `DEFAULT_MUSIC_MIX`: sin ese cable,
+  cambiar un preset era un no-op porque el consumidor real es `audioMix.automation`.
+- **Las captions se pueden alinear al guion (spec-014).** `alignTranscriptToScript(words,
+  scriptText)` alinea por LCS sobre tokens normalizados (sin tildes ni puntuación) y **reemplaza el
+  texto** de las palabras mal oídas por el del guion **conservando los tiempos de Whisper**. Un
+  bloque de diferencia es un run de *n* palabras de Whisper contra *k* del guion: con `n ≥ 1` el
+  span `[inicio de la primera, fin de la última]` se reparte en *k* tramos iguales (cubre `Ven y →
+  Vení` y `sinembargo → sin embargo`); con `n = 0` las *k* palabras entran en el hueco vecino sólo
+  si mide al menos *k* ms y si no **se descartan** (`dropped`); con `k = 0` las palabras de Whisper
+  se eliminan. `autoMontage` lo aplica antes de podar silencios, así que captions, conceptos y
+  ducking ven el mismo texto; los `segments` de la transcripción se vacían porque sus `wordRange`
+  dejan de ser válidos.
 - **No renderiza.** `auto-montage` no importa `@video-maker/composition-remotion`, `remotion` ni
   React — quien cablea el motor con el render es `tools/render-cli` (`cycle-03`).
 - `discoverAssets`, `probeAssets`, `transcribeAssets`, `planIngestWork`, `buildTranscriptionKey`,

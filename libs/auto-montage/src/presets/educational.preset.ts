@@ -26,5 +26,5 @@ export const educationalPreset: MontagePreset = {
     kinds: ['fade'],
     timing: 'linear',
   },
-  audio: { baseGainDb: -12, duckedGainDb: -26, attackMs: 200, releaseMs: 500, holdMs: 320 },
+  audio: { baseGainDb: -8, duckedGainDb: -18, referenceLufs: -16, attackMs: 200, releaseMs: 500, holdMs: 320 },
 };

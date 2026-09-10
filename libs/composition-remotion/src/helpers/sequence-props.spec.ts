@@ -1,3 +1,4 @@
+import type { Timeline } from '@video-maker/timeline-core';
 import { describe, expect, it } from 'vitest';
 import { buildExampleTimeline } from '../__fixtures__/example-timeline';
 import { timelineToSequenceProps } from './timeline-to-sequence-props';
@@ -112,5 +113,90 @@ describe('timelineToSequenceProps', () => {
     expect(minimalPlan.music).toEqual([]);
     expect(minimalPlan.captions).toEqual([]);
     expect(minimalPlan.aroll).toHaveLength(2);
+  });
+});
+
+describe('timelineToSequenceProps — normalización de la música y capa de logo (spec-014)', () => {
+  const timeline = buildExampleTimeline('reels-9x16');
+
+  function withMusicLoudness(integratedLufs: number | undefined): Timeline {
+    return {
+      ...timeline,
+      assets: timeline.assets.map((asset) =>
+        asset.id === 'music-bed-01'
+          ? {
+              ...asset,
+              audio: {
+                sampleRate: 44_100,
+                channels: 2,
+                codec: 'mp3',
+                ...(integratedLufs === undefined ? {} : { integratedLufs }),
+              },
+            }
+          : asset,
+      ),
+    };
+  }
+
+  it('deriva normalizationGainDb del asset y del referenceLufs del plan', () => {
+    const plan = timelineToSequenceProps(withMusicLoudness(-22.3));
+
+    expect(plan.music[0]?.normalizationGainDb).toBeCloseTo(6.3, 10);
+    expect(plan.music[0]?.volume).toBeCloseTo(10 ** ((-12 + 6.3) / 20), 10);
+  });
+
+  it('sin medición en el asset la ganancia de normalización es 0', () => {
+    const plan = timelineToSequenceProps(withMusicLoudness(undefined));
+
+    expect(plan.music[0]?.normalizationGainDb).toBe(0);
+    expect(plan.music[0]?.volume).toBeCloseTo(0.2512, 4);
+  });
+
+  it('la voz nunca se normaliza contra la referencia de música', () => {
+    const plan = timelineToSequenceProps(withMusicLoudness(-30));
+
+    expect(plan.voice[0]?.normalizationGainDb).toBe(0);
+  });
+
+  it('sin logo el plan expone logo: null', () => {
+    expect(timelineToSequenceProps(timeline).logo).toBeNull();
+  });
+
+  it('con logo resuelve el src del asset y propaga la capa y el formato', () => {
+    const withLogo: Timeline = {
+      ...timeline,
+      logo: {
+        assetId: 'broll-shot-01',
+        position: 'bottom-right',
+        widthRatio: 0.32,
+        marginRatio: 0.035,
+        opacity: 1,
+      },
+    };
+
+    const plan = timelineToSequenceProps(withLogo);
+
+    expect(plan.logo?.assetId).toBe('broll-shot-01');
+    expect(plan.logo?.src.length).toBeGreaterThan(0);
+    expect(plan.logo?.overlay.position).toBe('bottom-right');
+    expect(plan.logo?.format.width).toBe(1080);
+  });
+
+  it('un logo cuyo asset falta se acumula en unresolvedAssetIds y no rompe el plan', () => {
+    const withMissingLogo: Timeline = {
+      ...timeline,
+      logo: {
+        assetId: 'logo-inexistente',
+        position: 'bottom-right',
+        widthRatio: 0.32,
+        marginRatio: 0.035,
+        opacity: 1,
+      },
+    };
+
+    const plan = timelineToSequenceProps(withMissingLogo);
+
+    expect(plan.logo).toBeNull();
+    expect(plan.unresolvedAssetIds).toContain('logo-inexistente');
   });
 });

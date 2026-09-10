@@ -103,6 +103,21 @@
       "description": "Voz en off del modo generativo de punta a punta: rol `voice` para subir locución propia y Piper TTS local como binario configurable, job kind: 'voice' que sintetiza una pista por escena desde el storyboard, la transcribe con Whisper para alinear captions y fija la duración real de cada escena, y su consumo completo en el Web Studio: página de voz con selector de voces, progreso por escena, reproductor y duración real contra la estimada por escena, marca de narración desactualizada con regeneración de esa sola escena, y sustitución de cualquier escena por una grabación propia subida o ya presente en raw/voice/",
       "cycles_completed": 2,
       "completed_at": "2026-09-10"
+    },
+    {
+      "module": "production-quality",
+      "spec": "spec-e-burgos-014-production-quality",
+      "apps": [
+        "libs/media-local",
+        "libs/auto-montage",
+        "libs/timeline-core",
+        "libs/composition-remotion",
+        "tools/render-cli",
+        "apps/render-api"
+      ],
+      "description": "Calidad de produccion sobre el feedback del primer video real: cama musical normalizada a una referencia de loudness antes de las ganancias del preset y niveles de publicidad por preset, captions alineadas al guion del productor (--script / scriptPath) conservando los tiempos de Whisper, y capa de logo opcional en la Timeline con default en el margen inferior derecho, ingestada desde raw/logo/ y dibujada por Remotion",
+      "cycles_completed": 1,
+      "completed_at": "2026-09-10"
     }
   ],
   "in_progress_modules": [],
@@ -148,19 +163,6 @@
         "apps/web"
       ],
       "description": "Timeline multipista visual: las cinco pistas en escala de tiempo, recorte y reordenamiento por drag, playhead sincronizado en los dos sentidos con el Player de Remotion, inspector por escena y subida drag&drop multi-archivo"
-    },
-    {
-      "module": "production-quality",
-      "spec": "spec-e-burgos-014-production-quality",
-      "apps": [
-        "libs/media-local",
-        "libs/auto-montage",
-        "libs/timeline-core",
-        "libs/composition-remotion",
-        "tools/render-cli",
-        "apps/render-api"
-      ],
-      "description": "Calidad de produccion sobre el feedback del primer video real: cama musical normalizada a una referencia de loudness antes de las ganancias del preset y niveles de publicidad por preset, captions alineadas al guion del productor (--script / scriptPath) conservando los tiempos de Whisper, y capa de logo opcional en la Timeline con default en el margen inferior derecho, ingestada desde raw/logo/ y dibujada por Remotion"
     }
   ],
   "monorepo": {

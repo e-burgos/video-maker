@@ -62,7 +62,7 @@ export type { DetectSilencesWithFfmpegOptions } from './ffmpeg/detect-silences';
 
 export { parseLoudnormJson } from './ffmpeg/parse-loudnorm-json';
 export type { LoudnessMeasurement } from './ffmpeg/parse-loudnorm-json';
-export { DEFAULT_VOICE_TARGET, measureLoudness } from './ffmpeg/measure-loudness';
+export { DEFAULT_VOICE_TARGET, FIRST_AUDIO_STREAM, measureLoudness } from './ffmpeg/measure-loudness';
 export type { MeasureLoudnessOptions } from './ffmpeg/measure-loudness';
 export { buildLoudnormFilter } from './ffmpeg/build-loudnorm-filter';
 export { normalizeVoice } from './ffmpeg/normalize-voice';

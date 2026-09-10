@@ -98,6 +98,8 @@ describe('toPlanReport', () => {
       editedDurationMs: 18540,
       edlPath: 'work/edl.json',
       timelinePath: 'work/timeline.json',
+      logoAssetId: 'raw/logo/brand.png',
+      scriptAlignment: { replaced: 4, removed: 2, inserted: 1, dropped: 0, corrected: 7 },
     };
 
     const report = toPlanReport(result);
@@ -111,6 +113,8 @@ describe('toPlanReport', () => {
       conceptTerms: ['comando', 'deploy'],
       brollOverlayCount: 1,
       brollRejections: [{ conceptTerm: 'deploy', startMs: 12400, reason: 'punch-in-overlap' }],
+      logoAssetId: 'raw/logo/brand.png',
+      scriptAlignment: { replaced: 4, removed: 2, inserted: 1, dropped: 0, corrected: 7 },
     });
   });
 });

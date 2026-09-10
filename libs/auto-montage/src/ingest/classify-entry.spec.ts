@@ -93,3 +93,32 @@ describe('classifyFileEntry', () => {
     });
   });
 });
+
+describe('classifyTopLevelEntry / classifyFileEntry — rol logo (spec-014)', () => {
+  it('raw/logo/ es un directorio de rol conocido', () => {
+    expect(classifyTopLevelEntry({ name: 'logo', isDirectory: true })).toEqual({
+      kind: 'role',
+      role: 'logo',
+    });
+  });
+
+  it('acepta png, jpg y webp como assets de logo', () => {
+    expect(classifyFileEntry('brand.png', 'logo')).toEqual({ kind: 'asset' });
+    expect(classifyFileEntry('brand.jpg', 'logo')).toEqual({ kind: 'asset' });
+    expect(classifyFileEntry('brand.webp', 'logo')).toEqual({ kind: 'asset' });
+  });
+
+  it('rechaza un video dentro de raw/logo/ como extension-role-mismatch', () => {
+    expect(classifyFileEntry('brand.mp4', 'logo')).toEqual({
+      kind: 'ignored',
+      reason: 'extension-role-mismatch',
+    });
+  });
+
+  it('rechaza un svg dentro de raw/logo/ como unsupported-extension', () => {
+    expect(classifyFileEntry('brand.svg', 'logo')).toEqual({
+      kind: 'ignored',
+      reason: 'unsupported-extension',
+    });
+  });
+});

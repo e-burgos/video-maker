@@ -1,5 +1,6 @@
 import { catalogPath, discoverAssets, readCatalog, toAbsolutePath } from '@video-maker/auto-montage';
 import type {
+  AssetRole as CatalogAssetRole,
   Catalog,
   DirectoryReader,
   FileStatReader,
@@ -11,6 +12,7 @@ import type { MediaAsset } from '@video-maker/timeline-core';
 import type { ObjectStorage } from '../deps/object-storage';
 import { translateAutoMontageError } from '../errors/translate-store-error';
 import type { AssetRole } from './asset-path';
+import { isAssetRole } from './asset-path';
 
 export interface AssetFingerprint {
   readonly sizeBytes: number;
@@ -19,7 +21,7 @@ export interface AssetFingerprint {
 
 export interface AssetListEntry {
   readonly path: string;
-  readonly role: AssetRole;
+  readonly role: CatalogAssetRole;
   readonly fingerprint: AssetFingerprint;
   readonly media: MediaAsset | null;
 }
@@ -125,11 +127,13 @@ export async function resolveProjectAssets(
 }
 
 export function countAssetsByRole(
-  entries: readonly { readonly role: AssetRole }[],
+  entries: readonly { readonly role: CatalogAssetRole }[],
 ): Readonly<Record<AssetRole, number>> {
   const counts: Record<AssetRole, number> = { aroll: 0, broll: 0, image: 0, audio: 0, voice: 0 };
   for (const entry of entries) {
-    counts[entry.role] += 1;
+    if (isAssetRole(entry.role)) {
+      counts[entry.role] += 1;
+    }
   }
   return counts;
 }

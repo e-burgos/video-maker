@@ -1,5 +1,5 @@
 import { resolveMediaProject } from '@video-maker/auto-montage';
-import type { MontagePresetName } from '@video-maker/auto-montage';
+import type { LogoMode, MontagePresetName } from '@video-maker/auto-montage';
 import type { Timeline } from '@video-maker/timeline-core';
 
 import type { RenderApiDependencies } from '../deps/render-api-dependencies';
@@ -79,6 +79,9 @@ interface MontageJobRecord extends JobRecordBase {
   readonly kind: 'montage';
   readonly preset: MontagePresetName;
   readonly seed: number;
+  readonly scriptPath: string | null;
+  readonly scriptText: string | null;
+  readonly logo: LogoMode;
   progress: MontageJobProgress | null;
   report: MontageJobReport | null;
 }
@@ -179,7 +182,14 @@ export function createRenderJobQueue(deps: RenderApiDependencies): RenderJobQueu
 
     try {
       report = await runMontagePipeline(
-        { project: resolveMediaProject(record.projectRoot), preset: record.preset, seed: record.seed },
+        {
+          project: resolveMediaProject(record.projectRoot),
+          preset: record.preset,
+          seed: record.seed,
+          scriptPath: record.scriptPath,
+          scriptText: record.scriptText,
+          logo: record.logo,
+        },
         deps,
         observer,
       );
@@ -306,7 +316,17 @@ export function createRenderJobQueue(deps: RenderApiDependencies): RenderJobQueu
       case 'render':
         return { ...base, kind: 'render', timeline: input.timeline, progress: null, report: null };
       case 'montage':
-        return { ...base, kind: 'montage', preset: input.preset, seed: input.seed, progress: null, report: null };
+        return {
+          ...base,
+          kind: 'montage',
+          preset: input.preset,
+          seed: input.seed,
+          scriptPath: input.scriptPath,
+          scriptText: input.scriptText,
+          logo: input.logo,
+          progress: null,
+          report: null,
+        };
       case 'storyboard':
         return {
           ...base,

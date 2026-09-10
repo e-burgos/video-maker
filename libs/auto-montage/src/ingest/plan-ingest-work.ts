@@ -40,12 +40,19 @@ function findPreviousTranscript(previousCatalog: Catalog | null, assetId: string
   return previousCatalog?.transcripts.find((entry) => entry.assetId === assetId);
 }
 
+export function isMissingLoudnessMeasurement(entry: CatalogAsset): boolean {
+  return entry.role === 'audio' && entry.asset.audio?.integratedLufs === undefined;
+}
+
 function planAssetReuse(finding: AssetFinding, previousCatalog: Catalog | null): CatalogAsset | undefined {
   const previous = findPreviousAsset(previousCatalog, finding.relativePath);
   if (previous === undefined) {
     return undefined;
   }
-  return fingerprintsMatch(previous.fingerprint, finding.fingerprint) ? previous : undefined;
+  if (!fingerprintsMatch(previous.fingerprint, finding.fingerprint)) {
+    return undefined;
+  }
+  return isMissingLoudnessMeasurement(previous) ? undefined : previous;
 }
 
 function planTranscriptionReuse(

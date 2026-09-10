@@ -20,6 +20,18 @@ function formatIngestReport(report: IngestReport): string[] {
   return lines;
 }
 
+function formatScriptAlignment(report: PlanReport): string[] {
+  const alignment = report.scriptAlignment;
+  if (alignment === null) {
+    return [];
+  }
+
+  return [
+    `  script-corrections: ${alignment.corrected}`,
+    `    replaced: ${alignment.replaced} removed: ${alignment.removed} inserted: ${alignment.inserted} dropped: ${alignment.dropped}`,
+  ];
+}
+
 function formatPlanReport(report: PlanReport): string[] {
   return [
     `ok [plan] ${report.timelinePath}`,
@@ -33,6 +45,8 @@ function formatPlanReport(report: PlanReport): string[] {
     ...report.brollRejections.map(
       (rejection) => `    ${rejection.conceptTerm}@${rejection.startMs}ms ${rejection.reason}`,
     ),
+    `  logo: ${report.logoAssetId ?? 'none'}`,
+    ...formatScriptAlignment(report),
   ];
 }
 

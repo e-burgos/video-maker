@@ -5,6 +5,7 @@ export type MontageInputReason =
   | 'no-aroll-asset'
   | 'aroll-asset-not-found'
   | 'music-asset-not-found'
+  | 'logo-asset-not-found'
   | 'unknown-preset'
   | 'empty-aroll';
 

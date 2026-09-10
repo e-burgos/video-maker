@@ -32,6 +32,7 @@ function clip(
     trimStartMs: 0,
     trimBefore: 0,
     gainDb: -12,
+    normalizationGainDb: 0,
     volume: 1,
     fadeInFrames: null,
     fadeOutFrames: null,
@@ -89,5 +90,32 @@ describe('AudioTrack', () => {
 
     expect(capturedAudioProps).toHaveLength(2);
     expect(markup.match(/data-component="Audio"/g)).toHaveLength(2);
+  });
+});
+
+describe('AudioTrack — normalización de la cama (spec-014)', () => {
+  it('suma normalizationGainDb a la automation antes de convertir a volumen', () => {
+    capturedAudioProps.length = 0;
+    const automation: GainKeyframe[] = [
+      { frame: 0, gainDb: -4 },
+      { frame: 30, gainDb: -12 },
+    ];
+    const musicClip = clip({ clipId: 'music-0001', normalizationGainDb: 6.3 });
+
+    renderToStaticMarkup(createElement(AudioTrack, { voice: [], music: [musicClip], automation }));
+
+    const volumeFn = capturedAudioProps[0]?.['volume'] as (frameInClip: number) => number;
+
+    expect(volumeFn(30)).toBeCloseTo(volumeAtFrame(automation, 30, 6.3), 9);
+    expect(volumeFn(30)).toBeGreaterThan(volumeAtFrame(automation, 30));
+  });
+
+  it('la voz nunca lleva offset de normalización', () => {
+    capturedAudioProps.length = 0;
+    const voiceClip = clip({ clipId: 'voice-0001', volume: 1 });
+
+    renderToStaticMarkup(createElement(AudioTrack, { voice: [voiceClip], music: [], automation: [] }));
+
+    expect(capturedAudioProps[0]?.['volume']).toBe(1);
   });
 });

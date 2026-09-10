@@ -52,6 +52,11 @@ const EDL_WITHOUT_DUCKING: EditDecisionList = {
 const MUSIC_WITH_FADES: MusicInput = { assetId: 'music-1', gainDb: -12, fadeInFrames: 15, fadeOutFrames: 30 };
 const MUSIC_IDENTITY: MusicInput = { assetId: 'music-1', gainDb: 0 };
 
+const MEASURED_MUSIC_ASSET: MediaAsset = {
+  ...MUSIC_ASSET,
+  audio: { sampleRate: 44_100, channels: 2, codec: 'mp3', integratedLufs: -22.3 },
+};
+
 const EXPECTED_MUSIC_EXPRESSION =
   "volume=volume='min(1,pow(10,(lt(t,0)*(-12)+gte(t,0)*lt(t,0.866666667)*((-12)+(0)*(t-0))+gte(t,0.866666667)*lt(t,1)*((-12)+(-90)*(t-0.866666667))+gte(t,1)*lt(t,3.266666667)*((-24)+(0)*(t-1))+gte(t,3.266666667)*lt(t,3.666666667)*((-24)+(30)*(t-3.266666667))+gte(t,3.666666667)*lt(t,4.866666667)*((-12)+(0)*(t-3.666666667))+gte(t,4.866666667)*lt(t,5)*((-12)+(-90)*(t-4.866666667))+gte(t,5)*lt(t,6.266666667)*((-24)+(0)*(t-5))+gte(t,6.266666667)*lt(t,6.666666667)*((-24)+(30)*(t-6.266666667))+gte(t,6.666666667)*(-12))/20))':eval=frame";
 
@@ -88,7 +93,7 @@ describe('buildAudioMixGraph', () => {
             EXPECTED_MUSIC_EXPRESSION,
             'afade=t=in:st=0:d=0.5',
             'afade=t=out:st=6:d=1',
-            'apad',
+            'apad=whole_dur=7',
             'atrim=end=7',
           ],
           outputLabels: ['music0'],
@@ -176,5 +181,15 @@ describe('buildAudioMixGraph', () => {
     const withoutAudio = { ...timeline, tracks: { ...timeline.tracks, voice: [], music: [] } };
 
     expect(() => buildAudioMixGraph({ timeline: withoutAudio })).toThrow(ZodError);
+  });
+
+  it('normaliza la cama al referenceLufs del plan cuando el asset trae integratedLufs (spec-014)', () => {
+    const timeline = buildTimeline(EDL_WITH_DUCKING, [VOICE_ASSET, MEASURED_MUSIC_ASSET], MUSIC_WITH_FADES);
+
+    const graph = buildAudioMixGraph({ timeline });
+
+    expect(graph.chains[1]?.filters[3]).toBe('volume=6.3dB');
+    expect(graph.chains[1]?.filters[4]).toBe(EXPECTED_MUSIC_EXPRESSION);
+    expect(graph.chains[0]?.filters.some((filter) => filter.endsWith('dB'))).toBe(false);
   });
 });

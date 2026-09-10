@@ -6,7 +6,7 @@ import { DEFAULT_AUDIO_MIX_PLAN, DEFAULT_MUSIC_MIX, planDucking } from '../ducki
 import type { EditDecisionList } from '../schemas/edit-decision-list.schema';
 import { TimelineSchema } from '../schemas/timeline.schema';
 import { TimelineBuildError, buildTimeline } from './build-timeline';
-import type { MusicInput } from './build-timeline';
+import type { LogoInput, MusicInput } from './build-timeline';
 
 function parseOrThrow(timeline: unknown) {
   const result = TimelineSchema.safeParse(timeline);
@@ -391,5 +391,87 @@ describe('buildTimeline — casos borde', () => {
     expect(timeline.tracks.broll[0]?.assetId).toBe('broll-does-not-exist');
     expect(timeline.assets.some((asset) => asset.id === 'broll-does-not-exist')).toBe(false);
     parseOrThrow(timeline);
+  });
+});
+
+describe('buildTimeline — niveles del preset y logo', () => {
+  const advertisingMix = {
+    baseGainDb: -4,
+    duckedGainDb: -12,
+    referenceLufs: -16,
+    attackMs: 150,
+    releaseMs: 400,
+    holdMs: 250,
+  };
+
+  const duckEdl: EditDecisionList = {
+    schemaVersion: 1,
+    sourceAssetId: 'aroll-cam-01',
+    format: ca013Format,
+    generatedBy: { tool: 'fixture', params: {} },
+    decisions: [
+      { id: 'keep-0001', type: 'keep', startMs: 0, endMs: 5000 },
+      { id: 'duck-0001', type: 'duck', startMs: 1000, endMs: 2000, gainDb: -12 },
+    ],
+  };
+
+  it('lleva los niveles de MusicInput.mix a audioMix.music y a la automation', () => {
+    const music: MusicInput = { assetId: 'music-bed-01', mix: advertisingMix };
+    const timeline = buildTimeline(duckEdl, ca013Assets, music);
+
+    expect(timeline.audioMix.music).toEqual(advertisingMix);
+    expect(timeline.audioMix.automation).toEqual(
+      planDucking([{ startMs: 1000, endMs: 2000 }], advertisingMix, 30).automation,
+    );
+    expect(timeline.audioMix.automation.some((keyframe) => keyframe.gainDb === -12)).toBe(true);
+    expect(timeline.audioMix.automation.some((keyframe) => keyframe.gainDb === -24)).toBe(false);
+    expect(timeline.tracks.music[0]?.gainDb).toBe(-4);
+    parseOrThrow(timeline);
+  });
+
+  it('sin MusicInput.mix conserva DEFAULT_MUSIC_MIX', () => {
+    const timeline = buildTimeline(duckEdl, ca013Assets, { assetId: 'music-bed-01' });
+
+    expect(timeline.audioMix.music).toEqual(DEFAULT_MUSIC_MIX);
+  });
+
+  it('sin logo la Timeline no declara la clave', () => {
+    const timeline = buildTimeline(duckEdl, ca013Assets);
+
+    expect(timeline).not.toHaveProperty('logo');
+    parseOrThrow(timeline);
+  });
+
+  it('con logo aplica los defaults del schema: bottom-right, 0.32, 0.035, 1', () => {
+    const logo: LogoInput = { assetId: 'broll-shot-01' };
+    const timeline = buildTimeline(duckEdl, ca013Assets, undefined, logo);
+
+    expect(timeline.logo).toEqual({
+      assetId: 'broll-shot-01',
+      position: 'bottom-right',
+      widthRatio: 0.32,
+      marginRatio: 0.035,
+      opacity: 1,
+    });
+    parseOrThrow(timeline);
+  });
+
+  it('respeta los overrides explícitos del logo', () => {
+    const logo: LogoInput = {
+      assetId: 'broll-shot-01',
+      position: 'top-left',
+      widthRatio: 0.2,
+      marginRatio: 0.1,
+      opacity: 0.5,
+    };
+    const timeline = buildTimeline(duckEdl, ca013Assets, undefined, logo);
+
+    expect(timeline.logo).toEqual({
+      assetId: 'broll-shot-01',
+      position: 'top-left',
+      widthRatio: 0.2,
+      marginRatio: 0.1,
+      opacity: 0.5,
+    });
   });
 });

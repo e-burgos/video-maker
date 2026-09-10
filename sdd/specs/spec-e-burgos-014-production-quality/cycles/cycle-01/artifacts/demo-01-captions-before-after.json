@@ -1,0 +1,496 @@
+{
+  "project": "media/demo-01",
+  "script": "work/producer/script.txt",
+  "before": [
+    {
+      "id": "caption-0001",
+      "from": 2,
+      "words": [
+        "Tu",
+        "mirada",
+        "hice"
+      ]
+    },
+    {
+      "id": "caption-0002",
+      "from": 23,
+      "words": [
+        "mucho",
+        "antes",
+        "que"
+      ]
+    },
+    {
+      "id": "caption-0003",
+      "from": 48,
+      "words": [
+        "vos."
+      ]
+    },
+    {
+      "id": "caption-0004",
+      "from": 82,
+      "words": [
+        "En",
+        "nuestra",
+        "óptica,"
+      ]
+    },
+    {
+      "id": "caption-0005",
+      "from": 115,
+      "words": [
+        "los",
+        "lentes",
+        "se"
+      ]
+    },
+    {
+      "id": "caption-0006",
+      "from": 143,
+      "words": [
+        "eligen",
+        "con"
+      ]
+    },
+    {
+      "id": "caption-0007",
+      "from": 166,
+      "words": [
+        "kanma."
+      ]
+    },
+    {
+      "id": "caption-0008",
+      "from": 187,
+      "words": [
+        "Armazones",
+        "de"
+      ]
+    },
+    {
+      "id": "caption-0009",
+      "from": 213,
+      "words": [
+        "colores,",
+        "formas"
+      ]
+    },
+    {
+      "id": "caption-0010",
+      "from": 255,
+      "words": [
+        "y",
+        "de",
+        "estilo"
+      ]
+    },
+    {
+      "id": "caption-0011",
+      "from": 271,
+      "words": [
+        "para",
+        "cada",
+        "cara."
+      ]
+    },
+    {
+      "id": "caption-0012",
+      "from": 298,
+      "words": [
+        "Lentes",
+        "de",
+        "sol"
+      ]
+    },
+    {
+      "id": "caption-0013",
+      "from": 324,
+      "words": [
+        "que",
+        "cuidan",
+        "tus"
+      ]
+    },
+    {
+      "id": "caption-0014",
+      "from": 348,
+      "words": [
+        "ojos",
+        "con",
+        "estilo."
+      ]
+    },
+    {
+      "id": "caption-0015",
+      "from": 386,
+      "words": [
+        "Lentes",
+        "de",
+        "contacto"
+      ]
+    },
+    {
+      "id": "caption-0016",
+      "from": 422,
+      "words": [
+        "con",
+        "todo",
+        "lo"
+      ]
+    },
+    {
+      "id": "caption-0017",
+      "from": 438,
+      "words": [
+        "que",
+        "necesitas"
+      ]
+    },
+    {
+      "id": "caption-0018",
+      "from": 470,
+      "words": [
+        "para",
+        "el",
+        "día"
+      ]
+    },
+    {
+      "id": "caption-0019",
+      "from": 489,
+      "words": [
+        "a",
+        "día."
+      ]
+    },
+    {
+      "id": "caption-0020",
+      "from": 500,
+      "words": [
+        "Te",
+        "asesoramos",
+        "para"
+      ]
+    },
+    {
+      "id": "caption-0021",
+      "from": 534,
+      "words": [
+        "que",
+        "tu",
+        "mirada"
+      ]
+    },
+    {
+      "id": "caption-0022",
+      "from": 562,
+      "words": [
+        "se",
+        "sienta",
+        "cómoda"
+      ]
+    },
+    {
+      "id": "caption-0023",
+      "from": 587,
+      "words": [
+        "y",
+        "segura."
+      ]
+    },
+    {
+      "id": "caption-0024",
+      "from": 611,
+      "words": [
+        "Porque",
+        "cambiar",
+        "de"
+      ]
+    },
+    {
+      "id": "caption-0025",
+      "from": 644,
+      "words": [
+        "lentes",
+        "es",
+        "cambiar"
+      ]
+    },
+    {
+      "id": "caption-0026",
+      "from": 676,
+      "words": [
+        "de",
+        "mirada."
+      ]
+    },
+    {
+      "id": "caption-0027",
+      "from": 702,
+      "words": [
+        "Ven",
+        "y",
+        "a"
+      ]
+    },
+    {
+      "id": "caption-0028",
+      "from": 716,
+      "words": [
+        "probarte",
+        "tu",
+        "nuevo"
+      ]
+    },
+    {
+      "id": "caption-0029",
+      "from": 753,
+      "words": [
+        "estilo."
+      ]
+    }
+  ],
+  "after": [
+    {
+      "id": "caption-0001",
+      "from": 2,
+      "words": [
+        "Tu",
+        "mirada",
+        "dice"
+      ]
+    },
+    {
+      "id": "caption-0002",
+      "from": 23,
+      "words": [
+        "mucho",
+        "antes",
+        "que"
+      ]
+    },
+    {
+      "id": "caption-0003",
+      "from": 48,
+      "words": [
+        "vos."
+      ]
+    },
+    {
+      "id": "caption-0004",
+      "from": 82,
+      "words": [
+        "En",
+        "nuestra",
+        "óptica,"
+      ]
+    },
+    {
+      "id": "caption-0005",
+      "from": 115,
+      "words": [
+        "los",
+        "lentes",
+        "se"
+      ]
+    },
+    {
+      "id": "caption-0006",
+      "from": 143,
+      "words": [
+        "eligen",
+        "con"
+      ]
+    },
+    {
+      "id": "caption-0007",
+      "from": 166,
+      "words": [
+        "calma."
+      ]
+    },
+    {
+      "id": "caption-0008",
+      "from": 187,
+      "words": [
+        "Armazones",
+        "de"
+      ]
+    },
+    {
+      "id": "caption-0009",
+      "from": 213,
+      "words": [
+        "colores,",
+        "formas"
+      ]
+    },
+    {
+      "id": "caption-0010",
+      "from": 255,
+      "words": [
+        "y",
+        "estilo",
+        "para"
+      ]
+    },
+    {
+      "id": "caption-0011",
+      "from": 276,
+      "words": [
+        "cada",
+        "cara."
+      ]
+    },
+    {
+      "id": "caption-0012",
+      "from": 298,
+      "words": [
+        "Lentes",
+        "de",
+        "sol"
+      ]
+    },
+    {
+      "id": "caption-0013",
+      "from": 324,
+      "words": [
+        "que",
+        "cuidan",
+        "tus"
+      ]
+    },
+    {
+      "id": "caption-0014",
+      "from": 348,
+      "words": [
+        "ojos",
+        "con",
+        "estilo."
+      ]
+    },
+    {
+      "id": "caption-0015",
+      "from": 386,
+      "words": [
+        "Lentes",
+        "de",
+        "contacto,"
+      ]
+    },
+    {
+      "id": "caption-0016",
+      "from": 422,
+      "words": [
+        "con",
+        "todo",
+        "lo"
+      ]
+    },
+    {
+      "id": "caption-0017",
+      "from": 438,
+      "words": [
+        "que",
+        "necesitás"
+      ]
+    },
+    {
+      "id": "caption-0018",
+      "from": 470,
+      "words": [
+        "para",
+        "el",
+        "día"
+      ]
+    },
+    {
+      "id": "caption-0019",
+      "from": 489,
+      "words": [
+        "a",
+        "día."
+      ]
+    },
+    {
+      "id": "caption-0020",
+      "from": 500,
+      "words": [
+        "Te",
+        "asesoramos",
+        "para"
+      ]
+    },
+    {
+      "id": "caption-0021",
+      "from": 534,
+      "words": [
+        "que",
+        "tu",
+        "mirada"
+      ]
+    },
+    {
+      "id": "caption-0022",
+      "from": 562,
+      "words": [
+        "se",
+        "sienta",
+        "cómoda"
+      ]
+    },
+    {
+      "id": "caption-0023",
+      "from": 587,
+      "words": [
+        "y",
+        "segura."
+      ]
+    },
+    {
+      "id": "caption-0024",
+      "from": 611,
+      "words": [
+        "Porque",
+        "cambiar",
+        "de"
+      ]
+    },
+    {
+      "id": "caption-0025",
+      "from": 644,
+      "words": [
+        "lentes",
+        "es",
+        "cambiar"
+      ]
+    },
+    {
+      "id": "caption-0026",
+      "from": 676,
+      "words": [
+        "de",
+        "mirada."
+      ]
+    },
+    {
+      "id": "caption-0027",
+      "from": 702,
+      "words": [
+        "Vení",
+        "a",
+        "probarte"
+      ]
+    },
+    {
+      "id": "caption-0028",
+      "from": 738,
+      "words": [
+        "tu",
+        "nuevo",
+        "estilo."
+      ]
+    }
+  ]
+}

@@ -6,13 +6,15 @@ import type {
   Db,
   Fps,
   Frame,
+  LogoOverlay,
   MediaAsset,
   Ms,
+  OutputFormat,
   Timeline,
   TimelineTransition,
   VideoClip,
 } from '@video-maker/timeline-core';
-import { msToFrames } from '@video-maker/timeline-core';
+import { msToFrames, musicNormalizationGainDb } from '@video-maker/timeline-core';
 import { assetSrc } from './asset-src';
 import { gainDbToVolume } from './audio-gain';
 import type {
@@ -48,9 +50,17 @@ export interface AudioSequenceProps {
   trimStartMs: Ms;
   trimBefore: Frame;
   gainDb: Db;
+  normalizationGainDb: Db;
   volume: number;
   fadeInFrames: Frame | null;
   fadeOutFrames: Frame | null;
+}
+
+export interface LogoSequenceProps {
+  assetId: AssetId;
+  src: string;
+  overlay: LogoOverlay;
+  format: OutputFormat;
 }
 
 export interface CaptionSequenceProps {
@@ -81,6 +91,7 @@ export interface SequencePropsPlan {
   voice: readonly AudioSequenceProps[];
   music: readonly AudioSequenceProps[];
   captions: readonly CaptionSequenceProps[];
+  logo: LogoSequenceProps | null;
   unresolvedAssetIds: readonly AssetId[];
 }
 
@@ -104,7 +115,12 @@ function toVideoSequenceProps(clip: VideoClip, asset: MediaAsset, fps: Fps): Vid
   };
 }
 
-function toAudioSequenceProps(clip: AudioClip, asset: MediaAsset, fps: Fps): AudioSequenceProps {
+function toAudioSequenceProps(
+  clip: AudioClip,
+  asset: MediaAsset,
+  fps: Fps,
+  normalizationGainDb: Db,
+): AudioSequenceProps {
   return {
     clipId: clip.id,
     assetId: clip.assetId,
@@ -114,7 +130,8 @@ function toAudioSequenceProps(clip: AudioClip, asset: MediaAsset, fps: Fps): Aud
     trimStartMs: clip.trimStartMs,
     trimBefore: msToFrames(clip.trimStartMs, fps),
     gainDb: clip.gainDb,
-    volume: gainDbToVolume(clip.gainDb),
+    normalizationGainDb,
+    volume: gainDbToVolume(clip.gainDb + normalizationGainDb),
     fadeInFrames: clip.fadeInFrames ?? null,
     fadeOutFrames: clip.fadeOutFrames ?? null,
   };
@@ -156,6 +173,7 @@ function mapAudioTrack(
   assets: readonly MediaAsset[],
   fps: Fps,
   unresolvedAssetIds: Set<AssetId>,
+  referenceLufs?: number,
 ): AudioSequenceProps[] {
   const mapped: AudioSequenceProps[] = [];
 
@@ -165,10 +183,32 @@ function mapAudioTrack(
       unresolvedAssetIds.add(clip.assetId);
       continue;
     }
-    mapped.push(toAudioSequenceProps(clip, asset, fps));
+    const normalizationGainDb =
+      referenceLufs === undefined
+        ? 0
+        : musicNormalizationGainDb(asset.audio?.integratedLufs, referenceLufs);
+    mapped.push(toAudioSequenceProps(clip, asset, fps, normalizationGainDb));
   }
 
   return mapped;
+}
+
+function mapLogo(
+  timeline: Timeline,
+  unresolvedAssetIds: Set<AssetId>,
+): LogoSequenceProps | null {
+  const { logo } = timeline;
+  if (logo === undefined) {
+    return null;
+  }
+
+  const asset = resolveAsset(timeline.assets, logo.assetId);
+  if (asset === undefined) {
+    unresolvedAssetIds.add(logo.assetId);
+    return null;
+  }
+
+  return { assetId: logo.assetId, src: assetSrc(asset), overlay: logo, format: timeline.format };
 }
 
 function mapArollTransitions(transitions: readonly TimelineTransition[]): ArollTransitionPlan[] {
@@ -199,8 +239,15 @@ export function timelineToSequenceProps(timeline: Timeline): SequencePropsPlan {
   const aroll = mapVideoTrack(timeline.tracks.aroll, timeline.assets, fps, unresolvedAssetIds);
   const broll = mapVideoTrack(timeline.tracks.broll, timeline.assets, fps, unresolvedAssetIds);
   const voice = mapAudioTrack(timeline.tracks.voice, timeline.assets, fps, unresolvedAssetIds);
-  const music = mapAudioTrack(timeline.tracks.music, timeline.assets, fps, unresolvedAssetIds);
+  const music = mapAudioTrack(
+    timeline.tracks.music,
+    timeline.assets,
+    fps,
+    unresolvedAssetIds,
+    timeline.audioMix.music.referenceLufs,
+  );
   const captions = timeline.tracks.captions.map(toCaptionSequenceProps);
+  const logo = mapLogo(timeline, unresolvedAssetIds);
   const arollTransitions = mapArollTransitions(timeline.transitions ?? []);
 
   return {
@@ -214,6 +261,7 @@ export function timelineToSequenceProps(timeline: Timeline): SequencePropsPlan {
     voice,
     music,
     captions,
+    logo,
     unresolvedAssetIds: [...unresolvedAssetIds],
   };
 }

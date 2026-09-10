@@ -186,3 +186,63 @@ describe('validateTimeline (CA-014)', () => {
     }
   });
 });
+
+describe('validateTimeline — capa de logo', () => {
+  it('acepta un logo que referencia un asset de imagen', () => {
+    const timeline: Timeline = {
+      ...referenceTimeline(),
+      logo: {
+        assetId: 'broll-shot-01',
+        position: 'bottom-right',
+        widthRatio: 0.32,
+        marginRatio: 0.035,
+        opacity: 1,
+      },
+    };
+
+    expect(validateTimeline(timeline)).toEqual({ ok: true });
+  });
+
+  it('LOGO_ASSET_NOT_FOUND cuando el asset del logo no está en assets', () => {
+    const timeline: Timeline = {
+      ...referenceTimeline(),
+      logo: {
+        assetId: 'logo-inexistente',
+        position: 'bottom-right',
+        widthRatio: 0.32,
+        marginRatio: 0.035,
+        opacity: 1,
+      },
+    };
+
+    const result = validateTimeline(timeline);
+    expect(result.ok).toBe(false);
+    if (!result.ok) {
+      expect(result.issues.map((issue) => issue.code)).toContain<TimelineIssueCode>(
+        'LOGO_ASSET_NOT_FOUND',
+      );
+      expect(result.issues[0]?.path).toBe('logo.assetId');
+    }
+  });
+
+  it('LOGO_ASSET_NOT_IMAGE cuando el asset del logo no es una imagen', () => {
+    const timeline: Timeline = {
+      ...referenceTimeline(),
+      logo: {
+        assetId: 'music-bed-01',
+        position: 'bottom-right',
+        widthRatio: 0.32,
+        marginRatio: 0.035,
+        opacity: 1,
+      },
+    };
+
+    const result = validateTimeline(timeline);
+    expect(result.ok).toBe(false);
+    if (!result.ok) {
+      expect(result.issues.map((issue) => issue.code)).toContain<TimelineIssueCode>(
+        'LOGO_ASSET_NOT_IMAGE',
+      );
+    }
+  });
+});

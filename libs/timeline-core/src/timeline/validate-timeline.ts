@@ -24,7 +24,9 @@ export type TimelineIssueCode =
   | 'DURATION_MISMATCH'
   | 'CLIP_OUT_OF_TIMELINE'
   | 'TRANSITION_CLIP_NOT_FOUND'
-  | 'CAPTION_OUT_OF_SAFE_ZONE';
+  | 'CAPTION_OUT_OF_SAFE_ZONE'
+  | 'LOGO_ASSET_NOT_FOUND'
+  | 'LOGO_ASSET_NOT_IMAGE';
 
 export interface TimelineIssue {
   code: TimelineIssueCode;
@@ -288,6 +290,39 @@ function collectCaptionSafeZoneIssues(timeline: Timeline): TimelineIssue[] {
   return issues;
 }
 
+function collectLogoIssues(
+  timeline: Timeline,
+  assetsById: ReadonlyMap<AssetId, MediaAsset>,
+): TimelineIssue[] {
+  const { logo } = timeline;
+  if (logo === undefined) {
+    return [];
+  }
+
+  const asset = assetsById.get(logo.assetId);
+  if (asset === undefined) {
+    return [
+      {
+        code: 'LOGO_ASSET_NOT_FOUND',
+        path: 'logo.assetId',
+        message: `El logo referencia el asset "${logo.assetId}", que no existe en assets.`,
+      },
+    ];
+  }
+
+  if (asset.kind !== 'image') {
+    return [
+      {
+        code: 'LOGO_ASSET_NOT_IMAGE',
+        path: 'logo.assetId',
+        message: `El logo referencia el asset "${logo.assetId}", que es kind=${asset.kind} y no image.`,
+      },
+    ];
+  }
+
+  return [];
+}
+
 export function validateTimeline(timeline: Timeline): TimelineValidationResult {
   const parsed = TimelineSchema.safeParse(timeline);
   if (!parsed.success) {
@@ -300,6 +335,7 @@ export function validateTimeline(timeline: Timeline): TimelineValidationResult {
     ...collectArollOrderIssues(parsed.data),
     ...collectTransitionIssues(parsed.data),
     ...collectCaptionSafeZoneIssues(parsed.data),
+    ...collectLogoIssues(parsed.data, assetsById),
   ];
 
   return issues.length === 0 ? { ok: true } : { ok: false, issues };

@@ -47,6 +47,7 @@ export interface MontagePreset {
   readonly audio: {
     readonly baseGainDb: number;
     readonly duckedGainDb: number;
+    readonly referenceLufs: number;
     readonly attackMs: number;
     readonly releaseMs: number;
     readonly holdMs: number;

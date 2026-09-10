@@ -1,7 +1,13 @@
 import type { StoreConfig } from '../../config/store-config';
 import type { RenderApiDependencies } from '../../deps/render-api-dependencies';
 import { PipelineStageError } from '../../errors/pipeline-stage-error';
-import { parseMontageOverwrite, parseMontagePreset, parseMontageSeed } from '../../jobs/montage-job-params';
+import {
+  parseMontageLogo,
+  parseMontageOverwrite,
+  parseMontagePreset,
+  parseMontageScript,
+  parseMontageSeed,
+} from '../../jobs/montage-job-params';
 import { parseStoryboardInput, parseStoryboardOverwrite } from '../../jobs/storyboard-job-params';
 import { parseVoiceJobInput } from '../../jobs/voice-job-params';
 import { assertVoiceTracksNotPersisted, selectVoiceScenes } from '../../voice/select-voice-scenes';
@@ -146,10 +152,21 @@ export async function handleCreateRenderJob(
   const preset = parseMontagePreset(bodyObject.preset);
   const seed = parseMontageSeed(bodyObject.seed);
   const overwrite = parseMontageOverwrite(bodyObject.overwrite);
+  const script = parseMontageScript(bodyObject.scriptPath, bodyObject.scriptText);
+  const logo = parseMontageLogo(bodyObject.logo);
 
   await assertTimelineNotPersisted(deps, project, overwrite);
 
-  const job = runtime.jobs.create({ kind: 'montage', slug, projectRoot: project.root, preset, seed });
+  const job = runtime.jobs.create({
+    kind: 'montage',
+    slug,
+    projectRoot: project.root,
+    preset,
+    seed,
+    scriptPath: script.scriptPath,
+    scriptText: script.scriptText,
+    logo,
+  });
 
   return {
     status: 202,

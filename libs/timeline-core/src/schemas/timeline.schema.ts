@@ -86,6 +86,21 @@ export const TimelineTransitionSchema = z.object({
   timing: TransitionTimingSchema,
 });
 
+export const LogoPositionSchema = z.enum([
+  'bottom-right',
+  'bottom-left',
+  'top-right',
+  'top-left',
+]);
+
+export const LogoOverlaySchema = z.strictObject({
+  assetId: IdSchema,
+  position: LogoPositionSchema.default('bottom-right'),
+  widthRatio: z.number().gt(0).max(1).default(0.32),
+  marginRatio: z.number().nonnegative().max(0.5).default(0.035),
+  opacity: z.number().gt(0).max(1).default(1),
+});
+
 export const TimelineTracksSchema = z.strictObject({
   aroll: z.array(VideoClipSchema),
   broll: z.array(VideoClipSchema),
@@ -125,6 +140,7 @@ export const TimelineSchema = z
     tracks: TimelineTracksSchema,
     transitions: z.array(TimelineTransitionSchema).optional(),
     audioMix: AudioMixPlanSchema,
+    logo: LogoOverlaySchema.optional(),
     safeZone: SafeZoneSchema.optional(),
   })
   .superRefine((timeline, ctx) => {
@@ -140,5 +156,7 @@ export type CaptionClipBox = z.infer<typeof CaptionClipBoxSchema>;
 export type CaptionClip = z.infer<typeof CaptionClipSchema>;
 export type TransitionTiming = z.infer<typeof TransitionTimingSchema>;
 export type TimelineTransition = z.infer<typeof TimelineTransitionSchema>;
+export type LogoPosition = z.infer<typeof LogoPositionSchema>;
+export type LogoOverlay = z.infer<typeof LogoOverlaySchema>;
 export type TimelineTracks = z.infer<typeof TimelineTracksSchema>;
 export type Timeline = z.infer<typeof TimelineSchema>;
