@@ -164,21 +164,5 @@
       "file": "tools.schema.json"
     }
   ],
-  "memory": [
-    {
-      "file": "2026-09-10-spec-e-burgos-015-studio-producer-cycle-02.md"
-    },
-    {
-      "file": "2026-09-10-spec-e-burgos-015-studio-producer-cycle-01.md"
-    },
-    {
-      "file": "2026-09-10-spec-e-burgos-014-production-quality-cycle-01.md"
-    },
-    {
-      "file": "2026-09-10-spec-e-burgos-009-voice-over-cycle-02.md"
-    },
-    {
-      "file": "2026-09-09-spec-e-burgos-009-voice-over-cycle-01.md"
-    }
-  ]
+  "memory": []
 }
