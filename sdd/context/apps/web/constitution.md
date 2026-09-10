@@ -1,8 +1,8 @@
 # Constitución — apps/web
 
-> Versión 2.0 | Última actualización: spec-e-burgos-006 cycle-03 | Fecha: 2026-09-09
-> Consolidada por el orquestador al abrir `cycle-01` de `spec-e-burgos-007-web-montage`
-> (fundió los fragmentos de `spec-006` cycles 02-03).
+> Versión 2.1 | Última actualización: spec-e-burgos-007 cycle-02 | Fecha: 2026-09-09
+> Consolidada por el orquestador al abrir `cycle-02` de `spec-e-burgos-008-ai-storyboard`
+> (fundió el fragmento de `spec-007` cycle-02).
 > Las actualizaciones por ciclo/fix van como fragmentos aditivos en `updates/` —
 > este archivo base solo lo modifica la consolidación (ver `sdd/context/context_prompt.md` sección 6).
 
@@ -10,11 +10,12 @@
 
 - **Tipo:** app React 19 (SPA local, mono-usuario, sin auth ni despliegue)
 - **Rol en el sistema:** el Web Studio — la interfaz con la que el dev opera el motor desde el
-  navegador de su propia máquina: biblioteca de assets crudos, preview de la `Timeline` en el
-  `<Player>` de Remotion con la composición real, edición del documento persistido y disparo,
-  seguimiento y descarga de renders locales.
+  navegador de su propia máquina: biblioteca de assets crudos, **generación del montaje** (la app
+  ya no sólo consume la `Timeline`, la produce: `tools/render-cli` dejó de ser obligatorio),
+  preview de la `Timeline` en el `<Player>` de Remotion con la composición real, edición del
+  documento persistido y disparo, seguimiento y descarga de renders locales.
 - **No tiene lógica de motor ni toca el filesystem.** Todo lo que muestra y todo lo que escribe
-  pasa por los endpoints de `apps/render-api` (`sdd/api.json` → `EP-001`..`EP-015`), su único
+  pasa por los endpoints de `apps/render-api` (`sdd/api.json` → `EP-001`..`EP-018`), su único
   backend. Si hace falta un cálculo, vive en una lib o en la API, nunca acá.
 
 ## 2. Stack tecnológico
@@ -41,6 +42,7 @@ src/
                 artifact-url, project-slug, asset-media-kind, RenderApiProvider,
                 parse-timeline · player-timeline · preview-format,
                 render-api-types · parse-render-job · render-job-poll-plan · render-job-artifact,
+                montage-capability,
                 timeline-edit/  (toda la máquina de edición: reglas, layout de a-roll,
                                 rescale de automation, presets, severidad, reducer)
   hooks/        useAsyncResource (único primitivo de estado de servidor) · use-api-action ·
@@ -49,10 +51,11 @@ src/
                 asset-card · asset-preview · asset-uploader · timeline-player ·
                 clip-track-editor · caption-editor · music-mix-editor · output-preset-selector ·
                 timeline-issue-list · timeline-save-bar · render-trigger · render-job-list ·
-                render-job-panel
+                render-job-panel · montage-trigger · montage-job-panel
   pages/        projects-page · asset-library-page · project-preview-page
   app/app.tsx   router (`/`, `/projects/:slug`, `/projects/:slug/preview`) y provider
-e2e/            studio-smoke.mjs · capture-frame-240.mjs (fuera del build, fuera de Vitest)
+e2e/            smoke-helpers.mjs (compartido) · studio-smoke.mjs · montage-smoke.mjs ·
+                capture-frame-240.mjs (fuera del build, fuera de Vitest)
 ```
 
 - **`src/api/` es el único lugar que sabe que el servicio existe** (RNF-4). Ningún componente arma
@@ -66,6 +69,16 @@ e2e/            studio-smoke.mjs · capture-frame-240.mjs (fuera del build, fuer
 - **Los tipos del contrato se declaran acá, no se importan** (D-5): `apps/render-api` es otra app y
   `libs/auto-montage` es una lib Node (`node:fs`, `execa`) que no puede entrar a un bundle de
   navegador. La frontera entre las dos apps es el contrato HTTP y su registro es `sdd/api.json`.
+- **`Job` es una unión discriminada por `kind`, nunca un tipo con opcionales** (espejo de
+  `apps/render-api/src/jobs/render-job.ts`): `RenderJob | MontageJob` con progreso y reporte
+  propios de cada rama. Con opcionales, la UI podía leer `renderedFrames` de un job de montaje.
+  `parseJob` es la entrada única y `parseRenderJob`/`parseMontageJob` **rechazan** el otro `kind`.
+  Un `kind` nuevo se agrega en los tres lugares: el union de tipos, el parser y el panel que lo
+  muestra.
+- **La capacidad del servicio se decide en una función pura de `src/api/`**
+  (`montageBlockers(health)`): el botón se deshabilita con el motivo escrito, nunca en silencio.
+- **La suite no tiene `@testing-library/jest-dom`**: `toBeEnabled()`/`toBeDisabled()` fallan con
+  `Invalid Chai property`. Aserar sobre `(el as HTMLButtonElement).disabled`.
 - **Superficie de errores:** `RenderApiError` conserva el `code` del servicio (37 códigos) y suma
   exactamente **tres** códigos propios de transporte: `SERVICE_UNREACHABLE` (el `fetch` rechaza),
   `RESPONSE_NOT_JSON` (status de error sin payload tipado) y `RESPONSE_SHAPE_UNEXPECTED` (200 con
@@ -127,7 +140,9 @@ e2e/            studio-smoke.mjs · capture-frame-240.mjs (fuera del build, fuer
   diagnóstico de `timeline-player.tsx` (`data-duration-in-frames`, `data-fps`,
   `data-composition-width/height`) y el `?frame=` de la ruta de preview son el contrato de la
   captura de paridad de encuadre; los `data-testid` (`timeline-player`, `timeline-save-bar`,
-  `render-job-panel`, `asset-source`) y `data-timeline-dirty`, el del smoke E2E. Si se renombran,
+  `render-job-panel`, `asset-source`, `montage-trigger`, `montage-job-panel`, `montage-stage`,
+  `montage-blockers`, `montage-asset-progress`) y `data-timeline-dirty`/`data-montage-state`, el
+  del smoke E2E. Si se renombran,
   hay que actualizar los guiones.
 - **Cada ciclo cierra con al menos una captura real de Playwright** de la UI contra un `render-api`
   real, en `cycles/cycle-XX/artifacts/` (D-10, RNF-5). `lint`/`test`/`build` verdes no prueban que
