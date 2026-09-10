@@ -101,6 +101,7 @@ export function producerTurnStartFixture(
 ): ProducerTurnStart {
   return {
     text: 'Contame qué material hay',
+    model: 'sonnet',
     systemPrompt: '# Skill: video-producer',
     sessionId: '11111111-2222-3333-4444-555555555555',
     resume: false,

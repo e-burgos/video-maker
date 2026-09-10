@@ -136,6 +136,84 @@ describe('handleCreateProducerMessage', () => {
     expect(body).toMatchObject({ slug: 'demo-01', status: 'running' });
   });
 
+  it('manda al agente el modelo que eligió el usuario y lo deja en session.json (FIX-e-burgos-015-001)', async () => {
+    const { deps, runtime, starts, storage } = scenario({ lines: successStream() });
+
+    const accepted = (
+      await handleCreateProducerMessage(
+        deps,
+        STORE,
+        { slug: 'demo-01' },
+        messageRequest({ text: 'hola', model: 'haiku' }),
+        runtime,
+      )
+    ).body as ProducerTurnAcceptedBody;
+    await new Promise((resolve) => setImmediate(resolve));
+
+    expect(starts[0]?.model).toBe('haiku');
+    expect(runtime.producerTurns.get(accepted.turnId).model).toBe('haiku');
+
+    const body = (await handleGetProducer(deps, STORE, { slug: 'demo-01' }, runtime))
+      .body as ProducerConversationBody;
+    expect(body.session?.model).toBe('haiku');
+    expect(body.messages[1]?.model).toBe('haiku');
+    const onDisk = JSON.parse(
+      await storage.readTextFile(`${PROJECT_ROOT}/work/producer/session.json`),
+    ) as { model: string };
+    expect(onDisk.model).toBe('haiku');
+  });
+
+  it('sin model explícito sigue con el modelo de la sesión, y sin sesión con el default del servicio', async () => {
+    const { deps, runtime, starts } = scenario({ lines: successStream() });
+
+    await handleCreateProducerMessage(
+      deps,
+      STORE,
+      { slug: 'demo-01' },
+      messageRequest({ text: 'primero' }),
+      runtime,
+    );
+    await new Promise((resolve) => setImmediate(resolve));
+
+    await handleCreateProducerMessage(
+      deps,
+      STORE,
+      { slug: 'demo-01' },
+      messageRequest({ text: 'segundo', model: 'haiku' }),
+      runtime,
+    );
+    await new Promise((resolve) => setImmediate(resolve));
+
+    await handleCreateProducerMessage(
+      deps,
+      STORE,
+      { slug: 'demo-01' },
+      messageRequest({ text: 'tercero' }),
+      runtime,
+    );
+    await new Promise((resolve) => setImmediate(resolve));
+
+    expect(starts.map((start) => start.model)).toEqual(['sonnet', 'haiku', 'haiku']);
+  });
+
+  it('rechaza con PRODUCER_MODEL_INVALID un modelo fuera de la lista permitida', async () => {
+    const { deps, runtime, starts } = scenario({ lines: successStream() });
+
+    expect(
+      await codeOf(
+        handleCreateProducerMessage(
+          deps,
+          STORE,
+          { slug: 'demo-01' },
+          messageRequest({ text: 'hola', model: 'gpt-5' }),
+          runtime,
+        ),
+      ),
+    ).toBe('PRODUCER_MODEL_INVALID');
+    expect(starts).toEqual([]);
+    expect(runtime.producerTurns.activeFor('demo-01')).toBeNull();
+  });
+
   it('no mete el turno en la cola de jobs: el contador de la cola no se mueve (US-15-003)', async () => {
     const { deps, runtime } = scenario({ lines: successStream(), hold: true });
 
@@ -219,8 +297,23 @@ describe('handleGetProducer', () => {
     const body = response.body as ProducerConversationBody;
 
     expect(response.status).toBe(200);
-    expect(Object.keys(body).sort()).toEqual(['activeTurn', 'messages', 'session', 'slug'].sort());
-    expect(body).toEqual({ slug: 'demo-01', messages: [], session: null, activeTurn: null });
+    expect(Object.keys(body).sort()).toEqual(
+      ['activeTurn', 'messages', 'models', 'session', 'slug'].sort(),
+    );
+    expect(body).toEqual({
+      slug: 'demo-01',
+      messages: [],
+      session: null,
+      activeTurn: null,
+      models: {
+        default: 'sonnet',
+        allowed: [
+          { id: 'sonnet', label: 'Sonnet', description: 'Balanced · faster, cheaper' },
+          { id: 'opus', label: 'Opus', description: 'Most capable · slower, costlier' },
+          { id: 'haiku', label: 'Haiku', description: 'Fastest · lightest' },
+        ],
+      },
+    });
   });
 
   it('devuelve los dos mensajes, la sesión y ningún turno activo cuando el turno cerró', async () => {
@@ -281,6 +374,7 @@ describe('handleGetProducerTurn', () => {
         'error',
         'events',
         'finishedAt',
+        'model',
         'slug',
         'startedAt',
         'status',

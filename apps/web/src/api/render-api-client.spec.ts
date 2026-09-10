@@ -886,6 +886,22 @@ describe('createRenderApiClient — producer', () => {
     expect(accepted.turnId).toBe('turn-0002');
   });
 
+  it('manda a EP-023 el modelo elegido, y lo omite cuando el llamador no eligió ninguno', async () => {
+    const { fetchImpl, calls } = recordingFetch(() =>
+      jsonResponse(
+        { slug: 'demo-01', turnId: 'turn-0002', startedAt: '2026-09-10T10:00:00.000Z', status: 'running' },
+        202,
+      ),
+    );
+    const client = createRenderApiClient(fetchImpl);
+
+    await client.sendProducerMessage('demo-01', 'dale', 'haiku');
+    await client.sendProducerMessage('demo-01', 'dale');
+
+    expect(JSON.parse(String(calls[0]?.init?.body))).toEqual({ text: 'dale', model: 'haiku' });
+    expect(JSON.parse(String(calls[1]?.init?.body))).toEqual({ text: 'dale' });
+  });
+
   it('surfaces PRODUCER_TURN_ACTIVE from EP-023 with its code intact', async () => {
     const { fetchImpl } = recordingFetch(() =>
       jsonResponse(

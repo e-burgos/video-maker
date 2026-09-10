@@ -2,8 +2,23 @@ import type {
   ProducerConversation,
   ProducerEvent,
   ProducerMessage,
+  ProducerModelCatalog,
   ProducerTurn,
 } from '../render-api-types';
+
+export function producerModels(
+  overrides: Partial<ProducerModelCatalog> = {},
+): ProducerModelCatalog {
+  return {
+    default: 'sonnet',
+    allowed: [
+      { id: 'sonnet', label: 'Sonnet', description: 'Balanced · faster, cheaper' },
+      { id: 'opus', label: 'Opus', description: 'Most capable · slower, costlier' },
+      { id: 'haiku', label: 'Haiku', description: 'Fastest · lightest' },
+    ],
+    ...overrides,
+  };
+}
 
 export const ASSISTANT_ANSWER = [
   'Tengo **3 clips** de a-roll y una locución de 32 segundos.',
@@ -38,6 +53,7 @@ export function producerTurn(overrides: Partial<ProducerTurn> = {}): ProducerTur
     turnId: 'turn-0001',
     slug: 'demo-01',
     status: 'running',
+    model: 'sonnet',
     startedAt: '2026-09-10T10:00:01.000Z',
     finishedAt: null,
     events: producerEvents(),
@@ -72,6 +88,7 @@ export function producerConversation(
         createdAt: '2026-09-10T10:04:01.000Z',
         suggestions: ['Dale, avanzá con el corte de 30 segundos'],
         turnId: 'turn-0001',
+        model: 'sonnet',
       }),
     ],
     session: {
@@ -81,6 +98,7 @@ export function producerConversation(
       lastTurnAt: '2026-09-10T10:04:01.000Z',
     },
     activeTurn: null,
+    models: producerModels(),
     ...overrides,
   };
 }

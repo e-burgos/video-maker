@@ -11,6 +11,7 @@ export interface ProducerMessage {
   readonly createdAt: string;
   readonly suggestions?: readonly string[];
   readonly turnId?: string;
+  readonly model?: string;
 }
 
 export interface ProducerConversation {
@@ -67,6 +68,9 @@ function parseProducerMessage(value: unknown, relativePath: string): ProducerMes
   if (value.turnId !== undefined && !isNonEmptyString(value.turnId)) {
     throw invalid(relativePath, 'turnId to be a non-empty string when present');
   }
+  if (value.model !== undefined && !isNonEmptyString(value.model)) {
+    throw invalid(relativePath, 'model to be a non-empty string when present');
+  }
 
   return {
     id: value.id,
@@ -75,6 +79,7 @@ function parseProducerMessage(value: unknown, relativePath: string): ProducerMes
     createdAt: value.createdAt,
     ...(value.suggestions === undefined ? {} : { suggestions: [...value.suggestions] }),
     ...(value.turnId === undefined ? {} : { turnId: value.turnId }),
+    ...(value.model === undefined ? {} : { model: value.model }),
   };
 }
 

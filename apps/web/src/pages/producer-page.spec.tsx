@@ -2,7 +2,12 @@ import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { MemoryRouter, Route, Routes } from 'react-router-dom';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
-import { producerConversation, producerTurn, succeededTurn } from '../api/__fixtures__/producer';
+import {
+  producerConversation,
+  producerModels,
+  producerTurn,
+  succeededTurn,
+} from '../api/__fixtures__/producer';
 import { PRODUCER_TURN_POLL_INTERVAL_MS } from '../api/producer-turn-poll-plan';
 import { RenderApiProvider } from '../api/render-api-context';
 import { RenderApiError } from '../api/render-api-error';
@@ -78,7 +83,13 @@ describe('ProducerPage', () => {
     renderPage({
       getProducer: vi
         .fn()
-        .mockResolvedValue({ slug: 'demo-01', messages: [], session: null, activeTurn: null }),
+        .mockResolvedValue({
+          slug: 'demo-01',
+          messages: [],
+          session: null,
+          activeTurn: null,
+          models: producerModels(),
+        }),
     });
 
     await waitFor(() => expect(screen.getByTestId('producer-welcome')).toBeTruthy());
@@ -90,7 +101,13 @@ describe('ProducerPage', () => {
     renderPage({
       getProducer: vi
         .fn()
-        .mockResolvedValue({ slug: 'demo-01', messages: [], session: null, activeTurn: null }),
+        .mockResolvedValue({
+          slug: 'demo-01',
+          messages: [],
+          session: null,
+          activeTurn: null,
+          models: producerModels(),
+        }),
     });
 
     await waitFor(() => expect(screen.getByTestId('producer-starters')).toBeTruthy());
@@ -143,6 +160,60 @@ describe('ProducerPage', () => {
       ),
     );
     expect(screen.getByTestId('producer-send-failure').textContent).toContain('Claude Code is not installed');
+  });
+
+  it('starts on the model of the session and sends the one the user picks (FIX-e-burgos-015-001)', async () => {
+    const sendProducerMessage = vi.fn().mockResolvedValue({
+      slug: 'demo-01',
+      turnId: 'turn-0004',
+      startedAt: '2026-09-10T10:30:00.000Z',
+      status: 'running',
+    });
+    renderPage({
+      sendProducerMessage,
+      getProducer: vi.fn().mockResolvedValue(
+        producerConversation({
+          session: {
+            sessionId: 'session-0001',
+            model: 'opus',
+            createdAt: '2026-09-10T10:00:01.000Z',
+            lastTurnAt: '2026-09-10T10:04:01.000Z',
+          },
+        }),
+      ),
+      getProducerTurn: vi.fn().mockResolvedValue(producerTurn({ turnId: 'turn-0004' })),
+    });
+
+    await waitFor(() => expect(screen.getByTestId('producer-message-list')).toBeTruthy());
+    const picker = screen.getByLabelText('model') as HTMLSelectElement;
+    expect(picker.value).toBe('opus');
+
+    fireEvent.change(picker, { target: { value: 'haiku' } });
+    fireEvent.change(composer(), { target: { value: 'dale' } });
+    fireEvent.click(screen.getByRole('button', { name: 'Send' }));
+
+    await waitFor(() =>
+      expect(sendProducerMessage).toHaveBeenCalledWith('demo-01', 'dale', 'haiku'),
+    );
+  });
+
+  it('falls back to the default of the service when the project has no session yet', async () => {
+    renderPage({
+      getProducer: vi.fn().mockResolvedValue(
+        producerConversation({ session: null, models: producerModels({ default: 'haiku' }) }),
+      ),
+    });
+
+    await waitFor(() => expect(screen.getByTestId('producer-message-list')).toBeTruthy());
+    expect((screen.getByLabelText('model') as HTMLSelectElement).value).toBe('haiku');
+  });
+
+  it('shows the model that produced each answer of the producer', async () => {
+    renderPage({});
+
+    await waitFor(() => expect(screen.getByTestId('producer-message-list')).toBeTruthy());
+    expect(screen.getByTestId('producer-message-model-msg-0002').textContent).toBe('sonnet');
+    expect(screen.queryByTestId('producer-message-model-msg-0001')).toBeNull();
   });
 
   it('adopts a turn that was already running when the page opened', async () => {
@@ -205,7 +276,11 @@ describe('ProducerPage — a full turn', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Send' }));
 
     await waitFor(() =>
-      expect(sendProducerMessage).toHaveBeenCalledWith('demo-01', 'Proponeme un video de 30 segundos'),
+      expect(sendProducerMessage).toHaveBeenCalledWith(
+        'demo-01',
+        'Proponeme un video de 30 segundos',
+        'sonnet',
+      ),
     );
     await waitFor(() => expect(composer().value).toBe(''));
     await waitFor(() => expect(screen.getByTestId('producer-turn-activity')).toBeTruthy());
@@ -272,6 +347,7 @@ describe('ProducerPage — a full turn', () => {
       expect(sendProducerMessage).toHaveBeenCalledWith(
         'demo-01',
         'Dale, avanzá con el corte de 30 segundos',
+        'sonnet',
       ),
     );
   });

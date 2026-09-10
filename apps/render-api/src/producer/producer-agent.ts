@@ -1,5 +1,6 @@
 export interface ProducerTurnStart {
   readonly text: string;
+  readonly model: string;
   readonly systemPrompt: string;
   readonly sessionId: string;
   readonly resume: boolean;

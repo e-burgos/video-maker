@@ -377,6 +377,70 @@
           }
         ]
       }
+    },
+    {
+      "id": "FIX-e-burgos-015-001",
+      "author": "e-burgos",
+      "spec_id": "spec-e-burgos-015-studio-producer",
+      "fix_document": "sdd/specs/spec-e-burgos-015-studio-producer/fixes/fix-e-burgos-015-001.md",
+      "type": "IMPROVEMENT",
+      "severity": "medium",
+      "created_at": "2026-09-10",
+      "resolved_at": "2026-09-10",
+      "validated_at": null,
+      "title": "the producer model is fixed by PRODUCER_MODEL: the user cannot choose it from the chat",
+      "estimation_hours": 3,
+      "description": "PRODUCER_MODEL freezes the model of every producer turn at startup: claude-code-producer-agent passes config.model to --model and the chat screen has no way to change it. A cheap turn (a question about the material) and an expensive one (deciding the montage) pay the same price, and switching means restarting the service. The fix adds an allowed-models list (PRODUCER_MODELS, default sonnet,opus,haiku, which must contain PRODUCER_MODEL), an optional model field on POST /projects/:slug/producer/messages validated against that list (422 PRODUCER_MODEL_INVALID), persistence of the model in effect in session.json (claude -p --resume <id> --model <m> accepts a different model on a later turn), the models catalog on GET /projects/:slug/producer and the model of the turn on GET .../turns/:id. The web adds a model picker next to the composer and a badge with the model used on each assistant message.",
+      "justification": "Explicit request of the dev (\"es importante que permitas elegir el modelo que se usara\") on a spec already closed. No new endpoint, module or domain entity: the change is additive on three payloads of the studio-producer contract and one env var, and it is registered field by field in sdd/api.json (EP-022, EP-023, EP-024). Solo profile FIX GATE, no cycle open.",
+      "related_modules": [
+        "studio-producer"
+      ],
+      "affected_files": [
+        "apps/render-api/src/config/producer-config.ts",
+        "apps/render-api/src/config/producer-config.spec.ts",
+        "apps/render-api/src/errors/render-api-error.ts",
+        "apps/render-api/src/errors/http-status-for.ts",
+        "apps/render-api/src/errors/http-status-for.spec.ts",
+        "apps/render-api/src/errors/to-error-payload.ts",
+        "apps/render-api/src/producer/producer-agent.ts",
+        "apps/render-api/src/producer/claude-code-producer-agent.ts",
+        "apps/render-api/src/producer/claude-code-producer-agent.spec.ts",
+        "apps/render-api/src/producer/producer-documents.ts",
+        "apps/render-api/src/producer/producer-turn-registry.ts",
+        "apps/render-api/src/producer/run-producer-turn.ts",
+        "apps/render-api/src/http/handlers/producer-handler.ts",
+        "apps/render-api/src/http/handlers/producer-handler.spec.ts",
+        "apps/render-api/src/__fixtures__/fake-producer-agent.ts",
+        "apps/render-api/README.md",
+        "apps/web/src/api/render-api-types.ts",
+        "apps/web/src/api/parse-producer.ts",
+        "apps/web/src/api/parse-producer.spec.ts",
+        "apps/web/src/api/render-api-client.ts",
+        "apps/web/src/api/render-api-client.spec.ts",
+        "apps/web/src/api/__fixtures__/producer.ts",
+        "apps/web/src/components/producer-composer.tsx",
+        "apps/web/src/components/producer-composer.spec.tsx",
+        "apps/web/src/components/producer-message-list.tsx",
+        "apps/web/src/pages/producer-page.tsx",
+        "apps/web/src/pages/producer-page.spec.tsx",
+        "apps/web/e2e/producer-smoke.mjs",
+        "sdd/api.json",
+        "sdd/context/apps/render-api/updates/2026-09-10-fix-e-burgos-015-001.md",
+        "sdd/context/apps/web/updates/2026-09-10-fix-e-burgos-015-001.md"
+      ],
+      "test_reference": "pnpm nx run-many -t lint test build verde en los 8 proyectos (2026-09-10); render-api 839 tests (97.99 % stmts / 92.49 % branch), web 713 tests (98.73 % stmts / 96 % branch), thresholds 80 % sin tocar coverage.include. Casos nuevos: readProducerConfig (lista, deduplicado, default fuera de la lista, lista vacia, describeProducerModel), producerCliArgs pasa el modelo del turno, handler (modelo elegido -> agente + session.json + mensaje, herencia sonnet/haiku/haiku sin model explicito, PRODUCER_MODEL_INVALID sin reservar turno, claves exactas de EP-022/EP-024), parse-producer (catalogo obligatorio y rechazos), cliente (body con y sin model), ProducerComposer (opciones, descripcion, bloqueo) y ProducerPage (arranque en session.model, fallback al default, badge por mensaje). E2E real apps/web/e2e/producer-smoke.mjs con PRODUCER_SMOKE_STOP_AFTER=5 (2026-09-10 23:33): el selector ofrece exactamente sonnet/opus/haiku, se cambia a haiku, un turno real responde en 9 s con model haiku en el registro del turno, work/producer/session.json en disco queda {\"sessionId\":\"c6564061-d7d4-46fa-aed8-01430ab115ec\",\"model\":\"haiku\",...} y el badge del mensaje del asistente dice haiku. Evidencia: sdd/specs/spec-e-burgos-015-studio-producer/cycles/cycle-02/artifacts/producer-smoke-09-model-haiku.png.",
+      "status": "implemented",
+      "cycle": null,
+      "usage": {
+        "provider_model": "claude/opus",
+        "effort": "high",
+        "agent": "implementor-back",
+        "tokens_in": 430000,
+        "tokens_out": 38000,
+        "approx": true,
+        "source": "declared-estimate",
+        "recorded_at": "2026-09-10"
+      }
     }
   ]
 }

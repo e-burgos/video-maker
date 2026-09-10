@@ -77,6 +77,7 @@ const MESSAGE_BY_CODE: Readonly<Record<RenderApiErrorCode, string>> = {
   PRODUCER_TURN_NOT_FOUND: 'The requested producer turn does not exist.',
   PRODUCER_TURN_NOT_CANCELABLE: 'The producer turn already reached a terminal state.',
   PRODUCER_MESSAGE_INVALID: 'The producer message must carry a non-empty text field.',
+  PRODUCER_MODEL_INVALID: 'The requested producer model is not one of the models this service allows.',
   PRODUCER_STATE_INVALID: 'The stored producer state exists but could not be read.',
 };
 

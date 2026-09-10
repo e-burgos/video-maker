@@ -1,10 +1,16 @@
+import { describeProducerModel } from '../../config/producer-config';
+import type { ProducerModelOption } from '../../config/producer-config';
 import type { StoreConfig } from '../../config/store-config';
 import type { RenderApiDependencies } from '../../deps/render-api-dependencies';
 import { PipelineStageError } from '../../errors/pipeline-stage-error';
 import { readProducerConversation, readProducerSession } from '../../producer/producer-store';
 import type { ProducerMessage, ProducerSession } from '../../producer/producer-documents';
 import type { ProducerTurnRecord } from '../../producer/producer-turn-registry';
-import { assertProducerMessageText, startProducerTurn } from '../../producer/run-producer-turn';
+import {
+  assertProducerMessageText,
+  assertProducerModel,
+  startProducerTurn,
+} from '../../producer/run-producer-turn';
 import { assertValidProjectSlug, resolveExistingProject } from '../../store/project-scope';
 import { JSON_CONTENT_TYPE } from '../http-message';
 import type { HttpRequestLine, HttpResponse } from '../http-message';
@@ -12,11 +18,17 @@ import { MAX_JSON_BODY_BYTES, readJsonBody } from '../read-json-body';
 import type { RenderApiRuntime } from '../render-api-runtime';
 import type { RouteParams } from '../router';
 
+export interface ProducerModelCatalog {
+  readonly default: string;
+  readonly allowed: readonly ProducerModelOption[];
+}
+
 export interface ProducerConversationBody {
   readonly slug: string;
   readonly messages: readonly ProducerMessage[];
   readonly session: ProducerSession | null;
   readonly activeTurn: ProducerTurnRecord | null;
+  readonly models: ProducerModelCatalog;
 }
 
 export interface ProducerTurnAcceptedBody {
@@ -58,6 +70,10 @@ export async function handleGetProducer(
     messages: (await readProducerConversation(deps, project)).messages,
     session: await readProducerSession(deps, project),
     activeTurn: runtime.producerTurns.activeFor(slug),
+    models: {
+      default: runtime.producer.model,
+      allowed: runtime.producer.models.map(describeProducerModel),
+    },
   };
 
   return jsonResponse(200, body);
@@ -91,11 +107,13 @@ export async function handleCreateProducerMessage(
 
   const value = bodyResult.value as Record<string, unknown>;
   const text = assertProducerMessageText(value.text);
+  const model = assertProducerModel(value.model, runtime.producer);
   const project = await resolveExistingProject(deps, store, slug);
 
   const started = await startProducerTurn(deps, runtime.producerTurns, {
     project,
     text,
+    model,
     config: runtime.producer,
   });
   void started.completed;

@@ -10,6 +10,7 @@ export interface ProducerTurnRecord {
   readonly turnId: string;
   readonly slug: string;
   readonly status: ProducerTurnStatus;
+  readonly model: string;
   readonly startedAt: string;
   readonly finishedAt: string | null;
   readonly events: readonly ProducerEvent[];
@@ -27,7 +28,7 @@ export interface ProducerTurnSettlement {
 }
 
 export interface ProducerTurnRegistry {
-  readonly reserve: (slug: string, turnId: string, startedAt: string) => void;
+  readonly reserve: (slug: string, turnId: string, startedAt: string, model: string) => void;
   readonly attachCanceler: (turnId: string, cancel: () => void) => void;
   readonly appendEvents: (turnId: string, events: readonly ProducerEvent[]) => void;
   readonly settle: (turnId: string, settlement: ProducerTurnSettlement) => void;
@@ -67,7 +68,7 @@ export function createProducerTurnRegistry(): ProducerTurnRegistry {
   };
 
   return {
-    reserve: (slug, turnId, startedAt) => {
+    reserve: (slug, turnId, startedAt, model) => {
       const active = activeFor(slug);
       if (active !== null) {
         throw new PipelineStageError({
@@ -84,6 +85,7 @@ export function createProducerTurnRegistry(): ProducerTurnRegistry {
           turnId,
           slug,
           status: 'running',
+          model,
           startedAt,
           finishedAt: null,
           events: [],

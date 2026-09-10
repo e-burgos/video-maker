@@ -92,7 +92,7 @@ export type RenderApiClient = {
     fileName: string,
   ) => Promise<VoiceSceneWriteResult>;
   getProducer: (slug: string) => Promise<ProducerConversation>;
-  sendProducerMessage: (slug: string, text: string) => Promise<ProducerTurnAccepted>;
+  sendProducerMessage: (slug: string, text: string, model?: string) => Promise<ProducerTurnAccepted>;
   getProducerTurn: (slug: string, turnId: string) => Promise<ProducerTurn>;
   cancelProducerTurn: (slug: string, turnId: string) => Promise<ProducerTurn>;
   listRenderJobs: (slug: string) => Promise<RenderJobListing>;
@@ -411,13 +411,17 @@ export function createRenderApiClient(fetchImpl: FetchLike): RenderApiClient {
       return parseProducerConversation(body);
     },
 
-    async sendProducerMessage(slug: string, text: string): Promise<ProducerTurnAccepted> {
+    async sendProducerMessage(
+      slug: string,
+      text: string,
+      model?: string,
+    ): Promise<ProducerTurnAccepted> {
       const body = await requestJson(
         `/projects/${encodeURIComponent(slug)}/producer/messages`,
         {
           method: 'POST',
           headers: { 'content-type': 'application/json' },
-          body: JSON.stringify({ text }),
+          body: JSON.stringify(model === undefined ? { text } : { text, model }),
         },
         'an accepted producer turn',
         (value) => isRecord(value),

@@ -1,11 +1,13 @@
 import { fireEvent, render, screen } from '@testing-library/react';
 import { describe, expect, it, vi } from 'vitest';
 
+import { producerModels } from '../api/__fixtures__/producer';
 import { ProducerComposer } from './producer-composer';
 
 function renderComposer(overrides: Partial<Parameters<typeof ProducerComposer>[0]> = {}) {
   const onChange = vi.fn();
   const onSend = vi.fn();
+  const onModelChange = vi.fn();
 
   render(
     <ProducerComposer
@@ -14,11 +16,18 @@ function renderComposer(overrides: Partial<Parameters<typeof ProducerComposer>[0
       onSend={onSend}
       pending={false}
       blockers={[]}
+      models={producerModels().allowed}
+      model="sonnet"
+      onModelChange={onModelChange}
       {...overrides}
     />,
   );
 
-  return { onChange, onSend };
+  return { onChange, onSend, onModelChange };
+}
+
+function modelPicker(): HTMLSelectElement {
+  return screen.getByLabelText('model') as HTMLSelectElement;
 }
 
 function textarea(): HTMLTextAreaElement {
@@ -75,11 +84,42 @@ describe('ProducerComposer', () => {
     expect(onSend).not.toHaveBeenCalled();
   });
 
+  it('offers every allowed model with its description and reports the choice upwards', () => {
+    const { onModelChange } = renderComposer();
+
+    expect([...modelPicker().options].map((option) => option.value)).toEqual([
+      'sonnet',
+      'opus',
+      'haiku',
+    ]);
+    expect(modelPicker().value).toBe('sonnet');
+    expect(screen.getByTestId('producer-model-help').textContent).toBe('Balanced · faster, cheaper');
+
+    fireEvent.change(modelPicker(), { target: { value: 'haiku' } });
+
+    expect(onModelChange).toHaveBeenCalledWith('haiku');
+  });
+
+  it('shows the description of the model in use, not the one of the default', () => {
+    renderComposer({ model: 'opus' });
+
+    expect(modelPicker().value).toBe('opus');
+    expect(screen.getByTestId('producer-model-help').textContent).toBe(
+      'Most capable · slower, costlier',
+    );
+  });
+
+  it('locks the model while a turn is starting and while the producer is not available', () => {
+    renderComposer({ pending: true });
+    expect(modelPicker().disabled).toBe(true);
+  });
+
   it('blocks the field with the reason written when the producer is not available', () => {
     const { onSend } = renderComposer({ blockers: ['Claude Code is not available.'] });
 
     expect(textarea().disabled).toBe(true);
     expect(sendButton().disabled).toBe(true);
+    expect(modelPicker().disabled).toBe(true);
     expect(screen.getByTestId('producer-blockers').textContent).toContain('Claude Code');
     fireEvent.keyDown(textarea(), { key: 'Enter' });
 

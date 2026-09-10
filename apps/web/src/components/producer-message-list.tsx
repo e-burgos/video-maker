@@ -166,8 +166,16 @@ export function ProducerMessageList({
               : 'max-w-[95%] rounded-lg border border-slate-800 bg-slate-900/60 p-3'
           }
         >
-          <p className="mb-1 font-mono text-[10px] uppercase tracking-wide text-slate-500">
+          <p className="mb-1 flex items-center gap-2 font-mono text-[10px] uppercase tracking-wide text-slate-500">
             {message.role === 'user' ? 'you' : 'producer'}
+            {message.model !== undefined && (
+              <span
+                data-testid={`producer-message-model-${message.id}`}
+                className="rounded-full border border-slate-700 px-1.5 py-0.5 text-[9px] text-slate-400"
+              >
+                {message.model}
+              </span>
+            )}
           </p>
           <ProducerMarkdown text={message.text} />
         </li>

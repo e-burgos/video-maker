@@ -11,7 +11,7 @@ import type {
 export const PRODUCER_KILL_GRACE_MS = 5_000;
 export const PRODUCER_STDERR_MAX_CHARS = 4_000;
 
-export function producerCliArgs(start: ProducerTurnStart, config: ProducerConfig): readonly string[] {
+export function producerCliArgs(start: ProducerTurnStart): readonly string[] {
   return [
     '--print',
     start.text,
@@ -21,7 +21,7 @@ export function producerCliArgs(start: ProducerTurnStart, config: ProducerConfig
     '--permission-mode',
     'dontAsk',
     '--model',
-    config.model,
+    start.model,
     '--append-system-prompt',
     start.systemPrompt,
     '--add-dir',
@@ -83,7 +83,7 @@ export function createClaudeCodeProducerAgent(
 
     const child = spawnProcess({
       command: config.binaryPath,
-      args: producerCliArgs(start, config),
+      args: producerCliArgs(start),
       cwd: config.workingDirectory,
     });
 

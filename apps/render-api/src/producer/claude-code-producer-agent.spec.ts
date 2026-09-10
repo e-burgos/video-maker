@@ -26,7 +26,7 @@ function agentWith(config = CONFIG) {
 
 describe('producerCliArgs', () => {
   it('pide stream-json verboso, dontAsk, el modelo configurado y la sesión nueva', () => {
-    const args = producerCliArgs(producerTurnStartFixture(), CONFIG);
+    const args = producerCliArgs(producerTurnStartFixture());
 
     expect(args).toEqual([
       '--print',
@@ -50,19 +50,19 @@ describe('producerCliArgs', () => {
   });
 
   it('no pide --include-partial-messages: el turno se pollea por mensaje, no por chunk', () => {
-    expect(producerCliArgs(producerTurnStartFixture(), CONFIG)).not.toContain(
+    expect(producerCliArgs(producerTurnStartFixture())).not.toContain(
       '--include-partial-messages',
     );
   });
 
   it('retoma el hilo con --resume en vez de --session-id a partir del segundo turno', () => {
-    const args = producerCliArgs(producerTurnStartFixture({ resume: true }), CONFIG);
+    const args = producerCliArgs(producerTurnStartFixture({ resume: true }));
     expect(args).toContain('--resume');
     expect(args).not.toContain('--session-id');
   });
 
   it('pone --allowedTools ÚLTIMO y cada patrón como argumento propio: es variádico y se comería --resume', () => {
-    const args = producerCliArgs(producerTurnStartFixture({ resume: true }), CONFIG);
+    const args = producerCliArgs(producerTurnStartFixture({ resume: true }));
     const index = args.indexOf('--allowedTools');
 
     expect(args.slice(index + 1)).toEqual([...PRODUCER_ALLOWED_TOOLS]);
@@ -77,9 +77,10 @@ describe('producerCliArgs', () => {
     expect(patterns).toContain('Write');
   });
 
-  it('respeta PRODUCER_MODEL', () => {
-    const config = readProducerConfig({ PRODUCER_MODEL: 'opus' }, '/repo', 'http://127.0.0.1:4310');
-    expect(producerCliArgs(producerTurnStartFixture(), config)).toContain('opus');
+  it('pasa el modelo del turno, no el del arranque del servicio', () => {
+    const args = producerCliArgs(producerTurnStartFixture({ model: 'haiku', resume: true }));
+    expect(args[args.indexOf('--model') + 1]).toBe('haiku');
+    expect(args).toContain('--resume');
   });
 });
 

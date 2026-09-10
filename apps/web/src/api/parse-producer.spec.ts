@@ -1,6 +1,11 @@
 import { describe, expect, it } from 'vitest';
 
-import { producerConversation, producerTurn, succeededTurn } from './__fixtures__/producer';
+import {
+  producerConversation,
+  producerModels,
+  producerTurn,
+  succeededTurn,
+} from './__fixtures__/producer';
 import {
   isTerminalProducerTurnStatus,
   parseProducerConversation,
@@ -17,14 +22,21 @@ describe('parseProducerConversation', () => {
   it('accepts the exact shape EP-022 documents and nothing else', () => {
     const parsed = parseProducerConversation(producerConversation());
 
-    expect(shapeOf(parsed)).toEqual(['activeTurn', 'messages', 'session', 'slug']);
+    expect(shapeOf(parsed)).toEqual(['activeTurn', 'messages', 'models', 'session', 'slug']);
     expect(shapeOf(parsed.messages[1] as object)).toEqual([
       'createdAt',
       'id',
+      'model',
       'role',
       'suggestions',
       'text',
       'turnId',
+    ]);
+    expect(shapeOf(parsed.models)).toEqual(['allowed', 'default']);
+    expect(shapeOf(parsed.models.allowed[0] as object)).toEqual([
+      'description',
+      'id',
+      'label',
     ]);
     expect(shapeOf(parsed.session as object)).toEqual([
       'createdAt',
@@ -40,10 +52,30 @@ describe('parseProducerConversation', () => {
       messages: [],
       session: null,
       activeTurn: null,
+      models: producerModels(),
     });
 
     expect(parsed.messages).toEqual([]);
     expect(parsed.session).toBeNull();
+    expect(parsed.models.default).toBe('sonnet');
+  });
+
+  it('rejects a conversation without the catalog of models the user can choose from', () => {
+    const body = producerConversation() as Record<string, unknown>;
+    delete body['models'];
+
+    expect(() => parseProducerConversation(body)).toThrow(RenderApiError);
+  });
+
+  it.each([
+    ['a catalog without a default', { default: undefined }],
+    ['an option without description', { allowed: [{ id: 'sonnet', label: 'Sonnet' }] }],
+  ])('rejects %s', (_label, overrides) => {
+    expect(() =>
+      parseProducerConversation(
+        producerConversation({ models: { ...producerModels(), ...overrides } as never }),
+      ),
+    ).toThrow(RenderApiError);
   });
 
   it('carries the running turn when the service reports one', () => {
@@ -83,6 +115,7 @@ describe('parseProducerTurn', () => {
       'error',
       'events',
       'finishedAt',
+      'model',
       'slug',
       'startedAt',
       'status',

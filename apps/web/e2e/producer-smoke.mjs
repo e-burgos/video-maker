@@ -1,7 +1,7 @@
 import { execSync } from 'node:child_process';
 import { cp, mkdir, mkdtemp, readFile, readdir } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
-import { join } from 'node:path';
+import { basename, join } from 'node:path';
 
 import {
   REPO_ROOT,
@@ -30,10 +30,14 @@ const TURN_ONE_TEXT =
   'Contame qué material hay y proponeme un video de 30 segundos, sin nombrar la marca.';
 const TURN_TWO_FALLBACK = 'Dale, avanzá con esa propuesta y entregame el MP4.';
 const TURN_THREE_TEXT = 'Escribime un título alternativo para el video.';
+const MODEL_TURN_TEXT = 'Respondeme solamente con la palabra LISTO, sin tocar ningún archivo.';
+const MODEL_TURN_DEADLINE_MS = 300_000;
 
 const TURN_DEADLINE_MS = 900_000;
 const STOP_AFTER_STEP = Number(process.env.PRODUCER_SMOKE_STOP_AFTER ?? '99');
 const RATE_LIMIT_CODES = new Set(['PRODUCER_RATE_LIMITED', 'PRODUCER_UNAVAILABLE']);
+
+const CARRIED_OVER_PRODUCER_STATE = new Set(['conversation.json', 'conversation.md', 'session.json']);
 
 const timeline = [];
 
@@ -127,7 +131,10 @@ async function main() {
   await loadRootEnv(VOICE_ENV_VARS);
   assertMediaEnvResolvable(VOICE_ENV_VARS);
 
-  record('1', 'copying raw/ and work/producer/ of media/demo-01 into a temporary media root');
+  record(
+    '1',
+    'copying raw/ and work/producer/ of media/demo-01 into a temporary media root, leaving behind the conversation and the session of the real project so the run always starts on the empty state',
+  );
   const tempMediaRoot = await mkdtemp(join(tmpdir(), 'producer-smoke-'));
   const projectRoot = join(tempMediaRoot, SLUG);
   await mkdir(join(projectRoot, 'work'), { recursive: true });
@@ -135,7 +142,10 @@ async function main() {
   await cp(
     join(REPO_ROOT, 'media', SLUG, 'work', 'producer'),
     join(projectRoot, 'work', 'producer'),
-    { recursive: true },
+    {
+      recursive: true,
+      filter: (source) => !CARRIED_OVER_PRODUCER_STATE.has(basename(source)),
+    },
   );
   await mkdir(join(projectRoot, 'out'), { recursive: true });
   record('1', `temp media root: ${tempMediaRoot} (no out/, no catalog, no timeline)`);
@@ -202,8 +212,69 @@ async function main() {
     assert(inventory.includes('logo'), 'the logo of raw/logo/ is part of the inventory');
     await page.screenshot({ path: join(ARTIFACTS_DIR, 'producer-smoke-01-empty-state.png'), fullPage: true });
 
+    record('M', 'model picker: the catalog of EP-022 and the select of the composer say the same thing');
+    const conversation = await apiJson(`/projects/${SLUG}/producer`);
+    record('M', `GET /producer models: ${JSON.stringify(conversation.body.models)}`);
+    assert(
+      conversation.body.models?.default === 'sonnet',
+      'the conversation publishes the default model of the service (a stale build has no models at all)',
+    );
+    const allowed = conversation.body.models.allowed.map((option) => option.id);
+    assert(allowed.includes('haiku'), `haiku is one of the allowed models (got ${JSON.stringify(allowed)})`);
+
+    const picker = page.getByLabel('model');
+    const offered = await picker.locator('option').evaluateAll((options) =>
+      options.map((option) => option.value),
+    );
+    record('M', `models offered on screen: ${JSON.stringify(offered)}`);
+    assert(
+      JSON.stringify(offered) === JSON.stringify(allowed),
+      'the select offers exactly the models the service allows, in the same order',
+    );
+    assert(
+      (await picker.inputValue()) === 'sonnet',
+      'the picker starts on the model of the session, or on the default when there is none',
+    );
+
     if (STOP_AFTER_STEP <= 4) {
       record('probe', 'PRODUCER_SMOKE_STOP_AFTER=4 — the mechanics are verified, no claude -p was spent');
+      return;
+    }
+
+    record('M', `switching the model to haiku and sending a short turn: "${MODEL_TURN_TEXT}"`);
+    await picker.selectOption('haiku');
+    await page.getByLabel('Message for the producer').fill(MODEL_TURN_TEXT);
+    const modelTurnId = await startTurn(page, 'M', () =>
+      page.getByRole('button', { name: 'Send' }).click(),
+    );
+    const modelTurn = await followTurn(modelTurnId, 'M', MODEL_TURN_DEADLINE_MS);
+    stopIfQuota(modelTurn.turn, 'M');
+    assert(modelTurn.turn !== null, 'the haiku turn reached a terminal state inside the deadline');
+    assert(
+      modelTurn.turn.model === 'haiku',
+      `the turn record carries the model the user chose (got ${modelTurn.turn.model})`,
+    );
+    assert(modelTurn.turn.status === 'succeeded', `the haiku turn succeeded (got ${modelTurn.turn.status})`);
+
+    const sessionOnDisk = JSON.parse(
+      await readFile(join(projectRoot, 'work', 'producer', 'session.json'), 'utf8'),
+    );
+    record('M', `work/producer/session.json on disk: ${JSON.stringify(sessionOnDisk)}`);
+    assert(
+      sessionOnDisk.model === 'haiku',
+      `the model in effect reached session.json on disk, not just the screen (got ${sessionOnDisk.model})`,
+    );
+
+    const badges = await page.locator('[data-testid^="producer-message-model-"]').allTextContents();
+    record('M', `model badges on screen: ${JSON.stringify(badges)}`);
+    assert(badges.at(-1) === 'haiku', 'the answer of the producer shows the model that wrote it');
+    await page.screenshot({ path: join(ARTIFACTS_DIR, 'producer-smoke-09-model-haiku.png'), fullPage: true });
+
+    record('M', 'back to sonnet for the rest of the run: switching model mid session is valid');
+    await picker.selectOption('sonnet');
+
+    if (STOP_AFTER_STEP <= 5) {
+      record('probe', 'PRODUCER_SMOKE_STOP_AFTER=5 — the model picker is verified end to end, one short turn spent');
       return;
     }
 

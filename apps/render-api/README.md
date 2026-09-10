@@ -57,7 +57,8 @@ injects.
 | `CLAUDE_CLI_CWD` | the OS temporary directory | Working directory the agent process runs in. The default is deliberately **outside this repository**: from the repo root the CLI would load this project's `CLAUDE.md` and settings and answer as an SDD orchestrator instead of a storyboard writer. Point it somewhere else only if you know why. |
 | `CLAUDE_CLI_TIMEOUT_MS` | `600000` (10 min) | Positive integer. Zero, negative or non-numeric makes the `storyboard` job fail with `SERVER_CONFIG_INVALID`. A real call took 70-100 s on this machine. |
 | `CLAUDE_CLI_MODEL` | — | Model alias passed to the CLI (`sonnet`, `opus`, …). Unset lets the CLI pick its own default. Applies to the `storyboard` job only; the producer has its own. |
-| `PRODUCER_MODEL` | `sonnet` | Model alias for the **studio producer** (`spec-e-burgos-015`). `sonnet` is the default on cost grounds: a producer turn can run for minutes and call dozens of tools. Set it to `opus` when the project needs better judgement about the material. |
+| `PRODUCER_MODEL` | `sonnet` | Default model alias for the **studio producer** (`spec-e-burgos-015`), and the one a project starts on. `sonnet` on cost grounds: a producer turn can run for minutes and call dozens of tools. It **must** belong to `PRODUCER_MODELS` or startup aborts with `SERVER_CONFIG_INVALID`. From the chat the user picks the model per message, so this is a default, not a lock. |
+| `PRODUCER_MODELS` | `sonnet,opus,haiku` | Comma separated list of the model aliases the chat may choose from. `GET .../producer` publishes it as `models.allowed` with a label and a description each; `POST .../producer/messages` rejects anything outside it with `422 PRODUCER_MODEL_INVALID`. A list that names no model aborts startup with `SERVER_CONFIG_INVALID`. |
 | `PRODUCER_TURN_TIMEOUT_MS` | `1800000` (30 min) | Positive integer. Zero, negative or non-numeric aborts startup with `SERVER_CONFIG_INVALID` (exit 78) instead of falling back to the default. Half an hour because a single turn can include a transcription and a full render. |
 | `PRODUCER_SKILL_PATH` | `sdd/skills/video-producer/SKILL.md` | The skill that **is** the producer's system prompt, read from disk on every turn (edit it and the next turn picks it up). Resolved against the process working directory. If it cannot be read, `POST .../producer/messages` answers `503 PRODUCER_UNAVAILABLE`. |
 | `RENDER_API_URL` | `http://<RENDER_API_HOST>:<RENDER_API_PORT>` | The URL the producer agent is told to call to enqueue jobs on this same service. Only override it when the service is reachable at a different address from inside the child process. |
@@ -114,7 +115,7 @@ path below and are not repeated per endpoint.
 | `GET` | `/jobs/:jobId` | Full job detail, in any of its six states, for either `kind`. Always `200`, even `state: "failed"` — the job's own failure is not a transport error; the typed `error` is embedded in the body instead. `404 RENDER_JOB_NOT_FOUND` for an id the queue does not know. The id is never validated as a path segment: the lookup is a `Map` read, not a filesystem access. |
 | `DELETE` | `/jobs/:jobId` | Requests cancellation. See "Cancelling a job" below for the exact status per prior state. |
 | `GET` | `/projects/:slug/producer` | The producer conversation of the project (`work/producer/conversation.json`), the Claude Code session behind it and the turn in flight. See "The studio producer" below. |
-| `POST` | `/projects/:slug/producer/messages` | Sends a message to the producer and starts a turn **outside the job queue**. `202 { slug, turnId, startedAt, status: 'running' }`. `409 PRODUCER_TURN_ACTIVE` with a turn already running on that project. |
+| `POST` | `/projects/:slug/producer/messages` | Sends a message to the producer and starts a turn **outside the job queue**. Body `{ text, model? }`, with `model` one of `PRODUCER_MODELS`. `202 { slug, turnId, startedAt, status: 'running' }`. `409 PRODUCER_TURN_ACTIVE` with a turn already running on that project, `422 PRODUCER_MODEL_INVALID` for a model outside the list. |
 | `GET` | `/projects/:slug/producer/turns/:turnId` | State, accumulated events, answer and suggestions of one turn. |
 | `DELETE` | `/projects/:slug/producer/turns/:turnId` | Kills the turn's child process. `202`; poll the turn until `canceled`. |
 
@@ -660,7 +661,8 @@ chunks would only inflate the `.jsonl`. Each line becomes zero or more events:
 turn is reserved, so a 503 never leaves a project blocked), `409 PRODUCER_TURN_ACTIVE`,
 `429 PRODUCER_RATE_LIMITED` (the subscription limit, detected in the `result` line),
 `502 PRODUCER_TURN_FAILED` (timeout or no answer), `404 PRODUCER_TURN_NOT_FOUND`,
-`409 PRODUCER_TURN_NOT_CANCELABLE`, `422 PRODUCER_MESSAGE_INVALID`, `422 PRODUCER_STATE_INVALID`.
+`409 PRODUCER_TURN_NOT_CANCELABLE`, `422 PRODUCER_MESSAGE_INVALID`, `422 PRODUCER_MODEL_INVALID`,
+`422 PRODUCER_STATE_INVALID`.
 None of them carries the child's stderr or a host path.
 
 ## D-11 — no MinIO in this cycle

@@ -9,6 +9,8 @@ import type {
   ProducerEvent,
   ProducerMessage,
   ProducerMessageRole,
+  ProducerModelCatalog,
+  ProducerModelOption,
   ProducerSession,
   ProducerTurn,
   ProducerTurnAccepted,
@@ -67,7 +69,28 @@ function isProducerMessage(value: unknown): value is ProducerMessage {
   if (value['suggestions'] !== undefined && !isStringArray(value['suggestions'])) {
     return false;
   }
-  return value['turnId'] === undefined || typeof value['turnId'] === 'string';
+  if (value['turnId'] !== undefined && typeof value['turnId'] !== 'string') {
+    return false;
+  }
+  return value['model'] === undefined || typeof value['model'] === 'string';
+}
+
+function isProducerModelOption(value: unknown): value is ProducerModelOption {
+  return (
+    isRecord(value) &&
+    typeof value['id'] === 'string' &&
+    typeof value['label'] === 'string' &&
+    typeof value['description'] === 'string'
+  );
+}
+
+function isProducerModelCatalog(value: unknown): value is ProducerModelCatalog {
+  return (
+    isRecord(value) &&
+    typeof value['default'] === 'string' &&
+    Array.isArray(value['allowed']) &&
+    value['allowed'].every(isProducerModelOption)
+  );
 }
 
 function isProducerSession(value: unknown): value is ProducerSession {
@@ -90,6 +113,7 @@ function isProducerTurn(value: unknown): value is ProducerTurn {
     typeof value['turnId'] === 'string' &&
     typeof value['slug'] === 'string' &&
     isProducerTurnStatus(value['status']) &&
+    typeof value['model'] === 'string' &&
     typeof value['startedAt'] === 'string' &&
     (value['finishedAt'] === null || typeof value['finishedAt'] === 'string') &&
     Array.isArray(value['events']) &&
@@ -114,7 +138,8 @@ export function parseProducerConversation(value: unknown): ProducerConversation 
     !Array.isArray(value['messages']) ||
     !value['messages'].every(isProducerMessage) ||
     !(value['session'] === null || isProducerSession(value['session'])) ||
-    !(value['activeTurn'] === null || isProducerTurn(value['activeTurn']))
+    !(value['activeTurn'] === null || isProducerTurn(value['activeTurn'])) ||
+    !isProducerModelCatalog(value['models'])
   ) {
     throw responseShapeUnexpected(200, 'a producer conversation');
   }

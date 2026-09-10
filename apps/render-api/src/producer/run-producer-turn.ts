@@ -12,7 +12,7 @@ import { buildProducerSystemPrompt } from './build-producer-system-prompt';
 import { collectProducerContext } from './collect-producer-context';
 import { parseProducerAnswer } from './parse-producer-suggestions';
 import { interpretProducerStreamLine } from './producer-stream-events';
-import type { ProducerMessage } from './producer-documents';
+import type { ProducerMessage, ProducerSession } from './producer-documents';
 import { appendProducerMessage } from './producer-documents';
 import {
   appendProducerConversationMarkdown,
@@ -27,6 +27,7 @@ import type { ProducerTurnRegistry } from './producer-turn-registry';
 export interface StartProducerTurnInput {
   readonly project: MediaProject;
   readonly text: string;
+  readonly model: string | null;
   readonly config: ProducerConfig;
 }
 
@@ -48,12 +49,31 @@ export function assertProducerMessageText(text: unknown): string {
   return text.trim();
 }
 
+export function assertProducerModel(model: unknown, config: ProducerConfig): string | null {
+  if (model === undefined || model === null) {
+    return null;
+  }
+  if (typeof model !== 'string' || !config.models.includes(model)) {
+    throw new PipelineStageError({
+      code: 'PRODUCER_MODEL_INVALID',
+      stage: null,
+      resource: typeof model === 'string' ? model : 'model',
+      expected: `one of ${config.models.join(', ')}`,
+    });
+  }
+  return model;
+}
+
 async function resolvePiperPath(deps: RenderApiDependencies): Promise<string | null> {
   try {
     return (await deps.resolveVoiceBinaries()).piperCli;
   } catch {
     return null;
   }
+}
+
+function resumableModel(session: ProducerSession | null, config: ProducerConfig): string {
+  return session !== null && config.models.includes(session.model) ? session.model : config.model;
 }
 
 export async function startProducerTurn(
@@ -69,9 +89,12 @@ export async function startProducerTurn(
     throw producerUnavailable();
   }
 
+  const session = await readProducerSession(deps, input.project);
+  const model = input.model ?? resumableModel(session, input.config);
+
   const turnId = deps.randomId();
   const startedAt = deps.clock.nowIso();
-  registry.reserve(input.project.slug, turnId, startedAt);
+  registry.reserve(input.project.slug, turnId, startedAt, model);
 
   const userMessage: ProducerMessage = {
     id: deps.randomId(),
@@ -88,7 +111,6 @@ export async function startProducerTurn(
   await writeProducerConversation(deps, input.project, conversation);
   await appendProducerConversationMarkdown(deps, input.project, userMessage);
 
-  const session = await readProducerSession(deps, input.project);
   const context = await collectProducerContext(deps, input.project, {
     repoRoot: input.config.workingDirectory,
     apiUrl: input.config.apiUrl,
@@ -104,6 +126,7 @@ export async function startProducerTurn(
   const run = deps.producerAgent(
     {
       text: input.text,
+      model,
       systemPrompt,
       sessionId,
       resume: session !== null,
@@ -174,6 +197,7 @@ export async function startProducerTurn(
       text: answer.text,
       createdAt: finishedAt,
       turnId,
+      model,
       ...(answer.suggestions.length === 0 ? {} : { suggestions: answer.suggestions }),
     };
 
@@ -188,7 +212,7 @@ export async function startProducerTurn(
     await appendProducerConversationMarkdown(deps, input.project, assistantMessage);
     await writeProducerSession(deps, input.project, {
       sessionId: reportedSessionId ?? sessionId,
-      model: input.config.model,
+      model,
       createdAt: session?.createdAt ?? startedAt,
       lastTurnAt: finishedAt,
     });

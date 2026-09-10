@@ -402,6 +402,18 @@ export type ProducerMessage = {
   createdAt: string;
   suggestions?: string[];
   turnId?: string;
+  model?: string;
+};
+
+export type ProducerModelOption = {
+  id: string;
+  label: string;
+  description: string;
+};
+
+export type ProducerModelCatalog = {
+  default: string;
+  allowed: ProducerModelOption[];
 };
 
 export type ProducerSession = {
@@ -443,6 +455,7 @@ export type ProducerTurn = {
   turnId: string;
   slug: string;
   status: ProducerTurnStatus;
+  model: string;
   startedAt: string;
   finishedAt: string | null;
   events: ProducerEvent[];
@@ -456,6 +469,7 @@ export type ProducerConversation = {
   messages: ProducerMessage[];
   session: ProducerSession | null;
   activeTurn: ProducerTurn | null;
+  models: ProducerModelCatalog;
 };
 
 export type ProducerTurnAccepted = {

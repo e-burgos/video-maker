@@ -61,6 +61,7 @@ export function ProducerPage() {
   const jobs = useAsyncResource<RenderJobListing>(loadJobs, `jobs:${slug}`);
 
   const [draft, setDraft] = useState('');
+  const [model, setModel] = useState<string | null>(null);
   const [turnId, setTurnId] = useState<string | null>(null);
   const adoptedActiveTurnRef = useRef<string | null>(null);
   const settledTurnRef = useRef<string | null>(null);
@@ -79,7 +80,9 @@ export function ProducerPage() {
   );
   const poll = useProducerTurnPoll(turnId, loadTurn);
 
-  const sendAction = useApiAction((text: string) => client.sendProducerMessage(slug, text));
+  const sendAction = useApiAction((text: string, chosenModel: string) =>
+    client.sendProducerMessage(slug, text, chosenModel),
+  );
   const cancelAction = useApiAction((currentTurnId: string) =>
     client.cancelProducerTurn(slug, currentTurnId),
   );
@@ -107,6 +110,17 @@ export function ProducerPage() {
 
   const blockers = producerBlockers(health.data);
   const running = poll.polling;
+  const models = conversation.data?.models.allowed ?? [];
+  const sessionModel = conversation.data === null
+    ? null
+    : (conversation.data.session?.model ?? conversation.data.models.default);
+  const selectedModel = model ?? sessionModel ?? '';
+
+  useEffect(() => {
+    if (model === null && sessionModel !== null) {
+      setModel(sessionModel);
+    }
+  }, [model, sessionModel]);
 
   async function send(text: string) {
     const trimmed = text.trim();
@@ -114,7 +128,7 @@ export function ProducerPage() {
       return;
     }
 
-    const accepted = await sendAction.run(trimmed);
+    const accepted = await sendAction.run(trimmed, selectedModel);
     if (accepted !== null) {
       setDraft('');
       setTurnId(accepted.turnId);
@@ -182,6 +196,9 @@ export function ProducerPage() {
         onSend={() => void send(draft)}
         pending={sendAction.status === 'pending' || running}
         blockers={blockers}
+        models={models}
+        model={selectedModel}
+        onModelChange={setModel}
       />
 
       {sendFailure !== null && (
