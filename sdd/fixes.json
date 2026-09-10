@@ -435,11 +435,12 @@
         "provider_model": "claude/opus",
         "effort": "high",
         "agent": "implementor-back",
-        "tokens_in": 430000,
-        "tokens_out": 38000,
-        "approx": true,
-        "source": "declared-estimate",
-        "recorded_at": "2026-09-10"
+        "tokens_in": 175692,
+        "tokens_out": 31005,
+        "approx": false,
+        "source": "agent-usage-notification",
+        "recorded_at": "2026-09-10",
+        "tokens_total": 206697
       }
     }
   ]
