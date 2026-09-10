@@ -52,7 +52,21 @@ describe('handleHealth', () => {
       montageQueue: true,
       storyboardQueue: true,
       voiceQueue: true,
+      producer: true,
     });
+  });
+
+  it('reporta capabilities.producer false sin Claude Code, y el servicio SIGUE ok (D-4)', async () => {
+    const callLog = createCallLog();
+    const deps = createFakeRenderApiDependencies(callLog, { probeProducerBinary: async () => false });
+    const runtime = createRenderApiRuntime(deps);
+
+    const response = await handleHealth(deps, runtime);
+    const body = response.body as HealthBody;
+
+    expect(body.capabilities.producer).toBe(false);
+    expect(body.status).toBe('ok');
+    expect(body.binaries.map((binary) => binary.name)).not.toContain('claude');
   });
 
   it('degrada el servicio cuando falta la voz de Piper, con los otros cinco binarios resueltos (US-09-002)', async () => {

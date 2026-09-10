@@ -40,6 +40,14 @@ export interface PlanReport {
   readonly scriptAlignment: ScriptAlignmentCounts | null;
 }
 
+export interface RenderLoudnessReport {
+  readonly withinTolerance: boolean;
+  readonly integratedLufs: number;
+  readonly truePeakDbtp: number;
+  readonly integratedDeltaLu: number;
+  readonly truePeakDeltaDb: number;
+}
+
 export interface RenderReport {
   readonly kind: 'render';
   readonly outPath: string;
@@ -47,6 +55,9 @@ export interface RenderReport {
   readonly height: number;
   readonly fps: number;
   readonly durationInFrames: number;
+  readonly mutedVideoPath: string;
+  readonly masterAudioPath: string;
+  readonly loudness: RenderLoudnessReport;
 }
 
 export interface RunReport {

@@ -55,6 +55,15 @@ const RENDER_REPORT: RenderReport = {
   height: 1920,
   fps: 30,
   durationInFrames: 556,
+  mutedVideoPath: 'work/renders/smoke-ingest/video-muted.mp4',
+  masterAudioPath: 'work/renders/smoke-ingest/master.wav',
+  loudness: {
+    withinTolerance: true,
+    integratedLufs: -14.2,
+    truePeakDbtp: -1.4,
+    integratedDeltaLu: 0.2,
+    truePeakDeltaDb: 0.1,
+  },
 };
 
 describe('formatReport — ingest', () => {
@@ -128,7 +137,19 @@ describe('formatReport — render', () => {
       'ok [render] out/smoke-ingest.mp4',
       '  format: 1080x1920@30',
       '  frames: 556',
+      '  muted-video: work/renders/smoke-ingest/video-muted.mp4',
+      '  master-audio: work/renders/smoke-ingest/master.wav',
+      '  loudness: -14.2 LUFS / -1.4 dBTP (within tolerance)',
     ]);
+  });
+
+  it('grita cuando la mezcla quedó fuera de tolerancia', () => {
+    expect(
+      formatReport({
+        ...RENDER_REPORT,
+        loudness: { ...RENDER_REPORT.loudness, withinTolerance: false, integratedLufs: -11 },
+      }),
+    ).toContain('  loudness: -11 LUFS / -1.4 dBTP (OUT OF TOLERANCE)');
   });
 });
 

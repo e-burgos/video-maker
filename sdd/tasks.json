@@ -285,6 +285,21 @@
           "tasks_done": 8
         }
       }
+    },
+    "spec-e-burgos-015-studio-producer": {
+      "cycles": {
+        "cycle-01": {
+          "file": "sdd/specs/spec-e-burgos-015-studio-producer/cycles/cycle-01/tasks.json",
+          "module": "studio-producer",
+          "apps": [
+            "apps/render-api",
+            "tools/render-cli"
+          ],
+          "status": "completed",
+          "tasks_total": 7,
+          "tasks_done": 7
+        }
+      }
     }
   }
 }

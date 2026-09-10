@@ -58,6 +58,8 @@ const DEFAULT_RENDER_OUTPUT: Omit<RenderMutedVideoOutput, 'outPath'> = {
 
 const FIXED_NOW_ISO = '2026-09-08T00:00:00.000Z';
 
+const DEFAULT_SKILL_DOCUMENT = '# Skill: video-producer\n\nSos el productor de video del studio.\n';
+
 function createDeterministicRandomId(): () => string {
   let counter = 0;
   return () => {
@@ -208,6 +210,30 @@ export function createFakeRenderApiDependencies(
         return overrides.aiAgent(request);
       }
       throw new Error('createFakeRenderApiDependencies: no aiAgent override configured');
+    },
+
+    producerAgent: (start, onLine) => {
+      callLog.record('producerAgent', start);
+      if (overrides?.producerAgent) {
+        return overrides.producerAgent(start, onLine);
+      }
+      throw new Error('createFakeRenderApiDependencies: no producerAgent override configured');
+    },
+
+    readSkillDocument: async (path) => {
+      callLog.record('readSkillDocument', path);
+      if (overrides?.readSkillDocument) {
+        return overrides.readSkillDocument(path);
+      }
+      return DEFAULT_SKILL_DOCUMENT;
+    },
+
+    probeProducerBinary: async () => {
+      callLog.record('probeProducerBinary', undefined);
+      if (overrides?.probeProducerBinary) {
+        return overrides.probeProducerBinary();
+      }
+      return true;
     },
 
     resolveVoiceBinaries: async () => {

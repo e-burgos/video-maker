@@ -1,3 +1,4 @@
+import { spawn } from 'node:child_process';
 import { once } from 'node:events';
 import { createReadStream, createWriteStream } from 'node:fs';
 import { mkdir, readFile, readdir, rename, stat, unlink, writeFile } from 'node:fs/promises';
@@ -9,6 +10,10 @@ import { nodeDirectoryReader, nodeFileStatReader } from '@video-maker/auto-monta
 
 import { createClaudeCliAiAgent } from '../ai/claude-cli-ai-agent';
 import { readAiAgentConfig } from '../config/ai-agent-config';
+import { readProducerConfig } from '../config/producer-config';
+import { readServerConfig } from '../config/server-config';
+import { createClaudeCodeProducerAgent } from '../producer/claude-code-producer-agent';
+import type { SpawnedProducerProcess, SpawnProducerProcessInput } from '../producer/producer-agent';
 import type { StoreConfig } from '../config/store-config';
 import { ENGINE_MODULE_NAMES } from '../engine/engine-modules';
 import type { EngineModuleStatus } from '../engine/engine-modules';
@@ -151,10 +156,51 @@ function createConfinedNodeObjectStorage(store: StoreConfig): ObjectStorage {
   };
 }
 
+function spawnProducerProcess(input: SpawnProducerProcessInput): SpawnedProducerProcess {
+  const child = spawn(input.command, [...input.args], {
+    cwd: input.cwd,
+    env: process.env,
+    stdio: ['ignore', 'pipe', 'pipe'],
+  });
+
+  child.stdout?.setEncoding('utf8');
+  child.stderr?.setEncoding('utf8');
+
+  return {
+    onStdout: (listener) => {
+      child.stdout?.on('data', (chunk: string) => listener(chunk));
+    },
+    onStderr: (listener) => {
+      child.stderr?.on('data', (chunk: string) => listener(chunk));
+    },
+    onExit: (listener) => {
+      child.on('close', (exitCode, signal) => listener(exitCode, signal));
+    },
+    onSpawnError: (listener) => {
+      child.on('error', (error) => listener(error));
+    },
+    kill: (signal) => {
+      child.kill(signal);
+    },
+  };
+}
+
+function scheduleNodeTimeout(callback: () => void, ms: number): () => void {
+  const handle = setTimeout(callback, ms);
+  handle.unref();
+  return () => clearTimeout(handle);
+}
+
 export function createNodeRenderApiDependencies(
   env: NodeJS.ProcessEnv,
   store: StoreConfig,
 ): RenderApiDependencies {
+  const server = readServerConfig(env);
+  const producerConfig = readProducerConfig(
+    env,
+    process.cwd(),
+    `http://${server.host}:${server.port}`,
+  );
   let mediaLocalModule: Promise<typeof import('@video-maker/media-local')> | null = null;
   let renderModule: Promise<typeof import('@video-maker/composition-remotion/render')> | null = null;
   let binaries: Promise<ResolvedMediaBinaries> | null = null;
@@ -304,6 +350,36 @@ export function createNodeRenderApiDependencies(
       const { ExecaCommandRunner } = await loadMediaLocal();
       const config = readAiAgentConfig(env, tmpdir());
       return createClaudeCliAiAgent(new ExecaCommandRunner(), config)(request);
+    },
+
+    producerAgent: createClaudeCodeProducerAgent(
+      spawnProducerProcess,
+      producerConfig,
+      scheduleNodeTimeout,
+    ),
+
+    readSkillDocument: async (path) => {
+      try {
+        return await readFile(path, 'utf8');
+      } catch (error) {
+        if (isEnoent(error)) {
+          return null;
+        }
+        throw error;
+      }
+    },
+
+    probeProducerBinary: async () => {
+      const { nodeBinaryLookup } = await loadMediaLocal();
+      if (producerConfig.binaryPath.includes('/')) {
+        return nodeBinaryLookup.isExecutableFile(producerConfig.binaryPath);
+      }
+      for (const directory of (env.PATH ?? '').split(':').filter((entry) => entry !== '')) {
+        if (await nodeBinaryLookup.isExecutableFile(join(directory, producerConfig.binaryPath))) {
+          return true;
+        }
+      }
+      return false;
     },
 
     resolveVoiceBinaries: async () => {

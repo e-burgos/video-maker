@@ -9,6 +9,7 @@ import type {
 import type { MediaAsset, Timeline, Transcription, VoiceTarget } from '@video-maker/timeline-core';
 
 import type { EngineModuleStatus } from '../engine/engine-modules';
+import type { ProducerAgentPort } from '../producer/producer-agent';
 import type { BinaryStatus } from '../engine/media-binaries';
 import type { ObjectStorage } from './object-storage';
 
@@ -101,6 +102,10 @@ export interface AiAgentResponse {
 
 export type AiAgentPort = (request: AiAgentRequest) => Promise<AiAgentResponse>;
 
+export type ReadSkillDocumentPort = (path: string) => Promise<string | null>;
+
+export type ProbeProducerBinaryPort = () => Promise<boolean>;
+
 export type ResolveVoiceBinariesPort = () => Promise<ResolvedVoiceBinaries>;
 
 export type ListVoiceModelsPort = () => Promise<readonly VoiceModel[]>;
@@ -168,6 +173,9 @@ export interface RenderApiDependencies {
   readonly createCommandRunner: CreateCommandRunnerPort;
   readonly resolveMontageBinaries: ResolveMontageBinariesPort;
   readonly aiAgent: AiAgentPort;
+  readonly producerAgent: ProducerAgentPort;
+  readonly readSkillDocument: ReadSkillDocumentPort;
+  readonly probeProducerBinary: ProbeProducerBinaryPort;
   readonly resolveVoiceBinaries: ResolveVoiceBinariesPort;
   readonly listVoiceModels: ListVoiceModelsPort;
   readonly synthesizeVoice: SynthesizeVoicePort;

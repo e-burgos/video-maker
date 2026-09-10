@@ -55,6 +55,10 @@ function formatRenderReport(report: RenderReport): string[] {
     `ok [render] ${report.outPath}`,
     `  format: ${report.width}x${report.height}@${report.fps}`,
     `  frames: ${report.durationInFrames}`,
+    `  muted-video: ${report.mutedVideoPath}`,
+    `  master-audio: ${report.masterAudioPath}`,
+    `  loudness: ${report.loudness.integratedLufs} LUFS / ${report.loudness.truePeakDbtp} dBTP` +
+      ` (${report.loudness.withinTolerance ? 'within tolerance' : 'OUT OF TOLERANCE'})`,
   ];
 }
 

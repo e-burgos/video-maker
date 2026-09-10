@@ -56,7 +56,11 @@ injects.
 | `CLAUDE_CLI_PATH` | `claude` | Path to the Claude Code CLI used as the AI agent of a `storyboard` job. Without this variable it is resolved via `PATH`. **No API key is involved**: the CLI authenticates with the subscription already installed on the machine. If it cannot be started, a `storyboard` job fails with `503 AI_AGENT_UNAVAILABLE`. |
 | `CLAUDE_CLI_CWD` | the OS temporary directory | Working directory the agent process runs in. The default is deliberately **outside this repository**: from the repo root the CLI would load this project's `CLAUDE.md` and settings and answer as an SDD orchestrator instead of a storyboard writer. Point it somewhere else only if you know why. |
 | `CLAUDE_CLI_TIMEOUT_MS` | `600000` (10 min) | Positive integer. Zero, negative or non-numeric makes the `storyboard` job fail with `SERVER_CONFIG_INVALID`. A real call took 70-100 s on this machine. |
-| `CLAUDE_CLI_MODEL` | — | Model alias passed to the CLI (`sonnet`, `opus`, …). Unset lets the CLI pick its own default. |
+| `CLAUDE_CLI_MODEL` | — | Model alias passed to the CLI (`sonnet`, `opus`, …). Unset lets the CLI pick its own default. Applies to the `storyboard` job only; the producer has its own. |
+| `PRODUCER_MODEL` | `sonnet` | Model alias for the **studio producer** (`spec-e-burgos-015`). `sonnet` is the default on cost grounds: a producer turn can run for minutes and call dozens of tools. Set it to `opus` when the project needs better judgement about the material. |
+| `PRODUCER_TURN_TIMEOUT_MS` | `1800000` (30 min) | Positive integer. Zero, negative or non-numeric aborts startup with `SERVER_CONFIG_INVALID` (exit 78) instead of falling back to the default. Half an hour because a single turn can include a transcription and a full render. |
+| `PRODUCER_SKILL_PATH` | `sdd/skills/video-producer/SKILL.md` | The skill that **is** the producer's system prompt, read from disk on every turn (edit it and the next turn picks it up). Resolved against the process working directory. If it cannot be read, `POST .../producer/messages` answers `503 PRODUCER_UNAVAILABLE`. |
+| `RENDER_API_URL` | `http://<RENDER_API_HOST>:<RENDER_API_PORT>` | The URL the producer agent is told to call to enqueue jobs on this same service. Only override it when the service is reachable at a different address from inside the child process. |
 
 **Never commit values for any of the six binary variables above** (or for any other secret in
 `.env`) — only their names belong in this file or in any other tracked document.
@@ -91,7 +95,7 @@ path below and are not repeated per endpoint.
 
 | Method | Path | Purpose |
 | --- | --- | --- |
-| `GET` | `/health` | Service health probe. Reports engine module and media binary resolution (now four binaries: `ffmpeg`, `ffprobe`, `whisperCli`, `whisperModel`), plus `capabilities: { renderPipeline, assetStore, jobQueue, montageQueue, storyboardQueue }`, `cycle` and the queue's `jobs: { running, queued }` counters. Always 200, in both the `ok` and `degraded` states — neither the asset store nor the job queue's load enters the health calculation. The `claude` CLI is deliberately **not** in `binaries`: that list is resolved by `@video-maker/media-local`, and adding it would report `degraded` on every machine without Claude Code installed, CI included. `montageQueue` is always `true`: a `montage` job can always be created, whether or not the four binaries resolve — an unresolved binary only fails the job itself, at the stage that needs it (`503 MEDIA_BINARY_NOT_FOUND`), the same contract `renderPipeline`/`jobQueue` already had. |
+| `GET` | `/health` | Service health probe. Reports engine module and media binary resolution (now four binaries: `ffmpeg`, `ffprobe`, `whisperCli`, `whisperModel`), plus `capabilities: { renderPipeline, assetStore, jobQueue, montageQueue, storyboardQueue }`, `cycle` and the queue's `jobs: { running, queued }` counters. Always 200, in both the `ok` and `degraded` states — neither the asset store nor the job queue's load enters the health calculation. The `claude` CLI is deliberately **not** in `binaries`: that list is resolved by `@video-maker/media-local`, and adding it would report `degraded` on every machine without Claude Code installed, CI included. `capabilities.producer` (added by `spec-e-burgos-015` `cycle-01`) is `true` when the Claude Code binary resolves and, for the same reason, **never** turns the service `degraded`. `montageQueue` is always `true`: a `montage` job can always be created, whether or not the four binaries resolve — an unresolved binary only fails the job itself, at the stage that needs it (`503 MEDIA_BINARY_NOT_FOUND`), the same contract `renderPipeline`/`jobQueue` already had. |
 | `GET` | `/projects` | Lists every project directory under `RENDER_API_MEDIA_ROOT`, ascending by slug, with its five layout flags (`raw`, `catalog`, `timeline`, `edl`, `out`). A missing media root answers `200 []`; files and non-portable directory names are ignored silently. |
 | `POST` | `/projects` | Creates the canonical project layout for a slug: `raw/aroll`, `raw/broll`, `raw/images`, `raw/audio`, `work`, `out`, in that exact order. Body `{ "slug": "my-project" }`; `content-type` is not required. `409` if the project already exists — the existing project is never touched. |
 | `GET` | `/projects/:slug` | Project detail: layout flags plus `assetSource` (`catalog` \| `raw-scan`) and `assetCounts` by role, both derived from the same resolver `GET .../assets` uses, so the two endpoints never disagree. |
@@ -109,6 +113,10 @@ path below and are not repeated per endpoint.
 | `GET` | `/projects/:slug/jobs` | Lists the project's jobs in creation order, each reduced to a summary (`id`, `kind`, `state`, `stage`, `errorCode`, `createdAt`, `startedAt`, `finishedAt`) — never the full `report` or `error`; use `GET /jobs/:jobId` for those. `kind` is the only field this cycle adds; every field that existed before keeps its name and meaning (RNF-2). Does not check that the project exists: a slug with no jobs answers `200 { "slug", "jobs": [] }` whether or not the project does. |
 | `GET` | `/jobs/:jobId` | Full job detail, in any of its six states, for either `kind`. Always `200`, even `state: "failed"` — the job's own failure is not a transport error; the typed `error` is embedded in the body instead. `404 RENDER_JOB_NOT_FOUND` for an id the queue does not know. The id is never validated as a path segment: the lookup is a `Map` read, not a filesystem access. |
 | `DELETE` | `/jobs/:jobId` | Requests cancellation. See "Cancelling a job" below for the exact status per prior state. |
+| `GET` | `/projects/:slug/producer` | The producer conversation of the project (`work/producer/conversation.json`), the Claude Code session behind it and the turn in flight. See "The studio producer" below. |
+| `POST` | `/projects/:slug/producer/messages` | Sends a message to the producer and starts a turn **outside the job queue**. `202 { slug, turnId, startedAt, status: 'running' }`. `409 PRODUCER_TURN_ACTIVE` with a turn already running on that project. |
+| `GET` | `/projects/:slug/producer/turns/:turnId` | State, accumulated events, answer and suggestions of one turn. |
+| `DELETE` | `/projects/:slug/producer/turns/:turnId` | Kills the turn's child process. `202`; poll the turn until `canceled`. |
 
 ### Cancelling a job (EP-015)
 
@@ -569,6 +577,91 @@ curl -sS -X PUT http://127.0.0.1:4411/projects/voice-smoke/voice/scenes/scene-03
 
 Evidence of the executed run:
 `sdd/specs/spec-e-burgos-009-voice-over/cycles/cycle-01/artifacts/`.
+
+## The studio producer (`spec-e-burgos-015-studio-producer`, `cycle-01`)
+
+The producer is the skill `sdd/skills/video-producer/SKILL.md` running as a **headless Claude Code
+process** on the machine's own subscription (no API key, same as the `storyboard` agent). The user
+writes a prompt, the agent inventories `raw/`, agrees on a plan and produces the video with the
+tools that already exist — enqueuing `montage` and `render` jobs on this very service.
+
+**The turn is not a job (D-1).** The queue has concurrency 1, and the agent waits for the jobs it
+enqueues: a turn inside the queue would deadlock itself. Turns live in their own registry with two
+differences from the queue:
+
+- Exclusion is **per project**, not global: two projects can have a producer turn at once.
+- Cancellation **kills the child process** (`SIGTERM`, then `SIGKILL` after 5 s). There is no
+  cooperative checkpoint: the agent is an opaque external process. That is why `DELETE` answers
+  `202` and the turn settles when the process actually dies.
+
+The registry is in memory: a turn from a previous run of the service is a `404`. The
+**conversation** is not — it lives on disk:
+
+```
+media/<slug>/work/producer/
+  conversation.json        machine readable: [{ id, role, text, createdAt, suggestions?, turnId? }]
+  conversation.md          the same conversation as bullets, the format used by hand in demo-01
+  session.json             { sessionId, model, createdAt, lastTurnAt } — the Claude Code session
+  turns/<turnId>.jsonl     the raw stream-json of that turn, one event per line
+```
+
+`session.json` is what makes the second turn remember the first: turn 1 runs with `--session-id`
+and turn 2 with `--resume`, so the app never replays the conversation into the prompt. The stored
+id is the one the CLI reports in its `init` event, not the uuid we passed it.
+
+**What the child process is allowed to do.** `--permission-mode dontAsk` plus a whitelist:
+`Bash(pnpm nx run render-cli:*)`, `Bash(ffmpeg *)`, `Bash(ffprobe *)`, `Bash(curl *)`,
+`Bash(ls *)`, `Bash(cat *)`, `Bash(rtk curl *)`, `Bash(rtk ls *)`, `Bash(rtk read *)`, `Read`,
+`Glob`, `Grep`, `Write`, `Edit`. Everything else is denied by the CLI itself. `--allowedTools` is **variadic and goes last**, one pattern per argument, or it
+swallows the flags after it. The working directory is the **repository root** (that is what
+`pnpm nx` needs) and `--add-dir` opens the project directory.
+
+> **Two things `--allowedTools` cannot do**, both measured against the real CLI (2.1.123) and not
+> guessed:
+>
+> 1. **A path pattern does not confine a write.** `--allowedTools 'Write(allowed/**)'` denied a
+>    write the agent made with an **absolute** path inside `allowed/`. Write confinement is
+>    therefore by instruction in the system prompt plus `--add-dir`, never by pattern — which is
+>    why plain `Write` is on the list.
+> 2. **The repo's rtk hook rewrites the command before the allowlist sees it.** The child runs
+>    with the repository as its working directory, so `.claude/settings.json`'s `PreToolUse` hook
+>    applies: `curl …` becomes `rtk curl …`, `cat X` becomes `rtk read X`, `ls -la` becomes
+>    `rtk ls -la` (`ffprobe`, `ffmpeg` and `pnpm nx` pass through untouched). The rewritten command
+>    no longer matches `Bash(curl *)` and is denied — which is why the three `Bash(rtk …)` patterns
+>    are on the list. They stay harmless with rtk disabled, and adding a bare `Bash(rtk *)` instead
+>    would silently authorize everything rtk wraps, `git` included.
+> 3. **A wildcard never authorizes a file-mutating shell command.** With
+>    `--allowedTools 'Bash(ls *)' 'Bash(mkdir *)' 'Bash(cp *)'` in the same run, `ls -la` was
+>    allowed and `mkdir uno` and `cp /etc/hosts ./hosts.txt` were both denied. `Bash(mkdir *)` and
+>    `Bash(cp *)` are dead entries, so they are **not** on the list and the system prompt tells the
+>    agent to use `Write` (it creates parent directories) and `ffmpeg -i src -c copy dst` instead.
+>    `curl`, `ffmpeg` and `ffprobe` with a wildcard do work, writes included.
+
+**The system prompt** is `--append-system-prompt` with three parts: the skill verbatim, the project
+context (slug, absolute roots, `RENDER_API_URL`, the catalog assets or the raw scan, whether a
+timeline exists), and the app rules — ignore the repository's developer instructions, never modify
+source code, write only under the project, do not `source .env` (the media variables are already in
+the child's environment), prefer the API jobs over the CLI, and end **every** answer with a
+` ```suggestions ` block holding a JSON array of 2–4 short actions.
+
+**Events.** The turn reads `--output-format stream-json --verbose`, without
+`--include-partial-messages` (D-3): the studio polls, so message granularity is enough and partial
+chunks would only inflate the `.jsonl`. Each line becomes zero or more events:
+
+| Stream line | Event |
+| --- | --- |
+| `system` / `init` | `{ type: 'status', status: 'started' }` and the session id |
+| `assistant` text block | `{ type: 'text', text }` (a `thinking` block is dropped) |
+| `assistant` `tool_use` | `{ type: 'tool', name, summary }` — `summary` is derived from the command: `ffprobe raw/broll/lentes.mp4`, `queued montage job`, `Write work/producer/script.txt` |
+| `user` `tool_result` with `is_error` | `{ type: 'status', status: 'tool-failed' }` |
+| `result` | closes the turn; its text becomes `assistantMessage` after the suggestions block is cut out |
+
+**Typed failures**: `503 PRODUCER_UNAVAILABLE` (no binary or no skill file — checked *before* the
+turn is reserved, so a 503 never leaves a project blocked), `409 PRODUCER_TURN_ACTIVE`,
+`429 PRODUCER_RATE_LIMITED` (the subscription limit, detected in the `result` line),
+`502 PRODUCER_TURN_FAILED` (timeout or no answer), `404 PRODUCER_TURN_NOT_FOUND`,
+`409 PRODUCER_TURN_NOT_CANCELABLE`, `422 PRODUCER_MESSAGE_INVALID`, `422 PRODUCER_STATE_INVALID`.
+None of them carries the child's stderr or a host path.
 
 ## D-11 — no MinIO in this cycle
 

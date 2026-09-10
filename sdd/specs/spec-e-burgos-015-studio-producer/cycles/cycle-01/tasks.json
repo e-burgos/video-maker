@@ -1,0 +1,289 @@
+{
+  "$schema": "../../../../schemas/cycle-tasks.schema.json",
+  "spec": "spec-e-burgos-015-studio-producer",
+  "cycle": 1,
+  "module": "studio-producer",
+  "apps": [
+    "apps/render-api",
+    "tools/render-cli"
+  ],
+  "flow": "lite",
+  "user_stories_generated": true,
+  "prerequisites": {
+    "tasks_generated": true
+  },
+  "tasks": [
+    {
+      "id": "TASK-001",
+      "title": "Persist the producer conversation, session and turn log under work/producer/",
+      "user_stories": [
+        "US-15-001"
+      ],
+      "estimation_hours": 4,
+      "story_points": 5,
+      "depends_on": [],
+      "status": "done",
+      "files": [
+        "apps/render-api/src/errors/http-status-for.spec.ts",
+        "apps/render-api/src/errors/http-status-for.ts",
+        "apps/render-api/src/errors/render-api-error.ts",
+        "apps/render-api/src/errors/to-error-payload.ts",
+        "apps/render-api/src/producer/producer-conversation-markdown.spec.ts",
+        "apps/render-api/src/producer/producer-conversation-markdown.ts",
+        "apps/render-api/src/producer/producer-documents.spec.ts",
+        "apps/render-api/src/producer/producer-documents.ts",
+        "apps/render-api/src/producer/producer-paths.spec.ts",
+        "apps/render-api/src/producer/producer-paths.ts",
+        "apps/render-api/src/producer/producer-store.spec.ts",
+        "apps/render-api/src/producer/producer-store.ts"
+      ],
+      "usage": {
+        "provider_model": "claude/opus",
+        "effort": "high",
+        "agent": "orchestrator",
+        "tokens_in": 62000,
+        "tokens_out": 9000,
+        "approx": true,
+        "source": "declared-estimate",
+        "recorded_at": "2026-09-10"
+      }
+    },
+    {
+      "id": "TASK-002",
+      "title": "Build the producer system prompt, parse suggestions and map the stream into readable events",
+      "user_stories": [
+        "US-15-004",
+        "US-15-005",
+        "US-15-006"
+      ],
+      "estimation_hours": 5,
+      "story_points": 5,
+      "depends_on": [
+        "TASK-001"
+      ],
+      "status": "done",
+      "files": [
+        "apps/render-api/src/config/producer-config.spec.ts",
+        "apps/render-api/src/config/producer-config.ts",
+        "apps/render-api/src/producer/build-producer-system-prompt.spec.ts",
+        "apps/render-api/src/producer/build-producer-system-prompt.ts",
+        "apps/render-api/src/producer/collect-producer-context.spec.ts",
+        "apps/render-api/src/producer/collect-producer-context.ts",
+        "apps/render-api/src/producer/parse-producer-suggestions.spec.ts",
+        "apps/render-api/src/producer/parse-producer-suggestions.ts",
+        "apps/render-api/src/producer/producer-stream-events.spec.ts",
+        "apps/render-api/src/producer/producer-stream-events.ts"
+      ],
+      "usage": {
+        "provider_model": "claude/opus",
+        "effort": "high",
+        "agent": "orchestrator",
+        "tokens_in": 78000,
+        "tokens_out": 12000,
+        "approx": true,
+        "source": "declared-estimate",
+        "recorded_at": "2026-09-10"
+      }
+    },
+    {
+      "id": "TASK-003",
+      "title": "Add the ProducerAgent port and its headless Claude Code adapter with typed failures",
+      "user_stories": [
+        "US-15-004",
+        "US-15-007",
+        "US-15-009"
+      ],
+      "estimation_hours": 6,
+      "story_points": 8,
+      "depends_on": [
+        "TASK-002"
+      ],
+      "status": "done",
+      "files": [
+        "apps/render-api/src/__fixtures__/fake-producer-agent.ts",
+        "apps/render-api/src/__fixtures__/fake-render-api-dependencies.ts",
+        "apps/render-api/src/deps/render-api-dependencies.ts",
+        "apps/render-api/src/errors/http-status-for.spec.ts",
+        "apps/render-api/src/errors/http-status-for.ts",
+        "apps/render-api/src/errors/render-api-error.ts",
+        "apps/render-api/src/errors/to-error-payload.ts",
+        "apps/render-api/src/errors/translate-producer-error.spec.ts",
+        "apps/render-api/src/errors/translate-producer-error.ts",
+        "apps/render-api/src/producer/claude-code-producer-agent.spec.ts",
+        "apps/render-api/src/producer/claude-code-producer-agent.ts",
+        "apps/render-api/src/producer/producer-agent.ts"
+      ],
+      "usage": {
+        "provider_model": "claude/opus",
+        "effort": "high",
+        "agent": "orchestrator",
+        "tokens_in": 95000,
+        "tokens_out": 15000,
+        "approx": true,
+        "source": "declared-estimate",
+        "recorded_at": "2026-09-10"
+      }
+    },
+    {
+      "id": "TASK-004",
+      "title": "Run one producer turn per project outside the job queue and persist its outcome",
+      "user_stories": [
+        "US-15-002",
+        "US-15-003",
+        "US-15-005",
+        "US-15-007"
+      ],
+      "estimation_hours": 6,
+      "story_points": 8,
+      "depends_on": [
+        "TASK-003"
+      ],
+      "status": "done",
+      "files": [
+        "apps/render-api/src/__fixtures__/fake-producer-agent.ts",
+        "apps/render-api/src/http/render-api-runtime.ts",
+        "apps/render-api/src/producer/producer-turn-registry.spec.ts",
+        "apps/render-api/src/producer/producer-turn-registry.ts",
+        "apps/render-api/src/producer/run-producer-turn.spec.ts",
+        "apps/render-api/src/producer/run-producer-turn.ts"
+      ],
+      "usage": {
+        "provider_model": "claude/opus",
+        "effort": "high",
+        "agent": "orchestrator",
+        "tokens_in": 88000,
+        "tokens_out": 14000,
+        "approx": true,
+        "source": "declared-estimate",
+        "recorded_at": "2026-09-10"
+      }
+    },
+    {
+      "id": "TASK-005",
+      "title": "Expose the producer over HTTP and declare capabilities.producer in /health",
+      "user_stories": [
+        "US-15-001",
+        "US-15-002",
+        "US-15-005",
+        "US-15-006",
+        "US-15-007",
+        "US-15-008",
+        "US-15-009"
+      ],
+      "estimation_hours": 5,
+      "story_points": 5,
+      "depends_on": [
+        "TASK-004"
+      ],
+      "status": "done",
+      "files": [
+        "apps/render-api/README.md",
+        "apps/render-api/src/deps/node-render-api-dependencies.ts",
+        "apps/render-api/src/http/create-render-api-server.ts",
+        "apps/render-api/src/http/handle-request.ts",
+        "apps/render-api/src/http/handlers/producer-handler.spec.ts",
+        "apps/render-api/src/http/handlers/producer-handler.ts",
+        "apps/render-api/src/http/health-handler.spec.ts",
+        "apps/render-api/src/http/health-handler.ts",
+        "apps/render-api/src/http/router.spec.ts",
+        "apps/render-api/src/http/routes.ts",
+        "apps/render-api/src/main.ts",
+        "sdd/api.json"
+      ],
+      "usage": {
+        "provider_model": "claude/opus",
+        "effort": "high",
+        "agent": "orchestrator",
+        "tokens_in": 92000,
+        "tokens_out": 16000,
+        "approx": true,
+        "source": "declared-estimate",
+        "recorded_at": "2026-09-10"
+      }
+    },
+    {
+      "id": "TASK-006",
+      "title": "Deliver the mastered mix from render-cli render and measure the 0 ms parity",
+      "user_stories": [
+        "US-15-010"
+      ],
+      "estimation_hours": 5,
+      "story_points": 5,
+      "depends_on": [],
+      "status": "done",
+      "files": [
+        "sdd/specs/spec-e-burgos-015-studio-producer/cycles/cycle-01/artifacts/cli-audio-parity.md",
+        "sdd/specs/spec-e-burgos-015-studio-producer/cycles/cycle-01/artifacts/measure-audio-offset.ts",
+        "tools/render-cli/README.md",
+        "tools/render-cli/src/__fixtures__/fake-cli-dependencies.ts",
+        "tools/render-cli/src/commands/render-command.spec.ts",
+        "tools/render-cli/src/commands/render-command.ts",
+        "tools/render-cli/src/deps/cli-dependencies.ts",
+        "tools/render-cli/src/deps/node-cli-dependencies.ts",
+        "tools/render-cli/src/deps/timeline-renderer.ts",
+        "tools/render-cli/src/errors/translate-lib-error.spec.ts",
+        "tools/render-cli/src/pipeline/master-render-paths.spec.ts",
+        "tools/render-cli/src/pipeline/master-render-paths.ts",
+        "tools/render-cli/src/report/cli-report.ts",
+        "tools/render-cli/src/report/format-report.spec.ts",
+        "tools/render-cli/src/report/format-report.ts",
+        "tools/render-cli/src/report/to-reports.spec.ts",
+        "tools/render-cli/src/report/to-reports.ts"
+      ],
+      "usage": {
+        "provider_model": "claude/opus",
+        "effort": "high",
+        "agent": "orchestrator",
+        "tokens_in": 74000,
+        "tokens_out": 13000,
+        "approx": true,
+        "source": "declared-estimate",
+        "recorded_at": "2026-09-10"
+      }
+    },
+    {
+      "id": "TASK-007",
+      "title": "Run the real producer smoke against claude -p on a temporary copy of demo-01",
+      "user_stories": [
+        "US-15-001",
+        "US-15-003",
+        "US-15-004",
+        "US-15-005",
+        "US-15-006",
+        "US-15-007"
+      ],
+      "estimation_hours": 4,
+      "story_points": 3,
+      "depends_on": [
+        "TASK-005",
+        "TASK-006"
+      ],
+      "status": "done",
+      "files": [
+        "apps/render-api/README.md",
+        "apps/render-api/src/http/create-render-api-server.ts",
+        "apps/render-api/src/producer/build-producer-system-prompt.spec.ts",
+        "apps/render-api/src/producer/build-producer-system-prompt.ts",
+        "apps/render-api/src/producer/claude-code-producer-agent.spec.ts",
+        "apps/render-api/src/producer/claude-code-producer-agent.ts",
+        "apps/render-api/src/producer/producer-stream-events.spec.ts",
+        "apps/render-api/src/producer/producer-stream-events.ts",
+        "apps/render-api/src/producer/producer-turn-registry.spec.ts",
+        "apps/render-api/src/producer/producer-turn-registry.ts",
+        "sdd/specs/spec-e-burgos-015-studio-producer/cycles/cycle-01/artifacts/producer-smoke-turn-01.json",
+        "sdd/specs/spec-e-burgos-015-studio-producer/cycles/cycle-01/artifacts/producer-smoke-turn-02.json",
+        "sdd/specs/spec-e-burgos-015-studio-producer/cycles/cycle-01/artifacts/producer-smoke.md"
+      ],
+      "usage": {
+        "provider_model": "claude/opus",
+        "effort": "high",
+        "agent": "orchestrator",
+        "tokens_in": 210000,
+        "tokens_out": 24000,
+        "approx": true,
+        "source": "declared-estimate",
+        "recorded_at": "2026-09-10"
+      }
+    }
+  ]
+}

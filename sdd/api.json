@@ -54,7 +54,7 @@
         "required_headers": [],
         "request_body": {},
         "responses": {
-          "200": "application/json: { status: 'ok' | 'degraded', service: 'render-api', cycle: number, time: ISO-8601 string, engine: [{ name, loaded }], binaries: [{ name, envVar, resolved }] (4 entries: ffmpeg, ffprobe, whisper-cli, whisper-model), capabilities: { renderPipeline, assetStore, jobQueue, montageQueue, storyboardQueue }, jobs: { running, queued } }. status is ok only when every engine module loaded and every binary resolved (all four); the jobs counters never affect it.",
+          "200": "application/json: { status: 'ok' | 'degraded', service: 'render-api', cycle: number, time: ISO-8601 string, engine: [{ name, loaded }], binaries: [{ name, envVar, resolved }] (4 entries: ffmpeg, ffprobe, whisper-cli, whisper-model), capabilities (which gained producer in spec-e-burgos-015 cycle-01: true when the Claude Code binary resolves; it never turns the service degraded, because a machine without Claude Code still renders — same reasoning as D-12 of spec-008 for the binaries list): { renderPipeline, assetStore, jobQueue, montageQueue, storyboardQueue }, jobs: { running, queued } }. status is ok only when every engine module loaded and every binary resolved (all four); the jobs counters never affect it.",
           "405": "application/json: { error: { code: 'METHOD_NOT_ALLOWED', stage: null, message, resource, expected } } with an Allow header, for any method other than GET on this path.",
           "500": "application/json: { error: { code: 'INTERNAL_ERROR', stage: null, message } } from the central error handler."
         },
@@ -83,6 +83,11 @@
             "cycle": 1,
             "date": "2026-09-09",
             "change": "Updated in spec-e-burgos-009 cycle-01: binaries now reports six entries (piperCli/PIPER_PATH and piperModel/PIPER_MODEL_PATH joined the four media binaries), so a machine without Piper reports degraded exactly like one without the Whisper model; capabilities gained voiceQueue."
+          },
+          {
+            "cycle": 1,
+            "date": "2026-09-10",
+            "change": "spec-e-burgos-015 cycle-01: capabilities.producer added. Reported from a probe of the Claude Code binary and never part of the ok/degraded decision."
           }
         ]
       },
@@ -676,6 +681,137 @@
             "cycle": 1,
             "date": "2026-09-09",
             "change": "Created in spec-e-burgos-009 cycle-01: attach an uploaded locution to a storyboard scene."
+          }
+        ]
+      },
+      {
+        "id": "EP-022",
+        "method": "GET",
+        "path": "/projects/:slug/producer",
+        "module": "studio-producer",
+        "spec": "sdd/specs/spec-e-burgos-015-studio-producer",
+        "status": "implemented",
+        "created_in_cycle": 1,
+        "updated_in_cycle": 1,
+        "description": "Returns the whole producer conversation of the project, the Claude Code session that backs it and the turn in flight if there is one. This is what the studio chat screen loads when it opens. The conversation is persisted in media/<slug>/work/producer/conversation.json (and mirrored, human readable, in conversation.md), so it survives a restart of the service: the queue does not.",
+        "path_params": [
+          "slug"
+        ],
+        "required_headers": [],
+        "request_body": {
+          "content-type": "none",
+          "schema": "Takes no request body."
+        },
+        "responses": {
+          "200": "application/json: { slug, messages: [{ id, role: user|assistant, text, createdAt, suggestions?: string[], turnId? }], session: { sessionId, model, createdAt, lastTurnAt } | null, activeTurn: ProducerTurn | null }. messages is [] and session is null for a project that never talked to the producer. activeTurn carries the same shape as EP-024 and is null unless a turn is running.",
+          "404": "PROJECT_NOT_FOUND when the project directory does not exist. application/json: { error: { code, stage, message, resource?, expected?, hint?, assetPersisted?, catalogUpdated? } }.",
+          "422": "PROJECT_SLUG_INVALID when the slug is not a single kebab-case path segment, PRODUCER_STATE_INVALID when conversation.json or session.json exist but cannot be read (the service refuses to overwrite a conversation it cannot parse). application/json: { error: { code, stage, message, resource?, expected?, hint?, assetPersisted?, catalogUpdated? } }."
+        },
+        "changelog": [
+          {
+            "cycle": 1,
+            "date": "2026-09-10",
+            "change": "Created in spec-e-burgos-015 cycle-01: conversation, session and active turn of the studio producer."
+          }
+        ]
+      },
+      {
+        "id": "EP-023",
+        "method": "POST",
+        "path": "/projects/:slug/producer/messages",
+        "module": "studio-producer",
+        "spec": "sdd/specs/spec-e-burgos-015-studio-producer",
+        "status": "implemented",
+        "created_in_cycle": 1,
+        "updated_in_cycle": 1,
+        "description": "Sends one user message to the producer and starts a turn. The turn runs OUTSIDE the job queue (D-1 of the cycle): the agent enqueues montage/render jobs on this same API and waits for them, so a turn sitting in a queue of concurrency 1 would deadlock itself. Exclusion is per project: one running turn per slug. The user message is persisted before the 202 answers, so the chat can render it immediately. Cancellation kills the child process (it is not the cooperative cancellation of the job queue).",
+        "path_params": [
+          "slug"
+        ],
+        "required_headers": [],
+        "request_body": {
+          "content-type": "application/json",
+          "schema": "{ text: string } — the user message, non-empty after trimming. Any other field is ignored."
+        },
+        "responses": {
+          "202": "application/json: { slug, turnId, startedAt, status: running }. Poll EP-024 for the events and the answer.",
+          "400": "REQUEST_BODY_INVALID_JSON when the body is absent, empty or not a JSON object. application/json: { error: { code, stage, message, resource?, expected?, hint?, assetPersisted?, catalogUpdated? } }.",
+          "404": "PROJECT_NOT_FOUND when the project directory does not exist. application/json: { error: { code, stage, message, resource?, expected?, hint?, assetPersisted?, catalogUpdated? } }.",
+          "409": "PRODUCER_TURN_ACTIVE when the project already has a running turn; resource carries its turnId. application/json: { error: { code, stage, message, resource?, expected?, hint?, assetPersisted?, catalogUpdated? } }.",
+          "413": "REQUEST_BODY_TOO_LARGE when the body exceeds the JSON body limit. application/json: { error: { code, stage, message, resource?, expected?, hint?, assetPersisted?, catalogUpdated? } }.",
+          "422": "PRODUCER_MESSAGE_INVALID when text is missing or blank, PROJECT_SLUG_INVALID when the slug is not a single kebab-case path segment. application/json: { error: { code, stage, message, resource?, expected?, hint?, assetPersisted?, catalogUpdated? } }.",
+          "503": "PRODUCER_UNAVAILABLE when the Claude Code binary does not resolve or the video-producer skill file cannot be read. Checked before the turn is reserved, so a 503 never leaves the project blocked. application/json: { error: { code, stage, message, resource?, expected?, hint?, assetPersisted?, catalogUpdated? } }."
+        },
+        "changelog": [
+          {
+            "cycle": 1,
+            "date": "2026-09-10",
+            "change": "Created in spec-e-burgos-015 cycle-01: one producer turn per project, outside the job queue."
+          }
+        ]
+      },
+      {
+        "id": "EP-024",
+        "method": "GET",
+        "path": "/projects/:slug/producer/turns/:turnId",
+        "module": "studio-producer",
+        "spec": "sdd/specs/spec-e-burgos-015-studio-producer",
+        "status": "implemented",
+        "created_in_cycle": 1,
+        "updated_in_cycle": 1,
+        "description": "Returns the state of one producer turn: its accumulated events while it runs, and its answer plus suggestions when it succeeds. Events are derived from the stream-json output of Claude Code at message granularity (no partial chunks, D-3): a text block becomes a text event, a tool call becomes a tool event with a readable summary built from the command itself, and a failed tool result becomes a status event. The raw stream is kept, one JSON per line, in work/producer/turns/<turnId>.jsonl.",
+        "path_params": [
+          "slug",
+          "turnId"
+        ],
+        "required_headers": [],
+        "request_body": {
+          "content-type": "none",
+          "schema": "Takes no request body."
+        },
+        "responses": {
+          "200": "application/json: { turnId, slug, status: running|succeeded|failed|canceled, startedAt, finishedAt: string|null, events: ({ type: text, text } | { type: tool, name, summary } | { type: status, status })[], assistantMessage: string|null, suggestions: string[], error: ErrorPayload|null }. assistantMessage is the answer with the ```suggestions block removed; suggestions holds 2 to 4 short actions taken from that block ([] when the model did not emit one). error is filled only when status is failed.",
+          "404": "PRODUCER_TURN_NOT_FOUND when the turn id is unknown or belongs to another project. The registry lives in memory: a turn from a previous run of the service answers the same 404. application/json: { error: { code, stage, message, resource?, expected?, hint?, assetPersisted?, catalogUpdated? } }.",
+          "422": "PROJECT_SLUG_INVALID when the slug is not a single kebab-case path segment. application/json: { error: { code, stage, message, resource?, expected?, hint?, assetPersisted?, catalogUpdated? } }."
+        },
+        "changelog": [
+          {
+            "cycle": 1,
+            "date": "2026-09-10",
+            "change": "Created in spec-e-burgos-015 cycle-01: state, events, answer and suggestions of a producer turn."
+          }
+        ]
+      },
+      {
+        "id": "EP-025",
+        "method": "DELETE",
+        "path": "/projects/:slug/producer/turns/:turnId",
+        "module": "studio-producer",
+        "spec": "sdd/specs/spec-e-burgos-015-studio-producer",
+        "status": "implemented",
+        "created_in_cycle": 1,
+        "updated_in_cycle": 1,
+        "description": "Cancels a running producer turn by killing its child process (SIGTERM, then SIGKILL after a grace period). Unlike a job, there is no cooperative checkpoint to wait for: the agent is an opaque external process. The answer is 202 because the turn settles when the process actually dies; poll EP-024 until status is canceled. A canceled turn persists neither an assistant message nor a session, so the next turn starts a fresh Claude Code session unless an earlier turn already created one.",
+        "path_params": [
+          "slug",
+          "turnId"
+        ],
+        "required_headers": [],
+        "request_body": {
+          "content-type": "none",
+          "schema": "Takes no request body."
+        },
+        "responses": {
+          "202": "application/json: the turn record of EP-024, still status running at the moment the kill was requested.",
+          "404": "PRODUCER_TURN_NOT_FOUND when the turn id is unknown or belongs to another project. application/json: { error: { code, stage, message, resource?, expected?, hint?, assetPersisted?, catalogUpdated? } }.",
+          "409": "PRODUCER_TURN_NOT_CANCELABLE when the turn already reached succeeded, failed or canceled. application/json: { error: { code, stage, message, resource?, expected?, hint?, assetPersisted?, catalogUpdated? } }.",
+          "422": "PROJECT_SLUG_INVALID when the slug is not a single kebab-case path segment. application/json: { error: { code, stage, message, resource?, expected?, hint?, assetPersisted?, catalogUpdated? } }."
+        },
+        "changelog": [
+          {
+            "cycle": 1,
+            "date": "2026-09-10",
+            "change": "Created in spec-e-burgos-015 cycle-01: kill of the producer child process."
           }
         ]
       }

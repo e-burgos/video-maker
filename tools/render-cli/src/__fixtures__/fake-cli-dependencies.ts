@@ -3,7 +3,13 @@ import type { Clock, CommandRunner, ReadTextFile, ResolvedBinaries } from '@vide
 import { FixtureCommandRunner, systemClock } from '@video-maker/media-local';
 
 import type { CliDependencies } from '../deps/cli-dependencies';
-import type { TimelineRenderer } from '../deps/timeline-renderer';
+import type {
+  AudioVideoMuxer,
+  MixLoudnessReport,
+  MixLoudnessVerifier,
+  TimelineAudioMixer,
+  TimelineRenderer,
+} from '../deps/timeline-renderer';
 
 export interface FakeFileSystemFileInit {
   readonly path: string;
@@ -19,6 +25,7 @@ export interface FakeFileSystem {
   readonly writeTextFile: WriteTextFile;
   readonly ensureDirectory: EnsureDirectory;
   readFile(path: string): string | undefined;
+  directories(): readonly string[];
 }
 
 function fileNotFoundError(path: string): Error {
@@ -150,6 +157,7 @@ export function createFakeFileSystem(
     writeTextFile,
     ensureDirectory,
     readFile: (path) => writtenFiles.get(path) ?? filesByPath.get(path)?.contents,
+    directories: () => [...knownDirectories],
   };
 }
 
@@ -164,11 +172,30 @@ function unusedRenderTimeline(): ReturnType<TimelineRenderer> {
   return Promise.reject(new Error('fake-cli-dependencies: renderTimeline was not overridden for this test.'));
 }
 
+export const DEFAULT_FAKE_MIX_LOUDNESS: MixLoudnessReport = {
+  withinTolerance: true,
+  integratedLufs: -14,
+  truePeakDbtp: -1.5,
+  integratedDeltaLu: 0,
+  truePeakDeltaDb: 0,
+};
+
+const passthroughMixer: TimelineAudioMixer = async (_timeline, request) => ({
+  outputPath: request.outPath,
+});
+
+const passthroughMuxer: AudioVideoMuxer = async (request) => ({ outputPath: request.outPath });
+
+const passthroughVerifier: MixLoudnessVerifier = async () => DEFAULT_FAKE_MIX_LOUDNESS;
+
 export interface FakeCliDependenciesOverrides {
   readonly fileSystem?: FakeFileSystem;
   readonly runner?: CommandRunner;
   readonly resolveBinaries?: () => Promise<ResolvedBinaries>;
   readonly renderTimeline?: TimelineRenderer;
+  readonly mixTimelineAudio?: TimelineAudioMixer;
+  readonly muxAudioIntoVideo?: AudioVideoMuxer;
+  readonly verifyMixLoudness?: MixLoudnessVerifier;
   readonly clock?: Clock;
 }
 
@@ -185,5 +212,8 @@ export function createFakeCliDependencies(overrides: FakeCliDependenciesOverride
     ensureDirectory: fileSystem.ensureDirectory,
     clock: overrides.clock ?? systemClock,
     renderTimeline: overrides.renderTimeline ?? unusedRenderTimeline,
+    mixTimelineAudio: overrides.mixTimelineAudio ?? passthroughMixer,
+    muxAudioIntoVideo: overrides.muxAudioIntoVideo ?? passthroughMuxer,
+    verifyMixLoudness: overrides.verifyMixLoudness ?? passthroughVerifier,
   };
 }

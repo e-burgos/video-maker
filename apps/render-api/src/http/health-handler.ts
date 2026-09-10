@@ -23,6 +23,7 @@ export interface HealthBody {
     readonly montageQueue: boolean;
     readonly storyboardQueue: boolean;
     readonly voiceQueue: boolean;
+    readonly producer: boolean;
   };
   readonly jobs: RenderJobQueueSize;
 }
@@ -33,6 +34,7 @@ export async function handleHealth(
 ): Promise<HttpResponse> {
   const engine = await deps.preloadEngineModules();
   const binaries = await deps.probeMediaBinaries();
+  const producer = await deps.probeProducerBinary();
 
   const status =
     engine.every((module) => module.loaded) && binaries.every((binary) => binary.resolved)
@@ -53,6 +55,7 @@ export async function handleHealth(
       montageQueue: true,
       storyboardQueue: true,
       voiceQueue: true,
+      producer,
     },
     jobs: runtime.jobs.size(),
   };

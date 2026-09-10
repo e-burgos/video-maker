@@ -3,6 +3,7 @@ import { createServer } from 'node:http';
 import type { IncomingMessage, ServerResponse } from 'node:http';
 import type { AddressInfo } from 'node:net';
 
+import type { ProducerConfig } from '../config/producer-config';
 import type { ServerConfig } from '../config/server-config';
 import type { StoreConfig } from '../config/store-config';
 import type { RenderApiDependencies } from '../deps/render-api-dependencies';
@@ -65,8 +66,9 @@ export function createRenderApiServer(
   deps: RenderApiDependencies,
   config: ServerConfig,
   store: StoreConfig,
+  producer?: ProducerConfig,
 ): RenderApiServer {
-  const runtime = createRenderApiRuntime(deps);
+  const runtime = createRenderApiRuntime(deps, producer);
   const server = createServer((incoming, outgoing) => {
     void (async () => {
       try {
@@ -91,8 +93,9 @@ export function createRenderApiServer(
         });
       }),
 
-    close: () =>
-      new Promise((resolve, reject) => {
+    close: () => {
+      runtime.producerTurns.cancelAll();
+      return new Promise((resolve, reject) => {
         server.close((cause) => {
           if (cause) {
             reject(cause);
@@ -100,6 +103,7 @@ export function createRenderApiServer(
           }
           resolve();
         });
-      }),
+      });
+    },
   };
 }

@@ -36,6 +36,35 @@ no negativo, default `0`.
 
 `ingest` y `render` rechazan las cuatro opciones (`--preset`, `--seed`, `--script`, `--no-logo`).
 
+## `render` entrega la mezcla masterizada (spec-015 cycle-01)
+
+`render` no es un solo paso de Remotion: hace **los mismos cuatro** que el job `render` de
+`apps/render-api`, y por eso los dos caminos entregan exactamente el mismo audio.
+
+1. `renderTimeline(..., { audio: 'muted' })` → `work/renders/<slug>/video-muted.mp4`
+2. `mixTimelineAudio` (grafo FFmpeg) → `work/renders/<slug>/master.wav`
+3. `muxAudioIntoVideo` → `out/<slug>.mp4` (el nombre del entregable no cambió)
+4. `verifyMixLoudness` sobre el entregable, con el resultado en el reporte
+
+```
+ok [render] out/demo-01.mp4
+  format: 1080x1920@30
+  frames: 778
+  muted-video: work/renders/demo-01/video-muted.mp4
+  master-audio: work/renders/demo-01/master.wav
+  loudness: -14.19 LUFS / -2.52 dBTP (within tolerance)
+```
+
+Antes de este cambio el MP4 llevaba el audio que renderiza Remotion, **corrido +40 ms constantes**
+respecto de la locución (medido sobre `media/demo-01`). Hoy el audio decodificado del entregable
+de la CLI tiene el mismo `sha256` que el del job de la API. Evidencia y guion de medición:
+`sdd/specs/spec-e-burgos-015-studio-producer/cycles/cycle-01/artifacts/`.
+
+> `media-local` entra a la CLI por `import` **estático**. No lo cargues con `await import()` en
+> ningún archivo nuevo: `@nx/enforce-module-boundaries` marca entonces la lib entera como
+> lazy-loaded y rompe el lint de todos los archivos que la importan estáticamente. El único
+> perezoso acá es `@video-maker/composition-remotion/render`.
+
 ## Regenerar el material de `media/smoke-ingest`
 
 `media/smoke-ingest/` es material regenerable (no versionado — `media/` está gitignoreado).

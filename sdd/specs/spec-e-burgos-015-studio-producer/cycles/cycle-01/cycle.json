@@ -1,0 +1,195 @@
+{
+  "$schema": "../../../../schemas/cycle.schema.json",
+  "cycle": 1,
+  "module": "studio-producer",
+  "spec": "spec-e-burgos-015-studio-producer",
+  "apps": [
+    "apps/render-api",
+    "tools/render-cli"
+  ],
+  "phase": "studio-producer",
+  "flow": "lite",
+  "objectives": [
+    "Que el productor de la skill video-producer corra detras de la API: conversacion persistida por proyecto, turnos fuera de la cola de jobs y eventos legibles con sugerencias de accion",
+    "Que el agente use la suscripcion local de Claude Code con la skill como system prompt, sesion retomable y lista blanca de herramientas",
+    "Que el entregable de render-cli lleve la misma mezcla masterizada que el job render de la API, con 0 ms de desfase contra la locucion"
+  ],
+  "status": "completed",
+  "started_at": "2026-09-10",
+  "completed_at": "2026-09-10",
+  "documents": {
+    "plan": "sdd/specs/spec-e-burgos-015-studio-producer/cycles/cycle-01/plan.md",
+    "tasks": "sdd/specs/spec-e-burgos-015-studio-producer/cycles/cycle-01/tasks.json"
+  },
+  "artifacts": [
+    "sdd/specs/spec-e-burgos-015-studio-producer/cycles/cycle-01/artifacts/cli-audio-parity.md",
+    "sdd/specs/spec-e-burgos-015-studio-producer/cycles/cycle-01/artifacts/measure-audio-offset.ts",
+    "sdd/specs/spec-e-burgos-015-studio-producer/cycles/cycle-01/artifacts/producer-smoke.md",
+    "sdd/specs/spec-e-burgos-015-studio-producer/cycles/cycle-01/artifacts/producer-smoke-turn-01.json",
+    "sdd/specs/spec-e-burgos-015-studio-producer/cycles/cycle-01/artifacts/producer-smoke-turn-02.json"
+  ],
+  "metrics": {
+    "tasks_total": 7,
+    "tasks_completed": 7,
+    "story_points": 39,
+    "files_created": [
+      "apps/render-api/src/__fixtures__/fake-producer-agent.ts",
+      "apps/render-api/src/config/producer-config.spec.ts",
+      "apps/render-api/src/config/producer-config.ts",
+      "apps/render-api/src/errors/translate-producer-error.spec.ts",
+      "apps/render-api/src/errors/translate-producer-error.ts",
+      "apps/render-api/src/http/handlers/producer-handler.spec.ts",
+      "apps/render-api/src/http/handlers/producer-handler.ts",
+      "apps/render-api/src/producer/build-producer-system-prompt.spec.ts",
+      "apps/render-api/src/producer/build-producer-system-prompt.ts",
+      "apps/render-api/src/producer/claude-code-producer-agent.spec.ts",
+      "apps/render-api/src/producer/claude-code-producer-agent.ts",
+      "apps/render-api/src/producer/collect-producer-context.spec.ts",
+      "apps/render-api/src/producer/collect-producer-context.ts",
+      "apps/render-api/src/producer/parse-producer-suggestions.spec.ts",
+      "apps/render-api/src/producer/parse-producer-suggestions.ts",
+      "apps/render-api/src/producer/producer-agent.ts",
+      "apps/render-api/src/producer/producer-conversation-markdown.spec.ts",
+      "apps/render-api/src/producer/producer-conversation-markdown.ts",
+      "apps/render-api/src/producer/producer-documents.spec.ts",
+      "apps/render-api/src/producer/producer-documents.ts",
+      "apps/render-api/src/producer/producer-paths.spec.ts",
+      "apps/render-api/src/producer/producer-paths.ts",
+      "apps/render-api/src/producer/producer-store.spec.ts",
+      "apps/render-api/src/producer/producer-store.ts",
+      "apps/render-api/src/producer/producer-stream-events.spec.ts",
+      "apps/render-api/src/producer/producer-stream-events.ts",
+      "apps/render-api/src/producer/producer-turn-registry.spec.ts",
+      "apps/render-api/src/producer/producer-turn-registry.ts",
+      "apps/render-api/src/producer/run-producer-turn.spec.ts",
+      "apps/render-api/src/producer/run-producer-turn.ts",
+      "sdd/context/apps/render-api/updates/2026-09-10-spec-e-burgos-015-studio-producer-cycle-01.md",
+      "sdd/context/tools/render-cli/updates/2026-09-10-spec-e-burgos-015-studio-producer-cycle-01.md",
+      "sdd/memory/journal/2026-09-10-spec-e-burgos-015-studio-producer-cycle-01.md",
+      "sdd/specs/spec-e-burgos-015-studio-producer/cycles/cycle-01/artifacts/cli-audio-parity.md",
+      "sdd/specs/spec-e-burgos-015-studio-producer/cycles/cycle-01/artifacts/measure-audio-offset.ts",
+      "sdd/specs/spec-e-burgos-015-studio-producer/cycles/cycle-01/artifacts/producer-smoke-turn-01.json",
+      "sdd/specs/spec-e-burgos-015-studio-producer/cycles/cycle-01/artifacts/producer-smoke-turn-02.json",
+      "sdd/specs/spec-e-burgos-015-studio-producer/cycles/cycle-01/artifacts/producer-smoke.md",
+      "sdd/specs/spec-e-burgos-015-studio-producer/cycles/cycle-01/cycle.json",
+      "sdd/specs/spec-e-burgos-015-studio-producer/cycles/cycle-01/plan.md",
+      "sdd/specs/spec-e-burgos-015-studio-producer/cycles/cycle-01/tasks.json",
+      "tools/render-cli/src/pipeline/master-render-paths.spec.ts",
+      "tools/render-cli/src/pipeline/master-render-paths.ts"
+    ],
+    "files_modified": [
+      "apps/render-api/README.md",
+      "apps/render-api/src/__fixtures__/fake-render-api-dependencies.ts",
+      "apps/render-api/src/deps/node-render-api-dependencies.ts",
+      "apps/render-api/src/deps/render-api-dependencies.ts",
+      "apps/render-api/src/errors/http-status-for.spec.ts",
+      "apps/render-api/src/errors/http-status-for.ts",
+      "apps/render-api/src/errors/render-api-error.ts",
+      "apps/render-api/src/errors/to-error-payload.ts",
+      "apps/render-api/src/http/create-render-api-server.ts",
+      "apps/render-api/src/http/handle-request.ts",
+      "apps/render-api/src/http/health-handler.spec.ts",
+      "apps/render-api/src/http/health-handler.ts",
+      "apps/render-api/src/http/render-api-runtime.ts",
+      "apps/render-api/src/http/routes.ts",
+      "apps/render-api/src/main.ts",
+      "sdd/api.json",
+      "sdd/catalog.json",
+      "sdd/context/constitution.md",
+      "sdd/global.json",
+      "sdd/skills/video-producer/SKILL.md",
+      "sdd/specs/index.json",
+      "sdd/tasks.json",
+      "tools/render-cli/README.md",
+      "tools/render-cli/src/__fixtures__/fake-cli-dependencies.ts",
+      "tools/render-cli/src/commands/render-command.spec.ts",
+      "tools/render-cli/src/commands/render-command.ts",
+      "tools/render-cli/src/deps/cli-dependencies.ts",
+      "tools/render-cli/src/deps/node-cli-dependencies.ts",
+      "tools/render-cli/src/deps/timeline-renderer.ts",
+      "tools/render-cli/src/report/cli-report.ts",
+      "tools/render-cli/src/report/format-report.spec.ts",
+      "tools/render-cli/src/report/format-report.ts",
+      "tools/render-cli/src/report/to-reports.spec.ts",
+      "tools/render-cli/src/report/to-reports.ts"
+    ],
+    "files_deleted": [],
+    "usage": {
+      "tokens_in": 699000,
+      "tokens_out": 103000,
+      "approx": true,
+      "source": "declared-estimate",
+      "by_tier": {
+        "claude/opus": {
+          "tokens_in": 699000,
+          "tokens_out": 103000,
+          "approx": true,
+          "source": "declared-estimate"
+        }
+      },
+      "by_agent": [
+        {
+          "agent": "orchestrator",
+          "label": "solo",
+          "provider_model": "claude/opus",
+          "effort": "high",
+          "tokens_in": 699000,
+          "tokens_out": 103000,
+          "approx": true,
+          "source": "declared-estimate",
+          "recorded_at": "2026-09-10"
+        }
+      ]
+    }
+  },
+  "tables_created": [],
+  "endpoints_implemented": [
+    "EP-001",
+    "EP-022",
+    "EP-023",
+    "EP-024",
+    "EP-025"
+  ],
+  "components_created": [],
+  "issues_found": [
+    "--allowedTools NO confina una escritura por patron de ruta: con Write(allowed/**) el CLI real (2.1.123) denego una escritura que el agente hizo con path ABSOLUTO adentro de allowed/. La escritura se confina por instruccion del system prompt mas --add-dir, y por eso en la lista va Write pelado.",
+    "Un comodin NUNCA autoriza un comando de shell que muta archivos: en la MISMA corrida y con la misma sintaxis, Bash(ls *) dejo pasar ls -la y Bash(mkdir *)/Bash(cp *) denegaron mkdir uno y cp /etc/hosts ./hosts.txt. Las dos entradas eran letra muerta y se sacaron; el prompt manda usar Write (crea los padres) y ffmpeg -i src -c copy dst.",
+    "El hook rtk del propio repo reescribe el comando ANTES de que la lista blanca lo mire: como el hijo corre con cwd en la raiz del repo, curl llega como rtk curl, cat X como rtk read X y ls como rtk ls, y los tres quedan denegados (ffprobe, ffmpeg y pnpm nx pasan intactos, que es lo que hacia parecer que la lista andaba a medias). Se agregaron Bash(rtk curl *), Bash(rtk ls *) y Bash(rtk read *) en vez de un Bash(rtk *) que habilitaria todo lo que rtk envuelve, git incluido.",
+    "Matar el proceso del servicio NO mataba al hijo claude en curso: un agente huerfano de una corrida anterior siguio escribiendo dentro de la copia temporal del smoke y contamino la medicion siguiente con un out/demo-01.mp4 que nadie de esa corrida produjo. Se detecto comparando ls -laT contra la ventana temporal del turno. close() del servidor ahora cancela todos los turnos vivos.",
+    "El agente intento leer el .env con cat y despues con Read. Las variables de medios ya viajan exportadas en el entorno del hijo; el system prompt ahora prohibe explicitamente leer, abrir o imprimir ese archivo.",
+    "mixTimelineAudio/muxAudioIntoVideo/verifyMixLoudness cargados con await import() en tools/render-cli rompieron @nx/enforce-module-boundaries en OCHO archivos (Static imports of lazy-loaded libraries are forbidden), dos de ellos fuera del alcance de la task: media-local ya entraba por import estatico a la CLI y mezclar las dos formas marca la lib entera como lazy-loaded.",
+    "El resumen de los eventos marcaba queued render job en cualquier comando que mencionara /jobs, incluidos los curl de polling, y arrastraba las comillas de las rutas que el agente cita. Los dos artefactos del smoke quedaron guardados con los resumenes viejos; el codigo se corrigio despues (exige -X POST y limpia comillas)."
+  ],
+  "reviewer_report": {
+    "approved": true,
+    "date": "2026-09-10",
+    "ca_results": {
+      "US-15-001": "PASS — smoke real: tras el turno 1, work/producer/conversation.json trae los dos mensajes (user y assistant) y conversation.md los muestra con el encabezado y las vinetas del archivo escrito a mano en media/demo-01. GET /projects/demo-01/producer devuelve exactamente { slug, messages, session, activeTurn } (assertion por Object.keys().sort() en producer-handler.spec.ts).",
+      "US-15-002": "PASS — un POST con el turno 2 en curso respondio 409 PRODUCER_TURN_ACTIVE con el turnId en curso como resource, y el doble del agente confirma que no se lanza un segundo proceso (starts.length === 1).",
+      "US-15-003": "PASS — el turno no aparece en GET /projects/:slug/jobs ni mueve jobs.size(); durante el turno 2 el agente encolo montage y render por HTTP en esa misma API y los dos terminaron succeeded mientras el turno seguia vivo.",
+      "US-15-004": "PASS — el prompt del hijo lleva la skill entera, el contexto del proyecto (slug, rutas absolutas, RENDER_API_URL, assets del catalogo o el escaneo de raw/) y las reglas de la app; el turno 1 fija session.json y el turno 2 arranca con --resume y sigue la conversacion sin repreguntar.",
+      "US-15-005": "PASS — 44 y 70 eventos en los dos turnos, con text, tool (ffprobe raw/aroll/clip01.mp4, queued montage job, Write work/producer/script.txt) y status; interpretProducerStreamLine esta pineado linea por linea contra las cinco formas del stream-json.",
+      "US-15-006": "PASS — los dos turnos cerraron con 4 sugerencias y el bloque ```suggestions no aparece en assistantMessage. parse-producer-suggestions.spec.ts cubre bloque ausente, JSON invalido, no-array, entradas que no son strings y el corte en cuatro.",
+      "US-15-007": "PASS — DELETE de un turno en curso respondio 202 con el registro todavia running, 12 s despues el turno quedo canceled con error null, cero procesos claude vivos, y el segundo DELETE dio 409 PRODUCER_TURN_NOT_CANCELABLE.",
+      "US-15-008": "PASS — GET /health del smoke reporta capabilities.producer true; el test con probeProducerBinary false verifica que el servicio sigue status ok y que claude no entra a binaries.",
+      "US-15-009": "PASS — los ocho codigos estan en el union, en el mapa de status (probado contra una tabla independiente en http-status-for.spec.ts) y en los mensajes; classifyProducerTurn prueba la precedencia (binario ausente gana sobre cancelacion y sobre cuota) y que el hint nunca lleva el stderr ni una ruta del host.",
+      "US-15-010": "PASS — sobre media/demo-01, el audio del MP4 de render-cli correlaciona a 0 ms con work/producer/voice.wav (antes +40 ms, con la correlacion cayendo de 0,974 a 0,607 al forzar lag 0: el oraculo es sensible al defecto) y el sha256 del audio decodificado es IDENTICO al del MP4 de la API (e1030289ca9798d3858041bb). Evidencia y guion repetible en artifacts/."
+    },
+    "tests": {
+      "nx run-many -t lint test build": "VERDE en los 8 proyectos.",
+      "pnpm sdd:validate": "OK",
+      "coverage apps/render-api": "98,02 % stmts / 92,47 % branch (piso 80), 831 tests",
+      "coverage tools/render-cli": "98,49 % stmts / 93,38 % branch (piso 85), 174 tests",
+      "smoke real del productor": "claude -p sonnet contra una copia temporal de media/demo-01: turno 1 224,3 s / 44 eventos, turno 2 501,4 s / 70 eventos con montage + render encolados por la API y MP4 de 778 frames a 1080x1920 y -14,2 LUFS; DELETE probado sobre un turno en curso. artifacts/producer-smoke.md.",
+      "paridad de audio de la CLI": "render real de media/demo-01: 0 ms de desfase y sha256 identico al de la API. artifacts/cli-audio-parity.md + measure-audio-offset.ts."
+    },
+    "notes": "Ningun coverage.include se recorto y no se agrego ninguna dependencia npm. apps/web no se toco. El ciclo es lite por prefijo [LITE] del dev aunque crea cuatro endpoints que apps/web va a consumir: sdd:validate deja el warning y el cycle-02 lo evalua. El smoke se corrio tres veces: las dos primeras descubrieron los limites reales de --allowedTools y la tercera quedo contaminada por un hijo huerfano; la corrida reportada es la cuarta, limpia y con cero procesos previos.",
+    "follow_ups": [
+      "El agente sigue perdiendo ~6 turnos por corrida con comandos compuestos (ffmpeg ... 2>/dev/null, redirecciones): el prompt lo desalienta pero no lo impide. La solucion de fondo es una herramienta propia del studio en vez de Bash.",
+      "El registro de turnos es in-memory y sin cap: un reinicio del servicio deja la conversacion en disco pero el turno en curso da 404, y el historial crece sin limite.",
+      "El agente deja archivos auxiliares dentro del proyecto (work/producer/frames/, work/producer/lines/) sin limpiarlos al entregar.",
+      "render-cli render rerenderiza siempre: no reusa work/renders/<slug>/video-muted.mp4 aunque la Timeline no haya cambiado.",
+      "cycle-02 (apps/web): la pantalla del chat sobre EP-022..EP-025, con capabilities.producer como gate y los codigos 409/429/502/503 traducidos a lenguaje de usuario."
+    ]
+  }
+}

@@ -70,6 +70,14 @@ const MESSAGE_BY_CODE: Readonly<Record<RenderApiErrorCode, string>> = {
   VOICE_SCENE_IDS_INVALID: 'The sceneIds parameter is not a non-empty array of scene ids.',
   VOICE_OVERWRITE_INVALID: 'The overwrite flag is not a boolean.',
   VOICE_ASSET_NOT_FOUND: 'The referenced locution file is not under the raw voice directory.',
+  PRODUCER_UNAVAILABLE: 'The producer agent binary could not be resolved on this machine.',
+  PRODUCER_TURN_ACTIVE: 'The project already has a producer turn in progress.',
+  PRODUCER_TURN_FAILED: 'The producer agent ended the turn without an answer.',
+  PRODUCER_RATE_LIMITED: 'The producer agent refused the turn because the account plan limit was reached.',
+  PRODUCER_TURN_NOT_FOUND: 'The requested producer turn does not exist.',
+  PRODUCER_TURN_NOT_CANCELABLE: 'The producer turn already reached a terminal state.',
+  PRODUCER_MESSAGE_INVALID: 'The producer message must carry a non-empty text field.',
+  PRODUCER_STATE_INVALID: 'The stored producer state exists but could not be read.',
 };
 
 export function toErrorPayload(value: unknown): RenderApiErrorPayload {

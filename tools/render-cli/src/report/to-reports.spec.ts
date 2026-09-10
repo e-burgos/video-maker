@@ -5,6 +5,7 @@ import type { BrollOverlayPlan, BrollRejection } from '@video-maker/auto-montage
 import { describe, expect, it } from 'vitest';
 
 import { fixtureMediaProject } from '../__fixtures__/media-project';
+import { resolveMasterRenderPaths } from '../pipeline/master-render-paths';
 import type { RenderOutcome } from '../deps/timeline-renderer';
 
 import { toIngestReport, toPlanReport, toRenderReport } from './to-reports';
@@ -120,16 +121,24 @@ describe('toPlanReport', () => {
 });
 
 describe('toRenderReport', () => {
-  it('relativizes outPath against the project root and keeps the render metrics', () => {
+  it('reporta el entregable y los dos intermedios relativos al proyecto, con la métrica de loudness', () => {
+    const paths = resolveMasterRenderPaths(fixtureMediaProject);
     const outcome: RenderOutcome = {
-      outPath: `${fixtureMediaProject.outDir}/${fixtureMediaProject.slug}.mp4`,
+      outPath: paths.mutedVideoPath,
       width: 1080,
       height: 1920,
       fps: 30,
       durationInFrames: 556,
     };
+    const loudness = {
+      withinTolerance: true,
+      integratedLufs: -14.2,
+      truePeakDbtp: -1.4,
+      integratedDeltaLu: 0.2,
+      truePeakDeltaDb: 0.1,
+    };
 
-    const report = toRenderReport(outcome, fixtureMediaProject);
+    const report = toRenderReport(outcome, loudness, paths, fixtureMediaProject);
 
     expect(report).toEqual({
       kind: 'render',
@@ -138,6 +147,28 @@ describe('toRenderReport', () => {
       height: 1920,
       fps: 30,
       durationInFrames: 556,
+      mutedVideoPath: `work/renders/${fixtureMediaProject.slug}/video-muted.mp4`,
+      masterAudioPath: `work/renders/${fixtureMediaProject.slug}/master.wav`,
+      loudness,
     });
+  });
+
+  it('el outPath del reporte es el entregable muxeado, NO el mudo que devolvió Remotion', () => {
+    const paths = resolveMasterRenderPaths(fixtureMediaProject);
+    const report = toRenderReport(
+      { outPath: paths.mutedVideoPath, width: 1, height: 1, fps: 1, durationInFrames: 1 },
+      {
+        withinTolerance: true,
+        integratedLufs: -14,
+        truePeakDbtp: -1,
+        integratedDeltaLu: 0,
+        truePeakDeltaDb: 0,
+      },
+      paths,
+      fixtureMediaProject,
+    );
+
+    expect(report.outPath).toBe(`out/${fixtureMediaProject.slug}.mp4`);
+    expect(report.outPath).not.toBe(report.mutedVideoPath);
   });
 });

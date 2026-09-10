@@ -17,6 +17,12 @@ import {
   handlePutEditDecisionList,
   handlePutTimeline,
 } from './handlers/montage-handler';
+import {
+  handleCancelProducerTurn,
+  handleCreateProducerMessage,
+  handleGetProducer,
+  handleGetProducerTurn,
+} from './handlers/producer-handler';
 import { handleCreateProject, handleGetProject, handleListProjects } from './handlers/projects-handler';
 import {
   handleGetStoryboard,
@@ -94,6 +100,14 @@ export async function handleRequest(
         return await handleGetVoice(deps, store, params);
       case 'projects.voice.scene.put':
         return await handlePutVoiceScene(deps, store, params, request);
+      case 'projects.producer.get':
+        return await handleGetProducer(deps, store, params, runtime);
+      case 'projects.producer.messages':
+        return await handleCreateProducerMessage(deps, store, params, request, runtime);
+      case 'projects.producer.turn.get':
+        return await handleGetProducerTurn(params, runtime);
+      case 'projects.producer.turn.cancel':
+        return await handleCancelProducerTurn(params, runtime);
       case 'projects.jobs.create':
         return await handleCreateRenderJob(deps, store, params, request, runtime);
       case 'projects.jobs.list':

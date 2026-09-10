@@ -1,7 +1,8 @@
 import type { AssetRole, AutoMontageResult, IngestResult, MediaProject } from '@video-maker/auto-montage';
 import { relative } from 'node:path/posix';
 
-import type { RenderOutcome } from '../deps/timeline-renderer';
+import type { MixLoudnessReport, RenderOutcome } from '../deps/timeline-renderer';
+import type { MasterRenderPaths } from '../pipeline/master-render-paths';
 
 import type { AssetRoleCount, IngestReport, PlanReport, RenderReport } from './cli-report';
 
@@ -53,13 +54,21 @@ export function toPlanReport(result: AutoMontageResult): PlanReport {
   };
 }
 
-export function toRenderReport(outcome: RenderOutcome, project: MediaProject): RenderReport {
+export function toRenderReport(
+  outcome: RenderOutcome,
+  loudness: MixLoudnessReport,
+  paths: MasterRenderPaths,
+  project: MediaProject,
+): RenderReport {
   return {
     kind: 'render',
-    outPath: toProjectRelativePath(project, outcome.outPath),
+    outPath: toProjectRelativePath(project, paths.deliverablePath),
     width: outcome.width,
     height: outcome.height,
     fps: outcome.fps,
     durationInFrames: outcome.durationInFrames,
+    mutedVideoPath: toProjectRelativePath(project, paths.mutedVideoPath),
+    masterAudioPath: toProjectRelativePath(project, paths.masterAudioPath),
+    loudness,
   };
 }

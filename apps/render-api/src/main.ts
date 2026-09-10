@@ -1,3 +1,4 @@
+import { readProducerConfig } from './config/producer-config';
 import { readServerConfig } from './config/server-config';
 import { readStoreConfig } from './config/store-config';
 import { createNodeRenderApiDependencies } from './deps/node-render-api-dependencies';
@@ -19,7 +20,12 @@ async function main(): Promise<void> {
 
   await deps.preloadEngineModules();
 
-  const server = createRenderApiServer(deps, config, store);
+  const producer = readProducerConfig(
+    process.env,
+    process.cwd(),
+    `http://${config.host}:${config.port}`,
+  );
+  const server = createRenderApiServer(deps, config, store, producer);
   const address = await server.listen();
 
   process.stdout.write(`${JSON.stringify({ event: 'listening', host: address.host, port: address.port })}\n`);
