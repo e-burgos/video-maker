@@ -1,0 +1,170 @@
+{
+  "$schema": "../../../../schemas/cycle.schema.json",
+  "cycle": 2,
+  "module": "voice-over",
+  "spec": "spec-e-burgos-009-voice-over",
+  "apps": [
+    "apps/web"
+  ],
+  "phase": "voice-studio",
+  "flow": "lite",
+  "objectives": [
+    "Pick a Piper voice and generate the whole voice-over of the storyboard from the browser",
+    "Play every scene track and compare its real duration with the one the model estimated",
+    "See which scene went stale after a script edit and regenerate only that one",
+    "Replace the track of one scene with a recording of my own, uploaded or already there"
+  ],
+  "status": "completed",
+  "started_at": "2026-09-09",
+  "completed_at": "2026-09-10",
+  "documents": {
+    "plan": "sdd/specs/spec-e-burgos-009-voice-over/cycles/cycle-02/plan.md",
+    "tasks": "sdd/specs/spec-e-burgos-009-voice-over/cycles/cycle-02/tasks.json"
+  },
+  "artifacts": [
+    "sdd/specs/spec-e-burgos-009-voice-over/cycles/cycle-02/artifacts/smoke-real.md",
+    "sdd/specs/spec-e-burgos-009-voice-over/cycles/cycle-02/artifacts/smoke-storyboard-edited-from-web.json",
+    "sdd/specs/spec-e-burgos-009-voice-over/cycles/cycle-02/artifacts/smoke-voice-manifest-from-web.json",
+    "sdd/specs/spec-e-burgos-009-voice-over/cycles/cycle-02/artifacts/smoke-voice-players.json",
+    "sdd/specs/spec-e-burgos-009-voice-over/cycles/cycle-02/artifacts/voice-smoke-01-empty-state.png",
+    "sdd/specs/spec-e-burgos-009-voice-over/cycles/cycle-02/artifacts/voice-smoke-02-tracks.png",
+    "sdd/specs/spec-e-burgos-009-voice-over/cycles/cycle-02/artifacts/voice-smoke-03-stale.png",
+    "sdd/specs/spec-e-burgos-009-voice-over/cycles/cycle-02/artifacts/voice-smoke-04-regenerated.png",
+    "sdd/specs/spec-e-burgos-009-voice-over/cycles/cycle-02/artifacts/voice-smoke-05-uploaded.png"
+  ],
+  "metrics": {
+    "tasks_total": 6,
+    "tasks_completed": 6,
+    "story_points": 34,
+    "files_created": [
+      "apps/web/e2e/voice-smoke.mjs",
+      "apps/web/src/api/__fixtures__/voice.ts",
+      "apps/web/src/api/parse-voice.spec.ts",
+      "apps/web/src/api/parse-voice.ts",
+      "apps/web/src/api/voice-capability.spec.ts",
+      "apps/web/src/api/voice-capability.ts",
+      "apps/web/src/components/voice-job-panel.spec.tsx",
+      "apps/web/src/components/voice-job-panel.tsx",
+      "apps/web/src/components/voice-scene-card.spec.tsx",
+      "apps/web/src/components/voice-scene-card.tsx",
+      "apps/web/src/components/voice-trigger.spec.tsx",
+      "apps/web/src/components/voice-trigger.tsx",
+      "apps/web/src/pages/voice-page.spec.tsx",
+      "apps/web/src/pages/voice-page.tsx",
+      "sdd/context/apps/web/updates/2026-09-09-spec-e-burgos-009-voice-over-cycle-02.md",
+      "sdd/memory/journal/2026-09-10-spec-e-burgos-009-voice-over-cycle-02.md",
+      "sdd/specs/spec-e-burgos-009-voice-over/cycles/cycle-02/artifacts/smoke-real.md",
+      "sdd/specs/spec-e-burgos-009-voice-over/cycles/cycle-02/artifacts/smoke-storyboard-edited-from-web.json",
+      "sdd/specs/spec-e-burgos-009-voice-over/cycles/cycle-02/artifacts/smoke-voice-manifest-from-web.json",
+      "sdd/specs/spec-e-burgos-009-voice-over/cycles/cycle-02/artifacts/smoke-voice-players.json",
+      "sdd/specs/spec-e-burgos-009-voice-over/cycles/cycle-02/artifacts/voice-smoke-01-empty-state.png",
+      "sdd/specs/spec-e-burgos-009-voice-over/cycles/cycle-02/artifacts/voice-smoke-02-tracks.png",
+      "sdd/specs/spec-e-burgos-009-voice-over/cycles/cycle-02/artifacts/voice-smoke-03-stale.png",
+      "sdd/specs/spec-e-burgos-009-voice-over/cycles/cycle-02/artifacts/voice-smoke-04-regenerated.png",
+      "sdd/specs/spec-e-burgos-009-voice-over/cycles/cycle-02/artifacts/voice-smoke-05-uploaded.png",
+      "sdd/specs/spec-e-burgos-009-voice-over/cycles/cycle-02/cycle.json",
+      "sdd/specs/spec-e-burgos-009-voice-over/cycles/cycle-02/plan.md",
+      "sdd/specs/spec-e-burgos-009-voice-over/cycles/cycle-02/tasks.json"
+    ],
+    "files_modified": [
+      "apps/web/README.md",
+      "apps/web/e2e/smoke-helpers.mjs",
+      "apps/web/src/api/montage-capability.spec.ts",
+      "apps/web/src/api/parse-render-job.ts",
+      "apps/web/src/api/render-api-client.spec.ts",
+      "apps/web/src/api/render-api-client.ts",
+      "apps/web/src/api/render-api-types.ts",
+      "apps/web/src/api/storyboard-capability.spec.ts",
+      "apps/web/src/api/storyboard-edit/storyboard-document.ts",
+      "apps/web/src/app/app.tsx",
+      "apps/web/src/components/asset-uploader.spec.tsx",
+      "apps/web/src/components/asset-uploader.tsx",
+      "apps/web/src/components/montage-trigger.spec.tsx",
+      "apps/web/src/components/service-health-badge.spec.tsx",
+      "apps/web/src/components/storyboard-trigger.spec.tsx",
+      "apps/web/src/components/studio-layout.spec.tsx",
+      "apps/web/src/components/studio-layout.tsx",
+      "apps/web/src/pages/asset-library-page.spec.tsx",
+      "apps/web/src/pages/asset-library-page.tsx",
+      "apps/web/src/pages/storyboard-page.spec.tsx",
+      "sdd/catalog.json",
+      "sdd/components.json",
+      "sdd/context/constitution.md",
+      "sdd/global.json",
+      "sdd/specs/index.json",
+      "sdd/tasks.json"
+    ],
+    "files_deleted": [],
+    "usage": {
+      "tokens_in": 415000,
+      "tokens_out": 71500,
+      "approx": true,
+      "source": "declared-estimate",
+      "by_tier": {
+        "claude/opus": {
+          "tokens_in": 415000,
+          "tokens_out": 71500,
+          "approx": true,
+          "source": "declared-estimate"
+        }
+      },
+      "by_agent": [
+        {
+          "agent": "orchestrator",
+          "label": "solo",
+          "provider_model": "claude/opus",
+          "effort": "high",
+          "tokens_in": 415000,
+          "tokens_out": 71500,
+          "approx": true,
+          "source": "declared-estimate",
+          "recorded_at": "2026-09-10",
+          "tokens_total": 486500
+        }
+      ]
+    }
+  },
+  "tables_created": [],
+  "endpoints_implemented": [],
+  "components_created": [
+    "COMP-035",
+    "COMP-036",
+    "COMP-037",
+    "COMP-038"
+  ],
+  "issues_found": [
+    "El gate de memoria libre >= 35 % que pide el ciclo no se puede calcular sobre vm_stat dividiendo por hw.memsize: esa cuenta ignora la memoria comprimida y daba 23,1 % con el sistema informando 47 %. Se usa el porcentaje que publica memory_pressure ('System-wide memory free percentage'), que no es su nivel de presion (lo que la leccion prohibe usar).",
+    "El build de apps/web SI typechequea los *.spec.tsx (a diferencia de las libs, que los excluyen del tsconfig.lib.json): ensanchar ServiceCapabilities rompio el build en cinco fixtures de spec con lint y test en verde. Un fixture inline con ...overrides NO lo detecta TypeScript: montage-capability.spec.ts y service-health-badge.spec.ts compilaban sin voiceQueue y fallaban en runtime al aserar la lista de capabilities.",
+    "El array del target de tsconfig de apps/web no incluye Array.prototype.at: takeFileName tuvo que resolverse por indice. Lint y Vitest no lo ven; solo el build.",
+    "Los 4 warnings de lint heredados de spec-008 cycle-02 (no-unused-vars por destructuring-para-omitir en storyboard-document.ts) se saldaron con un helper omitKeys tipado. No se toco eslint.config.mjs: esta bajo el hook config-protection y ademas es la raiz del workspace.",
+    "El primer intento de spec del panel de job fallo por texto ambiguo: 'work/voice/manifest.json' aparece tanto en la etiqueta de la etapa persist como en el reporte final. La asercion se ancla ahora al parrafo del reporte."
+  ],
+  "reviewer_report": {
+    "approved": true,
+    "date": "2026-09-10",
+    "ca_results": {
+      "US-09-008": "PASS — voice-trigger.spec.tsx (default marcado y enviado, voz elegida por el usuario, 503 VOICE_MODEL_UNAVAILABLE distinguido del catalogo vacio, 409 como confirmacion que reintenta con overwrite), render-api-client.spec.ts (el body de EP-012 lleva exactamente {kind, overwrite, voice} verificado con Object.keys().sort()) y el E2E real: job 202, etapas synthesize -> transcribe -> persist, cinco pistas en 22,2 s.",
+      "US-09-009": "PASS — voice-scene-card.spec.tsx (src de EP-011, real vs estimada con la diferencia firmada en los dos sentidos, ausencia de estimacion dicha en pantalla) y el E2E: los cinco <audio> medidos EN EL NAVEGADOR con readyState 4 y duration > 0, y las cinco filas de duracion leidas del DOM. Las cinco escenas duraron menos de lo estimado (0,35 s a 2,02 s).",
+      "US-09-010": "PASS — voice-page.spec.tsx (la escena stale es la que el manifest marca, la regeneracion manda sceneIds con la voz de esa pista y no el default global) y el E2E: narracion editada en la pagina de storyboard, PUT 200, stale en exactamente una escena, job parcial con sceneIds:['scene-02'] y sha256 en disco: scene-02 14fea4a9 -> dcccf5f8, las otras cuatro BYTE-IDENTICAS. El oraculo es sensible por construccion (Piper mete ruido distinto por corrida).",
+      "US-09-011": "PASS — voice-scene-card.spec.tsx (attach de una toma ya subida, attach de la que el usuario elige, boton y select deshabilitados con raw/voice/ vacio, subida + attach encadenados en un gesto, VOICE_ASSET_NOT_FOUND con su codigo en pantalla), asset-uploader.spec.tsx (rol fijo sin selector, ids por useId, entrada devuelta al caller) y el E2E: EP-021 200, track source uploaded con voiceId null, manifest en disco verificado y los otros cuatro wav byte-identicos.",
+      "US-09-012": "PASS — voice-capability.spec.ts (los SEIS binarios, cada uno nombrado con su env var y nunca una ruta resuelta; un binario ajeno al pipeline se ignora), service-health-badge.spec.tsx (piperCli/piperModel listados y voiceQueue entre las capabilities), voice-trigger.spec.tsx (boton deshabilitado con el motivo escrito) y el E2E: /health con los dos binarios de Piper resueltos verificado ANTES de la primera llamada."
+    },
+    "tests": {
+      "sdd:validate": "OK — 52 archivos validos, cross-checks pasados",
+      "web": "548/548 PASS en 63 archivos — 98,98 % stmts · 95,88 % branch · 98,71 % funcs · 99,29 % lines (piso 80 %, coverage.include sin recortar)",
+      "workspace": "pnpm nx run-many -t lint test build: 8 proyectos verdes y CERO warnings de lint (los 4 heredados de spec-008 cycle-02 quedaron saldados)",
+      "vite build": "chunk inicial 474,27 kB · voice-page 20 kB · storyboard-page 33 kB · project-preview-page 364 kB · 111 kB compartidos; sin el aviso de 'chunks larger than 500 kB'",
+      "smoke-voice": "Corrida real con Piper y whisper-cli sobre un media root temporal: 5 pistas en 22,2 s, cinco <audio> con readyState 4, stale tras editar la narracion, regeneracion de una sola escena probada por sha256, y toma propia subida y asociada. Evidencia literal en artifacts/smoke-real.md."
+    },
+    "notes": "El ciclo cierra la spec y con ella el modo generativo: idea -> storyboard -> voz, todo local y sin API paga. La decision de fondo fue darle pagina propia a la voz (D-1) en vez de un panel del storyboard: son dos documentos con ciclos de vida distintos —uno se edita a mano, el otro lo produce un job— y la pagina de storyboard ya montaba ocho componentes. La segunda fue no duplicar el editor de narracion (D-3): la voz enlaza a storyboard y solo muestra el texto, asi que hay una unica fuente de verdad del documento. El manifest se valida con guards estructurales y no con Zod porque la UI no lo edita, lo que ademas mantiene la pagina liviana. El E2E se sembro con un storyboard de una corrida anterior (D-6) en vez de llamar a claude -p: ~70 s y cuota ahorrados, y lo que se prueba es lo de este ciclo. Se saldaron los 4 warnings de lint heredados sin tocar ninguna config protegida. El flow quedo en lite por decision explicita del dev; este ciclo no crea ningun contrato, solo consume el de cycle-01, asi que el aviso del validador no aplica.",
+    "follow_ups": [
+      "spec-010 (buildTimelineFromStoryboard) tiene que leer durationMs del manifest y NO estimatedDurationMs: en la corrida real las cinco escenas duraron menos de lo estimado, hasta 2,02 s. Armar la Timeline con la estimacion desincroniza el video entero.",
+      "El job de voz no se cancela desde la UI aunque EP-015 lo soporte y una corrida de cinco escenas dure ~22 s: misma laguna que el panel de storyboard.",
+      "No hay vuelta atras de una pista uploaded a una generada por escena: falta un DELETE de la pista en apps/render-api. Hoy el unico camino es regenerar todo con overwrite, que pisa las otras tomas.",
+      "El selector de voz es del proyecto, no por escena, aunque EP-012 acepta voice + sceneIds juntos: la regeneracion por escena ya podria ofrecer su propia voz.",
+      "GET /voices no distingue idioma ni calidad mas alla del id (limitacion anotada en cycle-01): con varias voces instaladas el selector muestra ids crudos.",
+      "apps/web acumula 2 fragmentos de contexto en updates/ (spec-008 c02 y spec-009 c02). Lejos del umbral de 5, pero el proximo ciclo sobre esta app conviene que consolide.",
+      "El E2E de voz deja el chrome-headless y los dos servidores como unico consumidor pesado, pero corre despues del de storyboard y el de montaje: los tres comparten el gate de procesos, asi que no se pueden lanzar en paralelo."
+    ]
+  }
+}

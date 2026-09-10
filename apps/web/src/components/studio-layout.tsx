@@ -5,6 +5,7 @@ import { ServiceHealthBadge } from './service-health-badge';
 const PROJECT_SECTIONS = [
   { path: '', label: 'library' },
   { path: '/storyboard', label: 'storyboard' },
+  { path: '/voice', label: 'voice' },
   { path: '/preview', label: 'preview' },
 ] as const;
 

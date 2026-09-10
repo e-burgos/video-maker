@@ -36,7 +36,7 @@ const HEALTHY_SERVICE = {
     { name: 'whisperCli', envVar: 'WHISPER_CPP_PATH', resolved: true },
     { name: 'whisperModel', envVar: 'WHISPER_MODEL_PATH', resolved: true },
   ],
-  capabilities: { renderPipeline: true, assetStore: true, jobQueue: true, montageQueue: true, storyboardQueue: true },
+  capabilities: { renderPipeline: true, assetStore: true, jobQueue: true, montageQueue: true, storyboardQueue: true, voiceQueue: true },
   jobs: { running: 0, queued: 0 },
 };
 
@@ -212,6 +212,9 @@ describe('AssetLibraryPage · storyboard', () => {
     expect(
       screen.getByRole('link', { name: 'open storyboard' }).getAttribute('href'),
     ).toBe('/projects/smoke-ingest/storyboard');
+    expect(screen.getByRole('link', { name: 'open voice' }).getAttribute('href')).toBe(
+      '/projects/smoke-ingest/voice',
+    );
     expect(screen.getByRole('link', { name: 'open preview' }).getAttribute('href')).toBe(
       '/projects/smoke-ingest/preview',
     );

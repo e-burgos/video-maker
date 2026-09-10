@@ -42,6 +42,12 @@ export function AssetLibraryPage() {
             open storyboard
           </Link>
           <Link
+            to={`/projects/${slug}/voice`}
+            className="rounded-md border border-slate-700 px-3 py-1 font-mono text-xs text-slate-300 hover:border-slate-500"
+          >
+            open voice
+          </Link>
+          <Link
             to={`/projects/${slug}/preview`}
             className="rounded-md border border-slate-700 px-3 py-1 font-mono text-xs text-slate-300 hover:border-slate-500"
           >

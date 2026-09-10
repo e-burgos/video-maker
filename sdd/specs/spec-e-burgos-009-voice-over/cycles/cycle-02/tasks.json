@@ -1,0 +1,217 @@
+{
+  "$schema": "../../../../schemas/cycle-tasks.schema.json",
+  "spec": "spec-e-burgos-009-voice-over",
+  "cycle": 2,
+  "module": "voice-over",
+  "apps": [
+    "apps/web"
+  ],
+  "flow": "lite",
+  "user_stories_generated": true,
+  "prerequisites": {
+    "tasks_generated": true
+  },
+  "tasks": [
+    {
+      "id": "TASK-001",
+      "title": "Declare the voice contract in the api boundary and clear the inherited lint debt",
+      "user_stories": [
+        "US-09-008",
+        "US-09-011",
+        "US-09-012"
+      ],
+      "estimation_hours": 3,
+      "story_points": 5,
+      "depends_on": [],
+      "status": "done",
+      "files": [
+        "apps/web/src/api/render-api-types.ts",
+        "apps/web/src/api/parse-render-job.ts",
+        "apps/web/src/api/parse-render-job.spec.ts",
+        "apps/web/src/api/parse-voice.ts",
+        "apps/web/src/api/parse-voice.spec.ts",
+        "apps/web/src/api/voice-capability.ts",
+        "apps/web/src/api/voice-capability.spec.ts",
+        "apps/web/src/api/render-api-client.ts",
+        "apps/web/src/api/render-api-client.spec.ts",
+        "apps/web/src/api/__fixtures__/voice.ts",
+        "apps/web/src/api/storyboard-edit/storyboard-document.ts"
+      ],
+      "usage": {
+        "provider_model": "claude/opus",
+        "effort": "high",
+        "agent": "orchestrator",
+        "tokens_in": 74000,
+        "tokens_out": 9500,
+        "approx": true,
+        "source": "declared-estimate",
+        "recorded_at": "2026-09-09"
+      }
+    },
+    {
+      "id": "TASK-002",
+      "title": "Add the voice trigger with its model selector and the per-scene job panel",
+      "user_stories": [
+        "US-09-008",
+        "US-09-012"
+      ],
+      "estimation_hours": 3,
+      "story_points": 5,
+      "depends_on": [
+        "TASK-001"
+      ],
+      "status": "done",
+      "files": [
+        "apps/web/src/components/voice-trigger.tsx",
+        "apps/web/src/components/voice-trigger.spec.tsx",
+        "apps/web/src/components/voice-job-panel.tsx",
+        "apps/web/src/components/voice-job-panel.spec.tsx"
+      ],
+      "usage": {
+        "provider_model": "claude/opus",
+        "effort": "high",
+        "agent": "orchestrator",
+        "tokens_in": 58000,
+        "tokens_out": 11000,
+        "approx": true,
+        "source": "declared-estimate",
+        "recorded_at": "2026-09-10"
+      }
+    },
+    {
+      "id": "TASK-003",
+      "title": "Play, compare and replace the track of one scene",
+      "user_stories": [
+        "US-09-009",
+        "US-09-010",
+        "US-09-011"
+      ],
+      "estimation_hours": 4,
+      "story_points": 8,
+      "depends_on": [
+        "TASK-001"
+      ],
+      "status": "done",
+      "files": [
+        "apps/web/src/components/voice-scene-card.tsx",
+        "apps/web/src/components/voice-scene-card.spec.tsx",
+        "apps/web/src/components/asset-uploader.tsx",
+        "apps/web/src/components/asset-uploader.spec.tsx"
+      ],
+      "usage": {
+        "provider_model": "claude/opus",
+        "effort": "high",
+        "agent": "orchestrator",
+        "tokens_in": 62000,
+        "tokens_out": 12500,
+        "approx": true,
+        "source": "declared-estimate",
+        "recorded_at": "2026-09-10"
+      }
+    },
+    {
+      "id": "TASK-004",
+      "title": "Mount the voice page on its own lazy route and surface Piper in the health panel",
+      "user_stories": [
+        "US-09-008",
+        "US-09-009",
+        "US-09-012"
+      ],
+      "estimation_hours": 3,
+      "story_points": 5,
+      "depends_on": [
+        "TASK-002",
+        "TASK-003"
+      ],
+      "status": "done",
+      "files": [
+        "apps/web/src/pages/voice-page.tsx",
+        "apps/web/src/pages/voice-page.spec.tsx",
+        "apps/web/src/app/app.tsx",
+        "apps/web/src/components/studio-layout.tsx",
+        "apps/web/src/components/studio-layout.spec.tsx",
+        "apps/web/src/components/service-health-badge.spec.tsx",
+        "apps/web/src/pages/asset-library-page.tsx"
+      ],
+      "usage": {
+        "provider_model": "claude/opus",
+        "effort": "high",
+        "agent": "orchestrator",
+        "tokens_in": 66000,
+        "tokens_out": 11500,
+        "approx": true,
+        "source": "declared-estimate",
+        "recorded_at": "2026-09-10"
+      }
+    },
+    {
+      "id": "TASK-005",
+      "title": "Run the voice studio end to end against a real render-api with Piper and Whisper",
+      "user_stories": [
+        "US-09-008",
+        "US-09-009",
+        "US-09-010",
+        "US-09-011"
+      ],
+      "estimation_hours": 4,
+      "story_points": 8,
+      "depends_on": [
+        "TASK-004"
+      ],
+      "status": "done",
+      "files": [
+        "apps/web/e2e/voice-smoke.mjs",
+        "apps/web/e2e/smoke-helpers.mjs",
+        "sdd/specs/spec-e-burgos-009-voice-over/cycles/cycle-02/artifacts/smoke-real.md",
+        "sdd/specs/spec-e-burgos-009-voice-over/cycles/cycle-02/artifacts/smoke-voice-manifest-from-web.json",
+        "sdd/specs/spec-e-burgos-009-voice-over/cycles/cycle-02/artifacts/smoke-voice-players.json"
+      ],
+      "usage": {
+        "provider_model": "claude/opus",
+        "effort": "high",
+        "agent": "orchestrator",
+        "tokens_in": 71000,
+        "tokens_out": 13000,
+        "approx": true,
+        "source": "declared-estimate",
+        "recorded_at": "2026-09-10"
+      }
+    },
+    {
+      "id": "TASK-006",
+      "title": "Close the voice-over spec: registries, README and context",
+      "user_stories": [
+        "US-09-008",
+        "US-09-009",
+        "US-09-010",
+        "US-09-011",
+        "US-09-012"
+      ],
+      "estimation_hours": 2,
+      "story_points": 3,
+      "depends_on": [
+        "TASK-005"
+      ],
+      "status": "done",
+      "files": [
+        "sdd/components.json",
+        "apps/web/README.md",
+        "sdd/context/apps/web/updates/2026-09-09-spec-e-burgos-009-voice-over-cycle-02.md",
+        "sdd/context/constitution.md",
+        "sdd/global.json",
+        "sdd/specs/index.json",
+        "sdd/specs/spec-e-burgos-009-voice-over/cycles/cycle-02/cycle.json"
+      ],
+      "usage": {
+        "provider_model": "claude/opus",
+        "effort": "high",
+        "agent": "orchestrator",
+        "tokens_in": 42000,
+        "tokens_out": 12000,
+        "approx": true,
+        "source": "declared-estimate",
+        "recorded_at": "2026-09-10"
+      }
+    }
+  ]
+}

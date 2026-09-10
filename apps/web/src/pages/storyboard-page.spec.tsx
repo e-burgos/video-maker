@@ -22,6 +22,7 @@ const HEALTHY_SERVICE = {
     jobQueue: true,
     montageQueue: true,
     storyboardQueue: true,
+    voiceQueue: true,
   },
   jobs: { running: 0, queued: 0 },
 };

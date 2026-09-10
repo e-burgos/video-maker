@@ -8,14 +8,17 @@ trigger, live progress, and the MP4 download. `cycle-02` of `spec-e-burgos-007-w
 the loop: the studio can now **produce** the timeline it used to only consume. `cycle-02` of
 `spec-e-burgos-008-ai-storyboard` opens the second way in: a storyboard written by a local AI agent
 from an idea or a pasted script, editable scene by scene, with a numbered visual prompt sheet for
-the external generative tools.
+the external generative tools. `cycle-02` of `spec-e-burgos-009-voice-over` gives that storyboard a
+voice: pick a Piper model, generate one track per scene, listen to each of them with its real
+duration, regenerate the scene whose script you just changed, or replace any of them with a
+recording of your own.
 
 **The whole product is reachable from the browser:** upload the raw material → generate the montage
 → adjust it → render → download the MP4. `tools/render-cli` is still valid and still supported, but
 it is no longer required to reach an MP4.
 
 **This app has no engine logic and never touches the filesystem.** Everything it shows and
-everything it writes goes through the HTTP contract in `sdd/api.json` (`EP-001`..`EP-018`).
+everything it writes goes through the HTTP contract in `sdd/api.json` (`EP-001`..`EP-021`).
 
 ## Commands
 
@@ -61,8 +64,10 @@ src/
                        create form, timeline editors (clip track, caption, music mix, output
                        preset), issue list, save bar, render trigger, job list, job panel,
                        montage trigger/panel, storyboard trigger/panel and the storyboard editors
-                       (header, character sheet, scene, save bar, prompt sheet)
-  pages/              projects-page, asset-library-page, project-preview-page, storyboard-page
+                       (header, character sheet, scene, save bar, prompt sheet), voice
+                       trigger/panel and the per-scene voice card
+  pages/              projects-page, asset-library-page, project-preview-page, storyboard-page,
+                       voice-page
   app/app.tsx         router and provider wiring
 ```
 
@@ -276,6 +281,69 @@ script verifies the failure branch on screen, screenshots it and stops there ins
 silently. Artifacts (the produced document, the copied sheet and five screenshots) land in
 `sdd/specs/spec-e-burgos-008-ai-storyboard/cycles/cycle-02/artifacts/`.
 
+## Voice-over (spec-009 cycle-02)
+
+`/projects/:slug/voice` is where the storyboard gets a voice, reached from the project nav
+(`library · storyboard · voice · preview`) or from the asset library's "open voice" link. It is a
+page of its own and not a panel of the storyboard: the two documents have different lifecycles —
+one is edited by hand, the other is produced by a job — and the storyboard page was already full.
+
+- **The voice is the clock of the video.** Every scene shows the duration `ffprobe` measured on its
+  track next to the `estimatedDurationMs` the model proposed, and the signed gap between them. In
+  the measured E2E run all five scenes came out **shorter** than estimated, by 0.35 s to 2.02 s.
+- **One panel generates, one panel follows.** `VoiceTrigger` lists the installed models with
+  `GET /voices` (`EP-019`), marks the one `PIPER_MODEL_PATH` points at as `(default)`, and sends
+  `POST /projects/:slug/jobs` with `{"kind":"voice","voice","overwrite"}`. `VoiceJobPanel` polls it
+  on the same `useRenderJobPoll` and reports the stages `synthesize | transcribe | persist` **with
+  the per-scene counter** the service emits.
+- **An empty catalogue and an unconfigured Piper are different things.** `EP-019` answers
+  `503 VOICE_MODEL_UNAVAILABLE` for the second, and the page says which of the two happened instead
+  of showing an empty selector either way.
+- **`Job` gains its fourth branch, not an optional.** `VoiceJob` carries `VoiceJobProgress`
+  (`processedScenes`/`totalScenes`) and `VoiceJobReport` of its own, mirroring
+  `apps/render-api/src/jobs/render-job.ts`; `parseVoiceJob` rejects the other three kinds. A new
+  kind is still added in the three places: the union, the parser and the panel that shows it.
+- **The 409 is handled, not prevented** — same pattern as the montage and the storyboard.
+  `409 VOICE_ALREADY_EXISTS` becomes an overwrite confirmation that warns it also replaces the takes
+  you recorded yourself.
+- **Staleness is the service's answer, not a client guess.** `EP-020` returns a `stale` flag per
+  scene, computed against the narration hash stored in the manifest. A stale scene is flagged with
+  the reason written and its "Regenerate this scene" button sends `sceneIds: [that scene]` with
+  `overwrite: true` **and the voice that track was already synthesized with**, not the global
+  default. The E2E verifies by `sha256` that the other four wav files stay byte-identical: Piper
+  adds different noise per run, so an identical hash proves the file was not rewritten.
+- **"Use my recording" is one gesture over two endpoints.** The card embeds an `AssetUploader`
+  pinned to the `voice` role (`EP-006`) and attaches the stored file to the scene with `EP-021` in
+  the same move; a take already sitting under `raw/voice/` can be picked from the select instead.
+  The scene then reads `uploaded · my own recording` and its manifest entry carries
+  `source: "uploaded"` with `voiceId: null`.
+- **Health gates the button.** `voiceBlockers()` (`src/api/voice-capability.ts`) disables "Generate
+  voice-over" and names the reason when `capabilities.voiceQueue` is false or any of the **six**
+  binaries the pipeline needs is unresolved — `ffmpeg`, `ffprobe`, `whisperCli`, `whisperModel`,
+  `piperCli`, `piperModel`. The health badge lists all six with their env var, never a resolved path.
+- **The page is lazy.** It needs no Zod (the manifest is validated with structural guards, like the
+  jobs) but the initial chunk was already at 470 kB against Vite's 500 kB warning. Measured after
+  this cycle: initial 474 kB, `voice-page` 20 kB, `storyboard-page` 33 kB,
+  `project-preview-page` 364 kB, with no size warning.
+
+### The voice E2E
+
+```bash
+node apps/web/e2e/voice-smoke.mjs
+```
+
+Real `render-api`, real Chrome, real Piper and real whisper-cli, over a temporary copy of
+`media/smoke-ingest/raw/` seeded with a `storyboard.json` produced by an earlier run — **no
+`claude -p` call**. It gates on no live `ffmpeg|whisper-cli|piper|chrome-headless` process and on
+at least 35% free memory (read from `memory_pressure`'s own free percentage, never its pressure
+level), then walks: project nav → empty state → default voice selected → generate → live stages and
+per-scene counter → **the five `<audio>` elements measured in the browser** (`readyState`,
+`duration`; a good `src` and a 404 look the same in a screenshot) → real versus estimated durations
+→ a narration edited on the storyboard page and saved → the `stale` flag on exactly that scene →
+regenerate it alone, verified by `sha256` on disk → a take uploaded and attached, verified in
+`work/voice/manifest.json`. Evidence and five screenshots land in
+`sdd/specs/spec-e-burgos-009-voice-over/cycles/cycle-02/artifacts/`.
+
 ## Montage (spec-007 cycle-02)
 
 The asset library owns the montage. `MontageTrigger` calls the same `POST /projects/:slug/jobs`
@@ -314,6 +382,12 @@ The asset library owns the montage. `MontageTrigger` calls the same `POST /proje
   the output canvas anamorphically, in both the Player and the render — that is the render's actual
   framing bug, deliberately left out of this cycle's scope. See
   `libs/composition-remotion/README.md`'s D-12 note before touching this.
+- **The voice-over cannot be cancelled from the UI.** `EP-015` supports it and the job may run for
+  half a minute over five scenes, but no acceptance criterion asks for it — the same gap the
+  storyboard panel has.
+- **There is no way back from an uploaded take to a generated one for a single scene.** The service
+  has no `DELETE` for a scene track, so the only route is regenerating the whole voice-over with
+  `overwrite: true`, which also replaces every other take.
 - **The upload has no progress bar.** `fetch` reports no upload progress without `XMLHttpRequest`;
   a large asset shows `Uploading…` and nothing else.
 - **`vite.config.ts` prints a Vite deprecation warning** (`ESM syntax in a file loaded as

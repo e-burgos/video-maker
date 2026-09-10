@@ -21,6 +21,7 @@ function healthyService(storyboardQueue = true): ServiceHealth {
       jobQueue: true,
       montageQueue: true,
       storyboardQueue,
+      voiceQueue: true,
     },
     jobs: { running: 0, queued: 0 },
   };

@@ -233,11 +233,17 @@
         "path": "src/components/studio-layout.tsx",
         "status": "implemented",
         "created_in_cycle": 1,
-        "updated_in_cycle": null,
+        "updated_in_cycle": 2,
         "description": "Shell del studio: header con el nombre, el link a proyectos y el badge de salud, y el Outlet de la pagina ruteada.",
         "consumes": [],
         "created_at": "2026-09-09",
-        "changelog": []
+        "changelog": [
+          {
+            "cycle": 2,
+            "date": "2026-09-10",
+            "change": "Actualizado en spec-e-burgos-009 cycle-02: el nav por proyecto suma la seccion voice, en el orden del pipeline library · storyboard · voice · preview."
+          }
+        ]
       },
       {
         "id": "COMP-002",
@@ -380,13 +386,19 @@
         "path": "src/components/asset-uploader.tsx",
         "status": "implemented",
         "created_in_cycle": 1,
-        "updated_in_cycle": null,
+        "updated_in_cycle": 2,
         "description": "Sube un archivo al rol elegido como body binario crudo con su content-type, refresca el listado al exito y muestra el code tipado al fallar.",
         "consumes": [
           "EP-006"
         ],
         "created_at": "2026-09-09",
-        "changelog": []
+        "changelog": [
+          {
+            "cycle": 2,
+            "date": "2026-09-10",
+            "change": "Actualizado en spec-e-burgos-009 cycle-02: acepta roles para acotar los roles ofrecidos (con uno solo desaparece el selector y el rol se muestra fijo), fileInputLabel para que varias instancias convivan en una pagina, ids de campo derivados de useId, y onUploaded recibe la entrada del catalogo que se acaba de escribir en vez de no recibir nada."
+          }
+        ]
       },
       {
         "id": "COMP-010",
@@ -827,6 +839,80 @@
           "EP-016"
         ],
         "created_at": "2026-09-09",
+        "changelog": []
+      },
+      {
+        "id": "COMP-035",
+        "name": "VoiceTrigger",
+        "type": "component",
+        "module": "voice-over",
+        "spec": "sdd/specs/spec-e-burgos-009-voice-over",
+        "path": "src/components/voice-trigger.tsx",
+        "status": "implemented",
+        "created_in_cycle": 2,
+        "updated_in_cycle": null,
+        "description": "Selector de voces de EP-019 con el default marcado y disparo del job kind: 'voice' (EP-012). Distingue en pantalla el catalogo vacio del 503 VOICE_MODEL_UNAVAILABLE, bloquea el boton con el motivo escrito segun voiceBlockers(health) y resuelve el 409 VOICE_ALREADY_EXISTS como confirmacion de sobreescritura que reintenta con overwrite: true.",
+        "consumes": [
+          "EP-001",
+          "EP-012",
+          "EP-019"
+        ],
+        "created_at": "2026-09-10",
+        "changelog": []
+      },
+      {
+        "id": "COMP-036",
+        "name": "VoiceJobPanel",
+        "type": "component",
+        "module": "voice-over",
+        "spec": "sdd/specs/spec-e-burgos-009-voice-over",
+        "path": "src/components/voice-job-panel.tsx",
+        "status": "implemented",
+        "created_in_cycle": 2,
+        "updated_in_cycle": null,
+        "description": "Panel de seguimiento del job de voz sobre useRenderJobPoll: etapas synthesize | transcribe | persist con el contador por escena que emite el servicio, reporte final con el manifest y la voz usada, y el codigo tipado del fallo junto a su explicacion en lenguaje de usuario.",
+        "consumes": [
+          "EP-014"
+        ],
+        "created_at": "2026-09-10",
+        "changelog": []
+      },
+      {
+        "id": "COMP-037",
+        "name": "VoiceSceneCard",
+        "type": "component",
+        "module": "voice-over",
+        "spec": "sdd/specs/spec-e-burgos-009-voice-over",
+        "path": "src/components/voice-scene-card.tsx",
+        "status": "implemented",
+        "created_in_cycle": 2,
+        "updated_in_cycle": null,
+        "description": "Escena a escena: reproductor del wav servido por EP-011, duracion real medida con ffprobe contra la estimada del storyboard con la diferencia firmada, origen de la pista (generated con su voz o uploaded), marca de stale con el motivo, regeneracion de esa sola escena y las dos vias de 'use my recording' (subir con rol voice por EP-006 o elegir una toma ya presente en raw/voice/), asociada con EP-021.",
+        "consumes": [
+          "EP-006",
+          "EP-011",
+          "EP-021"
+        ],
+        "created_at": "2026-09-10",
+        "changelog": []
+      },
+      {
+        "id": "COMP-038",
+        "name": "VoicePage",
+        "type": "component",
+        "module": "voice-over",
+        "spec": "sdd/specs/spec-e-burgos-009-voice-over",
+        "path": "src/pages/voice-page.tsx",
+        "status": "implemented",
+        "created_in_cycle": 2,
+        "updated_in_cycle": null,
+        "description": "Pagina /projects/:slug/voice, montada perezosamente: estado vacio accionable ante VOICE_NOT_FOUND, ciclo completo trigger -> job -> pistas, cruce del manifest (EP-020) con el storyboard (EP-016) para la narracion y la duracion estimada, tomas de raw/voice/ derivadas del listado de assets, y regeneracion por escena con la voz que esa pista ya usaba.",
+        "consumes": [
+          "EP-012",
+          "EP-016",
+          "EP-020"
+        ],
+        "created_at": "2026-09-10",
         "changelog": []
       }
     ]

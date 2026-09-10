@@ -84,3 +84,50 @@ describe('AssetUploader', () => {
     expect(uploadAsset).not.toHaveBeenCalled();
   });
 });
+
+describe('AssetUploader pinned to a single role', () => {
+  it('drops the selector, states the role and hands the stored entry back to the caller', async () => {
+    const uploadAsset = vi.fn().mockResolvedValue({ path: 'raw/voice/take-03.wav', role: 'voice' });
+    const onUploaded = vi.fn();
+
+    render(
+      <RenderApiProvider client={{ uploadAsset } as unknown as RenderApiClient}>
+        <AssetUploader
+          slug="smoke-ingest"
+          roles={['voice']}
+          fileInputLabel="Upload a take for scene-03"
+          onUploaded={onUploaded}
+        />
+      </RenderApiProvider>,
+    );
+
+    expect(screen.queryByLabelText('Upload to')).toBeNull();
+    expect(screen.getByText('voice')).toBeDefined();
+
+    const file = new File(['bytes'], 'take-03.wav', { type: 'audio/wav' });
+    fireEvent.change(screen.getByLabelText('Upload a take for scene-03'), {
+      target: { files: [file] },
+    });
+
+    await waitFor(() => expect(onUploaded).toHaveBeenCalledTimes(1));
+    expect(uploadAsset).toHaveBeenCalledWith(
+      expect.objectContaining({ role: 'voice', filename: 'take-03.wav', contentType: 'audio/wav' }),
+    );
+    expect(onUploaded).toHaveBeenCalledWith({ path: 'raw/voice/take-03.wav', role: 'voice' });
+  });
+
+  it('gives each instance its own field ids so several cards can coexist', () => {
+    const uploadAsset = vi.fn();
+
+    render(
+      <RenderApiProvider client={{ uploadAsset } as unknown as RenderApiClient}>
+        <AssetUploader slug="s" roles={['voice']} fileInputLabel="one" onUploaded={vi.fn()} />
+        <AssetUploader slug="s" roles={['voice']} fileInputLabel="two" onUploaded={vi.fn()} />
+      </RenderApiProvider>,
+    );
+
+    const first = screen.getByLabelText('one') as HTMLInputElement;
+    const second = screen.getByLabelText('two') as HTMLInputElement;
+    expect(first.id).not.toBe(second.id);
+  });
+});

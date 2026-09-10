@@ -64,6 +64,7 @@ describe('projectSlugFromPathname', () => {
   it('reads the slug of every project route and nothing else', () => {
     expect(projectSlugFromPathname('/projects/smoke-ingest')).toBe('smoke-ingest');
     expect(projectSlugFromPathname('/projects/smoke-ingest/storyboard')).toBe('smoke-ingest');
+    expect(projectSlugFromPathname('/projects/smoke-ingest/voice')).toBe('smoke-ingest');
     expect(projectSlugFromPathname('/projects/smoke-ingest/preview')).toBe('smoke-ingest');
     expect(projectSlugFromPathname('/')).toBeNull();
     expect(projectSlugFromPathname('/projects')).toBeNull();
@@ -88,6 +89,7 @@ describe('StudioLayout project nav', () => {
               <Route path="/" element={<p>projects</p>} />
               <Route path="/projects/:slug" element={<p>library</p>} />
               <Route path="/projects/:slug/storyboard" element={<p>storyboard</p>} />
+              <Route path="/projects/:slug/voice" element={<p>voice</p>} />
               <Route path="/projects/:slug/preview" element={<p>preview</p>} />
             </Route>
           </Routes>
@@ -102,15 +104,23 @@ describe('StudioLayout project nav', () => {
     expect(screen.queryByTestId('project-nav')).toBeNull();
   });
 
-  it('links the three sections of the project from any of them', () => {
+  it('links the four sections of the project from any of them, in pipeline order', () => {
     renderAt('/projects/smoke-ingest/storyboard');
 
     const nav = screen.getByTestId('project-nav');
     expect(Array.from(nav.querySelectorAll('a')).map((link) => link.getAttribute('href'))).toEqual([
       '/projects/smoke-ingest',
       '/projects/smoke-ingest/storyboard',
+      '/projects/smoke-ingest/voice',
       '/projects/smoke-ingest/preview',
     ]);
+  });
+
+  it('marks the voice section as the current one while it is open', () => {
+    renderAt('/projects/smoke-ingest/voice');
+
+    expect(screen.getByRole('link', { name: 'voice' }).getAttribute('aria-current')).toBe('page');
+    expect(screen.getByRole('link', { name: 'library' }).getAttribute('aria-current')).toBeNull();
   });
 
   it('marks the storyboard section as the current one while it is open', () => {

@@ -6,7 +6,13 @@ import {
   parseRenderJob,
   parseRenderJobListing,
   parseStoryboardJob,
+  parseVoiceJob,
 } from './parse-render-job';
+import {
+  parseVoiceDocument,
+  parseVoiceListing,
+  parseVoiceSceneWriteResult,
+} from './parse-voice';
 import {
   RenderApiError,
   fromErrorResponse,
@@ -28,6 +34,10 @@ import type {
   StoryboardJob,
   StoryboardWriteResult,
   TimelineWriteResult,
+  VoiceDocument,
+  VoiceJob,
+  VoiceListing,
+  VoiceSceneWriteResult,
 } from './render-api-types';
 
 export type FetchLike = (input: string, init?: RequestInit) => Promise<Response>;
@@ -44,6 +54,12 @@ export type CreateStoryboardJobInput =
   | { brief: string; overwrite: boolean }
   | { scriptText: string; overwrite: boolean };
 
+export type CreateVoiceJobInput = {
+  voiceId: string | null;
+  sceneIds: readonly string[] | null;
+  overwrite: boolean;
+};
+
 export type RenderApiClient = {
   getHealth: () => Promise<ServiceHealth>;
   listProjects: () => Promise<ProjectSummary[]>;
@@ -59,6 +75,14 @@ export type RenderApiClient = {
   getStoryboard: (slug: string) => Promise<StoryboardDocument>;
   putStoryboard: (slug: string, storyboard: StoryboardDocument) => Promise<StoryboardWriteResult>;
   getStoryboardPrompts: (slug: string) => Promise<string>;
+  listVoices: () => Promise<VoiceListing>;
+  getVoice: (slug: string) => Promise<VoiceDocument>;
+  createVoiceJob: (slug: string, input: CreateVoiceJobInput) => Promise<VoiceJob>;
+  attachVoiceTake: (
+    slug: string,
+    sceneId: string,
+    fileName: string,
+  ) => Promise<VoiceSceneWriteResult>;
   listRenderJobs: (slug: string) => Promise<RenderJobListing>;
   getRenderJob: (jobId: string) => Promise<Job>;
   cancelRenderJob: (jobId: string) => Promise<RenderJobCancelOutcome>;
@@ -309,6 +333,60 @@ export function createRenderApiClient(fetchImpl: FetchLike): RenderApiClient {
 
     async getStoryboardPrompts(slug: string): Promise<string> {
       return requestText(`/projects/${encodeURIComponent(slug)}/storyboard/prompts`);
+    },
+
+    async listVoices(): Promise<VoiceListing> {
+      const body = await requestJson('/voices', undefined, 'a voice listing', (value) =>
+        isRecord(value),
+      );
+      return parseVoiceListing(body);
+    },
+
+    async getVoice(slug: string): Promise<VoiceDocument> {
+      const body = await requestJson(
+        `/projects/${encodeURIComponent(slug)}/voice`,
+        undefined,
+        'a voice document',
+        (value) => isRecord(value),
+      );
+      return parseVoiceDocument(body);
+    },
+
+    async createVoiceJob(slug: string, input: CreateVoiceJobInput): Promise<VoiceJob> {
+      const body = await requestJson(
+        `/projects/${encodeURIComponent(slug)}/jobs`,
+        {
+          method: 'POST',
+          headers: { 'content-type': 'application/json' },
+          body: JSON.stringify({
+            kind: 'voice',
+            overwrite: input.overwrite,
+            ...(input.voiceId === null ? {} : { voice: input.voiceId }),
+            ...(input.sceneIds === null ? {} : { sceneIds: input.sceneIds }),
+          }),
+        },
+        'a voice job document',
+        (value) => isRecord(value),
+      );
+      return parseVoiceJob(body);
+    },
+
+    async attachVoiceTake(
+      slug: string,
+      sceneId: string,
+      fileName: string,
+    ): Promise<VoiceSceneWriteResult> {
+      const body = await requestJson(
+        `/projects/${encodeURIComponent(slug)}/voice/scenes/${encodeURIComponent(sceneId)}`,
+        {
+          method: 'PUT',
+          headers: { 'content-type': 'application/json' },
+          body: JSON.stringify({ fileName }),
+        },
+        'a voice scene write result',
+        (value) => isRecord(value),
+      );
+      return parseVoiceSceneWriteResult(body);
     },
 
     async listRenderJobs(slug: string): Promise<RenderJobListing> {

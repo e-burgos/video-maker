@@ -7,6 +7,8 @@ import {
   STORYBOARD_SOURCES,
   STORYBOARD_STAGES,
   TERMINAL_RENDER_JOB_STATES,
+  VOICE_STAGES,
+  VOICE_TRACK_SOURCES,
 } from './render-api-types';
 import type {
   Job,
@@ -32,6 +34,12 @@ import type {
   StoryboardJobSource,
   StoryboardJobUsage,
   StoryboardStage,
+  VoiceJob,
+  VoiceJobProgress,
+  VoiceJobReport,
+  VoiceJobSceneReport,
+  VoiceStage,
+  VoiceTrackSource,
 } from './render-api-types';
 
 function isRecord(value: unknown): value is Record<string, unknown> {
@@ -70,6 +78,14 @@ export function isStoryboardJobSource(value: unknown): value is StoryboardJobSou
   return typeof value === 'string' && (STORYBOARD_SOURCES as readonly string[]).includes(value);
 }
 
+export function isVoiceStage(value: unknown): value is VoiceStage {
+  return typeof value === 'string' && (VOICE_STAGES as readonly string[]).includes(value);
+}
+
+export function isVoiceTrackSource(value: unknown): value is VoiceTrackSource {
+  return typeof value === 'string' && (VOICE_TRACK_SOURCES as readonly string[]).includes(value);
+}
+
 export function isTerminalRenderJobState(state: RenderJobState): boolean {
   return (TERMINAL_RENDER_JOB_STATES as readonly RenderJobState[]).includes(state);
 }
@@ -78,6 +94,12 @@ export function showsFrameProgress(
   progress: RenderJobProgress | null,
 ): progress is RenderJobProgress & { stage: 'render' } {
   return progress !== null && progress.stage === 'render';
+}
+
+export function showsSceneProgress(
+  progress: VoiceJobProgress | null,
+): progress is VoiceJobProgress & { processedScenes: number; totalScenes: number } {
+  return progress !== null && progress.processedScenes !== null && progress.totalScenes !== null;
 }
 
 export function showsAssetProgress(
@@ -109,6 +131,39 @@ function isStoryboardJobReport(value: unknown): value is StoryboardJobReport {
     typeof value['language'] === 'string' &&
     typeof value['sceneCount'] === 'number' &&
     isStoryboardJobUsage(value['usage'])
+  );
+}
+
+function isVoiceJobProgress(value: unknown): value is VoiceJobProgress {
+  return (
+    isRecord(value) &&
+    isVoiceStage(value['stage']) &&
+    isNumberOrNull(value['processedScenes']) &&
+    isNumberOrNull(value['totalScenes']) &&
+    isNumberOrNull(value['percent'])
+  );
+}
+
+function isVoiceJobSceneReport(value: unknown): value is VoiceJobSceneReport {
+  return (
+    isRecord(value) &&
+    typeof value['sceneId'] === 'string' &&
+    typeof value['path'] === 'string' &&
+    typeof value['wordsPath'] === 'string' &&
+    typeof value['durationMs'] === 'number' &&
+    isVoiceTrackSource(value['source'])
+  );
+}
+
+function isVoiceJobReport(value: unknown): value is VoiceJobReport {
+  return (
+    isRecord(value) &&
+    typeof value['manifestPath'] === 'string' &&
+    typeof value['storyboardId'] === 'string' &&
+    typeof value['voiceId'] === 'string' &&
+    typeof value['language'] === 'string' &&
+    Array.isArray(value['scenes']) &&
+    value['scenes'].every(isVoiceJobSceneReport)
   );
 }
 
@@ -222,6 +277,13 @@ function isJob(value: unknown): value is Job {
     );
   }
 
+  if (value['kind'] === 'voice') {
+    return (
+      (value['progress'] === null || isVoiceJobProgress(value['progress'])) &&
+      (value['report'] === null || isVoiceJobReport(value['report']))
+    );
+  }
+
   return (
     (value['progress'] === null || isRenderJobProgress(value['progress'])) &&
     (value['report'] === null || isRenderPipelineReport(value['report']))
@@ -263,6 +325,15 @@ export function parseStoryboardJob(value: unknown): StoryboardJob {
   return job;
 }
 
+export function parseVoiceJob(value: unknown): VoiceJob {
+  const job = parseJob(value);
+  if (job.kind !== 'voice') {
+    throw responseShapeUnexpected(200, 'a voice job document');
+  }
+
+  return job;
+}
+
 function isRenderJobSummary(value: unknown): value is RenderJobSummary {
   return (
     isRecord(value) &&
@@ -272,7 +343,8 @@ function isRenderJobSummary(value: unknown): value is RenderJobSummary {
     (value['stage'] === null ||
       isRenderPipelineStage(value['stage']) ||
       isMontageStage(value['stage']) ||
-      isStoryboardStage(value['stage'])) &&
+      isStoryboardStage(value['stage']) ||
+      isVoiceStage(value['stage'])) &&
     isStringOrNull(value['errorCode']) &&
     typeof value['createdAt'] === 'string' &&
     isStringOrNull(value['startedAt']) &&

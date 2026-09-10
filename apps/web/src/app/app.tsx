@@ -14,6 +14,10 @@ const StoryboardPage = lazy(async () => ({
   default: (await import('../pages/storyboard-page')).StoryboardPage,
 }));
 
+const VoicePage = lazy(async () => ({
+  default: (await import('../pages/voice-page')).VoicePage,
+}));
+
 export function App() {
   return (
     <BrowserRouter basename={import.meta.env.BASE_URL}>
@@ -27,6 +31,14 @@ export function App() {
               element={
                 <Suspense fallback={<p className="text-sm text-slate-500">Loading storyboard…</p>}>
                   <StoryboardPage />
+                </Suspense>
+              }
+            />
+            <Route
+              path="/projects/:slug/voice"
+              element={
+                <Suspense fallback={<p className="text-sm text-slate-500">Loading voice…</p>}>
+                  <VoicePage />
                 </Suspense>
               }
             />

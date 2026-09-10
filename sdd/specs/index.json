@@ -143,10 +143,10 @@
       "file": "sdd/specs/spec-e-burgos-009-voice-over/spec-e-burgos-009-voice-over.spec.md",
       "module": "voice-over",
       "app": "apps/render-api",
-      "status": "in-progress",
+      "status": "completed",
       "title": "Voice Over: Locución Propia y Síntesis Local",
       "created_at": "2026-09-09",
-      "completed_at": null,
+      "completed_at": "2026-09-10",
       "depends_on": [
         "spec-e-burgos-008-ai-storyboard"
       ]

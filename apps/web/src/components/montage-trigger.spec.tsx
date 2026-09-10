@@ -150,6 +150,7 @@ describe('MontageTrigger', () => {
           jobQueue: true,
           montageQueue: false,
           storyboardQueue: true,
+          voiceQueue: true,
         },
       }),
     );

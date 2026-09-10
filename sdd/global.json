@@ -91,9 +91,7 @@
       "cycles_completed": 2,
       "description": "Storyboard generativo de punta a punta: puerto AiAgent sobre `claude -p` local (sin API key), documento work/storyboard.json con hoja de personajes y escenas ordenadas con narracion, prompt visual y fuente del visual, job kind: 'storyboard', endpoints GET/PUT del documento y export numerado de prompts, y su consumo completo en el Web Studio: pagina de storyboard con brief o guion, progreso por etapa, edicion escena por escena con espejo de cliente de la validacion, guardado con un unico PUT y copia de la hoja de prompts para las herramientas generativas externas",
       "completed_at": "2026-09-09"
-    }
-  ],
-  "in_progress_modules": [
+    },
     {
       "module": "voice-over",
       "spec": "spec-e-burgos-009-voice-over",
@@ -102,9 +100,12 @@
         "apps/web",
         "libs/media-local"
       ],
-      "description": "Voz en off del modo generativo: rol `voice` para subir locución propia y Piper TTS local como binario configurable, job kind: 'voice' que sintetiza una pista por escena desde el storyboard, la transcribe con Whisper para alinear captions y fija la duración real de cada escena"
+      "description": "Voz en off del modo generativo de punta a punta: rol `voice` para subir locución propia y Piper TTS local como binario configurable, job kind: 'voice' que sintetiza una pista por escena desde el storyboard, la transcribe con Whisper para alinear captions y fija la duración real de cada escena, y su consumo completo en el Web Studio: página de voz con selector de voces, progreso por escena, reproductor y duración real contra la estimada por escena, marca de narración desactualizada con regeneración de esa sola escena, y sustitución de cualquier escena por una grabación propia subida o ya presente en raw/voice/",
+      "cycles_completed": 2,
+      "completed_at": "2026-09-10"
     }
   ],
+  "in_progress_modules": [],
   "pending_modules": [
     {
       "module": "scene-assembly",
@@ -153,7 +154,7 @@
     "tool": "Nx",
     "package_manager": "pnpm",
     "apps": {
-      "web": "apps/web — react (Web Studio): SPA local sobre apps/render-api y producto completo de punta a punta (subir crudo, generar el montaje, ajustar la Timeline, renderizar y descargar el MP4), con biblioteca de assets, disparo del job de montaje y del de render, y toda la frontera con el servicio confinada a src/api/ y servida por el proxy /api del dev-server (React 19 + react-router-dom 7 + Tailwind 4 + Vite 8, unica dependencia npm propia @remotion/player)",
+      "web": "apps/web — react (Web Studio): SPA local sobre apps/render-api y producto completo de punta a punta (subir crudo, generar el montaje o el storyboard, ponerle voz, ajustar la Timeline, renderizar y descargar el MP4), con biblioteca de assets, disparo de los cuatro tipos de job y toda la frontera con el servicio confinada a src/api/ y servida por el proxy /api del dev-server (React 19 + react-router-dom 7 + Tailwind 4 + Vite 8, unica dependencia npm propia @remotion/player)",
       "render-api": "apps/render-api — servicio HTTP local del motor: 15 endpoints sobre `media/` (proyectos, assets, Timeline/EDL, descarga con Range) más la cola de jobs de render que orquesta render mudo → mezcla → mux → verificación de loudness, con progreso por frame y cancelación cooperativa, sobre puertos inyectables (TypeScript + node:http, cero dependencias npm propias)"
     },
     "libs": {

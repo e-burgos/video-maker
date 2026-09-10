@@ -22,8 +22,17 @@ function health(overrides: Partial<ServiceHealth> = {}): ServiceHealth {
       { name: 'ffprobe', envVar: 'FFPROBE_PATH', resolved: true },
       { name: 'whisperCli', envVar: 'WHISPER_CPP_PATH', resolved: true },
       { name: 'whisperModel', envVar: 'WHISPER_MODEL_PATH', resolved: true },
+      { name: 'piperCli', envVar: 'PIPER_PATH', resolved: true },
+      { name: 'piperModel', envVar: 'PIPER_MODEL_PATH', resolved: true },
     ],
-    capabilities: { renderPipeline: true, assetStore: true, jobQueue: true, montageQueue: true, storyboardQueue: true },
+    capabilities: {
+      renderPipeline: true,
+      assetStore: true,
+      jobQueue: true,
+      montageQueue: true,
+      storyboardQueue: true,
+      voiceQueue: true,
+    },
     jobs: { running: 0, queued: 0 },
     ...overrides,
   };
@@ -107,7 +116,7 @@ describe('ServiceHealthBadge', () => {
     );
   });
 
-  it('lists the four media binaries with their env var and resolution state (US-2-007)', async () => {
+  it('lists the six media binaries with their env var and resolution state (US-2-007, US-09-012)', async () => {
     renderBadge(clientWith(() => Promise.resolve(health())));
 
     await waitFor(() => expect(screen.getByTestId('service-health-binaries')).toBeTruthy());
@@ -120,10 +129,12 @@ describe('ServiceHealthBadge', () => {
       'ffprobe · FFPROBE_PATH · resolved',
       'whisperCli · WHISPER_CPP_PATH · resolved',
       'whisperModel · WHISPER_MODEL_PATH · resolved',
+      'piperCli · PIPER_PATH · resolved',
+      'piperModel · PIPER_MODEL_PATH · resolved',
     ]);
   });
 
-  it('reports montageQueue and storyboardQueue among the capabilities (US-2-007, US-08-010)', async () => {
+  it('reports every queue among the capabilities (US-2-007, US-08-010, US-09-012)', async () => {
     renderBadge(clientWith(() => Promise.resolve(health())));
 
     await waitFor(() => expect(screen.getByTestId('service-health-capabilities')).toBeTruthy());
@@ -137,7 +148,35 @@ describe('ServiceHealthBadge', () => {
       'jobQueue · on',
       'montageQueue · on',
       'storyboardQueue · on',
+      'voiceQueue · on',
     ]);
+  });
+
+  it('lists the two Piper entries by their logical name and env var (US-09-012)', async () => {
+    renderBadge(
+      clientWith(() =>
+        Promise.resolve(
+          health({
+            status: 'degraded',
+            binaries: [
+              { name: 'piperCli', envVar: 'PIPER_PATH', resolved: true },
+              { name: 'piperModel', envVar: 'PIPER_MODEL_PATH', resolved: false },
+            ],
+          }),
+        ),
+      ),
+    );
+
+    await waitFor(() => expect(screen.getByTestId('service-health-binaries')).toBeTruthy());
+    const rows = Array.from(screen.getByTestId('service-health-binaries').children).map(
+      (row) => row.textContent,
+    );
+
+    expect(rows).toEqual([
+      'piperCli · PIPER_PATH · resolved',
+      'piperModel · PIPER_MODEL_PATH · missing',
+    ]);
+    expect(screen.getByTestId('service-health-label').textContent).toContain('piperModel');
   });
 
   it('marks a missing binary and a disabled capability, never a resolved host path', async () => {
@@ -153,6 +192,7 @@ describe('ServiceHealthBadge', () => {
               jobQueue: true,
               montageQueue: false,
               storyboardQueue: true,
+              voiceQueue: true,
             },
           }),
         ),

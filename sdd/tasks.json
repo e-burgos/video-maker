@@ -254,6 +254,16 @@
           "status": "completed",
           "tasks_total": 8,
           "tasks_done": 8
+        },
+        "cycle-02": {
+          "file": "sdd/specs/spec-e-burgos-009-voice-over/cycles/cycle-02/tasks.json",
+          "module": "voice-over",
+          "apps": [
+            "apps/web"
+          ],
+          "status": "completed",
+          "tasks_total": 6,
+          "tasks_done": 6
         }
       }
     }

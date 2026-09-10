@@ -15,6 +15,10 @@ export const MEDIA_ENV_VARS = [
   'WHISPER_MODEL_PATH',
 ];
 
+export const VOICE_ENV_VARS = [...MEDIA_ENV_VARS, 'PIPER_PATH', 'PIPER_MODEL_PATH'];
+
+export const MIN_FREE_MEMORY_RATIO = 0.35;
+
 export function log(step, message) {
   console.log(`[${step}] ${message}`);
 }
@@ -53,19 +57,28 @@ export async function loadRootEnv(names = MEDIA_ENV_VARS) {
   return filled;
 }
 
-export function assertMediaEnvResolvable() {
-  const missing = MEDIA_ENV_VARS.filter((name) => (process.env[name] ?? '') === '');
+export function assertMediaEnvResolvable(names = MEDIA_ENV_VARS) {
+  const missing = names.filter((name) => (process.env[name] ?? '') === '');
   assert(
     missing.length === 0,
-    `the four media env vars are present in the environment (missing: ${missing.join(', ') || 'none'})`,
+    `the ${names.length} media env vars are present in the environment (missing: ${missing.join(', ') || 'none'})`,
   );
+}
+
+export function freeMemoryRatio() {
+  const report = execSync('memory_pressure', { encoding: 'utf8' });
+  const percentage = /System-wide memory free percentage:\s*(\d+)%/.exec(report)?.[1];
+  if (percentage === undefined) {
+    throw new Error('memory_pressure did not report a system-wide free percentage');
+  }
+  return Number(percentage) / 100;
 }
 
 export async function memoryGate() {
   log('0', 'memory gate');
   let heavyProcesses = '';
   try {
-    heavyProcesses = execSync("pgrep -fl 'ffmpeg|whisper-cli|chrome-headless' || true", {
+    heavyProcesses = execSync("pgrep -fl 'ffmpeg|whisper-cli|piper|chrome-headless' || true", {
       encoding: 'utf8',
     }).trim();
   } catch {
@@ -73,14 +86,21 @@ export async function memoryGate() {
   }
   assert(
     heavyProcesses === '',
-    `no ffmpeg/whisper-cli/chrome-headless process alive (found: ${heavyProcesses || 'none'})`,
+    `no ffmpeg/whisper-cli/piper/chrome-headless process alive (found: ${heavyProcesses || 'none'})`,
   );
 
   try {
-    const pressure = execSync('memory_pressure | tail -2', { encoding: 'utf8' }).trim();
-    log('0', pressure);
-  } catch {
-    log('0', 'memory_pressure not available on this platform, continuing');
+    const ratio = freeMemoryRatio();
+    log('0', `free memory ratio: ${(ratio * 100).toFixed(1)}%`);
+    assert(
+      ratio >= MIN_FREE_MEMORY_RATIO,
+      `at least ${MIN_FREE_MEMORY_RATIO * 100}% of the memory is free (measured ${(ratio * 100).toFixed(1)}%)`,
+    );
+  } catch (cause) {
+    if (String(cause).startsWith('Error: ASSERTION FAILED')) {
+      throw cause;
+    }
+    log('0', 'vm_stat not available on this platform, continuing without the memory gate');
   }
 }
 

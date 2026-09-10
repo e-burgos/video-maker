@@ -1,0 +1,67 @@
+{
+  "schemaVersion": 1,
+  "storyboardId": "5861fd3e-f065-4e9f-abc2-868b4a4acc64",
+  "language": "es-AR",
+  "tracks": [
+    {
+      "sceneId": "scene-01",
+      "index": 1,
+      "source": "generated",
+      "path": "work/voice/scene-01.wav",
+      "wordsPath": "work/voice/scene-01.words.json",
+      "durationMs": 2984,
+      "sampleRate": 48000,
+      "voiceId": "es_AR-daniela-high",
+      "narrationHash": "f121ad99f5e514ca",
+      "updatedAt": "2026-09-10T03:17:08.705Z"
+    },
+    {
+      "sceneId": "scene-02",
+      "index": 2,
+      "source": "generated",
+      "path": "work/voice/scene-02.wav",
+      "wordsPath": "work/voice/scene-02.words.json",
+      "durationMs": 2868,
+      "sampleRate": 48000,
+      "voiceId": "es_AR-daniela-high",
+      "narrationHash": "97cc7bc53796f9cd",
+      "updatedAt": "2026-09-10T03:17:21.843Z"
+    },
+    {
+      "sceneId": "scene-03",
+      "index": 3,
+      "source": "uploaded",
+      "path": "work/voice/scene-03.wav",
+      "wordsPath": "work/voice/scene-03.words.json",
+      "durationMs": 3529,
+      "sampleRate": 48000,
+      "voiceId": null,
+      "narrationHash": "c6e3bc535915d5bc",
+      "updatedAt": "2026-09-10T03:17:24.436Z"
+    },
+    {
+      "sceneId": "scene-04",
+      "index": 4,
+      "source": "generated",
+      "path": "work/voice/scene-04.wav",
+      "wordsPath": "work/voice/scene-04.words.json",
+      "durationMs": 5828,
+      "sampleRate": 48000,
+      "voiceId": "es_AR-daniela-high",
+      "narrationHash": "26a33d1c41b1c045",
+      "updatedAt": "2026-09-10T03:17:13.394Z"
+    },
+    {
+      "sceneId": "scene-05",
+      "index": 5,
+      "source": "generated",
+      "path": "work/voice/scene-05.wav",
+      "wordsPath": "work/voice/scene-05.words.json",
+      "durationMs": 3529,
+      "sampleRate": 48000,
+      "voiceId": "es_AR-daniela-high",
+      "narrationHash": "f9df116ff5438174",
+      "updatedAt": "2026-09-10T03:17:14.862Z"
+    }
+  ]
+}

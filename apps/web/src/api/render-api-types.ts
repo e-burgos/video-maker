@@ -1,4 +1,4 @@
-export const ASSET_ROLES = ['aroll', 'broll', 'image', 'audio'] as const;
+export const ASSET_ROLES = ['aroll', 'broll', 'image', 'audio', 'voice'] as const;
 
 export type AssetRole = (typeof ASSET_ROLES)[number];
 
@@ -23,6 +23,7 @@ export type ServiceCapabilities = {
   jobQueue: boolean;
   montageQueue: boolean;
   storyboardQueue: boolean;
+  voiceQueue: boolean;
 };
 
 export type ServiceJobCounters = {
@@ -136,7 +137,7 @@ export const RENDER_PIPELINE_STAGES = ['prepare', 'render', 'mix', 'mux', 'verif
 
 export type RenderPipelineStage = (typeof RENDER_PIPELINE_STAGES)[number];
 
-export const JOB_KINDS = ['render', 'montage', 'storyboard'] as const;
+export const JOB_KINDS = ['render', 'montage', 'storyboard', 'voice'] as const;
 
 export type JobKind = (typeof JOB_KINDS)[number];
 
@@ -155,6 +156,14 @@ export type StoryboardStage = (typeof STORYBOARD_STAGES)[number];
 export const STORYBOARD_SOURCES = ['brief', 'script'] as const;
 
 export type StoryboardJobSource = (typeof STORYBOARD_SOURCES)[number];
+
+export const VOICE_STAGES = ['synthesize', 'transcribe', 'persist'] as const;
+
+export type VoiceStage = (typeof VOICE_STAGES)[number];
+
+export const VOICE_TRACK_SOURCES = ['generated', 'uploaded'] as const;
+
+export type VoiceTrackSource = (typeof VOICE_TRACK_SOURCES)[number];
 
 export type RenderJobProgress = {
   stage: RenderPipelineStage;
@@ -268,13 +277,49 @@ export type StoryboardJob = {
   error: RenderApiErrorPayload | null;
 };
 
-export type Job = RenderJob | MontageJob | StoryboardJob;
+export type VoiceJobProgress = {
+  stage: VoiceStage;
+  processedScenes: number | null;
+  totalScenes: number | null;
+  percent: number | null;
+};
+
+export type VoiceJobSceneReport = {
+  sceneId: string;
+  path: string;
+  wordsPath: string;
+  durationMs: number;
+  source: VoiceTrackSource;
+};
+
+export type VoiceJobReport = {
+  manifestPath: string;
+  storyboardId: string;
+  voiceId: string;
+  language: string;
+  scenes: VoiceJobSceneReport[];
+};
+
+export type VoiceJob = {
+  id: string;
+  kind: 'voice';
+  slug: string;
+  state: RenderJobState;
+  createdAt: string;
+  startedAt: string | null;
+  finishedAt: string | null;
+  progress: VoiceJobProgress | null;
+  report: VoiceJobReport | null;
+  error: RenderApiErrorPayload | null;
+};
+
+export type Job = RenderJob | MontageJob | StoryboardJob | VoiceJob;
 
 export type RenderJobSummary = {
   id: string;
   kind: JobKind;
   state: RenderJobState;
-  stage: RenderPipelineStage | MontageStage | StoryboardStage | null;
+  stage: RenderPipelineStage | MontageStage | StoryboardStage | VoiceStage | null;
   errorCode: string | null;
   createdAt: string;
   startedAt: string | null;
@@ -294,4 +339,53 @@ export type TimelineWriteResult = {
 export type StoryboardWriteResult = {
   slug: string;
   path: string;
+};
+
+export type VoiceModel = {
+  id: string;
+  fileName: string;
+  isDefault: boolean;
+};
+
+export type VoiceListing = {
+  voices: VoiceModel[];
+};
+
+export type VoiceTrack = {
+  sceneId: string;
+  index: number;
+  source: VoiceTrackSource;
+  path: string;
+  wordsPath: string;
+  durationMs: number;
+  sampleRate: number;
+  voiceId: string | null;
+  narrationHash: string;
+  updatedAt: string;
+};
+
+export type VoiceManifest = {
+  schemaVersion: number;
+  storyboardId: string;
+  language: string;
+  tracks: VoiceTrack[];
+};
+
+export type VoiceSceneStatus = {
+  sceneId: string;
+  index: number;
+  source: VoiceTrackSource;
+  stale: boolean | null;
+};
+
+export type VoiceDocument = {
+  slug: string;
+  manifest: VoiceManifest;
+  scenes: VoiceSceneStatus[];
+};
+
+export type VoiceSceneWriteResult = {
+  slug: string;
+  path: string;
+  track: VoiceTrack;
 };

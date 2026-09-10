@@ -37,6 +37,12 @@ const DEFAULT_REMOTION_SCENE_BY_KIND: Readonly<Record<RemotionSceneKind, Remotio
   'image-kenburns': { kind: 'image-kenburns', zoomFrom: 1, zoomTo: 1.2 },
 };
 
+function omitKeys<T extends object>(source: T, keys: readonly string[]): T {
+  const rest = { ...source } as Record<string, unknown>;
+  keys.forEach((key) => delete rest[key]);
+  return rest as T;
+}
+
 export function storyboardIssues(document: StoryboardDocument): StoryboardIssue[] {
   const parsed = StoryboardDocumentSchema.safeParse(document);
 
@@ -113,8 +119,7 @@ export function setSceneText(
 ): StoryboardDocument {
   return mapScene(document, sceneId, (scene) => {
     if ((field === 'assetId' || field === 'captionsStyle') && value.length === 0) {
-      const { [field]: _removed, ...rest } = scene;
-      return rest as StoryboardScene;
+      return omitKeys(scene, [field]);
     }
     return { ...scene, [field]: value };
   });
@@ -143,7 +148,7 @@ export function setSceneVisualSource(
   visualSource: VisualSource,
 ): StoryboardDocument {
   return mapScene(document, sceneId, (scene) => {
-    const { assetId: _assetId, remotionScene: _remotionScene, ...rest } = scene;
+    const rest = omitKeys(scene, ['assetId', 'remotionScene']);
     if (visualSource === 'asset') {
       return { ...rest, visualSource, assetId: scene.assetId ?? '' };
     }
@@ -181,8 +186,7 @@ export function setRemotionSceneText(
       return scene;
     }
     if (field === 'subtitle' && value.length === 0) {
-      const { subtitle: _subtitle, ...rest } = scene.remotionScene;
-      return { ...scene, remotionScene: rest as RemotionScene };
+      return { ...scene, remotionScene: omitKeys(scene.remotionScene, ['subtitle']) };
     }
     return { ...scene, remotionScene: { ...scene.remotionScene, [field]: value } };
   });

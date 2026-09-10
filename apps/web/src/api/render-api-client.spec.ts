@@ -2,6 +2,7 @@ import { describe, expect, it, vi } from 'vitest';
 
 import { RAW_PREVIEW_TIMELINE, previewTimelineFixture } from './__fixtures__/timeline';
 import { RAW_STORYBOARD, storyboardFixture } from './__fixtures__/storyboard';
+import { VOICE_MODELS, voiceDocument, voiceJob, voiceTrack } from './__fixtures__/voice';
 import { createRenderApiClient } from './render-api-client';
 import { RenderApiError } from './render-api-error';
 import type { FetchLike } from './render-api-client';
@@ -65,7 +66,7 @@ const health = {
   time: '2026-09-09T00:00:00.000Z',
   engine: [{ name: 'media-local', loaded: true }],
   binaries: [{ name: 'ffmpeg', envVar: 'FFMPEG_PATH', resolved: true }],
-  capabilities: { renderPipeline: true, assetStore: true, jobQueue: true, montageQueue: true, storyboardQueue: true },
+  capabilities: { renderPipeline: true, assetStore: true, jobQueue: true, montageQueue: true, storyboardQueue: true, voiceQueue: true },
   jobs: { running: 0, queued: 0 },
 };
 
@@ -720,5 +721,133 @@ describe('createRenderApiClient · storyboard', () => {
       .catch((caught: unknown) => caught);
 
     expect((error as RenderApiError).code).toBe('STORYBOARD_NOT_FOUND');
+  });
+});
+
+describe('createRenderApiClient · voice', () => {
+  it('lists the installed voices from EP-019', async () => {
+    const { fetchImpl, calls } = recordingFetch(() => jsonResponse(VOICE_MODELS));
+
+    const listing = await createRenderApiClient(fetchImpl).listVoices();
+
+    expect(calls[0]?.url).toBe('/api/voices');
+    expect(calls[0]?.init).toBeUndefined();
+    expect(listing.voices.find((voice) => voice.isDefault)?.id).toBe('es_AR-daniela-high');
+  });
+
+  it('surfaces VOICE_MODEL_UNAVAILABLE from EP-019 instead of an empty list', async () => {
+    const { fetchImpl } = recordingFetch(() =>
+      jsonResponse(
+        { error: { code: 'VOICE_MODEL_UNAVAILABLE', stage: null, message: 'piper not configured' } },
+        503,
+      ),
+    );
+
+    const error = await createRenderApiClient(fetchImpl)
+      .listVoices()
+      .catch((caught: unknown) => caught);
+
+    expect((error as RenderApiError).code).toBe('VOICE_MODEL_UNAVAILABLE');
+  });
+
+  it('reads the manifest and its staleness view from EP-020', async () => {
+    const { fetchImpl, calls } = recordingFetch(() => jsonResponse(voiceDocument()));
+
+    const document = await createRenderApiClient(fetchImpl).getVoice('smoke-ingest');
+
+    expect(calls[0]?.url).toBe('/api/projects/smoke-ingest/voice');
+    expect(document.scenes.map((scene) => scene.stale)).toEqual([false, true]);
+  });
+
+  it('surfaces VOICE_NOT_FOUND from EP-020 so the page can show its empty state', async () => {
+    const { fetchImpl } = recordingFetch(() =>
+      jsonResponse(
+        { error: { code: 'VOICE_NOT_FOUND', stage: null, message: 'no manifest yet' } },
+        404,
+      ),
+    );
+
+    const error = await createRenderApiClient(fetchImpl)
+      .getVoice('smoke-ingest')
+      .catch((caught: unknown) => caught);
+
+    expect((error as RenderApiError).code).toBe('VOICE_NOT_FOUND');
+  });
+
+  it('creates a whole voice-over with only the fields EP-012 reads for this kind', async () => {
+    const { fetchImpl, calls } = recordingFetch(() => jsonResponse(voiceJob(), 202));
+
+    await createRenderApiClient(fetchImpl).createVoiceJob('smoke-ingest', {
+      voiceId: 'es_AR-daniela-high',
+      sceneIds: null,
+      overwrite: false,
+    });
+
+    expect(calls[0]?.url).toBe('/api/projects/smoke-ingest/jobs');
+    expect(calls[0]?.init?.method).toBe('POST');
+    const body = JSON.parse(String(calls[0]?.init?.body));
+    expect(Object.keys(body).sort()).toEqual(['kind', 'overwrite', 'voice']);
+    expect(body).toEqual({ kind: 'voice', overwrite: false, voice: 'es_AR-daniela-high' });
+  });
+
+  it('regenerates a single scene by sending sceneIds and overwrite', async () => {
+    const { fetchImpl, calls } = recordingFetch(() => jsonResponse(voiceJob(), 202));
+
+    await createRenderApiClient(fetchImpl).createVoiceJob('smoke-ingest', {
+      voiceId: null,
+      sceneIds: ['scene-02'],
+      overwrite: true,
+    });
+
+    const body = JSON.parse(String(calls[0]?.init?.body));
+    expect(Object.keys(body).sort()).toEqual(['kind', 'overwrite', 'sceneIds']);
+    expect(body).toEqual({ kind: 'voice', overwrite: true, sceneIds: ['scene-02'] });
+  });
+
+  it('refuses a job document of another kind coming back from the voice request', async () => {
+    const { fetchImpl } = recordingFetch(() => jsonResponse(montageJob(), 202));
+
+    const error = await createRenderApiClient(fetchImpl)
+      .createVoiceJob('smoke-ingest', { voiceId: null, sceneIds: null, overwrite: false })
+      .catch((caught: unknown) => caught);
+
+    expect((error as RenderApiError).code).toBe('RESPONSE_SHAPE_UNEXPECTED');
+  });
+
+  it('attaches a recorded take to one scene with EP-021', async () => {
+    const { fetchImpl, calls } = recordingFetch(() =>
+      jsonResponse({
+        slug: 'smoke-ingest',
+        path: 'work/voice/manifest.json',
+        track: voiceTrack({ source: 'uploaded', voiceId: null }),
+      }),
+    );
+
+    const written = await createRenderApiClient(fetchImpl).attachVoiceTake(
+      'smoke-ingest',
+      'scene 03',
+      'take-03.wav',
+    );
+
+    expect(calls[0]?.url).toBe('/api/projects/smoke-ingest/voice/scenes/scene%2003');
+    expect(calls[0]?.init?.method).toBe('PUT');
+    expect(JSON.parse(String(calls[0]?.init?.body))).toEqual({ fileName: 'take-03.wav' });
+    expect(written.track.source).toBe('uploaded');
+    expect(written.track.voiceId).toBeNull();
+  });
+
+  it('surfaces VOICE_ASSET_NOT_FOUND from EP-021 with its code intact', async () => {
+    const { fetchImpl } = recordingFetch(() =>
+      jsonResponse(
+        { error: { code: 'VOICE_ASSET_NOT_FOUND', stage: null, message: 'not under raw/voice/' } },
+        404,
+      ),
+    );
+
+    const error = await createRenderApiClient(fetchImpl)
+      .attachVoiceTake('smoke-ingest', 'scene-03', 'missing.wav')
+      .catch((caught: unknown) => caught);
+
+    expect((error as RenderApiError).code).toBe('VOICE_ASSET_NOT_FOUND');
   });
 });

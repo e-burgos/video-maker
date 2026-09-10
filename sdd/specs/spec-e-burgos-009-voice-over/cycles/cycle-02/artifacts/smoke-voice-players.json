@@ -1,0 +1,62 @@
+{
+  "players": [
+    {
+      "label": "Voice track of scene-01",
+      "src": "/api/projects/smoke-ingest/files/work/voice/scene-01.wav",
+      "readyState": 4,
+      "duration": 2.984
+    },
+    {
+      "label": "Voice track of scene-02",
+      "src": "/api/projects/smoke-ingest/files/work/voice/scene-02.wav",
+      "readyState": 4,
+      "duration": 5.654
+    },
+    {
+      "label": "Voice track of scene-03",
+      "src": "/api/projects/smoke-ingest/files/work/voice/scene-03.wav",
+      "readyState": 4,
+      "duration": 5.48
+    },
+    {
+      "label": "Voice track of scene-04",
+      "src": "/api/projects/smoke-ingest/files/work/voice/scene-04.wav",
+      "readyState": 4,
+      "duration": 5.828
+    },
+    {
+      "label": "Voice track of scene-05",
+      "src": "/api/projects/smoke-ingest/files/work/voice/scene-05.wav",
+      "readyState": 4,
+      "duration": 3.529
+    }
+  ],
+  "durations": [
+    "real 2.98 s · estimated 5.00 s · −2.02 s vs the estimate",
+    "real 5.65 s · estimated 6.00 s · −0.35 s vs the estimate",
+    "real 5.48 s · estimated 6.50 s · −1.02 s vs the estimate",
+    "real 5.83 s · estimated 7.00 s · −1.17 s vs the estimate",
+    "real 3.53 s · estimated 4.50 s · −0.97 s vs the estimate"
+  ],
+  "hashesBefore": {
+    "scene-01": "b689e08a",
+    "scene-02": "14fea4a9",
+    "scene-03": "d97e0bd2",
+    "scene-04": "f9ead102",
+    "scene-05": "51e9491a"
+  },
+  "hashesAfter": {
+    "scene-01": "b689e08a",
+    "scene-02": "dcccf5f8",
+    "scene-03": "d97e0bd2",
+    "scene-04": "f9ead102",
+    "scene-05": "51e9491a"
+  },
+  "hashesAfterUpload": {
+    "scene-01": "b689e08a",
+    "scene-02": "dcccf5f8",
+    "scene-03": "51e9491a",
+    "scene-04": "f9ead102",
+    "scene-05": "51e9491a"
+  }
+}
