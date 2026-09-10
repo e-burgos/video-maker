@@ -91,16 +91,16 @@
       "sdd/context/apps/web/updates/2026-09-09-spec-e-burgos-007-web-montage-cycle-02.md"
     ],
     "usage": {
-      "tokens_in": 555000,
-      "tokens_out": 116000,
-      "approx": true,
-      "source": "declared-estimate",
+      "tokens_in": 266450,
+      "tokens_out": 47020,
+      "approx": false,
+      "source": "agent-usage-notification",
       "by_tier": {
         "claude/opus": {
-          "tokens_in": 555000,
-          "tokens_out": 116000,
-          "approx": true,
-          "source": "declared-estimate"
+          "tokens_in": 266450,
+          "tokens_out": 47020,
+          "approx": false,
+          "source": "agent-usage-notification"
         }
       },
       "by_agent": [
@@ -109,12 +109,12 @@
           "label": "solo",
           "provider_model": "claude/opus",
           "effort": "high",
-          "tokens_in": 555000,
-          "tokens_out": 116000,
-          "approx": true,
-          "source": "declared-estimate",
+          "tokens_in": 266450,
+          "tokens_out": 47020,
+          "approx": false,
+          "source": "agent-usage-notification",
           "recorded_at": "2026-09-09",
-          "tokens_total": 671000
+          "tokens_total": 313470
         }
       ]
     }
