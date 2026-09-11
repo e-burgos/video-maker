@@ -6,7 +6,7 @@ import type {
   OutputPreset,
   Timeline,
 } from '@video-maker/timeline-core';
-import { buildTimeline, planPunchIns, remapMsAfterCuts } from '@video-maker/timeline-core';
+import { buildTimeline, framesToMs, planPunchIns, remapMsAfterCuts } from '@video-maker/timeline-core';
 import type { ReadTextFile } from '@video-maker/media-local';
 import { nodeReadTextFile } from '@video-maker/media-local';
 
@@ -39,8 +39,17 @@ import type { EnsureDirectory } from './fs/ensure-directory';
 import { nodeEnsureDirectory } from './fs/ensure-directory';
 import type { WriteTextFile } from './fs/write-text-file';
 import { nodeWriteTextFile } from './fs/write-text-file';
+import { readVoiceScriptTrack } from './voice/read-voice-script-track';
 
 export type LogoMode = 'auto' | 'off';
+
+export type VoiceSource = 'aroll' | 'script';
+
+export interface VoiceTrackSummary {
+  readonly assetId: string;
+  readonly durationMs: number;
+  readonly truncatedMs: number;
+}
 
 export interface AutoMontageOptions {
   readonly preset: MontagePresetName | MontagePreset;
@@ -51,6 +60,8 @@ export interface AutoMontageOptions {
   readonly logoAssetId?: string;
   readonly logo?: LogoMode;
   readonly scriptText?: string;
+  readonly voice?: VoiceSource;
+  readonly pruneSilences?: boolean;
   readonly persist?: boolean;
 }
 
@@ -67,6 +78,8 @@ export interface AutoMontageResult {
   readonly brollOverlays: readonly BrollOverlayPlan[];
   readonly brollRejections: readonly BrollRejection[];
   readonly transcriptionSource: TranscriptionSource;
+  readonly voiceSource: VoiceSource;
+  readonly voiceTrack: VoiceTrackSummary | null;
   readonly stopwordLanguage: string | null;
   readonly logoAssetId: string | null;
   readonly scriptAlignment: ScriptAlignmentCounts | null;
@@ -102,6 +115,21 @@ function toAlignmentCounts(alignment: ScriptAlignmentResult): ScriptAlignmentCou
   };
 }
 
+function toVoiceTrackSummary(
+  track: { readonly asset: MediaAsset } | null,
+  sourceDurationMs: number,
+): VoiceTrackSummary | null {
+  if (track === null) {
+    return null;
+  }
+
+  return {
+    assetId: track.asset.id,
+    durationMs: track.asset.durationMs,
+    truncatedMs: Math.max(0, track.asset.durationMs - sourceDurationMs),
+  };
+}
+
 function toLogoInput(logoAsset: MediaAsset | undefined): LogoInput | undefined {
   return logoAsset === undefined ? undefined : { assetId: logoAsset.id };
 }
@@ -134,20 +162,35 @@ export async function autoMontage(
       { readTextFile },
     );
 
-  const alignment =
-    options.scriptText === undefined
-      ? null
-      : alignTranscriptToScript(transcription.words, options.scriptText);
-  const alignedTranscription =
-    alignment === null ? transcription : { ...transcription, words: [...alignment.words], segments: [] };
-
   const fps = format.fps;
+  const voiceSource: VoiceSource = options.voice ?? 'aroll';
+  const voiceScriptTrack =
+    voiceSource === 'script' ? await readVoiceScriptTrack(project, { readTextFile }) : null;
+
+  if (voiceScriptTrack !== null && voiceScriptTrack.asset.durationMs <= framesToMs(1, fps, 'ceil')) {
+    throw new MontageInputError({ projectRoot: project.root, reason: 'empty-voice-track' });
+  }
+
+  const speech = voiceScriptTrack === null ? transcription : voiceScriptTrack.transcription;
+  const speechSource: TranscriptionSource =
+    voiceScriptTrack === null ? transcriptionSource : 'voice-script';
+
+  const alignment =
+    options.scriptText === undefined ? null : alignTranscriptToScript(speech.words, options.scriptText);
+  const alignedTranscription =
+    alignment === null ? speech : { ...speech, words: [...alignment.words], segments: [] };
+
+  const sourceDurationMs =
+    voiceScriptTrack === null
+      ? arollAsset.durationMs
+      : Math.min(arollAsset.durationMs, voiceScriptTrack.asset.durationMs);
+
   const { pruneDurationMs, keeps, cuts } = pruneSilencesWithFrameMargin(
     project.root,
-    arollAsset,
     alignedTranscription,
     preset,
     fps,
+    { sourceDurationMs, prune: options.pruneSilences ?? voiceSource === 'aroll' },
   );
 
   const punchIns = planPunchIns(keeps, {
@@ -190,6 +233,9 @@ export async function autoMontage(
   );
 
   const assets = [arollAsset, ...brollAssetsUsedBy(overlays, catalog.assets)];
+  if (voiceScriptTrack !== null) {
+    assets.push(voiceScriptTrack.asset);
+  }
   if (musicAsset !== undefined) {
     assets.push(musicAsset);
   }
@@ -198,7 +244,13 @@ export async function autoMontage(
   }
 
   const timeline = assertValidTimeline(
-    buildTimeline(edl, assets, toMusicInput(musicAsset, preset), toLogoInput(logoAsset)),
+    buildTimeline(
+      edl,
+      assets,
+      toMusicInput(musicAsset, preset),
+      toLogoInput(logoAsset),
+      voiceScriptTrack === null ? undefined : { assetId: voiceScriptTrack.asset.id },
+    ),
   );
 
   if (options.persist !== false) {
@@ -214,7 +266,9 @@ export async function autoMontage(
     concepts,
     brollOverlays: overlays,
     brollRejections: rejections,
-    transcriptionSource,
+    transcriptionSource: speechSource,
+    voiceSource,
+    voiceTrack: toVoiceTrackSummary(voiceScriptTrack, sourceDurationMs),
     stopwordLanguage,
     logoAssetId: logoAsset?.id ?? null,
     scriptAlignment: alignment === null ? null : toAlignmentCounts(alignment),

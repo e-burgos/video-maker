@@ -8,12 +8,16 @@ import {
   parseMontagePreset,
   parseMontageScript,
   parseMontageSeed,
+  parseMontageVoice,
 } from '../../jobs/montage-job-params';
 import { parseJobModel } from '../../jobs/job-model-params';
 import { parseStoryboardInput, parseStoryboardOverwrite } from '../../jobs/storyboard-job-params';
 import { parseVoiceJobInput } from '../../jobs/voice-job-params';
 import { assertVoiceTracksNotPersisted, selectVoiceScenes } from '../../voice/select-voice-scenes';
-import { assertVoiceScriptTrackNotPersisted } from '../../voice/voice-script-preconditions';
+import {
+  assertVoiceScriptTrackNotPersisted,
+  assertVoiceScriptTrackPersisted,
+} from '../../voice/voice-script-preconditions';
 import { readVoiceManifestIfUsable } from '../../voice/voice-store';
 import { readStoredStoryboard } from '../../storyboard/storyboard-store';
 import { storyboardPath } from '../../storyboard/storyboard-paths';
@@ -169,8 +173,13 @@ export async function handleCreateRenderJob(
   const script = parseMontageScript(bodyObject.scriptPath, bodyObject.scriptText);
   const logo = parseMontageLogo(bodyObject.logo);
   const format = parseMontageFormat(bodyObject.format);
+  const voice = parseMontageVoice(bodyObject.voice);
 
   await assertTimelineNotPersisted(deps, project, overwrite);
+
+  if (voice === 'script') {
+    await assertVoiceScriptTrackPersisted(deps, project);
+  }
 
   const job = runtime.jobs.create({
     kind: 'montage',
@@ -182,6 +191,7 @@ export async function handleCreateRenderJob(
     scriptText: script.scriptText,
     logo,
     format,
+    voice,
   });
 
   return {

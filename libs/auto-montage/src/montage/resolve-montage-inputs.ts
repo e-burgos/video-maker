@@ -7,7 +7,7 @@ import { MontageInputError } from '../errors/montage-input-error';
 import type { MediaProject } from '../project/media-project';
 import { toAbsolutePath } from '../project/project-paths';
 
-export type TranscriptionSource = 'catalog' | 'missing' | 'unreadable';
+export type TranscriptionSource = 'catalog' | 'missing' | 'unreadable' | 'voice-script';
 
 export interface ResolveMontageInputsOptions {
   readonly arollAssetId?: string;

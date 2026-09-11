@@ -27,7 +27,7 @@ describe('parseCliArgs — success paths', () => {
     expect(parseCliArgs(['plan', 'media/p', '--preset', 'hardware'])).toEqual({
       command: 'plan',
       projectRoot: 'media/p',
-      options: { preset: 'hardware', seed: 0, scriptPath: null, logo: 'auto', format: 'reels-9x16' },
+      options: { preset: 'hardware', seed: 0, scriptPath: null, logo: 'auto', format: 'reels-9x16', voice: 'aroll', pruneSilences: undefined },
     });
   });
 
@@ -35,7 +35,7 @@ describe('parseCliArgs — success paths', () => {
     expect(parseCliArgs(['plan', 'media/p', '--preset', 'recipe', '--seed', '42'])).toEqual({
       command: 'plan',
       projectRoot: 'media/p',
-      options: { preset: 'recipe', seed: 42, scriptPath: null, logo: 'auto', format: 'reels-9x16' },
+      options: { preset: 'recipe', seed: 42, scriptPath: null, logo: 'auto', format: 'reels-9x16', voice: 'aroll', pruneSilences: undefined },
     });
   });
 
@@ -43,7 +43,7 @@ describe('parseCliArgs — success paths', () => {
     expect(parseCliArgs(['run', 'media/p', '--preset', 'educational', '--seed', '3'])).toEqual({
       command: 'run',
       projectRoot: 'media/p',
-      options: { preset: 'educational', seed: 3, scriptPath: null, logo: 'auto', format: 'reels-9x16' },
+      options: { preset: 'educational', seed: 3, scriptPath: null, logo: 'auto', format: 'reels-9x16', voice: 'aroll', pruneSilences: undefined },
     });
   });
 });
@@ -180,7 +180,7 @@ describe('parseCliArgs — the 8-step validation order of §4.1', () => {
     expect(parseCliArgs(['plan', 'media/p', '--preset', 'hardware', '--seed', '0'])).toEqual({
       command: 'plan',
       projectRoot: 'media/p',
-      options: { preset: 'hardware', seed: 0, scriptPath: null, logo: 'auto', format: 'reels-9x16' },
+      options: { preset: 'hardware', seed: 0, scriptPath: null, logo: 'auto', format: 'reels-9x16', voice: 'aroll', pruneSilences: undefined },
     });
   });
 });
@@ -190,12 +190,12 @@ describe('parseCliArgs — --format (FIX-e-burgos-007-001)', () => {
     expect(parseCliArgs(['plan', 'media/demo-01', '--preset', 'software-demo', '--format', 'youtube-16x9'])).toEqual({
       command: 'plan',
       projectRoot: 'media/demo-01',
-      options: { preset: 'software-demo', seed: 0, scriptPath: null, logo: 'auto', format: 'youtube-16x9' },
+      options: { preset: 'software-demo', seed: 0, scriptPath: null, logo: 'auto', format: 'youtube-16x9', voice: 'aroll', pruneSilences: undefined },
     });
     expect(parseCliArgs(['run', 'media/demo-01', '--preset', 'hardware', '--format', 'tiktok-9x16'])).toEqual({
       command: 'run',
       projectRoot: 'media/demo-01',
-      options: { preset: 'hardware', seed: 0, scriptPath: null, logo: 'auto', format: 'tiktok-9x16' },
+      options: { preset: 'hardware', seed: 0, scriptPath: null, logo: 'auto', format: 'tiktok-9x16', voice: 'aroll', pruneSilences: undefined },
     });
   });
 
@@ -232,6 +232,73 @@ describe('parseCliArgs — --format (FIX-e-burgos-007-001)', () => {
   });
 });
 
+describe('parseCliArgs — --voice y --prune-silences (FIX-e-burgos-007-002)', () => {
+  it('sin --voice la fuente de habla es el A-roll y la poda queda sin decidir', () => {
+    const parsed = parseCliArgs(['plan', 'media/demo-01', '--preset', 'software-demo']);
+
+    expect(parsed.command === 'plan' && parsed.options.voice).toBe('aroll');
+    expect(parsed.command === 'plan' ? parsed.options.pruneSilences : 'x').toBeUndefined();
+  });
+
+  it('toma --voice script y --prune-silences en plan y en run', () => {
+    expect(
+      parseCliArgs(['plan', 'media/demo-01', '--preset', 'software-demo', '--voice', 'script']),
+    ).toEqual({
+      command: 'plan',
+      projectRoot: 'media/demo-01',
+      options: {
+        preset: 'software-demo',
+        seed: 0,
+        scriptPath: null,
+        logo: 'auto',
+        format: 'reels-9x16',
+        voice: 'script',
+        pruneSilences: undefined,
+      },
+    });
+    expect(
+      parseCliArgs(['run', 'media/demo-01', '--preset=hardware', '--voice=script', '--prune-silences']),
+    ).toEqual({
+      command: 'run',
+      projectRoot: 'media/demo-01',
+      options: {
+        preset: 'hardware',
+        seed: 0,
+        scriptPath: null,
+        logo: 'auto',
+        format: 'reels-9x16',
+        voice: 'script',
+        pruneSilences: true,
+      },
+    });
+  });
+
+  it('rechaza una fuente de voz desconocida nombrando las dos válidas', () => {
+    try {
+      parseCliArgs(['plan', 'media/demo-01', '--preset', 'software-demo', '--voice', 'piper']);
+      expect.unreachable('parseCliArgs debe rechazar una fuente de voz desconocida');
+    } catch (error) {
+      expect(error).toBeInstanceOf(CliArgumentError);
+      expect((error as CliArgumentError).reason).toBe('unknown-voice-source');
+      expect((error as CliArgumentError).resource).toBe('--voice=piper');
+      expect((error as CliArgumentError).expected).toBe('aroll | script');
+      expect((error as CliArgumentError).stage).toBe('plan');
+    }
+  });
+
+  it.each(['ingest', 'render'])('%s no acepta --voice ni --prune-silences', (command) => {
+    for (const option of ['--voice=script', '--prune-silences']) {
+      try {
+        parseCliArgs([command, 'media/demo-01', option]);
+        expect.unreachable('parseCliArgs debe rechazar la opción fuera de plan y run');
+      } catch (error) {
+        expect(error).toBeInstanceOf(CliUsageError);
+        expect((error as CliUsageError).reason).toBe('unexpected-option');
+      }
+    }
+  });
+});
+
 describe('parseCliArgs — --script y --no-logo (spec-014)', () => {
   it('plan acepta --script con la ruta del guion', () => {
     expect(parseCliArgs(['plan', 'media/demo-01', '--preset=hardware', '--script=media/demo-01/work/producer/script.txt'])).toEqual({
@@ -243,6 +310,8 @@ describe('parseCliArgs — --script y --no-logo (spec-014)', () => {
         scriptPath: 'media/demo-01/work/producer/script.txt',
         logo: 'auto',
         format: 'reels-9x16',
+        voice: 'aroll',
+        pruneSilences: undefined,
       },
     });
   });
@@ -251,7 +320,7 @@ describe('parseCliArgs — --script y --no-logo (spec-014)', () => {
     expect(parseCliArgs(['run', 'media/demo-01', '--preset=hardware', '--seed=3', '--script=guion.txt', '--no-logo'])).toEqual({
       command: 'run',
       projectRoot: 'media/demo-01',
-      options: { preset: 'hardware', seed: 3, scriptPath: 'guion.txt', logo: 'off', format: 'reels-9x16' },
+      options: { preset: 'hardware', seed: 3, scriptPath: 'guion.txt', logo: 'off', format: 'reels-9x16', voice: 'aroll', pruneSilences: undefined },
     });
   });
 

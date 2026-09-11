@@ -1,4 +1,4 @@
-import type { AssetRole, ScriptAlignmentCounts } from '@video-maker/auto-montage';
+import type { AssetRole, ScriptAlignmentCounts, VoiceSource, VoiceTrackSummary } from '@video-maker/auto-montage';
 import type { OutputFormat } from '@video-maker/timeline-core';
 
 export interface AssetRoleCount {
@@ -35,6 +35,8 @@ export interface PlanReport {
   readonly edlPath: string;
   readonly editedDurationMs: number;
   readonly transcriptionSource: string;
+  readonly voiceSource: VoiceSource;
+  readonly voiceTrack: VoiceTrackSummary | null;
   readonly conceptTerms: readonly string[];
   readonly brollOverlayCount: number;
   readonly brollRejections: readonly PlanBrollRejectionReport[];

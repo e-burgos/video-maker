@@ -1,5 +1,7 @@
-import type { Timeline } from '@video-maker/timeline-core';
+import type { MediaAsset, Timeline } from '@video-maker/timeline-core';
+import { buildTimeline, defaultFormat } from '@video-maker/timeline-core';
 import { describe, expect, it } from 'vitest';
+import { exampleAssets, exampleEdl } from '../__fixtures__/example-edl';
 import { buildExampleTimeline } from '../__fixtures__/example-timeline';
 import { timelineToSequenceProps } from './timeline-to-sequence-props';
 
@@ -77,6 +79,29 @@ describe('timelineToSequenceProps', () => {
     expect(plan.music[0]).toMatchObject({ from: 0, durationInFrames: 265, gainDb: -12 });
     expect(plan.music[0]?.volume).toBeCloseTo(0.2512, 4);
     expect(plan.voice[0]?.volume).toBe(1);
+  });
+
+  it('resuelve la voz del guion como un asset de audio propio bajo work/ (FIX-e-burgos-007-002)', () => {
+    const scriptVoice: MediaAsset = {
+      id: 'work/voice/voice.wav',
+      kind: 'audio',
+      path: 'work/voice/voice.wav',
+      durationMs: 10_000,
+      probedAt: '2026-09-07T00:00:00.000Z',
+    };
+    const scriptPlan = timelineToSequenceProps(
+      buildTimeline(
+        { ...exampleEdl, format: defaultFormat('youtube-16x9') },
+        [...exampleAssets, scriptVoice],
+        undefined,
+        undefined,
+        { assetId: scriptVoice.id },
+      ),
+    );
+
+    expect(scriptPlan.unresolvedAssetIds).toEqual([]);
+    expect(scriptPlan.voice.every((clip) => clip.assetId === 'work/voice/voice.wav')).toBe(true);
+    expect(scriptPlan.voice[0]?.src).toContain('work/voice/voice.wav');
   });
 
   it('mapea captions con from/durationInFrames relativos a la Sequence', () => {

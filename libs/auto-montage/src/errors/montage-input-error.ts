@@ -7,7 +7,10 @@ export type MontageInputReason =
   | 'music-asset-not-found'
   | 'logo-asset-not-found'
   | 'unknown-preset'
-  | 'empty-aroll';
+  | 'empty-aroll'
+  | 'voice-track-missing'
+  | 'voice-track-unreadable'
+  | 'empty-voice-track';
 
 export class MontageInputError extends AutoMontageError {
   readonly code = 'MONTAGE_INPUT_INVALID';

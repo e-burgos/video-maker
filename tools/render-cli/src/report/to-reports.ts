@@ -43,6 +43,8 @@ export function toPlanReport(result: AutoMontageResult): PlanReport {
     edlPath: result.edlPath,
     editedDurationMs: result.editedDurationMs,
     transcriptionSource: result.transcriptionSource,
+    voiceSource: result.voiceSource,
+    voiceTrack: result.voiceTrack,
     conceptTerms: result.concepts.map((concept) => concept.term),
     brollOverlayCount: result.brollOverlays.length,
     brollRejections: result.brollRejections.map((rejection) => ({

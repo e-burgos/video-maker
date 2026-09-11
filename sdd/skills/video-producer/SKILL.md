@@ -70,9 +70,10 @@ El logo **sí** se maneja desde la web desde `spec-015` `cycle-02`: el usuario l
    de audio). Mirá un frame de cada video y cada foto (`ffmpeg -ss N -frames:v 1`) para saber qué
    muestran: sin eso no podés escribir un guion coherente con el material.
 2. **Entender el pedido y acordar.** Antes de producir, una sola ronda de preguntas, con
-   **sugerencias concretas** para que el usuario solo confirme: tono y objetivo, duración
-   (sugerí 30–45 s para redes, 60–120 s para tutorial), formato (`9:16` reels/tiktok/shorts o
-   `16:9`), voz (¿locución propia en `raw/voice/` o generada con Piper?), música (¿la trae, la
+   **sugerencias concretas** para que el usuario solo confirme: **para qué plataforma es el video**
+   (YouTube/web → `youtube-16x9`; Reels/TikTok/Shorts → `9x16`; se produce **un solo formato**, §5),
+   tono y objetivo, duración
+   (sugerí 30–45 s para redes, 60–120 s para tutorial), voz (¿locución propia en `raw/voice/` o generada con Piper?), música (¿la trae, la
    busco libre, o sin música?), guion (¿lo trae o lo propongo?). Si falta material para un
    concepto, proponé buscarlo libre y pedí permiso. No arranques sin el "dale".
 3. **Escribir el plan** en `media/<slug>/work/producer/plan.md` (objetivo, guion final, mapa
@@ -132,14 +133,26 @@ la dejan más discreta, que es lo que quiere un tutorial.
 
 `--seed N` cambia qué B-roll y qué transición se eligen sin cambiar las reglas.
 
-### Formato de salida (lo elegís vos, no se adivina)
+### Formato de salida: preguntá la plataforma y producí UN SOLO formato
 
 `reels-9x16` · `tiktok-9x16` · `shorts-9x16` (1080×1920) y `youtube-16x9` (1920×1080). El default es
 **`reels-9x16` en los dos caminos**, así que si no lo pedís, una grabación de pantalla apaisada sale
-vertical. **Regla:** medí el A-roll con `ffprobe` y seguí su orientación salvo pedido explícito del
-usuario — apaisado (pantallas grabadas, escritorio) → `youtube-16x9`; vertical (redes) → uno de los
-`9x16`. Se pasa con `--format <preset>` en `plan`/`run` de la CLI y con `"format": "<preset>"` en el
-job `montage`. Decí siempre qué formato elegiste cuando acordás el plan.
+vertical.
+
+**Regla, en este orden:**
+
+1. **Antes de producir, preguntá para qué plataforma es el video** (es una de las preguntas de la
+   ronda única del §2, con recomendación): YouTube o web → `youtube-16x9`; Reels, TikTok o Shorts →
+   el `9x16` que corresponda.
+2. Si el usuario no elige, proponé el formato que sigue la orientación del A-roll medida con
+   `ffprobe` — apaisado (pantalla grabada, escritorio) → `youtube-16x9`; vertical → `9x16` — y decílo
+   explícito al acordar el plan.
+3. **Producí ese formato y nada más.** Nunca rendericés "todos los tamaños" salvo que el usuario lo
+   pida: cada formato es un render completo (minutos de CPU y de memoria) y un entregable distinto.
+   Si pide dos, hacelos de a uno y avisá el costo.
+
+Se pasa con `--format <preset>` en `plan`/`run` de la CLI y con `"format": "<preset>"` en el job
+`montage`.
 
 ## 6. Voz con Piper y A-roll sintético (receta exacta)
 
@@ -174,6 +187,36 @@ ffmpeg -y -ss <inicio> -i <base.mp4> -i work/producer/voice.wav -map 0:v:0 -map 
 Si el usuario trae su locución, reemplazá `voice.wav` por su archivo. Si el video base es más
 corto que la voz, concatená o loopeá clips (`-stream_loop`) antes de muxear.
 
+### Grabación muda + narración generada: NO hace falta muxear (FIX-e-burgos-007-002)
+
+Si el A-roll es una pantalla grabada **sin audio** y la voz la generás vos, el camino corto es
+`voice` → `montage` con `voice: "script"` → `render`. El montaje toma el habla del wav sintetizado,
+no del A-roll:
+
+```bash
+curl -sS -X POST $RENDER_API_URL/projects/<slug>/jobs -H 'content-type: application/json' \
+  -d '{"kind":"voice","scriptPath":"work/producer/script.txt","model":"<modelo del turno>"}'
+curl -sS -X POST $RENDER_API_URL/projects/<slug>/jobs -H 'content-type: application/json' \
+  -d '{"kind":"montage","preset":"software-demo","voice":"script","format":"youtube-16x9","scriptPath":"work/producer/script.txt","overwrite":true}'
+curl -sS -X POST $RENDER_API_URL/projects/<slug>/jobs -H 'content-type: application/json' -d '{"kind":"render"}'
+```
+
+Qué cambia con `"voice":"script"`:
+
+- Conceptos, B-roll y **captions** salen de las palabras de la narración (`work/voice/voice.words.json`),
+  así que un A-roll mudo deja de dar `captions 0`.
+- La pista `voice` de la Timeline apunta a `work/voice/voice.wav` y el audio del A-roll se **ignora**
+  por completo.
+- La **poda de silencios queda apagada**: la grabación es continua y la narración va encima, así que
+  el corte queda en un solo tramo. Con la CLI podés forzarla con `--prune-silences`.
+- El video dura `min(voz, A-roll)`. Si la voz es más larga, se corta y el reporte lo dice
+  (`voiceTrack.truncatedMs`): avisale al usuario y ofrecé acortar el guion o alargar la grabación.
+- El job falla con `409 MONTAGE_VOICE_TRACK_NOT_FOUND` si mandás `"voice":"script"` sin haber corrido
+  antes el job `voice`, y con `422 MONTAGE_VOICE_INVALID` si mandás cualquier otro valor.
+
+Lo mismo desde la CLI: `pnpm nx run render-cli:cli -- run media/<slug> --preset software-demo
+--format youtube-16x9 --voice script --script media/<slug>/work/producer/script.txt`.
+
 ## 7. Medios libres (solo con permiso o a pedido)
 
 - **NASA** (dominio público, sin key): `https://images-api.nasa.gov/search?q=<q>&media_type=video|image`;
@@ -205,7 +248,8 @@ corto que la voz, concatená o loopeá clips (`-stream_loop`) antes de muxear.
 
 - **Tutorial con pantalla grabada y voz**: la grabación es el A-roll. Preset `software-demo`.
   Fotos o clips de apoyo nombrados por lo que se dice (`terminal.mp4`, `deploy.png`).
-- **Pantalla grabada muda + guion**: voz Piper (§6) muxeada sobre la grabación.
+- **Pantalla grabada muda + guion**: job `voice` con el guion y después `montage` con
+  `"voice":"script"` (§6). No hace falta muxear la voz sobre la grabación.
 - **Publicidad con fotos y clips del cliente**: guion propuesto con 3 conceptos repetidos, voz
   Piper o locución del cliente, un clip del cliente como base del A-roll, el resto como B-roll
   nombrado por concepto, música libre si no trae. Preset `educational` (sobrio) o `software-demo`

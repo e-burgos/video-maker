@@ -6,7 +6,7 @@ import { DEFAULT_AUDIO_MIX_PLAN, DEFAULT_MUSIC_MIX, planDucking } from '../ducki
 import type { EditDecisionList } from '../schemas/edit-decision-list.schema';
 import { TimelineSchema } from '../schemas/timeline.schema';
 import { TimelineBuildError, buildTimeline } from './build-timeline';
-import type { LogoInput, MusicInput } from './build-timeline';
+import type { LogoInput, MusicInput, VoiceInput } from './build-timeline';
 
 function parseOrThrow(timeline: unknown) {
   const result = TimelineSchema.safeParse(timeline);
@@ -47,6 +47,24 @@ describe('buildTimeline (CA-013)', () => {
       muted: true,
       transform: { scale: 1.15, translateX: 0, translateY: 0 },
     });
+  });
+
+  it('con una voz propia la pista de voz apunta a ese asset y conserva el recorte del A-roll (FIX-e-burgos-007-002)', () => {
+    const voice: VoiceInput = { assetId: 'work/voice/voice.wav' };
+    const timeline = buildTimeline(ca013Edl, ca013Assets, undefined, undefined, voice);
+
+    expect(timeline.tracks.voice).toHaveLength(timeline.tracks.aroll.length);
+    timeline.tracks.voice.forEach((voiceClip, index) => {
+      const arollClip = timeline.tracks.aroll[index];
+      expect(voiceClip).toMatchObject({
+        assetId: 'work/voice/voice.wav',
+        from: arollClip?.from,
+        durationFrames: arollClip?.durationFrames,
+        trimStartMs: arollClip?.trimStartMs,
+        gainDb: 0,
+      });
+    });
+    expect(timeline.tracks.aroll.every((clip) => clip.assetId !== 'work/voice/voice.wav')).toBe(true);
   });
 
   it('espeja el A-roll en la pista de voz sin ganancia aplicada', () => {

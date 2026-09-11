@@ -1,4 +1,4 @@
-import type { LogoMode, MediaProject, MontagePresetName } from '@video-maker/auto-montage';
+import type { LogoMode, MediaProject, MontagePresetName, VoiceSource } from '@video-maker/auto-montage';
 import type { OutputPreset } from '@video-maker/timeline-core';
 import { autoMontage, discoverAssets, ingestProject, toAbsolutePath } from '@video-maker/auto-montage';
 
@@ -20,6 +20,7 @@ export interface MontagePipelineRequest {
   readonly scriptText?: string | null;
   readonly logo?: LogoMode;
   readonly format?: OutputPreset;
+  readonly voice?: VoiceSource;
 }
 
 async function resolveScriptText(
@@ -111,6 +112,7 @@ export async function runMontagePipeline(
         preset: request.preset,
         seed: request.seed,
         logo: request.logo ?? 'auto',
+        voice: request.voice ?? 'aroll',
         ...(request.format === undefined ? {} : { outputPreset: request.format }),
         ...(scriptText === undefined ? {} : { scriptText }),
       },
@@ -130,5 +132,7 @@ export async function runMontagePipeline(
     seed: request.seed,
     logoAssetId: montageResult.logoAssetId,
     scriptAlignment: montageResult.scriptAlignment,
+    voiceSource: montageResult.voiceSource,
+    voiceTrack: montageResult.voiceTrack,
   };
 }

@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest';
 
 import {
   parseMontageFormat,
+  parseMontageVoice,
   parseMontageLogo,
   parseMontageOverwrite,
   parseMontagePreset,
@@ -194,5 +195,28 @@ describe('parseMontageFormat', () => {
     expect((error as PipelineStageError).expected).toBe(
       'one of reels-9x16, tiktok-9x16, shorts-9x16, youtube-16x9',
     );
+  });
+});
+
+describe('parseMontageVoice (FIX-e-burgos-007-002)', () => {
+  it('defaults to aroll', () => {
+    expect(parseMontageVoice(undefined)).toBe('aroll');
+  });
+
+  it.each(['aroll', 'script'])('accepts %s', (source) => {
+    expect(parseMontageVoice(source)).toBe(source);
+  });
+
+  it('rejects anything else with MONTAGE_VOICE_INVALID naming both sources', () => {
+    const error = captureError(() => parseMontageVoice('piper'));
+
+    expect(error).toBeInstanceOf(PipelineStageError);
+    expect((error as PipelineStageError).code).toBe('MONTAGE_VOICE_INVALID');
+    expect((error as PipelineStageError).resource).toBe('voice');
+    expect((error as PipelineStageError).expected).toBe('one of aroll, script');
+  });
+
+  it('rejects a non-string with MONTAGE_VOICE_INVALID', () => {
+    expect(captureError(() => parseMontageVoice(1))).toBeInstanceOf(PipelineStageError);
   });
 });

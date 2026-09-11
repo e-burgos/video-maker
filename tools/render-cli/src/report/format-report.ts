@@ -32,6 +32,17 @@ function formatScriptAlignment(report: PlanReport): string[] {
   ];
 }
 
+function formatVoiceTrack(report: PlanReport): string[] {
+  const track = report.voiceTrack;
+  if (track === null) {
+    return [];
+  }
+
+  return [
+    `  voice-track: ${track.assetId} ${track.durationMs}ms (truncated ${track.truncatedMs}ms)`,
+  ];
+}
+
 function formatPlanReport(report: PlanReport): string[] {
   return [
     `ok [plan] ${report.timelinePath}`,
@@ -39,6 +50,8 @@ function formatPlanReport(report: PlanReport): string[] {
     `  edl: ${report.edlPath}`,
     `  edited-duration-ms: ${report.editedDurationMs}`,
     `  transcription-source: ${report.transcriptionSource}`,
+    `  voice: ${report.voiceSource}`,
+    ...formatVoiceTrack(report),
     `  concepts: ${report.conceptTerms.length}`,
     ...report.conceptTerms.map((term) => `    ${term}`),
     `  broll-overlays: ${report.brollOverlayCount}`,

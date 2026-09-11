@@ -1,4 +1,4 @@
-import type { LogoMode, MontagePresetName } from '@video-maker/auto-montage';
+import type { LogoMode, MontagePresetName, VoiceSource } from '@video-maker/auto-montage';
 import type { OutputPreset, StoryboardSource, Timeline, VoiceTrackSource } from '@video-maker/timeline-core';
 
 import type { RenderApiErrorCode, RenderApiErrorPayload, RenderPipelineStage } from '../errors/render-api-error';
@@ -112,6 +112,12 @@ export interface MontageScriptAlignmentReport {
   readonly corrected: number;
 }
 
+export interface MontageVoiceTrackReport {
+  readonly assetId: string;
+  readonly durationMs: number;
+  readonly truncatedMs: number;
+}
+
 export interface MontageJobReport {
   readonly catalogPath: string;
   readonly timelinePath: string;
@@ -120,6 +126,8 @@ export interface MontageJobReport {
   readonly seed: number;
   readonly logoAssetId: string | null;
   readonly scriptAlignment: MontageScriptAlignmentReport | null;
+  readonly voiceSource: VoiceSource;
+  readonly voiceTrack: MontageVoiceTrackReport | null;
 }
 
 interface JobBase {
@@ -194,6 +202,7 @@ export interface CreateMontageJobInput {
   readonly scriptText: string | null;
   readonly logo: LogoMode;
   readonly format: OutputPreset;
+  readonly voice: VoiceSource;
 }
 
 export interface CreateStoryboardJobInput {

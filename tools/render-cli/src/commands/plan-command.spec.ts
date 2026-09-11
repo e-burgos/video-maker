@@ -169,6 +169,85 @@ describe('planCommand', () => {
     expect(report.scriptAlignment).toBeNull();
   });
 
+  it('--voice script planifica sobre el wav sintetizado, sin podar silencios (FIX-e-burgos-007-002)', async () => {
+    const fileSystem = buildPlannableFileSystem();
+    await fileSystem.writeTextFile(
+      `${fixtureMediaProject.workDir}/voice/script-manifest.json`,
+      JSON.stringify({
+        schemaVersion: 1,
+        source: 'script',
+        language: 'es',
+        voiceId: 'es_AR-daniela-high',
+        gapMs: 900,
+        path: 'work/voice/voice.wav',
+        wordsPath: 'work/voice/voice.words.json',
+        durationMs: 9000,
+        sampleRate: 48_000,
+        updatedAt: '2026-01-01T00:00:00.000Z',
+        lines: [
+          { index: 1, text: 'abrimos la terminal', path: 'work/voice/sources/line-01.wav', startMs: 0, durationMs: 9000 },
+        ],
+      }),
+    );
+    await fileSystem.writeTextFile(
+      `${fixtureMediaProject.workDir}/voice/voice.words.json`,
+      JSON.stringify({
+        assetId: 'work/voice/voice.wav',
+        engine: 'whisper.cpp',
+        language: 'es',
+        words: [
+          word('abrimos', 0, 600),
+          word('la', 600, 800),
+          word('terminal', 800, 1400),
+          word('escribimos', 2600, 3300),
+          word('en', 3300, 3500),
+          word('la', 3500, 3700),
+          word('terminal', 3700, 4300),
+        ],
+        segments: [],
+      }),
+    );
+    const deps = createFakeCliDependencies({ fileSystem });
+
+    const report = await planCommand(
+      fixtureMediaProject,
+      {
+        preset: 'software-demo',
+        seed: 0,
+        scriptPath: null,
+        logo: 'auto',
+        format: 'youtube-16x9',
+        voice: 'script',
+        pruneSilences: undefined,
+      },
+      deps,
+    );
+
+    expect(report.voiceSource).toBe('script');
+    expect(report.transcriptionSource).toBe('voice-script');
+    expect(report.voiceTrack).toEqual({
+      assetId: 'work/voice/voice.wav',
+      durationMs: 9000,
+      truncatedMs: 0,
+    });
+
+    const pruned = await planCommand(
+      fixtureMediaProject,
+      {
+        preset: 'software-demo',
+        seed: 0,
+        scriptPath: null,
+        logo: 'auto',
+        format: 'youtube-16x9',
+        voice: 'script',
+        pruneSilences: true,
+      },
+      deps,
+    );
+
+    expect(pruned.editedDurationMs).toBeLessThan(report.editedDurationMs);
+  });
+
   it('un --script que no se puede leer es STAGE_INPUT_MISSING en la etapa plan', async () => {
     const deps = createFakeCliDependencies({ fileSystem: buildPlannableFileSystem() });
 

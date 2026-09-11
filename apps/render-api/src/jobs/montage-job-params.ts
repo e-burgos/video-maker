@@ -1,5 +1,5 @@
 import { MONTAGE_PRESETS } from '@video-maker/auto-montage';
-import type { LogoMode, MontagePresetName } from '@video-maker/auto-montage';
+import type { LogoMode, MontagePresetName, VoiceSource } from '@video-maker/auto-montage';
 import { OUTPUT_PRESETS } from '@video-maker/timeline-core';
 import type { OutputPreset } from '@video-maker/timeline-core';
 
@@ -12,6 +12,8 @@ const DEFAULT_MONTAGE_SEED = 0;
 const DEFAULT_MONTAGE_OVERWRITE = false;
 const DEFAULT_MONTAGE_LOGO: LogoMode = 'auto';
 const DEFAULT_MONTAGE_FORMAT: OutputPreset = 'reels-9x16';
+const DEFAULT_MONTAGE_VOICE: VoiceSource = 'aroll';
+const MONTAGE_VOICE_SOURCES: readonly VoiceSource[] = ['aroll', 'script'];
 
 function isMontagePresetName(value: unknown): value is MontagePresetName {
   return typeof value === 'string' && Object.prototype.hasOwnProperty.call(MONTAGE_PRESETS, value);
@@ -52,6 +54,23 @@ export function parseMontageFormat(value: unknown): OutputPreset {
   }
 
   return value;
+}
+
+export function parseMontageVoice(value: unknown): VoiceSource {
+  if (value === undefined) {
+    return DEFAULT_MONTAGE_VOICE;
+  }
+
+  if (typeof value !== 'string' || !(MONTAGE_VOICE_SOURCES as readonly string[]).includes(value)) {
+    throw new PipelineStageError({
+      code: 'MONTAGE_VOICE_INVALID',
+      stage: null,
+      resource: 'voice',
+      expected: `one of ${MONTAGE_VOICE_SOURCES.join(', ')}`,
+    });
+  }
+
+  return value as VoiceSource;
 }
 
 export function parseMontageSeed(value: unknown): number {

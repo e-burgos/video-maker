@@ -14,6 +14,7 @@ pnpm nx run render-cli:cli -- run media/smoke-ingest --preset software-demo --se
 pnpm nx run render-cli:cli -- run media/demo-01 --preset hardware --script media/demo-01/work/producer/script.txt
 pnpm nx run render-cli:cli -- plan media/demo-01 --preset hardware --no-logo
 pnpm nx run render-cli:cli -- plan media/display-ads --preset software-demo --format youtube-16x9
+pnpm nx run render-cli:cli -- run media/display-ads --preset software-demo --format youtube-16x9 --voice script
 
 pnpm nx run render-cli:smoke        # invocación fija sobre media/smoke-ingest
 ```
@@ -44,8 +45,21 @@ no negativo, default `0`. Formatos disponibles: `reels-9x16` (default), `tiktok-
   1920×1080; los tres `9x16` comparten dimensiones y difieren en nada más hoy. El reporte de `plan`
   abre con `format: <preset> <ancho>x<alto>@<fps>`.
 
-`ingest` y `render` rechazan las cinco opciones (`--preset`, `--seed`, `--script`, `--no-logo`,
-`--format`).
+- `--voice <aroll|script>` (FIX-e-burgos-007-002): de dónde sale el **habla**. Default `aroll`: la
+  transcripción del A-roll del catálogo, como siempre. Con `script`, la fuente es la voz que dejó el
+  job `voice` de `apps/render-api` —`work/voice/voice.wav` + `work/voice/voice.words.json`, descritos
+  en `work/voice/script-manifest.json`—: de esas palabras salen conceptos, B-roll y captions, la pista
+  `voice` de la Timeline apunta al wav como asset de audio propio y el audio del A-roll se ignora por
+  completo (la pista de video ya nace muteada). Sin ese manifest el error es `MONTAGE_INPUT_INVALID`
+  con `reason: voice-track-missing`. El montaje dura `min(voz, A-roll)`: si la voz es más larga se
+  corta y el reporte lo dice en `voice-track: <asset> <ms> (truncated <ms>)`.
+- `--prune-silences` (FIX-e-burgos-007-002): fuerza el corte por silencios en modo `script`, donde
+  está apagado por defecto —la grabación de pantalla es continua y la narración va encima, así que el
+  EDL trae un único `keep`—. En modo `aroll` la poda siempre estuvo encendida y la bandera no cambia
+  nada.
+
+`ingest` y `render` rechazan las siete opciones (`--preset`, `--seed`, `--script`, `--no-logo`,
+`--format`, `--voice`, `--prune-silences`).
 
 ## `render` entrega la mezcla masterizada (spec-015 cycle-01)
 

@@ -34,6 +34,8 @@ function createMontageInput(slug: string): CreateMontageJobInput {
     scriptPath: null,
     scriptText: null,
     logo: 'auto',
+    format: 'reels-9x16',
+    voice: 'aroll',
   };
 }
 
@@ -633,6 +635,8 @@ describe('createRenderJobQueue — montage jobs', () => {
       seed: 0,
       logoAssetId: null,
       scriptAlignment: null,
+      voiceSource: 'aroll',
+      voiceTrack: null,
     });
   });
 });

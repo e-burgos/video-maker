@@ -24,3 +24,18 @@ export async function assertVoiceScriptTrackNotPersisted(
     });
   }
 }
+
+export async function assertVoiceScriptTrackPersisted(
+  deps: RenderApiDependencies,
+  project: MediaProject,
+): Promise<void> {
+  const relativePath = voiceScriptTrackPath();
+  if ((await deps.storage.stat(toAbsolutePath(project, relativePath))) === null) {
+    throw new PipelineStageError({
+      code: 'MONTAGE_VOICE_TRACK_NOT_FOUND',
+      stage: null,
+      resource: relativePath,
+      expected: "a voice job with a script before a montage with voice: 'script'",
+    });
+  }
+}

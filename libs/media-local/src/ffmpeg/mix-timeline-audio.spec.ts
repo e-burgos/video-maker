@@ -183,6 +183,42 @@ describe('mixTimelineAudio (RF-2-01, CA-008, D-12/D-13/D-15/D-21)', () => {
     expect(runner.calls).toHaveLength(2);
   });
 
+  it('mezcla la voz desde un wav propio aunque el A-roll sea un video mudo (FIX-e-burgos-007-002)', async () => {
+    const silentAroll: MediaAsset = {
+      id: 'raw/aroll/screen.mp4',
+      kind: 'video',
+      path: '/assets/screen.mp4',
+      durationMs: 7000,
+      fps: 30,
+      width: 1920,
+      height: 1080,
+      hasAudio: false,
+      probedAt: PROBED_AT,
+    };
+    const scriptVoice: MediaAsset = {
+      id: 'work/voice/voice.wav',
+      kind: 'audio',
+      path: 'work/voice/voice.wav',
+      durationMs: 7000,
+      probedAt: PROBED_AT,
+    };
+    const timeline = buildTimeline(
+      { ...EDL_WITH_DUCKING, sourceAssetId: silentAroll.id },
+      [silentAroll, scriptVoice],
+      undefined,
+      undefined,
+      { assetId: scriptVoice.id },
+    );
+    const runner = measurementRunner();
+
+    const result = await mixTimelineAudio(timeline, '/out/master.wav', runner);
+
+    expect(result.voiceMeasured).toEqual(new Map([['work/voice/voice.wav', EXPECTED_MEASUREMENT]]));
+    expect(runner.calls[0]?.args).toContain('work/voice/voice.wav');
+    expect(result.args).toContain('work/voice/voice.wav');
+    expect(result.args).not.toContain('/assets/screen.mp4');
+  });
+
   it('un asset de voz sin stream de audio lanza MissingMediaStreamError antes de invocar el runner (TASK-001)', async () => {
     const base = buildFixtureTimeline();
     const voiceAssetWithoutAudio: MediaAsset = {

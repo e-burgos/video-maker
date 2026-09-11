@@ -128,6 +128,61 @@ function buildIngestibleProjectDeps(
   });
 }
 
+const VOICE_SCRIPT_WORDS = JSON.stringify({
+  assetId: 'work/voice/voice.wav',
+  engine: 'whisper.cpp',
+  language: 'es',
+  words: [
+    { text: 'abrimos', startMs: 0, endMs: 600 },
+    { text: 'la', startMs: 600, endMs: 800 },
+    { text: 'terminal', startMs: 800, endMs: 1400 },
+    { text: 'y', startMs: 2600, endMs: 2800 },
+    { text: 'volvemos', startMs: 2800, endMs: 3400 },
+    { text: 'a', startMs: 3400, endMs: 3500 },
+    { text: 'la', startMs: 3500, endMs: 3700 },
+    { text: 'terminal', startMs: 3700, endMs: 4300 },
+  ],
+  segments: [],
+});
+
+function voiceScriptManifest(durationMs: number): string {
+  return JSON.stringify({
+    schemaVersion: 1,
+    source: 'script',
+    language: 'es',
+    voiceId: 'es_AR-daniela-high',
+    gapMs: 900,
+    path: 'work/voice/voice.wav',
+    wordsPath: 'work/voice/voice.words.json',
+    durationMs,
+    sampleRate: 48_000,
+    updatedAt: '2026-01-01T00:00:00.000Z',
+    lines: [
+      { index: 1, text: 'abrimos la terminal', path: 'work/voice/sources/line-01.wav', startMs: 0, durationMs },
+    ],
+  });
+}
+
+function buildVoiceScriptProjectDeps(callLog: CallLog, voiceDurationMs: number): RenderApiDependencies {
+  const storage = createFakeObjectStorage(callLog, {
+    files: [
+      { path: `${PROJECT_ROOT}/raw/aroll/clip01.mp4`, contents: 'clip-bytes', modifiedAtMs: 1_700_000_000_000 },
+      { path: `${PROJECT_ROOT}/work/whisper/aroll/clip01.json`, contents: WHISPER_RAW_OUTPUT },
+      { path: `${PROJECT_ROOT}/work/voice/script-manifest.json`, contents: voiceScriptManifest(voiceDurationMs) },
+      { path: `${PROJECT_ROOT}/work/voice/voice.words.json`, contents: VOICE_SCRIPT_WORDS },
+    ],
+  });
+
+  return createFakeRenderApiDependencies(callLog, {
+    storage,
+    readDirectory: toDirectoryReader(storage),
+    statFile: toFileStatReader(storage),
+    ensureDirectory: storage.ensureDirectory,
+    createCommandRunner: activeCommandRunnerFactory(callLog),
+    resolveMontageBinaries: async () => BINARIES,
+  });
+}
+
 function buildBrollOnlyProjectDeps(callLog: CallLog): RenderApiDependencies {
   const storage = createFakeObjectStorage(callLog, {
     files: [{ path: `${PROJECT_ROOT}/raw/broll/clip01.mp4`, contents: 'clip-bytes', modifiedAtMs: 1_700_000_000_000 }],
@@ -233,6 +288,78 @@ describe('runMontagePipeline', () => {
     expect(report.catalogPath).toBe('work/catalog.json');
     expect(report.timelinePath).toBe('work/timeline.json');
     expect(report.editDecisionListPath).toBe('work/edl.json');
+  });
+
+  it("voice: 'script' arma la pista de voz sobre el wav sintetizado (FIX-e-burgos-007-002)", async () => {
+    const callLog = createCallLog();
+    const deps = buildVoiceScriptProjectDeps(callLog, 5000);
+    const { observer } = createRecordingObserver();
+
+    const report = await runMontagePipeline({ ...REQUEST, voice: 'script' }, deps, observer);
+
+    expect(Object.keys(report).sort()).toEqual([
+      'catalogPath',
+      'editDecisionListPath',
+      'logoAssetId',
+      'preset',
+      'scriptAlignment',
+      'seed',
+      'timelinePath',
+      'voiceSource',
+      'voiceTrack',
+    ]);
+    expect(report.voiceSource).toBe('script');
+    expect(report.voiceTrack).toEqual({
+      assetId: 'work/voice/voice.wav',
+      durationMs: 5000,
+      truncatedMs: 0,
+    });
+
+    const timeline = JSON.parse(
+      callLog
+        .entries()
+        .filter((entry) => entry.port === 'writeTextFile')
+        .map((entry) => entry.input as { path: string; contents: string })
+        .find((entry) => entry.path.endsWith('work/timeline.json'))?.contents ?? '{}',
+    ) as { tracks: { voice: { assetId: string }[]; captions: unknown[] } };
+
+    expect(timeline.tracks.voice.map((clip) => clip.assetId)).toEqual(['work/voice/voice.wav']);
+    expect(timeline.tracks.captions.length).toBeGreaterThan(0);
+  });
+
+  it("voice: 'script' con una voz más larga que el A-roll reporta el recorte (FIX-e-burgos-007-002)", async () => {
+    const callLog = createCallLog();
+    const deps = buildVoiceScriptProjectDeps(callLog, 10_000);
+    const { observer } = createRecordingObserver();
+
+    const report = await runMontagePipeline({ ...REQUEST, voice: 'script' }, deps, observer);
+
+    expect(report.voiceTrack).toEqual({
+      assetId: 'work/voice/voice.wav',
+      durationMs: 10_000,
+      truncatedMs: 2000,
+    });
+  });
+
+  it('el default sigue siendo el A-roll y no reporta pista de voz propia', async () => {
+    const callLog = createCallLog();
+    const deps = buildIngestibleProjectDeps(callLog);
+    const { observer } = createRecordingObserver();
+
+    const report = await runMontagePipeline(REQUEST, deps, observer);
+
+    expect(report.voiceSource).toBe('aroll');
+    expect(report.voiceTrack).toBeNull();
+  });
+
+  it("voice: 'script' sin manifest falla con MONTAGE_INPUT_INVALID en la etapa plan", async () => {
+    const callLog = createCallLog();
+    const deps = buildIngestibleProjectDeps(callLog);
+    const { observer } = createRecordingObserver();
+
+    await expect(
+      runMontagePipeline({ ...REQUEST, voice: 'script' }, deps, observer),
+    ).rejects.toMatchObject({ code: 'MONTAGE_INPUT_INVALID', stage: 'plan' });
   });
 
   it('fails MONTAGE_RAW_MISSING without ever resolving a single binary when raw/ has no role directory', async () => {

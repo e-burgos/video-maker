@@ -169,6 +169,7 @@ interface CreateJobRequestBody {
   readonly scriptPath?: string;
   readonly scriptText?: string;
   readonly logo?: 'auto' | 'off';
+  readonly voice?: 'aroll' | 'script';
 }
 ```
 
@@ -200,7 +201,19 @@ interface CreateJobRequestBody {
   already planned, so the caller chooses — the studio producer reads the A-roll resolution and sends
   `format` explicitly (`youtube-16x9` for a landscape screen recording, `reels-9x16` for a vertical
   one).
-- `preset`/`seed`/`overwrite`/`scriptPath`/`scriptText`/`logo`/`format` are only ever read on the
+- `voice` (FIX-e-burgos-007-002) — `'aroll'` (default) or `'script'`, forwarded to `autoMontage`.
+  With `'aroll'` the speech comes from the A-roll transcript, exactly as before. With `'script'` it
+  comes from the track the `voice` job synthesized (`work/voice/voice.wav` +
+  `work/voice/voice.words.json`, described by `work/voice/script-manifest.json`): concepts, B-roll
+  and captions are built from those words, the Timeline's `voice` track points at the wav as an
+  audio asset of its own, the A-roll audio is ignored altogether, and silence pruning is off (a
+  screen recording is continuous and the narration runs over it, so the EDL keeps a single `keep`).
+  The montage lasts `min(voice, A-roll)`; a voice longer than the A-roll is cut and the report says
+  by how much. Anything else answers `422 MONTAGE_VOICE_INVALID`, and `'script'` without
+  `work/voice/voice.wav` answers `409 MONTAGE_VOICE_TRACK_NOT_FOUND`, both before registering the
+  job. Note the overload: on a `voice` job the `voice` field is a voice-model id, on a `montage`
+  job it is the speech source.
+- `preset`/`seed`/`overwrite`/`scriptPath`/`scriptText`/`logo`/`format`/`voice` are only ever read on the
   `montage` branch. A `render` job (explicit
   or implied) never looks at them, even if they are present in the body.
 
@@ -220,6 +233,12 @@ interface MontageJobReport {
     readonly inserted: number;
     readonly dropped: number;
     readonly corrected: number;
+  } | null;
+  readonly voiceSource: 'aroll' | 'script';   // FIX-e-burgos-007-002
+  readonly voiceTrack: {                      // FIX-e-burgos-007-002, null with voice: 'aroll'
+    readonly assetId: string;                 // "work/voice/voice.wav"
+    readonly durationMs: number;
+    readonly truncatedMs: number;             // narration that did not fit in the A-roll
   } | null;
 }
 ```

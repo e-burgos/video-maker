@@ -1,4 +1,4 @@
-import type { CutRange, Fps, KeepRange, MediaAsset, Transcription } from '@video-maker/timeline-core';
+import type { CutRange, Fps, KeepRange, Ms, Transcription } from '@video-maker/timeline-core';
 import { detectSilencesFromWords, framesToMs, pruneSilences } from '@video-maker/timeline-core';
 
 import { MontageInputError } from '../errors/montage-input-error';
@@ -10,23 +10,28 @@ export interface PruneSilencesWithFrameMarginResult {
   readonly cuts: readonly CutRange[];
 }
 
+export interface PruneSilencesWithFrameMarginOptions {
+  readonly sourceDurationMs: Ms;
+  readonly prune: boolean;
+}
+
 export function pruneSilencesWithFrameMargin(
   projectRoot: string,
-  arollAsset: MediaAsset,
   transcription: Transcription,
   preset: MontagePreset,
   fps: Fps,
+  options: PruneSilencesWithFrameMarginOptions,
 ): PruneSilencesWithFrameMarginResult {
   const frameMs = framesToMs(1, fps, 'ceil');
-  if (arollAsset.durationMs <= frameMs) {
+  if (options.sourceDurationMs <= frameMs) {
     throw new MontageInputError({ projectRoot, reason: 'empty-aroll' });
   }
 
-  const pruneDurationMs = Math.max(1, arollAsset.durationMs - frameMs);
+  const pruneDurationMs = Math.max(1, options.sourceDurationMs - frameMs);
 
-  const silences = detectSilencesFromWords(transcription, {
-    minSilenceMs: preset.silence.minSilenceMs,
-  });
+  const silences = options.prune
+    ? detectSilencesFromWords(transcription, { minSilenceMs: preset.silence.minSilenceMs })
+    : [];
   const { keeps, cuts } = pruneSilences(pruneDurationMs, silences, {
     paddingMs: preset.silence.paddingMs,
     minKeepMs: preset.silence.minKeepMs,

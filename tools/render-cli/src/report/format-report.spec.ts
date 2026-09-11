@@ -47,6 +47,8 @@ const PLAN_REPORT: PlanReport = {
   brollRejections: [{ conceptTerm: 'deploy', startMs: 12400, reason: 'punch-in-overlap' }],
   logoAssetId: null,
   scriptAlignment: null,
+  voiceSource: 'aroll',
+  voiceTrack: null,
 };
 
 const RENDER_REPORT: RenderReport = {
@@ -110,6 +112,7 @@ describe('formatReport — plan', () => {
       '  edl: work/edl.json',
       '  edited-duration-ms: 18540',
       '  transcription-source: catalog',
+      '  voice: aroll',
       '  concepts: 2',
       '    comando',
       '    deploy',
@@ -130,6 +133,19 @@ describe('formatReport — plan', () => {
     expect(lines).toContain('  logo: raw/logo/brand.png');
     expect(lines).toContain('  script-corrections: 7');
     expect(lines).toContain('    replaced: 4 removed: 2 inserted: 1 dropped: 0');
+  });
+
+  it('nombra la pista de voz del guion y lo que quedó afuera (FIX-e-burgos-007-002)', () => {
+    const lines = formatReport({
+      ...PLAN_REPORT,
+      transcriptionSource: 'voice-script',
+      voiceSource: 'script',
+      voiceTrack: { assetId: 'work/voice/voice.wav', durationMs: 41200, truncatedMs: 1300 },
+    });
+
+    expect(lines).toContain('  transcription-source: voice-script');
+    expect(lines).toContain('  voice: script');
+    expect(lines).toContain('  voice-track: work/voice/voice.wav 41200ms (truncated 1300ms)');
   });
 });
 

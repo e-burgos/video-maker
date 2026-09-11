@@ -82,7 +82,28 @@ export { alignTranscriptToScript } from './transcript/align-transcript-to-script
 export type { ScriptAlignmentCounts, ScriptAlignmentResult } from './transcript/align-transcript-to-script';
 
 export { autoMontage } from './auto-montage';
-export type { AutoMontageOptions, AutoMontageResult, LogoMode, MontageDependencies } from './auto-montage';
+export type {
+  AutoMontageOptions,
+  AutoMontageResult,
+  LogoMode,
+  MontageDependencies,
+  VoiceSource,
+  VoiceTrackSummary,
+} from './auto-montage';
+
+export {
+  VOICE_DIRECTORY_NAME,
+  VOICE_SCRIPT_MANIFEST_FILE_NAME,
+  VOICE_SCRIPT_TRACK_ID,
+  voiceDirectoryPath,
+  voiceScriptManifestPath,
+  voiceScriptTrackPath,
+  voiceScriptWordsPath,
+  voiceTrackPath,
+  voiceWordsPath,
+} from './voice/voice-script-paths';
+export { readVoiceScriptTrack } from './voice/read-voice-script-track';
+export type { VoiceScriptTrack } from './voice/read-voice-script-track';
 
 export { serializeMontageDocument } from './montage/serialize-montage-document';
 export { writeEditDecisionList } from './montage/write-edit-decision-list';

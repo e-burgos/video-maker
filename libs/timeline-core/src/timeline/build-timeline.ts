@@ -40,6 +40,10 @@ export interface MusicInput {
   fadeOutFrames?: Frame;
 }
 
+export interface VoiceInput {
+  assetId: AssetId;
+}
+
 export interface LogoInput {
   assetId: AssetId;
   position?: LogoOverlay['position'];
@@ -201,10 +205,13 @@ function buildArollTrack(
   return { clips, clipIdsByKeep, placements, durationFrames: cursorFrame };
 }
 
-function buildVoiceTrack(arollClips: readonly VideoClip[]): AudioClip[] {
+function buildVoiceTrack(
+  arollClips: readonly VideoClip[],
+  voice: VoiceInput | undefined,
+): AudioClip[] {
   return arollClips.map((clip, index) => ({
     id: sequentialId('voice', index),
-    assetId: clip.assetId,
+    assetId: voice?.assetId ?? clip.assetId,
     from: clip.from,
     durationFrames: clip.durationFrames,
     trimStartMs: clip.trimStartMs,
@@ -396,6 +403,7 @@ export function buildTimeline(
   assets: readonly MediaAsset[],
   music?: MusicInput,
   logo?: LogoInput,
+  voice?: VoiceInput,
 ): Timeline {
   const fps = edl.format.fps;
   const keeps = decisionsOfType(edl.decisions, 'keep').sort(byStartMs);
@@ -413,7 +421,7 @@ export function buildTimeline(
   const duckDecisions = decisionsOfType(edl.decisions, 'duck');
 
   const arollTrack = buildArollTrack(keeps, punches, transitions, edl.sourceAssetId, fps);
-  const voiceClips = buildVoiceTrack(arollTrack.clips);
+  const voiceClips = buildVoiceTrack(arollTrack.clips, voice);
   const brollClips = buildBrollTrack(brollDecisions, arollTrack.placements, fps);
   const captionClips = buildCaptionTrack(captionDecisions, arollTrack.placements, edl.format, fps);
   const timelineTransitions = buildTimelineTransitions(

@@ -133,6 +133,20 @@ describe('buildProducerAppRulesSection', () => {
     expect(section).toContain('"kind":"voice","scriptPath":"work/producer/script.txt"');
   });
 
+  it('manda preguntar la plataforma y producir un solo formato (FIX-e-burgos-007-002)', () => {
+    const section = buildProducerAppRulesSection(CONTEXT, null, 'sonnet');
+    expect(section).toContain('ASK THE USER WHICH PLATFORM');
+    expect(section).toContain('Never render every size unless the user explicitly asks');
+  });
+
+  it('explica el camino de grabación muda + narración generada (FIX-e-burgos-007-002)', () => {
+    const section = buildProducerAppRulesSection(CONTEXT, null, 'sonnet');
+    expect(section).toContain('"voice":"script"');
+    expect(section).toContain('MONTAGE_VOICE_TRACK_NOT_FOUND');
+    expect(section).toContain('voiceTrack.truncatedMs');
+    expect(section).toContain('min(voice, A-roll)');
+  });
+
   it('publica la lista blanca completa de herramientas', () => {
     const section = buildProducerAppRulesSection(CONTEXT, null, 'sonnet');
     for (const tool of PRODUCER_BASE_ALLOWED_TOOLS) {

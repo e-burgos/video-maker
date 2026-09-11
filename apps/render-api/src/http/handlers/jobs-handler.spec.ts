@@ -330,6 +330,65 @@ describe('handleCreateRenderJob', () => {
       expect(runtime.jobs.listBySlug('acme-launch')).toHaveLength(1);
     });
 
+    it('answers 422 MONTAGE_VOICE_INVALID and registers no job (FIX-e-burgos-007-002)', async () => {
+      const { deps, runtime } = createMontageDeps();
+
+      await expect(
+        handleCreateRenderJob(
+          deps,
+          STORE,
+          { slug: 'acme-launch' },
+          jsonBodyRequest('acme-launch', { kind: 'montage', voice: 'piper' }),
+          runtime,
+        ),
+      ).rejects.toMatchObject({
+        code: 'MONTAGE_VOICE_INVALID',
+        expected: 'one of aroll, script',
+      });
+      expect(runtime.jobs.listBySlug('acme-launch')).toEqual([]);
+    });
+
+    it("answers 409 MONTAGE_VOICE_TRACK_NOT_FOUND when voice: 'script' has no synthesized track (FIX-e-burgos-007-002)", async () => {
+      const { deps, runtime } = createMontageDeps();
+
+      await expect(
+        handleCreateRenderJob(
+          deps,
+          STORE,
+          { slug: 'acme-launch' },
+          jsonBodyRequest('acme-launch', { kind: 'montage', voice: 'script' }),
+          runtime,
+        ),
+      ).rejects.toMatchObject({
+        code: 'MONTAGE_VOICE_TRACK_NOT_FOUND',
+        resource: 'work/voice/voice.wav',
+      });
+      expect(runtime.jobs.listBySlug('acme-launch')).toEqual([]);
+    });
+
+    it("registers the montage job with voice: 'script' once the track exists (FIX-e-burgos-007-002)", async () => {
+      const callLog = createCallLog();
+      const storage = createFakeObjectStorage(callLog, {
+        directories: [`${STORE.mediaRoot}/acme-launch`],
+        files: [{ path: `${STORE.mediaRoot}/acme-launch/work/voice/voice.wav`, contents: 'RIFF' }],
+      });
+      const deps = createFakeRenderApiDependencies(callLog, { storage });
+      const runtime = createRenderApiRuntime(deps);
+
+      const response = await handleCreateRenderJob(
+        deps,
+        STORE,
+        { slug: 'acme-launch' },
+        jsonBodyRequest('acme-launch', { kind: 'montage', voice: 'script', format: 'youtube-16x9' }),
+        runtime,
+      );
+
+      expect(response.status).toBe(202);
+      expect(runtime.jobs.listBySlug('acme-launch')).toHaveLength(1);
+
+      await runtime.jobs.whenIdle();
+    });
+
     it('answers 422 MONTAGE_OVERWRITE_INVALID and registers no job', async () => {
       const { deps, runtime } = createMontageDeps();
 
