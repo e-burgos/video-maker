@@ -1,6 +1,6 @@
 # 🧠 Memoria del proyecto — lecciones destiladas
 
-> Versión 1.5 | Última destilación: 2026-09-10 (spec-009 c01-02, spec-014 c01, spec-015 c01-02)
+> Versión 1.6 | Última destilación: 2026-09-11 (fix-005-001, fix-007-002, fix-015-001, spec-016 c01-02)
 > **Cap duro: 120 líneas.** Se lee COMPLETO al inicio de cada sesión: cada línea cuesta tokens en
 > todas las futuras. Al destilar, primero podar lo obsoleto o ya absorbido por constitutions/skills.
 
@@ -23,6 +23,8 @@ se edita nada durante un ciclo/fix. Lo de un subproyecto va a su `constitution.m
   (`audioMix.automation`, no `baseGainDb`), editar el declarativo es un no-op que tipos, schema,
   disco y un `200` confirman. Simétrico: leer quién **produce** un dato antes de dar default a un
   flag que elige entre dos fuentes, y fijar la paridad contra el productor real, no contra el RF.
+  Mismo principio al sumar una fuente nueva a un renderer/mezclador: leer qué parte del pipeline ya
+  la acepta antes de tocar código — el cambio real suele ser a qué apunta el clip, no cómo se consume.
 - Tratar el `files[]` como checklist de cierre y trazar cada CA al archivo que **emite** el valor
   que nombra, no al que nombra la operación: si un CA cita un literal, el spec hermano de ese
   archivo es obligatorio en la lista cerrada y en el `files[]`.
@@ -39,15 +41,17 @@ se edita nada durante un ciclo/fix. Lo de un subproyecto va a su `constitution.m
 - Cuando el invariante es "la salida no cambia", usar como oráculo byte-exacto el artefacto que NO
   embebe reloj de pared (`edl.json`; nunca `catalog`/`timeline`, con `probedAt`/`modifiedAtMs`),
   comparar los demás sin los campos volátiles, y **probar el oráculo sensible** rompiéndolo aposta.
+  Sobre `media/`, replanificar antes de comparar en vez de re-renderizar lo que ya está en disco, y
+  reproducir con el código base todo oráculo heredado de otro ciclo antes de usarlo como criterio.
 - Committear todo guion que produjo una evidencia junto al artefacto que la reporta: un artefacto
   cuyo productor quedó en un scratchpad documenta un número, no una medición repetible.
 - Verificar que el símbolo EXISTE (grep de la definición) después de toda edición scriptada por
   patrón: un `replace` que no matchea es silencioso y ni `node --check` ni el linter ven un
   identificador faltante — lo descubre la primera corrida cara.
-- Reproducir con el código base todo oráculo heredado de otro ciclo antes de usarlo como criterio;
-  si no reproduce, el baseline es un worktree del commit anterior.
 - Parsear la salida de una herramienta de medición siempre desde su bloque de resumen, y sospechar
   de inmediato cuando dos entradas distintas dan el mismo número.
+- En una migración transversal del texto que asera la suite (p. ej. introducir i18n), hacer que el
+  default sin provider/config devuelva el valor de HOY: la suite existente prueba que nada cambió.
 
 ## Técnica (stack, herramientas, gotchas transversales)
 
@@ -55,53 +59,49 @@ se edita nada durante un ciclo/fix. Lo de un subproyecto va a su `constitution.m
   los targets de ESE repo sin error visible.
 - No dar por verde nada sin correr `nx run-many -t lint test build`: `sdd:validate` no compila y
   Vitest no tipa (un `const facts = [media.kind]` rompió `build` con `test` verde).
+- Verificar para qué runtime está tipado un proyecto antes de leer archivos desde un test/spec: un
+  `node:fs` en uno tipado para navegador no compila aunque Vitest no tipe specs.
 - Ejecutar un `.ts` suelto con `node -r @swc-node/register` (CJS) **acotado a TypeScript** (patrón
   `cli-register.cjs`): el hook ESM no anda acá y el loader `.js` de swc panica sin nombrar archivo.
 - Declarar el alias `@video-maker/*` de una lib en los **TRES** resolvedores cuando otra lib importa
   un valor: `tsconfig.base.json → paths` (tsc), `resolve.alias` de `vite.config.ts` (Vitest) y
   `webpackOverride` de `@remotion/bundler` (render) — verde en los tres targets no prueba nada.
-- Nunca copiar el union de códigos de error de otra lib: derivarlo con `import type` o estrechar con
-  un type guard sobre una lista propia `as const` — y **antes de nombrar un `code` ajeno en un
-  contrato, abrir el union y verificar que exista** (`VOICE_TRACK_NOT_MIRRORED` no existía: costó
-  re-alcanzar tres tasks). Al mergear ramas de specs, `nx run-many -t build` antes de commitear.
+- Nunca copiar el union de códigos de error de otra lib: derivarlo con `import type` o un type guard
+  sobre una lista propia `as const`, y **abrir el union antes de nombrar un `code` ajeno** en un
+  contrato para verificar que exista (`VOICE_TRACK_NOT_MIRRORED` no existía: costó tres tasks).
 - Ensanchar un tipo suma (unión discriminada, enum, result kind) es un cambio **global** que ningún
-  `files[]` acota: correr el `build` del subproyecto y tratar todos los errores de exhaustividad
-  como alcance de la misma task.
+  `files[]` acota: correr el `build` del subproyecto y tratar la exhaustividad como parte de la task.
 - Tipar los fixtures contra el tipo de producción: los specs no se typechequean (`tsconfig.lib.json`
-  los excluye, Vitest no tipa), y un fixture sin discriminante cae en la rama equivocada y cuelga
-  con `lint`/`build` en verde — nunca compensarlo con un guard de runtime.
+  los excluye) y un fixture sin discriminante cuelga con `lint`/`build` en verde, nunca un guard de runtime.
 - Pasar la raíz junto al documento en todo puerto cuyo input lleve paths **relativos** (`projectRoot`
-  + `runOptions.cwd`): el doble no los resuelve y sólo lo ve el primer binario real. `cwd` alcanza
-  para el binario pero NO para el wrapper: si la función que lo invoca hace I/O propio, todo path
-  que cruza el puerto va **absoluto**, y el test asera la FORMA del path, no que el doble lo recibió.
+  + `runOptions.cwd`): el doble no los resuelve, y si la función que lo invoca hace I/O propio, todo
+  path que cruza el puerto va **absoluto** (el test asera la FORMA del path, no que el doble lo recibió).
 - Buscar los fixtures que terminan en `...overrides` al ensanchar un tipo compartido: el spread
   esconde de `tsc` la propiedad faltante y el fallo aparece recién en runtime.
-- Sondear cada permiso de un agente externo con el comando real que se le va a permitir —uno por
-  clase de efecto (leer, escribir, red, binario propio)— antes de escribir la lista blanca, y matar
-  al proceso hijo al cerrar el servicio: un huérfano sigue escribiendo en el mismo directorio.
+- Copiar a un fixture E2E solo lo que el escenario necesita, filtrando documentos de estado
+  (`conversation.json`, `session.json`): clonar material vivo hereda el estado de otra corrida.
+- Verificar un parámetro de **query string** contra el servidor real (test que levanta el socket),
+  nunca contra el handler con ruta escrita a mano: un parser en el medio puede estar descartándolo.
 - Verificar un exit code exacto invocando el **binario**, nunca vía `nx run` (Nx normaliza todo
   fallo a `1`), y sabiendo que `@remotion/renderer` instala sus propios handlers de señal: tras un
   render, `SIGTERM` da `143` aunque el server cierre limpio, y `process.exit(0)` no lo cambia.
 - Comparar la duración de un render contra el **stream de video** (`nb_frames`/`r_frame_rate`),
   nunca contra `format.duration` (máximo entre streams, inflado por el padding AAC).
-- Largar un render, síntesis o transcripción solo sin procesos `ffmpeg`/`whisper-cli`/`piper`/
-  `chrome-headless` vivos y con ≥ 35 % de memoria libre; nunca esperar `memory_pressure` en `normal`
-  (nivel basal 2 en esta máquina) ni correr dos jobs pesados a la vez.
+- Largar un render, síntesis o transcripción solo sin otro proceso `ffmpeg`/`whisper-cli`/`piper`/
+  `chrome-headless` vivo y con memoria libre de sobra: nunca dos jobs pesados a la vez.
 - Verificar una UI midiendo en el navegador el estado del medio (`readyState` 4, `duration`,
-  `videoWidth/Height`), nunca la captura ni el `src`: un `src` bien armado y un 404 se ven igual. El
-  MCP de Playwright no abre navegador acá; anda el de `~/.npm/_npx` con `channel: 'chrome'`.
+  `videoWidth/Height`), nunca la captura ni el `src`: un `src` armado y un 404 se ven igual.
+- El nombre accesible de un control con `aria-label` **es** el `aria-label`: verificarlo en el DOM
+  real antes de un locator por rol+nombre — el texto visible deja de ser buscable.
 - Cargar un binario o paquete nativo con `await import()` dentro del método que lo usa, no en el tope
-  del módulo — y nunca mezclar `import` estático y `await import()` de la misma lib del workspace:
-  `@nx/enforce-module-boundaries` lo prohíbe; el consumidor perezoso se mueve a un módulo propio.
-- Verificar con un test el orden de claves de `JSON.stringify` tras un `.parse()` de Zod cuando un
-  CA depende de bytes idénticos (no es el orden del literal), e inyectar un `Clock` fijo en la
-  **ingesta** en todo test que compare bytes entre dos corridas del pipeline.
-- Elegir al menos un valor distinto de cero por eje posicional en las fixtures: `f(0)` da 100 % de
-  cobertura sin distinguir la fórmula correcta de casi ninguna.
+  del módulo, y nunca mezclar `import` estático y `await import()` de la misma lib: `@nx/enforce-module-boundaries` lo prohíbe.
+- Verificar con un test el orden de claves de `JSON.stringify` tras un `.parse()` de Zod cuando un CA
+  depende de bytes idénticos, e inyectar un `Clock` fijo en la ingesta para comparar entre corridas.
+- Versionar en el **nombre** del archivo todo caché cuyo contenido dependa de una constante del
+  código (`<clave>.v1.wav`): el `mtime` del insumo no ve un cambio que sólo tocó quien lo produce.
 - Verificar que una herramienta externa **aplicó** un contrato mirando el campo que sólo aparece si
-  lo aplicó (`structured_output`), nunca su código de éxito: `claude -p --json-schema` ignora el
-  schema si éste declara `$schema` (`z.toJSONSchema()` la emite) y devuelve `is_error: false`.
-  Sondear siempre con el artefacto real que va a viajar, no con uno escrito a mano.
+  lo aplicó (`structured_output`), nunca su código de éxito (`claude -p --json-schema` ignora un
+  schema con `$schema` y devuelve `is_error: false`): sondear con el artefacto real, no uno a mano.
 
 ## Costo (qué gastó tokens/tiempo de más y cómo evitarlo)
 
