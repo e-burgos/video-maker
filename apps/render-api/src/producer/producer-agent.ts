@@ -5,6 +5,7 @@ export interface ProducerTurnStart {
   readonly sessionId: string;
   readonly resume: boolean;
   readonly projectRoot: string;
+  readonly allowedTools: readonly string[];
 }
 
 export interface ProducerTurnResult {

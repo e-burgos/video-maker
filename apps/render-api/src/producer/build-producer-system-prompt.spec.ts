@@ -4,7 +4,8 @@ import {
   buildProducerAppRulesSection,
   buildProducerProjectSection,
   buildProducerSystemPrompt,
-  PRODUCER_ALLOWED_TOOLS,
+  PRODUCER_BASE_ALLOWED_TOOLS,
+  producerAllowedTools,
 } from './build-producer-system-prompt';
 import type { ProducerProjectContext } from './collect-producer-context';
 
@@ -62,67 +63,99 @@ describe('buildProducerProjectSection', () => {
 
 describe('buildProducerAppRulesSection', () => {
   it('desactiva las instrucciones de desarrollo del repo para el productor', () => {
-    const section = buildProducerAppRulesSection(CONTEXT, '/usr/bin/piper');
+    const section = buildProducerAppRulesSection(CONTEXT, '/usr/bin/piper', 'sonnet');
     expect(section).toContain('CLAUDE.md');
     expect(section).toContain('Never modify source code');
   });
 
   it('confina la escritura al proyecto y prohíbe tocar otros proyectos de media/', () => {
-    const section = buildProducerAppRulesSection(CONTEXT, '/usr/bin/piper');
+    const section = buildProducerAppRulesSection(CONTEXT, '/usr/bin/piper', 'sonnet');
     expect(section).toContain('only create or change files under /media/demo-01');
     expect(section).toContain('Never touch another project');
   });
 
   it('prefiere los jobs de la API y da el curl exacto del proyecto', () => {
-    const section = buildProducerAppRulesSection(CONTEXT, '/usr/bin/piper');
+    const section = buildProducerAppRulesSection(CONTEXT, '/usr/bin/piper', 'sonnet');
     expect(section).toContain('http://127.0.0.1:4399/projects/demo-01/jobs');
     expect(section).toContain('"kind":"montage"');
     expect(section).toContain('http://127.0.0.1:4399/jobs/<jobId>');
   });
 
   it('prohíbe leer el .env, no sólo sourcearlo: el agente intentó un cat en el smoke', () => {
-    const section = buildProducerAppRulesSection(CONTEXT, '/usr/bin/piper');
+    const section = buildProducerAppRulesSection(CONTEXT, '/usr/bin/piper', 'sonnet');
     expect(section).toContain('Never source, read,');
     expect(section).toContain('open or print the .env file');
   });
 
   it('incluye las formas reescritas por el hook rtk, que si no quedan denegadas', () => {
-    const patterns = [...PRODUCER_ALLOWED_TOOLS];
+    const patterns = [...PRODUCER_BASE_ALLOWED_TOOLS];
     expect(patterns).toContain('Bash(rtk curl *)');
     expect(patterns).toContain('Bash(rtk ls *)');
     expect(patterns).toContain('Bash(rtk read *)');
   });
 
   it('da la receta de Piper con el binario resuelto, y una salida cuando no está instalado', () => {
-    expect(buildProducerAppRulesSection(CONTEXT, '/usr/bin/piper')).toContain(
-      '`/usr/bin/piper -m $PIPER_MODEL_PATH -i <text file> -f <out.wav>`',
+    expect(buildProducerAppRulesSection(CONTEXT, '/usr/bin/piper', 'sonnet')).toContain(
+      '`/usr/bin/piper -m <model .onnx> -i <text file> -f <out.wav>`',
     );
-    expect(buildProducerAppRulesSection(CONTEXT, null)).toContain('Piper is not installed');
+    expect(buildProducerAppRulesSection(CONTEXT, null, 'sonnet')).toContain('Piper is not installed');
+  });
+
+  it('pone el binario de Piper en la lista blanca cuando está instalado (FIX-e-burgos-015-002)', () => {
+    expect(producerAllowedTools('/usr/bin/piper')).toEqual([
+      ...PRODUCER_BASE_ALLOWED_TOOLS,
+      'Bash(/usr/bin/piper *)',
+    ]);
+    expect(producerAllowedTools('piper').at(-1)).toBe('Bash(piper *)');
+    expect(producerAllowedTools(null)).toEqual([...PRODUCER_BASE_ALLOWED_TOOLS]);
+    expect(buildProducerAppRulesSection(CONTEXT, '/usr/bin/piper', 'sonnet')).toContain(
+      'Bash(/usr/bin/piper *)',
+    );
+  });
+
+  it('inyecta el modelo del turno en la regla de los jobs (FIX-e-burgos-015-002)', () => {
+    expect(buildProducerAppRulesSection(CONTEXT, null, 'haiku')).toContain('"model": "haiku"');
+    expect(buildProducerAppRulesSection(CONTEXT, null, 'opus')).toContain('"model": "opus"');
+  });
+
+  it('nunca habla de API key y manda mostrar el error literal del proveedor (FIX-e-burgos-015-002)', () => {
+    const section = buildProducerAppRulesSection(CONTEXT, null, 'sonnet');
+    expect(section).toContain('Claude Code subscription');
+    expect(section).toContain('NO API key anywhere');
+    expect(section).toContain('AI_AGENT_RATE_LIMITED');
+    expect(section).toContain('`result` field of the error');
+  });
+
+  it('manda seguir el A-roll para el formato y dar voz sin storyboard (FIX-e-burgos-015-002)', () => {
+    const section = buildProducerAppRulesSection(CONTEXT, null, 'sonnet');
+    expect(section).toContain('youtube-16x9');
+    expect(section).toContain('reels-9x16');
+    expect(section).toContain('"kind":"voice","scriptPath":"work/producer/script.txt"');
   });
 
   it('publica la lista blanca completa de herramientas', () => {
-    const section = buildProducerAppRulesSection(CONTEXT, null);
-    for (const tool of PRODUCER_ALLOWED_TOOLS) {
+    const section = buildProducerAppRulesSection(CONTEXT, null, 'sonnet');
+    for (const tool of PRODUCER_BASE_ALLOWED_TOOLS) {
       expect(section).toContain(tool);
     }
   });
 
   it('explica que mkdir y cp no existen y cómo copiar un medio sin ellos', () => {
-    const section = buildProducerAppRulesSection(CONTEXT, null);
+    const section = buildProducerAppRulesSection(CONTEXT, null, 'sonnet');
     expect(section).toContain('`mkdir`, `cp`, `mv` and `rm` are NOT available');
     expect(section).toContain('ffmpeg -i <source> -c copy <destination>');
     expect(section).toContain('Never ask the user to change permissions.');
   });
 
   it('exige un comando por llamada, sin prefijos ni encadenados que la lista blanca no matchea', () => {
-    const section = buildProducerAppRulesSection(CONTEXT, null);
+    const section = buildProducerAppRulesSection(CONTEXT, null, 'sonnet');
     expect(section).toContain('literal prefix');
     expect(section).toContain('`BASE=/x ffprobe …` is denied');
     expect(section).toContain('one command per call');
   });
 
   it('exige el bloque de sugerencias en toda respuesta, con el ejemplo literal', () => {
-    const section = buildProducerAppRulesSection(CONTEXT, null);
+    const section = buildProducerAppRulesSection(CONTEXT, null, 'sonnet');
     expect(section).toContain('End EVERY reply');
     expect(section).toContain('```suggestions');
     expect(section).toContain('opciones numeradas'.replace('opciones numeradas', 'numbered options'));
@@ -132,7 +165,7 @@ describe('buildProducerAppRulesSection', () => {
 describe('buildProducerSystemPrompt', () => {
   it('pone la skill primero, entera, y las dos secciones propias separadas por reglas', () => {
     const skill = '# Skill: video-producer\n\nSos el productor de video del studio.\n';
-    const prompt = buildProducerSystemPrompt(skill, CONTEXT, '/usr/bin/piper');
+    const prompt = buildProducerSystemPrompt(skill, CONTEXT, '/usr/bin/piper', 'sonnet');
 
     expect(prompt.startsWith('# Skill: video-producer')).toBe(true);
     expect(prompt).toContain('Sos el productor de video del studio.');

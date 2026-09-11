@@ -669,7 +669,11 @@ id is the one the CLI reports in its `init` event, not the uuid we passed it.
 **What the child process is allowed to do.** `--permission-mode dontAsk` plus a whitelist:
 `Bash(pnpm nx run render-cli:*)`, `Bash(ffmpeg *)`, `Bash(ffprobe *)`, `Bash(curl *)`,
 `Bash(ls *)`, `Bash(cat *)`, `Bash(rtk curl *)`, `Bash(rtk ls *)`, `Bash(rtk read *)`, `Read`,
-`Glob`, `Grep`, `Write`, `Edit`. Everything else is denied by the CLI itself. `--allowedTools` is **variadic and goes last**, one pattern per argument, or it
+`Glob`, `Grep`, `Write`, `Edit`, and — since FIX-e-burgos-015-002 — `Bash(<resolved PIPER_PATH> *)`
+when the Piper binary resolves on this machine (with `PIPER_PATH=piper` the rule is `Bash(piper *)`;
+with no Piper the entry is simply absent). The list is therefore built per turn
+(`producerAllowedTools(piperPath)`) and travels in `ProducerTurnStart.allowedTools`. Everything else
+is denied by the CLI itself. `--allowedTools` is **variadic and goes last**, one pattern per argument, or it
 swallows the flags after it. The working directory is the **repository root** (that is what
 `pnpm nx` needs) and `--add-dir` opens the project directory.
 
@@ -687,7 +691,13 @@ swallows the flags after it. The working directory is the **repository root** (t
 >    no longer matches `Bash(curl *)` and is denied — which is why the three `Bash(rtk …)` patterns
 >    are on the list. They stay harmless with rtk disabled, and adding a bare `Bash(rtk *)` instead
 >    would silently authorize everything rtk wraps, `git` included.
-> 3. **A wildcard never authorizes a file-mutating shell command.** With
+> 3. **A wildcard never authorizes `mkdir`, `cp`, `mv` or `rm`** — but it does authorize an
+>    ordinary binary that writes files. Probed for FIX-e-burgos-015-002 against the same CLI:
+>    with `--allowedTools "Bash(<PIPER_PATH> *)" Read`, `--permission-mode dontAsk` and
+>    `--add-dir <tmp>`, the agent ran Piper and produced a 109 612-byte wav
+>    (`pcm_s16le, 22 050 Hz, mono, 2.484535 s`), answering `DONE` with `is_error: false`. So Piper
+>    is on the list and the producer can synthesize by hand; the shell built-ins below are the ones
+>    that stay out. With
 >    `--allowedTools 'Bash(ls *)' 'Bash(mkdir *)' 'Bash(cp *)'` in the same run, `ls -la` was
 >    allowed and `mkdir uno` and `cp /etc/hosts ./hosts.txt` were both denied. `Bash(mkdir *)` and
 >    `Bash(cp *)` are dead entries, so they are **not** on the list and the system prompt tells the
@@ -700,6 +710,15 @@ timeline exists), and the app rules — ignore the repository's developer instru
 source code, write only under the project, do not `source .env` (the media variables are already in
 the child's environment), prefer the API jobs over the CLI, and end **every** answer with a
 ` ```suggestions ` block holding a JSON array of 2–4 short actions.
+
+FIX-e-burgos-015-002 adds four rules to that third part, all of them things the producer got wrong on
+a real project: every `storyboard`/`voice` job it POSTs must carry `"model": "<the model of this
+turn>"`, injected as a literal value so the agent cannot drift from the model the user picked; the AI
+runs on the **Claude Code subscription** and there is no API key, so it must never tell the user one
+is missing; on `AI_AGENT_FAILED` / `AI_AGENT_RATE_LIMITED` it must show the literal `result` of the
+error and offer to retry or to switch model; and the output format follows the A-roll
+(`youtube-16x9` landscape, `9x16` vertical) sent explicitly as `format`, while voice without a
+storyboard is the `voice` job with `scriptPath`/`scriptText`.
 
 **Events.** The turn reads `--output-format stream-json --verbose`, without
 `--include-partial-messages` (D-3): the studio polls, so message granularity is enough and partial

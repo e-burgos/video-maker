@@ -21,10 +21,17 @@ comandos van en inglés/ASCII.
   además estas reglas, que el servicio te repite en el prompt:
   - Las variables de medios (`FFMPEG_PATH`, `PIPER_PATH`, `PIPER_MODEL_PATH`, `WHISPER_*`) ya están
     **exportadas en tu entorno**: no hace falta `source .env` (y no debés leer ese archivo).
-  - Sólo tenés `ffmpeg`, `ffprobe`, `curl`, `ls`, `cat`, `pnpm nx run render-cli:*`, `Read`,
-    `Glob`, `Grep`, `Write` y `Edit`. **`mkdir`, `cp`, `mv` y `rm` no existen**: creá con `Write`
-    (crea los directorios padre) y copiá o renombrá un medio con `ffmpeg -i <origen> -c copy
+  - Sólo tenés `ffmpeg`, `ffprobe`, `curl`, `ls`, `cat`, `pnpm nx run render-cli:*`, el binario de
+    Piper cuando está instalado (`$PIPER_PATH`, con la ruta absoluta resuelta en tu lista blanca),
+    `Read`, `Glob`, `Grep`, `Write` y `Edit`. **`mkdir`, `cp`, `mv` y `rm` no existen**: creá con
+    `Write` (crea los directorios padre) y copiá o renombrá un medio con `ffmpeg -i <origen> -c copy
     <destino>` (con `-an` si querés sacarle el audio).
+  - La IA corre con la **suscripción de Claude Code** de esta máquina: no hay ninguna API key. Nunca
+    le digas al usuario que falta, venció o hay que configurar una.
+  - Todo `POST /jobs` de `storyboard` o `voice` lleva `"model": "<el modelo de este turno>"` (el
+    servicio te lo dice en el prompt con el valor concreto). Si un job falla con `AI_AGENT_FAILED` o
+    `AI_AGENT_RATE_LIMITED`, mostrale al usuario el `result` **literal** del error y ofrecele dos
+    salidas: reintentar, o reintentar con otro modelo.
   - Cada llamada a `Bash` es **un solo comando que empieza por el binario**: sin `VAR=x` adelante,
     sin `&&`, `;`, `|`, sin redirecciones y sin `$VAR` en las rutas, que si no queda denegado.
   - Preferí los jobs de la API (`curl -X POST $RENDER_API_URL/projects/<slug>/jobs`) sobre la CLI.
@@ -43,8 +50,9 @@ comandos van en inglés/ASCII.
 | Herramienta                                             | Para qué                                                                                        |
 | ------------------------------------------------------- | ----------------------------------------------------------------------------------------------- |
 | `pnpm nx run render-cli:cli -- ingest\|plan\|render\|run <proyecto> --preset <p> --seed <n> [--script <guion>] [--no-logo]` | Transcribir (Whisper), planificar el montaje (cortes por silencio, punch-ins, B-roll por concepto, captions, ducking) y renderizar (Remotion + mix + mux). `run` encadena los tres. `--script` alinea las captions al guion; `--no-logo` ignora `raw/logo/`. |
-| `apps/render-api` (`POST /projects/:slug/jobs`)         | Lo mismo por HTTP, con jobs `montage`, `render`, `storyboard`, `voice`. Úsalo si el studio está corriendo; si no, la CLI. **Los dos caminos entregan el mismo audio desde `spec-015`**: `render-cli render` hace el mismo render mudo → mezcla → mux → verificación que el job de la API. |
-| Piper (`$PIPER_PATH`, `$PIPER_MODEL_PATH` del `.env`)   | Voz en off en español rioplatense. Receta en §6.                                                |
+| `apps/render-api` (`POST /projects/:slug/jobs`)         | Lo mismo por HTTP, con jobs `montage`, `render`, `storyboard`, `voice`. Úsalo si el studio está corriendo; si no, la CLI. **Los dos caminos entregan el mismo audio desde `spec-015`**: `render-cli render` hace el mismo render mudo → mezcla → mux → verificación que el job de la API. El `montage` acepta `format` (§5) y el `voice` acepta `scriptText`/`scriptPath` (§6). |
+| Job `voice` con `scriptText`/`scriptPath`               | **La forma recomendada de generar voz**: una frase por línea → un wav por frase con Piper → concatenación con `gapMs` (default 900) → `work/voice/voice.wav` 48 kHz mono + alineación de palabras. No necesita storyboard. Receta en §6. |
+| Piper (`$PIPER_PATH`, `$PIPER_MODEL_PATH` del `.env`)   | Voz en off en español rioplatense, a mano, cuando querés control frase por frase. Receta en §6.  |
 | `ffmpeg` / `ffprobe` (`$FFMPEG_PATH`, `$FFPROBE_PATH`)  | Recortar, muxear voz sobre video, medir duraciones y verificar el resultado.                    |
 | Bancos libres sin key: NASA Images API, Wikimedia Commons; con key opcional: Pexels (`PEXELS_API_KEY`) | Solo cuando el usuario lo pide o no aportó material para un concepto. Receta en §7. El usuario también puede darte URLs directas de descarga. |
 | Presets de montaje: `software-demo`, `educational`, `recipe`, `hardware` | Ritmo, cortes, transiciones, densidad de B-roll, palabras por caption. Tabla en §5.            |
@@ -124,7 +132,31 @@ la dejan más discreta, que es lo que quiere un tutorial.
 
 `--seed N` cambia qué B-roll y qué transición se eligen sin cambiar las reglas.
 
+### Formato de salida (lo elegís vos, no se adivina)
+
+`reels-9x16` · `tiktok-9x16` · `shorts-9x16` (1080×1920) y `youtube-16x9` (1920×1080). El default es
+**`reels-9x16` en los dos caminos**, así que si no lo pedís, una grabación de pantalla apaisada sale
+vertical. **Regla:** medí el A-roll con `ffprobe` y seguí su orientación salvo pedido explícito del
+usuario — apaisado (pantallas grabadas, escritorio) → `youtube-16x9`; vertical (redes) → uno de los
+`9x16`. Se pasa con `--format <preset>` en `plan`/`run` de la CLI y con `"format": "<preset>"` en el
+job `montage`. Decí siempre qué formato elegiste cuando acordás el plan.
+
 ## 6. Voz con Piper y A-roll sintético (receta exacta)
+
+**Primero probá el job `voice` con el guion suelto**: hace exactamente lo de abajo, pero lo corre el
+servicio, mide cada frase y deja además la alineación de palabras.
+
+```bash
+curl -sS -X POST $RENDER_API_URL/projects/<slug>/jobs -H 'content-type: application/json' \
+  -d '{"kind":"voice","scriptPath":"work/producer/script.txt","model":"<modelo del turno>"}'
+```
+
+Deja `work/voice/voice.wav` (48 kHz mono, duración = suma de las frases + `gapMs` × (frases − 1)),
+`work/voice/voice.words.json` y `work/voice/script-manifest.json`. `gapMs` default 900 —el mismo
+silencio sobre el que corta `plan`—, `scriptText` sirve para mandar el guion inline y `overwrite:
+true` para reemplazar una toma anterior. No necesita storyboard.
+
+A mano, si querés controlar cada frase (el binario de Piper está en tu lista blanca):
 
 ```bash
 set -a && source .env && set +a          # las variables del .env no las carga node suelto

@@ -6,7 +6,7 @@ import {
   producerTurnStartFixture,
 } from '../__fixtures__/fake-producer-agent';
 import { readProducerConfig } from '../config/producer-config';
-import { PRODUCER_ALLOWED_TOOLS } from './build-producer-system-prompt';
+import { producerAllowedTools } from './build-producer-system-prompt';
 import {
   createClaudeCodeProducerAgent,
   PRODUCER_KILL_GRACE_MS,
@@ -45,7 +45,7 @@ describe('producerCliArgs', () => {
       '--session-id',
       '11111111-2222-3333-4444-555555555555',
       '--allowedTools',
-      ...PRODUCER_ALLOWED_TOOLS,
+      ...producerAllowedTools(null),
     ]);
   });
 
@@ -61,17 +61,28 @@ describe('producerCliArgs', () => {
     expect(args).not.toContain('--session-id');
   });
 
+  it('pasa la lista blanca del turno, con el binario de Piper cuando está resuelto (FIX-e-burgos-015-002)', () => {
+    const args = producerCliArgs(
+      producerTurnStartFixture({ allowedTools: producerAllowedTools('/usr/bin/piper') }),
+    );
+
+    expect(args.at(-1)).toBe('Bash(/usr/bin/piper *)');
+    expect(args.slice(args.indexOf('--allowedTools') + 1)).toEqual([
+      ...producerAllowedTools('/usr/bin/piper'),
+    ]);
+  });
+
   it('pone --allowedTools ÚLTIMO y cada patrón como argumento propio: es variádico y se comería --resume', () => {
     const args = producerCliArgs(producerTurnStartFixture({ resume: true }));
     const index = args.indexOf('--allowedTools');
 
-    expect(args.slice(index + 1)).toEqual([...PRODUCER_ALLOWED_TOOLS]);
+    expect(args.slice(index + 1)).toEqual([...producerAllowedTools(null)]);
     expect(args.slice(0, index)).toContain('--resume');
-    expect(args.at(-1)).toBe(PRODUCER_ALLOWED_TOOLS.at(-1));
+    expect(args.at(-1)).toBe(producerAllowedTools(null).at(-1));
   });
 
   it('no ofrece mkdir ni cp: el CLI nunca autoriza un comando de escritura por patrón comodín', () => {
-    const patterns = [...PRODUCER_ALLOWED_TOOLS];
+    const patterns = [...producerAllowedTools(null)];
     expect(patterns).not.toContain('Bash(mkdir *)');
     expect(patterns).not.toContain('Bash(cp *)');
     expect(patterns).toContain('Write');

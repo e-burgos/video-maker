@@ -1,5 +1,4 @@
 import type { ProducerConfig } from '../config/producer-config';
-import { PRODUCER_ALLOWED_TOOLS } from './build-producer-system-prompt';
 import type {
   ProducerAgentPort,
   ProducerTurnResult,
@@ -28,7 +27,7 @@ export function producerCliArgs(start: ProducerTurnStart): readonly string[] {
     start.projectRoot,
     ...(start.resume ? ['--resume', start.sessionId] : ['--session-id', start.sessionId]),
     '--allowedTools',
-    ...PRODUCER_ALLOWED_TOOLS,
+    ...start.allowedTools,
   ];
 }
 

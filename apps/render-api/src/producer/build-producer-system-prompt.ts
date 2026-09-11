@@ -1,6 +1,6 @@
 import type { ProducerProjectContext } from './collect-producer-context';
 
-export const PRODUCER_ALLOWED_TOOLS = [
+export const PRODUCER_BASE_ALLOWED_TOOLS = [
   'Bash(pnpm nx run render-cli:*)',
   'Bash(ffmpeg *)',
   'Bash(ffprobe *)',
@@ -16,6 +16,12 @@ export const PRODUCER_ALLOWED_TOOLS = [
   'Write',
   'Edit',
 ] as const;
+
+export function producerAllowedTools(piperPath: string | null): readonly string[] {
+  return piperPath === null
+    ? [...PRODUCER_BASE_ALLOWED_TOOLS]
+    : [...PRODUCER_BASE_ALLOWED_TOOLS, `Bash(${piperPath} *)`];
+}
 
 function describeAsset(asset: ProducerProjectContext['assets'][number]): string {
   const duration = asset.durationMs === null ? '' : ` (${Math.round(asset.durationMs / 100) / 10}s)`;
@@ -50,11 +56,12 @@ export function buildProducerProjectSection(context: ProducerProjectContext): st
 export function buildProducerAppRulesSection(
   context: ProducerProjectContext,
   piperPath: string | null,
+  model: string,
 ): string {
   const piperRule =
     piperPath === null
-      ? '- Piper is not installed on this machine: offer the user to record the voice over or to use an existing file under raw/voice/.'
-      : `- Synthesize voice with \`${piperPath} -m $PIPER_MODEL_PATH -i <text file> -f <out.wav>\`: write the text file with Write first, one sentence per file.`;
+      ? '- Piper is not installed on this machine: synthesize the voice with the `voice` job of the API, or offer the user to record it or to use an existing file under raw/voice/.'
+      : `- You may run Piper directly: \`${piperPath} -m <model .onnx> -i <text file> -f <out.wav>\` is on your allowed list (write the text file with Write first, one sentence per file). Prefer the \`voice\` job of the API anyway: it synthesizes every sentence, concatenates them with the 900 ms pauses the montage cuts on, transcribes the result and leaves work/voice/voice.wav ready.`;
 
   return [
     '# How you run inside the studio',
@@ -71,13 +78,29 @@ export function buildProducerAppRulesSection(
     `- The studio API is already running at ${context.apiUrl}. Prefer its jobs over the CLI:`,
     `  \`curl -sS -X POST ${context.apiUrl}/projects/${context.slug}/jobs -H 'content-type: application/json' -d '{"kind":"montage","preset":"hardware","seed":0,"scriptPath":"work/producer/script.txt","overwrite":true}'\``,
     `  then poll \`curl -sS ${context.apiUrl}/jobs/<jobId>\` until status is succeeded, failed or canceled.`,
-    `  A render is \`{"kind":"render"}\` and the deliverable lands in out/. \`{"kind":"voice"}\` needs a storyboard.`,
+    `  A render is \`{"kind":"render"}\` and the deliverable lands in out/.`,
+    `- Voice with no storyboard: \`{"kind":"voice","scriptPath":"work/producer/script.txt"}\` (or`,
+    '  `scriptText` inline, one sentence per line, plus `gapMs` if you want a pause other than 900 ms).',
+    '  It writes work/voice/voice.wav at 48 kHz mono, its word alignment and work/voice/script-manifest.json.',
+    '  `{"kind":"voice"}` without a script is the storyboard mode and does need work/storyboard.json.',
+    `- EVERY \`storyboard\` and \`voice\` job you POST must carry \`"model": "${model}"\` — the model of`,
+    '  this turn, chosen by the user. Do not send any other model and do not omit the field.',
+    '- The output format follows the A-roll unless the user asks for something else: measure it with',
+    '  `ffprobe` and send `format` on the `montage` job — `youtube-16x9` when the A-roll is landscape',
+    '  (screen recordings, desktop captures), one of `reels-9x16`, `tiktok-9x16` or `shorts-9x16` when',
+    '  it is vertical (social). Without `format` the montage plans 9:16, so state the format you chose',
+    '  when you agree the plan with the user.',
+    '- The AI of this studio runs on the Claude Code subscription installed on this machine. There is',
+    '  NO API key anywhere: never tell the user that one is missing, expired or has to be configured.',
+    '- When a job fails with `AI_AGENT_FAILED` or `AI_AGENT_RATE_LIMITED`, show the user the literal',
+    '  `result` field of the error (that is what the provider answered) and offer two concrete next',
+    '  steps: retry the same job, or retry it with another model. Never invent a cause.',
     '- The media environment variables (FFMPEG_PATH, FFPROBE_PATH, WHISPER_CPP_PATH, WHISPER_MODEL_PATH,',
     '  PIPER_PATH, PIPER_MODEL_PATH) are already exported in your environment. Never source, read,',
     '  open or print the .env file of the repository: everything you need is already in your',
     '  environment, and that file is none of your business.',
     piperRule,
-    `- Only these tools are allowed: ${PRODUCER_ALLOWED_TOOLS.join(', ')}. Anything else is denied;`,
+    `- Only these tools are allowed: ${producerAllowedTools(piperPath).join(', ')}. Anything else is denied;`,
     '  do not retry a denied tool, use an allowed one or tell the user what you cannot do.',
     '- A Bash command is matched against that list by its literal prefix, so every Bash call must be',
     '  ONE command that STARTS with an allowed binary: no variable assignment in front of it',
@@ -104,10 +127,11 @@ export function buildProducerSystemPrompt(
   skill: string,
   context: ProducerProjectContext,
   piperPath: string | null,
+  model: string,
 ): string {
   return [
     skill.trim(),
     buildProducerProjectSection(context),
-    buildProducerAppRulesSection(context, piperPath),
+    buildProducerAppRulesSection(context, piperPath, model),
   ].join('\n\n---\n\n');
 }

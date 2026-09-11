@@ -8,7 +8,7 @@ import {
   producerUnavailable,
 } from '../errors/translate-producer-error';
 import { PipelineStageError } from '../errors/pipeline-stage-error';
-import { buildProducerSystemPrompt } from './build-producer-system-prompt';
+import { buildProducerSystemPrompt, producerAllowedTools } from './build-producer-system-prompt';
 import { collectProducerContext } from './collect-producer-context';
 import { parseProducerAnswer } from './parse-producer-suggestions';
 import { interpretProducerStreamLine } from './producer-stream-events';
@@ -115,7 +115,8 @@ export async function startProducerTurn(
     repoRoot: input.config.workingDirectory,
     apiUrl: input.config.apiUrl,
   });
-  const systemPrompt = buildProducerSystemPrompt(skill, context, await resolvePiperPath(deps));
+  const piperPath = await resolvePiperPath(deps);
+  const systemPrompt = buildProducerSystemPrompt(skill, context, piperPath, model);
 
   const sessionId = session?.sessionId ?? deps.randomId();
   const rawLines: string[] = [];
@@ -131,6 +132,7 @@ export async function startProducerTurn(
       sessionId,
       resume: session !== null,
       projectRoot: input.project.root,
+      allowedTools: producerAllowedTools(piperPath),
     },
     (line) => {
       rawLines.push(line);

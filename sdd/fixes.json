@@ -632,6 +632,49 @@
         "source": "declared-estimate",
         "recorded_at": "2026-09-11"
       }
+    },
+    {
+      "id": "FIX-e-burgos-015-002",
+      "author": "e-burgos",
+      "spec_id": "spec-e-burgos-015-studio-producer",
+      "fix_document": "sdd/specs/spec-e-burgos-015-studio-producer/fixes/fix-e-burgos-015-002.md",
+      "type": "BUGFIX",
+      "severity": "high",
+      "created_at": "2026-09-11",
+      "resolved_at": "2026-09-11",
+      "validated_at": null,
+      "title": "the producer cannot synthesize voice, loses the model of the turn and blames a missing API key",
+      "estimation_hours": 4,
+      "description": "Three defects of the producer turn seen on the real project media/display-ads. (a) Piper is not on the allowed-tools list, so the agent cannot synthesize voice at all: it can neither run the binary nor, before FIX-e-burgos-009-001, reach the voice job without a storyboard. (b) The model the user picks in the chat governs the turn but not the jobs the agent enqueues, so a storyboard job kept running on the server default. (c) The system text never said the CLI runs on the Claude Code subscription, so on AI_AGENT_FAILED the producer told the user an API key was missing, and it had no rule about the output format, which left a 16:9 screen recording rendering vertical. The fix adds the resolved Piper path to the allowed tools (verified with a real probe), injects the model of the turn into the prompt so every storyboard/voice job carries it, and rewrites the rules about the subscription, agent failures, the output format and voice without a storyboard, in the system prompt and in the skill.",
+      "justification": "Explicit request of the dev on a spec already closed, driven by a real failed production. No new endpoint, module or domain entity: one entry added to the allowed-tools list, one value injected into the system prompt, and prose in the prompt and the skill. Solo profile FIX GATE, no cycle open.",
+      "related_modules": [
+        "studio-producer"
+      ],
+      "affected_files": [
+        "apps/render-api/src/producer/build-producer-system-prompt.ts",
+        "apps/render-api/src/producer/build-producer-system-prompt.spec.ts",
+        "apps/render-api/src/producer/claude-code-producer-agent.ts",
+        "apps/render-api/src/producer/claude-code-producer-agent.spec.ts",
+        "apps/render-api/src/producer/producer-agent.ts",
+        "apps/render-api/src/producer/run-producer-turn.ts",
+        "apps/render-api/src/__fixtures__/fake-producer-agent.ts",
+        "apps/render-api/README.md",
+        "sdd/skills/video-producer/SKILL.md",
+        "sdd/context/apps/render-api/updates/2026-09-11-fix-e-burgos-015-002.md"
+      ],
+      "test_reference": "pnpm nx run-many -t lint test build verde en los 8 proyectos (2026-09-11); render-api 879 tests (98.08 % stmts / 92.63 % branch), piso 80 % sin tocar coverage.include. Casos nuevos: producerAllowedTools agrega 'Bash(/usr/bin/piper *)' al final (y 'Bash(piper *)' cuando el path es solo 'piper'), no agrega nada con null, y la regla aparece en el texto del prompt; el prompt inyecta '\"model\": \"haiku\"' / '\"model\": \"opus\"' segun el turno; el prompt dice 'Claude Code subscription', 'NO API key anywhere', nombra AI_AGENT_RATE_LIMITED y manda mostrar el '`result` field of the error'; nombra youtube-16x9 / reels-9x16 y el curl de voz '\"kind\":\"voice\",\"scriptPath\":\"work/producer/script.txt\"'; producerCliArgs pasa la lista del turno y termina en 'Bash(/usr/bin/piper *)'. Sonda REAL de la lista blanca contra claude 2.1.123 (mktemp -d, --permission-mode dontAsk --model haiku --output-format json --add-dir <tmp> --allowedTools \"Bash($PIPER_PATH *)\" Read): is_error false, num_turns 2, result 'DONE' y out.wav de 109612 bytes (ffprobe: pcm_s16le, 22050 Hz, 1 canal, 2.484535 s) — el CLI SI autoriza el binario por comodin, asi que la opcion (a) quedo implementada y no hizo falta el plan B. Turno real de punta a punta sobre la copia temporal de media/display-ads (API en el puerto 4411, modelo haiku): status succeeded, model haiku, y el productor contesto '**Formato:** `youtube-16x9` (el A-roll es apaisado 1920x1080, webapp desktop), se manda en el job montage como \"format\": \"youtube-16x9\"' — la lista blanca nueva no rompe la invocacion y la regla de formato se aplica.",
+      "status": "implemented",
+      "cycle": null,
+      "usage": {
+        "provider_model": "claude/opus",
+        "effort": "high",
+        "agent": "implementor-back",
+        "tokens_in": 92000,
+        "tokens_out": 14000,
+        "approx": true,
+        "source": "declared-estimate",
+        "recorded_at": "2026-09-11"
+      }
     }
   ]
 }
