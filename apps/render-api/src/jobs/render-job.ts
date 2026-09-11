@@ -187,6 +187,7 @@ export interface CreateStoryboardJobInput {
   readonly projectRoot: string;
   readonly brief: string | null;
   readonly scriptText: string | null;
+  readonly model: string | null;
 }
 
 export interface CreateVoiceJobInput {

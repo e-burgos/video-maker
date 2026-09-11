@@ -442,6 +442,58 @@
         "recorded_at": "2026-09-10",
         "tokens_total": 206697
       }
+    },
+    {
+      "id": "FIX-e-burgos-008-001",
+      "author": "e-burgos",
+      "spec_id": "spec-e-burgos-008-ai-storyboard",
+      "fix_document": "sdd/specs/spec-e-burgos-008-ai-storyboard/fixes/fix-e-burgos-008-001.md",
+      "type": "BUGFIX",
+      "severity": "high",
+      "created_at": "2026-09-11",
+      "resolved_at": "2026-09-11",
+      "validated_at": null,
+      "title": "a storyboard job dies with AI_AGENT_FAILED and no provider detail when CLAUDE_CLI_MODEL is unset",
+      "estimation_hours": 3,
+      "description": "With CLAUDE_CLI_MODEL unset the adapter omitted --model and the CLI fell back to the developer default model, which Claude Code 2.1.123 rejects with 'API Error: 400 ... claude_code_version_too_old'. The job failed in 5-10 s and, because claudeCliAiAgent threw failed(payload.subtype) and dropped payload.result, the API answered 502 AI_AGENT_FAILED with no trace of the real cause, so the studio producer guessed out loud that an API key was missing. The fix pins CLAUDE_CLI_MODEL to sonnet by default (the adapter never calls the CLI without --model), carries the provider detail in the error payload as details.subtype and details.result trimmed to 600 chars with a specific hint for claude_code_version_too_old, and lets the storyboard and voice jobs take an optional model validated against the PRODUCER_MODELS list so the producer can forward the model chosen in the chat.",
+      "justification": "Confirmed bug on the real project media/display-ads: the producer got stuck and misreported the cause to the user. No new endpoint, module or domain entity: one env default, one error payload widened with two optional fields, and one optional body field on the existing POST /projects/:slug/jobs (EP-012). Solo profile FIX GATE, no cycle open.",
+      "related_modules": [
+        "ai-storyboard",
+        "render-service"
+      ],
+      "affected_files": [
+        "apps/render-api/src/ai/claude-cli-ai-agent.ts",
+        "apps/render-api/src/ai/claude-cli-ai-agent.spec.ts",
+        "apps/render-api/src/config/ai-agent-config.ts",
+        "apps/render-api/src/config/ai-agent-config.spec.ts",
+        "apps/render-api/src/deps/render-api-dependencies.ts",
+        "apps/render-api/src/errors/render-api-error.ts",
+        "apps/render-api/src/errors/to-error-payload.ts",
+        "apps/render-api/src/errors/http-status-for.ts",
+        "apps/render-api/src/errors/http-status-for.spec.ts",
+        "apps/render-api/src/jobs/job-model-params.ts",
+        "apps/render-api/src/jobs/render-job.ts",
+        "apps/render-api/src/jobs/render-job-queue.ts",
+        "apps/render-api/src/jobs/run-storyboard-pipeline.ts",
+        "apps/render-api/src/http/handlers/jobs-handler.ts",
+        "apps/render-api/src/http/handlers/jobs-handler.spec.ts",
+        "apps/render-api/README.md",
+        "sdd/api.json",
+        "sdd/context/apps/render-api/updates/2026-09-11-fix-e-burgos-008-001.md"
+      ],
+      "test_reference": "pnpm nx run-many -t lint test build verde en los 8 proyectos (2026-09-11); render-api 848 tests, 98.01 % stmts / 92.64 % branch, piso 80 % sin tocar coverage.include. Casos nuevos: readAiAgentConfig con default sonnet y 'nunca deja el modelo sin declarar'; claudeCliArgs siempre termina en --model (del pedido si viene, del servicio si no); AI_AGENT_FAILED publica subtype/result, recorta a AI_AGENT_DETAIL_MAX_CHARS=600 con '...' y da el hint 'update Claude Code: run `claude update`' ante claude_code_version_too_old, sin publicar claves cuando el CLI no informa detalle; jobs-handler reenvia el model del body al agente (['haiku', null]) y rechaza uno fuera de la lista con JOB_MODEL_INVALID en storyboard y en voice sin registrar job. Smoke real (mktemp -d con copia de media/smoke-ingest, puerto 4411, PRODUCER_MODELS=sonnet,opus,haiku,bogus-model-for-probe): POST model=gpt-5 -> 422 JOB_MODEL_INVALID expected 'one of sonnet, opus, haiku, bogus-model-for-probe'; POST model=bogus-model-for-probe -> job failed en 8,7 s con error.result literal del CLI \"There's an issue with the selected model (bogus-model-for-probe). It may not exist or you may not have access to it. Run --model to pick a different model.\" — antes del fix ese payload no traia ningun detalle.",
+      "status": "implemented",
+      "cycle": null,
+      "usage": {
+        "provider_model": "claude/opus",
+        "effort": "high",
+        "agent": "implementor-back",
+        "tokens_in": 96000,
+        "tokens_out": 13000,
+        "approx": true,
+        "source": "declared-estimate",
+        "recorded_at": "2026-09-11"
+      }
     }
   ]
 }

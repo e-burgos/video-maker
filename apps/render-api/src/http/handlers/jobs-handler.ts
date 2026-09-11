@@ -8,6 +8,7 @@ import {
   parseMontageScript,
   parseMontageSeed,
 } from '../../jobs/montage-job-params';
+import { parseJobModel } from '../../jobs/job-model-params';
 import { parseStoryboardInput, parseStoryboardOverwrite } from '../../jobs/storyboard-job-params';
 import { parseVoiceJobInput } from '../../jobs/voice-job-params';
 import { assertVoiceTracksNotPersisted, selectVoiceScenes } from '../../voice/select-voice-scenes';
@@ -102,6 +103,7 @@ export async function handleCreateRenderJob(
   if (jobKind === 'storyboard') {
     const input = parseStoryboardInput(bodyObject);
     const overwrite = parseStoryboardOverwrite(bodyObject.overwrite);
+    const model = parseJobModel(bodyObject.model, runtime.producer.models);
 
     if (!overwrite && (await storyboardExists(deps, project))) {
       throw new PipelineStageError({
@@ -117,6 +119,7 @@ export async function handleCreateRenderJob(
       projectRoot: project.root,
       brief: input.brief,
       scriptText: input.scriptText,
+      model,
     });
 
     return {
@@ -127,6 +130,7 @@ export async function handleCreateRenderJob(
   }
 
   if (jobKind === 'voice') {
+    parseJobModel(bodyObject.model, runtime.producer.models);
     const input = parseVoiceJobInput(bodyObject);
     const document = await readStoredStoryboard(deps, project);
     const scenes = selectVoiceScenes(document, input.sceneIds);

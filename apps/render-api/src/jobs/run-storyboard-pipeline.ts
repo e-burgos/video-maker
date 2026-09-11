@@ -18,6 +18,7 @@ export interface StoryboardPipelineRequest {
   readonly storyboardId: string;
   readonly brief: string | null;
   readonly scriptText: string | null;
+  readonly model: string | null;
 }
 
 function withStage(error: PipelineStageError, stage: StoryboardStage): PipelineStageError {
@@ -83,6 +84,7 @@ export async function runStoryboardPipeline(
         inventory,
       }),
       jsonSchema: storyboardProposalJsonSchema(),
+      model: request.model,
     }),
   );
 

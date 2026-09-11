@@ -9,6 +9,11 @@ const BINARY_MISSING_CODES = ['BINARY_NOT_FOUND'] as const satisfies readonly Me
 
 const RATE_LIMIT_MARKERS = ['rate limit', 'rate_limit', 'usage limit', 'quota', '429', 'overloaded'] as const;
 
+export const AI_AGENT_DETAIL_MAX_CHARS = 600;
+
+const VERSION_TOO_OLD_MARKER = 'claude_code_version_too_old';
+const VERSION_TOO_OLD_HINT = 'update Claude Code: run `claude update`';
+
 const UNAVAILABLE_HINT = `install the Claude Code CLI and sign it in, or set ${'CLAUDE_CLI_PATH'} to its absolute path`;
 const RATE_LIMITED_HINT = 'the account plan limit was reached, wait for the window to reset and retry';
 const FAILED_HINT = 'run the same prompt manually with the CLI to see the provider error';
@@ -85,6 +90,39 @@ function failed(cause: unknown): PipelineStageError {
   });
 }
 
+function trimDetail(value: unknown): string | null {
+  if (typeof value !== 'string') {
+    return null;
+  }
+
+  const text = value.trim();
+  if (text === '') {
+    return null;
+  }
+
+  return text.length <= AI_AGENT_DETAIL_MAX_CHARS ? text : `${text.slice(0, AI_AGENT_DETAIL_MAX_CHARS)}...`;
+}
+
+function hintFor(result: string | null): string {
+  return result !== null && result.includes(VERSION_TOO_OLD_MARKER) ? VERSION_TOO_OLD_HINT : FAILED_HINT;
+}
+
+function failedWithProviderDetail(payload: CliResultPayload): PipelineStageError {
+  const subtype = trimDetail(payload.subtype);
+  const result = trimDetail(payload.result);
+
+  return new PipelineStageError({
+    code: 'AI_AGENT_FAILED',
+    stage: null,
+    resource: 'ai-agent',
+    hint: hintFor(result),
+    details: {
+      ...(subtype === null ? {} : { subtype }),
+      ...(result === null ? {} : { result }),
+    },
+  });
+}
+
 function rateLimited(): PipelineStageError {
   return new PipelineStageError({
     code: 'AI_AGENT_RATE_LIMITED',
@@ -119,7 +157,8 @@ export function claudeCliArgs(request: AiAgentRequest, config: AiAgentConfig): r
     '--permission-mode',
     'dontAsk',
     '--disable-slash-commands',
-    ...(config.model === null ? [] : ['--model', config.model]),
+    '--model',
+    request.model ?? config.model,
   ];
 }
 
@@ -176,7 +215,7 @@ export function createClaudeCliAiAgent(runner: CommandRunner, config: AiAgentCon
     const payload = parsed as CliResultPayload;
 
     if (exitCode !== 0 || payload.is_error === true) {
-      throw mentionsRateLimit(payload) ? rateLimited() : failed(payload.subtype);
+      throw mentionsRateLimit(payload) ? rateLimited() : failedWithProviderDetail(payload);
     }
 
     if (!isRecord(payload.structured_output)) {

@@ -40,6 +40,7 @@ const MESSAGE_BY_CODE: Readonly<Record<RenderApiErrorCode, string>> = {
   RENDER_JOB_NOT_FOUND: 'The requested render job does not exist.',
   RENDER_JOB_NOT_CANCELABLE: 'The render job has already finished and cannot be canceled.',
   JOB_KIND_INVALID: 'The job kind is not render, montage or storyboard.',
+  JOB_MODEL_INVALID: 'The requested model is not one of the models this service allows.',
   MONTAGE_PRESET_INVALID: 'The montage preset is not one of the known preset names.',
   MONTAGE_SEED_INVALID: 'The montage seed is not a non-negative integer.',
   MONTAGE_OVERWRITE_INVALID: 'The overwrite flag is not a boolean.',

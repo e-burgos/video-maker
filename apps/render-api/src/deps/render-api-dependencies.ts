@@ -85,6 +85,7 @@ export interface AiAgentRequest {
   readonly systemPrompt: string;
   readonly userPrompt: string;
   readonly jsonSchema: unknown;
+  readonly model?: string | null;
 }
 
 export interface AiAgentUsage {

@@ -7,12 +7,13 @@ export const AI_AGENT_MODEL_ENV_VAR = 'CLAUDE_CLI_MODEL';
 
 export const DEFAULT_AI_AGENT_BINARY = 'claude';
 export const DEFAULT_AI_AGENT_TIMEOUT_MS = 600_000;
+export const DEFAULT_AI_AGENT_MODEL = 'sonnet';
 
 export interface AiAgentConfig {
   readonly binaryPath: string;
   readonly workingDirectory: string;
   readonly timeoutMs: number;
-  readonly model: string | null;
+  readonly model: string;
 }
 
 function readNonEmpty(env: NodeJS.ProcessEnv, name: string): string | null {
@@ -44,6 +45,6 @@ export function readAiAgentConfig(env: NodeJS.ProcessEnv, neutralDirectory: stri
     binaryPath: readNonEmpty(env, AI_AGENT_BINARY_ENV_VAR) ?? DEFAULT_AI_AGENT_BINARY,
     workingDirectory: readNonEmpty(env, AI_AGENT_CWD_ENV_VAR) ?? neutralDirectory,
     timeoutMs: readTimeoutMs(env),
-    model: readNonEmpty(env, AI_AGENT_MODEL_ENV_VAR),
+    model: readNonEmpty(env, AI_AGENT_MODEL_ENV_VAR) ?? DEFAULT_AI_AGENT_MODEL,
   };
 }

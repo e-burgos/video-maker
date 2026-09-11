@@ -56,7 +56,7 @@ injects.
 | `CLAUDE_CLI_PATH` | `claude` | Path to the Claude Code CLI used as the AI agent of a `storyboard` job. Without this variable it is resolved via `PATH`. **No API key is involved**: the CLI authenticates with the subscription already installed on the machine. If it cannot be started, a `storyboard` job fails with `503 AI_AGENT_UNAVAILABLE`. |
 | `CLAUDE_CLI_CWD` | the OS temporary directory | Working directory the agent process runs in. The default is deliberately **outside this repository**: from the repo root the CLI would load this project's `CLAUDE.md` and settings and answer as an SDD orchestrator instead of a storyboard writer. Point it somewhere else only if you know why. |
 | `CLAUDE_CLI_TIMEOUT_MS` | `600000` (10 min) | Positive integer. Zero, negative or non-numeric makes the `storyboard` job fail with `SERVER_CONFIG_INVALID`. A real call took 70-100 s on this machine. |
-| `CLAUDE_CLI_MODEL` | — | Model alias passed to the CLI (`sonnet`, `opus`, …). Unset lets the CLI pick its own default. Applies to the `storyboard` job only; the producer has its own. |
+| `CLAUDE_CLI_MODEL` | `sonnet` | Model alias passed to the CLI (`sonnet`, `opus`, …). The adapter **never** calls the CLI without `--model`: letting it fall back to the machine's default model is what made a `storyboard` job die in 5-10 s with `API Error: 400 … claude_code_version_too_old` (FIX-e-burgos-008-001). This is the default of the `storyboard` job; the body of `POST /projects/:slug/jobs` overrides it per job with `model`, and the producer has its own `PRODUCER_MODEL`. |
 | `PRODUCER_MODEL` | `sonnet` | Default model alias for the **studio producer** (`spec-e-burgos-015`), and the one a project starts on. `sonnet` on cost grounds: a producer turn can run for minutes and call dozens of tools. It **must** belong to `PRODUCER_MODELS` or startup aborts with `SERVER_CONFIG_INVALID`. From the chat the user picks the model per message, so this is a default, not a lock. |
 | `PRODUCER_MODELS` | `sonnet,opus,haiku` | Comma separated list of the model aliases the chat may choose from. `GET .../producer` publishes it as `models.allowed` with a label and a description each; `POST .../producer/messages` rejects anything outside it with `422 PRODUCER_MODEL_INVALID`. A list that names no model aborts startup with `SERVER_CONFIG_INVALID`. |
 | `PRODUCER_TURN_TIMEOUT_MS` | `1800000` (30 min) | Positive integer. Zero, negative or non-numeric aborts startup with `SERVER_CONFIG_INVALID` (exit 78) instead of falling back to the default. Half an hour because a single turn can include a transcription and a full render. |
@@ -387,17 +387,32 @@ permission prompt from hanging the job until the timeout.
 > `result`. `storyboardProposalJsonSchema()` strips `$schema` and `$id` for that reason, and a test
 > holds the line.
 
-**Typed errors** (never leak `stderr`, absolute host paths or `.stack`):
+**Typed errors** (never leak `stderr` or `.stack`):
+
+`AI_AGENT_FAILED` carries what the provider said: `subtype` and `result` from the CLI payload,
+each trimmed to 600 characters (`AI_AGENT_DETAIL_MAX_CHARS`), so the caller — the studio producer
+included — reports the real cause instead of guessing. `result` is written by the provider and may
+name absolute paths of this machine; that is a deliberate trade for a self-hosted studio
+(FIX-e-burgos-008-001). A `result` mentioning `claude_code_version_too_old` gets the specific hint
+`update Claude Code: run \`claude update\``; a quota marker still wins and maps to
+`AI_AGENT_RATE_LIMITED` before any of this.
 
 | Code | HTTP | When |
 | --- | --- | --- |
 | `AI_AGENT_UNAVAILABLE` | 503 | The CLI could not be started. Install it, sign it in, or set `CLAUDE_CLI_PATH`. |
 | `AI_AGENT_RATE_LIMITED` | 429 | The account plan limit was reached. Wait for the window to reset. |
-| `AI_AGENT_FAILED` | 502 | The CLI ran but did not complete the request. |
+| `AI_AGENT_FAILED` | 502 | The CLI ran but did not complete the request. Carries `subtype` and `result` from the provider, and a `hint` that names `claude update` when the CLI is too old. |
 | `AI_AGENT_INVALID_OUTPUT` | 502 | The answer had no `structured_output`, or it did not pass `StoryboardProposalSchema`. |
 | `STORYBOARD_INPUT_INVALID` | 422 | `brief`/`scriptText`: neither, both, or not a non-empty string. |
 | `STORYBOARD_OVERWRITE_INVALID` | 422 | `overwrite` is not a boolean. |
 | `STORYBOARD_ALREADY_EXISTS` | 409 | A storyboard exists and `overwrite` is not `true`. |
+| `JOB_MODEL_INVALID` | 422 | `model` is not one of `PRODUCER_MODELS`. |
+
+**Choosing the model per job** (FIX-e-burgos-008-001): `POST /projects/:slug/jobs` takes an
+optional `model` on the `storyboard` and `voice` kinds, validated against the same `PRODUCER_MODELS`
+list the chat picker uses (`422 JOB_MODEL_INVALID`, no job registered). The `storyboard` job passes
+it to `--model`; the `voice` job accepts it for uniformity — the producer sends the model of the
+turn on every `POST /jobs` — but synthesis is local and ignores it.
 | `STORYBOARD_NOT_FOUND` | 404 | `GET`/`prompts` on a project with no storyboard. |
 | `STORYBOARD_INVALID` | 422 | The document does not pass `StoryboardDocumentSchema`. |
 

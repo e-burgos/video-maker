@@ -45,6 +45,7 @@ export const RENDER_API_ERROR_CODES = [
   'RENDER_JOB_NOT_FOUND',
   'RENDER_JOB_NOT_CANCELABLE',
   'JOB_KIND_INVALID',
+  'JOB_MODEL_INVALID',
   'MONTAGE_PRESET_INVALID',
   'MONTAGE_SEED_INVALID',
   'MONTAGE_OVERWRITE_INVALID',
@@ -91,6 +92,8 @@ export type RenderApiErrorCode = (typeof RENDER_API_ERROR_CODES)[number];
 export interface RenderApiErrorDetails {
   readonly assetPersisted?: boolean;
   readonly catalogUpdated?: boolean;
+  readonly subtype?: string;
+  readonly result?: string;
 }
 
 export interface RenderApiErrorPayload {
@@ -102,6 +105,8 @@ export interface RenderApiErrorPayload {
   readonly hint?: string;
   readonly assetPersisted?: boolean;
   readonly catalogUpdated?: boolean;
+  readonly subtype?: string;
+  readonly result?: string;
 }
 
 export abstract class RenderApiError extends Error {

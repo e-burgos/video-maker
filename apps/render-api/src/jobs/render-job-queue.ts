@@ -90,6 +90,7 @@ interface StoryboardJobRecord extends JobRecordBase {
   readonly kind: 'storyboard';
   readonly brief: string | null;
   readonly scriptText: string | null;
+  readonly model: string | null;
   progress: StoryboardJobProgress | null;
   report: StoryboardJobReport | null;
 }
@@ -218,6 +219,7 @@ export function createRenderJobQueue(deps: RenderApiDependencies): RenderJobQueu
           storyboardId: record.id,
           brief: record.brief,
           scriptText: record.scriptText,
+          model: record.model,
         },
         deps,
         observer,
@@ -333,6 +335,7 @@ export function createRenderJobQueue(deps: RenderApiDependencies): RenderJobQueu
           kind: 'storyboard',
           brief: input.brief,
           scriptText: input.scriptText,
+          model: input.model,
           progress: null,
           report: null,
         };

@@ -424,7 +424,7 @@ describe('handleCreateRenderJob', () => {
       });
       const fakeAgent = createFakeAiAgent(buildStoryboardProposal(), callLog);
       const deps = createFakeRenderApiDependencies(callLog, { storage, aiAgent: fakeAgent.agent });
-      return { deps, storage, runtime: createRenderApiRuntime(deps) };
+      return { deps, storage, fakeAgent, runtime: createRenderApiRuntime(deps) };
     }
 
     it('answers 202 with kind storyboard and the same job envelope as the other kinds', async () => {
@@ -495,6 +495,60 @@ describe('handleCreateRenderJob', () => {
       await expect(
         handleCreateRenderJob(deps, STORE, { slug: 'smoke-ingest' }, jsonBodyRequest('smoke-ingest', body), runtime),
       ).rejects.toMatchObject({ code });
+      expect(runtime.jobs.listBySlug('smoke-ingest')).toEqual([]);
+    });
+
+    it('forwards the model of the request to the agent and defaults to the service model', async () => {
+      const { deps, fakeAgent, runtime } = storyboardHarness();
+
+      await handleCreateRenderJob(
+        deps,
+        STORE,
+        { slug: 'smoke-ingest' },
+        jsonBodyRequest('smoke-ingest', { kind: 'storyboard', brief: 'idea', model: 'haiku' }),
+        runtime,
+      );
+      await runtime.jobs.whenIdle();
+
+      await handleCreateRenderJob(
+        deps,
+        STORE,
+        { slug: 'smoke-ingest' },
+        jsonBodyRequest('smoke-ingest', { kind: 'storyboard', brief: 'otra idea', overwrite: true }),
+        runtime,
+      );
+      await runtime.jobs.whenIdle();
+
+      expect(fakeAgent.requests.map((request) => request.model)).toEqual(['haiku', null]);
+    });
+
+    it('rejects a model outside PRODUCER_MODELS with JOB_MODEL_INVALID and registers no job', async () => {
+      const { deps, runtime } = storyboardHarness();
+
+      await expect(
+        handleCreateRenderJob(
+          deps,
+          STORE,
+          { slug: 'smoke-ingest' },
+          jsonBodyRequest('smoke-ingest', { kind: 'storyboard', brief: 'idea', model: 'gpt-5' }),
+          runtime,
+        ),
+      ).rejects.toMatchObject({ code: 'JOB_MODEL_INVALID', expected: 'one of sonnet, opus, haiku' });
+      expect(runtime.jobs.listBySlug('smoke-ingest')).toEqual([]);
+    });
+
+    it('rejects a model outside PRODUCER_MODELS on a voice job too', async () => {
+      const { deps, runtime } = storyboardHarness();
+
+      await expect(
+        handleCreateRenderJob(
+          deps,
+          STORE,
+          { slug: 'smoke-ingest' },
+          jsonBodyRequest('smoke-ingest', { kind: 'voice', model: 'gpt-5' }),
+          runtime,
+        ),
+      ).rejects.toMatchObject({ code: 'JOB_MODEL_INVALID' });
       expect(runtime.jobs.listBySlug('smoke-ingest')).toEqual([]);
     });
 

@@ -3,6 +3,7 @@ import { describe, expect, it } from 'vitest';
 import { isRenderApiError } from '../errors/render-api-error';
 import {
   DEFAULT_AI_AGENT_BINARY,
+  DEFAULT_AI_AGENT_MODEL,
   DEFAULT_AI_AGENT_TIMEOUT_MS,
   readAiAgentConfig,
 } from './ai-agent-config';
@@ -15,7 +16,7 @@ describe('readAiAgentConfig', () => {
       binaryPath: DEFAULT_AI_AGENT_BINARY,
       workingDirectory: NEUTRAL_DIR,
       timeoutMs: DEFAULT_AI_AGENT_TIMEOUT_MS,
-      model: null,
+      model: DEFAULT_AI_AGENT_MODEL,
     });
   });
 
@@ -29,8 +30,13 @@ describe('readAiAgentConfig', () => {
       binaryPath: DEFAULT_AI_AGENT_BINARY,
       workingDirectory: NEUTRAL_DIR,
       timeoutMs: DEFAULT_AI_AGENT_TIMEOUT_MS,
-      model: null,
+      model: DEFAULT_AI_AGENT_MODEL,
     });
+  });
+
+  it('nunca deja el modelo sin declarar', () => {
+    expect(DEFAULT_AI_AGENT_MODEL).toBe('sonnet');
+    expect(readAiAgentConfig({}, NEUTRAL_DIR).model).toBe('sonnet');
   });
 
   it('toma cada variable declarada', () => {
