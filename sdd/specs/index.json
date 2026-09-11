@@ -257,6 +257,24 @@
         "spec-e-burgos-008-ai-storyboard",
         "spec-e-burgos-014-production-quality"
       ]
+    },
+    {
+      "id": "spec-e-burgos-016-studio-usability",
+      "author": "e-burgos",
+      "slug": "studio-usability",
+      "folder": "sdd/specs/spec-e-burgos-016-studio-usability",
+      "file": "sdd/specs/spec-e-burgos-016-studio-usability/spec-e-burgos-016-studio-usability.spec.md",
+      "module": "studio-usability",
+      "app": "apps/web",
+      "status": "draft",
+      "title": "Studio Usability: voces con preview, roles explicados, i18n y guía",
+      "created_at": "2026-09-11",
+      "completed_at": null,
+      "depends_on": [
+        "spec-e-burgos-006-web-studio",
+        "spec-e-burgos-009-voice-over",
+        "spec-e-burgos-015-studio-producer"
+      ]
     }
   ]
 }

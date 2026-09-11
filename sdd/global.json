@@ -175,6 +175,15 @@
         "apps/web"
       ],
       "description": "Timeline multipista visual: las cinco pistas en escala de tiempo, recorte y reordenamiento por drag, playhead sincronizado en los dos sentidos con el Player de Remotion, inspector por escena y subida drag&drop multi-archivo"
+    },
+    {
+      "module": "studio-usability",
+      "spec": "spec-e-burgos-016-studio-usability",
+      "apps": [
+        "apps/web",
+        "apps/render-api"
+      ],
+      "description": "Usabilidad del Web Studio: catálogo de voces enriquecido con preview audible y descripciones de rol en el uploader (cycle-01), switch de idioma en/es y sección de guía (cycle-02). No agrega capacidad al motor: hace legible la que ya existe."
     }
   ],
   "monorepo": {
