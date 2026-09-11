@@ -62,8 +62,15 @@ no negativo, default `0`. Formatos disponibles: `reels-9x16` (default), `tiktok-
   EDL trae un único `keep`—. En modo `aroll` la poda siempre estuvo encendida y la bandera no cambia
   nada.
 
-`ingest` y `render` rechazan las siete opciones (`--preset`, `--seed`, `--script`, `--no-logo`,
-`--format`, `--voice`, `--prune-silences`).
+- `--caption-style <bold-impact|clean-sans|outline-pop|subtle-lower|off>` (FIX-e-burgos-003-003): el
+  estilo de las captions, escrito en `timeline.captionStyle` y leído por la composición para elegir
+  el preset tipográfico (`off` no renderiza captions). **Sin la bandera lo decide el preset de
+  montaje**: `educational` → `subtle-lower`, y `software-demo` / `hardware` / `recipe` →
+  `bold-impact` (lo de siempre). `subtle-lower` además agrupa como subtítulo —6 a 10 palabras por
+  caption en 2 a 4 s, caja inferior— en vez de las 1 a 3 palabras cinéticas.
+
+`ingest` y `render` rechazan las ocho opciones (`--preset`, `--seed`, `--script`, `--no-logo`,
+`--format`, `--voice`, `--caption-style`, `--prune-silences`).
 
 ## `render` entrega la mezcla masterizada (spec-015 cycle-01)
 

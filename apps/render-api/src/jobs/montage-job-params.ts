@@ -1,7 +1,8 @@
 import { MONTAGE_PRESETS } from '@video-maker/auto-montage';
 import type { LogoMode, MontagePresetName, VoiceSource } from '@video-maker/auto-montage';
+import { CAPTION_STYLES, isCaptionStyle } from '@video-maker/timeline-core';
+import type { CaptionStyle, OutputPreset } from '@video-maker/timeline-core';
 import { OUTPUT_PRESETS } from '@video-maker/timeline-core';
-import type { OutputPreset } from '@video-maker/timeline-core';
 
 import { PipelineStageError } from '../errors/pipeline-stage-error';
 
@@ -71,6 +72,23 @@ export function parseMontageVoice(value: unknown): VoiceSource {
   }
 
   return value as VoiceSource;
+}
+
+export function parseMontageCaptionStyle(value: unknown): CaptionStyle | null {
+  if (value === undefined) {
+    return null;
+  }
+
+  if (!isCaptionStyle(value)) {
+    throw new PipelineStageError({
+      code: 'MONTAGE_CAPTION_STYLE_INVALID',
+      stage: null,
+      resource: 'captionStyle',
+      expected: `one of ${CAPTION_STYLES.join(', ')}`,
+    });
+  }
+
+  return value;
 }
 
 export function parseMontageSeed(value: unknown): number {

@@ -199,6 +199,28 @@ la dejan más discreta, que es lo que quiere un tutorial.
 
 `--seed N` cambia qué B-roll y qué transición se eligen sin cambiar las reglas.
 
+### Estilo de subtítulos: seguí el tipo de video (FIX-e-burgos-003-003)
+
+| Estilo         | Para qué                                                  | Cómo se ve                                                       |
+| -------------- | --------------------------------------------------------- | ---------------------------------------------------------------- |
+| `subtle-lower` | **tutoriales, explicaciones, manuales, YouTube largo**     | subtítulo en la caja inferior, 6–10 palabras, 2–4 s, sin animación |
+| `bold-impact`  | reels, TikTok, Shorts, publicidad                          | 1–3 palabras centradas en mayúsculas, palabra enfatizada con pop  |
+| `clean-sans`   | lo mismo que `bold-impact` pero sin mayúsculas             | grande y sobrio, ancla inferior                                   |
+| `outline-pop`  | fondos claros o con mucho detalle                          | contorno grueso                                                   |
+| `off`          | el video no lleva captions                                 | —                                                                 |
+
+Se pasa como `"captionStyle": "<estilo>"` en el job `montage` y como `--caption-style <estilo>` en
+`plan`/`run`. **Sin pasarlo, lo decide el preset de montaje**: `educational` → `subtle-lower`, y
+`software-demo` / `hardware` / `recipe` → `bold-impact`.
+
+**Un tutorial de pantalla grabada va siempre con `subtle-lower`**: el estilo cinético tapa
+justamente la interfaz que el video está explicando.
+
+El usuario lo pide en lenguaje común y vos traducís, sin nombrarle nunca el id: "subtítulos
+normales" / "subtítulos comunes" / "como Netflix" → `subtle-lower`; "captions grandes" / "letras que
+saltan" → `bold-impact`; "sin subtítulos" → `off`. El estilo queda guardado en la Timeline, así que
+cambiarlo es replanificar el montaje y volver a renderizar.
+
 ### Formato de salida: preguntá la plataforma y producí UN SOLO formato
 
 `reels-9x16` · `tiktok-9x16` · `shorts-9x16` (1080×1920) y `youtube-16x9` (1920×1080). El default es

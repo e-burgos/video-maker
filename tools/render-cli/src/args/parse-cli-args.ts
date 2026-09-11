@@ -1,11 +1,13 @@
 import { parseArgs } from 'node:util';
 import type { LogoMode, MontagePresetName, VoiceSource } from '@video-maker/auto-montage';
-import type { OutputPreset } from '@video-maker/timeline-core';
+import { isCaptionStyle } from '@video-maker/timeline-core';
+import type { CaptionStyle, OutputPreset } from '@video-maker/timeline-core';
 
 import { CliArgumentError } from '../errors/cli-argument-error';
 import { CliUsageError } from '../errors/cli-usage-error';
 
 import {
+  CAPTION_STYLE_NAMES,
   COMMAND_NAMES,
   DEFAULT_FORMAT,
   DEFAULT_SEED,
@@ -23,6 +25,7 @@ export interface PlanOptions {
   readonly logo: LogoMode;
   readonly format: OutputPreset;
   readonly voice: VoiceSource;
+  readonly captionStyle: CaptionStyle | undefined;
   readonly pruneSilences: boolean | undefined;
 }
 
@@ -39,6 +42,7 @@ const COMMAND_LIST = COMMAND_NAMES.join(' | ');
 const PRESET_LIST = PRESET_NAMES.join(' | ');
 const FORMAT_LIST = FORMAT_NAMES.join(' | ');
 const VOICE_SOURCE_LIST = VOICE_SOURCE_NAMES.join(' | ');
+const CAPTION_STYLE_LIST = CAPTION_STYLE_NAMES.join(' | ');
 
 function isCommandName(value: string): value is CommandName {
   return (COMMAND_NAMES as readonly string[]).includes(value);
@@ -105,6 +109,7 @@ function parseNodeArgs(command: CommandName, rest: readonly string[]) {
         'no-logo': { type: 'boolean' },
         format: { type: 'string' },
         voice: { type: 'string' },
+        'caption-style': { type: 'string' },
         'prune-silences': { type: 'boolean' },
       },
       allowPositionals: true,
@@ -122,6 +127,7 @@ interface RawPlanValues {
   readonly noLogo: boolean | undefined;
   readonly format: string | undefined;
   readonly voice: string | undefined;
+  readonly captionStyle: string | undefined;
   readonly pruneSilences: boolean | undefined;
 }
 
@@ -176,6 +182,26 @@ function parseVoiceSource(command: 'plan' | 'run', rawVoice: string | undefined)
   return rawVoice;
 }
 
+function parseCaptionStyle(
+  command: 'plan' | 'run',
+  rawCaptionStyle: string | undefined,
+): CaptionStyle | undefined {
+  if (rawCaptionStyle === undefined) {
+    return undefined;
+  }
+
+  if (!isCaptionStyle(rawCaptionStyle)) {
+    throw new CliArgumentError({
+      stage: stageForArgument(command, 'caption-style'),
+      reason: 'unknown-caption-style',
+      resource: `--caption-style=${rawCaptionStyle}`,
+      expected: CAPTION_STYLE_LIST,
+    });
+  }
+
+  return rawCaptionStyle;
+}
+
 function parsePresetAndSeed(command: 'plan' | 'run', values: RawPlanValues): PlanOptions {
   const rawPreset = values.preset;
   const rawSeed = values.seed;
@@ -200,10 +226,20 @@ function parsePresetAndSeed(command: 'plan' | 'run', values: RawPlanValues): Pla
   const logo: LogoMode = values.noLogo === true ? 'off' : 'auto';
   const format = parseFormat(command, values.format);
   const voice = parseVoiceSource(command, values.voice);
+  const captionStyle = parseCaptionStyle(command, values.captionStyle);
   const pruneSilences = values.pruneSilences;
 
   if (rawSeed === undefined) {
-    return { preset: rawPreset, seed: DEFAULT_SEED, scriptPath, logo, format, voice, pruneSilences };
+    return {
+      preset: rawPreset,
+      seed: DEFAULT_SEED,
+      scriptPath,
+      logo,
+      format,
+      voice,
+      captionStyle,
+      pruneSilences,
+    };
   }
 
   if (!SEED_PATTERN.test(rawSeed) || !Number.isSafeInteger(Number(rawSeed))) {
@@ -215,7 +251,16 @@ function parsePresetAndSeed(command: 'plan' | 'run', values: RawPlanValues): Pla
     });
   }
 
-  return { preset: rawPreset, seed: Number(rawSeed), scriptPath, logo, format, voice, pruneSilences };
+  return {
+    preset: rawPreset,
+    seed: Number(rawSeed),
+    scriptPath,
+    logo,
+    format,
+    voice,
+    captionStyle,
+    pruneSilences,
+  };
 }
 
 const PLAN_ONLY_OPTIONS = [
@@ -225,6 +270,7 @@ const PLAN_ONLY_OPTIONS = [
   'no-logo',
   'format',
   'voice',
+  'caption-style',
   'prune-silences',
 ] as const;
 
@@ -236,6 +282,7 @@ function assertNoPlanOptions(command: 'ingest' | 'render', values: RawPlanValues
     ['no-logo', values.noLogo],
     ['format', values.format],
     ['voice', values.voice],
+    ['caption-style', values.captionStyle],
     ['prune-silences', values.pruneSilences],
   ];
 
@@ -281,6 +328,7 @@ export function parseCliArgs(argv: readonly string[]): ParsedCommand {
     'no-logo': rawNoLogo,
     format: rawFormat,
     voice: rawVoice,
+    'caption-style': rawCaptionStyle,
     'prune-silences': rawPruneSilences,
   } = parsed.values;
 
@@ -292,6 +340,7 @@ export function parseCliArgs(argv: readonly string[]): ParsedCommand {
       noLogo: rawNoLogo,
       format: rawFormat,
       voice: rawVoice,
+      captionStyle: rawCaptionStyle,
       pruneSilences: rawPruneSilences,
     });
     return { command: rawCommand, projectRoot };
@@ -304,6 +353,7 @@ export function parseCliArgs(argv: readonly string[]): ParsedCommand {
     noLogo: rawNoLogo,
     format: rawFormat,
     voice: rawVoice,
+    captionStyle: rawCaptionStyle,
     pruneSilences: rawPruneSilences,
   });
   return { command: rawCommand, projectRoot, options };

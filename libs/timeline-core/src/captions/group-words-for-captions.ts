@@ -9,6 +9,7 @@ export interface TranscriptWord {
 }
 
 export interface CaptionGroupOptions {
+  minWords?: number;
   maxWords?: number;
   maxDurationMs?: Ms;
   minDurationMs?: Ms;
@@ -31,6 +32,7 @@ interface WordGroup {
 }
 
 const DEFAULT_MAX_WORDS = 3;
+const DEFAULT_MIN_WORDS = 1;
 const MIN_MAX_WORDS = 1;
 const DEFAULT_MAX_DURATION_MS: Ms = 1200;
 const DEFAULT_MIN_DURATION_MS: Ms = 300;
@@ -102,29 +104,35 @@ function appendToGroup(group: WordGroup, word: TranscriptWord): WordGroup {
   return { words: [...group.words, word], firstWord: group.firstWord, lastWord: word };
 }
 
+interface GroupBoundaries {
+  readonly minWords: number;
+  readonly maxWords: number;
+  readonly maxDurationMs: Ms;
+  readonly maxGapMs: Ms;
+}
+
 function shouldStartNewGroup(
   current: WordGroup,
   candidateWord: TranscriptWord,
-  maxWords: number,
-  maxDurationMs: Ms,
-  maxGapMs: Ms,
+  boundaries: GroupBoundaries,
 ): boolean {
   const gapMs = candidateWord.startMs - current.lastWord.endMs;
   const candidateDurationMs = candidateWord.endMs - current.firstWord.startMs;
 
-  return (
-    endsSentence(current.lastWord) ||
-    gapMs >= maxGapMs ||
-    current.words.length >= maxWords ||
-    candidateDurationMs > maxDurationMs
-  );
+  if (
+    current.words.length >= boundaries.maxWords ||
+    candidateDurationMs > boundaries.maxDurationMs ||
+    gapMs >= boundaries.maxGapMs
+  ) {
+    return true;
+  }
+
+  return current.words.length >= boundaries.minWords && endsSentence(current.lastWord);
 }
 
 function splitIntoGroups(
   words: readonly TranscriptWord[],
-  maxWords: number,
-  maxDurationMs: Ms,
-  maxGapMs: Ms,
+  boundaries: GroupBoundaries,
 ): WordGroup[] {
   const groups: WordGroup[] = [];
   let current: WordGroup | undefined;
@@ -135,7 +143,7 @@ function splitIntoGroups(
       continue;
     }
 
-    if (shouldStartNewGroup(current, word, maxWords, maxDurationMs, maxGapMs)) {
+    if (shouldStartNewGroup(current, word, boundaries)) {
       groups.push(current);
       current = startGroup(word);
     } else {
@@ -168,9 +176,10 @@ export function groupWordsForCaptions(
   const maxDurationMs = opts.maxDurationMs ?? DEFAULT_MAX_DURATION_MS;
   const minDurationMs = opts.minDurationMs ?? DEFAULT_MIN_DURATION_MS;
   const maxGapMs = opts.maxGapMs ?? DEFAULT_MAX_GAP_MS;
+  const minWords = Math.min(maxWords, Math.max(MIN_MAX_WORDS, opts.minWords ?? DEFAULT_MIN_WORDS));
   const emphasisKeywords = opts.emphasisKeywords ?? [];
 
-  const groups = splitIntoGroups(words, maxWords, maxDurationMs, maxGapMs);
+  const groups = splitIntoGroups(words, { minWords, maxWords, maxDurationMs, maxGapMs });
 
   return groups.map((group, index) => ({
     id: sequentialId('cap', index),

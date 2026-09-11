@@ -94,6 +94,7 @@ export type {
 export { activeWordIndex, captionWordRenders } from './helpers/caption-active-word';
 export type { CaptionWordRender } from './helpers/caption-active-word';
 
+export { captionPresetIdForStyle } from './helpers/caption-style-preset';
 export { captionBoxStyle, captionClipPlan } from './helpers/caption-clip-plan';
 export type { CaptionBoxSource, CaptionClipPlan } from './helpers/caption-clip-plan';
 

@@ -637,6 +637,7 @@ describe('createRenderJobQueue — montage jobs', () => {
       scriptAlignment: null,
       voiceSource: 'aroll',
       voiceTrack: null,
+      captionStyle: 'bold-impact',
     });
   });
 });

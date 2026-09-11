@@ -9,6 +9,7 @@ export type CliArgument =
   | 'logo'
   | 'format'
   | 'voice'
+  | 'caption-style'
   | 'prune-silences';
 
 type CommandName = ParsedCommand['command'];
@@ -22,6 +23,7 @@ const STAGE_FOR_ARGUMENT: Record<CommandName, Record<CliArgument, Stage>> = {
     logo: 'ingest',
     format: 'ingest',
     voice: 'ingest',
+    'caption-style': 'ingest',
     'prune-silences': 'ingest',
   },
   plan: {
@@ -32,6 +34,7 @@ const STAGE_FOR_ARGUMENT: Record<CommandName, Record<CliArgument, Stage>> = {
     logo: 'plan',
     format: 'plan',
     voice: 'plan',
+    'caption-style': 'plan',
     'prune-silences': 'plan',
   },
   render: {
@@ -42,6 +45,7 @@ const STAGE_FOR_ARGUMENT: Record<CommandName, Record<CliArgument, Stage>> = {
     logo: 'render',
     format: 'render',
     voice: 'render',
+    'caption-style': 'render',
     'prune-silences': 'render',
   },
   run: {
@@ -52,6 +56,7 @@ const STAGE_FOR_ARGUMENT: Record<CommandName, Record<CliArgument, Stage>> = {
     logo: 'plan',
     format: 'plan',
     voice: 'plan',
+    'caption-style': 'plan',
     'prune-silences': 'plan',
   },
 };

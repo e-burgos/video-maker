@@ -1,4 +1,5 @@
 import type {
+  CaptionStyle,
   EditDecisionList,
   LogoInput,
   MediaAsset,
@@ -8,6 +9,7 @@ import type {
 } from '@video-maker/timeline-core';
 import {
   buildTimeline,
+  captionGroupingForStyle,
   framesToMs,
   planPunchIns,
   remapMsAfterCuts,
@@ -35,6 +37,7 @@ import { resolveMontageInputs } from './montage/resolve-montage-inputs';
 import { writeEditDecisionList } from './montage/write-edit-decision-list';
 import { writeTimeline } from './montage/write-timeline';
 import type { MontagePreset, MontagePresetName } from './presets/montage-preset';
+import { captionStyleForMontagePreset } from './presets/caption-style-defaults';
 import { resolveMontagePreset } from './presets/preset-registry';
 import type { MediaProject } from './project/media-project';
 import { editDecisionListPath, timelinePath } from './project/project-paths';
@@ -68,6 +71,7 @@ export interface AutoMontageOptions {
   readonly logo?: LogoMode;
   readonly scriptText?: string;
   readonly voice?: VoiceSource;
+  readonly captionStyle?: CaptionStyle;
   readonly pruneSilences?: boolean;
   readonly persist?: boolean;
 }
@@ -90,6 +94,7 @@ export interface AutoMontageResult {
   readonly stopwordLanguage: string | null;
   readonly logoAssetId: string | null;
   readonly scriptAlignment: ScriptAlignmentCounts | null;
+  readonly captionStyle: CaptionStyle;
   readonly editedDurationMs: number;
   readonly edlPath: ProjectRelativePath;
   readonly timelinePath: ProjectRelativePath;
@@ -223,7 +228,14 @@ export async function autoMontage(
     fps,
   });
 
-  const captionGroups = planCaptionGroups(alignedTranscription.words, keeps, concepts, preset);
+  const captionStyle = captionStyleForMontagePreset(preset.name, options.captionStyle);
+  const captionGroups = planCaptionGroups(
+    alignedTranscription.words,
+    keeps,
+    concepts,
+    preset,
+    captionGroupingForStyle(captionStyle),
+  );
   const duckDecisions = planDuckRanges(alignedTranscription.words, keeps, preset, fps);
   const transitions = planTransitions(keeps, preset, fps);
 
@@ -263,6 +275,7 @@ export async function autoMontage(
       voiceScriptTrack === null
         ? undefined
         : { assetId: voiceScriptTrack.asset.id, durationMs: voiceScriptTrack.asset.durationMs },
+      captionStyle,
     ),
   );
 
@@ -285,6 +298,7 @@ export async function autoMontage(
     stopwordLanguage,
     logoAssetId: logoAsset?.id ?? null,
     scriptAlignment: alignment === null ? null : toAlignmentCounts(alignment),
+    captionStyle,
     editedDurationMs: remapMsAfterCuts(pruneDurationMs, keeps),
     edlPath: editDecisionListPath(),
     timelinePath: timelinePath(),

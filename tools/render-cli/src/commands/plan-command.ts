@@ -42,6 +42,7 @@ async function runAutoMontage(
         logo: options.logo,
         outputPreset: options.format,
         voice: options.voice,
+        ...(options.captionStyle === undefined ? {} : { captionStyle: options.captionStyle }),
         ...(options.pruneSilences === undefined ? {} : { pruneSilences: options.pruneSilences }),
         ...(scriptText === undefined ? {} : { scriptText }),
       },

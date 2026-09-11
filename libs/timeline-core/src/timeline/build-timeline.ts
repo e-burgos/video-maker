@@ -26,6 +26,7 @@ import type { AssetId, ClipId, DecisionId, Db, Frame, Fps, Ms, Scale } from '../
 import { safeZoneFor } from '../format/format';
 import { framesToMs, msToFrames } from '../units/units';
 import { pickEmphasisIndex } from '../captions/group-words-for-captions';
+import type { CaptionStyle } from '../captions/caption-style';
 import { DEFAULT_AUDIO_MIX_PLAN, DEFAULT_MUSIC_MIX, planDucking } from '../ducking/plan-ducking';
 import type { VoiceRange } from '../ducking/plan-ducking';
 import type { PunchInAnchor } from '../punch-in/plan-punch-ins';
@@ -427,6 +428,7 @@ export function buildTimeline(
   music?: MusicInput,
   logo?: LogoInput,
   voice?: VoiceInput,
+  captionStyle?: CaptionStyle,
 ): Timeline {
   const fps = edl.format.fps;
   const keeps = decisionsOfType(edl.decisions, 'keep').sort(byStartMs);
@@ -485,5 +487,6 @@ export function buildTimeline(
     audioMix,
     ...optionalField('logo', logo === undefined ? undefined : buildLogoOverlay(logo)),
     safeZone: safeZoneFor(edl.format),
+    ...optionalField('captionStyle', captionStyle),
   };
 }

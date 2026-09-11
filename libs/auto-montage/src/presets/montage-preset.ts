@@ -33,7 +33,7 @@ export interface MontagePreset {
     readonly fit: ClipFit;
   };
   readonly captions: {
-    readonly maxWords: 1 | 2 | 3;
+    readonly maxWords: number;
     readonly maxDurationMs: number;
     readonly minDurationMs: number;
     readonly maxGapMs: number;

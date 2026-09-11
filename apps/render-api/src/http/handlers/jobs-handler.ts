@@ -2,6 +2,7 @@ import type { StoreConfig } from '../../config/store-config';
 import type { RenderApiDependencies } from '../../deps/render-api-dependencies';
 import { PipelineStageError } from '../../errors/pipeline-stage-error';
 import {
+  parseMontageCaptionStyle,
   parseMontageFormat,
   parseMontageLogo,
   parseMontageOverwrite,
@@ -174,6 +175,7 @@ export async function handleCreateRenderJob(
   const logo = parseMontageLogo(bodyObject.logo);
   const format = parseMontageFormat(bodyObject.format);
   const voice = parseMontageVoice(bodyObject.voice);
+  const captionStyle = parseMontageCaptionStyle(bodyObject.captionStyle);
 
   await assertTimelineNotPersisted(deps, project, overwrite);
 
@@ -192,6 +194,7 @@ export async function handleCreateRenderJob(
     logo,
     format,
     voice,
+    captionStyle,
   });
 
   return {

@@ -344,3 +344,44 @@ describe('parseCliArgs — --script y --no-logo (spec-014)', () => {
     expect(() => parseCliArgs(['render', 'p', '--no-logo'])).toThrow(CliUsageError);
   });
 });
+
+describe('parseCliArgs — --caption-style (FIX-e-burgos-003-003)', () => {
+  it('sin --caption-style el estilo lo decide el preset de montaje', () => {
+    const parsed = parseCliArgs(['plan', 'media/demo-01', '--preset', 'educational']);
+
+    expect(parsed.command === 'plan' ? parsed.options.captionStyle : 'x').toBeUndefined();
+  });
+
+  it.each(['bold-impact', 'clean-sans', 'outline-pop', 'subtle-lower', 'off'])(
+    'acepta --caption-style %s',
+    (style) => {
+      const parsed = parseCliArgs([
+        'run',
+        'media/demo-01',
+        '--preset=educational',
+        `--caption-style=${style}`,
+      ]);
+
+      expect(parsed.command === 'run' && parsed.options.captionStyle).toBe(style);
+    },
+  );
+
+  it('rechaza un estilo desconocido nombrando los cinco válidos', () => {
+    expect(() =>
+      parseCliArgs(['plan', 'media/demo-01', '--preset=educational', '--caption-style=neon']),
+    ).toThrowError(
+      expect.objectContaining({
+        reason: 'unknown-caption-style',
+        resource: '--caption-style=neon',
+        expected: 'bold-impact | clean-sans | outline-pop | subtle-lower | off',
+        stage: 'plan',
+      }),
+    );
+  });
+
+  it('ingest y render rechazan --caption-style como cualquier opción de plan', () => {
+    expect(() =>
+      parseCliArgs(['ingest', 'media/demo-01', '--caption-style=off']),
+    ).toThrowError(expect.objectContaining({ reason: 'unexpected-option', resource: '--caption-style' }));
+  });
+});

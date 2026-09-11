@@ -280,7 +280,7 @@
               },
               "words": {
                 "minItems": 1,
-                "maxItems": 3,
+                "maxItems": 10,
                 "type": "array",
                 "items": {
                   "type": "object",
@@ -311,7 +311,7 @@
               "emphasisIndex": {
                 "type": "integer",
                 "minimum": 0,
-                "maximum": 2
+                "maximum": 9
               }
             },
             "required": [

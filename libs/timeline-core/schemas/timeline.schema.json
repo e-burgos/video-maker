@@ -313,7 +313,7 @@
               },
               "words": {
                 "minItems": 1,
-                "maxItems": 3,
+                "maxItems": 10,
                 "type": "array",
                 "items": {
                   "type": "object",
@@ -566,6 +566,16 @@
         "right"
       ],
       "additionalProperties": false
+    },
+    "captionStyle": {
+      "type": "string",
+      "enum": [
+        "bold-impact",
+        "clean-sans",
+        "outline-pop",
+        "subtle-lower",
+        "off"
+      ]
     }
   },
   "required": [

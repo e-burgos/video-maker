@@ -212,6 +212,30 @@ describe('autoMontage — voice: script (FIX-e-burgos-007-002)', () => {
     );
   });
 
+  it('con el preset educational las captions se agrupan como subtítulo, cortando sólo en los silencios (FIX-e-burgos-003-003)', async () => {
+    const result = await run(buildFileSystem(), { preset: 'educational' });
+
+    expect(result.captionStyle).toBe('subtle-lower');
+    expect(result.timeline.captionStyle).toBe('subtle-lower');
+    expect(result.timeline.tracks.captions.map((caption) => caption.words.length)).toEqual([3, 4, 5]);
+    const validation = validateTimeline(result.timeline);
+    expect(validation.ok ? [] : validation.issues).toEqual([]);
+  });
+
+  it('con software-demo el estilo sigue siendo el cinético y el agrupado de 3 palabras (FIX-e-burgos-003-003)', async () => {
+    const result = await run(buildFileSystem());
+
+    expect(result.captionStyle).toBe('bold-impact');
+    expect(result.timeline.captionStyle).toBe('bold-impact');
+    expect(result.timeline.tracks.captions.every((caption) => caption.words.length <= 3)).toBe(true);
+  });
+
+  it('un captionStyle explícito gana sobre el default del preset (FIX-e-burgos-003-003)', async () => {
+    const result = await run(buildFileSystem(), { captionStyle: 'off' });
+
+    expect(result.timeline.captionStyle).toBe('off');
+  });
+
   it('con guion cronometrado truncatedMs mide la narración, no el silencio de relleno (FIX-e-burgos-009-002)', async () => {
     const result = await run(buildFileSystem(26_000, true));
 

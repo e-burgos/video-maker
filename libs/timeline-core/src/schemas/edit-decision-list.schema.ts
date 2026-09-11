@@ -72,8 +72,8 @@ export const CaptionGroupDecisionSchema = z.strictObject({
   type: z.literal('caption-group'),
   startMs: MsSchema,
   endMs: MsSchema,
-  words: z.array(CaptionGroupWordSchema).min(1).max(3),
-  emphasisIndex: z.number().int().min(0).max(2).optional(),
+  words: z.array(CaptionGroupWordSchema).min(1).max(10),
+  emphasisIndex: z.number().int().min(0).max(9).optional(),
 });
 
 export const DuckDecisionSchema = z.strictObject({

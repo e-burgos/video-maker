@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest';
 
 import {
   parseMontageFormat,
+  parseMontageCaptionStyle,
   parseMontageVoice,
   parseMontageLogo,
   parseMontageOverwrite,
@@ -218,5 +219,30 @@ describe('parseMontageVoice (FIX-e-burgos-007-002)', () => {
 
   it('rejects a non-string with MONTAGE_VOICE_INVALID', () => {
     expect(captureError(() => parseMontageVoice(1))).toBeInstanceOf(PipelineStageError);
+  });
+});
+
+describe('parseMontageCaptionStyle (FIX-e-burgos-003-003)', () => {
+  it('returns null when the value is absent so the montage preset decides', () => {
+    expect(parseMontageCaptionStyle(undefined)).toBeNull();
+  });
+
+  it.each(['bold-impact', 'clean-sans', 'outline-pop', 'subtle-lower', 'off'])(
+    'accepts %s',
+    (style) => {
+      expect(parseMontageCaptionStyle(style)).toBe(style);
+    },
+  );
+
+  it.each([['neon'], [3], [null], [{}]])('rejects %s with MONTAGE_CAPTION_STYLE_INVALID', (value) => {
+    const error = captureError(() => parseMontageCaptionStyle(value));
+
+    expect(error).toBeInstanceOf(PipelineStageError);
+    expect(error).toMatchObject({
+      code: 'MONTAGE_CAPTION_STYLE_INVALID',
+      stage: null,
+      resource: 'captionStyle',
+      expected: 'one of bold-impact, clean-sans, outline-pop, subtle-lower, off',
+    });
   });
 });

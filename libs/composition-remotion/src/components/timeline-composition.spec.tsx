@@ -143,3 +143,46 @@ describe('TimelineComposition — capa de logo (spec-014)', () => {
     expect(childTypes({ ...withLogo, audio: 'muted' })).toContain(LogoOverlay);
   });
 });
+
+describe('TimelineComposition — captionStyle del documento (FIX-e-burgos-003-003)', () => {
+  function captionPresetOf(props: TimelineCompositionProps): unknown {
+    const tree = TimelineComposition(props);
+    if (!isValidElement(tree)) {
+      throw new Error('expected TimelineComposition to return an AbsoluteFill element');
+    }
+    const fragmentProps = tree.props as { children?: unknown };
+    const captions = Children.toArray(fragmentProps.children).find(
+      (child) => isValidElement(child) && child.type === KineticCaptions,
+    );
+    return isValidElement(captions) ? (captions.props as { preset?: unknown }).preset : undefined;
+  }
+
+  it('el captionStyle de la Timeline elige el preset tipográfico', () => {
+    expect(captionPresetOf({ timeline: { ...TIMELINE, captionStyle: 'subtle-lower' } })).toBe(
+      'subtle-lower',
+    );
+  });
+
+  it('el captionStyle de la Timeline gana sobre la prop de preview', () => {
+    expect(
+      captionPresetOf({
+        timeline: { ...TIMELINE, captionStyle: 'outline-pop' },
+        captionPreset: 'clean-sans',
+      }),
+    ).toBe('outline-pop');
+  });
+
+  it('sin captionStyle sigue mandando la prop de preview', () => {
+    expect(captionPresetOf({ timeline: TIMELINE, captionPreset: 'clean-sans' })).toBe('clean-sans');
+  });
+
+  it("con captionStyle 'off' no monta la capa de captions", () => {
+    expect(childTypes({ timeline: { ...TIMELINE, captionStyle: 'off' } })).not.toContain(
+      KineticCaptions,
+    );
+  });
+
+  it('sin captionStyle monta las captions como siempre', () => {
+    expect(childTypes({ timeline: TIMELINE })).toContain(KineticCaptions);
+  });
+});

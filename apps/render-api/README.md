@@ -172,6 +172,7 @@ interface CreateJobRequestBody {
   readonly scriptText?: string;
   readonly logo?: 'auto' | 'off';
   readonly voice?: 'aroll' | 'script';
+  readonly captionStyle?: 'bold-impact' | 'clean-sans' | 'outline-pop' | 'subtle-lower' | 'off';
 }
 ```
 
@@ -219,8 +220,17 @@ interface CreateJobRequestBody {
   `work/voice/voice.wav` answers `409 MONTAGE_VOICE_TRACK_NOT_FOUND`, both before registering the
   job. Note the overload: on a `voice` job the `voice` field is a voice-model id, on a `montage`
   job it is the speech source.
-- `preset`/`seed`/`overwrite`/`scriptPath`/`scriptText`/`logo`/`format`/`voice` are only ever read on the
-  `montage` branch. A `render` job (explicit
+- `captionStyle` (FIX-e-burgos-003-003) — `'bold-impact'`, `'clean-sans'`, `'outline-pop'`,
+  `'subtle-lower'` or `'off'`, written into `timeline.captionStyle` and read by the composition to
+  pick the typographic preset (`'off'` renders no captions at all). **Absent, the montage preset
+  decides**: `educational` → `'subtle-lower'`, `software-demo` / `hardware` / `recipe` →
+  `'bold-impact'` (the behaviour before this fix). `'subtle-lower'` also changes the word grouping
+  to a subtitle: 6 to 10 words per caption over 2 to 4 seconds in the lower box, instead of the 1 to
+  3 kinetic words. Anything else answers `422 MONTAGE_CAPTION_STYLE_INVALID` before registering the
+  job. Because it lives in the Timeline, `PUT /projects/:slug/timeline` can change it and a plain
+  `render` picks it up without replanning.
+- `preset`/`seed`/`overwrite`/`scriptPath`/`scriptText`/`logo`/`format`/`voice`/`captionStyle` are only
+  ever read on the `montage` branch. A `render` job (explicit
   or implied) never looks at them, even if they are present in the body.
 
 **Job report** (`report`, once `state` is `succeeded`):
@@ -246,6 +256,8 @@ interface MontageJobReport {
     readonly durationMs: number;
     readonly truncatedMs: number;             // narration that did not fit in the A-roll
   } | null;
+  readonly captionStyle:                      // FIX-e-burgos-003-003, always resolved
+    | 'bold-impact' | 'clean-sans' | 'outline-pop' | 'subtle-lower' | 'off';
 }
 ```
 

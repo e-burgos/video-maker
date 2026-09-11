@@ -67,6 +67,10 @@ export { nodeEnsureDirectory } from './fs/ensure-directory';
 export type { EnsureDirectory } from './fs/ensure-directory';
 
 export { MONTAGE_PRESETS, resolveMontagePreset } from './presets/preset-registry';
+export {
+  CAPTION_STYLE_BY_MONTAGE_PRESET,
+  captionStyleForMontagePreset,
+} from './presets/caption-style-defaults';
 export type { BrollRolePriority, MontagePreset, MontagePresetName } from './presets/montage-preset';
 
 export { EditDecisionListInvalidError } from './errors/edit-decision-list-invalid-error';

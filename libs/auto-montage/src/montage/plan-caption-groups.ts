@@ -1,4 +1,9 @@
-import type { CaptionGroupDecision, KeepRange, Word } from '@video-maker/timeline-core';
+import type {
+  CaptionGroupDecision,
+  CaptionStyleGrouping,
+  KeepRange,
+  Word,
+} from '@video-maker/timeline-core';
 import { groupWordsForCaptions } from '@video-maker/timeline-core';
 
 import type { Concept } from '../concepts/concept';
@@ -40,13 +45,15 @@ export function planCaptionGroups(
   keeps: readonly KeepRange[],
   concepts: readonly Concept[],
   preset: MontagePreset,
+  grouping: CaptionStyleGrouping | null = null,
 ): readonly CaptionGroupDecision[] {
   const transcriptWords = words.map(toCaptionGroupWord);
   const groups = groupWordsForCaptions(transcriptWords, {
-    maxWords: preset.captions.maxWords,
-    maxDurationMs: preset.captions.maxDurationMs,
-    minDurationMs: preset.captions.minDurationMs,
-    maxGapMs: preset.captions.maxGapMs,
+    maxWords: grouping?.maxWords ?? preset.captions.maxWords,
+    maxDurationMs: grouping?.maxDurationMs ?? preset.captions.maxDurationMs,
+    minDurationMs: grouping?.minDurationMs ?? preset.captions.minDurationMs,
+    maxGapMs: grouping?.maxGapMs ?? preset.captions.maxGapMs,
+    ...(grouping === null ? {} : { minWords: grouping.minWords }),
     emphasisKeywords: emphasisKeywordsFor(concepts),
   });
 

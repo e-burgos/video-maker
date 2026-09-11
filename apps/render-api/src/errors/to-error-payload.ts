@@ -51,6 +51,8 @@ const MESSAGE_BY_CODE: Readonly<Record<RenderApiErrorCode, string>> = {
   MONTAGE_LOGO_INVALID: 'The logo mode of the montage job is not valid.',
   MONTAGE_FORMAT_INVALID: 'The output format of the montage job is not one of the known presets.',
   MONTAGE_VOICE_INVALID: 'The voice source of the montage job is neither aroll nor script.',
+  MONTAGE_CAPTION_STYLE_INVALID:
+    'The caption style of the montage job is not one of the five supported styles.',
   MONTAGE_VOICE_TRACK_NOT_FOUND: 'The montage job asks for the script voice but the project has no synthesized voice track.',
   TIMELINE_ALREADY_EXISTS: 'A timeline already exists for this project.',
   MONTAGE_RAW_MISSING: 'The project has no raw asset role directories to ingest.',

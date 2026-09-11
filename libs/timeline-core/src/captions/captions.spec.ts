@@ -183,3 +183,84 @@ describe('groupWordsForCaptions + EditDecisionListSchema', () => {
     ]);
   });
 });
+
+describe('groupWordsForCaptions con minWords (FIX-e-burgos-003-003)', () => {
+  function sentenceWords(texts: readonly string[], stepMs = 400): TranscriptWord[] {
+    return texts.map((text, index) => ({
+      text,
+      startMs: index * stepMs,
+      endMs: index * stepMs + stepMs - 50,
+    }));
+  }
+
+  const TWO_SENTENCES = sentenceWords([
+    'Entramos',
+    'a',
+    'la',
+    'plataforma',
+    'con',
+    'nuestro',
+    'usuario.',
+    'Las',
+    'campañas',
+    'viven',
+    'acá.',
+  ]);
+
+  it('sin minWords corta en el fin de oración, como siempre', () => {
+    const groups = groupWordsForCaptions(TWO_SENTENCES, { maxWords: 10, maxDurationMs: 10_000 });
+
+    expect(groups[0]?.words).toHaveLength(7);
+  });
+
+  it('con minWords 6 el fin de oración deja de cortar hasta alcanzar el mínimo', () => {
+    const groups = groupWordsForCaptions(sentenceWords(['Y', 'listo.', 'La', 'campaña', 'nace', 'en', 'borrador.']), {
+      minWords: 6,
+      maxWords: 10,
+      maxDurationMs: 10_000,
+    });
+
+    expect(groups).toHaveLength(1);
+    expect(groups[0]?.words).toHaveLength(7);
+  });
+
+  it('minWords nunca gana sobre maxWords', () => {
+    const groups = groupWordsForCaptions(TWO_SENTENCES, {
+      minWords: 9,
+      maxWords: 4,
+      maxDurationMs: 10_000,
+    });
+
+    expect(groups.every((group) => group.words.length <= 4)).toBe(true);
+  });
+
+  it('minWords nunca pega dos frases a través de un silencio', () => {
+    const words: TranscriptWord[] = [
+      { text: 'Y', startMs: 0, endMs: 300 },
+      { text: 'listo.', startMs: 300, endMs: 800 },
+      { text: 'La', startMs: 8000, endMs: 8200 },
+      { text: 'campaña', startMs: 8200, endMs: 8800 },
+    ];
+
+    const groups = groupWordsForCaptions(words, {
+      minWords: 6,
+      maxWords: 10,
+      maxDurationMs: 10_000,
+      maxGapMs: 900,
+    });
+
+    expect(groups).toHaveLength(2);
+    expect(groups[0]?.words.map((word) => word.text)).toEqual(['Y', 'listo.']);
+  });
+
+  it('minWords nunca gana sobre maxDurationMs', () => {
+    const groups = groupWordsForCaptions(sentenceWords(['uno', 'dos', 'tres', 'cuatro'], 1500), {
+      minWords: 6,
+      maxWords: 10,
+      maxDurationMs: 4000,
+      maxGapMs: 3000,
+    });
+
+    expect(groups.length).toBeGreaterThan(1);
+  });
+});

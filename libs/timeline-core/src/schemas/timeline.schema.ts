@@ -1,5 +1,6 @@
 import { z } from 'zod';
 
+import { CAPTION_STYLES } from '../captions/caption-style';
 import { AudioMixPlanSchema } from './audio-mix-plan.schema';
 import { PunchInAnchorSchema } from './edit-decision-list.schema';
 import { MediaAssetSchema } from './media-asset.schema';
@@ -63,10 +64,12 @@ export const CaptionClipSchema = z.object({
   id: IdSchema,
   from: FrameSchema,
   durationFrames: z.number().int().min(1),
-  words: z.array(CaptionClipWordSchema).min(1).max(3),
+  words: z.array(CaptionClipWordSchema).min(1).max(10),
   emphasisIndex: z.number().int().nonnegative().optional(),
   box: CaptionClipBoxSchema.optional(),
 });
+
+export const CaptionStyleSchema = z.enum(CAPTION_STYLES);
 
 export const TransitionTimingSchema = z.discriminatedUnion('type', [
   z.strictObject({ type: z.literal('linear') }),
@@ -142,6 +145,7 @@ export const TimelineSchema = z
     audioMix: AudioMixPlanSchema,
     logo: LogoOverlaySchema.optional(),
     safeZone: SafeZoneSchema.optional(),
+    captionStyle: CaptionStyleSchema.optional(),
   })
   .superRefine((timeline, ctx) => {
     validateUniqueClipIds(timeline.tracks, ctx);

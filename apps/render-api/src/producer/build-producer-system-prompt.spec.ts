@@ -174,6 +174,16 @@ describe('buildProducerAppRulesSection', () => {
     expect(rules).toContain('min(voice, A-roll)');
   });
 
+  it('elige el estilo de subtítulos según el tipo de video y traduce el lenguaje común (FIX-e-burgos-003-003)', () => {
+    const rules = buildProducerAppRulesSection(CONTEXT, null, 'sonnet');
+
+    expect(rules).toContain('captionStyle');
+    expect(rules).toContain('subtle-lower');
+    expect(rules).toContain('bold-impact');
+    expect(rules).toContain('subtítulos normales');
+    expect(rules).toContain('captions grandes');
+  });
+
   it('publica la lista blanca completa de herramientas', () => {
     const section = buildProducerAppRulesSection(CONTEXT, null, 'sonnet');
     for (const tool of PRODUCER_BASE_ALLOWED_TOOLS) {

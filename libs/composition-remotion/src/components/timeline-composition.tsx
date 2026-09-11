@@ -3,6 +3,7 @@ import type { CalculateMetadataFunction } from 'remotion';
 import { AbsoluteFill } from 'remotion';
 import type { Timeline } from '@video-maker/timeline-core';
 import { safeZoneFor } from '@video-maker/timeline-core';
+import { captionPresetIdForStyle } from '../helpers/caption-style-preset';
 import type { CaptionAnchor } from '../helpers/caption-box';
 import type { CaptionPresetId } from '../helpers/caption-preset';
 import type { CaptionPlatform } from '../helpers/caption-safe-zone';
@@ -49,6 +50,7 @@ export const TimelineComposition: FC<TimelineCompositionProps> = ({
 }) => {
   const plan = timelineToSequenceProps(timeline);
   const safeZone = timeline.safeZone ?? safeZoneFor(timeline.format);
+  const resolvedCaptionPreset = captionPresetIdForStyle(timeline.captionStyle, captionPreset);
 
   return (
     <AbsoluteFill>
@@ -58,14 +60,16 @@ export const TimelineComposition: FC<TimelineCompositionProps> = ({
         <AudioTrack voice={plan.voice} music={plan.music} automation={timeline.audioMix.automation} />
       )}
       {plan.logo === null ? null : <LogoOverlay logo={plan.logo} />}
-      <KineticCaptions
-        clips={plan.captions}
-        format={timeline.format}
-        safeZone={safeZone}
-        preset={captionPreset}
-        platform={captionPlatform}
-        anchor={captionAnchor}
-      />
+      {resolvedCaptionPreset === null ? null : (
+        <KineticCaptions
+          clips={plan.captions}
+          format={timeline.format}
+          safeZone={safeZone}
+          preset={resolvedCaptionPreset}
+          platform={captionPlatform}
+          anchor={captionAnchor}
+        />
+      )}
     </AbsoluteFill>
   );
 };

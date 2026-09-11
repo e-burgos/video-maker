@@ -298,6 +298,7 @@ describe('runMontagePipeline', () => {
     const report = await runMontagePipeline({ ...REQUEST, voice: 'script' }, deps, observer);
 
     expect(Object.keys(report).sort()).toEqual([
+      'captionStyle',
       'catalogPath',
       'editDecisionListPath',
       'logoAssetId',

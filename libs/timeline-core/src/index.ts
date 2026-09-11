@@ -48,6 +48,7 @@ export type { AudioMixPlan, GainKeyframe, MusicMixSettings, VoiceTarget } from '
 export {
   AudioClipSchema,
   CaptionClipSchema,
+  CaptionStyleSchema,
   LogoOverlaySchema,
   LogoPositionSchema,
   TimelineSchema,
@@ -106,6 +107,9 @@ export type {
   CaptionGroupPlan,
   TranscriptWord,
 } from './captions/group-words-for-captions';
+
+export { CAPTION_STYLES, captionGroupingForStyle, isCaptionStyle } from './captions/caption-style';
+export type { CaptionStyle, CaptionStyleGrouping } from './captions/caption-style';
 
 export { DEFAULT_AUDIO_MIX_PLAN, DEFAULT_MUSIC_MIX, planDucking } from './ducking/plan-ducking';
 export type { DuckDecisionPlan, DuckingPlanResult, VoiceRange } from './ducking/plan-ducking';
