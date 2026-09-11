@@ -6,6 +6,7 @@ import { copyToClipboard } from '../api/clipboard';
 import { parseStoryboardDocument } from '../api/parse-storyboard';
 import { useRenderApi } from '../api/render-api-context';
 import { useAsyncResource } from '../hooks/use-async-resource';
+import { useT } from '../i18n/language-context';
 import { ErrorNotice } from '../components/error-notice';
 import { StoryboardCharacterSheet } from '../components/storyboard-character-sheet';
 import { StoryboardHeaderEditor } from '../components/storyboard-header-editor';
@@ -22,18 +23,15 @@ type StoryboardEmptyStateProps = {
 };
 
 function StoryboardEmptyState({ slug }: StoryboardEmptyStateProps) {
+  const t = useT();
+
   return (
     <div
       data-testid="storyboard-empty-state"
       className="space-y-2 rounded-lg border border-slate-800 bg-slate-900/40 p-4"
     >
-      <p className="text-sm text-slate-300">
-        <span className="font-mono text-slate-100">{slug}</span> has no storyboard yet.
-      </p>
-      <p className="text-sm text-slate-400">
-        Describe the video you want above and the local AI agent writes the script, the character
-        sheet and one visual prompt per scene.
-      </p>
+      <p className="text-sm text-slate-300">{t('storyboard.emptyTitle', { slug })}</p>
+      <p className="text-sm text-slate-400">{t('storyboard.emptyBody')}</p>
     </div>
   );
 }
@@ -51,6 +49,7 @@ export function StoryboardPage() {
   const [draft, setDraft] = useState<StoryboardDocument | null>(null);
   const [saved, setSaved] = useState<StoryboardDocument | null>(null);
   const [copiedSceneId, setCopiedSceneId] = useState<string | null>(null);
+  const t = useT();
 
   const baseline = saved ?? stored.data;
   const storyboard = draft ?? baseline;
@@ -74,20 +73,21 @@ export function StoryboardPage() {
     <section className="space-y-6">
       <div>
         <Link to={`/projects/${slug}`} className="text-xs text-slate-500 hover:text-slate-300">
-          ← asset library
+          {t('storyboard.backToLibrary')}
         </Link>
-        <h1 className="mt-2 font-mono text-2xl font-semibold tracking-tight">{slug} · storyboard</h1>
-        <p className="mt-1 text-sm text-slate-400">
-          The generative mode: an idea or a script becomes a storyboard, and every scene carries the
-          prompt you paste into an external tool to produce its footage.
-        </p>
+        <h1 className="mt-2 font-mono text-2xl font-semibold tracking-tight">
+          {t('storyboard.title', { slug })}
+        </h1>
+        <p className="mt-1 text-sm text-slate-400">{t('storyboard.description')}</p>
       </div>
 
       <StoryboardTrigger slug={slug} onCreated={(job) => setJobId(job.id)} />
 
       <StoryboardJobPanel jobId={jobId} onSucceeded={reload} />
 
-      {stored.status === 'loading' && <p className="text-sm text-slate-500">Loading storyboard…</p>}
+      {stored.status === 'loading' && (
+        <p className="text-sm text-slate-500">{t('storyboard.loading')}</p>
+      )}
 
       {missing && <StoryboardEmptyState slug={slug} />}
 
@@ -113,11 +113,12 @@ export function StoryboardPage() {
 
           <div className="space-y-3">
             <h2 className="font-mono text-sm uppercase tracking-wide text-slate-400">
-              scenes <span className="text-slate-600">({storyboard.scenes.length})</span>
+              {t('storyboard.scenesHeading')}{' '}
+              <span className="text-slate-600">({storyboard.scenes.length})</span>
             </h2>
             {copiedSceneId !== null && (
               <p data-testid="storyboard-scene-copied" className="text-xs text-emerald-300">
-                Prompt of {copiedSceneId} copied to the clipboard.
+                {t('storyboard.promptCopied', { sceneId: copiedSceneId })}
               </p>
             )}
             <ul className="space-y-3">

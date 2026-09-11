@@ -1,11 +1,14 @@
 import type { ProducerModelOption } from '../api/render-api-types';
+import type { Blocker } from '../api/blockers';
+import { blockerId } from '../api/blockers';
+import { useT } from '../i18n/language-context';
 
 export type ProducerComposerProps = {
   value: string;
   onChange: (value: string) => void;
   onSend: () => void;
   pending: boolean;
-  blockers: readonly string[];
+  blockers: readonly Blocker[];
   models: readonly ProducerModelOption[];
   model: string;
   onModelChange: (model: string) => void;
@@ -21,6 +24,7 @@ export function ProducerComposer({
   model,
   onModelChange,
 }: ProducerComposerProps) {
+  const t = useT();
   const blocked = blockers.length > 0;
   const empty = value.trim() === '';
   const disabled = blocked || pending || empty;
@@ -32,11 +36,11 @@ export function ProducerComposer({
       className="space-y-2 rounded-lg border border-slate-800 bg-slate-900/40 p-4"
     >
       <textarea
-        aria-label="Message for the producer"
+        aria-label={t('producer.composerLabel')}
         value={value}
         rows={3}
         disabled={blocked}
-        placeholder="Tell the producer what you want and what material you have…"
+        placeholder={t('producer.composerPlaceholder')}
         onChange={(event) => onChange(event.target.value)}
         onKeyDown={(event) => {
           if (event.key !== 'Enter' || event.shiftKey) {
@@ -53,7 +57,7 @@ export function ProducerComposer({
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div className="flex items-center gap-2">
           <label htmlFor="producer-model" className="font-mono text-[11px] uppercase tracking-wide text-slate-500">
-            model
+            {t('producer.modelLabel')}
           </label>
           <select
             id="producer-model"
@@ -77,7 +81,7 @@ export function ProducerComposer({
           )}
         </div>
         <p className="font-mono text-[11px] text-slate-500">
-          Enter sends · Shift+Enter adds a line
+          {t('producer.sendHint')}
         </p>
         <button
           type="button"
@@ -85,14 +89,14 @@ export function ProducerComposer({
           onClick={onSend}
           className="rounded-md border border-sky-500/50 bg-sky-500/10 px-3 py-1.5 text-sm text-sky-100 disabled:opacity-40"
         >
-          {pending ? 'Sending…' : 'Send'}
+          {pending ? t('producer.sending') : t('producer.send')}
         </button>
       </div>
 
       {blocked && (
         <ul data-testid="producer-blockers" className="space-y-0.5 font-mono text-xs text-amber-300">
           {blockers.map((blocker) => (
-            <li key={blocker}>{blocker}</li>
+            <li key={blockerId(blocker)}>{t(blocker.key, blocker.params)}</li>
           ))}
         </ul>
       )}

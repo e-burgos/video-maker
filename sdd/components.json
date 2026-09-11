@@ -247,6 +247,11 @@
             "cycle": 2,
             "date": "2026-09-10",
             "change": "spec-e-burgos-015 cycle-02: el nav por proyecto pasa a cinco secciones con producer primero (producer, library, storyboard, voice, preview)."
+          },
+          {
+            "cycle": 2,
+            "date": "2026-09-11",
+            "change": "spec-e-burgos-016 cycle-02: el header suma el switch de idioma y la entrada a /guide, y todo su copy (titulo, subtitulo y las cinco secciones del nav) sale del catalogo de traduccion."
           }
         ]
       },
@@ -270,6 +275,11 @@
             "cycle": 2,
             "date": "2026-09-09",
             "change": "Adds a details disclosure listing the engine modules, the four media binaries with their env var (never a resolved host path) and every capability, montageQueue included (spec-e-burgos-007 cycle-02)."
+          },
+          {
+            "cycle": 2,
+            "date": "2026-09-11",
+            "change": "spec-e-burgos-016 cycle-02: la etiqueta, el detalle y los estados (loaded/resolved/on/off) salen del catalogo con interpolacion; los nombres de modulo, binario y capability siguen siendo los del servicio."
           }
         ]
       },
@@ -395,9 +405,9 @@
         "module": "web-studio",
         "spec": "sdd/specs/spec-e-burgos-006-web-studio",
         "path": "src/components/asset-uploader.tsx",
-        "status": "implemented",
+        "status": "updated",
         "created_in_cycle": 1,
-        "updated_in_cycle": 1,
+        "updated_in_cycle": 2,
         "description": "Sube un archivo al rol elegido como body binario crudo con su content-type, refresca el listado al exito y muestra el code tipado al fallar.",
         "consumes": [
           "EP-006"
@@ -413,6 +423,11 @@
             "cycle": 1,
             "date": "2026-09-11",
             "change": "spec-e-burgos-016 cycle-01: el selector de rol pasa de un select de ids crudos a tarjetas con nombre legible, el impacto de cada rol en el video final, el directorio raw/ destino, la marca de obligatorio y la regla de matching de B-roll; el copy vive en src/api/asset-roles.ts."
+          },
+          {
+            "cycle": 2,
+            "date": "2026-09-11",
+            "change": "spec-e-burgos-016 cycle-02: el copy de los roles deja de vivir en asset-roles.ts como texto y pasa a claves del catalogo; el directorio raw/<rol>/ se sigue mostrando sin traducir."
           }
         ]
       },
@@ -1068,14 +1083,50 @@
         "module": "studio-usability",
         "spec": "sdd/specs/spec-e-burgos-016-studio-usability",
         "path": "src/components/voice-picker.tsx",
-        "status": "implemented",
+        "status": "updated",
         "created_in_cycle": 1,
-        "updated_in_cycle": null,
+        "updated_in_cycle": 2,
         "description": "Tarjetas de voz en lugar del select de ids crudos: cada voz instalada con su etiqueta legible, idioma, calidad y descripcion, un radio que la selecciona para el job voice y un boton de reproduccion que suena en el navegador con el demo de EP-026 (estados idle/loading/playing/error, una sola voz sonando a la vez y el error explicado en pantalla).",
         "consumes": [
           "EP-019",
           "EP-026"
         ],
+        "created_at": "2026-09-11",
+        "changelog": [
+          {
+            "cycle": 2,
+            "date": "2026-09-11",
+            "change": "spec-e-burgos-016 cycle-02: la calidad, los estados del boton de reproduccion y los aria-label salen del catalogo. El label y la description que publica GET /voices no se traducen: son dato del catalogo del servicio."
+          }
+        ]
+      },
+      {
+        "id": "COMP-046",
+        "name": "LanguageSwitch",
+        "type": "component",
+        "module": "studio-usability",
+        "spec": "sdd/specs/spec-e-burgos-016-studio-usability",
+        "path": "src/components/language-switch.tsx",
+        "status": "implemented",
+        "created_in_cycle": 2,
+        "updated_in_cycle": null,
+        "description": "Switch en | es del header: un boton por idioma dentro de un role=group con aria-label, cada uno nombrado en palabras para un lector de pantalla y con aria-pressed en el activo. Cambia toda la UI al instante (el catalogo es la fuente del texto, no el componente) y persiste la eleccion en localStorage.",
+        "consumes": [],
+        "created_at": "2026-09-11",
+        "changelog": []
+      },
+      {
+        "id": "COMP-047",
+        "name": "GuidePage",
+        "type": "page",
+        "module": "studio-usability",
+        "spec": "sdd/specs/spec-e-burgos-016-studio-usability",
+        "path": "src/pages/guide-page.tsx",
+        "status": "implemented",
+        "created_in_cycle": 2,
+        "updated_in_cycle": null,
+        "description": "Ruta perezosa /guide: explica cada seccion del studio (projects, library, producer, storyboard, voice, preview), la tabla de presets de salida y tres flujos tipicos, en ingles y en espanol. El contenido viaja como texto md-like en dos modulos propios cargados perezosamente y se dibuja con el markdown minimo del productor (tablas incluidas), asi que no entra al chunk inicial.",
+        "consumes": [],
         "created_at": "2026-09-11",
         "changelog": []
       }

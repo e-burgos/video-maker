@@ -2,6 +2,8 @@ import { Link } from 'react-router-dom';
 
 import { ASSET_ROLES } from '../api/render-api-types';
 import type { AssetListing } from '../api/render-api-types';
+import { useT } from '../i18n/language-context';
+import type { TranslationKey } from '../i18n/messages-en';
 
 export type ProducerWelcomeProps = {
   slug: string;
@@ -14,17 +16,17 @@ export type InventoryEntry = {
   count: number;
 };
 
-export const STARTER_SUGGESTIONS_WITH_MATERIAL = [
-  'Contame qué video querés y para qué plataforma',
-  'Proponeme un guion con el material que subí',
-  'Narrá esta grabación con una voz generada',
-  'Hacé un video de 30 s sobre ',
-] as const;
+export const STARTER_KEYS_WITH_MATERIAL = [
+  'producer.starter.platform',
+  'producer.starter.script',
+  'producer.starter.narrate',
+  'producer.starter.short',
+] as const satisfies readonly TranslationKey[];
 
-export const STARTER_SUGGESTIONS_WITHOUT_MATERIAL = [
-  'Contame qué video querés y para qué plataforma',
-  'Buscá material libre sobre ',
-] as const;
+export const STARTER_KEYS_WITHOUT_MATERIAL = [
+  'producer.starter.platform',
+  'producer.starter.freeFootage',
+] as const satisfies readonly TranslationKey[];
 
 export function inventoryOf(assets: AssetListing | null): InventoryEntry[] {
   if (assets === null) {
@@ -49,11 +51,10 @@ export function inventoryOf(assets: AssetListing | null): InventoryEntry[] {
 }
 
 export function ProducerWelcome({ slug, assets, onDraft }: ProducerWelcomeProps) {
+  const t = useT();
   const inventory = inventoryOf(assets);
   const hasMaterial = inventory.length > 0;
-  const suggestions = hasMaterial
-    ? STARTER_SUGGESTIONS_WITH_MATERIAL
-    : STARTER_SUGGESTIONS_WITHOUT_MATERIAL;
+  const starterKeys = hasMaterial ? STARTER_KEYS_WITH_MATERIAL : STARTER_KEYS_WITHOUT_MATERIAL;
 
   return (
     <div
@@ -62,18 +63,14 @@ export function ProducerWelcome({ slug, assets, onDraft }: ProducerWelcomeProps)
     >
       <div>
         <h2 className="text-lg font-semibold tracking-tight text-slate-100">
-          Tell the producer what you want to make
+          {t('producer.welcomeTitle')}
         </h2>
-        <p className="mt-1 text-sm text-slate-400">
-          It works with the material of{' '}
-          <span className="font-mono text-slate-200">{slug}</span>, agrees the script with you and
-          then edits, voices and renders the video on this machine.
-        </p>
+        <p className="mt-1 text-sm text-slate-400">{t('producer.welcomeBody', { slug })}</p>
       </div>
 
       <div data-testid="producer-inventory" className="space-y-2">
         <p className="font-mono text-xs uppercase tracking-wide text-slate-500">
-          material in this project
+          {t('producer.inventoryHeading')}
         </p>
         {hasMaterial ? (
           <ul className="flex flex-wrap gap-2">
@@ -89,38 +86,44 @@ export function ProducerWelcome({ slug, assets, onDraft }: ProducerWelcomeProps)
           </ul>
         ) : (
           <p className="text-sm text-amber-200">
-            No raw material yet.{' '}
+            {t('producer.noMaterialBefore')}{' '}
             <Link
               to={`/projects/${encodeURIComponent(slug)}`}
               className="text-sky-300 underline hover:text-sky-200"
             >
-              Upload your clips, photos, music or logo
+              {t('producer.noMaterialLink')}
             </Link>{' '}
-            and the producer will work with them. It can also look for free material for you.
+            {t('producer.noMaterialAfter')}
           </p>
         )}
       </div>
 
       <div className="space-y-2">
         <p className="font-mono text-xs uppercase tracking-wide text-slate-500">
-          start with one of these
+          {t('producer.startersHeading')}
         </p>
         <ul data-testid="producer-starters" className="flex flex-wrap gap-2">
-          {suggestions.map((suggestion) => (
-            <li key={suggestion}>
-              <button
-                type="button"
-                onClick={() => onDraft(suggestion)}
-                className="rounded-full border border-sky-500/50 bg-sky-500/10 px-3 py-1 text-xs text-sky-100"
-              >
-                {suggestion.trim()}
-                {suggestion.endsWith(' ') ? '…' : ''}
-              </button>
-            </li>
-          ))}
+          {starterKeys.map((starterKey) => {
+            const suggestion = t(starterKey);
+            return (
+              <li key={starterKey}>
+                <button
+                  type="button"
+                  onClick={() => onDraft(suggestion)}
+                  className="rounded-full border border-sky-500/50 bg-sky-500/10 px-3 py-1 text-xs text-sky-100"
+                >
+                  {suggestion.trim()}
+                  {suggestion.endsWith(' ') ? '…' : ''}
+                </button>
+              </li>
+            );
+          })}
         </ul>
         <p className="text-xs text-slate-500">
-          A starter lands in the box below so you can finish it in your own words.
+          {t('producer.startersHint')}{' '}
+          <Link to="/guide" className="text-sky-300 underline hover:text-sky-200">
+            {t('guide.howDoesThisWork')}
+          </Link>
         </p>
       </div>
     </div>

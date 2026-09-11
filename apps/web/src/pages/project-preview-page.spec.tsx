@@ -227,7 +227,7 @@ describe('ProjectPreviewPage', () => {
     expect(screen.getByTestId('timeline-player').getAttribute('data-composition-width')).toBe('1080');
     expect(screen.getByTestId('timeline-player').getAttribute('data-composition-height')).toBe('1920');
 
-    fireEvent.change(screen.getByLabelText('Output preset'), { target: { value: 'youtube-16x9' } });
+    fireEvent.change(screen.getByLabelText('Output preset — saved with the timeline'), { target: { value: 'youtube-16x9' } });
 
     await waitFor(() =>
       expect(screen.getByTestId('timeline-player').getAttribute('data-composition-width')).toBe(

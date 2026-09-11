@@ -1,7 +1,7 @@
 import { cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
-import { VoicePicker, voiceQualityLabel } from './voice-picker';
+import { VoicePicker, voiceQualityKey } from './voice-picker';
 import type { VoiceModel } from '../api/render-api-types';
 
 const DANIELA: VoiceModel = {
@@ -157,7 +157,7 @@ describe('VoicePicker (US-016-003)', () => {
     const unknown: VoiceModel = { ...DAVEFX, id: 'custom', quality: null, label: 'Custom · custom' };
     render(<VoicePicker voices={[unknown]} selectedId={null} onSelect={() => undefined} />);
 
-    expect(voiceQualityLabel(null)).toBeNull();
+    expect(voiceQualityKey(null)).toBeNull();
     expect(cardOf('custom').textContent).not.toContain('quality');
   });
 

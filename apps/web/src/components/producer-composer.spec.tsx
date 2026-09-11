@@ -115,7 +115,7 @@ describe('ProducerComposer', () => {
   });
 
   it('blocks the field with the reason written when the producer is not available', () => {
-    const { onSend } = renderComposer({ blockers: ['Claude Code is not available.'] });
+    const { onSend } = renderComposer({ blockers: [{ key: 'producer.blocker.unavailable' }] });
 
     expect(textarea().disabled).toBe(true);
     expect(sendButton().disabled).toBe(true);

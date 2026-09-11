@@ -18,6 +18,7 @@ import {
   setSceneVisualSource,
 } from '../api/storyboard-edit/storyboard-document';
 import type { RemotionSceneTextField } from '../api/storyboard-edit/storyboard-document';
+import { useT } from '../i18n/language-context';
 
 const REMOTION_TEXT_FIELDS_BY_KIND: Readonly<Record<RemotionSceneKind, readonly RemotionSceneTextField[]>> =
   {
@@ -44,6 +45,7 @@ export function StoryboardSceneEditor({
   onChange,
   onCopyPrompt,
 }: StoryboardSceneEditorProps) {
+  const t = useT();
   const remotionScene = scene.remotionScene;
 
   return (
@@ -60,14 +62,14 @@ export function StoryboardSceneEditor({
           onClick={() => onCopyPrompt(scene)}
           className="rounded-md border border-slate-700 px-2 py-1 font-mono text-xs text-slate-300 hover:border-slate-500"
         >
-          copy prompt
+          {t('storyboardScene.copyPrompt')}
         </button>
       </div>
 
       <label className="flex flex-col gap-1 text-xs text-slate-400">
-        Narration for {scene.id}
+        {t('storyboardScene.narration', { sceneId: scene.id })}
         <textarea
-          aria-label={`Narration for ${scene.id}`}
+          aria-label={t('storyboardScene.narration', { sceneId: scene.id })}
           rows={2}
           value={scene.narration}
           onChange={(event) =>
@@ -78,9 +80,9 @@ export function StoryboardSceneEditor({
       </label>
 
       <label className="flex flex-col gap-1 text-xs text-slate-400">
-        Visual prompt for {scene.id}
+        {t('storyboardScene.visualPrompt', { sceneId: scene.id })}
         <textarea
-          aria-label={`Visual prompt for ${scene.id}`}
+          aria-label={t('storyboardScene.visualPrompt', { sceneId: scene.id })}
           rows={3}
           value={scene.visualPrompt}
           onChange={(event) =>
@@ -92,9 +94,9 @@ export function StoryboardSceneEditor({
 
       <div className="flex flex-wrap items-end gap-3">
         <label className="flex flex-col gap-1 text-xs text-slate-400">
-          Visual source for {scene.id}
+          {t('storyboardScene.visualSource', { sceneId: scene.id })}
           <select
-            aria-label={`Visual source for ${scene.id}`}
+            aria-label={t('storyboardScene.visualSource', { sceneId: scene.id })}
             value={scene.visualSource}
             onChange={(event) =>
               onChange(
@@ -112,7 +114,7 @@ export function StoryboardSceneEditor({
         </label>
 
         <label className="flex flex-col gap-1 text-xs text-slate-400">
-          Estimated duration for {scene.id}
+          {t('storyboardScene.duration', { sceneId: scene.id })}
           <input
             inputMode="numeric"
             value={String(scene.estimatedDurationMs)}
@@ -125,7 +127,7 @@ export function StoryboardSceneEditor({
 
         {scene.visualSource === 'asset' && (
           <label className="flex flex-col gap-1 text-xs text-slate-400">
-            Asset id for {scene.id}
+            {t('storyboardScene.assetId', { sceneId: scene.id })}
             <input
               value={scene.assetId ?? ''}
               onChange={(event) =>
@@ -140,9 +142,9 @@ export function StoryboardSceneEditor({
       {remotionScene !== undefined && (
         <div className="space-y-2 rounded-md border border-slate-800 bg-slate-950/60 p-3">
           <label className="flex flex-col gap-1 text-xs text-slate-400">
-            Remotion scene kind for {scene.id}
+            {t('storyboardScene.remotionKind', { sceneId: scene.id })}
             <select
-              aria-label={`Remotion scene kind for ${scene.id}`}
+              aria-label={t('storyboardScene.remotionKind', { sceneId: scene.id })}
               value={remotionScene.kind}
               onChange={(event) =>
                 onChange(
@@ -161,7 +163,7 @@ export function StoryboardSceneEditor({
 
           {REMOTION_TEXT_FIELDS_BY_KIND[remotionScene.kind].map((field) => (
             <label key={field} className="flex flex-col gap-1 text-xs text-slate-400">
-              {field} for {scene.id}
+              {t('storyboardScene.field', { field, sceneId: scene.id })}
               <input
                 value={remotionScene[field] ?? ''}
                 onChange={(event) =>
@@ -175,7 +177,7 @@ export function StoryboardSceneEditor({
           {remotionScene.kind === 'image-kenburns' &&
             (['zoomFrom', 'zoomTo'] as const).map((field) => (
               <label key={field} className="flex flex-col gap-1 text-xs text-slate-400">
-                {field} for {scene.id}
+                {t('storyboardScene.field', { field, sceneId: scene.id })}
                 <input
                   inputMode="decimal"
                   value={String(remotionScene[field] ?? '')}
@@ -193,7 +195,7 @@ export function StoryboardSceneEditor({
 
       <div className="flex flex-wrap gap-3">
         <label className="flex flex-col gap-1 text-xs text-slate-400">
-          Caption style for {scene.id}
+          {t('storyboardScene.captionStyle', { sceneId: scene.id })}
           <input
             value={scene.captionsStyle ?? ''}
             placeholder={storyboard.captionsStyle}
@@ -205,7 +207,7 @@ export function StoryboardSceneEditor({
         </label>
 
         <label className="flex flex-col gap-1 text-xs text-slate-400">
-          Music tags for {scene.id}
+          {t('storyboardScene.musicTags', { sceneId: scene.id })}
           <input
             value={formatTags(scene.musicTags)}
             onChange={(event) =>
@@ -216,7 +218,7 @@ export function StoryboardSceneEditor({
         </label>
 
         <label className="flex flex-col gap-1 text-xs text-slate-400">
-          Sfx tags for {scene.id}
+          {t('storyboardScene.sfxTags', { sceneId: scene.id })}
           <input
             value={formatTags(scene.sfxTags)}
             onChange={(event) =>

@@ -1,10 +1,11 @@
 import { useId, useRef, useState } from 'react';
 
-import { BROLL_MATCHING_HINT, assetRoleCopy, orderedAssetRoles } from '../api/asset-roles';
+import { BROLL_MATCHING_HINT_KEY, assetRoleCopy, orderedAssetRoles } from '../api/asset-roles';
 import { ASSET_ROLES } from '../api/render-api-types';
 import { assetContentType } from '../api/asset-media-kind';
 import { useRenderApi } from '../api/render-api-context';
 import { RenderApiError, serviceUnreachable } from '../api/render-api-error';
+import { useT } from '../i18n/language-context';
 import { ErrorNotice } from './error-notice';
 import type { AssetListEntry, AssetRole } from '../api/render-api-types';
 
@@ -24,6 +25,7 @@ export function AssetUploader({ slug, onUploaded, roles, fileInputLabel }: Asset
   const [uploading, setUploading] = useState(false);
   const [uploaded, setUploaded] = useState<string | null>(null);
   const [error, setError] = useState<RenderApiError | null>(null);
+  const t = useT();
 
   async function upload(file: File) {
     setError(null);
@@ -57,16 +59,16 @@ export function AssetUploader({ slug, onUploaded, roles, fileInputLabel }: Asset
       {offered.length === 1 ? (
         <div className="flex flex-wrap items-center gap-3">
           <label htmlFor={`${fieldId}-role`} className="text-sm text-slate-400">
-            Upload to
+            {t('assetRole.legend')}
           </label>
           <span id={`${fieldId}-role`} className="font-mono text-sm text-slate-100">
             {role}
           </span>
-          <span className="text-xs text-slate-500">{assetRoleCopy(role).impact}</span>
+          <span className="text-xs text-slate-500">{t(assetRoleCopy(role).impactKey)}</span>
         </div>
       ) : (
         <fieldset data-testid="asset-role-choices" className="space-y-2">
-          <legend className="text-sm text-slate-400">Upload to</legend>
+          <legend className="text-sm text-slate-400">{t('assetRole.legend')}</legend>
           <ul className="grid gap-2 sm:grid-cols-2">
             {choices.map((choice) => (
               <li
@@ -87,26 +89,26 @@ export function AssetUploader({ slug, onUploaded, roles, fileInputLabel }: Asset
                     value={choice.role}
                     checked={choice.role === role}
                     disabled={uploading}
-                    aria-label={`Upload to ${choice.name}`}
+                    aria-label={t('assetRole.chooseAria', { name: t(choice.nameKey) })}
                     onChange={() => setRole(choice.role)}
                     className="mt-1"
                   />
                   <span className="space-y-0.5">
                     <span className="block text-sm font-semibold text-slate-100">
-                      {choice.name}
+                      {t(choice.nameKey)}
                       {choice.required && (
                         <span
                           data-testid="asset-role-required"
                           className="ml-2 rounded-sm border border-amber-500/50 px-1 font-mono text-[10px] uppercase text-amber-300"
                         >
-                          required
+                          {t('assetRole.required')}
                         </span>
                       )}
                     </span>
                     <span className="block font-mono text-[11px] text-slate-500">
-                      raw/{choice.role}/
+                      {t('assetRole.directory', { role: choice.role })}
                     </span>
-                    <span className="block text-xs text-slate-400">{choice.impact}</span>
+                    <span className="block text-xs text-slate-400">{t(choice.impactKey)}</span>
                   </span>
                 </label>
               </li>
@@ -114,7 +116,7 @@ export function AssetUploader({ slug, onUploaded, roles, fileInputLabel }: Asset
           </ul>
           {showsBrollHint && (
             <p data-testid="asset-role-hint" className="text-xs text-slate-500">
-              {BROLL_MATCHING_HINT}
+              {t(BROLL_MATCHING_HINT_KEY)}
             </p>
           )}
         </fieldset>
@@ -124,7 +126,7 @@ export function AssetUploader({ slug, onUploaded, roles, fileInputLabel }: Asset
           ref={inputRef}
           id={`${fieldId}-file`}
           type="file"
-          aria-label={fileInputLabel ?? 'Asset file'}
+          aria-label={fileInputLabel ?? t('assetUploader.fileLabel')}
           disabled={uploading}
           onChange={(event) => {
             const file = event.target.files?.[0];
@@ -134,11 +136,11 @@ export function AssetUploader({ slug, onUploaded, roles, fileInputLabel }: Asset
           }}
           className="text-sm text-slate-400 file:mr-3 file:rounded-md file:border-0 file:bg-slate-800 file:px-3 file:py-1.5 file:text-sm file:text-slate-200"
         />
-        {uploading && <span className="text-sm text-slate-400">Uploading…</span>}
+        {uploading && <span className="text-sm text-slate-400">{t('assetUploader.uploading')}</span>}
       </div>
       {uploaded !== null && (
         <p role="status" className="font-mono text-xs text-emerald-300">
-          stored {uploaded}
+          {t('assetUploader.stored', { path: uploaded })}
         </p>
       )}
       {error !== null && <ErrorNotice error={error} />}

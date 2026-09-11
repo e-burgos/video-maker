@@ -1,6 +1,7 @@
 import type { MusicMixSettings } from '@video-maker/timeline-core';
 
 import type { TimelineEditAction } from '../api/timeline-edit/timeline-edit-state';
+import { useT } from '../i18n/language-context';
 
 export type MusicMixEditorProps = {
   music: MusicMixSettings;
@@ -8,13 +9,15 @@ export type MusicMixEditorProps = {
 };
 
 export function MusicMixEditor({ music, dispatch }: MusicMixEditorProps) {
+  const t = useT();
+
   return (
     <div className="flex flex-wrap items-center gap-4 rounded-lg border border-slate-800 bg-slate-900/40 p-3">
       <label className="flex items-center gap-2 text-sm text-slate-400">
-        Base level (dB)
+        {t('music.baseLevel')}
         <input
           type="number"
-          aria-label="Base level (dB)"
+          aria-label={t('music.baseLevel')}
           value={music.baseGainDb}
           onChange={(event) =>
             dispatch({
@@ -28,10 +31,10 @@ export function MusicMixEditor({ music, dispatch }: MusicMixEditorProps) {
       </label>
 
       <label className="flex items-center gap-2 text-sm text-slate-400">
-        Ducked level (dB)
+        {t('music.duckedLevel')}
         <input
           type="number"
-          aria-label="Ducked level (dB)"
+          aria-label={t('music.duckedLevel')}
           value={music.duckedGainDb}
           onChange={(event) =>
             dispatch({

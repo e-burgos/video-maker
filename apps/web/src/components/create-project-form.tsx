@@ -1,8 +1,10 @@
 import { useState } from 'react';
 
-import { projectSlugProblem, projectSlugProblemMessage } from '../api/project-slug';
+import { projectSlugProblem, projectSlugProblemKey } from '../api/project-slug';
 import { useRenderApi } from '../api/render-api-context';
 import { RenderApiError, serviceUnreachable } from '../api/render-api-error';
+import { useT } from '../i18n/language-context';
+import type { TranslationKey } from '../i18n/messages-en';
 import { ErrorNotice } from './error-notice';
 
 export type CreateProjectFormProps = {
@@ -12,9 +14,10 @@ export type CreateProjectFormProps = {
 export function CreateProjectForm({ onCreated }: CreateProjectFormProps) {
   const client = useRenderApi();
   const [slug, setSlug] = useState('');
-  const [localProblem, setLocalProblem] = useState<string | null>(null);
+  const [localProblem, setLocalProblem] = useState<TranslationKey | null>(null);
   const [serviceError, setServiceError] = useState<RenderApiError | null>(null);
   const [submitting, setSubmitting] = useState(false);
+  const t = useT();
 
   async function submit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -22,7 +25,7 @@ export function CreateProjectForm({ onCreated }: CreateProjectFormProps) {
 
     const problem = projectSlugProblem(slug);
     if (problem !== null) {
-      setLocalProblem(projectSlugProblemMessage(problem));
+      setLocalProblem(projectSlugProblemKey(problem));
       return;
     }
 
@@ -43,13 +46,13 @@ export function CreateProjectForm({ onCreated }: CreateProjectFormProps) {
     <form onSubmit={submit} className="space-y-3">
       <div className="flex flex-wrap items-center gap-3">
         <label htmlFor="project-slug" className="text-sm text-slate-400">
-          New project
+          {t('createProject.label')}
         </label>
         <input
           id="project-slug"
           value={slug}
           onChange={(event) => setSlug(event.target.value)}
-          placeholder="my-next-reel"
+          placeholder={t('createProject.placeholder')}
           className="w-64 rounded-md border border-slate-700 bg-slate-900 px-3 py-1.5 font-mono text-sm text-slate-100 placeholder:text-slate-600"
         />
         <button
@@ -57,12 +60,12 @@ export function CreateProjectForm({ onCreated }: CreateProjectFormProps) {
           disabled={submitting}
           className="rounded-md bg-emerald-500/90 px-3 py-1.5 text-sm font-medium text-slate-950 hover:bg-emerald-400 disabled:opacity-50"
         >
-          {submitting ? 'Creating…' : 'Create'}
+          {submitting ? t('createProject.submitting') : t('createProject.submit')}
         </button>
       </div>
       {localProblem !== null && (
         <p role="alert" className="text-sm text-amber-300">
-          {localProblem}
+          {t(localProblem)}
         </p>
       )}
       {serviceError !== null && <ErrorNotice error={serviceError} />}

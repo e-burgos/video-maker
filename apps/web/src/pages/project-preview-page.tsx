@@ -13,6 +13,8 @@ import {
 } from '../api/timeline-edit/timeline-edit-state';
 import type { TimelineEditAction } from '../api/timeline-edit/timeline-edit-state';
 import { useAsyncResource } from '../hooks/use-async-resource';
+import { useT } from '../i18n/language-context';
+import type { TranslateFn } from '../i18n/language-context';
 import { CaptionEditor } from '../components/caption-editor';
 import { ClipTrackEditor } from '../components/clip-track-editor';
 import { ErrorNotice } from '../components/error-notice';
@@ -36,16 +38,16 @@ function captureFrameFromLocation(search: string): number | null {
   return frameParam === null ? null : Number(frameParam);
 }
 
-function trackSummary(timeline: Timeline): string {
+function trackSummary(timeline: Timeline, t: TranslateFn): string {
   const { tracks } = timeline;
 
-  return [
-    `${tracks.aroll.length} a-roll`,
-    `${tracks.broll.length} b-roll`,
-    `${tracks.voice.length} voice`,
-    `${tracks.music.length} music`,
-    `${tracks.captions.length} captions`,
-  ].join(' · ');
+  return t('preview.trackSummary', {
+    aroll: tracks.aroll.length,
+    broll: tracks.broll.length,
+    voice: tracks.voice.length,
+    music: tracks.music.length,
+    captions: tracks.captions.length,
+  });
 }
 
 export const TIMELINE_NOT_FOUND = 'TIMELINE_NOT_FOUND';
@@ -56,29 +58,28 @@ type TimelineEmptyStateProps = {
 };
 
 function TimelineEmptyState({ slug, onRetry }: TimelineEmptyStateProps) {
+  const t = useT();
+
   return (
     <div
       data-testid="timeline-empty-state"
       className="space-y-3 rounded-lg border border-slate-700 bg-slate-900/40 p-6"
     >
-      <p className="text-sm font-medium text-slate-200">This project has no timeline yet.</p>
-      <p className="text-sm text-slate-400">
-        Generate the montage from the asset library: the service ingests the raw material and builds
-        the timeline this page plays.
-      </p>
+      <p className="text-sm font-medium text-slate-200">{t('preview.emptyTitle')}</p>
+      <p className="text-sm text-slate-400">{t('preview.emptyBody')}</p>
       <div className="flex flex-wrap gap-2">
         <Link
           to={`/projects/${slug}`}
           className="rounded-md border border-sky-500/50 bg-sky-500/10 px-3 py-1.5 text-sm text-sky-100"
         >
-          Generate montage
+          {t('preview.generateMontage')}
         </Link>
         <button
           type="button"
           onClick={onRetry}
           className="rounded-md border border-slate-700 px-3 py-1.5 text-sm text-slate-300"
         >
-          Retry
+          {t('error.retry')}
         </button>
       </div>
     </div>
@@ -99,6 +100,7 @@ function StudioView({ slug, initialTimeline }: StudioViewProps) {
   const [preset, setPreset] = useState<PreviewPreset | null>(null);
   const [selectedJobId, setSelectedJobId] = useState<string | null>(null);
   const captureFrame = captureFrameFromLocation(window.location.search);
+  const t = useT();
 
   const playable = useMemo(() => {
     const withUrls = playerTimeline(editState.draft, slug, window.location.origin);
@@ -110,7 +112,9 @@ function StudioView({ slug, initialTimeline }: StudioViewProps) {
   return (
     <>
       <div className="flex flex-wrap items-center gap-3">
-        <span className="font-mono text-xs uppercase tracking-wide text-slate-500">format</span>
+        <span className="font-mono text-xs uppercase tracking-wide text-slate-500">
+          {t('preview.formatLabel')}
+        </span>
         {PREVIEW_PRESETS.map((candidate) => (
           <button
             key={candidate}
@@ -126,7 +130,7 @@ function StudioView({ slug, initialTimeline }: StudioViewProps) {
             {PRESET_LABELS[candidate]}
           </button>
         ))}
-        <span className="text-xs text-slate-600">preview only — nothing is persisted</span>
+        <span className="text-xs text-slate-600">{t('preview.formatNote')}</span>
       </div>
 
       <OutputPresetSelector preset={editState.draft.format.preset} dispatch={dispatchAction} />
@@ -138,21 +142,29 @@ function StudioView({ slug, initialTimeline }: StudioViewProps) {
 
       <dl className="grid gap-2 text-sm text-slate-400 sm:grid-cols-3">
         <div>
-          <dt className="font-mono text-xs uppercase tracking-wide text-slate-600">canvas</dt>
+          <dt className="font-mono text-xs uppercase tracking-wide text-slate-600">
+            {t('preview.canvas')}
+          </dt>
           <dd data-testid="preview-canvas">
             {playable.format.width}×{playable.format.height} @ {playable.format.fps} fps
           </dd>
         </div>
         <div>
-          <dt className="font-mono text-xs uppercase tracking-wide text-slate-600">duration</dt>
+          <dt className="font-mono text-xs uppercase tracking-wide text-slate-600">
+            {t('preview.duration')}
+          </dt>
           <dd data-testid="preview-duration">
-            {playable.durationFrames} frames · {(playable.durationFrames / playable.format.fps).toFixed(2)}{' '}
-            s
+            {t('preview.durationValue', {
+              frames: playable.durationFrames,
+              seconds: (playable.durationFrames / playable.format.fps).toFixed(2),
+            })}
           </dd>
         </div>
         <div>
-          <dt className="font-mono text-xs uppercase tracking-wide text-slate-600">tracks</dt>
-          <dd data-testid="preview-tracks">{trackSummary(editState.draft)}</dd>
+          <dt className="font-mono text-xs uppercase tracking-wide text-slate-600">
+            {t('preview.tracks')}
+          </dt>
+          <dd data-testid="preview-tracks">{trackSummary(editState.draft, t)}</dd>
         </div>
       </dl>
 
@@ -161,7 +173,9 @@ function StudioView({ slug, initialTimeline }: StudioViewProps) {
       <TimelineSaveBar slug={slug} state={editState} dispatch={dispatchAction} />
 
       <div className="space-y-2">
-        <h2 className="font-mono text-xs uppercase tracking-wide text-slate-500">logo</h2>
+        <h2 className="font-mono text-xs uppercase tracking-wide text-slate-500">
+          {t('preview.section.logo')}
+        </h2>
         <LogoOverlayEditor
           slug={slug}
           {...(editState.draft.logo === undefined ? {} : { logo: editState.draft.logo })}
@@ -170,27 +184,37 @@ function StudioView({ slug, initialTimeline }: StudioViewProps) {
       </div>
 
       <div className="space-y-2">
-        <h2 className="font-mono text-xs uppercase tracking-wide text-slate-500">music</h2>
+        <h2 className="font-mono text-xs uppercase tracking-wide text-slate-500">
+          {t('preview.section.music')}
+        </h2>
         <MusicMixEditor music={editState.draft.audioMix.music} dispatch={dispatchAction} />
       </div>
 
       <div className="space-y-2">
-        <h2 className="font-mono text-xs uppercase tracking-wide text-slate-500">a-roll</h2>
+        <h2 className="font-mono text-xs uppercase tracking-wide text-slate-500">
+          {t('preview.section.aroll')}
+        </h2>
         <ClipTrackEditor track="aroll" clips={editState.draft.tracks.aroll} dispatch={dispatchAction} />
       </div>
 
       <div className="space-y-2">
-        <h2 className="font-mono text-xs uppercase tracking-wide text-slate-500">b-roll</h2>
+        <h2 className="font-mono text-xs uppercase tracking-wide text-slate-500">
+          {t('preview.section.broll')}
+        </h2>
         <ClipTrackEditor track="broll" clips={editState.draft.tracks.broll} dispatch={dispatchAction} />
       </div>
 
       <div className="space-y-2">
-        <h2 className="font-mono text-xs uppercase tracking-wide text-slate-500">captions</h2>
+        <h2 className="font-mono text-xs uppercase tracking-wide text-slate-500">
+          {t('preview.section.captions')}
+        </h2>
         <CaptionEditor captions={editState.draft.tracks.captions} dispatch={dispatchAction} />
       </div>
 
       <div className="space-y-2">
-        <h2 className="font-mono text-xs uppercase tracking-wide text-slate-500">render</h2>
+        <h2 className="font-mono text-xs uppercase tracking-wide text-slate-500">
+          {t('preview.section.render')}
+        </h2>
         <RenderTrigger slug={slug} state={editState} onCreated={(job) => setSelectedJobId(job.id)} />
         <RenderJobList slug={slug} onSelect={setSelectedJobId} />
         <RenderJobPanel slug={slug} jobId={selectedJobId} />
@@ -207,21 +231,23 @@ export function ProjectPreviewPage() {
     [client, slug],
   );
   const timeline = useAsyncResource<Timeline>(load, `timeline:${slug}`);
+  const t = useT();
 
   return (
     <section className="space-y-6">
       <div>
         <Link to={`/projects/${slug}`} className="text-xs text-slate-500 hover:text-slate-300">
-          ← asset library
+          {t('preview.backToLibrary')}
         </Link>
-        <h1 className="mt-2 font-mono text-2xl font-semibold tracking-tight">{slug} preview</h1>
-        <p className="mt-1 text-sm text-slate-400">
-          The persisted timeline rendered by the same composition the render uses. The player mixes
-          voice and ducked music, but never applies the -14 LUFS mastering of the deliverable.
-        </p>
+        <h1 className="mt-2 font-mono text-2xl font-semibold tracking-tight">
+          {t('preview.title', { slug })}
+        </h1>
+        <p className="mt-1 text-sm text-slate-400">{t('preview.description')}</p>
       </div>
 
-      {timeline.status === 'loading' && <p className="text-sm text-slate-500">Loading timeline…</p>}
+      {timeline.status === 'loading' && (
+        <p className="text-sm text-slate-500">{t('preview.loading')}</p>
+      )}
       {timeline.status === 'error' &&
         timeline.error !== null &&
         (timeline.error.code === TIMELINE_NOT_FOUND ? (

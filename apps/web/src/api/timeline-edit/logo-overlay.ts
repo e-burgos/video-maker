@@ -2,6 +2,7 @@ import { MediaAssetSchema } from '@video-maker/timeline-core';
 import type { LogoPosition, MediaAsset, Timeline } from '@video-maker/timeline-core';
 
 import type { AssetListing } from '../render-api-types';
+import type { Blocker } from '../blockers';
 
 export const LOGO_POSITIONS: readonly LogoPosition[] = [
   'bottom-right',
@@ -30,9 +31,9 @@ export function logoAssetsOf(listing: AssetListing | null): MediaAsset[] {
     .map((parsed) => (parsed as { data: MediaAsset }).data);
 }
 
-export function logoBlockers(listing: AssetListing | null): string[] {
+export function logoBlockers(listing: AssetListing | null): Blocker[] {
   if (listing === null) {
-    return ['The asset listing of this project has not loaded yet.'];
+    return [{ key: 'logo.blocker.listingNotLoaded' }];
   }
 
   if (logoAssetsOf(listing).length > 0) {
@@ -40,10 +41,8 @@ export function logoBlockers(listing: AssetListing | null): string[] {
   }
 
   return listing.source === 'raw-scan'
-    ? [
-        'This project has no catalog yet, so the logo image was never probed. Generate the montage once and the logo becomes available here.',
-      ]
-    : ['Upload an image with the logo role to raw/logo/ and it can be drawn over the video.'];
+    ? [{ key: 'logo.blocker.noCatalog' }]
+    : [{ key: 'logo.blocker.noLogoAsset' }];
 }
 
 export function setTimelineLogo(

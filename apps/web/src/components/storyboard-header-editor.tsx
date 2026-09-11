@@ -6,6 +6,7 @@ import {
   setStoryboardHeader,
   setStoryboardMusicTags,
 } from '../api/storyboard-edit/storyboard-document';
+import { useT } from '../i18n/language-context';
 
 export type StoryboardHeaderEditorProps = {
   storyboard: StoryboardDocument;
@@ -13,13 +14,15 @@ export type StoryboardHeaderEditorProps = {
 };
 
 export function StoryboardHeaderEditor({ storyboard, onChange }: StoryboardHeaderEditorProps) {
+  const t = useT();
+
   return (
     <div
       data-testid="storyboard-header-editor"
       className="grid gap-3 rounded-lg border border-slate-800 bg-slate-900/40 p-4 sm:grid-cols-2"
     >
       <label className="flex flex-col gap-1 text-xs text-slate-400 sm:col-span-2">
-        Title
+        {t('storyboardHeader.title')}
         <input
           value={storyboard.title}
           onChange={(event) => onChange(setStoryboardHeader(storyboard, 'title', event.target.value))}
@@ -28,7 +31,7 @@ export function StoryboardHeaderEditor({ storyboard, onChange }: StoryboardHeade
       </label>
 
       <label className="flex flex-col gap-1 text-xs text-slate-400">
-        Language
+        {t('storyboardHeader.language')}
         <input
           value={storyboard.language}
           onChange={(event) =>
@@ -39,9 +42,9 @@ export function StoryboardHeaderEditor({ storyboard, onChange }: StoryboardHeade
       </label>
 
       <label className="flex flex-col gap-1 text-xs text-slate-400">
-        Format
+        {t('storyboardHeader.format')}
         <select
-          aria-label="Format"
+          aria-label={t('storyboardHeader.format')}
           value={storyboard.format}
           onChange={(event) =>
             onChange(setStoryboardHeader(storyboard, 'format', event.target.value as StoryboardFormat))
@@ -57,7 +60,7 @@ export function StoryboardHeaderEditor({ storyboard, onChange }: StoryboardHeade
       </label>
 
       <label className="flex flex-col gap-1 text-xs text-slate-400">
-        Caption style
+        {t('storyboardHeader.captionStyle')}
         <input
           value={storyboard.captionsStyle}
           onChange={(event) =>
@@ -68,7 +71,7 @@ export function StoryboardHeaderEditor({ storyboard, onChange }: StoryboardHeade
       </label>
 
       <label className="flex flex-col gap-1 text-xs text-slate-400">
-        Music tags
+        {t('storyboardHeader.musicTags')}
         <input
           value={formatTags(storyboard.musicTags)}
           onChange={(event) => onChange(setStoryboardMusicTags(storyboard, event.target.value))}
@@ -76,10 +79,7 @@ export function StoryboardHeaderEditor({ storyboard, onChange }: StoryboardHeade
         />
       </label>
 
-      <p className="text-xs text-slate-500 sm:col-span-2">
-        The caption style and the tags are free text until the style catalog and the audio library
-        ship; the storyboard language is the one the narration is written in.
-      </p>
+      <p className="text-xs text-slate-500 sm:col-span-2">{t('storyboardHeader.note')}</p>
     </div>
   );
 }

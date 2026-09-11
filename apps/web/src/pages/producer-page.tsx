@@ -1,11 +1,12 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 
-import { producerBlockers, producerFailureExplanation } from '../api/producer-capability';
+import { producerBlockers, producerFailureKey } from '../api/producer-capability';
 import { useRenderApi } from '../api/render-api-context';
 import { useApiAction } from '../hooks/use-api-action';
 import { useAsyncResource } from '../hooks/use-async-resource';
 import { useProducerTurnPoll } from '../hooks/use-producer-turn-poll';
+import { useT } from '../i18n/language-context';
 import { ErrorNotice } from '../components/error-notice';
 import { ProducerComposer } from '../components/producer-composer';
 import { ProducerMessageList } from '../components/producer-message-list';
@@ -18,6 +19,7 @@ import type {
 } from '../api/render-api-types';
 
 function JobStrip({ listing }: { listing: RenderJobListing | null }) {
+  const t = useT();
   const jobs = listing?.jobs ?? [];
 
   if (jobs.length === 0) {
@@ -27,7 +29,7 @@ function JobStrip({ listing }: { listing: RenderJobListing | null }) {
   return (
     <div data-testid="producer-jobs" className="space-y-2">
       <p className="font-mono text-xs uppercase tracking-wide text-slate-500">
-        jobs of this project
+        {t('producer.jobsHeading')}
       </p>
       <ul className="flex flex-wrap gap-2">
         {jobs.map((job) => (
@@ -49,6 +51,7 @@ function JobStrip({ listing }: { listing: RenderJobListing | null }) {
 export function ProducerPage() {
   const client = useRenderApi();
   const { slug = '' } = useParams<{ slug: string }>();
+  const t = useT();
 
   const loadConversation = useCallback(() => client.getProducer(slug), [client, slug]);
   const loadAssets = useCallback(() => client.listAssets(slug), [client, slug]);
@@ -145,23 +148,22 @@ export function ProducerPage() {
 
   const messages = conversation.data?.messages ?? [];
   const sendFailure = sendAction.error;
+  const sendFailureKey = sendFailure === null ? null : producerFailureKey(sendFailure.code);
 
   return (
     <section className="space-y-6">
       <div>
         <Link to="/" className="text-xs text-slate-500 hover:text-slate-300">
-          ← projects
+          {t('producer.backToProjects')}
         </Link>
-        <h1 className="mt-2 font-mono text-2xl font-semibold tracking-tight">{slug} · producer</h1>
-        <p className="mt-1 text-sm text-slate-400">
-          Ask for the video you want. The producer reads the material of this project, agrees the
-          plan with you and then runs the montage and the render for you. A turn takes minutes, not
-          seconds.
-        </p>
+        <h1 className="mt-2 font-mono text-2xl font-semibold tracking-tight">
+          {t('producer.title', { slug })}
+        </h1>
+        <p className="mt-1 text-sm text-slate-400">{t('producer.description')}</p>
       </div>
 
       {conversation.status === 'loading' && (
-        <p className="text-sm text-slate-500">Loading the conversation…</p>
+        <p className="text-sm text-slate-500">{t('producer.loading')}</p>
       )}
 
       {conversation.status === 'error' && conversation.error !== null && (
@@ -204,10 +206,8 @@ export function ProducerPage() {
       {sendFailure !== null && (
         <div data-testid="producer-send-failure" className="space-y-2">
           <ErrorNotice error={sendFailure} />
-          {producerFailureExplanation(sendFailure.code) !== null && (
-            <p className="text-sm text-amber-200">
-              {producerFailureExplanation(sendFailure.code)}
-            </p>
+          {sendFailureKey !== null && (
+            <p className="text-sm text-amber-200">{t(sendFailureKey)}</p>
           )}
         </div>
       )}

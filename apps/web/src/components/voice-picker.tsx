@@ -2,6 +2,8 @@ import { useEffect, useRef, useState } from 'react';
 
 import { servicePathUrl } from '../api/artifact-url';
 import type { VoiceModel, VoiceQuality } from '../api/render-api-types';
+import { useT } from '../i18n/language-context';
+import type { TranslationKey } from '../i18n/messages-en';
 
 export type VoicePickerProps = {
   voices: readonly VoiceModel[];
@@ -12,22 +14,15 @@ export type VoicePickerProps = {
 
 type PreviewState = 'idle' | 'loading' | 'playing' | 'error';
 
-const QUALITY_LABELS: Readonly<Record<VoiceQuality, string>> = {
-  x_low: 'very low quality',
-  low: 'low quality',
-  medium: 'medium quality',
-  high: 'high quality',
-};
-
-export function voiceQualityLabel(quality: VoiceQuality | null): string | null {
-  return quality === null ? null : QUALITY_LABELS[quality];
+export function voiceQualityKey(quality: VoiceQuality | null): TranslationKey | null {
+  return quality === null ? null : (`voiceQuality.${quality}` as TranslationKey);
 }
 
-const PREVIEW_BUTTON_LABEL: Readonly<Record<PreviewState, string>> = {
-  idle: 'Play',
-  loading: 'Loading…',
-  playing: 'Stop',
-  error: 'Retry',
+const PREVIEW_BUTTON_KEY: Readonly<Record<PreviewState, TranslationKey>> = {
+  idle: 'voicePicker.play',
+  loading: 'voicePicker.loading',
+  playing: 'voicePicker.stop',
+  error: 'voicePicker.retry',
 };
 
 type VoiceCardProps = {
@@ -49,6 +44,7 @@ function VoiceCard({
   onPlay,
   onStopped,
 }: VoiceCardProps) {
+  const t = useT();
   const audioRef = useRef<HTMLAudioElement>(null);
   const previewRef = useRef<PreviewState>('idle');
   const [preview, setPreview] = useState<PreviewState>('idle');
@@ -89,7 +85,8 @@ function VoiceCard({
     }
   }
 
-  const quality = voiceQualityLabel(voice.quality);
+  const qualityKey = voiceQualityKey(voice.quality);
+  const quality = qualityKey === null ? null : t(qualityKey);
 
   return (
     <li
@@ -109,7 +106,7 @@ function VoiceCard({
             value={voice.id}
             checked={selected}
             disabled={disabled}
-            aria-label={`Use ${voice.label}`}
+            aria-label={t('voicePicker.use', { label: voice.label })}
             onChange={() => onSelect(voice.id)}
             className="mt-1"
           />
@@ -118,18 +115,18 @@ function VoiceCard({
             <span className="block font-mono text-xs text-slate-500">
               {voice.language.code}
               {quality === null ? '' : ` · ${quality}`}
-              {voice.isDefault ? ' · default' : ''}
+              {voice.isDefault ? ` · ${t('voicePicker.default')}` : ''}
             </span>
           </span>
         </label>
 
         <button
           type="button"
-          aria-label={`Preview ${voice.label}`}
+          aria-label={t('voicePicker.preview', { label: voice.label })}
           onClick={() => void togglePreview()}
           className="shrink-0 rounded-md border border-slate-700 px-2 py-1 font-mono text-xs text-slate-200"
         >
-          {preview === 'playing' ? '■' : '▶'} {PREVIEW_BUTTON_LABEL[preview]}
+          {preview === 'playing' ? '■' : '▶'} {t(PREVIEW_BUTTON_KEY[preview])}
         </button>
       </div>
 
@@ -137,7 +134,7 @@ function VoiceCard({
 
       {preview === 'error' && (
         <p data-testid="voice-preview-error" className="font-mono text-xs text-amber-300">
-          This voice could not be synthesized on this machine. Check that Piper is installed.
+          {t('voicePicker.previewFailed')}
         </p>
       )}
 

@@ -1,6 +1,7 @@
 import type { CaptionClip } from '@video-maker/timeline-core';
 
 import type { TimelineEditAction } from '../api/timeline-edit/timeline-edit-state';
+import { useT } from '../i18n/language-context';
 
 export type CaptionEditorProps = {
   captions: readonly CaptionClip[];
@@ -8,6 +9,8 @@ export type CaptionEditorProps = {
 };
 
 export function CaptionEditor({ captions, dispatch }: CaptionEditorProps) {
+  const t = useT();
+
   return (
     <ol className="space-y-2">
       {captions.map((caption) => (
@@ -20,7 +23,7 @@ export function CaptionEditor({ captions, dispatch }: CaptionEditorProps) {
             <input
               key={wordIndex}
               type="text"
-              aria-label={`Word ${wordIndex + 1} of ${caption.id}`}
+              aria-label={t('caption.word', { index: wordIndex + 1, clipId: caption.id })}
               value={word.text}
               onChange={(event) =>
                 dispatch({

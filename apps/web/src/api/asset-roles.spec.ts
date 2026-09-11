@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 
-import { BROLL_MATCHING_HINT, assetRoleCopy, orderedAssetRoles } from './asset-roles';
+import { BROLL_MATCHING_HINT_KEY, assetRoleCopy, orderedAssetRoles } from './asset-roles';
+import { MESSAGES_EN } from '../i18n/messages-en';
 import { ASSET_ROLES } from './render-api-types';
 
 describe('asset role copy (US-016-004)', () => {
@@ -32,15 +33,22 @@ describe('asset role copy (US-016-004)', () => {
     ]);
   });
 
+  it('points every role at a translation key the catalog actually carries', () => {
+    for (const entry of orderedAssetRoles()) {
+      expect(MESSAGES_EN[entry.nameKey]).toBeTruthy();
+      expect(MESSAGES_EN[entry.impactKey]).toBeTruthy();
+    }
+  });
+
   it('states for every role what it does to the final video, not just what it is', () => {
     for (const entry of orderedAssetRoles()) {
-      expect(entry.impact.length).toBeGreaterThan(40);
-      expect(entry.name).not.toBe(entry.role);
+      expect(MESSAGES_EN[entry.impactKey].length).toBeGreaterThan(40);
+      expect(MESSAGES_EN[entry.nameKey]).not.toBe(entry.role);
     }
   });
 
   it('explains the rule that decides when a B-roll clip is actually used', () => {
-    expect(BROLL_MATCHING_HINT).toContain('at least three times');
-    expect(assetRoleCopy('broll').impact).toContain('three times');
+    expect(MESSAGES_EN[BROLL_MATCHING_HINT_KEY]).toContain('at least three times');
+    expect(MESSAGES_EN[assetRoleCopy('broll').impactKey]).toContain('three times');
   });
 });

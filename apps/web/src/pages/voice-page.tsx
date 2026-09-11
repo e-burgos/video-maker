@@ -5,6 +5,7 @@ import type { StoryboardDocument } from '@video-maker/timeline-core';
 import { useRenderApi } from '../api/render-api-context';
 import { useApiAction } from '../hooks/use-api-action';
 import { useAsyncResource } from '../hooks/use-async-resource';
+import { useT } from '../i18n/language-context';
 import { ErrorNotice } from '../components/error-notice';
 import { VoiceJobPanel } from '../components/voice-job-panel';
 import { VoiceSceneCard, takeFileName } from '../components/voice-scene-card';
@@ -25,18 +26,15 @@ export function recordedTakes(listing: AssetListing | null): string[] {
 }
 
 function VoiceEmptyState({ slug }: { slug: string }) {
+  const t = useT();
+
   return (
     <div
       data-testid="voice-empty-state"
       className="space-y-2 rounded-lg border border-slate-800 bg-slate-900/40 p-4"
     >
-      <p className="text-sm text-slate-300">
-        <span className="font-mono text-slate-100">{slug}</span> has no voice-over yet.
-      </p>
-      <p className="text-sm text-slate-400">
-        Pick a voice above and generate it: Piper reads every scene of the storyboard on this
-        machine and the real duration of each track becomes the duration of its scene.
-      </p>
+      <p className="text-sm text-slate-300">{t('voice.emptyTitle', { slug })}</p>
+      <p className="text-sm text-slate-400">{t('voice.emptyBody')}</p>
     </div>
   );
 }
@@ -44,6 +42,7 @@ function VoiceEmptyState({ slug }: { slug: string }) {
 export function VoicePage() {
   const client = useRenderApi();
   const { slug = '' } = useParams<{ slug: string }>();
+  const t = useT();
 
   const loadVoice = useCallback(() => client.getVoice(slug), [client, slug]);
   const loadStoryboard = useCallback(() => client.getStoryboard(slug), [client, slug]);
@@ -82,16 +81,17 @@ export function VoicePage() {
     <section className="space-y-6">
       <div>
         <Link to={`/projects/${slug}`} className="text-xs text-slate-500 hover:text-slate-300">
-          ← asset library
+          {t('voice.backToLibrary')}
         </Link>
-        <h1 className="mt-2 font-mono text-2xl font-semibold tracking-tight">{slug} · voice</h1>
+        <h1 className="mt-2 font-mono text-2xl font-semibold tracking-tight">
+          {t('voice.title', { slug })}
+        </h1>
         <p className="mt-1 text-sm text-slate-400">
-          The voice is the clock of the video: every scene lasts what its track lasts, not what the
-          model estimated. Edit the script on the{' '}
+          {t('voice.descriptionBefore')}{' '}
           <Link to={`/projects/${slug}/storyboard`} className="text-sky-300 hover:text-sky-200">
-            storyboard page
+            {t('voice.descriptionLink')}
           </Link>
-          ; a scene whose narration changed is flagged here.
+          {t('voice.descriptionAfter')}
         </p>
       </div>
 
@@ -101,7 +101,9 @@ export function VoicePage() {
 
       {regenerateAction.error !== null && <ErrorNotice error={regenerateAction.error} />}
 
-      {voice.status === 'loading' && <p className="text-sm text-slate-500">Loading voice tracks…</p>}
+      {voice.status === 'loading' && (
+        <p className="text-sm text-slate-500">{t('voice.loading')}</p>
+      )}
 
       {missing && <VoiceEmptyState slug={slug} />}
 
@@ -112,7 +114,8 @@ export function VoicePage() {
       {document !== null && (
         <div className="space-y-3">
           <h2 className="font-mono text-sm uppercase tracking-wide text-slate-400">
-            tracks <span className="text-slate-600">({document.scenes.length})</span>
+            {t('voice.tracksHeading')}{' '}
+            <span className="text-slate-600">({document.scenes.length})</span>
           </h2>
           <ul className="space-y-3">
             {document.scenes.map((status) => {

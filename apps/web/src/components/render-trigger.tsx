@@ -6,6 +6,8 @@ import { canStartRender } from '../api/timeline-edit/timeline-edit-state';
 import type { TimelineEditState } from '../api/timeline-edit/timeline-edit-state';
 import { useApiAction } from '../hooks/use-api-action';
 import type { RenderJob } from '../api/render-api-types';
+import { useT } from '../i18n/language-context';
+import type { TranslateFn } from '../i18n/language-context';
 import { ErrorNotice } from './error-notice';
 
 export type RenderTriggerProps = {
@@ -14,10 +16,10 @@ export type RenderTriggerProps = {
   onCreated: (job: RenderJob) => void;
 };
 
-function blockingReasons(state: TimelineEditState): string[] {
+function blockingReasons(state: TimelineEditState, t: TranslateFn): string[] {
   const reasons: string[] = [];
   if (state.dirty) {
-    reasons.push('Save your changes before rendering.');
+    reasons.push(t('render.saveFirst'));
   }
   state.issues
     .filter((issue) => issueSeverity(issue.code) === 'render-blocking')
@@ -29,6 +31,7 @@ export function RenderTrigger({ slug, state, onCreated }: RenderTriggerProps) {
   const client = useRenderApi();
   const createAction = useApiAction(() => client.createRenderJob(slug));
   const [lastJobId, setLastJobId] = useState<string | null>(null);
+  const t = useT();
 
   async function trigger() {
     const job = await createAction.run();
@@ -38,7 +41,7 @@ export function RenderTrigger({ slug, state, onCreated }: RenderTriggerProps) {
     }
   }
 
-  const reasons = blockingReasons(state);
+  const reasons = blockingReasons(state, t);
   const disabled = !canStartRender(state) || createAction.status === 'pending';
 
   return (
@@ -49,7 +52,7 @@ export function RenderTrigger({ slug, state, onCreated }: RenderTriggerProps) {
         onClick={() => void trigger()}
         className="rounded-md border border-sky-500/50 bg-sky-500/10 px-3 py-1.5 text-sm text-sky-100 disabled:opacity-40"
       >
-        {createAction.status === 'pending' ? 'Starting render…' : 'Render'}
+        {createAction.status === 'pending' ? t('render.starting') : t('render.start')}
       </button>
 
       {reasons.length > 0 && (
@@ -62,7 +65,7 @@ export function RenderTrigger({ slug, state, onCreated }: RenderTriggerProps) {
 
       {lastJobId !== null && (
         <p role="status" className="text-sm text-slate-400">
-          Render job {lastJobId} started.
+          {t('render.started', { jobId: lastJobId })}
         </p>
       )}
 

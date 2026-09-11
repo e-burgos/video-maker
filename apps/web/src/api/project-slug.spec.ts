@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import { projectSlugProblem, projectSlugProblemMessage } from './project-slug';
+import { projectSlugProblem, projectSlugProblemKey } from './project-slug';
 
 describe('projectSlugProblem', () => {
   it('accepts what the service accepts', () => {
@@ -23,8 +23,8 @@ describe('projectSlugProblem', () => {
     expect(projectSlugProblem('..')).toBe('not-kebab-case');
   });
 
-  it('names both problems for the operator', () => {
-    expect(projectSlugProblemMessage('empty')).toContain('slug');
-    expect(projectSlugProblemMessage('not-kebab-case')).toContain('kebab-case');
+  it('names the translation key of both problems', () => {
+    expect(projectSlugProblemKey('empty')).toBe('projectSlug.empty');
+    expect(projectSlugProblemKey('not-kebab-case')).toBe('projectSlug.notKebabCase');
   });
 });

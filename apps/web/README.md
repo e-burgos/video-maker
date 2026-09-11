@@ -449,6 +449,75 @@ in the browser measuring `readyState` and `duration` on the `<audio>` element** 
 screenshot, never the `src`. Three screenshots land in
 `sdd/specs/spec-e-burgos-016-studio-usability/cycles/cycle-01/artifacts/`.
 
+## Language and guide (spec-016 cycle-02)
+
+The studio reads in English or Spanish. The switch lives in the header next to the health badge;
+the choice is persisted in `localStorage` under `video-maker.language` and stamped on
+`<html lang>`. With nothing stored, a browser whose `navigator.languages` starts with `es-*` opens
+in Spanish and anything else opens in English.
+
+There is **no i18n dependency**. The whole mechanism is `src/i18n/`:
+
+| File | What it holds |
+| --- | --- |
+| `messages-en.ts` | The English catalog, and the **type**: `TranslationKey = keyof typeof MESSAGES_EN`. |
+| `messages-es.ts` | The Spanish catalog, declared `Messages = Readonly<Record<TranslationKey, string>>`. |
+| `translate.ts` | `t(key, params)` with `{param}` interpolation and `tn(key, count)` for plurals. |
+| `language.ts` | The supported languages, the detection order and the storage. |
+| `language-context.tsx` | `LanguageProvider`, `useLanguage()`, `useT()`, `useTn()`. |
+
+### Adding a key
+
+1. Add it to `messages-en.ts`. That alone makes `messages-es.ts` fail to compile until the Spanish
+   text is there: the Spanish catalog is typed against the English one, so **a missing key and an
+   unknown key are both type errors**, in both directions.
+2. Use it: `const t = useT();` and then `t('my.key')`, or `t('my.key', { slug })` when the sentence
+   carries a value. Never concatenate a translated string with a value — put the value in the
+   template as `{slug}` so word order can differ between languages.
+3. For a count, declare `my.key.one` and `my.key.other` and call `tn('my.key', count)`. `{count}` is
+   injected for you.
+4. Run `pnpm nx test web`. `messages-parity.spec.ts` also checks, at runtime, that no translation is
+   empty, that both languages carry the same placeholders, and that no plural is half declared.
+
+### Adding a language
+
+Add the code to `LANGUAGES` in `language.ts`, write `messages-<code>.ts` typed as `Messages` (the
+compiler lists every key you still owe), add its branch to `loadMessages` in `language-context.tsx`
+and its name to `language.name.<code>` in every catalog, and write `guide/guide-content-<code>.ts`
+plus its branch in `loadGuideContent`. Load it **lazily**, like Spanish: a full catalog is ~26 kB
+and the initial chunk has about 10 kB of room before the 500 kB warning comes back.
+
+### What is not translated, on purpose
+
+- What the producer agent writes: it already answers in the language of the user.
+- The `label` and `description` of a voice: `GET /voices` publishes them from the model metadata,
+  they are catalog data, not UI copy.
+- The `message` of a service error: it is shown as a technical line under the translated explanation
+  of its `code`, and the `code` itself is never translated. Same for every other technical id
+  (`youtube-16x9`, `aroll`, `raw/broll/`, job stages).
+
+### No literal copy
+
+`no-literal-copy.spec.ts` reads every `.tsx` under `src/app`, `src/components` and `src/pages` with
+`import.meta.glob(..., { query: '?raw' })` and fails if any of them writes copy straight into the
+markup: JSX text, or a `placeholder`, `title`, `aria-label` or `alt` string with three or more
+letters in a row that is not a known technical token. The scanner itself is
+`src/i18n/literal-copy-scan.ts`, and `literal-copy-scan.spec.ts` proves it catches planted copy
+rather than only accepting the current tree. It is a plain test, not an ESLint rule: this app does
+not own an `eslint.config.mjs` (D-9) and the root config is protected.
+
+### The guide
+
+`/guide` explains what each section of the studio decides, plus the output preset table and three
+worked flows. The content is `src/guide/guide-content-{en,es}.ts`, loaded lazily by the route and
+rendered with `ProducerMarkdown` — the same minimal markdown the producer already speaks, tables
+included. `guide-content.spec.ts` fails if a section is missing, if a language drifts out of
+structure, or if a montage or output preset stops being tabulated with its id and its readable name.
+
+Evidence: `node apps/web/e2e/i18n-smoke.mjs` (ports 4415/4416) drives a real Chrome against a real
+`render-api`: it switches to Spanish, reads the nav, the upload roles, the producer welcome and the
+voice cards in Spanish, reloads to prove the choice persists, and opens the guide in both languages.
+
 ## Montage (spec-007 cycle-02)
 
 The asset library owns the montage. `MontageTrigger` calls the same `POST /projects/:slug/jobs`

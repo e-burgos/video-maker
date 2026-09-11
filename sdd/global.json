@@ -130,9 +130,7 @@
       "description": "Productor conversacional dentro de la app de punta a punta: la skill video-producer corriendo detras de render-api como agente Claude Code headless sobre la suscripcion local, con conversacion persistida por proyecto en work/producer/, turnos fuera de la cola de jobs, eventos legibles y sugerencias de accion, la paridad de audio del entregable de render-cli con la mezcla masterizada de la API, y la pantalla del Web Studio que es el punto de partida de todo proyecto: chat con la conversacion persistida y markdown propio, actividad del turno en vivo con cancelacion, sugerencias y opciones numeradas como chips, estado vacio con el inventario real del material, refresco del studio al cerrar el turno, capa de logo manejable desde la UI y presets de montaje con nombre descriptivo",
       "cycles_completed": 2,
       "completed_at": "2026-09-10"
-    }
-  ],
-  "in_progress_modules": [
+    },
     {
       "module": "studio-usability",
       "spec": "spec-e-burgos-016-studio-usability",
@@ -142,9 +140,11 @@
         "libs/media-local"
       ],
       "description": "Usabilidad del Web Studio: catálogo de voces enriquecido con preview audible y descripciones de rol en el uploader (cycle-01), switch de idioma en/es y sección de guía (cycle-02). No agrega capacidad al motor: hace legible la que ya existe.",
-      "cycles_completed": 1
+      "cycles_completed": 2,
+      "completed_at": "2026-09-11"
     }
   ],
+  "in_progress_modules": [],
   "pending_modules": [
     {
       "module": "scene-assembly",

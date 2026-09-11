@@ -1,4 +1,5 @@
 import type { ServiceHealth } from './render-api-types';
+import type { Blocker } from './blockers';
 
 export const MONTAGE_BINARY_NAMES = ['ffmpeg', 'ffprobe', 'whisperCli', 'whisperModel'] as const;
 
@@ -8,20 +9,25 @@ function isMontageBinaryName(name: string): name is MontageBinaryName {
   return (MONTAGE_BINARY_NAMES as readonly string[]).includes(name);
 }
 
-export function montageBlockers(health: ServiceHealth | null): string[] {
+export function montageBlockers(health: ServiceHealth | null): Blocker[] {
   if (health === null) {
-    return ['The render service health is unknown, so the montage cannot be started.'];
+    return [{ key: 'montage.blocker.healthUnknown' }];
   }
 
-  const blockers: string[] = [];
+  const blockers: Blocker[] = [];
 
   if (!health.capabilities.montageQueue) {
-    blockers.push('The render service does not expose a montage queue.');
+    blockers.push({ key: 'montage.blocker.noQueue' });
   }
 
   health.binaries
     .filter((binary) => isMontageBinaryName(binary.name) && !binary.resolved)
-    .forEach((binary) => blockers.push(`${binary.name} is not resolved (${binary.envVar}).`));
+    .forEach((binary) =>
+      blockers.push({
+        key: 'montage.blocker.binaryUnresolved',
+        params: { name: binary.name, envVar: binary.envVar },
+      }),
+    );
 
   return blockers;
 }

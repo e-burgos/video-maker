@@ -12,6 +12,7 @@ import {
 } from './voice-scene-card';
 import type { RenderApiClient } from '../api/render-api-client';
 import type { VoiceSceneStatus, VoiceTrack } from '../api/render-api-types';
+import { MESSAGES_EN } from '../i18n/messages-en';
 
 type Overrides = {
   status?: Partial<VoiceSceneStatus>;
@@ -76,9 +77,10 @@ describe('formatSeconds and durationDelta', () => {
   });
 
   it('signs the gap against the estimate in both directions', () => {
-    expect(durationDelta(5561, 4000)).toBe('+1.56 s vs the estimate');
-    expect(durationDelta(3100, 5000)).toBe('−1.90 s vs the estimate');
+    expect(durationDelta(5561, 4000)).toEqual({ sign: '+', seconds: '1.56' });
+    expect(durationDelta(3100, 5000)).toEqual({ sign: '−', seconds: '1.90' });
     expect(durationDelta(3100, null)).toBeNull();
+    expect(MESSAGES_EN['voiceScene.delta']).toBe('{sign}{seconds} s vs the estimate');
   });
 });
 

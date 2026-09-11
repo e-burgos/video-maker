@@ -1,7 +1,8 @@
 import { describe, expect, it } from 'vitest';
 
 import { healthyVoiceService } from './__fixtures__/voice';
-import { canGenerateVoice, voiceBlockers, voiceFailureExplanation } from './voice-capability';
+import { canGenerateVoice, voiceBlockers, voiceFailureKey } from './voice-capability';
+import { MESSAGES_EN } from '../i18n/messages-en';
 
 describe('voiceBlockers', () => {
   it('is empty when the queue is exposed and the six binaries resolve', () => {
@@ -10,9 +11,10 @@ describe('voiceBlockers', () => {
   });
 
   it('blocks while the health document has not been read', () => {
-    expect(voiceBlockers(null)).toEqual([
+    expect(voiceBlockers(null)).toEqual([{ key: 'voice.blocker.healthUnknown' }]);
+    expect(MESSAGES_EN['voice.blocker.healthUnknown']).toBe(
       'The render service health is unknown, so no voice-over can be generated.',
-    ]);
+    );
     expect(canGenerateVoice(null)).toBe(false);
   });
 
@@ -22,7 +24,10 @@ describe('voiceBlockers', () => {
       ...health,
       capabilities: { ...health.capabilities, voiceQueue: false },
     };
-    expect(voiceBlockers(blocked)).toEqual(['The render service does not expose a voice queue.']);
+    expect(voiceBlockers(blocked)).toEqual([{ key: 'voice.blocker.noQueue' }]);
+    expect(MESSAGES_EN['voice.blocker.noQueue']).toBe(
+      'The render service does not expose a voice queue.',
+    );
   });
 
   it('names the Piper binary and its env var when it is missing, never a resolved path', () => {
@@ -34,7 +39,12 @@ describe('voiceBlockers', () => {
         binary.name === 'piperCli' ? { ...binary, resolved: false } : binary,
       ),
     };
-    expect(voiceBlockers(blocked)).toEqual(['piperCli is not resolved (PIPER_PATH).']);
+    expect(voiceBlockers(blocked)).toEqual([
+      {
+        key: 'voice.blocker.binaryUnresolved',
+        params: { name: 'piperCli', envVar: 'PIPER_PATH' },
+      },
+    ]);
     expect(canGenerateVoice(blocked)).toBe(false);
   });
 
@@ -46,7 +56,12 @@ describe('voiceBlockers', () => {
         binary.name === 'piperModel' ? { ...binary, resolved: false } : binary,
       ),
     };
-    expect(voiceBlockers(blocked)).toEqual(['piperModel is not resolved (PIPER_MODEL_PATH).']);
+    expect(voiceBlockers(blocked)).toEqual([
+      {
+        key: 'voice.blocker.binaryUnresolved',
+        params: { name: 'piperModel', envVar: 'PIPER_MODEL_PATH' },
+      },
+    ]);
   });
 
   it('blocks on whisper as well, because every track is aligned word by word', () => {
@@ -57,7 +72,13 @@ describe('voiceBlockers', () => {
         binary.name === 'whisperCli' ? { ...binary, resolved: false } : binary,
       ),
     };
-    expect(voiceBlockers(blocked)).toEqual(['whisperCli is not resolved (WHISPER_CPP_PATH).']);
+    expect(voiceBlockers(blocked)).toEqual([
+      {
+        key: 'voice.blocker.binaryUnresolved',
+        params: { name: 'whisperCli', envVar: 'WHISPER_CPP_PATH' },
+      },
+    ]);
+    expect(MESSAGES_EN['voice.blocker.binaryUnresolved']).toBe('{name} is not resolved ({envVar}).');
   });
 
   it('ignores a binary this pipeline does not use', () => {
@@ -70,14 +91,14 @@ describe('voiceBlockers', () => {
   });
 });
 
-describe('voiceFailureExplanation', () => {
+describe('voiceFailureKey', () => {
   it('explains the typed codes of the voice pipeline in the words of a user', () => {
-    expect(voiceFailureExplanation('VOICE_MODEL_UNAVAILABLE')).toContain('PIPER_MODEL_PATH');
-    expect(voiceFailureExplanation('VOICE_TRANSCRIPTION_FAILED')).toContain('manifest');
-    expect(voiceFailureExplanation('STORYBOARD_NOT_FOUND')).toContain('storyboard');
+    expect(MESSAGES_EN['voiceFailure.VOICE_MODEL_UNAVAILABLE']).toContain('PIPER_MODEL_PATH');
+    expect(MESSAGES_EN['voiceFailure.VOICE_TRANSCRIPTION_FAILED']).toContain('manifest');
+    expect(MESSAGES_EN['voiceFailure.STORYBOARD_NOT_FOUND']).toContain('storyboard');
   });
 
   it('returns null for a code it does not know, so the raw code still reaches the screen', () => {
-    expect(voiceFailureExplanation('SOMETHING_ELSE')).toBeNull();
+    expect(voiceFailureKey('SOMETHING_ELSE')).toBeNull();
   });
 });

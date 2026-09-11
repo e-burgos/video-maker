@@ -324,6 +324,16 @@
           "status": "completed",
           "tasks_total": 5,
           "tasks_done": 5
+        },
+        "cycle-02": {
+          "file": "sdd/specs/spec-e-burgos-016-studio-usability/cycles/cycle-02/tasks.json",
+          "module": "studio-usability",
+          "apps": [
+            "apps/web"
+          ],
+          "status": "completed",
+          "tasks_total": 7,
+          "tasks_done": 7
         }
       }
     }

@@ -12,6 +12,7 @@ import {
 } from './logo-overlay';
 import type { AssetListing } from '../render-api-types';
 import type { MediaAsset } from '@video-maker/timeline-core';
+import { MESSAGES_EN } from '../../i18n/messages-en';
 
 const LOGO_ASSET: MediaAsset = {
   id: 'raw/logo/brand.png',
@@ -77,13 +78,17 @@ describe('logoBlockers', () => {
   });
 
   it('asks for the upload when the catalog has no logo', () => {
-    expect(logoBlockers(listing([{ role: 'aroll', media: null }]))[0]).toContain('raw/logo/');
+    const [blocker] = logoBlockers(listing([{ role: 'aroll', media: null }]));
+
+    expect(blocker?.key).toBe('logo.blocker.noLogoAsset');
+    expect(MESSAGES_EN['logo.blocker.noLogoAsset']).toContain('raw/logo/');
   });
 
   it('explains that a project without a catalog never probed its logo', () => {
-    expect(logoBlockers(listing([{ role: 'logo', media: null }], 'raw-scan'))[0]).toContain(
-      'no catalog yet',
-    );
+    const [blocker] = logoBlockers(listing([{ role: 'logo', media: null }], 'raw-scan'));
+
+    expect(blocker?.key).toBe('logo.blocker.noCatalog');
+    expect(MESSAGES_EN['logo.blocker.noCatalog']).toContain('no catalog yet');
   });
 
   it('does not decide before the listing arrives', () => {

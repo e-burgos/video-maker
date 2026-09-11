@@ -4,6 +4,7 @@ import { Link, useNavigate, useParams } from 'react-router-dom';
 import { ASSET_ROLES } from '../api/render-api-types';
 import { useRenderApi } from '../api/render-api-context';
 import { useAsyncResource } from '../hooks/use-async-resource';
+import { useT, useTn } from '../i18n/language-context';
 import { AssetCard } from '../components/asset-card';
 import { AssetUploader } from '../components/asset-uploader';
 import { ErrorNotice } from '../components/error-notice';
@@ -22,6 +23,8 @@ export function AssetLibraryPage() {
   const load = useCallback(() => client.listAssets(slug), [client, slug]);
   const listing = useAsyncResource<AssetListing>(load, `assets:${slug}`);
   const [montageJobId, setMontageJobId] = useState<string | null>(null);
+  const t = useT();
+  const tn = useTn();
 
   const openPreview = useCallback(() => {
     navigate(`/projects/${slug}/preview`);
@@ -31,7 +34,7 @@ export function AssetLibraryPage() {
     <section className="space-y-6">
       <div>
         <Link to="/" className="text-xs text-slate-500 hover:text-slate-300">
-          ← all projects
+          {t('library.backToProjects')}
         </Link>
         <div className="mt-2 flex flex-wrap items-center gap-3">
           <h1 className="font-mono text-2xl font-semibold tracking-tight">{slug}</h1>
@@ -39,24 +42,24 @@ export function AssetLibraryPage() {
             to={`/projects/${slug}/storyboard`}
             className="rounded-md border border-slate-700 px-3 py-1 font-mono text-xs text-slate-300 hover:border-slate-500"
           >
-            open storyboard
+            {t('library.openStoryboard')}
           </Link>
           <Link
             to={`/projects/${slug}/voice`}
             className="rounded-md border border-slate-700 px-3 py-1 font-mono text-xs text-slate-300 hover:border-slate-500"
           >
-            open voice
+            {t('library.openVoice')}
           </Link>
           <Link
             to={`/projects/${slug}/preview`}
             className="rounded-md border border-slate-700 px-3 py-1 font-mono text-xs text-slate-300 hover:border-slate-500"
           >
-            open preview
+            {t('library.openPreview')}
           </Link>
         </div>
         {listing.status === 'ready' && listing.data !== null && (
           <p className="mt-1 text-sm text-slate-400">
-            {listing.data.assets.length} raw assets · source{' '}
+            {tn('library.assetCount', listing.data.assets.length)} · {t('library.source')}{' '}
             <span data-testid="asset-source" className="font-mono text-slate-300">
               {listing.data.source}
             </span>
@@ -70,7 +73,9 @@ export function AssetLibraryPage() {
 
       <MontageJobPanel jobId={montageJobId} onSucceeded={openPreview} />
 
-      {listing.status === 'loading' && <p className="text-sm text-slate-500">Loading assets…</p>}
+      {listing.status === 'loading' && (
+        <p className="text-sm text-slate-500">{t('library.loading')}</p>
+      )}
       {listing.status === 'error' && listing.error !== null && (
         <ErrorNotice error={listing.error} onRetry={listing.reload} />
       )}
@@ -79,7 +84,7 @@ export function AssetLibraryPage() {
         <>
           {listing.data.probeFailures.length > 0 && (
             <div role="note" className="rounded-lg border border-amber-500/40 bg-amber-500/10 p-3">
-              <p className="text-sm font-medium text-amber-200">Probe failures in the catalog</p>
+              <p className="text-sm font-medium text-amber-200">{t('library.probeFailures')}</p>
               <ul className="mt-1 space-y-0.5 font-mono text-xs text-amber-100/80">
                 {listing.data.probeFailures.map((failure) => (
                   <li key={failure.path}>
@@ -98,7 +103,7 @@ export function AssetLibraryPage() {
                   {role} <span className="text-slate-600">({assets.length})</span>
                 </h2>
                 {assets.length === 0 ? (
-                  <p className="text-sm text-slate-600">No {role} assets yet.</p>
+                  <p className="text-sm text-slate-600">{t('library.roleEmpty', { role })}</p>
                 ) : (
                   <ul className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
                     {assets.map((asset) => (

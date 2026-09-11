@@ -10,6 +10,8 @@ import {
 } from '../api/timeline-edit/logo-overlay';
 import type { TimelineEditAction } from '../api/timeline-edit/timeline-edit-state';
 import { useAsyncResource } from '../hooks/use-async-resource';
+import { useT } from '../i18n/language-context';
+import { blockerId } from '../api/blockers';
 import { AssetUploader } from './asset-uploader';
 import type { AssetListing } from '../api/render-api-types';
 
@@ -24,6 +26,7 @@ export function LogoOverlayEditor({ slug, logo, dispatch }: LogoOverlayEditorPro
   const load = useCallback(() => client.listAssets(slug), [client, slug]);
   const assets = useAsyncResource<AssetListing>(load, `assets:${slug}`);
   const [position, setPosition] = useState<LogoPosition>(logo?.position ?? DEFAULT_LOGO_POSITION);
+  const t = useT();
 
   const candidates = logoAssetsOf(assets.data);
   const blockers = assets.status === 'loading' ? [] : logoBlockers(assets.data);
@@ -54,21 +57,24 @@ export function LogoOverlayEditor({ slug, logo, dispatch }: LogoOverlayEditorPro
       className="space-y-3 rounded-lg border border-slate-800 bg-slate-900/40 p-4"
     >
       <div className="flex flex-wrap items-center gap-4">
-        <label className="flex items-center gap-2 text-sm text-slate-300" title={blockers[0] ?? ''}>
+        <label
+          className="flex items-center gap-2 text-sm text-slate-300"
+          title={blockers[0] === undefined ? '' : t(blockers[0].key, blockers[0].params)}
+        >
           <input
             type="checkbox"
-            aria-label="Show logo"
+            aria-label={t('logo.show')}
             checked={shown}
             disabled={asset === undefined}
             onChange={(event) => toggle(event.target.checked)}
           />
-          Show logo
+          {t('logo.show')}
         </label>
 
         <label className="flex items-center gap-2 text-xs text-slate-400">
-          Logo position
+          {t('logo.position')}
           <select
-            aria-label="Logo position"
+            aria-label={t('logo.position')}
             value={position}
             disabled={asset === undefined}
             onChange={(event) => move(event.target.value as LogoPosition)}
@@ -92,7 +98,7 @@ export function LogoOverlayEditor({ slug, logo, dispatch }: LogoOverlayEditorPro
       {blockers.length > 0 && (
         <ul data-testid="logo-blockers" className="space-y-0.5 font-mono text-xs text-amber-300">
           {blockers.map((blocker) => (
-            <li key={blocker}>{blocker}</li>
+            <li key={blockerId(blocker)}>{t(blocker.key, blocker.params)}</li>
           ))}
         </ul>
       )}
@@ -100,7 +106,7 @@ export function LogoOverlayEditor({ slug, logo, dispatch }: LogoOverlayEditorPro
       <AssetUploader
         slug={slug}
         roles={['logo']}
-        fileInputLabel="Logo image"
+        fileInputLabel={t('logo.fileLabel')}
         onUploaded={assets.reload}
       />
     </div>

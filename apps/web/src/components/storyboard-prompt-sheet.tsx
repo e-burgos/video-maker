@@ -3,6 +3,7 @@ import { useState } from 'react';
 import { copyToClipboard } from '../api/clipboard';
 import { useRenderApi } from '../api/render-api-context';
 import { useApiAction } from '../hooks/use-api-action';
+import { useT } from '../i18n/language-context';
 import { ErrorNotice } from './error-notice';
 
 export type StoryboardPromptSheetProps = {
@@ -14,6 +15,7 @@ export function StoryboardPromptSheet({ slug, dirty }: StoryboardPromptSheetProp
   const client = useRenderApi();
   const [sheet, setSheet] = useState<string | null>(null);
   const [copied, setCopied] = useState<boolean | null>(null);
+  const t = useT();
 
   const loadAction = useApiAction(() => client.getStoryboardPrompts(slug));
 
@@ -35,13 +37,10 @@ export function StoryboardPromptSheet({ slug, dirty }: StoryboardPromptSheetProp
       data-testid="storyboard-prompt-sheet"
       className="space-y-3 rounded-lg border border-slate-800 bg-slate-900/40 p-4"
     >
-      <h2 className="font-mono text-sm uppercase tracking-wide text-slate-400">visual prompts</h2>
-      <p className="text-sm text-slate-400">
-        Paste this sheet into a free generative tool such as Meta AI or Google Flow, one prompt at a
-        time, and save each result named by its number (01.mp4, 03.png). The character sheet comes
-        first so a character stays the same across shots. The numbered batch import lands in
-        spec-e-burgos-010; for now the numbers are how you keep the files aligned with the scenes.
-      </p>
+      <h2 className="font-mono text-sm uppercase tracking-wide text-slate-400">
+        {t('storyboardPrompts.heading')}
+      </h2>
+      <p className="text-sm text-slate-400">{t('storyboardPrompts.description')}</p>
 
       <div className="flex flex-wrap items-center gap-3">
         <button
@@ -50,7 +49,7 @@ export function StoryboardPromptSheet({ slug, dirty }: StoryboardPromptSheetProp
           onClick={() => void copySheet()}
           className="rounded-md border border-sky-500/50 bg-sky-500/10 px-3 py-1.5 text-sm text-sky-100 disabled:opacity-40"
         >
-          Copy prompts
+          {t('storyboardPrompts.copy')}
         </button>
         <button
           type="button"
@@ -58,21 +57,18 @@ export function StoryboardPromptSheet({ slug, dirty }: StoryboardPromptSheetProp
           onClick={() => void load()}
           className="rounded-md border border-slate-700 px-3 py-1.5 text-sm text-slate-300 disabled:opacity-40"
         >
-          Show prompts
+          {t('storyboardPrompts.show')}
         </button>
-        {copied === true && <span className="text-xs text-emerald-300">Copied to the clipboard.</span>}
+        {copied === true && (
+          <span className="text-xs text-emerald-300">{t('storyboardPrompts.copied')}</span>
+        )}
         {copied === false && (
-          <span className="text-xs text-amber-300">
-            This browser refused the clipboard: select the sheet below and copy it by hand.
-          </span>
+          <span className="text-xs text-amber-300">{t('storyboardPrompts.clipboardRefused')}</span>
         )}
       </div>
 
       {dirty && (
-        <p className="text-xs text-amber-300">
-          The sheet is built from the saved storyboard: save your changes first or you will copy the
-          previous prompts.
-        </p>
+        <p className="text-xs text-amber-300">{t('storyboardPrompts.dirty')}</p>
       )}
 
       {loadAction.error !== null && <ErrorNotice error={loadAction.error} />}

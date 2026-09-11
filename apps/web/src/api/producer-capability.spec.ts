@@ -1,7 +1,8 @@
 import { describe, expect, it } from 'vitest';
 
-import { canTalkToProducer, producerBlockers, producerFailureExplanation } from './producer-capability';
+import { canTalkToProducer, producerBlockers, producerFailureKey } from './producer-capability';
 import type { ServiceHealth } from './render-api-types';
+import { MESSAGES_EN } from '../i18n/messages-en';
 
 function health(producer: boolean): ServiceHealth {
   return {
@@ -26,9 +27,10 @@ function health(producer: boolean): ServiceHealth {
 
 describe('producerBlockers', () => {
   it('blocks with a written reason when the health is unknown', () => {
-    expect(producerBlockers(null)).toEqual([
+    expect(producerBlockers(null)).toEqual([{ key: 'producer.blocker.healthUnknown' }]);
+    expect(MESSAGES_EN['producer.blocker.healthUnknown']).toBe(
       'The render service health is unknown, so the producer cannot be reached.',
-    ]);
+    );
   });
 
   it('blocks when the service does not expose the producer capability', () => {
@@ -42,7 +44,7 @@ describe('producerBlockers', () => {
   });
 });
 
-describe('producerFailureExplanation', () => {
+describe('producerFailureKey', () => {
   it.each([
     'PRODUCER_UNAVAILABLE',
     'PRODUCER_RATE_LIMITED',
@@ -53,17 +55,19 @@ describe('producerFailureExplanation', () => {
     'PRODUCER_MESSAGE_INVALID',
     'PRODUCER_STATE_INVALID',
   ])('explains %s in the language of the user', (code) => {
-    const explanation = producerFailureExplanation(code);
+    const key = producerFailureKey(code);
 
-    expect(explanation).not.toBeNull();
+    expect(key).not.toBeNull();
+    const explanation = MESSAGES_EN[key as keyof typeof MESSAGES_EN];
+    expect(explanation).toBeTruthy();
     expect(explanation).not.toContain(code);
   });
 
   it('says that the conversation survives a quota failure', () => {
-    expect(producerFailureExplanation('PRODUCER_RATE_LIMITED')).toContain('conversation is saved');
+    expect(MESSAGES_EN['producerFailure.PRODUCER_RATE_LIMITED']).toContain('conversation is saved');
   });
 
   it('returns null for a code it does not own', () => {
-    expect(producerFailureExplanation('TIMELINE_NOT_FOUND')).toBeNull();
+    expect(producerFailureKey('TIMELINE_NOT_FOUND')).toBeNull();
   });
 });

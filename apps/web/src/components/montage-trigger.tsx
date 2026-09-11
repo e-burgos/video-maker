@@ -5,6 +5,8 @@ import { MONTAGE_PRESET_DETAILS, montagePresetDetail } from '../api/montage-pres
 import { useRenderApi } from '../api/render-api-context';
 import { useApiAction } from '../hooks/use-api-action';
 import { useAsyncResource } from '../hooks/use-async-resource';
+import { useT } from '../i18n/language-context';
+import { blockerId } from '../api/blockers';
 import type { MontageJob, MontagePresetName, ServiceHealth } from '../api/render-api-types';
 import { ErrorNotice } from './error-notice';
 
@@ -26,6 +28,7 @@ export function MontageTrigger({ slug, onCreated }: MontageTriggerProps) {
 
   const [preset, setPreset] = useState<MontagePresetName>('software-demo');
   const [seed, setSeed] = useState('0');
+  const t = useT();
 
   const createAction = useApiAction((overwrite: boolean) =>
     client.createMontageJob(slug, { preset, seed: Number(seed), overwrite }),
@@ -48,31 +51,30 @@ export function MontageTrigger({ slug, onCreated }: MontageTriggerProps) {
       data-testid="montage-trigger"
       className="space-y-3 rounded-lg border border-slate-800 bg-slate-900/40 p-4"
     >
-      <h2 className="font-mono text-sm uppercase tracking-wide text-slate-400">montage</h2>
-      <p className="text-sm text-slate-400">
-        Ingest the raw material and build the timeline with the auto-montage engine, without leaving
-        the studio.
-      </p>
+      <h2 className="font-mono text-sm uppercase tracking-wide text-slate-400">
+        {t('montage.heading')}
+      </h2>
+      <p className="text-sm text-slate-400">{t('montage.description')}</p>
 
       <div className="flex flex-wrap items-end gap-3">
         <label className="flex flex-col gap-1 text-xs text-slate-400">
-          Montage preset
+          {t('montage.presetLabel')}
           <select
-            aria-label="Montage preset"
+            aria-label={t('montage.presetLabel')}
             value={preset}
             onChange={(event) => setPreset(event.target.value as MontagePresetName)}
             className="rounded-md border border-slate-700 bg-slate-900 px-2 py-1 text-xs text-slate-200"
           >
             {MONTAGE_PRESET_DETAILS.map((candidate) => (
               <option key={candidate.name} value={candidate.name}>
-                {candidate.label}
+                {t(candidate.labelKey)}
               </option>
             ))}
           </select>
         </label>
 
         <label className="flex flex-col gap-1 text-xs text-slate-400">
-          Seed
+          {t('montage.seedLabel')}
           <input
             value={seed}
             inputMode="numeric"
@@ -87,25 +89,23 @@ export function MontageTrigger({ slug, onCreated }: MontageTriggerProps) {
           onClick={() => void generate(false)}
           className="rounded-md border border-sky-500/50 bg-sky-500/10 px-3 py-1.5 text-sm text-sky-100 disabled:opacity-40"
         >
-          {createAction.status === 'pending' ? 'Starting montage…' : 'Generate montage'}
+          {createAction.status === 'pending' ? t('montage.generating') : t('montage.generate')}
         </button>
       </div>
 
       <p data-testid="montage-preset-description" className="text-xs text-slate-400">
         <span className="font-mono text-slate-500">{preset}</span> ·{' '}
-        {montagePresetDetail(preset).description}
+        {t(montagePresetDetail(preset).descriptionKey)}
       </p>
 
       {!seedValid && (
-        <p className="font-mono text-xs text-amber-300">
-          The seed must be a non-negative integer.
-        </p>
+        <p className="font-mono text-xs text-amber-300">{t('montage.seedInvalid')}</p>
       )}
 
       {blockers.length > 0 && (
         <ul data-testid="montage-blockers" className="space-y-0.5 font-mono text-xs text-amber-300">
           {blockers.map((blocker) => (
-            <li key={blocker}>{blocker}</li>
+            <li key={blockerId(blocker)}>{t(blocker.key, blocker.params)}</li>
           ))}
         </ul>
       )}
@@ -113,13 +113,10 @@ export function MontageTrigger({ slug, onCreated }: MontageTriggerProps) {
       {needsConfirmation && (
         <div
           role="alertdialog"
-          aria-label="Overwrite the existing timeline"
+          aria-label={t('montage.overwriteTitle')}
           className="space-y-2 rounded-md border border-amber-500/40 bg-amber-500/10 p-3"
         >
-          <p className="text-sm text-amber-100">
-            This project already has a timeline. Regenerating it overwrites the edited timeline and
-            every change saved from the studio is lost.
-          </p>
+          <p className="text-sm text-amber-100">{t('montage.overwriteWarning')}</p>
           <div className="flex gap-2">
             <button
               type="button"
@@ -127,14 +124,14 @@ export function MontageTrigger({ slug, onCreated }: MontageTriggerProps) {
               disabled={createAction.status === 'pending'}
               className="rounded-md border border-amber-400/60 px-3 py-1 text-xs text-amber-100 disabled:opacity-40"
             >
-              Overwrite and regenerate
+              {t('montage.overwriteConfirm')}
             </button>
             <button
               type="button"
               onClick={createAction.reset}
               className="rounded-md border border-slate-700 px-3 py-1 text-xs text-slate-300"
             >
-              Keep the current timeline
+              {t('montage.overwriteKeep')}
             </button>
           </div>
         </div>

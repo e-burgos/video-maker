@@ -111,9 +111,11 @@ describe('ProducerPage', () => {
     });
 
     await waitFor(() => expect(screen.getByTestId('producer-starters')).toBeTruthy());
-    fireEvent.click(screen.getByRole('button', { name: 'Proponeme un guion con el material que subí' }));
+    fireEvent.click(
+      screen.getByRole('button', { name: 'Propose a script with the material I uploaded' }),
+    );
 
-    expect(composer().value).toBe('Proponeme un guion con el material que subí');
+    expect(composer().value).toBe('Propose a script with the material I uploaded');
   });
 
   it('renders the stored conversation instead of the welcome', async () => {

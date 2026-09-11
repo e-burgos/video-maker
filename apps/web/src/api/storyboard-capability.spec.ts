@@ -3,9 +3,10 @@ import { describe, expect, it } from 'vitest';
 import {
   canProposeStoryboard,
   storyboardBlockers,
-  storyboardFailureExplanation,
+  storyboardFailureKey,
 } from './storyboard-capability';
 import type { ServiceHealth } from './render-api-types';
+import { MESSAGES_EN } from '../i18n/messages-en';
 
 function health(storyboardQueue: boolean): ServiceHealth {
   return {
@@ -35,7 +36,8 @@ describe('storyboardBlockers', () => {
   });
 
   it('blocks when the service exposes no storyboard queue', () => {
-    expect(storyboardBlockers(health(false))[0]).toContain('storyboard queue');
+    expect(storyboardBlockers(health(false))[0]?.key).toBe('storyboard.blocker.noQueue');
+    expect(MESSAGES_EN['storyboard.blocker.noQueue']).toContain('storyboard queue');
   });
 
   it('does not block a service that can reach the agent', () => {
@@ -54,9 +56,12 @@ describe('storyboardBlockers', () => {
   });
 });
 
-describe('storyboardFailureExplanation', () => {
+describe('storyboardFailureKey', () => {
   it('explains the quota failure in the language of the user, not of the CLI', () => {
-    expect(storyboardFailureExplanation('AI_AGENT_RATE_LIMITED')).toContain('usage limit');
+    expect(storyboardFailureKey('AI_AGENT_RATE_LIMITED')).toBe(
+      'storyboardFailure.AI_AGENT_RATE_LIMITED',
+    );
+    expect(MESSAGES_EN['storyboardFailure.AI_AGENT_RATE_LIMITED']).toContain('usage limit');
   });
 
   it('explains every agent failure code the service can answer', () => {
@@ -66,11 +71,13 @@ describe('storyboardFailureExplanation', () => {
       'AI_AGENT_FAILED',
       'AI_AGENT_INVALID_OUTPUT',
     ]) {
-      expect(storyboardFailureExplanation(code)).not.toBeNull();
+      const key = storyboardFailureKey(code);
+      expect(key).not.toBeNull();
+      expect(MESSAGES_EN[key as keyof typeof MESSAGES_EN]).toBeTruthy();
     }
   });
 
   it('has nothing to add for a code it does not know', () => {
-    expect(storyboardFailureExplanation('PROJECT_NOT_FOUND')).toBeNull();
+    expect(storyboardFailureKey('PROJECT_NOT_FOUND')).toBeNull();
   });
 });

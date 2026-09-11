@@ -1,6 +1,7 @@
 import { numberedOptions, parseProducerMarkdown } from '../api/producer-markdown';
 import type { ProducerBlock, ProducerInline, ProducerTableRow } from '../api/producer-markdown';
 import type { ProducerMessage } from '../api/render-api-types';
+import { useT } from '../i18n/language-context';
 
 export type ProducerMessageListProps = {
   messages: readonly ProducerMessage[];
@@ -150,6 +151,7 @@ export function ProducerMessageList({
   onQuickReply,
   quickRepliesDisabled,
 }: ProducerMessageListProps) {
+  const t = useT();
   const last = messages.length === 0 ? null : (messages[messages.length - 1] as ProducerMessage);
   const quickReplies = last !== null && last.role === 'assistant' ? quickRepliesOf(last) : [];
 
@@ -167,7 +169,7 @@ export function ProducerMessageList({
           }
         >
           <p className="mb-1 flex items-center gap-2 font-mono text-[10px] uppercase tracking-wide text-slate-500">
-            {message.role === 'user' ? 'you' : 'producer'}
+            {message.role === 'user' ? t('producer.roleUser') : t('producer.roleAssistant')}
             {message.model !== undefined && (
               <span
                 data-testid={`producer-message-model-${message.id}`}

@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 
-import { producerFailureExplanation } from '../api/producer-capability';
+import { producerFailureKey } from '../api/producer-capability';
+import { useT } from '../i18n/language-context';
 import { ErrorNotice } from './error-notice';
 import type { RenderApiError } from '../api/render-api-error';
 import type { ProducerEvent, ProducerTurn } from '../api/render-api-types';
@@ -57,6 +58,7 @@ export function ProducerTurnActivity({
   canceling,
   onCancel,
 }: ProducerTurnActivityProps) {
+  const t = useT();
   const now = useNow(polling);
   const feedRef = useRef<HTMLOListElement>(null);
   const eventCount = turn?.events.length ?? 0;
@@ -74,6 +76,7 @@ export function ProducerTurnActivity({
 
   const status = turn?.status ?? 'running';
   const failure = turn?.error ?? null;
+  const failureKey = failure === null ? null : producerFailureKey(failure.code);
 
   return (
     <div
@@ -83,7 +86,7 @@ export function ProducerTurnActivity({
     >
       <div className="flex items-center justify-between gap-3">
         <p className="font-mono text-xs uppercase tracking-wide text-slate-400">
-          {status === 'running' ? 'the producer is working' : `turn ${status}`}
+          {status === 'running' ? t('producer.working') : t('producer.turnStatus', { status })}
           {turn !== null && (
             <span data-testid="producer-turn-elapsed" className="ml-2 text-slate-500">
               {formatElapsed(turn.startedAt, now)}
@@ -97,7 +100,7 @@ export function ProducerTurnActivity({
             onClick={onCancel}
             className="rounded-md border border-amber-400/60 px-3 py-1 text-xs text-amber-100 disabled:opacity-40"
           >
-            {canceling ? 'Canceling…' : 'Cancel'}
+            {canceling ? t('producer.canceling') : t('producer.cancel')}
           </button>
         )}
       </div>
@@ -112,14 +115,16 @@ export function ProducerTurnActivity({
             {eventLabel(event)}
           </li>
         ))}
-        {eventCount === 0 && <li className="text-slate-600">waiting for the first step…</li>}
+        {eventCount === 0 && (
+          <li className="text-slate-600">{t('producer.waitingFirstStep')}</li>
+        )}
       </ol>
 
       {failure !== null && (
         <div data-testid="producer-turn-failure" role="alert" className="rounded-md border border-rose-500/40 bg-rose-500/10 p-3">
           <p className="font-mono text-xs font-semibold text-rose-300">{failure.code}</p>
           <p className="mt-1 text-sm text-rose-100">
-            {producerFailureExplanation(failure.code) ?? failure.message}
+            {failureKey === null ? failure.message : t(failureKey)}
           </p>
         </div>
       )}

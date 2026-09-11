@@ -1,7 +1,9 @@
 import { useCallback, useState } from 'react';
 
 import { useRenderApi } from '../api/render-api-context';
-import { voiceBlockers, voiceFailureExplanation } from '../api/voice-capability';
+import { voiceBlockers, voiceFailureKey } from '../api/voice-capability';
+import { blockerId } from '../api/blockers';
+import { useT } from '../i18n/language-context';
 import { useApiAction } from '../hooks/use-api-action';
 import { useAsyncResource } from '../hooks/use-async-resource';
 import type { ServiceHealth, VoiceJob, VoiceListing } from '../api/render-api-types';
@@ -30,6 +32,7 @@ export function VoiceTrigger({ slug, onCreated }: VoiceTriggerProps) {
   const voices = useAsyncResource<VoiceListing>(loadVoices, 'voices');
 
   const [picked, setPicked] = useState<string | null>(null);
+  const t = useT();
 
   const createAction = useApiAction((overwrite: boolean, voiceId: string | null) =>
     client.createVoiceJob(slug, { voiceId, sceneIds: null, overwrite }),
@@ -47,8 +50,10 @@ export function VoiceTrigger({ slug, onCreated }: VoiceTriggerProps) {
   const blockers = voiceBlockers(health.data);
   const catalogueEmpty = voices.data !== null && voices.data.voices.length === 0;
   const needsConfirmation = createAction.error?.code === VOICE_ALREADY_EXISTS;
-  const explanation =
-    createAction.error === null ? null : voiceFailureExplanation(createAction.error.code);
+  const explanationKey =
+    createAction.error === null ? null : voiceFailureKey(createAction.error.code);
+  const catalogueErrorKey =
+    voices.error === null ? null : voiceFailureKey(voices.error.code);
   const disabled =
     blockers.length > 0 ||
     selectedVoiceId === null ||
@@ -60,12 +65,10 @@ export function VoiceTrigger({ slug, onCreated }: VoiceTriggerProps) {
       data-testid="voice-trigger"
       className="space-y-3 rounded-lg border border-slate-800 bg-slate-900/40 p-4"
     >
-      <h2 className="font-mono text-sm uppercase tracking-wide text-slate-400">voice-over</h2>
-      <p className="text-sm text-slate-400">
-        Piper reads the narration of every scene on this machine and Whisper aligns it word by word,
-        so each scene gets its own track and its real duration. No API key, no upload. Play a voice
-        before you pick it: the demo is synthesized once on this machine and cached.
-      </p>
+      <h2 className="font-mono text-sm uppercase tracking-wide text-slate-400">
+        {t('voice.heading')}
+      </h2>
+      <p className="text-sm text-slate-400">{t('voice.triggerDescription')}</p>
 
       {voices.data !== null && !catalogueEmpty && (
         <VoicePicker
@@ -83,25 +86,25 @@ export function VoiceTrigger({ slug, onCreated }: VoiceTriggerProps) {
           onClick={() => void generate(false)}
           className="rounded-md border border-sky-500/50 bg-sky-500/10 px-3 py-1.5 text-sm text-sky-100 disabled:opacity-40"
         >
-          {createAction.status === 'pending' ? 'Sending…' : 'Generate voice-over'}
+          {createAction.status === 'pending' ? t('voice.generating') : t('voice.generate')}
         </button>
       </div>
 
       {voices.status === 'loading' && (
-        <p className="text-xs text-slate-500">Reading the installed voices…</p>
+        <p className="text-xs text-slate-500">{t('voice.loadingCatalogue')}</p>
       )}
 
       {catalogueEmpty && (
         <p data-testid="voice-catalogue-empty" className="font-mono text-xs text-amber-300">
-          Piper answers, but there is no .onnx voice next to the configured model.
+          {t('voice.catalogueEmpty')}
         </p>
       )}
 
       {voices.status === 'error' && voices.error !== null && (
         <div data-testid="voice-catalogue-error" className="space-y-2">
           <ErrorNotice error={voices.error} onRetry={voices.reload} />
-          {voiceFailureExplanation(voices.error.code) !== null && (
-            <p className="text-sm text-amber-100">{voiceFailureExplanation(voices.error.code)}</p>
+          {catalogueErrorKey !== null && (
+            <p className="text-sm text-amber-100">{t(catalogueErrorKey)}</p>
           )}
         </div>
       )}
@@ -109,7 +112,7 @@ export function VoiceTrigger({ slug, onCreated }: VoiceTriggerProps) {
       {blockers.length > 0 && (
         <ul data-testid="voice-blockers" className="space-y-0.5 font-mono text-xs text-amber-300">
           {blockers.map((blocker) => (
-            <li key={blocker}>{blocker}</li>
+            <li key={blockerId(blocker)}>{t(blocker.key, blocker.params)}</li>
           ))}
         </ul>
       )}
@@ -117,13 +120,10 @@ export function VoiceTrigger({ slug, onCreated }: VoiceTriggerProps) {
       {needsConfirmation && (
         <div
           role="alertdialog"
-          aria-label="Overwrite the existing voice-over"
+          aria-label={t('voice.overwriteTitle')}
           className="space-y-2 rounded-md border border-amber-500/40 bg-amber-500/10 p-3"
         >
-          <p className="text-sm text-amber-100">
-            Some scenes already have a track. Generating again replaces the audio of every scene,
-            including the takes you recorded yourself.
-          </p>
+          <p className="text-sm text-amber-100">{t('voice.overwriteWarning')}</p>
           <div className="flex gap-2">
             <button
               type="button"
@@ -131,14 +131,14 @@ export function VoiceTrigger({ slug, onCreated }: VoiceTriggerProps) {
               disabled={createAction.status === 'pending'}
               className="rounded-md border border-amber-400/60 px-3 py-1 text-xs text-amber-100 disabled:opacity-40"
             >
-              Overwrite and generate again
+              {t('voice.overwriteConfirm')}
             </button>
             <button
               type="button"
               onClick={createAction.reset}
               className="rounded-md border border-slate-700 px-3 py-1 text-xs text-slate-300"
             >
-              Keep the current voice-over
+              {t('voice.overwriteKeep')}
             </button>
           </div>
         </div>
@@ -147,9 +147,9 @@ export function VoiceTrigger({ slug, onCreated }: VoiceTriggerProps) {
       {createAction.error !== null && !needsConfirmation && (
         <div className="space-y-2">
           <ErrorNotice error={createAction.error} />
-          {explanation !== null && (
+          {explanationKey !== null && (
             <p data-testid="voice-failure-explanation" className="text-sm text-amber-100">
-              {explanation}
+              {t(explanationKey)}
             </p>
           )}
         </div>

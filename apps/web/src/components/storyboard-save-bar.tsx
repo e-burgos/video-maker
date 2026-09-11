@@ -3,6 +3,7 @@ import type { StoryboardDocument } from '@video-maker/timeline-core';
 import { useRenderApi } from '../api/render-api-context';
 import { storyboardIssues } from '../api/storyboard-edit/storyboard-document';
 import { useApiAction } from '../hooks/use-api-action';
+import { useT } from '../i18n/language-context';
 import { ErrorNotice } from './error-notice';
 
 export type StoryboardSaveBarProps = {
@@ -15,6 +16,7 @@ export type StoryboardSaveBarProps = {
 export function StoryboardSaveBar({ slug, storyboard, dirty, onSaved }: StoryboardSaveBarProps) {
   const client = useRenderApi();
   const saveAction = useApiAction(() => client.putStoryboard(slug, storyboard));
+  const t = useT();
 
   async function save() {
     const result = await saveAction.run();
@@ -39,9 +41,11 @@ export function StoryboardSaveBar({ slug, storyboard, dirty, onSaved }: Storyboa
           onClick={() => void save()}
           className="rounded-md border border-emerald-500/50 bg-emerald-500/10 px-3 py-1.5 text-sm text-emerald-100 disabled:opacity-40"
         >
-          {saveAction.status === 'pending' ? 'Saving…' : 'Save storyboard'}
+          {saveAction.status === 'pending' ? t('storyboardSave.saving') : t('storyboardSave.save')}
         </button>
-        <span className="text-sm text-slate-400">{dirty ? 'Unsaved changes' : 'Saved'}</span>
+        <span className="text-sm text-slate-400">
+          {dirty ? t('edit.unsaved') : t('edit.saved')}
+        </span>
       </div>
 
       {issues.length > 0 && (

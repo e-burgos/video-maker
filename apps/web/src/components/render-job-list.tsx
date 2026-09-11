@@ -1,5 +1,6 @@
 import { useRenderApi } from '../api/render-api-context';
 import { useAsyncResource } from '../hooks/use-async-resource';
+import { useT } from '../i18n/language-context';
 import { ErrorNotice } from './error-notice';
 
 export type RenderJobListProps = {
@@ -10,9 +11,10 @@ export type RenderJobListProps = {
 export function RenderJobList({ slug, onSelect }: RenderJobListProps) {
   const client = useRenderApi();
   const listing = useAsyncResource(() => client.listRenderJobs(slug), `jobs:${slug}`);
+  const t = useT();
 
   if (listing.status === 'loading') {
-    return <p className="text-sm text-slate-400">Loading render jobs…</p>;
+    return <p className="text-sm text-slate-400">{t('renderJobs.loading')}</p>;
   }
 
   if (listing.status === 'error' && listing.error !== null) {
@@ -30,23 +32,23 @@ export function RenderJobList({ slug, onSelect }: RenderJobListProps) {
           disabled={listing.isRefreshing}
           className="rounded-md border border-slate-700 px-2 py-1 text-xs text-slate-300 disabled:opacity-40"
         >
-          {listing.isRefreshing ? 'Refreshing…' : 'Refresh'}
+          {listing.isRefreshing ? t('renderJobs.refreshing') : t('renderJobs.refresh')}
         </button>
       </div>
 
       {jobs.length === 0 ? (
-        <p className="text-sm text-slate-400">No render jobs yet.</p>
+        <p className="text-sm text-slate-400">{t('renderJobs.empty')}</p>
       ) : (
         <table className="w-full text-left text-sm text-slate-300">
           <thead>
             <tr className="text-xs uppercase text-slate-500">
-              <th>Id</th>
-              <th>State</th>
-              <th>Stage</th>
-              <th>Error</th>
-              <th>Created</th>
-              <th>Started</th>
-              <th>Finished</th>
+              <th>{t('renderJobs.id')}</th>
+              <th>{t('renderJobs.state')}</th>
+              <th>{t('renderJobs.stage')}</th>
+              <th>{t('renderJobs.error')}</th>
+              <th>{t('renderJobs.created')}</th>
+              <th>{t('renderJobs.started')}</th>
+              <th>{t('renderJobs.finished')}</th>
             </tr>
           </thead>
           <tbody>

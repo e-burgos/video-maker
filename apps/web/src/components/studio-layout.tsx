@@ -1,14 +1,17 @@
 import { NavLink, Outlet, useLocation } from 'react-router-dom';
 
+import { useT } from '../i18n/language-context';
+import type { TranslationKey } from '../i18n/messages-en';
+import { LanguageSwitch } from './language-switch';
 import { ServiceHealthBadge } from './service-health-badge';
 
 const PROJECT_SECTIONS = [
-  { path: '/producer', label: 'producer' },
-  { path: '', label: 'library' },
-  { path: '/storyboard', label: 'storyboard' },
-  { path: '/voice', label: 'voice' },
-  { path: '/preview', label: 'preview' },
-] as const;
+  { path: '/producer', labelKey: 'nav.producer' },
+  { path: '', labelKey: 'nav.library' },
+  { path: '/storyboard', labelKey: 'nav.storyboard' },
+  { path: '/voice', labelKey: 'nav.voice' },
+  { path: '/preview', labelKey: 'nav.preview' },
+] as const satisfies readonly { path: string; labelKey: TranslationKey }[];
 
 export function projectSlugFromPathname(pathname: string): string | null {
   const match = /^\/projects\/([^/]+)(?:\/|$)/.exec(pathname);
@@ -17,6 +20,7 @@ export function projectSlugFromPathname(pathname: string): string | null {
 
 export function StudioLayout() {
   const slug = projectSlugFromPathname(useLocation().pathname);
+  const t = useT();
 
   return (
     <div className="min-h-screen bg-slate-950 text-slate-100">
@@ -24,11 +28,27 @@ export function StudioLayout() {
         <div className="mx-auto flex max-w-6xl items-center justify-between gap-4 px-6 py-4">
           <div className="flex items-baseline gap-3">
             <NavLink to="/" className="text-lg font-semibold tracking-tight">
-              Video Maker Studio
+              {t('layout.title')}
             </NavLink>
-            <span className="text-xs text-slate-500">local render service</span>
+            <span className="text-xs text-slate-500">{t('layout.subtitle')}</span>
           </div>
-          <ServiceHealthBadge />
+          <div className="flex items-center gap-3">
+            <NavLink
+              to="/guide"
+              data-testid="guide-nav"
+              className={({ isActive }) =>
+                `rounded-md border px-2 py-1 font-mono text-xs ${
+                  isActive
+                    ? 'border-sky-500/60 bg-sky-500/10 text-sky-100'
+                    : 'border-slate-800 text-slate-400 hover:border-slate-600'
+                }`
+              }
+            >
+              {t('nav.guide')}
+            </NavLink>
+            <ServiceHealthBadge />
+            <LanguageSwitch />
+          </div>
         </div>
 
         {slug !== null && (
@@ -38,7 +58,7 @@ export function StudioLayout() {
           >
             {PROJECT_SECTIONS.map((section) => (
               <NavLink
-                key={section.label}
+                key={section.labelKey}
                 end={section.path === ''}
                 to={`/projects/${slug}${section.path}`}
                 className={({ isActive }) =>
@@ -49,7 +69,7 @@ export function StudioLayout() {
                   }`
                 }
               >
-                {section.label}
+                {t(section.labelKey)}
               </NavLink>
             ))}
           </nav>
