@@ -1,8 +1,8 @@
 # Constitución — apps/render-api
 
-> Versión 3.0 | Última actualización: spec-e-burgos-015 cycle-01 | Fecha: 2026-09-10
-> Consolidada al cerrar `cycle-01` de `spec-e-burgos-015-studio-producer` (fundió los fragmentos de
-> `spec-007` c01, `spec-008` c01, `spec-009` c01, `spec-014` c01 y `spec-015` c01).
+> Versión 3.1 | Última actualización: FIX-e-burgos-015-002 | Fecha: 2026-09-11
+> Consolidada al abrir `cycle-01` de `spec-e-burgos-016-studio-usability` (fundió los fragmentos de
+> `FIX-015-001`, `FIX-007-001`, `FIX-007-002`, `FIX-008-001`, `FIX-009-001` y `FIX-015-002`).
 > Las actualizaciones por ciclo/fix van como fragmentos aditivos en `updates/`.
 
 ## 1. Propósito
@@ -14,7 +14,7 @@
   subproyecto que puede depender de `libs/media-local` y `libs/composition-remotion` a la vez (ver
   `context_prompt.md`).
 - **Estado:** **completo y verificado contra binarios reales.** 25 rutas (`EP-001`..`EP-025`),
-  76 códigos de error, 73 archivos de test / 831 tests, cobertura 98,02 % stmts · 92,47 % branch
+  83 códigos de error, 74 archivos de test / 895 tests, cobertura 98,09 % stmts · 92,70 % branch
   (umbral 80 %).
 
 ## 2. Stack tecnológico
@@ -57,6 +57,26 @@
 - **Los jobs son una unión discriminada por `kind`** (`render` · `montage` · `storyboard` · `voice`)
   con etapas propias por tipo. Agregar un miembro rompe la exhaustividad en **todos** los call
   sites, incluidos handlers que la task en curso no lista: es la red de seguridad, no un costo.
+- **El modelo de IA viaja por request, no por arranque**: `POST …/producer/messages` y los jobs
+  `storyboard`/`voice` aceptan `model?`, validado contra `runtime.producer.models`
+  (`PRODUCER_MODEL_INVALID` / `JOB_MODEL_INVALID`, 422). El productor lo persiste en `session.json`,
+  lo informa en el turno y lo inyecta como **valor concreto** en el system prompt. El agente de
+  storyboard nunca se invoca sin `--model` (`CLAUDE_CLI_MODEL` default `sonnet`,
+  `AiAgentConfig.model` no nullable); el job `voice` valida el campo y lo descarta, porque la
+  síntesis es local.
+- **El job `montage` parametriza formato y fuente de habla**: `format` (los cuatro `OutputPreset`,
+  default `reels-9x16`) y `voice: 'aroll' | 'script'` (default `aroll`), los dos validados **antes**
+  de registrar el job — `script` sin `work/voice/voice.wav` es `409 MONTAGE_VOICE_TRACK_NOT_FOUND`.
+  `voice` está **sobrecargado por `kind`**: en un job `voice` es el id del modelo Piper, en un
+  `montage` es la fuente de habla.
+- **El job `voice` tiene dos entradas**: el storyboard, o un guion suelto (`scriptText` XOR
+  `scriptPath`, una frase por línea, más `gapMs` default 900) que sintetiza un wav por frase, los
+  concatena en `work/voice/voice.wav` (48 kHz mono) y los describe en
+  `work/voice/script-manifest.json` con `source: 'script'`. Los paths de la pista de guion se
+  **re-exportan de `@video-maker/auto-montage`**, que es quien también los lee desde el montaje.
+- **La lista blanca de herramientas del productor no es global**: `producerAllowedTools(piperPath)`
+  la arma por turno y viaja en `ProducerTurnStart.allowedTools`. Agregar un binario obliga a
+  sondearlo contra el CLI real antes de escribirlo en la lista.
 - **El turno del productor NO es un job** (D-1 de `spec-015`): el agente encola `montage`/`render`
   en esta misma API y espera su resultado, así que dentro de una cola de concurrencia 1 se
   bloquearía solo. Vive en `producerTurns`, la exclusión es **por proyecto** y la cancelación

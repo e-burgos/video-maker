@@ -2,17 +2,20 @@
 
 > Entry point para agentes que trabajen sobre `apps/render-api`.
 > Leer junto con `constitution.md` de este directorio **+ `updates/*.md` en orden de nombre**.
-> Última actualización: spec-e-burgos-015 cycle-01 | Fecha: 2026-09-10
-> Consolidado al cerrar `cycle-01` de `spec-e-burgos-015-studio-producer`.
+> Última actualización: FIX-e-burgos-015-002 | Fecha: 2026-09-11
+> Consolidado al abrir `cycle-01` de `spec-e-burgos-016-studio-usability` (fundió los seis fragmentos
+> de fixes de `spec-007`, `spec-008`, `spec-009` y `spec-015`).
 
 - **Tipo:** app Node (servicio HTTP local, headless, mono-usuario)
-- **Estado:** **completo.** 25 rutas, 76 códigos de error, 831 tests. Verificado contra binarios
+- **Estado:** **completo.** 25 rutas, 83 códigos de error, 74 archivos de test / 895 tests. Verificado contra binarios
   reales (Remotion, FFmpeg, whisper-cli, Piper y `claude -p`) en smokes manuales, nunca en CI.
 - **Specs que la gobiernan:** `spec-005-render-service` (la creó) · `spec-007-web-montage`
   (job `montage`) · `spec-008-ai-storyboard` (job `storyboard` y el puerto `aiAgent`) ·
-  `spec-009-voice-over` (job `voice` y Piper) · `spec-014-production-quality` (guion y logo en el
-  job `montage`) · `spec-015-studio-producer` (`cycle-01` cerrado: el productor conversacional;
-  `cycle-02` es la pantalla en `apps/web`).
+  `spec-009-voice-over` (job `voice` y Piper; `FIX-009-001` le sumó el modo guion suelto) ·
+  `spec-014-production-quality` (guion y logo en el job `montage`) · `spec-015-studio-producer`
+  (`cycle-01` cerrado: el productor conversacional; `cycle-02` es la pantalla en `apps/web`;
+  `FIX-015-001` le dio modelo por request y `FIX-015-002` la lista blanca por turno) ·
+  `spec-016-studio-usability` (`cycle-01`: catálogo de voces enriquecido y preview de voz).
 - **Rol en el sistema:** la puerta HTTP del motor. Es **el único subproyecto del monorepo que puede
   depender a la vez de `libs/media-local` (`type:util`) y `libs/composition-remotion` (`type:ui`)**:
   los `depConstraints` del `eslint.config.mjs` raíz impiden que esas dos libs se importen entre sí, y
@@ -96,8 +99,9 @@ src/
 | `PIPER_PATH` | `piper` | Binario de Piper TTS, instalado fuera del repo. |
 | `CLAUDE_CLI_PATH` | `claude` | Claude Code CLI, compartido por el agente de storyboard y por el productor. Sin API key. |
 | `CLAUDE_CLI_CWD` | temporal del SO | Working directory del agente de **storyboard**: fuera del repo, para que no cargue el `CLAUDE.md` del proyecto. El productor no lo usa (necesita la raíz del repo). |
-| `CLAUDE_CLI_TIMEOUT_MS` / `CLAUDE_CLI_MODEL` | `600000` / — | Sólo del job `storyboard`. |
-| `PRODUCER_MODEL` | `sonnet` | Modelo del productor. `opus` cuando haga falta mejor criterio sobre el material. |
+| `CLAUDE_CLI_TIMEOUT_MS` / `CLAUDE_CLI_MODEL` | `600000` / `sonnet` | Sólo del job `storyboard`. El agente **nunca** se invoca sin `--model`: el `model?` del request gana sobre este default. |
+| `PRODUCER_MODEL` | `sonnet` | Modelo **default** del productor; debe pertenecer a `PRODUCER_MODELS` o el arranque aborta con `SERVER_CONFIG_INVALID`. |
+| `PRODUCER_MODELS` | `sonnet,opus,haiku` | Lista permitida. Es la que valida el `model?` de los turnos y de los jobs `storyboard`/`voice`, y la que `EP-022` publica como `models.allowed`. |
 | `PRODUCER_TURN_TIMEOUT_MS` | `1800000` | Media hora: un turno puede incluir transcripción y render. Inválido ⇒ exit 78. |
 | `PRODUCER_SKILL_PATH` | `sdd/skills/video-producer/SKILL.md` | La skill **es** el system prompt del productor y se lee de disco en cada turno. |
 
@@ -114,9 +118,11 @@ Un `EADDRINUSE` ahí no es un defecto del servicio: los smokes usan `4399`.
   propios handlers de señal. Un `process.exit(0)` explícito se probó y **no** lo corrige.
 - **`--allowedTools` del CLI de Claude tiene dos límites medidos** (2.1.123), que definen cómo se
   confina al productor: un **patrón de ruta no confina una escritura** (`Write(dir/**)` denegó una
-  escritura con path absoluto adentro de `dir/`), y un **comodín nunca autoriza un comando de shell
-  que muta archivos** (`Bash(ls *)` alcanza; `Bash(mkdir *)` y `Bash(cp *)` se deniegan). Por eso la
-  lista lleva `Write` pelado y no lleva `mkdir` ni `cp`. Además `--allowedTools` es **variádico**:
+  escritura con path absoluto adentro de `dir/`), y un **comodín no autoriza un comando de shell del
+  sistema que muta archivos** (`Bash(ls *)` alcanza; `Bash(mkdir *)`, `Bash(cp *)`, `mv` y `rm` se
+  deniegan). Por eso la lista lleva `Write` pelado y no lleva `mkdir` ni `cp`. Un **binario propio**
+  sí se autoriza con comodín: `Bash(<PIPER_PATH> *)` produjo un wav de 109 612 bytes. Todo binario
+  nuevo se sondea con el comando real antes de escribirlo en la lista. Además `--allowedTools` es **variádico**:
   va último y con un patrón por argumento.
 - **El hook `rtk` del repo reescribe el comando antes de que la lista blanca lo mire**: el hijo del
   productor corre con cwd en la raíz del repo, así que `curl …` llega como `rtk curl …`, `cat X`
@@ -124,6 +130,15 @@ Un `EADDRINUSE` ahí no es un defecto del servicio: los smokes usan `4399`.
 - **Un hijo del productor sobrevive al proceso del servicio** si nadie lo mata: `close()` cancela
   todos los turnos vivos justamente por eso (un huérfano siguió escribiendo en el proyecto de un
   smoke y contaminó la medición siguiente).
+- **`AI_AGENT_FAILED` publica el detalle del proveedor** (`subtype` y `result`, recortados a 600
+  caracteres) y un `hint` que nombra `claude update` ante `claude_code_version_too_old`. Ese `result`
+  **puede contener rutas absolutas de la máquina**: canje deliberado para un studio self-hosted,
+  documentado en el README de la app. El marcador de cuota sigue teniendo prioridad y mapea a
+  `AI_AGENT_RATE_LIMITED`.
+- **La API no expone `pruneSilences`** (sí la CLI, con `--prune-silences`): en `voice: 'script'` la
+  poda queda apagada y no hay forma de forzarla por HTTP.
+- **`VoiceJobReport` cambió de forma** con el modo guion: ganó `source` y `track`, y `storyboardId`
+  pasó a `string | null`. Todo consumidor nuevo tiene que narrar los dos modos.
 - **El store no es seguro entre procesos.** La serialización por slug (`createKeyedSerializer`) es
   intra-proceso: correr `tools/render-cli` contra un proyecto mientras la API escribe su catálogo es
   una carrera y gana el que escribe último. La cola tiene el mismo riesgo: concurrencia 1 vale
