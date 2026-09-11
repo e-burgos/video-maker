@@ -113,6 +113,14 @@ describe('buildProducerAppRulesSection', () => {
     );
   });
 
+  it('traduce el lenguaje comun del usuario a jobs y flags sin pedirle parametros tecnicos (FIX-e-burgos-015-003)', () => {
+    const rules = buildProducerAppRulesSection(CONTEXT, null, 'haiku');
+    expect(rules).toContain('THE USER SPEAKS IN PLAIN LANGUAGE AND YOU TRANSLATE');
+    expect(rules).toContain('"for YouTube / the web" → `format: youtube-16x9`');
+    expect(rules).toContain('"generate the voice / automatic voice / AI voice"');
+    expect(rules).toContain('do not ask again');
+  });
+
   it('inyecta el modelo del turno en la regla de los jobs (FIX-e-burgos-015-002)', () => {
     expect(buildProducerAppRulesSection(CONTEXT, null, 'haiku')).toContain('"model": "haiku"');
     expect(buildProducerAppRulesSection(CONTEXT, null, 'opus')).toContain('"model": "opus"');

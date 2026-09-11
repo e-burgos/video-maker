@@ -771,6 +771,53 @@
         "recorded_at": "2026-09-11",
         "tokens_total": 373937
       }
+    },
+    {
+      "id": "FIX-e-burgos-015-003",
+      "author": "e-burgos",
+      "spec_id": "spec-e-burgos-015-studio-producer",
+      "fix_document": "sdd/specs/spec-e-burgos-015-studio-producer/fixes/fix-e-burgos-015-003.md",
+      "type": "IMPROVEMENT",
+      "severity": "medium",
+      "created_at": "2026-09-11",
+      "resolved_at": "2026-09-11",
+      "validated_at": null,
+      "title": "producer translates plain-language requests into jobs and flags instead of asking for technical parameters",
+      "estimation_hours": 1,
+      "description": "Dev feedback on the suggested prompt for display-ads: a user does not know formats, job kinds or flags; saying 'It is for YouTube. Generate the voice automatically, run the montage with voice, find soft free music, logo bottom right, and render' must be enough. The system prompt and the skill now carry an explicit plain-language-to-tools mapping, forbid exposing technical parameters to the user, and tell the agent not to re-ask what a complete instruction already decided.",
+      "justification": "Prompt and skill only, no contract change; one new test on the rules section. Solo-profile FIX GATE, no cycle open.",
+      "related_modules": [
+        "studio-producer"
+      ],
+      "affected_files": [
+        "apps/render-api/src/producer/build-producer-system-prompt.ts",
+        "apps/render-api/src/producer/build-producer-system-prompt.spec.ts",
+        "sdd/skills/video-producer/SKILL.md"
+      ],
+      "test_reference": "pnpm nx run-many -t lint test build -p render-api green (2026-09-11): 915 tests; new case asserts the plain-language mapping and the do-not-re-ask rule in the app rules section. Real producer turn on a temporary copy of media/display-ads with the literal user sentence (see conversation of this fix).",
+      "status": "implemented",
+      "cycle": null,
+      "usage": {
+        "provider_model": "claude/fable",
+        "effort": "medium",
+        "tokens_in": 40000,
+        "tokens_out": 6000,
+        "approx": true,
+        "source": "declared-estimate",
+        "recorded_at": "2026-09-11",
+        "by_agent": [
+          {
+            "agent": "steward",
+            "provider_model": "claude/fable",
+            "effort": "medium",
+            "tokens_in": 40000,
+            "tokens_out": 6000,
+            "approx": true,
+            "source": "declared-estimate",
+            "recorded_at": "2026-09-11"
+          }
+        ]
+      }
     }
   ]
 }

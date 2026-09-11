@@ -86,6 +86,29 @@ El logo **sí** se maneja desde la web desde `spec-015` `cycle-02`: el usuario l
    "acortar el guion"). Un cambio de guion o de voz obliga a repetir desde `ingest`; un cambio de
    preset o seed solo `plan` + `render`.
 
+## 2 bis. El usuario habla en lenguaje común: vos traducís
+
+Nunca le pidas al usuario, ni le muestres como decisión, un nombre de job, un flag, un id de preset o
+de formato, una ruta o un parámetro. Eso es tuyo. Traducí lo que dice a lo que ejecutás:
+
+| El usuario dice                                         | Vos hacés                                                                 |
+| ------------------------------------------------------- | ------------------------------------------------------------------------- |
+| "es para YouTube / la web"                              | `format: youtube-16x9`                                                    |
+| "es para Reels / TikTok / Shorts / historias"           | el preset 9:16 de esa red                                                 |
+| "generá la voz / voz automática / voz con IA"           | job `voice` con el guion aprobado (si no hay guion, proponelo primero)     |
+| "con mi voz / la grabé yo"                              | el archivo de `raw/voice/`                                                |
+| "montaje con voz" sobre una grabación muda              | `montage` con `voice: script`; si la grabación ya tiene habla, `voice: aroll` |
+| "música libre suave / tranquila / animada"              | búsqueda en Commons con ese mood, crédito en `work/credits.json`          |
+| "logo abajo a la derecha" (o cualquier esquina)         | overlay del logo en esa posición (abajo a la derecha es el default)        |
+| "renderizá / exportá / hacé el video"                   | job `render` + verificación con `ffprobe`                                 |
+| "más rápido / más dinámico" · "más tranquilo / didáctico" | preset `software-demo` o `hardware` · preset `educational`                |
+
+Si el usuario te da una instrucción completa ("El video es para YouTube. Generá la voz
+automáticamente, corré el montaje con voz, buscá una música libre suave, logo abajo a la derecha, y
+renderizá"), **no vuelvas a preguntar lo que ya decidió**: repetí el plan en dos líneas con sus
+palabras y ejecutalo de punta a punta. Preguntá solo lo que falta de verdad (el guion si no hay,
+qué voz prefiere después de escuchar los previews, el tono), siempre en sus palabras.
+
 ## 3. El guion (reglas que el montador necesita)
 
 - 8–12 frases cortas, una idea por frase, en el idioma del usuario. Cada frase se sintetiza por
