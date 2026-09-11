@@ -973,8 +973,8 @@
       "usage": {
         "provider_model": "claude/opus",
         "effort": "high",
-        "tokens_in": 520000,
-        "tokens_out": 55000,
+        "tokens_in": 223134,
+        "tokens_out": 39377,
         "approx": true,
         "source": "declared-estimate",
         "recorded_at": "2026-09-11",
@@ -983,14 +983,17 @@
             "agent": "implementor-back",
             "provider_model": "claude/opus",
             "effort": "high",
-            "tokens_in": 520000,
-            "tokens_out": 55000,
+            "tokens_in": 223134,
+            "tokens_out": 39377,
             "approx": true,
             "source": "declared-estimate",
-            "recorded_at": "2026-09-11"
+            "recorded_at": "2026-09-11",
+            "tokens_total": 262511
           }
-        ]
-      }
+        ],
+        "tokens_total": 262511
+      },
+      "process_note": "Usage: one agent run resolved both fixes and reported 454258 tokens in total (agent-usage-notification); split in proportion to the declared estimates."
     },
     {
       "id": "FIX-e-burgos-003-003",
@@ -1072,8 +1075,8 @@
       "usage": {
         "provider_model": "claude/opus",
         "effort": "high",
-        "tokens_in": 380000,
-        "tokens_out": 40000,
+        "tokens_in": 162985,
+        "tokens_out": 28762,
         "approx": true,
         "source": "declared-estimate",
         "recorded_at": "2026-09-11",
@@ -1082,14 +1085,17 @@
             "agent": "implementor-back",
             "provider_model": "claude/opus",
             "effort": "high",
-            "tokens_in": 380000,
-            "tokens_out": 40000,
+            "tokens_in": 162985,
+            "tokens_out": 28762,
             "approx": true,
             "source": "declared-estimate",
-            "recorded_at": "2026-09-11"
+            "recorded_at": "2026-09-11",
+            "tokens_total": 191747
           }
-        ]
-      }
+        ],
+        "tokens_total": 191747
+      },
+      "process_note": "Usage: one agent run resolved both fixes and reported 454258 tokens in total (agent-usage-notification); split in proportion to the declared estimates."
     }
   ]
 }
