@@ -887,23 +887,25 @@
       "usage": {
         "provider_model": "claude/opus",
         "effort": "high",
-        "tokens_in": 260000,
-        "tokens_out": 34000,
-        "approx": true,
-        "source": "declared-estimate",
+        "tokens_in": 238421,
+        "tokens_out": 42074,
+        "approx": false,
+        "source": "agent-usage-notification",
         "recorded_at": "2026-09-11",
         "by_agent": [
           {
             "agent": "implementor-back",
             "provider_model": "claude/opus",
             "effort": "high",
-            "tokens_in": 260000,
-            "tokens_out": 34000,
-            "approx": true,
-            "source": "declared-estimate",
-            "recorded_at": "2026-09-11"
+            "tokens_in": 238421,
+            "tokens_out": 42074,
+            "approx": false,
+            "source": "agent-usage-notification",
+            "recorded_at": "2026-09-11",
+            "tokens_total": 280495
           }
-        ]
+        ],
+        "tokens_total": 280495
       }
     }
   ]
