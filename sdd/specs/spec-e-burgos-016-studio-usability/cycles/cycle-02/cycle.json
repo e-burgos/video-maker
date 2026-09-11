@@ -136,29 +136,30 @@
     ],
     "files_deleted": [],
     "usage": {
-      "tokens_in": 606000,
-      "tokens_out": 129000,
-      "approx": true,
-      "source": "declared-estimate",
+      "tokens_in": 367571,
+      "tokens_out": 64866,
+      "approx": false,
+      "source": "agent-usage-notification",
       "by_agent": [
         {
           "agent": "orchestrator",
           "label": "solo",
           "provider_model": "claude/opus",
           "effort": "high",
-          "tokens_in": 606000,
-          "tokens_out": 129000,
-          "approx": true,
-          "source": "declared-estimate",
-          "recorded_at": "2026-09-11"
+          "tokens_in": 367571,
+          "tokens_out": 64866,
+          "approx": false,
+          "source": "agent-usage-notification",
+          "recorded_at": "2026-09-11",
+          "tokens_total": 432437
         }
       ],
       "by_tier": {
         "claude/opus": {
-          "tokens_in": 606000,
-          "tokens_out": 129000,
-          "approx": true,
-          "source": "declared-estimate"
+          "tokens_in": 367571,
+          "tokens_out": 64866,
+          "approx": false,
+          "source": "agent-usage-notification"
         }
       }
     }
