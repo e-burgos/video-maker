@@ -21,6 +21,7 @@ import { SegmentSchema, TranscriptionSchema, WordSchema, normalizeTranscriptionW
 const SCHEMAS_DIR = join(__dirname, '..', '..', 'schemas');
 
 const PUBLIC_VALUE_EXPORTS = [
+  'OUTPUT_PRESETS',
   'OutputFormatSchema',
   'OutputPresetSchema',
   'SafeZoneSchema',

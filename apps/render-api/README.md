@@ -193,8 +193,15 @@ interface CreateJobRequestBody {
 - `logo` (spec-014) — `'auto'` (default) or `'off'`. With `'auto'`, if the project has an image in
   `raw/logo/` it becomes the Timeline's logo layer, bottom-right. Anything else answers
   `422 MONTAGE_LOGO_INVALID`.
-- `preset`/`seed`/`overwrite`/`scriptPath`/`scriptText`/`logo` are only ever read on the `montage`
-  branch. A `render` job (explicit
+- `format` (FIX-e-burgos-007-001) — `'reels-9x16'` (default), `'tiktok-9x16'`, `'shorts-9x16'` or
+  `'youtube-16x9'`, forwarded to `autoMontage` as `outputPreset` and written into `timeline.format`.
+  Anything else answers `422 MONTAGE_FORMAT_INVALID` before registering the job. The default is
+  fixed, not derived from the A-roll: deriving it would silently change the output of every project
+  already planned, so the caller chooses — the studio producer reads the A-roll resolution and sends
+  `format` explicitly (`youtube-16x9` for a landscape screen recording, `reels-9x16` for a vertical
+  one).
+- `preset`/`seed`/`overwrite`/`scriptPath`/`scriptText`/`logo`/`format` are only ever read on the
+  `montage` branch. A `render` job (explicit
   or implied) never looks at them, even if they are present in the body.
 
 **Job report** (`report`, once `state` is `succeeded`):
@@ -228,6 +235,7 @@ interface MontageJobReport {
 | `MONTAGE_SCRIPT_INVALID` | `422` | `scriptPath` and `scriptText` both present, or either is not a non-empty string. |
 | `MONTAGE_SCRIPT_NOT_FOUND` | `404` | `scriptPath` does not resolve to a readable file in the project (surfaced when the job settles). |
 | `MONTAGE_LOGO_INVALID` | `422` | `logo` present, neither `'auto'` nor `'off'`. |
+| `MONTAGE_FORMAT_INVALID` | `422` | `format` present, not one of the four output presets. |
 | `TIMELINE_ALREADY_EXISTS` | `409` | `overwrite` is `false` (or absent) and `work/timeline.json` already exists. |
 | `MONTAGE_RAW_MISSING` | `422` | The project exists but `raw/` has none of the four role directories, or `raw/` itself is unreadable. |
 | `MONTAGE_INPUT_INVALID` | `422` | `autoMontage` rejects the ingested catalog (for example: no `aroll` asset after ingest). |

@@ -1,5 +1,7 @@
 import { MONTAGE_PRESETS } from '@video-maker/auto-montage';
 import type { LogoMode, MontagePresetName } from '@video-maker/auto-montage';
+import { OUTPUT_PRESETS } from '@video-maker/timeline-core';
+import type { OutputPreset } from '@video-maker/timeline-core';
 
 import { PipelineStageError } from '../errors/pipeline-stage-error';
 
@@ -9,6 +11,7 @@ const DEFAULT_MONTAGE_PRESET: MontagePresetName = 'software-demo';
 const DEFAULT_MONTAGE_SEED = 0;
 const DEFAULT_MONTAGE_OVERWRITE = false;
 const DEFAULT_MONTAGE_LOGO: LogoMode = 'auto';
+const DEFAULT_MONTAGE_FORMAT: OutputPreset = 'reels-9x16';
 
 function isMontagePresetName(value: unknown): value is MontagePresetName {
   return typeof value === 'string' && Object.prototype.hasOwnProperty.call(MONTAGE_PRESETS, value);
@@ -24,6 +27,27 @@ export function parseMontagePreset(value: unknown): MontagePresetName {
       code: 'MONTAGE_PRESET_INVALID',
       stage: null,
       expected: `one of ${MONTAGE_PRESET_NAMES.join(', ')}`,
+    });
+  }
+
+  return value;
+}
+
+function isOutputPreset(value: unknown): value is OutputPreset {
+  return typeof value === 'string' && (OUTPUT_PRESETS as readonly string[]).includes(value);
+}
+
+export function parseMontageFormat(value: unknown): OutputPreset {
+  if (value === undefined) {
+    return DEFAULT_MONTAGE_FORMAT;
+  }
+
+  if (!isOutputPreset(value)) {
+    throw new PipelineStageError({
+      code: 'MONTAGE_FORMAT_INVALID',
+      stage: null,
+      resource: 'format',
+      expected: `one of ${OUTPUT_PRESETS.join(', ')}`,
     });
   }
 

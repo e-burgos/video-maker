@@ -1,4 +1,4 @@
-export { OutputFormatSchema, OutputPresetSchema, SafeZoneSchema } from './schemas/output-format.schema';
+export { OUTPUT_PRESETS, OutputFormatSchema, OutputPresetSchema, SafeZoneSchema } from './schemas/output-format.schema';
 export type { OutputFormat, OutputPreset, SafeZone } from './schemas/output-format.schema';
 
 export { MediaAssetSchema, MediaKindSchema } from './schemas/media-asset.schema';

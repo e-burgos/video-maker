@@ -85,14 +85,14 @@ describe('planCommand', () => {
     const deps = createFakeCliDependencies({ fileSystem: createFakeFileSystem([]) });
 
     await expect(
-      planCommand(fixtureMediaProject, { preset: 'software-demo', seed: 0, scriptPath: null, logo: 'auto' }, deps),
+      planCommand(fixtureMediaProject, { preset: 'software-demo', seed: 0, scriptPath: null, logo: 'auto', format: 'reels-9x16' }, deps),
     ).rejects.toBeInstanceOf(StageInputMissingError);
   });
 
   it('runs autoMontage for real and maps the result to a PlanReport, resolving even with broll rejections (RN-28)', async () => {
     const deps = createFakeCliDependencies({ fileSystem: buildPlannableFileSystem() });
 
-    const report = await planCommand(fixtureMediaProject, { preset: 'software-demo', seed: 42, scriptPath: null, logo: 'auto' }, deps);
+    const report = await planCommand(fixtureMediaProject, { preset: 'software-demo', seed: 42, scriptPath: null, logo: 'auto', format: 'reels-9x16' }, deps);
 
     expect(report.kind).toBe('plan');
     expect(report.timelinePath).toBe('work/timeline.json');
@@ -101,12 +101,30 @@ describe('planCommand', () => {
     expect(Array.isArray(report.brollRejections)).toBe(true);
   });
 
+  it('planifica en el formato pedido y por defecto en vertical', async () => {
+    const deps = createFakeCliDependencies({ fileSystem: buildPlannableFileSystem() });
+
+    const vertical = await planCommand(
+      fixtureMediaProject,
+      { preset: 'software-demo', seed: 0, scriptPath: null, logo: 'auto', format: 'reels-9x16' },
+      deps,
+    );
+    const landscape = await planCommand(
+      fixtureMediaProject,
+      { preset: 'software-demo', seed: 0, scriptPath: null, logo: 'auto', format: 'youtube-16x9' },
+      deps,
+    );
+
+    expect(vertical.format).toEqual({ preset: 'reels-9x16', width: 1080, height: 1920, fps: 30 });
+    expect(landscape.format).toEqual({ preset: 'youtube-16x9', width: 1920, height: 1080, fps: 30 });
+  });
+
   it('translates a thrown MontageInputError to a StageFailedError with stage plan (RN-26)', async () => {
     const deps = createFakeCliDependencies({ fileSystem: buildPlannableFileSystem() });
 
     const error = await planCommand(
       fixtureMediaProject,
-      { preset: 'unknown-preset-value' as MontagePresetName, seed: 0, scriptPath: null, logo: 'auto' },
+      { preset: 'unknown-preset-value' as MontagePresetName, seed: 0, scriptPath: null, logo: 'auto', format: 'reels-9x16' },
       deps,
     ).catch((caught: unknown) => caught);
 
@@ -125,7 +143,7 @@ describe('planCommand', () => {
 
     const report = await planCommand(
       fixtureMediaProject,
-      { preset: 'software-demo', seed: 42, scriptPath: '/tmp/script.txt', logo: 'auto' },
+      { preset: 'software-demo', seed: 42, scriptPath: '/tmp/script.txt', logo: 'auto', format: 'reels-9x16' },
       deps,
     );
 
@@ -144,7 +162,7 @@ describe('planCommand', () => {
 
     const report = await planCommand(
       fixtureMediaProject,
-      { preset: 'software-demo', seed: 42, scriptPath: null, logo: 'auto' },
+      { preset: 'software-demo', seed: 42, scriptPath: null, logo: 'auto', format: 'reels-9x16' },
       deps,
     );
 
@@ -156,7 +174,7 @@ describe('planCommand', () => {
 
     const error = await planCommand(
       fixtureMediaProject,
-      { preset: 'software-demo', seed: 0, scriptPath: '/tmp/no-existe.txt', logo: 'auto' },
+      { preset: 'software-demo', seed: 0, scriptPath: '/tmp/no-existe.txt', logo: 'auto', format: 'reels-9x16' },
       deps,
     ).catch((caught: unknown) => caught);
 

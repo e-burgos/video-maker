@@ -1,4 +1,5 @@
 import type { AssetRole, ScriptAlignmentCounts } from '@video-maker/auto-montage';
+import type { OutputFormat } from '@video-maker/timeline-core';
 
 export interface AssetRoleCount {
   readonly role: AssetRole;
@@ -29,6 +30,7 @@ export interface PlanBrollRejectionReport {
 
 export interface PlanReport {
   readonly kind: 'plan';
+  readonly format: OutputFormat;
   readonly timelinePath: string;
   readonly edlPath: string;
   readonly editedDurationMs: number;

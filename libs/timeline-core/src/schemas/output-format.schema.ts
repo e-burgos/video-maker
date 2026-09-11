@@ -9,6 +9,8 @@ export const OutputPresetSchema = z.enum([
   'youtube-16x9',
 ]);
 
+export const OUTPUT_PRESETS = OutputPresetSchema.options;
+
 export const OutputFormatSchema = z.strictObject({
   preset: OutputPresetSchema,
   width: z.number().int().min(240),

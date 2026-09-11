@@ -47,6 +47,7 @@ const MESSAGE_BY_CODE: Readonly<Record<RenderApiErrorCode, string>> = {
   MONTAGE_SCRIPT_INVALID: 'The script parameters of the montage job are not valid.',
   MONTAGE_SCRIPT_NOT_FOUND: 'The script the montage job points at does not exist in the project.',
   MONTAGE_LOGO_INVALID: 'The logo mode of the montage job is not valid.',
+  MONTAGE_FORMAT_INVALID: 'The output format of the montage job is not one of the known presets.',
   TIMELINE_ALREADY_EXISTS: 'A timeline already exists for this project.',
   MONTAGE_RAW_MISSING: 'The project has no raw asset role directories to ingest.',
   MONTAGE_INPUT_INVALID: 'The montage input does not have enough usable assets to build a timeline.',

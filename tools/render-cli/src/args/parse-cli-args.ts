@@ -1,10 +1,11 @@
 import { parseArgs } from 'node:util';
 import type { LogoMode, MontagePresetName } from '@video-maker/auto-montage';
+import type { OutputPreset } from '@video-maker/timeline-core';
 
 import { CliArgumentError } from '../errors/cli-argument-error';
 import { CliUsageError } from '../errors/cli-usage-error';
 
-import { COMMAND_NAMES, DEFAULT_SEED, PRESET_NAMES } from './preset-names';
+import { COMMAND_NAMES, DEFAULT_FORMAT, DEFAULT_SEED, FORMAT_NAMES, PRESET_NAMES } from './preset-names';
 import { stageForArgument } from './stage-for-argument';
 
 export interface PlanOptions {
@@ -12,6 +13,7 @@ export interface PlanOptions {
   readonly seed: number;
   readonly scriptPath: string | null;
   readonly logo: LogoMode;
+  readonly format: OutputPreset;
 }
 
 export type ParsedCommand =
@@ -25,6 +27,7 @@ type CommandName = (typeof COMMAND_NAMES)[number];
 const SEED_PATTERN = /^\d+$/;
 const COMMAND_LIST = COMMAND_NAMES.join(' | ');
 const PRESET_LIST = PRESET_NAMES.join(' | ');
+const FORMAT_LIST = FORMAT_NAMES.join(' | ');
 
 function isCommandName(value: string): value is CommandName {
   return (COMMAND_NAMES as readonly string[]).includes(value);
@@ -32,6 +35,10 @@ function isCommandName(value: string): value is CommandName {
 
 function isPresetName(value: string): value is MontagePresetName {
   return (PRESET_NAMES as readonly string[]).includes(value);
+}
+
+function isFormatName(value: string): value is OutputPreset {
+  return (FORMAT_NAMES as readonly string[]).includes(value);
 }
 
 function parseArgsErrorCode(error: unknown): string | null {
@@ -81,6 +88,7 @@ function parseNodeArgs(command: CommandName, rest: readonly string[]) {
         seed: { type: 'string' },
         script: { type: 'string' },
         'no-logo': { type: 'boolean' },
+        format: { type: 'string' },
       },
       allowPositionals: true,
       strict: true,
@@ -95,6 +103,7 @@ interface RawPlanValues {
   readonly seed: string | undefined;
   readonly script: string | undefined;
   readonly noLogo: boolean | undefined;
+  readonly format: string | undefined;
 }
 
 function parseScriptPath(command: 'plan' | 'run', rawScript: string | undefined): string | null {
@@ -112,6 +121,23 @@ function parseScriptPath(command: 'plan' | 'run', rawScript: string | undefined)
   }
 
   return rawScript;
+}
+
+function parseFormat(command: 'plan' | 'run', rawFormat: string | undefined): OutputPreset {
+  if (rawFormat === undefined) {
+    return DEFAULT_FORMAT;
+  }
+
+  if (!isFormatName(rawFormat)) {
+    throw new CliArgumentError({
+      stage: stageForArgument(command, 'format'),
+      reason: 'unknown-format',
+      resource: `--format=${rawFormat}`,
+      expected: FORMAT_LIST,
+    });
+  }
+
+  return rawFormat;
 }
 
 function parsePresetAndSeed(command: 'plan' | 'run', values: RawPlanValues): PlanOptions {
@@ -136,9 +162,10 @@ function parsePresetAndSeed(command: 'plan' | 'run', values: RawPlanValues): Pla
 
   const scriptPath = parseScriptPath(command, values.script);
   const logo: LogoMode = values.noLogo === true ? 'off' : 'auto';
+  const format = parseFormat(command, values.format);
 
   if (rawSeed === undefined) {
-    return { preset: rawPreset, seed: DEFAULT_SEED, scriptPath, logo };
+    return { preset: rawPreset, seed: DEFAULT_SEED, scriptPath, logo, format };
   }
 
   if (!SEED_PATTERN.test(rawSeed) || !Number.isSafeInteger(Number(rawSeed))) {
@@ -150,10 +177,10 @@ function parsePresetAndSeed(command: 'plan' | 'run', values: RawPlanValues): Pla
     });
   }
 
-  return { preset: rawPreset, seed: Number(rawSeed), scriptPath, logo };
+  return { preset: rawPreset, seed: Number(rawSeed), scriptPath, logo, format };
 }
 
-const PLAN_ONLY_OPTIONS = ['preset', 'seed', 'script', 'no-logo'] as const;
+const PLAN_ONLY_OPTIONS = ['preset', 'seed', 'script', 'no-logo', 'format'] as const;
 
 function assertNoPlanOptions(command: 'ingest' | 'render', values: RawPlanValues): void {
   const present: readonly [(typeof PLAN_ONLY_OPTIONS)[number], unknown][] = [
@@ -161,6 +188,7 @@ function assertNoPlanOptions(command: 'ingest' | 'render', values: RawPlanValues
     ['seed', values.seed],
     ['script', values.script],
     ['no-logo', values.noLogo],
+    ['format', values.format],
   ];
 
   for (const [name, value] of present) {
@@ -203,10 +231,17 @@ export function parseCliArgs(argv: readonly string[]): ParsedCommand {
     seed: rawSeed,
     script: rawScript,
     'no-logo': rawNoLogo,
+    format: rawFormat,
   } = parsed.values;
 
   if (rawCommand === 'ingest' || rawCommand === 'render') {
-    assertNoPlanOptions(rawCommand, { preset: rawPreset, seed: rawSeed, script: rawScript, noLogo: rawNoLogo });
+    assertNoPlanOptions(rawCommand, {
+      preset: rawPreset,
+      seed: rawSeed,
+      script: rawScript,
+      noLogo: rawNoLogo,
+      format: rawFormat,
+    });
     return { command: rawCommand, projectRoot };
   }
 
@@ -215,6 +250,7 @@ export function parseCliArgs(argv: readonly string[]): ParsedCommand {
     seed: rawSeed,
     script: rawScript,
     noLogo: rawNoLogo,
+    format: rawFormat,
   });
   return { command: rawCommand, projectRoot, options };
 }

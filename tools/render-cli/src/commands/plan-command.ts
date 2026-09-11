@@ -40,6 +40,7 @@ async function runAutoMontage(
         preset: options.preset,
         seed: options.seed,
         logo: options.logo,
+        outputPreset: options.format,
         ...(scriptText === undefined ? {} : { scriptText }),
       },
       {

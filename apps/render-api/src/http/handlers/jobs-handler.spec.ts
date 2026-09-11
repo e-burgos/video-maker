@@ -277,6 +277,40 @@ describe('handleCreateRenderJob', () => {
       expect(runtime.jobs.listBySlug('acme-launch')).toEqual([]);
     });
 
+    it('answers 422 MONTAGE_FORMAT_INVALID and registers no job (FIX-e-burgos-007-001)', async () => {
+      const { deps, runtime } = createMontageDeps();
+
+      await expect(
+        handleCreateRenderJob(
+          deps,
+          STORE,
+          { slug: 'acme-launch' },
+          jsonBodyRequest('acme-launch', { kind: 'montage', format: '4k' }),
+          runtime,
+        ),
+      ).rejects.toMatchObject({
+        code: 'MONTAGE_FORMAT_INVALID',
+        expected: 'one of reels-9x16, tiktok-9x16, shorts-9x16, youtube-16x9',
+      });
+      expect(runtime.jobs.listBySlug('acme-launch')).toEqual([]);
+    });
+
+    it('accepts one of the four output formats (FIX-e-burgos-007-001)', async () => {
+      const { deps, runtime } = createMontageDeps();
+
+      const response = await handleCreateRenderJob(
+        deps,
+        STORE,
+        { slug: 'acme-launch' },
+        jsonBodyRequest('acme-launch', { kind: 'montage', format: 'youtube-16x9' }),
+        runtime,
+      );
+
+      expect(response.status).toBe(202);
+
+      await runtime.jobs.whenIdle();
+    });
+
     it('registers the montage job with the script and the logo mode it received (spec-014)', async () => {
       const { deps, runtime } = createMontageDeps();
 

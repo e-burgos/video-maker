@@ -1,4 +1,5 @@
 import type { LogoMode, MediaProject, MontagePresetName } from '@video-maker/auto-montage';
+import type { OutputPreset } from '@video-maker/timeline-core';
 import { autoMontage, discoverAssets, ingestProject, toAbsolutePath } from '@video-maker/auto-montage';
 
 import { PipelineStageError } from '../errors/pipeline-stage-error';
@@ -18,6 +19,7 @@ export interface MontagePipelineRequest {
   readonly scriptPath?: string | null;
   readonly scriptText?: string | null;
   readonly logo?: LogoMode;
+  readonly format?: OutputPreset;
 }
 
 async function resolveScriptText(
@@ -109,6 +111,7 @@ export async function runMontagePipeline(
         preset: request.preset,
         seed: request.seed,
         logo: request.logo ?? 'auto',
+        ...(request.format === undefined ? {} : { outputPreset: request.format }),
         ...(scriptText === undefined ? {} : { scriptText }),
       },
       {

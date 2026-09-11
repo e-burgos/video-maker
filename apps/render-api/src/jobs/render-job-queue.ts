@@ -1,6 +1,6 @@
 import { resolveMediaProject } from '@video-maker/auto-montage';
 import type { LogoMode, MontagePresetName } from '@video-maker/auto-montage';
-import type { Timeline } from '@video-maker/timeline-core';
+import type { OutputPreset, Timeline } from '@video-maker/timeline-core';
 
 import type { RenderApiDependencies } from '../deps/render-api-dependencies';
 import type { RenderApiErrorPayload } from '../errors/render-api-error';
@@ -82,6 +82,7 @@ interface MontageJobRecord extends JobRecordBase {
   readonly scriptPath: string | null;
   readonly scriptText: string | null;
   readonly logo: LogoMode;
+  readonly format: OutputPreset;
   progress: MontageJobProgress | null;
   report: MontageJobReport | null;
 }
@@ -190,6 +191,7 @@ export function createRenderJobQueue(deps: RenderApiDependencies): RenderJobQueu
           scriptPath: record.scriptPath,
           scriptText: record.scriptText,
           logo: record.logo,
+          format: record.format,
         },
         deps,
         observer,
@@ -326,6 +328,7 @@ export function createRenderJobQueue(deps: RenderApiDependencies): RenderJobQueu
           scriptPath: input.scriptPath,
           scriptText: input.scriptText,
           logo: input.logo,
+          format: input.format,
           progress: null,
           report: null,
         };

@@ -1,5 +1,5 @@
 import type { LogoMode, MontagePresetName } from '@video-maker/auto-montage';
-import type { StoryboardSource, Timeline, VoiceTrackSource } from '@video-maker/timeline-core';
+import type { OutputPreset, StoryboardSource, Timeline, VoiceTrackSource } from '@video-maker/timeline-core';
 
 import type { RenderApiErrorCode, RenderApiErrorPayload, RenderPipelineStage } from '../errors/render-api-error';
 import type { RenderPipelineReport } from '../pipeline/run-render-pipeline';
@@ -179,6 +179,7 @@ export interface CreateMontageJobInput {
   readonly scriptPath: string | null;
   readonly scriptText: string | null;
   readonly logo: LogoMode;
+  readonly format: OutputPreset;
 }
 
 export interface CreateStoryboardJobInput {

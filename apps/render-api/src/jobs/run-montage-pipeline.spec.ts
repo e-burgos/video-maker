@@ -192,6 +192,37 @@ describe('runMontagePipeline', () => {
     expect(report.seed).toBe(7);
   });
 
+  it('writes the timeline in the requested output format and defaults to vertical', async () => {
+    async function timelineFormatOf(request: MontagePipelineRequest): Promise<unknown> {
+      const callLog = createCallLog();
+      const deps = buildIngestibleProjectDeps(callLog);
+      const { observer } = createRecordingObserver();
+
+      await runMontagePipeline(request, deps, observer);
+
+      const write = callLog
+        .entries()
+        .filter((entry) => entry.port === 'writeTextFile')
+        .map((entry) => entry.input as { path: string; contents: string })
+        .find((entry) => entry.path.endsWith('work/timeline.json'));
+
+      return JSON.parse(write?.contents ?? '{}').format;
+    }
+
+    expect(await timelineFormatOf({ ...REQUEST, format: 'youtube-16x9' })).toEqual({
+      preset: 'youtube-16x9',
+      width: 1920,
+      height: 1080,
+      fps: 30,
+    });
+    expect(await timelineFormatOf(REQUEST)).toEqual({
+      preset: 'reels-9x16',
+      width: 1080,
+      height: 1920,
+      fps: 30,
+    });
+  });
+
   it('reports the three project-relative paths written by ingestProject and autoMontage', async () => {
     const callLog = createCallLog();
     const deps = buildIngestibleProjectDeps(callLog);

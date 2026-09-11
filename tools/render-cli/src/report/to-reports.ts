@@ -38,6 +38,7 @@ export function toIngestReport(result: IngestResult): IngestReport {
 export function toPlanReport(result: AutoMontageResult): PlanReport {
   return {
     kind: 'plan',
+    format: result.timeline.format,
     timelinePath: result.timelinePath,
     edlPath: result.edlPath,
     editedDurationMs: result.editedDurationMs,

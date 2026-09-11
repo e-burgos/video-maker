@@ -79,7 +79,7 @@ describe('runCommand', () => {
   it('cuts at the first failing stage and reports that stage, never "run" (RN-21)', async () => {
     const deps = createFakeCliDependencies({ fileSystem: createFakeFileSystem([]) });
 
-    const error = await runCommand(fixtureMediaProject, { preset: 'software-demo', seed: 0, scriptPath: null, logo: 'auto' }, deps).catch(
+    const error = await runCommand(fixtureMediaProject, { preset: 'software-demo', seed: 0, scriptPath: null, logo: 'auto', format: 'reels-9x16' }, deps).catch(
       (caught: unknown) => caught,
     );
 
@@ -111,7 +111,7 @@ describe('runCommand', () => {
       }),
     });
 
-    const report = await runCommand(fixtureMediaProject, { preset: 'software-demo', seed: 42, scriptPath: null, logo: 'auto' }, deps);
+    const report = await runCommand(fixtureMediaProject, { preset: 'software-demo', seed: 42, scriptPath: null, logo: 'auto', format: 'reels-9x16' }, deps);
 
     expect(report.kind).toBe('run');
     expect(report.ingest.kind).toBe('ingest');

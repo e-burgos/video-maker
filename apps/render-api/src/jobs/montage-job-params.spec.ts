@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 
 import {
+  parseMontageFormat,
   parseMontageLogo,
   parseMontageOverwrite,
   parseMontagePreset,
@@ -173,5 +174,25 @@ describe('parseMontageLogo', () => {
 
     expect(error).toBeInstanceOf(PipelineStageError);
     expect((error as PipelineStageError).code).toBe('MONTAGE_LOGO_INVALID');
+  });
+});
+
+describe('parseMontageFormat', () => {
+  it('defaults to reels-9x16', () => {
+    expect(parseMontageFormat(undefined)).toBe('reels-9x16');
+  });
+
+  it.each(['reels-9x16', 'tiktok-9x16', 'shorts-9x16', 'youtube-16x9'])('accepts %s', (preset) => {
+    expect(parseMontageFormat(preset)).toBe(preset);
+  });
+
+  it('rejects anything else with MONTAGE_FORMAT_INVALID naming the four presets', () => {
+    const error = captureError(() => parseMontageFormat('4k'));
+
+    expect(error).toBeInstanceOf(PipelineStageError);
+    expect((error as PipelineStageError).code).toBe('MONTAGE_FORMAT_INVALID');
+    expect((error as PipelineStageError).expected).toBe(
+      'one of reels-9x16, tiktok-9x16, shorts-9x16, youtube-16x9',
+    );
   });
 });

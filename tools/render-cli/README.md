@@ -13,6 +13,7 @@ pnpm nx run render-cli:cli -- render media/smoke-ingest
 pnpm nx run render-cli:cli -- run media/smoke-ingest --preset software-demo --seed 0
 pnpm nx run render-cli:cli -- run media/demo-01 --preset hardware --script media/demo-01/work/producer/script.txt
 pnpm nx run render-cli:cli -- plan media/demo-01 --preset hardware --no-logo
+pnpm nx run render-cli:cli -- plan media/display-ads --preset software-demo --format youtube-16x9
 
 pnpm nx run render-cli:smoke        # invocación fija sobre media/smoke-ingest
 ```
@@ -21,7 +22,8 @@ pnpm nx run render-cli:smoke        # invocación fija sobre media/smoke-ingest
 corren sin `cwd`), no contra el directorio donde se invoca `pnpm`.
 
 Presets disponibles: `software-demo`, `hardware`, `recipe`, `educational`. `--seed` es un entero
-no negativo, default `0`.
+no negativo, default `0`. Formatos disponibles: `reels-9x16` (default), `tiktok-9x16`,
+`shorts-9x16`, `youtube-16x9`.
 
 `plan` y `run` aceptan además (spec-014):
 
@@ -34,7 +36,16 @@ no negativo, default `0`.
   en el margen inferior derecho. El reporte de `plan` siempre nombra el logo usado (`logo: none`
   cuando no hay).
 
-`ingest` y `render` rechazan las cuatro opciones (`--preset`, `--seed`, `--script`, `--no-logo`).
+- `--format <reels-9x16|tiktok-9x16|shorts-9x16|youtube-16x9>` (FIX-e-burgos-007-001): el formato de
+  salida de la Timeline. **Default `reels-9x16`** (1080×1920) para cualquier proyecto, también cuando
+  el A-roll es apaisado: el formato no se adivina desde el material, lo elige quien invoca —el
+  productor de la app lo decide por el A-roll y lo manda explícito— porque un default derivado del
+  material cambiaría en silencio la salida de los proyectos ya planificados. `youtube-16x9` es
+  1920×1080; los tres `9x16` comparten dimensiones y difieren en nada más hoy. El reporte de `plan`
+  abre con `format: <preset> <ancho>x<alto>@<fps>`.
+
+`ingest` y `render` rechazan las cinco opciones (`--preset`, `--seed`, `--script`, `--no-logo`,
+`--format`).
 
 ## `render` entrega la mezcla masterizada (spec-015 cycle-01)
 

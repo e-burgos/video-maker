@@ -494,6 +494,71 @@
         "source": "declared-estimate",
         "recorded_at": "2026-09-11"
       }
+    },
+    {
+      "id": "FIX-e-burgos-007-001",
+      "author": "e-burgos",
+      "spec_id": "spec-e-burgos-007-web-montage",
+      "fix_document": "sdd/specs/spec-e-burgos-007-web-montage/fixes/fix-e-burgos-007-001.md",
+      "type": "IMPROVEMENT",
+      "severity": "medium",
+      "created_at": "2026-09-11",
+      "resolved_at": "2026-09-11",
+      "validated_at": null,
+      "title": "neither the CLI nor the montage job can choose the output format: everything renders 9x16",
+      "estimation_hours": 3,
+      "description": "resolveMontageInputs takes options.outputPreset but nobody passes it: autoMontage is called without it from tools/render-cli and from the montage job, so every project falls back to reels-9x16 even when the A-roll is a landscape screen recording. youtube-16x9 already exists in libs/timeline-core. The fix exposes it end to end: --format <reels-9x16|tiktok-9x16|shorts-9x16|youtube-16x9> on render-cli plan and run, and format with the same values on the montage job (422 MONTAGE_FORMAT_INVALID), both forwarded to autoMontage as outputPreset. The default stays reels-9x16 in both paths and the plan report prints the resolved format so the choice is visible.",
+      "justification": "Explicit request of the dev after a 16:9 screen recording came out vertical. No new endpoint, module or domain entity: one optional CLI flag, one optional body field on EP-012 and one argument already accepted by the library. Solo profile FIX GATE, no cycle open.",
+      "related_modules": [
+        "web-montage",
+        "render-service"
+      ],
+      "affected_files": [
+        "libs/timeline-core/src/schemas/output-format.schema.ts",
+        "libs/timeline-core/src/schemas/schemas.spec.ts",
+        "libs/timeline-core/src/index.ts",
+        "tools/render-cli/src/args/preset-names.ts",
+        "tools/render-cli/src/args/parse-cli-args.ts",
+        "tools/render-cli/src/args/parse-cli-args.spec.ts",
+        "tools/render-cli/src/args/stage-for-argument.ts",
+        "tools/render-cli/src/commands/plan-command.ts",
+        "tools/render-cli/src/commands/plan-command.spec.ts",
+        "tools/render-cli/src/commands/run-command.spec.ts",
+        "tools/render-cli/src/report/cli-report.ts",
+        "tools/render-cli/src/report/to-reports.ts",
+        "tools/render-cli/src/report/format-report.ts",
+        "tools/render-cli/src/report/format-report.spec.ts",
+        "tools/render-cli/README.md",
+        "apps/render-api/src/jobs/montage-job-params.ts",
+        "apps/render-api/src/jobs/montage-job-params.spec.ts",
+        "apps/render-api/src/jobs/render-job.ts",
+        "apps/render-api/src/jobs/render-job-queue.ts",
+        "apps/render-api/src/jobs/run-montage-pipeline.ts",
+        "apps/render-api/src/jobs/run-montage-pipeline.spec.ts",
+        "apps/render-api/src/http/handlers/jobs-handler.ts",
+        "apps/render-api/src/http/handlers/jobs-handler.spec.ts",
+        "apps/render-api/src/errors/render-api-error.ts",
+        "apps/render-api/src/errors/to-error-payload.ts",
+        "apps/render-api/src/errors/http-status-for.ts",
+        "apps/render-api/src/errors/http-status-for.spec.ts",
+        "apps/render-api/README.md",
+        "sdd/api.json",
+        "sdd/context/tools/render-cli/updates/2026-09-11-fix-e-burgos-007-001.md",
+        "sdd/context/apps/render-api/updates/2026-09-11-fix-e-burgos-007-001.md"
+      ],
+      "test_reference": "pnpm nx run-many -t lint test build verde en los 8 proyectos (2026-09-11); render-cli 180 tests (98.55 % stmts / 93.57 % branch), render-api 858 tests (98.02 % / 92.69 %), timeline-core 265 tests (97.8 % / 92.56 %), piso 80 % sin tocar coverage.include. Casos nuevos: parseCliArgs toma --format en plan y en run, sin flag da reels-9x16, rechaza '4k' con reason unknown-format / resource --format=4k / expected 'reels-9x16 | tiktok-9x16 | shorts-9x16 | youtube-16x9', e ingest y render lo rechazan como unexpected-option; planCommand corre autoMontage de verdad y devuelve format {reels-9x16 1080x1920@30} y {youtube-16x9 1920x1080@30}; parseMontageFormat (default, los cuatro valores, MONTAGE_FORMAT_INVALID); runMontagePipeline escribe timeline.format 1920x1080 con format youtube-16x9 y 1080x1920 sin format; el handler contesta 422 MONTAGE_FORMAT_INVALID sin registrar job y 202 con un formato valido. Aceptacion real sobre una copia temporal de media/display-ads (A-roll 1920x1080 apaisado, mktemp -d, sin timeline previo): 'plan --preset software-demo --script work/producer/script.txt' sin flag imprime 'format: reels-9x16 1080x1920@30' y timeline.format {'preset': 'reels-9x16', 'width': 1080, 'height': 1920, 'fps': 30} — NO youtube-16x9: el default quedo fijo por decision escrita en el documento del fix; con '--format youtube-16x9' imprime 'format: youtube-16x9 1920x1080@30' y timeline.format {'preset': 'youtube-16x9', 'width': 1920, 'height': 1080, 'fps': 30}; con '--format 4k' sale por stderr 'error [plan] unknown-format' + resource + expected. API en el puerto 4411 contra esa copia: format '4k' -> 422 MONTAGE_FORMAT_INVALID con expected 'one of reels-9x16, tiktok-9x16, shorts-9x16, youtube-16x9'; format 'youtube-16x9' pasa la validacion y llega al guard del timeline (409 TIMELINE_ALREADY_EXISTS).",
+      "status": "implemented",
+      "cycle": null,
+      "usage": {
+        "provider_model": "claude/opus",
+        "effort": "high",
+        "agent": "implementor-back",
+        "tokens_in": 84000,
+        "tokens_out": 11000,
+        "approx": true,
+        "source": "declared-estimate",
+        "recorded_at": "2026-09-11"
+      }
     }
   ]
 }

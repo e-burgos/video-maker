@@ -35,6 +35,7 @@ function formatScriptAlignment(report: PlanReport): string[] {
 function formatPlanReport(report: PlanReport): string[] {
   return [
     `ok [plan] ${report.timelinePath}`,
+    `  format: ${report.format.preset} ${report.format.width}x${report.format.height}@${report.format.fps}`,
     `  edl: ${report.edlPath}`,
     `  edited-duration-ms: ${report.editedDurationMs}`,
     `  transcription-source: ${report.transcriptionSource}`,

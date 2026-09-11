@@ -37,6 +37,7 @@ const INGEST_REPORT_WITH_PARTIAL_FAILURES: IngestReport = {
 
 const PLAN_REPORT: PlanReport = {
   kind: 'plan',
+  format: { preset: 'reels-9x16', width: 1080, height: 1920, fps: 30 },
   timelinePath: 'work/timeline.json',
   edlPath: 'work/edl.json',
   editedDurationMs: 18540,
@@ -105,6 +106,7 @@ describe('formatReport — plan', () => {
   it('formats the ok block with concepts and broll rejections (RN-28)', () => {
     expect(formatReport(PLAN_REPORT)).toEqual([
       'ok [plan] work/timeline.json',
+      '  format: reels-9x16 1080x1920@30',
       '  edl: work/edl.json',
       '  edited-duration-ms: 18540',
       '  transcription-source: catalog',

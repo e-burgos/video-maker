@@ -27,7 +27,7 @@ describe('parseCliArgs — success paths', () => {
     expect(parseCliArgs(['plan', 'media/p', '--preset', 'hardware'])).toEqual({
       command: 'plan',
       projectRoot: 'media/p',
-      options: { preset: 'hardware', seed: 0, scriptPath: null, logo: 'auto' },
+      options: { preset: 'hardware', seed: 0, scriptPath: null, logo: 'auto', format: 'reels-9x16' },
     });
   });
 
@@ -35,7 +35,7 @@ describe('parseCliArgs — success paths', () => {
     expect(parseCliArgs(['plan', 'media/p', '--preset', 'recipe', '--seed', '42'])).toEqual({
       command: 'plan',
       projectRoot: 'media/p',
-      options: { preset: 'recipe', seed: 42, scriptPath: null, logo: 'auto' },
+      options: { preset: 'recipe', seed: 42, scriptPath: null, logo: 'auto', format: 'reels-9x16' },
     });
   });
 
@@ -43,7 +43,7 @@ describe('parseCliArgs — success paths', () => {
     expect(parseCliArgs(['run', 'media/p', '--preset', 'educational', '--seed', '3'])).toEqual({
       command: 'run',
       projectRoot: 'media/p',
-      options: { preset: 'educational', seed: 3, scriptPath: null, logo: 'auto' },
+      options: { preset: 'educational', seed: 3, scriptPath: null, logo: 'auto', format: 'reels-9x16' },
     });
   });
 });
@@ -180,8 +180,55 @@ describe('parseCliArgs — the 8-step validation order of §4.1', () => {
     expect(parseCliArgs(['plan', 'media/p', '--preset', 'hardware', '--seed', '0'])).toEqual({
       command: 'plan',
       projectRoot: 'media/p',
-      options: { preset: 'hardware', seed: 0, scriptPath: null, logo: 'auto' },
+      options: { preset: 'hardware', seed: 0, scriptPath: null, logo: 'auto', format: 'reels-9x16' },
     });
+  });
+});
+
+describe('parseCliArgs — --format (FIX-e-burgos-007-001)', () => {
+  it('toma el formato pedido en plan y en run', () => {
+    expect(parseCliArgs(['plan', 'media/demo-01', '--preset', 'software-demo', '--format', 'youtube-16x9'])).toEqual({
+      command: 'plan',
+      projectRoot: 'media/demo-01',
+      options: { preset: 'software-demo', seed: 0, scriptPath: null, logo: 'auto', format: 'youtube-16x9' },
+    });
+    expect(parseCliArgs(['run', 'media/demo-01', '--preset', 'hardware', '--format', 'tiktok-9x16'])).toEqual({
+      command: 'run',
+      projectRoot: 'media/demo-01',
+      options: { preset: 'hardware', seed: 0, scriptPath: null, logo: 'auto', format: 'tiktok-9x16' },
+    });
+  });
+
+  it('sin --format planifica vertical', () => {
+    const parsed = parseCliArgs(['plan', 'media/demo-01', '--preset', 'software-demo']);
+
+    expect(parsed.command === 'plan' && parsed.options.format).toBe('reels-9x16');
+  });
+
+  it('rechaza un formato desconocido nombrando los cuatro válidos', () => {
+    try {
+      parseCliArgs(['plan', 'media/demo-01', '--preset', 'software-demo', '--format', '4k']);
+      expect.unreachable('parseCliArgs debe rechazar un formato desconocido');
+    } catch (error) {
+      expect(error).toBeInstanceOf(CliArgumentError);
+      expect((error as CliArgumentError).reason).toBe('unknown-format');
+      expect((error as CliArgumentError).resource).toBe('--format=4k');
+      expect((error as CliArgumentError).expected).toBe(
+        'reels-9x16 | tiktok-9x16 | shorts-9x16 | youtube-16x9',
+      );
+      expect((error as CliArgumentError).stage).toBe('plan');
+    }
+  });
+
+  it.each(['ingest', 'render'])('%s no acepta --format', (command) => {
+    try {
+      parseCliArgs([command, 'media/demo-01', '--format', 'youtube-16x9']);
+      expect.unreachable('parseCliArgs debe rechazar --format fuera de plan y run');
+    } catch (error) {
+      expect(error).toBeInstanceOf(CliUsageError);
+      expect((error as CliUsageError).reason).toBe('unexpected-option');
+      expect((error as CliUsageError).resource).toBe('--format');
+    }
   });
 });
 
@@ -195,6 +242,7 @@ describe('parseCliArgs — --script y --no-logo (spec-014)', () => {
         seed: 0,
         scriptPath: 'media/demo-01/work/producer/script.txt',
         logo: 'auto',
+        format: 'reels-9x16',
       },
     });
   });
@@ -203,7 +251,7 @@ describe('parseCliArgs — --script y --no-logo (spec-014)', () => {
     expect(parseCliArgs(['run', 'media/demo-01', '--preset=hardware', '--seed=3', '--script=guion.txt', '--no-logo'])).toEqual({
       command: 'run',
       projectRoot: 'media/demo-01',
-      options: { preset: 'hardware', seed: 3, scriptPath: 'guion.txt', logo: 'off' },
+      options: { preset: 'hardware', seed: 3, scriptPath: 'guion.txt', logo: 'off', format: 'reels-9x16' },
     });
   });
 
