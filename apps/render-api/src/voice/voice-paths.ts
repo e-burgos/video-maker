@@ -41,6 +41,25 @@ export function voiceWhisperWavPath(sceneId: string): string {
   return workPath(VOICE_DIRECTORY_NAME, VOICE_WHISPER_DIRECTORY_NAME, `${sceneId}.wav`);
 }
 
+export const VOICE_SCRIPT_TRACK_ID = 'voice';
+export const VOICE_SCRIPT_MANIFEST_FILE_NAME = 'script-manifest.json';
+
+export function voiceScriptLineId(index: number): string {
+  return `line-${String(index).padStart(2, '0')}`;
+}
+
+export function voiceScriptTrackPath(): string {
+  return voiceTrackPath(VOICE_SCRIPT_TRACK_ID);
+}
+
+export function voiceScriptWordsPath(): string {
+  return voiceWordsPath(VOICE_SCRIPT_TRACK_ID);
+}
+
+export function voiceScriptManifestPath(): string {
+  return workPath(VOICE_DIRECTORY_NAME, VOICE_SCRIPT_MANIFEST_FILE_NAME);
+}
+
 export function voiceWhisperOutBase(sceneId: string): string {
   return workPath(VOICE_DIRECTORY_NAME, VOICE_WHISPER_DIRECTORY_NAME, sceneId);
 }

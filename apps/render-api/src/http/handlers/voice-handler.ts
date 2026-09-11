@@ -8,7 +8,7 @@ import type { StoreConfig } from '../../config/store-config';
 import type { RenderApiDependencies } from '../../deps/render-api-dependencies';
 import { PipelineStageError } from '../../errors/pipeline-stage-error';
 import { translateVoiceError } from '../../errors/translate-voice-error';
-import { ensureVoiceDirectories, transcribeVoiceTrack } from '../../jobs/run-voice-pipeline';
+import { ensureVoiceDirectories, transcribeVoiceTrack } from '../../voice/voice-synthesis-steps';
 import { readStoryboardIfUsable } from '../../storyboard/storyboard-store';
 import { isPortableFileName, rawDirectoryForRole } from '../../store/asset-path';
 import { assertValidProjectSlug, resolveExistingProject } from '../../store/project-scope';

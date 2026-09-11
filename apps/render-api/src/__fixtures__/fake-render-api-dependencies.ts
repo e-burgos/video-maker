@@ -266,6 +266,13 @@ export function createFakeRenderApiDependencies(
       }
     },
 
+    concatVoiceTracks: async (input) => {
+      callLog.record('concatVoiceTracks', input);
+      if (overrides?.concatVoiceTracks) {
+        await overrides.concatVoiceTracks(input);
+      }
+    },
+
     transcribeVoice: async (input) => {
       callLog.record('transcribeVoice', input);
       if (overrides?.transcribeVoice) {

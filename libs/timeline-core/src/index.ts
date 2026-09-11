@@ -152,6 +152,15 @@ export {
 } from './schemas/voice-manifest.schema';
 export type { VoiceManifest, VoiceTrack, VoiceTrackSource } from './schemas/voice-manifest.schema';
 
+export {
+  DEFAULT_VOICE_SCRIPT_GAP_MS,
+  splitVoiceScriptLines,
+  VOICE_SCRIPT_MANIFEST_SCHEMA_VERSION,
+  VoiceScriptLineSchema,
+  VoiceScriptManifestSchema,
+} from './schemas/voice-script-manifest.schema';
+export type { VoiceScriptLine, VoiceScriptManifest } from './schemas/voice-script-manifest.schema';
+
 export { hashNarration } from './voice/hash-narration';
 export {
   dropVoiceTracksOutsideScenes,

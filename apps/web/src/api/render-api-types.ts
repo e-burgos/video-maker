@@ -293,12 +293,26 @@ export type VoiceJobSceneReport = {
   source: VoiceTrackSource;
 };
 
+export const VOICE_JOB_SOURCES = ['storyboard', 'script'] as const;
+
+export type VoiceJobSource = (typeof VOICE_JOB_SOURCES)[number];
+
+export type VoiceJobTrackReport = {
+  path: string;
+  wordsPath: string;
+  durationMs: number;
+  lineCount: number;
+  gapMs: number;
+};
+
 export type VoiceJobReport = {
+  source: VoiceJobSource;
   manifestPath: string;
-  storyboardId: string;
+  storyboardId: string | null;
   voiceId: string;
   language: string;
   scenes: VoiceJobSceneReport[];
+  track: VoiceJobTrackReport | null;
 };
 
 export type VoiceJob = {

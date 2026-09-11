@@ -418,6 +418,16 @@ export function createNodeRenderApiDependencies(
       });
     },
 
+    concatVoiceTracks: async ({ inputPaths, outPath, gapMs, sampleRate, channels, projectRoot }) => {
+      const { ExecaCommandRunner, concatSpeechSegments } = await loadMediaLocal();
+      const { ffmpeg } = await loadBinaries();
+      await concatSpeechSegments(
+        outPath,
+        { inputPaths, gapMs, sampleRate, channels, ffmpegPath: ffmpeg, runOptions: { cwd: projectRoot } },
+        new ExecaCommandRunner(),
+      );
+    },
+
     transcribeVoice: async ({ wavPath, outBase, assetId, language, projectRoot }) => {
       const { ExecaCommandRunner, transcribeWithWhisperCpp } = await loadMediaLocal();
       const { whisperCli, whisperModel } = await loadVoiceBinaries();

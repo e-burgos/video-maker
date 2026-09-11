@@ -8,6 +8,7 @@ import {
   parseVoiceSceneWriteResult,
 } from './parse-voice';
 import { RenderApiError } from './render-api-error';
+import type { VoiceJobReport } from './render-api-types';
 
 function expectShapeRefusal(run: () => unknown): void {
   expect(run).toThrowError(RenderApiError);
@@ -142,6 +143,8 @@ describe('parseVoiceJob', () => {
         state: 'succeeded',
         progress: { stage: 'persist', processedScenes: null, totalScenes: null, percent: null },
         report: {
+          source: 'storyboard',
+          track: null,
           manifestPath: 'work/voice/manifest.json',
           storyboardId: 'sb',
           voiceId: 'es_AR-daniela-high',
@@ -159,6 +162,69 @@ describe('parseVoiceJob', () => {
       }),
     );
     expect(job.report?.scenes).toHaveLength(1);
+  });
+
+  it('accepts the script report: no storyboard, one concatenated track (FIX-e-burgos-009-001)', () => {
+    const job = parseVoiceJob(
+      voiceJob({
+        state: 'succeeded',
+        progress: { stage: 'persist', processedScenes: null, totalScenes: null, percent: null },
+        report: {
+          source: 'script',
+          manifestPath: 'work/voice/script-manifest.json',
+          storyboardId: null,
+          voiceId: 'es_AR-daniela-high',
+          language: 'es-AR',
+          scenes: [],
+          track: {
+            path: 'work/voice/voice.wav',
+            wordsPath: 'work/voice/voice.words.json',
+            durationMs: 7800,
+            lineCount: 3,
+            gapMs: 900,
+          },
+        },
+      }),
+    );
+
+    expect(job.report?.source).toBe('script');
+    expect(job.report?.storyboardId).toBeNull();
+    expect(job.report?.track?.lineCount).toBe(3);
+  });
+
+  it('refuses a report with an unknown source or a malformed track', () => {
+    expectShapeRefusal(() =>
+      parseVoiceJob(
+        voiceJob({
+          state: 'succeeded',
+          report: {
+            source: 'freestyle',
+            manifestPath: 'work/voice/manifest.json',
+            storyboardId: null,
+            voiceId: 'v',
+            language: 'es-AR',
+            scenes: [],
+            track: null,
+          } as unknown as VoiceJobReport,
+        }),
+      ),
+    );
+    expectShapeRefusal(() =>
+      parseVoiceJob(
+        voiceJob({
+          state: 'succeeded',
+          report: {
+            source: 'script',
+            manifestPath: 'work/voice/script-manifest.json',
+            storyboardId: null,
+            voiceId: 'v',
+            language: 'es-AR',
+            scenes: [],
+            track: { path: 'work/voice/voice.wav' },
+          } as unknown as VoiceJobReport,
+        }),
+      ),
+    );
   });
 
   it('refuses a job of any other kind', () => {

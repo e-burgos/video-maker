@@ -66,12 +66,26 @@ export interface VoiceJobSceneReport {
   readonly source: VoiceTrackSource;
 }
 
+export const VOICE_JOB_SOURCES = ['storyboard', 'script'] as const;
+
+export type VoiceJobSource = (typeof VOICE_JOB_SOURCES)[number];
+
+export interface VoiceJobTrackReport {
+  readonly path: string;
+  readonly wordsPath: string;
+  readonly durationMs: number;
+  readonly lineCount: number;
+  readonly gapMs: number;
+}
+
 export interface VoiceJobReport {
+  readonly source: VoiceJobSource;
   readonly manifestPath: string;
-  readonly storyboardId: string;
+  readonly storyboardId: string | null;
   readonly voiceId: string;
   readonly language: string;
   readonly scenes: readonly VoiceJobSceneReport[];
+  readonly track: VoiceJobTrackReport | null;
 }
 
 export interface StoryboardJobUsage {
@@ -197,6 +211,9 @@ export interface CreateVoiceJobInput {
   readonly projectRoot: string;
   readonly voiceId: string | null;
   readonly sceneIds: readonly string[] | null;
+  readonly scriptText: string | null;
+  readonly scriptPath: string | null;
+  readonly gapMs: number;
 }
 
 export function toJob(record: RenderJob): RenderJob;

@@ -79,6 +79,8 @@ describe('VoiceJobPanel', () => {
       finishedAt: '2026-09-09T02:36:30.000Z',
       progress: { stage: 'persist', processedScenes: null, totalScenes: null, percent: null },
       report: {
+        source: 'storyboard',
+        track: null,
         manifestPath: 'work/voice/manifest.json',
         storyboardId: 'sb',
         voiceId: 'es_AR-daniela-high',

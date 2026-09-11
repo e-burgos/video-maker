@@ -130,6 +130,17 @@ export interface ExtractVoiceAudioInput {
 
 export type ExtractVoiceAudioPort = (input: ExtractVoiceAudioInput) => Promise<void>;
 
+export interface ConcatVoiceTracksInput {
+  readonly inputPaths: readonly string[];
+  readonly outPath: string;
+  readonly gapMs: number;
+  readonly sampleRate: number;
+  readonly channels: number;
+  readonly projectRoot: string;
+}
+
+export type ConcatVoiceTracksPort = (input: ConcatVoiceTracksInput) => Promise<void>;
+
 export interface TranscribeVoiceInput {
   readonly wavPath: string;
   readonly outBase: string;
@@ -181,5 +192,6 @@ export interface RenderApiDependencies {
   readonly listVoiceModels: ListVoiceModelsPort;
   readonly synthesizeVoice: SynthesizeVoicePort;
   readonly extractVoiceAudio: ExtractVoiceAudioPort;
+  readonly concatVoiceTracks: ConcatVoiceTracksPort;
   readonly transcribeVoice: TranscribeVoicePort;
 }

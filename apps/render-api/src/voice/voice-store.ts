@@ -1,11 +1,11 @@
 import { serializeMontageDocument, toAbsolutePath } from '@video-maker/auto-montage';
 import type { MediaProject } from '@video-maker/auto-montage';
-import { VoiceManifestSchema } from '@video-maker/timeline-core';
-import type { Transcription, VoiceManifest } from '@video-maker/timeline-core';
+import { VoiceManifestSchema, VoiceScriptManifestSchema } from '@video-maker/timeline-core';
+import type { Transcription, VoiceManifest, VoiceScriptManifest } from '@video-maker/timeline-core';
 
 import type { RenderApiDependencies } from '../deps/render-api-dependencies';
 import { PipelineStageError } from '../errors/pipeline-stage-error';
-import { voiceDirectoryPath, voiceManifestPath } from './voice-paths';
+import { voiceDirectoryPath, voiceManifestPath, voiceScriptManifestPath } from './voice-paths';
 
 const EXPECTED_DOCUMENT = 'a document accepted by VoiceManifestSchema';
 
@@ -87,5 +87,36 @@ export async function writeVoiceWords(
     toAbsolutePath(project, relativePath),
     serializeMontageDocument(transcription),
   );
+  return relativePath;
+}
+
+const EXPECTED_SCRIPT_DOCUMENT = 'a document accepted by VoiceScriptManifestSchema';
+
+export function parseVoiceScriptManifest(value: unknown, relativePath: string): VoiceScriptManifest {
+  const result = VoiceScriptManifestSchema.safeParse(value);
+  if (!result.success) {
+    throw new PipelineStageError({
+      code: 'VOICE_INVALID',
+      stage: null,
+      resource: relativePath,
+      expected: EXPECTED_SCRIPT_DOCUMENT,
+    });
+  }
+  return result.data;
+}
+
+export async function writeVoiceScriptManifest(
+  deps: RenderApiDependencies,
+  project: MediaProject,
+  manifest: VoiceScriptManifest,
+): Promise<string> {
+  const relativePath = voiceScriptManifestPath();
+
+  await deps.storage.ensureDirectory(toAbsolutePath(project, voiceDirectoryPath()));
+  await deps.storage.writeTextFile(
+    toAbsolutePath(project, relativePath),
+    serializeMontageDocument(parseVoiceScriptManifest(manifest, relativePath)),
+  );
+
   return relativePath;
 }

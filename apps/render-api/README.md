@@ -507,9 +507,42 @@ What lands in `work/voice/`:
 | `sources/scene-NN.txt` · `sources/scene-NN.wav` | The narration collapsed to a single line (Piper treats every line of the input file as a separate utterance) and Piper's raw 22 050 Hz output. |
 | `whisper/scene-NN.wav` · `whisper/scene-NN.json` | The 16 kHz mono input `whisper-cli` requires, and its own output. |
 
+### Synthesizing a loose script, with no storyboard (FIX-e-burgos-009-001)
+
+The same job takes a script instead of the storyboard: `scriptText` inline, or `scriptPath`
+project-relative. **One sentence per line** — Piper treats every line of its input as a separate
+utterance, and that is what gives the montage its cut points.
+
+```bash
+curl -sS -X POST http://127.0.0.1:4310/projects/<slug>/jobs \
+  -H 'content-type: application/json' \
+  -d '{"kind":"voice","scriptPath":"work/producer/script.txt"}'
+
+# inline, with a different pause between sentences and replacing the previous take
+curl -sS -X POST http://127.0.0.1:4310/projects/<slug>/jobs \
+  -H 'content-type: application/json' \
+  -d '{"kind":"voice","scriptText":"Primera frase.\nSegunda frase.","gapMs":400,"overwrite":true}'
+```
+
+One wav per sentence goes to `sources/line-NN.wav`, they are concatenated with `gapMs` of silence
+between them (default `900`, the same pause `plan` cuts on) into **`work/voice/voice.wav`** at
+48 kHz mono, Whisper aligns that track into `work/voice/voice.words.json`, and
+`work/voice/script-manifest.json` describes it: `source: 'script'`, the voice, the language derived
+from the Piper model id, the gap, the measured duration and one entry per line with its `startMs`.
+The duration is exactly the sum of the sentences plus `(lines - 1) * gapMs`.
+
+The storyboard manifest is **not** touched: script mode writes its own document, and the job report
+tells the two apart — `source`, `storyboardId: null` and a `track` object instead of `scenes`.
+Rejections (all before the job is registered): `422 VOICE_SCRIPT_INVALID` for `scriptText` and
+`scriptPath` together, an empty one of either, `sceneIds` alongside a script, or a `gapMs` that is
+not a non-negative integer or comes without a script; `409 VOICE_ALREADY_EXISTS` when
+`work/voice/voice.wav` is there without `overwrite: true`. A `scriptPath` that cannot be read
+surfaces as `404 VOICE_SCRIPT_NOT_FOUND` when the job settles (stage `synthesize`).
+
 Rules worth knowing before calling it:
 
-- **The storyboard must exist.** No `work/storyboard.json` is `404 STORYBOARD_NOT_FOUND`, checked
+- **The storyboard must exist — in storyboard mode.** With `scriptText`/`scriptPath` it is never
+  read. No `work/storyboard.json` is `404 STORYBOARD_NOT_FOUND`, checked
   before the job is registered — as are an unknown `sceneIds` entry (`404 VOICE_SCENE_NOT_FOUND`)
   and a scene that already has a track without `overwrite: true` (`409 VOICE_ALREADY_EXISTS`).
 - **An uploaded locution always wins.** A track with `source: 'uploaded'` is skipped by every

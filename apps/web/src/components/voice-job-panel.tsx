@@ -86,8 +86,11 @@ export function VoiceJobPanel({ jobId, onSucceeded }: VoiceJobPanelProps) {
 
       {job.kind === 'voice' && job.state === 'succeeded' && job.report !== null && (
         <p className="font-mono text-xs text-emerald-200">
-          {job.report.manifestPath} · {job.report.scenes.length} tracks · {job.report.voiceId} ·{' '}
-          {job.report.language}
+          {job.report.manifestPath} ·{' '}
+          {job.report.track === null
+            ? `${job.report.scenes.length} tracks`
+            : `${job.report.track.path} · ${job.report.track.lineCount} lines`}{' '}
+          · {job.report.voiceId} · {job.report.language}
         </p>
       )}
 

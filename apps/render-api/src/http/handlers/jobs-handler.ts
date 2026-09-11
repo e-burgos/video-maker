@@ -13,6 +13,7 @@ import { parseJobModel } from '../../jobs/job-model-params';
 import { parseStoryboardInput, parseStoryboardOverwrite } from '../../jobs/storyboard-job-params';
 import { parseVoiceJobInput } from '../../jobs/voice-job-params';
 import { assertVoiceTracksNotPersisted, selectVoiceScenes } from '../../voice/select-voice-scenes';
+import { assertVoiceScriptTrackNotPersisted } from '../../voice/voice-script-preconditions';
 import { readVoiceManifestIfUsable } from '../../voice/voice-store';
 import { readStoredStoryboard } from '../../storyboard/storyboard-store';
 import { storyboardPath } from '../../storyboard/storyboard-paths';
@@ -133,11 +134,16 @@ export async function handleCreateRenderJob(
   if (jobKind === 'voice') {
     parseJobModel(bodyObject.model, runtime.producer.models);
     const input = parseVoiceJobInput(bodyObject);
-    const document = await readStoredStoryboard(deps, project);
-    const scenes = selectVoiceScenes(document, input.sceneIds);
-    const manifest = await readVoiceManifestIfUsable(deps, project);
 
-    assertVoiceTracksNotPersisted(manifest, scenes, input.overwrite);
+    if (input.scriptText === null && input.scriptPath === null) {
+      const document = await readStoredStoryboard(deps, project);
+      const scenes = selectVoiceScenes(document, input.sceneIds);
+      const manifest = await readVoiceManifestIfUsable(deps, project);
+
+      assertVoiceTracksNotPersisted(manifest, scenes, input.overwrite);
+    } else {
+      await assertVoiceScriptTrackNotPersisted(deps, project, input.overwrite);
+    }
 
     const voiceJob = runtime.jobs.create({
       kind: 'voice',
@@ -145,6 +151,9 @@ export async function handleCreateRenderJob(
       projectRoot: project.root,
       voiceId: input.voiceId,
       sceneIds: input.sceneIds,
+      scriptText: input.scriptText,
+      scriptPath: input.scriptPath,
+      gapMs: input.gapMs,
     });
 
     return {

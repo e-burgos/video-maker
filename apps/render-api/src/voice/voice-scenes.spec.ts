@@ -5,7 +5,7 @@ import { describe, expect, it } from 'vitest';
 import { buildStoryboardDocument } from '../__fixtures__/storyboard-fixtures';
 import { assertVoiceTracksNotPersisted, selectVoiceScenes } from './select-voice-scenes';
 import { VOICE_TRACK_CHANNELS, VOICE_TRACK_SAMPLE_RATE } from './voice-format';
-import { whisperLanguageFor } from './voice-language';
+import { DEFAULT_VOICE_LANGUAGE, voiceLanguageFromModelId, whisperLanguageFor } from './voice-language';
 import {
   voiceManifestPath,
   voiceNarrationTextPath,
@@ -130,5 +130,23 @@ describe('assertVoiceTracksNotPersisted (US-09-005, US-09-006)', () => {
     const scenes = selectVoiceScenes(DOCUMENT, ['scene-02']);
 
     expect(() => assertVoiceTracksNotPersisted(manifest, scenes, false)).not.toThrow();
+  });
+});
+
+describe('voiceLanguageFromModelId (FIX-e-burgos-009-001)', () => {
+  it('deriva el idioma del nombre del modelo Piper', () => {
+    expect(voiceLanguageFromModelId('es_AR-daniela-high')).toBe('es-AR');
+    expect(voiceLanguageFromModelId('es_ES-sharvard-medium')).toBe('es-ES');
+    expect(voiceLanguageFromModelId('fr_FR-siwis-low')).toBe('fr-FR');
+  });
+
+  it('cae al idioma por defecto cuando el id no sigue la convención', () => {
+    expect(voiceLanguageFromModelId('daniela')).toBe(DEFAULT_VOICE_LANGUAGE);
+    expect(voiceLanguageFromModelId('')).toBe(DEFAULT_VOICE_LANGUAGE);
+    expect(DEFAULT_VOICE_LANGUAGE).toBe('es');
+  });
+
+  it('lo que deriva sigue siendo un idioma que Whisper entiende', () => {
+    expect(whisperLanguageFor(voiceLanguageFromModelId('es_AR-daniela-high'))).toBe('es');
   });
 });

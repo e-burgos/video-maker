@@ -1,35 +1,34 @@
 import { toAbsolutePath } from '@video-maker/auto-montage';
 import type { MediaProject } from '@video-maker/auto-montage';
-import { emptyVoiceManifest, hashNarration, upsertVoiceTrack } from '@video-maker/timeline-core';
+import {
+  DEFAULT_VOICE_SCRIPT_GAP_MS,
+  emptyVoiceManifest,
+  hashNarration,
+  upsertVoiceTrack,
+} from '@video-maker/timeline-core';
 import type { StoryboardScene, VoiceManifest, VoiceTrack } from '@video-maker/timeline-core';
-import { dirname, join } from 'node:path/posix';
 
 import type { RenderApiDependencies } from '../deps/render-api-dependencies';
-import { PipelineStageError } from '../errors/pipeline-stage-error';
-import { translateVoiceError } from '../errors/translate-voice-error';
 import { readStoredStoryboard } from '../storyboard/storyboard-store';
-import {
-  VOICE_TRACK_CHANNELS,
-  VOICE_TRACK_SAMPLE_RATE,
-  VOICE_TRANSCRIPTION_CHANNELS,
-  VOICE_TRANSCRIPTION_SAMPLE_RATE,
-} from '../voice/voice-format';
-import { whisperLanguageFor } from '../voice/voice-language';
+import { VOICE_TRACK_CHANNELS, VOICE_TRACK_SAMPLE_RATE } from '../voice/voice-format';
 import {
   voiceDirectoryPath,
   voiceManifestPath,
   voiceNarrationTextPath,
-  voiceSourcesDirectoryPath,
   voiceSourceWavPath,
   voiceTrackPath,
-  voiceWhisperDirectoryPath,
-  voiceWhisperOutBase,
-  voiceWhisperWavPath,
-  voiceWordsPath,
 } from '../voice/voice-paths';
 import { selectVoiceScenes } from '../voice/select-voice-scenes';
-import { readVoiceManifestIfUsable, writeVoiceManifest, writeVoiceWords } from '../voice/voice-store';
-import type { VoiceJobReport, VoiceJobSceneReport, VoiceStage } from './render-job';
+import {
+  ensureVoiceDirectories,
+  resolveVoiceModel,
+  runVoiceStage,
+  transcribeVoiceTrack,
+} from '../voice/voice-synthesis-steps';
+import type { ResolvedVoiceModel } from '../voice/voice-synthesis-steps';
+import { readVoiceManifestIfUsable, writeVoiceManifest } from '../voice/voice-store';
+import type { VoiceJobReport, VoiceJobSceneReport } from './render-job';
+import { runVoiceScriptPipeline } from './run-voice-script-pipeline';
 import { voiceCheckpoint } from './voice-pipeline-observer';
 import type { VoicePipelineObserver } from './voice-pipeline-observer';
 
@@ -37,11 +36,9 @@ export interface VoicePipelineRequest {
   readonly project: MediaProject;
   readonly voiceId: string | null;
   readonly sceneIds: readonly string[] | null;
-}
-
-interface ResolvedVoiceModel {
-  readonly id: string;
-  readonly path: string;
+  readonly scriptText?: string | null;
+  readonly scriptPath?: string | null;
+  readonly gapMs?: number;
 }
 
 interface SynthesizedScene {
@@ -49,42 +46,6 @@ interface SynthesizedScene {
   readonly trackPath: string;
   readonly durationMs: number;
   readonly sampleRate: number;
-}
-
-async function runVoiceStage<T>(stage: VoiceStage, resource: string | null, fn: () => Promise<T>): Promise<T> {
-  try {
-    return await fn();
-  } catch (cause) {
-    throw translateVoiceError(cause, stage, resource);
-  }
-}
-
-async function resolveVoiceModel(
-  deps: RenderApiDependencies,
-  voiceId: string | null,
-): Promise<ResolvedVoiceModel> {
-  const binaries = await deps.resolveVoiceBinaries();
-  const voices = await deps.listVoiceModels();
-
-  if (voiceId === null) {
-    const configured = voices.find((voice) => voice.isDefault);
-    return {
-      id: configured?.id ?? dirname(binaries.piperModel),
-      path: binaries.piperModel,
-    };
-  }
-
-  const requested = voices.find((voice) => voice.id === voiceId);
-  if (requested === undefined) {
-    throw new PipelineStageError({
-      code: 'VOICE_ID_INVALID',
-      stage: null,
-      resource: voiceId,
-      expected: 'a voice model id listed by GET /voices',
-    });
-  }
-
-  return { id: requested.id, path: join(dirname(binaries.piperModel), requested.fileName) };
 }
 
 async function synthesizeScene(
@@ -130,44 +91,7 @@ async function synthesizeScene(
   };
 }
 
-export async function transcribeVoiceTrack(
-  sceneId: string,
-  trackPath: string,
-  language: string,
-  deps: RenderApiDependencies,
-  project: MediaProject,
-): Promise<string> {
-  const whisperWavPath = voiceWhisperWavPath(sceneId);
-
-  await deps.extractVoiceAudio({
-    inputPath: toAbsolutePath(project, trackPath),
-    outPath: toAbsolutePath(project, whisperWavPath),
-    sampleRate: VOICE_TRANSCRIPTION_SAMPLE_RATE,
-    channels: VOICE_TRANSCRIPTION_CHANNELS,
-    projectRoot: project.root,
-  });
-
-  const transcription = await deps.transcribeVoice({
-    wavPath: toAbsolutePath(project, whisperWavPath),
-    outBase: toAbsolutePath(project, voiceWhisperOutBase(sceneId)),
-    assetId: trackPath,
-    language: whisperLanguageFor(language),
-    projectRoot: project.root,
-  });
-
-  return writeVoiceWords(deps, project, voiceWordsPath(sceneId), transcription);
-}
-
-export async function ensureVoiceDirectories(
-  deps: RenderApiDependencies,
-  project: MediaProject,
-): Promise<void> {
-  for (const directory of [voiceDirectoryPath(), voiceSourcesDirectoryPath(), voiceWhisperDirectoryPath()]) {
-    await deps.storage.ensureDirectory(toAbsolutePath(project, directory));
-  }
-}
-
-export async function runVoicePipeline(
+export async function runStoryboardVoicePipeline(
   request: VoicePipelineRequest,
   deps: RenderApiDependencies,
   observer: VoicePipelineObserver,
@@ -246,10 +170,37 @@ export async function runVoicePipeline(
   );
 
   return {
+    source: 'storyboard',
     manifestPath,
     storyboardId: document.id,
     voiceId: model.id,
     language: document.language,
     scenes,
+    track: null,
   };
+}
+
+export async function runVoicePipeline(
+  request: VoicePipelineRequest,
+  deps: RenderApiDependencies,
+  observer: VoicePipelineObserver,
+): Promise<VoiceJobReport> {
+  const scriptText = request.scriptText ?? null;
+  const scriptPath = request.scriptPath ?? null;
+
+  if (scriptText === null && scriptPath === null) {
+    return runStoryboardVoicePipeline(request, deps, observer);
+  }
+
+  return runVoiceScriptPipeline(
+    {
+      project: request.project,
+      voiceId: request.voiceId,
+      scriptText,
+      scriptPath,
+      gapMs: request.gapMs ?? DEFAULT_VOICE_SCRIPT_GAP_MS,
+    },
+    deps,
+    observer,
+  );
 }

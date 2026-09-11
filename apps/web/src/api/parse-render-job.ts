@@ -7,6 +7,7 @@ import {
   STORYBOARD_SOURCES,
   STORYBOARD_STAGES,
   TERMINAL_RENDER_JOB_STATES,
+  VOICE_JOB_SOURCES,
   VOICE_STAGES,
   VOICE_TRACK_SOURCES,
 } from './render-api-types';
@@ -38,6 +39,8 @@ import type {
   VoiceJobProgress,
   VoiceJobReport,
   VoiceJobSceneReport,
+  VoiceJobSource,
+  VoiceJobTrackReport,
   VoiceStage,
   VoiceTrackSource,
 } from './render-api-types';
@@ -155,11 +158,28 @@ function isVoiceJobSceneReport(value: unknown): value is VoiceJobSceneReport {
   );
 }
 
+export function isVoiceJobSource(value: unknown): value is VoiceJobSource {
+  return typeof value === 'string' && (VOICE_JOB_SOURCES as readonly string[]).includes(value);
+}
+
+function isVoiceJobTrackReport(value: unknown): value is VoiceJobTrackReport {
+  return (
+    isRecord(value) &&
+    typeof value['path'] === 'string' &&
+    typeof value['wordsPath'] === 'string' &&
+    typeof value['durationMs'] === 'number' &&
+    typeof value['lineCount'] === 'number' &&
+    typeof value['gapMs'] === 'number'
+  );
+}
+
 function isVoiceJobReport(value: unknown): value is VoiceJobReport {
   return (
     isRecord(value) &&
+    isVoiceJobSource(value['source']) &&
+    (value['track'] === null || isVoiceJobTrackReport(value['track'])) &&
     typeof value['manifestPath'] === 'string' &&
-    typeof value['storyboardId'] === 'string' &&
+    isStringOrNull(value['storyboardId']) &&
     typeof value['voiceId'] === 'string' &&
     typeof value['language'] === 'string' &&
     Array.isArray(value['scenes']) &&

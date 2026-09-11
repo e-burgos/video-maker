@@ -72,6 +72,8 @@ const MESSAGE_BY_CODE: Readonly<Record<RenderApiErrorCode, string>> = {
   VOICE_SCENE_IDS_INVALID: 'The sceneIds parameter is not a non-empty array of scene ids.',
   VOICE_OVERWRITE_INVALID: 'The overwrite flag is not a boolean.',
   VOICE_ASSET_NOT_FOUND: 'The referenced locution file is not under the raw voice directory.',
+  VOICE_SCRIPT_INVALID: 'The script parameters of the voice job are not valid.',
+  VOICE_SCRIPT_NOT_FOUND: 'The script the voice job points at does not exist in the project.',
   PRODUCER_UNAVAILABLE: 'The producer agent binary could not be resolved on this machine.',
   PRODUCER_TURN_ACTIVE: 'The project already has a producer turn in progress.',
   PRODUCER_TURN_FAILED: 'The producer agent ended the turn without an answer.',

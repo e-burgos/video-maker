@@ -13,7 +13,14 @@ import {
 
 describe('parseVoiceJobInput (US-09-004, US-09-005)', () => {
   it('un body vacío sintetiza todas las escenas con la voz configurada y sin sobreescribir', () => {
-    expect(parseVoiceJobInput({})).toEqual({ voiceId: null, sceneIds: null, overwrite: false });
+    expect(parseVoiceJobInput({})).toEqual({
+      voiceId: null,
+      sceneIds: null,
+      overwrite: false,
+      scriptText: null,
+      scriptPath: null,
+      gapMs: 900,
+    });
   });
 
   it('recorta el id de voz y la lista de escenas', () => {
@@ -21,6 +28,9 @@ describe('parseVoiceJobInput (US-09-004, US-09-005)', () => {
       voiceId: 'es_AR-daniela-high',
       sceneIds: ['scene-02'],
       overwrite: false,
+      scriptText: null,
+      scriptPath: null,
+      gapMs: 900,
     });
   });
 
@@ -53,7 +63,41 @@ describe('parseVoiceJobInput (US-09-004, US-09-005)', () => {
       voiceId: null,
       sceneIds: null,
       overwrite: false,
+      scriptText: null,
+      scriptPath: null,
+      gapMs: 900,
     });
+  });
+
+  it('acepta scriptText o scriptPath como entrada alternativa al storyboard (FIX-e-burgos-009-001)', () => {
+    expect(parseVoiceJobInput({ scriptText: 'Primera.\nSegunda.' })).toEqual({
+      voiceId: null,
+      sceneIds: null,
+      overwrite: false,
+      scriptText: 'Primera.\nSegunda.',
+      scriptPath: null,
+      gapMs: 900,
+    });
+    expect(parseVoiceJobInput({ scriptPath: 'work/producer/script.txt', gapMs: 400 }).gapMs).toBe(400);
+  });
+
+  it('rechaza las combinaciones imposibles del guion con VOICE_SCRIPT_INVALID', () => {
+    const rejections: readonly Record<string, unknown>[] = [
+      { scriptText: 'hola', scriptPath: 'work/producer/script.txt' },
+      { scriptText: '   ' },
+      { scriptPath: 42 },
+      { scriptText: 'hola', sceneIds: ['scene-01'] },
+      { gapMs: 400 },
+      { scriptText: 'hola', gapMs: -1 },
+      { scriptText: 'hola', gapMs: 1.5 },
+      { scriptText: 'hola', gapMs: '400' },
+    ];
+
+    for (const body of rejections) {
+      expect(() => parseVoiceJobInput(body)).toThrowError(
+        expect.objectContaining({ code: 'VOICE_SCRIPT_INVALID' }),
+      );
+    }
   });
 
   it('overwrite tiene que ser booleano', () => {

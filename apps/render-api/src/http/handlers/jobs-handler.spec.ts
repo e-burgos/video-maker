@@ -646,6 +646,52 @@ describe('handleCreateRenderJob', () => {
       expect(runtime.jobs.listBySlug('smoke-ingest')).toEqual([]);
     });
 
+    it('a voice job with a script needs no storyboard at all (FIX-e-burgos-009-001)', async () => {
+      const { deps, runtime } = storyboardHarness();
+
+      const response = await handleCreateRenderJob(
+        deps,
+        STORE,
+        { slug: 'smoke-ingest' },
+        jsonBodyRequest('smoke-ingest', { kind: 'voice', scriptText: 'Primera.\nSegunda.' }),
+        runtime,
+      );
+
+      expect(response.status).toBe(202);
+      expect((response.body as Job).kind).toBe('voice');
+
+      await runtime.jobs.whenIdle();
+    });
+
+    it('a voice job with a script is 409 VOICE_ALREADY_EXISTS when work/voice/voice.wav is there (FIX-e-burgos-009-001)', async () => {
+      const { deps, runtime } = storyboardHarness({
+        files: [{ path: `${STORE.mediaRoot}/smoke-ingest/work/voice/voice.wav`, contents: 'RIFF' }],
+      });
+
+      await expect(
+        handleCreateRenderJob(
+          deps,
+          STORE,
+          { slug: 'smoke-ingest' },
+          jsonBodyRequest('smoke-ingest', { kind: 'voice', scriptText: 'Primera.' }),
+          runtime,
+        ),
+      ).rejects.toMatchObject({ code: 'VOICE_ALREADY_EXISTS', resource: 'work/voice/voice.wav' });
+      expect(runtime.jobs.listBySlug('smoke-ingest')).toEqual([]);
+
+      const response = await handleCreateRenderJob(
+        deps,
+        STORE,
+        { slug: 'smoke-ingest' },
+        jsonBodyRequest('smoke-ingest', { kind: 'voice', scriptText: 'Primera.', overwrite: true }),
+        runtime,
+      );
+
+      expect(response.status).toBe(202);
+
+      await runtime.jobs.whenIdle();
+    });
+
     it('a voice job naming a scene outside the storyboard is 404 and registers no job (US-09-005)', async () => {
       const { deps, runtime } = storyboardHarness({
         files: [

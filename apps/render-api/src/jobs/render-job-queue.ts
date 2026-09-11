@@ -100,6 +100,9 @@ interface VoiceJobRecord extends JobRecordBase {
   readonly kind: 'voice';
   readonly voiceId: string | null;
   readonly sceneIds: readonly string[] | null;
+  readonly scriptText: string | null;
+  readonly scriptPath: string | null;
+  readonly gapMs: number;
   progress: VoiceJobProgress | null;
   report: VoiceJobReport | null;
 }
@@ -253,6 +256,9 @@ export function createRenderJobQueue(deps: RenderApiDependencies): RenderJobQueu
           project: resolveMediaProject(record.projectRoot),
           voiceId: record.voiceId,
           sceneIds: record.sceneIds,
+          scriptText: record.scriptText,
+          scriptPath: record.scriptPath,
+          gapMs: record.gapMs,
         },
         deps,
         observer,
@@ -348,6 +354,9 @@ export function createRenderJobQueue(deps: RenderApiDependencies): RenderJobQueu
           kind: 'voice',
           voiceId: input.voiceId,
           sceneIds: input.sceneIds,
+          scriptText: input.scriptText,
+          scriptPath: input.scriptPath,
+          gapMs: input.gapMs,
           progress: null,
           report: null,
         };

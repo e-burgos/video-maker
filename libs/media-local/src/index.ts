@@ -71,6 +71,14 @@ export type { NormalizeVoiceOptions, NormalizeVoiceResult } from './ffmpeg/norma
 export { extractAudioForTranscription } from './ffmpeg/extract-audio';
 export type { ExtractAudioOptions } from './ffmpeg/extract-audio';
 
+export {
+  concatSpeechFilterGraph,
+  concatSpeechSegments,
+  DEFAULT_CONCAT_SPEECH_CHANNELS,
+  DEFAULT_CONCAT_SPEECH_SAMPLE_RATE,
+} from './ffmpeg/concat-speech-segments';
+export type { ConcatSpeechSegmentsOptions } from './ffmpeg/concat-speech-segments';
+
 export { gainDbToVolume } from './mix/gain-db-to-volume';
 export {
   buildGainAutomationCurve,
