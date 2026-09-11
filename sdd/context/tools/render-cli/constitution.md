@@ -1,6 +1,6 @@
 # Constitución — tools/render-cli
 
-> Versión 1.0 | Última actualización: spec-e-burgos-002 cycle-03 | Fecha: 2026-09-08
+> Versión 1.5 | Última actualización: consolidación de `updates/` hasta FIX-007-002 | Fecha: 2026-09-11
 > Creada por el orquestador al abrir `cycle-01` de `spec-e-burgos-002-auto-montage-pipeline`.
 > Las actualizaciones por ciclo/fix van como fragmentos aditivos en `updates/`.
 
@@ -18,10 +18,17 @@
 - `@video-maker/auto-montage`, `@video-maker/media-local`, `@video-maker/timeline-core` y
   `@video-maker/composition-remotion/render` (subpath `/render` exclusivamente, nunca el barrel, y
   solo vía `await import()` desde `node-cli-dependencies.ts`)
-- Parser de argumentos: `node:util parseArgs`. **Cero dependencias npm nuevas.**
-- Vitest sobre toda la lógica no-I/O (151 tests en 17 archivos, cobertura 98.26 % stmts / 92.37 %
-  branches / 100 % funcs / 98.24 % lines, umbral 85 %); el render real es smoke manual
-  (`nx run render-cli:smoke`)
+- **`@video-maker/media-local` entra por `import` estático y tiene que seguir así**: cargarlo con
+  `await import()` en un solo archivo marca la lib entera como lazy-loaded para
+  `@nx/enforce-module-boundaries` y rompe el lint de los ocho archivos que la importan
+  estáticamente. El único perezoso de la CLI es `@video-maker/composition-remotion/render`.
+- Parser de argumentos: `node:util parseArgs`. **Cero dependencias npm nuevas** (verificado de
+  nuevo en `spec-e-burgos-007`: `@video-maker/timeline-core` exporta `OUTPUT_PRESETS`, la lista
+  contra la que validan CLI y API el `--format`).
+- Vitest sobre toda la lógica no-I/O (151 tests en 17 archivos al cierre de `spec-002` cycle-03,
+  cobertura 98.26 % stmts / 92.37 % branches / 100 % funcs / 98.24 % lines, umbral 85 %; la
+  superficie creció con `spec-007`/`spec-014`/`spec-015` sin bajar el piso); el render real es
+  smoke manual (`nx run render-cli:smoke`)
 - Tags Nx: `["scope:engine", "type:tool"]`. `type:tool` no tiene regla propia en los
   `depConstraints` de la raíz y cae en el fallback `{ sourceTag: '*', onlyDependOnLibsWithTags:
   ['*'] }` — HC-3 se cumple sin editar `eslint.config.mjs` de la raíz.
@@ -34,12 +41,16 @@
 ```
 src/main.ts                 frontera de proceso: argv, cwd, stdout/stderr, process.exitCode
 src/cli.ts                  runCli(argv, resolveProjectRoot, deps) -> CliOutcome; try/catch único
-src/args/                   parse-cli-args, preset-names, stage-for-argument (puro, sin I/O)
+src/args/                   parse-cli-args, preset-names (FORMAT_NAMES/DEFAULT_FORMAT,
+                             VOICE_SOURCE_NAMES/DEFAULT_VOICE_SOURCE), stage-for-argument (puro)
 src/commands/                ingest | plan | render | run — uno por archivo, devuelven un *Report
-src/pipeline/                assert-project-preconditions, read-timeline-document, resolve-render-target
+src/pipeline/                assert-project-preconditions, read-timeline-document,
+                             resolve-render-target, master-render-paths (rutas de
+                             work/renders/<slug>/ para el mix masterizado)
 src/report/                  cli-report (tipos), to-reports (mapeo), format-report (texto)
 src/errors/                  RenderCliError + 4 subclases, exit-code-for, format-cli-error, translate-lib-error
-src/deps/                    cli-dependencies (puertos), node-cli-dependencies (adaptador), timeline-renderer
+src/deps/                    cli-dependencies (puertos, incluye mixTimelineAudio/muxAudioIntoVideo/
+                             verifyMixLoudness), node-cli-dependencies (adaptador), timeline-renderer
 src/cli-register.cjs         loader: registra swc-node y le devuelve a Node su loader nativo de .js
 src/__fixtures__/            fake-cli-dependencies, media-project
 ```
@@ -54,6 +65,12 @@ src/__fixtures__/            fake-cli-dependencies, media-project
   `resolve` del cwd en `main.ts`.
 - **Etapas en secuencia estricta**: `run` encadena y corta en la primera que falla; nada de
   `Promise.all`/`allSettled`/`race`.
+- **`render` entrega la mezcla masterizada, no el audio que dibuja Remotion** (`spec-015`):
+  `renderCommand` encadena `renderTimeline(..., { audio: 'muted' })` → `mixTimelineAudio` →
+  `muxAudioIntoVideo` → `verifyMixLoudness`. Los intermedios (`video-muted.mp4`, `master.wav`) viven
+  en `work/renders/<slug>/`; el entregable sigue siendo `out/<slug>.mp4`. `mix`/`mux`/`verify` son
+  pasos **internos** de la etapa `render`: no ensanchan `Stage` ni cambian los exit codes 4/5/6, y
+  un fallo de `media-local` en cualquiera de los tres sale como `STAGE_FAILED` con `stage: 'render'`.
 
 ## 4. Convenciones propias
 
@@ -65,7 +82,8 @@ src/__fixtures__/            fake-cli-dependencies, media-project
 - **`nx run render-cli:cli` NO propaga el exit code real** — Nx normaliza cualquier fallo de
   `nx:run-commands` a `1`. El proceso invocado directo (`node -r
   ./tools/render-cli/src/cli-register.cjs tools/render-cli/src/main.ts …`) sí devuelve el código
-  correcto. Un consumidor que necesite el código exacto invoca el binario, no el target Nx.
+  correcto. Un consumidor que necesite el código exacto invoca el binario, no el target Nx —
+  incluido `apps/render-api`, que invoca el binario directo (ver `context_prompt.md`).
 - **`{workspaceRoot}` no se puede usar como token intermedio** dentro de un `command` compuesto de
   Nx 23: solo se resuelve al inicio absoluto del valor de la opción. Por eso el target `smoke` dice
   `run media/smoke-ingest` a secas (sin `cwd`; `nx:run-commands` ya corre desde la raíz).
@@ -74,8 +92,29 @@ src/__fixtures__/            fake-cli-dependencies, media-project
 - **Sin comentarios** en el código; nombres declarativos, funciones cortas.
 - Regla operativa heredada de `spec-001`: transcribir **antes** de renderizar, nunca en paralelo
   (16 GB compartidos entre Chrome Headless Shell, ffmpeg y el modelo Whisper).
+- **`stageForArgument` reporta la etapa del comando ya reconocido** (`spec-005` FIX-002-002): un
+  error de uso sobre un comando conocido (`--preset`/`--seed` en `ingest|render`, `<project-root>`
+  faltante, positional extra, y los tres errores traducidos de `node:util parseArgs`) lleva la etapa
+  de ese comando; el token genérico `[uso]` queda solo para cuando ni el comando se reconoció.
+- **Las seis etiquetas de `formatCliError` son inglesas** (`[usage]`, `[internal]`, `resource:`,
+  `expected:`, `cause:`, `hint:`) — la superficie de salida dejó de ser bilingüe salvo por la línea
+  `cause:`, cuyo contenido no lo genera la CLI: viene tal cual del `message` de los errores de
+  `libs/media-local` y `libs/composition-remotion`, y traducirlo es cambio de esas libs, no de acá.
+- **`plan`/`run` aceptan siete opciones de planificación** (`--preset`, `--seed`, `--script`,
+  `--no-logo`, `--format <reels-9x16|tiktok-9x16|shorts-9x16|youtube-16x9>`, `--voice
+  <aroll|script>`, `--prune-silences`); `ingest`/`render` las rechazan todas como
+  `unexpected-option`. `--prune-silences` es un booleano de tres estados (`true`/ausente): ausente
+  delega el default en la librería (`aroll` poda, `script` no).
+- La ruta de `--script` se resuelve igual que `<project-root>` (contra la raíz del workspace, no
+  del proyecto de medios); si no se puede leer, el error es `STAGE_INPUT_MISSING` con
+  `reason: 'script-missing'` en la etapa `plan`. `PlanReport` imprime `logo: <assetId>|none`
+  siempre, `script-corrections: N` solo en modo guion, `format: <preset> <ancho>x<alto>@<fps>`,
+  `voice: <fuente>` y, en modo guion, `voice-track: <asset> <ms> (truncated <ms>)`.
+- El default de `--format` es fijo (`reels-9x16`) y **no** se deriva de la orientación del A-roll:
+  derivarlo cambiaría el formato de los renders de referencia y, condicionado a "sin timeline
+  previo", volvería `plan` no idempotente. Quien invoca elige explícitamente.
 
-### Pendientes (a resolver en spec-005)
+### Pendientes
 
 - **`tools/render-cli/eslint.config.mjs` no existe**: el hook `config-protection` del harness del
   dev (plugin de usuario, fuera de este repo) bloquea cualquier archivo cuyo *basename* sea
@@ -84,14 +123,13 @@ src/__fixtures__/            fake-cli-dependencies, media-project
   §2.5 del `architect.md` (`no-restricted-imports/globals/properties`) — hoy se sostienen por
   convención, verificados a mano por grep. Reversible en un paso: pegar §2.5 tal cual, sin tocar
   código.
-- **N-2**: los errores de uso sobre un comando ya conocido (`--preset`/`--seed` en
-  `ingest|render`, falta de `<project-root>`, positional extra) se reportan con el token genérico
-  `[uso]` en vez de la etapa del comando (decisión funcional 5). No cambia el exit code
-  (`CLI_USAGE`/`CLI_ARGUMENT` mapean ambos a 2). La columna `'project-root'` de
-  `STAGE_FOR_ARGUMENT` está cableada y ningún llamador de producción la usa.
-- **Superficie de salida bilingüe**: etiquetas en castellano (`recurso:`, `esperado:`, `causa:`,
-  `sugerencia:`, `[uso]`, `[interno]`) sobre tokens de datos en inglés (`ingest|plan|render`,
-  `unknown-preset`). Decisión a tomar explícitamente en spec-005, donde pasan a ser payload de API.
-- Regenerar `media/smoke-ingest`: receta en el README del tool; incluye alargar
-  `raw/audio/music01.mp3`, no solo el A-roll (ver fragmento de contexto de `auto-montage` de esta
-  misma fecha).
+- **La línea `cause:` todavía puede traer castellano**: no es un defecto de `render-cli` — el
+  mensaje viene de otro subproyecto (`No se encontró el binario "whisper-cli".`, `Remotion no pudo
+  bundlear el entry point.`). Traducirlo es cambio de esas libs.
+- El conteo de assets del reporte de `ingest` sigue mostrando los cuatro roles originales; el logo
+  se ve solo en la línea propia del reporte de `plan`.
+- `render` no reusa el `video-muted.mp4` anterior aunque la Timeline no haya cambiado: cada corrida
+  rerenderiza (37 s de reloj para 778 frames a 1080×1920 en esta máquina). Cachearlo por hash de la
+  Timeline es decisión de otro ciclo.
+- Si algún día hace falta apagar la poda de silencios en modo `aroll`, el flag simétrico sería
+  `--no-prune-silences` (hoy no existe).
