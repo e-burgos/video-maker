@@ -311,6 +311,21 @@
           "tasks_done": 7
         }
       }
+    },
+    "spec-e-burgos-016-studio-usability": {
+      "cycles": {
+        "cycle-01": {
+          "file": "sdd/specs/spec-e-burgos-016-studio-usability/cycles/cycle-01/tasks.json",
+          "module": "studio-usability",
+          "apps": [
+            "apps/render-api",
+            "apps/web"
+          ],
+          "status": "completed",
+          "tasks_total": 5,
+          "tasks_done": 5
+        }
+      }
     }
   }
 }

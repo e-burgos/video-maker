@@ -6,7 +6,7 @@ import { RenderApiProvider } from '../api/render-api-context';
 import { RenderApiError } from '../api/render-api-error';
 import { VoiceTrigger, defaultVoiceId } from './voice-trigger';
 import type { RenderApiClient } from '../api/render-api-client';
-import type { ServiceHealth, VoiceListing } from '../api/render-api-types';
+import type { ServiceHealth, VoiceListing, VoiceModel } from '../api/render-api-types';
 
 function renderTrigger(
   createVoiceJob: RenderApiClient['createVoiceJob'],
@@ -35,9 +35,10 @@ describe('defaultVoiceId', () => {
   });
 
   it('falls back to the first voice when none is marked, and to null with no catalogue', () => {
-    expect(
-      defaultVoiceId({ voices: [{ id: 'a', fileName: 'a.onnx', isDefault: false }] }),
-    ).toBe('a');
+    const [first] = VOICE_MODELS.voices;
+    expect(defaultVoiceId({ voices: [{ ...(first as VoiceModel), isDefault: false }] })).toBe(
+      'es_AR-daniela-high',
+    );
     expect(defaultVoiceId({ voices: [] })).toBeNull();
     expect(defaultVoiceId(null)).toBeNull();
   });
@@ -49,8 +50,9 @@ describe('VoiceTrigger', () => {
     const onCreated = renderTrigger(createVoiceJob);
 
     await waitFor(() => expect(generateButton().disabled).toBe(false));
-    expect(screen.getByRole('option', { name: 'es_AR-daniela-high (default)' })).toBeDefined();
-    expect((screen.getByLabelText('Voice model') as HTMLSelectElement).value).toBe(
+    const cards = screen.getAllByTestId('voice-card');
+    expect(cards).toHaveLength(2);
+    expect(cards.find((card) => card.dataset['selected'] === 'true')?.dataset['voiceId']).toBe(
       'es_AR-daniela-high',
     );
 
@@ -71,9 +73,9 @@ describe('VoiceTrigger', () => {
     renderTrigger(createVoiceJob);
 
     await waitFor(() => expect(generateButton().disabled).toBe(false));
-    fireEvent.change(screen.getByLabelText('Voice model'), {
-      target: { value: 'es_ES-carlfm-x-low' },
-    });
+    fireEvent.click(
+      screen.getByLabelText('Use Carlfm \u00b7 Spanish (Spain) \u00b7 Very low quality'),
+    );
     fireEvent.click(generateButton());
 
     await waitFor(() =>

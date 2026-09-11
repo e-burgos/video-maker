@@ -1,4 +1,5 @@
 import { isVoiceTrackSource } from './parse-render-job';
+import { VOICE_QUALITIES } from './render-api-types';
 import { responseShapeUnexpected } from './render-api-error';
 import type {
   VoiceDocument,
@@ -13,12 +14,29 @@ function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === 'object' && value !== null && !Array.isArray(value);
 }
 
+function isVoiceLanguage(value: unknown): boolean {
+  return (
+    isRecord(value) &&
+    typeof value['code'] === 'string' &&
+    (value['region'] === null || typeof value['region'] === 'string')
+  );
+}
+
+function isVoiceQuality(value: unknown): boolean {
+  return value === null || (VOICE_QUALITIES as readonly unknown[]).includes(value);
+}
+
 function isVoiceModel(value: unknown): boolean {
   return (
     isRecord(value) &&
     typeof value['id'] === 'string' &&
     typeof value['fileName'] === 'string' &&
-    typeof value['isDefault'] === 'boolean'
+    typeof value['isDefault'] === 'boolean' &&
+    isVoiceLanguage(value['language']) &&
+    isVoiceQuality(value['quality']) &&
+    typeof value['label'] === 'string' &&
+    typeof value['description'] === 'string' &&
+    typeof value['previewUrl'] === 'string'
   );
 }
 

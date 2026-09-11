@@ -11,3 +11,7 @@ function encodeArtifactPath(path: string): string {
 export function artifactUrl(slug: string, path: string): string {
   return `${RENDER_API_BASE_PATH}/projects/${encodeURIComponent(slug)}/files/${encodeArtifactPath(path)}`;
 }
+
+export function servicePathUrl(path: string): string {
+  return `${RENDER_API_BASE_PATH}${path.startsWith('/') ? path : `/${path}`}`;
+}

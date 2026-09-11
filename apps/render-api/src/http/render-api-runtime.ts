@@ -14,6 +14,7 @@ export interface RenderApiRuntime {
   readonly producerTurns: ProducerTurnRegistry;
   readonly producer: ProducerConfig;
   readonly uploadSerializer: KeyedSerializer;
+  readonly voicePreviewSerializer: KeyedSerializer;
 }
 
 export function defaultProducerConfig(): ProducerConfig {
@@ -29,5 +30,6 @@ export function createRenderApiRuntime(
     producerTurns: createProducerTurnRegistry(),
     producer,
     uploadSerializer: createKeyedSerializer(),
+    voicePreviewSerializer: createKeyedSerializer(),
   };
 }

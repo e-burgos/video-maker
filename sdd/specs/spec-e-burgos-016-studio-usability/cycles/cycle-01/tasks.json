@@ -1,0 +1,187 @@
+{
+  "$schema": "../../../../schemas/cycle-tasks.schema.json",
+  "spec": "spec-e-burgos-016-studio-usability",
+  "cycle": 1,
+  "module": "studio-usability",
+  "apps": [
+    "apps/render-api",
+    "apps/web"
+  ],
+  "flow": "lite",
+  "user_stories_generated": true,
+  "prerequisites": {
+    "tasks_generated": true
+  },
+  "tasks": [
+    {
+      "id": "TASK-001",
+      "title": "Enrich the Piper voice catalog with language, quality, label, description and previewUrl",
+      "user_stories": [
+        "US-016-001"
+      ],
+      "estimation_hours": 3,
+      "story_points": 3,
+      "depends_on": [],
+      "status": "done",
+      "files": [
+        "libs/media-local/src/piper/build-voice-catalog.ts",
+        "libs/media-local/src/piper/piper.spec.ts",
+        "libs/media-local/src/index.ts",
+        "apps/render-api/src/voice/voice-preview-url.ts",
+        "apps/render-api/src/voice/voice-preview-url.spec.ts",
+        "apps/render-api/src/deps/node-render-api-dependencies.ts",
+        "apps/render-api/src/deps/node-render-api-dependencies.spec.ts",
+        "apps/render-api/src/http/handlers/voices-handler.ts",
+        "apps/render-api/src/http/handlers/voices-handler.spec.ts",
+        "apps/render-api/src/__fixtures__/fake-render-api-dependencies.ts",
+        "sdd/api.json"
+      ],
+      "usage": {
+        "provider_model": "claude/opus",
+        "effort": "high",
+        "tokens_in": 62000,
+        "tokens_out": 11000,
+        "approx": true,
+        "source": "declared-estimate",
+        "recorded_at": "2026-09-11"
+      }
+    },
+    {
+      "id": "TASK-002",
+      "title": "Add GET /voices/:id/preview: cached Piper synthesis of a fixed phrase served as audio/wav outside the job queue",
+      "user_stories": [
+        "US-016-002"
+      ],
+      "estimation_hours": 4,
+      "story_points": 5,
+      "depends_on": [
+        "TASK-001"
+      ],
+      "status": "done",
+      "files": [
+        "apps/render-api/src/config/voice-preview-config.ts",
+        "apps/render-api/src/config/voice-preview-config.spec.ts",
+        "apps/render-api/src/voice/voice-preview.ts",
+        "apps/render-api/src/http/handlers/voice-preview-handler.ts",
+        "apps/render-api/src/http/handlers/voice-preview-handler.spec.ts",
+        "apps/render-api/src/http/routes.ts",
+        "apps/render-api/src/http/handle-request.ts",
+        "apps/render-api/src/http/render-api-runtime.ts",
+        "apps/render-api/src/deps/render-api-dependencies.ts",
+        "apps/render-api/src/deps/node-render-api-dependencies.ts",
+        "apps/render-api/src/__fixtures__/fake-voice-preview-cache.ts",
+        "apps/render-api/src/__fixtures__/fake-render-api-dependencies.ts",
+        "apps/render-api/README.md",
+        "sdd/api.json"
+      ],
+      "usage": {
+        "provider_model": "claude/opus",
+        "effort": "high",
+        "tokens_in": 78000,
+        "tokens_out": 14000,
+        "approx": true,
+        "source": "declared-estimate",
+        "recorded_at": "2026-09-11"
+      }
+    },
+    {
+      "id": "TASK-003",
+      "title": "Replace the voice select with audible voice cards on the web voice page",
+      "user_stories": [
+        "US-016-003"
+      ],
+      "estimation_hours": 4,
+      "story_points": 5,
+      "depends_on": [
+        "TASK-001",
+        "TASK-002"
+      ],
+      "status": "done",
+      "files": [
+        "apps/web/src/api/render-api-types.ts",
+        "apps/web/src/api/artifact-url.ts",
+        "apps/web/src/api/parse-voice.ts",
+        "apps/web/src/api/parse-voice.spec.ts",
+        "apps/web/src/api/__fixtures__/voice.ts",
+        "apps/web/src/components/voice-picker.tsx",
+        "apps/web/src/components/voice-picker.spec.tsx",
+        "apps/web/src/components/voice-trigger.tsx",
+        "apps/web/src/components/voice-trigger.spec.tsx",
+        "sdd/components.json"
+      ],
+      "usage": {
+        "provider_model": "claude/opus",
+        "effort": "high",
+        "tokens_in": 71000,
+        "tokens_out": 13000,
+        "approx": true,
+        "source": "declared-estimate",
+        "recorded_at": "2026-09-11"
+      }
+    },
+    {
+      "id": "TASK-004",
+      "title": "Explain every upload role in the asset uploader from a single copy module, and apply the producer starter texts of FIX-007-002",
+      "user_stories": [
+        "US-016-004"
+      ],
+      "estimation_hours": 3,
+      "story_points": 3,
+      "depends_on": [],
+      "status": "done",
+      "files": [
+        "apps/web/src/api/asset-roles.ts",
+        "apps/web/src/api/asset-roles.spec.ts",
+        "apps/web/src/components/asset-uploader.tsx",
+        "apps/web/src/components/asset-uploader.spec.tsx",
+        "apps/web/src/components/logo-overlay-editor.spec.tsx",
+        "apps/web/src/components/producer-welcome.tsx",
+        "apps/web/src/components/producer-welcome.spec.tsx",
+        "sdd/components.json"
+      ],
+      "usage": {
+        "provider_model": "claude/opus",
+        "effort": "high",
+        "tokens_in": 54000,
+        "tokens_out": 10000,
+        "approx": true,
+        "source": "declared-estimate",
+        "recorded_at": "2026-09-11"
+      }
+    },
+    {
+      "id": "TASK-005",
+      "title": "Playwright smoke over a real render-api: three voices listed, two previews played and measured, cache hit timed, role descriptions visible",
+      "user_stories": [
+        "US-016-001",
+        "US-016-002",
+        "US-016-003",
+        "US-016-004"
+      ],
+      "estimation_hours": 3,
+      "story_points": 3,
+      "depends_on": [
+        "TASK-003",
+        "TASK-004"
+      ],
+      "status": "done",
+      "files": [
+        "apps/web/e2e/voices-smoke.mjs",
+        "apps/web/e2e/voice-smoke.mjs",
+        "apps/web/README.md",
+        "sdd/specs/spec-e-burgos-016-studio-usability/cycles/cycle-01/artifacts/voices-smoke-01-upload-roles.png",
+        "sdd/specs/spec-e-burgos-016-studio-usability/cycles/cycle-01/artifacts/voices-smoke-02-voice-cards.png",
+        "sdd/specs/spec-e-burgos-016-studio-usability/cycles/cycle-01/artifacts/voices-smoke-03-preview-played.png"
+      ],
+      "usage": {
+        "provider_model": "claude/opus",
+        "effort": "high",
+        "tokens_in": 66000,
+        "tokens_out": 12000,
+        "approx": true,
+        "source": "declared-estimate",
+        "recorded_at": "2026-09-11"
+      }
+    }
+  ]
+}

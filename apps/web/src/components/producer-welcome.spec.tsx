@@ -2,7 +2,12 @@ import { fireEvent, render, screen } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
 import { describe, expect, it, vi } from 'vitest';
 
-import { ProducerWelcome, inventoryOf } from './producer-welcome';
+import {
+  ProducerWelcome,
+  STARTER_SUGGESTIONS_WITHOUT_MATERIAL,
+  STARTER_SUGGESTIONS_WITH_MATERIAL,
+  inventoryOf,
+} from './producer-welcome';
 import type { AssetListing } from '../api/render-api-types';
 
 function listing(roles: string[]): AssetListing {
@@ -88,5 +93,25 @@ describe('ProducerWelcome', () => {
     renderWelcome(null);
 
     expect(screen.getByTestId('producer-inventory').textContent).toContain('No raw material yet');
+  });
+});
+
+describe('ProducerWelcome starters (FIX-e-burgos-007-002)', () => {
+  it('asks for the platform before anything else, in both inventory states', () => {
+    expect(STARTER_SUGGESTIONS_WITH_MATERIAL[0]).toBe(
+      'Contame qué video querés y para qué plataforma',
+    );
+    expect(STARTER_SUGGESTIONS_WITHOUT_MATERIAL[0]).toBe(
+      'Contame qué video querés y para qué plataforma',
+    );
+  });
+
+  it('offers the silent-recording recipe once there is material to work with', () => {
+    expect(STARTER_SUGGESTIONS_WITH_MATERIAL).toContain(
+      'Narrá esta grabación con una voz generada',
+    );
+    expect(STARTER_SUGGESTIONS_WITHOUT_MATERIAL).not.toContain(
+      'Narrá esta grabación con una voz generada',
+    );
   });
 });

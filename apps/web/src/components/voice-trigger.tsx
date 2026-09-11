@@ -6,6 +6,7 @@ import { useApiAction } from '../hooks/use-api-action';
 import { useAsyncResource } from '../hooks/use-async-resource';
 import type { ServiceHealth, VoiceJob, VoiceListing } from '../api/render-api-types';
 import { ErrorNotice } from './error-notice';
+import { VoicePicker } from './voice-picker';
 
 export const VOICE_ALREADY_EXISTS = 'VOICE_ALREADY_EXISTS';
 
@@ -62,28 +63,20 @@ export function VoiceTrigger({ slug, onCreated }: VoiceTriggerProps) {
       <h2 className="font-mono text-sm uppercase tracking-wide text-slate-400">voice-over</h2>
       <p className="text-sm text-slate-400">
         Piper reads the narration of every scene on this machine and Whisper aligns it word by word,
-        so each scene gets its own track and its real duration. No API key, no upload.
+        so each scene gets its own track and its real duration. No API key, no upload. Play a voice
+        before you pick it: the demo is synthesized once on this machine and cached.
       </p>
 
-      <div className="flex flex-wrap items-center gap-3">
-        <label htmlFor="voice-model" className="text-xs text-slate-400">
-          Voice
-        </label>
-        <select
-          id="voice-model"
-          aria-label="Voice model"
-          value={selectedVoiceId ?? ''}
-          disabled={voices.data === null || catalogueEmpty}
-          onChange={(event) => setPicked(event.target.value)}
-          className="rounded-md border border-slate-700 bg-slate-900 px-2 py-1.5 font-mono text-sm text-slate-100 disabled:opacity-40"
-        >
-          {voices.data?.voices.map((voice) => (
-            <option key={voice.id} value={voice.id}>
-              {voice.isDefault ? `${voice.id} (default)` : voice.id}
-            </option>
-          ))}
-        </select>
+      {voices.data !== null && !catalogueEmpty && (
+        <VoicePicker
+          voices={voices.data.voices}
+          selectedId={selectedVoiceId}
+          onSelect={setPicked}
+          disabled={createAction.status === 'pending'}
+        />
+      )}
 
+      <div className="flex flex-wrap items-center gap-3">
         <button
           type="button"
           disabled={disabled}

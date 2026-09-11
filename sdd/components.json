@@ -397,7 +397,7 @@
         "path": "src/components/asset-uploader.tsx",
         "status": "implemented",
         "created_in_cycle": 1,
-        "updated_in_cycle": 2,
+        "updated_in_cycle": 1,
         "description": "Sube un archivo al rol elegido como body binario crudo con su content-type, refresca el listado al exito y muestra el code tipado al fallar.",
         "consumes": [
           "EP-006"
@@ -408,6 +408,11 @@
             "cycle": 2,
             "date": "2026-09-10",
             "change": "Actualizado en spec-e-burgos-009 cycle-02: acepta roles para acotar los roles ofrecidos (con uno solo desaparece el selector y el rol se muestra fijo), fileInputLabel para que varias instancias convivan en una pagina, ids de campo derivados de useId, y onUploaded recibe la entrada del catalogo que se acaba de escribir en vez de no recibir nada."
+          },
+          {
+            "cycle": 1,
+            "date": "2026-09-11",
+            "change": "spec-e-burgos-016 cycle-01: el selector de rol pasa de un select de ids crudos a tarjetas con nombre legible, el impacto de cada rol en el video final, el directorio raw/ destino, la marca de obligatorio y la regla de matching de B-roll; el copy vive en src/api/asset-roles.ts."
           }
         ]
       },
@@ -873,7 +878,7 @@
         "path": "src/components/voice-trigger.tsx",
         "status": "implemented",
         "created_in_cycle": 2,
-        "updated_in_cycle": null,
+        "updated_in_cycle": 1,
         "description": "Selector de voces de EP-019 con el default marcado y disparo del job kind: 'voice' (EP-012). Distingue en pantalla el catalogo vacio del 503 VOICE_MODEL_UNAVAILABLE, bloquea el boton con el motivo escrito segun voiceBlockers(health) y resuelve el 409 VOICE_ALREADY_EXISTS como confirmacion de sobreescritura que reintenta con overwrite: true.",
         "consumes": [
           "EP-001",
@@ -881,7 +886,13 @@
           "EP-019"
         ],
         "created_at": "2026-09-10",
-        "changelog": []
+        "changelog": [
+          {
+            "cycle": 1,
+            "date": "2026-09-11",
+            "change": "spec-e-burgos-016 cycle-01: el select de ids crudos se reemplaza por VoicePicker (COMP-045)."
+          }
+        ]
       },
       {
         "id": "COMP-036",
@@ -995,13 +1006,19 @@
         "path": "src/components/producer-welcome.tsx",
         "status": "implemented",
         "created_in_cycle": 2,
-        "updated_in_cycle": null,
+        "updated_in_cycle": 1,
         "description": "Estado vacio accionable del productor: inventario real del proyecto por rol derivado del listado de assets, sugerencias iniciales que caen en el compositor para editarlas, y link a la biblioteca cuando el proyecto no tiene material.",
         "consumes": [
           "EP-005"
         ],
         "created_at": "2026-09-10",
-        "changelog": []
+        "changelog": [
+          {
+            "cycle": 1,
+            "date": "2026-09-11",
+            "change": "spec-e-burgos-016 cycle-01: se aplican los textos de arranque que dejo escritos FIX-e-burgos-007-002 (preguntar la plataforma primero, y ofrecer la receta de grabacion muda + narracion generada cuando hay material)."
+          }
+        ]
       },
       {
         "id": "COMP-043",
@@ -1042,6 +1059,24 @@
           "EP-006"
         ],
         "created_at": "2026-09-10",
+        "changelog": []
+      },
+      {
+        "id": "COMP-045",
+        "name": "VoicePicker",
+        "type": "component",
+        "module": "studio-usability",
+        "spec": "sdd/specs/spec-e-burgos-016-studio-usability",
+        "path": "src/components/voice-picker.tsx",
+        "status": "implemented",
+        "created_in_cycle": 1,
+        "updated_in_cycle": null,
+        "description": "Tarjetas de voz en lugar del select de ids crudos: cada voz instalada con su etiqueta legible, idioma, calidad y descripcion, un radio que la selecciona para el job voice y un boton de reproduccion que suena en el navegador con el demo de EP-026 (estados idle/loading/playing/error, una sola voz sonando a la vez y el error explicado en pantalla).",
+        "consumes": [
+          "EP-019",
+          "EP-026"
+        ],
+        "created_at": "2026-09-11",
         "changelog": []
       }
     ]

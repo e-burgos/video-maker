@@ -357,7 +357,8 @@ one is edited by hand, the other is produced by a job — and the storyboard pag
   track next to the `estimatedDurationMs` the model proposed, and the signed gap between them. In
   the measured E2E run all five scenes came out **shorter** than estimated, by 0.35 s to 2.02 s.
 - **One panel generates, one panel follows.** `VoiceTrigger` lists the installed models with
-  `GET /voices` (`EP-019`), marks the one `PIPER_MODEL_PATH` points at as `(default)`, and sends
+  `GET /voices` (`EP-019`) — since `spec-016 cycle-01` as the **audible cards** of `VoicePicker`,
+  not a `<select>` of file names — marks the one `PIPER_MODEL_PATH` points at as `default`, and sends
   `POST /projects/:slug/jobs` with `{"kind":"voice","voice","overwrite"}`. `VoiceJobPanel` polls it
   on the same `useRenderJobPoll` and reports the stages `synthesize | transcribe | persist` **with
   the per-scene counter** the service emits.
@@ -408,6 +409,45 @@ per-scene counter → **the five `<audio>` elements measured in the browser** (`
 regenerate it alone, verified by `sha256` on disk → a take uploaded and attached, verified in
 `work/voice/manifest.json`. Evidence and five screenshots land in
 `sdd/specs/spec-e-burgos-009-voice-over/cycles/cycle-02/artifacts/`.
+
+## Choosing a voice and choosing a role (spec-016 cycle-01)
+
+Two places where the studio used to speak the engine's language and now explains itself.
+
+- **Voices are cards, not file names.** `VoicePicker` (`src/components/voice-picker.tsx`) renders one
+  card per installed model with the readable `label`, the BCP47 language, the quality and a factual
+  description, all of them **derived by the service from the `.onnx.json` of the model** — nothing is
+  invented, and no gender, age or temperament is stated, because Piper does not document them. A
+  model with no sidecar is described from its file name and the card says so.
+- **The play button is the point.** Each card owns an `<audio preload="none">` pointed at `EP-026`
+  (`/api/voices/<id>/preview` through the dev-server proxy). The first click synthesizes the demo on
+  the machine and caches it; later clicks are instant. Only one voice sounds at a time, the button
+  reports `Play | Loading… | Stop | Retry`, and a preview the service could not produce is explained
+  on the card instead of failing silently.
+- **Measured, not assumed** (see "The voices E2E" below): first request 1.3-1.7 s, second request
+  3-6 ms from the service cache, both byte-identical; in the browser `readyState` 4 and durations of
+  2.93 s and 3.37 s for the two voices played.
+- **Every upload role says what it does to the video.** The `AssetUploader` selector is a card per
+  role with a readable name, the `raw/<role>/` directory it lands in, a one-line impact on the final
+  video, a `required` badge on A-roll and the B-roll matching rule written out. The copy lives in
+  **one module**, `src/api/asset-roles.ts` (same precedent as `montage-presets.ts`), so a new role
+  breaks the type in a single place and `cycle-02` can translate one file instead of six components.
+
+### The voices E2E
+
+```bash
+node apps/web/e2e/voices-smoke.mjs
+```
+
+Real `render-api` on port 4411 over a temporary media root, real Chrome, real Piper, a **temporary
+`PIPER_PREVIEW_CACHE_DIR`** and no `claude -p`. It gates on memory and stray processes like the
+others, then: asserts `GET /voices` carries `previewUrl` (a field only this build emits, so a stale
+server cannot pass), lists the three installed voices with their label, language and quality, times
+a cache miss against a cache hit on the voice the browser never touches, checks the typed
+`404 VOICE_NOT_FOUND`, reads the six role cards in the asset library, and finally **plays two voices
+in the browser measuring `readyState` and `duration` on the `<audio>` element** — never the
+screenshot, never the `src`. Three screenshots land in
+`sdd/specs/spec-e-burgos-016-studio-usability/cycles/cycle-01/artifacts/`.
 
 ## Montage (spec-007 cycle-02)
 

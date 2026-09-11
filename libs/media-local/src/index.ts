@@ -34,8 +34,21 @@ export type {
 
 export { narrationToSingleLine, synthesizeSpeech } from './piper/synthesize-speech';
 export type { SynthesizeSpeechOptions } from './piper/synthesize-speech';
-export { buildVoiceCatalog, VOICE_MODEL_EXTENSION, voiceModelId } from './piper/build-voice-catalog';
-export type { VoiceModel } from './piper/build-voice-catalog';
+export {
+  buildVoiceCatalog,
+  describeVoiceModel,
+  VOICE_MODEL_CONFIG_EXTENSION,
+  VOICE_MODEL_EXTENSION,
+  VOICE_QUALITIES,
+  voiceModelConfigFileName,
+  voiceModelId,
+} from './piper/build-voice-catalog';
+export type {
+  VoiceLanguage,
+  VoiceModel,
+  VoiceModelFile,
+  VoiceQuality,
+} from './piper/build-voice-catalog';
 
 export { nodeBinaryLookup } from './fs/binary-lookup';
 export type { BinaryLookup } from './fs/binary-lookup';

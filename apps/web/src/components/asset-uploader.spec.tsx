@@ -24,7 +24,7 @@ describe('AssetUploader', () => {
     const uploadAsset = vi.fn().mockResolvedValue({ path: 'raw/broll/clip02.mp4' });
     const onUploaded = renderUploader(uploadAsset as unknown as RenderApiClient['uploadAsset']);
 
-    fireEvent.change(screen.getByLabelText('Upload to'), { target: { value: 'broll' } });
+    fireEvent.click(screen.getByLabelText('Upload to B-roll · supporting clips'));
     const file = new File(['bytes'], 'clip02.mp4', { type: 'video/mp4' });
     chooseFile(file);
 
@@ -101,7 +101,7 @@ describe('AssetUploader pinned to a single role', () => {
       </RenderApiProvider>,
     );
 
-    expect(screen.queryByLabelText('Upload to')).toBeNull();
+    expect(screen.queryByTestId('asset-role-choices')).toBeNull();
     expect(screen.getByText('voice')).toBeDefined();
 
     const file = new File(['bytes'], 'take-03.wav', { type: 'audio/wav' });
@@ -129,5 +129,58 @@ describe('AssetUploader pinned to a single role', () => {
     const first = screen.getByLabelText('one') as HTMLInputElement;
     const second = screen.getByLabelText('two') as HTMLInputElement;
     expect(first.id).not.toBe(second.id);
+  });
+});
+
+describe('AssetUploader role descriptions (US-016-004)', () => {
+  it('shows every role with a readable name and what it does to the final video', () => {
+    renderUploader(vi.fn() as unknown as RenderApiClient['uploadAsset']);
+
+    const choices = screen.getAllByTestId('asset-role-choice');
+    expect(choices.map((choice) => choice.dataset['role'])).toEqual([
+      'aroll',
+      'broll',
+      'image',
+      'audio',
+      'voice',
+      'logo',
+    ]);
+    expect(choices[0]?.textContent).toContain('A-roll · main footage');
+    expect(choices[0]?.textContent).toContain('sets how long the video lasts');
+    expect(choices[3]?.textContent).toContain('ducked automatically');
+  });
+
+  it('marks A-roll as required and starts selected on it', () => {
+    renderUploader(vi.fn() as unknown as RenderApiClient['uploadAsset']);
+
+    const required = screen.getAllByTestId('asset-role-required');
+    expect(required).toHaveLength(1);
+    const selected = screen
+      .getAllByTestId('asset-role-choice')
+      .filter((choice) => choice.dataset['selected'] === 'true');
+    expect(selected.map((choice) => choice.dataset['role'])).toEqual(['aroll']);
+  });
+
+  it('states the rule that decides when a B-roll clip is actually used', () => {
+    renderUploader(vi.fn() as unknown as RenderApiClient['uploadAsset']);
+
+    expect(screen.getByTestId('asset-role-hint').textContent).toContain('at least three times');
+  });
+
+  it('names the directory each role lands in, so the copy matches what the disk shows', () => {
+    renderUploader(vi.fn() as unknown as RenderApiClient['uploadAsset']);
+
+    expect(screen.getAllByTestId('asset-role-choice')[5]?.textContent).toContain('raw/logo/');
+  });
+
+  it('explains the fixed role too when the uploader is pinned to one', () => {
+    render(
+      <RenderApiProvider client={{ uploadAsset: vi.fn() } as unknown as RenderApiClient}>
+        <AssetUploader slug="s" roles={['logo']} onUploaded={vi.fn()} />
+      </RenderApiProvider>,
+    );
+
+    expect(screen.queryByTestId('asset-role-hint')).toBeNull();
+    expect(screen.getByText(/PNG with transparency/)).toBeDefined();
   });
 });

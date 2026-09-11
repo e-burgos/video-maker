@@ -15,14 +15,14 @@ export type InventoryEntry = {
 };
 
 export const STARTER_SUGGESTIONS_WITH_MATERIAL = [
-  'Contame qué video querés y qué material tenés',
+  'Contame qué video querés y para qué plataforma',
   'Proponeme un guion con el material que subí',
+  'Narrá esta grabación con una voz generada',
   'Hacé un video de 30 s sobre ',
-  'Buscá material libre sobre ',
 ] as const;
 
 export const STARTER_SUGGESTIONS_WITHOUT_MATERIAL = [
-  'Contame qué video querés y qué material tenés',
+  'Contame qué video querés y para qué plataforma',
   'Buscá material libre sobre ',
 ] as const;
 

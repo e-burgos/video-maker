@@ -15,6 +15,7 @@ import type { BinaryStatus, MediaBinaryName } from '../engine/media-binaries';
 import type { CallLog } from './call-log';
 import { createFakeCommandRunner } from './fake-command-runner';
 import { createFakeObjectStorage } from './fake-object-storage';
+import { createFakeVoicePreviewCache } from './fake-voice-preview-cache';
 
 const DEFAULT_RESOLVED_BINARIES: ResolvedBinaries = {
   ffmpeg: '/usr/bin/ffmpeg',
@@ -30,8 +31,26 @@ const DEFAULT_RESOLVED_VOICE_BINARIES: ResolvedVoiceBinaries = {
 };
 
 const DEFAULT_VOICE_MODELS: readonly VoiceModel[] = [
-  { id: 'es_AR-daniela-high', fileName: 'es_AR-daniela-high.onnx', isDefault: true },
-  { id: 'es_ES-sharvard-medium', fileName: 'es_ES-sharvard-medium.onnx', isDefault: false },
+  {
+    id: 'es_AR-daniela-high',
+    fileName: 'es_AR-daniela-high.onnx',
+    isDefault: true,
+    language: { code: 'es-AR', region: 'AR' },
+    quality: 'high',
+    label: 'Daniela \u00b7 Spanish (Argentina) \u00b7 High quality',
+    description:
+      'Neural voice trained on the "daniela" dataset. Spanish as spoken in Argentina, synthesized at 22050 Hz.',
+  },
+  {
+    id: 'es_ES-sharvard-medium',
+    fileName: 'es_ES-sharvard-medium.onnx',
+    isDefault: false,
+    language: { code: 'es-ES', region: 'ES' },
+    quality: 'medium',
+    label: 'Sharvard \u00b7 Spanish (Spain) \u00b7 Medium quality',
+    description:
+      'Neural voice trained on the "sharvard" dataset. Spanish as spoken in Spain, synthesized at 22050 Hz.',
+  },
 ];
 
 const BINARY_ENV_VAR_NAMES: Readonly<Record<MediaBinaryName, string>> = {
@@ -243,6 +262,8 @@ export function createFakeRenderApiDependencies(
       }
       return DEFAULT_RESOLVED_VOICE_BINARIES;
     },
+
+    voicePreviewCache: overrides?.voicePreviewCache ?? createFakeVoicePreviewCache(callLog),
 
     listVoiceModels: async () => {
       callLog.record('listVoiceModels', undefined);

@@ -29,6 +29,7 @@ vi.mock('@video-maker/media-local', () => ({
   extractAudioForTranscription: vi.fn(),
   transcribeWithWhisperCpp: vi.fn(),
   buildVoiceCatalog: vi.fn(),
+  voiceModelConfigFileName: (fileName: string) => `${fileName}.json`,
   mixTimelineAudio: vi.fn(),
   muxAudioIntoVideo: vi.fn(),
   verifyMixLoudness: vi.fn(),
@@ -358,22 +359,55 @@ describe('createNodeRenderApiDependencies', () => {
     mocks.resolveBinaryMock.mockImplementation(async (name: string) =>
       name === 'piperModel' ? modelPath : `/opt/homebrew/bin/${name}`,
     );
-    mocks.buildVoiceCatalogMock.mockReturnValue([
-      { id: 'es_AR-daniela-high', fileName: 'es_AR-daniela-high.onnx', isDefault: true },
-    ]);
+    const catalog = [
+      {
+        id: 'es_AR-daniela-high',
+        fileName: 'es_AR-daniela-high.onnx',
+        isDefault: true,
+        language: { code: 'es-AR', region: 'AR' },
+        quality: 'high' as const,
+        label: 'Daniela',
+        description: 'a voice',
+      },
+    ];
+    mocks.buildVoiceCatalogMock.mockReturnValue(catalog);
 
     const deps = createNodeRenderApiDependencies(ENV, STORE);
     const voices = await deps.listVoiceModels();
 
-    expect(voices).toEqual([
-      { id: 'es_AR-daniela-high', fileName: 'es_AR-daniela-high.onnx', isDefault: true },
-    ]);
-    const [fileNames, configured] = mocks.buildVoiceCatalogMock.mock.calls[0] ?? [];
-    expect([...(fileNames ?? [])].sort()).toEqual([
+    expect(voices).toEqual(catalog);
+    const [files, configured] = mocks.buildVoiceCatalogMock.mock.calls[0] ?? [];
+    expect([...(files ?? [])].map((file) => file.fileName).sort()).toEqual([
       'es_AR-daniela-high.onnx',
       'es_AR-daniela-high.onnx.json',
     ]);
     expect(configured).toBe(modelPath);
+
+    await rm(voicesDir, { recursive: true, force: true });
+  });
+
+  it('listVoiceModels lee el sidecar .onnx.json de cada modelo y tolera uno corrupto (US-016-001)', async () => {
+    const voicesDir = await mkdtemp(join(tmpdir(), 'piper-voices-'));
+    await writeFile(join(voicesDir, 'es_AR-daniela-high.onnx'), 'model');
+    await writeFile(join(voicesDir, 'es_AR-daniela-high.onnx.json'), '{"dataset":"daniela"}');
+    await writeFile(join(voicesDir, 'es_MX-claude-high.onnx'), 'model');
+    await writeFile(join(voicesDir, 'es_MX-claude-high.onnx.json'), 'not json at all');
+    await writeFile(join(voicesDir, 'es_ES-davefx-medium.onnx'), 'model');
+    const modelPath = join(voicesDir, 'es_AR-daniela-high.onnx');
+    mocks.resolveBinaryMock.mockImplementation(async (name: string) =>
+      name === 'piperModel' ? modelPath : `/opt/homebrew/bin/${name}`,
+    );
+    mocks.buildVoiceCatalogMock.mockReturnValue([]);
+
+    const deps = createNodeRenderApiDependencies(ENV, STORE);
+    await deps.listVoiceModels();
+
+    const [files] = mocks.buildVoiceCatalogMock.mock.calls[0] ?? [];
+    const byName = new Map([...(files ?? [])].map((file) => [file.fileName, file.config]));
+
+    expect(byName.get('es_AR-daniela-high.onnx')).toEqual({ dataset: 'daniela' });
+    expect(byName.get('es_MX-claude-high.onnx')).toBeNull();
+    expect(byName.get('es_ES-davefx-medium.onnx')).toBeNull();
 
     await rm(voicesDir, { recursive: true, force: true });
   });

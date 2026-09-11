@@ -143,12 +143,17 @@ async function main() {
       `the nav opened the voice route (${page.url()})`,
     );
 
-    const selectedVoice = await page.getByLabel('Voice model', { exact: true }).inputValue();
-    const options = await page.locator('#voice-model option').allTextContents();
-    log('4', `voice selector: selected=${selectedVoice} options=${JSON.stringify(options)}`);
+    await page.waitForSelector('[data-testid="voice-picker"]');
+    const selectedVoice = await page
+      .locator('[data-testid="voice-card"][data-selected="true"]')
+      .getAttribute('data-voice-id');
+    const offered = await page
+      .locator('[data-testid="voice-card"]')
+      .evaluateAll((nodes) => nodes.map((node) => node.dataset.voiceId));
+    log('4', `voice cards: selected=${selectedVoice} offered=${JSON.stringify(offered)}`);
     assert(
-      options.some((option) => option.includes('(default)')),
-      'the selector marks which voice PIPER_MODEL_PATH points at',
+      selectedVoice !== null && offered.includes(selectedVoice),
+      'the picker marks which voice PIPER_MODEL_PATH points at',
     );
     await page.screenshot({ path: join(ARTIFACTS_DIR, 'voice-smoke-01-empty-state.png') });
 

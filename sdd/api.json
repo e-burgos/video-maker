@@ -629,11 +629,11 @@
         "method": "GET",
         "path": "/voices",
         "module": "voice-over",
-        "spec": "sdd/specs/spec-e-burgos-009-voice-over",
+        "spec": "sdd/specs/spec-e-burgos-016-studio-usability",
         "status": "implemented",
         "created_in_cycle": 1,
         "updated_in_cycle": 1,
-        "description": "Lists the Piper voice models installed on the machine. The list is derived from the .onnx files sitting next to the model configured in PIPER_MODEL_PATH, so dropping a new voice in that directory is enough to make it selectable; the .onnx.json config files are not voices and are filtered out. It is a resource of its own and not a field of GET /health because health is polled and must not pay a directory read per call. The route is not project-scoped: voices belong to the machine, not to a project.",
+        "description": "Lists the Piper voice models installed on the machine, each one described well enough to choose it without reading file names. The list is derived from the .onnx files sitting next to the model configured in PIPER_MODEL_PATH, so dropping a new voice in that directory is enough to make it selectable; the .onnx.json config files are not voices and are filtered out, they are read as the metadata of the voice they belong to. It is a resource of its own and not a field of GET /health because health is polled and must not pay a directory read per call. The route is not project-scoped: voices belong to the machine, not to a project.",
         "path_params": [],
         "required_headers": [],
         "request_body": {
@@ -641,7 +641,7 @@
           "schema": "Takes no request body."
         },
         "responses": {
-          "200": "application/json: { voices: [{ id, fileName, isDefault }] } sorted by id. id is the file name without its .onnx extension and is what a voice job accepts in its voice parameter. isDefault marks the model configured in PIPER_MODEL_PATH. An empty array means the directory has no .onnx model.",
+          "200": "application/json: { voices: [{ id, fileName, isDefault, language: { code, region }, quality, label, description, previewUrl }] } sorted by id. id is the file name without its .onnx extension and is what a voice job accepts in its voice parameter. isDefault marks the model configured in PIPER_MODEL_PATH. language.code is BCP47 (es-AR) and region is null when the model declares none. quality is one of x_low|low|medium|high, taken from the sidecar and otherwise from the file name, and is null when neither declares it. label and description are derived entirely from the model metadata (dataset, language names, audio quality and sample rate) and never state a gender, an age or a temperament, which Piper does not document; without a sidecar the description says so instead of guessing. previewUrl is the path of EP-026 for this voice, relative to the service. An empty array means the directory has no .onnx model.",
           "503": "VOICE_MODEL_UNAVAILABLE when PIPER_MODEL_PATH is not set or does not point at a readable file. Answering an empty list there would be a lie: the difference between 'no voices installed' and 'Piper not configured' is what the studio needs to explain. The payload never carries the resolved path of the voice directory. application/json: { error: { code, stage, message, resource?, expected?, hint?, assetPersisted?, catalogUpdated? } }."
         },
         "changelog": [
@@ -649,6 +649,11 @@
             "cycle": 1,
             "date": "2026-09-09",
             "change": "Created in spec-e-burgos-009 cycle-01: catalog of locally installed Piper voices."
+          },
+          {
+            "cycle": 1,
+            "date": "2026-09-11",
+            "change": "Updated in spec-e-burgos-016 cycle-01: every voice now carries language, quality, a readable label, a factual description and the previewUrl of EP-026, all derived from the .onnx.json sidecar of the model or, when it is missing or corrupt, from the file name."
           }
         ]
       },
@@ -862,6 +867,38 @@
             "cycle": 1,
             "date": "2026-09-10",
             "change": "Created in spec-e-burgos-015 cycle-01: kill of the producer child process."
+          }
+        ]
+      },
+      {
+        "id": "EP-026",
+        "method": "GET",
+        "path": "/voices/:voiceId/preview",
+        "module": "studio-usability",
+        "spec": "sdd/specs/spec-e-burgos-016-studio-usability",
+        "status": "implemented",
+        "created_in_cycle": 1,
+        "updated_in_cycle": 1,
+        "description": "Serves a short spoken demo of one installed Piper voice, so the studio can let the user hear a voice before spending a full narration on it. The phrase is fixed and in Spanish, about four seconds long, and the same for every voice: what is being compared is the timbre, not the text. The first request for a voice synthesizes it with Piper and caches the wav under PIPER_PREVIEW_CACHE_DIR, outside media/ because a demo clip is not material of any project; later requests are served from that cache, and it is rebuilt when the .onnx model is newer than the cached wav. The synthesis runs OUTSIDE the job queue: the queue has concurrency 1 and a preview waiting behind a ten-minute render is not a preview. Two simultaneous requests for the same voice are serialized per voice id, so the wav is synthesized once.",
+        "path_params": [
+          "voiceId — voice model id as published by EP-019 (the .onnx file name without its extension). Only an id present in that catalog is accepted, which is what keeps a crafted path from reaching the filesystem."
+        ],
+        "required_headers": [],
+        "request_body": {
+          "content-type": "none",
+          "schema": "Takes no request body."
+        },
+        "responses": {
+          "200": "audio/wav: the demo, streamed, with content-length and Cache-Control: public, max-age=86400. The body is audio, never JSON.",
+          "404": "VOICE_NOT_FOUND when the id is not in the catalog of EP-019. application/json: { error: { code, stage, message, resource?, expected?, hint? } }.",
+          "500": "VOICE_SYNTHESIS_FAILED when Piper returns without writing a playable wav. The payload never carries the stderr of the process nor the resolved path of the model. application/json: { error: { code, stage, message, resource?, expected?, hint? } }.",
+          "503": "VOICE_MODEL_UNAVAILABLE when PIPER_PATH or PIPER_MODEL_PATH do not resolve on this machine, same condition as EP-019. application/json: { error: { code, stage, message, resource?, expected?, hint? } }."
+        },
+        "changelog": [
+          {
+            "cycle": 1,
+            "date": "2026-09-11",
+            "change": "Created in spec-e-burgos-016 cycle-01: audible preview of an installed voice, cached outside media/ and served off the job queue."
           }
         ]
       }

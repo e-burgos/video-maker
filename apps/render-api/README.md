@@ -53,6 +53,7 @@ injects.
 
 | `PIPER_PATH` | — | Path to the [Piper](https://github.com/OHF-Voice/piper1-gpl) TTS executable used by a `voice` job's `synthesize` stage. Without this variable it is resolved via `PATH`. Installed outside this repository with `python3 -m pip install --user piper-tts` (the binary lands in `~/Library/Python/3.11/bin/piper` on macOS, like `yt-dlp`). |
 | `PIPER_MODEL_PATH` | — | Path to the `.onnx` Piper voice model. Like `WHISPER_MODEL_PATH` this is a model file, not an executable, and is **never** resolved via `PATH`: it must point at a readable file or `GET /health` reports it unresolved and any `voice` job fails with `503 VOICE_MODEL_UNAVAILABLE`. Its **directory** is also the voice catalog served by `GET /voices`, so every `.onnx` next to it becomes selectable. Voices are downloaded from [`rhasspy/piper-voices`](https://huggingface.co/rhasspy/piper-voices); the Rioplatense one used to verify this cycle is `es/es_AR/daniela/high/es_AR-daniela-high.onnx` (114 199 011 bytes, `sha256 7ceb1fc0dab349418c5b54a639ae9ee595212d7c9ea422220d8419163d5cc985`) plus its `.onnx.json` config (7 248 bytes), which must sit next to the model. Never commit a path or the model itself. |
+| `PIPER_PREVIEW_CACHE_DIR` | `<OS tmp>/video-maker-voice-previews` | Directory where `GET /voices/:voiceId/preview` caches the demo wav of each installed voice. It sits **outside `media/`** on purpose: a demo clip is not material of any project, and everything under `media/<slug>/` is what the CLI and the producer take inventory of. The cache is rebuilt for a voice whose `.onnx` is newer than the cached wav. |
 | `CLAUDE_CLI_PATH` | `claude` | Path to the Claude Code CLI used as the AI agent of a `storyboard` job. Without this variable it is resolved via `PATH`. **No API key is involved**: the CLI authenticates with the subscription already installed on the machine. If it cannot be started, a `storyboard` job fails with `503 AI_AGENT_UNAVAILABLE`. |
 | `CLAUDE_CLI_CWD` | the OS temporary directory | Working directory the agent process runs in. The default is deliberately **outside this repository**: from the repo root the CLI would load this project's `CLAUDE.md` and settings and answer as an SDD orchestrator instead of a storyboard writer. Point it somewhere else only if you know why. |
 | `CLAUDE_CLI_TIMEOUT_MS` | `600000` (10 min) | Positive integer. Zero, negative or non-numeric makes the `storyboard` job fail with `SERVER_CONFIG_INVALID`. A real call took 70-100 s on this machine. |
@@ -512,8 +513,13 @@ curl -sS -X POST http://127.0.0.1:4310/projects/<slug>/jobs \
   -H 'content-type: application/json' \
   -d '{"kind":"voice","voice":"es_AR-daniela-high","sceneIds":["scene-02","scene-04"],"overwrite":true}'
 
-curl -sS http://127.0.0.1:4310/voices                      # what is installed
+curl -sS http://127.0.0.1:4310/voices                      # what is installed, with label/language/quality
 curl -sS http://127.0.0.1:4310/projects/<slug>/voice       # the manifest + staleness per scene
+
+# hear a voice before spending a narration on it (EP-026): first call synthesizes and caches,
+# the next ones are served from PIPER_PREVIEW_CACHE_DIR, outside media/
+curl -sS -o /tmp/daniela.wav -D - http://127.0.0.1:4310/voices/es_AR-daniela-high/preview
+ffprobe -v error -show_entries format=duration -of default=noprint_wrappers=1 /tmp/daniela.wav
 ```
 
 What lands in `work/voice/`:

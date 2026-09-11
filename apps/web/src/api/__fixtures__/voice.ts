@@ -9,8 +9,28 @@ import type {
 
 export const VOICE_MODELS: VoiceListing = {
   voices: [
-    { id: 'es_AR-daniela-high', fileName: 'es_AR-daniela-high.onnx', isDefault: true },
-    { id: 'es_ES-carlfm-x-low', fileName: 'es_ES-carlfm-x-low.onnx', isDefault: false },
+    {
+      id: 'es_AR-daniela-high',
+      fileName: 'es_AR-daniela-high.onnx',
+      isDefault: true,
+      language: { code: 'es-AR', region: 'AR' },
+      quality: 'high',
+      label: 'Daniela \u00b7 Spanish (Argentina) \u00b7 High quality',
+      description:
+        'Neural voice trained on the "daniela" dataset. Spanish as spoken in Argentina, synthesized at 22050 Hz.',
+      previewUrl: '/voices/es_AR-daniela-high/preview',
+    },
+    {
+      id: 'es_ES-carlfm-x-low',
+      fileName: 'es_ES-carlfm-x-low.onnx',
+      isDefault: false,
+      language: { code: 'es-ES', region: 'ES' },
+      quality: 'x_low',
+      label: 'Carlfm \u00b7 Spanish (Spain) \u00b7 Very low quality',
+      description:
+        'Neural voice trained on the "carlfm" dataset. Spanish as spoken in Spain, synthesized at 16000 Hz.',
+      previewUrl: '/voices/es_ES-carlfm-x-low/preview',
+    },
   ],
 };
 

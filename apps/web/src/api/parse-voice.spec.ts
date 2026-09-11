@@ -24,10 +24,39 @@ describe('parseVoiceListing', () => {
     const listing = parseVoiceListing(JSON.parse(JSON.stringify(VOICE_MODELS)));
     expect(Object.keys(listing).sort()).toEqual(['voices']);
     expect(Object.keys(listing.voices[0] as object).sort()).toEqual([
+      'description',
       'fileName',
       'id',
       'isDefault',
+      'label',
+      'language',
+      'previewUrl',
+      'quality',
     ]);
+  });
+
+  it('rejects a voice without the metadata the picker renders', () => {
+    const [first] = VOICE_MODELS.voices;
+    const withoutLabel = Object.fromEntries(
+      Object.entries(first as Record<string, unknown>).filter(([key]) => key !== 'label'),
+    );
+
+    expect(() => parseVoiceListing({ voices: [withoutLabel] })).toThrow();
+  });
+
+  it('rejects a quality the contract does not declare instead of rendering it raw', () => {
+    const [first] = VOICE_MODELS.voices;
+
+    expect(() => parseVoiceListing({ voices: [{ ...first, quality: 'ultra' }] })).toThrow();
+  });
+
+  it('accepts a voice with no quality and no region, which the contract allows', () => {
+    const [first] = VOICE_MODELS.voices;
+    const listing = parseVoiceListing({
+      voices: [{ ...first, quality: null, language: { code: 'es', region: null } }],
+    });
+
+    expect(listing.voices[0]?.quality).toBeNull();
   });
 
   it('accepts an empty catalogue, which is not the same as Piper being unconfigured', () => {

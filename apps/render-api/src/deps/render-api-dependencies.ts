@@ -111,6 +111,19 @@ export type ResolveVoiceBinariesPort = () => Promise<ResolvedVoiceBinaries>;
 
 export type ListVoiceModelsPort = () => Promise<readonly VoiceModel[]>;
 
+export interface VoicePreviewCacheStat {
+  readonly sizeBytes: number;
+  readonly modifiedAtMs: number;
+}
+
+export interface VoicePreviewCache {
+  readonly directory: string;
+  readonly ensureDirectory: (path: string) => Promise<void>;
+  readonly stat: (path: string) => Promise<VoicePreviewCacheStat | null>;
+  readonly writeTextFile: (path: string, contents: string) => Promise<void>;
+  readonly openReadStream: (path: string) => AsyncIterable<Uint8Array>;
+}
+
 export interface SynthesizeVoiceInput {
   readonly textPath: string;
   readonly outPath: string;
@@ -190,6 +203,7 @@ export interface RenderApiDependencies {
   readonly probeProducerBinary: ProbeProducerBinaryPort;
   readonly resolveVoiceBinaries: ResolveVoiceBinariesPort;
   readonly listVoiceModels: ListVoiceModelsPort;
+  readonly voicePreviewCache: VoicePreviewCache;
   readonly synthesizeVoice: SynthesizeVoicePort;
   readonly extractVoiceAudio: ExtractVoiceAudioPort;
   readonly concatVoiceTracks: ConcatVoiceTracksPort;

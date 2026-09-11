@@ -30,6 +30,7 @@ import {
   handlePutStoryboard,
 } from './handlers/storyboard-handler';
 import { handleGetVoice, handlePutVoiceScene } from './handlers/voice-handler';
+import { handleGetVoicePreview } from './handlers/voice-preview-handler';
 import { handleListVoices } from './handlers/voices-handler';
 import { handleHealth } from './health-handler';
 import { JSON_CONTENT_TYPE } from './http-message';
@@ -70,6 +71,8 @@ export async function handleRequest(
         return await handleHealth(deps, runtime);
       case 'voices.list':
         return await handleListVoices(deps);
+      case 'voices.preview':
+        return await handleGetVoicePreview(deps, params, runtime);
       case 'projects.list':
         return await handleListProjects(deps, store);
       case 'projects.create':

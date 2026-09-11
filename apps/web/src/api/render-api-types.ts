@@ -356,10 +356,24 @@ export type StoryboardWriteResult = {
   path: string;
 };
 
+export const VOICE_QUALITIES = ['x_low', 'low', 'medium', 'high'] as const;
+
+export type VoiceQuality = (typeof VOICE_QUALITIES)[number];
+
+export type VoiceLanguage = {
+  code: string;
+  region: string | null;
+};
+
 export type VoiceModel = {
   id: string;
   fileName: string;
   isDefault: boolean;
+  language: VoiceLanguage;
+  quality: VoiceQuality | null;
+  label: string;
+  description: string;
+  previewUrl: string;
 };
 
 export type VoiceListing = {

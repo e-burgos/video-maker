@@ -1,5 +1,6 @@
 import { useId, useRef, useState } from 'react';
 
+import { BROLL_MATCHING_HINT, assetRoleCopy, orderedAssetRoles } from '../api/asset-roles';
 import { ASSET_ROLES } from '../api/render-api-types';
 import { assetContentType } from '../api/asset-media-kind';
 import { useRenderApi } from '../api/render-api-context';
@@ -48,31 +49,77 @@ export function AssetUploader({ slug, onUploaded, roles, fileInputLabel }: Asset
     }
   }
 
+  const choices = orderedAssetRoles(offered);
+  const showsBrollHint = choices.some((choice) => choice.role === 'broll' || choice.role === 'image');
+
   return (
     <div className="space-y-3 rounded-lg border border-slate-800 bg-slate-900/40 p-4">
-      <div className="flex flex-wrap items-center gap-3">
-        <label htmlFor={`${fieldId}-role`} className="text-sm text-slate-400">
-          Upload to
-        </label>
-        {offered.length === 1 ? (
+      {offered.length === 1 ? (
+        <div className="flex flex-wrap items-center gap-3">
+          <label htmlFor={`${fieldId}-role`} className="text-sm text-slate-400">
+            Upload to
+          </label>
           <span id={`${fieldId}-role`} className="font-mono text-sm text-slate-100">
             {role}
           </span>
-        ) : (
-          <select
-            id={`${fieldId}-role`}
-            aria-label="Upload to"
-            value={role}
-            onChange={(event) => setRole(event.target.value as AssetRole)}
-            className="rounded-md border border-slate-700 bg-slate-900 px-2 py-1.5 font-mono text-sm text-slate-100"
-          >
-            {offered.map((value) => (
-              <option key={value} value={value}>
-                {value}
-              </option>
+          <span className="text-xs text-slate-500">{assetRoleCopy(role).impact}</span>
+        </div>
+      ) : (
+        <fieldset data-testid="asset-role-choices" className="space-y-2">
+          <legend className="text-sm text-slate-400">Upload to</legend>
+          <ul className="grid gap-2 sm:grid-cols-2">
+            {choices.map((choice) => (
+              <li
+                key={choice.role}
+                data-testid="asset-role-choice"
+                data-role={choice.role}
+                data-selected={choice.role === role ? 'true' : 'false'}
+                className={`rounded-lg border p-3 ${
+                  choice.role === role
+                    ? 'border-sky-500/60 bg-sky-500/10'
+                    : 'border-slate-800 bg-slate-900/40'
+                }`}
+              >
+                <label className="flex items-start gap-2">
+                  <input
+                    type="radio"
+                    name={`${fieldId}-role`}
+                    value={choice.role}
+                    checked={choice.role === role}
+                    disabled={uploading}
+                    aria-label={`Upload to ${choice.name}`}
+                    onChange={() => setRole(choice.role)}
+                    className="mt-1"
+                  />
+                  <span className="space-y-0.5">
+                    <span className="block text-sm font-semibold text-slate-100">
+                      {choice.name}
+                      {choice.required && (
+                        <span
+                          data-testid="asset-role-required"
+                          className="ml-2 rounded-sm border border-amber-500/50 px-1 font-mono text-[10px] uppercase text-amber-300"
+                        >
+                          required
+                        </span>
+                      )}
+                    </span>
+                    <span className="block font-mono text-[11px] text-slate-500">
+                      raw/{choice.role}/
+                    </span>
+                    <span className="block text-xs text-slate-400">{choice.impact}</span>
+                  </span>
+                </label>
+              </li>
             ))}
-          </select>
-        )}
+          </ul>
+          {showsBrollHint && (
+            <p data-testid="asset-role-hint" className="text-xs text-slate-500">
+              {BROLL_MATCHING_HINT}
+            </p>
+          )}
+        </fieldset>
+      )}
+      <div className="flex flex-wrap items-center gap-3">
         <input
           ref={inputRef}
           id={`${fieldId}-file`}

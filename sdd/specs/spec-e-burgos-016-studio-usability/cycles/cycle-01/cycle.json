@@ -1,0 +1,159 @@
+{
+  "$schema": "../../../../schemas/cycle.schema.json",
+  "cycle": 1,
+  "module": "studio-usability",
+  "spec": "spec-e-burgos-016-studio-usability",
+  "apps": [
+    "apps/render-api",
+    "apps/web",
+    "libs/media-local"
+  ],
+  "phase": "voices-and-roles",
+  "flow": "lite",
+  "objectives": [
+    "GET /voices publica cada voz Piper con idioma, calidad, etiqueta legible, descripción factual y previewUrl, derivados del .onnx.json del modelo o de su nombre de archivo",
+    "GET /voices/:id/preview sintetiza una frase fija con Piper, la cachea fuera de media/ y la sirve como audio/wav sin pasar por la cola de jobs",
+    "La página de voz ofrece tarjetas de voz con reproducción del preview en el navegador en lugar del select de ids crudos",
+    "El selector de rol del AssetUploader explica cada rol y su impacto en el video final, con todo el copy centralizado en un módulo traducible"
+  ],
+  "status": "completed",
+  "started_at": "2026-09-11",
+  "completed_at": "2026-09-11",
+  "documents": {
+    "plan": "sdd/specs/spec-e-burgos-016-studio-usability/cycles/cycle-01/plan.md",
+    "tasks": "sdd/specs/spec-e-burgos-016-studio-usability/cycles/cycle-01/tasks.json"
+  },
+  "artifacts": [
+    "sdd/specs/spec-e-burgos-016-studio-usability/cycles/cycle-01/artifacts/voices-smoke-01-upload-roles.png",
+    "sdd/specs/spec-e-burgos-016-studio-usability/cycles/cycle-01/artifacts/voices-smoke-02-voice-cards.png",
+    "sdd/specs/spec-e-burgos-016-studio-usability/cycles/cycle-01/artifacts/voices-smoke-03-preview-played.png"
+  ],
+  "metrics": {
+    "tasks_total": 5,
+    "tasks_completed": 5,
+    "story_points": 19,
+    "files_created": [
+      "apps/render-api/src/config/voice-preview-config.ts",
+      "apps/render-api/src/config/voice-preview-config.spec.ts",
+      "apps/render-api/src/voice/voice-preview.ts",
+      "apps/render-api/src/voice/voice-preview-url.ts",
+      "apps/render-api/src/voice/voice-preview-url.spec.ts",
+      "apps/render-api/src/http/handlers/voice-preview-handler.ts",
+      "apps/render-api/src/http/handlers/voice-preview-handler.spec.ts",
+      "apps/render-api/src/__fixtures__/fake-voice-preview-cache.ts",
+      "apps/web/src/api/asset-roles.ts",
+      "apps/web/src/api/asset-roles.spec.ts",
+      "apps/web/src/components/voice-picker.tsx",
+      "apps/web/src/components/voice-picker.spec.tsx",
+      "apps/web/e2e/voices-smoke.mjs",
+      "sdd/specs/spec-e-burgos-016-studio-usability/spec-e-burgos-016-studio-usability.spec.md",
+      "sdd/specs/spec-e-burgos-016-studio-usability/cycles/cycle-01/plan.md",
+      "sdd/specs/spec-e-burgos-016-studio-usability/cycles/cycle-01/cycle.json",
+      "sdd/specs/spec-e-burgos-016-studio-usability/cycles/cycle-01/tasks.json",
+      "sdd/context/apps/render-api/updates/2026-09-11-spec-e-burgos-016-studio-usability-cycle-01.md",
+      "sdd/context/apps/web/updates/2026-09-11-spec-e-burgos-016-studio-usability-cycle-01.md",
+      "sdd/context/libs/media-local/updates/2026-09-11-spec-e-burgos-016-studio-usability-cycle-01.md",
+      "sdd/memory/journal/2026-09-11-spec-e-burgos-016-studio-usability-cycle-01.md"
+    ],
+    "files_modified": [
+      "libs/media-local/src/piper/build-voice-catalog.ts",
+      "libs/media-local/src/piper/piper.spec.ts",
+      "libs/media-local/src/index.ts",
+      "apps/render-api/src/deps/render-api-dependencies.ts",
+      "apps/render-api/src/deps/node-render-api-dependencies.ts",
+      "apps/render-api/src/deps/node-render-api-dependencies.spec.ts",
+      "apps/render-api/src/http/handlers/voices-handler.ts",
+      "apps/render-api/src/http/handlers/voices-handler.spec.ts",
+      "apps/render-api/src/http/handle-request.ts",
+      "apps/render-api/src/http/routes.ts",
+      "apps/render-api/src/http/render-api-runtime.ts",
+      "apps/render-api/src/__fixtures__/fake-render-api-dependencies.ts",
+      "apps/render-api/README.md",
+      "apps/web/src/api/render-api-types.ts",
+      "apps/web/src/api/artifact-url.ts",
+      "apps/web/src/api/parse-voice.ts",
+      "apps/web/src/api/parse-voice.spec.ts",
+      "apps/web/src/api/__fixtures__/voice.ts",
+      "apps/web/src/components/voice-trigger.tsx",
+      "apps/web/src/components/voice-trigger.spec.tsx",
+      "apps/web/src/components/asset-uploader.tsx",
+      "apps/web/src/components/asset-uploader.spec.tsx",
+      "apps/web/src/components/producer-welcome.tsx",
+      "apps/web/src/components/producer-welcome.spec.tsx",
+      "apps/web/e2e/voice-smoke.mjs",
+      "apps/web/README.md",
+      "sdd/api.json",
+      "sdd/components.json",
+      "sdd/global.json",
+      "sdd/specs/index.json",
+      "sdd/tasks.json",
+      "sdd/context/constitution.md"
+    ],
+    "files_deleted": [],
+    "usage": {
+      "tokens_in": 426000,
+      "tokens_out": 77000,
+      "approx": true,
+      "source": "declared-estimate",
+      "by_agent": [
+        {
+          "agent": "orchestrator",
+          "label": "solo",
+          "provider_model": "claude/opus",
+          "effort": "high",
+          "tokens_in": 426000,
+          "tokens_out": 77000,
+          "approx": true,
+          "source": "declared-estimate",
+          "recorded_at": "2026-09-11"
+        }
+      ],
+      "by_tier": {
+        "claude/opus": {
+          "tokens_in": 426000,
+          "tokens_out": 77000
+        }
+      }
+    }
+  },
+  "tables_created": [],
+  "endpoints_implemented": [
+    "EP-019",
+    "EP-026"
+  ],
+  "components_created": [
+    "COMP-045"
+  ],
+  "issues_found": [
+    "El preview cacheado se invalida por el mtime del .onnx, que no ve un cambio de VOICE_PREVIEW_PHRASE: por eso el nombre del archivo lleva VOICE_PREVIEW_REVISION y hay que bumpearlo al tocar la frase.",
+    "La frase del preview es fija y en espanol: una voz instalada de otro idioma la leeria con fonetica cruzada. Las tres instaladas hoy son es_*.",
+    "El caché de previews no se poda nunca; vive en el tmp del SO y depende de que el SO lo limpie."
+  ],
+  "reviewer_report": {
+    "approved": true,
+    "date": "2026-09-11",
+    "ca_results": {
+      "US-016-001": "PASS — GET /voices sobre Piper real devuelve las tres voces instaladas con label legible, language BCP47, quality y description derivados del .onnx.json, mas previewUrl. Verificado en el E2E (voices-smoke paso 2) y por 5 tests de buildVoiceCatalog (metadatos completos, sidecar ausente, sidecar corrupto, quality nula, sidecar ganando sobre el nombre).",
+      "US-016-002": "PASS — GET /voices/:voiceId/preview: audio/wav de 172-193 kB y 2,9-6,0 s segun la voz, Cache-Control: public, max-age=86400; miss 1301-1679 ms contra hit 4-6 ms byte-identico; 404 VOICE_NOT_FOUND con el code tipado; 503 VOICE_MODEL_UNAVAILABLE y VOICE_SYNTHESIS_FAILED cubiertos por el spec del handler, que ademas verifica que dos pedidos simultaneos sintetizan una sola vez y que runtime.jobs queda en {running:0,queued:0}.",
+      "US-016-003": "PASS — la pagina de voz muestra una tarjeta por voz instalada con etiqueta, idioma, calidad y descripcion, exactamente una seleccionada (la de PIPER_MODEL_PATH), y el E2E reprodujo dos voces en Chrome midiendo el medio: readyState 4 y duration 2,93 s / 3,37 s, con currentSrc apuntando al preview de cada voz. Elegir una voz no default la deja seleccionada.",
+      "US-016-004": "PASS — los seis roles se ofrecen ordenados aroll,broll,image,audio,voice,logo, cada uno con nombre legible, directorio raw/<rol>/ e impacto en el video final (todos > 60 caracteres en el DOM real), A-roll marcado como required y la regla de matching de B-roll escrita en pantalla. Copy centralizado en src/api/asset-roles.ts.",
+      "RNF-1": "PASS — cero dependencias npm nuevas: package.json raiz sin cambios.",
+      "RNF-2": "PASS — cobertura sin recortar coverage.include: media-local 98,74 % stmts / 94,39 % branch; render-api 98,08 % / 92,73 %; web 98,71 % / 95,96 %, piso 80 %.",
+      "RNF-3": "PASS — vite build: chunk inicial 479,33 kB, sin el aviso de 500 kB.",
+      "RNF-4": "PASS — el preview corre fuera de la cola (test del handler sobre runtime.jobs.size()) y escribe solo bajo PIPER_PREVIEW_CACHE_DIR (test que asera que ningun puerto storage.* fue llamado).",
+      "RNF-5": "PASS — tres capturas reales de Playwright contra render-api y Piper reales en artifacts/, y la UI verificada midiendo readyState/duration en el navegador, no la captura.",
+      "RNF-6": "PASS — copy, identificadores y commits en ingles; documentos SDD en espanol."
+    },
+    "tests": {
+      "sdd:validate": "OK — 60 files valid, cross-checks passed",
+      "suite": "nx run-many -t lint test build: 8/8 proyectos OK · media-local 318/318 · render-api 914/914 · web 742/742 · lint sin warnings",
+      "e2e": "node apps/web/e2e/voices-smoke.mjs — PASS contra render-api (4411), Chrome y Piper reales, con media root y PIPER_PREVIEW_CACHE_DIR temporales"
+    },
+    "notes": "Ciclo lite de un solo actor. Backend: EP-019 enriquecido desde el .onnx.json del modelo (sin inventar genero, edad ni caracter, que Piper no documenta) y EP-026 nuevo, cacheado fuera de media/ y fuera de la cola de jobs con exclusion por voz. Frontend: VoicePicker reemplaza el select de ids Piper y el selector de rol del AssetUploader pasa a tarjetas explicadas, con todo el copy nuevo en un solo modulo para que cycle-02 lo traduzca. Se aplicaron ademas los textos de arranque del productor que dejo escritos FIX-e-burgos-007-002 y se migro voice-smoke.mjs, que apuntaba al select eliminado.",
+    "follow_ups": [
+      "cycle-02 (i18n-and-guide): extraer a un catalogo de traduccion el copy de src/api/asset-roles.ts, voice-picker.tsx y voice-trigger.tsx, que es el trabajo que este ciclo dejo preparado.",
+      "Derivar la frase del preview del language.family del modelo cuando se instale una voz que no sea es_*.",
+      "Elegir la voz por escena: EP-012 ya acepta voice + sceneIds juntos y el picker ya es un componente reusable."
+    ]
+  }
+}

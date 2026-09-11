@@ -12,6 +12,7 @@ import { createClaudeCliAiAgent } from '../ai/claude-cli-ai-agent';
 import { readAiAgentConfig } from '../config/ai-agent-config';
 import { readProducerConfig } from '../config/producer-config';
 import { readServerConfig } from '../config/server-config';
+import { readVoicePreviewConfig } from '../config/voice-preview-config';
 import { createClaudeCodeProducerAgent } from '../producer/claude-code-producer-agent';
 import type { SpawnedProducerProcess, SpawnProducerProcessInput } from '../producer/producer-agent';
 import type { StoreConfig } from '../config/store-config';
@@ -23,7 +24,41 @@ import { PipelineStageError } from '../errors/pipeline-stage-error';
 import type { ResolvedVoiceBinaries } from '@video-maker/media-local';
 
 import type { ByteRange, ObjectStorage, WriteTemporaryInput, WriteTemporaryOutcome } from './object-storage';
-import type { RenderApiDependencies } from './render-api-dependencies';
+import type { RenderApiDependencies, VoicePreviewCache } from './render-api-dependencies';
+
+function createNodeVoicePreviewCache(directory: string): VoicePreviewCache {
+  return {
+    directory,
+    ensureDirectory: async (path) => {
+      await mkdir(path, { recursive: true });
+    },
+    stat: async (path) => {
+      try {
+        const stats = await stat(path);
+        return stats.isFile()
+          ? { sizeBytes: stats.size, modifiedAtMs: Math.trunc(stats.mtimeMs) }
+          : null;
+      } catch (error) {
+        if (isEnoent(error)) {
+          return null;
+        }
+        throw error;
+      }
+    },
+    writeTextFile: async (path, contents) => {
+      await writeFile(path, contents, 'utf8');
+    },
+    openReadStream: (path) => createReadStream(path),
+  };
+}
+
+async function readVoiceModelConfig(path: string): Promise<unknown> {
+  try {
+    return JSON.parse(await readFile(path, 'utf8'));
+  } catch {
+    return null;
+  }
+}
 
 function isEnoent(error: unknown): boolean {
   return typeof error === 'object' && error !== null && (error as NodeJS.ErrnoException).code === 'ENOENT';
@@ -387,14 +422,26 @@ export function createNodeRenderApiDependencies(
       return resolveVoiceBinaries(env);
     },
 
+    voicePreviewCache: createNodeVoicePreviewCache(
+      readVoicePreviewConfig(env, tmpdir()).cacheDirectory,
+    ),
+
     listVoiceModels: async () => {
-      const { buildVoiceCatalog, resolveBinary } = await loadMediaLocal();
+      const { buildVoiceCatalog, resolveBinary, voiceModelConfigFileName } = await loadMediaLocal();
       const modelPath = await resolveBinary('piperModel', env);
-      const entries = await readdir(dirname(modelPath), { withFileTypes: true });
-      return buildVoiceCatalog(
-        entries.filter((entry) => entry.isFile()).map((entry) => entry.name),
-        modelPath,
+      const voicesDirectory = dirname(modelPath);
+      const entries = await readdir(voicesDirectory, { withFileTypes: true });
+      const fileNames = entries.filter((entry) => entry.isFile()).map((entry) => entry.name);
+      const present = new Set(fileNames);
+      const files = await Promise.all(
+        fileNames.map(async (fileName) => ({
+          fileName,
+          config: present.has(voiceModelConfigFileName(fileName))
+            ? await readVoiceModelConfig(join(voicesDirectory, voiceModelConfigFileName(fileName)))
+            : null,
+        })),
       );
+      return buildVoiceCatalog(files, modelPath);
     },
 
     synthesizeVoice: async ({ textPath, outPath, modelPath, projectRoot }) => {
