@@ -1,10 +1,12 @@
 import { formatBytes, formatDuration } from '../api/asset-media-kind';
+import { AssetDeleteControl } from './asset-delete-control';
 import { AssetPreview } from './asset-preview';
-import type { AssetListEntry } from '../api/render-api-types';
+import type { AssetDeletion, AssetListEntry } from '../api/render-api-types';
 
 export type AssetCardProps = {
   slug: string;
   asset: AssetListEntry;
+  onDeleted: (deletion: AssetDeletion) => void;
 };
 
 function mediaFacts(asset: AssetListEntry): string[] {
@@ -29,9 +31,13 @@ function mediaFacts(asset: AssetListEntry): string[] {
   return facts;
 }
 
-export function AssetCard({ slug, asset }: AssetCardProps) {
+export function AssetCard({ slug, asset, onDeleted }: AssetCardProps) {
   return (
-    <li className="space-y-2 rounded-lg border border-slate-800 bg-slate-900/60 p-3">
+    <li
+      data-testid="asset-card"
+      data-asset-path={asset.path}
+      className="space-y-2 rounded-lg border border-slate-800 bg-slate-900/60 p-3"
+    >
       <AssetPreview slug={slug} path={asset.path} />
       <p className="truncate font-mono text-xs text-slate-200" title={asset.path}>
         {asset.path}
@@ -39,6 +45,7 @@ export function AssetCard({ slug, asset }: AssetCardProps) {
       <p className="font-mono text-[11px] text-slate-500">
         {[formatBytes(asset.fingerprint.sizeBytes), ...mediaFacts(asset)].join(' · ')}
       </p>
+      <AssetDeleteControl slug={slug} role={asset.role} path={asset.path} onDeleted={onDeleted} />
     </li>
   );
 }

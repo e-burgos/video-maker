@@ -162,6 +162,84 @@ describe('createRenderApiClient', () => {
     expect(result.path).toBe('raw/aroll/clip01.mp4');
   });
 
+  it('deletes one asset through EP-027 with every path segment encoded', async () => {
+    const deletion = {
+      slug: 'smoke-ingest',
+      deleted: {
+        path: 'raw/aroll/clip 01.mp4',
+        role: 'aroll',
+        catalogEntryRemoved: true,
+        removedArtifacts: ['work/transcripts/aroll/clip 01.json'],
+      },
+      timelineReferences: [],
+    };
+    const { fetchImpl, calls } = recordingFetch(() => jsonResponse(deletion));
+
+    const result = await createRenderApiClient(fetchImpl).deleteAsset({
+      slug: 'smoke ingest',
+      role: 'aroll',
+      filename: 'clip 01.mp4',
+      force: false,
+    });
+
+    expect(calls[0]?.url).toBe('/api/projects/smoke%20ingest/assets/aroll/clip%2001.mp4');
+    expect(calls[0]?.init?.method).toBe('DELETE');
+    expect(calls[0]?.init?.headers).toBeUndefined();
+    expect(result).toEqual(deletion);
+  });
+
+  it('asks EP-027 to delete an asset the timeline uses with force=true', async () => {
+    const { fetchImpl, calls } = recordingFetch(() =>
+      jsonResponse({
+        slug: 'smoke-ingest',
+        deleted: {
+          path: 'raw/aroll/clip01.mp4',
+          role: 'aroll',
+          catalogEntryRemoved: true,
+          removedArtifacts: [],
+        },
+        timelineReferences: [{ kind: 'asset' }, { kind: 'clip', track: 'aroll', clipId: 'c1' }],
+      }),
+    );
+
+    const result = await createRenderApiClient(fetchImpl).deleteAsset({
+      slug: 'smoke-ingest',
+      role: 'aroll',
+      filename: 'clip01.mp4',
+      force: true,
+    });
+
+    expect(calls[0]?.url).toBe('/api/projects/smoke-ingest/assets/aroll/clip01.mp4?force=true');
+    expect(result.timelineReferences).toHaveLength(2);
+  });
+
+  it('raises the typed ASSET_IN_USE of EP-027 with its list of uses', async () => {
+    const client = createRenderApiClient(
+      recordingFetch(() =>
+        jsonResponse(
+          {
+            error: {
+              code: 'ASSET_IN_USE',
+              stage: null,
+              message: 'The stored timeline still references this asset.',
+              resource: 'raw/aroll/clip01.mp4',
+              hint: 'asset, tracks.aroll clip clip-aroll-1',
+            },
+          },
+          409,
+        ),
+      ).fetchImpl,
+    );
+
+    await expect(
+      client.deleteAsset({ slug: 'demo', role: 'aroll', filename: 'clip01.mp4', force: false }),
+    ).rejects.toMatchObject({
+      code: 'ASSET_IN_USE',
+      status: 409,
+      payload: { hint: 'asset, tracks.aroll clip clip-aroll-1' },
+    });
+  });
+
   it('reads the persisted timeline from EP-007 with the slug encoded', async () => {
     const { fetchImpl, calls } = recordingFetch(() => jsonResponse(RAW_PREVIEW_TIMELINE));
 

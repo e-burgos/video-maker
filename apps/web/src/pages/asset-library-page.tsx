@@ -107,7 +107,12 @@ export function AssetLibraryPage() {
                 ) : (
                   <ul className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
                     {assets.map((asset) => (
-                      <AssetCard key={asset.path} slug={slug} asset={asset} />
+                      <AssetCard
+                        key={asset.path}
+                        slug={slug}
+                        asset={asset}
+                        onDeleted={listing.reload}
+                      />
                     ))}
                   </ul>
                 )}

@@ -103,6 +103,28 @@ export type AssetProbeFailure = {
   errorCode: string;
 };
 
+export const TIMELINE_CLIP_TRACKS = ['aroll', 'broll', 'voice', 'music'] as const;
+
+export type TimelineClipTrack = (typeof TIMELINE_CLIP_TRACKS)[number];
+
+export type TimelineAssetReference =
+  | { kind: 'asset' }
+  | { kind: 'clip'; track: TimelineClipTrack; clipId: string }
+  | { kind: 'logo' };
+
+export type DeletedAsset = {
+  path: string;
+  role: AssetRole;
+  catalogEntryRemoved: boolean;
+  removedArtifacts: string[];
+};
+
+export type AssetDeletion = {
+  slug: string;
+  deleted: DeletedAsset;
+  timelineReferences: TimelineAssetReference[];
+};
+
 export type AssetListing = {
   slug: string;
   source: AssetSource;

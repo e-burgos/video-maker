@@ -6,6 +6,8 @@ const EXPLAINED_CODES = [
   'RESPONSE_SHAPE_UNEXPECTED',
   'TIMELINE_NOT_FOUND',
   'TIMELINE_ALREADY_EXISTS',
+  'ASSET_IN_USE',
+  'ASSET_NOT_FOUND',
 ] as const;
 
 type ExplainedCode = (typeof EXPLAINED_CODES)[number];

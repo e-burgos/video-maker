@@ -69,6 +69,14 @@ export async function readStoredTimeline(deps: RenderApiDependencies, project: M
   return result.data;
 }
 
+export async function readStoredTimelineIfPersisted(
+  deps: RenderApiDependencies,
+  project: MediaProject,
+): Promise<Timeline | null> {
+  const fileStat = await deps.storage.stat(toAbsolutePath(project, timelinePath()));
+  return fileStat === null ? null : readStoredTimeline(deps, project);
+}
+
 export async function assertTimelineNotPersisted(
   deps: RenderApiDependencies,
   project: MediaProject,

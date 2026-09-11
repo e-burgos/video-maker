@@ -45,6 +45,8 @@ export const MESSAGES_ES: Messages = {
   'error.RESPONSE_SHAPE_UNEXPECTED': 'El servicio de render respondió fuera del contrato que este studio espera.',
   'error.TIMELINE_NOT_FOUND': 'Este proyecto todavía no tiene timeline. Generá el montaje desde la biblioteca de assets.',
   'error.TIMELINE_ALREADY_EXISTS': 'Este proyecto ya tiene una timeline.',
+  'error.ASSET_IN_USE': 'La timeline guardada todavía usa este medio. Borrarlo igual rompe el montaje hasta que la timeline se rearme.',
+  'error.ASSET_NOT_FOUND': 'Este medio ya no está en el proyecto. Recargá la biblioteca para ver qué hay guardado de verdad.',
 
   'library.assetCount.one': '{count} asset crudo',
   'library.assetCount.other': '{count} assets crudos',
@@ -83,6 +85,18 @@ export const MESSAGES_ES: Messages = {
   'assetUploader.fileLabel': 'Archivo del asset',
   'assetUploader.uploading': 'Subiendo…',
   'assetUploader.stored': 'guardado {path}',
+
+  'assetDelete.action': 'Borrar',
+  'assetDelete.openAria': 'Borrar {filename}',
+  'assetDelete.question': '¿Borrar {filename}?',
+  'assetDelete.warning': 'El archivo sale de raw/ y su entrada del catálogo se va con él. No se puede deshacer.',
+  'assetDelete.accept': 'Borrar',
+  'assetDelete.cancel': 'Dejarlo',
+  'assetDelete.pending': 'Borrando…',
+  'assetDelete.force': 'Borrar igual',
+  'assetDelete.inUseTitle': 'La timeline todavía usa este medio',
+  'assetDelete.inUseUses': 'usado como {uses}',
+  'assetDelete.inUseWarning': 'Borrarlo deja el montaje apuntando a un archivo que ya no está: rearmá la timeline después.',
 
   'library.backToProjects': '← todos los proyectos',
   'library.openStoryboard': 'abrir storyboard',

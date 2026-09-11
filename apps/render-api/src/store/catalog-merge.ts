@@ -79,3 +79,31 @@ export function mergeProbeFailure(previous: Catalog | null, failure: UploadProbe
 
   return { ...base, probeFailures };
 }
+
+export interface CatalogRemoval {
+  readonly catalog: Catalog;
+  readonly entryRemoved: boolean;
+  readonly removedTranscriptPaths: readonly ProjectRelativePath[];
+}
+
+export function removeCatalogAsset(previous: Catalog, assetId: string): CatalogRemoval {
+  const assets = previous.assets.filter((entry) => entry.asset.id !== assetId);
+  const removedTranscriptPaths = previous.transcripts
+    .filter((entry) => entry.assetId === assetId)
+    .map((entry) => entry.transcriptPath);
+
+  return {
+    catalog: {
+      ...previous,
+      assets,
+      transcripts: previous.transcripts.filter((entry) => entry.assetId !== assetId),
+      ignored: previous.ignored.filter((entry) => entry.path !== assetId),
+      probeFailures: previous.probeFailures.filter((entry) => entry.path !== assetId),
+    },
+    entryRemoved:
+      assets.length !== previous.assets.length ||
+      previous.ignored.some((entry) => entry.path === assetId) ||
+      previous.probeFailures.some((entry) => entry.path === assetId),
+    removedTranscriptPaths,
+  };
+}

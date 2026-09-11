@@ -24,6 +24,8 @@ const MESSAGE_BY_CODE: Readonly<Record<RenderApiErrorCode, string>> = {
   ASSET_ROLE_INVALID: 'The asset role is not one of aroll, broll, image or audio.',
   ASSET_PATH_INVALID: 'The path is not a portable, project-relative path.',
   ASSET_ALREADY_EXISTS: 'An asset already exists at the requested destination.',
+  ASSET_NOT_FOUND: 'The requested asset does not exist in the project.',
+  ASSET_IN_USE: 'The stored timeline still references this asset.',
   ASSET_CONTENT_LENGTH_REQUIRED: 'The content-length header is required for an asset upload.',
   ASSET_CONTENT_TYPE_REQUIRED: 'The content-type header is required for an asset upload.',
   ASSET_TOO_LARGE: 'The asset exceeds the configured upload size limit.',

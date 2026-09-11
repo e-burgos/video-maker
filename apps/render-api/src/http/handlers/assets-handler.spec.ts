@@ -1,5 +1,9 @@
+import { CatalogSchema } from '@video-maker/auto-montage';
+import type { Catalog } from '@video-maker/auto-montage';
+import type { Timeline } from '@video-maker/timeline-core';
 import { describe, expect, it } from 'vitest';
 
+import { buildMinimalTimeline } from '../../__fixtures__/minimal-timeline';
 import { createCallLog } from '../../__fixtures__/call-log';
 import { buildCatalogAssetFixture, buildCatalogFixture } from '../../__fixtures__/catalog-fixtures';
 import { createFakeObjectStorage } from '../../__fixtures__/fake-object-storage';
@@ -9,7 +13,7 @@ import type { StoreConfig } from '../../config/store-config';
 import { httpStatusFor } from '../../errors/http-status-for';
 import type { RenderApiErrorCode } from '../../errors/render-api-error';
 import { createRenderApiRuntime } from '../render-api-runtime';
-import { handleListAssets, handleUploadAsset } from './assets-handler';
+import { handleDeleteAsset, handleListAssets, handleUploadAsset } from './assets-handler';
 
 const STORE: StoreConfig = { mediaRoot: '/media', maxUploadBytes: 2_147_483_648, objectStore: 'fs' };
 
@@ -410,5 +414,280 @@ describe('handleUploadAsset', () => {
       handleUploadAsset(deps, STORE, { slug: 'smoke-ingest', role: 'aroll', filename: 'clip01.mp4' }, request, runtime),
     ).rejects.toMatchObject({ code: 'ASSET_ALREADY_EXISTS' });
     expect(callLog.ports()).not.toContain('writeTemporary');
+  });
+});
+
+const AROLL_ASSET_ID = 'raw/aroll/clip01.mp4';
+const AROLL_ABSOLUTE_PATH = `${STORE.mediaRoot}/smoke-ingest/${AROLL_ASSET_ID}`;
+const TRANSCRIPT_RELATIVE_PATH = 'work/transcripts/aroll/clip01.json';
+const DELETE_PARAMS = { slug: 'smoke-ingest', role: 'aroll', filename: 'clip01.mp4' };
+
+function deleteRequest(force = false): ReturnType<typeof requestLine> {
+  return requestLine({
+    method: 'DELETE',
+    path: `/projects/smoke-ingest/assets/aroll/clip01.mp4${force ? '?force=true' : ''}`,
+  });
+}
+
+function timelineReferencing(assetId: string): Timeline {
+  const base = buildMinimalTimeline();
+  const firstClip = base.tracks.aroll[0];
+  if (firstClip === undefined) {
+    throw new Error('the minimal timeline fixture has no aroll clip to retarget');
+  }
+
+  return {
+    ...base,
+    assets: base.assets.map((asset) => ({ ...asset, id: assetId, path: assetId })),
+    tracks: { ...base.tracks, aroll: [{ ...firstClip, id: 'clip-aroll-1', assetId }] },
+  };
+}
+
+function catalogWithTranscribedAroll(): Catalog {
+  return CatalogSchema.parse({
+    ...buildCatalogFixture('smoke-ingest', [buildCatalogAssetFixture({ assetId: AROLL_ASSET_ID })]),
+    transcripts: [
+      {
+        assetId: AROLL_ASSET_ID,
+        transcriptPath: TRANSCRIPT_RELATIVE_PATH,
+        fingerprint: { sizeBytes: 1024, modifiedAtMs: 1_757_289_600_000 },
+        engine: 'whisper.cpp',
+        model: 'ggml-large-v3-turbo-q5_0.bin',
+        language: 'auto',
+      },
+    ],
+  });
+}
+
+function storageWithStoredAroll(
+  callLog: ReturnType<typeof createCallLog>,
+  extraFiles: readonly { path: string; contents: string }[] = [],
+): ReturnType<typeof createFakeObjectStorage> {
+  return createFakeObjectStorage(callLog, {
+    directories: [`${STORE.mediaRoot}/smoke-ingest`],
+    files: [
+      { path: AROLL_ABSOLUTE_PATH, contents: 'stored bytes' },
+      {
+        path: `${STORE.mediaRoot}/smoke-ingest/work/catalog.json`,
+        contents: JSON.stringify(catalogWithTranscribedAroll()),
+      },
+      {
+        path: `${STORE.mediaRoot}/smoke-ingest/${TRANSCRIPT_RELATIVE_PATH}`,
+        contents: '{"segments":[]}',
+      },
+      ...extraFiles,
+    ],
+  });
+}
+
+describe('handleDeleteAsset', () => {
+  it('rejects a role outside the six catalog roles before invoking any storage port', async () => {
+    const callLog = createCallLog();
+    const deps = createFakeRenderApiDependencies(callLog);
+    const runtime = createRenderApiRuntime(deps);
+
+    await expect(
+      handleDeleteAsset(
+        deps,
+        STORE,
+        { slug: 'smoke-ingest', role: 'video', filename: 'clip01.mp4' },
+        deleteRequest(),
+        runtime,
+      ),
+    ).rejects.toMatchObject({ code: 'ASSET_ROLE_INVALID' });
+    expect(callLog.ports()).toEqual([]);
+  });
+
+  it.each(['../secret.mp4', 'nested/clip.mp4', '/absolute.mp4', '..', '.', 'C:\\clip.mp4'])(
+    'refuses to leave raw/<role>/ for the filename %s',
+    async (filename) => {
+      const callLog = createCallLog();
+      const deps = createFakeRenderApiDependencies(callLog);
+      const runtime = createRenderApiRuntime(deps);
+
+      await expect(
+        handleDeleteAsset(
+          deps,
+          STORE,
+          { slug: 'smoke-ingest', role: 'aroll', filename },
+          deleteRequest(),
+          runtime,
+        ),
+      ).rejects.toMatchObject({ code: 'ASSET_PATH_INVALID' });
+      expect(callLog.ports()).toEqual([]);
+    },
+  );
+
+  it('answers 404 PROJECT_NOT_FOUND for a project that does not exist', async () => {
+    const callLog = createCallLog();
+    const storage = createFakeObjectStorage(callLog);
+    const deps = createFakeRenderApiDependencies(callLog, { storage });
+    const runtime = createRenderApiRuntime(deps);
+
+    await expect(
+      handleDeleteAsset(deps, STORE, DELETE_PARAMS, deleteRequest(), runtime),
+    ).rejects.toMatchObject({ code: 'PROJECT_NOT_FOUND' });
+  });
+
+  it('answers 404 ASSET_NOT_FOUND without removing anything when the file is absent', async () => {
+    const callLog = createCallLog();
+    const storage = createFakeObjectStorage(callLog, {
+      directories: [`${STORE.mediaRoot}/smoke-ingest`],
+    });
+    const deps = createFakeRenderApiDependencies(callLog, { storage });
+    const runtime = createRenderApiRuntime(deps);
+
+    await expect(
+      handleDeleteAsset(deps, STORE, DELETE_PARAMS, deleteRequest(), runtime),
+    ).rejects.toMatchObject({ code: 'ASSET_NOT_FOUND', resource: AROLL_ASSET_ID });
+    expect(callLog.ports()).not.toContain('removeFile');
+  });
+
+  it('deletes the file, its catalog entry and the transcript derived from it', async () => {
+    const callLog = createCallLog();
+    const storage = storageWithStoredAroll(callLog);
+    const deps = createFakeRenderApiDependencies(callLog, { storage });
+    const runtime = createRenderApiRuntime(deps);
+
+    const response = await handleDeleteAsset(deps, STORE, DELETE_PARAMS, deleteRequest(), runtime);
+
+    expect(response.status).toBe(200);
+    expect(Object.keys(response.body as object).sort()).toEqual([
+      'deleted',
+      'slug',
+      'timelineReferences',
+    ]);
+    expect(response.body).toEqual({
+      slug: 'smoke-ingest',
+      deleted: {
+        path: AROLL_ASSET_ID,
+        role: 'aroll',
+        catalogEntryRemoved: true,
+        removedArtifacts: [TRANSCRIPT_RELATIVE_PATH],
+      },
+      timelineReferences: [],
+    });
+
+    expect(await storage.stat(AROLL_ABSOLUTE_PATH)).toBeNull();
+    expect(
+      await storage.stat(`${STORE.mediaRoot}/smoke-ingest/${TRANSCRIPT_RELATIVE_PATH}`),
+    ).toBeNull();
+
+    const storedCatalog = JSON.parse(
+      await storage.readTextFile(`${STORE.mediaRoot}/smoke-ingest/work/catalog.json`),
+    ) as Catalog;
+    expect(storedCatalog.assets).toEqual([]);
+    expect(storedCatalog.transcripts).toEqual([]);
+    expect(() => CatalogSchema.parse(storedCatalog)).not.toThrow();
+  });
+
+  it('deletes an asset the catalog never listed without writing the catalog', async () => {
+    const callLog = createCallLog();
+    const storage = createFakeObjectStorage(callLog, {
+      directories: [`${STORE.mediaRoot}/smoke-ingest`],
+      files: [
+        { path: `${STORE.mediaRoot}/smoke-ingest/raw/broll/clip09.mp4`, contents: 'stored bytes' },
+        {
+          path: `${STORE.mediaRoot}/smoke-ingest/work/catalog.json`,
+          contents: JSON.stringify(catalogWithTranscribedAroll()),
+        },
+      ],
+    });
+    const deps = createFakeRenderApiDependencies(callLog, { storage });
+    const runtime = createRenderApiRuntime(deps);
+
+    const response = await handleDeleteAsset(
+      deps,
+      STORE,
+      { slug: 'smoke-ingest', role: 'broll', filename: 'clip09.mp4' },
+      requestLine({ method: 'DELETE', path: '/projects/smoke-ingest/assets/broll/clip09.mp4' }),
+      runtime,
+    );
+
+    expect((response.body as { deleted: { catalogEntryRemoved: boolean } }).deleted.catalogEntryRemoved).toBe(
+      false,
+    );
+    expect(callLog.ports()).not.toContain('writeTextFile');
+    expect(await storage.stat(`${STORE.mediaRoot}/smoke-ingest/raw/broll/clip09.mp4`)).toBeNull();
+  });
+
+  it('answers 409 ASSET_IN_USE listing the uses, and removes nothing', async () => {
+    const callLog = createCallLog();
+    const storage = storageWithStoredAroll(callLog, [
+      {
+        path: `${STORE.mediaRoot}/smoke-ingest/work/timeline.json`,
+        contents: JSON.stringify(timelineReferencing(AROLL_ASSET_ID)),
+      },
+    ]);
+    const deps = createFakeRenderApiDependencies(callLog, { storage });
+    const runtime = createRenderApiRuntime(deps);
+
+    await expect(
+      handleDeleteAsset(deps, STORE, DELETE_PARAMS, deleteRequest(), runtime),
+    ).rejects.toMatchObject({
+      code: 'ASSET_IN_USE',
+      resource: AROLL_ASSET_ID,
+      hint: 'asset, tracks.aroll clip clip-aroll-1',
+    });
+    expect(httpStatusFor('ASSET_IN_USE' satisfies RenderApiErrorCode)).toBe(409);
+    expect(callLog.ports()).not.toContain('removeFile');
+    expect(await storage.stat(AROLL_ABSOLUTE_PATH)).not.toBeNull();
+  });
+
+  it('deletes a referenced asset with force=true and reports what it broke', async () => {
+    const callLog = createCallLog();
+    const storage = storageWithStoredAroll(callLog, [
+      {
+        path: `${STORE.mediaRoot}/smoke-ingest/work/timeline.json`,
+        contents: JSON.stringify(timelineReferencing(AROLL_ASSET_ID)),
+      },
+    ]);
+    const deps = createFakeRenderApiDependencies(callLog, { storage });
+    const runtime = createRenderApiRuntime(deps);
+
+    const response = await handleDeleteAsset(deps, STORE, DELETE_PARAMS, deleteRequest(true), runtime);
+
+    expect(response.status).toBe(200);
+    expect((response.body as { timelineReferences: unknown[] }).timelineReferences).toEqual([
+      { kind: 'asset' },
+      { kind: 'clip', track: 'aroll', clipId: 'clip-aroll-1' },
+    ]);
+    expect(await storage.stat(AROLL_ABSOLUTE_PATH)).toBeNull();
+  });
+
+  it('answers 500 CATALOG_UNREADABLE with the asset still on disk', async () => {
+    const callLog = createCallLog();
+    const storage = createFakeObjectStorage(callLog, {
+      directories: [`${STORE.mediaRoot}/smoke-ingest`],
+      files: [
+        { path: AROLL_ABSOLUTE_PATH, contents: 'stored bytes' },
+        { path: `${STORE.mediaRoot}/smoke-ingest/work/catalog.json`, contents: 'not valid json' },
+      ],
+    });
+    const deps = createFakeRenderApiDependencies(callLog, { storage });
+    const runtime = createRenderApiRuntime(deps);
+
+    await expect(
+      handleDeleteAsset(deps, STORE, DELETE_PARAMS, deleteRequest(), runtime),
+    ).rejects.toMatchObject({
+      code: 'CATALOG_UNREADABLE',
+      details: { assetPersisted: true, catalogUpdated: false },
+    });
+    expect(await storage.stat(AROLL_ABSOLUTE_PATH)).not.toBeNull();
+  });
+
+  it('serializes two concurrent deletes of the same project on the upload mutex', async () => {
+    const callLog = createCallLog();
+    const storage = storageWithStoredAroll(callLog);
+    const deps = createFakeRenderApiDependencies(callLog, { storage });
+    const runtime = createRenderApiRuntime(deps);
+
+    const outcomes = await Promise.allSettled([
+      handleDeleteAsset(deps, STORE, DELETE_PARAMS, deleteRequest(), runtime),
+      handleDeleteAsset(deps, STORE, DELETE_PARAMS, deleteRequest(), runtime),
+    ]);
+
+    expect(outcomes.map((outcome) => outcome.status)).toEqual(['fulfilled', 'rejected']);
+    expect((outcomes[1] as PromiseRejectedResult).reason).toMatchObject({ code: 'ASSET_NOT_FOUND' });
   });
 });

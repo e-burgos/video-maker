@@ -116,7 +116,7 @@ async function* readFileRange(path: string, range?: ByteRange): AsyncGenerator<U
   }
 }
 
-async function removeTemporaryTolerant(path: string): Promise<void> {
+async function unlinkTolerant(path: string): Promise<void> {
   try {
     await unlink(path);
   } catch (error) {
@@ -136,7 +136,7 @@ async function writeTemporaryStreaming(input: WriteTemporaryInput): Promise<Writ
       bytesWritten += chunk.length;
       if (bytesWritten > input.limitBytes) {
         outgoing.destroy();
-        await removeTemporaryTolerant(temporaryPath);
+        await unlinkTolerant(temporaryPath);
         return { kind: 'limit-exceeded', limitBytes: input.limitBytes };
       }
 
@@ -146,7 +146,7 @@ async function writeTemporaryStreaming(input: WriteTemporaryInput): Promise<Writ
     }
   } catch {
     outgoing.destroy();
-    await removeTemporaryTolerant(temporaryPath);
+    await unlinkTolerant(temporaryPath);
     return { kind: 'aborted' };
   }
 
@@ -161,7 +161,7 @@ async function writeTemporaryStreaming(input: WriteTemporaryInput): Promise<Writ
   });
 
   if (bytesWritten !== input.expectedBytes) {
-    await removeTemporaryTolerant(temporaryPath);
+    await unlinkTolerant(temporaryPath);
     return { kind: 'aborted' };
   }
 
@@ -187,7 +187,8 @@ function createConfinedNodeObjectStorage(store: StoreConfig): ObjectStorage {
     promoteTemporary: async (temporaryPath, finalPath) => {
       await rename(confine(temporaryPath), confine(finalPath));
     },
-    removeTemporary: async (path) => removeTemporaryTolerant(confine(path)),
+    removeTemporary: async (path) => unlinkTolerant(confine(path)),
+    removeFile: async (path) => unlinkTolerant(confine(path)),
   };
 }
 

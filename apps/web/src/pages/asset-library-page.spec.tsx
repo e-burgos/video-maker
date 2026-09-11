@@ -85,6 +85,42 @@ describe('AssetLibraryPage', () => {
     await waitFor(() => expect(screen.getByText('No broll assets yet.')).toBeTruthy());
   });
 
+  it('reloads the listing after a card deletes its asset', async () => {
+    const listAssets = vi
+      .fn()
+      .mockResolvedValueOnce(listing)
+      .mockResolvedValueOnce({ ...listing, assets: listing.assets.slice(1) });
+    const deleteAsset = vi.fn().mockResolvedValue({
+      slug: 'smoke-ingest',
+      deleted: {
+        path: 'raw/aroll/clip01.mp4',
+        role: 'aroll',
+        catalogEntryRemoved: true,
+        removedArtifacts: [],
+      },
+      timelineReferences: [],
+    });
+    renderPage({ listAssets, deleteAsset });
+
+    await waitFor(() => expect(screen.getByTestId('asset-source').textContent).toBe('catalog'));
+    const arollGroup = screen.getByTestId('role-aroll');
+    fireEvent.click(within(arollGroup).getByTestId('asset-delete-open'));
+    fireEvent.click(within(arollGroup).getByTestId('asset-delete-accept'));
+
+    await waitFor(() =>
+      expect(deleteAsset).toHaveBeenCalledWith({
+        slug: 'smoke-ingest',
+        role: 'aroll',
+        filename: 'clip01.mp4',
+        force: false,
+      }),
+    );
+    await waitFor(() =>
+      expect(within(screen.getByTestId('role-aroll')).queryAllByRole('listitem')).toHaveLength(0),
+    );
+    expect(listAssets).toHaveBeenCalledTimes(2);
+  });
+
   it('surfaces the probe failures the catalog recorded', async () => {
     renderPage({
       listAssets: vi.fn().mockResolvedValue({

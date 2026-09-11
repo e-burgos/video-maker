@@ -818,6 +818,93 @@
           }
         ]
       }
+    },
+    {
+      "id": "FIX-e-burgos-005-001",
+      "author": "e-burgos",
+      "spec_id": "spec-e-burgos-005-render-service",
+      "fix_document": "sdd/specs/spec-e-burgos-005-render-service/fixes/fix-e-burgos-005-001.md",
+      "type": "IMPROVEMENT",
+      "severity": "medium",
+      "created_at": "2026-09-11",
+      "resolved_at": "2026-09-11",
+      "validated_at": null,
+      "title": "uploaded assets cannot be deleted from the studio",
+      "estimation_hours": 3,
+      "description": "Literal dev request: 'No se pueden borrar los medios subidos.' The asset store only grows: PUT uploads and GET lists, but nothing removes. A wrong take, a duplicate or a heavy file stays in raw/ forever and keeps polluting the catalog and every montage. This fix adds DELETE /projects/:slug/assets/:role/:filename (EP-027) with the same path confinement as EP-006/EP-011, catalog cleanup, timeline reference detection (409 ASSET_IN_USE, ?force=true to override) and a Delete control on every asset card of the web library.",
+      "justification": "Solo-profile FIX GATE: one new endpoint over the existing asset store, no new entity and no schema change. The contract is registered field by field in sdd/api.json (EP-027) and in the render-api README. No cycle open on spec-005.",
+      "related_modules": [
+        "render-service"
+      ],
+      "affected_files": [
+        "apps/render-api/README.md",
+        "apps/render-api/src/__fixtures__/fake-object-storage.ts",
+        "apps/render-api/src/deps/node-render-api-dependencies.ts",
+        "apps/render-api/src/deps/object-storage.ts",
+        "apps/render-api/src/errors/http-status-for.spec.ts",
+        "apps/render-api/src/errors/http-status-for.ts",
+        "apps/render-api/src/errors/render-api-error.ts",
+        "apps/render-api/src/errors/to-error-payload.ts",
+        "apps/render-api/src/http/create-render-api-server.spec.ts",
+        "apps/render-api/src/http/create-render-api-server.ts",
+        "apps/render-api/src/http/handle-request.ts",
+        "apps/render-api/src/http/handlers/assets-handler.spec.ts",
+        "apps/render-api/src/http/handlers/assets-handler.ts",
+        "apps/render-api/src/http/query-flag.spec.ts",
+        "apps/render-api/src/http/query-flag.ts",
+        "apps/render-api/src/http/routes.ts",
+        "apps/render-api/src/store/catalog-merge.spec.ts",
+        "apps/render-api/src/store/catalog-merge.ts",
+        "apps/render-api/src/store/project-scope.ts",
+        "apps/render-api/src/store/timeline-asset-references.spec.ts",
+        "apps/render-api/src/store/timeline-asset-references.ts",
+        "apps/web/e2e/delete-asset-smoke.mjs",
+        "apps/web/src/api/asset-path.spec.ts",
+        "apps/web/src/api/asset-path.ts",
+        "apps/web/src/api/error-explanations.ts",
+        "apps/web/src/api/render-api-client.spec.ts",
+        "apps/web/src/api/render-api-client.ts",
+        "apps/web/src/api/render-api-types.ts",
+        "apps/web/src/components/asset-card.spec.tsx",
+        "apps/web/src/components/asset-card.tsx",
+        "apps/web/src/components/asset-delete-control.spec.tsx",
+        "apps/web/src/components/asset-delete-control.tsx",
+        "apps/web/src/i18n/messages-en.ts",
+        "apps/web/src/i18n/messages-es.ts",
+        "apps/web/src/pages/asset-library-page.spec.tsx",
+        "apps/web/src/pages/asset-library-page.tsx",
+        "sdd/api.json",
+        "sdd/context/apps/render-api/updates/2026-09-11-fix-e-burgos-005-001.md",
+        "sdd/context/apps/web/updates/2026-09-11-fix-e-burgos-005-001.md",
+        "sdd/context/constitution.md",
+        "sdd/fixes.json",
+        "sdd/specs/spec-e-burgos-005-render-service/fixes/fix-e-burgos-005-001.md",
+        "sdd/specs/spec-e-burgos-005-render-service/fixes/artifacts/ (5 E2E screenshots)"
+      ],
+      "test_reference": "pnpm nx run-many -t lint test build green for 8 projects and pnpm sdd:validate OK (2026-09-11). render-api 949 tests (98.14% stmts / 92.66% branch), web 876 tests (99.27% / 95.68%), floors untouched at 80%. New unit coverage: path confinement, 404 ASSET_NOT_FOUND, 409 ASSET_IN_USE with its list of uses, ?force=true, catalog and transcript cleanup, CATALOG_UNREADABLE leaving the file on disk, two concurrent deletes serialized on the upload mutex, and a server-level test that proves the query string reaches the handler (broken on purpose: without it the forced delete answers 409). Web: deleteAsset client (encoding, force, typed 409), AssetDeleteControl (confirmation, in-use retry, error codes) and the library reload. E2E apps/web/e2e/delete-asset-smoke.mjs on ports 4420/4421 over a temporary copy of media/smoke-ingest: uploaded a file through the UI, deleted it from the card and verified it left disk and work/catalog.json; the A-roll the timeline uses answered 409 and stayed on disk; Delete anyway removed it together with its transcript. Screenshots in sdd/specs/spec-e-burgos-005-render-service/fixes/artifacts/.",
+      "status": "implemented",
+      "cycle": null,
+      "usage": {
+        "provider_model": "claude/opus",
+        "effort": "high",
+        "tokens_in": 260000,
+        "tokens_out": 34000,
+        "approx": true,
+        "source": "declared-estimate",
+        "recorded_at": "2026-09-11",
+        "by_agent": [
+          {
+            "agent": "implementor-back",
+            "provider_model": "claude/opus",
+            "effort": "high",
+            "tokens_in": 260000,
+            "tokens_out": 34000,
+            "approx": true,
+            "source": "declared-estimate",
+            "recorded_at": "2026-09-11"
+          }
+        ]
+      }
     }
   ]
 }

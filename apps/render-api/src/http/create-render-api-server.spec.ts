@@ -42,6 +42,62 @@ describe('createRenderApiServer', () => {
     await expect(fetch(`http://${address.host}:${address.port}/health`)).rejects.toThrow();
   });
 
+  it('hands the query string to the handler and still routes on the path alone', async () => {
+    const assetId = 'raw/aroll/clip01.mp4';
+    const base = buildMinimalTimeline();
+    const firstClip = base.tracks.aroll[0];
+    if (firstClip === undefined) {
+      throw new Error('the minimal timeline fixture has no aroll clip to retarget');
+    }
+    const timeline = {
+      ...base,
+      assets: base.assets.map((asset) => ({ ...asset, id: assetId, path: assetId })),
+      tracks: { ...base.tracks, aroll: [{ ...firstClip, assetId }] },
+    };
+
+    const seed = () => ({
+      directories: [`${STORE.mediaRoot}/smoke-ingest`],
+      files: [
+        { path: `${STORE.mediaRoot}/smoke-ingest/${assetId}`, contents: 'bytes' },
+        {
+          path: `${STORE.mediaRoot}/smoke-ingest/work/timeline.json`,
+          contents: JSON.stringify(timeline),
+        },
+      ],
+    });
+
+    const refusingCallLog = createCallLog();
+    const refusingStorage = createFakeObjectStorage(refusingCallLog, seed());
+    server = createRenderApiServer(
+      createFakeRenderApiDependencies(refusingCallLog, { storage: refusingStorage }),
+      { host: '127.0.0.1', port: 0 },
+      STORE,
+    );
+    const refusingAddress = await server.listen();
+    const refused = await fetch(
+      `http://${refusingAddress.host}:${refusingAddress.port}/projects/smoke-ingest/assets/aroll/clip01.mp4`,
+      { method: 'DELETE' },
+    );
+    expect(refused.status).toBe(409);
+    await server.close();
+
+    const callLog = createCallLog();
+    const storage = createFakeObjectStorage(callLog, seed());
+    server = createRenderApiServer(
+      createFakeRenderApiDependencies(callLog, { storage }),
+      { host: '127.0.0.1', port: 0 },
+      STORE,
+    );
+    const address = await server.listen();
+    const forced = await fetch(
+      `http://${address.host}:${address.port}/projects/smoke-ingest/assets/aroll/clip01.mp4?force=true`,
+      { method: 'DELETE' },
+    );
+
+    expect(forced.status).toBe(200);
+    expect(await storage.stat(`${STORE.mediaRoot}/smoke-ingest/${assetId}`)).toBeNull();
+  });
+
   it('falls back to its own last-resort 500 when handleRequest itself throws', async () => {
     const callLog = createCallLog();
     const deps = createFakeRenderApiDependencies(callLog, {

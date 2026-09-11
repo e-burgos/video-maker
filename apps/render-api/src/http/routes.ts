@@ -9,6 +9,7 @@ export const ROUTES = [
   { id: 'projects.detail', method: 'GET', pattern: '/projects/:slug' },
   { id: 'projects.assets.list', method: 'GET', pattern: '/projects/:slug/assets' },
   { id: 'projects.assets.upload', method: 'PUT', pattern: '/projects/:slug/assets/:role/:filename' },
+  { id: 'projects.assets.delete', method: 'DELETE', pattern: '/projects/:slug/assets/:role/:filename' },
   { id: 'projects.timeline.get', method: 'GET', pattern: '/projects/:slug/timeline' },
   { id: 'projects.timeline.put', method: 'PUT', pattern: '/projects/:slug/timeline' },
   { id: 'projects.edl.get', method: 'GET', pattern: '/projects/:slug/edl' },

@@ -7,7 +7,13 @@ import {
   buildCatalogFixture,
   buildMinimalMediaAsset,
 } from '../__fixtures__/catalog-fixtures';
-import { emptyCatalogFor, mergeProbeFailure, mergeUploadedAsset, toCatalogAsset } from './catalog-merge';
+import {
+  emptyCatalogFor,
+  mergeProbeFailure,
+  mergeUploadedAsset,
+  removeCatalogAsset,
+  toCatalogAsset,
+} from './catalog-merge';
 
 describe('emptyCatalogFor', () => {
   it('creates an empty catalog for the slug when there is no previous one', () => {
@@ -156,5 +162,73 @@ describe('mergeProbeFailure', () => {
     );
 
     expect(merged.probeFailures[0]?.message).toBe('A media command exited with a non-zero status.');
+  });
+});
+
+describe('removeCatalogAsset', () => {
+  function catalogWithTranscript(): Catalog {
+    const aroll = buildCatalogAssetFixture({ assetId: 'raw/aroll/clip01.mp4', role: 'aroll' });
+    const music = buildCatalogAssetFixture({ assetId: 'raw/audio/music01.mp3', role: 'audio' });
+
+    return CatalogSchema.parse({
+      ...buildCatalogFixture('smoke-ingest', [aroll, music]),
+      transcripts: [
+        {
+          assetId: 'raw/aroll/clip01.mp4',
+          transcriptPath: 'work/transcripts/aroll/clip01.json',
+          fingerprint: { sizeBytes: 1024, modifiedAtMs: 1_757_289_600_000 },
+          engine: 'whisper.cpp',
+          model: 'ggml-large-v3-turbo-q5_0.bin',
+          language: 'auto',
+        },
+      ],
+      ignored: [{ path: 'raw/broll/notes.txt', reason: 'unsupported-extension' }],
+      probeFailures: [
+        {
+          path: 'raw/images/broken.jpg',
+          errorCode: 'COMMAND_FAILED',
+          message: 'A media command exited with a non-zero status.',
+        },
+      ],
+    });
+  }
+
+  it('drops the asset entry, its transcript and keeps the catalog valid', () => {
+    const removal = removeCatalogAsset(catalogWithTranscript(), 'raw/aroll/clip01.mp4');
+
+    expect(removal.entryRemoved).toBe(true);
+    expect(removal.removedTranscriptPaths).toEqual(['work/transcripts/aroll/clip01.json']);
+    expect(removal.catalog.assets.map((entry) => entry.asset.id)).toEqual(['raw/audio/music01.mp3']);
+    expect(removal.catalog.transcripts).toEqual([]);
+    expect(() => CatalogSchema.parse(removal.catalog)).not.toThrow();
+  });
+
+  it('leaves the transcripts of the assets it does not remove', () => {
+    const removal = removeCatalogAsset(catalogWithTranscript(), 'raw/audio/music01.mp3');
+
+    expect(removal.entryRemoved).toBe(true);
+    expect(removal.removedTranscriptPaths).toEqual([]);
+    expect(removal.catalog.transcripts.map((entry) => entry.assetId)).toEqual([
+      'raw/aroll/clip01.mp4',
+    ]);
+  });
+
+  it('removes an ignored entry and a probe failure of the same path', () => {
+    const ignoredRemoval = removeCatalogAsset(catalogWithTranscript(), 'raw/broll/notes.txt');
+    expect(ignoredRemoval.entryRemoved).toBe(true);
+    expect(ignoredRemoval.catalog.ignored).toEqual([]);
+
+    const failureRemoval = removeCatalogAsset(catalogWithTranscript(), 'raw/images/broken.jpg');
+    expect(failureRemoval.entryRemoved).toBe(true);
+    expect(failureRemoval.catalog.probeFailures).toEqual([]);
+  });
+
+  it('reports nothing removed for a path the catalog never mentions', () => {
+    const catalog = catalogWithTranscript();
+    const removal = removeCatalogAsset(catalog, 'raw/aroll/never-ingested.mp4');
+
+    expect(removal.entryRemoved).toBe(false);
+    expect(removal.removedTranscriptPaths).toEqual([]);
+    expect(removal.catalog).toEqual(catalog);
   });
 });

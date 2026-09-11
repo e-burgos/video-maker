@@ -25,6 +25,7 @@ import {
   serviceUnreachable,
 } from './render-api-error';
 import type {
+  AssetDeletion,
   AssetListEntry,
   AssetListing,
   AssetRole,
@@ -76,6 +77,7 @@ export type RenderApiClient = {
   listAssets: (slug: string) => Promise<AssetListing>;
   getTimeline: (slug: string) => Promise<Timeline>;
   uploadAsset: (input: UploadAssetInput) => Promise<AssetListEntry>;
+  deleteAsset: (input: DeleteAssetInput) => Promise<AssetDeletion>;
   putTimeline: (slug: string, timeline: Timeline) => Promise<TimelineWriteResult>;
   createRenderJob: (slug: string) => Promise<RenderJob>;
   createMontageJob: (slug: string, input: CreateMontageJobInput) => Promise<MontageJob>;
@@ -106,6 +108,13 @@ export type UploadAssetInput = {
   filename: string;
   contentType: string;
   body: Blob;
+};
+
+export type DeleteAssetInput = {
+  slug: string;
+  role: AssetRole;
+  filename: string;
+  force: boolean;
 };
 
 function isRecord(value: unknown): value is Record<string, unknown> {
@@ -254,6 +263,20 @@ export function createRenderApiClient(fetchImpl: FetchLike): RenderApiClient {
         (value) => isRecord(value) && typeof value['path'] === 'string',
       );
       return body as AssetListEntry;
+    },
+
+    async deleteAsset(input: DeleteAssetInput): Promise<AssetDeletion> {
+      const path = `/projects/${encodeURIComponent(input.slug)}/assets/${encodeURIComponent(
+        input.role,
+      )}/${encodeURIComponent(input.filename)}${input.force ? '?force=true' : ''}`;
+
+      const body = await requestJson(
+        path,
+        { method: 'DELETE' },
+        'an asset deletion result',
+        (value) => isRecord(value) && isRecord(value['deleted']) && Array.isArray(value['timelineReferences']),
+      );
+      return body as AssetDeletion;
     },
 
     async putTimeline(slug: string, timeline: Timeline): Promise<TimelineWriteResult> {

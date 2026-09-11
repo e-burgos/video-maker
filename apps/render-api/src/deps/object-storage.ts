@@ -37,4 +37,5 @@ export interface ObjectStorage {
   readonly writeTemporary: (input: WriteTemporaryInput) => Promise<WriteTemporaryOutcome>;
   readonly promoteTemporary: (temporaryPath: string, finalPath: string) => Promise<void>;
   readonly removeTemporary: (path: string) => Promise<void>;
+  readonly removeFile: (path: string) => Promise<void>;
 }

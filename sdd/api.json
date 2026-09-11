@@ -901,6 +901,44 @@
             "change": "Created in spec-e-burgos-016 cycle-01: audible preview of an installed voice, cached outside media/ and served off the job queue."
           }
         ]
+      },
+      {
+        "id": "EP-027",
+        "method": "DELETE",
+        "path": "/projects/:slug/assets/:role/:filename",
+        "module": "render-service",
+        "spec": "sdd/specs/spec-e-burgos-005-render-service",
+        "status": "implemented",
+        "created_in_cycle": 3,
+        "updated_in_cycle": null,
+        "description": "Deletes one raw asset of the project. Same path confinement as EP-006: role is one of the six catalog roles and filename a single portable path segment, so the target can never leave raw/<rawDirectoryForRole(role)>/. Removes the file, drops its entry from work/catalog.json (assets, transcripts, ignored and probeFailures alike) and deletes the transcript file the removed transcripts[] entry pointed at — the only derivative the catalog models per asset. Derivatives the catalog does not model (work/renders/<jobId>/, work/edl.json, files under out/) are left orphaned until the next ingest or montage: there is no reverse index tying them to an asset. Serialized per project by the same RenderApiRuntime mutex as the upload, so a delete never interleaves with an upload of the same project. Nothing is removed unless every check passed: a 404, a 409 or a 500 leaves the file and the catalog exactly as they were.",
+        "path_params": [
+          "slug",
+          "role",
+          "filename"
+        ],
+        "query_params": {
+          "force": "'true' (the only truthy spelling; any other value is read as absent) deletes an asset the stored timeline still references instead of answering 409."
+        },
+        "required_headers": [],
+        "request_body": {
+          "content-type": "none",
+          "schema": "Takes no request body."
+        },
+        "responses": {
+          "200": "application/json: { slug, deleted: { path, role, catalogEntryRemoved, removedArtifacts }, timelineReferences }. removedArtifacts lists the project-relative paths deleted alongside the asset (the transcript of an aroll asset, if any). timelineReferences is empty on a plain delete and, after ?force=true, carries the uses that were broken: { kind: 'asset' } | { kind: 'clip', track: 'aroll'|'broll'|'voice'|'music', clipId } | { kind: 'logo' }.",
+          "404": "PROJECT_NOT_FOUND, or ASSET_NOT_FOUND when raw/<dir>/<filename> does not exist in the project. application/json: { error: { code, stage: null, message, resource?, expected?, hint?, assetPersisted?, catalogUpdated? } }.",
+          "409": "ASSET_IN_USE — work/timeline.json still references the asset in assets[], in a clip of any track or as logo.assetId. hint carries the comma-separated list of uses (for example 'asset, tracks.aroll clip clip-aroll-1'); retry with ?force=true to delete anyway. application/json: { error: { code, stage: null, message, resource?, expected?, hint?, assetPersisted?, catalogUpdated? } }.",
+          "422": "PROJECT_SLUG_INVALID, ASSET_ROLE_INVALID (expected: 'aroll, broll, image, audio, voice or logo'), ASSET_PATH_INVALID — no storage port was invoked — or TIMELINE_INVALID when work/timeline.json exists but does not validate, because then the references cannot be proven absent. application/json: { error: { code, stage: null, message, resource?, expected?, hint?, assetPersisted?, catalogUpdated? } }.",
+          "500": "CATALOG_UNREADABLE with assetPersisted true and catalogUpdated false: the catalog is read before anything is removed, so the asset is still on disk. application/json: { error: { code, stage: null, message, resource?, expected?, hint?, assetPersisted?, catalogUpdated? } }."
+        },
+        "changelog": [
+          {
+            "cycle": 3,
+            "date": "2026-09-11",
+            "change": "Created by FIX-e-burgos-005-001: the asset store only grew — PUT uploaded and GET listed, but nothing removed."
+          }
+        ]
       }
     ]
   }

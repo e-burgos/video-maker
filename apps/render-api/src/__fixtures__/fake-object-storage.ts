@@ -237,5 +237,10 @@ export function createFakeObjectStorage(callLog: CallLog, seed?: FakeObjectStora
       callLog.record('removeTemporary', path);
       records.delete(path);
     },
+
+    removeFile: async (path) => {
+      callLog.record('removeFile', path);
+      records.delete(path);
+    },
   };
 }

@@ -43,6 +43,8 @@ export const MESSAGES_EN = {
   'error.RESPONSE_SHAPE_UNEXPECTED': 'The render service answered outside the contract this studio expects.',
   'error.TIMELINE_NOT_FOUND': 'This project has no timeline yet. Generate the montage from the asset library.',
   'error.TIMELINE_ALREADY_EXISTS': 'This project already has a timeline.',
+  'error.ASSET_IN_USE': 'The stored timeline still uses this asset. Deleting it anyway breaks the montage until the timeline is rebuilt.',
+  'error.ASSET_NOT_FOUND': 'This asset is no longer in the project. Reload the library to see what is actually stored.',
 
   'library.assetCount.one': '{count} raw asset',
   'library.assetCount.other': '{count} raw assets',
@@ -80,6 +82,18 @@ export const MESSAGES_EN = {
   'assetUploader.fileLabel': 'Asset file',
   'assetUploader.uploading': 'Uploading…',
   'assetUploader.stored': 'stored {path}',
+
+  'assetDelete.action': 'Delete',
+  'assetDelete.openAria': 'Delete {filename}',
+  'assetDelete.question': 'Delete {filename}?',
+  'assetDelete.warning': 'The file leaves raw/ and its catalog entry goes with it. This cannot be undone.',
+  'assetDelete.accept': 'Delete',
+  'assetDelete.cancel': 'Keep it',
+  'assetDelete.pending': 'Deleting…',
+  'assetDelete.force': 'Delete anyway',
+  'assetDelete.inUseTitle': 'The timeline still uses this asset',
+  'assetDelete.inUseUses': 'used as {uses}',
+  'assetDelete.inUseWarning': 'Deleting it leaves the montage pointing at a file that is gone: rebuild the timeline afterwards.',
 
   'library.backToProjects': '← all projects',
   'library.openStoryboard': 'open storyboard',

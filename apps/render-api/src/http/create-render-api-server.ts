@@ -37,10 +37,10 @@ function toHeaders(incoming: IncomingMessage): Readonly<Record<string, string>> 
 }
 
 function toRequestLine(incoming: IncomingMessage): HttpRequestLine {
-  const pathname = new URL(incoming.url ?? '/', PATH_PARSE_BASE).pathname;
+  const requested = new URL(incoming.url ?? '/', PATH_PARSE_BASE);
   return {
     method: incoming.method ?? 'GET',
-    path: pathname,
+    path: `${requested.pathname}${requested.search}`,
     headers: toHeaders(incoming),
     body: { stream: () => incoming },
   };
