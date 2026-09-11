@@ -1,9 +1,9 @@
 # Constitución — apps/web
 
-> Versión 2.2 | Última actualización: FIX-e-burgos-009-001 | Fecha: 2026-09-11
-> Consolidada por el orquestador al abrir `cycle-01` de `spec-e-burgos-016-studio-usability`
-> (fundió los fragmentos de `spec-008` c02, `spec-009` c02, `spec-015` c02, `FIX-015-001` y
-> `FIX-009-001`).
+> Versión 2.3 | Última actualización: spec-e-burgos-016 cycle-01 | Fecha: 2026-09-11
+> Consolidada por el orquestador al abrir `cycle-02` de `spec-e-burgos-016-studio-usability`
+> (fundió el fragmento de `spec-016` c01 sobre la 2.2, que ya traía `spec-008` c02, `spec-009` c02,
+> `spec-015` c02, `FIX-015-001` y `FIX-009-001`).
 > Las actualizaciones por ciclo/fix van como fragmentos aditivos en `updates/` —
 > este archivo base solo lo modifica la consolidación (ver `sdd/context/context_prompt.md` sección 6).
 
@@ -41,7 +41,8 @@
 ```
 src/
   api/          frontera con render-api: tipos del contrato, cliente tipado, superficie de errores,
-                artifact-url, project-slug, asset-media-kind, clipboard, RenderApiProvider,
+                artifact-url (+ servicePathUrl), project-slug, asset-media-kind, asset-roles,
+                clipboard, RenderApiProvider,
                 parse-timeline · player-timeline · preview-format,
                 render-api-types · parse-render-job · render-job-poll-plan · render-job-artifact,
                 montage-capability · montage-presets,
@@ -53,6 +54,7 @@ src/
   hooks/        useAsyncResource (único primitivo de estado de servidor) · use-api-action ·
                 use-render-job-poll · use-producer-turn-poll
   components/   studio-layout · service-health-badge · error-notice · create-project-form ·
+                voice-picker ·
                 asset-card · asset-preview · asset-uploader · timeline-player ·
                 clip-track-editor · caption-editor · music-mix-editor · output-preset-selector ·
                 timeline-issue-list · timeline-save-bar · render-trigger · render-job-list ·
@@ -67,7 +69,7 @@ src/
   app/app.tsx   router (`/`, `/projects/:slug`, `/projects/:slug/{producer,storyboard,voice,preview}`)
                 y provider
 e2e/            smoke-helpers.mjs (compartido) · studio-smoke.mjs · montage-smoke.mjs ·
-                storyboard-smoke.mjs · voice-smoke.mjs · producer-smoke.mjs ·
+                storyboard-smoke.mjs · voice-smoke.mjs · voices-smoke.mjs · producer-smoke.mjs ·
                 capture-frame-240.mjs (fuera del build, fuera de Vitest)
 ```
 
@@ -102,8 +104,22 @@ e2e/            smoke-helpers.mjs (compartido) · studio-smoke.mjs · montage-sm
   (`montageFailureExplanation`, `storyboardFailureExplanation`, `voiceFailureExplanation`,
   `producerFailureExplanation`) y la UI muestra **el code y la frase**, nunca una sola de las dos.
 - **Las etiquetas legibles de un union viven en `src/api/`, no en el componente**
-  (`montage-presets.ts` es el precedente): así un miembro nuevo del union rompe el tipo en un solo
-  lugar y no se cuela un `switch` incompleto en JSX.
+  (`montage-presets.ts` es el precedente, `asset-roles.ts` el segundo caso): así un miembro nuevo
+  del union rompe el tipo en un solo lugar y no se cuela un `switch` incompleto en JSX.
+  `asset-roles.ts` concentra nombre, impacto en el video final, orden por importancia y
+  obligatoriedad de los seis roles más `BROLL_MATCHING_HINT`, y `orderedAssetRoles()` impone el
+  orden del catálogo, no el que le pase el llamador.
+- **`servicePathUrl(path)` resuelve los paths relativos que publica el servicio** (el `previewUrl`
+  de una voz) same-origin por el proxy `/api`, igual que `artifactUrl`: el servicio nunca emite su
+  propio host. El preview de voz **no es un artefacto de proyecto** y no pasa por `EP-011`.
+- **Una tarjeta de voz monta su propio `<audio preload="none">`** (`voice-picker.tsx`): el estado
+  `idle|loading|playing|error` vive en la tarjeta y el id que suena, en el picker, así que arrancar
+  una voz pausa la anterior. Ese estado también se guarda en un `ref` para que el efecto de "pausá
+  si ya no sos la activa" **no llame `pause()` en el montaje** — jsdom no implementa `pause` y
+  ensuciaba la salida de toda la suite. Un `play()` rechazado por el navegador deja la tarjeta en
+  `error`, nunca trabada en `loading`.
+- **`AssetUploader` conserva el camino de rol fijo** (`roles={['voice']}`/`['logo']`) con su
+  `<label htmlFor>` intacto: es el contrato que asera `logo-overlay-editor.spec`.
 - **La suite no tiene `@testing-library/jest-dom`**: `toBeEnabled()`/`toBeDisabled()` fallan con
   `Invalid Chai property`. Aserar sobre `(el as HTMLButtonElement).disabled`.
 - **Superficie de errores:** `RenderApiError` conserva el `code` del servicio y suma exactamente
@@ -145,7 +161,7 @@ e2e/            smoke-helpers.mjs (compartido) · studio-smoke.mjs · montage-sm
   lib, así que la salida no es un import dinámico sino mantener a los consumidores dentro de la ruta
   perezosa. **El detector es la salida de `vite build`**: importar Zod desde el cliente subió el
   chunk inicial de 466 kB a 580 kB y reapareció el aviso de "chunks larger than 500 kB". Medición
-  vigente: inicial **478 kB**, `producer-page` 23,1 kB, `voice-page` 19,9 kB, `storyboard-page`
+  vigente: inicial **479,33 kB**, `producer-page` 23,1 kB, `voice-page` 19,9 kB, `storyboard-page`
   33,1 kB, `project-preview-page` 366 kB, **sin** el aviso de 500 kB.
 - **`useSearchParams` de `react-router` arrastra al chunk inicial**: la salida es `URLSearchParams`
   nativo. No cambiarlo por el hook del router "por consistencia".
@@ -185,7 +201,10 @@ e2e/            smoke-helpers.mjs (compartido) · studio-smoke.mjs · montage-sm
   captura de paridad de encuadre; los `data-testid` (`timeline-player`, `timeline-save-bar`,
   `render-job-panel`, `asset-source`, `montage-trigger`, `montage-job-panel`, `montage-stage`,
   `montage-blockers`, `montage-asset-progress`) y `data-timeline-dirty`/`data-montage-state`, el
-  del smoke E2E. Si se renombran, hay que actualizar los guiones.
+  del smoke E2E. Los de `cycle-01` de `spec-016` se suman a ese contrato: `voice-picker`,
+  `voice-card` (con `data-voice-id`, `data-selected`, `data-preview-state`), `voice-preview-audio`,
+  `asset-role-choices`, `asset-role-choice` (con `data-role`, `data-selected`),
+  `asset-role-required` y `asset-role-hint`. Si se renombran, hay que actualizar los guiones.
 - **Cada ciclo cierra con al menos una captura real de Playwright** de la UI contra un `render-api`
   real, en `cycles/cycle-XX/artifacts/` (D-10, RNF-5). `lint`/`test`/`build` verdes no prueban que
   la pantalla se dibuje, y **una UI se verifica midiendo el estado del medio en el navegador**

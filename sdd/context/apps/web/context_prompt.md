@@ -2,8 +2,8 @@
 
 > Entry point para agentes que trabajen sobre `apps/web`.
 > Leer junto con `constitution.md` de este directorio **+ `updates/*.md` en orden de nombre**.
-> Última actualización: FIX-e-burgos-009-001 | Fecha: 2026-09-11
-> Consolidado por el orquestador al abrir `cycle-01` de `spec-e-burgos-016-studio-usability`.
+> Última actualización: spec-e-burgos-016 cycle-01 | Fecha: 2026-09-11
+> Consolidado por el orquestador al abrir `cycle-02` de `spec-e-burgos-016-studio-usability`.
 
 - **Tipo:** app React 19 (SPA local sobre `apps/render-api`)
 - **Estado:** **producto completo de punta a punta.** El nav por proyecto es
@@ -15,9 +15,13 @@
   estimada, regeneración de una escena, sustitución por grabación propia), preview de la `Timeline`
   en el `<Player>` de Remotion con edición del documento (trim y orden de escenas, captions,
   niveles de música con reescritura de la automation, preset de salida, capa de logo) y un único
-  `PUT`, y jobs de render con polling, cancelación y descarga del MP4. Consume
-  `EP-001`..`EP-008` y `EP-011`..`EP-025`. Suite: **76 archivos / 715 tests**, 98,73 % stmts ·
-  95,96 % branch · 98,69 % funcs · 98,99 % lines, piso 80 %, `coverage.include` sin recortar.
+  `PUT`, y jobs de render con polling, cancelación y descarga del MP4. La voz se elige desde
+  **tarjetas audibles** (`VoicePicker`: etiqueta legible, idioma, calidad, descripción y demo de
+  `EP-026` reproducida en el navegador) y cada rol de subida llega con **qué le hace al video
+  final**, el directorio `raw/<rol>/` destino, la marca de obligatorio y la regla de matching de
+  B-roll. Consume `EP-001`..`EP-008`, `EP-011`..`EP-025` y `EP-026`. Suite: **78 archivos /
+  742 tests**, 98,71 % stmts · 95,96 % branch · 98,73 % funcs · 98,96 % lines, piso 80 %,
+  `coverage.include` sin recortar.
   Cero dependencias npm propias además de `@remotion/player`.
 - **Descopado a propósito:** la **edición del EDL (`EP-009`/`EP-010`)**, porque `buildTimeline` sólo
   se invoca desde `libs/auto-montage` y guardar un EDL editado escribiría `work/edl.json` sin efecto
@@ -74,7 +78,9 @@
   `spec-012` y `spec-011`. **La hoja de prompts se lee del documento guardado**, así que con cambios
   sin guardar copia los prompts previos; la UI lo avisa en vez de guardar sola.
 - **La voz no se elige por escena**: el selector es del proyecto, aunque `EP-012` acepta
-  `voice` + `sceneIds` juntos. **No hay vuelta atrás de una pista `uploaded` a una generada**: el
+  `voice` + `sceneIds` juntos, y el `VoicePicker` ya es un componente reusable. El demo tampoco
+  ofrece volumen ni velocidad, y **la frase del preview es siempre la misma y en español**: una voz
+  instalada de otro idioma la leería con fonética cruzada (hoy las tres instaladas son `es_*`). **No hay vuelta atrás de una pista `uploaded` a una generada**: el
   servicio no expone un `DELETE` de la pista y regenerar con `overwrite: true` pisa las otras tomas.
 - **`durationMs` del manifest de voz se muestra pero nadie lo consume**: `buildTimelineFromStoryboard`
   (`spec-010`) tiene que leerlo y no la `estimatedDurationMs` del storyboard — en la corrida real las
@@ -83,6 +89,9 @@
   expone un `DELETE` de `work/producer/`), **un turno perdido por reinicio da
   `PRODUCER_TURN_NOT_FOUND`** sin reenganche posible (registro in-memory), y **el productor no sube
   archivos**: el material entra por la biblioteca o por el panel del logo.
+- **Todo el copy de la app está en inglés y repartido entre componentes**: sólo `asset-roles.ts`,
+  `montage-presets.ts` y los cuatro traductores de códigos de error lo tienen centralizado. No hay
+  mecanismo de traducción ni switch de idioma — es exactamente el trabajo de `cycle-02`.
 - **El costo en tokens no se muestra en ninguna pantalla**: el `usage` del reporte de storyboard
   llega a la UI y no se dibuja, y el contrato del turno del productor directamente no lo expone.
 - **Los dos `404` de `/favicon.ico`** en consola no son un defecto: `index.html` no declara icono.
