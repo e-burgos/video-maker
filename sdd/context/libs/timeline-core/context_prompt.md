@@ -2,20 +2,22 @@
 
 > Entry point para agentes que trabajen sobre `libs/timeline-core`.
 > Leer junto con `constitution.md` de este directorio **+ `updates/*.md` en orden de nombre**.
-> Última actualización: spec-e-burgos-001 cycle-01 + spec-e-burgos-002 cycle-02 | Fecha: 2026-09-08
+> Última actualización: spec-008 c01 + spec-009 c01 + spec-014 c01 + fixes 003-003 / 007-002 / 009-002 | Fecha: 2026-09-11
 
 - **Tipo:** lib de dominio TypeScript (sin I/O, sin React)
-- **Estado:** completa para su alcance de `cycle-01` de `spec-e-burgos-001-core-composition-media-pipeline`
-  (cerrado el 2026-09-07) y de `cycle-02` de `spec-e-burgos-002` (cerrado el 2026-09-07): los 6
-  contratos Zod (`OutputFormat`, `MediaAsset`, `Transcription`, `EditDecisionList`, `AudioMixPlan`,
-  `Timeline`) con sus invariantes, y todas las funciones puras del motor (`msToFrames`/`framesToMs`,
-  `defaultFormat`/`safeZoneFor`, `detectSilencesFromWords`/`mergeSilences`/`pruneSilences`,
-  `planPunchIns`, `remapMsAfterCuts`, `groupWordsForCaptions`/`pickEmphasisIndex`, `planDucking`,
-  `buildTimeline`, `validateTimeline`, `normalizeTranscriptionWords` y los helpers de JSON Schema).
-  CA-001..CA-016 en verde; 209 tests, cobertura 97.29 % statements.
-- **Spec que la gobierna:** `sdd/specs/spec-e-burgos-001-core-composition-media-pipeline/spec-e-burgos-001-core-composition-media-pipeline.spec.md` (secciones "Contratos de datos" y "Cálculos del motor")
+- **Estado:** completa para su alcance acumulado. Los contratos Zod del motor (`OutputFormat`,
+  `MediaAsset`, `Transcription`, `EditDecisionList`, `AudioMixPlan`, `Timeline`) con sus
+  invariantes, más los contratos del modo generativo (`StoryboardDocument` + propuesta y JSON Schema
+  derivado, `VoiceManifest`, `VoiceScriptManifest`), y todas las funciones puras del motor
+  (`msToFrames`/`framesToMs`, `defaultFormat`/`safeZoneFor`, `detectSilencesFromWords`/
+  `mergeSilences`/`pruneSilences`, `planPunchIns`, `remapMsAfterCuts`, `groupWordsForCaptions`/
+  `pickEmphasisIndex`, `captionGroupingForStyle`, `planDucking`, `musicNormalizationGainDb`,
+  `hashNarration` y los helpers de manifest de voz, `parseVoiceScriptLines`/
+  `planVoiceScriptPlacements`, `buildTimeline`, `validateTimeline`, `normalizeTranscriptionWords`
+  y los helpers de JSON Schema).
+- **Spec que la gobierna:** `sdd/specs/spec-e-burgos-001-core-composition-media-pipeline/spec-e-burgos-001-core-composition-media-pipeline.spec.md` (secciones "Contratos de datos" y "Cálculos del motor"); las extensiones posteriores vienen de `spec-008` (storyboard), `spec-009` (voz), `spec-014` (calidad de producción) y los fixes 003-003 / 007-002 / 009-002.
 - **Cómo correr y testear:** `pnpm nx test timeline-core`, `pnpm nx lint timeline-core`, `pnpm nx build timeline-core`, `pnpm nx run timeline-core:schemas` (regenera los JSON Schema commiteados)
-- **Consumidores previstos:** `libs/media-local` (aplica `normalizeTranscriptionWords` en sus parsers antes de validar contra `TranscriptionSchema` — pendiente en `cycle-02` de esa lib), `libs/composition-remotion` (`cycle-03`: necesita la Timeline de CA-013/CA-023 y cablear `scene.transform.anchor` a `punchInStyle` en `aroll-series.tsx`, dejando su propio fragmento en `sdd/context/libs/composition-remotion/updates/`), `libs/auto-montage`, `apps/render-api`, `apps/web`
+- **Consumidores:** `libs/media-local` (aplica `normalizeTranscriptionWords` en sus parsers antes de validar contra `TranscriptionSchema`), `libs/composition-remotion` (cablea `scene.transform.anchor` a `punchInStyle` y lee `timeline.captionStyle`/`timeline.logo`), `libs/auto-montage`, `apps/render-api`, `apps/render-cli`, `apps/web`
 
 ## Pendientes conocidos
 
@@ -24,3 +26,12 @@
 - `buildTimeline` fija el clip de música con `durationFrames` = duración de la Timeline: si el
   asset de música es más corto, `validateTimeline` lo reporta como `CLIP_EXCEEDS_ASSET`. No hay
   estrategia de loop/fade definida — la define el ciclo que la necesite.
+- `MediaAsset.audio.integratedLufs` es opcional: quien no lo mida no normaliza.
+- `durationMs` del `VoiceManifest` es la fuente de verdad de la duración de cada escena y **no**
+  reemplaza a `estimatedDurationMs` del `StoryboardDocument`: quien arme la Timeline lee el manifest.
+- `StoryboardDocument` y `VoiceManifest` no están en `timelineSchemaRegistry` ni en el bundle de
+  JSON Schema; sumarlos obliga a regenerar los `.schema.json` versionados.
+- `captionsStyle` y `musicTags`/`sfxTags` del storyboard son strings libres.
+- `planVoiceScriptPlacements` acelera **por línea**, no reparte el sobrante entre frases seguidas, y
+  no valida marcas no monótonas (`[0:30]` después de `[0:40]` desplaza, no falla).
+- `minWords` de `groupWordsForCaptions` no reparte: el rango "6–10" es un objetivo, no una garantía.
