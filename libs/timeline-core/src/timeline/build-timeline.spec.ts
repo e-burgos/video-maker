@@ -5,6 +5,7 @@ import { ca013Edl, ca013Format } from '../__fixtures__/edl';
 import { DEFAULT_AUDIO_MIX_PLAN, DEFAULT_MUSIC_MIX, planDucking } from '../ducking/plan-ducking';
 import type { EditDecisionList } from '../schemas/edit-decision-list.schema';
 import { TimelineSchema } from '../schemas/timeline.schema';
+import { framesToMs } from '../units/units';
 import { TimelineBuildError, buildTimeline } from './build-timeline';
 import type { LogoInput, MusicInput, VoiceInput } from './build-timeline';
 
@@ -65,6 +66,40 @@ describe('buildTimeline (CA-013)', () => {
       });
     });
     expect(timeline.tracks.aroll.every((clip) => clip.assetId !== 'work/voice/voice.wav')).toBe(true);
+  });
+
+  it('recorta el clip de voz a la duración del asset cuando la narración termina antes del A-roll (FIX-e-burgos-009-002)', () => {
+    const fps = ca013Edl.format.fps;
+    const timeline = buildTimeline(ca013Edl, ca013Assets, undefined, undefined, {
+      assetId: 'work/voice/voice.wav',
+      durationMs: 1000,
+    });
+
+    const clips = timeline.tracks.voice;
+    expect(clips.length).toBeGreaterThan(0);
+    clips.forEach((clip) => {
+      expect(clip.trimStartMs + framesToMs(clip.durationFrames, fps, 'ceil')).toBeLessThanOrEqual(1000);
+    });
+  });
+
+  it('deja fuera de la pista de voz el clip que empieza después de que la narración terminó (FIX-e-burgos-009-002)', () => {
+    const timeline = buildTimeline(ca013Edl, ca013Assets, undefined, undefined, {
+      assetId: 'work/voice/voice.wav',
+      durationMs: 1,
+    });
+
+    expect(timeline.tracks.voice).toHaveLength(0);
+  });
+
+  it('con una voz más larga que el A-roll el clip de voz no se recorta (FIX-e-burgos-009-002)', () => {
+    const timeline = buildTimeline(ca013Edl, ca013Assets, undefined, undefined, {
+      assetId: 'work/voice/voice.wav',
+      durationMs: 9_000_000,
+    });
+
+    timeline.tracks.voice.forEach((clip, index) => {
+      expect(clip.durationFrames).toBe(timeline.tracks.aroll[index]?.durationFrames);
+    });
   });
 
   it('espeja el A-roll en la pista de voz sin ganancia aplicada', () => {

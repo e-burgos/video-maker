@@ -294,6 +294,13 @@ export function createFakeRenderApiDependencies(
       }
     },
 
+    placeVoiceTracks: async (input) => {
+      callLog.record('placeVoiceTracks', input);
+      if (overrides?.placeVoiceTracks) {
+        await overrides.placeVoiceTracks(input);
+      }
+    },
+
     transcribeVoice: async (input) => {
       callLog.record('transcribeVoice', input);
       if (overrides?.transcribeVoice) {

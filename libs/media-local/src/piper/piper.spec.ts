@@ -138,6 +138,39 @@ describe('synthesizeSpeech (US-09-004)', () => {
     ]);
   });
 
+  it('pasa --length-scale cuando se pide acelerar la locución (FIX-e-burgos-009-002)', async () => {
+    const runner = new FixtureCommandRunner([{ bin: 'piper', response: { exitCode: 0 } }]);
+
+    await synthesizeSpeech(
+      '/out.wav',
+      { modelPath: DEFAULT_MODEL, textPath: '/in.txt', lengthScale: 0.88 },
+      runner,
+    );
+
+    expect(runner.calls[0]?.args).toEqual([
+      '-m',
+      DEFAULT_MODEL,
+      '-i',
+      '/in.txt',
+      '--length-scale',
+      '0.88',
+      '-f',
+      '/out.wav',
+    ]);
+  });
+
+  it('no pasa --length-scale a velocidad natural (FIX-e-burgos-009-002)', async () => {
+    const runner = new FixtureCommandRunner([{ bin: 'piper', response: { exitCode: 0 } }]);
+
+    await synthesizeSpeech(
+      '/out.wav',
+      { modelPath: DEFAULT_MODEL, textPath: '/in.txt', lengthScale: 1 },
+      runner,
+    );
+
+    expect(runner.calls[0]?.args).not.toContain('--length-scale');
+  });
+
   it('sin piperPath usa el comando piper del PATH', async () => {
     const runner = new FixtureCommandRunner([{ bin: 'piper', response: { exitCode: 0 } }]);
 

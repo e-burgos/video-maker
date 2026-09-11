@@ -6,7 +6,13 @@ import type {
   OutputPreset,
   Timeline,
 } from '@video-maker/timeline-core';
-import { buildTimeline, framesToMs, planPunchIns, remapMsAfterCuts } from '@video-maker/timeline-core';
+import {
+  buildTimeline,
+  framesToMs,
+  planPunchIns,
+  remapMsAfterCuts,
+  stripVoiceScriptTimeMarks,
+} from '@video-maker/timeline-core';
 import type { ReadTextFile } from '@video-maker/media-local';
 import { nodeReadTextFile } from '@video-maker/media-local';
 
@@ -40,6 +46,7 @@ import { nodeEnsureDirectory } from './fs/ensure-directory';
 import type { WriteTextFile } from './fs/write-text-file';
 import { nodeWriteTextFile } from './fs/write-text-file';
 import { readVoiceScriptTrack } from './voice/read-voice-script-track';
+import type { VoiceScriptTrack } from './voice/read-voice-script-track';
 
 export type LogoMode = 'auto' | 'off';
 
@@ -116,17 +123,19 @@ function toAlignmentCounts(alignment: ScriptAlignmentResult): ScriptAlignmentCou
 }
 
 function toVoiceTrackSummary(
-  track: { readonly asset: MediaAsset } | null,
+  track: VoiceScriptTrack | null,
   sourceDurationMs: number,
 ): VoiceTrackSummary | null {
   if (track === null) {
     return null;
   }
 
+  const audibleEndMs = track.timed ? track.narrationEndMs : track.asset.durationMs;
+
   return {
     assetId: track.asset.id,
     durationMs: track.asset.durationMs,
-    truncatedMs: Math.max(0, track.asset.durationMs - sourceDurationMs),
+    truncatedMs: Math.max(0, audibleEndMs - sourceDurationMs),
   };
 }
 
@@ -176,12 +185,14 @@ export async function autoMontage(
     voiceScriptTrack === null ? transcriptionSource : 'voice-script';
 
   const alignment =
-    options.scriptText === undefined ? null : alignTranscriptToScript(speech.words, options.scriptText);
+    options.scriptText === undefined
+      ? null
+      : alignTranscriptToScript(speech.words, stripVoiceScriptTimeMarks(options.scriptText));
   const alignedTranscription =
     alignment === null ? speech : { ...speech, words: [...alignment.words], segments: [] };
 
   const sourceDurationMs =
-    voiceScriptTrack === null
+    voiceScriptTrack === null || voiceScriptTrack.timed
       ? arollAsset.durationMs
       : Math.min(arollAsset.durationMs, voiceScriptTrack.asset.durationMs);
 
@@ -249,7 +260,9 @@ export async function autoMontage(
       assets,
       toMusicInput(musicAsset, preset),
       toLogoInput(logoAsset),
-      voiceScriptTrack === null ? undefined : { assetId: voiceScriptTrack.asset.id },
+      voiceScriptTrack === null
+        ? undefined
+        : { assetId: voiceScriptTrack.asset.id, durationMs: voiceScriptTrack.asset.durationMs },
     ),
   );
 

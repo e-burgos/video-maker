@@ -155,6 +155,25 @@ describe('buildProducerAppRulesSection', () => {
     expect(section).toContain('min(voice, A-roll)');
   });
 
+  it('exige sincronizar la narración con la acción y explica las marcas de tiempo (FIX-e-burgos-009-002)', () => {
+    const rules = buildProducerAppRulesSection(CONTEXT, null, 'sonnet');
+
+    expect(rules).toContain('SYNCHRONIZE THE NARRATION WITH WHAT HAPPENS ON SCREEN');
+    expect(rules).toContain('`[m:ss]`');
+    expect(rules).toContain('[m:ss-m:ss]');
+    expect(rules).toContain('Never spread the sentences over the');
+    expect(rules).toContain('WATCH THE VIDEO BEFORE WRITING');
+    expect(rules).toContain('ffmpeg -ss <seconds>');
+    expect(rules).toContain('overflowMs');
+  });
+
+  it('con guion cronometrado el video dura el A-roll completo (FIX-e-burgos-009-002)', () => {
+    const rules = buildProducerAppRulesSection(CONTEXT, null, 'sonnet');
+
+    expect(rules).toContain('With a timed script the video lasts the WHOLE A-roll');
+    expect(rules).toContain('min(voice, A-roll)');
+  });
+
   it('publica la lista blanca completa de herramientas', () => {
     const section = buildProducerAppRulesSection(CONTEXT, null, 'sonnet');
     for (const tool of PRODUCER_BASE_ALLOWED_TOOLS) {

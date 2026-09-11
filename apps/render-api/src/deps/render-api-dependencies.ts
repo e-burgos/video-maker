@@ -128,6 +128,7 @@ export interface SynthesizeVoiceInput {
   readonly textPath: string;
   readonly outPath: string;
   readonly modelPath: string;
+  readonly lengthScale?: number;
   readonly projectRoot: string;
 }
 
@@ -153,6 +154,22 @@ export interface ConcatVoiceTracksInput {
 }
 
 export type ConcatVoiceTracksPort = (input: ConcatVoiceTracksInput) => Promise<void>;
+
+export interface PlaceVoiceSegment {
+  readonly path: string;
+  readonly startMs: number;
+}
+
+export interface PlaceVoiceTracksInput {
+  readonly segments: readonly PlaceVoiceSegment[];
+  readonly totalMs: number | null;
+  readonly outPath: string;
+  readonly sampleRate: number;
+  readonly channels: number;
+  readonly projectRoot: string;
+}
+
+export type PlaceVoiceTracksPort = (input: PlaceVoiceTracksInput) => Promise<void>;
 
 export interface TranscribeVoiceInput {
   readonly wavPath: string;
@@ -207,5 +224,6 @@ export interface RenderApiDependencies {
   readonly synthesizeVoice: SynthesizeVoicePort;
   readonly extractVoiceAudio: ExtractVoiceAudioPort;
   readonly concatVoiceTracks: ConcatVoiceTracksPort;
+  readonly placeVoiceTracks: PlaceVoiceTracksPort;
   readonly transcribeVoice: TranscribeVoicePort;
 }

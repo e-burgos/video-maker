@@ -158,10 +158,26 @@ export {
   VOICE_SCRIPT_MANIFEST_SCHEMA_VERSION,
   VoiceScriptLineSchema,
   VoiceScriptManifestSchema,
+  voiceScriptManifestIsTimed,
 } from './schemas/voice-script-manifest.schema';
 export type { VoiceScriptLine, VoiceScriptManifest } from './schemas/voice-script-manifest.schema';
 
 export { hashNarration } from './voice/hash-narration';
+export {
+  hasVoiceScriptTimeMarks,
+  parseVoiceScriptLines,
+  stripVoiceScriptTimeMarks,
+} from './voice/parse-voice-script-lines';
+export type { ParsedVoiceScriptLine } from './voice/parse-voice-script-lines';
+export {
+  planVoiceScriptPlacements,
+  VOICE_SCRIPT_MIN_LENGTH_SCALE,
+} from './voice/plan-voice-script-placements';
+export type {
+  PlanVoiceScriptPlacementsOptions,
+  VoiceScriptPlacement,
+  VoiceScriptPlacementRequest,
+} from './voice/plan-voice-script-placements';
 export {
   dropVoiceTracksOutsideScenes,
   findVoiceTrack,

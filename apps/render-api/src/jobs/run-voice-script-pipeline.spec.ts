@@ -217,3 +217,172 @@ describe('runVoicePipeline con guion suelto (FIX-e-burgos-009-001)', () => {
     ).rejects.toMatchObject({ code: 'VOICE_SCRIPT_INVALID', stage: 'synthesize' });
   });
 });
+
+const TIMED_SCRIPT = '[0:00] Entramos a la plataforma.\n[0:20] Las campañas viven acá.\n[0:28] Creamos una nueva.\n';
+
+function createTimedHarness(durationsByLine: ReadonlyMap<string, readonly number[]>, trackDurationMs: number) {
+  const callLog = createCallLog();
+  const storage = createFakeObjectStorage(callLog, { directories: [PROJECT_ROOT] });
+  const probeCounts = new Map<string, number>();
+
+  const deps = createFakeRenderApiDependencies(callLog, {
+    storage,
+    probeAsset: async ({ assetId }) => {
+      if (assetId === voiceScriptTrackPath()) {
+        return audioAsset(assetId, trackDurationMs);
+      }
+      const attempt = probeCounts.get(assetId) ?? 0;
+      probeCounts.set(assetId, attempt + 1);
+      const durations = durationsByLine.get(assetId) ?? [1000];
+      return audioAsset(assetId, durations[Math.min(attempt, durations.length - 1)] ?? 1000);
+    },
+  });
+
+  let progress: VoiceJobProgress | null = null;
+  const observer: VoicePipelineObserver = {
+    stageStarted: (stage) => {
+      progress = startVoiceJobStage(progress, stage);
+    },
+    sceneProcessed: (stage, processed, total) => {
+      progress = mergeVoiceJobProgress(progress, stage, processed, total);
+    },
+    cancellationRequested: () => false,
+  };
+
+  return { deps, callLog, storage, observer };
+}
+
+function runTimed(harness: ReturnType<typeof createTimedHarness>, scriptText = TIMED_SCRIPT) {
+  return runVoicePipeline(
+    { project: PROJECT, voiceId: null, sceneIds: null, scriptText, scriptPath: null, gapMs: 900 },
+    harness.deps,
+    harness.observer,
+  );
+}
+
+describe('runVoicePipeline con guion cronometrado (FIX-e-burgos-009-002)', () => {
+  const FITTING = new Map<string, readonly number[]>([
+    ['work/voice/sources/line-01.wav', [4000]],
+    ['work/voice/sources/line-02.wav', [6000]],
+    ['work/voice/sources/line-03.wav', [3000]],
+  ]);
+
+  it('coloca cada frase en el tiempo de su marca en vez de concatenarlas', async () => {
+    const harness = createTimedHarness(FITTING, 31_000);
+
+    await runTimed(harness);
+
+    const placed = harness.callLog.entries().find((entry) => entry.port === 'placeVoiceTracks');
+
+    expect(placed?.input).toEqual({
+      segments: [
+        { path: absolute('work/voice/sources/line-01.wav'), startMs: 0 },
+        { path: absolute('work/voice/sources/line-02.wav'), startMs: 20_000 },
+        { path: absolute('work/voice/sources/line-03.wav'), startMs: 28_000 },
+      ],
+      totalMs: null,
+      outPath: absolute(voiceScriptTrackPath()),
+      sampleRate: 48000,
+      channels: 1,
+      projectRoot: PROJECT_ROOT,
+    });
+    expect(harness.callLog.entries().some((entry) => entry.port === 'concatVoiceTracks')).toBe(false);
+  });
+
+  it('estira el track hasta el fin de la ventana que el guion declaró (FIX-e-burgos-009-002)', async () => {
+    const harness = createTimedHarness(FITTING, 40_000);
+
+    await runTimed(harness, '[0:00] Entramos.\n[0:20] Las campañas viven acá.\n[0:28-0:40] Creamos una nueva.\n');
+
+    const placed = harness.callLog.entries().find((entry) => entry.port === 'placeVoiceTracks');
+
+    expect((placed?.input as { totalMs: number | null }).totalMs).toBe(40_000);
+  });
+
+  it('no estira el track cuando la narración pasa el fin declarado (FIX-e-burgos-009-002)', async () => {
+    const harness = createTimedHarness(
+      new Map<string, readonly number[]>([
+        ['work/voice/sources/line-01.wav', [4000]],
+        ['work/voice/sources/line-02.wav', [6000]],
+        ['work/voice/sources/line-03.wav', [9000]],
+      ]),
+      37_000,
+    );
+
+    await runTimed(harness, '[0:00] Entramos.\n[0:20] Las campañas viven acá.\n[0:28-0:35] Creamos una nueva.\n');
+
+    const placed = harness.callLog.entries().find((entry) => entry.port === 'placeVoiceTracks');
+
+    expect((placed?.input as { totalMs: number | null }).totalMs).toBeNull();
+  });
+
+  it('guarda startMs, endMs, requestedStartMs y overflowMs por línea', async () => {
+    const harness = createTimedHarness(FITTING, 31_000);
+
+    await runTimed(harness);
+    const manifest = await readScriptManifest(harness.storage);
+
+    expect(
+      manifest.lines.map((line) => [line.startMs, line.endMs, line.requestedStartMs, line.overflowMs]),
+    ).toEqual([
+      [0, 4000, 0, 0],
+      [20_000, 26_000, 20_000, 0],
+      [28_000, 31_000, 28_000, 0],
+    ]);
+    expect(manifest.lines.every((line) => line.lengthScale === undefined)).toBe(true);
+  });
+
+  it('acelera con length-scale la frase que no entra en su ventana y vuelve a sintetizarla', async () => {
+    const harness = createTimedHarness(
+      new Map<string, readonly number[]>([
+        ['work/voice/sources/line-01.wav', [21_000, 19_000]],
+        ['work/voice/sources/line-02.wav', [6000]],
+        ['work/voice/sources/line-03.wav', [3000]],
+      ]),
+      31_000,
+    );
+
+    await runTimed(harness);
+
+    const scales = harness.callLog
+      .entries()
+      .filter((entry) => entry.port === 'synthesizeVoice')
+      .map((entry) => (entry.input as { lengthScale?: number }).lengthScale);
+    const manifest = await readScriptManifest(harness.storage);
+
+    expect(scales).toEqual([undefined, undefined, undefined, 0.95]);
+    expect(manifest.lines[0]?.lengthScale).toBe(0.95);
+    expect(manifest.lines[0]?.overflowMs).toBe(0);
+  });
+
+  it('desplaza la línea siguiente y reporta el sobrante cuando la aceleración no alcanza', async () => {
+    const harness = createTimedHarness(
+      new Map<string, readonly number[]>([
+        ['work/voice/sources/line-01.wav', [26_000, 22_000]],
+        ['work/voice/sources/line-02.wav', [6000]],
+        ['work/voice/sources/line-03.wav', [3000]],
+      ]),
+      31_000,
+    );
+
+    await runTimed(harness);
+    const manifest = await readScriptManifest(harness.storage);
+
+    expect(manifest.lines[0]?.overflowMs).toBe(2000);
+    expect(manifest.lines[1]?.startMs).toBe(22_000);
+    expect(manifest.lines[1]?.requestedStartMs).toBe(20_000);
+  });
+
+  it('encadena con gapMs las líneas sin marca mezcladas con las marcadas', async () => {
+    const harness = createTimedHarness(FITTING, 31_000);
+
+    await runTimed(harness, '[0:00] Entramos.\nSeguimos.\n[0:28] Creamos una nueva.\n');
+    const manifest = await readScriptManifest(harness.storage);
+
+    expect(manifest.lines.map((line) => [line.startMs, line.requestedStartMs])).toEqual([
+      [0, 0],
+      [4900, null],
+      [28_000, 28_000],
+    ]);
+  });
+});

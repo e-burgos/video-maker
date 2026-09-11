@@ -91,6 +91,11 @@ export {
   DEFAULT_CONCAT_SPEECH_SAMPLE_RATE,
 } from './ffmpeg/concat-speech-segments';
 export type { ConcatSpeechSegmentsOptions } from './ffmpeg/concat-speech-segments';
+export { placeSpeechFilterGraph, placeSpeechSegments } from './ffmpeg/place-speech-segments';
+export type {
+  PlaceSpeechSegmentsOptions,
+  SpeechSegmentPlacement,
+} from './ffmpeg/place-speech-segments';
 
 export { gainDbToVolume } from './mix/gain-db-to-volume';
 export {

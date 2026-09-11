@@ -210,8 +210,12 @@ interface CreateJobRequestBody {
   and captions are built from those words, the Timeline's `voice` track points at the wav as an
   audio asset of its own, the A-roll audio is ignored altogether, and silence pruning is off (a
   screen recording is continuous and the narration runs over it, so the EDL keeps a single `keep`).
-  The montage lasts `min(voice, A-roll)`; a voice longer than the A-roll is cut and the report says
-  by how much. Anything else answers `422 MONTAGE_VOICE_INVALID`, and `'script'` without
+  With a script **without** time marks the montage lasts `min(voice, A-roll)` and a voice longer
+  than the A-roll is cut, with the report saying by how much; with a **timed** script
+  (FIX-e-burgos-009-002 — `work/voice/script-manifest.json` carries a non-null `requestedStartMs`
+  on at least one line) it lasts the **whole A-roll**, the narration ends earlier and the tail stays
+  silent, so `truncatedMs` is 0 and the Timeline's `voice` clip is clipped to the wav's own
+  duration. Anything else answers `422 MONTAGE_VOICE_INVALID`, and `'script'` without
   `work/voice/voice.wav` answers `409 MONTAGE_VOICE_TRACK_NOT_FOUND`, both before registering the
   job. Note the overload: on a `voice` job the `voice` field is a voice-model id, on a `montage`
   job it is the speech source.
@@ -556,6 +560,44 @@ between them (default `900`, the same pause `plan` cuts on) into **`work/voice/v
 `work/voice/script-manifest.json` describes it: `source: 'script'`, the voice, the language derived
 from the Piper model id, the gap, the measured duration and one entry per line with its `startMs`.
 The duration is exactly the sum of the sentences plus `(lines - 1) * gapMs`.
+
+#### Timed scripts (FIX-e-burgos-009-002)
+
+A script line may open with a time mark — `[m:ss]`, `[mm:ss]` or `[m:ss-m:ss]` (the range separator
+accepts `-`, `–` and `—`) — and the sentence is then **placed at that time** instead of being
+chained, with real silence in between:
+
+```text
+[0:00] Entramos a la plataforma con nuestro usuario.
+[0:20] Las campañas viven acá.
+[1:30-1:37] La campaña nace en borrador.
+```
+
+Marked and unmarked lines can be mixed: an unmarked line still chains with `gapMs` after the
+previous one. **A script with no mark at all behaves exactly as before.** With marks the track is
+built with one `adelay` per segment plus a non-normalizing `amix`, so the gaps are silence and the
+sample rate, channel count and Whisper alignment are unchanged.
+
+When a sentence does not fit its window — the window ends at the next mark, or at the end of its own
+range — three remedies run **in order**, and the result is reported per line:
+
+1. **Shorten the pause.** The window reserves a `gapMs` cushion before the next sentence; if the
+   line fits without it, the cushion is dropped and nothing else changes.
+2. **Speed the synthesis up.** The line is re-synthesized with Piper's `--length-scale`, down to
+   **`0.85` — a 15 % limit**, below which the voice stops sounding natural. The value used is stored
+   as `lengthScale`.
+3. **Displace the next line.** If it still does not fit, the sentence is emitted whole, `overflowMs`
+   holds the milliseconds that did not fit, and the next line starts at the end of this one instead
+   of at its mark (visible as `startMs !== requestedStartMs`).
+
+`lines[]` therefore carries `startMs`, `durationMs`, `endMs`, `requestedStartMs` (`null` without a
+mark), `overflowMs` and the optional `lengthScale`. The four new fields are **optional in the
+schema**, so a manifest written before this fix still reads; `schemaVersion` stays at `1`.
+
+When the last line declares a range (`[1:30-1:37]`) and the narration ends before it, the track is
+padded with silence up to that end, so a timed script produces a wav that lasts what the script says
+it lasts. A montage over that track reports `voiceTrack.truncatedMs` against the end of the **last
+sentence**, never against the padding.
 
 The storyboard manifest is **not** touched: script mode writes its own document, and the job report
 tells the two apart — `source`, `storyboardId: null` and a `track` object instead of `scenes`.

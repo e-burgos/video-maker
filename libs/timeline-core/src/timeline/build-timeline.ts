@@ -42,6 +42,7 @@ export interface MusicInput {
 
 export interface VoiceInput {
   assetId: AssetId;
+  durationMs?: Ms;
 }
 
 export interface LogoInput {
@@ -205,18 +206,40 @@ function buildArollTrack(
   return { clips, clipIdsByKeep, placements, durationFrames: cursorFrame };
 }
 
+function framesFittingInto(availableMs: Ms, fps: Fps): Frame {
+  const frames = msToFrames(availableMs, fps, 'floor');
+  return framesToMs(frames, fps, 'ceil') > availableMs ? frames - 1 : frames;
+}
+
+function voiceClipDurationFrames(clip: VideoClip, voice: VoiceInput, fps: Fps): Frame {
+  if (voice.durationMs === undefined) {
+    return clip.durationFrames;
+  }
+  return Math.min(clip.durationFrames, framesFittingInto(voice.durationMs - clip.trimStartMs, fps));
+}
+
 function buildVoiceTrack(
   arollClips: readonly VideoClip[],
   voice: VoiceInput | undefined,
+  fps: Fps,
 ): AudioClip[] {
-  return arollClips.map((clip, index) => ({
-    id: sequentialId('voice', index),
-    assetId: voice?.assetId ?? clip.assetId,
-    from: clip.from,
-    durationFrames: clip.durationFrames,
-    trimStartMs: clip.trimStartMs,
-    gainDb: 0,
-  }));
+  return arollClips.flatMap((clip, index) => {
+    const durationFrames =
+      voice === undefined ? clip.durationFrames : voiceClipDurationFrames(clip, voice, fps);
+
+    return durationFrames < 1
+      ? []
+      : [
+          {
+            id: sequentialId('voice', index),
+            assetId: voice?.assetId ?? clip.assetId,
+            from: clip.from,
+            durationFrames,
+            trimStartMs: clip.trimStartMs,
+            gainDb: 0,
+          },
+        ];
+  });
 }
 
 function findPlacementForRange(
@@ -421,7 +444,7 @@ export function buildTimeline(
   const duckDecisions = decisionsOfType(edl.decisions, 'duck');
 
   const arollTrack = buildArollTrack(keeps, punches, transitions, edl.sourceAssetId, fps);
-  const voiceClips = buildVoiceTrack(arollTrack.clips, voice);
+  const voiceClips = buildVoiceTrack(arollTrack.clips, voice, fps);
   const brollClips = buildBrollTrack(brollDecisions, arollTrack.placements, fps);
   const captionClips = buildCaptionTrack(captionDecisions, arollTrack.placements, edl.format, fps);
   const timelineTransitions = buildTimelineTransitions(

@@ -12,6 +12,19 @@ export const VoiceScriptLineSchema = z.strictObject({
   path: z.string().min(1).describe('Project-relative path of the wav synthesized for this line.'),
   startMs: MsSchema.describe('Offset of this line inside the concatenated track.'),
   durationMs: MsSchema,
+  endMs: MsSchema.optional().describe('Offset at which this line stops sounding.'),
+  requestedStartMs: MsSchema.nullable()
+    .optional()
+    .describe('Start the time mark of the script asked for, null when the line carries no mark.'),
+  overflowMs: MsSchema.optional().describe(
+    'Milliseconds the line could not fit in its window after shortening the pause and speeding up the synthesis.',
+  ),
+  lengthScale: z
+    .number()
+    .gt(0)
+    .max(1)
+    .optional()
+    .describe('Piper --length-scale used for this line; absent or 1 means the natural pace.'),
 });
 
 export const VoiceScriptManifestSchema = z
@@ -42,6 +55,10 @@ export const VoiceScriptManifestSchema = z
 
 export type VoiceScriptLine = z.infer<typeof VoiceScriptLineSchema>;
 export type VoiceScriptManifest = z.infer<typeof VoiceScriptManifestSchema>;
+
+export function voiceScriptManifestIsTimed(manifest: VoiceScriptManifest): boolean {
+  return manifest.lines.some((line) => (line.requestedStartMs ?? null) !== null);
+}
 
 export function splitVoiceScriptLines(scriptText: string): readonly string[] {
   return scriptText

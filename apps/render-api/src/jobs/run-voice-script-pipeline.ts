@@ -2,9 +2,16 @@ import { toAbsolutePath } from '@video-maker/auto-montage';
 import type { MediaProject } from '@video-maker/auto-montage';
 import {
   VOICE_SCRIPT_MANIFEST_SCHEMA_VERSION,
-  splitVoiceScriptLines,
+  hasVoiceScriptTimeMarks,
+  parseVoiceScriptLines,
+  planVoiceScriptPlacements,
 } from '@video-maker/timeline-core';
-import type { VoiceScriptLine, VoiceScriptManifest } from '@video-maker/timeline-core';
+import type {
+  ParsedVoiceScriptLine,
+  VoiceScriptLine,
+  VoiceScriptManifest,
+  VoiceScriptPlacement,
+} from '@video-maker/timeline-core';
 
 import type { RenderApiDependencies } from '../deps/render-api-dependencies';
 import { PipelineStageError } from '../errors/pipeline-stage-error';
@@ -44,6 +51,9 @@ interface SynthesizedLine {
   readonly text: string;
   readonly path: string;
   readonly durationMs: number;
+  readonly requestedStartMs: number | null;
+  readonly requestedEndMs: number | null;
+  readonly lengthScale: number;
 }
 
 async function resolveScriptText(
@@ -67,7 +77,10 @@ async function resolveScriptText(
   }
 }
 
-function assertScriptHasLines(lines: readonly string[], resource: string | null): void {
+function assertScriptHasLines(
+  lines: readonly ParsedVoiceScriptLine[],
+  resource: string | null,
+): void {
   if (lines.length === 0) {
     throw new PipelineStageError({
       code: 'VOICE_SCRIPT_INVALID',
@@ -80,7 +93,8 @@ function assertScriptHasLines(lines: readonly string[], resource: string | null)
 
 async function synthesizeLine(
   index: number,
-  text: string,
+  line: ParsedVoiceScriptLine,
+  lengthScale: number,
   model: ResolvedVoiceModel,
   deps: RenderApiDependencies,
   project: MediaProject,
@@ -89,34 +103,92 @@ async function synthesizeLine(
   const textPath = voiceNarrationTextPath(lineId);
   const wavPath = voiceSourceWavPath(lineId);
 
-  await deps.storage.writeTextFile(toAbsolutePath(project, textPath), `${text}\n`);
+  await deps.storage.writeTextFile(toAbsolutePath(project, textPath), `${line.text}\n`);
 
   await deps.synthesizeVoice({
     textPath: toAbsolutePath(project, textPath),
     outPath: toAbsolutePath(project, wavPath),
     modelPath: model.path,
     projectRoot: project.root,
+    ...(lengthScale === 1 ? {} : { lengthScale }),
   });
 
   const probed = await deps.probeAsset({ path: toAbsolutePath(project, wavPath), assetId: wavPath });
 
-  return { index, text, path: wavPath, durationMs: probed.durationMs };
+  return {
+    index,
+    text: line.text,
+    path: wavPath,
+    durationMs: probed.durationMs,
+    requestedStartMs: line.requestedStartMs,
+    requestedEndMs: line.requestedEndMs,
+    lengthScale,
+  };
 }
 
-function toManifestLines(lines: readonly SynthesizedLine[], gapMs: number): readonly VoiceScriptLine[] {
-  let startMs = 0;
+function toPlacementRequests(lines: readonly SynthesizedLine[]) {
+  return lines.map((line) => ({
+    requestedStartMs: line.requestedStartMs,
+    requestedEndMs: line.requestedEndMs,
+    durationMs: line.durationMs,
+  }));
+}
 
-  return lines.map((line) => {
-    const entry: VoiceScriptLine = {
+function toManifestLines(
+  lines: readonly SynthesizedLine[],
+  placements: readonly VoiceScriptPlacement[],
+): readonly VoiceScriptLine[] {
+  return lines.map((line, position) => {
+    const placement = placements[position] as VoiceScriptPlacement;
+    return {
       index: line.index,
       text: line.text,
       path: line.path,
-      startMs,
+      startMs: placement.startMs,
       durationMs: line.durationMs,
+      endMs: placement.endMs,
+      requestedStartMs: placement.requestedStartMs,
+      overflowMs: placement.overflowMs,
+      ...(line.lengthScale === 1 ? {} : { lengthScale: line.lengthScale }),
     };
-    startMs += line.durationMs + gapMs;
-    return entry;
   });
+}
+
+function declaredWindowEndMs(
+  lines: readonly SynthesizedLine[],
+  placements: readonly VoiceScriptPlacement[],
+): number | null {
+  const declaredEndMs = Math.max(
+    0,
+    ...lines.map((line) => line.requestedEndMs ?? 0),
+  );
+  const narrationEndMs = Math.max(0, ...placements.map((placement) => placement.endMs));
+
+  return declaredEndMs > narrationEndMs ? declaredEndMs : null;
+}
+
+async function fitTimedLinesIntoTheirWindows(
+  lines: readonly SynthesizedLine[],
+  gapMs: number,
+  model: ResolvedVoiceModel,
+  deps: RenderApiDependencies,
+  project: MediaProject,
+): Promise<readonly SynthesizedLine[]> {
+  const planned = planVoiceScriptPlacements(toPlacementRequests(lines), { gapMs });
+  const fitted: SynthesizedLine[] = [];
+
+  for (const [position, line] of lines.entries()) {
+    const lengthScale = planned[position]?.lengthScale ?? 1;
+    fitted.push(
+      lengthScale === 1
+        ? line
+        : await runVoiceStage('synthesize', voiceScriptLineId(line.index), () =>
+            synthesizeLine(line.index, line, lengthScale, model, deps, project),
+          ),
+    );
+  }
+
+  return fitted;
 }
 
 export async function runVoiceScriptPipeline(
@@ -127,8 +199,9 @@ export async function runVoiceScriptPipeline(
   const scriptText = await runVoiceStage('synthesize', request.scriptPath, () =>
     resolveScriptText(request, deps),
   );
-  const lines = splitVoiceScriptLines(scriptText);
+  const lines = parseVoiceScriptLines(scriptText);
   assertScriptHasLines(lines, request.scriptPath);
+  const timed = hasVoiceScriptTimeMarks(lines);
 
   const model = await runVoiceStage('synthesize', null, () => resolveVoiceModel(deps, request.voiceId));
   const language = voiceLanguageFromModelId(model.id);
@@ -139,27 +212,54 @@ export async function runVoiceScriptPipeline(
   observer.stageStarted('synthesize');
 
   const synthesized: SynthesizedLine[] = [];
-  for (const [position, text] of lines.entries()) {
+  for (const [position, line] of lines.entries()) {
     voiceCheckpoint(observer, 'synthesize');
     synthesized.push(
       await runVoiceStage('synthesize', voiceScriptLineId(position + 1), () =>
-        synthesizeLine(position + 1, text, model, deps, request.project),
+        synthesizeLine(position + 1, line, 1, model, deps, request.project),
       ),
     );
     observer.sceneProcessed('synthesize', synthesized.length, lines.length);
   }
 
+  const fitted = timed
+    ? await fitTimedLinesIntoTheirWindows(
+        synthesized,
+        request.gapMs,
+        model,
+        deps,
+        request.project,
+      )
+    : synthesized;
+
+  const placements = planVoiceScriptPlacements(toPlacementRequests(fitted), {
+    gapMs: request.gapMs,
+    allowSpeedUp: false,
+  });
+
   const trackPath = voiceScriptTrackPath();
 
   await runVoiceStage('synthesize', trackPath, () =>
-    deps.concatVoiceTracks({
-      inputPaths: synthesized.map((line) => toAbsolutePath(request.project, line.path)),
-      outPath: toAbsolutePath(request.project, trackPath),
-      gapMs: request.gapMs,
-      sampleRate: VOICE_TRACK_SAMPLE_RATE,
-      channels: VOICE_TRACK_CHANNELS,
-      projectRoot: request.project.root,
-    }),
+    timed
+      ? deps.placeVoiceTracks({
+          segments: fitted.map((line, position) => ({
+            path: toAbsolutePath(request.project, line.path),
+            startMs: placements[position]?.startMs ?? 0,
+          })),
+          totalMs: declaredWindowEndMs(fitted, placements),
+          outPath: toAbsolutePath(request.project, trackPath),
+          sampleRate: VOICE_TRACK_SAMPLE_RATE,
+          channels: VOICE_TRACK_CHANNELS,
+          projectRoot: request.project.root,
+        })
+      : deps.concatVoiceTracks({
+          inputPaths: fitted.map((line) => toAbsolutePath(request.project, line.path)),
+          outPath: toAbsolutePath(request.project, trackPath),
+          gapMs: request.gapMs,
+          sampleRate: VOICE_TRACK_SAMPLE_RATE,
+          channels: VOICE_TRACK_CHANNELS,
+          projectRoot: request.project.root,
+        }),
   );
 
   const track = await runVoiceStage('synthesize', trackPath, () =>
@@ -196,7 +296,7 @@ export async function runVoiceScriptPipeline(
     durationMs: track.durationMs,
     sampleRate: track.audio?.sampleRate ?? VOICE_TRACK_SAMPLE_RATE,
     updatedAt: deps.clock.nowIso(),
-    lines: [...toManifestLines(synthesized, request.gapMs)],
+    lines: [...toManifestLines(fitted, placements)],
   };
 
   const manifestPath = await runVoiceStage('persist', voiceScriptManifestPath(), () =>

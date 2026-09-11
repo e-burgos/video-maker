@@ -907,6 +907,90 @@
         ],
         "tokens_total": 280495
       }
+    },
+    {
+      "id": "FIX-e-burgos-009-002",
+      "author": "e-burgos",
+      "spec_id": "spec-e-burgos-009-voice-over",
+      "fix_document": "sdd/specs/spec-e-burgos-009-voice-over/fixes/fix-e-burgos-009-002.md",
+      "type": "IMPROVEMENT",
+      "severity": "medium",
+      "created_at": "2026-09-11",
+      "resolved_at": "2026-09-11",
+      "validated_at": null,
+      "title": "voice job places each narration line at the timestamp its script mark declares",
+      "estimation_hours": 4,
+      "description": "Real case media/display-ads: the user handed a scene table with times (10 scenes up to 1:37 over a silent 96.5 s screen recording) and the voice job chained the ten sentences from second 0 with a 900 ms pause, so the narration runs ahead of what happens on screen. The voice job now accepts timestamped script lines ([m:ss] / [mm:ss] / [m:ss-m:ss]), places each synthesized sentence at its own start with real silence in between, and reports per line startMs, endMs, requestedStartMs, overflowMs and lengthScale in script-manifest.json. When a sentence does not fit its window the engine first drops the pause cushion, then re-synthesizes with Piper --length-scale down to 0.85 (15% faster, documented limit), and only then displaces the next line and records the overflow. With a timed script the montage lasts the full A-roll instead of min(voice, A-roll). The producer skill and system prompt now require the narration to be synchronized with the action: honor the user scene table, or look at the video (frames every 5-10 s with ffmpeg -ss, read with Read) and agree a scene-time-sentence table before producing.",
+      "justification": "Solo-profile FIX GATE: no new endpoint and no new entity. Additive optional fields on an existing document (work/voice/script-manifest.json), one new internal port, and a prompt rule. A script without marks behaves exactly as before. No cycle open on spec-009.",
+      "related_modules": [
+        "voice-over",
+        "studio-producer"
+      ],
+      "affected_files": [
+        "apps/render-api/README.md",
+        "apps/render-api/src/__fixtures__/fake-render-api-dependencies.ts",
+        "apps/render-api/src/deps/node-render-api-dependencies.ts",
+        "apps/render-api/src/deps/render-api-dependencies.ts",
+        "apps/render-api/src/jobs/run-voice-script-pipeline.spec.ts",
+        "apps/render-api/src/jobs/run-voice-script-pipeline.ts",
+        "apps/render-api/src/producer/build-producer-system-prompt.spec.ts",
+        "apps/render-api/src/producer/build-producer-system-prompt.ts",
+        "apps/web/e2e/timed-narration-captions-smoke.mjs",
+        "libs/auto-montage/src/auto-montage-voice-script.spec.ts",
+        "libs/auto-montage/src/auto-montage.ts",
+        "libs/auto-montage/src/voice/read-voice-script-track.ts",
+        "libs/media-local/src/ffmpeg/place-speech-segments.spec.ts",
+        "libs/media-local/src/ffmpeg/place-speech-segments.ts",
+        "libs/media-local/src/index.ts",
+        "libs/media-local/src/piper/piper.spec.ts",
+        "libs/media-local/src/piper/synthesize-speech.ts",
+        "libs/timeline-core/src/index.ts",
+        "libs/timeline-core/src/schemas/schemas.spec.ts",
+        "libs/timeline-core/src/schemas/voice-script-manifest.schema.ts",
+        "libs/timeline-core/src/timeline/build-timeline.spec.ts",
+        "libs/timeline-core/src/timeline/build-timeline.ts",
+        "libs/timeline-core/src/voice/parse-voice-script-lines.spec.ts",
+        "libs/timeline-core/src/voice/parse-voice-script-lines.ts",
+        "libs/timeline-core/src/voice/plan-voice-script-placements.spec.ts",
+        "libs/timeline-core/src/voice/plan-voice-script-placements.ts",
+        "sdd/api.json",
+        "sdd/context/apps/render-api/updates/2026-09-11-fix-e-burgos-009-002.md",
+        "sdd/context/constitution.md",
+        "sdd/context/libs/auto-montage/updates/2026-09-11-fix-e-burgos-009-002.md",
+        "sdd/context/libs/media-local/updates/2026-09-11-fix-e-burgos-009-002.md",
+        "sdd/context/libs/timeline-core/updates/2026-09-11-fix-e-burgos-009-002.md",
+        "sdd/context/tools/render-cli/updates/2026-09-11-fix-e-burgos-009-002.md",
+        "sdd/fixes.json",
+        "sdd/memory/journal/2026-09-11-fix-e-burgos-009-002.md",
+        "sdd/skills/video-producer/SKILL.md",
+        "sdd/specs/spec-e-burgos-009-voice-over/fixes/artifacts/ (4 rendered frames)",
+        "sdd/specs/spec-e-burgos-009-voice-over/fixes/fix-e-burgos-009-002.md",
+        "tools/render-cli/README.md"
+      ],
+      "test_reference": "pnpm nx run-many -t lint test build green for 8 projects and pnpm sdd:validate OK (2026-09-11). timeline-core 308 tests (97.7% stmts / 92.69% branch), media-local 327, auto-montage 345, render-api 970 (98.15% / 92.81%), floors untouched. New unit coverage: parseVoiceScriptLines (the three mark shapes, the three dash separators, a bracket that is not a mark, mixed marked/unmarked lines), planVoiceScriptPlacements (the untimed chaining reproduced byte for byte, absolute placement, pause shortening before speeding up, the 0.85 cap, the declared range end as the window limit, displacement with overflowMs, no acceleration on a window already missed), placeSpeechFilterGraph/placeSpeechSegments (adelay per segment, amix normalize=0, apad to the declared total, single segment, non-zero exit), synthesizeSpeech --length-scale present and absent, the voice pipeline placing instead of concatenating plus the re-synthesis of an overflowing line, buildTimeline clipping the voice clip to its asset, and the montage lasting the whole A-roll with a timed manifest with truncatedMs measured against the narration and not the padding. E2E apps/web/e2e/timed-narration-captions-smoke.mjs on port 4420 over a temporary copy of media/display-ads (raw/ + work/producer/): the 10 marks of the user scene table landed at exactly 0/20000/28000/32000/40000/50000/56000/74000/82000/90000 ms with overflowMs 0 and lengthScale 1 on every line; voice.wav 97.000 s (the window the script declares), 48 kHz mono; silencedetect silent across the whole 8-20 s band and speaking at 22 s; montage timeline of 2895 frames (the whole A-roll) with truncatedMs 0; MP4 1920x1080 with 2895 frames; envelope correlation of the rendered audio against voice.wav peaks at 0 ms offset (0.9008). Frames at 10/22/45/92 s in the artifacts directory.",
+      "status": "implemented",
+      "cycle": null,
+      "usage": {
+        "provider_model": "claude/opus",
+        "effort": "high",
+        "tokens_in": 520000,
+        "tokens_out": 55000,
+        "approx": true,
+        "source": "declared-estimate",
+        "recorded_at": "2026-09-11",
+        "by_agent": [
+          {
+            "agent": "implementor-back",
+            "provider_model": "claude/opus",
+            "effort": "high",
+            "tokens_in": 520000,
+            "tokens_out": 55000,
+            "approx": true,
+            "source": "declared-estimate",
+            "recorded_at": "2026-09-11"
+          }
+        ]
+      }
     }
   ]
 }

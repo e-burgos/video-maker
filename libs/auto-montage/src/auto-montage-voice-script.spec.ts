@@ -92,12 +92,25 @@ function manifest(durationMs: number) {
   };
 }
 
-function buildFileSystem(voiceDurationMs = 8000) {
+function timedManifest(durationMs: number) {
+  const base = manifest(durationMs);
+  return {
+    ...base,
+    lines: base.lines.map((line) => ({
+      ...line,
+      endMs: line.startMs + line.durationMs,
+      requestedStartMs: line.startMs,
+      overflowMs: 0,
+    })),
+  };
+}
+
+function buildFileSystem(voiceDurationMs = 8000, timed = false) {
   return createFakeFileSystem([
     { path: toAbsolutePath(project, catalogPath()), contents: JSON.stringify(CATALOG) },
     {
       path: toAbsolutePath(project, voiceScriptManifestPath()),
-      contents: JSON.stringify(manifest(voiceDurationMs)),
+      contents: JSON.stringify(timed ? timedManifest(voiceDurationMs) : manifest(voiceDurationMs)),
     },
     { path: toAbsolutePath(project, voiceScriptWordsPath()), contents: JSON.stringify(VOICE_WORDS) },
   ]);
@@ -181,6 +194,32 @@ describe('autoMontage — voice: script (FIX-e-burgos-007-002)', () => {
     });
     const validation = validateTimeline(result.timeline);
     expect(validation.ok ? [] : validation.issues).toEqual([]);
+  });
+
+  it('con un guion cronometrado el video dura el A-roll completo y la voz termina antes (FIX-e-burgos-009-002)', async () => {
+    const result = await run(buildFileSystem(8000, true));
+
+    const validation = validateTimeline(result.timeline);
+    expect(validation.ok ? [] : validation.issues).toEqual([]);
+    expect(result.editedDurationMs).toBeGreaterThan(19_000);
+    expect(result.voiceTrack).toEqual({
+      assetId: 'work/voice/voice.wav',
+      durationMs: 8000,
+      truncatedMs: 0,
+    });
+    expect(result.timeline.tracks.voice[0]?.durationFrames).toBeLessThan(
+      result.timeline.tracks.aroll[0]?.durationFrames ?? 0,
+    );
+  });
+
+  it('con guion cronometrado truncatedMs mide la narración, no el silencio de relleno (FIX-e-burgos-009-002)', async () => {
+    const result = await run(buildFileSystem(26_000, true));
+
+    expect(result.voiceTrack).toEqual({
+      assetId: 'work/voice/voice.wav',
+      durationMs: 26_000,
+      truncatedMs: 0,
+    });
   });
 
   it('--prune-silences fuerza los cortes por silencio también en modo guion', async () => {

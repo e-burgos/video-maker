@@ -121,6 +121,49 @@ qué voz prefiere después de escuchar los previews, el tono), siempre en sus pa
   nombre de la marca es clave, repetilo igual pero no lo uses como concepto de B-roll.
 - Cerrá con un llamado a la acción corto. Guardá el guion en `work/producer/script.txt`, una
   frase por línea.
+
+### La narración va sincronizada con la acción (FIX-e-burgos-009-002)
+
+**Pantalla grabada, demo, tutorial, y en general cualquier video donde la narración describe lo que
+se ve: la frase tiene que sonar cuando pasa lo que cuenta.** Repartir las frases con pausas fijas
+sobre un video con acciones da una narración adelantada y un video roto. Nunca lo hagas.
+
+Una línea del guion puede empezar con una **marca de tiempo**:
+
+```text
+[0:00] Entramos a la plataforma con nuestro usuario.
+[0:20] Las campañas viven acá. Esta línea de tiempo muestra qué corre en cada pantalla.
+[1:30-1:37] La campaña nace en borrador, así la revisás antes de ponerla al aire.
+```
+
+`[m:ss]` o `[mm:ss]` es el inicio; `[m:ss-m:ss]` además declara el fin de la ventana (el separador
+puede ser `-`, `–` o `—`). El job `voice` **coloca cada frase en ese tiempo**, con silencio real en
+el medio. Podés mezclar líneas con marca y sin marca: las que no tienen marca se encadenan con
+`gapMs` a continuación de la anterior. **Un guion sin ninguna marca se comporta como siempre.**
+
+Cómo decidís los tiempos:
+
+1. **Si el usuario te dio una tabla de escenas con tiempos, respetala tal cual**: una línea de guion
+   por escena, cada una con la marca de esa escena. No la reinterpretes.
+2. **Si no te la dio, mirá el video antes de escribir.** Sacá un frame cada 5–10 s y leelos:
+
+   ```bash
+   ffmpeg -ss 10 -i media/<slug>/raw/aroll/clip01.mp4 -frames:v 1 media/<slug>/work/producer/frames/t010.jpg
+   ```
+
+   Después armá una tabla **escena → tiempo → frase** y **mostrásela al usuario antes de producir**.
+
+Qué reporta el motor por línea, en `work/voice/script-manifest.json`:
+
+| Campo              | Para qué lo mirás                                                    |
+| ------------------ | -------------------------------------------------------------------- |
+| `startMs` / `endMs` | Dónde quedó realmente la frase en `voice.wav`.                       |
+| `requestedStartMs` | Lo que pedía la marca. Si difiere de `startMs`, la frase se desplazó. |
+| `overflowMs`       | Milisegundos que no entraron. **> 0 → acortá esa frase en el guion.** |
+| `lengthScale`      | Si aparece, la frase se aceleró (tope 15 %, `--length-scale` ≥ 0,85). |
+
+Orden de los remedios cuando una frase no entra en su ventana: primero se acorta la pausa, después
+se acelera la síntesis hasta un 15 %, y recién después se desplaza la frase siguiente.
 - **Pasá siempre ese archivo con `--script`** al planificar: Whisper transcribe mal las tildes, los
   nombres propios y las palabras poco frecuentes, y sin el guion esas palabras llegan literales a
   las captions. Con `--script`, el motor reemplaza el texto de las palabras mal oídas por las del
@@ -232,8 +275,12 @@ Qué cambia con `"voice":"script"`:
   por completo.
 - La **poda de silencios queda apagada**: la grabación es continua y la narración va encima, así que
   el corte queda en un solo tramo. Con la CLI podés forzarla con `--prune-silences`.
-- El video dura `min(voz, A-roll)`. Si la voz es más larga, se corta y el reporte lo dice
-  (`voiceTrack.truncatedMs`): avisale al usuario y ofrecé acortar el guion o alargar la grabación.
+- **Con guion cronometrado (marcas `[m:ss]`, §3) el video dura el A-roll COMPLETO**: la narración
+  termina antes y el video sigue mudo hasta el final, con la música si la hay. `truncatedMs` queda
+  en 0.
+- Con guion **sin marcas** el video dura `min(voz, A-roll)`. Si la voz es más larga, se corta y el
+  reporte lo dice (`voiceTrack.truncatedMs`): avisale al usuario y ofrecé acortar el guion o alargar
+  la grabación.
 - El job falla con `409 MONTAGE_VOICE_TRACK_NOT_FOUND` si mandás `"voice":"script"` sin haber corrido
   antes el job `voice`, y con `422 MONTAGE_VOICE_INVALID` si mandás cualquier otro valor.
 

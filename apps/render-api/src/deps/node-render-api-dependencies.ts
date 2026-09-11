@@ -445,12 +445,18 @@ export function createNodeRenderApiDependencies(
       return buildVoiceCatalog(files, modelPath);
     },
 
-    synthesizeVoice: async ({ textPath, outPath, modelPath, projectRoot }) => {
+    synthesizeVoice: async ({ textPath, outPath, modelPath, lengthScale, projectRoot }) => {
       const { ExecaCommandRunner, synthesizeSpeech } = await loadMediaLocal();
       const { piperCli } = await loadVoiceBinaries();
       await synthesizeSpeech(
         outPath,
-        { modelPath, textPath, piperPath: piperCli, runOptions: { cwd: projectRoot } },
+        {
+          modelPath,
+          textPath,
+          piperPath: piperCli,
+          runOptions: { cwd: projectRoot },
+          ...(lengthScale === undefined ? {} : { lengthScale }),
+        },
         new ExecaCommandRunner(),
       );
     },
@@ -472,6 +478,23 @@ export function createNodeRenderApiDependencies(
       await concatSpeechSegments(
         outPath,
         { inputPaths, gapMs, sampleRate, channels, ffmpegPath: ffmpeg, runOptions: { cwd: projectRoot } },
+        new ExecaCommandRunner(),
+      );
+    },
+
+    placeVoiceTracks: async ({ segments, totalMs, outPath, sampleRate, channels, projectRoot }) => {
+      const { ExecaCommandRunner, placeSpeechSegments } = await loadMediaLocal();
+      const { ffmpeg } = await loadBinaries();
+      await placeSpeechSegments(
+        outPath,
+        {
+          segments,
+          sampleRate,
+          channels,
+          ffmpegPath: ffmpeg,
+          runOptions: { cwd: projectRoot },
+          ...(totalMs === null ? {} : { totalMs }),
+        },
         new ExecaCommandRunner(),
       );
     },

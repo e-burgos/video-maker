@@ -51,8 +51,12 @@ no negativo, default `0`. Formatos disponibles: `reels-9x16` (default), `tiktok-
   en `work/voice/script-manifest.json`—: de esas palabras salen conceptos, B-roll y captions, la pista
   `voice` de la Timeline apunta al wav como asset de audio propio y el audio del A-roll se ignora por
   completo (la pista de video ya nace muteada). Sin ese manifest el error es `MONTAGE_INPUT_INVALID`
-  con `reason: voice-track-missing`. El montaje dura `min(voz, A-roll)`: si la voz es más larga se
-  corta y el reporte lo dice en `voice-track: <asset> <ms> (truncated <ms>)`.
+  con `reason: voice-track-missing`. Con un guion **sin marcas de tiempo** el montaje dura
+  `min(voz, A-roll)`: si la voz es más larga se corta y el reporte lo dice en
+  `voice-track: <asset> <ms> (truncated <ms>)`. Con un guion **cronometrado**
+  (FIX-e-burgos-009-002: `script-manifest.json` trae `requestedStartMs` no nulo en alguna línea) el
+  montaje dura el **A-roll completo**, la narración termina antes y la cola queda muda, con
+  `truncated 0`.
 - `--prune-silences` (FIX-e-burgos-007-002): fuerza el corte por silencios en modo `script`, donde
   está apagado por defecto —la grabación de pantalla es continua y la narración va encima, así que el
   EDL trae un único `keep`—. En modo `aroll` la poda siempre estuvo encendida y la bandera no cambia

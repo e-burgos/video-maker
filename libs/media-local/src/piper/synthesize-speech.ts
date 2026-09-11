@@ -4,6 +4,7 @@ import type { CommandOptions, CommandRunner } from '../runner/command-runner';
 export interface SynthesizeSpeechOptions {
   modelPath: string;
   textPath: string;
+  lengthScale?: number;
   piperPath?: string;
   runOptions?: CommandOptions;
 }
@@ -18,7 +19,11 @@ export async function synthesizeSpeech(
   runner: CommandRunner,
 ): Promise<string> {
   const piperPath = opts.piperPath ?? 'piper';
-  const args = ['-m', opts.modelPath, '-i', opts.textPath, '-f', outPath];
+  const lengthScaleArgs =
+    opts.lengthScale === undefined || opts.lengthScale === 1
+      ? []
+      : ['--length-scale', String(opts.lengthScale)];
+  const args = ['-m', opts.modelPath, '-i', opts.textPath, ...lengthScaleArgs, '-f', outPath];
 
   const result = await runner.run(piperPath, args, opts.runOptions);
   if (result.exitCode !== 0) {

@@ -1,5 +1,9 @@
 import type { MediaAsset, Transcription, VoiceScriptManifest } from '@video-maker/timeline-core';
-import { TranscriptionSchema, VoiceScriptManifestSchema } from '@video-maker/timeline-core';
+import {
+  TranscriptionSchema,
+  VoiceScriptManifestSchema,
+  voiceScriptManifestIsTimed,
+} from '@video-maker/timeline-core';
 import type { ReadTextFile } from '@video-maker/media-local';
 
 import { MontageInputError } from '../errors/montage-input-error';
@@ -15,6 +19,8 @@ export interface VoiceScriptTrack {
   readonly asset: MediaAsset;
   readonly transcription: Transcription;
   readonly manifestPath: string;
+  readonly timed: boolean;
+  readonly narrationEndMs: number;
 }
 
 async function readJsonDocument(
@@ -35,6 +41,13 @@ async function readJsonDocument(
   } catch {
     throw new MontageInputError({ projectRoot: project.root, reason: 'voice-track-unreadable' });
   }
+}
+
+function narrationEndMs(manifest: VoiceScriptManifest): number {
+  return Math.max(
+    0,
+    ...manifest.lines.map((line) => line.endMs ?? line.startMs + line.durationMs),
+  );
 }
 
 function toVoiceAsset(manifest: VoiceScriptManifest): MediaAsset {
@@ -76,5 +89,11 @@ export async function readVoiceScriptTrack(
     throw new MontageInputError({ projectRoot: project.root, reason: 'voice-track-unreadable' });
   }
 
-  return { asset: toVoiceAsset(manifest.data), transcription: transcription.data, manifestPath };
+  return {
+    asset: toVoiceAsset(manifest.data),
+    transcription: transcription.data,
+    manifestPath,
+    timed: voiceScriptManifestIsTimed(manifest.data),
+    narrationEndMs: narrationEndMs(manifest.data),
+  };
 }
