@@ -1140,13 +1140,15 @@
       "usage": {
         "provider_model": "claude/opus",
         "effort": "high",
-        "tokens_in": 118000,
-        "tokens_out": 21000,
+        "tokens_in": 87395,
+        "tokens_out": 15423,
         "approx": true,
         "source": "declared-estimate",
         "recorded_at": "2026-09-11",
-        "agent": "implementor-front"
-      }
+        "agent": "implementor-front",
+        "tokens_total": 102818
+      },
+      "process_note": "Usage: one agent run resolved the four fixes and reported 443819 tokens in total; split in proportion to the declared estimates."
     },
     {
       "id": "FIX-e-burgos-006-001",
@@ -1230,13 +1232,15 @@
       "usage": {
         "provider_model": "claude/opus",
         "effort": "high",
-        "tokens_in": 262000,
-        "tokens_out": 46000,
+        "tokens_in": 193653,
+        "tokens_out": 34174,
         "approx": true,
         "source": "declared-estimate",
         "recorded_at": "2026-09-11",
-        "agent": "implementor-front"
-      }
+        "agent": "implementor-front",
+        "tokens_total": 227827
+      },
+      "process_note": "Usage: one agent run resolved the four fixes and reported 443819 tokens in total; split in proportion to the declared estimates."
     },
     {
       "id": "FIX-e-burgos-009-003",
@@ -1282,13 +1286,15 @@
       "usage": {
         "provider_model": "claude/opus",
         "effort": "high",
-        "tokens_in": 96000,
-        "tokens_out": 17000,
+        "tokens_in": 71048,
+        "tokens_out": 12538,
         "approx": true,
         "source": "declared-estimate",
         "recorded_at": "2026-09-11",
-        "agent": "implementor-front"
-      }
+        "agent": "implementor-front",
+        "tokens_total": 83586
+      },
+      "process_note": "Usage: one agent run resolved the four fixes and reported 443819 tokens in total; split in proportion to the declared estimates."
     },
     {
       "id": "FIX-e-burgos-015-004",
@@ -1322,13 +1328,15 @@
       "usage": {
         "provider_model": "claude/opus",
         "effort": "high",
-        "tokens_in": 34000,
-        "tokens_out": 6000,
+        "tokens_in": 25150,
+        "tokens_out": 4438,
         "approx": true,
         "source": "declared-estimate",
         "recorded_at": "2026-09-11",
-        "agent": "implementor-front"
-      }
+        "agent": "implementor-front",
+        "tokens_total": 29588
+      },
+      "process_note": "Usage: one agent run resolved the four fixes and reported 443819 tokens in total; split in proportion to the declared estimates."
     }
   ]
 }
