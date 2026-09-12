@@ -15,6 +15,7 @@ export const VOICE_ALREADY_EXISTS = 'VOICE_ALREADY_EXISTS';
 export type VoiceTriggerProps = {
   slug: string;
   onCreated: (job: VoiceJob) => void;
+  scriptPath?: string;
 };
 
 export function defaultVoiceId(listing: VoiceListing | null): string | null {
@@ -24,7 +25,7 @@ export function defaultVoiceId(listing: VoiceListing | null): string | null {
   return (listing.voices.find((voice) => voice.isDefault) ?? listing.voices[0])?.id ?? null;
 }
 
-export function VoiceTrigger({ slug, onCreated }: VoiceTriggerProps) {
+export function VoiceTrigger({ slug, onCreated, scriptPath }: VoiceTriggerProps) {
   const client = useRenderApi();
   const loadHealth = useCallback(() => client.getHealth(), [client]);
   const loadVoices = useCallback(() => client.listVoices(), [client]);
@@ -35,7 +36,12 @@ export function VoiceTrigger({ slug, onCreated }: VoiceTriggerProps) {
   const t = useT();
 
   const createAction = useApiAction((overwrite: boolean, voiceId: string | null) =>
-    client.createVoiceJob(slug, { voiceId, sceneIds: null, overwrite }),
+    client.createVoiceJob(slug, {
+      voiceId,
+      sceneIds: null,
+      overwrite,
+      ...(scriptPath === undefined ? {} : { scriptPath }),
+    }),
   );
 
   const selectedVoiceId = picked ?? defaultVoiceId(voices.data);
@@ -68,7 +74,9 @@ export function VoiceTrigger({ slug, onCreated }: VoiceTriggerProps) {
       <h2 className="font-mono text-sm uppercase tracking-wide text-slate-400">
         {t('voice.heading')}
       </h2>
-      <p className="text-sm text-slate-400">{t('voice.triggerDescription')}</p>
+      <p className="text-sm text-slate-400">
+        {scriptPath === undefined ? t('voice.triggerDescription') : t('voice.script.rerunNotice')}
+      </p>
 
       {voices.data !== null && !catalogueEmpty && (
         <VoicePicker
@@ -86,7 +94,13 @@ export function VoiceTrigger({ slug, onCreated }: VoiceTriggerProps) {
           onClick={() => void generate(false)}
           className="rounded-md border border-sky-500/50 bg-sky-500/10 px-3 py-1.5 text-sm text-sky-100 disabled:opacity-40"
         >
-          {createAction.status === 'pending' ? t('voice.generating') : t('voice.generate')}
+          {scriptPath === undefined
+            ? createAction.status === 'pending'
+              ? t('voice.generating')
+              : t('voice.generate')
+            : createAction.status === 'pending'
+              ? t('voice.script.regenerating')
+              : t('voice.script.regenerate')}
         </button>
       </div>
 

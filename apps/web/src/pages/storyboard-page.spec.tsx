@@ -60,6 +60,11 @@ afterEach(() => {
 function renderPage(client: Partial<RenderApiClient>) {
   const withDefaults: Partial<RenderApiClient> = {
     getHealth: vi.fn().mockResolvedValue(HEALTHY_SERVICE),
+    getProjectFile: vi
+      .fn()
+      .mockRejectedValue(
+        new RenderApiError('ARTIFACT_NOT_FOUND', 'no script', 404, null),
+      ),
     ...client,
   };
 
@@ -196,5 +201,49 @@ describe('StoryboardPage', () => {
 
     await waitFor(() => expect(screen.getByTestId('storyboard-header-editor')).toBeTruthy());
     expect(getStoryboard).toHaveBeenCalledTimes(2);
+  });
+});
+
+describe('StoryboardPage — guion del productor (FIX-009-003)', () => {
+  const NO_STORYBOARD = new RenderApiError('STORYBOARD_NOT_FOUND', 'nothing yet', 404, null);
+  const SCRIPT = '[0:00] Cada anuncio arranca de una plantilla.\n[0:22] El editor la ajusta.';
+
+  it('sin storyboard pero con script.txt muestra el guion en vez del estado vacío', async () => {
+    renderPage({
+      getStoryboard: vi.fn().mockRejectedValue(NO_STORYBOARD),
+      getProjectFile: vi.fn().mockResolvedValue(SCRIPT),
+    });
+
+    expect((await screen.findByTestId('producer-script-text')).textContent).toBe(SCRIPT);
+    expect(screen.queryByTestId('storyboard-empty-state')).toBeNull();
+  });
+
+  it('lee el guion por el endpoint de artefactos', async () => {
+    const getProjectFile = vi.fn().mockResolvedValue(SCRIPT);
+    renderPage({
+      getStoryboard: vi.fn().mockRejectedValue(NO_STORYBOARD),
+      getProjectFile,
+    });
+
+    await waitFor(() =>
+      expect(getProjectFile).toHaveBeenCalledWith('smoke-ingest', 'work/producer/script.txt'),
+    );
+  });
+
+  it('conserva el estado vacío cuando tampoco hay guion', async () => {
+    renderPage({ getStoryboard: vi.fn().mockRejectedValue(NO_STORYBOARD) });
+
+    expect(await screen.findByTestId('storyboard-empty-state')).toBeTruthy();
+    expect(screen.queryByTestId('producer-script-panel')).toBeNull();
+  });
+
+  it('con storyboard no muestra el guion del productor', async () => {
+    renderPage({
+      getStoryboard: vi.fn().mockResolvedValue(storyboardFixture()),
+      getProjectFile: vi.fn().mockResolvedValue(SCRIPT),
+    });
+
+    await waitFor(() => expect(screen.getByTestId('storyboard-save-bar')).toBeTruthy());
+    expect(screen.queryByTestId('producer-script-panel')).toBeNull();
   });
 });

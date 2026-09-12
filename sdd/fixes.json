@@ -1246,7 +1246,7 @@
       "type": "IMPROVEMENT",
       "severity": "medium",
       "created_at": "2026-09-11",
-      "resolved_at": null,
+      "resolved_at": "2026-09-11",
       "validated_at": null,
       "title": "voice and storyboard are dead ends when the producer worked from a script instead of a storyboard",
       "estimation_hours": 6,
@@ -1256,10 +1256,39 @@
         "voice-over",
         "web-studio"
       ],
-      "affected_files": [],
-      "test_reference": "",
-      "status": "in-progress",
-      "cycle": null
+      "affected_files": [
+        "apps/web/src/api/parse-voice-script.spec.ts",
+        "apps/web/src/api/parse-voice-script.ts",
+        "apps/web/src/api/voice-script-lines.spec.ts",
+        "apps/web/src/api/voice-script-lines.ts",
+        "apps/web/src/components/producer-script-panel.spec.tsx",
+        "apps/web/src/components/producer-script-panel.tsx",
+        "apps/web/src/components/voice-script-panel.spec.tsx",
+        "apps/web/src/components/voice-script-panel.tsx",
+        "apps/web/src/components/voice-trigger.tsx",
+        "apps/web/src/pages/storyboard-page.spec.tsx",
+        "apps/web/src/pages/storyboard-page.tsx",
+        "apps/web/src/pages/voice-page.spec.tsx",
+        "apps/web/src/pages/voice-page.tsx",
+        "sdd/context/apps/web/updates/2026-09-11-fix-e-burgos-009-003.md",
+        "sdd/fixes.json",
+        "sdd/specs/spec-e-burgos-009-voice-over/fixes/artifacts/script-mode-02-voice-script-mode.png",
+        "sdd/specs/spec-e-burgos-009-voice-over/fixes/artifacts/script-mode-03-storyboard-producer-script.png",
+        "sdd/specs/spec-e-burgos-009-voice-over/fixes/fix-e-burgos-009-003.md"
+      ],
+      "test_reference": "pnpm nx run-many -t lint test build green for 8 projects and pnpm sdd:validate OK (2026-09-11). web 968 tests, 99.4 % stmts / 95.85 % branch, coverage.include untouched; the new code lives in the voice and storyboard page chunks, so the initial chunk stays at 494.5 kB. New unit coverage: parseVoiceScriptManifest returning the manifest or null for text that is not JSON, JSON that is not a script manifest and a manifest with no lines; formatTimecode, lineEndMs falling back to startMs + durationMs on a v1 manifest, overflowOf and requestedStartOf treating a mark at 0 as a mark; the VoiceScriptPanel listing one entry per line with its window, the voice id, the track duration and the single overflow warning; the ProducerScriptPanel showing the script verbatim; the voice page entering script mode only when there is no storyboard and there is a manifest, reading it from work/voice/script-manifest.json, posting the voice job with scriptPath work/producer/script.txt and the picked voice, warning that a new montage and render are needed, and pointing the empty state at the producer when there is no manifest either; the storyboard page showing the producer script instead of the empty state and keeping the empty state when there is no script. E2E apps/web/e2e/script-mode-smoke.mjs (render-api on 4421, web on 4211, temporary copy of media/display-ads with raw/ and work/producer/script.txt and no storyboard): the voice job writes a manifest with the 10 lines of the script, the voice page renders exactly 10 lines with the track decoding in the browser (readyState 4, 42.9 s) and no empty state, the Regenerate button is enabled, and the storyboard page shows the script byte for byte as it is on disk. Screenshots in sdd/specs/spec-e-burgos-009-voice-over/fixes/artifacts/.",
+      "status": "implemented",
+      "cycle": null,
+      "usage": {
+        "provider_model": "claude/opus",
+        "effort": "high",
+        "tokens_in": 96000,
+        "tokens_out": 17000,
+        "approx": true,
+        "source": "declared-estimate",
+        "recorded_at": "2026-09-11",
+        "agent": "implementor-front"
+      }
     },
     {
       "id": "FIX-e-burgos-015-004",

@@ -1,6 +1,6 @@
 import { useCallback, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
-import type { StoryboardDocument } from '@video-maker/timeline-core';
+import type { StoryboardDocument, VoiceScriptManifest } from '@video-maker/timeline-core';
 
 import { useRenderApi } from '../api/render-api-context';
 import { useApiAction } from '../hooks/use-api-action';
@@ -9,7 +9,10 @@ import { useT } from '../i18n/language-context';
 import { ErrorNotice } from '../components/error-notice';
 import { VoiceJobPanel } from '../components/voice-job-panel';
 import { VoiceSceneCard, takeFileName } from '../components/voice-scene-card';
+import { VoiceScriptPanel } from '../components/voice-script-panel';
 import { VoiceTrigger } from '../components/voice-trigger';
+import { PRODUCER_SCRIPT_PATH, VOICE_SCRIPT_MANIFEST_PATH } from '../api/generated-files';
+import { parseVoiceScriptManifest } from '../api/parse-voice-script';
 import type { AssetListing, VoiceDocument, VoiceTrack } from '../api/render-api-types';
 
 export const VOICE_NOT_FOUND = 'VOICE_NOT_FOUND';
@@ -35,6 +38,12 @@ function VoiceEmptyState({ slug }: { slug: string }) {
     >
       <p className="text-sm text-slate-300">{t('voice.emptyTitle', { slug })}</p>
       <p className="text-sm text-slate-400">{t('voice.emptyBody')}</p>
+      <Link
+        to={`/projects/${slug}/producer`}
+        className="inline-block rounded-md border border-sky-500/50 bg-sky-500/10 px-3 py-1.5 text-sm text-sky-100"
+      >
+        {t('voice.emptyProducer')}
+      </Link>
     </div>
   );
 }
@@ -48,9 +57,18 @@ export function VoicePage() {
   const loadStoryboard = useCallback(() => client.getStoryboard(slug), [client, slug]);
   const loadAssets = useCallback(() => client.listAssets(slug), [client, slug]);
 
+  const loadScriptManifest = useCallback(
+    async () => parseVoiceScriptManifest(await client.getProjectFile(slug, VOICE_SCRIPT_MANIFEST_PATH)),
+    [client, slug],
+  );
+
   const voice = useAsyncResource<VoiceDocument>(loadVoice, `voice:${slug}`);
   const storyboard = useAsyncResource<StoryboardDocument>(loadStoryboard, `storyboard:${slug}`);
   const assets = useAsyncResource<AssetListing>(loadAssets, `assets:${slug}`);
+  const scriptManifest = useAsyncResource<VoiceScriptManifest | null>(
+    loadScriptManifest,
+    `voice-script:${slug}`,
+  );
 
   const [jobId, setJobId] = useState<string | null>(null);
 
@@ -61,7 +79,8 @@ export function VoicePage() {
   const reload = useCallback(() => {
     voice.reload();
     assets.reload();
-  }, [assets, voice]);
+    scriptManifest.reload();
+  }, [assets, scriptManifest, voice]);
 
   const document = voice.data;
   const trackOf = (sceneId: string): VoiceTrack | undefined =>
@@ -74,8 +93,10 @@ export function VoicePage() {
     }
   }
 
-  const missing = voice.status === 'error' && voice.error?.code === VOICE_NOT_FOUND;
   const takes = recordedTakes(assets.data);
+  const manifest = scriptManifest.data;
+  const scriptMode = storyboard.data === null && manifest !== null;
+  const missing = !scriptMode && voice.status === 'error' && voice.error?.code === VOICE_NOT_FOUND;
 
   return (
     <section className="space-y-6">
@@ -95,7 +116,11 @@ export function VoicePage() {
         </p>
       </div>
 
-      <VoiceTrigger slug={slug} onCreated={(job) => setJobId(job.id)} />
+      <VoiceTrigger
+        slug={slug}
+        onCreated={(job) => setJobId(job.id)}
+        {...(scriptMode ? { scriptPath: PRODUCER_SCRIPT_PATH } : {})}
+      />
 
       <VoiceJobPanel jobId={jobId} onSucceeded={reload} />
 
@@ -107,11 +132,13 @@ export function VoicePage() {
 
       {missing && <VoiceEmptyState slug={slug} />}
 
+      {scriptMode && manifest !== null && <VoiceScriptPanel slug={slug} manifest={manifest} />}
+
       {voice.status === 'error' && voice.error !== null && !missing && (
         <ErrorNotice error={voice.error} onRetry={voice.reload} />
       )}
 
-      {document !== null && (
+      {document !== null && !scriptMode && (
         <div className="space-y-3">
           <h2 className="font-mono text-sm uppercase tracking-wide text-slate-400">
             {t('voice.tracksHeading')}{' '}

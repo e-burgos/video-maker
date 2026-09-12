@@ -5,6 +5,7 @@ import { describe, expect, it, vi } from 'vitest';
 import { storyboardFixture } from '../api/__fixtures__/storyboard';
 import {
   VOICE_MODELS,
+  VOICE_SCRIPT_MANIFEST_JSON,
   healthyVoiceService,
   voiceDocument,
   voiceJob,
@@ -37,6 +38,9 @@ function renderPage(client: Partial<RenderApiClient>) {
     getStoryboard: vi.fn().mockResolvedValue(storyboardFixture()),
     listAssets: vi.fn().mockResolvedValue(assetListing(['raw/voice/take-01.wav'])),
     getRenderJob: vi.fn().mockResolvedValue(voiceJob({ state: 'queued', progress: null })),
+    getProjectFile: vi
+      .fn()
+      .mockRejectedValue(new RenderApiError('ARTIFACT_NOT_FOUND', 'no manifest', 404, null)),
     ...client,
   };
 
@@ -215,5 +219,89 @@ describe('VoicePage', () => {
         'href',
       ),
     ).toBe('/projects/smoke-ingest/storyboard');
+  });
+});
+
+describe('VoicePage — modo guion (FIX-009-003)', () => {
+  const NO_STORYBOARD = new RenderApiError('STORYBOARD_NOT_FOUND', 'nothing yet', 404, null);
+  const NO_VOICE_MANIFEST = new RenderApiError('VOICE_NOT_FOUND', 'nothing yet', 404, null);
+
+  function renderScriptMode(overrides: Partial<RenderApiClient> = {}) {
+    return renderPage({
+      getStoryboard: vi.fn().mockRejectedValue(NO_STORYBOARD),
+      getVoice: vi.fn().mockRejectedValue(NO_VOICE_MANIFEST),
+      getProjectFile: vi.fn().mockResolvedValue(VOICE_SCRIPT_MANIFEST_JSON),
+      ...overrides,
+    });
+  }
+
+  it('sin storyboard pero con script-manifest.json muestra el guion en vez del estado vacío', async () => {
+    renderScriptMode();
+
+    expect(await screen.findByTestId('voice-script-panel')).toBeTruthy();
+    expect(screen.getAllByTestId('voice-script-line')).toHaveLength(2);
+    expect(screen.queryByTestId('voice-empty-state')).toBeNull();
+  });
+
+  it('lee el manifest del guion por el endpoint de artefactos', async () => {
+    const client = renderScriptMode();
+
+    await waitFor(() =>
+      expect(client.getProjectFile).toHaveBeenCalledWith(
+        'smoke-ingest',
+        'work/voice/script-manifest.json',
+      ),
+    );
+  });
+
+  it('el botón regenera desde el guion del productor con la voz elegida', async () => {
+    const createVoiceJob = vi.fn().mockResolvedValue(voiceJob());
+    renderScriptMode({ createVoiceJob });
+
+    const button = await screen.findByRole('button', {
+      name: 'Regenerate with the selected voice',
+    });
+    fireEvent.click(button);
+
+    await waitFor(() =>
+      expect(createVoiceJob).toHaveBeenCalledWith('smoke-ingest', {
+        voiceId: 'es_AR-daniela-high',
+        sceneIds: null,
+        overwrite: false,
+        scriptPath: 'work/producer/script.txt',
+      }),
+    );
+  });
+
+  it('avisa que después hay que volver a montar y renderizar', async () => {
+    renderScriptMode();
+
+    expect(
+      await screen.findByText(
+        'After regenerating you have to run the montage and the render again.',
+      ),
+    ).toBeTruthy();
+  });
+
+  it('sin storyboard y sin manifest el estado vacío lleva al productor', async () => {
+    renderPage({
+      getStoryboard: vi.fn().mockRejectedValue(NO_STORYBOARD),
+      getVoice: vi.fn().mockRejectedValue(NO_VOICE_MANIFEST),
+    });
+
+    const empty = await screen.findByTestId('voice-empty-state');
+
+    expect(empty.textContent).toContain('Ask the producer for a narration');
+    expect(screen.queryByTestId('voice-script-panel')).toBeNull();
+  });
+
+  it('con storyboard sigue en modo escenas aunque haya un manifest de guion viejo', async () => {
+    renderPage({
+      getVoice: vi.fn().mockResolvedValue(voiceDocument()),
+      getProjectFile: vi.fn().mockResolvedValue(VOICE_SCRIPT_MANIFEST_JSON),
+    });
+
+    await waitFor(() => expect(screen.getByText(/tracks/u)).toBeTruthy());
+    expect(screen.queryByTestId('voice-script-panel')).toBeNull();
   });
 });

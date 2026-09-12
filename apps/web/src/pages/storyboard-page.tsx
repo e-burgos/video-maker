@@ -3,11 +3,13 @@ import { Link, useParams } from 'react-router-dom';
 import type { StoryboardDocument, StoryboardScene } from '@video-maker/timeline-core';
 
 import { copyToClipboard } from '../api/clipboard';
+import { PRODUCER_SCRIPT_PATH } from '../api/generated-files';
 import { parseStoryboardDocument } from '../api/parse-storyboard';
 import { useRenderApi } from '../api/render-api-context';
 import { useAsyncResource } from '../hooks/use-async-resource';
 import { useT } from '../i18n/language-context';
 import { ErrorNotice } from '../components/error-notice';
+import { ProducerScriptPanel } from '../components/producer-script-panel';
 import { StoryboardCharacterSheet } from '../components/storyboard-character-sheet';
 import { StoryboardHeaderEditor } from '../components/storyboard-header-editor';
 import { StoryboardJobPanel } from '../components/storyboard-job-panel';
@@ -44,6 +46,11 @@ export function StoryboardPage() {
     [client, slug],
   );
   const stored = useAsyncResource<StoryboardDocument>(load, `storyboard:${slug}`);
+  const loadProducerScript = useCallback(
+    () => client.getProjectFile(slug, PRODUCER_SCRIPT_PATH),
+    [client, slug],
+  );
+  const producerScript = useAsyncResource<string>(loadProducerScript, `producer-script:${slug}`);
 
   const [jobId, setJobId] = useState<string | null>(null);
   const [draft, setDraft] = useState<StoryboardDocument | null>(null);
@@ -89,7 +96,11 @@ export function StoryboardPage() {
         <p className="text-sm text-slate-500">{t('storyboard.loading')}</p>
       )}
 
-      {missing && <StoryboardEmptyState slug={slug} />}
+      {missing && producerScript.data !== null && (
+        <ProducerScriptPanel script={producerScript.data} />
+      )}
+
+      {missing && producerScript.data === null && <StoryboardEmptyState slug={slug} />}
 
       {stored.status === 'error' && stored.error !== null && !missing && (
         <ErrorNotice error={stored.error} onRetry={reload} />
