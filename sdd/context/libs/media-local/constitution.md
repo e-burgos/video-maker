@@ -1,6 +1,8 @@
 # Constitución — libs/media-local
 
-> Versión 1.0 | Última actualización: cycle-02 (spec-e-burgos-004) | Fecha: 2026-09-08
+> Versión 1.1 | Última actualización: spec-e-burgos-016 cycle-01 | Fecha: 2026-09-11
+> Consolidada al cerrar `cycle-01` de `spec-e-burgos-016-studio-usability` (fundió los fragmentos de
+> `spec-009 cycle-01`, `spec-014 cycle-01`, `FIX-006-001`, `FIX-009-002` y el propio `cycle-01`).
 > Las actualizaciones por ciclo/fix van como fragmentos aditivos en `updates/`.
 
 ## 1. Propósito
@@ -52,7 +54,13 @@
   comando. `buildLoudnormFilter` vive en `src/ffmpeg/build-loudnorm-filter.ts` (no en
   `normalize-voice.ts`: ubicarlo ahí crea el único ciclo de imports de la lib,
   `measure-loudness ↔ normalize-voice`). `src/ffmpeg/` es también la capa de ejecución del mix
-  (`mixTimelineAudio`, `verifyMixLoudness`, `muxAudioIntoVideo`, el master bus limiter)
+  (`mixTimelineAudio`, `verifyMixLoudness`, `muxAudioIntoVideo`, el master bus limiter,
+  `place-speech-segments.ts` y `concat-speech-segments.ts`, las dos rutas de armado de la pista de
+  voz). `ffprobe-output.schema.ts`/`parse-ffprobe-json.ts` leen también `pix_fmt` y derivan
+  `hasAlpha` para assets de imagen.
+- `src/piper/` — `synthesizeSpeech` (wrapper del binario Piper TTS) y `buildVoiceCatalog` +
+  `describeVoiceModel` (deriva metadata de voz del `.onnx.json` sidecar de cada modelo, sin mapa
+  hardcodeado de nombres).
 - `src/mix/` — capa **pura** de mezcla: traduce un `AudioMixPlan` + `Timeline` a un `FilterGraph`
   tipado y a los argumentos de invocación de ffmpeg. No ejecuta ffmpeg, no usa `CommandRunner`, no
   toca el filesystem — solo composición de strings y aritmética. Import unidireccional
@@ -131,6 +139,39 @@
 - **`MissingMediaStreamError`** (`code: 'MISSING_MEDIA_STREAM'`) es un solo error tipado para las dos
   direcciones de `muxAudioIntoVideo` (`stream: 'audio' | 'video'`, mensaje distinto por cada una);
   `muxAudioIntoVideo` verifica el stream de video con `probeMedia` antes de invocar ffmpeg
+- **Binarios ensanchados a seis**: `piperCli` (`PIPER_PATH`, fallback por `PATH` a `piper`) y
+  `piperModel` (`PIPER_MODEL_PATH`, `.onnx` legible, **sin** fallback por `PATH`, mismo contrato que
+  `whisperModel`). La distinción binario/modelo es la lista `MODEL_BINARY_NAMES` con su type guard,
+  no un `if`: agregar otro modelo no vuelve a tocar dos ramas. `resolveBinaries` sigue devolviendo
+  los cuatro de montaje; `resolveVoiceBinaries` devuelve esos cuatro más los dos de Piper.
+- **`synthesizeSpeech` le pasa la narración a Piper por archivo, no por stdin** (el `CommandRunner`
+  no tiene canal de entrada): Piper trata cada línea como una emisión separada, así que
+  `narrationToSingleLine` colapsa el texto a una línea antes de escribirlo. `lengthScale?` agrega
+  `--length-scale <n>` entre `-i` y `-f`; con `undefined` o `1` los args quedan igual que antes.
+  Piper entrega 22 050 Hz mono: quien lo consuma remuestrea con `extractAudioForTranscription`.
+- **Dos rutas para armar la pista de voz, deliberadamente sin unificar**: `concatSpeechSegments`
+  (guion sin marcas de tiempo, concatena) y `placeSpeechSegments` (guion cronometrado, coloca cada
+  segmento en su `startMs` absoluto vía `adelay` + `amix=inputs=N:normalize=0:duration=longest` —
+  `normalize=0` es obligatorio, si no `amix` divide el nivel entre N aunque los segmentos no se
+  pisen; un solo segmento usa `anull`). `totalMs` opcional agrega `apad=whole_dur=<n>ms`. Mismo
+  formato de salida que `concatSpeechSegments` (48 kHz mono `pcm_s16le`).
+- **`buildVoiceCatalog` deriva metadata de voz, no la nombra**: recibe `VoiceModelFile[]`
+  (`{ fileName, config }`) y `describeVoiceModel` deriva `language { code, region }` (BCP47),
+  `quality`, `label` y `description` del `.onnx.json` — sin mapa hardcodeado, y **sin publicar
+  género, edad ni carácter** porque Piper no los documenta y deducirlos del dataset sería inventar.
+  Un `config` que no es objeto se trata como ausente.
+- **`buildMusicBedChain` normaliza la cama musical antes de las ganancias del preset**: antepone
+  `volume=<g>dB` cuando el asset trae `audio.integratedLufs` medido (`g =
+  musicNormalizationGainDb(...)`); sin medición no emite nodo, comportamiento viejo intacto. La
+  medición **no se hace acá**: la escribe el ingest de `auto-montage` en el catálogo; una Timeline
+  armada a mano sin `integratedLufs` degrada al nivel crudo del archivo, no es un bug. `apad` pasa a
+  `apad=whole_dur=<duración del video en s>` (antes `apad` a secas): cambio de contrato deliberado.
+- **El probe de imágenes informa alfa declarado, no efectivo**: `pixelFormatHasAlpha(pixelFormat)`
+  mira las letras de componente antes del primer dígito (`rgba`, `bgra`, `yuva`, `ya`…; `pal8`
+  cuenta por el `tRNS` del PNG; el prefijo `gray` se descarta para que `grayf32le` no dé falso
+  positivo). Sin `pix_fmt` devuelve `undefined`; sólo `buildImageAsset` emite la clave `hasAlpha`.
+  Un PNG `rgba` con el fondo pintado de blanco opaco informa `hasAlpha: true` igual: el chequeo
+  real de "sale como recuadro o no" lo hace un humano viendo el preview.
 - **`gainDbToVolume` está duplicada a propósito** entre `libs/media-local/src/mix/gain-db-to-volume.ts`
   y `libs/composition-remotion/src/helpers/audio-gain.ts` por los mismos boundaries Nx que impiden que
   ambas libs se importen entre sí. El contrato entre las dos copias es la tabla de paridad de
@@ -148,9 +189,10 @@
 - **Sin comentarios** en el código; nombres declarativos, funciones cortas
 - Tags Nx: `scope:engine`, `type:util` → `onlyDependOnLibsWithTags: ['type:domain']`. Depende solo de
   `libs/timeline-core`
-- Targets: `lint`, `test` (`vitest run --coverage --passWithNoTests`, umbral 80 %, real 98.63 %
-  statements / 95.77 % ramas / 98.56 % funcs sobre 280 tests), `build` (`tsc -p tsconfig.lib.json`);
-  sin plugins inferidos en `nx.json`. Target manual adicional `smoke-audio` (ver §3), fuera de CI
+- Targets: `lint`, `test` (`vitest run --coverage --passWithNoTests`, umbral 80 %, real 98.79 %
+  statements / 94.51 % ramas / 98.88 % funcs sobre 29 archivos / 348 tests), `build`
+  (`tsc -p tsconfig.lib.json`); sin plugins inferidos en `nx.json`. Target manual adicional
+  `smoke-audio` (ver §3), fuera de CI
 - **`ExecaCommandRunner.run()` es la única ruta sin test por diseño** (ejecutar un proceso real está
   prohibido por RNF-3); `mapExecaResult`, que concentra la lógica de traducción, sí está cubierto al
   100 % con dobles. La verificación del wrapper real es el smoke manual del README

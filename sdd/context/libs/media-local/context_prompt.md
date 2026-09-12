@@ -2,36 +2,41 @@
 
 > Entry point para agentes que trabajen sobre `libs/media-local`.
 > Leer junto con `constitution.md` de este directorio **+ `updates/*.md` en orden de nombre**.
-> Última actualización: cycle-02 (spec-e-burgos-004) | Fecha: 2026-09-08
+> Última actualización: spec-e-burgos-016 cycle-01 | Fecha: 2026-09-11
+> Consolidado al cerrar `cycle-01` de `spec-e-burgos-016-studio-usability` (fundió los fragmentos de
+> `spec-009 cycle-01`, `spec-014 cycle-01`, `FIX-006-001`, `FIX-009-002` y el propio `cycle-01`).
 
-- **Tipo:** lib Node TypeScript (wrappers de binarios locales + mezcla/mastering de audio)
-- **Estado:** completa para su alcance, sin ciclo abierto. `cycle-02` de
-  `spec-e-burgos-001-core-composition-media-pipeline` y `cycle-02` de
-  `spec-e-burgos-004-audio-mix-mastering` cerrados: la lib cubre wrappers de ffprobe/ffmpeg/whisper,
-  la capa pura de mezcla (`src/mix/`) y su ejecución (`mixTimelineAudio`, `verifyMixLoudness`,
-  `muxAudioIntoVideo`).
+- **Tipo:** lib Node TypeScript (wrappers de binarios locales + mezcla/mastering de audio + voz)
+- **Estado:** completa para su alcance, sin ciclo abierto, y en crecimiento activo vía ciclos de
+  otras specs y fixes. Cubre wrappers de ffprobe/ffmpeg/whisper/piper, la capa pura de mezcla
+  (`src/mix/`) y su ejecución (`mixTimelineAudio`, `verifyMixLoudness`, `muxAudioIntoVideo`), síntesis
+  de voz (`synthesizeSpeech`, dos rutas de armado de pista: concatenada y cronometrada) y el catálogo
+  de voces con metadata derivada del `.onnx.json` de cada modelo.
+- **Suite:** 29 archivos / 348 tests, 98,79 % stmts · 94,51 % branch · 98,88 % funcs.
+- **Ciclos y fixes:** `cycle-02` de `spec-e-burgos-001` y `cycle-02` de `spec-e-burgos-004` cerraron
+  el núcleo (wrappers + mezcla/mastering). Desde entonces: `spec-e-burgos-009-voice-over` `cycle-01`
+  (binarios de Piper, `synthesizeSpeech`, `buildVoiceCatalog`), `spec-e-burgos-014-production-quality`
+  `cycle-01` (normalización de la cama musical antes de las ganancias del preset), `FIX-006-001`
+  (canal alfa declarado en el probe de imágenes, usado por la regla de logo del productor en
+  `apps/render-api`), `FIX-009-002` (`placeSpeechSegments` para guion cronometrado, `--length-scale`
+  de Piper) y `spec-e-burgos-016-studio-usability` `cycle-01` (metadata de voces por `.onnx.json`).
 - **Specs que la gobiernan:**
   - `sdd/specs/spec-e-burgos-001-core-composition-media-pipeline/spec-e-burgos-001-core-composition-media-pipeline.spec.md` (sección "Wrappers locales (libs/media-local)")
   - `sdd/specs/spec-e-burgos-004-audio-mix-mastering/spec-e-burgos-004-audio-mix-mastering.spec.md`
     (capa de mezcla/mastering; contrato de API pública en `cycles/cycle-02/architect.md` §15)
+  - `sdd/specs/spec-e-burgos-009-voice-over` (binarios y wrapper de Piper)
+  - `sdd/specs/spec-e-burgos-014-production-quality` (normalización de música, canal alfa de logo)
+  - `sdd/specs/spec-e-burgos-016-studio-usability` (`cycle-01`: catálogo de voces enriquecido,
+    consumido por `EP-019` de `apps/render-api`)
 - **Depende de:** `@video-maker/timeline-core` (ver `sdd/context/libs/timeline-core/` + `updates/`)
 - **Cómo correr y testear:** `pnpm nx test media-local`, `pnpm nx lint media-local`,
   `pnpm nx build media-local`; smoke manual (fuera de CI, requiere ffmpeg real):
   `pnpm nx smoke-audio media-local`
-- **Consumidores previstos:** `libs/auto-montage`, `apps/render-api`, `tools/render-cli`
-- **Vuelve a tocarse en:** `spec-e-burgos-005-render-service` (`apps/render-api`) — es quien
-  orquesta `renderTimeline(timeline, { audio: 'muted' })` (de `libs/composition-remotion`) →
-  `mixTimelineAudio` → `verifyMixLoudness` → `muxAudioIntoVideo` en una sola llamada. Ninguna de
-  las dos libs puede hacer esa orquestación: los boundaries Nx (`type:util` solo depende de
-  `type:domain`) impiden que `media-local` y `composition-remotion` se importen entre sí, así que
-  `apps/render-api` (`type:app`) es el único subproyecto habilitado para depender de ambas.
+- **Consumidores:** `libs/auto-montage` (ingest: probe, loudness, transcripción), `apps/render-api`
+  (activo: jobs `render`/`montage`/`voice`, catálogo de voces y preview), `tools/render-cli`.
 
 ## Qué sigue
 
-- **Entrada obligatoria de `spec-e-burgos-005`:** implementar en `apps/render-api` la cadena
-  `render → mix → mux` (ver "Vuelve a tocarse en" arriba) y, si hiciera falta, un re-master de dos
-  pasadas sobre el bus completo — el master bus limiter de esta lib garantiza el true peak pero no
-  re-normaliza el integrado de voz+música.
 - Regrabar las fixtures de `ffmpeg/` y `whisper/` en una máquina con los binarios instalados
   (`ffmpeg`, `ffprobe`, `whisper-cli`), manteniendo los mismos valores numéricos que arrastran los
   `toEqual` exactos de CA-018/CA-019/CA-020. El README (sección "Fixtures: procedencia y cómo
@@ -43,7 +48,15 @@
   así que `adelay` solo está verificado en el valor degenerado `0`. La implementación
   (`framesToMs(clip.from, fps)`) es correcta por inspección, pero falta un fixture con `from > 0`
   que pruebe numéricamente ese valor y los `st` absolutos de los `afade`.
-- **Mantenimiento de paridad:** cualquier cambio en `gainDbToVolume` (`src/mix/gain-db-to-volume.ts`)
+  **Mantenimiento de paridad:** cualquier cambio en `gainDbToVolume` (`src/mix/gain-db-to-volume.ts`)
   tiene que replicarse en `libs/composition-remotion/src/helpers/audio-gain.ts` (y viceversa) o el
   master deja de sonar como el preview de Remotion — contrato en `cycle-01/architect.md` §7.2.
 - `ExecaCommandRunner.run()` sigue siendo la única ruta de código sin test por diseño.
+- `synthesizeSpeech` no expone `--noise-scale` ni `--speaker`: si hace falta control adicional o
+  voces multi-speaker, son opciones nuevas del mismo wrapper.
+- `concatSpeechSegments` sigue existiendo a propósito junto a `placeSpeechSegments`: no se unificó
+  para que el camino sin marcas de tiempo no cambie ni un argumento de FFmpeg.
+- El canal alfa del probe de imágenes (`hasAlpha`) mide lo **declarado**, no la transparencia
+  efectiva: un PNG `rgba` con fondo blanco opaco pintado informa `hasAlpha: true` igual. Cualquier
+  regla que dependa de esto (como la del logo en el productor de `apps/render-api`) necesita
+  confirmación humana en el preview.
