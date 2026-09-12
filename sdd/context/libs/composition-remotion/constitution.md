@@ -1,6 +1,8 @@
 # Constitución — libs/composition-remotion
 
-> Versión 1.0 | Última actualización: spec-e-burgos-002 cycle-03 + spec-e-burgos-004 cycle-02 + FIX-e-burgos-001-001 | Fecha: 2026-09-08
+> Versión 1.1 | Última actualización: FIX-e-burgos-003-004 | Fecha: 2026-09-11
+> Consolidada al cerrar `FIX-e-burgos-003-004` (fundió los fragmentos de `FIX-001-002`,
+> `spec-006 cycle-02`, `spec-006 cycle-03`, `spec-014 cycle-01`, `FIX-003-003` y `FIX-003-004`).
 > Las actualizaciones por ciclo/fix van como fragmentos aditivos en `updates/`.
 
 ## 1. Propósito
@@ -26,10 +28,12 @@
   captions (`caption-preset`, `caption-safe-zone`, `caption-box`, `caption-font-size`,
   `caption-word-style`, `caption-font-face`, `caption-animation`, `caption-active-word`,
   `caption-clip-plan`). Ninguno importa `remotion`: cargan igual en un `Player` de browser que en Node.
-- `src/components/` — `TimelineComposition` (con `calculateTimelineMetadata` y el tipo
-  `TimelineAudioMode` que controla si monta `AudioTrack`), `ArollSeries` (con `ArollScene`, no
-  exportado), `BrollTrack`, `AudioTrack`, `KineticCaptions` (en el barrel); `CaptionPresetGallery`
-  (solo para `remotion studio`, fuera del barrel).
+- `src/components/` — `TimelineComposition` (con `calculateTimelineMetadata`, el tipo
+  `TimelineAudioMode` que controla si monta `AudioTrack`, y el estilo de captions resuelto de
+  `timeline.captionStyle ?? captionPreset`), `ArollSeries` (con `ArollScene`, no exportado),
+  `BrollTrack`, `AudioTrack`, `KineticCaptions`, `LogoOverlay`, `TimelineVideo`,
+  `VideoBackendProvider`/`useVideoBackend` (en el barrel); `CaptionPresetGallery` (solo para
+  `remotion studio`, fuera del barrel).
 - `src/transitions/` — presentaciones propias (whip-pan) sobre `@remotion/transitions`
 - `src/Root.tsx` — composiciones de ejemplo para `remotion studio` (`TimelineComposition` 9:16,
   `TimelineCompositionLandscape` 16:9, `CaptionPresetGallery` 4320x1920); sus `defaultProps` no
@@ -92,16 +96,60 @@
 - **Precedencia de caja de captions:** `captionClipPlan` usa `boxSource` con default `'preset'` —
   `buildTimeline` siempre rellena `CaptionClip.box`, así que un default `'clip'` anularía las safe
   zones/anchor/`boxHeightRatio` sin que ningún test lo note.
+- **El estilo de captions lo decide el documento, no el preview**: `captionPresetIdForStyle(style,
+  fallback)` resuelve `timeline.captionStyle ?? captionPreset` — el `captionStyle` de la `Timeline`
+  **gana** sobre la prop `captionPreset` (el override del preview), porque el documento es la
+  decisión editorial persistida. `'off'` no monta `<KineticCaptions>`.
+- **`subtle-lower` es un subtítulo de película, no un caption cinético**: sans-serif blanco, contorno
+  fino, sin píldora ni realce ni animación por palabra, `maxLines: 2` (los tres presets cinéticos
+  declaran `1`). `CaptionPreset.maxLines` alimenta tanto el ajuste de tamaño
+  (`caption-font-size.ts`, reparte el ancho entre `maxLines` líneas) como el padding lateral de la
+  caja (`sidePaddingRatio`, default `0` para no mover los demás presets) — los dos tienen que
+  coincidir o el envolvimiento no calza con el tamaño calculado. El margen lateral de
+  `subtle-lower` (0.2) es lo que lo separa del logo por defecto en 16:9; en 9:16 esa separación
+  **no** está garantizada (el logo por defecto ocupa 0.28 del ancho) y habría que derivarlo del
+  logo en vez de dejarlo fijo si `subtle-lower` se usa en vertical.
 - **Un solo `transform` por elemento** en la jerarquía de `KineticCaptions`: caja (posición/fontSize,
   sin transform) > bloque (`opacity` + `transform`) > palabra.
 - **Presets sin píxeles absolutos**: todo ratio contra `format.height` o `em` contra el `fontSize` del
   clip. `CaptionPreset` exige el campo `animation: CaptionAnimation`.
+- **El logo se dibuja entre `BrollTrack` y `KineticCaptions`** (nunca puede tapar texto) y también
+  con `audio: 'muted'`, porque el video mudo es el que se muxea. `logoOverlayBox`/`logoOverlayStyle`
+  (`helpers/logo-overlay-style.ts`, puro) calculan ancho y margen contra `format.width` y emiten
+  sólo la esquina que corresponde; un `assetId` que no resuelve cae en `unresolvedAssetIds` en vez
+  de romper el render.
+- **`AudioTrack` normaliza la música con `volumeAtFrame(automation, frame, offsetDb)`**, no con
+  `gainDbToVolume(music.baseGainDb)` a secas: el tercer parámetro opcional es la
+  `normalizationGainDb` que viene de `timeline-core` y se suma en dB antes de convertir a volumen
+  (el clamp a 1 sigue aplicando, así que en el preview la cama nunca pasa de fondo de escala; en el
+  master ese techo lo pone el `alimiter` del bus). Editar un nivel de música obliga a reescribir
+  `audioMix.automation`, no esta función.
+- **`TimelineVideo` conmuta `<Video>`/`<OffthreadVideo>` por `VideoBackendProvider`** (`'player'` →
+  `<Video>`, cualquier otro caso, incluido sin proveedor, → `<OffthreadVideo>`) para que el
+  `<Player>` de `apps/web` y el render compartan componente. Aplica `PLAYER_MEDIA_STYLE = {
+  objectFit: 'fill' }` **sólo en la rama `player`**, con el spread `{ ...PLAYER_MEDIA_STYLE,
+  ...style }` — el estilo del llamador gana, no invertir el orden (rompe el `cover`/`contain` de
+  b-roll y pip). La rama `render` recibe el `style` entrante sin agregar ni quitar claves: es lo que
+  sostiene la paridad byte a byte del entregable.
+- **Defecto conocido y deliberadamente no corregido todavía**: el render monta el video con
+  `object-fit: fill` efectivo (estira anamórficamente), mientras el navegador computa `contain` por
+  hoja de agente de usuario; se alineó el **preview al render** (no al revés) porque corregir el
+  render cambia el `sha256` del entregable. El dev ve en el preview el mismo encuadre defectuoso que
+  sale en el MP4. Corregirlo (dar a `ArollScene` un `COVER_MEDIA_STYLE` idéntico al de `BrollTrack`)
+  es un `[FIX]` pendiente, con re-baseline de `sha256` incluido — no una regresión cuando se haga.
 - **Sin comentarios** en el código; nombres declarativos, componentes cortos
 - Tags Nx: `scope:engine`, `type:ui`. Depende solo de `libs/timeline-core`
 - Targets: `lint`, `test` (`vitest run --coverage --passWithNoTests`, umbral 80 % sobre
-  `src/helpers/**` + `src/transitions/**`, real 96.77 % stmts / 93.16 % branches / 98.07 % funcs
-  sobre 249 tests — `src/render.ts` y `src/components/**` quedan **fuera** de ese `include`, sin
-  ningún threshold que los vigile), `build` (`tsc -p tsconfig.lib.json`), `smoke` (manual:
+  `coverage.include` — `src/helpers/**`, `src/transitions/**`, `src/render.ts` y sólo tres
+  componentes: `timeline-video.tsx`, `video-backend.tsx` y `audio-track.tsx` (D-6 de
+  `spec-005-render-service`: medir `render.ts` bajó el número de 97,61 % a algo honesto). Real:
+  26 archivos / 303 tests, 94,42 % stmts · 93,45 % branch · 92,2 % funcs · 94,31 % lines. El resto
+  de `src/components/**` (`ArollSeries`/`ArollScene`, `BrollTrack`, `KineticCaptions`,
+  `LogoOverlay`) queda **fuera** de ese `include` con fundamento medido: incluirlo baja branch y
+  funcs por debajo del piso de 80 %, y `Vitest 4.1.11` no soporta un threshold distinto por glob
+  para esos archivos (tres formas de glob probadas, todas cuentan igual para el umbral global). Su
+  evidencia es el smoke E2E con binarios reales y la paridad de `sha256`/PSNR contra un frame de
+  referencia, no el reporte de v8), `build` (`tsc -p tsconfig.lib.json`), `smoke` (manual:
   `node -r ./src/smoke-register.cjs ./src/smoke.ts` con `SWC_NODE_PROJECT=./tsconfig.smoke.json` —
-  produjo un render real el 2026-09-08, y otro más el mismo día vía `tools/render-cli`), `studio`
-  (manual, `remotion studio`)
+  produjo un render real el 2026-09-08 (538 frames a 1080×1920) y sucesivas corridas de
+  no-regresión por `sha256` en `spec-006`), `studio` (manual, `remotion studio`)
