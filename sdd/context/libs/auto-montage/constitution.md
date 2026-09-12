@@ -1,6 +1,8 @@
 # Constitución — libs/auto-montage
 
-> Versión 1.1 | Última actualización: cycle-03 | Fecha: 2026-09-08
+> Versión 1.2 | Última actualización: FIX-e-burgos-009-002 | Fecha: 2026-09-11
+> Consolidada al cerrar `FIX-e-burgos-009-002` (fundió los fragmentos de
+> `spec-009 cycle-01`, `spec-014 cycle-01`, `FIX-003-003`, `FIX-007-002` y `FIX-009-002`).
 > Las actualizaciones por ciclo/fix van como fragmentos aditivos en `updates/`.
 
 ## 1. Propósito
@@ -58,6 +60,14 @@
 - `src/errors/` — `AutoMontageError` como raíz + errores tipados con `code` estable:
   `CatalogUnreadableError`, `MontageInputError` (`MONTAGE_INPUT_INVALID`, con `reason`),
   `EditDecisionListInvalidError`, `TimelineInvalidError`.
+- `src/transcript/` — `tokenizeScript` y `alignTranscriptToScript(words, scriptText)`: alinea la
+  transcripción de Whisper contra un guion escrito por LCS sobre tokens normalizados. `autoMontage`
+  lo aplica **antes** de podar silencios, así que captions/conceptos/ducking ven el mismo texto.
+- `src/voice/` — fuente de verdad de `work/voice/voice.wav`, `work/voice/voice.words.json` y
+  `work/voice/script-manifest.json` (`voice-script-paths.ts`, re-exportado por
+  `apps/render-api` en vez de redefinido); `read-voice-script-track.ts` lee el manifest y sus
+  palabras y devuelve `{ asset, transcription, manifestPath }` sin `stat`: el manifest es la prueba
+  de existencia.
 - `src/__fixtures__/` — árboles de proyecto y transcripciones de fixture.
 - `src/smoke.ts` + target `smoke` (`nx run auto-montage:smoke`): único camino a I/O real, fuera de
   `lint test build` y de CI. Material regenerable documentado en el README (`media/smoke-ingest`).
@@ -92,6 +102,33 @@
   segunda corrida sin cambios produce un `catalog.json` idéntico byte a byte (D-6); no lleva
   `generatedAt` (D-7). Un catálogo anterior ilegible degrada a ingesta completa con
   `staleCatalogReplaced: true` (D-8).
+- **`AssetRole` es un tipo suma de seis miembros** (`aroll`, `broll`, `music`, `image`, `voice`,
+  `logo`): ensancharlo es un cambio global, todo `Record<AssetRole, …>` nuevo (en esta lib o en un
+  consumidor) tiene que contemplar los seis. `raw/voice/` espera `MediaKind: 'audio'`; `raw/logo/`
+  espera png/jpg/webp (`.svg` ⇒ `unsupported-extension`). `DEFAULT_TRANSCRIBE_ROLES` sigue siendo
+  `['aroll']`: la ingesta no transcribe `raw/voice/` (lo hace el job `voice` de `apps/render-api`
+  cuando se asocia a una escena).
+- **`probeAssets` mide loudness de todo asset `audio`** (`measureLoudness` → `audio.integratedLufs`);
+  una medición fallida no pierde el asset ni cuenta como `probeFailure`. `planIngestWork` **no
+  reusa** una entrada de catálogo de rol `audio` sin esa medición (`isMissingLoudnessMeasurement`):
+  un proyecto ya ingestado se re-mide solo, sin borrar `work/catalog.json`.
+- **El estilo de captions lo resuelve el preset de montaje, no un default global**:
+  `captionStyleForMontagePreset(presetName, requested)` sobre `CAPTION_STYLE_BY_MONTAGE_PRESET`
+  (`educational → subtle-lower`, los otros tres → `bold-impact`); `AutoMontageOptions.captionStyle?`
+  gana si se pasa explícito, y `AutoMontageResult.captionStyle` siempre lo publica resuelto. El
+  estilo no cambia el preset de montaje: `educational` + `bold-impact` explícito es válido.
+- **`autoMontage` tiene dos fuentes de habla** (`voice: 'aroll' | 'script'`, default `aroll`,
+  byte a byte igual al comportamiento anterior): la transcripción del A-roll o la voz sintetizada
+  por el job `voice`. `pruneSilencesWithFrameMargin` recibe `{ sourceDurationMs, prune }` en vez del
+  `MediaAsset` del A-roll; `prune` default es `voice === 'aroll'`, forzable por
+  `options.pruneSilences`. Un guion suelto pasa por `stripVoiceScriptTimeMarks` antes de
+  `alignTranscriptToScript` — sin eso, `[0:00]` tokeniza como palabras y contamina la primera
+  caption.
+- **La duración del montaje en modo `script` depende de si el guion es cronometrado**: con marcas de
+  tiempo dura el A-roll completo (la narración termina antes, la cola queda muda, `truncatedMs` se
+  calcula contra `narrationEndMs`); sin marcas es `min(voz, A-roll)` con `truncatedMs` clásico. El
+  A-roll se transcribe igual en modo `script` — es trabajo de Whisper que nadie lee, pero cambiarlo
+  es tocar `DEFAULT_TRANSCRIBE_ROLES`, no el modo de voz.
 - **Sin comentarios** en el código; nombres declarativos, funciones cortas.
 - Tags Nx: `scope:engine` + `type:feature` (D-1), con la regla
   `{ sourceTag: 'type:feature', onlyDependOnLibsWithTags: ['type:domain', 'type:util'] }` en el
