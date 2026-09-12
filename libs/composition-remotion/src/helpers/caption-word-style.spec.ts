@@ -1,6 +1,22 @@
 import { describe, expect, it } from 'vitest';
 import { CAPTION_PRESET_IDS, captionPreset } from './caption-preset';
+import type { CaptionPreset } from './caption-preset';
 import { captionWordStyle } from './caption-word-style';
+
+const KINETIC_PRESET_IDS = CAPTION_PRESET_IDS.filter((id) => id !== 'subtle-lower');
+
+const PILL_PRESET: CaptionPreset = {
+  ...captionPreset('clean-sans'),
+  stroke: null,
+  shadow: null,
+  pill: {
+    color: 'rgba(0, 0, 0, 0.55)',
+    emphasisColor: 'rgba(0, 0, 0, 0.78)',
+    paddingXEm: 0.35,
+    paddingYEm: 0.12,
+    radiusEm: 0.35,
+  },
+};
 
 const STATES = [
   { isEmphasis: false, isActive: false },
@@ -9,7 +25,7 @@ const STATES = [
   { isEmphasis: true, isActive: true },
 ] as const;
 
-describe.each(CAPTION_PRESET_IDS)('captionWordStyle — %s', (id) => {
+describe.each(KINETIC_PRESET_IDS)('captionWordStyle — %s', (id) => {
   const preset = captionPreset(id);
 
   it('la palabra normal y la de impacto no producen estilos idénticos (CA-004)', () => {
@@ -124,7 +140,6 @@ describe('captionWordStyle — composición multiplicativa de la escala por pres
     ['bold-impact', 1.21],
     ['clean-sans', 1.145],
     ['outline-pop', 1.254],
-    ['subtle-lower', 1.082],
   ] as const)('%s: emphasis+active compone a scale(%s)', (id, expectedScale) => {
     const preset = captionPreset(id);
     const style = captionWordStyle(preset, { isEmphasis: true, isActive: true });
@@ -156,11 +171,24 @@ describe('captionWordStyle — ramas condicionales de stroke/shadow/pill (R-7)',
     expect('backgroundColor' in style).toBe(false);
   });
 
-  it('subtle-lower (único con píldora) devuelve backgroundColor/padding/borderRadius y no tiene stroke ni shadow', () => {
+  it('subtle-lower se lee por contorno y sombra, sin píldora (FIX-003-004)', () => {
     const preset = captionPreset('subtle-lower');
 
     const normal = captionWordStyle(preset, { isEmphasis: false, isActive: false });
     const emphasis = captionWordStyle(preset, { isEmphasis: true, isActive: false });
+
+    expect(normal.WebkitTextStroke).toBe('0.045em rgba(0, 0, 0, 0.9)');
+    expect(normal.paintOrder).toBe('stroke fill');
+    expect(normal.textShadow).toBe('0 0.03em 0.08em rgba(0, 0, 0, 0.75)');
+    expect('backgroundColor' in normal).toBe(false);
+    expect('padding' in normal).toBe(false);
+    expect('borderRadius' in normal).toBe(false);
+    expect(emphasis).toEqual(normal);
+  });
+
+  it('un preset con píldora emite backgroundColor/padding/borderRadius y distingue la de impacto', () => {
+    const normal = captionWordStyle(PILL_PRESET, { isEmphasis: false, isActive: false });
+    const emphasis = captionWordStyle(PILL_PRESET, { isEmphasis: true, isActive: false });
 
     expect('WebkitTextStroke' in normal).toBe(false);
     expect('textShadow' in normal).toBe(false);
@@ -168,5 +196,26 @@ describe('captionWordStyle — ramas condicionales de stroke/shadow/pill (R-7)',
     expect(normal.padding).toBe('0.12em 0.35em');
     expect(normal.borderRadius).toBe('0.35em');
     expect(emphasis.backgroundColor).toBe('rgba(0, 0, 0, 0.78)');
+  });
+});
+
+describe('captionWordStyle — subtle-lower no resalta ninguna palabra (FIX-003-004)', () => {
+  const preset = captionPreset('subtle-lower');
+
+  it('los cuatro estados producen exactamente el mismo estilo', () => {
+    const styles = STATES.map((state) => captionWordStyle(preset, state, 8));
+
+    for (const style of styles) {
+      expect(style).toEqual(styles[0]);
+    }
+  });
+
+  it('nunca escala ni reserva ancho por el escalado', () => {
+    const both = captionWordStyle(preset, { isEmphasis: true, isActive: true }, 12);
+
+    expect(both.transform).toBe('scale(1)');
+    expect('marginLeft' in both).toBe(false);
+    expect(both.fontWeight).toBe(preset.fontWeight);
+    expect(both.color).toBe('#ffffff');
   });
 });

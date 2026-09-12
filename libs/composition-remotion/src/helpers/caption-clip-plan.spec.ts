@@ -167,6 +167,9 @@ describe('captionBoxStyle', () => {
       top: plan.box.y,
       width: plan.box.width,
       height: plan.box.height,
+      paddingLeft: 0,
+      paddingRight: 0,
+      boxSizing: 'border-box',
       display: 'flex',
       alignItems: 'center',
       justifyContent: 'center',
@@ -175,5 +178,27 @@ describe('captionBoxStyle', () => {
     });
     expect('transform' in style).toBe(false);
     expect('opacity' in style).toBe(false);
+  });
+
+  it('reserva a los costados la misma fracción que usó el ajuste de tamaño (FIX-003-004)', () => {
+    const subtitle = captionPreset('subtle-lower');
+    const [plan] = captionClipPlan({
+      clips: [clipWithBox(null)],
+      format: FORMAT,
+      preset: subtitle,
+      platform: 'tiktok',
+    });
+
+    if (plan === undefined) {
+      throw new Error('expected a caption clip plan entry');
+    }
+
+    const style = captionBoxStyle(plan.box, plan.fontSize, subtitle.sidePaddingRatio);
+    const reserved = Math.round(plan.box.width * subtitle.sidePaddingRatio);
+
+    expect(style.paddingLeft).toBe(reserved);
+    expect(style.paddingRight).toBe(reserved);
+    expect(style.boxSizing).toBe('border-box');
+    expect(reserved).toBeGreaterThan(0);
   });
 });

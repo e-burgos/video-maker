@@ -74,7 +74,7 @@ export const KineticCaptions: FC<KineticCaptionsProps> = ({
           from={plan.from}
           durationInFrames={plan.durationInFrames}
         >
-          <div style={captionBoxStyle(plan.box, plan.fontSize)}>
+          <div style={captionBoxStyle(plan.box, plan.fontSize, resolvedPreset.sidePaddingRatio)}>
             <CaptionClipBlock plan={plan} preset={resolvedPreset} />
           </div>
         </Sequence>

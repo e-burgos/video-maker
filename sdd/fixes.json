@@ -1096,6 +1096,126 @@
         "tokens_total": 191747
       },
       "process_note": "Usage: one agent run resolved both fixes and reported 454258 tokens in total (agent-usage-notification); split in proportion to the declared estimates."
+    },
+    {
+      "id": "FIX-e-burgos-003-004",
+      "author": "e-burgos",
+      "spec_id": "spec-e-burgos-003-kinetic-captions",
+      "fix_document": "sdd/specs/spec-e-burgos-003-kinetic-captions/fixes/fix-e-burgos-003-004.md",
+      "type": "IMPROVEMENT",
+      "severity": "medium",
+      "created_at": "2026-09-11",
+      "resolved_at": "2026-09-11",
+      "validated_at": null,
+      "title": "subtle-lower is not a film subtitle: serif over a dark pill, with an emphasized word and per-word scaling",
+      "estimation_hours": 3,
+      "description": "Real case media/display-ads: the dev asked for normal movie subtitles and subtle-lower renders a serif over a translucent pill, with the emphasis word in a different colour and weight and every active word scaling up. This fix turns subtle-lower into the classic cinema subtitle: sans-serif, pure white, a thin dark stroke plus a soft shadow, no pill, no emphasis and no per-word animation (emphasisColor/activeColor equal to color, emphasisScale/activeScale 1, emphasisFontWeight equal to fontWeight), a short fade, and a lower box sized for up to two lines. CaptionPreset gains maxLines and fitCaptionFontSize honours it, so a preset can wrap instead of shrinking to a single line; maxLines 1 keeps the three kinetic presets byte-identical.",
+      "justification": "Solo-profile FIX GATE: no new endpoint and no new entity. It retunes one existing preset and adds one numeric field to an internal helper type of libs/composition-remotion. No cycle open on spec-003.",
+      "related_modules": [
+        "kinetic-captions"
+      ],
+      "affected_files": [
+        "apps/web/e2e/measure-caption-layout.mjs",
+        "apps/web/e2e/timed-narration-captions-smoke.mjs",
+        "libs/composition-remotion/README.md",
+        "libs/composition-remotion/src/components/kinetic-captions.tsx",
+        "libs/composition-remotion/src/helpers/caption-box.spec.ts",
+        "libs/composition-remotion/src/helpers/caption-clip-plan.spec.ts",
+        "libs/composition-remotion/src/helpers/caption-clip-plan.ts",
+        "libs/composition-remotion/src/helpers/caption-font-size.spec.ts",
+        "libs/composition-remotion/src/helpers/caption-font-size.ts",
+        "libs/composition-remotion/src/helpers/caption-preset.spec.ts",
+        "libs/composition-remotion/src/helpers/caption-preset.ts",
+        "libs/composition-remotion/src/helpers/caption-word-style.spec.ts",
+        "sdd/context/libs/composition-remotion/updates/2026-09-11-fix-e-burgos-003-004.md",
+        "sdd/fixes.json",
+        "sdd/specs/spec-e-burgos-003-kinetic-captions/fixes/artifacts/subtle-lower-layout.json",
+        "sdd/specs/spec-e-burgos-003-kinetic-captions/fixes/artifacts/subtle-lower-t010.png",
+        "sdd/specs/spec-e-burgos-003-kinetic-captions/fixes/artifacts/subtle-lower-t022.png",
+        "sdd/specs/spec-e-burgos-003-kinetic-captions/fixes/fix-e-burgos-003-004.md"
+      ],
+      "test_reference": "pnpm nx run-many -t lint test build green for 8 projects and pnpm sdd:validate OK (2026-09-11). composition-remotion 303 tests (was 294), 94.42 % stmts / 93.45 % branch, floors untouched. New unit coverage: the subtle-lower contract (sans-serif, #ffffff, emphasis and active equal to the normal word in colour, weight and scale, pill null, stroke 0.045em rgba(0,0,0,0.9), fade of at most 6 frames, bottom anchor, maxLines 2 and a box that fits two lines at the maximum font size); captionWordStyle returning one identical style for the four word states of subtle-lower and never a margin reserve; the pill branch kept covered by a test preset; fitCaptionFontSize honouring maxLines (two lines allow a larger size, the two lines fit the box height, maxLines 1 still returns the historical 211 px for bold-impact); and captionBoxStyle reserving the preset side padding with boxSizing border-box (0 by default, so the kinetic presets are byte-identical). Contract change written up in the fix document: the test 'subtle-lower (unico con pildora)' and the emphasis invariants of the per-preset tables. REAL RENDER (the point of the fix): apps/web/e2e/timed-narration-captions-smoke.mjs over a temporary copy of media/display-ads, educational + youtube-16x9 + voice script, 2895 frames at 1920x1080, audio in sync at 0 ms (correlation 0.9144). Frames subtle-lower-t010.png and subtle-lower-t022.png: at 10 s one centred white word at the bottom, at 22 s two centred lines, in both cases with a thin dark outline, no pill, no emphasised word and no per-word animation. NO OVERLAP measured in the DOM, not by eye (apps/web/e2e/measure-caption-layout.mjs over the Remotion Player of the same timeline, subtle-lower-layout.json): at 22 s the longest line ends at x=1475 px and the logo starts at x=1505 px, a 30 px gap; at 10 s the gap is 435 px.",
+      "status": "implemented",
+      "cycle": null,
+      "usage": {
+        "provider_model": "claude/opus",
+        "effort": "high",
+        "tokens_in": 118000,
+        "tokens_out": 21000,
+        "approx": true,
+        "source": "declared-estimate",
+        "recorded_at": "2026-09-11",
+        "agent": "implementor-front"
+      }
+    },
+    {
+      "id": "FIX-e-burgos-006-001",
+      "author": "e-burgos",
+      "spec_id": "spec-e-burgos-006-web-studio",
+      "fix_document": "sdd/specs/spec-e-burgos-006-web-studio/fixes/fix-e-burgos-006-001.md",
+      "type": "IMPROVEMENT",
+      "severity": "medium",
+      "created_at": "2026-09-11",
+      "resolved_at": null,
+      "validated_at": null,
+      "title": "the library hides what the engine generated, the caption style cannot be picked and the logo is oversized",
+      "estimation_hours": 8,
+      "description": "Real case media/display-ads. Three gaps of the studio web after the producer delivered a video. (1) The library only lists raw/, so the generated narration, the producer script and the rendered mp4 are invisible: a new GET /projects/:slug/generated confined to work/voice, work/producer and out feeds a Generated section with an audio player, the voice id read from the manifest, the script and the deliverables. (2) timeline.captionStyle shipped in FIX-003-003 but nothing in the web could set it: a Caption style selector on the preview writes it through the existing full PUT and the Player reflects it. (3) The logo defaulted to widthRatio 0.32 in every format and a PNG without an alpha channel showed as a white box: buildTimeline now derives the default from the format (0.18 landscape, 0.28 portrait), the logo panel gains a size and an opacity control, and the probe records hasAlpha from ffprobe pix_fmt so the library and the panel warn when the logo has no transparency.",
+      "justification": "Solo-profile FIX GATE: it adds one read-only listing endpoint over directories the artifact endpoint already serves, and everything else is additive over existing documents (one optional MediaAsset field, one format-derived default, three web controls). No new entity and no cycle open on spec-006.",
+      "related_modules": [
+        "web-studio",
+        "render-service",
+        "auto-montage-pipeline"
+      ],
+      "affected_files": [],
+      "test_reference": "",
+      "status": "in-progress",
+      "cycle": null
+    },
+    {
+      "id": "FIX-e-burgos-009-003",
+      "author": "e-burgos",
+      "spec_id": "spec-e-burgos-009-voice-over",
+      "fix_document": "sdd/specs/spec-e-burgos-009-voice-over/fixes/fix-e-burgos-009-003.md",
+      "type": "IMPROVEMENT",
+      "severity": "medium",
+      "created_at": "2026-09-11",
+      "resolved_at": null,
+      "validated_at": null,
+      "title": "voice and storyboard are dead ends when the producer worked from a script instead of a storyboard",
+      "estimation_hours": 6,
+      "description": "Real case media/display-ads: the producer narrated from a timed script, so there is no work/storyboard.json and both screens were useless. The voice page now reads work/voice/script-manifest.json through the artifact endpoint and renders a script mode: every line with its startMs, endMs and overflow, the voice.wav player, the voice that produced it, a regenerate button that posts a voice job with scriptPath work/producer/script.txt, and a notice that a new montage and render are needed. Without a storyboard and without a manifest the empty state points at the producer as well as at the storyboard. The storyboard page shows the producer script read-only under Producer script when work/producer/script.txt exists, keeping the propose-storyboard button as the alternative.",
+      "justification": "Solo-profile FIX GATE: no new endpoint and no new entity. Both screens read documents the engine already writes, through EP-011, and the regenerate button posts the voice job exactly as the producer does. No cycle open on spec-009.",
+      "related_modules": [
+        "voice-over",
+        "web-studio"
+      ],
+      "affected_files": [],
+      "test_reference": "",
+      "status": "in-progress",
+      "cycle": null
+    },
+    {
+      "id": "FIX-e-burgos-015-004",
+      "author": "e-burgos",
+      "spec_id": "spec-e-burgos-015-studio-producer",
+      "fix_document": "sdd/specs/spec-e-burgos-015-studio-producer/fixes/fix-e-burgos-015-004.md",
+      "type": "IMPROVEMENT",
+      "severity": "low",
+      "created_at": "2026-09-11",
+      "resolved_at": null,
+      "validated_at": null,
+      "title": "the producer delivers without saying where each artifact is and picks a logo without transparency",
+      "estimation_hours": 2,
+      "description": "Real case media/display-ads: the producer finished the video without telling the user where to watch it or where the narration and the script live, and it picked a PNG with a white background out of raw/logo/ without a word. The system prompt and the video-producer skill now require the delivery message to name the place of every artifact (video in preview and in the Generated section of the library, voice in the voice screen, script in the storyboard screen) and to pick the logo with transparency when raw/logo/ holds more than one file, asking only when both are transparent and never choosing a PNG without alpha silently.",
+      "justification": "Solo-profile FIX GATE: prompt and skill copy only, no contract, endpoint or entity. No cycle open on spec-015.",
+      "related_modules": [
+        "studio-producer"
+      ],
+      "affected_files": [],
+      "test_reference": "",
+      "status": "in-progress",
+      "cycle": null
     }
   ]
 }

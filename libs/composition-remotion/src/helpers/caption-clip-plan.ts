@@ -60,13 +60,20 @@ export function captionClipPlan(input: CaptionClipPlanInput): readonly CaptionCl
   });
 }
 
-export function captionBoxStyle(box: CaptionBox, fontSize: number): CSSProperties {
+export function captionBoxStyle(
+  box: CaptionBox,
+  fontSize: number,
+  sidePaddingRatio = 0,
+): CSSProperties {
   return {
     position: 'absolute',
     left: box.x,
     top: box.y,
     width: box.width,
     height: box.height,
+    paddingLeft: Math.round(box.width * sidePaddingRatio),
+    paddingRight: Math.round(box.width * sidePaddingRatio),
+    boxSizing: 'border-box',
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',

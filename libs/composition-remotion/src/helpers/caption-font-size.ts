@@ -28,8 +28,9 @@ export function fitCaptionFontSize(
     return maxFontSize;
   }
 
-  const availableWidth = Math.max(0, box.width * (1 - 2 * preset.sidePaddingRatio));
-  const heightCap = Math.floor(box.height / preset.lineHeightEm);
+  const lines = Math.max(1, preset.maxLines);
+  const availableWidth = Math.max(0, box.width * (1 - 2 * preset.sidePaddingRatio)) * lines;
+  const heightCap = Math.floor(box.height / (preset.lineHeightEm * lines));
   const rawFontSize = Math.min(availableWidth / widthEm, heightCap);
 
   return Math.min(maxFontSize, Math.max(minFontSize, Math.floor(rawFontSize)));

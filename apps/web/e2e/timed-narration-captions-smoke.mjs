@@ -23,6 +23,11 @@ const ARTIFACTS_DIR = join(
   REPO_ROOT,
   'sdd/specs/spec-e-burgos-009-voice-over/fixes/artifacts',
 );
+const SUBTITLE_ARTIFACTS_DIR = join(
+  REPO_ROOT,
+  'sdd/specs/spec-e-burgos-003-kinetic-captions/fixes/artifacts',
+);
+const SUBTITLE_FRAME_SECONDS = [10, 22];
 
 const TIMED_SCRIPT = [
   '[0:00] Entramos a la plataforma con nuestro usuario.',
@@ -220,6 +225,7 @@ async function main() {
   const tempMediaRoot = await mkdtemp(join(tmpdir(), 'timed-narration-media-'));
   const projectRoot = await seedProject(tempMediaRoot);
   await mkdir(ARTIFACTS_DIR, { recursive: true });
+  await mkdir(SUBTITLE_ARTIFACTS_DIR, { recursive: true });
   log('1', `temp media root: ${tempMediaRoot} (raw/ + work/producer/ of media/display-ads)`);
 
   const renderApi = spawnLogged(
@@ -374,6 +380,21 @@ async function main() {
       ffmpeg(['-y', '-v', 'error', '-ss', String(seconds), '-i', outPath, '-frames:v', '1', framePath]);
       log('6', `frame at ${seconds} s: ${framePath}`);
     }
+
+    for (const seconds of SUBTITLE_FRAME_SECONDS) {
+      const framePath = join(
+        SUBTITLE_ARTIFACTS_DIR,
+        `subtle-lower-t${String(seconds).padStart(3, '0')}.png`,
+      );
+      ffmpeg(['-y', '-v', 'error', '-ss', String(seconds), '-i', outPath, '-frames:v', '1', framePath]);
+      log('6', `subtitle frame at ${seconds} s: ${framePath}`);
+    }
+
+    log('6', `logo of the rendered timeline: ${JSON.stringify(timeline.logo)}`);
+    assert(
+      timeline.logo === undefined || timeline.logo.widthRatio === 0.18,
+      `a 16:9 montage sizes the logo at 0.18 of the width (got ${timeline.logo?.widthRatio})`,
+    );
 
     log('7', 'audio sync: envelope correlation of the MP4 against voice.wav');
     const reference = envelope(voiceWav, 0, 96);

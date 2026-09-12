@@ -38,7 +38,7 @@ Todo lo exportado vive en `src/index.ts` (firmas completas en `architect.md` §3
 | Backend de video (Player vs render) | `TimelineVideo`, `VideoBackendProvider`, `useVideoBackend`, `DEFAULT_VIDEO_BACKEND`, tipos `TimelineVideoProps`, `VideoBackend`, `VideoBackendProviderProps` |
 | Metadata / composición raíz | `computeTimelineMetadata`, `calculateTimelineMetadata`, `TIMELINE_COMPOSITION_ID` |
 | Tipos derivados públicos | `CaptionBox`, `TransitionDirection` (el resto de `timeline-types.ts` es interno) |
-| Kinetic captions — presets | `CAPTION_PRESETS`, `CAPTION_PRESET_IDS`, `DEFAULT_CAPTION_PRESET_ID`, `captionPreset`, tipos `CaptionPreset`, `CaptionPresetId`, `CaptionStroke`, `CaptionPill`, `CaptionTextTransform` |
+| Kinetic captions — presets | `CAPTION_PRESETS`, `CAPTION_PRESET_IDS`, `DEFAULT_CAPTION_PRESET_ID`, `captionPreset`, tipos `CaptionPreset` (incluye `maxLines`), `CaptionPresetId`, `CaptionStroke`, `CaptionPill`, `CaptionTextTransform` |
 | Kinetic captions — safe zone | `CAPTION_PLATFORMS`, `captionChromeInsets`, `captionSafeZone`, tipos `CaptionPlatform`, `CaptionChromeInsets`, `CaptionChromeReference` |
 | Kinetic captions — layout y tipografía | `captionBoxFor` (tipo `CaptionAnchor`), `fitCaptionFontSize`, `captionWordStyle` (tipo `CaptionWordState`) |
 | Kinetic captions — fuente propia | `captionFontFaceCss`, tipos `CaptionFontFace`, `CaptionFontFormat`, `CaptionFontDisplay` |
@@ -123,7 +123,12 @@ en `em` (tipografía) o en fracción del formato (layout) — ver `architect.md`
 | `bold-impact` | Hook / gancho, texto grande al centro | Mayúsculas, 800/900, contorno fino, ámbar en el impacto |
 | `clean-sans` | Explicativo, subtítulo legible sin ruido visual | Sin contorno, caja mixta, anclado abajo, verde en el impacto |
 | `outline-pop` | Máximo contraste sobre metraje ruidoso | Contorno grueso + `paintOrder`, tres colores saturados |
-| `subtle-lower` | Discreto abajo, subtítulo tipo documental | Serif, píldora semitransparente, el rango de tamaño más chico del registro |
+| `subtle-lower` | Subtítulo clásico de cine: tutorial, explicación, manual | Sans-serif blanco con contorno fino oscuro y sombra suave, **sin píldora, sin realce y sin animación por palabra**, caja inferior de hasta dos líneas |
+
+`subtle-lower` es el único preset que no es cinético (FIX-e-burgos-003-004): `emphasisColor` y
+`activeColor` valen lo mismo que `color`, `emphasisFontWeight` lo mismo que `fontWeight` y ambas
+escalas valen `1`, así que `captionWordStyle` devuelve el mismo estilo para los cuatro estados de
+palabra. Los invariantes de realce de los tests aplican a los tres presets cinéticos.
 
 `captionSafeZone(format, platform?, baseSafeZone?)` suma, nunca resta, el margen de chrome de una
 red social sobre el safe zone base del formato. Sin `platform` es la identidad de `safeZoneFor(format)`.
@@ -138,6 +143,10 @@ red social sobre el safe zone base del formato. Sin `platform` es la identidad d
 `captionBoxFor(safeZone, format, preset, anchor?)` calcula la caja anclada (`top`/`center`/`bottom`,
 default `preset.anchor`) contenida en el safe zone, y `fitCaptionFontSize(words, box, preset, format)`
 ajusta el tamaño de letra sin medir el DOM, con clamp a `[minFontSize, maxFontSize]` del preset.
+`CaptionPreset.maxLines` dice en cuántas líneas puede envolver la frase: el ajuste reparte el ancho
+disponible entre esas líneas y limita el alto a `maxLines * lineHeightEm`. Los tres presets cinéticos
+declaran `maxLines: 1` —con ese valor la fórmula es la de siempre, término a término— y
+`subtle-lower` declara `2`.
 `captionWordStyle(preset, { isEmphasis, isActive })` da el `CSSProperties` de una palabra — sin
 `fontSize`: lo pone el contenedor del clip una sola vez por frase (`cycle-02`).
 

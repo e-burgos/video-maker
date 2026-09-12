@@ -157,3 +157,37 @@ describe.each(CAPTION_PRESET_IDS)('fitCaptionFontSize — %s', (id) => {
     expect(Number.isInteger(result)).toBe(true);
   });
 });
+
+describe('fitCaptionFontSize — maxLines (FIX-003-004)', () => {
+  const SENTENCE = 'Cada anuncio arranca de una plantilla y el editor la ajusta en dos minutos'
+    .split(' ')
+    .map(word);
+
+  it('un preset de dos líneas admite un tamaño mayor que el mismo preset de una', () => {
+    const twoLines = captionPreset('subtle-lower');
+    const oneLine = { ...twoLines, maxLines: 1 };
+    const format = defaultFormat('youtube-16x9');
+    const safeZone = captionSafeZone(format);
+    const box = captionBoxFor(safeZone, format, twoLines);
+
+    expect(fitCaptionFontSize(SENTENCE, box, twoLines, format)).toBeGreaterThan(
+      fitCaptionFontSize(SENTENCE, box, oneLine, format),
+    );
+  });
+
+  it('el alto de las dos líneas entra en la caja del preset', () => {
+    const preset = captionPreset('subtle-lower');
+    const format = defaultFormat('youtube-16x9');
+    const safeZone = captionSafeZone(format);
+    const box = captionBoxFor(safeZone, format, preset);
+    const fontSize = fitCaptionFontSize(SENTENCE, box, preset, format);
+
+    expect(fontSize * preset.lineHeightEm * preset.maxLines).toBeLessThanOrEqual(box.height);
+  });
+
+  it('maxLines 1 deja la fórmula anterior intacta para los cinéticos', () => {
+    const preset = captionPreset('bold-impact');
+
+    expect(fitCaptionFontSize([word('GO')], TIKTOK_BOX, preset, TIKTOK_FORMAT)).toBe(211);
+  });
+});

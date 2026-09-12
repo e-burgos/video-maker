@@ -1,0 +1,42 @@
+{
+  "source": "DOM measurement of the Remotion Player in apps/web, converted to frame pixels",
+  "slug": "timed-narration-smoke",
+  "frameWidth": 1920,
+  "frames": {
+    "300": {
+      "seconds": 10,
+      "captionLines": [
+        {
+          "text": "plataforma",
+          "leftPx": 850,
+          "rightPx": 1070
+        }
+      ],
+      "logoPx": {
+        "leftPx": 1505,
+        "rightPx": 1849
+      },
+      "gapToLogoPx": 435
+    },
+    "660": {
+      "seconds": 22,
+      "captionLines": [
+        {
+          "text": "campañas viven acá. Esta línea de tiempo muestra",
+          "leftPx": 445,
+          "rightPx": 1475
+        },
+        {
+          "text": "qué corre",
+          "leftPx": 863,
+          "rightPx": 1057
+        }
+      ],
+      "logoPx": {
+        "leftPx": 1505,
+        "rightPx": 1849
+      },
+      "gapToLogoPx": 30
+    }
+  }
+}
