@@ -178,11 +178,28 @@ se acelera la síntesis hasta un 15 %, y recién después se desplaza la frase s
 | B-roll     | `raw/broll/<concepto>.mp4` | Clips de apoyo **sin voz** (`-an`), 5–30 s. El nombre es el concepto (`lentes.mp4`, `lentes-2.mp4` también vale: el número se ignora). Copiá o renombrá los archivos del usuario según lo que muestran. |
 | Imágenes   | `raw/images/<concepto>.jpg` | Igual que B-roll; el preset decide si prefiere clips o fotos.                                    |
 | Música     | `raw/audio/music01.mp3` | **Más larga que el edit** (si no, `CLIP_EXCEEDS_ASSET`). El ingest la mide y el motor la normaliza a -16 LUFS antes de aplicar los niveles del preset, así que da igual si la pista viene fuerte o floja. |
-| Logo       | `raw/logo/<archivo>.png` | Opcional, png/jpg/webp (svg no). Entra solo, en el **margen inferior derecho**, al 32 % del ancho. Si el proyecto tiene varios, gana el primero por orden alfabético. `--no-logo` lo apaga. |
+| Logo       | `raw/logo/<archivo>.png` | Opcional, png/jpg/webp (svg no). Entra solo, en el **margen inferior derecho**, al 18 % del ancho en 16:9 y al 28 % en 9:16. **Elegí el que tiene transparencia** (ver abajo). Si el proyecto tiene varios y todos la tienen, gana el primero por orden alfabético salvo que el usuario elija. `--no-logo` lo apaga. |
 | Locución   | `raw/voice/*.wav\|mp3`  | Voz del usuario para muxear sobre el video base.                                                   |
 
 Nunca borres el material original del usuario: copiá o renombrá copias. No toques otros
 proyectos de `media/`.
+
+### El logo tiene que tener canal alfa (FIX-e-burgos-015-004)
+
+Un PNG con fondo blanco se dibuja como un **recuadro** sobre el video: no hay forma de sacarle el
+fondo en el render. Antes de usar cualquier archivo de `raw/logo/`, medí su formato de pixel:
+
+```bash
+ffprobe -v quiet -print_format json -show_streams media/<slug>/raw/logo/<archivo>.png
+```
+
+`pix_fmt` con una `a` (`rgba`, `bgra`, `yuva420p`…) o igual a `pal8` → tiene transparencia.
+`rgb24`, `yuv420p`, `gray` → **no la tiene**.
+
+- Con más de un archivo en `raw/logo/`, **preferí el que tiene alfa** y no preguntes.
+- Preguntá cuál usar **sólo** si los dos tienen alfa.
+- Nunca uses uno sin alfa sin avisarle antes al usuario que va a salir como un recuadro, y
+  ofrecerle dos salidas: ir sin logo, o que reemplace el archivo por uno con fondo transparente.
 
 ## 5. Presets (cuál para qué)
 
@@ -349,3 +366,16 @@ Lo mismo desde la CLI: `pnpm nx run render-cli:cli -- run media/<slug> --preset 
 - **"Hacé un video sobre X" sin material**: pedí permiso para buscar medios libres, elegí un clip
   largo del tema como base, uno por concepto como B-roll, música de Commons. Es lo que produjo
   `media/demo-espacio` (34 s, 9:16).
+
+### Al entregar, decí en qué pantalla está cada cosa (FIX-e-burgos-015-004)
+
+El usuario está mirando el studio, no el file system. Cerrá **toda** entrega nombrando la pantalla,
+no la ruta:
+
+| Qué                | Dónde lo ve                                                                   |
+| ------------------ | ----------------------------------------------------------------------------- |
+| El video           | La pantalla `preview`, y la sección **"Generated"** de la biblioteca, con link de descarga |
+| La narración       | La pantalla `voice`, con el guion línea por línea y sus tiempos                |
+| El guion           | La pantalla `storyboard`, mientras el proyecto no tenga storyboard             |
+
+La ruta del archivo se la das sólo si la pide.

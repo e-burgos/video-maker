@@ -224,3 +224,31 @@ describe('buildProducerSystemPrompt', () => {
     expect(prompt.indexOf('# This project')).toBeLessThan(prompt.indexOf('# How you run inside the studio'));
   });
 });
+
+describe('buildProducerAppRulesSection — entrega y logo (FIX-015-004)', () => {
+  const section = buildProducerAppRulesSection(CONTEXT, null, 'sonnet');
+
+  it('exige nombrar la pantalla de cada artefacto al entregar', () => {
+    expect(section).toContain('WHEN YOU DELIVER, SAY WHERE EACH THING IS');
+    expect(section).toContain('"Generated" section of the library');
+    expect(section).toContain('the `voice` screen');
+    expect(section).toContain('the `storyboard` screen');
+  });
+
+  it('prohíbe contestar "dónde está" con una ruta de archivo', () => {
+    expect(section).toContain('Never hand over');
+    expect(section).toContain('name the screen first');
+  });
+
+  it('enseña a medir el canal alfa del logo con ffprobe', () => {
+    expect(section).toContain('PICK A LOGO WITH TRANSPARENCY');
+    expect(section).toContain('pix_fmt');
+    expect(section).toContain('`pal8`');
+  });
+
+  it('ordena preferir el logo con alfa y preguntar sólo cuando los dos la tienen', () => {
+    expect(section).toContain('prefer');
+    expect(section).toContain('ask which one only when both have it');
+    expect(section).toContain('it will show as a box');
+  });
+});

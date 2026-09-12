@@ -1298,7 +1298,7 @@
       "type": "IMPROVEMENT",
       "severity": "low",
       "created_at": "2026-09-11",
-      "resolved_at": null,
+      "resolved_at": "2026-09-11",
       "validated_at": null,
       "title": "the producer delivers without saying where each artifact is and picks a logo without transparency",
       "estimation_hours": 2,
@@ -1307,10 +1307,28 @@
       "related_modules": [
         "studio-producer"
       ],
-      "affected_files": [],
-      "test_reference": "",
-      "status": "in-progress",
-      "cycle": null
+      "affected_files": [
+        "apps/render-api/src/producer/build-producer-system-prompt.spec.ts",
+        "apps/render-api/src/producer/build-producer-system-prompt.ts",
+        "sdd/catalog.json",
+        "sdd/context/apps/render-api/updates/2026-09-11-fix-e-burgos-015-004.md",
+        "sdd/fixes.json",
+        "sdd/skills/video-producer/SKILL.md",
+        "sdd/specs/spec-e-burgos-015-studio-producer/fixes/fix-e-burgos-015-004.md"
+      ],
+      "test_reference": "pnpm nx run-many -t lint test build green for 8 projects, pnpm sdd:validate OK and pnpm sdd:rebuild-catalog run after touching the skill (2026-09-11). render-api 981 tests (was 977), 98.18 % stmts / 92.63 % branch, floors untouched. Four new assertions over buildProducerAppRulesSection: the delivery rule names the preview screen, the Generated section of the library, the voice screen and the storyboard screen, and forbids answering 'where is it' with a file path; the logo rule teaches ffprobe pix_fmt including pal8, orders preferring the file with alpha, asking only when both have it, and never using one without alpha without warning it will show as a box. Measured on the real project: both files in media/display-ads/raw/logo/ report pix_fmt rgba, so the heuristic the fix prescribes does not fire on them — the white card the dev saw is opaque white painted into the artwork, not a missing alpha channel (alpha plane YMIN 10 measured with alphaextract,signalstats). Written up in the fix document as a known limit.",
+      "status": "implemented",
+      "cycle": null,
+      "usage": {
+        "provider_model": "claude/opus",
+        "effort": "high",
+        "tokens_in": 34000,
+        "tokens_out": 6000,
+        "approx": true,
+        "source": "declared-estimate",
+        "recorded_at": "2026-09-11",
+        "agent": "implementor-front"
+      }
     }
   ]
 }
