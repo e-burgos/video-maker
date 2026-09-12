@@ -2,20 +2,24 @@
 
 > Entry point para agentes que trabajen sobre `apps/render-api`.
 > Leer junto con `constitution.md` de este directorio **+ `updates/*.md` en orden de nombre**.
-> Última actualización: FIX-e-burgos-015-002 | Fecha: 2026-09-11
-> Consolidado al abrir `cycle-01` de `spec-e-burgos-016-studio-usability` (fundió los seis fragmentos
-> de fixes de `spec-007`, `spec-008`, `spec-009` y `spec-015`).
+> Última actualización: spec-e-burgos-016 cycle-01 | Fecha: 2026-09-11
+> Consolidado al cerrar `cycle-01` de `spec-e-burgos-016-studio-usability` (fundió los fragmentos de
+> `FIX-003-003`, `FIX-005-001`, `FIX-006-001`, `FIX-009-002`, `FIX-015-004` y el propio `cycle-01`).
 
 - **Tipo:** app Node (servicio HTTP local, headless, mono-usuario)
-- **Estado:** **completo.** 25 rutas, 83 códigos de error, 74 archivos de test / 895 tests. Verificado contra binarios
+- **Estado:** **completo.** 28 rutas, 86 códigos de error, 80 archivos de test / 981 tests. Verificado contra binarios
   reales (Remotion, FFmpeg, whisper-cli, Piper y `claude -p`) en smokes manuales, nunca en CI.
-- **Specs que la gobiernan:** `spec-005-render-service` (la creó) · `spec-007-web-montage`
-  (job `montage`) · `spec-008-ai-storyboard` (job `storyboard` y el puerto `aiAgent`) ·
-  `spec-009-voice-over` (job `voice` y Piper; `FIX-009-001` le sumó el modo guion suelto) ·
-  `spec-014-production-quality` (guion y logo en el job `montage`) · `spec-015-studio-producer`
-  (`cycle-01` cerrado: el productor conversacional; `cycle-02` es la pantalla en `apps/web`;
-  `FIX-015-001` le dio modelo por request y `FIX-015-002` la lista blanca por turno) ·
-  `spec-016-studio-usability` (`cycle-01`: catálogo de voces enriquecido y preview de voz).
+- **Specs que la gobiernan:** `spec-003-kinetic-captions` (`FIX-003-003` le sumó `captionStyle` al
+  job `montage`) · `spec-005-render-service` (la creó; `FIX-005-001` le sumó el borrado de assets,
+  `EP-027`) · `spec-006-web-studio` (`FIX-006-001` le sumó `EP-028`, listado de generados para la
+  biblioteca) · `spec-007-web-montage` (job `montage`) · `spec-008-ai-storyboard` (job `storyboard`
+  y el puerto `aiAgent`) · `spec-009-voice-over` (job `voice` y Piper; `FIX-009-001` le sumó el modo
+  guion suelto y `FIX-009-002` las marcas de tiempo del guion) · `spec-014-production-quality`
+  (guion y logo en el job `montage`) · `spec-015-studio-producer` (`cycle-01` cerrado: el productor
+  conversacional; `cycle-02` es la pantalla en `apps/web`; `FIX-015-001` le dio modelo por request,
+  `FIX-015-002` la lista blanca por turno y `FIX-015-004` las reglas de entrega y de logo del system
+  prompt) · `spec-016-studio-usability` (`cycle-01` cerrado: catálogo de voces enriquecido, `EP-019`,
+  y preview de voz, `EP-026`).
 - **Rol en el sistema:** la puerta HTTP del motor. Es **el único subproyecto del monorepo que puede
   depender a la vez de `libs/media-local` (`type:util`) y `libs/composition-remotion` (`type:ui`)**:
   los `depConstraints` del `eslint.config.mjs` raíz impiden que esas dos libs se importen entre sí, y
@@ -37,30 +41,49 @@
 src/
   main.ts                      única frontera de proceso (env, señales, exitCode, stdout/stderr)
   server-register.cjs          loader @swc-node/register acotado a .ts
-  config/                      server-config · store-config · ai-agent-config · producer-config
+  config/                      server-config · store-config · ai-agent-config · producer-config ·
+                               voice-preview-config
   deps/                        contrato de puertos + puerto ObjectStorage + adaptador de producción
   ai/                          claude-cli-ai-agent (request/response con --json-schema, storyboard)
   engine/                      nombres de módulos de motor y de binarios de media
-  errors/                      76 códigos, etapas por tipo de job, PipelineStageError y traducciones
+  errors/                      86 códigos, etapas por tipo de job, PipelineStageError y traducciones
   pipeline/                    runRenderPipeline (prepare → render → mix → mux → verify) + observer
   jobs/                        unión discriminada por kind (render|montage|storyboard|voice),
                                máquina de estados pura, progreso monotónico, cola FIFO
   storyboard/                  documento, inventario, prompt y export numerado de prompts
-  voice/                       rutas, formatos, idioma, selección de escenas y store del manifest
+  voice/                       rutas, formatos, idioma, selección de escenas, store del manifest,
+                               catálogo/preview de voces (voice-preview, voice-preview-url)
   producer/                    conversación persistida, prompt del sistema, mapeo del stream-json,
                                puerto ProducerAgent + adaptador Claude Code, registro de turnos
   store/                       slug · asset-path · layout · catalog-merge · project-assets ·
-                               project-scope · montage-preconditions · serialize-by-key
-  http/                        router con params y comodín, handlers, health, runtime, servidor
+                               project-scope · montage-preconditions · serialize-by-key ·
+                               timeline-asset-references
+  http/                        router con params y comodín, handlers (incl. generated, voice-preview),
+                               query-flag, health, runtime, servidor
   __fixtures__/                call-log ordenado y dobles de todos los puertos
 ```
 
 ## Contrato y comportamiento que hay que respetar
 
-- **25 endpoints, registrados campo a campo en `sdd/api.json`** (`EP-001`..`EP-025`). Es el contrato
+- **28 endpoints, registrados campo a campo en `sdd/api.json`** (`EP-001`..`EP-028`). Es el contrato
   que `apps/web` consume: ningún campo publicado cambia de nombre, tipo ni semántica sin un ciclo
   que lo declare. Toda aserción de forma se hace con `Object.keys(body).sort()` contra la interfaz,
   nunca campo por campo contra lo que el handler ya emite.
+- **`DELETE /projects/:slug/assets/:role/:filename` (`EP-027`)** borra un asset bajo el mismo mutex
+  por slug que el upload (`runtime.uploadSerializer`): `404 ASSET_NOT_FOUND`; `409 ASSET_IN_USE` con
+  la lista de usos en `hint` (`assets[]`, clip de cualquier pista, `logo.assetId`) cuando
+  `work/timeline.json` lo referencia, y `?force=true` borra igual devolviendo
+  `{ deleted, timelineReferences }`. Saca el archivo, su entrada de `work/catalog.json` y la
+  transcripción a la que apuntaba. La timeline no se repara sola tras un `force`.
+- **`GET /projects/:slug/generated` (`EP-028`)** recorre `work/voice`, `work/producer` y `out`
+  (`GENERATED_ROOTS`) y devuelve `{ slug, roots, files: [{ path, sizeBytes, modifiedAtMs }] }`, ciego
+  al contenido; los bytes los sigue sirviendo `EP-011`.
+- **`GET /voices` (`EP-019`)** publica por voz `language { code, region }`, `quality`, `label`,
+  `description` y `previewUrl`, derivado del `.onnx.json` de cada modelo (o del nombre del archivo si
+  el sidecar falta). **`GET /voices/:voiceId/preview` (`EP-026`)** sintetiza con Piper una frase fija
+  en español (~4 s), la cachea (`voicePreviewCache`, fuera de `mediaRoot`) y la sirve como
+  `audio/wav` con `Cache-Control: public, max-age=86400`; `404 VOICE_NOT_FOUND` / `503
+  VOICE_MODEL_UNAVAILABLE`.
 - **`GET /health`** reporta módulos de motor, los **seis** binarios de media (por nombre lógico y
   variable de entorno, **nunca** por ruta resuelta), `capabilities` y `jobs: { running, queued }`.
   El bloque `jobs` es un contador de carga: **nunca** afecta el cálculo `ok`/`degraded`.
@@ -104,6 +127,7 @@ src/
 | `PRODUCER_MODELS` | `sonnet,opus,haiku` | Lista permitida. Es la que valida el `model?` de los turnos y de los jobs `storyboard`/`voice`, y la que `EP-022` publica como `models.allowed`. |
 | `PRODUCER_TURN_TIMEOUT_MS` | `1800000` | Media hora: un turno puede incluir transcripción y render. Inválido ⇒ exit 78. |
 | `PRODUCER_SKILL_PATH` | `sdd/skills/video-producer/SKILL.md` | La skill **es** el system prompt del productor y se lee de disco en cada turno. |
+| `PIPER_PREVIEW_CACHE_DIR` | `<tmp del SO>/video-maker-voice-previews` | Caché del preview de voces (`EP-026`), deliberadamente fuera de `mediaRoot`: nunca se poda, el SO lo limpia. |
 
 **El puerto default `4310` puede estar tomado** por el visor de docs del kit SDD (`pnpm sdd:docs`).
 Un `EADDRINUSE` ahí no es un defecto del servicio: los smokes usan `4399`.
@@ -149,3 +173,12 @@ Un `EADDRINUSE` ahí no es un defecto del servicio: los smokes usan `4399`.
   `pgrep -fl 'ffmpeg|whisper-cli|chrome-headless|piper'` vacío y ≥ 35 % de memoria libre (el
   `[Cc]hrome` del guion original matchea el navegador del dev y aborta el smoke con un falso
   positivo).
+- **El delete de assets (`EP-027`) no tiene índice inverso**: borrar deja huérfanos en
+  `work/renders/<jobId>/`, `work/edl.json` y `out/`, y un `?force=true` deja la timeline apuntando a
+  un archivo que ya no está — el `200` lo informa en `timelineReferences`, pero nadie repara la
+  timeline sola. El `hint` del `409` lista **todos** los usos: una timeline con muchos clips del
+  mismo A-roll da una línea larga.
+- **El preview de voz (`EP-026`) no se regenera al cambiar la frase**: la invalidación mira el
+  `mtime` del modelo Piper, no el código del servicio. Bumpear `VOICE_PREVIEW_REVISION` es la única
+  forma de que un dev con caché caliente deje de escuchar la frase vieja. La frase es fija y en
+  español: una voz `en_US` la lee con fonética inglesa.

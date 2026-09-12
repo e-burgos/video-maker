@@ -1,8 +1,8 @@
 # Constitución — apps/render-api
 
-> Versión 3.1 | Última actualización: FIX-e-burgos-015-002 | Fecha: 2026-09-11
-> Consolidada al abrir `cycle-01` de `spec-e-burgos-016-studio-usability` (fundió los fragmentos de
-> `FIX-015-001`, `FIX-007-001`, `FIX-007-002`, `FIX-008-001`, `FIX-009-001` y `FIX-015-002`).
+> Versión 3.2 | Última actualización: spec-e-burgos-016 cycle-01 | Fecha: 2026-09-11
+> Consolidada al cerrar `cycle-01` de `spec-e-burgos-016-studio-usability` (fundió los fragmentos de
+> `FIX-003-003`, `FIX-005-001`, `FIX-006-001`, `FIX-009-002`, `FIX-015-004` y el propio `cycle-01`).
 > Las actualizaciones por ciclo/fix van como fragmentos aditivos en `updates/`.
 
 ## 1. Propósito
@@ -13,8 +13,8 @@
   una cola de jobs con progreso y cancelación, y el **productor conversacional**. Es el único
   subproyecto que puede depender de `libs/media-local` y `libs/composition-remotion` a la vez (ver
   `context_prompt.md`).
-- **Estado:** **completo y verificado contra binarios reales.** 25 rutas (`EP-001`..`EP-025`),
-  83 códigos de error, 74 archivos de test / 895 tests, cobertura 98,09 % stmts · 92,70 % branch
+- **Estado:** **completo y verificado contra binarios reales.** 28 rutas (`EP-001`..`EP-028`),
+  86 códigos de error, 80 archivos de test / 981 tests, cobertura 98,18 % stmts · 92,63 % branch
   (umbral 80 %).
 
 ## 2. Stack tecnológico
@@ -64,16 +64,25 @@
   storyboard nunca se invoca sin `--model` (`CLAUDE_CLI_MODEL` default `sonnet`,
   `AiAgentConfig.model` no nullable); el job `voice` valida el campo y lo descarta, porque la
   síntesis es local.
-- **El job `montage` parametriza formato y fuente de habla**: `format` (los cuatro `OutputPreset`,
-  default `reels-9x16`) y `voice: 'aroll' | 'script'` (default `aroll`), los dos validados **antes**
-  de registrar el job — `script` sin `work/voice/voice.wav` es `409 MONTAGE_VOICE_TRACK_NOT_FOUND`.
-  `voice` está **sobrecargado por `kind`**: en un job `voice` es el id del modelo Piper, en un
-  `montage` es la fuente de habla.
+- **El job `montage` parametriza formato, fuente de habla y estilo de captions**: `format` (los
+  cuatro `OutputPreset`, default `reels-9x16`), `voice: 'aroll' | 'script'` (default `aroll`) y
+  `captionStyle` (`CaptionStyle | null`; `undefined` ⇒ `null`, decide el preset de montaje), los
+  tres validados **antes** de registrar el job — `script` sin `work/voice/voice.wav` es
+  `409 MONTAGE_VOICE_TRACK_NOT_FOUND`, un `captionStyle` fuera de `CAPTION_STYLES` es
+  `422 MONTAGE_CAPTION_STYLE_INVALID`. `voice` está **sobrecargado por `kind`**: en un job `voice`
+  es el id del modelo Piper, en un `montage` es la fuente de habla. `captionStyle` queda persistido
+  en `work/timeline.json`, así que `PUT /projects/:slug/timeline` puede cambiarlo y un `render`
+  pelado lo toma sin replanificar; `MontageJobReport` siempre lo resuelve.
 - **El job `voice` tiene dos entradas**: el storyboard, o un guion suelto (`scriptText` XOR
   `scriptPath`, una frase por línea, más `gapMs` default 900) que sintetiza un wav por frase, los
   concatena en `work/voice/voice.wav` (48 kHz mono) y los describe en
   `work/voice/script-manifest.json` con `source: 'script'`. Los paths de la pista de guion se
   **re-exportan de `@video-maker/auto-montage`**, que es quien también los lee desde el montaje.
+  El guion entiende **marcas de tiempo**: `hasVoiceScriptTimeMarks` decide un flujo de dos pasadas
+  (sintetizar a velocidad natural → planificar y decidir qué líneas acelerar → resintetizar sólo
+  esas → planificar de nuevo con `allowSpeedUp: false`, que fija `startMs`/`endMs`/`overflowMs`); un
+  guion sin marcas usa el flujo simple de siempre. El reporte del job **no** publica si era
+  cronometrado ni el overflow total — se lee de `work/voice/script-manifest.json`.
 - **La lista blanca de herramientas del productor no es global**: `producerAllowedTools(piperPath)`
   la arma por turno y viaja en `ProducerTurnStart.allowedTools`. Agregar un binario obliga a
   sondearlo contra el CLI real antes de escribirlo en la lista.
@@ -106,6 +115,30 @@
 - **Los artefactos de `work/` se escriben con los escritores de `auto-montage`**
   (`serializeMontageDocument`, `writeTimeline`, `writeEditDecisionList`), nunca con un
   `JSON.stringify` propio: es lo que sostiene la paridad byte a byte con la CLI (D-16).
+- **El store de assets también borra** (`EP-027`): mismo confinamiento y mismo mutex por slug que el
+  upload (`runtime.uploadSerializer`), así que un delete nunca se intercala con una subida del mismo
+  proyecto. `409 ASSET_IN_USE` si `work/timeline.json` lo referencia (`findTimelineAssetReferences`),
+  salvo `?force=true`. **Nada se borra hasta que pasaron todas las verificaciones**: el catálogo se
+  lee antes de tocar el disco. El borrado no conoce derivados (`work/renders/`, `work/edl.json`,
+  `out/`): quedan huérfanos porque no hay índice inverso de artefacto → asset; sólo la transcripción
+  del asset se limpia porque el catálogo la modela por asset.
+- **`GET /projects/:slug/generated` (`EP-028`) es ciego al contenido**: recorre recursivamente
+  `work/voice`, `work/producer` y `out` (`GENERATED_ROOTS`, ninguna otra raíz), no parsea ni borra;
+  los bytes los sigue sirviendo `EP-011`. Una raíz ausente aporta cero entradas, nunca falla.
+- **El catálogo de voces no infiere nada que el modelo no documente** (ni género, ni edad, ni
+  carácter): `language`, `quality` y `label` salen del `.onnx.json` de cada voz, y del nombre del
+  archivo sólo cuando el sidecar falta o está corrupto. `GET /voices/:voiceId/preview` (`EP-026`)
+  sintetiza una frase fija en español, la cachea fuera de `mediaRoot` (`voicePreviewCache` es un
+  puerto propio, no `deps.storage`) e invalida por `mtime` del `.onnx` — **no** por el código: bumpear
+  `VOICE_PREVIEW_REVISION` es obligatorio al tocar la frase. El preview corre en un
+  `createKeyedSerializer` por voz, **fuera de la cola de jobs**, mismo fundamento que el turno del
+  productor.
+- **El system prompt del productor exige decir en qué pantalla quedó cada artefacto** al entregar
+  (`preview`/"Generated" para el video, `voice` para la narración, `storyboard` para el guion) y
+  nunca contestar "dónde está" con una ruta. Para el logo, enseña a leer `pix_fmt` con
+  `ffprobe -show_streams` y preferir el archivo con canal alfa cuando hay más de uno en
+  `raw/logo/` — un PNG `rgba` con el arte sobre un recuadro blanco opaco pasa el filtro igual, así
+  que el chequeo real lo hace el humano en el preview.
 - **`apps/render-api/eslint.config.mjs` no existe** (D-9): el hook `config-protection` del harness
   del dev bloquea cualquier archivo de ese basename y rodearlo con `Bash` anularía el guardrail.
   `@nx/eslint:lint` resuelve el flat config de la raíz, así que el proyecto sí se lintea y los
