@@ -949,6 +949,28 @@
             "change": "Created by FIX-e-burgos-005-001: the asset store only grew — PUT uploaded and GET listed, but nothing removed."
           }
         ]
+      },
+      {
+        "id": "EP-028",
+        "method": "GET",
+        "path": "/projects/:slug/generated",
+        "module": "render-service",
+        "spec": "sdd/specs/spec-e-burgos-006-web-studio",
+        "status": "implemented",
+        "created_in_cycle": 3,
+        "updated_in_cycle": null,
+        "description": "Lists, recursively, every file the engine produced under exactly three project-relative roots and no other: work/voice, work/producer and out. Read-only and content-blind: it reports path, sizeBytes and modifiedAtMs per file and never parses, streams or deletes anything — the bytes are served by EP-011. It exists so the studio library can show the generated narration, the producer script and the deliverables, which live outside raw/ and therefore never appear in EP-005. A root that does not exist contributes no entries instead of failing.",
+        "path_params": [
+          "slug"
+        ],
+        "required_headers": [],
+        "request_body": {},
+        "responses": {
+          "200": "{ slug, roots: ['work/voice','work/producer','out'], files: [{ path, sizeBytes, modifiedAtMs }] } — files sorted by root in that order and by name inside each directory, with the files of a subdirectory following its name.",
+          "404": "PROJECT_NOT_FOUND. application/json: { error: { code, stage: null, message, resource?, expected?, hint?, assetPersisted?, catalogUpdated? } }.",
+          "422": "PROJECT_SLUG_INVALID. application/json: { error: { code, stage: null, message, resource?, expected?, hint?, assetPersisted?, catalogUpdated? } }."
+        },
+        "changelog": []
       }
     ]
   }

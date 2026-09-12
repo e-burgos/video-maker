@@ -21,6 +21,7 @@ import type {
   VideoClip,
 } from '../schemas/timeline.schema';
 import { LogoOverlaySchema } from '../schemas/timeline.schema';
+import { defaultLogoWidthRatio } from './logo-defaults';
 import type { MusicMixSettings } from '../schemas/audio-mix-plan.schema';
 import type { AssetId, ClipId, DecisionId, Db, Frame, Fps, Ms, Scale } from '../types/units';
 import { safeZoneFor } from '../format/format';
@@ -412,11 +413,11 @@ function buildMusicClip(music: MusicInput, musicBaseGainDb: Db, durationFrames: 
   };
 }
 
-function buildLogoOverlay(logo: LogoInput): LogoOverlay {
+function buildLogoOverlay(logo: LogoInput, format: OutputFormat): LogoOverlay {
   return LogoOverlaySchema.parse({
     assetId: logo.assetId,
     ...optionalField('position', logo.position),
-    ...optionalField('widthRatio', logo.widthRatio),
+    widthRatio: logo.widthRatio ?? defaultLogoWidthRatio(format),
     ...optionalField('marginRatio', logo.marginRatio),
     ...optionalField('opacity', logo.opacity),
   });
@@ -485,7 +486,7 @@ export function buildTimeline(
     },
     transitions: timelineTransitions,
     audioMix,
-    ...optionalField('logo', logo === undefined ? undefined : buildLogoOverlay(logo)),
+    ...optionalField('logo', logo === undefined ? undefined : buildLogoOverlay(logo, edl.format)),
     safeZone: safeZoneFor(edl.format),
     ...optionalField('captionStyle', captionStyle),
   };

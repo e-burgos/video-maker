@@ -1,5 +1,5 @@
 import type { MediaAsset } from '@video-maker/timeline-core';
-import { validateTimeline } from '@video-maker/timeline-core';
+import { defaultLogoWidthRatio, validateTimeline } from '@video-maker/timeline-core';
 import { describe, expect, it } from 'vitest';
 
 import { autoMontage } from './auto-montage';
@@ -448,10 +448,11 @@ describe('autoMontage — niveles del preset y logo (spec-014)', () => {
     expect(result.timeline.logo).toEqual({
       assetId: 'raw/logo/brand.png',
       position: 'bottom-right',
-      widthRatio: 0.32,
+      widthRatio: defaultLogoWidthRatio(result.timeline.format),
       marginRatio: 0.035,
       opacity: 1,
     });
+    expect(result.timeline.logo?.widthRatio).toBe(0.28);
     expect(result.timeline.assets.map((asset) => asset.id)).toContain('raw/logo/brand.png');
     const validation = validateTimeline(result.timeline);
     expect(validation.ok ? [] : validation.issues).toEqual([]);

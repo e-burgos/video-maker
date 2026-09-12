@@ -126,3 +126,39 @@ export function healthyVoiceService(overrides: Partial<ServiceHealth> = {}): Ser
     ...overrides,
   };
 }
+
+export const VOICE_SCRIPT_MANIFEST = {
+  schemaVersion: 1,
+  source: 'script',
+  language: 'es-AR',
+  voiceId: 'es_AR-daniela-high',
+  gapMs: 900,
+  path: 'work/voice/voice.wav',
+  wordsPath: 'work/voice/voice.words.json',
+  durationMs: 63_480,
+  sampleRate: 48_000,
+  updatedAt: '2026-09-11T10:00:00.000Z',
+  lines: [
+    {
+      index: 1,
+      text: 'Cada anuncio arranca de una plantilla.',
+      path: 'work/voice/lines/line-01.wav',
+      startMs: 0,
+      durationMs: 4_200,
+      endMs: 4_200,
+      requestedStartMs: 0,
+    },
+    {
+      index: 2,
+      text: 'El editor la ajusta en dos minutos.',
+      path: 'work/voice/lines/line-02.wav',
+      startMs: 22_000,
+      durationMs: 5_400,
+      endMs: 27_400,
+      requestedStartMs: 22_000,
+      overflowMs: 840,
+    },
+  ],
+} as const;
+
+export const VOICE_SCRIPT_MANIFEST_JSON = JSON.stringify(VOICE_SCRIPT_MANIFEST);

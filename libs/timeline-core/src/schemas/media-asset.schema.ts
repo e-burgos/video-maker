@@ -21,6 +21,7 @@ export const MediaAssetSchema = z
     height: z.number().int().min(1).optional(),
     rotation: MediaRotationSchema.optional(),
     hasAudio: z.boolean().optional(),
+    hasAlpha: z.boolean().optional(),
     audio: MediaAssetAudioSchema.optional(),
     videoCodec: z.string().optional(),
     probedAt: z.iso.datetime(),

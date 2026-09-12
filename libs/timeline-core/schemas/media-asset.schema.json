@@ -50,6 +50,9 @@
     "hasAudio": {
       "type": "boolean"
     },
+    "hasAlpha": {
+      "type": "boolean"
+    },
     "audio": {
       "type": "object",
       "properties": {

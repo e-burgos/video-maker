@@ -96,6 +96,11 @@ export type { PunchInAnchor, PunchInOptions, PunchInPlan } from './punch-in/plan
 export { remapMsAfterCuts } from './timeline/remap-ms-after-cuts';
 
 export { TimelineBuildError, buildTimeline } from './timeline/build-timeline';
+export {
+  LANDSCAPE_LOGO_WIDTH_RATIO,
+  PORTRAIT_LOGO_WIDTH_RATIO,
+  defaultLogoWidthRatio,
+} from './timeline/logo-defaults';
 export type { LogoInput, MusicInput, TimelineBuildErrorCode, VoiceInput } from './timeline/build-timeline';
 
 export { validateTimeline } from './timeline/validate-timeline';

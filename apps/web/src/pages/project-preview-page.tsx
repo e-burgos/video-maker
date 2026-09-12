@@ -16,6 +16,7 @@ import { useAsyncResource } from '../hooks/use-async-resource';
 import { useT } from '../i18n/language-context';
 import type { TranslateFn } from '../i18n/language-context';
 import { CaptionEditor } from '../components/caption-editor';
+import { CaptionStyleSelector } from '../components/caption-style-selector';
 import { ClipTrackEditor } from '../components/clip-track-editor';
 import { ErrorNotice } from '../components/error-notice';
 import { LogoOverlayEditor } from '../components/logo-overlay-editor';
@@ -208,6 +209,12 @@ function StudioView({ slug, initialTimeline }: StudioViewProps) {
         <h2 className="font-mono text-xs uppercase tracking-wide text-slate-500">
           {t('preview.section.captions')}
         </h2>
+        <CaptionStyleSelector
+          {...(editState.draft.captionStyle === undefined
+            ? {}
+            : { captionStyle: editState.draft.captionStyle })}
+          dispatch={dispatchAction}
+        />
         <CaptionEditor captions={editState.draft.tracks.captions} dispatch={dispatchAction} />
       </div>
 

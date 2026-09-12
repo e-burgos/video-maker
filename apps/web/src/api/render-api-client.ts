@@ -1,5 +1,6 @@
 import type { StoryboardDocument, Timeline } from '@video-maker/timeline-core';
 import { RENDER_API_BASE_PATH } from './artifact-url';
+import { parseGeneratedListing } from './parse-generated';
 import {
   parseJob,
   parseMontageJob,
@@ -28,6 +29,7 @@ import type {
   AssetDeletion,
   AssetListEntry,
   AssetListing,
+  GeneratedListing,
   AssetRole,
   Job,
   MontageJob,
@@ -67,6 +69,7 @@ export type CreateVoiceJobInput = {
   voiceId: string | null;
   sceneIds: readonly string[] | null;
   overwrite: boolean;
+  scriptPath?: string;
 };
 
 export type RenderApiClient = {
@@ -75,6 +78,8 @@ export type RenderApiClient = {
   createProject: (slug: string) => Promise<ProjectDetail>;
   getProject: (slug: string) => Promise<ProjectDetail>;
   listAssets: (slug: string) => Promise<AssetListing>;
+  listGenerated: (slug: string) => Promise<GeneratedListing>;
+  getProjectFile: (slug: string, path: string) => Promise<string>;
   getTimeline: (slug: string) => Promise<Timeline>;
   uploadAsset: (input: UploadAssetInput) => Promise<AssetListEntry>;
   deleteAsset: (input: DeleteAssetInput) => Promise<AssetDeletion>;
@@ -119,6 +124,16 @@ export type DeleteAssetInput = {
 
 function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === 'object' && value !== null && !Array.isArray(value);
+}
+
+function artifactPath(slug: string, path: string): string {
+  const segments = path
+    .split('/')
+    .filter((segment) => segment.length > 0 && segment !== '.' && segment !== '..')
+    .map((segment) => encodeURIComponent(segment))
+    .join('/');
+
+  return `/projects/${encodeURIComponent(slug)}/files/${segments}`;
 }
 
 export function createRenderApiClient(fetchImpl: FetchLike): RenderApiClient {
@@ -235,6 +250,20 @@ export function createRenderApiClient(fetchImpl: FetchLike): RenderApiClient {
         (value) => isRecord(value) && Array.isArray(value['assets']),
       );
       return body as AssetListing;
+    },
+
+    async listGenerated(slug: string): Promise<GeneratedListing> {
+      const body = await requestJson(
+        `/projects/${encodeURIComponent(slug)}/generated`,
+        undefined,
+        'a generated listing',
+        (value) => isRecord(value),
+      );
+      return parseGeneratedListing(body);
+    },
+
+    async getProjectFile(slug: string, path: string): Promise<string> {
+      return requestText(artifactPath(slug, path));
     },
 
     async getTimeline(slug: string): Promise<Timeline> {
@@ -398,6 +427,7 @@ export function createRenderApiClient(fetchImpl: FetchLike): RenderApiClient {
             overwrite: input.overwrite,
             ...(input.voiceId === null ? {} : { voice: input.voiceId }),
             ...(input.sceneIds === null ? {} : { sceneIds: input.sceneIds }),
+            ...(input.scriptPath === undefined ? {} : { scriptPath: input.scriptPath }),
           }),
         },
         'a voice job document',

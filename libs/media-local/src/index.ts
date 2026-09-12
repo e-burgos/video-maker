@@ -59,7 +59,7 @@ export type { Clock } from './clock';
 export { nodeReadTextFile } from './fs/read-text-file';
 export type { ReadTextFile } from './fs/read-text-file';
 
-export { parseFfprobeJson } from './ffprobe/parse-ffprobe-json';
+export { parseFfprobeJson, pixelFormatHasAlpha } from './ffprobe/parse-ffprobe-json';
 export type { ParseFfprobeContext } from './ffprobe/parse-ffprobe-json';
 export { probeMedia } from './ffprobe/probe-media';
 export type { ProbeMediaOptions } from './ffprobe/probe-media';

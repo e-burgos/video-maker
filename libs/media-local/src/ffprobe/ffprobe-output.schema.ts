@@ -6,6 +6,7 @@ export const FfprobeStreamSchema = z.object({
   codec_name: z.string().optional(),
   width: z.number().int().optional(),
   height: z.number().int().optional(),
+  pix_fmt: z.string().optional(),
   avg_frame_rate: z.string().optional(),
   r_frame_rate: z.string().optional(),
   duration: z.string().optional(),

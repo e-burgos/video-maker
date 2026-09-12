@@ -6,7 +6,13 @@ import { readFixture } from '../__fixtures__/load-fixture';
 import { UnparseableOutputError } from '../errors/unparseable-output-error';
 import { FixtureCommandRunner } from '../runner/fixture-command-runner';
 import type { FfprobeStream } from './ffprobe-output.schema';
-import { classifyKind, parseFfprobeJson, parseRational, resolveRotation } from './parse-ffprobe-json';
+import {
+  classifyKind,
+  parseFfprobeJson,
+  parseRational,
+  pixelFormatHasAlpha,
+  resolveRotation,
+} from './parse-ffprobe-json';
 import { FFPROBE_ARGS, probeMedia } from './probe-media';
 
 const PROBED_AT = '2026-09-07T00:00:00.000Z';
@@ -335,5 +341,65 @@ describe('probeMedia (CA-017)', () => {
 
     expect(asset.id).toBe('custom-id');
     expect(new Date(asset.probedAt).getTime()).not.toBeNaN();
+  });
+});
+
+describe('pixelFormatHasAlpha (FIX-006-001)', () => {
+  it('no opina cuando ffprobe no informó pix_fmt', () => {
+    expect(pixelFormatHasAlpha(undefined)).toBeUndefined();
+  });
+
+  it.each(['rgba', 'bgra', 'argb', 'abgr', 'ya8', 'yuva420p', 'rgba64le', 'gbrap', 'pal8'])(
+    '%s lleva canal alfa',
+    (pixelFormat) => {
+      expect(pixelFormatHasAlpha(pixelFormat)).toBe(true);
+    },
+  );
+
+  it.each(['rgb24', 'bgr0', 'yuv420p', 'yuvj420p', 'gray', 'grayf32le', 'nv12', 'p010le'])(
+    '%s no lleva canal alfa',
+    (pixelFormat) => {
+      expect(pixelFormatHasAlpha(pixelFormat)).toBe(false);
+    },
+  );
+});
+
+describe('parseFfprobeJson — canal alfa de una imagen (FIX-006-001)', () => {
+  function imageWithPixelFormat(pixelFormat: string | undefined): string {
+    const parsed = JSON.parse(imageRaw) as { streams: Array<Record<string, unknown>> };
+    const [imageStream, ...rest] = parsed.streams;
+    const stream =
+      pixelFormat === undefined
+        ? (imageStream as Record<string, unknown>)
+        : { ...(imageStream as Record<string, unknown>), pix_fmt: pixelFormat };
+
+    return JSON.stringify({ ...parsed, streams: [stream, ...rest] });
+  }
+
+  it('un PNG con transparencia informa hasAlpha true', () => {
+    const asset = parseFfprobeJson(imageWithPixelFormat('rgba'), {
+      path: '/fixtures/logo.png',
+      probedAt: PROBED_AT,
+    });
+
+    expect(asset.hasAlpha).toBe(true);
+  });
+
+  it('un PNG con fondo opaco informa hasAlpha false', () => {
+    const asset = parseFfprobeJson(imageWithPixelFormat('rgb24'), {
+      path: '/fixtures/logo.png',
+      probedAt: PROBED_AT,
+    });
+
+    expect(asset.hasAlpha).toBe(false);
+  });
+
+  it('sin pix_fmt la clave no se emite', () => {
+    const asset = parseFfprobeJson(imageWithPixelFormat(undefined), {
+      path: '/fixtures/broll-shot-01.jpg',
+      probedAt: PROBED_AT,
+    });
+
+    expect('hasAlpha' in asset).toBe(false);
   });
 });

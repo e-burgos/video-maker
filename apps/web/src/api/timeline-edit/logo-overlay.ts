@@ -1,4 +1,9 @@
-import { MediaAssetSchema } from '@video-maker/timeline-core';
+import {
+  LANDSCAPE_LOGO_WIDTH_RATIO,
+  MediaAssetSchema,
+  PORTRAIT_LOGO_WIDTH_RATIO,
+  defaultLogoWidthRatio,
+} from '@video-maker/timeline-core';
 import type { LogoPosition, MediaAsset, Timeline } from '@video-maker/timeline-core';
 
 import type { AssetListing } from '../render-api-types';
@@ -13,11 +18,36 @@ export const LOGO_POSITIONS: readonly LogoPosition[] = [
 
 export const DEFAULT_LOGO_POSITION: LogoPosition = 'bottom-right';
 
-const DEFAULT_LOGO_OVERLAY = {
-  widthRatio: 0.32,
-  marginRatio: 0.035,
-  opacity: 1,
-} as const;
+const DEFAULT_LOGO_MARGIN_RATIO = 0.035;
+const DEFAULT_LOGO_OPACITY = 1;
+
+export const LOGO_SIZES = ['small', 'medium', 'large'] as const;
+
+export type LogoSize = (typeof LOGO_SIZES)[number];
+
+export const LOGO_WIDTH_RATIO_BY_SIZE: Readonly<Record<LogoSize, number>> = {
+  small: 0.12,
+  medium: LANDSCAPE_LOGO_WIDTH_RATIO,
+  large: PORTRAIT_LOGO_WIDTH_RATIO,
+};
+
+export function logoSizeOf(widthRatio: number): LogoSize {
+  return (
+    LOGO_SIZES.find((size) => LOGO_WIDTH_RATIO_BY_SIZE[size] === widthRatio) ??
+    LOGO_SIZES.reduce((closest, size) =>
+      Math.abs(LOGO_WIDTH_RATIO_BY_SIZE[size] - widthRatio) <
+      Math.abs(LOGO_WIDTH_RATIO_BY_SIZE[closest] - widthRatio)
+        ? size
+        : closest,
+    )
+  );
+}
+
+export function logoAssetsWithoutAlpha(listing: AssetListing | null): string[] {
+  return (listing?.assets ?? [])
+    .filter((entry) => entry.role === 'logo' && entry.media?.hasAlpha === false)
+    .map((entry) => entry.path);
+}
 
 export function logoAssetsOf(listing: AssetListing | null): MediaAsset[] {
   if (listing === null) {
@@ -58,7 +88,9 @@ export function setTimelineLogo(
     ...timeline,
     assets,
     logo: {
-      ...DEFAULT_LOGO_OVERLAY,
+      widthRatio: defaultLogoWidthRatio(timeline.format),
+      marginRatio: DEFAULT_LOGO_MARGIN_RATIO,
+      opacity: DEFAULT_LOGO_OPACITY,
       ...(timeline.logo?.assetId === asset.id ? timeline.logo : {}),
       assetId: asset.id,
       position,
@@ -84,4 +116,15 @@ export function clearTimelineLogo(timeline: Timeline): Timeline {
       ? timeline.assets
       : timeline.assets.filter((asset) => asset.id !== logo.assetId),
   };
+}
+
+export function setTimelineLogoStyle(
+  timeline: Timeline,
+  style: { widthRatio: number; opacity: number },
+): Timeline {
+  if (timeline.logo === undefined) {
+    return timeline;
+  }
+
+  return { ...timeline, logo: { ...timeline.logo, ...style } };
 }

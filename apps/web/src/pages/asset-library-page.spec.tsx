@@ -24,6 +24,12 @@ const listing: AssetListing = {
   probeFailures: [],
 };
 
+const EMPTY_GENERATED = {
+  slug: 'smoke-ingest',
+  roots: ['work/voice', 'work/producer', 'out'],
+  files: [],
+};
+
 const HEALTHY_SERVICE = {
   status: 'ok' as const,
   service: 'render-api',
@@ -43,6 +49,8 @@ const HEALTHY_SERVICE = {
 function renderPage(client: Partial<RenderApiClient>) {
   const withHealth: Partial<RenderApiClient> = {
     getHealth: vi.fn().mockResolvedValue(HEALTHY_SERVICE),
+    listGenerated: vi.fn().mockResolvedValue(EMPTY_GENERATED),
+    getVoice: vi.fn().mockRejectedValue(new RenderApiError('VOICE_NOT_FOUND', 'no voice', 404, null)),
     ...client,
   };
   render(
@@ -173,6 +181,12 @@ describe('AssetLibraryPage montage', () => {
           {
             getHealth: vi.fn().mockResolvedValue(HEALTHY_SERVICE),
             listAssets: vi.fn().mockResolvedValue(listing),
+            listGenerated: vi.fn().mockResolvedValue(EMPTY_GENERATED),
+            getVoice: vi
+              .fn()
+              .mockRejectedValue(
+                new RenderApiError('VOICE_NOT_FOUND', 'no voice', 404, null),
+              ),
             ...client,
           } as RenderApiClient
         }

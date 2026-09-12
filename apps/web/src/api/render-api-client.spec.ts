@@ -1038,3 +1038,97 @@ describe('createRenderApiClient — producer', () => {
     expect((error as RenderApiError).code).toBe('PRODUCER_TURN_NOT_CANCELABLE');
   });
 });
+
+describe('createRenderApiClient — listGenerated y getProjectFile (FIX-006-001, FIX-009-003)', () => {
+  const LISTING = {
+    slug: 'display-ads',
+    roots: ['work/voice', 'work/producer', 'out'],
+    files: [{ path: 'out/display-ads.mp4', sizeBytes: 10, modifiedAtMs: 1 }],
+  };
+
+  it('pide el listado de lo generado a EP-028', async () => {
+    const { fetchImpl, calls } = recordingFetch(() => jsonResponse(LISTING));
+
+    const listing = await createRenderApiClient(fetchImpl).listGenerated('display-ads');
+
+    expect(calls[0]?.url).toBe('/api/projects/display-ads/generated');
+    expect(listing.files).toHaveLength(1);
+  });
+
+  it('rechaza un cuerpo que no tiene la forma del listado', async () => {
+    const { fetchImpl } = recordingFetch(() => jsonResponse({ slug: 'display-ads', files: 'many' }));
+
+    const error = await createRenderApiClient(fetchImpl)
+      .listGenerated('display-ads')
+      .catch((caught: unknown) => caught);
+
+    expect((error as RenderApiError).code).toBe('RESPONSE_SHAPE_UNEXPECTED');
+  });
+
+  it('propaga el error tipado del servicio', async () => {
+    const { fetchImpl } = recordingFetch(() =>
+      jsonResponse({ error: { code: 'PROJECT_NOT_FOUND', stage: null, message: 'gone' } }, 404),
+    );
+
+    const error = await createRenderApiClient(fetchImpl)
+      .listGenerated('display-ads')
+      .catch((caught: unknown) => caught);
+
+    expect((error as RenderApiError).code).toBe('PROJECT_NOT_FOUND');
+  });
+
+  it('lee un archivo del proyecto por EP-011, con cada segmento escapado', async () => {
+    const { fetchImpl, calls } = recordingFetch(
+      () => new Response('[0:00] Hola', { status: 200, headers: { 'content-type': 'text/plain' } }),
+    );
+
+    const text = await createRenderApiClient(fetchImpl).getProjectFile(
+      'display ads',
+      'work/producer/script.txt',
+    );
+
+    expect(text).toBe('[0:00] Hola');
+    expect(calls[0]?.url).toBe('/api/projects/display%20ads/files/work/producer/script.txt');
+  });
+
+  it('nunca deja que un path escape del proyecto', async () => {
+    const { fetchImpl, calls } = recordingFetch(() => new Response('x', { status: 200 }));
+
+    await createRenderApiClient(fetchImpl).getProjectFile('demo', '../../etc/passwd');
+
+    expect(calls[0]?.url).toBe('/api/projects/demo/files/etc/passwd');
+  });
+
+  it('lee el error tipado cuando el archivo no está', async () => {
+    const { fetchImpl } = recordingFetch(() =>
+      jsonResponse({ error: { code: 'ARTIFACT_NOT_FOUND', stage: null, message: 'no file' } }, 404),
+    );
+
+    const error = await createRenderApiClient(fetchImpl)
+      .getProjectFile('demo', 'work/voice/script-manifest.json')
+      .catch((caught: unknown) => caught);
+
+    expect((error as RenderApiError).code).toBe('ARTIFACT_NOT_FOUND');
+  });
+
+  it('manda scriptPath en el job de voz sólo cuando se lo pide', async () => {
+    const { fetchImpl, calls } = recordingFetch(() => jsonResponse(voiceJob(), 202));
+    const client = createRenderApiClient(fetchImpl);
+
+    await client.createVoiceJob('demo', { voiceId: null, sceneIds: null, overwrite: false });
+    await client.createVoiceJob('demo', {
+      voiceId: 'es_AR-daniela-high',
+      sceneIds: null,
+      overwrite: true,
+      scriptPath: 'work/producer/script.txt',
+    });
+
+    expect(JSON.parse(String(calls[0]?.init?.body))).toEqual({ kind: 'voice', overwrite: false });
+    expect(JSON.parse(String(calls[1]?.init?.body))).toEqual({
+      kind: 'voice',
+      overwrite: true,
+      voice: 'es_AR-daniela-high',
+      scriptPath: 'work/producer/script.txt',
+    });
+  });
+});

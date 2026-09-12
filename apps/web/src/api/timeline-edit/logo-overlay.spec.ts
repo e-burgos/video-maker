@@ -5,10 +5,14 @@ import { editableTimelineFixture } from '../__fixtures__/editable-timeline';
 import {
   DEFAULT_LOGO_POSITION,
   LOGO_POSITIONS,
+  LOGO_SIZES,
+  LOGO_WIDTH_RATIO_BY_SIZE,
   clearTimelineLogo,
   logoAssetsOf,
   logoBlockers,
+  logoSizeOf,
   setTimelineLogo,
+  setTimelineLogoStyle,
 } from './logo-overlay';
 import type { AssetListing } from '../render-api-types';
 import type { MediaAsset } from '@video-maker/timeline-core';
@@ -103,7 +107,7 @@ describe('setTimelineLogo', () => {
     expect(next.logo).toEqual({
       assetId: 'raw/logo/brand.png',
       position: 'bottom-right',
-      widthRatio: 0.32,
+      widthRatio: 0.28,
       marginRatio: 0.035,
       opacity: 1,
     });
@@ -131,7 +135,7 @@ describe('setTimelineLogo', () => {
     const tuned = { ...shown, logo: { ...shown.logo, widthRatio: 0.5 } } as typeof shown;
     const other: MediaAsset = { ...LOGO_ASSET, id: 'raw/logo/other.png', path: 'raw/logo/other.png' };
 
-    expect(setTimelineLogo(tuned, other, 'bottom-right').logo?.widthRatio).toBe(0.32);
+    expect(setTimelineLogo(tuned, other, 'bottom-right').logo?.widthRatio).toBe(0.28);
   });
 });
 
@@ -158,5 +162,42 @@ describe('clearTimelineLogo', () => {
     const timeline = editableTimelineFixture();
 
     expect(clearTimelineLogo(timeline)).toBe(timeline);
+  });
+});
+
+describe('logoSizeOf, LOGO_WIDTH_RATIO_BY_SIZE y setTimelineLogoStyle (FIX-006-001)', () => {
+  it('nombra cada ancho conocido con su tamaño', () => {
+    expect(logoSizeOf(0.12)).toBe('small');
+    expect(logoSizeOf(0.18)).toBe('medium');
+    expect(logoSizeOf(0.28)).toBe('large');
+  });
+
+  it('un ancho heredado cae en el tamaño más cercano', () => {
+    expect(logoSizeOf(0.32)).toBe('large');
+    expect(logoSizeOf(0.05)).toBe('small');
+    expect(logoSizeOf(0.2)).toBe('medium');
+  });
+
+  it('los tres tamaños están ordenados de menor a mayor', () => {
+    expect(LOGO_SIZES.map((size) => LOGO_WIDTH_RATIO_BY_SIZE[size])).toEqual([0.12, 0.18, 0.28]);
+  });
+
+  it('escribe el ancho y la opacidad conservando el asset y la posición', () => {
+    const withLogo = setTimelineLogo(editableTimelineFixture(), LOGO_ASSET, 'top-left');
+    const tuned = setTimelineLogoStyle(withLogo, { widthRatio: 0.12, opacity: 0.5 });
+
+    expect(tuned.logo).toEqual({
+      assetId: LOGO_ASSET.id,
+      position: 'top-left',
+      widthRatio: 0.12,
+      marginRatio: 0.035,
+      opacity: 0.5,
+    });
+  });
+
+  it('no inventa un logo cuando el documento no tiene ninguno', () => {
+    const timeline = editableTimelineFixture();
+
+    expect(setTimelineLogoStyle(timeline, { widthRatio: 0.12, opacity: 0.5 })).toBe(timeline);
   });
 });

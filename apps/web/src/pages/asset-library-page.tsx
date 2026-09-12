@@ -8,6 +8,7 @@ import { useT, useTn } from '../i18n/language-context';
 import { AssetCard } from '../components/asset-card';
 import { AssetUploader } from '../components/asset-uploader';
 import { ErrorNotice } from '../components/error-notice';
+import { GeneratedFilesPanel } from '../components/generated-files-panel';
 import { MontageJobPanel } from '../components/montage-job-panel';
 import { MontageTrigger } from '../components/montage-trigger';
 import type { AssetListing, AssetRole } from '../api/render-api-types';
@@ -66,6 +67,8 @@ export function AssetLibraryPage() {
           </p>
         )}
       </div>
+
+      <GeneratedFilesPanel slug={slug} assets={listing.data} />
 
       <AssetUploader slug={slug} onUploaded={listing.reload} />
 

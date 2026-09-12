@@ -15,6 +15,7 @@ export const ROUTES = [
   { id: 'projects.edl.get', method: 'GET', pattern: '/projects/:slug/edl' },
   { id: 'projects.edl.put', method: 'PUT', pattern: '/projects/:slug/edl' },
   { id: 'projects.files.get', method: 'GET', pattern: '/projects/:slug/files/*path' },
+  { id: 'projects.generated.get', method: 'GET', pattern: '/projects/:slug/generated' },
   { id: 'projects.storyboard.get', method: 'GET', pattern: '/projects/:slug/storyboard' },
   { id: 'projects.storyboard.put', method: 'PUT', pattern: '/projects/:slug/storyboard' },
   { id: 'projects.storyboard.prompts', method: 'GET', pattern: '/projects/:slug/storyboard/prompts' },

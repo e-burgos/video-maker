@@ -1,0 +1,22 @@
+{
+  "generatedRoots": [
+    "work/voice",
+    "work/producer",
+    "out"
+  ],
+  "narration": {
+    "readyState": 4,
+    "duration": 42.906729,
+    "src": "/api/projects/script-mode-smoke/files/work/voice/voice.wav"
+  },
+  "scriptAudio": {
+    "readyState": 4,
+    "duration": 42.906729,
+    "src": "/api/projects/script-mode-smoke/files/work/voice/voice.wav"
+  },
+  "scriptLines": 10,
+  "captionStyleBefore": "bold-impact",
+  "captionStyleAfter": "subtle-lower",
+  "logoWidthRatio": 0.18,
+  "voiceBadge": "generated with es_AR-daniela-high"
+}

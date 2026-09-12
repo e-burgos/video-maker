@@ -4,6 +4,7 @@ import { httpStatusFor } from '../errors/http-status-for';
 import { PipelineStageError } from '../errors/pipeline-stage-error';
 import { toErrorPayload } from '../errors/to-error-payload';
 import { handleGetArtifact } from './handlers/artifact-handler';
+import { handleGetGenerated } from './handlers/generated-handler';
 import { handleDeleteAsset, handleListAssets, handleUploadAsset } from './handlers/assets-handler';
 import {
   handleCancelRenderJob,
@@ -95,6 +96,8 @@ export async function handleRequest(
         return await handlePutEditDecisionList(deps, store, params, request);
       case 'projects.files.get':
         return await handleGetArtifact(deps, store, params, request);
+      case 'projects.generated.get':
+        return await handleGetGenerated(deps, store, params);
       case 'projects.storyboard.get':
         return await handleGetStoryboard(deps, store, params);
       case 'projects.storyboard.put':

@@ -18,6 +18,8 @@ type Rotation = 0 | 90 | 180 | 270;
 const COMMAND = 'ffprobe';
 const VALID_ROTATIONS: readonly Rotation[] = [0, 90, 180, 270];
 const IMAGE_FORMAT_NAME_PATTERN = /(^|,)(image2|image2pipe|[a-z0-9]+_pipe)(,|$)/;
+const PALETTED_PIXEL_FORMAT = 'pal8';
+const GRAYSCALE_COMPONENT_PREFIX = 'gray';
 
 interface AudioInfo {
   sampleRate: number;
@@ -154,8 +156,23 @@ function buildAudioInfo(stream: FfprobeStream): AudioInfo {
   };
 }
 
+export function pixelFormatHasAlpha(pixelFormat: string | undefined): boolean | undefined {
+  if (pixelFormat === undefined) {
+    return undefined;
+  }
+
+  if (pixelFormat === PALETTED_PIXEL_FORMAT) {
+    return true;
+  }
+
+  const components = pixelFormat.split(/[^a-z]/)[0] ?? '';
+
+  return !components.startsWith(GRAYSCALE_COMPONENT_PREFIX) && components.includes('a');
+}
+
 function buildImageAsset(params: BuildAssetParams): Record<string, unknown> {
   const { id, ctx, videoStream } = params;
+  const hasAlpha = pixelFormatHasAlpha(videoStream?.pix_fmt);
   return {
     id,
     kind: 'image',
@@ -164,6 +181,7 @@ function buildImageAsset(params: BuildAssetParams): Record<string, unknown> {
     ...(videoStream?.width !== undefined ? { width: videoStream.width } : {}),
     ...(videoStream?.height !== undefined ? { height: videoStream.height } : {}),
     hasAudio: false,
+    ...(hasAlpha === undefined ? {} : { hasAlpha }),
     probedAt: ctx.probedAt,
   };
 }

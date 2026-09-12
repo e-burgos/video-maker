@@ -151,3 +151,85 @@ describe('LogoOverlayEditor', () => {
     expect(screen.queryByRole('combobox', { name: 'Upload to' })).toBeNull();
   });
 });
+
+describe('LogoOverlayEditor — tamaño, opacidad y transparencia (FIX-006-001)', () => {
+  const SHOWN_LOGO: LogoOverlay = {
+    assetId: 'raw/logo/brand.png',
+    position: 'bottom-right',
+    widthRatio: 0.18,
+    marginRatio: 0.035,
+    opacity: 1,
+  };
+
+  function sizeSelect(): HTMLSelectElement {
+    return screen.getByLabelText('Logo size') as HTMLSelectElement;
+  }
+
+  function opacityRange(): HTMLInputElement {
+    return screen.getByLabelText('Logo opacity') as HTMLInputElement;
+  }
+
+  it('refleja el ancho del documento como el tamaño elegido', async () => {
+    renderEditor({ assets: listing(true), logo: SHOWN_LOGO });
+
+    await waitFor(() => expect(sizeSelect().value).toBe('medium'));
+  });
+
+  it('cambiar el tamaño despacha el ancho de ese tamaño conservando la opacidad', async () => {
+    const dispatch = renderEditor({
+      assets: listing(true),
+      logo: { ...SHOWN_LOGO, opacity: 0.6 },
+    });
+
+    await waitFor(() => expect(sizeSelect().disabled).toBe(false));
+    fireEvent.change(sizeSelect(), { target: { value: 'small' } });
+
+    expect(dispatch).toHaveBeenCalledWith({ type: 'logo-style', widthRatio: 0.12, opacity: 0.6 });
+  });
+
+  it('mover la opacidad despacha la fracción conservando el ancho', async () => {
+    const dispatch = renderEditor({ assets: listing(true), logo: SHOWN_LOGO });
+
+    await waitFor(() => expect(opacityRange().disabled).toBe(false));
+    fireEvent.change(opacityRange(), { target: { value: '45' } });
+
+    expect(dispatch).toHaveBeenCalledWith({ type: 'logo-style', widthRatio: 0.18, opacity: 0.45 });
+  });
+
+  it('los dos controles quedan deshabilitados mientras el logo está apagado', async () => {
+    renderEditor({ assets: listing(true) });
+
+    await waitFor(() => expect(checkbox().disabled).toBe(false));
+    expect(sizeSelect().disabled).toBe(true);
+    expect(opacityRange().disabled).toBe(true);
+  });
+
+  it('avisa cuando el logo del catálogo no tiene canal alfa', async () => {
+    const withoutAlpha = listing(true);
+    const [entry] = withoutAlpha.assets;
+    const assets: AssetListing = {
+      ...withoutAlpha,
+      assets: [{ ...(entry as AssetListing['assets'][number]), media: { ...LOGO_MEDIA, hasAlpha: false } as AssetListing['assets'][number]['media'] }],
+    };
+
+    renderEditor({ assets, logo: SHOWN_LOGO });
+
+    const notice = await screen.findByTestId('logo-no-alpha');
+    expect(notice.textContent).toContain('raw/logo/brand.png');
+    expect(notice.textContent).toContain('This logo has no transparency; it will show as a box');
+  });
+
+  it('no avisa nada cuando el logo tiene transparencia', async () => {
+    const withAlpha = listing(true);
+    const [entry] = withAlpha.assets;
+    const assets: AssetListing = {
+      ...withAlpha,
+      assets: [{ ...(entry as AssetListing['assets'][number]), media: { ...LOGO_MEDIA, hasAlpha: true } as AssetListing['assets'][number]['media'] }],
+    };
+
+    renderEditor({ assets, logo: SHOWN_LOGO });
+
+    await waitFor(() => expect(screen.getByTestId('logo-asset')).toBeTruthy());
+    expect(screen.queryByTestId('logo-no-alpha')).toBeNull();
+  });
+});

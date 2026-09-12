@@ -1,4 +1,5 @@
 import type {
+  CaptionStyle,
   LogoPosition,
   MediaAsset,
   OutputPreset,
@@ -11,7 +12,8 @@ import { relayoutArollTrack, voiceMirrorIssue } from './aroll-layout';
 import type { VoiceMirrorIssue } from './aroll-layout';
 import { applyOutputPreset } from './apply-output-preset';
 import { issueSeverity } from './issue-severity';
-import { clearTimelineLogo, setTimelineLogo } from './logo-overlay';
+import { clearTimelineLogo, setTimelineLogo, setTimelineLogoStyle } from './logo-overlay';
+import { setTimelineCaptionStyle } from './caption-style';
 import { rescaleMusicAutomation } from './rescale-music-automation';
 import {
   rejectCaptionWordText,
@@ -32,7 +34,9 @@ export type TimelineEditAction =
   | { type: 'music-levels'; baseGainDb: number; duckedGainDb: number }
   | { type: 'output-preset'; preset: OutputPreset }
   | { type: 'logo-set'; asset: MediaAsset; position: LogoPosition }
+  | { type: 'logo-style'; widthRatio: number; opacity: number }
   | { type: 'logo-clear' }
+  | { type: 'caption-style'; captionStyle: CaptionStyle }
   | { type: 'saved'; timeline: Timeline }
   | { type: 'reset' };
 
@@ -229,8 +233,21 @@ export function timelineEditReducer(state: TimelineEditState, action: TimelineEd
         null,
       );
 
+    case 'logo-style':
+      return settle(
+        state.saved,
+        setTimelineLogoStyle(state.draft, {
+          widthRatio: action.widthRatio,
+          opacity: action.opacity,
+        }),
+        null,
+      );
+
     case 'logo-clear':
       return settle(state.saved, clearTimelineLogo(state.draft), null);
+
+    case 'caption-style':
+      return settle(state.saved, setTimelineCaptionStyle(state.draft, action.captionStyle), null);
   }
 }
 

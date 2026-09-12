@@ -86,6 +86,7 @@ export type ProbedMedia = {
   height?: number;
   rotation?: number;
   hasAudio?: boolean;
+  hasAlpha?: boolean;
   audio?: ProbedAudio;
   videoCodec?: string;
   probedAt: string;
@@ -123,6 +124,18 @@ export type AssetDeletion = {
   slug: string;
   deleted: DeletedAsset;
   timelineReferences: TimelineAssetReference[];
+};
+
+export type GeneratedFile = {
+  path: string;
+  sizeBytes: number;
+  modifiedAtMs: number;
+};
+
+export type GeneratedListing = {
+  slug: string;
+  roots: string[];
+  files: GeneratedFile[];
 };
 
 export type AssetListing = {

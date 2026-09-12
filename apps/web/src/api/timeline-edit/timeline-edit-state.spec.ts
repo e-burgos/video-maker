@@ -456,3 +456,63 @@ describe('canSaveTimeline / canStartRender (T-24 / CA-218)', () => {
     expect(canSaveTimeline({ ...state, dirty: true })).toBe(true);
   });
 });
+
+const LOGO_ASSET: MediaAsset = {
+  id: 'raw/logo/brand.png',
+  kind: 'image',
+  path: 'raw/logo/brand.png',
+  durationMs: 0,
+  width: 800,
+  height: 200,
+  hasAudio: false,
+  probedAt: '2026-09-01T00:00:00.000Z',
+};
+
+describe('timelineEditReducer — logo-style y caption-style (FIX-006-001)', () => {
+  function withLogo() {
+    const base = initialTimelineEditState(editableTimelineFixture());
+    return timelineEditReducer(base, {
+      type: 'logo-set',
+      asset: LOGO_ASSET,
+      position: 'bottom-right',
+    });
+  }
+
+  it('logo-style cambia el ancho y la opacidad y ensucia el borrador', () => {
+    const next = timelineEditReducer(withLogo(), {
+      type: 'logo-style',
+      widthRatio: 0.12,
+      opacity: 0.4,
+    });
+
+    expect(next.draft.logo?.widthRatio).toBe(0.12);
+    expect(next.draft.logo?.opacity).toBe(0.4);
+    expect(next.dirty).toBe(true);
+  });
+
+  it('logo-style sobre un documento sin logo no cambia nada', () => {
+    const base = initialTimelineEditState(editableTimelineFixture());
+    const next = timelineEditReducer(base, { type: 'logo-style', widthRatio: 0.12, opacity: 1 });
+
+    expect(next.draft).toBe(base.draft);
+    expect(next.dirty).toBe(false);
+  });
+
+  it('caption-style escribe el estilo y deja el documento válido', () => {
+    const base = initialTimelineEditState(editableTimelineFixture());
+    const next = timelineEditReducer(base, { type: 'caption-style', captionStyle: 'subtle-lower' });
+
+    expect(next.draft.captionStyle).toBe('subtle-lower');
+    expect(next.dirty).toBe(true);
+    expect(canSaveTimeline(next)).toBe(true);
+  });
+
+  it('volver al estilo guardado deja el borrador limpio otra vez', () => {
+    const saved = { ...editableTimelineFixture(), captionStyle: 'off' as const };
+    const base = initialTimelineEditState(saved);
+    const changed = timelineEditReducer(base, { type: 'caption-style', captionStyle: 'clean-sans' });
+    const back = timelineEditReducer(changed, { type: 'caption-style', captionStyle: 'off' });
+
+    expect(back.dirty).toBe(false);
+  });
+});

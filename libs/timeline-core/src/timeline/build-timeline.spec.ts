@@ -495,18 +495,30 @@ describe('buildTimeline — niveles del preset y logo', () => {
     parseOrThrow(timeline);
   });
 
-  it('con logo aplica los defaults del schema: bottom-right, 0.32, 0.035, 1', () => {
+  it('con logo aplica los defaults: bottom-right, el ancho del formato vertical, 0.035, 1 (FIX-006-001)', () => {
     const logo: LogoInput = { assetId: 'broll-shot-01' };
     const timeline = buildTimeline(duckEdl, ca013Assets, undefined, logo);
 
     expect(timeline.logo).toEqual({
       assetId: 'broll-shot-01',
       position: 'bottom-right',
-      widthRatio: 0.32,
+      widthRatio: 0.28,
       marginRatio: 0.035,
       opacity: 1,
     });
     parseOrThrow(timeline);
+  });
+
+  it('en 16:9 el logo por defecto ocupa 0.18 del ancho, no 0.28 (FIX-006-001)', () => {
+    const landscapeEdl: EditDecisionList = {
+      ...duckEdl,
+      format: { preset: 'youtube-16x9', width: 1920, height: 1080, fps: 30 },
+    };
+    const timeline = buildTimeline(landscapeEdl, ca013Assets, undefined, {
+      assetId: 'broll-shot-01',
+    });
+
+    expect(timeline.logo?.widthRatio).toBe(0.18);
   });
 
   it('respeta los overrides explícitos del logo', () => {
