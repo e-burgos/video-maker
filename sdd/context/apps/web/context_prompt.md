@@ -2,26 +2,34 @@
 
 > Entry point para agentes que trabajen sobre `apps/web`.
 > Leer junto con `constitution.md` de este directorio **+ `updates/*.md` en orden de nombre**.
-> Última actualización: spec-e-burgos-016 cycle-01 | Fecha: 2026-09-11
-> Consolidado por el orquestador al abrir `cycle-02` de `spec-e-burgos-016-studio-usability`.
+> Última actualización: FIX-e-burgos-015-005 | Fecha: 2026-09-20
+> Consolidado por un chore de higiene SDD (fundió los fragmentos de `FIX-e-burgos-005-001`,
+> `FIX-e-burgos-006-001`, `FIX-e-burgos-009-003`, `spec-e-burgos-016-studio-usability cycle-02`,
+> `FIX-e-burgos-006-002` y `FIX-e-burgos-015-005`).
 
 - **Tipo:** app React 19 (SPA local sobre `apps/render-api`)
-- **Estado:** **producto completo de punta a punta.** El nav por proyecto es
+- **Estado:** **producto completo de punta a punta, en español e inglés.** El nav por proyecto es
   `producer · library · storyboard · voice · preview` y el productor es el punto de partida de
   cada proyecto. Cubre: chat persistido con el productor (turnos en vivo, cancelación, chips de
-  sugerencias y opciones numeradas, selector de modelo, estado vacío con el inventario real),
-  biblioteca de assets por rol con subida y disparo del montaje, storyboard generativo editable
-  escena por escena con hoja numerada de prompts, voz (síntesis por escena, duración real contra la
-  estimada, regeneración de una escena, sustitución por grabación propia), preview de la `Timeline`
-  en el `<Player>` de Remotion con edición del documento (trim y orden de escenas, captions,
-  niveles de música con reescritura de la automation, preset de salida, capa de logo) y un único
-  `PUT`, y jobs de render con polling, cancelación y descarga del MP4. La voz se elige desde
-  **tarjetas audibles** (`VoicePicker`: etiqueta legible, idioma, calidad, descripción y demo de
-  `EP-026` reproducida en el navegador) y cada rol de subida llega con **qué le hace al video
-  final**, el directorio `raw/<rol>/` destino, la marca de obligatorio y la regla de matching de
-  B-roll. Consume `EP-001`..`EP-008`, `EP-011`..`EP-025` y `EP-026`. Suite: **78 archivos /
-  742 tests**, 98,71 % stmts · 95,96 % branch · 98,73 % funcs · 98,96 % lines, piso 80 %,
-  `coverage.include` sin recortar.
+  sugerencias y opciones numeradas, una fila de **recetas** con prompt completo precargado —hoy
+  **Tutorial**—, selector de modelo, estado vacío con el inventario real), biblioteca de assets por
+  rol con subida, **borrado con confirmación** (y manejo de `409 ASSET_IN_USE` con "Delete
+  anyway"), disparo del montaje y una sección **Generated** con lo que produjo el motor
+  (narración, guion, `out/*.mp4`), storyboard generativo editable escena por escena con hoja
+  numerada de prompts (o **modo guion** de sólo lectura si el proyecto se narró desde un script),
+  voz (síntesis por escena, duración real contra la estimada, regeneración de una escena,
+  sustitución por grabación propia, o el mismo **modo guion**), preview de la `Timeline` en el
+  `<Player>` de Remotion con edición del documento (trim y orden de escenas, captions con estilo
+  elegible, niveles de música con reescritura de la automation, preset de salida, capa de logo con
+  tamaño/opacidad/aviso de transparencia y **bumpers de inicio/fin**) y un único `PUT`, y jobs de
+  render con polling, cancelación y descarga del MP4. La voz se elige desde **tarjetas audibles**
+  (`VoicePicker`: etiqueta legible, idioma, calidad, descripción y demo de `EP-026` reproducida en
+  el navegador) y cada rol de subida llega con **qué le hace al video final**, el directorio
+  `raw/<rol>/` destino, la marca de obligatorio y la regla de matching de B-roll. Una ruta `/guide`
+  perezosa explica cada sección del studio, la tabla de presets de salida y tres flujos típicos, en
+  los dos idiomas. Consume `EP-001`..`EP-008`, `EP-011`..`EP-026` y `EP-028`. Suite (medida
+  2026-09-20): **102 archivos / 1005 tests**, 99,37 % stmts · 95,81 % branch · 99,47 % funcs ·
+  99,4 % lines, piso 80 %, `coverage.include` sin recortar.
   Cero dependencias npm propias además de `@remotion/player`.
 - **Descopado a propósito:** la **edición del EDL (`EP-009`/`EP-010`)**, porque `buildTimeline` sólo
   se invoca desde `libs/auto-montage` y guardar un EDL editado escribiría `work/edl.json` sin efecto
@@ -89,9 +97,6 @@
   expone un `DELETE` de `work/producer/`), **un turno perdido por reinicio da
   `PRODUCER_TURN_NOT_FOUND`** sin reenganche posible (registro in-memory), y **el productor no sube
   archivos**: el material entra por la biblioteca o por el panel del logo.
-- **Todo el copy de la app está en inglés y repartido entre componentes**: sólo `asset-roles.ts`,
-  `montage-presets.ts` y los cuatro traductores de códigos de error lo tienen centralizado. No hay
-  mecanismo de traducción ni switch de idioma — es exactamente el trabajo de `cycle-02`.
 - **El costo en tokens no se muestra en ninguna pantalla**: el `usage` del reporte de storyboard
   llega a la UI y no se dibuja, y el contrato del turno del productor directamente no lo expone.
 - **Los dos `404` de `/favicon.ico`** en consola no son un defecto: `index.html` no declara icono.
@@ -101,3 +106,20 @@
   "Playwright MCP Bridge"). La verificación visual usa el Playwright cacheado en `~/.npm/_npx` con
   `chromium.launch({ channel: 'chrome' })`, porque el `chromium_headless_shell` que ese build
   espera no está descargado.
+- **El borrado de un asset es inline en la tarjeta, no un modal**: con muchos usos de timeline la
+  tarjeta crece bastante. No hay borrado múltiple ni deshacer, y un borrado con `force` puede romper
+  la timeline — la UI sólo avisa, no lo impide.
+- **No hay borrado de archivos generados** (narración, guion, `out/*.mp4`) desde la sección
+  "Generated" de la biblioteca. Follow-up abierto.
+- **El modo guion de Voz/Storyboard es de sólo lectura**: para cambiar el texto narrado hay que
+  volver al productor; no hay edición inline del guion todavía.
+- **Sumar una receta al productor toca cuatro lugares, dos de ellos fuera de esta app**
+  (`PRODUCER_RECIPES` + prompt por idioma + dos claves de catálogo en `apps/web`, **y** el system
+  prompt del productor en `apps/render-api` **y** la skill `video-producer`): si se olvida
+  cualquiera de los dos últimos, el agente no sabe qué parámetros aplicar al oír el nombre de la
+  receta.
+- **El chunk inicial quedó en 495,84 kB, a menos de 5 kB del aviso de "chunks larger than 500 kB"
+  de Vite**: la próxima pantalla o catálogo de copy que entre al chunk inicial (en vez de una ruta
+  o un `await import()` perezoso) probablemente lo dispare.
+- **El switch de idioma no ofrece un tercer idioma listo para usar**: agregar uno implica sumar el
+  módulo de catálogo, sumarlo a `LANGUAGES` y resolver cada clave que `tsc` señale como faltante.

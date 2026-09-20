@@ -1,9 +1,10 @@
 # Constitución — apps/web
 
-> Versión 2.3 | Última actualización: spec-e-burgos-016 cycle-01 | Fecha: 2026-09-11
-> Consolidada por el orquestador al abrir `cycle-02` de `spec-e-burgos-016-studio-usability`
-> (fundió el fragmento de `spec-016` c01 sobre la 2.2, que ya traía `spec-008` c02, `spec-009` c02,
-> `spec-015` c02, `FIX-015-001` y `FIX-009-001`).
+> Versión 2.4 | Última actualización: FIX-e-burgos-015-005 | Fecha: 2026-09-20
+> Consolidada por un chore de higiene SDD (fundió los fragmentos de `FIX-e-burgos-005-001`,
+> `FIX-e-burgos-006-001`, `FIX-e-burgos-009-003`, `spec-e-burgos-016-studio-usability cycle-02`,
+> `FIX-e-burgos-006-002` y `FIX-e-burgos-015-005` sobre la 2.3, que ya traía `spec-016` cycle-01,
+> `spec-008` c02, `spec-009` c02, `spec-015` c02, `FIX-015-001` y `FIX-009-001`).
 > Las actualizaciones por ciclo/fix van como fragmentos aditivos en `updates/` —
 > este archivo base solo lo modifica la consolidación (ver `sdd/context/context_prompt.md` sección 6).
 
@@ -12,10 +13,14 @@
 - **Tipo:** app React 19 (SPA local, mono-usuario, sin auth ni despliegue)
 - **Rol en el sistema:** el Web Studio — la interfaz con la que el dev opera el motor desde el
   navegador de su propia máquina. Cubre el producto entero: el **productor conversacional** como
-  punto de partida, biblioteca de assets crudos, **generación del montaje**, **storyboard
-  generativo**, **voz** (síntesis por escena o locución propia), preview de la `Timeline` en el
-  `<Player>` de Remotion con la composición real, edición del documento persistido y disparo,
-  seguimiento y descarga de renders locales.
+  punto de partida (con recetas de arranque tipo "Tutorial"), biblioteca de assets crudos (con
+  borrado y vista de lo que generó el motor), **generación del montaje**, **storyboard
+  generativo** (con modo de sólo lectura cuando el proyecto se narró desde un guion), **voz**
+  (síntesis por escena, locución propia o modo guion), preview de la `Timeline` en el `<Player>`
+  de Remotion con la composición real, edición del documento persistido (trim y orden de clips,
+  captions con estilo elegible, música, preset de salida, logo con tamaño/opacidad y bumpers de
+  inicio/fin) y disparo, seguimiento y descarga de renders locales. **Toda la interfaz está en
+  español e inglés** (`src/i18n/`), con una ruta `/guide` que la explica en los dos idiomas.
 - **No tiene lógica de motor ni toca el filesystem.** Todo lo que muestra y todo lo que escribe
   pasa por los endpoints de `apps/render-api` (`sdd/api.json` → `EP-001`..`EP-025`), su único
   backend. Si hace falta un cálculo, vive en una lib o en la API, nunca acá.
@@ -42,35 +47,44 @@
 src/
   api/          frontera con render-api: tipos del contrato, cliente tipado, superficie de errores,
                 artifact-url (+ servicePathUrl), project-slug, asset-media-kind, asset-roles,
-                clipboard, RenderApiProvider,
+                asset-path, clipboard, RenderApiProvider, error-explanations, blockers (Blocker),
                 parse-timeline · player-timeline · preview-format,
                 render-api-types · parse-render-job · render-job-poll-plan · render-job-artifact,
                 montage-capability · montage-presets,
+                generated-files · parse-generated,
                 parse-storyboard · storyboard-capability · storyboard-edit/,
-                parse-voice · voice-capability,
-                parse-producer · producer-capability · producer-markdown · producer-turn-poll-plan,
+                parse-voice · voice-capability · parse-voice-script · voice-script-lines,
+                parse-producer · producer-capability · producer-markdown · producer-turn-poll-plan ·
+                producer-recipes · producer-recipe-prompts,
                 timeline-edit/  (toda la máquina de edición: reglas, layout de a-roll,
-                                rescale de automation, presets, severidad, logo-overlay, reducer)
+                                rescale de automation, presets, severidad,
+                                logo-overlay, logo-bumpers, caption-style, reducer)
+  i18n/         messages-en (fuente de verdad tipada) · messages-es (lazy) · translate ·
+                language-context · literal-copy-scan
+  guide/        guide-content-en · guide-content-es · guide-content (selector por idioma)
   hooks/        useAsyncResource (único primitivo de estado de servidor) · use-api-action ·
                 use-render-job-poll · use-producer-turn-poll
   components/   studio-layout · service-health-badge · error-notice · create-project-form ·
                 voice-picker ·
-                asset-card · asset-preview · asset-uploader · timeline-player ·
-                clip-track-editor · caption-editor · music-mix-editor · output-preset-selector ·
+                asset-card · asset-delete-control · asset-preview · asset-uploader ·
+                generated-files-panel · timeline-player ·
+                clip-track-editor · caption-editor · caption-style-selector · music-mix-editor ·
+                output-preset-selector ·
                 timeline-issue-list · timeline-save-bar · render-trigger · render-job-list ·
                 render-job-panel · montage-trigger · montage-job-panel ·
                 storyboard-trigger · storyboard-job-panel · storyboard-header-editor ·
                 storyboard-character-sheet · storyboard-scene-editor · storyboard-save-bar ·
                 storyboard-prompt-sheet · voice-trigger · voice-job-panel · voice-scene-card ·
+                voice-script-panel · producer-script-panel ·
                 producer-message-list · producer-composer · producer-turn-activity ·
-                producer-welcome · logo-overlay-editor
+                producer-welcome (COMP-042) · logo-overlay-editor · logo-bumper-editor (COMP-048)
   pages/        projects-page · asset-library-page · producer-page · storyboard-page ·
-                voice-page · project-preview-page
-  app/app.tsx   router (`/`, `/projects/:slug`, `/projects/:slug/{producer,storyboard,voice,preview}`)
-                y provider
+                voice-page · project-preview-page · guide-page (ruta perezosa)
+  app/app.tsx   router (`/`, `/projects/:slug`, `/projects/:slug/{producer,storyboard,voice,preview}`,
+                `/guide`) y provider
 e2e/            smoke-helpers.mjs (compartido) · studio-smoke.mjs · montage-smoke.mjs ·
                 storyboard-smoke.mjs · voice-smoke.mjs · voices-smoke.mjs · producer-smoke.mjs ·
-                capture-frame-240.mjs (fuera del build, fuera de Vitest)
+                delete-asset-smoke.mjs · capture-frame-240.mjs (fuera del build, fuera de Vitest)
 ```
 
 - **`src/api/` es el único lugar que sabe que el servicio existe** (RNF-4). Ningún componente arma
@@ -160,9 +174,17 @@ e2e/            smoke-helpers.mjs (compartido) · studio-smoke.mjs · montage-sm
   `@nx/enforce-module-boundaries` prohíbe mezclar import estático y `await import()` de la misma
   lib, así que la salida no es un import dinámico sino mantener a los consumidores dentro de la ruta
   perezosa. **El detector es la salida de `vite build`**: importar Zod desde el cliente subió el
-  chunk inicial de 466 kB a 580 kB y reapareció el aviso de "chunks larger than 500 kB". Medición
-  vigente: inicial **479,33 kB**, `producer-page` 23,1 kB, `voice-page` 19,9 kB, `storyboard-page`
-  33,1 kB, `project-preview-page` 366 kB, **sin** el aviso de 500 kB.
+  chunk inicial de 466 kB a 580 kB y reapareció el aviso de "chunks larger than 500 kB". El mismo
+  patrón se usa para copy larga que no se renderiza al abrir la pantalla: `messages-es.ts`
+  (catálogo `es` completo) y `guide-content-{en,es}.ts` sólo se alcanzan por `await import()`, y
+  `producer-recipe-prompts.ts` (los textos largos de cada receta del productor) igual, desde
+  `loadRecipePrompt`. Medición vigente: inicial **495,84 kB**, `messages-es` 26,38 kB,
+  `project-preview-page` 370,75 kB, `storyboard-page` 31,68 kB, `voice-page` 21,57 kB,
+  `producer-page` 15,84 kB, `asset-library-page` 14,31 kB, `guide-content-es` 9,37 kB,
+  `guide-content-en` 8,90 kB, `producer-recipe-prompts` 1,23 kB — **sin** el aviso de 500 kB, pero
+  con muy poco margen (bajó de 490,17 kB a 495,84 kB entre `spec-016 cycle-02` y `FIX-015-005`):
+  la próxima pantalla que sume copy visible al abrir o claves de catálogo conviene que entre
+  perezosa.
 - **`useSearchParams` de `react-router` arrastra al chunk inicial**: la salida es `URLSearchParams`
   nativo. No cambiarlo por el hook del router "por consistencia".
 - **La validación de cliente es espejo del servicio y clasifica por severidad**: `SCHEMA_INVALID`
@@ -180,6 +202,91 @@ e2e/            smoke-helpers.mjs (compartido) · studio-smoke.mjs · montage-sm
   `numberedOptions`, todo puro. La lista de bloques salió de mirar lo que el agente **realmente**
   contesta, no de un subset teórico de CommonMark.
 - **`media/` nunca se copia a `apps/web/public`** (D-6): todo asset se lee por `EP-011`.
+- **El borrado de assets es una máquina de tres pasos en la propia tarjeta**
+  (`asset-delete-control.tsx`: `closed` → `confirm` → `in-use`), no un modal: si el servicio
+  contesta `409 ASSET_IN_USE` la confirmación pasa a mostrar los usos reportados y ofrece **Delete
+  anyway** (reintento con `force=true`); al confirmar se recarga el listado. `AssetCard` sólo
+  expone `onDeleted` y `data-testid="asset-card"` + `data-asset-path` para que el E2E ubique una
+  tarjeta concreta. No hay borrado múltiple ni deshacer: un borrado con `force` puede romper la
+  timeline y la UI sólo avisa.
+- **La sección "Generated" de la biblioteca** (`generated-files-panel.tsx`) lee las rutas conocidas
+  del motor (`work/voice/voice.wav`, `work/producer/script.txt`, `work/voice/script-manifest.json`
+  y los `out/*.mp4`) vía `listGenerated` (`EP-028`) y `getProjectFile` (`EP-011`, que arma la URL
+  **segmento por segmento** descartando `.`/`..`, igual que `artifactUrl`). No hay borrado de
+  generados.
+- **El estilo de subtítulos se elige desde el preview** (`caption-style-selector.tsx` +
+  `timeline-edit/caption-style.ts`): los cinco estilos se muestran por etiqueta de producto, nunca
+  por id; un documento sin `captionStyle` se lee como el implícito `bold-impact`.
+- **El panel de logo cubre tamaño, opacidad, aviso de transparencia y bumpers de inicio/fin**
+  (`timeline-edit/logo-overlay.ts` + `timeline-edit/logo-bumpers.ts`): `LOGO_SIZES`
+  (0.12/0.18/0.28) cae al tamaño más cercano para una timeline vieja con otro valor; el aviso de
+  transparencia se apoya en `MediaAsset.hasAlpha`, que refleja el `pix_fmt` declarado y no un
+  análisis de píxeles (un PNG `rgba` con fondo blanco opaco pintado en el arte no lo dispara). Los
+  bumpers (`timeline.bumpers`, editor `logo-bumper-editor.tsx`/COMP-048 montado dentro de
+  `LogoOverlayEditor`) tienen cuatro duraciones (1500/2000/3000/4000 ms) y tres tamaños de logo
+  (0.3/0.4/0.55); `setTimelineBumperEnabled` no prende nada si la timeline no tiene logo y
+  `setTimelineBumperStyle` no inventa un bumper que no existe. La fila DURACIÓN del preview
+  muestra contenido + inicio/fin (`computeTimelineMetadata` ya traía `timelineTotalFrames`).
+- **`TimelineEditState.warnings` es un array separado de `issues`** (de `timelineWarnings` de
+  `timeline-core`): `canStartRender` sigue exigiendo cero issues, y un warning (por ejemplo
+  `BUMPER_WITHOUT_LOGO`, severidad `warning`, pintado en azul por `issue-severity.ts`) no bloquea
+  nada. La página monta una segunda lista sólo para warnings.
+- **Voz y Storyboard reconocen el modo guion** cuando el proyecto se narró desde un script:
+  `parseVoiceScriptManifest` devuelve el manifest validado con `VoiceScriptManifestSchema` o
+  **null** (JSON inválido, documento ajeno o manifest sin líneas se tratan igual del lado de la
+  UI). En `voice-page.tsx` el modo guion se activa con `storyboard.data === null && manifest !==
+  null`, reemplaza la lista de escenas y pasa `scriptPath` al `VoiceTrigger` (que cambia su rótulo
+  a "Regenerate with the selected voice"). En `storyboard-page.tsx`, con `STORYBOARD_NOT_FOUND` y
+  `work/producer/script.txt` legible, se muestra el guion en sólo lectura. El modo guion no edita:
+  para cambiar el texto hay que volver al productor — si algún día se edita desde acá, el guion es
+  la fuente y el manifest el derivado, nunca al revés.
+- **Toda la interfaz vive en español e inglés** (`src/i18n/`): `messages-en.ts` es la fuente de
+  verdad tipada (`{...} as const satisfies Record<string,string>` → `TranslationKey = keyof typeof
+  MESSAGES_EN`), y `messages-es.ts` se declara `Messages = Readonly<Record<TranslationKey,
+  string>>` — una clave de más o de menos es error de `tsc`, no un test que se puede olvidar
+  (`messages-parity.spec.ts` lo vuelve a aserar en runtime, incluidos placeholders y variantes de
+  plural). `translate.ts` da `t(key, params)` (interpolación `{param}`; un placeholder sin valor
+  queda tal cual, nunca `undefined`) y `tn(key, count, params)` (elige `<key>.one`/`<key>.other`,
+  claves normales dentro del mismo chequeo de paridad). `language-context.tsx` expone
+  `LanguageProvider` + `useLanguage()` + `useT()` + `useTn()`; **`useT()` sin provider devuelve el
+  catálogo inglés**, así que ninguna suite vieja que aserara texto en inglés tuvo que tocarse — la
+  migración cambió de dónde sale el texto, no qué texto sale.
+- **El idioma inicial sale de `localStorage` → `navigator.languages` (`es-*` → `es`) → `en`**,
+  persiste en `localStorage` y estampa `documentElement.lang`. El switch no ofrece un tercer
+  idioma listo para usar: agregar uno es sumar el módulo, sumarlo a `LANGUAGES` y dejar que `tsc`
+  señale cada clave faltante.
+- **Los bloqueadores de acción devuelven claves, no frases** (`src/api/blockers.ts`, `Blocker =
+  { key, params? }`): `voiceBlockers` (mira `voiceQueue` y los seis binarios), `montageBlockers`
+  (cuatro binarios), `storyboardBlockers` (ninguno) y `producerBlockers` deciden *qué* bloquea; el
+  componente decide *cómo se dice*. `blockerId()` da la React key cuando dos blockers comparten
+  clave con params distintos.
+- **`/guide` es una ruta perezosa que explica el studio** (`src/guide/guide-content-{en,es}.ts`,
+  ocho secciones md-like, dibujadas con `ProducerMarkdown`), con la tabla de presets de salida y
+  tres flujos típicos en los dos idiomas. Es texto fijo: no se genera de los catálogos, pero
+  `guide-content.spec.ts` falla si un preset de montaje o de salida deja de estar tabulado con su
+  id y su etiqueta legible.
+- **El "no hay copy literal" se verifica con un scanner propio** (`src/i18n/literal-copy-scan.ts`:
+  borra las expresiones `{...}` y busca texto JSX y `placeholder`/`title`/`aria-label`/`alt` fuera
+  de una lista cerrada de tokens técnicos), corrido sobre los `.tsx` de `app`, `components` y
+  `pages` vía `import.meta.glob(..., { query: '?raw' })` — no un plugin de ESLint, porque D-9
+  prohíbe un config propio de la app. `literal-copy-scan.spec.ts` prueba el oráculo rompiéndolo
+  aposta, con fixtures de copy plantada que tiene que detectar.
+- **Lo que NO se traduce, a propósito:** el texto que escribe el agente productor (ya viene en el
+  idioma del usuario), el `label`/`description` que publica `GET /voices` (dato del catálogo del
+  servicio, derivado del `.onnx.json`), el `message` de un error del servicio (se muestra como
+  línea técnica cuando hay explicación traducida) y las etiquetas de `errorDetailLines`
+  (`resource:`/`expected:`/`hint:`/`stage:`, nombres de campo del payload).
+- **La bienvenida del productor ofrece recetas** (`api/producer-recipes.ts`:
+  `PRODUCER_RECIPE_IDS`, `PRODUCER_RECIPES` con metadata `{ id, labelKey, descriptionKey }`,
+  `recipePromptHasHole` y `loadRecipePrompt(id, language)`): una fila propia encima de las
+  sugerencias sueltas, hoy con el chip **Tutorial**. Al tocarlo el compositor se rellena con el
+  prompt completo en el idioma de la UI, editable y con un hueco `[…]` para la tabla de escenas del
+  usuario. `producer-welcome.tsx` (COMP-042) usa `useLanguage()` además de `useT()`: el prompt
+  sigue el idioma de la UI, no el del catálogo por defecto. Para sumar una receta hacen falta
+  cuatro lugares: una entrada en `PRODUCER_RECIPES`, su prompt por idioma en
+  `producer-recipe-prompts.ts`, sus dos claves de catálogo, y la receta también en el system
+  prompt del productor (`apps/render-api`) y en la skill `video-producer` — si no, el agente no
+  sabe qué parámetros aplicar al oír su nombre.
 
 ## 4. Convenciones propias
 
@@ -204,7 +311,11 @@ e2e/            smoke-helpers.mjs (compartido) · studio-smoke.mjs · montage-sm
   del smoke E2E. Los de `cycle-01` de `spec-016` se suman a ese contrato: `voice-picker`,
   `voice-card` (con `data-voice-id`, `data-selected`, `data-preview-state`), `voice-preview-audio`,
   `asset-role-choices`, `asset-role-choice` (con `data-role`, `data-selected`),
-  `asset-role-required` y `asset-role-hint`. Si se renombran, hay que actualizar los guiones.
+  `asset-role-required` y `asset-role-hint`. Los de `cycle-02` de `spec-016` (i18n y guía) suman
+  `language-switch` (con `data-language` por botón), `guide-nav`, `guide`, `guide-index`,
+  `guide-section` (con `data-guide-section` y `data-guide-language`) y `error-technical-detail`.
+  `FIX-005-001` suma `asset-card` (con `data-asset-path`) para el borrado. Si se renombran, hay
+  que actualizar los guiones.
 - **Cada ciclo cierra con al menos una captura real de Playwright** de la UI contra un `render-api`
   real, en `cycles/cycle-XX/artifacts/` (D-10, RNF-5). `lint`/`test`/`build` verdes no prueban que
   la pantalla se dibuje, y **una UI se verifica midiendo el estado del medio en el navegador**
