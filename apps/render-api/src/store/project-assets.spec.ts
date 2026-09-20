@@ -60,6 +60,30 @@ describe('resolveProjectAssets', () => {
     }
   });
 
+  it('merges raw files that the catalog does not know yet and drops catalog entries that vanished from disk (FIX-e-burgos-005-002)', async () => {
+    const callLog = createCallLog();
+    const project = resolveMediaProject('/media/smoke-ingest');
+    const known = buildCatalogAssetFixture({ assetId: 'raw/aroll/clip01.mp4' });
+    const vanished = buildCatalogAssetFixture({ assetId: 'raw/broll/gone.mp4' });
+    const catalog = CatalogSchema.parse(buildCatalogFixture('smoke-ingest', [known, vanished]));
+    const storage = createFakeObjectStorage(callLog, {
+      directories: [project.rawDir, `${project.rawDir}/aroll`, `${project.rawDir}/broll`],
+      files: [
+        { path: `${project.workDir}/catalog.json`, contents: JSON.stringify(catalog) },
+        { path: `${project.rawDir}/aroll/clip01.mp4`, contents: 'binary-placeholder' },
+        { path: `${project.rawDir}/broll/added-by-hand.mp4`, contents: 'new-binary' },
+      ],
+    });
+
+    const result = await resolveProjectAssets(storage, project);
+
+    expect(result.source).toBe('catalog');
+    expect(result.assets.map((entry) => [entry.path, entry.media === null])).toEqual([
+      ['raw/aroll/clip01.mp4', false],
+      ['raw/broll/added-by-hand.mp4', true],
+    ]);
+  });
+
   it('throws PROJECT_LAYOUT_INVALID when the raw directory is missing on a raw scan', async () => {
     const callLog = createCallLog();
     const project = resolveMediaProject('/media/smoke-ingest');

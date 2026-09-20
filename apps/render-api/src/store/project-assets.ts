@@ -103,6 +103,38 @@ async function fromRawScan(storage: ObjectStorage, project: MediaProject): Promi
   }
 }
 
+async function scanRawFindings(storage: ObjectStorage, project: MediaProject): Promise<readonly AssetListEntry[] | null> {
+  try {
+    const { findings } = await discoverAssets(project, {
+      readDirectory: toDirectoryReader(storage),
+      statFile: toFileStatReader(storage),
+    });
+    return findings.map((finding) => ({
+      path: finding.relativePath,
+      role: finding.role,
+      fingerprint: finding.fingerprint,
+      media: null,
+    }));
+  } catch {
+    return null;
+  }
+}
+
+function mergeRawFindings(catalogAssets: ProjectAssets, rawEntries: readonly AssetListEntry[] | null): ProjectAssets {
+  if (rawEntries === null) {
+    return catalogAssets;
+  }
+  const onDisk = new Set(rawEntries.map((entry) => entry.path));
+  const catalogued = new Set(catalogAssets.assets.map((entry) => entry.path));
+  return {
+    ...catalogAssets,
+    assets: [
+      ...catalogAssets.assets.filter((entry) => onDisk.has(entry.path)),
+      ...rawEntries.filter((entry) => !catalogued.has(entry.path)),
+    ],
+  };
+}
+
 export async function resolveProjectAssets(
   storage: ObjectStorage,
   project: MediaProject,
@@ -119,7 +151,7 @@ export async function resolveProjectAssets(
     }
 
     if (catalog !== null) {
-      return fromCatalog(catalog);
+      return mergeRawFindings(fromCatalog(catalog), await scanRawFindings(storage, project));
     }
   }
 
