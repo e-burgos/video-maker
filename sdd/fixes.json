@@ -1443,6 +1443,48 @@
         "tokens_total": 142978
       },
       "process_note": "Usage: one agent run resolved both fixes and reported 279998 tokens in total; split in proportion to the declared estimates."
+    },
+    {
+      "id": "FIX-e-burgos-001",
+      "author": "e-burgos",
+      "spec_id": null,
+      "fix_document": "sdd/fixes/fix-e-burgos-001.md",
+      "type": "IMPROVEMENT",
+      "severity": "medium",
+      "created_at": "2026-09-20",
+      "resolved_at": "2026-09-20",
+      "validated_at": null,
+      "title": "external material producers have no written contract of what the engine needs",
+      "estimation_hours": 3,
+      "description": "Everything the engine demands from the raw material (raw/ layout and roles, accepted extensions, a single A-roll, B-roll named by spoken concept, music longer than the edit, logo with alpha, one sentence per script line with [m:ss] marks, explicit output format) was spread across the code, the render-cli README and the video-producer skill, which addresses the producer, not the project that delivers the material. The display-ads case paid for it with redone material. New self-contained skill sdd/skills/video-maker-material-contract/SKILL.md written for the external project: layout, per-file and per-format specs (youtube-16x9 vs *-9x16 with safe zones), script and concept-matching rules, presets, ffprobe delivery checklist, filesystem and HTTP hand-off with real payloads and error codes, three complete recipes, frequent material errors, engine limits and how to copy the skill into another repo. Linked from the reference table of sdd/context/context_prompt.md and listed in the catalog.",
+      "justification": "Solo-profile FIX GATE: documentation only, no code, no new contract and no new entity. Repo-level because the contract spans every subproject (ingest, timeline formats, render-api, render-cli).",
+      "related_modules": [
+        "auto-montage-pipeline",
+        "render-service",
+        "studio-producer"
+      ],
+      "affected_files": [
+        "sdd/skills/video-maker-material-contract/SKILL.md",
+        "sdd/context/context_prompt.md",
+        "sdd/catalog.json",
+        "sdd/fixes.json",
+        "sdd/fixes/fix-e-burgos-001.md"
+      ],
+      "test_reference": "Retrieval test with a haiku reader agent restricted to the skill file, asked to produce the display-ads material for a 16:9 tutorial with generated narration and a 9:16 clip with on-camera voice. Baseline without the skill invented a screens/ folder, root-level logo and music, a narration.jsonl with frame indices, a 1:1 format and a non-existent CLI. With the skill it returned the raw/ layout with the six roles, one A-roll per project, the script path work/producer/script.txt with [m:ss] marks, B-roll names that match the normalized concepts, the POST /projects, PUT assets, voice -> montage -> render job payloads with format youtube-16x9 / tiktok-9x16, and GET files/out/<jobId>.mp4, reporting no gaps. Every rule in the skill was checked against the source files it cites (supported-extensions.ts, asset-path.ts, format.ts, *.preset.ts, parse-voice-script-lines.ts, asset-tokens.ts, assets-handler.ts, jobs-handler.ts, resolve-montage-inputs.ts). pnpm sdd:validate OK and pnpm sdd:rebuild-catalog run (2026-09-20).",
+      "status": "implemented",
+      "cycle": null,
+      "usage": {
+        "provider_model": "claude/fable",
+        "effort": "medium",
+        "tokens_in": 210000,
+        "tokens_out": 25000,
+        "approx": true,
+        "source": "declared-estimate",
+        "recorded_at": "2026-09-20",
+        "agent": "custom",
+        "tokens_total": 235000
+      },
+      "process_note": "Usage: main loop (fable, repo survey + writing) plus two haiku reader agents (baseline 42.6k measured, skill test estimated) summed as a declared estimate."
     }
   ]
 }

@@ -132,6 +132,7 @@ pnpm sdd:gate <spec-id|slug> cycle-XX   # GATE B — ¿se puede escribir código
 | **Prompt SPEC GATE**        | `sdd/prompts/check-spec-before-implement.prompt.md` | **Verificar antes de CUALQUIER implementación**                             |
 | **Prompt inicio ciclo**     | `sdd/prompts/start-sdd-cycle.prompt.md`             | Iniciar un ciclo SDD                                                        |
 | **Template nueva API Java** | `sdd/skills/generate-springboot-api/SKILL.md`       | **Leer antes de crear cualquier API Spring Boot**                           |
+| Contrato de material externo | `sdd/skills/video-maker-material-contract/SKILL.md` | Qué archivos, nombres, specs y llamadas necesita el motor de un proyecto que entrega material (16:9 / 9:16) |
 
 ---
 
