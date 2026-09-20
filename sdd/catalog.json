@@ -168,5 +168,9 @@
       "file": "tools.schema.json"
     }
   ],
-  "memory": []
+  "memory": [
+    {
+      "file": "2026-09-20-fix-e-burgos-001-003.md"
+    }
+  ]
 }
