@@ -6,6 +6,8 @@ export const VOICE_SCRIPT_MANIFEST_SCHEMA_VERSION = 1;
 
 export const DEFAULT_VOICE_SCRIPT_GAP_MS = 900;
 
+export const VoiceScriptWordsSourceSchema = z.enum(['whisper', 'script']);
+
 export const VoiceScriptLineSchema = z.strictObject({
   index: z.number().int().min(1),
   text: z.string().min(1),
@@ -25,6 +27,9 @@ export const VoiceScriptLineSchema = z.strictObject({
     .max(1)
     .optional()
     .describe('Piper --length-scale used for this line; absent or 1 means the natural pace.'),
+  wordsSource: VoiceScriptWordsSourceSchema.optional().describe(
+    'Where the word timings of this line came from: whisper over its own wav, or the script spread evenly over its window.',
+  ),
 });
 
 export const VoiceScriptManifestSchema = z
@@ -53,6 +58,7 @@ export const VoiceScriptManifestSchema = z
     });
   });
 
+export type VoiceScriptWordsSource = z.infer<typeof VoiceScriptWordsSourceSchema>;
 export type VoiceScriptLine = z.infer<typeof VoiceScriptLineSchema>;
 export type VoiceScriptManifest = z.infer<typeof VoiceScriptManifestSchema>;
 

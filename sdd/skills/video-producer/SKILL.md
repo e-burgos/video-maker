@@ -161,9 +161,19 @@ Qué reporta el motor por línea, en `work/voice/script-manifest.json`:
 | `requestedStartMs` | Lo que pedía la marca. Si difiere de `startMs`, la frase se desplazó. |
 | `overflowMs`       | Milisegundos que no entraron. **> 0 → acortá esa frase en el guion.** |
 | `lengthScale`      | Si aparece, la frase se aceleró (tope 15 %, `--length-scale` ≥ 0,85). |
+| `wordsSource`      | `whisper` = tiempos medidos sobre el wav de esa frase. `script` = Whisper falló y las palabras se repartieron parejo dentro de la ventana. |
 
 Orden de los remedios cuando una frase no entra en su ventana: primero se acorta la pausa, después
 se acelera la síntesis hasta un 15 %, y recién después se desplaza la frase siguiente.
+
+### Nunca edites `voice.words.json` a mano (FIX-e-burgos-009-004)
+
+Los tiempos de palabra salen de transcribir **cada frase por separado** y acotarlos a la ventana de
+su línea, así que ninguna palabra puede estirarse sobre un silencio del guion. Si los subtítulos
+salen corridos, la respuesta es **regenerar la voz** (job `voice` con el mismo guion), nunca reescribir
+`work/voice/voice.words.json`: un archivo editado a mano se pierde en la próxima corrida y no deja
+rastro de por qué estaba mal. Si una línea reporta `wordsSource: script`, Whisper falló en esa frase:
+revisá su wav en `work/voice/sources/` antes de seguir.
 - **Pasá siempre ese archivo con `--script`** al planificar: Whisper transcribe mal las tildes, los
   nombres propios y las palabras poco frecuentes, y sin el guion esas palabras llegan literales a
   las captions. Con `--script`, el motor reemplaza el texto de las palabras mal oídas por las del

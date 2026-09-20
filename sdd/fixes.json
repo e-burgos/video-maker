@@ -1337,6 +1337,76 @@
         "tokens_total": 29588
       },
       "process_note": "Usage: one agent run resolved the four fixes and reported 443819 tokens in total; split in proportion to the declared estimates."
+    },
+    {
+      "id": "FIX-e-burgos-009-004",
+      "author": "e-burgos",
+      "spec_id": "spec-e-burgos-009-voice-over",
+      "fix_document": "sdd/specs/spec-e-burgos-009-voice-over/fixes/fix-e-burgos-009-004.md",
+      "type": "BUGFIX",
+      "severity": "high",
+      "created_at": "2026-09-20",
+      "resolved_at": "2026-09-20",
+      "validated_at": null,
+      "title": "timed script word timings are transcribed over the whole track, so words stretch across the silences",
+      "estimation_hours": 5,
+      "description": "Real case media/display-ads: a timed script places ten sentences at 0, 20, 28, 32, 40, 50, 56, 74, 82 and 90 s with silences of up to 18 s between them, and runVoiceScriptPipeline transcribes the whole concatenated voice.wav in one whisper.cpp pass. With -ml 1 whisper attributes each silence to the preceding token, so the last word of every sentence lasts until the next sentence starts (Entramos lasts 4 s, plataforma 5.8 s to 11.0 s). The pipeline now transcribes each line from its own short wav, shifts the words by the startMs the placement gave the line and clamps every word to the window of its line, so no word can start before its line or end after the real end of its audio. voice.words.json is the ordered union of the per-line transcriptions and voice.wav stays concatenated as before.",
+      "justification": "Solo-profile FIX GATE: no new endpoint and no new entity. One optional additive field in a document that already exists (VoiceScriptLine.wordsSource) and an internal change of the voice pipeline. No cycle open on spec-009.",
+      "related_modules": [
+        "voice-over"
+      ],
+      "affected_files": [
+        "apps/render-api/src/jobs/run-voice-script-pipeline.spec.ts",
+        "apps/render-api/src/jobs/run-voice-script-pipeline.ts",
+        "apps/render-api/src/voice/transcribe-voice-script-lines.spec.ts",
+        "apps/render-api/src/voice/transcribe-voice-script-lines.ts",
+        "apps/render-api/src/voice/voice-synthesis-steps.ts",
+        "libs/timeline-core/src/index.ts",
+        "libs/timeline-core/src/schemas/voice-script-manifest.schema.ts",
+        "libs/timeline-core/src/voice/voice-script-manifest.spec.ts",
+        "sdd/context/apps/render-api/updates/2026-09-20-fix-e-burgos-009-004.md",
+        "sdd/fixes.json",
+        "sdd/memory/journal/2026-09-20-fix-e-burgos-009-004.md",
+        "sdd/skills/video-producer/SKILL.md",
+        "sdd/specs/spec-e-burgos-009-voice-over/fixes/fix-e-burgos-009-004.md"
+      ],
+      "test_reference": "pnpm nx run-many -t lint test build green for 8 projects and pnpm sdd:validate OK (2026-09-20). render-api 996 tests (was 985), 98.22 % stmts / 92.68 % branch; timeline-core 322 tests (was 318), 97.75 % stmts / 92.99 % branch; floors and coverage.include untouched. New unit coverage: transcribeVoiceScriptLine shifting a line's words by the startMs of its placement, clamping the last word to the real end of the line's audio instead of the start of the next line, dropping a word that would fall entirely outside the window, and spreading the script of the line evenly inside its window both when whisper throws and when it returns no word inside the window; mergeVoiceScriptLineWords joining the words in order with empty segments and falling back to the pipeline whisper language when no line could be transcribed; runVoicePipeline transcribing work/voice/whisper/line-01..03.wav instead of the concatenated track, writing voice.words.json with every word inside the window of its line, and recording wordsSource per line (whisper, and script for the line whisper failed on); VoiceScriptManifestSchema accepting wordsSource, keeping it optional and rejecting a value outside whisper|script. The five behaviour tests were run against the base commit 0d47fab in a separate worktree and fail there. E2E apps/web/e2e/script-word-timing-smoke.mjs (render-api on 4430, temporary copy of media/display-ads with raw/ and the ten timed lines of the scene table): every one of the 127 words of voice.words.json falls inside the window of its line, and the last word of line 1 ends at 2194 ms, exactly the end of line 1's own audio (the manifest window), instead of at 20000 ms. Measured before the fix on the same project with the base build: Entramos 0.06-4.15 s, plataforma 5.71-10.90 s, usuario 16.09-19.76 s. Note recorded in sdd/memory/journal: Piper is not deterministic across runs (the same line 1 measured 2194, 2264 and 2310 ms), so the acceptance is asserted against the manifest window of the run, not against a fixed 2300 ms threshold.",
+      "status": "implemented",
+      "cycle": null,
+      "usage": {
+        "provider_model": "claude/opus",
+        "effort": "high",
+        "tokens_in": 196000,
+        "tokens_out": 34000,
+        "approx": true,
+        "source": "declared-estimate",
+        "recorded_at": "2026-09-20",
+        "agent": "implementor-back",
+        "tokens_total": 230000
+      }
+    },
+    {
+      "id": "FIX-e-burgos-002-004",
+      "author": "e-burgos",
+      "spec_id": "spec-e-burgos-002-auto-montage-pipeline",
+      "fix_document": "sdd/specs/spec-e-burgos-002-auto-montage-pipeline/fixes/fix-e-burgos-002-004.md",
+      "type": "BUGFIX",
+      "severity": "high",
+      "created_at": "2026-09-20",
+      "resolved_at": null,
+      "validated_at": null,
+      "title": "script alignment stretches inserted tokens over whole silences and captions cross sentence boundaries",
+      "estimation_hours": 5,
+      "description": "Real case media/display-ads: fillGap and replaceWhisperRun spread the script tokens whisper missed over the entire neighbouring gap with no cap, so with an 18 s silence any token mismatch stretches words and captions by seconds, and the caption grouper does not know the sentence boundaries of the voice script manifest, so one group can cross from one sentence into the next. Inserted tokens are now packed against the preceding run within min(gap, 1500 ms), replaceWhisperRun never extends past the end of the run it replaces, the alignment runs line by line when the project has a voice script manifest, and caption groups get the line starts as forced breaks and are clamped to the end of their line.",
+      "justification": "Solo-profile FIX GATE: no new contract and no new entity. Internal behaviour of alignTranscriptToScript, one optional option on groupWordsForCaptions and one optional argument on planCaptionGroups. No cycle open on spec-002.",
+      "related_modules": [
+        "auto-montage-pipeline",
+        "kinetic-captions"
+      ],
+      "affected_files": [],
+      "test_reference": null,
+      "status": "in-progress",
+      "cycle": null
     }
   ]
 }

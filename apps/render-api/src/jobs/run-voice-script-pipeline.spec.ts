@@ -1,6 +1,6 @@
 import { resolveMediaProject } from '@video-maker/auto-montage';
-import { VoiceScriptManifestSchema } from '@video-maker/timeline-core';
-import type { MediaAsset, VoiceScriptManifest } from '@video-maker/timeline-core';
+import { TranscriptionSchema, VoiceScriptManifestSchema } from '@video-maker/timeline-core';
+import type { MediaAsset, Transcription, VoiceScriptManifest } from '@video-maker/timeline-core';
 import { describe, expect, it } from 'vitest';
 
 import { createCallLog } from '../__fixtures__/call-log';
@@ -70,6 +70,13 @@ function createHarness(options?: { readonly overrides?: Partial<RenderApiDepende
   };
 
   return { deps, callLog, storage, observer, progress: () => progress };
+}
+
+async function readVoiceWords(
+  storage: ReturnType<typeof createFakeObjectStorage>,
+): Promise<Transcription> {
+  const raw = await storage.readTextFile(absolute(voiceScriptWordsPath()));
+  return TranscriptionSchema.parse(JSON.parse(raw));
 }
 
 async function readScriptManifest(
@@ -178,6 +185,106 @@ describe('runVoicePipeline con guion suelto (FIX-e-burgos-009-001)', () => {
     ]);
     expect(manifest.durationMs).toBe(7800);
     expect(manifest.sampleRate).toBe(48000);
+  });
+
+  it('transcribe el wav de cada frase por separado, nunca la pista concatenada', async () => {
+    const harness = createHarness();
+
+    await runVoicePipeline(
+      { project: PROJECT, voiceId: null, sceneIds: null, scriptText: SCRIPT, scriptPath: null, gapMs: 900 },
+      harness.deps,
+      harness.observer,
+    );
+
+    const transcribed = harness.callLog
+      .entries()
+      .filter((entry) => entry.port === 'transcribeVoice')
+      .map((entry) => (entry.input as { wavPath: string }).wavPath);
+
+    expect(transcribed).toEqual([
+      absolute('work/voice/whisper/line-01.wav'),
+      absolute('work/voice/whisper/line-02.wav'),
+      absolute('work/voice/whisper/line-03.wav'),
+    ]);
+  });
+
+  it('desplaza y acota las palabras de cada frase a la ventana de su línea', async () => {
+    const harness = createHarness();
+
+    await runVoicePipeline(
+      { project: PROJECT, voiceId: null, sceneIds: null, scriptText: SCRIPT, scriptPath: null, gapMs: 900 },
+      harness.deps,
+      harness.observer,
+    );
+
+    const words = await readVoiceWords(harness.storage);
+    const manifest = await readScriptManifest(harness.storage);
+
+    expect(words.words).toEqual([
+      { text: 'hola', startMs: 0, endMs: 400 },
+      { text: 'mundo', startMs: 400, endMs: 900 },
+      { text: 'hola', startMs: 1900, endMs: 2300 },
+      { text: 'mundo', startMs: 2300, endMs: 2800 },
+      { text: 'hola', startMs: 4800, endMs: 5200 },
+      { text: 'mundo', startMs: 5200, endMs: 5700 },
+    ]);
+    expect(words.segments).toEqual([]);
+    manifest.lines.forEach((line) => {
+      const lineWords = words.words.filter(
+        (word) => word.startMs >= line.startMs && word.startMs < line.startMs + line.durationMs,
+      );
+      expect(lineWords.every((word) => word.endMs <= line.startMs + line.durationMs)).toBe(true);
+    });
+  });
+
+  it('anota wordsSource whisper por línea', async () => {
+    const harness = createHarness();
+
+    await runVoicePipeline(
+      { project: PROJECT, voiceId: null, sceneIds: null, scriptText: SCRIPT, scriptPath: null, gapMs: 900 },
+      harness.deps,
+      harness.observer,
+    );
+
+    const manifest = await readScriptManifest(harness.storage);
+
+    expect(manifest.lines.map((line) => line.wordsSource)).toEqual(['whisper', 'whisper', 'whisper']);
+  });
+
+  it('cae al guion de la línea y lo anota cuando Whisper falla en esa frase', async () => {
+    const harness = createHarness({
+      overrides: {
+        transcribeVoice: async (input) => {
+          if (input.wavPath.endsWith('line-02.wav')) {
+            throw new Error('whisper-cli exited with 1');
+          }
+          return {
+            assetId: input.assetId,
+            engine: 'whisper.cpp',
+            language: input.language,
+            words: [{ text: 'hola', startMs: 0, endMs: 400 }],
+            segments: [],
+          };
+        },
+      },
+    });
+
+    await runVoicePipeline(
+      { project: PROJECT, voiceId: null, sceneIds: null, scriptText: SCRIPT, scriptPath: null, gapMs: 900 },
+      harness.deps,
+      harness.observer,
+    );
+
+    const manifest = await readScriptManifest(harness.storage);
+    const words = await readVoiceWords(harness.storage);
+    const lineTwo = manifest.lines[1];
+
+    expect(manifest.lines.map((line) => line.wordsSource)).toEqual(['whisper', 'script', 'whisper']);
+    const fallbackWords = words.words.filter(
+      (word) => word.startMs >= (lineTwo?.startMs ?? 0) && word.startMs < (lineTwo?.endMs ?? 0),
+    );
+    expect(fallbackWords.map((word) => word.text)).toEqual(['Segunda', 'frase', 'del', 'guion.']);
+    expect(fallbackWords.every((word) => word.endMs <= (lineTwo?.endMs ?? 0))).toBe(true);
   });
 
   it('lee el guion del proyecto cuando llega por scriptPath', async () => {

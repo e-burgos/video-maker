@@ -1,5 +1,6 @@
 import { toAbsolutePath } from '@video-maker/auto-montage';
 import type { MediaProject } from '@video-maker/auto-montage';
+import type { Transcription } from '@video-maker/timeline-core';
 import { dirname, join } from 'node:path/posix';
 
 import type { RenderApiDependencies } from '../deps/render-api-dependencies';
@@ -85,14 +86,13 @@ export async function transcribeVoiceTrack(
   return transcribeVoiceTrackInto(sceneId, trackPath, voiceWordsPath(sceneId), language, deps, project);
 }
 
-export async function transcribeVoiceTrackInto(
+export async function transcribeVoiceTrackDocument(
   trackId: string,
   trackPath: string,
-  wordsPath: string,
   language: string,
   deps: RenderApiDependencies,
   project: MediaProject,
-): Promise<string> {
+): Promise<Transcription> {
   const whisperWavPath = voiceWhisperWavPath(trackId);
 
   await deps.extractVoiceAudio({
@@ -103,13 +103,30 @@ export async function transcribeVoiceTrackInto(
     projectRoot: project.root,
   });
 
-  const transcription = await deps.transcribeVoice({
+  return deps.transcribeVoice({
     wavPath: toAbsolutePath(project, whisperWavPath),
     outBase: toAbsolutePath(project, voiceWhisperOutBase(trackId)),
     assetId: trackPath,
     language: whisperLanguageFor(language),
     projectRoot: project.root,
   });
+}
+
+export async function transcribeVoiceTrackInto(
+  trackId: string,
+  trackPath: string,
+  wordsPath: string,
+  language: string,
+  deps: RenderApiDependencies,
+  project: MediaProject,
+): Promise<string> {
+  const transcription = await transcribeVoiceTrackDocument(
+    trackId,
+    trackPath,
+    language,
+    deps,
+    project,
+  );
 
   return writeVoiceWords(deps, project, wordsPath, transcription);
 }

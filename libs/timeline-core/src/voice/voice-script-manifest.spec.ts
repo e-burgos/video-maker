@@ -48,6 +48,49 @@ describe('VoiceScriptManifestSchema', () => {
     expect(VoiceScriptManifestSchema.safeParse(manifest({ source: 'storyboard' })).success).toBe(false);
   });
 
+  it('accepts wordsSource per line and keeps it optional (FIX-e-burgos-009-004)', () => {
+    const withSource = manifest({
+      lines: [
+        {
+          index: 1,
+          text: 'Primera frase.',
+          path: 'work/voice/lines/line-01.wav',
+          startMs: 0,
+          durationMs: 1500,
+          wordsSource: 'whisper',
+        },
+        {
+          index: 2,
+          text: 'Segunda frase.',
+          path: 'work/voice/lines/line-02.wav',
+          startMs: 2400,
+          durationMs: 1800,
+          wordsSource: 'script',
+        },
+      ],
+    });
+
+    expect(VoiceScriptManifestSchema.safeParse(withSource).success).toBe(true);
+    expect(VoiceScriptManifestSchema.safeParse(manifest()).success).toBe(true);
+  });
+
+  it('rejects a wordsSource outside whisper and script', () => {
+    const invalid = manifest({
+      lines: [
+        {
+          index: 1,
+          text: 'Primera frase.',
+          path: 'work/voice/lines/line-01.wav',
+          startMs: 0,
+          durationMs: 1500,
+          wordsSource: 'piper',
+        },
+      ],
+    });
+
+    expect(VoiceScriptManifestSchema.safeParse(invalid).success).toBe(false);
+  });
+
   it('rejects an unknown key', () => {
     expect(VoiceScriptManifestSchema.safeParse(manifest({ storyboardId: 'sb' })).success).toBe(false);
   });

@@ -169,7 +169,11 @@ export {
   VoiceScriptManifestSchema,
   voiceScriptManifestIsTimed,
 } from './schemas/voice-script-manifest.schema';
-export type { VoiceScriptLine, VoiceScriptManifest } from './schemas/voice-script-manifest.schema';
+export type {
+  VoiceScriptLine,
+  VoiceScriptManifest,
+  VoiceScriptWordsSource,
+} from './schemas/voice-script-manifest.schema';
 
 export { hashNarration } from './voice/hash-narration';
 export {

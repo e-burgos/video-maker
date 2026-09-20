@@ -24,16 +24,20 @@ import {
   voiceScriptTrackPath,
   voiceScriptWordsPath,
   voiceSourceWavPath,
-  VOICE_SCRIPT_TRACK_ID,
 } from '../voice/voice-paths';
+import {
+  mergeVoiceScriptLineWords,
+  transcribeVoiceScriptLine,
+} from '../voice/transcribe-voice-script-lines';
+import type { VoiceScriptLineWords } from '../voice/transcribe-voice-script-lines';
+import { whisperLanguageFor } from '../voice/voice-language';
 import {
   ensureVoiceDirectories,
   resolveVoiceModel,
   runVoiceStage,
-  transcribeVoiceTrackInto,
 } from '../voice/voice-synthesis-steps';
 import type { ResolvedVoiceModel } from '../voice/voice-synthesis-steps';
-import { writeVoiceScriptManifest } from '../voice/voice-store';
+import { writeVoiceScriptManifest, writeVoiceWords } from '../voice/voice-store';
 import type { VoiceJobReport } from './render-job';
 import { voiceCheckpoint } from './voice-pipeline-observer';
 import type { VoicePipelineObserver } from './voice-pipeline-observer';
@@ -137,6 +141,7 @@ function toPlacementRequests(lines: readonly SynthesizedLine[]) {
 function toManifestLines(
   lines: readonly SynthesizedLine[],
   placements: readonly VoiceScriptPlacement[],
+  lineWords: readonly VoiceScriptLineWords[],
 ): readonly VoiceScriptLine[] {
   return lines.map((line, position) => {
     const placement = placements[position] as VoiceScriptPlacement;
@@ -150,6 +155,7 @@ function toManifestLines(
       requestedStartMs: placement.requestedStartMs,
       overflowMs: placement.overflowMs,
       ...(line.lengthScale === 1 ? {} : { lengthScale: line.lengthScale }),
+      ...(lineWords[position] === undefined ? {} : { wordsSource: lineWords[position].source }),
     };
   });
 }
@@ -269,18 +275,35 @@ export async function runVoiceScriptPipeline(
   voiceCheckpoint(observer, 'transcribe');
   observer.stageStarted('transcribe');
 
+  const lineWords: VoiceScriptLineWords[] = [];
+  for (const [position, line] of fitted.entries()) {
+    voiceCheckpoint(observer, 'transcribe');
+    const placement = placements[position] as VoiceScriptPlacement;
+    lineWords.push(
+      await transcribeVoiceScriptLine(
+        {
+          lineId: voiceScriptLineId(line.index),
+          text: line.text,
+          path: line.path,
+          startMs: placement.startMs,
+          endMs: placement.endMs,
+        },
+        language,
+        deps,
+        request.project,
+      ),
+    );
+    observer.sceneProcessed('transcribe', lineWords.length, fitted.length);
+  }
+
   const wordsPath = await runVoiceStage('transcribe', trackPath, () =>
-    transcribeVoiceTrackInto(
-      VOICE_SCRIPT_TRACK_ID,
-      trackPath,
-      voiceScriptWordsPath(),
-      language,
+    writeVoiceWords(
       deps,
       request.project,
+      voiceScriptWordsPath(),
+      mergeVoiceScriptLineWords(trackPath, whisperLanguageFor(language), lineWords),
     ),
   );
-
-  observer.sceneProcessed('transcribe', 1, 1);
 
   voiceCheckpoint(observer, 'persist');
   observer.stageStarted('persist');
@@ -296,7 +319,7 @@ export async function runVoiceScriptPipeline(
     durationMs: track.durationMs,
     sampleRate: track.audio?.sampleRate ?? VOICE_TRACK_SAMPLE_RATE,
     updatedAt: deps.clock.nowIso(),
-    lines: [...toManifestLines(fitted, placements)],
+    lines: [...toManifestLines(fitted, placements, lineWords)],
   };
 
   const manifestPath = await runVoiceStage('persist', voiceScriptManifestPath(), () =>
