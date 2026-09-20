@@ -1662,11 +1662,11 @@
       "usage": {
         "provider_model": "claude/opus",
         "effort": "high",
-        "tokens_in": 152000,
-        "tokens_out": 24000,
-        "tokens_total": 176000,
-        "approx": true,
-        "source": "declared-estimate",
+        "tokens_in": 126021,
+        "tokens_out": 22239,
+        "tokens_total": 148260,
+        "approx": false,
+        "source": "agent-usage-notification",
         "recorded_at": "2026-09-20",
         "agent": "implementor-front"
       }
