@@ -133,6 +133,40 @@ describe('alignTranscriptToScript', () => {
     });
   });
 
+  it('no estira una palabra insertada sobre un silencio largo: la pega al run anterior dentro de 1500 ms', () => {
+    const words = [word('hola', 0, 300), word('mundo', 18_300, 18_600)];
+
+    const result = alignTranscriptToScript(words, 'hola querido mundo');
+
+    expect(result.words).toEqual([
+      word('hola', 0, 300),
+      word('querido', 300, 1800),
+      word('mundo', 18_300, 18_600),
+    ]);
+  });
+
+  it('reparte varias palabras insertadas dentro del mismo tope de 1500 ms', () => {
+    const words = [word('hola', 0, 300), word('mundo', 18_300, 18_600)];
+
+    const result = alignTranscriptToScript(words, 'hola muy querido mundo');
+
+    expect(result.words).toEqual([
+      word('hola', 0, 300),
+      word('muy', 300, 1050),
+      word('querido', 1050, 1800),
+      word('mundo', 18_300, 18_600),
+    ]);
+  });
+
+  it('no extiende el fin del run que reemplaza más allá de su última palabra', () => {
+    const words = [word('sinembargo', 0, 3)];
+
+    const result = alignTranscriptToScript(words, 'sin embargo pero igual ahora');
+
+    expect(result.words).toHaveLength(5);
+    expect(result.words[result.words.length - 1]?.endMs).toBe(3);
+  });
+
   it('un guion que no se parece en nada reemplaza el bloque entero', () => {
     const words = [word('uno', 0, 300), word('dos', 300, 600)];
 

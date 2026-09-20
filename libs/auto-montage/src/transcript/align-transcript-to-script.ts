@@ -16,6 +16,8 @@ export interface ScriptAlignmentResult extends ScriptAlignmentCounts {
   readonly words: readonly Word[];
 }
 
+const MAX_INSERTED_SPAN_MS = 1500;
+
 interface Match {
   readonly wordIndex: number;
   readonly scriptIndex: number;
@@ -83,13 +85,12 @@ function replaceWhisperRun(
 ): Word[] {
   const first = whisperWords[0] as Word;
   const last = whisperWords[whisperWords.length - 1] as Word;
-  const endMs = Math.max(last.endMs, first.startMs + scriptTokens.length);
 
   counts.replaced += Math.min(whisperWords.length, scriptTokens.length);
   counts.removed += Math.max(0, whisperWords.length - scriptTokens.length);
   counts.inserted += Math.max(0, scriptTokens.length - whisperWords.length);
 
-  return spreadOver(scriptTokens, first.startMs, endMs);
+  return spreadOver(scriptTokens, first.startMs, Math.max(first.startMs, last.endMs));
 }
 
 function fillGap(
@@ -98,13 +99,14 @@ function fillGap(
   nextStartMs: number,
   counts: MutableCounts,
 ): Word[] {
-  if (nextStartMs - previousEndMs < scriptTokens.length) {
+  const gapMs = nextStartMs - previousEndMs;
+  if (gapMs < scriptTokens.length) {
     counts.dropped += scriptTokens.length;
     return [];
   }
 
   counts.inserted += scriptTokens.length;
-  return spreadOver(scriptTokens, previousEndMs, nextStartMs);
+  return spreadOver(scriptTokens, previousEndMs, previousEndMs + Math.min(gapMs, MAX_INSERTED_SPAN_MS));
 }
 
 function resolveBlock(

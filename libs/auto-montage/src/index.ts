@@ -83,6 +83,8 @@ export type { Concept, ConceptOccurrence } from './concepts/concept';
 export type { BrollOverlayPlan, BrollRejection, BrollRejectionReason } from './broll/plan-broll-overlays';
 
 export { alignTranscriptToScript } from './transcript/align-transcript-to-script';
+export { alignTranscriptToScriptLines } from './transcript/align-transcript-to-script-lines';
+export type { ScriptLineWindow } from './transcript/align-transcript-to-script-lines';
 export type { ScriptAlignmentCounts, ScriptAlignmentResult } from './transcript/align-transcript-to-script';
 
 export { autoMontage } from './auto-montage';

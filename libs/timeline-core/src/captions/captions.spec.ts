@@ -264,3 +264,47 @@ describe('groupWordsForCaptions con minWords (FIX-e-burgos-003-003)', () => {
     expect(groups.length).toBeGreaterThan(1);
   });
 });
+
+describe('groupWordsForCaptions con cortes obligatorios', () => {
+  const words: TranscriptWord[] = [
+    { text: 'Entramos', startMs: 0, endMs: 400 },
+    { text: 'acá', startMs: 400, endMs: 800 },
+    { text: 'Las', startMs: 900, endMs: 1300 },
+    { text: 'campañas', startMs: 1300, endMs: 1700 },
+  ];
+
+  it('corta el grupo en el instante indicado aunque las reglas de tamaño y hueco no lo pidan', () => {
+    const groups = groupWordsForCaptions(words, {
+      maxWords: 10,
+      maxDurationMs: 10_000,
+      maxGapMs: 5000,
+      forcedBreaksMs: [900],
+    });
+
+    expect(groups.map((group) => group.words.map((word) => word.text).join(' '))).toEqual([
+      'Entramos acá',
+      'Las campañas',
+    ]);
+  });
+
+  it('sin cortes obligatorios agrupa las cuatro palabras juntas', () => {
+    const groups = groupWordsForCaptions(words, {
+      maxWords: 10,
+      maxDurationMs: 10_000,
+      maxGapMs: 5000,
+    });
+
+    expect(groups).toHaveLength(1);
+  });
+
+  it('un corte que no cae entre dos palabras no parte nada', () => {
+    const groups = groupWordsForCaptions(words, {
+      maxWords: 10,
+      maxDurationMs: 10_000,
+      maxGapMs: 5000,
+      forcedBreaksMs: [0, 5000],
+    });
+
+    expect(groups).toHaveLength(1);
+  });
+});

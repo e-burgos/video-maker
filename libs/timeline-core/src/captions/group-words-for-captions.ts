@@ -14,6 +14,7 @@ export interface CaptionGroupOptions {
   maxDurationMs?: Ms;
   minDurationMs?: Ms;
   maxGapMs?: Ms;
+  forcedBreaksMs?: readonly Ms[];
   emphasisKeywords?: readonly string[];
 }
 
@@ -109,6 +110,17 @@ interface GroupBoundaries {
   readonly maxWords: number;
   readonly maxDurationMs: Ms;
   readonly maxGapMs: Ms;
+  readonly forcedBreaksMs: readonly Ms[];
+}
+
+function crossesForcedBreak(
+  previousWord: TranscriptWord,
+  candidateWord: TranscriptWord,
+  forcedBreaksMs: readonly Ms[],
+): boolean {
+  return forcedBreaksMs.some(
+    (breakMs) => breakMs > previousWord.startMs && breakMs <= candidateWord.startMs,
+  );
 }
 
 function shouldStartNewGroup(
@@ -122,7 +134,8 @@ function shouldStartNewGroup(
   if (
     current.words.length >= boundaries.maxWords ||
     candidateDurationMs > boundaries.maxDurationMs ||
-    gapMs >= boundaries.maxGapMs
+    gapMs >= boundaries.maxGapMs ||
+    crossesForcedBreak(current.lastWord, candidateWord, boundaries.forcedBreaksMs)
   ) {
     return true;
   }
@@ -179,7 +192,15 @@ export function groupWordsForCaptions(
   const minWords = Math.min(maxWords, Math.max(MIN_MAX_WORDS, opts.minWords ?? DEFAULT_MIN_WORDS));
   const emphasisKeywords = opts.emphasisKeywords ?? [];
 
-  const groups = splitIntoGroups(words, { minWords, maxWords, maxDurationMs, maxGapMs });
+  const forcedBreaksMs = opts.forcedBreaksMs ?? [];
+
+  const groups = splitIntoGroups(words, {
+    minWords,
+    maxWords,
+    maxDurationMs,
+    maxGapMs,
+    forcedBreaksMs,
+  });
 
   return groups.map((group, index) => ({
     id: sequentialId('cap', index),

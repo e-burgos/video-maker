@@ -279,3 +279,91 @@ describe('autoMontage — voice: script (FIX-e-burgos-007-002)', () => {
     expect(result.timeline.tracks.voice[0]?.assetId).toBe(SILENT_AROLL.id);
   });
 });
+
+describe('autoMontage — guion cronometrado, alineación y captions por frase (FIX-e-burgos-002-004)', () => {
+  const THREE_LINE_SCRIPT = [
+    'abrimos la terminal',
+    'escribimos en la terminal',
+    'y volvemos a la terminal',
+  ].join('\n');
+
+  function threeLineManifest() {
+    const windows = [
+      { startMs: 0, durationMs: 1400 },
+      { startMs: 2600, durationMs: 1700 },
+      { startMs: 5500, durationMs: 1800 },
+    ];
+    return {
+      ...manifest(7300),
+      lines: windows.map((window, index) => ({
+        index: index + 1,
+        text: THREE_LINE_SCRIPT.split('\n')[index] as string,
+        path: `work/voice/sources/line-0${index + 1}.wav`,
+        startMs: window.startMs,
+        durationMs: window.durationMs,
+        endMs: window.startMs + window.durationMs,
+        requestedStartMs: window.startMs,
+        overflowMs: 0,
+        wordsSource: 'whisper' as const,
+      })),
+    };
+  }
+
+  function threeLineFileSystem() {
+    return createFakeFileSystem([
+      { path: toAbsolutePath(project, catalogPath()), contents: JSON.stringify(CATALOG) },
+      {
+        path: toAbsolutePath(project, voiceScriptManifestPath()),
+        contents: JSON.stringify(threeLineManifest()),
+      },
+      {
+        path: toAbsolutePath(project, voiceScriptWordsPath()),
+        contents: JSON.stringify(VOICE_WORDS),
+      },
+    ]);
+  }
+
+  it('ninguna caption cruza el límite de una línea del manifiesto', async () => {
+    const result = await run(threeLineFileSystem(), {
+      preset: 'educational',
+      scriptText: THREE_LINE_SCRIPT,
+    });
+
+    const windows = threeLineManifest().lines;
+    for (const caption of result.timeline.tracks.captions) {
+      const startMs = Math.round((caption.from / result.timeline.format.fps) * 1000);
+      const line = windows.find((window) => window.startMs <= startMs && startMs < window.endMs);
+      expect(line).toBeDefined();
+      const endMs = Math.round(((caption.from + caption.durationFrames) / result.timeline.format.fps) * 1000);
+      expect(endMs).toBeLessThanOrEqual((line?.endMs ?? 0) + 200);
+    }
+  });
+
+  it('una palabra que falta en el guion de una línea no se estira sobre el silencio siguiente', async () => {
+    const result = await run(threeLineFileSystem(), {
+      preset: 'educational',
+      scriptText: ['abrimos la terminal nueva', 'escribimos en la terminal', 'y volvemos a la terminal'].join('\n'),
+    });
+
+    const validation = validateTimeline(result.timeline);
+    expect(validation.ok ? [] : validation.issues).toEqual([]);
+    const firstCaptionEndMs = Math.round(
+      (((result.timeline.tracks.captions[0]?.from ?? 0) +
+        (result.timeline.tracks.captions[0]?.durationFrames ?? 0)) /
+        result.timeline.format.fps) *
+        1000,
+    );
+    expect(firstCaptionEndMs).toBeLessThanOrEqual(1400);
+  });
+
+  it('con un guion de otra cantidad de líneas vuelve a la alineación global', async () => {
+    const result = await run(threeLineFileSystem(), {
+      preset: 'educational',
+      scriptText: 'abrimos la terminal escribimos en la terminal y volvemos a la terminal',
+    });
+
+    const validation = validateTimeline(result.timeline);
+    expect(validation.ok ? [] : validation.issues).toEqual([]);
+    expect(result.scriptAlignment).not.toBeNull();
+  });
+});

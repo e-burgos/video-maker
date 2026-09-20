@@ -7,6 +7,8 @@ import {
   REPO_ROOT,
   VOICE_ENV_VARS,
   assert,
+  audioEnvelope,
+  bestOffsetMs,
   assertMediaEnvResolvable,
   loadRootEnv,
   log,
@@ -142,79 +144,6 @@ function silenceWindows(wavPath) {
 
 function isSilentAt(windows, seconds) {
   return windows.some(([from, to]) => seconds >= from && seconds <= to);
-}
-
-function envelope(wavPath, offsetSeconds, durationSeconds) {
-  const raw = execFileSync(
-    process.env.FFMPEG_PATH ?? 'ffmpeg',
-    [
-      '-hide_banner',
-      '-nostats',
-      '-v',
-      'error',
-      '-ss',
-      String(offsetSeconds),
-      '-t',
-      String(durationSeconds),
-      '-i',
-      wavPath,
-      '-map',
-      'a:0',
-      '-ac',
-      '1',
-      '-ar',
-      '100',
-      '-af',
-      'aeval=abs(val(0)):c=same',
-      '-f',
-      'f32le',
-      '-',
-    ],
-    { maxBuffer: 1024 * 1024 * 64 },
-  );
-
-  const samples = new Float32Array(
-    raw.buffer.slice(raw.byteOffset, raw.byteOffset + raw.byteLength - (raw.byteLength % 4)),
-  );
-  return Array.from(samples);
-}
-
-function correlation(left, right) {
-  const length = Math.min(left.length, right.length);
-  let sumLeft = 0;
-  let sumRight = 0;
-  for (let index = 0; index < length; index += 1) {
-    sumLeft += left[index];
-    sumRight += right[index];
-  }
-  const meanLeft = sumLeft / length;
-  const meanRight = sumRight / length;
-
-  let covariance = 0;
-  let varianceLeft = 0;
-  let varianceRight = 0;
-  for (let index = 0; index < length; index += 1) {
-    const deltaLeft = left[index] - meanLeft;
-    const deltaRight = right[index] - meanRight;
-    covariance += deltaLeft * deltaRight;
-    varianceLeft += deltaLeft * deltaLeft;
-    varianceRight += deltaRight * deltaRight;
-  }
-
-  return covariance / Math.sqrt(varianceLeft * varianceRight);
-}
-
-function bestOffsetMs(reference, candidate, maxLagSamples) {
-  let best = { lagSamples: 0, score: -2 };
-  for (let lag = -maxLagSamples; lag <= maxLagSamples; lag += 1) {
-    const left = lag >= 0 ? reference.slice(lag) : reference;
-    const right = lag >= 0 ? candidate : candidate.slice(-lag);
-    const score = correlation(left, right);
-    if (score > best.score) {
-      best = { lagSamples: lag, score };
-    }
-  }
-  return { offsetMs: best.lagSamples * 10, score: best.score };
 }
 
 async function main() {
@@ -397,8 +326,8 @@ async function main() {
     );
 
     log('7', 'audio sync: envelope correlation of the MP4 against voice.wav');
-    const reference = envelope(voiceWav, 0, 96);
-    const rendered = envelope(outPath, 0, 96);
+    const reference = audioEnvelope(voiceWav, 0, 96);
+    const rendered = audioEnvelope(outPath, 0, 96);
     const { offsetMs, score } = bestOffsetMs(reference, rendered, 50);
     log('7', `best offset: ${offsetMs} ms (correlation ${score.toFixed(4)})`);
     assert(offsetMs === 0, `the rendered audio is in sync with voice.wav at 0 ms (got ${offsetMs} ms)`);

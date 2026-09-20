@@ -103,3 +103,62 @@ describe('planCaptionGroups (§6 paso 5)', () => {
     expect(decisions[0]?.emphasisIndex).toBe(1);
   });
 });
+
+describe('planCaptionGroups con ventanas de línea del guion', () => {
+  const keeps = [keep('keep-0001', 0, 40_000)];
+  const lineWindows = [
+    { startMs: 0, endMs: 2000 },
+    { startMs: 20_000, endMs: 22_000 },
+  ];
+
+  it('corta el grupo en el inicio de la línea siguiente aunque el hueco no llegue a maxGapMs', () => {
+    const adjacentWindows = [
+      { startMs: 0, endMs: 700 },
+      { startMs: 800, endMs: 1600 },
+    ];
+    const words = [word('Entramos', 0, 300), word('acá', 800, 1100)];
+    const grouping = {
+      minWords: 1,
+      maxWords: 10,
+      minDurationMs: 100,
+      maxDurationMs: 10_000,
+      maxGapMs: 900,
+    };
+
+    const decisions = planCaptionGroups(
+      words,
+      keeps,
+      [],
+      softwareDemoPreset,
+      grouping,
+      adjacentWindows,
+    );
+
+    expect(decisions.map((decision) => decision.words.map((entry) => entry.text).join(' '))).toEqual([
+      'Entramos',
+      'acá',
+    ]);
+  });
+
+  it('acota el fin del grupo al fin de su línea en vez de estirarlo hasta la línea siguiente', () => {
+    const words = [word('Entramos', 0, 500), word('acá', 500, 1000)];
+    const preset = {
+      ...softwareDemoPreset,
+      captions: { ...softwareDemoPreset.captions, minDurationMs: 9000 },
+    };
+
+    const decisions = planCaptionGroups(words, keeps, [], preset, null, lineWindows);
+
+    expect(decisions[0]?.endMs).toBe(2000);
+  });
+
+  it('sin ventanas de línea conserva el comportamiento anterior', () => {
+    const words = [word('Entramos', 0, 500), word('acá', 500, 1000)];
+    const preset = {
+      ...softwareDemoPreset,
+      captions: { ...softwareDemoPreset.captions, minDurationMs: 9000 },
+    };
+
+    expect(planCaptionGroups(words, keeps, [], preset)[0]?.endMs).toBe(9000);
+  });
+});

@@ -1393,7 +1393,7 @@
       "type": "BUGFIX",
       "severity": "high",
       "created_at": "2026-09-20",
-      "resolved_at": null,
+      "resolved_at": "2026-09-20",
       "validated_at": null,
       "title": "script alignment stretches inserted tokens over whole silences and captions cross sentence boundaries",
       "estimation_hours": 5,
@@ -1403,10 +1403,44 @@
         "auto-montage-pipeline",
         "kinetic-captions"
       ],
-      "affected_files": [],
-      "test_reference": null,
-      "status": "in-progress",
-      "cycle": null
+      "affected_files": [
+        "apps/web/e2e/script-word-timing-smoke.mjs",
+        "apps/web/e2e/smoke-helpers.mjs",
+        "apps/web/e2e/timed-narration-captions-smoke.mjs",
+        "libs/auto-montage/src/auto-montage-voice-script.spec.ts",
+        "libs/auto-montage/src/auto-montage.ts",
+        "libs/auto-montage/src/index.ts",
+        "libs/auto-montage/src/montage/plan-caption-groups.spec.ts",
+        "libs/auto-montage/src/montage/plan-caption-groups.ts",
+        "libs/auto-montage/src/transcript/align-transcript-to-script-lines.spec.ts",
+        "libs/auto-montage/src/transcript/align-transcript-to-script-lines.ts",
+        "libs/auto-montage/src/transcript/align-transcript-to-script.spec.ts",
+        "libs/auto-montage/src/transcript/align-transcript-to-script.ts",
+        "libs/auto-montage/src/voice/read-voice-script-track.ts",
+        "libs/timeline-core/src/captions/captions.spec.ts",
+        "libs/timeline-core/src/captions/group-words-for-captions.ts",
+        "sdd/context/libs/auto-montage/updates/2026-09-20-fix-e-burgos-002-004.md",
+        "sdd/context/libs/timeline-core/updates/2026-09-20-fix-e-burgos-002-004.md",
+        "sdd/fixes.json",
+        "sdd/specs/spec-e-burgos-002-auto-montage-pipeline/fixes/artifacts/script-word-timing-t010.jpg",
+        "sdd/specs/spec-e-burgos-002-auto-montage-pipeline/fixes/artifacts/script-word-timing-t022.jpg",
+        "sdd/specs/spec-e-burgos-002-auto-montage-pipeline/fixes/artifacts/script-word-timing-t057.jpg",
+        "sdd/specs/spec-e-burgos-002-auto-montage-pipeline/fixes/fix-e-burgos-002-004.md"
+      ],
+      "test_reference": "pnpm nx run-many -t lint test build green for 8 projects and pnpm sdd:validate OK (2026-09-20). auto-montage 367 tests (was 355), 98.75 % stmts / 94.07 % branch; timeline-core 322 tests, 97.75 % stmts / 92.99 % branch; floors and coverage.include untouched. New unit coverage: alignTranscriptToScript packing an inserted token against the preceding run within min(gap, 1500 ms) over an 18 s silence, spreading several inserted tokens inside the same cap, and replaceWhisperRun not extending past the end of the run it replaces; alignTranscriptToScriptLines aligning each line against its own window, never filling a missing word with the time of the next line, correcting the text of one line without touching the others, assigning to line 1 the words before every window and summing the counters; groupWordsForCaptions breaking at a forced break that neither the size nor the gap rules would ask for, and not breaking without it or on a break that does not fall between two words; planCaptionGroups breaking at the start of the next line with a gap under maxGapMs, clamping the end of a group to the end of its line instead of stretching it, and keeping the previous behaviour with no windows; autoMontage with a three-line manifest keeping every caption inside its line (+200 ms), not stretching a missing word over the following silence, and falling back to the global alignment when the script has another line count. The eight behaviour tests were run against the base commit 0d47fab in a separate worktree and fail there. E2E apps/web/e2e/script-word-timing-smoke.mjs (render-api on 4430, temporary copy of media/display-ads): montage with and without --script, 19 captions each; first caption 0.06-2.26 s (line 1 window ends at 2264 ms), campaigns caption at 20.04 s, no caption starts in a silence of the manifest or ends after the endMs of its line + 200 ms, longest subtle-lower caption 10 words and 12 of 19 group 6 or more, aligning to the script restores 'Las campañas viven acá.' that whisper misheard. Render 1920x1080 2895 frames, frames at 10 s (no subtitle: silence), 22 s and 57 s in the artifacts folder, audio in sync with voice.wav at 0 ms (envelope correlation 0.9072). Measured before the fix on the same project with the base build: 29 captions, 'Entramos' 0.06-4.15 s, 'plataforma' 5.71-10.90 s and 'usuario Las' 16.09-20.00 s crossing the silence. No regression: the smoke-ingest project (aroll mode, software-demo, seed 0) rendered on the base commit in a separate worktree and on this branch gives a byte-identical work/renders/<slug>/video-muted.mp4 (sha256 1dea290c772ab4c2a289f22b842b6df0428371baf4c7e5a9c06d41dcacce2567) and an identical work/edl.json (sha256 2800c237dcf50ea46d9eee6a8d395fcfafeceab35a24846bc6b9f0e846723a2d), 20 captions in both.",
+      "status": "implemented",
+      "cycle": null,
+      "usage": {
+        "provider_model": "claude/opus",
+        "effort": "high",
+        "tokens_in": 204000,
+        "tokens_out": 36000,
+        "approx": true,
+        "source": "declared-estimate",
+        "recorded_at": "2026-09-20",
+        "agent": "implementor-back",
+        "tokens_total": 240000
+      }
     }
   ]
 }

@@ -8,7 +8,7 @@
 | **Keyword**   | [BUGFIX]                                                            |
 | **Fecha**     | 2026-09-20                                                          |
 | **Autor**     | e-burgos                                                            |
-| **Estado**    | in-progress                                                         |
+| **Estado**    | implemented                                                         |
 | **Spec**      | spec-e-burgos-009-voice-over                                        |
 | **Origen**    | Caso real `media/display-ads`: tutorial 16:9 de 96,5 s con guion cronometrado de 10 frases. |
 

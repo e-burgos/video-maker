@@ -8,6 +8,7 @@ import { groupWordsForCaptions } from '@video-maker/timeline-core';
 
 import type { Concept } from '../concepts/concept';
 import type { MontagePreset } from '../presets/montage-preset';
+import type { ScriptLineWindow } from '../transcript/align-transcript-to-script-lines';
 import { findEnclosingKeep } from './keep-window';
 
 type CaptionGroupWord = CaptionGroupDecision['words'][number];
@@ -40,12 +41,20 @@ function wordsExtentMs(words: readonly { startMs: number; endMs: number }[]): {
   };
 }
 
+function lineEndMsFor(lineWindows: readonly ScriptLineWindow[], startMs: number): number {
+  const enclosing = lineWindows.find(
+    (window) => window.startMs <= startMs && startMs < window.endMs,
+  );
+  return enclosing === undefined ? Number.POSITIVE_INFINITY : enclosing.endMs;
+}
+
 export function planCaptionGroups(
   words: readonly Word[],
   keeps: readonly KeepRange[],
   concepts: readonly Concept[],
   preset: MontagePreset,
   grouping: CaptionStyleGrouping | null = null,
+  lineWindows: readonly ScriptLineWindow[] = [],
 ): readonly CaptionGroupDecision[] {
   const transcriptWords = words.map(toCaptionGroupWord);
   const groups = groupWordsForCaptions(transcriptWords, {
@@ -54,6 +63,7 @@ export function planCaptionGroups(
     minDurationMs: grouping?.minDurationMs ?? preset.captions.minDurationMs,
     maxGapMs: grouping?.maxGapMs ?? preset.captions.maxGapMs,
     ...(grouping === null ? {} : { minWords: grouping.minWords }),
+    forcedBreaksMs: lineWindows.map((window) => window.startMs),
     emphasisKeywords: emphasisKeywordsFor(concepts),
   });
 
@@ -66,7 +76,11 @@ export function planCaptionGroups(
       continue;
     }
 
-    const clampedEndMs = Math.min(group.endMs, enclosingKeep.endMs);
+    const clampedEndMs = Math.min(
+      group.endMs,
+      enclosingKeep.endMs,
+      lineEndMsFor(lineWindows, group.startMs),
+    );
     if (clampedEndMs <= group.startMs) {
       continue;
     }

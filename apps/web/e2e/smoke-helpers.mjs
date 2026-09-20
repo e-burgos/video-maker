@@ -1,4 +1,4 @@
-import { execSync, spawn } from 'node:child_process';
+import { execFileSync, execSync, spawn } from 'node:child_process';
 import { readFile, readdir } from 'node:fs/promises';
 import { homedir } from 'node:os';
 import { dirname, join } from 'node:path';
@@ -165,4 +165,77 @@ export function probeStream(mp4Path, selector, entries) {
     { encoding: 'utf8' },
   );
   return JSON.parse(raw).streams[0];
+}
+
+export function audioEnvelope(mediaPath, offsetSeconds, durationSeconds) {
+  const raw = execFileSync(
+    process.env.FFMPEG_PATH ?? 'ffmpeg',
+    [
+      '-hide_banner',
+      '-nostats',
+      '-v',
+      'error',
+      '-ss',
+      String(offsetSeconds),
+      '-t',
+      String(durationSeconds),
+      '-i',
+      mediaPath,
+      '-map',
+      'a:0',
+      '-ac',
+      '1',
+      '-ar',
+      '100',
+      '-af',
+      'aeval=abs(val(0)):c=same',
+      '-f',
+      'f32le',
+      '-',
+    ],
+    { maxBuffer: 1024 * 1024 * 64 },
+  );
+
+  const samples = new Float32Array(
+    raw.buffer.slice(raw.byteOffset, raw.byteOffset + raw.byteLength - (raw.byteLength % 4)),
+  );
+  return Array.from(samples);
+}
+
+export function correlation(left, right) {
+  const length = Math.min(left.length, right.length);
+  let sumLeft = 0;
+  let sumRight = 0;
+  for (let index = 0; index < length; index += 1) {
+    sumLeft += left[index];
+    sumRight += right[index];
+  }
+  const meanLeft = sumLeft / length;
+  const meanRight = sumRight / length;
+
+  let covariance = 0;
+  let varianceLeft = 0;
+  let varianceRight = 0;
+  for (let index = 0; index < length; index += 1) {
+    const deltaLeft = left[index] - meanLeft;
+    const deltaRight = right[index] - meanRight;
+    covariance += deltaLeft * deltaRight;
+    varianceLeft += deltaLeft * deltaLeft;
+    varianceRight += deltaRight * deltaRight;
+  }
+
+  return covariance / Math.sqrt(varianceLeft * varianceRight);
+}
+
+export function bestOffsetMs(reference, candidate, maxLagSamples) {
+  let best = { lagSamples: 0, score: -2 };
+  for (let lag = -maxLagSamples; lag <= maxLagSamples; lag += 1) {
+    const left = lag >= 0 ? reference.slice(lag) : reference;
+    const right = lag >= 0 ? candidate : candidate.slice(-lag);
+    const score = correlation(left, right);
+    if (score > best.score) {
+      best = { lagSamples: lag, score };
+    }
+  }
+  return { offsetMs: best.lagSamples * 10, score: best.score };
 }

@@ -6,6 +6,7 @@ import type {
   MusicInput,
   OutputPreset,
   Timeline,
+  Word,
 } from '@video-maker/timeline-core';
 import {
   buildTimeline,
@@ -13,6 +14,7 @@ import {
   framesToMs,
   planPunchIns,
   remapMsAfterCuts,
+  splitVoiceScriptLines,
   stripVoiceScriptTimeMarks,
 } from '@video-maker/timeline-core';
 import type { ReadTextFile } from '@video-maker/media-local';
@@ -44,6 +46,7 @@ import { editDecisionListPath, timelinePath } from './project/project-paths';
 import { pruneSilencesWithFrameMargin } from './montage/prune-silences-with-frame-margin';
 import type { ScriptAlignmentCounts, ScriptAlignmentResult } from './transcript/align-transcript-to-script';
 import { alignTranscriptToScript } from './transcript/align-transcript-to-script';
+import { alignTranscriptToScriptLines } from './transcript/align-transcript-to-script-lines';
 import type { EnsureDirectory } from './fs/ensure-directory';
 import { nodeEnsureDirectory } from './fs/ensure-directory';
 import type { WriteTextFile } from './fs/write-text-file';
@@ -144,6 +147,19 @@ function toVoiceTrackSummary(
   };
 }
 
+function alignScript(
+  words: readonly Word[],
+  scriptText: string,
+  voiceScriptTrack: VoiceScriptTrack | null,
+): ScriptAlignmentResult {
+  const spokenScript = stripVoiceScriptTimeMarks(scriptText);
+  const scriptLines = splitVoiceScriptLines(spokenScript);
+
+  return voiceScriptTrack !== null && scriptLines.length === voiceScriptTrack.lineWindows.length
+    ? alignTranscriptToScriptLines(words, scriptLines, voiceScriptTrack.lineWindows)
+    : alignTranscriptToScript(words, spokenScript);
+}
+
 function toLogoInput(logoAsset: MediaAsset | undefined): LogoInput | undefined {
   return logoAsset === undefined ? undefined : { assetId: logoAsset.id };
 }
@@ -192,7 +208,7 @@ export async function autoMontage(
   const alignment =
     options.scriptText === undefined
       ? null
-      : alignTranscriptToScript(speech.words, stripVoiceScriptTimeMarks(options.scriptText));
+      : alignScript(speech.words, options.scriptText, voiceScriptTrack);
   const alignedTranscription =
     alignment === null ? speech : { ...speech, words: [...alignment.words], segments: [] };
 
@@ -235,6 +251,7 @@ export async function autoMontage(
     concepts,
     preset,
     captionGroupingForStyle(captionStyle),
+    voiceScriptTrack?.lineWindows ?? [],
   );
   const duckDecisions = planDuckRanges(alignedTranscription.words, keeps, preset, fps);
   const transitions = planTransitions(keeps, preset, fps);

@@ -8,6 +8,7 @@ import type { ReadTextFile } from '@video-maker/media-local';
 
 import { MontageInputError } from '../errors/montage-input-error';
 import type { MediaProject } from '../project/media-project';
+import type { ScriptLineWindow } from '../transcript/align-transcript-to-script-lines';
 import { toAbsolutePath } from '../project/project-paths';
 import { voiceScriptManifestPath } from './voice-script-paths';
 
@@ -21,6 +22,7 @@ export interface VoiceScriptTrack {
   readonly manifestPath: string;
   readonly timed: boolean;
   readonly narrationEndMs: number;
+  readonly lineWindows: readonly ScriptLineWindow[];
 }
 
 async function readJsonDocument(
@@ -43,11 +45,15 @@ async function readJsonDocument(
   }
 }
 
+function toLineWindows(manifest: VoiceScriptManifest): readonly ScriptLineWindow[] {
+  return manifest.lines.map((line) => ({
+    startMs: line.startMs,
+    endMs: line.endMs ?? line.startMs + line.durationMs,
+  }));
+}
+
 function narrationEndMs(manifest: VoiceScriptManifest): number {
-  return Math.max(
-    0,
-    ...manifest.lines.map((line) => line.endMs ?? line.startMs + line.durationMs),
-  );
+  return Math.max(0, ...toLineWindows(manifest).map((window) => window.endMs));
 }
 
 function toVoiceAsset(manifest: VoiceScriptManifest): MediaAsset {
@@ -95,5 +101,6 @@ export async function readVoiceScriptTrack(
     manifestPath,
     timed: voiceScriptManifestIsTimed(manifest.data),
     narrationEndMs: narrationEndMs(manifest.data),
+    lineWindows: toLineWindows(manifest.data),
   };
 }
