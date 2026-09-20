@@ -1376,14 +1376,15 @@
       "usage": {
         "provider_model": "claude/opus",
         "effort": "high",
-        "tokens_in": 196000,
-        "tokens_out": 34000,
+        "tokens_in": 116467,
+        "tokens_out": 20553,
         "approx": true,
         "source": "declared-estimate",
         "recorded_at": "2026-09-20",
         "agent": "implementor-back",
-        "tokens_total": 230000
-      }
+        "tokens_total": 137020
+      },
+      "process_note": "Usage: one agent run resolved both fixes and reported 279998 tokens in total; split in proportion to the declared estimates."
     },
     {
       "id": "FIX-e-burgos-002-004",
@@ -1433,14 +1434,15 @@
       "usage": {
         "provider_model": "claude/opus",
         "effort": "high",
-        "tokens_in": 204000,
-        "tokens_out": 36000,
+        "tokens_in": 121531,
+        "tokens_out": 21447,
         "approx": true,
         "source": "declared-estimate",
         "recorded_at": "2026-09-20",
         "agent": "implementor-back",
-        "tokens_total": 240000
-      }
+        "tokens_total": 142978
+      },
+      "process_note": "Usage: one agent run resolved both fixes and reported 279998 tokens in total; split in proportion to the declared estimates."
     }
   ]
 }
