@@ -1,18 +1,21 @@
 import type {
   CaptionStyle,
   LogoPosition,
+  TimelineWarning,
   MediaAsset,
   OutputPreset,
   Timeline,
   TimelineIssue,
 } from '@video-maker/timeline-core';
-import { validateTimeline } from '@video-maker/timeline-core';
+import { timelineWarnings, validateTimeline } from '@video-maker/timeline-core';
 
 import { relayoutArollTrack, voiceMirrorIssue } from './aroll-layout';
 import type { VoiceMirrorIssue } from './aroll-layout';
 import { applyOutputPreset } from './apply-output-preset';
 import { issueSeverity } from './issue-severity';
 import { clearTimelineLogo, setTimelineLogo, setTimelineLogoStyle } from './logo-overlay';
+import { setTimelineBumperEnabled, setTimelineBumperStyle } from './logo-bumpers';
+import type { BumperEdge, BumperStyle } from './logo-bumpers';
 import { setTimelineCaptionStyle } from './caption-style';
 import { rescaleMusicAutomation } from './rescale-music-automation';
 import {
@@ -24,7 +27,7 @@ import {
 import type { TimelineEditRejection } from './timeline-edit-rules';
 import { timelineDocumentsEqual } from './timeline-document';
 
-export type TimelineEditIssue = TimelineIssue | VoiceMirrorIssue;
+export type TimelineEditIssue = TimelineIssue | VoiceMirrorIssue | TimelineWarning;
 
 export type TimelineEditAction =
   | { type: 'clip-trim-start'; track: 'aroll' | 'broll'; clipId: string; trimStartMs: number }
@@ -36,6 +39,8 @@ export type TimelineEditAction =
   | { type: 'logo-set'; asset: MediaAsset; position: LogoPosition }
   | { type: 'logo-style'; widthRatio: number; opacity: number }
   | { type: 'logo-clear' }
+  | { type: 'bumper-enabled'; edge: BumperEdge; enabled: boolean }
+  | { type: 'bumper-style'; edge: BumperEdge; style: BumperStyle }
   | { type: 'caption-style'; captionStyle: CaptionStyle }
   | { type: 'saved'; timeline: Timeline }
   | { type: 'reset' };
@@ -46,6 +51,7 @@ export type TimelineEditState = {
   dirty: boolean;
   rejections: readonly TimelineEditRejection[];
   issues: readonly TimelineEditIssue[];
+  warnings: readonly TimelineWarning[];
 };
 
 function computeIssues(timeline: Timeline): TimelineEditIssue[] {
@@ -71,6 +77,7 @@ function settle(
     dirty: !timelineDocumentsEqual(draft, saved),
     rejections: rejection === null ? [] : [rejection],
     issues: computeIssues(draft),
+    warnings: timelineWarnings(draft),
   };
 }
 
@@ -81,6 +88,7 @@ export function initialTimelineEditState(timeline: Timeline): TimelineEditState 
     dirty: false,
     rejections: [],
     issues: computeIssues(timeline),
+    warnings: timelineWarnings(timeline),
   };
 }
 
@@ -245,6 +253,20 @@ export function timelineEditReducer(state: TimelineEditState, action: TimelineEd
 
     case 'logo-clear':
       return settle(state.saved, clearTimelineLogo(state.draft), null);
+
+    case 'bumper-enabled':
+      return settle(
+        state.saved,
+        setTimelineBumperEnabled(state.draft, action.edge, action.enabled),
+        null,
+      );
+
+    case 'bumper-style':
+      return settle(
+        state.saved,
+        setTimelineBumperStyle(state.draft, action.edge, action.style),
+        null,
+      );
 
     case 'caption-style':
       return settle(state.saved, setTimelineCaptionStyle(state.draft, action.captionStyle), null);

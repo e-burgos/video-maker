@@ -516,3 +516,86 @@ describe('timelineEditReducer — logo-style y caption-style (FIX-006-001)', () 
     expect(back.dirty).toBe(false);
   });
 });
+
+describe('bumpers de logo en el borrador (FIX-e-burgos-006-002)', () => {
+  const LOGO_ASSET: MediaAsset = {
+    id: 'raw/logo/brand.png',
+    kind: 'image',
+    path: 'raw/logo/brand.png',
+    durationMs: 0,
+    width: 1200,
+    height: 240,
+    hasAudio: false,
+    probedAt: '2026-01-01T00:00:00.000Z',
+  };
+
+  function withLogo(): Timeline {
+    const fixture = editableTimelineFixture();
+    return {
+      ...fixture,
+      assets: [...fixture.assets, LOGO_ASSET],
+      logo: {
+        assetId: LOGO_ASSET.id,
+        position: 'bottom-right',
+        widthRatio: 0.18,
+        marginRatio: 0.035,
+        opacity: 1,
+      },
+    };
+  }
+
+  it('prender el inicio ensucia el borrador y se puede guardar', () => {
+    const base = initialTimelineEditState(withLogo());
+
+    const next = timelineEditReducer(base, { type: 'bumper-enabled', edge: 'intro', enabled: true });
+
+    expect(next.draft.bumpers?.intro?.enabled).toBe(true);
+    expect(next.dirty).toBe(true);
+    expect(canSaveTimeline(next)).toBe(true);
+    expect(validateTimeline(next.draft).ok).toBe(true);
+  });
+
+  it('el estilo del bumper viaja al borrador sin tocar el otro extremo', () => {
+    const base = initialTimelineEditState(withLogo());
+    const enabled = timelineEditReducer(base, { type: 'bumper-enabled', edge: 'outro', enabled: true });
+
+    const styled = timelineEditReducer(enabled, {
+      type: 'bumper-style',
+      edge: 'outro',
+      style: { backgroundColor: '#0b1020', durationMs: 4000, animation: 'fade' },
+    });
+
+    expect(styled.draft.bumpers?.outro).toMatchObject({
+      backgroundColor: '#0b1020',
+      durationMs: 4000,
+      animation: 'fade',
+    });
+    expect(styled.draft.bumpers?.intro).toBeUndefined();
+  });
+
+  it('un bumper prendido sin logo queda como warning, no bloquea guardar ni renderizar', () => {
+    const state = initialTimelineEditState({
+      ...editableTimelineFixture(),
+      bumpers: {
+        intro: {
+          enabled: true,
+          durationMs: 2000,
+          backgroundColor: '#ffffff',
+          animation: 'zoom',
+          logoWidthRatio: 0.4,
+        },
+      },
+    });
+
+    expect(state.warnings.map((warning) => warning.code)).toEqual(['BUMPER_WITHOUT_LOGO']);
+    expect(state.issues).toEqual([]);
+    expect(canStartRender(state)).toBe(true);
+  });
+
+  it('con logo no hay warning', () => {
+    const base = initialTimelineEditState(withLogo());
+    const next = timelineEditReducer(base, { type: 'bumper-enabled', edge: 'intro', enabled: true });
+
+    expect(next.warnings).toEqual([]);
+  });
+});

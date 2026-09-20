@@ -1,5 +1,5 @@
 import { useCallback, useState } from 'react';
-import type { LogoOverlay, LogoPosition } from '@video-maker/timeline-core';
+import type { LogoOverlay, LogoPosition, TimelineBumpers } from '@video-maker/timeline-core';
 
 import { useRenderApi } from '../api/render-api-context';
 import {
@@ -18,15 +18,17 @@ import { useAsyncResource } from '../hooks/use-async-resource';
 import { useT } from '../i18n/language-context';
 import { blockerId } from '../api/blockers';
 import { AssetUploader } from './asset-uploader';
+import { LogoBumperEditor } from './logo-bumper-editor';
 import type { AssetListing } from '../api/render-api-types';
 
 export type LogoOverlayEditorProps = {
   slug: string;
   logo?: LogoOverlay;
+  bumpers?: TimelineBumpers;
   dispatch: (action: TimelineEditAction) => void;
 };
 
-export function LogoOverlayEditor({ slug, logo, dispatch }: LogoOverlayEditorProps) {
+export function LogoOverlayEditor({ slug, logo, bumpers, dispatch }: LogoOverlayEditorProps) {
   const client = useRenderApi();
   const load = useCallback(() => client.listAssets(slug), [client, slug]);
   const assets = useAsyncResource<AssetListing>(load, `assets:${slug}`);
@@ -165,6 +167,12 @@ export function LogoOverlayEditor({ slug, logo, dispatch }: LogoOverlayEditorPro
           ))}
         </ul>
       )}
+
+      <LogoBumperEditor
+        {...(bumpers === undefined ? {} : { bumpers })}
+        logoAvailable={shown}
+        dispatch={dispatch}
+      />
 
       <AssetUploader
         slug={slug}

@@ -8,7 +8,7 @@
 | **Keyword**   | [IMPROVEMENT]                |
 | **Fecha**     | 2026-09-20                   |
 | **Autor**     | e-burgos                     |
-| **Estado**    | in-progress                  |
+| **Estado**    | implemented                  |
 | **Spec**      | spec-e-burgos-006-web-studio |
 | **Origen**    | Pedido del dev: "esto se debe visualizar como opciones con dos tildes, en la sección vista previa, panel Logo". |
 

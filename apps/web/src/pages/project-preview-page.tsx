@@ -7,6 +7,7 @@ import { playerTimeline } from '../api/player-timeline';
 import { PREVIEW_PRESETS, previewFormat, previewPresetFor } from '../api/preview-format';
 import type { PreviewPreset } from '../api/preview-format';
 import { useRenderApi } from '../api/render-api-context';
+import { BUMPER_EDGES, bumperSeconds } from '../api/timeline-edit/logo-bumpers';
 import {
   initialTimelineEditState,
   timelineEditReducer,
@@ -37,6 +38,18 @@ const PRESET_LABELS: Record<PreviewPreset, string> = {
 function captureFrameFromLocation(search: string): number | null {
   const frameParam = new URLSearchParams(search).get('frame');
   return frameParam === null ? null : Number(frameParam);
+}
+
+function durationSummary(draft: Timeline, playable: Timeline, t: TranslateFn): string {
+  const content = t('preview.durationValue', {
+    frames: playable.durationFrames,
+    seconds: (playable.durationFrames / playable.format.fps).toFixed(2),
+  });
+  const bumperParts = BUMPER_EDGES.map((edge) => bumperSeconds(draft, edge))
+    .filter((seconds): seconds is number => seconds !== null)
+    .map((seconds) => t('preview.durationBumper', { seconds: String(seconds) }));
+
+  return [content, ...bumperParts].join(' ');
 }
 
 function trackSummary(timeline: Timeline, t: TranslateFn): string {
@@ -155,10 +168,7 @@ function StudioView({ slug, initialTimeline }: StudioViewProps) {
             {t('preview.duration')}
           </dt>
           <dd data-testid="preview-duration">
-            {t('preview.durationValue', {
-              frames: playable.durationFrames,
-              seconds: (playable.durationFrames / playable.format.fps).toFixed(2),
-            })}
+            {durationSummary(editState.draft, playable, t)}
           </dd>
         </div>
         <div>
@@ -170,6 +180,7 @@ function StudioView({ slug, initialTimeline }: StudioViewProps) {
       </dl>
 
       <TimelineIssueList issues={editState.issues} />
+      <TimelineIssueList issues={editState.warnings} />
 
       <TimelineSaveBar slug={slug} state={editState} dispatch={dispatchAction} />
 
@@ -180,6 +191,7 @@ function StudioView({ slug, initialTimeline }: StudioViewProps) {
         <LogoOverlayEditor
           slug={slug}
           {...(editState.draft.logo === undefined ? {} : { logo: editState.draft.logo })}
+          {...(editState.draft.bumpers === undefined ? {} : { bumpers: editState.draft.bumpers })}
           dispatch={dispatchAction}
         />
       </div>

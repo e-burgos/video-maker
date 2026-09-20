@@ -1,12 +1,19 @@
-import type { TimelineIssueCode } from '@video-maker/timeline-core';
+import type { TimelineIssueCode, TimelineWarningCode } from '@video-maker/timeline-core';
 
 import { VOICE_TRACK_NOT_MIRRORED_CODE } from './aroll-layout';
 
-export type TimelineIssueSeverity = 'save-blocking' | 'render-blocking';
+export type TimelineIssueSeverity = 'save-blocking' | 'render-blocking' | 'warning';
 
-export type UiIssueCode = TimelineIssueCode | typeof VOICE_TRACK_NOT_MIRRORED_CODE;
+export type UiIssueCode =
+  | TimelineIssueCode
+  | TimelineWarningCode
+  | typeof VOICE_TRACK_NOT_MIRRORED_CODE;
 
-const TIMELINE_ISSUE_SEVERITY: Record<TimelineIssueCode, TimelineIssueSeverity> = {
+const TIMELINE_ISSUE_SEVERITY: Record<
+  TimelineIssueCode | TimelineWarningCode,
+  TimelineIssueSeverity
+> = {
+  BUMPER_WITHOUT_LOGO: 'warning',
   SCHEMA_INVALID: 'save-blocking',
   EMPTY_AROLL: 'render-blocking',
   ASSET_NOT_FOUND: 'render-blocking',

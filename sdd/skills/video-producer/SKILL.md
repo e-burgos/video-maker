@@ -211,6 +211,29 @@ ffprobe -v quiet -print_format json -show_streams media/<slug>/raw/logo/<archivo
 - Nunca uses uno sin alfa sin avisarle antes al usuario que va a salir como un recuadro, y
   ofrecerle dos salidas: ir sin logo, o que reemplace el archivo por uno con fondo transparente.
 
+### Inicio y fin con el logo se activan desde la vista previa (FIX-e-burgos-001-003)
+
+Si el usuario pide "ponele una intro/cierre con el logo", **no** se monta ningún clip: se activan
+los `bumpers` de la timeline con un `PUT` del documento completo, y el video abre y/o cierra con una
+placa de color con el logo centrado.
+
+```json
+"bumpers": {
+  "intro": { "enabled": true, "durationMs": 2000, "backgroundColor": "#ffffff", "animation": "zoom", "logoWidthRatio": 0.4 },
+  "outro": { "enabled": true, "durationMs": 2000, "backgroundColor": "#0b1020", "animation": "fade", "logoWidthRatio": 0.4 }
+}
+```
+
+- `durationMs` entre 500 y 6000 (la web ofrece 1,5 / 2 / 3 / 4 s), `backgroundColor` hex `#rrggbb`,
+  `animation` `fade` | `zoom` | `slide-up`, `logoWidthRatio` 0.3 / 0.4 / 0.55.
+- Usa el logo de `timeline.logo`: si el proyecto no tiene logo, la placa sale **sólo con el fondo de
+  color**. Primero conseguí el logo (§4).
+- `timeline.durationFrames` **no cambia**: sigue siendo el contenido. El video final dura
+  contenido + inicio + fin, y así lo reporta el render.
+- El usuario lo hace solo desde **vista previa → panel Logo**, con las tildes "Incorporar inicio de
+  video" e "Incorporar fin de video". Es la pantalla que hay que nombrar al entregar.
+- Re-montar no borra `logo` ni `bumpers`: las decisiones de marca sobreviven al re-montaje.
+
 ## 5. Presets (cuál para qué)
 
 | Preset          | Úsalo para                                   | Rasgos                                                                   | Música |
@@ -377,6 +400,10 @@ Lo mismo desde la CLI: `pnpm nx run render-cli:cli -- run media/<slug> --preset 
   largo del tema como base, uno por concepto como B-roll, música de Commons. Es lo que produjo
   `media/demo-espacio` (34 s, 9:16).
 
+- **"Que abra y cierre con el logo"**: no es un montaje nuevo. Activá `bumpers.intro` y
+  `bumpers.outro` con un `PUT` de la timeline (§4) y volvé a renderizar; el usuario los puede
+  retocar en vista previa → panel Logo.
+
 ### Al entregar, decí en qué pantalla está cada cosa (FIX-e-burgos-015-004)
 
 El usuario está mirando el studio, no el file system. Cerrá **toda** entrega nombrando la pantalla,
@@ -387,5 +414,6 @@ no la ruta:
 | El video           | La pantalla `preview`, y la sección **"Generated"** de la biblioteca, con link de descarga |
 | La narración       | La pantalla `voice`, con el guion línea por línea y sus tiempos                |
 | El guion           | La pantalla `storyboard`, mientras el proyecto no tenga storyboard             |
+| Inicio y fin con el logo | La pantalla `preview`, panel **Logo**: las tildes "Incorporar inicio de video" e "Incorporar fin de video" |
 
 La ruta del archivo se la das sólo si la pide.

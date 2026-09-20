@@ -9,6 +9,7 @@ export type TimelineIssueListProps = {
 const SEVERITY_STYLES: Record<TimelineIssueSeverity, string> = {
   'save-blocking': 'border-rose-500/40 bg-rose-500/10 text-rose-100',
   'render-blocking': 'border-amber-500/40 bg-amber-500/10 text-amber-100',
+  warning: 'border-sky-500/40 bg-sky-500/10 text-sky-100',
 };
 
 export function TimelineIssueList({ issues }: TimelineIssueListProps) {
