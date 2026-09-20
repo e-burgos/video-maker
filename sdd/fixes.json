@@ -1670,6 +1670,54 @@
         "recorded_at": "2026-09-20",
         "agent": "implementor-front"
       }
+    },
+    {
+      "id": "FIX-e-burgos-005-002",
+      "author": "e-burgos",
+      "spec_id": "spec-e-burgos-005-render-service",
+      "fix_document": "sdd/specs/spec-e-burgos-005-render-service/fixes/fix-e-burgos-005-002.md",
+      "type": "BUGFIX",
+      "severity": "high",
+      "created_at": "2026-09-20",
+      "resolved_at": "2026-09-20",
+      "validated_at": null,
+      "title": "assets copied straight into raw/ are invisible while a stale work/catalog.json exists",
+      "estimation_hours": 1,
+      "description": "External agents and the dev copy files into media/<slug>/raw/ without running ingest. GET /projects/:slug/assets answered from work/catalog.json whenever it existed, so files added after the last ingest never appeared in the library nor in the producer inventory. resolveProjectAssets now merges the catalog with a raw scan: uncatalogued files are listed with media null until the next ingest probes them, and catalog entries whose file vanished from disk are dropped.",
+      "justification": "Confirmed defect with real data (display-ads-creacion-campana-full-desktop); one store function and its test; no contract change. Fast-fix mode agreed with the dev on 2026-09-20.",
+      "related_modules": [
+        "render-service",
+        "studio-producer"
+      ],
+      "affected_files": [
+        "apps/render-api/src/store/project-assets.ts",
+        "apps/render-api/src/store/project-assets.spec.ts"
+      ],
+      "test_reference": "pnpm nx run-many -t lint test build -p render-api green (2026-09-20): 998 tests; new case merges an uncatalogued raw file and drops a vanished catalog entry. Real check after restart: the project lists its A-roll with media null.",
+      "status": "implemented",
+      "cycle": null,
+      "process_note": "Resolved by the steward directly in the main loop (fast-fix mode); code landed in e6ee0ba, registry in the following commit.",
+      "usage": {
+        "provider_model": "claude/fable",
+        "effort": "medium",
+        "tokens_in": 25000,
+        "tokens_out": 4000,
+        "approx": true,
+        "source": "declared-estimate",
+        "recorded_at": "2026-09-20",
+        "by_agent": [
+          {
+            "agent": "steward",
+            "provider_model": "claude/fable",
+            "effort": "medium",
+            "tokens_in": 25000,
+            "tokens_out": 4000,
+            "approx": true,
+            "source": "declared-estimate",
+            "recorded_at": "2026-09-20"
+          }
+        ]
+      }
     }
   ]
 }
