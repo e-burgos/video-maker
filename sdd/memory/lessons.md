@@ -1,6 +1,6 @@
 # 🧠 Memoria del proyecto — lecciones destiladas
 
-> Versión 1.6 | Última destilación: 2026-09-11 (fix-005-001, fix-007-002, fix-015-001, spec-016 c01-02)
+> Versión 1.7 | Última destilación: 2026-09-20 (fix-e-burgos-003-003, fix-e-burgos-009-002, fix-e-burgos-009-004)
 > **Cap duro: 120 líneas.** Se lee COMPLETO al inicio de cada sesión: cada línea cuesta tokens en
 > todas las futuras. Al destilar, primero podar lo obsoleto o ya absorbido por constitutions/skills.
 
@@ -13,8 +13,7 @@ se edita nada durante un ciclo/fix. Lo de un subproyecto va a su `constitution.m
   `planner.md`/`plan.md`): si la corrida se corta, el ciclo queda arrancable.
 - Cerrar toda edición a mano de un `*.json` de `sdd/` corriendo `pnpm sdd:validate` en el acto.
 - Escalar al dev con el diff cualquier config protegida por el hook `config-protection`
-  (`eslint.config.mjs`, `tsconfig.base.json`): cubre `Write|Edit` pero NO `Bash`, rodearlo anula el
-  guardrail; matchea por **basename**, y lo bloqueado se descopa por escrito en el plan.
+  (`eslint.config.mjs`, `tsconfig.base.json`): cubre `Write|Edit` pero NO `Bash` (rodearlo anula el guardrail), matchea por **basename**, y lo bloqueado se descopa por escrito en el plan.
 - Derivar el `depends_on` de cada task de los **imports que ya están en las firmas escritas**, no
   del agrupamiento por historia: dos historias distintas se acoplan por un símbolo compartido.
 - Cuando un RF describe cómo componer algo que otra lib ya entregó, derivar el contrato de la
@@ -38,20 +37,18 @@ se edita nada durante un ciclo/fix. Lo de un subproyecto va a su `constitution.m
   condición imposible es código muerto con nombre de validación.
 - Un CA aceptado como "procedimiento documentado, nunca ejecutado" **no está verificado**: correr
   el guion de ejecución real en la **primera** task que deja el binario arrancable, no al cerrar.
-- Cuando el invariante es "la salida no cambia", usar como oráculo byte-exacto el artefacto que NO
-  embebe reloj de pared (`edl.json`; nunca `catalog`/`timeline`, con `probedAt`/`modifiedAtMs`),
-  comparar los demás sin los campos volátiles, y **probar el oráculo sensible** rompiéndolo aposta.
-  Sobre `media/`, replanificar antes de comparar en vez de re-renderizar lo que ya está en disco, y
-  reproducir con el código base todo oráculo heredado de otro ciclo antes de usarlo como criterio.
+- Cuando el invariante es "la salida no cambia", usar como oráculo byte-exacto el artefacto que NO embebe reloj de pared (`edl.json`; nunca `catalog`/`timeline`, con `probedAt`/`modifiedAtMs`), comparar los demás sin los campos volátiles, y **probar el oráculo sensible** rompiéndolo aposta.
+  Sobre `media/`, replanificar antes de comparar en vez de re-renderizar lo que ya está en disco, y reproducir con el código base todo oráculo heredado de otro ciclo antes de usarlo como criterio.
 - Committear todo guion que produjo una evidencia junto al artefacto que la reporta: un artefacto
   cuyo productor quedó en un scratchpad documenta un número, no una medición repetible.
 - Verificar que el símbolo EXISTE (grep de la definición) después de toda edición scriptada por
   patrón: un `replace` que no matchea es silencioso y ni `node --check` ni el linter ven un
   identificador faltante — lo descubre la primera corrida cara.
-- Parsear la salida de una herramienta de medición siempre desde su bloque de resumen, y sospechar
-  de inmediato cuando dos entradas distintas dan el mismo número.
+- Parsear la salida de una herramienta de medición siempre desde su bloque de resumen, y sospechar de inmediato cuando dos entradas distintas dan el mismo número.
 - En una migración transversal del texto que asera la suite (p. ej. introducir i18n), hacer que el
   default sin provider/config devuelva el valor de HOY: la suite existente prueba que nada cambió.
+- Nunca tapar un defecto reescribiendo a mano un artefacto derivado (p. ej. `voice.words.json` con tiempos inventados) para destrabar una corrida: esconde el defecto y se repite en la próxima — el fix va siempre al productor real del artefacto, no al artefacto.
+- Una decisión editorial que varía por tipo de contenido (p. ej. `captionStyle`) se persiste en el documento (timeline), nunca como flag del render: se decide una vez, se edita, y el render la lee de ahí.
 
 ## Técnica (stack, herramientas, gotchas transversales)
 
@@ -102,6 +99,9 @@ se edita nada durante un ciclo/fix. Lo de un subproyecto va a su `constitution.m
 - Verificar que una herramienta externa **aplicó** un contrato mirando el campo que sólo aparece si
   lo aplicó (`structured_output`), nunca su código de éxito (`claude -p --json-schema` ignora un
   schema con `$schema` y devuelve `is_error: false`): sondear con el artefacto real, no uno a mano.
+- Nunca transcribir con whisper.cpp una pista con silencios largos de una sola pasada: `-ml 1` atribuye el hueco al token anterior y estira la última palabra hasta la frase siguiente; transcribir por segmento corto (una frase por wav) y acotar cada palabra a su ventana conocida (`[startMs, endMs]`).
+- Nunca repartir palabras "omitidas" de una alineación de transcripción sobre un hueco sin tope: acotar el reparto a ~1,5 s pegado al run anterior, o alinear línea a línea contra el manifiesto de voz cuando existe — cruzar de frase sobre un silencio largo es el defecto, no un detalle cosmético.
+- Un sintetizador de voz (Piper) no es determinista entre corridas (±100 ms por frase, misma frase y mismo `lengthScale`): escribir el criterio de aceptación contra la ventana del manifiesto que produjo esa misma corrida, nunca contra un número absoluto fijo.
 
 ## Costo (qué gastó tokens/tiempo de más y cómo evitarlo)
 
