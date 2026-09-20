@@ -154,6 +154,10 @@ export const MESSAGES_EN = {
   'producer.noMaterialBefore': 'No raw material yet.',
   'producer.noMaterialLink': 'Upload your clips, photos, music or logo',
   'producer.noMaterialAfter': 'and the producer will work with them. It can also look for free material for you.',
+  'producer.recipesHeading': 'recipes that already worked',
+  'producer.recipe.tutorial.label': 'Tutorial',
+  'producer.recipe.tutorial.description':
+    'Software tutorial or screen recording: YouTube 16:9, narration synchronized with the action, classic subtitles at the bottom, soft music, logo, and an opening and closing with the logo.',
   'producer.startersHeading': 'start with one of these',
   'producer.startersHint': 'A starter lands in the box below so you can finish it in your own words.',
   'producer.starter.platform': 'Tell me what video you want and for which platform',

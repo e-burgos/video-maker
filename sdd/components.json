@@ -1019,7 +1019,7 @@
         "module": "studio-producer",
         "spec": "sdd/specs/spec-e-burgos-015-studio-producer",
         "path": "src/components/producer-welcome.tsx",
-        "status": "implemented",
+        "status": "updated",
         "created_in_cycle": 2,
         "updated_in_cycle": 1,
         "description": "Estado vacio accionable del productor: inventario real del proyecto por rol derivado del listado de assets, sugerencias iniciales que caen en el compositor para editarlas, y link a la biblioteca cuando el proyecto no tiene material.",
@@ -1032,6 +1032,12 @@
             "cycle": 1,
             "date": "2026-09-11",
             "change": "spec-e-burgos-016 cycle-01: se aplican los textos de arranque que dejo escritos FIX-e-burgos-007-002 (preguntar la plataforma primero, y ofrecer la receta de grabacion muda + narracion generada cuando hay material)."
+          },
+          {
+            "cycle": 1,
+            "date": "2026-09-20",
+            "change": "FIX-e-burgos-015-005: suma la fila Recetas encima de las sugerencias sueltas, con el chip Tutorial; al tocarlo escribe en el compositor el prompt completo de la receta en el idioma de la UI, cargado perezosamente desde api/producer-recipe-prompts.ts.",
+            "fix": "FIX-e-burgos-015-005"
           }
         ]
       },

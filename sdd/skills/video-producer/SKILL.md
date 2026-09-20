@@ -404,6 +404,37 @@ Lo mismo desde la CLI: `pnpm nx run render-cli:cli -- run media/<slug> --preset 
   `bumpers.outro` con un `PUT` de la timeline (§4) y volvé a renderizar; el usuario los puede
   retocar en vista previa → panel Logo.
 
+### Recetas: una receta nombrada ya decidió todo (FIX-e-burgos-015-005)
+
+El tab productor ofrece **chips de receta** que escriben en el chat el pedido completo. Cuando el
+usuario nombra una receta —o describe eso mismo con sus palabras— los parámetros **ya están
+elegidos**: aplicalos y **no vuelvas a preguntar por ninguno**.
+
+#### Receta **Tutorial** (la que produjo `media/display-ads`)
+
+| Decisión              | Valor                                                                        |
+| --------------------- | ---------------------------------------------------------------------------- |
+| Formato               | `format: youtube-16x9`                                                        |
+| Preset                | `educational`, `seed: 0`                                                      |
+| Voz del montaje       | `voice: script`                                                               |
+| Subtítulos            | `captionStyle: subtle-lower`                                                  |
+| Narración             | job `voice` con `voiceId: es_AR-daniela-high`, `gapMs: 900` y guion con marcas `[m:ss]`, una línea por escena |
+| Música                | pista libre suave de Commons, acreditada en `work/credits.json`, a los niveles de `educational` (-8 dB base / -18 dB duckeado): no los pises |
+| Logo                  | archivo de `raw/logo/` **con alfa** (§4), `position: bottom-right`, `widthRatio: 0.18`, `opacity: 0.5` |
+| Inicio y cierre       | `bumpers` intro y outro por `PUT` de la timeline: `durationMs: 2000`, `backgroundColor: "#ffffff"`, `logoWidthRatio: 0.4`, intro `slide-up`, outro `zoom` |
+
+El logo y los dos bumpers viajan en el **mismo `PUT`** del documento completo de la timeline, después
+del montaje y antes del `render`.
+
+**Lo único que la receta no puede saber, y por lo tanto lo único que preguntás:**
+
+1. El **guion con tiempos**: la tabla de escenas del usuario, o su permiso para mirar el video y
+   proponérsela (§3 — la narración va sincronizada con la acción).
+2. **Cuál logo**, y sólo si `raw/logo/` tiene más de un archivo con transparencia (§4).
+
+Repetí la receta en dos líneas con las palabras del usuario, acordá el guion, y producí punta a
+punta hasta el `render` y la entrega.
+
 ### Al entregar, decí en qué pantalla está cada cosa (FIX-e-burgos-015-004)
 
 El usuario está mirando el studio, no el file system. Cerrá **toda** entrega nombrando la pantalla,

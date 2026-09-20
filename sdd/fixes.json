@@ -1618,6 +1618,58 @@
         "tokens_total": 128165
       },
       "process_note": "Usage: one agent run resolved both fixes and reported 357032 tokens in total; split in proportion to the declared estimates."
+    },
+    {
+      "id": "FIX-e-burgos-015-005",
+      "author": "e-burgos",
+      "spec_id": "spec-e-burgos-015-studio-producer",
+      "fix_document": "sdd/specs/spec-e-burgos-015-studio-producer/fixes/fix-e-burgos-015-005.md",
+      "type": "IMPROVEMENT",
+      "severity": "low",
+      "created_at": "2026-09-20",
+      "resolved_at": "2026-09-20",
+      "validated_at": null,
+      "title": "the producer tab has no predefined recipe that reproduces a video that already worked",
+      "estimation_hours": 4,
+      "description": "The producer welcome gains a Recipes row above the loose starters, with a Tutorial chip. Tapping it drops into the composer, in the language of the ui, the whole plain-language prompt of the recipe that produced media/display-ads (YouTube 16:9, narration with a generated voice synchronized with the action, classic lower subtitles, soft free music with a credit, transparent logo bottom right, 2 s white intro and outro plates with the logo), leaving an explicit hole for the scene table only the user knows. The producer system prompt and the video-producer skill learn the recipe by name, so the agent applies youtube-16x9, educational, voice script, subtle-lower, es_AR-daniela-high, the logo overlay at 0.18/0.5 and the bumpers without asking again, and only asks for what is missing.",
+      "justification": "Solo-profile FIX GATE: ui copy plus prompt and skill text. No new endpoint, no new entity, no contract change. No cycle open on spec-015.",
+      "related_modules": [
+        "studio-producer",
+        "web-studio"
+      ],
+      "affected_files": [
+        "apps/render-api/src/producer/build-producer-system-prompt.spec.ts",
+        "apps/render-api/src/producer/build-producer-system-prompt.ts",
+        "apps/web/e2e/producer-recipes-smoke.mjs",
+        "apps/web/src/api/producer-recipe-prompts.ts",
+        "apps/web/src/api/producer-recipes.spec.ts",
+        "apps/web/src/api/producer-recipes.ts",
+        "apps/web/src/components/producer-welcome.spec.tsx",
+        "apps/web/src/components/producer-welcome.tsx",
+        "apps/web/src/i18n/messages-en.ts",
+        "apps/web/src/i18n/messages-es.ts",
+        "sdd/components.json",
+        "sdd/context/apps/web/updates/2026-09-20-fix-e-burgos-015-005.md",
+        "sdd/fixes.json",
+        "sdd/skills/video-producer/SKILL.md",
+        "sdd/specs/spec-e-burgos-015-studio-producer/fixes/artifacts/producer-recipes-01-tutorial-es.png",
+        "sdd/specs/spec-e-burgos-015-studio-producer/fixes/artifacts/producer-recipes-02-tutorial-en.png",
+        "sdd/specs/spec-e-burgos-015-studio-producer/fixes/fix-e-burgos-015-005.md"
+      ],
+      "test_reference": "pnpm nx run-many -t lint test build green for 8 projects and pnpm sdd:validate OK (2026-09-20). web 1005 tests (was 991), 99.37 % stmts / 95.81 % branch / 99.47 % funcs / 99.4 % lines; floors and coverage.include untouched. Initial chunk 495.84 kB (was 495.52 kB), no 500 kB warning: the long recipe prompts are only reachable through the await import() of loadRecipePrompt, so Vite emits them as their own producer-recipe-prompts-*.js chunk (1.23 kB) and only the three short chip keys enter the en catalog. New unit coverage: producer-recipes.spec.ts (tutorial first in the list; every recipe named and described in both catalogs with a different description per language; a prompt over 200 chars per id and per language; a [hole] in every prompt and recipePromptHasHole false without one; the word the system prompt keys on, Receta Tutorial / Tutorial recipe; no preset, format, voice, captionStyle, widthRatio, bumpers or montage id leaking into the plain-language prompt; and every decision of the video that worked spelled out in es and in en). producer-welcome.spec.tsx: the recipes row renders above the loose starters with one chip named Tutorial, the description next to it, the chip drafting the whole prompt instead of sending it, the draft following the ui language (es through LanguageProvider) and the row showing even with no material. build-producer-system-prompt.spec.ts: the rule reads A NAMED RECIPE IS A DECISION ALREADY TAKEN and NEVER ask about any of it again, carries the thirteen literal parameters (youtube-16x9, educational, seed 0, voice script, subtle-lower, es_AR-daniela-high, gapMs 900, bottom-right 0.18/0.5, 2000 ms, #ffffff, 0.4, slide-up, zoom), credits the music without overriding the educational levels, and leaves only the timed script and the multiple-logo question open. E2E apps/web/e2e/producer-recipes-smoke.mjs (render-api on 4450, vite on 4451, temporary media root outside media/ holding only a copy of media/display-ads/raw): the cheap gate waits for [data-testid=producer-recipes], which no older build has; then in Chrome the inventory shows the copied aroll/broll/audio/logo, the Tutorial chip and its spanish description are in a row above the starters, tapping it fills the composer with the nine literal phrases of the es prompt with no id leaking and no message sent, and switching to en changes both the description and the drafted prompt. Screenshots in fixes/artifacts/producer-recipes-01-tutorial-es.png and -02-tutorial-en.png. The optional real claude -p turn was not run (quota kept for the dev's own production).",
+      "status": "implemented",
+      "cycle": null,
+      "usage": {
+        "provider_model": "claude/opus",
+        "effort": "high",
+        "tokens_in": 152000,
+        "tokens_out": 24000,
+        "tokens_total": 176000,
+        "approx": true,
+        "source": "declared-estimate",
+        "recorded_at": "2026-09-20",
+        "agent": "implementor-front"
+      }
     }
   ]
 }

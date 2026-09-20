@@ -1,8 +1,10 @@
 import { Link } from 'react-router-dom';
 
+import { PRODUCER_RECIPES, loadRecipePrompt } from '../api/producer-recipes';
+import type { ProducerRecipeId } from '../api/producer-recipes';
 import { ASSET_ROLES } from '../api/render-api-types';
 import type { AssetListing } from '../api/render-api-types';
-import { useT } from '../i18n/language-context';
+import { useLanguage, useT } from '../i18n/language-context';
 import type { TranslationKey } from '../i18n/messages-en';
 
 export type ProducerWelcomeProps = {
@@ -52,9 +54,14 @@ export function inventoryOf(assets: AssetListing | null): InventoryEntry[] {
 
 export function ProducerWelcome({ slug, assets, onDraft }: ProducerWelcomeProps) {
   const t = useT();
+  const { language } = useLanguage();
   const inventory = inventoryOf(assets);
   const hasMaterial = inventory.length > 0;
   const starterKeys = hasMaterial ? STARTER_KEYS_WITH_MATERIAL : STARTER_KEYS_WITHOUT_MATERIAL;
+
+  async function draftRecipe(id: ProducerRecipeId) {
+    onDraft(await loadRecipePrompt(id, language));
+  }
 
   return (
     <div
@@ -96,6 +103,28 @@ export function ProducerWelcome({ slug, assets, onDraft }: ProducerWelcomeProps)
             {t('producer.noMaterialAfter')}
           </p>
         )}
+      </div>
+
+      <div className="space-y-2">
+        <p className="font-mono text-xs uppercase tracking-wide text-slate-500">
+          {t('producer.recipesHeading')}
+        </p>
+        <ul data-testid="producer-recipes" className="flex flex-wrap gap-2">
+          {PRODUCER_RECIPES.map((recipe) => (
+            <li key={recipe.id}>
+              <button
+                type="button"
+                data-recipe={recipe.id}
+                title={t(recipe.descriptionKey)}
+                onClick={() => void draftRecipe(recipe.id)}
+                className="rounded-full border border-emerald-400/60 bg-emerald-400/10 px-3 py-1 text-xs font-semibold text-emerald-100"
+              >
+                {t(recipe.labelKey)}
+              </button>
+              <p className="mt-1 max-w-md text-xs text-slate-500">{t(recipe.descriptionKey)}</p>
+            </li>
+          ))}
+        </ul>
       </div>
 
       <div className="space-y-2">

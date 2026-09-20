@@ -252,3 +252,52 @@ describe('buildProducerAppRulesSection — entrega y logo (FIX-015-004)', () => 
     expect(section).toContain('it will show as a box');
   });
 });
+
+describe('buildProducerAppRulesSection — receta Tutorial (FIX-015-005)', () => {
+  const section = buildProducerAppRulesSection(CONTEXT, null, 'sonnet');
+
+  it('trata una receta nombrada como una decisión tomada, no como una pista', () => {
+    expect(section).toContain('A NAMED RECIPE IS A DECISION ALREADY TAKEN, NOT A HINT');
+    expect(section).toContain('TUTORIAL RECIPE');
+    expect(section).toContain('"Receta Tutorial", "Tutorial recipe"');
+    expect(section).toContain('NEVER ask about any of it again');
+  });
+
+  it('fija los parámetros exactos del video que salió bien', () => {
+    for (const parameter of [
+      '"format":"youtube-16x9"',
+      '"preset":"educational"',
+      '"seed":0',
+      '"voice":"script"',
+      '"captionStyle":"subtle-lower"',
+      '"voiceId":"es_AR-daniela-high"',
+      '"gapMs":900',
+      '"position":"bottom-right","widthRatio":0.18,"opacity":0.5',
+      '"durationMs":2000',
+      '"backgroundColor":"#ffffff"',
+      '"logoWidthRatio":0.4',
+      '"animation":"slide-up"',
+      '"animation":"zoom"',
+    ]) {
+      expect(section).toContain(parameter);
+    }
+  });
+
+  it('acredita la música y no pisa los niveles del preset', () => {
+    expect(section).toContain('credited in work/credits.json');
+    expect(section).toContain('-8 dB base, -18 dB ducked');
+    expect(section).toContain('do not override them');
+  });
+
+  it('deja sólo dos huecos: el guion con tiempos y, si hay varios logos con alfa, cuál', () => {
+    expect(section).toContain('ASK ONLY for what the recipe cannot know');
+    expect(section).toContain('their scene table, or their');
+    expect(section).toContain('more than one file');
+    expect(section).toContain('which logo');
+  });
+
+  it('pide un guion con marcas de tiempo, una línea por escena', () => {
+    expect(section).toContain('carry `[m:ss]` marks');
+    expect(section).toContain('one line per scene');
+  });
+});

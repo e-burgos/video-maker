@@ -155,6 +155,10 @@ export const MESSAGES_ES: Messages = {
   'producer.noMaterialBefore': 'Todavía no hay material crudo.',
   'producer.noMaterialLink': 'Subí tus clips, fotos, música o logo',
   'producer.noMaterialAfter': 'y el productor va a trabajar con ellos. También puede buscarte material libre.',
+  'producer.recipesHeading': 'recetas que ya salieron bien',
+  'producer.recipe.tutorial.label': 'Tutorial',
+  'producer.recipe.tutorial.description':
+    'Tutorial de software o pantalla grabada: YouTube 16:9, narración sincronizada con la acción, subtítulos clásicos abajo, música suave, logo e inicio/cierre con el logo.',
   'producer.startersHeading': 'empezá con alguna de estas',
   'producer.startersHint': 'La sugerencia cae en el cuadro de abajo para que la termines con tus palabras.',
   'producer.starter.platform': 'Contame qué video querés y para qué plataforma',
