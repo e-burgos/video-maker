@@ -32,6 +32,8 @@ import { assertValidEditDecisionList } from './montage/assert-valid-edl';
 import { assertValidTimeline } from './montage/assert-valid-timeline';
 import { buildEditDecisionList } from './montage/build-edit-decision-list';
 import { planCaptionGroups } from './montage/plan-caption-groups';
+import { preserveBrandDecisions } from './montage/preserve-brand-decisions';
+import { readExistingTimeline } from './montage/read-existing-timeline';
 import { planDuckRanges } from './montage/plan-duck-ranges';
 import { planTransitions } from './montage/plan-transitions';
 import type { TranscriptionSource } from './montage/resolve-montage-inputs';
@@ -283,16 +285,20 @@ export async function autoMontage(
     assets.push(logoAsset);
   }
 
+  const previousTimeline = await readExistingTimeline(project, { readTextFile });
   const timeline = assertValidTimeline(
-    buildTimeline(
-      edl,
-      assets,
-      toMusicInput(musicAsset, preset),
-      toLogoInput(logoAsset),
-      voiceScriptTrack === null
-        ? undefined
-        : { assetId: voiceScriptTrack.asset.id, durationMs: voiceScriptTrack.asset.durationMs },
-      captionStyle,
+    preserveBrandDecisions(
+      buildTimeline(
+        edl,
+        assets,
+        toMusicInput(musicAsset, preset),
+        toLogoInput(logoAsset),
+        voiceScriptTrack === null
+          ? undefined
+          : { assetId: voiceScriptTrack.asset.id, durationMs: voiceScriptTrack.asset.durationMs },
+        captionStyle,
+      ),
+      previousTimeline,
     ),
   );
 

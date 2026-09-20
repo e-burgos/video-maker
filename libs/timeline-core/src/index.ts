@@ -49,8 +49,18 @@ export {
   AudioClipSchema,
   CaptionClipSchema,
   CaptionStyleSchema,
+  DEFAULT_LOGO_BUMPER_BACKGROUND_COLOR,
+  DEFAULT_LOGO_BUMPER_DURATION_MS,
+  DEFAULT_LOGO_BUMPER_WIDTH_RATIO,
+  HexColorSchema,
+  LOGO_BUMPER_ANIMATIONS,
+  LogoBumperAnimationSchema,
+  LogoBumperSchema,
   LogoOverlaySchema,
   LogoPositionSchema,
+  MAX_LOGO_BUMPER_DURATION_MS,
+  MIN_LOGO_BUMPER_DURATION_MS,
+  TimelineBumpersSchema,
   TimelineSchema,
   TimelineTransitionSchema,
   VideoClipSchema,
@@ -58,9 +68,12 @@ export {
 export type {
   AudioClip,
   CaptionClip,
+  LogoBumper,
+  LogoBumperAnimation,
   LogoOverlay,
   LogoPosition,
   Timeline,
+  TimelineBumpers,
   TimelineTransition,
   VideoClip,
 } from './schemas/timeline.schema';
@@ -103,8 +116,21 @@ export {
 } from './timeline/logo-defaults';
 export type { LogoInput, MusicInput, TimelineBuildErrorCode, VoiceInput } from './timeline/build-timeline';
 
-export { validateTimeline } from './timeline/validate-timeline';
-export type { TimelineIssue, TimelineIssueCode, TimelineValidationResult } from './timeline/validate-timeline';
+export { timelineWarnings, validateTimeline } from './timeline/validate-timeline';
+export type {
+  TimelineIssue,
+  TimelineIssueCode,
+  TimelineValidationResult,
+  TimelineWarning,
+  TimelineWarningCode,
+} from './timeline/validate-timeline';
+
+export {
+  introBumperFrames,
+  logoBumperFrames,
+  outroBumperFrames,
+  timelineTotalFrames,
+} from './timeline/bumper-frames';
 
 export { groupWordsForCaptions, pickEmphasisIndex } from './captions/group-words-for-captions';
 export type {

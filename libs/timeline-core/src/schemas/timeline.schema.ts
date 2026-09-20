@@ -104,6 +104,36 @@ export const LogoOverlaySchema = z.strictObject({
   opacity: z.number().gt(0).max(1).default(1),
 });
 
+export const LOGO_BUMPER_ANIMATIONS = ['fade', 'zoom', 'slide-up'] as const;
+
+export const LogoBumperAnimationSchema = z.enum(LOGO_BUMPER_ANIMATIONS);
+
+export const HexColorSchema = z.string().regex(/^#[0-9a-fA-F]{6}$/);
+
+export const DEFAULT_LOGO_BUMPER_DURATION_MS = 2000;
+export const MIN_LOGO_BUMPER_DURATION_MS = 500;
+export const MAX_LOGO_BUMPER_DURATION_MS = 6000;
+export const DEFAULT_LOGO_BUMPER_BACKGROUND_COLOR = '#ffffff';
+export const DEFAULT_LOGO_BUMPER_WIDTH_RATIO = 0.4;
+
+export const LogoBumperSchema = z.strictObject({
+  enabled: z.boolean().default(false),
+  durationMs: z
+    .number()
+    .int()
+    .min(MIN_LOGO_BUMPER_DURATION_MS)
+    .max(MAX_LOGO_BUMPER_DURATION_MS)
+    .default(DEFAULT_LOGO_BUMPER_DURATION_MS),
+  backgroundColor: HexColorSchema.default(DEFAULT_LOGO_BUMPER_BACKGROUND_COLOR),
+  animation: LogoBumperAnimationSchema.default('zoom'),
+  logoWidthRatio: z.number().gt(0).max(1).default(DEFAULT_LOGO_BUMPER_WIDTH_RATIO),
+});
+
+export const TimelineBumpersSchema = z.strictObject({
+  intro: LogoBumperSchema.optional(),
+  outro: LogoBumperSchema.optional(),
+});
+
 export const TimelineTracksSchema = z.strictObject({
   aroll: z.array(VideoClipSchema),
   broll: z.array(VideoClipSchema),
@@ -144,6 +174,7 @@ export const TimelineSchema = z
     transitions: z.array(TimelineTransitionSchema).optional(),
     audioMix: AudioMixPlanSchema,
     logo: LogoOverlaySchema.optional(),
+    bumpers: TimelineBumpersSchema.optional(),
     safeZone: SafeZoneSchema.optional(),
     captionStyle: CaptionStyleSchema.optional(),
   })
@@ -162,5 +193,8 @@ export type TransitionTiming = z.infer<typeof TransitionTimingSchema>;
 export type TimelineTransition = z.infer<typeof TimelineTransitionSchema>;
 export type LogoPosition = z.infer<typeof LogoPositionSchema>;
 export type LogoOverlay = z.infer<typeof LogoOverlaySchema>;
+export type LogoBumperAnimation = z.infer<typeof LogoBumperAnimationSchema>;
+export type LogoBumper = z.infer<typeof LogoBumperSchema>;
+export type TimelineBumpers = z.infer<typeof TimelineBumpersSchema>;
 export type TimelineTracks = z.infer<typeof TimelineTracksSchema>;
 export type Timeline = z.infer<typeof TimelineSchema>;

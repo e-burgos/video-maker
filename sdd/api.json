@@ -256,7 +256,7 @@
         "path": "/projects/:slug/timeline",
         "module": "render-service",
         "spec": "sdd/specs/spec-e-burgos-005-render-service",
-        "status": "implemented",
+        "status": "updated",
         "created_in_cycle": 2,
         "updated_in_cycle": null,
         "description": "Reads work/timeline.json and answers the parsed document validated against TimelineSchema, with no envelope. An absent file is a 404, never a null body.",
@@ -270,7 +270,13 @@
           "404": "PROJECT_NOT_FOUND or TIMELINE_NOT_FOUND. application/json: { error: { code, stage: null, message, resource?, expected?, hint?, assetPersisted?, catalogUpdated? } }.",
           "422": "PROJECT_SLUG_INVALID or TIMELINE_INVALID (the stored document does not parse or does not validate). application/json: { error: { code, stage: null, message, resource?, expected?, hint?, assetPersisted?, catalogUpdated? } }."
         },
-        "changelog": []
+        "changelog": [
+          {
+            "cycle": 2,
+            "date": "2026-09-20",
+            "change": "FIX-e-burgos-001-003: the Timeline document gains the optional bumpers field (intro/outro LogoBumper, full-screen logo cards at the start and the end); the request and response shapes of the endpoint do not change."
+          }
+        ]
       },
       {
         "id": "EP-008",
@@ -278,7 +284,7 @@
         "path": "/projects/:slug/timeline",
         "module": "render-service",
         "spec": "sdd/specs/spec-e-burgos-005-render-service",
-        "status": "implemented",
+        "status": "updated",
         "created_in_cycle": 2,
         "updated_in_cycle": null,
         "description": "Full replacement of work/timeline.json. The body is validated with TimelineSchema before any write port is invoked and the bytes are produced by writeTimeline of @video-maker/auto-montage, so they are byte-identical to what tools/render-cli writes.",
@@ -297,7 +303,13 @@
           "413": "REQUEST_BODY_TOO_LARGE. application/json: { error: { code, stage: null, message, resource?, expected?, hint?, assetPersisted?, catalogUpdated? } }.",
           "422": "PROJECT_SLUG_INVALID or TIMELINE_INVALID — nothing was written. application/json: { error: { code, stage: null, message, resource?, expected?, hint?, assetPersisted?, catalogUpdated? } }."
         },
-        "changelog": []
+        "changelog": [
+          {
+            "cycle": 2,
+            "date": "2026-09-20",
+            "change": "FIX-e-burgos-001-003: the Timeline document gains the optional bumpers field (intro/outro LogoBumper, full-screen logo cards at the start and the end); the request and response shapes of the endpoint do not change."
+          }
+        ]
       },
       {
         "id": "EP-009",

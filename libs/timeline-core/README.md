@@ -18,7 +18,8 @@ Todo lo exportado vive en `src/index.ts`. Resumen por área (firmas completas en
 | Punch-ins | `planPunchIns` |
 | Captions | `groupWordsForCaptions`, `pickEmphasisIndex` |
 | Ducking | `planDucking`, `DEFAULT_MUSIC_MIX`, `DEFAULT_AUDIO_MIX_PLAN` |
-| Timeline | `buildTimeline`, `TimelineBuildError`, `validateTimeline` |
+| Timeline | `buildTimeline`, `TimelineBuildError`, `validateTimeline`, `timelineWarnings` |
+| Bumpers de logo | `LogoBumperSchema`, `TimelineBumpersSchema`, `timelineTotalFrames`, `introBumperFrames`, `outroBumperFrames`, `logoBumperFrames` |
 | Transcripción | `normalizeTranscriptionWords` |
 | Schemas Zod | `OutputFormatSchema`, `MediaAssetSchema`, `TranscriptionSchema`, `EditDecisionListSchema` (+ decisiones), `AudioMixPlanSchema`, `TimelineSchema` y los tipos inferidos homónimos |
 | JSON Schema | `buildJsonSchemaBundle`, `timelineToJsonSchema`, `serializeJsonSchemaFile` |
@@ -81,3 +82,16 @@ Nada en esta lib lee `Date`, `process`, `Math.random()` ni hace I/O — el tiemp
 - `buildTimeline` posiciona los overlays (punch-in, B-roll, captions, ducking) relativo al `keep`
   que los contiene, no reutilizando `remapMsAfterCuts` — ese remapeo no descuenta los frames que
   consumen las transiciones. `remapMsAfterCuts` sigue siendo API pública para otros consumidores.
+
+## Bumpers de logo (FIX-e-burgos-001-003)
+
+`timeline.bumpers` es opcional y declara la placa de marca con la que el video abre (`intro`) y
+cierra (`outro`): `enabled`, `durationMs` (500–6000, default 2000), `backgroundColor` (hex
+`#rrggbb`, default `#ffffff`), `animation` (`fade` | `zoom` | `slide-up`, default `zoom`) y
+`logoWidthRatio` (default 0.4). El logo que dibuja es el de `timeline.logo`; sin logo la placa es
+sólo el fondo de color y `timelineWarnings` devuelve `BUMPER_WITHOUT_LOGO` — **warning, no error**:
+`validateTimeline` no lo reporta y no bloquea ni el guardado ni el render.
+
+**`durationFrames` sigue siendo el contenido.** La duración total del video la da
+`timelineTotalFrames(timeline)` (= intro + contenido + outro), y es la que usan el render, el
+`<Player>` de la web y el reporte de la API.

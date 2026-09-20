@@ -109,6 +109,7 @@ export { buildMusicBedChain } from './mix/build-music-bed-chain';
 export type { MusicBedChainOptions } from './mix/build-music-bed-chain';
 export { buildAudioMixGraph } from './mix/build-audio-mix-graph';
 export type { AudioMixGraphSpec } from './mix/build-audio-mix-graph';
+export { shiftTimelineAudioForBumpers } from './mix/shift-timeline-audio-for-bumpers';
 export { serializeFilterGraph } from './mix/serialize-filter-graph';
 export type { FilterChain, FilterGraph } from './mix/filter-graph';
 export { audioMixFfmpegArgs } from './mix/audio-mix-ffmpeg-args';

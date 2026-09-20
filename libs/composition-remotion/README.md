@@ -35,6 +35,7 @@ Todo lo exportado vive en `src/index.ts` (firmas completas en `architect.md` §3
 | Transiciones | `whipPanStyle`, `whipPan`, `presentationFor`, tipos `WhipPanProps`, `ArollPresentation`, `PresentationDirection` |
 | Componentes | `ArollSeries`, `BrollTrack`, `AudioTrack`, `LogoOverlay`, `KineticCaptions`, `TimelineComposition` |
 | Logo | `logoOverlayBox`, `logoOverlayStyle`, tipos `LogoOverlayBox`, `LogoOverlayProps` |
+| Bumpers de logo | `LogoBumperScene`, `logoBumperLogoStyle`, `logoBumperEnterFrames`, `logoBumperExitFrames`, `LOGO_BUMPER_ENTER_MS`, `LOGO_BUMPER_EXIT_MS` |
 | Backend de video (Player vs render) | `TimelineVideo`, `VideoBackendProvider`, `useVideoBackend`, `DEFAULT_VIDEO_BACKEND`, tipos `TimelineVideoProps`, `VideoBackend`, `VideoBackendProviderProps` |
 | Metadata / composición raíz | `computeTimelineMetadata`, `calculateTimelineMetadata`, `TIMELINE_COMPOSITION_ID` |
 | Tipos derivados públicos | `CaptionBox`, `TransitionDirection` (el resto de `timeline-types.ts` es interno) |
@@ -68,6 +69,19 @@ ancho `widthRatio × format.width` recortado al espacio entre márgenes, margen 
 format.width` **igual en los dos ejes**, y la esquina que dicta `position` (default
 `bottom-right`). El logo se dibuja también con `audio: 'muted'`, porque el video mudo es el que
 después se muxea.
+
+## Bumpers de logo (FIX-e-burgos-001-003)
+
+Con `timeline.bumpers.intro.enabled`, `TimelineComposition` mete **todo** el contenido (A-roll,
+B-roll, audio, overlay de logo y captions) en una `<Sequence from={introFrames}>` y dibuja
+`LogoBumperScene` en los primeros `introFrames`; el `outro` agrega otra placa después del
+contenido. Ni el overlay de logo ni las captions se dibujan durante los bumpers. La duración de la
+composición pasa a ser `timelineTotalFrames` — misma función para el render y para el `<Player>`.
+Sin bumpers el árbol montado es exactamente el de antes.
+
+La animación es pura y vive en `logoBumperLogoStyle`: el logo entra en los primeros 600 ms con
+`fade`, `zoom` (escala desde 0.8) o `slide-up` (12 % de alto), y sale con fade en los últimos
+300 ms; en un bumper corto la entrada se recorta para que la salida siempre entre.
 
 ## Normalización de la cama musical (spec-014)
 

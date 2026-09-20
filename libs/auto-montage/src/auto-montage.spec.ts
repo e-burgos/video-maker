@@ -439,6 +439,42 @@ describe('autoMontage — niveles del preset y logo (spec-014)', () => {
     expect(result.timeline.audioMix.music.duckedGainDb).toBe(-18);
   });
 
+  it('un re-montaje conserva el logo y los bumpers que el usuario editó (FIX-e-burgos-001-003)', async () => {
+    const fileSystem = buildFixtureFileSystem([catalogAsset('logo', logoAsset)]);
+    const first = await run(fileSystem, { preset: 'hardware', seed: 0 });
+
+    const edited = {
+      ...first.timeline,
+      logo: { ...first.timeline.logo, position: 'top-left', widthRatio: 0.12, opacity: 0.6 },
+      bumpers: {
+        intro: {
+          enabled: true,
+          durationMs: 3000,
+          backgroundColor: '#0b1020',
+          animation: 'slide-up',
+          logoWidthRatio: 0.55,
+        },
+        outro: {
+          enabled: false,
+          durationMs: 2000,
+          backgroundColor: '#ffffff',
+          animation: 'zoom',
+          logoWidthRatio: 0.4,
+        },
+      },
+    };
+    await fileSystem.writeTextFile(
+      toAbsolutePath(project, first.timelinePath),
+      JSON.stringify(edited),
+    );
+
+    const second = await run(fileSystem, { preset: 'hardware', seed: 0 });
+
+    expect(second.timeline.logo).toEqual(edited.logo);
+    expect(second.timeline.bumpers).toEqual(edited.bumpers);
+    expect(validateTimeline(second.timeline).ok).toBe(true);
+  });
+
   it('incorpora el logo del proyecto por defecto y lo agrega a assets', async () => {
     const fileSystem = buildFixtureFileSystem([catalogAsset('logo', logoAsset)]);
 

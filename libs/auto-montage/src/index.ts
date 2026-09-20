@@ -111,6 +111,8 @@ export {
 export { readVoiceScriptTrack } from './voice/read-voice-script-track';
 export type { VoiceScriptTrack } from './voice/read-voice-script-track';
 
+export { preserveBrandDecisions } from './montage/preserve-brand-decisions';
+export { readExistingTimeline } from './montage/read-existing-timeline';
 export { serializeMontageDocument } from './montage/serialize-montage-document';
 export { writeEditDecisionList } from './montage/write-edit-decision-list';
 export { writeTimeline } from './montage/write-timeline';

@@ -24,6 +24,10 @@ Se importa por source vía el alias `@video-maker/auto-montage`.
   png/jpg/webp (un `.mp4` ahí es `extension-role-mismatch`; un `.svg`, `unsupported-extension`).
   Si el proyecto tiene un logo, `autoMontage` lo incorpora a `timeline.logo` con los defaults del
   schema (abajo a la derecha); `logo: 'off'` lo omite.
+- **Las decisiones de marca sobreviven al re-montaje** (FIX-e-burgos-001-003): si ya había un
+  `work/timeline.json` con `logo` o `bumpers` editados, `preserveBrandDecisions` los conserva en la
+  timeline nueva (el logo sólo si su asset sigue presente). Re-montar no borra la placa de inicio
+  ni la de cierre que el usuario configuró en la vista previa.
 - **El ingest mide el loudness de los assets de rol `audio` (spec-014).** Tras el `ffprobe`,
   `probeAssets` corre `measureLoudness` y guarda `asset.audio.integratedLufs` en el catálogo: es la
   única medición de la que dependen el grafo del mix de `media-local` y el `<Audio>` de Remotion

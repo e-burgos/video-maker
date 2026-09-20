@@ -535,6 +535,98 @@
       ],
       "additionalProperties": false
     },
+    "bumpers": {
+      "type": "object",
+      "properties": {
+        "intro": {
+          "type": "object",
+          "properties": {
+            "enabled": {
+              "default": false,
+              "type": "boolean"
+            },
+            "durationMs": {
+              "default": 2000,
+              "type": "integer",
+              "minimum": 500,
+              "maximum": 6000
+            },
+            "backgroundColor": {
+              "default": "#ffffff",
+              "type": "string",
+              "pattern": "^#[0-9a-fA-F]{6}$"
+            },
+            "animation": {
+              "default": "zoom",
+              "type": "string",
+              "enum": [
+                "fade",
+                "zoom",
+                "slide-up"
+              ]
+            },
+            "logoWidthRatio": {
+              "default": 0.4,
+              "type": "number",
+              "exclusiveMinimum": 0,
+              "maximum": 1
+            }
+          },
+          "required": [
+            "enabled",
+            "durationMs",
+            "backgroundColor",
+            "animation",
+            "logoWidthRatio"
+          ],
+          "additionalProperties": false
+        },
+        "outro": {
+          "type": "object",
+          "properties": {
+            "enabled": {
+              "default": false,
+              "type": "boolean"
+            },
+            "durationMs": {
+              "default": 2000,
+              "type": "integer",
+              "minimum": 500,
+              "maximum": 6000
+            },
+            "backgroundColor": {
+              "default": "#ffffff",
+              "type": "string",
+              "pattern": "^#[0-9a-fA-F]{6}$"
+            },
+            "animation": {
+              "default": "zoom",
+              "type": "string",
+              "enum": [
+                "fade",
+                "zoom",
+                "slide-up"
+              ]
+            },
+            "logoWidthRatio": {
+              "default": 0.4,
+              "type": "number",
+              "exclusiveMinimum": 0,
+              "maximum": 1
+            }
+          },
+          "required": [
+            "enabled",
+            "durationMs",
+            "backgroundColor",
+            "animation",
+            "logoWidthRatio"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "additionalProperties": false
+    },
     "safeZone": {
       "type": "object",
       "properties": {

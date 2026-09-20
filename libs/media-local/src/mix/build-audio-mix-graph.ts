@@ -5,6 +5,7 @@ import type { LoudnessMeasurement } from '../ffmpeg/parse-loudnorm-json';
 import { UnresolvedAudioAssetError } from '../errors/unresolved-audio-asset-error';
 import { buildMusicBedChain } from './build-music-bed-chain';
 import { buildVoiceChain } from './build-voice-chain';
+import { shiftTimelineAudioForBumpers } from './shift-timeline-audio-for-bumpers';
 import type { FilterChain, FilterGraph } from './filter-graph';
 import { formatFilterNumber } from './format-filter-number';
 
@@ -98,8 +99,20 @@ function buildClipChain(
   };
 }
 
+function buildAmixFilters(entryCount: number, padToSeconds: string | null): string[] {
+  const amix = `amix=inputs=${entryCount}:duration=longest:normalize=0`;
+
+  // no atrim here: loudnorm offsets the voice PTS, so atrim=end would cut the tail of the mix short
+  return padToSeconds === null ? [amix] : [amix, `apad=whole_dur=${padToSeconds}`];
+}
+
 export function buildAudioMixGraph(spec: AudioMixGraphSpec): FilterGraph {
-  const timeline = AudioMixTimelineSchema.parse(spec.timeline);
+  const parsed = AudioMixTimelineSchema.parse(spec.timeline);
+  const timeline = shiftTimelineAudioForBumpers(parsed);
+  const padToSeconds =
+    timeline.durationFrames === parsed.durationFrames
+      ? null
+      : formatFilterNumber(timeline.durationFrames / timeline.format.fps);
   const entries = collectAudioTrackEntries(timeline);
 
   const inputs = entries.map((entry) => resolveAssetPath(entry, timeline));
@@ -109,7 +122,7 @@ export function buildAudioMixGraph(spec: AudioMixGraphSpec): FilterGraph {
 
   const amixChain: FilterChain = {
     inputLabels: entries.map((entry) => entry.label),
-    filters: [`amix=inputs=${entries.length}:duration=longest:normalize=0`],
+    filters: buildAmixFilters(entries.length, padToSeconds),
     outputLabels: ['mix'],
   };
 

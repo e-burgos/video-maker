@@ -12,6 +12,16 @@ export { logoOverlayBox, logoOverlayStyle } from './helpers/logo-overlay-style';
 export type { LogoOverlayBox } from './helpers/logo-overlay-style';
 export { LogoOverlay } from './components/logo-overlay';
 export type { LogoOverlayProps } from './components/logo-overlay';
+export { LogoBumperScene } from './components/logo-bumper-scene';
+export type { LogoBumperSceneProps } from './components/logo-bumper-scene';
+export {
+  LOGO_BUMPER_ENTER_MS,
+  LOGO_BUMPER_EXIT_MS,
+  logoBumperEnterFrames,
+  logoBumperExitFrames,
+  logoBumperLogoStyle,
+} from './helpers/logo-bumper-style';
+export type { LogoBumperLogoStyle, LogoBumperStyleInput } from './helpers/logo-bumper-style';
 export type { CaptionBox, TransitionDirection } from './helpers/timeline-types';
 export { transitionTiming } from './helpers/transition-timing';
 export { punchInStyle } from './helpers/punch-in-style';

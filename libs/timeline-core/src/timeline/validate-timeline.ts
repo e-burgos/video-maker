@@ -28,6 +28,14 @@ export type TimelineIssueCode =
   | 'LOGO_ASSET_NOT_FOUND'
   | 'LOGO_ASSET_NOT_IMAGE';
 
+export type TimelineWarningCode = 'BUMPER_WITHOUT_LOGO';
+
+export interface TimelineWarning {
+  code: TimelineWarningCode;
+  path: string;
+  message: string;
+}
+
 export interface TimelineIssue {
   code: TimelineIssueCode;
   path: string;
@@ -321,6 +329,20 @@ function collectLogoIssues(
   }
 
   return [];
+}
+
+const BUMPER_EDGES = ['intro', 'outro'] as const;
+
+export function timelineWarnings(timeline: Timeline): TimelineWarning[] {
+  if (timeline.logo !== undefined) {
+    return [];
+  }
+
+  return BUMPER_EDGES.filter((edge) => timeline.bumpers?.[edge]?.enabled === true).map((edge) => ({
+    code: 'BUMPER_WITHOUT_LOGO' as const,
+    path: `bumpers.${edge}`,
+    message: `El bumper de ${edge} está activo pero la Timeline no tiene logo: se verá sólo el fondo de color.`,
+  }));
 }
 
 export function validateTimeline(timeline: Timeline): TimelineValidationResult {

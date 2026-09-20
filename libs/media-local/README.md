@@ -103,6 +103,12 @@ ffmpeg**, no usa `CommandRunner`; el wrapper que sí lo ejecuta (`mixTimelineAud
 - **`apad` siempre lleva `whole_dur`** (`apad=whole_dur=<duración del video en s>`): sin él el
   stream es infinito y sólo lo acota el `atrim` siguiente. El `atrim=end` se conserva porque
   también recorta una música más larga que el edit.
+- **Los bumpers de logo corren el audio (FIX-e-burgos-001-003).** Con `timeline.bumpers.intro`
+  activo, `shiftTimelineAudioForBumpers` adelanta voz, música y la automation de ducking
+  `introFrames` antes de armar el grafo: el `adelay` de cada clip y los `afade` de la cama ya salen
+  corridos. La duración de referencia pasa a `timelineTotalFrames`, y la salida del `amix` gana
+  `apad=whole_dur=<total>` + `atrim=end=<total>` para que la mezcla dure exactamente lo que el
+  video mudo. Sin bumpers el grafo emitido es idéntico al de antes.
 - **`gainDbToVolume` está duplicada a propósito** entre esta lib y
   `libs/composition-remotion/src/helpers/audio-gain.ts`: los boundaries Nx (`type:util` → solo
   `type:domain`) impiden que `media-local` importe `composition-remotion`. La tabla de paridad de
