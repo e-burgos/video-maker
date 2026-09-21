@@ -317,6 +317,25 @@ describe('buildProducerAppRulesSection — receta Tutorial (FIX-015-005)', () =>
     expect(section).toContain('respect the farewell the user wrote when there is one');
   });
 
+  it('deriva la receta vertical de la horizontal, con sus tres deltas (FIX-e-burgos-015-008)', () => {
+    expect(section).toContain('THE VERTICAL TUTORIAL RECIPE');
+    expect(section).toContain('"Receta Tutorial Vertical", "Vertical tutorial recipe"');
+    expect(section).toContain('"format":"shorts-9x16"');
+    expect(section).toContain('never ask the user which network it is for');
+    expect(section).toContain('"position":"top-left","widthRatio":0.18,"marginRatio":0.06,"opacity":0.5');
+  });
+
+  it('frena si la grabación no es vertical, porque el motor no reencuadra (FIX-e-burgos-015-008)', () => {
+    expect(section).toContain('THE RECORDING HAS TO BE VERTICAL ALREADY');
+    expect(section).toContain('The engine does not reframe');
+    expect(section).toContain('If `width` is not smaller than `height`, STOP');
+    expect(section).toContain('Never produce a squashed or letterboxed tutorial');
+  });
+
+  it('mantiene el subtítulo clásico en vertical y ofrece el cambio en el preview (FIX-e-burgos-015-008)', () => {
+    expect(section).toContain('one selector away in the `preview` screen');
+  });
+
   it('pide un guion con marcas de tiempo, una línea por escena', () => {
     expect(section).toContain('carry `[m:ss]` marks');
     expect(section).toContain('one line per scene');

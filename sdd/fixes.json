@@ -1800,8 +1800,8 @@
       "usage": {
         "provider_model": "claude/fable",
         "effort": "medium",
-        "tokens_in": 30000,
-        "tokens_out": 4000,
+        "tokens_in": 70000,
+        "tokens_out": 9000,
         "approx": true,
         "source": "declared-estimate",
         "recorded_at": "2026-09-21",
@@ -1810,8 +1810,61 @@
             "agent": "steward",
             "provider_model": "claude/fable",
             "effort": "medium",
-            "tokens_in": 30000,
-            "tokens_out": 4000,
+            "tokens_in": 70000,
+            "tokens_out": 9000,
+            "approx": true,
+            "source": "declared-estimate",
+            "recorded_at": "2026-09-21"
+          }
+        ]
+      }
+    },
+    {
+      "id": "FIX-e-burgos-015-008",
+      "author": "e-burgos",
+      "spec_id": "spec-e-burgos-015-studio-producer",
+      "fix_document": "sdd/specs/spec-e-burgos-015-studio-producer/fixes/fix-e-burgos-015-008.md",
+      "type": "IMPROVEMENT",
+      "severity": "low",
+      "created_at": "2026-09-21",
+      "resolved_at": "2026-09-21",
+      "validated_at": null,
+      "title": "Vertical Tutorial recipe (9:16) for Shorts, Reels and TikTok",
+      "estimation_hours": 2,
+      "description": "The studio only offered a 16:9 recipe. Switching the format is not enough for mobile: the pipeline never reframes, so a 16:9 A-roll on a 1080x1920 canvas renders letterboxed (OffthreadVideo applies object-fit contain) and shows up stretched in the player (timeline-video.tsx forces objectFit fill). The dev decided the A-roll will be handed already vertical, so no engine change and no ffmpeg pre-pass. New tutorial-vertical recipe in the web catalog with its prompt and i18n texts, and a vertical variant of the Tutorial block in the producer system prompt: format shorts-9x16 (reels-9x16 and tiktok-9x16 are identical today, so the network is never asked), an ffprobe guard that stops when the recording is not portrait, and the logo at top-left with marginRatio 0.06 because the bottom right corner is where the three apps stack their own buttons. The classic caption style stays the default and the delivery points at the preview selector for the kinetic one.",
+      "justification": "Prompt and catalog change on an existing feature, no schema and no contract touched. Fast-fix mode, framing decided by the dev.",
+      "related_modules": [
+        "studio-producer"
+      ],
+      "affected_files": [
+        "apps/render-api/src/producer/build-producer-system-prompt.ts",
+        "apps/render-api/src/producer/build-producer-system-prompt.spec.ts",
+        "apps/web/src/api/producer-recipe-prompts.ts",
+        "apps/web/src/api/producer-recipes.ts",
+        "apps/web/src/api/producer-recipes.spec.ts",
+        "apps/web/src/components/producer-welcome.spec.tsx",
+        "apps/web/src/i18n/messages-en.ts",
+        "apps/web/src/i18n/messages-es.ts"
+      ],
+      "test_reference": "pnpm nx run-many -t lint test build -p web render-api green (2026-09-21): web 1010 tests, render-api 1003; new cases cover the vertical recipe catalog, both prompts, the three deltas and the portrait guard.",
+      "status": "implemented",
+      "cycle": null,
+      "process_note": "Resolved by the steward directly in the main loop (fast-fix mode).",
+      "usage": {
+        "provider_model": "claude/fable",
+        "effort": "medium",
+        "tokens_in": 70000,
+        "tokens_out": 9000,
+        "approx": true,
+        "source": "declared-estimate",
+        "recorded_at": "2026-09-21",
+        "by_agent": [
+          {
+            "agent": "steward",
+            "provider_model": "claude/fable",
+            "effort": "medium",
+            "tokens_in": 70000,
+            "tokens_out": 9000,
             "approx": true,
             "source": "declared-estimate",
             "recorded_at": "2026-09-21"

@@ -2,7 +2,7 @@ import type { Language } from '../i18n/language';
 import type { TranslationKey } from '../i18n/messages-en';
 import type { GeneratedListing } from './render-api-types';
 
-export const PRODUCER_RECIPE_IDS = ['tutorial'] as const;
+export const PRODUCER_RECIPE_IDS = ['tutorial', 'tutorial-vertical'] as const;
 
 export type ProducerRecipeId = (typeof PRODUCER_RECIPE_IDS)[number];
 
@@ -17,6 +17,11 @@ export const PRODUCER_RECIPES: readonly ProducerRecipe[] = [
     id: 'tutorial',
     labelKey: 'producer.recipe.tutorial.label',
     descriptionKey: 'producer.recipe.tutorial.description',
+  },
+  {
+    id: 'tutorial-vertical',
+    labelKey: 'producer.recipe.tutorial-vertical.label',
+    descriptionKey: 'producer.recipe.tutorial-vertical.description',
   },
 ];
 

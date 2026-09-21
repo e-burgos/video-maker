@@ -23,8 +23,32 @@ export const TUTORIAL_RECIPE_PROMPT: ProducerRecipePrompts = {
     'el guion, producí y renderizá.',
 };
 
+export const TUTORIAL_VERTICAL_RECIPE_PROMPT: ProducerRecipePrompts = {
+  en:
+    'I want a vertical tutorial out of this screen recording, for Shorts, Reels and TikTok. ' +
+    'Vertical tutorial recipe: the recording is already vertical, narration with a generated voice ' +
+    '(Daniela, Rioplatense Spanish) synchronized with what happens on screen, following my table of ' +
+    'scenes and times, classic subtitles at the bottom — I will switch them to the big ones in the ' +
+    'preview if I want to —, soft free background music with its credit, the transparent logo at the ' +
+    'top left at 50 %, and a 2 second opening plate and closing plate with a white background and ' +
+    'the logo. The script always closes with a farewell: if my scene table does not bring one, add ' +
+    'one yourself as the last line, something like «¡Gracias por ver este tutorial! Nos vemos en el ' +
+    'próximo.» {script} Once we agree on the script, produce it and render it.',
+  es:
+    'Quiero un tutorial vertical de esta grabación de pantalla, para Shorts, Reels y TikTok. Receta ' +
+    'Tutorial Vertical: la grabación ya está en vertical, narración con voz generada (Daniela, ' +
+    'español rioplatense) sincronizada con lo que pasa en pantalla siguiendo mi tabla de escenas y ' +
+    'tiempos, subtítulos clásicos abajo —después los cambio por los grandes en el preview si quiero—, ' +
+    'música libre suave de fondo con crédito, el logo transparente arriba a la izquierda al 50 %, y ' +
+    'una placa de inicio y otra de cierre de 2 segundos con fondo blanco y el logo. El guion cierra ' +
+    'siempre con una despedida: si mi tabla no la trae, agregala vos como última línea, del estilo ' +
+    '«¡Gracias por ver este tutorial! Nos vemos en el próximo.» {script} Cuando confirmemos el guion, ' +
+    'producí y renderizá.',
+};
+
 export const PRODUCER_RECIPE_PROMPTS = {
   tutorial: TUTORIAL_RECIPE_PROMPT,
+  'tutorial-vertical': TUTORIAL_VERTICAL_RECIPE_PROMPT,
 } as const;
 
 export const RECIPE_SCRIPT_SENTENCES: Readonly<Record<Language, Readonly<Record<'present' | 'missing', string>>>> = {

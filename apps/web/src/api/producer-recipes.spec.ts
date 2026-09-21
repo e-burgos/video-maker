@@ -110,6 +110,32 @@ describe('producer recipes', () => {
     expect(english).not.toBe(await loadRecipePrompt('tutorial', 'es'));
   });
 
+  it('offers a vertical twin of the tutorial recipe for Shorts, Reels and TikTok (FIX-e-burgos-015-008)', async () => {
+    expect(PRODUCER_RECIPE_IDS).toContain('tutorial-vertical');
+    expect(PRODUCER_RECIPES.map((recipe) => recipe.id)).toEqual(['tutorial', 'tutorial-vertical']);
+
+    const spanish = await loadRecipePrompt('tutorial-vertical', 'es');
+    const english = await loadRecipePrompt('tutorial-vertical', 'en');
+
+    expect(spanish).toContain('Receta Tutorial Vertical');
+    expect(spanish).toContain('la grabación ya está en vertical');
+    expect(spanish).toContain('arriba a la izquierda al 50 %');
+    expect(spanish).toContain('Shorts, Reels y TikTok');
+    expect(english).toContain('Vertical tutorial recipe');
+    expect(english).toContain('the recording is already vertical');
+    expect(english).toContain('top left at 50 %');
+    expect(english).not.toBe(spanish);
+  });
+
+  it('keeps the classic subtitle default in the vertical recipe, switchable later (FIX-e-burgos-015-008)', async () => {
+    expect(await loadRecipePrompt('tutorial-vertical', 'es')).toContain(
+      'subtítulos clásicos abajo',
+    );
+    expect(await loadRecipePrompt('tutorial-vertical', 'en')).toContain(
+      'classic subtitles at the bottom',
+    );
+  });
+
   it('replaces the script hole with the project script when work/producer/script.txt exists (FIX-e-burgos-015-006)', async () => {
     const withScript = await loadRecipePrompt('tutorial', 'es', { hasTimedScript: true });
     const without = await loadRecipePrompt('tutorial', 'es');

@@ -150,8 +150,11 @@ describe('ProducerWelcome recipes (FIX-e-burgos-015-005)', () => {
     const recipes = screen.getByTestId('producer-recipes');
     const starters = screen.getByTestId('producer-starters');
 
-    expect(recipes.querySelectorAll('button')).toHaveLength(1);
+    expect(recipes.querySelectorAll('button')).toHaveLength(2);
     expect(recipes.querySelector('[data-recipe="tutorial"]')?.textContent).toBe('Tutorial');
+    expect(recipes.querySelector('[data-recipe="tutorial-vertical"]')?.textContent).toBe(
+      'Vertical tutorial',
+    );
     expect(
       welcome.compareDocumentPosition(recipes) & Node.DOCUMENT_POSITION_PRECEDING,
     ).toBe(0);
@@ -194,6 +197,21 @@ describe('ProducerWelcome recipes (FIX-e-burgos-015-005)', () => {
   it('offers the recipes even when the project has no material yet', () => {
     renderWelcome(listing([]));
 
-    expect(screen.getByTestId('producer-recipes').querySelectorAll('button')).toHaveLength(1);
+    expect(screen.getByTestId('producer-recipes').querySelectorAll('button')).toHaveLength(2);
+  });
+
+  it('drops the vertical recipe prompt when its chip is tapped (FIX-e-burgos-015-008)', async () => {
+    const onDraft = renderWelcome(listing(['aroll']));
+
+    fireEvent.click(screen.getByRole('button', { name: 'Vertical tutorial' }));
+
+    await waitFor(() => {
+      expect(onDraft).toHaveBeenCalledWith(
+        PRODUCER_RECIPE_PROMPTS['tutorial-vertical'].en.replace(
+          '{script}',
+          RECIPE_SCRIPT_SENTENCES.en.missing,
+        ),
+      );
+    });
   });
 });

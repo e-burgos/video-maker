@@ -159,6 +159,9 @@ export const MESSAGES_ES: Messages = {
   'producer.recipe.tutorial.label': 'Tutorial',
   'producer.recipe.tutorial.description':
     'Tutorial de software o pantalla grabada: YouTube 16:9, narración sincronizada con la acción, subtítulos clásicos abajo, música suave, logo e inicio/cierre con el logo.',
+  'producer.recipe.tutorial-vertical.label': 'Tutorial vertical',
+  'producer.recipe.tutorial-vertical.description':
+    'La misma receta Tutorial en vertical 9:16, para Shorts, Reels y TikTok: necesita una grabación ya vertical, y el logo va arriba a la izquierda para no chocar con los botones de la app.',
   'producer.startersHeading': 'empezá con alguna de estas',
   'producer.startersHint': 'La sugerencia cae en el cuadro de abajo para que la termines con tus palabras.',
   'producer.starter.platform': 'Contame qué video querés y para qué plataforma',
