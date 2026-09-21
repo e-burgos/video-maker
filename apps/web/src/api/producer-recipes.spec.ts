@@ -7,7 +7,6 @@ import {
   recipePromptHasHole,
   hasProducerScript,
 } from './producer-recipes';
-import { PRODUCER_RECIPE_PROMPTS } from './producer-recipe-prompts';
 import { LANGUAGES } from '../i18n/language';
 import { MESSAGES_EN } from '../i18n/messages-en';
 import { MESSAGES_ES } from '../i18n/messages-es';
