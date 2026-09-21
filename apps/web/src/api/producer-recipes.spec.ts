@@ -86,6 +86,16 @@ describe('producer recipes', () => {
     expect(spanish).toContain('[pegá acá tu tabla de escenas, o decime que mire el video y te la proponga]');
   });
 
+  it('asks for a farewell line in both languages when the scene table has none (FIX-e-burgos-015-007)', async () => {
+    const spanish = await loadRecipePrompt('tutorial', 'es');
+    const english = await loadRecipePrompt('tutorial', 'en');
+
+    expect(spanish).toContain('El guion cierra siempre con una despedida');
+    expect(spanish).toContain('¡Gracias por ver este tutorial! Nos vemos en el próximo.');
+    expect(english).toContain('The script always closes with a farewell');
+    expect(english).toContain('¡Gracias por ver este tutorial! Nos vemos en el próximo.');
+  });
+
   it('says the same thing in english, word for word different', async () => {
     const english = await loadRecipePrompt('tutorial', 'en');
 

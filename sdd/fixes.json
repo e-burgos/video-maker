@@ -1751,21 +1751,70 @@
       "usage": {
         "provider_model": "claude/fable",
         "effort": "medium",
-        "tokens_in": 45000,
-        "tokens_out": 7000,
+        "tokens_in": 30000,
+        "tokens_out": 4000,
         "approx": true,
         "source": "declared-estimate",
-        "recorded_at": "2026-09-20",
+        "recorded_at": "2026-09-21",
         "by_agent": [
           {
             "agent": "steward",
             "provider_model": "claude/fable",
             "effort": "medium",
-            "tokens_in": 45000,
-            "tokens_out": 7000,
+            "tokens_in": 30000,
+            "tokens_out": 4000,
             "approx": true,
             "source": "declared-estimate",
-            "recorded_at": "2026-09-20"
+            "recorded_at": "2026-09-21"
+          }
+        ]
+      }
+    },
+    {
+      "id": "FIX-e-burgos-015-007",
+      "author": "e-burgos",
+      "spec_id": "spec-e-burgos-015-studio-producer",
+      "fix_document": "sdd/specs/spec-e-burgos-015-studio-producer/fixes/fix-e-burgos-015-007.md",
+      "type": "IMPROVEMENT",
+      "severity": "low",
+      "created_at": "2026-09-21",
+      "resolved_at": "2026-09-21",
+      "validated_at": null,
+      "title": "the Tutorial recipe always closes the video with a farewell line",
+      "estimation_hours": 1,
+      "description": "A scene table handed by the user, or a script already sitting in work/producer/script.txt, can end on the last on-screen action with no goodbye, so the tutorial ends abruptly under the closing plate. The Tutorial recipe of the producer system prompt now carries the rule THE SCRIPT ALWAYS ENDS WITH A FAREWELL: before synthesizing the voice the producer checks the last script line and, when it does not say goodbye, adds one itself as the last line, in the narration language and with its own [m:ss] mark over the closing seconds of the A-roll. It never asks permission, states in one line that it added it, and respects the farewell the user wrote. The recipe chip prompt says the same in both languages.",
+      "justification": "Prompt-only change on an existing recipe, no contract and no schema touched. Fast-fix mode.",
+      "related_modules": [
+        "studio-producer"
+      ],
+      "affected_files": [
+        "apps/render-api/src/producer/build-producer-system-prompt.ts",
+        "apps/render-api/src/producer/build-producer-system-prompt.spec.ts",
+        "apps/web/src/api/producer-recipe-prompts.ts",
+        "apps/web/src/api/producer-recipes.spec.ts"
+      ],
+      "test_reference": "pnpm nx run-many -t lint test -p web render-api green (2026-09-21); new cases assert the farewell rule in the system prompt and in both recipe prompts.",
+      "status": "implemented",
+      "cycle": null,
+      "process_note": "Resolved by the steward directly in the main loop (fast-fix mode).",
+      "usage": {
+        "provider_model": "claude/fable",
+        "effort": "medium",
+        "tokens_in": 30000,
+        "tokens_out": 4000,
+        "approx": true,
+        "source": "declared-estimate",
+        "recorded_at": "2026-09-21",
+        "by_agent": [
+          {
+            "agent": "steward",
+            "provider_model": "claude/fable",
+            "effort": "medium",
+            "tokens_in": 30000,
+            "tokens_out": 4000,
+            "approx": true,
+            "source": "declared-estimate",
+            "recorded_at": "2026-09-21"
           }
         ]
       }

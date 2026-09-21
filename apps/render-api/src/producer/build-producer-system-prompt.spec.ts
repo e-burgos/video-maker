@@ -309,6 +309,14 @@ describe('buildProducerAppRulesSection — receta Tutorial (FIX-015-005)', () =>
     expect(section).toContain('which logo');
   });
 
+  it('cierra siempre el tutorial con una despedida, aunque el guion no la traiga (FIX-e-burgos-015-007)', () => {
+    expect(section).toContain('THE SCRIPT ALWAYS ENDS WITH A FAREWELL');
+    expect(section).toContain('ADD one yourself as the last');
+    expect(section).toContain('¡Gracias por ver este tutorial! Nos vemos en el próximo.');
+    expect(section).toContain('Never ask permission for it');
+    expect(section).toContain('respect the farewell the user wrote when there is one');
+  });
+
   it('pide un guion con marcas de tiempo, una línea por escena', () => {
     expect(section).toContain('carry `[m:ss]` marks');
     expect(section).toContain('one line per scene');
