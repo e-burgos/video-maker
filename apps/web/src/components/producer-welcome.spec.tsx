@@ -8,7 +8,7 @@ import {
   STARTER_KEYS_WITH_MATERIAL,
   inventoryOf,
 } from './producer-welcome';
-import { PRODUCER_RECIPE_PROMPTS } from '../api/producer-recipe-prompts';
+import { PRODUCER_RECIPE_PROMPTS, RECIPE_SCRIPT_SENTENCES } from '../api/producer-recipe-prompts';
 import type { AssetListing } from '../api/render-api-types';
 import { LANGUAGE_STORAGE_KEY } from '../i18n/language';
 import { LanguageProvider } from '../i18n/language-context';
@@ -172,7 +172,9 @@ describe('ProducerWelcome recipes (FIX-e-burgos-015-005)', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Tutorial' }));
 
     await waitFor(() => {
-      expect(onDraft).toHaveBeenCalledWith(PRODUCER_RECIPE_PROMPTS.tutorial.en);
+      expect(onDraft).toHaveBeenCalledWith(
+        PRODUCER_RECIPE_PROMPTS.tutorial.en.replace('{script}', RECIPE_SCRIPT_SENTENCES.en.missing),
+      );
     });
   });
 
@@ -183,7 +185,9 @@ describe('ProducerWelcome recipes (FIX-e-burgos-015-005)', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Tutorial' }));
 
     await waitFor(() => {
-      expect(onDraft).toHaveBeenCalledWith(PRODUCER_RECIPE_PROMPTS.tutorial.es);
+      expect(onDraft).toHaveBeenCalledWith(
+        PRODUCER_RECIPE_PROMPTS.tutorial.es.replace('{script}', RECIPE_SCRIPT_SENTENCES.es.missing),
+      );
     });
   });
 

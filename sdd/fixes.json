@@ -1718,6 +1718,57 @@
           }
         ]
       }
+    },
+    {
+      "id": "FIX-e-burgos-015-006",
+      "author": "e-burgos",
+      "spec_id": "spec-e-burgos-015-studio-producer",
+      "fix_document": "sdd/specs/spec-e-burgos-015-studio-producer/fixes/fix-e-burgos-015-006.md",
+      "type": "IMPROVEMENT",
+      "severity": "low",
+      "created_at": "2026-09-20",
+      "resolved_at": "2026-09-20",
+      "validated_at": null,
+      "title": "the Tutorial recipe and the producer use the timed script an external agent left in work/producer/script.txt",
+      "estimation_hours": 1,
+      "description": "External projects deliver the narration script with time marks at work/producer/script.txt (material contract skill, section 3). The Tutorial recipe still asked the user to paste a scene table, and the producer prompt did not mention the file. Now the recipe replaces the hole with 'use the script already in the project' when the generated listing shows work/producer/script.txt, and the producer context reports producerScript none|plain|timed so the system prompt declares it as THE script and forbids asking for the table again.",
+      "justification": "Small web and prompt change on an existing feature, no contract change (the generated listing already existed). Fast-fix mode.",
+      "related_modules": [
+        "studio-producer"
+      ],
+      "affected_files": [
+        "apps/web/src/api/producer-recipes.ts",
+        "apps/web/src/api/producer-recipe-prompts.ts",
+        "apps/web/src/components/producer-welcome.tsx",
+        "apps/web/src/pages/producer-page.tsx",
+        "apps/render-api/src/producer/collect-producer-context.ts",
+        "apps/render-api/src/producer/build-producer-system-prompt.ts"
+      ],
+      "test_reference": "pnpm nx run-many -t lint test build -p web render-api green (2026-09-20): web 1006 tests, render-api 999; new cases cover the present/missing script sentence and the prompt rule for timed, plain and absent scripts.",
+      "status": "implemented",
+      "cycle": null,
+      "process_note": "Resolved by the steward directly in the main loop (fast-fix mode).",
+      "usage": {
+        "provider_model": "claude/fable",
+        "effort": "medium",
+        "tokens_in": 45000,
+        "tokens_out": 7000,
+        "approx": true,
+        "source": "declared-estimate",
+        "recorded_at": "2026-09-20",
+        "by_agent": [
+          {
+            "agent": "steward",
+            "provider_model": "claude/fable",
+            "effort": "medium",
+            "tokens_in": 45000,
+            "tokens_out": 7000,
+            "approx": true,
+            "source": "declared-estimate",
+            "recorded_at": "2026-09-20"
+          }
+        ]
+      }
     }
   ]
 }

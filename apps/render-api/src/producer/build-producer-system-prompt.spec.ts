@@ -20,6 +20,7 @@ const CONTEXT: ProducerProjectContext = {
     { path: 'raw/logo/logo.png', role: 'logo', durationMs: null },
   ],
   hasTimeline: true,
+  producerScript: 'none',
 };
 
 const EMPTY_CONTEXT: ProducerProjectContext = {
@@ -27,6 +28,7 @@ const EMPTY_CONTEXT: ProducerProjectContext = {
   assetSource: 'raw-scan',
   assets: [],
   hasTimeline: false,
+  producerScript: 'none',
 };
 
 describe('buildProducerProjectSection', () => {
@@ -111,6 +113,17 @@ describe('buildProducerAppRulesSection', () => {
     expect(buildProducerAppRulesSection(CONTEXT, '/usr/bin/piper', 'sonnet')).toContain(
       'Bash(/usr/bin/piper *)',
     );
+  });
+
+  it('cuando el proyecto ya trae work/producer/script.txt lo declara como EL guion y prohibe pedir la tabla de nuevo', () => {
+    const timed = buildProducerProjectSection({ ...CONTEXT, producerScript: 'timed' });
+    const plain = buildProducerProjectSection({ ...CONTEXT, producerScript: 'plain' });
+    const none = buildProducerProjectSection({ ...CONTEXT, producerScript: 'none' });
+
+    expect(timed).toContain('work/producer/script.txt WITH time marks');
+    expect(timed).toContain('never ask the user for a scene table');
+    expect(plain).toContain('without time marks');
+    expect(none).not.toContain('work/producer/script.txt');
   });
 
   it('traduce el lenguaje comun del usuario a jobs y flags sin pedirle parametros tecnicos (FIX-e-burgos-015-003)', () => {

@@ -12,10 +12,12 @@ import { ProducerComposer } from '../components/producer-composer';
 import { ProducerMessageList } from '../components/producer-message-list';
 import { ProducerTurnActivity } from '../components/producer-turn-activity';
 import { ProducerWelcome } from '../components/producer-welcome';
+import { hasProducerScript } from '../api/producer-recipes';
 import type {
   AssetListing,
   ProducerConversation,
   RenderJobListing,
+  GeneratedListing,
 } from '../api/render-api-types';
 
 function JobStrip({ listing }: { listing: RenderJobListing | null }) {
@@ -57,11 +59,14 @@ export function ProducerPage() {
   const loadAssets = useCallback(() => client.listAssets(slug), [client, slug]);
   const loadHealth = useCallback(() => client.getHealth(), [client]);
   const loadJobs = useCallback(() => client.listRenderJobs(slug), [client, slug]);
+  const loadGenerated = useCallback(() => client.listGenerated(slug), [client, slug]);
 
   const conversation = useAsyncResource<ProducerConversation>(loadConversation, `producer:${slug}`);
   const assets = useAsyncResource<AssetListing>(loadAssets, `assets:${slug}`);
   const health = useAsyncResource(loadHealth, 'health');
   const jobs = useAsyncResource<RenderJobListing>(loadJobs, `jobs:${slug}`);
+  const generated = useAsyncResource<GeneratedListing>(loadGenerated, `generated:${slug}`);
+  const hasTimedScript = hasProducerScript(generated.data);
 
   const [draft, setDraft] = useState('');
   const [model, setModel] = useState<string | null>(null);
@@ -171,7 +176,7 @@ export function ProducerPage() {
       )}
 
       {conversation.data !== null && messages.length === 0 && (
-        <ProducerWelcome slug={slug} assets={assets.data} onDraft={setDraft} />
+        <ProducerWelcome slug={slug} assets={assets.data} onDraft={setDraft} hasTimedScript={hasTimedScript} />
       )}
 
       {messages.length > 0 && (

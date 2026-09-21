@@ -18,6 +18,7 @@ export interface ProducerProjectContext {
   readonly assetSource: 'catalog' | 'raw-scan';
   readonly assets: readonly ProducerContextAsset[];
   readonly hasTimeline: boolean;
+  readonly producerScript: 'none' | 'plain' | 'timed';
 }
 
 export interface ProducerContextInput {
@@ -32,6 +33,7 @@ export async function collectProducerContext(
 ): Promise<ProducerProjectContext> {
   const projectAssets = await resolveProjectAssets(deps.storage, project);
   const timelineStat = await deps.storage.stat(toAbsolutePath(project, timelinePath()));
+  const producerScript = await readProducerScriptKind(deps, project);
 
   return {
     slug: project.slug,
@@ -45,5 +47,21 @@ export async function collectProducerContext(
       durationMs: entry.media?.durationMs ?? null,
     })),
     hasTimeline: timelineStat !== null && timelineStat.kind === 'file',
+    producerScript,
   };
+}
+
+const TIME_MARK_PATTERN = /^\s*\[\d{1,2}:\d{2}/mu;
+
+async function readProducerScriptKind(
+  deps: RenderApiDependencies,
+  project: MediaProject,
+): Promise<'none' | 'plain' | 'timed'> {
+  const scriptPath = toAbsolutePath(project, 'work/producer/script.txt');
+  const stat = await deps.storage.stat(scriptPath);
+  if (stat === null || stat.kind !== 'file') {
+    return 'none';
+  }
+  const text = await deps.storage.readTextFile(scriptPath);
+  return TIME_MARK_PATTERN.test(text) ? 'timed' : 'plain';
 }

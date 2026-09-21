@@ -5,6 +5,7 @@ import {
   PRODUCER_RECIPE_IDS,
   loadRecipePrompt,
   recipePromptHasHole,
+  hasProducerScript,
 } from './producer-recipes';
 import { PRODUCER_RECIPE_PROMPTS } from './producer-recipe-prompts';
 import { LANGUAGES } from '../i18n/language';
@@ -74,7 +75,7 @@ describe('producer recipes', () => {
   });
 
   it('spells out in the tutorial prompt every decision of the video that worked', async () => {
-    const spanish = PRODUCER_RECIPE_PROMPTS.tutorial.es;
+    const spanish = await loadRecipePrompt('tutorial', 'es');
 
     expect(spanish).toContain('YouTube');
     expect(spanish).toContain('voz generada (Daniela, español rioplatense)');
@@ -87,7 +88,7 @@ describe('producer recipes', () => {
   });
 
   it('says the same thing in english, word for word different', async () => {
-    const english = PRODUCER_RECIPE_PROMPTS.tutorial.en;
+    const english = await loadRecipePrompt('tutorial', 'en');
 
     expect(english).toContain('for YouTube');
     expect(english).toContain('generated voice (Daniela, Rioplatense Spanish)');
@@ -97,6 +98,17 @@ describe('producer recipes', () => {
     expect(english).toContain('transparent logo at the bottom right at 50 %');
     expect(english).toContain('2 second opening plate and closing plate with a white background');
     expect(english).toContain('[paste your table of scenes here, or tell me to watch the video and propose it to you]');
-    expect(english).not.toBe(PRODUCER_RECIPE_PROMPTS.tutorial.es);
+    expect(english).not.toBe(await loadRecipePrompt('tutorial', 'es'));
+  });
+
+  it('replaces the script hole with the project script when work/producer/script.txt exists (FIX-e-burgos-015-006)', async () => {
+    const withScript = await loadRecipePrompt('tutorial', 'es', { hasTimedScript: true });
+    const without = await loadRecipePrompt('tutorial', 'es');
+
+    expect(withScript).toContain('usá el que ya está en el proyecto (work/producer/script.txt)');
+    expect(recipePromptHasHole(withScript)).toBe(false);
+    expect(recipePromptHasHole(without)).toBe(true);
+    expect(hasProducerScript({ slug: 'x', roots: [], files: [{ path: 'work/producer/script.txt' } as never] })).toBe(true);
+    expect(hasProducerScript(null)).toBe(false);
   });
 });

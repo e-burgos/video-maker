@@ -40,6 +40,15 @@ function assetSection(context: ProducerProjectContext): string {
 }
 
 export function buildProducerProjectSection(context: ProducerProjectContext): string {
+  const scriptLines =
+    context.producerScript === 'none'
+      ? []
+      : [
+          `- The project already has a narration script at work/producer/script.txt${context.producerScript === 'timed' ? ' WITH time marks' : ' without time marks'}.`,
+          '  Use it as THE script: never ask the user for a scene table or to paste it again. If it has time',
+          '  marks, they are the timing of the narration. If it has none, propose the timing after watching',
+          '  frames of the video and confirm it in one round.',
+        ];
   return [
     '# This project',
     '',
@@ -50,6 +59,7 @@ export function buildProducerProjectSection(context: ProducerProjectContext): st
     `- Persisted timeline: ${context.hasTimeline ? 'yes, work/timeline.json exists' : 'none yet'}`,
     '',
     assetSection(context),
+    ...scriptLines,
   ].join('\n');
 }
 

@@ -11,6 +11,7 @@ export type ProducerWelcomeProps = {
   slug: string;
   assets: AssetListing | null;
   onDraft: (text: string) => void;
+  hasTimedScript?: boolean;
 };
 
 export type InventoryEntry = {
@@ -52,7 +53,7 @@ export function inventoryOf(assets: AssetListing | null): InventoryEntry[] {
   return [...known, ...extra];
 }
 
-export function ProducerWelcome({ slug, assets, onDraft }: ProducerWelcomeProps) {
+export function ProducerWelcome({ slug, assets, onDraft, hasTimedScript = false }: ProducerWelcomeProps) {
   const t = useT();
   const { language } = useLanguage();
   const inventory = inventoryOf(assets);
@@ -60,7 +61,7 @@ export function ProducerWelcome({ slug, assets, onDraft }: ProducerWelcomeProps)
   const starterKeys = hasMaterial ? STARTER_KEYS_WITH_MATERIAL : STARTER_KEYS_WITHOUT_MATERIAL;
 
   async function draftRecipe(id: ProducerRecipeId) {
-    onDraft(await loadRecipePrompt(id, language));
+    onDraft(await loadRecipePrompt(id, language, { hasTimedScript }));
   }
 
   return (

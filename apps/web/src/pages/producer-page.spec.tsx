@@ -57,6 +57,7 @@ function renderPage(client: Partial<RenderApiClient>) {
     getHealth: vi.fn().mockResolvedValue(health()),
     listAssets: vi.fn().mockResolvedValue(assetListing()),
     listRenderJobs: vi.fn().mockResolvedValue({ slug: 'demo-01', jobs: [] }),
+    listGenerated: vi.fn().mockResolvedValue({ slug: 'demo-01', roots: [], files: [] }),
     getProducer: vi.fn().mockResolvedValue(producerConversation()),
     ...client,
   };
