@@ -24,7 +24,21 @@ import {
   handleGetProducer,
   handleGetProducerTurn,
 } from './handlers/producer-handler';
-import { handleCreateProject, handleGetProject, handleListProjects } from './handlers/projects-handler';
+import {
+  handleCreateProject,
+  handleDeleteProject,
+  handleGetProject,
+  handleListProjects,
+  handlePutProjectPlacement,
+} from './handlers/projects-handler';
+import {
+  handleCreateCategory,
+  handleCreateFolder,
+  handleDeleteCategory,
+  handleDeleteFolder,
+  handleListFolders,
+  handleRenameFolder,
+} from './handlers/folders-handler';
 import {
   handleGetStoryboard,
   handleGetStoryboardPrompts,
@@ -80,6 +94,22 @@ export async function handleRequest(
         return await handleCreateProject(deps, store, params, request);
       case 'projects.detail':
         return await handleGetProject(deps, store, params);
+      case 'projects.delete':
+        return await handleDeleteProject(deps, store, params);
+      case 'projects.placement.put':
+        return await handlePutProjectPlacement(deps, store, params, request);
+      case 'folders.list':
+        return await handleListFolders(deps, store);
+      case 'folders.create':
+        return await handleCreateFolder(deps, store, params, request);
+      case 'folders.rename':
+        return await handleRenameFolder(deps, store, params, request);
+      case 'folders.delete':
+        return await handleDeleteFolder(deps, store, params);
+      case 'folders.categories.create':
+        return await handleCreateCategory(deps, store, params, request);
+      case 'folders.categories.delete':
+        return await handleDeleteCategory(deps, store, params);
       case 'projects.assets.list':
         return await handleListAssets(deps, store, params);
       case 'projects.assets.upload':

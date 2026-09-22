@@ -89,6 +89,10 @@ const MESSAGE_BY_CODE: Readonly<Record<RenderApiErrorCode, string>> = {
   PRODUCER_MESSAGE_INVALID: 'The producer message must carry a non-empty text field.',
   PRODUCER_MODEL_INVALID: 'The requested producer model is not one of the models this service allows.',
   PRODUCER_STATE_INVALID: 'The stored producer state exists but could not be read.',
+  FOLDER_NOT_FOUND: 'No folder with that id is registered in this media root.',
+  FOLDER_NAME_INVALID: 'A folder or category needs a name holding at least one letter or digit.',
+  FOLDER_CATEGORY_NOT_FOUND: 'That folder has no category with that id.',
+  VIDEO_PLACEMENT_INVALID: 'The requested placement for the video is not a valid folder and category pair.',
 };
 
 export function toErrorPayload(value: unknown): RenderApiErrorPayload {

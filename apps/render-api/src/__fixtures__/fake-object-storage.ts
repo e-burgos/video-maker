@@ -242,5 +242,15 @@ export function createFakeObjectStorage(callLog: CallLog, seed?: FakeObjectStora
       callLog.record('removeFile', path);
       records.delete(path);
     },
+
+    removeDirectory: async (path) => {
+      callLog.record('removeDirectory', path);
+      const prefix = `${path}/`;
+      for (const key of [...records.keys()]) {
+        if (key === path || key.startsWith(prefix)) {
+          records.delete(key);
+        }
+      }
+    },
   };
 }

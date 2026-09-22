@@ -87,6 +87,10 @@ const STATUS_BY_CODE: Readonly<Record<RenderApiErrorCode, number>> = {
   PRODUCER_MESSAGE_INVALID: 422,
   PRODUCER_MODEL_INVALID: 422,
   PRODUCER_STATE_INVALID: 422,
+  FOLDER_NOT_FOUND: 404,
+  FOLDER_NAME_INVALID: 422,
+  FOLDER_CATEGORY_NOT_FOUND: 404,
+  VIDEO_PLACEMENT_INVALID: 422,
 };
 
 export function httpStatusFor(code: RenderApiErrorCode): number {

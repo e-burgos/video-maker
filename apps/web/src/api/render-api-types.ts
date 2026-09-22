@@ -56,6 +56,38 @@ export type ProjectSummary = {
   layout: ProjectLayout;
 };
 
+export type VideoCategory = {
+  id: string;
+  name: string;
+};
+
+export type VideoFolder = {
+  id: string;
+  name: string;
+  categories: VideoCategory[];
+};
+
+export type VideoPlacement = {
+  folderId: string | null;
+  categoryId: string | null;
+  archived: boolean;
+};
+
+export type VideoOrganization = {
+  folders: VideoFolder[];
+  videos: Record<string, VideoPlacement>;
+};
+
+export type VideoPlacementResult = {
+  slug: string;
+  placement: VideoPlacement;
+};
+
+export type VideoDeletion = {
+  slug: string;
+  deleted: boolean;
+};
+
 export type AssetCounts = Record<AssetRole, number>;
 
 export type ProjectDetail = ProjectSummary & {

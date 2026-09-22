@@ -13,6 +13,9 @@ import type { ObjectStorage } from '../../deps/object-storage';
 import type { RenderApiDependencies } from '../../deps/render-api-dependencies';
 import { PipelineStageError } from '../../errors/pipeline-stage-error';
 import { isValidProjectSlug } from '../../store/project-slug';
+import { archiveVideo, findCategory, findFolder, forgetVideo, placeVideo, placementOf } from '../../store/organization';
+import type { Organization } from '../../store/organization';
+import { readOrganization, writeOrganization } from '../../store/organization-store';
 import { layoutFlagsFrom } from '../../store/project-layout';
 import type { ProjectLayoutFlags } from '../../store/project-layout';
 import { countAssetsByRole, resolveProjectAssets } from '../../store/project-assets';
@@ -180,4 +183,158 @@ export async function handleGetProject(
   }
 
   return jsonResponse(200, await buildProjectDetail(deps.storage, project, slug));
+}
+
+function extractPlacementFromBody(value: unknown): {
+  folderId: string | null;
+  categoryId: string | null;
+  archived: boolean | null;
+} {
+  if (typeof value !== 'object' || value === null || Array.isArray(value)) {
+    throw new PipelineStageError({
+      code: 'REQUEST_BODY_INVALID_JSON',
+      stage: null,
+      expected: 'a JSON object',
+    });
+  }
+
+  const { folderId, categoryId, archived } = value as {
+    folderId?: unknown;
+    categoryId?: unknown;
+    archived?: unknown;
+  };
+
+  const readOptionalId = (candidate: unknown, field: string): string | null => {
+    if (candidate === undefined || candidate === null) {
+      return null;
+    }
+    if (typeof candidate !== 'string') {
+      throw new PipelineStageError({
+        code: 'VIDEO_PLACEMENT_INVALID',
+        stage: null,
+        resource: field,
+        expected: 'a string identifier or null',
+      });
+    }
+    return candidate;
+  };
+
+  if (archived !== undefined && typeof archived !== 'boolean') {
+    throw new PipelineStageError({
+      code: 'VIDEO_PLACEMENT_INVALID',
+      stage: null,
+      resource: 'archived',
+      expected: 'a boolean',
+    });
+  }
+
+  return {
+    folderId: readOptionalId(folderId, 'folderId'),
+    categoryId: readOptionalId(categoryId, 'categoryId'),
+    archived: archived === undefined ? null : archived,
+  };
+}
+
+function assertPlacementExists(
+  organization: Organization,
+  folderId: string | null,
+  categoryId: string | null,
+): void {
+  if (folderId === null) {
+    if (categoryId !== null) {
+      throw new PipelineStageError({
+        code: 'VIDEO_PLACEMENT_INVALID',
+        stage: null,
+        resource: categoryId,
+        expected: 'no category when the video belongs to no folder',
+      });
+    }
+    return;
+  }
+
+  const folder = findFolder(organization, folderId);
+  if (folder === null) {
+    throw new PipelineStageError({ code: 'FOLDER_NOT_FOUND', stage: null, resource: folderId });
+  }
+  if (categoryId !== null && findCategory(folder, categoryId) === null) {
+    throw new PipelineStageError({
+      code: 'FOLDER_CATEGORY_NOT_FOUND',
+      stage: null,
+      resource: `${folderId}/${categoryId}`,
+    });
+  }
+}
+
+async function assertProjectDirectoryExists(
+  deps: RenderApiDependencies,
+  project: MediaProject,
+  slug: string,
+): Promise<void> {
+  const existing = await deps.storage.stat(project.root);
+  if (existing === null || existing.kind !== 'directory') {
+    throw new PipelineStageError({ code: 'PROJECT_NOT_FOUND', stage: null, resource: slug });
+  }
+}
+
+export async function handlePutProjectPlacement(
+  deps: RenderApiDependencies,
+  store: StoreConfig,
+  params: RouteParams,
+  request: HttpRequestLine,
+): Promise<HttpResponse> {
+  const slug = params.slug ?? '';
+  assertValidProjectSlug(slug);
+
+  const project = resolveMediaProject(join(store.mediaRoot, slug));
+  await assertProjectDirectoryExists(deps, project, slug);
+
+  const bodyResult = await readJsonBody(request.body.stream(), MAX_JSON_BODY_BYTES);
+  if (bodyResult.kind === 'too-large') {
+    throw new PipelineStageError({
+      code: 'REQUEST_BODY_TOO_LARGE',
+      stage: null,
+      expected: `at most ${MAX_JSON_BODY_BYTES} bytes`,
+    });
+  }
+  if (bodyResult.kind !== 'parsed') {
+    throw new PipelineStageError({
+      code: 'REQUEST_BODY_INVALID_JSON',
+      stage: null,
+      expected: 'a JSON object',
+    });
+  }
+
+  const requested = extractPlacementFromBody(bodyResult.value);
+  const current = await readOrganization(deps.storage, store.mediaRoot);
+  assertPlacementExists(current, requested.folderId, requested.categoryId);
+
+  const placed = placeVideo(current, slug, {
+    folderId: requested.folderId,
+    categoryId: requested.categoryId,
+  });
+  const organization =
+    requested.archived === null ? placed : archiveVideo(placed, slug, requested.archived);
+
+  await writeOrganization(deps.storage, store.mediaRoot, organization);
+
+  return jsonResponse(200, { slug, placement: placementOf(organization, slug) });
+}
+
+export async function handleDeleteProject(
+  deps: RenderApiDependencies,
+  store: StoreConfig,
+  params: RouteParams,
+): Promise<HttpResponse> {
+  const slug = params.slug ?? '';
+  assertValidProjectSlug(slug);
+
+  const project = resolveMediaProject(join(store.mediaRoot, slug));
+  await assertProjectDirectoryExists(deps, project, slug);
+
+  await deps.storage.removeDirectory(project.root);
+
+  const current = await readOrganization(deps.storage, store.mediaRoot);
+  await writeOrganization(deps.storage, store.mediaRoot, forgetVideo(current, slug));
+
+  return jsonResponse(200, { slug, deleted: true });
 }

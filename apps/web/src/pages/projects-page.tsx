@@ -1,36 +1,164 @@
-import { useCallback } from 'react';
+import { useCallback, useState } from 'react';
 import { Link } from 'react-router-dom';
 
 import { useRenderApi } from '../api/render-api-context';
+import { archivedVideos, groupVideos, placementFor } from '../api/video-grouping';
+import type { VideoGroup } from '../api/video-grouping';
 import { useT } from '../i18n/language-context';
 import { useAsyncResource } from '../hooks/use-async-resource';
+import { CreateFolderForm } from '../components/create-folder-form';
 import { CreateProjectForm } from '../components/create-project-form';
 import { ErrorNotice } from '../components/error-notice';
-import type { ProjectLayout, ProjectSummary } from '../api/render-api-types';
+import { FolderHeading } from '../components/folder-heading';
+import { VideoCard } from '../components/video-card';
+import type { ProjectSummary, VideoOrganization } from '../api/render-api-types';
 
-const LAYOUT_FLAGS: ReadonlyArray<keyof ProjectLayout> = ['raw', 'catalog', 'timeline', 'edl', 'out'];
-
-function LayoutFlags({ layout }: { layout: ProjectLayout }) {
+function VideoGrid({
+  videos,
+  organization,
+  onChanged,
+}: {
+  videos: readonly ProjectSummary[];
+  organization: VideoOrganization;
+  onChanged: () => void;
+}) {
   return (
-    <ul className="flex flex-wrap gap-1.5">
-      {LAYOUT_FLAGS.map((flag) => (
-        <li
-          key={flag}
-          data-present={layout[flag]}
-          className="rounded border border-slate-700 px-1.5 py-0.5 font-mono text-[11px] text-slate-500 data-[present=true]:border-emerald-500/50 data-[present=true]:text-emerald-300"
-        >
-          {flag}
+    <ul className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+      {videos.map((video) => (
+        <li key={video.slug}>
+          <VideoCard
+            video={video}
+            placement={placementFor(organization, video.slug)}
+            folders={organization.folders}
+            onChanged={onChanged}
+          />
         </li>
       ))}
     </ul>
   );
 }
 
+function FolderSection({
+  group,
+  organization,
+  onChanged,
+}: {
+  group: VideoGroup;
+  organization: VideoOrganization;
+  onChanged: () => void;
+}) {
+  const t = useT();
+
+  return (
+    <section
+      data-testid="folder-section"
+      data-folder={group.folder?.id ?? 'unassigned'}
+      className="space-y-3 rounded-xl border border-slate-800/80 p-4"
+    >
+      <FolderHeading folder={group.folder} total={group.total} onChanged={onChanged} />
+
+      {group.total === 0 ? (
+        <p data-testid="folder-empty" className="text-sm text-slate-500">
+          {t('projects.folderEmpty')}
+        </p>
+      ) : (
+        group.buckets
+          .filter((bucket) => bucket.videos.length > 0)
+          .map((bucket) => (
+            <div
+              key={bucket.category?.id ?? 'uncategorized'}
+              data-testid="category-bucket"
+              data-category={bucket.category?.id ?? 'uncategorized'}
+              className="space-y-2"
+            >
+              <h4 className="text-xs uppercase tracking-wide text-slate-500">
+                {bucket.category === null ? t('projects.noCategory') : bucket.category.name}
+              </h4>
+              <VideoGrid videos={bucket.videos} organization={organization} onChanged={onChanged} />
+            </div>
+          ))
+      )}
+    </section>
+  );
+}
+
+function ReadyProjects({
+  videos,
+  organization,
+  onChanged,
+}: {
+  videos: readonly ProjectSummary[];
+  organization: VideoOrganization;
+  onChanged: () => void;
+}) {
+  const t = useT();
+  const [showArchived, setShowArchived] = useState(false);
+  const archived = archivedVideos(videos, organization);
+
+  if (videos.length === 0) {
+    return (
+      <p className="text-sm text-slate-500">
+        {t('projects.empty')}{' '}
+        <Link to="/guide" className="text-sky-300 underline hover:text-sky-200">
+          {t('guide.howDoesThisWork')}
+        </Link>
+      </p>
+    );
+  }
+
+  return (
+    <>
+      <div className="space-y-4">
+        {groupVideos(videos, organization).map((group) => (
+          <FolderSection
+            key={group.folder?.id ?? 'unassigned'}
+            group={group}
+            organization={organization}
+            onChanged={onChanged}
+          />
+        ))}
+      </div>
+
+      {archived.length > 0 && (
+        <section data-testid="archived-section" className="space-y-3">
+          <button
+            type="button"
+            data-testid="archived-toggle"
+            aria-expanded={showArchived}
+            onClick={() => setShowArchived((open) => !open)}
+            className="text-sm text-slate-400 underline hover:text-slate-200"
+          >
+            {showArchived
+              ? t('projects.hideArchived', { count: String(archived.length) })
+              : t('projects.showArchived', { count: String(archived.length) })}
+          </button>
+          {showArchived && (
+            <VideoGrid videos={archived} organization={organization} onChanged={onChanged} />
+          )}
+        </section>
+      )}
+    </>
+  );
+}
+
 export function ProjectsPage() {
   const client = useRenderApi();
-  const load = useCallback(() => client.listProjects(), [client]);
-  const projects = useAsyncResource<ProjectSummary[]>(load, 'projects');
   const t = useT();
+
+  const loadVideos = useCallback(() => client.listProjects(), [client]);
+  const loadOrganization = useCallback(() => client.getOrganization(), [client]);
+  const videos = useAsyncResource<ProjectSummary[]>(loadVideos, 'projects');
+  const organization = useAsyncResource<VideoOrganization>(loadOrganization, 'organization');
+
+  const reloadVideos = videos.reload;
+  const reloadOrganization = organization.reload;
+  const reloadAll = useCallback(() => {
+    reloadVideos();
+    reloadOrganization();
+  }, [reloadOrganization, reloadVideos]);
+
+  const videoList = videos.data;
+  const organizationData = organization.data;
 
   return (
     <section className="space-y-6">
@@ -39,40 +167,28 @@ export function ProjectsPage() {
           <h1 className="text-2xl font-semibold tracking-tight">{t('projects.title')}</h1>
           <p className="mt-1 text-sm text-slate-400">{t('projects.subtitle')}</p>
         </div>
-        <CreateProjectForm onCreated={projects.reload} />
+        <div className="flex flex-wrap items-end gap-6">
+          <CreateFolderForm onCreated={reloadAll} />
+          <CreateProjectForm onCreated={reloadAll} />
+        </div>
       </div>
 
-      {projects.status === 'loading' && (
+      {(videos.status === 'loading' || organization.status === 'loading') && (
         <p className="text-sm text-slate-500">{t('projects.loading')}</p>
       )}
-      {projects.status === 'error' && projects.error !== null && (
-        <ErrorNotice error={projects.error} onRetry={projects.reload} />
+      {videos.status === 'error' && videos.error !== null && (
+        <ErrorNotice error={videos.error} onRetry={reloadAll} />
       )}
-      {projects.status === 'ready' && projects.data !== null && projects.data.length === 0 && (
-        <p className="text-sm text-slate-500">
-          {t('projects.empty')}{' '}
-          <Link to="/guide" className="text-sky-300 underline hover:text-sky-200">
-            {t('guide.howDoesThisWork')}
-          </Link>
-        </p>
+      {organization.status === 'error' && organization.error !== null && (
+        <ErrorNotice error={organization.error} onRetry={reloadAll} />
       )}
-      {projects.status === 'ready' && projects.data !== null && projects.data.length > 0 && (
-        <ul className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-          {projects.data.map((project) => (
-            <li key={project.slug}>
-              <Link
-                to={`/projects/${encodeURIComponent(project.slug)}/producer`}
-                className="block rounded-lg border border-slate-800 bg-slate-900/60 p-4 hover:border-slate-600"
-              >
-                <p className="font-mono text-sm font-medium text-slate-100">{project.slug}</p>
-                <div className="mt-3">
-                  <LayoutFlags layout={project.layout} />
-                </div>
-              </Link>
-            </li>
-          ))}
-        </ul>
-      )}
+
+      {videos.status === 'ready' &&
+        videoList !== null &&
+        organization.status === 'ready' &&
+        organizationData !== null && (
+          <ReadyProjects videos={videoList} organization={organizationData} onChanged={reloadAll} />
+        )}
     </section>
   );
 }

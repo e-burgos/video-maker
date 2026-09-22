@@ -7,7 +7,14 @@ import { requestLine } from '../../__fixtures__/http-request';
 import type { StoreConfig } from '../../config/store-config';
 import { toErrorPayload } from '../../errors/to-error-payload';
 import { MAX_JSON_BODY_BYTES } from '../read-json-body';
-import { handleCreateProject, handleGetProject, handleListProjects } from './projects-handler';
+import { organizationPath } from '../../store/organization-store';
+import {
+  handleCreateProject,
+  handleDeleteProject,
+  handleGetProject,
+  handleListProjects,
+  handlePutProjectPlacement,
+} from './projects-handler';
 
 const STORE: StoreConfig = { mediaRoot: '/media', maxUploadBytes: 2_147_483_648, objectStore: 'fs' };
 
@@ -249,5 +256,189 @@ describe('handleGetProject', () => {
       assetSource: 'raw-scan',
       assetCounts: { aroll: 1, broll: 0, image: 0, audio: 0, voice: 0 },
     });
+  });
+});
+
+const ORGANIZATION = {
+  folders: [{ id: 'display-ads', name: 'Display Ads', categories: [{ id: 'campanas', name: 'Campañas' }] }],
+  videos: {},
+};
+
+function projectStorage(slug: string, organization: unknown = ORGANIZATION) {
+  const callLog = createCallLog();
+  const storage = createFakeObjectStorage(callLog, {
+    directories: [
+      `${STORE.mediaRoot}/${slug}`,
+      `${STORE.mediaRoot}/${slug}/raw`,
+      `${STORE.mediaRoot}/${slug}/out`,
+    ],
+    files: [
+      { path: organizationPath(STORE.mediaRoot), contents: JSON.stringify(organization) },
+      { path: `${STORE.mediaRoot}/${slug}/raw/aroll/take.mp4`, contents: 'video bytes' },
+    ],
+  });
+  return { callLog, storage, deps: createFakeRenderApiDependencies(callLog, { storage }) };
+}
+
+describe('handlePutProjectPlacement', () => {
+  it('files the video under a folder and a category', async () => {
+    const { deps } = projectStorage('editar-campana');
+
+    const response = await handlePutProjectPlacement(
+      deps,
+      STORE,
+      { slug: 'editar-campana' },
+      requestLine({
+        method: 'PUT',
+        path: '/projects/editar-campana/placement',
+        body: jsonBody({ folderId: 'display-ads', categoryId: 'campanas' }),
+      }),
+    );
+
+    expect(response.status).toBe(200);
+    expect(response.body).toEqual({
+      slug: 'editar-campana',
+      placement: { folderId: 'display-ads', categoryId: 'campanas', archived: false },
+    });
+  });
+
+  it('archives without moving the video out of its folder', async () => {
+    const { deps } = projectStorage('editar-campana', {
+      ...ORGANIZATION,
+      videos: { 'editar-campana': { folderId: 'display-ads', categoryId: 'campanas', archived: false } },
+    });
+
+    const response = await handlePutProjectPlacement(
+      deps,
+      STORE,
+      { slug: 'editar-campana' },
+      requestLine({
+        method: 'PUT',
+        path: '/projects/editar-campana/placement',
+        body: jsonBody({ folderId: 'display-ads', categoryId: 'campanas', archived: true }),
+      }),
+    );
+
+    expect(response.body).toEqual({
+      slug: 'editar-campana',
+      placement: { folderId: 'display-ads', categoryId: 'campanas', archived: true },
+    });
+  });
+
+  it('refuses a folder that does not exist instead of writing a dangling placement', async () => {
+    const { deps } = projectStorage('editar-campana');
+
+    const payload = await caughtErrorPayload(
+      handlePutProjectPlacement(
+        deps,
+        STORE,
+        { slug: 'editar-campana' },
+        requestLine({
+          method: 'PUT',
+          path: '/projects/editar-campana/placement',
+          body: jsonBody({ folderId: 'ghost', categoryId: null }),
+        }),
+      ),
+    );
+
+    expect(payload.code).toBe('FOLDER_NOT_FOUND');
+  });
+
+  it('refuses a category that belongs to another folder', async () => {
+    const { deps } = projectStorage('editar-campana');
+
+    const payload = await caughtErrorPayload(
+      handlePutProjectPlacement(
+        deps,
+        STORE,
+        { slug: 'editar-campana' },
+        requestLine({
+          method: 'PUT',
+          path: '/projects/editar-campana/placement',
+          body: jsonBody({ folderId: 'display-ads', categoryId: 'ghost' }),
+        }),
+      ),
+    );
+
+    expect(payload.code).toBe('FOLDER_CATEGORY_NOT_FOUND');
+  });
+
+  it('refuses a category with no folder, which would be an orphan', async () => {
+    const { deps } = projectStorage('editar-campana');
+
+    const payload = await caughtErrorPayload(
+      handlePutProjectPlacement(
+        deps,
+        STORE,
+        { slug: 'editar-campana' },
+        requestLine({
+          method: 'PUT',
+          path: '/projects/editar-campana/placement',
+          body: jsonBody({ folderId: null, categoryId: 'campanas' }),
+        }),
+      ),
+    );
+
+    expect(payload.code).toBe('VIDEO_PLACEMENT_INVALID');
+  });
+
+  it('answers 404 for a video whose directory is not there', async () => {
+    const { deps } = projectStorage('editar-campana');
+
+    const payload = await caughtErrorPayload(
+      handlePutProjectPlacement(
+        deps,
+        STORE,
+        { slug: 'never-created' },
+        requestLine({
+          method: 'PUT',
+          path: '/projects/never-created/placement',
+          body: jsonBody({ folderId: null, categoryId: null }),
+        }),
+      ),
+    );
+
+    expect(payload.code).toBe('PROJECT_NOT_FOUND');
+  });
+});
+
+describe('handleDeleteProject', () => {
+  it('removes the whole directory and forgets the video in the registry', async () => {
+    const { deps, storage, callLog } = projectStorage('editar-campana', {
+      ...ORGANIZATION,
+      videos: { 'editar-campana': { folderId: 'display-ads', categoryId: 'campanas', archived: true } },
+    });
+
+    const response = await handleDeleteProject(deps, STORE, { slug: 'editar-campana' });
+
+    expect(response.status).toBe(200);
+    expect(response.body).toEqual({ slug: 'editar-campana', deleted: true });
+    expect(callLog.entries()).toContainEqual({
+      port: 'removeDirectory',
+      input: `${STORE.mediaRoot}/editar-campana`,
+    });
+
+    const stored = JSON.parse(await storage.readTextFile(organizationPath(STORE.mediaRoot))) as {
+      videos: Record<string, unknown>;
+    };
+    expect(stored.videos).toEqual({});
+  });
+
+  it('answers 404 and deletes nothing when the video does not exist', async () => {
+    const { deps, callLog } = projectStorage('editar-campana');
+
+    const payload = await caughtErrorPayload(handleDeleteProject(deps, STORE, { slug: 'never-created' }));
+
+    expect(payload.code).toBe('PROJECT_NOT_FOUND');
+    expect(callLog.ports()).not.toContain('removeDirectory');
+  });
+
+  it('refuses a slug that is not a single kebab-case segment, so no path escapes the media root', async () => {
+    const { deps, callLog } = projectStorage('editar-campana');
+
+    const payload = await caughtErrorPayload(handleDeleteProject(deps, STORE, { slug: '../../etc' }));
+
+    expect(payload.code).toBe('PROJECT_SLUG_INVALID');
+    expect(callLog.ports()).not.toContain('removeDirectory');
   });
 });

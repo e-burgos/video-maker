@@ -17,7 +17,7 @@ function renderForm(createProject: RenderApiClient['createProject'], onCreated =
 }
 
 function typeSlug(value: string) {
-  fireEvent.change(screen.getByLabelText('New project'), { target: { value } });
+  fireEvent.change(screen.getByLabelText('New video'), { target: { value } });
   fireEvent.click(screen.getByRole('button', { name: 'Create' }));
 }
 
@@ -50,7 +50,7 @@ describe('CreateProjectForm', () => {
 
     await waitFor(() => expect(onCreated).toHaveBeenCalledWith('my-reel'));
     expect(createProject).toHaveBeenCalledWith('my-reel');
-    expect((screen.getByLabelText('New project') as HTMLInputElement).value).toBe('');
+    expect((screen.getByLabelText('New video') as HTMLInputElement).value).toBe('');
   });
 
   it('shows the service error code and does not report a creation', async () => {

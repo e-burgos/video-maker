@@ -39,10 +39,16 @@ import type {
   ProducerTurnAccepted,
   ProjectDetail,
   ProjectSummary,
+  VideoCategory,
   RenderJob,
   RenderJobListing,
   ServiceHealth,
   StoryboardJob,
+  VideoDeletion,
+  VideoFolder,
+  VideoOrganization,
+  VideoPlacement,
+  VideoPlacementResult,
   StoryboardWriteResult,
   TimelineWriteResult,
   VoiceDocument,
@@ -77,6 +83,14 @@ export type RenderApiClient = {
   listProjects: () => Promise<ProjectSummary[]>;
   createProject: (slug: string) => Promise<ProjectDetail>;
   getProject: (slug: string) => Promise<ProjectDetail>;
+  getOrganization: () => Promise<VideoOrganization>;
+  createFolder: (name: string) => Promise<VideoFolder>;
+  renameFolder: (folderId: string, name: string) => Promise<VideoFolder>;
+  deleteFolder: (folderId: string) => Promise<VideoOrganization>;
+  createCategory: (folderId: string, name: string) => Promise<VideoCategory>;
+  deleteCategory: (folderId: string, categoryId: string) => Promise<VideoOrganization>;
+  putVideoPlacement: (slug: string, placement: VideoPlacement) => Promise<VideoPlacementResult>;
+  deleteVideo: (slug: string) => Promise<VideoDeletion>;
   listAssets: (slug: string) => Promise<AssetListing>;
   listGenerated: (slug: string) => Promise<GeneratedListing>;
   getProjectFile: (slug: string, path: string) => Promise<string>;
@@ -230,6 +244,99 @@ export function createRenderApiClient(fetchImpl: FetchLike): RenderApiClient {
         (value) => isRecord(value) && typeof value['slug'] === 'string',
       );
       return body as ProjectDetail;
+    },
+
+    async getOrganization(): Promise<VideoOrganization> {
+      const body = await requestJson('/folders', undefined, 'an organization document', (value) =>
+        isRecord(value) && Array.isArray(value['folders']) && isRecord(value['videos']),
+      );
+      return body as VideoOrganization;
+    },
+
+    async createFolder(name: string): Promise<VideoFolder> {
+      const body = await requestJson(
+        '/folders',
+        {
+          method: 'POST',
+          headers: { 'content-type': 'application/json' },
+          body: JSON.stringify({ name }),
+        },
+        'a folder',
+        (value) => isRecord(value) && typeof value['id'] === 'string',
+      );
+      return body as VideoFolder;
+    },
+
+    async renameFolder(folderId: string, name: string): Promise<VideoFolder> {
+      const body = await requestJson(
+        `/folders/${encodeURIComponent(folderId)}`,
+        {
+          method: 'PUT',
+          headers: { 'content-type': 'application/json' },
+          body: JSON.stringify({ name }),
+        },
+        'a folder',
+        (value) => isRecord(value) && typeof value['id'] === 'string',
+      );
+      return body as VideoFolder;
+    },
+
+    async deleteFolder(folderId: string): Promise<VideoOrganization> {
+      const body = await requestJson(
+        `/folders/${encodeURIComponent(folderId)}`,
+        { method: 'DELETE' },
+        'an organization document',
+        (value) => isRecord(value) && Array.isArray(value['folders']),
+      );
+      return body as VideoOrganization;
+    },
+
+    async createCategory(folderId: string, name: string): Promise<VideoCategory> {
+      const body = await requestJson(
+        `/folders/${encodeURIComponent(folderId)}/categories`,
+        {
+          method: 'POST',
+          headers: { 'content-type': 'application/json' },
+          body: JSON.stringify({ name }),
+        },
+        'a category',
+        (value) => isRecord(value) && typeof value['id'] === 'string',
+      );
+      return body as VideoCategory;
+    },
+
+    async deleteCategory(folderId: string, categoryId: string): Promise<VideoOrganization> {
+      const body = await requestJson(
+        `/folders/${encodeURIComponent(folderId)}/categories/${encodeURIComponent(categoryId)}`,
+        { method: 'DELETE' },
+        'an organization document',
+        (value) => isRecord(value) && Array.isArray(value['folders']),
+      );
+      return body as VideoOrganization;
+    },
+
+    async putVideoPlacement(slug: string, placement: VideoPlacement): Promise<VideoPlacementResult> {
+      const body = await requestJson(
+        `/projects/${encodeURIComponent(slug)}/placement`,
+        {
+          method: 'PUT',
+          headers: { 'content-type': 'application/json' },
+          body: JSON.stringify(placement),
+        },
+        'a placement result',
+        (value) => isRecord(value) && isRecord(value['placement']),
+      );
+      return body as VideoPlacementResult;
+    },
+
+    async deleteVideo(slug: string): Promise<VideoDeletion> {
+      const body = await requestJson(
+        `/projects/${encodeURIComponent(slug)}`,
+        { method: 'DELETE' },
+        'a deletion result',
+        (value) => isRecord(value) && value['deleted'] === true,
+      );
+      return body as VideoDeletion;
     },
 
     async getProject(slug: string): Promise<ProjectDetail> {

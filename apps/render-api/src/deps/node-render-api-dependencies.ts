@@ -1,7 +1,7 @@
 import { spawn } from 'node:child_process';
 import { once } from 'node:events';
 import { createReadStream, createWriteStream } from 'node:fs';
-import { mkdir, readFile, readdir, rename, stat, unlink, writeFile } from 'node:fs/promises';
+import { mkdir, readFile, readdir, rename, rm, stat, unlink, writeFile } from 'node:fs/promises';
 import { randomUUID } from 'node:crypto';
 import { tmpdir } from 'node:os';
 import { dirname, isAbsolute, join, relative } from 'node:path/posix';
@@ -189,6 +189,9 @@ function createConfinedNodeObjectStorage(store: StoreConfig): ObjectStorage {
     },
     removeTemporary: async (path) => unlinkTolerant(confine(path)),
     removeFile: async (path) => unlinkTolerant(confine(path)),
+    removeDirectory: async (path) => {
+      await rm(confine(path), { recursive: true, force: true });
+    },
   };
 }
 
