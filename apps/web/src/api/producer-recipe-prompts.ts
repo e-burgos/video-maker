@@ -46,9 +46,34 @@ export const TUTORIAL_VERTICAL_RECIPE_PROMPT: ProducerRecipePrompts = {
     'producí y renderizá.',
 };
 
+export const PRODUCT_AD_RECIPE_PROMPT: ProducerRecipePrompts = {
+  en:
+    'I want a vertical ad for my product, for Shorts, Reels and TikTok: short, very energetic and ' +
+    'full of movement. Product ad recipe: build the video out of the product photos I uploaded, ' +
+    'zooming each one continuously so nothing is ever still, one photo per line of the script, ' +
+    'narration with a generated voice (Daniela, Rioplatense Spanish), fast cuts, big captions that ' +
+    'pop word by word, free music with a lot of presence and its credit, the logo at the top left, ' +
+    'and a one and a half second closing plate with a white background and the logo — no opening ' +
+    'plate, nobody waits for one. The ad ends with a short call to action, not with a goodbye. ' +
+    'Message: [tell me in one line what the product is and what the ad should promise, or tell me ' +
+    'to read the photos and propose it myself]. Once we agree on the script, produce it and render it.',
+  es:
+    'Quiero una publicidad vertical de mi producto, para Shorts, Reels y TikTok: corta, muy ' +
+    'energética y con mucho movimiento. Receta Publicidad: armá el video con las fotos del producto ' +
+    'que subí, con zoom continuo en cada una para que nunca queden quietas, una foto por línea del ' +
+    'guion, narración con voz generada (Daniela, español rioplatense), cortes rápidos, captions ' +
+    'grandes que saltan palabra por palabra, música libre con mucha presencia y su crédito, el logo ' +
+    'arriba a la izquierda, y una placa de cierre de un segundo y medio con fondo blanco y el logo ' +
+    '—sin placa de inicio, nadie espera dos segundos—. El aviso termina con un llamado a la acción ' +
+    'corto, no con una despedida. Mensaje: [contame en una línea qué producto es y qué querés que ' +
+    'prometa el aviso, o decime que mire las fotos y lo proponga yo]. Cuando confirmemos el guion, ' +
+    'producí y renderizá.',
+};
+
 export const PRODUCER_RECIPE_PROMPTS = {
   tutorial: TUTORIAL_RECIPE_PROMPT,
   'tutorial-vertical': TUTORIAL_VERTICAL_RECIPE_PROMPT,
+  'product-ad': PRODUCT_AD_RECIPE_PROMPT,
 } as const;
 
 export const RECIPE_SCRIPT_SENTENCES: Readonly<Record<Language, Readonly<Record<'present' | 'missing', string>>>> = {

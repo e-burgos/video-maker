@@ -1853,21 +1853,74 @@
       "usage": {
         "provider_model": "claude/fable",
         "effort": "medium",
-        "tokens_in": 70000,
-        "tokens_out": 9000,
+        "tokens_in": 120000,
+        "tokens_out": 14000,
         "approx": true,
         "source": "declared-estimate",
-        "recorded_at": "2026-09-21",
+        "recorded_at": "2026-09-22",
         "by_agent": [
           {
             "agent": "steward",
             "provider_model": "claude/fable",
             "effort": "medium",
-            "tokens_in": 70000,
-            "tokens_out": 9000,
+            "tokens_in": 120000,
+            "tokens_out": 14000,
             "approx": true,
             "source": "declared-estimate",
-            "recorded_at": "2026-09-21"
+            "recorded_at": "2026-09-22"
+          }
+        ]
+      }
+    },
+    {
+      "id": "FIX-e-burgos-015-009",
+      "author": "e-burgos",
+      "spec_id": "spec-e-burgos-015-studio-producer",
+      "fix_document": "sdd/specs/spec-e-burgos-015-studio-producer/fixes/fix-e-burgos-015-009.md",
+      "type": "IMPROVEMENT",
+      "severity": "medium",
+      "created_at": "2026-09-22",
+      "resolved_at": "2026-09-22",
+      "validated_at": null,
+      "title": "Product ad recipe: vertical ad built from product photos",
+      "estimation_hours": 3,
+      "description": "The ad could not reuse the tutorial recipes: the A-roll must be a video (a photo in raw/aroll/ is ignored and the montage throws no-aroll-asset), the engine has no motion inside a clip (punch-in is a static scale), and voice: script turns pruning off (auto-montage.ts:227, and pruneSilences is not exposed on the API job) so there are no cuts and no transitions at all. The recipe therefore builds its own A-roll and puts the speech back in it: short script with no time marks ending in a call to action, voice job with gapMs 500, one photo per line animated with ffmpeg zoompan using the per-line durations from script-manifest.json, concat, mux of the narration into the video, montage with shorts-9x16 + recipe + voice: aroll + bold-impact + scriptPath, a timeline PUT raising the music to -4/-12 dB with an opaque top-left logo and only a 1500 ms outro plate, and render. The ffmpeg command was verified by hand: the -t form makes zoompan expand every input frame and yields a clip 75 times too long, so the recipe documents -loop 1 with -frames:v and warns about the trap.",
+      "justification": "Prompt and catalog change on an existing feature, no schema and no contract touched. Fast-fix mode, shape decided by the dev.",
+      "related_modules": [
+        "studio-producer"
+      ],
+      "affected_files": [
+        "apps/render-api/src/producer/build-producer-system-prompt.ts",
+        "apps/render-api/src/producer/build-producer-system-prompt.spec.ts",
+        "apps/web/src/api/producer-recipe-prompts.ts",
+        "apps/web/src/api/producer-recipes.ts",
+        "apps/web/src/api/producer-recipes.spec.ts",
+        "apps/web/src/components/producer-welcome.spec.tsx",
+        "apps/web/src/i18n/messages-en.ts",
+        "apps/web/src/i18n/messages-es.ts"
+      ],
+      "test_reference": "pnpm nx run-many -t lint test build -p web render-api green (2026-09-22): web 1012 tests, render-api 1007. The ffmpeg chain (zoompan, concat, mux) was run by hand on media/demo-espacio/raw/images/espacio.jpg: 1080x1920, 90 frames, duration 3.000000, moving image, h264+aac after the mux.",
+      "status": "implemented",
+      "cycle": null,
+      "process_note": "Resolved by the steward directly in the main loop (fast-fix mode).",
+      "usage": {
+        "provider_model": "claude/fable",
+        "effort": "medium",
+        "tokens_in": 120000,
+        "tokens_out": 14000,
+        "approx": true,
+        "source": "declared-estimate",
+        "recorded_at": "2026-09-22",
+        "by_agent": [
+          {
+            "agent": "steward",
+            "provider_model": "claude/fable",
+            "effort": "medium",
+            "tokens_in": 120000,
+            "tokens_out": 14000,
+            "approx": true,
+            "source": "declared-estimate",
+            "recorded_at": "2026-09-22"
           }
         ]
       }

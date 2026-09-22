@@ -158,6 +158,9 @@ export const MESSAGES_EN = {
   'producer.recipe.tutorial.label': 'Tutorial',
   'producer.recipe.tutorial.description':
     'Software tutorial or screen recording: YouTube 16:9, narration synchronized with the action, classic subtitles at the bottom, soft music, logo, and an opening and closing with the logo.',
+  'producer.recipe.product-ad.label': 'Product ad',
+  'producer.recipe.product-ad.description':
+    'Vertical 9:16 ad for a product, made out of your photos: the producer animates each one with a continuous zoom, one per line of the script, and builds a short video with fast cuts, big captions, loud music and a logo close.',
   'producer.recipe.tutorial-vertical.label': 'Vertical tutorial',
   'producer.recipe.tutorial-vertical.description':
     'The same Tutorial recipe in vertical 9:16, for Shorts, Reels and TikTok: it needs a recording that is already vertical, and the logo sits at the top left so it never collides with the buttons of the app.',

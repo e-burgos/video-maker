@@ -150,11 +150,12 @@ describe('ProducerWelcome recipes (FIX-e-burgos-015-005)', () => {
     const recipes = screen.getByTestId('producer-recipes');
     const starters = screen.getByTestId('producer-starters');
 
-    expect(recipes.querySelectorAll('button')).toHaveLength(2);
+    expect(recipes.querySelectorAll('button')).toHaveLength(3);
     expect(recipes.querySelector('[data-recipe="tutorial"]')?.textContent).toBe('Tutorial');
     expect(recipes.querySelector('[data-recipe="tutorial-vertical"]')?.textContent).toBe(
       'Vertical tutorial',
     );
+    expect(recipes.querySelector('[data-recipe="product-ad"]')?.textContent).toBe('Product ad');
     expect(
       welcome.compareDocumentPosition(recipes) & Node.DOCUMENT_POSITION_PRECEDING,
     ).toBe(0);
@@ -197,7 +198,7 @@ describe('ProducerWelcome recipes (FIX-e-burgos-015-005)', () => {
   it('offers the recipes even when the project has no material yet', () => {
     renderWelcome(listing([]));
 
-    expect(screen.getByTestId('producer-recipes').querySelectorAll('button')).toHaveLength(2);
+    expect(screen.getByTestId('producer-recipes').querySelectorAll('button')).toHaveLength(3);
   });
 
   it('drops the vertical recipe prompt when its chip is tapped (FIX-e-burgos-015-008)', async () => {

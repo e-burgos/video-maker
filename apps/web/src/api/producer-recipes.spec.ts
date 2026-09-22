@@ -112,7 +112,11 @@ describe('producer recipes', () => {
 
   it('offers a vertical twin of the tutorial recipe for Shorts, Reels and TikTok (FIX-e-burgos-015-008)', async () => {
     expect(PRODUCER_RECIPE_IDS).toContain('tutorial-vertical');
-    expect(PRODUCER_RECIPES.map((recipe) => recipe.id)).toEqual(['tutorial', 'tutorial-vertical']);
+    expect(PRODUCER_RECIPES.map((recipe) => recipe.id)).toEqual([
+      'tutorial',
+      'tutorial-vertical',
+      'product-ad',
+    ]);
 
     const spanish = await loadRecipePrompt('tutorial-vertical', 'es');
     const english = await loadRecipePrompt('tutorial-vertical', 'en');
@@ -133,6 +137,30 @@ describe('producer recipes', () => {
     );
     expect(await loadRecipePrompt('tutorial-vertical', 'en')).toContain(
       'classic subtitles at the bottom',
+    );
+  });
+
+  it('offers a product ad recipe that asks for the message, not for a scene table (FIX-e-burgos-015-009)', async () => {
+    expect(PRODUCER_RECIPE_IDS).toContain('product-ad');
+
+    const spanish = await loadRecipePrompt('product-ad', 'es');
+    const english = await loadRecipePrompt('product-ad', 'en');
+
+    expect(spanish).toContain('Receta Publicidad');
+    expect(spanish).toContain('una foto por línea del guion');
+    expect(spanish).toContain('llamado a la acción');
+    expect(spanish).toContain('sin placa de inicio');
+    expect(spanish).toContain('qué producto es');
+    expect(english).toContain('Product ad recipe');
+    expect(english).toContain('one photo per line of the script');
+    expect(english).toContain('call to action');
+    expect(english).toContain('no opening');
+    expect(english).not.toBe(spanish);
+  });
+
+  it('keeps a hole in the ad prompt even when the project already has a script (FIX-e-burgos-015-009)', async () => {
+    expect(recipePromptHasHole(await loadRecipePrompt('product-ad', 'es', { hasTimedScript: true }))).toBe(
+      true,
     );
   });
 

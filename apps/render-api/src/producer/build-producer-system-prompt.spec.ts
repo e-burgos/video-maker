@@ -336,6 +336,41 @@ describe('buildProducerAppRulesSection — receta Tutorial (FIX-015-005)', () =>
     expect(section).toContain('one selector away in the `preview` screen');
   });
 
+  it('arma su propio A-roll animado desde las fotos (FIX-e-burgos-015-009)', () => {
+    expect(section).toContain('THE PRODUCT AD RECIPE');
+    expect(section).toContain('"Receta Publicidad", "Product ad recipe"');
+    expect(section).toContain('BUILDS ITS OWN A-ROLL');
+    expect(section).toContain('ONE PHOTO PER LINE');
+    expect(section).toContain('zoompan=z=min(zoom+0.0015\\,1.25)');
+    expect(section).toContain('Scaling to 2160x3840 BEFORE the zoompan');
+    expect(section).toContain('-frames:v <frames>');
+    expect(section).toContain('NEVER put `-t <seconds>` on that call');
+    expect(section).toContain('75 times too long');
+  });
+
+  it('muxea la locución en el A-roll para que el motor corte de verdad (FIX-e-burgos-015-009)', () => {
+    expect(section).toContain('MUX THE NARRATION INTO THAT VIDEO');
+    expect(section).toContain('"voice":"aroll"');
+    expect(section).toContain('the montage only cuts when the speech');
+    expect(section).toContain('one single continuous');
+    expect(section).toContain('NO transitions at all');
+  });
+
+  it('fija el ritmo, la mezcla fuerte y el cierre sin placa de inicio (FIX-e-burgos-015-009)', () => {
+    expect(section).toContain('"preset":"recipe"');
+    expect(section).toContain('"captionStyle":"bold-impact"');
+    expect(section).toContain('"baseGainDb":-4');
+    expect(section).toContain('"duckedGainDb":-12');
+    expect(section).toContain('"position":"top-left","widthRatio":0.18,"marginRatio":0.06,"opacity":1');
+    expect(section).toContain('"durationMs":1500');
+    expect(section).toContain('NO intro plate');
+  });
+
+  it('cierra el aviso con un llamado a la acción, no con la despedida del tutorial (FIX-e-burgos-015-009)', () => {
+    expect(section).toContain('THE LAST LINE IS A CALL TO ACTION');
+    expect(section).toContain('that rule belongs to the tutorials');
+  });
+
   it('pide un guion con marcas de tiempo, una línea por escena', () => {
     expect(section).toContain('carry `[m:ss]` marks');
     expect(section).toContain('one line per scene');
