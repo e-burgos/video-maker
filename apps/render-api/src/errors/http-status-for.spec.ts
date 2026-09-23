@@ -101,6 +101,8 @@ const EXPECTED_STATUS_BY_CODE: Readonly<Record<RenderApiErrorCode, number>> = {
   FILE_NOT_FOUND: 404,
   FILE_TOO_LARGE: 413,
   ASSET_EXISTS: 409,
+  MUSIC_SOURCE_UNAVAILABLE: 503,
+  MUSIC_RESULT_UNKNOWN: 404,
 };
 
 describe('httpStatusFor', () => {

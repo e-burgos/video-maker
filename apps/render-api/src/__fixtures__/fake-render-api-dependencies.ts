@@ -185,6 +185,14 @@ export function createFakeRenderApiDependencies(
       }
     },
 
+    fetchRemote: async (url, init) => {
+      callLog.record('fetchRemote', { url, init });
+      if (overrides?.fetchRemote) {
+        return overrides.fetchRemote(url, init);
+      }
+      throw new Error('createFakeRenderApiDependencies: no fetchRemote override configured');
+    },
+
     randomId: overrides?.randomId ?? createDeterministicRandomId(),
 
     clock: overrides?.clock ?? { nowIso: () => FIXED_NOW_ISO },

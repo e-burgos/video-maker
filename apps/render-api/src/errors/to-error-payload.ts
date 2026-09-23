@@ -99,6 +99,8 @@ const MESSAGE_BY_CODE: Readonly<Record<RenderApiErrorCode, string>> = {
   FILE_NOT_FOUND: 'The requested file does not exist in the project.',
   FILE_TOO_LARGE: 'The file exceeds the size limit this endpoint allows.',
   ASSET_EXISTS: 'A file already exists at the requested destination.',
+  MUSIC_SOURCE_UNAVAILABLE: 'Wikimedia Commons did not answer with a usable response.',
+  MUSIC_RESULT_UNKNOWN: 'The music search result id is unknown or its cache entry expired.',
 };
 
 export function toErrorPayload(value: unknown): RenderApiErrorPayload {

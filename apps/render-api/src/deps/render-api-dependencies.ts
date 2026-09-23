@@ -79,6 +79,19 @@ export type ProbeAssetPort = (input: ProbeAssetInput) => Promise<MediaAsset>;
 
 export type CreateCommandRunnerPort = () => Promise<CommandRunner>;
 
+export interface FetchRemoteInit {
+  readonly headers?: Readonly<Record<string, string>>;
+  readonly timeoutMs: number;
+}
+
+export interface FetchRemoteResponse {
+  readonly status: number;
+  readonly headers: Readonly<Record<string, string>>;
+  readonly body: () => AsyncIterable<Uint8Array>;
+}
+
+export type FetchRemotePort = (url: string, init: FetchRemoteInit) => Promise<FetchRemoteResponse>;
+
 export interface ExtractFrameInput {
   readonly path: string;
   readonly atSeconds: number;
@@ -218,6 +231,7 @@ export interface RenderApiDependencies {
   readonly storage: ObjectStorage;
   readonly probeAsset: ProbeAssetPort;
   readonly extractFrame: ExtractFramePort;
+  readonly fetchRemote: FetchRemotePort;
   readonly randomId: RandomIdPort;
   readonly clock: Clock;
   readonly logger: Logger;

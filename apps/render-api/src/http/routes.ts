@@ -23,6 +23,8 @@ export const ROUTES = [
   { id: 'projects.frames', method: 'POST', pattern: '/projects/:slug/frames' },
   { id: 'projects.text.get', method: 'GET', pattern: '/projects/:slug/text' },
   { id: 'projects.text.put', method: 'PUT', pattern: '/projects/:slug/text' },
+  { id: 'projects.music.search', method: 'GET', pattern: '/projects/:slug/music/search' },
+  { id: 'projects.music.import', method: 'POST', pattern: '/projects/:slug/music/import' },
   { id: 'projects.timeline.get', method: 'GET', pattern: '/projects/:slug/timeline' },
   { id: 'projects.timeline.put', method: 'PUT', pattern: '/projects/:slug/timeline' },
   { id: 'projects.edl.get', method: 'GET', pattern: '/projects/:slug/edl' },

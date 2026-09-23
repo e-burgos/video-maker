@@ -10,6 +10,7 @@ import { handleCopyAsset } from './handlers/asset-copy-handler';
 import { handleProbeMedia } from './handlers/probe-handler';
 import { handleExtractFrames } from './handlers/frames-handler';
 import { handleGetProjectText, handlePutProjectText } from './handlers/project-text-handler';
+import { handleImportMusic, handleSearchFreeMusic } from './handlers/music-handler';
 import {
   handleCancelRenderJob,
   handleCreateRenderJob,
@@ -130,6 +131,10 @@ export async function handleRequest(
         return await handleGetProjectText(deps, store, params, request);
       case 'projects.text.put':
         return await handlePutProjectText(deps, store, params, request);
+      case 'projects.music.search':
+        return await handleSearchFreeMusic(deps, store, params, request, runtime);
+      case 'projects.music.import':
+        return await handleImportMusic(deps, store, params, request, runtime);
       case 'projects.timeline.get':
         return await handleGetTimeline(deps, store, params);
       case 'projects.timeline.put':

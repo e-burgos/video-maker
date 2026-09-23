@@ -5,6 +5,8 @@ import { copyFile, mkdir, readFile, readdir, realpath, rename, rm, stat, unlink,
 import { randomUUID } from 'node:crypto';
 import { tmpdir } from 'node:os';
 import { dirname, isAbsolute, join, relative } from 'node:path/posix';
+import { Readable } from 'node:stream';
+import type { ReadableStream as NodeReadableStreamWeb } from 'node:stream/web';
 
 import { nodeDirectoryReader, nodeFileStatReader } from '@video-maker/auto-montage';
 
@@ -107,6 +109,14 @@ async function listDirectoryEntries(path: string): ReturnType<ObjectStorage['lis
     }
     throw error;
   }
+}
+
+function emptyAsyncIterable(): AsyncIterable<Uint8Array> {
+  return {
+    [Symbol.asyncIterator]: () => ({
+      next: () => Promise.resolve({ value: undefined, done: true as const }),
+    }),
+  };
 }
 
 async function* readFileRange(path: string, range?: ByteRange): AsyncGenerator<Uint8Array> {
@@ -384,6 +394,27 @@ export function createNodeRenderApiDependencies(
         ffmpegPath: ffmpeg,
         runOptions: { cwd: projectRoot },
       });
+    },
+
+    fetchRemote: async (url, init) => {
+      const response = await fetch(url, {
+        ...(init.headers === undefined ? {} : { headers: init.headers }),
+        signal: AbortSignal.timeout(init.timeoutMs),
+      });
+
+      const headers: Record<string, string> = {};
+      response.headers.forEach((value, key) => {
+        headers[key.toLowerCase()] = value;
+      });
+
+      return {
+        status: response.status,
+        headers,
+        body: () =>
+          response.body === null
+            ? emptyAsyncIterable()
+            : Readable.fromWeb(response.body as unknown as NodeReadableStreamWeb),
+      };
     },
 
     randomId: () => randomUUID(),

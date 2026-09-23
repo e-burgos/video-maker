@@ -103,6 +103,8 @@ export const RENDER_API_ERROR_CODES = [
   'FILE_NOT_FOUND',
   'FILE_TOO_LARGE',
   'ASSET_EXISTS',
+  'MUSIC_SOURCE_UNAVAILABLE',
+  'MUSIC_RESULT_UNKNOWN',
 ] as const;
 
 export type RenderApiErrorCode = (typeof RENDER_API_ERROR_CODES)[number];

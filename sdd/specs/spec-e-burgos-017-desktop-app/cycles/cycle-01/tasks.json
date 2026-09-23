@@ -113,7 +113,7 @@
       "depends_on": [
         "TASK-001"
       ],
-      "status": "pending",
+      "status": "done",
       "files": [
         "apps/render-api/src/music/commons-music-search.ts",
         "apps/render-api/src/music/commons-music-search.spec.ts",
@@ -121,14 +121,33 @@
         "apps/render-api/src/music/import-music.spec.ts",
         "apps/render-api/src/music/project-credits.ts",
         "apps/render-api/src/music/project-credits.spec.ts",
+        "apps/render-api/src/music/music-search-cache.ts",
+        "apps/render-api/src/music/music-search-cache.spec.ts",
         "apps/render-api/src/http/handlers/music-handler.ts",
         "apps/render-api/src/http/handlers/music-handler.spec.ts",
         "apps/render-api/src/http/routes.ts",
         "apps/render-api/src/http/handle-request.ts",
+        "apps/render-api/src/http/render-api-runtime.ts",
         "apps/render-api/src/deps/render-api-dependencies.ts",
         "apps/render-api/src/deps/node-render-api-dependencies.ts",
+        "apps/render-api/src/__fixtures__/fake-fetch-remote.ts",
+        "apps/render-api/src/__fixtures__/fake-render-api-dependencies.ts",
+        "apps/render-api/src/errors/render-api-error.ts",
+        "apps/render-api/src/errors/http-status-for.ts",
+        "apps/render-api/src/errors/http-status-for.spec.ts",
+        "apps/render-api/src/errors/to-error-payload.ts",
         "sdd/api.json"
-      ]
+      ],
+      "usage": {
+        "tokens_in": 195000,
+        "tokens_out": 24000,
+        "provider_model": "claude/sonnet",
+        "effort": "medium",
+        "agent": "implementor-back",
+        "approx": true,
+        "source": "declared-estimate",
+        "recorded_at": "2026-09-23"
+      }
     },
     {
       "id": "TASK-004",

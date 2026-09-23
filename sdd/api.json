@@ -1149,6 +1149,74 @@
             "change": "Created in spec-e-burgos-017 cycle-01: in-project file copy for the producer's copy_asset MCP tool, replacing the ffmpeg -c copy shell trick."
           }
         ]
+      },
+      {
+        "id": "EP-034",
+        "method": "GET",
+        "path": "/projects/:slug/music/search",
+        "module": "desktop-app",
+        "spec": "sdd/specs/spec-e-burgos-017-desktop-app",
+        "status": "implemented",
+        "created_in_cycle": 1,
+        "updated_in_cycle": null,
+        "description": "Searches Wikimedia Commons (generator=search over the File namespace, filetype:audio, formatversion=2) for the producer's search_free_music MCP tool, replacing the old curl-to-Commons shell trick. Calls only https://commons.wikimedia.org/w/api.php with a descriptive User-Agent. Keeps only results whose mime is one of audio/mpeg, audio/wav, audio/x-wav, audio/vnd.wave, audio/flac, audio/x-flac, audio/ogg, audio/opus or application/ogg (Commons reports .ogg/.opus/.oga containers as application/ogg) and whose extmetadata LicenseShortName is CC0, Public domain/PDM, CC BY or CC BY-SA (any version) — CC BY-NC, CC BY-ND and files with no LicenseShortName are dropped. durationMs is required by the contract, so a result with no numeric imageinfo.duration is dropped rather than reported as null. Artist is HTML-stripped into author. resultId is a stable non-cryptographic hash of the File: title. Results are cached in memory per project slug for 1 hour (runtime.musicSearchCache) so EP-035 can resolve a resultId; a fresh search replaces the previous cache entry for that slug. Network failure, a non-200 status or unparseable JSON all become MUSIC_SOURCE_UNAVAILABLE — the Commons response body is never included in the error.",
+        "path_params": [
+          "slug"
+        ],
+        "query_params": {
+          "mood": "Required. Free text combined server-side into the Commons search as '<mood> filetype:audio'.",
+          "maxResults": "Required. Integer, 1 to 10 (MIN/MAX_SEARCH_FREE_MUSIC_RESULTS of @video-maker/producer-tools)."
+        },
+        "required_headers": [],
+        "request_body": {
+          "content-type": "none",
+          "schema": "Takes no request body."
+        },
+        "responses": {
+          "200": "application/json: { results: [{ resultId, title, durationMs, license, author, pageUrl }] }, at most maxResults entries, license-filtered and mime-filtered. Shape frozen as producer-tools STUDIO_TOOLS.search_free_music.output — downloadUrl is kept server-side only and never leaves this response.",
+          "422": "INVALID_INPUT when mood is missing/blank or maxResults is missing or outside 1..10; PROJECT_SLUG_INVALID when the slug is not a single kebab-case path segment. application/json: { error: { code, stage: null, message, resource?, expected?, hint? } }.",
+          "404": "PROJECT_NOT_FOUND. application/json: { error: { code, stage: null, message, resource?, expected?, hint? } }.",
+          "503": "MUSIC_SOURCE_UNAVAILABLE when Commons cannot be reached, answers a non-200 status, or returns a body that is not the expected JSON shape. application/json: { error: { code, stage: null, message, resource?, expected?, hint? } }."
+        },
+        "changelog": [
+          {
+            "cycle": 1,
+            "date": "2026-09-23",
+            "change": "Created in spec-e-burgos-017 cycle-01: server-side Commons search for the producer's search_free_music MCP tool, replacing the shell curl-to-Commons trick."
+          }
+        ]
+      },
+      {
+        "id": "EP-035",
+        "method": "POST",
+        "path": "/projects/:slug/music/import",
+        "module": "desktop-app",
+        "spec": "sdd/specs/spec-e-burgos-017-desktop-app",
+        "status": "implemented",
+        "created_in_cycle": 1,
+        "updated_in_cycle": null,
+        "description": "Downloads a music result found by EP-034 for the producer's import_music MCP tool. resultId must come from this project's search cache (EP-034), not expired (1h TTL) — otherwise MUSIC_RESULT_UNKNOWN. Downloads only if the file's own url host is exactly upload.wikimedia.org (defense in depth on top of the fact the url was already produced server-side by EP-034), requires a content-length header to enforce the 50 MB cap up front (a response with no content-length is refused rather than streamed unbounded), and writes through the existing upload-temp-then-promote flow (work/.uploads, same as asset upload) into raw/audio/<file name>, where <file name> is the last path segment of the Commons download url; if that name is already taken it is suffixed -2, -3, ... before the source is ever touched, so an import never overwrites an existing file. The whole read-cache/download/promote/write-credit sequence is serialized per project on the same uploadSerializer as asset upload/copy. Appends one entry to work/credits.json (created if missing, existing entries kept; a corrupt existing file is treated as empty rather than blocking the import).",
+        "path_params": [
+          "slug"
+        ],
+        "required_headers": [],
+        "request_body": {
+          "content-type": "application/json",
+          "schema": "{ resultId: string } — a non-empty resultId returned by a prior GET .../music/search for this same project."
+        },
+        "responses": {
+          "200": "application/json: { path, credit: { kind: 'music', path, title, author, license, sourceUrl, importedAt } }. Shape frozen as producer-tools STUDIO_TOOLS.import_music.output — credit is an open record in the contract; this is render-api's own shape for it.",
+          "404": "PROJECT_NOT_FOUND, or MUSIC_RESULT_UNKNOWN when resultId is not in this project's search cache or its 1h TTL expired. application/json: { error: { code, stage: null, message, resource?, expected?, hint? } }.",
+          "422": "INVALID_INPUT when resultId is missing or blank; PROJECT_SLUG_INVALID when the slug is not a single kebab-case path segment. application/json: { error: { code, stage: null, message, resource?, expected?, hint? } }.",
+          "503": "MUSIC_SOURCE_UNAVAILABLE when the download host is not upload.wikimedia.org, the response is not 200, content-length is missing or exceeds 50 MB, or the transfer does not complete. application/json: { error: { code, stage: null, message, resource?, expected?, hint? } }."
+        },
+        "changelog": [
+          {
+            "cycle": 1,
+            "date": "2026-09-23",
+            "change": "Created in spec-e-burgos-017 cycle-01: host-confined download from Commons into raw/audio/ plus a work/credits.json entry, for the producer's import_music MCP tool."
+          }
+        ]
       }
     ]
   }
