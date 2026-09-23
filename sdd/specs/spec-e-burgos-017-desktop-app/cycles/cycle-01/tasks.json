@@ -1,0 +1,240 @@
+{
+  "$schema": "../../../../schemas/cycle-tasks.schema.json",
+  "spec": "spec-e-burgos-017-desktop-app",
+  "cycle": 1,
+  "module": "desktop-app",
+  "apps": [
+    "libs/producer-tools",
+    "apps/render-api"
+  ],
+  "flow": "lite",
+  "user_stories_generated": true,
+  "prerequisites": {
+    "tasks_generated": true
+  },
+  "tasks": [
+    {
+      "id": "TASK-001",
+      "title": "Scaffold libs/producer-tools and freeze the studio tool contract: names, zod input/output schemas and typed error codes",
+      "user_stories": [
+        "US-017-001"
+      ],
+      "estimation_hours": 4,
+      "story_points": 3,
+      "depends_on": [],
+      "status": "pending",
+      "files": [
+        "libs/producer-tools/project.json",
+        "libs/producer-tools/package.json",
+        "libs/producer-tools/src/index.ts",
+        "libs/producer-tools/src/contract/tool-names.ts",
+        "libs/producer-tools/src/contract/tool-schemas.ts",
+        "libs/producer-tools/src/contract/tool-schemas.spec.ts",
+        "libs/producer-tools/src/contract/tool-errors.ts",
+        "libs/producer-tools/src/contract/tool-errors.spec.ts",
+        "tsconfig.base.json"
+      ]
+    },
+    {
+      "id": "TASK-002",
+      "title": "Add project-scoped inspection endpoints to render-api: probe a media file, extract frames, read and write allowlisted project text files, copy an asset between roles",
+      "user_stories": [
+        "US-017-002"
+      ],
+      "estimation_hours": 7,
+      "story_points": 5,
+      "depends_on": [
+        "TASK-001"
+      ],
+      "status": "pending",
+      "files": [
+        "apps/render-api/src/store/producer-writable-paths.ts",
+        "apps/render-api/src/store/producer-writable-paths.spec.ts",
+        "apps/render-api/src/http/handlers/probe-handler.ts",
+        "apps/render-api/src/http/handlers/probe-handler.spec.ts",
+        "apps/render-api/src/http/handlers/frames-handler.ts",
+        "apps/render-api/src/http/handlers/frames-handler.spec.ts",
+        "apps/render-api/src/http/handlers/project-text-handler.ts",
+        "apps/render-api/src/http/handlers/project-text-handler.spec.ts",
+        "apps/render-api/src/http/handlers/asset-copy-handler.ts",
+        "apps/render-api/src/http/handlers/asset-copy-handler.spec.ts",
+        "apps/render-api/src/http/routes.ts",
+        "apps/render-api/src/http/handle-request.ts",
+        "apps/render-api/src/deps/render-api-dependencies.ts",
+        "apps/render-api/src/deps/node-render-api-dependencies.ts",
+        "apps/render-api/src/__fixtures__/fake-render-api-dependencies.ts",
+        "sdd/api.json"
+      ]
+    },
+    {
+      "id": "TASK-003",
+      "title": "Add free-music search and import against Wikimedia Commons as server-side endpoints with a fixed host and credits written to work/credits.json",
+      "user_stories": [
+        "US-017-003"
+      ],
+      "estimation_hours": 6,
+      "story_points": 5,
+      "depends_on": [
+        "TASK-001"
+      ],
+      "status": "pending",
+      "files": [
+        "apps/render-api/src/music/commons-music-search.ts",
+        "apps/render-api/src/music/commons-music-search.spec.ts",
+        "apps/render-api/src/music/import-music.ts",
+        "apps/render-api/src/music/import-music.spec.ts",
+        "apps/render-api/src/music/project-credits.ts",
+        "apps/render-api/src/music/project-credits.spec.ts",
+        "apps/render-api/src/http/handlers/music-handler.ts",
+        "apps/render-api/src/http/handlers/music-handler.spec.ts",
+        "apps/render-api/src/http/routes.ts",
+        "apps/render-api/src/http/handle-request.ts",
+        "apps/render-api/src/deps/render-api-dependencies.ts",
+        "apps/render-api/src/deps/node-render-api-dependencies.ts",
+        "sdd/api.json"
+      ]
+    },
+    {
+      "id": "TASK-004",
+      "title": "Add the photo-aroll job kind that builds the Product ad A-roll (Ken Burns per photo sized from the voice manifest, concat, narration mux) without the agent touching ffmpeg",
+      "user_stories": [
+        "US-017-004"
+      ],
+      "estimation_hours": 7,
+      "story_points": 5,
+      "depends_on": [
+        "TASK-001"
+      ],
+      "status": "pending",
+      "files": [
+        "apps/render-api/src/jobs/photo-aroll-job-params.ts",
+        "apps/render-api/src/jobs/photo-aroll-job-params.spec.ts",
+        "apps/render-api/src/jobs/run-photo-aroll-pipeline.ts",
+        "apps/render-api/src/jobs/run-photo-aroll-pipeline.spec.ts",
+        "apps/render-api/src/jobs/render-job.ts",
+        "apps/render-api/src/jobs/render-job-queue.ts",
+        "libs/media-local/src/ffmpeg/ken-burns-clip.ts",
+        "libs/media-local/src/ffmpeg/ken-burns-clip.spec.ts",
+        "libs/media-local/src/index.ts",
+        "sdd/api.json"
+      ]
+    },
+    {
+      "id": "TASK-005",
+      "title": "Implement the tool handlers over a RenderApiClient port and the project-scoped stdio MCP server that exposes them",
+      "user_stories": [
+        "US-017-001",
+        "US-017-005"
+      ],
+      "estimation_hours": 7,
+      "story_points": 5,
+      "depends_on": [
+        "TASK-002",
+        "TASK-003",
+        "TASK-004"
+      ],
+      "status": "pending",
+      "files": [
+        "libs/producer-tools/src/client/render-api-client.ts",
+        "libs/producer-tools/src/client/http-render-api-client.ts",
+        "libs/producer-tools/src/client/http-render-api-client.spec.ts",
+        "libs/producer-tools/src/handlers/studio-tool-handlers.ts",
+        "libs/producer-tools/src/handlers/studio-tool-handlers.spec.ts",
+        "libs/producer-tools/src/mcp/studio-mcp-server.ts",
+        "libs/producer-tools/src/mcp/studio-mcp-server.spec.ts",
+        "libs/producer-tools/src/mcp/main.ts",
+        "libs/producer-tools/src/__fixtures__/fake-render-api-client.ts",
+        "package.json",
+        "pnpm-lock.yaml"
+      ]
+    },
+    {
+      "id": "TASK-006",
+      "title": "Rewrite the in-app producer prompt against the studio tools, recipes included, and stop appending the developer skill",
+      "user_stories": [
+        "US-017-006"
+      ],
+      "estimation_hours": 6,
+      "story_points": 5,
+      "depends_on": [
+        "TASK-001"
+      ],
+      "status": "pending",
+      "files": [
+        "libs/producer-tools/src/prompt/build-producer-prompt.ts",
+        "libs/producer-tools/src/prompt/build-producer-prompt.spec.ts",
+        "apps/render-api/src/producer/build-producer-system-prompt.ts",
+        "apps/render-api/src/producer/build-producer-system-prompt.spec.ts",
+        "apps/render-api/src/config/producer-config.ts",
+        "apps/render-api/src/config/producer-config.spec.ts"
+      ]
+    },
+    {
+      "id": "TASK-007",
+      "title": "Launch claude -p with the per-turn MCP config, no built-in tools, strict MCP, neutral working directory and only mcp__studio allowed; summarize MCP tool events in the turn stream",
+      "user_stories": [
+        "US-017-005",
+        "US-017-007"
+      ],
+      "estimation_hours": 5,
+      "story_points": 5,
+      "depends_on": [
+        "TASK-005",
+        "TASK-006"
+      ],
+      "status": "pending",
+      "files": [
+        "apps/render-api/src/producer/claude-code-producer-agent.ts",
+        "apps/render-api/src/producer/claude-code-producer-agent.spec.ts",
+        "apps/render-api/src/producer/producer-mcp-config.ts",
+        "apps/render-api/src/producer/producer-mcp-config.spec.ts",
+        "apps/render-api/src/producer/run-producer-turn.ts",
+        "apps/render-api/src/producer/run-producer-turn.spec.ts",
+        "apps/render-api/src/producer/producer-stream-events.ts",
+        "apps/render-api/src/producer/producer-stream-events.spec.ts",
+        "apps/render-api/src/producer/producer-agent.ts"
+      ]
+    },
+    {
+      "id": "TASK-008",
+      "title": "Real smoke: the three recipes end to end on copies of real projects with claude -p, plus the prompt-injection probe with evidence from the turn log",
+      "user_stories": [
+        "US-017-005",
+        "US-017-006",
+        "US-017-007"
+      ],
+      "estimation_hours": 5,
+      "story_points": 5,
+      "depends_on": [
+        "TASK-007"
+      ],
+      "status": "pending",
+      "files": [
+        "apps/render-api/e2e/producer-mcp-smoke.mjs",
+        "sdd/specs/spec-e-burgos-017-desktop-app/cycles/cycle-01/artifacts/producer-mcp-smoke.md"
+      ]
+    },
+    {
+      "id": "TASK-009",
+      "title": "Close the cycle: context fragments, api.json, READMEs, constitution row and validation",
+      "user_stories": [
+        "US-017-001"
+      ],
+      "estimation_hours": 2,
+      "story_points": 2,
+      "depends_on": [
+        "TASK-008"
+      ],
+      "status": "pending",
+      "files": [
+        "sdd/context/apps/render-api/updates/2026-09-23-spec-e-burgos-017-desktop-app-cycle-01.md",
+        "sdd/context/libs/producer-tools/constitution.md",
+        "sdd/context/libs/producer-tools/context_prompt.md",
+        "sdd/context/constitution.md",
+        "sdd/context/context_prompt.md",
+        "apps/render-api/README.md",
+        "libs/producer-tools/README.md"
+      ]
+    }
+  ]
+}

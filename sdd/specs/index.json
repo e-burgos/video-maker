@@ -275,6 +275,25 @@
         "spec-e-burgos-009-voice-over",
         "spec-e-burgos-015-studio-producer"
       ]
+    },
+    {
+      "id": "spec-e-burgos-017-desktop-app",
+      "author": "e-burgos",
+      "slug": "desktop-app",
+      "folder": "sdd/specs/spec-e-burgos-017-desktop-app",
+      "file": "sdd/specs/spec-e-burgos-017-desktop-app/spec-e-burgos-017-desktop-app.spec.md",
+      "module": "desktop-app",
+      "app": "apps/desktop",
+      "status": "in-progress",
+      "title": "Desktop App: el estudio como app de macOS autocontenida",
+      "created_at": "2026-09-23",
+      "completed_at": null,
+      "depends_on": [
+        "spec-e-burgos-005-render-service",
+        "spec-e-burgos-006-web-studio",
+        "spec-e-burgos-015-studio-producer",
+        "spec-e-burgos-016-studio-usability"
+      ]
     }
   ]
 }

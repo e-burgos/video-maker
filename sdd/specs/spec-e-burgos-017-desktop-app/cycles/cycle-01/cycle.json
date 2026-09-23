@@ -1,0 +1,32 @@
+{
+  "$schema": "../../../../schemas/cycle.schema.json",
+  "cycle": 1,
+  "module": "desktop-app",
+  "spec": "spec-e-burgos-017-desktop-app",
+  "apps": [
+    "libs/producer-tools",
+    "apps/render-api"
+  ],
+  "phase": "producer-mcp-tools",
+  "flow": "lite",
+  "objectives": [
+    "Las herramientas del productor quedan definidas una sola vez en libs/producer-tools, con schemas Zod de entrada y salida y errores tipados, y expuestas por un servidor MCP stdio acotado a un proyecto",
+    "render-api suma los endpoints project-scoped que reemplazan el shell del agente: probe, frames, texto permitido, copia de assets, música de Commons y el job photo-aroll",
+    "claude -p se lanza sin tools built-in, con MCP estricto, solo mcp__studio permitido y cwd neutro, y el prompt de la app se reescribe contra las herramientas",
+    "Un smoke real con las tres recetas produce MP4 y un intento de prompt injection termina sin salir del proyecto"
+  ],
+  "status": "in-progress",
+  "started_at": "2026-09-23",
+  "completed_at": null,
+  "documents": {
+    "plan": "sdd/specs/spec-e-burgos-017-desktop-app/cycles/cycle-01/plan.md",
+    "tasks": "sdd/specs/spec-e-burgos-017-desktop-app/cycles/cycle-01/tasks.json"
+  },
+  "artifacts": [],
+  "metrics": null,
+  "tables_created": [],
+  "endpoints_implemented": [],
+  "components_created": [],
+  "issues_found": [],
+  "reviewer_report": null
+}

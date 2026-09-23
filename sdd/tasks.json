@@ -336,6 +336,21 @@
           "tasks_done": 7
         }
       }
+    },
+    "spec-e-burgos-017-desktop-app": {
+      "cycles": {
+        "cycle-01": {
+          "file": "sdd/specs/spec-e-burgos-017-desktop-app/cycles/cycle-01/tasks.json",
+          "module": "desktop-app",
+          "apps": [
+            "libs/producer-tools",
+            "apps/render-api"
+          ],
+          "status": "in-progress",
+          "tasks_total": 9,
+          "tasks_done": 0
+        }
+      }
     }
   }
 }
