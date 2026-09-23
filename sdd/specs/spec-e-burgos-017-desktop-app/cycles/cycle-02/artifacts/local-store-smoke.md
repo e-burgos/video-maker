@@ -13,14 +13,17 @@
 | `import` | PASSED | 4/4 | No |
 | `interrupted-render` | PASSED | 7/7 | No |
 | `producer-restart` | PASSED | 6/6 | No |
-| `web-interrupted` | Omitido (ver abajo) | — | N/A |
+| `web` (TASK-007) | PASSED | 2 ciclos (en + es), 8/8 asserts cada uno | No |
 
-Ninguna de las tres corridas obligatorias encontró un defecto real en el código de
-producción — las tres pasaron en su primera ejecución contra `libs/local-store` y
+Ninguna de las cuatro corridas encontró un defecto real en el código de producción — las tres
+de `apps/render-api` pasaron en su primera ejecución contra `libs/local-store` y
 `apps/render-api` tal como quedaron al cerrar TASK-005/006. Los dos bugs que sí aparecieron
-durante el desarrollo de este script (comparación de JSON sensible al orden de claves, y
+durante el desarrollo de ese script (comparación de JSON sensible al orden de claves, y
 pérdida del objeto de evidencia al lanzar una excepción) eran del propio script de e2e, no
-del backend, y quedaron corregidos en `local-store-smoke.mjs` antes de esta corrida final.
+del backend, y quedaron corregidos en `local-store-smoke.mjs` antes de esa corrida final. El
+caso `web` (TASK-007, detallado más abajo) también pasó contra `apps/web` tal como quedó al
+cerrar TASK-007, con un único ajuste al propio script de e2e (encuadre de las capturas, no el
+producto).
 
 ## Caso 1 — `import`
 
@@ -82,16 +85,50 @@ Clon de `media/display-ads-analiticas`, dos turnos de productor con `PRODUCER_MO
 | La segunda respuesta hace referencia a la primera pregunta (la sesión sobrevivió al reinicio) | OK |
 | No se escribió `conversation.json` ni `session.json` en el directorio del proyecto (todo vive en SQLite) | OK |
 
-## Caso 4 — `web-interrupted` (omitido)
+## Web — `apps/web/e2e/interrupted-job-smoke.mjs` (TASK-007)
 
-Se decide omitir esta corrida. Playwright no está instalado en el repo: `pnpm-lock.yaml` solo
-lo menciona de forma incidental como peer dependency de `@nx/playwright` y
-`@vitest/browser-playwright`, nunca como dependencia real de ningún `package.json` del
-workspace, y no hay ningún runner de Playwright configurado en `apps/web`. Agregar la
-dependencia solo para esta corrida puntual excede el alcance de TASK-008. El caso 4 quedó
-implementado como no soportado en el script (`--case=web-interrupted` imprime un mensaje de
-uso explicando esta omisión) para que quede documentado ahí también.
+> Script: `apps/web/e2e/interrupted-job-smoke.mjs`. Reproducible con
+> `node apps/web/e2e/interrupted-job-smoke.mjs`. Sigue el patrón de los demás smokes de
+> `apps/web/e2e/` (`voices-smoke.mjs`, `montage-smoke.mjs`): arranca `render-api` y el `vite`
+> dev server él mismo, y abre Chrome real con Playwright resuelto desde el caché de `npx`
+> (`resolvePlaywright()` en `smoke-helpers.mjs`) — nunca como dependencia de `package.json`
+> (D-invariante del repo). La nota que TASK-008 dejó en este mismo archivo diciendo que
+> "Playwright no está instalado" describía correctamente `pnpm-lock.yaml`, pero no el patrón
+> ya vigente en `apps/web/e2e/`: el caso web queda cubierto acá, por el implementador
+> frontend, con el harness que ya usan los otros doce smokes de esa carpeta.
 
-La cobertura funcional equivalente del lado UI (badge de "Interrumpido" + botón "Volver a
-ejecutar" en los cuatro paneles de jobs) ya fue validada en TASK-007, que se cerró y
-commiteó por separado.
+Sobre un proyecto sintético propio (`interrupted-job-smoke`, un clip de 8s con video y audio
+vía `ffmpeg lavfi testsrc+sine`, igual que el caso 2), el script corre el ciclo completo dos
+veces — una en inglés y otra en español — sobre la misma base temporal: monta el timeline por
+API, dispara un render, espera `progress.renderedFrames > 0`, mata `render-api` con
+`kill -9`, cuenta y limpia los procesos huérfanos, reinicia el servicio, abre la página de
+preview en Chrome, selecciona el job desde `RenderJobList` y verifica en el DOM (nunca por
+captura) el badge y el botón antes de hacer click y confirmar por API que el job reintentado
+termina en `succeeded`.
+
+| Verificación | en | es |
+| --- | --- | --- |
+| `progress.renderedFrames > 0` visible por API antes del kill | OK | OK |
+| Procesos huérfanos encontrados tras el `kill -9` | 8 | 8 |
+| Procesos huérfanos eliminados | 8/8 | 8/8 |
+| Badge "Interrupted"/"Interrumpido" visible en el DOM (no por screenshot) | OK | OK |
+| Botón "Run again"/"Volver a intentar" visible en el DOM | OK | OK |
+| `POST /jobs/:id/retry` responde `202` desde el click de la UI | OK | OK |
+| El nuevo id de job reemplaza al interrumpido en el DOM | OK | OK |
+| El job reintentado termina en `succeeded` (poll por API) y `ffprobe nb_frames` ==
+  `report.deliverable.durationInFrames` | OK (239==239) | OK (239==239) |
+
+No se encontró ningún defecto de producción: los dos ciclos pasaron con el código de
+`apps/web` tal como quedó al cerrar TASK-007. El único ajuste que hizo falta fue al propio
+script (no al producto): la primera corrida probó que el badge y el botón existen en el DOM
+correctamente, pero la captura de pantalla los dejaba fuera del viewport (el panel del job
+queda más abajo de lo que entra en una pantalla de 1280×1400, y crece con cada fila nueva de
+`RenderJobList`); se corrigió con `locator.scrollIntoViewIfNeeded()` antes de cada captura y
+subiendo el viewport a 1280×1800, sin tocar la aserción del DOM que ya venía pasando.
+
+Capturas (`sdd/specs/spec-e-burgos-017-desktop-app/cycles/cycle-02/artifacts/`):
+
+- `interrupted-job-smoke-01-badge-en.png` / `-es.png` — badge + botón visibles apenas
+  reabierto el preview tras el reinicio.
+- `interrupted-job-smoke-02-after-retry-en.png` / `-es.png` — el panel ya muestra el job
+  nuevo (`estado: running`/`state: running`) justo después del click.

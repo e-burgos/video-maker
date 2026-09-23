@@ -26,7 +26,7 @@ El proyecto usa **Nx** como monorepo manager con **pnpm** como package manager (
 ```
 <repo-root>/                 → nombre del proyecto en sdd/global.json → project
   apps/                      → Una carpeta por app generada con Nx (`render-api`: servicio HTTP local del motor)
-  libs/                      → Una carpeta por lib generada con Nx (`timeline-core`, `media-local`, `composition-remotion`, `auto-montage`, `producer-tools`, `shared-utils`)
+  libs/                      → Una carpeta por lib generada con Nx (`timeline-core`, `media-local`, `composition-remotion`, `auto-montage`, `producer-tools`, `local-store`, `shared-utils`)
   tools/                     → Herramientas del workspace (`render-cli`: CLI headless del motor)
   sdd/                       → Sistema SDD (NO modificar manualmente)
     context/
@@ -54,6 +54,7 @@ El proyecto usa **Nx** como monorepo manager con **pnpm** como package manager (
 | `libs/composition-remotion` | `sdd/context/libs/composition-remotion/context_prompt.md` | `sdd/context/libs/composition-remotion/constitution.md` |
 | `libs/auto-montage` | `sdd/context/libs/auto-montage/context_prompt.md` | `sdd/context/libs/auto-montage/constitution.md` |
 | `libs/producer-tools` | `sdd/context/libs/producer-tools/context_prompt.md` | `sdd/context/libs/producer-tools/constitution.md` |
+| `libs/local-store` | `sdd/context/libs/local-store/context_prompt.md` | `sdd/context/libs/local-store/constitution.md` |
 | `tools/render-cli` | `sdd/context/tools/render-cli/context_prompt.md` | `sdd/context/tools/render-cli/constitution.md` |
 | `apps/render-api` | `sdd/context/apps/render-api/context_prompt.md` | `sdd/context/apps/render-api/constitution.md` |
 | `apps/web` | `sdd/context/apps/web/context_prompt.md` | `sdd/context/apps/web/constitution.md` |

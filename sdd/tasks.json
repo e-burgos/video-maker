@@ -358,9 +358,9 @@
             "apps/render-api",
             "apps/web"
           ],
-          "status": "in-progress",
+          "status": "completed",
           "tasks_total": 9,
-          "tasks_done": 8
+          "tasks_done": 9
         }
       }
     }
