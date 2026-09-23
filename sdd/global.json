@@ -214,7 +214,8 @@
       "timeline-core": "libs/timeline-core — contratos Timeline/EDL y cálculos puros de edición (TypeScript + Zod)",
       "media-local": "libs/media-local — wrappers de ffprobe/ffmpeg/whisper-cli sobre un CommandRunner inyectable y parsers hacia los contratos del motor (TypeScript + execa + Zod)",
       "composition-remotion": "libs/composition-remotion — composición y render Remotion 4 de una Timeline: pistas, transiciones, captions y renderTimeline headless (React 19)",
-      "auto-montage": "libs/auto-montage — ingesta de un proyecto de medios, keyword spotting, planificador de B-roll y armado automático de la Timeline (TypeScript, puertos de I/O inyectables)"
+      "auto-montage": "libs/auto-montage — ingesta de un proyecto de medios, keyword spotting, planificador de B-roll y armado automático de la Timeline (TypeScript, puertos de I/O inyectables)",
+      "producer-tools": "libs/producer-tools — herramientas del productor: contrato tipado de 14 tools, handlers sobre render-api, servidor MCP stdio acotado a un proyecto y prompt del productor (TypeScript + Zod + @modelcontextprotocol/sdk)"
     }
   }
 }
