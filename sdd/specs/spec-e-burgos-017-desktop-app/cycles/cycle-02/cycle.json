@@ -1,0 +1,33 @@
+{
+  "$schema": "../../../../schemas/cycle.schema.json",
+  "cycle": 2,
+  "module": "desktop-app",
+  "spec": "spec-e-burgos-017-desktop-app",
+  "apps": [
+    "libs/local-store",
+    "apps/render-api",
+    "apps/web"
+  ],
+  "phase": "local-store",
+  "flow": "lite",
+  "objectives": [
+    "El estado del estudio (proyectos, organización, conversaciones del productor, jobs y configuración) vive en una base SQLite con migraciones versionadas en libs/local-store",
+    "Los endpoints existentes responden igual que antes, leyendo y escribiendo en la base",
+    "Un job sin terminar al cerrar el estudio queda como interrumpido y se puede relanzar desde la API y la web",
+    "Los proyectos existentes en media/ se importan al arrancar sin duplicar ni modificar los archivos de origen"
+  ],
+  "status": "in-progress",
+  "started_at": "2026-09-23",
+  "completed_at": null,
+  "documents": {
+    "plan": "sdd/specs/spec-e-burgos-017-desktop-app/cycles/cycle-02/plan.md",
+    "tasks": "sdd/specs/spec-e-burgos-017-desktop-app/cycles/cycle-02/tasks.json"
+  },
+  "artifacts": [],
+  "metrics": null,
+  "tables_created": [],
+  "endpoints_implemented": [],
+  "components_created": [],
+  "issues_found": [],
+  "reviewer_report": null
+}

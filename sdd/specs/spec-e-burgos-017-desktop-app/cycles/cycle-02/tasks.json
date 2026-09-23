@@ -1,0 +1,229 @@
+{
+  "$schema": "../../../../schemas/cycle-tasks.schema.json",
+  "spec": "spec-e-burgos-017-desktop-app",
+  "cycle": 2,
+  "module": "desktop-app",
+  "apps": [
+    "libs/local-store",
+    "apps/render-api",
+    "apps/web"
+  ],
+  "flow": "lite",
+  "user_stories_generated": true,
+  "prerequisites": {
+    "tasks_generated": true
+  },
+  "tasks": [
+    {
+      "id": "TASK-001",
+      "title": "Scaffold libs/local-store with better-sqlite3 and Drizzle: open the database in WAL mode with foreign keys, versioned migrations by user_version, and the studio schema",
+      "user_stories": [
+        "US-017-101"
+      ],
+      "estimation_hours": 5,
+      "story_points": 3,
+      "depends_on": [],
+      "status": "pending",
+      "files": [
+        "libs/local-store/project.json",
+        "libs/local-store/package.json",
+        "libs/local-store/src/index.ts",
+        "libs/local-store/src/database/open-studio-database.ts",
+        "libs/local-store/src/database/open-studio-database.spec.ts",
+        "libs/local-store/src/database/migrations.ts",
+        "libs/local-store/src/database/migrations.spec.ts",
+        "libs/local-store/src/schema/studio-schema.ts",
+        "package.json",
+        "pnpm-lock.yaml",
+        "pnpm-workspace.yaml",
+        "tsconfig.base.json"
+      ]
+    },
+    {
+      "id": "TASK-002",
+      "title": "Implement the repositories: projects, organization, producer conversations and sessions, jobs and settings, tested against a real in-memory database",
+      "user_stories": [
+        "US-017-101",
+        "US-017-102",
+        "US-017-103"
+      ],
+      "estimation_hours": 7,
+      "story_points": 5,
+      "depends_on": [
+        "TASK-001"
+      ],
+      "status": "pending",
+      "files": [
+        "libs/local-store/src/repositories/projects-repository.ts",
+        "libs/local-store/src/repositories/organization-repository.ts",
+        "libs/local-store/src/repositories/producer-repository.ts",
+        "libs/local-store/src/repositories/jobs-repository.ts",
+        "libs/local-store/src/repositories/settings-repository.ts",
+        "libs/local-store/src/repositories/projects-repository.spec.ts",
+        "libs/local-store/src/repositories/organization-repository.spec.ts",
+        "libs/local-store/src/repositories/producer-repository.spec.ts",
+        "libs/local-store/src/repositories/jobs-repository.spec.ts",
+        "libs/local-store/src/repositories/settings-repository.spec.ts"
+      ]
+    },
+    {
+      "id": "TASK-003",
+      "title": "Move projects and organization of render-api onto the store: listing, creation, deletion, folders, categories and placement read and written in SQLite",
+      "user_stories": [
+        "US-017-102"
+      ],
+      "estimation_hours": 6,
+      "story_points": 5,
+      "depends_on": [
+        "TASK-002"
+      ],
+      "status": "pending",
+      "files": [
+        "apps/render-api/src/config/store-config.ts",
+        "apps/render-api/src/config/store-config.spec.ts",
+        "apps/render-api/src/deps/render-api-dependencies.ts",
+        "apps/render-api/src/deps/node-render-api-dependencies.ts",
+        "apps/render-api/src/__fixtures__/fake-render-api-dependencies.ts",
+        "apps/render-api/src/store/organization-store.ts",
+        "apps/render-api/src/store/organization-store.spec.ts",
+        "apps/render-api/src/http/handlers/projects-handler.ts",
+        "apps/render-api/src/http/handlers/projects-handler.spec.ts",
+        "apps/render-api/src/http/handlers/organization-handler.ts",
+        "apps/render-api/src/http/handlers/organization-handler.spec.ts"
+      ]
+    },
+    {
+      "id": "TASK-004",
+      "title": "Move the producer conversation and session onto the store, keeping conversation.md and the raw turn logs as files",
+      "user_stories": [
+        "US-017-103"
+      ],
+      "estimation_hours": 5,
+      "story_points": 3,
+      "depends_on": [
+        "TASK-002"
+      ],
+      "status": "pending",
+      "files": [
+        "apps/render-api/src/producer/producer-store.ts",
+        "apps/render-api/src/producer/producer-store.spec.ts",
+        "apps/render-api/src/producer/run-producer-turn.ts",
+        "apps/render-api/src/producer/run-producer-turn.spec.ts",
+        "apps/render-api/src/http/handlers/producer-handler.ts",
+        "apps/render-api/src/http/handlers/producer-handler.spec.ts"
+      ]
+    },
+    {
+      "id": "TASK-005",
+      "title": "Persist the job queue: write every transition and throttled progress through the jobs repository, recover unfinished jobs as failed JOB_INTERRUPTED on startup, serve list and detail from the store, and add POST /jobs/:jobId/retry",
+      "user_stories": [
+        "US-017-104"
+      ],
+      "estimation_hours": 8,
+      "story_points": 5,
+      "depends_on": [
+        "TASK-002"
+      ],
+      "status": "pending",
+      "files": [
+        "apps/render-api/src/jobs/render-job-queue.ts",
+        "apps/render-api/src/jobs/render-job-queue.spec.ts",
+        "apps/render-api/src/jobs/job-persistence.ts",
+        "apps/render-api/src/jobs/job-persistence.spec.ts",
+        "apps/render-api/src/http/handlers/jobs-handler.ts",
+        "apps/render-api/src/http/handlers/jobs-handler.spec.ts",
+        "apps/render-api/src/http/routes.ts",
+        "apps/render-api/src/http/handle-request.ts",
+        "apps/render-api/src/errors/render-api-error.ts",
+        "apps/render-api/src/errors/http-status-for.ts",
+        "apps/render-api/src/errors/http-status-for.spec.ts",
+        "sdd/api.json"
+      ]
+    },
+    {
+      "id": "TASK-006",
+      "title": "Import existing media/ into the store on startup: projects, organization.json and producer documents, idempotent and without touching the source files",
+      "user_stories": [
+        "US-017-105"
+      ],
+      "estimation_hours": 5,
+      "story_points": 3,
+      "depends_on": [
+        "TASK-003",
+        "TASK-004"
+      ],
+      "status": "pending",
+      "files": [
+        "apps/render-api/src/store/import-legacy-media.ts",
+        "apps/render-api/src/store/import-legacy-media.spec.ts",
+        "apps/render-api/src/main.ts",
+        "apps/render-api/src/http/render-api-runtime.ts",
+        "apps/render-api/src/http/handlers/health-handler.ts",
+        "apps/render-api/src/http/handlers/health-handler.spec.ts"
+      ]
+    },
+    {
+      "id": "TASK-007",
+      "title": "Show interrupted jobs in the web studio and let the user relaunch them",
+      "user_stories": [
+        "US-017-104"
+      ],
+      "estimation_hours": 4,
+      "story_points": 3,
+      "depends_on": [
+        "TASK-005"
+      ],
+      "status": "pending",
+      "files": [
+        "apps/web/src/api/render-api-client.ts",
+        "apps/web/src/api/render-api-types.ts",
+        "apps/web/src/i18n/catalog-en.ts",
+        "apps/web/src/i18n/catalog-es.ts",
+        "apps/web/src/components/job-retry-button.tsx",
+        "apps/web/src/components/job-retry-button.spec.tsx"
+      ]
+    },
+    {
+      "id": "TASK-008",
+      "title": "Real checks: import a copy of all of media/ twice with source hashes unchanged, kill the server during a render and relaunch it, and continue a producer conversation after a restart",
+      "user_stories": [
+        "US-017-104",
+        "US-017-105"
+      ],
+      "estimation_hours": 4,
+      "story_points": 3,
+      "depends_on": [
+        "TASK-006",
+        "TASK-007"
+      ],
+      "status": "pending",
+      "files": [
+        "apps/render-api/e2e/local-store-smoke.mjs",
+        "sdd/specs/spec-e-burgos-017-desktop-app/cycles/cycle-02/artifacts/local-store-smoke.md"
+      ]
+    },
+    {
+      "id": "TASK-009",
+      "title": "Close the cycle: context fragments, api.json, READMEs, constitution rows and validation",
+      "user_stories": [
+        "US-017-101"
+      ],
+      "estimation_hours": 2,
+      "story_points": 2,
+      "depends_on": [
+        "TASK-008"
+      ],
+      "status": "pending",
+      "files": [
+        "sdd/context/libs/local-store/constitution.md",
+        "sdd/context/libs/local-store/context_prompt.md",
+        "sdd/context/apps/render-api/updates/2026-09-23-spec-e-burgos-017-desktop-app-cycle-02.md",
+        "sdd/context/apps/web/updates/2026-09-23-spec-e-burgos-017-desktop-app-cycle-02.md",
+        "sdd/context/constitution.md",
+        "sdd/context/context_prompt.md",
+        "apps/render-api/README.md",
+        "libs/local-store/README.md"
+      ]
+    }
+  ]
+}
