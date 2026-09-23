@@ -23,7 +23,12 @@
     "plan": "sdd/specs/spec-e-burgos-017-desktop-app/cycles/cycle-02/plan.md",
     "tasks": "sdd/specs/spec-e-burgos-017-desktop-app/cycles/cycle-02/tasks.json"
   },
-  "artifacts": [],
+  "artifacts": [
+    "sdd/specs/spec-e-burgos-017-desktop-app/cycles/cycle-02/artifacts/local-store-smoke.md",
+    "sdd/specs/spec-e-burgos-017-desktop-app/cycles/cycle-02/artifacts/local-store-smoke-import.json",
+    "sdd/specs/spec-e-burgos-017-desktop-app/cycles/cycle-02/artifacts/local-store-smoke-interrupted-render.json",
+    "sdd/specs/spec-e-burgos-017-desktop-app/cycles/cycle-02/artifacts/local-store-smoke-producer-restart.json"
+  ],
   "metrics": null,
   "tables_created": [],
   "endpoints_implemented": [],

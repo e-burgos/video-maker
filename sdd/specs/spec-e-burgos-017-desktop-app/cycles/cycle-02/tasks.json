@@ -322,11 +322,25 @@
         "TASK-006",
         "TASK-007"
       ],
-      "status": "pending",
+      "status": "done",
       "files": [
         "apps/render-api/e2e/local-store-smoke.mjs",
-        "sdd/specs/spec-e-burgos-017-desktop-app/cycles/cycle-02/artifacts/local-store-smoke.md"
-      ]
+        "sdd/specs/spec-e-burgos-017-desktop-app/cycles/cycle-02/artifacts/local-store-smoke.md",
+        "sdd/specs/spec-e-burgos-017-desktop-app/cycles/cycle-02/artifacts/local-store-smoke-import.json",
+        "sdd/specs/spec-e-burgos-017-desktop-app/cycles/cycle-02/artifacts/local-store-smoke-interrupted-render.json",
+        "sdd/specs/spec-e-burgos-017-desktop-app/cycles/cycle-02/artifacts/local-store-smoke-producer-restart.json",
+        "sdd/specs/spec-e-burgos-017-desktop-app/cycles/cycle-02/cycle.json"
+      ],
+      "usage": {
+        "provider_model": "claude/sonnet",
+        "effort": "high",
+        "agent": "implementor-back",
+        "tokens_in": 260000,
+        "tokens_out": 32000,
+        "approx": true,
+        "source": "declared-estimate",
+        "recorded_at": "2026-09-23"
+      }
     },
     {
       "id": "TASK-009",

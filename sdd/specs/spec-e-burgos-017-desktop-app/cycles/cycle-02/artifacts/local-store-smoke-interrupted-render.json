@@ -1,0 +1,128 @@
+{
+  "case": "interrupted-render",
+  "startedAt": "2026-09-23T21:04:55.879Z",
+  "checks": [
+    {
+      "message": "the montage job that builds the timeline succeeds",
+      "ok": true
+    },
+    {
+      "message": "progress.renderedFrames > 0 is visible directly in the SQLite row before the kill",
+      "ok": true
+    },
+    {
+      "message": "the job is reported as failed after the restart",
+      "ok": true
+    },
+    {
+      "message": "the job error.code is JOB_INTERRUPTED after the restart",
+      "ok": true
+    },
+    {
+      "message": "POST /jobs/:id/retry answers 202",
+      "ok": true
+    },
+    {
+      "message": "the retried job succeeds",
+      "ok": true
+    },
+    {
+      "message": "ffprobe nb_frames (239) equals report.deliverable.durationInFrames (239)",
+      "ok": true
+    }
+  ],
+  "originalJobId": "0fa3d448-ce2f-482a-a7d4-a8fee407d36b",
+  "progressBeforeKill": {
+    "stage": "render",
+    "renderedFrames": 14,
+    "totalFrames": 239,
+    "percent": 5
+  },
+  "orphanProcessesFound": 8,
+  "orphanProcessLines": [
+    "42988 /Users/macbookprom2/github/personal-projects/video-maker/node_modules/.remotion/chrome-headless-shell/mac-arm64/chrome-headless-shell-mac-arm64/chrome-headless-shell about:blank --allow-pre-commit-input --disable-background-networking --enable-features=NetworkService,NetworkServiceInProcess,CanvasDrawElement --disable-background-timer-throttling --disable-backgrounding-occluded-windows --disable-breakpad --disable-client-side-phishing-detection --disable-component-extensions-with-background-pages --disable-default-apps --disable-dev-shm-usage --no-proxy-server --proxy-server='direct://' --proxy-bypass-list=* --force-gpu-mem-available-mb=4096 --disable-hang-monitor --disable-extensions --allow-chrome-scheme-url --disable-ipc-flooding-protection --disable-popup-blocking --disable-prompt-on-repost --disable-renderer-backgrounding --disable-sync --force-color-profile=srgb --metrics-recording-only --mute-audio --no-first-run --video-threads=1 --enable-automation --password-store=basic --use-mock-keychain --enable-blink-features=IdleDetection --export-tagged-pdf --intensive-wake-up-throttling-policy=0 --headless=old --no-sandbox --disable-setuid-sandbox --disable-background-media-suspend --allow-running-insecure-content --disable-component-update --disable-domain-reliability --disable-features=AudioServiceOutOfProcess,IsolateOrigins,site-per-process,Translate,BackForwardCache,AvoidUnnecessaryBeforeUnloadCheckSync,IntensiveWakeUpThrottling,LocalNetworkAccessChecks,BlockInsecurePrivateNetworkRequests,PrivateNetworkAccessSendPreflights,PrivateNetworkAccessRespectPreflightResults --disable-print-preview --disable-site-isolation-trials --disk-cache-size=268435456 --hide-scrollbars --no-default-browser-check --no-pings --font-render-hinting=none --no-zygote --ignore-gpu-blocklist --enable-unsafe-webgpu --force-device-scale-factor=1 --remote-debugging-port=0 --user-data-dir=/var/folders/lw/gy7lfk_52gq0fv1yvph2fb100000gn/T/puppeteer_dev_chrome_profile-VEFPQY",
+    "42989 /Users/macbookprom2/github/personal-projects/video-maker/node_modules/.remotion/chrome-headless-shell/mac-arm64/chrome-headless-shell-mac-arm64/chrome-headless-shell --type=gpu-process --no-sandbox --disable-breakpad --headless=old --use-angle=swiftshader-webgl --gpu-preferences=SAAAAAAAAAAgAQAMAAAAAAAAAAAAAGAAAwAAAAAAAAAAAAAAAAAAAAYAAAAAAAAAAAAAAAAAAAAQAAAAAAAAABAAAAAAAAAACAAAAAAAAAAIAAAAAAAAAA== --use-gl=angle --shared-files --field-trial-handle=1718379636,r,5536936965394475677,16565228751477729972,262144 --enable-features=CanvasDrawElement,NetworkService,NetworkServiceInProcess --disable-features=AudioServiceOutOfProcess,AvoidUnnecessaryBeforeUnloadCheckSync,BackForwardCache,BlockInsecurePrivateNetworkRequests,IntensiveWakeUpThrottling,IsolateOrigins,LocalNetworkAccessChecks,PaintHolding,PrivateNetworkAccessRespectPreflightResults,PrivateNetworkAccessSendPreflights,Translate,site-per-process --variations-seed-version --pseudonymization-salt-handle=1935764596,r,14588933958585695432,1499145522319938524,4 --trace-process-track-uuid=3190708988185955192",
+    "42990 /Users/macbookprom2/github/personal-projects/video-maker/node_modules/.remotion/chrome-headless-shell/mac-arm64/chrome-headless-shell-mac-arm64/chrome-headless-shell --type=utility --utility-sub-type=network.mojom.NetworkService --lang=en-US --service-sandbox-type=none --no-sandbox --use-angle=swiftshader-webgl --use-gl=angle --mute-audio --headless=old --shared-files --field-trial-handle=1718379636,r,5536936965394475677,16565228751477729972,262144 --enable-features=CanvasDrawElement,NetworkService,NetworkServiceInProcess --disable-features=AudioServiceOutOfProcess,AvoidUnnecessaryBeforeUnloadCheckSync,BackForwardCache,BlockInsecurePrivateNetworkRequests,IntensiveWakeUpThrottling,IsolateOrigins,LocalNetworkAccessChecks,PaintHolding,PrivateNetworkAccessRespectPreflightResults,PrivateNetworkAccessSendPreflights,Translate,site-per-process --variations-seed-version --pseudonymization-salt-handle=1935764596,r,14588933958585695432,1499145522319938524,4 --trace-process-track-uuid=3190708989122997041",
+    "42996 /Users/macbookprom2/github/personal-projects/video-maker/node_modules/.remotion/chrome-headless-shell/mac-arm64/chrome-headless-shell-mac-arm64/chrome-headless-shell --type=renderer --headless=old --no-sandbox --disable-background-timer-throttling --disable-breakpad --disable-background-media-suspend --enable-automation --enable-unsafe-webgpu --force-device-scale-factor=1 --force-color-profile=srgb --no-zygote --remote-debugging-port=0 --video-threads=1 --allow-pre-commit-input --force-gpu-mem-available-mb=4096 --enable-blink-features=IdleDetection --lang=en-US --num-raster-threads=4 --enable-zero-copy --enable-gpu-memory-buffer-compositor-resources --enable-main-frame-before-activation --renderer-client-id=4 --time-ticks-at-unix-epoch=-1790166591870956 --launch-time-ticks=30912769642 --shared-files --field-trial-handle=1718379636,r,5536936965394475677,16565228751477729972,262144 --enable-features=CanvasDrawElement,NetworkService,NetworkServiceInProcess --disable-features=AudioServiceOutOfProcess,AvoidUnnecessaryBeforeUnloadCheckSync,BackForwardCache,BlockInsecurePrivateNetworkRequests,IntensiveWakeUpThrottling,IsolateOrigins,LocalNetworkAccessChecks,PaintHolding,PrivateNetworkAccessRespectPreflightResults,PrivateNetworkAccessSendPreflights,Translate,site-per-process --variations-seed-version --pseudonymization-salt-handle=1935764596,r,14588933958585695432,1499145522319938524,4 --trace-process-track-uuid=3190708990060038890",
+    "43006 /Users/macbookprom2/github/personal-projects/video-maker/node_modules/.remotion/chrome-headless-shell/mac-arm64/chrome-headless-shell-mac-arm64/chrome-headless-shell --type=renderer --headless=old --no-sandbox --disable-background-timer-throttling --disable-breakpad --disable-background-media-suspend --enable-automation --enable-unsafe-webgpu --force-device-scale-factor=1 --force-color-profile=srgb --no-zygote --remote-debugging-port=0 --video-threads=1 --allow-pre-commit-input --force-gpu-mem-available-mb=4096 --enable-blink-features=IdleDetection --lang=en-US --num-raster-threads=4 --enable-zero-copy --enable-gpu-memory-buffer-compositor-resources --enable-main-frame-before-activation --renderer-client-id=5 --time-ticks-at-unix-epoch=-1790166591870956 --launch-time-ticks=30912796647 --shared-files --field-trial-handle=1718379636,r,5536936965394475677,16565228751477729972,262144 --enable-features=CanvasDrawElement,NetworkService,NetworkServiceInProcess --disable-features=AudioServiceOutOfProcess,AvoidUnnecessaryBeforeUnloadCheckSync,BackForwardCache,BlockInsecurePrivateNetworkRequests,IntensiveWakeUpThrottling,IsolateOrigins,LocalNetworkAccessChecks,PaintHolding,PrivateNetworkAccessRespectPreflightResults,PrivateNetworkAccessSendPreflights,Translate,site-per-process --variations-seed-version --pseudonymization-salt-handle=1935764596,r,14588933958585695432,1499145522319938524,4 --trace-process-track-uuid=3190708990997080739",
+    "43007 /Users/macbookprom2/github/personal-projects/video-maker/node_modules/.remotion/chrome-headless-shell/mac-arm64/chrome-headless-shell-mac-arm64/chrome-headless-shell --type=renderer --headless=old --no-sandbox --disable-background-timer-throttling --disable-breakpad --disable-background-media-suspend --enable-automation --enable-unsafe-webgpu --force-device-scale-factor=1 --force-color-profile=srgb --no-zygote --remote-debugging-port=0 --video-threads=1 --allow-pre-commit-input --force-gpu-mem-available-mb=4096 --enable-blink-features=IdleDetection --lang=en-US --num-raster-threads=4 --enable-zero-copy --enable-gpu-memory-buffer-compositor-resources --enable-main-frame-before-activation --renderer-client-id=6 --time-ticks-at-unix-epoch=-1790166591870956 --launch-time-ticks=30912800483 --shared-files --field-trial-handle=1718379636,r,5536936965394475677,16565228751477729972,262144 --enable-features=CanvasDrawElement,NetworkService,NetworkServiceInProcess --disable-features=AudioServiceOutOfProcess,AvoidUnnecessaryBeforeUnloadCheckSync,BackForwardCache,BlockInsecurePrivateNetworkRequests,IntensiveWakeUpThrottling,IsolateOrigins,LocalNetworkAccessChecks,PaintHolding,PrivateNetworkAccessRespectPreflightResults,PrivateNetworkAccessSendPreflights,Translate,site-per-process --variations-seed-version --pseudonymization-salt-handle=1935764596,r,14588933958585695432,1499145522319938524,4 --trace-process-track-uuid=3190708991934122588",
+    "43008 /Users/macbookprom2/github/personal-projects/video-maker/node_modules/.remotion/chrome-headless-shell/mac-arm64/chrome-headless-shell-mac-arm64/chrome-headless-shell --type=renderer --headless=old --no-sandbox --disable-background-timer-throttling --disable-breakpad --disable-background-media-suspend --enable-automation --enable-unsafe-webgpu --force-device-scale-factor=1 --force-color-profile=srgb --no-zygote --remote-debugging-port=0 --video-threads=1 --allow-pre-commit-input --force-gpu-mem-available-mb=4096 --enable-blink-features=IdleDetection --lang=en-US --num-raster-threads=4 --enable-zero-copy --enable-gpu-memory-buffer-compositor-resources --enable-main-frame-before-activation --renderer-client-id=7 --time-ticks-at-unix-epoch=-1790166591870956 --launch-time-ticks=30912802138 --shared-files --field-trial-handle=1718379636,r,5536936965394475677,16565228751477729972,262144 --enable-features=CanvasDrawElement,NetworkService,NetworkServiceInProcess --disable-features=AudioServiceOutOfProcess,AvoidUnnecessaryBeforeUnloadCheckSync,BackForwardCache,BlockInsecurePrivateNetworkRequests,IntensiveWakeUpThrottling,IsolateOrigins,LocalNetworkAccessChecks,PaintHolding,PrivateNetworkAccessRespectPreflightResults,PrivateNetworkAccessSendPreflights,Translate,site-per-process --variations-seed-version --pseudonymization-salt-handle=1935764596,r,14588933958585695432,1499145522319938524,4 --trace-process-track-uuid=3190708992871164437",
+    "43009 /Users/macbookprom2/github/personal-projects/video-maker/node_modules/.remotion/chrome-headless-shell/mac-arm64/chrome-headless-shell-mac-arm64/chrome-headless-shell --type=renderer --headless=old --no-sandbox --disable-background-timer-throttling --disable-breakpad --disable-background-media-suspend --enable-automation --enable-unsafe-webgpu --force-device-scale-factor=1 --force-color-profile=srgb --no-zygote --remote-debugging-port=0 --video-threads=1 --allow-pre-commit-input --force-gpu-mem-available-mb=4096 --enable-blink-features=IdleDetection --lang=en-US --num-raster-threads=4 --enable-zero-copy --enable-gpu-memory-buffer-compositor-resources --enable-main-frame-before-activation --renderer-client-id=8 --time-ticks-at-unix-epoch=-1790166591870956 --launch-time-ticks=30912803215 --shared-files --field-trial-handle=1718379636,r,5536936965394475677,16565228751477729972,262144 --enable-features=CanvasDrawElement,NetworkService,NetworkServiceInProcess --disable-features=AudioServiceOutOfProcess,AvoidUnnecessaryBeforeUnloadCheckSync,BackForwardCache,BlockInsecurePrivateNetworkRequests,IntensiveWakeUpThrottling,IsolateOrigins,LocalNetworkAccessChecks,PaintHolding,PrivateNetworkAccessRespectPreflightResults,PrivateNetworkAccessSendPreflights,Translate,site-per-process --variations-seed-version --pseudonymization-salt-handle=1935764596,r,14588933958585695432,1499145522319938524,4 --trace-process-track-uuid=3190708993808206286"
+  ],
+  "orphanProcessesKilled": 8,
+  "interruptedJob": {
+    "id": "0fa3d448-ce2f-482a-a7d4-a8fee407d36b",
+    "slug": "smoke-interrupted",
+    "state": "failed",
+    "createdAt": "2026-09-23T21:05:02.115Z",
+    "startedAt": "2026-09-23T21:05:02.116Z",
+    "finishedAt": "2026-09-23T21:05:07.431Z",
+    "error": {
+      "code": "JOB_INTERRUPTED",
+      "stage": null,
+      "message": "The service restarted while this job was still in progress."
+    },
+    "kind": "render",
+    "progress": {
+      "stage": "render",
+      "renderedFrames": 14,
+      "totalFrames": 239,
+      "percent": 5
+    },
+    "report": null
+  },
+  "retriedJobId": "61233703-bd8a-4ddb-9ffb-1334aed2ef31",
+  "retriedJobResult": {
+    "id": "61233703-bd8a-4ddb-9ffb-1334aed2ef31",
+    "slug": "smoke-interrupted",
+    "kind": "render",
+    "state": "succeeded",
+    "createdAt": "2026-09-23T21:05:07.603Z",
+    "startedAt": "2026-09-23T21:05:07.604Z",
+    "finishedAt": "2026-09-23T21:05:21.577Z",
+    "progress": {
+      "stage": "verify",
+      "renderedFrames": null,
+      "totalFrames": null,
+      "percent": null
+    },
+    "report": {
+      "renderId": "61233703-bd8a-4ddb-9ffb-1334aed2ef31",
+      "startedAt": "2026-09-23T21:05:07.604Z",
+      "finishedAt": "2026-09-23T21:05:21.577Z",
+      "deliverable": {
+        "resource": "out/61233703-bd8a-4ddb-9ffb-1334aed2ef31.mp4",
+        "width": 1080,
+        "height": 1920,
+        "fps": 30,
+        "durationInFrames": 239
+      },
+      "intermediates": {
+        "mutedVideoResource": "work/renders/61233703-bd8a-4ddb-9ffb-1334aed2ef31/video-muted.mp4",
+        "masterAudioResource": "work/renders/61233703-bd8a-4ddb-9ffb-1334aed2ef31/master.wav"
+      },
+      "loudness": {
+        "withinTolerance": true,
+        "integratedLufs": -14.04,
+        "truePeakDbtp": -12.83,
+        "integratedDeltaLu": -0.03999999999999915,
+        "truePeakDeltaDb": -11.83
+      }
+    },
+    "error": null
+  },
+  "ffprobe": {
+    "codec_name": "h264",
+    "width": 1080,
+    "height": 1920,
+    "r_frame_rate": "30/1",
+    "nb_frames": "239",
+    "nb_read_frames": "239",
+    "side_data_list": [
+      {}
+    ]
+  },
+  "reportDurationInFrames": 239,
+  "ok": true,
+  "finishedAt": "2026-09-23T21:05:22.605Z"
+}

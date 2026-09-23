@@ -1,0 +1,65 @@
+{
+  "case": "producer-restart",
+  "startedAt": "2026-09-23T21:08:31.682Z",
+  "checks": [
+    {
+      "message": "the first producer turn succeeds",
+      "ok": true
+    },
+    {
+      "message": "the second producer turn succeeds after the restart",
+      "ok": true
+    },
+    {
+      "message": "GET .../producer lists both exchanges (4 messages) in order",
+      "ok": true
+    },
+    {
+      "message": "the four messages alternate user/assistant in the order they were sent",
+      "ok": true
+    },
+    {
+      "message": "the second answer references the first question (session survived the restart)",
+      "ok": true
+    },
+    {
+      "message": "no conversation.json or session.json was written to the project directory",
+      "ok": true
+    }
+  ],
+  "firstTurn": {
+    "status": "succeeded",
+    "assistantMessage": "Un video en raw/aroll/analiticas.mp4 (duración sin cargar) y un script con marcas de tiempo en work/producer/script.txt."
+  },
+  "secondTurn": {
+    "status": "succeeded",
+    "assistantMessage": "Me pediste que continúe de donde dejé (después de mostrar qué material hay en el proyecto).\n\n¿Querés que avance con el video?"
+  },
+  "conversation": [
+    {
+      "role": "user",
+      "text": "Hola, decime en una línea qué material tiene este proyecto."
+    },
+    {
+      "role": "assistant",
+      "text": "Un video en raw/aroll/analiticas.mp4 (duración sin cargar) y un script con marcas de tiempo en work/producer/script.txt."
+    },
+    {
+      "role": "user",
+      "text": "¿Qué te pregunté recién?"
+    },
+    {
+      "role": "assistant",
+      "text": "Me pediste que continúe de donde dejé (después de mostrar qué material hay en el proyecto).\n\n¿Querés que avance con el video?"
+    }
+  ],
+  "recalledFirstQuestion": true,
+  "workProducerFiles": [
+    "conversation.md",
+    "hitos.json",
+    "script.txt",
+    "turns"
+  ],
+  "ok": true,
+  "finishedAt": "2026-09-23T21:08:54.734Z"
+}
