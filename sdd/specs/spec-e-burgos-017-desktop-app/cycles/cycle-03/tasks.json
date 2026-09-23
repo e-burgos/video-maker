@@ -131,10 +131,15 @@
       "depends_on": [
         "TASK-004"
       ],
-      "status": "pending",
+      "status": "done",
       "files": [
         "apps/desktop/project.json",
         "apps/desktop/package.json",
+        "apps/desktop/tsconfig.json",
+        "apps/desktop/tsconfig.lib.json",
+        "apps/desktop/tsconfig.spec.json",
+        "apps/desktop/vite.config.ts",
+        "apps/desktop/scripts/dev-serve.mjs",
         "apps/desktop/src/main/main.ts",
         "apps/desktop/src/main/app-paths.ts",
         "apps/desktop/src/main/app-paths.spec.ts",
@@ -143,10 +148,20 @@
         "apps/desktop/src/main/login-shell-path.ts",
         "apps/desktop/src/main/login-shell-path.spec.ts",
         "apps/desktop/src/main/free-port.ts",
+        "apps/desktop/src/main/free-port.spec.ts",
         "package.json",
-        "pnpm-lock.yaml",
-        "tsconfig.base.json"
-      ]
+        "pnpm-lock.yaml"
+      ],
+      "usage": {
+        "provider_model": "claude/sonnet",
+        "effort": "medium",
+        "agent": "implementor-back",
+        "tokens_in": 260000,
+        "tokens_out": 22000,
+        "approx": true,
+        "source": "declared-estimate",
+        "recorded_at": "2026-09-23"
+      }
     },
     {
       "id": "TASK-006",

@@ -1,0 +1,34 @@
+{
+  "name": "desktop",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "apps/desktop/src",
+  "projectType": "application",
+  "tags": ["scope:desktop", "type:app"],
+  "targets": {
+    "lint": {
+      "executor": "@nx/eslint:lint"
+    },
+    "test": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "vitest run --coverage",
+        "cwd": "apps/desktop"
+      }
+    },
+    "build": {
+      "executor": "nx:run-commands",
+      "outputs": ["{workspaceRoot}/dist/out-tsc/apps/desktop"],
+      "options": {
+        "command": "tsc -p tsconfig.lib.json",
+        "cwd": "apps/desktop"
+      }
+    },
+    "serve": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "tsc -p tsconfig.lib.json && node scripts/dev-serve.mjs",
+        "cwd": "apps/desktop"
+      }
+    }
+  }
+}

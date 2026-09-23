@@ -1,0 +1,7 @@
+{
+  "name": "video-maker-desktop",
+  "productName": "Video Maker",
+  "private": true,
+  "version": "0.0.0",
+  "main": "../../dist/out-tsc/apps/desktop/src/main/main.js"
+}
