@@ -1,0 +1,82 @@
+{
+  "generatedAt": "2026-09-23T23:06:38.047Z",
+  "platform": "darwin-arm64",
+  "binaries": {
+    "ffmpeg": {
+      "name": "ffmpeg",
+      "version": "9.0.2",
+      "sourceUrl": "https://ffmpeg.martin-riedl.de/download/macos/arm64/1789931890_9.0.2/ffmpeg.zip",
+      "sourceSha256": "c8ed4c4e6978a03c485edbfe4e0a5dc2380f8a30bba5150531b31b094492d924",
+      "sha256": "2e11c6f90993cdb79fff84d3f90044d28316b310e75b3e030cfc9a54f2c9d384",
+      "license": "GPL-3.0-or-later (built with --enable-gpl --enable-libx264 --enable-libx265)"
+    },
+    "ffprobe": {
+      "name": "ffprobe",
+      "version": "9.0.2",
+      "sourceUrl": "https://ffmpeg.martin-riedl.de/download/macos/arm64/1789931890_9.0.2/ffprobe.zip",
+      "sourceSha256": "fcbe839537485eaee7a7a8bc5cbc0f90d53617e80943e8a5b2e31cb851197ea6",
+      "sha256": "2738aa46a7f9acbc8ab09a6715554c90f7de603171ac403726765685df6a0059",
+      "license": "GPL-3.0-or-later (built with --enable-gpl --enable-libx264 --enable-libx265)"
+    },
+    "sherpaOnnx": {
+      "name": "sherpa-onnx-offline-tts",
+      "version": "1.13.8",
+      "sourceUrl": "https://github.com/k2-fsa/sherpa-onnx/releases/download/v1.13.8/sherpa-onnx-v1.13.8-osx-arm64-static.tar.bz2",
+      "sourceSha256": "d97d56f677168b0a35cf96e587f65e4f036fe5776e40476e4f84e3f47cd4d978",
+      "sha256": "1c586d73f0ac440f19ee02e3198fdcd45db5406d78c0d143715c797dac299198",
+      "license": "Apache-2.0"
+    },
+    "whisperCli": {
+      "name": "whisper-cli",
+      "version": "v1.7.6",
+      "commit": "a8d002cfd879315632a579e73f0148d06959de36",
+      "sourceUrl": "https://github.com/ggml-org/whisper.cpp.git",
+      "sourceSha256": "bc6066978fe882b2774df873b0637d4a615d2362cc86815123d41f38dfdae081",
+      "sha256": "b09b036ecb7adc2c005c4e0004690f23be23b8a51867dc9b4b73bdb42725b71e",
+      "license": "MIT"
+    }
+  },
+  "models": {
+    "whisper": {
+      "name": "ggml-large-v3-turbo-q5_0",
+      "url": "https://huggingface.co/ggerganov/whisper.cpp/resolve/main/ggml-large-v3-turbo-q5_0.bin",
+      "sizeBytes": 574041195,
+      "sha256": "394221709cd5ad1f40c46e6031ca61bce88931e6e088c188294c6d5a55ffa7e2",
+      "license": "MIT (whisper.cpp weights, ggerganov/whisper.cpp) — derived from OpenAI Whisper (MIT)"
+    },
+    "chromeHeadlessShell": {
+      "name": "chrome-headless-shell-mac-arm64",
+      "url": "https://storage.googleapis.com/chrome-for-testing-public/149.0.7790.0/mac-arm64/chrome-headless-shell-mac-arm64.zip",
+      "sizeBytes": 98080877,
+      "sha256": "17ef152eba8ffcfebc42e25ab295eb040d8e62455cff7dfcc735b652456d6899",
+      "license": "Chromium (BSD-3-Clause) + Chrome for Testing terms (https://googlechromelabs.github.io/chrome-for-testing/)",
+      "version": "149.0.7790.0"
+    },
+    "voices": [
+      {
+        "name": "vits-piper-es_AR-daniela-high",
+        "url": "https://github.com/k2-fsa/sherpa-onnx/releases/download/tts-models/vits-piper-es_AR-daniela-high.tar.bz2",
+        "sizeBytes": 115562134,
+        "sha256": "71cbf6b7f646ab74f3c51336151abef41e6c54467ac929ffdb19ed706a07dd7b",
+        "license": "CC-BY-SA-4.0 (dataset openslr.org/61; model trained by larcanio/piper-voices)",
+        "id": "es_AR-daniela-high"
+      },
+      {
+        "name": "vits-piper-es_ES-davefx-medium",
+        "url": "https://github.com/k2-fsa/sherpa-onnx/releases/download/tts-models/vits-piper-es_ES-davefx-medium.tar.bz2",
+        "sizeBytes": 67184952,
+        "sha256": "a3f6beb54a9cb893279f72978a22f807a4d9fc9c7848157b524d5cc7b7f58b22",
+        "license": "CC0-1.0 (dataset github.com/NabuCasa/voice-datasets)",
+        "id": "es_ES-davefx-medium"
+      },
+      {
+        "name": "vits-piper-es_MX-claude-high",
+        "url": "https://github.com/k2-fsa/sherpa-onnx/releases/download/tts-models/vits-piper-es_MX-claude-high.tar.bz2",
+        "sizeBytes": 67207890,
+        "sha256": "ec33fb689c248fe64810aab564cba97babf0f506672cfd404928d46e751a4721",
+        "license": "Apache-2.0 (huggingface.co/spaces/HirCoir/Piper-TTS-Spanish)",
+        "id": "es_MX-claude-high"
+      }
+    ]
+  }
+}

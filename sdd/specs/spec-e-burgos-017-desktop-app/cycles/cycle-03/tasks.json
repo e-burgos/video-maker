@@ -51,13 +51,23 @@
       "depends_on": [
         "TASK-001"
       ],
-      "status": "pending",
+      "status": "done",
       "files": [
         "apps/desktop/scripts/vendor-binaries.mjs",
         "apps/desktop/vendor/manifest.json",
         "apps/desktop/vendor/THIRD_PARTY_NOTICES.md",
         ".gitignore"
-      ]
+      ],
+      "usage": {
+        "provider_model": "claude/sonnet",
+        "effort": "medium",
+        "agent": "implementor-back",
+        "tokens_in": 210000,
+        "tokens_out": 15000,
+        "approx": true,
+        "source": "declared-estimate",
+        "recorded_at": "2026-09-23"
+      }
     },
     {
       "id": "TASK-003",
@@ -71,7 +81,7 @@
       "depends_on": [
         "TASK-001"
       ],
-      "status": "pending",
+      "status": "in-progress",
       "files": [
         "libs/media-local/src/binaries/binaries.ts",
         "libs/media-local/src/binaries/binaries.spec.ts",
