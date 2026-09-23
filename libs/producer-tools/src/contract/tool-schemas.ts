@@ -372,8 +372,18 @@ export const STUDIO_TOOLS: Readonly<Record<StudioToolName, StudioToolDefinition>
     output: CopyAssetOutputSchema,
   },
   start_job: {
+    // The installed MCP SDK degrades a discriminated-union inputSchema to an empty JSON object in
+    // tools/list, so the exact shape per kind is spelled out here instead of relying on the schema.
     description:
-      'Start an asynchronous render engine job (render, montage, storyboard, voice or photo-aroll) and get back its id and initial status. Poll it with wait_for_job.',
+      'Start an asynchronous render engine job and get back its id and initial status. Poll it with ' +
+      'wait_for_job. The input is a single object whose "kind" picks one of five shapes, for example: ' +
+      '{"kind":"render"} · ' +
+      '{"kind":"montage","preset":"educational","seed":0,"voice":"script","format":"youtube-16x9","captionStyle":"subtle-lower"} · ' +
+      '{"kind":"storyboard","brief":"..."} (or "scriptText" instead of "brief") · ' +
+      '{"kind":"voice","voice":"es_AR-daniela-high","gapMs":900,"scriptPath":"work/producer/script.txt"} · ' +
+      '{"kind":"photo-aroll","photos":["raw/images/a.jpg"],"output":"ad.mp4"} — "output" here is a ' +
+      'bare file name with no directories, saved under raw/aroll/. ' +
+      'Every field beyond "kind" is optional unless shown above as required by its job.',
     input: StartJobInputSchema,
     output: StartJobOutputSchema,
   },

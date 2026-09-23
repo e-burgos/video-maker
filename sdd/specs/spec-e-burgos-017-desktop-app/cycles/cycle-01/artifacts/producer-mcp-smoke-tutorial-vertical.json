@@ -1,0 +1,143 @@
+{
+  "case": "tutorial-vertical",
+  "slug": "smoke-tutorial-vertical",
+  "model": "sonnet",
+  "tempMediaRoot": "/var/folders/lw/gy7lfk_52gq0fv1yvph2fb100000gn/T/producer-mcp-smoke-tutorial-vertical-8a9piq",
+  "tempCliCwdBase": "/var/folders/lw/gy7lfk_52gq0fv1yvph2fb100000gn/T/producer-mcp-smoke-cwd-tutorial-vertical-AiB9tv",
+  "rawFilesBefore": 4,
+  "turns": [
+    {
+      "turnId": "97791f21-f524-4801-bdc5-94998c394a1c",
+      "sentText": "Quiero un tutorial vertical de esta grabación de pantalla, para Shorts, Reels y TikTok. Receta Tutorial Vertical: la grabación ya está en vertical, narración con voz generada (Daniela, español rioplatense) sincronizada con lo que pasa en pantalla siguiendo mi tabla de escenas y tiempos, subtítulos clásicos abajo —después los cambio por los grandes en el preview si quiero—, música libre suave de fondo con crédito, el logo transparente arriba a la izquierda al 50 %, y una placa de inicio y otra de cierre de 2 segundos con fondo blanco y el logo. El guion cierra siempre con una despedida: si mi tabla no la trae, agregala vos como última línea, del estilo «¡Gracias por ver este tutorial! Nos vemos en el próximo.» Guion con tiempos: usá el que ya está en el proyecto (work/producer/script.txt). Cuando confirmemos el guion, producí y renderizá.",
+      "status": "succeeded",
+      "seconds": 78.122,
+      "toolCalls": [
+        "mcp__studio__get_project_overview",
+        "mcp__studio__read_project_text",
+        "mcp__studio__probe_media",
+        "mcp__studio__probe_media",
+        "mcp__studio__extract_frames"
+      ],
+      "jobs": [],
+      "assistantMessage": "Todo chequeado. Acá el resumen antes de arrancar:\n\n**Video**: 1080×1920 → vertical ✓ | **Duración**: 120s | **Audio**: sin audio propio (se reemplaza con la voz generada)\n\n**Guion encontrado** — la despedida ya está en la última línea, la respeto tal cual:\n\n| Tiempo | Línea |\n|--------|-------|\n| 0:01 | Las campañas viven en este módulo. Desde el celular también podés planificar y publicar. |\n| 0:07 | Creamos una nueva: cinco pasos, y podés moverte libre entre ellos. |\n| 0:12 | Primero el nombre. Sin fecha de fin, la campaña no vence. |\n| 0:18 | Después los días y la franja horaria: todos los días, de nueve a veintiuna. |\n| 0:30 | El contenido se separa por orientación. Para las pantallas apaisadas, dos piezas. |\n| 0:44 | Y para las verticales, otras tres. |\n| 1:00 | En la vista previa la recorrés anuncio por anuncio, tal como la va a ver la pantalla. |\n| 1:09 | Lo mismo en vertical. |\n| 1:19 | Guardamos: nace en borrador, todavía no sale al aire. |\n| 1:23 | En la solapa Campañas, desde el menú de la tarjeta, la asignamos a Core Pro Demo y Counter 15 Demo. |\n| 1:37 | Desde el mismo menú la activamos: ya está al aire. |\n| 1:42 | En Programación la vemos en cada pantalla: hoy, por día, por semana o por mes. |\n| 1:53 | Y al tocar la campaña, abajo aparece su detalle. Así de simple es publicar desde el celular. |\n| 1:57 | ¡Gracias por ver este tutorial! |\n\n**Lo que voy a producir si confirmás:**\n- Voz Daniela (español rioplatense) sincronizada a los tiempos de arriba\n- Música suave de fondo (libre, con crédito automático)\n- Subtítulos clásicos abajo (`subtle-lower`)\n- Logo arriba a la izquierda, 18% ancho, 50% opacidad\n- Placa intro (slide-up) + placa cierre (zoom), 2 s, fondo blanco\n- Formato Shorts/Reels/TikTok 9:16 → render final\n\n> ⚠️ El logo PNG no devolvió datos de canal alpha en el análisis. Si al renderizar aparece con fondo sólido, te aviso y lo saltemos. Igual avanzo con él porque es lo habitual en logos PNG.\n\n¿Confirmás el guion y arrancamos?",
+      "error": null
+    },
+    {
+      "turnId": "fed18357-b2e9-4bec-904b-1095cf32a617",
+      "sentText": "Confirmado, producí y renderizá",
+      "status": "succeeded",
+      "seconds": 626.296,
+      "toolCalls": [
+        "mcp__studio__search_free_music",
+        "mcp__studio__start_job",
+        "mcp__studio__import_music",
+        "mcp__studio__start_job",
+        "mcp__studio__start_job",
+        "mcp__studio__start_job",
+        "mcp__studio__wait_for_job",
+        "mcp__studio__read_project_text",
+        "mcp__studio__start_job",
+        "mcp__studio__start_job",
+        "mcp__studio__wait_for_job",
+        "mcp__studio__get_timeline",
+        "mcp__studio__probe_media",
+        "mcp__studio__put_timeline",
+        "mcp__studio__start_job",
+        "mcp__studio__wait_for_job",
+        "mcp__studio__probe_media",
+        "mcp__studio__extract_frames"
+      ],
+      "jobs": [
+        "e1d22849-b28d-43ae-9227-9b86f032335b:voice:running",
+        "e1d22849-b28d-43ae-9227-9b86f032335b:voice:succeeded",
+        "9d1a37cc-129f-4ffb-bdce-05c1b3b8a050:montage:running",
+        "9d1a37cc-129f-4ffb-bdce-05c1b3b8a050:montage:succeeded",
+        "92becf82-acc2-47cf-8b0c-593f14aa2c99:render:running",
+        "92becf82-acc2-47cf-8b0c-593f14aa2c99:render:succeeded"
+      ],
+      "assistantMessage": "Todo impecable. Revisión frame a frame:\n\n| Tiempo | ¿Qué se ve? | Estado |\n|--------|-------------|--------|\n| 0.5 s | Placa blanca intro con logo DisplayAds (slide-up) | ✅ |\n| 2.5 s | Dashboard — logo arriba izquierda al 50 % | ✅ |\n| 10 s | Pantalla Programación + subtítulo \"Creamos una nueva…\" | ✅ |\n| 35 s | Diálogo Nueva Campaña / Contenido + subtítulo sincronizado | ✅ |\n| 65 s | Vista Previa + subtítulo \"como la va a ver la pantalla.\" | ✅ |\n| 100 s | Lista Campañas + \"Desde el mismo menú la activamos…\" | ✅ |\n| 122 s | Detalle campaña activa — últimos segundos antes del outro | ✅ |\n\n---\n\n**Tu tutorial vertical está listo.**\n\n- **Video** → pantalla `preview` del studio; también en la sección **Generated** con link de descarga directo.\n- **Narración** línea a línea con tiempos → pantalla `voice`.\n- **Crédito de música** → \"Inspire Action\" de Yuri Megis (CC BY 4.0), registrado automáticamente en el proyecto.\n\nDatos técnicos: 1080×1920 · 30 fps · 124 s (120 s de grabación + 2 s intro + 2 s outro) · subtítulos `subtle-lower` (podés cambiarlos a los grandes kinéticos en el selector de la pantalla `preview`).",
+      "error": null
+    },
+    {
+      "turnId": "7fbeb3a3-bd4c-47b9-b57d-bc55e8395439",
+      "sentText": "Sí, esa elección está bien, seguí.",
+      "status": "succeeded",
+      "seconds": 36.046,
+      "toolCalls": [],
+      "jobs": [
+        "e1d22849-b28d-43ae-9227-9b86f032335b:voice:succeeded",
+        "9d1a37cc-129f-4ffb-bdce-05c1b3b8a050:montage:succeeded",
+        "92becf82-acc2-47cf-8b0c-593f14aa2c99:render:succeeded"
+      ],
+      "assistantMessage": "El video está entregado y completo — no quedó ningún paso pendiente de mi parte en la sesión anterior.\n\nPara saber con qué seguir, confirmame cuál de estas opciones tenés en mente:\n\n1. **Subtítulos grandes** — cambiar el estilo de `subtle-lower` a `bold-impact` (los kinéticos que saltan por palabra) y volver a renderizar.\n2. **Versión YouTube 16:9** — producir el mismo tutorial en horizontal para subir a YouTube.\n3. **Ajustar el guion** — modificar alguna línea, regenerar la voz y re-renderizar.\n\n¿Cuál es?",
+      "error": null
+    }
+  ],
+  "mp4": "92becf82-acc2-47cf-8b0c-593f14aa2c99.mp4",
+  "video": {
+    "codec_name": "h264",
+    "width": 1080,
+    "height": 1920,
+    "r_frame_rate": "30/1",
+    "nb_frames": "3731",
+    "side_data_list": [
+      {}
+    ]
+  },
+  "frames": [
+    "tutorial-vertical-t18.jpg",
+    "tutorial-vertical-t62.jpg",
+    "tutorial-vertical-t105.jpg"
+  ],
+  "rawFilesAfter": 5,
+  "ranJobs": [
+    "e1d22849-b28d-43ae-9227-9b86f032335b:voice:running",
+    "e1d22849-b28d-43ae-9227-9b86f032335b:voice:succeeded",
+    "9d1a37cc-129f-4ffb-bdce-05c1b3b8a050:montage:running",
+    "9d1a37cc-129f-4ffb-bdce-05c1b3b8a050:montage:succeeded",
+    "92becf82-acc2-47cf-8b0c-593f14aa2c99:render:running",
+    "92becf82-acc2-47cf-8b0c-593f14aa2c99:render:succeeded",
+    "e1d22849-b28d-43ae-9227-9b86f032335b:voice:succeeded",
+    "9d1a37cc-129f-4ffb-bdce-05c1b3b8a050:montage:succeeded",
+    "92becf82-acc2-47cf-8b0c-593f14aa2c99:render:succeeded"
+  ],
+  "startedAt": "2026-09-23T18:13:44.547Z",
+  "durationSeconds": 124.36666666666666,
+  "nonMcpToolUses": [],
+  "failedToolCalls": [
+    {
+      "file": "fed18357-b2e9-4bec-904b-1095cf32a617.jsonl",
+      "name": "mcp__studio__start_job",
+      "input": {},
+      "resultContent": "MCP error -32602: Input validation error: Invalid arguments for tool start_job: Invalid discriminator value. Expected 'render' | 'montage' | 'storyboard' | 'voice' | 'photo-aroll' at kind"
+    },
+    {
+      "file": "fed18357-b2e9-4bec-904b-1095cf32a617.jsonl",
+      "name": "mcp__studio__start_job",
+      "input": {},
+      "resultContent": "MCP error -32602: Input validation error: Invalid arguments for tool start_job: Invalid discriminator value. Expected 'render' | 'montage' | 'storyboard' | 'voice' | 'photo-aroll' at kind"
+    },
+    {
+      "file": "fed18357-b2e9-4bec-904b-1095cf32a617.jsonl",
+      "name": "mcp__studio__start_job",
+      "input": {},
+      "resultContent": "MCP error -32602: Input validation error: Invalid arguments for tool start_job: Invalid discriminator value. Expected 'render' | 'montage' | 'storyboard' | 'voice' | 'photo-aroll' at kind"
+    },
+    {
+      "file": "fed18357-b2e9-4bec-904b-1095cf32a617.jsonl",
+      "name": "mcp__studio__start_job",
+      "input": {
+        "kind": "montage",
+        "format": "shorts-9x16",
+        "preset": "educational",
+        "seed": 0,
+        "voice": "script",
+        "captionStyle": "subtle-lower",
+        "scriptPath": "work/producer/script.txt",
+        "musicPath": "raw/audio/Inspire_Action_by_Yuri_Megis.ogg"
+      },
+      "resultContent": "MCP error -32602: Input validation error: Invalid arguments for tool start_job: Unrecognized key: \"musicPath\""
+    }
+  ],
+  "finishedAt": "2026-09-23T18:26:06.910Z"
+}

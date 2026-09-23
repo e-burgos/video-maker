@@ -1,0 +1,125 @@
+{
+  "case": "tutorial",
+  "slug": "smoke-tutorial",
+  "model": "sonnet",
+  "tempMediaRoot": "/var/folders/lw/gy7lfk_52gq0fv1yvph2fb100000gn/T/producer-mcp-smoke-tutorial-wYkHDQ",
+  "tempCliCwdBase": "/var/folders/lw/gy7lfk_52gq0fv1yvph2fb100000gn/T/producer-mcp-smoke-cwd-tutorial-SlAQEU",
+  "rawFilesBefore": 1,
+  "turns": [
+    {
+      "turnId": "76478b72-94a5-4a8c-9a86-c2a77c3a76f5",
+      "sentText": "Quiero un tutorial de esta grabación de pantalla, para YouTube. Receta Tutorial: narración con voz generada (Daniela, español rioplatense) sincronizada con lo que pasa en pantalla siguiendo mi tabla de escenas y tiempos, subtítulos clásicos abajo, música libre suave de fondo con crédito, el logo transparente abajo a la derecha al 50 %, y una placa de inicio y otra de cierre de 2 segundos con fondo blanco y el logo. El guion cierra siempre con una despedida: si mi tabla no la trae, agregala vos como última línea, del estilo «¡Gracias por ver este tutorial! Nos vemos en el próximo.» Guion con tiempos: usá el que ya está en el proyecto (work/producer/script.txt). Cuando confirmemos el guion, producí y renderizá.",
+      "status": "succeeded",
+      "seconds": 93.139,
+      "toolCalls": [
+        "mcp__studio__get_project_overview",
+        "mcp__studio__read_project_text",
+        "mcp__studio__probe_media",
+        "mcp__studio__extract_frames"
+      ],
+      "jobs": [],
+      "assistantMessage": "Vi todo el material. El video tiene 71 segundos y termina en la pestaña de IA Insights. El guion cubre hasta [0:54] — le falta la despedida, que agrego yo en [1:05] aprovechando los últimos segundos de pantalla estática.\n\n---\n\n**Guion completo (una línea añadida al final):**\n\n```\n[0:01] Analíticas responde la pregunta que importa: qué está pasando de verdad con tus pantallas.\n[0:08] Arriba, el resumen: cuántas están conectadas, cuántas campañas hay al aire y cuánto consumo de inteligencia artificial llevás en el mes.\n[0:20] El mapa de calor cruza los días con las horas. Cuanto más intenso el color, más reproducciones hubo en esa franja.\n[0:30] Abajo te lo dice con palabras: la hora pico, el día de mayor impacto, la pantalla más activa y la campaña más vista de la semana.\n[0:42] Los gráficos completan el cuadro: cuántos equipos estuvieron activos cada día, y el ranking de campañas y de pantallas por reproducciones.\n[0:54] La segunda pestaña es la de inteligencia artificial. Si tu organización todavía no tiene ese módulo habilitado, la pantalla te lo dice con todas las letras.\n[1:05] ¡Gracias por ver este tutorial! Nos vemos en el próximo.\n```\n\n---\n\n**Una sola cosa pendiente — el logo:** no hay ningún archivo de logo en el proyecto todavía. Lo necesito para la marca de agua (abajo a la derecha, 50 % de opacidad) y para las placas de inicio y cierre. ¿Lo subís, o preferís que arranque sin logo por ahora?\n\nTodo lo demás está definido: voz Daniela, YouTube 16:9, subtítulos clásicos abajo, música suave libre de derechos, placas blancas de 2 segundos. En cuanto confirmes el guion y el logo, arranco de punta a punta.",
+      "error": null
+    },
+    {
+      "turnId": "a82206cc-b3dd-45c8-8291-45318c284fca",
+      "sentText": "Dale, avanzá con tu propuesta: confirmo el guion, producí todo y renderizá.",
+      "status": "succeeded",
+      "seconds": 439.673,
+      "toolCalls": [
+        "mcp__studio__write_project_text",
+        "mcp__studio__search_free_music",
+        "mcp__studio__import_music",
+        "mcp__studio__start_job",
+        "mcp__studio__start_job",
+        "mcp__studio__start_job",
+        "mcp__studio__list_voices",
+        "mcp__studio__start_job",
+        "mcp__studio__wait_for_job",
+        "mcp__studio__read_project_text",
+        "mcp__studio__start_job",
+        "mcp__studio__wait_for_job",
+        "mcp__studio__get_timeline",
+        "mcp__studio__probe_media",
+        "mcp__studio__put_timeline",
+        "mcp__studio__start_job",
+        "mcp__studio__wait_for_job",
+        "mcp__studio__probe_media",
+        "mcp__studio__extract_frames"
+      ],
+      "jobs": [
+        "3c16d545-3223-4400-9218-10196845b9d2:voice:running",
+        "3c16d545-3223-4400-9218-10196845b9d2:voice:succeeded",
+        "7af23a13-dfc6-4495-8541-ce63af666e68:montage:succeeded",
+        "60dc8401-9bf2-4541-90dd-c96daa2e0ab5:render:running",
+        "60dc8401-9bf2-4541-90dd-c96daa2e0ab5:render:succeeded"
+      ],
+      "assistantMessage": "Todo verifica perfectamente. Esto es lo que confirmo en los fotogramas:\n\n| Segundo | Qué se ve |\n|---|---|\n| 0.5 s | Placa blanca de inicio (slide-up) ✓ |\n| 3 s | Dashboard con contenido, empieza la narración ✓ |\n| 15 s | Subtítulos clásicos abajo, sincronizados con la voz ✓ |\n| 40 s | Pantalla limpia entre frases, sin texto intrusivo ✓ |\n| 65 s | Pestaña IA Insights, última escena ✓ |\n| 73.5 s | Placa blanca de cierre (zoom) ✓ |\n\n---\n\n**Tutorial listo — 75 segundos, YouTube 1080p.**\n\nEl video está en la pantalla **preview** y disponible para descargar en la sección **Generated** de la biblioteca. La narración línea por línea con sus tiempos la podés revisar en la pantalla **voice**.\n\nCrédito de música registrado automáticamente: *\"Inspire Action\" — Yuri Megis, CC BY 4.0.*\n\nQuedó sin logo porque no había archivo en el proyecto. Cuando lo tengas, lo puedo agregar con un re-render rápido.",
+      "error": null
+    },
+    {
+      "turnId": "c4637f21-2bee-47c5-bf15-dac9dd1344d6",
+      "sentText": "Agregar el logo y re-renderizar",
+      "status": "succeeded",
+      "seconds": 15.021,
+      "toolCalls": [
+        "mcp__studio__get_project_overview"
+      ],
+      "jobs": [
+        "3c16d545-3223-4400-9218-10196845b9d2:voice:succeeded",
+        "7af23a13-dfc6-4495-8541-ce63af666e68:montage:succeeded",
+        "60dc8401-9bf2-4541-90dd-c96daa2e0ab5:render:succeeded"
+      ],
+      "assistantMessage": "Todavía no hay ningún archivo de logo en el proyecto. Para poder agregarlo necesito que lo subas primero desde la biblioteca de assets del estudio (botón **+ Subir** o arrastrando el archivo).\n\nIdealmente un PNG o SVG **con fondo transparente** — así la marca de agua queda limpia sobre el video. Una vez que aparezca en los assets te lo agrego al timeline y re-renderizo sin tocar nada más.",
+      "error": null
+    },
+    {
+      "turnId": "eef0b625-9501-4ca2-aca1-df0adf063049",
+      "sentText": "Seguir sin logo",
+      "status": "succeeded",
+      "seconds": 9.016,
+      "toolCalls": [],
+      "jobs": [
+        "3c16d545-3223-4400-9218-10196845b9d2:voice:succeeded",
+        "7af23a13-dfc6-4495-8541-ce63af666e68:montage:succeeded",
+        "60dc8401-9bf2-4541-90dd-c96daa2e0ab5:render:succeeded"
+      ],
+      "assistantMessage": "El tutorial ya está completo y renderizado sin logo. No hay nada más que hacer en este punto — el video está en la pantalla **preview** y disponible para descargar en la sección **Generated** de la biblioteca.\n\nSi en algún momento conseguís el logo, lo agrego con un re-render de un par de minutos.",
+      "error": null
+    }
+  ],
+  "mp4": "60dc8401-9bf2-4541-90dd-c96daa2e0ab5.mp4",
+  "video": {
+    "codec_name": "h264",
+    "width": 1920,
+    "height": 1080,
+    "r_frame_rate": "30/1",
+    "nb_frames": "2255",
+    "side_data_list": [
+      {}
+    ]
+  },
+  "frames": [
+    "tutorial-t11.jpg",
+    "tutorial-t37.jpg",
+    "tutorial-t63.jpg"
+  ],
+  "rawFilesAfter": 2,
+  "ranJobs": [
+    "3c16d545-3223-4400-9218-10196845b9d2:voice:running",
+    "3c16d545-3223-4400-9218-10196845b9d2:voice:succeeded",
+    "7af23a13-dfc6-4495-8541-ce63af666e68:montage:succeeded",
+    "60dc8401-9bf2-4541-90dd-c96daa2e0ab5:render:running",
+    "60dc8401-9bf2-4541-90dd-c96daa2e0ab5:render:succeeded",
+    "3c16d545-3223-4400-9218-10196845b9d2:voice:succeeded",
+    "7af23a13-dfc6-4495-8541-ce63af666e68:montage:succeeded",
+    "60dc8401-9bf2-4541-90dd-c96daa2e0ab5:render:succeeded",
+    "3c16d545-3223-4400-9218-10196845b9d2:voice:succeeded",
+    "7af23a13-dfc6-4495-8541-ce63af666e68:montage:succeeded",
+    "60dc8401-9bf2-4541-90dd-c96daa2e0ab5:render:succeeded"
+  ],
+  "startedAt": "2026-09-23T18:02:09.206Z",
+  "durationSeconds": 75.16666666666667,
+  "nonMcpToolUses": [],
+  "finishedAt": "2026-09-23T18:11:27.717Z"
+}

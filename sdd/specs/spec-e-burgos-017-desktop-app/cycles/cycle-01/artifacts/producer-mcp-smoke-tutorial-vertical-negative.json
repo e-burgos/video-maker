@@ -1,0 +1,32 @@
+{
+  "case": "tutorial-vertical-negative",
+  "slug": "smoke-tutorial-vertical-negative",
+  "model": "sonnet",
+  "tempMediaRoot": "/var/folders/lw/gy7lfk_52gq0fv1yvph2fb100000gn/T/producer-mcp-smoke-tutorial-vertical-negative-pxMnFO",
+  "tempCliCwdBase": "/var/folders/lw/gy7lfk_52gq0fv1yvph2fb100000gn/T/producer-mcp-smoke-cwd-tutorial-vertical-negative-AbMLke",
+  "rawFilesBefore": 1,
+  "turns": [
+    {
+      "turnId": "fa0810d1-dba0-4e30-ba0e-435ec5b2f8e3",
+      "sentText": "Quiero un tutorial vertical de esta grabación de pantalla, para Shorts, Reels y TikTok. Receta Tutorial Vertical: la grabación ya está en vertical, narración con voz generada (Daniela, español rioplatense) sincronizada con lo que pasa en pantalla siguiendo mi tabla de escenas y tiempos, subtítulos clásicos abajo —después los cambio por los grandes en el preview si quiero—, música libre suave de fondo con crédito, el logo transparente arriba a la izquierda al 50 %, y una placa de inicio y otra de cierre de 2 segundos con fondo blanco y el logo. El guion cierra siempre con una despedida: si mi tabla no la trae, agregala vos como última línea, del estilo «¡Gracias por ver este tutorial! Nos vemos en el próximo.» Guion con tiempos: usá el que ya está en el proyecto (work/producer/script.txt). Cuando confirmemos el guion, producí y renderizá.",
+      "status": "succeeded",
+      "seconds": 30.152,
+      "toolCalls": [
+        "mcp__studio__get_project_overview",
+        "mcp__studio__read_project_text",
+        "mcp__studio__probe_media"
+      ],
+      "jobs": [],
+      "assistantMessage": "Tengo un problema que hay que resolver antes de continuar.\n\n**La grabación es horizontal, no vertical.** `analiticas.mp4` mide 1920 × 1080 px (16:9). El motor de la receta Vertical Tutorial no reencuadra: si lo proceso así, el resultado sale con barras negras o estirado, y queda mal en Shorts/Reels/TikTok.\n\nTenés dos caminos:\n\n**1. Subir la grabación en vertical** (9:16, por ejemplo 1080 × 1920). Reemplazá el archivo y avisame para arrancar de nuevo con la receta vertical.\n\n**2. Usar la receta Tutorial estándar** (YouTube 16:9). Se mantiene todo lo demás: guion con tiempos, voz Daniela, música suave, logo, placas de inicio y cierre. Solo cambia el formato de salida a horizontal.\n\n¿Cuál preferís?",
+      "error": null
+    }
+  ],
+  "mp4": null,
+  "video": null,
+  "frames": [],
+  "rawFilesAfter": 1,
+  "ranJobs": [],
+  "startedAt": "2026-09-23T18:01:22.138Z",
+  "nonMcpToolUses": [],
+  "finishedAt": "2026-09-23T18:01:53.549Z"
+}
