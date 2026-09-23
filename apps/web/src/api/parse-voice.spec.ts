@@ -25,6 +25,7 @@ describe('parseVoiceListing', () => {
     expect(Object.keys(listing).sort()).toEqual(['voices']);
     expect(Object.keys(listing.voices[0] as object).sort()).toEqual([
       'description',
+      'directory',
       'fileName',
       'id',
       'isDefault',
@@ -59,13 +60,13 @@ describe('parseVoiceListing', () => {
     expect(listing.voices[0]?.quality).toBeNull();
   });
 
-  it('accepts an empty catalogue, which is not the same as Piper being unconfigured', () => {
+  it('accepts an empty catalogue, which is not the same as the voice engine being unconfigured', () => {
     expect(parseVoiceListing({ voices: [] }).voices).toEqual([]);
   });
 
   it('refuses a voice without its isDefault flag', () => {
     expectShapeRefusal(() =>
-      parseVoiceListing({ voices: [{ id: 'a', fileName: 'a.onnx' }] }),
+      parseVoiceListing({ voices: [{ id: 'a', directory: 'vits-piper-a', fileName: 'a.onnx' }] }),
     );
   });
 });

@@ -48,13 +48,13 @@
         "spec": "sdd/specs/spec-e-burgos-005-render-service",
         "status": "updated",
         "created_in_cycle": 1,
-        "updated_in_cycle": 2,
-        "description": "Service health probe. Reports the resolved state of the two engine modules loaded via dynamic import (media-local, composition-remotion/render), the resolution state of the four media binaries (ffmpeg, ffprobe, whisper-cli, the Whisper model) by logical name and env var — never their resolved host path — and the capabilities enabled in this cycle. Answers 200 in both the ok and degraded states. capabilities gains storyboardQueue in spec-e-burgos-008 cycle-01. The claude CLI is deliberately NOT added to binaries: that list is resolved by @video-maker/media-local and adding it would report degraded on every machine without Claude Code installed, CI included.",
+        "updated_in_cycle": 3,
+        "description": "Service health probe. Reports the resolved state of the two engine modules loaded via dynamic import (media-local, composition-remotion/render), the resolution state of the media binaries (ffmpeg, ffprobe, whisper-cli, the Whisper model, the sherpa-onnx-offline-tts CLI, the TTS voices directory) by logical name and env var — never their resolved host path — and the capabilities enabled in this cycle. Answers 200 in both the ok and degraded states. capabilities gains storyboardQueue in spec-e-burgos-008 cycle-01. The claude CLI is deliberately NOT added to binaries: that list is resolved by @video-maker/media-local and adding it would report degraded on every machine without Claude Code installed, CI included.",
         "path_params": [],
         "required_headers": [],
         "request_body": {},
         "responses": {
-          "200": "application/json: { status: 'ok' | 'degraded', service: 'render-api', cycle: number, time: ISO-8601 string, engine: [{ name, loaded }], binaries: [{ name, envVar, resolved }] (4 entries: ffmpeg, ffprobe, whisper-cli, whisper-model), capabilities (which gained producer in spec-e-burgos-015 cycle-01: true when the Claude Code binary resolves; it never turns the service degraded, because a machine without Claude Code still renders — same reasoning as D-12 of spec-008 for the binaries list): { renderPipeline, assetStore, jobQueue, montageQueue, storyboardQueue }, jobs: { running, queued }, store: { schemaVersion: number, dbPath: string } }. status is ok only when every engine module loaded and every binary resolved (all four); the jobs counters and the store block never affect it. store.schemaVersion is the SQLite PRAGMA user_version of the local studio database (libs/local-store migrations). store.dbPath is the database file path relative to mediaRoot when it lives inside it (the default), or just the file name when RENDER_API_DB_PATH points somewhere else — never an absolute host path.",
+          "200": "application/json: { status: 'ok' | 'degraded', service: 'render-api', cycle: number, time: ISO-8601 string, engine: [{ name, loaded }], binaries: [{ name, envVar, resolved }] (6 entries: ffmpeg, ffprobe, whisper-cli, whisper-model, ttsCli, ttsVoicesDir), capabilities (which gained producer in spec-e-burgos-015 cycle-01: true when the Claude Code binary resolves; it never turns the service degraded, because a machine without Claude Code still renders — same reasoning as D-12 of spec-008 for the binaries list): { renderPipeline, assetStore, jobQueue, montageQueue, storyboardQueue }, jobs: { running, queued }, store: { schemaVersion: number, dbPath: string } }. status is ok only when every engine module loaded and every binary resolved (all six); the jobs counters and the store block never affect it. store.schemaVersion is the SQLite PRAGMA user_version of the local studio database (libs/local-store migrations). store.dbPath is the database file path relative to mediaRoot when it lives inside it (the default), or just the file name when RENDER_API_DB_PATH points somewhere else — never an absolute host path.",
           "405": "application/json: { error: { code: 'METHOD_NOT_ALLOWED', stage: null, message, resource, expected } } with an Allow header, for any method other than GET on this path.",
           "500": "application/json: { error: { code: 'INTERNAL_ERROR', stage: null, message } } from the central error handler."
         },
@@ -93,6 +93,11 @@
             "cycle": 2,
             "date": "2026-09-23",
             "change": "spec-e-burgos-017 cycle-02 (TASK-006): additive store: { schemaVersion, dbPath } block reporting the local SQLite studio database. Every field already published keeps its name, type and meaning."
+          },
+          {
+            "cycle": 3,
+            "date": "2026-09-23",
+            "change": "spec-e-burgos-017 cycle-03 (TASK-003, D-C3-09): the two Piper binary entries (piperCli/PIPER_PATH, piperModel/PIPER_MODEL_PATH) are replaced by ttsCli/TTS_CLI_PATH and ttsVoicesDir/TTS_VOICES_DIR — sherpa-onnx-offline-tts replaces Piper as the voice engine, in the app and in development. Still six entries; status keeps the same ok/degraded formula."
           }
         ]
       },
@@ -679,8 +684,8 @@
         "spec": "sdd/specs/spec-e-burgos-016-studio-usability",
         "status": "implemented",
         "created_in_cycle": 1,
-        "updated_in_cycle": 1,
-        "description": "Lists the Piper voice models installed on the machine, each one described well enough to choose it without reading file names. The list is derived from the .onnx files sitting next to the model configured in PIPER_MODEL_PATH, so dropping a new voice in that directory is enough to make it selectable; the .onnx.json config files are not voices and are filtered out, they are read as the metadata of the voice they belong to. It is a resource of its own and not a field of GET /health because health is polled and must not pay a directory read per call. The route is not project-scoped: voices belong to the machine, not to a project.",
+        "updated_in_cycle": 3,
+        "description": "Lists the voice models installed on the machine, each one described well enough to choose it without reading file names. The list is derived from the vits-piper-<id> subdirectories of TTS_VOICES_DIR, so dropping a new voice directory there is enough to make it selectable; the .onnx.json config file next to each voice's .onnx is not a voice and is filtered out, it is read as the metadata of the voice it belongs to. It is a resource of its own and not a field of GET /health because health is polled and must not pay a directory read per call. The route is not project-scoped: voices belong to the machine, not to a project.",
         "path_params": [],
         "required_headers": [],
         "request_body": {
@@ -688,8 +693,8 @@
           "schema": "Takes no request body."
         },
         "responses": {
-          "200": "application/json: { voices: [{ id, fileName, isDefault, language: { code, region }, quality, label, description, previewUrl }] } sorted by id. id is the file name without its .onnx extension and is what a voice job accepts in its voice parameter. isDefault marks the model configured in PIPER_MODEL_PATH. language.code is BCP47 (es-AR) and region is null when the model declares none. quality is one of x_low|low|medium|high, taken from the sidecar and otherwise from the file name, and is null when neither declares it. label and description are derived entirely from the model metadata (dataset, language names, audio quality and sample rate) and never state a gender, an age or a temperament, which Piper does not document; without a sidecar the description says so instead of guessing. previewUrl is the path of EP-026 for this voice, relative to the service. An empty array means the directory has no .onnx model.",
-          "503": "VOICE_MODEL_UNAVAILABLE when PIPER_MODEL_PATH is not set or does not point at a readable file. Answering an empty list there would be a lie: the difference between 'no voices installed' and 'Piper not configured' is what the studio needs to explain. The payload never carries the resolved path of the voice directory. application/json: { error: { code, stage, message, resource?, expected?, hint?, assetPersisted?, catalogUpdated? } }."
+          "200": "application/json: { voices: [{ id, directory, fileName, isDefault, language: { code, region }, quality, label, description, previewUrl }] } sorted by id. id is the file name without its .onnx extension and is what a voice job accepts in its voice parameter. directory is the voice's subdirectory name under TTS_VOICES_DIR (vits-piper-<id>) and is what the service joins with TTS_VOICES_DIR to locate the model, tokens and espeak-ng-data at synthesis time; the payload never carries the resolved absolute path. isDefault marks the DEFAULT_VOICE_ID constant (es_AR-daniela-high) when that voice is installed. language.code is BCP47 (es-AR) and region is null when the model declares none. quality is one of x_low|low|medium|high, taken from the sidecar and otherwise from the file name, and is null when neither declares it. label and description are derived entirely from the model metadata (dataset, language names, audio quality and sample rate) and never state a gender, an age or a temperament, which the model card does not document; without a sidecar the description says so instead of guessing. previewUrl is the path of EP-026 for this voice, relative to the service. An empty array means TTS_VOICES_DIR has no vits-piper-<id> subdirectory.",
+          "503": "VOICE_MODEL_UNAVAILABLE when TTS_VOICES_DIR is not set or does not point at a readable directory. Answering an empty list there would be a lie: the difference between 'no voices installed' and 'the voice engine not configured' is what the studio needs to explain. The payload never carries the resolved path of the voice directory. application/json: { error: { code, stage, message, resource?, expected?, hint?, assetPersisted?, catalogUpdated? } }."
         },
         "changelog": [
           {
@@ -701,6 +706,11 @@
             "cycle": 1,
             "date": "2026-09-11",
             "change": "Updated in spec-e-burgos-016 cycle-01: every voice now carries language, quality, a readable label, a factual description and the previewUrl of EP-026, all derived from the .onnx.json sidecar of the model or, when it is missing or corrupt, from the file name."
+          },
+          {
+            "cycle": 3,
+            "date": "2026-09-23",
+            "change": "spec-e-burgos-017 cycle-03 (TASK-003, D-C3-09): sherpa-onnx-offline-tts replaces Piper as the voice engine. New field directory (the vits-piper-<id> subdirectory under TTS_VOICES_DIR). isDefault now marks the DEFAULT_VOICE_ID constant instead of the file PIPER_MODEL_PATH pointed at. 503 now reports TTS_VOICES_DIR instead of PIPER_MODEL_PATH. id, fileName, language, quality, label, description and previewUrl keep their name, type and meaning."
           }
         ]
       },
@@ -925,8 +935,8 @@
         "spec": "sdd/specs/spec-e-burgos-016-studio-usability",
         "status": "implemented",
         "created_in_cycle": 1,
-        "updated_in_cycle": 1,
-        "description": "Serves a short spoken demo of one installed Piper voice, so the studio can let the user hear a voice before spending a full narration on it. The phrase is fixed and in Spanish, about four seconds long, and the same for every voice: what is being compared is the timbre, not the text. The first request for a voice synthesizes it with Piper and caches the wav under PIPER_PREVIEW_CACHE_DIR, outside media/ because a demo clip is not material of any project; later requests are served from that cache, and it is rebuilt when the .onnx model is newer than the cached wav. The synthesis runs OUTSIDE the job queue: the queue has concurrency 1 and a preview waiting behind a ten-minute render is not a preview. Two simultaneous requests for the same voice are serialized per voice id, so the wav is synthesized once.",
+        "updated_in_cycle": 3,
+        "description": "Serves a short spoken demo of one installed voice, so the studio can let the user hear a voice before spending a full narration on it. The phrase is fixed and in Spanish, about four seconds long, and the same for every voice: what is being compared is the timbre, not the text. The first request for a voice synthesizes it with sherpa-onnx-offline-tts and caches the wav under VOICE_PREVIEW_CACHE_DIR, outside media/ because a demo clip is not material of any project; later requests are served from that cache, and it is rebuilt when the .onnx model is newer than the cached wav. The synthesis runs OUTSIDE the job queue: the queue has concurrency 1 and a preview waiting behind a ten-minute render is not a preview. Two simultaneous requests for the same voice are serialized per voice id, so the wav is synthesized once.",
         "path_params": [
           "voiceId — voice model id as published by EP-019 (the .onnx file name without its extension). Only an id present in that catalog is accepted, which is what keeps a crafted path from reaching the filesystem."
         ],
@@ -938,14 +948,19 @@
         "responses": {
           "200": "audio/wav: the demo, streamed, with content-length and Cache-Control: public, max-age=86400. The body is audio, never JSON.",
           "404": "VOICE_NOT_FOUND when the id is not in the catalog of EP-019. application/json: { error: { code, stage, message, resource?, expected?, hint? } }.",
-          "500": "VOICE_SYNTHESIS_FAILED when Piper returns without writing a playable wav. The payload never carries the stderr of the process nor the resolved path of the model. application/json: { error: { code, stage, message, resource?, expected?, hint? } }.",
-          "503": "VOICE_MODEL_UNAVAILABLE when PIPER_PATH or PIPER_MODEL_PATH do not resolve on this machine, same condition as EP-019. application/json: { error: { code, stage, message, resource?, expected?, hint? } }."
+          "500": "VOICE_SYNTHESIS_FAILED when the voice engine returns without writing a playable wav. The payload never carries the stderr of the process nor the resolved path of the model. application/json: { error: { code, stage, message, resource?, expected?, hint? } }.",
+          "503": "VOICE_MODEL_UNAVAILABLE when TTS_CLI_PATH or TTS_VOICES_DIR do not resolve on this machine, same condition as EP-019. application/json: { error: { code, stage, message, resource?, expected?, hint? } }."
         },
         "changelog": [
           {
             "cycle": 1,
             "date": "2026-09-11",
             "change": "Created in spec-e-burgos-016 cycle-01: audible preview of an installed voice, cached outside media/ and served off the job queue."
+          },
+          {
+            "cycle": 3,
+            "date": "2026-09-23",
+            "change": "spec-e-burgos-017 cycle-03 (TASK-003, D-C3-09): sherpa-onnx-offline-tts replaces Piper as the voice engine; the cache env var is renamed VOICE_PREVIEW_CACHE_DIR (was PIPER_PREVIEW_CACHE_DIR) and 503 now reports TTS_CLI_PATH/TTS_VOICES_DIR. Response shapes and status codes are unchanged."
           }
         ]
       },

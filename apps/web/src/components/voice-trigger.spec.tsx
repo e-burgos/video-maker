@@ -91,18 +91,18 @@ describe('VoiceTrigger', () => {
     const createVoiceJob = vi.fn();
     renderTrigger(createVoiceJob, {
       voices: async () => {
-        throw new RenderApiError('VOICE_MODEL_UNAVAILABLE', 'piper is not configured', 503, null);
+        throw new RenderApiError('VOICE_MODEL_UNAVAILABLE', 'voice engine is not configured', 503, null);
       },
     });
 
     await waitFor(() => expect(screen.getByTestId('voice-catalogue-error')).toBeDefined());
     expect(screen.getByText(/VOICE_MODEL_UNAVAILABLE/)).toBeDefined();
-    expect(screen.getByText(/PIPER_MODEL_PATH/)).toBeDefined();
+    expect(screen.getByText(/TTS_VOICES_DIR/)).toBeDefined();
     expect(generateButton().disabled).toBe(true);
     expect(createVoiceJob).not.toHaveBeenCalled();
   });
 
-  it('separates an empty catalogue from an unconfigured Piper', async () => {
+  it('separates an empty catalogue from an unconfigured voice engine', async () => {
     renderTrigger(vi.fn(), { voices: async () => ({ voices: [] }) });
 
     await waitFor(() => expect(screen.getByTestId('voice-catalogue-empty')).toBeDefined());
@@ -110,20 +110,20 @@ describe('VoiceTrigger', () => {
     expect(generateButton().disabled).toBe(true);
   });
 
-  it('blocks with the reason written when the Piper binary is missing', async () => {
+  it('blocks with the reason written when the voice engine binary is missing', async () => {
     const health = healthyVoiceService();
     renderTrigger(vi.fn(), {
       health: {
         ...health,
         status: 'degraded',
         binaries: health.binaries.map((binary) =>
-          binary.name === 'piperCli' ? { ...binary, resolved: false } : binary,
+          binary.name === 'ttsCli' ? { ...binary, resolved: false } : binary,
         ),
       },
     });
 
     await waitFor(() => expect(screen.getByTestId('voice-blockers')).toBeDefined());
-    expect(screen.getByText('piperCli is not resolved (PIPER_PATH).')).toBeDefined();
+    expect(screen.getByText('ttsCli is not resolved (TTS_CLI_PATH).')).toBeDefined();
     expect(generateButton().disabled).toBe(true);
   });
 

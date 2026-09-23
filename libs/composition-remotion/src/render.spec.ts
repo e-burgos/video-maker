@@ -236,4 +236,55 @@ describe('renderTimeline', () => {
       expect.objectContaining({ inputProps: { timeline } }),
     );
   });
+
+  it('con serveUrl explícito, salta bundleProject y usa esa carpeta como serveUrl (US-017-201)', async () => {
+    const timeline = buildExampleTimeline('reels-9x16');
+    const deps = createRecordingDeps();
+
+    await renderTimeline(
+      timeline,
+      { outPath: 'out/prebuilt.mp4', serveUrl: '/app/resources/remotion-bundle' },
+      deps,
+    );
+
+    expect(deps.bundleProject).not.toHaveBeenCalled();
+    expect(deps.selectTimelineComposition).toHaveBeenCalledWith({
+      serveUrl: '/app/resources/remotion-bundle',
+      id: TIMELINE_COMPOSITION_ID,
+      inputProps: { timeline },
+    });
+    expect(deps.renderTimelineMedia).toHaveBeenCalledWith(
+      expect.objectContaining({ serveUrl: '/app/resources/remotion-bundle' }),
+    );
+  });
+
+  it('reenvía browserExecutable a selectTimelineComposition y renderTimelineMedia (US-017-201)', async () => {
+    const timeline = buildExampleTimeline('reels-9x16');
+    const deps = createRecordingDeps();
+
+    await renderTimeline(
+      timeline,
+      { outPath: 'out/browser.mp4', browserExecutable: '/app/resources/chrome-headless-shell' },
+      deps,
+    );
+
+    expect(deps.selectTimelineComposition).toHaveBeenCalledWith(
+      expect.objectContaining({ browserExecutable: '/app/resources/chrome-headless-shell' }),
+    );
+    expect(deps.renderTimelineMedia).toHaveBeenCalledWith(
+      expect.objectContaining({ browserExecutable: '/app/resources/chrome-headless-shell' }),
+    );
+  });
+
+  it('sin browserExecutable no manda la clave, ni con serveUrl prebuilt ni con bundle (RN default)', async () => {
+    const timeline = buildExampleTimeline('reels-9x16');
+    const deps = createRecordingDeps();
+
+    await renderTimeline(timeline, { outPath: 'out/no-browser.mp4' }, deps);
+
+    const selectArgs = (deps.selectTimelineComposition as ReturnType<typeof vi.fn>).mock.calls[0]?.[0];
+    const renderArgs = (deps.renderTimelineMedia as ReturnType<typeof vi.fn>).mock.calls[0]?.[0];
+    expect(selectArgs).not.toHaveProperty('browserExecutable');
+    expect(renderArgs).not.toHaveProperty('browserExecutable');
+  });
 });

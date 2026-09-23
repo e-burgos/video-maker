@@ -5,8 +5,8 @@ export const MEDIA_BINARY_NAMES = [
   'ffprobe',
   'whisperCli',
   'whisperModel',
-  'piperCli',
-  'piperModel',
+  'ttsCli',
+  'ttsVoicesDir',
 ] as const satisfies readonly BinaryName[];
 
 export type MediaBinaryName = (typeof MEDIA_BINARY_NAMES)[number];

@@ -22,20 +22,20 @@ describe('translateVoiceError (US-09-002, US-09-004)', () => {
 
   it('traduce BINARY_NOT_FOUND a VOICE_MODEL_UNAVAILABLE con la pista de las env vars', () => {
     const error = translateVoiceError(
-      new FakeMediaLocalError('BINARY_NOT_FOUND', 'piper-voice not found'),
+      new FakeMediaLocalError('BINARY_NOT_FOUND', 'tts-voices not found'),
       'synthesize',
       'scene-01',
     );
 
     expect(error.code).toBe('VOICE_MODEL_UNAVAILABLE');
     expect(httpStatusFor(error.code)).toBe(503);
-    expect(error.hint).toContain('PIPER_MODEL_PATH');
+    expect(error.hint).toContain('TTS_VOICES_DIR');
     expect(error.stage).toBe('synthesize');
   });
 
   it('un fallo del binario en synthesize es VOICE_SYNTHESIS_FAILED', () => {
     const error = translateVoiceError(
-      new FakeMediaLocalError('COMMAND_FAILED', 'piper exited with 1'),
+      new FakeMediaLocalError('COMMAND_FAILED', 'sherpa-onnx-offline-tts exited with 1'),
       'synthesize',
       'scene-02',
     );
@@ -63,7 +63,7 @@ describe('translateVoiceError (US-09-002, US-09-004)', () => {
   });
 
   it('sin etapa, cualquier fallo que no sea de binario es INTERNAL_ERROR', () => {
-    const error = translateVoiceError(new Error('ENOENT'), null, 'piper-voices');
+    const error = translateVoiceError(new Error('ENOENT'), null, 'tts-voices');
 
     expect(error.code).toBe('INTERNAL_ERROR');
     expect(error.stage).toBeNull();

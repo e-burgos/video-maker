@@ -11,6 +11,7 @@ export const VOICE_MODELS: VoiceListing = {
   voices: [
     {
       id: 'es_AR-daniela-high',
+      directory: 'vits-piper-es_AR-daniela-high',
       fileName: 'es_AR-daniela-high.onnx',
       isDefault: true,
       language: { code: 'es-AR', region: 'AR' },
@@ -22,6 +23,7 @@ export const VOICE_MODELS: VoiceListing = {
     },
     {
       id: 'es_ES-carlfm-x-low',
+      directory: 'vits-piper-es_ES-carlfm-x-low',
       fileName: 'es_ES-carlfm-x-low.onnx',
       isDefault: false,
       language: { code: 'es-ES', region: 'ES' },
@@ -110,8 +112,8 @@ export function healthyVoiceService(overrides: Partial<ServiceHealth> = {}): Ser
       { name: 'ffprobe', envVar: 'FFPROBE_PATH', resolved: true },
       { name: 'whisperCli', envVar: 'WHISPER_CPP_PATH', resolved: true },
       { name: 'whisperModel', envVar: 'WHISPER_MODEL_PATH', resolved: true },
-      { name: 'piperCli', envVar: 'PIPER_PATH', resolved: true },
-      { name: 'piperModel', envVar: 'PIPER_MODEL_PATH', resolved: true },
+      { name: 'ttsCli', envVar: 'TTS_CLI_PATH', resolved: true },
+      { name: 'ttsVoicesDir', envVar: 'TTS_VOICES_DIR', resolved: true },
     ],
     capabilities: {
       renderPipeline: true,

@@ -1,7 +1,7 @@
 import { toAbsolutePath } from '@video-maker/auto-montage';
 import type { MediaProject } from '@video-maker/auto-montage';
 import type { Transcription } from '@video-maker/timeline-core';
-import { dirname, join } from 'node:path/posix';
+import { join } from 'node:path/posix';
 
 import type { RenderApiDependencies } from '../deps/render-api-dependencies';
 import { PipelineStageError } from '../errors/pipeline-stage-error';
@@ -47,11 +47,16 @@ export async function resolveVoiceModel(
   const voices = await deps.listVoiceModels();
 
   if (voiceId === null) {
-    const configured = voices.find((voice) => voice.isDefault);
-    return {
-      id: configured?.id ?? dirname(binaries.piperModel),
-      path: binaries.piperModel,
-    };
+    const configured = voices.find((voice) => voice.isDefault) ?? voices[0];
+    if (configured === undefined) {
+      throw new PipelineStageError({
+        code: 'VOICE_MODEL_UNAVAILABLE',
+        stage: null,
+        resource: null,
+        expected: 'at least one voice installed under TTS_VOICES_DIR',
+      });
+    }
+    return { id: configured.id, path: join(binaries.ttsVoicesDir, configured.directory) };
   }
 
   const requested = voices.find((voice) => voice.id === voiceId);
@@ -64,7 +69,7 @@ export async function resolveVoiceModel(
     });
   }
 
-  return { id: requested.id, path: join(dirname(binaries.piperModel), requested.fileName) };
+  return { id: requested.id, path: join(binaries.ttsVoicesDir, requested.directory) };
 }
 
 export async function ensureVoiceDirectories(

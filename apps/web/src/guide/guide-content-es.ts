@@ -79,7 +79,7 @@ export const GUIDE_ES: GuideContent = {
       id: 'voice',
       title: 'Voz — el reloj del video',
       body: [
-        'Piper lee la narración de cada escena en esta máquina y Whisper la alinea palabra por palabra. **Cada escena termina durando lo que dura su pista**, no lo que estimó el modelo, y por eso la voz se genera antes de confiar en el timing final.',
+        'sherpa-onnx lee la narración de cada escena en esta máquina y Whisper la alinea palabra por palabra. **Cada escena termina durando lo que dura su pista**, no lo que estimó el modelo, y por eso la voz se genera antes de confiar en el timing final.',
         '',
         '- Cada voz instalada se ofrece como una tarjeta con su nombre legible, idioma, calidad y un **botón de reproducción**: el demo se sintetiza una vez y queda cacheado, así escuchás una voz antes de gastar una narración entera en ella.',
         '- La voz elegida aplica a todo el proyecto.',
@@ -118,7 +118,7 @@ export const GUIDE_ES: GuideContent = {
       id: 'flows',
       title: 'Tres flujos que funcionan',
       body: [
-        '**Pantalla grabada muda más un guion.** Subí la grabación como B-roll y grabá o escribí la narración. Pedile al productor que la narre con una voz generada: propone el guion, genera la locución con Piper, y el montaje corta la grabación contra ese habla. Preset `software-demo`.',
+        '**Pantalla grabada muda más un guion.** Subí la grabación como B-roll y grabá o escribí la narración. Pedile al productor que la narre con una voz generada: propone el guion, genera la locución con sherpa-onnx, y el montaje corta la grabación contra ese habla. Preset `software-demo`.',
         '',
         '**Una publicidad con fotos.** Subí las fotos del producto con el rol `image`, nombradas por lo que muestran, y una cama de música como `audio`. Contale al productor que es una publicidad y para qué plataforma. Preset `hardware`: primero las fotos, música presente bajo la voz.',
         '',

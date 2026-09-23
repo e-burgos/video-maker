@@ -51,7 +51,7 @@ describe('voice paths (US-09-007)', () => {
 });
 
 describe('voice format (US-09-004)', () => {
-  it('el entregable sale al sample rate que espera la mezcla, no al que da Piper', async () => {
+  it('el entregable sale al sample rate que espera la mezcla, no al del motor de voz', async () => {
     const { AUDIO_MIX_SAMPLE_RATE } = await import('@video-maker/media-local');
 
     expect(VOICE_TRACK_SAMPLE_RATE).toBe(AUDIO_MIX_SAMPLE_RATE);
@@ -134,7 +134,7 @@ describe('assertVoiceTracksNotPersisted (US-09-005, US-09-006)', () => {
 });
 
 describe('voiceLanguageFromModelId (FIX-e-burgos-009-001)', () => {
-  it('deriva el idioma del nombre del modelo Piper', () => {
+  it('deriva el idioma del nombre del modelo de voz', () => {
     expect(voiceLanguageFromModelId('es_AR-daniela-high')).toBe('es-AR');
     expect(voiceLanguageFromModelId('es_ES-sharvard-medium')).toBe('es-ES');
     expect(voiceLanguageFromModelId('fr_FR-siwis-low')).toBe('fr-FR');

@@ -44,7 +44,7 @@ describe('VoiceJobPanel', () => {
     await waitFor(() => expect(screen.getByTestId('voice-stage').textContent).toBe('stage: synthesize'));
     expect(screen.getByTestId('voice-scene-progress').textContent).toContain('scene 2 of 5');
     expect(screen.getByTestId('voice-scene-progress').textContent).toContain('40%');
-    expect(screen.getByText('Piper is reading the narration of every scene.')).toBeDefined();
+    expect(screen.getByText('sherpa-onnx is reading the narration of every scene.')).toBeDefined();
   });
 
   it('names the transcribe stage as the word by word alignment', async () => {

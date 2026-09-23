@@ -288,7 +288,7 @@ describe('runVoicePipeline regeneración parcial (US-09-005)', () => {
     expect(manifest.tracks.find((track) => track.sceneId === 'scene-02')).toEqual(uploaded);
   });
 
-  it('elige la voz pedida y la resuelve contra el directorio del modelo configurado', async () => {
+  it('elige la voz pedida y la resuelve contra el directorio de voces configurado', async () => {
     const harness = createHarness();
 
     const report = await runVoicePipeline(
@@ -300,7 +300,7 @@ describe('runVoicePipeline regeneración parcial (US-09-005)', () => {
     expect(report.voiceId).toBe('es_ES-sharvard-medium');
     const call = harness.callLog.entries().find((entry) => entry.port === 'synthesizeVoice');
     expect((call?.input as { modelPath: string }).modelPath).toBe(
-      '/usr/share/piper/es_ES-sharvard-medium.onnx',
+      '/usr/share/tts-voices/vits-piper-es_ES-sharvard-medium',
     );
   });
 
@@ -310,6 +310,16 @@ describe('runVoicePipeline regeneración parcial (US-09-005)', () => {
     await expect(
       runVoicePipeline({ project: PROJECT, voiceId: 'fr_FR-siwis-low', sceneIds: null }, harness.deps, harness.observer),
     ).rejects.toMatchObject({ code: 'VOICE_ID_INVALID', resource: 'fr_FR-siwis-low' });
+
+    expect(harness.callLog.entries().filter((entry) => entry.port === 'synthesizeVoice')).toEqual([]);
+  });
+
+  it('sin ninguna voz instalada, pedir la default es VOICE_MODEL_UNAVAILABLE (US-017-201)', async () => {
+    const harness = createHarness({ overrides: { listVoiceModels: async () => [] } });
+
+    await expect(
+      runVoicePipeline({ project: PROJECT, voiceId: null, sceneIds: null }, harness.deps, harness.observer),
+    ).rejects.toMatchObject({ code: 'VOICE_MODEL_UNAVAILABLE' });
 
     expect(harness.callLog.entries().filter((entry) => entry.port === 'synthesizeVoice')).toEqual([]);
   });

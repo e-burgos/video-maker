@@ -13,7 +13,7 @@ const FAILURE_CODE_BY_STAGE: Readonly<Record<VoiceStage, RenderApiErrorCode>> = 
   persist: 'INTERNAL_ERROR',
 };
 
-const MISSING_BINARY_HINT = 'set PIPER_PATH and PIPER_MODEL_PATH, and WHISPER_CPP_PATH with WHISPER_MODEL_PATH';
+const MISSING_BINARY_HINT = 'set TTS_CLI_PATH and TTS_VOICES_DIR, and WHISPER_CPP_PATH with WHISPER_MODEL_PATH';
 
 function engineErrorCode(value: unknown): string | null {
   if (typeof value !== 'object' || value === null) {

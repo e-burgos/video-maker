@@ -1,7 +1,7 @@
 const BCP47_PRIMARY_SUBTAG = /^[A-Za-z]{2,3}/u;
 const WHISPER_AUTO_LANGUAGE = 'auto';
 
-const PIPER_MODEL_LOCALE = /^([a-z]{2,3})(?:_([A-Za-z]{2,4}))?-/u;
+const VOICE_MODEL_LOCALE = /^([a-z]{2,3})(?:_([A-Za-z]{2,4}))?-/u;
 
 export const DEFAULT_VOICE_LANGUAGE = 'es';
 
@@ -11,7 +11,7 @@ export function whisperLanguageFor(languageTag: string): string {
 }
 
 export function voiceLanguageFromModelId(voiceModelId: string): string {
-  const match = PIPER_MODEL_LOCALE.exec(voiceModelId);
+  const match = VOICE_MODEL_LOCALE.exec(voiceModelId);
   if (match === null) {
     return DEFAULT_VOICE_LANGUAGE;
   }

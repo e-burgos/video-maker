@@ -37,13 +37,14 @@ const DEFAULT_RESOLVED_BINARIES: ResolvedBinaries = {
 
 const DEFAULT_RESOLVED_VOICE_BINARIES: ResolvedVoiceBinaries = {
   ...DEFAULT_RESOLVED_BINARIES,
-  piperCli: '/usr/bin/piper',
-  piperModel: '/usr/share/piper/es_AR-daniela-high.onnx',
+  ttsCli: '/usr/bin/sherpa-onnx-offline-tts',
+  ttsVoicesDir: '/usr/share/tts-voices',
 };
 
 const DEFAULT_VOICE_MODELS: readonly VoiceModel[] = [
   {
     id: 'es_AR-daniela-high',
+    directory: 'vits-piper-es_AR-daniela-high',
     fileName: 'es_AR-daniela-high.onnx',
     isDefault: true,
     language: { code: 'es-AR', region: 'AR' },
@@ -54,6 +55,7 @@ const DEFAULT_VOICE_MODELS: readonly VoiceModel[] = [
   },
   {
     id: 'es_ES-sharvard-medium',
+    directory: 'vits-piper-es_ES-sharvard-medium',
     fileName: 'es_ES-sharvard-medium.onnx',
     isDefault: false,
     language: { code: 'es-ES', region: 'ES' },
@@ -69,8 +71,8 @@ const BINARY_ENV_VAR_NAMES: Readonly<Record<MediaBinaryName, string>> = {
   ffprobe: 'FFPROBE_PATH',
   whisperCli: 'WHISPER_CPP_PATH',
   whisperModel: 'WHISPER_MODEL_PATH',
-  piperCli: 'PIPER_PATH',
-  piperModel: 'PIPER_MODEL_PATH',
+  ttsCli: 'TTS_CLI_PATH',
+  ttsVoicesDir: 'TTS_VOICES_DIR',
 };
 
 const DEFAULT_MEDIA_BINARY_STATUSES: readonly BinaryStatus[] = MEDIA_BINARY_NAMES.map((name) => ({

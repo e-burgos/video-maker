@@ -1,4 +1,4 @@
-import { dirname, join } from 'node:path/posix';
+import { join } from 'node:path/posix';
 
 import type { RenderApiDependencies } from '../deps/render-api-dependencies';
 import { PipelineStageError } from '../errors/pipeline-stage-error';
@@ -31,7 +31,7 @@ async function modelModifiedAtMs(deps: RenderApiDependencies, modelPath: string)
   try {
     return (await deps.statFile.statFile(modelPath)).modifiedAtMs;
   } catch (cause) {
-    throw translateVoiceError(cause, null, 'piper-voices');
+    throw translateVoiceError(cause, null, 'tts-voices');
   }
 }
 
@@ -52,7 +52,8 @@ export async function buildVoicePreview(
   }
 
   const binaries = await runVoiceStage('synthesize', voice.id, () => deps.resolveVoiceBinaries());
-  const modelPath = join(dirname(binaries.piperModel), voice.fileName);
+  const voiceDirPath = join(binaries.ttsVoicesDir, voice.directory);
+  const modelPath = join(voiceDirPath, voice.fileName);
   const cache = deps.voicePreviewCache;
   const wavPath = previewWavPath(cache.directory, voice.id);
 
@@ -72,7 +73,7 @@ export async function buildVoicePreview(
     await deps.synthesizeVoice({
       textPath,
       outPath: wavPath,
-      modelPath,
+      modelPath: voiceDirPath,
       projectRoot: cache.directory,
     });
   });
@@ -94,6 +95,6 @@ async function runVoicesLookup(deps: RenderApiDependencies) {
   try {
     return await deps.listVoiceModels();
   } catch (cause) {
-    throw translateVoiceError(cause, null, 'piper-voices');
+    throw translateVoiceError(cause, null, 'tts-voices');
   }
 }

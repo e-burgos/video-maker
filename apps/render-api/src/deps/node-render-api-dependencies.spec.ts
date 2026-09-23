@@ -1,4 +1,4 @@
-import { mkdir, mkdtemp, readFile, rm, stat, writeFile } from 'node:fs/promises';
+import { mkdir, mkdtemp, readFile, realpath, rm, stat, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 
@@ -19,8 +19,8 @@ vi.mock('@video-maker/media-local', () => ({
     ffprobe: 'FFPROBE_PATH',
     whisperCli: 'WHISPER_CPP_PATH',
     whisperModel: 'WHISPER_MODEL_PATH',
-    piperCli: 'PIPER_PATH',
-    piperModel: 'PIPER_MODEL_PATH',
+    ttsCli: 'TTS_CLI_PATH',
+    ttsVoicesDir: 'TTS_VOICES_DIR',
   },
   resolveBinary: vi.fn(),
   resolveBinaries: vi.fn(),
@@ -30,6 +30,10 @@ vi.mock('@video-maker/media-local', () => ({
   transcribeWithWhisperCpp: vi.fn(),
   buildVoiceCatalog: vi.fn(),
   voiceModelConfigFileName: (fileName: string) => `${fileName}.json`,
+  voiceIdFromDirectoryName: (directoryName: string) =>
+    directoryName.startsWith('vits-piper-') ? directoryName.slice('vits-piper-'.length) : null,
+  VOICE_ESPEAK_DATA_DIR_NAME: 'espeak-ng-data',
+  VOICE_TOKENS_FILE_NAME: 'tokens.txt',
   mixTimelineAudio: vi.fn(),
   muxAudioIntoVideo: vi.fn(),
   verifyMixLoudness: vi.fn(),
@@ -81,8 +85,8 @@ beforeEach(async () => {
     ffprobe: '/opt/homebrew/bin/ffprobe',
     whisperCli: '/opt/homebrew/bin/whisper-cli',
     whisperModel: '/models/ggml.bin',
-    piperCli: '/opt/python/bin/piper',
-    piperModel: '/voices/es_AR-daniela-high.onnx',
+    ttsCli: '/opt/tts/bin/sherpa-onnx-offline-tts',
+    ttsVoicesDir: '/voices',
   });
 });
 
@@ -147,6 +151,108 @@ describe('createNodeRenderApiDependencies', () => {
     });
 
     expect(received).toEqual([[120, 538]]);
+  });
+
+  it('without REMOTION_SERVE_URL, renders through bundleProject as always (US-017-201)', async () => {
+    mocks.renderTimelineMock.mockResolvedValue({
+      outPath: '/work/renders/r1/video-muted.mp4',
+      width: 1080,
+      height: 1920,
+      fps: 30,
+      durationInFrames: 150,
+      compositionId: 'timeline-composition',
+    });
+
+    const deps = createNodeRenderApiDependencies(ENV, STORE);
+    const timeline = buildMinimalTimeline();
+
+    await deps.renderMutedVideo({
+      timeline,
+      outPath: '/work/renders/r1/video-muted.mp4',
+      publicDir: CWD,
+    });
+
+    const [, options] = mocks.renderTimelineMock.mock.calls[0] ?? [];
+    expect(options).not.toHaveProperty('serveUrl');
+    expect(options).not.toHaveProperty('browserExecutable');
+  });
+
+  it('with REMOTION_SERVE_URL and REMOTION_BROWSER_EXECUTABLE, forwards both and symlinks the prebuilt bundle public dir to the project root (US-017-201)', async () => {
+    mocks.renderTimelineMock.mockResolvedValue({
+      outPath: '/work/renders/r1/video-muted.mp4',
+      width: 1080,
+      height: 1920,
+      fps: 30,
+      durationInFrames: 150,
+      compositionId: 'timeline-composition',
+    });
+
+    const serveUrl = await mkdtemp(join(tmpdir(), 'remotion-bundle-'));
+    const publicDir = await mkdtemp(join(tmpdir(), 'project-root-'));
+    const env = {
+      REMOTION_SERVE_URL: serveUrl,
+      REMOTION_BROWSER_EXECUTABLE: '/app/resources/chrome-headless-shell',
+    };
+
+    const deps = createNodeRenderApiDependencies(env, STORE);
+    const timeline = buildMinimalTimeline();
+
+    await deps.renderMutedVideo({
+      timeline,
+      outPath: '/work/renders/r1/video-muted.mp4',
+      publicDir,
+    });
+
+    expect(mocks.renderTimelineMock).toHaveBeenCalledWith(
+      timeline,
+      expect.objectContaining({
+        serveUrl,
+        browserExecutable: '/app/resources/chrome-headless-shell',
+      }),
+    );
+
+    const linkTarget = await realpath(join(serveUrl, 'public'));
+    expect(linkTarget).toBe(await realpath(publicDir));
+
+    await rm(serveUrl, { recursive: true, force: true });
+    await rm(publicDir, { recursive: true, force: true });
+  });
+
+  it('rendering twice with REMOTION_SERVE_URL re-links the public dir to a different project root (US-017-201)', async () => {
+    mocks.renderTimelineMock.mockResolvedValue({
+      outPath: '/work/renders/r1/video-muted.mp4',
+      width: 1080,
+      height: 1920,
+      fps: 30,
+      durationInFrames: 150,
+      compositionId: 'timeline-composition',
+    });
+
+    const serveUrl = await mkdtemp(join(tmpdir(), 'remotion-bundle-'));
+    const firstProjectRoot = await mkdtemp(join(tmpdir(), 'project-a-'));
+    const secondProjectRoot = await mkdtemp(join(tmpdir(), 'project-b-'));
+    const env = { REMOTION_SERVE_URL: serveUrl };
+
+    const deps = createNodeRenderApiDependencies(env, STORE);
+    const timeline = buildMinimalTimeline();
+
+    await deps.renderMutedVideo({
+      timeline,
+      outPath: '/work/renders/r1/video-muted.mp4',
+      publicDir: firstProjectRoot,
+    });
+    await deps.renderMutedVideo({
+      timeline,
+      outPath: '/work/renders/r1/video-muted.mp4',
+      publicDir: secondProjectRoot,
+    });
+
+    const linkTarget = await realpath(join(serveUrl, 'public'));
+    expect(linkTarget).toBe(await realpath(secondProjectRoot));
+
+    await rm(serveUrl, { recursive: true, force: true });
+    await rm(firstProjectRoot, { recursive: true, force: true });
+    await rm(secondProjectRoot, { recursive: true, force: true });
   });
 
   it('feeds mixTimelineAudio with the timeline, the out path and the resolved ffmpeg binary', async () => {
@@ -254,8 +360,8 @@ describe('createNodeRenderApiDependencies', () => {
       { name: 'ffprobe', envVar: 'FFPROBE_PATH', resolved: false },
       { name: 'whisperCli', envVar: 'WHISPER_CPP_PATH', resolved: true },
       { name: 'whisperModel', envVar: 'WHISPER_MODEL_PATH', resolved: true },
-      { name: 'piperCli', envVar: 'PIPER_PATH', resolved: true },
-      { name: 'piperModel', envVar: 'PIPER_MODEL_PATH', resolved: true },
+      { name: 'ttsCli', envVar: 'TTS_CLI_PATH', resolved: true },
+      { name: 'ttsVoicesDir', envVar: 'TTS_VOICES_DIR', resolved: true },
     ]);
     for (const status of statuses) {
       expect(status).not.toHaveProperty('path');
@@ -263,26 +369,63 @@ describe('createNodeRenderApiDependencies', () => {
     }
   });
 
-  it('synthesizeVoice invoca a piper con el binario resuelto y el cwd del proyecto (US-09-004)', async () => {
+  it('synthesizeVoice invoca al motor de voz con el modelo, los tokens y el directorio de datos propio de la voz (US-09-004, US-017-201)', async () => {
+    const voicesDir = await mkdtemp(join(tmpdir(), 'tts-voices-'));
+    const voiceDir = join(voicesDir, 'vits-piper-es_AR-daniela-high');
+    await mkdir(voiceDir, { recursive: true });
+    await mkdir(join(voiceDir, 'espeak-ng-data'), { recursive: true });
+    await writeFile(join(voiceDir, 'es_AR-daniela-high.onnx'), 'model');
+    await writeFile(join(voiceDir, 'tokens.txt'), 'tokens');
+
     const deps = createNodeRenderApiDependencies(ENV, STORE);
 
     await deps.synthesizeVoice({
       textPath: 'work/voice/sources/scene-01.txt',
       outPath: 'work/voice/sources/scene-01.wav',
-      modelPath: '/voices/es_AR-daniela-high.onnx',
+      modelPath: voiceDir,
       projectRoot: CWD,
     });
 
     expect(mocks.synthesizeSpeechMock).toHaveBeenCalledWith(
       'work/voice/sources/scene-01.wav',
       {
-        modelPath: '/voices/es_AR-daniela-high.onnx',
+        modelPath: join(voiceDir, 'es_AR-daniela-high.onnx'),
+        tokensPath: join(voiceDir, 'tokens.txt'),
+        dataDirPath: join(voiceDir, 'espeak-ng-data'),
         textPath: 'work/voice/sources/scene-01.txt',
-        piperPath: '/opt/python/bin/piper',
+        ttsPath: '/opt/tts/bin/sherpa-onnx-offline-tts',
         runOptions: { cwd: CWD },
       },
       expect.any(mocks.ExecaCommandRunner),
     );
+
+    await rm(voicesDir, { recursive: true, force: true });
+  });
+
+  it('synthesizeVoice cae al espeak-ng-data compartido en la raíz cuando la voz no trae el suyo (US-017-201)', async () => {
+    const voicesDir = await mkdtemp(join(tmpdir(), 'tts-voices-'));
+    const voiceDir = join(voicesDir, 'vits-piper-es_ES-davefx-medium');
+    await mkdir(voiceDir, { recursive: true });
+    await mkdir(join(voicesDir, 'espeak-ng-data'), { recursive: true });
+    await writeFile(join(voiceDir, 'es_ES-davefx-medium.onnx'), 'model');
+    await writeFile(join(voiceDir, 'tokens.txt'), 'tokens');
+
+    const deps = createNodeRenderApiDependencies(ENV, STORE);
+
+    await deps.synthesizeVoice({
+      textPath: 'work/voice/sources/scene-01.txt',
+      outPath: 'work/voice/sources/scene-01.wav',
+      modelPath: voiceDir,
+      projectRoot: CWD,
+    });
+
+    expect(mocks.synthesizeSpeechMock).toHaveBeenCalledWith(
+      'work/voice/sources/scene-01.wav',
+      expect.objectContaining({ dataDirPath: join(voicesDir, 'espeak-ng-data') }),
+      expect.any(mocks.ExecaCommandRunner),
+    );
+
+    await rm(voicesDir, { recursive: true, force: true });
   });
 
   it('extractVoiceAudio pasa el sample rate, los canales y la raíz del proyecto a ffmpeg (US-09-004)', async () => {
@@ -350,18 +493,19 @@ describe('createNodeRenderApiDependencies', () => {
     expect(mocks.resolveVoiceBinariesMock).toHaveBeenCalledWith(ENV);
   });
 
-  it('listVoiceModels lee el directorio del modelo configurado y descarta lo que no es archivo (US-09-003)', async () => {
-    const voicesDir = await mkdtemp(join(tmpdir(), 'piper-voices-'));
-    await writeFile(join(voicesDir, 'es_AR-daniela-high.onnx'), 'model');
-    await writeFile(join(voicesDir, 'es_AR-daniela-high.onnx.json'), '{}');
-    await mkdir(join(voicesDir, 'nested.onnx'));
-    const modelPath = join(voicesDir, 'es_AR-daniela-high.onnx');
+  it('listVoiceModels lee las subcarpetas vits-piper-<id> y descarta lo que no matchea ese prefijo (US-09-003, US-017-201)', async () => {
+    const voicesDir = await mkdtemp(join(tmpdir(), 'tts-voices-'));
+    await mkdir(join(voicesDir, 'vits-piper-es_AR-daniela-high'), { recursive: true });
+    await writeFile(join(voicesDir, 'vits-piper-es_AR-daniela-high', 'es_AR-daniela-high.onnx'), 'model');
+    await writeFile(join(voicesDir, 'vits-piper-es_AR-daniela-high', 'es_AR-daniela-high.onnx.json'), '{}');
+    await writeFile(join(voicesDir, 'README.md'), 'not a voice');
     mocks.resolveBinaryMock.mockImplementation(async (name: string) =>
-      name === 'piperModel' ? modelPath : `/opt/homebrew/bin/${name}`,
+      name === 'ttsVoicesDir' ? voicesDir : `/opt/homebrew/bin/${name}`,
     );
     const catalog = [
       {
         id: 'es_AR-daniela-high',
+        directory: 'vits-piper-es_AR-daniela-high',
         fileName: 'es_AR-daniela-high.onnx',
         isDefault: true,
         language: { code: 'es-AR', region: 'AR' },
@@ -376,26 +520,32 @@ describe('createNodeRenderApiDependencies', () => {
     const voices = await deps.listVoiceModels();
 
     expect(voices).toEqual(catalog);
-    const [files, configured] = mocks.buildVoiceCatalogMock.mock.calls[0] ?? [];
-    expect([...(files ?? [])].map((file) => file.fileName).sort()).toEqual([
-      'es_AR-daniela-high.onnx',
-      'es_AR-daniela-high.onnx.json',
+    const [files] = mocks.buildVoiceCatalogMock.mock.calls[0] ?? [];
+    expect([...(files ?? [])]).toEqual([
+      { directory: 'vits-piper-es_AR-daniela-high', fileName: 'es_AR-daniela-high.onnx', config: {} },
     ]);
-    expect(configured).toBe(modelPath);
 
     await rm(voicesDir, { recursive: true, force: true });
   });
 
-  it('listVoiceModels lee el sidecar .onnx.json de cada modelo y tolera uno corrupto (US-016-001)', async () => {
-    const voicesDir = await mkdtemp(join(tmpdir(), 'piper-voices-'));
-    await writeFile(join(voicesDir, 'es_AR-daniela-high.onnx'), 'model');
-    await writeFile(join(voicesDir, 'es_AR-daniela-high.onnx.json'), '{"dataset":"daniela"}');
-    await writeFile(join(voicesDir, 'es_MX-claude-high.onnx'), 'model');
-    await writeFile(join(voicesDir, 'es_MX-claude-high.onnx.json'), 'not json at all');
-    await writeFile(join(voicesDir, 'es_ES-davefx-medium.onnx'), 'model');
-    const modelPath = join(voicesDir, 'es_AR-daniela-high.onnx');
+  it('listVoiceModels lee el sidecar .onnx.json de cada voz y tolera uno corrupto (US-016-001, US-017-201)', async () => {
+    const voicesDir = await mkdtemp(join(tmpdir(), 'tts-voices-'));
+    await mkdir(join(voicesDir, 'vits-piper-es_AR-daniela-high'), { recursive: true });
+    await writeFile(join(voicesDir, 'vits-piper-es_AR-daniela-high', 'es_AR-daniela-high.onnx'), 'model');
+    await writeFile(
+      join(voicesDir, 'vits-piper-es_AR-daniela-high', 'es_AR-daniela-high.onnx.json'),
+      '{"dataset":"daniela"}',
+    );
+    await mkdir(join(voicesDir, 'vits-piper-es_MX-claude-high'), { recursive: true });
+    await writeFile(join(voicesDir, 'vits-piper-es_MX-claude-high', 'es_MX-claude-high.onnx'), 'model');
+    await writeFile(
+      join(voicesDir, 'vits-piper-es_MX-claude-high', 'es_MX-claude-high.onnx.json'),
+      'not json at all',
+    );
+    await mkdir(join(voicesDir, 'vits-piper-es_ES-davefx-medium'), { recursive: true });
+    await writeFile(join(voicesDir, 'vits-piper-es_ES-davefx-medium', 'es_ES-davefx-medium.onnx'), 'model');
     mocks.resolveBinaryMock.mockImplementation(async (name: string) =>
-      name === 'piperModel' ? modelPath : `/opt/homebrew/bin/${name}`,
+      name === 'ttsVoicesDir' ? voicesDir : `/opt/homebrew/bin/${name}`,
     );
     mocks.buildVoiceCatalogMock.mockReturnValue([]);
 
@@ -403,11 +553,11 @@ describe('createNodeRenderApiDependencies', () => {
     await deps.listVoiceModels();
 
     const [files] = mocks.buildVoiceCatalogMock.mock.calls[0] ?? [];
-    const byName = new Map([...(files ?? [])].map((file) => [file.fileName, file.config]));
+    const byFileName = new Map([...(files ?? [])].map((file) => [file.fileName, file.config]));
 
-    expect(byName.get('es_AR-daniela-high.onnx')).toEqual({ dataset: 'daniela' });
-    expect(byName.get('es_MX-claude-high.onnx')).toBeNull();
-    expect(byName.get('es_ES-davefx-medium.onnx')).toBeNull();
+    expect(byFileName.get('es_AR-daniela-high.onnx')).toEqual({ dataset: 'daniela' });
+    expect(byFileName.get('es_MX-claude-high.onnx')).toBeNull();
+    expect(byFileName.get('es_ES-davefx-medium.onnx')).toBeNull();
 
     await rm(voicesDir, { recursive: true, force: true });
   });

@@ -122,10 +122,10 @@ describe('handleGetVoicePreview (US-016-002)', () => {
     ).rejects.toMatchObject({ code: 'VOICE_NOT_FOUND', resource: 'es_XX-nobody-high' });
   });
 
-  it('answers VOICE_MODEL_UNAVAILABLE when Piper is not configured on this machine', async () => {
+  it('answers VOICE_MODEL_UNAVAILABLE when the voice engine is not configured on this machine', async () => {
     const { deps } = harness({
       listVoiceModels: async () => {
-        throw new FakeBinaryNotFoundError('piper-voice not found at /home/dev/.cache/piper-voices');
+        throw new FakeBinaryNotFoundError('tts-voices not found at /home/dev/.cache/tts-voices');
       },
     });
 
@@ -139,7 +139,7 @@ describe('handleGetVoicePreview (US-016-002)', () => {
     expect(JSON.stringify(error)).not.toContain('/home/dev/.cache');
   });
 
-  it('answers VOICE_SYNTHESIS_FAILED when Piper returns without writing a preview', async () => {
+  it('answers VOICE_SYNTHESIS_FAILED when the voice engine returns without writing a preview', async () => {
     const { deps } = harness({}, { synthesisWritesBytes: 0 });
 
     await expect(

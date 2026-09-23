@@ -68,7 +68,7 @@ describe('VoiceManifestSchema (US-09-007)', () => {
     expect(result.error?.issues[0]?.path).toEqual(['tracks', 1, 'index']);
   });
 
-  it('rechaza una pista subida que declara la voz de un modelo de Piper', () => {
+  it('rechaza una pista subida que declara la voz de un modelo generado', () => {
     const document = manifest([track({ source: 'uploaded' })]);
 
     const result = VoiceManifestSchema.safeParse(document);

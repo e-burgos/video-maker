@@ -1,7 +1,9 @@
-import { basename } from 'node:path';
-
 export const VOICE_MODEL_EXTENSION = '.onnx';
 export const VOICE_MODEL_CONFIG_EXTENSION = '.onnx.json';
+export const VOICE_DIRECTORY_PREFIX = 'vits-piper-';
+export const VOICE_ESPEAK_DATA_DIR_NAME = 'espeak-ng-data';
+export const VOICE_TOKENS_FILE_NAME = 'tokens.txt';
+export const DEFAULT_VOICE_ID = 'es_AR-daniela-high';
 
 export const VOICE_QUALITIES = ['x_low', 'low', 'medium', 'high'] as const;
 
@@ -14,6 +16,7 @@ export interface VoiceLanguage {
 
 export interface VoiceModel {
   readonly id: string;
+  readonly directory: string;
   readonly fileName: string;
   readonly isDefault: boolean;
   readonly language: VoiceLanguage;
@@ -23,6 +26,7 @@ export interface VoiceModel {
 }
 
 export interface VoiceModelFile {
+  readonly directory: string;
   readonly fileName: string;
   readonly config: unknown;
 }
@@ -62,6 +66,16 @@ export function voiceModelId(fileName: string): string {
 
 export function voiceModelConfigFileName(fileName: string): string {
   return `${fileName}.json`;
+}
+
+export function voiceDirectoryName(voiceId: string): string {
+  return `${VOICE_DIRECTORY_PREFIX}${voiceId}`;
+}
+
+export function voiceIdFromDirectoryName(directoryName: string): string | null {
+  return directoryName.startsWith(VOICE_DIRECTORY_PREFIX)
+    ? directoryName.slice(VOICE_DIRECTORY_PREFIX.length)
+    : null;
 }
 
 function isVoiceQuality(value: unknown): value is VoiceQuality {
@@ -167,7 +181,10 @@ function descriptionOf(
     : `${trained}. ${spoken}, synthesized at ${sampleRate} Hz.`;
 }
 
-export function describeVoiceModel(fileName: string, config: unknown): Omit<VoiceModel, 'isDefault'> {
+export function describeVoiceModel(
+  fileName: string,
+  config: unknown,
+): Omit<VoiceModel, 'isDefault' | 'directory'> {
   const id = voiceModelId(fileName);
   const record = isRecord(config) ? config : null;
   const language = languageOf(id, record);
@@ -186,15 +203,14 @@ export function describeVoiceModel(fileName: string, config: unknown): Omit<Voic
 
 export function buildVoiceCatalog(
   files: readonly VoiceModelFile[],
-  configuredModelPath: string,
+  defaultVoiceId: string | null = DEFAULT_VOICE_ID,
 ): readonly VoiceModel[] {
-  const defaultFileName = basename(configuredModelPath);
-
   return files
     .filter((file) => isVoiceModelFile(file.fileName))
     .map((file) => ({
       ...describeVoiceModel(file.fileName, file.config),
-      isDefault: file.fileName === defaultFileName,
+      directory: file.directory,
+      isDefault: voiceModelId(file.fileName) === defaultVoiceId,
     }))
     .sort((left, right) => left.id.localeCompare(right.id));
 }

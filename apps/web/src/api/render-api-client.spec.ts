@@ -864,7 +864,7 @@ describe('createRenderApiClient · voice', () => {
   it('surfaces VOICE_MODEL_UNAVAILABLE from EP-019 instead of an empty list', async () => {
     const { fetchImpl } = recordingFetch(() =>
       jsonResponse(
-        { error: { code: 'VOICE_MODEL_UNAVAILABLE', stage: null, message: 'piper not configured' } },
+        { error: { code: 'VOICE_MODEL_UNAVAILABLE', stage: null, message: 'voice engine not configured' } },
         503,
       ),
     );

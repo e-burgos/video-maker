@@ -19,8 +19,10 @@ export { CommandFailedError, STDERR_MAX_BYTES } from './errors/command-failed-er
 export { SAMPLE_MAX_CHARS, UnparseableOutputError } from './errors/unparseable-output-error';
 
 export {
+  APP_DATA_MODELS_DIR_ENV_VAR,
   BINARY_COMMAND_NAMES,
   BINARY_ENV_VARS,
+  BUNDLED_BIN_DIR_ENV_VAR,
   resolveBinaries,
   resolveBinary,
   resolveVoiceBinaries,
@@ -32,23 +34,29 @@ export type {
   ResolveBinariesOptions,
 } from './binaries/resolve-binaries';
 
-export { narrationToSingleLine, synthesizeSpeech } from './piper/synthesize-speech';
-export type { SynthesizeSpeechOptions } from './piper/synthesize-speech';
+export { narrationToSingleLine, synthesizeSpeech } from './tts/synthesize-speech';
+export type { SynthesizeSpeechOptions } from './tts/synthesize-speech';
 export {
   buildVoiceCatalog,
   describeVoiceModel,
+  DEFAULT_VOICE_ID,
+  VOICE_DIRECTORY_PREFIX,
+  VOICE_ESPEAK_DATA_DIR_NAME,
   VOICE_MODEL_CONFIG_EXTENSION,
   VOICE_MODEL_EXTENSION,
   VOICE_QUALITIES,
+  VOICE_TOKENS_FILE_NAME,
+  voiceDirectoryName,
+  voiceIdFromDirectoryName,
   voiceModelConfigFileName,
   voiceModelId,
-} from './piper/build-voice-catalog';
+} from './tts/build-voice-catalog';
 export type {
   VoiceLanguage,
   VoiceModel,
   VoiceModelFile,
   VoiceQuality,
-} from './piper/build-voice-catalog';
+} from './tts/build-voice-catalog';
 
 export { nodeBinaryLookup } from './fs/binary-lookup';
 export type { BinaryLookup } from './fs/binary-lookup';

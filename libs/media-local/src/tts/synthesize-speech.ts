@@ -1,11 +1,16 @@
 import { CommandFailedError } from '../errors/command-failed-error';
+import type { ReadTextFile } from '../fs/read-text-file';
+import { nodeReadTextFile } from '../fs/read-text-file';
 import type { CommandOptions, CommandRunner } from '../runner/command-runner';
 
 export interface SynthesizeSpeechOptions {
   modelPath: string;
+  tokensPath: string;
+  dataDirPath: string;
   textPath: string;
   lengthScale?: number;
-  piperPath?: string;
+  ttsPath?: string;
+  readTextFile?: ReadTextFile;
   runOptions?: CommandOptions;
 }
 
@@ -18,17 +23,26 @@ export async function synthesizeSpeech(
   opts: SynthesizeSpeechOptions,
   runner: CommandRunner,
 ): Promise<string> {
-  const piperPath = opts.piperPath ?? 'piper';
+  const ttsPath = opts.ttsPath ?? 'sherpa-onnx-offline-tts';
+  const readTextFile = opts.readTextFile ?? nodeReadTextFile;
   const lengthScaleArgs =
     opts.lengthScale === undefined || opts.lengthScale === 1
       ? []
-      : ['--length-scale', String(opts.lengthScale)];
-  const args = ['-m', opts.modelPath, '-i', opts.textPath, ...lengthScaleArgs, '-f', outPath];
+      : ['--vits-length-scale', String(opts.lengthScale)];
+  const narration = narrationToSingleLine(await readTextFile(opts.textPath));
+  const args = [
+    `--vits-model=${opts.modelPath}`,
+    `--vits-tokens=${opts.tokensPath}`,
+    `--vits-data-dir=${opts.dataDirPath}`,
+    ...lengthScaleArgs,
+    `--output-filename=${outPath}`,
+    narration,
+  ];
 
-  const result = await runner.run(piperPath, args, opts.runOptions);
+  const result = await runner.run(ttsPath, args, opts.runOptions);
   if (result.exitCode !== 0) {
     throw new CommandFailedError({
-      command: piperPath,
+      command: ttsPath,
       args,
       exitCode: result.exitCode,
       stderr: result.stderr,

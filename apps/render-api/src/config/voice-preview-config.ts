@@ -1,4 +1,4 @@
-export const VOICE_PREVIEW_CACHE_DIR_ENV_VAR = 'PIPER_PREVIEW_CACHE_DIR';
+export const VOICE_PREVIEW_CACHE_DIR_ENV_VAR = 'VOICE_PREVIEW_CACHE_DIR';
 
 export const VOICE_PREVIEW_CACHE_DIR_NAME = 'video-maker-voice-previews';
 

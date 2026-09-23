@@ -79,7 +79,7 @@ export const GUIDE_EN: GuideContent = {
       id: 'voice',
       title: 'Voice — the clock of the video',
       body: [
-        'Piper reads the narration of every scene on this machine and Whisper aligns it word by word. **Every scene ends up lasting what its track lasts**, not what the model estimated, which is why the voice is generated before the final timing is trusted.',
+        'sherpa-onnx reads the narration of every scene on this machine and Whisper aligns it word by word. **Every scene ends up lasting what its track lasts**, not what the model estimated, which is why the voice is generated before the final timing is trusted.',
         '',
         '- Each installed voice is offered as a card with its readable name, language, quality and a **play button**: the demo is synthesized once and cached, so you can hear a voice before spending a full narration on it.',
         '- The selected voice applies to the whole project.',
@@ -118,7 +118,7 @@ export const GUIDE_EN: GuideContent = {
       id: 'flows',
       title: 'Three flows that work',
       body: [
-        '**Silent screen recording plus a script.** Upload the recording as B-roll and record or write the narration. Ask the producer to narrate it with a generated voice: it proposes the script, generates the voice-over with Piper, and the montage cuts the recording against that speech. Preset `software-demo`.',
+        '**Silent screen recording plus a script.** Upload the recording as B-roll and record or write the narration. Ask the producer to narrate it with a generated voice: it proposes the script, generates the voice-over with sherpa-onnx, and the montage cuts the recording against that speech. Preset `software-demo`.',
         '',
         '**An ad from photos.** Upload the product photos with the `image` role, named after what they show, and a music bed as `audio`. Tell the producer it is an ad and for which platform. Preset `hardware`: photos first, music present under the voice.',
         '',

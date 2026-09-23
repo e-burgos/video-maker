@@ -14,7 +14,7 @@ export const VoiceTrackSchema = z.strictObject({
   wordsPath: z.string().min(1).describe('Project-relative path of the Transcription document of this wav.'),
   durationMs: MsSchema.describe('Real duration measured with ffprobe. It supersedes estimatedDurationMs.'),
   sampleRate: z.number().int().min(1),
-  voiceId: IdSchema.nullable().describe('Piper voice model id, or null when the track was uploaded.'),
+  voiceId: IdSchema.nullable().describe('Voice model id, or null when the track was uploaded.'),
   narrationHash: z
     .string()
     .min(1)

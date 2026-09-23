@@ -52,9 +52,19 @@ describe('buildProducerSystemPrompt', () => {
     expect(prompt).toContain('never ask the user for a scene table');
   });
 
-  it('nunca menciona shell, ffmpeg/ffprobe, curl, piper, render-cli, pnpm ni el modelo del turno', () => {
+  it('nunca menciona shell, ffmpeg/ffprobe, curl, el motor de voz, render-cli, pnpm ni el modelo del turno', () => {
     const prompt = buildProducerSystemPrompt(CONTEXT);
-    for (const word of ['curl', 'ffmpeg', 'ffprobe', 'Bash', 'piper', 'render-cli', 'pnpm', '"model"']) {
+    for (const word of [
+      'curl',
+      'ffmpeg',
+      'ffprobe',
+      'Bash',
+      'piper',
+      'sherpa-onnx',
+      'render-cli',
+      'pnpm',
+      '"model"',
+    ]) {
       expect(prompt).not.toContain(word);
     }
   });

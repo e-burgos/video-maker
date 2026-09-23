@@ -7,8 +7,8 @@ export const VOICE_BINARY_NAMES = [
   'ffprobe',
   'whisperCli',
   'whisperModel',
-  'piperCli',
-  'piperModel',
+  'ttsCli',
+  'ttsVoicesDir',
 ] as const;
 
 export type VoiceBinaryName = (typeof VOICE_BINARY_NAMES)[number];

@@ -26,7 +26,7 @@ export const VoiceScriptLineSchema = z.strictObject({
     .gt(0)
     .max(1)
     .optional()
-    .describe('Piper --length-scale used for this line; absent or 1 means the natural pace.'),
+    .describe('--vits-length-scale used for this line; absent or 1 means the natural pace.'),
   wordsSource: VoiceScriptWordsSourceSchema.optional().describe(
     'Where the word timings of this line came from: whisper over its own wav, or the script spread evenly over its window.',
   ),

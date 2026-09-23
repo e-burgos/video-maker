@@ -1,7 +1,20 @@
 import { spawn } from 'node:child_process';
 import { once } from 'node:events';
 import { createReadStream, createWriteStream } from 'node:fs';
-import { copyFile, mkdir, readFile, readdir, realpath, rename, rm, stat, unlink, writeFile } from 'node:fs/promises';
+import {
+  copyFile,
+  lstat,
+  mkdir,
+  readFile,
+  readdir,
+  realpath,
+  rename,
+  rm,
+  stat,
+  symlink,
+  unlink,
+  writeFile,
+} from 'node:fs/promises';
 import { createHash, randomUUID } from 'node:crypto';
 import { tmpdir } from 'node:os';
 import { dirname, isAbsolute, join, relative } from 'node:path/posix';
@@ -23,6 +36,7 @@ import type { StudioDatabase } from '@video-maker/local-store';
 import { createClaudeCliAiAgent } from '../ai/claude-cli-ai-agent';
 import { readAiAgentConfig } from '../config/ai-agent-config';
 import { readProducerConfig } from '../config/producer-config';
+import { readRemotionConfig } from '../config/remotion-config';
 import { readServerConfig } from '../config/server-config';
 import { readVoicePreviewConfig } from '../config/voice-preview-config';
 import { createClaudeCodeProducerAgent } from '../producer/claude-code-producer-agent';
@@ -74,6 +88,49 @@ async function readVoiceModelConfig(path: string): Promise<unknown> {
 
 function isEnoent(error: unknown): boolean {
   return typeof error === 'object' && error !== null && (error as NodeJS.ErrnoException).code === 'ENOENT';
+}
+
+const PREBUILT_BUNDLE_PUBLIC_DIR_NAME = 'public';
+
+async function ensurePrebuiltBundlePublicDir(serveUrl: string, publicDir: string): Promise<void> {
+  const linkPath = join(serveUrl, PREBUILT_BUNDLE_PUBLIC_DIR_NAME);
+  try {
+    const existing = await lstat(linkPath);
+    if (existing.isSymbolicLink() && (await realpath(linkPath)) === (await realpath(publicDir))) {
+      return;
+    }
+    await rm(linkPath, { recursive: true, force: true });
+  } catch (error) {
+    if (!isEnoent(error)) {
+      throw error;
+    }
+  }
+  await symlink(publicDir, linkPath, 'dir');
+}
+
+async function directoryExists(path: string): Promise<boolean> {
+  try {
+    return (await stat(path)).isDirectory();
+  } catch (error) {
+    if (isEnoent(error)) {
+      return false;
+    }
+    throw error;
+  }
+}
+
+async function findOnnxFileName(voiceDirPath: string): Promise<string> {
+  const entries = await readdir(voiceDirPath, { withFileTypes: true });
+  const onnxFile = entries.find((entry) => entry.isFile() && entry.name.endsWith('.onnx'));
+  if (onnxFile === undefined) {
+    throw new PipelineStageError({
+      code: 'VOICE_MODEL_UNAVAILABLE',
+      stage: null,
+      resource: voiceDirPath,
+      expected: 'a .onnx model file inside the voice directory',
+    });
+  }
+  return onnxFile.name;
 }
 
 function assertInsideMediaRoot(store: StoreConfig, path: string): string {
@@ -334,13 +391,20 @@ export function createNodeRenderApiDependencies(
     return binaries;
   };
 
+  const remotion = readRemotionConfig(env);
+
   return {
     renderMutedVideo: async ({ timeline, outPath, publicDir, onProgress }) => {
       const { renderTimeline } = await loadRender();
+      if (remotion.serveUrl !== null) {
+        await ensurePrebuiltBundlePublicDir(remotion.serveUrl, publicDir);
+      }
       const result = await renderTimeline(timeline, {
         outPath,
         publicDir,
         audio: 'muted',
+        ...(remotion.serveUrl === null ? {} : { serveUrl: remotion.serveUrl }),
+        ...(remotion.browserExecutable === null ? {} : { browserExecutable: remotion.browserExecutable }),
         ...(onProgress === undefined ? {} : { onProgress }),
       });
       return {
@@ -535,32 +599,47 @@ export function createNodeRenderApiDependencies(
     ),
 
     listVoiceModels: async () => {
-      const { buildVoiceCatalog, resolveBinary, voiceModelConfigFileName } = await loadMediaLocal();
-      const modelPath = await resolveBinary('piperModel', env);
-      const voicesDirectory = dirname(modelPath);
+      const { buildVoiceCatalog, resolveBinary, voiceIdFromDirectoryName, voiceModelConfigFileName } =
+        await loadMediaLocal();
+      const voicesDirectory = await resolveBinary('ttsVoicesDir', env);
       const entries = await readdir(voicesDirectory, { withFileTypes: true });
-      const fileNames = entries.filter((entry) => entry.isFile()).map((entry) => entry.name);
-      const present = new Set(fileNames);
-      const files = await Promise.all(
-        fileNames.map(async (fileName) => ({
-          fileName,
-          config: present.has(voiceModelConfigFileName(fileName))
-            ? await readVoiceModelConfig(join(voicesDirectory, voiceModelConfigFileName(fileName)))
-            : null,
-        })),
+      const voiceDirectories = entries.filter(
+        (entry) => entry.isDirectory() && voiceIdFromDirectoryName(entry.name) !== null,
       );
-      return buildVoiceCatalog(files, modelPath);
+      const files = await Promise.all(
+        voiceDirectories.map(async (entry) => {
+          const voiceId = voiceIdFromDirectoryName(entry.name) as string;
+          const fileName = `${voiceId}.onnx`;
+          const configPath = join(voicesDirectory, entry.name, voiceModelConfigFileName(fileName));
+          return { directory: entry.name, fileName, config: await readVoiceModelConfig(configPath) };
+        }),
+      );
+      return buildVoiceCatalog(files);
     },
 
-    synthesizeVoice: async ({ textPath, outPath, modelPath, lengthScale, projectRoot }) => {
-      const { ExecaCommandRunner, synthesizeSpeech } = await loadMediaLocal();
-      const { piperCli } = await loadVoiceBinaries();
+    synthesizeVoice: async ({ textPath, outPath, modelPath: voiceDirPath, lengthScale, projectRoot }) => {
+      const {
+        ExecaCommandRunner,
+        synthesizeSpeech,
+        VOICE_ESPEAK_DATA_DIR_NAME,
+        VOICE_TOKENS_FILE_NAME,
+      } = await loadMediaLocal();
+      const { ttsCli } = await loadVoiceBinaries();
+      const voicesDirectory = dirname(voiceDirPath);
+      const ownDataDirPath = join(voiceDirPath, VOICE_ESPEAK_DATA_DIR_NAME);
+      const dataDirPath = (await directoryExists(ownDataDirPath))
+        ? ownDataDirPath
+        : join(voicesDirectory, VOICE_ESPEAK_DATA_DIR_NAME);
+      const onnxFileName = await findOnnxFileName(voiceDirPath);
+
       await synthesizeSpeech(
         outPath,
         {
-          modelPath,
+          modelPath: join(voiceDirPath, onnxFileName),
+          tokensPath: join(voiceDirPath, VOICE_TOKENS_FILE_NAME),
+          dataDirPath,
           textPath,
-          piperPath: piperCli,
+          ttsPath: ttsCli,
           runOptions: { cwd: projectRoot },
           ...(lengthScale === undefined ? {} : { lengthScale }),
         },

@@ -30,36 +30,36 @@ describe('voiceBlockers', () => {
     );
   });
 
-  it('names the Piper binary and its env var when it is missing, never a resolved path', () => {
+  it('names the voice engine binary and its env var when it is missing, never a resolved path', () => {
     const health = healthyVoiceService();
     const blocked = {
       ...health,
       status: 'degraded' as const,
       binaries: health.binaries.map((binary) =>
-        binary.name === 'piperCli' ? { ...binary, resolved: false } : binary,
+        binary.name === 'ttsCli' ? { ...binary, resolved: false } : binary,
       ),
     };
     expect(voiceBlockers(blocked)).toEqual([
       {
         key: 'voice.blocker.binaryUnresolved',
-        params: { name: 'piperCli', envVar: 'PIPER_PATH' },
+        params: { name: 'ttsCli', envVar: 'TTS_CLI_PATH' },
       },
     ]);
     expect(canGenerateVoice(blocked)).toBe(false);
   });
 
-  it('blocks on the voice model too: a Piper without a voice cannot synthesize', () => {
+  it('blocks on the voices directory too: the engine without a voice cannot synthesize', () => {
     const health = healthyVoiceService();
     const blocked = {
       ...health,
       binaries: health.binaries.map((binary) =>
-        binary.name === 'piperModel' ? { ...binary, resolved: false } : binary,
+        binary.name === 'ttsVoicesDir' ? { ...binary, resolved: false } : binary,
       ),
     };
     expect(voiceBlockers(blocked)).toEqual([
       {
         key: 'voice.blocker.binaryUnresolved',
-        params: { name: 'piperModel', envVar: 'PIPER_MODEL_PATH' },
+        params: { name: 'ttsVoicesDir', envVar: 'TTS_VOICES_DIR' },
       },
     ]);
   });
@@ -93,7 +93,7 @@ describe('voiceBlockers', () => {
 
 describe('voiceFailureKey', () => {
   it('explains the typed codes of the voice pipeline in the words of a user', () => {
-    expect(MESSAGES_EN['voiceFailure.VOICE_MODEL_UNAVAILABLE']).toContain('PIPER_MODEL_PATH');
+    expect(MESSAGES_EN['voiceFailure.VOICE_MODEL_UNAVAILABLE']).toContain('TTS_VOICES_DIR');
     expect(MESSAGES_EN['voiceFailure.VOICE_TRANSCRIPTION_FAILED']).toContain('manifest');
     expect(MESSAGES_EN['voiceFailure.STORYBOARD_NOT_FOUND']).toContain('storyboard');
   });

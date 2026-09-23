@@ -19,7 +19,7 @@ export async function handleListVoices(deps: RenderApiDependencies): Promise<Htt
   try {
     voices = await deps.listVoiceModels();
   } catch (cause) {
-    throw translateVoiceError(cause, null, 'piper-voices');
+    throw translateVoiceError(cause, null, 'tts-voices');
   }
 
   const body: VoicesBody = {

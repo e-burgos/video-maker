@@ -39,6 +39,17 @@
           "SWC_NODE_PROJECT": "./tsconfig.smoke.json"
         }
       }
+    },
+    "bundle": {
+      "executor": "nx:run-commands",
+      "outputs": ["{workspaceRoot}/dist/libs/composition-remotion/bundle"],
+      "options": {
+        "command": "node -r ./src/smoke-register.cjs ./src/bundle.ts",
+        "cwd": "libs/composition-remotion",
+        "env": {
+          "SWC_NODE_PROJECT": "./tsconfig.smoke.json"
+        }
+      }
     }
   }
 }

@@ -21,8 +21,28 @@ describe('handleListVoices (US-09-003, US-016-001)', () => {
     expect(response.headers['content-type']).toBe(JSON_CONTENT_TYPE);
     expect(Object.keys(body).sort()).toEqual(['voices']);
     expect(body.voices.map((voice) => Object.keys(voice).sort())).toEqual([
-      ['description', 'fileName', 'id', 'isDefault', 'label', 'language', 'previewUrl', 'quality'],
-      ['description', 'fileName', 'id', 'isDefault', 'label', 'language', 'previewUrl', 'quality'],
+      [
+        'description',
+        'directory',
+        'fileName',
+        'id',
+        'isDefault',
+        'label',
+        'language',
+        'previewUrl',
+        'quality',
+      ],
+      [
+        'description',
+        'directory',
+        'fileName',
+        'id',
+        'isDefault',
+        'label',
+        'language',
+        'previewUrl',
+        'quality',
+      ],
     ]);
     expect(body.voices.filter((voice) => voice.isDefault).map((voice) => voice.id)).toEqual([
       'es_AR-daniela-high',
@@ -53,23 +73,23 @@ describe('handleListVoices (US-09-003, US-016-001)', () => {
     expect(body.voices.every((voice) => !voice.previewUrl.includes('://'))).toBe(true);
   });
 
-  it('answers 503 VOICE_MODEL_UNAVAILABLE instead of an empty list when Piper is not configured', async () => {
+  it('answers 503 VOICE_MODEL_UNAVAILABLE instead of an empty list when the voice engine is not configured', async () => {
     const deps = createFakeRenderApiDependencies(createCallLog(), {
       listVoiceModels: async () => {
-        throw new FakeBinaryNotFoundError('piper-voice not found');
+        throw new FakeBinaryNotFoundError('tts-voices not found');
       },
     });
 
     await expect(handleListVoices(deps)).rejects.toMatchObject({
       code: 'VOICE_MODEL_UNAVAILABLE',
-      resource: 'piper-voices',
+      resource: 'tts-voices',
     });
   });
 
   it('never leaks the resolved path of the voice directory into the error payload', async () => {
     const deps = createFakeRenderApiDependencies(createCallLog(), {
       listVoiceModels: async () => {
-        throw new FakeBinaryNotFoundError('piper-voice not found at /home/dev/.cache/piper-voices');
+        throw new FakeBinaryNotFoundError('tts-voices not found at /home/dev/.cache/tts-voices');
       },
     });
 

@@ -22,8 +22,8 @@ function health(overrides: Partial<ServiceHealth> = {}): ServiceHealth {
       { name: 'ffprobe', envVar: 'FFPROBE_PATH', resolved: true },
       { name: 'whisperCli', envVar: 'WHISPER_CPP_PATH', resolved: true },
       { name: 'whisperModel', envVar: 'WHISPER_MODEL_PATH', resolved: true },
-      { name: 'piperCli', envVar: 'PIPER_PATH', resolved: true },
-      { name: 'piperModel', envVar: 'PIPER_MODEL_PATH', resolved: true },
+      { name: 'ttsCli', envVar: 'TTS_CLI_PATH', resolved: true },
+      { name: 'ttsVoicesDir', envVar: 'TTS_VOICES_DIR', resolved: true },
     ],
     capabilities: {
       renderPipeline: true,
@@ -129,8 +129,8 @@ describe('ServiceHealthBadge', () => {
       'ffprobe · FFPROBE_PATH · resolved',
       'whisperCli · WHISPER_CPP_PATH · resolved',
       'whisperModel · WHISPER_MODEL_PATH · resolved',
-      'piperCli · PIPER_PATH · resolved',
-      'piperModel · PIPER_MODEL_PATH · resolved',
+      'ttsCli · TTS_CLI_PATH · resolved',
+      'ttsVoicesDir · TTS_VOICES_DIR · resolved',
     ]);
   });
 
@@ -152,15 +152,15 @@ describe('ServiceHealthBadge', () => {
     ]);
   });
 
-  it('lists the two Piper entries by their logical name and env var (US-09-012)', async () => {
+  it('lists the two voice-engine entries by their logical name and env var (US-09-012)', async () => {
     renderBadge(
       clientWith(() =>
         Promise.resolve(
           health({
             status: 'degraded',
             binaries: [
-              { name: 'piperCli', envVar: 'PIPER_PATH', resolved: true },
-              { name: 'piperModel', envVar: 'PIPER_MODEL_PATH', resolved: false },
+              { name: 'ttsCli', envVar: 'TTS_CLI_PATH', resolved: true },
+              { name: 'ttsVoicesDir', envVar: 'TTS_VOICES_DIR', resolved: false },
             ],
           }),
         ),
@@ -173,10 +173,10 @@ describe('ServiceHealthBadge', () => {
     );
 
     expect(rows).toEqual([
-      'piperCli · PIPER_PATH · resolved',
-      'piperModel · PIPER_MODEL_PATH · missing',
+      'ttsCli · TTS_CLI_PATH · resolved',
+      'ttsVoicesDir · TTS_VOICES_DIR · missing',
     ]);
-    expect(screen.getByTestId('service-health-label').textContent).toContain('piperModel');
+    expect(screen.getByTestId('service-health-label').textContent).toContain('ttsVoicesDir');
   });
 
   it('marks a missing binary and a disabled capability, never a resolved host path', async () => {

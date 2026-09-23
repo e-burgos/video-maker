@@ -165,7 +165,7 @@ describe('cancelación del pipeline de voz (US-09-004)', () => {
 
   it('isVoicePipelineCanceled distingue la cancelación de cualquier otro fallo', () => {
     expect(isVoicePipelineCanceled(new VoicePipelineCanceledError('persist'))).toBe(true);
-    expect(isVoicePipelineCanceled(new Error('piper exited with 1'))).toBe(false);
+    expect(isVoicePipelineCanceled(new Error('sherpa-onnx-offline-tts exited with 1'))).toBe(false);
     expect(new VoicePipelineCanceledError('persist').stage).toBe('persist');
   });
 });

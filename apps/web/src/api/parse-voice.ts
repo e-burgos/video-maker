@@ -30,6 +30,7 @@ function isVoiceModel(value: unknown): boolean {
   return (
     isRecord(value) &&
     typeof value['id'] === 'string' &&
+    typeof value['directory'] === 'string' &&
     typeof value['fileName'] === 'string' &&
     typeof value['isDefault'] === 'boolean' &&
     isVoiceLanguage(value['language']) &&

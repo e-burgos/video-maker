@@ -141,7 +141,7 @@ describe('VoicePicker (US-016-003)', () => {
     fireEvent.error(audioOf(DANIELA.id));
 
     expect(cardOf(DANIELA.id).dataset['previewState']).toBe('error');
-    expect(screen.getByTestId('voice-preview-error').textContent).toContain('Piper is installed');
+    expect(screen.getByTestId('voice-preview-error').textContent).toContain('voice engine is installed');
   });
 
   it('a play() the browser rejects leaves the card in error, never stuck on loading', async () => {

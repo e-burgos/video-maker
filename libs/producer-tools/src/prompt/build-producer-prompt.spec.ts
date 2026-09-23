@@ -65,7 +65,7 @@ describe('buildProducerPrompt — herramientas del estudio', () => {
     }
   });
 
-  it('nunca menciona shell, ffmpeg/ffprobe, curl, piper, render-cli, pnpm ni rutas absolutas del host', () => {
+  it('nunca menciona shell, ffmpeg/ffprobe, curl, el motor de voz, render-cli, pnpm ni rutas absolutas del host', () => {
     const forbidden = [
       'curl',
       'ffmpeg',
@@ -73,6 +73,7 @@ describe('buildProducerPrompt — herramientas del estudio', () => {
       'Bash',
       'piper',
       'Piper',
+      'sherpa-onnx',
       'render-cli',
       'pnpm',
       '/Users',

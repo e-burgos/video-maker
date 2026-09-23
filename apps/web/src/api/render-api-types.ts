@@ -434,6 +434,7 @@ export type VoiceLanguage = {
 
 export type VoiceModel = {
   id: string;
+  directory: string;
   fileName: string;
   isDefault: boolean;
   language: VoiceLanguage;

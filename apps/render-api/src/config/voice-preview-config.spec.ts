@@ -12,17 +12,17 @@ describe('readVoicePreviewConfig (US-016-002)', () => {
     expect(config.cacheDirectory).toBe(`/var/folders/tmp/${VOICE_PREVIEW_CACHE_DIR_NAME}`);
   });
 
-  it('PIPER_PREVIEW_CACHE_DIR wins over the temporary directory', () => {
+  it('VOICE_PREVIEW_CACHE_DIR wins over the temporary directory', () => {
     const config = readVoicePreviewConfig(
-      { PIPER_PREVIEW_CACHE_DIR: '/cache/voices' },
+      { VOICE_PREVIEW_CACHE_DIR: '/cache/voices' },
       '/var/folders/tmp',
     );
 
     expect(config.cacheDirectory).toBe('/cache/voices');
   });
 
-  it('an empty PIPER_PREVIEW_CACHE_DIR falls back instead of caching at the filesystem root', () => {
-    const config = readVoicePreviewConfig({ PIPER_PREVIEW_CACHE_DIR: '' }, '/var/folders/tmp');
+  it('an empty VOICE_PREVIEW_CACHE_DIR falls back instead of caching at the filesystem root', () => {
+    const config = readVoicePreviewConfig({ VOICE_PREVIEW_CACHE_DIR: '' }, '/var/folders/tmp');
 
     expect(config.cacheDirectory).toBe(`/var/folders/tmp/${VOICE_PREVIEW_CACHE_DIR_NAME}`);
   });

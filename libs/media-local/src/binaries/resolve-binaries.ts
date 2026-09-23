@@ -4,23 +4,29 @@ import { BinaryNotFoundError } from '../errors/binary-not-found-error';
 import { nodeBinaryLookup } from '../fs/binary-lookup';
 import type { BinaryLookup } from '../fs/binary-lookup';
 
-export type BinaryName = 'ffmpeg' | 'ffprobe' | 'whisperCli' | 'whisperModel' | 'piperCli' | 'piperModel';
+export type BinaryName = 'ffmpeg' | 'ffprobe' | 'whisperCli' | 'whisperModel' | 'ttsCli' | 'ttsVoicesDir';
 
-const MODEL_BINARY_NAMES = ['whisperModel', 'piperModel'] as const satisfies readonly BinaryName[];
+export const BUNDLED_BIN_DIR_ENV_VAR = 'VIDEO_MAKER_BIN_DIR';
+export const APP_DATA_MODELS_DIR_ENV_VAR = 'VIDEO_MAKER_MODELS_DIR';
 
-type ModelBinaryName = (typeof MODEL_BINARY_NAMES)[number];
+type BinaryKind = 'executable' | 'file' | 'directory';
 
-function isModelBinary(name: BinaryName): name is ModelBinaryName {
-  return (MODEL_BINARY_NAMES as readonly BinaryName[]).includes(name);
-}
+const BINARY_KINDS: Readonly<Record<BinaryName, BinaryKind>> = {
+  ffmpeg: 'executable',
+  ffprobe: 'executable',
+  whisperCli: 'executable',
+  whisperModel: 'file',
+  ttsCli: 'executable',
+  ttsVoicesDir: 'directory',
+};
 
 export const BINARY_ENV_VARS: Readonly<Record<BinaryName, string>> = {
   ffmpeg: 'FFMPEG_PATH',
   ffprobe: 'FFPROBE_PATH',
   whisperCli: 'WHISPER_CPP_PATH',
   whisperModel: 'WHISPER_MODEL_PATH',
-  piperCli: 'PIPER_PATH',
-  piperModel: 'PIPER_MODEL_PATH',
+  ttsCli: 'TTS_CLI_PATH',
+  ttsVoicesDir: 'TTS_VOICES_DIR',
 };
 
 export const BINARY_COMMAND_NAMES: Readonly<Record<BinaryName, string>> = {
@@ -28,8 +34,8 @@ export const BINARY_COMMAND_NAMES: Readonly<Record<BinaryName, string>> = {
   ffprobe: 'ffprobe',
   whisperCli: 'whisper-cli',
   whisperModel: 'ggml-model',
-  piperCli: 'piper',
-  piperModel: 'piper-voice',
+  ttsCli: 'sherpa-onnx-offline-tts',
+  ttsVoicesDir: 'voices',
 };
 
 const BINARY_DISPLAY_NAMES: Readonly<Record<BinaryName, string>> = {
@@ -37,8 +43,13 @@ const BINARY_DISPLAY_NAMES: Readonly<Record<BinaryName, string>> = {
   ffprobe: 'ffprobe',
   whisperCli: 'whisper-cli',
   whisperModel: 'whisper-model',
-  piperCli: 'piper',
-  piperModel: 'piper-voice',
+  ttsCli: 'sherpa-onnx-offline-tts',
+  ttsVoicesDir: 'tts-voices',
+};
+
+const APP_DATA_RELATIVE_PATHS: Readonly<Partial<Record<BinaryName, string>>> = {
+  whisperModel: 'whisper-model.bin',
+  ttsVoicesDir: 'voices',
 };
 
 export interface ResolveBinariesOptions {
@@ -53,16 +64,70 @@ export interface ResolvedBinaries {
 }
 
 export interface ResolvedVoiceBinaries extends ResolvedBinaries {
-  piperCli: string;
-  piperModel: string;
+  ttsCli: string;
+  ttsVoicesDir: string;
 }
 
 function pathDirectories(env: NodeJS.ProcessEnv): string[] {
   return (env.PATH ?? '').split(delimiter).filter((dir) => dir !== '');
 }
 
-async function isValidCandidate(name: BinaryName, candidate: string, lookup: BinaryLookup): Promise<boolean> {
-  return isModelBinary(name) ? lookup.isReadableFile(candidate) : lookup.isExecutableFile(candidate);
+function readNonEmpty(env: NodeJS.ProcessEnv, key: string): string | null {
+  const value = env[key];
+  return value === undefined || value === '' ? null : value;
+}
+
+async function isValidCandidate(kind: BinaryKind, candidate: string, lookup: BinaryLookup): Promise<boolean> {
+  if (kind === 'executable') {
+    return lookup.isExecutableFile(candidate);
+  }
+  return kind === 'directory' ? lookup.isReadableDirectory(candidate) : lookup.isReadableFile(candidate);
+}
+
+async function resolveFromAppDataDir(
+  name: BinaryName,
+  env: NodeJS.ProcessEnv,
+  lookup: BinaryLookup,
+): Promise<string | null> {
+  const modelsDir = readNonEmpty(env, APP_DATA_MODELS_DIR_ENV_VAR);
+  const relativePath = APP_DATA_RELATIVE_PATHS[name];
+  if (modelsDir === null || relativePath === undefined) {
+    return null;
+  }
+
+  const candidate = join(modelsDir, relativePath);
+  return (await isValidCandidate(BINARY_KINDS[name], candidate, lookup)) ? candidate : null;
+}
+
+async function resolveExecutable(
+  name: BinaryName,
+  env: NodeJS.ProcessEnv,
+  lookup: BinaryLookup,
+): Promise<string> {
+  const envVar = BINARY_ENV_VARS[name];
+  const binary = BINARY_DISPLAY_NAMES[name];
+  const commandName = BINARY_COMMAND_NAMES[name];
+  const binDir = readNonEmpty(env, BUNDLED_BIN_DIR_ENV_VAR);
+  const searched: string[] = [];
+
+  if (binDir !== null) {
+    const bundledPath = join(binDir, commandName);
+    searched.push(bundledPath);
+    if (await lookup.isExecutableFile(bundledPath)) {
+      return bundledPath;
+    }
+  }
+
+  const directories = pathDirectories(env);
+  for (const dir of directories) {
+    const candidatePath = join(dir, commandName);
+    searched.push(candidatePath);
+    if (await lookup.isExecutableFile(candidatePath)) {
+      return candidatePath;
+    }
+  }
+
+  throw new BinaryNotFoundError({ binary, envVar, searchedPaths: searched });
 }
 
 export async function resolveBinary(
@@ -73,33 +138,29 @@ export async function resolveBinary(
   const lookup = opts?.lookup ?? nodeBinaryLookup;
   const envVar = BINARY_ENV_VARS[name];
   const binary = BINARY_DISPLAY_NAMES[name];
+  const kind = BINARY_KINDS[name];
   const candidate = env[envVar];
 
   if (candidate !== undefined && candidate !== '') {
-    if (await isValidCandidate(name, candidate, lookup)) {
+    if (await isValidCandidate(kind, candidate, lookup)) {
       return candidate;
     }
     throw new BinaryNotFoundError({ binary, envVar, searchedPaths: [candidate] });
   }
 
-  if (isModelBinary(name)) {
-    throw new BinaryNotFoundError({ binary, envVar, searchedPaths: [] });
-  }
-
-  const commandName = BINARY_COMMAND_NAMES[name];
-  const directories = pathDirectories(env);
-  for (const dir of directories) {
-    const candidatePath = join(dir, commandName);
-    if (await lookup.isExecutableFile(candidatePath)) {
-      return candidatePath;
+  if (kind !== 'executable') {
+    const fromAppData = await resolveFromAppDataDir(name, env, lookup);
+    if (fromAppData !== null) {
+      return fromAppData;
     }
+
+    const modelsDir = readNonEmpty(env, APP_DATA_MODELS_DIR_ENV_VAR);
+    const relativePath = APP_DATA_RELATIVE_PATHS[name];
+    const searched = modelsDir === null || relativePath === undefined ? [] : [join(modelsDir, relativePath)];
+    throw new BinaryNotFoundError({ binary, envVar, searchedPaths: searched });
   }
 
-  throw new BinaryNotFoundError({
-    binary,
-    envVar,
-    searchedPaths: directories.map((dir) => join(dir, commandName)),
-  });
+  return resolveExecutable(name, env, lookup);
 }
 
 export async function resolveBinaries(
@@ -118,7 +179,7 @@ export async function resolveVoiceBinaries(
   opts?: ResolveBinariesOptions,
 ): Promise<ResolvedVoiceBinaries> {
   const base = await resolveBinaries(env, opts);
-  const piperCli = await resolveBinary('piperCli', env, opts);
-  const piperModel = await resolveBinary('piperModel', env, opts);
-  return { ...base, piperCli, piperModel };
+  const ttsCli = await resolveBinary('ttsCli', env, opts);
+  const ttsVoicesDir = await resolveBinary('ttsVoicesDir', env, opts);
+  return { ...base, ttsCli, ttsVoicesDir };
 }

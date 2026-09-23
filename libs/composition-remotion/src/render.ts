@@ -8,13 +8,13 @@ import type { TimelineAudioMode } from './components/timeline-composition';
 
 export const DEFAULT_RENDER_CONCURRENCY = 4;
 
-const DEFAULT_ENTRY_POINT = resolve(__dirname, 'remotion-entry.ts');
+export const DEFAULT_ENTRY_POINT = resolve(__dirname, 'remotion-entry.ts');
 
 const WORKSPACE_ALIASES: Record<string, string> = {
   '@video-maker/timeline-core': resolve(__dirname, '../../timeline-core/src/index.ts'),
 };
 
-function withWorkspaceAliases(config: WebpackConfiguration): WebpackConfiguration {
+export function withWorkspaceAliases(config: WebpackConfiguration): WebpackConfiguration {
   return {
     ...config,
     resolve: {
@@ -36,6 +36,8 @@ export interface RenderTimelineOptions {
   compositionId?: string;
   entryPoint?: string;
   publicDir?: string | null;
+  serveUrl?: string;
+  browserExecutable?: string;
   onProgress?: (renderedFrames: number, totalFrames: number) => void;
 }
 
@@ -83,6 +85,7 @@ export interface RenderTimelineDeps {
     serveUrl: string;
     id: string;
     inputProps: TimelineInputProps;
+    browserExecutable?: string;
   }): Promise<CompositionMetadata>;
   renderTimelineMedia(input: {
     composition: CompositionMetadata;
@@ -91,6 +94,7 @@ export interface RenderTimelineDeps {
     outputLocation: string;
     concurrency: number;
     inputProps: TimelineInputProps;
+    browserExecutable?: string;
     onProgress?: (renderedFrames: number, totalFrames: number) => void;
   }): Promise<void>;
 }
@@ -101,12 +105,26 @@ export const remotionRenderDeps: RenderTimelineDeps = {
     return bundle({ entryPoint, webpackOverride: withWorkspaceAliases, publicDir });
   },
 
-  async selectTimelineComposition({ serveUrl, id, inputProps }) {
+  async selectTimelineComposition({ serveUrl, id, inputProps, browserExecutable }) {
     const { selectComposition } = await import('@remotion/renderer');
-    return selectComposition({ serveUrl, id, inputProps });
+    return selectComposition({
+      serveUrl,
+      id,
+      inputProps,
+      ...(browserExecutable === undefined ? {} : { browserExecutable }),
+    });
   },
 
-  async renderTimelineMedia({ composition, serveUrl, codec, outputLocation, concurrency, inputProps, onProgress }) {
+  async renderTimelineMedia({
+    composition,
+    serveUrl,
+    codec,
+    outputLocation,
+    concurrency,
+    inputProps,
+    browserExecutable,
+    onProgress,
+  }) {
     const { renderMedia } = await import('@remotion/renderer');
     await renderMedia({
       composition,
@@ -116,6 +134,7 @@ export const remotionRenderDeps: RenderTimelineDeps = {
       concurrency,
       inputProps,
       licenseKey: 'free-license',
+      ...(browserExecutable === undefined ? {} : { browserExecutable }),
       ...(onProgress === undefined
         ? {}
         : { onProgress: (progress) => onProgress(progress.renderedFrames, composition.durationInFrames) }),
@@ -154,10 +173,18 @@ export async function renderTimeline(
     ...(options.audio === 'muted' ? { audio: options.audio } : {}),
   };
 
-  const serveUrl = await runStage('BUNDLE_FAILED', () => deps.bundleProject({ entryPoint, publicDir }));
+  const serveUrl =
+    options.serveUrl ??
+    (await runStage('BUNDLE_FAILED', () => deps.bundleProject({ entryPoint, publicDir })));
+  const browserExecutable = options.browserExecutable;
 
   const composition = await runStage('COMPOSITION_NOT_FOUND', () =>
-    deps.selectTimelineComposition({ serveUrl, id: compositionId, inputProps }),
+    deps.selectTimelineComposition({
+      serveUrl,
+      id: compositionId,
+      inputProps,
+      ...(browserExecutable === undefined ? {} : { browserExecutable }),
+    }),
   );
 
   await runStage('RENDER_FAILED', () =>
@@ -168,6 +195,7 @@ export async function renderTimeline(
       outputLocation: options.outPath,
       concurrency,
       inputProps,
+      ...(browserExecutable === undefined ? {} : { browserExecutable }),
       ...(options.onProgress === undefined ? {} : { onProgress: options.onProgress }),
     }),
   );

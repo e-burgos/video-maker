@@ -32,6 +32,18 @@ describe('nodeBinaryLookup', () => {
   it('isReadableFile es false para un archivo inexistente', async () => {
     await expect(nodeBinaryLookup.isReadableFile('/no/existe/archivo.json')).resolves.toBe(false);
   });
+
+  it('isReadableDirectory es true para un directorio del propio repo', async () => {
+    await expect(nodeBinaryLookup.isReadableDirectory(thisDir)).resolves.toBe(true);
+  });
+
+  it('isReadableDirectory es false para un archivo', async () => {
+    await expect(nodeBinaryLookup.isReadableDirectory(thisFile)).resolves.toBe(false);
+  });
+
+  it('isReadableDirectory es false para un directorio inexistente', async () => {
+    await expect(nodeBinaryLookup.isReadableDirectory('/no/existe/directorio')).resolves.toBe(false);
+  });
 });
 
 describe('nodeReadTextFile', () => {
