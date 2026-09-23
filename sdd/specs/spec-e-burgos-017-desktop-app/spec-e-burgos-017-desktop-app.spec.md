@@ -23,7 +23,7 @@ un cliente**, sin Docker ni terminal:
   artefactos que el pipeline lee como archivo.
 - **Interfaz centrada en el chat**: se arrastran archivos al chat y el agente propone su rol
   (A-roll, B-roll, imagen, logo, música) para que el usuario confirme.
-- Distribución firmada y notarizada, con un **trial**; el pago queda fuera de esta spec.
+- Se reparte **entre amigos**: `.dmg` sin firmar publicado en GitHub Releases de un repo público de distribución, con una web de documentación en GitHub Pages para descargarlo e instalarlo.
 
 ## Contexto de Negocio
 
@@ -49,7 +49,9 @@ del cliente elimina casi todos esos problemas.
 | D-05 | Herramientas del productor como **servidor MCP** compartido por los dos motores | Definir herramientas por motor: duplica prompts y tools. Shell (`Bash(curl *)`, `cat`): superficie de prompt injection sobre la máquina del cliente |
 | D-06 | **SQLite híbrido** (better-sqlite3 + Drizzle) | Todo en archivos JSON: sin consultas ni transacciones, jobs perdidos al reiniciar. Blobs en SQLite: infla la base y rompe la reproducción por rangos. Prisma: motor pesado para empaquetar. `node:sqlite`: no estable en el Node de Electron |
 | D-07 | API key de OpenRouter en el **llavero del sistema** (`safeStorage`) | Texto plano en disco o en SQLite |
-| D-08 | **Trial** local; el pago simbólico queda para una spec posterior | Cobro dentro de esta spec |
+| D-08 | **Sin trial ni cobro**: la app se reparte entre amigos, no se vende (decisión del dev, 2026-09-23) | Trial local y pago simbólico: no hay a quién cobrarle |
+| D-09 | **App sin firmar** (firma ad hoc de Electron, sin cuenta de Apple Developer): la primera apertura se habilita desde Ajustes → Privacidad y seguridad → "Abrir igual", documentado en la web de la app | Firma y notarización (USD 99/año): se suma después sin rehacer nada si la app se abre a más gente. Sin firma no hay auto-actualización en macOS: cada versión se reinstala a mano |
+| D-10 | Distribución por **GitHub Releases de un repo público aparte** (el código sigue en el repo privado) más una **web de documentación en GitHub Pages** del mismo repo, con el botón de descarga apuntando a `releases/latest/download/<archivo>` | Hacer público el repo del código: expone todo el código. Releases del repo privado: tus amigos necesitarían acceso al repo |
 
 Esta spec **revierte** una exclusión de `spec-015` ("ejecutar el agente con key propia: es la
 suscripción o nada"): la suscripción sigue siendo el camino por defecto y la API key de OpenRouter
@@ -77,13 +79,13 @@ se suma como alternativa.
    MCP; selección de motor y modelo en la configuración; API key en el llavero.
 5. **Interfaz nueva centrada en el chat**: chat a la izquierda, vista previa del video y del
    material a la derecha, arrastrar y soltar archivos al chat con propuesta de rol confirmable.
-6. **Distribución**: build firmada y notarizada (`.dmg`), auto-actualizaciones y trial local.
+6. **Distribución entre amigos**: `.dmg` sin firmar para Apple Silicon generado con un comando, publicado como release en un repo público de distribución, y una web de documentación en GitHub Pages (requisitos, instalación, cómo habilitar la primera apertura, cómo conectar Claude u OpenRouter, guía de uso) con el botón de descarga.
 
 ### Fuera
 
 - Windows, Linux y Macs Intel (el código queda portable; el empaquetado no).
 - Despliegue web, multi-usuario, autenticación o cualquier servidor remoto propio.
-- Cobro, cuentas de usuario y verificación de licencias contra un servidor.
+- Trial, cobro, cuentas de usuario, firma, notarización y auto-actualización.
 - Cambiar el motor de edición: el pipeline, la composición y la mezcla no cambian de comportamiento.
 - Migrar los artefactos del pipeline (`catalog.json`, timeline, EDL) a SQLite.
 
@@ -96,7 +98,7 @@ se suma como alternativa.
 | `cycle-03` | Shell Electron: `render-api` embebido, build de la web, manifiesto de binarios, descarga de modelos en el primer arranque, detección del CLI `claude` | `apps/desktop` (nuevo), `apps/render-api`, `apps/web` |
 | `cycle-04` | Motor OpenRouter sobre Vercel AI SDK consumiendo el mismo MCP; configuración de motor, modelo y API key | `libs/producer-tools`, `apps/render-api`, `apps/desktop`, `apps/web` |
 | `cycle-05` | Interfaz centrada en el chat, arrastrar y soltar con clasificación de assets | `apps/web` |
-| `cycle-06` | Firma, notarización, auto-actualizaciones y trial | `apps/desktop` |
+| `cycle-06` | Distribución entre amigos: script de release, repo público de distribución, web de documentación en GitHub Pages y avisos de licencias de terceros | `apps/desktop`, `apps/docs-site` (nuevo) |
 
 El orden es deliberado: `cycle-01` quita el shell del agente y define el contrato que usan
 `cycle-04` y `cycle-05`; `cycle-02` es independiente de Electron y se puede probar con `pnpm studio`.
@@ -134,30 +136,28 @@ El orden es deliberado: `cycle-01` quita el shell del agente y define el contrat
 - **RF-17-011 — Arrastrar y clasificar.** Soltar uno o varios archivos en el chat los sube al
   proyecto; el agente propone un rol por archivo a partir de sus metadatos (duración, resolución,
   presencia de audio, canal alfa, nombre) y el rol se persiste solo cuando el usuario lo confirma.
-- **RF-17-012 — App firmada.** El `.dmg` está firmado y notarizado: Gatekeeper lo abre sin avisos.
-- **RF-17-013 — Trial.** La app registra la fecha del primer arranque y, vencido el período de
-  prueba, bloquea iniciar nuevos renders y turnos del productor sin borrar ni ocultar los proyectos
-  del usuario.
+- **RF-17-012 — Descarga e instalación documentadas.** La web de documentación ofrece el `.dmg` de la última versión y explica, con capturas, cómo abrirlo la primera vez sin firma; un amigo con una Mac Apple Silicon limpia llega al chat siguiendo solo esa página.
+- **RF-17-013 — Avisos de licencias.** La app y la web incluyen los avisos de licencia de cada binario, modelo y voz de terceros que se distribuyen (ffmpeg en build LGPL, whisper.cpp, piper y cada voz, Remotion).
 
 ## Riesgos y temas a validar antes de distribuir
 
 | Riesgo | Qué hacer | Cuándo |
 | --- | --- | --- |
-| Uso de la suscripción de Claude desde una app de terceros | Confirmar contra los términos vigentes de Anthropic; validar con Compliance (Ariel Presta) | Antes de `cycle-06` |
-| Licencia comercial de Remotion | Confirmar la licencia que corresponde a distribuir la app | Antes de `cycle-06` |
+| Uso de la suscripción de Claude desde una app de terceros | Cada amigo usa su propio CLI `claude` logueado en su máquina, sin uso comercial; se vuelve a evaluar si la app se abre al público | Si se publica |
+| Licencia de Remotion | Uso personal y no comercial: licencia gratuita; se vuelve a evaluar si se publica | Si se publica |
 | ffmpeg GPL vs LGPL | Empaquetar una build LGPL o asumir las obligaciones de la GPL | `cycle-03` |
 | Licencias de las voces de piper | Revisar voz por voz; excluir las no comerciales | `cycle-03` |
 | Tamaño y descarga de modelos (~0,6 GB de whisper más voces y Chromium) | Descarga reanudable con verificación | `cycle-03` |
 | better-sqlite3 es nativo | Recompilar para Electron con `@electron/rebuild` en el build | `cycle-02`/`cycle-03` |
 | Calidad de tool calling en OpenRouter | Lista curada, probada con un smoke real por modelo | `cycle-04` |
-| Trial evitable (es local) | Aceptado para un trial; la verificación remota va con la spec de pago | `cycle-06` |
-| Cuenta de Apple Developer (USD 99/año) | Alta a cargo del dev | Antes de `cycle-06` |
+| Primera apertura sin firma | Documentada paso a paso en la web, con capturas | `cycle-06` |
+| Repo público de distribución | Crearlo lo confirma el dev en `cycle-06` antes de publicar nada | `cycle-06` |
 
 ## Criterios de Aceptación
 
 Cada ciclo fija los suyos en `cycles/cycle-XX/plan.md`. La spec cierra cuando:
 
-1. Una Mac Apple Silicon limpia instala el `.dmg` firmado, completa el primer arranque y produce un
+1. Una Mac Apple Silicon limpia descarga el `.dmg` desde la web de documentación, lo abre siguiendo sus instrucciones, completa el primer arranque y produce un
    MP4 desde el chat **con cada uno de los dos motores**, usando material arrastrado al chat.
 2. Un prompt de inyección sobre el productor que pide leer `~/.ssh` o hacer un request a un host
    externo termina sin haber ejecutado ninguna de las dos cosas, con evidencia en el log del turno.

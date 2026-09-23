@@ -153,9 +153,10 @@
         "apps/render-api",
         "apps/web",
         "libs/producer-tools",
-        "libs/local-store"
+        "libs/local-store",
+        "apps/docs-site"
       ],
-      "description": "App de escritorio macOS (Apple Silicon) autocontenida: shell Electron con render-api embebido y binarios incluidos, herramientas del productor como servidor MCP compartido por el CLI claude del cliente y OpenRouter (Vercel AI SDK), store SQLite híbrido, interfaz centrada en el chat con arrastrar y soltar, firma, notarización y trial"
+      "description": "App de escritorio macOS (Apple Silicon) autocontenida para repartir entre amigos: shell Electron con render-api embebido y binarios incluidos, herramientas del productor como servidor MCP compartido por el CLI claude de cada usuario y OpenRouter (Vercel AI SDK), store SQLite híbrido, interfaz centrada en el chat con arrastrar y soltar, .dmg sin firmar en GitHub Releases y web de documentación en GitHub Pages"
     }
   ],
   "pending_modules": [
