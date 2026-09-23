@@ -23,10 +23,14 @@
       "estimation_hours": 5,
       "story_points": 3,
       "depends_on": [],
-      "status": "pending",
+      "status": "done",
       "files": [
         "libs/local-store/project.json",
         "libs/local-store/package.json",
+        "libs/local-store/tsconfig.json",
+        "libs/local-store/tsconfig.lib.json",
+        "libs/local-store/tsconfig.spec.json",
+        "libs/local-store/vite.config.ts",
         "libs/local-store/src/index.ts",
         "libs/local-store/src/database/open-studio-database.ts",
         "libs/local-store/src/database/open-studio-database.spec.ts",
@@ -35,9 +39,18 @@
         "libs/local-store/src/schema/studio-schema.ts",
         "package.json",
         "pnpm-lock.yaml",
-        "pnpm-workspace.yaml",
-        "tsconfig.base.json"
-      ]
+        "pnpm-workspace.yaml"
+      ],
+      "usage": {
+        "provider_model": "claude/sonnet",
+        "effort": "medium",
+        "agent": "implementor-back",
+        "tokens_in": 95000,
+        "tokens_out": 12000,
+        "approx": true,
+        "source": "declared-estimate",
+        "recorded_at": "2026-09-23"
+      }
     },
     {
       "id": "TASK-002",
@@ -52,7 +65,7 @@
       "depends_on": [
         "TASK-001"
       ],
-      "status": "pending",
+      "status": "done",
       "files": [
         "libs/local-store/src/repositories/projects-repository.ts",
         "libs/local-store/src/repositories/organization-repository.ts",
@@ -63,8 +76,20 @@
         "libs/local-store/src/repositories/organization-repository.spec.ts",
         "libs/local-store/src/repositories/producer-repository.spec.ts",
         "libs/local-store/src/repositories/jobs-repository.spec.ts",
-        "libs/local-store/src/repositories/settings-repository.spec.ts"
-      ]
+        "libs/local-store/src/repositories/settings-repository.spec.ts",
+        "libs/local-store/src/index.ts",
+        "sdd/specs/spec-e-burgos-017-desktop-app/cycles/cycle-02/plan.md"
+      ],
+      "usage": {
+        "provider_model": "claude/sonnet",
+        "effort": "medium",
+        "agent": "implementor-back",
+        "tokens_in": 110000,
+        "tokens_out": 15000,
+        "approx": true,
+        "source": "declared-estimate",
+        "recorded_at": "2026-09-23"
+      }
     },
     {
       "id": "TASK-003",

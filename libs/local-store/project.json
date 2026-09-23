@@ -1,0 +1,27 @@
+{
+  "name": "local-store",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "libs/local-store/src",
+  "projectType": "library",
+  "tags": ["scope:engine", "type:feature"],
+  "targets": {
+    "lint": {
+      "executor": "@nx/eslint:lint"
+    },
+    "test": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "vitest run --coverage --passWithNoTests",
+        "cwd": "libs/local-store"
+      }
+    },
+    "build": {
+      "executor": "nx:run-commands",
+      "outputs": ["{workspaceRoot}/dist/out-tsc/libs/local-store"],
+      "options": {
+        "command": "tsc -p tsconfig.lib.json",
+        "cwd": "libs/local-store"
+      }
+    }
+  }
+}

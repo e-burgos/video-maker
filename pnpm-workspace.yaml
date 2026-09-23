@@ -7,5 +7,6 @@ packages:
 # Add a package here only after checking why it needs a postinstall.
 onlyBuiltDependencies:
   - '@swc/core'
+  - better-sqlite3
   - esbuild
   - nx

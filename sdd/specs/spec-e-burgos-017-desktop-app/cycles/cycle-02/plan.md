@@ -113,3 +113,13 @@ documentos: la base no es excusa para confiar en lo que devuelve.
 | Escribir el progreso de cada frame en la base frena el render | Progreso con tope de 1 escritura por segundo por job; los cambios de estado se escriben siempre |
 | Dos procesos abren la misma base (CLI y API) | WAL más `busy_timeout`; la CLI no abre la base en este ciclo |
 | Un endpoint cambia su payload sin querer | Cada handler migrado asera `Object.keys().sort()` contra la forma actual antes y después |
+
+## Pendiente de documentar en contexto
+
+- **TASK-001/002 — `producer_messages` gana una columna `model` (nullable) no listada en la
+  tabla Schema de este documento.** `ProducerMessage.model` (`apps/render-api/src/producer/producer-documents.ts`)
+  se escribe hoy en cada mensaje de assistant (`run-producer-turn.ts` línea ~200, el modelo del
+  turno) y `US-017-103` exige que `GET …/producer` devuelva "la misma forma que hoy". Sin la
+  columna, `getConversation` no podía reconstruir ese campo. Migración 1 y `studio-schema.ts`
+  quedaron con la columna incluida desde el arranque; el resto de la tabla (FKs, `UNIQUE (slug, seq)`
+  implementado como índice único nombrado, índice de `jobs`) se implementó tal cual el plan.
