@@ -361,6 +361,20 @@
           "status": "completed",
           "tasks_total": 9,
           "tasks_done": 9
+        },
+        "cycle-03": {
+          "file": "sdd/specs/spec-e-burgos-017-desktop-app/cycles/cycle-03/tasks.json",
+          "module": "desktop-app",
+          "apps": [
+            "apps/desktop",
+            "apps/render-api",
+            "libs/media-local",
+            "libs/composition-remotion",
+            "libs/producer-tools"
+          ],
+          "status": "in-progress",
+          "tasks_total": 9,
+          "tasks_done": 0
         }
       }
     }

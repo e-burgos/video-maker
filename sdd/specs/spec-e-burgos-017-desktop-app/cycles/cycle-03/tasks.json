@@ -1,0 +1,218 @@
+{
+  "$schema": "../../../../schemas/cycle-tasks.schema.json",
+  "spec": "spec-e-burgos-017-desktop-app",
+  "cycle": 3,
+  "module": "desktop-app",
+  "apps": [
+    "apps/desktop",
+    "apps/render-api",
+    "libs/media-local",
+    "libs/composition-remotion",
+    "libs/producer-tools"
+  ],
+  "flow": "lite",
+  "user_stories_generated": true,
+  "prerequisites": {
+    "tasks_generated": true
+  },
+  "tasks": [
+    {
+      "id": "TASK-001",
+      "title": "Packaging spike: prove each bundled piece standalone on Apple Silicon (static ffmpeg, whisper.cpp static Metal build, standalone piper with the three voices, Remotion from a prebuilt bundle with a downloaded chrome-headless-shell, better-sqlite3 rebuilt for Electron) and record the decisions",
+      "user_stories": [
+        "US-017-201"
+      ],
+      "estimation_hours": 6,
+      "story_points": 5,
+      "depends_on": [],
+      "status": "pending",
+      "files": [
+        "sdd/specs/spec-e-burgos-017-desktop-app/cycles/cycle-03/artifacts/packaging-spike.md"
+      ]
+    },
+    {
+      "id": "TASK-002",
+      "title": "Reproducible vendor script that downloads or builds the pinned binaries with sha256 checks into apps/desktop/vendor/darwin-arm64 and writes a manifest with versions and licenses",
+      "user_stories": [
+        "US-017-201"
+      ],
+      "estimation_hours": 5,
+      "story_points": 3,
+      "depends_on": [
+        "TASK-001"
+      ],
+      "status": "pending",
+      "files": [
+        "apps/desktop/scripts/vendor-binaries.mjs",
+        "apps/desktop/vendor/manifest.json",
+        "apps/desktop/vendor/THIRD_PARTY_NOTICES.md",
+        ".gitignore"
+      ]
+    },
+    {
+      "id": "TASK-003",
+      "title": "Resolve binaries from a bundled directory and models from the app data directory, and render from a prebuilt Remotion bundle with a configured browser executable",
+      "user_stories": [
+        "US-017-201",
+        "US-017-203"
+      ],
+      "estimation_hours": 6,
+      "story_points": 5,
+      "depends_on": [
+        "TASK-001"
+      ],
+      "status": "pending",
+      "files": [
+        "libs/media-local/src/binaries/binaries.ts",
+        "libs/media-local/src/binaries/binaries.spec.ts",
+        "libs/composition-remotion/src/render.ts",
+        "libs/composition-remotion/src/render.spec.ts",
+        "apps/render-api/src/config/media-config.ts",
+        "apps/render-api/src/config/media-config.spec.ts",
+        "apps/render-api/src/deps/node-render-api-dependencies.ts"
+      ]
+    },
+    {
+      "id": "TASK-004",
+      "title": "Production build of render-api and of the studio MCP server as plain JavaScript, static serving of the web build, and a per-launch token plus Host check on the local API",
+      "user_stories": [
+        "US-017-202",
+        "US-017-205"
+      ],
+      "estimation_hours": 7,
+      "story_points": 5,
+      "depends_on": [
+        "TASK-003"
+      ],
+      "status": "pending",
+      "files": [
+        "apps/render-api/project.json",
+        "libs/producer-tools/project.json",
+        "apps/render-api/src/http/static-web-handler.ts",
+        "apps/render-api/src/http/static-web-handler.spec.ts",
+        "apps/render-api/src/http/local-access-guard.ts",
+        "apps/render-api/src/http/local-access-guard.spec.ts",
+        "apps/render-api/src/http/handle-request.ts",
+        "apps/render-api/src/config/server-config.ts",
+        "apps/render-api/src/config/server-config.spec.ts",
+        "libs/producer-tools/src/mcp/studio-mcp-launch.ts",
+        "libs/producer-tools/src/mcp/studio-mcp-launch.spec.ts"
+      ]
+    },
+    {
+      "id": "TASK-005",
+      "title": "Electron main process: app data directories, a free local port, render-api spawned with Electron as Node in its own process group and killed as a group on quit or crash, the login-shell PATH for finding the claude CLI, and the main window",
+      "user_stories": [
+        "US-017-202",
+        "US-017-204"
+      ],
+      "estimation_hours": 7,
+      "story_points": 5,
+      "depends_on": [
+        "TASK-004"
+      ],
+      "status": "pending",
+      "files": [
+        "apps/desktop/project.json",
+        "apps/desktop/package.json",
+        "apps/desktop/src/main/main.ts",
+        "apps/desktop/src/main/app-paths.ts",
+        "apps/desktop/src/main/app-paths.spec.ts",
+        "apps/desktop/src/main/render-api-process.ts",
+        "apps/desktop/src/main/render-api-process.spec.ts",
+        "apps/desktop/src/main/login-shell-path.ts",
+        "apps/desktop/src/main/login-shell-path.spec.ts",
+        "apps/desktop/src/main/free-port.ts",
+        "package.json",
+        "pnpm-lock.yaml",
+        "tsconfig.base.json"
+      ]
+    },
+    {
+      "id": "TASK-006",
+      "title": "First-run setup window: resumable model and browser downloads with size and sha256 checks and progress, choice of the projects folder, and detection of the claude CLI with install and login guidance",
+      "user_stories": [
+        "US-017-203",
+        "US-017-204"
+      ],
+      "estimation_hours": 7,
+      "story_points": 5,
+      "depends_on": [
+        "TASK-005"
+      ],
+      "status": "pending",
+      "files": [
+        "apps/desktop/src/main/model-downloads.ts",
+        "apps/desktop/src/main/model-downloads.spec.ts",
+        "apps/desktop/src/main/setup-state.ts",
+        "apps/desktop/src/main/setup-state.spec.ts",
+        "apps/desktop/src/main/claude-cli-check.ts",
+        "apps/desktop/src/main/claude-cli-check.spec.ts",
+        "apps/desktop/src/setup/setup.html",
+        "apps/desktop/src/setup/setup.ts",
+        "apps/desktop/src/preload/setup-preload.ts"
+      ]
+    },
+    {
+      "id": "TASK-007",
+      "title": "Package an unsigned arm64 .dmg with one command: electron-builder config, flattened production dependencies, unpacked native modules and vendor binaries, and the third-party notices inside the app",
+      "user_stories": [
+        "US-017-206"
+      ],
+      "estimation_hours": 6,
+      "story_points": 5,
+      "depends_on": [
+        "TASK-002",
+        "TASK-006"
+      ],
+      "status": "pending",
+      "files": [
+        "apps/desktop/electron-builder.yml",
+        "apps/desktop/scripts/build-desktop.mjs",
+        "package.json"
+      ]
+    },
+    {
+      "id": "TASK-008",
+      "title": "Real check: build the .dmg, mark it as downloaded, install and open it as a friend would, complete the first run in a fresh app data directory, produce a video with the Tutorial recipe, quit with no orphan processes and reopen with the data intact",
+      "user_stories": [
+        "US-017-201",
+        "US-017-202",
+        "US-017-203",
+        "US-017-204",
+        "US-017-205",
+        "US-017-206"
+      ],
+      "estimation_hours": 5,
+      "story_points": 3,
+      "depends_on": [
+        "TASK-007"
+      ],
+      "status": "pending",
+      "files": [
+        "sdd/specs/spec-e-burgos-017-desktop-app/cycles/cycle-03/artifacts/desktop-smoke.md"
+      ]
+    },
+    {
+      "id": "TASK-009",
+      "title": "Close the cycle: context fragments, READMEs, constitution rows and validation",
+      "user_stories": [
+        "US-017-206"
+      ],
+      "estimation_hours": 2,
+      "story_points": 2,
+      "depends_on": [
+        "TASK-008"
+      ],
+      "status": "pending",
+      "files": [
+        "sdd/context/apps/desktop/constitution.md",
+        "sdd/context/apps/desktop/context_prompt.md",
+        "sdd/context/apps/render-api/updates/2026-09-23-spec-e-burgos-017-desktop-app-cycle-03.md",
+        "sdd/context/constitution.md",
+        "sdd/context/context_prompt.md",
+        "apps/desktop/README.md"
+      ]
+    }
+  ]
+}

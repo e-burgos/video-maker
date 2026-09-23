@@ -137,7 +137,7 @@ El orden es deliberado: `cycle-01` quita el shell del agente y define el contrat
   proyecto; el agente propone un rol por archivo a partir de sus metadatos (duración, resolución,
   presencia de audio, canal alfa, nombre) y el rol se persiste solo cuando el usuario lo confirma.
 - **RF-17-012 — Descarga e instalación documentadas.** La web de documentación ofrece el `.dmg` de la última versión y explica, con capturas, cómo abrirlo la primera vez sin firma; un amigo con una Mac Apple Silicon limpia llega al chat siguiendo solo esa página.
-- **RF-17-013 — Avisos de licencias.** La app y la web incluyen los avisos de licencia de cada binario, modelo y voz de terceros que se distribuyen (ffmpeg en build LGPL, whisper.cpp, piper y cada voz, Remotion).
+- **RF-17-013 — Avisos de licencias.** La app y la web incluyen los avisos de licencia de cada binario, modelo y voz de terceros que se distribuyen (ffmpeg GPL con `libx264`, whisper.cpp, piper y cada voz, Remotion).
 
 ## Riesgos y temas a validar antes de distribuir
 
@@ -145,7 +145,7 @@ El orden es deliberado: `cycle-01` quita el shell del agente y define el contrat
 | --- | --- | --- |
 | Uso de la suscripción de Claude desde una app de terceros | Cada amigo usa su propio CLI `claude` logueado en su máquina, sin uso comercial; se vuelve a evaluar si la app se abre al público | Si se publica |
 | Licencia de Remotion | Uso personal y no comercial: licencia gratuita; se vuelve a evaluar si se publica | Si se publica |
-| ffmpeg GPL vs LGPL | Empaquetar una build LGPL o asumir las obligaciones de la GPL | `cycle-03` |
+| ffmpeg es GPL (el pipeline usa `libx264`) | Distribuir la build estática con su aviso de licencia y el link a su código fuente (encontrado al abrir `cycle-03`) | `cycle-03` |
 | Licencias de las voces de piper | Revisar voz por voz; excluir las no comerciales | `cycle-03` |
 | Tamaño y descarga de modelos (~0,6 GB de whisper más voces y Chromium) | Descarga reanudable con verificación | `cycle-03` |
 | better-sqlite3 es nativo | Recompilar para Electron con `@electron/rebuild` en el build | `cycle-02`/`cycle-03` |

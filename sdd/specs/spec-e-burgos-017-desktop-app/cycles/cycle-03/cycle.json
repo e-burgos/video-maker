@@ -1,0 +1,35 @@
+{
+  "$schema": "../../../../schemas/cycle.schema.json",
+  "cycle": 3,
+  "module": "desktop-app",
+  "spec": "spec-e-burgos-017-desktop-app",
+  "apps": [
+    "apps/desktop",
+    "apps/render-api",
+    "libs/media-local",
+    "libs/composition-remotion",
+    "libs/producer-tools"
+  ],
+  "phase": "electron-shell",
+  "flow": "lite",
+  "objectives": [
+    "Un .dmg sin firmar para Apple Silicon que se instala y abre sin terminal, Homebrew ni el repo",
+    "ffmpeg, whisper y piper viajan adentro de la app y los modelos se descargan en el primer arranque con verificación",
+    "render-api y el servidor MCP corren como JavaScript con el Node de Electron, en un grupo de procesos que se mata entero al cerrar",
+    "La API local exige un token por arranque y un Host local, y la app encuentra el CLI claude del usuario aunque se abra desde el Finder"
+  ],
+  "status": "in-progress",
+  "started_at": "2026-09-23",
+  "completed_at": null,
+  "documents": {
+    "plan": "sdd/specs/spec-e-burgos-017-desktop-app/cycles/cycle-03/plan.md",
+    "tasks": "sdd/specs/spec-e-burgos-017-desktop-app/cycles/cycle-03/tasks.json"
+  },
+  "artifacts": [],
+  "metrics": null,
+  "tables_created": [],
+  "endpoints_implemented": [],
+  "components_created": [],
+  "issues_found": [],
+  "reviewer_report": null
+}
