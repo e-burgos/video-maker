@@ -417,6 +417,25 @@ export function createNodeRenderApiDependencies(
       };
     },
 
+    buildKenBurnsClip: async ({ photoPath, frames, fps, outPath, projectRoot }) => {
+      const { buildKenBurnsClip: runBuildKenBurnsClip, ExecaCommandRunner } = await loadMediaLocal();
+      const { ffmpeg } = await loadBinaries();
+      await runBuildKenBurnsClip(photoPath, frames, outPath, new ExecaCommandRunner(), {
+        fps,
+        ffmpegPath: ffmpeg,
+        runOptions: { cwd: projectRoot },
+      });
+    },
+
+    concatVideoClips: async ({ listPath, outPath, projectRoot }) => {
+      const { concatVideoClips: runConcatVideoClips, ExecaCommandRunner } = await loadMediaLocal();
+      const { ffmpeg } = await loadBinaries();
+      await runConcatVideoClips(listPath, outPath, new ExecaCommandRunner(), {
+        ffmpegPath: ffmpeg,
+        runOptions: { cwd: projectRoot },
+      });
+    },
+
     randomId: () => randomUUID(),
 
     clock: { nowIso: () => new Date().toISOString() },

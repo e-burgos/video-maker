@@ -645,7 +645,7 @@ describe('handleCreateRenderJob', () => {
       expect(runtime.jobs.listBySlug('smoke-ingest')).toEqual([]);
     });
 
-    it('rejects an unknown kind and names the four valid ones', async () => {
+    it('rejects an unknown kind and names the five valid ones', async () => {
       const { deps, runtime } = storyboardHarness();
 
       await expect(
@@ -658,7 +658,7 @@ describe('handleCreateRenderJob', () => {
         ),
       ).rejects.toMatchObject({
         code: 'JOB_KIND_INVALID',
-        expected: "'render', 'montage', 'storyboard' or 'voice'",
+        expected: "'render', 'montage', 'storyboard', 'voice' or 'photo-aroll'",
       });
       expect(runtime.jobs.listBySlug('smoke-ingest')).toEqual([]);
     });
@@ -924,6 +924,118 @@ describe('handleCreateRenderJob', () => {
 
       await runtime.jobs.whenIdle();
       expect(runtime.jobs.get(first.id)?.state).toBe('succeeded');
+    });
+  });
+
+  describe('photo-aroll job creation', () => {
+    const MANIFEST = {
+      schemaVersion: 1,
+      source: 'script',
+      language: 'es',
+      voiceId: 'es_AR-daniela-high',
+      gapMs: 500,
+      path: 'work/voice/voice.wav',
+      wordsPath: 'work/voice/voice.words.json',
+      durationMs: 6000,
+      sampleRate: 48000,
+      updatedAt: '2026-09-23T00:00:00.000Z',
+      lines: [
+        { index: 1, text: 'Uno.', path: 'work/voice/sources/line-01.wav', startMs: 0, durationMs: 2000 },
+        { index: 2, text: 'Dos.', path: 'work/voice/sources/line-02.wav', startMs: 3000, durationMs: 2000 },
+      ],
+    };
+
+    function photoArollHarness(seed?: FakeObjectStorageSeed) {
+      const callLog = createCallLog();
+      const storage = createFakeObjectStorage(callLog, {
+        directories: [`${STORE.mediaRoot}/smoke-ingest`],
+        files: [
+          { path: `${STORE.mediaRoot}/smoke-ingest/work/voice/script-manifest.json`, contents: JSON.stringify(MANIFEST) },
+          { path: `${STORE.mediaRoot}/smoke-ingest/work/voice/voice.wav`, contents: 'wav-bytes' },
+          { path: `${STORE.mediaRoot}/smoke-ingest/raw/images/1.jpg`, contents: 'jpeg-bytes' },
+        ],
+        ...(seed ?? {}),
+      });
+      const deps = createFakeRenderApiDependencies(callLog, { storage });
+      return { deps, storage, runtime: createRenderApiRuntime(deps) };
+    }
+
+    it('answers 202 with kind photo-aroll and the same job envelope as the other kinds', async () => {
+      const { deps, runtime } = photoArollHarness();
+
+      const response = await handleCreateRenderJob(
+        deps,
+        STORE,
+        { slug: 'smoke-ingest' },
+        jsonBodyRequest('smoke-ingest', { kind: 'photo-aroll', photos: ['raw/images/1.jpg'], output: 'ad.mp4' }),
+        runtime,
+      );
+      const body = response.body as Job;
+
+      expect(response.status).toBe(202);
+      expect(response.headers.location).toBe(`/jobs/${body.id}`);
+      expect(body.kind).toBe('photo-aroll');
+      expect(Object.keys(body).sort()).toEqual(RENDER_JOB_RESPONSE_KEYS);
+
+      await runtime.jobs.whenIdle();
+      const finished = runtime.jobs.get(body.id);
+      expect(finished?.state).toBe('succeeded');
+      expect(finished?.report).toMatchObject({ path: 'raw/aroll/ad.mp4', clips: 2 });
+    });
+
+    it('rejects when work/voice/voice.wav has not been synthesized yet', async () => {
+      const callLog = createCallLog();
+      const storage = createFakeObjectStorage(callLog, { directories: [`${STORE.mediaRoot}/smoke-ingest`] });
+      const deps = createFakeRenderApiDependencies(callLog, { storage });
+      const runtime = createRenderApiRuntime(deps);
+
+      await expect(
+        handleCreateRenderJob(
+          deps,
+          STORE,
+          { slug: 'smoke-ingest' },
+          jsonBodyRequest('smoke-ingest', { kind: 'photo-aroll', photos: ['raw/images/1.jpg'], output: 'ad.mp4' }),
+          runtime,
+        ),
+      ).rejects.toMatchObject({ code: 'MONTAGE_VOICE_TRACK_NOT_FOUND' });
+      expect(runtime.jobs.listBySlug('smoke-ingest')).toEqual([]);
+    });
+
+    it('rejects when raw/aroll/<output> already exists, with ASSET_EXISTS, and registers no job', async () => {
+      const { deps, runtime } = photoArollHarness({
+        files: [
+          { path: `${STORE.mediaRoot}/smoke-ingest/work/voice/script-manifest.json`, contents: JSON.stringify(MANIFEST) },
+          { path: `${STORE.mediaRoot}/smoke-ingest/work/voice/voice.wav`, contents: 'wav-bytes' },
+          { path: `${STORE.mediaRoot}/smoke-ingest/raw/images/1.jpg`, contents: 'jpeg-bytes' },
+          { path: `${STORE.mediaRoot}/smoke-ingest/raw/aroll/ad.mp4`, contents: 'already there' },
+        ],
+      });
+
+      await expect(
+        handleCreateRenderJob(
+          deps,
+          STORE,
+          { slug: 'smoke-ingest' },
+          jsonBodyRequest('smoke-ingest', { kind: 'photo-aroll', photos: ['raw/images/1.jpg'], output: 'ad.mp4' }),
+          runtime,
+        ),
+      ).rejects.toMatchObject({ code: 'ASSET_EXISTS' });
+      expect(runtime.jobs.listBySlug('smoke-ingest')).toEqual([]);
+    });
+
+    it('rejects invalid input (e.g. no photos) with PHOTO_AROLL_INPUT_INVALID and registers no job', async () => {
+      const { deps, runtime } = photoArollHarness();
+
+      await expect(
+        handleCreateRenderJob(
+          deps,
+          STORE,
+          { slug: 'smoke-ingest' },
+          jsonBodyRequest('smoke-ingest', { kind: 'photo-aroll', photos: [], output: 'ad.mp4' }),
+          runtime,
+        ),
+      ).rejects.toMatchObject({ code: 'PHOTO_AROLL_INPUT_INVALID' });
+      expect(runtime.jobs.listBySlug('smoke-ingest')).toEqual([]);
     });
   });
 });

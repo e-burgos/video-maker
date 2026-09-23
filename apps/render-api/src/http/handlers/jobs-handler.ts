@@ -1,3 +1,5 @@
+import { toAbsolutePath } from '@video-maker/auto-montage';
+
 import type { StoreConfig } from '../../config/store-config';
 import type { RenderApiDependencies } from '../../deps/render-api-dependencies';
 import { PipelineStageError } from '../../errors/pipeline-stage-error';
@@ -12,6 +14,7 @@ import {
   parseMontageVoice,
 } from '../../jobs/montage-job-params';
 import { parseJobModel } from '../../jobs/job-model-params';
+import { parsePhotoArollJobInput } from '../../jobs/photo-aroll-job-params';
 import { parseStoryboardInput, parseStoryboardOverwrite } from '../../jobs/storyboard-job-params';
 import { parseVoiceJobInput } from '../../jobs/voice-job-params';
 import { assertVoiceTracksNotPersisted, selectVoiceScenes } from '../../voice/select-voice-scenes';
@@ -49,7 +52,13 @@ function resolveJobKind(value: unknown): JobKind | 'invalid' {
   if (raw === undefined) {
     return 'render';
   }
-  if (raw === 'render' || raw === 'montage' || raw === 'storyboard' || raw === 'voice') {
+  if (
+    raw === 'render' ||
+    raw === 'montage' ||
+    raw === 'storyboard' ||
+    raw === 'voice' ||
+    raw === 'photo-aroll'
+  ) {
     return raw;
   }
   return 'invalid';
@@ -87,7 +96,7 @@ export async function handleCreateRenderJob(
     throw new PipelineStageError({
       code: 'JOB_KIND_INVALID',
       stage: null,
-      expected: "'render', 'montage', 'storyboard' or 'voice'",
+      expected: "'render', 'montage', 'storyboard', 'voice' or 'photo-aroll'",
     });
   }
 
@@ -165,6 +174,32 @@ export async function handleCreateRenderJob(
       status: 202,
       headers: { 'content-type': JSON_CONTENT_TYPE, location: `/jobs/${voiceJob.id}` },
       body: voiceJob,
+    };
+  }
+
+  if (jobKind === 'photo-aroll') {
+    const input = parsePhotoArollJobInput(bodyObject);
+
+    await assertVoiceScriptTrackPersisted(deps, project);
+
+    const targetPath = `raw/aroll/${input.output}`;
+    if ((await deps.storage.stat(toAbsolutePath(project, targetPath))) !== null) {
+      throw new PipelineStageError({ code: 'ASSET_EXISTS', stage: null, resource: targetPath });
+    }
+
+    const photoArollJob = runtime.jobs.create({
+      kind: 'photo-aroll',
+      slug,
+      projectRoot: project.root,
+      photos: input.photos,
+      output: input.output,
+      fps: input.fps,
+    });
+
+    return {
+      status: 202,
+      headers: { 'content-type': JSON_CONTENT_TYPE, location: `/jobs/${photoArollJob.id}` },
+      body: photoArollJob,
     };
   }
 

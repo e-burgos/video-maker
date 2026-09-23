@@ -41,7 +41,7 @@ const MESSAGE_BY_CODE: Readonly<Record<RenderApiErrorCode, string>> = {
   REQUEST_BODY_TOO_LARGE: 'The request body exceeds the configured size limit.',
   RENDER_JOB_NOT_FOUND: 'The requested render job does not exist.',
   RENDER_JOB_NOT_CANCELABLE: 'The render job has already finished and cannot be canceled.',
-  JOB_KIND_INVALID: 'The job kind is not render, montage or storyboard.',
+  JOB_KIND_INVALID: 'The job kind is not render, montage, storyboard, voice or photo-aroll.',
   JOB_MODEL_INVALID: 'The requested model is not one of the models this service allows.',
   MONTAGE_PRESET_INVALID: 'The montage preset is not one of the known preset names.',
   MONTAGE_SEED_INVALID: 'The montage seed is not a non-negative integer.',
@@ -101,6 +101,7 @@ const MESSAGE_BY_CODE: Readonly<Record<RenderApiErrorCode, string>> = {
   ASSET_EXISTS: 'A file already exists at the requested destination.',
   MUSIC_SOURCE_UNAVAILABLE: 'Wikimedia Commons did not answer with a usable response.',
   MUSIC_RESULT_UNKNOWN: 'The music search result id is unknown or its cache entry expired.',
+  PHOTO_AROLL_INPUT_INVALID: 'The photo-aroll job input does not pass validation.',
 };
 
 export function toErrorPayload(value: unknown): RenderApiErrorPayload {

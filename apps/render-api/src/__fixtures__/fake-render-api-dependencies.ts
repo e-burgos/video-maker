@@ -193,6 +193,20 @@ export function createFakeRenderApiDependencies(
       throw new Error('createFakeRenderApiDependencies: no fetchRemote override configured');
     },
 
+    buildKenBurnsClip: async (input) => {
+      callLog.record('buildKenBurnsClip', input);
+      if (overrides?.buildKenBurnsClip) {
+        await overrides.buildKenBurnsClip(input);
+      }
+    },
+
+    concatVideoClips: async (input) => {
+      callLog.record('concatVideoClips', input);
+      if (overrides?.concatVideoClips) {
+        await overrides.concatVideoClips(input);
+      }
+    },
+
     randomId: overrides?.randomId ?? createDeterministicRandomId(),
 
     clock: overrides?.clock ?? { nowIso: () => FIXED_NOW_ISO },

@@ -160,19 +160,45 @@
       "depends_on": [
         "TASK-001"
       ],
-      "status": "pending",
+      "status": "done",
       "files": [
         "apps/render-api/src/jobs/photo-aroll-job-params.ts",
         "apps/render-api/src/jobs/photo-aroll-job-params.spec.ts",
         "apps/render-api/src/jobs/run-photo-aroll-pipeline.ts",
         "apps/render-api/src/jobs/run-photo-aroll-pipeline.spec.ts",
+        "apps/render-api/src/jobs/photo-aroll-job-progress.ts",
+        "apps/render-api/src/jobs/photo-aroll-job-progress.spec.ts",
+        "apps/render-api/src/jobs/photo-aroll-pipeline-observer.ts",
+        "apps/render-api/src/jobs/photo-aroll-pipeline-observer.spec.ts",
         "apps/render-api/src/jobs/render-job.ts",
         "apps/render-api/src/jobs/render-job-queue.ts",
+        "apps/render-api/src/http/handlers/jobs-handler.ts",
+        "apps/render-api/src/http/handlers/jobs-handler.spec.ts",
+        "apps/render-api/src/voice/voice-store.ts",
+        "apps/render-api/src/deps/render-api-dependencies.ts",
+        "apps/render-api/src/deps/node-render-api-dependencies.ts",
+        "apps/render-api/src/__fixtures__/fake-render-api-dependencies.ts",
+        "apps/render-api/src/errors/render-api-error.ts",
+        "apps/render-api/src/errors/http-status-for.ts",
+        "apps/render-api/src/errors/http-status-for.spec.ts",
+        "apps/render-api/src/errors/to-error-payload.ts",
         "libs/media-local/src/ffmpeg/ken-burns-clip.ts",
         "libs/media-local/src/ffmpeg/ken-burns-clip.spec.ts",
+        "libs/media-local/src/ffmpeg/concat-video-clips.ts",
+        "libs/media-local/src/ffmpeg/concat-video-clips.spec.ts",
         "libs/media-local/src/index.ts",
         "sdd/api.json"
-      ]
+      ],
+      "usage": {
+        "tokens_in": 260000,
+        "tokens_out": 34000,
+        "provider_model": "claude/sonnet",
+        "effort": "medium",
+        "agent": "implementor-back",
+        "approx": true,
+        "source": "declared-estimate",
+        "recorded_at": "2026-09-23"
+      }
     },
     {
       "id": "TASK-005",

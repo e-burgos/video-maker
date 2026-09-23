@@ -99,6 +99,7 @@ const STATUS_BY_CODE: Readonly<Record<RenderApiErrorCode, number>> = {
   ASSET_EXISTS: 409,
   MUSIC_SOURCE_UNAVAILABLE: 503,
   MUSIC_RESULT_UNKNOWN: 404,
+  PHOTO_AROLL_INPUT_INVALID: 422,
 };
 
 export function httpStatusFor(code: RenderApiErrorCode): number {

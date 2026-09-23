@@ -105,6 +105,39 @@ export function parseVoiceScriptManifest(value: unknown, relativePath: string): 
   return result.data;
 }
 
+export async function readStoredVoiceScriptManifest(
+  deps: RenderApiDependencies,
+  project: MediaProject,
+): Promise<VoiceScriptManifest> {
+  const relativePath = voiceScriptManifestPath();
+  const absolutePath = toAbsolutePath(project, relativePath);
+
+  if ((await deps.storage.stat(absolutePath)) === null) {
+    throw new PipelineStageError({
+      code: 'MONTAGE_VOICE_TRACK_NOT_FOUND',
+      stage: null,
+      resource: relativePath,
+      expected: 'a voice job with a script before a photo-aroll job',
+    });
+  }
+
+  const raw = await deps.storage.readTextFile(absolutePath);
+
+  let parsedJson: unknown;
+  try {
+    parsedJson = JSON.parse(raw);
+  } catch {
+    throw new PipelineStageError({
+      code: 'VOICE_INVALID',
+      stage: null,
+      resource: relativePath,
+      expected: EXPECTED_SCRIPT_DOCUMENT,
+    });
+  }
+
+  return parseVoiceScriptManifest(parsedJson, relativePath);
+}
+
 export async function writeVoiceScriptManifest(
   deps: RenderApiDependencies,
   project: MediaProject,

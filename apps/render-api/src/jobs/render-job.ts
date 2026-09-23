@@ -27,7 +27,7 @@ export function isTerminalRenderJobState(state: RenderJobState): boolean {
   return TERMINAL_RENDER_JOB_STATES.some((terminal) => terminal === state);
 }
 
-export type JobKind = 'render' | 'montage' | 'storyboard' | 'voice';
+export type JobKind = 'render' | 'montage' | 'storyboard' | 'voice' | 'photo-aroll';
 
 export const MONTAGE_STAGES = ['discover', 'probe', 'transcribe', 'plan'] as const;
 export type MontageStage = (typeof MONTAGE_STAGES)[number];
@@ -37,6 +37,9 @@ export type StoryboardStage = (typeof STORYBOARD_STAGES)[number];
 
 export const VOICE_STAGES = ['synthesize', 'transcribe', 'persist'] as const;
 export type VoiceStage = (typeof VOICE_STAGES)[number];
+
+export const PHOTO_AROLL_STAGES = ['clips', 'concat', 'mux'] as const;
+export type PhotoArollStage = (typeof PHOTO_AROLL_STAGES)[number];
 
 export interface RenderJobProgress {
   readonly stage: RenderPipelineStage;
@@ -62,6 +65,20 @@ export interface VoiceJobProgress {
   readonly processedScenes: number | null;
   readonly totalScenes: number | null;
   readonly percent: number | null;
+}
+
+export interface PhotoArollJobProgress {
+  readonly stage: PhotoArollStage;
+  readonly processedClips: number | null;
+  readonly totalClips: number | null;
+  readonly percent: number | null;
+}
+
+export interface PhotoArollJobReport {
+  readonly path: string;
+  readonly clips: number;
+  readonly frames: number;
+  readonly durationMs: number;
 }
 
 export interface VoiceJobSceneReport {
@@ -171,13 +188,19 @@ export type VoiceJob = JobBase & {
   readonly report: VoiceJobReport | null;
 };
 
-export type Job = RenderJob | MontageJob | StoryboardJob | VoiceJob;
+export type PhotoArollJob = JobBase & {
+  readonly kind: 'photo-aroll';
+  readonly progress: PhotoArollJobProgress | null;
+  readonly report: PhotoArollJobReport | null;
+};
+
+export type Job = RenderJob | MontageJob | StoryboardJob | VoiceJob | PhotoArollJob;
 
 export interface JobSummary {
   readonly id: string;
   readonly kind: JobKind;
   readonly state: RenderJobState;
-  readonly stage: RenderPipelineStage | MontageStage | StoryboardStage | VoiceStage | null;
+  readonly stage: RenderPipelineStage | MontageStage | StoryboardStage | VoiceStage | PhotoArollStage | null;
   readonly errorCode: RenderApiErrorCode | null;
   readonly createdAt: string;
   readonly startedAt: string | null;
@@ -190,7 +213,8 @@ export type CreateJobInput =
   | CreateRenderJobInput
   | CreateMontageJobInput
   | CreateStoryboardJobInput
-  | CreateVoiceJobInput;
+  | CreateVoiceJobInput
+  | CreatePhotoArollJobInput;
 
 export interface CreateRenderJobInput {
   readonly kind: 'render';
@@ -233,10 +257,20 @@ export interface CreateVoiceJobInput {
   readonly gapMs: number;
 }
 
+export interface CreatePhotoArollJobInput {
+  readonly kind: 'photo-aroll';
+  readonly slug: string;
+  readonly projectRoot: string;
+  readonly photos: readonly string[];
+  readonly output: string;
+  readonly fps: number;
+}
+
 export function toJob(record: RenderJob): RenderJob;
 export function toJob(record: MontageJob): MontageJob;
 export function toJob(record: StoryboardJob): StoryboardJob;
 export function toJob(record: VoiceJob): VoiceJob;
+export function toJob(record: PhotoArollJob): PhotoArollJob;
 export function toJob(record: Job): Job;
 export function toJob(record: Job): Job {
   switch (record.kind) {
@@ -284,6 +318,19 @@ export function toJob(record: Job): Job {
         id: record.id,
         slug: record.slug,
         kind: 'voice',
+        state: record.state,
+        createdAt: record.createdAt,
+        startedAt: record.startedAt,
+        finishedAt: record.finishedAt,
+        progress: record.progress,
+        report: record.report,
+        error: record.error,
+      };
+    case 'photo-aroll':
+      return {
+        id: record.id,
+        slug: record.slug,
+        kind: 'photo-aroll',
         state: record.state,
         createdAt: record.createdAt,
         startedAt: record.startedAt,

@@ -102,6 +102,24 @@ export interface ExtractFrameInput {
 
 export type ExtractFramePort = (input: ExtractFrameInput) => Promise<void>;
 
+export interface BuildKenBurnsClipInput {
+  readonly photoPath: string;
+  readonly frames: number;
+  readonly fps: number;
+  readonly outPath: string;
+  readonly projectRoot: string;
+}
+
+export type BuildKenBurnsClipPort = (input: BuildKenBurnsClipInput) => Promise<void>;
+
+export interface ConcatVideoClipsInput {
+  readonly listPath: string;
+  readonly outPath: string;
+  readonly projectRoot: string;
+}
+
+export type ConcatVideoClipsPort = (input: ConcatVideoClipsInput) => Promise<void>;
+
 export type ResolveMontageBinariesPort = () => Promise<ResolvedBinaries>;
 
 export interface AiAgentRequest {
@@ -232,6 +250,8 @@ export interface RenderApiDependencies {
   readonly probeAsset: ProbeAssetPort;
   readonly extractFrame: ExtractFramePort;
   readonly fetchRemote: FetchRemotePort;
+  readonly buildKenBurnsClip: BuildKenBurnsClipPort;
+  readonly concatVideoClips: ConcatVideoClipsPort;
   readonly randomId: RandomIdPort;
   readonly clock: Clock;
   readonly logger: Logger;

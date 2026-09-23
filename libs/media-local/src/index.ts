@@ -93,6 +93,22 @@ export {
 export type { ExtractFrameOptions } from './ffmpeg/extract-frame';
 
 export {
+  buildKenBurnsClip,
+  DEFAULT_KEN_BURNS_FPS,
+  DEFAULT_KEN_BURNS_MAX_ZOOM,
+  DEFAULT_KEN_BURNS_OUTPUT_HEIGHT,
+  DEFAULT_KEN_BURNS_OUTPUT_WIDTH,
+  DEFAULT_KEN_BURNS_SCALE_HEIGHT,
+  DEFAULT_KEN_BURNS_SCALE_WIDTH,
+  DEFAULT_KEN_BURNS_ZOOM_STEP,
+  kenBurnsFilter,
+} from './ffmpeg/ken-burns-clip';
+export type { BuildKenBurnsClipOptions } from './ffmpeg/ken-burns-clip';
+
+export { concatVideoClips } from './ffmpeg/concat-video-clips';
+export type { ConcatVideoClipsOptions } from './ffmpeg/concat-video-clips';
+
+export {
   concatSpeechFilterGraph,
   concatSpeechSegments,
   DEFAULT_CONCAT_SPEECH_CHANNELS,

@@ -16,6 +16,10 @@ import { isVoicePipelineCanceled } from './voice-pipeline-observer';
 import type { VoicePipelineObserver } from './voice-pipeline-observer';
 import { isMontagePipelineCanceled } from './montage-pipeline-observer';
 import type { MontagePipelineObserver } from './montage-pipeline-observer';
+import { mergePhotoArollJobProgress, startPhotoArollJobStage } from './photo-aroll-job-progress';
+import { isPhotoArollPipelineCanceled } from './photo-aroll-pipeline-observer';
+import type { PhotoArollPipelineObserver } from './photo-aroll-pipeline-observer';
+import { runPhotoArollPipeline } from './run-photo-aroll-pipeline';
 import type { RenderPipelineObserver } from '../pipeline/render-pipeline-observer';
 import { isRenderPipelineCanceled } from '../pipeline/render-pipeline-observer';
 import type { RenderPipelineReport } from '../pipeline/run-render-pipeline';
@@ -27,6 +31,8 @@ import type {
   Job,
   MontageJobProgress,
   MontageJobReport,
+  PhotoArollJobProgress,
+  PhotoArollJobReport,
   RenderJobProgress,
   RenderJobState,
   StoryboardJobProgress,
@@ -109,7 +115,16 @@ interface VoiceJobRecord extends JobRecordBase {
   report: VoiceJobReport | null;
 }
 
-type JobRecord = RenderJobRecord | MontageJobRecord | StoryboardJobRecord | VoiceJobRecord;
+interface PhotoArollJobRecord extends JobRecordBase {
+  readonly kind: 'photo-aroll';
+  readonly photos: readonly string[];
+  readonly output: string;
+  readonly fps: number;
+  progress: PhotoArollJobProgress | null;
+  report: PhotoArollJobReport | null;
+}
+
+type JobRecord = RenderJobRecord | MontageJobRecord | StoryboardJobRecord | VoiceJobRecord | PhotoArollJobRecord;
 
 export function createRenderJobQueue(deps: RenderApiDependencies): RenderJobQueue {
   const records = new Map<string, JobRecord>();
@@ -274,6 +289,38 @@ export function createRenderJobQueue(deps: RenderApiDependencies): RenderJobQueu
     settle(record, report, failure);
   }
 
+  async function runPhotoArollJob(record: PhotoArollJobRecord): Promise<void> {
+    const observer: PhotoArollPipelineObserver = {
+      stageStarted: (stage) => {
+        record.progress = startPhotoArollJobStage(record.progress, stage);
+      },
+      clipProcessed: (totalClips) => {
+        record.progress = mergePhotoArollJobProgress(record.progress, totalClips);
+      },
+      cancellationRequested: () => record.state === 'canceling',
+    };
+
+    let report: PhotoArollJobReport | null = null;
+    let failure: RenderApiErrorPayload | null = null;
+
+    try {
+      report = await runPhotoArollPipeline(
+        {
+          project: resolveMediaProject(record.projectRoot),
+          photos: record.photos,
+          output: record.output,
+          fps: record.fps,
+        },
+        deps,
+        observer,
+      );
+    } catch (cause) {
+      failure = isPhotoArollPipelineCanceled(cause) ? null : toErrorPayload(cause);
+    }
+
+    settle(record, report, failure);
+  }
+
   async function runJob(record: JobRecord): Promise<void> {
     switch (record.kind) {
       case 'render':
@@ -287,6 +334,9 @@ export function createRenderJobQueue(deps: RenderApiDependencies): RenderJobQueu
         break;
       case 'voice':
         await runVoiceJob(record);
+        break;
+      case 'photo-aroll':
+        await runPhotoArollJob(record);
         break;
     }
 
@@ -363,6 +413,16 @@ export function createRenderJobQueue(deps: RenderApiDependencies): RenderJobQueu
           scriptText: input.scriptText,
           scriptPath: input.scriptPath,
           gapMs: input.gapMs,
+          progress: null,
+          report: null,
+        };
+      case 'photo-aroll':
+        return {
+          ...base,
+          kind: 'photo-aroll',
+          photos: input.photos,
+          output: input.output,
+          fps: input.fps,
           progress: null,
           report: null,
         };

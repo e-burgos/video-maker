@@ -105,6 +105,7 @@ export const RENDER_API_ERROR_CODES = [
   'ASSET_EXISTS',
   'MUSIC_SOURCE_UNAVAILABLE',
   'MUSIC_RESULT_UNKNOWN',
+  'PHOTO_AROLL_INPUT_INVALID',
 ] as const;
 
 export type RenderApiErrorCode = (typeof RENDER_API_ERROR_CODES)[number];
