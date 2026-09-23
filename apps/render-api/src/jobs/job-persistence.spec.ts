@@ -1,0 +1,266 @@
+import { describe, expect, it } from 'vitest';
+
+import { buildMinimalTimeline } from '../__fixtures__/minimal-timeline';
+import type { RenderApiErrorPayload } from '../errors/render-api-error';
+import { parseStoredJob, parseStoredParams, toStoredParams } from './job-persistence';
+import type { CreateJobInput } from './render-job';
+
+const TIMELINE = buildMinimalTimeline();
+
+const BASE_ROW = {
+  id: 'job-0001',
+  slug: 'demo-01',
+  createdAt: '2026-09-23T00:00:00.000Z',
+  startedAt: null as string | null,
+  finishedAt: null as string | null,
+};
+
+describe('toStoredParams / parseStoredParams', () => {
+  it('round-trips a render job, including the timeline snapshot', () => {
+    const input: CreateJobInput = {
+      kind: 'render',
+      slug: 'demo-01',
+      projectRoot: '/media/demo-01',
+      timeline: TIMELINE,
+    };
+
+    const stored = toStoredParams(input);
+    expect(stored).toEqual({ kind: 'render', timeline: TIMELINE });
+
+    const parsed = parseStoredParams('render', JSON.parse(JSON.stringify(stored)));
+    expect(parsed).toEqual({ kind: 'render', timeline: TIMELINE });
+  });
+
+  it('round-trips a montage job', () => {
+    const input: CreateJobInput = {
+      kind: 'montage',
+      slug: 'demo-01',
+      projectRoot: '/media/demo-01',
+      preset: 'software-demo',
+      seed: 7,
+      scriptPath: null,
+      scriptText: 'hola',
+      logo: 'auto',
+      format: 'reels-9x16',
+      voice: 'aroll',
+      captionStyle: 'bold-impact',
+    };
+
+    const stored = toStoredParams(input);
+    const parsed = parseStoredParams('montage', JSON.parse(JSON.stringify(stored)));
+
+    expect(parsed).toEqual({
+      kind: 'montage',
+      preset: 'software-demo',
+      seed: 7,
+      scriptPath: null,
+      scriptText: 'hola',
+      logo: 'auto',
+      format: 'reels-9x16',
+      voice: 'aroll',
+      captionStyle: 'bold-impact',
+    });
+  });
+
+  it('round-trips a storyboard job', () => {
+    const input: CreateJobInput = {
+      kind: 'storyboard',
+      slug: 'demo-01',
+      projectRoot: '/media/demo-01',
+      brief: 'un producto nuevo',
+      scriptText: null,
+      model: 'sonnet',
+    };
+
+    const parsed = parseStoredParams('storyboard', JSON.parse(JSON.stringify(toStoredParams(input))));
+    expect(parsed).toEqual({ kind: 'storyboard', brief: 'un producto nuevo', scriptText: null, model: 'sonnet' });
+  });
+
+  it('round-trips a voice job', () => {
+    const input: CreateJobInput = {
+      kind: 'voice',
+      slug: 'demo-01',
+      projectRoot: '/media/demo-01',
+      voiceId: 'es_AR-daniela-high',
+      sceneIds: ['scene-1', 'scene-2'],
+      scriptText: null,
+      scriptPath: null,
+      gapMs: 900,
+    };
+
+    const parsed = parseStoredParams('voice', JSON.parse(JSON.stringify(toStoredParams(input))));
+    expect(parsed).toEqual({
+      kind: 'voice',
+      voiceId: 'es_AR-daniela-high',
+      sceneIds: ['scene-1', 'scene-2'],
+      scriptText: null,
+      scriptPath: null,
+      gapMs: 900,
+    });
+  });
+
+  it('round-trips a photo-aroll job', () => {
+    const input: CreateJobInput = {
+      kind: 'photo-aroll',
+      slug: 'demo-01',
+      projectRoot: '/media/demo-01',
+      photos: ['raw/images/a.jpg', 'raw/images/b.jpg'],
+      output: 'ad.mp4',
+      fps: 30,
+    };
+
+    const parsed = parseStoredParams('photo-aroll', JSON.parse(JSON.stringify(toStoredParams(input))));
+    expect(parsed).toEqual({
+      kind: 'photo-aroll',
+      photos: ['raw/images/a.jpg', 'raw/images/b.jpg'],
+      output: 'ad.mp4',
+      fps: 30,
+    });
+  });
+
+  it('rejects a value that is not an object, and a render timeline that fails schema validation', () => {
+    expect(parseStoredParams('render', null)).toBeNull();
+    expect(parseStoredParams('render', 'nope')).toBeNull();
+    expect(parseStoredParams('render', { timeline: { not: 'a timeline' } })).toBeNull();
+  });
+
+  it('rejects a montage record missing or mistyping a required field', () => {
+    expect(parseStoredParams('montage', { preset: 'software-demo' })).toBeNull();
+    expect(
+      parseStoredParams('montage', {
+        preset: 'software-demo',
+        seed: 'not-a-number',
+        scriptPath: null,
+        scriptText: null,
+        logo: 'auto',
+        format: 'reels-9x16',
+        voice: 'aroll',
+        captionStyle: null,
+      }),
+    ).toBeNull();
+  });
+
+  it('rejects a voice record whose sceneIds is not an array of strings', () => {
+    expect(
+      parseStoredParams('voice', {
+        voiceId: null,
+        sceneIds: [1, 2],
+        scriptText: null,
+        scriptPath: null,
+        gapMs: 900,
+      }),
+    ).toBeNull();
+  });
+
+  it('rejects a photo-aroll record whose photos is not an array of strings', () => {
+    expect(parseStoredParams('photo-aroll', { photos: 'not-an-array', output: 'ad.mp4', fps: 30 })).toBeNull();
+  });
+});
+
+describe('parseStoredJob', () => {
+  it('builds a render job from a fully valid row', () => {
+    const job = parseStoredJob({
+      ...BASE_ROW,
+      kind: 'render',
+      state: 'running',
+      params: { kind: 'render', timeline: TIMELINE },
+      progress: { stage: 'render', renderedFrames: 10, totalFrames: 100, percent: 10 },
+      report: null,
+      error: null,
+      retryOf: null,
+    });
+
+    expect(job).toEqual({
+      id: 'job-0001',
+      slug: 'demo-01',
+      kind: 'render',
+      state: 'running',
+      createdAt: BASE_ROW.createdAt,
+      startedAt: null,
+      finishedAt: null,
+      progress: { stage: 'render', renderedFrames: 10, totalFrames: 100, percent: 10 },
+      report: null,
+      error: null,
+    });
+  });
+
+  it('builds a job with a terminal state and a report', () => {
+    const job = parseStoredJob({
+      ...BASE_ROW,
+      kind: 'montage',
+      state: 'succeeded',
+      params: {},
+      progress: null,
+      report: { catalogPath: 'work/catalog.json' },
+      error: null,
+      retryOf: null,
+    });
+
+    expect(job.state).toBe('succeeded');
+    expect(job.report).toEqual({ catalogPath: 'work/catalog.json' });
+  });
+
+  it('surfaces an unknown state as failed with JOB_RECORD_INVALID, without throwing', () => {
+    const job = parseStoredJob({
+      ...BASE_ROW,
+      kind: 'render',
+      state: 'orbiting',
+      params: {},
+      progress: null,
+      report: null,
+      error: null,
+      retryOf: null,
+    });
+
+    expect(job.state).toBe('failed');
+    expect(job.kind).toBe('render');
+    expect((job.error as RenderApiErrorPayload | null)?.code).toBe('JOB_RECORD_INVALID');
+  });
+
+  it('surfaces an unknown kind as a failed render job with JOB_RECORD_INVALID, without throwing', () => {
+    const job = parseStoredJob({
+      ...BASE_ROW,
+      kind: 'teleport',
+      state: 'succeeded',
+      params: {},
+      progress: null,
+      report: null,
+      error: null,
+      retryOf: null,
+    });
+
+    expect(job.kind).toBe('render');
+    expect(job.state).toBe('failed');
+    expect((job.error as RenderApiErrorPayload | null)?.code).toBe('JOB_RECORD_INVALID');
+  });
+
+  it('falls back to createdAt for finishedAt on an invalid row that never got one', () => {
+    const job = parseStoredJob({
+      ...BASE_ROW,
+      kind: 'ghost-kind',
+      state: 'queued',
+      params: {},
+      progress: null,
+      report: null,
+      error: null,
+      retryOf: null,
+    });
+
+    expect(job.finishedAt).toBe(BASE_ROW.createdAt);
+  });
+
+  it('passes through the persisted error payload for a failed job', () => {
+    const job = parseStoredJob({
+      ...BASE_ROW,
+      kind: 'storyboard',
+      state: 'failed',
+      params: {},
+      progress: null,
+      report: null,
+      error: { code: 'AI_AGENT_FAILED', stage: null, message: 'boom' },
+      retryOf: null,
+    });
+
+    expect(job.error).toEqual({ code: 'AI_AGENT_FAILED', stage: null, message: 'boom' });
+  });
+});

@@ -16,6 +16,7 @@ import {
   handleCreateRenderJob,
   handleGetRenderJob,
   handleListRenderJobs,
+  handleRetryRenderJob,
 } from './handlers/jobs-handler';
 import {
   handleGetEditDecisionList,
@@ -173,6 +174,8 @@ export async function handleRequest(
         return await handleGetRenderJob(params, runtime);
       case 'jobs.cancel':
         return await handleCancelRenderJob(params, runtime);
+      case 'jobs.retry':
+        return await handleRetryRenderJob(deps, store, params, runtime);
       default:
         return match.id satisfies never;
     }

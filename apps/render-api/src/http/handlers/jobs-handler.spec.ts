@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
+import type { CallLog } from '../../__fixtures__/call-log';
 import { createCallLog } from '../../__fixtures__/call-log';
 import { createControllableRenderMutedVideo } from '../../__fixtures__/controllable-render';
 import type { FakeObjectStorageSeed } from '../../__fixtures__/fake-object-storage';
@@ -10,6 +11,7 @@ import { requestLine } from '../../__fixtures__/http-request';
 import { buildMinimalTimeline } from '../../__fixtures__/minimal-timeline';
 import { buildStoryboardDocument, buildStoryboardProposal } from '../../__fixtures__/storyboard-fixtures';
 import type { StoreConfig } from '../../config/store-config';
+import type { RenderApiDependencies } from '../../deps/render-api-dependencies';
 import { toErrorPayload } from '../../errors/to-error-payload';
 import type { Job, RenderJob } from '../../jobs/render-job';
 import type { HttpRequestLine } from '../http-message';
@@ -19,7 +21,20 @@ import {
   handleCreateRenderJob,
   handleGetRenderJob,
   handleListRenderJobs,
+  handleRetryRenderJob,
 } from './jobs-handler';
+
+const KNOWN_SLUGS = ['acme-launch', 'smoke-ingest'];
+
+function withProjects(callLog: CallLog, overrides?: Partial<RenderApiDependencies>): RenderApiDependencies {
+  const deps = createFakeRenderApiDependencies(callLog, overrides);
+  for (const slug of KNOWN_SLUGS) {
+    if (!deps.localStore.projects.exists(slug)) {
+      deps.localStore.projects.insert(slug);
+    }
+  }
+  return deps;
+}
 
 const STORE: StoreConfig = { mediaRoot: '/media', dbPath: '/media/.studio/studio.db', maxUploadBytes: 2_147_483_648, objectStore: 'fs' };
 const PROJECT_ROOT = '/var/data/media/acme-launch';
@@ -79,7 +94,7 @@ describe('handleCreateRenderJob', () => {
       directories: [`${STORE.mediaRoot}/smoke-ingest`],
       files: [{ path: `${STORE.mediaRoot}/smoke-ingest/work/timeline.json`, contents: JSON.stringify(timeline) }],
     });
-    const deps = createFakeRenderApiDependencies(callLog, { storage });
+    const deps = withProjects(callLog, { storage });
     const runtime = createRenderApiRuntime(deps);
 
     const response = await handleCreateRenderJob(
@@ -131,7 +146,7 @@ describe('handleCreateRenderJob', () => {
   it.each(REJECTION_CASES)('answers $code and registers no job', async ({ code, slug, seed }) => {
     const callLog = createCallLog();
     const storage = createFakeObjectStorage(callLog, seed);
-    const deps = createFakeRenderApiDependencies(callLog, { storage });
+    const deps = withProjects(callLog, { storage });
     const runtime = createRenderApiRuntime(deps);
 
     await expect(
@@ -166,7 +181,7 @@ describe('handleCreateRenderJob', () => {
         directories: [`${STORE.mediaRoot}/smoke-ingest`],
         files: [{ path: `${STORE.mediaRoot}/smoke-ingest/work/timeline.json`, contents: JSON.stringify(timeline) }],
       });
-      const deps = createFakeRenderApiDependencies(callLog, { storage });
+      const deps = withProjects(callLog, { storage });
       const runtime = createRenderApiRuntime(deps);
 
       const response = await handleCreateRenderJob(deps, STORE, { slug: 'smoke-ingest' }, request('smoke-ingest'), runtime);
@@ -184,7 +199,7 @@ describe('handleCreateRenderJob', () => {
   describe('resolveJobKind', () => {
     it('answers 422 JOB_KIND_INVALID for an unknown kind and registers no job', async () => {
       const callLog = createCallLog();
-      const deps = createFakeRenderApiDependencies(callLog);
+      const deps = withProjects(callLog);
       const runtime = createRenderApiRuntime(deps);
 
       await expect(
@@ -195,7 +210,7 @@ describe('handleCreateRenderJob', () => {
 
     it('answers 400 REQUEST_BODY_INVALID_JSON for a syntactically invalid body', async () => {
       const callLog = createCallLog();
-      const deps = createFakeRenderApiDependencies(callLog);
+      const deps = withProjects(callLog);
       const runtime = createRenderApiRuntime(deps);
 
       await expect(
@@ -209,7 +224,7 @@ describe('handleCreateRenderJob', () => {
     function createMontageDeps(): { deps: ReturnType<typeof createFakeRenderApiDependencies>; runtime: ReturnType<typeof createRenderApiRuntime> } {
       const callLog = createCallLog();
       const storage = createFakeObjectStorage(callLog, { directories: [`${STORE.mediaRoot}/acme-launch`] });
-      const deps = createFakeRenderApiDependencies(callLog, { storage });
+      const deps = withProjects(callLog, { storage });
       return { deps, runtime: createRenderApiRuntime(deps) };
     }
 
@@ -372,7 +387,7 @@ describe('handleCreateRenderJob', () => {
         directories: [`${STORE.mediaRoot}/acme-launch`],
         files: [{ path: `${STORE.mediaRoot}/acme-launch/work/voice/voice.wav`, contents: 'RIFF' }],
       });
-      const deps = createFakeRenderApiDependencies(callLog, { storage });
+      const deps = withProjects(callLog, { storage });
       const runtime = createRenderApiRuntime(deps);
 
       const response = await handleCreateRenderJob(
@@ -409,7 +424,7 @@ describe('handleCreateRenderJob', () => {
     it('answers 202 with kind montage and default preset/seed/overwrite when omitted', async () => {
       const callLog = createCallLog();
       const storage = createFakeObjectStorage(callLog, { directories: [`${STORE.mediaRoot}/acme-launch`] });
-      const deps = createFakeRenderApiDependencies(callLog, { storage });
+      const deps = withProjects(callLog, { storage });
       const runtime = createRenderApiRuntime(deps);
 
       const response = await handleCreateRenderJob(
@@ -436,7 +451,7 @@ describe('handleCreateRenderJob', () => {
         directories: [`${STORE.mediaRoot}/acme-launch`],
         files: [{ path: `${STORE.mediaRoot}/acme-launch/work/timeline.json`, contents: JSON.stringify(timeline) }],
       });
-      const deps = createFakeRenderApiDependencies(callLog, { storage });
+      const deps = withProjects(callLog, { storage });
       const runtime = createRenderApiRuntime(deps);
 
       const response = await handleCreateRenderJob(
@@ -464,7 +479,7 @@ describe('handleCreateRenderJob', () => {
         directories: [`${STORE.mediaRoot}/acme-launch`],
         files: [{ path: `${STORE.mediaRoot}/acme-launch/work/timeline.json`, contents: JSON.stringify(timeline) }],
       });
-      const deps = createFakeRenderApiDependencies(callLog, { storage });
+      const deps = withProjects(callLog, { storage });
       const runtime = createRenderApiRuntime(deps);
 
       await expect(
@@ -488,7 +503,7 @@ describe('handleCreateRenderJob', () => {
         directories: [`${STORE.mediaRoot}/acme-launch`],
         files: [{ path: `${STORE.mediaRoot}/acme-launch/work/timeline.json`, contents: JSON.stringify(timeline) }],
       });
-      const deps = createFakeRenderApiDependencies(callLog, { storage });
+      const deps = withProjects(callLog, { storage });
       const runtime = createRenderApiRuntime(deps);
 
       const response = await handleCreateRenderJob(
@@ -516,7 +531,7 @@ describe('handleCreateRenderJob', () => {
         ...(seed ?? {}),
       });
       const fakeAgent = createFakeAiAgent(buildStoryboardProposal(), callLog);
-      const deps = createFakeRenderApiDependencies(callLog, { storage, aiAgent: fakeAgent.agent });
+      const deps = withProjects(callLog, { storage, aiAgent: fakeAgent.agent });
       return { deps, storage, fakeAgent, runtime: createRenderApiRuntime(deps) };
     }
 
@@ -956,7 +971,7 @@ describe('handleCreateRenderJob', () => {
         ],
         ...(seed ?? {}),
       });
-      const deps = createFakeRenderApiDependencies(callLog, { storage });
+      const deps = withProjects(callLog, { storage });
       return { deps, storage, runtime: createRenderApiRuntime(deps) };
     }
 
@@ -986,7 +1001,7 @@ describe('handleCreateRenderJob', () => {
     it('rejects when work/voice/voice.wav has not been synthesized yet', async () => {
       const callLog = createCallLog();
       const storage = createFakeObjectStorage(callLog, { directories: [`${STORE.mediaRoot}/smoke-ingest`] });
-      const deps = createFakeRenderApiDependencies(callLog, { storage });
+      const deps = withProjects(callLog, { storage });
       const runtime = createRenderApiRuntime(deps);
 
       await expect(
@@ -1043,7 +1058,7 @@ describe('handleCreateRenderJob', () => {
 describe('handleListRenderJobs', () => {
   it('answers 200 with an empty jobs array for a slug without jobs', async () => {
     const callLog = createCallLog();
-    const deps = createFakeRenderApiDependencies(callLog);
+    const deps = withProjects(callLog);
     const runtime = createRenderApiRuntime(deps);
 
     const response = await handleListRenderJobs({ slug: 'smoke-ingest' }, runtime);
@@ -1054,7 +1069,7 @@ describe('handleListRenderJobs', () => {
 
   it('answers 200 with the exact JobSummary key set on every entry (§8.2)', async () => {
     const callLog = createCallLog();
-    const deps = createFakeRenderApiDependencies(callLog);
+    const deps = withProjects(callLog);
     const runtime = createRenderApiRuntime(deps);
 
     runtime.jobs.create({ kind: 'render', slug: 'acme-launch', projectRoot: PROJECT_ROOT, timeline: buildMinimalTimeline() });
@@ -1082,7 +1097,7 @@ describe('handleGetRenderJob', () => {
 
   it('answers 200 with state failed and the embedded typed error', async () => {
     const callLog = createCallLog();
-    const deps = createFakeRenderApiDependencies(callLog, {
+    const deps = withProjects(callLog, {
       muxAudioIntoVideo: async () => {
         throw new Error('mux exploded');
       },
@@ -1108,7 +1123,7 @@ describe('handleGetRenderJob', () => {
 
   it('answers 200 with the exact Job key set (§8.3)', async () => {
     const callLog = createCallLog();
-    const deps = createFakeRenderApiDependencies(callLog);
+    const deps = withProjects(callLog);
     const runtime = createRenderApiRuntime(deps);
 
     const created = runtime.jobs.create({
@@ -1130,7 +1145,7 @@ describe('handleCancelRenderJob', () => {
   it('answers 200 with state canceled for a queued job', async () => {
     const callLog = createCallLog();
     const controllable = createControllableRenderMutedVideo();
-    const deps = createFakeRenderApiDependencies(callLog, { renderMutedVideo: controllable.port });
+    const deps = withProjects(callLog, { renderMutedVideo: controllable.port });
     const runtime = createRenderApiRuntime(deps);
 
     runtime.jobs.create({ kind: 'render', slug: 'acme-launch', projectRoot: PROJECT_ROOT, timeline: buildMinimalTimeline() });
@@ -1155,7 +1170,7 @@ describe('handleCancelRenderJob', () => {
   it('answers 202 with state canceling for a running job', async () => {
     const callLog = createCallLog();
     const controllable = createControllableRenderMutedVideo();
-    const deps = createFakeRenderApiDependencies(callLog, { renderMutedVideo: controllable.port });
+    const deps = withProjects(callLog, { renderMutedVideo: controllable.port });
     const runtime = createRenderApiRuntime(deps);
 
     const job = runtime.jobs.create({
@@ -1190,7 +1205,7 @@ describe('handleCancelRenderJob', () => {
     async ({ title, settle }) => {
       const callLog = createCallLog();
       const controllable = createControllableRenderMutedVideo();
-      const deps = createFakeRenderApiDependencies(callLog, { renderMutedVideo: controllable.port });
+      const deps = withProjects(callLog, { renderMutedVideo: controllable.port });
       const runtime = createRenderApiRuntime(deps);
 
       const job = runtime.jobs.create({
@@ -1226,7 +1241,7 @@ describe('handleCancelRenderJob', () => {
   });
 
   it('answers the two queue errors with a payload free of stack, of Spanish text and of absolute paths', async () => {
-    const deps = createFakeRenderApiDependencies(createCallLog());
+    const deps = withProjects(createCallLog());
     const runtime = createRenderApiRuntime(deps);
 
     const notFoundError = await handleCancelRenderJob({ jobId: 'unknown-id' }, runtime).catch(
@@ -1256,5 +1271,146 @@ describe('handleCancelRenderJob', () => {
     expect(isAsciiOnly(notCancelablePayload.message)).toBe(true);
     expect('stack' in notCancelablePayload).toBe(false);
     expect(notCancelablePayload.resource?.startsWith('/')).toBe(false);
+  });
+});
+
+describe('handleRetryRenderJob', () => {
+  it('answers 404 RENDER_JOB_NOT_FOUND for an id the store does not know', async () => {
+    const deps = withProjects(createCallLog());
+    const runtime = createRenderApiRuntime(deps);
+
+    await expect(
+      handleRetryRenderJob(deps, STORE, { jobId: 'unknown-id' }, runtime),
+    ).rejects.toMatchObject({ code: 'RENDER_JOB_NOT_FOUND' });
+  });
+
+  it('answers 409 JOB_NOT_RETRYABLE for a job still queued or running', async () => {
+    const callLog = createCallLog();
+    const controllable = createControllableRenderMutedVideo();
+    const deps = withProjects(callLog, { renderMutedVideo: controllable.port });
+    const runtime = createRenderApiRuntime(deps);
+
+    const job = runtime.jobs.create({
+      kind: 'render',
+      slug: 'acme-launch',
+      projectRoot: PROJECT_ROOT,
+      timeline: buildMinimalTimeline(),
+    });
+
+    await expect(
+      handleRetryRenderJob(deps, STORE, { jobId: job.id }, runtime),
+    ).rejects.toMatchObject({ code: 'JOB_NOT_RETRYABLE' });
+
+    controllable.resolve(DEFAULT_RENDER_OUTPUT);
+    await runtime.jobs.whenIdle();
+  });
+
+  it('answers 409 JOB_NOT_RETRYABLE for a job that already succeeded', async () => {
+    const deps = withProjects(createCallLog());
+    const runtime = createRenderApiRuntime(deps);
+
+    const job = runtime.jobs.create({
+      kind: 'render',
+      slug: 'acme-launch',
+      projectRoot: PROJECT_ROOT,
+      timeline: buildMinimalTimeline(),
+    });
+    await runtime.jobs.whenIdle();
+    expect(runtime.jobs.get(job.id)?.state).toBe('succeeded');
+
+    await expect(
+      handleRetryRenderJob(deps, STORE, { jobId: job.id }, runtime),
+    ).rejects.toMatchObject({ code: 'JOB_NOT_RETRYABLE' });
+  });
+
+  it('creates a new render job with the same timeline snapshot, retry_of the original, and answers 202', async () => {
+    const callLog = createCallLog();
+    const storage = createFakeObjectStorage(callLog, { directories: [`${STORE.mediaRoot}/acme-launch`] });
+    const deps = withProjects(callLog, {
+      storage,
+      renderMutedVideo: async () => {
+        throw new Error('render exploded');
+      },
+    });
+    const runtime = createRenderApiRuntime(deps);
+
+    const failed = runtime.jobs.create({
+      kind: 'render',
+      slug: 'acme-launch',
+      projectRoot: PROJECT_ROOT,
+      timeline: buildMinimalTimeline(),
+    });
+    await runtime.jobs.whenIdle();
+    expect(runtime.jobs.get(failed.id)?.state).toBe('failed');
+
+    const response = await handleRetryRenderJob(deps, STORE, { jobId: failed.id }, runtime);
+    const retried = response.body as RenderJob;
+
+    expect(response.status).toBe(202);
+    expect(response.headers.location).toBe(`/jobs/${retried.id}`);
+    expect(retried.id).not.toBe(failed.id);
+    expect(retried.slug).toBe('acme-launch');
+    expect(retried.kind).toBe('render');
+    expect(retried.state).toBe('running');
+
+    const storedRetry = deps.localStore.jobs.get(retried.id);
+    expect(storedRetry?.retryOf).toBe(failed.id);
+    expect(storedRetry?.params).toEqual({ kind: 'render', timeline: buildMinimalTimeline() });
+
+    await runtime.jobs.whenIdle();
+  });
+
+  it('retries a canceled job too', async () => {
+    const callLog = createCallLog();
+    const storage = createFakeObjectStorage(callLog, { directories: [`${STORE.mediaRoot}/acme-launch`] });
+    const controllable = createControllableRenderMutedVideo();
+    const deps = withProjects(callLog, { storage, renderMutedVideo: controllable.port });
+    const runtime = createRenderApiRuntime(deps);
+
+    const job = runtime.jobs.create({
+      kind: 'render',
+      slug: 'acme-launch',
+      projectRoot: PROJECT_ROOT,
+      timeline: buildMinimalTimeline(),
+    });
+    await controllable.started;
+    runtime.jobs.cancel(job.id);
+    controllable.resolve(DEFAULT_RENDER_OUTPUT);
+    await runtime.jobs.whenIdle();
+    expect(runtime.jobs.get(job.id)?.state).toBe('canceled');
+
+    const response = await handleRetryRenderJob(deps, STORE, { jobId: job.id }, runtime);
+    expect(response.status).toBe(202);
+
+    await runtime.jobs.whenIdle();
+  });
+
+  it('re-validates montage preconditions on retry: 409 TIMELINE_ALREADY_EXISTS once a timeline exists', async () => {
+    const callLog = createCallLog();
+    const storage = createFakeObjectStorage(callLog, { directories: [`${STORE.mediaRoot}/acme-launch`] });
+    const deps = withProjects(callLog, {
+      storage,
+      resolveMontageBinaries: async () => {
+        throw new Error('media binaries unavailable');
+      },
+    });
+    const runtime = createRenderApiRuntime(deps);
+
+    const response = await handleCreateRenderJob(
+      deps,
+      STORE,
+      { slug: 'acme-launch' },
+      jsonBodyRequest('acme-launch', { kind: 'montage' }),
+      runtime,
+    );
+    const created = response.body as Job;
+    await runtime.jobs.whenIdle();
+    expect(runtime.jobs.get(created.id)?.state).toBe('failed');
+
+    await storage.writeTextFile(`${STORE.mediaRoot}/acme-launch/work/timeline.json`, '{}');
+
+    await expect(
+      handleRetryRenderJob(deps, STORE, { jobId: created.id }, runtime),
+    ).rejects.toMatchObject({ code: 'TIMELINE_ALREADY_EXISTS' });
   });
 });

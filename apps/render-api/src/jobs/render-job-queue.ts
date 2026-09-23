@@ -26,6 +26,8 @@ import type { RenderPipelineReport } from '../pipeline/run-render-pipeline';
 import { runRenderPipeline } from '../pipeline/run-render-pipeline';
 import { mergeRenderProgress, startRenderJobStage } from './render-job-progress';
 import { applyRenderJobEvent } from './render-job-state';
+import { parseStoredJob, toStoredParams } from './job-persistence';
+import { toJob } from './render-job';
 import type {
   CreateJobInput,
   Job,
@@ -40,8 +42,10 @@ import type {
   VoiceJobProgress,
   VoiceJobReport,
 } from './render-job';
-import { toJob } from './render-job';
 import { runMontagePipeline } from './run-montage-pipeline';
+
+const PROGRESS_PERSIST_THROTTLE_MS = 1_000;
+const JOB_INTERRUPTED_MESSAGE = 'The service restarted while this job was still in progress.';
 
 export type CancelRenderJobResult =
   | { readonly kind: 'canceled'; readonly job: Job }
@@ -56,11 +60,32 @@ export interface RenderJobQueueSize {
 
 export interface RenderJobQueue {
   readonly create: (input: CreateJobInput) => Job;
+  readonly createRetry: (originalId: string, input: CreateJobInput) => Job;
   readonly get: (jobId: string) => Job | null;
   readonly listBySlug: (slug: string) => readonly Job[];
   readonly cancel: (jobId: string) => CancelRenderJobResult;
   readonly size: () => RenderJobQueueSize;
   readonly whenIdle: () => Promise<void>;
+}
+
+export function recoverInterruptedJobs(deps: RenderApiDependencies): void {
+  const unfinished = deps.localStore.jobs.listUnfinished();
+  if (unfinished.length === 0) {
+    return;
+  }
+
+  const errorPayload: RenderApiErrorPayload = {
+    code: 'JOB_INTERRUPTED',
+    stage: null,
+    message: JOB_INTERRUPTED_MESSAGE,
+  };
+  const finishedAt = deps.clock.nowIso();
+
+  deps.localStore.jobs.markInterrupted(
+    unfinished.map((job) => job.id),
+    errorPayload,
+    finishedAt,
+  );
 }
 
 interface JobRecordBase {
@@ -127,9 +152,11 @@ interface PhotoArollJobRecord extends JobRecordBase {
 type JobRecord = RenderJobRecord | MontageJobRecord | StoryboardJobRecord | VoiceJobRecord | PhotoArollJobRecord;
 
 export function createRenderJobQueue(deps: RenderApiDependencies): RenderJobQueue {
+  const jobsStore = deps.localStore.jobs;
   const records = new Map<string, JobRecord>();
   const pending: string[] = [];
   const idleResolvers: Array<() => void> = [];
+  const lastProgressPersistMs = new Map<string, number>();
   let activeId: string | null = null;
 
   function logTransition(record: JobRecord, from: RenderJobState, to: RenderJobState): void {
@@ -146,6 +173,16 @@ export function createRenderJobQueue(deps: RenderApiDependencies): RenderJobQueu
     }
   }
 
+  function persistProgress(record: JobRecord, force: boolean): void {
+    const nowMs = Date.parse(deps.clock.nowIso());
+    const lastMs = lastProgressPersistMs.get(record.id) ?? -Infinity;
+    if (!force && nowMs - lastMs < PROGRESS_PERSIST_THROTTLE_MS) {
+      return;
+    }
+    lastProgressPersistMs.set(record.id, nowMs);
+    jobsStore.updateProgress(record.id, record.progress);
+  }
+
   function settle<T extends JobRecord>(record: T, report: T['report'], failure: RenderApiErrorPayload | null): void {
     const from = record.state;
     const transition = applyRenderJobEvent(from, { kind: 'settle', failed: failure !== null });
@@ -159,15 +196,22 @@ export function createRenderJobQueue(deps: RenderApiDependencies): RenderJobQueu
     record.error = transition.state === 'failed' ? failure : null;
     record.finishedAt = deps.clock.nowIso();
     logTransition(record, from, record.state);
+
+    persistProgress(record, true);
+    lastProgressPersistMs.delete(record.id);
+    jobsStore.setReport(record.id, record.report);
+    jobsStore.updateState(record.id, record.state, undefined, record.finishedAt, record.error);
   }
 
   async function runRenderJob(record: RenderJobRecord): Promise<void> {
     const observer: RenderPipelineObserver = {
       stageStarted: (stage) => {
         record.progress = startRenderJobStage(record.progress, stage);
+        persistProgress(record, false);
       },
       renderProgressed: (renderedFrames, totalFrames) => {
         record.progress = mergeRenderProgress(record.progress, renderedFrames, totalFrames);
+        persistProgress(record, false);
       },
       cancellationRequested: () => record.state === 'canceling',
     };
@@ -192,9 +236,11 @@ export function createRenderJobQueue(deps: RenderApiDependencies): RenderJobQueu
     const observer: MontagePipelineObserver = {
       stageStarted: (stage) => {
         record.progress = startMontageJobStage(record.progress, stage);
+        persistProgress(record, false);
       },
       assetProcessed: (stage, totalAssets) => {
         record.progress = mergeMontageJobProgress(record.progress, stage, totalAssets);
+        persistProgress(record, false);
       },
       cancellationRequested: () => record.state === 'canceling',
     };
@@ -229,6 +275,7 @@ export function createRenderJobQueue(deps: RenderApiDependencies): RenderJobQueu
     const observer: StoryboardPipelineObserver = {
       stageStarted: (stage) => {
         record.progress = startStoryboardJobStage(record.progress, stage);
+        persistProgress(record, false);
       },
       cancellationRequested: () => record.state === 'canceling',
     };
@@ -259,9 +306,11 @@ export function createRenderJobQueue(deps: RenderApiDependencies): RenderJobQueu
     const observer: VoicePipelineObserver = {
       stageStarted: (stage) => {
         record.progress = startVoiceJobStage(record.progress, stage);
+        persistProgress(record, false);
       },
       sceneProcessed: (stage, processedScenes, totalScenes) => {
         record.progress = mergeVoiceJobProgress(record.progress, stage, processedScenes, totalScenes);
+        persistProgress(record, false);
       },
       cancellationRequested: () => record.state === 'canceling',
     };
@@ -293,9 +342,11 @@ export function createRenderJobQueue(deps: RenderApiDependencies): RenderJobQueu
     const observer: PhotoArollPipelineObserver = {
       stageStarted: (stage) => {
         record.progress = startPhotoArollJobStage(record.progress, stage);
+        persistProgress(record, false);
       },
       clipProcessed: (totalClips) => {
         record.progress = mergePhotoArollJobProgress(record.progress, totalClips);
+        persistProgress(record, false);
       },
       cancellationRequested: () => record.state === 'canceling',
     };
@@ -368,6 +419,7 @@ export function createRenderJobQueue(deps: RenderApiDependencies): RenderJobQueu
       record.startedAt = deps.clock.nowIso();
       activeId = record.id;
       logTransition(record, previousState, record.state);
+      jobsStore.updateState(record.id, record.state, record.startedAt);
       void runJob(record);
       return;
     }
@@ -429,13 +481,14 @@ export function createRenderJobQueue(deps: RenderApiDependencies): RenderJobQueu
     }
   }
 
-  function create(input: CreateJobInput): Job {
+  function registerJob(input: CreateJobInput, retryOf: string | null): Job {
     const id = deps.randomId();
+    const createdAt = deps.clock.nowIso();
     const base = {
       id,
       slug: input.slug,
       projectRoot: input.projectRoot,
-      createdAt: deps.clock.nowIso(),
+      createdAt,
       state: 'queued' as const,
       startedAt: null,
       finishedAt: null,
@@ -446,30 +499,63 @@ export function createRenderJobQueue(deps: RenderApiDependencies): RenderJobQueu
 
     records.set(id, record);
     pending.push(id);
+
+    jobsStore.insert({
+      id,
+      slug: input.slug,
+      kind: input.kind,
+      state: 'queued',
+      params: toStoredParams(input),
+      createdAt,
+      retryOf,
+    });
+
     dispatchNext();
 
     return toJob(record);
   }
 
+  function create(input: CreateJobInput): Job {
+    return registerJob(input, null);
+  }
+
+  function createRetry(originalId: string, input: CreateJobInput): Job {
+    return registerJob(input, originalId);
+  }
+
   function get(jobId: string): Job | null {
     const record = records.get(jobId);
-    return record === undefined ? null : toJob(record);
+    if (record !== undefined) {
+      return toJob(record);
+    }
+    const stored = jobsStore.get(jobId);
+    return stored === null ? null : parseStoredJob(stored);
   }
 
   function listBySlug(slug: string): readonly Job[] {
+    const liveIds = new Set<string>();
     const jobs: Job[] = [];
     for (const record of records.values()) {
       if (record.slug === slug) {
         jobs.push(toJob(record));
+        liveIds.add(record.id);
       }
     }
-    return jobs;
+
+    for (const row of jobsStore.listByProject(slug)) {
+      if (!liveIds.has(row.id)) {
+        jobs.push(parseStoredJob(row));
+      }
+    }
+
+    return jobs.sort((left, right) => (left.createdAt < right.createdAt ? -1 : left.createdAt > right.createdAt ? 1 : 0));
   }
 
   function cancel(jobId: string): CancelRenderJobResult {
     const record = records.get(jobId);
     if (record === undefined) {
-      return { kind: 'not-found' };
+      const stored = jobsStore.get(jobId);
+      return stored === null ? { kind: 'not-found' } : { kind: 'not-cancelable', job: parseStoredJob(stored) };
     }
 
     const previousState = record.state;
@@ -494,6 +580,7 @@ export function createRenderJobQueue(deps: RenderApiDependencies): RenderJobQueu
     }
 
     logTransition(record, previousState, record.state);
+    jobsStore.updateState(record.id, record.state, undefined, record.finishedAt, record.error);
 
     return {
       kind: transition.state === 'canceled' ? 'canceled' : 'canceling',
@@ -514,5 +601,5 @@ export function createRenderJobQueue(deps: RenderApiDependencies): RenderJobQueu
     });
   }
 
-  return { create, get, listBySlug, cancel, size, whenIdle };
+  return { create, createRetry, get, listBySlug, cancel, size, whenIdle };
 }

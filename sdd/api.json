@@ -478,8 +478,8 @@
         "spec": "sdd/specs/spec-e-burgos-005-render-service",
         "status": "updated",
         "created_in_cycle": 3,
-        "updated_in_cycle": 1,
-        "description": "Lists the project's jobs (render and montage) in creation order, each reduced to a summary (id, kind, state, stage, errorCode, createdAt, startedAt, finishedAt) — never the full report or the full error, which GET /jobs/:jobId serves. The listing is scoped strictly by slug and does not check that the project exists on disk.",
+        "updated_in_cycle": 2,
+        "description": "Lists the project's jobs (render, montage, storyboard, voice and photo-aroll) in creation order, each reduced to a summary (id, kind, state, stage, errorCode, createdAt, startedAt, finishedAt) — never the full report or the full error, which GET /jobs/:jobId serves. The listing is scoped strictly by slug and does not check that the project exists on disk. spec-e-burgos-017 cycle-02 (TASK-005): jobs now persist in SQLite, so the listing includes jobs created in a previous run of the service, not only the ones this process itself dispatched.",
         "path_params": [
           "slug"
         ],
@@ -495,6 +495,11 @@
             "cycle": 1,
             "date": "2026-09-09",
             "change": "Each summary gains a kind: 'render' | 'montage' field; every field already published (id, state, stage, errorCode, createdAt, startedAt, finishedAt) keeps its name, type and meaning for render jobs."
+          },
+          {
+            "cycle": 2,
+            "date": "2026-09-23",
+            "change": "spec-e-burgos-017 cycle-02 (TASK-005): the listing reads from the persisted job store instead of the in-memory queue, so it now includes jobs from a previous run of the service (a job left queued, running or canceling when the process stopped is reported as failed with JOB_INTERRUPTED, see EP-014). Order, fields and types are unchanged."
           }
         ]
       },
@@ -506,8 +511,8 @@
         "spec": "sdd/specs/spec-e-burgos-005-render-service",
         "status": "updated",
         "created_in_cycle": 3,
-        "updated_in_cycle": 1,
-        "description": "Full detail of a single job (render or montage) in any of its six states (queued, running, canceling, succeeded, failed, canceled). The job id is globally unique because the queue is global, not per project, so no slug is required. The lookup is an in-memory Map read, never a filesystem access, so the id is not validated as a path segment. progress carries the current stage: for kind 'render', monotonic renderedFrames/totalFrames/percent during the render stage only; for kind 'montage', monotonic processedAssets/totalAssets/percent during the probe and transcribe stages only (discover and plan never carry a count).",
+        "updated_in_cycle": 2,
+        "description": "Full detail of a single job (render, montage, storyboard, voice or photo-aroll) in any of its six states (queued, running, canceling, succeeded, failed, canceled). The job id is globally unique because the queue is global, not per project, so no slug is required. spec-e-burgos-017 cycle-02 (TASK-005): the lookup answers from the persisted job store — a currently active job is read from the in-memory queue for a live, unthrottled progress value, and a job from a previous run of the service is read back from SQLite, so it no longer disappears on a restart. progress carries the current stage: for kind 'render', monotonic renderedFrames/totalFrames/percent during the render stage only; for kind 'montage', monotonic processedAssets/totalAssets/percent during the probe and transcribe stages only (discover and plan never carry a count); for kind 'storyboard', 'voice' and 'photo-aroll', their own stage sets and counters.",
         "path_params": [
           "jobId"
         ],
@@ -515,7 +520,7 @@
         "request_body": {},
         "responses": {
           "200": "application/json: the full Job. Also 200 for state: 'failed' — the job's own failure is not a transport error and the typed error is embedded in the body instead of becoming the response status.",
-          "404": "RENDER_JOB_NOT_FOUND for an id the queue does not know, including one lost to a process restart (the queue is in memory and does not persist). application/json: { error: { code, stage: null, message, resource?, expected?, hint?, assetPersisted?, catalogUpdated? } }.",
+          "404": "RENDER_JOB_NOT_FOUND for an id neither the in-memory queue nor the persisted job store knows. application/json: { error: { code, stage: null, message, resource?, expected?, hint?, assetPersisted?, catalogUpdated? } }.",
           "500": "application/json: { error: { code: 'INTERNAL_ERROR', stage: null, message } } from the central error handler."
         },
         "changelog": [
@@ -523,6 +528,11 @@
             "cycle": 1,
             "date": "2026-09-09",
             "change": "Adds a kind: 'render' | 'montage' field. For kind: 'montage', progress uses its own stage set (discover/probe/transcribe/plan) and counter field names (processedAssets/totalAssets instead of renderedFrames/totalFrames), and report uses MontageJobReport (catalogPath, timelinePath, editDecisionListPath, preset, seed) instead of RenderPipelineReport. Every field already published for kind: 'render' keeps its name, type and meaning."
+          },
+          {
+            "cycle": 2,
+            "date": "2026-09-23",
+            "change": "spec-e-burgos-017 cycle-02 (TASK-005): jobs persist in SQLite — every insert, state transition, report and error is written through, and progress is throttled to at most one write per second per job (the last one before a job settles is always flushed). A job still queued, running or canceling when the service restarts is marked failed with error.code JOB_INTERRUPTED at startup, before the server accepts requests. The 404 case no longer mentions a process restart, because a job now survives one; it still fires for a truly unknown id. Every field already published keeps its name, type and meaning."
           }
         ]
       },
@@ -534,7 +544,7 @@
         "spec": "sdd/specs/spec-e-burgos-005-render-service",
         "status": "updated",
         "created_in_cycle": 3,
-        "updated_in_cycle": 1,
+        "updated_in_cycle": 2,
         "description": "Requests cancellation of a job (render or montage). Cancellation is real but cooperative: no process is ever signalled or killed. A queued job is canceled immediately without invoking a single pipeline port. A running job moves to the observable transitional state canceling and settles as canceled at the next stage checkpoint (for montage: only before ingestProject starts or before autoMontage starts — never mid-way through either opaque call), after the binary in flight finishes its current invocation. A job canceled while its last stage is in flight still settles as canceled with report: null even though its on-disk artifacts (out/<jobId>.mp4 for render; work/catalog.json for montage) may already exist and be complete — the entry state wins over the pipeline result. Nothing on disk is ever deleted.",
         "path_params": [
           "jobId"
@@ -553,6 +563,11 @@
             "cycle": 1,
             "date": "2026-09-09",
             "change": "Cancellation now applies with the identical cooperative semantics to kind: 'montage' jobs; no field or status code changes for kind: 'render'."
+          },
+          {
+            "cycle": 2,
+            "date": "2026-09-23",
+            "change": "spec-e-burgos-017 cycle-02 (TASK-005): a job id that only exists in the persisted job store (from a previous run, always in a terminal state after startup recovery) now answers 409 RENDER_JOB_NOT_CANCELABLE instead of 404, matching a job the current process knows about. 404 RENDER_JOB_NOT_FOUND still fires for an id neither the in-memory queue nor the store knows."
           }
         ]
       },
@@ -1220,6 +1235,36 @@
             "cycle": 1,
             "date": "2026-09-23",
             "change": "Created in spec-e-burgos-017 cycle-01: host-confined download from Commons into raw/audio/ plus a work/credits.json entry, for the producer's import_music MCP tool."
+          }
+        ]
+      },
+      {
+        "id": "EP-036",
+        "method": "POST",
+        "path": "/jobs/:jobId/retry",
+        "module": "desktop-app",
+        "spec": "sdd/specs/spec-e-burgos-017-desktop-app",
+        "status": "implemented",
+        "created_in_cycle": 2,
+        "updated_in_cycle": null,
+        "description": "Retries a job that is failed or canceled by creating a brand new job (a fresh id, retry_of set to the original) with the same kind and the same kind-specific parameters the original job was created with — for kind 'render', the exact Timeline snapshot the original job rendered, never a live re-read of work/timeline.json. Creation reuses the same handler code POST /projects/:slug/jobs runs, so a retry is validated by the exact same preconditions a fresh request of that kind would be (e.g. a montage retry still checks TIMELINE_ALREADY_EXISTS; overwrite is not carried over from the original request, so a retry always behaves like overwrite: false). The original job's own record is never modified: its state, report and error stay exactly as they were.",
+        "path_params": [
+          "jobId"
+        ],
+        "required_headers": [],
+        "request_body": {},
+        "responses": {
+          "202": "application/json: the full new Job — { id, kind, slug, state, createdAt, startedAt, finishedAt, progress, report, error } — with a location: /jobs/<newId> header. Dispatch follows the same FIFO, concurrency-1 rule as every other job: running if the single slot is free, queued otherwise.",
+          "404": "RENDER_JOB_NOT_FOUND for an id neither the in-memory queue nor the persisted job store knows, or PROJECT_NOT_FOUND if the original job's project directory is gone. application/json: { error: { code, stage: null, message, resource?, expected?, hint?, assetPersisted?, catalogUpdated? } }.",
+          "409": "JOB_NOT_RETRYABLE when the job is not in the failed or canceled state (queued, running, canceling or succeeded); a job that finished successfully is not retryable either, since retrying a good result has no defined meaning. Reusing the creation preconditions can also answer the same 409s POST /projects/:slug/jobs answers for that kind — TIMELINE_ALREADY_EXISTS (render/montage), STORYBOARD_ALREADY_EXISTS (storyboard), VOICE_ALREADY_EXISTS or MONTAGE_VOICE_TRACK_NOT_FOUND (voice/montage/photo-aroll) — if the precondition that held at the original creation no longer holds. application/json: { error: { code, stage: null, message, resource?, expected?, hint?, assetPersisted?, catalogUpdated? } }.",
+          "422": "JOB_RECORD_INVALID when the persisted row cannot be read back as a job of a known kind and state, or its stored params do not pass the same validation POST /projects/:slug/jobs applies to a fresh body — this should only happen to a row written by an incompatible, older version of this service. application/json: { error: { code, stage: null, message, resource?, expected?, hint?, assetPersisted?, catalogUpdated? } }.",
+          "500": "application/json: { error: { code: 'INTERNAL_ERROR', stage: null, message } } from the central error handler."
+        },
+        "changelog": [
+          {
+            "cycle": 2,
+            "date": "2026-09-23",
+            "change": "Created in spec-e-burgos-017 cycle-02 (TASK-005), alongside the persisted job store."
           }
         ]
       }

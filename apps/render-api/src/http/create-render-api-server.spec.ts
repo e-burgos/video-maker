@@ -159,6 +159,7 @@ describe('createRenderApiServer', () => {
       files: [{ path: `${STORE.mediaRoot}/smoke-ingest/work/timeline.json`, contents: JSON.stringify(timeline) }],
     });
     const deps = createFakeRenderApiDependencies(callLog, { storage });
+    deps.localStore.projects.insert('smoke-ingest');
     server = createRenderApiServer(deps, { host: '127.0.0.1', port: 0 }, STORE);
 
     const address = await server.listen();

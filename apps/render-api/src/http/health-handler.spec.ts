@@ -162,9 +162,9 @@ describe('handleHealth', () => {
     const callLog = createCallLog();
     const deps = createFakeRenderApiDependencies(callLog);
     const controllable = createControllableRenderMutedVideo();
-    const runtime = createRenderApiRuntime(
-      createFakeRenderApiDependencies(createCallLog(), { renderMutedVideo: controllable.port }),
-    );
+    const jobDeps = createFakeRenderApiDependencies(createCallLog(), { renderMutedVideo: controllable.port });
+    jobDeps.localStore.projects.insert('acme-launch');
+    const runtime = createRenderApiRuntime(jobDeps);
 
     runtime.jobs.create({ kind: 'render', slug: 'acme-launch', projectRoot: PROJECT_ROOT, timeline: buildMinimalTimeline() });
     runtime.jobs.create({ kind: 'render', slug: 'acme-launch', projectRoot: PROJECT_ROOT, timeline: buildMinimalTimeline() });

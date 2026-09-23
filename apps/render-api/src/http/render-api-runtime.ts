@@ -4,7 +4,7 @@ import { DEFAULT_HOST, DEFAULT_PORT } from '../config/server-config';
 import { readProducerConfig } from '../config/producer-config';
 import type { ProducerConfig } from '../config/producer-config';
 import type { RenderApiDependencies } from '../deps/render-api-dependencies';
-import { createRenderJobQueue } from '../jobs/render-job-queue';
+import { createRenderJobQueue, recoverInterruptedJobs } from '../jobs/render-job-queue';
 import type { RenderJobQueue } from '../jobs/render-job-queue';
 import { createMusicSearchCache } from '../music/music-search-cache';
 import type { MusicSearchCache } from '../music/music-search-cache';
@@ -30,6 +30,8 @@ export function createRenderApiRuntime(
   deps: RenderApiDependencies,
   producer: ProducerConfig = defaultProducerConfig(),
 ): RenderApiRuntime {
+  recoverInterruptedJobs(deps);
+
   return {
     jobs: createRenderJobQueue(deps),
     producerTurns: createProducerTurnRegistry(),

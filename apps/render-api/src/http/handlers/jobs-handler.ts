@@ -1,8 +1,12 @@
+import type { MediaProject } from '@video-maker/auto-montage';
 import { toAbsolutePath } from '@video-maker/auto-montage';
+import type { Timeline } from '@video-maker/timeline-core';
 
 import type { StoreConfig } from '../../config/store-config';
 import type { RenderApiDependencies } from '../../deps/render-api-dependencies';
 import { PipelineStageError } from '../../errors/pipeline-stage-error';
+import { parseStoredJob, parseStoredParams } from '../../jobs/job-persistence';
+import type { StoredJobParams } from '../../jobs/job-persistence';
 import {
   parseMontageCaptionStyle,
   parseMontageFormat,
@@ -26,7 +30,7 @@ import { readVoiceManifestIfUsable } from '../../voice/voice-store';
 import { readStoredStoryboard } from '../../storyboard/storyboard-store';
 import { storyboardPath } from '../../storyboard/storyboard-paths';
 import { storyboardExists } from '../../storyboard/storyboard-store';
-import type { JobKind, RenderJobSummary } from '../../jobs/render-job';
+import type { CreateJobInput, Job, JobKind, RenderJobSummary } from '../../jobs/render-job';
 import { toJobSummary } from '../../jobs/render-job';
 import { assertTimelineNotPersisted, assertValidProjectSlug, readStoredTimeline, resolveExistingProject } from '../../store/project-scope';
 import { JSON_CONTENT_TYPE } from '../http-message';
@@ -37,6 +41,18 @@ import type { RouteParams } from '../router';
 
 function jsonResponse(status: number, body: unknown): HttpResponse {
   return { status, headers: { 'content-type': JSON_CONTENT_TYPE }, body };
+}
+
+function jobAcceptedResponse(job: Job): HttpResponse {
+  return {
+    status: 202,
+    headers: { 'content-type': JSON_CONTENT_TYPE, location: `/jobs/${job.id}` },
+    body: job,
+  };
+}
+
+function registerJob(runtime: RenderApiRuntime, input: CreateJobInput, retryOf: string | null): Job {
+  return retryOf === null ? runtime.jobs.create(input) : runtime.jobs.createRetry(retryOf, input);
 }
 
 export interface RenderJobListBody {
@@ -62,6 +78,130 @@ function resolveJobKind(value: unknown): JobKind | 'invalid' {
     return raw;
   }
   return 'invalid';
+}
+
+async function createRenderJobResponse(
+  runtime: RenderApiRuntime,
+  slug: string,
+  projectRoot: string,
+  timeline: Timeline,
+  retryOf: string | null,
+): Promise<HttpResponse> {
+  const job = registerJob(runtime, { kind: 'render', slug, projectRoot, timeline }, retryOf);
+  return jobAcceptedResponse(job);
+}
+
+interface MontageParams {
+  readonly preset: ReturnType<typeof parseMontagePreset>;
+  readonly seed: number;
+  readonly scriptPath: string | null;
+  readonly scriptText: string | null;
+  readonly logo: ReturnType<typeof parseMontageLogo>;
+  readonly format: ReturnType<typeof parseMontageFormat>;
+  readonly voice: ReturnType<typeof parseMontageVoice>;
+  readonly captionStyle: ReturnType<typeof parseMontageCaptionStyle>;
+}
+
+async function createMontageJobResponse(
+  deps: RenderApiDependencies,
+  project: MediaProject,
+  runtime: RenderApiRuntime,
+  slug: string,
+  params: MontageParams,
+  overwrite: boolean,
+  retryOf: string | null,
+): Promise<HttpResponse> {
+  await assertTimelineNotPersisted(deps, project, overwrite);
+
+  if (params.voice === 'script') {
+    await assertVoiceScriptTrackPersisted(deps, project);
+  }
+
+  const job = registerJob(runtime, { kind: 'montage', slug, projectRoot: project.root, ...params }, retryOf);
+  return jobAcceptedResponse(job);
+}
+
+interface StoryboardParams {
+  readonly brief: string | null;
+  readonly scriptText: string | null;
+  readonly model: string | null;
+}
+
+async function createStoryboardJobResponse(
+  deps: RenderApiDependencies,
+  project: MediaProject,
+  runtime: RenderApiRuntime,
+  slug: string,
+  params: StoryboardParams,
+  overwrite: boolean,
+  retryOf: string | null,
+): Promise<HttpResponse> {
+  if (!overwrite && (await storyboardExists(deps, project))) {
+    throw new PipelineStageError({
+      code: 'STORYBOARD_ALREADY_EXISTS',
+      stage: null,
+      resource: storyboardPath(),
+    });
+  }
+
+  const job = registerJob(runtime, { kind: 'storyboard', slug, projectRoot: project.root, ...params }, retryOf);
+  return jobAcceptedResponse(job);
+}
+
+interface VoiceParams {
+  readonly voiceId: string | null;
+  readonly sceneIds: readonly string[] | null;
+  readonly scriptText: string | null;
+  readonly scriptPath: string | null;
+  readonly gapMs: number;
+}
+
+async function createVoiceJobResponse(
+  deps: RenderApiDependencies,
+  project: MediaProject,
+  runtime: RenderApiRuntime,
+  slug: string,
+  params: VoiceParams,
+  overwrite: boolean,
+  retryOf: string | null,
+): Promise<HttpResponse> {
+  if (params.scriptText === null && params.scriptPath === null) {
+    const document = await readStoredStoryboard(deps, project);
+    const scenes = selectVoiceScenes(document, params.sceneIds);
+    const manifest = await readVoiceManifestIfUsable(deps, project);
+
+    assertVoiceTracksNotPersisted(manifest, scenes, overwrite);
+  } else {
+    await assertVoiceScriptTrackNotPersisted(deps, project, overwrite);
+  }
+
+  const job = registerJob(runtime, { kind: 'voice', slug, projectRoot: project.root, ...params }, retryOf);
+  return jobAcceptedResponse(job);
+}
+
+interface PhotoArollParams {
+  readonly photos: readonly string[];
+  readonly output: string;
+  readonly fps: number;
+}
+
+async function createPhotoArollJobResponse(
+  deps: RenderApiDependencies,
+  project: MediaProject,
+  runtime: RenderApiRuntime,
+  slug: string,
+  params: PhotoArollParams,
+  retryOf: string | null,
+): Promise<HttpResponse> {
+  await assertVoiceScriptTrackPersisted(deps, project);
+
+  const targetPath = `raw/aroll/${params.output}`;
+  if ((await deps.storage.stat(toAbsolutePath(project, targetPath))) !== null) {
+    throw new PipelineStageError({ code: 'ASSET_EXISTS', stage: null, resource: targetPath });
+  }
+
+  const job = registerJob(runtime, { kind: 'photo-aroll', slug, projectRoot: project.root, ...params }, retryOf);
+  return jobAcceptedResponse(job);
 }
 
 export async function handleCreateRenderJob(
@@ -105,13 +245,7 @@ export async function handleCreateRenderJob(
 
   if (jobKind === 'render') {
     const timeline = await readStoredTimeline(deps, project);
-    const job = runtime.jobs.create({ kind: 'render', slug, projectRoot: project.root, timeline });
-
-    return {
-      status: 202,
-      headers: { 'content-type': JSON_CONTENT_TYPE, location: `/jobs/${job.id}` },
-      body: job,
-    };
+    return createRenderJobResponse(runtime, slug, project.root, timeline, null);
   }
 
   const bodyObject = value as Record<string, unknown>;
@@ -121,86 +255,48 @@ export async function handleCreateRenderJob(
     const overwrite = parseStoryboardOverwrite(bodyObject.overwrite);
     const model = parseJobModel(bodyObject.model, runtime.producer.models);
 
-    if (!overwrite && (await storyboardExists(deps, project))) {
-      throw new PipelineStageError({
-        code: 'STORYBOARD_ALREADY_EXISTS',
-        stage: null,
-        resource: storyboardPath(),
-      });
-    }
-
-    const storyboardJob = runtime.jobs.create({
-      kind: 'storyboard',
+    return createStoryboardJobResponse(
+      deps,
+      project,
+      runtime,
       slug,
-      projectRoot: project.root,
-      brief: input.brief,
-      scriptText: input.scriptText,
-      model,
-    });
-
-    return {
-      status: 202,
-      headers: { 'content-type': JSON_CONTENT_TYPE, location: `/jobs/${storyboardJob.id}` },
-      body: storyboardJob,
-    };
+      { brief: input.brief, scriptText: input.scriptText, model },
+      overwrite,
+      null,
+    );
   }
 
   if (jobKind === 'voice') {
     parseJobModel(bodyObject.model, runtime.producer.models);
     const input = parseVoiceJobInput(bodyObject);
 
-    if (input.scriptText === null && input.scriptPath === null) {
-      const document = await readStoredStoryboard(deps, project);
-      const scenes = selectVoiceScenes(document, input.sceneIds);
-      const manifest = await readVoiceManifestIfUsable(deps, project);
-
-      assertVoiceTracksNotPersisted(manifest, scenes, input.overwrite);
-    } else {
-      await assertVoiceScriptTrackNotPersisted(deps, project, input.overwrite);
-    }
-
-    const voiceJob = runtime.jobs.create({
-      kind: 'voice',
+    return createVoiceJobResponse(
+      deps,
+      project,
+      runtime,
       slug,
-      projectRoot: project.root,
-      voiceId: input.voiceId,
-      sceneIds: input.sceneIds,
-      scriptText: input.scriptText,
-      scriptPath: input.scriptPath,
-      gapMs: input.gapMs,
-    });
-
-    return {
-      status: 202,
-      headers: { 'content-type': JSON_CONTENT_TYPE, location: `/jobs/${voiceJob.id}` },
-      body: voiceJob,
-    };
+      {
+        voiceId: input.voiceId,
+        sceneIds: input.sceneIds,
+        scriptText: input.scriptText,
+        scriptPath: input.scriptPath,
+        gapMs: input.gapMs,
+      },
+      input.overwrite,
+      null,
+    );
   }
 
   if (jobKind === 'photo-aroll') {
     const input = parsePhotoArollJobInput(bodyObject);
-
-    await assertVoiceScriptTrackPersisted(deps, project);
-
-    const targetPath = `raw/aroll/${input.output}`;
-    if ((await deps.storage.stat(toAbsolutePath(project, targetPath))) !== null) {
-      throw new PipelineStageError({ code: 'ASSET_EXISTS', stage: null, resource: targetPath });
-    }
-
-    const photoArollJob = runtime.jobs.create({
-      kind: 'photo-aroll',
+    return createPhotoArollJobResponse(
+      deps,
+      project,
+      runtime,
       slug,
-      projectRoot: project.root,
-      photos: input.photos,
-      output: input.output,
-      fps: input.fps,
-    });
-
-    return {
-      status: 202,
-      headers: { 'content-type': JSON_CONTENT_TYPE, location: `/jobs/${photoArollJob.id}` },
-      body: photoArollJob,
-    };
+      { photos: input.photos, output: input.output, fps: input.fps },
+      null,
+    );
   }
 
   const preset = parseMontagePreset(bodyObject.preset);
@@ -212,31 +308,24 @@ export async function handleCreateRenderJob(
   const voice = parseMontageVoice(bodyObject.voice);
   const captionStyle = parseMontageCaptionStyle(bodyObject.captionStyle);
 
-  await assertTimelineNotPersisted(deps, project, overwrite);
-
-  if (voice === 'script') {
-    await assertVoiceScriptTrackPersisted(deps, project);
-  }
-
-  const job = runtime.jobs.create({
-    kind: 'montage',
+  return createMontageJobResponse(
+    deps,
+    project,
+    runtime,
     slug,
-    projectRoot: project.root,
-    preset,
-    seed,
-    scriptPath: script.scriptPath,
-    scriptText: script.scriptText,
-    logo,
-    format,
-    voice,
-    captionStyle,
-  });
-
-  return {
-    status: 202,
-    headers: { 'content-type': JSON_CONTENT_TYPE, location: `/jobs/${job.id}` },
-    body: job,
-  };
+    {
+      preset,
+      seed,
+      scriptPath: script.scriptPath,
+      scriptText: script.scriptText,
+      logo,
+      format,
+      voice,
+      captionStyle,
+    },
+    overwrite,
+    null,
+  );
 }
 
 export async function handleListRenderJobs(
@@ -283,5 +372,57 @@ export async function handleCancelRenderJob(
       });
     case 'not-found':
       throw new PipelineStageError({ code: 'RENDER_JOB_NOT_FOUND', stage: null, resource: jobId });
+  }
+}
+
+const RETRYABLE_STATES = new Set(['failed', 'canceled']);
+
+function requireRetryableParams(jobId: string, kind: JobKind, rawParams: unknown): StoredJobParams {
+  const parsed = parseStoredParams(kind, rawParams);
+  if (parsed === null) {
+    throw new PipelineStageError({ code: 'JOB_RECORD_INVALID', stage: null, resource: jobId });
+  }
+  return parsed;
+}
+
+export async function handleRetryRenderJob(
+  deps: RenderApiDependencies,
+  store: StoreConfig,
+  params: RouteParams,
+  runtime: RenderApiRuntime,
+): Promise<HttpResponse> {
+  const jobId = params.jobId ?? '';
+  const storedRow = deps.localStore.jobs.get(jobId);
+  if (storedRow === null) {
+    throw new PipelineStageError({ code: 'RENDER_JOB_NOT_FOUND', stage: null, resource: jobId });
+  }
+
+  const job = parseStoredJob(storedRow);
+  if (job.error?.code === 'JOB_RECORD_INVALID') {
+    throw new PipelineStageError({ code: 'JOB_RECORD_INVALID', stage: null, resource: jobId });
+  }
+  if (!RETRYABLE_STATES.has(job.state)) {
+    throw new PipelineStageError({
+      code: 'JOB_NOT_RETRYABLE',
+      stage: null,
+      resource: jobId,
+      expected: 'a job in the failed or canceled state',
+    });
+  }
+
+  const retryParams = requireRetryableParams(jobId, job.kind, storedRow.params);
+  const project = await resolveExistingProject(deps, store, job.slug);
+
+  switch (retryParams.kind) {
+    case 'render':
+      return createRenderJobResponse(runtime, job.slug, project.root, retryParams.timeline, jobId);
+    case 'montage':
+      return createMontageJobResponse(deps, project, runtime, job.slug, retryParams, false, jobId);
+    case 'storyboard':
+      return createStoryboardJobResponse(deps, project, runtime, job.slug, retryParams, false, jobId);
+    case 'voice':
+      return createVoiceJobResponse(deps, project, runtime, job.slug, retryParams, false, jobId);
+    case 'photo-aroll':
+      return createPhotoArollJobResponse(deps, project, runtime, job.slug, retryParams, jobId);
   }
 }

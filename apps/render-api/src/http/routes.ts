@@ -44,6 +44,7 @@ export const ROUTES = [
   { id: 'projects.jobs.list', method: 'GET', pattern: '/projects/:slug/jobs' },
   { id: 'jobs.detail', method: 'GET', pattern: '/jobs/:jobId' },
   { id: 'jobs.cancel', method: 'DELETE', pattern: '/jobs/:jobId' },
+  { id: 'jobs.retry', method: 'POST', pattern: '/jobs/:jobId/retry' },
 ] as const;
 
 export type RouteId = (typeof ROUTES)[number]['id'];

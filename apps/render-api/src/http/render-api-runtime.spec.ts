@@ -6,9 +6,10 @@ import { buildMinimalTimeline } from '../__fixtures__/minimal-timeline';
 import { createRenderApiRuntime } from './render-api-runtime';
 
 describe('createRenderApiRuntime', () => {
-  it('creates an independent queue and upload serializer per runtime', async () => {
+  it('keeps independent in-memory scheduling per runtime while sharing the persisted job store', async () => {
     const callLog = createCallLog();
     const deps = createFakeRenderApiDependencies(callLog);
+    deps.localStore.projects.insert('acme-launch');
 
     const first = createRenderApiRuntime(deps);
     const second = createRenderApiRuntime(deps);
@@ -21,7 +22,8 @@ describe('createRenderApiRuntime', () => {
     });
 
     expect(first.jobs.get(job.id)).not.toBeNull();
-    expect(second.jobs.get(job.id)).toBeNull();
+    expect(second.jobs.get(job.id)).not.toBeNull();
+    expect(second.jobs.size()).toEqual({ running: 0, queued: 0 });
     expect(first.uploadSerializer).not.toBe(second.uploadSerializer);
 
     await first.jobs.whenIdle();

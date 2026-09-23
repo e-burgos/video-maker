@@ -145,3 +145,30 @@ documentos: la base no es excusa para confiar en lo que devuelve.
   calcula el set de ids contra `current.folders.flatMap(f => f.categories)` antes de pedir el id
   único. Cambio de comportamiento menor (antes "Intro" podía repetirse en dos carpetas distintas,
   ahora la segunda es "intro-2"), sin cambio de payload.
+- **Nota para TASK-006 (importador), dejada por el orquestador al cerrar TASK-003/004:** como los
+  category id son ahora únicos globalmente (ver el punto anterior), el importador puede encontrar
+  un `organization.json` legado con dos carpetas que comparten un category id — tiene que sufijar
+  el duplicado y remapear los placements que apuntaban a él. Agregar un test para ese caso.
+- **TASK-005 — dos códigos de error nuevos no estaban en el plan original: `JOB_RECORD_INVALID`
+  (422) y `JOB_NOT_RETRYABLE` (409).** `JOB_RECORD_INVALID` cubre una fila de `jobs` que
+  `job-persistence.ts` no puede reconstruir (kind o state desconocidos, o `params` que no valida
+  contra el parser de esa kind) — nunca tira, la lista y el detalle la reportan como un job
+  `failed` con ese código en vez de romper. Para "no retryable" se evaluó reusar
+  `RENDER_JOB_NOT_CANCELABLE`, pero su mensaje habla de cancelación y no encaja para un job que
+  **ya tuvo éxito**; se agregó `JOB_NOT_RETRYABLE` en su lugar.
+- **TASK-005 — hallazgo real, no corregido en este ciclo:** un `kill -9` del proceso `render-api`
+  a mitad de un render puede dejar huérfanos los `chrome-headless-shell` de Remotion (se observó al
+  hacer el chequeo real de este ciclo; en una segunda corrida con un clip más corto no volvió a
+  pasar, así que depende de en qué punto del render cae la señal). `SIGKILL` no llega a los hijos y
+  no hay manejo de grupo de procesos ni un `SIGTERM` con gracia antes del `kill -9` en
+  `create-render-api-server.ts`. Fuera del alcance de TASK-005 (es limpieza de proceso del
+  pipeline, no persistencia); si se repite en producción conviene un `SIGTERM` al queue con espera
+  corta antes de que el supervisor mate con `-9`, o matar el grupo de procesos del render en curso
+  al recibir la señal.
+- **TASK-005 — un proyecto de `media/` que todavía no tiene fila en `projects` (o sea, cualquiera
+  hoy, porque TASK-006 no corrió) no puede crear un job:** `resolveExistingProject` lo encuentra
+  por directorio, pero `jobsStore.insert` explota con un `SqliteError` de FK crudo (500
+  `INTERNAL_ERROR`, no un código tipado) en vez de un 404/409 legible. Es exactamente el hueco que
+  TASK-006 cierra al importar cada carpeta al arrancar; para el chequeo real de este ciclo se
+  insertó la fila a mano (mismo movimiento que hará el importador) en vez de arreglarlo acá. Si
+  TASK-006 se demora, vale la pena un guard más amable en `handleCreateRenderJob`.

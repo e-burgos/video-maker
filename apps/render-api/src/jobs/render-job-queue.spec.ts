@@ -15,16 +15,24 @@ import type { ObjectStorage } from '../deps/object-storage';
 import type { RenderApiDependencies } from '../deps/render-api-dependencies';
 import type { RenderPipelineStage } from '../errors/render-api-error';
 import type { CreateMontageJobInput, CreateRenderJobInput } from './render-job';
-import { createRenderJobQueue } from './render-job-queue';
+import { createRenderJobQueue, recoverInterruptedJobs } from './render-job-queue';
 
 const PROJECT_ROOT = '/var/data/media/acme-launch';
 const MONTAGE_PROJECT_ROOT = '/var/data/media/montage-project';
 
-function createInput(slug: string): CreateRenderJobInput {
+function ensureProject(deps: RenderApiDependencies, slug: string): void {
+  if (!deps.localStore.projects.exists(slug)) {
+    deps.localStore.projects.insert(slug);
+  }
+}
+
+function createInput(deps: RenderApiDependencies, slug: string): CreateRenderJobInput {
+  ensureProject(deps, slug);
   return { kind: 'render', slug, projectRoot: PROJECT_ROOT, timeline: buildMinimalTimeline() };
 }
 
-function createMontageInput(slug: string): CreateMontageJobInput {
+function createMontageInput(deps: RenderApiDependencies, slug: string): CreateMontageJobInput {
+  ensureProject(deps, slug);
   return {
     kind: 'montage',
     slug,
@@ -167,8 +175,8 @@ describe('createRenderJobQueue', () => {
     });
     const queue = createRenderJobQueue(deps);
 
-    const first = queue.create(createInput('acme-launch'));
-    const second = queue.create(createInput('acme-launch'));
+    const first = queue.create(createInput(deps, 'acme-launch'));
+    const second = queue.create(createInput(deps, 'acme-launch'));
 
     expect(first.state).toBe('running');
     expect(second.state).toBe('queued');
@@ -210,8 +218,8 @@ describe('createRenderJobQueue', () => {
       });
       const queue = createRenderJobQueue(deps);
 
-      const first = queue.create(createInput('acme-launch'));
-      const second = queue.create(createInput('acme-launch'));
+      const first = queue.create(createInput(deps, 'acme-launch'));
+      const second = queue.create(createInput(deps, 'acme-launch'));
 
       expect(second.state).toBe('queued');
 
@@ -239,9 +247,9 @@ describe('createRenderJobQueue', () => {
     const deps = createFakeRenderApiDependencies(callLog);
     const queue = createRenderJobQueue(deps);
 
-    const alphaFirst = queue.create(createInput('alpha'));
-    queue.create(createInput('beta'));
-    const alphaSecond = queue.create(createInput('alpha'));
+    const alphaFirst = queue.create(createInput(deps, 'alpha'));
+    queue.create(createInput(deps, 'beta'));
+    const alphaSecond = queue.create(createInput(deps, 'alpha'));
 
     const alphaJobs = queue.listBySlug('alpha');
 
@@ -257,7 +265,7 @@ describe('createRenderJobQueue', () => {
     const deps = createFakeRenderApiDependencies(callLog, { renderMutedVideo: controllable.port });
     const queue = createRenderJobQueue(deps);
 
-    const job = queue.create(createInput('acme-launch'));
+    const job = queue.create(createInput(deps, 'acme-launch'));
     await controllable.started;
 
     controllable.emitProgress(120, 538);
@@ -286,8 +294,8 @@ describe('createRenderJobQueue', () => {
     const deps = createFakeRenderApiDependencies(callLog, { renderMutedVideo: controllable.port });
     const queue = createRenderJobQueue(deps);
 
-    queue.create(createInput('acme-launch'));
-    const second = queue.create(createInput('acme-launch'));
+    queue.create(createInput(deps, 'acme-launch'));
+    const second = queue.create(createInput(deps, 'acme-launch'));
     expect(second.state).toBe('queued');
 
     const portsBeforeCancel = callLog.ports();
@@ -310,7 +318,7 @@ describe('createRenderJobQueue', () => {
     const deps = createFakeRenderApiDependencies(callLog, { renderMutedVideo: controllable.port });
     const queue = createRenderJobQueue(deps);
 
-    const job = queue.create(createInput('acme-launch'));
+    const job = queue.create(createInput(deps, 'acme-launch'));
     await controllable.started;
 
     const result = queue.cancel(job.id);
@@ -345,7 +353,7 @@ describe('createRenderJobQueue', () => {
     });
     const queue = createRenderJobQueue(deps);
 
-    const job = queue.create(createInput('acme-launch'));
+    const job = queue.create(createInput(deps, 'acme-launch'));
     cancelJob = () => {
       queue.cancel(job.id);
     };
@@ -364,7 +372,7 @@ describe('createRenderJobQueue', () => {
     const deps = createFakeRenderApiDependencies(callLog, { logger, renderMutedVideo: controllable.port });
     const queue = createRenderJobQueue(deps);
 
-    const job = queue.create(createInput('acme-launch'));
+    const job = queue.create(createInput(deps, 'acme-launch'));
     await controllable.started;
 
     const firstCancel = queue.cancel(job.id);
@@ -444,7 +452,7 @@ describe('createRenderJobQueue', () => {
       const deps = createFakeRenderApiDependencies(callLog, overrides);
       const queue = createRenderJobQueue(deps);
 
-      const job = queue.create(createInput('acme-launch'));
+      const job = queue.create(createInput(deps, 'acme-launch'));
       await queue.whenIdle();
 
       const finished = queue.get(job.id);
@@ -459,7 +467,7 @@ describe('createRenderJobQueue', () => {
     const deps = createFakeRenderApiDependencies(callLog);
     const queue = createRenderJobQueue(deps);
 
-    const job = queue.create(createInput('acme-launch'));
+    const job = queue.create(createInput(deps, 'acme-launch'));
     await queue.whenIdle();
 
     const finished = queue.get(job.id);
@@ -470,29 +478,30 @@ describe('createRenderJobQueue', () => {
 
   it('never invokes a removal port for a finished job', async () => {
     const succeededCallLog = createCallLog();
-    const succeededQueue = createRenderJobQueue(createFakeRenderApiDependencies(succeededCallLog));
-    succeededQueue.create(createInput('acme-launch'));
+    const succeededDeps = createFakeRenderApiDependencies(succeededCallLog);
+    const succeededQueue = createRenderJobQueue(succeededDeps);
+    succeededQueue.create(createInput(succeededDeps, 'acme-launch'));
     await succeededQueue.whenIdle();
     expect(succeededCallLog.ports()).not.toContain('removeTemporary');
 
     const failedCallLog = createCallLog();
-    const failedQueue = createRenderJobQueue(
-      createFakeRenderApiDependencies(failedCallLog, {
-        muxAudioIntoVideo: async () => {
-          throw new Error('mux exploded');
-        },
-      }),
-    );
-    failedQueue.create(createInput('acme-launch'));
+    const failedDeps = createFakeRenderApiDependencies(failedCallLog, {
+      muxAudioIntoVideo: async () => {
+        throw new Error('mux exploded');
+      },
+    });
+    const failedQueue = createRenderJobQueue(failedDeps);
+    failedQueue.create(createInput(failedDeps, 'acme-launch'));
     await failedQueue.whenIdle();
     expect(failedCallLog.ports()).not.toContain('removeTemporary');
 
     const canceledCallLog = createCallLog();
     const canceledControllable = createControllableRenderMutedVideo();
-    const canceledQueue = createRenderJobQueue(
-      createFakeRenderApiDependencies(canceledCallLog, { renderMutedVideo: canceledControllable.port }),
-    );
-    const canceledJob = canceledQueue.create(createInput('acme-launch'));
+    const canceledDeps = createFakeRenderApiDependencies(canceledCallLog, {
+      renderMutedVideo: canceledControllable.port,
+    });
+    const canceledQueue = createRenderJobQueue(canceledDeps);
+    const canceledJob = canceledQueue.create(createInput(canceledDeps, 'acme-launch'));
     await canceledControllable.started;
     canceledQueue.cancel(canceledJob.id);
     canceledControllable.resolve(DEFAULT_RENDER_OUTPUT);
@@ -511,8 +520,8 @@ describe('createRenderJobQueue — montage jobs', () => {
     };
     const queue = createRenderJobQueue(deps);
 
-    const renderJob = queue.create(createInput('acme-launch'));
-    const montageJob = queue.create(createMontageInput('montage-project'));
+    const renderJob = queue.create(createInput(deps, 'acme-launch'));
+    const montageJob = queue.create(createMontageInput(deps, 'montage-project'));
 
     expect(renderJob.state).toBe('running');
     expect(montageJob.state).toBe('queued');
@@ -531,8 +540,8 @@ describe('createRenderJobQueue — montage jobs', () => {
     const deps = buildMontageDeps(callLog, { controllableProbe });
     const queue = createRenderJobQueue(deps);
 
-    const montageJob = queue.create(createMontageInput('montage-project'));
-    const renderJob = queue.create(createInput('acme-launch'));
+    const montageJob = queue.create(createMontageInput(deps, 'montage-project'));
+    const renderJob = queue.create(createInput(deps, 'acme-launch'));
 
     expect(montageJob.state).toBe('running');
     expect(renderJob.state).toBe('queued');
@@ -550,8 +559,8 @@ describe('createRenderJobQueue — montage jobs', () => {
     const deps = buildMontageDeps(callLog, { controllableProbe });
     const queue = createRenderJobQueue(deps);
 
-    queue.create(createMontageInput('montage-project'));
-    const second = queue.create(createMontageInput('montage-project'));
+    queue.create(createMontageInput(deps, 'montage-project'));
+    const second = queue.create(createMontageInput(deps, 'montage-project'));
     expect(second.state).toBe('queued');
 
     const portsBeforeCancel = callLog.ports();
@@ -573,7 +582,7 @@ describe('createRenderJobQueue — montage jobs', () => {
     const deps = buildMontageDeps(callLog, { controllableProbe });
     const queue = createRenderJobQueue(deps);
 
-    const job = queue.create(createMontageInput('montage-project'));
+    const job = queue.create(createMontageInput(deps, 'montage-project'));
     await controllableProbe.started;
     expect(queue.get(job.id)?.state).toBe('running');
 
@@ -605,7 +614,7 @@ describe('createRenderJobQueue — montage jobs', () => {
     const deps = buildMontageDeps(callLog);
     const queue = createRenderJobQueue(deps);
 
-    const job = queue.create(createMontageInput('montage-project'));
+    const job = queue.create(createMontageInput(deps, 'montage-project'));
     await queue.whenIdle();
 
     const finished = queue.get(job.id);
@@ -622,7 +631,7 @@ describe('createRenderJobQueue — montage jobs', () => {
     const deps = buildMontageDeps(callLog);
     const queue = createRenderJobQueue(deps);
 
-    const job = queue.create(createMontageInput('montage-project'));
+    const job = queue.create(createMontageInput(deps, 'montage-project'));
     await queue.whenIdle();
 
     const finished = queue.get(job.id);
@@ -639,5 +648,137 @@ describe('createRenderJobQueue — montage jobs', () => {
       voiceTrack: null,
       captionStyle: 'bold-impact',
     });
+  });
+});
+
+describe('createRenderJobQueue — persistence across a restart', () => {
+  it('a fresh queue over the same store reads back a job created before the restart', async () => {
+    const callLog = createCallLog();
+    const deps = createFakeRenderApiDependencies(callLog);
+    const queue = createRenderJobQueue(deps);
+
+    const job = queue.create(createInput(deps, 'acme-launch'));
+    await queue.whenIdle();
+
+    const restarted = createRenderJobQueue(deps);
+
+    expect(restarted.get(job.id)).toMatchObject({ id: job.id, state: 'succeeded' });
+    expect(restarted.listBySlug('acme-launch').map((entry) => entry.id)).toEqual([job.id]);
+  });
+
+  it('after a restart, the new queue sees the old job from the store and a new one live in its own map', async () => {
+    const callLog = createCallLog();
+    let nowMs = 0;
+    const deps = createFakeRenderApiDependencies(callLog, {
+      clock: { nowIso: () => new Date(nowMs).toISOString() },
+    });
+    const firstQueue = createRenderJobQueue(deps);
+
+    const oldJob = firstQueue.create(createInput(deps, 'acme-launch'));
+    await firstQueue.whenIdle();
+
+    nowMs += 60_000;
+    const controllable = createControllableRenderMutedVideo();
+    const liveDeps = { ...deps, renderMutedVideo: controllable.port };
+    const restartedQueue = createRenderJobQueue(liveDeps);
+    const newJob = restartedQueue.create(createInput(liveDeps, 'acme-launch'));
+
+    const listed = restartedQueue.listBySlug('acme-launch');
+    expect(listed.map((entry) => entry.id)).toEqual([oldJob.id, newJob.id]);
+
+    controllable.resolve(DEFAULT_RENDER_OUTPUT);
+    await restartedQueue.whenIdle();
+  });
+});
+
+describe('recoverInterruptedJobs', () => {
+  it('marks every queued, running or canceling job as failed with JOB_INTERRUPTED and leaves terminal jobs untouched', async () => {
+    const callLog = createCallLog();
+    const deps = createFakeRenderApiDependencies(callLog);
+    deps.localStore.projects.insert('acme-launch');
+
+    deps.localStore.jobs.insert({
+      id: 'queued-1',
+      slug: 'acme-launch',
+      kind: 'render',
+      state: 'queued',
+      params: {},
+      createdAt: '2026-09-23T00:00:00.000Z',
+    });
+    deps.localStore.jobs.insert({
+      id: 'running-1',
+      slug: 'acme-launch',
+      kind: 'render',
+      state: 'running',
+      params: {},
+      createdAt: '2026-09-23T00:00:00.000Z',
+    });
+    deps.localStore.jobs.insert({
+      id: 'canceling-1',
+      slug: 'acme-launch',
+      kind: 'render',
+      state: 'canceling',
+      params: {},
+      createdAt: '2026-09-23T00:00:00.000Z',
+    });
+    deps.localStore.jobs.insert({
+      id: 'succeeded-1',
+      slug: 'acme-launch',
+      kind: 'render',
+      state: 'succeeded',
+      params: {},
+      createdAt: '2026-09-23T00:00:00.000Z',
+    });
+
+    recoverInterruptedJobs(deps);
+
+    for (const id of ['queued-1', 'running-1', 'canceling-1']) {
+      const row = deps.localStore.jobs.get(id);
+      expect(row?.state).toBe('failed');
+      expect(row?.error).toMatchObject({ code: 'JOB_INTERRUPTED' });
+      expect(row?.finishedAt).not.toBeNull();
+    }
+
+    const untouched = deps.localStore.jobs.get('succeeded-1');
+    expect(untouched?.state).toBe('succeeded');
+    expect(untouched?.error).toBeNull();
+  });
+
+  it('does nothing when there is nothing unfinished', () => {
+    const callLog = createCallLog();
+    const deps = createFakeRenderApiDependencies(callLog);
+    expect(() => recoverInterruptedJobs(deps)).not.toThrow();
+  });
+});
+
+describe('createRenderJobQueue — progress throttling', () => {
+  it('throttles progress writes to the store to at most one per second, and always flushes the last one on settle', async () => {
+    const callLog = createCallLog();
+    let nowMs = 0;
+    const deps = createFakeRenderApiDependencies(callLog, {
+      clock: { nowIso: () => new Date(nowMs).toISOString() },
+    });
+    const controllable = createControllableRenderMutedVideo();
+    const throttledDeps = { ...deps, renderMutedVideo: controllable.port };
+    const queue = createRenderJobQueue(throttledDeps);
+
+    const job = queue.create(createInput(throttledDeps, 'acme-launch'));
+    await controllable.started;
+
+    controllable.emitProgress(10, 100);
+    nowMs += 100;
+    controllable.emitProgress(20, 100);
+
+    const midway = deps.localStore.jobs.get(job.id)?.progress as { renderedFrames: number | null } | null;
+    expect(midway?.renderedFrames).not.toBe(20);
+
+    nowMs += 5_000;
+    controllable.resolve(DEFAULT_RENDER_OUTPUT);
+    await queue.whenIdle();
+
+    const settled = deps.localStore.jobs.get(job.id);
+    const live = queue.get(job.id);
+    expect(settled?.state).toBe('succeeded');
+    expect(settled?.progress).toEqual(live?.progress);
   });
 });
