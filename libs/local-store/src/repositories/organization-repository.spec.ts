@@ -92,6 +92,16 @@ describe('createOrganizationRepository', () => {
     expect(organization.videos['video-a']).toEqual({ folderId: null, categoryId: null, archived: true });
   });
 
+  it('hides a placement row that the FK cascade turned back into the default shape', () => {
+    const repository = createOrganizationRepository(db);
+    repository.createFolder('clients', 'Clients');
+    repository.setPlacement('video-a', { folderId: 'clients', categoryId: null, archived: false });
+
+    repository.deleteFolder('clients');
+
+    expect(repository.getOrganization().videos).toEqual({});
+  });
+
   it('deleting a category nulls its placements via the FK, keeping the folder placement', () => {
     const repository = createOrganizationRepository(db);
     repository.createFolder('clients', 'Clients');

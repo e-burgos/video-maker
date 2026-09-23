@@ -10,7 +10,7 @@ import { JSON_CONTENT_TYPE } from './http-message';
 import { createRenderApiRuntime } from './render-api-runtime';
 import { ROUTES } from './routes';
 
-const STORE: StoreConfig = { mediaRoot: '/media', maxUploadBytes: 2_147_483_648, objectStore: 'fs' };
+const STORE: StoreConfig = { mediaRoot: '/media', dbPath: '/media/.studio/studio.db', maxUploadBytes: 2_147_483_648, objectStore: 'fs' };
 
 function canonicalPathFor(pattern: string): string {
   return pattern

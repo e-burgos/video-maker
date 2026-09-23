@@ -104,17 +104,17 @@ export async function handleRequest(
       case 'projects.placement.put':
         return await handlePutProjectPlacement(deps, store, params, request);
       case 'folders.list':
-        return await handleListFolders(deps, store);
+        return await handleListFolders(deps);
       case 'folders.create':
-        return await handleCreateFolder(deps, store, params, request);
+        return await handleCreateFolder(deps, params, request);
       case 'folders.rename':
-        return await handleRenameFolder(deps, store, params, request);
+        return await handleRenameFolder(deps, params, request);
       case 'folders.delete':
-        return await handleDeleteFolder(deps, store, params);
+        return await handleDeleteFolder(deps, params);
       case 'folders.categories.create':
-        return await handleCreateCategory(deps, store, params, request);
+        return await handleCreateCategory(deps, params, request);
       case 'folders.categories.delete':
-        return await handleDeleteCategory(deps, store, params);
+        return await handleDeleteCategory(deps, params);
       case 'projects.assets.list':
         return await handleListAssets(deps, store, params);
       case 'projects.assets.upload':

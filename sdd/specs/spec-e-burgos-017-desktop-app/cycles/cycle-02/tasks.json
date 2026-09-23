@@ -102,20 +102,53 @@
       "depends_on": [
         "TASK-002"
       ],
-      "status": "pending",
+      "status": "done",
       "files": [
         "apps/render-api/src/config/store-config.ts",
         "apps/render-api/src/config/store-config.spec.ts",
         "apps/render-api/src/deps/render-api-dependencies.ts",
         "apps/render-api/src/deps/node-render-api-dependencies.ts",
+        "apps/render-api/src/deps/node-render-api-dependencies.spec.ts",
         "apps/render-api/src/__fixtures__/fake-render-api-dependencies.ts",
+        "apps/render-api/src/http/create-render-api-server.ts",
+        "apps/render-api/src/http/create-render-api-server.spec.ts",
+        "apps/render-api/src/http/handle-request.ts",
+        "apps/render-api/src/http/handle-request.spec.ts",
+        "apps/render-api/vite.config.ts",
         "apps/render-api/src/store/organization-store.ts",
         "apps/render-api/src/store/organization-store.spec.ts",
+        "apps/render-api/src/store/project-scope.spec.ts",
         "apps/render-api/src/http/handlers/projects-handler.ts",
         "apps/render-api/src/http/handlers/projects-handler.spec.ts",
-        "apps/render-api/src/http/handlers/organization-handler.ts",
-        "apps/render-api/src/http/handlers/organization-handler.spec.ts"
-      ]
+        "apps/render-api/src/http/handlers/folders-handler.ts",
+        "apps/render-api/src/http/handlers/folders-handler.spec.ts",
+        "apps/render-api/src/http/handlers/artifact-handler.spec.ts",
+        "apps/render-api/src/http/handlers/asset-copy-handler.spec.ts",
+        "apps/render-api/src/http/handlers/assets-handler.spec.ts",
+        "apps/render-api/src/http/handlers/frames-handler.spec.ts",
+        "apps/render-api/src/http/handlers/generated-handler.spec.ts",
+        "apps/render-api/src/http/handlers/jobs-handler.spec.ts",
+        "apps/render-api/src/http/handlers/montage-handler.spec.ts",
+        "apps/render-api/src/http/handlers/music-handler.spec.ts",
+        "apps/render-api/src/http/handlers/probe-handler.spec.ts",
+        "apps/render-api/src/http/handlers/project-text-handler.spec.ts",
+        "apps/render-api/src/http/handlers/storyboard-handler.spec.ts",
+        "apps/render-api/src/http/handlers/voice-handler.spec.ts",
+        "libs/local-store/src/database/open-studio-database.ts",
+        "libs/local-store/src/repositories/organization-repository.ts",
+        "libs/local-store/src/repositories/organization-repository.spec.ts",
+        "sdd/specs/spec-e-burgos-017-desktop-app/cycles/cycle-02/plan.md"
+      ],
+      "usage": {
+        "provider_model": "claude/sonnet",
+        "effort": "high",
+        "agent": "implementor-back",
+        "tokens_in": 340000,
+        "tokens_out": 42000,
+        "approx": true,
+        "source": "declared-estimate",
+        "recorded_at": "2026-09-23"
+      }
     },
     {
       "id": "TASK-004",
@@ -128,15 +161,27 @@
       "depends_on": [
         "TASK-002"
       ],
-      "status": "pending",
+      "status": "done",
       "files": [
         "apps/render-api/src/producer/producer-store.ts",
         "apps/render-api/src/producer/producer-store.spec.ts",
+        "apps/render-api/src/producer/producer-documents.ts",
+        "apps/render-api/src/producer/producer-documents.spec.ts",
         "apps/render-api/src/producer/run-producer-turn.ts",
         "apps/render-api/src/producer/run-producer-turn.spec.ts",
         "apps/render-api/src/http/handlers/producer-handler.ts",
         "apps/render-api/src/http/handlers/producer-handler.spec.ts"
-      ]
+      ],
+      "usage": {
+        "provider_model": "claude/sonnet",
+        "effort": "high",
+        "agent": "implementor-back",
+        "tokens_in": 120000,
+        "tokens_out": 16000,
+        "approx": true,
+        "source": "declared-estimate",
+        "recorded_at": "2026-09-23"
+      }
     },
     {
       "id": "TASK-005",

@@ -3,7 +3,7 @@ import { describe, expect, it } from 'vitest';
 import { createCallLog } from '../__fixtures__/call-log';
 import { createFakeObjectStorage } from '../__fixtures__/fake-object-storage';
 import { EMPTY_ORGANIZATION } from './organization';
-import { organizationPath, parseOrganization, readOrganization, writeOrganization } from './organization-store';
+import { organizationPath, parseOrganization, readOrganization } from './organization-store';
 
 const MEDIA_ROOT = '/media';
 
@@ -73,11 +73,11 @@ describe('readOrganization', () => {
     expect(await readOrganization(storage, MEDIA_ROOT)).toEqual(EMPTY_ORGANIZATION);
   });
 
-  it('reads back what it wrote', async () => {
+  it('reads a persisted document, as the importer will find it on disk', async () => {
     const callLog = createCallLog();
-    const storage = createFakeObjectStorage(callLog);
-
-    await writeOrganization(storage, MEDIA_ROOT, ORGANIZATION);
+    const storage = createFakeObjectStorage(callLog, {
+      files: [{ path: organizationPath(MEDIA_ROOT), contents: JSON.stringify(ORGANIZATION) }],
+    });
 
     expect(await readOrganization(storage, MEDIA_ROOT)).toEqual(ORGANIZATION);
   });

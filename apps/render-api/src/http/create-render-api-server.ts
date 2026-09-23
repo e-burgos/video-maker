@@ -101,6 +101,7 @@ export function createRenderApiServer(
             reject(cause);
             return;
           }
+          deps.localStore.close();
           resolve();
         });
       });

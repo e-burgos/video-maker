@@ -7,7 +7,7 @@ import { requestLine } from '../../__fixtures__/http-request';
 import type { StoreConfig } from '../../config/store-config';
 import { handleGetArtifact } from './artifact-handler';
 
-const STORE: StoreConfig = { mediaRoot: '/media', maxUploadBytes: 2_147_483_648, objectStore: 'fs' };
+const STORE: StoreConfig = { mediaRoot: '/media', dbPath: '/media/.studio/studio.db', maxUploadBytes: 2_147_483_648, objectStore: 'fs' };
 
 async function collectStream(stream: AsyncIterable<Uint8Array>): Promise<Uint8Array> {
   const chunks: Uint8Array[] = [];

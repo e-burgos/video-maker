@@ -7,7 +7,7 @@ import type { StoreConfig } from '../../config/store-config';
 import { GENERATED_ROOTS, handleGetGenerated } from './generated-handler';
 import type { GeneratedBody } from './generated-handler';
 
-const STORE: StoreConfig = { mediaRoot: '/media', maxUploadBytes: 2_147_483_648, objectStore: 'fs' };
+const STORE: StoreConfig = { mediaRoot: '/media', dbPath: '/media/.studio/studio.db', maxUploadBytes: 2_147_483_648, objectStore: 'fs' };
 const PROJECT_ROOT = '/media/display-ads';
 
 function dependencies(files: readonly { path: string; contents: string }[]) {

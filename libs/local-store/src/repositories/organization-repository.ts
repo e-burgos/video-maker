@@ -54,7 +54,14 @@ export function createOrganizationRepository(db: BetterSQLite3Database<typeof sc
 
     const videos: Record<string, VideoPlacement> = {};
     for (const row of placementRows) {
-      videos[row.slug] = { folderId: row.folderId, categoryId: row.categoryId, archived: row.archived };
+      const placement: VideoPlacement = {
+        folderId: row.folderId,
+        categoryId: row.categoryId,
+        archived: row.archived,
+      };
+      if (!isDefaultPlacement(placement)) {
+        videos[row.slug] = placement;
+      }
     }
 
     return { folders: organizationFolders, videos };

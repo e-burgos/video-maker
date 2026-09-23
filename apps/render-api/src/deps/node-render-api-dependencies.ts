@@ -9,6 +9,15 @@ import { Readable } from 'node:stream';
 import type { ReadableStream as NodeReadableStreamWeb } from 'node:stream/web';
 
 import { nodeDirectoryReader, nodeFileStatReader } from '@video-maker/auto-montage';
+import {
+  createJobsRepository,
+  createOrganizationRepository,
+  createProducerRepository,
+  createProjectsRepository,
+  createSettingsRepository,
+  openStudioDatabase,
+} from '@video-maker/local-store';
+import type { StudioDatabase } from '@video-maker/local-store';
 
 import { createClaudeCliAiAgent } from '../ai/claude-cli-ai-agent';
 import { readAiAgentConfig } from '../config/ai-agent-config';
@@ -26,7 +35,7 @@ import { PipelineStageError } from '../errors/pipeline-stage-error';
 import type { ResolvedVoiceBinaries } from '@video-maker/media-local';
 
 import type { ByteRange, ObjectStorage, WriteTemporaryInput, WriteTemporaryOutcome } from './object-storage';
-import type { RenderApiDependencies, VoicePreviewCache } from './render-api-dependencies';
+import type { LocalStorePort, RenderApiDependencies, VoicePreviewCache } from './render-api-dependencies';
 
 function createNodeVoicePreviewCache(directory: string): VoicePreviewCache {
   return {
@@ -268,6 +277,30 @@ export function createNodeRenderApiDependencies(
   let renderModule: Promise<typeof import('@video-maker/composition-remotion/render')> | null = null;
   let binaries: Promise<ResolvedMediaBinaries> | null = null;
   let voiceBinaries: Promise<ResolvedVoiceBinaries> | null = null;
+  let studioDatabase: StudioDatabase | null = null;
+  let localStorePort: LocalStorePort | null = null;
+
+  const nowIso = (): string => new Date().toISOString();
+
+  const loadStudioDatabase = (): StudioDatabase => {
+    studioDatabase ??= openStudioDatabase(store.dbPath);
+    return studioDatabase;
+  };
+
+  const loadLocalStore = (): LocalStorePort => {
+    if (localStorePort === null) {
+      const database = loadStudioDatabase();
+      localStorePort = {
+        projects: createProjectsRepository(database.db, nowIso),
+        organization: createOrganizationRepository(database.db),
+        producer: createProducerRepository(database.db),
+        jobs: createJobsRepository(database.db),
+        settings: createSettingsRepository(database.db, nowIso),
+        close: () => database.close(),
+      };
+    }
+    return localStorePort;
+  };
 
   const loadMediaLocal = (): Promise<typeof import('@video-maker/media-local')> => {
     mediaLocalModule ??= import('@video-maker/media-local');
@@ -381,6 +414,10 @@ export function createNodeRenderApiDependencies(
 
     storage: createConfinedNodeObjectStorage(store),
 
+    get localStore() {
+      return loadLocalStore();
+    },
+
     probeAsset: async ({ path }) => {
       const { ExecaCommandRunner, probeMedia } = await loadMediaLocal();
       const { ffprobe } = await loadBinaries();
@@ -439,7 +476,7 @@ export function createNodeRenderApiDependencies(
 
     randomId: () => randomUUID(),
 
-    clock: { nowIso: () => new Date().toISOString() },
+    clock: { nowIso },
 
     logger: {
       info: () => undefined,

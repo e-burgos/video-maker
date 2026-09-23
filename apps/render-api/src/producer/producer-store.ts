@@ -1,93 +1,60 @@
-import { serializeMontageDocument, toAbsolutePath } from '@video-maker/auto-montage';
+import { toAbsolutePath } from '@video-maker/auto-montage';
 import type { MediaProject } from '@video-maker/auto-montage';
+import type { ProducerSession as StoredProducerSession } from '@video-maker/local-store';
 
 import type { RenderApiDependencies } from '../deps/render-api-dependencies';
-import { PipelineStageError } from '../errors/pipeline-stage-error';
 import { appendProducerMessageToMarkdown } from './producer-conversation-markdown';
-import {
-  EMPTY_PRODUCER_CONVERSATION,
-  parseProducerConversation,
-  parseProducerSession,
-} from './producer-documents';
-import type { ProducerConversation, ProducerMessage, ProducerSession } from './producer-documents';
+import type { ProducerMessage, ProducerSession } from './producer-documents';
 import {
   producerConversationMarkdownPath,
-  producerConversationPath,
   producerDirectoryPath,
-  producerSessionPath,
   producerTurnLogPath,
   producerTurnsDirectoryPath,
 } from './producer-paths';
 
-async function readJsonDocument(
+export function readProducerConversation(
   deps: RenderApiDependencies,
   project: MediaProject,
-  relativePath: string,
-): Promise<unknown | null> {
-  const absolutePath = toAbsolutePath(project, relativePath);
-  if ((await deps.storage.stat(absolutePath)) === null) {
-    return null;
-  }
-
-  const raw = await deps.storage.readTextFile(absolutePath);
-  try {
-    return JSON.parse(raw);
-  } catch {
-    throw new PipelineStageError({
-      code: 'PRODUCER_STATE_INVALID',
-      stage: null,
-      resource: relativePath,
-      expected: 'a JSON document',
-    });
-  }
+): readonly ProducerMessage[] {
+  return deps.localStore.producer.getConversation(project.slug);
 }
 
-export async function readProducerConversation(
+export function appendProducerMessage(
   deps: RenderApiDependencies,
   project: MediaProject,
-): Promise<ProducerConversation> {
-  const relativePath = producerConversationPath();
-  const document = await readJsonDocument(deps, project, relativePath);
-  return document === null
-    ? EMPTY_PRODUCER_CONVERSATION
-    : parseProducerConversation(document, relativePath);
+  message: ProducerMessage,
+): void {
+  deps.localStore.producer.appendMessage(project.slug, message);
 }
 
-export async function readProducerSession(
+function toProducerSession(record: StoredProducerSession): ProducerSession {
+  return {
+    sessionId: record.sessionId,
+    model: record.model,
+    createdAt: record.startedAt,
+    lastTurnAt: record.updatedAt,
+  };
+}
+
+export function readProducerSession(
   deps: RenderApiDependencies,
   project: MediaProject,
-): Promise<ProducerSession | null> {
-  const relativePath = producerSessionPath();
-  const document = await readJsonDocument(deps, project, relativePath);
-  return document === null ? null : parseProducerSession(document, relativePath);
+): ProducerSession | null {
+  const record = deps.localStore.producer.getSession(project.slug);
+  return record === null ? null : toProducerSession(record);
 }
 
-export async function writeProducerConversation(
-  deps: RenderApiDependencies,
-  project: MediaProject,
-  conversation: ProducerConversation,
-): Promise<string> {
-  const relativePath = producerConversationPath();
-  await deps.storage.ensureDirectory(toAbsolutePath(project, producerDirectoryPath()));
-  await deps.storage.writeTextFile(
-    toAbsolutePath(project, relativePath),
-    serializeMontageDocument(conversation),
-  );
-  return relativePath;
-}
-
-export async function writeProducerSession(
+export function writeProducerSession(
   deps: RenderApiDependencies,
   project: MediaProject,
   session: ProducerSession,
-): Promise<string> {
-  const relativePath = producerSessionPath();
-  await deps.storage.ensureDirectory(toAbsolutePath(project, producerDirectoryPath()));
-  await deps.storage.writeTextFile(
-    toAbsolutePath(project, relativePath),
-    serializeMontageDocument(session),
-  );
-  return relativePath;
+): void {
+  deps.localStore.producer.setSession(project.slug, {
+    sessionId: session.sessionId,
+    model: session.model,
+    startedAt: session.createdAt,
+    updatedAt: session.lastTurnAt,
+  });
 }
 
 export async function appendProducerConversationMarkdown(

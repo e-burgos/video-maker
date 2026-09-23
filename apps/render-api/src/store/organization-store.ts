@@ -90,12 +90,3 @@ export async function readOrganization(storage: ObjectStorage, mediaRoot: string
     return EMPTY_ORGANIZATION;
   }
 }
-
-export async function writeOrganization(
-  storage: ObjectStorage,
-  mediaRoot: string,
-  organization: Organization,
-): Promise<void> {
-  await storage.ensureDirectory(join(mediaRoot, ORGANIZATION_DIRECTORY));
-  await storage.writeTextFile(organizationPath(mediaRoot), `${JSON.stringify(organization, null, 2)}\n`);
-}

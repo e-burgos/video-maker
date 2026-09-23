@@ -18,7 +18,7 @@ import {
 } from './producer-handler';
 import type { ProducerConversationBody, ProducerTurnAcceptedBody } from './producer-handler';
 
-const STORE: StoreConfig = { mediaRoot: '/media', maxUploadBytes: 2_147_483_648, objectStore: 'fs' };
+const STORE: StoreConfig = { mediaRoot: '/media', dbPath: '/media/.studio/studio.db', maxUploadBytes: 2_147_483_648, objectStore: 'fs' };
 const PROJECT_ROOT = '/media/demo-01';
 
 const OK_RESULT: ProducerTurnResult = {
@@ -89,6 +89,10 @@ function scenario(options: ScenarioOptions = {}) {
     ...options.overrides,
   });
 
+  if (!deps.localStore.projects.exists('demo-01')) {
+    deps.localStore.projects.insert('demo-01');
+  }
+
   return {
     deps,
     storage,
@@ -136,8 +140,8 @@ describe('handleCreateProducerMessage', () => {
     expect(body).toMatchObject({ slug: 'demo-01', status: 'running' });
   });
 
-  it('manda al agente el modelo que eligió el usuario y lo deja en session.json (FIX-e-burgos-015-001)', async () => {
-    const { deps, runtime, starts, storage } = scenario({ lines: successStream() });
+  it('manda al agente el modelo que eligió el usuario y lo deja en la sesión persistida (FIX-e-burgos-015-001)', async () => {
+    const { deps, runtime, starts } = scenario({ lines: successStream() });
 
     const accepted = (
       await handleCreateProducerMessage(
@@ -157,10 +161,7 @@ describe('handleCreateProducerMessage', () => {
       .body as ProducerConversationBody;
     expect(body.session?.model).toBe('haiku');
     expect(body.messages[1]?.model).toBe('haiku');
-    const onDisk = JSON.parse(
-      await storage.readTextFile(`${PROJECT_ROOT}/work/producer/session.json`),
-    ) as { model: string };
-    expect(onDisk.model).toBe('haiku');
+    expect(deps.localStore.producer.getSession('demo-01')?.model).toBe('haiku');
   });
 
   it('sin model explícito sigue con el modelo de la sesión, y sin sesión con el default del servicio', async () => {

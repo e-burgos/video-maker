@@ -8,7 +8,7 @@ import { requestLine } from '../../__fixtures__/http-request';
 import type { StoreConfig } from '../../config/store-config';
 import { handleExtractFrames } from './frames-handler';
 
-const STORE: StoreConfig = { mediaRoot: '/media', maxUploadBytes: 2_147_483_648, objectStore: 'fs' };
+const STORE: StoreConfig = { mediaRoot: '/media', dbPath: '/media/.studio/studio.db', maxUploadBytes: 2_147_483_648, objectStore: 'fs' };
 const PROJECT_ROOT = `${STORE.mediaRoot}/pitch-deck`;
 const FRAMES_OUTPUT_KEYS = Object.keys(STUDIO_TOOLS.extract_frames.output.shape).sort();
 

@@ -21,7 +21,7 @@ import {
   handleListRenderJobs,
 } from './jobs-handler';
 
-const STORE: StoreConfig = { mediaRoot: '/media', maxUploadBytes: 2_147_483_648, objectStore: 'fs' };
+const STORE: StoreConfig = { mediaRoot: '/media', dbPath: '/media/.studio/studio.db', maxUploadBytes: 2_147_483_648, objectStore: 'fs' };
 const PROJECT_ROOT = '/var/data/media/acme-launch';
 const DEFAULT_RENDER_OUTPUT = {
   outPath: `${PROJECT_ROOT}/work/renders/r/video-muted.mp4`,

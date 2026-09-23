@@ -8,7 +8,7 @@ import type { StoreConfig } from '../config/store-config';
 import { createRenderApiServer } from './create-render-api-server';
 import type { RenderApiServer } from './create-render-api-server';
 
-const STORE: StoreConfig = { mediaRoot: '/media', maxUploadBytes: 2_147_483_648, objectStore: 'fs' };
+const STORE: StoreConfig = { mediaRoot: '/media', dbPath: '/media/.studio/studio.db', maxUploadBytes: 2_147_483_648, objectStore: 'fs' };
 
 describe('createRenderApiServer', () => {
   let server: RenderApiServer | undefined;

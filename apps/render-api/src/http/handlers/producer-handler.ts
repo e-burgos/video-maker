@@ -67,8 +67,8 @@ export async function handleGetProducer(
 
   const body: ProducerConversationBody = {
     slug,
-    messages: (await readProducerConversation(deps, project)).messages,
-    session: await readProducerSession(deps, project),
+    messages: readProducerConversation(deps, project),
+    session: readProducerSession(deps, project),
     activeTurn: runtime.producerTurns.activeFor(slug),
     models: {
       default: runtime.producer.model,

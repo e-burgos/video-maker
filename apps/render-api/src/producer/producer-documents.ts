@@ -110,10 +110,3 @@ export function parseProducerSession(value: unknown, relativePath: string): Prod
     lastTurnAt: value.lastTurnAt,
   };
 }
-
-export function appendProducerMessage(
-  conversation: ProducerConversation,
-  message: ProducerMessage,
-): ProducerConversation {
-  return { messages: [...conversation.messages, message] };
-}

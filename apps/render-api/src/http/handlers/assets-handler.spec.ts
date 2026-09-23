@@ -15,7 +15,7 @@ import type { RenderApiErrorCode } from '../../errors/render-api-error';
 import { createRenderApiRuntime } from '../render-api-runtime';
 import { handleDeleteAsset, handleListAssets, handleUploadAsset } from './assets-handler';
 
-const STORE: StoreConfig = { mediaRoot: '/media', maxUploadBytes: 2_147_483_648, objectStore: 'fs' };
+const STORE: StoreConfig = { mediaRoot: '/media', dbPath: '/media/.studio/studio.db', maxUploadBytes: 2_147_483_648, objectStore: 'fs' };
 
 async function* singleChunk(bytes: Uint8Array): AsyncGenerator<Uint8Array> {
   yield bytes;

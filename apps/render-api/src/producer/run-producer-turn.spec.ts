@@ -7,12 +7,14 @@ import { createFakeRenderApiDependencies } from '../__fixtures__/fake-render-api
 import { readProducerConfig } from '../config/producer-config';
 import type { RenderApiDependencies } from '../deps/render-api-dependencies';
 import { isRenderApiError } from '../errors/render-api-error';
+import { readProducerConversation, readProducerSession } from './producer-store';
 import type { ProducerTurnResult, ProducerTurnStart } from './producer-agent';
 import { createProducerTurnRegistry } from './producer-turn-registry';
 import { assertProducerMessageText, startProducerTurn } from './run-producer-turn';
 
 const PROJECT = resolveMediaProject('/media/demo-01');
 const CONFIG = readProducerConfig({}, '/repo', 'http://127.0.0.1:4399', '/tmp');
+const MARKDOWN_PATH = '/media/demo-01/work/producer/conversation.md';
 
 const OK_RESULT: ProducerTurnResult = {
   exitCode: 0,
@@ -31,15 +33,17 @@ interface ScriptedAgent {
 
 function scenario(script: ScriptedAgent, overrides?: Partial<RenderApiDependencies>) {
   const callLog = createCallLog();
-  const storage = createFakeObjectStorage(callLog, {
-    directories: [
-      '/media/demo-01',
-      '/media/demo-01/raw',
-      '/media/demo-01/raw/aroll',
-      '/media/demo-01/work',
-    ],
-    files: [{ path: '/media/demo-01/raw/aroll/clip01.mp4', contents: 'video' }],
-  });
+  const storage =
+    (overrides?.storage as ReturnType<typeof createFakeObjectStorage> | undefined) ??
+    createFakeObjectStorage(callLog, {
+      directories: [
+        '/media/demo-01',
+        '/media/demo-01/raw',
+        '/media/demo-01/raw/aroll',
+        '/media/demo-01/work',
+      ],
+      files: [{ path: '/media/demo-01/raw/aroll/clip01.mp4', contents: 'video' }],
+    });
   const starts: ProducerTurnStart[] = [];
   const cancels: string[] = [];
   let counter = 0;
@@ -62,6 +66,10 @@ function scenario(script: ScriptedAgent, overrides?: Partial<RenderApiDependenci
     },
     ...overrides,
   });
+
+  if (!deps.localStore.projects.exists('demo-01')) {
+    deps.localStore.projects.insert('demo-01');
+  }
 
   return { callLog, storage, deps, starts, cancels, registry: createProducerTurnRegistry() };
 }
@@ -106,20 +114,26 @@ describe('assertProducerMessageText', () => {
 
 describe('startProducerTurn', () => {
   it('persiste el mensaje del usuario ANTES de responder, para que el chat lo muestre ya', async () => {
-    const { deps, registry, storage } = scenario({ lines: streamOf(ANSWER) });
+    const { deps, registry } = scenario({ lines: streamOf(ANSWER) });
 
     const started = await startProducerTurn(deps, registry, { project: PROJECT, text: 'hola', config: CONFIG });
 
-    const persisted = JSON.parse(await storage.readTextFile('/media/demo-01/work/producer/conversation.json'));
-    expect(persisted.messages).toHaveLength(1);
-    expect(persisted.messages[0]).toMatchObject({ role: 'user', text: 'hola', turnId: started.turnId });
+    const persisted = readProducerConversation(deps, PROJECT);
+    expect(persisted).toHaveLength(1);
+    expect(persisted[0]).toMatchObject({ role: 'user', text: 'hola', turnId: started.turnId });
     expect(registry.get(started.turnId).status).toBe('running');
 
     await started.completed;
   });
 
   it('abre sesión nueva en el primer turno y la retoma en el segundo', async () => {
-    const first = scenario({ lines: streamOf(ANSWER) });
+    let sharedCounter = 0;
+    const sharedRandomId = (): string => {
+      sharedCounter += 1;
+      return `id-${String(sharedCounter).padStart(2, '0')}`;
+    };
+
+    const first = scenario({ lines: streamOf(ANSWER) }, { randomId: sharedRandomId });
     const started = await startProducerTurn(first.deps, first.registry, {
       project: PROJECT,
       text: 'hola',
@@ -128,11 +142,14 @@ describe('startProducerTurn', () => {
     await started.completed;
 
     expect(first.starts[0]?.resume).toBe(false);
-    const session = JSON.parse(await first.storage.readTextFile('/media/demo-01/work/producer/session.json'));
+    const session = readProducerSession(first.deps, PROJECT);
     expect(session).toMatchObject({ sessionId: 'session-abc', model: 'sonnet' });
     expect(first.starts[0]?.sessionId).not.toBe('session-abc');
 
-    const second = scenario({ lines: streamOf(ANSWER) }, { storage: first.storage });
+    const second = scenario(
+      { lines: streamOf(ANSWER) },
+      { storage: first.storage, localStore: first.deps.localStore, randomId: sharedRandomId },
+    );
     const startedAgain = await startProducerTurn(second.deps, second.registry, {
       project: PROJECT,
       text: 'seguí',
@@ -141,11 +158,11 @@ describe('startProducerTurn', () => {
     await startedAgain.completed;
 
     expect(second.starts[0]?.resume).toBe(true);
-    expect(second.starts[0]?.sessionId).toBe(session.sessionId);
+    expect(second.starts[0]?.sessionId).toBe(session?.sessionId);
   });
 
   it('persiste el sessionId que reporta el CLI, no el uuid que le pasamos, y cae al nuestro sin init', async () => {
-    const { deps, registry, storage } = scenario({
+    const { deps, registry } = scenario({
       lines: [
         JSON.stringify({ type: 'result', subtype: 'success', is_error: false, result: 'listo' }),
       ],
@@ -153,8 +170,8 @@ describe('startProducerTurn', () => {
     const started = await startProducerTurn(deps, registry, { project: PROJECT, text: 'hola', config: CONFIG });
     await started.completed;
 
-    const session = JSON.parse(await storage.readTextFile('/media/demo-01/work/producer/session.json'));
-    expect(session.sessionId).toBe('id-03');
+    const session = readProducerSession(deps, PROJECT);
+    expect(session?.sessionId).toBe('id-03');
   });
 
   it('acumula los eventos legibles del stream y descarta la línea que no es JSON', async () => {
@@ -179,16 +196,14 @@ describe('startProducerTurn', () => {
     expect(record.assistantMessage).toBe('Tenés un A-roll de 26 s.');
     expect(record.suggestions).toEqual(['Dale', 'Cambiá el guion']);
 
-    const persisted = JSON.parse(await storage.readTextFile('/media/demo-01/work/producer/conversation.json'));
-    expect(persisted.messages).toHaveLength(2);
-    expect(persisted.messages[1]).toMatchObject({
+    const persisted = readProducerConversation(deps, PROJECT);
+    expect(persisted).toHaveLength(2);
+    expect(persisted[1]).toMatchObject({
       role: 'assistant',
       text: 'Tenés un A-roll de 26 s.',
       suggestions: ['Dale', 'Cambiá el guion'],
     });
-    expect(await storage.readTextFile('/media/demo-01/work/producer/conversation.md')).toContain(
-      '- Productor: Tenés un A-roll de 26 s.',
-    );
+    expect(await storage.readTextFile(MARKDOWN_PATH)).toContain('- Productor: Tenés un A-roll de 26 s.');
   });
 
   it('guarda el jsonl crudo del turno, línea por línea, incluida la que no parsea', async () => {
@@ -202,7 +217,7 @@ describe('startProducerTurn', () => {
   });
 
   it('un turno cancelado queda canceled, sin error y sin mensaje del asistente', async () => {
-    const { deps, registry, storage } = scenario({
+    const { deps, registry } = scenario({
       lines: [JSON.stringify({ type: 'system', subtype: 'init', session_id: 's' })],
       result: { ...OK_RESULT, canceled: true, exitCode: null },
     });
@@ -214,9 +229,8 @@ describe('startProducerTurn', () => {
       error: null,
       assistantMessage: null,
     });
-    const persisted = JSON.parse(await storage.readTextFile('/media/demo-01/work/producer/conversation.json'));
-    expect(persisted.messages).toHaveLength(1);
-    expect((await storage.stat('/media/demo-01/work/producer/session.json'))).toBeNull();
+    expect(readProducerConversation(deps, PROJECT)).toHaveLength(1);
+    expect(readProducerSession(deps, PROJECT)).toBeNull();
   });
 
   it('el 429 de la suscripción cierra el turno como failed con PRODUCER_RATE_LIMITED', async () => {
@@ -237,11 +251,11 @@ describe('startProducerTurn', () => {
     expect(registry.get(started.turnId).error?.code).toBe('PRODUCER_RATE_LIMITED');
   });
 
-  it('un fallo escribiendo la conversación cierra el turno como failed en vez de quedar colgado', async () => {
+  it('un fallo escribiendo el markdown de la conversación cierra el turno como failed en vez de quedar colgado', async () => {
     const { deps, registry, storage } = scenario({ lines: streamOf(ANSWER) });
     const started = await startProducerTurn(deps, registry, { project: PROJECT, text: 'hola', config: CONFIG });
     storage.control.queueReadTextFileError(
-      '/media/demo-01/work/producer/conversation.json',
+      MARKDOWN_PATH,
       Object.assign(new Error('EIO'), { code: 'EIO' }),
     );
     await started.completed;

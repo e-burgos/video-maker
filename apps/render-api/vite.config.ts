@@ -16,6 +16,9 @@ export default defineConfig({
       '@video-maker/media-local': fileURLToPath(
         new URL('../../libs/media-local/src/index.ts', import.meta.url),
       ),
+      '@video-maker/local-store': fileURLToPath(
+        new URL('../../libs/local-store/src/index.ts', import.meta.url),
+      ),
       '@video-maker/timeline-core': fileURLToPath(
         new URL('../../libs/timeline-core/src/index.ts', import.meta.url),
       ),

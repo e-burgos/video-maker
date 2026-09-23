@@ -16,12 +16,10 @@ import { buildProducerMcpConfigJson } from './producer-mcp-config';
 import { parseProducerAnswer } from './parse-producer-suggestions';
 import { interpretProducerStreamLine } from './producer-stream-events';
 import type { ProducerMessage, ProducerSession } from './producer-documents';
-import { appendProducerMessage } from './producer-documents';
 import {
   appendProducerConversationMarkdown,
-  readProducerConversation,
+  appendProducerMessage,
   readProducerSession,
-  writeProducerConversation,
   writeProducerSession,
   writeProducerTurnLog,
 } from './producer-store';
@@ -86,7 +84,7 @@ export async function startProducerTurn(
     throw producerUnavailable();
   }
 
-  const session = await readProducerSession(deps, input.project);
+  const session = readProducerSession(deps, input.project);
   const model = input.model ?? resumableModel(session, input.config);
 
   const turnId = deps.randomId();
@@ -101,11 +99,7 @@ export async function startProducerTurn(
     turnId,
   };
 
-  const conversation = appendProducerMessage(
-    await readProducerConversation(deps, input.project),
-    userMessage,
-  );
-  await writeProducerConversation(deps, input.project, conversation);
+  appendProducerMessage(deps, input.project, userMessage);
   await appendProducerConversationMarkdown(deps, input.project, userMessage);
 
   const context = await collectProducerContext(deps, input.project, {
@@ -207,16 +201,9 @@ export async function startProducerTurn(
       ...(answer.suggestions.length === 0 ? {} : { suggestions: answer.suggestions }),
     };
 
-    await writeProducerConversation(
-      deps,
-      input.project,
-      appendProducerMessage(
-        await readProducerConversation(deps, input.project),
-        assistantMessage,
-      ),
-    );
+    appendProducerMessage(deps, input.project, assistantMessage);
     await appendProducerConversationMarkdown(deps, input.project, assistantMessage);
-    await writeProducerSession(deps, input.project, {
+    writeProducerSession(deps, input.project, {
       sessionId: reportedSessionId ?? sessionId,
       model,
       createdAt: session?.createdAt ?? startedAt,

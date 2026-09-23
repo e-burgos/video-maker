@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest';
 
 import { isRenderApiError } from '../errors/render-api-error';
 import {
+  DB_PATH_ENV_VAR,
   DEFAULT_MAX_UPLOAD_BYTES,
   DEFAULT_MEDIA_ROOT,
   MAX_UPLOAD_BYTES_ENV_VAR,
@@ -46,6 +47,25 @@ describe('readStoreConfig', () => {
     }
 
     expect(readStoreConfig({ [MAX_UPLOAD_BYTES_ENV_VAR]: '1024' }, CWD).maxUploadBytes).toBe(1024);
+  });
+
+  it('defaults the db path under .studio inside the resolved media root', () => {
+    expect(readStoreConfig({}, CWD).dbPath).toBe(`${CWD}/${DEFAULT_MEDIA_ROOT}/.studio/studio.db`);
+    expect(readStoreConfig({ [MEDIA_ROOT_ENV_VAR]: 'projects-media' }, CWD).dbPath).toBe(
+      `${CWD}/projects-media/.studio/studio.db`,
+    );
+  });
+
+  it('resolves a relative RENDER_API_DB_PATH against the cwd, like the media root', () => {
+    expect(readStoreConfig({ [DB_PATH_ENV_VAR]: 'state/studio.db' }, CWD).dbPath).toBe(
+      `${CWD}/state/studio.db`,
+    );
+  });
+
+  it('keeps an absolute RENDER_API_DB_PATH as is', () => {
+    expect(readStoreConfig({ [DB_PATH_ENV_VAR]: '/var/lib/video-maker/studio.db' }, CWD).dbPath).toBe(
+      '/var/lib/video-maker/studio.db',
+    );
   });
 
   it('accepts only fs as RENDER_API_OBJECT_STORE', () => {

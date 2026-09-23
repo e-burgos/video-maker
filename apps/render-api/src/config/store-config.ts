@@ -3,17 +3,21 @@ import { isAbsolute, join } from 'node:path/posix';
 import { PipelineStageError } from '../errors/pipeline-stage-error';
 
 export const MEDIA_ROOT_ENV_VAR = 'RENDER_API_MEDIA_ROOT';
+export const DB_PATH_ENV_VAR = 'RENDER_API_DB_PATH';
 export const MAX_UPLOAD_BYTES_ENV_VAR = 'RENDER_API_MAX_UPLOAD_BYTES';
 export const OBJECT_STORE_ENV_VAR = 'RENDER_API_OBJECT_STORE';
 
 export const DEFAULT_MEDIA_ROOT = 'media';
 export const DEFAULT_MAX_UPLOAD_BYTES = 2_147_483_648;
 export const OBJECT_STORE_KINDS = ['fs'] as const;
+const STUDIO_DIRECTORY_NAME = '.studio';
+const STUDIO_DATABASE_FILE_NAME = 'studio.db';
 
 export type ObjectStoreKind = (typeof OBJECT_STORE_KINDS)[number];
 
 export interface StoreConfig {
   readonly mediaRoot: string;
+  readonly dbPath: string;
   readonly maxUploadBytes: number;
   readonly objectStore: ObjectStoreKind;
 }
@@ -22,6 +26,14 @@ function readMediaRoot(env: NodeJS.ProcessEnv, cwd: string): string {
   const value = env[MEDIA_ROOT_ENV_VAR];
   const mediaRoot = value !== undefined && value !== '' ? value : DEFAULT_MEDIA_ROOT;
   return isAbsolute(mediaRoot) ? mediaRoot : join(cwd, mediaRoot);
+}
+
+function readDbPath(env: NodeJS.ProcessEnv, cwd: string, mediaRoot: string): string {
+  const value = env[DB_PATH_ENV_VAR];
+  if (value === undefined || value === '') {
+    return join(mediaRoot, STUDIO_DIRECTORY_NAME, STUDIO_DATABASE_FILE_NAME);
+  }
+  return isAbsolute(value) ? value : join(cwd, value);
 }
 
 function readMaxUploadBytes(env: NodeJS.ProcessEnv): number {
@@ -62,8 +74,10 @@ function readObjectStore(env: NodeJS.ProcessEnv): ObjectStoreKind {
 }
 
 export function readStoreConfig(env: NodeJS.ProcessEnv, cwd: string): StoreConfig {
+  const mediaRoot = readMediaRoot(env, cwd);
   return {
-    mediaRoot: readMediaRoot(env, cwd),
+    mediaRoot,
+    dbPath: readDbPath(env, cwd, mediaRoot),
     maxUploadBytes: readMaxUploadBytes(env),
     objectStore: readObjectStore(env),
   };

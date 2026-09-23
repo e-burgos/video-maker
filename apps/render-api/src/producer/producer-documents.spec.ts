@@ -1,12 +1,7 @@
 import { describe, expect, it } from 'vitest';
 
 import { isRenderApiError } from '../errors/render-api-error';
-import {
-  appendProducerMessage,
-  EMPTY_PRODUCER_CONVERSATION,
-  parseProducerConversation,
-  parseProducerSession,
-} from './producer-documents';
+import { parseProducerConversation, parseProducerSession } from './producer-documents';
 import type { ProducerMessage } from './producer-documents';
 
 const PATH = 'work/producer/conversation.json';
@@ -139,26 +134,5 @@ describe('parseProducerSession', () => {
         ),
       ),
     ).toBe('PRODUCER_STATE_INVALID');
-  });
-});
-
-describe('appendProducerMessage', () => {
-  it('agrega sin mutar la conversación anterior', () => {
-    const first = appendProducerMessage(EMPTY_PRODUCER_CONVERSATION, {
-      id: 'msg-0001',
-      role: 'user',
-      text: 'hola',
-      createdAt: '2026-09-10T10:00:00.000Z',
-    });
-    const second = appendProducerMessage(first, {
-      id: 'msg-0002',
-      role: 'assistant',
-      text: 'buenas',
-      createdAt: '2026-09-10T10:00:30.000Z',
-    });
-
-    expect(EMPTY_PRODUCER_CONVERSATION.messages).toHaveLength(0);
-    expect(first.messages).toHaveLength(1);
-    expect(second.messages.map((message) => message.id)).toEqual(['msg-0001', 'msg-0002']);
   });
 });

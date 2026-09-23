@@ -1,3 +1,11 @@
+import {
+  createJobsRepository,
+  createOrganizationRepository,
+  createProducerRepository,
+  createProjectsRepository,
+  createSettingsRepository,
+  openStudioDatabase,
+} from '@video-maker/local-store';
 import type {
   LoudnessMeasurement,
   ResolvedBinaries,
@@ -7,6 +15,8 @@ import type {
 import type { MediaAsset, Transcription } from '@video-maker/timeline-core';
 
 import type {
+  Clock,
+  LocalStorePort,
   RenderApiDependencies,
   RenderMutedVideoOutput,
 } from '../deps/render-api-dependencies';
@@ -85,10 +95,25 @@ function createDeterministicRandomId(): () => string {
   };
 }
 
+function createFakeLocalStore(clock: Clock): LocalStorePort {
+  const database = openStudioDatabase(':memory:');
+  const nowIso = (): string => clock.nowIso();
+  return {
+    projects: createProjectsRepository(database.db, nowIso),
+    organization: createOrganizationRepository(database.db),
+    producer: createProducerRepository(database.db),
+    jobs: createJobsRepository(database.db),
+    settings: createSettingsRepository(database.db, nowIso),
+    close: () => database.close(),
+  };
+}
+
 export function createFakeRenderApiDependencies(
   callLog: CallLog,
   overrides?: Partial<RenderApiDependencies>,
 ): RenderApiDependencies {
+  const clock = overrides?.clock ?? { nowIso: () => FIXED_NOW_ISO };
+
   return {
     renderMutedVideo: async (input) => {
       callLog.record('renderMutedVideo', input);
@@ -157,6 +182,8 @@ export function createFakeRenderApiDependencies(
 
     storage: overrides?.storage ?? createFakeObjectStorage(callLog),
 
+    localStore: overrides?.localStore ?? createFakeLocalStore(clock),
+
     probeAsset: async (input) => {
       callLog.record('probeAsset', input);
       if (overrides?.probeAsset) {
@@ -207,7 +234,7 @@ export function createFakeRenderApiDependencies(
 
     randomId: overrides?.randomId ?? createDeterministicRandomId(),
 
-    clock: overrides?.clock ?? { nowIso: () => FIXED_NOW_ISO },
+    clock,
 
     logger: overrides?.logger ?? {
       info: () => undefined,

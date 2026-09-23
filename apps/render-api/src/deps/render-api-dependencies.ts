@@ -1,5 +1,12 @@
 import type { DirectoryReader, FileStatReader } from '@video-maker/auto-montage';
 import type {
+  JobsRepository,
+  OrganizationRepository,
+  ProducerRepository,
+  ProjectsRepository,
+  SettingsRepository,
+} from '@video-maker/local-store';
+import type {
   CommandRunner,
   MixLoudnessVerification,
   ResolvedBinaries,
@@ -236,6 +243,15 @@ export interface Logger {
   readonly error: (event: LogEvent) => void;
 }
 
+export interface LocalStorePort {
+  readonly projects: ProjectsRepository;
+  readonly organization: OrganizationRepository;
+  readonly producer: ProducerRepository;
+  readonly jobs: JobsRepository;
+  readonly settings: SettingsRepository;
+  readonly close: () => void;
+}
+
 export interface RenderApiDependencies {
   readonly renderMutedVideo: RenderMutedVideoPort;
   readonly mixTimelineAudio: MixTimelineAudioPort;
@@ -245,6 +261,7 @@ export interface RenderApiDependencies {
   readonly probeMediaBinaries: ProbeMediaBinariesPort;
   readonly preloadEngineModules: PreloadEngineModulesPort;
   readonly storage: ObjectStorage;
+  readonly localStore: LocalStorePort;
   readonly probeAsset: ProbeAssetPort;
   readonly extractFrame: ExtractFramePort;
   readonly fetchRemote: FetchRemotePort;

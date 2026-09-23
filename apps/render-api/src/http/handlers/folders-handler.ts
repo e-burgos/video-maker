@@ -1,19 +1,7 @@
-import type { StoreConfig } from '../../config/store-config';
 import type { RenderApiDependencies } from '../../deps/render-api-dependencies';
 import { PipelineStageError } from '../../errors/pipeline-stage-error';
-import {
-  addCategory,
-  addFolder,
-  findCategory,
-  findFolder,
-  normalizeName,
-  removeCategory,
-  removeFolder,
-  renameFolder,
-  toIdentifier,
-} from '../../store/organization';
+import { findCategory, findFolder, normalizeName, toIdentifier } from '../../store/organization';
 import type { Organization, VideoFolder } from '../../store/organization';
-import { readOrganization, writeOrganization } from '../../store/organization-store';
 import { JSON_CONTENT_TYPE } from '../http-message';
 import type { HttpRequestLine, HttpResponse } from '../http-message';
 import { MAX_JSON_BODY_BYTES, readJsonBody } from '../read-json-body';
@@ -21,6 +9,17 @@ import type { RouteParams } from '../router';
 
 function jsonResponse(status: number, body: unknown): HttpResponse {
   return { status, headers: { 'content-type': JSON_CONTENT_TYPE }, body };
+}
+
+function uniqueIdentifier(base: string, taken: ReadonlySet<string>): string {
+  if (!taken.has(base)) {
+    return base;
+  }
+  let suffix = 2;
+  while (taken.has(`${base}-${String(suffix)}`)) {
+    suffix += 1;
+  }
+  return `${base}-${String(suffix)}`;
 }
 
 async function readNameFromBody(request: HttpRequestLine): Promise<string> {
@@ -76,93 +75,88 @@ function requireFolder(organization: Organization, folderId: string): VideoFolde
   return folder;
 }
 
-export async function handleListFolders(
-  deps: RenderApiDependencies,
-  store: StoreConfig,
-): Promise<HttpResponse> {
-  return jsonResponse(200, await readOrganization(deps.storage, store.mediaRoot));
+export async function handleListFolders(deps: RenderApiDependencies): Promise<HttpResponse> {
+  return jsonResponse(200, deps.localStore.organization.getOrganization());
 }
 
 export async function handleCreateFolder(
   deps: RenderApiDependencies,
-  store: StoreConfig,
   _params: RouteParams | undefined,
   request: HttpRequestLine,
 ): Promise<HttpResponse> {
   const name = await readNameFromBody(request);
-  const current = await readOrganization(deps.storage, store.mediaRoot);
-  const { organization, folder } = addFolder(current, name);
-  await writeOrganization(deps.storage, store.mediaRoot, organization);
+  const current = deps.localStore.organization.getOrganization();
+  const id = uniqueIdentifier(
+    toIdentifier(name),
+    new Set(current.folders.map((folder) => folder.id)),
+  );
 
+  deps.localStore.organization.createFolder(id, name);
+
+  const folder: VideoFolder = { id, name, categories: [] };
   return {
     status: 201,
-    headers: { 'content-type': JSON_CONTENT_TYPE, location: `/folders/${folder.id}` },
+    headers: { 'content-type': JSON_CONTENT_TYPE, location: `/folders/${id}` },
     body: folder,
   };
 }
 
 export async function handleRenameFolder(
   deps: RenderApiDependencies,
-  store: StoreConfig,
   params: RouteParams,
   request: HttpRequestLine,
 ): Promise<HttpResponse> {
   const folderId = params.folderId ?? '';
   const name = await readNameFromBody(request);
-  const current = await readOrganization(deps.storage, store.mediaRoot);
-  requireFolder(current, folderId);
+  requireFolder(deps.localStore.organization.getOrganization(), folderId);
 
-  const organization = renameFolder(current, folderId, name);
-  await writeOrganization(deps.storage, store.mediaRoot, organization);
+  deps.localStore.organization.renameFolder(folderId, name);
 
-  return jsonResponse(200, requireFolder(organization, folderId));
+  return jsonResponse(200, requireFolder(deps.localStore.organization.getOrganization(), folderId));
 }
 
 export async function handleDeleteFolder(
   deps: RenderApiDependencies,
-  store: StoreConfig,
   params: RouteParams,
 ): Promise<HttpResponse> {
   const folderId = params.folderId ?? '';
-  const current = await readOrganization(deps.storage, store.mediaRoot);
-  requireFolder(current, folderId);
+  requireFolder(deps.localStore.organization.getOrganization(), folderId);
 
-  const organization = removeFolder(current, folderId);
-  await writeOrganization(deps.storage, store.mediaRoot, organization);
+  deps.localStore.organization.deleteFolder(folderId);
 
-  return jsonResponse(200, organization);
+  return jsonResponse(200, deps.localStore.organization.getOrganization());
 }
 
 export async function handleCreateCategory(
   deps: RenderApiDependencies,
-  store: StoreConfig,
   params: RouteParams,
   request: HttpRequestLine,
 ): Promise<HttpResponse> {
   const folderId = params.folderId ?? '';
   const name = await readNameFromBody(request);
-  const current = await readOrganization(deps.storage, store.mediaRoot);
-  const folder = requireFolder(current, folderId);
+  const current = deps.localStore.organization.getOrganization();
+  requireFolder(current, folderId);
+  const allCategoryIds = new Set(
+    current.folders.flatMap((folder) => folder.categories.map((category) => category.id)),
+  );
+  const id = uniqueIdentifier(toIdentifier(name), allCategoryIds);
 
-  const { organization, category } = addCategory(current, folder, name);
-  await writeOrganization(deps.storage, store.mediaRoot, organization);
+  deps.localStore.organization.createCategory(id, folderId, name);
 
   return {
     status: 201,
-    headers: { 'content-type': JSON_CONTENT_TYPE, location: `/folders/${folderId}/categories/${category.id}` },
-    body: category,
+    headers: { 'content-type': JSON_CONTENT_TYPE, location: `/folders/${folderId}/categories/${id}` },
+    body: { id, name },
   };
 }
 
 export async function handleDeleteCategory(
   deps: RenderApiDependencies,
-  store: StoreConfig,
   params: RouteParams,
 ): Promise<HttpResponse> {
   const folderId = params.folderId ?? '';
   const categoryId = params.categoryId ?? '';
-  const current = await readOrganization(deps.storage, store.mediaRoot);
-  const folder = requireFolder(current, folderId);
+  const folder = requireFolder(deps.localStore.organization.getOrganization(), folderId);
 
   if (findCategory(folder, categoryId) === null) {
     throw new PipelineStageError({
@@ -172,8 +166,7 @@ export async function handleDeleteCategory(
     });
   }
 
-  const organization = removeCategory(current, folderId, categoryId);
-  await writeOrganization(deps.storage, store.mediaRoot, organization);
+  deps.localStore.organization.deleteCategory(categoryId);
 
-  return jsonResponse(200, organization);
+  return jsonResponse(200, deps.localStore.organization.getOrganization());
 }

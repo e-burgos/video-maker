@@ -11,7 +11,12 @@ import { assertTimelineNotPersisted, readStoredTimeline, resolveExistingProject 
 const MEDIA_ROOT = '/media';
 const SLUG = 'smoke-ingest';
 const PROJECT_ROOT = `${MEDIA_ROOT}/${SLUG}`;
-const STORE: StoreConfig = { mediaRoot: MEDIA_ROOT, maxUploadBytes: 2_147_483_648, objectStore: 'fs' };
+const STORE: StoreConfig = {
+  mediaRoot: MEDIA_ROOT,
+  dbPath: `${MEDIA_ROOT}/.studio/studio.db`,
+  maxUploadBytes: 2_147_483_648,
+  objectStore: 'fs',
+};
 
 describe('readStoredTimeline', () => {
   it('reads and parses work/timeline.json with a single readTextFile', async () => {

@@ -7,7 +7,6 @@ import { requestLine } from '../../__fixtures__/http-request';
 import type { StoreConfig } from '../../config/store-config';
 import { toErrorPayload } from '../../errors/to-error-payload';
 import { MAX_JSON_BODY_BYTES } from '../read-json-body';
-import { organizationPath } from '../../store/organization-store';
 import {
   handleCreateProject,
   handleDeleteProject,
@@ -16,7 +15,12 @@ import {
   handlePutProjectPlacement,
 } from './projects-handler';
 
-const STORE: StoreConfig = { mediaRoot: '/media', maxUploadBytes: 2_147_483_648, objectStore: 'fs' };
+const STORE: StoreConfig = {
+  mediaRoot: '/media',
+  dbPath: '/media/.studio/studio.db',
+  maxUploadBytes: 2_147_483_648,
+  objectStore: 'fs',
+};
 
 async function* textBody(text: string): AsyncGenerator<Uint8Array> {
   yield new TextEncoder().encode(text);
@@ -35,8 +39,14 @@ async function caughtErrorPayload(promise: Promise<unknown>): Promise<ReturnType
   );
 }
 
+const PROJECT_SUMMARY_KEYS = ['layout', 'slug'];
+const PROJECT_DETAIL_KEYS = ['assetCounts', 'assetSource', 'layout', 'slug'];
+const PLACEMENT_BODY_KEYS = ['placement', 'slug'];
+const PLACEMENT_KEYS = ['archived', 'categoryId', 'folderId'];
+const DELETE_BODY_KEYS = ['deleted', 'slug'];
+
 describe('handleListProjects', () => {
-  it('answers 200 with an empty array when the media root does not exist', async () => {
+  it('answers 200 with an empty array when no project was ever created', async () => {
     const callLog = createCallLog();
     const storage = createFakeObjectStorage(callLog);
     const deps = createFakeRenderApiDependencies(callLog, { storage });
@@ -47,7 +57,7 @@ describe('handleListProjects', () => {
     expect(response.body).toEqual([]);
   });
 
-  it('lists one entry per project directory sorted by slug with its layout flags', async () => {
+  it('lists one entry per project row sorted by slug with its layout flags', async () => {
     const callLog = createCallLog();
     const storage = createFakeObjectStorage(callLog, {
       directories: [
@@ -61,6 +71,8 @@ describe('handleListProjects', () => {
       files: [{ path: `${STORE.mediaRoot}/acme-launch/work/catalog.json`, contents: '{}' }],
     });
     const deps = createFakeRenderApiDependencies(callLog, { storage });
+    deps.localStore.projects.insert('zeta-project');
+    deps.localStore.projects.insert('acme-launch');
 
     const response = await handleListProjects(deps, STORE);
 
@@ -74,19 +86,20 @@ describe('handleListProjects', () => {
         layout: { raw: true, catalog: false, timeline: false, edl: false, out: true },
       },
     ]);
+    expect(Object.keys(response.body as object).length).toBeGreaterThan(0);
+    for (const summary of response.body as readonly unknown[]) {
+      expect(Object.keys(summary as object).sort()).toEqual(PROJECT_SUMMARY_KEYS);
+    }
   });
 
-  it('ignores files and non-portable directory names under the media root', async () => {
+  it('does not list a project row whose directory was removed, and does not insert on read', async () => {
     const callLog = createCallLog();
     const storage = createFakeObjectStorage(callLog, {
-      directories: [
-        `${STORE.mediaRoot}/Not_Valid`,
-        `${STORE.mediaRoot}/valid-project`,
-        `${STORE.mediaRoot}/valid-project/raw`,
-      ],
-      files: [{ path: `${STORE.mediaRoot}/stray-file.txt`, contents: 'x' }],
+      directories: [`${STORE.mediaRoot}/valid-project`, `${STORE.mediaRoot}/valid-project/raw`],
     });
     const deps = createFakeRenderApiDependencies(callLog, { storage });
+    deps.localStore.projects.insert('valid-project');
+    deps.localStore.projects.insert('ghost-project');
 
     const response = await handleListProjects(deps, STORE);
 
@@ -111,7 +124,7 @@ describe('handleCreateProject', () => {
     expect(callLog.ports()).toEqual([]);
   });
 
-  it('creates the eight layout directories in order and answers 201 with catalog, timeline and edl false', async () => {
+  it('creates the eight layout directories in order, inserts the row and answers 201 with the same keys as before', async () => {
     const callLog = createCallLog();
     const storage = createFakeObjectStorage(callLog);
     const deps = createFakeRenderApiDependencies(callLog, { storage });
@@ -125,12 +138,14 @@ describe('handleCreateProject', () => {
 
     expect(response.status).toBe(201);
     expect(response.headers.location).toBe('/projects/smoke-ingest');
+    expect(Object.keys(response.body as object).sort()).toEqual(PROJECT_DETAIL_KEYS);
     expect(response.body).toEqual({
       slug: 'smoke-ingest',
       layout: { raw: true, catalog: false, timeline: false, edl: false, out: true },
       assetSource: 'raw-scan',
       assetCounts: { aroll: 0, broll: 0, image: 0, audio: 0, voice: 0, logo: 0 },
     });
+    expect(deps.localStore.projects.exists('smoke-ingest')).toBe(true);
 
     const ensureDirectoryCalls = callLog
       .entries()
@@ -148,7 +163,7 @@ describe('handleCreateProject', () => {
     ]);
   });
 
-  it('answers 409 PROJECT_ALREADY_EXISTS without touching the existing project', async () => {
+  it('answers 409 PROJECT_ALREADY_EXISTS without touching the existing project or inserting a second row', async () => {
     const callLog = createCallLog();
     const storage = createFakeObjectStorage(callLog, {
       directories: [`${STORE.mediaRoot}/smoke-ingest`],
@@ -164,6 +179,7 @@ describe('handleCreateProject', () => {
       code: 'PROJECT_ALREADY_EXISTS',
     });
     expect(callLog.ports()).not.toContain('ensureDirectory');
+    expect(deps.localStore.projects.exists('smoke-ingest')).toBe(false);
   });
 
   it('answers 400 REQUEST_BODY_INVALID_JSON and 413 REQUEST_BODY_TOO_LARGE for a malformed body', async () => {
@@ -228,7 +244,7 @@ describe('handleCreateProject', () => {
 });
 
 describe('handleGetProject', () => {
-  it('answers 404 PROJECT_NOT_FOUND and 200 with assetCounts for the detail route', async () => {
+  it('answers 404 PROJECT_NOT_FOUND and 200 with the same keys as before for the detail route', async () => {
     const missingCallLog = createCallLog();
     const missingDeps = createFakeRenderApiDependencies(missingCallLog, {
       storage: createFakeObjectStorage(missingCallLog),
@@ -251,6 +267,7 @@ describe('handleGetProject', () => {
     const response = await handleGetProject(deps, STORE, { slug: 'smoke-ingest' });
 
     expect(response.status).toBe(200);
+    expect(Object.keys(response.body as object).sort()).toEqual(PROJECT_DETAIL_KEYS);
     expect(response.body).toMatchObject({
       slug: 'smoke-ingest',
       assetSource: 'raw-scan',
@@ -259,12 +276,13 @@ describe('handleGetProject', () => {
   });
 });
 
-const ORGANIZATION = {
-  folders: [{ id: 'display-ads', name: 'Display Ads', categories: [{ id: 'campanas', name: 'Campañas' }] }],
-  videos: {},
-};
+interface SeededPlacement {
+  readonly folderId: string | null;
+  readonly categoryId: string | null;
+  readonly archived: boolean;
+}
 
-function projectStorage(slug: string, organization: unknown = ORGANIZATION) {
+function projectFixture(slug: string, placement?: SeededPlacement) {
   const callLog = createCallLog();
   const storage = createFakeObjectStorage(callLog, {
     directories: [
@@ -272,17 +290,21 @@ function projectStorage(slug: string, organization: unknown = ORGANIZATION) {
       `${STORE.mediaRoot}/${slug}/raw`,
       `${STORE.mediaRoot}/${slug}/out`,
     ],
-    files: [
-      { path: organizationPath(STORE.mediaRoot), contents: JSON.stringify(organization) },
-      { path: `${STORE.mediaRoot}/${slug}/raw/aroll/take.mp4`, contents: 'video bytes' },
-    ],
+    files: [{ path: `${STORE.mediaRoot}/${slug}/raw/aroll/take.mp4`, contents: 'video bytes' }],
   });
-  return { callLog, storage, deps: createFakeRenderApiDependencies(callLog, { storage }) };
+  const deps = createFakeRenderApiDependencies(callLog, { storage });
+  deps.localStore.projects.insert(slug);
+  deps.localStore.organization.createFolder('display-ads', 'Display Ads');
+  deps.localStore.organization.createCategory('campanas', 'display-ads', 'Campañas');
+  if (placement !== undefined) {
+    deps.localStore.organization.setPlacement(slug, placement);
+  }
+  return { callLog, storage, deps };
 }
 
 describe('handlePutProjectPlacement', () => {
   it('files the video under a folder and a category', async () => {
-    const { deps } = projectStorage('editar-campana');
+    const { deps } = projectFixture('editar-campana');
 
     const response = await handlePutProjectPlacement(
       deps,
@@ -296,6 +318,8 @@ describe('handlePutProjectPlacement', () => {
     );
 
     expect(response.status).toBe(200);
+    expect(Object.keys(response.body as object).sort()).toEqual(PLACEMENT_BODY_KEYS);
+    expect(Object.keys((response.body as { placement: object }).placement).sort()).toEqual(PLACEMENT_KEYS);
     expect(response.body).toEqual({
       slug: 'editar-campana',
       placement: { folderId: 'display-ads', categoryId: 'campanas', archived: false },
@@ -303,9 +327,10 @@ describe('handlePutProjectPlacement', () => {
   });
 
   it('archives without moving the video out of its folder', async () => {
-    const { deps } = projectStorage('editar-campana', {
-      ...ORGANIZATION,
-      videos: { 'editar-campana': { folderId: 'display-ads', categoryId: 'campanas', archived: false } },
+    const { deps } = projectFixture('editar-campana', {
+      folderId: 'display-ads',
+      categoryId: 'campanas',
+      archived: false,
     });
 
     const response = await handlePutProjectPlacement(
@@ -326,7 +351,7 @@ describe('handlePutProjectPlacement', () => {
   });
 
   it('refuses a folder that does not exist instead of writing a dangling placement', async () => {
-    const { deps } = projectStorage('editar-campana');
+    const { deps } = projectFixture('editar-campana');
 
     const payload = await caughtErrorPayload(
       handlePutProjectPlacement(
@@ -345,7 +370,8 @@ describe('handlePutProjectPlacement', () => {
   });
 
   it('refuses a category that belongs to another folder', async () => {
-    const { deps } = projectStorage('editar-campana');
+    const { deps } = projectFixture('editar-campana');
+    deps.localStore.organization.createFolder('other', 'Other');
 
     const payload = await caughtErrorPayload(
       handlePutProjectPlacement(
@@ -355,7 +381,7 @@ describe('handlePutProjectPlacement', () => {
         requestLine({
           method: 'PUT',
           path: '/projects/editar-campana/placement',
-          body: jsonBody({ folderId: 'display-ads', categoryId: 'ghost' }),
+          body: jsonBody({ folderId: 'other', categoryId: 'campanas' }),
         }),
       ),
     );
@@ -364,7 +390,7 @@ describe('handlePutProjectPlacement', () => {
   });
 
   it('refuses a category with no folder, which would be an orphan', async () => {
-    const { deps } = projectStorage('editar-campana');
+    const { deps } = projectFixture('editar-campana');
 
     const payload = await caughtErrorPayload(
       handlePutProjectPlacement(
@@ -383,7 +409,7 @@ describe('handlePutProjectPlacement', () => {
   });
 
   it('answers 404 for a video whose directory is not there', async () => {
-    const { deps } = projectStorage('editar-campana');
+    const { deps } = projectFixture('editar-campana');
 
     const payload = await caughtErrorPayload(
       handlePutProjectPlacement(
@@ -403,29 +429,29 @@ describe('handlePutProjectPlacement', () => {
 });
 
 describe('handleDeleteProject', () => {
-  it('removes the whole directory and forgets the video in the registry', async () => {
-    const { deps, storage, callLog } = projectStorage('editar-campana', {
-      ...ORGANIZATION,
-      videos: { 'editar-campana': { folderId: 'display-ads', categoryId: 'campanas', archived: true } },
+  it('removes the whole directory, the row and cascades the placement', async () => {
+    const { deps, callLog } = projectFixture('editar-campana', {
+      folderId: 'display-ads',
+      categoryId: 'campanas',
+      archived: true,
     });
 
     const response = await handleDeleteProject(deps, STORE, { slug: 'editar-campana' });
 
     expect(response.status).toBe(200);
+    expect(Object.keys(response.body as object).sort()).toEqual(DELETE_BODY_KEYS);
     expect(response.body).toEqual({ slug: 'editar-campana', deleted: true });
     expect(callLog.entries()).toContainEqual({
       port: 'removeDirectory',
       input: `${STORE.mediaRoot}/editar-campana`,
     });
 
-    const stored = JSON.parse(await storage.readTextFile(organizationPath(STORE.mediaRoot))) as {
-      videos: Record<string, unknown>;
-    };
-    expect(stored.videos).toEqual({});
+    expect(deps.localStore.projects.exists('editar-campana')).toBe(false);
+    expect(deps.localStore.organization.getOrganization().videos).toEqual({});
   });
 
   it('answers 404 and deletes nothing when the video does not exist', async () => {
-    const { deps, callLog } = projectStorage('editar-campana');
+    const { deps, callLog } = projectFixture('editar-campana');
 
     const payload = await caughtErrorPayload(handleDeleteProject(deps, STORE, { slug: 'never-created' }));
 
@@ -434,7 +460,7 @@ describe('handleDeleteProject', () => {
   });
 
   it('refuses a slug that is not a single kebab-case segment, so no path escapes the media root', async () => {
-    const { deps, callLog } = projectStorage('editar-campana');
+    const { deps, callLog } = projectFixture('editar-campana');
 
     const payload = await caughtErrorPayload(handleDeleteProject(deps, STORE, { slug: '../../etc' }));
 

@@ -13,9 +13,8 @@ import type { ObjectStorage } from '../../deps/object-storage';
 import type { RenderApiDependencies } from '../../deps/render-api-dependencies';
 import { PipelineStageError } from '../../errors/pipeline-stage-error';
 import { isValidProjectSlug } from '../../store/project-slug';
-import { archiveVideo, findCategory, findFolder, forgetVideo, placeVideo, placementOf } from '../../store/organization';
-import type { Organization } from '../../store/organization';
-import { readOrganization, writeOrganization } from '../../store/organization-store';
+import { findCategory, findFolder, placementOf } from '../../store/organization';
+import type { Organization, VideoPlacement } from '../../store/organization';
 import { layoutFlagsFrom } from '../../store/project-layout';
 import type { ProjectLayoutFlags } from '../../store/project-layout';
 import { countAssetsByRole, resolveProjectAssets } from '../../store/project-assets';
@@ -89,16 +88,15 @@ export async function handleListProjects(
   deps: RenderApiDependencies,
   store: StoreConfig,
 ): Promise<HttpResponse> {
-  const entries = await deps.storage.listDirectory(store.mediaRoot);
-  const slugs = (entries ?? [])
-    .filter((entry) => entry.isDirectory && isValidProjectSlug(entry.name))
-    .map((entry) => entry.name)
-    .sort((left, right) => (left < right ? -1 : left > right ? 1 : 0));
-
   const summaries: ProjectSummary[] = [];
-  for (const slug of slugs) {
-    const project = resolveMediaProject(join(store.mediaRoot, slug));
-    summaries.push({ slug, layout: await computeLayoutFlags(deps.storage, project) });
+
+  for (const record of deps.localStore.projects.list()) {
+    const project = resolveMediaProject(join(store.mediaRoot, record.slug));
+    const projectStat = await deps.storage.stat(project.root);
+    if (projectStat === null || projectStat.kind !== 'directory') {
+      continue;
+    }
+    summaries.push({ slug: record.slug, layout: await computeLayoutFlags(deps.storage, project) });
   }
 
   return jsonResponse(200, summaries);
@@ -144,6 +142,8 @@ export async function handleCreateProject(
   if (existing !== null) {
     throw new PipelineStageError({ code: 'PROJECT_ALREADY_EXISTS', stage: null, resource: slug });
   }
+
+  deps.localStore.projects.insert(slug);
 
   const directoriesInOrder = [
     join(project.rawDir, 'aroll'),
@@ -305,19 +305,17 @@ export async function handlePutProjectPlacement(
   }
 
   const requested = extractPlacementFromBody(bodyResult.value);
-  const current = await readOrganization(deps.storage, store.mediaRoot);
+  const current = deps.localStore.organization.getOrganization();
   assertPlacementExists(current, requested.folderId, requested.categoryId);
 
-  const placed = placeVideo(current, slug, {
+  const placement: VideoPlacement = {
     folderId: requested.folderId,
     categoryId: requested.categoryId,
-  });
-  const organization =
-    requested.archived === null ? placed : archiveVideo(placed, slug, requested.archived);
+    archived: requested.archived ?? placementOf(current, slug).archived,
+  };
+  deps.localStore.organization.setPlacement(slug, placement);
 
-  await writeOrganization(deps.storage, store.mediaRoot, organization);
-
-  return jsonResponse(200, { slug, placement: placementOf(organization, slug) });
+  return jsonResponse(200, { slug, placement });
 }
 
 export async function handleDeleteProject(
@@ -332,9 +330,7 @@ export async function handleDeleteProject(
   await assertProjectDirectoryExists(deps, project, slug);
 
   await deps.storage.removeDirectory(project.root);
-
-  const current = await readOrganization(deps.storage, store.mediaRoot);
-  await writeOrganization(deps.storage, store.mediaRoot, forgetVideo(current, slug));
+  deps.localStore.projects.delete(slug);
 
   return jsonResponse(200, { slug, deleted: true });
 }

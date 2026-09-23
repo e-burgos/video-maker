@@ -123,3 +123,25 @@ documentos: la base no es excusa para confiar en lo que devuelve.
   columna, `getConversation` no podía reconstruir ese campo. Migración 1 y `studio-schema.ts`
   quedaron con la columna incluida desde el arranque; el resto de la tabla (FKs, `UNIQUE (slug, seq)`
   implementado como índice único nombrado, índice de `jobs`) se implementó tal cual el plan.
+- **TASK-002 — `getOrganization()` esconde una fila de `placements` que el `ON DELETE SET NULL`
+  dejó con forma default** (`folderId`/`categoryId` null, `archived: false`) en vez de listarla en
+  `videos`. Se detectó en TASK-003 al borrar una carpeta con un video sin categoría: la fila queda
+  en la tabla (el FK solo pone sus columnas en `NULL`, no la borra) pero `organization.json` nunca
+  guardó placements por defecto. `organization-repository.ts` ahora filtra con el mismo
+  `isDefaultPlacement` que ya usaba `setPlacement` para no reinsertar una fila default.
+- **TASK-001 — `openStudioDatabase` importa `better-sqlite3` con `createRequire` en vez de
+  `import Database from 'better-sqlite3'`.** El import ESM por defecto compila bien con `tsc`
+  (`moduleResolution: bundler`) y con Vitest (esbuild), pero bajo `@swc-node/register`
+  (`node -r ./apps/render-api/src/server-register.cjs …`, el arranque real de `main.ts`) el interop
+  de SWC para un módulo `export =` como `better-sqlite3` rompe en runtime:
+  `_bettersqlite3.default is not a constructor`. Solo se detecta arrancando el server de verdad, no
+  con `pnpm nx test` — coincide con la lección de `sdd/memory/lessons.md` sobre paquetes nativos y
+  `await import()`; acá la solución fue `createRequire(import.meta.url)` en vez de volver asíncrona
+  toda la apertura de la base.
+- **TASK-003 — `organization-repository`'s category id ahora se genera único contra TODAS las
+  categorías de la organización, no solo las de la carpeta.** `categories.id` es PK global en el
+  schema (a diferencia del JSON, donde cada carpeta anidaba las suyas); dos carpetas que hoy crean
+  una categoría con el mismo nombre generarían el mismo id y violarían la PK. `folders-handler.ts`
+  calcula el set de ids contra `current.folders.flatMap(f => f.categories)` antes de pedir el id
+  único. Cambio de comportamiento menor (antes "Intro" podía repetirse en dos carpetas distintas,
+  ahora la segunda es "intro-2"), sin cambio de payload.

@@ -37,7 +37,7 @@ vi.mock('@video-maker/media-local', () => ({
 
 const ENV: NodeJS.ProcessEnv = {};
 const CWD = '/var/data/media/acme-launch';
-const STORE: StoreConfig = { mediaRoot: '/var/data/media', maxUploadBytes: 2_147_483_648, objectStore: 'fs' };
+const STORE: StoreConfig = { mediaRoot: '/var/data/media', dbPath: '/var/data/media/.studio/studio.db', maxUploadBytes: 2_147_483_648, objectStore: 'fs' };
 
 async function loadMocks() {
   const render = await import('@video-maker/composition-remotion/render');
@@ -561,7 +561,12 @@ describe('createNodeRenderApiDependencies', () => {
     const base = await mkdtemp(join(tmpdir(), 'render-api-store-'));
 
     try {
-      const store: StoreConfig = { mediaRoot: base, maxUploadBytes: 1024, objectStore: 'fs' };
+      const store: StoreConfig = {
+        mediaRoot: base,
+        dbPath: join(base, '.studio', 'studio.db'),
+        maxUploadBytes: 1024,
+        objectStore: 'fs',
+      };
       const deps = createNodeRenderApiDependencies(ENV, store);
       const uploadsDir = join(base, 'work', '.uploads');
       const finalDir = join(base, 'raw', 'aroll');
