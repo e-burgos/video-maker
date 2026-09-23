@@ -35,6 +35,7 @@
 | D-C3-06 | La carpeta de proyectos se **elige en el primer arranque**: la de la app por defecto, o una existente (por ejemplo tu `media/`), guardada en `settings` | Vos seguís con tus 17 proyectos sin copiarlos, y un amigo arranca con la carpeta vacía |
 | D-C3-07 | Resolución de binarios: **variable de entorno > carpeta de la app > `PATH`** | `pnpm studio` sigue andando igual con el `.env` y Homebrew; la app no depende de nada instalado |
 | D-C3-08 | `electron-builder` con `identity: null` y target `dmg` arm64 | Sin firma (D-09); en Apple Silicon queda firmada ad hoc, que es lo mínimo para que abra |
+| D-C3-09 | **sherpa-onnx reemplaza a piper como motor de voz**, en la app y también en desarrollo (decisión del dev tras TASK-001) | El piper empaquetable no existe para arm64 (release x86 sin dylibs, wheel con ruta de datos grabada). sherpa-onnx 1.13.8 es estático, Apache-2.0, corre las mismas tres voces convertidas (`vits-piper-*`) con `--vits-data-dir` relocatable y `--vits-length-scale`, y su audio transcribe igual al de piper. Un solo motor evita que desarrollo y app diverjan |
 
 ## Historias
 
