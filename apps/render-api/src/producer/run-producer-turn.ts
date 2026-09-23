@@ -81,10 +81,6 @@ export async function startProducerTurn(
   registry: ProducerTurnRegistry,
   input: StartProducerTurnInput,
 ): Promise<StartedProducerTurn> {
-  const skill = await deps.readSkillDocument(input.config.skillPath);
-  if (skill === null) {
-    throw producerUnavailable();
-  }
   if (!(await deps.probeProducerBinary())) {
     throw producerUnavailable();
   }
@@ -116,7 +112,7 @@ export async function startProducerTurn(
     apiUrl: input.config.apiUrl,
   });
   const piperPath = await resolvePiperPath(deps);
-  const systemPrompt = buildProducerSystemPrompt(skill, context, piperPath, model);
+  const systemPrompt = buildProducerSystemPrompt(context);
 
   const sessionId = session?.sessionId ?? deps.randomId();
   const rawLines: string[] = [];

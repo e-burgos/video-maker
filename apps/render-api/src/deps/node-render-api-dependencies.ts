@@ -470,17 +470,6 @@ export function createNodeRenderApiDependencies(
       scheduleNodeTimeout,
     ),
 
-    readSkillDocument: async (path) => {
-      try {
-        return await readFile(path, 'utf8');
-      } catch (error) {
-        if (isEnoent(error)) {
-          return null;
-        }
-        throw error;
-      }
-    },
-
     probeProducerBinary: async () => {
       const { nodeBinaryLookup } = await loadMediaLocal();
       if (producerConfig.binaryPath.includes('/')) {

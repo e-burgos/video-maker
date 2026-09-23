@@ -4,14 +4,12 @@ import { AI_AGENT_BINARY_ENV_VAR, DEFAULT_AI_AGENT_BINARY } from './ai-agent-con
 export const PRODUCER_MODEL_ENV_VAR = 'PRODUCER_MODEL';
 export const PRODUCER_MODELS_ENV_VAR = 'PRODUCER_MODELS';
 export const PRODUCER_TURN_TIMEOUT_ENV_VAR = 'PRODUCER_TURN_TIMEOUT_MS';
-export const PRODUCER_SKILL_PATH_ENV_VAR = 'PRODUCER_SKILL_PATH';
 export const PRODUCER_API_URL_ENV_VAR = 'RENDER_API_URL';
 
 export const DEFAULT_PRODUCER_MODEL = 'sonnet';
 export const DEFAULT_PRODUCER_MODELS = ['sonnet', 'opus', 'haiku'] as const;
 
 export const DEFAULT_PRODUCER_TURN_TIMEOUT_MS = 1_800_000;
-export const DEFAULT_PRODUCER_SKILL_PATH = 'sdd/skills/video-producer/SKILL.md';
 
 const PRODUCER_MODEL_CATALOG: Readonly<Record<string, { label: string; description: string }>> = {
   sonnet: { label: 'Sonnet', description: 'Balanced · faster, cheaper' },
@@ -38,7 +36,6 @@ export interface ProducerConfig {
   readonly model: string;
   readonly models: readonly string[];
   readonly timeoutMs: number;
-  readonly skillPath: string;
   readonly apiUrl: string;
 }
 
@@ -107,7 +104,6 @@ export function readProducerConfig(
     model,
     models,
     timeoutMs: readTimeoutMs(env),
-    skillPath: readNonEmpty(env, PRODUCER_SKILL_PATH_ENV_VAR) ?? DEFAULT_PRODUCER_SKILL_PATH,
     apiUrl: readNonEmpty(env, PRODUCER_API_URL_ENV_VAR) ?? fallbackApiUrl,
   };
 }

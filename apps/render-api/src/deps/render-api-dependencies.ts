@@ -144,8 +144,6 @@ export interface AiAgentResponse {
 
 export type AiAgentPort = (request: AiAgentRequest) => Promise<AiAgentResponse>;
 
-export type ReadSkillDocumentPort = (path: string) => Promise<string | null>;
-
 export type ProbeProducerBinaryPort = () => Promise<boolean>;
 
 export type ResolveVoiceBinariesPort = () => Promise<ResolvedVoiceBinaries>;
@@ -261,7 +259,6 @@ export interface RenderApiDependencies {
   readonly resolveMontageBinaries: ResolveMontageBinariesPort;
   readonly aiAgent: AiAgentPort;
   readonly producerAgent: ProducerAgentPort;
-  readonly readSkillDocument: ReadSkillDocumentPort;
   readonly probeProducerBinary: ProbeProducerBinaryPort;
   readonly resolveVoiceBinaries: ResolveVoiceBinariesPort;
   readonly listVoiceModels: ListVoiceModelsPort;

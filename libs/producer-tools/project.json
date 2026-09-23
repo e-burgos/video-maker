@@ -22,6 +22,15 @@
         "command": "tsc -p tsconfig.lib.json",
         "cwd": "libs/producer-tools"
       }
+    },
+    "mcp": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "node -r ./libs/producer-tools/src/mcp/mcp-register.cjs libs/producer-tools/src/mcp/main.ts",
+        "env": {
+          "SWC_NODE_PROJECT": "tsconfig.base.json"
+        }
+      }
     }
   }
 }

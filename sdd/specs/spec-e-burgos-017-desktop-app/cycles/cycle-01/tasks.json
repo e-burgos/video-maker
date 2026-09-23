@@ -214,7 +214,7 @@
         "TASK-003",
         "TASK-004"
       ],
-      "status": "pending",
+      "status": "done",
       "files": [
         "libs/producer-tools/src/client/render-api-client.ts",
         "libs/producer-tools/src/client/http-render-api-client.ts",
@@ -224,10 +224,30 @@
         "libs/producer-tools/src/mcp/studio-mcp-server.ts",
         "libs/producer-tools/src/mcp/studio-mcp-server.spec.ts",
         "libs/producer-tools/src/mcp/main.ts",
+        "libs/producer-tools/src/mcp/studio-mcp-cli-args.ts",
+        "libs/producer-tools/src/mcp/studio-mcp-cli-args.spec.ts",
+        "libs/producer-tools/src/mcp/studio-mcp-launch.ts",
+        "libs/producer-tools/src/mcp/studio-mcp-launch.spec.ts",
+        "libs/producer-tools/src/mcp/mcp-register.cjs",
+        "libs/producer-tools/src/errors/studio-tool-runtime-error.ts",
         "libs/producer-tools/src/__fixtures__/fake-render-api-client.ts",
+        "libs/producer-tools/src/__fixtures__/minimal-timeline.ts",
+        "libs/producer-tools/src/index.ts",
+        "libs/producer-tools/project.json",
+        "libs/producer-tools/vite.config.ts",
         "package.json",
         "pnpm-lock.yaml"
-      ]
+      ],
+      "usage": {
+        "tokens_in": 310000,
+        "tokens_out": 42000,
+        "provider_model": "claude/sonnet",
+        "effort": "medium",
+        "agent": "implementor-back",
+        "approx": true,
+        "source": "declared-estimate",
+        "recorded_at": "2026-09-23"
+      }
     },
     {
       "id": "TASK-006",
@@ -240,15 +260,30 @@
       "depends_on": [
         "TASK-001"
       ],
-      "status": "pending",
+      "status": "done",
       "files": [
         "libs/producer-tools/src/prompt/build-producer-prompt.ts",
         "libs/producer-tools/src/prompt/build-producer-prompt.spec.ts",
         "apps/render-api/src/producer/build-producer-system-prompt.ts",
         "apps/render-api/src/producer/build-producer-system-prompt.spec.ts",
         "apps/render-api/src/config/producer-config.ts",
-        "apps/render-api/src/config/producer-config.spec.ts"
-      ]
+        "apps/render-api/src/config/producer-config.spec.ts",
+        "apps/render-api/src/producer/run-producer-turn.ts",
+        "apps/render-api/src/producer/run-producer-turn.spec.ts",
+        "apps/render-api/src/deps/render-api-dependencies.ts",
+        "apps/render-api/src/deps/node-render-api-dependencies.ts",
+        "apps/render-api/src/__fixtures__/fake-render-api-dependencies.ts"
+      ],
+      "usage": {
+        "tokens_in": 155000,
+        "tokens_out": 20000,
+        "provider_model": "claude/sonnet",
+        "effort": "medium",
+        "agent": "implementor-back",
+        "approx": true,
+        "source": "declared-estimate",
+        "recorded_at": "2026-09-23"
+      }
     },
     {
       "id": "TASK-007",

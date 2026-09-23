@@ -20,7 +20,7 @@ export default defineConfig({
       reporter: ['text', 'lcov'],
       reportsDirectory: '../../coverage/libs/producer-tools',
       include: ['src/**/*.ts'],
-      exclude: ['src/**/*.spec.ts', 'src/index.ts'],
+      exclude: ['src/**/*.spec.ts', 'src/index.ts', 'src/__fixtures__/**', 'src/mcp/main.ts'],
       thresholds: { lines: 80, functions: 80, branches: 80, statements: 80 },
     },
   },

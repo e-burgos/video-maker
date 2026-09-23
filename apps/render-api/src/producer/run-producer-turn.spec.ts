@@ -249,19 +249,7 @@ describe('startProducerTurn', () => {
     expect(registry.get(started.turnId).status).toBe('failed');
   });
 
-  it('rechaza el turno con PRODUCER_UNAVAILABLE si falta la skill o el binario, sin reservar el proyecto', async () => {
-    const withoutSkill = scenario({ lines: [] }, { readSkillDocument: async () => null });
-    expect(
-      await codeOf(
-        startProducerTurn(withoutSkill.deps, withoutSkill.registry, {
-          project: PROJECT,
-          text: 'hola',
-          config: CONFIG,
-        }),
-      ),
-    ).toBe('PRODUCER_UNAVAILABLE');
-    expect(withoutSkill.registry.activeFor('demo-01')).toBeNull();
-
+  it('rechaza el turno con PRODUCER_UNAVAILABLE si falta el binario, sin reservar el proyecto', async () => {
     const withoutBinary = scenario({ lines: [] }, { probeProducerBinary: async () => false });
     expect(
       await codeOf(
@@ -272,6 +260,7 @@ describe('startProducerTurn', () => {
         }),
       ),
     ).toBe('PRODUCER_UNAVAILABLE');
+    expect(withoutBinary.registry.activeFor('demo-01')).toBeNull();
   });
 
   it('el segundo turno del mismo proyecto rebota con PRODUCER_TURN_ACTIVE', async () => {
@@ -283,14 +272,14 @@ describe('startProducerTurn', () => {
     ).toBe('PRODUCER_TURN_ACTIVE');
   });
 
-  it('pasa al agente la ruta absoluta del proyecto y el prompt con la skill y las reglas', async () => {
+  it('pasa al agente la ruta absoluta del proyecto y el prompt del productor construido por la lib', async () => {
     const { deps, registry, starts } = scenario({ lines: streamOf(ANSWER) });
     const started = await startProducerTurn(deps, registry, { project: PROJECT, text: 'hola', config: CONFIG });
     await started.completed;
 
     expect(starts[0]?.projectRoot).toBe('/media/demo-01');
-    expect(starts[0]?.systemPrompt).toContain('Sos el productor de video del studio.');
+    expect(starts[0]?.systemPrompt).toContain('# Your tools');
     expect(starts[0]?.systemPrompt).toContain('# This project');
-    expect(starts[0]?.systemPrompt).toContain('http://127.0.0.1:4399/projects/demo-01/jobs');
+    expect(starts[0]?.systemPrompt).toContain('get_project_overview');
   });
 });

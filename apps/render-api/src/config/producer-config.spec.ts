@@ -5,7 +5,6 @@ import {
   DEFAULT_PRODUCER_MODEL,
   DEFAULT_PRODUCER_MODELS,
   describeProducerModel,
-  DEFAULT_PRODUCER_SKILL_PATH,
   DEFAULT_PRODUCER_TURN_TIMEOUT_MS,
   readProducerConfig,
 } from './producer-config';
@@ -14,14 +13,13 @@ const REPO_ROOT = '/repo';
 const FALLBACK_URL = 'http://127.0.0.1:4310';
 
 describe('readProducerConfig', () => {
-  it('usa sonnet por costo, media hora de timeout y la skill del repo por default', () => {
+  it('usa sonnet por costo y media hora de timeout por default', () => {
     expect(readProducerConfig({}, REPO_ROOT, FALLBACK_URL)).toEqual({
       binaryPath: 'claude',
       workingDirectory: REPO_ROOT,
       model: DEFAULT_PRODUCER_MODEL,
       models: [...DEFAULT_PRODUCER_MODELS],
       timeoutMs: DEFAULT_PRODUCER_TURN_TIMEOUT_MS,
-      skillPath: DEFAULT_PRODUCER_SKILL_PATH,
       apiUrl: FALLBACK_URL,
     });
     expect(DEFAULT_PRODUCER_MODEL).toBe('sonnet');
@@ -35,13 +33,12 @@ describe('readProducerConfig', () => {
     ).toBe('/opt/homebrew/bin/claude');
   });
 
-  it('deja elegir modelo, timeout, skill y URL de la API', () => {
+  it('deja elegir modelo, timeout y URL de la API', () => {
     expect(
       readProducerConfig(
         {
           PRODUCER_MODEL: 'opus',
           PRODUCER_TURN_TIMEOUT_MS: '600000',
-          PRODUCER_SKILL_PATH: '/tmp/SKILL.md',
           RENDER_API_URL: 'http://127.0.0.1:4399',
         },
         REPO_ROOT,
@@ -53,7 +50,6 @@ describe('readProducerConfig', () => {
       model: 'opus',
       models: [...DEFAULT_PRODUCER_MODELS],
       timeoutMs: 600_000,
-      skillPath: '/tmp/SKILL.md',
       apiUrl: 'http://127.0.0.1:4399',
     });
   });

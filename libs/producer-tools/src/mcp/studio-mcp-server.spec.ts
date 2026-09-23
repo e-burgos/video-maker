@@ -1,0 +1,104 @@
+import { Client } from '@modelcontextprotocol/sdk/client/index.js';
+import { InMemoryTransport } from '@modelcontextprotocol/sdk/inMemory.js';
+import { describe, expect, it } from 'vitest';
+
+import { createFakeRenderApiClient } from '../__fixtures__/fake-render-api-client';
+import { buildMinimalTimeline } from '../__fixtures__/minimal-timeline';
+import type { RenderApiClient } from '../client/render-api-client';
+import { STUDIO_TOOL_NAMES } from '../contract/tool-names';
+import { StudioToolRuntimeError } from '../errors/studio-tool-runtime-error';
+import { createStudioToolHandlers } from '../handlers/studio-tool-handlers';
+import { createStudioMcpServer } from './studio-mcp-server';
+
+async function connectedPair(overrides: Partial<RenderApiClient> = {}) {
+  const fakeClient = createFakeRenderApiClient(overrides);
+  const handlers = createStudioToolHandlers({ client: fakeClient, model: 'sonnet' });
+  const server = createStudioMcpServer(handlers);
+  const [clientTransport, serverTransport] = InMemoryTransport.createLinkedPair();
+  const client = new Client({ name: 'test-client', version: '0.0.0' });
+
+  await Promise.all([server.connect(serverTransport), client.connect(clientTransport)]);
+
+  return { client, server };
+}
+
+describe('createStudioMcpServer', () => {
+  it('lists exactly the 14 contract tool names', async () => {
+    const { client } = await connectedPair();
+
+    const { tools } = await client.listTools();
+
+    expect(tools.map((tool) => tool.name).sort()).toEqual([...STUDIO_TOOL_NAMES].sort());
+  });
+
+  it('answers get_timeline with structuredContent matching the contract shape', async () => {
+    const timeline = buildMinimalTimeline();
+    const { client } = await connectedPair({ getTimeline: async () => timeline });
+
+    const result = await client.callTool({ name: 'get_timeline', arguments: {} });
+
+    expect(result.structuredContent).toEqual({ timeline });
+    expect(result.isError).toBeFalsy();
+  });
+
+  it('returns an isError result with { code, hint } JSON text when the tool fails', async () => {
+    const { client } = await connectedPair({
+      probeMedia: async () => {
+        throw new StudioToolRuntimeError('FILE_NOT_FOUND', 'raw/aroll/x.mp4 does not exist');
+      },
+    });
+
+    const result = await client.callTool({ name: 'probe_media', arguments: { path: 'raw/aroll/x.mp4' } });
+
+    expect(result.isError).toBe(true);
+    const content = result.content as readonly { type: string; text?: string }[];
+    expect(JSON.parse(content[0]?.text ?? '')).toEqual({
+      code: 'FILE_NOT_FOUND',
+      hint: 'raw/aroll/x.mp4 does not exist',
+    });
+  });
+
+  // The MCP SDK validates args against inputSchema itself before the tool callback runs, so a
+  // schema-invalid call never reaches StudioToolRuntimeError and gets the SDK's own isError text.
+  it('rejects a schema-invalid call before it ever reaches a handler', async () => {
+    const { client } = await connectedPair();
+
+    const result = await client.callTool({ name: 'probe_media', arguments: { path: '/etc/passwd' } });
+
+    expect(result.isError).toBe(true);
+  });
+
+  it('returns an image content block alongside the text block for extract_frames', async () => {
+    const { client } = await connectedPair({
+      extractFrames: async () => [{ atSeconds: 1, path: 'work/producer/frames/t1000.jpg' }],
+      readFileBytes: async () => ({ bytes: new Uint8Array([1, 2, 3]), mimeType: 'image/jpeg' }),
+    });
+
+    const result = await client.callTool({
+      name: 'extract_frames',
+      arguments: { path: 'raw/aroll/a.mp4', atSeconds: [1] },
+    });
+
+    const content = result.content as readonly { type: string; mimeType?: string; data?: string }[];
+    expect(content.some((block) => block.type === 'text')).toBe(true);
+    const image = content.find((block) => block.type === 'image');
+    expect(image).toMatchObject({ mimeType: 'image/jpeg', data: Buffer.from([1, 2, 3]).toString('base64') });
+  });
+
+  it('injects the model into a voice start_job call', async () => {
+    const { client } = await connectedPair({
+      createJob: async (body) => ({
+        id: 'job-1',
+        kind: (body as { kind: string }).kind,
+        state: 'queued',
+        progress: null,
+        report: null,
+        error: null,
+      }),
+    });
+
+    const result = await client.callTool({ name: 'start_job', arguments: { kind: 'voice' } });
+
+    expect(result.structuredContent).toEqual({ jobId: 'job-1', kind: 'voice', status: 'queued' });
+  });
+});
