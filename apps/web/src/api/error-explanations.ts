@@ -8,6 +8,9 @@ const EXPLAINED_CODES = [
   'TIMELINE_ALREADY_EXISTS',
   'ASSET_IN_USE',
   'ASSET_NOT_FOUND',
+  'JOB_INTERRUPTED',
+  'JOB_NOT_RETRYABLE',
+  'JOB_RECORD_INVALID',
 ] as const;
 
 type ExplainedCode = (typeof EXPLAINED_CODES)[number];

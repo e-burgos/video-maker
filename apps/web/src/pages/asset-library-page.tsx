@@ -74,7 +74,11 @@ export function AssetLibraryPage() {
 
       <MontageTrigger slug={slug} onCreated={(job) => setMontageJobId(job.id)} />
 
-      <MontageJobPanel jobId={montageJobId} onSucceeded={openPreview} />
+      <MontageJobPanel
+        jobId={montageJobId}
+        onSucceeded={openPreview}
+        onRetried={(job) => setMontageJobId(job.id)}
+      />
 
       {listing.status === 'loading' && (
         <p className="text-sm text-slate-500">{t('library.loading')}</p>

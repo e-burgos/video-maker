@@ -122,7 +122,7 @@ export function VoicePage() {
         {...(scriptMode ? { scriptPath: PRODUCER_SCRIPT_PATH } : {})}
       />
 
-      <VoiceJobPanel jobId={jobId} onSucceeded={reload} />
+      <VoiceJobPanel jobId={jobId} onSucceeded={reload} onRetried={(job) => setJobId(job.id)} />
 
       {regenerateAction.error !== null && <ErrorNotice error={regenerateAction.error} />}
 

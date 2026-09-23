@@ -6,6 +6,8 @@ import { useRenderJobPoll } from '../hooks/use-render-job-poll';
 import { useT } from '../i18n/language-context';
 import type { TranslationKey } from '../i18n/messages-en';
 import { ErrorNotice } from './error-notice';
+import { JobRetryButton } from './job-retry-button';
+import type { Job } from '../api/render-api-types';
 
 const STAGE_KEYS: Readonly<Record<string, TranslationKey>> = {
   collect: 'storyboardJob.stage.collect',
@@ -16,9 +18,10 @@ const STAGE_KEYS: Readonly<Record<string, TranslationKey>> = {
 export type StoryboardJobPanelProps = {
   jobId: string | null;
   onSucceeded: () => void;
+  onRetried: (job: Job) => void;
 };
 
-export function StoryboardJobPanel({ jobId, onSucceeded }: StoryboardJobPanelProps) {
+export function StoryboardJobPanel({ jobId, onSucceeded, onRetried }: StoryboardJobPanelProps) {
   const client = useRenderApi();
   const poll = useRenderJobPoll(jobId, (id) => client.getRenderJob(id));
   const t = useT();
@@ -93,9 +96,19 @@ export function StoryboardJobPanel({ jobId, onSucceeded }: StoryboardJobPanelPro
 
       {job.state === 'failed' && job.error !== null && (
         <div className="space-y-1">
-          <p role="alert" className="font-mono text-sm text-rose-300">
-            {t('job.failed', { code: job.error.code, message: job.error.message })}
-          </p>
+          {job.error.code === 'JOB_INTERRUPTED' ? (
+            <p
+              role="status"
+              data-testid="job-interrupted-badge"
+              className="inline-block rounded-md border border-amber-500/40 bg-amber-500/10 px-2 py-0.5 text-xs font-medium text-amber-200"
+            >
+              {t('job.interrupted')}
+            </p>
+          ) : (
+            <p role="alert" className="font-mono text-sm text-rose-300">
+              {t('job.failed', { code: job.error.code, message: job.error.message })}
+            </p>
+          )}
           {explanationKey !== null && (
             <p data-testid="storyboard-failure-explanation" className="text-sm text-amber-100">
               {t(explanationKey)}
@@ -103,6 +116,8 @@ export function StoryboardJobPanel({ jobId, onSucceeded }: StoryboardJobPanelPro
           )}
         </div>
       )}
+
+      <JobRetryButton job={job} onRetried={onRetried} />
     </div>
   );
 }

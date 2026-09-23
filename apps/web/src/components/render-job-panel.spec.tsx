@@ -28,10 +28,14 @@ function job(overrides: Partial<RenderJob> = {}): RenderJob {
 function renderPanel(
   getRenderJob: RenderApiClient['getRenderJob'],
   cancelRenderJob: RenderApiClient['cancelRenderJob'] = vi.fn(),
+  onRetried: (job: RenderJob) => void = vi.fn(),
+  retryJob: RenderApiClient['retryJob'] = vi.fn(),
 ) {
   render(
-    <RenderApiProvider client={{ getRenderJob, cancelRenderJob } as unknown as RenderApiClient}>
-      <RenderJobPanel slug="smoke-ingest" jobId="job-0001" />
+    <RenderApiProvider
+      client={{ getRenderJob, cancelRenderJob, retryJob } as unknown as RenderApiClient}
+    >
+      <RenderJobPanel slug="smoke-ingest" jobId="job-0001" onRetried={onRetried} />
     </RenderApiProvider>,
   );
 }
@@ -157,7 +161,7 @@ describe('RenderJobPanel', () => {
       const getRenderJob = vi.fn().mockResolvedValue(job({ state, progress: null }));
       const { unmount } = render(
         <RenderApiProvider client={{ getRenderJob } as unknown as RenderApiClient}>
-          <RenderJobPanel slug="smoke-ingest" jobId="job-0001" />
+          <RenderJobPanel slug="smoke-ingest" jobId="job-0001" onRetried={vi.fn()} />
         </RenderApiProvider>,
       );
 
@@ -189,10 +193,47 @@ describe('RenderJobPanel', () => {
   it('shows nothing to poll when no job is selected', () => {
     render(
       <RenderApiProvider client={{ getRenderJob: vi.fn() } as unknown as RenderApiClient}>
-        <RenderJobPanel slug="smoke-ingest" jobId={null} />
+        <RenderJobPanel slug="smoke-ingest" jobId={null} onRetried={vi.fn()} />
       </RenderApiProvider>,
     );
 
     expect(screen.getByText('No render job selected.')).toBeTruthy();
+  });
+
+  it('shows the Interrupted badge instead of the generic failure text for JOB_INTERRUPTED, plus a retry button', async () => {
+    const getRenderJob = vi.fn().mockResolvedValue(
+      job({ state: 'failed', progress: null, error: { code: 'JOB_INTERRUPTED', stage: null, message: 'interrupted' } }),
+    );
+    renderPanel(getRenderJob as unknown as RenderApiClient['getRenderJob']);
+
+    await act(async () => {
+      await Promise.resolve();
+    });
+
+    expect(screen.getByText('Interrupted')).toBeTruthy();
+    expect(screen.queryByRole('alert')).toBeNull();
+    expect(screen.getByRole('button', { name: 'Run again' })).toBeTruthy();
+  });
+
+  it('retries a failed job and hands the new job to onRetried', async () => {
+    const getRenderJob = vi.fn().mockResolvedValue(
+      job({ state: 'failed', progress: null, error: { code: 'INVALID_TIMELINE', stage: 'render', message: 'x' } }),
+    );
+    const newJob = job({ id: 'job-0002', state: 'queued', progress: null, error: null });
+    const retryJob = vi.fn().mockResolvedValue(newJob);
+    const onRetried = vi.fn();
+    renderPanel(getRenderJob as unknown as RenderApiClient['getRenderJob'], vi.fn(), onRetried, retryJob);
+
+    await act(async () => {
+      await Promise.resolve();
+    });
+
+    await act(async () => {
+      screen.getByRole('button', { name: 'Run again' }).click();
+      await Promise.resolve();
+    });
+
+    expect(retryJob).toHaveBeenCalledWith('job-0001');
+    expect(onRetried).toHaveBeenCalledWith(newJob);
   });
 });

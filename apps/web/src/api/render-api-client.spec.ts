@@ -592,6 +592,53 @@ describe('createRenderApiClient', () => {
 
     expect((error as RenderApiError).code).toBe('RESPONSE_SHAPE_UNEXPECTED');
   });
+
+  it('retries a job via EP-036, posting to /jobs/:jobId/retry and parsing the new job', async () => {
+    const retried = { ...jobWithState('queued'), id: 'job-0002' };
+    const { fetchImpl, calls } = recordingFetch(() => jsonResponse(retried, 202));
+
+    const result = await createRenderApiClient(fetchImpl).retryJob('job-0001');
+
+    expect(calls[0]?.url).toBe('/api/jobs/job-0001/retry');
+    expect(calls[0]?.init?.method).toBe('POST');
+    expect(result).toEqual(retried);
+  });
+
+  it('maps RENDER_JOB_NOT_FOUND from EP-036 for an id no store knows', async () => {
+    const { fetchImpl } = recordingFetch(() =>
+      jsonResponse({ error: { code: 'RENDER_JOB_NOT_FOUND', stage: null, message: 'gone' } }, 404),
+    );
+
+    const error = await createRenderApiClient(fetchImpl)
+      .retryJob('ghost-job')
+      .catch((caught: unknown) => caught);
+
+    expect((error as RenderApiError).code).toBe('RENDER_JOB_NOT_FOUND');
+  });
+
+  it('maps JOB_NOT_RETRYABLE from EP-036 for a job that is not failed or canceled', async () => {
+    const { fetchImpl } = recordingFetch(() =>
+      jsonResponse({ error: { code: 'JOB_NOT_RETRYABLE', stage: null, message: 'not retryable' } }, 409),
+    );
+
+    const error = await createRenderApiClient(fetchImpl)
+      .retryJob('job-0001')
+      .catch((caught: unknown) => caught);
+
+    expect((error as RenderApiError).code).toBe('JOB_NOT_RETRYABLE');
+  });
+
+  it('maps JOB_RECORD_INVALID from EP-036 for a persisted row that cannot be reconstructed', async () => {
+    const { fetchImpl } = recordingFetch(() =>
+      jsonResponse({ error: { code: 'JOB_RECORD_INVALID', stage: null, message: 'invalid record' } }, 422),
+    );
+
+    const error = await createRenderApiClient(fetchImpl)
+      .retryJob('job-0001')
+      .catch((caught: unknown) => caught);
+
+    expect((error as RenderApiError).code).toBe('JOB_RECORD_INVALID');
+  });
 });
 
 function storyboardJob(): StoryboardJob {

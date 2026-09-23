@@ -90,7 +90,7 @@ export function StoryboardPage() {
 
       <StoryboardTrigger slug={slug} onCreated={(job) => setJobId(job.id)} />
 
-      <StoryboardJobPanel jobId={jobId} onSucceeded={reload} />
+      <StoryboardJobPanel jobId={jobId} onSucceeded={reload} onRetried={(job) => setJobId(job.id)} />
 
       {stored.status === 'loading' && (
         <p className="text-sm text-slate-500">{t('storyboard.loading')}</p>

@@ -5,13 +5,16 @@ import { useRenderApi } from '../api/render-api-context';
 import { useRenderJobPoll } from '../hooks/use-render-job-poll';
 import { useT } from '../i18n/language-context';
 import { ErrorNotice } from './error-notice';
+import { JobRetryButton } from './job-retry-button';
+import type { Job } from '../api/render-api-types';
 
 export type MontageJobPanelProps = {
   jobId: string | null;
   onSucceeded: () => void;
+  onRetried: (job: Job) => void;
 };
 
-export function MontageJobPanel({ jobId, onSucceeded }: MontageJobPanelProps) {
+export function MontageJobPanel({ jobId, onSucceeded, onRetried }: MontageJobPanelProps) {
   const client = useRenderApi();
   const poll = useRenderJobPoll(jobId, (id) => client.getRenderJob(id));
   const t = useT();
@@ -87,11 +90,23 @@ export function MontageJobPanel({ jobId, onSucceeded }: MontageJobPanelProps) {
         </p>
       )}
 
-      {job.state === 'failed' && job.error !== null && (
+      {job.state === 'failed' && job.error !== null && job.error.code === 'JOB_INTERRUPTED' && (
+        <p
+          role="status"
+          data-testid="job-interrupted-badge"
+          className="inline-block rounded-md border border-amber-500/40 bg-amber-500/10 px-2 py-0.5 text-xs font-medium text-amber-200"
+        >
+          {t('job.interrupted')}
+        </p>
+      )}
+
+      {job.state === 'failed' && job.error !== null && job.error.code !== 'JOB_INTERRUPTED' && (
         <p role="alert" className="font-mono text-sm text-rose-300">
           {t('job.failed', { code: job.error.code, message: job.error.message })}
         </p>
       )}
+
+      <JobRetryButton job={job} onRetried={onRetried} />
     </div>
   );
 }

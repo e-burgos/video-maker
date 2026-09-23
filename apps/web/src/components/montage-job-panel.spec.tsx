@@ -31,7 +31,7 @@ function renderPanel(
   const onSucceeded = vi.fn();
   render(
     <RenderApiProvider client={{ getRenderJob } as unknown as RenderApiClient}>
-      <MontageJobPanel jobId={jobId} onSucceeded={onSucceeded} />
+      <MontageJobPanel jobId={jobId} onSucceeded={onSucceeded} onRetried={vi.fn()} />
     </RenderApiProvider>,
   );
   return onSucceeded;
@@ -171,5 +171,21 @@ describe('MontageJobPanel', () => {
     await advanceOnePoll();
 
     expect(screen.getByRole('alert').textContent).toContain('SERVICE_UNREACHABLE');
+  });
+
+  it('shows the Interrupted badge instead of the generic failure text for JOB_INTERRUPTED, plus a retry button', async () => {
+    const getRenderJob = vi.fn().mockResolvedValue(
+      job({
+        state: 'failed',
+        progress: null,
+        error: { code: 'JOB_INTERRUPTED', stage: null, message: 'interrupted' },
+      }),
+    );
+    renderPanel(getRenderJob);
+    await flush();
+
+    expect(screen.getByText('Interrupted')).toBeTruthy();
+    expect(screen.queryByRole('alert')).toBeNull();
+    expect(screen.getByRole('button', { name: 'Run again' })).toBeTruthy();
   });
 });

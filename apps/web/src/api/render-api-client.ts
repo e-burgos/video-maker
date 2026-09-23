@@ -119,6 +119,7 @@ export type RenderApiClient = {
   listRenderJobs: (slug: string) => Promise<RenderJobListing>;
   getRenderJob: (jobId: string) => Promise<Job>;
   cancelRenderJob: (jobId: string) => Promise<RenderJobCancelOutcome>;
+  retryJob: (jobId: string) => Promise<Job>;
 };
 
 export type UploadAssetInput = {
@@ -637,6 +638,16 @@ export function createRenderApiClient(fetchImpl: FetchLike): RenderApiClient {
         (value) => isRecord(value),
       );
       return { status: status as 200 | 202, job: parseJob(body) };
+    },
+
+    async retryJob(jobId: string): Promise<Job> {
+      const body = await requestJson(
+        `/jobs/${encodeURIComponent(jobId)}/retry`,
+        { method: 'POST' },
+        'a job document',
+        (value) => isRecord(value),
+      );
+      return parseJob(body);
     },
   };
 }

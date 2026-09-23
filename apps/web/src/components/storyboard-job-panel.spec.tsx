@@ -28,7 +28,7 @@ function renderPanel(getRenderJob: RenderApiClient['getRenderJob'], jobId: strin
 
   render(
     <RenderApiProvider client={{ getRenderJob } as unknown as RenderApiClient}>
-      <StoryboardJobPanel jobId={jobId} onSucceeded={onSucceeded} />
+      <StoryboardJobPanel jobId={jobId} onSucceeded={onSucceeded} onRetried={vi.fn()} />
     </RenderApiProvider>,
   );
 
@@ -47,7 +47,7 @@ describe('StoryboardJobPanel', () => {
   it('renders nothing until a job has been created', () => {
     const { container } = render(
       <RenderApiProvider client={{ getRenderJob: vi.fn() } as unknown as RenderApiClient}>
-        <StoryboardJobPanel jobId={null} onSucceeded={vi.fn()} />
+        <StoryboardJobPanel jobId={null} onSucceeded={vi.fn()} onRetried={vi.fn()} />
       </RenderApiProvider>,
     );
 
@@ -135,5 +135,21 @@ describe('StoryboardJobPanel', () => {
     );
 
     await waitFor(() => expect(screen.getByText('SERVICE_UNREACHABLE')).toBeTruthy());
+  });
+
+  it('shows the Interrupted badge instead of the generic failure text for JOB_INTERRUPTED, plus a retry button', async () => {
+    renderPanel(
+      vi.fn().mockResolvedValue(
+        job({
+          state: 'failed',
+          progress: null,
+          error: { code: 'JOB_INTERRUPTED', stage: null, message: 'interrupted' },
+        }),
+      ),
+    );
+
+    await waitFor(() => expect(screen.getByText('Interrupted')).toBeTruthy());
+    expect(screen.queryByRole('alert')).toBeNull();
+    expect(screen.getByRole('button', { name: 'Run again' })).toBeTruthy();
   });
 });

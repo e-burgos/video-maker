@@ -236,7 +236,11 @@ function StudioView({ slug, initialTimeline }: StudioViewProps) {
         </h2>
         <RenderTrigger slug={slug} state={editState} onCreated={(job) => setSelectedJobId(job.id)} />
         <RenderJobList slug={slug} onSelect={setSelectedJobId} />
-        <RenderJobPanel slug={slug} jobId={selectedJobId} />
+        <RenderJobPanel
+          slug={slug}
+          jobId={selectedJobId}
+          onRetried={(job) => setSelectedJobId(job.id)}
+        />
       </div>
     </>
   );

@@ -12,7 +12,7 @@ function renderPanel(getRenderJob: RenderApiClient['getRenderJob'], jobId: strin
 
   render(
     <RenderApiProvider client={{ getRenderJob } as unknown as RenderApiClient}>
-      <VoiceJobPanel jobId={jobId} onSucceeded={onSucceeded} />
+      <VoiceJobPanel jobId={jobId} onSucceeded={onSucceeded} onRetried={vi.fn()} />
     </RenderApiProvider>,
   );
 
@@ -31,7 +31,7 @@ describe('VoiceJobPanel', () => {
   it('renders nothing until a job has been created', () => {
     const { container } = render(
       <RenderApiProvider client={{ getRenderJob: vi.fn() } as unknown as RenderApiClient}>
-        <VoiceJobPanel jobId={null} onSucceeded={vi.fn()} />
+        <VoiceJobPanel jobId={null} onSucceeded={vi.fn()} onRetried={vi.fn()} />
       </RenderApiProvider>,
     );
 
@@ -133,5 +133,21 @@ describe('VoiceJobPanel', () => {
 
     await waitFor(() => expect(screen.getByRole('alert').textContent).toContain('RENDER_JOB_NOT_FOUND'));
     expect(screen.getByRole('alert').textContent).toContain('restarted');
+  });
+
+  it('shows the Interrupted badge instead of the generic failure text for JOB_INTERRUPTED, plus a retry button', async () => {
+    renderPanel(
+      vi.fn().mockResolvedValue(
+        voiceJob({
+          state: 'failed',
+          progress: null,
+          error: { code: 'JOB_INTERRUPTED', stage: null, message: 'interrupted' },
+        }),
+      ),
+    );
+
+    await waitFor(() => expect(screen.getByText('Interrupted')).toBeTruthy());
+    expect(screen.queryByRole('alert')).toBeNull();
+    expect(screen.getByRole('button', { name: 'Run again' })).toBeTruthy();
   });
 });
