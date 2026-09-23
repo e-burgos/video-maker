@@ -12,7 +12,7 @@ import { createProducerTurnRegistry } from './producer-turn-registry';
 import { assertProducerMessageText, startProducerTurn } from './run-producer-turn';
 
 const PROJECT = resolveMediaProject('/media/demo-01');
-const CONFIG = readProducerConfig({}, '/repo', 'http://127.0.0.1:4399');
+const CONFIG = readProducerConfig({}, '/repo', 'http://127.0.0.1:4399', '/tmp');
 
 const OK_RESULT: ProducerTurnResult = {
   exitCode: 0,
@@ -76,8 +76,8 @@ function streamOf(answer: string, sessionId = 'session-abc'): readonly string[] 
           { type: 'text', text: 'Miro el material.' },
           {
             type: 'tool_use',
-            name: 'Bash',
-            input: { command: 'ffprobe /media/demo-01/raw/aroll/clip01.mp4' },
+            name: 'mcp__studio__probe_media',
+            input: { path: 'raw/aroll/clip01.mp4' },
           },
         ],
       },
@@ -165,7 +165,7 @@ describe('startProducerTurn', () => {
     expect(registry.get(started.turnId).events).toEqual([
       { type: 'status', status: 'started' },
       { type: 'text', text: 'Miro el material.' },
-      { type: 'tool', name: 'Bash', summary: 'ffprobe raw/aroll/clip01.mp4' },
+      { type: 'tool', name: 'mcp__studio__probe_media', summary: 'Measuring raw/aroll/clip01.mp4' },
     ]);
   });
 
@@ -272,14 +272,37 @@ describe('startProducerTurn', () => {
     ).toBe('PRODUCER_TURN_ACTIVE');
   });
 
-  it('pasa al agente la ruta absoluta del proyecto y el prompt del productor construido por la lib', async () => {
+  it('pasa al agente el prompt del productor construido por la lib', async () => {
     const { deps, registry, starts } = scenario({ lines: streamOf(ANSWER) });
     const started = await startProducerTurn(deps, registry, { project: PROJECT, text: 'hola', config: CONFIG });
     await started.completed;
 
-    expect(starts[0]?.projectRoot).toBe('/media/demo-01');
     expect(starts[0]?.systemPrompt).toContain('# Your tools');
     expect(starts[0]?.systemPrompt).toContain('# This project');
     expect(starts[0]?.systemPrompt).toContain('get_project_overview');
+  });
+
+  it('arma el config MCP del turno con el slug del proyecto, la URL de la API y el modelo', async () => {
+    const { deps, registry, starts } = scenario({ lines: streamOf(ANSWER) });
+    const started = await startProducerTurn(deps, registry, { project: PROJECT, text: 'hola', config: CONFIG });
+    await started.completed;
+
+    const mcpConfig = JSON.parse(starts[0]?.mcpConfig ?? '{}');
+    expect(mcpConfig.mcpServers.studio.args).toContain('--project');
+    expect(mcpConfig.mcpServers.studio.args).toContain('demo-01');
+    expect(mcpConfig.mcpServers.studio.args).toContain('http://127.0.0.1:4399');
+    expect(mcpConfig.mcpServers.studio.args).toContain('sonnet');
+  });
+
+  it('arranca el turno en un cwd neutro por proyecto, afuera del repo y de la carpeta de medios', async () => {
+    const { deps, registry, starts, callLog } = scenario({ lines: streamOf(ANSWER) });
+    const started = await startProducerTurn(deps, registry, { project: PROJECT, text: 'hola', config: CONFIG });
+    await started.completed;
+
+    expect(starts[0]?.cwd).toBe('/tmp/video-maker-producer/demo-01');
+    expect(callLog.entries().filter((entry) => entry.port === 'ensureDirectory')).toContainEqual({
+      port: 'ensureDirectory',
+      input: '/tmp/video-maker-producer/demo-01',
+    });
   });
 });

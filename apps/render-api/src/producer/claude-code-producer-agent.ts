@@ -21,13 +21,16 @@ export function producerCliArgs(start: ProducerTurnStart): readonly string[] {
     'dontAsk',
     '--model',
     start.model,
+    '--tools',
+    '',
+    '--strict-mcp-config',
+    '--mcp-config',
+    start.mcpConfig,
+    '--allowedTools',
+    'mcp__studio',
     '--append-system-prompt',
     start.systemPrompt,
-    '--add-dir',
-    start.projectRoot,
     ...(start.resume ? ['--resume', start.sessionId] : ['--session-id', start.sessionId]),
-    '--allowedTools',
-    ...start.allowedTools,
   ];
 }
 
@@ -83,7 +86,7 @@ export function createClaudeCodeProducerAgent(
     const child = spawnProcess({
       command: config.binaryPath,
       args: producerCliArgs(start),
-      cwd: config.workingDirectory,
+      cwd: start.cwd,
     });
 
     let cancelForceKill = (): void => undefined;

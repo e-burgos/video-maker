@@ -1,3 +1,5 @@
+import { tmpdir } from 'node:os';
+
 import { DEFAULT_HOST, DEFAULT_PORT } from '../config/server-config';
 import { readProducerConfig } from '../config/producer-config';
 import type { ProducerConfig } from '../config/producer-config';
@@ -21,7 +23,7 @@ export interface RenderApiRuntime {
 }
 
 export function defaultProducerConfig(): ProducerConfig {
-  return readProducerConfig({}, '.', `http://${DEFAULT_HOST}:${DEFAULT_PORT}`);
+  return readProducerConfig({}, '.', `http://${DEFAULT_HOST}:${DEFAULT_PORT}`, tmpdir());
 }
 
 export function createRenderApiRuntime(

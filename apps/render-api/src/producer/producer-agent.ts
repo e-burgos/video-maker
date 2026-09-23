@@ -4,8 +4,8 @@ export interface ProducerTurnStart {
   readonly systemPrompt: string;
   readonly sessionId: string;
   readonly resume: boolean;
-  readonly projectRoot: string;
-  readonly allowedTools: readonly string[];
+  readonly mcpConfig: string;
+  readonly cwd: string;
 }
 
 export interface ProducerTurnResult {

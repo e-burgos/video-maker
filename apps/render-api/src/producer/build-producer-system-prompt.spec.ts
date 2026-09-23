@@ -1,10 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import {
-  buildProducerSystemPrompt,
-  PRODUCER_BASE_ALLOWED_TOOLS,
-  producerAllowedTools,
-} from './build-producer-system-prompt';
+import { buildProducerSystemPrompt } from './build-producer-system-prompt';
 import type { ProducerProjectContext } from './collect-producer-context';
 
 const CONTEXT: ProducerProjectContext = {
@@ -20,24 +16,6 @@ const CONTEXT: ProducerProjectContext = {
   hasTimeline: true,
   producerScript: 'none',
 };
-
-describe('producerAllowedTools', () => {
-  it('pone el binario de Piper en la lista blanca cuando está instalado (FIX-e-burgos-015-002)', () => {
-    expect(producerAllowedTools('/usr/bin/piper')).toEqual([
-      ...PRODUCER_BASE_ALLOWED_TOOLS,
-      'Bash(/usr/bin/piper *)',
-    ]);
-    expect(producerAllowedTools('piper').at(-1)).toBe('Bash(piper *)');
-    expect(producerAllowedTools(null)).toEqual([...PRODUCER_BASE_ALLOWED_TOOLS]);
-  });
-
-  it('incluye las formas reescritas por el hook rtk', () => {
-    const patterns = [...PRODUCER_BASE_ALLOWED_TOOLS];
-    expect(patterns).toContain('Bash(rtk curl *)');
-    expect(patterns).toContain('Bash(rtk ls *)');
-    expect(patterns).toContain('Bash(rtk read *)');
-  });
-});
 
 describe('buildProducerSystemPrompt', () => {
   it('delega en el builder de la lib y no anexa ningún archivo de skill', () => {

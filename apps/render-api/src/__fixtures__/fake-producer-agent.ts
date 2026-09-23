@@ -1,4 +1,3 @@
-import { producerAllowedTools } from '../producer/build-producer-system-prompt';
 import type {
   ProducerTurnResult,
   ProducerTurnRun,
@@ -106,8 +105,8 @@ export function producerTurnStartFixture(
     systemPrompt: '# Skill: video-producer',
     sessionId: '11111111-2222-3333-4444-555555555555',
     resume: false,
-    projectRoot: '/media/demo-01',
-    allowedTools: producerAllowedTools(null),
+    mcpConfig: '{"mcpServers":{"studio":{"command":"node","args":[],"env":{}}}}',
+    cwd: '/tmp/video-maker-producer/demo-01',
     ...overrides,
   };
 }

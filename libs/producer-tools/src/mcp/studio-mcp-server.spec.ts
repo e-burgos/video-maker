@@ -58,9 +58,7 @@ describe('createStudioMcpServer', () => {
     });
   });
 
-  // The MCP SDK validates args against inputSchema itself before the tool callback runs, so a
-  // schema-invalid call never reaches StudioToolRuntimeError and gets the SDK's own isError text.
-  it('rejects a schema-invalid call before it ever reaches a handler', async () => {
+  it('rejects a schema-invalid call via the SDK input validation, never reaching the handler or a StudioToolRuntimeError', async () => {
     const { client } = await connectedPair();
 
     const result = await client.callTool({ name: 'probe_media', arguments: { path: '/etc/passwd' } });
@@ -83,6 +81,18 @@ describe('createStudioMcpServer', () => {
     expect(content.some((block) => block.type === 'text')).toBe(true);
     const image = content.find((block) => block.type === 'image');
     expect(image).toMatchObject({ mimeType: 'image/jpeg', data: Buffer.from([1, 2, 3]).toString('base64') });
+    expect(result.structuredContent).toBeUndefined();
+  });
+
+  it('does not advertise an outputSchema for extract_frames, unlike the other contract tools', async () => {
+    const { client } = await connectedPair();
+
+    const { tools } = await client.listTools();
+
+    const extractFrames = tools.find((tool) => tool.name === 'extract_frames');
+    const getTimeline = tools.find((tool) => tool.name === 'get_timeline');
+    expect(extractFrames?.outputSchema).toBeUndefined();
+    expect(getTimeline?.outputSchema).toBeDefined();
   });
 
   it('injects the model into a voice start_job call', async () => {

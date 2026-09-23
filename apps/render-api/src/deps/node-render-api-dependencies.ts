@@ -262,6 +262,7 @@ export function createNodeRenderApiDependencies(
     env,
     process.cwd(),
     `http://${server.host}:${server.port}`,
+    tmpdir(),
   );
   let mediaLocalModule: Promise<typeof import('@video-maker/media-local')> | null = null;
   let renderModule: Promise<typeof import('@video-maker/composition-remotion/render')> | null = null;

@@ -1,3 +1,5 @@
+import { tmpdir } from 'node:os';
+
 import { readProducerConfig } from './config/producer-config';
 import { readServerConfig } from './config/server-config';
 import { readStoreConfig } from './config/store-config';
@@ -24,6 +26,7 @@ async function main(): Promise<void> {
     process.env,
     process.cwd(),
     `http://${config.host}:${config.port}`,
+    tmpdir(),
   );
   const server = createRenderApiServer(deps, config, store, producer);
   const address = await server.listen();

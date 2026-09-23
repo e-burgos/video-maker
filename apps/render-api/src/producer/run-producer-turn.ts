@@ -1,3 +1,5 @@
+import { join } from 'node:path/posix';
+
 import type { MediaProject } from '@video-maker/auto-montage';
 
 import type { ProducerConfig } from '../config/producer-config';
@@ -8,8 +10,9 @@ import {
   producerUnavailable,
 } from '../errors/translate-producer-error';
 import { PipelineStageError } from '../errors/pipeline-stage-error';
-import { buildProducerSystemPrompt, producerAllowedTools } from './build-producer-system-prompt';
+import { buildProducerSystemPrompt } from './build-producer-system-prompt';
 import { collectProducerContext } from './collect-producer-context';
+import { buildProducerMcpConfigJson } from './producer-mcp-config';
 import { parseProducerAnswer } from './parse-producer-suggestions';
 import { interpretProducerStreamLine } from './producer-stream-events';
 import type { ProducerMessage, ProducerSession } from './producer-documents';
@@ -23,6 +26,12 @@ import {
   writeProducerTurnLog,
 } from './producer-store';
 import type { ProducerTurnRegistry } from './producer-turn-registry';
+
+const PRODUCER_CWD_DIR_NAME = 'video-maker-producer';
+
+function producerWorkingDirectory(cliCwdBase: string, slug: string): string {
+  return join(cliCwdBase, PRODUCER_CWD_DIR_NAME, slug);
+}
 
 export interface StartProducerTurnInput {
   readonly project: MediaProject;
@@ -64,14 +73,6 @@ export function assertProducerModel(model: unknown, config: ProducerConfig): str
   return model;
 }
 
-async function resolvePiperPath(deps: RenderApiDependencies): Promise<string | null> {
-  try {
-    return (await deps.resolveVoiceBinaries()).piperCli;
-  } catch {
-    return null;
-  }
-}
-
 function resumableModel(session: ProducerSession | null, config: ProducerConfig): string {
   return session !== null && config.models.includes(session.model) ? session.model : config.model;
 }
@@ -111,8 +112,15 @@ export async function startProducerTurn(
     repoRoot: input.config.workingDirectory,
     apiUrl: input.config.apiUrl,
   });
-  const piperPath = await resolvePiperPath(deps);
   const systemPrompt = buildProducerSystemPrompt(context);
+  const mcpConfig = buildProducerMcpConfigJson({
+    repoRoot: context.repoRoot,
+    apiUrl: context.apiUrl,
+    project: context.slug,
+    model,
+  });
+  const cwd = producerWorkingDirectory(input.config.cliCwdBase, input.project.slug);
+  await deps.ensureDirectory(cwd);
 
   const sessionId = session?.sessionId ?? deps.randomId();
   const rawLines: string[] = [];
@@ -127,8 +135,8 @@ export async function startProducerTurn(
       systemPrompt,
       sessionId,
       resume: session !== null,
-      projectRoot: input.project.root,
-      allowedTools: producerAllowedTools(piperPath),
+      mcpConfig,
+      cwd,
     },
     (line) => {
       rawLines.push(line);
@@ -139,7 +147,7 @@ export async function startProducerTurn(
         return;
       }
 
-      const signal = interpretProducerStreamLine(parsed, input.project.root);
+      const signal = interpretProducerStreamLine(parsed);
       if (signal.kind === 'session') {
         reportedSessionId = signal.sessionId;
       }

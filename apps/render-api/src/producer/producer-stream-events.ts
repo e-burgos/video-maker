@@ -1,4 +1,5 @@
-import { relative } from 'node:path/posix';
+import { claudeCodeToolName, isStudioToolName } from '@video-maker/producer-tools';
+import type { StudioToolName } from '@video-maker/producer-tools';
 
 export const PRODUCER_EVENT_TYPES = ['text', 'tool', 'status'] as const;
 
@@ -37,6 +38,8 @@ const RATE_LIMIT_MARKERS = ['rate limit', 'rate_limit', 'usage limit', 'quota', 
 
 const SUMMARY_MAX_CHARS = 140;
 
+const STUDIO_TOOL_PREFIX = 'mcp__studio__';
+
 function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === 'object' && value !== null && !Array.isArray(value);
 }
@@ -49,60 +52,67 @@ function truncate(text: string): string {
   return text.length <= SUMMARY_MAX_CHARS ? text : `${text.slice(0, SUMMARY_MAX_CHARS - 1)}…`;
 }
 
-export function toProjectRelative(value: string, projectRoot: string): string {
-  if (!value.startsWith(`${projectRoot}/`)) {
-    return value;
-  }
-  const relativePath = relative(projectRoot, value);
-  return relativePath === '' ? value : relativePath;
+function stringField(input: Record<string, unknown>, key: string): string | null {
+  const value = input[key];
+  return typeof value === 'string' && value !== '' ? value : null;
 }
 
-function queuedJobSummary(command: string): string | null {
-  const createsJob = /(?:-X|--request)\s+POST/u.test(command) && /\/jobs(?:\s|'|"|$)/u.test(command);
-  if (!createsJob) {
+function pluralize(count: number, word: string): string {
+  return count === 1 ? `1 ${word}` : `${count} ${word}s`;
+}
+
+function studioToolNameOf(name: string): StudioToolName | null {
+  if (!name.startsWith(STUDIO_TOOL_PREFIX)) {
     return null;
   }
-  const kind = /"kind"\s*:\s*"([a-z]+)"/u.exec(command);
-  return kind === null ? 'queued render job' : `queued ${kind[1]} job`;
+  const candidate = name.slice(STUDIO_TOOL_PREFIX.length);
+  return isStudioToolName(candidate) && claudeCodeToolName(candidate) === name ? candidate : null;
 }
 
-function bashSummary(command: string, projectRoot: string): string {
-  const collapsed = collapse(command);
-  const queued = queuedJobSummary(collapsed);
-  if (queued !== null) {
-    return queued;
+function summarizeStudioTool(tool: StudioToolName, input: Record<string, unknown>): string {
+  switch (tool) {
+    case 'get_project_overview':
+      return 'Checking the project';
+    case 'probe_media':
+      return truncate(`Measuring ${stringField(input, 'path') ?? 'the media'}`);
+    case 'extract_frames': {
+      const atSeconds = input.atSeconds;
+      const frameCount = Array.isArray(atSeconds) ? atSeconds.length : 1;
+      return truncate(`Looking at ${pluralize(frameCount, 'frame')} of ${stringField(input, 'path') ?? 'the video'}`);
+    }
+    case 'list_voices':
+      return 'Listing available voices';
+    case 'read_project_text':
+      return truncate(`Reading ${stringField(input, 'path') ?? 'a file'}`);
+    case 'write_project_text':
+      return truncate(`Writing ${stringField(input, 'path') ?? 'a file'}`);
+    case 'copy_asset': {
+      const role = stringField(input, 'role') ?? 'raw';
+      return truncate(`Copying ${stringField(input, 'from') ?? 'the file'} into raw/${role}/`);
+    }
+    case 'start_job':
+      return truncate(`Starting the ${stringField(input, 'kind') ?? 'render'} job`);
+    case 'wait_for_job':
+      return truncate(`Waiting for job ${stringField(input, 'jobId') ?? ''}`.trim());
+    case 'cancel_job':
+      return truncate(`Canceling job ${stringField(input, 'jobId') ?? ''}`.trim());
+    case 'get_timeline':
+      return 'Checking the timeline';
+    case 'put_timeline':
+      return 'Saving the timeline';
+    case 'search_free_music':
+      return truncate(`Searching free music: ${stringField(input, 'mood') ?? ''}`.trim());
+    case 'import_music':
+      return 'Importing music';
   }
-
-  const tokens = collapsed
-    .split(' ')
-    .map((token) => token.replace(/^['"]|['"]$/gu, ''))
-    .filter((token) => token !== '');
-  const binary = tokens[0] ?? '';
-  const lastPath = [...tokens]
-    .reverse()
-    .find((token) => token.includes('/') && !token.startsWith('-'));
-
-  if (binary === '' || lastPath === undefined) {
-    return truncate(collapsed);
-  }
-
-  return truncate(`${toProjectRelative(binary, projectRoot)} ${toProjectRelative(lastPath, projectRoot)}`);
 }
 
-export function summarizeToolUse(name: string, input: unknown, projectRoot: string): string {
-  if (!isRecord(input)) {
+export function summarizeToolUse(name: string, input: unknown): string {
+  const tool = studioToolNameOf(name);
+  if (tool === null) {
     return name;
   }
-
-  if (name === 'Bash' && typeof input.command === 'string') {
-    return bashSummary(input.command, projectRoot);
-  }
-
-  const target = [input.file_path, input.path, input.pattern, input.url].find(
-    (value): value is string => typeof value === 'string' && value !== '',
-  );
-
-  return target === undefined ? name : truncate(`${name} ${toProjectRelative(target, projectRoot)}`);
+  return summarizeStudioTool(tool, isRecord(input) ? input : {});
 }
 
 function mentionsRateLimit(...values: readonly unknown[]): boolean {
@@ -113,7 +123,7 @@ function mentionsRateLimit(...values: readonly unknown[]): boolean {
   return RATE_LIMIT_MARKERS.some((marker) => haystack.includes(marker));
 }
 
-function assistantEvents(content: unknown, projectRoot: string): readonly ProducerEvent[] {
+function assistantEvents(content: unknown): readonly ProducerEvent[] {
   if (!Array.isArray(content)) {
     return [];
   }
@@ -131,7 +141,7 @@ function assistantEvents(content: unknown, projectRoot: string): readonly Produc
       events.push({
         type: 'tool',
         name: block.name,
-        summary: summarizeToolUse(block.name, block.input, projectRoot),
+        summary: summarizeToolUse(block.name, block.input),
       });
     }
   }
@@ -147,7 +157,7 @@ function toolResultEvents(content: unknown): readonly ProducerEvent[] {
     : [];
 }
 
-export function interpretProducerStreamLine(value: unknown, projectRoot: string): ProducerStreamSignal {
+export function interpretProducerStreamLine(value: unknown): ProducerStreamSignal {
   if (!isRecord(value)) {
     return { kind: 'ignored' };
   }
@@ -161,7 +171,7 @@ export function interpretProducerStreamLine(value: unknown, projectRoot: string)
   }
 
   if (value.type === 'assistant' && isRecord(value.message)) {
-    const events = assistantEvents(value.message.content, projectRoot);
+    const events = assistantEvents(value.message.content);
     return events.length === 0 ? { kind: 'ignored' } : { kind: 'events', events };
   }
 

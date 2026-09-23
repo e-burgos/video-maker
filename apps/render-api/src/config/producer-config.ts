@@ -1,5 +1,5 @@
 import { PipelineStageError } from '../errors/pipeline-stage-error';
-import { AI_AGENT_BINARY_ENV_VAR, DEFAULT_AI_AGENT_BINARY } from './ai-agent-config';
+import { AI_AGENT_BINARY_ENV_VAR, AI_AGENT_CWD_ENV_VAR, DEFAULT_AI_AGENT_BINARY } from './ai-agent-config';
 
 export const PRODUCER_MODEL_ENV_VAR = 'PRODUCER_MODEL';
 export const PRODUCER_MODELS_ENV_VAR = 'PRODUCER_MODELS';
@@ -33,6 +33,7 @@ export function describeProducerModel(id: string): ProducerModelOption {
 export interface ProducerConfig {
   readonly binaryPath: string;
   readonly workingDirectory: string;
+  readonly cliCwdBase: string;
   readonly model: string;
   readonly models: readonly string[];
   readonly timeoutMs: number;
@@ -86,6 +87,7 @@ export function readProducerConfig(
   env: NodeJS.ProcessEnv,
   workingDirectory: string,
   fallbackApiUrl: string,
+  neutralCwdBase: string,
 ): ProducerConfig {
   const models = readModels(env);
   const model = readNonEmpty(env, PRODUCER_MODEL_ENV_VAR) ?? DEFAULT_PRODUCER_MODEL;
@@ -101,6 +103,7 @@ export function readProducerConfig(
   return {
     binaryPath: readNonEmpty(env, AI_AGENT_BINARY_ENV_VAR) ?? DEFAULT_AI_AGENT_BINARY,
     workingDirectory,
+    cliCwdBase: readNonEmpty(env, AI_AGENT_CWD_ENV_VAR) ?? neutralCwdBase,
     model,
     models,
     timeoutMs: readTimeoutMs(env),

@@ -298,7 +298,7 @@
         "TASK-005",
         "TASK-006"
       ],
-      "status": "pending",
+      "status": "done",
       "files": [
         "apps/render-api/src/producer/claude-code-producer-agent.ts",
         "apps/render-api/src/producer/claude-code-producer-agent.spec.ts",
@@ -308,8 +308,28 @@
         "apps/render-api/src/producer/run-producer-turn.spec.ts",
         "apps/render-api/src/producer/producer-stream-events.ts",
         "apps/render-api/src/producer/producer-stream-events.spec.ts",
-        "apps/render-api/src/producer/producer-agent.ts"
-      ]
+        "apps/render-api/src/producer/producer-agent.ts",
+        "apps/render-api/src/producer/build-producer-system-prompt.ts",
+        "apps/render-api/src/producer/build-producer-system-prompt.spec.ts",
+        "apps/render-api/src/config/producer-config.ts",
+        "apps/render-api/src/config/producer-config.spec.ts",
+        "apps/render-api/src/main.ts",
+        "apps/render-api/src/deps/node-render-api-dependencies.ts",
+        "apps/render-api/src/http/render-api-runtime.ts",
+        "apps/render-api/src/__fixtures__/fake-producer-agent.ts",
+        "libs/producer-tools/src/mcp/studio-mcp-server.ts",
+        "libs/producer-tools/src/mcp/studio-mcp-server.spec.ts"
+      ],
+      "usage": {
+        "tokens_in": 340000,
+        "tokens_out": 46000,
+        "provider_model": "claude/sonnet",
+        "effort": "medium",
+        "agent": "implementor-back",
+        "approx": true,
+        "source": "declared-estimate",
+        "recorded_at": "2026-09-23"
+      }
     },
     {
       "id": "TASK-008",

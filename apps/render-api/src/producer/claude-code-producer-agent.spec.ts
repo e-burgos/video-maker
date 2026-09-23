@@ -6,7 +6,6 @@ import {
   producerTurnStartFixture,
 } from '../__fixtures__/fake-producer-agent';
 import { readProducerConfig } from '../config/producer-config';
-import { producerAllowedTools } from './build-producer-system-prompt';
 import {
   createClaudeCodeProducerAgent,
   PRODUCER_KILL_GRACE_MS,
@@ -14,7 +13,7 @@ import {
   producerCliArgs,
 } from './claude-code-producer-agent';
 
-const CONFIG = readProducerConfig({}, '/repo', 'http://127.0.0.1:4310');
+const CONFIG = readProducerConfig({}, '/repo', 'http://127.0.0.1:4310', '/tmp');
 
 function agentWith(config = CONFIG) {
   const spawner = createFakeProducerSpawner();
@@ -25,7 +24,7 @@ function agentWith(config = CONFIG) {
 }
 
 describe('producerCliArgs', () => {
-  it('pide stream-json verboso, dontAsk, el modelo configurado y la sesión nueva', () => {
+  it('pide stream-json verboso, dontAsk, el modelo configurado y la sesión nueva, sin tools built-in', () => {
     const args = producerCliArgs(producerTurnStartFixture());
 
     expect(args).toEqual([
@@ -38,14 +37,17 @@ describe('producerCliArgs', () => {
       'dontAsk',
       '--model',
       'sonnet',
+      '--tools',
+      '',
+      '--strict-mcp-config',
+      '--mcp-config',
+      '{"mcpServers":{"studio":{"command":"node","args":[],"env":{}}}}',
+      '--allowedTools',
+      'mcp__studio',
       '--append-system-prompt',
       '# Skill: video-producer',
-      '--add-dir',
-      '/media/demo-01',
       '--session-id',
       '11111111-2222-3333-4444-555555555555',
-      '--allowedTools',
-      ...producerAllowedTools(null),
     ]);
   });
 
@@ -55,37 +57,33 @@ describe('producerCliArgs', () => {
     );
   });
 
+  it('nunca pide --add-dir: el agente ya no lee archivos por su cuenta', () => {
+    expect(producerCliArgs(producerTurnStartFixture())).not.toContain('--add-dir');
+  });
+
   it('retoma el hilo con --resume en vez de --session-id a partir del segundo turno', () => {
     const args = producerCliArgs(producerTurnStartFixture({ resume: true }));
     expect(args).toContain('--resume');
     expect(args).not.toContain('--session-id');
   });
 
-  it('pasa la lista blanca del turno, con el binario de Piper cuando está resuelto (FIX-e-burgos-015-002)', () => {
+  it('pasa el config MCP del turno tal cual, después de --strict-mcp-config', () => {
     const args = producerCliArgs(
-      producerTurnStartFixture({ allowedTools: producerAllowedTools('/usr/bin/piper') }),
+      producerTurnStartFixture({ mcpConfig: '{"mcpServers":{"studio":{"command":"/usr/bin/node"}}}' }),
     );
 
-    expect(args.at(-1)).toBe('Bash(/usr/bin/piper *)');
-    expect(args.slice(args.indexOf('--allowedTools') + 1)).toEqual([
-      ...producerAllowedTools('/usr/bin/piper'),
+    const index = args.indexOf('--mcp-config');
+    expect(args[index + 1]).toBe('{"mcpServers":{"studio":{"command":"/usr/bin/node"}}}');
+    expect(args[index - 1]).toBe('--strict-mcp-config');
+  });
+
+  it('sólo permite mcp__studio: nunca ningún tool built-in', () => {
+    const args = producerCliArgs(producerTurnStartFixture());
+    expect(args.slice(args.indexOf('--allowedTools') + 1, args.indexOf('--allowedTools') + 2)).toEqual([
+      'mcp__studio',
     ]);
-  });
-
-  it('pone --allowedTools ÚLTIMO y cada patrón como argumento propio: es variádico y se comería --resume', () => {
-    const args = producerCliArgs(producerTurnStartFixture({ resume: true }));
-    const index = args.indexOf('--allowedTools');
-
-    expect(args.slice(index + 1)).toEqual([...producerAllowedTools(null)]);
-    expect(args.slice(0, index)).toContain('--resume');
-    expect(args.at(-1)).toBe(producerAllowedTools(null).at(-1));
-  });
-
-  it('no ofrece mkdir ni cp: el CLI nunca autoriza un comando de escritura por patrón comodín', () => {
-    const patterns = [...producerAllowedTools(null)];
-    expect(patterns).not.toContain('Bash(mkdir *)');
-    expect(patterns).not.toContain('Bash(cp *)');
-    expect(patterns).toContain('Write');
+    const toolsIndex = args.indexOf('--tools');
+    expect(args[toolsIndex + 1]).toBe('');
   });
 
   it('pasa el modelo del turno, no el del arranque del servicio', () => {
@@ -96,13 +94,23 @@ describe('producerCliArgs', () => {
 });
 
 describe('createClaudeCodeProducerAgent', () => {
-  it('arranca el binario configurado en la raíz del repo, que es lo que pnpm nx necesita', () => {
+  it('arranca el binario configurado en el cwd neutro del turno, no en la raíz del repo', () => {
     const { spawner, agent, lines } = agentWith();
 
     agent(producerTurnStartFixture(), (line) => lines.push(line));
 
     expect(spawner.last().input.command).toBe('claude');
-    expect(spawner.last().input.cwd).toBe('/repo');
+    expect(spawner.last().input.cwd).toBe('/tmp/video-maker-producer/demo-01');
+  });
+
+  it('usa el cwd que trae cada turno, no uno fijo del arranque del servicio', () => {
+    const { spawner, agent, lines } = agentWith();
+
+    agent(producerTurnStartFixture({ cwd: '/tmp/video-maker-producer/otro-proyecto' }), (line) =>
+      lines.push(line),
+    );
+
+    expect(spawner.last().input.cwd).toBe('/tmp/video-maker-producer/otro-proyecto');
   });
 
   it('entrega una línea por evento, aunque el chunk parta un JSON al medio', async () => {

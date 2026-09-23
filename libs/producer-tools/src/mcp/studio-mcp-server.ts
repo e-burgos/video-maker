@@ -9,15 +9,26 @@ import type { StudioToolHandler } from '../handlers/studio-tool-handlers';
 
 const STUDIO_MCP_SERVER_VERSION = '0.1.0';
 
+// Claude Code CLI 2.1.123 forwards structuredContent to the model instead of image content blocks, so image-carrying tools must omit outputSchema entirely.
+const TOOLS_WITHOUT_OUTPUT_SCHEMA: ReadonlySet<StudioToolName> = new Set(['extract_frames']);
+
 function toCallToolResult(
   data: unknown,
   images: readonly { readonly mimeType: string; readonly base64: string }[] | undefined,
 ): CallToolResult {
-  const content: ContentBlock[] = [{ type: 'text', text: JSON.stringify(data) }];
-  for (const image of images ?? []) {
-    content.push({ type: 'image', data: image.base64, mimeType: image.mimeType });
+  if (images !== undefined && images.length > 0) {
+    const content: ContentBlock[] = images.map((image) => ({
+      type: 'image',
+      data: image.base64,
+      mimeType: image.mimeType,
+    }));
+    content.push({ type: 'text', text: JSON.stringify(data) });
+    return { content };
   }
-  return { content, structuredContent: data as Record<string, unknown> };
+  return {
+    content: [{ type: 'text', text: JSON.stringify(data) }],
+    structuredContent: data as Record<string, unknown>,
+  };
 }
 
 function toErrorResult(cause: unknown): CallToolResult {
@@ -43,7 +54,9 @@ export function createStudioMcpServer(handlers: Readonly<Record<StudioToolName, 
 
     server.registerTool(
       name,
-      { description: definition.description, inputSchema: definition.input, outputSchema: definition.output },
+      TOOLS_WITHOUT_OUTPUT_SCHEMA.has(name)
+        ? { description: definition.description, inputSchema: definition.input }
+        : { description: definition.description, inputSchema: definition.input, outputSchema: definition.output },
       async (args: unknown) => {
         try {
           const result = await handler(args);

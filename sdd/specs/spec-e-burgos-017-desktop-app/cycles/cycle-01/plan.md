@@ -186,8 +186,23 @@ Sin `--bare`: en macOS saltearía la lectura del llavero, que es donde vive el l
 
 | Riesgo | Mitigación |
 | --- | --- |
-| `--tools ""` o `--allowedTools mcp__studio` se comportan distinto de lo que dice `--help` (CLI 2.1.123) | Primera sonda de TASK-007: un turno mínimo que pide usar `Bash` y debe fallar; si la forma del flag cambia, se ajusta antes de seguir |
-| Las imágenes de `extract_frames` no llegan al modelo como imagen | Sonda en TASK-005 con un frame real; si no, se descopa a texto con descripción y se avisa al dev |
+| `--tools ""` o `--allowedTools mcp__studio` se comportan distinto de lo que dice `--help` (CLI 2.1.123) | **Resuelto en TASK-007**: probado end-to-end contra el server real (`claude -p` con `--tools ""`, `--strict-mcp-config`, `--allowedTools mcp__studio`); el pedido de inyección con `Bash` no aparece en el log del turno y el modelo la rechaza solo |
+| Las imágenes de `extract_frames` no llegan al modelo como imagen | **Resuelto en TASK-007**: el CLI 2.1.123 reenvía `structuredContent` al modelo en vez de los `content` blocks cuando la tool declara `outputSchema`; `extract_frames` deja de declararlo y devuelve sólo `content` (imagen + texto), validado igual del lado del handler. Probado con un frame real: el modelo describe lo que ve en pantalla |
 | El prompt reescrito pierde una regla editorial de una receta | TASK-006 lista cada regla actual y el test del prompt asera que cada una sigue presente |
 | Commons cambia su API o limita pedidos | Error tipado `MUSIC_SOURCE_UNAVAILABLE`; el productor ofrece usar un archivo del usuario |
 | Ciclo grande (40 SP) | Si pasa de un día de trabajo, se corta después de TASK-005 y TASK-006–009 abren `cycle-02`, corriendo los demás ciclos de la spec |
+
+## Pendiente de documentar en contexto
+
+- **`extract_frames` sin `outputSchema`** (`libs/producer-tools/src/mcp/studio-mcp-server.ts`): es la única
+  tool del contrato que no declara `outputSchema` ni devuelve `structuredContent` — Claude Code CLI
+  2.1.123 reenvía `structuredContent` al modelo en lugar de los `content` blocks, así que una tool con
+  imágenes tiene que evitarlo. El handler sigue validando la forma de salida con
+  `STUDIO_TOOLS.extract_frames.output` internamente. Cualquier tool nueva que devuelva imágenes debe
+  seguir el mismo patrón.
+- **`ProducerConfig.cliCwdBase`** (`apps/render-api/src/config/producer-config.ts`): nuevo campo, lee
+  `CLAUDE_CLI_CWD` (la misma variable que ya usaba el otro agente de IA en `ai-agent-config.ts`) como
+  override del directorio base bajo el que se crea `video-maker-producer/<slug>` por turno. No estaba en
+  el `files[]` original de TASK-007 pero es necesario para el cwd neutro por proyecto que pide
+  US-017-005; toca también `main.ts`, `node-render-api-dependencies.ts` y `render-api-runtime.ts`
+  (todos pasan el `neutralCwdBase`, hoy `os.tmpdir()`).
