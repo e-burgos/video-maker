@@ -25,6 +25,7 @@ export interface FakeObjectStorageControl {
   readonly queueStat: (path: string, ...values: readonly (StorageStat | null)[]) => void;
   readonly queueWriteOutcome: (outcome: WriteTemporaryOutcome) => void;
   readonly queueReadTextFileError: (path: string, error: NodeJS.ErrnoException) => void;
+  readonly setRealPath: (path: string, resolved: string | null) => void;
 }
 
 export interface FakeObjectStorage extends ObjectStorage {
@@ -58,6 +59,7 @@ export function createFakeObjectStorage(callLog: CallLog, seed?: FakeObjectStora
   const statQueues = new Map<string, (StorageStat | null)[]>();
   const readTextFileErrorQueues = new Map<string, NodeJS.ErrnoException[]>();
   const writeOutcomeQueue: WriteTemporaryOutcome[] = [];
+  const realPathOverrides = new Map<string, string | null>();
   let temporaryFileSequence = 0;
 
   for (const directory of seed?.directories ?? []) {
@@ -105,6 +107,9 @@ export function createFakeObjectStorage(callLog: CallLog, seed?: FakeObjectStora
         const queue = readTextFileErrorQueues.get(path) ?? [];
         queue.push(error);
         readTextFileErrorQueues.set(path, queue);
+      },
+      setRealPath: (path, resolved) => {
+        realPathOverrides.set(path, resolved);
       },
     },
 
@@ -251,6 +256,23 @@ export function createFakeObjectStorage(callLog: CallLog, seed?: FakeObjectStora
           records.delete(key);
         }
       }
+    },
+
+    copyFile: async (from, to) => {
+      callLog.record('copyFile', { from, to });
+      const record = records.get(from);
+      if (!record || record.kind !== 'file') {
+        throw toEnoent(from);
+      }
+      records.set(to, { kind: 'file', bytes: record.bytes.slice(), modifiedAtMs: DEFAULT_MODIFIED_AT_MS });
+    },
+
+    realPath: async (path) => {
+      callLog.record('realPath', path);
+      if (realPathOverrides.has(path)) {
+        return realPathOverrides.get(path) ?? null;
+      }
+      return records.has(path) || hasDescendant(path) ? path : null;
     },
   };
 }

@@ -178,6 +178,13 @@ export function createFakeRenderApiDependencies(
       return asset;
     },
 
+    extractFrame: async (input) => {
+      callLog.record('extractFrame', input);
+      if (overrides?.extractFrame) {
+        await overrides.extractFrame(input);
+      }
+    },
+
     randomId: overrides?.randomId ?? createDeterministicRandomId(),
 
     clock: overrides?.clock ?? { nowIso: () => FIXED_NOW_ISO },

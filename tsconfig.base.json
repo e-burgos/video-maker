@@ -19,7 +19,8 @@
       "@video-maker/media-local": ["./libs/media-local/src/index.ts"],
       "@video-maker/auto-montage": ["./libs/auto-montage/src/index.ts"],
       "@video-maker/composition-remotion": ["./libs/composition-remotion/src/index.ts"],
-      "@video-maker/composition-remotion/render": ["./libs/composition-remotion/src/render.ts"]
+      "@video-maker/composition-remotion/render": ["./libs/composition-remotion/src/render.ts"],
+      "@video-maker/producer-tools": ["./libs/producer-tools/src/index.ts"]
     }
   },
   "exclude": ["node_modules", "tmp"]

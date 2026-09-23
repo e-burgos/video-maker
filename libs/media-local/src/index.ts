@@ -85,6 +85,14 @@ export { extractAudioForTranscription } from './ffmpeg/extract-audio';
 export type { ExtractAudioOptions } from './ffmpeg/extract-audio';
 
 export {
+  DEFAULT_EXTRACT_FRAME_MAX_LONG_SIDE_PX,
+  DEFAULT_EXTRACT_FRAME_QUALITY,
+  extractFrame,
+  extractFrameScaleFilter,
+} from './ffmpeg/extract-frame';
+export type { ExtractFrameOptions } from './ffmpeg/extract-frame';
+
+export {
   concatSpeechFilterGraph,
   concatSpeechSegments,
   DEFAULT_CONCAT_SPEECH_CHANNELS,

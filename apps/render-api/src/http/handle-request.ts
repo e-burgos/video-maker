@@ -6,6 +6,10 @@ import { toErrorPayload } from '../errors/to-error-payload';
 import { handleGetArtifact } from './handlers/artifact-handler';
 import { handleGetGenerated } from './handlers/generated-handler';
 import { handleDeleteAsset, handleListAssets, handleUploadAsset } from './handlers/assets-handler';
+import { handleCopyAsset } from './handlers/asset-copy-handler';
+import { handleProbeMedia } from './handlers/probe-handler';
+import { handleExtractFrames } from './handlers/frames-handler';
+import { handleGetProjectText, handlePutProjectText } from './handlers/project-text-handler';
 import {
   handleCancelRenderJob,
   handleCreateRenderJob,
@@ -116,6 +120,16 @@ export async function handleRequest(
         return await handleUploadAsset(deps, store, params, request, runtime);
       case 'projects.assets.delete':
         return await handleDeleteAsset(deps, store, params, request, runtime);
+      case 'projects.assets.copy':
+        return await handleCopyAsset(deps, store, params, request, runtime);
+      case 'projects.probe':
+        return await handleProbeMedia(deps, store, params, request);
+      case 'projects.frames':
+        return await handleExtractFrames(deps, store, params, request);
+      case 'projects.text.get':
+        return await handleGetProjectText(deps, store, params, request);
+      case 'projects.text.put':
+        return await handlePutProjectText(deps, store, params, request);
       case 'projects.timeline.get':
         return await handleGetTimeline(deps, store, params);
       case 'projects.timeline.put':

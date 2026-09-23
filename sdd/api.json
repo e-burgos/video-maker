@@ -983,6 +983,172 @@
           "422": "PROJECT_SLUG_INVALID. application/json: { error: { code, stage: null, message, resource?, expected?, hint?, assetPersisted?, catalogUpdated? } }."
         },
         "changelog": []
+      },
+      {
+        "id": "EP-029",
+        "method": "POST",
+        "path": "/projects/:slug/probe",
+        "module": "desktop-app",
+        "spec": "sdd/specs/spec-e-burgos-017-desktop-app",
+        "status": "implemented",
+        "created_in_cycle": 1,
+        "updated_in_cycle": null,
+        "description": "Measures a media file already inside the project with ffprobe, so the producer agent (spec-e-burgos-017 cycle-01, tool probe_media) never runs ffprobe itself. The path is resolved through the single producer path resolver (store/producer-writable-paths.ts): it must be project-relative, without '..' or backslashes, and its realpath (symlinks resolved) must stay inside the project root. frames is derived as round(durationMs / 1000 * fps), not read from ffprobe's own nb_frames (frequently absent depending on container); codec falls back to 'unknown' and hasAlpha to false when ffprobe does not report them. video and audio are both null for a still image.",
+        "path_params": [
+          "slug"
+        ],
+        "required_headers": [],
+        "request_body": {
+          "content-type": "application/json",
+          "schema": "{ path: string } — a non-empty, project-relative path."
+        },
+        "responses": {
+          "200": "application/json: { path, durationMs, video: { width, height, fps, frames, codec, hasAlpha } | null, audio: { channels, sampleRate, codec } | null }. Shape frozen as producer_tools STUDIO_TOOLS.probe_media.output in libs/producer-tools.",
+          "403": "PATH_OUTSIDE_PROJECT when path is absolute, contains '..', uses backslashes, or its realpath resolves outside the project root. application/json: { error: { code, stage: null, message, resource?, expected?, hint? } }.",
+          "404": "PROJECT_NOT_FOUND, or FILE_NOT_FOUND when the resolved path is not a file in the project. application/json: { error: { code, stage: null, message, resource?, expected?, hint? } }.",
+          "422": "INVALID_INPUT when path is missing, blank or not a string; PROJECT_SLUG_INVALID when the slug is not a single kebab-case path segment. application/json: { error: { code, stage: null, message, resource?, expected?, hint? } }.",
+          "500": "MEDIA_COMMAND_FAILED, MEDIA_OUTPUT_UNPARSEABLE or MEDIA_BINARY_NOT_FOUND (503) when ffprobe itself fails, translated by translateEngineError. application/json: { error: { code, stage: null, message, resource?, expected?, hint? } }."
+        },
+        "changelog": [
+          {
+            "cycle": 1,
+            "date": "2026-09-23",
+            "change": "Created in spec-e-burgos-017 cycle-01: ffprobe measurement for the producer's probe_media MCP tool, path confined by the new producer path resolver."
+          }
+        ]
+      },
+      {
+        "id": "EP-030",
+        "method": "POST",
+        "path": "/projects/:slug/frames",
+        "module": "desktop-app",
+        "spec": "sdd/specs/spec-e-burgos-017-desktop-app",
+        "status": "implemented",
+        "created_in_cycle": 1,
+        "updated_in_cycle": null,
+        "description": "Extracts up to 12 still JPEG frames from a video already inside the project with ffmpeg (-ss before -i, one 'frames:v 1' call per timestamp), so the producer agent (tool extract_frames) can look at footage without running ffmpeg or reading files itself. Frames are scaled to a 768px long side (short side even, preserving aspect) and written under work/producer/frames/t<ms>.jpg, ms = round(atSeconds * 1000); a repeated timestamp overwrites its own file. The MCP layer (cycle-01 TASK-005) fetches the bytes back through the existing GET /projects/:slug/files/*path.",
+        "path_params": [
+          "slug"
+        ],
+        "required_headers": [],
+        "request_body": {
+          "content-type": "application/json",
+          "schema": "{ path: string, atSeconds: number[] } — path is project-relative; atSeconds has 1 to 12 non-negative entries (MIN/MAX_EXTRACT_FRAMES_AT_SECONDS of @video-maker/producer-tools)."
+        },
+        "responses": {
+          "200": "application/json: { frames: [{ atSeconds, path }] }, path project-relative under work/producer/frames/. Shape frozen as producer-tools STUDIO_TOOLS.extract_frames.output.",
+          "403": "PATH_OUTSIDE_PROJECT when path is absolute, contains '..', uses backslashes, or its realpath resolves outside the project root. application/json: { error: { code, stage: null, message, resource?, expected?, hint? } }.",
+          "404": "PROJECT_NOT_FOUND, or FILE_NOT_FOUND when the source path is not a file in the project. application/json: { error: { code, stage: null, message, resource?, expected?, hint? } }.",
+          "422": "INVALID_INPUT when path is missing/blank, or atSeconds is not an array of 1 to 12 non-negative numbers; PROJECT_SLUG_INVALID when the slug is not a single kebab-case path segment. application/json: { error: { code, stage: null, message, resource?, expected?, hint? } }.",
+          "500": "MEDIA_COMMAND_FAILED, MEDIA_OUTPUT_UNPARSEABLE or MEDIA_BINARY_NOT_FOUND (503) when ffmpeg fails on one of the timestamps, translated by translateEngineError. application/json: { error: { code, stage: null, message, resource?, expected?, hint? } }."
+        },
+        "changelog": [
+          {
+            "cycle": 1,
+            "date": "2026-09-23",
+            "change": "Created in spec-e-burgos-017 cycle-01: ffmpeg frame grabs for the producer's extract_frames MCP tool, backed by the new extractFrame port and libs/media-local ffmpeg/extract-frame.ts."
+          }
+        ]
+      },
+      {
+        "id": "EP-031",
+        "method": "GET",
+        "path": "/projects/:slug/text",
+        "module": "desktop-app",
+        "spec": "sdd/specs/spec-e-burgos-017-desktop-app",
+        "status": "implemented",
+        "created_in_cycle": 1,
+        "updated_in_cycle": null,
+        "description": "Reads a small project text file for the producer agent (tool read_project_text), so it never needs Read. Only .txt, .md, .json or .srt files under work/ are answered, and only up to 256 KB (MAX_READABLE_PROJECT_TEXT_BYTES of store/producer-writable-paths.ts) — a larger file is refused, not truncated.",
+        "path_params": [
+          "slug"
+        ],
+        "query_params": {
+          "path": "Required. A non-empty, project-relative path to a .txt, .md, .json or .srt file under work/."
+        },
+        "required_headers": [],
+        "request_body": {
+          "content-type": "none",
+          "schema": "Takes no request body."
+        },
+        "responses": {
+          "200": "application/json: { path, content }. Shape frozen as producer-tools STUDIO_TOOLS.read_project_text.output.",
+          "403": "PATH_OUTSIDE_PROJECT when path is absolute, contains '..', uses backslashes, or its realpath resolves outside the project root. application/json: { error: { code, stage: null, message, resource?, expected?, hint? } }.",
+          "404": "PROJECT_NOT_FOUND, or FILE_NOT_FOUND when the resolved path is not a file in the project. application/json: { error: { code, stage: null, message, resource?, expected?, hint? } }.",
+          "413": "FILE_TOO_LARGE when the file exceeds 256 KB. application/json: { error: { code, stage: null, message, resource?, expected?, hint? } }.",
+          "422": "INVALID_INPUT when the path query parameter is missing/blank, is not under work/, or does not have an allowed extension; PROJECT_SLUG_INVALID when the slug is not a single kebab-case path segment. application/json: { error: { code, stage: null, message, resource?, expected?, hint? } }."
+        },
+        "changelog": [
+          {
+            "cycle": 1,
+            "date": "2026-09-23",
+            "change": "Created in spec-e-burgos-017 cycle-01: read-only text access for the producer's read_project_text MCP tool."
+          }
+        ]
+      },
+      {
+        "id": "EP-032",
+        "method": "PUT",
+        "path": "/projects/:slug/text",
+        "module": "desktop-app",
+        "spec": "sdd/specs/spec-e-burgos-017-desktop-app",
+        "status": "implemented",
+        "created_in_cycle": 1,
+        "updated_in_cycle": null,
+        "description": "Writes a project text file for the producer agent (tool write_project_text), so it never needs Write. Only paths under work/producer/ or exactly work/credits.json are accepted; parent directories are created automatically. Full replace, no append mode.",
+        "path_params": [
+          "slug"
+        ],
+        "required_headers": [],
+        "request_body": {
+          "content-type": "application/json",
+          "schema": "{ path: string, content: string } — path must resolve under work/producer/ or be exactly work/credits.json; content may be empty."
+        },
+        "responses": {
+          "200": "application/json: { path, bytes }, bytes the UTF-8 byte length written. Shape frozen as producer-tools STUDIO_TOOLS.write_project_text.output.",
+          "403": "PATH_OUTSIDE_PROJECT when path is absolute, contains '..', uses backslashes, or its realpath resolves outside the project root; PATH_NOT_WRITABLE when the path is inside the project but not under work/producer/ or work/credits.json. application/json: { error: { code, stage: null, message, resource?, expected?, hint? } }.",
+          "422": "INVALID_INPUT when path is missing/blank or content is not a string; PROJECT_SLUG_INVALID when the slug is not a single kebab-case path segment. application/json: { error: { code, stage: null, message, resource?, expected?, hint? } }."
+        },
+        "changelog": [
+          {
+            "cycle": 1,
+            "date": "2026-09-23",
+            "change": "Created in spec-e-burgos-017 cycle-01: scoped text writes for the producer's write_project_text MCP tool."
+          }
+        ]
+      },
+      {
+        "id": "EP-033",
+        "method": "POST",
+        "path": "/projects/:slug/assets/copy",
+        "module": "desktop-app",
+        "spec": "sdd/specs/spec-e-burgos-017-desktop-app",
+        "status": "implemented",
+        "created_in_cycle": 1,
+        "updated_in_cycle": null,
+        "description": "Copies a file already inside the project to raw/<rawDirectoryForRole(role)>/<filename> for the producer agent (tool copy_asset), replacing the ffmpeg -c copy trick the prompt used to teach. Never deletes the source; refuses to overwrite an existing destination. role and filename reuse the same store/asset-path.ts validation as EP-006/EP-027 (six catalog roles, filename a single portable path segment). Serialized per project through the same uploadSerializer as asset upload/delete so a concurrent copy to the same destination cannot race past the existence check. Does not touch work/catalog.json: a copied asset is picked up by the next ingest or montage the same way any other raw file is.",
+        "path_params": [
+          "slug"
+        ],
+        "required_headers": [],
+        "request_body": {
+          "content-type": "application/json",
+          "schema": "{ from: string, role: string, filename: string } — from is a non-empty, project-relative path; role is one of aroll, broll, image, audio, voice, logo; filename is a single portable path segment."
+        },
+        "responses": {
+          "201": "application/json: { path }, path the new raw/<role>/<filename>. location header points at GET /projects/:slug/files/<path>. Shape frozen as producer-tools STUDIO_TOOLS.copy_asset.output.",
+          "403": "PATH_OUTSIDE_PROJECT when from is absolute, contains '..', uses backslashes, or its realpath resolves outside the project root. application/json: { error: { code, stage: null, message, resource?, expected?, hint? } }.",
+          "404": "PROJECT_NOT_FOUND, or FILE_NOT_FOUND when from does not resolve to a file in the project. application/json: { error: { code, stage: null, message, resource?, expected?, hint? } }.",
+          "409": "ASSET_EXISTS when raw/<role>/<filename> already exists. application/json: { error: { code, stage: null, message, resource?, expected?, hint? } }.",
+          "422": "INVALID_INPUT when from is missing/blank, role is not one of the six catalog roles, or filename is not a single portable path segment; PROJECT_SLUG_INVALID when the slug is not a single kebab-case path segment. application/json: { error: { code, stage: null, message, resource?, expected?, hint? } }."
+        },
+        "changelog": [
+          {
+            "cycle": 1,
+            "date": "2026-09-23",
+            "change": "Created in spec-e-burgos-017 cycle-01: in-project file copy for the producer's copy_asset MCP tool, replacing the ffmpeg -c copy shell trick."
+          }
+        ]
       }
     ]
   }

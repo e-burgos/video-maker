@@ -79,6 +79,16 @@ export type ProbeAssetPort = (input: ProbeAssetInput) => Promise<MediaAsset>;
 
 export type CreateCommandRunnerPort = () => Promise<CommandRunner>;
 
+export interface ExtractFrameInput {
+  readonly path: string;
+  readonly atSeconds: number;
+  readonly outPath: string;
+  readonly maxLongSidePx: number;
+  readonly projectRoot: string;
+}
+
+export type ExtractFramePort = (input: ExtractFrameInput) => Promise<void>;
+
 export type ResolveMontageBinariesPort = () => Promise<ResolvedBinaries>;
 
 export interface AiAgentRequest {
@@ -207,6 +217,7 @@ export interface RenderApiDependencies {
   readonly preloadEngineModules: PreloadEngineModulesPort;
   readonly storage: ObjectStorage;
   readonly probeAsset: ProbeAssetPort;
+  readonly extractFrame: ExtractFramePort;
   readonly randomId: RandomIdPort;
   readonly clock: Clock;
   readonly logger: Logger;

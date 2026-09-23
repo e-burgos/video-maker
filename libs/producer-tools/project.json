@@ -1,0 +1,27 @@
+{
+  "name": "producer-tools",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "libs/producer-tools/src",
+  "projectType": "library",
+  "tags": ["scope:engine", "type:feature"],
+  "targets": {
+    "lint": {
+      "executor": "@nx/eslint:lint"
+    },
+    "test": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "vitest run --coverage --passWithNoTests",
+        "cwd": "libs/producer-tools"
+      }
+    },
+    "build": {
+      "executor": "nx:run-commands",
+      "outputs": ["{workspaceRoot}/dist/out-tsc/libs/producer-tools"],
+      "options": {
+        "command": "tsc -p tsconfig.lib.json",
+        "cwd": "libs/producer-tools"
+      }
+    }
+  }
+}

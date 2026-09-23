@@ -1,7 +1,7 @@
 import { spawn } from 'node:child_process';
 import { once } from 'node:events';
 import { createReadStream, createWriteStream } from 'node:fs';
-import { mkdir, readFile, readdir, rename, rm, stat, unlink, writeFile } from 'node:fs/promises';
+import { copyFile, mkdir, readFile, readdir, realpath, rename, rm, stat, unlink, writeFile } from 'node:fs/promises';
 import { randomUUID } from 'node:crypto';
 import { tmpdir } from 'node:os';
 import { dirname, isAbsolute, join, relative } from 'node:path/posix';
@@ -192,6 +192,19 @@ function createConfinedNodeObjectStorage(store: StoreConfig): ObjectStorage {
     removeDirectory: async (path) => {
       await rm(confine(path), { recursive: true, force: true });
     },
+    copyFile: async (from, to) => {
+      await copyFile(confine(from), confine(to));
+    },
+    realPath: async (path) => {
+      try {
+        return await realpath(confine(path));
+      } catch (error) {
+        if (isEnoent(error)) {
+          return null;
+        }
+        throw error;
+      }
+    },
   };
 }
 
@@ -361,6 +374,16 @@ export function createNodeRenderApiDependencies(
       const { ExecaCommandRunner, probeMedia } = await loadMediaLocal();
       const { ffprobe } = await loadBinaries();
       return probeMedia(path, new ExecaCommandRunner(), { ffprobePath: ffprobe });
+    },
+
+    extractFrame: async ({ path, atSeconds, outPath, maxLongSidePx, projectRoot }) => {
+      const { ExecaCommandRunner, extractFrame: runExtractFrame } = await loadMediaLocal();
+      const { ffmpeg } = await loadBinaries();
+      await runExtractFrame(path, atSeconds, outPath, new ExecaCommandRunner(), {
+        maxLongSidePx,
+        ffmpegPath: ffmpeg,
+        runOptions: { cwd: projectRoot },
+      });
     },
 
     randomId: () => randomUUID(),

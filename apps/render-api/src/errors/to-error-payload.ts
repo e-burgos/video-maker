@@ -93,6 +93,12 @@ const MESSAGE_BY_CODE: Readonly<Record<RenderApiErrorCode, string>> = {
   FOLDER_NAME_INVALID: 'A folder or category needs a name holding at least one letter or digit.',
   FOLDER_CATEGORY_NOT_FOUND: 'That folder has no category with that id.',
   VIDEO_PLACEMENT_INVALID: 'The requested placement for the video is not a valid folder and category pair.',
+  INVALID_INPUT: 'The request body or query parameters did not pass validation.',
+  PATH_OUTSIDE_PROJECT: 'The path is not a project-relative path inside the project root.',
+  PATH_NOT_WRITABLE: 'The path is inside the project but not one this endpoint may write to.',
+  FILE_NOT_FOUND: 'The requested file does not exist in the project.',
+  FILE_TOO_LARGE: 'The file exceeds the size limit this endpoint allows.',
+  ASSET_EXISTS: 'A file already exists at the requested destination.',
 };
 
 export function toErrorPayload(value: unknown): RenderApiErrorPayload {

@@ -39,4 +39,6 @@ export interface ObjectStorage {
   readonly removeTemporary: (path: string) => Promise<void>;
   readonly removeFile: (path: string) => Promise<void>;
   readonly removeDirectory: (path: string) => Promise<void>;
+  readonly copyFile: (from: string, to: string) => Promise<void>;
+  readonly realPath: (path: string) => Promise<string | null>;
 }

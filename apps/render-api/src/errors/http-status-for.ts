@@ -91,6 +91,12 @@ const STATUS_BY_CODE: Readonly<Record<RenderApiErrorCode, number>> = {
   FOLDER_NAME_INVALID: 422,
   FOLDER_CATEGORY_NOT_FOUND: 404,
   VIDEO_PLACEMENT_INVALID: 422,
+  INVALID_INPUT: 422,
+  PATH_OUTSIDE_PROJECT: 403,
+  PATH_NOT_WRITABLE: 403,
+  FILE_NOT_FOUND: 404,
+  FILE_TOO_LARGE: 413,
+  ASSET_EXISTS: 409,
 };
 
 export function httpStatusFor(code: RenderApiErrorCode): number {
