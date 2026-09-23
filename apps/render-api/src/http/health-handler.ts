@@ -1,3 +1,6 @@
+import { basename, isAbsolute, relative } from 'node:path/posix';
+
+import type { StoreConfig } from '../config/store-config';
 import type { RenderApiDependencies } from '../deps/render-api-dependencies';
 import type { EngineModuleStatus } from '../engine/engine-modules';
 import type { BinaryStatus } from '../engine/media-binaries';
@@ -8,6 +11,11 @@ import type { RenderApiRuntime } from './render-api-runtime';
 
 const SERVICE_NAME = 'render-api';
 const SERVICE_CYCLE = 3;
+
+export interface HealthStoreInfo {
+  readonly schemaVersion: number;
+  readonly dbPath: string;
+}
 
 export interface HealthBody {
   readonly status: 'ok' | 'degraded';
@@ -26,10 +34,20 @@ export interface HealthBody {
     readonly producer: boolean;
   };
   readonly jobs: RenderJobQueueSize;
+  readonly store: HealthStoreInfo;
+}
+
+function relativeDbPath(store: StoreConfig): string {
+  const relativePath = relative(store.mediaRoot, store.dbPath);
+  if (relativePath.startsWith('..') || isAbsolute(relativePath)) {
+    return basename(store.dbPath);
+  }
+  return relativePath;
 }
 
 export async function handleHealth(
   deps: RenderApiDependencies,
+  store: StoreConfig,
   runtime: RenderApiRuntime,
 ): Promise<HttpResponse> {
   const engine = await deps.preloadEngineModules();
@@ -58,6 +76,10 @@ export async function handleHealth(
       producer,
     },
     jobs: runtime.jobs.size(),
+    store: {
+      schemaVersion: deps.localStore.schemaVersion,
+      dbPath: relativeDbPath(store),
+    },
   };
 
   return {

@@ -89,7 +89,7 @@ export async function handleRequest(
 
     switch (match.id) {
       case 'health':
-        return await handleHealth(deps, runtime);
+        return await handleHealth(deps, store, runtime);
       case 'voices.list':
         return await handleListVoices(deps);
       case 'voices.preview':

@@ -172,3 +172,28 @@ documentos: la base no es excusa para confiar en lo que devuelve.
   TASK-006 cierra al importar cada carpeta al arrancar; para el chequeo real de este ciclo se
   insertó la fila a mano (mismo movimiento que hará el importador) en vez de arreglarlo acá. Si
   TASK-006 se demora, vale la pena un guard más amable en `handleCreateRenderJob`.
+- **TASK-006 — cerrado el hueco de arriba desde `resolveExistingProject` (`store/project-scope.ts`),
+  un solo lugar.** Después de confirmar el directorio, si el slug no tiene fila la inserta con
+  `importedAt` (mismo criterio que usa el importador: una carpeta que existe en disco es un
+  proyecto). Como esta función la usan casi todos los handlers de escritura Y de lectura sobre un
+  proyecto (jobs, producer, assets, montage, storyboard, voice, texto, probe, frames, music,
+  artifact, generated), un `GET` también puede disparar el insert — es la lectura la que decide si
+  la carpeta cuenta como proyecto, no el método HTTP; se aceptó a propósito en vez de duplicar el
+  guard por handler.
+- **TASK-006 — nuevo puerto `hashText` en `RenderApiDependencies`.** `node-render-api-dependencies.ts`
+  es el único lugar permitido para `node:crypto` (invariante de la constitución, verificado por
+  grep); como el importador necesita el sha256 de `organization.json` para el marcador de
+  `import.organization.v1`, se agregó `hashText: (text) => string` implementado con
+  `createHash('sha256')` ahí, y una versión determinística sin `node:crypto` en el fixture de deps
+  falsos (no necesita ser criptográficamente real, solo estable).
+- **TASK-006 — idempotencia del import de producer decidida por "sin mensajes" en vez de un
+  marcador en `settings`.** Un proyecto sin filas en `producer_messages` con
+  `work/producer/conversation.json` en disco se importa; uno con al menos un mensaje (importado
+  antes o escrito por uso real) nunca se reintenta. Es más simple que un marcador por proyecto y
+  no tiene falsos positivos: la única situación rara es un `conversation.json` vacío (`{"messages":
+  []}`), donde el chequeo se repite sin efecto en cada arranque — inofensivo.
+- **TASK-006 — category id duplicados entre carpetas: la corrección fue la que pidió el
+  orquestador.** El id se sufija (`-2`, `-3`, …) globalmente único en `settings` first-seen order
+  (carpeta por carpeta, categoría por categoría, tal como aparece en `organization.json`), y el
+  remap solo toca los placements que apuntaban específicamente a la categoría que cambió de id — un
+  placement que ya apuntaba a la primera aparición del id colisionado queda intacto.

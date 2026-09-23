@@ -2,7 +2,7 @@ import { spawn } from 'node:child_process';
 import { once } from 'node:events';
 import { createReadStream, createWriteStream } from 'node:fs';
 import { copyFile, mkdir, readFile, readdir, realpath, rename, rm, stat, unlink, writeFile } from 'node:fs/promises';
-import { randomUUID } from 'node:crypto';
+import { createHash, randomUUID } from 'node:crypto';
 import { tmpdir } from 'node:os';
 import { dirname, isAbsolute, join, relative } from 'node:path/posix';
 import { Readable } from 'node:stream';
@@ -15,6 +15,7 @@ import {
   createProducerRepository,
   createProjectsRepository,
   createSettingsRepository,
+  currentUserVersion,
   openStudioDatabase,
 } from '@video-maker/local-store';
 import type { StudioDatabase } from '@video-maker/local-store';
@@ -296,6 +297,7 @@ export function createNodeRenderApiDependencies(
         producer: createProducerRepository(database.db),
         jobs: createJobsRepository(database.db),
         settings: createSettingsRepository(database.db, nowIso),
+        schemaVersion: currentUserVersion(database.sqlite),
         close: () => database.close(),
       };
     }
@@ -417,6 +419,8 @@ export function createNodeRenderApiDependencies(
     get localStore() {
       return loadLocalStore();
     },
+
+    hashText: (text) => createHash('sha256').update(text, 'utf8').digest('hex'),
 
     probeAsset: async ({ path }) => {
       const { ExecaCommandRunner, probeMedia } = await loadMediaLocal();

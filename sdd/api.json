@@ -48,13 +48,13 @@
         "spec": "sdd/specs/spec-e-burgos-005-render-service",
         "status": "updated",
         "created_in_cycle": 1,
-        "updated_in_cycle": 1,
+        "updated_in_cycle": 2,
         "description": "Service health probe. Reports the resolved state of the two engine modules loaded via dynamic import (media-local, composition-remotion/render), the resolution state of the four media binaries (ffmpeg, ffprobe, whisper-cli, the Whisper model) by logical name and env var — never their resolved host path — and the capabilities enabled in this cycle. Answers 200 in both the ok and degraded states. capabilities gains storyboardQueue in spec-e-burgos-008 cycle-01. The claude CLI is deliberately NOT added to binaries: that list is resolved by @video-maker/media-local and adding it would report degraded on every machine without Claude Code installed, CI included.",
         "path_params": [],
         "required_headers": [],
         "request_body": {},
         "responses": {
-          "200": "application/json: { status: 'ok' | 'degraded', service: 'render-api', cycle: number, time: ISO-8601 string, engine: [{ name, loaded }], binaries: [{ name, envVar, resolved }] (4 entries: ffmpeg, ffprobe, whisper-cli, whisper-model), capabilities (which gained producer in spec-e-burgos-015 cycle-01: true when the Claude Code binary resolves; it never turns the service degraded, because a machine without Claude Code still renders — same reasoning as D-12 of spec-008 for the binaries list): { renderPipeline, assetStore, jobQueue, montageQueue, storyboardQueue }, jobs: { running, queued } }. status is ok only when every engine module loaded and every binary resolved (all four); the jobs counters never affect it.",
+          "200": "application/json: { status: 'ok' | 'degraded', service: 'render-api', cycle: number, time: ISO-8601 string, engine: [{ name, loaded }], binaries: [{ name, envVar, resolved }] (4 entries: ffmpeg, ffprobe, whisper-cli, whisper-model), capabilities (which gained producer in spec-e-burgos-015 cycle-01: true when the Claude Code binary resolves; it never turns the service degraded, because a machine without Claude Code still renders — same reasoning as D-12 of spec-008 for the binaries list): { renderPipeline, assetStore, jobQueue, montageQueue, storyboardQueue }, jobs: { running, queued }, store: { schemaVersion: number, dbPath: string } }. status is ok only when every engine module loaded and every binary resolved (all four); the jobs counters and the store block never affect it. store.schemaVersion is the SQLite PRAGMA user_version of the local studio database (libs/local-store migrations). store.dbPath is the database file path relative to mediaRoot when it lives inside it (the default), or just the file name when RENDER_API_DB_PATH points somewhere else — never an absolute host path.",
           "405": "application/json: { error: { code: 'METHOD_NOT_ALLOWED', stage: null, message, resource, expected } } with an Allow header, for any method other than GET on this path.",
           "500": "application/json: { error: { code: 'INTERNAL_ERROR', stage: null, message } } from the central error handler."
         },
@@ -88,6 +88,11 @@
             "cycle": 1,
             "date": "2026-09-10",
             "change": "spec-e-burgos-015 cycle-01: capabilities.producer added. Reported from a probe of the Claude Code binary and never part of the ok/degraded decision."
+          },
+          {
+            "cycle": 2,
+            "date": "2026-09-23",
+            "change": "spec-e-burgos-017 cycle-02 (TASK-006): additive store: { schemaVersion, dbPath } block reporting the local SQLite studio database. Every field already published keeps its name, type and meaning."
           }
         ]
       },

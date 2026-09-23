@@ -4,6 +4,7 @@ import { createCallLog } from '../__fixtures__/call-log';
 import { createControllableRenderMutedVideo } from '../__fixtures__/controllable-render';
 import { createFakeRenderApiDependencies } from '../__fixtures__/fake-render-api-dependencies';
 import { buildMinimalTimeline } from '../__fixtures__/minimal-timeline';
+import type { StoreConfig } from '../config/store-config';
 import { ENGINE_MODULE_NAMES } from '../engine/engine-modules';
 import { MEDIA_BINARY_NAMES } from '../engine/media-binaries';
 import { JSON_CONTENT_TYPE } from './http-message';
@@ -13,6 +14,12 @@ import { createRenderApiRuntime } from './render-api-runtime';
 
 const FIXED_NOW_ISO = '2026-09-08T00:00:00.000Z';
 const PROJECT_ROOT = '/var/data/media/acme-launch';
+const STORE: StoreConfig = {
+  mediaRoot: '/var/data/media',
+  dbPath: '/var/data/media/.studio/studio.db',
+  maxUploadBytes: 2_147_483_648,
+  objectStore: 'fs',
+};
 
 const ALL_BINARIES_RESOLVED = [
   { name: 'ffmpeg', envVar: 'FFMPEG_PATH', resolved: true },
@@ -35,7 +42,7 @@ describe('handleHealth', () => {
     });
     const runtime = emptyRuntime();
 
-    const response = await handleHealth(deps, runtime);
+    const response = await handleHealth(deps, STORE, runtime);
     const body = response.body as HealthBody;
 
     expect(response.status).toBe(200);
@@ -61,7 +68,7 @@ describe('handleHealth', () => {
     const deps = createFakeRenderApiDependencies(callLog, { probeProducerBinary: async () => false });
     const runtime = createRenderApiRuntime(deps);
 
-    const response = await handleHealth(deps, runtime);
+    const response = await handleHealth(deps, STORE, runtime);
     const body = response.body as HealthBody;
 
     expect(body.capabilities.producer).toBe(false);
@@ -78,7 +85,7 @@ describe('handleHealth', () => {
       ],
     });
 
-    const response = await handleHealth(deps, emptyRuntime());
+    const response = await handleHealth(deps, STORE, emptyRuntime());
     const body = response.body as HealthBody;
 
     expect(body.status).toBe('degraded');
@@ -90,6 +97,7 @@ describe('handleHealth', () => {
   it('reporta los binarios de Piper por nombre lógico y env var, nunca por la ruta resuelta (US-09-002)', async () => {
     const response = await handleHealth(
       createFakeRenderApiDependencies(createCallLog()),
+      STORE,
       emptyRuntime(),
     );
     const body = response.body as HealthBody;
@@ -111,7 +119,7 @@ describe('handleHealth', () => {
     });
     const runtime = emptyRuntime();
 
-    const response = await handleHealth(deps, runtime);
+    const response = await handleHealth(deps, STORE, runtime);
     const body = response.body as HealthBody;
 
     expect(response.status).toBe(200);
@@ -124,14 +132,14 @@ describe('handleHealth', () => {
     expect(byName.get('whisperModel')).toBe(false);
   });
 
-  it('serializes exactly the eight top-level HealthBody keys', async () => {
+  it('serializes exactly the nine top-level HealthBody keys', async () => {
     const callLog = createCallLog();
     const deps = createFakeRenderApiDependencies(callLog, {
       probeMediaBinaries: async () => ALL_BINARIES_RESOLVED,
     });
     const runtime = emptyRuntime();
 
-    const response = await handleHealth(deps, runtime);
+    const response = await handleHealth(deps, STORE, runtime);
     const body = response.body as HealthBody;
 
     expect(Object.keys(body).sort()).toEqual([
@@ -142,8 +150,34 @@ describe('handleHealth', () => {
       'jobs',
       'service',
       'status',
+      'store',
       'time',
     ]);
+  });
+
+  describe('store info', () => {
+    it('reports the schema version and a dbPath relative to mediaRoot when it is inside it', async () => {
+      const deps = createFakeRenderApiDependencies(createCallLog());
+      const response = await handleHealth(deps, STORE, emptyRuntime());
+      const body = response.body as HealthBody;
+
+      expect(Object.keys(body.store).sort()).toEqual(['dbPath', 'schemaVersion']);
+      expect(body.store.schemaVersion).toBeGreaterThan(0);
+      expect(body.store.dbPath).toBe('.studio/studio.db');
+    });
+
+    it('reports just the file name when dbPath is outside mediaRoot', async () => {
+      const deps = createFakeRenderApiDependencies(createCallLog());
+      const outsideStore: StoreConfig = {
+        ...STORE,
+        dbPath: '/var/lib/video-maker/studio.db',
+      };
+
+      const response = await handleHealth(deps, outsideStore, emptyRuntime());
+      const body = response.body as HealthBody;
+
+      expect(body.store.dbPath).toBe('studio.db');
+    });
   });
 
   it('answers capabilities.jobQueue true and cycle 3', async () => {
@@ -151,7 +185,7 @@ describe('handleHealth', () => {
     const deps = createFakeRenderApiDependencies(callLog);
     const runtime = emptyRuntime();
 
-    const response = await handleHealth(deps, runtime);
+    const response = await handleHealth(deps, STORE, runtime);
     const body = response.body as HealthBody;
 
     expect(body.capabilities.jobQueue).toBe(true);
@@ -169,7 +203,7 @@ describe('handleHealth', () => {
     runtime.jobs.create({ kind: 'render', slug: 'acme-launch', projectRoot: PROJECT_ROOT, timeline: buildMinimalTimeline() });
     runtime.jobs.create({ kind: 'render', slug: 'acme-launch', projectRoot: PROJECT_ROOT, timeline: buildMinimalTimeline() });
 
-    const response = await handleHealth(deps, runtime);
+    const response = await handleHealth(deps, STORE, runtime);
     const body = response.body as HealthBody;
 
     expect(body.jobs).toEqual({ running: 1, queued: 1 });
@@ -188,7 +222,7 @@ describe('handleHealth', () => {
     });
     const runtime = emptyRuntime();
 
-    const response = await handleHealth(deps, runtime);
+    const response = await handleHealth(deps, STORE, runtime);
     const body = response.body as HealthBody;
 
     expect(response.status).toBe(200);
@@ -204,7 +238,7 @@ describe('handleHealth', () => {
     });
     const runtime = emptyRuntime();
 
-    const response = await handleHealth(deps, runtime);
+    const response = await handleHealth(deps, STORE, runtime);
     const body = response.body as HealthBody;
     const serialized = JSON.stringify(response.body);
 

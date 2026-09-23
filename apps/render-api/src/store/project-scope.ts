@@ -30,6 +30,9 @@ export async function resolveExistingProject(
   if (projectStat === null || projectStat.kind !== 'directory') {
     throw new PipelineStageError({ code: 'PROJECT_NOT_FOUND', stage: null, resource: slug });
   }
+  if (!deps.localStore.projects.exists(slug)) {
+    deps.localStore.projects.insert(slug, deps.clock.nowIso());
+  }
   return project;
 }
 

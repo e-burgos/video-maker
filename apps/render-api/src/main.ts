@@ -7,6 +7,7 @@ import { createNodeRenderApiDependencies } from './deps/node-render-api-dependen
 import { toErrorPayload } from './errors/to-error-payload';
 import { isRenderApiError } from './errors/render-api-error';
 import { createRenderApiServer } from './http/create-render-api-server';
+import { importLegacyMedia } from './store/import-legacy-media';
 
 const SHUTDOWN_SIGNALS = ['SIGINT', 'SIGTERM'] as const;
 const CONFIG_EXIT_CODE = 78;
@@ -29,6 +30,10 @@ async function main(): Promise<void> {
     tmpdir(),
   );
   const server = createRenderApiServer(deps, config, store, producer);
+
+  const importReport = await importLegacyMedia(deps, store);
+  process.stdout.write(`${JSON.stringify({ event: 'legacy-media-import', ...importReport })}\n`);
+
   const address = await server.listen();
 
   process.stdout.write(`${JSON.stringify({ event: 'listening', host: address.host, port: address.port })}\n`);

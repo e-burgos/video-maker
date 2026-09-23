@@ -70,6 +70,31 @@ describe('resolveExistingProject', () => {
       code: 'PROJECT_NOT_FOUND',
     });
   });
+
+  it('inserts the missing project row for a directory that exists but was never imported or created via the API', async () => {
+    const callLog = createCallLog();
+    const storage = createFakeObjectStorage(callLog, { directories: [PROJECT_ROOT] });
+    const deps = createFakeRenderApiDependencies(callLog, { storage });
+
+    expect(deps.localStore.projects.exists(SLUG)).toBe(false);
+
+    const project = await resolveExistingProject(deps, STORE, SLUG);
+
+    expect(project.slug).toBe(SLUG);
+    expect(deps.localStore.projects.exists(SLUG)).toBe(true);
+    expect(deps.localStore.projects.get(SLUG)?.importedAt).not.toBeNull();
+  });
+
+  it('does not insert a second row when the project already has one', async () => {
+    const callLog = createCallLog();
+    const storage = createFakeObjectStorage(callLog, { directories: [PROJECT_ROOT] });
+    const deps = createFakeRenderApiDependencies(callLog, { storage });
+    deps.localStore.projects.insert(SLUG);
+
+    await resolveExistingProject(deps, STORE, SLUG);
+
+    expect(deps.localStore.projects.list().filter((record) => record.slug === SLUG)).toHaveLength(1);
+  });
 });
 
 describe('assertTimelineNotPersisted', () => {

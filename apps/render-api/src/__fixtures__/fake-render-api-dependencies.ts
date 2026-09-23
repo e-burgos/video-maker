@@ -4,6 +4,7 @@ import {
   createProducerRepository,
   createProjectsRepository,
   createSettingsRepository,
+  currentUserVersion,
   openStudioDatabase,
 } from '@video-maker/local-store';
 import type {
@@ -104,8 +105,17 @@ function createFakeLocalStore(clock: Clock): LocalStorePort {
     producer: createProducerRepository(database.db),
     jobs: createJobsRepository(database.db),
     settings: createSettingsRepository(database.db, nowIso),
+    schemaVersion: currentUserVersion(database.sqlite),
     close: () => database.close(),
   };
+}
+
+function fakeHashText(text: string): string {
+  let hash = 0;
+  for (let index = 0; index < text.length; index += 1) {
+    hash = (Math.imul(hash, 31) + text.charCodeAt(index)) | 0;
+  }
+  return `fake-sha256-${(hash >>> 0).toString(16)}-${String(text.length)}`;
 }
 
 export function createFakeRenderApiDependencies(
@@ -183,6 +193,8 @@ export function createFakeRenderApiDependencies(
     storage: overrides?.storage ?? createFakeObjectStorage(callLog),
 
     localStore: overrides?.localStore ?? createFakeLocalStore(clock),
+
+    hashText: overrides?.hashText ?? fakeHashText,
 
     probeAsset: async (input) => {
       callLog.record('probeAsset', input);

@@ -249,8 +249,11 @@ export interface LocalStorePort {
   readonly producer: ProducerRepository;
   readonly jobs: JobsRepository;
   readonly settings: SettingsRepository;
+  readonly schemaVersion: number;
   readonly close: () => void;
 }
+
+export type HashTextPort = (text: string) => string;
 
 export interface RenderApiDependencies {
   readonly renderMutedVideo: RenderMutedVideoPort;
@@ -262,6 +265,7 @@ export interface RenderApiDependencies {
   readonly preloadEngineModules: PreloadEngineModulesPort;
   readonly storage: ObjectStorage;
   readonly localStore: LocalStorePort;
+  readonly hashText: HashTextPort;
   readonly probeAsset: ProbeAssetPort;
   readonly extractFrame: ExtractFramePort;
   readonly fetchRemote: FetchRemotePort;
