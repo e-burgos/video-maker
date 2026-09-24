@@ -168,3 +168,41 @@
   ESM-only en el grafo de imports (`ai`, `@openrouter/ai-sdk-provider`) porque Node 22.12+ resuelve
   `require()` de un grafo ESM síncrono sin flags. Sirve para cualquier e2e futuro que necesite
   llamar funciones de una lib TS directamente en vez de contra un servidor HTTP.
+- **Follow-up post-cierre (aprobado por el dev, commit 988d5b1 ya mergeado):** dos pedidos del
+  orquestador sobre el set recomendado real.
+  1. **TASK-009 — set recomendado real + default determinista.** `recommended-openrouter-models.ts`
+     reemplaza los 3 placeholders por los 2 ids reales del benchmark
+     (`deepseek/deepseek-v4.1-flash` cheap, `anthropic/claude-haiku-4.5` reference) con su `bench`
+     real, y suma un campo `isDefault: boolean` validado (exactamente un `true` en el array, si no
+     `readRecommendedOpenRouterModels` tira `SERVER_CONFIG_INVALID`) — nueva
+     `defaultRecommendedOpenRouterModel()`. Se eligió el flag explícito en vez de "el primero del
+     array" u "orden por tier" porque `resolveOpenRouterModel` (`run-producer-turn.ts`) antes tomaba
+     el primer id que el catálogo EN VIVO marcaba `recommended`, y ese orden lo decide OpenRouter, no
+     nosotros — con dos ids recomendados eso era no determinista de verdad (test nuevo
+     `'picks the isDefault recommended model regardless of catalog order...'` lo prueba con
+     `claude-haiku-4.5` apareciendo primero en el fixture y el default siendo igual
+     `deepseek/deepseek-v4.1-flash`). `openrouter-models-sample.ts` sumó la entrada de deepseek;
+     los ids viejos (`gpt-4o-mini`, `gemini-3.5-flash-lite`) siguen en el fixture como modelos
+     comunes del catálogo, ya no recomendados.
+  2. **Bug real de mapeo de errores, encontrado corriendo TASK-006.** Un 429 real de OpenRouter con
+     reintentos agotados llega a `generateText` envuelto en `AI_RetryError` (de `ai`), no en
+     `APICallError` directo — `mapOpenRouterError` sólo miraba `APICallError.isInstance(cause)`, así
+     que todo 429 real (no simulado en test con `isRetryable:false`) caía a `OPENROUTER_FAILED`
+     genérico, perdiendo el código y el motivo. Fix en
+     `libs/producer-tools/src/runtime/openrouter-producer-runtime.ts`: `unwrapRetryError` recorre
+     `RetryError.lastError` antes de clasificar; nuevo código `OPENROUTER_FREE_QUOTA_EXHAUSTED`
+     (detectado por el patrón `/free-models-per-day/iu` en `message` o `responseBody` de la
+     `APICallError` desenvuelta) con el hint en español pedido por el dev. Además, un `fetch` wrapper
+     (`withoutRetryableFreeQuotaExhausted`) intercepta la respuesta 429 de OpenRouter ANTES de que el
+     SDK decida si reintentar: si el cuerpo tiene el patrón de cuota diaria, reescribe el status a 400
+     (no reintentable por default en `APICallError`) preservando el cuerpo — evita 2-3 reintentos con
+     backoff exponencial en un error que no se va a arreglar solo. Propagado: `render-api-error.ts`
+     (nuevo código en `RENDER_API_ERROR_CODES`), `http-status-for.ts` (429), `to-error-payload.ts`
+     (descripción genérica en inglés), catálogos web `messages-es.ts`/`messages-en.ts` +
+     `error-explanations.ts` (`EXPLAINED_CODES`). De paso se encontró y arregló un segundo bug real:
+     `run-producer-turn.ts` construía el `PipelineStageError` final de un turno OpenRouter fallido
+     SIN pasarle `hint`, así que el mensaje específico del runtime (el que sí llega al chat via
+     `answerText`) nunca llegaba al `error.hint` estructurado — ahora se pasa `answerText` como
+     `hint` cuando no es null/vacío. Esto corrige el hint estructurado para **todos** los códigos
+     OpenRouter, no sólo el nuevo. Verificado con `pnpm nx run-many -t lint test build` en verde
+     para los 11 proyectos del workspace.

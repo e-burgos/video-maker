@@ -276,13 +276,15 @@
         "apps/web/src/i18n/messages-en.ts",
         "sdd/api.json",
         "apps/render-api/src/config/curated-openrouter-models.ts",
-        "apps/render-api/src/config/curated-openrouter-models.spec.ts"
+        "apps/render-api/src/config/curated-openrouter-models.spec.ts",
+        "apps/render-api/src/config/recommended-openrouter-models.spec.ts",
+        "apps/web/src/api/error-explanations.ts"
       ],
       "usage": {
-        "tokens_in": 380000,
-        "tokens_out": 42000,
+        "tokens_in": 470000,
+        "tokens_out": 51000,
         "provider_model": "claude/sonnet",
-        "effort": "medium",
+        "effort": "high",
         "agent": "implementor-back",
         "approx": true,
         "source": "declared-estimate",
@@ -304,13 +306,15 @@
       "files": [
         "libs/producer-tools/e2e/openrouter-model-bench.mjs",
         "sdd/specs/spec-e-burgos-017-desktop-app/cycles/cycle-04/artifacts/openrouter-model-bench.md",
-        "sdd/specs/spec-e-burgos-017-desktop-app/cycles/cycle-04/artifacts/openrouter-model-bench-results.json"
+        "sdd/specs/spec-e-burgos-017-desktop-app/cycles/cycle-04/artifacts/openrouter-model-bench-results.json",
+        "libs/producer-tools/src/runtime/openrouter-producer-runtime.ts",
+        "libs/producer-tools/src/runtime/openrouter-producer-runtime.spec.ts"
       ],
       "usage": {
         "provider_model": "claude/sonnet",
         "effort": "high",
-        "tokens_in": 190000,
-        "tokens_out": 16000,
+        "tokens_in": 260000,
+        "tokens_out": 23000,
         "agent": "implementor-back",
         "approx": true,
         "source": "declared-estimate",

@@ -2,7 +2,11 @@ import { join } from 'node:path/posix';
 
 import type { MediaProject } from '@video-maker/auto-montage';
 
-import { RECOMMENDED_OPENROUTER_MODELS, isRecommendedOpenRouterModelId } from '../config/recommended-openrouter-models';
+import {
+  RECOMMENDED_OPENROUTER_MODELS,
+  defaultRecommendedOpenRouterModel,
+  isRecommendedOpenRouterModelId,
+} from '../config/recommended-openrouter-models';
 import type { ProducerConfig } from '../config/producer-config';
 import type { RenderApiDependencies } from '../deps/render-api-dependencies';
 import { toErrorPayload } from '../errors/to-error-payload';
@@ -134,9 +138,9 @@ async function resolveOpenRouterModel(
     if (configured !== null && isKnownId(configured)) {
       return { id: configured, supportsImages: supportsImagesFor(configured) };
     }
-    const firstRecommended = catalogModels?.find((entry) => entry.recommended) ?? null;
-    const id = firstRecommended?.id ?? RECOMMENDED_OPENROUTER_MODELS[0]?.id ?? '';
-    return { id, supportsImages: firstRecommended?.supportsImages ?? false };
+    const defaultId = defaultRecommendedOpenRouterModel().id;
+    const defaultCatalogEntry = catalogModels?.find((entry) => entry.id === defaultId) ?? null;
+    return { id: defaultId, supportsImages: defaultCatalogEntry?.supportsImages ?? false };
   }
 
   if (typeof model !== 'string' || !isKnownId(model)) {
@@ -348,7 +352,12 @@ export async function startProducerTurn(
           status: 'failed',
           finishedAt,
           error: toErrorPayload(
-            new PipelineStageError({ code: openRouterErrorCode as RenderApiErrorCode, stage: null, resource: 'producer-agent' }),
+            new PipelineStageError({
+              code: openRouterErrorCode as RenderApiErrorCode,
+              stage: null,
+              resource: 'producer-agent',
+              ...(answerText === null || answerText === '' ? {} : { hint: answerText }),
+            }),
           ),
         });
         return;

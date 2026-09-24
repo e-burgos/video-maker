@@ -1,7 +1,8 @@
 // Recorded live from GET https://openrouter.ai/api/v1/models on 2026-09-24 (no key required),
-// trimmed to the fields the catalog reads and to ~20 entries: the 3 current recommended
-// placeholder ids, several :free tool-capable models, a zero-priced model that is not
-// ":free"-suffixed, paid tool-capable models with and without image input, and a few
+// trimmed to the fields the catalog reads and to ~20 entries: the 2 current recommended ids
+// (anthropic/claude-haiku-4.5, deepseek/deepseek-v4.1-flash), 2 formerly-recommended placeholder
+// ids kept as ordinary catalog entries, several :free tool-capable models, a zero-priced model
+// that is not ":free"-suffixed, paid tool-capable models with and without image input, and a few
 // models without "tools" in supported_parameters to exercise the filter.
 export const OPENROUTER_MODELS_SAMPLE_PAYLOAD = {
   data: [
@@ -11,6 +12,14 @@ export const OPENROUTER_MODELS_SAMPLE_PAYLOAD = {
       context_length: 200000,
       pricing: { prompt: '0.000001', completion: '0.000005' },
       architecture: { input_modalities: ['text', 'image', 'file'] },
+      supported_parameters: ['response_format', 'temperature', 'tool_choice', 'tools', 'top_k', 'top_p'],
+    },
+    {
+      id: 'deepseek/deepseek-v4.1-flash',
+      name: 'DeepSeek: DeepSeek V4.1 Flash',
+      context_length: 1048576,
+      pricing: { prompt: '0.00000015', completion: '0.0000006' },
+      architecture: { input_modalities: ['text', 'image'] },
       supported_parameters: ['response_format', 'temperature', 'tool_choice', 'tools', 'top_k', 'top_p'],
     },
     {

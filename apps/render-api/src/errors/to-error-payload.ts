@@ -110,6 +110,7 @@ const MESSAGE_BY_CODE: Readonly<Record<RenderApiErrorCode, string>> = {
   OPENROUTER_KEY_INVALID: 'The OpenRouter API key is not well formed or was rejected by OpenRouter.',
   OPENROUTER_KEY_MISSING: 'The OpenRouter engine is selected but no API key is stored in the keychain yet.',
   OPENROUTER_RATE_LIMITED: 'OpenRouter refused the request because the account or model hit a rate limit.',
+  OPENROUTER_FREE_QUOTA_EXHAUSTED: "OpenRouter's free-models-per-day quota for this account is exhausted; it resets at 00:00 UTC.",
   OPENROUTER_MODEL_UNAVAILABLE: 'OpenRouter could not serve the requested model.',
   OPENROUTER_FAILED: 'The call to OpenRouter failed for an unexpected reason.',
   OPENROUTER_CATALOG_UNAVAILABLE: 'OpenRouter did not answer the model catalog with a usable response.',

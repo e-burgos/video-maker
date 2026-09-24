@@ -33,7 +33,7 @@ describe('handleGetOpenRouterModels', () => {
     const body = response.body as OpenRouterModelsBody;
 
     expect(response.status).toBe(200);
-    expect(body.models.length).toBe(17);
+    expect(body.models.length).toBe(18);
     expect(body.models[0]?.recommended).toBe(true);
     expect(body.stale).toBe(false);
     expect(typeof body.fetchedAt).toBe('string');
@@ -51,8 +51,7 @@ describe('handleGetOpenRouterModels', () => {
 
     expect(body.models.map((model) => model.id)).toEqual([
       'anthropic/claude-haiku-4.5',
-      'openai/gpt-4o-mini',
-      'google/gemini-3.5-flash-lite',
+      'deepseek/deepseek-v4.1-flash',
     ]);
   });
 

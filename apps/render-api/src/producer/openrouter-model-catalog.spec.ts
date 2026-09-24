@@ -21,7 +21,7 @@ describe('fetchOpenRouterModelCatalog', () => {
     const models = await fetchOpenRouterModelCatalog(fetchRemote);
 
     expect(calls[0]?.url).toBe(OPENROUTER_MODELS_URL);
-    expect(models.length).toBe(17);
+    expect(models.length).toBe(18);
     expect(models.some((model) => model.id === 'inference-net/schematron-v2-turbo')).toBe(false);
     expect(models.some((model) => model.id === 'tencent/hy-mt2-1.8b')).toBe(false);
 

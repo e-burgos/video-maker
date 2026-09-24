@@ -201,8 +201,7 @@ describe('GET /settings/producer — engines.openrouter.models', () => {
 
     expect(models.map((model) => model.id)).toEqual([
       'anthropic/claude-haiku-4.5',
-      'openai/gpt-4o-mini',
-      'google/gemini-3.5-flash-lite',
+      'deepseek/deepseek-v4.1-flash',
     ]);
   });
 

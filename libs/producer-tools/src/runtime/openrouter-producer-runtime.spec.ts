@@ -1,4 +1,4 @@
-import { APICallError } from 'ai';
+import { APICallError, RetryError } from 'ai';
 import { MockLanguageModelV4 } from 'ai/test';
 import { describe, expect, it, vi } from 'vitest';
 
@@ -200,6 +200,47 @@ describe('runProducerTurnWithModel', () => {
     });
   });
 
+  it('unwraps a RetryError from exhausted retries and maps its last 429 to OPENROUTER_RATE_LIMITED', async () => {
+    const lastError = new APICallError({
+      message: 'Rate limit exceeded: temporary-burst-limit',
+      url: 'https://openrouter.ai/api/v1/chat/completions',
+      requestBodyValues: {},
+      statusCode: 429,
+      responseBody: '{"error":{"message":"Rate limit exceeded: temporary-burst-limit"}}',
+      isRetryable: true,
+    });
+    const model = new MockLanguageModelV4({
+      doGenerate: async () => {
+        throw new RetryError({ message: 'Failed after 3 attempts.', reason: 'maxRetriesExceeded', errors: [lastError] });
+      },
+    });
+
+    await expect(runProducerTurnWithModel({ ...baseOptions(), model })).rejects.toMatchObject({
+      code: 'OPENROUTER_RATE_LIMITED',
+    });
+  });
+
+  it('unwraps a RetryError whose last error is a free-tier daily quota 429 to OPENROUTER_FREE_QUOTA_EXHAUSTED with a Spanish hint', async () => {
+    const lastError = new APICallError({
+      message: 'Rate limit exceeded: free-models-per-day-high-balance.',
+      url: 'https://openrouter.ai/api/v1/chat/completions',
+      requestBodyValues: {},
+      statusCode: 429,
+      responseBody: '{"error":{"message":"Rate limit exceeded: free-models-per-day-high-balance."}}',
+      isRetryable: true,
+    });
+    const model = new MockLanguageModelV4({
+      doGenerate: async () => {
+        throw new RetryError({ message: 'Failed after 3 attempts.', reason: 'maxRetriesExceeded', errors: [lastError] });
+      },
+    });
+
+    await expect(runProducerTurnWithModel({ ...baseOptions(), model })).rejects.toMatchObject({
+      code: 'OPENROUTER_FREE_QUOTA_EXHAUSTED',
+      message: expect.stringContaining('cuota diaria'),
+    });
+  });
+
   it('maps a non-API-call failure to OPENROUTER_FAILED', async () => {
     const model = new MockLanguageModelV4({
       doGenerate: async () => {
@@ -266,5 +307,30 @@ describe('runOpenRouterProducerTurn', () => {
     const [, requestInit] = fakeFetch.mock.calls[0] as [unknown, RequestInit];
     const headers = new Headers(requestInit.headers);
     expect(headers.get('authorization')).toBe(`Bearer ${SECRET_KEY}`);
+  });
+
+  it('never retries a 429 whose body reports the free-tier daily quota is exhausted, and maps it to OPENROUTER_FREE_QUOTA_EXHAUSTED', async () => {
+    const fakeFetch = vi.fn(async () =>
+      new Response(
+        JSON.stringify({ error: { message: 'Rate limit exceeded: free-models-per-day-high-balance.' } }),
+        { status: 429, headers: { 'content-type': 'application/json' } },
+      ),
+    );
+
+    let thrown: unknown;
+    try {
+      await runOpenRouterProducerTurn({
+        ...baseOptions(),
+        apiKey: 'sk-or-v1-does-not-matter-here',
+        model: 'openrouter/some-free-model:free',
+        fetch: fakeFetch as unknown as typeof fetch,
+      });
+    } catch (cause) {
+      thrown = cause;
+    }
+
+    expect(thrown).toBeInstanceOf(OpenRouterProducerRuntimeError);
+    expect((thrown as OpenRouterProducerRuntimeError).code).toBe('OPENROUTER_FREE_QUOTA_EXHAUSTED');
+    expect(fakeFetch).toHaveBeenCalledTimes(1);
   });
 });

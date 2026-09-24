@@ -16,17 +16,29 @@ export interface RecommendedOpenRouterModel {
   readonly tier: RecommendedOpenRouterModelTier;
   readonly notes: string;
   readonly bench: RecommendedOpenRouterModelBench | null;
+  readonly isDefault: boolean;
 }
 
-const PLACEHOLDER_NOTES =
-  'Placeholder pending the tool-calling benchmark (plan.md D-C4-06); the benchmark agent replaces this set.';
-
-// Seed data pending TASK-006's benchmark (plan.md D-C4-06 note). Kept as a plain, JSON-shaped
-// literal so the benchmark agent can replace it wholesale without touching the loader below.
+// Real results from TASK-006's benchmark (plan.md D-C4-06), 2 runs per model against the real
+// producer runtime — see sdd/specs/spec-e-burgos-017-desktop-app/cycles/cycle-04/artifacts/
+// openrouter-model-bench.md. The 4 free candidates could not be scored: this OpenRouter account
+// had already hit its free-models-per-day quota (account-wide, not per-model) on 2026-09-24; a
+// free tier entry lands here once a free-tier re-run passes after the daily reset.
 const RAW_RECOMMENDED_OPENROUTER_MODELS: readonly unknown[] = [
-  { id: 'anthropic/claude-haiku-4.5', tier: 'reference', notes: PLACEHOLDER_NOTES, bench: null },
-  { id: 'openai/gpt-4o-mini', tier: 'reference', notes: PLACEHOLDER_NOTES, bench: null },
-  { id: 'google/gemini-3.5-flash-lite', tier: 'reference', notes: PLACEHOLDER_NOTES, bench: null },
+  {
+    id: 'anthropic/claude-haiku-4.5',
+    tier: 'reference',
+    notes: '2/2 en el benchmark real. La más rápida y confiable, pero ~21x el costo de deepseek por turno.',
+    bench: { successRate: 1, avgSteps: 7, avgSeconds: 70.8, avgCostUsd: 0.097188 },
+    isDefault: false,
+  },
+  {
+    id: 'deepseek/deepseek-v4.1-flash',
+    tier: 'cheap',
+    notes: '2/2 en el benchmark real, la más barata que pasó limpio las dos corridas. Motor por defecto de OpenRouter.',
+    bench: { successRate: 1, avgSteps: 9.5, avgSeconds: 118.2, avgCostUsd: 0.0045477663 },
+    isDefault: true,
+  },
 ];
 
 function isRecord(value: unknown): value is Record<string, unknown> {
@@ -54,7 +66,8 @@ function isRecommendedOpenRouterModel(value: unknown): value is RecommendedOpenR
     value['id'] !== '' &&
     isTier(value['tier']) &&
     typeof value['notes'] === 'string' &&
-    (value['bench'] === null || isBench(value['bench']))
+    (value['bench'] === null || isBench(value['bench'])) &&
+    typeof value['isDefault'] === 'boolean'
   );
 }
 
@@ -64,7 +77,15 @@ export function readRecommendedOpenRouterModels(raw: unknown): readonly Recommen
       code: 'SERVER_CONFIG_INVALID',
       stage: null,
       resource: 'config/recommended-openrouter-models',
-      expected: 'a non-empty array of { id, tier: free|cheap|reference, notes, bench }',
+      expected: 'a non-empty array of { id, tier: free|cheap|reference, notes, bench, isDefault }',
+    });
+  }
+  if (raw.filter((model) => model.isDefault).length !== 1) {
+    throw new PipelineStageError({
+      code: 'SERVER_CONFIG_INVALID',
+      stage: null,
+      resource: 'config/recommended-openrouter-models',
+      expected: 'exactly one entry with isDefault: true',
     });
   }
   return raw;
@@ -80,4 +101,17 @@ export function isRecommendedOpenRouterModelId(id: string): boolean {
 
 export function recommendedOpenRouterModelById(id: string): RecommendedOpenRouterModel | null {
   return RECOMMENDED_OPENROUTER_MODELS.find((model) => model.id === id) ?? null;
+}
+
+export function defaultRecommendedOpenRouterModel(): RecommendedOpenRouterModel {
+  const found = RECOMMENDED_OPENROUTER_MODELS.find((model) => model.isDefault);
+  if (found === undefined) {
+    throw new PipelineStageError({
+      code: 'SERVER_CONFIG_INVALID',
+      stage: null,
+      resource: 'config/recommended-openrouter-models',
+      expected: 'exactly one entry with isDefault: true',
+    });
+  }
+  return found;
 }

@@ -52,6 +52,7 @@ export const MESSAGES_ES: Messages = {
   'error.JOB_NOT_RETRYABLE': 'Este job no se puede volver a correr: no está fallido ni cancelado.',
   'error.JOB_RECORD_INVALID': 'Este job quedó guardado por una versión anterior del servicio y no se puede leer para volver a correrlo.',
   'error.OPENROUTER_KEY_INVALID': 'OpenRouter rechazó esta key, o no se pudo verificar. Copiala de nuevo desde openrouter.ai/keys.',
+  'error.OPENROUTER_FREE_QUOTA_EXHAUSTED': 'Se agotó la cuota diaria de modelos gratis de OpenRouter; se reinicia a las 00:00 UTC. Elegí un modelo pago barato o esperá.',
   'error.SECRET_STORE_UNAVAILABLE': 'El llavero de macOS no respondió. Probá de nuevo en un momento.',
   'error.PRODUCER_MODEL_INVALID': 'Ese modelo no está en la lista que ofrece este motor.',
 

@@ -1,4 +1,4 @@
-import { APICallError } from 'ai';
+import { APICallError, RetryError } from 'ai';
 import { generateText, stepCountIs } from 'ai';
 import type { LanguageModel, ModelMessage, StepResult, ToolSet } from 'ai';
 import { createOpenRouter } from '@openrouter/ai-sdk-provider';
@@ -12,8 +12,12 @@ export const DEFAULT_MAX_STEPS = 60;
 export type OpenRouterProducerRuntimeErrorCode =
   | 'OPENROUTER_KEY_INVALID'
   | 'OPENROUTER_RATE_LIMITED'
+  | 'OPENROUTER_FREE_QUOTA_EXHAUSTED'
   | 'OPENROUTER_MODEL_UNAVAILABLE'
   | 'OPENROUTER_FAILED';
+
+const FREE_QUOTA_EXHAUSTED_MESSAGE_PATTERN = /free-models-per-day/iu;
+const NON_RETRYABLE_STATUS_FOR_EXHAUSTED_QUOTA = 400;
 
 export class OpenRouterProducerRuntimeError extends Error {
   readonly code: OpenRouterProducerRuntimeErrorCode;
@@ -103,14 +107,30 @@ function sumOpenRouterCost(steps: readonly StepResult<ToolSet>[]): number | null
   return sawAny ? total : null;
 }
 
-function mapOpenRouterError(cause: unknown, abortSignal: AbortSignal | undefined): never {
+function unwrapRetryError(cause: unknown): unknown {
+  return RetryError.isInstance(cause) ? unwrapRetryError(cause.lastError) : cause;
+}
+
+function isFreeQuotaExhausted(cause: APICallError): boolean {
+  return FREE_QUOTA_EXHAUSTED_MESSAGE_PATTERN.test(cause.message) ||
+    (cause.responseBody !== undefined && FREE_QUOTA_EXHAUSTED_MESSAGE_PATTERN.test(cause.responseBody));
+}
+
+function mapOpenRouterError(rawCause: unknown, abortSignal: AbortSignal | undefined): never {
   if (abortSignal?.aborted === true) {
-    throw cause;
+    throw rawCause;
   }
+  const cause = unwrapRetryError(rawCause);
   if (APICallError.isInstance(cause)) {
     const status = cause.statusCode;
     if (status === 401) {
       throw new OpenRouterProducerRuntimeError('OPENROUTER_KEY_INVALID', 'OpenRouter rejected this API key.');
+    }
+    if (isFreeQuotaExhausted(cause)) {
+      throw new OpenRouterProducerRuntimeError(
+        'OPENROUTER_FREE_QUOTA_EXHAUSTED',
+        'Se agotó la cuota diaria de modelos gratis de OpenRouter; se reinicia a las 00:00 UTC. Elegí un modelo pago barato o esperá.',
+      );
     }
     if (status === 429) {
       throw new OpenRouterProducerRuntimeError(
@@ -127,6 +147,29 @@ function mapOpenRouterError(cause: unknown, abortSignal: AbortSignal | undefined
     throw new OpenRouterProducerRuntimeError('OPENROUTER_FAILED', 'The call to OpenRouter failed.');
   }
   throw new OpenRouterProducerRuntimeError('OPENROUTER_FAILED', 'The call to OpenRouter failed.');
+}
+
+function withoutRetryableFreeQuotaExhausted(fetchImpl: typeof fetch): typeof fetch {
+  return async (input, init) => {
+    const response = await fetchImpl(input, init);
+    if (response.status !== 429) {
+      return response;
+    }
+    let bodyText: string;
+    try {
+      bodyText = await response.clone().text();
+    } catch {
+      return response;
+    }
+    if (!FREE_QUOTA_EXHAUSTED_MESSAGE_PATTERN.test(bodyText)) {
+      return response;
+    }
+    return new Response(bodyText, {
+      status: NON_RETRYABLE_STATUS_FOR_EXHAUSTED_QUOTA,
+      statusText: response.statusText,
+      headers: response.headers,
+    });
+  };
 }
 
 export async function runProducerTurnWithModel(
@@ -182,7 +225,7 @@ export async function runOpenRouterProducerTurn(
   options: RunOpenRouterProducerTurnOptions,
 ): Promise<RunOpenRouterProducerTurnResult> {
   const { apiKey, model, fetch: fetchOverride, ...rest } = options;
-  const openrouter = createOpenRouter({ apiKey, ...(fetchOverride === undefined ? {} : { fetch: fetchOverride }) });
+  const openrouter = createOpenRouter({ apiKey, fetch: withoutRetryableFreeQuotaExhausted(fetchOverride ?? fetch) });
   const languageModel = openrouter.chat(model, { usage: { include: true } });
   return runProducerTurnWithModel({ ...rest, model: languageModel });
 }

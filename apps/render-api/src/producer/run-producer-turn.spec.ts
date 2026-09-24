@@ -11,6 +11,7 @@ import type { RenderApiDependencies } from '../deps/render-api-dependencies';
 import { httpStatusFor } from '../errors/http-status-for';
 import { isRenderApiError } from '../errors/render-api-error';
 import { OPENROUTER_SECRET_NAME, PRODUCER_ENGINE_SETTING_KEY } from '../http/handlers/producer-settings-handler';
+import { defaultRecommendedOpenRouterModel } from '../config/recommended-openrouter-models';
 import { createOpenRouterModelCatalog } from './openrouter-model-catalog';
 import type { CreateOpenRouterProducerAgentOptions } from './openrouter-producer-agent';
 import { readProducerConversation, readProducerSession } from './producer-store';
@@ -411,7 +412,7 @@ describe('startProducerTurn — engine routing (OpenRouter)', () => {
     );
     await started.completed;
 
-    expect(captured.options[0]?.chatModel).toBe(OPENROUTER_MODEL);
+    expect(captured.options[0]?.chatModel).toBe(defaultRecommendedOpenRouterModel().id);
     expect(captured.options[0]?.apiKey).toBe(OPENROUTER_SECRET);
 
     const record = base.registry.get(started.turnId);
@@ -520,6 +521,27 @@ describe('startProducerTurn — engine routing (OpenRouter)', () => {
     expect(base.registry.get(accepted.turnId).status).toBe('succeeded');
   });
 
+  it('picks the isDefault recommended model regardless of catalog order, not just the first recommended id it happens to see', async () => {
+    const { fetchRemote } = createFakeFetchRemote({
+      status: 200,
+      bodyChunks: jsonBodyChunks(OPENROUTER_MODELS_SAMPLE_PAYLOAD),
+    });
+    const base = scenario({ lines: [] }, { fetchRemote });
+    await withOpenRouterEngine(base);
+    const captured = { options: [] as CreateOpenRouterProducerAgentOptions[], starts: [] as ProducerTurnStart[] };
+
+    const started = await startProducerTurn(
+      base.deps,
+      base.registry,
+      { project: PROJECT, text: 'hola', config: CONFIG },
+      scriptedOpenRouterAgentFactory({}, captured),
+    );
+    await started.completed;
+
+    expect(captured.options[0]?.chatModel).toBe(defaultRecommendedOpenRouterModel().id);
+    expect(captured.options[0]?.chatModel).not.toBe(OPENROUTER_MODEL);
+  });
+
   it('reuses one shared catalog across turns so only the first turn hits the network', async () => {
     const { fetchRemote, calls } = createFakeFetchRemote({
       status: 200,
@@ -571,6 +593,26 @@ describe('startProducerTurn — engine routing (OpenRouter)', () => {
     expect(record.status).toBe('failed');
     expect(record.error?.code).toBe('OPENROUTER_RATE_LIMITED');
     expect(readProducerConversation(base.deps, PROJECT)).toHaveLength(1);
+  });
+
+  it('maps the free-tier daily quota exhaustion to its own error code with the Spanish hint intact', async () => {
+    const base = scenario({ lines: [] });
+    await withOpenRouterEngine(base);
+    const captured = { options: [] as CreateOpenRouterProducerAgentOptions[], starts: [] as ProducerTurnStart[] };
+    const hint = 'Se agotó la cuota diaria de modelos gratis de OpenRouter; se reinicia a las 00:00 UTC. Elegí un modelo pago barato o esperá.';
+
+    const started = await startProducerTurn(
+      base.deps,
+      base.registry,
+      { project: PROJECT, text: 'hola', config: CONFIG },
+      scriptedOpenRouterAgentFactory({ fail: { code: 'OPENROUTER_FREE_QUOTA_EXHAUSTED', hint } }, captured),
+    );
+    await started.completed;
+
+    const record = base.registry.get(started.turnId);
+    expect(record.status).toBe('failed');
+    expect(record.error?.code).toBe('OPENROUTER_FREE_QUOTA_EXHAUSTED');
+    expect(record.error?.hint).toBe(hint);
   });
 
   it('cancels the OpenRouter turn through the registry the same way as the Claude path', async () => {

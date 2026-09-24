@@ -50,6 +50,7 @@ export const MESSAGES_EN = {
   'error.JOB_NOT_RETRYABLE': 'This job cannot be run again: it is not failed or canceled.',
   'error.JOB_RECORD_INVALID': 'This job was stored by an older version of the service and cannot be read back to run it again.',
   'error.OPENROUTER_KEY_INVALID': 'OpenRouter rejected this key, or it could not be checked. Copy it again from openrouter.ai/keys.',
+  'error.OPENROUTER_FREE_QUOTA_EXHAUSTED': "OpenRouter's free-models daily quota is exhausted; it resets at 00:00 UTC. Pick a cheap paid model or wait.",
   'error.SECRET_STORE_UNAVAILABLE': 'The macOS keychain did not answer. Try again in a moment.',
   'error.PRODUCER_MODEL_INVALID': 'That model is not in the list this engine offers.',
 
