@@ -19,14 +19,14 @@
       "executor": "nx:run-commands",
       "outputs": ["{workspaceRoot}/dist/out-tsc/apps/desktop"],
       "options": {
-        "command": "tsc -p tsconfig.lib.json",
+        "command": "tsc -p tsconfig.lib.json && node scripts/copy-static-assets.mjs",
         "cwd": "apps/desktop"
       }
     },
     "serve": {
       "executor": "nx:run-commands",
       "options": {
-        "command": "tsc -p tsconfig.lib.json && node scripts/dev-serve.mjs",
+        "command": "tsc -p tsconfig.lib.json && node scripts/copy-static-assets.mjs && node scripts/dev-serve.mjs",
         "cwd": "apps/desktop"
       }
     }

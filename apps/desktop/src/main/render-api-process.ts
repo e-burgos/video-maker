@@ -121,6 +121,7 @@ export interface RenderApiHandle {
 
 export interface StartRenderApiProcessOptions {
   readonly healthUrl: string;
+  readonly healthHeaders?: Readonly<Record<string, string>>;
   readonly logFilePath: string;
   readonly startupTimeoutMs?: number;
   readonly healthPollIntervalMs?: number;
@@ -141,6 +142,7 @@ function delay(ms: number): Promise<void> {
 async function waitForHealth(
   fetchFn: typeof fetch,
   url: string,
+  headers: Readonly<Record<string, string>> | undefined,
   timeoutMs: number,
   pollIntervalMs: number,
   hasExited: () => boolean,
@@ -151,7 +153,7 @@ async function waitForHealth(
       throw new Error('render-api exited before it became healthy');
     }
     try {
-      const response = await fetchFn(url);
+      const response = await fetchFn(url, headers === undefined ? {} : { headers });
       if (response.ok) {
         return;
       }
@@ -211,6 +213,7 @@ export async function startRenderApiProcess(
   await waitForHealth(
     fetchFn,
     options.healthUrl,
+    options.healthHeaders,
     options.startupTimeoutMs ?? DEFAULT_STARTUP_TIMEOUT_MS,
     options.healthPollIntervalMs ?? DEFAULT_HEALTH_POLL_INTERVAL_MS,
     () => exited,

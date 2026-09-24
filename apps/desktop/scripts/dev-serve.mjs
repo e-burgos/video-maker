@@ -8,7 +8,10 @@ const mainEntry = resolve(repoRoot, 'dist', 'out-tsc', 'apps', 'desktop', 'src',
 const env = { ...process.env };
 delete env.ELECTRON_RUN_AS_NODE;
 
-const child = spawn(electronBin, [mainEntry], {
+const debugPort = process.env.DESKTOP_REMOTE_DEBUG_PORT;
+const args = debugPort !== undefined && debugPort !== '' ? [`--remote-debugging-port=${debugPort}`, mainEntry] : [mainEntry];
+
+const child = spawn(electronBin, args, {
   cwd: repoRoot,
   env,
   stdio: 'inherit',

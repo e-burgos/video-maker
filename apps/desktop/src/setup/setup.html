@@ -1,0 +1,222 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="utf-8" />
+    <meta
+      http-equiv="Content-Security-Policy"
+      content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self'"
+    />
+    <title>Video Maker — Primer arranque</title>
+    <style>
+      :root {
+        color-scheme: light dark;
+        --bg: #111318;
+        --panel: #1b1f27;
+        --text: #eef0f4;
+        --muted: #9aa2b1;
+        --accent: #6ea8fe;
+        --ok: #59c26a;
+        --error: #e5636b;
+      }
+      * {
+        box-sizing: border-box;
+      }
+      body {
+        margin: 0;
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+        background: var(--bg);
+        color: var(--text);
+        display: flex;
+        justify-content: center;
+        padding: 32px 16px;
+      }
+      main {
+        width: 100%;
+        max-width: 560px;
+      }
+      h1 {
+        font-size: 18px;
+        font-weight: 600;
+        margin: 0 0 4px;
+      }
+      p.subtitle {
+        color: var(--muted);
+        margin: 0 0 24px;
+        font-size: 13px;
+      }
+      .steps {
+        display: flex;
+        gap: 8px;
+        margin-bottom: 20px;
+      }
+      .steps span {
+        flex: 1;
+        height: 4px;
+        border-radius: 2px;
+        background: #2a2f3a;
+      }
+      .steps span.active {
+        background: var(--accent);
+      }
+      section.panel {
+        background: var(--panel);
+        border-radius: 10px;
+        padding: 20px;
+        display: none;
+      }
+      section.panel.visible {
+        display: block;
+      }
+      .item-row {
+        margin-bottom: 12px;
+      }
+      .item-row .label {
+        display: flex;
+        justify-content: space-between;
+        font-size: 13px;
+        margin-bottom: 4px;
+      }
+      .bar {
+        height: 8px;
+        border-radius: 4px;
+        background: #2a2f3a;
+        overflow: hidden;
+      }
+      .bar > i {
+        display: block;
+        height: 100%;
+        width: 0%;
+        background: var(--accent);
+        transition: width 120ms linear;
+      }
+      .bar.ok > i {
+        background: var(--ok);
+      }
+      .total-row {
+        margin-top: 16px;
+        padding-top: 16px;
+        border-top: 1px solid #2a2f3a;
+        font-size: 13px;
+      }
+      .row {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+        margin-bottom: 12px;
+      }
+      button {
+        font: inherit;
+        border-radius: 8px;
+        border: 1px solid #333a48;
+        background: #232833;
+        color: var(--text);
+        padding: 8px 14px;
+        cursor: pointer;
+      }
+      button.primary {
+        background: var(--accent);
+        color: #0b1220;
+        border-color: var(--accent);
+        font-weight: 600;
+      }
+      button:disabled {
+        opacity: 0.45;
+        cursor: default;
+      }
+      button.link {
+        background: none;
+        border: none;
+        color: var(--accent);
+        text-decoration: underline;
+        padding: 0;
+      }
+      .folder-path {
+        font-size: 12px;
+        color: var(--muted);
+        word-break: break-all;
+        background: #12151b;
+        padding: 8px 10px;
+        border-radius: 6px;
+      }
+      .status-badge {
+        font-size: 12px;
+        padding: 2px 8px;
+        border-radius: 999px;
+        display: inline-block;
+      }
+      .status-badge.ok {
+        background: rgba(89, 194, 106, 0.15);
+        color: var(--ok);
+      }
+      .status-badge.error {
+        background: rgba(229, 99, 107, 0.15);
+        color: var(--error);
+      }
+      .actions {
+        display: flex;
+        justify-content: flex-end;
+        gap: 8px;
+        margin-top: 20px;
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <h1 data-i18n="title"></h1>
+      <p class="subtitle" data-i18n="subtitle"></p>
+      <div class="steps">
+        <span id="step-dot-1" class="active"></span>
+        <span id="step-dot-2"></span>
+        <span id="step-dot-3"></span>
+      </div>
+
+      <section id="step-downloads" class="panel visible">
+        <h2 data-i18n="downloadsTitle"></h2>
+        <div id="download-items"></div>
+        <div class="total-row">
+          <div class="label">
+            <span data-i18n="totalLabel"></span>
+            <span id="total-size-label"></span>
+          </div>
+          <div class="bar" id="total-bar"><i></i></div>
+        </div>
+        <div class="actions">
+          <button id="downloads-continue" class="primary" disabled data-i18n="continueButton"></button>
+        </div>
+      </section>
+
+      <section id="step-folder" class="panel">
+        <h2 data-i18n="folderTitle"></h2>
+        <p data-i18n="folderHint"></p>
+        <p class="folder-path" id="folder-path"></p>
+        <div class="row">
+          <button id="choose-folder" data-i18n="chooseFolderButton"></button>
+        </div>
+        <div class="actions">
+          <button id="folder-back" data-i18n="backButton"></button>
+          <button id="folder-continue" class="primary" data-i18n="continueButton"></button>
+        </div>
+      </section>
+
+      <section id="step-claude" class="panel">
+        <h2 data-i18n="claudeTitle"></h2>
+        <div class="row">
+          <span data-i18n="claudeStatusLabel"></span>
+          <span id="claude-status-badge" class="status-badge"></span>
+        </div>
+        <p id="claude-detail" class="folder-path"></p>
+        <div class="row" id="claude-missing-help" style="display: none">
+          <button id="claude-install-docs" class="link" data-i18n="claudeInstallDocsButton"></button>
+          <button id="claude-recheck" data-i18n="claudeRecheckButton"></button>
+        </div>
+        <div class="actions">
+          <button id="claude-back" data-i18n="backButton"></button>
+          <button id="claude-skip" data-i18n="claudeSkipButton"></button>
+          <button id="claude-finish" class="primary" data-i18n="finishButton"></button>
+        </div>
+      </section>
+    </main>
+    <script src="./setup.js"></script>
+  </body>
+</html>
