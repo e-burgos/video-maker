@@ -5,6 +5,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import {
   producerConversation,
   producerModels,
+  producerSettings,
   producerTurn,
   succeededTurn,
 } from '../api/__fixtures__/producer';
@@ -59,6 +60,7 @@ function renderPage(client: Partial<RenderApiClient>) {
     listRenderJobs: vi.fn().mockResolvedValue({ slug: 'demo-01', jobs: [] }),
     listGenerated: vi.fn().mockResolvedValue({ slug: 'demo-01', roots: [], files: [] }),
     getProducer: vi.fn().mockResolvedValue(producerConversation()),
+    getProducerSettings: vi.fn().mockResolvedValue(producerSettings()),
     ...client,
   };
 
@@ -217,6 +219,41 @@ describe('ProducerPage', () => {
     await waitFor(() => expect(screen.getByTestId('producer-message-list')).toBeTruthy());
     expect(screen.getByTestId('producer-message-model-msg-0002').textContent).toBe('sonnet');
     expect(screen.queryByTestId('producer-message-model-msg-0001')).toBeNull();
+  });
+
+  it('shows which engine answers the conversation', async () => {
+    renderPage({});
+
+    await waitFor(() =>
+      expect(screen.getByTestId('producer-active-engine').textContent).toBe('with Claude'),
+    );
+  });
+
+  it('offers the models of the OpenRouter engine when it is the effective one', async () => {
+    renderPage({
+      getProducerSettings: vi.fn().mockResolvedValue(
+        producerSettings({
+          effectiveEngine: 'openrouter',
+          engines: {
+            claudeCli: { available: false, reason: 'not installed', models: producerModels().allowed },
+            openrouter: {
+              keyPresent: true,
+              keyHint: '1234',
+              models: [
+                { id: 'openai/gpt-4o-mini', label: 'GPT-4o mini', description: 'OpenAI · fast' },
+              ],
+            },
+          },
+        }),
+      ),
+    });
+
+    await waitFor(() =>
+      expect(screen.getByTestId('producer-active-engine').textContent).toBe('with OpenRouter'),
+    );
+    expect(
+      [...(screen.getByLabelText('model') as HTMLSelectElement).options].map((option) => option.value),
+    ).toEqual(['openai/gpt-4o-mini']);
   });
 
   it('adopts a turn that was already running when the page opened', async () => {

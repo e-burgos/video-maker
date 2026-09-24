@@ -1,4 +1,5 @@
 import { fireEvent, render, screen } from '@testing-library/react';
+import { MemoryRouter } from 'react-router-dom';
 import { describe, expect, it, vi } from 'vitest';
 
 import { producerModels } from '../api/__fixtures__/producer';
@@ -10,17 +11,19 @@ function renderComposer(overrides: Partial<Parameters<typeof ProducerComposer>[0
   const onModelChange = vi.fn();
 
   render(
-    <ProducerComposer
-      value="Proponeme un video de 30 segundos"
-      onChange={onChange}
-      onSend={onSend}
-      pending={false}
-      blockers={[]}
-      models={producerModels().allowed}
-      model="sonnet"
-      onModelChange={onModelChange}
-      {...overrides}
-    />,
+    <MemoryRouter>
+      <ProducerComposer
+        value="Proponeme un video de 30 segundos"
+        onChange={onChange}
+        onSend={onSend}
+        pending={false}
+        blockers={[]}
+        models={producerModels().allowed}
+        model="sonnet"
+        onModelChange={onModelChange}
+        {...overrides}
+      />
+    </MemoryRouter>,
   );
 
   return { onChange, onSend, onModelChange };
@@ -124,5 +127,31 @@ describe('ProducerComposer', () => {
     fireEvent.keyDown(textarea(), { key: 'Enter' });
 
     expect(onSend).not.toHaveBeenCalled();
+  });
+
+  it('offers a link to settings when no producer engine is available', () => {
+    renderComposer({ blockers: [{ key: 'producer.blocker.unavailable' }] });
+
+    expect(screen.getByTestId('producer-composer-settings-link').getAttribute('href')).toBe(
+      '/settings',
+    );
+  });
+
+  it('does not show the settings link for an unrelated blocker', () => {
+    renderComposer({ blockers: [{ key: 'producer.blocker.healthUnknown' }] });
+
+    expect(screen.queryByTestId('producer-composer-settings-link')).toBeNull();
+  });
+
+  it('shows the active engine next to the model picker', () => {
+    renderComposer({ activeEngine: 'openrouter' });
+
+    expect(screen.getByTestId('producer-active-engine').textContent).toBe('with OpenRouter');
+  });
+
+  it('shows nothing about the engine when it is not known', () => {
+    renderComposer({ activeEngine: null });
+
+    expect(screen.queryByTestId('producer-active-engine')).toBeNull();
   });
 });

@@ -84,6 +84,18 @@ describe('ProducerMessageList', () => {
 
     expect(screen.getByTestId('producer-message-list').childElementCount).toBe(0);
   });
+
+  it('shows the cost of a turn that reports one', () => {
+    renderList([producerMessage({ role: 'assistant', text: 'listo', costUsd: 0.0123 })]);
+
+    expect(screen.getByTestId('producer-message-cost-msg-0001').textContent).toBe('≈ US$ 0.012');
+  });
+
+  it('shows nothing about cost when the message does not report one', () => {
+    renderList([assistant]);
+
+    expect(screen.queryByTestId('producer-message-cost-msg-0002')).toBeNull();
+  });
 });
 
 describe('ProducerMessageList — the shapes the producer actually emits', () => {

@@ -13,6 +13,19 @@ const PROJECT_SECTIONS = [
   { path: '/preview', labelKey: 'nav.preview' },
 ] as const satisfies readonly { path: string; labelKey: TranslationKey }[];
 
+const HEADER_LINKS = [
+  { to: '/settings', testId: 'settings-nav', labelKey: 'nav.settings' },
+  { to: '/guide', testId: 'guide-nav', labelKey: 'nav.guide' },
+] as const satisfies readonly { to: string; testId: string; labelKey: TranslationKey }[];
+
+function navLinkClass({ isActive }: { isActive: boolean }): string {
+  return `rounded-md border px-2 py-1 font-mono text-xs ${
+    isActive
+      ? 'border-sky-500/60 bg-sky-500/10 text-sky-100'
+      : 'border-slate-800 text-slate-400 hover:border-slate-600'
+  }`;
+}
+
 export function projectSlugFromPathname(pathname: string): string | null {
   const match = /^\/projects\/([^/]+)(?:\/|$)/.exec(pathname);
   return match === null ? null : decodeURIComponent(match[1] as string);
@@ -33,19 +46,11 @@ export function StudioLayout() {
             <span className="text-xs text-slate-500">{t('layout.subtitle')}</span>
           </div>
           <div className="flex items-center gap-3">
-            <NavLink
-              to="/guide"
-              data-testid="guide-nav"
-              className={({ isActive }) =>
-                `rounded-md border px-2 py-1 font-mono text-xs ${
-                  isActive
-                    ? 'border-sky-500/60 bg-sky-500/10 text-sky-100'
-                    : 'border-slate-800 text-slate-400 hover:border-slate-600'
-                }`
-              }
-            >
-              {t('nav.guide')}
-            </NavLink>
+            {HEADER_LINKS.map((link) => (
+              <NavLink key={link.to} to={link.to} data-testid={link.testId} className={navLinkClass}>
+                {t(link.labelKey)}
+              </NavLink>
+            ))}
             <ServiceHealthBadge />
             <LanguageSwitch />
           </div>

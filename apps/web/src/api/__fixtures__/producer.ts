@@ -3,6 +3,7 @@ import type {
   ProducerEvent,
   ProducerMessage,
   ProducerModelCatalog,
+  ProducerSettings,
   ProducerTurn,
 } from '../render-api-types';
 
@@ -72,6 +73,29 @@ export function succeededTurn(overrides: Partial<ProducerTurn> = {}): ProducerTu
     suggestions: ['Dale, avanzá con el corte de 30 segundos', 'Mostrame el guion primero'],
     ...overrides,
   });
+}
+
+export function producerSettings(overrides: Partial<ProducerSettings> = {}): ProducerSettings {
+  return {
+    engine: null,
+    effectiveEngine: 'claude-cli',
+    engines: {
+      claudeCli: { available: true, reason: null, models: producerModels().allowed },
+      openrouter: {
+        keyPresent: false,
+        keyHint: null,
+        models: [
+          {
+            id: 'anthropic/claude-haiku-4.5',
+            label: 'Claude Haiku 4.5',
+            description: 'Anthropic · fast, tool-calling',
+          },
+        ],
+      },
+    },
+    models: { claude: null, openrouter: null },
+    ...overrides,
+  };
 }
 
 export function producerConversation(

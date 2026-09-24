@@ -2,7 +2,12 @@ import { describe, expect, it, vi } from 'vitest';
 
 import { RAW_PREVIEW_TIMELINE, previewTimelineFixture } from './__fixtures__/timeline';
 import { RAW_STORYBOARD, storyboardFixture } from './__fixtures__/storyboard';
-import { producerConversation, producerTurn, succeededTurn } from './__fixtures__/producer';
+import {
+  producerConversation,
+  producerSettings,
+  producerTurn,
+  succeededTurn,
+} from './__fixtures__/producer';
 import { VOICE_MODELS, voiceDocument, voiceJob, voiceTrack } from './__fixtures__/voice';
 import { createRenderApiClient } from './render-api-client';
 import { RenderApiError } from './render-api-error';
@@ -1083,6 +1088,111 @@ describe('createRenderApiClient — producer', () => {
       .catch((caught: unknown) => caught);
 
     expect((error as RenderApiError).code).toBe('PRODUCER_TURN_NOT_CANCELABLE');
+  });
+});
+
+describe('createRenderApiClient — producer settings', () => {
+  it('reads the engine and model configuration from EP-037', async () => {
+    const { fetchImpl, calls } = recordingFetch(() => jsonResponse(producerSettings()));
+
+    const settings = await createRenderApiClient(fetchImpl).getProducerSettings();
+
+    expect(calls[0]?.url).toBe('/api/settings/producer');
+    expect(calls[0]?.init).toBeUndefined();
+    expect(settings.effectiveEngine).toBe('claude-cli');
+  });
+
+  it('writes the engine and default models as JSON to EP-038', async () => {
+    const { fetchImpl, calls } = recordingFetch(() =>
+      jsonResponse(producerSettings({ engine: 'openrouter' })),
+    );
+
+    const settings = await createRenderApiClient(fetchImpl).updateProducerSettings({
+      engine: 'openrouter',
+      models: { openrouter: 'openai/gpt-4o-mini' },
+    });
+
+    expect(calls[0]?.url).toBe('/api/settings/producer');
+    expect(calls[0]?.init?.method).toBe('PUT');
+    expect(JSON.parse(String(calls[0]?.init?.body))).toEqual({
+      engine: 'openrouter',
+      models: { openrouter: 'openai/gpt-4o-mini' },
+    });
+    expect(settings.engine).toBe('openrouter');
+  });
+
+  it('surfaces PRODUCER_MODEL_INVALID from EP-038', async () => {
+    const { fetchImpl } = recordingFetch(() =>
+      jsonResponse(
+        { error: { code: 'PRODUCER_MODEL_INVALID', stage: null, message: 'not curated', resource: 'models.openrouter' } },
+        422,
+      ),
+    );
+
+    const error = await createRenderApiClient(fetchImpl)
+      .updateProducerSettings({ models: { openrouter: 'not-a-real-model' } })
+      .catch((caught: unknown) => caught);
+
+    expect((error as RenderApiError).code).toBe('PRODUCER_MODEL_INVALID');
+  });
+
+  it('sends the key to EP-039 and never keeps it beyond the request body', async () => {
+    const { fetchImpl, calls } = recordingFetch(() =>
+      jsonResponse({ keyPresent: true, keyHint: 'wxyz' }),
+    );
+
+    const result = await createRenderApiClient(fetchImpl).putOpenRouterKey(
+      'sk-or-v1-abcdefghijklmnop',
+    );
+
+    expect(calls[0]?.url).toBe('/api/settings/producer/openrouter-key');
+    expect(calls[0]?.init?.method).toBe('PUT');
+    expect(JSON.parse(String(calls[0]?.init?.body))).toEqual({
+      apiKey: 'sk-or-v1-abcdefghijklmnop',
+    });
+    expect(result).toEqual({ keyPresent: true, keyHint: 'wxyz' });
+  });
+
+  it('surfaces OPENROUTER_KEY_INVALID from EP-039', async () => {
+    const { fetchImpl } = recordingFetch(() =>
+      jsonResponse(
+        { error: { code: 'OPENROUTER_KEY_INVALID', stage: null, message: 'rejected' } },
+        422,
+      ),
+    );
+
+    const error = await createRenderApiClient(fetchImpl)
+      .putOpenRouterKey('sk-or-v1-abcdefghijklmnop')
+      .catch((caught: unknown) => caught);
+
+    expect((error as RenderApiError).code).toBe('OPENROUTER_KEY_INVALID');
+  });
+
+  it('deletes the key with DELETE on EP-040', async () => {
+    const { fetchImpl, calls } = recordingFetch(() =>
+      jsonResponse({ keyPresent: false, keyHint: null }),
+    );
+
+    const result = await createRenderApiClient(fetchImpl).deleteOpenRouterKey();
+
+    expect(calls[0]?.url).toBe('/api/settings/producer/openrouter-key');
+    expect(calls[0]?.init?.method).toBe('DELETE');
+    expect(result).toEqual({ keyPresent: false, keyHint: null });
+  });
+
+  it('surfaces SECRET_STORE_UNAVAILABLE from EP-040', async () => {
+    const { fetchImpl } = recordingFetch(() =>
+      jsonResponse(
+        { error: { code: 'SECRET_STORE_UNAVAILABLE', stage: null, message: 'keychain failed' } },
+        503,
+      ),
+    );
+
+    const error = await createRenderApiClient(fetchImpl)
+      .deleteOpenRouterKey()
+      .catch((caught: unknown) => caught);
+
+    expect((error as RenderApiError).code).toBe('SECRET_STORE_UNAVAILABLE');
   });
 });
 

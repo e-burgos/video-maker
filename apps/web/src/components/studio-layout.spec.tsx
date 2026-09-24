@@ -39,6 +39,7 @@ describe('StudioLayout', () => {
     );
 
     expect(screen.getByRole('link', { name: 'Video Maker Studio' })).toBeTruthy();
+    expect(screen.getByTestId('settings-nav').getAttribute('href')).toBe('/settings');
     expect(screen.getByText('routed page')).toBeTruthy();
     await waitFor(() =>
       expect(screen.getByTestId('service-health-label').textContent).toBe('service ok · cycle 3'),

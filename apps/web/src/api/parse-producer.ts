@@ -72,10 +72,15 @@ function isProducerMessage(value: unknown): value is ProducerMessage {
   if (value['turnId'] !== undefined && typeof value['turnId'] !== 'string') {
     return false;
   }
-  return value['model'] === undefined || typeof value['model'] === 'string';
+  if (value['model'] !== undefined && typeof value['model'] !== 'string') {
+    return false;
+  }
+  return (
+    value['costUsd'] === undefined || value['costUsd'] === null || typeof value['costUsd'] === 'number'
+  );
 }
 
-function isProducerModelOption(value: unknown): value is ProducerModelOption {
+export function isProducerModelOption(value: unknown): value is ProducerModelOption {
   return (
     isRecord(value) &&
     typeof value['id'] === 'string' &&

@@ -233,7 +233,7 @@
         "path": "src/components/studio-layout.tsx",
         "status": "updated",
         "created_in_cycle": 1,
-        "updated_in_cycle": 2,
+        "updated_in_cycle": 4,
         "description": "Shell del studio: header con el nombre, el link a proyectos y el badge de salud, y el Outlet de la pagina ruteada.",
         "consumes": [],
         "created_at": "2026-09-09",
@@ -252,6 +252,11 @@
             "cycle": 2,
             "date": "2026-09-11",
             "change": "spec-e-burgos-016 cycle-02: el header suma el switch de idioma y la entrada a /guide, y todo su copy (titulo, subtitulo y las cinco secciones del nav) sale del catalogo de traduccion."
+          },
+          {
+            "cycle": 4,
+            "date": "2026-09-24",
+            "change": "Adds the settings nav link (data-testid settings-nav) next to guide."
           }
         ]
       },
@@ -971,13 +976,19 @@
         "module": "studio-producer",
         "spec": "sdd/specs/spec-e-burgos-015-studio-producer",
         "path": "src/components/producer-message-list.tsx",
-        "status": "implemented",
+        "status": "updated",
         "created_in_cycle": 2,
-        "updated_in_cycle": null,
+        "updated_in_cycle": 4,
         "description": "Conversacion del productor en pantalla: markdown minimo propio (parrafos, listas ordenadas y no ordenadas, negritas) sin dependencia npm, rol de cada mensaje en un data-role, y chips de respuesta rapida del ULTIMO mensaje del asistente (sus suggestions mas las opciones numeradas de su texto, sin repetir).",
         "consumes": [],
         "created_at": "2026-09-10",
-        "changelog": []
+        "changelog": [
+          {
+            "cycle": 4,
+            "date": "2026-09-24",
+            "change": "Shows the turn cost under an assistant message when the payload reports costUsd."
+          }
+        ]
       },
       {
         "id": "COMP-040",
@@ -986,13 +997,19 @@
         "module": "studio-producer",
         "spec": "sdd/specs/spec-e-burgos-015-studio-producer",
         "path": "src/components/producer-composer.tsx",
-        "status": "implemented",
+        "status": "updated",
         "created_in_cycle": 2,
-        "updated_in_cycle": null,
+        "updated_in_cycle": 4,
         "description": "Campo multilinea del chat: Enter envia y Shift+Enter agrega linea, el borrador vive en la pagina (controlado), y los blockers de capabilities.producer deshabilitan el campo con el motivo escrito.",
         "consumes": [],
         "created_at": "2026-09-10",
-        "changelog": []
+        "changelog": [
+          {
+            "cycle": 4,
+            "date": "2026-09-24",
+            "change": "Shows the active producer engine next to the model picker, offers the models of the effective engine from the caller, and links to /settings when no engine is available."
+          }
+        ]
       },
       {
         "id": "COMP-041",
@@ -1157,6 +1174,26 @@
           "EP-008"
         ],
         "created_at": "2026-09-20",
+        "changelog": []
+      },
+      {
+        "id": "COMP-049",
+        "name": "SettingsPage",
+        "type": "page",
+        "module": "desktop-app",
+        "spec": "sdd/specs/spec-e-burgos-017-desktop-app",
+        "path": "src/pages/settings-page.tsx",
+        "status": "implemented",
+        "created_in_cycle": 4,
+        "updated_in_cycle": null,
+        "description": "Ruta perezosa /settings con la seccion Productor: motor (Automatico/Claude/OpenRouter) con disponibilidad y motivo por motor, modelo por defecto de cada motor y guardado unico via PUT; la key de OpenRouter se maneja aparte con estado enmascarado (Key cargada con los ultimos 4 caracteres), Reemplazar, Quitar con confirmacion, o un formulario write-only (el campo se vacia apenas se envia la key, nunca se vuelve a mostrar) con validacion del prefijo sk-or-v1- y un link a openrouter.ai/keys.",
+        "consumes": [
+          "EP-037",
+          "EP-038",
+          "EP-039",
+          "EP-040"
+        ],
+        "created_at": "2026-09-24",
         "changelog": []
       }
     ]

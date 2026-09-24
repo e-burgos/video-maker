@@ -180,6 +180,14 @@ export function ProducerMessageList({
             )}
           </p>
           <ProducerMarkdown text={message.text} />
+          {message.costUsd !== undefined && message.costUsd !== null && (
+            <p
+              data-testid={`producer-message-cost-${message.id}`}
+              className="mt-1 font-mono text-[10px] text-slate-500"
+            >
+              {t('producer.turnCost', { amount: message.costUsd.toFixed(3) })}
+            </p>
+          )}
         </li>
       ))}
 

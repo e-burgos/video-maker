@@ -16,6 +16,8 @@ import { hasProducerScript } from '../api/producer-recipes';
 import type {
   AssetListing,
   ProducerConversation,
+  ProducerModelOption,
+  ProducerSettings,
   RenderJobListing,
   GeneratedListing,
 } from '../api/render-api-types';
@@ -60,12 +62,14 @@ export function ProducerPage() {
   const loadHealth = useCallback(() => client.getHealth(), [client]);
   const loadJobs = useCallback(() => client.listRenderJobs(slug), [client, slug]);
   const loadGenerated = useCallback(() => client.listGenerated(slug), [client, slug]);
+  const loadProducerSettings = useCallback(() => client.getProducerSettings(), [client]);
 
   const conversation = useAsyncResource<ProducerConversation>(loadConversation, `producer:${slug}`);
   const assets = useAsyncResource<AssetListing>(loadAssets, `assets:${slug}`);
   const health = useAsyncResource(loadHealth, 'health');
   const jobs = useAsyncResource<RenderJobListing>(loadJobs, `jobs:${slug}`);
   const generated = useAsyncResource<GeneratedListing>(loadGenerated, `generated:${slug}`);
+  const producerSettings = useAsyncResource<ProducerSettings>(loadProducerSettings, 'producer-settings');
   const hasTimedScript = hasProducerScript(generated.data);
 
   const [draft, setDraft] = useState('');
@@ -118,10 +122,23 @@ export function ProducerPage() {
 
   const blockers = producerBlockers(health.data);
   const running = poll.polling;
-  const models = conversation.data?.models.allowed ?? [];
+  const effectiveEngine = producerSettings.data?.effectiveEngine ?? null;
+  const engineModels: ProducerModelOption[] =
+    effectiveEngine === 'claude-cli'
+      ? (producerSettings.data?.engines.claudeCli.models ?? [])
+      : effectiveEngine === 'openrouter'
+        ? (producerSettings.data?.engines.openrouter.models ?? [])
+        : (conversation.data?.models.allowed ?? []);
+  const models = engineModels.length > 0 ? engineModels : (conversation.data?.models.allowed ?? []);
+  const engineDefaultModel =
+    effectiveEngine === 'claude-cli'
+      ? (producerSettings.data?.models.claude ?? conversation.data?.models.default ?? null)
+      : effectiveEngine === 'openrouter'
+        ? (producerSettings.data?.models.openrouter ?? models[0]?.id ?? null)
+        : (conversation.data?.models.default ?? null);
   const sessionModel = conversation.data === null
     ? null
-    : (conversation.data.session?.model ?? conversation.data.models.default);
+    : (conversation.data.session?.model ?? engineDefaultModel);
   const selectedModel = model ?? sessionModel ?? '';
 
   useEffect(() => {
@@ -206,6 +223,7 @@ export function ProducerPage() {
         models={models}
         model={selectedModel}
         onModelChange={setModel}
+        activeEngine={effectiveEngine}
       />
 
       {sendFailure !== null && (

@@ -1,7 +1,10 @@
-import type { ProducerModelOption } from '../api/render-api-types';
+import { Link } from 'react-router-dom';
+
+import type { ProducerEngineId, ProducerModelOption } from '../api/render-api-types';
 import type { Blocker } from '../api/blockers';
 import { blockerId } from '../api/blockers';
 import { translateProducerModel } from '../api/producer-model-i18n';
+import { producerEngineActiveLabel } from '../api/producer-engine-i18n';
 import { useT } from '../i18n/language-context';
 
 export type ProducerComposerProps = {
@@ -13,6 +16,7 @@ export type ProducerComposerProps = {
   models: readonly ProducerModelOption[];
   model: string;
   onModelChange: (model: string) => void;
+  activeEngine?: ProducerEngineId | null;
 };
 
 export function ProducerComposer({
@@ -24,6 +28,7 @@ export function ProducerComposer({
   models,
   model,
   onModelChange,
+  activeEngine = null,
 }: ProducerComposerProps) {
   const t = useT();
   const blocked = blockers.length > 0;
@@ -31,6 +36,7 @@ export function ProducerComposer({
   const disabled = blocked || pending || empty;
   const translatedModels = models.map((option) => translateProducerModel(t, option));
   const chosen = translatedModels.find((option) => option.id === model) ?? null;
+  const engineUnavailable = blockers.some((blocker) => blocker.key === 'producer.blocker.unavailable');
 
   return (
     <div
@@ -81,6 +87,11 @@ export function ProducerComposer({
               {chosen.description}
             </span>
           )}
+          {activeEngine !== null && (
+            <span data-testid="producer-active-engine" className="text-[11px] text-slate-500">
+              {producerEngineActiveLabel(t, activeEngine)}
+            </span>
+          )}
         </div>
         <p className="font-mono text-[11px] text-slate-500">
           {t('producer.sendHint')}
@@ -101,6 +112,16 @@ export function ProducerComposer({
             <li key={blockerId(blocker)}>{t(blocker.key, blocker.params)}</li>
           ))}
         </ul>
+      )}
+
+      {engineUnavailable && (
+        <Link
+          to="/settings"
+          data-testid="producer-composer-settings-link"
+          className="inline-block text-xs text-sky-300 underline hover:text-sky-200"
+        >
+          {t('producer.blocker.goToSettings')}
+        </Link>
       )}
     </div>
   );

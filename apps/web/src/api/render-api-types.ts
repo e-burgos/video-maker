@@ -499,6 +499,7 @@ export type ProducerMessage = {
   suggestions?: string[];
   turnId?: string;
   model?: string;
+  costUsd?: number | null;
 };
 
 export type ProducerModelOption = {
@@ -573,4 +574,46 @@ export type ProducerTurnAccepted = {
   turnId: string;
   startedAt: string;
   status: 'running';
+};
+
+export const PRODUCER_ENGINES = ['claude-cli', 'openrouter'] as const;
+
+export type ProducerEngineId = (typeof PRODUCER_ENGINES)[number];
+
+export type ProducerClaudeEngineStatus = {
+  available: boolean;
+  reason: string | null;
+  models: ProducerModelOption[];
+};
+
+export type ProducerOpenRouterEngineStatus = {
+  keyPresent: boolean;
+  keyHint: string | null;
+  models: ProducerModelOption[];
+};
+
+export type ProducerSettings = {
+  engine: ProducerEngineId | null;
+  effectiveEngine: ProducerEngineId | null;
+  engines: {
+    claudeCli: ProducerClaudeEngineStatus;
+    openrouter: ProducerOpenRouterEngineStatus;
+  };
+  models: {
+    claude: string | null;
+    openrouter: string | null;
+  };
+};
+
+export type ProducerSettingsUpdate = {
+  engine?: ProducerEngineId | null;
+  models?: {
+    claude?: string;
+    openrouter?: string;
+  };
+};
+
+export type OpenRouterKeyResult = {
+  keyPresent: boolean;
+  keyHint: string | null;
 };

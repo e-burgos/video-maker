@@ -14,6 +14,7 @@ import {
   parseProducerTurn,
   parseProducerTurnAccepted,
 } from './parse-producer';
+import { parseOpenRouterKeyResult, parseProducerSettings } from './parse-producer-settings';
 import {
   parseVoiceDocument,
   parseVoiceListing,
@@ -34,7 +35,10 @@ import type {
   Job,
   MontageJob,
   MontagePresetName,
+  OpenRouterKeyResult,
   ProducerConversation,
+  ProducerSettings,
+  ProducerSettingsUpdate,
   ProducerTurn,
   ProducerTurnAccepted,
   ProjectDetail,
@@ -116,6 +120,10 @@ export type RenderApiClient = {
   sendProducerMessage: (slug: string, text: string, model?: string) => Promise<ProducerTurnAccepted>;
   getProducerTurn: (slug: string, turnId: string) => Promise<ProducerTurn>;
   cancelProducerTurn: (slug: string, turnId: string) => Promise<ProducerTurn>;
+  getProducerSettings: () => Promise<ProducerSettings>;
+  updateProducerSettings: (update: ProducerSettingsUpdate) => Promise<ProducerSettings>;
+  putOpenRouterKey: (apiKey: string) => Promise<OpenRouterKeyResult>;
+  deleteOpenRouterKey: () => Promise<OpenRouterKeyResult>;
   listRenderJobs: (slug: string) => Promise<RenderJobListing>;
   getRenderJob: (jobId: string) => Promise<Job>;
   cancelRenderJob: (jobId: string) => Promise<RenderJobCancelOutcome>;
@@ -608,6 +616,54 @@ export function createRenderApiClient(fetchImpl: FetchLike): RenderApiClient {
         (value) => isRecord(value),
       );
       return parseProducerTurn(body);
+    },
+
+    async getProducerSettings(): Promise<ProducerSettings> {
+      const body = await requestJson(
+        '/settings/producer',
+        undefined,
+        'producer settings',
+        (value) => isRecord(value),
+      );
+      return parseProducerSettings(body);
+    },
+
+    async updateProducerSettings(update: ProducerSettingsUpdate): Promise<ProducerSettings> {
+      const body = await requestJson(
+        '/settings/producer',
+        {
+          method: 'PUT',
+          headers: { 'content-type': 'application/json' },
+          body: JSON.stringify(update),
+        },
+        'producer settings',
+        (value) => isRecord(value),
+      );
+      return parseProducerSettings(body);
+    },
+
+    async putOpenRouterKey(apiKey: string): Promise<OpenRouterKeyResult> {
+      const body = await requestJson(
+        '/settings/producer/openrouter-key',
+        {
+          method: 'PUT',
+          headers: { 'content-type': 'application/json' },
+          body: JSON.stringify({ apiKey }),
+        },
+        'an openrouter key result',
+        (value) => isRecord(value),
+      );
+      return parseOpenRouterKeyResult(body);
+    },
+
+    async deleteOpenRouterKey(): Promise<OpenRouterKeyResult> {
+      const body = await requestJson(
+        '/settings/producer/openrouter-key',
+        { method: 'DELETE' },
+        'an openrouter key result',
+        (value) => isRecord(value),
+      );
+      return parseOpenRouterKeyResult(body);
     },
 
     async listRenderJobs(slug: string): Promise<RenderJobListing> {
