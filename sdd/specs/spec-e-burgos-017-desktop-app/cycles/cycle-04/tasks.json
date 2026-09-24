@@ -300,12 +300,22 @@
       "depends_on": [
         "TASK-004"
       ],
-      "status": "pending",
+      "status": "done",
       "files": [
         "libs/producer-tools/e2e/openrouter-model-bench.mjs",
         "sdd/specs/spec-e-burgos-017-desktop-app/cycles/cycle-04/artifacts/openrouter-model-bench.md",
-        "libs/producer-tools/src/runtime/curated-openrouter-models.ts"
-      ]
+        "sdd/specs/spec-e-burgos-017-desktop-app/cycles/cycle-04/artifacts/openrouter-model-bench-results.json"
+      ],
+      "usage": {
+        "provider_model": "claude/sonnet",
+        "effort": "high",
+        "tokens_in": 190000,
+        "tokens_out": 16000,
+        "agent": "implementor-back",
+        "approx": true,
+        "source": "declared-estimate",
+        "recorded_at": "2026-09-24"
+      }
     },
     {
       "id": "TASK-007",

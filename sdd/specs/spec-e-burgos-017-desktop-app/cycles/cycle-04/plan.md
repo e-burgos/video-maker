@@ -146,3 +146,25 @@
   (`producer.model.yourChoice`). Chunk inicial: 530,97 kB → 533,89 kB (+2,92 kB crudo, +0,80 kB
   gzip) — el picker en sí no pesa nada (vive en el chunk perezoso de `settings-page`), el costo es
   el método nuevo de `render-api-client.ts` y las claves nuevas de `MESSAGES_EN` (eager).
+- **TASK-006** corrió `libs/producer-tools/e2e/openrouter-model-bench.mjs` contra el runtime real
+  (`runOpenRouterProducerTurn`) dos veces sobre los 8 candidatos por defecto (4 free + 3 cheap + 1
+  reference), gasto total US$0.22 de un tope de US$3. Los 4 candidatos free (Gemma 4, Qwen3.8,
+  Nemotron 3 Nano Omni) devolvieron `Rate limit exceeded: free-models-per-day-high-balance` en las
+  8 corridas — tope diario de la cuenta para modelos gratis, confirmado con una sonda directa fuera
+  del wrapper del runtime (que colapsa cualquier error no 401/404/429-explícito a un
+  `OPENROUTER_FAILED` genérico); no se pudo evaluar ningún modelo gratuito hoy. Resultado real:
+  `deepseek/deepseek-v4.1-flash` 2/2 y `anthropic/claude-haiku-4.5` 2/2; `google/gemini-2.5-flash-lite`
+  0/2 (falla real: pasa `scriptText`/`voice` sueltos al job `voice` en vez de `scriptPath`, error de
+  forma real del modelo); `openai/gpt-5-nano` 1/3 (dispar, falla real en el formato del guion). Set
+  recomendado y modelo por defecto entregados al orquestador para que TASK-009 reemplace el
+  placeholder de `config/recommended-openrouter-models.ts` — el tier `free` queda pendiente de
+  reintentar después del reset diario (00:00 UTC) con
+  `node libs/producer-tools/e2e/openrouter-model-bench.mjs --candidates=<id>:free --runs=2`.
+  **Patrón nuevo (pendiente de documentar en la constitución de `libs/producer-tools`):** un script
+  `.mjs` standalone puede importar el código fuente TS de una lib del monorepo *en el mismo proceso*
+  (no HTTP, no child process) con `createRequire` + `@swc-node/register` + `process.env.SWC_NODE_PROJECT
+  = '<repo>/tsconfig.base.json'` antes del `require`, exactamente como hace
+  `apps/render-api/src/server-register.cjs` para levantar `main.ts` — funciona incluso con paquetes
+  ESM-only en el grafo de imports (`ai`, `@openrouter/ai-sdk-provider`) porque Node 22.12+ resuelve
+  `require()` de un grafo ESM síncrono sin flags. Sirve para cualquier e2e futuro que necesite
+  llamar funciones de una lib TS directamente en vez de contra un servidor HTTP.
