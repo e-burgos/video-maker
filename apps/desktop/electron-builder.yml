@@ -1,0 +1,52 @@
+appId: dev.eburgos.videomaker
+productName: Video Maker
+copyright: Copyright © Esteban Burgos
+electronDist: node_modules/electron/dist
+
+directories:
+  app: dist/desktop-staging/app
+  output: dist/desktop
+
+files:
+  - main/**/*
+  - preload/**/*
+  - setup/**/*
+  - package.json
+  - "!**/node_modules/**/*"
+
+extraResources:
+  - from: dist/apps/web
+    to: web
+  - from: dist/desktop-staging/render-api
+    to: render-api
+    filter:
+      - "**/*"
+  - from: dist/desktop-staging/mcp
+    to: mcp
+  - from: dist/libs/composition-remotion/bundle
+    to: remotion-bundle
+  - from: apps/desktop/vendor/darwin-arm64/bin
+    to: bin
+  - from: apps/desktop/vendor/manifest.json
+    to: manifest.json
+  - from: apps/desktop/vendor/THIRD_PARTY_NOTICES.md
+    to: THIRD_PARTY_NOTICES.md
+
+asar: true
+
+mac:
+  target:
+    - target: dmg
+      arch:
+        - arm64
+  identity: null
+  hardenedRuntime: false
+  gatekeeperAssess: false
+  category: public.app-category.video
+
+dmg:
+  artifactName: "Video-Maker-${version}-arm64.dmg"
+
+npmRebuild: false
+publish: null
+afterPack: apps/desktop/scripts/after-pack.cjs

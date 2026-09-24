@@ -72,14 +72,20 @@ function manifestJsonPath(location: ResourceLocation): string {
 
 function setupHtmlPath(location: ResourceLocation): string {
   return location.isPackaged
-    ? join(location.resourcesDir, 'setup', 'setup.html')
+    ? join(location.resourcesDir, 'app.asar', 'setup', 'setup.html')
     : join(location.repoRoot, 'dist', 'out-tsc', 'apps', 'desktop', 'src', 'setup', 'setup.html');
 }
 
 function setupPreloadPath(location: ResourceLocation): string {
   return location.isPackaged
-    ? join(location.resourcesDir, 'preload', 'setup-preload.js')
+    ? join(location.resourcesDir, 'app.asar', 'preload', 'setup-preload.js')
     : join(location.repoRoot, 'dist', 'out-tsc', 'apps', 'desktop', 'src', 'preload', 'setup-preload.js');
+}
+
+function thirdPartyNoticesPath(location: ResourceLocation): string {
+  return location.isPackaged
+    ? join(location.resourcesDir, 'THIRD_PARTY_NOTICES.md')
+    : join(location.repoRoot, 'apps', 'desktop', 'vendor', 'THIRD_PARTY_NOTICES.md');
 }
 
 function loadManifestModels(location: ResourceLocation): ManifestModels {
@@ -127,6 +133,7 @@ async function buildRenderApiEnv(input: {
   port: number;
   token: string;
   projectsFolder: string;
+  isPackaged: boolean;
 }): Promise<NodeJS.ProcessEnv> {
   const loginShellPath = await readLoginShellPath();
   const mergedPath = mergePathWithDefault(loginShellPath, process.env.PATH ?? '');
@@ -150,6 +157,10 @@ async function buildRenderApiEnv(input: {
   }
   if (input.paths.remotionServeUrl !== null) {
     env.REMOTION_SERVE_URL = input.paths.remotionServeUrl;
+  }
+  if (input.isPackaged) {
+    env.RENDER_API_WEB_ROOT = join(input.paths.resourcesDir, 'web');
+    env.STUDIO_MCP_ENTRY = join(input.paths.resourcesDir, 'mcp', 'main.js');
   }
 
   return env;
@@ -181,7 +192,11 @@ function resolveWindowTarget(input: {
   return appendToken(`http://${input.host}:${input.port}/`, input.token);
 }
 
-function buildApplicationMenu(paths: AppPaths, onChangeProjectsFolder: () => void): void {
+function buildApplicationMenu(
+  paths: AppPaths,
+  noticesPath: string,
+  onChangeProjectsFolder: () => void,
+): void {
   const template: MenuItemConstructorOptions[] = [
     { role: 'appMenu' },
     { role: 'editMenu' },
@@ -203,6 +218,12 @@ function buildApplicationMenu(paths: AppPaths, onChangeProjectsFolder: () => voi
           label: 'Open logs folder',
           click: () => {
             void shell.openPath(paths.logsDir);
+          },
+        },
+        {
+          label: 'About / Licenses',
+          click: () => {
+            void shell.openPath(noticesPath);
           },
         },
       ],
@@ -334,7 +355,13 @@ async function startStudio(input: { paths: AppPaths; projectsFolder: string; rep
 
   const port = await getFreePort(RENDER_API_HOST);
   const token = randomBytes(32).toString('hex');
-  const env = await buildRenderApiEnv({ paths: input.paths, port, token, projectsFolder: input.projectsFolder });
+  const env = await buildRenderApiEnv({
+    paths: input.paths,
+    port,
+    token,
+    projectsFolder: input.projectsFolder,
+    isPackaged: app.isPackaged,
+  });
   const launchCommand = buildLaunchCommand({
     isPackaged: app.isPackaged,
     repoRoot: input.repoRoot,
@@ -432,11 +459,12 @@ async function bootstrap(): Promise<void> {
     mkdirSync(dir, { recursive: true });
   }
 
-  buildApplicationMenu(paths, () => {
+  const location: ResourceLocation = { isPackaged: app.isPackaged, repoRoot, resourcesDir: paths.resourcesDir };
+
+  buildApplicationMenu(paths, thirdPartyNoticesPath(location), () => {
     void changeProjectsFolder(paths, repoRoot);
   });
 
-  const location: ResourceLocation = { isPackaged: app.isPackaged, repoRoot, resourcesDir: paths.resourcesDir };
   const models = loadManifestModels(location);
   const requiredIds = requiredModelIds(models);
   const setupJsonPath = join(paths.userDataDir, 'setup.json');
@@ -485,5 +513,11 @@ if (!app.requestSingleInstanceLock()) {
       mainWindow.focus();
     }
   });
-  void bootstrap();
+  app.on('window-all-closed', () => {
+    return;
+  });
+  bootstrap().catch((error: unknown) => {
+    dialog.showErrorBox('Video Maker', `Failed to start: ${(error as Error).message}`);
+    app.quit();
+  });
 }

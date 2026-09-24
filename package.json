@@ -15,6 +15,7 @@
     "studio:web": "node scripts/start-studio.mjs web",
     "studio:stop": "node scripts/stop-studio.mjs",
     "fetch:dev-voices": "node scripts/fetch-dev-voices.mjs",
+    "desktop:dist": "node apps/desktop/scripts/build-desktop.mjs",
     "sdd:docs": "node sdd/docs/serve.mjs",
     "sdd:validate": "node sdd/scripts/validate-sdd.mjs",
     "sdd:rebuild-tasks-index": "node sdd/scripts/rebuild-tasks-index.mjs",
@@ -44,6 +45,7 @@
     "zod": "^4.5"
   },
   "devDependencies": {
+    "@electron/rebuild": "4.2.0",
     "@nx/devkit": "23.1.1",
     "@nx/eslint": "23.1.1",
     "@nx/eslint-plugin": "23.1.1",
@@ -67,6 +69,7 @@
     "ajv": "^8.20.0",
     "ajv-formats": "^3.0.1",
     "electron": "44.4.5",
+    "electron-builder": "26.15.3",
     "esbuild": "0.28.1",
     "eslint": "^9.8.0",
     "jsdom": "^27.1.0",

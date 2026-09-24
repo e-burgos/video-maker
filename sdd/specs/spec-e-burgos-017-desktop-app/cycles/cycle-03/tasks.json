@@ -309,12 +309,25 @@
         "TASK-002",
         "TASK-006"
       ],
-      "status": "pending",
+      "status": "done",
       "files": [
         "apps/desktop/electron-builder.yml",
         "apps/desktop/scripts/build-desktop.mjs",
-        "package.json"
-      ]
+        "apps/desktop/scripts/after-pack.cjs",
+        "apps/desktop/src/main/main.ts",
+        "package.json",
+        "pnpm-lock.yaml"
+      ],
+      "usage": {
+        "provider_model": "claude/sonnet",
+        "effort": "high",
+        "agent": "implementor-back",
+        "tokens_in": 520000,
+        "tokens_out": 42000,
+        "approx": true,
+        "source": "declared-estimate",
+        "recorded_at": "2026-09-24"
+      }
     },
     {
       "id": "TASK-008",
