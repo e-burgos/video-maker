@@ -23,6 +23,7 @@ import {
   writeRenderApiPidFile,
 } from './render-api-pid-guard';
 import { buildRenderApiEnv } from './render-api-env';
+import { killOrphanableChromeChildren } from './kill-orphan-chrome';
 import { DEFAULT_LOCALE, menuStrings } from './menu-strings';
 import { resolvePreferredPort } from './preferred-port';
 import {
@@ -369,20 +370,28 @@ async function startStudio(input: {
   writeRenderApiPidFile(renderApiPidFilePath(input.paths.userDataDir), renderApi.pid);
 
   renderApi.onExit(() => {
-    if (currentShuttingDown || mainWindow === null) return;
-    const choice = dialog.showMessageBoxSync(mainWindow, {
-      type: 'error',
-      message: 'render-api stopped unexpectedly',
-      buttons: ['Restart', 'Quit'],
-      defaultId: 0,
-      cancelId: 1,
-    });
-    if (choice === 1) {
-      app.quit();
-    } else {
-      app.relaunch();
-      app.quit();
-    }
+    void (async () => {
+      await killOrphanableChromeChildren({
+        browserExecutablePath: input.paths.chromeHeadlessShellPath,
+        killProcessGroup: (pid) => killProcessGroup(pid, 'SIGKILL'),
+      });
+      killProcessGroup(renderApi.pid, 'SIGKILL');
+
+      if (currentShuttingDown || mainWindow === null) return;
+      const choice = dialog.showMessageBoxSync(mainWindow, {
+        type: 'error',
+        message: 'render-api stopped unexpectedly',
+        buttons: ['Restart', 'Quit'],
+        defaultId: 0,
+        cancelId: 1,
+      });
+      if (choice === 1) {
+        app.quit();
+      } else {
+        app.relaunch();
+        app.quit();
+      }
+    })();
   });
 
   const target = resolveWindowTarget({

@@ -25,3 +25,33 @@ la firma/empaquetado, chequear `echo $ELECTRON_RUN_AS_NODE` en la propia shell.
 antes de aislar la variable de entorno como causa. `apps/desktop/e2e/packaged-app-smoke.mjs` ya resolvía
 esto correctamente desde antes (por eso nunca fue un problema en CI/otros ciclos) — el costo fue no
 recordar copiar ese mismo patrón para una verificación manual ad-hoc.
+
+## Qué pasó (segunda lección, aceptación del coordinador)
+
+El coordinador pidió repetir el `kill -9` de huérfanos contra el `.dmg` **instalado** de verdad (no
+sólo unit tests), y además una segunda variante: matar `render-api` directamente (no la app). Esa
+segunda variante reveló dos bugs reales que ningún test con mocks había atrapado: (1) para cuando
+Electron reacciona al `exit` de `render-api`, `chrome-headless-shell` ya fue reparentado por el SO a
+`launchd` (`ppid=1`) — un filtro por `ppid === pidDelPadreMuerto` nunca matchea nada, porque ese pid ya
+no es el padre real de nadie en el momento del chequeo; (2) la limpieza async se disparaba con
+`void killOrphanableChromeChildren(...)` (fire-and-forget) inmediatamente antes de
+`dialog.showMessageBoxSync`, que es **síncrono y bloqueante** — bloqueaba el event loop antes de que el
+callback del `ps` asíncrono pudiera siquiera correr, así que la limpieza jamás pasaba.
+
+## Lección
+
+Para matar un huérfano cuyo padre YA murió, filtrar por **comando** (un path de binario único, no
+genérico), nunca por `ppid` — el reparenting a `launchd` es inmediato e irreversible, así que cualquier
+chequeo posterior a la muerte del padre ve `ppid=1`. Y: nunca dispares limpieza async justo antes de una
+llamada síncrona bloqueante (`showMessageBoxSync`, `execSync` largo, etc.) esperando que "ya va a correr
+en algún momento" — si el flujo sigue síncrono inmediatamente después, el event loop nunca le da la
+vuelta; hace falta `await` explícito antes de la llamada bloqueante.
+
+## Costo evitable
+
+Dos reconstrucciones + reinstalaciones completas del `.dmg` (~5 min cada una) para descubrir esto,
+porque el gap sólo se manifiesta con procesos reales del SO (no es simulable con mocks de `ps`/timers
+en un unit test) — exactamente el tipo de bug que la skill de verificación empírica busca atrapar antes
+de que llegue a un usuario real. Vale la pena, para cualquier limpieza de huérfanos futura, escribir el
+caso "el que muere es el hijo directo, no el nieto" como su propio escenario de prueba real, no asumir
+que el mismo código que funciona para "el padre murió" funciona igual al revés.
