@@ -25,7 +25,10 @@
     "plan": "sdd/specs/spec-e-burgos-017-desktop-app/cycles/cycle-03/plan.md",
     "tasks": "sdd/specs/spec-e-burgos-017-desktop-app/cycles/cycle-03/tasks.json"
   },
-  "artifacts": [],
+  "artifacts": [
+    "sdd/specs/spec-e-burgos-017-desktop-app/cycles/cycle-03/artifacts/packaging-spike.md",
+    "sdd/specs/spec-e-burgos-017-desktop-app/cycles/cycle-03/artifacts/desktop-smoke.md"
+  ],
   "metrics": null,
   "tables_created": [],
   "endpoints_implemented": [],
