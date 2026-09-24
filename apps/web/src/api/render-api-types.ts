@@ -623,3 +623,56 @@ export type OpenRouterKeyResult = {
   keyPresent: boolean;
   keyHint: string | null;
 };
+
+export const OPENROUTER_MODEL_SCOPES = ['all', 'recommended'] as const;
+
+export type OpenRouterModelScope = (typeof OPENROUTER_MODEL_SCOPES)[number];
+
+export const OPENROUTER_MODEL_SORTS = ['price', 'name'] as const;
+
+export type OpenRouterModelSort = (typeof OPENROUTER_MODEL_SORTS)[number];
+
+export const OPENROUTER_MODEL_TIERS = ['free', 'cheap', 'reference'] as const;
+
+export type OpenRouterModelTier = (typeof OPENROUTER_MODEL_TIERS)[number];
+
+export type OpenRouterModelBench = {
+  successRate: number;
+  avgSteps: number;
+  avgSeconds: number;
+  avgCostUsd: number;
+};
+
+export type OpenRouterModelRecommendation = {
+  tier: OpenRouterModelTier;
+  notes: string;
+  bench: OpenRouterModelBench | null;
+};
+
+export type OpenRouterModelPricing = {
+  promptPerMTokUsd: number;
+  completionPerMTokUsd: number;
+};
+
+export type OpenRouterCatalogModel = {
+  id: string;
+  name: string;
+  contextLength: number;
+  pricing: OpenRouterModelPricing;
+  supportsImages: boolean;
+  isFree: boolean;
+  recommended: boolean;
+  recommendation: OpenRouterModelRecommendation | null;
+};
+
+export type OpenRouterModelsResult = {
+  models: OpenRouterCatalogModel[];
+  fetchedAt: string;
+  stale: boolean;
+};
+
+export type GetOpenRouterModelsQuery = {
+  scope?: OpenRouterModelScope;
+  q?: string;
+  sort?: OpenRouterModelSort;
+};

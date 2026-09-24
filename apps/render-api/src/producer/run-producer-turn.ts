@@ -2,7 +2,7 @@ import { join } from 'node:path/posix';
 
 import type { MediaProject } from '@video-maker/auto-montage';
 
-import { CURATED_OPENROUTER_MODELS, curatedOpenRouterModelById, isCuratedOpenRouterModel } from '../config/curated-openrouter-models';
+import { RECOMMENDED_OPENROUTER_MODELS, isRecommendedOpenRouterModelId } from '../config/recommended-openrouter-models';
 import type { ProducerConfig } from '../config/producer-config';
 import type { RenderApiDependencies } from '../deps/render-api-dependencies';
 import { toErrorPayload } from '../errors/to-error-payload';
@@ -24,6 +24,8 @@ import { buildProducerSystemPrompt } from './build-producer-system-prompt';
 import { collectProducerContext } from './collect-producer-context';
 import { buildProducerHistory } from './producer-history';
 import { buildProducerMcpConfigJson } from './producer-mcp-config';
+import { createOpenRouterModelCatalog } from './openrouter-model-catalog';
+import type { OpenRouterModelCatalog } from './openrouter-model-catalog';
 import { createOpenRouterProducerAgent } from './openrouter-producer-agent';
 import { parseProducerAnswer } from './parse-producer-suggestions';
 import { interpretProducerStreamLine } from './producer-stream-events';
@@ -106,27 +108,49 @@ function resumableModel(session: ProducerSession | null, config: ProducerConfig)
   return session !== null && config.models.includes(session.model) ? session.model : config.model;
 }
 
-function defaultOpenRouterModel(deps: RenderApiDependencies): string {
-  const configured = readModelSetting(deps, PRODUCER_MODEL_OPENROUTER_SETTING_KEY);
-  if (configured !== null && isCuratedOpenRouterModel(configured)) {
-    return configured;
-  }
-  return CURATED_OPENROUTER_MODELS[0]?.id ?? '';
+interface ResolvedOpenRouterModel {
+  readonly id: string;
+  readonly supportsImages: boolean;
 }
 
-function assertOpenRouterModel(model: unknown, deps: RenderApiDependencies): string {
+async function resolveOpenRouterModel(
+  model: unknown,
+  deps: RenderApiDependencies,
+  catalog: OpenRouterModelCatalog,
+): Promise<ResolvedOpenRouterModel> {
+  const nowMs = Date.parse(deps.clock.nowIso());
+  const catalogModels = await catalog.load(deps.fetchRemote, nowMs).then(
+    (result) => result.models,
+    () => null,
+  );
+
+  const isKnownId = (id: string): boolean =>
+    catalogModels !== null ? catalogModels.some((entry) => entry.id === id) : isRecommendedOpenRouterModelId(id);
+  const supportsImagesFor = (id: string): boolean =>
+    catalogModels?.find((entry) => entry.id === id)?.supportsImages ?? false;
+
   if (model === undefined || model === null) {
-    return defaultOpenRouterModel(deps);
+    const configured = readModelSetting(deps, PRODUCER_MODEL_OPENROUTER_SETTING_KEY);
+    if (configured !== null && isKnownId(configured)) {
+      return { id: configured, supportsImages: supportsImagesFor(configured) };
+    }
+    const firstRecommended = catalogModels?.find((entry) => entry.recommended) ?? null;
+    const id = firstRecommended?.id ?? RECOMMENDED_OPENROUTER_MODELS[0]?.id ?? '';
+    return { id, supportsImages: firstRecommended?.supportsImages ?? false };
   }
-  if (typeof model !== 'string' || !isCuratedOpenRouterModel(model)) {
+
+  if (typeof model !== 'string' || !isKnownId(model)) {
     throw new PipelineStageError({
       code: 'PRODUCER_MODEL_INVALID',
       stage: null,
       resource: typeof model === 'string' ? model : 'model',
-      expected: `one of ${CURATED_OPENROUTER_MODELS.map((entry) => entry.id).join(', ')}`,
+      expected:
+        catalogModels !== null
+          ? 'a tool-capable OpenRouter model id'
+          : `one of ${RECOMMENDED_OPENROUTER_MODELS.map((entry) => entry.id).join(', ')}`,
     });
   }
-  return model;
+  return { id: model, supportsImages: supportsImagesFor(model) };
 }
 
 function openRouterKeyMissing(): PipelineStageError {
@@ -143,6 +167,7 @@ export async function startProducerTurn(
   registry: ProducerTurnRegistry,
   input: StartProducerTurnInput,
   openRouterAgentFactory: typeof createOpenRouterProducerAgent = createOpenRouterProducerAgent,
+  openRouterCatalog: OpenRouterModelCatalog = createOpenRouterModelCatalog(),
 ): Promise<StartedProducerTurn> {
   const claudeAvailable = await deps.probeProducerBinary();
   const storedOpenRouterKey = await deps.secretStore.get(OPENROUTER_SECRET_NAME);
@@ -156,10 +181,11 @@ export async function startProducerTurn(
   }
 
   const session = readProducerSession(deps, input.project);
+  const resolvedOpenRouterModel = engine === 'openrouter' ? await resolveOpenRouterModel(input.model, deps, openRouterCatalog) : null;
   const model =
     engine === 'claude-cli'
       ? (assertProducerModel(input.model, input.config) ?? resumableModel(session, input.config))
-      : assertOpenRouterModel(input.model, deps);
+      : (resolvedOpenRouterModel as ResolvedOpenRouterModel).id;
 
   const turnId = deps.randomId();
   const startedAt = deps.clock.nowIso();
@@ -241,7 +267,6 @@ export async function startProducerTurn(
     );
   } else {
     const history = buildProducerHistory(deps, input.project, registry);
-    const modelMeta = curatedOpenRouterModelById(model);
     const agent = openRouterAgentFactory({
       project: input.project,
       apiUrl: input.config.apiUrl,
@@ -249,7 +274,7 @@ export async function startProducerTurn(
       apiKey: storedOpenRouterKey as string,
       chatModel: model,
       turnModel: input.config.model,
-      supportsImages: modelMeta?.supportsImages ?? false,
+      supportsImages: (resolvedOpenRouterModel as ResolvedOpenRouterModel).supportsImages,
       history,
     });
 

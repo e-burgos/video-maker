@@ -1,8 +1,12 @@
-import { CURATED_OPENROUTER_MODELS, isCuratedOpenRouterModel } from '../../config/curated-openrouter-models';
 import { describeProducerModel } from '../../config/producer-config';
 import type { ProducerModelOption } from '../../config/producer-config';
+import {
+  RECOMMENDED_OPENROUTER_MODELS,
+  isRecommendedOpenRouterModelId,
+} from '../../config/recommended-openrouter-models';
 import type { RenderApiDependencies } from '../../deps/render-api-dependencies';
 import { PipelineStageError } from '../../errors/pipeline-stage-error';
+import type { OpenRouterCatalogModel } from '../../producer/openrouter-model-catalog';
 import { JSON_CONTENT_TYPE } from '../http-message';
 import type { HttpRequestLine, HttpResponse } from '../http-message';
 import { MAX_JSON_BODY_BYTES, readJsonBody } from '../read-json-body';
@@ -92,6 +96,34 @@ export function resolveEffectiveProducerEngine(
   return openRouterKeyPresent ? 'openrouter' : null;
 }
 
+function priceLabel(model: OpenRouterCatalogModel): string {
+  return model.isFree
+    ? 'Free'
+    : `US$${model.pricing.promptPerMTokUsd.toFixed(2)}/1M in · US$${model.pricing.completionPerMTokUsd.toFixed(2)}/1M out`;
+}
+
+function describeOpenRouterCatalogModel(model: OpenRouterCatalogModel): ProducerModelOption {
+  return { id: model.id, label: model.name, description: `${priceLabel(model)} · tool-calling` };
+}
+
+function fallbackRecommendedOpenRouterModels(): readonly ProducerModelOption[] {
+  return RECOMMENDED_OPENROUTER_MODELS.map((entry) => ({ id: entry.id, label: entry.id, description: entry.notes }));
+}
+
+async function recommendedOpenRouterModelOptions(
+  deps: RenderApiDependencies,
+  runtime: RenderApiRuntime,
+): Promise<readonly ProducerModelOption[]> {
+  try {
+    const nowMs = Date.parse(deps.clock.nowIso());
+    const { models } = await runtime.openRouterModelCatalog.load(deps.fetchRemote, nowMs);
+    const recommended = models.filter((model) => model.recommended).map(describeOpenRouterCatalogModel);
+    return recommended.length > 0 ? recommended : fallbackRecommendedOpenRouterModels();
+  } catch {
+    return fallbackRecommendedOpenRouterModels();
+  }
+}
+
 async function buildProducerSettingsBody(
   deps: RenderApiDependencies,
   runtime: RenderApiRuntime,
@@ -115,7 +147,7 @@ async function buildProducerSettingsBody(
       openrouter: {
         keyPresent,
         keyHint: storedKey === null ? null : keyHintOf(storedKey),
-        models: CURATED_OPENROUTER_MODELS,
+        models: await recommendedOpenRouterModelOptions(deps, runtime),
       },
     },
     models: {
@@ -159,13 +191,35 @@ function assertClaudeModel(value: unknown, runtime: RenderApiRuntime): string {
   return value;
 }
 
-function assertOpenRouterModel(value: unknown): string {
-  if (typeof value !== 'string' || !isCuratedOpenRouterModel(value)) {
+async function assertOpenRouterModel(
+  value: unknown,
+  deps: RenderApiDependencies,
+  runtime: RenderApiRuntime,
+): Promise<string> {
+  if (typeof value !== 'string' || value === '') {
     throw new PipelineStageError({
       code: 'PRODUCER_MODEL_INVALID',
       stage: null,
       resource: 'models.openrouter',
-      expected: `one of ${CURATED_OPENROUTER_MODELS.map((model) => model.id).join(', ')}`,
+      expected: 'a non-empty OpenRouter model id',
+    });
+  }
+
+  let known: boolean;
+  try {
+    const nowMs = Date.parse(deps.clock.nowIso());
+    const { models } = await runtime.openRouterModelCatalog.load(deps.fetchRemote, nowMs);
+    known = models.some((model) => model.id === value);
+  } catch {
+    known = isRecommendedOpenRouterModelId(value);
+  }
+
+  if (!known) {
+    throw new PipelineStageError({
+      code: 'PRODUCER_MODEL_INVALID',
+      stage: null,
+      resource: 'models.openrouter',
+      expected: 'a tool-capable OpenRouter model id',
     });
   }
   return value;
@@ -216,7 +270,10 @@ export async function handlePutProducerSettings(
       deps.localStore.settings.set(PRODUCER_MODEL_CLAUDE_SETTING_KEY, assertClaudeModel(modelsValue.claude, runtime));
     }
     if ('openrouter' in modelsValue) {
-      deps.localStore.settings.set(PRODUCER_MODEL_OPENROUTER_SETTING_KEY, assertOpenRouterModel(modelsValue.openrouter));
+      deps.localStore.settings.set(
+        PRODUCER_MODEL_OPENROUTER_SETTING_KEY,
+        await assertOpenRouterModel(modelsValue.openrouter, deps, runtime),
+      );
     }
   }
 

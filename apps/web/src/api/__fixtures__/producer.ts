@@ -1,4 +1,6 @@
 import type {
+  OpenRouterCatalogModel,
+  OpenRouterModelsResult,
   ProducerConversation,
   ProducerEvent,
   ProducerMessage,
@@ -123,6 +125,49 @@ export function producerConversation(
     },
     activeTurn: null,
     models: producerModels(),
+    ...overrides,
+  };
+}
+
+export function openRouterCatalogModel(overrides: Partial<OpenRouterCatalogModel> = {}): OpenRouterCatalogModel {
+  return {
+    id: 'anthropic/claude-haiku-4.5',
+    name: 'Anthropic: Claude Haiku 4.5',
+    contextLength: 200000,
+    pricing: { promptPerMTokUsd: 1, completionPerMTokUsd: 5 },
+    supportsImages: true,
+    isFree: false,
+    recommended: true,
+    recommendation: { tier: 'reference', notes: 'Placeholder pending the benchmark.', bench: null },
+    ...overrides,
+  };
+}
+
+export function openRouterModelsResult(overrides: Partial<OpenRouterModelsResult> = {}): OpenRouterModelsResult {
+  return {
+    models: [
+      openRouterCatalogModel(),
+      openRouterCatalogModel({
+        id: 'nex-agi/nex-n2.5-mini:free',
+        name: 'Nex AGI: Nex-N2.5-Mini (free)',
+        contextLength: 262144,
+        pricing: { promptPerMTokUsd: 0, completionPerMTokUsd: 0 },
+        isFree: true,
+        recommended: false,
+        recommendation: null,
+      }),
+      openRouterCatalogModel({
+        id: 'fireworks/ember-1',
+        name: 'Fireworks: Ember-1',
+        contextLength: 1048576,
+        pricing: { promptPerMTokUsd: 3, completionPerMTokUsd: 15 },
+        isFree: false,
+        recommended: false,
+        recommendation: null,
+      }),
+    ],
+    fetchedAt: '2026-09-24T00:00:00.000Z',
+    stale: false,
     ...overrides,
   };
 }

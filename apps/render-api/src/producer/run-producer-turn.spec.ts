@@ -2,14 +2,16 @@ import { resolveMediaProject } from '@video-maker/auto-montage';
 import { describe, expect, it, vi } from 'vitest';
 
 import { createCallLog } from '../__fixtures__/call-log';
+import { createFakeFetchRemote, jsonBodyChunks } from '../__fixtures__/fake-fetch-remote';
 import { createFakeObjectStorage } from '../__fixtures__/fake-object-storage';
 import { createFakeRenderApiDependencies } from '../__fixtures__/fake-render-api-dependencies';
-import { CURATED_OPENROUTER_MODELS } from '../config/curated-openrouter-models';
+import { OPENROUTER_MODELS_SAMPLE_PAYLOAD } from '../__fixtures__/openrouter-models-sample';
 import { readProducerConfig } from '../config/producer-config';
 import type { RenderApiDependencies } from '../deps/render-api-dependencies';
 import { httpStatusFor } from '../errors/http-status-for';
 import { isRenderApiError } from '../errors/render-api-error';
 import { OPENROUTER_SECRET_NAME, PRODUCER_ENGINE_SETTING_KEY } from '../http/handlers/producer-settings-handler';
+import { createOpenRouterModelCatalog } from './openrouter-model-catalog';
 import type { CreateOpenRouterProducerAgentOptions } from './openrouter-producer-agent';
 import { readProducerConversation, readProducerSession } from './producer-store';
 import type { ProducerTurnResult, ProducerTurnRun, ProducerTurnStart } from './producer-agent';
@@ -54,6 +56,8 @@ function scenario(script: ScriptedAgent, overrides?: Partial<RenderApiDependenci
 
   const deps = createFakeRenderApiDependencies(callLog, {
     storage,
+    fetchRemote: createFakeFetchRemote({ status: 200, bodyChunks: jsonBodyChunks(OPENROUTER_MODELS_SAMPLE_PAYLOAD) })
+      .fetchRemote,
     randomId: () => {
       counter += 1;
       return `id-${String(counter).padStart(2, '0')}`;
@@ -325,7 +329,8 @@ describe('startProducerTurn', () => {
   });
 });
 
-const OPENROUTER_MODEL = CURATED_OPENROUTER_MODELS[0]?.id ?? '';
+const OPENROUTER_MODEL = 'anthropic/claude-haiku-4.5';
+const OPENROUTER_NON_RECOMMENDED_MODEL = 'fireworks/ember-1';
 const OPENROUTER_SECRET = 'sk-or-v1-never-leak-this-exact-string';
 
 interface OpenRouterScript {
@@ -470,6 +475,80 @@ describe('startProducerTurn — engine routing (OpenRouter)', () => {
 
     expect(code).toBe('PRODUCER_MODEL_INVALID');
     expect(captured.starts).toEqual([]);
+  });
+
+  it('accepts a tool-capable OpenRouter model id from the live catalog even when it is not recommended', async () => {
+    const base = scenario({ lines: [] });
+    await withOpenRouterEngine(base);
+    const captured = { options: [] as CreateOpenRouterProducerAgentOptions[], starts: [] as ProducerTurnStart[] };
+
+    const started = await startProducerTurn(
+      base.deps,
+      base.registry,
+      { project: PROJECT, text: 'hola', model: OPENROUTER_NON_RECOMMENDED_MODEL, config: CONFIG },
+      scriptedOpenRouterAgentFactory({}, captured),
+    );
+    await started.completed;
+
+    expect(captured.options[0]?.chatModel).toBe(OPENROUTER_NON_RECOMMENDED_MODEL);
+    expect(base.registry.get(started.turnId).status).toBe('succeeded');
+  });
+
+  it('falls back to accepting only recommended ids when the live catalog is unreachable', async () => {
+    const failing = createFakeFetchRemote({ status: 503 });
+    const base = scenario({ lines: [] }, { fetchRemote: failing.fetchRemote });
+    await withOpenRouterEngine(base);
+    const captured = { options: [] as CreateOpenRouterProducerAgentOptions[], starts: [] as ProducerTurnStart[] };
+
+    const rejected = await codeOf(
+      startProducerTurn(
+        base.deps,
+        base.registry,
+        { project: PROJECT, text: 'hola', model: OPENROUTER_NON_RECOMMENDED_MODEL, config: CONFIG },
+        scriptedOpenRouterAgentFactory({}, captured),
+      ),
+    );
+    expect(rejected).toBe('PRODUCER_MODEL_INVALID');
+
+    const accepted = await startProducerTurn(
+      base.deps,
+      base.registry,
+      { project: PROJECT, text: 'hola', model: OPENROUTER_MODEL, config: CONFIG },
+      scriptedOpenRouterAgentFactory({}, captured),
+    );
+    await accepted.completed;
+    expect(base.registry.get(accepted.turnId).status).toBe('succeeded');
+  });
+
+  it('reuses one shared catalog across turns so only the first turn hits the network', async () => {
+    const { fetchRemote, calls } = createFakeFetchRemote({
+      status: 200,
+      bodyChunks: jsonBodyChunks(OPENROUTER_MODELS_SAMPLE_PAYLOAD),
+    });
+    const base = scenario({ lines: [] }, { fetchRemote });
+    await withOpenRouterEngine(base);
+    const captured = { options: [] as CreateOpenRouterProducerAgentOptions[], starts: [] as ProducerTurnStart[] };
+    const sharedCatalog = createOpenRouterModelCatalog();
+
+    const first = await startProducerTurn(
+      base.deps,
+      base.registry,
+      { project: PROJECT, text: 'hola', config: CONFIG },
+      scriptedOpenRouterAgentFactory({}, captured),
+      sharedCatalog,
+    );
+    await first.completed;
+
+    const second = await startProducerTurn(
+      base.deps,
+      base.registry,
+      { project: PROJECT, text: 'seguí', config: CONFIG },
+      scriptedOpenRouterAgentFactory({}, captured),
+      sharedCatalog,
+    );
+    await second.completed;
+
+    expect(calls.length).toBe(1);
   });
 
   it('maps a typed OpenRouter runtime failure to the matching error code, keeping the user message persisted', async () => {

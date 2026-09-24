@@ -38,6 +38,7 @@ export const ROUTES = [
   { id: 'projects.voice.scene.put', method: 'PUT', pattern: '/projects/:slug/voice/scenes/:sceneId' },
   { id: 'settings.producer.get', method: 'GET', pattern: '/settings/producer' },
   { id: 'settings.producer.put', method: 'PUT', pattern: '/settings/producer' },
+  { id: 'settings.producer.openrouterModels.get', method: 'GET', pattern: '/settings/producer/openrouter-models' },
   { id: 'settings.producer.openrouterKey.put', method: 'PUT', pattern: '/settings/producer/openrouter-key' },
   {
     id: 'settings.producer.openrouterKey.delete',

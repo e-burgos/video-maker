@@ -8,6 +8,8 @@ import { createRenderJobQueue, recoverInterruptedJobs } from '../jobs/render-job
 import type { RenderJobQueue } from '../jobs/render-job-queue';
 import { createMusicSearchCache } from '../music/music-search-cache';
 import type { MusicSearchCache } from '../music/music-search-cache';
+import { createOpenRouterModelCatalog } from '../producer/openrouter-model-catalog';
+import type { OpenRouterModelCatalog } from '../producer/openrouter-model-catalog';
 import { createProducerTurnRegistry } from '../producer/producer-turn-registry';
 import type { ProducerTurnRegistry } from '../producer/producer-turn-registry';
 import { createKeyedSerializer } from '../store/serialize-by-key';
@@ -20,6 +22,7 @@ export interface RenderApiRuntime {
   readonly uploadSerializer: KeyedSerializer;
   readonly voicePreviewSerializer: KeyedSerializer;
   readonly musicSearchCache: MusicSearchCache;
+  readonly openRouterModelCatalog: OpenRouterModelCatalog;
 }
 
 export function defaultProducerConfig(): ProducerConfig {
@@ -39,5 +42,6 @@ export function createRenderApiRuntime(
     uploadSerializer: createKeyedSerializer(),
     voicePreviewSerializer: createKeyedSerializer(),
     musicSearchCache: createMusicSearchCache(),
+    openRouterModelCatalog: createOpenRouterModelCatalog(),
   };
 }

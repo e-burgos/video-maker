@@ -1,7 +1,11 @@
 import { describe, expect, it } from 'vitest';
 
-import { producerSettings } from './__fixtures__/producer';
-import { parseOpenRouterKeyResult, parseProducerSettings } from './parse-producer-settings';
+import { openRouterModelsResult, producerSettings } from './__fixtures__/producer';
+import {
+  parseOpenRouterKeyResult,
+  parseOpenRouterModelsResult,
+  parseProducerSettings,
+} from './parse-producer-settings';
 import { RenderApiError } from './render-api-error';
 
 function shapeOf(value: object): string[] {
@@ -67,5 +71,45 @@ describe('parseOpenRouterKeyResult', () => {
 
   it('rejects a body without keyPresent', () => {
     expect(() => parseOpenRouterKeyResult({ keyHint: null })).toThrow(RenderApiError);
+  });
+});
+
+describe('parseOpenRouterModelsResult', () => {
+  it('accepts the exact shape EP-041 documents', () => {
+    const parsed = parseOpenRouterModelsResult(openRouterModelsResult());
+
+    expect(parsed.models).toHaveLength(3);
+    expect(parsed.models[0]).toMatchObject({ id: 'anthropic/claude-haiku-4.5', recommended: true });
+    expect(parsed.fetchedAt).toBe('2026-09-24T00:00:00.000Z');
+    expect(parsed.stale).toBe(false);
+  });
+
+  it('accepts a model with no recommendation', () => {
+    const parsed = parseOpenRouterModelsResult(
+      openRouterModelsResult({
+        models: [
+          {
+            id: 'fireworks/ember-1',
+            name: 'Fireworks: Ember-1',
+            contextLength: 1048576,
+            pricing: { promptPerMTokUsd: 3, completionPerMTokUsd: 15 },
+            supportsImages: true,
+            isFree: false,
+            recommended: false,
+            recommendation: null,
+          },
+        ],
+      }),
+    );
+
+    expect(parsed.models[0]?.recommendation).toBeNull();
+  });
+
+  it.each([
+    ['missing fetchedAt', { fetchedAt: undefined }],
+    ['a non-boolean stale', { stale: 'no' }],
+    ['a model with an invalid tier', { models: [{ ...openRouterModelsResult().models[0], recommendation: { tier: 'bogus', notes: '', bench: null } }] }],
+  ])('rejects %s', (_label, overrides) => {
+    expect(() => parseOpenRouterModelsResult(openRouterModelsResult(overrides as never))).toThrow(RenderApiError);
   });
 });

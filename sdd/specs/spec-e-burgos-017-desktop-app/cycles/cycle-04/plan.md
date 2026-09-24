@@ -114,3 +114,35 @@
   `producer.withEngine` con interpolación). No se pudo bajar de los 2 kB pedidos sin sacrificar los
   cuatro endpoints reales o el catálogo EN — para la próxima superficie de API grande conviene
   discutir si el cliente puede dejar de ser 100% eager.
+- **TASK-009** reemplazó `config/curated-openrouter-models.ts` (placeholder de 3 ids) por el
+  catálogo en vivo de D-C4-09: `producer/openrouter-model-catalog.ts` pega `GET
+  https://openrouter.ai/api/v1/models` a través del `fetchRemote` port, cachea 1h en memoria (mismo
+  patrón que `music/music-search-cache.ts`) y sirve la copia vieja con `stale: true` si el refetch
+  falla; sin caché y sin red tira `OPENROUTER_CATALOG_UNAVAILABLE` (503, nuevo código). Sólo quedan
+  los modelos con `"tools"` en `supported_parameters`; precios de OpenRouter (string USD por token)
+  se convierten a `promptPerMTokUsd`/`completionPerMTokUsd` (× 1e6). El set recomendado vive en
+  `config/recommended-openrouter-models.ts`, sembrado con los mismos 3 ids placeholder (`tier:
+  'reference'`, `bench: null`) que TASK-006 reemplaza.
+  **Desviación del contrato:** el Arquitecto pedía el set recomendado como `.json`; se implementó
+  como un literal `.ts` (mismo shape JSON, validado en el import con la misma función que validaría
+  un `.json`) porque el repo no tiene ningún precedente de `resolveJsonModule` y el bundle de
+  producción (`scripts/esbuild-node-bundle.mjs`, salida CJS single-file) mezclado con `tsc -p
+  tsconfig.lib.json` (ESM, sin bundlear) y `@swc-node/register` (dev) habría exigido tres
+  comportamientos de interop distintos para un mismo import sin poder probarlos los tres en CI barato;
+  el `.ts` es idéntico en ergonomía para el próximo benchmark (reemplaza el array entero) y cero
+  riesgo de build. Si el kit adopta `resolveJsonModule` en otro ciclo, migrar es un solo archivo.
+  `GET /settings/producer` (EP-037) sigue devolviendo `engines.openrouter.models` como
+  `ProducerModelOption[]` para no romper `producer-composer.tsx`, pero ahora son sólo los
+  recomendados descriptos desde el catálogo en vivo (nombre real, precio o "Free"), con fallback a
+  `id`+`notes` estáticos si OpenRouter no contesta. `PUT /settings/producer` y `startProducerTurn`
+  (`run-producer-turn.ts`) validan `models.openrouter` contra el catálogo completo (no sólo
+  recomendados); si el catálogo es inalcanzable, caen a aceptar sólo los ids recomendados — mismo
+  criterio en los dos lados. Nuevo endpoint `GET /settings/producer/openrouter-models` (EP-041,
+  `scope=all|recommended&q=&sort=price|name`) sirve el catálogo completo a
+  `openrouter-model-picker.tsx` (dos pestañas: Recomendados en cards, Todos los modelos en filas
+  compactas paginadas de a 30 sin virtualización — alcanza para ~400 modelos). El selector del chat
+  (`producer-page.tsx`) arma la lista como `engines.openrouter.models` (recomendados) + el
+  `models.openrouter` guardado si no está en esa lista, marcado "tu elección"
+  (`producer.model.yourChoice`). Chunk inicial: 530,97 kB → 533,89 kB (+2,92 kB crudo, +0,80 kB
+  gzip) — el picker en sí no pesa nada (vive en el chunk perezoso de `settings-page`), el costo es
+  el método nuevo de `render-api-client.ts` y las claves nuevas de `MESSAGES_EN` (eager).

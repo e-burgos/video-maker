@@ -8,6 +8,7 @@ import { useApiAction } from '../hooks/use-api-action';
 import { useAsyncResource } from '../hooks/use-async-resource';
 import { useT } from '../i18n/language-context';
 import { ErrorNotice } from '../components/error-notice';
+import { OpenRouterModelPicker } from '../components/openrouter-model-picker';
 import type { ProducerEngineId, ProducerSettings, ProducerSettingsUpdate } from '../api/render-api-types';
 
 const OPENROUTER_KEY_PREFIX = 'sk-or-v1-';
@@ -92,6 +93,7 @@ export function SettingsPage() {
 
   const keyPresent = data?.engines.openrouter.keyPresent ?? false;
   const showKeyForm = keyStep === 'edit' || (keyStep === 'view' && !keyPresent);
+  const recommendedOpenRouterIds = new Set((data?.engines.openrouter.models ?? []).map((option) => option.id));
 
   return (
     <section className="space-y-6">
@@ -172,24 +174,16 @@ export function SettingsPage() {
               </select>
             </div>
 
-            <div className="flex flex-wrap items-center gap-2">
-              <label htmlFor="settings-model-openrouter" className="text-sm text-slate-400">
-                {t('settings.defaultModel.openrouter')}
-              </label>
-              <select
-                id="settings-model-openrouter"
-                aria-label={t('settings.defaultModel.openrouter')}
-                value={openrouterModel}
-                onChange={(event) => setOpenrouterModel(event.target.value)}
-                className="rounded-md border border-slate-700 bg-slate-950 px-2 py-1 text-sm text-slate-100"
-              >
-                {data.engines.openrouter.models.map((option) => (
-                  <option key={option.id} value={option.id}>
-                    {option.label}
-                  </option>
-                ))}
-              </select>
-            </div>
+            {keyPresent && (
+              <div className="space-y-2">
+                <p className="text-sm text-slate-400">{t('settings.defaultModel.openrouter')}</p>
+                <OpenRouterModelPicker
+                  value={openrouterModel}
+                  onChange={setOpenrouterModel}
+                  recommendedIds={recommendedOpenRouterIds}
+                />
+              </div>
+            )}
 
             <div className="flex items-center gap-3">
               <button

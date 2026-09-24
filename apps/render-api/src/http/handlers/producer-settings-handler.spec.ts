@@ -1,8 +1,9 @@
 import { describe, expect, it } from 'vitest';
 
 import { createCallLog } from '../../__fixtures__/call-log';
-import { createFakeFetchRemote } from '../../__fixtures__/fake-fetch-remote';
+import { createFakeFetchRemote, jsonBodyChunks } from '../../__fixtures__/fake-fetch-remote';
 import { createFakeRenderApiDependencies } from '../../__fixtures__/fake-render-api-dependencies';
+import { OPENROUTER_MODELS_SAMPLE_PAYLOAD } from '../../__fixtures__/openrouter-models-sample';
 import { createRecordingLogger } from '../../__fixtures__/recording-logger';
 import { requestLine } from '../../__fixtures__/http-request';
 import { toErrorPayload } from '../../errors/to-error-payload';
@@ -122,19 +123,101 @@ describe('handlePutProducerSettings', () => {
     expect(payload.code).toBe('PRODUCER_MODEL_INVALID');
   });
 
-  it('rejects an openrouter model outside the curated list', async () => {
+  it('rejects an openrouter model that is not in the live catalog', async () => {
     const callLog = createCallLog();
-    const deps = createFakeRenderApiDependencies(callLog);
+    const { fetchRemote } = createFakeFetchRemote({
+      status: 200,
+      bodyChunks: jsonBodyChunks(OPENROUTER_MODELS_SAMPLE_PAYLOAD),
+    });
+    const deps = createFakeRenderApiDependencies(callLog, { fetchRemote });
     const runtime = createRenderApiRuntime(deps);
 
     const payload = await caughtErrorPayload(
       handlePutProducerSettings(
         deps,
         runtime,
-        putProducerSettingsRequest({ models: { openrouter: 'not-curated/anything' } }),
+        putProducerSettingsRequest({ models: { openrouter: 'not-in-the-catalog/anything' } }),
       ),
     );
     expect(payload.code).toBe('PRODUCER_MODEL_INVALID');
+  });
+
+  it('accepts a tool-capable openrouter model from the live catalog even when it is not recommended', async () => {
+    const callLog = createCallLog();
+    const { fetchRemote } = createFakeFetchRemote({
+      status: 200,
+      bodyChunks: jsonBodyChunks(OPENROUTER_MODELS_SAMPLE_PAYLOAD),
+    });
+    const deps = createFakeRenderApiDependencies(callLog, { fetchRemote });
+    const runtime = createRenderApiRuntime(deps);
+
+    const response = await handlePutProducerSettings(
+      deps,
+      runtime,
+      putProducerSettingsRequest({ models: { openrouter: 'fireworks/ember-1' } }),
+    );
+
+    expect(response.status).toBe(200);
+    expect((response.body as { models: { openrouter: unknown } }).models.openrouter).toBe('fireworks/ember-1');
+  });
+
+  it('falls back to accepting only recommended ids when the live catalog is unreachable', async () => {
+    const callLog = createCallLog();
+    const { fetchRemote } = createFakeFetchRemote({ status: 503 });
+    const deps = createFakeRenderApiDependencies(callLog, { fetchRemote });
+    const runtime = createRenderApiRuntime(deps);
+
+    const rejected = await caughtErrorPayload(
+      handlePutProducerSettings(
+        deps,
+        runtime,
+        putProducerSettingsRequest({ models: { openrouter: 'fireworks/ember-1' } }),
+      ),
+    );
+    expect(rejected.code).toBe('PRODUCER_MODEL_INVALID');
+
+    const accepted = await handlePutProducerSettings(
+      deps,
+      runtime,
+      putProducerSettingsRequest({ models: { openrouter: 'anthropic/claude-haiku-4.5' } }),
+    );
+    expect(accepted.status).toBe(200);
+  });
+});
+
+describe('GET /settings/producer — engines.openrouter.models', () => {
+  it('lists only the recommended models, described from the live catalog', async () => {
+    const callLog = createCallLog();
+    const { fetchRemote } = createFakeFetchRemote({
+      status: 200,
+      bodyChunks: jsonBodyChunks(OPENROUTER_MODELS_SAMPLE_PAYLOAD),
+    });
+    const deps = createFakeRenderApiDependencies(callLog, { fetchRemote });
+    const runtime = createRenderApiRuntime(deps);
+
+    const response = await handleGetProducerSettings(deps, runtime);
+    const models = (response.body as { engines: { openrouter: { models: { id: string }[] } } }).engines.openrouter
+      .models;
+
+    expect(models.map((model) => model.id)).toEqual([
+      'anthropic/claude-haiku-4.5',
+      'openai/gpt-4o-mini',
+      'google/gemini-3.5-flash-lite',
+    ]);
+  });
+
+  it('falls back to the static recommended set when the live catalog is unreachable', async () => {
+    const callLog = createCallLog();
+    const { fetchRemote } = createFakeFetchRemote({ status: 503 });
+    const deps = createFakeRenderApiDependencies(callLog, { fetchRemote });
+    const runtime = createRenderApiRuntime(deps);
+
+    const response = await handleGetProducerSettings(deps, runtime);
+    const models = (response.body as { engines: { openrouter: { models: { id: string }[] } } }).engines.openrouter
+      .models;
+
+    expect(models.length).toBeGreaterThan(0);
+    expect(models.map((model) => model.id)).toContain('anthropic/claude-haiku-4.5');
   });
 });
 

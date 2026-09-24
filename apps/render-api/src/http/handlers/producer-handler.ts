@@ -6,6 +6,7 @@ import { PipelineStageError } from '../../errors/pipeline-stage-error';
 import { readProducerConversation, readProducerSession } from '../../producer/producer-store';
 import type { ProducerMessage, ProducerSession } from '../../producer/producer-documents';
 import type { ProducerTurnRecord } from '../../producer/producer-turn-registry';
+import { createOpenRouterProducerAgent } from '../../producer/openrouter-producer-agent';
 import { assertProducerMessageText, startProducerTurn } from '../../producer/run-producer-turn';
 import { assertValidProjectSlug, resolveExistingProject } from '../../store/project-scope';
 import { JSON_CONTENT_TYPE } from '../http-message';
@@ -105,12 +106,13 @@ export async function handleCreateProducerMessage(
   const text = assertProducerMessageText(value.text);
   const project = await resolveExistingProject(deps, store, slug);
 
-  const started = await startProducerTurn(deps, runtime.producerTurns, {
-    project,
-    text,
-    model: value.model,
-    config: runtime.producer,
-  });
+  const started = await startProducerTurn(
+    deps,
+    runtime.producerTurns,
+    { project, text, model: value.model, config: runtime.producer },
+    createOpenRouterProducerAgent,
+    runtime.openRouterModelCatalog,
+  );
   void started.completed;
 
   const body: ProducerTurnAcceptedBody = {

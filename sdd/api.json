@@ -1328,7 +1328,7 @@
         "created_in_cycle": 4,
         "updated_in_cycle": null,
         "required_headers": [],
-        "description": "Reports the producer engine configuration (D-C4-04, D-C4-07, US-017-302/304). engine is the user's explicit choice, stored in the local settings table (producer.engine); effectiveEngine is what a new turn would actually use — engine when it is set, otherwise claude-cli when the Claude Code CLI is available, otherwise openrouter when an OpenRouter key is stored in the macOS keychain, otherwise null. engines.claudeCli.available comes from the same CLI probe /health uses; engines.claudeCli.models lists the configured PRODUCER_MODELS. engines.openrouter.keyPresent and keyHint (the key's last 4 characters, or null) come from a keychain lookup — the key value itself never appears in this or any other response. engines.openrouter.models is the curated placeholder list (config/curated-openrouter-models.ts) until TASK-006 replaces it with the benchmarked list. models.claude/models.openrouter are the stored per-engine default models (producer.model.claude, producer.model.openrouter settings), or null if never set.",
+        "description": "Reports the producer engine configuration (D-C4-04, D-C4-07, D-C4-09, US-017-302/304). engine is the user's explicit choice, stored in the local settings table (producer.engine); effectiveEngine is what a new turn would actually use — engine when it is set, otherwise claude-cli when the Claude Code CLI is available, otherwise openrouter when an OpenRouter key is stored in the macOS keychain, otherwise null. engines.claudeCli.available comes from the same CLI probe /health uses; engines.claudeCli.models lists the configured PRODUCER_MODELS. engines.openrouter.keyPresent and keyHint (the key's last 4 characters, or null) come from a keychain lookup — the key value itself never appears in this or any other response. engines.openrouter.models is the RECOMMENDED OpenRouter model set (for the chat composer): each recommended id from config/recommended-openrouter-models.ts described from the live GET https://openrouter.ai/api/v1/models catalog (1h in-memory cache), or, if that catalog cannot be reached, a static fallback built from the recommended set's own notes. See EP-041 for the full searchable catalog used by the settings page. models.claude/models.openrouter are the stored per-engine default models (producer.model.claude, producer.model.openrouter settings), or null if never set.",
         "path_params": [],
         "request_body": {},
         "responses": {
@@ -1340,6 +1340,11 @@
             "cycle": 4,
             "date": "2026-09-24",
             "change": "Created in spec-e-burgos-017 cycle-04 (TASK-002): read side of the producer engine/model settings for the OpenRouter engine (D-C4-04, D-C4-07)."
+          },
+          {
+            "cycle": 4,
+            "date": "2026-09-24",
+            "change": "TASK-009: engines.openrouter.models now comes from the live OpenRouter catalog filtered to the recommended set (config/recommended-openrouter-models.ts), replacing the static 3-model placeholder list; falls back to a static description built from the recommended set when the catalog is unreachable."
           }
         ]
       },
@@ -1353,7 +1358,7 @@
         "created_in_cycle": 4,
         "updated_in_cycle": null,
         "required_headers": [],
-        "description": "Updates the producer engine choice and/or the default model per engine. Both top-level fields are optional and independently applied: engine (null clears back to auto) must be null, \"claude-cli\" or \"openrouter\"; models.claude must be one of the configured PRODUCER_MODELS; models.openrouter must be one of the curated OpenRouter model ids (config/curated-openrouter-models.ts). Persists only the fields present in the body, then answers the same shape as GET /settings/producer with the updated values.",
+        "description": "Updates the producer engine choice and/or the default model per engine. Both top-level fields are optional and independently applied: engine (null clears back to auto) must be null, \"claude-cli\" or \"openrouter\"; models.claude must be one of the configured PRODUCER_MODELS; models.openrouter must be an id present in the live tool-capable OpenRouter catalog (GET https://openrouter.ai/api/v1/models, filtered to models whose supported_parameters include \"tools\") — not only the recommended set. If that catalog cannot be reached, models.openrouter falls back to accepting only the recommended ids (config/recommended-openrouter-models.ts). Persists only the fields present in the body, then answers the same shape as GET /settings/producer with the updated values.",
         "path_params": [],
         "request_body": {
           "content-type": "application/json",
@@ -1361,13 +1366,18 @@
         },
         "responses": {
           "200": "application/json: the same shape as GET /settings/producer, reflecting the fields just written.",
-          "422": "INVALID_INPUT when engine is present and is neither null, 'claude-cli' nor 'openrouter', or models is present and is not an object; PRODUCER_MODEL_INVALID when models.claude is not one of the configured PRODUCER_MODELS or models.openrouter is not one of the curated OpenRouter model ids. application/json: { error: { code, stage: null, message, resource?, expected? } }."
+          "422": "INVALID_INPUT when engine is present and is neither null, 'claude-cli' nor 'openrouter', or models is present and is not an object; PRODUCER_MODEL_INVALID when models.claude is not one of the configured PRODUCER_MODELS or models.openrouter is not a tool-capable id in the live OpenRouter catalog (or, when that catalog is unreachable, not one of the recommended ids). application/json: { error: { code, stage: null, message, resource?, expected? } }."
         },
         "changelog": [
           {
             "cycle": 4,
             "date": "2026-09-24",
             "change": "Created in spec-e-burgos-017 cycle-04 (TASK-002): write side of the producer engine/model settings for the OpenRouter engine (D-C4-04, D-C4-07)."
+          },
+          {
+            "cycle": 4,
+            "date": "2026-09-24",
+            "change": "TASK-009: models.openrouter now validates against the live tool-capable OpenRouter catalog instead of the static 3-model placeholder list, with a fallback to the recommended set when the catalog is unreachable."
           }
         ]
       },
@@ -1422,6 +1432,32 @@
             "cycle": 4,
             "date": "2026-09-24",
             "change": "Created in spec-e-burgos-017 cycle-04 (TASK-002): removes the OpenRouter key from the macOS keychain (D-C4-04, US-017-305)."
+          }
+        ]
+      },
+      {
+        "id": "EP-041",
+        "method": "GET",
+        "path": "/settings/producer/openrouter-models",
+        "module": "desktop-app",
+        "spec": "sdd/specs/spec-e-burgos-017-desktop-app",
+        "status": "implemented",
+        "created_in_cycle": 4,
+        "updated_in_cycle": null,
+        "required_headers": [],
+        "description": "The full, searchable OpenRouter model catalog for the settings page (D-C4-09, US-017-304/306). Fetches GET https://openrouter.ai/api/v1/models (public, no API key needed) through the fetchRemote port, kept in an in-memory cache for 1h and served stale (stale: true) if a refetch fails while a previous good catalog is cached; throws OPENROUTER_CATALOG_UNAVAILABLE (503) only when nothing is cached and the fetch fails. Only models whose supported_parameters include \"tools\" are kept. Each model reports id, name, contextLength, pricing (promptPerMTokUsd/completionPerMTokUsd, converted from OpenRouter's per-token USD strings), supportsImages (architecture.input_modalities includes \"image\"), isFree (id ends with \":free\" or both prices are 0), recommended, and recommendation (tier, notes, bench) when recommended — the recommended set lives in config/recommended-openrouter-models.ts, seeded with a 3-model placeholder until TASK-006's benchmark replaces it. scope=all (default) returns the full catalog with recommended models sorted first; scope=recommended returns only the recommended ones. q filters by a case-insensitive substring match on id or name. sort=price orders ascending by promptPerMTokUsd; sort=name orders alphabetically by name; omitting sort keeps the recommended-first order.",
+        "path_params": [],
+        "request_body": {},
+        "responses": {
+          "200": "application/json: { models: [{ id, name, contextLength, pricing: { promptPerMTokUsd, completionPerMTokUsd }, supportsImages, isFree, recommended, recommendation: { tier: 'free'|'cheap'|'reference', notes, bench: { successRate, avgSteps, avgSeconds, avgCostUsd } | null } | null }], fetchedAt: string, stale: boolean }.",
+          "422": "INVALID_INPUT when scope is present and is neither 'all' nor 'recommended', or sort is present and is neither 'price' nor 'name'. application/json: { error: { code, stage: null, message, resource?, expected? } }.",
+          "503": "OPENROUTER_CATALOG_UNAVAILABLE when OpenRouter's models endpoint cannot be reached or answers with an unusable payload and nothing is cached yet. application/json: { error: { code, stage: null, message, hint? } }."
+        },
+        "changelog": [
+          {
+            "cycle": 4,
+            "date": "2026-09-24",
+            "change": "Created in spec-e-burgos-017 cycle-04 (TASK-009): live, searchable OpenRouter model catalog for the settings page (D-C4-09)."
           }
         ]
       }

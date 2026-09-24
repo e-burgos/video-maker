@@ -1,8 +1,13 @@
 import { isProducerModelOption } from './parse-producer';
-import { PRODUCER_ENGINES } from './render-api-types';
+import { OPENROUTER_MODEL_TIERS, PRODUCER_ENGINES } from './render-api-types';
 import { responseShapeUnexpected } from './render-api-error';
 import type {
+  OpenRouterCatalogModel,
   OpenRouterKeyResult,
+  OpenRouterModelBench,
+  OpenRouterModelRecommendation,
+  OpenRouterModelTier,
+  OpenRouterModelsResult,
   ProducerClaudeEngineStatus,
   ProducerEngineId,
   ProducerModelOption,
@@ -66,4 +71,56 @@ export function parseOpenRouterKeyResult(value: unknown): OpenRouterKeyResult {
     throw responseShapeUnexpected(200, 'an openrouter key result');
   }
   return value as OpenRouterKeyResult;
+}
+
+function isOpenRouterModelTier(value: unknown): value is OpenRouterModelTier {
+  return typeof value === 'string' && (OPENROUTER_MODEL_TIERS as readonly string[]).includes(value);
+}
+
+function isOpenRouterModelBench(value: unknown): value is OpenRouterModelBench {
+  return (
+    isRecord(value) &&
+    typeof value['successRate'] === 'number' &&
+    typeof value['avgSteps'] === 'number' &&
+    typeof value['avgSeconds'] === 'number' &&
+    typeof value['avgCostUsd'] === 'number'
+  );
+}
+
+function isOpenRouterModelRecommendation(value: unknown): value is OpenRouterModelRecommendation {
+  return (
+    isRecord(value) &&
+    isOpenRouterModelTier(value['tier']) &&
+    typeof value['notes'] === 'string' &&
+    (value['bench'] === null || isOpenRouterModelBench(value['bench']))
+  );
+}
+
+function isOpenRouterCatalogModel(value: unknown): value is OpenRouterCatalogModel {
+  return (
+    isRecord(value) &&
+    typeof value['id'] === 'string' &&
+    typeof value['name'] === 'string' &&
+    typeof value['contextLength'] === 'number' &&
+    isRecord(value['pricing']) &&
+    typeof value['pricing']['promptPerMTokUsd'] === 'number' &&
+    typeof value['pricing']['completionPerMTokUsd'] === 'number' &&
+    typeof value['supportsImages'] === 'boolean' &&
+    typeof value['isFree'] === 'boolean' &&
+    typeof value['recommended'] === 'boolean' &&
+    (value['recommendation'] === null || isOpenRouterModelRecommendation(value['recommendation']))
+  );
+}
+
+export function parseOpenRouterModelsResult(value: unknown): OpenRouterModelsResult {
+  if (
+    !isRecord(value) ||
+    !Array.isArray(value['models']) ||
+    !value['models'].every(isOpenRouterCatalogModel) ||
+    typeof value['fetchedAt'] !== 'string' ||
+    typeof value['stale'] !== 'boolean'
+  ) {
+    throw responseShapeUnexpected(200, 'an openrouter models result');
+  }
+  return value as unknown as OpenRouterModelsResult;
 }

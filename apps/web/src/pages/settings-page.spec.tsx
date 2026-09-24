@@ -2,7 +2,7 @@ import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
 import { describe, expect, it, vi } from 'vitest';
 
-import { producerSettings } from '../api/__fixtures__/producer';
+import { openRouterModelsResult, producerSettings } from '../api/__fixtures__/producer';
 import { RenderApiProvider } from '../api/render-api-context';
 import { RenderApiError } from '../api/render-api-error';
 import { SettingsPage } from './settings-page';
@@ -11,6 +11,7 @@ import type { RenderApiClient } from '../api/render-api-client';
 function renderPage(client: Partial<RenderApiClient>) {
   const withDefaults: Partial<RenderApiClient> = {
     getProducerSettings: vi.fn().mockResolvedValue(producerSettings()),
+    getOpenRouterModels: vi.fn().mockResolvedValue(openRouterModelsResult()),
     ...client,
   };
 

@@ -256,6 +256,35 @@ describe('ProducerPage', () => {
     ).toEqual(['openai/gpt-4o-mini']);
   });
 
+  it('adds the chosen non-recommended OpenRouter model to the chat list, marked as your choice', async () => {
+    renderPage({
+      getProducer: vi.fn().mockResolvedValue(producerConversation({ session: null })),
+      getProducerSettings: vi.fn().mockResolvedValue(
+        producerSettings({
+          effectiveEngine: 'openrouter',
+          engines: {
+            claudeCli: { available: false, reason: 'not installed', models: producerModels().allowed },
+            openrouter: {
+              keyPresent: true,
+              keyHint: '1234',
+              models: [
+                { id: 'openai/gpt-4o-mini', label: 'GPT-4o mini', description: 'OpenAI · fast' },
+              ],
+            },
+          },
+          models: { claude: null, openrouter: 'fireworks/ember-1' },
+        }),
+      ),
+    });
+
+    await waitFor(() =>
+      expect(
+        [...(screen.getByLabelText('model') as HTMLSelectElement).options].map((option) => option.value),
+      ).toEqual(['openai/gpt-4o-mini', 'fireworks/ember-1']),
+    );
+    expect(screen.getByTestId('producer-model-help').textContent).toBe('your choice');
+  });
+
   it('adopts a turn that was already running when the page opened', async () => {
     const getProducerTurn = vi.fn().mockResolvedValue(producerTurn());
     renderPage({

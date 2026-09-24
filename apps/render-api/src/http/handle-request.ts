@@ -31,6 +31,7 @@ import {
   handleGetProducer,
   handleGetProducerTurn,
 } from './handlers/producer-handler';
+import { handleGetOpenRouterModels } from './handlers/openrouter-models-handler';
 import {
   handleDeleteOpenRouterKey,
   handleGetProducerSettings,
@@ -255,6 +256,8 @@ async function dispatchRoute(
         return await handleGetProducerSettings(deps, runtime);
       case 'settings.producer.put':
         return await handlePutProducerSettings(deps, runtime, request);
+      case 'settings.producer.openrouterModels.get':
+        return await handleGetOpenRouterModels(deps, runtime, request);
       case 'settings.producer.openrouterKey.put':
         return await handlePutOpenRouterKey(deps, request);
       case 'settings.producer.openrouterKey.delete':

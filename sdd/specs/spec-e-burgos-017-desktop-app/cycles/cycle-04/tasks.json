@@ -241,16 +241,53 @@
       "depends_on": [
         "TASK-005"
       ],
-      "status": "pending",
+      "status": "done",
       "files": [
         "apps/render-api/src/producer/openrouter-model-catalog.ts",
         "apps/render-api/src/producer/openrouter-model-catalog.spec.ts",
-        "apps/render-api/src/config/curated-openrouter-models.ts",
+        "apps/render-api/src/config/recommended-openrouter-models.ts",
+        "apps/render-api/src/__fixtures__/openrouter-models-sample.ts",
+        "apps/render-api/src/http/handlers/openrouter-models-handler.ts",
+        "apps/render-api/src/http/handlers/openrouter-models-handler.spec.ts",
         "apps/render-api/src/http/handlers/producer-settings-handler.ts",
+        "apps/render-api/src/http/handlers/producer-settings-handler.spec.ts",
+        "apps/render-api/src/http/handlers/producer-handler.ts",
+        "apps/render-api/src/http/routes.ts",
+        "apps/render-api/src/http/handle-request.ts",
+        "apps/render-api/src/http/render-api-runtime.ts",
+        "apps/render-api/src/producer/run-producer-turn.ts",
+        "apps/render-api/src/producer/run-producer-turn.spec.ts",
+        "apps/render-api/src/errors/render-api-error.ts",
+        "apps/render-api/src/errors/http-status-for.ts",
+        "apps/render-api/src/errors/http-status-for.spec.ts",
+        "apps/render-api/src/errors/to-error-payload.ts",
+        "apps/web/src/components/openrouter-model-picker.tsx",
+        "apps/web/src/components/openrouter-model-picker.spec.tsx",
         "apps/web/src/pages/settings-page.tsx",
-        "apps/web/src/components/producer-composer.tsx",
-        "sdd/api.json"
-      ]
+        "apps/web/src/pages/settings-page.spec.tsx",
+        "apps/web/src/pages/producer-page.tsx",
+        "apps/web/src/pages/producer-page.spec.tsx",
+        "apps/web/src/api/render-api-client.ts",
+        "apps/web/src/api/render-api-types.ts",
+        "apps/web/src/api/parse-producer-settings.ts",
+        "apps/web/src/api/parse-producer-settings.spec.ts",
+        "apps/web/src/api/__fixtures__/producer.ts",
+        "apps/web/src/i18n/messages-es.ts",
+        "apps/web/src/i18n/messages-en.ts",
+        "sdd/api.json",
+        "apps/render-api/src/config/curated-openrouter-models.ts",
+        "apps/render-api/src/config/curated-openrouter-models.spec.ts"
+      ],
+      "usage": {
+        "tokens_in": 380000,
+        "tokens_out": 42000,
+        "provider_model": "claude/sonnet",
+        "effort": "medium",
+        "agent": "implementor-back",
+        "approx": true,
+        "source": "declared-estimate",
+        "recorded_at": "2026-09-24"
+      }
     },
     {
       "id": "TASK-006",

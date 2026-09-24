@@ -123,11 +123,21 @@ export function ProducerPage() {
   const blockers = producerBlockers(health.data);
   const running = poll.polling;
   const effectiveEngine = producerSettings.data?.effectiveEngine ?? null;
+  const recommendedOpenRouterModels = producerSettings.data?.engines.openrouter.models ?? [];
+  const openRouterDefaultModel = producerSettings.data?.models.openrouter ?? null;
+  const openRouterModelsForChat: ProducerModelOption[] =
+    openRouterDefaultModel !== null &&
+    !recommendedOpenRouterModels.some((option) => option.id === openRouterDefaultModel)
+      ? [
+          ...recommendedOpenRouterModels,
+          { id: openRouterDefaultModel, label: openRouterDefaultModel, description: t('producer.model.yourChoice') },
+        ]
+      : recommendedOpenRouterModels;
   const engineModels: ProducerModelOption[] =
     effectiveEngine === 'claude-cli'
       ? (producerSettings.data?.engines.claudeCli.models ?? [])
       : effectiveEngine === 'openrouter'
-        ? (producerSettings.data?.engines.openrouter.models ?? [])
+        ? openRouterModelsForChat
         : (conversation.data?.models.allowed ?? []);
   const models = engineModels.length > 0 ? engineModels : (conversation.data?.models.allowed ?? []);
   const engineDefaultModel =

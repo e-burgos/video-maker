@@ -14,7 +14,11 @@ import {
   parseProducerTurn,
   parseProducerTurnAccepted,
 } from './parse-producer';
-import { parseOpenRouterKeyResult, parseProducerSettings } from './parse-producer-settings';
+import {
+  parseOpenRouterKeyResult,
+  parseOpenRouterModelsResult,
+  parseProducerSettings,
+} from './parse-producer-settings';
 import {
   parseVoiceDocument,
   parseVoiceListing,
@@ -32,10 +36,12 @@ import type {
   AssetListing,
   GeneratedListing,
   AssetRole,
+  GetOpenRouterModelsQuery,
   Job,
   MontageJob,
   MontagePresetName,
   OpenRouterKeyResult,
+  OpenRouterModelsResult,
   ProducerConversation,
   ProducerSettings,
   ProducerSettingsUpdate,
@@ -122,6 +128,7 @@ export type RenderApiClient = {
   cancelProducerTurn: (slug: string, turnId: string) => Promise<ProducerTurn>;
   getProducerSettings: () => Promise<ProducerSettings>;
   updateProducerSettings: (update: ProducerSettingsUpdate) => Promise<ProducerSettings>;
+  getOpenRouterModels: (query?: GetOpenRouterModelsQuery) => Promise<OpenRouterModelsResult>;
   putOpenRouterKey: (apiKey: string) => Promise<OpenRouterKeyResult>;
   deleteOpenRouterKey: () => Promise<OpenRouterKeyResult>;
   listRenderJobs: (slug: string) => Promise<RenderJobListing>;
@@ -640,6 +647,28 @@ export function createRenderApiClient(fetchImpl: FetchLike): RenderApiClient {
         (value) => isRecord(value),
       );
       return parseProducerSettings(body);
+    },
+
+    async getOpenRouterModels(query: GetOpenRouterModelsQuery = {}): Promise<OpenRouterModelsResult> {
+      const params = new URLSearchParams();
+      if (query.scope !== undefined) {
+        params.set('scope', query.scope);
+      }
+      if (query.q !== undefined && query.q !== '') {
+        params.set('q', query.q);
+      }
+      if (query.sort !== undefined) {
+        params.set('sort', query.sort);
+      }
+      const search = params.toString();
+
+      const body = await requestJson(
+        `/settings/producer/openrouter-models${search === '' ? '' : `?${search}`}`,
+        undefined,
+        'an openrouter models result',
+        (value) => isRecord(value),
+      );
+      return parseOpenRouterModelsResult(body);
     },
 
     async putOpenRouterKey(apiKey: string): Promise<OpenRouterKeyResult> {
