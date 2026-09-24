@@ -21,6 +21,14 @@ const DESKTOP_ROOT = join(REPO_ROOT, 'apps', 'desktop');
 const VENDOR_CACHE_MODELS_DIR = join(homedir(), '.cache', 'video-maker-vendor', 'models');
 const MIRROR_PORT = Number(process.env.PACKAGED_SMOKE_MIRROR_PORT ?? '8991');
 const DEBUG_PORT = Number(process.env.PACKAGED_SMOKE_DEBUG_PORT ?? '9700');
+const INSTALLED_APP_PATH = process.env.PACKAGED_SMOKE_INSTALLED_APP ?? '/Applications/Video Maker.app';
+const DEV_USER_DATA_DIR =
+  process.env.PACKAGED_SMOKE_SEED_USER_DATA ?? join(homedir(), 'Library', 'Application Support', 'Video Maker');
+
+function parseCliArgs(argv) {
+  const engineArg = argv.find((entry) => entry.startsWith('--engine='));
+  return { engine: engineArg === undefined ? 'claude' : engineArg.slice('--engine='.length) };
+}
 
 const FORWARD_CHIP_PATTERN = /dale|avanz|proces|renderiz|confirm|produc|adelante|segu[ií]/iu;
 const TERMINAL_JOB_STATES = new Set(['succeeded', 'failed', 'canceled']);
@@ -230,6 +238,13 @@ class CdpSession {
   close() {
     this.ws.close();
   }
+
+  async screenshot(filePath) {
+    await this.ready();
+    await this.send('Page.enable');
+    const result = await this.send('Page.captureScreenshot', { format: 'png' });
+    writeFileSync(filePath, Buffer.from(result.result.data, 'base64'));
+  }
 }
 
 async function driveSetupWindow(cdp, expectedInstalledIds) {
@@ -322,6 +337,22 @@ async function sendComposerText(cdp, text) {
   );
 }
 
+async function waitForTurnRunning(cdp, timeoutMs) {
+  try {
+    return await waitFor(
+      async () => {
+        const status = await cdp.evaluate(
+          'document.querySelector(\'[data-testid="producer-turn-activity"]\')?.getAttribute(\'data-status\') ?? null',
+        );
+        return status === 'running' ? true : null;
+      },
+      { timeoutMs, intervalMs: 250, label: 'new producer turn to start running' },
+    );
+  } catch {
+    return false;
+  }
+}
+
 async function waitForTurnSettled(cdp, deadlineMs) {
   return waitFor(
     async () => {
@@ -355,6 +386,7 @@ async function driveConversation(cdp) {
   for (let turnIndex = 0; turnIndex < TUTORIAL.maxTurns; turnIndex += 1) {
     log('conversation', `turn ${turnIndex + 1}/${TUTORIAL.maxTurns}`);
     await sendComposerText(cdp, text);
+    await waitForTurnRunning(cdp, 20_000);
     const settled = await waitForTurnSettled(cdp, TUTORIAL.turnDeadlineMs);
     allToolCalls.push(...settled.toolCalls);
     log('conversation', `turn ${turnIndex + 1} settled: ${settled.status}, tools: ${settled.toolCalls.join(', ')}`);
@@ -446,7 +478,380 @@ function sumRss(psOutput) {
   return total;
 }
 
+function seedUserDataFromDev(destUserDataDir, sourceUserDataDir, projectSlug) {
+  mkdirSync(destUserDataDir, { recursive: true });
+  execFileSync('cp', ['-Rc', join(sourceUserDataDir, 'models'), join(destUserDataDir, 'models')]);
+
+  const setup = JSON.parse(readFileSync(join(sourceUserDataDir, 'setup.json'), 'utf8'));
+  const rewrittenModels = Object.fromEntries(
+    Object.entries(setup.models).map(([id, record]) => [
+      id,
+      { ...record, path: record.path.replace(sourceUserDataDir, destUserDataDir) },
+    ]),
+  );
+  const projectsFolder = join(destUserDataDir, 'projects');
+  writeFileSync(
+    join(destUserDataDir, 'setup.json'),
+    JSON.stringify({ ...setup, models: rewrittenModels, projectsFolder, preferredPort: null }, null, 2),
+  );
+
+  mkdirSync(projectsFolder, { recursive: true });
+  execFileSync('cp', ['-Rc', join(REPO_ROOT, 'media', projectSlug), join(projectsFolder, projectSlug)]);
+  return projectsFolder;
+}
+
+async function goToSettings(cdp) {
+  await cdp.evaluate('document.querySelector(\'[data-testid="settings-nav"]\').click(); true');
+  await waitFor(
+    async () =>
+      JSON.parse(await cdp.evaluate('document.querySelector(\'[data-testid="settings-producer-section"]\') !== null')),
+    { timeoutMs: 15_000, intervalMs: 500, label: 'settings page loaded' },
+  );
+}
+
+async function goToProjectList(cdp) {
+  await cdp.evaluate('document.querySelector(\'a[href="/"]\').click(); true');
+  await waitFor(
+    async () => JSON.parse(await cdp.evaluate('document.querySelector(\'[data-testid="video-card"]\') !== null')),
+    { timeoutMs: 15_000, intervalMs: 500, label: 'project list after navigating home' },
+  );
+}
+
+async function readOpenRouterKeyStatus(cdp) {
+  const raw = await cdp.evaluate(`
+    JSON.stringify({
+      loadedText: document.querySelector('[data-testid="settings-key-loaded"]')?.textContent ?? null,
+      engineStatusText: document.querySelector('[data-testid="settings-engine-status-openrouter"]')?.textContent ?? null,
+    })
+  `);
+  return JSON.parse(raw);
+}
+
+async function setEngineToOpenRouterAndSave(cdp) {
+  await cdp.evaluate(`
+    (function () {
+      const select = document.getElementById('settings-engine');
+      const setter = Object.getOwnPropertyDescriptor(window.HTMLSelectElement.prototype, 'value').set;
+      setter.call(select, 'openrouter');
+      select.dispatchEvent(new Event('change', { bubbles: true }));
+      return true;
+    })()
+  `);
+  await cdp.evaluate(`
+    (function () {
+      const buttons = Array.from(document.querySelectorAll('[data-testid="settings-producer-section"] button'));
+      const save = buttons.find((button) => button.textContent.trim() === 'Guardar' || button.textContent.trim() === 'Save');
+      save.click();
+      return true;
+    })()
+  `);
+  await waitFor(
+    async () =>
+      JSON.parse(await cdp.evaluate('document.querySelector(\'[data-testid="settings-producer-saved"]\') !== null')),
+    { timeoutMs: 10_000, intervalMs: 500, label: 'settings saved confirmation' },
+  );
+}
+
+async function readRecommendedModelCards(cdp) {
+  await waitFor(
+    async () =>
+      JSON.parse(await cdp.evaluate('document.querySelectorAll(\'[data-testid="openrouter-model-card"]\').length > 0')),
+    { timeoutMs: 20_000, intervalMs: 1000, label: 'recommended model cards' },
+  );
+  return JSON.parse(
+    await cdp.evaluate(
+      "JSON.stringify(Array.from(document.querySelectorAll('[data-testid=\"openrouter-model-card\"]')).map((el) => el.textContent.trim()))",
+    ),
+  );
+}
+
+async function checkAllModelsSearch(cdp, query) {
+  await cdp.evaluate('document.querySelector(\'[data-testid="openrouter-models-tab-all"]\').click(); true');
+  await waitFor(
+    async () =>
+      JSON.parse(await cdp.evaluate('document.querySelectorAll(\'[data-testid="openrouter-model-row"]\').length > 0')),
+    { timeoutMs: 20_000, intervalMs: 1000, label: 'all-models rows' },
+  );
+  const totalCount = JSON.parse(
+    await cdp.evaluate('document.querySelectorAll(\'[data-testid="openrouter-model-row"]\').length'),
+  );
+
+  const escapedQuery = JSON.stringify(query);
+  await cdp.evaluate(`
+    (function () {
+      const input = document.querySelector('[data-testid="settings-producer-section"] input[type="text"]');
+      const setter = Object.getOwnPropertyDescriptor(window.HTMLInputElement.prototype, 'value').set;
+      setter.call(input, ${escapedQuery});
+      input.dispatchEvent(new Event('input', { bubbles: true }));
+      return true;
+    })()
+  `);
+  await new Promise((resolve) => setTimeout(resolve, 1500));
+  const filteredRows = JSON.parse(
+    await cdp.evaluate(
+      "JSON.stringify(Array.from(document.querySelectorAll('[data-testid=\"openrouter-model-row\"]')).map((el) => el.textContent.trim()))",
+    ),
+  );
+  return { totalCount, query, filteredCount: filteredRows.length, filteredRows };
+}
+
+async function readProducerEngineAndModels(cdp) {
+  const raw = await cdp.evaluate(`
+    JSON.stringify({
+      activeEngineText: document.querySelector('[data-testid="producer-active-engine"]')?.textContent ?? null,
+      modelOptions: Array.from(document.querySelectorAll('[data-testid="producer-model-picker"] option')).map((el) => ({
+        value: el.value,
+        label: el.textContent,
+      })),
+    })
+  `);
+  return JSON.parse(raw);
+}
+
+async function readTurnCosts(cdp) {
+  const raw = await cdp.evaluate(`
+    JSON.stringify(
+      Array.from(document.querySelectorAll('[data-testid^="producer-message-cost-"]')).map((el) => el.textContent.trim()),
+    )
+  `);
+  return JSON.parse(raw);
+}
+
+function readOpenRouterKeySecret() {
+  return execFileSync(
+    '/usr/bin/security',
+    ['find-generic-password', '-s', 'Video Maker', '-a', 'openrouter', '-w'],
+    { encoding: 'utf8' },
+  ).trim();
+}
+
+function walkFiles(dir) {
+  const out = [];
+  for (const entry of readdirSync(dir, { withFileTypes: true })) {
+    const full = join(dir, entry.name);
+    if (entry.isDirectory()) {
+      out.push(...walkFiles(full));
+    } else {
+      out.push(full);
+    }
+  }
+  return out;
+}
+
+function countOccurrences(text, needle) {
+  let count = 0;
+  let index = 0;
+  for (;;) {
+    index = text.indexOf(needle, index);
+    if (index === -1) {
+      return count;
+    }
+    count += 1;
+    index += needle.length;
+  }
+}
+
+function leakCheckPaths(paths, extraTexts = []) {
+  const secret = readOpenRouterKeySecret();
+  const leaks = [];
+  let filesScanned = 0;
+  for (const target of paths) {
+    let files;
+    try {
+      files = statSync(target).isDirectory() ? walkFiles(target) : [target];
+    } catch {
+      continue;
+    }
+    for (const file of files) {
+      filesScanned += 1;
+      let count = 0;
+      try {
+        count = countOccurrences(readFileSync(file, 'latin1'), secret);
+      } catch {
+        continue;
+      }
+      if (count > 0) {
+        leaks.push({ file, count });
+      }
+    }
+  }
+  for (const [label, text] of extraTexts) {
+    filesScanned += 1;
+    const count = countOccurrences(text, secret);
+    if (count > 0) {
+      leaks.push({ file: label, count });
+    }
+  }
+  return { secretLength: secret.length, filesScanned, leaks };
+}
+
+function readTurnLogs(turnsDir) {
+  if (!existsSync(turnsDir)) {
+    return [];
+  }
+  return readdirSync(turnsDir)
+    .filter((name) => name.endsWith('.jsonl'))
+    .map((name) => {
+      const lines = readFileSync(join(turnsDir, name), 'utf8')
+        .trim()
+        .split('\n')
+        .filter((line) => line !== '')
+        .map((line) => JSON.parse(line));
+      return { turnId: name.replace(/\.jsonl$/u, ''), events: lines };
+    });
+}
+
+async function runOpenRouterCheck() {
+  const screenshotDir = join(
+    REPO_ROOT,
+    'sdd',
+    'specs',
+    'spec-e-burgos-017-desktop-app',
+    'cycles',
+    'cycle-04',
+    'artifacts',
+  );
+
+  if (!existsSync(INSTALLED_APP_PATH)) {
+    throw new Error(`installed app not found at ${INSTALLED_APP_PATH} — install the freshly built dmg first`);
+  }
+  if (!existsSync(DEV_USER_DATA_DIR)) {
+    throw new Error(`dev userData not found at ${DEV_USER_DATA_DIR} — set PACKAGED_SMOKE_SEED_USER_DATA`);
+  }
+
+  const workDir = mkdtempSync(join(tmpdir(), 'openrouter-smoke-'));
+  const userDataDir = join(workDir, 'userData');
+  log('seed', `seeding userData at ${userDataDir} from ${DEV_USER_DATA_DIR}`);
+  const projectsDir = seedUserDataFromDev(userDataDir, DEV_USER_DATA_DIR, TUTORIAL.sourceSlug);
+
+  const appBinary = join(INSTALLED_APP_PATH, 'Contents', 'MacOS', 'Video Maker');
+  const child = spawn(appBinary, [`--remote-debugging-port=${DEBUG_PORT}`], {
+    env: finderLaunchEnv(userDataDir),
+    stdio: ['ignore', 'ignore', 'ignore'],
+    detached: false,
+  });
+
+  const renderApiPid = await waitFor(async () => renderApiPidUnder(child.pid), {
+    timeoutMs: 30_000,
+    intervalMs: 1000,
+    label: 'render-api process to start',
+  });
+  await waitFor(async () => renderApiTokenAndPort(renderApiPid), {
+    timeoutMs: 10_000,
+    intervalMs: 500,
+    label: 'render-api access token',
+  });
+  const port = await waitFor(
+    async () => {
+      const logPath = join(userDataDir, 'logs', 'render-api.log');
+      if (!existsSync(logPath)) return null;
+      const lines = readFileSync(logPath, 'utf8').trim().split('\n');
+      const last = JSON.parse(lines[lines.length - 1]);
+      return last.event === 'listening' ? last.port : null;
+    },
+    { timeoutMs: 15_000, intervalMs: 500, label: 'render-api port' },
+  );
+  log('render-api', `pid=${renderApiPid} port=${port}, no setup wizard expected (seeded completed userData)`);
+
+  const { cdp, hasCard } = await driveStudioProjectList(DEBUG_PORT, port, TUTORIAL.sourceSlug);
+  log('studio', `skipped setup wizard, project card present: ${hasCard}`);
+
+  await goToSettings(cdp);
+  const keyStatusBefore = await readOpenRouterKeyStatus(cdp);
+  log('settings', `key status: ${JSON.stringify(keyStatusBefore)}`);
+
+  await setEngineToOpenRouterAndSave(cdp);
+  const recommendedAfterSave = await readRecommendedModelCards(cdp);
+  await cdp.screenshot(join(screenshotDir, 'openrouter-settings-recommended.png'));
+  const allModelsSearch = await checkAllModelsSearch(cdp, 'gemini');
+  await cdp.screenshot(join(screenshotDir, 'openrouter-settings-all-models.png'));
+  const settingsHtml = await cdp.evaluate('document.documentElement.outerHTML');
+
+  await goToProjectList(cdp);
+  await openProducerPage(cdp, TUTORIAL.sourceSlug);
+  const engineAndModels = await readProducerEngineAndModels(cdp);
+  log('producer', `active engine: ${engineAndModels.activeEngineText}, models: ${JSON.stringify(engineAndModels.modelOptions)}`);
+
+  const conversationStartedAt = Date.now();
+  const { allToolCalls, lastStatus } = await driveConversation(cdp);
+  const renderJob = await waitForRenderJob(cdp, TUTORIAL.turnDeadlineMs);
+  const renderElapsedMs = Date.now() - conversationStartedAt;
+
+  const outDir = join(projectsDir, TUTORIAL.sourceSlug, 'out');
+  const mp4Path = existsSync(outDir) ? findLatestMp4(outDir) : null;
+  const probe = mp4Path === null ? null : ffprobeVideoStream(mp4Path);
+
+  const turnCosts = await readTurnCosts(cdp);
+  const producerHtml = await cdp.evaluate('document.documentElement.outerHTML');
+  const turnsDir = join(projectsDir, TUTORIAL.sourceSlug, 'work', 'producer', 'turns');
+  const turnLogs = readTurnLogs(turnsDir);
+
+  const idleRss = sumRss(processTreeSnapshot(child.pid));
+
+  cdp.close();
+  execSync(`osascript -e 'tell application "Video Maker" to quit'`, { stdio: 'ignore' });
+  await waitFor(async () => sh(`pgrep -f "${INSTALLED_APP_PATH}/Contents/MacOS/Video Maker" || true`) === '', {
+    timeoutMs: 15_000,
+    intervalMs: 500,
+    label: 'app process to exit after quit',
+  });
+  const orphans = sh(
+    "pgrep -fl 'render-api/main.js|chrome-headless-shell|ffmpeg|whisper-cli|sherpa-onnx-offline-tts' || true",
+  );
+
+  const leakCheck = leakCheckPaths(
+    [
+      join(userDataDir, 'studio.db'),
+      join(userDataDir, 'studio.db-wal'),
+      join(userDataDir, 'studio.db-shm'),
+      join(userDataDir, 'logs'),
+      join(userDataDir, 'setup.json'),
+      join(projectsDir, TUTORIAL.sourceSlug, 'work', 'producer'),
+    ],
+    [
+      ['settingsPageHtml', settingsHtml],
+      ['producerPageHtml', producerHtml],
+    ],
+  );
+
+  const report = {
+    engine: 'openrouter',
+    appPath: INSTALLED_APP_PATH,
+    userDataDir,
+    keyStatusBefore,
+    recommendedAfterSave,
+    allModelsSearch,
+    engineAndModels,
+    conversation: { allToolCalls, lastStatus },
+    renderJob,
+    renderElapsedMs,
+    mp4Path,
+    probe,
+    turnCosts,
+    turnLogs: turnLogs.map((turn) => ({
+      turnId: turn.turnId,
+      eventCount: turn.events.length,
+      toolEvents: turn.events.filter((event) => event.type === 'tool').map((event) => event.name ?? event.tool ?? event),
+      errorEvents: turn.events.filter((event) => `${event.type ?? ''}`.toLowerCase().includes('error')),
+    })),
+    idleRssKb: idleRss,
+    orphansAfterQuit: orphans,
+    leakCheck: { secretLength: leakCheck.secretLength, filesScanned: leakCheck.filesScanned, leaks: leakCheck.leaks },
+  };
+
+  writeFileSync(join(workDir, 'report.json'), JSON.stringify(report, null, 2));
+  process.stdout.write(`\n${JSON.stringify(report, null, 2)}\n`);
+  process.stdout.write(`\nreport written to ${join(workDir, 'report.json')}\n`);
+  process.stdout.write(`\nworkDir kept for inspection: ${workDir}\n`);
+}
+
 async function main() {
+  const cliArgs = parseCliArgs(process.argv.slice(2));
+  if (cliArgs.engine === 'openrouter') {
+    await runOpenRouterCheck();
+    return;
+  }
+
   const startedAt = Date.now();
   const version = readDesktopVersion();
   const dmgPath = join(REPO_ROOT, 'dist', 'desktop', `Video-Maker-${version}-arm64.dmg`);

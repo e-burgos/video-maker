@@ -157,6 +157,12 @@ export function ProducerPage() {
     }
   }, [model, sessionModel]);
 
+  useEffect(() => {
+    if (model !== null && models.length > 0 && !models.some((option) => option.id === model)) {
+      setModel(null);
+    }
+  }, [model, models]);
+
   async function send(text: string) {
     const trimmed = text.trim();
     if (trimmed === '' || running) {

@@ -14,7 +14,7 @@ import { RenderApiProvider } from '../api/render-api-context';
 import { RenderApiError } from '../api/render-api-error';
 import { ProducerPage } from './producer-page';
 import type { RenderApiClient } from '../api/render-api-client';
-import type { AssetListing, ServiceHealth } from '../api/render-api-types';
+import type { AssetListing, ProducerSettings, ServiceHealth } from '../api/render-api-types';
 
 function health(producer = true): ServiceHealth {
   return {
@@ -283,6 +283,43 @@ describe('ProducerPage', () => {
       ).toEqual(['openai/gpt-4o-mini', 'fireworks/ember-1']),
     );
     expect(screen.getByTestId('producer-model-help').textContent).toBe('your choice');
+  });
+
+  it('recovers the model when producer settings resolve after the conversation already locked a stale default', async () => {
+    let resolveSettings: (value: ProducerSettings) => void = () => undefined;
+    const settingsPromise = new Promise<ProducerSettings>((resolve) => {
+      resolveSettings = resolve;
+    });
+    renderPage({
+      getProducer: vi.fn().mockResolvedValue(producerConversation({ session: null })),
+      getProducerSettings: vi.fn().mockReturnValue(settingsPromise),
+    });
+
+    await waitFor(() =>
+      expect((screen.getByLabelText('model') as HTMLSelectElement).value).toBe('sonnet'),
+    );
+
+    resolveSettings(
+      producerSettings({
+        effectiveEngine: 'openrouter',
+        engines: {
+          claudeCli: { available: false, reason: 'not installed', models: producerModels().allowed },
+          openrouter: {
+            keyPresent: true,
+            keyHint: '1234',
+            models: [
+              { id: 'deepseek/deepseek-v4.1-flash', label: 'DeepSeek V4.1 Flash', description: 'cheap' },
+            ],
+          },
+        },
+      }),
+    );
+
+    await waitFor(() =>
+      expect((screen.getByLabelText('model') as HTMLSelectElement).value).toBe(
+        'deepseek/deepseek-v4.1-flash',
+      ),
+    );
   });
 
   it('adopts a turn that was already running when the page opened', async () => {

@@ -25,7 +25,15 @@
     "plan": "sdd/specs/spec-e-burgos-017-desktop-app/cycles/cycle-04/plan.md",
     "tasks": "sdd/specs/spec-e-burgos-017-desktop-app/cycles/cycle-04/tasks.json"
   },
-  "artifacts": [],
+  "artifacts": [
+    "sdd/specs/spec-e-burgos-017-desktop-app/cycles/cycle-04/artifacts/openrouter-model-bench.md",
+    "sdd/specs/spec-e-burgos-017-desktop-app/cycles/cycle-04/artifacts/openrouter-model-bench-results.json",
+    "sdd/specs/spec-e-burgos-017-desktop-app/cycles/cycle-04/artifacts/openrouter-model-bench-paid.md",
+    "sdd/specs/spec-e-burgos-017-desktop-app/cycles/cycle-04/artifacts/openrouter-model-bench-paid-results.json",
+    "sdd/specs/spec-e-burgos-017-desktop-app/cycles/cycle-04/artifacts/openrouter-smoke.md",
+    "sdd/specs/spec-e-burgos-017-desktop-app/cycles/cycle-04/artifacts/openrouter-settings-recommended.png",
+    "sdd/specs/spec-e-burgos-017-desktop-app/cycles/cycle-04/artifacts/openrouter-settings-all-models.png"
+  ],
   "metrics": null,
   "tables_created": [],
   "endpoints_implemented": [],
