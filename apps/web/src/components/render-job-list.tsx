@@ -65,7 +65,13 @@ export function RenderJobList({ slug, onSelect }: RenderJobListProps) {
                 </td>
                 <td>{job.state}</td>
                 <td>{job.stage ?? '—'}</td>
-                <td>{job.errorCode ?? '—'}</td>
+                <td>
+                  {job.errorCode === null
+                    ? '—'
+                    : job.errorCode === 'JOB_INTERRUPTED'
+                      ? t('job.interrupted')
+                      : job.errorCode}
+                </td>
                 <td>{job.createdAt}</td>
                 <td>{job.startedAt ?? '—'}</td>
                 <td>{job.finishedAt ?? '—'}</td>

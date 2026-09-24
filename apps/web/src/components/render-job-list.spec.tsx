@@ -53,6 +53,30 @@ describe('RenderJobList', () => {
     expect(onSelect).toHaveBeenCalledWith('job-0001');
   });
 
+  it('shows the friendly interrupted text in the error column instead of the raw JOB_INTERRUPTED code', async () => {
+    const listing: RenderJobListing = {
+      slug: 'smoke-ingest',
+      jobs: [summary({ id: 'job-0001', state: 'failed', errorCode: 'JOB_INTERRUPTED' })],
+    };
+    const listRenderJobs = vi.fn().mockResolvedValue(listing);
+    renderList(listRenderJobs as unknown as RenderApiClient['listRenderJobs']);
+
+    await waitFor(() => expect(screen.getByText('job-0001')).toBeTruthy());
+    expect(screen.getByText('Interrupted')).toBeTruthy();
+    expect(screen.queryByText('JOB_INTERRUPTED')).toBeNull();
+  });
+
+  it('shows any other error code as-is, unlike the interrupted one', async () => {
+    const listing: RenderJobListing = {
+      slug: 'smoke-ingest',
+      jobs: [summary({ id: 'job-0001', state: 'failed', errorCode: 'RENDER_FAILED' })],
+    };
+    const listRenderJobs = vi.fn().mockResolvedValue(listing);
+    renderList(listRenderJobs as unknown as RenderApiClient['listRenderJobs']);
+
+    await waitFor(() => expect(screen.getByText('RENDER_FAILED')).toBeTruthy());
+  });
+
   it('renders an empty jobs array as an empty list, without ErrorNotice', async () => {
     const listRenderJobs = vi.fn().mockResolvedValue({ slug: 'smoke-ingest', jobs: [] });
     renderList(listRenderJobs as unknown as RenderApiClient['listRenderJobs']);

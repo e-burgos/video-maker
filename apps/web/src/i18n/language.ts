@@ -6,7 +6,7 @@ export type Language = (typeof LANGUAGES)[number];
 
 export const LANGUAGE_STORAGE_KEY = 'video-maker.language';
 
-export const FALLBACK_LANGUAGE: Language = 'en';
+export const DEFAULT_LANGUAGE: Language = 'es';
 
 export function isLanguage(value: string | null): value is Language {
   return value !== null && (LANGUAGES as readonly string[]).includes(value);
@@ -16,22 +16,8 @@ export function languageNameKey(language: Language): TranslationKey {
   return language === 'es' ? 'language.name.es' : 'language.name.en';
 }
 
-export function preferredLanguage(
-  stored: string | null,
-  candidates: readonly string[],
-): Language {
-  if (isLanguage(stored)) {
-    return stored;
-  }
-
-  for (const candidate of candidates) {
-    const base = candidate.toLowerCase().split('-')[0] ?? '';
-    if (isLanguage(base)) {
-      return base;
-    }
-  }
-
-  return FALLBACK_LANGUAGE;
+export function preferredLanguage(stored: string | null): Language {
+  return isLanguage(stored) ? stored : DEFAULT_LANGUAGE;
 }
 
 export function readStoredLanguage(): string | null {
@@ -60,5 +46,5 @@ export function navigatorLanguages(): readonly string[] {
 }
 
 export function detectLanguage(): Language {
-  return preferredLanguage(readStoredLanguage(), navigatorLanguages());
+  return preferredLanguage(readStoredLanguage());
 }

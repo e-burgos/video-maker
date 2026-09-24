@@ -11,6 +11,7 @@ import {
   saveSetupState,
   verifyModelsReady,
   withCompleted,
+  withPreferredPort,
   withProjectsFolder,
 } from './setup-state';
 
@@ -70,9 +71,16 @@ describe('saveSetupState / loadSetupState round trip', () => {
     state = recordModelInstalled(state, 'whisperModel', { path: '/models/whisper-model.bin', sizeBytes: 10, sha256: 'aa' });
     state = withProjectsFolder(state, '/Users/friend/projects');
     state = withCompleted(state, true);
+    state = withPreferredPort(state, 42123);
 
     saveSetupState(path, state);
     expect(loadSetupState(path)).toEqual(state);
+  });
+});
+
+describe('withPreferredPort', () => {
+  it('records the port so the next launch can try it again first', () => {
+    expect(withPreferredPort(EMPTY_SETUP_STATE, 42500).preferredPort).toBe(42500);
   });
 });
 
@@ -83,6 +91,7 @@ describe('verifyModelsReady', () => {
     },
     projectsFolder: null,
     completed: true,
+    preferredPort: null,
   };
 
   it('is false when a required model was never recorded', () => {

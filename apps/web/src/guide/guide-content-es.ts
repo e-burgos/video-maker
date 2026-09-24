@@ -28,7 +28,7 @@ export const GUIDE_ES: GuideContent = {
         '| --- | --- | --- |',
         '| A-roll | `raw/aroll/` | Las tomas en las que hablás. Su habla se transcribe y decide cada corte, cada caption y cuánto dura el video. Obligatorio. |',
         '| B-roll | `raw/broll/` | Clips mudos que se superponen al A-roll. Se usa uno cuando su nombre de archivo coincide con una palabra que el guion repite al menos tres veces. |',
-        '| Imágenes | `raw/image/` | Fotos emparejadas por nombre de archivo igual que el B-roll, animadas con un Ken Burns lento o mostradas como imagen dentro de imagen. |',
+        '| Imágenes | `raw/images/` | Fotos emparejadas por nombre de archivo igual que el B-roll, animadas con un Ken Burns lento o mostradas como imagen dentro de imagen. |',
         '| Música | `raw/audio/` | La cama que suena bajo todo el video, atenuada sola cada vez que alguien habla. Hacela más larga que el montaje. |',
         '| Locución | `raw/voice/` | Una narración que grabaste vos. Reemplaza la voz sintetizada de una escena. |',
         '| Logo | `raw/logo/` | Un PNG con transparencia dibujado sobre el video terminado. Se enciende desde la página de vista previa. |',

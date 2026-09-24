@@ -1,6 +1,7 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
 import {
+  DEFAULT_LANGUAGE,
   LANGUAGE_STORAGE_KEY,
   detectLanguage,
   isLanguage,
@@ -27,28 +28,19 @@ describe('isLanguage', () => {
 });
 
 describe('preferredLanguage', () => {
-  it('honours a stored choice over the browser', () => {
-    expect(preferredLanguage('es', ['en-US'])).toBe('es');
-    expect(preferredLanguage('en', ['es-AR'])).toBe('en');
+  it('honours a stored choice, whichever language it is', () => {
+    expect(preferredLanguage('es')).toBe('es');
+    expect(preferredLanguage('en')).toBe('en');
   });
 
-  it('falls to the browser when nothing was stored', () => {
-    expect(preferredLanguage(null, ['es-AR', 'en-US'])).toBe('es');
-    expect(preferredLanguage(null, ['en-GB'])).toBe('en');
+  it('defaults to spanish when nothing was stored, regardless of the browser locale', () => {
+    expect(preferredLanguage(null)).toBe(DEFAULT_LANGUAGE);
+    expect(preferredLanguage(null)).toBe('es');
   });
 
-  it('reads any regional spanish as spanish', () => {
-    expect(preferredLanguage(null, ['ES-ar'])).toBe('es');
-    expect(preferredLanguage(null, ['es'])).toBe('es');
-  });
-
-  it('skips a language the studio does not ship and keeps looking', () => {
-    expect(preferredLanguage(null, ['pt-BR', 'es-AR'])).toBe('es');
-  });
-
-  it('ends in english when neither the storage nor the browser decides', () => {
-    expect(preferredLanguage(null, [])).toBe('en');
-    expect(preferredLanguage('fr', ['pt-BR'])).toBe('en');
+  it('defaults to spanish for a stored value the studio does not ship', () => {
+    expect(preferredLanguage('fr')).toBe('es');
+    expect(preferredLanguage('pt-BR')).toBe('es');
   });
 });
 
@@ -97,22 +89,21 @@ describe('navigatorLanguages', () => {
 
 describe('detectLanguage', () => {
   it('opens the studio in the stored language', () => {
-    window.localStorage.setItem(LANGUAGE_STORAGE_KEY, 'es');
+    window.localStorage.setItem(LANGUAGE_STORAGE_KEY, 'en');
+
+    expect(detectLanguage()).toBe('en');
+  });
+
+  it('opens in spanish with nothing stored, even on an english browser (dev request: spanish by default)', () => {
     vi.spyOn(window.navigator, 'languages', 'get').mockReturnValue(['en-US']);
 
     expect(detectLanguage()).toBe('es');
   });
 
-  it('opens a spanish browser in spanish with nothing stored', () => {
+  it('opens in spanish with nothing stored on a spanish browser too', () => {
     vi.spyOn(window.navigator, 'languages', 'get').mockReturnValue(['es-AR', 'en-US']);
 
     expect(detectLanguage()).toBe('es');
-  });
-
-  it('opens in english when neither decides', () => {
-    vi.spyOn(window.navigator, 'languages', 'get').mockReturnValue(['pt-BR']);
-
-    expect(detectLanguage()).toBe('en');
   });
 });
 

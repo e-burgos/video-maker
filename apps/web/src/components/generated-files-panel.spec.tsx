@@ -62,6 +62,13 @@ function renderPanel(options: {
       : vi.fn().mockRejectedValue(new RenderApiError('ARTIFACT_NOT_FOUND', 'no script', 404, null)),
   } as unknown as RenderApiClient;
 
+  if (options.scriptMode === true && client.listGenerated !== undefined) {
+    (client.listGenerated as ReturnType<typeof vi.fn>).mockResolvedValue({
+      ...(options.generated ?? GENERATED),
+      files: [...(options.generated ?? GENERATED).files, { path: 'work/voice/script-manifest.json', sizeBytes: 500, modifiedAtMs: 1 }],
+    });
+  }
+
   render(
     <RenderApiProvider client={client}>
       <GeneratedFilesPanel slug="display-ads" assets={options.assets ?? null} />
@@ -128,5 +135,23 @@ describe('GeneratedFilesPanel (FIX-006-001)', () => {
     expect((await screen.findByTestId('generated-narration-voice')).textContent).toContain(
       'es_AR-daniela-high',
     );
+  });
+
+  it('nunca pide el script-manifest si el listado no lo tiene, para no generar un 404 esperado en un proyecto nuevo', async () => {
+    const client = {
+      listGenerated: vi.fn().mockResolvedValue({ ...GENERATED, files: [] }),
+      getVoice: vi.fn().mockResolvedValue(voiceDocument()),
+      getProjectFile: vi.fn().mockRejectedValue(new RenderApiError('ARTIFACT_NOT_FOUND', 'no script', 404, null)),
+    } as unknown as RenderApiClient;
+
+    render(
+      <RenderApiProvider client={client}>
+        <GeneratedFilesPanel slug="display-ads" assets={null} />
+      </RenderApiProvider>,
+    );
+
+    await waitFor(() => expect(client.listGenerated).toHaveBeenCalled());
+    expect(await screen.findByTestId('generated-empty')).toBeTruthy();
+    expect(client.getProjectFile).not.toHaveBeenCalled();
   });
 });

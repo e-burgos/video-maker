@@ -1,12 +1,16 @@
 import { tmpdir } from 'node:os';
 
 import { readProducerConfig } from './config/producer-config';
+import { readRemotionConfig } from './config/remotion-config';
 import { readServerConfig } from './config/server-config';
 import { readStoreConfig } from './config/store-config';
 import { createNodeRenderApiDependencies } from './deps/node-render-api-dependencies';
 import { toErrorPayload } from './errors/to-error-payload';
 import { isRenderApiError } from './errors/render-api-error';
 import { createRenderApiServer } from './http/create-render-api-server';
+import { killOrphanableChromeChildren } from './process/kill-orphan-chrome';
+import { killProcessGroup } from './process/kill-process-group';
+import { startParentWatchdog } from './process/parent-watchdog';
 import { importLegacyMedia } from './store/import-legacy-media';
 
 const SHUTDOWN_SIGNALS = ['SIGINT', 'SIGTERM'] as const;
@@ -38,8 +42,24 @@ async function main(): Promise<void> {
 
   process.stdout.write(`${JSON.stringify({ event: 'listening', host: address.host, port: address.port })}\n`);
 
+  const remotion = readRemotionConfig(process.env);
+
+  async function shutDownAfterParentGone(): Promise<void> {
+    await killOrphanableChromeChildren({
+      parentPid: process.pid,
+      browserExecutablePath: remotion.browserExecutable,
+      killProcessGroup,
+    });
+    killProcessGroup(process.pid, 'SIGKILL');
+  }
+
+  const stopWatchdog = startParentWatchdog(process.env, () => {
+    void shutDownAfterParentGone();
+  });
+
   for (const signal of SHUTDOWN_SIGNALS) {
     process.once(signal, () => {
+      stopWatchdog();
       void server.close().then(() => {
         process.exitCode = 0;
       });

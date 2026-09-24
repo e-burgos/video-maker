@@ -7,6 +7,7 @@ import type { CommandOptions, CommandResult, CommandRunner } from './command-run
 export interface ExecaCommandRunnerOptions {
   defaultTimeoutMs?: number;
   cwd?: string;
+  env?: NodeJS.ProcessEnv;
 }
 
 export const SPAWN_FAILURE_EXIT_CODE = -1;
@@ -45,10 +46,12 @@ export function mapExecaResult(
 export class ExecaCommandRunner implements CommandRunner {
   private readonly defaultTimeoutMs: number;
   private readonly cwd: string | undefined;
+  private readonly env: NodeJS.ProcessEnv | undefined;
 
   constructor(opts?: ExecaCommandRunnerOptions) {
     this.defaultTimeoutMs = opts?.defaultTimeoutMs ?? DEFAULT_TIMEOUT_MS;
     this.cwd = opts?.cwd;
+    this.env = opts?.env;
   }
 
   async run(bin: string, args: readonly string[], opts?: CommandOptions): Promise<CommandResult> {
@@ -60,6 +63,7 @@ export class ExecaCommandRunner implements CommandRunner {
       stripFinalNewline: false,
       timeout: opts?.timeoutMs ?? this.defaultTimeoutMs,
       ...(cwd !== undefined ? { cwd } : {}),
+      ...(this.env !== undefined ? { env: this.env, extendEnv: false } : {}),
     });
 
     return mapExecaResult(bin, args, result);

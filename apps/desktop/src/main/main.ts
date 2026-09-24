@@ -8,20 +8,30 @@ import { appDirectoriesToCreate, resolveAppPaths } from './app-paths';
 import type { AppPaths } from './app-paths';
 import { checkClaudeCli } from './claude-cli-check';
 import type { ClaudeCliStatus } from './claude-cli-check';
-import { getFreePort } from './free-port';
 import { SETUP_CHANNELS } from './ipc-contract';
 import type { DownloadOutcome, SetupInitialData } from './ipc-contract';
-import { mergePathWithDefault, readLoginShellPath, resolveClaudeCli } from './login-shell-path';
+import { readLoginShellPath, resolveClaudeCli } from './login-shell-path';
 import { buildDownloadPlan, downloadAllModels } from './model-downloads';
 import type { ManifestModels } from './model-downloads';
 import { killProcessGroup, startRenderApiProcess } from './render-api-process';
 import type { LaunchCommand, RenderApiHandle } from './render-api-process';
+import {
+  killStaleRenderApiIfAny,
+  removeRenderApiPidFile,
+  renderApiIdentityMarker,
+  renderApiPidFilePath,
+  writeRenderApiPidFile,
+} from './render-api-pid-guard';
+import { buildRenderApiEnv } from './render-api-env';
+import { DEFAULT_LOCALE, menuStrings } from './menu-strings';
+import { resolvePreferredPort } from './preferred-port';
 import {
   loadSetupState,
   recordModelInstalled,
   saveSetupState,
   verifyModelsReady,
   withCompleted,
+  withPreferredPort,
   withProjectsFolder,
 } from './setup-state';
 import type { SetupState } from './setup-state';
@@ -43,6 +53,7 @@ if (userDataOverride !== undefined && userDataOverride !== '') {
 let mainWindow: BrowserWindow | null = null;
 let currentRenderApi: RenderApiHandle | null = null;
 let currentShuttingDown = false;
+let currentUserDataDir: string | null = null;
 
 function findRepoRoot(startDir: string): string {
   let dir = startDir;
@@ -102,7 +113,7 @@ function alreadyInstalledIds(state: SetupState, requiredIds: readonly string[]):
 }
 
 function detectedLocale(): 'es' | 'en' {
-  return app.getLocale().toLowerCase().startsWith('es') ? 'es' : 'en';
+  return DEFAULT_LOCALE;
 }
 
 function buildLaunchCommand(input: {
@@ -126,44 +137,6 @@ function buildLaunchCommand(input: {
     cwd: input.repoRoot,
     env: { ...input.env, SWC_NODE_PROJECT: 'tsconfig.base.json' },
   };
-}
-
-async function buildRenderApiEnv(input: {
-  paths: AppPaths;
-  port: number;
-  token: string;
-  projectsFolder: string;
-  isPackaged: boolean;
-}): Promise<NodeJS.ProcessEnv> {
-  const loginShellPath = await readLoginShellPath();
-  const mergedPath = mergePathWithDefault(loginShellPath, process.env.PATH ?? '');
-  const claudeCliPath = await resolveClaudeCli({ loginShellPath });
-
-  const env: NodeJS.ProcessEnv = {
-    ...process.env,
-    PATH: mergedPath,
-    RENDER_API_HOST,
-    RENDER_API_PORT: String(input.port),
-    RENDER_API_MEDIA_ROOT: input.projectsFolder,
-    RENDER_API_DB_PATH: input.paths.dbPath,
-    VIDEO_MAKER_BIN_DIR: input.paths.vendorBinDir,
-    VIDEO_MAKER_MODELS_DIR: input.paths.modelsDir,
-    RENDER_API_ACCESS_TOKEN: input.token,
-    REMOTION_BROWSER_EXECUTABLE: input.paths.chromeHeadlessShellPath,
-  };
-
-  if (claudeCliPath !== null) {
-    env.CLAUDE_CLI_PATH = claudeCliPath;
-  }
-  if (input.paths.remotionServeUrl !== null) {
-    env.REMOTION_SERVE_URL = input.paths.remotionServeUrl;
-  }
-  if (input.isPackaged) {
-    env.RENDER_API_WEB_ROOT = join(input.paths.resourcesDir, 'web');
-    env.STUDIO_MCP_ENTRY = join(input.paths.resourcesDir, 'mcp', 'main.js');
-  }
-
-  return env;
 }
 
 const PLACEHOLDER_HTML = `<!doctype html>
@@ -197,31 +170,32 @@ function buildApplicationMenu(
   noticesPath: string,
   onChangeProjectsFolder: () => void,
 ): void {
+  const strings = menuStrings();
   const template: MenuItemConstructorOptions[] = [
     { role: 'appMenu' },
     { role: 'editMenu' },
     { role: 'viewMenu' },
     {
-      label: 'Preferencias',
+      label: strings.preferences,
       submenu: [
         {
-          label: 'Carpeta de proyectos…',
+          label: strings.projectsFolder,
           click: onChangeProjectsFolder,
         },
       ],
     },
     { role: 'windowMenu' },
     {
-      label: 'Help',
+      label: strings.help,
       submenu: [
         {
-          label: 'Open logs folder',
+          label: strings.openLogsFolder,
           click: () => {
             void shell.openPath(paths.logsDir);
           },
         },
         {
-          label: 'About / Licenses',
+          label: strings.aboutLicenses,
           click: () => {
             void shell.openPath(noticesPath);
           },
@@ -344,23 +318,33 @@ async function shutdownCurrent(): Promise<void> {
   if (currentRenderApi !== null) {
     await currentRenderApi.stop();
   }
+  if (currentUserDataDir !== null) {
+    removeRenderApiPidFile(renderApiPidFilePath(currentUserDataDir));
+  }
 }
 
-async function startStudio(input: { paths: AppPaths; projectsFolder: string; repoRoot: string }): Promise<void> {
+async function startStudio(input: {
+  paths: AppPaths;
+  projectsFolder: string;
+  repoRoot: string;
+  port: number;
+}): Promise<void> {
   if (currentRenderApi !== null) {
     await currentRenderApi.stop();
     currentRenderApi = null;
   }
   currentShuttingDown = false;
 
-  const port = await getFreePort(RENDER_API_HOST);
+  const port = input.port;
   const token = randomBytes(32).toString('hex');
   const env = await buildRenderApiEnv({
     paths: input.paths,
+    host: RENDER_API_HOST,
     port,
     token,
     projectsFolder: input.projectsFolder,
     isPackaged: app.isPackaged,
+    parentPid: process.pid,
   });
   const launchCommand = buildLaunchCommand({
     isPackaged: app.isPackaged,
@@ -382,6 +366,7 @@ async function startStudio(input: { paths: AppPaths; projectsFolder: string; rep
     return;
   }
   currentRenderApi = renderApi;
+  writeRenderApiPidFile(renderApiPidFilePath(input.paths.userDataDir), renderApi.pid);
 
   renderApi.onExit(() => {
     if (currentShuttingDown || mainWindow === null) return;
@@ -432,7 +417,7 @@ async function startStudio(input: { paths: AppPaths; projectsFolder: string; rep
   }
 }
 
-async function changeProjectsFolder(paths: AppPaths, repoRoot: string): Promise<void> {
+async function changeProjectsFolder(paths: AppPaths, repoRoot: string, port: number): Promise<void> {
   if (mainWindow === null) return;
   const result = await dialog.showOpenDialog(mainWindow, { properties: ['openDirectory', 'createDirectory'] });
   const chosen = result.filePaths[0];
@@ -442,7 +427,7 @@ async function changeProjectsFolder(paths: AppPaths, repoRoot: string): Promise<
   const state = withProjectsFolder(loadSetupState(setupJsonPath), chosen);
   saveSetupState(setupJsonPath, state);
 
-  await startStudio({ paths, projectsFolder: chosen, repoRoot });
+  await startStudio({ paths, projectsFolder: chosen, repoRoot, port });
 }
 
 async function bootstrap(): Promise<void> {
@@ -458,17 +443,30 @@ async function bootstrap(): Promise<void> {
   for (const dir of appDirectoriesToCreate(paths)) {
     mkdirSync(dir, { recursive: true });
   }
+  currentUserDataDir = paths.userDataDir;
 
   const location: ResourceLocation = { isPackaged: app.isPackaged, repoRoot, resourcesDir: paths.resourcesDir };
 
-  buildApplicationMenu(paths, thirdPartyNoticesPath(location), () => {
-    void changeProjectsFolder(paths, repoRoot);
-  });
+  killStaleRenderApiIfAny(
+    renderApiPidFilePath(paths.userDataDir),
+    renderApiIdentityMarker({ isPackaged: app.isPackaged, resourcesDir: paths.resourcesDir }),
+    { killProcessGroup: (pid) => killProcessGroup(pid, 'SIGKILL') },
+  );
 
   const models = loadManifestModels(location);
   const requiredIds = requiredModelIds(models);
   const setupJsonPath = join(paths.userDataDir, 'setup.json');
-  const state = loadSetupState(setupJsonPath);
+  let state = loadSetupState(setupJsonPath);
+
+  const port = await resolvePreferredPort(RENDER_API_HOST, state.preferredPort);
+  if (port !== state.preferredPort) {
+    state = withPreferredPort(state, port);
+    saveSetupState(setupJsonPath, state);
+  }
+
+  buildApplicationMenu(paths, thirdPartyNoticesPath(location), () => {
+    void changeProjectsFolder(paths, repoRoot, port);
+  });
 
   const setupReady = state.completed && state.projectsFolder !== null && verifyModelsReady(state, requiredIds);
 
@@ -489,7 +487,7 @@ async function bootstrap(): Promise<void> {
     projectsFolder = result.projectsFolder;
   }
 
-  await startStudio({ paths, projectsFolder, repoRoot });
+  await startStudio({ paths, projectsFolder, repoRoot, port });
 }
 
 app.on('before-quit', () => {

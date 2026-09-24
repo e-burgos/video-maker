@@ -39,8 +39,64 @@ describe('FolderHeading', () => {
     renderHeading({}, null);
 
     expect(screen.getByText('No project')).toBeTruthy();
+    expect(screen.queryByTestId('folder-rename-open')).toBeNull();
     expect(screen.queryByTestId('folder-add-category-open')).toBeNull();
     expect(screen.queryByTestId('folder-delete')).toBeNull();
+  });
+
+  it('renames the folder inline, starting from its current name', async () => {
+    const renameFolder = vi.fn().mockResolvedValue({ id: 'display-ads', name: 'DA Q1', categories: [] });
+    const onChanged = renderHeading({ renameFolder });
+
+    fireEvent.click(screen.getByTestId('folder-rename-open'));
+    expect((screen.getByTestId('folder-rename-name') as HTMLInputElement).value).toBe('Display Ads');
+
+    fireEvent.change(screen.getByTestId('folder-rename-name'), { target: { value: 'DA Q1' } });
+    fireEvent.click(screen.getByTestId('folder-rename-submit'));
+
+    await waitFor(() => expect(onChanged).toHaveBeenCalled());
+    expect(renameFolder).toHaveBeenCalledWith('display-ads', 'DA Q1');
+    expect(screen.queryByTestId('folder-rename-form')).toBeNull();
+  });
+
+  it('never submits a blank name or the exact same name', () => {
+    const renameFolder = vi.fn();
+    renderHeading({ renameFolder });
+
+    fireEvent.click(screen.getByTestId('folder-rename-open'));
+    expect((screen.getByTestId('folder-rename-submit') as HTMLButtonElement).disabled).toBe(true);
+
+    fireEvent.change(screen.getByTestId('folder-rename-name'), { target: { value: '   ' } });
+    fireEvent.click(screen.getByTestId('folder-rename-submit'));
+    expect(renameFolder).not.toHaveBeenCalled();
+
+    fireEvent.change(screen.getByTestId('folder-rename-name'), { target: { value: 'Display Ads' } });
+    expect((screen.getByTestId('folder-rename-submit') as HTMLButtonElement).disabled).toBe(true);
+  });
+
+  it('cancels the rename without calling the service', () => {
+    const renameFolder = vi.fn();
+    renderHeading({ renameFolder });
+
+    fireEvent.click(screen.getByTestId('folder-rename-open'));
+    fireEvent.change(screen.getByTestId('folder-rename-name'), { target: { value: 'DA Q1' } });
+    fireEvent.click(screen.getByTestId('folder-rename-cancel'));
+
+    expect(screen.queryByTestId('folder-rename-form')).toBeNull();
+    expect(renameFolder).not.toHaveBeenCalled();
+  });
+
+  it('shows the typed error when renaming fails', async () => {
+    const renameFolder = vi
+      .fn()
+      .mockRejectedValue(new RenderApiError('FOLDER_NAME_TAKEN', 'taken', null, null));
+    renderHeading({ renameFolder });
+
+    fireEvent.click(screen.getByTestId('folder-rename-open'));
+    fireEvent.change(screen.getByTestId('folder-rename-name'), { target: { value: 'DA Q1' } });
+    fireEvent.click(screen.getByTestId('folder-rename-submit'));
+
+    await waitFor(() => expect(screen.getByRole('alert').textContent).toContain('FOLDER_NAME_TAKEN'));
   });
 
   it('creates a category inside this folder', async () => {

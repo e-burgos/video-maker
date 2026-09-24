@@ -12,9 +12,15 @@ export interface SetupState {
   readonly models: Readonly<Record<string, InstalledModelRecord>>;
   readonly projectsFolder: string | null;
   readonly completed: boolean;
+  readonly preferredPort: number | null;
 }
 
-export const EMPTY_SETUP_STATE: SetupState = { models: {}, projectsFolder: null, completed: false };
+export const EMPTY_SETUP_STATE: SetupState = {
+  models: {},
+  projectsFolder: null,
+  completed: false,
+  preferredPort: null,
+};
 
 function isInstalledModelRecord(value: unknown): value is InstalledModelRecord {
   if (typeof value !== 'object' || value === null) {
@@ -46,6 +52,7 @@ function parseSetupState(raw: unknown): SetupState {
     models,
     projectsFolder: typeof record.projectsFolder === 'string' ? record.projectsFolder : null,
     completed: record.completed === true,
+    preferredPort: typeof record.preferredPort === 'number' ? record.preferredPort : null,
   };
 }
 
@@ -76,6 +83,10 @@ export function withProjectsFolder(state: SetupState, projectsFolder: string): S
 
 export function withCompleted(state: SetupState, completed: boolean): SetupState {
   return { ...state, completed };
+}
+
+export function withPreferredPort(state: SetupState, preferredPort: number): SetupState {
+  return { ...state, preferredPort };
 }
 
 export interface VerifyFileDeps {

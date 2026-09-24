@@ -68,7 +68,11 @@ describe('handleListProjects', () => {
         `${STORE.mediaRoot}/acme-launch/raw`,
         `${STORE.mediaRoot}/acme-launch/out`,
       ],
-      files: [{ path: `${STORE.mediaRoot}/acme-launch/work/catalog.json`, contents: '{}' }],
+      files: [
+        { path: `${STORE.mediaRoot}/acme-launch/work/catalog.json`, contents: '{}' },
+        { path: `${STORE.mediaRoot}/acme-launch/raw/aroll/clip-0001.mp4`, contents: 'x' },
+        { path: `${STORE.mediaRoot}/acme-launch/out/final.mp4`, contents: 'x' },
+      ],
     });
     const deps = createFakeRenderApiDependencies(callLog, { storage });
     deps.localStore.projects.insert('zeta-project');
@@ -83,7 +87,7 @@ describe('handleListProjects', () => {
       },
       {
         slug: 'zeta-project',
-        layout: { raw: true, catalog: false, timeline: false, edl: false, out: true },
+        layout: { raw: false, catalog: false, timeline: false, edl: false, out: false },
       },
     ]);
     expect(Object.keys(response.body as object).length).toBeGreaterThan(0);
@@ -106,7 +110,7 @@ describe('handleListProjects', () => {
     expect(response.body).toEqual([
       {
         slug: 'valid-project',
-        layout: { raw: true, catalog: false, timeline: false, edl: false, out: false },
+        layout: { raw: false, catalog: false, timeline: false, edl: false, out: false },
       },
     ]);
   });
@@ -124,7 +128,7 @@ describe('handleCreateProject', () => {
     expect(callLog.ports()).toEqual([]);
   });
 
-  it('creates the eight layout directories in order, inserts the row and answers 201 with the same keys as before', async () => {
+  it('creates the eight layout directories in order, inserts the row and answers 201 with honest, content-based layout flags (US-017-QA-008: raw/out are empty on a brand-new project)', async () => {
     const callLog = createCallLog();
     const storage = createFakeObjectStorage(callLog);
     const deps = createFakeRenderApiDependencies(callLog, { storage });
@@ -141,7 +145,7 @@ describe('handleCreateProject', () => {
     expect(Object.keys(response.body as object).sort()).toEqual(PROJECT_DETAIL_KEYS);
     expect(response.body).toEqual({
       slug: 'smoke-ingest',
-      layout: { raw: true, catalog: false, timeline: false, edl: false, out: true },
+      layout: { raw: false, catalog: false, timeline: false, edl: false, out: false },
       assetSource: 'raw-scan',
       assetCounts: { aroll: 0, broll: 0, image: 0, audio: 0, voice: 0, logo: 0 },
     });

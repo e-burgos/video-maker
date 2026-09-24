@@ -23,7 +23,8 @@ afterEach(() => {
 });
 
 describe('GuidePage', () => {
-  it('explains every section of the studio in english', async () => {
+  it('explains every section of the studio in english when that is the chosen language', async () => {
+    window.localStorage.setItem(LANGUAGE_STORAGE_KEY, 'en');
     renderGuide();
 
     await waitFor(() => expect(screen.getByTestId('guide')).toBeTruthy());
@@ -31,6 +32,15 @@ describe('GuidePage', () => {
     expect(
       screen.getAllByTestId('guide-section').map((node) => node.dataset['guideSection']),
     ).toEqual(GUIDE_EN.sections.map((section) => section.id));
+  });
+
+  it('opens in spanish by default, with nothing stored', async () => {
+    renderGuide();
+
+    await waitFor(() =>
+      expect(screen.getByRole('heading', { level: 1 }).textContent).toBe(GUIDE_ES.title),
+    );
+    expect(screen.getByTestId('guide').dataset['guideLanguage']).toBe('es');
   });
 
   it('reads the very same sections in spanish when that is the language', async () => {
@@ -68,6 +78,7 @@ describe('GuidePage', () => {
   });
 
   it('says what the library roles decide before anything is uploaded', async () => {
+    window.localStorage.setItem(LANGUAGE_STORAGE_KEY, 'en');
     renderGuide();
 
     await waitFor(() => expect(screen.getByTestId('guide')).toBeTruthy());

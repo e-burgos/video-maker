@@ -1,4 +1,4 @@
-import type { StorageStat } from '../deps/object-storage';
+import type { ObjectStorage, StorageStat } from '../deps/object-storage';
 
 export interface ProjectLayoutFlags {
   readonly raw: boolean;
@@ -9,19 +9,37 @@ export interface ProjectLayoutFlags {
 }
 
 export interface ProjectLayoutStats {
-  readonly raw: StorageStat | null;
+  readonly rawHasFiles: boolean;
   readonly catalog: StorageStat | null;
   readonly timeline: StorageStat | null;
   readonly edl: StorageStat | null;
-  readonly out: StorageStat | null;
+  readonly outHasFiles: boolean;
 }
 
 export function layoutFlagsFrom(stats: ProjectLayoutStats): ProjectLayoutFlags {
   return {
-    raw: stats.raw?.kind === 'directory',
+    raw: stats.rawHasFiles,
     catalog: stats.catalog?.kind === 'file',
     timeline: stats.timeline?.kind === 'file',
     edl: stats.edl?.kind === 'file',
-    out: stats.out?.kind === 'directory',
+    out: stats.outHasFiles,
   };
+}
+
+export async function directoryHasAnyFile(storage: ObjectStorage, path: string): Promise<boolean> {
+  const entries = await storage.listDirectory(path);
+  if (entries === null) {
+    return false;
+  }
+  for (const entry of entries) {
+    if (entry.isFile) {
+      return true;
+    }
+  }
+  for (const entry of entries) {
+    if (entry.isDirectory && (await directoryHasAnyFile(storage, `${path}/${entry.name}`))) {
+      return true;
+    }
+  }
+  return false;
 }

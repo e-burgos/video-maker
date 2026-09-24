@@ -36,6 +36,7 @@ import type { StudioDatabase } from '@video-maker/local-store';
 
 import { createClaudeCliAiAgent } from '../ai/claude-cli-ai-agent';
 import { readAiAgentConfig } from '../config/ai-agent-config';
+import { allowlistedChildEnv } from '../config/child-process-env';
 import { readProducerConfig } from '../config/producer-config';
 import { readRemotionConfig } from '../config/remotion-config';
 import { readServerConfig } from '../config/server-config';
@@ -48,7 +49,7 @@ import type { EngineModuleStatus } from '../engine/engine-modules';
 import { MEDIA_BINARY_NAMES } from '../engine/media-binaries';
 import type { BinaryStatus, ResolvedMediaBinaries } from '../engine/media-binaries';
 import { PipelineStageError } from '../errors/pipeline-stage-error';
-import type { ResolvedVoiceBinaries } from '@video-maker/media-local';
+import type { CommandRunner, ResolvedVoiceBinaries } from '@video-maker/media-local';
 
 import type { ByteRange, ObjectStorage, WriteTemporaryInput, WriteTemporaryOutcome } from './object-storage';
 import type { LocalStorePort, RenderApiDependencies, VoicePreviewCache } from './render-api-dependencies';
@@ -336,7 +337,7 @@ function createConfinedNodeObjectStorage(store: StoreConfig): ObjectStorage {
 function spawnProducerProcess(input: SpawnProducerProcessInput): SpawnedProducerProcess {
   const child = spawn(input.command, [...input.args], {
     cwd: input.cwd,
-    env: process.env,
+    env: allowlistedChildEnv(process.env),
     stdio: ['ignore', 'pipe', 'pipe'],
   });
 
@@ -385,6 +386,8 @@ export function createNodeRenderApiDependencies(
   let voiceBinaries: Promise<ResolvedVoiceBinaries> | null = null;
   let studioDatabase: StudioDatabase | null = null;
   let localStorePort: LocalStorePort | null = null;
+  let commandRunner: Promise<CommandRunner> | null = null;
+  const childEnv = allowlistedChildEnv(env);
 
   const nowIso = (): string => new Date().toISOString();
 
@@ -412,6 +415,14 @@ export function createNodeRenderApiDependencies(
   const loadMediaLocal = (): Promise<typeof import('@video-maker/media-local')> => {
     mediaLocalModule ??= import('@video-maker/media-local');
     return mediaLocalModule;
+  };
+
+  const loadCommandRunner = (): Promise<CommandRunner> => {
+    commandRunner ??= (async () => {
+      const { ExecaCommandRunner } = await loadMediaLocal();
+      return new ExecaCommandRunner({ env: childEnv });
+    })();
+    return commandRunner;
   };
 
   const loadRender = (): Promise<typeof import('@video-maker/composition-remotion/render')> => {
@@ -473,9 +484,9 @@ export function createNodeRenderApiDependencies(
     },
 
     mixTimelineAudio: async ({ timeline, outPath, projectRoot }) => {
-      const { ExecaCommandRunner, mixTimelineAudio } = await loadMediaLocal();
-      const { ffmpeg } = await loadBinaries();
-      const result = await mixTimelineAudio(timeline, outPath, new ExecaCommandRunner(), {
+      const { mixTimelineAudio } = await loadMediaLocal();
+      const [{ ffmpeg }, runner] = await Promise.all([loadBinaries(), loadCommandRunner()]);
+      const result = await mixTimelineAudio(timeline, outPath, runner, {
         ffmpegPath: ffmpeg,
         runOptions: { cwd: projectRoot },
       });
@@ -483,9 +494,9 @@ export function createNodeRenderApiDependencies(
     },
 
     muxAudioIntoVideo: async ({ videoPath, audioPath, outPath }) => {
-      const { ExecaCommandRunner, muxAudioIntoVideo } = await loadMediaLocal();
-      const { ffmpeg, ffprobe } = await loadBinaries();
-      const result = await muxAudioIntoVideo(videoPath, audioPath, outPath, new ExecaCommandRunner(), {
+      const { muxAudioIntoVideo } = await loadMediaLocal();
+      const [{ ffmpeg, ffprobe }, runner] = await Promise.all([loadBinaries(), loadCommandRunner()]);
+      const result = await muxAudioIntoVideo(videoPath, audioPath, outPath, runner, {
         ffmpegPath: ffmpeg,
         ffprobePath: ffprobe,
       });
@@ -493,9 +504,9 @@ export function createNodeRenderApiDependencies(
     },
 
     verifyMixLoudness: async ({ path, target }) => {
-      const { ExecaCommandRunner, verifyMixLoudness } = await loadMediaLocal();
-      const { ffmpeg } = await loadBinaries();
-      return verifyMixLoudness(path, target, new ExecaCommandRunner(), { ffmpegPath: ffmpeg });
+      const { verifyMixLoudness } = await loadMediaLocal();
+      const [{ ffmpeg }, runner] = await Promise.all([loadBinaries(), loadCommandRunner()]);
+      return verifyMixLoudness(path, target, runner, { ffmpegPath: ffmpeg });
     },
 
     ensureDirectory: async (path) => {
@@ -543,15 +554,15 @@ export function createNodeRenderApiDependencies(
     hashText: (text) => createHash('sha256').update(text, 'utf8').digest('hex'),
 
     probeAsset: async ({ path }) => {
-      const { ExecaCommandRunner, probeMedia } = await loadMediaLocal();
-      const { ffprobe } = await loadBinaries();
-      return probeMedia(path, new ExecaCommandRunner(), { ffprobePath: ffprobe });
+      const { probeMedia } = await loadMediaLocal();
+      const [{ ffprobe }, runner] = await Promise.all([loadBinaries(), loadCommandRunner()]);
+      return probeMedia(path, runner, { ffprobePath: ffprobe });
     },
 
     extractFrame: async ({ path, atSeconds, outPath, maxLongSidePx, projectRoot }) => {
-      const { ExecaCommandRunner, extractFrame: runExtractFrame } = await loadMediaLocal();
-      const { ffmpeg } = await loadBinaries();
-      await runExtractFrame(path, atSeconds, outPath, new ExecaCommandRunner(), {
+      const { extractFrame: runExtractFrame } = await loadMediaLocal();
+      const [{ ffmpeg }, runner] = await Promise.all([loadBinaries(), loadCommandRunner()]);
+      await runExtractFrame(path, atSeconds, outPath, runner, {
         maxLongSidePx,
         ffmpegPath: ffmpeg,
         runOptions: { cwd: projectRoot },
@@ -580,9 +591,9 @@ export function createNodeRenderApiDependencies(
     },
 
     buildKenBurnsClip: async ({ photoPath, frames, fps, outPath, projectRoot }) => {
-      const { buildKenBurnsClip: runBuildKenBurnsClip, ExecaCommandRunner } = await loadMediaLocal();
-      const { ffmpeg } = await loadBinaries();
-      await runBuildKenBurnsClip(photoPath, frames, outPath, new ExecaCommandRunner(), {
+      const { buildKenBurnsClip: runBuildKenBurnsClip } = await loadMediaLocal();
+      const [{ ffmpeg }, runner] = await Promise.all([loadBinaries(), loadCommandRunner()]);
+      await runBuildKenBurnsClip(photoPath, frames, outPath, runner, {
         fps,
         ffmpegPath: ffmpeg,
         runOptions: { cwd: projectRoot },
@@ -590,9 +601,9 @@ export function createNodeRenderApiDependencies(
     },
 
     concatVideoClips: async ({ listPath, outPath, projectRoot }) => {
-      const { concatVideoClips: runConcatVideoClips, ExecaCommandRunner } = await loadMediaLocal();
-      const { ffmpeg } = await loadBinaries();
-      await runConcatVideoClips(listPath, outPath, new ExecaCommandRunner(), {
+      const { concatVideoClips: runConcatVideoClips } = await loadMediaLocal();
+      const [{ ffmpeg }, runner] = await Promise.all([loadBinaries(), loadCommandRunner()]);
+      await runConcatVideoClips(listPath, outPath, runner, {
         ffmpegPath: ffmpeg,
         runOptions: { cwd: projectRoot },
       });
@@ -612,7 +623,7 @@ export function createNodeRenderApiDependencies(
 
     createCommandRunner: async () => {
       const { ExecaCommandRunner } = await loadMediaLocal();
-      return new ExecaCommandRunner();
+      return new ExecaCommandRunner({ env: childEnv });
     },
 
     resolveMontageBinaries: async () => {
@@ -621,9 +632,9 @@ export function createNodeRenderApiDependencies(
     },
 
     aiAgent: async (request) => {
-      const { ExecaCommandRunner } = await loadMediaLocal();
       const config = readAiAgentConfig(env, tmpdir());
-      return createClaudeCliAiAgent(new ExecaCommandRunner(), config)(request);
+      const runner = await loadCommandRunner();
+      return createClaudeCliAiAgent(runner, config)(request);
     },
 
     producerAgent: createClaudeCodeProducerAgent(
@@ -674,13 +685,8 @@ export function createNodeRenderApiDependencies(
     },
 
     synthesizeVoice: async ({ textPath, outPath, modelPath: voiceDirPath, lengthScale, projectRoot }) => {
-      const {
-        ExecaCommandRunner,
-        synthesizeSpeech,
-        VOICE_ESPEAK_DATA_DIR_NAME,
-        VOICE_TOKENS_FILE_NAME,
-      } = await loadMediaLocal();
-      const { ttsCli } = await loadVoiceBinaries();
+      const { synthesizeSpeech, VOICE_ESPEAK_DATA_DIR_NAME, VOICE_TOKENS_FILE_NAME } = await loadMediaLocal();
+      const [{ ttsCli }, runner] = await Promise.all([loadVoiceBinaries(), loadCommandRunner()]);
       const voicesDirectory = dirname(voiceDirPath);
       const ownDataDirPath = join(voiceDirPath, VOICE_ESPEAK_DATA_DIR_NAME);
       const dataDirPath = (await directoryExists(ownDataDirPath))
@@ -699,14 +705,14 @@ export function createNodeRenderApiDependencies(
           runOptions: { cwd: projectRoot },
           ...(lengthScale === undefined ? {} : { lengthScale }),
         },
-        new ExecaCommandRunner(),
+        runner,
       );
     },
 
     extractVoiceAudio: async ({ inputPath, outPath, sampleRate, channels, projectRoot }) => {
-      const { ExecaCommandRunner, extractAudioForTranscription } = await loadMediaLocal();
-      const { ffmpeg } = await loadBinaries();
-      await extractAudioForTranscription(inputPath, outPath, new ExecaCommandRunner(), {
+      const { extractAudioForTranscription } = await loadMediaLocal();
+      const [{ ffmpeg }, runner] = await Promise.all([loadBinaries(), loadCommandRunner()]);
+      await extractAudioForTranscription(inputPath, outPath, runner, {
         sampleRate,
         channels,
         ffmpegPath: ffmpeg,
@@ -715,18 +721,18 @@ export function createNodeRenderApiDependencies(
     },
 
     concatVoiceTracks: async ({ inputPaths, outPath, gapMs, sampleRate, channels, projectRoot }) => {
-      const { ExecaCommandRunner, concatSpeechSegments } = await loadMediaLocal();
-      const { ffmpeg } = await loadBinaries();
+      const { concatSpeechSegments } = await loadMediaLocal();
+      const [{ ffmpeg }, runner] = await Promise.all([loadBinaries(), loadCommandRunner()]);
       await concatSpeechSegments(
         outPath,
         { inputPaths, gapMs, sampleRate, channels, ffmpegPath: ffmpeg, runOptions: { cwd: projectRoot } },
-        new ExecaCommandRunner(),
+        runner,
       );
     },
 
     placeVoiceTracks: async ({ segments, totalMs, outPath, sampleRate, channels, projectRoot }) => {
-      const { ExecaCommandRunner, placeSpeechSegments } = await loadMediaLocal();
-      const { ffmpeg } = await loadBinaries();
+      const { placeSpeechSegments } = await loadMediaLocal();
+      const [{ ffmpeg }, runner] = await Promise.all([loadBinaries(), loadCommandRunner()]);
       await placeSpeechSegments(
         outPath,
         {
@@ -737,13 +743,13 @@ export function createNodeRenderApiDependencies(
           runOptions: { cwd: projectRoot },
           ...(totalMs === null ? {} : { totalMs }),
         },
-        new ExecaCommandRunner(),
+        runner,
       );
     },
 
     transcribeVoice: async ({ wavPath, outBase, assetId, language, projectRoot }) => {
-      const { ExecaCommandRunner, transcribeWithWhisperCpp } = await loadMediaLocal();
-      const { whisperCli, whisperModel } = await loadVoiceBinaries();
+      const { transcribeWithWhisperCpp } = await loadMediaLocal();
+      const [{ whisperCli, whisperModel }, runner] = await Promise.all([loadVoiceBinaries(), loadCommandRunner()]);
       return transcribeWithWhisperCpp(
         wavPath,
         {
@@ -754,7 +760,7 @@ export function createNodeRenderApiDependencies(
           whisperPath: whisperCli,
           runOptions: { cwd: projectRoot },
         },
-        new ExecaCommandRunner(),
+        runner,
       );
     },
   };

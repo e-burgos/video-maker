@@ -18,6 +18,8 @@ export function FolderHeading({ folder, total, onChanged }: FolderHeadingProps) 
   const [categoryName, setCategoryName] = useState('');
   const [adding, setAdding] = useState(false);
   const [confirmingDelete, setConfirmingDelete] = useState(false);
+  const [renaming, setRenaming] = useState(false);
+  const [renameValue, setRenameValue] = useState('');
   const [error, setError] = useState<RenderApiError | null>(null);
   const [pending, setPending] = useState(false);
 
@@ -50,6 +52,17 @@ export function FolderHeading({ folder, total, onChanged }: FolderHeadingProps) 
           <div className="flex flex-wrap items-center gap-2">
             <button
               type="button"
+              data-testid="folder-rename-open"
+              onClick={() => {
+                setRenameValue(folder.name);
+                setRenaming((open) => !open);
+              }}
+              className="rounded-md border border-slate-700 px-2 py-1 text-xs text-slate-300 hover:border-slate-500"
+            >
+              {t('folder.rename')}
+            </button>
+            <button
+              type="button"
               data-testid="folder-add-category-open"
               onClick={() => setAdding((open) => !open)}
               className="rounded-md border border-slate-700 px-2 py-1 text-xs text-slate-300 hover:border-slate-500"
@@ -67,6 +80,49 @@ export function FolderHeading({ folder, total, onChanged }: FolderHeadingProps) 
           </div>
         )}
       </div>
+
+      {folder !== null && renaming && (
+        <form
+          data-testid="folder-rename-form"
+          onSubmit={(event) => {
+            event.preventDefault();
+            const trimmed = renameValue.trim();
+            if (trimmed === '' || trimmed === folder.name) {
+              return;
+            }
+            void run(async () => {
+              await client.renameFolder(folder.id, trimmed);
+              setRenaming(false);
+            });
+          }}
+          className="flex flex-wrap items-center gap-2"
+        >
+          <input
+            data-testid="folder-rename-name"
+            aria-label={t('folder.renameNameLabel')}
+            value={renameValue}
+            onChange={(event) => setRenameValue(event.target.value)}
+            className="w-48 rounded-md border border-slate-700 bg-slate-900 px-2 py-1 text-xs text-slate-100"
+          />
+          <button
+            type="submit"
+            data-testid="folder-rename-submit"
+            disabled={pending || renameValue.trim() === '' || renameValue.trim() === folder.name}
+            className="rounded-md border border-slate-600 px-2 py-1 text-xs text-slate-200 hover:border-slate-400 disabled:opacity-50"
+          >
+            {t('folder.renameSubmit')}
+          </button>
+          <button
+            type="button"
+            data-testid="folder-rename-cancel"
+            disabled={pending}
+            onClick={() => setRenaming(false)}
+            className="rounded-md border border-slate-700 px-2 py-1 text-xs text-slate-300 hover:border-slate-500 disabled:opacity-50"
+          >
+            {t('folder.renameCancel')}
+          </button>
+        </form>
+      )}
 
       {folder !== null && adding && (
         <form

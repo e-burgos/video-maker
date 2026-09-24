@@ -1,6 +1,7 @@
 import type { ProducerModelOption } from '../api/render-api-types';
 import type { Blocker } from '../api/blockers';
 import { blockerId } from '../api/blockers';
+import { translateProducerModel } from '../api/producer-model-i18n';
 import { useT } from '../i18n/language-context';
 
 export type ProducerComposerProps = {
@@ -28,7 +29,8 @@ export function ProducerComposer({
   const blocked = blockers.length > 0;
   const empty = value.trim() === '';
   const disabled = blocked || pending || empty;
-  const chosen = models.find((option) => option.id === model) ?? null;
+  const translatedModels = models.map((option) => translateProducerModel(t, option));
+  const chosen = translatedModels.find((option) => option.id === model) ?? null;
 
   return (
     <div
@@ -68,7 +70,7 @@ export function ProducerComposer({
             onChange={(event) => onModelChange(event.target.value)}
             className="rounded-md border border-slate-700 bg-slate-950 px-2 py-1 text-xs text-slate-100 disabled:opacity-40"
           >
-            {models.map((option) => (
+            {translatedModels.map((option) => (
               <option key={option.id} value={option.id} title={option.description}>
                 {option.label}
               </option>

@@ -104,6 +104,17 @@ describe('ProjectsPage', () => {
     expect(within(section('display-ads')).getByTestId('folder-empty')).toBeTruthy();
   });
 
+  it('keeps every folder visible when the account has zero videos, instead of the generic empty state', async () => {
+    renderPage({
+      listProjects: vi.fn().mockResolvedValue([]),
+      getOrganization: vi.fn().mockResolvedValue({ folders: DISPLAY_ADS.folders, videos: {} }),
+    });
+
+    await waitFor(() => expect(screen.getByTestId('folder-section')).toBeTruthy());
+    expect(within(section('display-ads')).getByTestId('folder-empty')).toBeTruthy();
+    expect(screen.queryByText(/No videos yet/u)).toBeNull();
+  });
+
   it('keeps the archived videos out of the folders, behind their own toggle', async () => {
     renderPage({
       listProjects: vi.fn().mockResolvedValue([project('vivo'), project('guardado')]),

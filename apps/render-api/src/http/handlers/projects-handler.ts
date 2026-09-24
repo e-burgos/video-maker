@@ -15,7 +15,7 @@ import { PipelineStageError } from '../../errors/pipeline-stage-error';
 import { isValidProjectSlug } from '../../store/project-slug';
 import { findCategory, findFolder, placementOf } from '../../store/organization';
 import type { Organization, VideoPlacement } from '../../store/organization';
-import { layoutFlagsFrom } from '../../store/project-layout';
+import { directoryHasAnyFile, layoutFlagsFrom } from '../../store/project-layout';
 import type { ProjectLayoutFlags } from '../../store/project-layout';
 import { countAssetsByRole, resolveProjectAssets } from '../../store/project-assets';
 import type { AssetRole } from '../../store/asset-path';
@@ -58,14 +58,14 @@ function assertValidProjectSlug(slug: string): void {
 }
 
 async function computeLayoutFlags(storage: ObjectStorage, project: MediaProject): Promise<ProjectLayoutFlags> {
-  const [raw, catalog, timeline, edl, out] = await Promise.all([
-    storage.stat(project.rawDir),
+  const [rawHasFiles, catalog, timeline, edl, outHasFiles] = await Promise.all([
+    directoryHasAnyFile(storage, project.rawDir),
     storage.stat(toAbsolutePath(project, catalogPath())),
     storage.stat(toAbsolutePath(project, timelinePath())),
     storage.stat(toAbsolutePath(project, editDecisionListPath())),
-    storage.stat(project.outDir),
+    directoryHasAnyFile(storage, project.outDir),
   ]);
-  return layoutFlagsFrom({ raw, catalog, timeline, edl, out });
+  return layoutFlagsFrom({ rawHasFiles, catalog, timeline, edl, outHasFiles });
 }
 
 async function buildProjectDetail(

@@ -94,8 +94,9 @@ function ReadyProjects({
   const t = useT();
   const [showArchived, setShowArchived] = useState(false);
   const archived = archivedVideos(videos, organization);
+  const groups = groupVideos(videos, organization);
 
-  if (videos.length === 0) {
+  if (videos.length === 0 && groups.length === 0) {
     return (
       <p className="text-sm text-slate-500">
         {t('projects.empty')}{' '}
@@ -109,7 +110,7 @@ function ReadyProjects({
   return (
     <>
       <div className="space-y-4">
-        {groupVideos(videos, organization).map((group) => (
+        {groups.map((group) => (
           <FolderSection
             key={group.folder?.id ?? 'unassigned'}
             group={group}

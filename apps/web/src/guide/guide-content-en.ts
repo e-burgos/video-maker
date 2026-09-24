@@ -28,7 +28,7 @@ export const GUIDE_EN: GuideContent = {
         '| --- | --- | --- |',
         '| A-roll | `raw/aroll/` | The takes you speak in. Their speech is transcribed and drives every cut, every caption and the length of the video. Required. |',
         '| B-roll | `raw/broll/` | Silent clips laid over the A-roll. One is used when its file name matches a word the script repeats at least three times. |',
-        '| Images | `raw/image/` | Photos matched by file name like B-roll, animated with a slow Ken Burns move or shown as a picture-in-picture. |',
+        '| Images | `raw/images/` | Photos matched by file name like B-roll, animated with a slow Ken Burns move or shown as a picture-in-picture. |',
         '| Music | `raw/audio/` | The bed under the whole video, ducked automatically whenever someone speaks. Make it longer than the edit. |',
         '| Voice-over | `raw/voice/` | A narration you recorded yourself. It replaces the synthesized voice of a scene. |',
         '| Logo | `raw/logo/` | A PNG with transparency drawn over the finished video. You turn it on from the preview page. |',

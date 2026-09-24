@@ -35,11 +35,11 @@ describe('LanguageSwitch', () => {
     expect(screen.getByRole('button', { name: 'Spanish' }).getAttribute('title')).toBe('Spanish');
   });
 
-  it('marks the active language as pressed and nothing else', () => {
+  it('marks the active language as pressed and nothing else (spanish by default)', () => {
     renderSwitch();
 
-    expect(screen.getByRole('button', { name: 'English' }).getAttribute('aria-pressed')).toBe('true');
-    expect(screen.getByRole('button', { name: 'Spanish' }).getAttribute('aria-pressed')).toBe('false');
+    expect(screen.getByRole('button', { name: 'Spanish' }).getAttribute('aria-pressed')).toBe('true');
+    expect(screen.getByRole('button', { name: 'English' }).getAttribute('aria-pressed')).toBe('false');
   });
 
   it('translates the whole tree the moment spanish is chosen', async () => {

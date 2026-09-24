@@ -50,10 +50,20 @@ describe('guide content', () => {
     }
   });
 
-  it('names every upload role with the directory it writes into', () => {
+  it('names every upload role with the real directory it writes into (image -> images)', () => {
+    const RAW_DIRECTORY_BY_ROLE: Readonly<Record<(typeof ASSET_ROLES)[number], string>> = {
+      aroll: 'aroll',
+      broll: 'broll',
+      image: 'images',
+      audio: 'audio',
+      voice: 'voice',
+      logo: 'logo',
+    };
+
     for (const role of ASSET_ROLES) {
-      expect(GUIDE_EN.sections[1]?.body).toContain(`raw/${role}/`);
-      expect(GUIDE_ES.sections[1]?.body).toContain(`raw/${role}/`);
+      const directory = RAW_DIRECTORY_BY_ROLE[role];
+      expect(GUIDE_EN.sections[1]?.body).toContain(`raw/${directory}/`);
+      expect(GUIDE_ES.sections[1]?.body).toContain(`raw/${directory}/`);
     }
   });
 
