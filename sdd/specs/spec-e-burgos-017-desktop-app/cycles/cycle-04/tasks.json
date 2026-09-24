@@ -367,13 +367,25 @@
       "depends_on": [
         "TASK-007"
       ],
-      "status": "pending",
+      "status": "done",
       "files": [
         "sdd/context/libs/producer-tools/updates/2026-09-24-spec-e-burgos-017-desktop-app-cycle-04.md",
         "sdd/context/apps/render-api/updates/2026-09-24-spec-e-burgos-017-desktop-app-cycle-04.md",
         "sdd/context/apps/web/updates/2026-09-24-spec-e-burgos-017-desktop-app-cycle-04.md",
-        "sdd/context/constitution.md"
-      ]
+        "sdd/context/libs/local-store/updates/2026-09-24-spec-e-burgos-017-desktop-app-cycle-04.md",
+        "sdd/context/constitution.md",
+        "sdd/specs/spec-e-burgos-017-desktop-app/cycles/cycle-04/cycle.json",
+        "sdd/context/apps/desktop/updates/2026-09-24-spec-e-burgos-017-desktop-app-cycle-04.md"
+      ],
+      "usage": {
+        "provider_model": "claude/opus",
+        "effort": "high",
+        "tokens_in": 40000,
+        "tokens_out": 10000,
+        "approx": true,
+        "source": "declared-estimate",
+        "recorded_at": "2026-09-24"
+      }
     }
   ]
 }
