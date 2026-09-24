@@ -6,11 +6,7 @@ import { PipelineStageError } from '../../errors/pipeline-stage-error';
 import { readProducerConversation, readProducerSession } from '../../producer/producer-store';
 import type { ProducerMessage, ProducerSession } from '../../producer/producer-documents';
 import type { ProducerTurnRecord } from '../../producer/producer-turn-registry';
-import {
-  assertProducerMessageText,
-  assertProducerModel,
-  startProducerTurn,
-} from '../../producer/run-producer-turn';
+import { assertProducerMessageText, startProducerTurn } from '../../producer/run-producer-turn';
 import { assertValidProjectSlug, resolveExistingProject } from '../../store/project-scope';
 import { JSON_CONTENT_TYPE } from '../http-message';
 import type { HttpRequestLine, HttpResponse } from '../http-message';
@@ -107,13 +103,12 @@ export async function handleCreateProducerMessage(
 
   const value = bodyResult.value as Record<string, unknown>;
   const text = assertProducerMessageText(value.text);
-  const model = assertProducerModel(value.model, runtime.producer);
   const project = await resolveExistingProject(deps, store, slug);
 
   const started = await startProducerTurn(deps, runtime.producerTurns, {
     project,
     text,
-    model,
+    model: value.model,
     config: runtime.producer,
   });
   void started.completed;

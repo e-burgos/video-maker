@@ -30,6 +30,7 @@ describe('createProducerTurnRegistry', () => {
       assistantMessage: null,
       suggestions: [],
       error: null,
+      usage: null,
     });
   });
 

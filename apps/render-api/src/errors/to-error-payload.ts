@@ -108,6 +108,10 @@ const MESSAGE_BY_CODE: Readonly<Record<RenderApiErrorCode, string>> = {
   MUSIC_RESULT_UNKNOWN: 'The music search result id is unknown or its cache entry expired.',
   PHOTO_AROLL_INPUT_INVALID: 'The photo-aroll job input does not pass validation.',
   OPENROUTER_KEY_INVALID: 'The OpenRouter API key is not well formed or was rejected by OpenRouter.',
+  OPENROUTER_KEY_MISSING: 'The OpenRouter engine is selected but no API key is stored in the keychain yet.',
+  OPENROUTER_RATE_LIMITED: 'OpenRouter refused the request because the account or model hit a rate limit.',
+  OPENROUTER_MODEL_UNAVAILABLE: 'OpenRouter could not serve the requested model.',
+  OPENROUTER_FAILED: 'The call to OpenRouter failed for an unexpected reason.',
   SECRET_STORE_UNAVAILABLE: 'The local keychain could not read or write the requested secret.',
 };
 

@@ -1,14 +1,18 @@
 import { resolveMediaProject } from '@video-maker/auto-montage';
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
 
 import { createCallLog } from '../__fixtures__/call-log';
 import { createFakeObjectStorage } from '../__fixtures__/fake-object-storage';
 import { createFakeRenderApiDependencies } from '../__fixtures__/fake-render-api-dependencies';
+import { CURATED_OPENROUTER_MODELS } from '../config/curated-openrouter-models';
 import { readProducerConfig } from '../config/producer-config';
 import type { RenderApiDependencies } from '../deps/render-api-dependencies';
+import { httpStatusFor } from '../errors/http-status-for';
 import { isRenderApiError } from '../errors/render-api-error';
+import { OPENROUTER_SECRET_NAME, PRODUCER_ENGINE_SETTING_KEY } from '../http/handlers/producer-settings-handler';
+import type { CreateOpenRouterProducerAgentOptions } from './openrouter-producer-agent';
 import { readProducerConversation, readProducerSession } from './producer-store';
-import type { ProducerTurnResult, ProducerTurnStart } from './producer-agent';
+import type { ProducerTurnResult, ProducerTurnRun, ProducerTurnStart } from './producer-agent';
 import { createProducerTurnRegistry } from './producer-turn-registry';
 import { assertProducerMessageText, startProducerTurn } from './run-producer-turn';
 
@@ -318,5 +322,211 @@ describe('startProducerTurn', () => {
       port: 'ensureDirectory',
       input: '/tmp/video-maker-producer/demo-01',
     });
+  });
+});
+
+const OPENROUTER_MODEL = CURATED_OPENROUTER_MODELS[0]?.id ?? '';
+const OPENROUTER_SECRET = 'sk-or-v1-never-leak-this-exact-string';
+
+interface OpenRouterScript {
+  readonly finalText?: string;
+  readonly usage?: { inputTokens: number | null; outputTokens: number | null; costUsd: number | null };
+  readonly fail?: { code: string; hint: string };
+  readonly onStart?: (run: ProducerTurnRun) => void;
+}
+
+function scriptedOpenRouterAgentFactory(
+  script: OpenRouterScript,
+  captured: { options: CreateOpenRouterProducerAgentOptions[]; starts: ProducerTurnStart[] },
+) {
+  return (options: CreateOpenRouterProducerAgentOptions) => {
+    captured.options.push(options);
+    return (start: ProducerTurnStart, onLine: (line: string) => void): ProducerTurnRun => {
+      captured.starts.push(start);
+      onLine(JSON.stringify({ type: 'system', subtype: 'init', session_id: start.sessionId }));
+
+      let resolveCompleted: (result: ProducerTurnResult) => void = () => undefined;
+      const completed = new Promise<ProducerTurnResult>((resolve) => {
+        resolveCompleted = resolve;
+      });
+
+      const run: ProducerTurnRun = {
+        cancel: () => resolveCompleted({ exitCode: null, canceled: true, timedOut: false, spawnFailed: false, stderr: '' }),
+        completed,
+      };
+
+      if (script.onStart !== undefined) {
+        script.onStart(run);
+      } else if (script.fail !== undefined) {
+        onLine(
+          JSON.stringify({
+            type: 'result',
+            subtype: `openrouter:${script.fail.code}`,
+            is_error: true,
+            result: script.fail.hint,
+          }),
+        );
+        resolveCompleted({ exitCode: 1, canceled: false, timedOut: false, spawnFailed: false, stderr: '' });
+      } else {
+        onLine(
+          JSON.stringify({
+            type: 'result',
+            subtype: 'success',
+            is_error: false,
+            result: script.finalText ?? 'Job en marcha.',
+            usage: script.usage ?? { inputTokens: 120, outputTokens: 40, costUsd: 0.0013 },
+          }),
+        );
+        resolveCompleted({ exitCode: 0, canceled: false, timedOut: false, spawnFailed: false, stderr: '' });
+      }
+
+      return run;
+    };
+  };
+}
+
+async function withOpenRouterEngine(base: ReturnType<typeof scenario>, apiKey: string | null = OPENROUTER_SECRET): Promise<void> {
+  base.deps.localStore.settings.set(PRODUCER_ENGINE_SETTING_KEY, 'openrouter');
+  if (apiKey !== null) {
+    await base.deps.secretStore.set(OPENROUTER_SECRET_NAME, apiKey);
+  }
+}
+
+describe('startProducerTurn — engine routing (OpenRouter)', () => {
+  it('routes to the OpenRouter agent, persists the same message shape as Claude, and never writes a resumable session', async () => {
+    const base = scenario({ lines: [] });
+    await withOpenRouterEngine(base);
+    const captured = { options: [] as CreateOpenRouterProducerAgentOptions[], starts: [] as ProducerTurnStart[] };
+
+    const started = await startProducerTurn(
+      base.deps,
+      base.registry,
+      { project: PROJECT, text: 'Armá el montaje', config: CONFIG },
+      scriptedOpenRouterAgentFactory({}, captured),
+    );
+    await started.completed;
+
+    expect(captured.options[0]?.chatModel).toBe(OPENROUTER_MODEL);
+    expect(captured.options[0]?.apiKey).toBe(OPENROUTER_SECRET);
+
+    const record = base.registry.get(started.turnId);
+    expect(record.status).toBe('succeeded');
+    expect(record.assistantMessage).toBe('Job en marcha.');
+    expect(record.usage).toEqual({ inputTokens: 120, outputTokens: 40, costUsd: 0.0013 });
+
+    const persisted = readProducerConversation(base.deps, PROJECT);
+    expect(persisted).toHaveLength(2);
+    expect(Object.keys(persisted[1] as object).sort()).toEqual(
+      ['createdAt', 'id', 'model', 'role', 'text', 'turnId'].sort(),
+    );
+
+    // The OpenRouter engine never resumes a CLI session; history is rebuilt from the store instead.
+    expect(readProducerSession(base.deps, PROJECT)).toBeNull();
+  });
+
+  it('rejects with OPENROUTER_KEY_MISSING, mapped to HTTP 409, and never reserves a turn when the key is absent', async () => {
+    const base = scenario({ lines: [] });
+    await withOpenRouterEngine(base, null);
+    const captured = { options: [] as CreateOpenRouterProducerAgentOptions[], starts: [] as ProducerTurnStart[] };
+
+    const code = await codeOf(
+      startProducerTurn(
+        base.deps,
+        base.registry,
+        { project: PROJECT, text: 'hola', config: CONFIG },
+        scriptedOpenRouterAgentFactory({}, captured),
+      ),
+    );
+
+    expect(code).toBe('OPENROUTER_KEY_MISSING');
+    expect(httpStatusFor('OPENROUTER_KEY_MISSING')).toBe(409);
+    expect(base.registry.activeFor('demo-01')).toBeNull();
+    expect(captured.starts).toEqual([]);
+  });
+
+  it('rejects a Claude model alias sent while the OpenRouter engine is active, with PRODUCER_MODEL_INVALID', async () => {
+    const base = scenario({ lines: [] });
+    await withOpenRouterEngine(base);
+    const captured = { options: [] as CreateOpenRouterProducerAgentOptions[], starts: [] as ProducerTurnStart[] };
+
+    const code = await codeOf(
+      startProducerTurn(
+        base.deps,
+        base.registry,
+        { project: PROJECT, text: 'hola', model: 'sonnet', config: CONFIG },
+        scriptedOpenRouterAgentFactory({}, captured),
+      ),
+    );
+
+    expect(code).toBe('PRODUCER_MODEL_INVALID');
+    expect(captured.starts).toEqual([]);
+  });
+
+  it('maps a typed OpenRouter runtime failure to the matching error code, keeping the user message persisted', async () => {
+    const base = scenario({ lines: [] });
+    await withOpenRouterEngine(base);
+    const captured = { options: [] as CreateOpenRouterProducerAgentOptions[], starts: [] as ProducerTurnStart[] };
+
+    const started = await startProducerTurn(
+      base.deps,
+      base.registry,
+      { project: PROJECT, text: 'hola', config: CONFIG },
+      scriptedOpenRouterAgentFactory(
+        { fail: { code: 'OPENROUTER_RATE_LIMITED', hint: 'rate limited, retry later' } },
+        captured,
+      ),
+    );
+    await started.completed;
+
+    const record = base.registry.get(started.turnId);
+    expect(record.status).toBe('failed');
+    expect(record.error?.code).toBe('OPENROUTER_RATE_LIMITED');
+    expect(readProducerConversation(base.deps, PROJECT)).toHaveLength(1);
+  });
+
+  it('cancels the OpenRouter turn through the registry the same way as the Claude path', async () => {
+    const base = scenario({ lines: [] });
+    await withOpenRouterEngine(base);
+    const captured = { options: [] as CreateOpenRouterProducerAgentOptions[], starts: [] as ProducerTurnStart[] };
+
+    const started = await startProducerTurn(
+      base.deps,
+      base.registry,
+      { project: PROJECT, text: 'hola', config: CONFIG },
+      scriptedOpenRouterAgentFactory({ onStart: () => undefined }, captured),
+    );
+
+    base.registry.requestCancel(started.turnId);
+    await started.completed;
+
+    expect(base.registry.get(started.turnId)).toMatchObject({ status: 'canceled', error: null, assistantMessage: null });
+  });
+
+  it('never puts the OpenRouter API key in the turn log, the persisted conversation, the conversation markdown, or any logger call', async () => {
+    const logger = { info: vi.fn(), error: vi.fn() };
+    const base = scenario({ lines: [] }, { logger });
+    await withOpenRouterEngine(base);
+    const captured = { options: [] as CreateOpenRouterProducerAgentOptions[], starts: [] as ProducerTurnStart[] };
+
+    const started = await startProducerTurn(
+      base.deps,
+      base.registry,
+      { project: PROJECT, text: 'hola, generá un guion', config: CONFIG },
+      scriptedOpenRouterAgentFactory({}, captured),
+    );
+    await started.completed;
+
+    const turnLog = await base.storage.readTextFile(`/media/demo-01/work/producer/turns/${started.turnId}.jsonl`);
+    expect(turnLog).not.toContain(OPENROUTER_SECRET);
+
+    const markdown = await base.storage.readTextFile(MARKDOWN_PATH);
+    expect(markdown).not.toContain(OPENROUTER_SECRET);
+
+    const conversationDump = JSON.stringify(readProducerConversation(base.deps, PROJECT));
+    expect(conversationDump).not.toContain(OPENROUTER_SECRET);
+
+    for (const call of [...logger.info.mock.calls, ...logger.error.mock.calls]) {
+      expect(JSON.stringify(call)).not.toContain(OPENROUTER_SECRET);
+    }
   });
 });

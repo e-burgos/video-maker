@@ -6,6 +6,12 @@ export const PRODUCER_TURN_STATUSES = ['running', 'succeeded', 'failed', 'cancel
 
 export type ProducerTurnStatus = (typeof PRODUCER_TURN_STATUSES)[number];
 
+export interface ProducerTurnUsage {
+  readonly inputTokens: number | null;
+  readonly outputTokens: number | null;
+  readonly costUsd: number | null;
+}
+
 export interface ProducerTurnRecord {
   readonly turnId: string;
   readonly slug: string;
@@ -17,6 +23,7 @@ export interface ProducerTurnRecord {
   readonly assistantMessage: string | null;
   readonly suggestions: readonly string[];
   readonly error: RenderApiErrorPayload | null;
+  readonly usage: ProducerTurnUsage | null;
 }
 
 export interface ProducerTurnSettlement {
@@ -25,6 +32,7 @@ export interface ProducerTurnSettlement {
   readonly assistantMessage?: string;
   readonly suggestions?: readonly string[];
   readonly error?: RenderApiErrorPayload;
+  readonly usage?: ProducerTurnUsage;
 }
 
 export interface ProducerTurnRegistry {
@@ -92,6 +100,7 @@ export function createProducerTurnRegistry(): ProducerTurnRegistry {
           assistantMessage: null,
           suggestions: [],
           error: null,
+          usage: null,
         },
       });
     },
@@ -121,6 +130,7 @@ export function createProducerTurnRegistry(): ProducerTurnRegistry {
         assistantMessage: settlement.assistantMessage ?? null,
         suggestions: settlement.suggestions ?? [],
         error: settlement.error ?? null,
+        usage: settlement.usage ?? null,
       };
     },
 

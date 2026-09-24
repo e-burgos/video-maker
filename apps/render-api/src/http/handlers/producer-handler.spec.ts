@@ -381,6 +381,7 @@ describe('handleGetProducerTurn', () => {
         'status',
         'suggestions',
         'turnId',
+        'usage',
       ].sort(),
     );
     expect(body.status).toBe('succeeded');

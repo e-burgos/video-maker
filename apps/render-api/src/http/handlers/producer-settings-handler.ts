@@ -10,9 +10,9 @@ import type { RenderApiRuntime } from '../render-api-runtime';
 
 export const OPENROUTER_SECRET_NAME = 'openrouter';
 
-const PRODUCER_ENGINE_SETTING_KEY = 'producer.engine';
-const PRODUCER_MODEL_CLAUDE_SETTING_KEY = 'producer.model.claude';
-const PRODUCER_MODEL_OPENROUTER_SETTING_KEY = 'producer.model.openrouter';
+export const PRODUCER_ENGINE_SETTING_KEY = 'producer.engine';
+export const PRODUCER_MODEL_CLAUDE_SETTING_KEY = 'producer.model.claude';
+export const PRODUCER_MODEL_OPENROUTER_SETTING_KEY = 'producer.model.openrouter';
 
 const PRODUCER_ENGINES = ['claude-cli', 'openrouter'] as const;
 export type ProducerEngine = (typeof PRODUCER_ENGINES)[number];
@@ -68,12 +68,12 @@ function isProducerEngine(value: unknown): value is ProducerEngine {
   return typeof value === 'string' && (PRODUCER_ENGINES as readonly string[]).includes(value);
 }
 
-function readEngineSetting(deps: RenderApiDependencies): ProducerEngine | null {
+export function readEngineSetting(deps: RenderApiDependencies): ProducerEngine | null {
   const value = deps.localStore.settings.get(PRODUCER_ENGINE_SETTING_KEY);
   return isProducerEngine(value) ? value : null;
 }
 
-function readModelSetting(deps: RenderApiDependencies, key: string): string | null {
+export function readModelSetting(deps: RenderApiDependencies, key: string): string | null {
   const value = deps.localStore.settings.get(key);
   return typeof value === 'string' && value !== '' ? value : null;
 }

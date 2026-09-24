@@ -87,3 +87,29 @@
 - `apps/render-api/src/config/curated-openrouter-models.ts` es un placeholder de 3 ids (verificados
   contra `GET https://openrouter.ai/api/v1/models`, con `tools` en `supported_parameters`) que
   TASK-006 reemplaza con la lista curada por benchmark real.
+- **TASK-005** agregó `/settings` como ruta perezosa top-level (mismo patrón que `/guide`) con nav
+  propio en `studio-layout.tsx` (`HEADER_LINKS`, ahora data-driven para no duplicar el `className`
+  de cada link). La página consume `GET/PUT /settings/producer` y `PUT/DELETE
+  /settings/producer/openrouter-key` (EP-037..040) a través de cuatro métodos nuevos en
+  `render-api-client.ts` + `parse-producer-settings.ts`. `isProducerModelOption` se exportó desde
+  `parse-producer.ts` para no duplicar el validador en el parser nuevo.
+  El campo de la key es **write-only en memoria**: `submitKey` lee el input a una constante local y
+  llama `setKeyDraft('')` antes del `await` a la API, así que el componente nunca vuelve a tener la
+  key en su estado ni la renderiza de nuevo, ni siquiera durante el request pendiente o tras un
+  rechazo — patrón a documentar en la constitución para cualquier input de secreto futuro.
+  `producer-composer.tsx` ahora recibe `models`/`activeEngine` que `producer-page.tsx` deriva de
+  `GET /settings/producer` (motor efectivo → catálogo de modelos de ESE motor), con fallback al
+  catálogo de `GET .../producer` mientras el nuevo recurso carga; `producer-message-list.tsx` pinta
+  `producer.turnCost` bajo un mensaje del asistente sólo si trae `costUsd` (campo opcional,
+  TASK-004 lo suma de forma aditiva del lado del turno).
+  **Presupuesto de chunk inicial:** el ciclo pedía no crecer más de 2 kB con la página de settings
+  perezosa. La página en sí y todo el catálogo `MESSAGES_ES` no cuestan nada al chunk inicial (ambos
+  perezosos), pero los cuatro métodos nuevos de `render-api-client.ts` (el cliente vive en
+  `RenderApiProvider`, que envuelve el router entero, nunca perezoso) y las ~35 claves nuevas de
+  `MESSAGES_EN` (también eager: es el catálogo por defecto de `translate()`) sí cuentan. Medido:
+  526,63 kB → 530,87 kB (+4,24 kB crudo, +0,96 kB gzip) tras deduplicar `isProducerModelOption` y
+  fusionar claves de catálogo redundantes (`settings.key.saving`→`settings.saving`,
+  `settings.key.removeAccept`→`settings.key.remove`, `producer.withEngine.{claudeCli,openrouter}`→
+  `producer.withEngine` con interpolación). No se pudo bajar de los 2 kB pedidos sin sacrificar los
+  cuatro endpoints reales o el catálogo EN — para la próxima superficie de API grande conviene
+  discutir si el cliente puede dejar de ser 100% eager.

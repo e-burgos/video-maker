@@ -131,7 +131,7 @@
         "TASK-002",
         "TASK-003"
       ],
-      "status": "pending",
+      "status": "done",
       "files": [
         "apps/render-api/src/producer/openrouter-producer-agent.ts",
         "apps/render-api/src/producer/openrouter-producer-agent.spec.ts",
@@ -139,11 +139,29 @@
         "apps/render-api/src/producer/run-producer-turn.spec.ts",
         "apps/render-api/src/producer/producer-history.ts",
         "apps/render-api/src/producer/producer-history.spec.ts",
-        "apps/render-api/src/config/producer-config.ts",
-        "apps/render-api/src/http/health-handler.ts",
+        "apps/render-api/src/producer/producer-turn-registry.ts",
+        "apps/render-api/src/producer/producer-turn-registry.spec.ts",
+        "apps/render-api/src/http/handlers/producer-settings-handler.ts",
+        "apps/render-api/src/http/handlers/producer-handler.ts",
+        "apps/render-api/src/http/handlers/producer-handler.spec.ts",
+        "apps/render-api/src/config/curated-openrouter-models.ts",
+        "apps/render-api/src/config/curated-openrouter-models.spec.ts",
         "apps/render-api/src/errors/render-api-error.ts",
-        "apps/render-api/src/errors/http-status-for.ts"
-      ]
+        "apps/render-api/src/errors/http-status-for.ts",
+        "apps/render-api/src/errors/http-status-for.spec.ts",
+        "apps/render-api/src/errors/to-error-payload.ts",
+        "sdd/api.json"
+      ],
+      "usage": {
+        "provider_model": "claude/sonnet",
+        "effort": "high",
+        "tokens_in": 210000,
+        "tokens_out": 30000,
+        "agent": "implementor-back",
+        "approx": true,
+        "source": "declared-estimate",
+        "recorded_at": "2026-09-24"
+      }
     },
     {
       "id": "TASK-005",
@@ -158,16 +176,44 @@
         "TASK-002",
         "TASK-004"
       ],
-      "status": "pending",
+      "status": "done",
       "files": [
         "apps/web/src/pages/settings-page.tsx",
         "apps/web/src/pages/settings-page.spec.tsx",
+        "apps/web/src/pages/producer-page.tsx",
+        "apps/web/src/pages/producer-page.spec.tsx",
         "apps/web/src/api/render-api-client.ts",
+        "apps/web/src/api/render-api-client.spec.ts",
         "apps/web/src/api/render-api-types.ts",
+        "apps/web/src/api/parse-producer.ts",
+        "apps/web/src/api/parse-producer-settings.ts",
+        "apps/web/src/api/parse-producer-settings.spec.ts",
+        "apps/web/src/api/producer-engine-i18n.ts",
+        "apps/web/src/api/producer-engine-i18n.spec.ts",
+        "apps/web/src/api/error-explanations.ts",
+        "apps/web/src/api/__fixtures__/producer.ts",
         "apps/web/src/components/producer-composer.tsx",
+        "apps/web/src/components/producer-composer.spec.tsx",
+        "apps/web/src/components/producer-message-list.tsx",
+        "apps/web/src/components/producer-message-list.spec.tsx",
+        "apps/web/src/components/studio-layout.tsx",
+        "apps/web/src/components/studio-layout.spec.tsx",
+        "apps/web/src/app/app.tsx",
         "apps/web/src/i18n/messages-en.ts",
-        "apps/web/src/i18n/messages-es.ts"
-      ]
+        "apps/web/src/i18n/messages-es.ts",
+        "sdd/components.json",
+        "sdd/specs/spec-e-burgos-017-desktop-app/cycles/cycle-04/plan.md"
+      ],
+      "usage": {
+        "provider_model": "claude/sonnet",
+        "effort": "medium",
+        "tokens_in": 130000,
+        "tokens_out": 20000,
+        "agent": "implementor-front",
+        "approx": true,
+        "source": "declared-estimate",
+        "recorded_at": "2026-09-24"
+      }
     },
     {
       "id": "TASK-006",

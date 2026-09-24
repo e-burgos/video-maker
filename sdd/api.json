@@ -830,21 +830,21 @@
         "spec": "sdd/specs/spec-e-burgos-015-studio-producer",
         "status": "implemented",
         "created_in_cycle": 1,
-        "updated_in_cycle": 1,
-        "description": "Sends one user message to the producer and starts a turn. The turn runs OUTSIDE the job queue (D-1 of the cycle): the agent enqueues montage/render jobs on this same API and waits for them, so a turn sitting in a queue of concurrency 1 would deadlock itself. Exclusion is per project: one running turn per slug. The user message is persisted before the 202 answers, so the chat can render it immediately. Cancellation kills the child process (it is not the cooperative cancellation of the job queue). The model of the turn is chosen per message: model is optional and validated against PRODUCER_MODELS; when it is absent the service keeps the model of the session and falls back to PRODUCER_MODEL. The model in effect is persisted in session.json, and switching model on a later turn is supported (claude -p --resume <id> --model <m>).",
+        "updated_in_cycle": 4,
+        "description": "Sends one user message to the producer and starts a turn. The turn runs OUTSIDE the job queue (D-1 of the cycle): the agent enqueues montage/render jobs on this same API and waits for them, so a turn sitting in a queue of concurrency 1 would deadlock itself. Exclusion is per project: one running turn per slug. The user message is persisted before the 202 answers, so the chat can render it immediately. Cancellation kills the child process (it is not the cooperative cancellation of the job queue). The model of the turn is chosen per message: model is optional and validated against PRODUCER_MODELS; when it is absent the service keeps the model of the session and falls back to PRODUCER_MODEL. The model in effect is persisted in session.json, and switching model on a later turn is supported (claude -p --resume <id> --model <m>). Since spec-e-burgos-017 cycle-04 (TASK-004), the engine is resolved per turn from the producer settings (GET/PUT /settings/producer, resolveEffectiveProducerEngine): claude-cli spawns the CLI as before; openrouter runs the turn in process via libs/producer-tools' OpenRouter runtime, rebuilding history from the stored conversation instead of a resumed CLI session (D-C4-05), and never persists session.json for that engine. The OpenRouter API key is read from the macOS keychain (EP-039); it is missing → 409 OPENROUTER_KEY_MISSING, checked before the turn is reserved.",
         "path_params": [
           "slug"
         ],
         "required_headers": [],
         "request_body": {
           "content-type": "application/json",
-          "schema": "{ text: string, model?: string } — text is the user message, non-empty after trimming; model is one of the aliases of GET .../producer models.allowed. Any other field is ignored."
+          "schema": "{ text: string, model?: string } — text is the user message, non-empty after trimming; model is validated against the CURRENT effective engine's own catalog: PRODUCER_MODELS for claude-cli, or config/curated-openrouter-models.ts for openrouter (spec-e-burgos-017 cycle-04, D-C4-07); a model from the other engine's list is rejected. Any other field is ignored."
         },
         "responses": {
           "202": "application/json: { slug, turnId, startedAt, status: running }. Poll EP-024 for the events and the answer.",
           "400": "REQUEST_BODY_INVALID_JSON when the body is absent, empty or not a JSON object. application/json: { error: { code, stage, message, resource?, expected?, hint?, assetPersisted?, catalogUpdated? } }.",
           "404": "PROJECT_NOT_FOUND when the project directory does not exist. application/json: { error: { code, stage, message, resource?, expected?, hint?, assetPersisted?, catalogUpdated? } }.",
-          "409": "PRODUCER_TURN_ACTIVE when the project already has a running turn; resource carries its turnId. application/json: { error: { code, stage, message, resource?, expected?, hint?, assetPersisted?, catalogUpdated? } }.",
+          "409": "PRODUCER_TURN_ACTIVE when the project already has a running turn; resource carries its turnId. application/json: { error: { code, stage, message, resource?, expected?, hint?, assetPersisted?, catalogUpdated? } }. OPENROUTER_KEY_MISSING when the effective engine is openrouter and no key is stored in the keychain (resource is \"producer-agent\"); checked before the turn is reserved, so it never leaves the project blocked. application/json: { error: { code, stage, message, resource?, expected?, hint?, assetPersisted?, catalogUpdated? } }.",
           "413": "REQUEST_BODY_TOO_LARGE when the body exceeds the JSON body limit. application/json: { error: { code, stage, message, resource?, expected?, hint?, assetPersisted?, catalogUpdated? } }.",
           "422": "PRODUCER_MESSAGE_INVALID when text is missing or blank, PRODUCER_MODEL_INVALID when model is present and is not one of the allowed models (resource carries the rejected value, expected the allowed list; the turn is not reserved), PROJECT_SLUG_INVALID when the slug is not a single kebab-case path segment. application/json: { error: { code, stage, message, resource?, expected?, hint?, assetPersisted?, catalogUpdated? } }.",
           "503": "PRODUCER_UNAVAILABLE when the Claude Code binary does not resolve or the video-producer skill file cannot be read. Checked before the turn is reserved, so a 503 never leaves the project blocked. application/json: { error: { code, stage, message, resource?, expected?, hint?, assetPersisted?, catalogUpdated? } }."
@@ -859,6 +859,11 @@
             "date": "2026-09-10",
             "change": "Accepts an optional model in the body, validated against PRODUCER_MODELS (422 PRODUCER_MODEL_INVALID), passed to claude --model and persisted in session.json.",
             "fix": "FIX-e-burgos-015-001"
+          },
+          {
+            "cycle": 4,
+            "date": "2026-09-24",
+            "change": "TASK-004: routes the turn to claude-cli or openrouter per the effective engine, validates model against that engine's own catalog, and answers 409 OPENROUTER_KEY_MISSING when openrouter has no stored key."
           }
         ]
       },
@@ -870,7 +875,7 @@
         "spec": "sdd/specs/spec-e-burgos-015-studio-producer",
         "status": "implemented",
         "created_in_cycle": 1,
-        "updated_in_cycle": 1,
+        "updated_in_cycle": 4,
         "description": "Returns the state of one producer turn: its accumulated events while it runs, and its answer plus suggestions when it succeeds. Events are derived from the stream-json output of Claude Code at message granularity (no partial chunks, D-3): a text block becomes a text event, a tool call becomes a tool event with a readable summary built from the command itself, and a failed tool result becomes a status event. The raw stream is kept, one JSON per line, in work/producer/turns/<turnId>.jsonl.",
         "path_params": [
           "slug",
@@ -882,7 +887,7 @@
           "schema": "Takes no request body."
         },
         "responses": {
-          "200": "application/json: { turnId, slug, status: running|succeeded|failed|canceled, model, startedAt, finishedAt: string|null, events: ({ type: text, text } | { type: tool, name, summary } | { type: status, status })[], assistantMessage: string|null, suggestions: string[], error: ErrorPayload|null }. model is the model the turn actually ran with. assistantMessage is the answer with the ```suggestions block removed; suggestions holds 2 to 4 short actions taken from that block ([] when the model did not emit one). error is filled only when status is failed.",
+          "200": "application/json: { turnId, slug, status: running|succeeded|failed|canceled, model, startedAt, finishedAt: string|null, events: ({ type: text, text } | { type: tool, name, summary } | { type: status, status })[], assistantMessage: string|null, suggestions: string[], error: ErrorPayload|null, usage: { inputTokens: number|null, outputTokens: number|null, costUsd: number|null } | null }. usage is filled only for a succeeded turn that ran on the openrouter engine (OpenRouter's own usage-accounting, spec-e-burgos-017 cycle-04 D-C4-08); it is null for the claude-cli engine and for a turn still running, failed or canceled. model is the model the turn actually ran with. assistantMessage is the answer with the ```suggestions block removed; suggestions holds 2 to 4 short actions taken from that block ([] when the model did not emit one). error is filled only when status is failed.",
           "404": "PRODUCER_TURN_NOT_FOUND when the turn id is unknown or belongs to another project. The registry lives in memory: a turn from a previous run of the service answers the same 404. application/json: { error: { code, stage, message, resource?, expected?, hint?, assetPersisted?, catalogUpdated? } }.",
           "422": "PROJECT_SLUG_INVALID when the slug is not a single kebab-case path segment. application/json: { error: { code, stage, message, resource?, expected?, hint?, assetPersisted?, catalogUpdated? } }."
         },
@@ -896,6 +901,11 @@
             "date": "2026-09-10",
             "change": "The turn record reports the model it ran with; EP-025 answers the same record.",
             "fix": "FIX-e-burgos-015-001"
+          },
+          {
+            "cycle": 4,
+            "date": "2026-09-24",
+            "change": "TASK-004: adds usage (inputTokens, outputTokens, costUsd) to the turn record for the openrouter engine, null otherwise."
           }
         ]
       },
@@ -907,7 +917,7 @@
         "spec": "sdd/specs/spec-e-burgos-015-studio-producer",
         "status": "implemented",
         "created_in_cycle": 1,
-        "updated_in_cycle": 1,
+        "updated_in_cycle": 4,
         "description": "Cancels a running producer turn by killing its child process (SIGTERM, then SIGKILL after a grace period). Unlike a job, there is no cooperative checkpoint to wait for: the agent is an opaque external process. The answer is 202 because the turn settles when the process actually dies; poll EP-024 until status is canceled. A canceled turn persists neither an assistant message nor a session, so the next turn starts a fresh Claude Code session unless an earlier turn already created one.",
         "path_params": [
           "slug",
@@ -929,6 +939,11 @@
             "cycle": 1,
             "date": "2026-09-10",
             "change": "Created in spec-e-burgos-015 cycle-01: kill of the producer child process."
+          },
+          {
+            "cycle": 4,
+            "date": "2026-09-24",
+            "change": "TASK-004: the turn record this endpoint echoes now carries the usage field added to EP-024; cancellation of an openrouter turn aborts its AbortSignal instead of killing a child process."
           }
         ]
       },
