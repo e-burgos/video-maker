@@ -1,0 +1,156 @@
+{
+  "$schema": "../../../../schemas/cycle-tasks.schema.json",
+  "spec": "spec-e-burgos-017-desktop-app",
+  "cycle": 5,
+  "module": "desktop-app",
+  "apps": [
+    "apps/web",
+    "apps/render-api",
+    "libs/local-store",
+    "libs/producer-tools",
+    "apps/desktop"
+  ],
+  "flow": "lite",
+  "user_stories_generated": true,
+  "prerequisites": {
+    "tasks_generated": true
+  },
+  "tasks": [
+    {
+      "id": "TASK-001",
+      "title": "Asset inbox with role proposals: files dropped in land in raw/inbox, get probed and a deterministic role proposal stored in a new assets table, and move to raw/<role> only when the user confirms; the producer sees pending assets in its overview",
+      "user_stories": [
+        "US-017-401",
+        "US-017-402"
+      ],
+      "estimation_hours": 7,
+      "story_points": 5,
+      "depends_on": [],
+      "status": "pending",
+      "files": [
+        "libs/local-store/src/database/migrations.ts",
+        "libs/local-store/src/schema/studio-schema.ts",
+        "libs/local-store/src/repositories/assets-repository.ts",
+        "apps/render-api/src/store/asset-inbox.ts",
+        "apps/render-api/src/store/propose-asset-role.ts",
+        "apps/render-api/src/http/handlers/asset-inbox-handler.ts",
+        "apps/render-api/src/http/routes.ts",
+        "libs/producer-tools/src/contract/tool-schemas.ts",
+        "sdd/api.json"
+      ]
+    },
+    {
+      "id": "TASK-002",
+      "title": "Chat-first project workspace: one screen per project with the producer chat on the left and a tabbed panel on the right (Vista previa, Material, Entregas), the advanced editors reachable from a menu",
+      "user_stories": [
+        "US-017-403"
+      ],
+      "estimation_hours": 8,
+      "story_points": 5,
+      "depends_on": [],
+      "status": "pending",
+      "files": [
+        "apps/web/src/pages/project-workspace-page.tsx",
+        "apps/web/src/components/workspace-side-panel.tsx",
+        "apps/web/src/app/app.tsx",
+        "apps/web/src/components/studio-layout.tsx"
+      ]
+    },
+    {
+      "id": "TASK-003",
+      "title": "Drag and drop into the chat and an attach button: per-file upload progress, proposal cards with confirm or change role, and the confirmed material showing up in the Material tab",
+      "user_stories": [
+        "US-017-401",
+        "US-017-402"
+      ],
+      "estimation_hours": 6,
+      "story_points": 5,
+      "depends_on": [
+        "TASK-001",
+        "TASK-002"
+      ],
+      "status": "pending",
+      "files": [
+        "apps/web/src/components/chat-drop-zone.tsx",
+        "apps/web/src/components/asset-proposal-card.tsx",
+        "apps/web/src/api/render-api-client.ts"
+      ]
+    },
+    {
+      "id": "TASK-004",
+      "title": "Home and polish: projects home with create-by-drop, translated voice descriptions, no speculative 404s on storyboard and voice pages, and a consistent visual system across the workspace",
+      "user_stories": [
+        "US-017-404"
+      ],
+      "estimation_hours": 5,
+      "story_points": 3,
+      "depends_on": [
+        "TASK-002"
+      ],
+      "status": "pending",
+      "files": [
+        "apps/web/src/pages/projects-page.tsx",
+        "apps/web/src/api/voice-i18n.ts",
+        "apps/web/src/pages/storyboard-page.tsx",
+        "apps/web/src/pages/voice-page.tsx"
+      ]
+    },
+    {
+      "id": "TASK-005",
+      "title": "Bring the web initial chunk under 500 kB without losing features",
+      "user_stories": [
+        "US-017-405"
+      ],
+      "estimation_hours": 3,
+      "story_points": 2,
+      "depends_on": [
+        "TASK-002",
+        "TASK-003",
+        "TASK-004"
+      ],
+      "status": "pending",
+      "files": [
+        "apps/web/vite.config.ts",
+        "apps/web/src/app/app.tsx"
+      ]
+    },
+    {
+      "id": "TASK-006",
+      "title": "Real checks: a browser E2E that drops real files, confirms proposals and runs one cheap producer turn with OpenRouter, plus a visual QA pass on the packaged app with screenshots reviewed and fixed",
+      "user_stories": [
+        "US-017-401",
+        "US-017-402",
+        "US-017-403",
+        "US-017-404",
+        "US-017-405"
+      ],
+      "estimation_hours": 6,
+      "story_points": 5,
+      "depends_on": [
+        "TASK-005"
+      ],
+      "status": "pending",
+      "files": [
+        "apps/web/e2e/workspace-smoke.mjs",
+        "sdd/specs/spec-e-burgos-017-desktop-app/cycles/cycle-05/artifacts/workspace-qa.md"
+      ]
+    },
+    {
+      "id": "TASK-007",
+      "title": "Close the cycle: rebuild and reinstall the dmg, context fragments, constitution rows and validation",
+      "user_stories": [
+        "US-017-403"
+      ],
+      "estimation_hours": 2,
+      "story_points": 2,
+      "depends_on": [
+        "TASK-006"
+      ],
+      "status": "pending",
+      "files": [
+        "sdd/context/apps/web/updates/2026-09-24-spec-e-burgos-017-desktop-app-cycle-05.md",
+        "sdd/context/constitution.md"
+      ]
+    }
+  ]
+}

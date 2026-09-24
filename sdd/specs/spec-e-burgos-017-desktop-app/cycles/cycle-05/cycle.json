@@ -1,0 +1,35 @@
+{
+  "$schema": "../../../../schemas/cycle.schema.json",
+  "cycle": 5,
+  "module": "desktop-app",
+  "spec": "spec-e-burgos-017-desktop-app",
+  "apps": [
+    "apps/web",
+    "apps/render-api",
+    "libs/local-store",
+    "libs/producer-tools",
+    "apps/desktop"
+  ],
+  "phase": "chat-first-ui",
+  "flow": "lite",
+  "objectives": [
+    "Cada proyecto es un solo espacio de trabajo centrado en el chat del productor, con vista previa, material y entregas al costado",
+    "Los archivos se arrastran al chat, la app propone su rol y se mueven a su carpeta solo cuando el usuario confirma",
+    "Se cierran los pendientes de interfaz de los ciclos anteriores: voces traducidas, 404 especulativos, input de archivos nativo y chunk inicial por debajo de 500 kB",
+    "Verificación real en el navegador y en la app empaquetada, con revisión visual de capturas"
+  ],
+  "status": "in-progress",
+  "started_at": "2026-09-24",
+  "completed_at": null,
+  "documents": {
+    "plan": "sdd/specs/spec-e-burgos-017-desktop-app/cycles/cycle-05/plan.md",
+    "tasks": "sdd/specs/spec-e-burgos-017-desktop-app/cycles/cycle-05/tasks.json"
+  },
+  "artifacts": [],
+  "metrics": null,
+  "tables_created": [],
+  "endpoints_implemented": [],
+  "components_created": [],
+  "issues_found": [],
+  "reviewer_report": null
+}
