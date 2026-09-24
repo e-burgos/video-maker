@@ -146,8 +146,13 @@ export function createStudioToolHandlers(
     },
 
     start_job: async (rawInput) => {
-      const input = parseInput<Record<string, unknown> & { kind: string }>(STUDIO_TOOLS.start_job.input, rawInput);
-      const body: Record<string, unknown> = JOB_KINDS_THAT_TAKE_MODEL.has(input.kind) ? { ...input, model } : input;
+      const { job: jobInput } = parseInput<{ job: Record<string, unknown> & { kind: string } }>(
+        STUDIO_TOOLS.start_job.input,
+        rawInput,
+      );
+      const body: Record<string, unknown> = JOB_KINDS_THAT_TAKE_MODEL.has(jobInput.kind)
+        ? { ...jobInput, model }
+        : jobInput;
       const job = await client.createJob(body);
       return withOutput('start_job', { jobId: job.id, kind: job.kind, status: job.state });
     },

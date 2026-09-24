@@ -24,16 +24,26 @@
       "estimation_hours": 3,
       "story_points": 2,
       "depends_on": [],
-      "status": "pending",
+      "status": "done",
       "files": [
         "libs/producer-tools/src/contract/tool-schemas.ts",
         "libs/producer-tools/src/contract/tool-schemas.spec.ts",
         "libs/producer-tools/src/handlers/studio-tool-handlers.ts",
         "libs/producer-tools/src/handlers/studio-tool-handlers.spec.ts",
-        "libs/producer-tools/src/mcp/studio-mcp-server.ts",
-        "libs/producer-tools/src/prompt/build-producer-prompt.ts",
-        "libs/producer-tools/src/prompt/build-producer-prompt.spec.ts"
-      ]
+        "libs/producer-tools/src/mcp/studio-mcp-server.spec.ts",
+        "apps/render-api/src/producer/producer-stream-events.ts",
+        "apps/render-api/src/producer/producer-stream-events.spec.ts"
+      ],
+      "usage": {
+        "provider_model": "claude/sonnet",
+        "effort": "high",
+        "tokens_in": 48000,
+        "tokens_out": 9000,
+        "agent": "implementor-back",
+        "approx": true,
+        "source": "declared-estimate",
+        "recorded_at": "2026-09-24"
+      }
     },
     {
       "id": "TASK-002",
@@ -87,7 +97,7 @@
       "depends_on": [
         "TASK-001"
       ],
-      "status": "pending",
+      "status": "done",
       "files": [
         "libs/producer-tools/src/runtime/openrouter-producer-runtime.ts",
         "libs/producer-tools/src/runtime/openrouter-producer-runtime.spec.ts",
@@ -96,7 +106,17 @@
         "libs/producer-tools/src/index.ts",
         "package.json",
         "pnpm-lock.yaml"
-      ]
+      ],
+      "usage": {
+        "provider_model": "claude/sonnet",
+        "effort": "high",
+        "tokens_in": 150000,
+        "tokens_out": 23000,
+        "agent": "implementor-back",
+        "approx": true,
+        "source": "declared-estimate",
+        "recorded_at": "2026-09-24"
+      }
     },
     {
       "id": "TASK-004",

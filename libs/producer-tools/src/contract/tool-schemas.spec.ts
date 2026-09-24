@@ -225,6 +225,20 @@ describe('StartJobInputSchema', () => {
   });
 });
 
+describe('STUDIO_TOOLS.start_job.input', () => {
+  it('accepts the union wrapped under "job"', () => {
+    expect(STUDIO_TOOLS.start_job.input.safeParse({ job: { kind: 'render' } }).success).toBe(true);
+  });
+
+  it('rejects the union unwrapped at the root', () => {
+    expect(STUDIO_TOOLS.start_job.input.safeParse({ kind: 'render' }).success).toBe(false);
+  });
+
+  it('rejects fields other than "job"', () => {
+    expect(STUDIO_TOOLS.start_job.input.safeParse({ job: { kind: 'render' }, extra: true }).success).toBe(false);
+  });
+});
+
 describe('bounds from the plan', () => {
   it('accepts atSeconds at the lower and upper bound', () => {
     const { extract_frames } = STUDIO_TOOLS;

@@ -138,10 +138,10 @@ describe('createStudioToolHandlers', () => {
       }),
     });
 
-    await handlers.start_job({ kind: 'voice' });
-    await handlers.start_job({ kind: 'storyboard', brief: 'idea' });
-    await handlers.start_job({ kind: 'render' });
-    await handlers.start_job({ kind: 'montage' });
+    await handlers.start_job({ job: { kind: 'voice' } });
+    await handlers.start_job({ job: { kind: 'storyboard', brief: 'idea' } });
+    await handlers.start_job({ job: { kind: 'render' } });
+    await handlers.start_job({ job: { kind: 'montage' } });
 
     const bodies = client.calls.map((call) => call.args[0] as Record<string, unknown>);
     expect(bodies[0]).toMatchObject({ kind: 'voice', model: 'sonnet' });
@@ -153,7 +153,14 @@ describe('createStudioToolHandlers', () => {
   it('start_job rejects an unknown kind before calling the client', async () => {
     const { handlers, client } = handlersWith();
 
-    await expect(handlers.start_job({ kind: 'bogus' })).rejects.toMatchObject({ code: 'INVALID_INPUT' });
+    await expect(handlers.start_job({ job: { kind: 'bogus' } })).rejects.toMatchObject({ code: 'INVALID_INPUT' });
+    expect(client.calls).toEqual([]);
+  });
+
+  it('start_job rejects a call that is not wrapped in "job"', async () => {
+    const { handlers, client } = handlersWith();
+
+    await expect(handlers.start_job({ kind: 'render' })).rejects.toMatchObject({ code: 'INVALID_INPUT' });
     expect(client.calls).toEqual([]);
   });
 

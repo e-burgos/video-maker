@@ -90,8 +90,10 @@ function summarizeStudioTool(tool: StudioToolName, input: Record<string, unknown
       const role = stringField(input, 'role') ?? 'raw';
       return truncate(`Copying ${stringField(input, 'from') ?? 'the file'} into raw/${role}/`);
     }
-    case 'start_job':
-      return truncate(`Starting the ${stringField(input, 'kind') ?? 'render'} job`);
+    case 'start_job': {
+      const job = isRecord(input.job) ? input.job : {};
+      return truncate(`Starting the ${stringField(job, 'kind') ?? 'render'} job`);
+    }
     case 'wait_for_job':
       return truncate(`Waiting for job ${stringField(input, 'jobId') ?? ''}`.trim());
     case 'cancel_job':

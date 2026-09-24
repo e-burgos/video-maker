@@ -107,8 +107,30 @@ describe('createStudioMcpServer', () => {
       }),
     });
 
-    const result = await client.callTool({ name: 'start_job', arguments: { kind: 'voice' } });
+    const result = await client.callTool({ name: 'start_job', arguments: { job: { kind: 'voice' } } });
 
     expect(result.structuredContent).toEqual({ jobId: 'job-1', kind: 'voice', status: 'queued' });
+  });
+
+  it('rejects a start_job call whose input is not wrapped in "job"', async () => {
+    const { client } = await connectedPair();
+
+    const result = await client.callTool({ name: 'start_job', arguments: { kind: 'render' } });
+
+    expect(result.isError).toBe(true);
+  });
+
+  it('publishes a full JSON schema for start_job, with "job" as a union by kind', async () => {
+    const { client } = await connectedPair();
+
+    const { tools } = await client.listTools();
+    const startJob = tools.find((tool) => tool.name === 'start_job');
+
+    expect(startJob?.inputSchema.type).toBe('object');
+    const properties = startJob?.inputSchema.properties as Record<string, unknown> | undefined;
+    const job = properties?.job as Record<string, unknown> | undefined;
+    expect(job).toBeDefined();
+    const union = (job?.anyOf ?? job?.oneOf) as readonly unknown[] | undefined;
+    expect(union?.length).toBe(5);
   });
 });

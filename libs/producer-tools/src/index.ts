@@ -72,3 +72,22 @@ export type { StudioMcpCliArgs } from './mcp/studio-mcp-cli-args';
 
 export { buildProducerPrompt, buildProducerProjectSection } from './prompt/build-producer-prompt';
 export type { ProducerPromptAsset, ProducerPromptContext } from './prompt/build-producer-prompt';
+
+export { buildStudioAiSdkTools } from './runtime/studio-ai-sdk-tools';
+export type { StudioAiSdkToolsOptions } from './runtime/studio-ai-sdk-tools';
+
+export {
+  DEFAULT_MAX_STEPS,
+  OpenRouterProducerRuntimeError,
+  runOpenRouterProducerTurn,
+  runProducerTurnWithModel,
+} from './runtime/openrouter-producer-runtime';
+export type {
+  OpenRouterProducerRuntimeErrorCode,
+  ProducerRuntimeEvent,
+  ProducerRuntimeMessage,
+  RunOpenRouterProducerTurnOptions,
+  RunOpenRouterProducerTurnResult,
+  RunOpenRouterProducerTurnUsage,
+  RunProducerTurnWithModelOptions,
+} from './runtime/openrouter-producer-runtime';

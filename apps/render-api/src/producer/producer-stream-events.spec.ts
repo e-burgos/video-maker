@@ -19,8 +19,10 @@ describe('summarizeToolUse', () => {
   });
 
   it('nombra el job que arranca por su kind', () => {
-    expect(summarizeToolUse('mcp__studio__start_job', { kind: 'montage' })).toBe('Starting the montage job');
-    expect(summarizeToolUse('mcp__studio__start_job', { kind: 'photo-aroll' })).toBe(
+    expect(summarizeToolUse('mcp__studio__start_job', { job: { kind: 'montage' } })).toBe(
+      'Starting the montage job',
+    );
+    expect(summarizeToolUse('mcp__studio__start_job', { job: { kind: 'photo-aroll' } })).toBe(
       'Starting the photo-aroll job',
     );
   });
