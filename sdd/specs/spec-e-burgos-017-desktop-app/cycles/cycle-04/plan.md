@@ -19,6 +19,7 @@
 | D-C4-05 | El historial para OpenRouter se **reconstruye desde la base** (mensajes de usuario y del productor, más un resumen de las herramientas de cada turno), recortado al presupuesto de contexto del modelo | Claude retoma su sesión con `--resume`; OpenRouter no tiene sesión del lado del proveedor |
 | D-C4-06 | **Lista curada** de modelos, elegida con un benchmark real y no por reputación | El productor encadena decenas de llamadas a herramientas; un modelo que falla en eso rompe la receta. La lista y sus resultados quedan en un artefacto |
 | D-C4-07 | Motor por defecto: Claude si el CLI está disponible y logueado; si no, OpenRouter si hay key | Nadie tiene que configurar nada si ya tiene uno de los dos |
+| D-C4-09 | **Catálogo en vivo** de OpenRouter servido por `render-api` (todos los modelos con herramientas, con precio, contexto, entrada de imágenes y si son gratuitos), combinado con el set recomendado; la web no tiene listas propias. Configuración muestra el catálogo completo con búsqueda; el chat, solo los recomendados (pedido del dev, 2026-09-24) | La lista fija de 3 modelos era un placeholder; el dev quiere elegir entre todo lo que ofrece OpenRouter y que los recomendados incluyan modelos gratuitos y muy baratos |
 | D-C4-08 | Cada turno de OpenRouter registra `usage` y costo en USD que informa OpenRouter, visible en el turno | Es plata de tu amigo: tiene que poder ver cuánto le costó un video |
 
 ## Historias

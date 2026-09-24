@@ -230,8 +230,31 @@
       }
     },
     {
+      "id": "TASK-009",
+      "title": "Live OpenRouter model catalog served by render-api: every tool-capable model with price, context, image input and free flag, merged with the recommended set; the full searchable list in settings and only the recommended ones in the chat",
+      "user_stories": [
+        "US-017-304",
+        "US-017-306"
+      ],
+      "estimation_hours": 5,
+      "story_points": 3,
+      "depends_on": [
+        "TASK-005"
+      ],
+      "status": "pending",
+      "files": [
+        "apps/render-api/src/producer/openrouter-model-catalog.ts",
+        "apps/render-api/src/producer/openrouter-model-catalog.spec.ts",
+        "apps/render-api/src/config/curated-openrouter-models.ts",
+        "apps/render-api/src/http/handlers/producer-settings-handler.ts",
+        "apps/web/src/pages/settings-page.tsx",
+        "apps/web/src/components/producer-composer.tsx",
+        "sdd/api.json"
+      ]
+    },
+    {
       "id": "TASK-006",
-      "title": "Pick the curated OpenRouter model list with a real tool-calling benchmark on a fixed scenario, recording success, steps, latency and cost per model",
+      "title": "Benchmark free, very cheap and one paid reference OpenRouter model on a fixed tool-calling scenario and pick the recommended set, recording success, steps, latency and cost per model",
       "user_stories": [
         "US-017-306"
       ],
@@ -259,7 +282,8 @@
       "story_points": 3,
       "depends_on": [
         "TASK-005",
-        "TASK-006"
+        "TASK-006",
+        "TASK-009"
       ],
       "status": "pending",
       "files": [
