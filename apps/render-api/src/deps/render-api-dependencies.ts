@@ -1,5 +1,6 @@
 import type { DirectoryReader, FileStatReader } from '@video-maker/auto-montage';
 import type {
+  AssetsRepository,
   JobsRepository,
   OrganizationRepository,
   ProducerRepository,
@@ -250,6 +251,7 @@ export interface LocalStorePort {
   readonly producer: ProducerRepository;
   readonly jobs: JobsRepository;
   readonly settings: SettingsRepository;
+  readonly assets: AssetsRepository;
   readonly schemaVersion: number;
   readonly close: () => void;
 }

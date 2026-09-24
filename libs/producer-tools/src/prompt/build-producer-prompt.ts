@@ -7,9 +7,16 @@ export interface ProducerPromptAsset {
   readonly durationMs: number | null;
 }
 
+export interface ProducerPromptPendingAsset {
+  readonly fileName: string;
+  readonly proposedRole: string;
+  readonly proposalReason: string;
+}
+
 export interface ProducerPromptContext {
   readonly assetSource: 'catalog' | 'raw-scan';
   readonly assets: readonly ProducerPromptAsset[];
+  readonly pendingAssets: readonly ProducerPromptPendingAsset[];
   readonly hasTimeline: boolean;
   readonly producerScript: 'none' | 'plain' | 'timed';
 }
@@ -61,6 +68,24 @@ function assetSection(context: ProducerPromptContext): string {
   return [source, ...context.assets.map(describeAsset)].join('\n');
 }
 
+function describePendingAsset(asset: ProducerPromptPendingAsset): string {
+  return `- ${asset.fileName}: proposed as ${asset.proposedRole} (${asset.proposalReason})`;
+}
+
+function pendingAssetSection(context: ProducerPromptContext): string | null {
+  if (context.pendingAssets.length === 0) {
+    return null;
+  }
+  return [
+    'Dropped material still waiting for the user to confirm its role, listed with the proposed role',
+    'and why. List these to the user with their proposed roles and ask them to confirm or change each',
+    'one in the chat cards before you produce anything. NEVER use one of these files as material for a',
+    'job: it is not part of this project until the user confirms it.',
+    '',
+    ...context.pendingAssets.map(describePendingAsset),
+  ].join('\n');
+}
+
 export function buildProducerProjectSection(context: ProducerPromptContext): string {
   const scriptLines =
     context.producerScript === 'none'
@@ -71,12 +96,15 @@ export function buildProducerProjectSection(context: ProducerPromptContext): str
           '  or to paste it again. If it has time marks, they are the timing of the narration. If it has',
           '  none, propose the timing after watching frames of the video and confirm it in one round.',
         ];
+  const pendingSection = pendingAssetSection(context);
+
   return [
     '# This project',
     '',
     `- Timeline: ${context.hasTimeline ? 'already saved — read it with get_timeline before you replace it' : 'none yet'}.`,
     '',
     assetSection(context),
+    ...(pendingSection === null ? [] : ['', pendingSection]),
     ...scriptLines,
   ].join('\n');
 }

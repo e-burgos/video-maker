@@ -1460,6 +1460,135 @@
             "change": "Created in spec-e-burgos-017 cycle-04 (TASK-009): live, searchable OpenRouter model catalog for the settings page (D-C4-09)."
           }
         ]
+      },
+      {
+        "id": "EP-042",
+        "method": "PUT",
+        "path": "/projects/:slug/inbox/:filename",
+        "module": "desktop-app",
+        "spec": "sdd/specs/spec-e-burgos-017-desktop-app",
+        "status": "implemented",
+        "created_in_cycle": 5,
+        "updated_in_cycle": null,
+        "description": "Uploads a dropped file into the inbox (raw/inbox/, D-C5-03): binary body written to a temp file under work/.uploads and promoted, same as an asset upload (EP-assets upload), same content-length/content-type/size checks and the per-project upload mutex. filename must be a single portable path segment with a supported video/image/audio extension; if a file with that name already exists in raw/inbox/, a numeric suffix (-2, -3, ...) is inserted before the extension — never overwritten. After the write, ffprobe runs and a deterministic role is proposed (D-C5-04, propose-asset-role.ts): video with an audio stream → aroll (has-audio), video without → broll (no-audio); image with alpha → logo (alpha-channel), image without → image (image); audio named with a voice hint (voz/voice/locucion/narr) → voice (voice-name-hint), named with a music hint (music/musica/song/track/bgm) → audio (music-name-hint), longer than 45s with no hint → audio (long-audio), otherwise → voice (short-audio). A new row lands in the local-store assets table (migration 3) with status 'pending'; raw/inbox/ is never read by the catalog, the pipeline or GET /projects/:slug/assets (D-C5-03).",
+        "path_params": [
+          "slug",
+          "filename"
+        ],
+        "required_headers": [
+          "content-length",
+          "content-type"
+        ],
+        "request_body": {
+          "content-type": "video/*, image/* or audio/* (binary body, one supported media file)"
+        },
+        "responses": {
+          "201": "application/json, location: /projects/:slug/files/raw/inbox/<finalFileName>: { asset: { id, fileName, path, proposedRole, proposalReason, probe: { kind, durationMs, width?, height?, hasAudio?, hasAlpha? }, status: 'pending' } }.",
+          "404": "PROJECT_NOT_FOUND when the project directory does not exist. application/json: { error: { code, stage: null, message, resource? } }.",
+          "411": "ASSET_CONTENT_LENGTH_REQUIRED without a content-length header. application/json: { error: { code, stage: null, message, resource } }.",
+          "400": "ASSET_CONTENT_TYPE_REQUIRED without a content-type header, or ASSET_UPLOAD_ABORTED when the source stream is cut short. application/json: { error: { code, stage: null, message, resource } }.",
+          "413": "ASSET_TOO_LARGE when content-length or the actual byte count exceeds the configured upload limit. application/json: { error: { code, stage: null, message, resource, expected } }.",
+          "415": "UNSUPPORTED_MEDIA_TYPE when the filename extension is not a supported video, image or audio format. application/json: { error: { code, stage: null, message, resource, expected } }.",
+          "422": "ASSET_PATH_INVALID when filename is not a single portable path segment. application/json: { error: { code, stage: null, message, resource, expected } }.",
+          "500": "MEDIA_COMMAND_FAILED, MEDIA_OUTPUT_UNPARSEABLE or MEDIA_BINARY_NOT_FOUND when ffprobe fails after the file is already persisted in raw/inbox/. application/json: { error: { code, stage: null, message, resource } }."
+        },
+        "changelog": [
+          {
+            "cycle": 5,
+            "date": "2026-09-24",
+            "change": "Created in spec-e-burgos-017 cycle-05 (TASK-001): asset inbox upload with a deterministic role proposal (D-C5-03, D-C5-04)."
+          }
+        ]
+      },
+      {
+        "id": "EP-043",
+        "method": "GET",
+        "path": "/projects/:slug/inbox",
+        "module": "desktop-app",
+        "spec": "sdd/specs/spec-e-burgos-017-desktop-app",
+        "status": "implemented",
+        "created_in_cycle": 5,
+        "updated_in_cycle": null,
+        "description": "Lists the assets in this project still pending role confirmation (status 'pending' in the local-store assets table, D-C5-05). Confirmed assets never appear here — use GET /projects/:slug/assets for the catalog once confirmed.",
+        "path_params": [
+          "slug"
+        ],
+        "required_headers": [],
+        "request_body": {},
+        "responses": {
+          "200": "application/json: { assets: [{ id, fileName, path, proposedRole, proposalReason, probe, status: 'pending' }] }.",
+          "404": "PROJECT_NOT_FOUND when the project directory does not exist. application/json: { error: { code, stage: null, message, resource? } }."
+        },
+        "changelog": [
+          {
+            "cycle": 5,
+            "date": "2026-09-24",
+            "change": "Created in spec-e-burgos-017 cycle-05 (TASK-001): pending inbox listing consumed by the Material tab and get_project_overview (D-C5-05, D-C5-07)."
+          }
+        ]
+      },
+      {
+        "id": "EP-044",
+        "method": "POST",
+        "path": "/projects/:slug/inbox/:assetId/confirm",
+        "module": "desktop-app",
+        "spec": "sdd/specs/spec-e-burgos-017-desktop-app",
+        "status": "implemented",
+        "created_in_cycle": 5,
+        "updated_in_cycle": null,
+        "description": "Confirms a pending inbox asset's role (D-C5-06, US-017-402): moves the file from raw/inbox/<fileName> to raw/<role>/<fileName> (a numeric suffix is inserted before the extension when a file with that name already exists at the destination — never overwritten), updates the catalog exactly as a normal asset upload to that role would (same probe-and-merge code path, apps/render-api/src/store/ingest-asset-into-catalog.ts), and marks the assets table row 'confirmed' with its confirmedRole and new path. role may differ from the original proposedRole (the user can override it). Serialized on the same per-project upload mutex as every other asset mutation.",
+        "path_params": [
+          "slug",
+          "assetId"
+        ],
+        "required_headers": [
+          "content-type"
+        ],
+        "request_body": {
+          "content-type": "application/json",
+          "schema": "{ role: 'aroll' | 'broll' | 'image' | 'audio' | 'voice' | 'logo' }"
+        },
+        "responses": {
+          "200": "application/json: { asset: { id, fileName, path (new raw/<role>/<fileName>), proposedRole, proposalReason, confirmedRole, probe, status: 'confirmed' } }.",
+          "404": "PROJECT_NOT_FOUND when the project directory does not exist, or INBOX_ASSET_NOT_FOUND when assetId is unknown, belongs to another project, is already confirmed, or its file is missing from raw/inbox/. application/json: { error: { code, stage: null, message, resource } }.",
+          "422": "ASSET_ROLE_INVALID when role is missing or not one of the six catalog roles. application/json: { error: { code, stage: null, message, resource, expected } }.",
+          "500": "MEDIA_COMMAND_FAILED, MEDIA_OUTPUT_UNPARSEABLE or MEDIA_BINARY_NOT_FOUND when ffprobe fails after the file is already moved to raw/<role>/ and the assets row is already confirmed. application/json: { error: { code, stage: null, message, resource } }."
+        },
+        "changelog": [
+          {
+            "cycle": 5,
+            "date": "2026-09-24",
+            "change": "Created in spec-e-burgos-017 cycle-05 (TASK-001): confirms a pending asset's role and promotes it into the catalog (D-C5-06)."
+          }
+        ]
+      },
+      {
+        "id": "EP-045",
+        "method": "DELETE",
+        "path": "/projects/:slug/inbox/:assetId",
+        "module": "desktop-app",
+        "spec": "sdd/specs/spec-e-burgos-017-desktop-app",
+        "status": "implemented",
+        "created_in_cycle": 5,
+        "updated_in_cycle": null,
+        "description": "Discards a pending inbox asset: removes the file from raw/inbox/ (if still present) and deletes its row from the assets table. Never touches a confirmed asset — use DELETE /projects/:slug/assets/:role/:filename for that.",
+        "path_params": [
+          "slug",
+          "assetId"
+        ],
+        "required_headers": [],
+        "request_body": {},
+        "responses": {
+          "200": "application/json: { slug, deleted: { id, path } }.",
+          "404": "PROJECT_NOT_FOUND when the project directory does not exist, or INBOX_ASSET_NOT_FOUND when assetId is unknown, belongs to another project, or is already confirmed. application/json: { error: { code, stage: null, message, resource } }."
+        },
+        "changelog": [
+          {
+            "cycle": 5,
+            "date": "2026-09-24",
+            "change": "Created in spec-e-burgos-017 cycle-05 (TASK-001): discards a pending inbox asset (D-C5-03)."
+          }
+        ]
       }
     ]
   }

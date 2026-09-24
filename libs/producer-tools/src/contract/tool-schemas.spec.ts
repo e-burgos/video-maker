@@ -15,7 +15,7 @@ import {
 } from './tool-schemas';
 
 const EXPECTED_OUTPUT_FIELDS: Record<(typeof STUDIO_TOOL_NAMES)[number], readonly string[]> = {
-  get_project_overview: ['slug', 'title', 'assets', 'hasTimeline', 'script', 'recentJobs'],
+  get_project_overview: ['slug', 'title', 'assets', 'pendingAssets', 'hasTimeline', 'script', 'recentJobs'],
   probe_media: ['path', 'durationMs', 'video', 'audio'],
   extract_frames: ['frames'],
   list_voices: ['voices', 'defaultVoiceId'],

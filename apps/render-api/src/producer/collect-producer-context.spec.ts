@@ -54,5 +54,30 @@ describe('collectProducerContext', () => {
     expect(context.assets).toEqual([
       { path: 'raw/aroll/clip01.mp4', role: 'aroll', durationMs: null },
     ]);
+    expect(context.pendingAssets).toEqual([]);
+  });
+
+  it('incluye los assets pendientes de confirmación del proyecto', async () => {
+    const callLog = createCallLog();
+    const storage = createFakeObjectStorage(callLog, {
+      directories: ['/media/demo-01', '/media/demo-01/raw', '/media/demo-01/work'],
+    });
+    const deps = createFakeRenderApiDependencies(callLog, { storage });
+    deps.localStore.projects.insert('demo-01');
+    deps.localStore.assets.insertPending({
+      id: 'asset-1',
+      slug: 'demo-01',
+      path: 'raw/inbox/dropped.mp4',
+      fileName: 'dropped.mp4',
+      proposedRole: 'aroll',
+      proposalReason: 'has-audio',
+      probe: {},
+    });
+
+    const context = await collectProducerContext(deps, PROJECT, INPUT);
+
+    expect(context.pendingAssets).toEqual([
+      { fileName: 'dropped.mp4', proposedRole: 'aroll', proposalReason: 'has-audio' },
+    ]);
   });
 });

@@ -1,4 +1,5 @@
 import {
+  createAssetsRepository,
   createJobsRepository,
   createOrganizationRepository,
   createProducerRepository,
@@ -107,6 +108,7 @@ function createFakeLocalStore(clock: Clock): LocalStorePort {
     producer: createProducerRepository(database.db),
     jobs: createJobsRepository(database.db),
     settings: createSettingsRepository(database.db, nowIso),
+    assets: createAssetsRepository(database.db, nowIso),
     schemaVersion: currentUserVersion(database.sqlite),
     close: () => database.close(),
   };

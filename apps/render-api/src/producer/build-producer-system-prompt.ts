@@ -7,6 +7,7 @@ function toPromptContext(context: ProducerProjectContext): ProducerPromptContext
   return {
     assetSource: context.assetSource,
     assets: context.assets,
+    pendingAssets: context.pendingAssets,
     hasTimeline: context.hasTimeline,
     producerScript: context.producerScript,
   };

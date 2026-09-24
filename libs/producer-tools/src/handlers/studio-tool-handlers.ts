@@ -67,9 +67,10 @@ export function createStudioToolHandlers(
     get_project_overview: async (rawInput) => {
       parseInput(STUDIO_TOOLS.get_project_overview.input, rawInput);
 
-      const [detail, assets, recentJobs, script] = await Promise.all([
+      const [detail, assets, pendingAssets, recentJobs, script] = await Promise.all([
         client.getProjectDetail(),
         client.listProjectAssets(),
+        client.listPendingAssets(),
         client.listRecentJobs(RECENT_JOBS_LIMIT),
         client.readProducerScriptState(),
       ]);
@@ -81,6 +82,12 @@ export function createStudioToolHandlers(
           path: asset.path,
           role: asset.role,
           durationMs: asset.media?.durationMs ?? null,
+        })),
+        pendingAssets: pendingAssets.map((asset) => ({
+          assetId: asset.id,
+          fileName: asset.fileName,
+          proposedRole: asset.proposedRole,
+          proposalReason: asset.proposalReason,
         })),
         hasTimeline: detail.layout.timeline,
         script,

@@ -17,6 +17,13 @@ export interface RenderApiAssetEntry {
   readonly media: { readonly durationMs: number } | null;
 }
 
+export interface RenderApiPendingAsset {
+  readonly id: string;
+  readonly fileName: string;
+  readonly proposedRole: string;
+  readonly proposalReason: string;
+}
+
 export interface RenderApiJobSummary {
   readonly id: string;
   readonly kind: string;
@@ -71,6 +78,7 @@ export interface RenderApiMusicResult {
 export interface RenderApiClient {
   getProjectDetail(): Promise<RenderApiProjectDetail>;
   listProjectAssets(): Promise<readonly RenderApiAssetEntry[]>;
+  listPendingAssets(): Promise<readonly RenderApiPendingAsset[]>;
   listRecentJobs(limit: number): Promise<readonly RenderApiJobSummary[]>;
   readProducerScriptState(): Promise<'none' | 'plain' | 'timed'>;
 

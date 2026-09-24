@@ -161,6 +161,14 @@ const GetProjectOverviewOutputSchema = z.strictObject({
       durationMs: z.number().int().nonnegative().nullable(),
     }),
   ),
+  pendingAssets: z.array(
+    z.strictObject({
+      assetId: z.string(),
+      fileName: z.string(),
+      proposedRole: z.string(),
+      proposalReason: z.string(),
+    }),
+  ),
   hasTimeline: z.boolean(),
   script: z.enum(['none', 'plain', 'timed']),
   recentJobs: z.array(

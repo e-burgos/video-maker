@@ -77,6 +77,25 @@ export const MIGRATIONS: readonly Migration[] = [
     version: 2,
     statements: [`ALTER TABLE producer_messages ADD COLUMN usage TEXT`],
   },
+  {
+    version: 3,
+    statements: [
+      `CREATE TABLE assets (
+        id TEXT PRIMARY KEY,
+        slug TEXT NOT NULL REFERENCES projects(slug) ON DELETE CASCADE,
+        path TEXT NOT NULL,
+        file_name TEXT NOT NULL,
+        proposed_role TEXT NOT NULL,
+        proposal_reason TEXT NOT NULL,
+        confirmed_role TEXT,
+        status TEXT NOT NULL,
+        probe TEXT NOT NULL,
+        created_at TEXT NOT NULL,
+        confirmed_at TEXT
+      )`,
+      `CREATE INDEX assets_slug_status_idx ON assets (slug, status)`,
+    ],
+  },
 ];
 
 export function currentUserVersion(sqlite: Database.Database): number {

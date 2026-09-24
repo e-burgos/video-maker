@@ -10,6 +10,7 @@ const CONTEXT: ProducerPromptContext = {
     { path: 'raw/aroll/clip01.mp4', role: 'aroll', durationMs: 25_900 },
     { path: 'raw/logo/logo.png', role: 'logo', durationMs: null },
   ],
+  pendingAssets: [],
   hasTimeline: true,
   producerScript: 'none',
 };
@@ -41,6 +42,20 @@ describe('buildProducerProjectSection', () => {
     expect(section).toContain('No material yet');
     expect(section).toContain('Ask the user');
     expect(section).toContain('none yet');
+  });
+
+  it('no menciona material pendiente cuando no hay ninguno', () => {
+    expect(buildProducerProjectSection(CONTEXT)).not.toContain('waiting for the user to confirm');
+  });
+
+  it('lista el material pendiente con su rol propuesto y prohibe usarlo antes de confirmar', () => {
+    const section = buildProducerProjectSection({
+      ...CONTEXT,
+      pendingAssets: [{ fileName: 'dropped.mp4', proposedRole: 'aroll', proposalReason: 'has-audio' }],
+    });
+    expect(section).toContain('waiting for the user to confirm');
+    expect(section).toContain('- dropped.mp4: proposed as aroll (has-audio)');
+    expect(section).toContain('NEVER use one of these files as material for a');
   });
 
   it('cuando ya hay guion lo declara como EL guion y prohibe pedir la tabla de nuevo', () => {

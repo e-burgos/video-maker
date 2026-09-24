@@ -46,6 +46,7 @@ export type {
   RenderApiJob,
   RenderApiJobSummary,
   RenderApiMusicResult,
+  RenderApiPendingAsset,
   RenderApiProbeResult,
   RenderApiProjectDetail,
   RenderApiVoice,
@@ -71,7 +72,11 @@ export { parseStudioMcpCliArgs } from './mcp/studio-mcp-cli-args';
 export type { StudioMcpCliArgs } from './mcp/studio-mcp-cli-args';
 
 export { buildProducerPrompt, buildProducerProjectSection } from './prompt/build-producer-prompt';
-export type { ProducerPromptAsset, ProducerPromptContext } from './prompt/build-producer-prompt';
+export type {
+  ProducerPromptAsset,
+  ProducerPromptContext,
+  ProducerPromptPendingAsset,
+} from './prompt/build-producer-prompt';
 
 export { buildStudioAiSdkTools } from './runtime/studio-ai-sdk-tools';
 export type { StudioAiSdkToolsOptions } from './runtime/studio-ai-sdk-tools';

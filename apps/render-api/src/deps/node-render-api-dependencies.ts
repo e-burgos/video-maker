@@ -24,6 +24,7 @@ import type { ReadableStream as NodeReadableStreamWeb } from 'node:stream/web';
 
 import { nodeDirectoryReader, nodeFileStatReader } from '@video-maker/auto-montage';
 import {
+  createAssetsRepository,
   createJobsRepository,
   createOrganizationRepository,
   createProducerRepository,
@@ -414,6 +415,7 @@ export function createNodeRenderApiDependencies(
         producer: createProducerRepository(database.db),
         jobs: createJobsRepository(database.db),
         settings: createSettingsRepository(database.db, nowIso),
+        assets: createAssetsRepository(database.db, nowIso),
         schemaVersion: currentUserVersion(database.sqlite),
         close: () => database.close(),
       };

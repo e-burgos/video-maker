@@ -67,6 +67,17 @@ describe('discoverAssets', () => {
     expect(result.ignored).toEqual([{ path: 'raw/scratch', reason: 'unknown-directory' }]);
   });
 
+  it('ignora raw/inbox sin recorrerla: la bandeja de entrada nunca es un rol del catálogo', async () => {
+    const deps = fakeDependencies([
+      { path: '/tmp/media/pitch-deck/raw/inbox/dropped.mp4', contents: 'z' },
+    ]);
+
+    const result = await discoverAssets(project, deps);
+
+    expect(result.findings).toEqual([]);
+    expect(result.ignored).toEqual([{ path: 'raw/inbox', reason: 'unknown-directory' }]);
+  });
+
   it('ignora un archivo suelto directamente bajo raw/ como unexpected-file', async () => {
     const deps = fakeDependencies([
       { path: '/tmp/media/pitch-deck/raw/aroll/clip01.mp4', contents: 'x' },

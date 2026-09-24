@@ -8,7 +8,8 @@
     "apps/render-api",
     "libs/local-store",
     "libs/producer-tools",
-    "apps/desktop"
+    "apps/desktop",
+    "libs/auto-montage"
   ],
   "phase": "chat-first-ui",
   "flow": "lite",

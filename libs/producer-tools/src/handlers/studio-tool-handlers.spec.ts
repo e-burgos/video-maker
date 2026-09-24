@@ -24,6 +24,9 @@ describe('createStudioToolHandlers', () => {
         { path: 'raw/aroll/a.mp4', role: 'aroll', media: { durationMs: 1000 } },
         { path: 'raw/images/b.jpg', role: 'image', media: null },
       ],
+      listPendingAssets: async () => [
+        { id: 'asset-1', fileName: 'dropped.mp4', proposedRole: 'aroll', proposalReason: 'has-audio' },
+      ],
       listRecentJobs: async () => [{ id: 'job-1', kind: 'render', state: 'succeeded', createdAt: '2026-01-01' }],
       readProducerScriptState: async () => 'timed',
     });
@@ -36,6 +39,9 @@ describe('createStudioToolHandlers', () => {
       assets: [
         { path: 'raw/aroll/a.mp4', role: 'aroll', durationMs: 1000 },
         { path: 'raw/images/b.jpg', role: 'image', durationMs: null },
+      ],
+      pendingAssets: [
+        { assetId: 'asset-1', fileName: 'dropped.mp4', proposedRole: 'aroll', proposalReason: 'has-audio' },
       ],
       hasTimeline: true,
       script: 'timed',

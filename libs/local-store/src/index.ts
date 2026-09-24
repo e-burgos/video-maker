@@ -42,3 +42,12 @@ export type { JobRecord, JobsRepository, NewJobRecord } from './repositories/job
 
 export { createSettingsRepository } from './repositories/settings-repository';
 export type { SettingsClock, SettingsRepository } from './repositories/settings-repository';
+
+export { ASSET_STATUSES, createAssetsRepository } from './repositories/assets-repository';
+export type {
+  AssetRecord,
+  AssetsClock,
+  AssetsRepository,
+  AssetStatus,
+  NewPendingAssetRecord,
+} from './repositories/assets-repository';

@@ -86,3 +86,23 @@ export const settings = sqliteTable('settings', {
   value: text('value').notNull(),
   updatedAt: text('updated_at').notNull(),
 });
+
+export const assets = sqliteTable(
+  'assets',
+  {
+    id: text('id').primaryKey(),
+    slug: text('slug')
+      .notNull()
+      .references(() => projects.slug, { onDelete: 'cascade' }),
+    path: text('path').notNull(),
+    fileName: text('file_name').notNull(),
+    proposedRole: text('proposed_role').notNull(),
+    proposalReason: text('proposal_reason').notNull(),
+    confirmedRole: text('confirmed_role'),
+    status: text('status').notNull(),
+    probe: text('probe').notNull(),
+    createdAt: text('created_at').notNull(),
+    confirmedAt: text('confirmed_at'),
+  },
+  (table) => [index('assets_slug_status_idx').on(table.slug, table.status)],
+);

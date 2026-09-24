@@ -77,3 +77,17 @@ inicial en 533,9 kB.
 | Detectar "voz" en un audio o video sin transcribir | Primera versión: presencia y nivel de audio por `ffprobe` más el nombre; si hace falta, una pasada corta de whisper sobre los primeros segundos (queda medida en TASK-001) |
 | Romper los E2E de las pantallas actuales | Se mantienen como edición avanzada; sus E2E se corren en TASK-006 |
 | El chunk no baja de 500 kB con cambios chicos | TASK-005 mide primero con el análisis de Vite y ataca lo más grande (catálogo inglés ansioso, cliente, Remotion player fuera del chunk inicial) |
+
+## Pendiente de documentar en contexto
+
+- **TASK-001** tocó `libs/auto-montage` (`src/index.ts` + `discover-assets.spec.ts`), un subproyecto que no
+  estaba en la lista `apps` de este ciclo. Cambio aditivo y de bajo riesgo: exporta `mediaKindForExtension` e
+  `isSupportedExtension` (ya existían y estaban testeados en `ingest/supported-extensions.ts`, solo faltaba el
+  export público) para que `apps/render-api` valide la extensión de un archivo dropeado antes de invocar
+  `ffprobe` (`UNSUPPORTED_MEDIA_TYPE`, EP-042). Se agregó además un test que fija que `raw/inbox/` se ignora
+  como `unknown-directory` en `discoverAssets` (ya era el comportamiento, ahora está bloqueado explícitamente).
+  Ningún contrato de `auto-montage` cambió de forma incompatible. El reviewer debería sumar `libs/auto-montage`
+  a la fila de subproyectos tocados en el cierre del ciclo si `sdd/context/constitution.md` lo exige.
+- Se extrajo `apps/render-api/src/store/ingest-asset-into-catalog.ts` (probe + merge de catálogo) desde
+  `assets-handler.ts` para reusarlo tal cual en el confirm del inbox (`asset-inbox-handler.ts`), sin duplicar
+  la lógica de probe-failure. Es un refactor interno del subproyecto, no un patrón nuevo a documentar aparte.

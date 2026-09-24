@@ -28,6 +28,7 @@ export function createFakeRenderApiClient(overrides: Partial<RenderApiClient> = 
     calls,
     getProjectDetail: (...args) => record('getProjectDetail', args, overrides.getProjectDetail),
     listProjectAssets: (...args) => record('listProjectAssets', args, overrides.listProjectAssets),
+    listPendingAssets: (...args) => record('listPendingAssets', args, overrides.listPendingAssets),
     listRecentJobs: (...args) => record('listRecentJobs', args, overrides.listRecentJobs),
     readProducerScriptState: (...args) => record('readProducerScriptState', args, overrides.readProducerScriptState),
     probeMedia: (...args) => record('probeMedia', args, overrides.probeMedia),

@@ -1,18 +1,15 @@
-import { catalogPath, readCatalog, resolveMediaProject, toAbsolutePath, workPath, writeCatalog } from '@video-maker/auto-montage';
+import { resolveMediaProject, toAbsolutePath, workPath, writeCatalog } from '@video-maker/auto-montage';
 import type { Catalog, MediaProject } from '@video-maker/auto-montage';
-import type { MediaAsset } from '@video-maker/timeline-core';
 import { join } from 'node:path/posix';
 
 import type { StoreConfig } from '../../config/store-config';
 import type { RenderApiDependencies } from '../../deps/render-api-dependencies';
 import { PipelineStageError } from '../../errors/pipeline-stage-error';
-import { translateAutoMontageError } from '../../errors/translate-store-error';
-import { translateEngineError } from '../../errors/translate-engine-error';
-import type { RenderApiError, RenderApiErrorCode } from '../../errors/render-api-error';
 import type { AssetRole } from '../../store/asset-path';
 import { isAssetRole, isPortableFileName, rawDirectoryForRole } from '../../store/asset-path';
 import type { CatalogRemoval } from '../../store/catalog-merge';
-import { mergeProbeFailure, mergeUploadedAsset, removeCatalogAsset, toCatalogAsset } from '../../store/catalog-merge';
+import { removeCatalogAsset } from '../../store/catalog-merge';
+import { ingestAssetIntoCatalog, readCatalogOrThrow } from '../../store/ingest-asset-into-catalog';
 import { isValidProjectSlug } from '../../store/project-slug';
 import { resolveProjectAssets, toAssetListEntry } from '../../store/project-assets';
 import { readStoredTimelineIfPersisted } from '../../store/project-scope';
@@ -26,34 +23,8 @@ import { queryFlag } from '../query-flag';
 import type { RenderApiRuntime } from '../render-api-runtime';
 import type { RouteParams } from '../router';
 
-const PROBE_FAILURE_CODE_BY_OWN_CODE: Readonly<Partial<Record<RenderApiErrorCode, 'BINARY_NOT_FOUND' | 'COMMAND_FAILED' | 'UNPARSEABLE_OUTPUT'>>> = {
-  MEDIA_BINARY_NOT_FOUND: 'BINARY_NOT_FOUND',
-  MEDIA_COMMAND_FAILED: 'COMMAND_FAILED',
-  MEDIA_OUTPUT_UNPARSEABLE: 'UNPARSEABLE_OUTPUT',
-};
-
 function jsonResponse(status: number, body: unknown): HttpResponse {
   return { status, headers: { 'content-type': JSON_CONTENT_TYPE }, body };
-}
-
-function deriveProbeFailureCode(ownCode: RenderApiErrorCode): 'BINARY_NOT_FOUND' | 'COMMAND_FAILED' | 'UNPARSEABLE_OUTPUT' | 'UNKNOWN' {
-  return PROBE_FAILURE_CODE_BY_OWN_CODE[ownCode] ?? 'UNKNOWN';
-}
-
-function withDetails(
-  error: RenderApiError,
-  details: { readonly assetPersisted: boolean; readonly catalogUpdated: boolean },
-  cause: unknown,
-): PipelineStageError {
-  return new PipelineStageError({
-    code: error.code,
-    stage: null,
-    resource: error.resource,
-    expected: error.expected,
-    hint: error.hint,
-    details,
-    cause,
-  });
 }
 
 function assertValidProjectSlug(slug: string): void {
@@ -119,19 +90,6 @@ function resolveAssetTarget(params: RouteParams): AssetTarget {
   }
 
   return { role, assetId: `raw/${rawDirectoryForRole(role)}/${filename}` };
-}
-
-async function readCatalogOrThrow(
-  deps: RenderApiDependencies,
-  project: MediaProject,
-  assetPersisted: boolean,
-): Promise<Catalog | null> {
-  try {
-    return await readCatalog(project, { readTextFile: deps.storage.readTextFile });
-  } catch (cause) {
-    const translated = translateAutoMontageError(cause, catalogPath());
-    throw withDetails(translated, { assetPersisted, catalogUpdated: false }, cause);
-  }
 }
 
 export async function handleUploadAsset(
@@ -218,38 +176,7 @@ export async function handleUploadAsset(
 
     await deps.storage.promoteTemporary(outcome.temporaryPath, absoluteDestination);
 
-    const finalStat = await deps.storage.stat(absoluteDestination);
-    if (finalStat === null) {
-      throw new PipelineStageError({ code: 'INTERNAL_ERROR', stage: null, resource: assetId });
-    }
-    const fingerprint = { sizeBytes: finalStat.sizeBytes, modifiedAtMs: finalStat.modifiedAtMs };
-
-    const catalog = await readCatalogOrThrow(deps, project, true);
-
-    let mediaAsset: MediaAsset;
-    try {
-      mediaAsset = await deps.probeAsset({ path: absoluteDestination, assetId });
-    } catch (cause) {
-      const translated = translateEngineError(cause, null, assetId);
-      const probeFailureCode = deriveProbeFailureCode(translated.code);
-      const catalogWithFailure = mergeProbeFailure(
-        catalog,
-        { path: assetId, errorCode: probeFailureCode },
-        project.slug,
-      );
-      await writeCatalog(project, catalogWithFailure, {
-        writeTextFile: deps.storage.writeTextFile,
-        ensureDirectory: deps.storage.ensureDirectory,
-      });
-      throw withDetails(translated, { assetPersisted: true, catalogUpdated: true }, cause);
-    }
-
-    const catalogEntry = toCatalogAsset({ asset: mediaAsset, assetId, role, fingerprint });
-    const updatedCatalog = mergeUploadedAsset(catalog, catalogEntry, project.slug);
-    await writeCatalog(project, updatedCatalog, {
-      writeTextFile: deps.storage.writeTextFile,
-      ensureDirectory: deps.storage.ensureDirectory,
-    });
+    const catalogEntry = await ingestAssetIntoCatalog(deps, { project, assetId, role, absolutePath: absoluteDestination });
 
     return {
       status: 201,

@@ -10,6 +10,12 @@ export interface ProducerContextAsset {
   readonly durationMs: number | null;
 }
 
+export interface ProducerContextPendingAsset {
+  readonly fileName: string;
+  readonly proposedRole: string;
+  readonly proposalReason: string;
+}
+
 export interface ProducerProjectContext {
   readonly slug: string;
   readonly projectRoot: string;
@@ -17,6 +23,7 @@ export interface ProducerProjectContext {
   readonly apiUrl: string;
   readonly assetSource: 'catalog' | 'raw-scan';
   readonly assets: readonly ProducerContextAsset[];
+  readonly pendingAssets: readonly ProducerContextPendingAsset[];
   readonly hasTimeline: boolean;
   readonly producerScript: 'none' | 'plain' | 'timed';
 }
@@ -34,6 +41,7 @@ export async function collectProducerContext(
   const projectAssets = await resolveProjectAssets(deps.storage, project);
   const timelineStat = await deps.storage.stat(toAbsolutePath(project, timelinePath()));
   const producerScript = await readProducerScriptKind(deps, project);
+  const pendingAssets = deps.localStore.assets.listPending(project.slug);
 
   return {
     slug: project.slug,
@@ -45,6 +53,11 @@ export async function collectProducerContext(
       path: entry.path,
       role: entry.role,
       durationMs: entry.media?.durationMs ?? null,
+    })),
+    pendingAssets: pendingAssets.map((asset) => ({
+      fileName: asset.fileName,
+      proposedRole: asset.proposedRole,
+      proposalReason: asset.proposalReason,
     })),
     hasTimeline: timelineStat !== null && timelineStat.kind === 'file',
     producerScript,

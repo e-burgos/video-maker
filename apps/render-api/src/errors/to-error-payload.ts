@@ -32,6 +32,8 @@ const MESSAGE_BY_CODE: Readonly<Record<RenderApiErrorCode, string>> = {
   ASSET_CONTENT_TYPE_REQUIRED: 'The content-type header is required for an asset upload.',
   ASSET_TOO_LARGE: 'The asset exceeds the configured upload size limit.',
   ASSET_UPLOAD_ABORTED: 'The asset upload was aborted before it completed.',
+  INBOX_ASSET_NOT_FOUND: 'The requested pending inbox asset does not exist in the project.',
+  UNSUPPORTED_MEDIA_TYPE: 'The file extension is not a supported video, image or audio format.',
   TIMELINE_NOT_FOUND: 'The project has no stored timeline.',
   TIMELINE_INVALID: 'The timeline document does not pass validation.',
   EDL_NOT_FOUND: 'The project has no stored edit decision list.',

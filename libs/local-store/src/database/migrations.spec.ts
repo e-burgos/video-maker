@@ -114,7 +114,10 @@ describe('applyMigrations', () => {
       `INSERT INTO producer_messages (id, slug, seq, role, text, created_at) VALUES ('msg-1', 'demo-01', 1, 'user', 'hola', 't')`,
     );
 
-    applyMigrations(sqlite, MIGRATIONS);
+    applyMigrations(
+      sqlite,
+      MIGRATIONS.filter((migration) => migration.version <= 2),
+    );
     expect(currentUserVersion(sqlite)).toBe(2);
 
     const columns = sqlite.pragma('table_info(producer_messages)') as SqliteColumnInfo[];
@@ -133,6 +136,41 @@ describe('applyMigrations', () => {
       usage: string | null;
     };
     expect(withUsage.usage).toBe('{"inputTokens":10,"outputTokens":5,"costUsd":0.001}');
+
+    sqlite.close();
+  });
+
+  it('migrates from v2 to v3 without losing existing rows, adding the assets table', () => {
+    const sqlite = new Database(':memory:');
+    sqlite.pragma('foreign_keys = ON');
+    applyMigrations(sqlite, MIGRATIONS.filter((migration) => migration.version <= 2));
+    expect(currentUserVersion(sqlite)).toBe(2);
+
+    sqlite.exec(`INSERT INTO projects (slug, created_at, updated_at) VALUES ('demo-01', 't', 't')`);
+
+    applyMigrations(sqlite, MIGRATIONS);
+    expect(currentUserVersion(sqlite)).toBe(3);
+
+    const tables = sqlite
+      .prepare("select name from sqlite_master where type = 'table'")
+      .all() as Array<{ name: string }>;
+    expect(tables.some((table) => table.name === 'assets')).toBe(true);
+
+    sqlite.exec(
+      `INSERT INTO assets (id, slug, path, file_name, proposed_role, proposal_reason, status, probe, created_at)
+       VALUES ('asset-1', 'demo-01', 'raw/inbox/clip.mp4', 'clip.mp4', 'aroll', 'has-audio', 'pending', '{"kind":"video"}', 't')`,
+    );
+    const row = sqlite.prepare('select id, confirmed_role, confirmed_at from assets where id = ?').get('asset-1') as {
+      id: string;
+      confirmed_role: string | null;
+      confirmed_at: string | null;
+    };
+    expect(row).toEqual({ id: 'asset-1', confirmed_role: null, confirmed_at: null });
+
+    const projectRow = sqlite.prepare('select slug from projects where slug = ?').get('demo-01') as {
+      slug: string;
+    };
+    expect(projectRow).toEqual({ slug: 'demo-01' });
 
     sqlite.close();
   });

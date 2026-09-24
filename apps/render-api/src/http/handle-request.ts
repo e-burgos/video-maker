@@ -8,6 +8,12 @@ import { handleGetArtifact } from './handlers/artifact-handler';
 import { handleGetGenerated } from './handlers/generated-handler';
 import { handleDeleteAsset, handleListAssets, handleUploadAsset } from './handlers/assets-handler';
 import { handleCopyAsset } from './handlers/asset-copy-handler';
+import {
+  handleConfirmInboxAsset,
+  handleDeleteInboxAsset,
+  handleListInbox,
+  handleUploadToInbox,
+} from './handlers/asset-inbox-handler';
 import { handleProbeMedia } from './handlers/probe-handler';
 import { handleExtractFrames } from './handlers/frames-handler';
 import { handleGetProjectText, handlePutProjectText } from './handlers/project-text-handler';
@@ -218,6 +224,14 @@ async function dispatchRoute(
         return await handleDeleteAsset(deps, store, params, request, runtime);
       case 'projects.assets.copy':
         return await handleCopyAsset(deps, store, params, request, runtime);
+      case 'projects.inbox.list':
+        return await handleListInbox(deps, store, params);
+      case 'projects.inbox.upload':
+        return await handleUploadToInbox(deps, store, params, request, runtime);
+      case 'projects.inbox.delete':
+        return await handleDeleteInboxAsset(deps, store, params, runtime);
+      case 'projects.inbox.confirm':
+        return await handleConfirmInboxAsset(deps, store, params, request, runtime);
       case 'projects.probe':
         return await handleProbeMedia(deps, store, params, request);
       case 'projects.frames':

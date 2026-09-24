@@ -9,6 +9,7 @@ import type {
   RenderApiJob,
   RenderApiJobSummary,
   RenderApiMusicResult,
+  RenderApiPendingAsset,
   RenderApiProbeResult,
   RenderApiProjectDetail,
   RenderApiVoice,
@@ -143,6 +144,18 @@ export function createHttpRenderApiClient(options: HttpRenderApiClientOptions): 
     listProjectAssets: async () => {
       const json = (await request('GET', `/projects/${slug}/assets`)) as { assets: readonly RenderApiAssetEntry[] };
       return json.assets;
+    },
+
+    listPendingAssets: async (): Promise<readonly RenderApiPendingAsset[]> => {
+      const json = (await request('GET', `/projects/${slug}/inbox`)) as {
+        assets: readonly { id: string; fileName: string; proposedRole: string; proposalReason: string }[];
+      };
+      return json.assets.map((asset) => ({
+        id: asset.id,
+        fileName: asset.fileName,
+        proposedRole: asset.proposedRole,
+        proposalReason: asset.proposalReason,
+      }));
     },
 
     listRecentJobs: async (limit) => {

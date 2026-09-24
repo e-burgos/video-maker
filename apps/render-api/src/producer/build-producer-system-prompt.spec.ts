@@ -13,6 +13,7 @@ const CONTEXT: ProducerProjectContext = {
     { path: 'raw/aroll/clip01.mp4', role: 'aroll', durationMs: 25_900 },
     { path: 'raw/logo/logo.png', role: 'logo', durationMs: null },
   ],
+  pendingAssets: [],
   hasTimeline: true,
   producerScript: 'none',
 };
@@ -44,6 +45,15 @@ describe('buildProducerSystemPrompt', () => {
 
     expect(prompt).toContain('No material yet');
     expect(prompt).toContain('none yet');
+  });
+
+  it('lista el material pendiente de confirmación y prohibe usarlo', () => {
+    const prompt = buildProducerSystemPrompt({
+      ...CONTEXT,
+      pendingAssets: [{ fileName: 'dropped.mp4', proposedRole: 'aroll', proposalReason: 'has-audio' }],
+    });
+    expect(prompt).toContain('- dropped.mp4: proposed as aroll (has-audio)');
+    expect(prompt).toContain('NEVER use one of these files as material for a');
   });
 
   it('declara el guion existente como EL guion cuando el proyecto ya tiene uno', () => {

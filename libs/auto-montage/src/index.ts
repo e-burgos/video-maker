@@ -13,6 +13,7 @@ export {
 } from './project/project-paths';
 
 export { discoverAssets } from './ingest/discover-assets';
+export { isSupportedExtension, mediaKindForExtension } from './ingest/supported-extensions';
 export type {
   AssetFinding,
   DiscoverAssetsDependencies,
