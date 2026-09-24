@@ -1,0 +1,192 @@
+{
+  "$schema": "../../../../schemas/cycle-tasks.schema.json",
+  "spec": "spec-e-burgos-017-desktop-app",
+  "cycle": 4,
+  "module": "desktop-app",
+  "apps": [
+    "libs/producer-tools",
+    "apps/render-api",
+    "apps/web",
+    "apps/desktop"
+  ],
+  "flow": "lite",
+  "user_stories_generated": true,
+  "prerequisites": {
+    "tasks_generated": true
+  },
+  "tasks": [
+    {
+      "id": "TASK-001",
+      "title": "Wrap the start_job input in an object ({ job: <union> }) so every engine gets a real schema, and update the prompt, the MCP server and the Claude launch",
+      "user_stories": [
+        "US-017-301"
+      ],
+      "estimation_hours": 3,
+      "story_points": 2,
+      "depends_on": [],
+      "status": "pending",
+      "files": [
+        "libs/producer-tools/src/contract/tool-schemas.ts",
+        "libs/producer-tools/src/contract/tool-schemas.spec.ts",
+        "libs/producer-tools/src/handlers/studio-tool-handlers.ts",
+        "libs/producer-tools/src/handlers/studio-tool-handlers.spec.ts",
+        "libs/producer-tools/src/mcp/studio-mcp-server.ts",
+        "libs/producer-tools/src/prompt/build-producer-prompt.ts",
+        "libs/producer-tools/src/prompt/build-producer-prompt.spec.ts"
+      ]
+    },
+    {
+      "id": "TASK-002",
+      "title": "Store the OpenRouter API key in the macOS login keychain from render-api and add the producer settings endpoints (engine, default model, key present or not), never echoing the key",
+      "user_stories": [
+        "US-017-302",
+        "US-017-305"
+      ],
+      "estimation_hours": 5,
+      "story_points": 3,
+      "depends_on": [],
+      "status": "pending",
+      "files": [
+        "apps/render-api/src/secrets/keychain-secret-store.ts",
+        "apps/render-api/src/secrets/keychain-secret-store.spec.ts",
+        "apps/render-api/src/http/handlers/producer-settings-handler.ts",
+        "apps/render-api/src/http/handlers/producer-settings-handler.spec.ts",
+        "apps/render-api/src/http/routes.ts",
+        "apps/render-api/src/http/handle-request.ts",
+        "apps/render-api/src/deps/render-api-dependencies.ts",
+        "apps/render-api/src/deps/node-render-api-dependencies.ts",
+        "sdd/api.json"
+      ]
+    },
+    {
+      "id": "TASK-003",
+      "title": "OpenRouter runtime on the Vercel AI SDK in libs/producer-tools: the studio tools in process, a bounded tool loop, images from extract_frames, streamed events, cancellation and usage with cost",
+      "user_stories": [
+        "US-017-303"
+      ],
+      "estimation_hours": 7,
+      "story_points": 5,
+      "depends_on": [
+        "TASK-001"
+      ],
+      "status": "pending",
+      "files": [
+        "libs/producer-tools/src/runtime/openrouter-producer-runtime.ts",
+        "libs/producer-tools/src/runtime/openrouter-producer-runtime.spec.ts",
+        "libs/producer-tools/src/runtime/studio-ai-sdk-tools.ts",
+        "libs/producer-tools/src/runtime/studio-ai-sdk-tools.spec.ts",
+        "libs/producer-tools/src/index.ts",
+        "package.json",
+        "pnpm-lock.yaml"
+      ]
+    },
+    {
+      "id": "TASK-004",
+      "title": "Route each producer turn to its engine in render-api: the OpenRouter adapter of ProducerAgentPort, history rebuilt from the store, the same turn events and persistence, typed errors and capabilities",
+      "user_stories": [
+        "US-017-303",
+        "US-017-304"
+      ],
+      "estimation_hours": 6,
+      "story_points": 5,
+      "depends_on": [
+        "TASK-002",
+        "TASK-003"
+      ],
+      "status": "pending",
+      "files": [
+        "apps/render-api/src/producer/openrouter-producer-agent.ts",
+        "apps/render-api/src/producer/openrouter-producer-agent.spec.ts",
+        "apps/render-api/src/producer/run-producer-turn.ts",
+        "apps/render-api/src/producer/run-producer-turn.spec.ts",
+        "apps/render-api/src/producer/producer-history.ts",
+        "apps/render-api/src/producer/producer-history.spec.ts",
+        "apps/render-api/src/config/producer-config.ts",
+        "apps/render-api/src/http/health-handler.ts",
+        "apps/render-api/src/errors/render-api-error.ts",
+        "apps/render-api/src/errors/http-status-for.ts"
+      ]
+    },
+    {
+      "id": "TASK-005",
+      "title": "Web settings for the producer engine: choose Claude or OpenRouter, paste or remove the key, pick the default model, and a composer that lists the models of the active engine",
+      "user_stories": [
+        "US-017-302",
+        "US-017-304"
+      ],
+      "estimation_hours": 6,
+      "story_points": 5,
+      "depends_on": [
+        "TASK-002",
+        "TASK-004"
+      ],
+      "status": "pending",
+      "files": [
+        "apps/web/src/pages/settings-page.tsx",
+        "apps/web/src/pages/settings-page.spec.tsx",
+        "apps/web/src/api/render-api-client.ts",
+        "apps/web/src/api/render-api-types.ts",
+        "apps/web/src/components/producer-composer.tsx",
+        "apps/web/src/i18n/messages-en.ts",
+        "apps/web/src/i18n/messages-es.ts"
+      ]
+    },
+    {
+      "id": "TASK-006",
+      "title": "Pick the curated OpenRouter model list with a real tool-calling benchmark on a fixed scenario, recording success, steps, latency and cost per model",
+      "user_stories": [
+        "US-017-306"
+      ],
+      "estimation_hours": 4,
+      "story_points": 3,
+      "depends_on": [
+        "TASK-004"
+      ],
+      "status": "pending",
+      "files": [
+        "libs/producer-tools/e2e/openrouter-model-bench.mjs",
+        "sdd/specs/spec-e-burgos-017-desktop-app/cycles/cycle-04/artifacts/openrouter-model-bench.md",
+        "libs/producer-tools/src/runtime/curated-openrouter-models.ts"
+      ]
+    },
+    {
+      "id": "TASK-007",
+      "title": "Real check: the Tutorial recipe end to end with the default OpenRouter model in the packaged app, compared with the Claude run of cycle-03, plus the key never showing in logs, payloads or the database",
+      "user_stories": [
+        "US-017-303",
+        "US-017-305",
+        "US-017-306"
+      ],
+      "estimation_hours": 4,
+      "story_points": 3,
+      "depends_on": [
+        "TASK-005",
+        "TASK-006"
+      ],
+      "status": "pending",
+      "files": [
+        "apps/desktop/e2e/packaged-app-smoke.mjs",
+        "sdd/specs/spec-e-burgos-017-desktop-app/cycles/cycle-04/artifacts/openrouter-smoke.md"
+      ]
+    },
+    {
+      "id": "TASK-008",
+      "title": "Close the cycle: rebuild and reinstall the dmg, context fragments, READMEs, constitution rows and validation",
+      "user_stories": [
+        "US-017-301"
+      ],
+      "estimation_hours": 2,
+      "story_points": 2,
+      "depends_on": [
+        "TASK-007"
+      ],
+      "status": "pending",
+      "files": [
+        "sdd/context/libs/producer-tools/updates/2026-09-24-spec-e-burgos-017-desktop-app-cycle-04.md",
+        "sdd/context/apps/render-api/updates/2026-09-24-spec-e-burgos-017-desktop-app-cycle-04.md",
+        "sdd/context/apps/web/updates/2026-09-24-spec-e-burgos-017-desktop-app-cycle-04.md",
+        "sdd/context/constitution.md"
+      ]
+    }
+  ]
+}
