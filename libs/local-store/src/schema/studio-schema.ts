@@ -55,6 +55,7 @@ export const producerMessages = sqliteTable(
     turnId: text('turn_id'),
     model: text('model'),
     createdAt: text('created_at').notNull(),
+    usage: text('usage'),
   },
   (table) => [uniqueIndex('producer_messages_slug_seq_unique').on(table.slug, table.seq)],
 );

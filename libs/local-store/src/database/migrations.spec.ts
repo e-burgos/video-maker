@@ -103,6 +103,40 @@ describe('applyMigrations', () => {
     sqlite.close();
   });
 
+  it('migrates from v1 to v2 without losing existing producer_messages rows, adding a nullable usage column', () => {
+    const sqlite = new Database(':memory:');
+    sqlite.pragma('foreign_keys = ON');
+    applyMigrations(sqlite, [MIGRATIONS[0] as (typeof MIGRATIONS)[number]]);
+    expect(currentUserVersion(sqlite)).toBe(1);
+
+    sqlite.exec(`INSERT INTO projects (slug, created_at, updated_at) VALUES ('demo-01', 't', 't')`);
+    sqlite.exec(
+      `INSERT INTO producer_messages (id, slug, seq, role, text, created_at) VALUES ('msg-1', 'demo-01', 1, 'user', 'hola', 't')`,
+    );
+
+    applyMigrations(sqlite, MIGRATIONS);
+    expect(currentUserVersion(sqlite)).toBe(2);
+
+    const columns = sqlite.pragma('table_info(producer_messages)') as SqliteColumnInfo[];
+    expect(columns.some((column) => column.name === 'usage')).toBe(true);
+
+    const row = sqlite.prepare('select id, usage from producer_messages where id = ?').get('msg-1') as {
+      id: string;
+      usage: string | null;
+    };
+    expect(row).toEqual({ id: 'msg-1', usage: null });
+
+    sqlite.exec(
+      `INSERT INTO producer_messages (id, slug, seq, role, text, created_at, usage) VALUES ('msg-2', 'demo-01', 2, 'assistant', 'listo', 't', '{"inputTokens":10,"outputTokens":5,"costUsd":0.001}')`,
+    );
+    const withUsage = sqlite.prepare('select usage from producer_messages where id = ?').get('msg-2') as {
+      usage: string | null;
+    };
+    expect(withUsage.usage).toBe('{"inputTokens":10,"outputTokens":5,"costUsd":0.001}');
+
+    sqlite.close();
+  });
+
   it('migrates a fresh :memory: database that matches the Drizzle schema exactly', () => {
     const sqlite = openMigratedMemoryDatabase();
 

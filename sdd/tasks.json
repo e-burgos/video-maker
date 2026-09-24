@@ -383,7 +383,8 @@
             "libs/producer-tools",
             "apps/render-api",
             "apps/web",
-            "apps/desktop"
+            "apps/desktop",
+            "libs/local-store"
           ],
           "status": "in-progress",
           "tasks_total": 8,

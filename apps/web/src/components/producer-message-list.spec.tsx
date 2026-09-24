@@ -1,9 +1,11 @@
-import { fireEvent, render, screen } from '@testing-library/react';
-import { describe, expect, it, vi } from 'vitest';
+import { fireEvent, render, screen, waitFor } from '@testing-library/react';
+import { afterEach, describe, expect, it, vi } from 'vitest';
 
 import { ASSISTANT_ANSWER, producerMessage } from '../api/__fixtures__/producer';
 import { ProducerMessageList, quickRepliesOf } from './producer-message-list';
 import type { ProducerMessage } from '../api/render-api-types';
+import { LANGUAGE_STORAGE_KEY } from '../i18n/language';
+import { LanguageProvider } from '../i18n/language-context';
 
 function renderList(messages: ProducerMessage[], quickRepliesDisabled = false) {
   const onQuickReply = vi.fn();
@@ -15,6 +17,18 @@ function renderList(messages: ProducerMessage[], quickRepliesDisabled = false) {
     />,
   );
   return onQuickReply;
+}
+
+async function renderListInLanguage(language: 'en' | 'es', messages: ProducerMessage[]) {
+  window.localStorage.setItem(LANGUAGE_STORAGE_KEY, language);
+  render(
+    <LanguageProvider>
+      <ProducerMessageList messages={messages} onQuickReply={vi.fn()} quickRepliesDisabled={false} />
+    </LanguageProvider>,
+  );
+  await waitFor(() => {
+    expect(document.documentElement.lang).toBe(language);
+  });
 }
 
 const assistant = producerMessage({
@@ -86,7 +100,13 @@ describe('ProducerMessageList', () => {
   });
 
   it('shows the cost of a turn that reports one', () => {
-    renderList([producerMessage({ role: 'assistant', text: 'listo', costUsd: 0.0123 })]);
+    renderList([
+      producerMessage({
+        role: 'assistant',
+        text: 'listo',
+        usage: { inputTokens: 120, outputTokens: 40, costUsd: 0.0123 },
+      }),
+    ]);
 
     expect(screen.getByTestId('producer-message-cost-msg-0001').textContent).toBe('≈ US$ 0.012');
   });
@@ -95,6 +115,32 @@ describe('ProducerMessageList', () => {
     renderList([assistant]);
 
     expect(screen.queryByTestId('producer-message-cost-msg-0002')).toBeNull();
+  });
+
+  it('formats the cost with a period in English', async () => {
+    const message = producerMessage({
+      role: 'assistant',
+      text: 'listo',
+      usage: { inputTokens: 120, outputTokens: 40, costUsd: 0.0123 },
+    });
+
+    await renderListInLanguage('en', [message]);
+    expect(screen.getByTestId('producer-message-cost-msg-0001').textContent).toBe('≈ US$ 0.012');
+  });
+
+  it('formats the cost with a comma in Spanish', async () => {
+    const message = producerMessage({
+      role: 'assistant',
+      text: 'listo',
+      usage: { inputTokens: 120, outputTokens: 40, costUsd: 0.0123 },
+    });
+
+    await renderListInLanguage('es', [message]);
+    expect(screen.getByTestId('producer-message-cost-msg-0001').textContent).toBe('≈ US$ 0,012');
+  });
+
+  afterEach(() => {
+    window.localStorage.clear();
   });
 });
 

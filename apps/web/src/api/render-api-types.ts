@@ -491,6 +491,12 @@ export const PRODUCER_MESSAGE_ROLES = ['user', 'assistant'] as const;
 
 export type ProducerMessageRole = (typeof PRODUCER_MESSAGE_ROLES)[number];
 
+export type ProducerMessageUsage = {
+  inputTokens: number | null;
+  outputTokens: number | null;
+  costUsd: number | null;
+};
+
 export type ProducerMessage = {
   id: string;
   role: ProducerMessageRole;
@@ -499,7 +505,7 @@ export type ProducerMessage = {
   suggestions?: string[];
   turnId?: string;
   model?: string;
-  costUsd?: number | null;
+  usage?: ProducerMessageUsage;
 };
 
 export type ProducerModelOption = {

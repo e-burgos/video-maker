@@ -8,6 +8,12 @@ export const PRODUCER_MESSAGE_ROLES = ['user', 'assistant'] as const;
 
 export type ProducerMessageRole = (typeof PRODUCER_MESSAGE_ROLES)[number];
 
+export interface ProducerMessageUsage {
+  readonly inputTokens: number | null;
+  readonly outputTokens: number | null;
+  readonly costUsd: number | null;
+}
+
 export interface ProducerMessage {
   readonly id: string;
   readonly role: ProducerMessageRole;
@@ -16,6 +22,7 @@ export interface ProducerMessage {
   readonly suggestions?: readonly string[];
   readonly turnId?: string;
   readonly model?: string;
+  readonly usage?: ProducerMessageUsage;
 }
 
 export interface ProducerSession {
@@ -27,6 +34,7 @@ export interface ProducerSession {
 
 function toProducerMessage(row: typeof producerMessages.$inferSelect): ProducerMessage {
   const suggestions = row.suggestions === null ? undefined : (JSON.parse(row.suggestions) as readonly string[]);
+  const usage = row.usage === null ? undefined : (JSON.parse(row.usage) as ProducerMessageUsage);
   return {
     id: row.id,
     role: row.role as ProducerMessageRole,
@@ -35,6 +43,7 @@ function toProducerMessage(row: typeof producerMessages.$inferSelect): ProducerM
     ...(suggestions === undefined ? {} : { suggestions }),
     ...(row.turnId === null ? {} : { turnId: row.turnId }),
     ...(row.model === null ? {} : { model: row.model }),
+    ...(usage === undefined ? {} : { usage }),
   };
 }
 
@@ -69,6 +78,7 @@ export function createProducerRepository(db: BetterSQLite3Database<typeof schema
           suggestions: message.suggestions === undefined ? null : JSON.stringify(message.suggestions),
           turnId: message.turnId ?? null,
           model: message.model ?? null,
+          usage: message.usage === undefined ? null : JSON.stringify(message.usage),
           createdAt: message.createdAt,
         })
         .run();

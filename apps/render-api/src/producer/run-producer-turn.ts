@@ -283,6 +283,7 @@ export async function startProducerTurn(
       turnId,
       model,
       ...(answer.suggestions.length === 0 ? {} : { suggestions: answer.suggestions }),
+      ...(turnUsage === null ? {} : { usage: turnUsage }),
     };
 
     appendProducerMessage(deps, input.project, assistantMessage);

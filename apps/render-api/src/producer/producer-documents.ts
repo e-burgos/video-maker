@@ -4,6 +4,12 @@ export const PRODUCER_MESSAGE_ROLES = ['user', 'assistant'] as const;
 
 export type ProducerMessageRole = (typeof PRODUCER_MESSAGE_ROLES)[number];
 
+export interface ProducerMessageUsage {
+  readonly inputTokens: number | null;
+  readonly outputTokens: number | null;
+  readonly costUsd: number | null;
+}
+
 export interface ProducerMessage {
   readonly id: string;
   readonly role: ProducerMessageRole;
@@ -12,6 +18,7 @@ export interface ProducerMessage {
   readonly suggestions?: readonly string[];
   readonly turnId?: string;
   readonly model?: string;
+  readonly usage?: ProducerMessageUsage;
 }
 
 export interface ProducerConversation {
@@ -48,6 +55,19 @@ function isStringArray(value: unknown): value is readonly string[] {
   return Array.isArray(value) && value.every((entry) => typeof entry === 'string');
 }
 
+function isNumberOrNull(value: unknown): value is number | null {
+  return value === null || typeof value === 'number';
+}
+
+function isProducerMessageUsage(value: unknown): value is ProducerMessageUsage {
+  return (
+    isRecord(value) &&
+    isNumberOrNull(value.inputTokens) &&
+    isNumberOrNull(value.outputTokens) &&
+    isNumberOrNull(value.costUsd)
+  );
+}
+
 function isProducerMessageRole(value: unknown): value is ProducerMessageRole {
   return typeof value === 'string' && (PRODUCER_MESSAGE_ROLES as readonly string[]).includes(value);
 }
@@ -71,6 +91,9 @@ function parseProducerMessage(value: unknown, relativePath: string): ProducerMes
   if (value.model !== undefined && !isNonEmptyString(value.model)) {
     throw invalid(relativePath, 'model to be a non-empty string when present');
   }
+  if (value.usage !== undefined && !isProducerMessageUsage(value.usage)) {
+    throw invalid(relativePath, 'usage to be { inputTokens, outputTokens, costUsd } (numbers or null) when present');
+  }
 
   return {
     id: value.id,
@@ -80,6 +103,7 @@ function parseProducerMessage(value: unknown, relativePath: string): ProducerMes
     ...(value.suggestions === undefined ? {} : { suggestions: [...value.suggestions] }),
     ...(value.turnId === undefined ? {} : { turnId: value.turnId }),
     ...(value.model === undefined ? {} : { model: value.model }),
+    ...(value.usage === undefined ? {} : { usage: value.usage }),
   };
 }
 

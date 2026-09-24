@@ -794,7 +794,7 @@
         "spec": "sdd/specs/spec-e-burgos-015-studio-producer",
         "status": "implemented",
         "created_in_cycle": 1,
-        "updated_in_cycle": 1,
+        "updated_in_cycle": 4,
         "description": "Returns the whole producer conversation of the project, the Claude Code session that backs it and the turn in flight if there is one. This is what the studio chat screen loads when it opens. The conversation is persisted in media/<slug>/work/producer/conversation.json (and mirrored, human readable, in conversation.md), so it survives a restart of the service: the queue does not. The catalog of models the user can choose from travels with the conversation: default is PRODUCER_MODEL and allowed is PRODUCER_MODELS (FIX-e-burgos-015-001).",
         "path_params": [
           "slug"
@@ -805,7 +805,7 @@
           "schema": "Takes no request body."
         },
         "responses": {
-          "200": "application/json: { slug, messages: [{ id, role: user|assistant, text, createdAt, suggestions?: string[], turnId?, model? }], session: { sessionId, model, createdAt, lastTurnAt } | null, activeTurn: ProducerTurn | null, models: { default: string, allowed: [{ id, label, description }] } }. messages is [] and session is null for a project that never talked to the producer; model is filled on the assistant messages and carries the model that produced the answer. session.model is the model in effect for the next turn and models.allowed is the closed list POST .../producer/messages accepts. activeTurn carries the same shape as EP-024 and is null unless a turn is running.",
+          "200": "application/json: { slug, messages: [{ id, role: user|assistant, text, createdAt, suggestions?: string[], turnId?, model?, usage?: { inputTokens: number|null, outputTokens: number|null, costUsd: number|null } }], session: { sessionId, model, createdAt, lastTurnAt } | null, activeTurn: ProducerTurn | null, models: { default: string, allowed: [{ id, label, description }] } }. messages is [] and session is null for a project that never talked to the producer; model is filled on the assistant messages and carries the model that produced the answer. session.model is the model in effect for the next turn and models.allowed is the closed list POST .../producer/messages accepts. activeTurn carries the same shape as EP-024 and is null unless a turn is running. usage is present only on an assistant message that answered on the openrouter engine (persisted in producer_messages.usage, spec-e-burgos-017 cycle-04 D-C4-08); it is absent on every claude-cli message and survives a restart of the service.",
           "404": "PROJECT_NOT_FOUND when the project directory does not exist. application/json: { error: { code, stage, message, resource?, expected?, hint?, assetPersisted?, catalogUpdated? } }.",
           "422": "PROJECT_SLUG_INVALID when the slug is not a single kebab-case path segment, PRODUCER_STATE_INVALID when conversation.json or session.json exist but cannot be read (the service refuses to overwrite a conversation it cannot parse). application/json: { error: { code, stage, message, resource?, expected?, hint?, assetPersisted?, catalogUpdated? } }."
         },
@@ -819,6 +819,11 @@
             "date": "2026-09-10",
             "change": "Added models: { default, allowed: [{ id, label, description }] } and model on each assistant message, so the chat can offer the model picker and show which model wrote each answer.",
             "fix": "FIX-e-burgos-015-001"
+          },
+          {
+            "cycle": 4,
+            "date": "2026-09-24",
+            "change": "TASK-004 follow-up: persists usage (inputTokens, outputTokens, costUsd) on the assistant message of a succeeded openrouter turn (libs/local-store migration 2, producer_messages.usage) and returns it additively on each message; absent for claude-cli messages and for conversations from before this change."
           }
         ]
       },
@@ -864,6 +869,11 @@
             "cycle": 4,
             "date": "2026-09-24",
             "change": "TASK-004: routes the turn to claude-cli or openrouter per the effective engine, validates model against that engine's own catalog, and answers 409 OPENROUTER_KEY_MISSING when openrouter has no stored key."
+          },
+          {
+            "cycle": 4,
+            "date": "2026-09-24",
+            "change": "TASK-004 follow-up: the assistant message this turn persists (returned by EP-022, and by GET/DELETE .../producer/turns/:turnId as usage on the turn record) now carries usage for the openrouter engine, surviving a service restart."
           }
         ]
       },

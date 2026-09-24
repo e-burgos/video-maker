@@ -9,6 +9,7 @@ import type {
   ProducerEvent,
   ProducerMessage,
   ProducerMessageRole,
+  ProducerMessageUsage,
   ProducerModelCatalog,
   ProducerModelOption,
   ProducerSession,
@@ -54,6 +55,19 @@ function isProducerEvent(value: unknown): value is ProducerEvent {
   return false;
 }
 
+function isNumberOrNull(value: unknown): value is number | null {
+  return value === null || typeof value === 'number';
+}
+
+function isProducerMessageUsage(value: unknown): value is ProducerMessageUsage {
+  return (
+    isRecord(value) &&
+    isNumberOrNull(value['inputTokens']) &&
+    isNumberOrNull(value['outputTokens']) &&
+    isNumberOrNull(value['costUsd'])
+  );
+}
+
 function isProducerMessage(value: unknown): value is ProducerMessage {
   if (!isRecord(value)) {
     return false;
@@ -75,9 +89,7 @@ function isProducerMessage(value: unknown): value is ProducerMessage {
   if (value['model'] !== undefined && typeof value['model'] !== 'string') {
     return false;
   }
-  return (
-    value['costUsd'] === undefined || value['costUsd'] === null || typeof value['costUsd'] === 'number'
-  );
+  return value['usage'] === undefined || isProducerMessageUsage(value['usage']);
 }
 
 export function isProducerModelOption(value: unknown): value is ProducerModelOption {

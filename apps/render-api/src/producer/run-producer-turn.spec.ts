@@ -393,7 +393,7 @@ async function withOpenRouterEngine(base: ReturnType<typeof scenario>, apiKey: s
 }
 
 describe('startProducerTurn — engine routing (OpenRouter)', () => {
-  it('routes to the OpenRouter agent, persists the same message shape as Claude, and never writes a resumable session', async () => {
+  it('routes to the OpenRouter agent, persists the same message shape as Claude plus usage, and never writes a resumable session', async () => {
     const base = scenario({ lines: [] });
     await withOpenRouterEngine(base);
     const captured = { options: [] as CreateOpenRouterProducerAgentOptions[], starts: [] as ProducerTurnStart[] };
@@ -417,11 +417,21 @@ describe('startProducerTurn — engine routing (OpenRouter)', () => {
     const persisted = readProducerConversation(base.deps, PROJECT);
     expect(persisted).toHaveLength(2);
     expect(Object.keys(persisted[1] as object).sort()).toEqual(
-      ['createdAt', 'id', 'model', 'role', 'text', 'turnId'].sort(),
+      ['createdAt', 'id', 'model', 'role', 'text', 'turnId', 'usage'].sort(),
     );
+    expect(persisted[1]?.usage).toEqual({ inputTokens: 120, outputTokens: 40, costUsd: 0.0013 });
 
     // The OpenRouter engine never resumes a CLI session; history is rebuilt from the store instead.
     expect(readProducerSession(base.deps, PROJECT)).toBeNull();
+  });
+
+  it('leaves usage undefined on a Claude-engine assistant message', async () => {
+    const { deps, registry } = scenario({ lines: streamOf(ANSWER) });
+    const started = await startProducerTurn(deps, registry, { project: PROJECT, text: 'hola', config: CONFIG });
+    await started.completed;
+
+    const persisted = readProducerConversation(deps, PROJECT);
+    expect(persisted[1]?.usage).toBeUndefined();
   });
 
   it('rejects with OPENROUTER_KEY_MISSING, mapped to HTTP 409, and never reserves a turn when the key is absent', async () => {

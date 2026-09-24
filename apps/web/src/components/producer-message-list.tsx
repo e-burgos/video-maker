@@ -1,7 +1,8 @@
+import { producerCostLabel } from '../api/producer-cost-format';
 import { numberedOptions, parseProducerMarkdown } from '../api/producer-markdown';
 import type { ProducerBlock, ProducerInline, ProducerTableRow } from '../api/producer-markdown';
 import type { ProducerMessage } from '../api/render-api-types';
-import { useT } from '../i18n/language-context';
+import { useLanguage, useT } from '../i18n/language-context';
 
 export type ProducerMessageListProps = {
   messages: readonly ProducerMessage[];
@@ -152,6 +153,7 @@ export function ProducerMessageList({
   quickRepliesDisabled,
 }: ProducerMessageListProps) {
   const t = useT();
+  const { language } = useLanguage();
   const last = messages.length === 0 ? null : (messages[messages.length - 1] as ProducerMessage);
   const quickReplies = last !== null && last.role === 'assistant' ? quickRepliesOf(last) : [];
 
@@ -180,12 +182,12 @@ export function ProducerMessageList({
             )}
           </p>
           <ProducerMarkdown text={message.text} />
-          {message.costUsd !== undefined && message.costUsd !== null && (
+          {message.usage?.costUsd !== undefined && message.usage.costUsd !== null && (
             <p
               data-testid={`producer-message-cost-${message.id}`}
               className="mt-1 font-mono text-[10px] text-slate-500"
             >
-              {t('producer.turnCost', { amount: message.costUsd.toFixed(3) })}
+              {producerCostLabel(t, language, message.usage.costUsd)}
             </p>
           )}
         </li>

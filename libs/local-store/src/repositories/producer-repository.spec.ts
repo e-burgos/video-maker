@@ -62,6 +62,27 @@ describe('createProducerRepository', () => {
     ]);
   });
 
+  it('round-trips the optional usage field as JSON, and leaves it out when absent', () => {
+    const repository = createProducerRepository(db);
+    repository.appendMessage('video-a', {
+      id: 'm1',
+      role: 'assistant',
+      text: 'listo',
+      createdAt: '2026-01-01T00:00:00.000Z',
+      usage: { inputTokens: 120, outputTokens: 40, costUsd: 0.0013 },
+    });
+    repository.appendMessage('video-a', {
+      id: 'm2',
+      role: 'user',
+      text: 'gracias',
+      createdAt: '2026-01-01T00:01:00.000Z',
+    });
+
+    const [withUsage, withoutUsage] = repository.getConversation('video-a');
+    expect(withUsage?.usage).toEqual({ inputTokens: 120, outputTokens: 40, costUsd: 0.0013 });
+    expect(withoutUsage?.usage).toBeUndefined();
+  });
+
   it('rejects a duplicate seq for the same project through the unique constraint', () => {
     const repository = createProducerRepository(db);
     repository.appendMessage('video-a', { id: 'm1', role: 'user', text: 'hello', createdAt: 'now' });

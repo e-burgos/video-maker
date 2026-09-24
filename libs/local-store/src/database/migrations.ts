@@ -73,6 +73,10 @@ export const MIGRATIONS: readonly Migration[] = [
       )`,
     ],
   },
+  {
+    version: 2,
+    statements: [`ALTER TABLE producer_messages ADD COLUMN usage TEXT`],
+  },
 ];
 
 export function currentUserVersion(sqlite: Database.Database): number {

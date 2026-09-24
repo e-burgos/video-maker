@@ -29,6 +29,7 @@ export {
 export type {
   ProducerMessage,
   ProducerMessageRole,
+  ProducerMessageUsage,
   ProducerRepository,
   ProducerSession,
 } from './repositories/producer-repository';
