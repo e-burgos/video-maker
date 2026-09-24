@@ -1,5 +1,5 @@
 import { Suspense, lazy } from 'react';
-import { BrowserRouter, Route, Routes } from 'react-router-dom';
+import { BrowserRouter, Navigate, Route, Routes, useParams } from 'react-router-dom';
 
 import { RenderApiProvider } from '../api/render-api-context';
 import { LanguageProvider, useT } from '../i18n/language-context';
@@ -15,8 +15,8 @@ const GuidePage = lazy(async () => ({
   default: (await import('../pages/guide-page')).GuidePage,
 }));
 
-const ProducerPage = lazy(async () => ({
-  default: (await import('../pages/producer-page')).ProducerPage,
+const ProjectWorkspacePage = lazy(async () => ({
+  default: (await import('../pages/project-workspace-page')).ProjectWorkspacePage,
 }));
 
 const ProjectPreviewPage = lazy(async () => ({
@@ -38,6 +38,11 @@ const VoicePage = lazy(async () => ({
 function RouteFallback({ messageKey }: { messageKey: TranslationKey }) {
   const t = useT();
   return <p className="text-sm text-slate-500">{t(messageKey)}</p>;
+}
+
+function ProducerRouteRedirect() {
+  const { slug = '' } = useParams<{ slug: string }>();
+  return <Navigate to={`/projects/${slug}`} replace />;
 }
 
 export function App() {
@@ -67,19 +72,20 @@ export function App() {
               <Route
                 path="/projects/:slug"
                 element={
+                  <Suspense fallback={<RouteFallback messageKey="app.loading.workspace" />}>
+                    <ProjectWorkspacePage />
+                  </Suspense>
+                }
+              />
+              <Route
+                path="/projects/:slug/library"
+                element={
                   <Suspense fallback={<RouteFallback messageKey="app.loading.library" />}>
                     <AssetLibraryPage />
                   </Suspense>
                 }
               />
-              <Route
-                path="/projects/:slug/producer"
-                element={
-                  <Suspense fallback={<RouteFallback messageKey="app.loading.producer" />}>
-                    <ProducerPage />
-                  </Suspense>
-                }
-              />
+              <Route path="/projects/:slug/producer" element={<ProducerRouteRedirect />} />
               <Route
                 path="/projects/:slug/storyboard"
                 element={

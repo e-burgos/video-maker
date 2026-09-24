@@ -96,7 +96,7 @@ export function ProducerWelcome({ slug, assets, onDraft, hasTimedScript = false 
           <p className="text-sm text-amber-200">
             {t('producer.noMaterialBefore')}{' '}
             <Link
-              to={`/projects/${encodeURIComponent(slug)}`}
+              to={`/projects/${encodeURIComponent(slug)}/library`}
               className="text-sky-300 underline hover:text-sky-200"
             >
               {t('producer.noMaterialLink')}

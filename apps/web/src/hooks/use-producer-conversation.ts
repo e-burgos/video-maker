@@ -1,60 +1,55 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { Link, useParams } from 'react-router-dom';
 
+import { hasProducerScript } from '../api/producer-recipes';
 import { producerBlockers, producerFailureKey } from '../api/producer-capability';
 import { useRenderApi } from '../api/render-api-context';
-import { useApiAction } from '../hooks/use-api-action';
-import { useAsyncResource } from '../hooks/use-async-resource';
-import { useProducerTurnPoll } from '../hooks/use-producer-turn-poll';
 import { useT } from '../i18n/language-context';
-import { ErrorNotice } from '../components/error-notice';
-import { ProducerComposer } from '../components/producer-composer';
-import { ProducerMessageList } from '../components/producer-message-list';
-import { ProducerTurnActivity } from '../components/producer-turn-activity';
-import { ProducerWelcome } from '../components/producer-welcome';
-import { hasProducerScript } from '../api/producer-recipes';
+import { useApiAction } from './use-api-action';
+import { useAsyncResource } from './use-async-resource';
+import type { AsyncResource } from './use-async-resource';
+import { useProducerTurnPoll } from './use-producer-turn-poll';
+import type { ProducerTurnPoll } from './use-producer-turn-poll';
+import type { Blocker } from '../api/blockers';
 import type {
   AssetListing,
+  GeneratedListing,
   ProducerConversation,
+  ProducerEngineId,
   ProducerModelOption,
   ProducerSettings,
   RenderJobListing,
-  GeneratedListing,
+  ServiceHealth,
 } from '../api/render-api-types';
+import type { RenderApiError } from '../api/render-api-error';
 
-function JobStrip({ listing }: { listing: RenderJobListing | null }) {
-  const t = useT();
-  const jobs = listing?.jobs ?? [];
+export type UseProducerConversationResult = {
+  slug: string;
+  conversation: AsyncResource<ProducerConversation>;
+  assets: AsyncResource<AssetListing>;
+  health: AsyncResource<ServiceHealth>;
+  jobs: AsyncResource<RenderJobListing>;
+  generated: AsyncResource<GeneratedListing>;
+  hasTimedScript: boolean;
+  draft: string;
+  setDraft: (value: string) => void;
+  selectedModel: string;
+  setModel: (model: string | null) => void;
+  models: readonly ProducerModelOption[];
+  effectiveEngine: ProducerEngineId | null;
+  blockers: readonly Blocker[];
+  running: boolean;
+  send: (text: string) => Promise<void>;
+  sendPending: boolean;
+  sendFailure: RenderApiError | null;
+  sendFailureKey: ReturnType<typeof producerFailureKey>;
+  cancel: () => Promise<void>;
+  cancelPending: boolean;
+  cancelFailure: RenderApiError | null;
+  poll: ProducerTurnPoll;
+};
 
-  if (jobs.length === 0) {
-    return null;
-  }
-
-  return (
-    <div data-testid="producer-jobs" className="space-y-2">
-      <p className="font-mono text-xs uppercase tracking-wide text-slate-500">
-        {t('producer.jobsHeading')}
-      </p>
-      <ul className="flex flex-wrap gap-2">
-        {jobs.map((job) => (
-          <li
-            key={job.id}
-            data-job-kind={job.kind}
-            data-job-state={job.state}
-            className="rounded-md border border-slate-700 px-2 py-1 font-mono text-xs text-slate-300"
-          >
-            {job.kind} · {job.state}
-            {job.stage !== null && ` · ${job.stage}`}
-          </li>
-        ))}
-      </ul>
-    </div>
-  );
-}
-
-export function ProducerPage() {
+export function useProducerConversation(slug: string): UseProducerConversationResult {
   const client = useRenderApi();
-  const { slug = '' } = useParams<{ slug: string }>();
   const t = useT();
 
   const loadConversation = useCallback(() => client.getProducer(slug), [client, slug]);
@@ -146,9 +141,8 @@ export function ProducerPage() {
       : effectiveEngine === 'openrouter'
         ? (producerSettings.data?.models.openrouter ?? models[0]?.id ?? null)
         : (conversation.data?.models.default ?? null);
-  const sessionModel = conversation.data === null
-    ? null
-    : (conversation.data.session?.model ?? engineDefaultModel);
+  const sessionModel =
+    conversation.data === null ? null : (conversation.data.session?.model ?? engineDefaultModel);
   const selectedModel = model ?? sessionModel ?? '';
 
   useEffect(() => {
@@ -184,74 +178,31 @@ export function ProducerPage() {
     }
   }
 
-  const messages = conversation.data?.messages ?? [];
   const sendFailure = sendAction.error;
-  const sendFailureKey = sendFailure === null ? null : producerFailureKey(sendFailure.code);
 
-  return (
-    <section className="space-y-6">
-      <div>
-        <Link to="/" className="text-xs text-slate-500 hover:text-slate-300">
-          {t('producer.backToProjects')}
-        </Link>
-        <h1 className="mt-2 font-mono text-2xl font-semibold tracking-tight">
-          {t('producer.title', { slug })}
-        </h1>
-        <p className="mt-1 text-sm text-slate-400">{t('producer.description')}</p>
-      </div>
-
-      {conversation.status === 'loading' && (
-        <p className="text-sm text-slate-500">{t('producer.loading')}</p>
-      )}
-
-      {conversation.status === 'error' && conversation.error !== null && (
-        <ErrorNotice error={conversation.error} onRetry={conversation.reload} />
-      )}
-
-      {conversation.data !== null && messages.length === 0 && (
-        <ProducerWelcome slug={slug} assets={assets.data} onDraft={setDraft} hasTimedScript={hasTimedScript} />
-      )}
-
-      {messages.length > 0 && (
-        <ProducerMessageList
-          messages={messages}
-          onQuickReply={(text) => void send(text)}
-          quickRepliesDisabled={running || sendAction.status === 'pending'}
-        />
-      )}
-
-      <ProducerTurnActivity
-        turn={poll.turn}
-        polling={poll.polling}
-        error={poll.error}
-        canceling={cancelAction.status === 'pending'}
-        onCancel={() => void cancel()}
-      />
-
-      <JobStrip listing={jobs.data} />
-
-      <ProducerComposer
-        value={draft}
-        onChange={setDraft}
-        onSend={() => void send(draft)}
-        pending={sendAction.status === 'pending' || running}
-        blockers={blockers}
-        models={models}
-        model={selectedModel}
-        onModelChange={setModel}
-        activeEngine={effectiveEngine}
-      />
-
-      {sendFailure !== null && (
-        <div data-testid="producer-send-failure" className="space-y-2">
-          <ErrorNotice error={sendFailure} />
-          {sendFailureKey !== null && (
-            <p className="text-sm text-amber-200">{t(sendFailureKey)}</p>
-          )}
-        </div>
-      )}
-
-      {cancelAction.error !== null && <ErrorNotice error={cancelAction.error} />}
-    </section>
-  );
+  return {
+    slug,
+    conversation,
+    assets,
+    health,
+    jobs,
+    generated,
+    hasTimedScript,
+    draft,
+    setDraft,
+    selectedModel,
+    setModel,
+    models,
+    effectiveEngine,
+    blockers,
+    running,
+    send,
+    sendPending: sendAction.status === 'pending',
+    sendFailure,
+    sendFailureKey: sendFailure === null ? null : producerFailureKey(sendFailure.code),
+    cancel,
+    cancelPending: cancelAction.status === 'pending',
+    cancelFailure: cancelAction.error,
+    poll,
+  };
 }

@@ -3,7 +3,7 @@ import { MemoryRouter, Route, Routes } from 'react-router-dom';
 import { describe, expect, it, vi } from 'vitest';
 
 import { RenderApiProvider, useRenderApi } from '../api/render-api-context';
-import { StudioLayout, projectSlugFromPathname } from './studio-layout';
+import { StudioLayout, isProjectWorkspaceRoot, projectSlugFromPathname } from './studio-layout';
 import type { RenderApiClient } from '../api/render-api-client';
 
 function ClientProbe() {
@@ -76,6 +76,14 @@ describe('projectSlugFromPathname', () => {
   });
 });
 
+describe('isProjectWorkspaceRoot', () => {
+  it('is true only for the bare project url', () => {
+    expect(isProjectWorkspaceRoot('/projects/smoke-ingest', 'smoke-ingest')).toBe(true);
+    expect(isProjectWorkspaceRoot('/projects/smoke-ingest/', 'smoke-ingest')).toBe(true);
+    expect(isProjectWorkspaceRoot('/projects/smoke-ingest/library', 'smoke-ingest')).toBe(false);
+  });
+});
+
 describe('StudioLayout project nav', () => {
   function renderAt(pathname: string) {
     const client = {
@@ -88,8 +96,8 @@ describe('StudioLayout project nav', () => {
           <Routes>
             <Route element={<StudioLayout />}>
               <Route path="/" element={<p>projects</p>} />
-              <Route path="/projects/:slug" element={<p>library</p>} />
-              <Route path="/projects/:slug/producer" element={<p>producer</p>} />
+              <Route path="/projects/:slug" element={<p>workspace</p>} />
+              <Route path="/projects/:slug/library" element={<p>library</p>} />
               <Route path="/projects/:slug/storyboard" element={<p>storyboard</p>} />
               <Route path="/projects/:slug/voice" element={<p>voice</p>} />
               <Route path="/projects/:slug/preview" element={<p>preview</p>} />
@@ -106,24 +114,22 @@ describe('StudioLayout project nav', () => {
     expect(screen.queryByTestId('project-nav')).toBeNull();
   });
 
-  it('links the five sections of the project from any of them, producer first', () => {
+  it('shows no project nav at the workspace root: the workspace header carries its own menu', () => {
+    renderAt('/projects/smoke-ingest');
+
+    expect(screen.queryByTestId('project-nav')).toBeNull();
+  });
+
+  it('links the four advanced-editing sections of the project from any of them', () => {
     renderAt('/projects/smoke-ingest/storyboard');
 
     const nav = screen.getByTestId('project-nav');
     expect(Array.from(nav.querySelectorAll('a')).map((link) => link.getAttribute('href'))).toEqual([
-      '/projects/smoke-ingest/producer',
-      '/projects/smoke-ingest',
+      '/projects/smoke-ingest/library',
       '/projects/smoke-ingest/storyboard',
       '/projects/smoke-ingest/voice',
       '/projects/smoke-ingest/preview',
     ]);
-  });
-
-  it('marks the producer section as the current one while it is open', () => {
-    renderAt('/projects/smoke-ingest/producer');
-
-    expect(screen.getByRole('link', { name: 'producer' }).getAttribute('aria-current')).toBe('page');
-    expect(screen.getByRole('link', { name: 'library' }).getAttribute('aria-current')).toBeNull();
   });
 
   it('marks the voice section as the current one while it is open', () => {
@@ -142,7 +148,7 @@ describe('StudioLayout project nav', () => {
   });
 
   it('marks the library as the current section only on the library route itself', () => {
-    renderAt('/projects/smoke-ingest');
+    renderAt('/projects/smoke-ingest/library');
 
     expect(screen.getByRole('link', { name: 'library' }).getAttribute('aria-current')).toBe('page');
   });

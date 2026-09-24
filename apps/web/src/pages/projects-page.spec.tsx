@@ -46,7 +46,7 @@ function section(folderId: string): HTMLElement {
 }
 
 describe('ProjectsPage', () => {
-  it('lists the videos with their layout flags and opens each one on the producer', async () => {
+  it('lists the videos with their layout flags and opens each one on its workspace', async () => {
     renderPage({
       listProjects: vi.fn().mockResolvedValue([project('smoke-ingest', { catalog: true, timeline: true })]),
       getOrganization: vi.fn().mockResolvedValue(EMPTY_ORGANIZATION),
@@ -54,7 +54,7 @@ describe('ProjectsPage', () => {
 
     await waitFor(() => expect(screen.getByText('smoke-ingest')).toBeTruthy());
     const link = screen.getByRole('link', { name: /smoke-ingest/u });
-    expect(link.getAttribute('href')).toBe('/projects/smoke-ingest/producer');
+    expect(link.getAttribute('href')).toBe('/projects/smoke-ingest');
     expect(screen.getByText('catalog').getAttribute('data-present')).toBe('true');
     expect(screen.getByText('edl').getAttribute('data-present')).toBe('false');
   });

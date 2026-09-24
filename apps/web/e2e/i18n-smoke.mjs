@@ -135,13 +135,13 @@ async function main() {
     });
 
     log('3', 'cheap gate: the header of the build under test carries the language switch');
-    await page.goto(`http://localhost:${WEB_PORT}/projects/${SLUG}`, { waitUntil: 'networkidle' });
+    await page.goto(`http://localhost:${WEB_PORT}/projects/${SLUG}/library`, { waitUntil: 'networkidle' });
     await page.waitForSelector('[data-testid="language-switch"]', { timeout: 15000 });
     const englishNav = await navTexts(page);
     log('3', `nav in english: ${englishNav.join(' · ')}`);
     assert(
-      englishNav.join(',') === 'producer,library,storyboard,voice,preview',
-      'the studio opens in english, with the five sections of the project',
+      englishNav.join(',') === 'library,storyboard,voice,preview',
+      'the studio opens in english, with the four advanced-editing sections of the project',
     );
 
     log('4', 'switching the header to spanish');
@@ -149,7 +149,7 @@ async function main() {
     const spanishNav = await navTexts(page);
     log('4', `nav in spanish: ${spanishNav.join(' · ')}`);
     assert(
-      spanishNav.join(',') === 'productor,biblioteca,storyboard,voz,vista previa',
+      spanishNav.join(',') === 'biblioteca,storyboard,voz,vista previa',
       'the whole nav changed language at once, with no reload',
     );
 
@@ -194,7 +194,7 @@ async function main() {
     );
     const reloadedNav = await navTexts(page);
     assert(
-      reloadedNav.join(',') === 'productor,biblioteca,storyboard,voz,vista previa',
+      reloadedNav.join(',') === 'biblioteca,storyboard,voz,vista previa',
       'the nav comes back in spanish after the reload',
     );
 

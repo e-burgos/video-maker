@@ -39,7 +39,7 @@ function VoiceEmptyState({ slug }: { slug: string }) {
       <p className="text-sm text-slate-300">{t('voice.emptyTitle', { slug })}</p>
       <p className="text-sm text-slate-400">{t('voice.emptyBody')}</p>
       <Link
-        to={`/projects/${slug}/producer`}
+        to={`/projects/${slug}`}
         className="inline-block rounded-md border border-sky-500/50 bg-sky-500/10 px-3 py-1.5 text-sm text-sky-100"
       >
         {t('voice.emptyProducer')}
@@ -101,7 +101,7 @@ export function VoicePage() {
   return (
     <section className="space-y-6">
       <div>
-        <Link to={`/projects/${slug}`} className="text-xs text-slate-500 hover:text-slate-300">
+        <Link to={`/projects/${slug}/library`} className="text-xs text-slate-500 hover:text-slate-300">
           {t('voice.backToLibrary')}
         </Link>
         <h1 className="mt-2 font-mono text-2xl font-semibold tracking-tight">

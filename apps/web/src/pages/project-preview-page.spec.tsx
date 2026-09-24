@@ -121,7 +121,7 @@ describe('ProjectPreviewPage', () => {
     expect(screen.queryByRole('alert')).toBeNull();
 
     const link = screen.getByRole('link', { name: 'Generate montage' }) as HTMLAnchorElement;
-    expect(link.getAttribute('href')).toBe('/projects/smoke-ingest');
+    expect(link.getAttribute('href')).toBe('/projects/smoke-ingest/library');
   });
 
   it('reintenta la lectura del timeline desde el estado vacio (US-2-006)', async () => {

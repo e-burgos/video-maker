@@ -197,13 +197,13 @@ async function main() {
       }
     });
 
-    record('4', 'opening the project: the studio lands on the producer page');
+    record('4', 'opening the project: the studio lands on the chat-first workspace');
     await page.goto(`http://localhost:${WEB_PORT}/`, { waitUntil: 'networkidle' });
     await page.getByRole('link', { name: new RegExp(SLUG) }).first().click();
     await page.waitForSelector('[data-testid="producer-welcome"]');
     assert(
-      page.url().endsWith(`/projects/${SLUG}/producer`),
-      `the projects list opens each project on the producer (${page.url()})`,
+      page.url().endsWith(`/projects/${SLUG}`),
+      `the projects list opens each project on its workspace (${page.url()})`,
     );
 
     const inventory = (await page.getByTestId('producer-inventory').textContent()) ?? '';

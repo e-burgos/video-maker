@@ -83,7 +83,7 @@ function TimelineEmptyState({ slug, onRetry }: TimelineEmptyStateProps) {
       <p className="text-sm text-slate-400">{t('preview.emptyBody')}</p>
       <div className="flex flex-wrap gap-2">
         <Link
-          to={`/projects/${slug}`}
+          to={`/projects/${slug}/library`}
           className="rounded-md border border-sky-500/50 bg-sky-500/10 px-3 py-1.5 text-sm text-sky-100"
         >
           {t('preview.generateMontage')}
@@ -259,7 +259,7 @@ export function ProjectPreviewPage() {
   return (
     <section className="space-y-6">
       <div>
-        <Link to={`/projects/${slug}`} className="text-xs text-slate-500 hover:text-slate-300">
+        <Link to={`/projects/${slug}/library`} className="text-xs text-slate-500 hover:text-slate-300">
           {t('preview.backToLibrary')}
         </Link>
         <h1 className="mt-2 font-mono text-2xl font-semibold tracking-tight">

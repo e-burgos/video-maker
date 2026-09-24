@@ -169,7 +169,7 @@ async function main() {
     page.on('pageerror', (error) => log('pageerror', error.stack ?? error.message));
 
     log('5', 'the asset library explains every upload role');
-    await page.goto(`http://localhost:${WEB_PORT}/projects/${SLUG}`, { waitUntil: 'networkidle' });
+    await page.goto(`http://localhost:${WEB_PORT}/projects/${SLUG}/library`, { waitUntil: 'networkidle' });
     await page.waitForSelector('[data-testid="asset-role-choices"]');
     const roles = await page.locator('[data-testid="asset-role-choice"]').evaluateAll((nodes) =>
       nodes.map((node) => ({

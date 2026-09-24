@@ -398,11 +398,12 @@
             "apps/render-api",
             "libs/local-store",
             "libs/producer-tools",
-            "apps/desktop"
+            "apps/desktop",
+            "libs/auto-montage"
           ],
           "status": "in-progress",
           "tasks_total": 7,
-          "tasks_done": 1
+          "tasks_done": 2
         }
       }
     }

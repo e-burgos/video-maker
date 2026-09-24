@@ -79,7 +79,7 @@ export function StoryboardPage() {
   return (
     <section className="space-y-6">
       <div>
-        <Link to={`/projects/${slug}`} className="text-xs text-slate-500 hover:text-slate-300">
+        <Link to={`/projects/${slug}/library`} className="text-xs text-slate-500 hover:text-slate-300">
           {t('storyboard.backToLibrary')}
         </Link>
         <h1 className="mt-2 font-mono text-2xl font-semibold tracking-tight">

@@ -74,7 +74,7 @@ export function VideoCard({ video, placement, folders, onChanged }: VideoCardPro
       className="relative rounded-lg border border-slate-800 bg-slate-900/60 hover:border-slate-600 data-[archived=true]:opacity-60"
     >
       <Link
-        to={`/projects/${encodeURIComponent(video.slug)}/producer`}
+        to={`/projects/${encodeURIComponent(video.slug)}`}
         className="block p-4 pr-10"
       >
         <p className="font-mono text-sm font-medium text-slate-100">{video.slug}</p>

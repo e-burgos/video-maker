@@ -145,7 +145,7 @@ async function main() {
     });
 
     log('4', 'uploading a file through the studio uploader');
-    await page.goto(`http://localhost:${WEB_PORT}/projects/${SLUG}`, { waitUntil: 'networkidle' });
+    await page.goto(`http://localhost:${WEB_PORT}/projects/${SLUG}/library`, { waitUntil: 'networkidle' });
     await page.waitForSelector('[data-testid="asset-card"]', { timeout: 20000 });
     await page.locator('[data-testid="asset-role-choice"][data-role="image"] input').check();
     await page.locator('input[type="file"]').setInputFiles(uploadSource);

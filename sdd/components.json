@@ -1065,9 +1065,9 @@
         "module": "studio-producer",
         "spec": "sdd/specs/spec-e-burgos-015-studio-producer",
         "path": "src/pages/producer-page.tsx",
-        "status": "implemented",
+        "status": "deprecated",
         "created_in_cycle": 2,
-        "updated_in_cycle": null,
+        "updated_in_cycle": 5,
         "description": "Pagina /projects/:slug/producer, montada perezosamente y primera parada de un proyecto: carga la conversacion persistida, adopta un turno que ya estaba corriendo, envia mensajes, sigue el turno con su propio poll (2,5 s), muestra los jobs que el agente encola y refresca conversacion, assets y jobs cuando el turno termina.",
         "consumes": [
           "EP-001",
@@ -1079,7 +1079,13 @@
           "EP-025"
         ],
         "created_at": "2026-09-10",
-        "changelog": []
+        "changelog": [
+          {
+            "cycle": 5,
+            "date": "2026-09-24",
+            "change": "Replaced by ProjectWorkspacePage (COMP-050): the conversation view is no longer a standalone route, /projects/:slug/producer now redirects to the workspace, and its reusable pieces moved to useProducerConversation and ProducerConversationPanel."
+          }
+        ]
       },
       {
         "id": "COMP-044",
@@ -1193,6 +1199,142 @@
           "EP-039",
           "EP-040"
         ],
+        "created_at": "2026-09-24",
+        "changelog": []
+      },
+      {
+        "id": "COMP-050",
+        "name": "ProjectWorkspacePage",
+        "type": "page",
+        "module": "desktop-app",
+        "spec": "sdd/specs/spec-e-burgos-017-desktop-app",
+        "path": "src/pages/project-workspace-page.tsx",
+        "status": "implemented",
+        "created_in_cycle": 5,
+        "updated_in_cycle": null,
+        "description": "Ruta perezosa /projects/:slug, nuevo punto de entrada del proyecto: columna de chat (conversacion del productor reusada via useProducerConversation + ProducerConversationPanel) y panel lateral con pestanas (WorkspaceSidePanel) que se auto-cambian cuando un turno termina un job de montaje o de render; menu Edicion avanzada hacia biblioteca, storyboard, voz y vista previa; el panel colapsa en un drawer con boton por debajo de ~1100px (useIsWideViewport).",
+        "consumes": [
+          "EP-005",
+          "EP-007",
+          "EP-011",
+          "EP-013",
+          "EP-022",
+          "EP-023",
+          "EP-024",
+          "EP-025",
+          "EP-028",
+          "EP-037"
+        ],
+        "created_at": "2026-09-24",
+        "changelog": []
+      },
+      {
+        "id": "COMP-051",
+        "name": "WorkspaceSidePanel",
+        "type": "component",
+        "module": "desktop-app",
+        "spec": "sdd/specs/spec-e-burgos-017-desktop-app",
+        "path": "src/components/workspace-side-panel.tsx",
+        "status": "implemented",
+        "created_in_cycle": 5,
+        "updated_in_cycle": null,
+        "description": "Panel con tres pestanas (Tabs de src/components/ui): Vista previa (ultimo render exitoso o, si no hay, la timeline en TimelinePlayer, o un estado vacio), Material (assets agrupados por rol con miniatura y duracion compacta, link a la biblioteca completa) y Entregas (renders exitosos, mas reciente primero, con reproductor y descarga).",
+        "consumes": [
+          "EP-005",
+          "EP-007",
+          "EP-011",
+          "EP-013"
+        ],
+        "created_at": "2026-09-24",
+        "changelog": []
+      },
+      {
+        "id": "COMP-052",
+        "name": "ProducerConversationPanel",
+        "type": "component",
+        "module": "desktop-app",
+        "spec": "sdd/specs/spec-e-burgos-017-desktop-app",
+        "path": "src/components/producer-conversation-panel.tsx",
+        "status": "implemented",
+        "created_in_cycle": 5,
+        "updated_in_cycle": null,
+        "description": "Columna de chat del espacio de trabajo: bienvenida o lista de mensajes, actividad del turno, la seam ChatDropZonePlaceholder para TASK-003 y el compositor, todo a partir del resultado de useProducerConversation. Extraido de producer-page.tsx para reusarlo sin duplicar el estado del productor.",
+        "consumes": [],
+        "created_at": "2026-09-24",
+        "changelog": []
+      },
+      {
+        "id": "COMP-053",
+        "name": "ChatDropZonePlaceholder",
+        "type": "component",
+        "module": "desktop-app",
+        "spec": "sdd/specs/spec-e-burgos-017-desktop-app",
+        "path": "src/components/chat-drop-zone-placeholder.tsx",
+        "status": "implemented",
+        "created_in_cycle": 5,
+        "updated_in_cycle": null,
+        "description": "Zona con el rotulo \"Arrastra tu material aca\" dentro de la columna de chat: por ahora solo marca el lugar (data-testid=\"chat-drop-zone\"); TASK-003 le suma el drag and drop real y las tarjetas de propuesta de rol.",
+        "consumes": [],
+        "created_at": "2026-09-24",
+        "changelog": []
+      },
+      {
+        "id": "COMP-054",
+        "name": "Button",
+        "type": "component",
+        "module": "desktop-app",
+        "spec": "sdd/specs/spec-e-burgos-017-desktop-app",
+        "path": "src/components/ui/button.tsx",
+        "status": "implemented",
+        "created_in_cycle": 5,
+        "updated_in_cycle": null,
+        "description": "Primitiva de boton (variant primary | secondary | ghost) sobre los tokens de color centralizados en index.css (D-C5-08). Sin dependencias nuevas.",
+        "consumes": [],
+        "created_at": "2026-09-24",
+        "changelog": []
+      },
+      {
+        "id": "COMP-055",
+        "name": "Card",
+        "type": "component",
+        "module": "desktop-app",
+        "spec": "sdd/specs/spec-e-burgos-017-desktop-app",
+        "path": "src/components/ui/card.tsx",
+        "status": "implemented",
+        "created_in_cycle": 5,
+        "updated_in_cycle": null,
+        "description": "Primitiva de contenedor con radio y borde centralizados (--radius-panel, --color-border-subtle).",
+        "consumes": [],
+        "created_at": "2026-09-24",
+        "changelog": []
+      },
+      {
+        "id": "COMP-056",
+        "name": "Badge",
+        "type": "component",
+        "module": "desktop-app",
+        "spec": "sdd/specs/spec-e-burgos-017-desktop-app",
+        "path": "src/components/ui/badge.tsx",
+        "status": "implemented",
+        "created_in_cycle": 5,
+        "updated_in_cycle": null,
+        "description": "Primitiva de badge con tono (neutral | accent | warning | danger | success) usada por el conteo de assets de WorkspaceSidePanel.",
+        "consumes": [],
+        "created_at": "2026-09-24",
+        "changelog": []
+      },
+      {
+        "id": "COMP-057",
+        "name": "Tabs",
+        "type": "component",
+        "module": "desktop-app",
+        "spec": "sdd/specs/spec-e-burgos-017-desktop-app",
+        "path": "src/components/ui/tabs.tsx",
+        "status": "implemented",
+        "created_in_cycle": 5,
+        "updated_in_cycle": null,
+        "description": "Primitiva de pestanas accesible (role=tablist/tab/tabpanel) controlada por value/onChange, usada por WorkspaceSidePanel para Vista previa, Material y Entregas.",
+        "consumes": [],
         "created_at": "2026-09-24",
         "changelog": []
       }

@@ -114,8 +114,8 @@ async function main() {
     });
     page.on('pageerror', (error) => log('pageerror', error.stack ?? error.message));
 
-    log('3', 'opening the producer of the copied project, in spanish');
-    await page.goto(`http://localhost:${WEB_PORT}/projects/${SLUG}/producer`, {
+    log('3', 'opening the workspace of the copied project, in spanish');
+    await page.goto(`http://localhost:${WEB_PORT}/projects/${SLUG}`, {
       waitUntil: 'networkidle',
     });
     await page.waitForSelector('[data-testid="producer-welcome"]', { timeout: 20000 });

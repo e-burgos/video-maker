@@ -104,7 +104,7 @@ describe('ProducerWelcome', () => {
     renderWelcome(listing([]));
 
     expect(screen.getByRole('link', { name: /Upload your clips/ }).getAttribute('href')).toBe(
-      '/projects/demo-01',
+      '/projects/demo-01/library',
     );
     expect(screen.getByTestId('producer-starters').querySelectorAll('button')).toHaveLength(2);
   });

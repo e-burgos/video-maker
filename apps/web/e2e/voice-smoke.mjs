@@ -134,7 +134,7 @@ async function main() {
 
   try {
     log('4', 'reaching the voice page from the project nav of the layout');
-    await page.goto(`http://localhost:${WEB_PORT}/projects/${SLUG}`, { waitUntil: 'networkidle' });
+    await page.goto(`http://localhost:${WEB_PORT}/projects/${SLUG}/library`, { waitUntil: 'networkidle' });
     await page.waitForSelector('[data-testid="project-nav"]');
     await page.getByRole('link', { name: 'voice', exact: true }).click();
     await page.waitForSelector('[data-testid="voice-empty-state"]');

@@ -6,8 +6,7 @@ import { LanguageSwitch } from './language-switch';
 import { ServiceHealthBadge } from './service-health-badge';
 
 const PROJECT_SECTIONS = [
-  { path: '/producer', labelKey: 'nav.producer' },
-  { path: '', labelKey: 'nav.library' },
+  { path: '/library', labelKey: 'nav.library' },
   { path: '/storyboard', labelKey: 'nav.storyboard' },
   { path: '/voice', labelKey: 'nav.voice' },
   { path: '/preview', labelKey: 'nav.preview' },
@@ -31,8 +30,15 @@ export function projectSlugFromPathname(pathname: string): string | null {
   return match === null ? null : decodeURIComponent(match[1] as string);
 }
 
+export function isProjectWorkspaceRoot(pathname: string, slug: string): boolean {
+  const rest = pathname.slice(`/projects/${encodeURIComponent(slug)}`.length);
+  return rest === '' || rest === '/';
+}
+
 export function StudioLayout() {
-  const slug = projectSlugFromPathname(useLocation().pathname);
+  const { pathname } = useLocation();
+  const slug = projectSlugFromPathname(pathname);
+  const showProjectNav = slug !== null && !isProjectWorkspaceRoot(pathname, slug);
   const t = useT();
 
   return (
@@ -56,7 +62,7 @@ export function StudioLayout() {
           </div>
         </div>
 
-        {slug !== null && (
+        {showProjectNav && (
           <nav
             data-testid="project-nav"
             className="mx-auto flex max-w-6xl items-center gap-3 px-6 pb-3 font-mono text-xs"
@@ -64,7 +70,6 @@ export function StudioLayout() {
             {PROJECT_SECTIONS.map((section) => (
               <NavLink
                 key={section.labelKey}
-                end={section.path === ''}
                 to={`/projects/${slug}${section.path}`}
                 className={({ isActive }) =>
                   `rounded-md border px-2 py-1 ${

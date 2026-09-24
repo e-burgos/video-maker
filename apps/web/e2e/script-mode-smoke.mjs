@@ -181,7 +181,7 @@ async function main() {
     page.on('pageerror', (error) => log('pageerror', error.stack ?? error.message));
 
     log('6', 'library: the Generated section lists what the engine produced');
-    await page.goto(`${webUrl}/projects/${SLUG}`, { waitUntil: 'networkidle' });
+    await page.goto(`${webUrl}/projects/${SLUG}/library`, { waitUntil: 'networkidle' });
     await page.waitForSelector('[data-testid="generated-narration"]');
     const narration = await mediaState(page, 'generated-narration-audio');
     log('6', `generated narration player: ${JSON.stringify(narration)}`);

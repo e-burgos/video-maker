@@ -40,11 +40,11 @@ function openMenu(): void {
 }
 
 describe('VideoCard', () => {
-  it('opens the video on the producer, like the card always did', () => {
+  it('opens the video on its chat-first workspace', () => {
     renderCard({});
 
     expect(screen.getByRole('link', { name: /editar-campana/u }).getAttribute('href')).toBe(
-      '/projects/editar-campana/producer',
+      '/projects/editar-campana',
     );
   });
 
