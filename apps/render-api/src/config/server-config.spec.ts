@@ -1,7 +1,15 @@
 import { describe, expect, it } from 'vitest';
 
 import { isRenderApiError } from '../errors/render-api-error';
-import { DEFAULT_HOST, DEFAULT_PORT, HOST_ENV_VAR, PORT_ENV_VAR, readServerConfig } from './server-config';
+import {
+  ACCESS_TOKEN_ENV_VAR,
+  DEFAULT_HOST,
+  DEFAULT_PORT,
+  HOST_ENV_VAR,
+  PORT_ENV_VAR,
+  readServerConfig,
+  WEB_ROOT_ENV_VAR,
+} from './server-config';
 
 function expectInvalidPort(port: string): void {
   try {
@@ -33,5 +41,22 @@ describe('readServerConfig', () => {
 
     expect(readServerConfig({ [PORT_ENV_VAR]: '0' }).port).toBe(0);
     expect(readServerConfig({ [PORT_ENV_VAR]: '65535' }).port).toBe(65535);
+  });
+
+  it('webRoot and accessToken default to null (US-017-202, US-017-205)', () => {
+    const config = readServerConfig({});
+    expect(config.webRoot).toBeNull();
+    expect(config.accessToken).toBeNull();
+  });
+
+  it('reads webRoot and accessToken when set, empty string treated as unset', () => {
+    expect(readServerConfig({ [WEB_ROOT_ENV_VAR]: '/app/resources/web' }).webRoot).toBe(
+      '/app/resources/web',
+    );
+    expect(readServerConfig({ [ACCESS_TOKEN_ENV_VAR]: 'abc123' }).accessToken).toBe('abc123');
+    expect(readServerConfig({ [WEB_ROOT_ENV_VAR]: '', [ACCESS_TOKEN_ENV_VAR]: '' })).toMatchObject({
+      webRoot: null,
+      accessToken: null,
+    });
   });
 });

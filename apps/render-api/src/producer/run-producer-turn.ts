@@ -112,6 +112,8 @@ export async function startProducerTurn(
     apiUrl: context.apiUrl,
     project: context.slug,
     model,
+    ...(input.config.accessToken === null ? {} : { accessToken: input.config.accessToken }),
+    ...(input.config.studioMcpEntryPath === null ? {} : { compiledEntryPath: input.config.studioMcpEntryPath }),
   });
   const cwd = producerWorkingDirectory(input.config.cliCwdBase, input.project.slug);
   await deps.ensureDirectory(cwd);

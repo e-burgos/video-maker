@@ -29,6 +29,13 @@
         "command": "node -r ./apps/render-api/src/server-register.cjs apps/render-api/src/main.ts",
         "env": { "SWC_NODE_PROJECT": "tsconfig.base.json" }
       }
+    },
+    "bundle": {
+      "executor": "nx:run-commands",
+      "outputs": ["{workspaceRoot}/dist/apps/render-api"],
+      "options": {
+        "command": "node scripts/esbuild-node-bundle.mjs apps/render-api/src/main.ts dist/apps/render-api/main.js --external:better-sqlite3 --external:@remotion/bundler --external:@remotion/renderer --external:@remotion/cli --external:@remotion/player --external:@remotion/transitions --external:remotion"
+      }
     }
   }
 }

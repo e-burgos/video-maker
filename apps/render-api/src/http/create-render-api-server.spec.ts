@@ -23,7 +23,7 @@ describe('createRenderApiServer', () => {
   it('serves GET /health over a real loopback socket on an ephemeral port and closes', async () => {
     const callLog = createCallLog();
     const deps = createFakeRenderApiDependencies(callLog);
-    server = createRenderApiServer(deps, { host: '127.0.0.1', port: 0 }, STORE);
+    server = createRenderApiServer(deps, { host: '127.0.0.1', port: 0, webRoot: null, accessToken: null }, STORE);
 
     const address = await server.listen();
     expect(address.host).toBe('127.0.0.1');
@@ -70,7 +70,7 @@ describe('createRenderApiServer', () => {
     const refusingStorage = createFakeObjectStorage(refusingCallLog, seed());
     server = createRenderApiServer(
       createFakeRenderApiDependencies(refusingCallLog, { storage: refusingStorage }),
-      { host: '127.0.0.1', port: 0 },
+      { host: '127.0.0.1', port: 0, webRoot: null, accessToken: null },
       STORE,
     );
     const refusingAddress = await server.listen();
@@ -85,7 +85,7 @@ describe('createRenderApiServer', () => {
     const storage = createFakeObjectStorage(callLog, seed());
     server = createRenderApiServer(
       createFakeRenderApiDependencies(callLog, { storage }),
-      { host: '127.0.0.1', port: 0 },
+      { host: '127.0.0.1', port: 0, webRoot: null, accessToken: null },
       STORE,
     );
     const address = await server.listen();
@@ -108,7 +108,7 @@ describe('createRenderApiServer', () => {
         },
       },
     });
-    server = createRenderApiServer(deps, { host: '127.0.0.1', port: 0 }, STORE);
+    server = createRenderApiServer(deps, { host: '127.0.0.1', port: 0, webRoot: null, accessToken: null }, STORE);
 
     const address = await server.listen();
     const response = await fetch(`http://${address.host}:${address.port}/unknown-path`);
@@ -121,7 +121,7 @@ describe('createRenderApiServer', () => {
   it('rejects a second close call because the server is no longer running', async () => {
     const callLog = createCallLog();
     const deps = createFakeRenderApiDependencies(callLog);
-    server = createRenderApiServer(deps, { host: '127.0.0.1', port: 0 }, STORE);
+    server = createRenderApiServer(deps, { host: '127.0.0.1', port: 0, webRoot: null, accessToken: null }, STORE);
 
     await server.listen();
     await server.close();
@@ -137,7 +137,7 @@ describe('createRenderApiServer', () => {
       files: [{ path: `${STORE.mediaRoot}/smoke-ingest/raw/aroll/clip01.mp4`, contents: 'hello world' }],
     });
     const deps = createFakeRenderApiDependencies(callLog, { storage });
-    server = createRenderApiServer(deps, { host: '127.0.0.1', port: 0 }, STORE);
+    server = createRenderApiServer(deps, { host: '127.0.0.1', port: 0, webRoot: null, accessToken: null }, STORE);
 
     const address = await server.listen();
     const response = await fetch(
@@ -160,7 +160,7 @@ describe('createRenderApiServer', () => {
     });
     const deps = createFakeRenderApiDependencies(callLog, { storage });
     deps.localStore.projects.insert('smoke-ingest');
-    server = createRenderApiServer(deps, { host: '127.0.0.1', port: 0 }, STORE);
+    server = createRenderApiServer(deps, { host: '127.0.0.1', port: 0, webRoot: null, accessToken: null }, STORE);
 
     const address = await server.listen();
 

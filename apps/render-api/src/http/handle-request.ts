@@ -1,3 +1,4 @@
+import type { ServerConfig } from '../config/server-config';
 import type { StoreConfig } from '../config/store-config';
 import type { RenderApiDependencies } from '../deps/render-api-dependencies';
 import { httpStatusFor } from '../errors/http-status-for';
@@ -56,38 +57,124 @@ import { handleListVoices } from './handlers/voices-handler';
 import { handleHealth } from './health-handler';
 import { JSON_CONTENT_TYPE } from './http-message';
 import type { HttpRequestLine, HttpResponse } from './http-message';
+import { evaluateLocalAccess, sessionCookieHeaderValue } from './local-access-guard';
 import type { RenderApiRuntime } from './render-api-runtime';
 import { normalizePath, routeRequest } from './router';
+import type { RouteMatch } from './router';
+import type { RouteId } from './routes';
+import { handleStaticWeb } from './static-web-handler';
+
+const API_PATH_PREFIX = '/api';
+const PATH_PARSE_BASE = 'http://render-api.invalid';
+const UNPREFIXED_HEALTH_PATHNAME = '/health';
+
+function stripApiPrefix(pathname: string): string {
+  const stripped = pathname.slice(API_PATH_PREFIX.length);
+  return stripped === '' ? '/' : stripped;
+}
+
+async function dispatchMatch(
+  match: RouteMatch,
+  pathname: string,
+  request: HttpRequestLine,
+  deps: RenderApiDependencies,
+  store: StoreConfig,
+  runtime: RenderApiRuntime,
+): Promise<HttpResponse> {
+  if (match.kind === 'not-found') {
+    throw new PipelineStageError({ code: 'ROUTE_NOT_FOUND', stage: null, resource: pathname });
+  }
+
+  if (match.kind === 'method-not-allowed') {
+    throw new PipelineStageError({
+      code: 'METHOD_NOT_ALLOWED',
+      stage: null,
+      resource: pathname,
+      expected: match.allow.join(', '),
+    });
+  }
+
+  const params = match.params ?? {};
+
+  return dispatchRoute(match.id, params, request, deps, store, runtime);
+}
+
+async function dispatchApiRoute(
+  pathname: string,
+  request: HttpRequestLine,
+  deps: RenderApiDependencies,
+  store: StoreConfig,
+  runtime: RenderApiRuntime,
+): Promise<HttpResponse> {
+  return dispatchMatch(routeRequest(request.method, pathname), pathname, request, deps, store, runtime);
+}
 
 export async function handleRequest(
   request: HttpRequestLine,
   deps: RenderApiDependencies,
   store: StoreConfig,
   runtime: RenderApiRuntime,
+  config: ServerConfig,
 ): Promise<HttpResponse> {
   try {
-    const match = routeRequest(request.method, normalizePath(request.path));
+    const url = new URL(request.path, PATH_PARSE_BASE);
+    const pathname = normalizePath(url.pathname);
 
-    if (match.kind === 'not-found') {
-      throw new PipelineStageError({
-        code: 'ROUTE_NOT_FOUND',
-        stage: null,
-        resource: normalizePath(request.path),
+    if (config.accessToken !== null) {
+      const decision = evaluateLocalAccess({
+        accessToken: config.accessToken,
+        port: config.port,
+        method: request.method,
+        pathname,
+        query: url.searchParams,
+        headers: request.headers,
       });
+
+      if (decision.kind === 'deny') {
+        throw new PipelineStageError({ code: 'ACCESS_DENIED', stage: null });
+      }
+
+      if (decision.kind === 'redirect-with-cookie') {
+        return {
+          status: 302,
+          headers: { location: '/', 'set-cookie': sessionCookieHeaderValue(decision.cookieValue) },
+          body: undefined,
+        };
+      }
     }
 
-    if (match.kind === 'method-not-allowed') {
-      throw new PipelineStageError({
-        code: 'METHOD_NOT_ALLOWED',
-        stage: null,
-        resource: normalizePath(request.path),
-        expected: match.allow.join(', '),
-      });
+    if (config.webRoot === null) {
+      return await dispatchApiRoute(pathname, request, deps, store, runtime);
     }
 
-    const params = match.params ?? {};
+    if (pathname === UNPREFIXED_HEALTH_PATHNAME) {
+      return await dispatchApiRoute(pathname, request, deps, store, runtime);
+    }
 
-    switch (match.id) {
+    if (pathname === API_PATH_PREFIX || pathname.startsWith(`${API_PATH_PREFIX}/`)) {
+      const strippedPathname = normalizePath(stripApiPrefix(pathname));
+      return await dispatchApiRoute(strippedPathname, request, deps, store, runtime);
+    }
+
+    if (request.method === 'GET' || request.method === 'HEAD') {
+      return await handleStaticWeb(config.webRoot, pathname);
+    }
+
+    throw new PipelineStageError({ code: 'ROUTE_NOT_FOUND', stage: null, resource: pathname });
+  } catch (cause) {
+    return toErrorResponse(cause, deps);
+  }
+}
+
+async function dispatchRoute(
+  id: RouteId,
+  params: Readonly<Record<string, string>>,
+  request: HttpRequestLine,
+  deps: RenderApiDependencies,
+  store: StoreConfig,
+  runtime: RenderApiRuntime,
+): Promise<HttpResponse> {
+  switch (id) {
       case 'health':
         return await handleHealth(deps, store, runtime);
       case 'voices.list':
@@ -177,11 +264,8 @@ export async function handleRequest(
       case 'jobs.retry':
         return await handleRetryRenderJob(deps, store, params, runtime);
       default:
-        return match.id satisfies never;
+        return id satisfies never;
     }
-  } catch (cause) {
-    return toErrorResponse(cause, deps);
-  }
 }
 
 export function toErrorResponse(cause: unknown, deps: RenderApiDependencies): HttpResponse {

@@ -15,6 +15,7 @@ import type {
 } from './render-api-client';
 
 export const DEFAULT_HTTP_RENDER_API_CLIENT_TIMEOUT_MS = 30_000;
+export const STUDIO_TOKEN_HEADER = 'x-studio-token';
 const PRODUCER_SCRIPT_PATH = 'work/producer/script.txt';
 const TIME_MARK_PATTERN = /^\s*\[\d{1,2}:\d{2}/mu;
 const ABSOLUTE_PATH_PATTERN = /\/(?:Users|home|var|tmp|private)\/[^\s'"]+/gu;
@@ -24,6 +25,7 @@ export interface HttpRenderApiClientOptions {
   readonly slug: string;
   readonly timeoutMs?: number;
   readonly fetchImpl?: typeof fetch;
+  readonly accessToken?: string;
 }
 
 function isKnownStudioErrorCode(code: string): code is StudioToolErrorCode {
@@ -78,6 +80,18 @@ export function createHttpRenderApiClient(options: HttpRenderApiClientOptions): 
   const slug = options.slug;
   const timeoutMs = options.timeoutMs ?? DEFAULT_HTTP_RENDER_API_CLIENT_TIMEOUT_MS;
   const fetchImpl = options.fetchImpl ?? fetch;
+  const accessToken = options.accessToken;
+
+  function requestHeaders(hasBody: boolean): Readonly<Record<string, string>> | undefined {
+    const headers: Record<string, string> = {};
+    if (hasBody) {
+      headers['content-type'] = 'application/json';
+    }
+    if (accessToken !== undefined) {
+      headers[STUDIO_TOKEN_HEADER] = accessToken;
+    }
+    return Object.keys(headers).length === 0 ? undefined : headers;
+  }
 
   async function raw(
     method: string,
@@ -87,9 +101,11 @@ export function createHttpRenderApiClient(options: HttpRenderApiClientOptions): 
   ): Promise<{ readonly response: Response; readonly json: unknown }> {
     let response: Response;
     try {
+      const headers = requestHeaders(body !== undefined);
       response = await fetchImpl(`${apiUrl}${path}`, {
         method,
-        ...(body === undefined ? {} : { headers: { 'content-type': 'application/json' }, body: JSON.stringify(body) }),
+        ...(headers === undefined ? {} : { headers }),
+        ...(body === undefined ? {} : { body: JSON.stringify(body) }),
         signal: AbortSignal.timeout(timeoutMs),
       });
     } catch {
@@ -164,8 +180,10 @@ export function createHttpRenderApiClient(options: HttpRenderApiClientOptions): 
     readFileBytes: async (path): Promise<RenderApiFileBytes> => {
       let response: Response;
       try {
+        const headers = requestHeaders(false);
         response = await fetchImpl(`${apiUrl}/projects/${slug}/files/${joinProjectPath(path)}`, {
           method: 'GET',
+          ...(headers === undefined ? {} : { headers }),
           signal: AbortSignal.timeout(timeoutMs),
         });
       } catch {

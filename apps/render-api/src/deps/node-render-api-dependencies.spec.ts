@@ -177,7 +177,7 @@ describe('createNodeRenderApiDependencies', () => {
     expect(options).not.toHaveProperty('browserExecutable');
   });
 
-  it('with REMOTION_SERVE_URL and REMOTION_BROWSER_EXECUTABLE, forwards both and symlinks the prebuilt bundle public dir to the project root (US-017-201)', async () => {
+  it('with REMOTION_SERVE_URL and REMOTION_BROWSER_EXECUTABLE, copies the bundle into a writable cache dir next to the db and symlinks its public dir to the project root (US-017-201)', async () => {
     mocks.renderTimelineMock.mockResolvedValue({
       outPath: '/work/renders/r1/video-muted.mp4',
       width: 1080,
@@ -187,14 +187,17 @@ describe('createNodeRenderApiDependencies', () => {
       compositionId: 'timeline-composition',
     });
 
-    const serveUrl = await mkdtemp(join(tmpdir(), 'remotion-bundle-'));
+    const sourceServeUrl = await mkdtemp(join(tmpdir(), 'remotion-bundle-source-'));
+    await writeFile(join(sourceServeUrl, 'bundle.js'), 'console.log(1)');
     const publicDir = await mkdtemp(join(tmpdir(), 'project-root-'));
+    const dataDir = await mkdtemp(join(tmpdir(), 'app-data-'));
+    const store: StoreConfig = { ...STORE, dbPath: join(dataDir, '.studio', 'studio.db') };
     const env = {
-      REMOTION_SERVE_URL: serveUrl,
+      REMOTION_SERVE_URL: sourceServeUrl,
       REMOTION_BROWSER_EXECUTABLE: '/app/resources/chrome-headless-shell',
     };
 
-    const deps = createNodeRenderApiDependencies(env, STORE);
+    const deps = createNodeRenderApiDependencies(env, store);
     const timeline = buildMinimalTimeline();
 
     await deps.renderMutedVideo({
@@ -203,22 +206,26 @@ describe('createNodeRenderApiDependencies', () => {
       publicDir,
     });
 
+    const [, options] = mocks.renderTimelineMock.mock.calls[0] ?? [];
+    const cachedServeUrl = (options as { serveUrl: string }).serveUrl;
+
+    expect(cachedServeUrl).not.toBe(sourceServeUrl);
+    expect(cachedServeUrl.startsWith(join(dataDir, '.studio', 'remotion-bundle'))).toBe(true);
+    expect(await readFile(join(cachedServeUrl, 'bundle.js'), 'utf8')).toBe('console.log(1)');
     expect(mocks.renderTimelineMock).toHaveBeenCalledWith(
       timeline,
-      expect.objectContaining({
-        serveUrl,
-        browserExecutable: '/app/resources/chrome-headless-shell',
-      }),
+      expect.objectContaining({ browserExecutable: '/app/resources/chrome-headless-shell' }),
     );
 
-    const linkTarget = await realpath(join(serveUrl, 'public'));
+    const linkTarget = await realpath(join(cachedServeUrl, 'public'));
     expect(linkTarget).toBe(await realpath(publicDir));
 
-    await rm(serveUrl, { recursive: true, force: true });
+    await rm(sourceServeUrl, { recursive: true, force: true });
     await rm(publicDir, { recursive: true, force: true });
+    await rm(dataDir, { recursive: true, force: true });
   });
 
-  it('rendering twice with REMOTION_SERVE_URL re-links the public dir to a different project root (US-017-201)', async () => {
+  it('rendering twice with REMOTION_SERVE_URL reuses the cached copy and re-links the public dir to a different project root (US-017-201)', async () => {
     mocks.renderTimelineMock.mockResolvedValue({
       outPath: '/work/renders/r1/video-muted.mp4',
       width: 1080,
@@ -228,12 +235,15 @@ describe('createNodeRenderApiDependencies', () => {
       compositionId: 'timeline-composition',
     });
 
-    const serveUrl = await mkdtemp(join(tmpdir(), 'remotion-bundle-'));
+    const sourceServeUrl = await mkdtemp(join(tmpdir(), 'remotion-bundle-source-'));
+    await writeFile(join(sourceServeUrl, 'bundle.js'), 'console.log(1)');
     const firstProjectRoot = await mkdtemp(join(tmpdir(), 'project-a-'));
     const secondProjectRoot = await mkdtemp(join(tmpdir(), 'project-b-'));
-    const env = { REMOTION_SERVE_URL: serveUrl };
+    const dataDir = await mkdtemp(join(tmpdir(), 'app-data-'));
+    const store: StoreConfig = { ...STORE, dbPath: join(dataDir, '.studio', 'studio.db') };
+    const env = { REMOTION_SERVE_URL: sourceServeUrl };
 
-    const deps = createNodeRenderApiDependencies(env, STORE);
+    const deps = createNodeRenderApiDependencies(env, store);
     const timeline = buildMinimalTimeline();
 
     await deps.renderMutedVideo({
@@ -247,12 +257,19 @@ describe('createNodeRenderApiDependencies', () => {
       publicDir: secondProjectRoot,
     });
 
-    const linkTarget = await realpath(join(serveUrl, 'public'));
+    const [firstCall] = mocks.renderTimelineMock.mock.calls;
+    const [secondCall] = mocks.renderTimelineMock.mock.calls.slice(1);
+    const firstServeUrl = (firstCall?.[1] as { serveUrl: string }).serveUrl;
+    const secondServeUrl = (secondCall?.[1] as { serveUrl: string }).serveUrl;
+    expect(secondServeUrl).toBe(firstServeUrl);
+
+    const linkTarget = await realpath(join(secondServeUrl, 'public'));
     expect(linkTarget).toBe(await realpath(secondProjectRoot));
 
-    await rm(serveUrl, { recursive: true, force: true });
+    await rm(sourceServeUrl, { recursive: true, force: true });
     await rm(firstProjectRoot, { recursive: true, force: true });
     await rm(secondProjectRoot, { recursive: true, force: true });
+    await rm(dataDir, { recursive: true, force: true });
   });
 
   it('feeds mixTimelineAudio with the timeline, the out path and the resolved ffmpeg binary', async () => {

@@ -16,6 +16,8 @@ const MESSAGE_BY_CODE: Readonly<Record<RenderApiErrorCode, string>> = {
   ROUTE_NOT_FOUND: 'No route matches the requested path.',
   METHOD_NOT_ALLOWED: 'The requested method is not allowed on this path.',
   SERVER_CONFIG_INVALID: 'The server configuration is invalid.',
+  STATIC_WEB_NOT_FOUND: 'The requested file was not found under the served web build.',
+  ACCESS_DENIED: 'The request was not authorized for this local service.',
   INTERNAL_ERROR: 'The service failed for an unexpected reason.',
   PROJECT_NOT_FOUND: 'The requested project does not exist.',
   PROJECT_SLUG_INVALID: 'The project slug is not a valid kebab-case path segment.',

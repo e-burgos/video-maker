@@ -23,6 +23,8 @@ describe('readProducerConfig', () => {
       models: [...DEFAULT_PRODUCER_MODELS],
       timeoutMs: DEFAULT_PRODUCER_TURN_TIMEOUT_MS,
       apiUrl: FALLBACK_URL,
+      accessToken: null,
+      studioMcpEntryPath: null,
     });
     expect(DEFAULT_PRODUCER_MODEL).toBe('sonnet');
     expect(DEFAULT_PRODUCER_TURN_TIMEOUT_MS).toBe(1_800_000);
@@ -70,7 +72,29 @@ describe('readProducerConfig', () => {
       models: [...DEFAULT_PRODUCER_MODELS],
       timeoutMs: 600_000,
       apiUrl: 'http://127.0.0.1:4399',
+      accessToken: null,
+      studioMcpEntryPath: null,
     });
+  });
+
+  it('reads RENDER_API_ACCESS_TOKEN and STUDIO_MCP_ENTRY, both null when unset or empty (US-017-202, US-017-205)', () => {
+    expect(
+      readProducerConfig(
+        { RENDER_API_ACCESS_TOKEN: 'secret-token', STUDIO_MCP_ENTRY: '/app/resources/studio-mcp/main.js' },
+        REPO_ROOT,
+        FALLBACK_URL,
+        NEUTRAL_CWD_BASE,
+      ),
+    ).toMatchObject({ accessToken: 'secret-token', studioMcpEntryPath: '/app/resources/studio-mcp/main.js' });
+
+    expect(
+      readProducerConfig(
+        { RENDER_API_ACCESS_TOKEN: '', STUDIO_MCP_ENTRY: '' },
+        REPO_ROOT,
+        FALLBACK_URL,
+        NEUTRAL_CWD_BASE,
+      ),
+    ).toMatchObject({ accessToken: null, studioMcpEntryPath: null });
   });
 
   it('trata la variable vacía como ausente', () => {

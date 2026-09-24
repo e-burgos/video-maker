@@ -5,6 +5,8 @@ export const PRODUCER_MODEL_ENV_VAR = 'PRODUCER_MODEL';
 export const PRODUCER_MODELS_ENV_VAR = 'PRODUCER_MODELS';
 export const PRODUCER_TURN_TIMEOUT_ENV_VAR = 'PRODUCER_TURN_TIMEOUT_MS';
 export const PRODUCER_API_URL_ENV_VAR = 'RENDER_API_URL';
+export const PRODUCER_ACCESS_TOKEN_ENV_VAR = 'RENDER_API_ACCESS_TOKEN';
+export const STUDIO_MCP_ENTRY_ENV_VAR = 'STUDIO_MCP_ENTRY';
 
 export const DEFAULT_PRODUCER_MODEL = 'sonnet';
 export const DEFAULT_PRODUCER_MODELS = ['sonnet', 'opus', 'haiku'] as const;
@@ -38,6 +40,8 @@ export interface ProducerConfig {
   readonly models: readonly string[];
   readonly timeoutMs: number;
   readonly apiUrl: string;
+  readonly accessToken: string | null;
+  readonly studioMcpEntryPath: string | null;
 }
 
 function readNonEmpty(env: NodeJS.ProcessEnv, name: string): string | null {
@@ -108,5 +112,7 @@ export function readProducerConfig(
     models,
     timeoutMs: readTimeoutMs(env),
     apiUrl: readNonEmpty(env, PRODUCER_API_URL_ENV_VAR) ?? fallbackApiUrl,
+    accessToken: readNonEmpty(env, PRODUCER_ACCESS_TOKEN_ENV_VAR),
+    studioMcpEntryPath: readNonEmpty(env, STUDIO_MCP_ENTRY_ENV_VAR),
   };
 }

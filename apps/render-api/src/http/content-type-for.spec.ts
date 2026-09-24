@@ -23,6 +23,14 @@ const CASES: readonly { readonly fileName: string; readonly contentType: string 
   { fileName: 'captions.vtt', contentType: 'text/vtt' },
   { fileName: 'archive.zip', contentType: 'application/octet-stream' },
   { fileName: 'no-extension', contentType: 'application/octet-stream' },
+  { fileName: 'index.html', contentType: 'text/html; charset=utf-8' },
+  { fileName: 'index-CRAQnvHw.css', contentType: 'text/css; charset=utf-8' },
+  { fileName: 'index-CRAQnvHw.js', contentType: 'text/javascript; charset=utf-8' },
+  { fileName: 'index-CRAQnvHw.js.map', contentType: 'application/json; charset=utf-8' },
+  { fileName: 'logo.svg', contentType: 'image/svg+xml' },
+  { fileName: 'favicon.ico', contentType: 'image/x-icon' },
+  { fileName: 'inter.woff2', contentType: 'font/woff2' },
+  { fileName: 'app.webmanifest', contentType: 'application/manifest+json' },
 ];
 
 describe('contentTypeFor', () => {

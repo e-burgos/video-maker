@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 
 import { StudioToolRuntimeError } from '../errors/studio-tool-runtime-error';
-import { createHttpRenderApiClient } from './http-render-api-client';
+import { createHttpRenderApiClient, STUDIO_TOKEN_HEADER } from './http-render-api-client';
 
 interface FakeFetchCall {
   readonly url: string;
@@ -236,5 +236,46 @@ describe('createHttpRenderApiClient', () => {
     const failure = client(fetchImpl).probeMedia('x');
     await expect(failure).rejects.toBeInstanceOf(StudioToolRuntimeError);
     await expect(failure).rejects.toMatchObject({ hint: 'bad path <path> rejected' });
+  });
+
+  it('sends x-studio-token on every request when accessToken is configured (US-017-205)', async () => {
+    const { fetchImpl, calls } = createFakeFetch(() =>
+      jsonResponse(200, { slug: 'pitch-deck', layout: { timeline: true }, assetSource: 'catalog', assetCounts: {} }),
+    );
+
+    await createHttpRenderApiClient({
+      apiUrl: 'http://127.0.0.1:4599',
+      slug: 'pitch-deck',
+      fetchImpl,
+      accessToken: 'secret-token',
+    }).getProjectDetail();
+
+    const headers = calls[0]?.init?.headers as Record<string, string> | undefined;
+    expect(headers?.[STUDIO_TOKEN_HEADER]).toBe('secret-token');
+  });
+
+  it('does not send x-studio-token when no accessToken is configured', async () => {
+    const { fetchImpl, calls } = createFakeFetch(() =>
+      jsonResponse(200, { slug: 'pitch-deck', layout: { timeline: true }, assetSource: 'catalog', assetCounts: {} }),
+    );
+
+    await client(fetchImpl).getProjectDetail();
+
+    const headers = calls[0]?.init?.headers as Record<string, string> | undefined;
+    expect(headers?.[STUDIO_TOKEN_HEADER]).toBeUndefined();
+  });
+
+  it('sends x-studio-token on readFileBytes too, which builds its request outside raw()', async () => {
+    const { fetchImpl, calls } = createFakeFetch(() => new Response(new Uint8Array([1, 2, 3]), { status: 200 }));
+
+    await createHttpRenderApiClient({
+      apiUrl: 'http://127.0.0.1:4599',
+      slug: 'pitch-deck',
+      fetchImpl,
+      accessToken: 'secret-token',
+    }).readFileBytes('work/producer/script.txt');
+
+    const headers = calls[0]?.init?.headers as Record<string, string> | undefined;
+    expect(headers?.[STUDIO_TOKEN_HEADER]).toBe('secret-token');
   });
 });

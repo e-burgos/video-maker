@@ -31,6 +31,13 @@
           "SWC_NODE_PROJECT": "tsconfig.base.json"
         }
       }
+    },
+    "bundle": {
+      "executor": "nx:run-commands",
+      "outputs": ["{workspaceRoot}/dist/libs/producer-tools/mcp"],
+      "options": {
+        "command": "node scripts/esbuild-node-bundle.mjs libs/producer-tools/src/mcp/main.ts dist/libs/producer-tools/mcp/main.js"
+      }
     }
   }
 }

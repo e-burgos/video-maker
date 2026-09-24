@@ -72,7 +72,7 @@ export function createRenderApiServer(
   const server = createServer((incoming, outgoing) => {
     void (async () => {
       try {
-        const response = await handleRequest(toRequestLine(incoming), deps, store, runtime);
+        const response = await handleRequest(toRequestLine(incoming), deps, store, runtime, config);
         await writeResponse(response, outgoing);
       } catch (cause) {
         const error = toErrorPayload(cause);

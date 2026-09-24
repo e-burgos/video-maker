@@ -164,20 +164,52 @@
       "depends_on": [
         "TASK-003"
       ],
-      "status": "in-progress",
+      "status": "done",
       "files": [
         "apps/render-api/project.json",
         "libs/producer-tools/project.json",
+        "scripts/esbuild-node-bundle.mjs",
         "apps/render-api/src/http/static-web-handler.ts",
         "apps/render-api/src/http/static-web-handler.spec.ts",
         "apps/render-api/src/http/local-access-guard.ts",
         "apps/render-api/src/http/local-access-guard.spec.ts",
         "apps/render-api/src/http/handle-request.ts",
+        "apps/render-api/src/http/handle-request.spec.ts",
+        "apps/render-api/src/http/create-render-api-server.ts",
+        "apps/render-api/src/http/create-render-api-server.spec.ts",
+        "apps/render-api/src/http/content-type-for.ts",
+        "apps/render-api/src/http/content-type-for.spec.ts",
         "apps/render-api/src/config/server-config.ts",
         "apps/render-api/src/config/server-config.spec.ts",
+        "apps/render-api/src/config/producer-config.ts",
+        "apps/render-api/src/config/producer-config.spec.ts",
+        "apps/render-api/src/errors/render-api-error.ts",
+        "apps/render-api/src/errors/http-status-for.ts",
+        "apps/render-api/src/errors/http-status-for.spec.ts",
+        "apps/render-api/src/errors/to-error-payload.ts",
+        "apps/render-api/src/deps/node-render-api-dependencies.ts",
+        "apps/render-api/src/deps/node-render-api-dependencies.spec.ts",
+        "apps/render-api/src/producer/producer-mcp-config.ts",
+        "apps/render-api/src/producer/run-producer-turn.ts",
+        "apps/render-api/src/main.ts",
         "libs/producer-tools/src/mcp/studio-mcp-launch.ts",
-        "libs/producer-tools/src/mcp/studio-mcp-launch.spec.ts"
-      ]
+        "libs/producer-tools/src/mcp/studio-mcp-launch.spec.ts",
+        "libs/producer-tools/src/mcp/main.ts",
+        "libs/producer-tools/src/client/http-render-api-client.ts",
+        "libs/producer-tools/src/client/http-render-api-client.spec.ts",
+        "package.json",
+        "sdd/specs/spec-e-burgos-017-desktop-app/cycles/cycle-03/plan.md"
+      ],
+      "usage": {
+        "provider_model": "claude/sonnet",
+        "effort": "high",
+        "agent": "implementor-back",
+        "tokens_in": 900000,
+        "tokens_out": 60000,
+        "approx": true,
+        "source": "declared-estimate",
+        "recorded_at": "2026-09-24"
+      }
     },
     {
       "id": "TASK-005",

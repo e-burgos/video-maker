@@ -5,6 +5,8 @@ export interface ProducerMcpConfigInput {
   readonly apiUrl: string;
   readonly project: string;
   readonly model: string;
+  readonly accessToken?: string;
+  readonly compiledEntryPath?: string;
 }
 
 export function buildProducerMcpConfigJson(input: ProducerMcpConfigInput): string {

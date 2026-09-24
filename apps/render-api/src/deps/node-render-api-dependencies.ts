@@ -3,6 +3,7 @@ import { once } from 'node:events';
 import { createReadStream, createWriteStream } from 'node:fs';
 import {
   copyFile,
+  link,
   lstat,
   mkdir,
   readFile,
@@ -117,6 +118,53 @@ async function directoryExists(path: string): Promise<boolean> {
     }
     throw error;
   }
+}
+
+const REMOTION_BUNDLE_CACHE_DIR_NAME = 'remotion-bundle';
+const REMOTION_BUNDLE_FINGERPRINT_FILE_NAME = 'bundle.js';
+
+async function fingerprintDirectory(dirPath: string): Promise<string> {
+  const contents = await readFile(join(dirPath, REMOTION_BUNDLE_FINGERPRINT_FILE_NAME));
+  return createHash('sha256').update(contents).digest('hex').slice(0, 16);
+}
+
+async function linkOrCopyFile(sourcePath: string, destPath: string): Promise<void> {
+  try {
+    await link(sourcePath, destPath);
+  } catch (error) {
+    if ((error as NodeJS.ErrnoException).code !== 'EXDEV') {
+      throw error;
+    }
+    await copyFile(sourcePath, destPath);
+  }
+}
+
+async function linkOrCopyDirectoryRecursive(sourceDir: string, destDir: string): Promise<void> {
+  await mkdir(destDir, { recursive: true });
+  const entries = await readdir(sourceDir, { withFileTypes: true });
+  for (const entry of entries) {
+    const sourcePath = join(sourceDir, entry.name);
+    const destPath = join(destDir, entry.name);
+    if (entry.isDirectory()) {
+      await linkOrCopyDirectoryRecursive(sourcePath, destPath);
+    } else if (entry.isFile()) {
+      await linkOrCopyFile(sourcePath, destPath);
+    }
+  }
+}
+
+async function ensureWritableRemotionBundle(sourceServeUrl: string, cacheParentDir: string): Promise<string> {
+  const fingerprint = await fingerprintDirectory(sourceServeUrl);
+  const targetDir = join(cacheParentDir, REMOTION_BUNDLE_CACHE_DIR_NAME, fingerprint);
+  if (await directoryExists(targetDir)) {
+    return targetDir;
+  }
+
+  const stagingDir = `${targetDir}.staging-${randomUUID()}`;
+  await linkOrCopyDirectoryRecursive(sourceServeUrl, stagingDir);
+  await mkdir(join(cacheParentDir, REMOTION_BUNDLE_CACHE_DIR_NAME), { recursive: true });
+  await rename(stagingDir, targetDir);
+  return targetDir;
 }
 
 async function findOnnxFileName(voiceDirPath: string): Promise<string> {
@@ -392,18 +440,26 @@ export function createNodeRenderApiDependencies(
   };
 
   const remotion = readRemotionConfig(env);
+  let writableRemotionServeUrl: Promise<string> | null = null;
+
+  const loadWritableRemotionServeUrl = (sourceServeUrl: string): Promise<string> => {
+    writableRemotionServeUrl ??= ensureWritableRemotionBundle(sourceServeUrl, dirname(store.dbPath));
+    return writableRemotionServeUrl;
+  };
 
   return {
     renderMutedVideo: async ({ timeline, outPath, publicDir, onProgress }) => {
       const { renderTimeline } = await loadRender();
-      if (remotion.serveUrl !== null) {
-        await ensurePrebuiltBundlePublicDir(remotion.serveUrl, publicDir);
+      const serveUrl =
+        remotion.serveUrl === null ? null : await loadWritableRemotionServeUrl(remotion.serveUrl);
+      if (serveUrl !== null) {
+        await ensurePrebuiltBundlePublicDir(serveUrl, publicDir);
       }
       const result = await renderTimeline(timeline, {
         outPath,
         publicDir,
         audio: 'muted',
-        ...(remotion.serveUrl === null ? {} : { serveUrl: remotion.serveUrl }),
+        ...(serveUrl === null ? {} : { serveUrl }),
         ...(remotion.browserExecutable === null ? {} : { browserExecutable: remotion.browserExecutable }),
         ...(onProgress === undefined ? {} : { onProgress }),
       });

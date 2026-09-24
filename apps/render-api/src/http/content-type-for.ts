@@ -17,6 +17,16 @@ const CONTENT_TYPE_BY_EXTENSION: Readonly<Record<string, string>> = {
   '.txt': 'text/plain; charset=utf-8',
   '.srt': 'application/x-subrip',
   '.vtt': 'text/vtt',
+  '.html': 'text/html; charset=utf-8',
+  '.css': 'text/css; charset=utf-8',
+  '.js': 'text/javascript; charset=utf-8',
+  '.mjs': 'text/javascript; charset=utf-8',
+  '.map': 'application/json; charset=utf-8',
+  '.svg': 'image/svg+xml',
+  '.ico': 'image/x-icon',
+  '.woff': 'font/woff',
+  '.woff2': 'font/woff2',
+  '.webmanifest': 'application/manifest+json',
 };
 
 const DEFAULT_CONTENT_TYPE = 'application/octet-stream';

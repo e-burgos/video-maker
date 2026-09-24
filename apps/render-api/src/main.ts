@@ -26,7 +26,7 @@ async function main(): Promise<void> {
   const producer = readProducerConfig(
     process.env,
     process.cwd(),
-    `http://${config.host}:${config.port}`,
+    `http://${config.host}:${config.port}${config.webRoot === null ? '' : '/api'}`,
     tmpdir(),
   );
   const server = createRenderApiServer(deps, config, store, producer);
