@@ -362,6 +362,29 @@
       }
     },
     {
+      "id": "TASK-010",
+      "title": "Fix the exploratory QA findings: folders hidden with zero videos, orphans after a hard kill, allowlisted environment for render-api and its children, stable local port so preferences persist, Spanish as the default language everywhere, native menu and model descriptions translated, folder rename, honest layout flags and cosmetic copy",
+      "user_stories": [
+        "US-017-202",
+        "US-017-205"
+      ],
+      "estimation_hours": 6,
+      "story_points": 5,
+      "depends_on": [
+        "TASK-008"
+      ],
+      "status": "pending",
+      "files": [
+        "apps/web/src/pages/projects-page.tsx",
+        "apps/desktop/src/main/render-api-process.ts",
+        "apps/desktop/src/main/main.ts",
+        "apps/desktop/src/main/free-port.ts",
+        "apps/web/src/i18n/language.ts",
+        "apps/render-api/src/store/project-layout.ts",
+        "sdd/specs/spec-e-burgos-017-desktop-app/cycles/cycle-03/artifacts/qa-exploratory.md"
+      ]
+    },
+    {
       "id": "TASK-009",
       "title": "Close the cycle: context fragments, READMEs, constitution rows and validation",
       "user_stories": [
@@ -370,7 +393,7 @@
       "estimation_hours": 2,
       "story_points": 2,
       "depends_on": [
-        "TASK-008"
+        "TASK-010"
       ],
       "status": "pending",
       "files": [
