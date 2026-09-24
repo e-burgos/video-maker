@@ -208,7 +208,8 @@
     "package_manager": "pnpm",
     "apps": {
       "web": "apps/web — react (Web Studio): SPA local sobre apps/render-api y producto completo de punta a punta (subir crudo, generar el montaje o el storyboard, ponerle voz, ajustar la Timeline, renderizar y descargar el MP4), con biblioteca de assets, disparo de los cuatro tipos de job y toda la frontera con el servicio confinada a src/api/ y servida por el proxy /api del dev-server (React 19 + react-router-dom 7 + Tailwind 4 + Vite 8, unica dependencia npm propia @remotion/player)",
-      "render-api": "apps/render-api — servicio HTTP local del motor: 15 endpoints sobre `media/` (proyectos, assets, Timeline/EDL, descarga con Range) más la cola de jobs de render que orquesta render mudo → mezcla → mux → verificación de loudness, con progreso por frame y cancelación cooperativa, sobre puertos inyectables (TypeScript + node:http, cero dependencias npm propias)"
+      "render-api": "apps/render-api — servicio HTTP local del motor: 15 endpoints sobre `media/` (proyectos, assets, Timeline/EDL, descarga con Range) más la cola de jobs de render que orquesta render mudo → mezcla → mux → verificación de loudness, con progreso por frame y cancelación cooperativa, sobre puertos inyectables (TypeScript + node:http, cero dependencias npm propias)",
+      "desktop": "apps/desktop — app Electron para macOS Apple Silicon: empaqueta el estudio (render-api como JS con el Node de Electron, la web servida por render-api, binarios de terceros y modelos descargados en la primera apertura) en un .dmg sin firmar para repartir entre amigos"
     },
     "libs": {
       "shared-utils": "libs/shared-utils — shared-utils",

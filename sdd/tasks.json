@@ -372,9 +372,9 @@
             "libs/composition-remotion",
             "libs/producer-tools"
           ],
-          "status": "in-progress",
+          "status": "completed",
           "tasks_total": 10,
-          "tasks_done": 9
+          "tasks_done": 10
         }
       }
     }

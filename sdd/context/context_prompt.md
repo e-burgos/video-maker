@@ -25,7 +25,7 @@ El proyecto usa **Nx** como monorepo manager con **pnpm** como package manager (
 
 ```
 <repo-root>/                 → nombre del proyecto en sdd/global.json → project
-  apps/                      → Una carpeta por app generada con Nx (`render-api`: servicio HTTP local del motor)
+  apps/                      → Una carpeta por app generada con Nx (`render-api`: servicio HTTP local del motor, `web`: el estudio, `desktop`: la app de escritorio)
   libs/                      → Una carpeta por lib generada con Nx (`timeline-core`, `media-local`, `composition-remotion`, `auto-montage`, `producer-tools`, `local-store`, `shared-utils`)
   tools/                     → Herramientas del workspace (`render-cli`: CLI headless del motor)
   sdd/                       → Sistema SDD (NO modificar manualmente)
@@ -58,6 +58,7 @@ El proyecto usa **Nx** como monorepo manager con **pnpm** como package manager (
 | `tools/render-cli` | `sdd/context/tools/render-cli/context_prompt.md` | `sdd/context/tools/render-cli/constitution.md` |
 | `apps/render-api` | `sdd/context/apps/render-api/context_prompt.md` | `sdd/context/apps/render-api/constitution.md` |
 | `apps/web` | `sdd/context/apps/web/context_prompt.md` | `sdd/context/apps/web/constitution.md` |
+| `apps/desktop` | `sdd/context/apps/desktop/context_prompt.md` | `sdd/context/apps/desktop/constitution.md` |
 
 > Al generar un subproyecto nuevo, sumar una fila a esta tabla (solo agregar filas — nunca reformatear la tabla completa).
 
