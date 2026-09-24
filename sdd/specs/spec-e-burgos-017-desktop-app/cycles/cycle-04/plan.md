@@ -70,3 +70,20 @@
 | Un modelo barato no sigue las recetas | Por eso el benchmark; el modelo por defecto sale de ahí |
 | Las imágenes de `extract_frames` no llegan en algunos modelos | La lista curada marca qué modelos aceptan imágenes; para los demás, `extract_frames` devuelve solo texto y el prompt lo sabe |
 | El historial reconstruido supera el contexto | Recorte por presupuesto con los mensajes más recientes completos y un resumen de los anteriores |
+
+## Notas de implementación
+
+- **TASK-002** adelantó dos piezas que `tasks.json` había asignado a **TASK-004** porque las pedía
+  el mismo endpoint de settings: `apps/render-api/src/http/health-handler.ts` (y su spec) ganó
+  `capabilities.producerEngines: { claudeCli, openrouter }` de forma aditiva, y `capabilities.producer`
+  ahora es `claudeCli || openrouter` (antes solo probaba el CLI de Claude) — implementa D-C4-07 para
+  `/health`. TASK-004 no necesita volver a tocar esos dos campos; sigue siendo dueña del ruteo por
+  motor y del resto de `capabilities`.
+- El puerto `SecretStore` (`apps/render-api/src/secrets/keychain-secret-store.ts`) quedó agregado a
+  `RenderApiDependencies` y wireado en `createNodeRenderApiDependencies` y en
+  `createFakeRenderApiDependencies` (fixture en memoria por defecto). Cualquier task siguiente que
+  necesite la key de OpenRouter (TASK-004) la lee con `deps.secretStore.get('openrouter')` —
+  constante `OPENROUTER_SECRET_NAME` exportada desde `producer-settings-handler.ts`.
+- `apps/render-api/src/config/curated-openrouter-models.ts` es un placeholder de 3 ids (verificados
+  contra `GET https://openrouter.ai/api/v1/models`, con `tools` en `supported_parameters`) que
+  TASK-006 reemplaza con la lista curada por benchmark real.

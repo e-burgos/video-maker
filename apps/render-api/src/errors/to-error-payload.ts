@@ -107,6 +107,8 @@ const MESSAGE_BY_CODE: Readonly<Record<RenderApiErrorCode, string>> = {
   MUSIC_SOURCE_UNAVAILABLE: 'Wikimedia Commons did not answer with a usable response.',
   MUSIC_RESULT_UNKNOWN: 'The music search result id is unknown or its cache entry expired.',
   PHOTO_AROLL_INPUT_INVALID: 'The photo-aroll job input does not pass validation.',
+  OPENROUTER_KEY_INVALID: 'The OpenRouter API key is not well formed or was rejected by OpenRouter.',
+  SECRET_STORE_UNAVAILABLE: 'The local keychain could not read or write the requested secret.',
 };
 
 export function toErrorPayload(value: unknown): RenderApiErrorPayload {

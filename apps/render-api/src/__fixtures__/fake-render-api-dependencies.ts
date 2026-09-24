@@ -112,6 +112,19 @@ function createFakeLocalStore(clock: Clock): LocalStorePort {
   };
 }
 
+function createFakeSecretStore(): RenderApiDependencies['secretStore'] {
+  const values = new Map<string, string>();
+  return {
+    get: async (name) => values.get(name) ?? null,
+    set: async (name, value) => {
+      values.set(name, value);
+    },
+    delete: async (name) => {
+      values.delete(name);
+    },
+  };
+}
+
 function fakeHashText(text: string): string {
   let hash = 0;
   for (let index = 0; index < text.length; index += 1) {
@@ -378,5 +391,7 @@ export function createFakeRenderApiDependencies(
       };
       return transcription;
     },
+
+    secretStore: overrides?.secretStore ?? createFakeSecretStore(),
   };
 }

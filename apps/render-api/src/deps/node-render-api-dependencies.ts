@@ -49,6 +49,11 @@ import type { EngineModuleStatus } from '../engine/engine-modules';
 import { MEDIA_BINARY_NAMES } from '../engine/media-binaries';
 import type { BinaryStatus, ResolvedMediaBinaries } from '../engine/media-binaries';
 import { PipelineStageError } from '../errors/pipeline-stage-error';
+import {
+  createKeychainSecretStore,
+  createNodeSecretStoreCommandRunner,
+  readKeychainServiceName,
+} from '../secrets/keychain-secret-store';
 import type { CommandRunner, ResolvedVoiceBinaries } from '@video-maker/media-local';
 
 import type { ByteRange, ObjectStorage, WriteTemporaryInput, WriteTemporaryOutcome } from './object-storage';
@@ -388,6 +393,10 @@ export function createNodeRenderApiDependencies(
   let localStorePort: LocalStorePort | null = null;
   let commandRunner: Promise<CommandRunner> | null = null;
   const childEnv = allowlistedChildEnv(env);
+  const secretStore = createKeychainSecretStore({
+    service: readKeychainServiceName(env),
+    runner: createNodeSecretStoreCommandRunner(),
+  });
 
   const nowIso = (): string => new Date().toISOString();
 
@@ -763,5 +772,7 @@ export function createNodeRenderApiDependencies(
         runner,
       );
     },
+
+    secretStore,
   };
 }

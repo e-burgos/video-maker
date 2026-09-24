@@ -18,6 +18,7 @@ import type { MediaAsset, Timeline, Transcription, VoiceTarget } from '@video-ma
 import type { EngineModuleStatus } from '../engine/engine-modules';
 import type { ProducerAgentPort } from '../producer/producer-agent';
 import type { BinaryStatus } from '../engine/media-binaries';
+import type { SecretStore } from '../secrets/keychain-secret-store';
 import type { ObjectStorage } from './object-storage';
 
 export type RenderProgressListener = (renderedFrames: number, totalFrames: number) => void;
@@ -289,4 +290,5 @@ export interface RenderApiDependencies {
   readonly concatVoiceTracks: ConcatVoiceTracksPort;
   readonly placeVoiceTracks: PlaceVoiceTracksPort;
   readonly transcribeVoice: TranscribeVoicePort;
+  readonly secretStore: SecretStore;
 }

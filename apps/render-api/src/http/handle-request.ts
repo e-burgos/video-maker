@@ -32,6 +32,12 @@ import {
   handleGetProducerTurn,
 } from './handlers/producer-handler';
 import {
+  handleDeleteOpenRouterKey,
+  handleGetProducerSettings,
+  handlePutOpenRouterKey,
+  handlePutProducerSettings,
+} from './handlers/producer-settings-handler';
+import {
   handleCreateProject,
   handleDeleteProject,
   handleGetProject,
@@ -245,6 +251,14 @@ async function dispatchRoute(
         return await handleGetVoice(deps, store, params);
       case 'projects.voice.scene.put':
         return await handlePutVoiceScene(deps, store, params, request);
+      case 'settings.producer.get':
+        return await handleGetProducerSettings(deps, runtime);
+      case 'settings.producer.put':
+        return await handlePutProducerSettings(deps, runtime, request);
+      case 'settings.producer.openrouterKey.put':
+        return await handlePutOpenRouterKey(deps, request);
+      case 'settings.producer.openrouterKey.delete':
+        return await handleDeleteOpenRouterKey(deps);
       case 'projects.producer.get':
         return await handleGetProducer(deps, store, params, runtime);
       case 'projects.producer.messages':

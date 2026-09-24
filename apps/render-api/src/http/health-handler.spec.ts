@@ -60,7 +60,22 @@ describe('handleHealth', () => {
       storyboardQueue: true,
       voiceQueue: true,
       producer: true,
+      producerEngines: { claudeCli: true, openrouter: false },
     });
+  });
+
+  it('reports capabilities.producer true from an OpenRouter key alone, with claude unavailable (D-C4-07)', async () => {
+    const callLog = createCallLog();
+    const deps = createFakeRenderApiDependencies(callLog, { probeProducerBinary: async () => false });
+    await deps.secretStore.set('openrouter', 'sk-or-v1-test-0000');
+    const runtime = createRenderApiRuntime(deps);
+
+    const response = await handleHealth(deps, STORE, runtime);
+    const body = response.body as HealthBody;
+
+    expect(body.capabilities.producer).toBe(true);
+    expect(body.capabilities.producerEngines).toEqual({ claudeCli: false, openrouter: true });
+    expect(body.status).toBe('ok');
   });
 
   it('reporta capabilities.producer false sin Claude Code, y el servicio SIGUE ok (D-4)', async () => {

@@ -7,6 +7,7 @@ import type { BinaryStatus } from '../engine/media-binaries';
 import type { RenderJobQueueSize } from '../jobs/render-job-queue';
 import { JSON_CONTENT_TYPE } from './http-message';
 import type { HttpResponse } from './http-message';
+import { OPENROUTER_SECRET_NAME } from './handlers/producer-settings-handler';
 import type { RenderApiRuntime } from './render-api-runtime';
 
 const SERVICE_NAME = 'render-api';
@@ -32,6 +33,10 @@ export interface HealthBody {
     readonly storyboardQueue: boolean;
     readonly voiceQueue: boolean;
     readonly producer: boolean;
+    readonly producerEngines: {
+      readonly claudeCli: boolean;
+      readonly openrouter: boolean;
+    };
   };
   readonly jobs: RenderJobQueueSize;
   readonly store: HealthStoreInfo;
@@ -52,7 +57,8 @@ export async function handleHealth(
 ): Promise<HttpResponse> {
   const engine = await deps.preloadEngineModules();
   const binaries = await deps.probeMediaBinaries();
-  const producer = await deps.probeProducerBinary();
+  const claudeCliAvailable = await deps.probeProducerBinary();
+  const openRouterKeyPresent = (await deps.secretStore.get(OPENROUTER_SECRET_NAME)) !== null;
 
   const status =
     engine.every((module) => module.loaded) && binaries.every((binary) => binary.resolved)
@@ -73,7 +79,11 @@ export async function handleHealth(
       montageQueue: true,
       storyboardQueue: true,
       voiceQueue: true,
-      producer,
+      producer: claudeCliAvailable || openRouterKeyPresent,
+      producerEngines: {
+        claudeCli: claudeCliAvailable,
+        openrouter: openRouterKeyPresent,
+      },
     },
     jobs: runtime.jobs.size(),
     store: {
