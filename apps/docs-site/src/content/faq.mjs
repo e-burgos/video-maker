@@ -38,7 +38,7 @@ ${faqItem(
 
 ${faqItem(
   '¿El storyboard funciona sin Claude?',
-  '<p>Sí. El editor de guion palabra por palabra (storyboard) genera sus propuestas con el motor de IA que tengas conectado en Configuración — Claude Code u OpenRouter — así que no hace falta tener Claude para usarlo, alcanza con cualquiera de los dos.</p>',
+  '<p>Sí. El storyboard (la propuesta de escenas del video: qué se dice y qué se ve en cada una) se genera con el motor de IA que tengas conectado en Configuración — Claude Code u OpenRouter — así que no hace falta tener Claude para usarlo, alcanza con cualquiera de los dos.</p>',
 )}
 `;
 
