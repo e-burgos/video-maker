@@ -401,9 +401,9 @@
             "apps/desktop",
             "libs/auto-montage"
           ],
-          "status": "in-progress",
+          "status": "completed",
           "tasks_total": 7,
-          "tasks_done": 6
+          "tasks_done": 7
         }
       }
     }
