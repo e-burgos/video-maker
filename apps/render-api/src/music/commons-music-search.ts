@@ -1,4 +1,7 @@
 import type { FetchRemotePort } from '../deps/render-api-dependencies';
+import { collectBytes, isFreeCommercialLicense, stableResultId, stripHtml } from '../media-search/commons-shared';
+
+export { isFreeCommercialLicense, stripHtml };
 
 export const COMMONS_API_URL = 'https://commons.wikimedia.org/w/api.php';
 export const COMMONS_USER_AGENT = 'video-maker-studio/0.1 (local desktop app)';
@@ -29,57 +32,8 @@ export interface CommonsMusicResult {
   readonly downloadUrl: string;
 }
 
-const HTML_TAG_PATTERN = /<[^>]*>/g;
-const HTML_ENTITIES: Readonly<Record<string, string>> = {
-  '&amp;': '&',
-  '&lt;': '<',
-  '&gt;': '>',
-  '&quot;': '"',
-  '&#39;': "'",
-  '&nbsp;': ' ',
-};
-
-export function stripHtml(value: string): string {
-  const withoutTags = value.replace(HTML_TAG_PATTERN, '');
-  const withoutEntities = withoutTags.replace(/&[a-z#0-9]+;/gi, (entity) => HTML_ENTITIES[entity] ?? entity);
-  return withoutEntities.replace(/\s+/g, ' ').trim();
-}
-
-const FREE_COMMERCIAL_LICENSE_PATTERN = /^CC[\s-]?BY(-SA)?\s+\d/;
-
-export function isFreeCommercialLicense(licenseShortName: string | undefined): boolean {
-  if (licenseShortName === undefined) {
-    return false;
-  }
-
-  const normalized = licenseShortName.trim().toUpperCase();
-  if (normalized.length === 0) {
-    return false;
-  }
-  if (normalized.startsWith('CC0')) {
-    return true;
-  }
-  if (
-    normalized.includes('PUBLIC DOMAIN') ||
-    normalized.startsWith('PDM') ||
-    normalized.startsWith('PD-') ||
-    normalized === 'PD'
-  ) {
-    return true;
-  }
-  return FREE_COMMERCIAL_LICENSE_PATTERN.test(normalized);
-}
-
 function titleFromFileTitle(fileTitle: string): string {
   return fileTitle.startsWith('File:') ? fileTitle.slice('File:'.length) : fileTitle;
-}
-
-function stableResultId(fileTitle: string): string {
-  let hash = 0;
-  for (let index = 0; index < fileTitle.length; index += 1) {
-    hash = (Math.imul(31, hash) + fileTitle.charCodeAt(index)) | 0;
-  }
-  return `commons-${(hash >>> 0).toString(16)}`;
 }
 
 interface CommonsExtMetadataField {
@@ -139,7 +93,7 @@ function parseCommonsPage(page: CommonsPage): CommonsMusicResult | null {
   const rawAuthor = metadataValue(imageInfo.extmetadata, 'Artist') ?? '';
 
   return {
-    resultId: stableResultId(fileTitle),
+    resultId: stableResultId('commons', fileTitle),
     title: titleFromFileTitle(fileTitle),
     durationMs: Math.round(durationSeconds * 1000),
     license: license as string,
@@ -184,27 +138,6 @@ export function buildCommonsSearchUrl(mood: string, fetchLimit: number): string 
   return url.toString();
 }
 
-async function collectBytes(source: AsyncIterable<Uint8Array>, limitBytes: number): Promise<Uint8Array> {
-  const chunks: Uint8Array[] = [];
-  let totalBytes = 0;
-
-  for await (const chunk of source) {
-    totalBytes += chunk.length;
-    if (totalBytes > limitBytes) {
-      throw new Error('Wikimedia Commons search response exceeded the size limit');
-    }
-    chunks.push(chunk);
-  }
-
-  const merged = new Uint8Array(totalBytes);
-  let offset = 0;
-  for (const chunk of chunks) {
-    merged.set(chunk, offset);
-    offset += chunk.length;
-  }
-  return merged;
-}
-
 export async function searchCommonsMusic(
   fetchRemote: FetchRemotePort,
   mood: string,
@@ -222,7 +155,7 @@ export async function searchCommonsMusic(
     throw new Error(`Wikimedia Commons search responded with status ${response.status}`);
   }
 
-  const bytes = await collectBytes(response.body(), MAX_COMMONS_RESPONSE_BYTES);
+  const bytes = await collectBytes(response.body(), MAX_COMMONS_RESPONSE_BYTES, 'Wikimedia Commons search');
   const text = new TextDecoder('utf-8').decode(bytes);
 
   let payload: unknown;

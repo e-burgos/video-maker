@@ -16,8 +16,10 @@ import {
 } from './handlers/asset-inbox-handler';
 import { handleProbeMedia } from './handlers/probe-handler';
 import { handleExtractFrames } from './handlers/frames-handler';
+import { handlePreviewImages } from './handlers/image-preview-handler';
 import { handleGetProjectText, handlePutProjectText } from './handlers/project-text-handler';
 import { handleImportMusic, handleSearchFreeMusic } from './handlers/music-handler';
+import { handleImportMedia, handleSearchFreeMedia } from './handlers/free-media-handler';
 import {
   handleCancelRenderJob,
   handleCreateRenderJob,
@@ -244,6 +246,12 @@ async function dispatchRoute(
         return await handleSearchFreeMusic(deps, store, params, request, runtime);
       case 'projects.music.import':
         return await handleImportMusic(deps, store, params, request, runtime);
+      case 'projects.media.search':
+        return await handleSearchFreeMedia(deps, store, params, request, runtime);
+      case 'projects.media.import':
+        return await handleImportMedia(deps, store, params, request, runtime);
+      case 'projects.images.preview':
+        return await handlePreviewImages(deps, store, params, request);
       case 'projects.timeline.get':
         return await handleGetTimeline(deps, store, params);
       case 'projects.timeline.put':

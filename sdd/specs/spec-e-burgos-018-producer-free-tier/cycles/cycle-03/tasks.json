@@ -22,14 +22,42 @@
       "estimation_hours": 4,
       "story_points": 3,
       "depends_on": [],
-      "status": "pending",
+      "status": "done",
       "files": [
+        "apps/render-api/src/media-search/commons-shared.ts",
+        "apps/render-api/src/media-search/free-media-result.ts",
         "apps/render-api/src/media-search/commons-media-search.ts",
+        "apps/render-api/src/media-search/commons-media-search.spec.ts",
         "apps/render-api/src/media-search/nasa-media-search.ts",
+        "apps/render-api/src/media-search/nasa-media-search.spec.ts",
         "apps/render-api/src/media-search/free-media-search.ts",
+        "apps/render-api/src/media-search/free-media-search.spec.ts",
+        "apps/render-api/src/media-search/free-media-search-cache.ts",
+        "apps/render-api/src/media-search/free-media-search-cache.spec.ts",
         "apps/render-api/src/http/handlers/free-media-handler.ts",
-        "apps/render-api/src/http/routes.ts"
-      ]
+        "apps/render-api/src/http/handlers/free-media-handler.spec.ts",
+        "apps/render-api/src/http/routes.ts",
+        "apps/render-api/src/http/render-api-runtime.ts",
+        "apps/render-api/src/http/handle-request.ts",
+        "apps/render-api/src/errors/render-api-error.ts",
+        "apps/render-api/src/errors/http-status-for.ts",
+        "apps/render-api/src/errors/http-status-for.spec.ts",
+        "apps/render-api/src/errors/to-error-payload.ts",
+        "apps/render-api/src/music/commons-music-search.ts",
+        "libs/producer-tools/src/contract/tool-schemas.ts",
+        "libs/producer-tools/src/index.ts",
+        "sdd/api.json"
+      ],
+      "usage": {
+        "tokens_in": 70000,
+        "tokens_out": 16000,
+        "provider_model": "claude/sonnet",
+        "effort": "medium",
+        "agent": "implementor-back",
+        "approx": true,
+        "source": "declared-estimate",
+        "recorded_at": "2026-09-25"
+      }
     },
     {
       "id": "TASK-002",
@@ -42,11 +70,27 @@
       "depends_on": [
         "TASK-001"
       ],
-      "status": "pending",
+      "status": "done",
       "files": [
+        "apps/render-api/src/media-search/download-shared.ts",
         "apps/render-api/src/media-search/import-free-media.ts",
-        "apps/render-api/src/music/project-credits.ts"
-      ]
+        "apps/render-api/src/media-search/import-free-media.spec.ts",
+        "apps/render-api/src/http/handlers/free-media-handler.ts",
+        "apps/render-api/src/http/handlers/free-media-handler.spec.ts",
+        "apps/render-api/src/music/import-music.ts",
+        "apps/render-api/src/music/project-credits.ts",
+        "apps/render-api/src/music/project-credits.spec.ts"
+      ],
+      "usage": {
+        "tokens_in": 35000,
+        "tokens_out": 9000,
+        "provider_model": "claude/sonnet",
+        "effort": "medium",
+        "agent": "implementor-back",
+        "approx": true,
+        "source": "declared-estimate",
+        "recorded_at": "2026-09-25"
+      }
     },
     {
       "id": "TASK-003",
@@ -57,10 +101,24 @@
       "estimation_hours": 2,
       "story_points": 2,
       "depends_on": [],
-      "status": "pending",
+      "status": "done",
       "files": [
-        "apps/render-api/src/http/handlers/image-preview-handler.ts"
-      ]
+        "apps/render-api/src/http/handlers/image-preview-handler.ts",
+        "apps/render-api/src/http/handlers/image-preview-handler.spec.ts",
+        "apps/render-api/src/http/routes.ts",
+        "apps/render-api/src/http/handle-request.ts",
+        "libs/producer-tools/src/contract/tool-schemas.ts"
+      ],
+      "usage": {
+        "tokens_in": 20000,
+        "tokens_out": 5000,
+        "provider_model": "claude/sonnet",
+        "effort": "medium",
+        "agent": "implementor-back",
+        "approx": true,
+        "source": "declared-estimate",
+        "recorded_at": "2026-09-25"
+      }
     },
     {
       "id": "TASK-004",
@@ -75,16 +133,38 @@
         "TASK-002",
         "TASK-003"
       ],
-      "status": "pending",
+      "status": "done",
       "files": [
         "libs/producer-tools/src/contract/tool-names.ts",
+        "libs/producer-tools/src/contract/tool-names.spec.ts",
+        "libs/producer-tools/src/contract/tool-errors.ts",
+        "libs/producer-tools/src/contract/tool-errors.spec.ts",
         "libs/producer-tools/src/contract/tool-schemas.ts",
         "libs/producer-tools/src/handlers/studio-tool-handlers.ts",
+        "libs/producer-tools/src/handlers/studio-tool-handlers.spec.ts",
         "libs/producer-tools/src/mcp/studio-mcp-server.ts",
+        "libs/producer-tools/src/mcp/studio-mcp-server.spec.ts",
         "libs/producer-tools/src/runtime/studio-ai-sdk-tools.ts",
+        "libs/producer-tools/src/client/render-api-client.ts",
         "libs/producer-tools/src/client/http-render-api-client.ts",
-        "libs/producer-tools/src/prompt/build-producer-prompt.ts"
-      ]
+        "libs/producer-tools/src/client/http-render-api-client.spec.ts",
+        "libs/producer-tools/src/__fixtures__/fake-render-api-client.ts",
+        "libs/producer-tools/src/prompt/build-producer-prompt.ts",
+        "libs/producer-tools/src/prompt/build-producer-prompt.spec.ts",
+        "libs/producer-tools/src/index.ts",
+        "apps/render-api/src/producer/producer-stream-events.ts",
+        "sdd/api.json"
+      ],
+      "usage": {
+        "tokens_in": 55000,
+        "tokens_out": 15000,
+        "provider_model": "claude/sonnet",
+        "effort": "medium",
+        "agent": "implementor-back",
+        "approx": true,
+        "source": "declared-estimate",
+        "recorded_at": "2026-09-25"
+      }
     },
     {
       "id": "TASK-005",
@@ -98,11 +178,35 @@
       "depends_on": [
         "TASK-004"
       ],
-      "status": "pending",
+      "status": "done",
       "files": [
         "sdd/specs/spec-e-burgos-018-producer-free-tier/cycles/cycle-03/artifacts/free-media-smoke.mjs",
-        "sdd/specs/spec-e-burgos-018-producer-free-tier/cycles/cycle-03/artifacts/free-media-smoke.md"
-      ]
+        "sdd/specs/spec-e-burgos-018-producer-free-tier/cycles/cycle-03/artifacts/free-media-smoke.md",
+        "sdd/specs/spec-e-burgos-018-producer-free-tier/cycles/cycle-03/artifacts/free-media-smoke-preview-1.jpg",
+        "apps/render-api/src/media-search/nasa-media-search.ts",
+        "apps/render-api/src/media-search/nasa-media-search.spec.ts",
+        "apps/render-api/src/media-search/free-media-search.ts",
+        "apps/render-api/src/media-search/free-media-search.spec.ts",
+        "libs/media-local/src/ffmpeg/resize-image.ts",
+        "libs/media-local/src/ffmpeg/resize-image.spec.ts",
+        "libs/media-local/src/index.ts",
+        "apps/render-api/src/deps/render-api-dependencies.ts",
+        "apps/render-api/src/deps/node-render-api-dependencies.ts",
+        "apps/render-api/src/http/handlers/image-preview-handler.ts",
+        "apps/render-api/src/http/handlers/image-preview-handler.spec.ts",
+        "apps/render-api/src/__fixtures__/fake-render-api-dependencies.ts",
+        "sdd/api.json"
+      ],
+      "usage": {
+        "tokens_in": 90000,
+        "tokens_out": 20000,
+        "provider_model": "claude/sonnet",
+        "effort": "medium",
+        "agent": "implementor-back",
+        "approx": true,
+        "source": "declared-estimate",
+        "recorded_at": "2026-09-25"
+      }
     },
     {
       "id": "TASK-006",

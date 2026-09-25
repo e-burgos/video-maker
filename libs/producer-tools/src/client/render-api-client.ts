@@ -75,6 +75,27 @@ export interface RenderApiMusicResult {
   readonly pageUrl: string;
 }
 
+export type RenderApiFreeMediaKind = 'video' | 'image';
+export type RenderApiFreeMediaSource = 'commons' | 'nasa';
+
+export interface RenderApiFreeMediaResult {
+  readonly resultId: string;
+  readonly source: RenderApiFreeMediaSource;
+  readonly kind: RenderApiFreeMediaKind;
+  readonly title: string;
+  readonly license: string;
+  readonly author: string;
+  readonly pageUrl: string;
+  readonly durationMs: number | null;
+  readonly width: number | null;
+  readonly height: number | null;
+}
+
+export interface RenderApiImagePreview {
+  readonly path: string;
+  readonly previewPath: string;
+}
+
 export interface RenderApiClient {
   getProjectDetail(): Promise<RenderApiProjectDetail>;
   listProjectAssets(): Promise<readonly RenderApiAssetEntry[]>;
@@ -101,4 +122,12 @@ export interface RenderApiClient {
 
   searchFreeMusic(mood: string, maxResults: number): Promise<readonly RenderApiMusicResult[]>;
   importMusic(resultId: string): Promise<{ readonly path: string; readonly credit: Readonly<Record<string, unknown>> }>;
+
+  searchFreeMedia(
+    query: string,
+    kind: RenderApiFreeMediaKind,
+    maxResults: number,
+  ): Promise<readonly RenderApiFreeMediaResult[]>;
+  importMedia(resultId: string): Promise<{ readonly path: string; readonly credit: Readonly<Record<string, unknown>> }>;
+  previewImages(paths: readonly string[]): Promise<readonly RenderApiImagePreview[]>;
 }

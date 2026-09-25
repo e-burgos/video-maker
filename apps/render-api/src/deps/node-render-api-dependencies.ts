@@ -590,6 +590,16 @@ export function createNodeRenderApiDependencies(
       });
     },
 
+    resizeImage: async ({ path, outPath, maxLongSidePx, projectRoot }) => {
+      const { resizeImage: runResizeImage } = await loadMediaLocal();
+      const [{ ffmpeg }, runner] = await Promise.all([loadBinaries(), loadCommandRunner()]);
+      await runResizeImage(path, outPath, runner, {
+        maxLongSidePx,
+        ffmpegPath: ffmpeg,
+        runOptions: { cwd: projectRoot },
+      });
+    },
+
     fetchRemote: async (url, init) => {
       const response = await fetch(url, {
         ...(init.headers === undefined ? {} : { headers: init.headers }),

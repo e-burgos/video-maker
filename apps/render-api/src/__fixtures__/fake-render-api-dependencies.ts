@@ -239,6 +239,13 @@ export function createFakeRenderApiDependencies(
       }
     },
 
+    resizeImage: async (input) => {
+      callLog.record('resizeImage', input);
+      if (overrides?.resizeImage) {
+        await overrides.resizeImage(input);
+      }
+    },
+
     fetchRemote: async (url, init) => {
       callLog.record('fetchRemote', { url, init });
       if (overrides?.fetchRemote) {

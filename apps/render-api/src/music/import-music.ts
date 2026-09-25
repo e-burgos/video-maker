@@ -3,6 +3,7 @@ import type { MediaProject } from '@video-maker/auto-montage';
 
 import type { FetchRemotePort } from '../deps/render-api-dependencies';
 import type { ObjectStorage } from '../deps/object-storage';
+import { resolveUniqueFileName } from '../media-search/download-shared';
 import { isPortableFileName } from '../store/asset-path';
 import { COMMONS_USER_AGENT } from './commons-music-search';
 import type { CommonsMusicResult } from './commons-music-search';
@@ -29,31 +30,6 @@ function fileNameFromDownloadUrl(downloadUrl: string, fallbackBaseName: string):
   const lastSegment = pathname.split('/').pop() ?? '';
   const decoded = decodeURIComponent(lastSegment);
   return isPortableFileName(decoded) ? decoded : `${fallbackBaseName}.audio`;
-}
-
-function withSuffix(baseName: string, suffix: number): string {
-  const dotIndex = baseName.lastIndexOf('.');
-  return dotIndex <= 0
-    ? `${baseName}-${suffix}`
-    : `${baseName.slice(0, dotIndex)}-${suffix}${baseName.slice(dotIndex)}`;
-}
-
-async function resolveFreeAudioFileName(
-  storage: ObjectStorage,
-  audioDirectory: string,
-  baseName: string,
-): Promise<string> {
-  const entries = await storage.listDirectory(audioDirectory);
-  const taken = new Set((entries ?? []).map((entry) => entry.name));
-  if (!taken.has(baseName)) {
-    return baseName;
-  }
-
-  let suffix = 2;
-  while (taken.has(withSuffix(baseName, suffix))) {
-    suffix += 1;
-  }
-  return withSuffix(baseName, suffix);
 }
 
 export async function downloadCommonsAudioFile(
@@ -87,7 +63,7 @@ export async function downloadCommonsAudioFile(
   await storage.ensureDirectory(audioDirectory);
 
   const baseName = fileNameFromDownloadUrl(result.downloadUrl, result.resultId);
-  const fileName = await resolveFreeAudioFileName(storage, audioDirectory, baseName);
+  const fileName = await resolveUniqueFileName(storage, audioDirectory, baseName);
   const relativePath = `raw/audio/${fileName}`;
 
   const uploadsDirectory = toAbsolutePath(project, workPath('.uploads'));

@@ -10,7 +10,7 @@ import type { StudioToolHandler } from '../handlers/studio-tool-handlers';
 const STUDIO_MCP_SERVER_VERSION = '0.1.0';
 
 // Claude Code CLI 2.1.123 forwards structuredContent to the model instead of image content blocks, so image-carrying tools must omit outputSchema entirely.
-const TOOLS_WITHOUT_OUTPUT_SCHEMA: ReadonlySet<StudioToolName> = new Set(['extract_frames']);
+const TOOLS_WITHOUT_OUTPUT_SCHEMA: ReadonlySet<StudioToolName> = new Set(['extract_frames', 'view_images']);
 
 function toCallToolResult(
   data: unknown,

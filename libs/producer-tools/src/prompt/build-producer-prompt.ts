@@ -38,6 +38,10 @@ const TOOL_DESCRIPTIONS: Readonly<Record<StudioToolName, string>> = {
   put_timeline: 'replace the project timeline in full with a new, valid one.',
   search_free_music: 'search for freely licensed music by mood and get back candidates.',
   import_music: "bring a searched result into the project; its credit is recorded automatically.",
+  search_free_media:
+    'search Wikimedia Commons and the NASA Image and Video Library for freely licensed B-roll video or photos by query and get back candidates.',
+  import_media: "bring a searched free media result into the project; its credit is recorded automatically.",
+  view_images: 'look at up to 6 photos already in the project. Use this for photos, never extract_frames.',
 };
 
 function buildProducerToolsSection(): string {
@@ -124,9 +128,9 @@ function buildProducerCraftSection(): string {
     '',
     '## The six steps, always in this order',
     '',
-    '1. INVENTORY. Call get_project_overview first. Then probe_media every asset that matters and',
-    '   extract_frames on a couple of seconds of each video or photo, so you know what the material',
-    '   shows before writing a single line about it.',
+    '1. INVENTORY. Call get_project_overview first. Then probe_media every asset that matters,',
+    '   extract_frames on a couple of seconds of each video, and view_images on every photo, so you',
+    '   know what the material shows before writing a single line about it.',
     '2. PROPOSE. Turn what you saw plus the request into a concrete plan — platform, tone, duration,',
     '   voice, music, script — with a recommendation attached to each open point.',
     '3. AGREE. One round of numbered options with your recommendation, so the user only has to',
@@ -150,6 +154,8 @@ function buildProducerCraftSection(): string {
     '- "montage with voice" on a silent recording → `"voice":"script"`; on a recording that already',
     '  has speech → `"voice":"aroll"`.',
     '- "soft / calm / upbeat free music" → search_free_music with that mood, then import_music.',
+    '- "free B-roll / free footage / free photos about X" → search_free_media with that query and',
+    '  the right kind, then import_media on the ones that fit.',
     '- "logo bottom right" (or any other corner) → the matching logo position in the timeline.',
     '- "render / export / make the video" → the `render` job plus the verification step.',
     '- "faster / more dynamic" → `"preset":"software-demo"` or `"preset":"hardware"`; "calmer /',
@@ -188,8 +194,8 @@ function buildProducerCraftSection(): string {
     '  send the text inline as `scriptText` without writing a file at all.',
     '- Read it back, or read any other small text, markdown, JSON or SRT file already in the',
     '  project, with read_project_text.',
-    '- Credits for imported music are written automatically by import_music: you never write the',
-    "  credits file yourself.",
+    '- Credits for imported music and free media are written automatically by import_music and',
+    '  import_media: you never write the credits file yourself.',
     '',
     '## Silent recording plus generated narration',
     '',

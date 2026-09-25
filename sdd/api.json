@@ -1589,6 +1589,108 @@
             "change": "Created in spec-e-burgos-017 cycle-05 (TASK-001): discards a pending inbox asset (D-C5-03)."
           }
         ]
+      },
+      {
+        "id": "EP-046",
+        "method": "GET",
+        "path": "/projects/:slug/media/search",
+        "module": "producer-free-tier",
+        "spec": "sdd/specs/spec-e-burgos-018-producer-free-tier",
+        "status": "implemented",
+        "created_in_cycle": 3,
+        "updated_in_cycle": null,
+        "description": "Searches Wikimedia Commons (generator=search, filetype:video or filetype:bitmap) and the NASA Image and Video Library (images-api.nasa.gov/search) for the producer's search_free_media MCP tool. Commons: video keeps mp4/webm directly; an ogv result is kept only if a transcoded webm derivative exists (prop=videoinfo&viprop=derivatives), otherwise dropped; image keeps jpg/png/webp. Both kinds require a free commercial extmetadata LicenseShortName (CC0, Public domain/PDM, CC BY, CC BY-SA). NASA: an item is kept only when it has neither photographer nor secondary_creator, or when that credit text contains 'NASA' (drops third-party credits like 'Rocket Lab'); the asset URL is read from the item's collection.json, preferring <id>~medium.mp4 (video) or <id>~large.jpg falling back to <id>~orig.<ext> (image); manifest URLs are upgraded from http to https before use. NASA license is always the fixed string 'NASA (public domain, NASA media usage guidelines)'. Both sources are queried in parallel and merged (Commons first); either one failing does not fail the search as long as the other answers, but both failing raises MEDIA_SOURCE_UNAVAILABLE. Results are cached in memory per project slug for 1 hour (runtime.freeMediaSearchCache) so EP-047 can resolve a resultId; a fresh search replaces the previous cache entry for that slug.",
+        "path_params": [
+          "slug"
+        ],
+        "query_params": {
+          "query": "Required. Free text search query.",
+          "kind": "Required. 'video' or 'image'.",
+          "maxResults": "Required. Integer, 1 to 10 (MIN/MAX_SEARCH_FREE_MEDIA_RESULTS of @video-maker/producer-tools)."
+        },
+        "required_headers": [],
+        "request_body": {
+          "content-type": "none",
+          "schema": "Takes no request body."
+        },
+        "responses": {
+          "200": "application/json: { results: [{ resultId, source: 'commons'|'nasa', kind: 'video'|'image', title, license, author, pageUrl, durationMs, width, height }] }, at most maxResults entries. Shape frozen as producer-tools STUDIO_TOOLS.search_free_media.output — downloadUrl is kept server-side only and never leaves this response.",
+          "404": "PROJECT_NOT_FOUND. application/json: { error: { code, stage: null, message, resource?, expected?, hint? } }.",
+          "422": "INVALID_INPUT when query is missing/blank, kind is not 'video'/'image', or maxResults is missing or outside 1..10; PROJECT_SLUG_INVALID when the slug is not a single kebab-case path segment. application/json: { error: { code, stage: null, message, resource?, expected?, hint? } }.",
+          "503": "MEDIA_SOURCE_UNAVAILABLE when neither Wikimedia Commons nor the NASA Image and Video Library answers with a usable response. application/json: { error: { code, stage: null, message, resource?, expected?, hint? } }."
+        },
+        "changelog": [
+          {
+            "cycle": 3,
+            "date": "2026-09-25",
+            "change": "Created in spec-e-burgos-018-producer-free-tier cycle-03: combined Wikimedia Commons + NASA Image and Video Library search for the producer's search_free_media MCP tool (US-018-301)."
+          }
+        ]
+      },
+      {
+        "id": "EP-047",
+        "method": "POST",
+        "path": "/projects/:slug/media/import",
+        "module": "producer-free-tier",
+        "spec": "sdd/specs/spec-e-burgos-018-producer-free-tier",
+        "status": "implemented",
+        "created_in_cycle": 3,
+        "updated_in_cycle": null,
+        "description": "Downloads a free media result found by EP-046 for the producer's import_media MCP tool. resultId must come from this project's search cache (EP-046), not expired (1h TTL) — otherwise MEDIA_RESULT_UNKNOWN. Downloads only if the file's own url host is exactly upload.wikimedia.org or images-assets.nasa.gov, requires a content-length header to enforce the size cap up front (200 MB video, 30 MB image; a response with no content-length is refused rather than streamed unbounded), and writes through the existing upload-temp-then-promote flow (work/.uploads) into raw/broll/<file name> (video) or raw/images/<file name> (image); if that name is already taken it is suffixed -2, -3, ... before the source is ever touched. The whole read-cache/download/promote/write-credit sequence is serialized per project on the same uploadSerializer as asset upload/copy and music import. Appends one entry to work/credits.json (kind 'video' or 'image', next to existing 'music' entries; created if missing, existing entries kept; a corrupt existing file is treated as empty rather than blocking the import).",
+        "path_params": [
+          "slug"
+        ],
+        "required_headers": [],
+        "request_body": {
+          "content-type": "application/json",
+          "schema": "{ resultId: string } — a non-empty resultId returned by a prior GET .../media/search for this same project."
+        },
+        "responses": {
+          "200": "application/json: { path, credit: { kind: 'video'|'image', path, title, author, license, sourceUrl, importedAt } }. Shape frozen as producer-tools STUDIO_TOOLS.import_media.output — credit is an open record in the contract; this is render-api's own shape for it.",
+          "404": "PROJECT_NOT_FOUND, or MEDIA_RESULT_UNKNOWN when resultId is not in this project's search cache or its 1h TTL expired. application/json: { error: { code, stage: null, message, resource?, expected?, hint? } }.",
+          "422": "INVALID_INPUT when resultId is missing or blank; PROJECT_SLUG_INVALID when the slug is not a single kebab-case path segment. application/json: { error: { code, stage: null, message, resource?, expected?, hint? } }.",
+          "503": "MEDIA_SOURCE_UNAVAILABLE when the download host is not allow-listed, the response is not 200, content-length is missing or exceeds the size cap, or the transfer does not complete. application/json: { error: { code, stage: null, message, resource?, expected?, hint? } }."
+        },
+        "changelog": [
+          {
+            "cycle": 3,
+            "date": "2026-09-25",
+            "change": "Created in spec-e-burgos-018-producer-free-tier cycle-03: host-confined download from Commons/NASA into raw/broll/ or raw/images/ plus a work/credits.json entry, for the producer's import_media MCP tool (US-018-301)."
+          }
+        ]
+      },
+      {
+        "id": "EP-048",
+        "method": "POST",
+        "path": "/projects/:slug/images/preview",
+        "module": "producer-free-tier",
+        "spec": "sdd/specs/spec-e-burgos-018-producer-free-tier",
+        "status": "implemented",
+        "created_in_cycle": 3,
+        "updated_in_cycle": null,
+        "description": "Downsizes 1 to 6 project image paths with ffmpeg to a JPEG at most 1280px on the long side under work/frames/previews/, so the producer agent's view_images MCP tool can read the bytes back through GET /projects/:slug/files/*path and show the model the photo, the same delivery pattern extract_frames uses for video. Uses a dedicated resizeImage port (libs/media-local ffmpeg/resize-image.ts), not extractFrame: an image2 input's near-zero reported duration makes ffmpeg's -ss seek past its only frame and write nothing, even at -ss 0, so resizeImage omits -ss entirely (-i path -frames:v 1 -vf scale -q:v). The preview file name is a deterministic hash of the source path (deps.hashText), so re-previewing the same photo reuses the same file. view_images has no outputSchema in the MCP server (Claude Code CLI 2.1.123 forwards structuredContent instead of image blocks when one is declared), and the OpenRouter runtime returns the images as file parts only when the active model accepts images.",
+        "path_params": [
+          "slug"
+        ],
+        "required_headers": [],
+        "request_body": {
+          "content-type": "application/json",
+          "schema": "{ paths: string[] } — 1 to 6 non-empty project-relative paths (MIN/MAX_VIEW_IMAGES_PATHS of @video-maker/producer-tools)."
+        },
+        "responses": {
+          "200": "application/json: { previews: [{ path, previewPath }] }, one entry per input path in order. Shape frozen as producer-tools STUDIO_TOOLS.view_images.output.",
+          "403": "PATH_OUTSIDE_PROJECT when a path is absolute, contains '..', uses backslashes, or its realpath resolves outside the project root. application/json: { error: { code, stage: null, message, resource?, expected?, hint? } }.",
+          "404": "PROJECT_NOT_FOUND, or FILE_NOT_FOUND when a source path is not a file in the project. application/json: { error: { code, stage: null, message, resource?, expected?, hint? } }.",
+          "422": "INVALID_INPUT when paths is missing or not an array of 1 to 6 non-empty strings; PROJECT_SLUG_INVALID when the slug is not a single kebab-case path segment. application/json: { error: { code, stage: null, message, resource?, expected?, hint? } }.",
+          "500": "MEDIA_COMMAND_FAILED, MEDIA_OUTPUT_UNPARSEABLE or MEDIA_BINARY_NOT_FOUND (503) when ffmpeg fails on one of the paths, translated by translateEngineError. application/json: { error: { code, stage: null, message, resource?, expected?, hint? } }."
+        },
+        "changelog": [
+          {
+            "cycle": 3,
+            "date": "2026-09-25",
+            "change": "Created in spec-e-burgos-018-producer-free-tier cycle-03: ffmpeg image downsizing for the producer's view_images MCP tool (US-018-301), via a new resizeImage port (extractFrame's -ss breaks single-frame image2 inputs, found while verifying against real imported photos)."
+          }
+        ]
       }
     ]
   }

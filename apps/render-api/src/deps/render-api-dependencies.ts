@@ -111,6 +111,15 @@ export interface ExtractFrameInput {
 
 export type ExtractFramePort = (input: ExtractFrameInput) => Promise<void>;
 
+export interface ResizeImageInput {
+  readonly path: string;
+  readonly outPath: string;
+  readonly maxLongSidePx: number;
+  readonly projectRoot: string;
+}
+
+export type ResizeImagePort = (input: ResizeImageInput) => Promise<void>;
+
 export interface BuildKenBurnsClipInput {
   readonly photoPath: string;
   readonly frames: number;
@@ -271,6 +280,7 @@ export interface RenderApiDependencies {
   readonly hashText: HashTextPort;
   readonly probeAsset: ProbeAssetPort;
   readonly extractFrame: ExtractFramePort;
+  readonly resizeImage: ResizeImagePort;
   readonly fetchRemote: FetchRemotePort;
   readonly buildKenBurnsClip: BuildKenBurnsClipPort;
   readonly concatVideoClips: ConcatVideoClipsPort;

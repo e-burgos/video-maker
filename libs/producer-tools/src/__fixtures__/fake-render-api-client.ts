@@ -45,5 +45,8 @@ export function createFakeRenderApiClient(overrides: Partial<RenderApiClient> = 
     putTimeline: (...args) => record('putTimeline', args, overrides.putTimeline),
     searchFreeMusic: (...args) => record('searchFreeMusic', args, overrides.searchFreeMusic),
     importMusic: (...args) => record('importMusic', args, overrides.importMusic),
+    searchFreeMedia: (...args) => record('searchFreeMedia', args, overrides.searchFreeMedia),
+    importMedia: (...args) => record('importMedia', args, overrides.importMedia),
+    previewImages: (...args) => record('previewImages', args, overrides.previewImages),
   };
 }

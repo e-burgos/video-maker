@@ -271,4 +271,58 @@ describe('createStudioToolHandlers', () => {
     expect(imported.data).toMatchObject({ path: 'raw/audio/a.mp3' });
     expect(client.calls[1]).toEqual({ method: 'importMusic', args: ['commons-1'] });
   });
+
+  it('search_free_media and import_media forward to the client', async () => {
+    const { handlers, client } = handlersWith({
+      searchFreeMedia: async () => [
+        {
+          resultId: 'commons-video-1',
+          source: 'commons',
+          kind: 'video',
+          title: 't',
+          license: 'CC0',
+          author: 'a',
+          pageUrl: 'u',
+          durationMs: 5000,
+          width: null,
+          height: null,
+        },
+      ],
+      importMedia: async (resultId) => ({ path: 'raw/broll/a.mp4', credit: { resultId } }),
+    });
+
+    const search = await handlers.search_free_media({ query: 'ocean', kind: 'video', maxResults: 5 });
+    expect(search.data).toMatchObject({
+      results: [{ resultId: 'commons-video-1', source: 'commons', kind: 'video' }],
+    });
+    expect(client.calls[0]).toEqual({ method: 'searchFreeMedia', args: ['ocean', 'video', 5] });
+
+    const imported = await handlers.import_media({ resultId: 'commons-video-1' });
+    expect(imported.data).toMatchObject({ path: 'raw/broll/a.mp4' });
+    expect(client.calls[1]).toEqual({ method: 'importMedia', args: ['commons-video-1'] });
+  });
+
+  it('view_images previews each path and returns data and base64 image bytes', async () => {
+    const { handlers, client } = handlersWith({
+      previewImages: async (paths) => paths.map((path) => ({ path, previewPath: `work/frames/previews/${path}.jpg` })),
+      readFileBytes: async () => ({ bytes: new Uint8Array([4, 5, 6]), mimeType: 'image/jpeg' }),
+    });
+
+    const result = await handlers.view_images({ paths: ['raw/images/a.jpg'] });
+
+    expect(result.data).toEqual({
+      previews: [{ path: 'raw/images/a.jpg', previewPath: 'work/frames/previews/raw/images/a.jpg.jpg' }],
+    });
+    expect(result.images).toEqual([{ mimeType: 'image/jpeg', base64: Buffer.from([4, 5, 6]).toString('base64') }]);
+    expect(client.calls[0]).toEqual({ method: 'previewImages', args: [['raw/images/a.jpg']] });
+  });
+
+  it('view_images rejects more than 6 paths before calling the client', async () => {
+    const { handlers, client } = handlersWith();
+
+    await expect(
+      handlers.view_images({ paths: ['a.jpg', 'b.jpg', 'c.jpg', 'd.jpg', 'e.jpg', 'f.jpg', 'g.jpg'] }),
+    ).rejects.toMatchObject({ code: 'INVALID_INPUT' });
+    expect(client.calls).toEqual([]);
+  });
 });

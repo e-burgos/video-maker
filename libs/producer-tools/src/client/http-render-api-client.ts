@@ -6,6 +6,8 @@ import type {
   RenderApiClient,
   RenderApiExtractedFrame,
   RenderApiFileBytes,
+  RenderApiFreeMediaResult,
+  RenderApiImagePreview,
   RenderApiJob,
   RenderApiJobSummary,
   RenderApiMusicResult,
@@ -266,5 +268,26 @@ export function createHttpRenderApiClient(options: HttpRenderApiClientOptions): 
         path: string;
         credit: Record<string, unknown>;
       },
+
+    searchFreeMedia: async (query, kind, maxResults) => {
+      const json = (await request(
+        'GET',
+        `/projects/${slug}/media/search?query=${encodeURIComponent(query)}&kind=${kind}&maxResults=${maxResults}`,
+      )) as { results: readonly RenderApiFreeMediaResult[] };
+      return json.results;
+    },
+
+    importMedia: async (resultId) =>
+      (await request('POST', `/projects/${slug}/media/import`, { resultId })) as {
+        path: string;
+        credit: Record<string, unknown>;
+      },
+
+    previewImages: async (paths) => {
+      const json = (await request('POST', `/projects/${slug}/images/preview`, { paths })) as {
+        previews: readonly RenderApiImagePreview[];
+      };
+      return json.previews;
+    },
   };
 }

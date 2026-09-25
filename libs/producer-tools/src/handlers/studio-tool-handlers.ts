@@ -213,6 +213,33 @@ export function createStudioToolHandlers(
       const result = await client.importMusic(input.resultId);
       return withOutput('import_music', result);
     },
+
+    search_free_media: async (rawInput) => {
+      const input = parseInput<{ query: string; kind: 'video' | 'image'; maxResults: number }>(
+        STUDIO_TOOLS.search_free_media.input,
+        rawInput,
+      );
+      const results = await client.searchFreeMedia(input.query, input.kind, input.maxResults);
+      return withOutput('search_free_media', { results });
+    },
+
+    import_media: async (rawInput) => {
+      const input = parseInput<{ resultId: string }>(STUDIO_TOOLS.import_media.input, rawInput);
+      const result = await client.importMedia(input.resultId);
+      return withOutput('import_media', result);
+    },
+
+    view_images: async (rawInput) => {
+      const input = parseInput<{ paths: readonly string[] }>(STUDIO_TOOLS.view_images.input, rawInput);
+      const previews = await client.previewImages(input.paths);
+      const images = await Promise.all(
+        previews.map(async (preview) => {
+          const file = await client.readFileBytes(preview.previewPath);
+          return { mimeType: file.mimeType, base64: Buffer.from(file.bytes).toString('base64') };
+        }),
+      );
+      return { data: parseOutput(STUDIO_TOOLS.view_images.output, { previews }), images };
+    },
   };
 
   return handlers;

@@ -15,6 +15,9 @@ export const STUDIO_TOOL_NAMES = [
   'put_timeline',
   'search_free_music',
   'import_music',
+  'search_free_media',
+  'import_media',
+  'view_images',
 ] as const;
 
 export type StudioToolName = (typeof STUDIO_TOOL_NAMES)[number];

@@ -108,6 +108,8 @@ const MESSAGE_BY_CODE: Readonly<Record<RenderApiErrorCode, string>> = {
   ASSET_EXISTS: 'A file already exists at the requested destination.',
   MUSIC_SOURCE_UNAVAILABLE: 'Wikimedia Commons did not answer with a usable response.',
   MUSIC_RESULT_UNKNOWN: 'The music search result id is unknown or its cache entry expired.',
+  MEDIA_SOURCE_UNAVAILABLE: 'Neither Wikimedia Commons nor the NASA Image and Video Library answered with a usable response.',
+  MEDIA_RESULT_UNKNOWN: 'The free media search result id is unknown or its cache entry expired.',
   PHOTO_AROLL_INPUT_INVALID: 'The photo-aroll job input does not pass validation.',
   OPENROUTER_KEY_INVALID: 'The OpenRouter API key is not well formed or was rejected by OpenRouter.',
   OPENROUTER_KEY_MISSING: 'The OpenRouter engine is selected but no API key is stored in the keychain yet.',

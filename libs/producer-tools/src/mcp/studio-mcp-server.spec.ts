@@ -23,7 +23,7 @@ async function connectedPair(overrides: Partial<RenderApiClient> = {}) {
 }
 
 describe('createStudioMcpServer', () => {
-  it('lists exactly the 14 contract tool names', async () => {
+  it('lists exactly the 17 contract tool names', async () => {
     const { client } = await connectedPair();
 
     const { tools } = await client.listTools();
@@ -93,6 +93,30 @@ describe('createStudioMcpServer', () => {
     const getTimeline = tools.find((tool) => tool.name === 'get_timeline');
     expect(extractFrames?.outputSchema).toBeUndefined();
     expect(getTimeline?.outputSchema).toBeDefined();
+  });
+
+  it('returns an image content block alongside the text block for view_images', async () => {
+    const { client } = await connectedPair({
+      previewImages: async () => [{ path: 'raw/images/a.jpg', previewPath: 'work/frames/previews/a.jpg' }],
+      readFileBytes: async () => ({ bytes: new Uint8Array([1, 2, 3]), mimeType: 'image/jpeg' }),
+    });
+
+    const result = await client.callTool({ name: 'view_images', arguments: { paths: ['raw/images/a.jpg'] } });
+
+    const content = result.content as readonly { type: string; mimeType?: string; data?: string }[];
+    expect(content.some((block) => block.type === 'text')).toBe(true);
+    const image = content.find((block) => block.type === 'image');
+    expect(image).toMatchObject({ mimeType: 'image/jpeg', data: Buffer.from([1, 2, 3]).toString('base64') });
+    expect(result.structuredContent).toBeUndefined();
+  });
+
+  it('does not advertise an outputSchema for view_images, unlike the other contract tools', async () => {
+    const { client } = await connectedPair();
+
+    const { tools } = await client.listTools();
+
+    const viewImages = tools.find((tool) => tool.name === 'view_images');
+    expect(viewImages?.outputSchema).toBeUndefined();
   });
 
   it('injects the model into a voice start_job call', async () => {

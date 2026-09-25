@@ -6,6 +6,8 @@ import type { ProducerConfig } from '../config/producer-config';
 import type { RenderApiDependencies } from '../deps/render-api-dependencies';
 import { createRenderJobQueue, recoverInterruptedJobs } from '../jobs/render-job-queue';
 import type { RenderJobQueue } from '../jobs/render-job-queue';
+import { createFreeMediaSearchCache } from '../media-search/free-media-search-cache';
+import type { FreeMediaSearchCache } from '../media-search/free-media-search-cache';
 import { createMusicSearchCache } from '../music/music-search-cache';
 import type { MusicSearchCache } from '../music/music-search-cache';
 import { createOpenRouterModelCatalog } from '../producer/openrouter-model-catalog';
@@ -22,6 +24,7 @@ export interface RenderApiRuntime {
   readonly uploadSerializer: KeyedSerializer;
   readonly voicePreviewSerializer: KeyedSerializer;
   readonly musicSearchCache: MusicSearchCache;
+  readonly freeMediaSearchCache: FreeMediaSearchCache;
   readonly openRouterModelCatalog: OpenRouterModelCatalog;
 }
 
@@ -42,6 +45,7 @@ export function createRenderApiRuntime(
     uploadSerializer: createKeyedSerializer(),
     voicePreviewSerializer: createKeyedSerializer(),
     musicSearchCache: createMusicSearchCache(),
+    freeMediaSearchCache: createFreeMediaSearchCache(),
     openRouterModelCatalog: createOpenRouterModelCatalog(),
   };
 }

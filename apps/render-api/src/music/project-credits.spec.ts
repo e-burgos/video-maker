@@ -3,8 +3,8 @@ import { describe, expect, it } from 'vitest';
 
 import { createCallLog } from '../__fixtures__/call-log';
 import { createFakeObjectStorage } from '../__fixtures__/fake-object-storage';
-import { appendMusicCredit } from './project-credits';
-import type { MusicCreditEntry } from './project-credits';
+import { appendMediaCredit, appendMusicCredit } from './project-credits';
+import type { MediaCreditEntry, MusicCreditEntry } from './project-credits';
 
 const PROJECT_ROOT = '/media/pitch-deck';
 
@@ -70,5 +70,55 @@ describe('appendMusicCredit', () => {
 
     const raw = await storage.readTextFile(`${PROJECT_ROOT}/work/credits.json`);
     expect(JSON.parse(raw)).toEqual([ENTRY, second]);
+  });
+});
+
+describe('appendMediaCredit', () => {
+  it('keeps music, video and image entries together in the same file', async () => {
+    const callLog = createCallLog();
+    const storage = createFakeObjectStorage(callLog, { directories: [PROJECT_ROOT] });
+    const video: MediaCreditEntry = {
+      kind: 'video',
+      path: 'raw/broll/ocean.mp4',
+      title: 'Ocean Waves',
+      author: 'Jane Doe',
+      license: 'CC BY 3.0',
+      sourceUrl: 'https://commons.wikimedia.org/wiki/File:Ocean_Waves.mp4',
+      importedAt: '2026-09-25T00:00:00.000Z',
+    };
+    const image: MediaCreditEntry = {
+      kind: 'image',
+      path: 'raw/images/nebula.jpg',
+      title: 'Nebula',
+      author: 'NASA',
+      license: 'NASA (public domain, NASA media usage guidelines)',
+      sourceUrl: 'https://images.nasa.gov/details/PIA1',
+      importedAt: '2026-09-25T00:00:00.000Z',
+    };
+
+    await appendMediaCredit(storage, project(), ENTRY);
+    await appendMediaCredit(storage, project(), video);
+    await appendMediaCredit(storage, project(), image);
+
+    const raw = await storage.readTextFile(`${PROJECT_ROOT}/work/credits.json`);
+    expect(JSON.parse(raw)).toEqual([ENTRY, video, image]);
+  });
+
+  it('drops a stored entry with an unknown kind when reading the file back', async () => {
+    const callLog = createCallLog();
+    const storage = createFakeObjectStorage(callLog, {
+      directories: [PROJECT_ROOT],
+      files: [
+        {
+          path: `${PROJECT_ROOT}/work/credits.json`,
+          contents: JSON.stringify([{ ...ENTRY, kind: 'unknown-kind' }]),
+        },
+      ],
+    });
+
+    await appendMediaCredit(storage, project(), ENTRY);
+
+    const raw = await storage.readTextFile(`${PROJECT_ROOT}/work/credits.json`);
+    expect(JSON.parse(raw)).toEqual([ENTRY]);
   });
 });

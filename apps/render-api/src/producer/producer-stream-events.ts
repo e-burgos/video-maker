@@ -106,6 +106,15 @@ function summarizeStudioTool(tool: StudioToolName, input: Record<string, unknown
       return truncate(`Searching free music: ${stringField(input, 'mood') ?? ''}`.trim());
     case 'import_music':
       return 'Importing music';
+    case 'search_free_media':
+      return truncate(`Searching free media: ${stringField(input, 'query') ?? ''}`.trim());
+    case 'import_media':
+      return 'Importing free media';
+    case 'view_images': {
+      const paths = input.paths;
+      const pathCount = Array.isArray(paths) ? paths.length : 1;
+      return truncate(`Looking at ${pluralize(pathCount, 'photo')}`);
+    }
   }
 }
 

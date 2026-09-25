@@ -214,6 +214,50 @@ describe('createHttpRenderApiClient', () => {
     expect(calls[0]?.url).toContain('mood=calm%20piano');
   });
 
+  it('searchFreeMedia and importMedia round-trip', async () => {
+    const { fetchImpl, calls } = createFakeFetch((_call, index) => {
+      if (index === 0) {
+        return jsonResponse(200, {
+          results: [
+            {
+              resultId: 'commons-video-1',
+              source: 'commons',
+              kind: 'video',
+              title: 't',
+              license: 'CC0',
+              author: 'a',
+              pageUrl: 'u',
+              durationMs: 5000,
+              width: null,
+              height: null,
+            },
+          ],
+        });
+      }
+      return jsonResponse(200, { path: 'raw/broll/a.mp4', credit: { title: 't' } });
+    });
+    const testClient = client(fetchImpl);
+
+    const results = await testClient.searchFreeMedia('ocean waves', 'video', 5);
+    const imported = await testClient.importMedia('commons-video-1');
+
+    expect(results).toHaveLength(1);
+    expect(imported.path).toBe('raw/broll/a.mp4');
+    expect(calls[0]?.url).toContain('query=ocean%20waves');
+    expect(calls[0]?.url).toContain('kind=video');
+  });
+
+  it('previewImages posts the paths and returns the preview list', async () => {
+    const { fetchImpl, calls } = createFakeFetch(() =>
+      jsonResponse(200, { previews: [{ path: 'raw/images/a.jpg', previewPath: 'work/frames/previews/a.jpg' }] }),
+    );
+
+    const previews = await client(fetchImpl).previewImages(['raw/images/a.jpg']);
+
+    expect(previews).toEqual([{ path: 'raw/images/a.jpg', previewPath: 'work/frames/previews/a.jpg' }]);
+    expect(JSON.parse(String(calls[0]?.init?.body))).toEqual({ paths: ['raw/images/a.jpg'] });
+  });
+
   it('maps a fetch rejection (network failure) into STUDIO_UNAVAILABLE', async () => {
     const fetchImpl = (async () => {
       throw new Error('ECONNREFUSED');

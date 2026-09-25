@@ -101,6 +101,13 @@ export {
 export type { ExtractFrameOptions } from './ffmpeg/extract-frame';
 
 export {
+  DEFAULT_RESIZE_IMAGE_MAX_LONG_SIDE_PX,
+  DEFAULT_RESIZE_IMAGE_QUALITY,
+  resizeImage,
+} from './ffmpeg/resize-image';
+export type { ResizeImageOptions } from './ffmpeg/resize-image';
+
+export {
   buildKenBurnsClip,
   DEFAULT_KEN_BURNS_FPS,
   DEFAULT_KEN_BURNS_MAX_ZOOM,

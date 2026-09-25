@@ -21,6 +21,18 @@ export const MIN_WAIT_FOR_JOB_TIMEOUT_SECONDS = 1;
 export const MAX_WAIT_FOR_JOB_TIMEOUT_SECONDS = 600;
 export const MIN_SEARCH_FREE_MUSIC_RESULTS = 1;
 export const MAX_SEARCH_FREE_MUSIC_RESULTS = 10;
+export const MIN_SEARCH_FREE_MEDIA_RESULTS = 1;
+export const MAX_SEARCH_FREE_MEDIA_RESULTS = 10;
+export const MIN_VIEW_IMAGES_PATHS = 1;
+export const MAX_VIEW_IMAGES_PATHS = 6;
+
+export const FREE_MEDIA_KINDS = ['video', 'image'] as const;
+export type FreeMediaKind = (typeof FREE_MEDIA_KINDS)[number];
+export const FreeMediaKindSchema = z.enum(FREE_MEDIA_KINDS);
+
+export const FREE_MEDIA_SOURCES = ['commons', 'nasa'] as const;
+export type FreeMediaSource = (typeof FREE_MEDIA_SOURCES)[number];
+export const FreeMediaSourceSchema = z.enum(FREE_MEDIA_SOURCES);
 
 export const STUDIO_JOB_KINDS = ['render', 'montage', 'storyboard', 'voice', 'photo-aroll'] as const;
 export type StudioJobKind = (typeof STUDIO_JOB_KINDS)[number];
@@ -335,6 +347,51 @@ const ImportMusicOutputSchema = z.strictObject({
   credit: z.record(z.string(), z.unknown()),
 });
 
+const SearchFreeMediaInputSchema = z.strictObject({
+  query: z.string().min(1),
+  kind: FreeMediaKindSchema,
+  maxResults: z.number().int().min(MIN_SEARCH_FREE_MEDIA_RESULTS).max(MAX_SEARCH_FREE_MEDIA_RESULTS),
+});
+
+const SearchFreeMediaOutputSchema = z.strictObject({
+  results: z.array(
+    z.strictObject({
+      resultId: z.string(),
+      source: FreeMediaSourceSchema,
+      kind: FreeMediaKindSchema,
+      title: z.string(),
+      license: z.string(),
+      author: z.string(),
+      pageUrl: z.string(),
+      durationMs: z.number().int().nonnegative().nullable(),
+      width: z.number().int().positive().nullable(),
+      height: z.number().int().positive().nullable(),
+    }),
+  ),
+});
+
+const ImportMediaInputSchema = z.strictObject({
+  resultId: z.string().min(1),
+});
+
+const ImportMediaOutputSchema = z.strictObject({
+  path: ProjectRelativePathSchema,
+  credit: z.record(z.string(), z.unknown()),
+});
+
+const ViewImagesInputSchema = z.strictObject({
+  paths: z.array(ProjectRelativePathSchema).min(MIN_VIEW_IMAGES_PATHS).max(MAX_VIEW_IMAGES_PATHS),
+});
+
+const ViewImagesOutputSchema = z.strictObject({
+  previews: z.array(
+    z.strictObject({
+      path: ProjectRelativePathSchema,
+      previewPath: ProjectRelativePathSchema,
+    }),
+  ),
+});
+
 export interface StudioToolDefinition<Input extends z.ZodTypeAny = z.ZodTypeAny, Output extends z.ZodTypeAny = z.ZodTypeAny> {
   readonly description: string;
   readonly input: Input;
@@ -423,5 +480,23 @@ export const STUDIO_TOOLS: Readonly<Record<StudioToolName, StudioToolDefinition>
       'Download a previously searched music result into raw/audio/ and record its credit in work/credits.json.',
     input: ImportMusicInputSchema,
     output: ImportMusicOutputSchema,
+  },
+  search_free_media: {
+    description:
+      'Search Wikimedia Commons and the NASA Image and Video Library for freely licensed B-roll video or photos matching a query, up to maxResults results. Use the returned resultId with import_media.',
+    input: SearchFreeMediaInputSchema,
+    output: SearchFreeMediaOutputSchema,
+  },
+  import_media: {
+    description:
+      'Download a previously searched free media result into raw/broll/ (video) or raw/images/ (image) and record its credit in work/credits.json.',
+    input: ImportMediaInputSchema,
+    output: ImportMediaOutputSchema,
+  },
+  view_images: {
+    description:
+      'Look at up to 6 photos already in the project and get them back as images. Use this to see a photo instead of extract_frames, which only works on video.',
+    input: ViewImagesInputSchema,
+    output: ViewImagesOutputSchema,
   },
 };
