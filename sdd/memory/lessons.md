@@ -1,6 +1,6 @@
 # 🧠 Memoria del proyecto — lecciones destiladas
 
-> Versión 1.7 | Última destilación: 2026-09-20 (fix-e-burgos-003-003, fix-e-burgos-009-002, fix-e-burgos-009-004)
+> Versión 1.8 | Última destilación: 2026-09-24 (fix-e-burgos-001-003, spec-e-burgos-017-desktop-app cycle-01, cycle-02, cycle-03, cycle-05)
 > **Cap duro: 120 líneas.** Se lee COMPLETO al inicio de cada sesión: cada línea cuesta tokens en
 > todas las futuras. Al destilar, primero podar lo obsoleto o ya absorbido por constitutions/skills.
 
@@ -18,12 +18,7 @@ se edita nada durante un ciclo/fix. Lo de un subproyecto va a su `constitution.m
   del agrupamiento por historia: dos historias distintas se acoplan por un símbolo compartido.
 - Cuando un RF describe cómo componer algo que otra lib ya entregó, derivar el contrato de la
   función real declarando la divergencia: la letra del RF puede especificar un defecto semántico.
-- `grep` los **lectores** de un campo antes de editarlo: si el consumidor real lee otro derivado
-  (`audioMix.automation`, no `baseGainDb`), editar el declarativo es un no-op que tipos, schema,
-  disco y un `200` confirman. Simétrico: leer quién **produce** un dato antes de dar default a un
-  flag que elige entre dos fuentes, y fijar la paridad contra el productor real, no contra el RF.
-  Mismo principio al sumar una fuente nueva a un renderer/mezclador: leer qué parte del pipeline ya
-  la acepta antes de tocar código — el cambio real suele ser a qué apunta el clip, no cómo se consume.
+- `grep` los **lectores** de un campo antes de editarlo (si el consumidor real lee otro derivado, editar el declarativo es un no-op que tipos, schema, disco y un `200` confirman) y los **productores** antes de dar default a un flag que elige entre dos fuentes, fijando la paridad contra el productor real, no contra el RF; mismo principio al sumar una fuente nueva a un renderer/mezclador.
 - Tratar el `files[]` como checklist de cierre y trazar cada CA al archivo que **emite** el valor
   que nombra, no al que nombra la operación: si un CA cita un literal, el spec hermano de ese
   archivo es obligatorio en la lista cerrada y en el `files[]`.
@@ -49,11 +44,10 @@ se edita nada durante un ciclo/fix. Lo de un subproyecto va a su `constitution.m
   default sin provider/config devuelva el valor de HOY: la suite existente prueba que nada cambió.
 - Nunca tapar un defecto reescribiendo a mano un artefacto derivado (p. ej. `voice.words.json` con tiempos inventados) para destrabar una corrida: esconde el defecto y se repite en la próxima — el fix va siempre al productor real del artefacto, no al artefacto.
 - Una decisión editorial que varía por tipo de contenido (p. ej. `captionStyle`) se persiste en el documento (timeline), nunca como flag del render: se decide una vez, se edita, y el render la lee de ahí.
+- Forzar `NODE_ENV=production` en los comandos de build sin heredarlo del `.env` raíz, medir el peso real de la carga inicial sumando `index.js` y todo lo que precarga `index.html` (no solo el archivo que dispara el aviso de tamaño), y abrir la captura que respalda cada "verificado" antes de aceptarlo — un implementor puede reportar verificado sin que su propia captura muestre lo esperado.
 
 ## Técnica (stack, herramientas, gotchas transversales)
 
-- Verificar `NX_WORKSPACE_ROOT_PATH` antes de cualquier `nx …`: si apunta a otro repo, Nx ejecuta
-  los targets de ESE repo sin error visible.
 - No dar por verde nada sin correr `nx run-many -t lint test build`: `sdd:validate` no compila y
   Vitest no tipa (un `const facts = [media.kind]` rompió `build` con `test` verde).
 - Verificar para qué runtime está tipado un proyecto antes de leer archivos desde un test/spec: un
@@ -84,8 +78,8 @@ se edita nada durante un ciclo/fix. Lo de un subproyecto va a su `constitution.m
   render, `SIGTERM` da `143` aunque el server cierre limpio, y `process.exit(0)` no lo cambia.
 - Comparar la duración de un render contra el **stream de video** (`nb_frames`/`r_frame_rate`),
   nunca contra `format.duration` (máximo entre streams, inflado por el padding AAC).
-- Largar un render, síntesis o transcripción solo sin otro proceso `ffmpeg`/`whisper-cli`/`piper`/
-  `chrome-headless` vivo y con memoria libre de sobra: nunca dos jobs pesados a la vez.
+- Largar un render, síntesis o transcripción solo sin otro proceso `ffmpeg`/`whisper-cli`/`chrome-headless`
+  vivo y con memoria libre de sobra: nunca dos jobs pesados a la vez.
 - Verificar una UI midiendo en el navegador el estado del medio (`readyState` 4, `duration`,
   `videoWidth/Height`), nunca la captura ni el `src`: un `src` armado y un 404 se ven igual.
 - El nombre accesible de un control con `aria-label` **es** el `aria-label`: verificarlo en el DOM
@@ -101,7 +95,10 @@ se edita nada durante un ciclo/fix. Lo de un subproyecto va a su `constitution.m
   schema con `$schema` y devuelve `is_error: false`): sondear con el artefacto real, no uno a mano.
 - Nunca transcribir con whisper.cpp una pista con silencios largos de una sola pasada: `-ml 1` atribuye el hueco al token anterior y estira la última palabra hasta la frase siguiente; transcribir por segmento corto (una frase por wav) y acotar cada palabra a su ventana conocida (`[startMs, endMs]`).
 - Nunca repartir palabras "omitidas" de una alineación de transcripción sobre un hueco sin tope: acotar el reparto a ~1,5 s pegado al run anterior, o alinear línea a línea contra el manifiesto de voz cuando existe — cruzar de frase sobre un silencio largo es el defecto, no un detalle cosmético.
-- Un sintetizador de voz (Piper) no es determinista entre corridas (±100 ms por frase, misma frase y mismo `lengthScale`): escribir el criterio de aceptación contra la ventana del manifiesto que produjo esa misma corrida, nunca contra un número absoluto fijo.
+- Nunca cerrar con `atrim=end=<T>` una mezcla que sale de `amix` con `loudnorm` en modo dinámico: el PTS no coincide con las muestras y corta el final — usar `apad=whole_dur=<T>` y dejar que el `-shortest` del mux marque el largo real.
+- Probar cada tool MCP nueva leyendo el `tool_result` que ve el MODELO en el `stream-json` del CLI, no la respuesta del servidor: `outputSchema` tapa los bloques de imagen, y un input que no es `z.object` en la raíz llega vacío al modelo.
+- Levantar el servidor con su loader real (p. ej. `@swc-node/register`) en la misma task que suma un paquete CJS o nativo: `tsc` y Vitest/esbuild resuelven el default import distinto que el loader de producción, y solo el arranque real lo detecta.
+- Al lanzar una app Electron empaquetada desde este arnés (verificación manual, no el e2e ya blindado), armar el `env` del spawn a mano en vez de heredar `process.env` (trae `ELECTRON_RUN_AS_NODE=1`, que hace arrancar cualquier binario Electron como Node headless sin GUI); y para matar un huérfano cuyo padre ya murió, filtrar por **comando** (no por `ppid`: el reparenting a `launchd` es inmediato) y nunca disparar limpieza async fire-and-forget justo antes de una llamada síncrona bloqueante (`showMessageBoxSync`) sin `await` explícito antes.
 
 ## Costo (qué gastó tokens/tiempo de más y cómo evitarlo)
 
