@@ -31,3 +31,21 @@
 - **TASK-004** — Tools MCP/OpenRouter y prompt.
 - **TASK-005** — Verificación real.
 - **TASK-006** — Cierre.
+
+## Pendiente de documentar en contexto (para quien cierre el ciclo)
+
+- **`resizeImage` es un puerto nuevo**, hermano de `extractFrame` (`apps/render-api/src/deps/render-api-dependencies.ts`,
+  implementado en `node-render-api-dependencies.ts`, función real en `libs/media-local/src/ffmpeg/resize-image.ts`).
+  `image-preview-handler.ts` NO reusa `extractFrame` con `atSeconds: 0` como decía D-C3-05: la verificación real
+  (TASK-005, imagen NASA real) encontró que ffmpeg no puede extraer una frame de una imagen fija con `-ss`, ni
+  siquiera en `0` — el demuxer `image2` reporta una duración casi nula y `-ss` se pasa de largo del único frame,
+  devolviendo `exitCode: 0` pero un archivo vacío (ningún error, ningún archivo). `resizeImage` es la misma
+  invocación de ffmpeg sin `-ss`. Documentar este puerto y la regla "nunca `-ss` sobre una imagen fija" en
+  `sdd/context/apps/render-api/constitution.md`.
+- **`searchFreeMedia` interleava en vez de concatenar**: la primera versión hacía
+  `[...commonsResults, ...nasaResults].slice(0, maxResults)`, así que cuando Commons por sí solo ya llenaba
+  `maxResults` (el caso normal para imágenes populares) NASA quedaba descartado en silencio pese a responder bien.
+  La verificación real lo detectó porque `search_free_media` devolvía 0 resultados NASA de forma reproducible.
+  Documentar la regla "combinar fuentes = intercalar antes de recortar" para la próxima tool que combine 2+ fuentes.
+
+
