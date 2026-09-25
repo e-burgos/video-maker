@@ -1,0 +1,87 @@
+{
+  "$schema": "../../../../schemas/cycle-tasks.schema.json",
+  "spec": "spec-e-burgos-018-producer-free-tier",
+  "cycle": 2,
+  "module": "producer-free-tier",
+  "apps": [
+    "apps/render-api",
+    "apps/web"
+  ],
+  "flow": "lite",
+  "user_stories_generated": true,
+  "prerequisites": {
+    "tasks_generated": true
+  },
+  "tasks": [
+    {
+      "id": "TASK-001",
+      "title": "OpenRouter AiAgent adapter on the Vercel AI SDK with structured output against the storyboard JSON schema, usage and cost in the response, and OpenRouter failures mapped to the existing error codes",
+      "user_stories": [
+        "US-018-201"
+      ],
+      "estimation_hours": 3,
+      "story_points": 3,
+      "depends_on": [],
+      "status": "pending",
+      "files": [
+        "apps/render-api/src/ai/openrouter-ai-agent.ts",
+        "apps/render-api/src/ai/openrouter-ai-agent.spec.ts"
+      ]
+    },
+    {
+      "id": "TASK-002",
+      "title": "Pick the storyboard agent from the effective producer engine (Claude CLI or OpenRouter with the stored key and the configured OpenRouter model), ignore Claude-only model aliases on OpenRouter, and show OpenRouter failures in the storyboard panel",
+      "user_stories": [
+        "US-018-201",
+        "US-018-202"
+      ],
+      "estimation_hours": 3,
+      "story_points": 3,
+      "depends_on": [
+        "TASK-001"
+      ],
+      "status": "pending",
+      "files": [
+        "apps/render-api/src/ai/effective-ai-agent.ts",
+        "apps/render-api/src/ai/effective-ai-agent.spec.ts",
+        "apps/render-api/src/deps/node-render-api-dependencies.ts",
+        "apps/web/src/api/storyboard-capability.ts"
+      ]
+    },
+    {
+      "id": "TASK-003",
+      "title": "Real smoke: a storyboard job on a clone of a real project with OpenRouter and DeepSeek through the running render-api, checking the saved storyboard document and the recorded cost",
+      "user_stories": [
+        "US-018-202"
+      ],
+      "estimation_hours": 1.5,
+      "story_points": 1,
+      "depends_on": [
+        "TASK-002"
+      ],
+      "status": "pending",
+      "files": [
+        "sdd/specs/spec-e-burgos-018-producer-free-tier/cycles/cycle-02/artifacts/storyboard-openrouter-smoke.md",
+        "sdd/specs/spec-e-burgos-018-producer-free-tier/cycles/cycle-02/artifacts/storyboard-openrouter-smoke.mjs"
+      ]
+    },
+    {
+      "id": "TASK-004",
+      "title": "Close the cycle: lint, test and build of the affected projects, context fragments and cycle record",
+      "user_stories": [
+        "US-018-201",
+        "US-018-202"
+      ],
+      "estimation_hours": 1,
+      "story_points": 1,
+      "depends_on": [
+        "TASK-003"
+      ],
+      "status": "pending",
+      "files": [
+        "sdd/context/apps/render-api/updates/2026-09-25-spec-e-burgos-018-producer-free-tier-cycle-02.md",
+        "sdd/context/apps/web/updates/2026-09-25-spec-e-burgos-018-producer-free-tier-cycle-02.md"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,31 @@
+{
+  "$schema": "../../../../schemas/cycle.schema.json",
+  "cycle": 2,
+  "module": "producer-free-tier",
+  "spec": "spec-e-burgos-018-producer-free-tier",
+  "apps": [
+    "apps/render-api",
+    "apps/web"
+  ],
+  "phase": "storyboard-openrouter",
+  "flow": "lite",
+  "objectives": [
+    "El job storyboard usa el motor efectivo del productor: Claude CLI u OpenRouter con salida estructurada",
+    "Mismo contrato del documento de storyboard (StoryboardProposalSchema) en los dos motores",
+    "Smoke real barato con DeepSeek"
+  ],
+  "status": "in-progress",
+  "started_at": "2026-09-25",
+  "completed_at": null,
+  "documents": {
+    "plan": "sdd/specs/spec-e-burgos-018-producer-free-tier/cycles/cycle-02/plan.md",
+    "tasks": "sdd/specs/spec-e-burgos-018-producer-free-tier/cycles/cycle-02/tasks.json"
+  },
+  "artifacts": [],
+  "metrics": null,
+  "tables_created": [],
+  "endpoints_implemented": [],
+  "components_created": [],
+  "issues_found": [],
+  "reviewer_report": null
+}
