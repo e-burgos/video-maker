@@ -1,0 +1,84 @@
+{
+  "$schema": "../../../../schemas/cycle-tasks.schema.json",
+  "spec": "spec-e-burgos-018-producer-free-tier",
+  "cycle": 1,
+  "module": "producer-free-tier",
+  "apps": [
+    "apps/render-api",
+    "libs/producer-tools",
+    "apps/docs-site"
+  ],
+  "flow": "lite",
+  "user_stories_generated": true,
+  "prerequisites": {
+    "tasks_generated": true
+  },
+  "tasks": [
+    {
+      "id": "TASK-001",
+      "title": "Let the model benchmark discover the live :free candidates with tools and image input from the OpenRouter catalog and write its report to a directory passed by flag instead of the cycle-04 folder",
+      "user_stories": [
+        "US-018-101"
+      ],
+      "estimation_hours": 1.5,
+      "story_points": 1,
+      "depends_on": [],
+      "status": "pending",
+      "files": [
+        "libs/producer-tools/e2e/openrouter-model-bench.mjs"
+      ]
+    },
+    {
+      "id": "TASK-002",
+      "title": "Run the real benchmark over the live free candidates (2 runs each, US$3 cap) and keep its report as a cycle artifact",
+      "user_stories": [
+        "US-018-101"
+      ],
+      "estimation_hours": 1.5,
+      "story_points": 1,
+      "depends_on": [
+        "TASK-001"
+      ],
+      "status": "pending",
+      "files": [
+        "sdd/specs/spec-e-burgos-018-producer-free-tier/cycles/cycle-01/artifacts/openrouter-free-model-bench.md",
+        "sdd/specs/spec-e-burgos-018-producer-free-tier/cycles/cycle-01/artifacts/openrouter-free-model-bench-results.json"
+      ]
+    },
+    {
+      "id": "TASK-003",
+      "title": "Add every free model that passed 2/2 to the recommended OpenRouter models with tier free and its measured metrics, and update the models and prices section of the docs site",
+      "user_stories": [
+        "US-018-102"
+      ],
+      "estimation_hours": 2,
+      "story_points": 2,
+      "depends_on": [
+        "TASK-002"
+      ],
+      "status": "pending",
+      "files": [
+        "apps/render-api/src/config/recommended-openrouter-models.ts",
+        "apps/render-api/src/config/recommended-openrouter-models.spec.ts",
+        "apps/docs-site/src/content/connect-ai.mjs"
+      ]
+    },
+    {
+      "id": "TASK-004",
+      "title": "Close the cycle: lint, test and build of the affected projects, context fragment and cycle record",
+      "user_stories": [
+        "US-018-101",
+        "US-018-102"
+      ],
+      "estimation_hours": 1,
+      "story_points": 1,
+      "depends_on": [
+        "TASK-003"
+      ],
+      "status": "pending",
+      "files": [
+        "sdd/context/apps/render-api/updates/2026-09-25-spec-e-burgos-018-producer-free-tier-cycle-01.md"
+      ]
+    }
+  ]
+}

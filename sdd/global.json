@@ -159,7 +159,18 @@
       "completed_at": "2026-09-25"
     }
   ],
-  "in_progress_modules": [],
+  "in_progress_modules": [
+    {
+      "module": "producer-free-tier",
+      "spec": "spec-e-burgos-018-producer-free-tier",
+      "apps": [
+        "apps/render-api",
+        "libs/producer-tools",
+        "apps/docs-site"
+      ],
+      "description": "Que un usuario sin Claude use el productor completo: modelos gratuitos de OpenRouter recomendados con benchmark real, storyboard sobre el motor efectivo del productor y búsqueda e importación de video e imágenes libres para B-roll con crédito automático, más una herramienta para mirar fotos"
+    }
+  ],
   "pending_modules": [
     {
       "module": "scene-assembly",
