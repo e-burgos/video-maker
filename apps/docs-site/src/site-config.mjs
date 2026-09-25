@@ -10,7 +10,7 @@ export const APPROX_DMG_SIZE_LABEL = '≈254 MB';
 
 export const APPROX_INSTALLED_SIZE_LABEL = '≈775 MB';
 
-export const APPROX_FIRST_RUN_DOWNLOAD_LABEL = '≈920 MB';
+export const APPROX_FIRST_RUN_DOWNLOAD_LABEL = '≈879 MB';
 
 export const APPLICATION_SUPPORT_PATH = '~/Library/Application Support/Video Maker';
 

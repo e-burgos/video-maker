@@ -9,9 +9,9 @@ export function renderPage(depth) {
   const bodyHtml = `
 <h1>${APP_DISPLAY_NAME}</h1>
 <p class="lede">
-Armá videos con la ayuda de un productor de IA que trabaja con tu propio material. La app corre
-entera en tu Mac: sube guion, corte, subtítulos, locución y música, y vos confirmás cada paso;
-solo la conversación con el productor sale de tu máquina.
+Armá videos con la ayuda de un productor de IA que trabaja con tu propio material. Todo el
+trabajo — guion, cortes, subtítulos, locución y música — pasa en tu Mac y vos confirmás cada
+paso; solo la conversación con el productor sale de tu máquina (a Claude o a OpenRouter).
 </p>
 
 <div class="hero-actions">
@@ -42,9 +42,9 @@ paso extra porque la app no tiene firma de Apple Developer (es gratis, entre ami
 
 <h2>Así se ve</h2>
 <div class="screenshot-grid">
-${screenshotFigure(depth, 'home-projects.png', 'Lista de proyectos de Video Maker Studio, cada uno con sus categorías de material')}
-${screenshotFigure(depth, 'home-chat.png', 'Conversación con el productor de IA dentro de un proyecto, con recetas sugeridas')}
-${screenshotFigure(depth, 'home-deliveries.png', 'Panel de entregas de un proyecto, con el guion y las opciones de material a subir')}
+${screenshotFigure(depth, 'home-projects.png', 'Tus videos: lista de proyectos con miniaturas reales y su estado')}
+${screenshotFigure(depth, 'workspace-preview.png', 'Conversación con el productor de IA y, a la derecha, la vista previa de un render ya terminado')}
+${screenshotFigure(depth, 'proposal-card.png', 'Al soltar un archivo nuevo, el productor propone un rol (acá "B-roll") para confirmar o descartar')}
 </div>
 `;
 

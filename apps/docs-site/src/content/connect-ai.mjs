@@ -1,6 +1,6 @@
-import { calloutBox, infoTable } from '../render.mjs';
+import { calloutBox, infoTable, screenshotFigure } from '../render.mjs';
 
-export function renderPage() {
+export function renderPage(depth) {
   const bodyHtml = `
 <h1>Conectar la IA</h1>
 <p class="lede">
@@ -35,24 +35,27 @@ ${infoTable(
     ['3. Pegarla en la app', 'Configuración → Productor → Motor: OpenRouter → pegá la key. La app solo guarda un hint (por ejemplo "Key cargada ••••56f7"), nunca la muestra entera.'],
   ],
 )}
+${screenshotFigure(depth, 'settings-openrouter.png', 'Configuración → Productor con OpenRouter elegido, los modelos recomendados y el hint de la key ya cargada')}
 
 <h3>Modelos recomendados y costo real</h3>
 <p>
-Medido corriendo la Receta Tutorial completa de punta a punta (guion, voz, música y render) con
-material real:
+Precios verificados en vivo dentro de la app (25/09/2026). El costo de una Receta Tutorial se
+midió corriendo el video completo de punta a punta (guion, voz, música y render) con material
+real — 817 989 tokens de entrada y 42 651 de salida en 4 turnos — y después se recalculó al
+precio vigente de cada modelo:
 </p>
 ${infoTable(
-  ['Modelo', 'Precio por 1M tokens', 'Costo real de una Receta Tutorial completa'],
+  ['Modelo', 'Precio por 1M tokens', 'Costo de una Receta Tutorial completa'],
   [
     [
       '<strong>DeepSeek V4.1 Flash</strong> (recomendado, es el que trae la app por defecto)',
-      'US$0.15 entrada · US$0.60 salida',
-      '<strong>US$0.0714</strong> medido (817 989 tokens de entrada, 42 651 de salida, 4 turnos)',
+      'US$0.30 entrada · US$1.20 salida',
+      '<strong>≈US$0.30</strong> (recalculado al precio actual)',
     ],
     [
       'Claude Haiku 4.5 (referencia de calidad)',
       'US$1.00 entrada · US$5.00 salida',
-      '≈US$1.03 estimado con los mismos tokens de la corrida anterior — no se corrió el mismo video con Haiku, es un cálculo a partir del precio',
+      '≈US$1.03 (recalculado; no se corrió el mismo video con Haiku)',
     ],
   ],
 )}

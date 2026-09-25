@@ -68,22 +68,23 @@
         "apps/docs-site/src/content/faq.mjs",
         "apps/docs-site/src/content/licenses.mjs",
         "apps/docs-site/scripts/build.mjs",
+        "apps/desktop/e2e/capture-app-screenshots.mjs",
         "apps/docs-site/public/screenshots/home-projects.png",
-        "apps/docs-site/public/screenshots/home-chat.png",
-        "apps/docs-site/public/screenshots/home-deliveries.png",
+        "apps/docs-site/public/screenshots/workspace-preview.png",
+        "apps/docs-site/public/screenshots/proposal-card.png",
+        "apps/docs-site/public/screenshots/material-tab.png",
+        "apps/docs-site/public/screenshots/first-run-setup.png",
         "apps/docs-site/public/screenshots/gatekeeper-not-opened.png",
-        "apps/docs-site/public/screenshots/role-proposal.png",
-        "apps/docs-site/public/screenshots/library-advanced.png",
         "apps/docs-site/public/screenshots/settings-openrouter.png"
       ],
       "usage": {
         "provider_model": "claude/sonnet",
         "effort": "high",
-        "tokens_in": 160000,
-        "tokens_out": 32000,
+        "tokens_in": 230000,
+        "tokens_out": 46000,
         "approx": true,
         "source": "declared-estimate",
-        "recorded_at": "2026-09-24"
+        "recorded_at": "2026-09-25"
       }
     },
     {
@@ -150,11 +151,11 @@
       "usage": {
         "provider_model": "claude/sonnet",
         "effort": "high",
-        "tokens_in": 95000,
-        "tokens_out": 19000,
+        "tokens_in": 140000,
+        "tokens_out": 28000,
         "approx": true,
         "source": "declared-estimate",
-        "recorded_at": "2026-09-24"
+        "recorded_at": "2026-09-25"
       }
     },
     {

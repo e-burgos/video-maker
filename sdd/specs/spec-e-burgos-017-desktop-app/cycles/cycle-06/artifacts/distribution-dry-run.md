@@ -8,8 +8,9 @@
 
 `pnpm exec nx run docs-site:build` genera 7 páginas en `dist/apps/docs-site/` (Inicio,
 Instalación, Primer arranque, Conectar la IA, Usar el estudio, Preguntas frecuentes, Licencias),
-más `assets/style.css` y `assets/screenshots/*.png` (7 capturas reales, copiadas de `cycle-04` y
-`cycle-05`, todas ≤1440 px de ancho — no hizo falta reescalarlas).
+más `assets/style.css` y `assets/screenshots/*.png`. Las capturas de la app (ver §7) salen de la
+**app instalada real** (`/Applications/Video Maker.app`), no de ciclos anteriores; todas ≤1440 px
+de ancho, no hizo falta reescalarlas.
 
 ## 2) Chequeo de links (`apps/docs-site/scripts/check-links.mjs`)
 
@@ -17,11 +18,11 @@ más `assets/style.css` y `assets/screenshots/*.png` (7 capturas reales, copiada
 | --- | --- |
 | Links/assets internos rotos | **0** de los 7 HTML generados |
 | Botón de descarga apunta a la forma esperada (`.../releases/latest/download/<archivo>`) | ✅ `https://github.com/e-burgos/video-maker-app/releases/latest/download/Video-Maker-arm64.dmg` |
-| Links externos encontrados | 20 (HEAD/GET real, sin fallar por red) |
-| Links externos con status ≠ 200 | **2**, ambos esperados hoy: el botón de descarga (**404** — el repo público todavía no existe) y (antes del fix de autolink) `remotion.dev/license` — ya corregido, ahora **200** |
+| Links externos encontrados | 21 (HEAD/GET real, sin fallar por red) |
+| Links externos con status ≠ 200 | **1**, esperado: el botón de descarga (**404** — el repo público todavía no existe) |
 
-Los 18 links externos restantes (docs.claude.com, openrouter.ai ×3, GitHub/HuggingFace/Chrome for
-Testing de `THIRD_PARTY_NOTICES.md`) devolvieron **200**.
+Los 20 links externos restantes (docs.claude.com, openrouter.ai ×3, GitHub/HuggingFace/Chrome for
+Testing/electron de `THIRD_PARTY_NOTICES.md`) devolvieron **200**.
 
 ## 3) Capturas de pantalla del sitio (1440×900 y 390×844)
 
@@ -72,13 +73,6 @@ Corrida sin `--publish`: solo imprime el plan (clonar `e-burgos/video-maker-app`
 
 ## 6) Cosas para decidir antes de publicar (TASK-005)
 
-- **`apps/desktop/vendor/THIRD_PARTY_NOTICES.md` tiene un placeholder viejo** en la sección
-  "Electron" (`"MIT (placeholder — TASK-007 fills in the exact Electron version pinned by
-  TASK-005 in apps/desktop/package.json)"`) que quedó de un ciclo anterior — y la web de
-  Licencias lo renderiza tal cual, con números de task internos, a la vista de tus amigos. El dato
-  real ya existe (`build-desktop.mjs` pinnea `ELECTRON_VERSION = '44.4.5'`, licencia MIT) — conviene
-  reemplazar ese texto por algo como `"Electron 44.4.5 — MIT"` antes de publicar. No lo toqué yo
-  porque ese archivo no es parte de los tasks de este ciclo (`TASK-001..004`).
 - **Repo de distribución `e-burgos/video-maker-app`**: hoy no existe (`gh repo view` fallaría), por
   eso el link de descarga da 404 en el chequeo de arriba — es lo esperado hasta TASK-005.
 - **Costo de Claude Haiku en "Conectar la IA" es una estimación**, no una medición real (se calculó
@@ -90,3 +84,57 @@ Corrida sin `--publish`: solo imprime el plan (clonar `e-burgos/video-maker-app`
   `actions/deploy-pages@v4.0.5`) — revisalas contra las últimas versiones publicadas antes de la
   primera corrida en el repo público, por si salió algo más nuevo.
 - **CHANGELOG.md** en español está redactado para tus amigos — revisalo por si querés otro tono.
+- **Precios de OpenRouter cambian**: el 25/09/2026 DeepSeek V4.1 Flash subió de US$0.15/US$0.60 a
+  US$0.30/US$1.20 por 1M tokens (verificado en vivo, ver §7) — la web ya muestra el precio y el
+  costo recalculados a esa fecha, pero si volvés a cambiar de modelo por defecto conviene
+  reverificar el número antes de cada release.
+
+## 7) Segunda pasada — capturas reales de la app instalada, copy y verificación de macOS mínimo
+
+Pedido del dev después de revisar `site-inicio-1440x900.png`: las capturas de "Así se ve" eran de
+una UI vieja (ciclo 3, badges `raw/catalog`, slugs monoespaciados). Se reemplazaron por capturas
+reales de la **app instalada** (`/Applications/Video Maker.app`), nunca de un servidor de
+desarrollo.
+
+- **Cómo se armaron**: `apps/desktop/e2e/capture-app-screenshots.mjs` (nuevo, mismo patrón CDP
+  crudo que `packaged-app-smoke.mjs`) cerró la app real del dev (`osascript … quit`), levantó la
+  app instalada con un `VIDEO_MAKER_USER_DATA` temporal — modelos clonados por APFS
+  (`cp -Rc`) desde `~/Library/Application Support/Video Maker/models`, un `setup.json` completo
+  reescrito a las nuevas rutas, y clones APFS de tres proyectos reales de `media/`
+  (`display-ads-analiticas`, `display-ads-creacion-campana-full-desktop`, `optica-siochana`) — y
+  con `--remote-debugging-port` tomó 5 capturas a 1440×900: **home-projects.png** (Tus videos, con
+  miniaturas reales), **workspace-preview.png** (chat del productor + Vista previa mostrando un
+  render terminado de `optica-siochana`), **proposal-card.png** (tarjeta de rol propuesto tras
+  adjuntar un clip nuevo por `DOM.setFileInputFiles`), **material-tab.png** (pestaña Material) y
+  **settings-openrouter.png** (Configuración → Productor con OpenRouter y los modelos
+  recomendados — la key sigue enmascarada, `"Key cargada ••••56f7"`, nunca se vio ni se logueó el
+  valor completo). Cerró esa instancia y, con `VIDEO_MAKER_USER_DATA` fresco (sin `setup.json`),
+  abrió una segunda vez solo para **first-run-setup.png** (paso de descargas en 0 %, sin esperar a
+  que terminen — se cerró la app apenas se tomó la captura). Al final relanzó la app real del dev
+  (`open -a "Video Maker"`, entorno limpio) contra su propio `userData` — proyectos y conversación
+  intactos, cero huérfanos (`render-api`, `chrome-headless-shell`, `ffmpeg`, `whisper-cli`,
+  `sherpa-onnx-offline-tts`) después de cada corrida.
+  - Nota operativa: la primera corrida del script chocó con `ELECTRON_RUN_AS_NODE=1` heredado del
+    shell al reabrir la app del dev (falla silenciosa, Electron arranca como Node y sale) — se
+    resolvió relanzando con `env -u ELECTRON_RUN_AS_NODE` y agregando reintentos a
+    `relaunchDevApp()`. Ninguna corrida imprimió ni leyó el contenido de `.env`.
+  - Se borraron los screenshots viejos (`home-chat.png`, `home-deliveries.png`, `role-proposal.png`,
+    `library-advanced.png`); Inicio, Usar el estudio, Primer arranque y Conectar la IA ahora usan
+    las 6 capturas nuevas (`gatekeeper-not-opened.png` no cambia, es el diálogo real de macOS).
+- **Copy de Inicio corregido** al texto pedido: *"Todo el trabajo — guion, cortes, subtítulos,
+  locución y música — pasa en tu Mac y vos confirmás cada paso; solo la conversación con el
+  productor sale de tu máquina (a Claude o a OpenRouter)."*
+- **macOS mínimo verificado**: `LSMinimumSystemVersion` en el `Info.plist` de la app instalada y
+  del Electron de dev es **`13.0`** (Electron 44.4.5 lo fija así), igual que la propia app
+  vendored — la afirmación "macOS 13 Ventura o posterior" de Inicio es correcta, no hizo falta
+  cambiarla.
+- **Tamaños del primer arranque corregidos** a los números reales que muestra la propia ventana de
+  setup (capturados en `first-run-setup.png`, todos en MB decimales redondeados por la UI):
+  whisperModel 547 MB, voice es_AR-daniela-high 110 MB, es_ES-davefx-medium 64 MB,
+  es_MX-claude-high 64 MB, chromeHeadlessShell 94 MB — total **≈879 MB** (antes decía ≈920 MB,
+  calculado a mano desde `manifest.json` en bytes decimales; ahora coincide con lo que el usuario
+  ve en pantalla).
+- **Precio de DeepSeek actualizado** a lo que muestra hoy `settings-openrouter.png` (ver §6).
+- Sitio reconstruido, `check-links.mjs` reverificado (0 rotos, mismos 2 no-200 esperados) y las 14
+  capturas `site-*.png` retomadas y revisadas de nuevo — sin overflows (chequeo automatizado en
+  las 7 páginas × 2 anchos).

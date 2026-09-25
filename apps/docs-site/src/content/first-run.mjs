@@ -1,5 +1,5 @@
 import { APPROX_FIRST_RUN_DOWNLOAD_LABEL, APP_DISPLAY_NAME } from '../site-config.mjs';
-import { calloutBox, infoTable, pageHref, stepList } from '../render.mjs';
+import { calloutBox, infoTable, pageHref, screenshotFigure, stepList } from '../render.mjs';
 
 export function renderPage(depth) {
   const bodyHtml = `
@@ -15,12 +15,15 @@ ${stepList([
     title: 'Descarga de lo que hace falta para editar',
     bodyHtml: `<p>La app descarga los modelos que corren en tu máquina para transcribir, generar voces y renderizar
 video. Se puede cortar y retomar; se verifica el tamaño y el sha256 de cada archivo.</p>
+${screenshotFigure(depth, 'first-run-setup.png', 'Ventana de primer arranque mostrando la lista de descargas: modelo de transcripción, tres voces y el navegador para renderizar')}
 ${infoTable(
-  ['Qué se baja', 'Tamaño aprox.'],
+  ['Qué se baja', 'Tamaño'],
   [
-    ['Modelo de transcripción (whisper)', '≈574 MB'],
-    ['Tres voces en español (es_AR, es_ES, es_MX)', '≈250 MB'],
-    ['Navegador para renderizar (Chrome headless)', '≈98 MB'],
+    ['Modelo de transcripción (whisper)', '547 MB'],
+    ['Voz es_AR-daniela-high', '110 MB'],
+    ['Voz es_ES-davefx-medium', '64 MB'],
+    ['Voz es_MX-claude-high', '64 MB'],
+    ['Navegador para renderizar (Chrome headless)', '94 MB'],
     [`<strong>Total</strong>`, `<strong>${APPROX_FIRST_RUN_DOWNLOAD_LABEL}</strong>`],
   ],
 )}`,
