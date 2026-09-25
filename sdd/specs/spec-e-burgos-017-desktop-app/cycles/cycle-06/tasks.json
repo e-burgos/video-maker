@@ -167,7 +167,7 @@
     },
     {
       "id": "TASK-005",
-      "title": "Publish: create the public distribution repo, push the site, enable Pages and upload the first release (requires the dev's explicit confirmation)",
+      "title": "Publish: Cloudflare Pages project with the custom domain, Hostinger DNS record, GitHub secrets, the dmg uploaded to R2 and main fast-forwarded so the deploy workflow runs (confirmed by the dev)",
       "user_stories": [
         "US-017-501",
         "US-017-502"
@@ -177,10 +177,19 @@
       "depends_on": [
         "TASK-004"
       ],
-      "status": "pending",
+      "status": "done",
       "files": [
         "sdd/specs/spec-e-burgos-017-desktop-app/cycles/cycle-06/artifacts/publish-log.md"
-      ]
+      ],
+      "usage": {
+        "provider_model": "claude/opus",
+        "effort": "high",
+        "tokens_in": 45000,
+        "tokens_out": 8000,
+        "approx": true,
+        "source": "declared-estimate",
+        "recorded_at": "2026-09-25"
+      }
     },
     {
       "id": "TASK-006",
@@ -193,13 +202,26 @@
       "depends_on": [
         "TASK-005"
       ],
-      "status": "pending",
+      "status": "done",
       "files": [
-        "sdd/context/apps/docs-site/constitution.md",
+        "sdd/context/apps/docs-site/updates/2026-09-25-spec-e-burgos-017-desktop-app-cycle-06.md",
+        "sdd/context/apps/desktop/updates/2026-09-25-spec-e-burgos-017-desktop-app-cycle-06.md",
         "sdd/context/constitution.md",
+        "sdd/context/context_prompt.md",
         "sdd/specs/index.json",
-        "sdd/global.json"
-      ]
+        "sdd/global.json",
+        "sdd/specs/spec-e-burgos-017-desktop-app/spec-e-burgos-017-desktop-app.spec.md",
+        "sdd/specs/spec-e-burgos-017-desktop-app/cycles/cycle-06/cycle.json"
+      ],
+      "usage": {
+        "provider_model": "claude/opus",
+        "effort": "high",
+        "tokens_in": 40000,
+        "tokens_out": 9000,
+        "approx": true,
+        "source": "declared-estimate",
+        "recorded_at": "2026-09-25"
+      }
     }
   ]
 }

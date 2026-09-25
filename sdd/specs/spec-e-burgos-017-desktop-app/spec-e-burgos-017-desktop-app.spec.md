@@ -1,7 +1,7 @@
 # SPEC-e-burgos-017: Desktop App: el estudio como app de macOS autocontenida
 
-> Estado: **in-progress** — registrada el 2026-09-23. `cycle-01` abierto el 2026-09-23, flow `lite`
-> (`profile: solo`), con el contrato MCP que consumen los ciclos siguientes congelado en su `plan.md`.
+> Estado: **completed** — registrada el 2026-09-23, cerrada el 2026-09-25. Seis ciclos `lite`; versión 0.1.0
+> publicada en https://video.estebanburgos.com.ar.
 
 ## Resumen Ejecutivo
 
@@ -51,7 +51,7 @@ del cliente elimina casi todos esos problemas.
 | D-07 | API key de OpenRouter en el **llavero del sistema** (`safeStorage`) | Texto plano en disco o en SQLite |
 | D-08 | **Sin trial ni cobro**: la app se reparte entre amigos, no se vende (decisión del dev, 2026-09-23) | Trial local y pago simbólico: no hay a quién cobrarle |
 | D-09 | **App sin firmar** (firma ad hoc de Electron, sin cuenta de Apple Developer): la primera apertura se habilita desde Ajustes → Privacidad y seguridad → "Abrir igual", documentado en la web de la app | Firma y notarización (USD 99/año): se suma después sin rehacer nada si la app se abre a más gente. Sin firma no hay auto-actualización en macOS: cada versión se reinstala a mano |
-| D-10 | Distribución por **GitHub Releases de un repo público aparte** (el código sigue en el repo privado) más una **web de documentación en GitHub Pages** del mismo repo, con el botón de descarga apuntando a `releases/latest/download/<archivo>` | Hacer público el repo del código: expone todo el código. Releases del repo privado: tus amigos necesitarían acceso al repo |
+| D-10 | Distribución desde **este mismo repo**: web de documentación en **Cloudflare Pages** (`video.estebanburgos.com.ar`) desplegada por GitHub Actions y `.dmg` en **R2** servido por una Pages Function en `/descargas/*` (cambiado en `cycle-06` a pedido del dev; antes: repo público aparte con GitHub Releases y Pages) | Un repo público aparte: duplica mantenimiento. GitHub Releases del repo privado: los amigos necesitarían acceso. Pages no acepta el `.dmg` (límite de 25 MiB por archivo) |
 
 Esta spec **revierte** una exclusión de `spec-015` ("ejecutar el agente con key propia: es la
 suscripción o nada"): la suscripción sigue siendo el camino por defecto y la API key de OpenRouter

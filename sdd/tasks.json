@@ -412,9 +412,9 @@
             "apps/docs-site",
             "apps/desktop"
           ],
-          "status": "in-progress",
+          "status": "completed",
           "tasks_total": 6,
-          "tasks_done": 4
+          "tasks_done": 6
         }
       }
     }

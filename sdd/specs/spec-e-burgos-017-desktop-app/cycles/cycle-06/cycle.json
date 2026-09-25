@@ -14,35 +14,197 @@
     "Una web de documentación en español con el botón de descarga y la instalación explicada paso a paso, incluida la apertura sin firma",
     "El despliegue en GitHub Pages listo para copiar al repo público, sin publicar nada hasta que el dev lo confirme"
   ],
-  "status": "in-progress",
+  "status": "completed",
   "started_at": "2026-09-24",
-  "completed_at": null,
+  "completed_at": "2026-09-25",
   "documents": {
     "plan": "sdd/specs/spec-e-burgos-017-desktop-app/cycles/cycle-06/plan.md",
     "tasks": "sdd/specs/spec-e-burgos-017-desktop-app/cycles/cycle-06/tasks.json"
   },
   "artifacts": [
-    "sdd/specs/spec-e-burgos-017-desktop-app/cycles/cycle-06/artifacts/gatekeeper-not-opened.png",
     "sdd/specs/spec-e-burgos-017-desktop-app/cycles/cycle-06/artifacts/distribution-dry-run.md",
+    "sdd/specs/spec-e-burgos-017-desktop-app/cycles/cycle-06/artifacts/gatekeeper-not-opened.png",
+    "sdd/specs/spec-e-burgos-017-desktop-app/cycles/cycle-06/artifacts/publish-log.md",
+    "sdd/specs/spec-e-burgos-017-desktop-app/cycles/cycle-06/artifacts/site-conectar-ia-1440x900.png",
+    "sdd/specs/spec-e-burgos-017-desktop-app/cycles/cycle-06/artifacts/site-conectar-ia-390x844.png",
     "sdd/specs/spec-e-burgos-017-desktop-app/cycles/cycle-06/artifacts/site-inicio-1440x900.png",
     "sdd/specs/spec-e-burgos-017-desktop-app/cycles/cycle-06/artifacts/site-inicio-390x844.png",
     "sdd/specs/spec-e-burgos-017-desktop-app/cycles/cycle-06/artifacts/site-instalacion-1440x900.png",
     "sdd/specs/spec-e-burgos-017-desktop-app/cycles/cycle-06/artifacts/site-instalacion-390x844.png",
-    "sdd/specs/spec-e-burgos-017-desktop-app/cycles/cycle-06/artifacts/site-primer-arranque-1440x900.png",
-    "sdd/specs/spec-e-burgos-017-desktop-app/cycles/cycle-06/artifacts/site-primer-arranque-390x844.png",
-    "sdd/specs/spec-e-burgos-017-desktop-app/cycles/cycle-06/artifacts/site-conectar-ia-1440x900.png",
-    "sdd/specs/spec-e-burgos-017-desktop-app/cycles/cycle-06/artifacts/site-conectar-ia-390x844.png",
-    "sdd/specs/spec-e-burgos-017-desktop-app/cycles/cycle-06/artifacts/site-usar-el-estudio-1440x900.png",
-    "sdd/specs/spec-e-burgos-017-desktop-app/cycles/cycle-06/artifacts/site-usar-el-estudio-390x844.png",
+    "sdd/specs/spec-e-burgos-017-desktop-app/cycles/cycle-06/artifacts/site-licencias-1440x900.png",
+    "sdd/specs/spec-e-burgos-017-desktop-app/cycles/cycle-06/artifacts/site-licencias-390x844.png",
     "sdd/specs/spec-e-burgos-017-desktop-app/cycles/cycle-06/artifacts/site-preguntas-frecuentes-1440x900.png",
     "sdd/specs/spec-e-burgos-017-desktop-app/cycles/cycle-06/artifacts/site-preguntas-frecuentes-390x844.png",
-    "sdd/specs/spec-e-burgos-017-desktop-app/cycles/cycle-06/artifacts/site-licencias-1440x900.png",
-    "sdd/specs/spec-e-burgos-017-desktop-app/cycles/cycle-06/artifacts/site-licencias-390x844.png"
+    "sdd/specs/spec-e-burgos-017-desktop-app/cycles/cycle-06/artifacts/site-primer-arranque-1440x900.png",
+    "sdd/specs/spec-e-burgos-017-desktop-app/cycles/cycle-06/artifacts/site-primer-arranque-390x844.png",
+    "sdd/specs/spec-e-burgos-017-desktop-app/cycles/cycle-06/artifacts/site-usar-el-estudio-1440x900.png",
+    "sdd/specs/spec-e-burgos-017-desktop-app/cycles/cycle-06/artifacts/site-usar-el-estudio-390x844.png"
   ],
-  "metrics": null,
+  "metrics": {
+    "tasks_total": 6,
+    "tasks_completed": 6,
+    "story_points": 15,
+    "files_created": [
+      ".github/workflows/deploy-docs-site.yml",
+      "apps/desktop/CHANGELOG.md",
+      "apps/desktop/e2e/capture-app-screenshots.mjs",
+      "apps/desktop/scripts/release-desktop.mjs",
+      "apps/desktop/scripts/release-desktop.spec.mjs",
+      "apps/docs-site/functions/descargas/[[path]].js",
+      "apps/docs-site/functions/descargas/[[path]].spec.mjs",
+      "apps/docs-site/project.json",
+      "apps/docs-site/public/screenshots/first-run-setup.png",
+      "apps/docs-site/public/screenshots/gatekeeper-not-opened.png",
+      "apps/docs-site/public/screenshots/home-projects.png",
+      "apps/docs-site/public/screenshots/material-tab.png",
+      "apps/docs-site/public/screenshots/proposal-card.png",
+      "apps/docs-site/public/screenshots/settings-openrouter.png",
+      "apps/docs-site/public/screenshots/workspace-preview.png",
+      "apps/docs-site/scripts/build.mjs",
+      "apps/docs-site/scripts/capture-screenshots.mjs",
+      "apps/docs-site/scripts/check-links.mjs",
+      "apps/docs-site/scripts/serve-dist.mjs",
+      "apps/docs-site/src/content/connect-ai.mjs",
+      "apps/docs-site/src/content/faq.mjs",
+      "apps/docs-site/src/content/first-run.mjs",
+      "apps/docs-site/src/content/home.mjs",
+      "apps/docs-site/src/content/installation.mjs",
+      "apps/docs-site/src/content/licenses.mjs",
+      "apps/docs-site/src/content/using-studio.mjs",
+      "apps/docs-site/src/markdown-lite.mjs",
+      "apps/docs-site/src/render.mjs",
+      "apps/docs-site/src/site-config.mjs",
+      "apps/docs-site/src/styles.css",
+      "apps/docs-site/vite.config.ts",
+      "apps/docs-site/wrangler.toml",
+      "sdd/context/apps/desktop/updates/2026-09-25-spec-e-burgos-017-desktop-app-cycle-06.md",
+      "sdd/context/apps/docs-site/updates/2026-09-25-spec-e-burgos-017-desktop-app-cycle-06.md"
+    ],
+    "files_modified": [
+      "apps/desktop/electron-builder.yml",
+      "apps/desktop/package.json",
+      "apps/desktop/scripts/vendor-binaries.mjs",
+      "apps/desktop/vendor/THIRD_PARTY_NOTICES.md",
+      "apps/desktop/vite.config.ts",
+      "package.json",
+      "sdd/catalog.json",
+      "sdd/context/constitution.md",
+      "sdd/context/context_prompt.md",
+      "sdd/memory/lessons.md",
+      "sdd/specs/spec-e-burgos-017-desktop-app/cycles/cycle-06/cycle.json",
+      "sdd/specs/spec-e-burgos-017-desktop-app/cycles/cycle-06/plan.md",
+      "sdd/specs/spec-e-burgos-017-desktop-app/cycles/cycle-06/tasks.json",
+      "sdd/specs/spec-e-burgos-017-desktop-app/spec-e-burgos-017-desktop-app.spec.md",
+      "sdd/tasks.json"
+    ],
+    "files_deleted": [
+      "sdd/memory/journal/2026-09-20-fix-e-burgos-001-003.md",
+      "sdd/memory/journal/2026-09-23-spec-e-burgos-017-desktop-app-cycle-01.md",
+      "sdd/memory/journal/2026-09-23-spec-e-burgos-017-desktop-app-cycle-02.md",
+      "sdd/memory/journal/2026-09-24-spec-e-burgos-017-desktop-app-cycle-03.md",
+      "sdd/memory/journal/2026-09-24-spec-e-burgos-017-desktop-app-cycle-05.md"
+    ],
+    "usage": {
+      "tokens_in": 770030,
+      "tokens_out": 139711,
+      "approx": true,
+      "source": "agent-usage-notification",
+      "by_agent": [
+        {
+          "agent": "implementor-front",
+          "label": "TASK-001..004 release y sitio",
+          "provider_model": "claude/sonnet",
+          "effort": "high",
+          "tokens_in": 392326,
+          "tokens_out": 69234,
+          "tokens_total": 461560,
+          "approx": true,
+          "source": "agent-usage-notification",
+          "recorded_at": "2026-09-25"
+        },
+        {
+          "agent": "implementor-back",
+          "label": "cambio a Cloudflare",
+          "provider_model": "claude/sonnet",
+          "effort": "high",
+          "tokens_in": 150368,
+          "tokens_out": 26535,
+          "tokens_total": 176903,
+          "approx": true,
+          "source": "agent-usage-notification",
+          "recorded_at": "2026-09-25"
+        },
+        {
+          "agent": "custom",
+          "label": "destilación de memoria",
+          "provider_model": "claude/sonnet",
+          "effort": "medium",
+          "tokens_in": 107336,
+          "tokens_out": 18942,
+          "tokens_total": 126278,
+          "approx": true,
+          "source": "agent-usage-notification",
+          "recorded_at": "2026-09-25"
+        },
+        {
+          "agent": "orchestrator",
+          "label": "plan, revisión, publicación y cierre",
+          "provider_model": "claude/opus",
+          "effort": "high",
+          "tokens_in": 120000,
+          "tokens_out": 25000,
+          "tokens_total": 145000,
+          "approx": true,
+          "source": "declared-estimate",
+          "recorded_at": "2026-09-25"
+        }
+      ],
+      "by_tier": {
+        "claude/sonnet": {
+          "tokens_in": 650030,
+          "tokens_out": 114711,
+          "approx": true,
+          "source": "agent-usage-notification"
+        },
+        "claude/opus": {
+          "tokens_in": 120000,
+          "tokens_out": 25000,
+          "approx": true,
+          "source": "declared-estimate"
+        }
+      }
+    }
+  },
   "tables_created": [],
   "endpoints_implemented": [],
   "components_created": [],
-  "issues_found": [],
-  "reviewer_report": null
+  "issues_found": [
+    "El destino cambió a pedido del dev de repo público + GitHub Releases/Pages a Cloudflare Pages + R2 desde este repo.",
+    "video-maker.pages.dev estaba tomado por otra cuenta: el proyecto quedó en video-maker-bqo.pages.dev y el CNAME se corrigió.",
+    "El token de Cloudflare no tenía permiso de R2 y la sesión de wrangler había vencido; el dev agregó el permiso.",
+    "Las primeras capturas del sitio mostraban una versión vieja de la interfaz; se reemplazaron por capturas de la app instalada.",
+    "El aviso de licencias tenía un placeholder de Electron y la app no incluía las licencias de Electron y Chromium; se agregaron.",
+    "main local tenía 4 commits de fixes sin subir; el fast-forward los publicó junto con la spec."
+  ],
+  "reviewer_report": {
+    "approved": true,
+    "date": "2026-09-25",
+    "ca_results": {
+      "US-017-501": "PASS — pnpm desktop:release --publish subió Video-Maker-0.1.0-arm64.dmg y Video-Maker-arm64.dmg a R2; el HEAD desde el dominio devuelve el mismo tamaño y la descarga completa tiene el mismo sha256 que el build local.",
+      "US-017-502": "PASS — https://video.estebanburgos.com.ar responde 200 con el botón de descarga funcionando (200, application/x-apple-diskimage, Range → 206); capturas a 1440 y 390 px revisadas.",
+      "US-017-503": "PASS — guía de instalación con la captura real del diálogo de macOS, los pasos de 'Abrir igual' en español e inglés, el comando alternativo, primer arranque, conexión con Claude u OpenRouter con precios vigentes y preguntas frecuentes."
+    },
+    "tests": {
+      "sdd:validate": "OK",
+      "suite": "nx run-many -t lint test build verde; en GitHub: CI, SDD validate y Deploy Docs Site en verde sobre main",
+      "e2e": "verificación en vivo del dominio, de /descargas (200, 206, 404) y sha256 de la descarga completa — artifacts/publish-log.md"
+    },
+    "notes": "Ciclo lite. La publicación se hizo con la confirmación explícita del dev y sus propios tokens, sin imprimirlos. La spec 017 queda completa.",
+    "follow_ups": [
+      "Probar la instalación en la Mac de un amigo siguiendo solo la web.",
+      "Benchmark de modelos gratuitos de OpenRouter.",
+      "Storyboard con OpenRouter.",
+      "Búsqueda de video y fotos libres para B-roll y una herramienta para mirar fotos."
+    ]
+  }
 }
