@@ -14,6 +14,7 @@ export type ProducerWelcomeProps = {
   assets: AssetListing | null;
   onDraft: (text: string) => void;
   hasTimedScript?: boolean;
+  compact?: boolean;
 };
 
 export type InventoryEntry = {
@@ -59,7 +60,13 @@ function inventoryLabel(role: string, t: TranslateFn): string {
   return isKnownAssetRole(role) ? t(assetRoleCopy(role).shortNameKey) : role;
 }
 
-export function ProducerWelcome({ slug, assets, onDraft, hasTimedScript = false }: ProducerWelcomeProps) {
+export function ProducerWelcome({
+  slug,
+  assets,
+  onDraft,
+  hasTimedScript = false,
+  compact = false,
+}: ProducerWelcomeProps) {
   const t = useT();
   const tn = useTn();
   const { language } = useLanguage();
@@ -69,6 +76,33 @@ export function ProducerWelcome({ slug, assets, onDraft, hasTimedScript = false 
 
   async function draftRecipe(id: ProducerRecipeId) {
     onDraft(await loadRecipePrompt(id, language, { hasTimedScript }));
+  }
+
+  if (compact) {
+    return (
+      <div
+        data-testid="producer-welcome"
+        data-compact="true"
+        className="space-y-2 rounded-lg border border-slate-800 bg-slate-900/40 p-3"
+      >
+        <p className="text-sm font-medium text-ink">{t('producer.welcomeTitle')}</p>
+        <ul data-testid="producer-recipes" className="flex flex-wrap gap-2">
+          {PRODUCER_RECIPES.map((recipe) => (
+            <li key={recipe.id}>
+              <button
+                type="button"
+                data-recipe={recipe.id}
+                title={t(recipe.descriptionKey)}
+                onClick={() => void draftRecipe(recipe.id)}
+                className="rounded-full border border-emerald-400/60 bg-emerald-400/10 px-3 py-1 text-xs font-semibold text-emerald-100"
+              >
+                {t(recipe.labelKey)}
+              </button>
+            </li>
+          ))}
+        </ul>
+      </div>
+    );
   }
 
   return (
@@ -84,9 +118,7 @@ export function ProducerWelcome({ slug, assets, onDraft, hasTimedScript = false 
       </div>
 
       <div data-testid="producer-inventory" className="space-y-2">
-        <p className="font-mono text-xs uppercase tracking-wide text-slate-500">
-          {t('producer.inventoryHeading')}
-        </p>
+        <p className="text-xs font-medium text-ink-faint">{t('producer.inventoryHeading')}</p>
         {hasMaterial ? (
           <ul className="flex flex-wrap gap-2">
             {inventory.map((entry) => (
@@ -114,7 +146,7 @@ export function ProducerWelcome({ slug, assets, onDraft, hasTimedScript = false 
       </div>
 
       <div className="space-y-2">
-        <p className="font-mono text-xs uppercase tracking-wide text-slate-500">
+        <p className="text-xs font-medium text-ink-faint">
           {t('producer.recipesHeading')}
         </p>
         <ul data-testid="producer-recipes" className="grid gap-2 sm:grid-cols-3">
@@ -148,7 +180,7 @@ export function ProducerWelcome({ slug, assets, onDraft, hasTimedScript = false 
       </div>
 
       <div className="space-y-2">
-        <p className="font-mono text-xs uppercase tracking-wide text-slate-500">
+        <p className="text-xs font-medium text-ink-faint">
           {t('producer.startersHeading')}
         </p>
         <ul data-testid="producer-starters" className="flex flex-wrap gap-2">

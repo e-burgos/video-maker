@@ -33,11 +33,11 @@ describe('translate', () => {
     expect(translate(CATALOG, 'health.ok', { cycle: 7 })).toBe('servicio ok · ciclo 7');
   });
 
-  it('falls back to english when the active catalog lacks the key', () => {
+  it('falls back to the raw key when the active catalog lacks it: real catalogs never do, parity is enforced elsewhere', () => {
     const partial = { 'projects.title': 'Proyectos' } as unknown as Messages;
 
     expect(translate(partial, 'projects.title')).toBe('Proyectos');
-    expect(translate(partial, 'projects.loading')).toBe(MESSAGES_EN['projects.loading']);
+    expect(translate(partial, 'projects.loading')).toBe('projects.loading');
   });
 
   it('never renders undefined for a key no catalog carries', () => {

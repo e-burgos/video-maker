@@ -1013,6 +1013,11 @@
             "cycle": 4,
             "date": "2026-09-24",
             "change": "Shows the active producer engine next to the model picker, offers the models of the effective engine from the caller, and links to /settings when no engine is available."
+          },
+          {
+            "cycle": 5,
+            "date": "2026-09-24",
+            "change": "Design-review polish: section label and send-hint go from mono uppercase to the UI sans (small, medium weight, sentence case, muted), and the model line merges the chosen model description with the active-engine note into a single line (e.g. \"Sonnet — Equilibrado, rapido y economico · con Claude\")."
           }
         ]
       },
@@ -1060,6 +1065,11 @@
             "date": "2026-09-20",
             "change": "FIX-e-burgos-015-005: suma la fila Recetas encima de las sugerencias sueltas, con el chip Tutorial; al tocarlo escribe en el compositor el prompt completo de la receta en el idioma de la UI, cargado perezosamente desde api/producer-recipe-prompts.ts.",
             "fix": "FIX-e-burgos-015-005"
+          },
+          {
+            "cycle": 5,
+            "date": "2026-09-24",
+            "change": "Adds a compact mode: when the caller has pending proposal cards (or any messages), the welcome collapses to a one-line header plus the recipe chips instead of the full inventory/recipes/starters layout, so pending cards always have room above the composer. Section labels also move from mono uppercase to sentence-case sans."
           }
         ]
       },
@@ -1280,7 +1290,7 @@
         "status": "updated",
         "created_in_cycle": 5,
         "updated_in_cycle": 5,
-        "description": "Columna de chat del espacio de trabajo: bienvenida o lista de mensajes, actividad del turno, la seam ChatDropZonePlaceholder para TASK-003 y el compositor, todo a partir del resultado de useProducerConversation. Extraido de producer-page.tsx para reusarlo sin duplicar el estado del productor.",
+        "description": "Columna de chat del espacio de trabajo: bienvenida (o su version compacta) o lista de mensajes, actividad del turno, la pila fija de tarjetas de propuesta y uploads pendientes, el ChatDropZone y el compositor, todo a partir del resultado de useProducerConversation. Extraido de producer-page.tsx para reusarlo sin duplicar el estado del productor.",
         "consumes": [],
         "created_at": "2026-09-24",
         "changelog": [
@@ -1288,6 +1298,11 @@
             "cycle": 5,
             "date": "2026-09-24",
             "change": "TASK-003: whole-column drag & drop with a visible overlay, ChatDropZone attach button, inline AssetProposalCard list from useInboxUploads (persisted pending assets survive reload), and useStickToBottom so a new card or upload entry is visible without manual scrolling."
+          },
+          {
+            "cycle": 5,
+            "date": "2026-09-24",
+            "change": "Fix: pending AssetProposalCards and the upload list move out of the long scrollable message area into a dedicated stack pinned directly above ChatDropZone/ProducerComposer, so they are always visible regardless of scroll position or load timing; ProducerWelcome switches to compact mode while any card is pending."
           }
         ]
       },

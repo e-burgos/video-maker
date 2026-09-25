@@ -30,7 +30,7 @@ function renderComposer(overrides: Partial<Parameters<typeof ProducerComposer>[0
 }
 
 function modelPicker(): HTMLSelectElement {
-  return screen.getByLabelText('model') as HTMLSelectElement;
+  return screen.getByLabelText('Model') as HTMLSelectElement;
 }
 
 function textarea(): HTMLTextAreaElement {
@@ -96,7 +96,9 @@ describe('ProducerComposer', () => {
       'haiku',
     ]);
     expect(modelPicker().value).toBe('sonnet');
-    expect(screen.getByTestId('producer-model-help').textContent).toBe('Balanced · faster, cheaper');
+    expect(screen.getByTestId('producer-model-help').textContent).toBe(
+      'Sonnet — Balanced, faster and cheaper',
+    );
 
     fireEvent.change(modelPicker(), { target: { value: 'haiku' } });
 
@@ -108,7 +110,7 @@ describe('ProducerComposer', () => {
 
     expect(modelPicker().value).toBe('opus');
     expect(screen.getByTestId('producer-model-help').textContent).toBe(
-      'Most capable · slower, costlier',
+      'Opus — Most capable, slower and costlier',
     );
   });
 
@@ -143,15 +145,19 @@ describe('ProducerComposer', () => {
     expect(screen.queryByTestId('producer-composer-settings-link')).toBeNull();
   });
 
-  it('shows the active engine next to the model picker', () => {
+  it('folds the active engine into the same model help line', () => {
     renderComposer({ activeEngine: 'openrouter' });
 
-    expect(screen.getByTestId('producer-active-engine').textContent).toBe('with OpenRouter');
+    expect(screen.getByTestId('producer-model-help').textContent).toBe(
+      'Sonnet — Balanced, faster and cheaper · with OpenRouter',
+    );
   });
 
-  it('shows nothing about the engine when it is not known', () => {
+  it('leaves the engine out of the line when it is not known', () => {
     renderComposer({ activeEngine: null });
 
-    expect(screen.queryByTestId('producer-active-engine')).toBeNull();
+    expect(screen.getByTestId('producer-model-help').textContent).toBe(
+      'Sonnet — Balanced, faster and cheaper',
+    );
   });
 });

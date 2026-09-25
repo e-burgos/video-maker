@@ -64,7 +64,7 @@ export function ProducerComposer({
 
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div className="flex items-center gap-2">
-          <label htmlFor="producer-model" className="font-mono text-[11px] uppercase tracking-wide text-slate-500">
+          <label htmlFor="producer-model" className="text-xs font-medium text-ink-faint">
             {t('producer.modelLabel')}
           </label>
           <select
@@ -83,19 +83,13 @@ export function ProducerComposer({
             ))}
           </select>
           {chosen !== null && (
-            <span data-testid="producer-model-help" className="text-[11px] text-slate-500">
-              {chosen.description}
-            </span>
-          )}
-          {activeEngine !== null && (
-            <span data-testid="producer-active-engine" className="text-[11px] text-slate-500">
-              {producerEngineActiveLabel(t, activeEngine)}
+            <span data-testid="producer-model-help" className="text-xs text-ink-faint">
+              {chosen.label} — {chosen.description}
+              {activeEngine !== null && ` · ${producerEngineActiveLabel(t, activeEngine)}`}
             </span>
           )}
         </div>
-        <p className="font-mono text-[11px] text-slate-500">
-          {t('producer.sendHint')}
-        </p>
+        <p className="text-xs text-ink-faint">{t('producer.sendHint')}</p>
         <button
           type="button"
           disabled={disabled}

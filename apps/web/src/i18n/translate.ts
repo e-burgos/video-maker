@@ -1,4 +1,3 @@
-import { MESSAGES_EN } from './messages-en';
 import type { Messages, TranslationKey } from './messages-en';
 
 export type TranslationParams = Readonly<Record<string, string | number>>;
@@ -21,7 +20,7 @@ export function translate(
   key: TranslationKey,
   params?: TranslationParams,
 ): string {
-  const template = messages[key] ?? MESSAGES_EN[key] ?? key;
+  const template = messages[key] ?? key;
   return interpolate(template, params);
 }
 

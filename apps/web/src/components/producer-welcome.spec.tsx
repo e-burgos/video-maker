@@ -114,6 +114,23 @@ describe('ProducerWelcome', () => {
 
     expect(screen.getByTestId('producer-inventory').textContent).toContain('No raw material yet');
   });
+
+  it('collapses to a one-line header with only recipe chips when compact', async () => {
+    const onDraft = vi.fn();
+    render(
+      <MemoryRouter>
+        <ProducerWelcome slug="demo-01" assets={listing(['aroll'])} onDraft={onDraft} compact />
+      </MemoryRouter>,
+    );
+
+    expect(screen.getByText('Tell the producer what you want to make')).toBeTruthy();
+    expect(screen.queryByTestId('producer-inventory')).toBeNull();
+    expect(screen.queryByTestId('producer-starters')).toBeNull();
+    expect(screen.getByTestId('producer-recipes').querySelectorAll('button')).toHaveLength(3);
+
+    fireEvent.click(screen.getByRole('button', { name: 'Tutorial' }));
+    await waitFor(() => expect(onDraft).toHaveBeenCalled());
+  });
 });
 
 describe('ProducerWelcome starters (FIX-e-burgos-007-002)', () => {
@@ -193,7 +210,7 @@ describe('ProducerWelcome recipes (FIX-e-burgos-015-005)', () => {
   it('drafts the recipe in the language of the ui, not in the language of the catalog default', async () => {
     const onDraft = renderWelcomeIn('es', listing(['aroll']));
 
-    await screen.findByText('recetas que ya salieron bien');
+    await screen.findByText('Recetas que ya salieron bien');
     fireEvent.click(screen.getByRole('button', { name: 'Tutorial' }));
 
     await waitFor(() => {

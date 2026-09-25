@@ -205,6 +205,33 @@ describe('ProducerConversationPanel', () => {
     await waitFor(() => expect(reloadAssets).toHaveBeenCalled());
   });
 
+  it('shows the proposal cards in a dedicated stack above the composer, never inside the long scroll area, with the welcome collapsed to one line', async () => {
+    renderPanel(fakeProducer(), {
+      pinned: true,
+      client: { listInbox: vi.fn().mockResolvedValue({ assets: [inboxAsset()] }) },
+    });
+
+    const proposalList = await screen.findByTestId('asset-proposal-list');
+    const scrollArea = screen.getByTestId('producer-conversation-panel').querySelector('.overflow-y-auto');
+
+    expect(scrollArea).not.toBeNull();
+    expect(scrollArea?.contains(proposalList)).toBe(false);
+
+    const welcome = screen.getByTestId('producer-welcome');
+    expect(welcome.dataset['compact']).toBe('true');
+    expect(screen.queryByTestId('producer-inventory')).toBeNull();
+    expect(screen.queryByTestId('producer-starters')).toBeNull();
+  });
+
+  it('keeps the full welcome, with material and starters, when there is no pending card', () => {
+    renderPanel(fakeProducer());
+
+    const welcome = screen.getByTestId('producer-welcome');
+    expect(welcome.dataset['compact']).toBeUndefined();
+    expect(screen.getByTestId('producer-inventory')).toBeTruthy();
+    expect(screen.getByTestId('producer-starters')).toBeTruthy();
+  });
+
   it('discards a proposal card without touching the material listing', async () => {
     const discardInboxAsset = vi.fn().mockResolvedValue({
       slug: 'demo-01',

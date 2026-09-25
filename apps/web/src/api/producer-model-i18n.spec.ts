@@ -11,7 +11,7 @@ describe('translateProducerModel', () => {
     expect(translateProducerModel(t, { id: 'sonnet', label: 'Sonnet', description: 'Balanced · faster, cheaper' })).toEqual({
       id: 'sonnet',
       label: 'Sonnet',
-      description: 'Equilibrado · más rápido y económico',
+      description: 'Equilibrado, rápido y económico',
     });
   });
 

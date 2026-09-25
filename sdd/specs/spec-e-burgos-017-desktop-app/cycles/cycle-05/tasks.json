@@ -205,14 +205,19 @@
         "sdd/specs/spec-e-burgos-017-desktop-app/cycles/cycle-05/artifacts/task3-04-pending-survives-reload-1440.png",
         "sdd/specs/spec-e-burgos-017-desktop-app/cycles/cycle-05/artifacts/task3-05-narrow-900.png",
         "apps/web/src/components/chat-drop-zone-placeholder.tsx (removed, replaced by chat-drop-zone.tsx)",
-        "apps/web/src/components/chat-drop-zone-placeholder.spec.tsx (removed)"
+        "apps/web/src/components/chat-drop-zone-placeholder.spec.tsx (removed)",
+        "apps/web/src/components/producer-welcome.tsx",
+        "apps/web/src/components/producer-welcome.spec.tsx",
+        "apps/web/src/components/producer-composer.tsx",
+        "apps/web/src/components/producer-composer.spec.tsx",
+        "apps/web/src/api/producer-model-i18n.spec.ts"
       ],
       "usage": {
         "provider_model": "claude/sonnet",
         "effort": "high",
         "agent": "implementor-front",
-        "tokens_in": 190000,
-        "tokens_out": 30000,
+        "tokens_in": 230000,
+        "tokens_out": 37000,
         "approx": true,
         "source": "declared-estimate",
         "recorded_at": "2026-09-24"
@@ -277,11 +282,24 @@
         "TASK-003",
         "TASK-004"
       ],
-      "status": "pending",
+      "status": "done",
       "files": [
         "apps/web/vite.config.ts",
-        "apps/web/src/app/app.tsx"
-      ]
+        "apps/web/src/i18n/language-context.tsx",
+        "apps/web/src/i18n/translate.ts",
+        "apps/web/src/i18n/translate.spec.ts",
+        "apps/web/src/test-setup.ts"
+      ],
+      "usage": {
+        "provider_model": "claude/sonnet",
+        "effort": "high",
+        "agent": "implementor-front",
+        "tokens_in": 140000,
+        "tokens_out": 21000,
+        "approx": true,
+        "source": "declared-estimate",
+        "recorded_at": "2026-09-24"
+      }
     },
     {
       "id": "TASK-006",

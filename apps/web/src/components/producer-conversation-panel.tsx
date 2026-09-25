@@ -128,6 +128,7 @@ export function ProducerConversationPanel({ producer, pinned = false }: Producer
               assets={assets.data}
               onDraft={setDraft}
               hasTimedScript={hasTimedScript}
+              compact={pendingAssets.length > 0}
             />
           )}
 
@@ -146,57 +147,60 @@ export function ProducerConversationPanel({ producer, pinned = false }: Producer
             canceling={cancelPending}
             onCancel={() => void cancel()}
           />
-
-          {pendingAssets.length > 0 && (
-            <div data-testid="asset-proposal-list" className="space-y-2">
-              {pendingAssets.map((asset) => (
-                <AssetProposalCard
-                  key={asset.id}
-                  slug={slug}
-                  asset={asset}
-                  onConfirm={confirmAsset}
-                  onDiscard={inbox.discard}
-                />
-              ))}
-            </div>
-          )}
-
-          {visibleUploads.length > 0 && (
-            <ul data-testid="inbox-upload-list" className="space-y-1">
-              {visibleUploads.map((entry) => (
-                <li
-                  key={entry.id}
-                  data-testid="inbox-upload-entry"
-                  data-status={entry.status}
-                  className="flex items-center justify-between gap-2 rounded-control border border-border-subtle px-2 py-1 text-xs text-ink-faint"
-                >
-                  {entry.status === 'uploading' && (
-                    <span>{t('inbox.upload.uploading', { fileName: entry.fileName })}</span>
-                  )}
-                  {entry.status === 'error' && (
-                    <span className="text-danger">
-                      {entry.errorCode === 'UNSUPPORTED_MEDIA_TYPE'
-                        ? t('inbox.upload.unsupported', { fileName: entry.fileName })
-                        : t('inbox.upload.failed', { fileName: entry.fileName, code: entry.errorCode ?? '' })}
-                    </span>
-                  )}
-                  {entry.status === 'error' && (
-                    <button
-                      type="button"
-                      onClick={() => inbox.dismissUpload(entry.id)}
-                      className="shrink-0 text-ink-faint underline"
-                    >
-                      {t('inbox.upload.dismiss')}
-                    </button>
-                  )}
-                </li>
-              ))}
-            </ul>
-          )}
         </div>
       </div>
 
       <div className={pinned ? 'shrink-0 space-y-2 pt-3' : 'space-y-2'}>
+        {pendingAssets.length > 0 && (
+          <div
+            data-testid="asset-proposal-list"
+            className="max-h-64 space-y-2 overflow-y-auto"
+          >
+            {pendingAssets.map((asset) => (
+              <AssetProposalCard
+                key={asset.id}
+                slug={slug}
+                asset={asset}
+                onConfirm={confirmAsset}
+                onDiscard={inbox.discard}
+              />
+            ))}
+          </div>
+        )}
+
+        {visibleUploads.length > 0 && (
+          <ul data-testid="inbox-upload-list" className="space-y-1">
+            {visibleUploads.map((entry) => (
+              <li
+                key={entry.id}
+                data-testid="inbox-upload-entry"
+                data-status={entry.status}
+                className="flex items-center justify-between gap-2 rounded-control border border-border-subtle px-2 py-1 text-xs text-ink-faint"
+              >
+                {entry.status === 'uploading' && (
+                  <span>{t('inbox.upload.uploading', { fileName: entry.fileName })}</span>
+                )}
+                {entry.status === 'error' && (
+                  <span className="text-danger">
+                    {entry.errorCode === 'UNSUPPORTED_MEDIA_TYPE'
+                      ? t('inbox.upload.unsupported', { fileName: entry.fileName })
+                      : t('inbox.upload.failed', { fileName: entry.fileName, code: entry.errorCode ?? '' })}
+                  </span>
+                )}
+                {entry.status === 'error' && (
+                  <button
+                    type="button"
+                    onClick={() => inbox.dismissUpload(entry.id)}
+                    className="shrink-0 text-ink-faint underline"
+                  >
+                    {t('inbox.upload.dismiss')}
+                  </button>
+                )}
+              </li>
+            ))}
+          </ul>
+        )}
+
         <ChatDropZone onFiles={(files) => void inbox.uploadFiles(files)} />
 
         <ProducerComposer
