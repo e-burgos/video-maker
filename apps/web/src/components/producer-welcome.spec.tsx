@@ -82,8 +82,8 @@ describe('ProducerWelcome', () => {
     renderWelcome(listing(['aroll', 'aroll', 'audio']));
 
     const inventory = screen.getByTestId('producer-inventory');
-    expect(inventory.querySelector('[data-role="aroll"]')?.textContent).toBe('aroll · 2');
-    expect(inventory.querySelector('[data-role="audio"]')?.textContent).toBe('audio · 1');
+    expect(inventory.querySelector('[data-role="aroll"]')?.textContent).toBe('A-roll · 2 files');
+    expect(inventory.querySelector('[data-role="audio"]')?.textContent).toBe('Music · 1 file');
   });
 
   it('drops a starter into the composer instead of sending it, so it can be finished', () => {
@@ -168,6 +168,14 @@ describe('ProducerWelcome recipes (FIX-e-burgos-015-005)', () => {
     renderWelcome(listing(['aroll']));
 
     expect(screen.getByTestId('producer-recipes').textContent).toContain('YouTube 16:9');
+  });
+
+  it('keeps the recipe descriptions collapsed behind a "read more" disclosure, not a button', () => {
+    renderWelcome(listing(['aroll']));
+
+    const recipes = screen.getByTestId('producer-recipes');
+    expect(recipes.querySelectorAll('details')).toHaveLength(3);
+    expect(recipes.querySelectorAll('button')).toHaveLength(3);
   });
 
   it('drops the whole recipe prompt into the composer instead of sending it', async () => {

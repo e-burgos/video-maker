@@ -2,16 +2,26 @@ import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
 import { describe, expect, it, vi } from 'vitest';
 
+import { RAW_PREVIEW_TIMELINE } from '../api/__fixtures__/timeline';
 import { assetEntry, assetListing, jobListing, succeededJob } from '../api/__fixtures__/workspace';
 import { RenderApiProvider } from '../api/render-api-context';
-import { RenderApiError } from '../api/render-api-error';
 import { WorkspaceSidePanel } from './workspace-side-panel';
 import type { RenderApiClient } from '../api/render-api-client';
 import type { AsyncResource } from '../hooks/use-async-resource';
-import type { AssetListing, RenderJobListing } from '../api/render-api-types';
+import type { AssetListing, ProjectDetail, RenderJobListing } from '../api/render-api-types';
 
 function readyResource<T>(data: T): AsyncResource<T> {
   return { status: 'ready', data, error: null, isRefreshing: false, reload: vi.fn() };
+}
+
+function projectDetail(overrides: Partial<ProjectDetail> = {}): ProjectDetail {
+  return {
+    slug: 'demo-01',
+    layout: { raw: true, catalog: true, timeline: false, edl: false, out: false },
+    assetSource: 'catalog',
+    assetCounts: { aroll: 0, broll: 0, image: 0, audio: 0, voice: 0, logo: 0 },
+    ...overrides,
+  };
 }
 
 function renderPanel(options: {
@@ -21,7 +31,8 @@ function renderPanel(options: {
   activeTab?: 'preview' | 'material' | 'deliveries';
 } = {}) {
   const client = {
-    getTimeline: vi.fn().mockRejectedValue(new RenderApiError('TIMELINE_NOT_FOUND', 'none', 404, null)),
+    getProject: vi.fn().mockResolvedValue(projectDetail()),
+    getTimeline: vi.fn(),
     ...options.client,
   } as unknown as RenderApiClient;
 
@@ -63,10 +74,27 @@ describe('WorkspaceSidePanel', () => {
     );
   });
 
-  it('shows an empty state in preview when there is no render and no timeline', async () => {
-    renderPanel();
+  it('shows an empty state in preview when there is no render and no timeline, without a speculative 404', async () => {
+    const { client } = renderPanel();
 
     await waitFor(() => expect(screen.getByTestId('workspace-preview-empty')).toBeTruthy());
+    expect(client.getTimeline).not.toHaveBeenCalled();
+  });
+
+  it('loads and renders the timeline only once the project detail confirms it exists', async () => {
+    const getTimeline = vi.fn().mockResolvedValue(RAW_PREVIEW_TIMELINE);
+
+    renderPanel({
+      client: {
+        getProject: vi.fn().mockResolvedValue(
+          projectDetail({ layout: { raw: true, catalog: true, timeline: true, edl: false, out: false } }),
+        ),
+        getTimeline,
+      },
+    });
+
+    await waitFor(() => expect(screen.getByTestId('timeline-player')).toBeTruthy());
+    expect(getTimeline).toHaveBeenCalledWith('demo-01');
   });
 
   it('groups material by role and links to the full library', () => {

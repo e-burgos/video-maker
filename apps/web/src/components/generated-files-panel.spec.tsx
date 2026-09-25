@@ -154,4 +154,21 @@ describe('GeneratedFilesPanel (FIX-006-001)', () => {
     expect(await screen.findByTestId('generated-empty')).toBeTruthy();
     expect(client.getProjectFile).not.toHaveBeenCalled();
   });
+
+  it('nunca pide el documento de voz si el listado no tiene work/voice/voice.wav, para no generar un 404 esperado en un proyecto nuevo', async () => {
+    const client = {
+      listGenerated: vi.fn().mockResolvedValue({ ...GENERATED, files: [] }),
+      getVoice: vi.fn().mockResolvedValue(voiceDocument()),
+      getProjectFile: vi.fn().mockRejectedValue(new RenderApiError('ARTIFACT_NOT_FOUND', 'no script', 404, null)),
+    } as unknown as RenderApiClient;
+
+    render(
+      <RenderApiProvider client={client}>
+        <GeneratedFilesPanel slug="display-ads" assets={null} />
+      </RenderApiProvider>,
+    );
+
+    expect(await screen.findByTestId('generated-empty')).toBeTruthy();
+    expect(client.getVoice).not.toHaveBeenCalled();
+  });
 });

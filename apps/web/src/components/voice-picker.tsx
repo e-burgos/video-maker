@@ -1,8 +1,9 @@
 import { useEffect, useRef, useState } from 'react';
 
 import { servicePathUrl } from '../api/artifact-url';
-import type { VoiceModel, VoiceQuality } from '../api/render-api-types';
-import { useT } from '../i18n/language-context';
+import { translateVoiceDescription, voiceQualityKey } from '../api/voice-i18n';
+import type { VoiceModel } from '../api/render-api-types';
+import { useLanguage, useT } from '../i18n/language-context';
 import type { TranslationKey } from '../i18n/messages-en';
 
 export type VoicePickerProps = {
@@ -14,9 +15,7 @@ export type VoicePickerProps = {
 
 type PreviewState = 'idle' | 'loading' | 'playing' | 'error';
 
-export function voiceQualityKey(quality: VoiceQuality | null): TranslationKey | null {
-  return quality === null ? null : (`voiceQuality.${quality}` as TranslationKey);
-}
+export { voiceQualityKey };
 
 const PREVIEW_BUTTON_KEY: Readonly<Record<PreviewState, TranslationKey>> = {
   idle: 'voicePicker.play',
@@ -45,6 +44,7 @@ function VoiceCard({
   onStopped,
 }: VoiceCardProps) {
   const t = useT();
+  const { language } = useLanguage();
   const audioRef = useRef<HTMLAudioElement>(null);
   const previewRef = useRef<PreviewState>('idle');
   const [preview, setPreview] = useState<PreviewState>('idle');
@@ -130,7 +130,7 @@ function VoiceCard({
         </button>
       </div>
 
-      <p className="text-xs text-slate-400">{voice.description}</p>
+      <p className="text-xs text-slate-400">{translateVoiceDescription(voice, language, t)}</p>
 
       {preview === 'error' && (
         <p data-testid="voice-preview-error" className="font-mono text-xs text-amber-300">

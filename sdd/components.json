@@ -312,7 +312,7 @@
         "path": "src/pages/projects-page.tsx",
         "status": "updated",
         "created_in_cycle": 1,
-        "updated_in_cycle": 2,
+        "updated_in_cycle": 5,
         "description": "Listado de los proyectos del media root con sus cinco flags de layout; cada tarjeta abre el proyecto en la pagina del productor.",
         "consumes": [
           "EP-002"
@@ -323,6 +323,11 @@
             "cycle": 2,
             "date": "2026-09-10",
             "change": "spec-e-burgos-015 cycle-02: cada proyecto abre en /projects/:slug/producer en vez de la biblioteca — el productor es el punto de partida del proyecto."
+          },
+          {
+            "cycle": 5,
+            "date": "2026-09-24",
+            "change": "TASK-004: envuelta en CreateProjectByDrop (crear un proyecto soltando un video) y tokens de color centralizados en el encabezado (text-ink/text-ink-muted) para consistencia con el resto del kit visual."
           }
         ]
       },
@@ -1120,7 +1125,7 @@
         "path": "src/components/voice-picker.tsx",
         "status": "updated",
         "created_in_cycle": 1,
-        "updated_in_cycle": 2,
+        "updated_in_cycle": 5,
         "description": "Tarjetas de voz en lugar del select de ids crudos: cada voz instalada con su etiqueta legible, idioma, calidad y descripcion, un radio que la selecciona para el job voice y un boton de reproduccion que suena en el navegador con el demo de EP-026 (estados idle/loading/playing/error, una sola voz sonando a la vez y el error explicado en pantalla).",
         "consumes": [
           "EP-019",
@@ -1132,6 +1137,11 @@
             "cycle": 2,
             "date": "2026-09-11",
             "change": "spec-e-burgos-016 cycle-02: la calidad, los estados del boton de reproduccion y los aria-label salen del catalogo. El label y la description que publica GET /voices no se traducen: son dato del catalogo del servicio."
+          },
+          {
+            "cycle": 5,
+            "date": "2026-09-24",
+            "change": "TASK-004: la descripcion de cada voz se traduce (api/voice-i18n.ts, Intl.DisplayNames sobre el codigo de idioma y la region) cuando la UI esta en espanol; en ingles se sigue mostrando la oracion tal cual la publica el catalogo del servicio."
           }
         ]
       },
@@ -1189,9 +1199,9 @@
         "module": "desktop-app",
         "spec": "sdd/specs/spec-e-burgos-017-desktop-app",
         "path": "src/pages/settings-page.tsx",
-        "status": "implemented",
+        "status": "updated",
         "created_in_cycle": 4,
-        "updated_in_cycle": null,
+        "updated_in_cycle": 5,
         "description": "Ruta perezosa /settings con la seccion Productor: motor (Automatico/Claude/OpenRouter) con disponibilidad y motivo por motor, modelo por defecto de cada motor y guardado unico via PUT; la key de OpenRouter se maneja aparte con estado enmascarado (Key cargada con los ultimos 4 caracteres), Reemplazar, Quitar con confirmacion, o un formulario write-only (el campo se vacia apenas se envia la key, nunca se vuelve a mostrar) con validacion del prefijo sk-or-v1- y un link a openrouter.ai/keys.",
         "consumes": [
           "EP-037",
@@ -1200,7 +1210,13 @@
           "EP-040"
         ],
         "created_at": "2026-09-24",
-        "changelog": []
+        "changelog": [
+          {
+            "cycle": 5,
+            "date": "2026-09-24",
+            "change": "TASK-004: encabezado con los tokens de color centralizados (text-ink/text-ink-muted) para consistencia visual con el resto del kit."
+          }
+        ]
       },
       {
         "id": "COMP-050",
@@ -1237,7 +1253,7 @@
         "path": "src/components/workspace-side-panel.tsx",
         "status": "implemented",
         "created_in_cycle": 5,
-        "updated_in_cycle": null,
+        "updated_in_cycle": 5,
         "description": "Panel con tres pestanas (Tabs de src/components/ui): Vista previa (ultimo render exitoso o, si no hay, la timeline en TimelinePlayer, o un estado vacio), Material (assets agrupados por rol con miniatura y duracion compacta, link a la biblioteca completa) y Entregas (renders exitosos, mas reciente primero, con reproductor y descarga).",
         "consumes": [
           "EP-005",
@@ -1246,7 +1262,13 @@
           "EP-013"
         ],
         "created_at": "2026-09-24",
-        "changelog": []
+        "changelog": [
+          {
+            "cycle": 5,
+            "date": "2026-09-24",
+            "change": "TASK-004: la pestana Vista previa ya no pide GET /timeline especulativamente; primero lee GET /projects/:slug (layout.timeline) y solo pide el documento cuando el flag confirma que existe, eliminando el 404 esperado en la consola de un proyecto sin timeline."
+          }
+        ]
       },
       {
         "id": "COMP-052",
@@ -1255,13 +1277,19 @@
         "module": "desktop-app",
         "spec": "sdd/specs/spec-e-burgos-017-desktop-app",
         "path": "src/components/producer-conversation-panel.tsx",
-        "status": "implemented",
+        "status": "updated",
         "created_in_cycle": 5,
-        "updated_in_cycle": null,
+        "updated_in_cycle": 5,
         "description": "Columna de chat del espacio de trabajo: bienvenida o lista de mensajes, actividad del turno, la seam ChatDropZonePlaceholder para TASK-003 y el compositor, todo a partir del resultado de useProducerConversation. Extraido de producer-page.tsx para reusarlo sin duplicar el estado del productor.",
         "consumes": [],
         "created_at": "2026-09-24",
-        "changelog": []
+        "changelog": [
+          {
+            "cycle": 5,
+            "date": "2026-09-24",
+            "change": "TASK-003: whole-column drag & drop with a visible overlay, ChatDropZone attach button, inline AssetProposalCard list from useInboxUploads (persisted pending assets survive reload), and useStickToBottom so a new card or upload entry is visible without manual scrolling."
+          }
+        ]
       },
       {
         "id": "COMP-053",
@@ -1337,6 +1365,118 @@
         "consumes": [],
         "created_at": "2026-09-24",
         "changelog": []
+      },
+      {
+        "id": "COMP-058",
+        "name": "ChatDropZone",
+        "type": "component",
+        "module": "desktop-app",
+        "spec": "sdd/specs/spec-e-burgos-017-desktop-app",
+        "path": "src/components/chat-drop-zone.tsx",
+        "status": "implemented",
+        "created_in_cycle": 5,
+        "updated_in_cycle": null,
+        "description": "Fila fija del chat con el hint \"Arrastra tu material aca\" y un boton Adjuntar archivos que dispara un input type=file oculto (multiple); el drop sobre TODA la columna del chat (con el overlay) lo maneja ProducerConversationPanel, no este componente.",
+        "consumes": [],
+        "created_at": "2026-09-24",
+        "changelog": []
+      },
+      {
+        "id": "COMP-059",
+        "name": "AssetProposalCard",
+        "type": "component",
+        "module": "desktop-app",
+        "spec": "sdd/specs/spec-e-burgos-017-desktop-app",
+        "path": "src/components/asset-proposal-card.tsx",
+        "status": "implemented",
+        "created_in_cycle": 5,
+        "updated_in_cycle": null,
+        "description": "Tarjeta inline de un asset pendiente del inbox: miniatura (imagen, video con #t=0.5 como poster barato, o icono para audio), razon de la propuesta traducida (inboxReasonKey), select de rol (default proposedRole) y Confirmar/Descartar contra EP-044/EP-045.",
+        "consumes": [
+          "EP-011",
+          "EP-044",
+          "EP-045"
+        ],
+        "created_at": "2026-09-24",
+        "changelog": []
+      },
+      {
+        "id": "COMP-060",
+        "name": "useInboxUploads",
+        "type": "hook",
+        "module": "desktop-app",
+        "spec": "sdd/specs/spec-e-burgos-017-desktop-app",
+        "path": "src/hooks/use-inbox-uploads.ts",
+        "status": "implemented",
+        "created_in_cycle": 5,
+        "updated_in_cycle": null,
+        "description": "Estado del inbox de un proyecto: listado pendiente (GET EP-043), subidas en curso con estado por archivo (uploading/done/error, rechazo local UNSUPPORTED_MEDIA_TYPE sin red para extensiones no soportadas), confirm (EP-044) y discard (EP-045), ambos recargando el listado pendiente.",
+        "consumes": [
+          "EP-042",
+          "EP-043",
+          "EP-044",
+          "EP-045"
+        ],
+        "created_at": "2026-09-24",
+        "changelog": []
+      },
+      {
+        "id": "COMP-061",
+        "name": "useStickToBottom",
+        "type": "hook",
+        "module": "desktop-app",
+        "spec": "sdd/specs/spec-e-burgos-017-desktop-app",
+        "path": "src/hooks/use-stick-to-bottom.ts",
+        "status": "implemented",
+        "created_in_cycle": 5,
+        "updated_in_cycle": null,
+        "description": "Ata un contenedor con scroll a su contenido via ResizeObserver: mientras el usuario esta cerca del final (menos de 40px), cada crecimiento del contenido (nuevo mensaje, tarjeta de propuesta, upload) hace scroll al fondo; si el usuario subio a leer algo viejo, deja de seguir. Usado por ProducerConversationPanel para que una tarjeta de propuesta nueva quede visible sin scroll manual.",
+        "consumes": [],
+        "created_at": "2026-09-24",
+        "changelog": []
+      },
+      {
+        "id": "COMP-062",
+        "name": "CreateProjectByDrop",
+        "type": "component",
+        "module": "desktop-app",
+        "spec": "sdd/specs/spec-e-burgos-017-desktop-app",
+        "path": "src/components/create-project-by-drop.tsx",
+        "status": "implemented",
+        "created_in_cycle": 5,
+        "updated_in_cycle": null,
+        "description": "Envuelve ProjectsPage: soltar un archivo sobre toda la pantalla de proyectos (overlay \"Solta para crear un proyecto nuevo\") crea el proyecto con un slug derivado del nombre de archivo (slugifyFileName + uniqueProjectSlug para evitar colisiones), sube el archivo al inbox del proyecto nuevo (EP-042) y navega directo a su espacio de trabajo, donde la tarjeta de propuesta ya espera confirmacion.",
+        "consumes": [
+          "EP-003",
+          "EP-042"
+        ],
+        "created_at": "2026-09-24",
+        "changelog": []
+      },
+      {
+        "id": "COMP-063",
+        "name": "GeneratedFilesPanel",
+        "type": "component",
+        "module": "desktop-app",
+        "spec": "sdd/specs/spec-e-burgos-017-desktop-app",
+        "path": "src/components/generated-files-panel.tsx",
+        "status": "updated",
+        "created_in_cycle": 5,
+        "updated_in_cycle": 5,
+        "description": "Seccion Generado de la biblioteca (narracion, guion, entregables) leida de EP-028. Preexistia sin registrar; se registra ahora junto con el cambio de este ciclo: getVoice (EP-020) ya no se pide especulativamente, solo cuando el listado de EP-028 ya trae work/voice/voice.wav, evitando el 404 esperado en un proyecto sin narracion.",
+        "consumes": [
+          "EP-011",
+          "EP-020",
+          "EP-028"
+        ],
+        "created_at": "2026-09-24",
+        "changelog": [
+          {
+            "cycle": 5,
+            "date": "2026-09-24",
+            "change": "TASK-004: getVoice se gatea con la existencia de work/voice/voice.wav en el listado ya obtenido (EP-028), en vez de pedirlo siempre y aceptar el 404 esperado."
+          }
+        ]
       }
     ]
   }

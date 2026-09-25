@@ -1,8 +1,8 @@
 import { useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 
+import { humanizeSlug } from '../api/humanize-slug';
 import { ProducerConversationPanel } from '../components/producer-conversation-panel';
-import { ServiceHealthBadge } from '../components/service-health-badge';
 import { Button } from '../components/ui/button';
 import { WorkspaceSidePanel } from '../components/workspace-side-panel';
 import { useAutoSwitchingTab } from '../hooks/use-auto-switching-tab';
@@ -60,24 +60,27 @@ export function ProjectWorkspacePage() {
   );
 
   return (
-    <section data-testid="project-workspace" className="space-y-6">
-      <header className="space-y-3">
+    <section
+      data-testid="project-workspace"
+      className={isWide ? 'flex h-full min-h-0 flex-col gap-4' : 'space-y-6'}
+    >
+      <header className="shrink-0 space-y-3">
         <Link to="/" className="text-xs text-ink-faint hover:text-ink-muted">
           {t('library.backToProjects')}
         </Link>
         <div className="flex flex-wrap items-center justify-between gap-3">
-          <h1 className="font-mono text-2xl font-semibold tracking-tight text-ink">{slug}</h1>
-          <div className="flex items-center gap-3">
-            <ServiceHealthBadge />
-            <AdvancedEditingMenu slug={slug} />
+          <div>
+            <h1 className="text-2xl font-semibold tracking-tight text-ink">{humanizeSlug(slug)}</h1>
+            <p className="font-mono text-xs text-ink-faint">{slug}</p>
           </div>
+          <AdvancedEditingMenu slug={slug} />
         </div>
       </header>
 
       {isWide ? (
-        <div className="grid grid-cols-[3fr_2fr] items-start gap-6">
-          <ProducerConversationPanel producer={producer} />
-          {sidePanel}
+        <div className="grid min-h-0 flex-1 grid-cols-[3fr_2fr] gap-6">
+          <ProducerConversationPanel producer={producer} pinned />
+          <div className="h-full min-h-0 overflow-y-auto">{sidePanel}</div>
         </div>
       ) : (
         <div className="space-y-4">

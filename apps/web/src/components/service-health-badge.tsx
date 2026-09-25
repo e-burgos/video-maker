@@ -36,7 +36,7 @@ function healthLabel(
       parts: missingParts(health.data as ServiceHealth).join(', '),
     });
   }
-  return t('health.ok', { cycle: health.data?.cycle ?? 0 });
+  return t('health.ok');
 }
 
 export function ServiceHealthBadge() {

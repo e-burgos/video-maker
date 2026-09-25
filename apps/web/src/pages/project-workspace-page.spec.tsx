@@ -54,7 +54,14 @@ function renderWorkspace(client: Partial<RenderApiClient> = {}) {
     listGenerated: vi.fn().mockResolvedValue({ slug: 'demo-01', roots: [], files: [] }),
     getProducer: vi.fn().mockResolvedValue(producerConversation()),
     getProducerSettings: vi.fn().mockResolvedValue(producerSettings()),
+    getProject: vi.fn().mockResolvedValue({
+      slug: 'demo-01',
+      layout: { raw: true, catalog: true, timeline: false, edl: false, out: false },
+      assetSource: 'catalog',
+      assetCounts: { aroll: 0, broll: 0, image: 0, audio: 0, voice: 0, logo: 0 },
+    }),
     getTimeline: vi.fn().mockRejectedValue(new RenderApiError('TIMELINE_NOT_FOUND', 'none', 404, null)),
+    listInbox: vi.fn().mockResolvedValue({ assets: [] }),
     ...client,
   };
 
@@ -76,11 +83,18 @@ afterEach(() => {
 });
 
 describe('ProjectWorkspacePage', () => {
-  it('shows the project name and the advanced editing menu with all four destinations', async () => {
+  it('shows a human title with the raw slug small underneath, and no duplicate health badge', async () => {
     stubMatchMedia(true);
     renderWorkspace();
 
-    expect(screen.getByRole('heading', { name: 'demo-01' })).toBeTruthy();
+    expect(screen.getByRole('heading', { name: 'Demo 01' })).toBeTruthy();
+    expect(screen.getByText('demo-01')).toBeTruthy();
+    expect(screen.queryByTestId('service-health-label')).toBeNull();
+  });
+
+  it('offers the advanced editing menu with all four destinations', async () => {
+    stubMatchMedia(true);
+    renderWorkspace();
 
     const menu = screen.getByTestId('workspace-advanced-menu');
     const hrefs = Array.from(menu.querySelectorAll('a')).map((link) => link.getAttribute('href'));
@@ -92,13 +106,15 @@ describe('ProjectWorkspacePage', () => {
     ]);
   });
 
-  it('lays the chat and the side panel out side by side on a wide viewport', async () => {
+  it('lays the chat and the side panel out side by side on a wide viewport, chat pinned to a full-height column', async () => {
     stubMatchMedia(true);
     renderWorkspace();
 
     await waitFor(() => expect(screen.getByTestId('producer-conversation-panel')).toBeTruthy());
     expect(screen.getByTestId('workspace-side-panel')).toBeTruthy();
     expect(screen.queryByTestId('workspace-panel-toggle')).toBeNull();
+    expect(screen.getByTestId('producer-conversation-panel').className).toContain('h-full');
+    expect(screen.getByTestId('producer-composer').closest('[class*="shrink-0"]')).toBeTruthy();
   });
 
   it('collapses the side panel into a drawer below the chat on a narrow viewport', async () => {

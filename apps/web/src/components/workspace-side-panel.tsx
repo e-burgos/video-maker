@@ -18,14 +18,14 @@ import {
 import type { WorkspaceTabId } from '../api/workspace-panel';
 import { useAsyncResource } from '../hooks/use-async-resource';
 import type { AsyncResource } from '../hooks/use-async-resource';
-import { useT } from '../i18n/language-context';
+import { useT, useTn } from '../i18n/language-context';
 import { ErrorNotice } from './error-notice';
 import { TimelinePlayer } from './timeline-player';
 import { Badge } from './ui/badge';
 import { Card } from './ui/card';
 import { TabPanel, Tabs } from './ui/tabs';
 import type { TabItem } from './ui/tabs';
-import type { AssetListing, RenderJobListing } from '../api/render-api-types';
+import type { AssetListing, ProjectDetail, RenderJobListing } from '../api/render-api-types';
 
 export type WorkspaceSidePanelProps = {
   slug: string;
@@ -67,13 +67,21 @@ function PreviewTab({ slug, jobs }: { slug: string; jobs: AsyncResource<RenderJo
   const latestRender = latestSucceededJobOfKind(jobs.data, 'render');
   const latestMontage = latestSucceededJobOfKind(jobs.data, 'montage');
 
-  const loadTimeline = useCallback(
-    async () => parseTimelineDocument(await client.getTimeline(slug)),
-    [client, slug],
+  const project = useAsyncResource<ProjectDetail>(
+    useCallback(() => client.getProject(slug), [client, slug]),
+    `project-detail:${slug}`,
   );
-  const timeline = useAsyncResource<Timeline>(
+  const timelineExists = project.data?.layout.timeline ?? null;
+
+  const loadTimeline = useCallback(async () => {
+    if (timelineExists !== true) {
+      return null;
+    }
+    return parseTimelineDocument(await client.getTimeline(slug));
+  }, [client, slug, timelineExists]);
+  const timeline = useAsyncResource<Timeline | null>(
     loadTimeline,
-    `workspace-timeline:${slug}:${latestMontage?.id ?? 'none'}`,
+    `workspace-timeline:${slug}:${latestMontage?.id ?? 'none'}:${timelineExists}`,
   );
 
   if (latestRender !== null) {
@@ -93,7 +101,7 @@ function PreviewTab({ slug, jobs }: { slug: string; jobs: AsyncResource<RenderJo
     );
   }
 
-  if (timeline.status === 'loading') {
+  if (project.status === 'loading' || timeline.status === 'loading') {
     return <p className="text-sm text-ink-faint">{t('preview.loading')}</p>;
   }
 
@@ -124,6 +132,7 @@ function PreviewTab({ slug, jobs }: { slug: string; jobs: AsyncResource<RenderJo
 
 function MaterialTab({ slug, assets }: { slug: string; assets: AsyncResource<AssetListing> }) {
   const t = useT();
+  const tn = useTn();
 
   if (assets.status === 'loading') {
     return <p className="text-sm text-ink-faint">{t('library.loading')}</p>;
@@ -148,10 +157,10 @@ function MaterialTab({ slug, assets }: { slug: string; assets: AsyncResource<Ass
       {groups.map((group) => (
         <div key={group.role} className="space-y-2">
           <div className="flex items-center gap-2">
-            <p className="font-mono text-xs uppercase tracking-wide text-ink-faint">
-              {t(assetRoleCopy(group.role).nameKey)}
+            <p className="text-xs font-medium text-ink-muted">
+              {t(assetRoleCopy(group.role).shortNameKey)}
             </p>
-            <Badge>{group.assets.length}</Badge>
+            <Badge>{tn('workspace.material.fileCount', group.assets.length)}</Badge>
           </div>
           <div className="flex gap-2 overflow-x-auto pb-1">
             {group.assets.map((asset) => (

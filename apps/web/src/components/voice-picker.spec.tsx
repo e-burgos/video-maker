@@ -2,6 +2,8 @@ import { cleanup, fireEvent, render, screen, waitFor } from '@testing-library/re
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { VoicePicker, voiceQualityKey } from './voice-picker';
+import { LANGUAGE_STORAGE_KEY } from '../i18n/language';
+import { LanguageProvider } from '../i18n/language-context';
 import type { VoiceModel } from '../api/render-api-types';
 
 const DANIELA: VoiceModel = {
@@ -159,6 +161,20 @@ describe('VoicePicker (US-016-003)', () => {
 
     expect(voiceQualityKey(null)).toBeNull();
     expect(cardOf('custom').textContent).not.toContain('quality');
+  });
+
+  it('translates the description into spanish instead of showing the raw english sentence', async () => {
+    window.localStorage.setItem(LANGUAGE_STORAGE_KEY, 'es');
+
+    render(
+      <LanguageProvider>
+        <VoicePicker voices={[DANIELA]} selectedId={null} onSelect={() => undefined} />
+      </LanguageProvider>,
+    );
+
+    await waitFor(() => expect(cardOf(DANIELA.id).textContent).toContain('Voz neuronal'));
+    expect(cardOf(DANIELA.id).textContent).not.toContain('trained on the "daniela" dataset');
+    window.localStorage.clear();
   });
 
   it('disables picking a voice while a job is being created, but still lets it be heard', () => {

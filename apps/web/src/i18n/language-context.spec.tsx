@@ -24,7 +24,7 @@ describe('useT outside a provider', () => {
   it('renders english so any component works on its own', () => {
     render(<Probe />);
 
-    expect(screen.getByTestId('probe').textContent).toBe('service ok · cycle 3');
+    expect(screen.getByTestId('probe').textContent).toBe('Ready');
     expect(screen.getByTestId('probe').dataset['language']).toBe('en');
   });
 });
@@ -41,7 +41,7 @@ describe('LanguageProvider', () => {
 
     expect(screen.getByTestId('probe').dataset['language']).toBe('es');
     await waitFor(() =>
-      expect(screen.getByTestId('probe').textContent).toBe('servicio ok · ciclo 3'),
+      expect(screen.getByTestId('probe').textContent).toBe('Listo'),
     );
   });
 
@@ -54,7 +54,7 @@ describe('LanguageProvider', () => {
       </LanguageProvider>,
     );
 
-    expect(screen.getByTestId('probe').textContent).toBe('service ok · cycle 3');
+    expect(screen.getByTestId('probe').textContent).toBe('Ready');
   });
 
   it('stamps the active language on the document for assistive technology', async () => {
@@ -79,7 +79,7 @@ describe('LanguageProvider', () => {
     );
 
     await waitFor(() =>
-      expect(screen.getByTestId('probe').textContent).toBe('servicio ok · ciclo 3'),
+      expect(screen.getByTestId('probe').textContent).toBe('Listo'),
     );
   });
 });

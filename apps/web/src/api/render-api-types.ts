@@ -177,6 +177,53 @@ export type AssetListing = {
   probeFailures: AssetProbeFailure[];
 };
 
+export const INBOX_PROPOSAL_REASONS = [
+  'has-audio',
+  'no-audio',
+  'alpha-channel',
+  'image',
+  'long-audio',
+  'voice-name-hint',
+  'music-name-hint',
+  'short-audio',
+] as const;
+
+export type InboxProposalReason = (typeof INBOX_PROPOSAL_REASONS)[number];
+
+export type InboxProbeSummary = {
+  kind: MediaKind;
+  durationMs: number;
+  width?: number;
+  height?: number;
+  hasAudio?: boolean;
+  hasAlpha?: boolean;
+};
+
+export type InboxAssetStatus = 'pending' | 'confirmed';
+
+export type InboxAsset = {
+  id: string;
+  fileName: string;
+  path: string;
+  proposedRole: AssetRole;
+  proposalReason: InboxProposalReason;
+  probe: InboxProbeSummary;
+  status: InboxAssetStatus;
+  confirmedRole?: AssetRole;
+};
+
+export type InboxListing = {
+  assets: InboxAsset[];
+};
+
+export type InboxDeletion = {
+  slug: string;
+  deleted: {
+    id: string;
+    path: string;
+  };
+};
+
 export type RenderApiErrorPayload = {
   code: string;
   stage: string | null;

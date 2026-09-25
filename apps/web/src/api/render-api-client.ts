@@ -37,6 +37,9 @@ import type {
   GeneratedListing,
   AssetRole,
   GetOpenRouterModelsQuery,
+  InboxAsset,
+  InboxDeletion,
+  InboxListing,
   Job,
   MontageJob,
   MontagePresetName,
@@ -107,6 +110,10 @@ export type RenderApiClient = {
   getTimeline: (slug: string) => Promise<Timeline>;
   uploadAsset: (input: UploadAssetInput) => Promise<AssetListEntry>;
   deleteAsset: (input: DeleteAssetInput) => Promise<AssetDeletion>;
+  uploadToInbox: (input: UploadInboxInput) => Promise<InboxAsset>;
+  listInbox: (slug: string) => Promise<InboxListing>;
+  confirmInboxAsset: (slug: string, assetId: string, role: AssetRole) => Promise<InboxAsset>;
+  discardInboxAsset: (slug: string, assetId: string) => Promise<InboxDeletion>;
   putTimeline: (slug: string, timeline: Timeline) => Promise<TimelineWriteResult>;
   createRenderJob: (slug: string) => Promise<RenderJob>;
   createMontageJob: (slug: string, input: CreateMontageJobInput) => Promise<MontageJob>;
@@ -150,6 +157,13 @@ export type DeleteAssetInput = {
   role: AssetRole;
   filename: string;
   force: boolean;
+};
+
+export type UploadInboxInput = {
+  slug: string;
+  filename: string;
+  contentType: string;
+  body: Blob;
 };
 
 function isRecord(value: unknown): value is Record<string, unknown> {
@@ -429,6 +443,56 @@ export function createRenderApiClient(fetchImpl: FetchLike): RenderApiClient {
         (value) => isRecord(value) && isRecord(value['deleted']) && Array.isArray(value['timelineReferences']),
       );
       return body as AssetDeletion;
+    },
+
+    async uploadToInbox(input: UploadInboxInput): Promise<InboxAsset> {
+      const path = `/projects/${encodeURIComponent(input.slug)}/inbox/${encodeURIComponent(input.filename)}`;
+
+      const body = await requestJson(
+        path,
+        {
+          method: 'PUT',
+          headers: { 'content-type': input.contentType },
+          body: input.body,
+        },
+        'an inbox asset',
+        (value) => isRecord(value) && isRecord(value['asset']),
+      );
+      return (body as { asset: InboxAsset }).asset;
+    },
+
+    async listInbox(slug: string): Promise<InboxListing> {
+      const body = await requestJson(
+        `/projects/${encodeURIComponent(slug)}/inbox`,
+        undefined,
+        'an inbox listing',
+        (value) => isRecord(value) && Array.isArray(value['assets']),
+      );
+      return body as InboxListing;
+    },
+
+    async confirmInboxAsset(slug: string, assetId: string, role: AssetRole): Promise<InboxAsset> {
+      const body = await requestJson(
+        `/projects/${encodeURIComponent(slug)}/inbox/${encodeURIComponent(assetId)}/confirm`,
+        {
+          method: 'POST',
+          headers: { 'content-type': 'application/json' },
+          body: JSON.stringify({ role }),
+        },
+        'an inbox asset',
+        (value) => isRecord(value) && isRecord(value['asset']),
+      );
+      return (body as { asset: InboxAsset }).asset;
+    },
+
+    async discardInboxAsset(slug: string, assetId: string): Promise<InboxDeletion> {
+      const body = await requestJson(
+        `/projects/${encodeURIComponent(slug)}/inbox/${encodeURIComponent(assetId)}`,
+        { method: 'DELETE' },
+        'an inbox deletion result',
+        (value) => isRecord(value) && isRecord(value['deleted']),
+      );
+      return body as InboxDeletion;
     },
 
     async putTimeline(slug: string, timeline: Timeline): Promise<TimelineWriteResult> {

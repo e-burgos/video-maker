@@ -1,10 +1,13 @@
-import { fireEvent, render, screen } from '@testing-library/react';
+import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
 import { describe, expect, it, vi } from 'vitest';
 
+import { RenderApiProvider } from '../api/render-api-context';
+import type { RenderApiClient } from '../api/render-api-client';
 import type { AsyncResource } from '../hooks/use-async-resource';
 import type { UseProducerConversationResult } from '../hooks/use-producer-conversation';
 import { ProducerConversationPanel } from './producer-conversation-panel';
+import type { InboxAsset } from '../api/render-api-types';
 
 function readyResource<T>(data: T): AsyncResource<T> {
   return { status: 'ready', data, error: null, isRefreshing: false, reload: vi.fn() };
@@ -49,13 +52,45 @@ function fakeProducer(overrides: Partial<UseProducerConversationResult> = {}): U
   };
 }
 
-describe('ProducerConversationPanel', () => {
-  it('shows the welcome and the drop-zone seam when there is no conversation yet', () => {
-    render(
+function inboxAsset(overrides: Partial<InboxAsset> = {}): InboxAsset {
+  return {
+    id: 'inbox-0001',
+    fileName: 'clip01.mp4',
+    path: 'raw/inbox/clip01.mp4',
+    proposedRole: 'aroll',
+    proposalReason: 'has-audio',
+    probe: { kind: 'video', durationMs: 4000, hasAudio: true },
+    status: 'pending',
+    ...overrides,
+  };
+}
+
+function renderPanel(
+  producer: UseProducerConversationResult,
+  options: { pinned?: boolean; client?: Partial<RenderApiClient> } = {},
+) {
+  const client = {
+    listInbox: vi.fn().mockResolvedValue({ assets: [] }),
+    confirmInboxAsset: vi.fn(),
+    discardInboxAsset: vi.fn(),
+    uploadToInbox: vi.fn(),
+    ...options.client,
+  } as unknown as RenderApiClient;
+
+  render(
+    <RenderApiProvider client={client}>
       <MemoryRouter>
-        <ProducerConversationPanel producer={fakeProducer()} />
-      </MemoryRouter>,
-    );
+        <ProducerConversationPanel producer={producer} pinned={options.pinned} />
+      </MemoryRouter>
+    </RenderApiProvider>,
+  );
+
+  return { client };
+}
+
+describe('ProducerConversationPanel', () => {
+  it('shows the welcome and the drop-zone seam when there is no conversation yet', async () => {
+    renderPanel(fakeProducer());
 
     expect(screen.getByTestId('producer-welcome')).toBeTruthy();
     expect(screen.getByTestId('chat-drop-zone')).toBeTruthy();
@@ -80,11 +115,7 @@ describe('ProducerConversationPanel', () => {
       }) as never,
     });
 
-    render(
-      <MemoryRouter>
-        <ProducerConversationPanel producer={producer} />
-      </MemoryRouter>,
-    );
+    renderPanel(producer);
 
     expect(screen.getByTestId('producer-message-list')).toBeTruthy();
     expect(screen.queryByTestId('producer-welcome')).toBeNull();
@@ -94,15 +125,24 @@ describe('ProducerConversationPanel', () => {
     const send = vi.fn(async () => undefined);
     const producer = fakeProducer({ draft: 'hola productor', send });
 
-    render(
-      <MemoryRouter>
-        <ProducerConversationPanel producer={producer} />
-      </MemoryRouter>,
-    );
+    renderPanel(producer);
 
     fireEvent.click(screen.getByText('Send'));
 
     expect(send).toHaveBeenCalledWith('hola productor');
+  });
+
+  it('pins the composer to the bottom of a full-height column when pinned is set', () => {
+    renderPanel(fakeProducer(), { pinned: true });
+
+    expect(screen.getByTestId('producer-conversation-panel').className).toContain('h-full');
+    expect(screen.getByTestId('producer-composer').closest('[class*="shrink-0"]')).toBeTruthy();
+  });
+
+  it('lets the whole column flow and scroll normally when not pinned', () => {
+    renderPanel(fakeProducer());
+
+    expect(screen.getByTestId('producer-conversation-panel').className).not.toContain('h-full');
   });
 
   it('surfaces a failed send with its explanation key', () => {
@@ -111,12 +151,132 @@ describe('ProducerConversationPanel', () => {
       sendFailureKey: 'producerFailure.PRODUCER_UNAVAILABLE',
     });
 
-    render(
-      <MemoryRouter>
-        <ProducerConversationPanel producer={producer} />
-      </MemoryRouter>,
-    );
+    renderPanel(producer);
 
     expect(screen.getByTestId('producer-send-failure')).toBeTruthy();
+  });
+
+  it('shows a drop overlay while a file is dragged over the whole column, and hides it after drop', () => {
+    renderPanel(fakeProducer());
+
+    const panel = screen.getByTestId('producer-conversation-panel');
+    fireEvent.dragEnter(panel, { dataTransfer: { types: ['Files'] } });
+
+    expect(screen.getByTestId('chat-drop-overlay').textContent).toBe('Drop to add to the project');
+
+    fireEvent.drop(panel, { dataTransfer: { types: ['Files'], files: [] } });
+
+    expect(screen.queryByTestId('chat-drop-overlay')).toBeNull();
+  });
+
+  it('lists the pending inbox assets as proposal cards, persisted from GET inbox', async () => {
+    renderPanel(fakeProducer(), {
+      client: { listInbox: vi.fn().mockResolvedValue({ assets: [inboxAsset()] }) },
+    });
+
+    await waitFor(() => expect(screen.getByTestId('asset-proposal-list')).toBeTruthy());
+    expect(screen.getByText('clip01.mp4')).toBeTruthy();
+  });
+
+  it('reloads the material listing after a proposal card is confirmed', async () => {
+    const reloadAssets = vi.fn();
+    const producer = fakeProducer({
+      assets: {
+        status: 'ready',
+        data: { slug: 'demo-01', source: 'catalog', assets: [], probeFailures: [] },
+        error: null,
+        isRefreshing: false,
+        reload: reloadAssets,
+      },
+    });
+    const confirmInboxAsset = vi.fn().mockResolvedValue(inboxAsset({ status: 'confirmed' }));
+
+    renderPanel(producer, {
+      client: {
+        listInbox: vi.fn().mockResolvedValue({ assets: [inboxAsset()] }),
+        confirmInboxAsset,
+      },
+    });
+
+    await waitFor(() => expect(screen.getByTestId('asset-proposal-list')).toBeTruthy());
+    fireEvent.click(screen.getByText('Confirm'));
+
+    await waitFor(() => expect(confirmInboxAsset).toHaveBeenCalledWith('demo-01', 'inbox-0001', 'aroll'));
+    await waitFor(() => expect(reloadAssets).toHaveBeenCalled());
+  });
+
+  it('discards a proposal card without touching the material listing', async () => {
+    const discardInboxAsset = vi.fn().mockResolvedValue({
+      slug: 'demo-01',
+      deleted: { id: 'inbox-0001', path: 'raw/inbox/clip01.mp4' },
+    });
+
+    renderPanel(fakeProducer(), {
+      client: {
+        listInbox: vi.fn().mockResolvedValue({ assets: [inboxAsset()] }),
+        discardInboxAsset,
+      },
+    });
+
+    await waitFor(() => expect(screen.getByTestId('asset-proposal-list')).toBeTruthy());
+    fireEvent.click(screen.getByText('Discard'));
+
+    await waitFor(() => expect(discardInboxAsset).toHaveBeenCalledWith('demo-01', 'inbox-0001'));
+  });
+
+  it('drops files onto the whole column and forwards them to the inbox upload', async () => {
+    const uploadToInbox = vi.fn().mockResolvedValue(inboxAsset());
+    renderPanel(fakeProducer(), { client: { uploadToInbox } });
+
+    const file = new File(['x'], 'clip01.mp4', { type: 'video/mp4' });
+    fireEvent.drop(screen.getByTestId('producer-conversation-panel'), {
+      dataTransfer: { types: ['Files'], files: [file] },
+    });
+
+    await waitFor(() =>
+      expect(uploadToInbox).toHaveBeenCalledWith(
+        expect.objectContaining({ slug: 'demo-01', filename: 'clip01.mp4' }),
+      ),
+    );
+  });
+
+  it('ignores a drag that carries no files', () => {
+    renderPanel(fakeProducer());
+
+    fireEvent.dragEnter(screen.getByTestId('producer-conversation-panel'), {
+      dataTransfer: { types: ['text/plain'] },
+    });
+
+    expect(screen.queryByTestId('chat-drop-overlay')).toBeNull();
+  });
+
+  it('keeps the overlay open while dragging across nested children, closing only once every leave is accounted for', () => {
+    renderPanel(fakeProducer());
+    const panel = screen.getByTestId('producer-conversation-panel');
+
+    fireEvent.dragEnter(panel, { dataTransfer: { types: ['Files'] } });
+    fireEvent.dragEnter(panel, { dataTransfer: { types: ['Files'] } });
+    fireEvent.dragLeave(panel, { dataTransfer: { types: ['Files'] } });
+
+    expect(screen.getByTestId('chat-drop-overlay')).toBeTruthy();
+
+    fireEvent.dragLeave(panel, { dataTransfer: { types: ['Files'] } });
+
+    expect(screen.queryByTestId('chat-drop-overlay')).toBeNull();
+  });
+
+  it('shows an unsupported-file message for a rejected drop, and can dismiss it', async () => {
+    renderPanel(fakeProducer());
+
+    const file = new File(['x'], 'notes.txt', { type: 'text/plain' });
+    fireEvent.drop(screen.getByTestId('producer-conversation-panel'), {
+      dataTransfer: { types: ['Files'], files: [file] },
+    });
+
+    await waitFor(() => expect(screen.getByText('notes.txt is not a supported video, image or audio file')).toBeTruthy());
+
+    fireEvent.click(screen.getByText('Dismiss'));
+
+    expect(screen.queryByTestId('inbox-upload-list')).toBeNull();
   });
 });

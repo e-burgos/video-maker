@@ -18,7 +18,7 @@ const HEADER_LINKS = [
 ] as const satisfies readonly { to: string; testId: string; labelKey: TranslationKey }[];
 
 function navLinkClass({ isActive }: { isActive: boolean }): string {
-  return `rounded-md border px-2 py-1 font-mono text-xs ${
+  return `rounded-md border px-3 py-1.5 text-sm font-medium capitalize ${
     isActive
       ? 'border-sky-500/60 bg-sky-500/10 text-sky-100'
       : 'border-slate-800 text-slate-400 hover:border-slate-600'
@@ -42,8 +42,8 @@ export function StudioLayout() {
   const t = useT();
 
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-100">
-      <header className="border-b border-slate-800 bg-slate-900/60">
+    <div className="flex h-screen flex-col bg-slate-950 text-slate-100">
+      <header className="shrink-0 border-b border-slate-800 bg-slate-900/60">
         <div className="mx-auto flex max-w-6xl items-center justify-between gap-4 px-6 py-4">
           <div className="flex items-baseline gap-3">
             <NavLink to="/" className="text-lg font-semibold tracking-tight">
@@ -85,7 +85,7 @@ export function StudioLayout() {
           </nav>
         )}
       </header>
-      <main className="mx-auto max-w-6xl px-6 py-8">
+      <main className="mx-auto min-h-0 w-full max-w-6xl flex-1 overflow-y-auto px-6 py-8">
         <Outlet />
       </main>
     </div>

@@ -15,3 +15,29 @@ export function projectSlugProblem(value: string): ProjectSlugProblem | null {
 export function projectSlugProblemKey(problem: ProjectSlugProblem): TranslationKey {
   return problem === 'empty' ? 'projectSlug.empty' : 'projectSlug.notKebabCase';
 }
+
+const FALLBACK_SLUG = 'project';
+
+export function slugifyFileName(fileName: string): string {
+  const withoutExtension = fileName.replace(/\.[^./\\]+$/u, '');
+  const slug = withoutExtension
+    .normalize('NFKD')
+    .replace(/[̀-ͯ]/gu, '')
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/gu, '-')
+    .replace(/^-+|-+$/gu, '');
+
+  return slug.length === 0 ? FALLBACK_SLUG : slug;
+}
+
+export function uniqueProjectSlug(base: string, existing: readonly string[]): string {
+  if (!existing.includes(base)) {
+    return base;
+  }
+
+  let counter = 2;
+  while (existing.includes(`${base}-${counter}`)) {
+    counter += 1;
+  }
+  return `${base}-${counter}`;
+}

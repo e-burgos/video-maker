@@ -147,14 +147,20 @@
         "sdd/specs/spec-e-burgos-017-desktop-app/cycles/cycle-05/artifacts/workspace-06-narrow-panel-open-900-full.png",
         "sdd/specs/spec-e-burgos-017-desktop-app/cycles/cycle-05/artifacts/workspace-07-library-advanced-1440.png",
         "apps/web/src/pages/producer-page.tsx (removed, replaced by project-workspace-page.tsx)",
-        "apps/web/src/pages/producer-page.spec.tsx (removed)"
+        "apps/web/src/pages/producer-page.spec.tsx (removed)",
+        "apps/web/src/api/humanize-slug.ts",
+        "apps/web/src/api/humanize-slug.spec.ts",
+        "apps/web/src/api/asset-roles.ts",
+        "apps/web/src/components/service-health-badge.tsx",
+        "apps/web/src/components/service-health-badge.spec.tsx",
+        "apps/web/src/i18n/language-context.spec.tsx"
       ],
       "usage": {
         "provider_model": "claude/sonnet",
         "effort": "high",
         "agent": "implementor-front",
-        "tokens_in": 220000,
-        "tokens_out": 34000,
+        "tokens_in": 280000,
+        "tokens_out": 46000,
         "approx": true,
         "source": "declared-estimate",
         "recorded_at": "2026-09-24"
@@ -173,12 +179,44 @@
         "TASK-001",
         "TASK-002"
       ],
-      "status": "pending",
+      "status": "done",
       "files": [
+        "apps/web/src/api/render-api-types.ts",
+        "apps/web/src/api/render-api-client.ts",
+        "apps/web/src/api/render-api-client.spec.ts",
+        "apps/web/src/api/inbox.ts",
+        "apps/web/src/api/inbox.spec.ts",
+        "apps/web/src/hooks/use-inbox-uploads.ts",
+        "apps/web/src/hooks/use-inbox-uploads.spec.tsx",
+        "apps/web/src/hooks/use-stick-to-bottom.ts",
+        "apps/web/src/hooks/use-stick-to-bottom.spec.tsx",
         "apps/web/src/components/chat-drop-zone.tsx",
+        "apps/web/src/components/chat-drop-zone.spec.tsx",
         "apps/web/src/components/asset-proposal-card.tsx",
-        "apps/web/src/api/render-api-client.ts"
-      ]
+        "apps/web/src/components/asset-proposal-card.spec.tsx",
+        "apps/web/src/components/producer-conversation-panel.tsx",
+        "apps/web/src/components/producer-conversation-panel.spec.tsx",
+        "apps/web/src/i18n/messages-en.ts",
+        "apps/web/src/i18n/messages-es.ts",
+        "sdd/components.json",
+        "sdd/specs/spec-e-burgos-017-desktop-app/cycles/cycle-05/artifacts/task3-01-drop-overlay-1440.png",
+        "sdd/specs/spec-e-burgos-017-desktop-app/cycles/cycle-05/artifacts/task3-02-proposal-card-1440.png",
+        "sdd/specs/spec-e-burgos-017-desktop-app/cycles/cycle-05/artifacts/task3-03-material-updated-1440.png",
+        "sdd/specs/spec-e-burgos-017-desktop-app/cycles/cycle-05/artifacts/task3-04-pending-survives-reload-1440.png",
+        "sdd/specs/spec-e-burgos-017-desktop-app/cycles/cycle-05/artifacts/task3-05-narrow-900.png",
+        "apps/web/src/components/chat-drop-zone-placeholder.tsx (removed, replaced by chat-drop-zone.tsx)",
+        "apps/web/src/components/chat-drop-zone-placeholder.spec.tsx (removed)"
+      ],
+      "usage": {
+        "provider_model": "claude/sonnet",
+        "effort": "high",
+        "agent": "implementor-front",
+        "tokens_in": 190000,
+        "tokens_out": 30000,
+        "approx": true,
+        "source": "declared-estimate",
+        "recorded_at": "2026-09-24"
+      }
     },
     {
       "id": "TASK-004",
@@ -191,13 +229,40 @@
       "depends_on": [
         "TASK-002"
       ],
-      "status": "pending",
+      "status": "done",
       "files": [
-        "apps/web/src/pages/projects-page.tsx",
+        "apps/web/src/components/create-project-by-drop.tsx",
+        "apps/web/src/components/create-project-by-drop.spec.tsx",
+        "apps/web/src/api/project-slug.ts",
+        "apps/web/src/api/project-slug.spec.ts",
         "apps/web/src/api/voice-i18n.ts",
-        "apps/web/src/pages/storyboard-page.tsx",
-        "apps/web/src/pages/voice-page.tsx"
-      ]
+        "apps/web/src/api/voice-i18n.spec.ts",
+        "apps/web/src/components/voice-picker.tsx",
+        "apps/web/src/components/voice-picker.spec.tsx",
+        "apps/web/src/components/workspace-side-panel.tsx",
+        "apps/web/src/components/workspace-side-panel.spec.tsx",
+        "apps/web/src/components/generated-files-panel.tsx",
+        "apps/web/src/components/generated-files-panel.spec.tsx",
+        "apps/web/src/pages/projects-page.tsx",
+        "apps/web/src/pages/project-workspace-page.spec.tsx",
+        "apps/web/src/pages/settings-page.tsx",
+        "apps/web/src/i18n/messages-en.ts",
+        "apps/web/src/i18n/messages-es.ts",
+        "sdd/components.json",
+        "sdd/specs/spec-e-burgos-017-desktop-app/cycles/cycle-05/artifacts/task4-01-create-overlay-1440.png",
+        "sdd/specs/spec-e-burgos-017-desktop-app/cycles/cycle-05/artifacts/task4-01b-created-workspace-1440.png",
+        "sdd/specs/spec-e-burgos-017-desktop-app/cycles/cycle-05/artifacts/task4-02-settings-1440.png"
+      ],
+      "usage": {
+        "provider_model": "claude/sonnet",
+        "effort": "high",
+        "agent": "implementor-front",
+        "tokens_in": 170000,
+        "tokens_out": 27000,
+        "approx": true,
+        "source": "declared-estimate",
+        "recorded_at": "2026-09-24"
+      }
     },
     {
       "id": "TASK-005",

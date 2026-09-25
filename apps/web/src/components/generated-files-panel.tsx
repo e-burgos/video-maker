@@ -42,24 +42,30 @@ function generatedVoiceId(
 export function GeneratedFilesPanel({ slug, assets }: GeneratedFilesPanelProps) {
   const client = useRenderApi();
   const loadGenerated = useCallback(() => client.listGenerated(slug), [client, slug]);
-  const loadVoice = useCallback(() => client.getVoice(slug), [client, slug]);
   const generated = useAsyncResource<GeneratedListing>(loadGenerated, `generated:${slug}`);
+  const group = groupGeneratedFiles(generated.data);
+  const narrationExists = group.narration !== null;
   const scriptManifestExists =
     generated.data?.files.some((file) => file.path === VOICE_SCRIPT_MANIFEST_PATH) ?? false;
+  const loadVoice = useCallback(async () => {
+    if (!narrationExists) {
+      return null;
+    }
+    return client.getVoice(slug);
+  }, [client, slug, narrationExists]);
   const loadScriptManifest = useCallback(async () => {
     if (!scriptManifestExists) {
       return null;
     }
     return parseVoiceScriptManifest(await client.getProjectFile(slug, VOICE_SCRIPT_MANIFEST_PATH));
   }, [client, slug, scriptManifestExists]);
-  const voice = useAsyncResource<VoiceDocument>(loadVoice, `voice:${slug}`);
+  const voice = useAsyncResource<VoiceDocument | null>(loadVoice, `voice:${slug}:${narrationExists}`);
   const scriptManifest = useAsyncResource<VoiceScriptManifest | null>(
     loadScriptManifest,
     `voice-script:${slug}:${scriptManifestExists}`,
   );
   const t = useT();
 
-  const group = groupGeneratedFiles(generated.data);
   const voiceId = generatedVoiceId(voice.data, scriptManifest.data);
   const opaqueLogos = logoAssetsWithoutAlpha(assets);
 

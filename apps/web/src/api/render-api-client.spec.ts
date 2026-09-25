@@ -193,6 +193,80 @@ describe('createRenderApiClient', () => {
     expect(result).toEqual(deletion);
   });
 
+  it('uploads a raw binary body to the inbox on EP-042 with the filename encoded', async () => {
+    const asset = {
+      id: 'inbox-0001',
+      fileName: 'clip 01.mp4',
+      path: 'raw/inbox/clip 01.mp4',
+      proposedRole: 'aroll',
+      proposalReason: 'has-audio',
+      probe: { kind: 'video', durationMs: 4000, hasAudio: true },
+      status: 'pending',
+    };
+    const { fetchImpl, calls } = recordingFetch(() => jsonResponse({ asset }, 201));
+    const body = new Blob(['0123456789ab'], { type: 'video/mp4' });
+
+    const result = await createRenderApiClient(fetchImpl).uploadToInbox({
+      slug: 'smoke-ingest',
+      filename: 'clip 01.mp4',
+      contentType: 'video/mp4',
+      body,
+    });
+
+    expect(calls[0]?.url).toBe('/api/projects/smoke-ingest/inbox/clip%2001.mp4');
+    expect(calls[0]?.init?.method).toBe('PUT');
+    expect(calls[0]?.init?.headers).toEqual({ 'content-type': 'video/mp4' });
+    expect(calls[0]?.init?.body).toBe(body);
+    expect(result).toEqual(asset);
+  });
+
+  it('lists the pending inbox assets from EP-043', async () => {
+    const listing = { assets: [] };
+    const { fetchImpl, calls } = recordingFetch(() => jsonResponse(listing));
+
+    const result = await createRenderApiClient(fetchImpl).listInbox('smoke-ingest');
+
+    expect(calls[0]?.url).toBe('/api/projects/smoke-ingest/inbox');
+    expect(result).toEqual(listing);
+  });
+
+  it('confirms an inbox asset role through EP-044 with a JSON body', async () => {
+    const asset = {
+      id: 'inbox-0001',
+      fileName: 'clip01.mp4',
+      path: 'raw/broll/clip01.mp4',
+      proposedRole: 'aroll',
+      proposalReason: 'has-audio',
+      confirmedRole: 'broll',
+      probe: { kind: 'video', durationMs: 4000, hasAudio: true },
+      status: 'confirmed',
+    };
+    const { fetchImpl, calls } = recordingFetch(() => jsonResponse({ asset }));
+
+    const result = await createRenderApiClient(fetchImpl).confirmInboxAsset(
+      'smoke-ingest',
+      'inbox-0001',
+      'broll',
+    );
+
+    expect(calls[0]?.url).toBe('/api/projects/smoke-ingest/inbox/inbox-0001/confirm');
+    expect(calls[0]?.init?.method).toBe('POST');
+    expect(calls[0]?.init?.headers).toEqual({ 'content-type': 'application/json' });
+    expect(calls[0]?.init?.body).toBe('{"role":"broll"}');
+    expect(result).toEqual(asset);
+  });
+
+  it('discards a pending inbox asset through EP-045', async () => {
+    const deletion = { slug: 'smoke-ingest', deleted: { id: 'inbox-0001', path: 'raw/inbox/clip01.mp4' } };
+    const { fetchImpl, calls } = recordingFetch(() => jsonResponse(deletion));
+
+    const result = await createRenderApiClient(fetchImpl).discardInboxAsset('smoke-ingest', 'inbox-0001');
+
+    expect(calls[0]?.url).toBe('/api/projects/smoke-ingest/inbox/inbox-0001');
+    expect(calls[0]?.init?.method).toBe('DELETE');
+    expect(result).toEqual(deletion);
+  });
+
   it('asks EP-027 to delete an asset the timeline uses with force=true', async () => {
     const { fetchImpl, calls } = recordingFetch(() =>
       jsonResponse({

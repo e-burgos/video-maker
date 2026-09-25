@@ -42,7 +42,7 @@ describe('StudioLayout', () => {
     expect(screen.getByTestId('settings-nav').getAttribute('href')).toBe('/settings');
     expect(screen.getByText('routed page')).toBeTruthy();
     await waitFor(() =>
-      expect(screen.getByTestId('service-health-label').textContent).toBe('service ok · cycle 3'),
+      expect(screen.getByTestId('service-health-label').textContent).toBe('Ready'),
     );
   });
 

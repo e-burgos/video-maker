@@ -58,11 +58,11 @@ function renderBadge(client: RenderApiClient) {
 }
 
 describe('ServiceHealthBadge', () => {
-  it('reports the healthy service with its cycle', async () => {
+  it('reports the healthy service as ready', async () => {
     renderBadge(clientWith(() => Promise.resolve(health())));
 
     await waitFor(() =>
-      expect(screen.getByTestId('service-health-label').textContent).toBe('service ok · cycle 3'),
+      expect(screen.getByTestId('service-health-label').textContent).toBe('Ready'),
     );
   });
 
@@ -112,7 +112,7 @@ describe('ServiceHealthBadge', () => {
     );
     fireEvent.click(screen.getByTitle('Re-check the render service'));
     await waitFor(() =>
-      expect(screen.getByTestId('service-health-label').textContent).toBe('service ok · cycle 3'),
+      expect(screen.getByTestId('service-health-label').textContent).toBe('Ready'),
     );
   });
 

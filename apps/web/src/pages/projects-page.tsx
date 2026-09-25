@@ -7,6 +7,7 @@ import type { VideoGroup } from '../api/video-grouping';
 import { useT } from '../i18n/language-context';
 import { useAsyncResource } from '../hooks/use-async-resource';
 import { CreateFolderForm } from '../components/create-folder-form';
+import { CreateProjectByDrop } from '../components/create-project-by-drop';
 import { CreateProjectForm } from '../components/create-project-form';
 import { ErrorNotice } from '../components/error-notice';
 import { FolderHeading } from '../components/folder-heading';
@@ -160,36 +161,39 @@ export function ProjectsPage() {
 
   const videoList = videos.data;
   const organizationData = organization.data;
+  const existingSlugs = videoList?.map((video) => video.slug) ?? [];
 
   return (
-    <section className="space-y-6">
-      <div className="flex flex-wrap items-end justify-between gap-4">
-        <div>
-          <h1 className="text-2xl font-semibold tracking-tight">{t('projects.title')}</h1>
-          <p className="mt-1 text-sm text-slate-400">{t('projects.subtitle')}</p>
+    <CreateProjectByDrop existingSlugs={existingSlugs}>
+      <section className="space-y-6">
+        <div className="flex flex-wrap items-end justify-between gap-4">
+          <div>
+            <h1 className="text-2xl font-semibold tracking-tight text-ink">{t('projects.title')}</h1>
+            <p className="mt-1 text-sm text-ink-muted">{t('projects.subtitle')}</p>
+          </div>
+          <div className="flex flex-wrap items-end gap-6">
+            <CreateFolderForm onCreated={reloadAll} />
+            <CreateProjectForm onCreated={reloadAll} />
+          </div>
         </div>
-        <div className="flex flex-wrap items-end gap-6">
-          <CreateFolderForm onCreated={reloadAll} />
-          <CreateProjectForm onCreated={reloadAll} />
-        </div>
-      </div>
 
-      {(videos.status === 'loading' || organization.status === 'loading') && (
-        <p className="text-sm text-slate-500">{t('projects.loading')}</p>
-      )}
-      {videos.status === 'error' && videos.error !== null && (
-        <ErrorNotice error={videos.error} onRetry={reloadAll} />
-      )}
-      {organization.status === 'error' && organization.error !== null && (
-        <ErrorNotice error={organization.error} onRetry={reloadAll} />
-      )}
-
-      {videos.status === 'ready' &&
-        videoList !== null &&
-        organization.status === 'ready' &&
-        organizationData !== null && (
-          <ReadyProjects videos={videoList} organization={organizationData} onChanged={reloadAll} />
+        {(videos.status === 'loading' || organization.status === 'loading') && (
+          <p className="text-sm text-ink-faint">{t('projects.loading')}</p>
         )}
-    </section>
+        {videos.status === 'error' && videos.error !== null && (
+          <ErrorNotice error={videos.error} onRetry={reloadAll} />
+        )}
+        {organization.status === 'error' && organization.error !== null && (
+          <ErrorNotice error={organization.error} onRetry={reloadAll} />
+        )}
+
+        {videos.status === 'ready' &&
+          videoList !== null &&
+          organization.status === 'ready' &&
+          organizationData !== null && (
+            <ReadyProjects videos={videoList} organization={organizationData} onChanged={reloadAll} />
+          )}
+      </section>
+    </CreateProjectByDrop>
   );
 }

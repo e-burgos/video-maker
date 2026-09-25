@@ -98,8 +98,8 @@ export function SettingsPage() {
   return (
     <section className="space-y-6">
       <div>
-        <h1 className="font-mono text-2xl font-semibold tracking-tight">{t('settings.title')}</h1>
-        <p className="mt-1 text-sm text-slate-400">{t('settings.description')}</p>
+        <h1 className="text-2xl font-semibold tracking-tight text-ink">{t('settings.title')}</h1>
+        <p className="mt-1 text-sm text-ink-muted">{t('settings.description')}</p>
       </div>
 
       {settings.status === 'loading' && <p className="text-sm text-slate-500">{t('settings.loading')}</p>}
