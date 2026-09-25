@@ -156,7 +156,7 @@ describe('MontageTrigger', () => {
     );
 
     await waitFor(() => expect(screen.getByTestId('montage-blockers')).toBeTruthy());
-    expect(screen.getByText('whisperModel is not resolved (WHISPER_MODEL_PATH).')).toBeTruthy();
+    expect(screen.getByText('WHISPER_MODEL_PATH is not set.')).toBeTruthy();
     expect(generateButton().disabled).toBe(true);
   });
 

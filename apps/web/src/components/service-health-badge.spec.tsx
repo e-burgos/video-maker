@@ -66,7 +66,7 @@ describe('ServiceHealthBadge', () => {
     );
   });
 
-  it('names the engine module and the binary that are missing when degraded', async () => {
+  it('groups the missing engine module and binary into user-language categories, never raw ids', async () => {
     renderBadge(
       clientWith(() =>
         Promise.resolve(
@@ -81,7 +81,7 @@ describe('ServiceHealthBadge', () => {
 
     await waitFor(() =>
       expect(screen.getByTestId('service-health-label').textContent).toBe(
-        'service degraded: composition-remotion/render, ffprobe',
+        'Missing: engine, video tools',
       ),
     );
   });
@@ -108,7 +108,7 @@ describe('ServiceHealthBadge', () => {
     renderBadge(clientWith(getHealth));
 
     await waitFor(() =>
-      expect(screen.getByTestId('service-health-label').textContent).toContain('degraded'),
+      expect(screen.getByTestId('service-health-label').textContent).toContain('Missing'),
     );
     fireEvent.click(screen.getByTitle('Re-check the render service'));
     await waitFor(() =>
@@ -176,7 +176,7 @@ describe('ServiceHealthBadge', () => {
       'ttsCli · TTS_CLI_PATH · resolved',
       'ttsVoicesDir · TTS_VOICES_DIR · missing',
     ]);
-    expect(screen.getByTestId('service-health-label').textContent).toContain('ttsVoicesDir');
+    expect(screen.getByTestId('service-health-label').textContent).toBe('Missing: voice engine');
   });
 
   it('marks a missing binary and a disabled capability, never a resolved host path', async () => {

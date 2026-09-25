@@ -45,11 +45,11 @@ describe('LanguageSwitch', () => {
   it('translates the whole tree the moment spanish is chosen', async () => {
     renderSwitch();
 
-    expect(screen.getByTestId('probe').textContent).toBe('Projects');
+    expect(screen.getByTestId('probe').textContent).toBe('Your videos');
 
     fireEvent.click(screen.getByRole('button', { name: 'Spanish' }));
 
-    await waitFor(() => expect(screen.getByTestId('probe').textContent).toBe('Proyectos'));
+    await waitFor(() => expect(screen.getByTestId('probe').textContent).toBe('Tus videos'));
     expect(screen.getByRole('button', { name: 'Español' }).getAttribute('aria-pressed')).toBe('true');
   });
 
@@ -65,11 +65,11 @@ describe('LanguageSwitch', () => {
     renderSwitch();
 
     fireEvent.click(screen.getByRole('button', { name: 'Spanish' }));
-    await waitFor(() => expect(screen.getByTestId('probe').textContent).toBe('Proyectos'));
+    await waitFor(() => expect(screen.getByTestId('probe').textContent).toBe('Tus videos'));
 
     fireEvent.click(screen.getByRole('button', { name: 'Inglés' }));
 
-    await waitFor(() => expect(screen.getByTestId('probe').textContent).toBe('Projects'));
+    await waitFor(() => expect(screen.getByTestId('probe').textContent).toBe('Your videos'));
     expect(window.localStorage.getItem(LANGUAGE_STORAGE_KEY)).toBe('en');
   });
 });

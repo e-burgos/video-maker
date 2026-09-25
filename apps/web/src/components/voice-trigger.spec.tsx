@@ -123,7 +123,7 @@ describe('VoiceTrigger', () => {
     });
 
     await waitFor(() => expect(screen.getByTestId('voice-blockers')).toBeDefined());
-    expect(screen.getByText('ttsCli is not resolved (TTS_CLI_PATH).')).toBeDefined();
+    expect(screen.getByText('TTS_CLI_PATH is not set.')).toBeDefined();
     expect(generateButton().disabled).toBe(true);
   });
 

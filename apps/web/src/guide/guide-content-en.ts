@@ -7,15 +7,15 @@ export const GUIDE_EN: GuideContent = {
   sections: [
     {
       id: 'projects',
-      title: 'Projects — one folder per video',
+      title: 'Videos — one folder per video',
       body: [
-        'A project is a folder under the media root of the service, named by its **slug**. Creating one from the top of the projects page prepares `media/<slug>/raw` and the working folders the engine writes into.',
+        'Every video is a folder under the media root of the service, named by an internal **slug**. Creating one from the home page asks for a name ("My next reel") and derives the slug for you, preparing `media/<slug>/raw` and the working folders the engine writes into.',
         '',
-        '- The slug is one lowercase kebab-case segment (`my-next-reel`): it is the folder name, so the service refuses anything else.',
-        '- Everything you upload lands under `media/<slug>/raw/<role>/`, and every artifact the engine produces stays inside that same project.',
-        '- The flags on a project card (`raw`, `catalog`, `timeline`, `edl`, `out`) tell you how far that project already went.',
+        '- The slug is one lowercase kebab-case segment (`my-next-reel`) derived from the name you typed: it is the folder name on disk, you never type it directly.',
+        '- Everything you upload lands under `media/<slug>/raw/<role>/`, and every artifact the engine produces stays inside that same video.',
+        '- A video card shows one status (No material, Material loaded, Cut ready, Video ready) that summarizes how far it already went; the advanced library still shows the underlying `raw`, `catalog`, `timeline`, `edl` and `out` flags.',
         '',
-        'Open a project and you land on the **producer**, which is the shortest path to a finished video. The other sections are there when you want to drive a step by hand.',
+        'Open a video and you land on the **producer**, which is the shortest path to a finished video. The other sections are there when you want to drive a step by hand. Folders and categories are just how you group videos on the home page — they hold no files of their own.',
       ].join('\n'),
     },
     {
@@ -51,14 +51,14 @@ export const GUIDE_EN: GuideContent = {
       id: 'producer',
       title: 'Producer — ask for the video in your own words',
       body: [
-        'The producer is a local AI agent that reads the material of the project, agrees a plan with you and then runs the other sections for you. It is the recommended starting point.',
+        'The producer is a local AI agent that reads the material of the video, agrees a plan with you and then runs the other sections for you. It is the recommended starting point.',
         '',
         '- **What to ask it for**: the video you want and what you have. It will ask you for the **platform** and the **format** before anything else, because a vertical Reel and a horizontal YouTube video are not the same edit.',
-        '- **It works with what is in the project**, and it can also look for free material when you have none.',
+        '- **It works with what is in the video**, and it can also look for free material when you have none.',
         '- **A turn takes minutes, not seconds.** It reads, writes files and starts jobs; the activity feed shows each step while it works, and you can cancel a running turn.',
         '- **Model**: the picker next to the composer chooses which model answers. A faster model is cheaper and enough for short exchanges; the strongest one is worth it for a full plan.',
         '- **Quota**: the producer runs on your Claude subscription. If it runs out, the conversation is saved on disk and you carry on later from where you left it.',
-        '- The conversation is persisted per project, so you can close the browser and come back.',
+        '- The conversation is persisted per video, so you can close the browser and come back.',
       ].join('\n'),
     },
     {
@@ -82,7 +82,7 @@ export const GUIDE_EN: GuideContent = {
         'sherpa-onnx reads the narration of every scene on this machine and Whisper aligns it word by word. **Every scene ends up lasting what its track lasts**, not what the model estimated, which is why the voice is generated before the final timing is trusted.',
         '',
         '- Each installed voice is offered as a card with its readable name, language, quality and a **play button**: the demo is synthesized once and cached, so you can hear a voice before spending a full narration on it.',
-        '- The selected voice applies to the whole project.',
+        '- The selected voice applies to the whole video.',
         '- **Your own recording** replaces the synthesized track of a scene: upload it with the `voice` role, or pick a take already under `raw/voice/`, and attach it to the scene.',
         '- A scene whose narration changed after the track was produced is flagged as stale, and you can regenerate just that scene.',
       ].join('\n'),

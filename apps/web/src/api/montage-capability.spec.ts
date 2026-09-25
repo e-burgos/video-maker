@@ -91,7 +91,7 @@ describe('montageBlockers', () => {
     ]);
     expect(
       translate(MESSAGES_EN, blockers[0]?.key ?? 'montage.blocker.noQueue', blockers[0]?.params),
-    ).toBe('whisperModel is not resolved (WHISPER_MODEL_PATH).');
+    ).toBe('WHISPER_MODEL_PATH is not set.');
     expect(canGenerateMontage(null)).toBe(false);
   });
 

@@ -17,7 +17,7 @@ const TONE_CLASS: Readonly<Record<BadgeTone, string>> = {
 export function Badge({ tone = 'neutral', className = '', ...props }: BadgeProps) {
   return (
     <span
-      className={`inline-flex items-center gap-1 rounded-full border px-2 py-0.5 font-mono text-[11px] ${TONE_CLASS[tone]} ${className}`}
+      className={`inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-[11px] ${TONE_CLASS[tone]} ${className}`}
       {...props}
     />
   );

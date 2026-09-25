@@ -7,15 +7,15 @@ export const GUIDE_ES: GuideContent = {
   sections: [
     {
       id: 'projects',
-      title: 'Proyectos — una carpeta por video',
+      title: 'Videos — una carpeta por video',
       body: [
-        'Un proyecto es una carpeta bajo la raíz de medios del servicio, nombrada por su **slug**. Crear uno desde arriba de la página de proyectos prepara `media/<slug>/raw` y las carpetas de trabajo donde escribe el motor.',
+        'Cada video es una carpeta bajo la raíz de medios del servicio, nombrada por un **slug** interno. Crear uno desde la página de inicio te pide un nombre ("Mi próximo reel") y deriva el slug solo, preparando `media/<slug>/raw` y las carpetas de trabajo donde escribe el motor.',
         '',
-        '- El slug es un único segmento en kebab-case minúsculo (`mi-proximo-reel`): es el nombre de la carpeta, así que el servicio rechaza cualquier otra cosa.',
-        '- Todo lo que subís cae bajo `media/<slug>/raw/<rol>/`, y cada artefacto que produce el motor queda dentro de ese mismo proyecto.',
-        '- Las banderas de la tarjeta de un proyecto (`raw`, `catalog`, `timeline`, `edl`, `out`) te dicen hasta dónde llegó ese proyecto.',
+        '- El slug es un único segmento en kebab-case minúsculo (`mi-proximo-reel`) derivado del nombre que escribiste: es el nombre de la carpeta en disco, nunca lo escribís vos directamente.',
+        '- Todo lo que subís cae bajo `media/<slug>/raw/<rol>/`, y cada artefacto que produce el motor queda dentro de ese mismo video.',
+        '- La tarjeta de un video muestra un solo estado (Sin material, Material cargado, Montaje listo, Video listo) que resume hasta dónde llegó; la biblioteca avanzada todavía muestra las banderas de fondo `raw`, `catalog`, `timeline`, `edl` y `out`.',
         '',
-        'Al abrir un proyecto caés en el **productor**, que es el camino más corto a un video terminado. Las otras secciones están para cuando querés manejar un paso a mano.',
+        'Al abrir un video caés en el **productor**, que es el camino más corto a un video terminado. Las otras secciones están para cuando querés manejar un paso a mano. Las carpetas y categorías son solo la forma de agrupar videos en la página de inicio — no guardan archivos propios.',
       ].join('\n'),
     },
     {
@@ -51,14 +51,14 @@ export const GUIDE_ES: GuideContent = {
       id: 'producer',
       title: 'Productor — pedí el video con tus palabras',
       body: [
-        'El productor es un agente de IA local que lee el material del proyecto, acuerda un plan con vos y después corre las otras secciones por vos. Es el punto de partida recomendado.',
+        'El productor es un agente de IA local que lee el material del video, acuerda un plan con vos y después corre las otras secciones por vos. Es el punto de partida recomendado.',
         '',
         '- **Qué pedirle**: el video que querés y qué tenés. Antes que nada te va a preguntar la **plataforma** y el **formato**, porque un Reel vertical y un video horizontal de YouTube no son el mismo montaje.',
-        '- **Trabaja con lo que hay en el proyecto**, y también puede buscar material libre cuando no tenés nada.',
+        '- **Trabaja con lo que hay en el video**, y también puede buscar material libre cuando no tenés nada.',
         '- **Un turno tarda minutos, no segundos.** Lee, escribe archivos y arranca jobs; el feed de actividad muestra cada paso mientras trabaja, y podés cancelar un turno en curso.',
         '- **Modelo**: el selector al lado del cuadro de texto elige qué modelo responde. Un modelo más rápido es más barato y alcanza para intercambios cortos; el más fuerte vale la pena para un plan completo.',
         '- **Cupo**: el productor corre sobre tu suscripción de Claude. Si se agota, la conversación queda guardada en disco y seguís más tarde desde donde la dejaste.',
-        '- La conversación se persiste por proyecto, así que podés cerrar el navegador y volver.',
+        '- La conversación se persiste por video, así que podés cerrar el navegador y volver.',
       ].join('\n'),
     },
     {
@@ -82,7 +82,7 @@ export const GUIDE_ES: GuideContent = {
         'sherpa-onnx lee la narración de cada escena en esta máquina y Whisper la alinea palabra por palabra. **Cada escena termina durando lo que dura su pista**, no lo que estimó el modelo, y por eso la voz se genera antes de confiar en el timing final.',
         '',
         '- Cada voz instalada se ofrece como una tarjeta con su nombre legible, idioma, calidad y un **botón de reproducción**: el demo se sintetiza una vez y queda cacheado, así escuchás una voz antes de gastar una narración entera en ella.',
-        '- La voz elegida aplica a todo el proyecto.',
+        '- La voz elegida aplica a todo el video.',
         '- **Tu propia grabación** reemplaza la pista sintetizada de una escena: subila con el rol `voice`, o elegí una toma que ya esté en `raw/voice/`, y adjuntala a la escena.',
         '- Una escena cuya narración cambió después de producir la pista queda marcada como desactualizada, y podés regenerar sólo esa escena.',
       ].join('\n'),

@@ -117,7 +117,7 @@ describe('loadMessages', () => {
   it('loads the spanish catalog lazily, out of the initial chunk', async () => {
     const spanish = await loadMessages('es');
 
-    expect(spanish['projects.title']).toBe('Proyectos');
+    expect(spanish['projects.title']).toBe('Tus videos');
     expect(spanish).not.toBe(MESSAGES_EN);
   });
 });

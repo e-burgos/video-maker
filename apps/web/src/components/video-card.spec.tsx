@@ -62,7 +62,7 @@ describe('VideoCard', () => {
     openMenu();
 
     expect(screen.getAllByRole('menuitem').map((item) => item.textContent)).toEqual([
-      'Assign to a project',
+      'Assign to a folder',
       'Archive',
       'Delete permanently',
     ]);

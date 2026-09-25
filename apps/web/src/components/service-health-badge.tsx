@@ -1,5 +1,6 @@
 import { useCallback } from 'react';
 
+import { dedupeHealthCategoryKeys } from '../api/health-categories';
 import { useRenderApi } from '../api/render-api-context';
 import { useAsyncResource } from '../hooks/use-async-resource';
 import { useT } from '../i18n/language-context';
@@ -32,8 +33,9 @@ function healthLabel(
     return t('health.unreachable', { code: health.error?.code ?? 'UNKNOWN' });
   }
   if (state === 'degraded') {
+    const categories = dedupeHealthCategoryKeys(missingParts(health.data as ServiceHealth));
     return t('health.degraded', {
-      parts: missingParts(health.data as ServiceHealth).join(', '),
+      parts: categories.map((key) => t(key)).join(', '),
     });
   }
   return t('health.ok');

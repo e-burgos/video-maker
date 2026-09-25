@@ -78,7 +78,7 @@ describe('voiceBlockers', () => {
         params: { name: 'whisperCli', envVar: 'WHISPER_CPP_PATH' },
       },
     ]);
-    expect(MESSAGES_EN['voice.blocker.binaryUnresolved']).toBe('{name} is not resolved ({envVar}).');
+    expect(MESSAGES_EN['voice.blocker.binaryUnresolved']).toBe('{envVar} is not set.');
   });
 
   it('ignores a binary this pipeline does not use', () => {
