@@ -65,13 +65,13 @@
         "apps/docs-site/src/content/faq.mjs"
       ],
       "usage": {
-        "tokens_in": 68000,
-        "tokens_out": 6500,
         "provider_model": "claude/sonnet",
         "effort": "medium",
         "agent": "implementor-front",
+        "tokens_in": 81942,
+        "tokens_out": 14460,
         "approx": true,
-        "source": "declared-estimate",
+        "source": "agent-usage-notification",
         "recorded_at": "2026-09-25"
       }
     },
@@ -151,13 +151,13 @@
         "sdd/specs/spec-e-burgos-018-producer-free-tier/cycles/cycle-04/artifacts/patch-timeline-smoke.md"
       ],
       "usage": {
-        "tokens_in": 180000,
-        "tokens_out": 16000,
         "provider_model": "claude/sonnet",
         "effort": "medium",
         "agent": "implementor-back",
+        "tokens_in": 217947,
+        "tokens_out": 38461,
         "approx": true,
-        "source": "declared-estimate",
+        "source": "agent-usage-notification",
         "recorded_at": "2026-09-25"
       }
     },
@@ -176,13 +176,13 @@
         "libs/producer-tools/src/prompt/build-producer-prompt.spec.ts"
       ],
       "usage": {
-        "tokens_in": 25000,
-        "tokens_out": 3000,
         "provider_model": "claude/sonnet",
         "effort": "medium",
         "agent": "implementor-back",
+        "tokens_in": 54487,
+        "tokens_out": 9615,
         "approx": true,
-        "source": "declared-estimate",
+        "source": "agent-usage-notification",
         "recorded_at": "2026-09-25"
       }
     },
@@ -199,10 +199,20 @@
         "TASK-008",
         "TASK-010"
       ],
-      "status": "pending",
+      "status": "done",
       "files": [
         "sdd/specs/spec-e-burgos-018-producer-free-tier/cycles/cycle-04/artifacts/display-ads-productions.md"
-      ]
+      ],
+      "usage": {
+        "provider_model": "claude/opus",
+        "effort": "high",
+        "agent": "orchestrator",
+        "tokens_in": 120000,
+        "tokens_out": 20000,
+        "approx": true,
+        "source": "declared-estimate",
+        "recorded_at": "2026-09-25"
+      }
     },
     {
       "id": "TASK-010",
@@ -228,13 +238,13 @@
         "sdd/specs/spec-e-burgos-018-producer-free-tier/cycles/cycle-04/artifacts/voice-fit-repro.md"
       ],
       "usage": {
-        "tokens_in": 210000,
-        "tokens_out": 19000,
         "provider_model": "claude/sonnet",
         "effort": "medium",
         "agent": "implementor-back",
+        "tokens_in": 279979,
+        "tokens_out": 49408,
         "approx": true,
-        "source": "declared-estimate",
+        "source": "agent-usage-notification",
         "recorded_at": "2026-09-25"
       }
     }
