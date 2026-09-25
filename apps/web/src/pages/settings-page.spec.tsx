@@ -89,6 +89,7 @@ describe('SettingsPage', () => {
 
     await waitFor(() =>
       expect(screen.getByTestId('settings-key-loaded').textContent).toBe('Key loaded ••••9abc'),
+      { timeout: 5000 },
     );
     expect(screen.queryByTestId('settings-key-form')).toBeNull();
 

@@ -447,11 +447,13 @@
           "module": "producer-free-tier",
           "apps": [
             "apps/render-api",
-            "libs/producer-tools"
+            "libs/producer-tools",
+            "libs/media-local",
+            "apps/web"
           ],
-          "status": "in-progress",
+          "status": "completed",
           "tasks_total": 6,
-          "tasks_done": 5
+          "tasks_done": 6
         }
       }
     }

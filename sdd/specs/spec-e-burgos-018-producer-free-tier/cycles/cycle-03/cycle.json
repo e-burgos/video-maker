@@ -5,7 +5,9 @@
   "spec": "spec-e-burgos-018-producer-free-tier",
   "apps": [
     "apps/render-api",
-    "libs/producer-tools"
+    "libs/producer-tools",
+    "libs/media-local",
+    "apps/web"
   ],
   "phase": "free-media",
   "flow": "lite",
@@ -13,18 +15,174 @@
     "search_free_media + import_media: video e imágenes libres con licencia comercial desde Wikimedia Commons y NASA, con crédito automático en work/credits.json",
     "view_images: el productor mira fotos del proyecto sin probar herramientas"
   ],
-  "status": "in-progress",
+  "status": "completed",
   "started_at": "2026-09-25",
-  "completed_at": null,
+  "completed_at": "2026-09-25",
   "documents": {
     "plan": "sdd/specs/spec-e-burgos-018-producer-free-tier/cycles/cycle-03/plan.md",
     "tasks": "sdd/specs/spec-e-burgos-018-producer-free-tier/cycles/cycle-03/tasks.json"
   },
-  "artifacts": [],
-  "metrics": null,
+  "artifacts": [
+    "sdd/specs/spec-e-burgos-018-producer-free-tier/cycles/cycle-03/artifacts/free-media-smoke.mjs",
+    "sdd/specs/spec-e-burgos-018-producer-free-tier/cycles/cycle-03/artifacts/free-media-smoke.md",
+    "sdd/specs/spec-e-burgos-018-producer-free-tier/cycles/cycle-03/artifacts/free-media-smoke-preview-1.jpg"
+  ],
+  "metrics": {
+    "tasks_total": 6,
+    "tasks_completed": 6,
+    "story_points": 13,
+    "files_created": [
+      "apps/render-api/src/http/handlers/free-media-handler.spec.ts",
+      "apps/render-api/src/http/handlers/free-media-handler.ts",
+      "apps/render-api/src/http/handlers/image-preview-handler.spec.ts",
+      "apps/render-api/src/http/handlers/image-preview-handler.ts",
+      "apps/render-api/src/media-search/commons-media-search.spec.ts",
+      "apps/render-api/src/media-search/commons-media-search.ts",
+      "apps/render-api/src/media-search/commons-shared.ts",
+      "apps/render-api/src/media-search/download-shared.ts",
+      "apps/render-api/src/media-search/free-media-result.ts",
+      "apps/render-api/src/media-search/free-media-search-cache.spec.ts",
+      "apps/render-api/src/media-search/free-media-search-cache.ts",
+      "apps/render-api/src/media-search/free-media-search.spec.ts",
+      "apps/render-api/src/media-search/free-media-search.ts",
+      "apps/render-api/src/media-search/import-free-media.spec.ts",
+      "apps/render-api/src/media-search/import-free-media.ts",
+      "apps/render-api/src/media-search/nasa-media-search.spec.ts",
+      "apps/render-api/src/media-search/nasa-media-search.ts",
+      "libs/media-local/src/ffmpeg/resize-image.spec.ts",
+      "libs/media-local/src/ffmpeg/resize-image.ts",
+      "sdd/context/apps/render-api/updates/2026-09-25-spec-e-burgos-018-producer-free-tier-cycle-03.md",
+      "sdd/context/apps/web/updates/2026-09-25-spec-e-burgos-018-producer-free-tier-cycle-03.md",
+      "sdd/context/libs/media-local/updates/2026-09-25-spec-e-burgos-018-producer-free-tier-cycle-03.md",
+      "sdd/context/libs/producer-tools/updates/2026-09-25-spec-e-burgos-018-producer-free-tier-cycle-03.md",
+      "sdd/memory/journal/2026-09-25-spec-e-burgos-018-producer-free-tier-cycle-03.md",
+      "sdd/specs/spec-e-burgos-018-producer-free-tier/cycles/cycle-03/artifacts/free-media-smoke-preview-1.jpg",
+      "sdd/specs/spec-e-burgos-018-producer-free-tier/cycles/cycle-03/artifacts/free-media-smoke.md",
+      "sdd/specs/spec-e-burgos-018-producer-free-tier/cycles/cycle-03/artifacts/free-media-smoke.mjs"
+    ],
+    "files_modified": [
+      "apps/render-api/src/__fixtures__/fake-render-api-dependencies.ts",
+      "apps/render-api/src/deps/node-render-api-dependencies.ts",
+      "apps/render-api/src/deps/render-api-dependencies.ts",
+      "apps/render-api/src/errors/http-status-for.spec.ts",
+      "apps/render-api/src/errors/http-status-for.ts",
+      "apps/render-api/src/errors/render-api-error.ts",
+      "apps/render-api/src/errors/to-error-payload.ts",
+      "apps/render-api/src/http/handle-request.ts",
+      "apps/render-api/src/http/render-api-runtime.ts",
+      "apps/render-api/src/http/routes.ts",
+      "apps/render-api/src/music/commons-music-search.ts",
+      "apps/render-api/src/music/import-music.ts",
+      "apps/render-api/src/music/project-credits.spec.ts",
+      "apps/render-api/src/music/project-credits.ts",
+      "apps/render-api/src/producer/producer-stream-events.ts",
+      "apps/web/src/pages/settings-page.spec.tsx",
+      "libs/media-local/src/index.ts",
+      "libs/producer-tools/src/__fixtures__/fake-render-api-client.ts",
+      "libs/producer-tools/src/client/http-render-api-client.spec.ts",
+      "libs/producer-tools/src/client/http-render-api-client.ts",
+      "libs/producer-tools/src/client/render-api-client.ts",
+      "libs/producer-tools/src/contract/tool-errors.spec.ts",
+      "libs/producer-tools/src/contract/tool-errors.ts",
+      "libs/producer-tools/src/contract/tool-names.spec.ts",
+      "libs/producer-tools/src/contract/tool-names.ts",
+      "libs/producer-tools/src/contract/tool-schemas.ts",
+      "libs/producer-tools/src/handlers/studio-tool-handlers.spec.ts",
+      "libs/producer-tools/src/handlers/studio-tool-handlers.ts",
+      "libs/producer-tools/src/index.ts",
+      "libs/producer-tools/src/mcp/studio-mcp-server.spec.ts",
+      "libs/producer-tools/src/mcp/studio-mcp-server.ts",
+      "libs/producer-tools/src/prompt/build-producer-prompt.spec.ts",
+      "libs/producer-tools/src/prompt/build-producer-prompt.ts",
+      "sdd/api.json",
+      "sdd/context/apps/web/constitution.md",
+      "sdd/context/apps/web/context_prompt.md"
+    ],
+    "files_deleted": [],
+    "usage": {
+      "tokens_in": 675236,
+      "tokens_out": 119336,
+      "approx": true,
+      "source": "agent-usage-notification",
+      "by_agent": [
+        {
+          "agent": "implementor-back",
+          "label": "TASK-001..005 material libre y view_images",
+          "provider_model": "claude/sonnet",
+          "effort": "medium",
+          "tokens_in": 499042,
+          "tokens_out": 88066,
+          "tokens_total": 587108,
+          "approx": true,
+          "source": "agent-usage-notification",
+          "recorded_at": "2026-09-25"
+        },
+        {
+          "agent": "custom",
+          "label": "consolidación de contexto de web",
+          "provider_model": "claude/sonnet",
+          "effort": "medium",
+          "tokens_in": 126194,
+          "tokens_out": 22270,
+          "tokens_total": 148464,
+          "approx": true,
+          "source": "agent-usage-notification",
+          "recorded_at": "2026-09-25"
+        },
+        {
+          "agent": "orchestrator",
+          "label": "plan, revisión, flaky y cierre",
+          "provider_model": "claude/opus",
+          "effort": "high",
+          "tokens_in": 50000,
+          "tokens_out": 9000,
+          "tokens_total": 59000,
+          "approx": true,
+          "source": "declared-estimate",
+          "recorded_at": "2026-09-25"
+        }
+      ],
+      "by_tier": {
+        "claude/sonnet": {
+          "tokens_in": 625236,
+          "tokens_out": 110336,
+          "approx": true,
+          "source": "agent-usage-notification"
+        },
+        "claude/opus": {
+          "tokens_in": 50000,
+          "tokens_out": 9000,
+          "approx": true,
+          "source": "declared-estimate"
+        }
+      }
+    }
+  },
   "tables_created": [],
-  "endpoints_implemented": [],
+  "endpoints_implemented": [
+    "EP-046",
+    "EP-047",
+    "EP-048"
+  ],
   "components_created": [],
-  "issues_found": [],
-  "reviewer_report": null
+  "issues_found": [
+    "El preview de fotos con -ss 0 sobre una imagen fija salía 0 sin escribir archivo; nuevo puerto resizeImage sin -ss.",
+    "La búsqueda combinada concatenaba antes de recortar y NASA nunca aparecía; ahora intercala.",
+    "settings-page.spec.tsx intermitente bajo carga (waitFor de 1 s); subido a 5 s."
+  ],
+  "reviewer_report": {
+    "approved": true,
+    "date": "2026-09-25",
+    "ca_results": {
+      "US-018-301": "PASS — búsqueda e import reales desde Commons (video webm 39,1 MB, imagen 4,2 MB, dominio público) y NASA (video mp4 113,1 MB, imagen 267 KB); ffprobe los lee; work/credits.json con 4 entradas video/video/image/image con licencia, autor y fuente.",
+      "US-018-302": "PASS — view_images con Claude CLI: tool_result del stream-json con [image, text] y respuesta que describe la foto; con OpenRouter (DeepSeek) el request lleva la imagen y la respuesta la describe (US$0.0032). Captura del preview revisada por el orquestador."
+    },
+    "tests": {
+      "sdd:validate": "OK",
+      "suite": "nx run-many -t lint test build -p render-api producer-tools media-local web desktop timeline-core auto-montage verde",
+      "e2e": "artifacts/free-media-smoke.md"
+    },
+    "notes": "Ciclo lite. Ninguna fuente pidió API key.",
+    "follow_ups": []
+  }
 }
