@@ -4,29 +4,86 @@
   "module": "producer-free-tier",
   "spec": "spec-e-burgos-018-producer-free-tier",
   "apps": [
-    "apps/render-api",
-    "libs/producer-tools",
-    "apps/docs-site"
+    "libs/producer-tools"
   ],
   "phase": "free-models",
   "flow": "lite",
   "objectives": [
-    "Benchmark real de los modelos :free vivos de OpenRouter con tools e imagen, 2 corridas por modelo y tope de US$3",
-    "Los que pasen 2/2 quedan recomendados con tier free y sus métricas",
-    "Precios y sección de modelos de la web al día"
+    "Dejar el benchmark de modelos corriendo contra el runtime actual y capaz de descubrir los :free vivos del catálogo",
+    "Diagnosticar si la cuota diaria de gratuitos permite correrlo hoy"
   ],
-  "status": "in-progress",
+  "status": "completed",
   "started_at": "2026-09-25",
-  "completed_at": null,
+  "completed_at": "2026-09-25",
   "documents": {
     "plan": "sdd/specs/spec-e-burgos-018-producer-free-tier/cycles/cycle-01/plan.md",
     "tasks": "sdd/specs/spec-e-burgos-018-producer-free-tier/cycles/cycle-01/tasks.json"
   },
   "artifacts": [],
-  "metrics": null,
+  "metrics": {
+    "tasks_total": 4,
+    "tasks_completed": 2,
+    "tasks_skipped": 2,
+    "story_points": 2,
+    "files_created": [
+      "sdd/context/libs/producer-tools/updates/2026-09-25-spec-e-burgos-018-producer-free-tier-cycle-01.md"
+    ],
+    "files_modified": [
+      "libs/producer-tools/e2e/openrouter-model-bench.mjs"
+    ],
+    "files_deleted": [],
+    "usage": {
+      "tokens_in": 85000,
+      "tokens_out": 12000,
+      "approx": true,
+      "source": "declared-estimate",
+      "by_agent": [
+        {
+          "agent": "orchestrator",
+          "label": "bench, diagnóstico de cuota y cierre",
+          "provider_model": "claude/opus",
+          "effort": "high",
+          "tokens_in": 85000,
+          "tokens_out": 12000,
+          "tokens_total": 97000,
+          "approx": true,
+          "source": "declared-estimate",
+          "recorded_at": "2026-09-25"
+        }
+      ],
+      "by_tier": {
+        "claude/opus": {
+          "tokens_in": 85000,
+          "tokens_out": 12000,
+          "approx": true,
+          "source": "declared-estimate"
+        }
+      }
+    }
+  },
   "tables_created": [],
   "endpoints_implemented": [],
   "components_created": [],
-  "issues_found": [],
-  "reviewer_report": null
+  "issues_found": [
+    "La cuota diaria de modelos gratis de la cuenta (1000 pedidos) estaba en 0 el 2026-09-25 antes de cualquier corrida del ciclo; X-RateLimit-Reset = 2026-09-26 00:00 UTC.",
+    "El bench pasaba a buildProducerPrompt el input anterior a cycle-05 de la 017 (sin pendingAssets) y fallaba antes de llamar al modelo.",
+    "Cuatro render-api del bench de cycle-04 de la 017 siguen vivos en 4490–4493 (huérfanos)."
+  ],
+  "reviewer_report": {
+    "approved": true,
+    "date": "2026-09-25",
+    "ca_results": {
+      "US-018-101": "MOVIDO a cycle-04 — sin cuota gratuita hoy; el bench quedó verificado con una corrida real que llega al modelo y detecta OPENROUTER_FREE_QUOTA_EXHAUSTED.",
+      "US-018-102": "MOVIDO a cycle-04."
+    },
+    "tests": {
+      "sdd:validate": "OK",
+      "lint": "producer-tools:lint verde",
+      "e2e": "corrida real de 1 candidato: llega a OpenRouter y reporta la cuota agotada en 0,4 s"
+    },
+    "notes": "Ciclo lite cerrado sin su objetivo principal por una causa externa (cuota). Se reordena la spec: storyboard (cycle-02) y material libre (cycle-03) avanzan mientras tanto; el benchmark quedó programado para 00:05 UTC y su resultado abre cycle-04.",
+    "follow_ups": [
+      "cycle-04: benchmark de gratuitos y lista recomendada."
+    ]
+  }
 }

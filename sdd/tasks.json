@@ -424,13 +424,11 @@
           "file": "sdd/specs/spec-e-burgos-018-producer-free-tier/cycles/cycle-01/tasks.json",
           "module": "producer-free-tier",
           "apps": [
-            "apps/render-api",
-            "libs/producer-tools",
-            "apps/docs-site"
+            "libs/producer-tools"
           ],
-          "status": "in-progress",
+          "status": "completed",
           "tasks_total": 4,
-          "tasks_done": 1
+          "tasks_done": 2
         }
       }
     }

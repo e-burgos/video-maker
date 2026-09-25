@@ -4,9 +4,7 @@
   "cycle": 1,
   "module": "producer-free-tier",
   "apps": [
-    "apps/render-api",
-    "libs/producer-tools",
-    "apps/docs-site"
+    "libs/producer-tools"
   ],
   "flow": "lite",
   "user_stories_generated": true,
@@ -40,7 +38,7 @@
     },
     {
       "id": "TASK-002",
-      "title": "Run the real benchmark over the live free candidates (2 runs each, US$3 cap) and keep its report as a cycle artifact",
+      "title": "Run the real benchmark over the live free candidates (2 runs each, US$3 cap) and keep its report as a cycle artifact — moved to cycle-04: the account free-model daily quota was already at 0 on 2026-09-25 (reset 00:00 UTC)",
       "user_stories": [
         "US-018-101"
       ],
@@ -49,7 +47,7 @@
       "depends_on": [
         "TASK-001"
       ],
-      "status": "pending",
+      "status": "skipped",
       "files": [
         "sdd/specs/spec-e-burgos-018-producer-free-tier/cycles/cycle-01/artifacts/openrouter-free-model-bench.md",
         "sdd/specs/spec-e-burgos-018-producer-free-tier/cycles/cycle-01/artifacts/openrouter-free-model-bench-results.json"
@@ -57,7 +55,7 @@
     },
     {
       "id": "TASK-003",
-      "title": "Add every free model that passed 2/2 to the recommended OpenRouter models with tier free and its measured metrics, and update the models and prices section of the docs site",
+      "title": "Add every free model that passed 2/2 to the recommended OpenRouter models with tier free and its measured metrics, and update the models and prices section of the docs site — moved to cycle-04: the account free-model daily quota was already at 0 on 2026-09-25 (reset 00:00 UTC)",
       "user_stories": [
         "US-018-102"
       ],
@@ -66,7 +64,7 @@
       "depends_on": [
         "TASK-002"
       ],
-      "status": "pending",
+      "status": "skipped",
       "files": [
         "apps/render-api/src/config/recommended-openrouter-models.ts",
         "apps/render-api/src/config/recommended-openrouter-models.spec.ts",
@@ -85,10 +83,20 @@
       "depends_on": [
         "TASK-003"
       ],
-      "status": "pending",
+      "status": "done",
       "files": [
-        "sdd/context/apps/render-api/updates/2026-09-25-spec-e-burgos-018-producer-free-tier-cycle-01.md"
-      ]
+        "sdd/context/libs/producer-tools/updates/2026-09-25-spec-e-burgos-018-producer-free-tier-cycle-01.md"
+      ],
+      "usage": {
+        "provider_model": "claude/opus",
+        "effort": "high",
+        "agent": "orchestrator",
+        "tokens_in": 25000,
+        "tokens_out": 4000,
+        "approx": true,
+        "source": "declared-estimate",
+        "recorded_at": "2026-09-25"
+      }
     }
   ]
 }

@@ -10,7 +10,7 @@ const HERE = dirname(fileURLToPath(import.meta.url));
 const REPO_ROOT = join(HERE, '..', '..', '..');
 const DEFAULT_ARTIFACTS_DIR = join(
   REPO_ROOT,
-  'sdd/specs/spec-e-burgos-018-producer-free-tier/cycles/cycle-01/artifacts',
+  'sdd/specs/spec-e-burgos-018-producer-free-tier/cycles/cycle-04/artifacts',
 );
 const DEFAULT_REPORT_NAME = 'openrouter-model-bench';
 const OPENROUTER_MODELS_URL = 'https://openrouter.ai/api/v1/models';
