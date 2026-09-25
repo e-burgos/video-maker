@@ -70,5 +70,8 @@ Generated from `apps/desktop/vendor/manifest.json`. Do not edit by hand — rege
 
 ## Electron
 
-- License: MIT (placeholder — TASK-007 fills in the exact Electron version pinned by TASK-005 in
-  `apps/desktop/package.json`).
+- Version: 44.4.5 (bundles Chromium and Node.js 24)
+- License: MIT — Copyright (c) Electron contributors, Copyright (c) 2013-2020 GitHub Inc.
+- Source: https://github.com/electron/electron
+- Chromium and Node.js inside Electron ship under their own licenses, listed in the app bundle at
+  `Contents/Resources/licenses/` (`electron-LICENSE.txt`, `LICENSES.chromium.html`).

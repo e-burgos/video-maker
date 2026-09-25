@@ -16,6 +16,7 @@
     "studio:stop": "node scripts/stop-studio.mjs",
     "fetch:dev-voices": "node scripts/fetch-dev-voices.mjs",
     "desktop:dist": "node apps/desktop/scripts/build-desktop.mjs",
+    "desktop:release": "node apps/desktop/scripts/release-desktop.mjs",
     "sdd:docs": "node sdd/docs/serve.mjs",
     "sdd:validate": "node sdd/scripts/validate-sdd.mjs",
     "sdd:rebuild-tasks-index": "node sdd/scripts/rebuild-tasks-index.mjs",

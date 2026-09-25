@@ -22,14 +22,24 @@
       "estimation_hours": 3,
       "story_points": 2,
       "depends_on": [],
-      "status": "pending",
+      "status": "done",
       "files": [
         "apps/desktop/package.json",
-        "apps/desktop/electron-builder.yml",
-        "apps/desktop/scripts/release-desktop.mjs",
         "apps/desktop/CHANGELOG.md",
+        "apps/desktop/scripts/release-desktop.mjs",
+        "apps/desktop/scripts/release-desktop.spec.mjs",
+        "apps/desktop/vite.config.ts",
         "package.json"
-      ]
+      ],
+      "usage": {
+        "provider_model": "claude/sonnet",
+        "effort": "high",
+        "tokens_in": 65000,
+        "tokens_out": 12000,
+        "approx": true,
+        "source": "declared-estimate",
+        "recorded_at": "2026-09-24"
+      }
     },
     {
       "id": "TASK-002",
@@ -43,13 +53,38 @@
       "depends_on": [
         "TASK-001"
       ],
-      "status": "pending",
+      "status": "done",
       "files": [
         "apps/docs-site/project.json",
-        "apps/docs-site/index.html",
-        "apps/docs-site/src/",
-        "apps/docs-site/public/"
-      ]
+        "apps/docs-site/src/site-config.mjs",
+        "apps/docs-site/src/render.mjs",
+        "apps/docs-site/src/styles.css",
+        "apps/docs-site/src/markdown-lite.mjs",
+        "apps/docs-site/src/content/home.mjs",
+        "apps/docs-site/src/content/installation.mjs",
+        "apps/docs-site/src/content/first-run.mjs",
+        "apps/docs-site/src/content/connect-ai.mjs",
+        "apps/docs-site/src/content/using-studio.mjs",
+        "apps/docs-site/src/content/faq.mjs",
+        "apps/docs-site/src/content/licenses.mjs",
+        "apps/docs-site/scripts/build.mjs",
+        "apps/docs-site/public/screenshots/home-projects.png",
+        "apps/docs-site/public/screenshots/home-chat.png",
+        "apps/docs-site/public/screenshots/home-deliveries.png",
+        "apps/docs-site/public/screenshots/gatekeeper-not-opened.png",
+        "apps/docs-site/public/screenshots/role-proposal.png",
+        "apps/docs-site/public/screenshots/library-advanced.png",
+        "apps/docs-site/public/screenshots/settings-openrouter.png"
+      ],
+      "usage": {
+        "provider_model": "claude/sonnet",
+        "effort": "high",
+        "tokens_in": 160000,
+        "tokens_out": 32000,
+        "approx": true,
+        "source": "declared-estimate",
+        "recorded_at": "2026-09-24"
+      }
     },
     {
       "id": "TASK-003",
@@ -62,11 +97,20 @@
       "depends_on": [
         "TASK-002"
       ],
-      "status": "pending",
+      "status": "done",
       "files": [
         "apps/docs-site/deploy/pages-workflow.yml",
         "apps/docs-site/scripts/publish-docs.mjs"
-      ]
+      ],
+      "usage": {
+        "provider_model": "claude/sonnet",
+        "effort": "high",
+        "tokens_in": 35000,
+        "tokens_out": 7000,
+        "approx": true,
+        "source": "declared-estimate",
+        "recorded_at": "2026-09-24"
+      }
     },
     {
       "id": "TASK-004",
@@ -81,10 +125,37 @@
       "depends_on": [
         "TASK-003"
       ],
-      "status": "pending",
+      "status": "done",
       "files": [
-        "sdd/specs/spec-e-burgos-017-desktop-app/cycles/cycle-06/artifacts/distribution-dry-run.md"
-      ]
+        "apps/docs-site/scripts/check-links.mjs",
+        "apps/docs-site/scripts/serve-dist.mjs",
+        "apps/docs-site/scripts/capture-screenshots.mjs",
+        "apps/docs-site/src/styles.css",
+        "sdd/specs/spec-e-burgos-017-desktop-app/cycles/cycle-06/artifacts/distribution-dry-run.md",
+        "sdd/specs/spec-e-burgos-017-desktop-app/cycles/cycle-06/artifacts/site-inicio-1440x900.png",
+        "sdd/specs/spec-e-burgos-017-desktop-app/cycles/cycle-06/artifacts/site-inicio-390x844.png",
+        "sdd/specs/spec-e-burgos-017-desktop-app/cycles/cycle-06/artifacts/site-instalacion-1440x900.png",
+        "sdd/specs/spec-e-burgos-017-desktop-app/cycles/cycle-06/artifacts/site-instalacion-390x844.png",
+        "sdd/specs/spec-e-burgos-017-desktop-app/cycles/cycle-06/artifacts/site-primer-arranque-1440x900.png",
+        "sdd/specs/spec-e-burgos-017-desktop-app/cycles/cycle-06/artifacts/site-primer-arranque-390x844.png",
+        "sdd/specs/spec-e-burgos-017-desktop-app/cycles/cycle-06/artifacts/site-conectar-ia-1440x900.png",
+        "sdd/specs/spec-e-burgos-017-desktop-app/cycles/cycle-06/artifacts/site-conectar-ia-390x844.png",
+        "sdd/specs/spec-e-burgos-017-desktop-app/cycles/cycle-06/artifacts/site-usar-el-estudio-1440x900.png",
+        "sdd/specs/spec-e-burgos-017-desktop-app/cycles/cycle-06/artifacts/site-usar-el-estudio-390x844.png",
+        "sdd/specs/spec-e-burgos-017-desktop-app/cycles/cycle-06/artifacts/site-preguntas-frecuentes-1440x900.png",
+        "sdd/specs/spec-e-burgos-017-desktop-app/cycles/cycle-06/artifacts/site-preguntas-frecuentes-390x844.png",
+        "sdd/specs/spec-e-burgos-017-desktop-app/cycles/cycle-06/artifacts/site-licencias-1440x900.png",
+        "sdd/specs/spec-e-burgos-017-desktop-app/cycles/cycle-06/artifacts/site-licencias-390x844.png"
+      ],
+      "usage": {
+        "provider_model": "claude/sonnet",
+        "effort": "high",
+        "tokens_in": 95000,
+        "tokens_out": 19000,
+        "approx": true,
+        "source": "declared-estimate",
+        "recorded_at": "2026-09-24"
+      }
     },
     {
       "id": "TASK-005",

@@ -31,6 +31,10 @@ extraResources:
     to: manifest.json
   - from: apps/desktop/vendor/THIRD_PARTY_NOTICES.md
     to: THIRD_PARTY_NOTICES.md
+  - from: node_modules/electron/dist/LICENSE
+    to: licenses/electron-LICENSE.txt
+  - from: node_modules/electron/dist/LICENSES.chromium.html
+    to: licenses/LICENSES.chromium.html
 
 asar: true
 
