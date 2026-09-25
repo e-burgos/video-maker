@@ -24,11 +24,12 @@ function renderCard(
   client: Partial<RenderApiClient>,
   placement: VideoPlacement = UNPLACED,
   onChanged = vi.fn(),
+  video: ProjectSummary = VIDEO,
 ) {
   render(
     <RenderApiProvider client={client as RenderApiClient}>
       <MemoryRouter>
-        <VideoCard video={VIDEO} placement={placement} folders={FOLDERS} onChanged={onChanged} />
+        <VideoCard video={video} placement={placement} folders={FOLDERS} onChanged={onChanged} />
       </MemoryRouter>
     </RenderApiProvider>,
   );
@@ -99,6 +100,53 @@ describe('VideoCard', () => {
     fireEvent.click(screen.getByTestId('video-card-menu-assign'));
 
     expect(screen.queryByTestId('video-card-menu')).toBeNull();
+  });
+
+  it('shows a humanized title above the raw slug', () => {
+    renderCard({}, UNPLACED, vi.fn(), { slug: 'editar-campana', layout: VIDEO.layout });
+
+    expect(screen.getByText('Editar campana')).toBeTruthy();
+    expect(screen.getByText('editar-campana')).toBeTruthy();
+  });
+
+  it.each([
+    [{ raw: false, catalog: false, timeline: false, edl: false, out: false }, 'No material'],
+    [{ raw: true, catalog: false, timeline: false, edl: false, out: false }, 'Material loaded'],
+    [{ raw: true, catalog: true, timeline: true, edl: false, out: false }, 'Cut ready'],
+    [{ raw: true, catalog: true, timeline: true, edl: true, out: true }, 'Video ready'],
+  ])('shows one status badge for the layout %j', (layout, label) => {
+    renderCard({}, UNPLACED, vi.fn(), { slug: 'a-video', layout });
+
+    expect(screen.getByText(label)).toBeTruthy();
+  });
+
+  it('falls back to a placeholder icon when there is nothing to show a frame of', async () => {
+    renderCard({
+      listGenerated: vi.fn().mockResolvedValue({ slug: 'editar-campana', roots: [], files: [] }),
+      listAssets: vi
+        .fn()
+        .mockResolvedValue({ slug: 'editar-campana', source: 'catalog', assets: [], probeFailures: [] }),
+    });
+
+    expect(
+      await screen.findByTestId('video-card-thumbnail-placeholder'),
+    ).toBeTruthy();
+    expect(screen.queryByTestId('video-card-updated-at')).toBeNull();
+  });
+
+  it('shows the latest render as the thumbnail with its date, over a raw asset', async () => {
+    renderCard({
+      listGenerated: vi.fn().mockResolvedValue({
+        slug: 'editar-campana',
+        roots: ['out'],
+        files: [{ path: 'out/final.mp4', sizeBytes: 10, modifiedAtMs: Date.UTC(2026, 8, 24, 12) }],
+      }),
+    });
+
+    const thumbnail = (await screen.findByTestId('video-card-thumbnail')) as HTMLVideoElement;
+    expect(thumbnail.src).toContain('/files/out/final.mp4');
+    expect(thumbnail.src).toContain('#t=0.5');
+    expect(screen.getByTestId('video-card-updated-at').textContent).toContain('24');
   });
 });
 

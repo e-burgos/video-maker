@@ -46,7 +46,7 @@ function section(folderId: string): HTMLElement {
 }
 
 describe('ProjectsPage', () => {
-  it('lists the videos with their layout flags and opens each one on its workspace', async () => {
+  it('lists the videos with a humanized title, their status and opens each one on its workspace', async () => {
     renderPage({
       listProjects: vi.fn().mockResolvedValue([project('smoke-ingest', { catalog: true, timeline: true })]),
       getOrganization: vi.fn().mockResolvedValue(EMPTY_ORGANIZATION),
@@ -55,11 +55,11 @@ describe('ProjectsPage', () => {
     await waitFor(() => expect(screen.getByText('smoke-ingest')).toBeTruthy());
     const link = screen.getByRole('link', { name: /smoke-ingest/u });
     expect(link.getAttribute('href')).toBe('/projects/smoke-ingest');
-    expect(screen.getByText('catalog').getAttribute('data-present')).toBe('true');
-    expect(screen.getByText('edl').getAttribute('data-present')).toBe('false');
+    expect(screen.getByText('Smoke ingest')).toBeTruthy();
+    expect(screen.getByText('Cut ready')).toBeTruthy();
   });
 
-  it('drops every unassigned video into the No project folder', async () => {
+  it('drops every unassigned video into the No folder folder', async () => {
     renderPage({
       listProjects: vi.fn().mockResolvedValue([project('suelto-uno'), project('suelto-dos')]),
       getOrganization: vi.fn().mockResolvedValue(EMPTY_ORGANIZATION),
@@ -67,7 +67,7 @@ describe('ProjectsPage', () => {
 
     await waitFor(() => expect(screen.getByText('suelto-uno')).toBeTruthy());
     const unassigned = section('unassigned');
-    expect(within(unassigned).getByText('No project')).toBeTruthy();
+    expect(within(unassigned).getByText('No folder')).toBeTruthy();
     expect(within(unassigned).getAllByTestId('video-card')).toHaveLength(2);
   });
 
@@ -164,8 +164,9 @@ describe('ProjectsPage', () => {
     });
 
     await waitFor(() => expect(screen.getByText(/No videos yet/u)).toBeTruthy());
-    fireEvent.change(screen.getByLabelText('New video'), { target: { value: 'fresh-one' } });
-    fireEvent.click(screen.getByRole('button', { name: 'Create' }));
+    fireEvent.click(screen.getByTestId('new-video-cta'));
+    fireEvent.change(screen.getByLabelText('Video name'), { target: { value: 'fresh-one' } });
+    fireEvent.click(screen.getByRole('button', { name: 'Create video' }));
 
     await waitFor(() => expect(screen.getByText('fresh-one')).toBeTruthy());
     expect(listProjects).toHaveBeenCalledTimes(2);

@@ -11,6 +11,8 @@ import { CreateProjectByDrop } from '../components/create-project-by-drop';
 import { CreateProjectForm } from '../components/create-project-form';
 import { ErrorNotice } from '../components/error-notice';
 import { FolderHeading } from '../components/folder-heading';
+import { HomeDropHint } from '../components/home-drop-hint';
+import { Button } from '../components/ui/button';
 import { VideoCard } from '../components/video-card';
 import type { ProjectSummary, VideoOrganization } from '../api/render-api-types';
 
@@ -72,7 +74,7 @@ function FolderSection({
               data-category={bucket.category?.id ?? 'uncategorized'}
               className="space-y-2"
             >
-              <h4 className="text-xs uppercase tracking-wide text-slate-500">
+              <h4 className="text-xs font-medium tracking-wide text-ink-faint">
                 {bucket.category === null ? t('projects.noCategory') : bucket.category.name}
               </h4>
               <VideoGrid videos={bucket.videos} organization={organization} onChanged={onChanged} />
@@ -146,6 +148,7 @@ function ReadyProjects({
 export function ProjectsPage() {
   const client = useRenderApi();
   const t = useT();
+  const [createOpen, setCreateOpen] = useState(false);
 
   const loadVideos = useCallback(() => client.listProjects(), [client]);
   const loadOrganization = useCallback(() => client.getOrganization(), [client]);
@@ -162,6 +165,7 @@ export function ProjectsPage() {
   const videoList = videos.data;
   const organizationData = organization.data;
   const existingSlugs = videoList?.map((video) => video.slug) ?? [];
+  const isEmpty = videos.status === 'ready' && videoList !== null && videoList.length === 0;
 
   return (
     <CreateProjectByDrop existingSlugs={existingSlugs}>
@@ -173,9 +177,28 @@ export function ProjectsPage() {
           </div>
           <div className="flex flex-wrap items-end gap-6">
             <CreateFolderForm onCreated={reloadAll} />
-            <CreateProjectForm onCreated={reloadAll} />
+            <Button
+              variant="primary"
+              data-testid="new-video-cta"
+              onClick={() => setCreateOpen((open) => !open)}
+            >
+              {t('projects.newVideoCta')}
+            </Button>
           </div>
         </div>
+
+        {createOpen && (
+          <CreateProjectForm
+            existingSlugs={existingSlugs}
+            onCreated={() => {
+              setCreateOpen(false);
+              reloadAll();
+            }}
+            onCancel={() => setCreateOpen(false)}
+          />
+        )}
+
+        {!isEmpty && <HomeDropHint />}
 
         {(videos.status === 'loading' || organization.status === 'loading') && (
           <p className="text-sm text-ink-faint">{t('projects.loading')}</p>
@@ -186,6 +209,8 @@ export function ProjectsPage() {
         {organization.status === 'error' && organization.error !== null && (
           <ErrorNotice error={organization.error} onRetry={reloadAll} />
         )}
+
+        {isEmpty && <HomeDropHint hero />}
 
         {videos.status === 'ready' &&
           videoList !== null &&

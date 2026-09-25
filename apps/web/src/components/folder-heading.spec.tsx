@@ -35,10 +35,10 @@ describe('FolderHeading', () => {
     expect(screen.getByTestId('folder-count').textContent).toBe('(3)');
   });
 
-  it('offers no actions on the No project bucket, which is not a real folder', () => {
+  it('offers no actions on the No folder bucket, which is not a real folder', () => {
     renderHeading({}, null);
 
-    expect(screen.getByText('No project')).toBeTruthy();
+    expect(screen.getByText('No folder')).toBeTruthy();
     expect(screen.queryByTestId('folder-rename-open')).toBeNull();
     expect(screen.queryByTestId('folder-add-category-open')).toBeNull();
     expect(screen.queryByTestId('folder-delete')).toBeNull();

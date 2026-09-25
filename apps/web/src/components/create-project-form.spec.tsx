@@ -6,51 +6,55 @@ import { RenderApiError } from '../api/render-api-error';
 import { RenderApiProvider } from '../api/render-api-context';
 import type { RenderApiClient } from '../api/render-api-client';
 
-function renderForm(createProject: RenderApiClient['createProject'], onCreated = vi.fn()) {
+function renderForm(
+  createProject: RenderApiClient['createProject'],
+  onCreated = vi.fn(),
+  existingSlugs: readonly string[] = [],
+  onCancel?: () => void,
+) {
   const client = { createProject } as unknown as RenderApiClient;
   render(
     <RenderApiProvider client={client}>
-      <CreateProjectForm onCreated={onCreated} />
+      <CreateProjectForm existingSlugs={existingSlugs} onCreated={onCreated} onCancel={onCancel} />
     </RenderApiProvider>,
   );
   return onCreated;
 }
 
-function typeSlug(value: string) {
-  fireEvent.change(screen.getByLabelText('New video'), { target: { value } });
-  fireEvent.click(screen.getByRole('button', { name: 'Create' }));
+function typeName(value: string) {
+  fireEvent.change(screen.getByLabelText('Video name'), { target: { value } });
+  fireEvent.click(screen.getByRole('button', { name: 'Create video' }));
 }
 
 describe('CreateProjectForm', () => {
-  it('rejects a slug the service would reject without emitting a request', async () => {
+  it('rejects an empty name without emitting a request', async () => {
     const createProject = vi.fn();
     renderForm(createProject as unknown as RenderApiClient['createProject']);
 
-    typeSlug('Not_A_Slug');
+    fireEvent.click(screen.getByRole('button', { name: 'Create video' }));
 
-    await waitFor(() => expect(screen.getByRole('alert').textContent).toContain('kebab-case'));
+    await waitFor(() => expect(screen.getByRole('alert').textContent).toContain('Enter a name'));
     expect(createProject).not.toHaveBeenCalled();
   });
 
-  it('rejects an empty slug without emitting a request', async () => {
-    const createProject = vi.fn();
-    renderForm(createProject as unknown as RenderApiClient['createProject']);
-
-    fireEvent.click(screen.getByRole('button', { name: 'Create' }));
-
-    await waitFor(() => expect(screen.getByRole('alert').textContent).toContain('Enter a project'));
-    expect(createProject).not.toHaveBeenCalled();
-  });
-
-  it('creates the project and reports the slug the service answered', async () => {
-    const createProject = vi.fn().mockResolvedValue({ slug: 'my-reel' });
+  it('derives a kebab-case slug from a human name and creates the video', async () => {
+    const createProject = vi.fn().mockResolvedValue({ slug: 'my-next-reel' });
     const onCreated = renderForm(createProject as unknown as RenderApiClient['createProject']);
 
-    typeSlug('my-reel');
+    typeName('My next reel!');
 
-    await waitFor(() => expect(onCreated).toHaveBeenCalledWith('my-reel'));
-    expect(createProject).toHaveBeenCalledWith('my-reel');
-    expect((screen.getByLabelText('New video') as HTMLInputElement).value).toBe('');
+    await waitFor(() => expect(onCreated).toHaveBeenCalledWith('my-next-reel'));
+    expect(createProject).toHaveBeenCalledWith('my-next-reel');
+    expect((screen.getByLabelText('Video name') as HTMLInputElement).value).toBe('');
+  });
+
+  it('avoids a slug collision with an existing video', async () => {
+    const createProject = vi.fn().mockResolvedValue({ slug: 'my-next-reel-2' });
+    renderForm(createProject as unknown as RenderApiClient['createProject'], vi.fn(), ['my-next-reel']);
+
+    typeName('My next reel');
+
+    await waitFor(() => expect(createProject).toHaveBeenCalledWith('my-next-reel-2'));
   });
 
   it('shows the service error code and does not report a creation', async () => {
@@ -59,7 +63,7 @@ describe('CreateProjectForm', () => {
       .mockRejectedValue(new RenderApiError('PROJECT_ALREADY_EXISTS', 'Already there.', 409, null));
     const onCreated = renderForm(createProject as unknown as RenderApiClient['createProject']);
 
-    typeSlug('my-reel');
+    typeName('My reel');
 
     await waitFor(() =>
       expect(screen.getByRole('alert').textContent).toContain('PROJECT_ALREADY_EXISTS'),
@@ -71,10 +75,16 @@ describe('CreateProjectForm', () => {
     const createProject = vi.fn().mockRejectedValue(new TypeError('Failed to fetch'));
     renderForm(createProject as unknown as RenderApiClient['createProject']);
 
-    typeSlug('my-reel');
+    typeName('My reel');
 
     await waitFor(() =>
       expect(screen.getByRole('alert').textContent).toContain('SERVICE_UNREACHABLE'),
     );
+  });
+
+  it('offers a cancel button only when the caller wants one', () => {
+    renderForm(vi.fn() as unknown as RenderApiClient['createProject'], vi.fn(), [], vi.fn());
+
+    expect(screen.getByRole('button', { name: 'Cancel' })).toBeTruthy();
   });
 });

@@ -51,7 +51,7 @@ describe('CreateProjectByDrop', () => {
 
     fireEvent.dragEnter(zone, { dataTransfer: { types: ['Files'] } });
     expect(screen.getByTestId('create-project-overlay').textContent).toBe(
-      'Drop to create a new project',
+      'Drop to create a new video',
     );
 
     fireEvent.dragLeave(zone, { dataTransfer: { types: ['Files'] } });
