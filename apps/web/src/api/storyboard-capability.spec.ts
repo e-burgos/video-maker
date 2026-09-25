@@ -70,6 +70,8 @@ describe('storyboardFailureKey', () => {
       'AI_AGENT_RATE_LIMITED',
       'AI_AGENT_FAILED',
       'AI_AGENT_INVALID_OUTPUT',
+      'OPENROUTER_KEY_MISSING',
+      'OPENROUTER_FREE_QUOTA_EXHAUSTED',
     ]) {
       const key = storyboardFailureKey(code);
       expect(key).not.toBeNull();

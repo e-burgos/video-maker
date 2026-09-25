@@ -2,11 +2,7 @@ import { join } from 'node:path/posix';
 
 import type { MediaProject } from '@video-maker/auto-montage';
 
-import {
-  RECOMMENDED_OPENROUTER_MODELS,
-  defaultRecommendedOpenRouterModel,
-  isRecommendedOpenRouterModelId,
-} from '../config/recommended-openrouter-models';
+import { defaultRecommendedOpenRouterModel } from '../config/recommended-openrouter-models';
 import type { ProducerConfig } from '../config/producer-config';
 import type { RenderApiDependencies } from '../deps/render-api-dependencies';
 import { toErrorPayload } from '../errors/to-error-payload';
@@ -14,6 +10,7 @@ import { RENDER_API_ERROR_CODES } from '../errors/render-api-error';
 import type { RenderApiErrorCode } from '../errors/render-api-error';
 import {
   classifyProducerTurn,
+  openRouterKeyMissing,
   producerUnavailable,
 } from '../errors/translate-producer-error';
 import { PipelineStageError } from '../errors/pipeline-stage-error';
@@ -30,6 +27,7 @@ import { buildProducerHistory } from './producer-history';
 import { buildProducerMcpConfigJson } from './producer-mcp-config';
 import { createOpenRouterModelCatalog } from './openrouter-model-catalog';
 import type { OpenRouterModelCatalog } from './openrouter-model-catalog';
+import { loadOpenRouterModelKnowledge } from './openrouter-model-knowledge';
 import { createOpenRouterProducerAgent } from './openrouter-producer-agent';
 import { parseProducerAnswer } from './parse-producer-suggestions';
 import { interpretProducerStreamLine } from './producer-stream-events';
@@ -122,48 +120,26 @@ async function resolveOpenRouterModel(
   deps: RenderApiDependencies,
   catalog: OpenRouterModelCatalog,
 ): Promise<ResolvedOpenRouterModel> {
-  const nowMs = Date.parse(deps.clock.nowIso());
-  const catalogModels = await catalog.load(deps.fetchRemote, nowMs).then(
-    (result) => result.models,
-    () => null,
-  );
-
-  const isKnownId = (id: string): boolean =>
-    catalogModels !== null ? catalogModels.some((entry) => entry.id === id) : isRecommendedOpenRouterModelId(id);
-  const supportsImagesFor = (id: string): boolean =>
-    catalogModels?.find((entry) => entry.id === id)?.supportsImages ?? false;
+  const knowledge = await loadOpenRouterModelKnowledge(deps, catalog);
 
   if (model === undefined || model === null) {
     const configured = readModelSetting(deps, PRODUCER_MODEL_OPENROUTER_SETTING_KEY);
-    if (configured !== null && isKnownId(configured)) {
-      return { id: configured, supportsImages: supportsImagesFor(configured) };
+    if (configured !== null && knowledge.isKnownId(configured)) {
+      return { id: configured, supportsImages: knowledge.supportsImagesFor(configured) };
     }
     const defaultId = defaultRecommendedOpenRouterModel().id;
-    const defaultCatalogEntry = catalogModels?.find((entry) => entry.id === defaultId) ?? null;
-    return { id: defaultId, supportsImages: defaultCatalogEntry?.supportsImages ?? false };
+    return { id: defaultId, supportsImages: knowledge.supportsImagesFor(defaultId) };
   }
 
-  if (typeof model !== 'string' || !isKnownId(model)) {
+  if (typeof model !== 'string' || !knowledge.isKnownId(model)) {
     throw new PipelineStageError({
       code: 'PRODUCER_MODEL_INVALID',
       stage: null,
       resource: typeof model === 'string' ? model : 'model',
-      expected:
-        catalogModels !== null
-          ? 'a tool-capable OpenRouter model id'
-          : `one of ${RECOMMENDED_OPENROUTER_MODELS.map((entry) => entry.id).join(', ')}`,
+      expected: knowledge.describeKnownIds(),
     });
   }
-  return { id: model, supportsImages: supportsImagesFor(model) };
-}
-
-function openRouterKeyMissing(): PipelineStageError {
-  return new PipelineStageError({
-    code: 'OPENROUTER_KEY_MISSING',
-    stage: null,
-    resource: 'producer-agent',
-    hint: 'paste an OpenRouter API key in settings, or switch the producer engine to Claude',
-  });
+  return { id: model, supportsImages: knowledge.supportsImagesFor(model) };
 }
 
 export async function startProducerTurn(

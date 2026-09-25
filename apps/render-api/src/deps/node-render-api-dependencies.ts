@@ -36,6 +36,7 @@ import {
 import type { StudioDatabase } from '@video-maker/local-store';
 
 import { createClaudeCliAiAgent } from '../ai/claude-cli-ai-agent';
+import { createEffectiveAiAgent } from '../ai/effective-ai-agent';
 import { readAiAgentConfig } from '../config/ai-agent-config';
 import { allowlistedChildEnv } from '../config/child-process-env';
 import { readProducerConfig } from '../config/producer-config';
@@ -43,6 +44,7 @@ import { readRemotionConfig } from '../config/remotion-config';
 import { readServerConfig } from '../config/server-config';
 import { readVoicePreviewConfig } from '../config/voice-preview-config';
 import { createClaudeCodeProducerAgent } from '../producer/claude-code-producer-agent';
+import { createOpenRouterModelCatalog } from '../producer/openrouter-model-catalog';
 import type { SpawnedProducerProcess, SpawnProducerProcessInput } from '../producer/producer-agent';
 import type { StoreConfig } from '../config/store-config';
 import { ENGINE_MODULE_NAMES } from '../engine/engine-modules';
@@ -58,7 +60,7 @@ import {
 import type { CommandRunner, ResolvedVoiceBinaries } from '@video-maker/media-local';
 
 import type { ByteRange, ObjectStorage, WriteTemporaryInput, WriteTemporaryOutcome } from './object-storage';
-import type { LocalStorePort, RenderApiDependencies, VoicePreviewCache } from './render-api-dependencies';
+import type { AiAgentPort, LocalStorePort, RenderApiDependencies, VoicePreviewCache } from './render-api-dependencies';
 
 function createNodeVoicePreviewCache(directory: string): VoicePreviewCache {
   return {
@@ -393,11 +395,19 @@ export function createNodeRenderApiDependencies(
   let studioDatabase: StudioDatabase | null = null;
   let localStorePort: LocalStorePort | null = null;
   let commandRunner: Promise<CommandRunner> | null = null;
+  let effectiveAiAgent: AiAgentPort | null = null;
   const childEnv = allowlistedChildEnv(env);
   const secretStore = createKeychainSecretStore({
     service: readKeychainServiceName(env),
     runner: createNodeSecretStoreCommandRunner(),
   });
+  const openRouterModelCatalog = createOpenRouterModelCatalog();
+
+  const claudeCliAgent: AiAgentPort = async (request) => {
+    const config = readAiAgentConfig(env, tmpdir());
+    const runner = await loadCommandRunner();
+    return createClaudeCliAiAgent(runner, config)(request);
+  };
 
   const nowIso = (): string => new Date().toISOString();
 
@@ -469,7 +479,7 @@ export function createNodeRenderApiDependencies(
     return writableRemotionServeUrl;
   };
 
-  return {
+  const deps: RenderApiDependencies = {
     renderMutedVideo: async ({ timeline, outPath, publicDir, onProgress }) => {
       const { renderTimeline } = await loadRender();
       const serveUrl =
@@ -643,9 +653,8 @@ export function createNodeRenderApiDependencies(
     },
 
     aiAgent: async (request) => {
-      const config = readAiAgentConfig(env, tmpdir());
-      const runner = await loadCommandRunner();
-      return createClaudeCliAiAgent(runner, config)(request);
+      effectiveAiAgent ??= createEffectiveAiAgent(deps, claudeCliAgent, openRouterModelCatalog);
+      return effectiveAiAgent(request);
     },
 
     producerAgent: createClaudeCodeProducerAgent(
@@ -777,4 +786,6 @@ export function createNodeRenderApiDependencies(
 
     secretStore,
   };
+
+  return deps;
 }
