@@ -6,14 +6,16 @@
   "apps": [
     "apps/render-api",
     "apps/docs-site",
-    "apps/desktop"
+    "apps/desktop",
+    "libs/producer-tools"
   ],
   "phase": "free-models-and-release",
   "flow": "lite",
   "objectives": [
     "Benchmark real de los :free vivos tras el reset diario y los que pasen 2/2 recomendados con tier free",
     "Web con precios vigentes, modelos gratis y las funciones nuevas de la spec",
-    "Versión 0.2.0 publicada y la web desplegada, con confirmación del dev"
+    "Versión 0.2.0 publicada y la web desplegada, con confirmación del dev",
+    "Producir desde la app instalada los videos pendientes de display ads y corregir lo que esas pruebas muestren (subtítulos sin tildes por put_timeline, pantallas viejas en el prompt)"
   ],
   "status": "in-progress",
   "started_at": "2026-09-25",

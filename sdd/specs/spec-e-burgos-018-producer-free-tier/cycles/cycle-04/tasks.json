@@ -6,7 +6,8 @@
   "apps": [
     "apps/render-api",
     "apps/docs-site",
-    "apps/desktop"
+    "apps/desktop",
+    "libs/producer-tools"
   ],
   "flow": "lite",
   "user_stories_generated": true,
@@ -84,7 +85,9 @@
       "story_points": 2,
       "depends_on": [
         "TASK-002",
-        "TASK-003"
+        "TASK-003",
+        "TASK-007",
+        "TASK-008"
       ],
       "status": "pending",
       "files": [
@@ -122,6 +125,54 @@
       ],
       "status": "pending",
       "files": []
+    },
+    {
+      "id": "TASK-007",
+      "title": "Producer tool patch_timeline that changes only logo, bumpers, audio mix, caption style and similar sections without re-sending captions, and a put_timeline guard that rejects caption text changes it did not intend (e.g. lost diacritics) and accepts a JSON-string timeline",
+      "user_stories": [
+        "US-018-404"
+      ],
+      "estimation_hours": 3,
+      "story_points": 3,
+      "depends_on": [],
+      "status": "pending",
+      "files": [
+        "libs/producer-tools/src/contract/tool-names.ts",
+        "libs/producer-tools/src/contract/tool-schemas.ts",
+        "libs/producer-tools/src/handlers/studio-tool-handlers.ts",
+        "libs/producer-tools/src/prompt/build-producer-prompt.ts"
+      ]
+    },
+    {
+      "id": "TASK-008",
+      "title": "Producer prompt names the current workspace tabs (Vista previa, Material, Entregas) instead of the old Preview, Generated and Voice screens",
+      "user_stories": [
+        "US-018-404"
+      ],
+      "estimation_hours": 0.5,
+      "story_points": 1,
+      "depends_on": [],
+      "status": "pending",
+      "files": [
+        "libs/producer-tools/src/prompt/build-producer-prompt.ts"
+      ]
+    },
+    {
+      "id": "TASK-009",
+      "title": "Produce the 12 pending display ads tutorials from the installed 0.2.0 app over the repo media, with the reference logo and music, and review each result",
+      "user_stories": [
+        "US-018-404"
+      ],
+      "estimation_hours": 4,
+      "story_points": 3,
+      "depends_on": [
+        "TASK-007",
+        "TASK-008"
+      ],
+      "status": "pending",
+      "files": [
+        "sdd/specs/spec-e-burgos-018-producer-free-tier/cycles/cycle-04/artifacts/display-ads-productions.md"
+      ]
     }
   ]
 }

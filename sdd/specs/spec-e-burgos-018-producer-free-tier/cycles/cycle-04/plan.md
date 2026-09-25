@@ -28,3 +28,21 @@
 - **TASK-004** — Dry-run y arranque real.
 - **TASK-005** — Publicar (**confirmación del dev**).
 - **TASK-006** — Cierre del ciclo y de la spec.
+
+## Ampliación (2026-09-25, pedido del dev: pruebas reales desde la app)
+
+Primera producción real desde la app 0.2.0 sobre `media/` (`display-ads-crear-grupo`): bien sincronizada, pero
+los subtítulos salieron **sin tildes**. El montaje los dejó bien; el productor usó `put_timeline` (reemplazo total)
+para sumar logo y placas y re-escribió a mano 12 KB de JSON perdiendo los acentos. Además su mensaje final nombra
+pantallas viejas ("Preview", "Generated", "Voice").
+
+| # | Decisión | Por qué |
+| --- | --- | --- |
+| D-C4-05 | Tool nueva `patch_timeline`: reemplaza solo secciones sin palabras (`logo`, `bumpers`, `audioMix`, `captionStyle`, `safeZone` y la pista de música); el servidor hace get + merge + validación | Un ajuste chico no debe obligar al modelo a re-escribir los subtítulos |
+| D-C4-06 | `put_timeline` del productor rechaza un timeline cuyo texto de subtítulos difiere del guardado (con pista a `patch_timeline`) salvo que se pida editar subtítulos explícitamente, y acepta un timeline mandado como string JSON | El caso real: tildes perdidas y un primer intento como string |
+| D-C4-07 | El prompt nombra las pestañas actuales: Vista previa, Material, Entregas | Interfaz de cycle-05 de la 017 |
+
+- **US-018-404 — Producir los pendientes.** CA: los 12 tutoriales de display ads pendientes producidos desde la app
+  con el logo y la música de la referencia; cada uno revisado (duración, frames clave, tildes en subtítulos).
+- **TASK-007/008** — arreglos; **TASK-009** — producciones y su reporte. Ningún render entre 23:45 y el fin del
+  benchmark de las 00:05 UTC.

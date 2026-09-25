@@ -461,10 +461,11 @@
           "apps": [
             "apps/render-api",
             "apps/docs-site",
-            "apps/desktop"
+            "apps/desktop",
+            "libs/producer-tools"
           ],
           "status": "in-progress",
-          "tasks_total": 6,
+          "tasks_total": 9,
           "tasks_done": 1
         }
       }
