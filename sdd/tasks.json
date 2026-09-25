@@ -454,6 +454,18 @@
           "status": "completed",
           "tasks_total": 6,
           "tasks_done": 6
+        },
+        "cycle-04": {
+          "file": "sdd/specs/spec-e-burgos-018-producer-free-tier/cycles/cycle-04/tasks.json",
+          "module": "producer-free-tier",
+          "apps": [
+            "apps/render-api",
+            "apps/docs-site",
+            "apps/desktop"
+          ],
+          "status": "in-progress",
+          "tasks_total": 6,
+          "tasks_done": 0
         }
       }
     }

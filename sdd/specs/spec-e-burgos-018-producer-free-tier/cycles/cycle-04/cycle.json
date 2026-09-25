@@ -1,0 +1,32 @@
+{
+  "$schema": "../../../../schemas/cycle.schema.json",
+  "cycle": 4,
+  "module": "producer-free-tier",
+  "spec": "spec-e-burgos-018-producer-free-tier",
+  "apps": [
+    "apps/render-api",
+    "apps/docs-site",
+    "apps/desktop"
+  ],
+  "phase": "free-models-and-release",
+  "flow": "lite",
+  "objectives": [
+    "Benchmark real de los :free vivos tras el reset diario y los que pasen 2/2 recomendados con tier free",
+    "Web con precios vigentes, modelos gratis y las funciones nuevas de la spec",
+    "Versión 0.2.0 publicada y la web desplegada, con confirmación del dev"
+  ],
+  "status": "in-progress",
+  "started_at": "2026-09-25",
+  "completed_at": null,
+  "documents": {
+    "plan": "sdd/specs/spec-e-burgos-018-producer-free-tier/cycles/cycle-04/plan.md",
+    "tasks": "sdd/specs/spec-e-burgos-018-producer-free-tier/cycles/cycle-04/tasks.json"
+  },
+  "artifacts": [],
+  "metrics": null,
+  "tables_created": [],
+  "endpoints_implemented": [],
+  "components_created": [],
+  "issues_found": [],
+  "reviewer_report": null
+}
