@@ -196,12 +196,47 @@
       "story_points": 3,
       "depends_on": [
         "TASK-007",
-        "TASK-008"
+        "TASK-008",
+        "TASK-010"
       ],
       "status": "pending",
       "files": [
         "sdd/specs/spec-e-burgos-018-producer-free-tier/cycles/cycle-04/artifacts/display-ads-productions.md"
       ]
+    },
+    {
+      "id": "TASK-010",
+      "title": "Voice jobs whose last line has no room fail with an actionable error, the producer sees every job error, and only adds the farewell where it fits",
+      "user_stories": [
+        "US-018-404"
+      ],
+      "estimation_hours": 3,
+      "story_points": 3,
+      "depends_on": [],
+      "status": "done",
+      "files": [
+        "libs/media-local/src/tts/synthesize-speech.ts",
+        "libs/media-local/src/tts/synthesize-speech.spec.ts",
+        "libs/producer-tools/src/contract/tool-schemas.ts",
+        "libs/producer-tools/src/contract/tool-schemas.spec.ts",
+        "libs/producer-tools/src/client/render-api-client.ts",
+        "libs/producer-tools/src/handlers/studio-tool-handlers.spec.ts",
+        "libs/producer-tools/src/prompt/build-producer-prompt.ts",
+        "libs/producer-tools/src/prompt/build-producer-prompt.spec.ts",
+        "libs/producer-tools/src/index.ts",
+        "sdd/specs/spec-e-burgos-018-producer-free-tier/cycles/cycle-04/artifacts/voice-fit-repro.mjs",
+        "sdd/specs/spec-e-burgos-018-producer-free-tier/cycles/cycle-04/artifacts/voice-fit-repro.md"
+      ],
+      "usage": {
+        "tokens_in": 210000,
+        "tokens_out": 19000,
+        "provider_model": "claude/sonnet",
+        "effort": "medium",
+        "agent": "implementor-back",
+        "approx": true,
+        "source": "declared-estimate",
+        "recorded_at": "2026-09-25"
+      }
     }
   ]
 }

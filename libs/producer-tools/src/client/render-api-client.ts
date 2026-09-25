@@ -31,13 +31,24 @@ export interface RenderApiJobSummary {
   readonly createdAt: string;
 }
 
+export interface RenderApiJobError {
+  readonly code: string;
+  readonly stage: string | null;
+  readonly message: string;
+  readonly resource?: string;
+  readonly expected?: string;
+  readonly hint?: string;
+  readonly assetPersisted?: boolean;
+  readonly catalogUpdated?: boolean;
+}
+
 export interface RenderApiJob {
   readonly id: string;
   readonly kind: string;
   readonly state: string;
   readonly progress: unknown;
   readonly report: unknown;
-  readonly error: { readonly code: string; readonly hint?: string } | null;
+  readonly error: RenderApiJobError | null;
 }
 
 export interface RenderApiVoice {

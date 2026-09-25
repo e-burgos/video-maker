@@ -214,6 +214,31 @@ describe('buildProducerPrompt — checklist de parámetros de las tres recetas',
     expect(prompt).toContain('every parameter below is');
     expect(prompt).toContain('already chosen');
   });
+
+  it('la despedida del Tutorial solo se agrega si entra antes del final del A-roll, con un plan B si no entra', () => {
+    expect(prompt).toContain('but only where it fits');
+    expect(prompt).toContain('2.5 words per second plus `gapMs`');
+    expect(prompt).toContain("the A-roll's probed duration");
+    expect(prompt).toContain('fold a two or three word goodbye into the last content line');
+    expect(prompt).toContain('skip the farewell and tell the user there was no room for it');
+  });
+});
+
+describe('buildProducerPrompt — reporta el error real de un job fallido', () => {
+  const prompt = buildProducerPrompt(CONTEXT);
+
+  it('lee code, message, stage, resource y hint en vez de asumir que siempre hay hint', () => {
+    expect(prompt).toContain('reports its real `code` and `message`');
+    expect(prompt).toContain('`stage`,');
+    expect(prompt).toContain('`resource` and `hint` whenever the engine set them');
+  });
+
+  it('solo ofrece reintentar sin cambios ante los tres codes de rate limit conocidos', () => {
+    expect(prompt).toContain('`AI_AGENT_RATE_LIMITED`');
+    expect(prompt).toContain('`OPENROUTER_RATE_LIMITED`');
+    expect(prompt).toContain('`OPENROUTER_FREE_QUOTA_EXHAUSTED`');
+    expect(prompt).toContain('A failure is\ndeterministic, not transient, unless its `code` is one of');
+  });
 });
 
 describe('buildProducerPrompt — dónde está cada cosa', () => {

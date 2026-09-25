@@ -28,7 +28,7 @@ export async function synthesizeSpeech(
   const lengthScaleArgs =
     opts.lengthScale === undefined || opts.lengthScale === 1
       ? []
-      : ['--vits-length-scale', String(opts.lengthScale)];
+      : [`--vits-length-scale=${opts.lengthScale}`];
   const narration = narrationToSingleLine(await readTextFile(opts.textPath));
   const args = [
     `--vits-model=${opts.modelPath}`,

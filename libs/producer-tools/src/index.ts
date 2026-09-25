@@ -29,6 +29,7 @@ export {
   MIN_VIEW_IMAGES_PATHS,
   MIN_WAIT_FOR_JOB_TIMEOUT_SECONDS,
   ProjectRelativePathSchema,
+  RenderApiJobErrorSchema,
   STUDIO_JOB_KINDS,
   STUDIO_JOB_STATUSES,
   STUDIO_TOOLS,

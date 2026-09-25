@@ -46,7 +46,7 @@ describe('synthesizeSpeech (US-09-004, US-017-201)', () => {
     ]);
   });
 
-  it('pasa --vits-length-scale cuando se pide acelerar la locución (FIX-e-burgos-009-002)', async () => {
+  it('pasa --vits-length-scale como un único argumento con "=" cuando se pide acelerar la locución', async () => {
     const runner = new FixtureCommandRunner([{ bin: 'sherpa-onnx-offline-tts', response: { exitCode: 0 } }]);
 
     await synthesizeSpeech(
@@ -66,8 +66,7 @@ describe('synthesizeSpeech (US-09-004, US-017-201)', () => {
       `--vits-model=${MODEL_PATH}`,
       `--vits-tokens=${TOKENS_PATH}`,
       `--vits-data-dir=${DATA_DIR_PATH}`,
-      '--vits-length-scale',
-      '0.88',
+      '--vits-length-scale=0.88',
       '--output-filename=/out.wav',
       'Texto de prueba.',
     ]);

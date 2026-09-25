@@ -62,6 +62,17 @@ export const StudioToolErrorSchema = z.strictObject({
   hint: z.string(),
 });
 
+export const RenderApiJobErrorSchema = z.looseObject({
+  code: z.string().min(1),
+  stage: z.string().nullable(),
+  message: z.string(),
+  resource: z.string().optional(),
+  expected: z.string().optional(),
+  hint: z.string().optional(),
+  assetPersisted: z.boolean().optional(),
+  catalogUpdated: z.boolean().optional(),
+});
+
 const MONTAGE_PRESET_NAMES = ['software-demo', 'hardware', 'recipe', 'educational'] as const;
 const MontagePresetNameSchema = z.enum(MONTAGE_PRESET_NAMES);
 
@@ -302,7 +313,7 @@ const WaitForJobOutputSchema = z.strictObject({
   status: StudioJobStatusSchema,
   progress: z.record(z.string(), z.unknown()),
   result: z.record(z.string(), z.unknown()).nullable(),
-  error: StudioToolErrorSchema.nullable(),
+  error: RenderApiJobErrorSchema.nullable(),
 });
 
 const CancelJobInputSchema = z.strictObject({

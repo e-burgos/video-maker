@@ -250,6 +250,37 @@ describe('createStudioToolHandlers', () => {
     expect(result.data).toMatchObject({ status: 'running' });
   });
 
+  it('wait_for_job reports the full render API error shape of a failed job instead of rejecting it', async () => {
+    const client = createFakeRenderApiClient({
+      getJob: async (jobId) => ({
+        id: jobId,
+        kind: 'voice',
+        state: 'failed',
+        progress: { stage: 'synthesize', processedScenes: 8, totalScenes: 8, percent: 100 },
+        report: null,
+        error: {
+          code: 'VOICE_SYNTHESIS_FAILED',
+          stage: 'synthesize',
+          message: 'The speech synthesizer failed while producing a scene track.',
+          resource: 'line-07',
+        },
+      }),
+    });
+    const handlers = createStudioToolHandlers({ client, model: 'sonnet', clock: () => 0 });
+
+    const result = await handlers.wait_for_job({ jobId: 'job-1', timeoutSeconds: 5 });
+
+    expect(result.data).toMatchObject({
+      status: 'failed',
+      error: {
+        code: 'VOICE_SYNTHESIS_FAILED',
+        stage: 'synthesize',
+        message: 'The speech synthesizer failed while producing a scene track.',
+        resource: 'line-07',
+      },
+    });
+  });
+
   it('cancel_job forwards the jobId and reports the resulting status', async () => {
     const { handlers, client } = handlersWith({
       cancelJob: async (jobId) => ({ id: jobId, kind: 'render', state: 'canceled', progress: null, report: null, error: null }),

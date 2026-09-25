@@ -44,5 +44,32 @@ pantallas viejas ("Preview", "Generated", "Voice").
 
 - **US-018-404 — Producir los pendientes.** CA: los 12 tutoriales de display ads pendientes producidos desde la app
   con el logo y la música de la referencia; cada uno revisado (duración, frames clave, tildes en subtítulos).
-- **TASK-007/008** — arreglos; **TASK-009** — producciones y su reporte. Ningún render entre 23:45 y el fin del
-  benchmark de las 00:05 UTC.
+- **TASK-007/008** — arreglos; **TASK-009** (depende de TASK-010) — producciones y su reporte; **TASK-010** —
+  el job `voice` fallaba 3/3 en 3 de las 12 producciones reales (`VOICE_SYNTHESIS_FAILED`/`synthesize`, la línea
+  que necesita comprimirse para entrar en su ventana) y el productor nunca vio la causa real. Ningún render entre
+  23:45 y el fin del benchmark de las 00:05 UTC.
+
+## Pendiente de documentar en contexto
+
+- **TASK-010 — causa raíz real de `VOICE_SYNTHESIS_FAILED` en las 3 producciones que nunca renderizaron.** No era
+  la despedida sin lugar (hipótesis inicial del dev): `synthesizeSpeech`
+  (`libs/media-local/src/tts/synthesize-speech.ts`) pasaba `--vits-length-scale` y su valor como dos argv
+  separados — el único flag de esa función que no usa la forma `--flag=value` que el resto ya usa. El parser de
+  opciones de `sherpa-onnx-offline-tts` (kaldi `parse-options.cc`) sólo acepta `--flag=value`; con dos tokens
+  lee un string vacío y sale con código 255 (`Invalid floating-point option ""`), que `translateVoiceError`
+  mapea a `VOICE_SYNTHESIS_FAILED` genérico. Determinístico: la primera síntesis de cada línea nunca manda
+  `lengthScale` (por eso todos los `line-XX.wav` ya existían); sólo la resíntesis de
+  `fitTimedLinesIntoTheirWindows` — la única línea que de verdad necesita comprimirse — pasa por el flag roto.
+  Fix de una línea (usar `--vits-length-scale=${lengthScale}`), sin código de error nuevo: el contrato ya trata
+  el overflow como dato (`overflowMs`), nunca como fallo, así que la resíntesis rota es lo único que hacía falta
+  arreglar. Repro real antes/después: `artifacts/voice-fit-repro.{mjs,md}`.
+- **Divergencia de contrato — `wait_for_job.error`.** El contrato original (`plan.md` de
+  `spec-e-burgos-017-desktop-app` cycle-01) congeló `error: { code, hint } | null`, calcado del union de errores
+  PROPIOS de la tool (`StudioToolErrorSchema`/`StudioToolErrorCode`, pensado para errores de invocación como
+  `INVALID_INPUT`), nunca del error real que emite un job del render-api (`code`, `stage`, `message` obligatorio,
+  `resource`/`expected`/`hint` opcionales — `hint` casi nunca está seteado). Ese calco hacía que
+  `wait_for_job` rechazara CUALQUIER job fallido sin `hint` con `STUDIO_UNAVAILABLE`, escondiendo el código y el
+  mensaje reales del modelo. Nuevo `RenderApiJobErrorSchema` (mismo patrón que `apps/web/src/api/render-api-types.ts`:
+  `code`/`stage` como `string`, nunca importando el union cerrado de `apps/render-api` — la lib no puede depender
+  de `apps/*` — y objeto abierto para tolerar campos futuros). `start_job`/`get_project_overview` no tenían este
+  problema: ninguno de los dos valida hoy un `job.error`.

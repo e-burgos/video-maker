@@ -11,6 +11,7 @@ import {
   MIN_SEARCH_FREE_MUSIC_RESULTS,
   MIN_WAIT_FOR_JOB_TIMEOUT_SECONDS,
   ProjectRelativePathSchema,
+  RenderApiJobErrorSchema,
   STUDIO_TOOLS,
   StartJobInputSchema,
 } from './tool-schemas';
@@ -337,5 +338,31 @@ describe('bounds from the plan', () => {
     const { search_free_music } = STUDIO_TOOLS;
     expect(search_free_music.input.safeParse({ mood: 'upbeat', maxResults: MIN_SEARCH_FREE_MUSIC_RESULTS - 1 }).success).toBe(false);
     expect(search_free_music.input.safeParse({ mood: 'upbeat', maxResults: MAX_SEARCH_FREE_MUSIC_RESULTS + 1 }).success).toBe(false);
+  });
+});
+
+describe('RenderApiJobErrorSchema', () => {
+  it('accepts the real render API job error shape, hint and all, omitted', () => {
+    const result = RenderApiJobErrorSchema.safeParse({
+      code: 'VOICE_SYNTHESIS_FAILED',
+      stage: 'synthesize',
+      message: 'The speech synthesizer failed while producing a scene track.',
+      resource: 'line-07',
+    });
+    expect(result.success).toBe(true);
+  });
+
+  it('accepts a code this contract has never seen, since render-api owns that list', () => {
+    const result = RenderApiJobErrorSchema.safeParse({
+      code: 'SOME_FUTURE_RENDER_API_CODE',
+      stage: null,
+      message: 'A new failure kind the tool contract does not know about yet.',
+    });
+    expect(result.success).toBe(true);
+  });
+
+  it('rejects a payload missing the required message', () => {
+    const result = RenderApiJobErrorSchema.safeParse({ code: 'VOICE_SYNTHESIS_FAILED', stage: 'synthesize' });
+    expect(result.success).toBe(false);
   });
 });
