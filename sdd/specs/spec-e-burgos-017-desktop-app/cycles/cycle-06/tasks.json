@@ -1,0 +1,126 @@
+{
+  "$schema": "../../../../schemas/cycle-tasks.schema.json",
+  "spec": "spec-e-burgos-017-desktop-app",
+  "cycle": 6,
+  "module": "desktop-app",
+  "apps": [
+    "apps/docs-site",
+    "apps/desktop"
+  ],
+  "flow": "lite",
+  "user_stories_generated": true,
+  "prerequisites": {
+    "tasks_generated": true
+  },
+  "tasks": [
+    {
+      "id": "TASK-001",
+      "title": "Version the app, give the dmg a stable download name, and add a release script that builds, hashes and drafts release notes, publishing only with an explicit --publish flag",
+      "user_stories": [
+        "US-017-501"
+      ],
+      "estimation_hours": 3,
+      "story_points": 2,
+      "depends_on": [],
+      "status": "pending",
+      "files": [
+        "apps/desktop/package.json",
+        "apps/desktop/electron-builder.yml",
+        "apps/desktop/scripts/release-desktop.mjs",
+        "apps/desktop/CHANGELOG.md",
+        "package.json"
+      ]
+    },
+    {
+      "id": "TASK-002",
+      "title": "Documentation site in Spanish (apps/docs-site): home with the download button, requirements, installation with the Gatekeeper steps, first run, connecting Claude or OpenRouter, using the studio, FAQ and licenses, with real screenshots",
+      "user_stories": [
+        "US-017-502",
+        "US-017-503"
+      ],
+      "estimation_hours": 6,
+      "story_points": 5,
+      "depends_on": [
+        "TASK-001"
+      ],
+      "status": "pending",
+      "files": [
+        "apps/docs-site/project.json",
+        "apps/docs-site/index.html",
+        "apps/docs-site/src/",
+        "apps/docs-site/public/"
+      ]
+    },
+    {
+      "id": "TASK-003",
+      "title": "GitHub Pages deployment for the public distribution repo as a ready-to-copy workflow plus a local publish script, both inert until the repo exists",
+      "user_stories": [
+        "US-017-502"
+      ],
+      "estimation_hours": 2,
+      "story_points": 2,
+      "depends_on": [
+        "TASK-002"
+      ],
+      "status": "pending",
+      "files": [
+        "apps/docs-site/deploy/pages-workflow.yml",
+        "apps/docs-site/scripts/publish-docs.mjs"
+      ]
+    },
+    {
+      "id": "TASK-004",
+      "title": "Real checks: build the site, check every link and the download URL shape, review screenshots at desktop and phone widths, and run the release script in dry-run end to end",
+      "user_stories": [
+        "US-017-501",
+        "US-017-502",
+        "US-017-503"
+      ],
+      "estimation_hours": 3,
+      "story_points": 2,
+      "depends_on": [
+        "TASK-003"
+      ],
+      "status": "pending",
+      "files": [
+        "sdd/specs/spec-e-burgos-017-desktop-app/cycles/cycle-06/artifacts/distribution-dry-run.md"
+      ]
+    },
+    {
+      "id": "TASK-005",
+      "title": "Publish: create the public distribution repo, push the site, enable Pages and upload the first release (requires the dev's explicit confirmation)",
+      "user_stories": [
+        "US-017-501",
+        "US-017-502"
+      ],
+      "estimation_hours": 1,
+      "story_points": 1,
+      "depends_on": [
+        "TASK-004"
+      ],
+      "status": "pending",
+      "files": [
+        "sdd/specs/spec-e-burgos-017-desktop-app/cycles/cycle-06/artifacts/publish-log.md"
+      ]
+    },
+    {
+      "id": "TASK-006",
+      "title": "Close the cycle and the spec: context fragments, constitution rows, spec status and validation",
+      "user_stories": [
+        "US-017-501"
+      ],
+      "estimation_hours": 2,
+      "story_points": 2,
+      "depends_on": [
+        "TASK-005"
+      ],
+      "status": "pending",
+      "files": [
+        "sdd/context/apps/docs-site/constitution.md",
+        "sdd/context/constitution.md",
+        "sdd/specs/index.json",
+        "sdd/global.json"
+      ]
+    }
+  ]
+}
