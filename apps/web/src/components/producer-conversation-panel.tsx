@@ -51,7 +51,9 @@ export function ProducerConversationPanel({ producer, pinned = false }: Producer
 
   const [dragActive, setDragActive] = useState(false);
   const dragDepth = useRef(0);
-  const { scrollRef, contentRef, onScroll } = useStickToBottom<HTMLDivElement, HTMLDivElement>();
+  const { scrollRef, contentRef, onScroll } = useStickToBottom<HTMLDivElement, HTMLDivElement>(
+    messages.length > 0,
+  );
 
   function onDragEnter(event: DragEvent<HTMLDivElement>) {
     if (!event.dataTransfer.types.includes('Files')) {

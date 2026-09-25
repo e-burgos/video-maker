@@ -27,8 +27,8 @@ function stubResizeObserver() {
   };
 }
 
-function Harness() {
-  const { scrollRef, contentRef, onScroll } = useStickToBottom();
+function Harness({ enabled }: { enabled?: boolean } = {}) {
+  const { scrollRef, contentRef, onScroll } = useStickToBottom(enabled);
   return (
     <div ref={scrollRef} onScroll={onScroll} data-testid="scroll">
       <div ref={contentRef} data-testid="content" />
@@ -85,5 +85,12 @@ describe('useStickToBottom', () => {
     resizeObserver.fire();
 
     expect(scroll.scrollTop).toBe(50);
+  });
+
+  it('does not observe the content when disabled, so a welcome screen keeps its scroll position', () => {
+    const resizeObserver = stubResizeObserver();
+    render(<Harness enabled={false} />);
+
+    expect(resizeObserver.observe).not.toHaveBeenCalled();
   });
 });

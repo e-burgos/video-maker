@@ -12,7 +12,7 @@ export type StickToBottom<Scroll extends HTMLElement, Content extends HTMLElemen
 export function useStickToBottom<
   Scroll extends HTMLElement = HTMLDivElement,
   Content extends HTMLElement = HTMLDivElement,
->(): StickToBottom<Scroll, Content> {
+>(enabled = true): StickToBottom<Scroll, Content> {
   const scrollRef = useRef<Scroll>(null);
   const contentRef = useRef<Content>(null);
   const pinnedRef = useRef(true);
@@ -20,7 +20,7 @@ export function useStickToBottom<
   useEffect(() => {
     const scroll = scrollRef.current;
     const content = contentRef.current;
-    if (scroll === null || content === null || typeof ResizeObserver === 'undefined') {
+    if (!enabled || scroll === null || content === null || typeof ResizeObserver === 'undefined') {
       return undefined;
     }
 
@@ -31,7 +31,7 @@ export function useStickToBottom<
     });
     observer.observe(content);
     return () => observer.disconnect();
-  }, []);
+  }, [enabled]);
 
   function onScroll() {
     const scroll = scrollRef.current;

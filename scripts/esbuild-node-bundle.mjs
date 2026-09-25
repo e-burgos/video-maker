@@ -49,7 +49,8 @@ async function main() {
     logLevel: 'info',
     alias: loadWorkspaceAliases(),
     external,
-    define: { 'import.meta.url': '__filename' },
+    // This script only produces packaged bundles (never `serve`); forcing production here drops the dev branch esbuild otherwise keeps for transitive react deps (e.g. the AI SDK's react peer).
+    define: { 'import.meta.url': '__filename', 'process.env.NODE_ENV': '"production"' },
   });
 }
 

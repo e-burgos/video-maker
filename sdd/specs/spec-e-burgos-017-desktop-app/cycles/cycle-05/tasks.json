@@ -316,11 +316,42 @@
       "depends_on": [
         "TASK-005"
       ],
-      "status": "pending",
+      "status": "done",
       "files": [
         "apps/web/e2e/workspace-smoke.mjs",
-        "sdd/specs/spec-e-burgos-017-desktop-app/cycles/cycle-05/artifacts/workspace-qa.md"
-      ]
+        "scripts/esbuild-node-bundle.mjs",
+        "apps/web/src/hooks/use-stick-to-bottom.ts",
+        "apps/web/src/hooks/use-stick-to-bottom.spec.tsx",
+        "apps/web/src/components/producer-conversation-panel.tsx",
+        "sdd/specs/spec-e-burgos-017-desktop-app/cycles/cycle-05/artifacts/workspace-qa.md",
+        "sdd/specs/spec-e-burgos-017-desktop-app/cycles/cycle-05/artifacts/e2e-00-projects-home.png",
+        "sdd/specs/spec-e-burgos-017-desktop-app/cycles/cycle-05/artifacts/e2e-01-new-project-pending-card.png",
+        "sdd/specs/spec-e-burgos-017-desktop-app/cycles/cycle-05/artifacts/e2e-02-five-proposal-cards.png",
+        "sdd/specs/spec-e-burgos-017-desktop-app/cycles/cycle-05/artifacts/e2e-03-all-confirmed.png",
+        "sdd/specs/spec-e-burgos-017-desktop-app/cycles/cycle-05/artifacts/e2e-04-material-tab.png",
+        "sdd/specs/spec-e-burgos-017-desktop-app/cycles/cycle-05/artifacts/e2e-05-producer-turn.png",
+        "sdd/specs/spec-e-burgos-017-desktop-app/cycles/cycle-05/artifacts/e2e-06-advanced-library.png",
+        "sdd/specs/spec-e-burgos-017-desktop-app/cycles/cycle-05/artifacts/e2e-06-advanced-storyboard.png",
+        "sdd/specs/spec-e-burgos-017-desktop-app/cycles/cycle-05/artifacts/e2e-06-advanced-voice.png",
+        "sdd/specs/spec-e-burgos-017-desktop-app/cycles/cycle-05/artifacts/e2e-06-advanced-preview.png",
+        "sdd/specs/spec-e-burgos-017-desktop-app/cycles/cycle-05/artifacts/qa-00-projects-home.png",
+        "sdd/specs/spec-e-burgos-017-desktop-app/cycles/cycle-05/artifacts/qa-01-workspace-chat.png",
+        "sdd/specs/spec-e-burgos-017-desktop-app/cycles/cycle-05/artifacts/qa-02-workspace-material.png",
+        "sdd/specs/spec-e-burgos-017-desktop-app/cycles/cycle-05/artifacts/qa-03-advanced-menu-open.png",
+        "sdd/specs/spec-e-burgos-017-desktop-app/cycles/cycle-05/artifacts/qa-04-library.png",
+        "sdd/specs/spec-e-burgos-017-desktop-app/cycles/cycle-05/artifacts/qa-05-settings.png",
+        "sdd/specs/spec-e-burgos-017-desktop-app/cycles/cycle-05/artifacts/qa-06-proposal-card.png"
+      ],
+      "usage": {
+        "provider_model": "claude/sonnet",
+        "effort": "high",
+        "agent": "implementor-front",
+        "tokens_in": 260000,
+        "tokens_out": 30000,
+        "approx": true,
+        "source": "declared-estimate",
+        "recorded_at": "2026-09-24"
+      }
     },
     {
       "id": "TASK-007",
