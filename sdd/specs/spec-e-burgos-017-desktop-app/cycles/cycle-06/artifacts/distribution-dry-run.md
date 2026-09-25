@@ -138,3 +138,73 @@ desarrollo.
 - Sitio reconstruido, `check-links.mjs` reverificado (0 rotos, mismos 2 no-200 esperados) y las 14
   capturas `site-*.png` retomadas y revisadas de nuevo — sin overflows (chequeo automatizado en
   las 7 páginas × 2 anchos).
+
+## 8) Tercera pasada — D-C6-03: destino cambiado a Cloudflare (2026-09-25)
+
+> Reemplaza el repo público y GitHub Pages/Releases de las secciones anteriores. Todo lo de acá
+> corrió en modo lectura o build local: **no se ejecutó ningún comando que escriba en Cloudflare**
+> (`pages deploy`, `r2 object put`, `pages project create`, `r2 bucket create` no corrieron ni una
+> vez). El único comando de red contra Cloudflare que corrió fue `wrangler whoami` (solo lectura,
+> confirma que el dev ya tiene una sesión `wrangler login` local con permisos de `pages`/`r2`).
+
+### Qué cambió
+
+- **Sitio → Cloudflare Pages**, proyecto `video-maker`, dominio propio
+  `https://video.estebanburgos.com.ar`. `apps/docs-site/wrangler.toml` fija
+  `pages_build_output_dir` y el binding de R2. `.github/workflows/deploy-docs-site.yml` (nuevo, en
+  este repo, ya no en un repo de distribución separado) hace `pnpm nx build docs-site` y despliega
+  con `pnpm dlx wrangler@4 pages deploy … --project-name=video-maker --branch=main` desde
+  `apps/docs-site` — mismo patrón que `tucu-ui/.github/workflows/deploy-demo.yml`
+  (`cloudflare/wrangler-action` no es compatible con workspaces pnpm).
+- **Descarga → bucket R2** `video-maker-downloads`, servido por una Pages Function propia en
+  `apps/docs-site/functions/descargas/[[path]].js`: GET/HEAD para `Video-Maker-arm64.dmg` y
+  `Video-Maker-<version>-arm64.dmg`, soporta `Range` (reanudar descargas), `cache-control` corto
+  para el nombre estable y `immutable` para el versionado, 404 para cualquier otra clave (sin
+  listado de directorio). `apps/docs-site/functions/descargas/[[path]].spec.mjs` la cubre con
+  `env.DOWNLOADS` mockeado — corre con `pnpm exec nx run docs-site:test` (nuevo target).
+- **`apps/desktop/scripts/release-desktop.mjs`**: reemplazó `gh release create` por
+  `pnpm dlx wrangler@4 r2 object put video-maker-downloads/<key> --file <path> --content-type
+  application/x-apple-diskimage --remote` para los dos archivos. En dry-run solo imprime los
+  comandos; `--publish` primero corre `wrangler whoami` y aborta si no hay sesión, después sube
+  los dos archivos y verifica con un HEAD HTTPS a `https://video.estebanburgos.com.ar/descargas/<key>`
+  que el `content-length` coincide (**avisa, no falla**, si el dominio todavía no está en línea).
+  Genera las notas de release igual que antes, desde `CHANGELOG.md`.
+- **Eliminado**: `apps/docs-site/deploy/pages-workflow.yml`, `apps/docs-site/scripts/publish-docs.mjs`
+  y toda referencia al repo público `e-burgos/video-maker-app` o a GitHub Releases en el sitio y
+  los scripts. `apps/docs-site/src/site-config.mjs` ahora expone `SITE_URL` (el dominio propio) en
+  vez de `DISTRIBUTION_REPO`; `DOWNLOAD_URL` apunta a `${SITE_URL}/descargas/<estable>`. Cada
+  página del sitio ahora tiene `<link rel="canonical">` con ese dominio.
+
+### Verificación real que corrió
+
+| Chequeo | Resultado |
+| --- | --- |
+| `pnpm exec nx run docs-site:test` (unit tests de la Pages Function) | **15/15 verdes** |
+| `pnpm exec nx run desktop:test` (incluye `release-desktop.spec.mjs` reescrito) | **109/109 verdes**, cobertura sobre los umbrales |
+| `pnpm dlx wrangler@4 pages functions build --outdir <tmp>` (compila `functions/` local, sin red de escritura) | `✨ Compiled Worker successfully` |
+| `pnpm exec nx run docs-site:build` | 7 páginas + assets, sin errores |
+| `node apps/docs-site/scripts/check-links.mjs` | 0 links internos rotos; URL de descarga presente y con la forma esperada (`https://video.estebanburgos.com.ar/descargas/Video-Maker-arm64.dmg`); **los 6 links a `video.estebanburgos.com.ar`** (canonical ×5 + descarga) dan `network error: fetch failed` — **esperado**, el dominio todavía no existe en Cloudflare; el script solo reporta, no falla (exit 0) |
+| `pnpm exec nx run-many -t lint test build -p docs-site desktop` | verde |
+| Capturas del sitio | **no se retomaron** — el único cambio visible sería el `<link rel="canonical">`, que no se ve en pantalla; el resto del contenido no cambió |
+
+### Configuración de una sola vez en Cloudflare (para el dev, antes de la primera corrida real)
+
+1. **Pages**: crear el proyecto `video-maker` (o dejar que lo cree el primer
+   `wrangler pages deploy` con `--project-name=video-maker`) y, en su dashboard, **adjuntar el
+   dominio propio** `video.estebanburgos.com.ar` (Custom domains → Set up a domain). El
+   `wrangler.toml` con `pages_build_output_dir` **sí está soportado por Pages** para fijar el
+   binding de R2 del proyecto — no hace falta repetirlo a mano en el dashboard, pero conviene
+   confirmarlo ahí la primera vez (Settings → Functions → R2 bucket bindings, `DOWNLOADS` →
+   `video-maker-downloads`).
+2. **R2**: crear el bucket `video-maker-downloads` (dashboard o `wrangler r2 bucket create
+   video-maker-downloads` corrido a mano por el dev — no lo corre este ciclo).
+3. **GitHub**: agregar los secrets `CLOUDFLARE_API_TOKEN` (con permiso de editar Pages; no hace
+   falta permiso de R2 para el token de CI, la subida del `.dmg` la hace el dev en su máquina) y
+   `CLOUDFLARE_ACCOUNT_ID` al repo `e-burgos/video-maker` (privado).
+4. **`wrangler login` local**: el dev ya tiene una sesión activa (`wrangler whoami` confirmado en
+   esta corrida, cuenta `Estebanburgos85@gmail.com`) — es la que usa `release-desktop.mjs
+   --publish` para subir el `.dmg` a R2, nunca un token leído de `.env`.
+5. **El workflow solo corre desde `main`**: `.github/workflows/deploy-docs-site.yml` dispara en
+   `push` a `main` (y `workflow_dispatch`, que en GitHub solo lista workflows presentes en la rama
+   default) — hay que mergear esta rama (`spec-e-burgos-017-desktop-app`) a `main`, o al menos que
+   el archivo del workflow llegue a `main`, antes de que el deploy automático o manual funcionen.

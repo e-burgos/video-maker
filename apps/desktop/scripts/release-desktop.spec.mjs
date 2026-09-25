@@ -1,40 +1,38 @@
 import { describe, expect, it } from 'vitest';
 
 import {
-  DEFAULT_RELEASE_REPO,
-  buildGhReleaseCreateArgs,
+  DEFAULT_DOWNLOADS_BUCKET,
+  DOWNLOADS_DOMAIN,
+  buildWranglerR2PutArgs,
+  downloadUrlFor,
   extractChangelogSection,
-  formatGhCommand,
+  formatPnpmCommand,
   formatSha256Line,
   parseReleaseArgs,
 } from './release-desktop.mjs';
 
 describe('parseReleaseArgs', () => {
-  it('defaults to dry-run and the default repo with no arguments', () => {
-    expect(parseReleaseArgs([])).toEqual({ publish: false, repo: DEFAULT_RELEASE_REPO });
+  it('defaults to dry-run and the default bucket with no arguments', () => {
+    expect(parseReleaseArgs([])).toEqual({ publish: false, bucket: DEFAULT_DOWNLOADS_BUCKET });
   });
 
   it('turns on publish with --publish', () => {
-    expect(parseReleaseArgs(['--publish'])).toEqual({ publish: true, repo: DEFAULT_RELEASE_REPO });
+    expect(parseReleaseArgs(['--publish'])).toEqual({ publish: true, bucket: DEFAULT_DOWNLOADS_BUCKET });
   });
 
-  it('overrides the repo with --repo=owner/name', () => {
-    expect(parseReleaseArgs(['--repo=someone/else'])).toEqual({ publish: false, repo: 'someone/else' });
+  it('overrides the bucket with --bucket=name', () => {
+    expect(parseReleaseArgs(['--bucket=some-other-bucket'])).toEqual({ publish: false, bucket: 'some-other-bucket' });
   });
 
-  it('accepts --repo and --publish together in either order', () => {
-    expect(parseReleaseArgs(['--repo=someone/else', '--publish'])).toEqual({
+  it('accepts --bucket and --publish together in either order', () => {
+    expect(parseReleaseArgs(['--bucket=some-other-bucket', '--publish'])).toEqual({
       publish: true,
-      repo: 'someone/else',
+      bucket: 'some-other-bucket',
     });
-    expect(parseReleaseArgs(['--publish', '--repo=someone/else'])).toEqual({
+    expect(parseReleaseArgs(['--publish', '--bucket=some-other-bucket'])).toEqual({
       publish: true,
-      repo: 'someone/else',
+      bucket: 'some-other-bucket',
     });
-  });
-
-  it('rejects a repo argument without an owner/name shape', () => {
-    expect(() => parseReleaseArgs(['--repo=not-a-repo'])).toThrow(/owner\/name/);
   });
 
   it('rejects an unrecognized argument', () => {
@@ -84,40 +82,42 @@ describe('formatSha256Line', () => {
   });
 });
 
-describe('buildGhReleaseCreateArgs', () => {
-  it('builds the gh release create argv in the expected order', () => {
-    const args = buildGhReleaseCreateArgs({
-      version: '0.1.0',
-      repo: DEFAULT_RELEASE_REPO,
-      title: 'Video Maker 0.1.0',
-      notesFilePath: '/tmp/release-notes.md',
-      assetPaths: ['/tmp/a.dmg', '/tmp/b.dmg'],
+describe('downloadUrlFor', () => {
+  it('builds the descargas URL under the custom domain', () => {
+    expect(downloadUrlFor('Video-Maker-arm64.dmg')).toBe(`${DOWNLOADS_DOMAIN}/descargas/Video-Maker-arm64.dmg`);
+  });
+});
+
+describe('buildWranglerR2PutArgs', () => {
+  it('builds the wrangler r2 object put argv in the expected order', () => {
+    const args = buildWranglerR2PutArgs({
+      bucket: DEFAULT_DOWNLOADS_BUCKET,
+      key: 'Video-Maker-arm64.dmg',
+      filePath: '/tmp/Video-Maker-arm64.dmg',
     });
 
     expect(args).toEqual([
-      'release',
-      'create',
-      'v0.1.0',
-      '/tmp/a.dmg',
-      '/tmp/b.dmg',
-      '--repo',
-      DEFAULT_RELEASE_REPO,
-      '--title',
-      'Video Maker 0.1.0',
-      '--notes-file',
-      '/tmp/release-notes.md',
+      'dlx',
+      'wrangler@4',
+      'r2',
+      'object',
+      'put',
+      `${DEFAULT_DOWNLOADS_BUCKET}/Video-Maker-arm64.dmg`,
+      '--file',
+      '/tmp/Video-Maker-arm64.dmg',
+      '--content-type',
+      'application/x-apple-diskimage',
+      '--remote',
     ]);
   });
 });
 
-describe('formatGhCommand', () => {
+describe('formatPnpmCommand', () => {
   it('quotes arguments that contain whitespace', () => {
-    expect(formatGhCommand(['release', 'create', '--title', 'Video Maker 0.1.0'])).toBe(
-      'gh release create --title "Video Maker 0.1.0"',
-    );
+    expect(formatPnpmCommand(['dlx', 'wrangler@4', '--help', 'a b'])).toBe('pnpm dlx wrangler@4 --help "a b"');
   });
 
   it('leaves plain arguments unquoted', () => {
-    expect(formatGhCommand(['release', 'create', 'v0.1.0'])).toBe('gh release create v0.1.0');
+    expect(formatPnpmCommand(['dlx', 'wrangler@4', 'whoami'])).toBe('pnpm dlx wrangler@4 whoami');
   });
 });

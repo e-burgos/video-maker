@@ -1,8 +1,8 @@
-export const DISTRIBUTION_REPO = 'e-burgos/video-maker-app';
+export const SITE_URL = 'https://video.estebanburgos.com.ar';
 
 export const STABLE_DMG_FILE_NAME = 'Video-Maker-arm64.dmg';
 
-export const DOWNLOAD_URL = `https://github.com/${DISTRIBUTION_REPO}/releases/latest/download/${STABLE_DMG_FILE_NAME}`;
+export const DOWNLOAD_URL = `${SITE_URL}/descargas/${STABLE_DMG_FILE_NAME}`;
 
 export const APP_DISPLAY_NAME = 'Video Maker';
 

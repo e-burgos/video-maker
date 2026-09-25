@@ -1,6 +1,6 @@
 import { createHash } from 'node:crypto';
 import { execFileSync } from 'node:child_process';
-import { copyFileSync, existsSync, readFileSync, writeFileSync } from 'node:fs';
+import { copyFileSync, existsSync, readFileSync, statSync, writeFileSync } from 'node:fs';
 import { join, resolve } from 'node:path';
 import { pathToFileURL } from 'node:url';
 
@@ -10,14 +10,16 @@ const DIST_DESKTOP_DIR = join(REPO_ROOT, 'dist', 'desktop');
 const BUILD_DESKTOP_SCRIPT = join(DESKTOP_ROOT, 'scripts', 'build-desktop.mjs');
 const CHANGELOG_PATH = join(DESKTOP_ROOT, 'CHANGELOG.md');
 
-export const DEFAULT_RELEASE_REPO = 'e-burgos/video-maker-app';
+export const DEFAULT_DOWNLOADS_BUCKET = 'video-maker-downloads';
+export const DOWNLOADS_DOMAIN = 'https://video.estebanburgos.com.ar';
+export const DMG_CONTENT_TYPE = 'application/x-apple-diskimage';
 
 export function log(message) {
   process.stdout.write(`[release-desktop] ${message}\n`);
 }
 
-export function parseReleaseArgs(argv, defaultRepo = DEFAULT_RELEASE_REPO) {
-  let repo = defaultRepo;
+export function parseReleaseArgs(argv, defaultBucket = DEFAULT_DOWNLOADS_BUCKET) {
+  let bucket = defaultBucket;
   let publish = false;
 
   for (const arg of argv) {
@@ -25,19 +27,15 @@ export function parseReleaseArgs(argv, defaultRepo = DEFAULT_RELEASE_REPO) {
       publish = true;
       continue;
     }
-    const repoMatch = /^--repo=(.+)$/.exec(arg);
-    if (repoMatch !== null) {
-      repo = repoMatch[1];
+    const bucketMatch = /^--bucket=(.+)$/.exec(arg);
+    if (bucketMatch !== null) {
+      bucket = bucketMatch[1];
       continue;
     }
     throw new Error(`unrecognized argument: ${arg}`);
   }
 
-  if (!/^[^/\s]+\/[^/\s]+$/.test(repo)) {
-    throw new Error(`--repo must look like "owner/name", got: ${repo}`);
-  }
-
-  return { publish, repo };
+  return { publish, bucket };
 }
 
 export function extractChangelogSection(changelog, version) {
@@ -63,23 +61,28 @@ export function formatSha256Line(hash, fileName) {
   return `${hash}  ${fileName}\n`;
 }
 
-export function buildGhReleaseCreateArgs({ version, repo, title, notesFilePath, assetPaths }) {
+export function downloadUrlFor(key) {
+  return `${DOWNLOADS_DOMAIN}/descargas/${key}`;
+}
+
+export function buildWranglerR2PutArgs({ bucket, key, filePath }) {
   return [
-    'release',
-    'create',
-    `v${version}`,
-    ...assetPaths,
-    '--repo',
-    repo,
-    '--title',
-    title,
-    '--notes-file',
-    notesFilePath,
+    'dlx',
+    'wrangler@4',
+    'r2',
+    'object',
+    'put',
+    `${bucket}/${key}`,
+    '--file',
+    filePath,
+    '--content-type',
+    DMG_CONTENT_TYPE,
+    '--remote',
   ];
 }
 
-export function formatGhCommand(args) {
-  return `gh ${args.map((part) => (/[\s"]/.test(part) ? JSON.stringify(part) : part)).join(' ')}`;
+export function formatPnpmCommand(args) {
+  return `pnpm ${args.map((part) => (/[\s"]/.test(part) ? JSON.stringify(part) : part)).join(' ')}`;
 }
 
 function readDesktopVersion() {
@@ -92,31 +95,51 @@ function runDesktopBuild() {
   execFileSync('node', [BUILD_DESKTOP_SCRIPT], { cwd: REPO_ROOT, stdio: 'inherit' });
 }
 
-function repoExistsOnGitHub(repo) {
+function ensureWranglerLoggedIn() {
+  let output;
   try {
-    execFileSync('gh', ['repo', 'view', repo], { stdio: 'pipe' });
-    return true;
-  } catch {
-    return false;
+    output = execFileSync('pnpm', ['dlx', 'wrangler@4', 'whoami'], { cwd: REPO_ROOT, encoding: 'utf8' });
+  } catch (error) {
+    throw new Error(`could not run "wrangler whoami": ${error.message}`);
   }
+  if (/not authenticated/i.test(output)) {
+    throw new Error('not logged in to Cloudflare — run "pnpm dlx wrangler@4 login" first');
+  }
+  log(output.trim());
 }
 
-function releaseTagExists(repo, tag) {
+async function verifyDownload({ key, filePath }) {
+  const url = downloadUrlFor(key);
+  const expectedSize = statSync(filePath).size;
+
+  let response;
   try {
-    execFileSync('gh', ['release', 'view', tag, '--repo', repo], { stdio: 'pipe' });
-    return true;
-  } catch {
-    return false;
+    response = await fetch(url, { method: 'HEAD' });
+  } catch (error) {
+    log(`warning: could not reach ${url}: ${error.message} — the domain may not be live yet`);
+    return;
   }
+
+  if (!response.ok) {
+    log(`warning: HEAD ${url} returned ${response.status} — the domain may not be live yet`);
+    return;
+  }
+
+  const contentLength = Number(response.headers.get('content-length'));
+  if (contentLength !== expectedSize) {
+    log(`warning: HEAD ${url} content-length ${contentLength} does not match the uploaded file size ${expectedSize}`);
+    return;
+  }
+
+  log(`verified ${url} — content-length matches (${contentLength} bytes)`);
 }
 
 async function main() {
-  const { publish, repo } = parseReleaseArgs(process.argv.slice(2));
+  const { publish, bucket } = parseReleaseArgs(process.argv.slice(2));
 
   runDesktopBuild();
 
   const version = readDesktopVersion();
-  const tag = `v${version}`;
   const versionedDmgName = `Video-Maker-${version}-arm64.dmg`;
   const stableDmgName = 'Video-Maker-arm64.dmg';
   const versionedDmgPath = join(DIST_DESKTOP_DIR, versionedDmgName);
@@ -142,31 +165,34 @@ async function main() {
   writeFileSync(notesFilePath, `${body}\n`);
   log(`release notes for "${title}" written to ${notesFilePath}`);
 
-  const ghArgs = buildGhReleaseCreateArgs({
-    version,
-    repo,
-    title: `Video Maker ${version}`,
-    notesFilePath,
-    assetPaths: [versionedDmgPath, stableDmgPath],
-  });
-  log(`this is the command that would publish the release:\n  ${formatGhCommand(ghArgs)}`);
+  const uploads = [
+    { key: versionedDmgName, filePath: versionedDmgPath },
+    { key: stableDmgName, filePath: stableDmgPath },
+  ];
+
+  for (const upload of uploads) {
+    const args = buildWranglerR2PutArgs({ bucket, key: upload.key, filePath: upload.filePath });
+    log(`this is the command that would upload ${upload.key}:\n  ${formatPnpmCommand(args)}`);
+  }
 
   if (!publish) {
-    log('dry-run: nothing was published. Pass --publish to actually create the GitHub release.');
+    log('dry-run: nothing was uploaded. Pass --publish to actually upload to R2.');
     return;
   }
 
-  log(`--publish given: checking that ${repo} exists and ${tag} is not taken yet`);
-  if (!repoExistsOnGitHub(repo)) {
-    throw new Error(`refusing to publish: repo "${repo}" does not exist or is not reachable with the local gh auth`);
-  }
-  if (releaseTagExists(repo, tag)) {
-    throw new Error(`refusing to publish: release "${tag}" already exists on ${repo}`);
-  }
+  log('--publish given: checking the local wrangler session');
+  ensureWranglerLoggedIn();
 
-  log('publishing the release with gh...');
-  execFileSync('gh', ghArgs, { cwd: REPO_ROOT, stdio: 'inherit' });
-  log('published.');
+  for (const upload of uploads) {
+    const args = buildWranglerR2PutArgs({ bucket, key: upload.key, filePath: upload.filePath });
+    log(`uploading ${upload.key}...`);
+    execFileSync('pnpm', args, { cwd: REPO_ROOT, stdio: 'inherit' });
+  }
+  log('uploaded.');
+
+  for (const upload of uploads) {
+    await verifyDownload(upload);
+  }
 }
 
 const isDirectRun = process.argv[1] !== undefined && import.meta.url === pathToFileURL(process.argv[1]).href;

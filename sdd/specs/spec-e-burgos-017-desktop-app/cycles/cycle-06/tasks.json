@@ -34,11 +34,12 @@
       "usage": {
         "provider_model": "claude/sonnet",
         "effort": "high",
-        "tokens_in": 65000,
-        "tokens_out": 12000,
+        "agent": "implementor-back",
+        "tokens_in": 105000,
+        "tokens_out": 20000,
         "approx": true,
         "source": "declared-estimate",
-        "recorded_at": "2026-09-24"
+        "recorded_at": "2026-09-25"
       }
     },
     {
@@ -80,8 +81,9 @@
       "usage": {
         "provider_model": "claude/sonnet",
         "effort": "high",
-        "tokens_in": 230000,
-        "tokens_out": 46000,
+        "agent": "implementor-back",
+        "tokens_in": 260000,
+        "tokens_out": 52000,
         "approx": true,
         "source": "declared-estimate",
         "recorded_at": "2026-09-25"
@@ -89,28 +91,32 @@
     },
     {
       "id": "TASK-003",
-      "title": "GitHub Pages deployment for the public distribution repo as a ready-to-copy workflow plus a local publish script, both inert until the repo exists",
+      "title": "Cloudflare deployment ready to copy: Pages project + R2-backed download Function for apps/docs-site, plus the deploy workflow in this repo (D-C6-03, replaces the GitHub Pages workflow and the public-repo publish script)",
       "user_stories": [
         "US-017-502"
       ],
-      "estimation_hours": 2,
-      "story_points": 2,
+      "estimation_hours": 3,
+      "story_points": 3,
       "depends_on": [
         "TASK-002"
       ],
       "status": "done",
       "files": [
-        "apps/docs-site/deploy/pages-workflow.yml",
-        "apps/docs-site/scripts/publish-docs.mjs"
+        "apps/docs-site/wrangler.toml",
+        "apps/docs-site/functions/descargas/[[path]].js",
+        "apps/docs-site/functions/descargas/[[path]].spec.mjs",
+        "apps/docs-site/vite.config.ts",
+        ".github/workflows/deploy-docs-site.yml"
       ],
       "usage": {
         "provider_model": "claude/sonnet",
         "effort": "high",
-        "tokens_in": 35000,
-        "tokens_out": 7000,
+        "agent": "implementor-back",
+        "tokens_in": 75000,
+        "tokens_out": 16000,
         "approx": true,
         "source": "declared-estimate",
-        "recorded_at": "2026-09-24"
+        "recorded_at": "2026-09-25"
       }
     },
     {
@@ -151,8 +157,9 @@
       "usage": {
         "provider_model": "claude/sonnet",
         "effort": "high",
-        "tokens_in": 140000,
-        "tokens_out": 28000,
+        "agent": "implementor-back",
+        "tokens_in": 165000,
+        "tokens_out": 34000,
         "approx": true,
         "source": "declared-estimate",
         "recorded_at": "2026-09-25"

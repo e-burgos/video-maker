@@ -2,12 +2,17 @@ import { existsSync, readFileSync, readdirSync, statSync } from 'node:fs';
 import { dirname, join, resolve } from 'node:path';
 import { pathToFileURL } from 'node:url';
 
-import { DOWNLOAD_URL, STABLE_DMG_FILE_NAME } from '../src/site-config.mjs';
+import { DOWNLOAD_URL, SITE_URL, STABLE_DMG_FILE_NAME } from '../src/site-config.mjs';
 
 const DOCS_SITE_ROOT = resolve(import.meta.dirname, '..');
 const REPO_ROOT = resolve(DOCS_SITE_ROOT, '..', '..');
 const DIST_DIR = join(REPO_ROOT, 'dist', 'apps', 'docs-site');
-const EXPECTED_DOWNLOAD_URL_PATTERN = /^https:\/\/github\.com\/[^/]+\/[^/]+\/releases\/latest\/download\/[^/]+$/;
+
+function escapeRegExp(text) {
+  return text.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+}
+
+const EXPECTED_DOWNLOAD_URL_PATTERN = new RegExp(`^${escapeRegExp(SITE_URL)}/descargas/[^/]+$`);
 
 function log(message) {
   process.stdout.write(`[check-links] ${message}\n`);

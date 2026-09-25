@@ -1,4 +1,4 @@
-import { APP_DISPLAY_NAME, NAV_PAGES } from './site-config.mjs';
+import { APP_DISPLAY_NAME, NAV_PAGES, SITE_URL } from './site-config.mjs';
 
 export function escapeHtml(text) {
   return text
@@ -18,6 +18,10 @@ export function assetHref(depth, path) {
 
 export function pageHref(depth, targetSlug) {
   return `${relativePrefix(depth)}${targetSlug === '' ? '' : `${targetSlug}/`}`;
+}
+
+export function canonicalHref(activeSlug) {
+  return `${SITE_URL}/${activeSlug === '' ? '' : `${activeSlug}/`}`;
 }
 
 function navMarkup(depth, activeSlug) {
@@ -40,6 +44,7 @@ export function pageLayout({ depth, activeSlug, title, description, bodyHtml }) 
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>${escapeHtml(fullTitle)}</title>
 <meta name="description" content="${escapeHtml(description)}" />
+<link rel="canonical" href="${canonicalHref(activeSlug)}" />
 <link rel="stylesheet" href="${assetHref(depth, 'assets/style.css')}" />
 </head>
 <body>

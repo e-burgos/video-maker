@@ -1,0 +1,35 @@
+name: Deploy Docs Site (Cloudflare Pages)
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'apps/docs-site/**'
+      - '.github/workflows/deploy-docs-site.yml'
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: 'pnpm'
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm exec nx run docs-site:build
+        env:
+          NX_NO_CLOUD: 'true'
+
+      # cloudflare/wrangler-action is incompatible with pnpm workspaces
+      # (it runs `pnpm add wrangler` at the repo root, which pnpm rejects),
+      # so invoke wrangler directly via dlx instead.
+      - run: pnpm dlx wrangler@4 pages deploy ../../dist/apps/docs-site --project-name=video-maker --branch=main
+        working-directory: apps/docs-site
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}

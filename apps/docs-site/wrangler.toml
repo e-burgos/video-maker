@@ -1,0 +1,7 @@
+name = "video-maker"
+pages_build_output_dir = "../../dist/apps/docs-site"
+compatibility_date = "2026-09-25"
+
+[[r2_buckets]]
+binding = "DOWNLOADS"
+bucket_name = "video-maker-downloads"
