@@ -1,4 +1,5 @@
 import { describe, expect, it } from 'vitest';
+import type { Timeline } from '@video-maker/timeline-core';
 
 import { createFakeRenderApiClient } from '../__fixtures__/fake-render-api-client';
 import { buildMinimalTimeline } from '../__fixtures__/minimal-timeline';
@@ -9,6 +10,27 @@ function handlersWith(overrides: Parameters<typeof createFakeRenderApiClient>[0]
   const client = createFakeRenderApiClient(overrides);
   const handlers = createStudioToolHandlers({ client, model });
   return { client, handlers };
+}
+
+function withCaptionWords(timeline: Timeline, words: readonly string[]): Timeline {
+  return {
+    ...timeline,
+    tracks: {
+      ...timeline.tracks,
+      captions: [
+        {
+          id: 'caption-under-test',
+          from: 0,
+          durationFrames: Math.max(words.length, 1),
+          words: words.map((text, index) => ({ text, fromFrame: index, durationFrames: 1 })),
+        },
+      ],
+    },
+  };
+}
+
+function timelineNotFound(): Promise<never> {
+  return Promise.reject(new StudioToolRuntimeError('FILE_NOT_FOUND', 'this project has no timeline yet'));
 }
 
 describe('createStudioToolHandlers', () => {
@@ -251,7 +273,136 @@ describe('createStudioToolHandlers', () => {
 
     const put = await handlers.put_timeline({ timeline });
     expect(put.data).toEqual({ saved: true });
-    expect(client.calls[1]).toEqual({ method: 'putTimeline', args: [timeline] });
+    expect(client.calls.map((call) => call.method)).toEqual(['getTimeline', 'getTimeline', 'putTimeline']);
+    expect(client.calls[2]).toEqual({ method: 'putTimeline', args: [timeline] });
+  });
+
+  describe('put_timeline caption guard', () => {
+    it('accepts the first timeline ever, without checking captions', async () => {
+      const timeline = withCaptionWords(buildMinimalTimeline(), ['hola']);
+      const { handlers, client } = handlersWith({
+        getTimeline: timelineNotFound,
+        putTimeline: async () => undefined,
+      });
+
+      const result = await handlers.put_timeline({ timeline });
+
+      expect(result.data).toEqual({ saved: true });
+      expect(client.calls[1]).toEqual({ method: 'putTimeline', args: [timeline] });
+    });
+
+    it('rejects a replacement whose caption words differ from what is saved (lost accents)', async () => {
+      const saved = withCaptionWords(buildMinimalTimeline(), ['quién', 'ahí', 'elegís']);
+      const rewritten = withCaptionWords(buildMinimalTimeline(), ['quien', 'ahi', 'elegis']);
+      const { handlers, client } = handlersWith({
+        getTimeline: async () => saved,
+        putTimeline: async () => undefined,
+      });
+
+      await expect(handlers.put_timeline({ timeline: rewritten })).rejects.toMatchObject({
+        code: 'INVALID_INPUT',
+        hint: expect.stringContaining('patch_timeline'),
+      });
+      expect(client.calls.some((call) => call.method === 'putTimeline')).toBe(false);
+    });
+
+    it('accepts a caption change when editCaptions is true', async () => {
+      const saved = withCaptionWords(buildMinimalTimeline(), ['quién']);
+      const rewritten = withCaptionWords(buildMinimalTimeline(), ['quien']);
+      const { handlers, client } = handlersWith({
+        getTimeline: async () => saved,
+        putTimeline: async () => undefined,
+      });
+
+      const result = await handlers.put_timeline({ timeline: rewritten, editCaptions: true });
+
+      expect(result.data).toEqual({ saved: true });
+      expect(client.calls.some((call) => call.method === 'getTimeline')).toBe(false);
+      expect(client.calls[0]).toEqual({ method: 'putTimeline', args: [rewritten] });
+    });
+
+    it('accepts the timeline as a JSON string that parses to the same object', async () => {
+      const saved = withCaptionWords(buildMinimalTimeline(), ['hola']);
+      const { handlers, client } = handlersWith({
+        getTimeline: async () => saved,
+        putTimeline: async () => undefined,
+      });
+
+      const result = await handlers.put_timeline({ timeline: JSON.stringify(saved) });
+
+      expect(result.data).toEqual({ saved: true });
+      expect(client.calls[1]).toEqual({ method: 'putTimeline', args: [saved] });
+    });
+
+    it('rejects a string timeline that is not valid JSON', async () => {
+      const { handlers } = handlersWith({ getTimeline: timelineNotFound });
+
+      await expect(handlers.put_timeline({ timeline: 'not json' })).rejects.toMatchObject({
+        code: 'INVALID_INPUT',
+      });
+    });
+  });
+
+  describe('patch_timeline', () => {
+    it('replaces only the requested sections and leaves captions untouched byte-for-byte', async () => {
+      const current = withCaptionWords(buildMinimalTimeline(), ['quién', 'ahí', 'elegís']);
+      let saved: unknown = null;
+      const { handlers, client } = handlersWith({
+        getTimeline: async () => current,
+        putTimeline: async (timeline) => {
+          saved = timeline;
+        },
+      });
+
+      const logo = { assetId: 'logo-asset', position: 'bottom-left' as const, widthRatio: 0.4, marginRatio: 0.035, opacity: 0.5 };
+      const result = await handlers.patch_timeline({ logo });
+
+      expect(result.data).toEqual({ changed: ['logo'], summary: 'Updated logo.' });
+      expect(client.calls.map((call) => call.method)).toEqual(['getTimeline', 'putTimeline']);
+      expect((saved as Timeline).logo).toEqual(logo);
+      expect((saved as Timeline).tracks.captions).toEqual(current.tracks.captions);
+    });
+
+    it('replaces the music track and audioMix together and reports both as changed', async () => {
+      const current = buildMinimalTimeline();
+      let saved: unknown = null;
+      const { handlers } = handlersWith({
+        getTimeline: async () => current,
+        putTimeline: async (timeline) => {
+          saved = timeline;
+        },
+      });
+
+      const music = [
+        { id: 'music-under-test', assetId: 'minimal-aroll', from: 0, durationFrames: 10, trimStartMs: 0, gainDb: -8 },
+      ];
+      const result = await handlers.patch_timeline({ music, audioMix: current.audioMix });
+
+      expect(result.data).toEqual({ changed: ['audioMix', 'music'], summary: 'Updated audioMix, music.' });
+      expect((saved as Timeline).tracks.music).toEqual(music);
+    });
+
+    it('rejects when the patched timeline fails Timeline validation', async () => {
+      const current = buildMinimalTimeline();
+      const collidingId = current.tracks.aroll[0]?.id;
+      if (collidingId === undefined) {
+        throw new Error('fixture must have at least one aroll clip');
+      }
+      const { handlers, client } = handlersWith({ getTimeline: async () => current });
+
+      const music = [
+        { id: collidingId, assetId: 'minimal-aroll', from: 0, durationFrames: 10, trimStartMs: 0, gainDb: 0 },
+      ];
+
+      await expect(handlers.patch_timeline({ music })).rejects.toMatchObject({ code: 'INVALID_INPUT' });
+      expect(client.calls.some((call) => call.method === 'putTimeline')).toBe(false);
+    });
+
+    it('errors when the project has no timeline yet', async () => {
+      const { handlers } = handlersWith({ getTimeline: timelineNotFound });
+
+      await expect(handlers.patch_timeline({ logo: null })).rejects.toMatchObject({ code: 'FILE_NOT_FOUND' });
+    });
   });
 
   it('search_free_music and import_music forward to the client', async () => {

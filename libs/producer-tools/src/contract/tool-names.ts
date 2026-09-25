@@ -13,6 +13,7 @@ export const STUDIO_TOOL_NAMES = [
   'cancel_job',
   'get_timeline',
   'put_timeline',
+  'patch_timeline',
   'search_free_music',
   'import_music',
   'search_free_media',

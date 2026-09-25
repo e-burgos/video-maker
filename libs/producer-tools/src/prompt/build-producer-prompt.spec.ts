@@ -73,11 +73,21 @@ describe('buildProducerProjectSection', () => {
 describe('buildProducerPrompt — herramientas del estudio', () => {
   const prompt = buildProducerPrompt(CONTEXT);
 
-  it('nombra las 17 herramientas del contrato', () => {
-    expect(STUDIO_TOOL_NAMES).toHaveLength(17);
+  it('nombra las 18 herramientas del contrato', () => {
+    expect(STUDIO_TOOL_NAMES).toHaveLength(18);
     for (const tool of STUDIO_TOOL_NAMES) {
       expect(prompt).toContain(tool);
     }
+  });
+
+  it('dice que patch_timeline reemplaza secciones sin tocar los subtítulos', () => {
+    expect(prompt).toContain('patch_timeline');
+    expect(prompt).toContain('leaving captions and voice untouched');
+  });
+
+  it('put_timeline explica el rechazo por subtítulos cambiados y remite a patch_timeline', () => {
+    expect(prompt).toContain('editCaptions is true');
+    expect(prompt).toContain('use patch_timeline instead for anything that');
   });
 
   it('nunca menciona shell, ffmpeg/ffprobe, curl, el motor de voz, render-cli, pnpm ni rutas absolutas del host', () => {
@@ -203,5 +213,22 @@ describe('buildProducerPrompt — checklist de parámetros de las tres recetas',
     expect(prompt).toContain('# Recipes: a named recipe is a decision already taken, not a hint');
     expect(prompt).toContain('every parameter below is');
     expect(prompt).toContain('already chosen');
+  });
+});
+
+describe('buildProducerPrompt — dónde está cada cosa', () => {
+  const prompt = buildProducerPrompt(CONTEXT);
+
+  it('nombra las pestañas actuales del panel: Preview, Material y Deliveries', () => {
+    expect(prompt).toContain('`Preview` tab');
+    expect(prompt).toContain('`Material` tab');
+    expect(prompt).toContain('`Deliveries` tab');
+  });
+
+  it('nunca menciona las pantallas viejas Preview/Generated/Voice ni la biblioteca como destino', () => {
+    expect(prompt).not.toContain('"Generated" section');
+    expect(prompt).not.toContain('`voice` screen');
+    expect(prompt).not.toContain('`storyboard` screen');
+    expect(prompt).not.toContain('name the screen first');
   });
 });

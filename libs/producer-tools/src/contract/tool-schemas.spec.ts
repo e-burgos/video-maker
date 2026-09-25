@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import type { ZodObject } from 'zod';
 
+import { buildMinimalTimeline } from '../__fixtures__/minimal-timeline';
 import { STUDIO_TOOL_NAMES } from './tool-names';
 import {
   MAX_EXTRACT_FRAMES_AT_SECONDS,
@@ -236,6 +237,65 @@ describe('STUDIO_TOOLS.start_job.input', () => {
 
   it('rejects fields other than "job"', () => {
     expect(STUDIO_TOOLS.start_job.input.safeParse({ job: { kind: 'render' }, extra: true }).success).toBe(false);
+  });
+});
+
+describe('STUDIO_TOOLS.put_timeline.input', () => {
+  it('accepts a valid timeline object', () => {
+    const timeline = buildMinimalTimeline();
+    expect(STUDIO_TOOLS.put_timeline.input.safeParse({ timeline }).success).toBe(true);
+  });
+
+  it('accepts the timeline as a JSON string', () => {
+    const timeline = buildMinimalTimeline();
+    const result = STUDIO_TOOLS.put_timeline.input.safeParse({ timeline: JSON.stringify(timeline) });
+    expect(result.success).toBe(true);
+  });
+
+  it('rejects an empty string timeline', () => {
+    expect(STUDIO_TOOLS.put_timeline.input.safeParse({ timeline: '' }).success).toBe(false);
+  });
+
+  it('accepts an explicit editCaptions flag', () => {
+    const timeline = buildMinimalTimeline();
+    expect(STUDIO_TOOLS.put_timeline.input.safeParse({ timeline, editCaptions: true }).success).toBe(true);
+  });
+
+  it('rejects a field outside the contract', () => {
+    const timeline = buildMinimalTimeline();
+    expect(STUDIO_TOOLS.put_timeline.input.safeParse({ timeline, extra: true }).success).toBe(false);
+  });
+});
+
+describe('STUDIO_TOOLS.patch_timeline.input', () => {
+  it('rejects an empty patch', () => {
+    expect(STUDIO_TOOLS.patch_timeline.input.safeParse({}).success).toBe(false);
+  });
+
+  it('accepts a patch with only the logo', () => {
+    const logo = { assetId: 'logo-asset', position: 'bottom-left', widthRatio: 0.2, marginRatio: 0.04, opacity: 1 };
+    expect(STUDIO_TOOLS.patch_timeline.input.safeParse({ logo }).success).toBe(true);
+  });
+
+  it('accepts null to clear an optional section', () => {
+    expect(STUDIO_TOOLS.patch_timeline.input.safeParse({ logo: null }).success).toBe(true);
+    expect(STUDIO_TOOLS.patch_timeline.input.safeParse({ bumpers: null }).success).toBe(true);
+    expect(STUDIO_TOOLS.patch_timeline.input.safeParse({ captionStyle: null }).success).toBe(true);
+    expect(STUDIO_TOOLS.patch_timeline.input.safeParse({ safeZone: null }).success).toBe(true);
+  });
+
+  it('rejects null for audioMix, which the timeline always requires', () => {
+    expect(STUDIO_TOOLS.patch_timeline.input.safeParse({ audioMix: null }).success).toBe(false);
+  });
+
+  it('rejects a field the plan never listed, such as captions or voice', () => {
+    expect(STUDIO_TOOLS.patch_timeline.input.safeParse({ captions: [] }).success).toBe(false);
+    expect(STUDIO_TOOLS.patch_timeline.input.safeParse({ tracks: { voice: [] } }).success).toBe(false);
+  });
+
+  it('accepts a replacement music track', () => {
+    const music = [{ id: 'music-1', assetId: 'a', from: 0, durationFrames: 10, trimStartMs: 0, gainDb: -8 }];
+    expect(STUDIO_TOOLS.patch_timeline.input.safeParse({ music }).success).toBe(true);
   });
 });
 

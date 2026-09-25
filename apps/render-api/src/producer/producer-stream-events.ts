@@ -102,6 +102,12 @@ function summarizeStudioTool(tool: StudioToolName, input: Record<string, unknown
       return 'Checking the timeline';
     case 'put_timeline':
       return 'Saving the timeline';
+    case 'patch_timeline': {
+      const sections = (['logo', 'bumpers', 'audioMix', 'captionStyle', 'safeZone', 'music'] as const).filter(
+        (key) => input[key] !== undefined,
+      );
+      return truncate(`Updating ${sections.join(', ') || 'the timeline'}`);
+    }
     case 'search_free_music':
       return truncate(`Searching free music: ${stringField(input, 'mood') ?? ''}`.trim());
     case 'import_music':

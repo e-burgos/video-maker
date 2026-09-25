@@ -1,6 +1,10 @@
 import { z } from 'zod';
 
-import { STUDIO_TOOLS } from '../contract/tool-schemas';
+import { TimelineSchema } from '@video-maker/timeline-core';
+import type { Timeline } from '@video-maker/timeline-core';
+
+import { PATCH_TIMELINE_SECTIONS, STUDIO_TOOLS } from '../contract/tool-schemas';
+import type { PatchTimelineInput, PatchTimelineSection } from '../contract/tool-schemas';
 import type { StudioToolName } from '../contract/tool-names';
 import { StudioToolRuntimeError } from '../errors/studio-tool-runtime-error';
 import type { RenderApiClient } from '../client/render-api-client';
@@ -49,6 +53,52 @@ function defaultSleep(ms: number): Promise<void> {
   return new Promise((resolve) => {
     setTimeout(resolve, ms);
   });
+}
+
+function captionWordTexts(timeline: Timeline): readonly string[] {
+  return timeline.tracks.captions.flatMap((clip) => clip.words.map((word) => word.text));
+}
+
+function captionWordsChanged(previous: Timeline, next: Timeline): boolean {
+  const previousWords = captionWordTexts(previous);
+  const nextWords = captionWordTexts(next);
+  return (
+    previousWords.length !== nextWords.length || previousWords.some((text, index) => text !== nextWords[index])
+  );
+}
+
+function parsePutTimelineTimeline(rawTimeline: unknown): Timeline {
+  let candidate = rawTimeline;
+  if (typeof rawTimeline === 'string') {
+    try {
+      candidate = JSON.parse(rawTimeline);
+    } catch {
+      throw new StudioToolRuntimeError('INVALID_INPUT', 'timeline was a string that is not valid JSON');
+    }
+  }
+  const result = TimelineSchema.safeParse(candidate);
+  if (!result.success) {
+    throw new StudioToolRuntimeError('INVALID_INPUT', z.prettifyError(result.error));
+  }
+  return result.data;
+}
+
+async function getExistingTimelineOrNull(client: RenderApiClient): Promise<Timeline | null> {
+  let existing: unknown;
+  try {
+    existing = await client.getTimeline();
+  } catch (cause) {
+    if (cause instanceof StudioToolRuntimeError && cause.code === 'FILE_NOT_FOUND') {
+      return null;
+    }
+    throw cause;
+  }
+  const result = TimelineSchema.safeParse(existing);
+  return result.success ? result.data : null;
+}
+
+function patchTimelineSummary(sections: readonly PatchTimelineSection[]): string {
+  return `Updated ${sections.join(', ')}.`;
 }
 
 export function createStudioToolHandlers(
@@ -197,9 +247,53 @@ export function createStudioToolHandlers(
     },
 
     put_timeline: async (rawInput) => {
-      const input = parseInput<{ timeline: unknown }>(STUDIO_TOOLS.put_timeline.input, rawInput);
-      await client.putTimeline(input.timeline);
+      const input = parseInput<{ timeline: unknown; editCaptions?: boolean }>(
+        STUDIO_TOOLS.put_timeline.input,
+        rawInput,
+      );
+      const nextTimeline = parsePutTimelineTimeline(input.timeline);
+
+      if (input.editCaptions !== true) {
+        const previousTimeline = await getExistingTimelineOrNull(client);
+        if (previousTimeline !== null && captionWordsChanged(previousTimeline, nextTimeline)) {
+          throw new StudioToolRuntimeError(
+            'INVALID_INPUT',
+            'put_timeline would change caption words already saved for this project (for example, lost ' +
+              'accents). Use patch_timeline for the logo, intro/outro plates, music level or caption style ' +
+              'instead, or pass editCaptions: true only if the user explicitly asked to change the caption text.',
+          );
+        }
+      }
+
+      await client.putTimeline(nextTimeline);
       return withOutput('put_timeline', { saved: true });
+    },
+
+    patch_timeline: async (rawInput) => {
+      const input = parseInput<PatchTimelineInput>(STUDIO_TOOLS.patch_timeline.input, rawInput);
+
+      const currentRaw = await client.getTimeline();
+      const current = parseOutput<Timeline>(TimelineSchema, currentRaw);
+
+      const patched: Timeline = {
+        ...current,
+        ...(input.logo !== undefined ? { logo: input.logo ?? undefined } : {}),
+        ...(input.bumpers !== undefined ? { bumpers: input.bumpers ?? undefined } : {}),
+        ...(input.audioMix !== undefined ? { audioMix: input.audioMix } : {}),
+        ...(input.captionStyle !== undefined ? { captionStyle: input.captionStyle ?? undefined } : {}),
+        ...(input.safeZone !== undefined ? { safeZone: input.safeZone ?? undefined } : {}),
+        ...(input.music !== undefined ? { tracks: { ...current.tracks, music: input.music } } : {}),
+      };
+
+      const validated = TimelineSchema.safeParse(patched);
+      if (!validated.success) {
+        throw new StudioToolRuntimeError('INVALID_INPUT', z.prettifyError(validated.error));
+      }
+
+      await client.putTimeline(validated.data);
+
+      const changed = PATCH_TIMELINE_SECTIONS.filter((section) => input[section] !== undefined);
+      return withOutput('patch_timeline', { changed, summary: patchTimelineSummary(changed) });
     },
 
     search_free_music: async (rawInput) => {

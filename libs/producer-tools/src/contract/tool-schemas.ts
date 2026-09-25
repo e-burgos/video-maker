@@ -1,6 +1,14 @@
 import { z } from 'zod';
 
-import { TimelineSchema } from '@video-maker/timeline-core';
+import {
+  AudioClipSchema,
+  AudioMixPlanSchema,
+  CaptionStyleSchema as TimelineCaptionStyleSchema,
+  LogoOverlaySchema,
+  SafeZoneSchema,
+  TimelineBumpersSchema,
+  TimelineSchema,
+} from '@video-maker/timeline-core';
 
 import type { StudioToolName } from './tool-names';
 import { STUDIO_TOOL_ERROR_CODES } from './tool-errors';
@@ -313,11 +321,37 @@ const GetTimelineOutputSchema = z.strictObject({
 });
 
 const PutTimelineInputSchema = z.strictObject({
-  timeline: TimelineSchema,
+  timeline: z.union([TimelineSchema, z.string().min(1)]),
+  editCaptions: z.boolean().optional(),
 });
 
 const PutTimelineOutputSchema = z.strictObject({
   saved: z.literal(true),
+});
+
+export const PATCH_TIMELINE_SECTIONS = ['logo', 'bumpers', 'audioMix', 'captionStyle', 'safeZone', 'music'] as const;
+export type PatchTimelineSection = (typeof PATCH_TIMELINE_SECTIONS)[number];
+const PatchTimelineSectionSchema = z.enum(PATCH_TIMELINE_SECTIONS);
+
+const PatchTimelineInputSchema = z
+  .strictObject({
+    logo: LogoOverlaySchema.nullable().optional(),
+    bumpers: TimelineBumpersSchema.nullable().optional(),
+    audioMix: AudioMixPlanSchema.optional(),
+    captionStyle: TimelineCaptionStyleSchema.nullable().optional(),
+    safeZone: SafeZoneSchema.nullable().optional(),
+    music: z.array(AudioClipSchema).optional(),
+  })
+  .refine(
+    (value) => PATCH_TIMELINE_SECTIONS.some((section) => value[section] !== undefined),
+    { message: 'patch_timeline needs at least one section to replace' },
+  );
+
+export type PatchTimelineInput = z.infer<typeof PatchTimelineInputSchema>;
+
+const PatchTimelineOutputSchema = z.strictObject({
+  changed: z.array(PatchTimelineSectionSchema).min(1),
+  summary: z.string(),
 });
 
 const SearchFreeMusicInputSchema = z.strictObject({
@@ -465,9 +499,24 @@ export const STUDIO_TOOLS: Readonly<Record<StudioToolName, StudioToolDefinition>
     output: GetTimelineOutputSchema,
   },
   put_timeline: {
-    description: 'Replace the project timeline in full with a new, already valid timeline.',
+    description:
+      'Replace the project timeline in full with a new, already valid timeline. Rejects a timeline whose ' +
+      'caption words differ from what is saved — for example lost accents — unless editCaptions is true ' +
+      'because the user explicitly asked to change the caption text. For a change that never touches the ' +
+      'words (logo, intro/outro plates, music level, caption style, safe zone) use patch_timeline instead. ' +
+      'Accepts the timeline as an object, or as a JSON string that parses to one.',
     input: PutTimelineInputSchema,
     output: PutTimelineOutputSchema,
+  },
+  patch_timeline: {
+    description:
+      'Replace only the given sections of the already saved timeline — logo, bumpers, audioMix, ' +
+      'captionStyle, safeZone and/or the music track — without touching captions, voice or any other word. ' +
+      'Reads the current timeline, replaces just those sections, validates the result and saves it. Use this ' +
+      'for a logo, an intro/outro plate, the music level or the caption style instead of put_timeline, which ' +
+      'forces you to re-send every caption word. Fails if the project has no timeline yet.',
+    input: PatchTimelineInputSchema,
+    output: PatchTimelineOutputSchema,
   },
   search_free_music: {
     description:

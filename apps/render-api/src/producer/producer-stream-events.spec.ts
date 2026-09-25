@@ -53,6 +53,13 @@ describe('summarizeToolUse', () => {
     expect(summarizeToolUse('mcp__studio__import_music', { resultId: 'r1' })).toBe('Importing music');
   });
 
+  it('nombra las secciones que patch_timeline va a reemplazar', () => {
+    expect(summarizeToolUse('mcp__studio__patch_timeline', { logo: {}, music: [] })).toBe(
+      'Updating logo, music',
+    );
+    expect(summarizeToolUse('mcp__studio__patch_timeline', {})).toBe('Updating the timeline');
+  });
+
   it('lee y escribe archivos de texto del proyecto por su ruta', () => {
     expect(summarizeToolUse('mcp__studio__read_project_text', { path: 'work/producer/script.txt' })).toBe(
       'Reading work/producer/script.txt',
