@@ -5,7 +5,8 @@
   "module": "producer-free-tier",
   "apps": [
     "apps/render-api",
-    "apps/web"
+    "apps/web",
+    "libs/timeline-core"
   ],
   "flow": "lite",
   "user_stories_generated": true,
@@ -122,11 +123,23 @@
       "depends_on": [
         "TASK-003"
       ],
-      "status": "pending",
+      "status": "done",
       "files": [
         "sdd/context/apps/render-api/updates/2026-09-25-spec-e-burgos-018-producer-free-tier-cycle-02.md",
-        "sdd/context/apps/web/updates/2026-09-25-spec-e-burgos-018-producer-free-tier-cycle-02.md"
-      ]
+        "sdd/context/apps/web/updates/2026-09-25-spec-e-burgos-018-producer-free-tier-cycle-02.md",
+        "sdd/context/libs/timeline-core/updates/2026-09-25-spec-e-burgos-018-producer-free-tier-cycle-02.md",
+        "sdd/memory/journal/2026-09-25-spec-e-burgos-018-producer-free-tier-cycle-02.md"
+      ],
+      "usage": {
+        "provider_model": "claude/opus",
+        "effort": "high",
+        "agent": "orchestrator",
+        "tokens_in": 60000,
+        "tokens_out": 10000,
+        "approx": true,
+        "source": "declared-estimate",
+        "recorded_at": "2026-09-25"
+      }
     }
   ]
 }

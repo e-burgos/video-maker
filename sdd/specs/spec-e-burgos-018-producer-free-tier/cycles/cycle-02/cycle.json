@@ -5,7 +5,8 @@
   "spec": "spec-e-burgos-018-producer-free-tier",
   "apps": [
     "apps/render-api",
-    "apps/web"
+    "apps/web",
+    "libs/timeline-core"
   ],
   "phase": "storyboard-openrouter",
   "flow": "lite",
@@ -14,18 +15,140 @@
     "Mismo contrato del documento de storyboard (StoryboardProposalSchema) en los dos motores",
     "Smoke real barato con DeepSeek"
   ],
-  "status": "in-progress",
+  "status": "completed",
   "started_at": "2026-09-25",
-  "completed_at": null,
+  "completed_at": "2026-09-25",
   "documents": {
     "plan": "sdd/specs/spec-e-burgos-018-producer-free-tier/cycles/cycle-02/plan.md",
     "tasks": "sdd/specs/spec-e-burgos-018-producer-free-tier/cycles/cycle-02/tasks.json"
   },
-  "artifacts": [],
-  "metrics": null,
+  "artifacts": [
+    "sdd/specs/spec-e-burgos-018-producer-free-tier/cycles/cycle-02/artifacts/storyboard-openrouter-smoke.md",
+    "sdd/specs/spec-e-burgos-018-producer-free-tier/cycles/cycle-02/artifacts/storyboard-openrouter-smoke.mjs"
+  ],
+  "metrics": {
+    "tasks_total": 4,
+    "tasks_completed": 4,
+    "story_points": 8,
+    "files_created": [
+      "apps/render-api/src/ai/effective-ai-agent.spec.ts",
+      "apps/render-api/src/ai/effective-ai-agent.ts",
+      "apps/render-api/src/ai/openrouter-ai-agent.spec.ts",
+      "apps/render-api/src/ai/openrouter-ai-agent.ts",
+      "apps/render-api/src/producer/openrouter-model-knowledge.ts",
+      "sdd/specs/spec-e-burgos-018-producer-free-tier/cycles/cycle-02/artifacts/storyboard-openrouter-smoke.md",
+      "sdd/specs/spec-e-burgos-018-producer-free-tier/cycles/cycle-02/artifacts/storyboard-openrouter-smoke.mjs",
+      "sdd/context/apps/render-api/updates/2026-09-25-spec-e-burgos-018-producer-free-tier-cycle-02.md",
+      "sdd/context/apps/web/updates/2026-09-25-spec-e-burgos-018-producer-free-tier-cycle-02.md",
+      "sdd/context/libs/timeline-core/updates/2026-09-25-spec-e-burgos-018-producer-free-tier-cycle-02.md",
+      "sdd/memory/journal/2026-09-25-spec-e-burgos-018-producer-free-tier-cycle-02.md"
+    ],
+    "files_modified": [
+      "apps/render-api/src/deps/node-render-api-dependencies.ts",
+      "apps/render-api/src/errors/translate-producer-error.ts",
+      "apps/render-api/src/jobs/render-job.ts",
+      "apps/render-api/src/jobs/run-storyboard-pipeline.spec.ts",
+      "apps/render-api/src/jobs/run-storyboard-pipeline.ts",
+      "apps/render-api/src/producer/run-producer-turn.ts",
+      "apps/render-api/src/storyboard/build-storyboard-prompt.spec.ts",
+      "apps/render-api/src/storyboard/build-storyboard-prompt.ts",
+      "apps/web/src/api/storyboard-capability.spec.ts",
+      "apps/web/src/api/storyboard-capability.ts",
+      "apps/web/src/i18n/messages-en.ts",
+      "apps/web/src/i18n/messages-es.ts",
+      "libs/timeline-core/src/index.ts",
+      "libs/timeline-core/src/schemas/schemas.spec.ts",
+      "libs/timeline-core/src/schemas/storyboard.schema.spec.ts",
+      "libs/timeline-core/src/schemas/storyboard.schema.ts",
+      "sdd/context/libs/producer-tools/constitution.md",
+      "sdd/context/libs/producer-tools/context_prompt.md"
+    ],
+    "files_deleted": [
+      "sdd/context/libs/producer-tools/updates/2026-09-23-spec-e-burgos-017-desktop-app-cycle-01.md",
+      "sdd/context/libs/producer-tools/updates/2026-09-24-spec-e-burgos-017-desktop-app-cycle-03.md",
+      "sdd/context/libs/producer-tools/updates/2026-09-24-spec-e-burgos-017-desktop-app-cycle-04.md",
+      "sdd/context/libs/producer-tools/updates/2026-09-24-spec-e-burgos-017-desktop-app-cycle-05.md",
+      "sdd/context/libs/producer-tools/updates/2026-09-25-spec-e-burgos-018-producer-free-tier-cycle-01.md"
+    ],
+    "usage": {
+      "tokens_in": 670708,
+      "tokens_out": 117772,
+      "approx": true,
+      "source": "agent-usage-notification",
+      "by_agent": [
+        {
+          "agent": "implementor-back",
+          "label": "TASK-001..003 storyboard con OpenRouter + arreglo del schema",
+          "provider_model": "claude/sonnet",
+          "effort": "medium",
+          "tokens_in": 523640,
+          "tokens_out": 92407,
+          "tokens_total": 616047,
+          "approx": true,
+          "source": "agent-usage-notification",
+          "recorded_at": "2026-09-25"
+        },
+        {
+          "agent": "custom",
+          "label": "consolidación de contexto de producer-tools",
+          "provider_model": "claude/sonnet",
+          "effort": "medium",
+          "tokens_in": 87068,
+          "tokens_out": 15365,
+          "tokens_total": 102433,
+          "approx": true,
+          "source": "agent-usage-notification",
+          "recorded_at": "2026-09-25"
+        },
+        {
+          "agent": "orchestrator",
+          "label": "plan, verificación del camino Claude y cierre",
+          "provider_model": "claude/opus",
+          "effort": "high",
+          "tokens_in": 60000,
+          "tokens_out": 10000,
+          "tokens_total": 70000,
+          "approx": true,
+          "source": "declared-estimate",
+          "recorded_at": "2026-09-25"
+        }
+      ],
+      "by_tier": {
+        "claude/sonnet": {
+          "tokens_in": 610708,
+          "tokens_out": 107772,
+          "approx": true,
+          "source": "agent-usage-notification"
+        },
+        "claude/opus": {
+          "tokens_in": 60000,
+          "tokens_out": 10000,
+          "approx": true,
+          "source": "declared-estimate"
+        }
+      }
+    }
+  },
   "tables_created": [],
   "endpoints_implemented": [],
   "components_created": [],
-  "issues_found": [],
-  "reviewer_report": null
+  "issues_found": [
+    "El JSON Schema del storyboard declaraba remotionScene como opcional (la regla condicional vivía solo en superRefine) y DeepSeek lo omitía 5/5 con un brief común; corregido con un schema para el modelo requerido+nullable con unión discriminada y un reintento de reparación.",
+    "El primer smoke pasaba forzando visualSource: upload en el brief; se rehízo con un brief común."
+  ],
+  "reviewer_report": {
+    "approved": true,
+    "date": "2026-09-25",
+    "ca_results": {
+      "US-018-201": "PASS — con motor OpenRouter el job storyboard termina succeeded 3/3 con un brief común (DeepSeek, 3 escenas, usage.model = deepseek/deepseek-v4.1-flash, US$0.0007–0.0011 por corrida); con Claude, claude -p --json-schema con el schema nuevo devuelve structured_output válido contra StoryboardProposalSchema.",
+      "US-018-202": "PASS — key inválida → job failed con OPENROUTER_KEY_MISSING sin facturar; el panel explica OPENROUTER_KEY_MISSING y OPENROUTER_FREE_QUOTA_EXHAUSTED en es/en; salida inválida → reintento de reparación y luego AI_AGENT_INVALID_OUTPUT (tests)."
+    },
+    "tests": {
+      "sdd:validate": "OK",
+      "suite": "nx run-many -t lint test build -p render-api web timeline-core verde (1482 + 1269 + 351 tests)",
+      "e2e": "artifacts/storyboard-openrouter-smoke.md: 3/3 succeeded + camino de falla; gasto US$0.0029"
+    },
+    "notes": "Ciclo lite. El contrato guardado del storyboard no cambió; solo el schema que ve el modelo.",
+    "follow_ups": []
+  }
 }

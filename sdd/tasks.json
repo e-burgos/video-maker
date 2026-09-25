@@ -435,11 +435,12 @@
           "module": "producer-free-tier",
           "apps": [
             "apps/render-api",
-            "apps/web"
+            "apps/web",
+            "libs/timeline-core"
           ],
-          "status": "in-progress",
+          "status": "completed",
           "tasks_total": 4,
-          "tasks_done": 3
+          "tasks_done": 4
         }
       }
     }
