@@ -9,9 +9,11 @@ import {
 } from '../__fixtures__/storyboard';
 import type { JsonObject } from './json-schema';
 import {
+  RemotionSceneSchema,
   StoryboardDocumentSchema,
   StoryboardProposalSchema,
   StoryboardSceneProposalSchema,
+  normalizeStoryboardProposalInput,
   storyboardProposalJsonSchema,
   toStoryboardDocument,
 } from './storyboard.schema';
@@ -24,6 +26,44 @@ function documentWithScenes(scenes: MutableDocument['scenes']): unknown {
 
 function sceneWith(overrides: Record<string, unknown>): unknown {
   return { ...structuredClone(minimalStoryboardDocument).scenes[0], ...overrides };
+}
+
+const REMOTION_SCENE_BRANCH_FIELDS: Readonly<Record<string, { required: readonly string[]; nullableOptional: readonly string[] }>> = {
+  title: { required: ['title'], nullableOptional: ['subtitle'] },
+  text: { required: ['text'], nullableOptional: [] },
+  code: { required: ['code', 'codeLanguage'], nullableOptional: [] },
+  'image-kenburns': { required: ['zoomFrom', 'zoomTo'], nullableOptional: ['assetId'] },
+};
+
+function isRecordLike(value: unknown): value is Record<string, unknown> {
+  return typeof value === 'object' && value !== null && !Array.isArray(value);
+}
+
+function asRawModelRemotionScene(remotionScene: Record<string, unknown>): unknown {
+  const branch = REMOTION_SCENE_BRANCH_FIELDS[remotionScene.kind as string];
+  const result: Record<string, unknown> = { kind: remotionScene.kind };
+  for (const field of branch.required) {
+    result[field] = remotionScene[field];
+  }
+  for (const field of branch.nullableOptional) {
+    result[field] = remotionScene[field] ?? null;
+  }
+  return result;
+}
+
+function asRawModelScene(scene: Record<string, unknown>): unknown {
+  const withDefaults: Record<string, unknown> = { assetId: null, remotionScene: null, ...scene };
+  if (isRecordLike(withDefaults.remotionScene)) {
+    withDefaults.remotionScene = asRawModelRemotionScene(withDefaults.remotionScene);
+  }
+  return withDefaults;
+}
+
+function asRawModelProposal(proposal: typeof minimalStoryboardProposal): unknown {
+  return {
+    ...proposal,
+    scenes: proposal.scenes.map((scene) => asRawModelScene(scene as unknown as Record<string, unknown>)),
+  };
 }
 
 describe('StoryboardDocumentSchema', () => {
@@ -200,16 +240,73 @@ describe('toStoryboardDocument', () => {
 describe('storyboardProposalJsonSchema', () => {
   const jsonSchema = storyboardProposalJsonSchema();
 
-  it('se deriva del schema Zod: las claves requeridas de una escena son las del shape', () => {
+  const DELIBERATELY_MODEL_ONLY_REQUIRED_KEYS = ['remotionScene', 'assetId'];
+
+  it('se deriva del schema Zod: las claves requeridas de una escena son las del shape, salvo remotionScene y assetId', () => {
     const sceneShape = StoryboardSceneProposalSchema.shape;
     const zodRequired = Object.entries(sceneShape)
-      .filter(([, field]) => !field.safeParse(undefined).success)
+      .filter(([key, field]) => !DELIBERATELY_MODEL_ONLY_REQUIRED_KEYS.includes(key) && !field.safeParse(undefined).success)
       .map(([key]) => key)
       .sort();
     const scenes = (jsonSchema.properties as JsonObject).scenes as JsonObject;
-    const derivedRequired = [...((scenes.items as JsonObject).required as string[])].sort();
+    const derivedRequired = [...((scenes.items as JsonObject).required as string[])]
+      .filter((key) => !DELIBERATELY_MODEL_ONLY_REQUIRED_KEYS.includes(key))
+      .sort();
 
     expect(derivedRequired).toEqual(zodRequired);
+  });
+
+  it('vuelve remotionScene obligatorio y nullable para el modelo, aunque en el contrato guardado siga siendo opcional', () => {
+    const scenes = (jsonSchema.properties as JsonObject).scenes as JsonObject;
+    const sceneItems = scenes.items as JsonObject;
+    const remotionSceneField = (sceneItems.properties as JsonObject).remotionScene as JsonObject;
+
+    expect((sceneItems.required as string[])).toContain('remotionScene');
+    expect(remotionSceneField.anyOf).toBeDefined();
+    expect((remotionSceneField.anyOf as JsonObject[]).some((entry) => entry.type === 'null')).toBe(true);
+    expect(StoryboardSceneProposalSchema.shape.remotionScene.safeParse(undefined).success).toBe(true);
+  });
+
+  it('vuelve assetId obligatorio y nullable para el modelo, aunque en el contrato guardado siga siendo opcional', () => {
+    const scenes = (jsonSchema.properties as JsonObject).scenes as JsonObject;
+    const sceneItems = scenes.items as JsonObject;
+    const assetIdField = (sceneItems.properties as JsonObject).assetId as JsonObject;
+
+    expect((sceneItems.required as string[])).toContain('assetId');
+    expect((assetIdField.anyOf as JsonObject[]).some((entry) => entry.type === 'null')).toBe(true);
+    expect(StoryboardSceneProposalSchema.shape.assetId.safeParse(undefined).success).toBe(true);
+  });
+
+  it('estructura remotionScene como un oneOf por kind: cada rama cierra sus propiedades a las que ese kind permite', () => {
+    const scenes = (jsonSchema.properties as JsonObject).scenes as JsonObject;
+    const sceneItems = scenes.items as JsonObject;
+    const remotionSceneField = (sceneItems.properties as JsonObject).remotionScene as JsonObject;
+    const unionEntry = (remotionSceneField.anyOf as JsonObject[]).find((entry) => entry.oneOf !== undefined);
+    const branches = unionEntry?.oneOf as JsonObject[];
+
+    expect(branches).toHaveLength(4);
+    for (const branch of branches) {
+      expect(branch.additionalProperties).toBe(false);
+    }
+
+    const branchFor = (kind: string): JsonObject =>
+      branches.find((branch) => ((branch.properties as JsonObject).kind as JsonObject).const === kind) as JsonObject;
+
+    const titleBranch = branchFor('title');
+    expect(titleBranch.required).toEqual(['kind', 'title', 'subtitle']);
+    expect(titleBranch.properties).not.toHaveProperty('text');
+    expect(titleBranch.properties).not.toHaveProperty('code');
+    expect(titleBranch.properties).not.toHaveProperty('zoomFrom');
+
+    const codeBranch = branchFor('code');
+    expect(codeBranch.required).toEqual(['kind', 'code', 'codeLanguage']);
+    expect(codeBranch.properties).not.toHaveProperty('title');
+
+    const kenburnsBranch = branchFor('image-kenburns');
+    expect(kenburnsBranch.required).toEqual(['kind', 'assetId', 'zoomFrom', 'zoomTo']);
+    expect(kenburnsBranch.properties).not.toHaveProperty('title');
+
+    expect(RemotionSceneSchema.shape.title.safeParse(undefined).success).toBe(true);
   });
 
   it('no declara $schema ni $id: un agente CLI ignora en silencio el schema que los trae', () => {
@@ -228,11 +325,11 @@ describe('storyboardProposalJsonSchema', () => {
     );
   });
 
-  it('valida las propuestas de ejemplo contra el JSON Schema derivado', () => {
+  it('valida las propuestas de ejemplo, en forma de salida cruda del modelo, contra el JSON Schema derivado', () => {
     const validate = new Ajv2020({ strict: false }).compile(jsonSchema);
 
-    expect(validate(minimalStoryboardProposal)).toBe(true);
-    expect(validate(fullStoryboardProposal)).toBe(true);
+    expect(validate(asRawModelProposal(minimalStoryboardProposal))).toBe(true);
+    expect(validate(asRawModelProposal(fullStoryboardProposal))).toBe(true);
   });
 
   it('rechaza contra el JSON Schema derivado una propuesta a la que le falta un campo', () => {
@@ -241,6 +338,89 @@ describe('storyboardProposalJsonSchema', () => {
 
     expect(scenes.length).toBe(1);
     expect(validate(withoutScenes)).toBe(false);
+  });
+});
+
+describe('normalizeStoryboardProposalInput', () => {
+  it('quita remotionScene cuando vale null, para volver al contrato guardado (opcional, no nullable)', () => {
+    const raw = asRawModelProposal(minimalStoryboardProposal);
+    const normalized = normalizeStoryboardProposalInput(raw) as { scenes: Record<string, unknown>[] };
+
+    expect(normalized.scenes[0]).not.toHaveProperty('remotionScene');
+    expect(StoryboardProposalSchema.safeParse(normalized).success).toBe(true);
+  });
+
+  it('conserva un remotionScene real, no solo lo quita porque está presente', () => {
+    const raw = asRawModelProposal(fullStoryboardProposal);
+    const normalized = normalizeStoryboardProposalInput(raw) as { scenes: Record<string, unknown>[] };
+
+    expect(normalized.scenes[1]?.remotionScene).toEqual({ kind: 'code', code: 'pnpm install\nnpm install', codeLanguage: 'bash' });
+    expect(StoryboardProposalSchema.safeParse(normalized).success).toBe(true);
+  });
+
+  it('un remotionScene null junto a visualSource=remotion-scene sigue siendo una propuesta inválida, no la esconde', () => {
+    const rawScene = {
+      ...minimalStoryboardProposal.scenes[0],
+      visualSource: 'remotion-scene',
+      remotionScene: null,
+    };
+    const raw = { ...minimalStoryboardProposal, scenes: [rawScene] };
+    const normalized = normalizeStoryboardProposalInput(raw);
+
+    const result = StoryboardProposalSchema.safeParse(normalized);
+    expect(result.success).toBe(false);
+  });
+
+  it('no toca una entrada que no tiene forma de propuesta de storyboard', () => {
+    expect(normalizeStoryboardProposalInput('not an object')).toBe('not an object');
+    expect(normalizeStoryboardProposalInput(null)).toBe(null);
+    expect(normalizeStoryboardProposalInput({ foo: 'bar' })).toEqual({ foo: 'bar' });
+  });
+
+  it('quita, dentro de remotionScene, los campos que el modelo mandó en null porque no aplican al kind elegido', () => {
+    const rawScene = {
+      ...minimalStoryboardProposal.scenes[0],
+      visualSource: 'remotion-scene',
+      remotionScene: {
+        kind: 'title',
+        title: 'Hola',
+        subtitle: null,
+        text: null,
+        code: null,
+        codeLanguage: null,
+        assetId: null,
+        zoomFrom: null,
+        zoomTo: null,
+      },
+    };
+    const raw = { ...minimalStoryboardProposal, scenes: [rawScene] };
+    const normalized = normalizeStoryboardProposalInput(raw) as { scenes: Record<string, unknown>[] };
+
+    expect(normalized.scenes[0]?.remotionScene).toEqual({ kind: 'title', title: 'Hola' });
+    expect(StoryboardProposalSchema.safeParse(normalized).success).toBe(true);
+  });
+
+  it('un campo null que sí hace falta para el kind elegido sigue siendo una propuesta inválida', () => {
+    const rawScene = {
+      ...minimalStoryboardProposal.scenes[0],
+      visualSource: 'remotion-scene',
+      remotionScene: {
+        kind: 'title',
+        title: null,
+        subtitle: null,
+        text: null,
+        code: null,
+        codeLanguage: null,
+        assetId: null,
+        zoomFrom: null,
+        zoomTo: null,
+      },
+    };
+    const raw = { ...minimalStoryboardProposal, scenes: [rawScene] };
+    const normalized = normalizeStoryboardProposalInput(raw);
+
+    const result = StoryboardProposalSchema.safeParse(normalized);
+    expect(result.success).toBe(false);
   });
 });
 

@@ -162,6 +162,7 @@ export {
   StoryboardSceneSchema,
   StoryboardSourceSchema,
   VisualSourceSchema,
+  normalizeStoryboardProposalInput,
   storyboardProposalJsonSchema,
   toStoryboardDocument,
 } from './schemas/storyboard.schema';

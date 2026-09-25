@@ -25,11 +25,15 @@
       "status": "done",
       "files": [
         "apps/render-api/src/ai/openrouter-ai-agent.ts",
-        "apps/render-api/src/ai/openrouter-ai-agent.spec.ts"
+        "apps/render-api/src/ai/openrouter-ai-agent.spec.ts",
+        "libs/timeline-core/src/schemas/storyboard.schema.ts",
+        "libs/timeline-core/src/schemas/storyboard.schema.spec.ts",
+        "libs/timeline-core/src/schemas/schemas.spec.ts",
+        "libs/timeline-core/src/index.ts"
       ],
       "usage": {
-        "tokens_in": 45000,
-        "tokens_out": 6000,
+        "tokens_in": 85000,
+        "tokens_out": 12000,
         "provider_model": "claude/sonnet",
         "effort": "medium",
         "agent": "implementor-back",
@@ -61,11 +65,16 @@
         "apps/web/src/api/storyboard-capability.ts",
         "apps/web/src/api/storyboard-capability.spec.ts",
         "apps/web/src/i18n/messages-en.ts",
-        "apps/web/src/i18n/messages-es.ts"
+        "apps/web/src/i18n/messages-es.ts",
+        "apps/render-api/src/jobs/run-storyboard-pipeline.ts",
+        "apps/render-api/src/jobs/run-storyboard-pipeline.spec.ts",
+        "apps/render-api/src/jobs/render-job.ts",
+        "apps/render-api/src/storyboard/build-storyboard-prompt.ts",
+        "apps/render-api/src/storyboard/build-storyboard-prompt.spec.ts"
       ],
       "usage": {
-        "tokens_in": 55000,
-        "tokens_out": 7000,
+        "tokens_in": 105000,
+        "tokens_out": 14000,
         "provider_model": "claude/sonnet",
         "effort": "medium",
         "agent": "implementor-back",
@@ -91,8 +100,8 @@
         "sdd/specs/spec-e-burgos-018-producer-free-tier/cycles/cycle-02/artifacts/storyboard-openrouter-smoke.mjs"
       ],
       "usage": {
-        "tokens_in": 55000,
-        "tokens_out": 6000,
+        "tokens_in": 95000,
+        "tokens_out": 11000,
         "provider_model": "claude/sonnet",
         "effort": "medium",
         "agent": "implementor-back",

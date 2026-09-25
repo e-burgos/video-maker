@@ -1,7 +1,11 @@
 import { describe, expect, it } from 'vitest';
 
 import { buildStoryboardDocument } from '../__fixtures__/storyboard-fixtures';
-import { buildStoryboardSystemPrompt, buildStoryboardUserPrompt } from './build-storyboard-prompt';
+import {
+  buildStoryboardRepairUserPrompt,
+  buildStoryboardSystemPrompt,
+  buildStoryboardUserPrompt,
+} from './build-storyboard-prompt';
 import { EMPTY_STORYBOARD_INVENTORY } from './collect-storyboard-inventory';
 import type { StoryboardInventory } from './collect-storyboard-inventory';
 
@@ -107,5 +111,25 @@ describe('buildStoryboardUserPrompt', () => {
     expect(withPrevious).toContain('# Previous storyboard');
     expect(withPrevious).toContain('Woman with short black hair and red framed glasses.');
     expect(without).not.toContain('# Previous storyboard');
+  });
+});
+
+describe('buildStoryboardRepairUserPrompt', () => {
+  it('conserva el prompt original y agrega cada issue con su path y mensaje', () => {
+    const original = buildStoryboardUserPrompt({
+      brief: 'Un video corto sobre las trampas de un monorepo.',
+      scriptText: null,
+      inventory: EMPTY_STORYBOARD_INVENTORY,
+    });
+
+    const repaired = buildStoryboardRepairUserPrompt(original, [
+      { path: 'scenes.0.remotionScene', message: 'Una escena visualSource=remotion-scene requiere remotionScene.' },
+      { path: 'scenes.1.assetId', message: 'Una escena visualSource=asset requiere assetId.' },
+    ]);
+
+    expect(repaired).toContain(original);
+    expect(repaired).toContain('# Your previous answer was rejected');
+    expect(repaired).toContain('- scenes.0.remotionScene: Una escena visualSource=remotion-scene requiere remotionScene.');
+    expect(repaired).toContain('- scenes.1.assetId: Una escena visualSource=asset requiere assetId.');
   });
 });

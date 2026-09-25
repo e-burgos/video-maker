@@ -125,6 +125,7 @@ export interface StoryboardJobReport {
   readonly language: string;
   readonly sceneCount: number;
   readonly usage: StoryboardJobUsage;
+  readonly repaired: boolean;
 }
 
 export interface MontageScriptAlignmentReport {

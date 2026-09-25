@@ -143,16 +143,48 @@ describe('runStoryboardPipeline', () => {
     expect(fakeAgent.requests[0]?.userPrompt).toContain('Red framed glasses.');
   });
 
-  it('reporta AI_AGENT_INVALID_OUTPUT con la etapa propose cuando la propuesta no valida', async () => {
-    const { deps, observer } = harness({ title: 'sin escenas' });
+  it('primer intento válido: llama al agente una sola vez, sin reparación', async () => {
+    const { deps, observer, requests } = harness(buildStoryboardProposal());
+
+    const report = await runStoryboardPipeline(REQUEST, deps, observer);
+
+    expect(requests).toHaveLength(1);
+    expect(report.sceneCount).toBe(3);
+    expect(report.usage).toEqual({
+      tokensIn: FAKE_AI_AGENT_USAGE.tokensIn,
+      tokensOut: FAKE_AI_AGENT_USAGE.tokensOut,
+      costUsd: FAKE_AI_AGENT_USAGE.costUsd,
+      model: FAKE_AI_AGENT_USAGE.model,
+    });
+  });
+
+  it('repara un primer intento inválido con una segunda llamada, y suma el usage de ambas', async () => {
+    const answers = [{ title: 'sin escenas' }, buildStoryboardProposal()];
+    const { deps, observer, requests } = harness((_request: unknown, index: number) => answers[index]);
+
+    const report = await runStoryboardPipeline(REQUEST, deps, observer);
+
+    expect(requests).toHaveLength(2);
+    expect(report.sceneCount).toBe(3);
+    expect(report.usage.tokensIn).toBe(FAKE_AI_AGENT_USAGE.tokensIn * 2);
+    expect(report.usage.tokensOut).toBe(FAKE_AI_AGENT_USAGE.tokensOut * 2);
+    expect(report.usage.costUsd).toBeCloseTo(FAKE_AI_AGENT_USAGE.costUsd * 2, 10);
+    expect(requests[1]?.userPrompt).toContain('# Your previous answer was rejected');
+    expect(requests[1]?.userPrompt).toContain('scenes');
+    expect(requests[1]?.systemPrompt).toBe(requests[0]?.systemPrompt);
+  });
+
+  it('reporta AI_AGENT_INVALID_OUTPUT con la etapa propose cuando la propuesta no valida ni tras la reparación', async () => {
+    const { deps, observer, requests } = harness({ title: 'sin escenas' });
 
     try {
       await runStoryboardPipeline(REQUEST, deps, observer);
-      expect.unreachable('una propuesta inválida debe fallar');
+      expect.unreachable('una propuesta inválida en ambos intentos debe fallar');
     } catch (error) {
       expect(isRenderApiError(error) && error.code).toBe('AI_AGENT_INVALID_OUTPUT');
       expect(isRenderApiError(error) && error.stage).toBe('propose');
     }
+    expect(requests).toHaveLength(2);
   });
 
   it('traduce a INTERNAL_ERROR con la etapa propose un fallo no tipado del agente', async () => {

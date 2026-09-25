@@ -18,7 +18,7 @@ const BUDGET_CAP_USD = 0.1;
 const JOB_POLL_TIMEOUT_MS = 120_000;
 const JOB_POLL_INTERVAL_MS = 2000;
 const SERVER_READY_TIMEOUT_MS = 20_000;
-const MAX_STORYBOARD_ATTEMPTS = 5;
+const SUCCESS_RUNS = 3;
 
 const KEYCHAIN_SERVICE_ENV_VAR = 'RENDER_API_KEYCHAIN_SERVICE';
 const REAL_KEYCHAIN_SERVICE = 'Video Maker';
@@ -38,9 +38,7 @@ const TOOLCHAIN_ENV_NAMES = [
 
 const BRIEF_TEXT =
   'Un anuncio corto de 3 escenas para una app de analítica de campañas de display ads: el gancho, ' +
-  'una demo del dashboard con las métricas clave, y un llamado a la acción para probar la app gratis. ' +
-  'IMPORTANTE: las tres escenas deben usar visualSource "upload" (metraje grabado o generado ' +
-  'externamente); ninguna escena usa remotion-scene ni asset.';
+  'una demo del dashboard con las métricas clave, y un llamado a la acción para probar la app gratis.';
 
 function log(scope, message) {
   process.stdout.write(`[${scope}] ${message}\n`);
@@ -235,9 +233,34 @@ async function pollJobUntilTerminal(port, jobId, timeoutMs, intervalMs) {
   return job;
 }
 
-async function runSuccessScenario({ toolchainEnv, realKey, timelineCore }) {
-  const keychainService = `Video Maker Smoke ${process.pid}-ok`;
-  const mediaRoot = await mkdtemp(join(tmpdir(), 'vm-storyboard-smoke-ok-'));
+async function runStoryboardJobOnce(port) {
+  const created = await postJson(port, `/projects/${SOURCE_PROJECT_SLUG}/jobs`, {
+    kind: 'storyboard',
+    brief: BRIEF_TEXT,
+  });
+  if (created.status !== 202) {
+    throw new Error(`POST storyboard job failed: ${created.status} ${JSON.stringify(created.body)}`);
+  }
+
+  const job = await pollJobUntilTerminal(port, created.body.id, JOB_POLL_TIMEOUT_MS, JOB_POLL_INTERVAL_MS);
+  if (job === null) {
+    throw new Error('storyboard job did not reach a terminal state before the poll timeout');
+  }
+  assertNoKeyLeak(job, 'the job record returned by the API');
+  return job;
+}
+
+function visualSourceMix(scenes) {
+  const mix = {};
+  for (const scene of scenes) {
+    mix[scene.visualSource] = (mix[scene.visualSource] ?? 0) + 1;
+  }
+  return mix;
+}
+
+async function runSuccessRun(runIndex, { toolchainEnv, realKey, timelineCore }) {
+  const keychainService = `Video Maker Smoke ${process.pid}-ok-${runIndex}`;
+  const mediaRoot = await mkdtemp(join(tmpdir(), `vm-storyboard-smoke-ok-${runIndex}-`));
   let child;
   try {
     await cloneProject(mediaRoot);
@@ -260,30 +283,10 @@ async function runSuccessScenario({ toolchainEnv, realKey, timelineCore }) {
       throw new Error(`PUT /settings/producer/openrouter-key failed: ${keyResult.status}`);
     }
 
-    let job = null;
-    let attempts = 0;
-    while (attempts < MAX_STORYBOARD_ATTEMPTS) {
-      attempts += 1;
-      const created = await postJson(SUCCESS_PORT, `/projects/${SOURCE_PROJECT_SLUG}/jobs`, {
-        kind: 'storyboard',
-        brief: BRIEF_TEXT,
-      });
-      if (created.status !== 202) {
-        throw new Error(`POST storyboard job failed: ${created.status} ${JSON.stringify(created.body)}`);
-      }
+    const job = await runStoryboardJobOnce(SUCCESS_PORT);
 
-      job = await pollJobUntilTerminal(SUCCESS_PORT, created.body.id, JOB_POLL_TIMEOUT_MS, JOB_POLL_INTERVAL_MS);
-      if (job === null) {
-        throw new Error('storyboard job did not reach a terminal state before the poll timeout');
-      }
-      assertNoKeyLeak(job, 'the job record returned by the API');
-      if (job.state === 'succeeded') {
-        break;
-      }
-      log('smoke', `attempt ${attempts}/${MAX_STORYBOARD_ATTEMPTS} ended as ${job.state} (${job.error?.code}); retrying if attempts remain`);
-    }
-    if (job === null || job.state !== 'succeeded') {
-      throw new Error(`storyboard job never succeeded after ${attempts} attempts: ${JSON.stringify(job?.error)}`);
+    if (job.state !== 'succeeded') {
+      return { runIndex, ok: false, jobState: job.state, errorCode: job.error?.code ?? null, costUsd: 0 };
     }
 
     const storyboardAbsPath = join(mediaRoot, SOURCE_PROJECT_SLUG, job.report.storyboardPath);
@@ -293,8 +296,8 @@ async function runSuccessScenario({ toolchainEnv, realKey, timelineCore }) {
       throw new Error(`saved storyboard does not validate against StoryboardDocumentSchema: ${parsedStoryboard.error.message}`);
     }
 
-    const sceneCount = parsedStoryboard.data.scenes.length;
-    if (sceneCount <= 0) {
+    const scenes = parsedStoryboard.data.scenes;
+    if (scenes.length <= 0) {
       throw new Error('saved storyboard has zero scenes');
     }
     if (job.report.usage.model !== MODEL_ID) {
@@ -305,10 +308,12 @@ async function runSuccessScenario({ toolchainEnv, realKey, timelineCore }) {
     }
 
     return {
+      runIndex,
       ok: true,
-      attempts,
       jobState: job.state,
-      sceneCount,
+      repaired: job.report.repaired,
+      sceneCount: scenes.length,
+      visualSourceMix: visualSourceMix(scenes),
       model: job.report.usage.model,
       tokensIn: job.report.usage.tokensIn,
       tokensOut: job.report.usage.tokensOut,
@@ -374,25 +379,42 @@ async function runFailureScenario({ toolchainEnv }) {
   }
 }
 
-function renderReport({ success, failure, totalCostUsd, keyNeverLeaked }) {
+function renderSuccessRunSection(run) {
+  if (!run.ok) {
+    return [`### Run ${run.runIndex}: FAILED`, '', `- Job state: ${run.jobState}`, `- Error code: ${run.errorCode}`, ''];
+  }
+  const mix = Object.entries(run.visualSourceMix)
+    .map(([source, count]) => `${source}=${count}`)
+    .join(', ');
+  return [
+    `### Run ${run.runIndex}: succeeded`,
+    '',
+    `- Needed the repair retry: ${run.repaired ? 'yes' : 'no'}`,
+    `- Scene count: ${run.sceneCount}`,
+    `- visualSource mix: ${mix}`,
+    `- usage.model: ${run.model}`,
+    `- usage.tokensIn / tokensOut: ${run.tokensIn} / ${run.tokensOut}`,
+    `- usage.costUsd: ${run.costUsd}`,
+    '',
+  ];
+}
+
+function renderReport({ successRuns, failure, totalCostUsd, keyNeverLeaked }) {
+  const successCount = successRuns.filter((run) => run.ok).length;
+  const repairedCount = successRuns.filter((run) => run.ok && run.repaired).length;
+
   const lines = [
-    '# Storyboard on OpenRouter — real smoke',
+    '# Storyboard on OpenRouter — real smoke (ordinary brief, no visualSource steering)',
     '',
     `Date: ${new Date().toISOString()}`,
     `Model: ${MODEL_ID}`,
+    `Brief: "${BRIEF_TEXT}"`,
     `Budget cap: US$${BUDGET_CAP_USD.toFixed(2)} · observed cost: US$${totalCostUsd.toFixed(6)}`,
     `Key leak check: ${keyNeverLeaked ? 'PASSED (the OpenRouter key never appears in this report or in job output)' : 'FAILED'}`,
     '',
-    '## Success path (real key, engine=openrouter)',
+    `## Success path — ${successCount}/${successRuns.length} runs succeeded, ${repairedCount} of those needed the repair retry`,
     '',
-    `- Attempts until success: ${success.attempts} (a schema-noncompliant generation is a real, transient AI_AGENT_INVALID_OUTPUT — the storyboard panel already tells the user to propose again)`,
-    `- Job state: ${success.jobState}`,
-    `- Storyboard path: ${success.storyboardPath}`,
-    `- Scene count: ${success.sceneCount}`,
-    `- usage.model: ${success.model}`,
-    `- usage.tokensIn / tokensOut: ${success.tokensIn} / ${success.tokensOut}`,
-    `- usage.costUsd: ${success.costUsd}`,
-    '',
+    ...successRuns.flatMap(renderSuccessRunSection),
     '## Failure path (well-formed but wrong key, stored unverified)',
     '',
     `- Job state: ${failure.jobState}`,
@@ -408,23 +430,35 @@ async function main() {
   const realKey = readOpenRouterKeyFromKeychain();
   const timelineCore = loadTimelineCoreModule();
 
-  log('smoke', 'running success scenario (real key, deepseek/deepseek-v4.1-flash)...');
-  const success = await runSuccessScenario({ toolchainEnv, realKey, timelineCore });
-  log('smoke', `success scenario: job ${success.jobState}, ${success.sceneCount} scenes, cost US$${success.costUsd}`);
+  const successRuns = [];
+  for (let runIndex = 1; runIndex <= SUCCESS_RUNS; runIndex += 1) {
+    log('smoke', `running success run ${runIndex}/${SUCCESS_RUNS} (real key, ordinary brief, ${MODEL_ID})...`);
+    const run = await runSuccessRun(runIndex, { toolchainEnv, realKey, timelineCore });
+    successRuns.push(run);
+    if (run.ok) {
+      log('smoke', `run ${runIndex}: succeeded, repaired=${run.repaired}, ${run.sceneCount} scenes, cost US$${run.costUsd}`);
+    } else {
+      log('smoke', `run ${runIndex}: FAILED as ${run.jobState} (${run.errorCode})`);
+    }
+  }
 
   log('smoke', 'running failure scenario (wrong key, no spending expected)...');
   const failure = await runFailureScenario({ toolchainEnv });
   log('smoke', `failure scenario: job ${failure.jobState}, code ${failure.errorCode}`);
 
-  const totalCostUsd = (success.costUsd ?? 0);
+  const totalCostUsd = successRuns.reduce((sum, run) => sum + (run.costUsd ?? 0), 0);
   if (totalCostUsd > BUDGET_CAP_USD) {
     throw new Error(`budget exceeded: observed US$${totalCostUsd} > cap US$${BUDGET_CAP_USD}`);
   }
 
-  const report = renderReport({ success, failure, totalCostUsd, keyNeverLeaked: true });
+  const report = renderReport({ successRuns, failure, totalCostUsd, keyNeverLeaked: true });
   assertNoKeyLeak(report, 'the generated report');
   await writeFile(REPORT_PATH, report, 'utf8');
   log('smoke', `report written to ${REPORT_PATH}`);
+
+  if (successRuns.some((run) => !run.ok)) {
+    log('smoke', 'WARNING: at least one success-path run failed even after the repair retry — see the report for details');
+  }
 }
 
 main().catch((error) => {

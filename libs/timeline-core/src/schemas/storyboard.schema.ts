@@ -38,6 +38,37 @@ export const RemotionSceneSchema = z.strictObject({
     .describe('Required for kind=image-kenburns. Ending zoom factor, 1 means no zoom.'),
 });
 
+const RemotionSceneTitleForModelSchema = z.strictObject({
+  kind: z.literal('title'),
+  title: z.string().min(1).describe('Headline shown on screen.'),
+  subtitle: z.string().min(1).nullable().describe('An optional second line; null when unused.'),
+});
+
+const RemotionSceneTextForModelSchema = z.strictObject({
+  kind: z.literal('text'),
+  text: z.string().min(1).describe('Body copy shown on screen.'),
+});
+
+const RemotionSceneCodeForModelSchema = z.strictObject({
+  kind: z.literal('code'),
+  code: z.string().min(1).describe('Source snippet shown on screen.'),
+  codeLanguage: z.string().min(1).describe('Language name used for highlighting, lowercase.'),
+});
+
+const RemotionSceneImageKenburnsForModelSchema = z.strictObject({
+  kind: z.literal('image-kenburns'),
+  assetId: IdSchema.nullable().describe('An optional catalog asset id; null when unused.'),
+  zoomFrom: z.number().min(1).max(3).describe('Starting zoom factor, 1 means no zoom.'),
+  zoomTo: z.number().min(1).max(3).describe('Ending zoom factor, 1 means no zoom.'),
+});
+
+const RemotionSceneForModelSchema = z.discriminatedUnion('kind', [
+  RemotionSceneTitleForModelSchema,
+  RemotionSceneTextForModelSchema,
+  RemotionSceneCodeForModelSchema,
+  RemotionSceneImageKenburnsForModelSchema,
+]);
+
 const CHARACTER_FIELDS = {
   name: z.string().min(1).describe('Short name used to refer to the character across scenes.'),
   visualDescription: z
@@ -78,6 +109,18 @@ const SCENE_FIELDS = {
 
 export const StoryboardSceneProposalSchema = z.strictObject(SCENE_FIELDS);
 
+const SCENE_FIELDS_FOR_MODEL_SCHEMA = {
+  ...SCENE_FIELDS,
+  assetId: IdSchema.nullable().describe(
+    'The id of the catalog asset to reuse when visualSource is asset; null for every other visualSource. Always include this field, never omit it.',
+  ),
+  remotionScene: RemotionSceneForModelSchema.nullable().describe(
+    'A RemotionScene object when visualSource is remotion-scene; null for every other visualSource. Always include this field, never omit it. Its shape depends on kind: only the fields that kind allows, never any other field.',
+  ),
+};
+
+const StoryboardSceneProposalForModelSchema = z.strictObject(SCENE_FIELDS_FOR_MODEL_SCHEMA);
+
 export const StoryboardSceneSchema = z.strictObject({
   id: IdSchema,
   index: z.number().int().min(1),
@@ -99,6 +142,12 @@ const StoryboardProposalObjectSchema = z.strictObject({
   ...STORYBOARD_FIELDS,
   characters: z.array(StoryboardCharacterProposalSchema).describe('Every recurring character shown in the video.'),
   scenes: z.array(StoryboardSceneProposalSchema).min(1).describe('Scenes in playback order.'),
+});
+
+const StoryboardProposalForModelSchema = z.strictObject({
+  ...STORYBOARD_FIELDS,
+  characters: z.array(StoryboardCharacterProposalSchema).describe('Every recurring character shown in the video.'),
+  scenes: z.array(StoryboardSceneProposalForModelSchema).min(1).describe('Scenes in playback order.'),
 });
 
 function addIssue(ctx: z.RefinementCtx, path: (string | number)[], message: string): void {
@@ -212,7 +261,7 @@ export type StoryboardProposal = z.infer<typeof StoryboardProposalSchema>;
 const JSON_SCHEMA_IDENTITY_KEYS = ['$schema', '$id'] as const;
 
 export function storyboardProposalJsonSchema(): JsonObject {
-  const schema = z.toJSONSchema(StoryboardProposalObjectSchema, {
+  const schema = z.toJSONSchema(StoryboardProposalForModelSchema, {
     target: 'draft-2020-12',
     io: 'input',
     unrepresentable: 'throw',
@@ -223,6 +272,32 @@ export function storyboardProposalJsonSchema(): JsonObject {
       ([key]) => !(JSON_SCHEMA_IDENTITY_KEYS as readonly string[]).includes(key),
     ),
   ) as JsonObject;
+}
+
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === 'object' && value !== null && !Array.isArray(value);
+}
+
+function withoutNullValues(record: Record<string, unknown>): Record<string, unknown> {
+  return Object.fromEntries(Object.entries(record).filter(([, value]) => value !== null));
+}
+
+function normalizeScene(scene: unknown): unknown {
+  if (!isRecord(scene)) {
+    return scene;
+  }
+  const withoutNullScene = withoutNullValues(scene);
+  if (!isRecord(withoutNullScene.remotionScene)) {
+    return withoutNullScene;
+  }
+  return { ...withoutNullScene, remotionScene: withoutNullValues(withoutNullScene.remotionScene) };
+}
+
+export function normalizeStoryboardProposalInput(raw: unknown): unknown {
+  if (!isRecord(raw) || !Array.isArray(raw.scenes)) {
+    return raw;
+  }
+  return { ...raw, scenes: raw.scenes.map(normalizeScene) };
 }
 
 export interface StoryboardIdentity {

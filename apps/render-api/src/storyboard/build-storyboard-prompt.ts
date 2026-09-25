@@ -8,6 +8,11 @@ export interface StoryboardPromptInput {
   readonly inventory: StoryboardInventory;
 }
 
+export interface StoryboardProposalIssue {
+  readonly path: string;
+  readonly message: string;
+}
+
 const SYSTEM_PROMPT_LINES = [
   'You are the storyboard writer of a local video studio for social media.',
   'You turn an idea, or an already written script, into an ordered list of scenes.',
@@ -122,5 +127,19 @@ export function buildStoryboardUserPrompt(input: StoryboardPromptInput): string 
     ...inventorySection(input.inventory),
     ...transcriptSection(input.inventory),
     ...previousStoryboardSection(input.inventory.previousStoryboard),
+  ].join('\n');
+}
+
+export function buildStoryboardRepairUserPrompt(
+  originalUserPrompt: string,
+  issues: readonly StoryboardProposalIssue[],
+): string {
+  return [
+    originalUserPrompt,
+    '',
+    '# Your previous answer was rejected',
+    'It did not match the required JSON Schema. Fix every issue below and answer again with the complete,',
+    'corrected structured payload — do not describe the fix, just send the corrected payload.',
+    ...issues.map((issue) => `- ${issue.path}: ${issue.message}`),
   ].join('\n');
 }

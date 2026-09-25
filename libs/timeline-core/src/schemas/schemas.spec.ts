@@ -105,6 +105,7 @@ const PUBLIC_VALUE_EXPORTS = [
   'StoryboardSceneSchema',
   'StoryboardSourceSchema',
   'VisualSourceSchema',
+  'normalizeStoryboardProposalInput',
   'storyboardProposalJsonSchema',
   'toStoryboardDocument',
   'VOICE_MANIFEST_SCHEMA_VERSION',
