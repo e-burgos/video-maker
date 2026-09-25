@@ -1,0 +1,126 @@
+{
+  "$schema": "../../../../schemas/cycle-tasks.schema.json",
+  "spec": "spec-e-burgos-018-producer-free-tier",
+  "cycle": 3,
+  "module": "producer-free-tier",
+  "apps": [
+    "apps/render-api",
+    "libs/producer-tools"
+  ],
+  "flow": "lite",
+  "user_stories_generated": true,
+  "prerequisites": {
+    "tasks_generated": true
+  },
+  "tasks": [
+    {
+      "id": "TASK-001",
+      "title": "Free media search in render-api over Wikimedia Commons and the NASA Image and Video Library: video and images with a commercial-use license, NASA limited to NASA-credited items, results cached like music search",
+      "user_stories": [
+        "US-018-301"
+      ],
+      "estimation_hours": 4,
+      "story_points": 3,
+      "depends_on": [],
+      "status": "pending",
+      "files": [
+        "apps/render-api/src/media-search/commons-media-search.ts",
+        "apps/render-api/src/media-search/nasa-media-search.ts",
+        "apps/render-api/src/media-search/free-media-search.ts",
+        "apps/render-api/src/http/handlers/free-media-handler.ts",
+        "apps/render-api/src/http/routes.ts"
+      ]
+    },
+    {
+      "id": "TASK-002",
+      "title": "Import a searched result into raw/broll or raw/images with size and host limits and append its credit to work/credits.json",
+      "user_stories": [
+        "US-018-301"
+      ],
+      "estimation_hours": 3,
+      "story_points": 2,
+      "depends_on": [
+        "TASK-001"
+      ],
+      "status": "pending",
+      "files": [
+        "apps/render-api/src/media-search/import-free-media.ts",
+        "apps/render-api/src/music/project-credits.ts"
+      ]
+    },
+    {
+      "id": "TASK-003",
+      "title": "Image preview endpoint that downsizes project photos to JPEG for the model",
+      "user_stories": [
+        "US-018-302"
+      ],
+      "estimation_hours": 2,
+      "story_points": 2,
+      "depends_on": [],
+      "status": "pending",
+      "files": [
+        "apps/render-api/src/http/handlers/image-preview-handler.ts"
+      ]
+    },
+    {
+      "id": "TASK-004",
+      "title": "MCP and OpenRouter tools search_free_media, import_media and view_images (view_images without outputSchema), client methods, prompt guidance for the advertising recipe",
+      "user_stories": [
+        "US-018-301",
+        "US-018-302"
+      ],
+      "estimation_hours": 3,
+      "story_points": 3,
+      "depends_on": [
+        "TASK-002",
+        "TASK-003"
+      ],
+      "status": "pending",
+      "files": [
+        "libs/producer-tools/src/contract/tool-names.ts",
+        "libs/producer-tools/src/contract/tool-schemas.ts",
+        "libs/producer-tools/src/handlers/studio-tool-handlers.ts",
+        "libs/producer-tools/src/mcp/studio-mcp-server.ts",
+        "libs/producer-tools/src/runtime/studio-ai-sdk-tools.ts",
+        "libs/producer-tools/src/client/http-render-api-client.ts",
+        "libs/producer-tools/src/prompt/build-producer-prompt.ts"
+      ]
+    },
+    {
+      "id": "TASK-005",
+      "title": "Real verification: search and import from both sources through the running render-api, credits written, and view_images reaching the model as an image in the Claude CLI stream-json tool_result and in the OpenRouter runtime",
+      "user_stories": [
+        "US-018-301",
+        "US-018-302"
+      ],
+      "estimation_hours": 2,
+      "story_points": 2,
+      "depends_on": [
+        "TASK-004"
+      ],
+      "status": "pending",
+      "files": [
+        "sdd/specs/spec-e-burgos-018-producer-free-tier/cycles/cycle-03/artifacts/free-media-smoke.mjs",
+        "sdd/specs/spec-e-burgos-018-producer-free-tier/cycles/cycle-03/artifacts/free-media-smoke.md"
+      ]
+    },
+    {
+      "id": "TASK-006",
+      "title": "Close the cycle: lint, test and build, context fragments and cycle record",
+      "user_stories": [
+        "US-018-301",
+        "US-018-302"
+      ],
+      "estimation_hours": 1,
+      "story_points": 1,
+      "depends_on": [
+        "TASK-005"
+      ],
+      "status": "pending",
+      "files": [
+        "sdd/context/apps/render-api/updates/2026-09-25-spec-e-burgos-018-producer-free-tier-cycle-03.md",
+        "sdd/context/libs/producer-tools/updates/2026-09-25-spec-e-burgos-018-producer-free-tier-cycle-03.md"
+      ]
+    }
+  ]
+}
