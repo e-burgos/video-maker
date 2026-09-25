@@ -2,35 +2,33 @@
 
 > Entry point para agentes que trabajen sobre `apps/web`.
 > Leer junto con `constitution.md` de este directorio **+ `updates/*.md` en orden de nombre**.
-> Última actualización: FIX-e-burgos-015-005 | Fecha: 2026-09-20
-> Consolidado por un chore de higiene SDD (fundió los fragmentos de `FIX-e-burgos-005-001`,
-> `FIX-e-burgos-006-001`, `FIX-e-burgos-009-003`, `spec-e-burgos-016-studio-usability cycle-02`,
-> `FIX-e-burgos-006-002` y `FIX-e-burgos-015-005`).
+> Última actualización: consolidación spec-017 cycle-02/03/04/05 + spec-018 cycle-02 | Fecha: 2026-09-25
 
 - **Tipo:** app React 19 (SPA local sobre `apps/render-api`)
-- **Estado:** **producto completo de punta a punta, en español e inglés.** El nav por proyecto es
-  `producer · library · storyboard · voice · preview` y el productor es el punto de partida de
-  cada proyecto. Cubre: chat persistido con el productor (turnos en vivo, cancelación, chips de
-  sugerencias y opciones numeradas, una fila de **recetas** con prompt completo precargado —hoy
-  **Tutorial**—, selector de modelo, estado vacío con el inventario real), biblioteca de assets por
-  rol con subida, **borrado con confirmación** (y manejo de `409 ASSET_IN_USE` con "Delete
-  anyway"), disparo del montaje y una sección **Generated** con lo que produjo el motor
-  (narración, guion, `out/*.mp4`), storyboard generativo editable escena por escena con hoja
-  numerada de prompts (o **modo guion** de sólo lectura si el proyecto se narró desde un script),
-  voz (síntesis por escena, duración real contra la estimada, regeneración de una escena,
-  sustitución por grabación propia, o el mismo **modo guion**), preview de la `Timeline` en el
-  `<Player>` de Remotion con edición del documento (trim y orden de escenas, captions con estilo
-  elegible, niveles de música con reescritura de la automation, preset de salida, capa de logo con
-  tamaño/opacidad/aviso de transparencia y **bumpers de inicio/fin**) y un único `PUT`, y jobs de
-  render con polling, cancelación y descarga del MP4. La voz se elige desde **tarjetas audibles**
-  (`VoicePicker`: etiqueta legible, idioma, calidad, descripción y demo de `EP-026` reproducida en
-  el navegador) y cada rol de subida llega con **qué le hace al video final**, el directorio
-  `raw/<rol>/` destino, la marca de obligatorio y la regla de matching de B-roll. Una ruta `/guide`
-  perezosa explica cada sección del studio, la tabla de presets de salida y tres flujos típicos, en
-  los dos idiomas. Consume `EP-001`..`EP-008`, `EP-011`..`EP-026` y `EP-028`. Suite (medida
-  2026-09-20): **102 archivos / 1005 tests**, 99,37 % stmts · 95,81 % branch · 99,47 % funcs ·
-  99,4 % lines, piso 80 %, `coverage.include` sin recortar.
-  Cero dependencias npm propias además de `@remotion/player`.
+- **Estado:** **producto completo de punta a punta, en español (default) e inglés.** La pantalla por
+  proyecto es un **workspace centrado en el chat** (`/projects/:slug`): conversación persistida con
+  el productor a la izquierda (turnos en vivo, cancelación, chips de sugerencias y opciones
+  numeradas, fila de **recetas** con prompt completo precargado —hoy **Tutorial**—, archivos que se
+  arrastran al chat o se adjuntan y llegan como tarjeta de propuesta de rol) y un panel lateral con
+  pestañas **Vista previa · Material · Entregas** que cambia solo al terminar un montaje o un
+  render. `/settings` configura el motor del productor (Claude Code u OpenRouter, key de sólo
+  escritura, catálogo con recomendados) y el chat muestra el costo de cada turno. Biblioteca,
+  storyboard, voz y preview siguen existiendo como **Edición avanzada**: biblioteca de assets por
+  rol con subida, **borrado con confirmación** (manejo de `409 ASSET_IN_USE` con "Delete anyway") y
+  sección **Generated** con lo que produjo el motor; storyboard generativo editable escena por
+  escena con hoja numerada de prompts (o **modo guion** de sólo lectura si el proyecto se narró
+  desde un script, ahora explicando también los códigos de falta de motor OpenRouter); voz (síntesis
+  por escena, duración real contra la estimada, regeneración de una escena, sustitución por
+  grabación propia, o el mismo **modo guion**); preview de la `Timeline` en el `<Player>` de
+  Remotion con edición del documento (trim y orden de escenas, captions, música, preset de salida,
+  logo con bumpers) y un único `PUT`. Los cuatro paneles de job soportan **reintento** (`EP-036`)
+  para un job `failed`/`canceled`, y uno `failed` con `JOB_INTERRUPTED` se etiqueta "Interrumpido".
+  El inicio (`/`) lista videos en tarjetas con miniatura y crea uno soltando un archivo; las
+  carpetas se listan vacías y se renombran inline. Una ruta `/guide` perezosa explica cada sección,
+  la tabla de presets de salida y tres flujos típicos, en los dos idiomas. Consume `EP-001`..`EP-008`,
+  `EP-011`..`EP-026`, `EP-028` y `EP-036`. Suite con cobertura piso 80 % (`coverage.include` sin
+  recortar; no remedida en esta consolidación). Cero dependencias npm propias además de
+  `@remotion/player`.
 - **Descopado a propósito:** la **edición del EDL (`EP-009`/`EP-010`)**, porque `buildTimeline` sólo
   se invoca desde `libs/auto-montage` y guardar un EDL editado escribiría `work/edl.json` sin efecto
   observable ni en el Player ni en un render. La edición de la Timeline cubre
@@ -41,7 +39,10 @@
 - **Specs que la gobiernan:** `spec-006-web-studio` (la creó) · `spec-007-web-montage` ·
   `spec-008-ai-storyboard` (c02) · `spec-009-voice-over` (c02) · `spec-015-studio-producer` (c02) ·
   `spec-016-studio-usability` (`cycle-01`: tarjetas de voz con preview y descripciones de rol en el
-  uploader; `cycle-02`: i18n `en`/`es` y sección de guía).
+  uploader; `cycle-02`: i18n `en`/`es` y sección de guía) · `spec-017-desktop-app` (`cycle-02`:
+  reintento de jobs interrumpidos; `cycle-03`: español default, carpetas, i18n de modelos;
+  `cycle-04`: `/settings` y motor OpenRouter; `cycle-05`: workspace centrado en el chat) ·
+  `spec-018-producer-free-tier` (`cycle-02`: storyboard explica los códigos de falta de OpenRouter).
 - **Backend único:** `apps/render-api` (ver `sdd/context/apps/render-api/` + `updates/`), por el
   proxy `/api` del dev-server. `sdd/api.json` es el contrato.
 - **Cómo correr y testear:** `pnpm nx test web` (jsdom + cobertura), `pnpm nx lint web`,
@@ -66,7 +67,8 @@
 - **`asset-media-kind.ts` / `content-type-for.ts` del servicio son un par sin test que los ate.**
   Si un ciclo toca una de las dos tablas, tocar la otra.
 - **Ningún panel de job cancela salvo el de render** (`EP-015` lo soporta para los cuatro `kind`):
-  montaje, storyboard y voz muestran el job hasta que termina. Ningún CA lo pide.
+  montaje, storyboard y voz muestran el job hasta que termina. Ningún CA lo pide. Distinto del
+  **reintento** (`EP-036`), que sí existe para los cuatro paneles.
 - **El listado de jobs no se refresca solo** cuando el job seguido cambia de estado: sólo un botón
   manual. **`RenderJobList` mezcla los cuatro `kind` sin columna `kind`**, aunque el summary ya la
   trae. **El montaje no refresca la biblioteca antes de navegar** (la fuente pasa de `raw-scan` a
@@ -94,11 +96,10 @@
   (`spec-010`) tiene que leerlo y no la `estimatedDurationMs` del storyboard — en la corrida real las
   cinco escenas duraron **menos** de lo estimado (0,35 s a 2,02 s).
 - **La conversación del productor no se puede borrar ni reiniciar desde la UI** (el servicio no
-  expone un `DELETE` de `work/producer/`), **un turno perdido por reinicio da
-  `PRODUCER_TURN_NOT_FOUND`** sin reenganche posible (registro in-memory), y **el productor no sube
-  archivos**: el material entra por la biblioteca o por el panel del logo.
-- **El costo en tokens no se muestra en ninguna pantalla**: el `usage` del reporte de storyboard
-  llega a la UI y no se dibuja, y el contrato del turno del productor directamente no lo expone.
+  expone un `DELETE` de `work/producer/`), y **un turno perdido por reinicio da
+  `PRODUCER_TURN_NOT_FOUND`** sin reenganche posible (registro in-memory).
+- **El costo del turno del productor se muestra en el chat** (`message.usage.costUsd`, formateado
+  por idioma); el `usage` del reporte de storyboard sigue sin dibujarse en ninguna pantalla.
 - **Los dos `404` de `/favicon.ico`** en consola no son un defecto: `index.html` no declara icono.
 - **`vite.config.ts` imprime un warning de deprecación de Vite** (`ESM syntax in a file loaded as
   CommonJS`) que comparten **todos** los proyectos del workspace: cambio transversal, no de esta app.
@@ -118,8 +119,11 @@
   prompt del productor en `apps/render-api` **y** la skill `video-producer`): si se olvida
   cualquiera de los dos últimos, el agente no sabe qué parámetros aplicar al oír el nombre de la
   receta.
-- **El chunk inicial quedó en 495,84 kB, a menos de 5 kB del aviso de "chunks larger than 500 kB"
-  de Vite**: la próxima pantalla o catálogo de copy que entre al chunk inicial (en vez de una ruta
-  o un `await import()` perezoso) probablemente lo dispare.
+- **El chunk inicial bajó a 294 kB reales con el workspace de chat** (`spec-017 cycle-05`), después
+  de haber subido hasta 533,9 kB (arriba del aviso de 500 kB de Vite) sobre la nav clásica en
+  `cycle-02`..`cycle-04`: la próxima pantalla o catálogo de copy que entre al chunk inicial (en vez
+  de una ruta o un `await import()` perezoso) probablemente lo vuelve a disparar.
 - **El switch de idioma no ofrece un tercer idioma listo para usar**: agregar uno implica sumar el
   módulo de catálogo, sumarlo a `LANGUAGES` y resolver cada clave que `tsc` señale como faltante.
+- **Quedan superficies de Edición avanzada en inglés o con 404 esperables** tras el rediseño del
+  workspace (`cycle-05`): el input de archivos del storyboard y otros documentos todavía no creados.

@@ -1,10 +1,6 @@
 # Constitución — apps/web
 
-> Versión 2.4 | Última actualización: FIX-e-burgos-015-005 | Fecha: 2026-09-20
-> Consolidada por un chore de higiene SDD (fundió los fragmentos de `FIX-e-burgos-005-001`,
-> `FIX-e-burgos-006-001`, `FIX-e-burgos-009-003`, `spec-e-burgos-016-studio-usability cycle-02`,
-> `FIX-e-burgos-006-002` y `FIX-e-burgos-015-005` sobre la 2.3, que ya traía `spec-016` cycle-01,
-> `spec-008` c02, `spec-009` c02, `spec-015` c02, `FIX-015-001` y `FIX-009-001`).
+> Versión 2.5 | Última actualización: consolidación spec-017 cycle-02/03/04/05 + spec-018 cycle-02 | Fecha: 2026-09-25
 > Las actualizaciones por ciclo/fix van como fragmentos aditivos en `updates/` —
 > este archivo base solo lo modifica la consolidación (ver `sdd/context/context_prompt.md` sección 6).
 
@@ -12,15 +8,21 @@
 
 - **Tipo:** app React 19 (SPA local, mono-usuario, sin auth ni despliegue)
 - **Rol en el sistema:** el Web Studio — la interfaz con la que el dev opera el motor desde el
-  navegador de su propia máquina. Cubre el producto entero: el **productor conversacional** como
-  punto de partida (con recetas de arranque tipo "Tutorial"), biblioteca de assets crudos (con
-  borrado y vista de lo que generó el motor), **generación del montaje**, **storyboard
+  navegador de su propia máquina. La pantalla principal de un proyecto es un **workspace centrado
+  en el chat** (`/projects/:slug`): la conversación con el productor a la izquierda (recetas de
+  arranque tipo "Tutorial", archivos que se arrastran al chat o se adjuntan y llegan como tarjeta
+  de propuesta de rol) con un panel lateral de pestañas **Vista previa · Material · Entregas** que
+  cambia solo al terminar un montaje o un render. Las pantallas previas siguen existiendo como
+  **"Edición avanzada"**: biblioteca de assets (con borrado y la sección Generated), **storyboard
   generativo** (con modo de sólo lectura cuando el proyecto se narró desde un guion), **voz**
-  (síntesis por escena, locución propia o modo guion), preview de la `Timeline` en el `<Player>`
-  de Remotion con la composición real, edición del documento persistido (trim y orden de clips,
-  captions con estilo elegible, música, preset de salida, logo con tamaño/opacidad y bumpers de
-  inicio/fin) y disparo, seguimiento y descarga de renders locales. **Toda la interfaz está en
-  español e inglés** (`src/i18n/`), con una ruta `/guide` que la explica en los dos idiomas.
+  (síntesis por escena, locución propia o modo guion), y el preview de la `Timeline` en el
+  `<Player>` de Remotion con edición del documento persistido (trim y orden de clips, captions con
+  estilo elegible, música, preset de salida, logo con tamaño/opacidad y bumpers de inicio/fin) y
+  disparo, seguimiento, **reintento** y descarga de renders locales. El inicio (`/`) lista videos
+  en tarjetas con miniatura y una zona para crear uno soltando un archivo; `/settings` (perezosa)
+  configura el motor del productor (Claude Code u OpenRouter) y su modelo. **Toda la interfaz está
+  en español (default) e inglés** (`src/i18n/`), con una ruta `/guide` que la explica en los dos
+  idiomas.
 - **No tiene lógica de motor ni toca el filesystem.** Todo lo que muestra y todo lo que escribe
   pasa por los endpoints de `apps/render-api` (`sdd/api.json` → `EP-001`..`EP-025`), su único
   backend. Si hace falta un cálculo, vive en una lib o en la API, nunca acá.
@@ -55,15 +57,21 @@ src/
                 parse-storyboard · storyboard-capability · storyboard-edit/,
                 parse-voice · voice-capability · parse-voice-script · voice-script-lines,
                 parse-producer · producer-capability · producer-markdown · producer-turn-poll-plan ·
-                producer-recipes · producer-recipe-prompts,
+                producer-recipes · producer-recipe-prompts · producer-model-i18n · producer-engine-i18n ·
+                producer-cost-format · parse-producer-settings,
+                storyboard-capability (`AGENT_FAILURE_CODES` incluye `OPENROUTER_KEY_MISSING` y
+                `OPENROUTER_FREE_QUOTA_EXHAUSTED`),
+                voice-i18n (etiquetas de voz con `Intl.DisplayNames`), project-status,
                 timeline-edit/  (toda la máquina de edición: reglas, layout de a-roll,
                                 rescale de automation, presets, severidad,
                                 logo-overlay, logo-bumpers, caption-style, reducer)
   i18n/         messages-en (fuente de verdad tipada) · messages-es (lazy) · translate ·
-                language-context · literal-copy-scan
+                language-context · language (`DEFAULT_LANGUAGE = 'es'`) · literal-copy-scan
   guide/        guide-content-en · guide-content-es · guide-content (selector por idioma)
   hooks/        useAsyncResource (único primitivo de estado de servidor) · use-api-action ·
-                use-render-job-poll · use-producer-turn-poll
+                use-render-job-poll · use-producer-turn-poll · use-producer-conversation ·
+                use-inbox-uploads · use-stick-to-bottom · use-auto-switching-tab ·
+                use-video-card-thumbnail
   components/   studio-layout · service-health-badge · error-notice · create-project-form ·
                 voice-picker ·
                 asset-card · asset-delete-control · asset-preview · asset-uploader ·
@@ -71,20 +79,26 @@ src/
                 clip-track-editor · caption-editor · caption-style-selector · music-mix-editor ·
                 output-preset-selector ·
                 timeline-issue-list · timeline-save-bar · render-trigger · render-job-list ·
-                render-job-panel · montage-trigger · montage-job-panel ·
+                render-job-panel · job-retry-button · montage-trigger · montage-job-panel ·
                 storyboard-trigger · storyboard-job-panel · storyboard-header-editor ·
                 storyboard-character-sheet · storyboard-scene-editor · storyboard-save-bar ·
                 storyboard-prompt-sheet · voice-trigger · voice-job-panel · voice-scene-card ·
                 voice-script-panel · producer-script-panel ·
                 producer-message-list · producer-composer · producer-turn-activity ·
-                producer-welcome (COMP-042) · logo-overlay-editor · logo-bumper-editor (COMP-048)
-  pages/        projects-page · asset-library-page · producer-page · storyboard-page ·
-                voice-page · project-preview-page · guide-page (ruta perezosa)
-  app/app.tsx   router (`/`, `/projects/:slug`, `/projects/:slug/{producer,storyboard,voice,preview}`,
-                `/guide`) y provider
+                producer-welcome (COMP-042) · logo-overlay-editor · logo-bumper-editor (COMP-048) ·
+                folder-heading (renombrado inline) · openrouter-model-picker ·
+                workspace-side-panel · producer-conversation-panel · chat-drop-zone ·
+                asset-proposal-card · video-card · home-drop-hint · create-project-by-drop ·
+                ui/{button,card,badge,tabs} (+ tokens en `index.css` bajo `@theme`)
+  pages/        projects-page · asset-library-page · project-workspace-page · storyboard-page ·
+                voice-page · project-preview-page · settings-page · guide-page (rutas perezosas)
+  app/app.tsx   router (`/`, `/guide`, `/settings`, `/projects/:slug` [workspace de chat],
+                `/projects/:slug/library`, `/projects/:slug/producer` [redirect a `/projects/:slug`],
+                `/projects/:slug/{storyboard,voice,preview}`) y provider
 e2e/            smoke-helpers.mjs (compartido) · studio-smoke.mjs · montage-smoke.mjs ·
                 storyboard-smoke.mjs · voice-smoke.mjs · voices-smoke.mjs · producer-smoke.mjs ·
-                delete-asset-smoke.mjs · capture-frame-240.mjs (fuera del build, fuera de Vitest)
+                delete-asset-smoke.mjs · interrupted-job-smoke.mjs ·
+                capture-frame-240.mjs (fuera del build, fuera de Vitest)
 ```
 
 - **`src/api/` es el único lugar que sabe que el servicio existe** (RNF-4). Ningún componente arma
@@ -109,6 +123,11 @@ e2e/            smoke-helpers.mjs (compartido) · studio-smoke.mjs · montage-sm
 - **El turno del productor NO entró a la unión `Job`**: no tiene `kind`, ni `state`, ni `progress`,
   y meterlo obligaría a ensanchar con opcionales — el antipatrón que esta app prohíbe.
   `useProducerTurnPoll` es un hook propio con el mismo patrón interno que `useRenderJobPoll`.
+- **Un job `failed`/`canceled` es relanzable, no solo diagnosticable**: `JobRetryButton` aparece en
+  los cuatro paneles de job y se oculta solo si el job no es relanzable; llama `retryJob` (`EP-036`)
+  y reemplaza el job del panel vía el `onRetried` de cada página. Un `failed` con código
+  `JOB_INTERRUPTED` se etiqueta "Interrumpido" en vez de "Failed" (tres códigos propios en
+  `error-explanations.ts`, claves `job.interrupted`/`job.retry`).
 - **La capacidad del servicio se decide en funciones puras de `src/api/`**
   (`montageBlockers`, `storyboardBlockers`, `voiceBlockers`, `producerBlockers`): el botón se
   deshabilita con el motivo escrito, nunca en silencio. `voiceBlockers` mira `voiceQueue` **y los
@@ -117,6 +136,9 @@ e2e/            smoke-helpers.mjs (compartido) · studio-smoke.mjs · montage-sm
 - **Cada familia de códigos de error tiene un único traductor a frase de usuario**
   (`montageFailureExplanation`, `storyboardFailureExplanation`, `voiceFailureExplanation`,
   `producerFailureExplanation`) y la UI muestra **el code y la frase**, nunca una sola de las dos.
+  `storyboardFailureExplanation` explica `OPENROUTER_KEY_MISSING` y
+  `OPENROUTER_FREE_QUOTA_EXHAUSTED` (`AGENT_FAILURE_CODES` en `storyboard-capability.ts`);
+  `AI_AGENT_RATE_LIMITED` dejó de nombrar a Claude porque vale para los dos motores del productor.
 - **Las etiquetas legibles de un union viven en `src/api/`, no en el componente**
   (`montage-presets.ts` es el precedente, `asset-roles.ts` el segundo caso): así un miembro nuevo
   del union rompe el tipo en un solo lugar y no se cuela un `switch` incompleto en JSX.
@@ -178,13 +200,11 @@ e2e/            smoke-helpers.mjs (compartido) · studio-smoke.mjs · montage-sm
   patrón se usa para copy larga que no se renderiza al abrir la pantalla: `messages-es.ts`
   (catálogo `es` completo) y `guide-content-{en,es}.ts` sólo se alcanzan por `await import()`, y
   `producer-recipe-prompts.ts` (los textos largos de cada receta del productor) igual, desde
-  `loadRecipePrompt`. Medición vigente: inicial **495,84 kB**, `messages-es` 26,38 kB,
-  `project-preview-page` 370,75 kB, `storyboard-page` 31,68 kB, `voice-page` 21,57 kB,
-  `producer-page` 15,84 kB, `asset-library-page` 14,31 kB, `guide-content-es` 9,37 kB,
-  `guide-content-en` 8,90 kB, `producer-recipe-prompts` 1,23 kB — **sin** el aviso de 500 kB, pero
-  con muy poco margen (bajó de 490,17 kB a 495,84 kB entre `spec-016 cycle-02` y `FIX-015-005`):
-  la próxima pantalla que sume copy visible al abrir o claves de catálogo conviene que entre
-  perezosa.
+  `loadRecipePrompt`. El chunk inicial subió hasta **533,9 kB** (arriba del aviso de 500 kB de
+  Vite) sobre `producer-page`/nav clásica en `spec-017 cycle-02`..`cycle-04`; el rediseño del
+  workspace de chat (`cycle-05`) lo bajó a **294 kB** reales al reemplazar esa pantalla y demorar
+  el resto detrás de rutas perezosas. La próxima pantalla o catálogo de copy que entre al chunk
+  inicial (en vez de una ruta o un `await import()` perezoso) probablemente lo vuelve a disparar.
 - **`useSearchParams` de `react-router` arrastra al chunk inicial**: la salida es `URLSearchParams`
   nativo. No cambiarlo por el hook del router "por consistencia".
 - **La validación de cliente es espejo del servicio y clasifica por severidad**: `SCHEMA_INVALID`
@@ -240,6 +260,34 @@ e2e/            smoke-helpers.mjs (compartido) · studio-smoke.mjs · montage-sm
   `work/producer/script.txt` legible, se muestra el guion en sólo lectura. El modo guion no edita:
   para cambiar el texto hay que volver al productor — si algún día se edita desde acá, el guion es
   la fuente y el manifest el derivado, nunca al revés.
+- **El workspace (`project-workspace-page.tsx`) es la pantalla por defecto de un proyecto**:
+  `workspace-side-panel.tsx` con pestañas Vista previa/Material/Entregas (`use-auto-switching-tab.ts`
+  cambia de pestaña sola cuando un montaje o un render termina) y `producer-conversation-panel.tsx`
+  (lógica en `use-producer-conversation.ts`) con el cuadro de texto fijo abajo y el scroll pegado al
+  último mensaje (`use-stick-to-bottom.ts`, solo con mensajes). Un archivo se suelta con
+  `chat-drop-zone.tsx` o se adjunta; `use-inbox-uploads.ts` lo sube y aparece como
+  `asset-proposal-card.tsx` (rol propuesto + razón) apilada encima del cuadro de texto hasta que el
+  usuario confirma, momento en que pasa a su carpeta (`raw/<rol>/`). Biblioteca, storyboard, voz y
+  preview quedan como **Edición avanzada**, accesibles desde el panel lateral.
+- **El inicio (`/`) lista videos, no proyectos crudos**: `video-card.tsx` con miniatura
+  (`use-video-card-thumbnail.ts`) y un solo estado en lenguaje de usuario (`api/project-status.ts`),
+  y `create-project-by-drop.tsx`/`home-drop-hint.tsx` crean un video soltando un archivo. Las
+  carpetas se listan aunque estén vacías y se renombran inline (`folder-heading.tsx`).
+  **Vocabulario propio de esta UI:** lo que `render-api` llama `project` se muestra como **video**;
+  lo que agrupa videos en pantalla es una **carpeta** — no confundir en código ni copy nuevos.
+- **`/settings` configura el motor del productor, no un modelo suelto** (`settings-page.tsx` +
+  `openrouter-model-picker.tsx` + `api/parse-producer-settings.ts` + `api/producer-engine-i18n.ts`):
+  motor Claude Code u OpenRouter, key de OpenRouter de sólo escritura (nunca se relee), catálogo
+  completo con búsqueda y una lista de recomendados con métricas. El chat muestra el motor activo,
+  solo ofrece los modelos recomendados (traducidos por id vía `api/producer-model-i18n.ts`) y el
+  costo de cada turno (`message.usage.costUsd`, formateado por idioma con
+  `api/producer-cost-format.ts`); si el modelo elegido deja de estar entre las opciones (carrera con
+  la configuración), el panel de conversación lo resetea solo.
+- **`vite.config.ts` fuerza `NODE_ENV=production` en `build`**: el `.env` raíz trae
+  `NODE_ENV=development`, Nx lo inyecta en todas las tasks, y sin el override el build salía con
+  React de desarrollo. La salud de servicio agrupa los binarios por categoría (herramientas de
+  video, transcripción, motor de voz) y sus textos dicen "motor de voz" en vez de nombrar Piper — el
+  motor es intercambiable.
 - **Toda la interfaz vive en español e inglés** (`src/i18n/`): `messages-en.ts` es la fuente de
   verdad tipada (`{...} as const satisfies Record<string,string>` → `TranslationKey = keyof typeof
   MESSAGES_EN`), y `messages-es.ts` se declara `Messages = Readonly<Record<TranslationKey,
@@ -251,10 +299,11 @@ e2e/            smoke-helpers.mjs (compartido) · studio-smoke.mjs · montage-sm
   `LanguageProvider` + `useLanguage()` + `useT()` + `useTn()`; **`useT()` sin provider devuelve el
   catálogo inglés**, así que ninguna suite vieja que aserara texto en inglés tuvo que tocarse — la
   migración cambió de dónde sale el texto, no qué texto sale.
-- **El idioma inicial sale de `localStorage` → `navigator.languages` (`es-*` → `es`) → `en`**,
-  persiste en `localStorage` y estampa `documentElement.lang`. El switch no ofrece un tercer
-  idioma listo para usar: agregar uno es sumar el módulo, sumarlo a `LANGUAGES` y dejar que `tsc`
-  señale cada clave faltante.
+- **El idioma default es español** (`i18n/language.ts`, `DEFAULT_LANGUAGE = 'es'`): gana la
+  elección guardada en `localStorage`; sin elección, arranca en `es` — ya **no** se mira
+  `navigator.languages`. `useT()` sin provider sigue devolviendo el catálogo inglés (lo usan los
+  tests). El switch no ofrece un tercer idioma listo para usar: agregar uno es sumar el módulo,
+  sumarlo a `LANGUAGES` y dejar que `tsc` señale cada clave faltante.
 - **Los bloqueadores de acción devuelven claves, no frases** (`src/api/blockers.ts`, `Blocker =
   { key, params? }`): `voiceBlockers` (mira `voiceQueue` y los seis binarios), `montageBlockers`
   (cuatro binarios), `storyboardBlockers` (ninguno) y `producerBlockers` deciden *qué* bloquea; el
