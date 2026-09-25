@@ -8,10 +8,12 @@ import { fileURLToPath } from 'node:url';
 
 const HERE = dirname(fileURLToPath(import.meta.url));
 const REPO_ROOT = join(HERE, '..', '..', '..');
-const ARTIFACTS_DIR = join(
+const DEFAULT_ARTIFACTS_DIR = join(
   REPO_ROOT,
-  'sdd/specs/spec-e-burgos-017-desktop-app/cycles/cycle-04/artifacts',
+  'sdd/specs/spec-e-burgos-018-producer-free-tier/cycles/cycle-01/artifacts',
 );
+const DEFAULT_REPORT_NAME = 'openrouter-model-bench';
+const OPENROUTER_MODELS_URL = 'https://openrouter.ai/api/v1/models';
 const SOURCE_PROJECT_SLUG = 'display-ads-analiticas';
 const AROLL_ROLE = 'aroll';
 const SCRIPT_RELATIVE_PATH = 'work/producer/script.txt';
@@ -57,7 +59,7 @@ const VOICE_JOB_POLL_INTERVAL_MS = 3000;
 const FREE_MODEL_PACE_MS = 9000;
 const PAID_MODEL_PACE_MS = 2000;
 const RATE_LIMIT_BACKOFF_MS = 20000;
-const BASE_PORT = 4490;
+const DEFAULT_BASE_PORT = 4520;
 
 function log(scope, message) {
   process.stdout.write(`[${scope}] ${message}\n`);
@@ -66,11 +68,11 @@ function log(scope, message) {
 function parseArgs(argv) {
   const args = {};
   for (const entry of argv) {
-    const match = /^--([^=]+)=(.*)$/u.exec(entry);
+    const match = /^--([^=]+)(?:=(.*))?$/u.exec(entry);
     if (match === null) {
       continue;
     }
-    args[match[1]] = match[2];
+    args[match[1]] = match[2] ?? 'true';
   }
   return args;
 }
@@ -142,7 +144,7 @@ async function waitForHttp(url, timeoutMs) {
 
 function spawnRenderApi(port, mediaRoot, toolchainEnv) {
   const child = spawn(
-    'node',
+    process.execPath,
     ['-r', join(REPO_ROOT, 'apps/render-api/src/server-register.cjs'), join(REPO_ROOT, 'apps/render-api/src/main.ts')],
     {
       cwd: REPO_ROOT,
@@ -165,14 +167,30 @@ function spawnRenderApi(port, mediaRoot, toolchainEnv) {
   return child;
 }
 
+function waitForExit(child, timeoutMs) {
+  if (child.exitCode !== null || child.signalCode !== null) {
+    return Promise.resolve(true);
+  }
+  return new Promise((resolve) => {
+    const timer = setTimeout(() => resolve(false), timeoutMs);
+    child.once('exit', () => {
+      clearTimeout(timer);
+      resolve(true);
+    });
+  });
+}
+
 async function stopRenderApi(child) {
-  if (child.exitCode !== null || child.killed) {
+  if (child.exitCode !== null || child.signalCode !== null) {
     return;
   }
   child.kill('SIGTERM');
-  await new Promise((resolve) => setTimeout(resolve, 1200));
-  if (child.exitCode === null) {
-    child.kill('SIGKILL');
+  if (await waitForExit(child, 3000)) {
+    return;
+  }
+  child.kill('SIGKILL');
+  if (!(await waitForExit(child, 3000))) {
+    log('bench', `render-api pid ${child.pid} did not exit after SIGKILL`);
   }
 }
 
@@ -271,6 +289,7 @@ async function runOneAttempt({ producerTools, apiKey, candidate, port, mediaRoot
   const systemPrompt = producerTools.buildProducerPrompt({
     assetSource: detail.assetSource,
     assets: assets.map((asset) => ({ path: asset.path, role: asset.role, durationMs: asset.media?.durationMs ?? null })),
+    pendingAssets: [],
     hasTimeline: detail.layout.timeline,
     producerScript,
   });
@@ -388,7 +407,9 @@ async function runOneAttempt({ producerTools, apiKey, candidate, port, mediaRoot
   const explicitRateLimit =
     (runtimeError instanceof producerTools.OpenRouterProducerRuntimeError && runtimeError.code === 'OPENROUTER_RATE_LIMITED') ||
     /rate limit/iu.test(errorMessage);
-  const explicitDailyQuota = /per-day/iu.test(errorMessage);
+  const explicitDailyQuota =
+    (runtimeError instanceof producerTools.OpenRouterProducerRuntimeError && runtimeError.code === 'OPENROUTER_FREE_QUOTA_EXHAUSTED') ||
+    /per-day/iu.test(errorMessage);
 
   const genericFailureBeforeAnyToolCall =
     runtimeError !== null && toolCalls.length === 0 && seconds < 15 &&
@@ -541,9 +562,39 @@ function pickRecommendation(summaries) {
   return { recommended, defaultModel };
 }
 
-function renderMarkdown({ candidates, summaries, totalSpent, budgetCapUsd, recommendation, notes }) {
+async function discoverLiveFreeCandidates() {
+  const response = await fetch(OPENROUTER_MODELS_URL);
+  if (!response.ok) {
+    throw new Error(`OpenRouter catalog answered ${response.status}`);
+  }
+  const catalog = await response.json();
+  return catalog.data
+    .filter((model) => model.id.endsWith(':free'))
+    .filter((model) => (model.supported_parameters ?? []).includes('tools'))
+    .filter((model) => (model.architecture?.input_modalities ?? []).includes('image'))
+    .map((model) => ({
+      id: model.id,
+      tier: 'free',
+      reason: `Gratis y vivo en el catálogo con tools e imagen (contexto ${model.context_length ?? 'n/d'}).`,
+    }));
+}
+
+function resolveCandidates(args, discoveredFree) {
+  if (discoveredFree !== null) {
+    return discoveredFree;
+  }
+  if (args.candidates === undefined) {
+    return DEFAULT_CANDIDATES;
+  }
+  return args.candidates
+    .split(',')
+    .map((id) => id.trim())
+    .map((id) => DEFAULT_CANDIDATES.find((candidate) => candidate.id === id) ?? { id, tier: id.endsWith(':free') ? 'free' : 'cheap', reason: 'pasado por --candidates' });
+}
+
+function renderMarkdown({ title, candidates, summaries, totalSpent, budgetCapUsd, recommendation, notes }) {
   const lines = [];
-  lines.push('# Benchmark de modelos OpenRouter — cycle-04 TASK-006');
+  lines.push(`# ${title}`);
   lines.push('');
   lines.push(`> Generado el ${new Date().toISOString().slice(0, 10)} corriendo el runtime real del productor ` +
     '(`runOpenRouterProducerTurn`) contra un clon APFS del proyecto `display-ads-analiticas`, con un ' +
@@ -639,10 +690,12 @@ function renderMarkdown({ candidates, summaries, totalSpent, budgetCapUsd, recom
 
 async function main() {
   const args = parseArgs(process.argv.slice(2));
-  const candidateIds = args.candidates !== undefined ? args.candidates.split(',').map((id) => id.trim()) : null;
-  const candidates = candidateIds === null
-    ? DEFAULT_CANDIDATES
-    : candidateIds.map((id) => DEFAULT_CANDIDATES.find((candidate) => candidate.id === id) ?? { id, tier: 'cheap', reason: 'pasado por --candidates' });
+  const discoveredFree = args['discover-free'] !== undefined ? await discoverLiveFreeCandidates() : null;
+  const candidates = resolveCandidates(args, discoveredFree);
+  const artifactsDir = args.out !== undefined ? args.out : DEFAULT_ARTIFACTS_DIR;
+  const reportName = args['report-name'] !== undefined ? args['report-name'] : DEFAULT_REPORT_NAME;
+  const basePort = args['base-port'] !== undefined ? Number(args['base-port']) : DEFAULT_BASE_PORT;
+  const reportTitle = args.title !== undefined ? args.title : 'Benchmark de modelos OpenRouter';
 
   const budgetCapUsd = args.budget !== undefined ? Number(args.budget) : DEFAULT_TOTAL_BUDGET_USD;
   const perRunBudgetUsd = args['per-run-budget'] !== undefined ? Number(args['per-run-budget']) : DEFAULT_PER_RUN_BUDGET_USD;
@@ -661,12 +714,13 @@ async function main() {
   );
   log('bench', `A-roll duration: ${arollDurationSeconds.toFixed(1)}s`);
 
-  await mkdir(ARTIFACTS_DIR, { recursive: true });
+  await mkdir(artifactsDir, { recursive: true });
 
   const allRuns = [];
   const notes = [];
   let totalSpent = 0;
   let budgetExhausted = false;
+  let freeDailyQuotaExhausted = false;
 
   for (const [candidateIndex, candidate] of candidates.entries()) {
     if (budgetExhausted) {
@@ -674,7 +728,12 @@ async function main() {
       continue;
     }
 
-    const port = BASE_PORT + candidateIndex;
+    if (freeDailyQuotaExhausted && candidate.tier === 'free') {
+      notes.push(`\`${candidate.id}\` se saltó: la cuota diaria de modelos gratis de la cuenta ya estaba agotada.`);
+      continue;
+    }
+
+    const port = basePort + candidateIndex;
     const runsForModel = [];
 
     for (let runIndex = 0; runIndex < runsPerModel; runIndex += 1) {
@@ -712,7 +771,7 @@ async function main() {
           success: false,
           rateLimited: false,
           errorCode: 'RUN_INFRA_FAILED',
-          errorHint: String(cause?.message ?? cause).slice(0, 300),
+          errorHint: String(cause?.stack ?? cause).slice(0, 900),
         };
       }
 
@@ -725,6 +784,12 @@ async function main() {
 
       runsForModel.push(run);
       allRuns.push(run);
+
+      if (run.dailyQuotaExhausted === true) {
+        freeDailyQuotaExhausted = true;
+        log(candidate.id, 'free daily quota exhausted, skipping the remaining free runs');
+        break;
+      }
 
       const pace = candidate.tier === 'free' ? FREE_MODEL_PACE_MS : PAID_MODEL_PACE_MS;
       await new Promise((resolve) => setTimeout(resolve, pace));
@@ -787,15 +852,15 @@ async function main() {
     notes,
   };
 
-  assertNoKeyLeak(rawResults, 'openrouter-model-bench-results.json');
+  assertNoKeyLeak(rawResults, `${reportName}-results.json`);
 
-  const markdown = renderMarkdown({ candidates, summaries, totalSpent, budgetCapUsd, recommendation, notes });
-  assertNoKeyLeak(markdown, 'openrouter-model-bench.md');
+  const markdown = renderMarkdown({ title: reportTitle, candidates, summaries, totalSpent, budgetCapUsd, recommendation, notes });
+  assertNoKeyLeak(markdown, `${reportName}.md`);
 
-  await writeFile(join(ARTIFACTS_DIR, 'openrouter-model-bench-results.json'), JSON.stringify(rawResults, null, 2), 'utf8');
-  await writeFile(join(ARTIFACTS_DIR, 'openrouter-model-bench.md'), markdown, 'utf8');
+  await writeFile(join(artifactsDir, `${reportName}-results.json`), JSON.stringify(rawResults, null, 2), 'utf8');
+  await writeFile(join(artifactsDir, `${reportName}.md`), markdown, 'utf8');
 
-  log('bench', `wrote artifacts to ${ARTIFACTS_DIR}`);
+  log('bench', `wrote artifacts to ${artifactsDir}`);
   log('bench', `total spent: US$${totalSpent.toFixed(4)} of US$${budgetCapUsd.toFixed(2)}`);
   for (const summary of summaries) {
     log('bench', `${summary.id}: ${summary.successCount}/${summary.runs} success, avgCostUsd=${(summary.avgCostUsd ?? 0).toFixed(4)}`);

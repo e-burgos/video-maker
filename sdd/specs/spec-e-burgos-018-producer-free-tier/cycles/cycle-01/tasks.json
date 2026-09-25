@@ -23,10 +23,20 @@
       "estimation_hours": 1.5,
       "story_points": 1,
       "depends_on": [],
-      "status": "pending",
+      "status": "done",
       "files": [
         "libs/producer-tools/e2e/openrouter-model-bench.mjs"
-      ]
+      ],
+      "usage": {
+        "provider_model": "claude/opus",
+        "effort": "high",
+        "agent": "orchestrator",
+        "tokens_in": 60000,
+        "tokens_out": 8000,
+        "approx": true,
+        "source": "declared-estimate",
+        "recorded_at": "2026-09-25"
+      }
     },
     {
       "id": "TASK-002",
