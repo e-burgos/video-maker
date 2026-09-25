@@ -56,13 +56,23 @@
       "estimation_hours": 2,
       "story_points": 2,
       "depends_on": [],
-      "status": "pending",
+      "status": "done",
       "files": [
         "apps/desktop/package.json",
         "apps/desktop/CHANGELOG.md",
         "apps/docs-site/src/content/using-studio.mjs",
         "apps/docs-site/src/content/faq.mjs"
-      ]
+      ],
+      "usage": {
+        "tokens_in": 68000,
+        "tokens_out": 6500,
+        "provider_model": "claude/sonnet",
+        "effort": "medium",
+        "agent": "implementor-front",
+        "approx": true,
+        "source": "declared-estimate",
+        "recorded_at": "2026-09-25"
+      }
     },
     {
       "id": "TASK-004",

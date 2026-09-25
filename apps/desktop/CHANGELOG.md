@@ -4,6 +4,16 @@ Historial de versiones de la app de escritorio, en español, pensado para los am
 instalan. `apps/desktop/scripts/release-desktop.mjs` toma la sección de la versión que publica
 y la usa como notas del release.
 
+## 0.2.0 — Storyboard sin Claude y material libre para B-roll
+
+- El storyboard (el guion palabra por palabra) ahora también funciona con OpenRouter — ya no
+  hace falta tener Claude conectado para generarlo, alcanza con cualquiera de los dos motores.
+- El productor puede buscar y traer video y fotos libres para B-roll desde Wikimedia Commons y
+  la biblioteca de NASA, directo desde la conversación — el crédito de cada uno se guarda solo
+  en el archivo de créditos del proyecto.
+- El productor ahora puede mirar las fotos que subís, para armar mejor la Receta Publicidad.
+- MODELOS_GRATIS_PENDIENTE
+
 ## 0.1.0 — Primera versión para amigos
 
 Primera versión que sale del disco del dev. Como es la primera, esto es todo lo que hace la app

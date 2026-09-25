@@ -37,8 +37,8 @@ ${faqItem(
 )}
 
 ${faqItem(
-  '¿Por qué el modo storyboard no hace nada sin Claude?',
-  '<p>El editor de guion palabra por palabra (storyboard) usa la misma transcripción local de siempre, pero algunas de sus sugerencias automáticas dependen de tener un motor de IA conectado (Claude u OpenRouter) — sin ninguno de los dos conectado, esa parte queda inactiva.</p>',
+  '¿El storyboard funciona sin Claude?',
+  '<p>Sí. El editor de guion palabra por palabra (storyboard) genera sus propuestas con el motor de IA que tengas conectado en Configuración — Claude Code u OpenRouter — así que no hace falta tener Claude para usarlo, alcanza con cualquiera de los dos.</p>',
 )}
 `;
 

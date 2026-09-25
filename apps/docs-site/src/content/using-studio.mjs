@@ -15,6 +15,22 @@ según lo que detecta — tiene voz, no tiene audio, tiene transparencia, es una
 menciona música — y vos confirmás o cambiás el rol antes de que se guarde.
 </p>
 ${screenshotFigure(depth, 'proposal-card.png', 'Tarjeta de material recién subido con el rol propuesto (B-roll) y los botones Confirmar / Descartar')}
+<p>
+El productor también puede mirar las fotos que subiste — le sirve, por ejemplo, para armar
+mejor la receta Publicidad a partir de tus propias imágenes.
+</p>
+
+<h2>Material libre para B-roll</h2>
+<p>
+Si te falta metraje, se lo podés pedir directo al productor: contale algo como "buscá material
+libre sobre bicicletas urbanas" y te va a traer opciones de video y fotos de Wikimedia Commons
+y de la biblioteca de NASA — solo con licencias libres para uso comercial. Elegís la que te
+sirve y queda importada como cualquier otro archivo de tu material.
+</p>
+<p>
+El crédito de cada archivo que importás así (autor, fuente, licencia) se guarda solo en el
+archivo de créditos del proyecto — incluilo en la descripción del video cuando lo publiques.
+</p>
 
 <h2>Recetas</h2>
 <p>
