@@ -84,7 +84,7 @@ function Block({ block }: { block: ProducerBlock }) {
     return (
       <pre
         data-language={block.language}
-        className="overflow-x-auto rounded-md border border-slate-800 bg-slate-950 p-3 font-mono text-xs text-slate-300"
+        className="whitespace-pre-wrap break-words rounded-md border border-slate-800 bg-slate-950 p-3 font-mono text-xs text-slate-300 [overflow-wrap:anywhere]"
       >
         {block.text}
       </pre>

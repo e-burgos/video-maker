@@ -248,6 +248,7 @@ describe('buildProducerPrompt — dónde está cada cosa', () => {
     expect(prompt).toContain('`Preview` tab');
     expect(prompt).toContain('`Material` tab');
     expect(prompt).toContain('`Deliveries` tab');
+    expect(prompt).toContain('`Vista previa`, `Entregas` and `Material`');
   });
 
   it('nunca menciona las pantallas viejas Preview/Generated/Voice ni la biblioteca como destino', () => {
