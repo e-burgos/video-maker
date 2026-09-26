@@ -157,20 +157,25 @@
       "description": "App de escritorio macOS (Apple Silicon) autocontenida para repartir entre amigos: shell Electron con render-api embebido y binarios incluidos, herramientas del productor como servidor MCP compartido por el CLI claude de cada usuario y OpenRouter (Vercel AI SDK), store SQLite híbrido, interfaz centrada en el chat con arrastrar y soltar, .dmg sin firmar en GitHub Releases y web de documentación en GitHub Pages",
       "cycles_completed": 6,
       "completed_at": "2026-09-25"
-    }
-  ],
-  "in_progress_modules": [
+    },
     {
       "module": "producer-free-tier",
       "spec": "spec-e-burgos-018-producer-free-tier",
       "apps": [
         "apps/render-api",
         "libs/producer-tools",
-        "apps/docs-site"
+        "apps/docs-site",
+        "apps/desktop",
+        "apps/web",
+        "libs/media-local",
+        "libs/timeline-core"
       ],
-      "description": "Que un usuario sin Claude use el productor completo: modelos gratuitos de OpenRouter recomendados con benchmark real, storyboard sobre el motor efectivo del productor y búsqueda e importación de video e imágenes libres para B-roll con crédito automático, más una herramienta para mirar fotos"
+      "description": "Que un usuario sin Claude use el productor completo: modelos gratuitos de OpenRouter recomendados con benchmark real, storyboard sobre el motor efectivo del productor y búsqueda e importación de video e imágenes libres para B-roll con crédito automático, más una herramienta para mirar fotos",
+      "cycles_completed": 4,
+      "completed_at": "2026-09-26"
     }
   ],
+  "in_progress_modules": [],
   "pending_modules": [
     {
       "module": "scene-assembly",

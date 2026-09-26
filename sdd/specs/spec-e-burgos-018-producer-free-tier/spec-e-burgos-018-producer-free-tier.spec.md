@@ -1,6 +1,7 @@
 # SPEC-e-burgos-018: Productor sin Claude — modelos gratuitos, storyboard con OpenRouter y material libre
 
-> Estado: **in-progress** — registrada el 2026-09-25. Ciclos `lite` (perfil `solo`), uno por mejora.
+> Estado: **completed** — registrada el 2026-09-25, cerrada el 2026-09-26. Cuatro ciclos `lite`; versión 0.2.0
+> publicada. Modelos gratuitos: no se recomiendan (decisión del dev tras el benchmark).
 > Continúa `spec-e-burgos-017-desktop-app` (0.1.0 publicada en https://video.estebanburgos.com.ar);
 > toma tres de sus `follow_ups` de cierre.
 

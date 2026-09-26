@@ -303,10 +303,10 @@
       "file": "sdd/specs/spec-e-burgos-018-producer-free-tier/spec-e-burgos-018-producer-free-tier.spec.md",
       "module": "producer-free-tier",
       "app": "apps/render-api",
-      "status": "in-progress",
+      "status": "completed",
       "title": "Productor sin Claude: modelos gratuitos, storyboard con OpenRouter y material libre",
       "created_at": "2026-09-25",
-      "completed_at": null,
+      "completed_at": "2026-09-26",
       "depends_on": [
         "spec-e-burgos-017-desktop-app"
       ]

@@ -7,7 +7,9 @@
     "apps/render-api",
     "apps/docs-site",
     "apps/desktop",
-    "libs/producer-tools"
+    "libs/producer-tools",
+    "libs/media-local",
+    "apps/web"
   ],
   "phase": "free-models-and-release",
   "flow": "lite",
@@ -17,18 +19,179 @@
     "Versión 0.2.0 publicada y la web desplegada, con confirmación del dev",
     "Producir desde la app instalada los videos pendientes de display ads y corregir lo que esas pruebas muestren (subtítulos sin tildes por put_timeline, pantallas viejas en el prompt)"
   ],
-  "status": "in-progress",
+  "status": "completed",
   "started_at": "2026-09-25",
-  "completed_at": null,
+  "completed_at": "2026-09-26",
   "documents": {
     "plan": "sdd/specs/spec-e-burgos-018-producer-free-tier/cycles/cycle-04/plan.md",
     "tasks": "sdd/specs/spec-e-burgos-018-producer-free-tier/cycles/cycle-04/tasks.json"
   },
-  "artifacts": [],
-  "metrics": null,
+  "artifacts": [
+    "sdd/specs/spec-e-burgos-018-producer-free-tier/cycles/cycle-04/artifacts/display-ads-productions.md",
+    "sdd/specs/spec-e-burgos-018-producer-free-tier/cycles/cycle-04/artifacts/openrouter-free-model-bench-run1-results.json",
+    "sdd/specs/spec-e-burgos-018-producer-free-tier/cycles/cycle-04/artifacts/openrouter-free-model-bench-run1.md",
+    "sdd/specs/spec-e-burgos-018-producer-free-tier/cycles/cycle-04/artifacts/patch-timeline-smoke.md",
+    "sdd/specs/spec-e-burgos-018-producer-free-tier/cycles/cycle-04/artifacts/patch-timeline-smoke.mjs",
+    "sdd/specs/spec-e-burgos-018-producer-free-tier/cycles/cycle-04/artifacts/publish-log.md",
+    "sdd/specs/spec-e-burgos-018-producer-free-tier/cycles/cycle-04/artifacts/release-dry-run.md",
+    "sdd/specs/spec-e-burgos-018-producer-free-tier/cycles/cycle-04/artifacts/voice-fit-repro.md",
+    "sdd/specs/spec-e-burgos-018-producer-free-tier/cycles/cycle-04/artifacts/voice-fit-repro.mjs",
+    "sdd/specs/spec-e-burgos-018-producer-free-tier/cycles/cycle-04/artifacts/workspace-no-horizontal-scroll.png"
+  ],
+  "metrics": {
+    "tasks_total": 10,
+    "tasks_completed": 10,
+    "story_points": 19,
+    "files_created": [
+      "sdd/context/apps/desktop/updates/2026-09-26-spec-e-burgos-018-producer-free-tier-cycle-04.md",
+      "sdd/context/apps/docs-site/updates/2026-09-26-spec-e-burgos-018-producer-free-tier-cycle-04.md",
+      "sdd/context/apps/render-api/updates/2026-09-26-spec-e-burgos-018-producer-free-tier-cycle-04.md",
+      "sdd/context/apps/web/updates/2026-09-26-spec-e-burgos-018-producer-free-tier-cycle-04.md",
+      "sdd/context/libs/media-local/updates/2026-09-26-spec-e-burgos-018-producer-free-tier-cycle-04.md",
+      "sdd/context/libs/producer-tools/updates/2026-09-26-spec-e-burgos-018-producer-free-tier-cycle-04.md",
+      "sdd/memory/journal/2026-09-26-spec-e-burgos-018-producer-free-tier-cycle-04.md",
+      "sdd/specs/spec-e-burgos-018-producer-free-tier/cycles/cycle-04/artifacts/display-ads-productions.md",
+      "sdd/specs/spec-e-burgos-018-producer-free-tier/cycles/cycle-04/artifacts/openrouter-free-model-bench-run1-results.json",
+      "sdd/specs/spec-e-burgos-018-producer-free-tier/cycles/cycle-04/artifacts/openrouter-free-model-bench-run1.md",
+      "sdd/specs/spec-e-burgos-018-producer-free-tier/cycles/cycle-04/artifacts/patch-timeline-smoke.md",
+      "sdd/specs/spec-e-burgos-018-producer-free-tier/cycles/cycle-04/artifacts/patch-timeline-smoke.mjs",
+      "sdd/specs/spec-e-burgos-018-producer-free-tier/cycles/cycle-04/artifacts/publish-log.md",
+      "sdd/specs/spec-e-burgos-018-producer-free-tier/cycles/cycle-04/artifacts/release-dry-run.md",
+      "sdd/specs/spec-e-burgos-018-producer-free-tier/cycles/cycle-04/artifacts/voice-fit-repro.md",
+      "sdd/specs/spec-e-burgos-018-producer-free-tier/cycles/cycle-04/artifacts/voice-fit-repro.mjs",
+      "sdd/specs/spec-e-burgos-018-producer-free-tier/cycles/cycle-04/artifacts/workspace-no-horizontal-scroll.png"
+    ],
+    "files_modified": [
+      "apps/desktop/CHANGELOG.md",
+      "apps/desktop/package.json",
+      "apps/docs-site/src/content/connect-ai.mjs",
+      "apps/docs-site/src/content/faq.mjs",
+      "apps/docs-site/src/content/using-studio.mjs",
+      "apps/render-api/src/producer/producer-stream-events.spec.ts",
+      "apps/render-api/src/producer/producer-stream-events.ts",
+      "apps/web/src/components/producer-conversation-panel.tsx",
+      "apps/web/src/components/producer-message-list.tsx",
+      "apps/web/src/components/producer-turn-activity.tsx",
+      "apps/web/src/pages/project-workspace-page.tsx",
+      "libs/media-local/src/tts/synthesize-speech.spec.ts",
+      "libs/media-local/src/tts/synthesize-speech.ts",
+      "libs/producer-tools/e2e/openrouter-model-bench.mjs",
+      "libs/producer-tools/src/client/render-api-client.ts",
+      "libs/producer-tools/src/contract/tool-names.spec.ts",
+      "libs/producer-tools/src/contract/tool-names.ts",
+      "libs/producer-tools/src/contract/tool-schemas.spec.ts",
+      "libs/producer-tools/src/contract/tool-schemas.ts",
+      "libs/producer-tools/src/handlers/studio-tool-handlers.spec.ts",
+      "libs/producer-tools/src/handlers/studio-tool-handlers.ts",
+      "libs/producer-tools/src/index.ts",
+      "libs/producer-tools/src/mcp/studio-mcp-server.spec.ts",
+      "libs/producer-tools/src/prompt/build-producer-prompt.spec.ts",
+      "libs/producer-tools/src/prompt/build-producer-prompt.ts",
+      "sdd/specs/spec-e-burgos-018-producer-free-tier/cycles/cycle-04/cycle.json",
+      "sdd/specs/spec-e-burgos-018-producer-free-tier/cycles/cycle-04/plan.md",
+      "sdd/specs/spec-e-burgos-018-producer-free-tier/cycles/cycle-04/tasks.json"
+    ],
+    "files_deleted": [],
+    "usage": {
+      "tokens_in": 904355,
+      "tokens_out": 158944,
+      "approx": true,
+      "source": "agent-usage-notification",
+      "by_agent": [
+        {
+          "agent": "implementor-front",
+          "label": "TASK-003 web y CHANGELOG",
+          "provider_model": "claude/sonnet",
+          "effort": "medium",
+          "tokens_in": 81942,
+          "tokens_out": 14460,
+          "tokens_total": 96402,
+          "approx": true,
+          "source": "agent-usage-notification",
+          "recorded_at": "2026-09-26"
+        },
+        {
+          "agent": "implementor-back",
+          "label": "TASK-007/008 patch_timeline y prompt",
+          "provider_model": "claude/sonnet",
+          "effort": "medium",
+          "tokens_in": 272434,
+          "tokens_out": 48076,
+          "tokens_total": 320510,
+          "approx": true,
+          "source": "agent-usage-notification",
+          "recorded_at": "2026-09-26"
+        },
+        {
+          "agent": "implementor-back",
+          "label": "TASK-010 voz y errores de job",
+          "provider_model": "claude/sonnet",
+          "effort": "medium",
+          "tokens_in": 279979,
+          "tokens_out": 49408,
+          "tokens_total": 329387,
+          "approx": true,
+          "source": "agent-usage-notification",
+          "recorded_at": "2026-09-26"
+        },
+        {
+          "agent": "orchestrator",
+          "label": "bench, producciones reales, arreglos de UI, release y cierre",
+          "provider_model": "claude/opus",
+          "effort": "high",
+          "tokens_in": 270000,
+          "tokens_out": 47000,
+          "tokens_total": 317000,
+          "approx": true,
+          "source": "declared-estimate",
+          "recorded_at": "2026-09-26"
+        }
+      ],
+      "by_tier": {
+        "claude/sonnet": {
+          "tokens_in": 634355,
+          "tokens_out": 111944,
+          "approx": true,
+          "source": "agent-usage-notification"
+        },
+        "claude/opus": {
+          "tokens_in": 270000,
+          "tokens_out": 47000,
+          "approx": true,
+          "source": "declared-estimate"
+        }
+      }
+    }
+  },
   "tables_created": [],
   "endpoints_implemented": [],
   "components_created": [],
-  "issues_found": [],
-  "reviewer_report": null
+  "issues_found": [
+    "Benchmark de gratuitos: primera pasada con el proveedor saturado tras el reset e inkling limitado a arneses agénticos; la heurística del bench confundió un 403 con cuota diaria. El dev decidió no recomendar gratuitos.",
+    "Subtítulos sin tildes por put_timeline de reemplazo total → patch_timeline + guarda.",
+    "Voz rota al acelerar una línea (--vits-length-scale en dos argumentos) — defecto presente en 0.1.0.",
+    "wait_for_job escondía el error real del job (schema equivocado).",
+    "Scroll horizontal en la página del proyecto por columnas fr sin minmax(0,…)."
+  ],
+  "reviewer_report": {
+    "approved": true,
+    "date": "2026-09-26",
+    "ca_results": {
+      "US-018-401": "PARCIAL por decisión del dev — primera pasada real (dots-3-note 0/2; qwen/gemma saturados en origen; inkling solo arneses agénticos); el dev pidió cerrar el tema sin recomendar gratuitos.",
+      "US-018-402": "PASS con alcance cambiado — ningún gratuito en la lista recomendada; la web explica por qué y lista los cuatro con tools+imagen para quien igual quiera probar; precios vigentes.",
+      "US-018-403": "PASS — 0.2.0 publicada en R2, sha256 de la descarga completa igual al build; web con las funciones nuevas; MCP empaquetado con 18 tools.",
+      "US-018-404": "PASS — 13/13 tutoriales de display ads producidos desde la app, con tildes y duración exacta; 4 defectos encontrados y arreglados; sin scroll horizontal."
+    },
+    "tests": {
+      "sdd:validate": "OK",
+      "suite": "nx run-many -t lint test build verde en render-api, producer-tools, media-local, timeline-core, web, desktop, docs-site, auto-montage",
+      "e2e": "display-ads-productions.md, patch-timeline-smoke.md, voice-fit-repro.md, release-dry-run.md, publish-log.md"
+    },
+    "notes": "Ciclo lite ampliado a pedido del dev con pruebas reales desde la app instalada (apuntada a media/ del repo, que queda así).",
+    "follow_ups": [
+      "Probar la instalación en la Mac de un amigo.",
+      "Contraste de subtítulos blancos sobre interfaces claras.",
+      "Loudness de la mezcla ≈ −18 LUFS (YouTube normaliza a −14)."
+    ]
+  }
 }

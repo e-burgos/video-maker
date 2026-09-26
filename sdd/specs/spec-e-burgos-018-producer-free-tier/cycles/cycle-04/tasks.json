@@ -7,7 +7,9 @@
     "apps/render-api",
     "apps/docs-site",
     "apps/desktop",
-    "libs/producer-tools"
+    "libs/producer-tools",
+    "libs/media-local",
+    "apps/web"
   ],
   "flow": "lite",
   "user_stories_generated": true,
@@ -141,10 +143,20 @@
       "depends_on": [
         "TASK-004"
       ],
-      "status": "pending",
+      "status": "done",
       "files": [
         "sdd/specs/spec-e-burgos-018-producer-free-tier/cycles/cycle-04/artifacts/publish-log.md"
-      ]
+      ],
+      "usage": {
+        "provider_model": "claude/opus",
+        "effort": "high",
+        "agent": "orchestrator",
+        "tokens_in": 20000,
+        "tokens_out": 3000,
+        "approx": true,
+        "source": "declared-estimate",
+        "recorded_at": "2026-09-26"
+      }
     },
     {
       "id": "TASK-006",
@@ -159,8 +171,26 @@
       "depends_on": [
         "TASK-005"
       ],
-      "status": "pending",
-      "files": []
+      "status": "done",
+      "files": [
+        "sdd/context/apps/render-api/updates/2026-09-26-spec-e-burgos-018-producer-free-tier-cycle-04.md",
+        "sdd/context/apps/docs-site/updates/2026-09-26-spec-e-burgos-018-producer-free-tier-cycle-04.md",
+        "sdd/context/apps/desktop/updates/2026-09-26-spec-e-burgos-018-producer-free-tier-cycle-04.md",
+        "sdd/context/libs/producer-tools/updates/2026-09-26-spec-e-burgos-018-producer-free-tier-cycle-04.md",
+        "sdd/context/libs/media-local/updates/2026-09-26-spec-e-burgos-018-producer-free-tier-cycle-04.md",
+        "sdd/context/apps/web/updates/2026-09-26-spec-e-burgos-018-producer-free-tier-cycle-04.md",
+        "sdd/memory/journal/2026-09-26-spec-e-burgos-018-producer-free-tier-cycle-04.md"
+      ],
+      "usage": {
+        "provider_model": "claude/opus",
+        "effort": "high",
+        "agent": "orchestrator",
+        "tokens_in": 40000,
+        "tokens_out": 8000,
+        "approx": true,
+        "source": "declared-estimate",
+        "recorded_at": "2026-09-26"
+      }
     },
     {
       "id": "TASK-007",

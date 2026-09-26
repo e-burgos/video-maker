@@ -462,11 +462,13 @@
             "apps/render-api",
             "apps/docs-site",
             "apps/desktop",
-            "libs/producer-tools"
+            "libs/producer-tools",
+            "libs/media-local",
+            "apps/web"
           ],
-          "status": "in-progress",
+          "status": "completed",
           "tasks_total": 10,
-          "tasks_done": 8
+          "tasks_done": 10
         }
       }
     }
