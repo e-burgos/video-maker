@@ -2,6 +2,7 @@ import { access, constants } from 'node:fs/promises';
 import { homedir } from 'node:os';
 import { join } from 'node:path';
 import { spawn } from 'node:child_process';
+import type { ChildProcess } from 'node:child_process';
 
 const START_MARKER = '__video_maker_login_path_start__';
 const END_MARKER = '__video_maker_login_path_end__';
@@ -18,28 +19,46 @@ export interface CommandRunner {
   run(command: string, args: readonly string[], opts: { timeoutMs: number }): Promise<CommandResult>;
 }
 
+function killProcessGroup(child: ChildProcess): void {
+  if (child.pid === undefined) {
+    return;
+  }
+  try {
+    process.kill(-child.pid, 'SIGKILL');
+  } catch {
+    child.kill('SIGKILL');
+  }
+}
+
 export const nodeCommandRunner: CommandRunner = {
   run(command, args, { timeoutMs }) {
     return new Promise((resolve) => {
-      const child = spawn(command, args, { stdio: ['ignore', 'pipe', 'ignore'] });
+      const child = spawn(command, args, { stdio: ['ignore', 'pipe', 'ignore'], detached: true });
       let stdout = '';
-      let timedOut = false;
+      let settled = false;
+
+      const settle = (result: CommandResult): void => {
+        if (settled) {
+          return;
+        }
+        settled = true;
+        clearTimeout(timer);
+        resolve(result);
+      };
 
       const timer = setTimeout(() => {
-        timedOut = true;
-        child.kill('SIGKILL');
+        killProcessGroup(child);
+        settle({ stdout, exitCode: null, timedOut: true });
       }, timeoutMs);
 
       child.stdout?.on('data', (chunk: Buffer) => {
         stdout += chunk.toString('utf8');
       });
       child.on('error', () => {
-        clearTimeout(timer);
-        resolve({ stdout, exitCode: null, timedOut });
+        settle({ stdout, exitCode: null, timedOut: false });
       });
       child.on('close', (code) => {
-        clearTimeout(timer);
-        resolve({ stdout, exitCode: code, timedOut });
+        settle({ stdout, exitCode: code, timedOut: false });
       });
     });
   },

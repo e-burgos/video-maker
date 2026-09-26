@@ -127,6 +127,13 @@ describe('nodeCommandRunner (real process)', () => {
     expect(result.timedOut).toBe(true);
   });
 
+  it('returns on the timeout even when a grandchild keeps the output pipe open', async () => {
+    const startedAt = Date.now();
+    const result = await nodeCommandRunner.run('/bin/sh', ['-c', 'sleep 5; echo done'], { timeoutMs: 50 });
+    expect(result.timedOut).toBe(true);
+    expect(Date.now() - startedAt).toBeLessThan(1000);
+  });
+
   it('reports a non-zero exit code', async () => {
     const result = await nodeCommandRunner.run('/bin/sh', ['-c', 'exit 3'], { timeoutMs: 5000 });
     expect(result.exitCode).toBe(3);

@@ -64,6 +64,8 @@
     "files_modified": [
       "apps/desktop/CHANGELOG.md",
       "apps/desktop/package.json",
+      "apps/desktop/src/main/login-shell-path.spec.ts",
+      "apps/desktop/src/main/login-shell-path.ts",
       "apps/docs-site/src/content/connect-ai.mjs",
       "apps/docs-site/src/content/faq.mjs",
       "apps/docs-site/src/content/using-studio.mjs",
@@ -171,7 +173,8 @@
     "Subtítulos sin tildes por put_timeline de reemplazo total → patch_timeline + guarda.",
     "Voz rota al acelerar una línea (--vits-length-scale en dos argumentos) — defecto presente en 0.1.0.",
     "wait_for_job escondía el error real del job (schema equivocado).",
-    "Scroll horizontal en la página del proyecto por columnas fr sin minmax(0,…)."
+    "Scroll horizontal en la página del proyecto por columnas fr sin minmax(0,…).",
+    "CI rojo desde el cierre de la 017: nodeCommandRunner esperaba el close de los pipes tras matar solo al shell; ahora mata el grupo de procesos y resuelve al vencer el timeout (test nuevo que reproduce el caso de Linux en macOS)."
   ],
   "reviewer_report": {
     "approved": true,
