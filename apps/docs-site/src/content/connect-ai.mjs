@@ -39,7 +39,7 @@ ${screenshotFigure(depth, 'settings-openrouter.png', 'Configuración → Product
 
 <h3>Modelos recomendados y costo real</h3>
 <p>
-Precios verificados en vivo dentro de la app (25/09/2026). El costo de una Receta Tutorial se
+Precios verificados en vivo en el catálogo de OpenRouter (26/09/2026). El costo de una Receta Tutorial se
 midió corriendo el video completo de punta a punta (guion, voz, música y render) con material
 real — 817 989 tokens de entrada y 42 651 de salida en 4 turnos — y después se recalculó al
 precio vigente de cada modelo:
@@ -49,8 +49,8 @@ ${infoTable(
   [
     [
       '<strong>DeepSeek V4.1 Flash</strong> (recomendado, es el que trae la app por defecto)',
-      'US$0.30 entrada · US$1.20 salida',
-      '<strong>≈US$0.30</strong> (recalculado al precio actual)',
+      'US$0.14 entrada · US$0.42 salida',
+      '<strong>≈US$0.13</strong> (recalculado al precio actual)',
     ],
     [
       'Claude Haiku 4.5 (referencia de calidad)',
@@ -62,11 +62,15 @@ ${infoTable(
 
 ${calloutBox(
   'warning',
-  '<p><strong>Modelos gratis de OpenRouter:</strong> hay opciones marcadas ":free" en el catálogo, pero OpenRouter ' +
-    'limita cuántos pedidos por día y por minuto podés hacerles, y según la configuración de privacidad de tu cuenta ' +
-    'las conversaciones con esos modelos pueden usarse para entrenarlos. Revisá esa configuración en ' +
-    '<a href="https://openrouter.ai/settings/privacy">openrouter.ai/settings/privacy</a> antes de usarlos si te ' +
-    'importa la privacidad de tu material.</p>',
+  '<p><strong>No recomendamos los modelos gratis de OpenRouter.</strong> Los probamos con el productor real y ' +
+    'ninguno terminó la tarea: se saturan en los horarios de más uso, tienen un tope de pedidos por día y por minuto, ' +
+    'algunos solo funcionan dentro de ciertas apps y, según la configuración de privacidad de tu cuenta, lo que les ' +
+    'mandás puede usarse para entrenarlos. DeepSeek V4.1 Flash cuesta centavos por video.</p>' +
+    '<p>Si igual querés probar uno, estos son los gratis que hoy aceptan herramientas e imágenes (lo que necesita el ' +
+    'productor): <code>google/gemma-4-31b-it:free</code>, <code>qwen/qwen3.8-27b:free</code>, ' +
+    '<code>google/gemma-4-26b-a4b-it:free</code> y <code>nvidia/nemotron-3-nano-omni-30b-a3b-reasoning:free</code>. ' +
+    'Buscalo en Configuración → pestaña "Todos los modelos", sin garantía de que termine el video. Antes, ' +
+    'revisá <a href="https://openrouter.ai/settings/privacy">openrouter.ai/settings/privacy</a>.</p>',
 )}
 `;
 

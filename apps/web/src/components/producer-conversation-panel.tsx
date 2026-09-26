@@ -95,7 +95,7 @@ export function ProducerConversationPanel({ producer, pinned = false }: Producer
   return (
     <div
       data-testid="producer-conversation-panel"
-      className={`relative ${pinned ? 'flex h-full min-h-0 flex-col' : 'space-y-4'}`}
+      className={`relative min-w-0 ${pinned ? 'flex h-full min-h-0 flex-col' : 'space-y-4'}`}
       onDragEnter={onDragEnter}
       onDragOver={onDragOver}
       onDragLeave={onDragLeave}

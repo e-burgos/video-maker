@@ -82,7 +82,7 @@ export function ProducerTurnActivity({
     <div
       data-testid="producer-turn-activity"
       data-status={status}
-      className="space-y-3 rounded-lg border border-slate-800 bg-slate-900/40 p-4"
+      className="min-w-0 space-y-3 rounded-lg border border-slate-800 bg-slate-900/40 p-4"
     >
       <div className="flex items-center justify-between gap-3">
         <p className="font-mono text-xs uppercase tracking-wide text-slate-400">
@@ -111,7 +111,7 @@ export function ProducerTurnActivity({
         className="max-h-64 space-y-1 overflow-y-auto rounded-md border border-slate-800 bg-slate-950 p-3 font-mono text-xs text-slate-400"
       >
         {turn?.events.map((event, index) => (
-          <li key={index} data-event-type={event.type} className="truncate">
+          <li key={index} data-event-type={event.type} className="whitespace-pre-wrap break-words [overflow-wrap:anywhere]">
             {eventLabel(event)}
           </li>
         ))}

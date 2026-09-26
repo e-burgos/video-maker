@@ -78,7 +78,7 @@ export function ProjectWorkspacePage() {
       </header>
 
       {isWide ? (
-        <div className="grid min-h-0 flex-1 grid-cols-[3fr_2fr] gap-6">
+        <div className="grid min-h-0 flex-1 grid-cols-[minmax(0,3fr)_minmax(0,2fr)] gap-6">
           <ProducerConversationPanel producer={producer} pinned />
           <div className="h-full min-h-0 overflow-y-auto">{sidePanel}</div>
         </div>

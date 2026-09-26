@@ -12,7 +12,9 @@ y la usa como notas del release.
   la biblioteca de NASA, directo desde la conversación — el crédito de cada uno se guarda solo
   en el archivo de créditos del proyecto.
 - El productor ahora puede mirar las fotos que subís, para armar mejor la Receta Publicidad.
-- MODELOS_GRATIS_PENDIENTE
+- Arreglado: la voz generada fallaba cuando una frase tenía que acelerarse un poco para entrar en su
+  tiempo, y los subtítulos podían perder las tildes al ajustar el logo o las placas.
+- La web explica por qué no recomendamos los modelos gratis de OpenRouter y actualiza los precios.
 
 ## 0.1.0 — Primera versión para amigos
 
