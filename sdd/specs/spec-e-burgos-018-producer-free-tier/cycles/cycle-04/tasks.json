@@ -17,22 +17,33 @@
   "tasks": [
     {
       "id": "TASK-001",
-      "title": "Run the real benchmark over the live free candidates after the daily reset (2 runs each, US$3 cap) and keep its report",
+      "title": "Run the real benchmark over the live free candidates after the daily reset (2 runs each, US$3 cap) and keep its report — first pass ran at 00:05 UTC; stopped by the dev after it (free models are not recommended)",
       "user_stories": [
         "US-018-401"
       ],
       "estimation_hours": 1.5,
       "story_points": 1,
       "depends_on": [],
-      "status": "pending",
+      "status": "done",
       "files": [
-        "sdd/specs/spec-e-burgos-018-producer-free-tier/cycles/cycle-04/artifacts/openrouter-free-model-bench.md",
-        "sdd/specs/spec-e-burgos-018-producer-free-tier/cycles/cycle-04/artifacts/openrouter-free-model-bench-results.json"
-      ]
+        "sdd/specs/spec-e-burgos-018-producer-free-tier/cycles/cycle-04/artifacts/openrouter-free-model-bench-run1.md",
+        "sdd/specs/spec-e-burgos-018-producer-free-tier/cycles/cycle-04/artifacts/openrouter-free-model-bench-run1-results.json",
+        "libs/producer-tools/e2e/openrouter-model-bench.mjs"
+      ],
+      "usage": {
+        "provider_model": "claude/opus",
+        "effort": "high",
+        "agent": "orchestrator",
+        "tokens_in": 30000,
+        "tokens_out": 5000,
+        "approx": true,
+        "source": "declared-estimate",
+        "recorded_at": "2026-09-26"
+      }
     },
     {
       "id": "TASK-002",
-      "title": "Add every free model that passed 2/2 to the recommended OpenRouter models with tier free and its metrics, and update the models and prices section of the docs site",
+      "title": "Per the dev: no free model enters the recommended list; the docs site says free models are not recommended, lists the free ones with tools and images for whoever still wants to try, and shows current prices",
       "user_stories": [
         "US-018-402"
       ],
@@ -41,12 +52,21 @@
       "depends_on": [
         "TASK-001"
       ],
-      "status": "pending",
+      "status": "done",
       "files": [
-        "apps/render-api/src/config/recommended-openrouter-models.ts",
-        "apps/render-api/src/config/recommended-openrouter-models.spec.ts",
-        "apps/docs-site/src/content/connect-ai.mjs"
-      ]
+        "apps/docs-site/src/content/connect-ai.mjs",
+        "apps/desktop/CHANGELOG.md"
+      ],
+      "usage": {
+        "provider_model": "claude/opus",
+        "effort": "high",
+        "agent": "orchestrator",
+        "tokens_in": 20000,
+        "tokens_out": 4000,
+        "approx": true,
+        "source": "declared-estimate",
+        "recorded_at": "2026-09-26"
+      }
     },
     {
       "id": "TASK-003",
@@ -89,10 +109,26 @@
         "TASK-007",
         "TASK-008"
       ],
-      "status": "pending",
+      "status": "done",
       "files": [
-        "sdd/specs/spec-e-burgos-018-producer-free-tier/cycles/cycle-04/artifacts/release-dry-run.md"
-      ]
+        "sdd/specs/spec-e-burgos-018-producer-free-tier/cycles/cycle-04/artifacts/release-dry-run.md",
+        "sdd/specs/spec-e-burgos-018-producer-free-tier/cycles/cycle-04/artifacts/workspace-no-horizontal-scroll.png",
+        "apps/web/src/components/producer-turn-activity.tsx",
+        "apps/web/src/components/producer-conversation-panel.tsx",
+        "apps/web/src/components/producer-message-list.tsx",
+        "apps/web/src/pages/project-workspace-page.tsx",
+        "libs/producer-tools/src/prompt/build-producer-prompt.ts"
+      ],
+      "usage": {
+        "provider_model": "claude/opus",
+        "effort": "high",
+        "agent": "orchestrator",
+        "tokens_in": 40000,
+        "tokens_out": 7000,
+        "approx": true,
+        "source": "declared-estimate",
+        "recorded_at": "2026-09-26"
+      }
     },
     {
       "id": "TASK-005",
