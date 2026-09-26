@@ -58,7 +58,7 @@ const VOICE_JOB_POLL_TIMEOUT_MS = 90 * 1000;
 const VOICE_JOB_POLL_INTERVAL_MS = 3000;
 const FREE_MODEL_PACE_MS = 9000;
 const PAID_MODEL_PACE_MS = 2000;
-const RATE_LIMIT_BACKOFF_MS = 20000;
+const rateLimitPolicy = { backoffMs: 20000, retries: 1 };
 const DEFAULT_BASE_PORT = 4520;
 
 function log(scope, message) {
@@ -411,13 +411,8 @@ async function runOneAttempt({ producerTools, apiKey, candidate, port, mediaRoot
     (runtimeError instanceof producerTools.OpenRouterProducerRuntimeError && runtimeError.code === 'OPENROUTER_FREE_QUOTA_EXHAUSTED') ||
     /per-day/iu.test(errorMessage);
 
-  const genericFailureBeforeAnyToolCall =
-    runtimeError !== null && toolCalls.length === 0 && seconds < 15 &&
-    (!(runtimeError instanceof producerTools.OpenRouterProducerRuntimeError) || runtimeError.code === 'OPENROUTER_FAILED');
-  const likelyFreeTierDailyQuota = candidate.tier === 'free' && genericFailureBeforeAnyToolCall;
-
-  const rateLimited = explicitRateLimit || likelyFreeTierDailyQuota;
-  const dailyQuotaExhausted = explicitDailyQuota || likelyFreeTierDailyQuota;
+  const rateLimited = explicitRateLimit || explicitDailyQuota;
+  const dailyQuotaExhausted = explicitDailyQuota;
 
   return {
     candidateId: candidate.id,
@@ -437,10 +432,7 @@ async function runOneAttempt({ producerTools, apiKey, candidate, port, mediaRoot
     dailyQuotaExhausted,
     errorCode: runtimeError instanceof producerTools.OpenRouterProducerRuntimeError ? runtimeError.code : (runtimeError !== null ? 'UNEXPECTED' : null),
     errorHint: runtimeError !== null
-      ? (likelyFreeTierDailyQuota && !explicitDailyQuota
-        ? `${errorMessage} (heuristic: free-tier call failed before any tool call in <15s; a direct control probe against this account outside the runtime wrapper reproduced "Rate limit exceeded: free-models-per-day-high-balance" for this exact failure shape)`
-        : errorMessage
-      ).slice(0, 500)
+      ? errorMessage.slice(0, 500)
       : null,
   };
 }
@@ -478,9 +470,10 @@ async function runOneRun(options) {
 
     if (attempt.rateLimited && attempt.dailyQuotaExhausted) {
       log(candidate.id, 'rate limited by a per-day quota, not a per-minute one: skipping the backoff retry, it would not help today');
-    } else if (attempt.rateLimited) {
-      log(candidate.id, `rate limited, backing off ${RATE_LIMIT_BACKOFF_MS}ms and retrying once`);
-      await new Promise((resolve) => setTimeout(resolve, RATE_LIMIT_BACKOFF_MS));
+    }
+    for (let retry = 0; retry < rateLimitPolicy.retries && attempt.rateLimited && !attempt.dailyQuotaExhausted; retry += 1) {
+      log(candidate.id, `rate limited, backing off ${rateLimitPolicy.backoffMs}ms (retry ${retry + 1}/${rateLimitPolicy.retries})`);
+      await new Promise((resolve) => setTimeout(resolve, rateLimitPolicy.backoffMs));
       attempt = await runOneAttempt({
         producerTools,
         apiKey,
@@ -694,6 +687,8 @@ async function main() {
   const candidates = resolveCandidates(args, discoveredFree);
   const artifactsDir = args.out !== undefined ? args.out : DEFAULT_ARTIFACTS_DIR;
   const reportName = args['report-name'] !== undefined ? args['report-name'] : DEFAULT_REPORT_NAME;
+  rateLimitPolicy.backoffMs = args['backoff-ms'] !== undefined ? Number(args['backoff-ms']) : rateLimitPolicy.backoffMs;
+  rateLimitPolicy.retries = args['rate-limit-retries'] !== undefined ? Number(args['rate-limit-retries']) : rateLimitPolicy.retries;
   const basePort = args['base-port'] !== undefined ? Number(args['base-port']) : DEFAULT_BASE_PORT;
   const reportTitle = args.title !== undefined ? args.title : 'Benchmark de modelos OpenRouter';
 

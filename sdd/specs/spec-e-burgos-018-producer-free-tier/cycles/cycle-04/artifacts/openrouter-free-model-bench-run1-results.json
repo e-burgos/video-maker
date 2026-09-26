@@ -1,0 +1,375 @@
+{
+  "generatedAt": "2026-09-26T00:09:45.952Z",
+  "scenario": "Mirá el material de este proyecto: medí el A-roll, mirá 3 frames repartidos y escribí en work/producer/script.txt un guion de 4 a 6 líneas con marcas [m:ss] sincronizadas con lo que pasa en pantalla. Después generá la voz con Daniela. No hagas montaje ni render.",
+  "sourceProject": "display-ads-analiticas",
+  "arollDurationSeconds": 71.2,
+  "budgetCapUsd": 3,
+  "perRunBudgetUsd": 0.4,
+  "totalSpentUsd": 0,
+  "candidates": [
+    {
+      "id": "qwen/qwen3.8-27b:free",
+      "tier": "free",
+      "reason": "Gratis y vivo en el catálogo con tools e imagen (contexto 262144)."
+    },
+    {
+      "id": "dots-studio/dots-3-note-preview:free",
+      "tier": "free",
+      "reason": "Gratis y vivo en el catálogo con tools e imagen (contexto 512000)."
+    },
+    {
+      "id": "thinkingmachines/inkling-small:free",
+      "tier": "free",
+      "reason": "Gratis y vivo en el catálogo con tools e imagen (contexto 1048576)."
+    },
+    {
+      "id": "thinkingmachines/inkling:free",
+      "tier": "free",
+      "reason": "Gratis y vivo en el catálogo con tools e imagen (contexto 1048576)."
+    },
+    {
+      "id": "nvidia/nemotron-3-nano-omni-30b-a3b-reasoning:free",
+      "tier": "free",
+      "reason": "Gratis y vivo en el catálogo con tools e imagen (contexto 256000)."
+    },
+    {
+      "id": "google/gemma-4-26b-a4b-it:free",
+      "tier": "free",
+      "reason": "Gratis y vivo en el catálogo con tools e imagen (contexto 262144)."
+    },
+    {
+      "id": "google/gemma-4-31b-it:free",
+      "tier": "free",
+      "reason": "Gratis y vivo en el catálogo con tools e imagen (contexto 262144)."
+    }
+  ],
+  "runs": [
+    {
+      "candidateId": "qwen/qwen3.8-27b:free",
+      "tier": "free",
+      "startedAt": "2026-09-26T00:05:42.350Z",
+      "seconds": 6.961,
+      "steps": null,
+      "usage": {
+        "inputTokens": null,
+        "outputTokens": null,
+        "costUsd": null
+      },
+      "toolCallNames": [],
+      "toolErrorCount": 0,
+      "framesRequested": [],
+      "scriptLineCount": 0,
+      "finalTextPreview": "",
+      "criteria": {
+        "calledOverview": false,
+        "probedAroll": false,
+        "framesCount3OrMore": false,
+        "scriptValid": false,
+        "voiceJobSucceeded": false,
+        "noMontageOrRender": true,
+        "finalAnswerSpanish": false
+      },
+      "success": false,
+      "rateLimited": true,
+      "dailyQuotaExhausted": false,
+      "errorCode": "OPENROUTER_RATE_LIMITED",
+      "errorHint": "OpenRouter rate-limited this request. Wait a moment and try again."
+    },
+    {
+      "candidateId": "qwen/qwen3.8-27b:free",
+      "tier": "free",
+      "startedAt": "2026-09-26T00:06:27.197Z",
+      "seconds": 6.982,
+      "steps": null,
+      "usage": {
+        "inputTokens": null,
+        "outputTokens": null,
+        "costUsd": null
+      },
+      "toolCallNames": [],
+      "toolErrorCount": 0,
+      "framesRequested": [],
+      "scriptLineCount": 0,
+      "finalTextPreview": "",
+      "criteria": {
+        "calledOverview": false,
+        "probedAroll": false,
+        "framesCount3OrMore": false,
+        "scriptValid": false,
+        "voiceJobSucceeded": false,
+        "noMontageOrRender": true,
+        "finalAnswerSpanish": false
+      },
+      "success": false,
+      "rateLimited": true,
+      "dailyQuotaExhausted": false,
+      "errorCode": "OPENROUTER_RATE_LIMITED",
+      "errorHint": "OpenRouter rate-limited this request. Wait a moment and try again."
+    },
+    {
+      "candidateId": "dots-studio/dots-3-note-preview:free",
+      "tier": "free",
+      "startedAt": "2026-09-26T00:06:44.812Z",
+      "seconds": 77.351,
+      "steps": 7,
+      "usage": {
+        "inputTokens": 101943,
+        "outputTokens": 2019,
+        "costUsd": 0
+      },
+      "toolCallNames": [
+        "mcp__studio__get_project_overview",
+        "mcp__studio__probe_media",
+        "mcp__studio__extract_frames",
+        "mcp__studio__write_project_text",
+        "mcp__studio__start_job",
+        "mcp__studio__wait_for_job",
+        "mcp__studio__read_project_text"
+      ],
+      "toolErrorCount": 0,
+      "framesRequested": [
+        10,
+        35,
+        60
+      ],
+      "scriptLineCount": 5,
+      "finalTextPreview": "\n\nListo. Acá va el resumen de lo que hice:\n\n**Material revisado**\n- A-roll: `analiticas.mp4`, 71.2 s, 1920×1080, 30 fps, sin audio.\n- Los 3 frames mostraron: a los 10 s el dashboard completo con todos los cards (tasa de conexión, dispositivos online, campañas, tokens), a los 35 s el heatmap de densidad de reproducciones con los cards inferiores (hora pico, día de mayor impacto, pantalla más activa",
+      "criteria": {
+        "calledOverview": true,
+        "probedAroll": true,
+        "framesCount3OrMore": true,
+        "scriptValid": false,
+        "voiceJobSucceeded": true,
+        "noMontageOrRender": true,
+        "finalAnswerSpanish": true
+      },
+      "success": false,
+      "rateLimited": false,
+      "dailyQuotaExhausted": false,
+      "errorCode": null,
+      "errorHint": null
+    },
+    {
+      "candidateId": "dots-studio/dots-3-note-preview:free",
+      "tier": "free",
+      "startedAt": "2026-09-26T00:08:13.448Z",
+      "seconds": 81.744,
+      "steps": 9,
+      "usage": {
+        "inputTokens": 142056,
+        "outputTokens": 2114,
+        "costUsd": 0
+      },
+      "toolCallNames": [
+        "mcp__studio__get_project_overview",
+        "mcp__studio__probe_media",
+        "mcp__studio__probe_media",
+        "mcp__studio__extract_frames",
+        "mcp__studio__write_project_text",
+        "mcp__studio__list_voices",
+        "mcp__studio__start_job",
+        "mcp__studio__wait_for_job",
+        "mcp__studio__read_project_text"
+      ],
+      "toolErrorCount": 0,
+      "framesRequested": [
+        5,
+        15,
+        25,
+        35,
+        45,
+        55,
+        65
+      ],
+      "scriptLineCount": 6,
+      "finalTextPreview": "\n\nListo — ya revisé el material, escribí el guion y generé la voz con Daniela. Pero hay un problema que debemos corregir.\n\n**Lo que hice:**\n\n- **A-roll:** `analiticas.mp4`, 71,2 s, 1920×1080 a 30 fps, sin audio. Es un screen recording del panel de analíticas de DisplayAds.\n- **Frames revisados:** a los 5, 15, 25, 35, 45, 55 y 65 s. Vi la tarjeta de Connection Rate (67%), dispositivos online (2/3),",
+      "criteria": {
+        "calledOverview": true,
+        "probedAroll": true,
+        "framesCount3OrMore": true,
+        "scriptValid": false,
+        "voiceJobSucceeded": true,
+        "noMontageOrRender": true,
+        "finalAnswerSpanish": true
+      },
+      "success": false,
+      "rateLimited": false,
+      "dailyQuotaExhausted": false,
+      "errorCode": null,
+      "errorHint": null
+    },
+    {
+      "candidateId": "thinkingmachines/inkling-small:free",
+      "tier": "free",
+      "startedAt": "2026-09-26T00:09:45.839Z",
+      "seconds": 0.095,
+      "steps": null,
+      "usage": {
+        "inputTokens": null,
+        "outputTokens": null,
+        "costUsd": null
+      },
+      "toolCallNames": [],
+      "toolErrorCount": 0,
+      "framesRequested": [],
+      "scriptLineCount": 0,
+      "finalTextPreview": "",
+      "criteria": {
+        "calledOverview": false,
+        "probedAroll": false,
+        "framesCount3OrMore": false,
+        "scriptValid": false,
+        "voiceJobSucceeded": false,
+        "noMontageOrRender": true,
+        "finalAnswerSpanish": false
+      },
+      "success": false,
+      "rateLimited": true,
+      "dailyQuotaExhausted": true,
+      "errorCode": "OPENROUTER_FAILED",
+      "errorHint": "The call to OpenRouter failed. (heuristic: free-tier call failed before any tool call in <15s; a direct control probe against this account outside the runtime wrapper reproduced \"Rate limit exceeded: free-models-per-day-high-balance\" for this exact failure shape)"
+    }
+  ],
+  "summaries": [
+    {
+      "id": "qwen/qwen3.8-27b:free",
+      "tier": "free",
+      "reason": "Gratis y vivo en el catálogo con tools e imagen (contexto 262144).",
+      "runs": 2,
+      "successCount": 0,
+      "successRate": 0,
+      "rateLimitedCount": 2,
+      "avgSteps": null,
+      "avgSeconds": 6.971500000000001,
+      "avgCostUsd": null,
+      "totalCostUsd": 0,
+      "criteriaTotals": {
+        "calledOverview": 0,
+        "probedAroll": 0,
+        "framesCount3OrMore": 0,
+        "scriptValid": 0,
+        "voiceJobSucceeded": 0,
+        "noMontageOrRender": 2,
+        "finalAnswerSpanish": 0
+      },
+      "imagesSupported": true
+    },
+    {
+      "id": "dots-studio/dots-3-note-preview:free",
+      "tier": "free",
+      "reason": "Gratis y vivo en el catálogo con tools e imagen (contexto 512000).",
+      "runs": 2,
+      "successCount": 0,
+      "successRate": 0,
+      "rateLimitedCount": 0,
+      "avgSteps": 8,
+      "avgSeconds": 79.5475,
+      "avgCostUsd": 0,
+      "totalCostUsd": 0,
+      "criteriaTotals": {
+        "calledOverview": 2,
+        "probedAroll": 2,
+        "framesCount3OrMore": 2,
+        "scriptValid": 0,
+        "voiceJobSucceeded": 2,
+        "noMontageOrRender": 2,
+        "finalAnswerSpanish": 2
+      },
+      "imagesSupported": true
+    },
+    {
+      "id": "thinkingmachines/inkling-small:free",
+      "tier": "free",
+      "reason": "Gratis y vivo en el catálogo con tools e imagen (contexto 1048576).",
+      "runs": 1,
+      "successCount": 0,
+      "successRate": 0,
+      "rateLimitedCount": 1,
+      "avgSteps": null,
+      "avgSeconds": 0.095,
+      "avgCostUsd": null,
+      "totalCostUsd": 0,
+      "criteriaTotals": {
+        "calledOverview": 0,
+        "probedAroll": 0,
+        "framesCount3OrMore": 0,
+        "scriptValid": 0,
+        "voiceJobSucceeded": 0,
+        "noMontageOrRender": 1,
+        "finalAnswerSpanish": 0
+      },
+      "imagesSupported": true
+    },
+    {
+      "id": "thinkingmachines/inkling:free",
+      "tier": "free",
+      "reason": "Gratis y vivo en el catálogo con tools e imagen (contexto 1048576).",
+      "runs": 0,
+      "successCount": 0,
+      "successRate": 0,
+      "rateLimitedCount": 0,
+      "avgSteps": null,
+      "avgSeconds": null,
+      "avgCostUsd": null,
+      "totalCostUsd": 0,
+      "criteriaTotals": {},
+      "imagesSupported": true
+    },
+    {
+      "id": "nvidia/nemotron-3-nano-omni-30b-a3b-reasoning:free",
+      "tier": "free",
+      "reason": "Gratis y vivo en el catálogo con tools e imagen (contexto 256000).",
+      "runs": 0,
+      "successCount": 0,
+      "successRate": 0,
+      "rateLimitedCount": 0,
+      "avgSteps": null,
+      "avgSeconds": null,
+      "avgCostUsd": null,
+      "totalCostUsd": 0,
+      "criteriaTotals": {},
+      "imagesSupported": true
+    },
+    {
+      "id": "google/gemma-4-26b-a4b-it:free",
+      "tier": "free",
+      "reason": "Gratis y vivo en el catálogo con tools e imagen (contexto 262144).",
+      "runs": 0,
+      "successCount": 0,
+      "successRate": 0,
+      "rateLimitedCount": 0,
+      "avgSteps": null,
+      "avgSeconds": null,
+      "avgCostUsd": null,
+      "totalCostUsd": 0,
+      "criteriaTotals": {},
+      "imagesSupported": true
+    },
+    {
+      "id": "google/gemma-4-31b-it:free",
+      "tier": "free",
+      "reason": "Gratis y vivo en el catálogo con tools e imagen (contexto 262144).",
+      "runs": 0,
+      "successCount": 0,
+      "successRate": 0,
+      "rateLimitedCount": 0,
+      "avgSteps": null,
+      "avgSeconds": null,
+      "avgCostUsd": null,
+      "totalCostUsd": 0,
+      "criteriaTotals": {},
+      "imagesSupported": true
+    }
+  ],
+  "recommendation": {
+    "recommended": [],
+    "defaultModel": "qwen/qwen3.8-27b:free"
+  },
+  "notes": [
+    "`thinkingmachines/inkling:free` se saltó: la cuota diaria de modelos gratis de la cuenta ya estaba agotada.",
+    "`nvidia/nemotron-3-nano-omni-30b-a3b-reasoning:free` se saltó: la cuota diaria de modelos gratis de la cuenta ya estaba agotada.",
+    "`google/gemma-4-26b-a4b-it:free` se saltó: la cuota diaria de modelos gratis de la cuenta ya estaba agotada.",
+    "`google/gemma-4-31b-it:free` se saltó: la cuota diaria de modelos gratis de la cuenta ya estaba agotada.",
+    "`thinkingmachines/inkling-small:free` no se pudo evaluar hoy: OpenRouter devolvió `Rate limit exceeded: free-models-per-day-high-balance` en las 1 corrida(s) — es un tope diario de la cuenta para modelos gratis, no algo que un backoff corto pueda resolver. Reintentar este candidato después del reset diario (00:00 UTC) con `node libs/producer-tools/e2e/openrouter-model-bench.mjs --candidates=thinkingmachines/inkling-small:free --runs=2`."
+  ]
+}
