@@ -55,10 +55,24 @@ describe('composeProject', () => {
 });
 
 describe('renderProject', () => {
+  it('leaves the music credit next to the video for the post description instead of on screen', async () => {
+    const ports = createFakePipelinePorts({ files: { [`${P}/timeline.json`]: JSON.stringify({ musicCredit: '"Tema" Autor · CC BY 4.0' }) } });
+    const result = await renderProject(ports, P, { outPath: '/out/v.mp4', fps: 30, quality: 'delivery' });
+    expect(ports.files.get('/out/v.credits.txt')).toBe('Música: "Tema" Autor · CC BY 4.0\n');
+    expect(result.lines).toEqual(['render: /out/v.mp4', 'credits: /out/v.credits.txt']);
+    expect(result.musicCredit).toBe('"Tema" Autor · CC BY 4.0');
+  });
+
+  it('writes no credits file for a silent video', async () => {
+    const ports = createFakePipelinePorts({ files: { [`${P}/timeline.json`]: JSON.stringify({ musicCredit: '' }) } });
+    await renderProject(ports, P, { outPath: '/out/v.mp4', fps: 30, quality: 'delivery' });
+    expect(ports.files.has('/out/v.credits.txt')).toBe(false);
+  });
+
   it('delegates to the render port with the given output, fps and quality', async () => {
     const ports = createFakePipelinePorts({});
     const result = await renderProject(ports, P, { outPath: '/out/v.mp4', fps: 60, quality: 'draft' });
     expect(ports.renders).toEqual([{ projectDir: P, outPath: '/out/v.mp4', fps: 60, quality: 'draft' }]);
-    expect(result).toEqual({ lines: ['render: /out/v.mp4'], outPath: '/out/v.mp4' });
+    expect(result).toEqual({ lines: ['render: /out/v.mp4'], outPath: '/out/v.mp4', creditsPath: null, musicCredit: null });
   });
 });

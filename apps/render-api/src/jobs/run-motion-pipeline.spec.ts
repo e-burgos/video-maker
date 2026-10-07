@@ -43,7 +43,7 @@ vi.mock('@video-maker/motion-graphics', async (importOriginal) => {
     },
     planProject: step('planProject', { lines: [] }),
     composeProject: step('composeProject', { lines: [], scenes: 9, durationSec: 61.5 }),
-    renderProject: step('renderProject', { lines: [], outPath: '' }),
+    renderProject: step('renderProject', { lines: [], outPath: '', creditsPath: null, musicCredit: '"Tema" Autor · CC BY 4.0' }),
   };
 });
 
@@ -51,7 +51,7 @@ import { runMotionPipeline } from './run-motion-pipeline';
 import type { MotionPipelineObserver } from './motion-pipeline-observer';
 
 const STORYBOARD_FIXTURE = fileURLToPath(
-  new URL('../../../../libs/motion-graphics/assets/storyboards/displayads/core-pro.json', import.meta.url),
+  new URL('../../../../libs/motion-graphics/assets/storyboards/displayads/easy-pro.json', import.meta.url),
 );
 const PROJECT = resolveMediaProject('/media/promo');
 const BRIEF = {
@@ -60,7 +60,7 @@ const BRIEF = {
   script: 'Una pantalla apagada es plata perdida.',
   images: [{ file: 'shot.png', caption: 'Pantalla' }],
 };
-const REPORT_KEYS = ['durationSec', 'path', 'scenes', 'storyboard'];
+const REPORT_KEYS = ['durationSec', 'musicCredit', 'path', 'scenes', 'storyboard'];
 const STORYBOARD_REPORT_KEYS = ['costUsd', 'repaired', 'tokensIn', 'tokensOut'];
 
 function fakePorts(): MotionPipelinePorts {
@@ -131,6 +131,7 @@ describe('runMotionPipeline', () => {
     expect(report).toMatchObject({
       path: null,
       durationSec: null,
+      musicCredit: null,
       storyboard: { repaired: true, tokensIn: 1200, tokensOut: 300, costUsd: 0.42 },
     });
     expect(report.scenes).toBeGreaterThan(0);
@@ -158,7 +159,7 @@ describe('runMotionPipeline', () => {
       'stage:render',
     ]);
     expect(Object.keys(report).sort()).toEqual(REPORT_KEYS);
-    expect(report).toEqual({ path: 'out/promo.mp4', durationSec: 61.5, scenes: 9, storyboard: null });
+    expect(report).toEqual({ path: 'out/promo.mp4', durationSec: 61.5, scenes: 9, musicCredit: '"Tema" Autor · CC BY 4.0', storyboard: null });
   });
 
   it('phase all chains the storyboard step and the video steps and reports the storyboard usage', async () => {

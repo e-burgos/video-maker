@@ -34,7 +34,7 @@ const CONFIG: ServerConfig = { host: '127.0.0.1', port: 4310, webRoot: null, acc
 
 const REAL_ASSETS = fileURLToPath(new URL('../../../../../libs/motion-graphics/assets/', import.meta.url));
 const BRAND_JSON = readFileSync(`${REAL_ASSETS}brands/displayads/brand.json`, 'utf8');
-const STORYBOARD_JSON = readFileSync(`${REAL_ASSETS}storyboards/displayads/core-pro.json`, 'utf8');
+const STORYBOARD_JSON = readFileSync(`${REAL_ASSETS}storyboards/displayads/easy-pro.json`, 'utf8');
 
 const BRAND_SUMMARY_KEYS = ['formats', 'id', 'music', 'name'];
 const MUSIC_SUMMARY_KEYS = ['bpm', 'hasDrop', 'id', 'mood'];

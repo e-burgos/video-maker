@@ -271,6 +271,7 @@ function isMotionJobReport(value: unknown): boolean {
     (value['path'] === null || typeof value['path'] === 'string') &&
     (value['durationSec'] === null || typeof value['durationSec'] === 'number') &&
     typeof value['scenes'] === 'number' &&
+    (value['musicCredit'] === undefined || value['musicCredit'] === null || typeof value['musicCredit'] === 'string') &&
     (value['storyboard'] === null || isRecord(value['storyboard']))
   );
 }

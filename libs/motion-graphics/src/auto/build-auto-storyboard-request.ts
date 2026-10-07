@@ -1,3 +1,4 @@
+import { activeDeviceIds, brandImageCaption } from '../brand/brand-manifest';
 import type { BrandManifest } from '../brand/brand-manifest';
 import { motionStoryboardJsonSchema } from '../storyboard/parse-motion-storyboard';
 import { SCENE_KINDS } from '../storyboard/motion-storyboard.schema';
@@ -36,8 +37,15 @@ function systemPrompt(): string {
 }
 
 function brandSection(brand: BrandManifest): string {
-  const devices = Object.entries(brand.devices).map(([id, device]) => `${id} (${device.name}, ${device.kind})`);
-  const images = Object.keys(brand.images).map((key) => `brand:${key}`);
+  const devices = activeDeviceIds(brand).map((id) => {
+    const device = brand.devices[id];
+    const spoken = device?.spokenName === undefined ? '' : `; in vo write it "${device.spokenName}"`;
+    return `${id} (${device?.name}, ${device?.kind}${spoken})`;
+  });
+  const images = Object.keys(brand.images).map((key) => {
+    const caption = brandImageCaption(brand, key);
+    return caption === undefined ? `brand:${key}` : `brand:${key} (${caption})`;
+  });
   const music = brand.music.map((track) => `${track.id} (${track.mood}, ${track.bpm} BPM${track.drop === undefined ? ', no drop' : `, drop at ${track.drop}s`})`);
   return [
     'BRAND',
@@ -46,7 +54,7 @@ function brandSection(brand: BrandManifest): string {
     ...(brand.url === undefined ? [] : [`url: ${brand.url}`]),
     `tagline: ${brand.tagline}${brand.taglineAccent === undefined ? '' : ` ${brand.taglineAccent}`}`,
     `devices: ${devices.length === 0 ? 'none' : devices.join('; ')}`,
-    `brand images: ${images.length === 0 ? 'none' : images.join(', ')}`,
+    `brand images: ${images.length === 0 ? 'none' : images.join('; ')}`,
     `music tracks: ${music.join('; ')}`,
     `voice: ${brand.voice.id}`,
   ].join('\n');

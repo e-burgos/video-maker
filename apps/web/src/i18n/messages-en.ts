@@ -177,6 +177,7 @@ export const MESSAGES_EN = {
   'motion.storyboard.sceneChapter': 'chapter {chapter}',
   'motion.video.heading': 'Video',
   'motion.video.path': '{path} · {duration}s',
+  'motion.video.credit': 'For the post description: Music: {credit}',
   'motion.workspace.link': 'Open Motion graphics',
   'createProject.cancel': 'Cancel',
   'createProject.nameRequired': 'Enter a name for the video.',

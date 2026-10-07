@@ -22,7 +22,7 @@ export { pickBestTake } from './voice/pick-best-take';
 export type { BestTakeOptions, BestTakePorts, HeardWord, TakeAttempt, TakeTranscript } from './voice/pick-best-take';
 export { wavDurationSec } from './voice/wav-duration';
 
-export { BrandManifestSchema, parseBrandManifest } from './brand/brand-manifest';
+export { activeDeviceIds, BrandManifestSchema, brandImageCaption, brandImageFile, parseBrandManifest } from './brand/brand-manifest';
 export type { BrandManifest } from './brand/brand-manifest';
 export { BRAND_ASSET_DIR, brandImageUrl, composeStoryboard, MOTION_COMPOSITION_ID, RUNTIME_ASSET_DIR, storyboardImages } from './compose/compose-storyboard';
 export type { ComposedStoryboard, ScriptDocument } from './compose/compose-storyboard';

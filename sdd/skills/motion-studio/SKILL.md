@@ -35,8 +35,8 @@ pnpm nx run motion-studio:cli -- render  .motion-work/presentacion --out .motion
 - `plan --no-beat-sync` apaga los cortes al golpe: las escenas siguen a la voz.
 - `voice` usa el stack de voz del repo (`TTS_*` y `WHISPER_*` como `render-api`). Escuchá el reporte:
   `take 3/5 · 0.957 · <lo que entendió Whisper>`. Debajo de ~0.9, reescribí la frase en el `script.json`
-  (palabras simples, la marca con contexto: "Esto es Display Ads: cartelería digital, …", "El Core Pro",
-  "Counter quince"). "Esto es Display Ads." suelto sale mal casi siempre (Whisper oye "display house").
+  (palabras simples, la marca con contexto: "Esto es Display Ads: cartelería digital, …", "El Isi Pro"
+  (así se escribe Easy Pro para que Piper no diga "asi pro"), "Counter quince"). "Esto es Display Ads." suelto sale mal casi siempre (Whisper oye "display house").
 - `voice --only cta,intro --takes 8` rehace sólo esas líneas y conserva el resto; después `plan` y `compose`.
 - Para previsualizar: `npx --yes hyperframes@0.8.139 preview` dentro del proyecto de trabajo.
 
@@ -92,6 +92,16 @@ fuentes, equipos con el polígono de su pantalla, imágenes, temas con BPM y `dr
 con los tokens `--mg-*` que usa el runtime. `assets/runtime/` (GSAP, `motion-runtime.js`, `scenes.css`,
 sfx) es común a todas las marcas. Una marca nueva = carpeta nueva con esos dos archivos y sus assets.
 
+
+Campos de cada equipo en `brand.json → devices`: `name`, `image`, `kind` (`counter` | `box` | `screen`),
+`screen` (polígono de la pantalla, para equipos con pantalla), `spokenName` (cómo se escribe en la voz),
+`plate: true` (placa clara detrás de un equipo oscuro, como el Easy Pro) y `retired: true` (equipo que ya
+no se vende: queda para videos viejos, la IA no lo ofrece y la verificación lo rechaza). Las fotos de marca
+van como `{file, caption}`: la IA elige por la descripción.
+
+DisplayAds hoy: `counter-15` (pantalla de mostrador) y `easy-pro` (caja HDMI que convierte un TV; sin
+Ethernet ni pantalla vertical: no prometerlos); `core-pro` está retirado. Fotos en `img/scenes/` con los
+textos de la landing de display-ads; tagline "Tus pantallas, bajo control.".
 ## Plantillas a mano
 
 `tools/motion-studio/templates/<marca>/_brand/brand/` (CSS de tokens `--da-*`, `kit.js`) y una carpeta por
@@ -116,7 +126,8 @@ En el script, `createDisplayAdsKit(T, W, chapters)` devuelve `tl`, `S(id)`, `E(i
    en el navegador o mirá `hyperframes snapshot` antes del render largo.
 5. Marca DisplayAds: fondo zinc oscuro, acentos sky/teal, Outfit + Geist + Geist Mono; sin violeta ni Inter;
    logos de `docs/branding/logo-final` (`assets/brand/img/logo.svg`, `isotipo.svg`).
-6. Música CC BY: el crédito queda visible (`{{music_credit}}`).
+6. Música CC BY: el crédito NO va en pantalla en los videos de storyboard; `render` deja `<video>.credits.txt`
+   al lado del MP4 y ese texto va en la descripción de la publicación (la licencia exige atribución).
 
 ## After Effects
 

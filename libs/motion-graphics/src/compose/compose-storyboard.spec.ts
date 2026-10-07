@@ -21,7 +21,7 @@ describe('composeStoryboard', () => {
     expect(template).toContain('data-width="1920" data-height="1080"');
     expect(template).toContain('{{music_track}}');
     expect(template).toContain('id="sfx-impact"');
-    expect(template).toContain('Música: {{music_credit}}');
+    expect(template).not.toContain('{{music_credit}}');
   });
 
   it('builds the script with the brand voice, default bars and the drop anchor from the track', () => {
@@ -68,5 +68,13 @@ describe('composeStoryboard', () => {
     expect(brandImageUrl('brand:img/x.png', testBrand)).toBe('assets/brand/img/x.png');
     expect(brandImageUrl('brand:img/x.png')).toBe('assets/brand/img/x.png');
     expect(brandImageUrl('images/a.jpg', testBrand)).toBe('images/a.jpg');
+  });
+});
+
+describe('brandImageUrl', () => {
+  it('resolves plain and captioned brand images to their file', () => {
+    expect(brandImageUrl('brand:local', testBrand)).toMatch(/\/img\/local\.jpg$/u);
+    expect(brandImageUrl('brand:cafe', testBrand)).toMatch(/\/img\/scenes\/cafe\.jpg$/u);
+    expect(brandImageUrl('images/foto.jpg', testBrand)).toBe('images/foto.jpg');
   });
 });
