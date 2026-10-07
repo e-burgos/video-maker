@@ -50,7 +50,7 @@
     {
       "id": "power",
       "kind": "connections",
-      "vo": "Después enchufalo con su fuente y prendé la tele. En unos segundos arranca solo y empieza a reproducir tu campaña.",
+      "vo": "Después enchufalo con su fuente y prendé la tele. En menos de un minuto arranca solo y empieza a reproducir tu campaña.",
       "props": {
         "title": "Enchufalo",
         "accent": "y prendé la tele.",
