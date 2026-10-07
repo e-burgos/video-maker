@@ -57,3 +57,6 @@ media/
 # only the manifest and notices travel with the repo
 apps/desktop/vendor/darwin-arm64/
 apps/desktop/.vendor-cache/previews/
+
+# motion-studio CLI working projects (outside the studio media root)
+.motion-work/

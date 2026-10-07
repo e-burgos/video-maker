@@ -14,6 +14,7 @@ import type {
   ResolvedVoiceBinaries,
   VoiceModel,
 } from '@video-maker/media-local';
+import type { MotionPipelinePorts } from '@video-maker/motion-graphics';
 import type { MediaAsset, Timeline, Transcription, VoiceTarget } from '@video-maker/timeline-core';
 
 import type { EngineModuleStatus } from '../engine/engine-modules';
@@ -265,6 +266,27 @@ export interface LocalStorePort {
   readonly close: () => void;
 }
 
+export interface MotionBrandDocument {
+  readonly id: string;
+  readonly manifest: unknown;
+}
+
+export type ListMotionBrandsPort = () => Promise<readonly MotionBrandDocument[]>;
+
+export type CreateMotionPortsPort = () => MotionPipelinePorts;
+
+export interface RunHyperframesInput {
+  readonly args: readonly string[];
+  readonly cwd: string;
+}
+
+export interface RunHyperframesOutput {
+  readonly exitCode: number;
+  readonly stderr: string;
+}
+
+export type RunHyperframesPort = (input: RunHyperframesInput) => Promise<RunHyperframesOutput>;
+
 export type HashTextPort = (text: string) => string;
 
 export interface RenderApiDependencies {
@@ -303,4 +325,7 @@ export interface RenderApiDependencies {
   readonly placeVoiceTracks: PlaceVoiceTracksPort;
   readonly transcribeVoice: TranscribeVoicePort;
   readonly secretStore: SecretStore;
+  readonly listMotionBrands: ListMotionBrandsPort;
+  readonly motionPorts: CreateMotionPortsPort;
+  readonly runHyperframes: RunHyperframesPort;
 }

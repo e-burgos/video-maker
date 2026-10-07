@@ -14,8 +14,8 @@ export type MotionStudioErrorCode =
 export class MotionStudioError extends Error {
   readonly code: MotionStudioErrorCode;
 
-  constructor(code: MotionStudioErrorCode, message: string) {
-    super(message);
+  constructor(code: MotionStudioErrorCode, message: string, options?: { cause?: unknown }) {
+    super(message, options);
     this.name = 'MotionStudioError';
     this.code = code;
   }

@@ -73,8 +73,8 @@ describe('buildProducerProjectSection', () => {
 describe('buildProducerPrompt — herramientas del estudio', () => {
   const prompt = buildProducerPrompt(CONTEXT);
 
-  it('nombra las 18 herramientas del contrato', () => {
-    expect(STUDIO_TOOL_NAMES).toHaveLength(18);
+  it('nombra las 22 herramientas del contrato', () => {
+    expect(STUDIO_TOOL_NAMES).toHaveLength(22);
     for (const tool of STUDIO_TOOL_NAMES) {
       expect(prompt).toContain(tool);
     }
@@ -256,5 +256,34 @@ describe('buildProducerPrompt — dónde está cada cosa', () => {
     expect(prompt).not.toContain('`voice` screen');
     expect(prompt).not.toContain('`storyboard` screen');
     expect(prompt).not.toContain('name the screen first');
+  });
+});
+
+describe('buildProducerPrompt motion mode', () => {
+  const motionPrompt = buildProducerPrompt({ ...CONTEXT, mode: 'motion' });
+
+  it('adds the motion recipe with the two phases and the wait for approval', () => {
+    expect(motionPrompt).toContain('Motion project recipe');
+    expect(motionPrompt).toContain('"phase":"storyboard"');
+    expect(motionPrompt).toContain('"phase":"video"');
+    expect(motionPrompt).toContain('write_motion_brief');
+    expect(motionPrompt).toContain('view_images');
+    expect(motionPrompt).toContain('wait for an OK');
+  });
+
+  it('drops the footage recipes in a motion project', () => {
+    expect(motionPrompt).not.toContain('## Tutorial recipe');
+    expect(motionPrompt).not.toContain('## Product ad recipe');
+  });
+
+  it('keeps the footage recipes and omits the motion recipe when the mode is footage or missing', () => {
+    for (const prompt of [buildProducerPrompt(CONTEXT), buildProducerPrompt({ ...CONTEXT, mode: 'footage' })]) {
+      expect(prompt).toContain('## Tutorial recipe');
+      expect(prompt).not.toContain('Motion project recipe');
+    }
+  });
+
+  it('lists the motion tools in every mode', () => {
+    expect(buildProducerPrompt(CONTEXT)).toContain('- get_motion_brands:');
   });
 });

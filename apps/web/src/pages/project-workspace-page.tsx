@@ -1,6 +1,9 @@
-import { useState } from 'react';
+import { useCallback, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 
+import { projectModeOf } from '../api/project-mode';
+import { useRenderApi } from '../api/render-api-context';
+import { useAsyncResource } from '../hooks/use-async-resource';
 import { humanizeSlug } from '../api/humanize-slug';
 import { ProducerConversationPanel } from '../components/producer-conversation-panel';
 import { Button } from '../components/ui/button';
@@ -44,6 +47,11 @@ function AdvancedEditingMenu({ slug }: { slug: string }) {
 export function ProjectWorkspacePage() {
   const { slug = '' } = useParams<{ slug: string }>();
   const t = useT();
+  const client = useRenderApi();
+  const project = useAsyncResource(
+    useCallback(async () => client.getProject(slug), [client, slug]),
+    `workspace-project:${slug}`,
+  );
   const producer = useProducerConversation(slug);
   const isWide = useIsWideViewport();
   const [activeTab, setActiveTab] = useAutoSwitchingTab(producer.jobs.data);
@@ -73,7 +81,18 @@ export function ProjectWorkspacePage() {
             <h1 className="text-2xl font-semibold tracking-tight text-ink">{humanizeSlug(slug)}</h1>
             <p className="font-mono text-xs text-ink-faint">{slug}</p>
           </div>
-          <AdvancedEditingMenu slug={slug} />
+          <div className="flex items-center gap-2">
+            {project.data !== null && projectModeOf(project.data) === 'motion' && (
+              <Link
+                to={`/projects/${encodeURIComponent(slug)}/motion`}
+                data-testid="workspace-motion-link"
+                className="rounded-control border border-accent px-3 py-1.5 text-xs text-ink hover:bg-surface-muted"
+              >
+                {t('motion.workspace.link')}
+              </Link>
+            )}
+            <AdvancedEditingMenu slug={slug} />
+          </div>
         </div>
       </header>
 

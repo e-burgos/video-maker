@@ -55,7 +55,7 @@ async function codeOf(promise: Promise<unknown>): Promise<string> {
 }
 
 describe('claudeCliArgs', () => {
-  it('deshabilita las herramientas, fija el formato estructurado y no pide permisos', () => {
+  it('deshabilita las herramientas, fija el formato estructurado, no pide permisos y no carga la configuración del usuario', () => {
     const args = claudeCliArgs(REQUEST, CONFIG);
 
     expect(args).toEqual([
@@ -72,6 +72,10 @@ describe('claudeCliArgs', () => {
       '--permission-mode',
       'dontAsk',
       '--disable-slash-commands',
+      '--setting-sources',
+      '',
+      '--strict-mcp-config',
+      '--no-session-persistence',
       '--model',
       'sonnet',
     ]);

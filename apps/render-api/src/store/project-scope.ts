@@ -97,3 +97,9 @@ export async function assertTimelineNotPersisted(
     throw new PipelineStageError({ code: 'TIMELINE_ALREADY_EXISTS', stage: null, resource: relativePath });
   }
 }
+
+export function assertMotionProject(deps: RenderApiDependencies, slug: string): void {
+  if (deps.localStore.projects.get(slug)?.mode !== 'motion') {
+    throw new PipelineStageError({ code: 'MOTION_PROJECT_REQUIRED', stage: null, resource: slug });
+  }
+}

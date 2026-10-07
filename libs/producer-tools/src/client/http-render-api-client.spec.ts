@@ -258,6 +258,60 @@ describe('createHttpRenderApiClient', () => {
     expect(JSON.parse(String(calls[0]?.init?.body))).toEqual({ paths: ['raw/images/a.jpg'] });
   });
 
+  it('listMotionBrands reads the global brands route', async () => {
+    const brands = [{ id: 'acme', name: 'Acme', formats: ['16:9'], music: [] }];
+    const { fetchImpl, calls } = createFakeFetch(() => jsonResponse(200, brands));
+
+    expect(await client(fetchImpl).listMotionBrands()).toEqual(brands);
+    expect(calls[0]?.url).toBe('http://127.0.0.1:4599/motion/brands');
+  });
+
+  it('getMotionBrief and getMotionStoryboard read the project motion routes', async () => {
+    const { fetchImpl, calls } = createFakeFetch(() => jsonResponse(200, { version: 1 }));
+    const api = client(fetchImpl);
+
+    await api.getMotionBrief();
+    await api.getMotionStoryboard();
+
+    expect(calls.map((call) => call.url)).toEqual([
+      'http://127.0.0.1:4599/projects/pitch-deck/motion/brief',
+      'http://127.0.0.1:4599/projects/pitch-deck/motion/storyboard',
+    ]);
+  });
+
+  it('putMotionBrief PUTs the brief as the body', async () => {
+    const { fetchImpl, calls } = createFakeFetch(() => jsonResponse(200, { ok: true }));
+
+    await client(fetchImpl).putMotionBrief({ version: 1, brand: 'acme' });
+
+    expect(calls[0]?.init?.method).toBe('PUT');
+    expect(calls[0]?.url).toBe('http://127.0.0.1:4599/projects/pitch-deck/motion/brief');
+    expect(JSON.parse(String(calls[0]?.init?.body))).toEqual({ version: 1, brand: 'acme' });
+  });
+
+  it('maps BRIEF_INVALID to INVALID_INPUT keeping the field hint', async () => {
+    const { fetchImpl } = createFakeFetch(() => errorResponse(400, 'BRIEF_INVALID', 'images.0.caption: required'));
+
+    await expect(client(fetchImpl).putMotionBrief({})).rejects.toMatchObject({
+      code: 'INVALID_INPUT',
+      hint: 'images.0.caption: required',
+    });
+  });
+
+  it('maps a missing storyboard to FILE_NOT_FOUND', async () => {
+    const { fetchImpl } = createFakeFetch(() => errorResponse(404, 'STORYBOARD_NOT_FOUND'));
+
+    await expect(client(fetchImpl).getMotionStoryboard()).rejects.toMatchObject({ code: 'FILE_NOT_FOUND' });
+  });
+
+  it('maps STORYBOARD_MISSING and MOTION_PROJECT_REQUIRED on start-job to JOB_REJECTED', async () => {
+    const missing = createFakeFetch(() => errorResponse(409, 'STORYBOARD_MISSING'));
+    const wrongMode = createFakeFetch(() => errorResponse(409, 'MOTION_PROJECT_REQUIRED'));
+
+    await expect(client(missing.fetchImpl).createJob({ kind: 'motion' })).rejects.toMatchObject({ code: 'JOB_REJECTED' });
+    await expect(client(wrongMode.fetchImpl).createJob({ kind: 'motion' })).rejects.toMatchObject({ code: 'JOB_REJECTED' });
+  });
+
   it('maps a fetch rejection (network failure) into STUDIO_UNAVAILABLE', async () => {
     const fetchImpl = (async () => {
       throw new Error('ECONNREFUSED');

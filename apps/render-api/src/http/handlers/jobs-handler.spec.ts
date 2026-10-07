@@ -660,7 +660,7 @@ describe('handleCreateRenderJob', () => {
       expect(runtime.jobs.listBySlug('smoke-ingest')).toEqual([]);
     });
 
-    it('rejects an unknown kind and names the five valid ones', async () => {
+    it('rejects an unknown kind and names the six valid ones', async () => {
       const { deps, runtime } = storyboardHarness();
 
       await expect(
@@ -673,7 +673,7 @@ describe('handleCreateRenderJob', () => {
         ),
       ).rejects.toMatchObject({
         code: 'JOB_KIND_INVALID',
-        expected: "'render', 'montage', 'storyboard', 'voice' or 'photo-aroll'",
+        expected: "'render', 'montage', 'storyboard', 'voice', 'photo-aroll' or 'motion'",
       });
       expect(runtime.jobs.listBySlug('smoke-ingest')).toEqual([]);
     });

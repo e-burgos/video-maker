@@ -402,5 +402,22 @@ export function createFakeRenderApiDependencies(
     },
 
     secretStore: overrides?.secretStore ?? createFakeSecretStore(),
+
+    listMotionBrands: async () => {
+      callLog.record('listMotionBrands', undefined);
+      return overrides?.listMotionBrands ? overrides.listMotionBrands() : [];
+    },
+
+    motionPorts: () => {
+      if (overrides?.motionPorts) {
+        return overrides.motionPorts();
+      }
+      throw new Error('createFakeRenderApiDependencies: no motionPorts override configured');
+    },
+
+    runHyperframes: async (input) => {
+      callLog.record('runHyperframes', input);
+      return overrides?.runHyperframes ? overrides.runHyperframes(input) : { exitCode: 0, stderr: '' };
+    },
   };
 }

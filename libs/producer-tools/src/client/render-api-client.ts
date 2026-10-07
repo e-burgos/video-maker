@@ -1,5 +1,20 @@
+export type RenderApiProjectMode = 'footage' | 'motion';
+
+export interface RenderApiMotionBrand {
+  readonly id: string;
+  readonly name: string;
+  readonly formats: readonly string[];
+  readonly music: readonly {
+    readonly id: string;
+    readonly mood: string;
+    readonly bpm: number;
+    readonly hasDrop: boolean;
+  }[];
+}
+
 export interface RenderApiProjectDetail {
   readonly slug: string;
+  readonly mode?: RenderApiProjectMode;
   readonly layout: {
     readonly raw: boolean;
     readonly catalog: boolean;
@@ -141,4 +156,9 @@ export interface RenderApiClient {
   ): Promise<readonly RenderApiFreeMediaResult[]>;
   importMedia(resultId: string): Promise<{ readonly path: string; readonly credit: Readonly<Record<string, unknown>> }>;
   previewImages(paths: readonly string[]): Promise<readonly RenderApiImagePreview[]>;
+
+  listMotionBrands(): Promise<readonly RenderApiMotionBrand[]>;
+  getMotionBrief(): Promise<Readonly<Record<string, unknown>>>;
+  putMotionBrief(brief: Readonly<Record<string, unknown>>): Promise<void>;
+  getMotionStoryboard(): Promise<Readonly<Record<string, unknown>>>;
 }

@@ -25,6 +25,8 @@ extraResources:
     to: mcp
   - from: dist/libs/composition-remotion/bundle
     to: remotion-bundle
+  - from: libs/motion-graphics/assets
+    to: motion-assets
   - from: apps/desktop/vendor/darwin-arm64/bin
     to: bin
   - from: apps/desktop/vendor/manifest.json

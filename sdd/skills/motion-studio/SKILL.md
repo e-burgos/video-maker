@@ -17,17 +17,19 @@ Hay tres caminos para el primer paso; desde ahí el pipeline es el mismo:
   cuando el catálogo no alcanza.
 
 `tools/motion-studio` arma un video en cinco pasos; cada uno deja un archivo en el proyecto de trabajo
-(`media/motion/<slug>/`, gitignoreado) y se puede rehacer solo.
+(`.motion-work/<slug>/`, gitignoreado) y se puede rehacer solo. Nunca dentro de `media/`: es la raíz del
+estudio y cada carpeta que aparece ahí se importa como proyecto. Desde el estudio, el modo motion corre como
+job `motion` de render-api y trabaja en `<proyecto>/work/motion/`.
 
 ```bash
-pnpm nx run motion-studio:cli -- auto libs/motion-graphics/assets/briefs/displayads/plataforma-60s.json media/motion/ia-60s
+pnpm nx run motion-studio:cli -- auto libs/motion-graphics/assets/briefs/displayads/plataforma-60s.json .motion-work/ia-60s
 # o, con un storyboard ya escrito:
-pnpm nx run motion-studio:cli -- storyboard libs/motion-graphics/assets/storyboards/displayads/presentacion.json media/motion/presentacion
-# o, con plantilla a mano:  init displayads/presentacion media/motion/presentacion
-pnpm nx run motion-studio:cli -- voice   media/motion/presentacion --takes 5   # vo-*.wav + words.json
-pnpm nx run motion-studio:cli -- plan    media/motion/presentacion             # timeline.json + music.wav
-pnpm nx run motion-studio:cli -- compose media/motion/presentacion             # index.html
-pnpm nx run motion-studio:cli -- render  media/motion/presentacion --out media/motion/out/presentacion.mp4
+pnpm nx run motion-studio:cli -- storyboard libs/motion-graphics/assets/storyboards/displayads/presentacion.json .motion-work/presentacion
+# o, con plantilla a mano:  init displayads/presentacion .motion-work/presentacion
+pnpm nx run motion-studio:cli -- voice   .motion-work/presentacion --takes 5   # vo-*.wav + words.json
+pnpm nx run motion-studio:cli -- plan    .motion-work/presentacion             # timeline.json + music.wav
+pnpm nx run motion-studio:cli -- compose .motion-work/presentacion             # index.html
+pnpm nx run motion-studio:cli -- render  .motion-work/presentacion --out .motion-work/out/presentacion.mp4
 ```
 
 - `plan --no-beat-sync` apaga los cortes al golpe: las escenas siguen a la voz.

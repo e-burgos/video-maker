@@ -5,11 +5,11 @@ HTML + GSAP con la marca, voz Piper es_AR con la mejor toma, grilla de golpes de
 golpe opcionales y ducking de la música bajo la voz.
 
 ```bash
-pnpm nx run motion-studio:cli -- init displayads/counter-15 media/motion/counter-15
-pnpm nx run motion-studio:cli -- voice media/motion/counter-15 --takes 5
-pnpm nx run motion-studio:cli -- plan media/motion/counter-15 [--no-beat-sync]
-pnpm nx run motion-studio:cli -- compose media/motion/counter-15
-pnpm nx run motion-studio:cli -- render media/motion/counter-15 --out media/motion/out/counter-15.mp4
+pnpm nx run motion-studio:cli -- init displayads/counter-15 .motion-work/counter-15
+pnpm nx run motion-studio:cli -- voice .motion-work/counter-15 --takes 5
+pnpm nx run motion-studio:cli -- plan .motion-work/counter-15 [--no-beat-sync]
+pnpm nx run motion-studio:cli -- compose .motion-work/counter-15
+pnpm nx run motion-studio:cli -- render .motion-work/counter-15 --out .motion-work/out/counter-15.mp4
 ```
 
 Guía completa (plantillas, placeholders, reglas del render): skill `motion-studio` (`sdd/skills/motion-studio/SKILL.md`).

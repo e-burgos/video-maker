@@ -108,6 +108,7 @@ describe('generateMotionStoryboard', () => {
     const first = await generateMotionStoryboard(scriptedAsk([new Error('boom')]).ask, brief, testBrand).catch((e: unknown) => e);
     expect((first as MotionStudioError).code).toBe('AI_FAILED');
     expect((first as Error).message).toContain('boom');
+    expect((first as Error).cause).toBeInstanceOf(Error);
     const second = await generateMotionStoryboard(scriptedAsk([response(badCue), new Error('limit')]).ask, brief, testBrand).catch((e: unknown) => e);
     expect((second as MotionStudioError).code).toBe('AI_FAILED');
   });

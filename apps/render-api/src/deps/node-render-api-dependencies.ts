@@ -35,6 +35,8 @@ import {
 } from '@video-maker/local-store';
 import type { StudioDatabase } from '@video-maker/local-store';
 
+import { listMotionBrandDocuments, createMotionPipelinePorts } from './motion-pipeline-adapters';
+import { HYPERFRAMES_RESOLVE_FROM_ENV_VAR, resolveHyperframesCli } from './hyperframes-cli';
 import { createClaudeCliAiAgent } from '../ai/claude-cli-ai-agent';
 import { createEffectiveAiAgent } from '../ai/effective-ai-agent';
 import { readAiAgentConfig } from '../config/ai-agent-config';
@@ -61,6 +63,13 @@ import type { CommandRunner, ResolvedVoiceBinaries } from '@video-maker/media-lo
 
 import type { ByteRange, ObjectStorage, WriteTemporaryInput, WriteTemporaryOutcome } from './object-storage';
 import type { AiAgentPort, LocalStorePort, RenderApiDependencies, VoicePreviewCache } from './render-api-dependencies';
+
+const HYPERFRAMES_TIMEOUT_MS = 3 * 60 * 60 * 1000;
+const HYPERFRAMES_PASSTHROUGH_KEYS = ['REMOTION_BROWSER_EXECUTABLE', HYPERFRAMES_RESOLVE_FROM_ENV_VAR] as const;
+
+function pickEnv(env: NodeJS.ProcessEnv, keys: readonly string[]): NodeJS.ProcessEnv {
+  return Object.fromEntries(keys.flatMap((key) => (env[key] === undefined ? [] : [[key, env[key]]])));
+}
 
 function createNodeVoicePreviewCache(directory: string): VoicePreviewCache {
   return {
@@ -795,6 +804,25 @@ export function createNodeRenderApiDependencies(
     },
 
     secretStore,
+
+    listMotionBrands: () => listMotionBrandDocuments(store.motionAssetsRoot),
+
+    motionPorts: () => createMotionPipelinePorts(deps, store.motionAssetsRoot),
+
+    runHyperframes: async ({ args, cwd }) => {
+      const invocation = resolveHyperframesCli({
+        env: { ...childEnv, ...pickEnv(env, HYPERFRAMES_PASSTHROUGH_KEYS) },
+        execPath: process.execPath,
+        isElectron: process.versions.electron !== undefined,
+      });
+      const { ExecaCommandRunner } = await loadMediaLocal();
+      const result = await new ExecaCommandRunner({ env: invocation.env }).run(
+        invocation.command,
+        [...invocation.args, ...args],
+        { cwd, timeoutMs: HYPERFRAMES_TIMEOUT_MS },
+      );
+      return { exitCode: result.exitCode, stderr: result.stderr };
+    },
   };
 
   return deps;

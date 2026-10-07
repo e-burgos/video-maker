@@ -17,7 +17,7 @@ import {
 } from './tool-schemas';
 
 const EXPECTED_OUTPUT_FIELDS: Record<(typeof STUDIO_TOOL_NAMES)[number], readonly string[]> = {
-  get_project_overview: ['slug', 'title', 'assets', 'pendingAssets', 'hasTimeline', 'script', 'recentJobs'],
+  get_project_overview: ['slug', 'title', 'mode', 'assets', 'pendingAssets', 'hasTimeline', 'script', 'recentJobs'],
   probe_media: ['path', 'durationMs', 'video', 'audio'],
   extract_frames: ['frames'],
   list_voices: ['voices', 'defaultVoiceId'],
@@ -173,6 +173,30 @@ describe('StartJobInputSchema', () => {
       gapMs: 500,
     });
     expect(result.success).toBe(true);
+  });
+
+  it('accepts a motion job with every field', () => {
+    const result = StartJobInputSchema.safeParse({
+      kind: 'motion',
+      phase: 'video',
+      output: 'promo.mp4',
+      takes: 8,
+      overwrite: true,
+    });
+    expect(result.success).toBe(true);
+  });
+
+  it('accepts a bare motion job', () => {
+    expect(StartJobInputSchema.safeParse({ kind: 'motion' }).success).toBe(true);
+  });
+
+  it('rejects a motion job with an unknown phase', () => {
+    expect(StartJobInputSchema.safeParse({ kind: 'motion', phase: 'render' }).success).toBe(false);
+  });
+
+  it('rejects a motion job with takes out of 1..8', () => {
+    expect(StartJobInputSchema.safeParse({ kind: 'motion', takes: 0 }).success).toBe(false);
+    expect(StartJobInputSchema.safeParse({ kind: 'motion', takes: 9 }).success).toBe(false);
   });
 
   it('accepts a photo-aroll job', () => {

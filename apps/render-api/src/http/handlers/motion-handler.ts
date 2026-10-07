@@ -3,10 +3,10 @@ import type { MotionBrief } from '@video-maker/motion-graphics';
 import { join } from 'node:path/posix';
 
 import type { StoreConfig } from '../../config/store-config';
-import type { RenderApiDependencies } from '../../deps/render-api-dependencies';
+import type { MotionBrandDocument, RenderApiDependencies } from '../../deps/render-api-dependencies';
 import { PipelineStageError } from '../../errors/pipeline-stage-error';
 import type { RenderApiErrorCode } from '../../errors/render-api-error';
-import { assertValidProjectSlug, resolveExistingProject } from '../../store/project-scope';
+import { assertMotionProject, assertValidProjectSlug, resolveExistingProject } from '../../store/project-scope';
 import { JSON_CONTENT_TYPE } from '../http-message';
 import type { HttpRequestLine, HttpResponse } from '../http-message';
 import { MAX_JSON_BODY_BYTES, readJsonBody } from '../read-json-body';
@@ -34,20 +34,15 @@ function jsonResponse(status: number, body: unknown): HttpResponse {
   return { status, headers: { 'content-type': JSON_CONTENT_TYPE }, body };
 }
 
-async function readBrandSummary(deps: RenderApiDependencies, brandFile: string): Promise<MotionBrandSummary | null> {
-  const stat = await deps.storage.stat(brandFile);
-  if (stat === null || stat.kind !== 'file') {
-    return null;
-  }
-
+function toBrandSummary(document: MotionBrandDocument): MotionBrandSummary {
   let manifest;
   try {
-    manifest = parseBrandManifest(JSON.parse(await deps.storage.readTextFile(brandFile)));
+    manifest = parseBrandManifest(document.manifest);
   } catch (cause) {
     throw new PipelineStageError({
       code: 'SERVER_CONFIG_INVALID',
       stage: null,
-      resource: brandFile,
+      resource: `brands/${document.id}/brand.json`,
       expected: 'a valid brand manifest',
       cause,
     });
@@ -66,21 +61,8 @@ async function readBrandSummary(deps: RenderApiDependencies, brandFile: string):
   };
 }
 
-export async function handleListMotionBrands(
-  deps: RenderApiDependencies,
-  store: StoreConfig,
-): Promise<HttpResponse> {
-  const brandsRoot = join(store.motionAssetsRoot, 'brands');
-  const entries = (await deps.storage.listDirectory(brandsRoot)) ?? [];
-
-  const summaries: MotionBrandSummary[] = [];
-  for (const entry of entries.filter((candidate) => candidate.isDirectory)) {
-    const summary = await readBrandSummary(deps, join(brandsRoot, entry.name, 'brand.json'));
-    if (summary !== null) {
-      summaries.push(summary);
-    }
-  }
-
+export async function handleListMotionBrands(deps: RenderApiDependencies): Promise<HttpResponse> {
+  const summaries = (await deps.listMotionBrands()).map(toBrandSummary);
   summaries.sort((left, right) => left.id.localeCompare(right.id));
   return jsonResponse(200, summaries);
 }
@@ -94,9 +76,7 @@ async function resolveMotionProject(
   assertValidProjectSlug(slug);
   const project = await resolveExistingProject(deps, store, slug);
 
-  if (deps.localStore.projects.get(slug)?.mode !== 'motion') {
-    throw new PipelineStageError({ code: 'MOTION_PROJECT_REQUIRED', stage: null, resource: slug });
-  }
+  assertMotionProject(deps, slug);
   return project;
 }
 
@@ -159,6 +139,18 @@ function parseOrThrow<T>(
   }
 }
 
+async function assertBrandInstalled(deps: RenderApiDependencies, brief: MotionBrief): Promise<void> {
+  const brands = await deps.listMotionBrands();
+  if (!brands.some((brand) => brand.id === brief.brand)) {
+    throw new PipelineStageError({
+      code: 'BRAND_NOT_FOUND',
+      stage: null,
+      resource: brief.brand,
+      expected: brands.map((brand) => brand.id).join(', '),
+    });
+  }
+}
+
 async function assertBriefImagesExist(
   deps: RenderApiDependencies,
   rawDir: string,
@@ -203,6 +195,7 @@ export async function handlePutMotionBrief(
 ): Promise<HttpResponse> {
   const project = await resolveMotionProject(deps, store, params);
   const brief = parseOrThrow(parseMotionBrief, await readRequestJson(request), 'BRIEF_INVALID', BRIEF_RELATIVE_PATH);
+  await assertBrandInstalled(deps, brief);
   await assertBriefImagesExist(deps, project.rawDir, brief);
 
   await deps.storage.ensureDirectory(join(project.root, 'motion'));

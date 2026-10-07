@@ -8,6 +8,7 @@ import { createFakeObjectStorage } from '../../__fixtures__/fake-object-storage'
 import type { FakeObjectStorageFileSeed } from '../../__fixtures__/fake-object-storage';
 import { createFakeRenderApiDependencies } from '../../__fixtures__/fake-render-api-dependencies';
 import { requestLine } from '../../__fixtures__/http-request';
+import type { MotionBrandDocument } from '../../deps/render-api-dependencies';
 import type { ServerConfig } from '../../config/server-config';
 import type { StoreConfig } from '../../config/store-config';
 import { httpStatusFor } from '../../errors/http-status-for';
@@ -46,13 +47,17 @@ function putRequest(path: string, value: unknown) {
   return requestLine({ method: 'PUT', path, body: textBody(JSON.stringify(value)) });
 }
 
-function setup(mode: 'motion' | 'footage', files: readonly FakeObjectStorageFileSeed[] = []) {
+function setup(
+  mode: 'motion' | 'footage',
+  files: readonly FakeObjectStorageFileSeed[] = [],
+  brands: readonly MotionBrandDocument[] = [{ id: 'displayads', manifest: JSON.parse(BRAND_JSON) as unknown }],
+) {
   const callLog = createCallLog();
   const storage = createFakeObjectStorage(callLog, {
-    directories: ['/media/promo', '/media/promo/raw', '/media/promo/raw/images', '/assets/brands/displayads', '/assets/brands/empty'],
-    files: [{ path: '/assets/brands/displayads/brand.json', contents: BRAND_JSON }, ...files],
+    directories: ['/media/promo', '/media/promo/raw', '/media/promo/raw/images'],
+    files,
   });
-  const deps = createFakeRenderApiDependencies(callLog, { storage });
+  const deps = createFakeRenderApiDependencies(callLog, { storage, listMotionBrands: async () => brands });
   deps.localStore.projects.insert('promo', null, mode);
   return { deps, storage };
 }
@@ -78,7 +83,7 @@ describe('handleListMotionBrands', () => {
   it('lists each brand directory with id, name, formats and music summary', async () => {
     const { deps } = setup('motion');
 
-    const response = await handleListMotionBrands(deps, STORE);
+    const response = await handleListMotionBrands(deps);
 
     const brands = response.body as Record<string, unknown>[];
     expect(response.status).toBe(200);
@@ -92,18 +97,17 @@ describe('handleListMotionBrands', () => {
   });
 
   it('answers an empty list when the assets root has no brands', async () => {
-    const callLog = createCallLog();
-    const deps = createFakeRenderApiDependencies(callLog, { storage: createFakeObjectStorage(callLog) });
+    const { deps } = setup('motion', [], []);
 
-    const response = await handleListMotionBrands(deps, STORE);
+    const response = await handleListMotionBrands(deps);
 
     expect(response.body).toEqual([]);
   });
 
   it('rejects a brand.json that does not parse as a manifest', async () => {
-    const { deps } = setup('motion', [{ path: '/assets/brands/empty/brand.json', contents: '{"id":"x"}' }]);
+    const { deps } = setup('motion', [], [{ id: 'broken', manifest: { id: 'x' } }]);
 
-    await expect(caught(handleListMotionBrands(deps, STORE))).resolves.toMatchObject({
+    await expect(caught(handleListMotionBrands(deps))).resolves.toMatchObject({
       code: 'SERVER_CONFIG_INVALID',
     });
   });
@@ -165,6 +169,18 @@ describe('motion brief handlers', () => {
     expect(getPayload.code).toBe('MOTION_PROJECT_REQUIRED');
     expect(putPayload.code).toBe('MOTION_PROJECT_REQUIRED');
     expect(httpStatusFor('MOTION_PROJECT_REQUIRED')).toBe(409);
+  });
+
+  it('answers 400 BRAND_NOT_FOUND when the brief names a brand that is not installed', async () => {
+    const { deps } = setup('motion', [{ path: '/media/promo/raw/images/shot.png', contents: 'png' }]);
+
+    const payload = await caught(
+      handlePutMotionBrief(deps, STORE, { slug: 'promo' }, putRequest('/p', { ...VALID_BRIEF, brand: 'ghost' })),
+    );
+
+    expect(payload.code).toBe('BRAND_NOT_FOUND');
+    expect(payload.resource).toBe('ghost');
+    expect(httpStatusFor(payload.code)).toBe(400);
   });
 
   it('answers 404 PROJECT_NOT_FOUND for an unknown project', async () => {

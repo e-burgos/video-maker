@@ -1,10 +1,10 @@
-import type { MontageStage, StoryboardStage, VoiceStage } from '../jobs/render-job';
+import type { MontageStage, MotionStage, StoryboardStage, VoiceStage } from '../jobs/render-job';
 
 export const RENDER_PIPELINE_STAGES = ['prepare', 'render', 'mix', 'mux', 'verify'] as const;
 
 export type RenderPipelineStage = (typeof RENDER_PIPELINE_STAGES)[number];
 
-export type RenderApiErrorStage = RenderPipelineStage | MontageStage | StoryboardStage | VoiceStage;
+export type RenderApiErrorStage = RenderPipelineStage | MontageStage | StoryboardStage | VoiceStage | MotionStage;
 
 export const RENDER_API_ERROR_CODES = [
   'INVALID_TIMELINE',
@@ -126,6 +126,11 @@ export const RENDER_API_ERROR_CODES = [
   'MOTION_PROJECT_REQUIRED',
   'BRIEF_NOT_FOUND',
   'BRIEF_INVALID',
+  'BRIEF_MISSING',
+  'BRAND_NOT_FOUND',
+  'STORYBOARD_MISSING',
+  'MOTION_JOB_INPUT_INVALID',
+  'MOTION_PIPELINE_FAILED',
 ] as const;
 
 export type RenderApiErrorCode = (typeof RENDER_API_ERROR_CODES)[number];

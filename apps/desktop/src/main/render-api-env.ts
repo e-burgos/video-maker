@@ -3,6 +3,9 @@ import { join } from 'node:path';
 import type { AppPaths } from './app-paths';
 import { mergePathWithDefault, readLoginShellPath, resolveClaudeCli } from './login-shell-path';
 
+const PACKAGED_MOTION_ASSETS_RELATIVE = 'motion-assets';
+const DEV_MOTION_ASSETS_RELATIVE = 'libs/motion-graphics/assets';
+
 const BASE_ALLOWED_KEYS = ['HOME', 'USER', 'LOGNAME', 'TMPDIR', 'SHELL', 'LANG'] as const;
 
 export function allowlistedParentEnv(source: NodeJS.ProcessEnv): NodeJS.ProcessEnv {
@@ -50,7 +53,7 @@ export async function buildRenderApiEnv(
 
   const env: NodeJS.ProcessEnv = {
     ...allowlistedParentEnv(sourceEnv),
-    PATH: mergedPath,
+    PATH: `${input.paths.vendorBinDir}:${mergedPath}`,
     RENDER_API_HOST: input.host,
     RENDER_API_PORT: String(input.port),
     RENDER_API_MEDIA_ROOT: input.projectsFolder,
@@ -60,6 +63,7 @@ export async function buildRenderApiEnv(
     VIDEO_MAKER_PARENT_PID: String(input.parentPid),
     RENDER_API_ACCESS_TOKEN: input.token,
     REMOTION_BROWSER_EXECUTABLE: input.paths.chromeHeadlessShellPath,
+    MOTION_GRAPHICS_ASSETS: join(input.paths.resourcesDir, input.isPackaged ? PACKAGED_MOTION_ASSETS_RELATIVE : DEV_MOTION_ASSETS_RELATIVE),
   };
 
   if (claudeCliPath !== null) {
@@ -71,6 +75,7 @@ export async function buildRenderApiEnv(
   if (input.isPackaged) {
     env.RENDER_API_WEB_ROOT = join(input.paths.resourcesDir, 'web');
     env.STUDIO_MCP_ENTRY = join(input.paths.resourcesDir, 'mcp', 'main.js');
+    env.HYPERFRAMES_RESOLVE_FROM = join(input.paths.resourcesDir, 'render-api');
   }
 
   return env;

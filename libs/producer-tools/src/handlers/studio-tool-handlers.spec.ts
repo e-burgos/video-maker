@@ -58,6 +58,7 @@ describe('createStudioToolHandlers', () => {
     expect(result.data).toEqual({
       slug: 'pitch-deck',
       title: 'pitch-deck',
+      mode: 'footage',
       assets: [
         { path: 'raw/aroll/a.mp4', role: 'aroll', durationMs: 1000 },
         { path: 'raw/images/b.jpg', role: 'image', durationMs: null },
@@ -69,6 +70,116 @@ describe('createStudioToolHandlers', () => {
       script: 'timed',
       recentJobs: [{ jobId: 'job-1', kind: 'render', status: 'succeeded' }],
     });
+  });
+
+  it('get_project_overview reports the motion mode the server answers', async () => {
+    const { handlers } = handlersWith({
+      getProjectDetail: async () => ({
+        slug: 'promo',
+        mode: 'motion',
+        layout: { raw: true, catalog: false, timeline: false, edl: false, out: false },
+        assetSource: 'raw-scan',
+        assetCounts: {},
+      }),
+      listProjectAssets: async () => [],
+      listPendingAssets: async () => [],
+      listRecentJobs: async () => [],
+      readProducerScriptState: async () => 'none',
+    });
+
+    const result = await handlers.get_project_overview({});
+
+    expect(result.data).toMatchObject({ mode: 'motion' });
+  });
+
+  it('start_job forwards a motion job without the model and keeps its fields', async () => {
+    const { handlers, client } = handlersWith({
+      createJob: async () => ({ id: 'job-9', kind: 'motion', state: 'queued', progress: null, report: null, error: null }),
+    });
+
+    const result = await handlers.start_job({ job: { kind: 'motion', phase: 'storyboard', takes: 3 } });
+
+    expect(result.data).toEqual({ jobId: 'job-9', kind: 'motion', status: 'queued' });
+    expect(client.calls).toEqual([{ method: 'createJob', args: [{ kind: 'motion', phase: 'storyboard', takes: 3 }] }]);
+  });
+
+  it('start_job rejects a motion job with a bad phase before calling the client', async () => {
+    const { handlers, client } = handlersWith();
+
+    await expect(handlers.start_job({ job: { kind: 'motion', phase: 'render' } })).rejects.toMatchObject({
+      code: 'INVALID_INPUT',
+    });
+    expect(client.calls).toEqual([]);
+  });
+
+  it('get_motion_brands lists the brands from the client', async () => {
+    const brands = [
+      { id: 'acme', name: 'Acme', formats: ['16:9', '9:16'], music: [{ id: 'm1', mood: 'upbeat', bpm: 120, hasDrop: true }] },
+    ];
+    const { handlers, client } = handlersWith({ listMotionBrands: async () => brands });
+
+    const result = await handlers.get_motion_brands({});
+
+    expect(result.data).toEqual({ brands });
+    expect(client.calls).toEqual([{ method: 'listMotionBrands', args: [] }]);
+  });
+
+  it('read_motion_brief wraps the stored brief', async () => {
+    const brief = { version: 1, brand: 'acme', script: 'Hola', images: [] };
+    const { handlers, client } = handlersWith({ getMotionBrief: async () => brief });
+
+    const result = await handlers.read_motion_brief({});
+
+    expect(result.data).toEqual({ brief });
+    expect(client.calls).toEqual([{ method: 'getMotionBrief', args: [] }]);
+  });
+
+  it('write_motion_brief sends the brief and confirms the save', async () => {
+    const brief = {
+      version: 1,
+      brand: 'acme',
+      goal: 'launch',
+      script: 'Hola',
+      music: 'auto',
+      images: [{ file: 'a.jpg', caption: 'a red car' }],
+    };
+    const { handlers, client } = handlersWith({ putMotionBrief: async () => undefined });
+
+    const result = await handlers.write_motion_brief({ brief });
+
+    expect(result.data).toEqual({ saved: true });
+    expect(client.calls).toEqual([{ method: 'putMotionBrief', args: [brief] }]);
+  });
+
+  it('write_motion_brief rejects a brief with no script before calling the client', async () => {
+    const { handlers, client } = handlersWith();
+
+    await expect(
+      handlers.write_motion_brief({ brief: { version: 1, brand: 'acme', images: [] } }),
+    ).rejects.toMatchObject({ code: 'INVALID_INPUT' });
+    expect(client.calls).toEqual([]);
+  });
+
+  it('write_motion_brief propagates the server field error unchanged', async () => {
+    const { handlers } = handlersWith({
+      putMotionBrief: async () => {
+        throw new StudioToolRuntimeError('INVALID_INPUT', 'images.0.file: not found in raw/images');
+      },
+    });
+
+    await expect(
+      handlers.write_motion_brief({ brief: { version: 1, brand: 'acme', script: 'x', images: [] } }),
+    ).rejects.toMatchObject({ code: 'INVALID_INPUT', hint: 'images.0.file: not found in raw/images' });
+  });
+
+  it('read_motion_storyboard wraps the stored storyboard', async () => {
+    const storyboard = { scenes: [{ kind: 'hero', voice: 'Hola' }] };
+    const { handlers, client } = handlersWith({ getMotionStoryboard: async () => storyboard });
+
+    const result = await handlers.read_motion_storyboard({});
+
+    expect(result.data).toEqual({ storyboard });
+    expect(client.calls).toEqual([{ method: 'getMotionStoryboard', args: [] }]);
   });
 
   it('probe_media forwards the path and returns the client result', async () => {

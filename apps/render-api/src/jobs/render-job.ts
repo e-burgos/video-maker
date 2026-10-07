@@ -27,7 +27,7 @@ export function isTerminalRenderJobState(state: RenderJobState): boolean {
   return TERMINAL_RENDER_JOB_STATES.some((terminal) => terminal === state);
 }
 
-export type JobKind = 'render' | 'montage' | 'storyboard' | 'voice' | 'photo-aroll';
+export type JobKind = 'render' | 'montage' | 'storyboard' | 'voice' | 'photo-aroll' | 'motion';
 
 export const MONTAGE_STAGES = ['discover', 'probe', 'transcribe', 'plan'] as const;
 export type MontageStage = (typeof MONTAGE_STAGES)[number];
@@ -40,6 +40,33 @@ export type VoiceStage = (typeof VOICE_STAGES)[number];
 
 export const PHOTO_AROLL_STAGES = ['clips', 'concat', 'mux'] as const;
 export type PhotoArollStage = (typeof PHOTO_AROLL_STAGES)[number];
+
+export const MOTION_STAGES = ['storyboard', 'voice', 'plan', 'compose', 'render'] as const;
+export type MotionStage = (typeof MOTION_STAGES)[number];
+
+export const MOTION_PHASES = ['storyboard', 'video', 'all'] as const;
+export type MotionPhase = (typeof MOTION_PHASES)[number];
+
+export interface MotionJobProgress {
+  readonly stage: MotionStage;
+  readonly linesVoiced: number | null;
+  readonly totalLines: number | null;
+  readonly percent: number | null;
+}
+
+export interface MotionJobStoryboardReport {
+  readonly repaired: boolean;
+  readonly tokensIn: number;
+  readonly tokensOut: number;
+  readonly costUsd: number | null;
+}
+
+export interface MotionJobReport {
+  readonly path: string | null;
+  readonly durationSec: number | null;
+  readonly scenes: number;
+  readonly storyboard: MotionJobStoryboardReport | null;
+}
 
 export interface RenderJobProgress {
   readonly stage: RenderPipelineStage;
@@ -195,13 +222,19 @@ export type PhotoArollJob = JobBase & {
   readonly report: PhotoArollJobReport | null;
 };
 
-export type Job = RenderJob | MontageJob | StoryboardJob | VoiceJob | PhotoArollJob;
+export type MotionJob = JobBase & {
+  readonly kind: 'motion';
+  readonly progress: MotionJobProgress | null;
+  readonly report: MotionJobReport | null;
+};
+
+export type Job = RenderJob | MontageJob | StoryboardJob | VoiceJob | PhotoArollJob | MotionJob;
 
 export interface JobSummary {
   readonly id: string;
   readonly kind: JobKind;
   readonly state: RenderJobState;
-  readonly stage: RenderPipelineStage | MontageStage | StoryboardStage | VoiceStage | PhotoArollStage | null;
+  readonly stage: RenderPipelineStage | MontageStage | StoryboardStage | VoiceStage | PhotoArollStage | MotionStage | null;
   readonly errorCode: RenderApiErrorCode | null;
   readonly createdAt: string;
   readonly startedAt: string | null;
@@ -215,7 +248,8 @@ export type CreateJobInput =
   | CreateMontageJobInput
   | CreateStoryboardJobInput
   | CreateVoiceJobInput
-  | CreatePhotoArollJobInput;
+  | CreatePhotoArollJobInput
+  | CreateMotionJobInput;
 
 export interface CreateRenderJobInput {
   readonly kind: 'render';
@@ -267,11 +301,21 @@ export interface CreatePhotoArollJobInput {
   readonly fps: number;
 }
 
+export interface CreateMotionJobInput {
+  readonly kind: 'motion';
+  readonly slug: string;
+  readonly projectRoot: string;
+  readonly phase: MotionPhase;
+  readonly output: string;
+  readonly takes: number;
+}
+
 export function toJob(record: RenderJob): RenderJob;
 export function toJob(record: MontageJob): MontageJob;
 export function toJob(record: StoryboardJob): StoryboardJob;
 export function toJob(record: VoiceJob): VoiceJob;
 export function toJob(record: PhotoArollJob): PhotoArollJob;
+export function toJob(record: MotionJob): MotionJob;
 export function toJob(record: Job): Job;
 export function toJob(record: Job): Job {
   switch (record.kind) {
@@ -332,6 +376,19 @@ export function toJob(record: Job): Job {
         id: record.id,
         slug: record.slug,
         kind: 'photo-aroll',
+        state: record.state,
+        createdAt: record.createdAt,
+        startedAt: record.startedAt,
+        finishedAt: record.finishedAt,
+        progress: record.progress,
+        report: record.report,
+        error: record.error,
+      };
+    case 'motion':
+      return {
+        id: record.id,
+        slug: record.slug,
+        kind: 'motion',
         state: record.state,
         createdAt: record.createdAt,
         startedAt: record.startedAt,

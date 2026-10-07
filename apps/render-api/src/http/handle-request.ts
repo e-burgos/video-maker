@@ -282,7 +282,7 @@ async function dispatchRoute(
       case 'projects.voice.scene.put':
         return await handlePutVoiceScene(deps, store, params, request);
       case 'motion.brands.list':
-        return await handleListMotionBrands(deps, store);
+        return await handleListMotionBrands(deps);
       case 'projects.motion.brief.get':
         return await handleGetMotionBrief(deps, store, params);
       case 'projects.motion.brief.put':

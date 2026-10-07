@@ -10,6 +10,7 @@ import type {
   RenderApiImagePreview,
   RenderApiJob,
   RenderApiJobSummary,
+  RenderApiMotionBrand,
   RenderApiMusicResult,
   RenderApiPendingAsset,
   RenderApiProbeResult,
@@ -37,6 +38,17 @@ function isKnownStudioErrorCode(code: string): code is StudioToolErrorCode {
 
 type ErrorContext = 'start-job' | 'default';
 
+const MOTION_VALIDATION_ERROR_CODES: ReadonlySet<string> = new Set([
+  'BRIEF_INVALID',
+  'STORYBOARD_INVALID',
+  'BRAND_NOT_FOUND',
+]);
+const MOTION_MISSING_DOCUMENT_ERROR_CODES: ReadonlySet<string> = new Set([
+  'BRIEF_NOT_FOUND',
+  'STORYBOARD_NOT_FOUND',
+  'STORYBOARD_MISSING',
+]);
+
 function mapRenderApiErrorCode(code: string, context: ErrorContext): StudioToolErrorCode {
   if (isKnownStudioErrorCode(code)) {
     return code;
@@ -49,6 +61,12 @@ function mapRenderApiErrorCode(code: string, context: ErrorContext): StudioToolE
   }
   if (code === 'RENDER_JOB_NOT_CANCELABLE') {
     return 'JOB_REJECTED';
+  }
+  if (MOTION_VALIDATION_ERROR_CODES.has(code)) {
+    return 'INVALID_INPUT';
+  }
+  if (MOTION_MISSING_DOCUMENT_ERROR_CODES.has(code)) {
+    return context === 'start-job' ? 'JOB_REJECTED' : 'FILE_NOT_FOUND';
   }
   return context === 'start-job' ? 'JOB_REJECTED' : 'STUDIO_UNAVAILABLE';
 }
@@ -289,5 +307,21 @@ export function createHttpRenderApiClient(options: HttpRenderApiClientOptions): 
       };
       return json.previews;
     },
+
+    listMotionBrands: async () => {
+      const json = await request('GET', '/motion/brands');
+      const brands = Array.isArray(json) ? json : (json as { brands: unknown }).brands;
+      return brands as readonly RenderApiMotionBrand[];
+    },
+
+    getMotionBrief: async () =>
+      (await request('GET', `/projects/${slug}/motion/brief`)) as Record<string, unknown>,
+
+    putMotionBrief: async (brief) => {
+      await request('PUT', `/projects/${slug}/motion/brief`, brief);
+    },
+
+    getMotionStoryboard: async () =>
+      (await request('GET', `/projects/${slug}/motion/storyboard`)) as Record<string, unknown>,
   };
 }

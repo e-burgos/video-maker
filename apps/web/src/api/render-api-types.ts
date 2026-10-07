@@ -1,3 +1,5 @@
+import type { MotionJob, MotionStage } from './motion-types';
+
 export const ASSET_ROLES = ['aroll', 'broll', 'image', 'audio', 'voice', 'logo'] as const;
 
 export type AssetRole = (typeof ASSET_ROLES)[number];
@@ -260,7 +262,7 @@ export const RENDER_PIPELINE_STAGES = ['prepare', 'render', 'mix', 'mux', 'verif
 
 export type RenderPipelineStage = (typeof RENDER_PIPELINE_STAGES)[number];
 
-export const JOB_KINDS = ['render', 'montage', 'storyboard', 'voice'] as const;
+export const JOB_KINDS = ['render', 'montage', 'storyboard', 'voice', 'motion'] as const;
 
 export type JobKind = (typeof JOB_KINDS)[number];
 
@@ -450,13 +452,13 @@ export type VoiceJob = {
   error: RenderApiErrorPayload | null;
 };
 
-export type Job = RenderJob | MontageJob | StoryboardJob | VoiceJob;
+export type Job = RenderJob | MontageJob | StoryboardJob | VoiceJob | MotionJob;
 
 export type RenderJobSummary = {
   id: string;
   kind: JobKind;
   state: RenderJobState;
-  stage: RenderPipelineStage | MontageStage | StoryboardStage | VoiceStage | null;
+  stage: RenderPipelineStage | MontageStage | StoryboardStage | VoiceStage | MotionStage | null;
   errorCode: string | null;
   createdAt: string;
   startedAt: string | null;

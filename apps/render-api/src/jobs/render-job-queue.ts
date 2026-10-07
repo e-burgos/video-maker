@@ -10,6 +10,10 @@ import { startStoryboardJobStage } from './storyboard-job-progress';
 import { isStoryboardPipelineCanceled } from './storyboard-pipeline-observer';
 import type { StoryboardPipelineObserver } from './storyboard-pipeline-observer';
 import { runStoryboardPipeline } from './run-storyboard-pipeline';
+import { mergeMotionVoiceProgress, startMotionJobStage } from './motion-job-progress';
+import { isMotionPipelineCanceled } from './motion-pipeline-observer';
+import type { MotionPipelineObserver } from './motion-pipeline-observer';
+import { runMotionPipeline } from './run-motion-pipeline';
 import { runVoicePipeline } from './run-voice-pipeline';
 import { mergeVoiceJobProgress, startVoiceJobStage } from './voice-job-progress';
 import { isVoicePipelineCanceled } from './voice-pipeline-observer';
@@ -33,6 +37,9 @@ import type {
   Job,
   MontageJobProgress,
   MontageJobReport,
+  MotionJobProgress,
+  MotionJobReport,
+  MotionPhase,
   PhotoArollJobProgress,
   PhotoArollJobReport,
   RenderJobProgress,
@@ -149,7 +156,22 @@ interface PhotoArollJobRecord extends JobRecordBase {
   report: PhotoArollJobReport | null;
 }
 
-type JobRecord = RenderJobRecord | MontageJobRecord | StoryboardJobRecord | VoiceJobRecord | PhotoArollJobRecord;
+interface MotionJobRecord extends JobRecordBase {
+  readonly kind: 'motion';
+  readonly phase: MotionPhase;
+  readonly output: string;
+  readonly takes: number;
+  progress: MotionJobProgress | null;
+  report: MotionJobReport | null;
+}
+
+type JobRecord =
+  | RenderJobRecord
+  | MontageJobRecord
+  | StoryboardJobRecord
+  | VoiceJobRecord
+  | PhotoArollJobRecord
+  | MotionJobRecord;
 
 export function createRenderJobQueue(deps: RenderApiDependencies): RenderJobQueue {
   const jobsStore = deps.localStore.jobs;
@@ -372,6 +394,40 @@ export function createRenderJobQueue(deps: RenderApiDependencies): RenderJobQueu
     settle(record, report, failure);
   }
 
+  async function runMotionJob(record: MotionJobRecord): Promise<void> {
+    const observer: MotionPipelineObserver = {
+      stageStarted: (stage) => {
+        record.progress = startMotionJobStage(record.progress, stage);
+        persistProgress(record, false);
+      },
+      lineVoiced: (linesVoiced, totalLines) => {
+        record.progress = mergeMotionVoiceProgress(record.progress, linesVoiced, totalLines);
+        persistProgress(record, false);
+      },
+      cancellationRequested: () => record.state === 'canceling',
+    };
+
+    let report: MotionJobReport | null = null;
+    let failure: RenderApiErrorPayload | null = null;
+
+    try {
+      report = await runMotionPipeline(
+        {
+          project: resolveMediaProject(record.projectRoot),
+          phase: record.phase,
+          output: record.output,
+          takes: record.takes,
+        },
+        deps,
+        observer,
+      );
+    } catch (cause) {
+      failure = isMotionPipelineCanceled(cause) ? null : toErrorPayload(cause);
+    }
+
+    settle(record, report, failure);
+  }
+
   async function runJob(record: JobRecord): Promise<void> {
     switch (record.kind) {
       case 'render':
@@ -388,6 +444,9 @@ export function createRenderJobQueue(deps: RenderApiDependencies): RenderJobQueu
         break;
       case 'photo-aroll':
         await runPhotoArollJob(record);
+        break;
+      case 'motion':
+        await runMotionJob(record);
         break;
     }
 
@@ -475,6 +534,16 @@ export function createRenderJobQueue(deps: RenderApiDependencies): RenderJobQueu
           photos: input.photos,
           output: input.output,
           fps: input.fps,
+          progress: null,
+          report: null,
+        };
+      case 'motion':
+        return {
+          ...base,
+          kind: 'motion',
+          phase: input.phase,
+          output: input.output,
+          takes: input.takes,
           progress: null,
           report: null,
         };

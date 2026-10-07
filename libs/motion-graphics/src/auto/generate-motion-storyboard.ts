@@ -85,7 +85,7 @@ async function askOrFail(ask: AskStoryboardAgent, request: AutoStoryboardRequest
   try {
     return await ask(request);
   } catch (cause) {
-    throw new MotionStudioError('AI_FAILED', `the agent failed: ${cause instanceof Error ? cause.message : String(cause)}`);
+    throw new MotionStudioError('AI_FAILED', `the agent failed: ${cause instanceof Error ? cause.message : String(cause)}`, { cause });
   }
 }
 

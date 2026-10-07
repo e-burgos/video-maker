@@ -19,6 +19,10 @@ export const STUDIO_TOOL_NAMES = [
   'search_free_media',
   'import_media',
   'view_images',
+  'get_motion_brands',
+  'read_motion_brief',
+  'write_motion_brief',
+  'read_motion_storyboard',
 ] as const;
 
 export type StudioToolName = (typeof STUDIO_TOOL_NAMES)[number];
