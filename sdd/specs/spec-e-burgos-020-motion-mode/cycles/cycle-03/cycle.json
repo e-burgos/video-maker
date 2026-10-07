@@ -14,9 +14,9 @@
     "Pedido a la IA generado desde el catálogo y la marca; generateMotionStoryboard con una reparación",
     "Comando auto en motion-studio con adaptador Claude CLI y corrida real con un guion nuevo de DisplayAds"
   ],
-  "status": "in-progress",
+  "status": "completed",
   "started_at": "2026-10-07",
-  "completed_at": null,
+  "completed_at": "2026-10-07",
   "documents": {
     "brief": "sdd/specs/spec-e-burgos-020-motion-mode/cycles/cycle-03/brief.yaml",
     "functional": "sdd/specs/spec-e-burgos-020-motion-mode/cycles/cycle-03/functional.md",
@@ -25,10 +25,116 @@
     "tasks": "sdd/specs/spec-e-burgos-020-motion-mode/cycles/cycle-03/tasks.json"
   },
   "artifacts": [],
-  "metrics": null,
+  "metrics": {
+    "tasks_total": 6,
+    "tasks_completed": 6,
+    "tasks_skipped": 0,
+    "story_points": 15,
+    "files_created": [
+      "libs/motion-graphics/src/auto/motion-brief.ts",
+      "libs/motion-graphics/src/auto/scene-guide.ts",
+      "libs/motion-graphics/src/auto/build-auto-storyboard-request.ts",
+      "libs/motion-graphics/src/auto/check-storyboard-against-brief.ts",
+      "libs/motion-graphics/src/auto/generate-motion-storyboard.ts",
+      "tools/motion-studio/src/deps/claude-cli-ask-agent.ts",
+      "libs/motion-graphics/assets/briefs/displayads/plataforma-60s.json",
+      "sdd/context/libs/motion-graphics/updates/2026-10-07-spec-e-burgos-020-motion-mode-cycle-03.md",
+      "sdd/context/tools/motion-studio/updates/2026-10-07-spec-e-burgos-020-motion-mode-cycle-03.md",
+      "sdd/memory/journal/2026-10-07-spec-e-burgos-020-motion-mode-cycle-03.md"
+    ],
+    "files_modified": [
+      "libs/motion-graphics/src/index.ts",
+      "libs/motion-graphics/src/errors/motion-studio-error.ts",
+      "libs/motion-graphics/src/storyboard/motion-storyboard.schema.ts",
+      "libs/motion-graphics/src/beats/fit-beat-grid.ts",
+      "libs/motion-graphics/src/scenes/render-scene.ts",
+      "libs/motion-graphics/src/scenes/scene-html.ts",
+      "libs/motion-graphics/assets/runtime/scenes.css",
+      "tools/motion-studio/src/cli.ts",
+      "tools/motion-studio/src/deps/motion-dependencies.ts",
+      "tools/motion-studio/src/deps/node-motion-dependencies.ts",
+      "sdd/skills/motion-studio/SKILL.md"
+    ],
+    "files_deleted": [],
+    "usage": {
+      "tokens_in": 618000,
+      "tokens_out": 72353,
+      "approx": true,
+      "source": "declared-estimate",
+      "by_agent": [
+        {
+          "agent": "implementor-back",
+          "label": "TASK-001..004: MotionBrief, verificación, prompt, generador y comando auto",
+          "provider_model": "claude/sonnet",
+          "effort": "medium",
+          "tokens_in": 138000,
+          "tokens_out": 24353,
+          "tokens_total": 162353,
+          "approx": false,
+          "source": "agent-usage-notification",
+          "recorded_at": "2026-10-07"
+        },
+        {
+          "agent": "orchestrator",
+          "label": "verificación, corridas reales de auto/voice/render, arreglos de prompt, grilla y catálogo, cierre",
+          "provider_model": "claude/opus",
+          "effort": "high",
+          "tokens_in": 480000,
+          "tokens_out": 48000,
+          "tokens_total": 528000,
+          "approx": true,
+          "source": "declared-estimate",
+          "recorded_at": "2026-10-07"
+        }
+      ],
+      "by_tier": {
+        "claude/sonnet": {
+          "tokens_in": 138000,
+          "tokens_out": 24353,
+          "approx": false,
+          "source": "agent-usage-notification"
+        },
+        "claude/opus": {
+          "tokens_in": 480000,
+          "tokens_out": 48000,
+          "approx": true,
+          "source": "declared-estimate"
+        }
+      }
+    }
+  },
   "tables_created": [],
   "endpoints_implemented": [],
   "components_created": [],
-  "issues_found": [],
-  "reviewer_report": null
+  "issues_found": [
+    "claude -p cargaba plugins, hooks y MCP del usuario: 178k tokens por llamada ($1,24 un storyboard). Aislado con --setting-sources '' --strict-mcp-config --no-session-persistence ($0,40–0,60).",
+    "fitBeatGrid daba 99 BPM (confianza 0,03) para un tema de 122: el tren regular de corcheas anula la coherencia de fase; se agregó la vía por intervalo mediano.",
+    "La IA inventaba la URL, pisaba la voz de la marca, repetía el título en accent y copiaba el tagline de la marca con un accent propio: se impone la marca en enforceBrief/generateMotionStoryboard y se describe accent en el schema.",
+    "Piper arruina el nombre de la marca al principio o al final de una línea: la regla del prompt pide 'Esto es <marca>: …'.",
+    "El texto grande de una promo larga se salía de su tarjeta: escala por largo (fit-mid / fit-long)."
+  ],
+  "reviewer_report": {
+    "approved": true,
+    "date": "2026-10-07",
+    "ca_results": {
+      "CA-01": "OK — motion-studio auto escribe storyboard.json válido y deja el proyecto compuesto con las imágenes del brief.",
+      "CA-02": "OK — la voz sale del guion (partida y ajustada) y todos los cues pasan la verificación cruzada.",
+      "CA-03": "OK — marca, formato, golpes y música del brief se imponen (test); con music auto eligió Voxel Revolution.",
+      "CA-04": "OK — reparación única con errores por campo y STORYBOARD_INVALID nombrando escena y campo (tests con agente falso).",
+      "CA-05": "OK — el comando informa tokens de entrada/salida y costo (p. ej. 68755 / 23400 · $0,4586).",
+      "CA-06": "OK — plataforma-60s.json → ia-60s.mp4 (1822 cuadros, 60,7 s, 122 BPM) sin editar el storyboard a mano; cuadros revisados."
+    },
+    "tests": {
+      "sdd:validate": "OK",
+      "lint": "motion-graphics, motion-studio verdes",
+      "test": "motion-graphics 120, motion-studio 23",
+      "build": "verde",
+      "e2e": "corrida real con Claude CLI + Piper + whisper + HyperFrames"
+    },
+    "notes": "El costo por storyboard bajó de $1,24 a ~$0,45 aislando el CLI. La salida es mayormente razonamiento: --effort configurable queda como mejora medible.",
+    "follow_ups": [
+      "Isolar también el adaptador Claude CLI de render-api (tarea aparte sugerida).",
+      "caption por imagen de marca en el BrandManifest para que la IA elija con criterio."
+    ]
+  }
 }

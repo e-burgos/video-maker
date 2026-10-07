@@ -23,11 +23,21 @@
       "estimation_hours": 2,
       "story_points": 3,
       "depends_on": [],
-      "status": "pending",
+      "status": "done",
       "files": [
         "libs/motion-graphics/src/auto/motion-brief.ts",
         "libs/motion-graphics/src/auto/check-storyboard-against-brief.ts"
-      ]
+      ],
+      "usage": {
+        "provider_model": "claude/sonnet",
+        "effort": "medium",
+        "agent": "implementor-back",
+        "tokens_in": 40000,
+        "tokens_out": 7000,
+        "approx": false,
+        "source": "agent-usage-notification",
+        "recorded_at": "2026-10-07"
+      }
     },
     {
       "id": "TASK-002",
@@ -40,11 +50,21 @@
       "depends_on": [
         "TASK-001"
       ],
-      "status": "pending",
+      "status": "done",
       "files": [
         "libs/motion-graphics/src/auto/build-auto-storyboard-request.ts",
         "libs/motion-graphics/src/auto/scene-guide.ts"
-      ]
+      ],
+      "usage": {
+        "provider_model": "claude/sonnet",
+        "effort": "medium",
+        "agent": "implementor-back",
+        "tokens_in": 30000,
+        "tokens_out": 5000,
+        "approx": false,
+        "source": "agent-usage-notification",
+        "recorded_at": "2026-10-07"
+      }
     },
     {
       "id": "TASK-003",
@@ -58,10 +78,20 @@
       "depends_on": [
         "TASK-002"
       ],
-      "status": "pending",
+      "status": "done",
       "files": [
         "libs/motion-graphics/src/auto/generate-motion-storyboard.ts"
-      ]
+      ],
+      "usage": {
+        "provider_model": "claude/sonnet",
+        "effort": "medium",
+        "agent": "implementor-back",
+        "tokens_in": 28000,
+        "tokens_out": 5000,
+        "approx": false,
+        "source": "agent-usage-notification",
+        "recorded_at": "2026-10-07"
+      }
     },
     {
       "id": "TASK-004",
@@ -74,11 +104,21 @@
       "depends_on": [
         "TASK-003"
       ],
-      "status": "pending",
+      "status": "done",
       "files": [
         "tools/motion-studio/src/cli.ts",
         "tools/motion-studio/src/deps/node-motion-dependencies.ts"
-      ]
+      ],
+      "usage": {
+        "provider_model": "claude/sonnet",
+        "effort": "medium",
+        "agent": "implementor-back",
+        "tokens_in": 40000,
+        "tokens_out": 7353,
+        "approx": false,
+        "source": "agent-usage-notification",
+        "recorded_at": "2026-10-07"
+      }
     },
     {
       "id": "TASK-005",
@@ -91,10 +131,20 @@
       "depends_on": [
         "TASK-004"
       ],
-      "status": "pending",
+      "status": "done",
       "files": [
         "libs/motion-graphics/assets/briefs/displayads/plataforma-60s.json"
-      ]
+      ],
+      "usage": {
+        "provider_model": "claude/opus",
+        "effort": "high",
+        "agent": "orchestrator",
+        "tokens_in": 420000,
+        "tokens_out": 42000,
+        "approx": true,
+        "source": "declared-estimate",
+        "recorded_at": "2026-10-07"
+      }
     },
     {
       "id": "TASK-006",
@@ -107,10 +157,20 @@
       "depends_on": [
         "TASK-005"
       ],
-      "status": "pending",
+      "status": "done",
       "files": [
         "sdd/context/libs/motion-graphics/updates/"
-      ]
+      ],
+      "usage": {
+        "provider_model": "claude/opus",
+        "effort": "high",
+        "agent": "orchestrator",
+        "tokens_in": 60000,
+        "tokens_out": 6000,
+        "approx": true,
+        "source": "declared-estimate",
+        "recorded_at": "2026-10-07"
+      }
     }
   ]
 }
