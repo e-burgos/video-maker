@@ -53,6 +53,10 @@
       "file": "SKILL.md"
     },
     {
+      "dir": "motion-studio",
+      "file": "SKILL.md"
+    },
+    {
       "dir": "scaffold-nx",
       "file": "SKILL.md"
     },
@@ -169,6 +173,9 @@
     }
   ],
   "memory": [
+    {
+      "file": "2026-10-07-spec-e-burgos-019-motion-studio-cycle-01.md"
+    },
     {
       "file": "2026-09-26-spec-e-burgos-018-producer-free-tier-cycle-04.md"
     },

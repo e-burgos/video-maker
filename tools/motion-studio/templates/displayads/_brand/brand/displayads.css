@@ -1,0 +1,170 @@
+:root {
+  --da-bg: #09090b;
+  --da-bg-deep: #050507;
+  --da-surface: #18181b;
+  --da-surface-glass: rgba(24, 24, 27, 0.72);
+  --da-border: rgba(255, 255, 255, 0.07);
+  --da-border-strong: rgba(255, 255, 255, 0.14);
+  --da-text: #fafafa;
+  --da-text-2: #a1a1aa;
+  --da-text-3: #71717a;
+  --da-sky-600: #0284c7;
+  --da-sky: #0ea5e9;
+  --da-sky-400: #38bdf8;
+  --da-sky-300: #7dd3fc;
+  --da-teal: #14b8a6;
+  --da-emerald: #34d399;
+  --da-amber: #f59e0b;
+  --da-rose: #f43f5e;
+  --da-radius: 28px;
+  --da-font-display: "Outfit", "Geist", sans-serif;
+  --da-font-body: "Geist", "Outfit", sans-serif;
+  --da-font-mono: "Geist Mono", ui-monospace, monospace;
+}
+
+body {
+  margin: 0;
+  background: var(--da-bg);
+  color: var(--da-text);
+  font-family: var(--da-font-body);
+  -webkit-font-smoothing: antialiased;
+}
+
+#root {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  background: var(--da-bg);
+}
+
+.da-bg {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(ellipse 120% 90% at 50% 40%, #0c0d10 0%, var(--da-bg) 55%, var(--da-bg-deep) 100%);
+}
+
+.da-dots {
+  position: absolute;
+  inset: -40px;
+  background-image: radial-gradient(rgba(255, 255, 255, 0.075) 1.4px, transparent 1.6px);
+  background-size: 34px 34px;
+  mask-image: radial-gradient(ellipse 75% 70% at 50% 50%, #000 30%, transparent 85%);
+}
+
+.da-glow {
+  position: absolute;
+  width: 900px;
+  height: 900px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(14, 165, 233, 0.22) 0%, rgba(14, 165, 233, 0.07) 40%, transparent 70%);
+  filter: blur(40px);
+}
+
+.da-glow.teal {
+  background: radial-gradient(circle, rgba(20, 184, 166, 0.16) 0%, rgba(20, 184, 166, 0.05) 40%, transparent 70%);
+}
+
+.da-vignette {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(ellipse 85% 80% at 50% 50%, transparent 55%, rgba(0, 0, 0, 0.55) 100%);
+  pointer-events: none;
+}
+
+.da-grain {
+  position: absolute;
+  inset: 0;
+  opacity: 0.05;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='240' height='240'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>");
+  mix-blend-mode: overlay;
+  pointer-events: none;
+}
+
+.da-glass {
+  background: var(--da-surface-glass);
+  border: 1px solid var(--da-border);
+  border-radius: var(--da-radius);
+  backdrop-filter: blur(24px);
+  box-shadow: 0 32px 80px rgba(0, 0, 0, 0.6), inset 0 1px 0 rgba(255, 255, 255, 0.05);
+}
+
+.da-title {
+  font-family: var(--da-font-display);
+  font-weight: 700;
+  letter-spacing: -0.045em;
+  line-height: 0.95;
+  margin: 0;
+}
+
+.da-grad {
+  background: linear-gradient(100deg, var(--da-sky-300) 0%, var(--da-sky) 45%, var(--da-sky-600) 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+.da-muted {
+  color: var(--da-text-3);
+}
+
+.da-label {
+  font-family: var(--da-font-mono);
+  font-size: 22px;
+  font-weight: 500;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--da-text-2);
+}
+
+.da-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 22px;
+  border-radius: 999px;
+  border: 1px solid var(--da-border-strong);
+  background: rgba(9, 9, 11, 0.7);
+  font-family: var(--da-font-mono);
+  font-size: 22px;
+  color: var(--da-text);
+  white-space: nowrap;
+}
+
+.da-dot {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: var(--da-emerald);
+  box-shadow: 0 0 14px rgba(52, 211, 153, 0.8);
+  flex: none;
+}
+
+.da-dot.off {
+  background: var(--da-amber);
+  box-shadow: 0 0 14px rgba(245, 158, 11, 0.8);
+}
+
+.da-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 18px 34px;
+  border-radius: 16px;
+  background: linear-gradient(180deg, var(--da-sky-400), var(--da-sky-600));
+  color: #fff;
+  font-family: var(--da-font-display);
+  font-weight: 600;
+  font-size: 28px;
+  box-shadow: 0 10px 40px rgba(14, 165, 233, 0.45), inset 0 1px 0 rgba(255, 255, 255, 0.3);
+}
+
+.da-icon {
+  width: 1em;
+  height: 1em;
+  stroke: currentColor;
+  fill: none;
+  stroke-width: 1.8;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}

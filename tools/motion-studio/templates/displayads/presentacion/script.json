@@ -1,0 +1,91 @@
+{
+  "voice": "es_AR-daniela-high",
+  "lengthScale": 1.08,
+  "music": {
+    "file": "Voxel Revolution.mp3",
+    "credit": "\"Voxel Revolution\" Kevin MacLeod (incompetech.com) · CC BY 4.0"
+  },
+  "scenes": [
+    {
+      "id": "hook",
+      "minBars": 3,
+      "vo": "¿Cuánto te cuesta una pantalla apagada? ¿O una promo que terminó hace dos semanas y todavía sigue en pantalla?"
+    },
+    {
+      "id": "pain",
+      "minBars": 2,
+      "vo": "Hoy son pendrives, llamadas al local y pantallas que nadie controla."
+    },
+    {
+      "id": "reveal",
+      "anchor": 13.8,
+      "minBars": 3,
+      "vo": "Esto es Display Ads: cartelería digital en la nube, con inteligencia artificial."
+    },
+    {
+      "id": "remote",
+      "minBars": 4,
+      "vo": "Cambiá el contenido de todas tus sucursales desde el celular, en segundos."
+    },
+    {
+      "id": "schedule",
+      "minBars": 4,
+      "vo": "Programá tus campañas por horario, por día o por sucursal. Nada de repetir siempre lo mismo: son campañas con reglas."
+    },
+    {
+      "id": "monitor",
+      "minBars": 3,
+      "vo": "Y sabés en todo momento qué pantalla está en línea y qué está reproduciendo. Nunca más te enterás tarde de que una pantalla está apagada."
+    },
+    {
+      "id": "ai",
+      "anchor": 45.3,
+      "minBars": 7,
+      "vo": "La inteligencia artificial crea imágenes y videos para tu promo en segundos. Mira el clima, los feriados y a tus competidores a quinientos metros, y te sugiere qué mostrar."
+    },
+    {
+      "id": "devices",
+      "anchor": 59.1,
+      "minBars": 8,
+      "vo": "Funciona con equipos propios. El Core Pro convierte cualquier televisor en una pantalla inteligente. El Counter quince es la pantalla de mostrador, todo en uno. Y si se corta internet, siguen reproduciendo."
+    },
+    {
+      "id": "cta",
+      "anchor": 76.5,
+      "minBars": 5,
+      "vo": "Con Display Ads, cada pantalla está bajo control. Con inteligencia artificial. Pedí tu cotización en nuestra web."
+    }
+  ],
+  "noWhooshOn": [
+    "reveal"
+  ],
+  "sfx": [
+    {
+      "id": "riser",
+      "scene": "reveal",
+      "offset": -3.4
+    },
+    {
+      "id": "click",
+      "scene": "remote",
+      "word": "celular"
+    },
+    {
+      "id": "notif",
+      "scene": "monitor",
+      "word": "apagada",
+      "offset": 0.3
+    },
+    {
+      "id": "pop",
+      "scene": "ai",
+      "word": "segundos"
+    },
+    {
+      "id": "chime",
+      "scene": "cta",
+      "word": "cotizacion",
+      "offset": -0.3
+    }
+  ]
+}

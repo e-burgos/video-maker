@@ -1,0 +1,57 @@
+{
+  "voice": "es_AR-daniela-high",
+  "lengthScale": 1.08,
+  "music": {
+    "file": "Newer Wave.mp3",
+    "credit": "\"Newer Wave\" Kevin MacLeod (incompetech.com) · CC BY 4.0"
+  },
+  "noWhooshOn": [],
+  "scenes": [
+    {
+      "id": "intro",
+      "minBars": 3,
+      "vo": "El Core Pro convierte cualquier televisor en una pantalla de Display Ads. Así se instala en tu local."
+    },
+    {
+      "id": "hdmi",
+      "minBars": 3,
+      "vo": "Conectá el cable micro hdmi en el puerto que está junto a la alimentación, y el otro extremo al televisor."
+    },
+    {
+      "id": "lan",
+      "minBars": 3,
+      "vo": "Si tenés un punto de red cerca, conectá también el cable de red. Es la conexión más estable."
+    },
+    {
+      "id": "power",
+      "minBars": 3,
+      "vo": "Por último, enchufá la fuente. Con cable de red, en pocos segundos empieza a reproducir tu campaña."
+    },
+    {
+      "id": "hotspot",
+      "minBars": 4,
+      "vo": "¿No tenés cable? Configurá el wifi desde tu celular. Cuando no tiene internet, el equipo crea su propia red, llamada Display Ads Setup. La contraseña es única de cada equipo."
+    },
+    {
+      "id": "browser",
+      "minBars": 4,
+      "vo": "Conectate a esa red, apagá los datos móviles, y abrí en el navegador la dirección que te mostramos acá."
+    },
+    {
+      "id": "portal",
+      "minBars": 4,
+      "vo": "Elegí la red del local, escribí la contraseña, y tocá Conectar dispositivo. En unos segundos, la pantalla empieza a reproducir tu campaña."
+    },
+    {
+      "id": "warn",
+      "minBars": 3,
+      "vo": "Ojo con las redes que piden iniciar sesión en una página, como las de hoteles o shoppings. Usá una red privada, o el cable."
+    },
+    {
+      "id": "check",
+      "minBars": 3,
+      "vo": "Para verificar, fijate en el panel que el equipo figure en línea. Y si necesitás ayuda, escribile al soporte de Display Ads."
+    }
+  ],
+  "sfx": []
+}

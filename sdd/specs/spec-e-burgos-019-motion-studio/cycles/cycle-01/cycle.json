@@ -1,0 +1,138 @@
+{
+  "$schema": "../../../../schemas/cycle.schema.json",
+  "cycle": 1,
+  "module": "motion-studio",
+  "spec": "spec-e-burgos-019-motion-studio",
+  "apps": [
+    "tools/motion-studio"
+  ],
+  "phase": "motion-studio",
+  "flow": "lite",
+  "objectives": [
+    "Crear tools/motion-studio con la lógica de grilla de golpes, escenas, ducking, mejor toma y armado de plantillas cubierta por tests",
+    "Entregar la presentación de DisplayAds y los instructivos de Counter 15 y Core Pro renderizados con la marca y la voz es_AR",
+    "Habilitar las skills de HyperFrames para el repo"
+  ],
+  "status": "completed",
+  "started_at": "2026-10-07",
+  "completed_at": "2026-10-07",
+  "documents": {
+    "plan": "sdd/specs/spec-e-burgos-019-motion-studio/cycles/cycle-01/plan.md",
+    "tasks": "sdd/specs/spec-e-burgos-019-motion-studio/cycles/cycle-01/tasks.json"
+  },
+  "artifacts": [],
+  "metrics": {
+    "tasks_total": 8,
+    "tasks_completed": 8,
+    "tasks_skipped": 0,
+    "story_points": 17,
+    "files_created": [
+      "sdd/context/tools/motion-studio/constitution.md",
+      "sdd/context/tools/motion-studio/context_prompt.md",
+      "sdd/context/tools/motion-studio/updates/2026-10-07-spec-e-burgos-019-motion-studio-cycle-01.md",
+      "sdd/memory/journal/2026-10-07-spec-e-burgos-019-motion-studio-cycle-01.md",
+      "sdd/skills/motion-studio/SKILL.md",
+      "tools/motion-studio/README.md",
+      "tools/motion-studio/project.json",
+      "tools/motion-studio/src/__fixtures__/fake-motion-dependencies.ts",
+      "tools/motion-studio/src/beats/fit-beat-grid.spec.ts",
+      "tools/motion-studio/src/beats/fit-beat-grid.ts",
+      "tools/motion-studio/src/beats/parse-hyperframes-beats.spec.ts",
+      "tools/motion-studio/src/beats/parse-hyperframes-beats.ts",
+      "tools/motion-studio/src/cli.spec.ts",
+      "tools/motion-studio/src/cli.ts",
+      "tools/motion-studio/src/deps/motion-dependencies.ts",
+      "tools/motion-studio/src/deps/node-motion-dependencies.ts",
+      "tools/motion-studio/src/main.ts",
+      "tools/motion-studio/src/script/motion-script.spec.ts",
+      "tools/motion-studio/src/script/motion-script.ts",
+      "tools/motion-studio/src/template/compose-template.spec.ts",
+      "tools/motion-studio/src/template/compose-template.ts",
+      "tools/motion-studio/src/timeline/build-duck-automation.spec.ts",
+      "tools/motion-studio/src/timeline/build-duck-automation.ts",
+      "tools/motion-studio/src/timeline/layout-scenes.spec.ts",
+      "tools/motion-studio/src/timeline/layout-scenes.ts",
+      "tools/motion-studio/src/voice/intelligibility-score.spec.ts",
+      "tools/motion-studio/src/voice/intelligibility-score.ts",
+      "tools/motion-studio/src/voice/pick-best-take.spec.ts",
+      "tools/motion-studio/src/voice/pick-best-take.ts",
+      "tools/motion-studio/templates/displayads/_brand/brand/kit.js",
+      "tools/motion-studio/templates/displayads/_brand/brand/tutorial.css",
+      "tools/motion-studio/templates/displayads/_brand/displayads.css",
+      "tools/motion-studio/templates/displayads/_music/CREDITS.md",
+      "tools/motion-studio/templates/displayads/core-pro/index.html.tpl",
+      "tools/motion-studio/templates/displayads/counter-15/index.html.tpl",
+      "tools/motion-studio/templates/displayads/presentacion/index.html.tpl",
+      "tools/motion-studio/vite.config.ts"
+    ],
+    "files_modified": [
+      ".claude/settings.json",
+      "sdd/context/constitution.md",
+      "sdd/context/context_prompt.md",
+      "sdd/global.json",
+      "sdd/specs/index.json"
+    ],
+    "files_deleted": [],
+    "usage": {
+      "tokens_in": 1240000,
+      "tokens_out": 117000,
+      "approx": true,
+      "source": "declared-estimate",
+      "by_agent": [
+        {
+          "agent": "orchestrator",
+          "label": "ciclo lite completo: herramienta, plantillas, voz, renders y cierre",
+          "provider_model": "claude/opus",
+          "effort": "high",
+          "tokens_in": 1240000,
+          "tokens_out": 117000,
+          "tokens_total": 1357000,
+          "approx": true,
+          "source": "declared-estimate",
+          "recorded_at": "2026-10-07"
+        }
+      ],
+      "by_tier": {
+        "claude/opus": {
+          "tokens_in": 1240000,
+          "tokens_out": 117000,
+          "approx": true,
+          "source": "declared-estimate"
+        }
+      }
+    }
+  },
+  "tables_created": [],
+  "endpoints_implemented": [],
+  "components_created": [],
+  "issues_found": [
+    "hyperframes beats devuelve onsets irregulares (234 BPM para un tema de 122): se ajusta una grilla regular encima; clava el BPM oficial de los dos temas (122 y 110) donde librosa daba 123.",
+    "Piper es estocástico: la misma frase sale trabada en algunas tomas ('franja horaria' → 'Franco Auraria'); se elige la mejor de 5 por transcripción.",
+    "Un throw en el JS de la plantilla (palabra que Whisper no reconoció) dejaba la composición sin registrar y HyperFrames renderizaba escenas vacías sin error; wordAt() ahora estima por posición en el guion.",
+    "plan resolvía también whisper-cli para recortar la música; ahora resuelve solo ffmpeg.",
+    "El comando voice no corrió en el contenedor (sin sherpa-onnx ni whisper-cli para Linux): las tomas salieron del mismo modelo Piper vía piper-tts con la misma selección por puntaje."
+  ],
+  "reviewer_report": {
+    "approved": true,
+    "date": "2026-10-07",
+    "ca_results": {
+      "US-019-101": "OK — plan con beat sync: escenas en golpes de la grilla (122 BPM presentación, 110 BPM instructivos), anclas en el compás más cercano (drop del logo en 13,80 s); --no-beat-sync cubierto por test; ducking verificado en el MP4 (voz −18 dB vs música sola −20/−21 dB).",
+      "US-019-102": "OK con observación — pickBestTake y el puntaje cubiertos por tests; en la entrega las 26 frases quedaron entre 0,86 y 1,00 de inteligibilidad. voice con media-local queda por verificar en la Mac del dev.",
+      "US-019-103": "OK — presentación 86,6 s, Counter 15 62,8 s y Core Pro 67,1 s, 1080p30, −16,3/−15,8/−15,1 LUFS, logos de logo-final, sin violeta ni Inter; hyperframes lint 0 errores en las tres; cuadros revisados sobre el MP4 final.",
+      "US-019-104": "OK — plugin hyperframes@hyperframes habilitado en .claude/settings.json; skill motion-studio en sdd/skills."
+    },
+    "tests": {
+      "sdd:validate": "OK",
+      "lint": "motion-studio:lint verde, 0 avisos",
+      "test": "motion-studio:test 52/52, 100 % líneas",
+      "build": "motion-studio:build (tsc) verde",
+      "e2e": "init → plan → compose → render real con la CLI para los tres videos"
+    },
+    "notes": "Ciclo lite cerrado punta a punta a pedido del dev (merge directo). Los tres MP4 se entregan en display-ads/docs/product/videos.",
+    "follow_ups": [
+      "Correr motion-studio voice en la Mac del dev (sherpa-onnx + whisper-cli) y comparar el reporte de tomas.",
+      "Plantilla 9:16 (reel) a partir de la presentación.",
+      "Alineamiento forzado contra el guion para no depender de que Whisper reconozca cada palabra."
+    ]
+  }
+}
