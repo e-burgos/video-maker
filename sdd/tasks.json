@@ -471,6 +471,20 @@
           "tasks_done": 10
         }
       }
+    },
+    "spec-e-burgos-019-motion-studio": {
+      "cycles": {
+        "cycle-01": {
+          "file": "sdd/specs/spec-e-burgos-019-motion-studio/cycles/cycle-01/tasks.json",
+          "module": "motion-studio",
+          "apps": [
+            "tools/motion-studio"
+          ],
+          "status": "in-progress",
+          "tasks_total": 8,
+          "tasks_done": 0
+        }
+      }
     }
   }
 }

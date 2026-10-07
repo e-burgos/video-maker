@@ -310,6 +310,22 @@
       "depends_on": [
         "spec-e-burgos-017-desktop-app"
       ]
+    },
+    {
+      "id": "spec-e-burgos-019-motion-studio",
+      "author": "e-burgos",
+      "slug": "motion-studio",
+      "folder": "sdd/specs/spec-e-burgos-019-motion-studio",
+      "file": "sdd/specs/spec-e-burgos-019-motion-studio/spec-e-burgos-019-motion-studio.spec.md",
+      "module": "motion-studio",
+      "app": "tools/motion-studio",
+      "status": "in-progress",
+      "title": "Motion Studio: motion graphics con HyperFrames, voz es_AR con mejor toma y cortes al golpe",
+      "created_at": "2026-10-07",
+      "depends_on": [
+        "spec-e-burgos-018-producer-free-tier"
+      ],
+      "completed_at": null
     }
   ]
 }

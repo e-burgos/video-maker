@@ -1,0 +1,30 @@
+{
+  "$schema": "../../../../schemas/cycle.schema.json",
+  "cycle": 1,
+  "module": "motion-studio",
+  "spec": "spec-e-burgos-019-motion-studio",
+  "apps": [
+    "tools/motion-studio"
+  ],
+  "phase": "motion-studio",
+  "flow": "lite",
+  "objectives": [
+    "Crear tools/motion-studio con la lógica de grilla de golpes, escenas, ducking, mejor toma y armado de plantillas cubierta por tests",
+    "Entregar la presentación de DisplayAds y los instructivos de Counter 15 y Core Pro renderizados con la marca y la voz es_AR",
+    "Habilitar las skills de HyperFrames para el repo"
+  ],
+  "status": "in-progress",
+  "started_at": "2026-10-07",
+  "completed_at": null,
+  "documents": {
+    "plan": "sdd/specs/spec-e-burgos-019-motion-studio/cycles/cycle-01/plan.md",
+    "tasks": "sdd/specs/spec-e-burgos-019-motion-studio/cycles/cycle-01/tasks.json"
+  },
+  "artifacts": [],
+  "metrics": null,
+  "tables_created": [],
+  "endpoints_implemented": [],
+  "components_created": [],
+  "issues_found": [],
+  "reviewer_report": null
+}

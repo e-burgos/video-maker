@@ -175,7 +175,16 @@
       "completed_at": "2026-09-26"
     }
   ],
-  "in_progress_modules": [],
+  "in_progress_modules": [
+    {
+      "module": "motion-studio",
+      "spec": "spec-e-burgos-019-motion-studio",
+      "apps": [
+        "tools/motion-studio"
+      ],
+      "description": "Herramienta de motion graphics sobre HyperFrames: plantillas de marca en HTML+GSAP, voz Piper es_AR con selección de la mejor toma por transcripción, grilla de golpes ajustada sobre `hyperframes beats` con cortes al golpe opcionales y ducking de la música; primera entrega: presentación de DisplayAds e instructivos de Counter 15 y Core Pro"
+    }
+  ],
   "pending_modules": [
     {
       "module": "scene-assembly",
