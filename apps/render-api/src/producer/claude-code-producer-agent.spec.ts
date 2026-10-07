@@ -39,6 +39,8 @@ describe('producerCliArgs', () => {
       'sonnet',
       '--tools',
       '',
+      '--setting-sources',
+      '',
       '--strict-mcp-config',
       '--mcp-config',
       '{"mcpServers":{"studio":{"command":"node","args":[],"env":{}}}}',
@@ -65,6 +67,14 @@ describe('producerCliArgs', () => {
     const args = producerCliArgs(producerTurnStartFixture({ resume: true }));
     expect(args).toContain('--resume');
     expect(args).not.toContain('--session-id');
+  });
+
+  it('aísla el turno de los settings, plugins y hooks del usuario pero conserva la sesión para --resume', () => {
+    const args = producerCliArgs(producerTurnStartFixture());
+
+    expect(args[args.indexOf('--setting-sources') + 1]).toBe('');
+    expect(args).toContain('--strict-mcp-config');
+    expect(args).not.toContain('--no-session-persistence');
   });
 
   it('pasa el config MCP del turno tal cual, después de --strict-mcp-config', () => {

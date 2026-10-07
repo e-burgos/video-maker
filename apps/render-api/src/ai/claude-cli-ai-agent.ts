@@ -157,6 +157,10 @@ export function claudeCliArgs(request: AiAgentRequest, config: AiAgentConfig): r
     '--permission-mode',
     'dontAsk',
     '--disable-slash-commands',
+    '--setting-sources',
+    '',
+    '--strict-mcp-config',
+    '--no-session-persistence',
     '--model',
     request.model ?? config.model,
   ];

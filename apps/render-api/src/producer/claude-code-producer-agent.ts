@@ -23,6 +23,8 @@ export function producerCliArgs(start: ProducerTurnStart): readonly string[] {
     start.model,
     '--tools',
     '',
+    '--setting-sources',
+    '',
     '--strict-mcp-config',
     '--mcp-config',
     start.mcpConfig,
