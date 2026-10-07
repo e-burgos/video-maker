@@ -4,6 +4,21 @@ Historial de versiones de la app de escritorio, en español, pensado para los am
 instalan. `apps/desktop/scripts/release-desktop.mjs` toma la sección de la versión que publica
 y la usa como notas del release.
 
+## 0.3.0 — Videos con motion graphics: un guion y unas fotos alcanzan
+
+- Al crear un video ahora elegís el camino: **Motion graphics** (escribís el guion, subís unas fotos con
+  una línea que diga qué muestran, y el Video Maker diseña las escenas animadas, pone la voz, elige la
+  música y corta al ritmo) o **Material crudo** (el montaje de grabaciones de siempre).
+- Página nueva **Motion** en cada video de motion graphics: marca, formato horizontal o vertical (reels),
+  música, guion e imágenes; "Armar storyboard" te muestra las escenas antes de gastar tiempo en el video,
+  y "Hacer video" muestra el avance ("Voz 3/7", "Render…") y el reproductor al terminar.
+- El productor también sabe armar videos de motion graphics desde la conversación.
+- La marca DisplayAds viene con sus equipos (Counter 15 y el nuevo Easy Pro) y sus fotos aprobadas.
+- El crédito de la música ya no aparece sobre el video: queda en un archivo `.credits.txt` al lado del
+  MP4 para que lo pegues en la descripción de la publicación (la licencia de los temas lo pide).
+- Claude se usa siempre con tu suscripción, y cada llamada es mucho más barata: ya no carga la
+  configuración de Claude Code de tu máquina.
+
 ## 0.2.0 — Storyboard sin Claude y material libre para B-roll
 
 - El storyboard (la propuesta de escenas del video: qué se dice y qué se ve en cada una) ahora también funciona con OpenRouter — ya no

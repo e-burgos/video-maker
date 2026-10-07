@@ -471,7 +471,7 @@ media/<slug>/                 proyecto con mode "motion" (se crea así, ver §12
 - Frases cortas, una idea por frase; números como se dicen ("dos por uno", "quinientos metros").
 - Abrí con una pregunta o un dolor concreto y cerrá con un llamado a la acción ("Pedí tu cotización").
 - Para un instructivo de equipo: un paso por frase, en el orden real ("Conectá el cable…", "Enchufá la
-  fuente…"); los equipos que la marca ya tiene (Counter 15, Core Pro) se animan solos con su pantalla.
+  fuente…"); los equipos que la marca vende hoy (Counter 15, Easy Pro) se animan solos; Core Pro está retirado.
 
 ### 12.4 Checklist de entrega (modo B)
 
@@ -501,6 +501,9 @@ curl -sS $API/projects/$SLUG/motion/storyboard
 # 2) video (voz, plan, compose y render; ~30 s por línea de voz + ~2,5 min por minuto de video)
 curl -sS -X POST $API/projects/$SLUG/jobs -H 'content-type: application/json' -d '{"kind":"motion","phase":"video","output":"video.mp4"}'
 ```
+
+La música de la marca es CC BY: el crédito no se dibuja en el video; queda en `out/<output sin extensión>.credits.txt`
+y **tiene que ir en la descripción de la publicación** (lo exige la licencia).
 
 Polling igual que §6.2 (`GET /jobs/<id>`; `progress.stage` ∈ `storyboard | voice | plan | compose |
 render`, con `linesVoiced/totalLines`). `phase: "all"` hace las dos cosas sin parar a revisar. El MP4

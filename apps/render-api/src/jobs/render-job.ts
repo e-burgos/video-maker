@@ -65,6 +65,7 @@ export interface MotionJobReport {
   readonly path: string | null;
   readonly durationSec: number | null;
   readonly scenes: number;
+  readonly musicCredit: string | null;
   readonly storyboard: MotionJobStoryboardReport | null;
 }
 

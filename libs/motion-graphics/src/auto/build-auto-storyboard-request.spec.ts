@@ -43,6 +43,12 @@ describe('buildAutoStoryboardRequest', () => {
     expect(request.systemPrompt).toMatch(/images\/<file>.*brand:<key>/u);
   });
 
+  it('describes brand photos by their caption and never offers a retired device', () => {
+    expect(request.userPrompt).toContain('brand:cafe (Cafetería con el menú en pantallas)');
+    expect(request.userPrompt).not.toMatch(/\bold \(Old/u);
+    expect(request.userPrompt).toContain('dark (Dark, box; in vo write it "Dark Ei")');
+  });
+
   it('gives the brand url and forbids inventing urls or voices', () => {
     expect(request.userPrompt).toContain(`url: ${testBrand.url}`);
     expect(request.systemPrompt).toMatch(/Never invent a URL/u);

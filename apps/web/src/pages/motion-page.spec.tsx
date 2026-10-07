@@ -237,7 +237,7 @@ describe('MotionPage', () => {
     const createMotionJob = vi.fn().mockResolvedValue(motionJob({ state: 'queued' }));
     const getRenderJob = vi.fn().mockResolvedValue(
       motionJob({
-        report: { path: 'out/video.mp4', durationSec: 42, scenes: 2, storyboard: null },
+        report: { path: 'out/video.mp4', durationSec: 42, scenes: 2, musicCredit: '"Tema" Autor · CC BY 4.0', storyboard: null },
       }),
     );
     renderPage({
@@ -260,5 +260,6 @@ describe('MotionPage', () => {
       '/api/projects/promo/files/out/video.mp4',
     );
     expect(player.textContent).toContain('out/video.mp4 · 42s');
+    expect(screen.getByTestId('motion-music-credit').textContent).toBe('For the post description: Music: "Tema" Autor · CC BY 4.0');
   });
 });

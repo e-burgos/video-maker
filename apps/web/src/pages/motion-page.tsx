@@ -29,10 +29,10 @@ const BRIEF_NOT_FOUND = 'BRIEF_NOT_FOUND';
 const STORYBOARD_NOT_FOUND = 'STORYBOARD_NOT_FOUND';
 const OUTPUT_FILE = 'video.mp4';
 
-type DeliveredVideo = { path: string; durationSec: number | null };
+type DeliveredVideo = { path: string; durationSec: number | null; musicCredit: string | null };
 
 function deliveredVideoOf(report: MotionJobReport | null): DeliveredVideo | null {
-  return report !== null && report.path !== null ? { path: report.path, durationSec: report.durationSec } : null;
+  return report !== null && report.path !== null ? { path: report.path, durationSec: report.durationSec, musicCredit: report.musicCredit ?? null } : null;
 }
 
 export function MotionPage() {
@@ -215,6 +215,11 @@ export function MotionPage() {
           <p className="font-mono text-xs text-ink-faint">
             {t('motion.video.path', { path: delivery.path, duration: delivery.durationSec ?? '' })}
           </p>
+          {delivery.musicCredit !== null && (
+            <p data-testid="motion-music-credit" className="text-xs text-ink-muted">
+              {t('motion.video.credit', { credit: delivery.musicCredit })}
+            </p>
+          )}
         </div>
       )}
     </section>

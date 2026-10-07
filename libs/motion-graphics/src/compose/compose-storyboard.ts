@@ -1,3 +1,4 @@
+import { brandImageFile } from '../brand/brand-manifest';
 import type { BrandManifest } from '../brand/brand-manifest';
 import { MotionStudioError } from '../errors/motion-studio-error';
 import { renderScene } from '../scenes/render-scene';
@@ -31,7 +32,7 @@ export interface ComposedStoryboard {
 export function brandImageUrl(ref: string, brand?: BrandManifest): string {
   if (!ref.startsWith('brand:')) return ref;
   const key = ref.slice('brand:'.length);
-  return `${BRAND_ASSET_DIR}/${brand?.images[key] ?? key}`;
+  return `${BRAND_ASSET_DIR}/${(brand === undefined ? undefined : brandImageFile(brand, key)) ?? key}`;
 }
 
 function collectImages(value: unknown, found: Set<string>): void {
@@ -116,7 +117,6 @@ export function composeStoryboard(storyboard: MotionStoryboard, brand: BrandMani
         <div id="mg-bug"><img src="${BRAND_ASSET_DIR}/${brand.isotipo}" alt="" /><span>${esc(brand.name)}</span></div>
         <div id="mg-chapter"></div>
         <div id="mg-ticks"><i></i><i></i><i></i><i></i></div>
-        ${track ? '<div id="mg-credit">Música: {{music_credit}}</div>' : ''}
       </div>
       <div id="mg-flash"></div>
       <div class="mg-layer mg-vignette"></div>

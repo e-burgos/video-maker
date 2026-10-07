@@ -1,0 +1,283 @@
+{
+  "version": 1,
+  "title": "Easy Pro — instalación",
+  "brand": "displayads",
+  "format": "16:9",
+  "beatSync": true,
+  "music": {
+    "track": "newer-wave"
+  },
+  "scenes": [
+    {
+      "id": "intro",
+      "kind": "product",
+      "chapter": "Easy Pro",
+      "vo": "El Isi Pro convierte cualquier televisor en una pantalla de Display Ads. Así se instala en tu local.",
+      "props": {
+        "kicker": "Instructivo",
+        "name": "Easy Pro",
+        "text": "Cualquier televisor, una pantalla inteligente.",
+        "specs": [
+          "Video 4K con HDR",
+          "Wi-Fi 6",
+          "Control remoto"
+        ],
+        "visual": {
+          "kind": "device",
+          "device": "easy-pro"
+        },
+        "textCue": "convierte"
+      }
+    },
+    {
+      "id": "hdmi",
+      "kind": "connections",
+      "chapter": "Conexión",
+      "vo": "Conectá el Isi Pro a una entrada HDMI del televisor.",
+      "props": {
+        "title": "Al HDMI",
+        "accent": "del televisor.",
+        "device": "easy-pro",
+        "links": [
+          {
+            "to": "tv",
+            "label": "HDMI",
+            "cue": "HDMI"
+          }
+        ]
+      }
+    },
+    {
+      "id": "power",
+      "kind": "connections",
+      "vo": "Después enchufalo con su fuente y prendé la tele. En unos segundos arranca solo y empieza a reproducir tu campaña.",
+      "props": {
+        "title": "Enchufalo",
+        "accent": "y prendé la tele.",
+        "device": "easy-pro",
+        "links": [
+          {
+            "to": "tv",
+            "label": "HDMI"
+          },
+          {
+            "to": "power",
+            "label": "220 V",
+            "cue": "fuente"
+          }
+        ],
+        "tv": [
+          {
+            "screen": {
+              "type": "off",
+              "text": "SIN SEÑAL"
+            }
+          },
+          {
+            "screen": {
+              "type": "boot"
+            },
+            "cue": "prendé"
+          },
+          {
+            "screen": {
+              "type": "promo",
+              "kicker": "Hoy",
+              "big": "2x1",
+              "small": "en cafés",
+              "tone": "sky"
+            },
+            "cue": "reproducir"
+          }
+        ]
+      }
+    },
+    {
+      "id": "tv",
+      "kind": "feature",
+      "vo": "Se prende y se apaga junto con la tele. No tenés que tocar nada: tu contenido vuelve solo a la pantalla.",
+      "props": {
+        "kicker": "Con la tele",
+        "title": "Se prende",
+        "accent": "con la tele.",
+        "bullets": [
+          {
+            "text": "Se apaga cuando apagás la tele",
+            "icon": "tv",
+            "cue": "apaga"
+          },
+          {
+            "text": "Tu contenido vuelve solo",
+            "tone": "ok",
+            "cue": "vuelve"
+          }
+        ],
+        "visual": {
+          "kind": "tv",
+          "states": [
+            {
+              "screen": {
+                "type": "off"
+              }
+            },
+            {
+              "screen": {
+                "type": "promo",
+                "kicker": "Buen día",
+                "big": "Café",
+                "small": "+ medialuna",
+                "tone": "warm"
+              },
+              "cue": "prende"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "content",
+      "kind": "remote-update",
+      "chapter": "Contenido",
+      "vo": "Desde el panel elegís qué campañas se muestran, y el equipo las reproduce en cuatro K con HDR.",
+      "props": {
+        "title": "Vos elegís,",
+        "accent": "la pantalla reproduce.",
+        "campaign": {
+          "name": "Promo de invierno",
+          "badge": "-20%"
+        },
+        "publishCue": "elegís",
+        "screens": [
+          {
+            "label": "Easy Pro · Salón",
+            "before": "Promo anterior",
+            "after": "Invierno -20%"
+          }
+        ]
+      }
+    },
+    {
+      "id": "offline",
+      "kind": "feature",
+      "vo": "Guarda tus campañas en su memoria: si se corta internet, sigue reproduciendo.",
+      "props": {
+        "kicker": "Sin internet",
+        "title": "Sigue",
+        "accent": "reproduciendo.",
+        "bullets": [
+          {
+            "text": "Campañas guardadas en el equipo",
+            "icon": "box",
+            "cue": "guarda"
+          },
+          {
+            "text": "Funciona sin internet",
+            "icon": "wifi-off",
+            "tone": "ok",
+            "cue": "corta"
+          }
+        ],
+        "visual": {
+          "kind": "tv",
+          "states": [
+            {
+              "screen": {
+                "type": "promo",
+                "kicker": "Hoy",
+                "big": "2x1",
+                "small": "en cafés",
+                "tone": "sky"
+              }
+            },
+            {
+              "screen": {
+                "type": "promo",
+                "kicker": "Sin internet",
+                "big": "Sigue",
+                "small": "reproduciendo",
+                "tone": "teal"
+              },
+              "cue": "corta"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "wifi",
+      "kind": "feature",
+      "chapter": "Wi-Fi",
+      "vo": "¿Cambiaste el wifi del local? Escribile a nuestro soporte y te guiamos paso a paso con el control remoto.",
+      "props": {
+        "kicker": "¿Cambiaste el Wi-Fi?",
+        "title": "Te guiamos",
+        "accent": "con el control remoto.",
+        "bullets": [
+          {
+            "text": "Escribile al soporte",
+            "icon": "message",
+            "cue": "escribile"
+          },
+          {
+            "text": "Paso a paso, con el control",
+            "icon": "wifi",
+            "cue": "paso"
+          }
+        ],
+        "visual": {
+          "kind": "tv",
+          "states": [
+            {
+              "screen": {
+                "type": "status",
+                "title": "Wi-Fi del local",
+                "status": "Sin conexión",
+                "ok": false
+              }
+            },
+            {
+              "screen": {
+                "type": "status",
+                "title": "Wi-Fi del local",
+                "status": "Conectada"
+              },
+              "cue": "control"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "check",
+      "kind": "dashboard",
+      "chapter": "Verificación",
+      "vo": "Para verificar, fijate en el panel que el equipo figure en línea.",
+      "props": {
+        "title": "Verificá",
+        "accent": "en el panel.",
+        "rows": [
+          {
+            "name": "Easy Pro",
+            "place": "Salón",
+            "now": "Promo de invierno"
+          }
+        ],
+        "stat": {
+          "label": "En línea",
+          "value": 1,
+          "total": 1,
+          "cue": "línea"
+        }
+      }
+    },
+    {
+      "id": "cta",
+      "kind": "cta",
+      "vo": "Esto es Display Ads: cartelería digital, con tus pantallas bajo control.",
+      "props": {
+        "button": "Soporte Display Ads"
+      },
+      "minBars": 4
+    }
+  ]
+}

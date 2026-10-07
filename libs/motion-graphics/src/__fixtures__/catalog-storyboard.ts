@@ -16,8 +16,10 @@ export const testBrand: BrandManifest = {
     counter: { name: 'Counter', image: 'img/counter.png', kind: 'counter', screen: { polygon: [[20, 10], [60, 12], [80, 86], [40, 89]], skew: 6, rotate: 4, aspect: 0.8 } },
     flat: { name: 'Flat', image: 'img/flat.png', kind: 'screen', screen: { polygon: [[0, 0], [100, 0], [100, 100], [0, 100]] } },
     box: { name: 'Box', image: 'img/box.png', kind: 'box' },
+    dark: { name: 'Dark', image: 'img/dark.png', kind: 'box', plate: true, spokenName: 'Dark Ei' },
+    old: { name: 'Old', image: 'img/old.png', kind: 'box', retired: true },
   },
-  images: { local: 'img/local.jpg' },
+  images: { local: 'img/local.jpg', cafe: { file: 'img/scenes/cafe.jpg', caption: 'Cafetería con el menú en pantallas' } },
   music: [
     { id: 'beat', file: 'music/Beat Song.mp3', credit: 'Beat · CC BY 4.0', bpm: 120, mood: 'energetic', drop: 12.5 },
     { id: 'calm', file: 'music/calm.mp3', credit: 'Calm · CC BY 4.0', bpm: 100, mood: 'calm' },

@@ -91,6 +91,12 @@ describe('checkStoryboardAgainstBrief', () => {
     expect(issues.map((i) => i.path)).toEqual(['scenes[0].props.visual.device', 'scenes[1].props.device']);
   });
 
+  it('flags a retired device so new videos never show a product that is no longer sold', () => {
+    const scenes: MotionStoryboard['scenes'] = [{ id: 'p', kind: 'product', vo: 'Equipo', props: { name: 'X', text: 'x', visual: { kind: 'device', device: 'old' } } }];
+    const issues = checkStoryboardAgainstBrief(withScenes(scenes), brief, testBrand);
+    expect(issues).toEqual([{ path: 'scenes[0].props.visual.device', message: expect.stringMatching(/retired/u) }]);
+  });
+
   it('flags a cue that is not the start of a word of the scene vo, in any cue field and nested screen state', () => {
     const scenes: MotionStoryboard['scenes'] = [
       { id: 'h', kind: 'hook', vo: 'Una pantalla apagada', props: { lines: [{ title: 'x', cue: 'ghost' }], screen: { text: 'x', offCue: 'apag', stampCue: 'nada' } } },

@@ -2,8 +2,7 @@
   "id": "displayads",
   "name": "DisplayAds",
   "spokenName": "Display Ads",
-  "tagline": "Cada pantalla, bajo control.",
-  "taglineAccent": "Con IA.",
+  "tagline": "Tus pantallas, bajo control.",
   "url": "displayads.com.ar",
   "logo": "img/logo.svg",
   "isotipo": "img/isotipo.svg",
@@ -53,21 +52,100 @@
         "skew": 6,
         "rotate": 4,
         "aspect": 0.8078
-      }
+      },
+      "spokenName": "Counter quince"
+    },
+    "easy-pro": {
+      "name": "Easy Pro",
+      "image": "img/easy-pro.png",
+      "kind": "box",
+      "plate": true,
+      "spokenName": "Isi Pro"
     },
     "core-pro": {
       "name": "Core Pro",
       "image": "img/core-pro.png",
-      "kind": "box"
+      "kind": "box",
+      "retired": true
     }
   },
   "images": {
-    "escena-04": "img/escena-04.png",
-    "escena-05": "img/escena-05.jpg",
-    "escena-06": "img/escena-06.jpg",
-    "escena-08": "img/escena-08.jpg",
-    "escena-09": "img/escena-09.jpg",
-    "escena-12": "img/escena-12.jpg"
+    "easy-pro-cafe": {
+      "file": "img/scenes/easy-pro-cafe.jpg",
+      "caption": "Cafetería con el menú en pantallas sobre el mostrador, manejadas con un Easy Pro"
+    },
+    "easy-pro-fast-food": {
+      "file": "img/scenes/easy-pro-fast-food.jpg",
+      "caption": "Local de comida rápida con el menú de hamburguesas en pantallas"
+    },
+    "easy-pro-farmacy": {
+      "file": "img/scenes/easy-pro-farmacy.jpg",
+      "caption": "Farmacia con pantallas de ofertas y descuentos sobre el mostrador de atención"
+    },
+    "easy-pro-sport-store": {
+      "file": "img/scenes/easy-pro-sport-store.jpg",
+      "caption": "Tienda deportiva con pantallas de productos sobre las góndolas"
+    },
+    "easy-pro-tech-store": {
+      "file": "img/scenes/easy-pro-tech-store.jpg",
+      "caption": "Local de tecnología con pantallas de ofertas y un tótem vertical"
+    },
+    "easy-pro-mall": {
+      "file": "img/scenes/easy-pro-mall.jpg",
+      "caption": "Pasillo de un shopping con tótems y pantallas de publicidad"
+    },
+    "counter-15-fast-food": {
+      "file": "img/scenes/counter-15-fast-food.jpg",
+      "caption": "Clienta armando su combo en un Counter 15 en un local de comida rápida"
+    },
+    "counter-15-farmacy": {
+      "file": "img/scenes/counter-15-farmacy.jpg",
+      "caption": "Farmacia con un Counter 15 para buscar productos y ofertas en el punto de pago"
+    },
+    "counter-15-clothes-store": {
+      "file": "img/scenes/counter-15-clothes-store.jpg",
+      "caption": "Tienda de ropa con un Counter 15 en el mostrador de los probadores"
+    },
+    "counter-15-tech-store": {
+      "file": "img/scenes/counter-15-tech-store.jpg",
+      "caption": "Cliente tocando una oferta exclusiva en un Counter 15 en un local de tecnología"
+    },
+    "counter-15-sport-store": {
+      "file": "img/scenes/counter-15-sport-store.jpg",
+      "caption": "Tienda deportiva con varios Counter 15 en el punto de asesoría"
+    },
+    "counter-15-food-market": {
+      "file": "img/scenes/counter-15-food-market.jpg",
+      "caption": "Clienta consultando un Counter 15 en el mostrador de un almacén"
+    },
+    "counter-15-shop-store": {
+      "file": "img/scenes/counter-15-shop-store.jpg",
+      "caption": "Counter 15 con una promoción de café y código QR sobre un mostrador"
+    },
+    "counter-15-watch-store": {
+      "file": "img/scenes/counter-15-watch-store.jpg",
+      "caption": "Counter 15 mostrando relojes inteligentes en una tienda"
+    },
+    "counter-15-survey": {
+      "file": "img/scenes/counter-15-survey.jpg",
+      "caption": "Counter 15 negro como pantalla de turnos en un banco"
+    },
+    "counter-15-survey-2": {
+      "file": "img/scenes/counter-15-survey-2.jpg",
+      "caption": "Counter 15 negro con una encuesta de satisfacción"
+    },
+    "counter-15-presentation": {
+      "file": "img/scenes/counter-15-presentation.jpg",
+      "caption": "Counter 15 sobre un escritorio de madera"
+    },
+    "counter-15-ads-01": {
+      "file": "img/scenes/counter-15-ads-01.jpg",
+      "caption": "Counter 15 con un menú de comida coreana"
+    },
+    "counter-15-ads-02": {
+      "file": "img/scenes/counter-15-ads-02.jpg",
+      "caption": "Counter 15 con una promoción de almacén"
+    }
   },
   "music": [
     {

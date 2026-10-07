@@ -142,7 +142,7 @@ function deviceVisual(deviceId: string, states: Array<{ screen: MotionScreen; cu
   const device = ctx.brand.devices[deviceId];
   if (device === undefined) throw new MotionStudioError('ASSET_MISSING', `brand "${ctx.brand.id}" has no device "${deviceId}"`);
   const img = `<img src="${esc(ctx.imageUrl(`brand:${device.image}`))}" alt="${esc(device.name)}" />`;
-  if (!device.screen || !states) return `<div class="mg-device" style="height:${height}px"${animAttrs({ anim: 'right' })}><div class="mg-device-glow"></div>${img}</div>`;
+  if (!device.screen || !states) return `<div class="mg-device${device.plate === true ? ' plate' : ''}" style="height:${height}px"${animAttrs({ anim: 'right' })}><div class="mg-device-glow"></div>${img}</div>`;
   const pts = device.screen.polygon;
   const aspect = device.screen.aspect;
   const xs = pts.map((p) => p[0]);
@@ -165,7 +165,7 @@ function deviceVisual(deviceId: string, states: Array<{ screen: MotionScreen; cu
       return `<div class="mg-layer"${anim}>${inner}</div>`;
     })
     .join('');
-  return `<div class="mg-device" style="height:${height}px"${animAttrs({ anim: 'right' })}><div class="mg-device-glow"></div>${img}<div class="face" style="clip-path:${clip}">${layers}</div></div>`;
+  return `<div class="mg-device${device.plate === true ? ' plate' : ''}" style="height:${height}px"${animAttrs({ anim: 'right' })}><div class="mg-device-glow"></div>${img}<div class="face" style="clip-path:${clip}">${layers}</div></div>`;
 }
 
 export function visual(v: MotionVisual, ctx: SceneContext): string {

@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 
 import counter15 from '../../assets/storyboards/displayads/counter-15.json';
-import corePro from '../../assets/storyboards/displayads/core-pro.json';
+import easyPro from '../../assets/storyboards/displayads/easy-pro.json';
 import presentacion from '../../assets/storyboards/displayads/presentacion.json';
 import { MotionStudioError } from '../errors/motion-studio-error';
 import { SCENE_KINDS } from './motion-storyboard.schema';
@@ -11,7 +11,7 @@ describe('parseMotionStoryboard', () => {
   it.each([
     ['presentacion', presentacion],
     ['counter-15', counter15],
-    ['core-pro', corePro],
+    ['easy-pro', easyPro],
   ])('accepts the shipped %s storyboard', (_, raw) => {
     expect(parseMotionStoryboard(raw).brand).toBe('displayads');
   });

@@ -123,6 +123,7 @@ interface VideoResult {
   readonly path: string;
   readonly durationSec: number;
   readonly scenes: number;
+  readonly musicCredit: string | null;
 }
 
 async function renderVideo(
@@ -162,7 +163,7 @@ async function renderVideo(
   motionCheckpoint(observer, 'render');
   observer.stageStarted('render');
   const outputRelativePath = `${OUT_DIRECTORY}/${request.output}`;
-  await runMotionStage('render', () =>
+  const rendered = await runMotionStage('render', () =>
     renderProject(ports, workDirectory, {
       outPath: toAbsolutePath(project, outputRelativePath),
       fps: RENDER_FPS,
@@ -170,7 +171,7 @@ async function renderVideo(
     }),
   );
 
-  return { path: outputRelativePath, durationSec: composed.durationSec, scenes: composed.scenes };
+  return { path: outputRelativePath, durationSec: composed.durationSec, scenes: composed.scenes, musicCredit: rendered.musicCredit };
 }
 
 export async function runMotionPipeline(
@@ -193,7 +194,7 @@ export async function runMotionPipeline(
   }
 
   if (request.phase === 'storyboard') {
-    return { path: null, durationSec: null, scenes: storyboardScenes, storyboard: storyboardReport };
+    return { path: null, durationSec: null, scenes: storyboardScenes, musicCredit: null, storyboard: storyboardReport };
   }
 
   const video = await renderVideo(ports, request, workDirectory, observer);

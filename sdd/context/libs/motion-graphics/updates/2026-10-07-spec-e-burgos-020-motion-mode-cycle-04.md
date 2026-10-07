@@ -15,3 +15,9 @@ Sin cambios (la lib sigue sin `node:*`).
 
 ## Qué sigue
 `MotionStudioError` admite `cause`: render-api la usa para mostrar el error real del agente.
+
+## FIX-e-burgos-003 (2026-10-07)
+`BrandManifest` suma por equipo `retired`, `plate` y `spokenName`, y las imágenes aceptan `{file, caption}`
+(helpers `brandImageFile`, `brandImageCaption`, `activeDeviceIds`). Kit DisplayAds: Easy Pro reemplaza a
+Core Pro (retirado; su storyboard en `storyboards/displayads/archivo/`), 19 fotos aprobadas con
+descripción en `img/scenes/`, tagline "Tus pantallas, bajo control.".

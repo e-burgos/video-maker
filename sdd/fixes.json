@@ -2044,6 +2044,72 @@
           }
         ]
       }
+    },
+    {
+      "id": "FIX-e-burgos-003",
+      "author": "e-burgos",
+      "spec_id": "spec-e-burgos-020-motion-mode",
+      "fix_document": "sdd/fixes/fix-e-burgos-003.md",
+      "type": "IMPROVEMENT",
+      "severity": "medium",
+      "created_at": "2026-10-07",
+      "resolved_at": "2026-10-07",
+      "validated_at": null,
+      "title": "Kit DisplayAds al día (Easy Pro reemplaza a Core Pro) y crédito de la música fuera del video",
+      "estimation_hours": 3,
+      "description": "display-ads cambió su línea de productos (spec 070): Easy Pro (caja HDMI, sin pantalla) reemplaza a Core Pro, que queda sin stock. El kit de video sigue ese cambio: BrandManifest suma retired (la IA no ofrece el equipo y la verificación lo rechaza), plate (placa clara detrás de un equipo oscuro), spokenName por equipo (\"Isi Pro\", porque Piper lee \"Easy\" con fonética española) e imágenes con caption (la IA elige fotos por lo que muestran). Las 19 fotos de ambiente aprobadas reemplazan a las escena-* en el manifiesto; tagline \"Tus pantallas, bajo control.\" (decisión del dueño). Instructivo nuevo de Easy Pro; el de Core Pro pasa a storyboards/displayads/archivo/; presentación y Counter 15 re-renderizados. A pedido del dueño, el crédito de la música (CC BY) deja de dibujarse sobre el video: render escribe <video>.credits.txt junto al MP4, el job motion lo devuelve como musicCredit y la página Motion lo muestra para pegarlo en la descripción de la publicación. App de escritorio 0.3.0.",
+      "justification": "Perfil solo: no crea contratos entre subproyectos (campos opcionales del manifiesto de la lib) ni entidades nuevas; verificable con tests y renders; reversible.",
+      "related_modules": [
+        "motion-mode"
+      ],
+      "affected_files": [
+        "libs/motion-graphics/src/brand/brand-manifest.ts",
+        "libs/motion-graphics/src/auto/build-auto-storyboard-request.ts",
+        "libs/motion-graphics/src/auto/check-storyboard-against-brief.ts",
+        "libs/motion-graphics/src/compose/compose-storyboard.ts",
+        "libs/motion-graphics/src/scenes/scene-html.ts",
+        "libs/motion-graphics/src/scenes/render-scene.ts",
+        "libs/motion-graphics/assets/runtime/scenes.css",
+        "libs/motion-graphics/assets/brands/displayads/brand.json",
+        "libs/motion-graphics/assets/brands/displayads/img/easy-pro.png",
+        "libs/motion-graphics/assets/brands/displayads/img/scenes/",
+        "libs/motion-graphics/assets/storyboards/displayads/easy-pro.json",
+        "libs/motion-graphics/assets/storyboards/displayads/presentacion.json",
+        "libs/motion-graphics/assets/storyboards/displayads/counter-15.json",
+        "libs/motion-graphics/assets/storyboards/displayads/archivo/core-pro.json",
+        "libs/motion-graphics/src/pipeline/render-project.ts",
+        "apps/render-api/src/jobs/run-motion-pipeline.ts",
+        "apps/render-api/src/jobs/render-job.ts",
+        "apps/web/src/pages/motion-page.tsx",
+        "apps/web/src/api/parse-render-job.ts",
+        "apps/desktop/package.json",
+        "apps/desktop/CHANGELOG.md"
+      ],
+      "test_reference": "pnpm nx run-many -t lint test build -p motion-graphics motion-studio render-api: verde (147 / 16 / 1631). Renders reales de easy-pro, counter-15 y presentación revisados con hyperframes snapshot.",
+      "status": "implemented",
+      "cycle": null,
+      "process_note": "Fuentes: display-ads@main (spec 070, PR #146): docs/branding/devices/*, apps/landing/src/lib/catalog/device-scenarios.ts (ALT_TEXTS), docs/budgets/propuesta-economica-easy-pro.md, guía de aprovisionamiento §7. Guion validado por la sesión de display-ads (sin PIN, sin Ethernet, sin fabricante).",
+      "usage": {
+        "provider_model": "claude/opus",
+        "effort": "high",
+        "tokens_in": 260000,
+        "tokens_out": 22000,
+        "approx": true,
+        "source": "declared-estimate",
+        "recorded_at": "2026-10-07",
+        "by_agent": [
+          {
+            "agent": "orchestrator",
+            "provider_model": "claude/opus",
+            "effort": "high",
+            "tokens_in": 260000,
+            "tokens_out": 22000,
+            "approx": true,
+            "source": "declared-estimate",
+            "recorded_at": "2026-10-07"
+          }
+        ]
+      }
     }
   ]
 }

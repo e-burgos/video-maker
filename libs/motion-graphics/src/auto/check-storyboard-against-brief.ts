@@ -1,3 +1,4 @@
+import { activeDeviceIds } from '../brand/brand-manifest';
 import type { BrandManifest } from '../brand/brand-manifest';
 import type { MotionStoryboard } from '../storyboard/motion-storyboard.schema';
 import { briefImageRef } from './motion-brief';
@@ -74,7 +75,9 @@ export function checkStoryboardAgainstBrief(storyboard: MotionStoryboard, brief:
       if (kind === 'cue' && !voiceWords.some((word) => word.startsWith(normalizeWord(value.trim())))) {
         issues.push({ path, message: `cue "${value}" is not the start of any word of the scene "${scene.id}" vo` });
       } else if (kind === 'device' && brand.devices[value] === undefined) {
-        issues.push({ path, message: `device "${value}" is not in the brand devices (${Object.keys(brand.devices).join(', ')})` });
+        issues.push({ path, message: `device "${value}" is not in the brand devices (${activeDeviceIds(brand).join(', ')})` });
+      } else if (kind === 'device' && brand.devices[value]?.retired === true) {
+        issues.push({ path, message: `device "${value}" is retired: use one of ${activeDeviceIds(brand).join(', ')}` });
       } else if (kind === 'image') {
         const known = value.startsWith(BRAND_PREFIX) ? brand.images[value.slice(BRAND_PREFIX.length)] !== undefined : briefImages.has(value);
         if (!known) issues.push({ path, message: `image "${value}" is neither listed in the brief nor a brand image (${Object.keys(brand.images).map((key) => `${BRAND_PREFIX}${key}`).join(', ')})` });

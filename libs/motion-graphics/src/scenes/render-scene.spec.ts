@@ -151,6 +151,15 @@ describe('renderScene', () => {
     for (const id of ['cta', 'reveal']) expect(orphanAccent(id)).not.toContain('hoy mismo');
   });
 
+  it('puts a light plate behind a dark device so it does not vanish on the dark background', () => {
+    const product = scene('product-box');
+    const onDark = renderScene({ ...product, props: { ...product.props, visual: { kind: 'device', device: 'dark' } } } as never, ctx);
+    expect(onDark).toContain('class="mg-device plate"');
+    expect(html('product-box')).not.toContain('plate');
+    const wiring = renderScene({ id: 'w', kind: 'connections', vo: 'Cables', props: { title: 'Cables', device: 'dark', links: [{ to: 'tv', label: 'HDMI' }] } } as never, ctx);
+    expect(wiring).toContain('class="dev plate"');
+  });
+
   it('device visuals fail when the brand lacks the device', () => {
     const missing = { ...scene('product-box'), props: { name: 'X', text: 'Y', visual: { kind: 'device' as const, device: 'nope' } } };
     expect(() => renderScene(missing as never, ctx)).toThrow(MotionStudioError);

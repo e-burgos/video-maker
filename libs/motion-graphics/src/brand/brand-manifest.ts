@@ -24,9 +24,12 @@ export const BrandManifestSchema = z.strictObject({
       image: Text,
       kind: z.enum(['counter', 'box', 'screen']),
       screen: z.strictObject({ polygon: z.array(Point).length(4), skew: z.number().optional(), rotate: z.number().optional(), aspect: z.number().positive().optional() }).optional(),
+      retired: z.boolean().optional(),
+      plate: z.boolean().optional(),
+      spokenName: Text.optional(),
     }),
   ),
-  images: z.record(z.string(), Text),
+  images: z.record(z.string(), z.union([Text, z.strictObject({ file: Text, caption: Text })])),
   music: z
     .array(z.strictObject({ id: z.string(), file: Text, credit: Text, bpm: z.number().positive(), mood: Text, drop: z.number().nonnegative().optional() }))
     .min(1),
@@ -40,4 +43,20 @@ export function parseBrandManifest(raw: unknown): BrandManifest {
   if (result.success) return result.data;
   const lines = result.error.issues.slice(0, 6).map((issue) => `${formatIssuePath(issue.path) || 'brand'}: ${issue.message}`);
   throw new MotionStudioError('BRAND_INVALID', `brand.json is invalid:\n  ${lines.join('\n  ')}`);
+}
+
+export function brandImageFile(brand: BrandManifest, key: string): string | undefined {
+  const image = brand.images[key];
+  return typeof image === 'string' ? image : image?.file;
+}
+
+export function brandImageCaption(brand: BrandManifest, key: string): string | undefined {
+  const image = brand.images[key];
+  return typeof image === 'string' ? undefined : image?.caption;
+}
+
+export function activeDeviceIds(brand: BrandManifest): string[] {
+  return Object.entries(brand.devices)
+    .filter(([, device]) => device.retired !== true)
+    .map(([id]) => id);
 }

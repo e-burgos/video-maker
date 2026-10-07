@@ -168,7 +168,7 @@ const connections: Renderer<'connections'> = ({ props }, ctx) => {
     ...(tvLink ? [`<path class="cable" data-from="#cx-dev" data-to="#cx-tv" pathLength="1"${animAttrs({ anim: 'draw', cue: tvLink.cue })} />`] : []),
     ...peers.map((p, i) => `<path class="cable ${p.to === 'router' ? 'teal' : 'zinc'}" data-from="#cx-p${i}" data-to="#cx-dev" data-from-side="top" data-to-side="bottom" pathLength="1"${animAttrs({ anim: 'draw', cue: p.cue })} />`),
   ].join('');
-  return frame(`${headline(props.title, props.accent)}<div class="mg-conn"><svg class="mg-links" data-links="1">${paths}</svg><div class="dev" id="cx-dev"${animAttrs({ anim: 'left' })}><img src="${esc(deviceImg)}" alt="" /></div>${tv}<div class="peers">${peersHtml}</div></div>`);
+  return frame(`${headline(props.title, props.accent)}<div class="mg-conn"><svg class="mg-links" data-links="1">${paths}</svg><div class="dev${device.plate === true ? ' plate' : ''}" id="cx-dev"${animAttrs({ anim: 'left' })}><img src="${esc(deviceImg)}" alt="" /></div>${tv}<div class="peers">${peersHtml}</div></div>`);
 };
 
 const doDont: Renderer<'do-dont'> = ({ props }) => {

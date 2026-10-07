@@ -228,7 +228,7 @@
         "accent": "creada con IA.",
         "prompt": "Promo de café con medialunas para una mañana fría",
         "result": {
-          "image": "brand:escena-04"
+          "image": "brand:easy-pro-cafe"
         },
         "badge": "Lista en segundos",
         "resultCue": "segundos"
@@ -271,21 +271,21 @@
       "kind": "product",
       "chapter": "Equipos propios",
       "minBars": 4,
-      "vo": "Funciona con equipos propios. El Core Pro convierte cualquier televisor en una pantalla inteligente.",
+      "vo": "Funciona con equipos propios. El Isi Pro convierte cualquier televisor en una pantalla inteligente.",
       "props": {
         "kicker": "Equipos propios",
-        "name": "Core Pro",
+        "name": "Easy Pro",
         "text": "Convierte cualquier televisor en una pantalla inteligente.",
         "specs": [
-          "HDMI",
-          "Wi-Fi o cable",
-          "Sin mantenimiento"
+          "HDMI, video 4K",
+          "Wi-Fi 6",
+          "Sigue sin internet"
         ],
         "visual": {
           "kind": "device",
-          "device": "core-pro"
+          "device": "easy-pro"
         },
-        "textCue": "Core"
+        "textCue": "convierte"
       }
     },
     {
@@ -332,7 +332,7 @@
     {
       "id": "cta",
       "kind": "cta",
-      "vo": "Con Display Ads, cada pantalla está bajo control. Con inteligencia artificial. Pedí tu cotización en nuestra web.",
+      "vo": "Tus pantallas, bajo control, con inteligencia artificial. Pedí tu cotización en nuestra web.",
       "props": {
         "button": "Pedí tu cotización",
         "buttonCue": "cotización"

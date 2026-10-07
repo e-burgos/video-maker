@@ -87,6 +87,7 @@ export type MotionJobReport = {
   path: string | null;
   durationSec: number | null;
   scenes: number;
+  musicCredit?: string | null;
   storyboard: MotionStoryboardReport | null;
 };
 
