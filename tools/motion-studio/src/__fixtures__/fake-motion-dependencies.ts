@@ -1,0 +1,89 @@
+import { dirname } from 'node:path';
+
+import type { MotionDependencies, RenderRequest } from '../deps/motion-dependencies';
+import type { TakeTranscript } from '../voice/pick-best-take';
+
+export function wavBytes(seconds: number): Uint8Array {
+  const dataSize = Math.round(seconds * 1000) * 2;
+  const bytes = new Uint8Array(44);
+  const view = new DataView(bytes.buffer);
+  const put = (offset: number, text: string) => [...text].forEach((c, i) => view.setUint8(offset + i, c.charCodeAt(0)));
+  put(0, 'RIFF');
+  put(8, 'WAVE');
+  put(12, 'fmt ');
+  view.setUint32(16, 16, true);
+  view.setUint32(28, 2000, true);
+  put(36, 'data');
+  view.setUint32(40, dataSize, true);
+  return bytes;
+}
+
+export interface FakeMotionDependencies extends MotionDependencies {
+  files: Map<string, string | Uint8Array>;
+  calls: string[];
+  renders: RenderRequest[];
+}
+
+export function createFakeMotionDependencies(init: {
+  files?: Record<string, string | Uint8Array>;
+  heard?: (text: string, take: number) => string;
+  takeSeconds?: (text: string, take: number) => number;
+  beatsJson?: string;
+}): FakeMotionDependencies {
+  const files = new Map<string, string | Uint8Array>(Object.entries(init.files ?? {}));
+  const calls: string[] = [];
+  const renders: RenderRequest[] = [];
+  const spoken = new Map<string, { text: string; take: number }>();
+  const get = (path: string) => {
+    const value = files.get(path);
+    if (value === undefined) throw new Error(`ENOENT ${path}`);
+    return value;
+  };
+  return {
+    files,
+    calls,
+    renders,
+    templatesRoot: '/repo/templates',
+    readText: async (path) => String(get(path)),
+    readBytes: async (path) => {
+      const value = get(path);
+      return typeof value === 'string' ? new TextEncoder().encode(value) : value;
+    },
+    writeText: async (path, content) => {
+      files.set(path, content);
+    },
+    exists: async (path) => files.has(path),
+    copyTree: async (from, to) => {
+      calls.push(`copyTree ${from} → ${to}`);
+      for (const [path, value] of [...files]) if (path.startsWith(`${from}/`)) files.set(`${to}${path.slice(from.length)}`, value);
+    },
+    copyFile: async (from, to) => {
+      files.set(to, get(from));
+    },
+    removeFile: async (path) => {
+      files.delete(path);
+    },
+    synthesize: async ({ text, outPath }) => {
+      const take = Number(/take(\d+)/u.exec(outPath)?.[1] ?? 0);
+      spoken.set(outPath, { text, take });
+      calls.push(`synthesize ${dirname(outPath)} take${take}`);
+      files.set(outPath, wavBytes(init.takeSeconds?.(text, take) ?? 2));
+    },
+    transcribe: async (path): Promise<TakeTranscript> => {
+      const { text, take } = spoken.get(path) ?? { text: '', take: 0 };
+      const heard = init.heard?.(text, take) ?? text;
+      return { text: heard, words: heard.split(' ').map((w, i) => ({ text: w, start: i * 0.3, end: i * 0.3 + 0.25 })) };
+    },
+    detectBeats: async (path) => {
+      calls.push(`detectBeats ${path}`);
+      return init.beatsJson ?? JSON.stringify({ version: 1, beats: Array.from({ length: 400 }, (_, i) => ({ time: 0.04 + i * 0.5, strength: i % 4 === 0 ? 0.9 : 0.5 })) });
+    },
+    trimAudio: async ({ to, durationSec }) => {
+      calls.push(`trimAudio ${to} ${durationSec}`);
+      files.set(to, wavBytes(durationSec));
+    },
+    render: async (request) => {
+      renders.push(request);
+    },
+  };
+}

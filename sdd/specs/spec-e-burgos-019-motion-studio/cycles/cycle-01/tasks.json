@@ -142,7 +142,7 @@
       "status": "pending",
       "files": [
         ".claude/settings.json",
-        ".claude/skills/motion-studio/SKILL.md",
+        "sdd/skills/motion-studio/SKILL.md",
         "tools/motion-studio/README.md"
       ]
     },

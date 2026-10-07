@@ -1,0 +1,52 @@
+{
+  "voice": "es_AR-daniela-high",
+  "lengthScale": 1.08,
+  "music": {
+    "file": "Newer Wave.mp3",
+    "credit": "\"Newer Wave\" Kevin MacLeod (incompetech.com) · CC BY 4.0"
+  },
+  "noWhooshOn": [],
+  "scenes": [
+    {
+      "id": "intro",
+      "minBars": 3,
+      "vo": "Este es el Counter quince, la pantalla de mostrador de Display Ads. Te mostramos cómo se instala y cómo funciona en tu local."
+    },
+    {
+      "id": "place",
+      "minBars": 3,
+      "vo": "Ubicala sobre el mostrador, de frente al público. La base viene integrada: no hay nada que armar."
+    },
+    {
+      "id": "power",
+      "minBars": 3,
+      "vo": "Enchufala y dejala siempre conectada. Al encenderse, arranca directo en la aplicación de cartelería. No tenés que instalar nada ni iniciar sesión."
+    },
+    {
+      "id": "content",
+      "minBars": 3,
+      "vo": "Desde el panel de Display Ads elegís qué campañas se muestran, y la pantalla las reproduce sola."
+    },
+    {
+      "id": "wifi",
+      "minBars": 3,
+      "vo": "¿Cambiaste el wifi del local? No hace falta un técnico. Durante el primer minuto y medio, la pantalla sigue mostrando tu contenido e intenta reconectarse sola."
+    },
+    {
+      "id": "recover",
+      "minBars": 4,
+      "vo": "Si la red no vuelve, aparece una pantalla con las redes disponibles. Tocá la red del local, escribí la contraseña, y listo: vuelve sola a mostrar tu contenido."
+    },
+    {
+      "id": "kiosk",
+      "minBars": 3,
+      "vo": "Esa pantalla sólo sirve para reconectar el wifi. Nadie puede salir de la aplicación ni usar la tablet para otra cosa."
+    },
+    {
+      "id": "help",
+      "minBars": 3,
+      "vo": "¿Quedó en negro o congelada? Desenchufala, esperá diez segundos y volvé a enchufarla. Si sigue igual, escribile al soporte de Display Ads."
+    }
+  ],
+  "sfx": []
+}
