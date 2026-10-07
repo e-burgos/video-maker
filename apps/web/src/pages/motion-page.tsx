@@ -12,6 +12,7 @@ import type {
   MotionStoryboard,
   MotionStoryboardReport,
 } from '../api/motion-types';
+import type { RenderApiClient } from '../api/render-api-client';
 import { useRenderApi } from '../api/render-api-context';
 import { nullWhenMissing } from '../api/null-when-missing';
 import type { Job } from '../api/render-api-types';
@@ -30,6 +31,23 @@ const STORYBOARD_NOT_FOUND = 'STORYBOARD_NOT_FOUND';
 const OUTPUT_FILE = 'video.mp4';
 
 type DeliveredVideo = { path: string; durationSec: number | null; musicCredit: string | null };
+
+const OUTPUT_PREFIX = 'out/';
+const VIDEO_EXTENSION = '.mp4';
+const CREDITS_EXTENSION = '.credits.txt';
+const CREDIT_LABEL = /^Música:\s*/u;
+
+async function storedVideoOf(client: RenderApiClient, slug: string): Promise<DeliveredVideo | null> {
+  const listing = await client.listGenerated(slug);
+  const newest = listing.files
+    .filter((file) => file.path.startsWith(OUTPUT_PREFIX) && file.path.endsWith(VIDEO_EXTENSION))
+    .sort((a, b) => b.modifiedAtMs - a.modifiedAtMs)[0];
+  if (newest === undefined) return null;
+  const creditsPath = `${newest.path.slice(0, -VIDEO_EXTENSION.length)}${CREDITS_EXTENSION}`;
+  const hasCredits = listing.files.some((file) => file.path === creditsPath);
+  const musicCredit = hasCredits ? (await client.getProjectFile(slug, creditsPath)).trim().replace(CREDIT_LABEL, '') : null;
+  return { path: newest.path, durationSec: null, musicCredit };
+}
 
 function deliveredVideoOf(report: MotionJobReport | null): DeliveredVideo | null {
   return report !== null && report.path !== null ? { path: report.path, durationSec: report.durationSec, musicCredit: report.musicCredit ?? null } : null;
@@ -66,6 +84,11 @@ export function MotionPage() {
   const [jobId, setJobId] = useState<string | null>(null);
   const [stats, setStats] = useState<MotionStoryboardReport | null>(null);
   const [delivery, setDelivery] = useState<DeliveredVideo | null>(null);
+  const storedVideo = useAsyncResource<DeliveredVideo | null>(
+    useCallback(() => storedVideoOf(client, slug), [client, slug]),
+    `motion-stored-video:${slug}`,
+  );
+  const shownVideo = delivery ?? storedVideo.data ?? null;
   const phaseByJob = useRef(new Map<string, MotionPhase>());
   const handledJob = useRef<string | null>(null);
 
@@ -203,21 +226,21 @@ export function MotionPage() {
 
       {storyboard.data !== null && <MotionSceneList storyboard={storyboard.data} stats={stats} />}
 
-      {delivery !== null && (
+      {shownVideo !== null && (
         <div data-testid="motion-video" className="space-y-2">
           <h2 className="text-sm font-medium text-ink">{t('motion.video.heading')}</h2>
           <video
-            src={artifactUrl(slug, delivery.path)}
+            src={artifactUrl(slug, shownVideo.path)}
             controls
             preload="metadata"
             className="w-full max-w-3xl rounded-control bg-black"
           />
           <p className="font-mono text-xs text-ink-faint">
-            {t('motion.video.path', { path: delivery.path, duration: delivery.durationSec ?? '' })}
+            {shownVideo.durationSec === null ? shownVideo.path : t('motion.video.path', { path: shownVideo.path, duration: shownVideo.durationSec })}
           </p>
-          {delivery.musicCredit !== null && (
+          {shownVideo.musicCredit !== null && (
             <p data-testid="motion-music-credit" className="text-xs text-ink-muted">
-              {t('motion.video.credit', { credit: delivery.musicCredit })}
+              {t('motion.video.credit', { credit: shownVideo.musicCredit })}
             </p>
           )}
         </div>

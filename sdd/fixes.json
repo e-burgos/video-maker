@@ -2111,6 +2111,52 @@
           }
         ]
       }
+    },
+    {
+      "id": "FIX-e-burgos-004",
+      "author": "e-burgos",
+      "spec_id": "spec-e-burgos-020-motion-mode",
+      "fix_document": "sdd/fixes/fix-e-burgos-004.md",
+      "type": "IMPROVEMENT",
+      "severity": "medium",
+      "created_at": "2026-10-07",
+      "resolved_at": "2026-10-07",
+      "validated_at": null,
+      "title": "La página Motion muestra el video ya renderizado y su crédito al abrirla",
+      "description": "La página Motion sólo mostraba el video de un job lanzado en la misma visita: un video hecho antes (o importado) no se veía al volver. Ahora lista lo generado del proyecto y muestra el MP4 más reciente de out/ con el crédito de su .credits.txt. Con esto se importaron al estudio como proyectos motion (brief, storyboard, work/motion, out/video.mp4 + credits) los videos hechos por CLI: display-ads-easy-pro, display-ads-counter-15, display-ads-presentacion y display-ads-ia-promo, ordenados en Display Ads › Motion graphics junto a motion-ia-reel.",
+      "justification": "Perfil solo: sin contratos ni entidades nuevas (usa GET /projects/:slug/generated y el endpoint de archivos existentes); verificable con test y en el navegador; reversible.",
+      "related_modules": [
+        "motion-mode"
+      ],
+      "affected_files": [
+        "apps/web/src/pages/motion-page.tsx",
+        "apps/web/src/pages/motion-page.spec.tsx"
+      ],
+      "test_reference": "pnpm nx run-many -t lint test build -p web: 1291 verdes. Navegador: /projects/display-ads-easy-pro/motion muestra el MP4 (readyState 4, 61,77 s), el crédito, 9 escenas y el guion.",
+      "status": "implemented",
+      "cycle": null,
+      "process_note": "Importación hecha por la API del estudio (POST /projects mode motion, PUT brief/storyboard validados, placement) más copia de work/motion y out/.",
+      "usage": {
+        "provider_model": "claude/opus",
+        "effort": "high",
+        "tokens_in": 90000,
+        "tokens_out": 8000,
+        "approx": true,
+        "source": "declared-estimate",
+        "recorded_at": "2026-10-07",
+        "by_agent": [
+          {
+            "agent": "orchestrator",
+            "provider_model": "claude/opus",
+            "effort": "high",
+            "tokens_in": 90000,
+            "tokens_out": 8000,
+            "approx": true,
+            "source": "declared-estimate",
+            "recorded_at": "2026-10-07"
+          }
+        ]
+      }
     }
   ]
 }
