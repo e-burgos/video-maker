@@ -84,8 +84,8 @@ export type MotionStoryboardReport = {
 };
 
 export type MotionJobReport = {
-  path: string;
-  durationSec: number;
+  path: string | null;
+  durationSec: number | null;
   scenes: number;
   storyboard: MotionStoryboardReport | null;
 };

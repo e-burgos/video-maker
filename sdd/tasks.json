@@ -532,9 +532,19 @@
             "libs/producer-tools",
             "apps/desktop"
           ],
-          "status": "in-progress",
+          "status": "completed",
           "tasks_total": 10,
-          "tasks_done": 0
+          "tasks_done": 10
+        },
+        "cycle-05": {
+          "file": "sdd/specs/spec-e-burgos-020-motion-mode/cycles/cycle-05/tasks.json",
+          "module": "motion-mode",
+          "apps": [
+            "tools/motion-studio"
+          ],
+          "status": "completed",
+          "tasks_total": 3,
+          "tasks_done": 3
         }
       }
     }

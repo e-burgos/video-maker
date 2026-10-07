@@ -1,6 +1,6 @@
 # SPEC-e-burgos-020: Modo motion graphics — un guion e imágenes, y el Video Maker hace el resto
 
-> Estado: **in-progress** — registrada el 2026-10-07. Continúa `spec-e-burgos-019-motion-studio`.
+> Estado: **completed** — registrada y cerrada el 2026-10-07 (cinco ciclos). Continúa `spec-e-burgos-019-motion-studio`.
 > Pedido del dev: unificar en el Video Maker los videos animados (el `apps/video-manager` de display-ads y
 > Motion Studio) sin perder nada, y que el estudio ofrezca de entrada dos caminos: **video con motion
 > graphics** (alcanza con un buen guion e imágenes; el resto lo hace el Video Maker) o **video con material

@@ -10,7 +10,7 @@ import { startStoryboardJobStage } from './storyboard-job-progress';
 import { isStoryboardPipelineCanceled } from './storyboard-pipeline-observer';
 import type { StoryboardPipelineObserver } from './storyboard-pipeline-observer';
 import { runStoryboardPipeline } from './run-storyboard-pipeline';
-import { mergeMotionVoiceProgress, startMotionJobStage } from './motion-job-progress';
+import { completeMotionJobProgress, mergeMotionVoiceProgress, startMotionJobStage } from './motion-job-progress';
 import { isMotionPipelineCanceled } from './motion-pipeline-observer';
 import type { MotionPipelineObserver } from './motion-pipeline-observer';
 import { runMotionPipeline } from './run-motion-pipeline';
@@ -425,6 +425,9 @@ export function createRenderJobQueue(deps: RenderApiDependencies): RenderJobQueu
       failure = isMotionPipelineCanceled(cause) ? null : toErrorPayload(cause);
     }
 
+    if (report !== null) {
+      record.progress = completeMotionJobProgress(record.progress);
+    }
     settle(record, report, failure);
   }
 

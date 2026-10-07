@@ -29,6 +29,12 @@ const BRIEF_NOT_FOUND = 'BRIEF_NOT_FOUND';
 const STORYBOARD_NOT_FOUND = 'STORYBOARD_NOT_FOUND';
 const OUTPUT_FILE = 'video.mp4';
 
+type DeliveredVideo = { path: string; durationSec: number | null };
+
+function deliveredVideoOf(report: MotionJobReport | null): DeliveredVideo | null {
+  return report !== null && report.path !== null ? { path: report.path, durationSec: report.durationSec } : null;
+}
+
 export function MotionPage() {
   const client = useRenderApi();
   const { slug = '' } = useParams<{ slug: string }>();
@@ -59,7 +65,7 @@ export function MotionPage() {
   const [saved, setSaved] = useState(false);
   const [jobId, setJobId] = useState<string | null>(null);
   const [stats, setStats] = useState<MotionStoryboardReport | null>(null);
-  const [delivery, setDelivery] = useState<MotionJobReport | null>(null);
+  const [delivery, setDelivery] = useState<DeliveredVideo | null>(null);
   const phaseByJob = useRef(new Map<string, MotionPhase>());
   const handledJob = useRef<string | null>(null);
 
@@ -90,8 +96,9 @@ export function MotionPage() {
     if (job.report?.storyboard) {
       setStats(job.report.storyboard);
     }
-    if (job.report !== null && phaseByJob.current.get(job.id) !== 'storyboard') {
-      setDelivery(job.report);
+    const delivered = deliveredVideoOf(job.report);
+    if (delivered !== null) {
+      setDelivery(delivered);
     }
   }, [job, reloadStoryboard]);
 
@@ -206,7 +213,7 @@ export function MotionPage() {
             className="w-full max-w-3xl rounded-control bg-black"
           />
           <p className="font-mono text-xs text-ink-faint">
-            {t('motion.video.path', { path: delivery.path, duration: delivery.durationSec })}
+            {t('motion.video.path', { path: delivery.path, duration: delivery.durationSec ?? '' })}
           </p>
         </div>
       )}

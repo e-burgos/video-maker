@@ -268,8 +268,8 @@ function isMotionJobProgress(value: unknown): boolean {
 function isMotionJobReport(value: unknown): boolean {
   return (
     isRecord(value) &&
-    typeof value['path'] === 'string' &&
-    typeof value['durationSec'] === 'number' &&
+    (value['path'] === null || typeof value['path'] === 'string') &&
+    (value['durationSec'] === null || typeof value['durationSec'] === 'number') &&
     typeof value['scenes'] === 'number' &&
     (value['storyboard'] === null || isRecord(value['storyboard']))
   );

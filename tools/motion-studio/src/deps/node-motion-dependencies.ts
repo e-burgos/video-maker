@@ -31,6 +31,10 @@ const exists = async (path: string): Promise<boolean> =>
     () => false,
   );
 
+export function subscriptionOnlyEnv(env: NodeJS.ProcessEnv): NodeJS.ProcessEnv {
+  return Object.fromEntries(Object.entries(env).filter(([key]) => key !== 'ANTHROPIC_API_KEY'));
+}
+
 export function createNodeMotionDependencies(env: NodeJS.ProcessEnv, workspaceRoot: string): MotionDependencies {
   const runner = new ExecaCommandRunner();
   const hyperframes = async (args: string[], cwd: string): Promise<void> => {
@@ -119,7 +123,7 @@ export function createNodeMotionDependencies(env: NodeJS.ProcessEnv, workspaceRo
       await hyperframes(['render', '-f', String(fps), '-q', quality, '-o', outPath], projectDir);
     },
     askAgent: createClaudeCliAskAgent({
-      runner,
+      runner: new ExecaCommandRunner({ env: subscriptionOnlyEnv(env) }),
       binaryPath: env['CLAUDE_CLI_PATH'] ?? 'claude',
       model: env['MOTION_STUDIO_MODEL'] ?? 'sonnet',
       timeoutMs: ASK_AGENT_TIMEOUT_MS,

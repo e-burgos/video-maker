@@ -183,9 +183,7 @@
       "description": "Herramienta de motion graphics sobre HyperFrames: plantillas de marca en HTML+GSAP, voz Piper es_AR con selección de la mejor toma por transcripción, grilla de golpes ajustada sobre `hyperframes beats` con cortes al golpe opcionales y ducking de la música; primera entrega: presentación de DisplayAds e instructivos de Counter 15 y Core Pro",
       "cycles_completed": 1,
       "completed_at": "2026-10-07"
-    }
-  ],
-  "in_progress_modules": [
+    },
     {
       "module": "motion-mode",
       "spec": "spec-e-burgos-020-motion-mode",
@@ -193,14 +191,18 @@
         "apps/motion-editor",
         "libs/motion-graphics",
         "tools/motion-studio",
+        "libs/local-store",
         "apps/render-api",
         "apps/web",
         "libs/producer-tools",
         "apps/desktop"
       ],
-      "description": "Modo motion graphics de punta a punta: video-manager unificado como apps/motion-editor, catálogo de escenas y storyboard de motion en libs/motion-graphics, storyboard automático desde guion e imágenes, job motion en render-api y elección de modo al crear el proyecto"
+      "description": "Modo motion graphics: video-manager mudado como apps/motion-editor; libs/motion-graphics con catálogo de 16 escenas, kits de marca y storyboard automático por IA desde un brief; el estudio ofrece motion graphics o material crudo al crear, con job motion en render-api, página Motion, receta del productor y HyperFrames empaquetado en desktop; contrato de material con modo B para display-ads",
+      "cycles_completed": 5,
+      "completed_at": "2026-10-07"
     }
   ],
+  "in_progress_modules": [],
   "pending_modules": [
     {
       "module": "scene-assembly",

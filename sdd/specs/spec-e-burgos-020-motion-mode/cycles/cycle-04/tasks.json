@@ -27,14 +27,24 @@
       "estimation_hours": 3,
       "story_points": 3,
       "depends_on": [],
-      "status": "pending",
+      "status": "done",
       "files": [
         "libs/motion-graphics/src/pipeline/motion-pipeline.ts",
         "libs/motion-graphics/src/pipeline/motion-pipeline-ports.ts",
         "tools/motion-studio/src/cli.ts",
         "tools/motion-studio/src/deps/hyperframes-cli.ts",
         "package.json"
-      ]
+      ],
+      "usage": {
+        "provider_model": "claude/sonnet",
+        "effort": "medium",
+        "agent": "implementor-back",
+        "tokens_in": 142916,
+        "tokens_out": 25220,
+        "approx": false,
+        "source": "agent-usage-notification",
+        "recorded_at": "2026-10-07"
+      }
     },
     {
       "id": "TASK-002",
@@ -45,12 +55,22 @@
       "estimation_hours": 1,
       "story_points": 1,
       "depends_on": [],
-      "status": "pending",
+      "status": "done",
       "files": [
         "libs/local-store/src/database/migrations.ts",
         "libs/local-store/src/schema/studio-schema.ts",
         "libs/local-store/src/repositories/projects-repository.ts"
-      ]
+      ],
+      "usage": {
+        "provider_model": "claude/sonnet",
+        "effort": "medium",
+        "agent": "implementor-back",
+        "tokens_in": 87690,
+        "tokens_out": 15475,
+        "approx": false,
+        "source": "agent-usage-notification",
+        "recorded_at": "2026-10-07"
+      }
     },
     {
       "id": "TASK-003",
@@ -65,12 +85,22 @@
         "TASK-001",
         "TASK-002"
       ],
-      "status": "pending",
+      "status": "done",
       "files": [
         "apps/render-api/src/http/handlers/projects-handler.ts",
         "apps/render-api/src/http/handlers/motion-handler.ts",
         "apps/render-api/vite.config.ts"
-      ]
+      ],
+      "usage": {
+        "provider_model": "claude/sonnet",
+        "effort": "medium",
+        "agent": "implementor-back",
+        "tokens_in": 147206,
+        "tokens_out": 25977,
+        "approx": false,
+        "source": "agent-usage-notification",
+        "recorded_at": "2026-10-07"
+      }
     },
     {
       "id": "TASK-004",
@@ -83,14 +113,24 @@
       "depends_on": [
         "TASK-003"
       ],
-      "status": "pending",
+      "status": "done",
       "files": [
         "apps/render-api/src/jobs/render-job.ts",
         "apps/render-api/src/jobs/motion-job-params.ts",
         "apps/render-api/src/jobs/run-motion-pipeline.ts",
         "apps/render-api/src/deps/motion-pipeline-adapters.ts",
         "apps/render-api/src/http/handlers/jobs-handler.ts"
-      ]
+      ],
+      "usage": {
+        "provider_model": "claude/sonnet",
+        "effort": "medium",
+        "agent": "implementor-back",
+        "tokens_in": 113988,
+        "tokens_out": 20115,
+        "approx": false,
+        "source": "agent-usage-notification",
+        "recorded_at": "2026-10-07"
+      }
     },
     {
       "id": "TASK-005",
@@ -103,11 +143,21 @@
       "depends_on": [
         "TASK-003"
       ],
-      "status": "pending",
+      "status": "done",
       "files": [
         "apps/web/src/components/create-project-form.tsx",
         "apps/web/src/api/render-api-client.ts"
-      ]
+      ],
+      "usage": {
+        "provider_model": "claude/sonnet",
+        "effort": "medium",
+        "agent": "implementor-front",
+        "tokens_in": 91421,
+        "tokens_out": 16133,
+        "approx": false,
+        "source": "agent-usage-notification",
+        "recorded_at": "2026-10-07"
+      }
     },
     {
       "id": "TASK-006",
@@ -122,11 +172,21 @@
         "TASK-004",
         "TASK-005"
       ],
-      "status": "pending",
+      "status": "done",
       "files": [
         "apps/web/src/pages/motion-page.tsx",
         "apps/web/src/app/app.tsx"
-      ]
+      ],
+      "usage": {
+        "provider_model": "claude/sonnet",
+        "effort": "medium",
+        "agent": "implementor-front",
+        "tokens_in": 47456,
+        "tokens_out": 8374,
+        "approx": false,
+        "source": "agent-usage-notification",
+        "recorded_at": "2026-10-07"
+      }
     },
     {
       "id": "TASK-007",
@@ -139,11 +199,21 @@
       "depends_on": [
         "TASK-004"
       ],
-      "status": "pending",
+      "status": "done",
       "files": [
         "libs/producer-tools/src/contract/tool-schemas.ts",
         "libs/producer-tools/src/prompt/build-producer-prompt.ts"
-      ]
+      ],
+      "usage": {
+        "provider_model": "claude/sonnet",
+        "effort": "medium",
+        "agent": "implementor-back",
+        "tokens_in": 129658,
+        "tokens_out": 22881,
+        "approx": false,
+        "source": "agent-usage-notification",
+        "recorded_at": "2026-10-07"
+      }
     },
     {
       "id": "TASK-008",
@@ -156,12 +226,22 @@
       "depends_on": [
         "TASK-004"
       ],
-      "status": "pending",
+      "status": "done",
       "files": [
         "apps/desktop/scripts/build-desktop.mjs",
         "apps/desktop/electron-builder.yml",
         "apps/desktop/src/main/render-api-env.ts"
-      ]
+      ],
+      "usage": {
+        "provider_model": "claude/opus",
+        "effort": "high",
+        "agent": "orchestrator",
+        "tokens_in": 60000,
+        "tokens_out": 6000,
+        "approx": true,
+        "source": "declared-estimate",
+        "recorded_at": "2026-10-07"
+      }
     },
     {
       "id": "TASK-009",
@@ -174,11 +254,21 @@
       "depends_on": [
         "TASK-006"
       ],
-      "status": "pending",
+      "status": "done",
       "files": [
         "libs/motion-graphics/assets/runtime/scenes.css",
         "libs/motion-graphics/assets/briefs/displayads/plataforma-reel.json"
-      ]
+      ],
+      "usage": {
+        "provider_model": "claude/opus",
+        "effort": "high",
+        "agent": "orchestrator",
+        "tokens_in": 380000,
+        "tokens_out": 32000,
+        "approx": true,
+        "source": "declared-estimate",
+        "recorded_at": "2026-10-07"
+      }
     },
     {
       "id": "TASK-010",
@@ -198,10 +288,20 @@
         "TASK-008",
         "TASK-009"
       ],
-      "status": "pending",
+      "status": "done",
       "files": [
         "sdd/context/apps/render-api/updates/"
-      ]
+      ],
+      "usage": {
+        "provider_model": "claude/opus",
+        "effort": "high",
+        "agent": "orchestrator",
+        "tokens_in": 80000,
+        "tokens_out": 8000,
+        "approx": true,
+        "source": "declared-estimate",
+        "recorded_at": "2026-10-07"
+      }
     }
   ]
 }

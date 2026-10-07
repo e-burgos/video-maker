@@ -23,3 +23,7 @@ export function mergeMotionVoiceProgress(
   const fraction = totalLines <= 0 ? 0 : Math.min(1, linesVoiced / totalLines);
   return { stage: 'voice', linesVoiced, totalLines, percent: stagePercent('voice', fraction) };
 }
+
+export function completeMotionJobProgress(previous: MotionJobProgress | null): MotionJobProgress | null {
+  return previous === null ? null : { ...previous, percent: 100 };
+}

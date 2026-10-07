@@ -1,0 +1,98 @@
+{
+  "$schema": "../../../../schemas/cycle-tasks.schema.json",
+  "spec": "spec-e-burgos-020-motion-mode",
+  "cycle": 5,
+  "module": "motion-mode",
+  "apps": [
+    "tools/motion-studio"
+  ],
+  "flow": "full",
+  "user_stories_generated": true,
+  "prerequisites": {
+    "tasks_generated": true
+  },
+  "tasks": [
+    {
+      "id": "TASK-001",
+      "title": "Extend the video-maker-material-contract skill with mode B (motion graphics): mode choice, brief.json, captioned images, script rules, checklist and CLI/HTTP delivery",
+      "user_stories": [
+        "HU-01",
+        "HU-02"
+      ],
+      "estimation_hours": 2,
+      "story_points": 2,
+      "depends_on": [],
+      "status": "done",
+      "files": [
+        "sdd/skills/video-maker-material-contract/SKILL.md"
+      ],
+      "usage": {
+        "provider_model": "claude/opus",
+        "effort": "high",
+        "agent": "orchestrator",
+        "tokens_in": 40000,
+        "tokens_out": 4000,
+        "approx": true,
+        "source": "declared-estimate",
+        "recorded_at": "2026-10-07"
+      }
+    },
+    {
+      "id": "TASK-002",
+      "title": "In display-ads (FIX-e-burgos-332): video-maker-request skill that decides the mode per video and builds the package, index modes, and retire apps/video-manager",
+      "user_stories": [
+        "HU-03",
+        "HU-04"
+      ],
+      "estimation_hours": 3,
+      "story_points": 3,
+      "depends_on": [
+        "TASK-001"
+      ],
+      "status": "done",
+      "files": [
+        "../display-ads/.claude/skills/video-maker-request/SKILL.md",
+        "../display-ads/docs/product/videos/index.md"
+      ],
+      "usage": {
+        "provider_model": "claude/sonnet",
+        "effort": "medium",
+        "agent": "implementor-back",
+        "tokens_in": 125700,
+        "tokens_out": 22182,
+        "approx": false,
+        "source": "agent-usage-notification",
+        "recorded_at": "2026-10-07"
+      }
+    },
+    {
+      "id": "TASK-003",
+      "title": "Close the cycle: context, validate",
+      "user_stories": [
+        "HU-01",
+        "HU-02",
+        "HU-03",
+        "HU-04"
+      ],
+      "estimation_hours": 0.5,
+      "story_points": 1,
+      "depends_on": [
+        "TASK-002"
+      ],
+      "status": "done",
+      "files": [
+        "sdd/context/tools/motion-studio/updates/"
+      ],
+      "usage": {
+        "provider_model": "claude/opus",
+        "effort": "high",
+        "agent": "orchestrator",
+        "tokens_in": 30000,
+        "tokens_out": 3000,
+        "approx": true,
+        "source": "declared-estimate",
+        "recorded_at": "2026-10-07"
+      }
+    }
+  ]
+}

@@ -193,8 +193,8 @@ describe('MotionPage', () => {
     const getRenderJob = vi.fn().mockResolvedValue(
       motionJob({
         report: {
-          path: 'out/video.mp4',
-          durationSec: 0,
+          path: null,
+          durationSec: null,
           scenes: 2,
           storyboard: { repaired: true, tokensIn: 1200, tokensOut: 340, costUsd: 0.0123 },
         },

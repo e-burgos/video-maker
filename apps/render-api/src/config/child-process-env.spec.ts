@@ -34,14 +34,18 @@ describe('allowlistedChildEnv', () => {
   it('passes CLAUDE_CODE_* and ANTHROPIC_* through only when already present, for the CLI subscription auth', () => {
     const withThem = allowlistedChildEnv({
       CLAUDE_CODE_OAUTH_TOKEN: 'present',
-      ANTHROPIC_API_KEY: 'present-too',
+      ANTHROPIC_BASE_URL: 'present-too',
     });
     expect(withThem).toEqual({
       CLAUDE_CODE_OAUTH_TOKEN: 'present',
-      ANTHROPIC_API_KEY: 'present-too',
+      ANTHROPIC_BASE_URL: 'present-too',
     });
 
     expect(allowlistedChildEnv({})).toEqual({});
+  });
+
+  it('never hands an API key to the CLI, so it always signs in with the subscription', () => {
+    expect(allowlistedChildEnv({ ANTHROPIC_API_KEY: 'sk-from-dotenv', CLAUDE_CODE_OAUTH_TOKEN: 'oauth' })).toEqual({ CLAUDE_CODE_OAUTH_TOKEN: 'oauth' });
   });
 
   it('never leaks an unrelated variable, no matter how it is named', () => {

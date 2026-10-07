@@ -1,0 +1,114 @@
+{
+  "$schema": "../../../../schemas/cycle.schema.json",
+  "cycle": 5,
+  "module": "motion-mode",
+  "spec": "spec-e-burgos-020-motion-mode",
+  "apps": [
+    "tools/motion-studio"
+  ],
+  "phase": "material-contract",
+  "flow": "full",
+  "objectives": [
+    "Contrato de material con modo B (motion graphics) además del material crudo",
+    "display-ads decide el modo por video y arma el paquete; se retira apps/video-manager"
+  ],
+  "status": "completed",
+  "started_at": "2026-10-07",
+  "completed_at": "2026-10-07",
+  "documents": {
+    "brief": "sdd/specs/spec-e-burgos-020-motion-mode/cycles/cycle-05/brief.yaml",
+    "functional": "sdd/specs/spec-e-burgos-020-motion-mode/cycles/cycle-05/functional.md",
+    "planner": "sdd/specs/spec-e-burgos-020-motion-mode/cycles/cycle-05/planner.md",
+    "architect": "sdd/specs/spec-e-burgos-020-motion-mode/cycles/cycle-05/architect.md",
+    "tasks": "sdd/specs/spec-e-burgos-020-motion-mode/cycles/cycle-05/tasks.json"
+  },
+  "artifacts": [],
+  "metrics": {
+    "tasks_total": 3,
+    "tasks_completed": 3,
+    "tasks_skipped": 0,
+    "story_points": 6,
+    "files_created": [
+      "sdd/context/tools/motion-studio/updates/2026-10-07-spec-e-burgos-020-motion-mode-cycle-05.md"
+    ],
+    "files_modified": [
+      "sdd/skills/video-maker-material-contract/SKILL.md"
+    ],
+    "files_deleted": [],
+    "usage": {
+      "tokens_in": 195700,
+      "tokens_out": 29182,
+      "approx": true,
+      "source": "declared-estimate",
+      "by_agent": [
+        {
+          "agent": "orchestrator",
+          "label": "modo B del contrato y cierre",
+          "provider_model": "claude/opus",
+          "effort": "high",
+          "tokens_in": 70000,
+          "tokens_out": 7000,
+          "tokens_total": 77000,
+          "approx": true,
+          "source": "declared-estimate",
+          "recorded_at": "2026-10-07"
+        },
+        {
+          "agent": "implementor-back",
+          "label": "FIX-e-burgos-332 en display-ads (worktree feat/video-maker-modes)",
+          "provider_model": "claude/sonnet",
+          "effort": "medium",
+          "tokens_in": 125700,
+          "tokens_out": 22182,
+          "tokens_total": 147882,
+          "approx": false,
+          "source": "agent-usage-notification",
+          "recorded_at": "2026-10-07"
+        }
+      ],
+      "by_tier": {
+        "claude/opus": {
+          "tokens_in": 70000,
+          "tokens_out": 7000,
+          "approx": true,
+          "source": "declared-estimate"
+        },
+        "claude/sonnet": {
+          "tokens_in": 125700,
+          "tokens_out": 22182,
+          "approx": false,
+          "source": "agent-usage-notification"
+        }
+      }
+    }
+  },
+  "tables_created": [],
+  "endpoints_implemented": [],
+  "components_created": [],
+  "issues_found": [
+    "display-ads tiene trabajo sin commitear del dueño en main: el FIX se hizo en un worktree y una rama propia, sin push ni merge.",
+    "Los tests de integración de landing necesitan Postgres real: no corren en el worktree (el FIX sólo toca un comentario de landing)."
+  ],
+  "reviewer_report": {
+    "approved": true,
+    "date": "2026-10-07",
+    "ca_results": {
+      "CA-01": "OK — §0 con la regla A/B y ejemplos.",
+      "CA-02": "OK — §12 con layout, brief, guion, checklist, HTTP, CLI y errores tomados del código de render-api.",
+      "CA-03": "OK — el camino de §12.5 es el que se recorrió en cycle-04 para el reel 9:16.",
+      "CA-04": "OK — display-ads: skill video-maker-request con la regla de modo, armado del brief y estados; índice con modos (FIX-e-burgos-332, sdd:validate verde).",
+      "CA-05": "OK — apps/video-manager borrado y sin referencias vivas; quedan sólo registros históricos de specs y fixes cerrados."
+    },
+    "tests": {
+      "sdd:validate": "OK (video-maker y display-ads)",
+      "lint": "display-ads: qa-flows y landing verdes",
+      "test": "landing: 3400 verdes; 37 archivos de integración requieren Postgres",
+      "build": "n/a",
+      "e2e": "n/a"
+    },
+    "notes": "La rama de display-ads queda para que el dueño la mergee cuando cierre su trabajo en curso.",
+    "follow_ups": [
+      "Mergear feat/video-maker-modes en display-ads."
+    ]
+  }
+}
