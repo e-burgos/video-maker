@@ -17,6 +17,7 @@ describe('composeStoryboard', () => {
     expect(template).toContain('<title>Catálogo &lt;completo&gt;</title>');
     expect(template).toContain('url("assets/brand/fonts/mono.woff2") format("woff2"); font-weight: 400;');
     expect(template).toContain('class="fmt-16x9"');
+    expect(template).toContain('data-scene="cta" data-chapter-end="1"');
     expect(template).toContain('data-width="1920" data-height="1080"');
     expect(template).toContain('{{music_track}}');
     expect(template).toContain('id="sfx-impact"');

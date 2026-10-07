@@ -150,6 +150,7 @@ window.createMotionRuntime = function createMotionRuntime(T, W, compositionId) {
 
   const chapterHost = document.getElementById('mg-chapter');
   const chapters = Array.from(document.querySelectorAll('[data-scene][data-chapter]')).map((section) => ({ ...scenes.get(section.dataset.scene), chapter: section.dataset.chapter }));
+  const chapterStops = Array.from(document.querySelectorAll('[data-scene][data-chapter-end]')).map((section) => scenes.get(section.dataset.scene).start);
   chapters.forEach((s, i) => {
     const el = document.createElement('div');
     el.className = 'mg-chap mg-label';
@@ -160,9 +161,9 @@ window.createMotionRuntime = function createMotionRuntime(T, W, compositionId) {
     label.textContent = s.chapter;
     el.append(number, label);
     chapterHost.appendChild(el);
-    const next = chapters[i + 1];
+    const ends = [chapters[i + 1]?.start, ...chapterStops.filter((t) => t > s.start)].filter((t) => t !== undefined);
     tl.fromTo(el, { opacity: 0, x: 16 }, { opacity: 1, x: 0, duration: 0.3, ease: 'power3.out' }, Math.max(0.3, s.start + 0.02));
-    if (next) tl.to(el, { opacity: 0, x: -16, duration: 0.18, ease: 'power2.in' }, next.start - 0.18);
+    if (ends.length) tl.to(el, { opacity: 0, x: -16, duration: 0.18, ease: 'power2.in' }, Math.min(...ends) - 0.18);
   });
 
   tl.fromTo('#mg-bug', { opacity: 0, y: -10 }, { opacity: 1, y: 0, duration: 0.5, ease: 'power3.out' }, 0.3);

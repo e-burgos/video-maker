@@ -9,7 +9,7 @@ Hay dos caminos para el primer paso; desde ahí el pipeline es el mismo:
 
 - **Storyboard (recomendado):** un `storyboard.json` elige escenas de un catálogo de 16 tipos y las
   llena con textos, imágenes y equipos de la marca. No se escribe HTML: la biblioteca
-  `@video-maker/motion-graphics` lo compone con el kit de la marca y un runtime de animación declarativo.
+  la lib `libs/motion-graphics` lo compone con el kit de la marca y un runtime de animación declarativo.
   Es lo que un agente puede generar solo desde un guion e imágenes.
 - **Plantilla a mano:** `index.html.tpl` escrito a medida (las tres de DisplayAds de la spec-019) para
   cuando el catálogo no alcanza.

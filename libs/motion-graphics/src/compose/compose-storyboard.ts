@@ -74,7 +74,7 @@ export function composeStoryboard(storyboard: MotionStoryboard, brand: BrandMani
   const sections = storyboard.scenes
     .map((scene) => {
       const flash = scene.anchor === 'drop' && storyboard.beatSync ? ' data-flash="1"' : '';
-      const chapter = scene.chapter ? ` data-chapter="${esc(scene.chapter)}"` : '';
+      const chapter = scene.chapter ? ` data-chapter="${esc(scene.chapter)}"` : scene.kind === 'cta' ? ' data-chapter-end="1"' : '';
       return `<section id="s-${scene.id}" class="clip scene" data-scene="${scene.id}"${chapter}${flash} data-start="{{start:${scene.id}}}" data-duration="{{dur:${scene.id}}}" data-track-index="1">
         <div class="scene-in">${renderScene(scene, ctx)}</div>
       </section>`;
@@ -127,7 +127,8 @@ export function composeStoryboard(storyboard: MotionStoryboard, brand: BrandMani
       ${sfx}
     </div>
     <script>
-      createMotionRuntime({{timeline_json}}, {{words_json}}, "${MOTION_COMPOSITION_ID}");
+      window.__timelines = window.__timelines || {};
+      window.__timelines["${MOTION_COMPOSITION_ID}"] = createMotionRuntime({{timeline_json}}, {{words_json}}, "${MOTION_COMPOSITION_ID}");
     </script>
   </body>
 </html>

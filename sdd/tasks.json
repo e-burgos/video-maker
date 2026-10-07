@@ -508,6 +508,17 @@
           "status": "in-progress",
           "tasks_total": 7,
           "tasks_done": 0
+        },
+        "cycle-03": {
+          "file": "sdd/specs/spec-e-burgos-020-motion-mode/cycles/cycle-03/tasks.json",
+          "module": "motion-mode",
+          "apps": [
+            "libs/motion-graphics",
+            "tools/motion-studio"
+          ],
+          "status": "in-progress",
+          "tasks_total": 6,
+          "tasks_done": 0
         }
       }
     }

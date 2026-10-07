@@ -99,7 +99,9 @@
     {
       "id": "TASK-006",
       "title": "Close the cycle: context, validate, lint/test/build",
-      "user_stories": [],
+      "user_stories": [
+        "HU-01"
+      ],
       "estimation_hours": 1,
       "story_points": 1,
       "depends_on": [
