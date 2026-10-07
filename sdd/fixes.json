@@ -2057,7 +2057,7 @@
       "validated_at": null,
       "title": "Kit DisplayAds al día (Easy Pro reemplaza a Core Pro) y crédito de la música fuera del video",
       "estimation_hours": 3,
-      "description": "display-ads cambió su línea de productos (spec 070): Easy Pro (caja HDMI, sin pantalla) reemplaza a Core Pro, que queda sin stock. El kit de video sigue ese cambio: BrandManifest suma retired (la IA no ofrece el equipo y la verificación lo rechaza), plate (placa clara detrás de un equipo oscuro), spokenName por equipo (\"Isi Pro\", porque Piper lee \"Easy\" con fonética española) e imágenes con caption (la IA elige fotos por lo que muestran). Las 19 fotos de ambiente aprobadas reemplazan a las escena-* en el manifiesto; tagline \"Tus pantallas, bajo control.\" (decisión del dueño). Instructivo nuevo de Easy Pro; el de Core Pro pasa a storyboards/displayads/archivo/; presentación y Counter 15 re-renderizados. A pedido del dueño, el crédito de la música (CC BY) deja de dibujarse sobre el video: render escribe <video>.credits.txt junto al MP4, el job motion lo devuelve como musicCredit y la página Motion lo muestra para pegarlo en la descripción de la publicación. App de escritorio 0.3.0.",
+      "description": "display-ads cambió su línea de productos (spec 070): Easy Pro (caja HDMI, sin pantalla) reemplaza a Core Pro, que queda sin stock. El kit de video sigue ese cambio: BrandManifest suma retired (la IA no ofrece el equipo y la verificación lo rechaza), plate (placa clara detrás de un equipo oscuro), spokenName por equipo (\"Isi Pro\", porque Piper lee \"Easy\" con fonética española) e imágenes con caption (la IA elige fotos por lo que muestran). Las 19 fotos de ambiente aprobadas reemplazan a las escena-* en el manifiesto; tagline \"Tus pantallas, bajo control.\" (decisión del dueño). Instructivo nuevo de Easy Pro; el de Core Pro pasa a storyboards/displayads/archivo/; presentación y Counter 15 re-renderizados. A pedido del dueño, el crédito de la música (CC BY) deja de dibujarse sobre el video: render escribe <video>.credits.txt junto al MP4, el job motion lo devuelve como musicCredit y la página Motion lo muestra para pegarlo en la descripción de la publicación. App de escritorio 0.3.0. Al publicar 0.3.0 el dmg superó los 300 MiB que acepta wrangler para R2: build-desktop poda del runtime de render-api los prebuilds de better-sqlite3 de otras plataformas, su código fuente y las skills de hyperframes (296,7 MiB; publicado y verificado por sha256). El instructivo de Easy Pro dice 'en menos de un minuto' (en campo la app abre ~47 s después del encendido).",
       "justification": "Perfil solo: no crea contratos entre subproyectos (campos opcionales del manifiesto de la lib) ni entidades nuevas; verificable con tests y renders; reversible.",
       "related_modules": [
         "motion-mode"
@@ -2083,7 +2083,8 @@
         "apps/web/src/pages/motion-page.tsx",
         "apps/web/src/api/parse-render-job.ts",
         "apps/desktop/package.json",
-        "apps/desktop/CHANGELOG.md"
+        "apps/desktop/CHANGELOG.md",
+        "apps/desktop/scripts/build-desktop.mjs"
       ],
       "test_reference": "pnpm nx run-many -t lint test build -p motion-graphics motion-studio render-api: verde (147 / 16 / 1631). Renders reales de easy-pro, counter-15 y presentación revisados con hyperframes snapshot.",
       "status": "implemented",

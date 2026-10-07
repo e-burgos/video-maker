@@ -1,6 +1,6 @@
 import { createHash } from 'node:crypto';
 import { execFileSync } from 'node:child_process';
-import { cpSync, existsSync, mkdirSync, readFileSync, rmSync, statSync, writeFileSync } from 'node:fs';
+import { cpSync, existsSync, mkdirSync, readdirSync, readFileSync, rmSync, statSync, writeFileSync } from 'node:fs';
 import { join, resolve } from 'node:path';
 
 const REPO_ROOT = resolve(import.meta.dirname, '..', '..', '..');
@@ -117,6 +117,19 @@ function stageAppDir() {
   );
 }
 
+const RUNTIME_PLATFORM = 'darwin-arm64';
+const UNUSED_RUNTIME_PATHS = ['better-sqlite3/deps', 'better-sqlite3/src', 'better-sqlite3/build/Release/obj.target', 'hyperframes/dist/skills'];
+
+function pruneRenderApiRuntime(nodeModulesDir) {
+  for (const relative of UNUSED_RUNTIME_PATHS) rmSync(join(nodeModulesDir, relative), { recursive: true, force: true });
+  const prebuildsDir = join(nodeModulesDir, 'better-sqlite3', 'prebuilds');
+  if (existsSync(prebuildsDir)) {
+    for (const file of readdirSync(prebuildsDir)) {
+      if (file !== `${RUNTIME_PLATFORM}.node`) rmSync(join(prebuildsDir, file), { force: true });
+    }
+  }
+}
+
 function stageRenderApiResource() {
   log('staging render-api resource (bundle + runtime deps)');
   rmSync(RENDER_API_RESOURCE_DIR, { recursive: true, force: true });
@@ -129,6 +142,7 @@ function stageRenderApiResource() {
     recursive: true,
     dereference: true,
   });
+  pruneRenderApiRuntime(join(RENDER_API_RESOURCE_DIR, 'node_modules'));
 }
 
 function stageMcpResource() {
