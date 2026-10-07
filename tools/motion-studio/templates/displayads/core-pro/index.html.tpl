@@ -30,7 +30,7 @@
       .box .da-icon { font-size: 40px; color: var(--da-sky-400); }
       #router { left: 140px; top: 900px; }
       #psu { left: 700px; top: 930px; }
-      #lbl-hdmi { left: 720px; top: 470px; }
+      #lbl-hdmi { left: 600px; top: 420px; }
       #lbl-lan { left: 140px; top: 820px; }
       #lbl-psu { left: 700px; top: 860px; }
       .tv-msg { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 14px; }
@@ -49,8 +49,8 @@
       #addr { left: 140px; top: 560px; padding: 30px 40px; font-family: var(--da-font-mono); font-size: 76px; letter-spacing: -0.01em; }
       #addr-k { left: 140px; top: 500px; }
       #mobile-off { left: 140px; top: 760px; }
-      #mini-tv { left: 140px; top: 560px; width: 640px; height: 370px; }
-      #mini-online { left: 160px; top: 950px; }
+      #mini-tv { left: 140px; top: 480px; width: 640px; height: 370px; }
+      #mini-online { left: 160px; top: 880px; }
 
       .wcard { position: absolute; top: 420px; width: 780px; padding: 44px 48px; box-sizing: border-box; display: flex; flex-direction: column; gap: 20px; }
       .wcard h3 { margin: 0; font-family: var(--da-font-display); font-weight: 600; font-size: 46px; letter-spacing: -0.03em; line-height: 1.05; }

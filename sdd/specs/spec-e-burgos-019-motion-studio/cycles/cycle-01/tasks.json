@@ -21,13 +21,23 @@
       "estimation_hours": 1.5,
       "story_points": 1,
       "depends_on": [],
-      "status": "pending",
+      "status": "done",
       "files": [
         "tools/motion-studio/src/beats/fit-beat-grid.ts",
         "tools/motion-studio/src/beats/fit-beat-grid.spec.ts",
         "tools/motion-studio/src/beats/parse-hyperframes-beats.ts",
         "tools/motion-studio/src/beats/parse-hyperframes-beats.spec.ts"
-      ]
+      ],
+      "usage": {
+        "provider_model": "claude/opus",
+        "effort": "high",
+        "agent": "orchestrator",
+        "tokens_in": 90000,
+        "tokens_out": 9000,
+        "approx": true,
+        "source": "declared-estimate",
+        "recorded_at": "2026-10-07"
+      }
     },
     {
       "id": "TASK-002",
@@ -40,13 +50,23 @@
       "depends_on": [
         "TASK-001"
       ],
-      "status": "pending",
+      "status": "done",
       "files": [
         "tools/motion-studio/src/timeline/layout-scenes.ts",
         "tools/motion-studio/src/timeline/layout-scenes.spec.ts",
         "tools/motion-studio/src/timeline/build-duck-automation.ts",
         "tools/motion-studio/src/timeline/build-duck-automation.spec.ts"
-      ]
+      ],
+      "usage": {
+        "provider_model": "claude/opus",
+        "effort": "high",
+        "agent": "orchestrator",
+        "tokens_in": 60000,
+        "tokens_out": 7000,
+        "approx": true,
+        "source": "declared-estimate",
+        "recorded_at": "2026-10-07"
+      }
     },
     {
       "id": "TASK-003",
@@ -57,13 +77,23 @@
       "estimation_hours": 2,
       "story_points": 2,
       "depends_on": [],
-      "status": "pending",
+      "status": "done",
       "files": [
         "tools/motion-studio/src/voice/intelligibility-score.ts",
         "tools/motion-studio/src/voice/intelligibility-score.spec.ts",
         "tools/motion-studio/src/voice/pick-best-take.ts",
         "tools/motion-studio/src/voice/pick-best-take.spec.ts"
-      ]
+      ],
+      "usage": {
+        "provider_model": "claude/opus",
+        "effort": "high",
+        "agent": "orchestrator",
+        "tokens_in": 140000,
+        "tokens_out": 9000,
+        "approx": true,
+        "source": "declared-estimate",
+        "recorded_at": "2026-10-07"
+      }
     },
     {
       "id": "TASK-004",
@@ -77,13 +107,23 @@
       "depends_on": [
         "TASK-002"
       ],
-      "status": "pending",
+      "status": "done",
       "files": [
         "tools/motion-studio/src/template/compose-template.ts",
         "tools/motion-studio/src/template/compose-template.spec.ts",
         "tools/motion-studio/src/script/motion-script.ts",
         "tools/motion-studio/src/script/motion-script.spec.ts"
-      ]
+      ],
+      "usage": {
+        "provider_model": "claude/opus",
+        "effort": "high",
+        "agent": "orchestrator",
+        "tokens_in": 70000,
+        "tokens_out": 8000,
+        "approx": true,
+        "source": "declared-estimate",
+        "recorded_at": "2026-10-07"
+      }
     },
     {
       "id": "TASK-005",
@@ -98,7 +138,7 @@
         "TASK-003",
         "TASK-004"
       ],
-      "status": "pending",
+      "status": "done",
       "files": [
         "tools/motion-studio/src/cli.ts",
         "tools/motion-studio/src/cli.spec.ts",
@@ -107,7 +147,17 @@
         "tools/motion-studio/src/deps/node-motion-dependencies.ts",
         "tools/motion-studio/src/__fixtures__/fake-motion-dependencies.ts",
         "tools/motion-studio/project.json"
-      ]
+      ],
+      "usage": {
+        "provider_model": "claude/opus",
+        "effort": "high",
+        "agent": "orchestrator",
+        "tokens_in": 160000,
+        "tokens_out": 14000,
+        "approx": true,
+        "source": "declared-estimate",
+        "recorded_at": "2026-10-07"
+      }
     },
     {
       "id": "TASK-006",
@@ -120,13 +170,23 @@
       "depends_on": [
         "TASK-005"
       ],
-      "status": "pending",
+      "status": "done",
       "files": [
         "tools/motion-studio/templates/displayads/_brand/displayads.css",
         "tools/motion-studio/templates/displayads/presentacion/index.html.tpl",
         "tools/motion-studio/templates/displayads/counter-15/index.html.tpl",
         "tools/motion-studio/templates/displayads/core-pro/index.html.tpl"
-      ]
+      ],
+      "usage": {
+        "provider_model": "claude/opus",
+        "effort": "high",
+        "agent": "orchestrator",
+        "tokens_in": 620000,
+        "tokens_out": 58000,
+        "approx": true,
+        "source": "declared-estimate",
+        "recorded_at": "2026-10-07"
+      }
     },
     {
       "id": "TASK-007",
@@ -139,12 +199,22 @@
       "depends_on": [
         "TASK-006"
       ],
-      "status": "pending",
+      "status": "done",
       "files": [
         ".claude/settings.json",
         "sdd/skills/motion-studio/SKILL.md",
         "tools/motion-studio/README.md"
-      ]
+      ],
+      "usage": {
+        "provider_model": "claude/opus",
+        "effort": "high",
+        "agent": "orchestrator",
+        "tokens_in": 40000,
+        "tokens_out": 6000,
+        "approx": true,
+        "source": "declared-estimate",
+        "recorded_at": "2026-10-07"
+      }
     },
     {
       "id": "TASK-008",
@@ -160,11 +230,21 @@
       "depends_on": [
         "TASK-007"
       ],
-      "status": "pending",
+      "status": "done",
       "files": [
         "sdd/context/tools/motion-studio/constitution.md",
         "sdd/context/tools/motion-studio/context_prompt.md"
-      ]
+      ],
+      "usage": {
+        "provider_model": "claude/opus",
+        "effort": "high",
+        "agent": "orchestrator",
+        "tokens_in": 60000,
+        "tokens_out": 6000,
+        "approx": true,
+        "source": "declared-estimate",
+        "recorded_at": "2026-10-07"
+      }
     }
   ]
 }

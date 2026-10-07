@@ -1,6 +1,6 @@
 # SPEC-e-burgos-019: Motion Studio — videos de producto con motion graphics, voz rioplatense y cortes al golpe
 
-> Estado: **in-progress** — registrada el 2026-10-07. Un ciclo `lite` (perfil `solo`).
+> Estado: **completed** — registrada y cerrada el 2026-10-07. Un ciclo `lite` (perfil `solo`).
 > Pedido del dev: llevar los videos a "el siguiente nivel" con motion graphics construidos por código
 > (skill `heygen-com/hyperframes`), respetando la marca de DisplayAds, con música y la opción de que
 > cada corte caiga en un golpe del tema, voz argentina rioplatense, y rehacer la presentación de la

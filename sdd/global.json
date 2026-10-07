@@ -173,18 +173,19 @@
       "description": "Que un usuario sin Claude use el productor completo: modelos gratuitos de OpenRouter recomendados con benchmark real, storyboard sobre el motor efectivo del productor y búsqueda e importación de video e imágenes libres para B-roll con crédito automático, más una herramienta para mirar fotos",
       "cycles_completed": 4,
       "completed_at": "2026-09-26"
-    }
-  ],
-  "in_progress_modules": [
+    },
     {
       "module": "motion-studio",
       "spec": "spec-e-burgos-019-motion-studio",
       "apps": [
         "tools/motion-studio"
       ],
-      "description": "Herramienta de motion graphics sobre HyperFrames: plantillas de marca en HTML+GSAP, voz Piper es_AR con selección de la mejor toma por transcripción, grilla de golpes ajustada sobre `hyperframes beats` con cortes al golpe opcionales y ducking de la música; primera entrega: presentación de DisplayAds e instructivos de Counter 15 y Core Pro"
+      "description": "Herramienta de motion graphics sobre HyperFrames: plantillas de marca en HTML+GSAP, voz Piper es_AR con selección de la mejor toma por transcripción, grilla de golpes ajustada sobre `hyperframes beats` con cortes al golpe opcionales y ducking de la música; primera entrega: presentación de DisplayAds e instructivos de Counter 15 y Core Pro",
+      "cycles_completed": 1,
+      "completed_at": "2026-10-07"
     }
   ],
+  "in_progress_modules": [],
   "pending_modules": [
     {
       "module": "scene-assembly",
