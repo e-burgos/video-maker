@@ -81,6 +81,15 @@ describe('claudeCliArgs', () => {
     ]);
   });
 
+  it('aísla la llamada de los settings, plugins, hooks, MCP y sesiones del usuario de la máquina', () => {
+    const args = claudeCliArgs(REQUEST, CONFIG);
+
+    expect(args[args.indexOf('--setting-sources') + 1]).toBe('');
+    expect(args).toContain('--strict-mcp-config');
+    expect(args).not.toContain('--mcp-config');
+    expect(args).toContain('--no-session-persistence');
+  });
+
   it('nunca invoca el CLI sin modelo: sin pedido explícito manda el del servicio', () => {
     expect(claudeCliArgs(REQUEST, { ...CONFIG, model: 'opus' }).slice(-2)).toEqual(['--model', 'opus']);
     expect(claudeCliArgs({ ...REQUEST, model: null }, CONFIG).slice(-2)).toEqual(['--model', 'sonnet']);

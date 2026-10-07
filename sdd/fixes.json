@@ -1994,6 +1994,56 @@
           }
         ]
       }
+    },
+    {
+      "id": "FIX-e-burgos-002",
+      "author": "e-burgos",
+      "spec_id": null,
+      "fix_document": "sdd/fixes/fix-e-burgos-002.md",
+      "type": "IMPROVEMENT",
+      "severity": "high",
+      "created_at": "2026-10-07",
+      "resolved_at": "2026-10-07",
+      "validated_at": null,
+      "title": "claude CLI calls from render-api isolated from the machine's Claude Code configuration",
+      "estimation_hours": 1,
+      "description": "Both claude spawns in render-api loaded the user's own Claude Code setup (settings, plugins, hooks, CLAUDE.md, skills and, for the AI agent, every MCP server) on every call. The AI agent now passes --setting-sources '' --strict-mcp-config --no-session-persistence, as motion-studio already does. The producer already had --strict-mcp-config next to its own --mcp-config, so it only gains --setting-sources ''; it keeps session persistence because later turns use --resume. libs/producer-tools/src/mcp/studio-mcp-launch.ts builds the studio MCP server command, not a claude call, so it is untouched.",
+      "justification": "Measured on 2026-10-07: a trivial AI agent call cost $0.6826 (num_turns 2, 181565 cache creation tokens) and dropped to $0.0065 with the flags; a first producer turn cost $0.0898 with 5 user plugins and 214 skills loaded and dropped to $0.0467.",
+      "related_modules": [
+        "ai-storyboard",
+        "studio-producer"
+      ],
+      "affected_files": [
+        "apps/render-api/src/ai/claude-cli-ai-agent.ts",
+        "apps/render-api/src/ai/claude-cli-ai-agent.spec.ts",
+        "apps/render-api/src/producer/claude-code-producer-agent.ts",
+        "apps/render-api/src/producer/claude-code-producer-agent.spec.ts"
+      ],
+      "test_reference": "pnpm nx test render-api green, with new specs asserting the isolation flags on both arg builders. Live check on a throwaway media root: one real producer turn before and after; after, the stream-json init shows plugins [], 8 built-in skills, the same 18 mcp__studio__* tools with studio connected, the model calls get_project_overview, and a second turn resumes the session. AI agent measured with the real claudeCliArgs builder before and after.",
+      "status": "implemented",
+      "cycle": null,
+      "process_note": "Resolved in the main loop under the standing fast-fix mode.",
+      "usage": {
+        "provider_model": "claude/opus",
+        "effort": "low",
+        "tokens_in": 180000,
+        "tokens_out": 14000,
+        "approx": true,
+        "source": "declared-estimate",
+        "recorded_at": "2026-10-07",
+        "by_agent": [
+          {
+            "agent": "steward",
+            "provider_model": "claude/opus",
+            "effort": "low",
+            "tokens_in": 180000,
+            "tokens_out": 14000,
+            "approx": true,
+            "source": "declared-estimate",
+            "recorded_at": "2026-10-07"
+          }
+        ]
+      }
     }
   ]
 }
