@@ -1,6 +1,6 @@
 ---
 name: video-maker-material-contract
-description: Contrato de entrada del Video Maker para proyectos EXTERNOS que producen material en crudo (grabaciones de pantalla, clips, fotos, logo, música, guion) — qué archivos generar, cómo nombrarlos, con qué specs y cómo entregarlos para que el pipeline arme un video horizontal (YouTube 16:9) o vertical (Reels/TikTok/Shorts 9:16) sin retoques. Usar cuando otro repo (ej. display-ads) necesita "preparar el material para el Video Maker", exportar una grabación para el tutorial, o automatizar la entrega vía API/CLI. No cubre cómo producir el video en sí: eso es `video-producer`.
+description: Contrato de entrada del Video Maker para proyectos EXTERNOS, en sus dos modos — A) material en crudo (grabaciones de pantalla, clips, fotos, logo, música, guion) para un montaje, y B) motion graphics (un brief con guion e imágenes descriptas; el Video Maker diseña, anima, pone voz y música solo) — qué archivos generar, cómo nombrarlos, con qué specs y cómo entregarlos para un video horizontal (YouTube 16:9) o vertical (Reels/TikTok/Shorts 9:16) sin retoques. Usar cuando otro repo (ej. display-ads) necesita "preparar el material para el Video Maker", exportar una grabación para el tutorial, o automatizar la entrega vía API/CLI. No cubre cómo producir el video en sí: eso es `video-producer`.
 ---
 
 # Skill: video-maker-material-contract
@@ -15,7 +15,18 @@ Este documento es **autocontenido**: podés copiar la carpeta `sdd/skills/video-
 a tu repo (`.claude/skills/`, `.github/skills/`, o donde tu agente lea skills) y usarlo sin nada
 más del Video Maker. Prosa en español; nombres de archivo, claves y comandos en inglés/ASCII.
 
-## 0. El modelo mental en 6 líneas
+## 0. Primero: ¿material crudo o motion graphics?
+
+| Si el video… | Modo | Entregás |
+| --- | --- | --- |
+| enseña un flujo real de la UI paso a paso (clics, formularios, estados que hay que ver tal cual) | **A — material crudo** (§1–§11) | una grabación (A-roll) + guion cronometrado + apoyo |
+| presenta un producto, una función o un equipo, explica un concepto, instala hardware o es un reel promocional, y no necesita la pantalla real | **B — motion graphics** (§12) | un `brief.json` (guion + imágenes con descripción) |
+
+Ante la duda: si alguien tiene que poder repetir lo que ve haciendo clic, es A; si alcanza con
+entender la idea, es B. Un mismo tema puede tener los dos (una promo en B y el tutorial en A): son dos
+proyectos.
+
+## 0.1 Modo A — el modelo mental en 6 líneas
 
 1. Un **proyecto** es una carpeta `media/<slug>/` (slug `^[a-z0-9]+(-[a-z0-9]+)*$`). Vos escribís
    solo en `raw/`; el motor escribe `work/` (intermedios) y `out/` (MP4 final).
@@ -407,3 +418,117 @@ Fuente de verdad de cada regla: `libs/auto-montage/src/ingest/supported-extensio
 `libs/timeline-core/src/voice/parse-voice-script-lines.ts` (marcas de tiempo),
 `libs/auto-montage/src/concepts/normalize-term.ts` (matching de conceptos),
 `apps/render-api/src/http/handlers/{assets,jobs}-handler.ts` (API), `tools/render-cli/README.md` (CLI).
+
+## 12. Modo B — motion graphics (guion + imágenes; el Video Maker hace el resto)
+
+En este modo no hay A-roll ni montaje: el Video Maker arma el storyboard con IA a partir de un catálogo
+de escenas animadas de la marca (títulos cinéticos, equipos con su pantalla, celulares, grillas,
+tableros, galerías de fotos, cierre con logo), sintetiza la voz con la mejor toma, elige o respeta la
+música, corta al golpe y renderiza. Vos entregás **el qué**, no el cómo.
+
+### 12.1 Layout
+
+```text
+media/<slug>/                 proyecto con mode "motion" (se crea así, ver §12.5)
+  motion/brief.json           el pedido (§12.2) — lo escribís vos (o por PUT)
+  raw/images/<archivo>        fotos que el video puede usar (0–12)
+  motion/storyboard.json      lo escribe el Video Maker (revisable y editable)
+  out/video.mp4               el entregable
+```
+
+### 12.2 `brief.json`
+
+```json
+{
+  "version": 1,
+  "brand": "displayads",
+  "title": "La IA de Display Ads",
+  "format": "16:9",
+  "beatSync": true,
+  "music": "auto",
+  "goal": "Qué tiene que lograr el video (una o dos frases).",
+  "audience": "A quién le habla.",
+  "script": "El guion en texto plano, como se va a decir.",
+  "images": [{ "file": "restaurante-menu.jpg", "caption": "Qué se ve en la foto, en una frase." }]
+}
+```
+
+| Campo | Reglas |
+| --- | --- |
+| `brand` | id de una marca instalada en el Video Maker (`GET /motion/brands`; hoy `displayads`). La marca trae colores, fuentes, logo, equipos con su pantalla, fotos propias, temas musicales y voz. |
+| `format` | `16:9` (YouTube, web) o `9:16` (reels). Default `16:9`. Un formato por proyecto. |
+| `music` | `"auto"` (la IA elige por el tono del guion), el id de un tema de la marca, o `null` (sin música). |
+| `beatSync` | `true` corta las escenas al golpe de la música; `false` sigue a la voz. |
+| `script` | Texto plano, en el idioma y registro de la voz (rioplatense para DisplayAds). La IA lo parte en escenas y puede pulir la redacción para la voz, pero no inventa funciones: escribí sólo lo que el producto hace. |
+| `images[]` | `file` es un nombre dentro de `raw/images/` (jpg, png o webp; ≥ 1280 px del lado largo). `caption` dice **qué muestra** la foto: la IA no ve las imágenes, elige por la descripción. |
+
+### 12.3 Cómo escribir el guion para este modo
+
+- **Duración:** ~2,5 palabras por segundo. Promo o explicativo de 45–75 s ≈ 120–180 palabras; reel 9:16
+  de 25–40 s ≈ 60–100 palabras; instructivo de un equipo hasta ~2 min.
+- **La marca con contexto y nunca en un extremo de la frase:** "Esto es Display Ads: cartelería digital
+  con…". "Display Ads." suelto, o al principio o al final de una línea, la voz sintética lo pronuncia mal.
+- Frases cortas, una idea por frase; números como se dicen ("dos por uno", "quinientos metros").
+- Abrí con una pregunta o un dolor concreto y cerrá con un llamado a la acción ("Pedí tu cotización").
+- Para un instructivo de equipo: un paso por frase, en el orden real ("Conectá el cable…", "Enchufá la
+  fuente…"); los equipos que la marca ya tiene (Counter 15, Core Pro) se animan solos con su pantalla.
+
+### 12.4 Checklist de entrega (modo B)
+
+1. ¿El video es realmente modo B (§0)? Si hay que ver la UI real, es modo A.
+2. `brief.json` valida: `version: 1`, `brand` instalada, `script` no vacío, `format` decidido.
+3. Cada imagen existe en `raw/images/`, es jpg/png/webp, tiene `caption` y **no** muestra datos de un
+   cliente real, mails, credenciales ni marcas ajenas.
+4. El guion nombra la marca con contexto (§12.3) y dura lo que pide la red.
+5. Nada de lo que dice el guion contradice el manual del producto.
+
+### 12.5 Entrega
+
+**Por HTTP (studio corriendo):**
+
+```bash
+API=http://127.0.0.1:4399
+SLUG=display-ads-ia-promo
+
+curl -sS -X POST $API/projects -H 'content-type: application/json' -d "{\"slug\":\"$SLUG\",\"mode\":\"motion\"}"
+curl -sS -X PUT "$API/projects/$SLUG/assets/image/restaurante-menu.jpg" -H 'content-type: image/jpeg' --data-binary @images/restaurante-menu.jpg
+curl -sS -X PUT "$API/projects/$SLUG/motion/brief" -H 'content-type: application/json' --data-binary @brief.json
+
+# 1) storyboard (IA, ~3–6 min, ~$0,5 con la suscripción de Claude): revisalo antes de seguir
+curl -sS -X POST $API/projects/$SLUG/jobs -H 'content-type: application/json' -d '{"kind":"motion","phase":"storyboard"}'
+curl -sS $API/projects/$SLUG/motion/storyboard
+
+# 2) video (voz, plan, compose y render; ~30 s por línea de voz + ~2,5 min por minuto de video)
+curl -sS -X POST $API/projects/$SLUG/jobs -H 'content-type: application/json' -d '{"kind":"motion","phase":"video","output":"video.mp4"}'
+```
+
+Polling igual que §6.2 (`GET /jobs/<id>`; `progress.stage` ∈ `storyboard | voice | plan | compose |
+render`, con `linesVoiced/totalLines`). `phase: "all"` hace las dos cosas sin parar a revisar. El MP4
+queda en `out/<output>`. Desde la web, el mismo flujo está en `/projects/<slug>/motion`.
+
+| Error | Qué significa |
+| --- | --- |
+| `400 BRIEF_INVALID` | el brief no cumple §12.2; el mensaje nombra el campo |
+| `400 BRAND_NOT_FOUND` | la marca no está instalada en el Video Maker |
+| `400` con el nombre de una imagen | `images[].file` no existe en `raw/images/` |
+| `409 MOTION_PROJECT_REQUIRED` | el proyecto se creó sin `mode: "motion"` |
+| `409 BRIEF_MISSING` / `STORYBOARD_MISSING` | falta el brief, o pediste `phase: video` sin storyboard |
+| `409 STORYBOARD_ALREADY_EXISTS` / `ASSET_EXISTS` | ya existe; mandá `"overwrite": true` para rehacerlo |
+| `STORYBOARD_INVALID` | la IA no logró un storyboard válido ni con una reparación; el mensaje nombra escena y campo |
+| `AI_AGENT_*` | el motor de IA del Video Maker falló (sin sesión de Claude, límite de uso): reintentá más tarde |
+
+**Por CLI (repo del Video Maker):** con `brief.json` y una carpeta `images/` al lado,
+
+```bash
+pnpm nx run motion-studio:cli -- auto <carpeta>/brief.json .motion-work/<slug>
+pnpm nx run motion-studio:cli -- voice   .motion-work/<slug> --takes 5
+pnpm nx run motion-studio:cli -- plan    .motion-work/<slug>
+pnpm nx run motion-studio:cli -- compose .motion-work/<slug>
+pnpm nx run motion-studio:cli -- render  .motion-work/<slug> --out .motion-work/out/<slug>.mp4
+```
+
+### 12.6 Qué NO hace el modo B
+
+Mostrar la UI real del producto (para eso es el modo A) · ver tus imágenes (sólo lee su descripción) ·
+inventar funciones que no estén en el guion · mezclar grabaciones de pantalla · marcas que no estén
+instaladas (una marca nueva es una carpeta `libs/motion-graphics/assets/brands/<id>/` en el Video Maker).

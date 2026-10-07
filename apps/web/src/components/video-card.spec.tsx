@@ -49,6 +49,27 @@ describe('VideoCard', () => {
     );
   });
 
+  it('treats a project without mode as footage: no badge, workspace link', () => {
+    renderCard({});
+
+    expect(screen.queryByTestId('video-card-mode-badge')).toBeNull();
+  });
+
+  it('badges a motion project and opens its Motion page', () => {
+    renderCard({}, UNPLACED, vi.fn(), { ...VIDEO, mode: 'motion' });
+
+    expect(screen.getByTestId('video-card-mode-badge').textContent).toBe('Motion graphics');
+    expect(screen.getByRole('link', { name: /editar-campana/u }).getAttribute('href')).toBe(
+      '/projects/editar-campana/motion',
+    );
+  });
+
+  it('does not badge an explicit footage project', () => {
+    renderCard({}, UNPLACED, vi.fn(), { ...VIDEO, mode: 'footage' });
+
+    expect(screen.queryByTestId('video-card-mode-badge')).toBeNull();
+  });
+
   it('keeps the menu closed until the three dots are pressed', () => {
     renderCard({});
 

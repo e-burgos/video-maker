@@ -1,0 +1,124 @@
+{
+  "$schema": "../../../../schemas/cycle.schema.json",
+  "cycle": 2,
+  "module": "motion-mode",
+  "spec": "spec-e-burgos-020-motion-mode",
+  "apps": [
+    "libs/motion-graphics",
+    "tools/motion-studio"
+  ],
+  "phase": "scene-catalog",
+  "flow": "full",
+  "objectives": [
+    "Crear libs/motion-graphics con la lógica de Motion Studio y el contrato MotionStoryboard",
+    "Catálogo de 16 escenas y animador declarativo",
+    "Re-expresar y renderizar los tres videos de la spec-019 como storyboards"
+  ],
+  "status": "completed",
+  "started_at": "2026-10-07",
+  "completed_at": "2026-10-07",
+  "documents": {
+    "brief": "sdd/specs/spec-e-burgos-020-motion-mode/cycles/cycle-02/brief.yaml",
+    "functional": "sdd/specs/spec-e-burgos-020-motion-mode/cycles/cycle-02/functional.md",
+    "planner": "sdd/specs/spec-e-burgos-020-motion-mode/cycles/cycle-02/planner.md",
+    "architect": "sdd/specs/spec-e-burgos-020-motion-mode/cycles/cycle-02/architect.md",
+    "tasks": "sdd/specs/spec-e-burgos-020-motion-mode/cycles/cycle-02/tasks.json"
+  },
+  "artifacts": [],
+  "metrics": {
+    "tasks_total": 7,
+    "tasks_completed": 7,
+    "tasks_skipped": 0,
+    "story_points": 22,
+    "files_created": [
+      "libs/motion-graphics/project.json",
+      "libs/motion-graphics/src/index.ts",
+      "libs/motion-graphics/src/storyboard/motion-storyboard.schema.ts",
+      "libs/motion-graphics/src/storyboard/parse-motion-storyboard.ts",
+      "libs/motion-graphics/src/brand/brand-manifest.ts",
+      "libs/motion-graphics/src/scenes/render-scene.ts",
+      "libs/motion-graphics/src/scenes/scene-html.ts",
+      "libs/motion-graphics/src/scenes/icons.ts",
+      "libs/motion-graphics/src/compose/compose-storyboard.ts",
+      "libs/motion-graphics/assets/runtime/scenes.css",
+      "libs/motion-graphics/assets/brands/displayads/brand.json",
+      "libs/motion-graphics/assets/brands/displayads/brand.css",
+      "libs/motion-graphics/assets/storyboards/displayads/presentacion.json",
+      "libs/motion-graphics/assets/storyboards/displayads/counter-15.json",
+      "libs/motion-graphics/assets/storyboards/displayads/core-pro.json",
+      "sdd/context/libs/motion-graphics/constitution.md",
+      "sdd/context/libs/motion-graphics/context_prompt.md",
+      "sdd/context/libs/motion-graphics/updates/2026-10-07-spec-e-burgos-020-motion-mode-cycle-02.md",
+      "sdd/context/tools/motion-studio/updates/2026-10-07-spec-e-burgos-020-motion-mode-cycle-02.md"
+    ],
+    "files_modified": [
+      "tsconfig.base.json",
+      "tools/motion-studio/src/cli.ts",
+      "tools/motion-studio/src/deps/node-motion-dependencies.ts",
+      "tools/motion-studio/vite.config.ts",
+      "sdd/skills/motion-studio/SKILL.md",
+      "sdd/context/constitution.md",
+      "sdd/context/context_prompt.md"
+    ],
+    "files_deleted": [],
+    "usage": {
+      "tokens_in": 890000,
+      "tokens_out": 97000,
+      "approx": true,
+      "source": "declared-estimate",
+      "by_agent": [
+        {
+          "agent": "orchestrator",
+          "label": "lib motion-graphics, catálogo, kit de marca, storyboards, renders y revisión de cuadros (actor único, dos sesiones)",
+          "provider_model": "claude/opus",
+          "effort": "high",
+          "tokens_in": 890000,
+          "tokens_out": 97000,
+          "tokens_total": 987000,
+          "approx": true,
+          "source": "declared-estimate",
+          "recorded_at": "2026-10-07"
+        }
+      ],
+      "by_tier": {
+        "claude/opus": {
+          "tokens_in": 890000,
+          "tokens_out": 97000,
+          "approx": true,
+          "source": "declared-estimate"
+        }
+      }
+    }
+  },
+  "tables_created": [],
+  "endpoints_implemented": [],
+  "components_created": [],
+  "issues_found": [
+    "Pantallas de UI (list/status/url) dentro de un equipo se dibujaban sobre toda la foto y quedaban cortadas: ahora van sobre el cuadrilátero de la pantalla con matrix() y screen.aspect.",
+    "connections: las fichas de router/fuente pisaban el pie del capítulo en 16:9.",
+    "Los títulos cortaban 'Wi-Fi' en el guion: se usa guion no separable.",
+    "El cierre 'Esto es Display Ads.' suelto es frágil en Piper (Whisper oye 'display house' en ~9 de 10 tomas): se cambió a la versión con contexto y se agregó voice --only para rehacer una línea."
+  ],
+  "reviewer_report": {
+    "approved": true,
+    "date": "2026-10-07",
+    "ca_results": {
+      "HU-01": "OK — storyboard → voice → plan → compose → render sin HTML a mano para counter-15 y core-pro.",
+      "HU-02": "OK — catálogo de 16 escenas con tests por tipo; cuadros revisados con hyperframes snapshot en los tres videos.",
+      "HU-03": "OK — BrandManifest de DisplayAds validado por schema (test sobre el manifiesto real).",
+      "HU-04": "OK — lógica de motion-studio mudada a libs/motion-graphics con sus tests; init sigue andando con las plantillas a mano."
+    },
+    "tests": {
+      "sdd:validate": "OK",
+      "lint": "motion-graphics, motion-studio verdes",
+      "test": "motion-graphics 83 al cierre del ciclo; motion-studio 22",
+      "build": "verde",
+      "e2e": "renders reales: counter-15 2112 cuadros (70,4 s), core-pro 2309 cuadros (77,0 s), 1920x1080 30 fps con audio AAC"
+    },
+    "notes": "Primer uso real de voice con Piper y whisper locales: funciona (~30 s por línea con 5 tomas).",
+    "follow_ups": [
+      "cycle-04: verificación visual 9:16 del catálogo.",
+      "Escuchar el cierre de counter-15 (mejor toma 0.909, Whisper oyó 'display apps')."
+    ]
+  }
+}

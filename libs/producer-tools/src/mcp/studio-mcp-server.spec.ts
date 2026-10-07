@@ -23,7 +23,7 @@ async function connectedPair(overrides: Partial<RenderApiClient> = {}) {
 }
 
 describe('createStudioMcpServer', () => {
-  it('lists exactly the 18 contract tool names', async () => {
+  it('lists exactly the 22 contract tool names', async () => {
     const { client } = await connectedPair();
 
     const { tools } = await client.listTools();
@@ -155,6 +155,6 @@ describe('createStudioMcpServer', () => {
     const job = properties?.job as Record<string, unknown> | undefined;
     expect(job).toBeDefined();
     const union = (job?.anyOf ?? job?.oneOf) as readonly unknown[] | undefined;
-    expect(union?.length).toBe(5);
+    expect(union?.length).toBe(6);
   });
 });

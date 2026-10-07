@@ -8,6 +8,7 @@ import type { RenderPipelineReport } from '../pipeline/run-render-pipeline';
 import type {
   CreateJobInput,
   CreateMontageJobInput,
+  CreateMotionJobInput,
   CreatePhotoArollJobInput,
   CreateRenderJobInput,
   CreateStoryboardJobInput,
@@ -16,6 +17,9 @@ import type {
   JobKind,
   MontageJobProgress,
   MontageJobReport,
+  MotionJobProgress,
+  MotionJobReport,
+  MotionPhase,
   PhotoArollJobProgress,
   PhotoArollJobReport,
   RenderJobProgress,
@@ -25,14 +29,15 @@ import type {
   VoiceJobProgress,
   VoiceJobReport,
 } from './render-job';
-import { RENDER_JOB_STATES } from './render-job';
+import { MOTION_PHASES, RENDER_JOB_STATES } from './render-job';
 
 export type StoredJobParams =
   | Omit<CreateRenderJobInput, 'slug' | 'projectRoot'>
   | Omit<CreateMontageJobInput, 'slug' | 'projectRoot'>
   | Omit<CreateStoryboardJobInput, 'slug' | 'projectRoot'>
   | Omit<CreateVoiceJobInput, 'slug' | 'projectRoot'>
-  | Omit<CreatePhotoArollJobInput, 'slug' | 'projectRoot'>;
+  | Omit<CreatePhotoArollJobInput, 'slug' | 'projectRoot'>
+  | Omit<CreateMotionJobInput, 'slug' | 'projectRoot'>;
 
 function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === 'object' && value !== null && !Array.isArray(value);
@@ -53,10 +58,15 @@ function isJobKind(value: string): value is JobKind {
     case 'storyboard':
     case 'voice':
     case 'photo-aroll':
+    case 'motion':
       return true;
     default:
       return false;
   }
+}
+
+function isMotionPhase(value: unknown): value is MotionPhase {
+  return typeof value === 'string' && (MOTION_PHASES as readonly string[]).includes(value);
 }
 
 function isRenderJobState(value: string): value is RenderJobState {
@@ -92,6 +102,8 @@ export function toStoredParams(input: CreateJobInput): StoredJobParams {
       };
     case 'photo-aroll':
       return { kind: 'photo-aroll', photos: input.photos, output: input.output, fps: input.fps };
+    case 'motion':
+      return { kind: 'motion', phase: input.phase, output: input.output, takes: input.takes };
   }
 }
 
@@ -158,6 +170,13 @@ export function parseStoredParams(kind: JobKind, value: unknown): StoredJobParam
       }
       return { kind: 'photo-aroll', photos, output, fps };
     }
+    case 'motion': {
+      const { phase, output, takes } = value;
+      if (!isMotionPhase(phase) || typeof output !== 'string' || typeof takes !== 'number') {
+        return null;
+      }
+      return { kind: 'motion', phase, output, takes };
+    }
   }
 }
 
@@ -196,6 +215,8 @@ function buildInvalidJob(row: StoredJobRow, kind: JobKind): Job {
     case 'voice':
       return { ...base, kind, progress: null, report: null };
     case 'photo-aroll':
+      return { ...base, kind, progress: null, report: null };
+    case 'motion':
       return { ...base, kind, progress: null, report: null };
   }
 }
@@ -236,6 +257,8 @@ function buildTypedJob(row: StoredJobRow, kind: JobKind, state: RenderJobState):
         progress: progress as PhotoArollJobProgress | null,
         report: report as PhotoArollJobReport | null,
       };
+    case 'motion':
+      return { ...base, kind, progress: progress as MotionJobProgress | null, report: report as MotionJobReport | null };
   }
 }
 

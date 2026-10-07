@@ -16,6 +16,7 @@ const STORE: StoreConfig = {
   dbPath: `${MEDIA_ROOT}/.studio/studio.db`,
   maxUploadBytes: 2_147_483_648,
   objectStore: 'fs',
+  motionAssetsRoot: '/repo/libs/motion-graphics/assets',
 };
 
 describe('readStoredTimeline', () => {

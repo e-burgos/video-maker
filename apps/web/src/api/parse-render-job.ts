@@ -1,3 +1,4 @@
+import { MOTION_STAGES } from './motion-types';
 import { responseShapeUnexpected } from './render-api-error';
 import {
   JOB_KINDS,
@@ -260,6 +261,20 @@ function isRenderPipelineReport(value: unknown): value is RenderPipelineReport {
   );
 }
 
+function isMotionJobProgress(value: unknown): boolean {
+  return isRecord(value) && (MOTION_STAGES as readonly string[]).includes(value['stage'] as string);
+}
+
+function isMotionJobReport(value: unknown): boolean {
+  return (
+    isRecord(value) &&
+    (value['path'] === null || typeof value['path'] === 'string') &&
+    (value['durationSec'] === null || typeof value['durationSec'] === 'number') &&
+    typeof value['scenes'] === 'number' &&
+    (value['storyboard'] === null || isRecord(value['storyboard']))
+  );
+}
+
 function isRenderApiErrorPayload(value: unknown): value is RenderApiErrorPayload {
   return isRecord(value) && typeof value['code'] === 'string' && typeof value['message'] === 'string';
 }
@@ -294,6 +309,13 @@ function isJob(value: unknown): value is Job {
     return (
       (value['progress'] === null || isStoryboardJobProgress(value['progress'])) &&
       (value['report'] === null || isStoryboardJobReport(value['report']))
+    );
+  }
+
+  if (value['kind'] === 'motion') {
+    return (
+      (value['progress'] === null || isMotionJobProgress(value['progress'])) &&
+      (value['report'] === null || isMotionJobReport(value['report']))
     );
   }
 
@@ -364,7 +386,8 @@ function isRenderJobSummary(value: unknown): value is RenderJobSummary {
       isRenderPipelineStage(value['stage']) ||
       isMontageStage(value['stage']) ||
       isStoryboardStage(value['stage']) ||
-      isVoiceStage(value['stage'])) &&
+      isVoiceStage(value['stage']) ||
+      (MOTION_STAGES as readonly string[]).includes(value['stage'] as string)) &&
     isStringOrNull(value['errorCode']) &&
     typeof value['createdAt'] === 'string' &&
     isStringOrNull(value['startedAt']) &&

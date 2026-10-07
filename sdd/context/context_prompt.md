@@ -25,8 +25,8 @@ El proyecto usa **Nx** como monorepo manager con **pnpm** como package manager (
 
 ```
 <repo-root>/                 → nombre del proyecto en sdd/global.json → project
-  apps/                      → Una carpeta por app generada con Nx (`render-api`: servicio HTTP local del motor, `web`: el estudio, `desktop`: la app de escritorio, `docs-site`: la web de descarga)
-  libs/                      → Una carpeta por lib generada con Nx (`timeline-core`, `media-local`, `composition-remotion`, `auto-montage`, `producer-tools`, `local-store`, `shared-utils`)
+  apps/                      → Una carpeta por app generada con Nx (`render-api`: servicio HTTP local del motor, `web`: el estudio, `desktop`: la app de escritorio, `docs-site`: la web de descarga, `motion-editor`: editor visual de videos animados)
+  libs/                      → Una carpeta por lib generada con Nx (`timeline-core`, `media-local`, `composition-remotion`, `auto-montage`, `producer-tools`, `local-store`, `shared-utils`, `motion-graphics`)
   tools/                     → Herramientas del workspace (`render-cli`: CLI headless del motor, `motion-studio`: videos de motion graphics sobre HyperFrames)
   sdd/                       → Sistema SDD (NO modificar manualmente)
     context/
@@ -57,6 +57,8 @@ El proyecto usa **Nx** como monorepo manager con **pnpm** como package manager (
 | `libs/local-store` | `sdd/context/libs/local-store/context_prompt.md` | `sdd/context/libs/local-store/constitution.md` |
 | `tools/render-cli` | `sdd/context/tools/render-cli/context_prompt.md` | `sdd/context/tools/render-cli/constitution.md` |
 | `tools/motion-studio` | `sdd/context/tools/motion-studio/context_prompt.md` | `sdd/context/tools/motion-studio/constitution.md` |
+| `libs/motion-graphics` | `sdd/context/libs/motion-graphics/context_prompt.md` | `sdd/context/libs/motion-graphics/constitution.md` |
+| `apps/motion-editor` | `sdd/context/apps/motion-editor/context_prompt.md` | `sdd/context/apps/motion-editor/constitution.md` |
 | `apps/render-api` | `sdd/context/apps/render-api/context_prompt.md` | `sdd/context/apps/render-api/constitution.md` |
 | `apps/web` | `sdd/context/apps/web/context_prompt.md` | `sdd/context/apps/web/constitution.md` |
 | `apps/desktop` | `sdd/context/apps/desktop/context_prompt.md` | `sdd/context/apps/desktop/constitution.md` |

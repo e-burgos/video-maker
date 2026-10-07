@@ -19,6 +19,7 @@ export interface ProducerPromptContext {
   readonly pendingAssets: readonly ProducerPromptPendingAsset[];
   readonly hasTimeline: boolean;
   readonly producerScript: 'none' | 'plain' | 'timed';
+  readonly mode?: 'footage' | 'motion';
 }
 
 const TOOL_DESCRIPTIONS: Readonly<Record<StudioToolName, string>> = {
@@ -31,7 +32,8 @@ const TOOL_DESCRIPTIONS: Readonly<Record<StudioToolName, string>> = {
   read_project_text: 'read a small text, markdown, JSON or SRT file already in the project.',
   write_project_text: "write a text file under this project's working area.",
   copy_asset: "copy a file already in the project into its raw material under a role, without touching the original.",
-  start_job: 'start an asynchronous engine job — render, montage, storyboard, voice or photo-aroll — and get back its id.',
+  start_job:
+    'start an asynchronous engine job — render, montage, storyboard, voice, photo-aroll or motion — and get back its id.',
   wait_for_job: 'wait for a job to finish, or for its timeout to elapse; call it again if it is still running.',
   cancel_job: 'cancel a running or queued job.',
   get_timeline: 'read the project timeline as it is currently saved.',
@@ -49,6 +51,11 @@ const TOOL_DESCRIPTIONS: Readonly<Record<StudioToolName, string>> = {
     'search Wikimedia Commons and the NASA Image and Video Library for freely licensed B-roll video or photos by query and get back candidates.',
   import_media: "bring a searched free media result into the project; its credit is recorded automatically.",
   view_images: 'look at up to 6 photos already in the project. Use this for photos, never extract_frames.',
+  get_motion_brands: 'the brands a motion video can use, with their formats and music tracks. Motion projects only.',
+  read_motion_brief: 'read the motion brief saved for this project.',
+  write_motion_brief:
+    'save the motion brief (brand, script, one caption per image); the studio validates it and names the bad field.',
+  read_motion_storyboard: 'read the motion storyboard (scenes with their kind and voice line) once the storyboard phase made it.',
 };
 
 function buildProducerToolsSection(): string {
@@ -269,6 +276,40 @@ function buildProducerCraftSection(): string {
   ].join('\n');
 }
 
+function buildProducerMotionRecipeSection(): string {
+  return [
+    '# Motion project recipe: a motion video built from a brief, a storyboard and the brand',
+    '',
+    'This project is a MOTION project: there is no footage to edit. The video is composed from a',
+    'brief you write, a storyboard the engine drafts from it, and the brand. The footage steps and',
+    'recipes do not apply here; follow this checklist in order.',
+    '',
+    '- 1) BRIEF INPUTS. Ask the user, in one round with your recommendation on each point, for the',
+    '  goal of the video, the audience, the format (16:9 or 9:16) and the script — or offer to',
+    '  derive them from what they already said. Call get_motion_brands to see the brands and the',
+    '  formats and music tracks each one supports, and pick the brand and music from there.',
+    '- 2) LOOK AT THE IMAGES. Call get_project_overview, then view_images on every file under',
+    '  raw/images/ (up to 6 per call) and write ONE short line per image describing what it shows.',
+    '  Those lines are the `caption` of each entry in the brief.',
+    '- 3) WRITE THE BRIEF. write_motion_brief with `version` 1, `brand`, `title`, `format`, `goal`,',
+    '  `audience`, `script`, `music` (a track id, "auto" or null) and `images` as a list of',
+    '  `{"file": <file name inside raw/images/>, "caption": <your line>}`. If the studio answers',
+    '  with a field error, fix exactly that field and write again.',
+    '- 4) STORYBOARD. start_job `{"kind":"motion","phase":"storyboard"}`, then wait_for_job until it',
+    '  ends. Its report carries the `scenes` count and the cost of drafting it (`storyboard.costUsd`).',
+    '- 5) SUMMARIZE AND WAIT. Read it with read_motion_storyboard and tell the user, in plain',
+    '  language, each scene — its kind and its voice line — plus the number of scenes and what',
+    '  the draft cost. Then STOP and wait for an OK or for changes. Never start the video phase',
+    '  before the user agrees.',
+    '- 6) CHANGES. If the user wants a different script, images or captions, rewrite the brief and',
+    '  run the storyboard phase again with `"overwrite":true`.',
+    '- 7) VIDEO. Once the user approves: start_job `{"kind":"motion","phase":"video"}` and',
+    '  wait_for_job; the stages are voice, plan, compose and render, so keep waiting while it runs.',
+    '- 8) DELIVER. Tell the user where the video is — the `path` in the job report — and its',
+    '  duration, and offer two or three concrete next steps.',
+  ].join('\n');
+}
+
 function buildProducerRecipesSection(): string {
   return [
     '# Recipes: a named recipe is a decision already taken, not a hint',
@@ -385,11 +426,12 @@ function buildProducerSuggestionsSection(): string {
 }
 
 export function buildProducerPrompt(context: ProducerPromptContext): string {
+  const recipes = context.mode === 'motion' ? buildProducerMotionRecipeSection() : buildProducerRecipesSection();
   return [
     buildProducerToolsSection(),
     buildProducerProjectSection(context),
     buildProducerCraftSection(),
-    buildProducerRecipesSection(),
+    recipes,
     buildProducerSafetySection(),
     buildProducerSuggestionsSection(),
   ].join('\n\n---\n\n');

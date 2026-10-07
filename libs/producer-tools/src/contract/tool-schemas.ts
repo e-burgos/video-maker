@@ -42,7 +42,7 @@ export const FREE_MEDIA_SOURCES = ['commons', 'nasa'] as const;
 export type FreeMediaSource = (typeof FREE_MEDIA_SOURCES)[number];
 export const FreeMediaSourceSchema = z.enum(FREE_MEDIA_SOURCES);
 
-export const STUDIO_JOB_KINDS = ['render', 'montage', 'storyboard', 'voice', 'photo-aroll'] as const;
+export const STUDIO_JOB_KINDS = ['render', 'montage', 'storyboard', 'voice', 'photo-aroll', 'motion'] as const;
 export type StudioJobKind = (typeof STUDIO_JOB_KINDS)[number];
 export const StudioJobKindSchema = z.enum(STUDIO_JOB_KINDS);
 
@@ -160,12 +160,25 @@ const StartPhotoArollJobSchema = z.strictObject({
   fps: z.literal(DEFAULT_PHOTO_AROLL_FPS).optional(),
 });
 
+export const MOTION_JOB_PHASES = ['storyboard', 'video', 'all'] as const;
+export const MIN_MOTION_TAKES = 1;
+export const MAX_MOTION_TAKES = 8;
+
+const StartMotionJobSchema = z.strictObject({
+  kind: z.literal('motion'),
+  phase: z.enum(MOTION_JOB_PHASES).optional(),
+  output: z.string().min(1).optional(),
+  takes: z.number().int().min(MIN_MOTION_TAKES).max(MAX_MOTION_TAKES).optional(),
+  overwrite: z.boolean().optional(),
+});
+
 export const StartJobInputSchema = z.discriminatedUnion('kind', [
   StartRenderJobSchema,
   StartMontageJobSchema,
   StartStoryboardJobSchema,
   StartVoiceJobSchema,
   StartPhotoArollJobSchema,
+  StartMotionJobSchema,
 ]);
 
 export type StartJobInput = z.infer<typeof StartJobInputSchema>;
@@ -182,9 +195,14 @@ const StartJobOutputSchema = z.strictObject({
 
 const GetProjectOverviewInputSchema = z.strictObject({});
 
+export const PROJECT_MODES = ['footage', 'motion'] as const;
+export type ProjectMode = (typeof PROJECT_MODES)[number];
+export const ProjectModeSchema = z.enum(PROJECT_MODES);
+
 const GetProjectOverviewOutputSchema = z.strictObject({
   slug: z.string(),
   title: z.string(),
+  mode: ProjectModeSchema,
   assets: z.array(
     z.strictObject({
       path: ProjectRelativePathSchema,
@@ -437,6 +455,66 @@ const ViewImagesOutputSchema = z.strictObject({
   ),
 });
 
+const GetMotionBrandsInputSchema = z.strictObject({});
+
+const GetMotionBrandsOutputSchema = z.strictObject({
+  brands: z.array(
+    z.looseObject({
+      id: z.string(),
+      name: z.string(),
+      formats: z.array(z.string()),
+      music: z.array(
+        z.looseObject({
+          id: z.string(),
+          mood: z.string(),
+          bpm: z.number(),
+          hasDrop: z.boolean(),
+        }),
+      ),
+    }),
+  ),
+});
+
+const ReadMotionBriefInputSchema = z.strictObject({});
+
+const ReadMotionBriefOutputSchema = z.strictObject({
+  brief: z.record(z.string(), z.unknown()),
+});
+
+export const MotionBriefImageSchema = z.strictObject({
+  file: z.string().min(1),
+  caption: z.string(),
+});
+
+export const MotionBriefInputSchema = z.looseObject({
+  version: z.literal(1),
+  brand: z.string().min(1),
+  title: z.string().optional(),
+  format: z.string().optional(),
+  beatSync: z.boolean().optional(),
+  music: z.string().nullable().optional(),
+  goal: z.string().optional(),
+  audience: z.string().optional(),
+  script: z.string().min(1),
+  images: z.array(MotionBriefImageSchema),
+});
+
+export type MotionBriefInput = z.infer<typeof MotionBriefInputSchema>;
+
+const WriteMotionBriefInputSchema = z.strictObject({
+  brief: MotionBriefInputSchema,
+});
+
+const WriteMotionBriefOutputSchema = z.strictObject({
+  saved: z.literal(true),
+});
+
+const ReadMotionStoryboardInputSchema = z.strictObject({});
+
+const ReadMotionStoryboardOutputSchema = z.strictObject({
+  storyboard: z.record(z.string(), z.unknown()),
+});
+
 export interface StudioToolDefinition<Input extends z.ZodTypeAny = z.ZodTypeAny, Output extends z.ZodTypeAny = z.ZodTypeAny> {
   readonly description: string;
   readonly input: Input;
@@ -488,8 +566,10 @@ export const STUDIO_TOOLS: Readonly<Record<StudioToolName, StudioToolDefinition>
   start_job: {
     description:
       'Start an asynchronous render engine job and get back its id and initial status. Poll it with ' +
-      'wait_for_job. Pass the job under "job"; its "kind" — render, montage, storyboard, voice or ' +
-      'photo-aroll — picks the shape of the rest of the object.',
+      'wait_for_job. Pass the job under "job"; its "kind" — render, montage, storyboard, voice, ' +
+      'photo-aroll or motion — picks the shape of the rest of the object. The motion kind (only in a ' +
+      'motion project) takes phase "storyboard", "video" or "all" (default), an optional output file ' +
+      'name, takes 1 to 8 and overwrite.',
     input: StartJobToolInputSchema,
     output: StartJobOutputSchema,
   },
@@ -558,5 +638,30 @@ export const STUDIO_TOOLS: Readonly<Record<StudioToolName, StudioToolDefinition>
       'Look at up to 6 photos already in the project and get them back as images. Use this to see a photo instead of extract_frames, which only works on video.',
     input: ViewImagesInputSchema,
     output: ViewImagesOutputSchema,
+  },
+  get_motion_brands: {
+    description:
+      'List the brands a motion video can use, with the formats (16:9, 9:16) each supports and its music tracks (id, mood, bpm, hasDrop). Only for motion projects.',
+    input: GetMotionBrandsInputSchema,
+    output: GetMotionBrandsOutputSchema,
+  },
+  read_motion_brief: {
+    description: 'Read the motion brief saved for this project. Fails with FILE_NOT_FOUND when none was written yet.',
+    input: ReadMotionBriefInputSchema,
+    output: ReadMotionBriefOutputSchema,
+  },
+  write_motion_brief: {
+    description:
+      'Save the motion brief (version 1, brand, script and one captioned entry per image in raw/images/) for ' +
+      'this project, replacing the previous one. The studio validates it and answers with the offending field ' +
+      'in the hint when it is invalid: fix that field and call again.',
+    input: WriteMotionBriefInputSchema,
+    output: WriteMotionBriefOutputSchema,
+  },
+  read_motion_storyboard: {
+    description:
+      'Read the motion storyboard (the scenes, each with its kind and voice line) that the storyboard phase produced. Fails with FILE_NOT_FOUND when it does not exist yet.',
+    input: ReadMotionStoryboardInputSchema,
+    output: ReadMotionStoryboardOutputSchema,
   },
 };

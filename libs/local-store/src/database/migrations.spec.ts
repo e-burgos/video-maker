@@ -148,7 +148,7 @@ describe('applyMigrations', () => {
 
     sqlite.exec(`INSERT INTO projects (slug, created_at, updated_at) VALUES ('demo-01', 't', 't')`);
 
-    applyMigrations(sqlite, MIGRATIONS);
+    applyMigrations(sqlite, MIGRATIONS.filter((migration) => migration.version <= 3));
     expect(currentUserVersion(sqlite)).toBe(3);
 
     const tables = sqlite
@@ -172,6 +172,21 @@ describe('applyMigrations', () => {
     };
     expect(projectRow).toEqual({ slug: 'demo-01' });
 
+    sqlite.close();
+  });
+
+  it('migrates from v3 to v4 keeping rows and defaulting them to footage', () => {
+    const sqlite = new Database(':memory:');
+    sqlite.pragma('foreign_keys = ON');
+    applyMigrations(sqlite, MIGRATIONS.filter((migration) => migration.version <= 3));
+    expect(currentUserVersion(sqlite)).toBe(3);
+    sqlite.exec(`INSERT INTO projects (slug, created_at, updated_at) VALUES ('legacy', 't', 't')`);
+
+    applyMigrations(sqlite, MIGRATIONS);
+    expect(currentUserVersion(sqlite)).toBe(4);
+
+    const row = sqlite.prepare('select slug, mode from projects where slug = ?').get('legacy');
+    expect(row).toEqual({ slug: 'legacy', mode: 'footage' });
     sqlite.close();
   });
 

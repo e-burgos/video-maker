@@ -455,3 +455,28 @@ describe('parseStoryboardJob', () => {
     expect(parseRenderJobListing(listing)).toEqual(listing);
   });
 });
+
+describe('parseJob for motion jobs', () => {
+  const motionJob = (report: unknown) => ({
+    id: 'j1',
+    slug: 'reel',
+    kind: 'motion',
+    state: 'succeeded',
+    createdAt: '2026-10-07T16:55:18.660Z',
+    startedAt: '2026-10-07T16:55:18.663Z',
+    finishedAt: '2026-10-07T16:59:12.228Z',
+    progress: { stage: 'storyboard', linesVoiced: null, totalLines: null, percent: 0 },
+    report,
+    error: null,
+  });
+
+  it('accepts the storyboard phase report, which has no video path nor duration yet', () => {
+    const report = { path: null, durationSec: null, scenes: 7, storyboard: { repaired: false, tokensIn: 63189, tokensOut: 18549, costUsd: 0.44 } };
+    expect(parseJob(motionJob(report))).toMatchObject({ kind: 'motion', state: 'succeeded', report });
+  });
+
+  it('accepts the video phase report with its path and duration', () => {
+    const report = { path: 'out/video.mp4', durationSec: 31.2, scenes: 7, storyboard: null };
+    expect(parseJob(motionJob(report))).toMatchObject({ report });
+  });
+});

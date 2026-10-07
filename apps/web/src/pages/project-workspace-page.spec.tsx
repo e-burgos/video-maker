@@ -92,6 +92,29 @@ describe('ProjectWorkspacePage', () => {
     expect(screen.queryByTestId('service-health-label')).toBeNull();
   });
 
+  it('links a motion project to its Motion page and a footage project does not', async () => {
+    stubMatchMedia(true);
+    const motionProject = {
+      slug: 'demo-01',
+      mode: 'motion',
+      layout: { raw: true, catalog: true, timeline: false, edl: false, out: false },
+      assetSource: 'catalog',
+      assetCounts: { aroll: 0, broll: 0, image: 0, audio: 0, voice: 0, logo: 0 },
+    };
+    renderWorkspace({ getProject: vi.fn().mockResolvedValue(motionProject) });
+
+    const link = await screen.findByTestId('workspace-motion-link');
+    expect(link.getAttribute('href')).toBe('/projects/demo-01/motion');
+  });
+
+  it('does not link a footage project to the Motion page', async () => {
+    stubMatchMedia(true);
+    renderWorkspace();
+
+    await screen.findByRole('heading', { name: 'Demo 01' });
+    expect(screen.queryByTestId('workspace-motion-link')).toBeNull();
+  });
+
   it('offers the advanced editing menu with all four destinations', async () => {
     stubMatchMedia(true);
     renderWorkspace();

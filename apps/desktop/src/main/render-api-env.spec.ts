@@ -108,6 +108,19 @@ describe('buildRenderApiEnv', () => {
     expect(packaged.STUDIO_MCP_ENTRY).toBe('/resources/mcp/main.js');
   });
 
+  it('points render-api at the motion assets and the bundled HyperFrames, with the vendored ffmpeg first on PATH', async () => {
+    const deps = { readLoginShellPath: vi.fn().mockResolvedValue(null), resolveClaudeCli: vi.fn().mockResolvedValue(null) };
+    const build = (isPackaged: boolean) =>
+      buildRenderApiEnv({ paths: PATHS, host: '127.0.0.1', port: 4310, token: 't', projectsFolder: '/p', isPackaged, parentPid: 1 }, deps);
+    const packaged = await build(true);
+    expect(packaged.MOTION_GRAPHICS_ASSETS).toBe('/resources/motion-assets');
+    expect(packaged.HYPERFRAMES_RESOLVE_FROM).toBe('/resources/render-api');
+    expect(packaged.PATH?.split(':')[0]).toBe('/resources/bin');
+    const unpackaged = await build(false);
+    expect(unpackaged.MOTION_GRAPHICS_ASSETS).toBe('/resources/libs/motion-graphics/assets');
+    expect(unpackaged.HYPERFRAMES_RESOLVE_FROM).toBeUndefined();
+  });
+
   it('sets REMOTION_SERVE_URL only when the paths carry one', async () => {
     const deps = {
       readLoginShellPath: vi.fn().mockResolvedValue(null),

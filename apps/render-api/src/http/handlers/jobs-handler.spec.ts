@@ -36,7 +36,7 @@ function withProjects(callLog: CallLog, overrides?: Partial<RenderApiDependencie
   return deps;
 }
 
-const STORE: StoreConfig = { mediaRoot: '/media', dbPath: '/media/.studio/studio.db', maxUploadBytes: 2_147_483_648, objectStore: 'fs' };
+const STORE: StoreConfig = { mediaRoot: '/media', dbPath: '/media/.studio/studio.db', maxUploadBytes: 2_147_483_648, objectStore: 'fs', motionAssetsRoot: '/repo/libs/motion-graphics/assets' };
 const PROJECT_ROOT = '/var/data/media/acme-launch';
 const DEFAULT_RENDER_OUTPUT = {
   outPath: `${PROJECT_ROOT}/work/renders/r/video-muted.mp4`,
@@ -660,7 +660,7 @@ describe('handleCreateRenderJob', () => {
       expect(runtime.jobs.listBySlug('smoke-ingest')).toEqual([]);
     });
 
-    it('rejects an unknown kind and names the five valid ones', async () => {
+    it('rejects an unknown kind and names the six valid ones', async () => {
       const { deps, runtime } = storyboardHarness();
 
       await expect(
@@ -673,7 +673,7 @@ describe('handleCreateRenderJob', () => {
         ),
       ).rejects.toMatchObject({
         code: 'JOB_KIND_INVALID',
-        expected: "'render', 'montage', 'storyboard', 'voice' or 'photo-aroll'",
+        expected: "'render', 'montage', 'storyboard', 'voice', 'photo-aroll' or 'motion'",
       });
       expect(runtime.jobs.listBySlug('smoke-ingest')).toEqual([]);
     });

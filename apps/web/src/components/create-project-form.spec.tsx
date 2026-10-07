@@ -44,7 +44,7 @@ describe('CreateProjectForm', () => {
     typeName('My next reel!');
 
     await waitFor(() => expect(onCreated).toHaveBeenCalledWith('my-next-reel'));
-    expect(createProject).toHaveBeenCalledWith('my-next-reel');
+    expect(createProject).toHaveBeenCalledWith({ slug: 'my-next-reel', mode: 'footage' });
     expect((screen.getByLabelText('Video name') as HTMLInputElement).value).toBe('');
   });
 
@@ -54,7 +54,7 @@ describe('CreateProjectForm', () => {
 
     typeName('My next reel');
 
-    await waitFor(() => expect(createProject).toHaveBeenCalledWith('my-next-reel-2'));
+    await waitFor(() => expect(createProject).toHaveBeenCalledWith({ slug: 'my-next-reel-2', mode: 'footage' }));
   });
 
   it('shows the service error code and does not report a creation', async () => {
@@ -86,5 +86,24 @@ describe('CreateProjectForm', () => {
     renderForm(vi.fn() as unknown as RenderApiClient['createProject'], vi.fn(), [], vi.fn());
 
     expect(screen.getByRole('button', { name: 'Cancel' })).toBeTruthy();
+  });
+
+  it('offers a labelled radio group with raw footage selected by default', () => {
+    renderForm(vi.fn() as unknown as RenderApiClient['createProject']);
+
+    const group = screen.getByRole('radiogroup', { name: 'How do you want to build the video?' });
+    expect(group).toBeTruthy();
+    expect((screen.getByRole('radio', { name: /Raw footage/ }) as HTMLInputElement).checked).toBe(true);
+    expect((screen.getByRole('radio', { name: /Motion graphics/ }) as HTMLInputElement).checked).toBe(false);
+  });
+
+  it('sends mode motion when Motion graphics is chosen', async () => {
+    const createProject = vi.fn().mockResolvedValue({ slug: 'promo' });
+    renderForm(createProject as unknown as RenderApiClient['createProject']);
+
+    fireEvent.click(screen.getByRole('radio', { name: /Motion graphics/ }));
+    typeName('Promo');
+
+    await waitFor(() => expect(createProject).toHaveBeenCalledWith({ slug: 'promo', mode: 'motion' }));
   });
 });

@@ -22,6 +22,9 @@ export default defineConfig({
       '@video-maker/timeline-core': fileURLToPath(
         new URL('../../libs/timeline-core/src/index.ts', import.meta.url),
       ),
+      '@video-maker/motion-graphics': fileURLToPath(
+        new URL('../../libs/motion-graphics/src/index.ts', import.meta.url),
+      ),
       '@video-maker/producer-tools': fileURLToPath(
         new URL('../../libs/producer-tools/src/index.ts', import.meta.url),
       ),

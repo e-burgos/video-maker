@@ -23,6 +23,10 @@ const ProjectPreviewPage = lazy(async () => ({
   default: (await import('../pages/project-preview-page')).ProjectPreviewPage,
 }));
 
+const MotionPage = lazy(async () => ({
+  default: (await import('../pages/motion-page')).MotionPage,
+}));
+
 const SettingsPage = lazy(async () => ({
   default: (await import('../pages/settings-page')).SettingsPage,
 }));
@@ -66,6 +70,14 @@ export function App() {
                 element={
                   <Suspense fallback={<RouteFallback messageKey="settings.loading" />}>
                     <SettingsPage />
+                  </Suspense>
+                }
+              />
+              <Route
+                path="/projects/:slug/motion"
+                element={
+                  <Suspense fallback={<RouteFallback messageKey="app.loading.workspace" />}>
+                    <MotionPage />
                   </Suspense>
                 }
               />

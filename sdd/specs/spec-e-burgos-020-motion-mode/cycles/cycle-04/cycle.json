@@ -1,0 +1,189 @@
+{
+  "$schema": "../../../../schemas/cycle.schema.json",
+  "cycle": 4,
+  "module": "motion-mode",
+  "spec": "spec-e-burgos-020-motion-mode",
+  "apps": [
+    "libs/motion-graphics",
+    "tools/motion-studio",
+    "libs/local-store",
+    "apps/render-api",
+    "apps/web",
+    "libs/producer-tools",
+    "apps/desktop"
+  ],
+  "phase": "studio-motion",
+  "flow": "full",
+  "objectives": [
+    "Elegir motion graphics o material crudo al crear un proyecto (mode en local-store y render-api)",
+    "Job motion en render-api con fases storyboard/video y página Motion en apps/web",
+    "Productor con receta motion y app de escritorio con HyperFrames empaquetado; verificación 9:16"
+  ],
+  "status": "completed",
+  "started_at": "2026-10-07",
+  "completed_at": "2026-10-07",
+  "documents": {
+    "brief": "sdd/specs/spec-e-burgos-020-motion-mode/cycles/cycle-04/brief.yaml",
+    "functional": "sdd/specs/spec-e-burgos-020-motion-mode/cycles/cycle-04/functional.md",
+    "planner": "sdd/specs/spec-e-burgos-020-motion-mode/cycles/cycle-04/planner.md",
+    "architect": "sdd/specs/spec-e-burgos-020-motion-mode/cycles/cycle-04/architect.md",
+    "tasks": "sdd/specs/spec-e-burgos-020-motion-mode/cycles/cycle-04/tasks.json"
+  },
+  "artifacts": [],
+  "metrics": {
+    "tasks_total": 10,
+    "tasks_completed": 10,
+    "tasks_skipped": 0,
+    "story_points": 28,
+    "files_created": [
+      "libs/motion-graphics/src/pipeline/ports.ts",
+      "libs/motion-graphics/src/pipeline/hyperframes-invocation.ts",
+      "libs/local-store/src/schema/project-mode.ts",
+      "apps/render-api/src/http/handlers/motion-handler.ts",
+      "apps/render-api/src/jobs/run-motion-pipeline.ts",
+      "apps/render-api/src/jobs/motion-job-params.ts",
+      "apps/render-api/src/jobs/motion-job-progress.ts",
+      "apps/render-api/src/deps/motion-pipeline-adapters.ts",
+      "apps/render-api/src/deps/hyperframes-cli.ts",
+      "apps/render-api/src/errors/translate-motion-error.ts",
+      "apps/web/src/pages/motion-page.tsx",
+      "apps/web/src/components/motion-brief-form.tsx",
+      "apps/web/src/components/motion-job-status.tsx",
+      "apps/web/src/components/motion-scene-list.tsx",
+      "apps/web/src/api/motion-types.ts",
+      "tools/motion-studio/src/deps/hyperframes-cli.ts",
+      "libs/motion-graphics/assets/briefs/displayads/plataforma-reel.json"
+    ],
+    "files_modified": [
+      "package.json",
+      "pnpm-lock.yaml",
+      "libs/local-store/src/database/migrations.ts",
+      "apps/render-api/src/http/handlers/projects-handler.ts",
+      "apps/render-api/src/jobs/render-job-queue.ts",
+      "apps/render-api/src/config/child-process-env.ts",
+      "apps/web/src/components/create-project-form.tsx",
+      "libs/producer-tools/src/contract/tool-schemas.ts",
+      "libs/producer-tools/src/prompt/build-producer-prompt.ts",
+      "apps/desktop/scripts/build-desktop.mjs",
+      "apps/desktop/electron-builder.yml",
+      "apps/desktop/src/main/render-api-env.ts",
+      "tools/motion-studio/src/cli.ts",
+      "libs/motion-graphics/assets/runtime/scenes.css"
+    ],
+    "files_deleted": [],
+    "usage": {
+      "tokens_in": 1352074,
+      "tokens_out": 192835,
+      "approx": true,
+      "source": "declared-estimate",
+      "by_agent": [
+        {
+          "agent": "implementor-back",
+          "label": "TASK-001..004 y 007: pipeline en la lib, mode, rutas y job motion, productor",
+          "provider_model": "claude/sonnet",
+          "effort": "medium",
+          "tokens_in": 621458,
+          "tokens_out": 109668,
+          "tokens_total": 731126,
+          "approx": false,
+          "source": "agent-usage-notification",
+          "recorded_at": "2026-10-07"
+        },
+        {
+          "agent": "implementor-front",
+          "label": "TASK-005..006: modo al crear y página Motion",
+          "provider_model": "claude/sonnet",
+          "effort": "medium",
+          "tokens_in": 138877,
+          "tokens_out": 24507,
+          "tokens_total": 163384,
+          "approx": false,
+          "source": "agent-usage-notification",
+          "recorded_at": "2026-10-07"
+        },
+        {
+          "agent": "custom",
+          "label": "explorador de puntos de contacto (diseño del ciclo)",
+          "provider_model": "claude/haiku",
+          "effort": "low",
+          "tokens_in": 71739,
+          "tokens_out": 12660,
+          "tokens_total": 84399,
+          "approx": false,
+          "source": "agent-usage-notification",
+          "recorded_at": "2026-10-07"
+        },
+        {
+          "agent": "orchestrator",
+          "label": "documentos, verificación, prueba de punta a punta en la web, auth por suscripción, 9:16, desktop y cierre",
+          "provider_model": "claude/opus",
+          "effort": "high",
+          "tokens_in": 520000,
+          "tokens_out": 46000,
+          "tokens_total": 566000,
+          "approx": true,
+          "source": "declared-estimate",
+          "recorded_at": "2026-10-07"
+        }
+      ],
+      "by_tier": {
+        "claude/sonnet": {
+          "tokens_in": 760335,
+          "tokens_out": 134175,
+          "approx": false,
+          "source": "agent-usage-notification"
+        },
+        "claude/haiku": {
+          "tokens_in": 71739,
+          "tokens_out": 12660,
+          "approx": false,
+          "source": "agent-usage-notification"
+        },
+        "claude/opus": {
+          "tokens_in": 520000,
+          "tokens_out": 46000,
+          "approx": true,
+          "source": "declared-estimate"
+        }
+      }
+    }
+  },
+  "tables_created": [],
+  "endpoints_implemented": [],
+  "components_created": [],
+  "issues_found": [
+    "El .env de desarrollo traía una ANTHROPIC_API_KEY inválida que render-api pasaba al CLI de Claude: 401 tras ~3 min de reintentos. Los hijos ya no reciben ANTHROPIC_API_KEY (el estudio usa la suscripción).",
+    "El error real del agente (subtype/result) se perdía al envolverse en MotionStudioError: ahora viaja como cause y llega al job.",
+    "media/motion/ (proyectos de trabajo de la CLI) se importaba como proyecto del estudio: se movió a .motion-work/ y el proyecto colado quedó archivado.",
+    "La web no aceptaba el reporte de la fase storyboard (path/durationSec null) y quedaba en 'Storyboard…' para siempre.",
+    "9:16: etiquetas de remote-update tapadas por el chip y escenas cortas pegadas arriba; se corrigió el CSS vertical.",
+    "El progreso del job motion quedaba en 80 % al terminar."
+  ],
+  "reviewer_report": {
+    "approved": true,
+    "date": "2026-10-07",
+    "ca_results": {
+      "CA-01": "OK — POST /projects con mode, default footage; migración 4 deja footage a los existentes (tests).",
+      "CA-02": "OK — la tarjeta lleva la insignia y abre /projects/:slug/motion (verificado en el navegador).",
+      "CA-03": "OK — brief guardado desde la página Motion y validado por campo (BRIEF_INVALID / BRAND_NOT_FOUND).",
+      "CA-04": "OK — 'Armar storyboard' desde la web: 7 escenas, $0,44, con la suscripción.",
+      "CA-05": "OK — 'Hacer video': progreso 'Voz 1/7' en la UI, MP4 1080x1920 de 46,97 s con readyState 4 en el reproductor.",
+      "CA-06": "OK — phase all/video según exista storyboard (tests de la página y del job).",
+      "CA-07": "OK — receta motion y tools nuevas en el productor; el prompt de un proyecto motion la incluye (test).",
+      "CA-08": "OK — app empaquetada: hyperframes beats, snapshot y render corren con el Electron de la app (ELECTRON_RUN_AS_NODE), su ffmpeg y su chrome-headless-shell, sin npx ni Node del sistema.",
+      "CA-09": "OK — reel 9:16 revisado cuadro por cuadro; defectos de layout corregidos y re-renderizado."
+    },
+    "tests": {
+      "sdd:validate": "OK",
+      "lint": "verde en los 7 proyectos tocados",
+      "test": "render-api 1631, web 1290, producer-tools 309, motion-graphics 142, desktop 111, local-store 62, motion-studio 16",
+      "build": "verde; dmg 0.2.0 arm64 armado",
+      "e2e": "proyecto motion-ia-reel de punta a punta desde la web; hyperframes empaquetado"
+    },
+    "notes": "La versión del dmg sigue en 0.2.0: publicar una versión nueva es un paso aparte (memoria desktop-app-distribution).",
+    "follow_ups": [
+      "Copy propio para el uploader de imágenes en la página Motion.",
+      "Tool de escritura del storyboard para el productor si hace falta editar escenas."
+    ]
+  }
+}

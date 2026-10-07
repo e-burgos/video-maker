@@ -1,11 +1,25 @@
-import { useState } from 'react';
+import { useId, useState } from 'react';
 
 import { slugifyFileName, uniqueProjectSlug } from '../api/project-slug';
 import { useRenderApi } from '../api/render-api-context';
+import type { ProjectMode } from '../api/render-api-types';
 import { RenderApiError, serviceUnreachable } from '../api/render-api-error';
 import { useT } from '../i18n/language-context';
 import { Button } from './ui/button';
 import { ErrorNotice } from './error-notice';
+
+const MODE_OPTIONS = [
+  {
+    value: 'motion',
+    titleKey: 'createProject.mode.motion',
+    hintKey: 'createProject.mode.motionHint',
+  },
+  {
+    value: 'footage',
+    titleKey: 'createProject.mode.footage',
+    hintKey: 'createProject.mode.footageHint',
+  },
+] as const;
 
 export type CreateProjectFormProps = {
   existingSlugs: readonly string[];
@@ -19,7 +33,9 @@ export function CreateProjectForm({ existingSlugs, onCreated, onCancel }: Create
   const [localProblem, setLocalProblem] = useState(false);
   const [serviceError, setServiceError] = useState<RenderApiError | null>(null);
   const [submitting, setSubmitting] = useState(false);
+  const [mode, setMode] = useState<ProjectMode>('footage');
   const t = useT();
+  const modeLabelId = useId();
 
   async function submit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -35,7 +51,7 @@ export function CreateProjectForm({ existingSlugs, onCreated, onCancel }: Create
     const slug = uniqueProjectSlug(slugifyFileName(trimmed), existingSlugs);
     setSubmitting(true);
     try {
-      const detail = await client.createProject(slug);
+      const detail = await client.createProject({ slug, mode });
       setName('');
       onCreated(detail.slug);
     } catch (cause) {
@@ -66,6 +82,32 @@ export function CreateProjectForm({ existingSlugs, onCreated, onCancel }: Create
             {t('createProject.cancel')}
           </Button>
         )}
+      </div>
+      <div className="space-y-2">
+        <p id={modeLabelId} className="text-sm text-ink-faint">
+          {t('createProject.mode.label')}
+        </p>
+        <div role="radiogroup" aria-labelledby={modeLabelId} className="grid gap-2 sm:grid-cols-2">
+          {MODE_OPTIONS.map((option) => (
+            <label
+              key={option.value}
+              className="flex cursor-pointer items-start gap-2 rounded-panel border border-border-subtle bg-surface p-3 text-sm has-[:checked]:border-accent"
+            >
+              <input
+                type="radio"
+                name="project-mode"
+                value={option.value}
+                checked={mode === option.value}
+                onChange={() => setMode(option.value)}
+                className="mt-1"
+              />
+              <span>
+                <span className="block font-medium text-ink">{t(option.titleKey)}</span>
+                <span className="block text-xs text-ink-faint">{t(option.hintKey)}</span>
+              </span>
+            </label>
+          ))}
+        </div>
       </div>
       {localProblem && (
         <p role="alert" className="text-sm text-warning">

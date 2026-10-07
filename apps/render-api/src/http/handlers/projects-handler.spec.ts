@@ -20,6 +20,7 @@ const STORE: StoreConfig = {
   dbPath: '/media/.studio/studio.db',
   maxUploadBytes: 2_147_483_648,
   objectStore: 'fs',
+  motionAssetsRoot: '/repo/libs/motion-graphics/assets',
 };
 
 async function* textBody(text: string): AsyncGenerator<Uint8Array> {
@@ -39,8 +40,8 @@ async function caughtErrorPayload(promise: Promise<unknown>): Promise<ReturnType
   );
 }
 
-const PROJECT_SUMMARY_KEYS = ['layout', 'slug'];
-const PROJECT_DETAIL_KEYS = ['assetCounts', 'assetSource', 'layout', 'slug'];
+const PROJECT_SUMMARY_KEYS = ['layout', 'mode', 'slug'];
+const PROJECT_DETAIL_KEYS = ['assetCounts', 'assetSource', 'layout', 'mode', 'slug'];
 const PLACEMENT_BODY_KEYS = ['placement', 'slug'];
 const PLACEMENT_KEYS = ['archived', 'categoryId', 'folderId'];
 const DELETE_BODY_KEYS = ['deleted', 'slug'];
@@ -83,10 +84,12 @@ describe('handleListProjects', () => {
     expect(response.body).toEqual([
       {
         slug: 'acme-launch',
+        mode: 'footage',
         layout: { raw: true, catalog: true, timeline: false, edl: false, out: true },
       },
       {
         slug: 'zeta-project',
+        mode: 'footage',
         layout: { raw: false, catalog: false, timeline: false, edl: false, out: false },
       },
     ]);
@@ -110,6 +113,7 @@ describe('handleListProjects', () => {
     expect(response.body).toEqual([
       {
         slug: 'valid-project',
+        mode: 'footage',
         layout: { raw: false, catalog: false, timeline: false, edl: false, out: false },
       },
     ]);
@@ -145,6 +149,7 @@ describe('handleCreateProject', () => {
     expect(Object.keys(response.body as object).sort()).toEqual(PROJECT_DETAIL_KEYS);
     expect(response.body).toEqual({
       slug: 'smoke-ingest',
+      mode: 'footage',
       layout: { raw: false, catalog: false, timeline: false, edl: false, out: false },
       assetSource: 'raw-scan',
       assetCounts: { aroll: 0, broll: 0, image: 0, audio: 0, voice: 0, logo: 0 },
@@ -470,5 +475,51 @@ describe('handleDeleteProject', () => {
 
     expect(payload.code).toBe('PROJECT_SLUG_INVALID');
     expect(callLog.ports()).not.toContain('removeDirectory');
+  });
+});
+
+describe('project mode', () => {
+  async function createWith(body: unknown) {
+    const callLog = createCallLog();
+    const storage = createFakeObjectStorage(callLog);
+    const deps = createFakeRenderApiDependencies(callLog, { storage });
+    const request = requestLine({ method: 'POST', path: '/projects', body: jsonBody(body) });
+    return { deps, storage, run: () => handleCreateProject(deps, STORE, undefined, request) };
+  }
+
+  it('defaults to footage and creates no motion directory', async () => {
+    const { deps, storage, run } = await createWith({ slug: 'plain' });
+
+    const response = await run();
+
+    expect((response.body as { mode: string }).mode).toBe('footage');
+    expect(deps.localStore.projects.get('plain')?.mode).toBe('footage');
+    expect(await storage.stat('/media/plain/motion')).toBeNull();
+  });
+
+  it('creates a motion project with its motion directory and reports the mode on GET and list', async () => {
+    const { deps, storage, run } = await createWith({ slug: 'promo', mode: 'motion' });
+
+    const created = await run();
+
+    expect((created.body as { mode: string }).mode).toBe('motion');
+    expect(deps.localStore.projects.get('promo')?.mode).toBe('motion');
+    expect((await storage.stat('/media/promo/motion'))?.kind).toBe('directory');
+
+    const detail = await handleGetProject(deps, STORE, { slug: 'promo' });
+    const list = await handleListProjects(deps, STORE);
+    expect(Object.keys(detail.body as object).sort()).toEqual(PROJECT_DETAIL_KEYS);
+    expect(detail.body).toMatchObject({ mode: 'motion' });
+    expect((list.body as { mode: string }[]).map((entry) => entry.mode)).toEqual(['motion']);
+  });
+
+  it('rejects an unknown mode with 400 and creates nothing', async () => {
+    const { deps, run } = await createWith({ slug: 'promo', mode: 'hologram' });
+
+    const payload = await caughtErrorPayload(run());
+
+    expect(payload.code).toBe('REQUEST_BODY_INVALID_JSON');
+    expect(payload.resource).toBe('mode');
+    expect(deps.localStore.projects.exists('promo')).toBe(false);
   });
 });

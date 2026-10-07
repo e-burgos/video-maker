@@ -1,0 +1,102 @@
+{
+  "$schema": "../../../../schemas/cycle.schema.json",
+  "cycle": 1,
+  "module": "motion-mode",
+  "spec": "spec-e-burgos-020-motion-mode",
+  "apps": [
+    "apps/motion-editor"
+  ],
+  "phase": "motion-editor-migration",
+  "flow": "lite",
+  "objectives": [
+    "Mudar apps/video-manager de display-ads a apps/motion-editor sin perder editor, motor, videos, tests ni guías",
+    "Dejar typecheck, test, lint y build verdes en el workspace del Video Maker"
+  ],
+  "status": "completed",
+  "started_at": "2026-10-07",
+  "completed_at": "2026-10-07",
+  "documents": {
+    "plan": "sdd/specs/spec-e-burgos-020-motion-mode/cycles/cycle-01/plan.md",
+    "tasks": "sdd/specs/spec-e-burgos-020-motion-mode/cycles/cycle-01/tasks.json"
+  },
+  "artifacts": [],
+  "metrics": {
+    "tasks_total": 4,
+    "tasks_completed": 4,
+    "tasks_skipped": 0,
+    "story_points": 5,
+    "files_created": [
+      "apps/motion-editor/project.json",
+      "apps/motion-editor/eslint.config.mjs",
+      "apps/motion-editor/README.md",
+      "apps/motion-editor/SKILLS/VIDEO-CREATOR.md",
+      "apps/motion-editor/src/videos/registry.ts",
+      "sdd/context/apps/motion-editor/constitution.md",
+      "sdd/context/apps/motion-editor/context_prompt.md",
+      "sdd/context/apps/motion-editor/updates/2026-10-07-spec-e-burgos-020-motion-mode-cycle-01.md"
+    ],
+    "files_modified": [
+      "package.json",
+      "pnpm-lock.yaml",
+      "sdd/context/constitution.md",
+      "sdd/context/context_prompt.md"
+    ],
+    "files_deleted": [],
+    "usage": {
+      "tokens_in": 220000,
+      "tokens_out": 23000,
+      "approx": true,
+      "source": "declared-estimate",
+      "by_agent": [
+        {
+          "agent": "orchestrator",
+          "label": "mudanza de video-manager a motion-editor y verificación en navegador",
+          "provider_model": "claude/opus",
+          "effort": "high",
+          "tokens_in": 220000,
+          "tokens_out": 23000,
+          "tokens_total": 243000,
+          "approx": true,
+          "source": "declared-estimate",
+          "recorded_at": "2026-10-07"
+        }
+      ],
+      "by_tier": {
+        "claude/opus": {
+          "tokens_in": 220000,
+          "tokens_out": 23000,
+          "approx": true,
+          "source": "declared-estimate"
+        }
+      }
+    }
+  },
+  "tables_created": [],
+  "endpoints_implemented": [],
+  "components_created": [],
+  "issues_found": [
+    "El workspace no infiere targets con @nx/vite: se declaran a mano como en apps/web.",
+    "mp4-muxer se importa en forma dinámica: no aparecía en el inventario de imports y faltaba en la raíz.",
+    "save-timeline-core.spec.ts 'caso inválido' no probaba nada en display-ads (filas como objeto suelto); corregido.",
+    "El workspace no trae eslint-plugin-react-hooks: se quitó el eslint-disable de esa regla en useActiveVideo.ts."
+  ],
+  "reviewer_report": {
+    "approved": true,
+    "date": "2026-10-07",
+    "ca_results": {
+      "US-020-101": "OK — typecheck, test (62/62), lint (0 avisos) y build verdes; los tres videos con su guion presentes.",
+      "US-020-102": "OK — Chromium contra el dev server: los tres videos cargan sin errores de página ni banner del registro, con la línea de tiempo del editor."
+    },
+    "tests": {
+      "sdd:validate": "OK",
+      "lint": "motion-editor:lint verde",
+      "test": "motion-editor:test 62/62",
+      "build": "motion-editor:build verde",
+      "e2e": "Playwright: ?v=como-funciona|conexion-core-pro|conexion-mostrador"
+    },
+    "notes": "Mudanza fiel; el retiro de display-ads/apps/video-manager queda para cycle-05 (después de que el modo motion cubra sus casos).",
+    "follow_ups": [
+      "cycle-02: catálogo de escenas que incluya las piezas de estos tres videos."
+    ]
+  }
+}

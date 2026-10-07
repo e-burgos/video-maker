@@ -1,0 +1,50 @@
+[
+  {
+    "name": "Apertura",
+    "dur": 8
+  },
+  {
+    "name": "Problema",
+    "dur": 9
+  },
+  {
+    "name": "Panel",
+    "dur": 10
+  },
+  {
+    "name": "Mañana",
+    "dur": 10
+  },
+  {
+    "name": "Timeline",
+    "dur": 12
+  },
+  {
+    "name": "Mediodía",
+    "dur": 9
+  },
+  {
+    "name": "IA",
+    "dur": 13
+  },
+  {
+    "name": "Publicar",
+    "dur": 10
+  },
+  {
+    "name": "Hardware",
+    "dur": 9
+  },
+  {
+    "name": "Medir",
+    "dur": 11
+  },
+  {
+    "name": "Noche",
+    "dur": 8
+  },
+  {
+    "name": "Cierre",
+    "dur": 11
+  }
+]

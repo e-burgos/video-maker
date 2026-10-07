@@ -20,6 +20,7 @@ const RENDER_API_RUNTIME_DEPS = {
   '@remotion/renderer': '4.0.522',
   '@remotion/transitions': '4.0.522',
   remotion: '4.0.522',
+  hyperframes: '0.8.139',
 };
 
 function log(message) {
@@ -64,7 +65,7 @@ function buildRenderApiDeps() {
     return;
   }
 
-  log('staging render-api runtime deps (better-sqlite3, @remotion/*, remotion)');
+  log('staging render-api runtime deps (better-sqlite3, @remotion/*, remotion, hyperframes)');
   rmSync(RENDER_API_DEPS_DIR, { recursive: true, force: true });
   mkdirSync(RENDER_API_DEPS_DIR, { recursive: true });
 

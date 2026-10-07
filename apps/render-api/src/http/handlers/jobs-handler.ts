@@ -18,6 +18,7 @@ import {
   parseMontageVoice,
 } from '../../jobs/montage-job-params';
 import { parseJobModel } from '../../jobs/job-model-params';
+import { parseMotionJobInput } from '../../jobs/motion-job-params';
 import { parsePhotoArollJobInput } from '../../jobs/photo-aroll-job-params';
 import { parseStoryboardInput, parseStoryboardOverwrite } from '../../jobs/storyboard-job-params';
 import { parseVoiceJobInput } from '../../jobs/voice-job-params';
@@ -30,9 +31,15 @@ import { readVoiceManifestIfUsable } from '../../voice/voice-store';
 import { readStoredStoryboard } from '../../storyboard/storyboard-store';
 import { storyboardPath } from '../../storyboard/storyboard-paths';
 import { storyboardExists } from '../../storyboard/storyboard-store';
-import type { CreateJobInput, Job, JobKind, RenderJobSummary } from '../../jobs/render-job';
+import type { CreateJobInput, Job, JobKind, MotionPhase, RenderJobSummary } from '../../jobs/render-job';
 import { toJobSummary } from '../../jobs/render-job';
-import { assertTimelineNotPersisted, assertValidProjectSlug, readStoredTimeline, resolveExistingProject } from '../../store/project-scope';
+import {
+  assertMotionProject,
+  assertTimelineNotPersisted,
+  assertValidProjectSlug,
+  readStoredTimeline,
+  resolveExistingProject,
+} from '../../store/project-scope';
 import { JSON_CONTENT_TYPE } from '../http-message';
 import type { HttpRequestLine, HttpResponse } from '../http-message';
 import { MAX_JSON_BODY_BYTES, readJsonBody } from '../read-json-body';
@@ -73,7 +80,8 @@ function resolveJobKind(value: unknown): JobKind | 'invalid' {
     raw === 'montage' ||
     raw === 'storyboard' ||
     raw === 'voice' ||
-    raw === 'photo-aroll'
+    raw === 'photo-aroll' ||
+    raw === 'motion'
   ) {
     return raw;
   }
@@ -204,6 +212,56 @@ async function createPhotoArollJobResponse(
   return jobAcceptedResponse(job);
 }
 
+interface MotionParams {
+  readonly phase: MotionPhase;
+  readonly output: string;
+  readonly takes: number;
+}
+
+async function assertMotionJobPreconditions(
+  deps: RenderApiDependencies,
+  project: MediaProject,
+  slug: string,
+  params: MotionParams,
+  overwrite: boolean,
+): Promise<void> {
+  assertMotionProject(deps, slug);
+
+  const exists = async (relativePath: string): Promise<boolean> =>
+    (await deps.storage.stat(toAbsolutePath(project, relativePath))) !== null;
+
+  if (params.phase !== 'video' && !(await exists('motion/brief.json'))) {
+    throw new PipelineStageError({ code: 'BRIEF_MISSING', stage: null, resource: 'motion/brief.json' });
+  }
+  if (params.phase === 'video' && !(await exists('motion/storyboard.json'))) {
+    throw new PipelineStageError({ code: 'STORYBOARD_MISSING', stage: null, resource: 'motion/storyboard.json' });
+  }
+  if (overwrite) {
+    return;
+  }
+  if (params.phase !== 'video' && (await exists('motion/storyboard.json'))) {
+    throw new PipelineStageError({ code: 'STORYBOARD_ALREADY_EXISTS', stage: null, resource: 'motion/storyboard.json' });
+  }
+  if (params.phase !== 'storyboard' && (await exists(`out/${params.output}`))) {
+    throw new PipelineStageError({ code: 'ASSET_EXISTS', stage: null, resource: `out/${params.output}` });
+  }
+}
+
+async function createMotionJobResponse(
+  deps: RenderApiDependencies,
+  project: MediaProject,
+  runtime: RenderApiRuntime,
+  slug: string,
+  params: MotionParams,
+  overwrite: boolean,
+  retryOf: string | null,
+): Promise<HttpResponse> {
+  await assertMotionJobPreconditions(deps, project, slug, params, overwrite);
+
+  const job = registerJob(runtime, { kind: 'motion', slug, projectRoot: project.root, ...params }, retryOf);
+  return jobAcceptedResponse(job);
+}
+
 export async function handleCreateRenderJob(
   deps: RenderApiDependencies,
   store: StoreConfig,
@@ -236,7 +294,7 @@ export async function handleCreateRenderJob(
     throw new PipelineStageError({
       code: 'JOB_KIND_INVALID',
       stage: null,
-      expected: "'render', 'montage', 'storyboard', 'voice' or 'photo-aroll'",
+      expected: "'render', 'montage', 'storyboard', 'voice', 'photo-aroll' or 'motion'",
     });
   }
 
@@ -282,6 +340,19 @@ export async function handleCreateRenderJob(
         scriptPath: input.scriptPath,
         gapMs: input.gapMs,
       },
+      input.overwrite,
+      null,
+    );
+  }
+
+  if (jobKind === 'motion') {
+    const input = parseMotionJobInput(bodyObject);
+    return createMotionJobResponse(
+      deps,
+      project,
+      runtime,
+      slug,
+      { phase: input.phase, output: input.output, takes: input.takes },
       input.overwrite,
       null,
     );
@@ -424,5 +495,7 @@ export async function handleRetryRenderJob(
       return createVoiceJobResponse(deps, project, runtime, job.slug, retryParams, false, jobId);
     case 'photo-aroll':
       return createPhotoArollJobResponse(deps, project, runtime, job.slug, retryParams, jobId);
+    case 'motion':
+      return createMotionJobResponse(deps, project, runtime, job.slug, retryParams, true, jobId);
   }
 }

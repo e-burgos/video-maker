@@ -48,5 +48,9 @@ export function createFakeRenderApiClient(overrides: Partial<RenderApiClient> = 
     searchFreeMedia: (...args) => record('searchFreeMedia', args, overrides.searchFreeMedia),
     importMedia: (...args) => record('importMedia', args, overrides.importMedia),
     previewImages: (...args) => record('previewImages', args, overrides.previewImages),
+    listMotionBrands: (...args) => record('listMotionBrands', args, overrides.listMotionBrands),
+    getMotionBrief: (...args) => record('getMotionBrief', args, overrides.getMotionBrief),
+    putMotionBrief: (...args) => record('putMotionBrief', args, overrides.putMotionBrief),
+    getMotionStoryboard: (...args) => record('getMotionStoryboard', args, overrides.getMotionStoryboard),
   };
 }

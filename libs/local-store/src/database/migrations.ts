@@ -96,6 +96,10 @@ export const MIGRATIONS: readonly Migration[] = [
       `CREATE INDEX assets_slug_status_idx ON assets (slug, status)`,
     ],
   },
+  {
+    version: 4,
+    statements: [`ALTER TABLE projects ADD COLUMN mode TEXT NOT NULL DEFAULT 'footage'`],
+  },
 ];
 
 export function currentUserVersion(sqlite: Database.Database): number {

@@ -4,12 +4,12 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=1920, height=1080" />
     <title>DisplayAds — Presentación de la plataforma</title>
-    <script src="assets/vendor/gsap.min.js"></script>
+    <script src="assets/runtime/gsap.min.js"></script>
     <link rel="stylesheet" href="assets/brand/displayads.css" />
     <style>
-      @font-face { font-family: "Outfit"; src: url("assets/fonts/outfit-latin-wght-normal.woff2") format("woff2"); font-weight: 100 900; }
-      @font-face { font-family: "Geist"; src: url("assets/fonts/geist-latin-wght-normal.woff2") format("woff2"); font-weight: 100 900; }
-      @font-face { font-family: "Geist Mono"; src: url("assets/fonts/geist-mono-latin-wght-normal.woff2") format("woff2"); font-weight: 100 900; }
+      @font-face { font-family: "Outfit"; src: url("assets/brand/fonts/outfit-latin-wght-normal.woff2") format("woff2"); font-weight: 100 900; }
+      @font-face { font-family: "Geist"; src: url("assets/brand/fonts/geist-latin-wght-normal.woff2") format("woff2"); font-weight: 100 900; }
+      @font-face { font-family: "Geist Mono"; src: url("assets/brand/fonts/geist-mono-latin-wght-normal.woff2") format("woff2"); font-weight: 100 900; }
 
       .layer { position: absolute; inset: 0; }
       .scene { position: absolute; inset: 0; }
@@ -163,7 +163,7 @@
       .spec { display: flex; gap: 14px; flex-wrap: wrap; }
       #dev-offline { left: 0; right: 0; top: 0; bottom: 0; }
       #dev-off-tv { left: 560px; top: 210px; width: 800px; height: 470px; padding: 16px; box-sizing: border-box; }
-      #dev-off-tv .tv-face { background: url("assets/img/escena-06.jpg") center/cover; }
+      #dev-off-tv .tv-face { background: url("assets/brand/img/escena-06.jpg") center/cover; }
       #dev-wifi { left: 1200px; top: 160px; width: 120px; height: 120px; border-radius: 50%; display: flex; align-items: center; justify-content: center; background: rgba(9,9,11,0.85); border: 2px solid rgba(245,158,11,0.6); }
       #dev-wifi .da-icon { font-size: 60px; color: var(--da-amber); }
       #dev-off-copy { left: 0; right: 0; top: 760px; text-align: center; }
@@ -249,7 +249,7 @@
       <section id="reveal" class="clip scene" data-start="{{start:reveal}}" data-duration="{{dur:reveal}}" data-track-index="1">
         <div class="scene-in" id="reveal-in">
           <div class="abs" id="reveal-ring"></div>
-          <div class="abs" id="reveal-logo"><img src="assets/img/logo.svg" alt="DisplayAds" id="reveal-logo-img" /></div>
+          <div class="abs" id="reveal-logo"><img src="assets/brand/img/logo.svg" alt="DisplayAds" id="reveal-logo-img" /></div>
           <h2 class="abs da-title" id="reveal-tag">Cada pantalla, bajo control. <span class="da-grad">Con IA.</span></h2>
           <div class="abs" id="reveal-sub">
             <span class="da-chip" id="reveal-c1">Cartelería digital en la nube</span>
@@ -383,7 +383,7 @@
         <div class="scene-in" id="devices-in">
           <div class="dev-part" id="dv-1">
             <div class="abs da-glow" id="dev-core-glow"></div>
-            <img class="abs" id="dev-core" src="assets/img/core-pro.png" alt="Core Pro" />
+            <img class="abs" id="dev-core" src="assets/brand/img/core-pro.png" alt="Core Pro" />
             <div class="abs dev-copy" id="dv-1c">
               <span class="da-label">Equipos propios · listos de fábrica</span>
               <h2 class="da-title" style="margin-top: 22px">Core <span class="da-grad">Pro</span></h2>
@@ -393,7 +393,7 @@
           </div>
           <div class="dev-part" id="dv-2">
             <div class="abs da-glow" id="dev-counter-glow"></div>
-            <div class="abs" id="dev-counter"><img src="assets/img/counter-15.png" alt="Counter 15" style="height: 100%; display: block" /><div id="c15-screen"><div class="c15-ad"><span class="k">MENÚ DEL DÍA</span><span class="p">$ 8.900</span><span class="s">Milanesa con puré</span></div></div></div>
+            <div class="abs" id="dev-counter"><img src="assets/brand/img/counter-15.png" alt="Counter 15" style="height: 100%; display: block" /><div id="c15-screen"><div class="c15-ad"><span class="k">MENÚ DEL DÍA</span><span class="p">$ 8.900</span><span class="s">Milanesa con puré</span></div></div></div>
             <div class="abs dev-copy" id="dv-2c">
               <span class="da-label">Todo en uno · 15,6"</span>
               <h2 class="da-title" style="margin-top: 22px">Counter <span class="da-grad">15</span></h2>
@@ -407,10 +407,10 @@
             <div class="abs" id="dev-off-copy"><h2 class="da-title">Sin internet, <span class="da-grad">sigue reproduciendo</span></h2></div>
           </div>
           <div class="dev-part" id="dv-4">
-            <div class="gal" id="gal-1"><img src="assets/img/escena-04.png" alt="" id="gi-1" /></div>
-            <div class="gal" id="gal-2"><img src="assets/img/escena-08.jpg" alt="" id="gi-2" /></div>
-            <div class="gal" id="gal-3"><img src="assets/img/escena-09.jpg" alt="" id="gi-3" /></div>
-            <div class="gal" id="gal-4"><img src="assets/img/escena-12.jpg" alt="" id="gi-4" /></div>
+            <div class="gal" id="gal-1"><img src="assets/brand/img/escena-04.png" alt="" id="gi-1" /></div>
+            <div class="gal" id="gal-2"><img src="assets/brand/img/escena-08.jpg" alt="" id="gi-2" /></div>
+            <div class="gal" id="gal-3"><img src="assets/brand/img/escena-09.jpg" alt="" id="gi-3" /></div>
+            <div class="gal" id="gal-4"><img src="assets/brand/img/escena-12.jpg" alt="" id="gi-4" /></div>
             <div class="abs da-label" id="gal-cap">Gastronomía · Retail · Bancos · Salud</div>
           </div>
         </div>
@@ -418,14 +418,14 @@
 
       <section id="cta" class="clip scene" data-start="{{start:cta}}" data-duration="{{dur:cta}}" data-track-index="1">
         <div class="scene-in" id="cta-in">
-          <div class="abs" id="cta-logo"><img src="assets/img/logo.svg" alt="DisplayAds" /></div>
+          <div class="abs" id="cta-logo"><img src="assets/brand/img/logo.svg" alt="DisplayAds" /></div>
           <h2 class="abs da-title" id="cta-tag">Cada pantalla, bajo control. <span class="da-grad">Con IA.</span></h2>
           <div class="abs" id="cta-row"><span class="da-btn" id="cta-btn">Pedí tu cotización</span><span id="cta-url">displayads.com.ar</span></div>
         </div>
       </section>
 
       <div class="layer" id="hud">
-        <div id="bug"><img src="assets/img/isotipo.svg" alt="" /><span>DisplayAds</span></div>
+        <div id="bug"><img src="assets/brand/img/isotipo.svg" alt="" /><span>DisplayAds</span></div>
         <div id="chapter" class="da-label"></div>
         <div id="beat-ticks"><i></i><i></i><i></i><i></i></div>
         <div id="credit">Música: {{music_credit}}</div>
@@ -437,13 +437,13 @@
 
       <audio id="music" src="assets/audio/music.wav" data-start="0" data-duration="{{duration}}" data-track-index="10" data-volume="1" data-automation='{{music_automation}}'></audio>
       {{voice_tracks}}
-      <audio id="sfx-riser" src="assets/sfx/riser.mp3" data-start="{{sfx:riser}}" data-duration="3.4" data-media-start="6.6" data-track-index="12" data-volume="0.55"></audio>
-      <audio id="sfx-impact" src="assets/sfx/impact-bass-1.mp3" data-start="{{start:reveal}}" data-duration="2" data-track-index="13" data-volume="0.8"></audio>
+      <audio id="sfx-riser" src="assets/runtime/sfx/riser.mp3" data-start="{{sfx:riser}}" data-duration="3.4" data-media-start="6.6" data-track-index="12" data-volume="0.55"></audio>
+      <audio id="sfx-impact" src="assets/runtime/sfx/impact-bass-1.mp3" data-start="{{start:reveal}}" data-duration="2" data-track-index="13" data-volume="0.8"></audio>
       {{whoosh_tracks}}
-      <audio id="sfx-click" src="assets/sfx/click-soft.mp3" data-start="{{sfx:click}}" data-duration="0.36" data-track-index="14" data-volume="0.7"></audio>
-      <audio id="sfx-notif" src="assets/sfx/notification.mp3" data-start="{{sfx:notif}}" data-duration="1.4" data-track-index="14" data-volume="0.45"></audio>
-      <audio id="sfx-pop" src="assets/sfx/pop.mp3" data-start="{{sfx:pop}}" data-duration="0.7" data-track-index="14" data-volume="0.5"></audio>
-      <audio id="sfx-chime" src="assets/sfx/chime.mp3" data-start="{{sfx:chime}}" data-duration="2.4" data-track-index="14" data-volume="0.4"></audio>
+      <audio id="sfx-click" src="assets/runtime/sfx/click-soft.mp3" data-start="{{sfx:click}}" data-duration="0.36" data-track-index="14" data-volume="0.7"></audio>
+      <audio id="sfx-notif" src="assets/runtime/sfx/notification.mp3" data-start="{{sfx:notif}}" data-duration="1.4" data-track-index="14" data-volume="0.45"></audio>
+      <audio id="sfx-pop" src="assets/runtime/sfx/pop.mp3" data-start="{{sfx:pop}}" data-duration="0.7" data-track-index="14" data-volume="0.5"></audio>
+      <audio id="sfx-chime" src="assets/runtime/sfx/chime.mp3" data-start="{{sfx:chime}}" data-duration="2.4" data-track-index="14" data-volume="0.4"></audio>
     </div>
 
     <script>

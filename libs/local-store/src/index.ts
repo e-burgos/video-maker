@@ -4,6 +4,9 @@ export type { StudioDatabase } from './database/open-studio-database';
 export { applyMigrations, currentUserVersion, MIGRATIONS } from './database/migrations';
 export type { Migration } from './database/migrations';
 
+export { PROJECT_MODES } from './schema/project-mode';
+export type { ProjectMode } from './schema/project-mode';
+
 export * as studioSchema from './schema/studio-schema';
 
 export { createProjectsRepository } from './repositories/projects-repository';

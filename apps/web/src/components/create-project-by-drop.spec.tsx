@@ -65,7 +65,7 @@ describe('CreateProjectByDrop', () => {
       dataTransfer: { types: ['Files'], files: [file('My Video Ad.mp4')] },
     });
 
-    await waitFor(() => expect(client.createProject).toHaveBeenCalledWith('my-video-ad'));
+    await waitFor(() => expect(client.createProject).toHaveBeenCalledWith({ slug: 'my-video-ad', mode: 'footage' }));
     expect(client.uploadToInbox).toHaveBeenCalledWith(
       expect.objectContaining({ slug: 'my-video-ad', filename: 'My Video Ad.mp4' }),
     );
@@ -78,7 +78,7 @@ describe('CreateProjectByDrop', () => {
       dataTransfer: { types: ['Files'], files: [file('My Video Ad.mp4')] },
     });
 
-    await waitFor(() => expect(client.createProject).toHaveBeenCalledWith('my-video-ad-2'));
+    await waitFor(() => expect(client.createProject).toHaveBeenCalledWith({ slug: 'my-video-ad-2', mode: 'footage' }));
   });
 
   it('ignores a dropped file type the studio does not support', () => {

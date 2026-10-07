@@ -108,12 +108,12 @@ describe('createRenderApiClient', () => {
     };
     const { fetchImpl, calls } = recordingFetch(() => jsonResponse(detail, 201));
 
-    const result = await createRenderApiClient(fetchImpl).createProject('demo');
+    const result = await createRenderApiClient(fetchImpl).createProject({ slug: 'demo', mode: 'motion' });
 
     expect(calls[0]?.url).toBe('/api/projects');
     expect(calls[0]?.init?.method).toBe('POST');
     expect(calls[0]?.init?.headers).toEqual({ 'content-type': 'application/json' });
-    expect(calls[0]?.init?.body).toBe('{"slug":"demo"}');
+    expect(calls[0]?.init?.body).toBe('{"slug":"demo","mode":"motion"}');
     expect(result.assetCounts.aroll).toBe(0);
   });
 
@@ -406,7 +406,7 @@ describe('createRenderApiClient', () => {
     await expect(client.listAssets('demo')).rejects.toMatchObject({
       code: 'RESPONSE_SHAPE_UNEXPECTED',
     });
-    await expect(client.createProject('demo')).rejects.toMatchObject({
+    await expect(client.createProject({ slug: 'demo' })).rejects.toMatchObject({
       code: 'RESPONSE_SHAPE_UNEXPECTED',
     });
     await expect(

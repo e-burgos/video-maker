@@ -38,6 +38,11 @@ function categoryRemapKey(folderId: string | null, categoryId: string): string {
   return `${folderId ?? ''}::${categoryId}`;
 }
 
+async function hasMotionBrief(deps: RenderApiDependencies, store: StoreConfig, slug: string): Promise<boolean> {
+  const stat = await deps.storage.stat(join(store.mediaRoot, slug, 'motion', 'brief.json'));
+  return stat !== null && stat.kind === 'file';
+}
+
 async function importProjectDirectories(deps: RenderApiDependencies, store: StoreConfig): Promise<number> {
   const entries = await deps.storage.listDirectory(store.mediaRoot);
   const slugs = (entries ?? [])
@@ -47,7 +52,8 @@ async function importProjectDirectories(deps: RenderApiDependencies, store: Stor
   let imported = 0;
   for (const slug of slugs) {
     if (!deps.localStore.projects.exists(slug)) {
-      deps.localStore.projects.insert(slug, deps.clock.nowIso());
+      const mode = (await hasMotionBrief(deps, store, slug)) ? 'motion' : 'footage';
+      deps.localStore.projects.insert(slug, deps.clock.nowIso(), mode);
       imported += 1;
     }
   }

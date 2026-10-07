@@ -1,0 +1,14 @@
+{
+  "version": 1,
+  "brand": "displayads",
+  "title": "Tu cartel, en segundos",
+  "format": "9:16",
+  "beatSync": true,
+  "music": "auto",
+  "goal": "Reel vertical para redes: mostrar que el asistente de IA de Display Ads arma el cartel de una promo en segundos y lo publica en todas las pantallas, para que el dueño del local pida una demo.",
+  "audience": "Dueños de cafeterías, restaurantes y comercios que ven el reel en el celular.",
+  "script": "¿Una promo nueva para hoy? Le contás al asistente lo que querés, por ejemplo un dos por uno en medialunas, y arma el cartel en segundos, en el tamaño justo de cada pantalla. Lo publicás desde el celular y todas tus sucursales se actualizan al instante. Esto es Display Ads: cartelería digital con inteligencia artificial. Pedí tu demo.",
+  "images": [
+    { "file": "restaurante-menu.jpg", "caption": "Clienta que toca una pantalla de mostrador con el menú del día en un restaurante de comida rápida." }
+  ]
+}

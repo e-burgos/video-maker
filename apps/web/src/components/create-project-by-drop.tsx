@@ -51,7 +51,7 @@ export function CreateProjectByDrop({ existingSlugs, children }: CreateProjectBy
     setCreating(true);
     try {
       const slug = uniqueProjectSlug(slugifyFileName(file.name), existingSlugs);
-      await client.createProject(slug);
+      await client.createProject({ slug, mode: 'footage' });
       await client.uploadToInbox({
         slug,
         filename: file.name,

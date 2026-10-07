@@ -8,7 +8,7 @@ import { requestLine } from '../../__fixtures__/http-request';
 import type { StoreConfig } from '../../config/store-config';
 import { handlePreviewImages } from './image-preview-handler';
 
-const STORE: StoreConfig = { mediaRoot: '/media', dbPath: '/media/.studio/studio.db', maxUploadBytes: 2_147_483_648, objectStore: 'fs' };
+const STORE: StoreConfig = { mediaRoot: '/media', dbPath: '/media/.studio/studio.db', maxUploadBytes: 2_147_483_648, objectStore: 'fs', motionAssetsRoot: '/repo/libs/motion-graphics/assets' };
 const PROJECT_ROOT = `${STORE.mediaRoot}/pitch-deck`;
 const PREVIEW_OUTPUT_KEYS = Object.keys(STUDIO_TOOLS.view_images.output.shape).sort();
 

@@ -128,6 +128,7 @@ export function createStudioToolHandlers(
       return withOutput('get_project_overview', {
         slug: detail.slug,
         title: detail.slug,
+        mode: detail.mode ?? 'footage',
         assets: assets.map((asset) => ({
           path: asset.path,
           role: asset.role,
@@ -333,6 +334,30 @@ export function createStudioToolHandlers(
         }),
       );
       return { data: parseOutput(STUDIO_TOOLS.view_images.output, { previews }), images };
+    },
+
+    get_motion_brands: async (rawInput) => {
+      parseInput(STUDIO_TOOLS.get_motion_brands.input, rawInput);
+      const brands = await client.listMotionBrands();
+      return withOutput('get_motion_brands', { brands });
+    },
+
+    read_motion_brief: async (rawInput) => {
+      parseInput(STUDIO_TOOLS.read_motion_brief.input, rawInput);
+      const brief = await client.getMotionBrief();
+      return withOutput('read_motion_brief', { brief });
+    },
+
+    write_motion_brief: async (rawInput) => {
+      const input = parseInput<{ brief: Record<string, unknown> }>(STUDIO_TOOLS.write_motion_brief.input, rawInput);
+      await client.putMotionBrief(input.brief);
+      return withOutput('write_motion_brief', { saved: true });
+    },
+
+    read_motion_storyboard: async (rawInput) => {
+      parseInput(STUDIO_TOOLS.read_motion_storyboard.input, rawInput);
+      const storyboard = await client.getMotionStoryboard();
+      return withOutput('read_motion_storyboard', { storyboard });
     },
   };
 

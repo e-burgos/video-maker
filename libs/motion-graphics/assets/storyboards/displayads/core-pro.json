@@ -1,0 +1,283 @@
+{
+  "version": 1,
+  "title": "Core Pro — instalación",
+  "brand": "displayads",
+  "format": "16:9",
+  "beatSync": true,
+  "music": {
+    "track": "newer-wave"
+  },
+  "scenes": [
+    {
+      "id": "intro",
+      "kind": "product",
+      "chapter": "Core Pro",
+      "vo": "El Core Pro convierte cualquier televisor en una pantalla de Display Ads. Así se instala en tu local.",
+      "props": {
+        "kicker": "Instructivo",
+        "name": "Core Pro",
+        "text": "Cualquier televisor, una pantalla inteligente.",
+        "visual": {
+          "kind": "device",
+          "device": "core-pro"
+        }
+      }
+    },
+    {
+      "id": "hdmi",
+      "kind": "connections",
+      "chapter": "Conexión",
+      "vo": "Conectá el cable micro hdmi en el puerto que está junto a la alimentación, y el otro extremo al televisor.",
+      "props": {
+        "title": "Micro HDMI",
+        "accent": "al televisor.",
+        "device": "core-pro",
+        "links": [
+          {
+            "to": "tv",
+            "label": "Micro HDMI → HDMI",
+            "cue": "televisor"
+          }
+        ]
+      }
+    },
+    {
+      "id": "lan",
+      "kind": "connections",
+      "vo": "Si tenés un punto de red cerca, conectá también el cable de red. Es la conexión más estable.",
+      "props": {
+        "title": "Cable de red,",
+        "accent": "lo más estable.",
+        "device": "core-pro",
+        "links": [
+          {
+            "to": "tv",
+            "label": "HDMI"
+          },
+          {
+            "to": "router",
+            "label": "Cable de red",
+            "cue": "cable"
+          }
+        ]
+      }
+    },
+    {
+      "id": "power",
+      "kind": "connections",
+      "vo": "Por último, enchufá la fuente. Con cable de red, en pocos segundos empieza a reproducir tu campaña.",
+      "props": {
+        "title": "Enchufá la fuente",
+        "accent": "y listo.",
+        "device": "core-pro",
+        "links": [
+          {
+            "to": "tv",
+            "label": "HDMI"
+          },
+          {
+            "to": "router",
+            "label": "Cable de red"
+          },
+          {
+            "to": "power",
+            "label": "Fuente",
+            "cue": "fuente"
+          }
+        ],
+        "tv": [
+          {
+            "screen": {
+              "type": "off",
+              "text": "SIN SEÑAL"
+            }
+          },
+          {
+            "screen": {
+              "type": "boot"
+            },
+            "cue": "fuente"
+          },
+          {
+            "screen": {
+              "type": "promo",
+              "kicker": "Hoy",
+              "big": "2x1",
+              "small": "en cafés",
+              "tone": "sky"
+            },
+            "cue": "reproducir"
+          }
+        ]
+      }
+    },
+    {
+      "id": "hotspot",
+      "kind": "feature",
+      "chapter": "Wi-Fi",
+      "minBars": 4,
+      "vo": "¿No tenés cable? Configurá el wifi desde tu celular. Cuando no tiene internet, el equipo crea su propia red, llamada Display Ads Setup. La contraseña es única de cada equipo.",
+      "props": {
+        "kicker": "¿No tenés cable?",
+        "title": "Configurá el Wi-Fi",
+        "accent": "desde el celular.",
+        "bullets": [
+          {
+            "text": "Red: DisplayAds-Setup",
+            "icon": "wifi",
+            "cue": "propia"
+          },
+          {
+            "text": "Contraseña única por equipo",
+            "icon": "lock",
+            "cue": "contraseña"
+          }
+        ],
+        "visual": {
+          "kind": "tv",
+          "states": [
+            {
+              "screen": {
+                "type": "status",
+                "title": "DisplayAds-Setup",
+                "status": "Conectate a esta red",
+                "ok": false
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "browser",
+      "kind": "step",
+      "minBars": 4,
+      "vo": "Conectate a esa red, apagá los datos móviles, y abrí en el navegador la dirección que te mostramos acá.",
+      "props": {
+        "n": 1,
+        "label": "Desde el celular",
+        "title": "Abrí el",
+        "accent": "navegador.",
+        "chips": [
+          {
+            "text": "Apagá los datos móviles",
+            "tone": "warn",
+            "cue": "datos"
+          }
+        ],
+        "visual": {
+          "kind": "phone",
+          "states": [
+            {
+              "screen": {
+                "type": "url",
+                "toggle": "Datos móviles",
+                "url": "http://10.42.0.1"
+              },
+              "cue": "apagá"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "portal",
+      "kind": "step",
+      "minBars": 4,
+      "vo": "Elegí la red del local, escribí la contraseña, y tocá Conectar dispositivo. En unos segundos, la pantalla empieza a reproducir tu campaña.",
+      "props": {
+        "n": 2,
+        "label": "Portal de configuración",
+        "title": "Elegí la red",
+        "accent": "y conectá.",
+        "visual": {
+          "kind": "phone",
+          "states": [
+            {
+              "screen": {
+                "type": "list",
+                "sub": "Display Ads",
+                "title": "Elegí la red",
+                "items": [
+                  "Local-WiFi",
+                  "Vecino-5G",
+                  "Invitados"
+                ],
+                "select": 0,
+                "field": "Contraseña",
+                "button": "Conectar dispositivo"
+              },
+              "cue": "elegí"
+            },
+            {
+              "screen": {
+                "type": "status",
+                "title": "Core Pro",
+                "status": "Conectado"
+              },
+              "cue": "segundos"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "warn",
+      "kind": "do-dont",
+      "vo": "Ojo con las redes que piden iniciar sesión en una página, como las de hoteles o shoppings. Usá una red privada, o el cable.",
+      "props": {
+        "title": "Ojo con",
+        "accent": "las redes públicas.",
+        "bad": {
+          "title": "No funcionan",
+          "items": [
+            "Hoteles",
+            "Shoppings",
+            "Redes con inicio de sesión"
+          ],
+          "cue": "hoteles"
+        },
+        "good": {
+          "title": "Usá",
+          "items": [
+            "Una red privada",
+            "El cable de red"
+          ],
+          "cue": "privada"
+        }
+      }
+    },
+    {
+      "id": "check",
+      "kind": "dashboard",
+      "chapter": "Verificación",
+      "vo": "Para verificar, fijate en el panel que el equipo figure en línea. Y si necesitás ayuda, escribile al soporte de Display Ads.",
+      "props": {
+        "title": "Verificá",
+        "accent": "en el panel.",
+        "rows": [
+          {
+            "name": "Core Pro",
+            "place": "Salón",
+            "now": "Promo de invierno"
+          }
+        ],
+        "stat": {
+          "label": "En línea",
+          "value": 1,
+          "total": 1,
+          "cue": "línea"
+        }
+      }
+    },
+    {
+      "id": "cta",
+      "kind": "cta",
+      "vo": "Esto es Display Ads: cartelería digital, con cada pantalla bajo control.",
+      "props": {
+        "button": "Soporte Display Ads"
+      },
+      "minBars": 4
+    }
+  ]
+}

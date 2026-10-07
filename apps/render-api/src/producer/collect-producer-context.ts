@@ -26,6 +26,7 @@ export interface ProducerProjectContext {
   readonly pendingAssets: readonly ProducerContextPendingAsset[];
   readonly hasTimeline: boolean;
   readonly producerScript: 'none' | 'plain' | 'timed';
+  readonly mode: 'footage' | 'motion';
 }
 
 export interface ProducerContextInput {
@@ -61,6 +62,7 @@ export async function collectProducerContext(
     })),
     hasTimeline: timelineStat !== null && timelineStat.kind === 'file',
     producerScript,
+    mode: deps.localStore.projects.get(project.slug)?.mode ?? 'footage',
   };
 }
 

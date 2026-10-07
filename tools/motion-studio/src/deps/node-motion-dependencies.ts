@@ -15,11 +15,15 @@ import {
 } from '@video-maker/media-local';
 import type { AssetId } from '@video-maker/timeline-core';
 
-import { MotionStudioError } from '../errors/motion-studio-error';
+import { MotionStudioError } from '@video-maker/motion-graphics';
+
+import { resolveHyperframesCli } from './hyperframes-cli';
+
+import { createClaudeCliAskAgent } from './claude-cli-ask-agent';
 import type { MotionDependencies } from './motion-dependencies';
 
-export const HYPERFRAMES_VERSION = '0.8.139';
 const HYPERFRAMES_TIMEOUT_MS = 3 * 60 * 60 * 1000;
+const ASK_AGENT_TIMEOUT_MS = 10 * 60 * 1000;
 
 const exists = async (path: string): Promise<boolean> =>
   access(path).then(
@@ -27,10 +31,15 @@ const exists = async (path: string): Promise<boolean> =>
     () => false,
   );
 
+export function subscriptionOnlyEnv(env: NodeJS.ProcessEnv): NodeJS.ProcessEnv {
+  return Object.fromEntries(Object.entries(env).filter(([key]) => key !== 'ANTHROPIC_API_KEY'));
+}
+
 export function createNodeMotionDependencies(env: NodeJS.ProcessEnv, workspaceRoot: string): MotionDependencies {
   const runner = new ExecaCommandRunner();
   const hyperframes = async (args: string[], cwd: string): Promise<void> => {
-    const result = await runner.run('npx', ['--yes', `hyperframes@${HYPERFRAMES_VERSION}`, ...args], { cwd, timeoutMs: HYPERFRAMES_TIMEOUT_MS });
+    const invocation = resolveHyperframesCli(env, workspaceRoot);
+    const result = await new ExecaCommandRunner({ env: invocation.env }).run(invocation.command, [...invocation.args, ...args], { cwd, timeoutMs: HYPERFRAMES_TIMEOUT_MS });
     if (result.exitCode !== 0) {
       throw new MotionStudioError('STAGE_FAILED', `hyperframes ${args[0]} failed: ${result.stderr.slice(-800)}`);
     }
@@ -38,6 +47,7 @@ export function createNodeMotionDependencies(env: NodeJS.ProcessEnv, workspaceRo
 
   return {
     templatesRoot: env['MOTION_STUDIO_TEMPLATES'] ?? resolve(workspaceRoot, 'tools', 'motion-studio', 'templates'),
+    assetsRoot: env['MOTION_STUDIO_ASSETS'] ?? resolve(workspaceRoot, 'libs', 'motion-graphics', 'assets'),
     readText: (path) => readFile(path, 'utf8'),
     readBytes: async (path) => new Uint8Array(await readFile(path)),
     writeText: async (path, content) => {
@@ -112,5 +122,11 @@ export function createNodeMotionDependencies(env: NodeJS.ProcessEnv, workspaceRo
       await hyperframes(['lint'], projectDir);
       await hyperframes(['render', '-f', String(fps), '-q', quality, '-o', outPath], projectDir);
     },
+    askAgent: createClaudeCliAskAgent({
+      runner: new ExecaCommandRunner({ env: subscriptionOnlyEnv(env) }),
+      binaryPath: env['CLAUDE_CLI_PATH'] ?? 'claude',
+      model: env['MOTION_STUDIO_MODEL'] ?? 'sonnet',
+      timeoutMs: ASK_AGENT_TIMEOUT_MS,
+    }),
   };
 }

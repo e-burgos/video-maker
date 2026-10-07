@@ -68,7 +68,15 @@ import type {
   VoiceJob,
   VoiceListing,
   VoiceSceneWriteResult,
+  CreateProjectInput,
 } from './render-api-types';
+import type {
+  CreateMotionJobInput,
+  MotionBrand,
+  MotionBrief,
+  MotionJob,
+  MotionStoryboard,
+} from './motion-types';
 
 export type FetchLike = (input: string, init?: RequestInit) => Promise<Response>;
 
@@ -94,7 +102,7 @@ export type CreateVoiceJobInput = {
 export type RenderApiClient = {
   getHealth: () => Promise<ServiceHealth>;
   listProjects: () => Promise<ProjectSummary[]>;
-  createProject: (slug: string) => Promise<ProjectDetail>;
+  createProject: (input: CreateProjectInput) => Promise<ProjectDetail>;
   getProject: (slug: string) => Promise<ProjectDetail>;
   getOrganization: () => Promise<VideoOrganization>;
   createFolder: (name: string) => Promise<VideoFolder>;
@@ -139,6 +147,11 @@ export type RenderApiClient = {
   putOpenRouterKey: (apiKey: string) => Promise<OpenRouterKeyResult>;
   deleteOpenRouterKey: () => Promise<OpenRouterKeyResult>;
   listRenderJobs: (slug: string) => Promise<RenderJobListing>;
+  getMotionBrands: () => Promise<MotionBrand[]>;
+  getMotionBrief: (slug: string) => Promise<MotionBrief>;
+  putMotionBrief: (slug: string, brief: MotionBrief) => Promise<MotionBrief>;
+  getMotionStoryboard: (slug: string) => Promise<MotionStoryboard>;
+  createMotionJob: (slug: string, input: CreateMotionJobInput) => Promise<MotionJob>;
   getRenderJob: (jobId: string) => Promise<Job>;
   cancelRenderJob: (jobId: string) => Promise<RenderJobCancelOutcome>;
   retryJob: (jobId: string) => Promise<Job>;
@@ -262,13 +275,13 @@ export function createRenderApiClient(fetchImpl: FetchLike): RenderApiClient {
       return body as ProjectSummary[];
     },
 
-    async createProject(slug: string): Promise<ProjectDetail> {
+    async createProject(input: CreateProjectInput): Promise<ProjectDetail> {
       const body = await requestJson(
         '/projects',
         {
           method: 'POST',
           headers: { 'content-type': 'application/json' },
-          body: JSON.stringify({ slug }),
+          body: JSON.stringify(input),
         },
         'a project detail',
         (value) => isRecord(value) && typeof value['slug'] === 'string',
@@ -767,6 +780,65 @@ export function createRenderApiClient(fetchImpl: FetchLike): RenderApiClient {
         (value) => isRecord(value) && Array.isArray(value['jobs']),
       );
       return parseRenderJobListing(body);
+    },
+
+    async getMotionBrands(): Promise<MotionBrand[]> {
+      const body = await requestJson('/motion/brands', undefined, 'a brand array', (value) =>
+        Array.isArray(value),
+      );
+      return body as MotionBrand[];
+    },
+
+    async getMotionBrief(slug: string): Promise<MotionBrief> {
+      const body = await requestJson(
+        `/projects/${encodeURIComponent(slug)}/motion/brief`,
+        undefined,
+        'a motion brief',
+        (value) => isRecord(value) && typeof value['script'] === 'string',
+      );
+      return body as MotionBrief;
+    },
+
+    async putMotionBrief(slug: string, brief: MotionBrief): Promise<MotionBrief> {
+      const body = await requestJson(
+        `/projects/${encodeURIComponent(slug)}/motion/brief`,
+        {
+          method: 'PUT',
+          headers: { 'content-type': 'application/json' },
+          body: JSON.stringify(brief),
+        },
+        'a motion brief',
+        (value) => isRecord(value),
+      );
+      return body as MotionBrief;
+    },
+
+    async getMotionStoryboard(slug: string): Promise<MotionStoryboard> {
+      const body = await requestJson(
+        `/projects/${encodeURIComponent(slug)}/motion/storyboard`,
+        undefined,
+        'a motion storyboard',
+        (value) => isRecord(value) && Array.isArray(value['scenes']),
+      );
+      return body as MotionStoryboard;
+    },
+
+    async createMotionJob(slug: string, input: CreateMotionJobInput): Promise<MotionJob> {
+      const body = await requestJson(
+        `/projects/${encodeURIComponent(slug)}/jobs`,
+        {
+          method: 'POST',
+          headers: { 'content-type': 'application/json' },
+          body: JSON.stringify({ kind: 'motion', ...input }),
+        },
+        'a motion job document',
+        (value) => isRecord(value),
+      );
+      const job = parseJob(body);
+      if (job.kind !== 'motion') {
+        throw responseShapeUnexpected(200, 'a motion job document');
+      }
+      return job;
     },
 
     async getRenderJob(jobId: string): Promise<Job> {

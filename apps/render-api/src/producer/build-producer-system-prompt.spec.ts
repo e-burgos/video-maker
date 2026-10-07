@@ -16,6 +16,7 @@ const CONTEXT: ProducerProjectContext = {
   pendingAssets: [],
   hasTimeline: true,
   producerScript: 'none',
+  mode: 'footage',
 };
 
 describe('buildProducerSystemPrompt', () => {
@@ -54,6 +55,14 @@ describe('buildProducerSystemPrompt', () => {
     });
     expect(prompt).toContain('- dropped.mp4: proposed as aroll (has-audio)');
     expect(prompt).toContain('NEVER use one of these files as material for a');
+  });
+
+  it('usa la receta motion en un proyecto motion y la de footage en el resto', () => {
+    const motion = buildProducerSystemPrompt({ ...CONTEXT, mode: 'motion' });
+    const footage = buildProducerSystemPrompt(CONTEXT);
+
+    expect(motion).toContain('Motion project recipe');
+    expect(footage).not.toContain('Motion project recipe');
   });
 
   it('declara el guion existente como EL guion cuando el proyecto ya tiene uno', () => {

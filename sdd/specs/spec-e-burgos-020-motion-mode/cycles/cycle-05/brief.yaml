@@ -1,0 +1,27 @@
+# sdd/specs/spec-e-burgos-020-motion-mode/cycles/cycle-05/brief.yaml
+# Generado por: sdd-orchestrator
+# Al: iniciar el ciclo
+
+cycle: 5
+module: motion-mode
+phase: material-contract
+date: 2026-10-07
+flow: full
+app_context: sdd/context/tools/motion-studio/context_prompt.md
+
+objective: |
+  display-ads le pide videos al Video Maker por un único contrato con dos modos: motion graphics (brief:
+  guion + imágenes descriptas + marca) o tutorial grabado (material crudo de platform-video-capture). Una
+  skill de display-ads decide el modo por video desde su índice de tutoriales y arma el paquete correcto;
+  apps/video-manager se retira de display-ads (vive en el Video Maker como apps/motion-editor).
+
+scope:
+  - video-maker-material-contract: §0 elección de modo y §12 modo B (layout, brief.json, imágenes con descripción, guion, checklist, entrega HTTP/CLI, errores).
+  - display-ads (FIX propio): skill video-maker-request, modos y estados en docs/product/videos/index.md, retiro de apps/video-manager.
+
+out_of_scope:
+  - Producir en este ciclo los videos pendientes de display-ads.
+
+invariants:
+  - La skill del contrato sigue autocontenida y copiable a otro repo.
+  - display-ads nunca entrega imágenes con datos o marcas de clientes reales.

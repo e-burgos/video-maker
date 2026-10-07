@@ -1,10 +1,13 @@
 import { index, integer, sqliteTable, text, uniqueIndex } from 'drizzle-orm/sqlite-core';
 
+import type { ProjectMode } from './project-mode';
+
 export const projects = sqliteTable('projects', {
   slug: text('slug').primaryKey(),
   createdAt: text('created_at').notNull(),
   updatedAt: text('updated_at').notNull(),
   importedAt: text('imported_at'),
+  mode: text('mode').$type<ProjectMode>().notNull().default('footage'),
 });
 
 export const folders = sqliteTable('folders', {

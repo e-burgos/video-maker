@@ -1,0 +1,72 @@
+import { describe, expect, it } from 'vitest';
+
+import { catalogStoryboard, testBrand } from '../__fixtures__/catalog-storyboard';
+import { MotionStudioError } from '../errors/motion-studio-error';
+import type { MotionStoryboard } from '../storyboard/motion-storyboard.schema';
+import { brandImageUrl, composeStoryboard, storyboardImages } from './compose-storyboard';
+
+const pick = (...ids: string[]): MotionStoryboard => ({ ...catalogStoryboard, scenes: catalogStoryboard.scenes.filter((s) => ids.includes(s.id)) });
+const base = pick('hook', 'reveal', 'gallery', 'cta');
+
+describe('composeStoryboard', () => {
+  it('writes one timed section per scene with chapter, flash and the brand kit', () => {
+    const { template } = composeStoryboard(base, testBrand);
+    expect(template.match(/<section id="s-/gu)).toHaveLength(4);
+    expect(template).toContain('data-start="{{start:reveal}}" data-duration="{{dur:reveal}}"');
+    expect(template).toContain('data-chapter="Plataforma" data-flash="1"');
+    expect(template).toContain('<title>Catálogo &lt;completo&gt;</title>');
+    expect(template).toContain('url("assets/brand/fonts/mono.woff2") format("woff2"); font-weight: 400;');
+    expect(template).toContain('class="fmt-16x9"');
+    expect(template).toContain('data-scene="cta" data-chapter-end="1"');
+    expect(template).toContain('data-width="1920" data-height="1080"');
+    expect(template).toContain('{{music_track}}');
+    expect(template).toContain('id="sfx-impact"');
+    expect(template).toContain('Música: {{music_credit}}');
+  });
+
+  it('builds the script with the brand voice, default bars and the drop anchor from the track', () => {
+    const { script, musicSource } = composeStoryboard(base, testBrand);
+    expect(script.voice).toBe('es_AR-daniela-high');
+    expect(script.music).toEqual({ file: 'Beat Song.mp3', credit: 'Beat · CC BY 4.0' });
+    expect(script.scenes.map((s) => s.minBars)).toEqual([3, 3, 4, 5]);
+    expect(script.scenes[1]).toMatchObject({ id: 'reveal', anchor: 12.5 });
+    expect(script.noWhooshOn).toEqual(['reveal']);
+    expect(script.sfx).toEqual([{ id: 'riser', scene: 'reveal', offset: -3.4 }]);
+    expect(musicSource).toBe('assets/brand/music/Beat Song.mp3');
+  });
+
+  it('drops anchors without beat sync and music without a track', () => {
+    const silent = composeStoryboard({ ...base, music: null, beatSync: false, voice: { id: 'otra', lengthScale: 1 } }, testBrand);
+    expect(silent.script.music).toBeNull();
+    expect(silent.musicSource).toBeNull();
+    expect(silent.script.voice).toBe('otra');
+    expect(silent.script.scenes[1]).not.toHaveProperty('anchor');
+    expect(silent.template).not.toContain('sfx-impact');
+    expect(silent.template).not.toContain('mg-credit');
+    const numeric = composeStoryboard({ ...pick('hook', 'cta'), scenes: pick('hook', 'cta').scenes.map((s) => ({ ...s, anchor: 30 })) }, testBrand);
+    expect(numeric.script.scenes[0]).toMatchObject({ anchor: 30 });
+    expect(numeric.script.noWhooshOn).toEqual([]);
+  });
+
+  it('composes vertical videos at 1080x1920', () => {
+    const { template } = composeStoryboard({ ...base, format: '9:16' }, testBrand);
+    expect(template).toContain('class="fmt-9x16"');
+    expect(template).toContain('data-width="1080" data-height="1920"');
+  });
+
+  it('fails on a brand mismatch or an unknown track', () => {
+    expect(() => composeStoryboard({ ...base, brand: 'otra' }, testBrand)).toThrow(MotionStudioError);
+    expect(() => composeStoryboard({ ...base, music: { track: 'nope' } }, testBrand)).toThrow(/no music track "nope"/u);
+  });
+
+  it('lists the project images the storyboard needs, leaving brand assets out', () => {
+    expect(storyboardImages(catalogStoryboard)).toEqual(['images/foto.jpg', 'images/otra.jpg']);
+  });
+
+  it('resolves brand image refs through the manifest', () => {
+    expect(brandImageUrl('brand:local', testBrand)).toBe('assets/brand/img/local.jpg');
+    expect(brandImageUrl('brand:img/x.png', testBrand)).toBe('assets/brand/img/x.png');
+    expect(brandImageUrl('brand:img/x.png')).toBe('assets/brand/img/x.png');
+    expect(brandImageUrl('images/a.jpg', testBrand)).toBe('images/a.jpg');
+  });
+});

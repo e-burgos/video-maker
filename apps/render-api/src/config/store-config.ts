@@ -6,8 +6,10 @@ export const MEDIA_ROOT_ENV_VAR = 'RENDER_API_MEDIA_ROOT';
 export const DB_PATH_ENV_VAR = 'RENDER_API_DB_PATH';
 export const MAX_UPLOAD_BYTES_ENV_VAR = 'RENDER_API_MAX_UPLOAD_BYTES';
 export const OBJECT_STORE_ENV_VAR = 'RENDER_API_OBJECT_STORE';
+export const MOTION_ASSETS_ENV_VAR = 'MOTION_GRAPHICS_ASSETS';
 
 export const DEFAULT_MEDIA_ROOT = 'media';
+export const DEFAULT_MOTION_ASSETS_ROOT = 'libs/motion-graphics/assets';
 export const DEFAULT_MAX_UPLOAD_BYTES = 2_147_483_648;
 export const OBJECT_STORE_KINDS = ['fs'] as const;
 const STUDIO_DIRECTORY_NAME = '.studio';
@@ -20,12 +22,19 @@ export interface StoreConfig {
   readonly dbPath: string;
   readonly maxUploadBytes: number;
   readonly objectStore: ObjectStoreKind;
+  readonly motionAssetsRoot: string;
 }
 
 function readMediaRoot(env: NodeJS.ProcessEnv, cwd: string): string {
   const value = env[MEDIA_ROOT_ENV_VAR];
   const mediaRoot = value !== undefined && value !== '' ? value : DEFAULT_MEDIA_ROOT;
   return isAbsolute(mediaRoot) ? mediaRoot : join(cwd, mediaRoot);
+}
+
+function readMotionAssetsRoot(env: NodeJS.ProcessEnv, cwd: string): string {
+  const value = env[MOTION_ASSETS_ENV_VAR];
+  const root = value !== undefined && value !== '' ? value : DEFAULT_MOTION_ASSETS_ROOT;
+  return isAbsolute(root) ? root : join(cwd, root);
 }
 
 function readDbPath(env: NodeJS.ProcessEnv, cwd: string, mediaRoot: string): string {
@@ -80,5 +89,6 @@ export function readStoreConfig(env: NodeJS.ProcessEnv, cwd: string): StoreConfi
     dbPath: readDbPath(env, cwd, mediaRoot),
     maxUploadBytes: readMaxUploadBytes(env),
     objectStore: readObjectStore(env),
+    motionAssetsRoot: readMotionAssetsRoot(env, cwd),
   };
 }

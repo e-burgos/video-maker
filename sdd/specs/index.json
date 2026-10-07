@@ -326,6 +326,22 @@
         "spec-e-burgos-018-producer-free-tier"
       ],
       "completed_at": "2026-10-07"
+    },
+    {
+      "id": "spec-e-burgos-020-motion-mode",
+      "author": "e-burgos",
+      "slug": "motion-mode",
+      "folder": "sdd/specs/spec-e-burgos-020-motion-mode",
+      "file": "sdd/specs/spec-e-burgos-020-motion-mode/spec-e-burgos-020-motion-mode.spec.md",
+      "module": "motion-mode",
+      "app": "apps/motion-editor",
+      "status": "completed",
+      "title": "Modo motion graphics: guion e imágenes → video automático; video-manager unificado",
+      "created_at": "2026-10-07",
+      "completed_at": "2026-10-07",
+      "depends_on": [
+        "spec-e-burgos-019-motion-studio"
+      ]
     }
   ]
 }

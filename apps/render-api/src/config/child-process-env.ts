@@ -2,6 +2,8 @@ const BASE_ALLOWED_KEYS = ['HOME', 'USER', 'LOGNAME', 'TMPDIR', 'PATH', 'SHELL',
 
 const CONDITIONAL_PREFIXES = ['LC_', 'CLAUDE_CODE_', 'ANTHROPIC_'] as const;
 
+const SUBSCRIPTION_ONLY_BLOCKED_KEYS: ReadonlySet<string> = new Set(['ANTHROPIC_API_KEY']);
+
 export function allowlistedChildEnv(source: NodeJS.ProcessEnv): NodeJS.ProcessEnv {
   const allowed: NodeJS.ProcessEnv = {};
   for (const key of BASE_ALLOWED_KEYS) {
@@ -14,7 +16,7 @@ export function allowlistedChildEnv(source: NodeJS.ProcessEnv): NodeJS.ProcessEn
     if (value === undefined) {
       continue;
     }
-    if (CONDITIONAL_PREFIXES.some((prefix) => key.startsWith(prefix))) {
+    if (CONDITIONAL_PREFIXES.some((prefix) => key.startsWith(prefix)) && !SUBSCRIPTION_ONLY_BLOCKED_KEYS.has(key)) {
       allowed[key] = value;
     }
   }

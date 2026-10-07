@@ -10,6 +10,7 @@ function toPromptContext(context: ProducerProjectContext): ProducerPromptContext
     pendingAssets: context.pendingAssets,
     hasTimeline: context.hasTimeline,
     producerScript: context.producerScript,
+    mode: context.mode,
   };
 }
 
