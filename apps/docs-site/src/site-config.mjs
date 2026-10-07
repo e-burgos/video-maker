@@ -6,9 +6,9 @@ export const DOWNLOAD_URL = `${SITE_URL}/descargas/${STABLE_DMG_FILE_NAME}`;
 
 export const APP_DISPLAY_NAME = 'Video Maker';
 
-export const APPROX_DMG_SIZE_LABEL = '≈254 MB';
+export const APPROX_DMG_SIZE_LABEL = '≈311 MB';
 
-export const APPROX_INSTALLED_SIZE_LABEL = '≈775 MB';
+export const APPROX_INSTALLED_SIZE_LABEL = '≈920 MB';
 
 export const APPROX_FIRST_RUN_DOWNLOAD_LABEL = '≈879 MB';
 

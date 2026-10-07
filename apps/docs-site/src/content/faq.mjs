@@ -37,6 +37,16 @@ ${faqItem(
 )}
 
 ${faqItem(
+  '¿Por qué el video no muestra el crédito de la música?',
+  '<p>Porque queda mejor en la descripción. Los temas de la marca son de Kevin MacLeod con licencia CC BY 4.0, que pide nombrar al autor: el texto exacto aparece debajo del reproductor en la página Motion y en <code>out/video.credits.txt</code> de cada proyecto. Pegalo en la descripción cada vez que publiques el video.</p>',
+)}
+
+${faqItem(
+  '¿Qué necesito para un video de motion graphics?',
+  '<p>Un guion y, si querés, unas fotos con una línea que diga qué muestran. La IA arma el storyboard con el motor que tengas conectado (Claude con tu suscripción u OpenRouter); la voz, la música y el render corren en tu Mac. Un video de un minuto tarda unos minutos en el storyboard y otros cinco a diez en voz y render.</p>',
+)}
+
+${faqItem(
   '¿El storyboard funciona sin Claude?',
   '<p>Sí. El storyboard (la propuesta de escenas del video: qué se dice y qué se ve en cada una) se genera con el motor de IA que tengas conectado en Configuración — Claude Code u OpenRouter — así que no hace falta tener Claude para usarlo, alcanza con cualquiera de los dos.</p>',
 )}

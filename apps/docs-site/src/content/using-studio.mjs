@@ -7,6 +7,36 @@ export function renderPage(depth) {
 Cada video vive en su propio proyecto, con su material y su conversación con el productor.
 </p>
 
+<h2>Dos caminos: motion graphics o material crudo</h2>
+<p>
+Al tocar "Nuevo video" elegís cómo armarlo. <strong>Motion graphics</strong>: no grabás nada,
+escribís el guion y el estudio diseña escenas animadas con la marca (títulos, equipos con su
+pantalla, celulares, tableros, fotos), pone la voz, elige la música y corta al ritmo.
+<strong>Material crudo</strong>: el montaje de tus grabaciones de siempre, con el productor.
+</p>
+${screenshotFigure(depth, 'create-mode.png', 'Nuevo video: elegir entre Motion graphics (guion e imágenes) y Material crudo (montaje de grabaciones)')}
+
+<h2>Videos de motion graphics</h2>
+<p>
+Cada video de motion graphics tiene su página <strong>Motion</strong>. Ahí completás el brief: la
+marca, el formato (horizontal 16:9 o vertical 9:16 para reels), la música (automática, un tema de
+la marca o sin música), el objetivo, el público y el guion. Si sumás fotos, escribí en una línea qué
+muestra cada una: la IA no las ve, elige por esa descripción.
+</p>
+${screenshotFigure(depth, 'motion-brief.png', 'Brief de un video de motion graphics: marca, formato, música, título, objetivo, público y guion')}
+<p>
+"Armar storyboard" le pide a la IA las escenas (tarda unos minutos); revisalas antes de seguir,
+porque cambiar el guion y volver a armarlas es barato. "Hacer video" sintetiza la voz, prepara la
+música y renderiza, mostrando el avance. El video queda en el proyecto y se ve cada vez que abrís la
+página. También se lo podés pedir al productor en la conversación.
+</p>
+${screenshotFigure(depth, 'motion-video.png', 'Video terminado en la página Motion, con el crédito de la música para la descripción')}
+<p>
+La música de la marca es de Kevin MacLeod con licencia CC BY: el crédito no se dibuja sobre el
+video, aparece debajo del reproductor (y en <code>out/video.credits.txt</code>) para que lo pegues
+en la descripción de la publicación — la licencia lo pide.
+</p>
+
 <h2>Subir material</h2>
 <p>
 Arrastrá tus archivos (grabaciones, cámara, fotos, música, logo) directo sobre la zona de
@@ -32,7 +62,7 @@ El crédito de cada archivo que importás así (autor, fuente, licencia) se guar
 archivo de créditos del proyecto — incluilo en la descripción del video cuando lo publiques.
 </p>
 
-<h2>Recetas</h2>
+<h2>Recetas (material crudo)</h2>
 <p>
 Son plantillas de video ya afinadas: le contás al productor cuál querés usar (o simplemente
 describís qué necesitás y él elige) y arma el guion, el corte y la locución siguiendo esa receta.
@@ -67,7 +97,7 @@ proyecto.
 
   return {
     title: 'Usar el estudio',
-    description: 'Cómo subir material, usar recetas, editar a mano y encontrar tus videos terminados en Video Maker.',
+    description: 'Cómo armar videos de motion graphics o con tu material, usar recetas, editar a mano y encontrar tus videos terminados en Video Maker.',
     bodyHtml,
   };
 }
