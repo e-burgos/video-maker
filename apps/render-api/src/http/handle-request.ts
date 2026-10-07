@@ -66,6 +66,13 @@ import {
   handleGetStoryboardPrompts,
   handlePutStoryboard,
 } from './handlers/storyboard-handler';
+import {
+  handleGetMotionBrief,
+  handleGetMotionStoryboard,
+  handleListMotionBrands,
+  handlePutMotionBrief,
+  handlePutMotionStoryboard,
+} from './handlers/motion-handler';
 import { handleGetVoice, handlePutVoiceScene } from './handlers/voice-handler';
 import { handleGetVoicePreview } from './handlers/voice-preview-handler';
 import { handleListVoices } from './handlers/voices-handler';
@@ -274,6 +281,16 @@ async function dispatchRoute(
         return await handleGetVoice(deps, store, params);
       case 'projects.voice.scene.put':
         return await handlePutVoiceScene(deps, store, params, request);
+      case 'motion.brands.list':
+        return await handleListMotionBrands(deps, store);
+      case 'projects.motion.brief.get':
+        return await handleGetMotionBrief(deps, store, params);
+      case 'projects.motion.brief.put':
+        return await handlePutMotionBrief(deps, store, params, request);
+      case 'projects.motion.storyboard.get':
+        return await handleGetMotionStoryboard(deps, store, params);
+      case 'projects.motion.storyboard.put':
+        return await handlePutMotionStoryboard(deps, store, params, request);
       case 'settings.producer.get':
         return await handleGetProducerSettings(deps, runtime);
       case 'settings.producer.put':

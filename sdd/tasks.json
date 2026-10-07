@@ -505,9 +505,9 @@
             "libs/motion-graphics",
             "tools/motion-studio"
           ],
-          "status": "in-progress",
+          "status": "completed",
           "tasks_total": 7,
-          "tasks_done": 0
+          "tasks_done": 7
         },
         "cycle-03": {
           "file": "sdd/specs/spec-e-burgos-020-motion-mode/cycles/cycle-03/tasks.json",
@@ -516,8 +516,24 @@
             "libs/motion-graphics",
             "tools/motion-studio"
           ],
-          "status": "in-progress",
+          "status": "completed",
           "tasks_total": 6,
+          "tasks_done": 6
+        },
+        "cycle-04": {
+          "file": "sdd/specs/spec-e-burgos-020-motion-mode/cycles/cycle-04/tasks.json",
+          "module": "motion-mode",
+          "apps": [
+            "libs/motion-graphics",
+            "tools/motion-studio",
+            "libs/local-store",
+            "apps/render-api",
+            "apps/web",
+            "libs/producer-tools",
+            "apps/desktop"
+          ],
+          "status": "in-progress",
+          "tasks_total": 10,
           "tasks_done": 0
         }
       }

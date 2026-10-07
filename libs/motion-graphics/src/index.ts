@@ -41,3 +41,18 @@ export type { AskResponse, AskStoryboardAgent, AskUsage, GeneratedStoryboard } f
 export { briefImageRef, MotionBriefSchema, parseMotionBrief } from './auto/motion-brief';
 export type { MotionBrief } from './auto/motion-brief';
 export { SCENE_GUIDE } from './auto/scene-guide';
+
+export { autoStoryboard } from './pipeline/auto-storyboard';
+export type { AutoStoryboardResult } from './pipeline/auto-storyboard';
+export { composeFromStoryboard } from './pipeline/compose-from-storyboard';
+export { composeProject } from './pipeline/compose-project';
+export { initFromTemplate } from './pipeline/init-from-template';
+export { joinPath } from './pipeline/join-path';
+export { planProject } from './pipeline/plan-project';
+export type { MotionPipelinePorts, RenderRequest } from './pipeline/ports';
+export { renderProject } from './pipeline/render-project';
+export type { RenderProjectOptions } from './pipeline/render-project';
+export { voiceProject } from './pipeline/voice-project';
+export type { VoicedLine, VoiceProjectOptions, VoiceProjectResult } from './pipeline/voice-project';
+export { HYPERFRAMES_VERSION, hyperframesInvocation } from './pipeline/hyperframes-invocation';
+export type { HyperframesInvocation, HyperframesInvocationInput } from './pipeline/hyperframes-invocation';

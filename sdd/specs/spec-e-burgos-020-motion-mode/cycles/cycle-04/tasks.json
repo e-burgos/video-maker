@@ -1,0 +1,207 @@
+{
+  "$schema": "../../../../schemas/cycle-tasks.schema.json",
+  "spec": "spec-e-burgos-020-motion-mode",
+  "cycle": 4,
+  "module": "motion-mode",
+  "apps": [
+    "libs/motion-graphics",
+    "tools/motion-studio",
+    "libs/local-store",
+    "apps/render-api",
+    "apps/web",
+    "libs/producer-tools",
+    "apps/desktop"
+  ],
+  "flow": "full",
+  "user_stories_generated": true,
+  "prerequisites": {
+    "tasks_generated": true
+  },
+  "tasks": [
+    {
+      "id": "TASK-001",
+      "title": "Move the motion pipeline steps (storyboard, auto, voice, plan, compose, render) behind MotionPipelinePorts in libs/motion-graphics and run HyperFrames from its installed CLI instead of npx",
+      "user_stories": [
+        "HU-05"
+      ],
+      "estimation_hours": 3,
+      "story_points": 3,
+      "depends_on": [],
+      "status": "pending",
+      "files": [
+        "libs/motion-graphics/src/pipeline/motion-pipeline.ts",
+        "libs/motion-graphics/src/pipeline/motion-pipeline-ports.ts",
+        "tools/motion-studio/src/cli.ts",
+        "tools/motion-studio/src/deps/hyperframes-cli.ts",
+        "package.json"
+      ]
+    },
+    {
+      "id": "TASK-002",
+      "title": "Persist the project mode (footage | motion) with migration v4 in libs/local-store",
+      "user_stories": [
+        "HU-01"
+      ],
+      "estimation_hours": 1,
+      "story_points": 1,
+      "depends_on": [],
+      "status": "pending",
+      "files": [
+        "libs/local-store/src/database/migrations.ts",
+        "libs/local-store/src/schema/studio-schema.ts",
+        "libs/local-store/src/repositories/projects-repository.ts"
+      ]
+    },
+    {
+      "id": "TASK-003",
+      "title": "Accept mode on POST /projects, return it on the project list and overview, list brands and read/write the motion brief and storyboard",
+      "user_stories": [
+        "HU-01",
+        "HU-02"
+      ],
+      "estimation_hours": 3,
+      "story_points": 3,
+      "depends_on": [
+        "TASK-001",
+        "TASK-002"
+      ],
+      "status": "pending",
+      "files": [
+        "apps/render-api/src/http/handlers/projects-handler.ts",
+        "apps/render-api/src/http/handlers/motion-handler.ts",
+        "apps/render-api/vite.config.ts"
+      ]
+    },
+    {
+      "id": "TASK-004",
+      "title": "Add the motion job kind to render-api: params, pipeline runner with progress, HyperFrames and AI adapters",
+      "user_stories": [
+        "HU-03"
+      ],
+      "estimation_hours": 4,
+      "story_points": 5,
+      "depends_on": [
+        "TASK-003"
+      ],
+      "status": "pending",
+      "files": [
+        "apps/render-api/src/jobs/render-job.ts",
+        "apps/render-api/src/jobs/motion-job-params.ts",
+        "apps/render-api/src/jobs/run-motion-pipeline.ts",
+        "apps/render-api/src/deps/motion-pipeline-adapters.ts",
+        "apps/render-api/src/http/handlers/jobs-handler.ts"
+      ]
+    },
+    {
+      "id": "TASK-005",
+      "title": "Let apps/web create a project choosing motion graphics or raw footage and show the mode in the list",
+      "user_stories": [
+        "HU-01"
+      ],
+      "estimation_hours": 2,
+      "story_points": 2,
+      "depends_on": [
+        "TASK-003"
+      ],
+      "status": "pending",
+      "files": [
+        "apps/web/src/components/create-project-form.tsx",
+        "apps/web/src/api/render-api-client.ts"
+      ]
+    },
+    {
+      "id": "TASK-006",
+      "title": "Add the Motion page to apps/web: brief editor with images and captions, storyboard review and video job with progress and player",
+      "user_stories": [
+        "HU-02",
+        "HU-03"
+      ],
+      "estimation_hours": 5,
+      "story_points": 5,
+      "depends_on": [
+        "TASK-004",
+        "TASK-005"
+      ],
+      "status": "pending",
+      "files": [
+        "apps/web/src/pages/motion-page.tsx",
+        "apps/web/src/app/app.tsx"
+      ]
+    },
+    {
+      "id": "TASK-007",
+      "title": "Teach the producer the motion mode: start_job kind motion, motion recipe and mode in the project overview",
+      "user_stories": [
+        "HU-04"
+      ],
+      "estimation_hours": 2,
+      "story_points": 2,
+      "depends_on": [
+        "TASK-004"
+      ],
+      "status": "pending",
+      "files": [
+        "libs/producer-tools/src/contract/tool-schemas.ts",
+        "libs/producer-tools/src/prompt/build-producer-prompt.ts"
+      ]
+    },
+    {
+      "id": "TASK-008",
+      "title": "Ship HyperFrames and the motion assets in the desktop app and run them with ELECTRON_RUN_AS_NODE and the bundled chrome-headless-shell",
+      "user_stories": [
+        "HU-05"
+      ],
+      "estimation_hours": 3,
+      "story_points": 3,
+      "depends_on": [
+        "TASK-004"
+      ],
+      "status": "pending",
+      "files": [
+        "apps/desktop/scripts/build-desktop.mjs",
+        "apps/desktop/electron-builder.yml",
+        "apps/desktop/src/main/render-api-env.ts"
+      ]
+    },
+    {
+      "id": "TASK-009",
+      "title": "Verify 9:16 end to end: a vertical brief rendered through the studio, frames reviewed and the catalog fixed where it breaks",
+      "user_stories": [
+        "HU-06"
+      ],
+      "estimation_hours": 3,
+      "story_points": 3,
+      "depends_on": [
+        "TASK-006"
+      ],
+      "status": "pending",
+      "files": [
+        "libs/motion-graphics/assets/runtime/scenes.css",
+        "libs/motion-graphics/assets/briefs/displayads/plataforma-reel.json"
+      ]
+    },
+    {
+      "id": "TASK-010",
+      "title": "Close the cycle: context, validate, lint/test/build of the affected projects",
+      "user_stories": [
+        "HU-01",
+        "HU-02",
+        "HU-03",
+        "HU-04",
+        "HU-05",
+        "HU-06"
+      ],
+      "estimation_hours": 1,
+      "story_points": 1,
+      "depends_on": [
+        "TASK-007",
+        "TASK-008",
+        "TASK-009"
+      ],
+      "status": "pending",
+      "files": [
+        "sdd/context/apps/render-api/updates/"
+      ]
+    }
+  ]
+}

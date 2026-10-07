@@ -68,6 +68,7 @@ import type {
   VoiceJob,
   VoiceListing,
   VoiceSceneWriteResult,
+  CreateProjectInput,
 } from './render-api-types';
 
 export type FetchLike = (input: string, init?: RequestInit) => Promise<Response>;
@@ -94,7 +95,7 @@ export type CreateVoiceJobInput = {
 export type RenderApiClient = {
   getHealth: () => Promise<ServiceHealth>;
   listProjects: () => Promise<ProjectSummary[]>;
-  createProject: (slug: string) => Promise<ProjectDetail>;
+  createProject: (input: CreateProjectInput) => Promise<ProjectDetail>;
   getProject: (slug: string) => Promise<ProjectDetail>;
   getOrganization: () => Promise<VideoOrganization>;
   createFolder: (name: string) => Promise<VideoFolder>;
@@ -262,13 +263,13 @@ export function createRenderApiClient(fetchImpl: FetchLike): RenderApiClient {
       return body as ProjectSummary[];
     },
 
-    async createProject(slug: string): Promise<ProjectDetail> {
+    async createProject(input: CreateProjectInput): Promise<ProjectDetail> {
       const body = await requestJson(
         '/projects',
         {
           method: 'POST',
           headers: { 'content-type': 'application/json' },
-          body: JSON.stringify({ slug }),
+          body: JSON.stringify(input),
         },
         'a project detail',
         (value) => isRecord(value) && typeof value['slug'] === 'string',

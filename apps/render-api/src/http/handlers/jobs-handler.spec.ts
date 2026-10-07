@@ -36,7 +36,7 @@ function withProjects(callLog: CallLog, overrides?: Partial<RenderApiDependencie
   return deps;
 }
 
-const STORE: StoreConfig = { mediaRoot: '/media', dbPath: '/media/.studio/studio.db', maxUploadBytes: 2_147_483_648, objectStore: 'fs' };
+const STORE: StoreConfig = { mediaRoot: '/media', dbPath: '/media/.studio/studio.db', maxUploadBytes: 2_147_483_648, objectStore: 'fs', motionAssetsRoot: '/repo/libs/motion-graphics/assets' };
 const PROJECT_ROOT = '/var/data/media/acme-launch';
 const DEFAULT_RENDER_OUTPUT = {
   outPath: `${PROJECT_ROOT}/work/renders/r/video-muted.mp4`,

@@ -263,3 +263,5 @@ body { margin: 0; background: var(--mg-bg); color: var(--mg-text); font-family: 
 .mg-url-chip { font-family: var(--mg-font-mono); font-size: 40px; padding: 18px 34px; border-radius: 16px; border: 1px solid var(--mg-border-strong); background: rgba(9,9,11,0.7); }
 .mg-device-screen { position: absolute; overflow: hidden; font-size: 18px; }
 .mg-device-screen .mg-ui { font-size: 18px; }
+.mg-promo .b.fit-mid, .mg-hook-screen .mg-promo .b.fit-mid, .mg-result .mg-promo .b.fit-mid { font-size: 1.7em; }
+.mg-promo .b.fit-long, .mg-hook-screen .mg-promo .b.fit-long, .mg-result .mg-promo .b.fit-long { font-size: 1.2em; line-height: 0.95; }

@@ -1,0 +1,37 @@
+# sdd/specs/spec-e-burgos-020-motion-mode/cycles/cycle-04/brief.yaml
+# Generado por: sdd-orchestrator
+# Al: iniciar el ciclo
+
+cycle: 4
+module: motion-mode
+phase: studio-motion
+date: 2026-10-07
+flow: full
+app_context: sdd/context/apps/render-api/context_prompt.md
+
+objective: |
+  El estudio ofrece de entrada los dos caminos: al crear un proyecto se elige "motion graphics" o
+  "material crudo". Un proyecto de motion graphics se arma desde el navegador o desde la app de escritorio
+  con un brief (guion, imágenes con su descripción, marca, formato y música); el estudio arma el
+  storyboard con la IA, lo muestra para revisarlo y hace el video con voz, música y render, todo con el
+  pipeline de las cycles 02-03 corriendo dentro de render-api como un job más. El productor conoce el modo.
+
+scope:
+  - Pasos del pipeline (storyboard, auto, voice, plan, compose, render) detrás de un puerto en libs/motion-graphics; la CLI queda como cliente fino.
+  - HyperFrames corre desde su CLI instalada (sin npx), en dev con node y en desktop con ELECTRON_RUN_AS_NODE y el chrome-headless-shell que ya baja la app.
+  - libs/local-store: columna mode de projects (migración v4).
+  - render-api: POST /projects con mode, mode en lista y overview, marcas, brief y storyboard del proyecto, job motion (fases storyboard | video | all).
+  - apps/web: elección de modo al crear, página Motion (brief, storyboard, video).
+  - libs/producer-tools: start_job kind motion, receta motion y modo en el overview.
+  - apps/desktop: HyperFrames y assets de motion empaquetados.
+  - Verificación 9:16 de punta a punta.
+
+out_of_scope:
+  - Edición visual escena por escena del storyboard (se edita el JSON o se regenera).
+  - Describir imágenes automáticamente con visión.
+  - Marcas nuevas desde la UI (una marca sigue siendo una carpeta en assets/brands).
+
+invariants:
+  - Un proyecto existente sin mode es footage: nada cambia para los proyectos de material crudo.
+  - La IA nunca escribe HTML: el job motion usa generateMotionStoryboard de la cycle-03.
+  - Nunca dos jobs pesados a la vez: el job motion pasa por la misma cola que render y montage.

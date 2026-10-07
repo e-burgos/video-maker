@@ -5,7 +5,7 @@ import { MotionStudioError } from '../errors/motion-studio-error';
 import { ICON_NAMES } from '../storyboard/motion-storyboard.schema';
 import { ICON_PATHS, iconSprite } from './icons';
 import { renderScene } from './render-scene';
-import { animAttrs, esc, headline, screenInner } from './scene-html';
+import { animAttrs, esc, headline, promo, screenInner } from './scene-html';
 import type { SceneContext } from './scene-html';
 
 const ctx: SceneContext = { brand: testBrand, format: '16:9', imageUrl: (ref) => (ref.startsWith('brand:') ? `assets/brand/${ref.slice(6)}` : ref) };
@@ -34,6 +34,15 @@ describe('scene html helpers', () => {
     const list = { type: 'list' as const, title: 'Redes', items: ['A'], select: 0, field: 'Clave', button: 'Ir' };
     expect(screenInner(list, ctx, 'red')).toContain('data-cue="red" data-after="2.4"');
     expect(screenInner(list, ctx, undefined)).toContain('data-beat="6"');
+  });
+});
+
+describe('promo', () => {
+  it('shrinks the big promo text by length so a long offer stays inside its card', () => {
+    expect(promo(undefined, '2x1', undefined)).toContain('<span class="b">2x1</span>');
+    expect(promo(undefined, '-20 %', undefined)).toContain('<span class="b">');
+    expect(promo(undefined, 'Merienda', undefined)).toContain('<span class="b fit-mid">');
+    expect(promo(undefined, '2×1 Medialunas', undefined)).toContain('<span class="b fit-long">');
   });
 });
 

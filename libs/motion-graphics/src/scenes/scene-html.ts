@@ -63,8 +63,17 @@ export function toneClass(tone: string | undefined, fallback = 'sky'): string {
   return `tone-${tone ?? fallback}`;
 }
 
+const PROMO_BIG_FITS_AS_IS = 5;
+const PROMO_BIG_FITS_MID = 9;
+
+export function promoBigClass(big: string): string {
+  const length = [...big.trim()].length;
+  if (length <= PROMO_BIG_FITS_AS_IS) return 'b';
+  return length <= PROMO_BIG_FITS_MID ? 'b fit-mid' : 'b fit-long';
+}
+
 export function promo(kicker: string | undefined, big: string, small: string | undefined): string {
-  return `<div class="mg-promo">${kicker ? `<span class="k">${esc(kicker)}</span>` : ''}<span class="b">${esc(big)}</span>${small ? `<span class="s">${esc(small)}</span>` : ''}</div>`;
+  return `<div class="mg-promo">${kicker ? `<span class="k">${esc(kicker)}</span>` : ''}<span class="${promoBigClass(big)}">${esc(big)}</span>${small ? `<span class="s">${esc(small)}</span>` : ''}</div>`;
 }
 
 export function screenInner(screen: MotionScreen, ctx: SceneContext, firstCue: string | undefined): string {
@@ -149,7 +158,7 @@ function deviceVisual(deviceId: string, states: Array<{ screen: MotionScreen; cu
       const cue = i === 0 ? undefined : state.cue;
       const inner =
         state.screen.type === 'promo'
-          ? `<div class="mg-screen ${toneClass(state.screen.tone)}"><div class="mg-promo" style="position:absolute;inset:auto;${box};padding:0;justify-content:flex-start">${state.screen.kicker ? `<span class="k">${esc(state.screen.kicker)}</span>` : ''}<span class="b">${esc(state.screen.big)}</span>${state.screen.small ? `<span class="s">${esc(state.screen.small)}</span>` : ''}</div></div>`
+          ? `<div class="mg-screen ${toneClass(state.screen.tone)}"><div class="mg-promo" style="position:absolute;inset:auto;${box};padding:0;justify-content:flex-start">${state.screen.kicker ? `<span class="k">${esc(state.screen.kicker)}</span>` : ''}<span class="${promoBigClass(state.screen.big)}">${esc(state.screen.big)}</span>${state.screen.small ? `<span class="s">${esc(state.screen.small)}</span>` : ''}</div></div>`
           : UI_SCREEN_TYPES.has(state.screen.type)
             ? `<div class="mg-device-screen" style="${screenQuadBox(pts, aspect, skew)}">${screenInner(state.screen, ctx, cue)}</div>`
             : screenInner(state.screen, ctx, cue);

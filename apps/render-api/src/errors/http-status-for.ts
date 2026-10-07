@@ -117,6 +117,9 @@ const STATUS_BY_CODE: Readonly<Record<RenderApiErrorCode, number>> = {
   OPENROUTER_FAILED: 502,
   OPENROUTER_CATALOG_UNAVAILABLE: 503,
   SECRET_STORE_UNAVAILABLE: 503,
+  MOTION_PROJECT_REQUIRED: 409,
+  BRIEF_NOT_FOUND: 404,
+  BRIEF_INVALID: 400,
 };
 
 export function httpStatusFor(code: RenderApiErrorCode): number {

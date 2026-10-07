@@ -6,6 +6,8 @@ import {
   toAbsolutePath,
 } from '@video-maker/auto-montage';
 import type { MediaProject } from '@video-maker/auto-montage';
+import { PROJECT_MODES } from '@video-maker/local-store';
+import type { ProjectMode } from '@video-maker/local-store';
 import { join } from 'node:path/posix';
 
 import type { StoreConfig } from '../../config/store-config';
@@ -26,6 +28,7 @@ import type { RouteParams } from '../router';
 
 export interface ProjectSummary {
   readonly slug: string;
+  readonly mode: ProjectMode;
   readonly layout: ProjectLayoutFlags;
 }
 
@@ -44,6 +47,22 @@ function extractSlugFromBody(value: unknown): string | null {
   }
   const candidate = (value as { slug?: unknown }).slug;
   return typeof candidate === 'string' ? candidate : null;
+}
+
+function extractModeFromBody(value: unknown): ProjectMode {
+  const candidate = (value as { mode?: unknown }).mode;
+  if (candidate === undefined) {
+    return 'footage';
+  }
+  if (typeof candidate !== 'string' || !(PROJECT_MODES as readonly string[]).includes(candidate)) {
+    throw new PipelineStageError({
+      code: 'REQUEST_BODY_INVALID_JSON',
+      stage: null,
+      resource: 'mode',
+      expected: PROJECT_MODES.join(' or '),
+    });
+  }
+  return candidate as ProjectMode;
 }
 
 function assertValidProjectSlug(slug: string): void {
@@ -72,12 +91,14 @@ async function buildProjectDetail(
   storage: ObjectStorage,
   project: MediaProject,
   slug: string,
+  mode: ProjectMode,
 ): Promise<ProjectDetail> {
   const layout = await computeLayoutFlags(storage, project);
   const projectAssets = await resolveProjectAssets(storage, project);
 
   return {
     slug,
+    mode,
     layout,
     assetSource: projectAssets.source,
     assetCounts: countAssetsByRole(projectAssets.assets),
@@ -96,7 +117,7 @@ export async function handleListProjects(
     if (projectStat === null || projectStat.kind !== 'directory') {
       continue;
     }
-    summaries.push({ slug: record.slug, layout: await computeLayoutFlags(deps.storage, project) });
+    summaries.push({ slug: record.slug, mode: record.mode, layout: await computeLayoutFlags(deps.storage, project) });
   }
 
   return jsonResponse(200, summaries);
@@ -135,6 +156,7 @@ export async function handleCreateProject(
   }
 
   assertValidProjectSlug(slug);
+  const mode = extractModeFromBody(bodyResult.value);
 
   const project = resolveMediaProject(join(store.mediaRoot, slug));
 
@@ -143,7 +165,7 @@ export async function handleCreateProject(
     throw new PipelineStageError({ code: 'PROJECT_ALREADY_EXISTS', stage: null, resource: slug });
   }
 
-  deps.localStore.projects.insert(slug);
+  deps.localStore.projects.insert(slug, null, mode);
 
   const directoriesInOrder = [
     join(project.rawDir, 'aroll'),
@@ -154,12 +176,13 @@ export async function handleCreateProject(
     join(project.rawDir, 'logo'),
     project.workDir,
     project.outDir,
+    ...(mode === 'motion' ? [join(project.root, 'motion')] : []),
   ];
   for (const directory of directoriesInOrder) {
     await deps.storage.ensureDirectory(directory);
   }
 
-  const detail = await buildProjectDetail(deps.storage, project, slug);
+  const detail = await buildProjectDetail(deps.storage, project, slug, mode);
 
   return {
     status: 201,
@@ -182,7 +205,9 @@ export async function handleGetProject(
     throw new PipelineStageError({ code: 'PROJECT_NOT_FOUND', stage: null, resource: slug });
   }
 
-  return jsonResponse(200, await buildProjectDetail(deps.storage, project, slug));
+  const mode = deps.localStore.projects.get(slug)?.mode ?? 'footage';
+
+  return jsonResponse(200, await buildProjectDetail(deps.storage, project, slug, mode));
 }
 
 function extractPlacementFromBody(value: unknown): {

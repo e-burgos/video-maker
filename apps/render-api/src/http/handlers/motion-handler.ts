@@ -1,0 +1,249 @@
+import { briefImageRef, isMotionStudioError, parseBrandManifest, parseMotionBrief, parseMotionStoryboard } from '@video-maker/motion-graphics';
+import type { MotionBrief } from '@video-maker/motion-graphics';
+import { join } from 'node:path/posix';
+
+import type { StoreConfig } from '../../config/store-config';
+import type { RenderApiDependencies } from '../../deps/render-api-dependencies';
+import { PipelineStageError } from '../../errors/pipeline-stage-error';
+import type { RenderApiErrorCode } from '../../errors/render-api-error';
+import { assertValidProjectSlug, resolveExistingProject } from '../../store/project-scope';
+import { JSON_CONTENT_TYPE } from '../http-message';
+import type { HttpRequestLine, HttpResponse } from '../http-message';
+import { MAX_JSON_BODY_BYTES, readJsonBody } from '../read-json-body';
+import type { RouteParams } from '../router';
+
+const BRIEF_RELATIVE_PATH = 'motion/brief.json';
+const STORYBOARD_RELATIVE_PATH = 'motion/storyboard.json';
+const SUPPORTED_FORMATS = ['16:9', '9:16'] as const;
+
+export interface MotionBrandMusicSummary {
+  readonly id: string;
+  readonly mood: string;
+  readonly bpm: number;
+  readonly hasDrop: boolean;
+}
+
+export interface MotionBrandSummary {
+  readonly id: string;
+  readonly name: string;
+  readonly formats: readonly string[];
+  readonly music: readonly MotionBrandMusicSummary[];
+}
+
+function jsonResponse(status: number, body: unknown): HttpResponse {
+  return { status, headers: { 'content-type': JSON_CONTENT_TYPE }, body };
+}
+
+async function readBrandSummary(deps: RenderApiDependencies, brandFile: string): Promise<MotionBrandSummary | null> {
+  const stat = await deps.storage.stat(brandFile);
+  if (stat === null || stat.kind !== 'file') {
+    return null;
+  }
+
+  let manifest;
+  try {
+    manifest = parseBrandManifest(JSON.parse(await deps.storage.readTextFile(brandFile)));
+  } catch (cause) {
+    throw new PipelineStageError({
+      code: 'SERVER_CONFIG_INVALID',
+      stage: null,
+      resource: brandFile,
+      expected: 'a valid brand manifest',
+      cause,
+    });
+  }
+
+  return {
+    id: manifest.id,
+    name: manifest.name,
+    formats: SUPPORTED_FORMATS,
+    music: manifest.music.map((track) => ({
+      id: track.id,
+      mood: track.mood,
+      bpm: track.bpm,
+      hasDrop: track.drop !== undefined,
+    })),
+  };
+}
+
+export async function handleListMotionBrands(
+  deps: RenderApiDependencies,
+  store: StoreConfig,
+): Promise<HttpResponse> {
+  const brandsRoot = join(store.motionAssetsRoot, 'brands');
+  const entries = (await deps.storage.listDirectory(brandsRoot)) ?? [];
+
+  const summaries: MotionBrandSummary[] = [];
+  for (const entry of entries.filter((candidate) => candidate.isDirectory)) {
+    const summary = await readBrandSummary(deps, join(brandsRoot, entry.name, 'brand.json'));
+    if (summary !== null) {
+      summaries.push(summary);
+    }
+  }
+
+  summaries.sort((left, right) => left.id.localeCompare(right.id));
+  return jsonResponse(200, summaries);
+}
+
+async function resolveMotionProject(
+  deps: RenderApiDependencies,
+  store: StoreConfig,
+  params: RouteParams,
+): Promise<{ readonly root: string; readonly rawDir: string }> {
+  const slug = params.slug ?? '';
+  assertValidProjectSlug(slug);
+  const project = await resolveExistingProject(deps, store, slug);
+
+  if (deps.localStore.projects.get(slug)?.mode !== 'motion') {
+    throw new PipelineStageError({ code: 'MOTION_PROJECT_REQUIRED', stage: null, resource: slug });
+  }
+  return project;
+}
+
+async function readStoredDocument(
+  deps: RenderApiDependencies,
+  absolutePath: string,
+  relativePath: string,
+  missingCode: RenderApiErrorCode,
+  invalidCode: RenderApiErrorCode,
+): Promise<unknown> {
+  const stat = await deps.storage.stat(absolutePath);
+  if (stat === null || stat.kind !== 'file') {
+    throw new PipelineStageError({ code: missingCode, stage: null, resource: relativePath });
+  }
+
+  try {
+    return JSON.parse(await deps.storage.readTextFile(absolutePath));
+  } catch {
+    throw new PipelineStageError({
+      code: invalidCode,
+      stage: null,
+      resource: relativePath,
+      expected: 'a JSON document',
+    });
+  }
+}
+
+async function readRequestJson(request: HttpRequestLine): Promise<unknown> {
+  const bodyResult = await readJsonBody(request.body.stream(), MAX_JSON_BODY_BYTES);
+  if (bodyResult.kind === 'too-large') {
+    throw new PipelineStageError({
+      code: 'REQUEST_BODY_TOO_LARGE',
+      stage: null,
+      expected: `at most ${MAX_JSON_BODY_BYTES} bytes`,
+    });
+  }
+  if (bodyResult.kind !== 'parsed') {
+    throw new PipelineStageError({
+      code: 'REQUEST_BODY_INVALID_JSON',
+      stage: null,
+      expected: 'a JSON object',
+    });
+  }
+  return bodyResult.value;
+}
+
+function parseOrThrow<T>(
+  parse: (raw: unknown) => T,
+  raw: unknown,
+  code: RenderApiErrorCode,
+  resource: string,
+): T {
+  try {
+    return parse(raw);
+  } catch (cause) {
+    if (isMotionStudioError(cause)) {
+      throw new PipelineStageError({ code, stage: null, resource, expected: cause.message, cause });
+    }
+    throw cause;
+  }
+}
+
+async function assertBriefImagesExist(
+  deps: RenderApiDependencies,
+  rawDir: string,
+  brief: MotionBrief,
+): Promise<void> {
+  const imagesDir = join(rawDir, 'images');
+  for (const image of brief.images) {
+    const name = briefImageRef(image.file).slice('images/'.length);
+    const stat = name.includes('/') || name.includes('..') ? null : await deps.storage.stat(join(imagesDir, name));
+    if (stat === null || stat.kind !== 'file') {
+      throw new PipelineStageError({
+        code: 'BRIEF_INVALID',
+        stage: null,
+        resource: BRIEF_RELATIVE_PATH,
+        expected: `images[].file "${image.file}" must exist under raw/images/`,
+      });
+    }
+  }
+}
+
+export async function handleGetMotionBrief(
+  deps: RenderApiDependencies,
+  store: StoreConfig,
+  params: RouteParams,
+): Promise<HttpResponse> {
+  const project = await resolveMotionProject(deps, store, params);
+  const document = await readStoredDocument(
+    deps,
+    join(project.root, BRIEF_RELATIVE_PATH),
+    BRIEF_RELATIVE_PATH,
+    'BRIEF_NOT_FOUND',
+    'BRIEF_INVALID',
+  );
+  return jsonResponse(200, document);
+}
+
+export async function handlePutMotionBrief(
+  deps: RenderApiDependencies,
+  store: StoreConfig,
+  params: RouteParams,
+  request: HttpRequestLine,
+): Promise<HttpResponse> {
+  const project = await resolveMotionProject(deps, store, params);
+  const brief = parseOrThrow(parseMotionBrief, await readRequestJson(request), 'BRIEF_INVALID', BRIEF_RELATIVE_PATH);
+  await assertBriefImagesExist(deps, project.rawDir, brief);
+
+  await deps.storage.ensureDirectory(join(project.root, 'motion'));
+  await deps.storage.writeTextFile(join(project.root, BRIEF_RELATIVE_PATH), `${JSON.stringify(brief, null, 2)}\n`);
+  return jsonResponse(200, brief);
+}
+
+export async function handleGetMotionStoryboard(
+  deps: RenderApiDependencies,
+  store: StoreConfig,
+  params: RouteParams,
+): Promise<HttpResponse> {
+  const project = await resolveMotionProject(deps, store, params);
+  const document = await readStoredDocument(
+    deps,
+    join(project.root, STORYBOARD_RELATIVE_PATH),
+    STORYBOARD_RELATIVE_PATH,
+    'STORYBOARD_NOT_FOUND',
+    'STORYBOARD_INVALID',
+  );
+  return jsonResponse(200, document);
+}
+
+export async function handlePutMotionStoryboard(
+  deps: RenderApiDependencies,
+  store: StoreConfig,
+  params: RouteParams,
+  request: HttpRequestLine,
+): Promise<HttpResponse> {
+  const project = await resolveMotionProject(deps, store, params);
+  const storyboard = parseOrThrow(
+    parseMotionStoryboard,
+    await readRequestJson(request),
+    'STORYBOARD_INVALID',
+    STORYBOARD_RELATIVE_PATH,
+  );
+
+  await deps.storage.ensureDirectory(join(project.root, 'motion'));
+  await deps.storage.writeTextFile(
+    join(project.root, STORYBOARD_RELATIVE_PATH),
+    `${JSON.stringify(storyboard, null, 2)}\n`,
+  );
+  return jsonResponse(200, storyboard);
+}

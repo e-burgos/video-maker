@@ -41,7 +41,7 @@ vi.mock('@video-maker/media-local', () => ({
 
 const ENV: NodeJS.ProcessEnv = {};
 const CWD = '/var/data/media/acme-launch';
-const STORE: StoreConfig = { mediaRoot: '/var/data/media', dbPath: '/var/data/media/.studio/studio.db', maxUploadBytes: 2_147_483_648, objectStore: 'fs' };
+const STORE: StoreConfig = { mediaRoot: '/var/data/media', dbPath: '/var/data/media/.studio/studio.db', maxUploadBytes: 2_147_483_648, objectStore: 'fs', motionAssetsRoot: '/repo/libs/motion-graphics/assets' };
 
 async function loadMocks() {
   const render = await import('@video-maker/composition-remotion/render');

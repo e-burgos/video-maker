@@ -17,10 +17,11 @@ import type { AssetId } from '@video-maker/timeline-core';
 
 import { MotionStudioError } from '@video-maker/motion-graphics';
 
+import { resolveHyperframesCli } from './hyperframes-cli';
+
 import { createClaudeCliAskAgent } from './claude-cli-ask-agent';
 import type { MotionDependencies } from './motion-dependencies';
 
-export const HYPERFRAMES_VERSION = '0.8.139';
 const HYPERFRAMES_TIMEOUT_MS = 3 * 60 * 60 * 1000;
 const ASK_AGENT_TIMEOUT_MS = 10 * 60 * 1000;
 
@@ -33,7 +34,8 @@ const exists = async (path: string): Promise<boolean> =>
 export function createNodeMotionDependencies(env: NodeJS.ProcessEnv, workspaceRoot: string): MotionDependencies {
   const runner = new ExecaCommandRunner();
   const hyperframes = async (args: string[], cwd: string): Promise<void> => {
-    const result = await runner.run('npx', ['--yes', `hyperframes@${HYPERFRAMES_VERSION}`, ...args], { cwd, timeoutMs: HYPERFRAMES_TIMEOUT_MS });
+    const invocation = resolveHyperframesCli(env, workspaceRoot);
+    const result = await new ExecaCommandRunner({ env: invocation.env }).run(invocation.command, [...invocation.args, ...args], { cwd, timeoutMs: HYPERFRAMES_TIMEOUT_MS });
     if (result.exitCode !== 0) {
       throw new MotionStudioError('STAGE_FAILED', `hyperframes ${args[0]} failed: ${result.stderr.slice(-800)}`);
     }

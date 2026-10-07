@@ -119,6 +119,9 @@ const MESSAGE_BY_CODE: Readonly<Record<RenderApiErrorCode, string>> = {
   OPENROUTER_FAILED: 'The call to OpenRouter failed for an unexpected reason.',
   OPENROUTER_CATALOG_UNAVAILABLE: 'OpenRouter did not answer the model catalog with a usable response.',
   SECRET_STORE_UNAVAILABLE: 'The local keychain could not read or write the requested secret.',
+  MOTION_PROJECT_REQUIRED: 'This route is only available for motion projects.',
+  BRIEF_NOT_FOUND: 'The project has no stored motion brief.',
+  BRIEF_INVALID: 'The motion brief does not pass validation.',
 };
 
 export function toErrorPayload(value: unknown): RenderApiErrorPayload {

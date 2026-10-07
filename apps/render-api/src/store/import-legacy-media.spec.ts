@@ -13,6 +13,7 @@ const STORE: StoreConfig = {
   dbPath: '/media/.studio/studio.db',
   maxUploadBytes: 2_147_483_648,
   objectStore: 'fs',
+  motionAssetsRoot: '/repo/libs/motion-graphics/assets',
 };
 
 const WRITE_PORTS = ['writeTextFile', 'ensureDirectory', 'writeTemporary', 'promoteTemporary', 'removeTemporary', 'removeFile', 'removeDirectory'];
@@ -80,6 +81,18 @@ function baseDirectories(...slugs: readonly string[]): readonly string[] {
 }
 
 describe('importLegacyMedia', () => {
+  it('marks a folder with motion/brief.json as motion and any other folder as footage', async () => {
+    const { deps } = seed(
+      [{ path: `${STORE.mediaRoot}/promo/motion/brief.json`, contents: '{}' }],
+      [`${STORE.mediaRoot}/promo`, `${STORE.mediaRoot}/promo/motion`, `${STORE.mediaRoot}/plain`],
+    );
+
+    await importLegacyMedia(deps, STORE);
+
+    expect(deps.localStore.projects.get('promo')?.mode).toBe('motion');
+    expect(deps.localStore.projects.get('plain')?.mode).toBe('footage');
+  });
+
   it('imports every project directory that does not have a row yet', async () => {
     const { deps } = seed(
       [],

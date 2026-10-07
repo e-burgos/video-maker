@@ -129,6 +129,13 @@ export const MESSAGES_EN = {
   'createProject.placeholder': 'My next reel',
   'createProject.submit': 'Create video',
   'createProject.submitting': 'Creating…',
+  'createProject.mode.label': 'How do you want to build the video?',
+  'createProject.mode.motion': 'Motion graphics',
+  'createProject.mode.motionHint': 'Script + images → animated video',
+  'createProject.mode.footage': 'Raw footage',
+  'createProject.mode.footageHint': 'Montage of recordings',
+  'projects.mode.motion': 'Motion graphics',
+  'motion.page.title': 'Motion graphics',
   'createProject.cancel': 'Cancel',
   'createProject.nameRequired': 'Enter a name for the video.',
 

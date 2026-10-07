@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 
 import { formatUpdatedAt } from '../api/format-updated-at';
 import { humanizeSlug } from '../api/humanize-slug';
+import { projectHref, projectModeOf } from '../api/project-mode';
 import { projectStatusKey } from '../api/project-status';
 import type { ProjectStatusKey } from '../api/project-status';
 import type { ProjectSummary, VideoFolder, VideoPlacement } from '../api/render-api-types';
@@ -104,7 +105,7 @@ export function VideoCard({ video, placement, folders, onChanged }: VideoCardPro
       className="relative rounded-panel border border-border-subtle bg-surface-raised/60 hover:border-border-strong data-[archived=true]:opacity-60"
     >
       <Link
-        to={`/projects/${encodeURIComponent(video.slug)}`}
+        to={projectHref(video)}
         className="block space-y-3 p-4 pr-10"
       >
         <VideoCardMedia slug={video.slug} />
@@ -112,9 +113,16 @@ export function VideoCard({ video, placement, folders, onChanged }: VideoCardPro
           <p className="truncate text-sm font-medium text-ink">{humanizeSlug(video.slug)}</p>
           <p className="truncate font-mono text-[11px] text-ink-faint">{video.slug}</p>
         </div>
-        <Badge tone={STATUS_TONE[projectStatusKey(video.layout)]}>
-          {t(projectStatusKey(video.layout))}
-        </Badge>
+        <div className="flex flex-wrap gap-1.5">
+          <Badge tone={STATUS_TONE[projectStatusKey(video.layout)]}>
+            {t(projectStatusKey(video.layout))}
+          </Badge>
+          {projectModeOf(video) === 'motion' && (
+            <Badge tone="accent" data-testid="video-card-mode-badge">
+              {t('projects.mode.motion')}
+            </Badge>
+          )}
+        </div>
       </Link>
 
       <button

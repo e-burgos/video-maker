@@ -7,6 +7,7 @@ import {
   DEFAULT_MEDIA_ROOT,
   MAX_UPLOAD_BYTES_ENV_VAR,
   MEDIA_ROOT_ENV_VAR,
+  MOTION_ASSETS_ENV_VAR,
   OBJECT_STORE_ENV_VAR,
   readStoreConfig,
 } from './store-config';
@@ -73,5 +74,15 @@ describe('readStoreConfig', () => {
     expect(readStoreConfig({ [OBJECT_STORE_ENV_VAR]: 'fs' }, CWD).objectStore).toBe('fs');
 
     expectInvalidConfig({ [OBJECT_STORE_ENV_VAR]: 'minio' }, CWD);
+  });
+
+  it('defaults the motion assets root to the repo libs folder and honours MOTION_GRAPHICS_ASSETS', () => {
+    expect(readStoreConfig({}, CWD).motionAssetsRoot).toBe(`${CWD}/libs/motion-graphics/assets`);
+    expect(readStoreConfig({ [MOTION_ASSETS_ENV_VAR]: 'assets/motion' }, CWD).motionAssetsRoot).toBe(
+      `${CWD}/assets/motion`,
+    );
+    expect(readStoreConfig({ [MOTION_ASSETS_ENV_VAR]: '/opt/motion-assets' }, CWD).motionAssetsRoot).toBe(
+      '/opt/motion-assets',
+    );
   });
 });

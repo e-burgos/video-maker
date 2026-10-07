@@ -15,7 +15,7 @@ import {
   handlePutStoryboard,
 } from './storyboard-handler';
 
-const STORE: StoreConfig = { mediaRoot: '/media', dbPath: '/media/.studio/studio.db', maxUploadBytes: 2_147_483_648, objectStore: 'fs' };
+const STORE: StoreConfig = { mediaRoot: '/media', dbPath: '/media/.studio/studio.db', maxUploadBytes: 2_147_483_648, objectStore: 'fs', motionAssetsRoot: '/repo/libs/motion-graphics/assets' };
 const SLUG = 'acme-launch';
 const STORYBOARD_ABSOLUTE = `${STORE.mediaRoot}/${SLUG}/work/storyboard.json`;
 

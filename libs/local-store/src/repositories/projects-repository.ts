@@ -2,6 +2,7 @@ import { asc, eq } from 'drizzle-orm';
 import type { BetterSQLite3Database } from 'drizzle-orm/better-sqlite3';
 
 import { projects } from '../schema/studio-schema';
+import type { ProjectMode } from '../schema/project-mode';
 import type * as schema from '../schema/studio-schema';
 
 export interface ProjectRecord {
@@ -9,6 +10,7 @@ export interface ProjectRecord {
   readonly createdAt: string;
   readonly updatedAt: string;
   readonly importedAt: string | null;
+  readonly mode: ProjectMode;
 }
 
 export type ProjectsClock = () => string;
@@ -32,9 +34,13 @@ export function createProjectsRepository(
     return get(slug) !== null;
   }
 
-  function insert(slug: string, importedAt: string | null = null): ProjectRecord {
+  function insert(
+    slug: string,
+    importedAt: string | null = null,
+    mode: ProjectMode = 'footage',
+  ): ProjectRecord {
     const timestamp = clock();
-    const record: ProjectRecord = { slug, createdAt: timestamp, updatedAt: timestamp, importedAt };
+    const record: ProjectRecord = { slug, createdAt: timestamp, updatedAt: timestamp, importedAt, mode };
     db.insert(projects).values(record).run();
     return record;
   }

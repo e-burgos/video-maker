@@ -51,9 +51,17 @@ export type ProjectLayout = {
   out: boolean;
 };
 
+export type ProjectMode = 'footage' | 'motion';
+
 export type ProjectSummary = {
   slug: string;
   layout: ProjectLayout;
+  mode?: ProjectMode;
+};
+
+export type CreateProjectInput = {
+  slug: string;
+  mode?: ProjectMode;
 };
 
 export type VideoCategory = {

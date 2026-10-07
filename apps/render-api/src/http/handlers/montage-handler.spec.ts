@@ -16,7 +16,7 @@ import {
   handlePutTimeline,
 } from './montage-handler';
 
-const STORE: StoreConfig = { mediaRoot: '/media', dbPath: '/media/.studio/studio.db', maxUploadBytes: 2_147_483_648, objectStore: 'fs' };
+const STORE: StoreConfig = { mediaRoot: '/media', dbPath: '/media/.studio/studio.db', maxUploadBytes: 2_147_483_648, objectStore: 'fs', motionAssetsRoot: '/repo/libs/motion-graphics/assets' };
 
 async function* jsonBody(value: unknown): AsyncGenerator<Uint8Array> {
   yield new TextEncoder().encode(JSON.stringify(value));

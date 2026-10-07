@@ -18,7 +18,7 @@ import {
 } from './producer-handler';
 import type { ProducerConversationBody, ProducerTurnAcceptedBody } from './producer-handler';
 
-const STORE: StoreConfig = { mediaRoot: '/media', dbPath: '/media/.studio/studio.db', maxUploadBytes: 2_147_483_648, objectStore: 'fs' };
+const STORE: StoreConfig = { mediaRoot: '/media', dbPath: '/media/.studio/studio.db', maxUploadBytes: 2_147_483_648, objectStore: 'fs', motionAssetsRoot: '/repo/libs/motion-graphics/assets' };
 const PROJECT_ROOT = '/media/demo-01';
 
 const OK_RESULT: ProducerTurnResult = {

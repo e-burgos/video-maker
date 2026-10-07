@@ -31,6 +31,7 @@ describe('createProjectsRepository', () => {
       createdAt: '2026-09-23T00:00:00.000Z',
       updatedAt: '2026-09-23T00:00:00.000Z',
       importedAt: null,
+      mode: 'footage',
     });
     expect(repository.exists('my-video')).toBe(true);
     expect(repository.exists('missing')).toBe(false);
@@ -40,6 +41,19 @@ describe('createProjectsRepository', () => {
     const repository = createProjectsRepository(db, () => '2026-09-23T00:00:00.000Z');
     const record = repository.insert('imported-video', '2026-01-01T00:00:00.000Z');
     expect(record.importedAt).toBe('2026-01-01T00:00:00.000Z');
+  });
+
+  it('inserts a motion project and returns its mode from get and list', () => {
+    const repository = createProjectsRepository(db);
+    repository.insert('footage-one');
+    repository.insert('motion-one', null, 'motion');
+
+    expect(repository.get('motion-one')?.mode).toBe('motion');
+    expect(repository.get('footage-one')?.mode).toBe('footage');
+    expect(repository.list().map((project) => [project.slug, project.mode])).toEqual([
+      ['footage-one', 'footage'],
+      ['motion-one', 'motion'],
+    ]);
   });
 
   it('lists projects ordered by slug', () => {
