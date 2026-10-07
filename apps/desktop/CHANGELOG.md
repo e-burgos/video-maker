@@ -4,6 +4,11 @@ Historial de versiones de la app de escritorio, en español, pensado para los am
 instalan. `apps/desktop/scripts/release-desktop.mjs` toma la sección de la versión que publica
 y la usa como notas del release.
 
+## 0.3.1 — Los videos hechos quedan a la vista
+
+- La página Motion muestra el último video que hiciste (y el crédito de su música) apenas la abrís, no
+  sólo justo después de hacerlo.
+
 ## 0.3.0 — Videos con motion graphics: un guion y unas fotos alcanzan
 
 - Al crear un video ahora elegís el camino: **Motion graphics** (escribís el guion, subís unas fotos con
