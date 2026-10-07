@@ -19,6 +19,20 @@ export const GUIDE_EN: GuideContent = {
       ].join('\n'),
     },
     {
+      id: 'motion',
+      title: 'Motion graphics — a script and a few photos are enough',
+      body: [
+        'When you create a video you pick the path: **Motion graphics** or **Raw footage**. With motion graphics you record nothing: you write the script and the studio designs animated scenes with the brand (titles, devices with their screen, phones, dashboards, photos), adds the voice, picks the music and cuts on the beat.',
+        '',
+        '- **Brief**: brand, format (16:9, or 9:16 for reels), music (automatic, one of the brand tracks or none), goal, audience and the script. If you upload photos, write one line saying what each one shows: the AI does not see them, it picks them by that caption.',
+        '- **Build storyboard**: the AI drafts the scenes from the brief (a few minutes). Review them before going on: changing the script and drafting again is cheap.',
+        '- **Make video**: voice, music and render, with visible progress ("Voice 3/7", "Render…"). The video lands in `out/video.mp4` and shows up when you open the page.',
+        '- **Music credit**: it is not drawn on the video. It stays in `out/video.credits.txt` and under the player: paste it in the description when you publish (the license requires it).',
+        '',
+        'Files live like in any video: `motion/brief.json` and `motion/storyboard.json`, photos in `raw/images/`, the animated project in `work/motion/` and the result in `out/`. The producer can also build these videos from the conversation.',
+      ].join('\n'),
+    },
+    {
       id: 'library',
       title: 'Library — the raw material and what each role does',
       body: [

@@ -19,6 +19,20 @@ export const GUIDE_ES: GuideContent = {
       ].join('\n'),
     },
     {
+      id: 'motion',
+      title: 'Motion graphics — un guion y unas fotos alcanzan',
+      body: [
+        'Al crear un video elegís el camino: **Motion graphics** o **Material crudo**. En motion graphics no grabás nada: escribís el guion y el studio diseña escenas animadas con la marca (títulos, equipos con su pantalla, celulares, tableros, fotos), pone la voz, elige la música y corta al ritmo.',
+        '',
+        '- **Brief**: marca, formato (16:9 o 9:16 para reels), música (automática, un tema de la marca o sin música), objetivo, público y el guion. Si subís fotos, escribí en una línea qué muestra cada una: la IA no las ve, elige por esa descripción.',
+        '- **Armar storyboard**: la IA arma las escenas a partir del brief (unos minutos). Revisalas antes de seguir: es barato cambiar el guion y volver a armarlas.',
+        '- **Hacer video**: voz, música y render, con el avance a la vista ("Voz 3/7", "Render…"). El video queda en `out/video.mp4` y se ve al abrir la página.',
+        '- **Crédito de la música**: no aparece sobre el video. Queda en `out/video.credits.txt` y debajo del reproductor: pegalo en la descripción cuando publiques (la licencia lo pide).',
+        '',
+        'Los archivos quedan como en cualquier video: `motion/brief.json` y `motion/storyboard.json`, las fotos en `raw/images/`, el proyecto animado en `work/motion/` y el resultado en `out/`. El productor también sabe armar estos videos desde la conversación.',
+      ].join('\n'),
+    },
+    {
       id: 'library',
       title: 'Biblioteca — el material crudo y qué hace cada rol',
       body: [

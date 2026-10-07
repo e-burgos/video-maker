@@ -455,6 +455,32 @@ ${voiceEntries}
   https://www.remotion.dev/license; not open source. This app is shared with friends free of
   charge and non-commercially, which the license permits without a company license.
 
+## HyperFrames
+
+- Version: 0.8.139
+- License: Apache-2.0 — Copyright HeyGen. Source: https://github.com/heygen-com/hyperframes
+- Renders the motion graphics videos (beat detection, frame capture, encoding). Its bundled sound
+  effects are part of the same Apache-2.0 package.
+- Ships with sharp and libvips (\`@img/sharp-libvips-darwin-arm64\`, LGPL-3.0-or-later; source at
+  https://github.com/lovell/sharp-libvips) as a dynamically loaded library.
+
+## GSAP
+
+- Version: 3.14.2
+- License: GSAP Standard "No Charge" License — https://gsap.com/standard-license
+- Animates the motion graphics scenes inside the rendered videos.
+
+## Fonts (motion graphics brand kit)
+
+- Outfit, Geist and Geist Mono — SIL Open Font License 1.1, via Fontsource.
+
+## Music (motion graphics brand kit)
+
+- "Voxel Revolution" and "Newer Wave" — Kevin MacLeod (incompetech.com), CC BY 4.0
+  (https://creativecommons.org/licenses/by/4.0/).
+- CC BY requires attribution: every render leaves \`<video>.credits.txt\` next to the MP4 with the
+  credit line, which must go in the description of the published video.
+
 ## Electron
 
 - Version: 44.4.5 (bundles Chromium and Node.js 24)

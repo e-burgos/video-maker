@@ -10,8 +10,13 @@ import { MESSAGES_EN } from '../i18n/messages-en';
 import { MESSAGES_ES } from '../i18n/messages-es';
 import { parseProducerMarkdown } from '../api/producer-markdown';
 
+function sectionById(guide: typeof GUIDE_EN, id: string) {
+  return guide.sections.find((section) => section.id === id);
+}
+
 const REQUIRED_SECTIONS = [
   'projects',
+  'motion',
   'library',
   'producer',
   'storyboard',
@@ -62,14 +67,14 @@ describe('guide content', () => {
 
     for (const role of ASSET_ROLES) {
       const directory = RAW_DIRECTORY_BY_ROLE[role];
-      expect(GUIDE_EN.sections[1]?.body).toContain(`raw/${directory}/`);
-      expect(GUIDE_ES.sections[1]?.body).toContain(`raw/${directory}/`);
+      expect(sectionById(GUIDE_EN, 'library')?.body).toContain(`raw/${directory}/`);
+      expect(sectionById(GUIDE_ES, 'library')?.body).toContain(`raw/${directory}/`);
     }
   });
 
   it('tabulates every output preset with its id and its readable name', () => {
-    const english = GUIDE_EN.sections[6]?.body ?? '';
-    const spanish = GUIDE_ES.sections[6]?.body ?? '';
+    const english = sectionById(GUIDE_EN, 'presets')?.body ?? '';
+    const spanish = sectionById(GUIDE_ES, 'presets')?.body ?? '';
 
     for (const preset of OUTPUT_PRESETS) {
       expect(english).toContain(`\`${preset}\``);
@@ -80,8 +85,8 @@ describe('guide content', () => {
   });
 
   it('tabulates every montage preset with its id and its readable name', () => {
-    const english = GUIDE_EN.sections[1]?.body ?? '';
-    const spanish = GUIDE_ES.sections[1]?.body ?? '';
+    const english = sectionById(GUIDE_EN, 'library')?.body ?? '';
+    const spanish = sectionById(GUIDE_ES, 'library')?.body ?? '';
 
     for (const preset of MONTAGE_PRESETS) {
       expect(english).toContain(`\`${preset}\``);
@@ -92,12 +97,12 @@ describe('guide content', () => {
   });
 
   it('describes the three flows the dev asked for, in both languages', () => {
-    expect(parseProducerMarkdown(GUIDE_EN.sections[7]?.body ?? '')).toHaveLength(3);
-    expect(parseProducerMarkdown(GUIDE_ES.sections[7]?.body ?? '')).toHaveLength(3);
+    expect(parseProducerMarkdown(sectionById(GUIDE_EN, 'flows')?.body ?? '')).toHaveLength(3);
+    expect(parseProducerMarkdown(sectionById(GUIDE_ES, 'flows')?.body ?? '')).toHaveLength(3);
   });
 
   it('renders with the markdown the producer already speaks, tables included', () => {
-    const blocks = parseProducerMarkdown(GUIDE_EN.sections[1]?.body ?? '');
+    const blocks = parseProducerMarkdown(sectionById(GUIDE_EN, 'library')?.body ?? '');
 
     expect(blocks.filter((block) => block.kind === 'table')).toHaveLength(2);
   });
