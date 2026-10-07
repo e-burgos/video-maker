@@ -17,10 +17,12 @@ import type { AssetId } from '@video-maker/timeline-core';
 
 import { MotionStudioError } from '@video-maker/motion-graphics';
 
+import { createClaudeCliAskAgent } from './claude-cli-ask-agent';
 import type { MotionDependencies } from './motion-dependencies';
 
 export const HYPERFRAMES_VERSION = '0.8.139';
 const HYPERFRAMES_TIMEOUT_MS = 3 * 60 * 60 * 1000;
+const ASK_AGENT_TIMEOUT_MS = 10 * 60 * 1000;
 
 const exists = async (path: string): Promise<boolean> =>
   access(path).then(
@@ -114,5 +116,11 @@ export function createNodeMotionDependencies(env: NodeJS.ProcessEnv, workspaceRo
       await hyperframes(['lint'], projectDir);
       await hyperframes(['render', '-f', String(fps), '-q', quality, '-o', outPath], projectDir);
     },
+    askAgent: createClaudeCliAskAgent({
+      runner,
+      binaryPath: env['CLAUDE_CLI_PATH'] ?? 'claude',
+      model: env['MOTION_STUDIO_MODEL'] ?? 'sonnet',
+      timeoutMs: ASK_AGENT_TIMEOUT_MS,
+    }),
   };
 }

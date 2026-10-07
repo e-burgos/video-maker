@@ -13,7 +13,7 @@ export const testBrand: BrandManifest = {
   css: 'brand.css',
   fonts: [{ family: 'Inter', file: 'fonts/inter.woff2' }, { family: 'Mono', file: 'fonts/mono.woff2', weight: '400' }],
   devices: {
-    counter: { name: 'Counter', image: 'img/counter.png', kind: 'counter', screen: { polygon: [[20, 10], [60, 12], [80, 86], [40, 89]], skew: 6, rotate: 4 } },
+    counter: { name: 'Counter', image: 'img/counter.png', kind: 'counter', screen: { polygon: [[20, 10], [60, 12], [80, 86], [40, 89]], skew: 6, rotate: 4, aspect: 0.8 } },
     flat: { name: 'Flat', image: 'img/flat.png', kind: 'screen', screen: { polygon: [[0, 0], [100, 0], [100, 100], [0, 100]] } },
     box: { name: 'Box', image: 'img/box.png', kind: 'box' },
   },

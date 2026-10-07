@@ -40,7 +40,9 @@ const Icon = z.enum(ICON_NAMES);
 const Tone = z.enum(['sky', 'teal', 'warm', 'zinc']);
 const ImageRef = Text.describe('Project image path like images/photo.jpg, or brand asset like brand:counter-15');
 
-const Headline = { title: Text, accent: Text.optional() };
+const Accent = Text.describe('Words shown right AFTER the title (or tagline) in the accent gradient; never repeat words of the title');
+
+const Headline = { title: Text, accent: Accent.optional() };
 
 const PromoScreen = z.strictObject({ type: z.literal('promo'), kicker: Text.optional(), big: Text, small: Text.optional(), tone: Tone.optional() });
 const ListScreen = z.strictObject({
@@ -80,7 +82,7 @@ const HookProps = z.strictObject({
   screen: z.strictObject({ kicker: Text.optional(), text: Text, stamp: Text.optional(), offCue: Cue.optional(), stampCue: Cue.optional() }).optional(),
 });
 const ProblemProps = z.strictObject({ kicker: Text.optional(), items: z.array(z.strictObject({ icon: Icon, label: Text, cue: Cue.optional() })).min(2).max(4), strike: z.boolean() });
-const BrandRevealProps = z.strictObject({ tagline: Text.optional(), accent: Text.optional(), chips: z.array(Text).max(3).optional() });
+const BrandRevealProps = z.strictObject({ tagline: Text.optional(), accent: Accent.optional(), chips: z.array(Text).max(3).optional() });
 const FeatureProps = z.strictObject({ ...Headline, kicker: Text.optional(), text: Text.optional(), bullets: z.array(Chip).max(5), visual: VisualSchema.optional() });
 const RemoteUpdateProps = z.strictObject({
   ...Headline,
@@ -110,11 +112,11 @@ const AiGenerateProps = z.strictObject({
   resultCue: Cue.optional(),
 });
 const ContextProps = z.strictObject({ ...Headline, chips: z.array(Chip).min(1).max(4), radar: z.strictObject({ label: Text, pins: z.number().int().min(0).max(6), cue: Cue.optional() }).optional() });
-const SuggestionProps = z.strictObject({ label: Text, text: Text, accent: Text.optional(), action: Text, done: Text, actionCue: Cue.optional() });
+const SuggestionProps = z.strictObject({ label: Text, text: Text, accent: Text.describe('Words of `text` to highlight in the accent gradient').optional(), action: Text, done: Text, actionCue: Cue.optional() });
 const ProductProps = z.strictObject({
   kicker: Text.optional(),
   name: Text,
-  accent: Text.optional(),
+  accent: Accent.optional(),
   text: Text,
   specs: z.array(Text).max(4).optional(),
   visual: VisualSchema,
@@ -129,7 +131,7 @@ const ConnectionsProps = z.strictObject({
   tv: ScreenStates.optional(),
 });
 const DoDontProps = z.strictObject({ ...Headline, bad: z.strictObject({ title: Text, items: z.array(Text).min(1).max(3), cue: Cue.optional() }), good: z.strictObject({ title: Text, items: z.array(Text).min(1).max(3), cue: Cue.optional() }) });
-const CtaProps = z.strictObject({ tagline: Text.optional(), accent: Text.optional(), button: Text, url: Text.optional(), buttonCue: Cue.optional() });
+const CtaProps = z.strictObject({ tagline: Text.optional(), accent: Accent.optional(), button: Text, url: Text.optional(), buttonCue: Cue.optional() });
 
 const sceneBase = {
   id: z.string().regex(/^[a-z][a-z0-9-]*$/u, 'kebab-case id'),

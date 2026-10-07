@@ -5,8 +5,10 @@ description: Produce videos de motion graphics (presentación de producto, expli
 
 # Skill: motion-studio
 
-Hay dos caminos para el primer paso; desde ahí el pipeline es el mismo:
+Hay tres caminos para el primer paso; desde ahí el pipeline es el mismo:
 
+- **Brief (automático):** `brief.json` con el guion, las imágenes descriptas y la marca; la IA (Claude CLI)
+  elige escenas del catálogo y escribe el `storyboard.json`. Ver "Storyboard automático".
 - **Storyboard (recomendado):** un `storyboard.json` elige escenas de un catálogo de 16 tipos y las
   llena con textos, imágenes y equipos de la marca. No se escribe HTML: la biblioteca
   la lib `libs/motion-graphics` lo compone con el kit de la marca y un runtime de animación declarativo.
@@ -18,6 +20,8 @@ Hay dos caminos para el primer paso; desde ahí el pipeline es el mismo:
 (`media/motion/<slug>/`, gitignoreado) y se puede rehacer solo.
 
 ```bash
+pnpm nx run motion-studio:cli -- auto libs/motion-graphics/assets/briefs/displayads/plataforma-60s.json media/motion/ia-60s
+# o, con un storyboard ya escrito:
 pnpm nx run motion-studio:cli -- storyboard libs/motion-graphics/assets/storyboards/displayads/presentacion.json media/motion/presentacion
 # o, con plantilla a mano:  init displayads/presentacion media/motion/presentacion
 pnpm nx run motion-studio:cli -- voice   media/motion/presentacion --takes 5   # vo-*.wav + words.json
@@ -29,7 +33,9 @@ pnpm nx run motion-studio:cli -- render  media/motion/presentacion --out media/m
 - `plan --no-beat-sync` apaga los cortes al golpe: las escenas siguen a la voz.
 - `voice` usa el stack de voz del repo (`TTS_*` y `WHISPER_*` como `render-api`). Escuchá el reporte:
   `take 3/5 · 0.957 · <lo que entendió Whisper>`. Debajo de ~0.9, reescribí la frase en el `script.json`
-  (palabras simples, la marca con contexto: "Esto es Display Ads", "El Core Pro", "Counter quince").
+  (palabras simples, la marca con contexto: "Esto es Display Ads: cartelería digital, …", "El Core Pro",
+  "Counter quince"). "Esto es Display Ads." suelto sale mal casi siempre (Whisper oye "display house").
+- `voice --only cta,intro --takes 8` rehace sólo esas líneas y conserva el resto; después `plan` y `compose`.
 - Para previsualizar: `npx --yes hyperframes@0.8.139 preview` dentro del proyecto de trabajo.
 
 ## Storyboard y catálogo de escenas
@@ -61,6 +67,21 @@ reales están en `libs/motion-graphics/assets/storyboards/displayads/`.
 `cue` en cualquier elemento = la palabra de la voz en que aparece (prefijo; sin tilde importa poco).
 Imágenes: `images/foto.jpg` (se copian desde la carpeta del storyboard) o `brand:<clave>` del manifiesto.
 Sin música (`music: null`) las escenas se acomodan a una grilla de 120 BPM sin audio.
+
+## Storyboard automático
+
+`brief.json`: `{version: 1, brand, title?, format?, beatSync?, music?: "auto"|<id de tema>|null, goal?,
+audience?, script, images: [{file, caption}]}`. Las imágenes van en `images/` al lado del brief y el
+`caption` dice qué muestra cada una (la IA no las ve). Lo que fija el brief (marca, formato, golpes,
+música) gana; la voz y la URL salen siempre de la marca; si el tema elegido tiene drop, el `brand-reveal`
+cae en el drop. Si la respuesta no pasa el schema o la verificación cruzada (imágenes, equipos, cues,
+tema), se pide una reparación con los errores por campo; si vuelve a fallar, el comando falla nombrando
+escena y campo.
+
+- `CLAUDE_CLI_PATH` (default `claude`) y `MOTION_STUDIO_MODEL` (default `sonnet`). El CLI corre aislado
+  (`--setting-sources ''`, `--strict-mcp-config`, cwd temporal): sin eso los plugins y hooks del usuario
+  le suman ~180k tokens a cada llamada. Costo medido: ~$0,40 y ~3 min por storyboard de 60 s.
+- Revisá el `storyboard.json` antes de `voice`: es barato de editar y caro de re-sintetizar.
 
 ## Marcas
 

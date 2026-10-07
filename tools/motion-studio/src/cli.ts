@@ -9,16 +9,18 @@ import {
   composeStoryboard,
   composeTemplate,
   fitBeatGrid,
+  generateMotionStoryboard,
   isMotionStudioError,
   layoutScenes,
   parseBrandManifest,
   parseHyperframesBeats,
+  parseMotionBrief,
   parseMotionScript,
   parseMotionStoryboard,
   pickBestTake,
   wavDurationSec,
 } from '@video-maker/motion-graphics';
-import type { BeatGrid, MotionScript, MotionTimeline, SceneWords } from '@video-maker/motion-graphics';
+import type { BeatGrid, MotionScript, MotionStoryboard, MotionTimeline, SceneWords } from '@video-maker/motion-graphics';
 
 import type { MotionDependencies } from './deps/motion-dependencies';
 
@@ -32,7 +34,8 @@ export const USAGE = [
   'usage: motion-studio <command> [options]',
   '  init <brand>/<video> <project>   copy a hand-made template, its brand kit and its music into a working project',
   '  storyboard <file> <project>      compose a project from a motion storyboard (scene catalog + brand manifest)',
-  '  voice <project> [--takes N]      synthesize every line keeping the most intelligible take',
+  '  auto <brief.json> <project>      let the AI write the storyboard from a brief (script, images, brand), then compose it like storyboard',
+  '  voice <project> [--takes N] [--only id,id]  synthesize every line (or only the listed scenes) keeping the most intelligible take',
   '  plan <project> [--no-beat-sync]  fit the beat grid, lay out scenes and duck the music',
   '  compose <project>                write index.html from index.html.tpl',
   '  render <project> [--out file] [--fps 30] [--quality delivery]',
@@ -76,12 +79,19 @@ async function initCommand(deps: MotionDependencies, template: string, project: 
 
 async function storyboardCommand(deps: MotionDependencies, storyboardPath: string, project: string): Promise<string[]> {
   const storyboard = parseMotionStoryboard(JSON.parse(await deps.readText(storyboardPath)));
-  const brandDir = join(deps.assetsRoot, 'brands', storyboard.brand);
-  if (!(await deps.exists(join(brandDir, BRAND_MANIFEST)))) throw new MotionStudioError('ASSET_MISSING', `brand "${storyboard.brand}" not found in ${deps.assetsRoot}/brands`);
-  const brand = parseBrandManifest(JSON.parse(await deps.readText(join(brandDir, BRAND_MANIFEST))));
+  return composeFromStoryboard(deps, storyboard, dirname(storyboardPath), project);
+}
+
+async function readBrand(deps: MotionDependencies, brandId: string) {
+  const brandDir = join(deps.assetsRoot, 'brands', brandId);
+  if (!(await deps.exists(join(brandDir, BRAND_MANIFEST)))) throw new MotionStudioError('ASSET_MISSING', `brand "${brandId}" not found in ${deps.assetsRoot}/brands`);
+  return parseBrandManifest(JSON.parse(await deps.readText(join(brandDir, BRAND_MANIFEST))));
+}
+
+async function composeFromStoryboard(deps: MotionDependencies, storyboard: MotionStoryboard, sourceDir: string, project: string): Promise<string[]> {
+  const brand = await readBrand(deps, storyboard.brand);
   const composed = composeStoryboard(storyboard, brand);
   await copySharedAssets(deps, storyboard.brand, project);
-  const sourceDir = dirname(storyboardPath);
   for (const image of composed.images) {
     const target = join(project, image);
     if (sourceDir !== project) {
@@ -97,17 +107,44 @@ async function storyboardCommand(deps: MotionDependencies, storyboardPath: strin
   return [`storyboard: ${storyboard.title} · ${storyboard.scenes.length} scenes · ${storyboard.format} · music ${composed.script.music?.file ?? 'none'} → ${project}`];
 }
 
+async function autoCommand(deps: MotionDependencies, briefPath: string, project: string): Promise<string[]> {
+  const brief = parseMotionBrief(JSON.parse(await deps.readText(briefPath)));
+  const brand = await readBrand(deps, brief.brand);
+  const generated = await generateMotionStoryboard(deps.askAgent, brief, brand);
+  await deps.writeText(join(project, 'storyboard.json'), `${JSON.stringify(generated.storyboard, null, 2)}\n`);
+  const composeReport = await composeFromStoryboard(deps, generated.storyboard, dirname(briefPath), project);
+  const { inputTokens, outputTokens, costUsd } = generated.usage;
+  return [
+    `auto: ${generated.storyboard.scenes.length} scenes · repaired ${generated.repaired ? 'yes' : 'no'} · tokens in ${inputTokens} / out ${outputTokens}${costUsd === null ? '' : ` · $${costUsd.toFixed(4)}`}`,
+    ...composeReport,
+  ];
+}
+
 function silentGrid(durationSec: number): BeatGrid {
   const period = 60 / SILENT_BPM;
   const beats = Array.from({ length: Math.ceil(durationSec / period) + 1 }, (_, i) => Math.round(i * period * 1000) / 1000);
   return { bpm: SILENT_BPM, period, phase: 0, confidence: 0, beats };
 }
 
-async function voiceCommand(deps: MotionDependencies, project: string, takes: number): Promise<string[]> {
+async function readExistingWords(deps: MotionDependencies, project: string): Promise<SceneWords> {
+  const path = join(project, WORDS);
+  return (await deps.exists(path)) ? (JSON.parse(await deps.readText(path)) as SceneWords) : {};
+}
+
+function scenesToVoice(script: MotionScript, only: string[] | undefined): MotionScript['scenes'] {
+  if (only === undefined) return script.scenes;
+  const known = new Set(script.scenes.map((scene) => scene.id));
+  const unknown = only.find((id) => !known.has(id));
+  if (unknown !== undefined) throw new MotionStudioError('CLI_USAGE', `--only: unknown scene "${unknown}"`);
+  return script.scenes.filter((scene) => only.includes(scene.id));
+}
+
+async function voiceCommand(deps: MotionDependencies, project: string, takes: number, only: string[] | undefined): Promise<string[]> {
   const script = await readScript(deps, project);
-  const words: SceneWords = {};
+  const scenes = scenesToVoice(script, only);
+  const words: SceneWords = only === undefined ? {} : await readExistingWords(deps, project);
   const report: string[] = [];
-  for (const scene of script.scenes) {
+  for (const scene of scenes) {
     const finalPath = join(project, 'assets', 'audio', `vo-${scene.id}.wav`);
     const { best, attempts } = await pickBestTake(
       scene.vo,
@@ -174,6 +211,7 @@ export async function runCli(argv: string[], resolvePath: (raw: string) => strin
       allowPositionals: true,
       options: {
         takes: { type: 'string', default: '5' },
+        only: { type: 'string' },
         'beat-sync': { type: 'boolean', default: true },
         'no-beat-sync': { type: 'boolean', default: false },
         out: { type: 'string' },
@@ -194,10 +232,15 @@ export async function runCli(argv: string[], resolvePath: (raw: string) => strin
         if (second === undefined) throw new MotionStudioError('CLI_USAGE', 'storyboard needs <file> <project>');
         stdout = await storyboardCommand(deps, project, resolvePath(second));
         break;
+      case 'auto':
+        if (second === undefined) throw new MotionStudioError('CLI_USAGE', 'auto needs <brief.json> <project>');
+        stdout = await autoCommand(deps, project, resolvePath(second));
+        break;
       case 'voice': {
         const takes = Number(values.takes);
         if (!Number.isInteger(takes) || takes < 1) throw new MotionStudioError('CLI_USAGE', '--takes must be a positive integer');
-        stdout = await voiceCommand(deps, project, takes);
+        const only = values.only?.split(',').map((id) => id.trim()).filter((id) => id.length > 0);
+        stdout = await voiceCommand(deps, project, takes, only);
         break;
       }
       case 'plan':

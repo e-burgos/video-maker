@@ -1,6 +1,6 @@
 import { dirname } from 'node:path';
 
-import type { TakeTranscript } from '@video-maker/motion-graphics';
+import type { AskStoryboardAgent, AutoStoryboardRequest, TakeTranscript } from '@video-maker/motion-graphics';
 
 import type { MotionDependencies, RenderRequest } from '../deps/motion-dependencies';
 
@@ -23,6 +23,7 @@ export interface FakeMotionDependencies extends MotionDependencies {
   files: Map<string, string | Uint8Array>;
   calls: string[];
   renders: RenderRequest[];
+  asked: AutoStoryboardRequest[];
 }
 
 export function createFakeMotionDependencies(init: {
@@ -30,10 +31,13 @@ export function createFakeMotionDependencies(init: {
   heard?: (text: string, take: number) => string;
   takeSeconds?: (text: string, take: number) => number;
   beatsJson?: string;
+  answers?: Array<unknown | Error>;
+  usage?: { inputTokens: number; outputTokens: number };
 }): FakeMotionDependencies {
   const files = new Map<string, string | Uint8Array>(Object.entries(init.files ?? {}));
   const calls: string[] = [];
   const renders: RenderRequest[] = [];
+  const asked: AutoStoryboardRequest[] = [];
   const spoken = new Map<string, { text: string; take: number }>();
   const get = (path: string) => {
     const value = files.get(path);
@@ -44,6 +48,7 @@ export function createFakeMotionDependencies(init: {
     files,
     calls,
     renders,
+    asked,
     templatesRoot: '/repo/templates',
     assetsRoot: '/repo/assets',
     readText: async (path) => String(get(path)),
@@ -87,5 +92,11 @@ export function createFakeMotionDependencies(init: {
     render: async (request) => {
       renders.push(request);
     },
+    askAgent: (async (request) => {
+      asked.push(request);
+      const answer = init.answers?.[asked.length - 1];
+      if (answer instanceof Error) throw answer;
+      return { json: answer, usage: init.usage ?? { inputTokens: 1000, outputTokens: 200 } };
+    }) satisfies AskStoryboardAgent,
   };
 }

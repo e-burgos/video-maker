@@ -23,7 +23,7 @@ export const BrandManifestSchema = z.strictObject({
       name: Text,
       image: Text,
       kind: z.enum(['counter', 'box', 'screen']),
-      screen: z.strictObject({ polygon: z.array(Point).length(4), skew: z.number().optional(), rotate: z.number().optional() }).optional(),
+      screen: z.strictObject({ polygon: z.array(Point).length(4), skew: z.number().optional(), rotate: z.number().optional(), aspect: z.number().positive().optional() }).optional(),
     }),
   ),
   images: z.record(z.string(), Text),

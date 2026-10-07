@@ -1,4 +1,4 @@
-import type { TakeTranscript } from '@video-maker/motion-graphics';
+import type { AskStoryboardAgent, TakeTranscript } from '@video-maker/motion-graphics';
 
 export interface RenderRequest {
   projectDir: string;
@@ -22,4 +22,5 @@ export interface MotionDependencies {
   detectBeats(musicPath: string): Promise<string>;
   trimAudio(request: { from: string; to: string; durationSec: number }): Promise<void>;
   render(request: RenderRequest): Promise<void>;
+  askAgent: AskStoryboardAgent;
 }

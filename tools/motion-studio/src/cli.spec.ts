@@ -107,6 +107,58 @@ describe('runCli', () => {
     expect(deps.files.has(`${P}/assets/music/tema.mp3`)).toBe(false);
   });
 
+  it('auto asks the agent with the brief, writes the storyboard and composes the project copying the brief images', async () => {
+    const brief = { version: 1, brand: 'acme', script: 'Mirá tu local. Probalo hoy.', images: [{ file: 'local.jpg', caption: 'Un local' }] };
+    const generated = {
+      ...storyboard,
+      format: '9:16',
+      scenes: [
+        { id: 'hook', kind: 'feature', vo: 'Mirá tu local', props: { title: 'Tu local', bullets: [{ text: 'Ok', cue: 'local' }], visual: { kind: 'image', src: 'images/local.jpg' } } },
+        storyboard.scenes[1],
+      ],
+    };
+    const deps = createFakeMotionDependencies({
+      files: { ...brandFiles(), '/in/brief.json': JSON.stringify(brief), '/in/images/local.jpg': 'jpg' },
+      answers: [generated],
+      usage: { inputTokens: 1200, outputTokens: 300 },
+    });
+    const outcome = await runCli(['auto', '/in/brief.json', P], resolvePath, deps);
+    expect(outcome.exitCode).toBe(0);
+    expect(outcome.stdout[0]).toBe('auto: 2 scenes · repaired no · tokens in 1200 / out 300');
+    expect(deps.asked[0]?.userPrompt).toContain('Mirá tu local. Probalo hoy.');
+    expect(JSON.parse(String(deps.files.get(`${P}/storyboard.json`))).format).toBe('16:9');
+    expect(String(deps.files.get(`${P}/index.html.tpl`))).toContain('data-scene="hook"');
+    expect(deps.files.get(`${P}/images/local.jpg`)).toBe('jpg');
+    expect(deps.files.get(`${P}/assets/music/tema.mp3`)).toBe('mp3');
+  });
+
+  it('auto reports a repair and the cost when the first answer breaks the cross-check', async () => {
+    const brief = { version: 1, brand: 'acme', script: 'Hola', music: 'tema' };
+    const broken = { ...storyboard, scenes: [{ ...storyboard.scenes[0], props: { ...storyboard.scenes[0]?.props, visual: { kind: 'image', src: 'images/ghost.jpg' } } }, storyboard.scenes[1]] };
+    const fixed = { ...storyboard, scenes: [{ id: 'hook', kind: 'hook', vo: 'Mirá tu local', props: { lines: [{ title: 'Tu local' }] } }, storyboard.scenes[1]] };
+    const deps = createFakeMotionDependencies({ files: { ...brandFiles(), '/in/brief.json': JSON.stringify(brief) }, answers: [broken, fixed] });
+    const outcome = await runCli(['auto', '/in/brief.json', P], resolvePath, deps);
+    expect(outcome.exitCode).toBe(0);
+    expect(outcome.stdout[0]).toBe('auto: 2 scenes · repaired yes · tokens in 2000 / out 400');
+    expect(deps.asked[1]?.userPrompt).toContain('images/ghost.jpg');
+  });
+
+  it('auto fails naming the field when the repair still breaks, and on an invalid brief, unknown brand or agent failure', async () => {
+    const brief = { version: 1, brand: 'acme', script: 'Hola' };
+    const broken = { ...storyboard, scenes: [{ ...storyboard.scenes[0], props: { ...storyboard.scenes[0]?.props, visual: { kind: 'image', src: 'images/ghost.jpg' } } }, storyboard.scenes[1]] };
+    const files = { ...brandFiles(), '/in/brief.json': JSON.stringify(brief) };
+    const stuck = await runCli(['auto', '/in/brief.json', P], resolvePath, createFakeMotionDependencies({ files, answers: [broken, broken] }));
+    expect(stuck.exitCode).toBe(1);
+    expect(stuck.stderr[0]).toContain('scenes[0].props.visual.src');
+    const invalid = await runCli(['auto', '/in/brief.json', P], resolvePath, createFakeMotionDependencies({ files: { ...files, '/in/brief.json': '{"version":1,"brand":"acme"}' } }));
+    expect(invalid.stderr[0]).toContain('brief.json is invalid');
+    const noBrand = await runCli(['auto', '/in/brief.json', P], resolvePath, createFakeMotionDependencies({ files: { '/in/brief.json': JSON.stringify(brief) } }));
+    expect(noBrand.stderr[0]).toContain('brand "acme" not found');
+    const down = await runCli(['auto', '/in/brief.json', P], resolvePath, createFakeMotionDependencies({ files, answers: [new Error('offline')] }));
+    expect(down.stderr[0]).toContain('offline');
+    expect((await runCli(['auto', '/in/brief.json'], resolvePath, createFakeMotionDependencies({}))).exitCode).toBe(2);
+  });
+
   it('init rejects an unknown template or a missing video name', async () => {
     const deps = createFakeMotionDependencies({});
     expect((await runCli(['init', 'acme/nope', P], resolvePath, deps)).stderr[0]).toContain('template acme/nope not found');
@@ -127,6 +179,26 @@ describe('runCli', () => {
     expect(deps.files.has(`${P}/assets/audio/vo-reveal.wav`)).toBe(true);
     const words = JSON.parse(String(deps.files.get(`${P}/words.json`)));
     expect(words.reveal[0]).toEqual({ w: 'Esto', t: 0, e: 0.25 });
+  });
+
+  it('voice --only redoes the listed lines and keeps the other word timings', async () => {
+    const previous = { hook: [{ w: 'previo', t: 0, e: 1 }], reveal: [{ w: 'viejo', t: 0, e: 1 }] };
+    const deps = createFakeMotionDependencies({ files: { [`${P}/script.json`]: JSON.stringify(script), [`${P}/words.json`]: JSON.stringify(previous) } });
+    const outcome = await runCli(['voice', P, '--only', 'reveal'], resolvePath, deps);
+    expect(outcome.exitCode).toBe(0);
+    expect(outcome.stdout).toHaveLength(1);
+    expect(outcome.stdout[0]).toMatch(/^voice reveal:/u);
+    expect(deps.files.has(`${P}/assets/audio/vo-hook.wav`)).toBe(false);
+    const words = JSON.parse(String(deps.files.get(`${P}/words.json`)));
+    expect(words.hook).toEqual(previous.hook);
+    expect(words.reveal[0]).toEqual({ w: 'Esto', t: 0, e: 0.25 });
+  });
+
+  it('voice --only rejects a scene id that is not in the script', async () => {
+    const deps = createFakeMotionDependencies({ files: projectFiles() });
+    const outcome = await runCli(['voice', P, '--only', 'reveal,nope'], resolvePath, deps);
+    expect(outcome.exitCode).toBe(2);
+    expect(outcome.stderr[0]).toContain('unknown scene "nope"');
   });
 
   it('voice rejects a non-positive --takes', async () => {

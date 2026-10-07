@@ -7,7 +7,9 @@ export type MotionStudioErrorCode =
   | 'STAGE_FAILED'
   | 'STORYBOARD_INVALID'
   | 'BRAND_INVALID'
-  | 'ASSET_MISSING';
+  | 'ASSET_MISSING'
+  | 'BRIEF_INVALID'
+  | 'AI_FAILED';
 
 export class MotionStudioError extends Error {
   readonly code: MotionStudioErrorCode;

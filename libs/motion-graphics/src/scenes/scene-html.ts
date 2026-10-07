@@ -42,9 +42,15 @@ export function icon(name: IconName): string {
   return `<svg class="mg-icon"><use href="#i-${name}"></use></svg>`;
 }
 
+const NON_BREAKING_HYPHEN = '\u2011';
+
+function keepHyphenatedWordsTogether(text: string): string {
+  return text.replace(/(?<=\p{L})-(?=\p{L})/gu, NON_BREAKING_HYPHEN);
+}
+
 export function headline(title: string, accent: string | undefined, size: '' | 'lg' | 'xl' = '', a: Anim | null = { anim: 'rise' }): string {
-  const accentHtml = accent ? ` <span class="mg-grad">${esc(accent)}</span>` : '';
-  return `<h2 class="mg-h ${size}"${animAttrs(a)}>${esc(title)}${accentHtml}</h2>`;
+  const accentHtml = accent ? ` <span class="mg-grad">${esc(keepHyphenatedWordsTogether(accent))}</span>` : '';
+  return `<h2 class="mg-h ${size}"${animAttrs(a)}>${esc(keepHyphenatedWordsTogether(title))}${accentHtml}</h2>`;
 }
 
 export function chip(c: MotionChip, size: '' | 'lg' = '', fallback: Anim = { anim: 'rise' }): string {
@@ -105,12 +111,31 @@ export function screenStates(states: Array<{ screen: MotionScreen; cue?: string 
     .join('');
 }
 
+const SCREEN_OVERFILL = 1.5;
+const UI_SCREEN_TYPES: ReadonlySet<MotionScreen['type']> = new Set(['list', 'status', 'url']);
+
+function parallelogramMatrix(topLeft: [number, number], topRight: [number, number], bottomLeft: [number, number], aspect: number): string {
+  const round = (n: number) => Math.round(n * 10000) / 10000;
+  const shearY = (topRight[1] - topLeft[1]) / (topRight[0] - topLeft[0]) / aspect;
+  const shearX = ((bottomLeft[0] - topLeft[0]) / (bottomLeft[1] - topLeft[1])) * aspect;
+  return `matrix(1, ${round(shearY)}, ${round(shearX)}, 1, 0, 0)`;
+}
+
+function screenQuadBox(polygon: Array<[number, number]>, aspect: number | undefined, fallbackTransform: string): string {
+  const [topLeft, topRight, , bottomLeft] = polygon;
+  if (!topLeft || !topRight || !bottomLeft) return 'inset:0';
+  const round = (n: number) => Math.round(n * 100) / 100;
+  const transform = aspect === undefined ? fallbackTransform : parallelogramMatrix(topLeft, topRight, bottomLeft, aspect);
+  return `left:${topLeft[0]}%;top:${topLeft[1]}%;width:${round(topRight[0] - topLeft[0] + SCREEN_OVERFILL)}%;height:${round(bottomLeft[1] - topLeft[1] + SCREEN_OVERFILL)}%;transform:${transform};transform-origin:0 0`;
+}
+
 function deviceVisual(deviceId: string, states: Array<{ screen: MotionScreen; cue?: string | undefined }> | undefined, ctx: SceneContext, height: number): string {
   const device = ctx.brand.devices[deviceId];
   if (device === undefined) throw new MotionStudioError('ASSET_MISSING', `brand "${ctx.brand.id}" has no device "${deviceId}"`);
   const img = `<img src="${esc(ctx.imageUrl(`brand:${device.image}`))}" alt="${esc(device.name)}" />`;
   if (!device.screen || !states) return `<div class="mg-device" style="height:${height}px"${animAttrs({ anim: 'right' })}><div class="mg-device-glow"></div>${img}</div>`;
   const pts = device.screen.polygon;
+  const aspect = device.screen.aspect;
   const xs = pts.map((p) => p[0]);
   const ys = pts.map((p) => p[1]);
   const left = Math.min(...xs);
@@ -121,7 +146,13 @@ function deviceVisual(deviceId: string, states: Array<{ screen: MotionScreen; cu
   const layers = states
     .map((state, i) => {
       const anim = i === 0 ? '' : animAttrs({ anim: 'swap', cue: state.cue, beat: state.cue ? undefined : i * 4 });
-      const inner = state.screen.type === 'promo' ? `<div class="mg-screen ${toneClass(state.screen.tone)}"><div class="mg-promo" style="position:absolute;inset:auto;${box};padding:0;justify-content:flex-start">${state.screen.kicker ? `<span class="k">${esc(state.screen.kicker)}</span>` : ''}<span class="b">${esc(state.screen.big)}</span>${state.screen.small ? `<span class="s">${esc(state.screen.small)}</span>` : ''}</div></div>` : screenInner(state.screen, ctx, i === 0 ? undefined : state.cue);
+      const cue = i === 0 ? undefined : state.cue;
+      const inner =
+        state.screen.type === 'promo'
+          ? `<div class="mg-screen ${toneClass(state.screen.tone)}"><div class="mg-promo" style="position:absolute;inset:auto;${box};padding:0;justify-content:flex-start">${state.screen.kicker ? `<span class="k">${esc(state.screen.kicker)}</span>` : ''}<span class="b">${esc(state.screen.big)}</span>${state.screen.small ? `<span class="s">${esc(state.screen.small)}</span>` : ''}</div></div>`
+          : UI_SCREEN_TYPES.has(state.screen.type)
+            ? `<div class="mg-device-screen" style="${screenQuadBox(pts, aspect, skew)}">${screenInner(state.screen, ctx, cue)}</div>`
+            : screenInner(state.screen, ctx, cue);
       return `<div class="mg-layer"${anim}>${inner}</div>`;
     })
     .join('');

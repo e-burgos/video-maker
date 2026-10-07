@@ -22,12 +22,22 @@
       "estimation_hours": 2,
       "story_points": 2,
       "depends_on": [],
-      "status": "pending",
+      "status": "done",
       "files": [
         "libs/motion-graphics/src/index.ts",
         "libs/motion-graphics/project.json",
         "tsconfig.base.json"
-      ]
+      ],
+      "usage": {
+        "provider_model": "claude/opus",
+        "effort": "high",
+        "agent": "orchestrator",
+        "tokens_in": 120000,
+        "tokens_out": 12000,
+        "approx": true,
+        "source": "declared-estimate",
+        "recorded_at": "2026-10-07"
+      }
     },
     {
       "id": "TASK-002",
@@ -41,11 +51,21 @@
       "depends_on": [
         "TASK-001"
       ],
-      "status": "pending",
+      "status": "done",
       "files": [
         "libs/motion-graphics/src/storyboard/motion-storyboard.schema.ts",
         "libs/motion-graphics/src/brand/brand-manifest.ts"
-      ]
+      ],
+      "usage": {
+        "provider_model": "claude/opus",
+        "effort": "high",
+        "agent": "orchestrator",
+        "tokens_in": 80000,
+        "tokens_out": 10000,
+        "approx": true,
+        "source": "declared-estimate",
+        "recorded_at": "2026-10-07"
+      }
     },
     {
       "id": "TASK-003",
@@ -58,11 +78,21 @@
       "depends_on": [
         "TASK-002"
       ],
-      "status": "pending",
+      "status": "done",
       "files": [
         "libs/motion-graphics/assets/runtime/kit.js",
         "libs/motion-graphics/assets/runtime/scenes.css"
-      ]
+      ],
+      "usage": {
+        "provider_model": "claude/opus",
+        "effort": "high",
+        "agent": "orchestrator",
+        "tokens_in": 100000,
+        "tokens_out": 12000,
+        "approx": true,
+        "source": "declared-estimate",
+        "recorded_at": "2026-10-07"
+      }
     },
     {
       "id": "TASK-004",
@@ -75,10 +105,20 @@
       "depends_on": [
         "TASK-003"
       ],
-      "status": "pending",
+      "status": "done",
       "files": [
         "libs/motion-graphics/src/scenes/render-scene.ts"
-      ]
+      ],
+      "usage": {
+        "provider_model": "claude/opus",
+        "effort": "high",
+        "agent": "orchestrator",
+        "tokens_in": 180000,
+        "tokens_out": 25000,
+        "approx": true,
+        "source": "declared-estimate",
+        "recorded_at": "2026-10-07"
+      }
     },
     {
       "id": "TASK-005",
@@ -91,11 +131,21 @@
       "depends_on": [
         "TASK-004"
       ],
-      "status": "pending",
+      "status": "done",
       "files": [
         "libs/motion-graphics/src/compose/compose-storyboard.ts",
         "tools/motion-studio/src/cli.ts"
-      ]
+      ],
+      "usage": {
+        "provider_model": "claude/opus",
+        "effort": "high",
+        "agent": "orchestrator",
+        "tokens_in": 100000,
+        "tokens_out": 12000,
+        "approx": true,
+        "source": "declared-estimate",
+        "recorded_at": "2026-10-07"
+      }
     },
     {
       "id": "TASK-006",
@@ -109,11 +159,21 @@
       "depends_on": [
         "TASK-005"
       ],
-      "status": "pending",
+      "status": "done",
       "files": [
         "libs/motion-graphics/assets/brands/displayads/brand.json",
         "libs/motion-graphics/assets/storyboards/displayads/presentacion.json"
-      ]
+      ],
+      "usage": {
+        "provider_model": "claude/opus",
+        "effort": "high",
+        "agent": "orchestrator",
+        "tokens_in": 250000,
+        "tokens_out": 20000,
+        "approx": true,
+        "source": "declared-estimate",
+        "recorded_at": "2026-10-07"
+      }
     },
     {
       "id": "TASK-007",
@@ -129,10 +189,20 @@
       "depends_on": [
         "TASK-006"
       ],
-      "status": "pending",
+      "status": "done",
       "files": [
         "sdd/context/libs/motion-graphics/constitution.md"
-      ]
+      ],
+      "usage": {
+        "provider_model": "claude/opus",
+        "effort": "high",
+        "agent": "orchestrator",
+        "tokens_in": 60000,
+        "tokens_out": 6000,
+        "approx": true,
+        "source": "declared-estimate",
+        "recorded_at": "2026-10-07"
+      }
     }
   ]
 }

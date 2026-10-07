@@ -31,3 +31,13 @@ export type { SceneContext } from './scenes/scene-html';
 export { formatIssuePath, motionStoryboardJsonSchema, parseMotionStoryboard } from './storyboard/parse-motion-storyboard';
 export { ICON_NAMES, MotionSceneSchema, MotionStoryboardSchema, SCENE_KINDS } from './storyboard/motion-storyboard.schema';
 export type { IconName, MotionChip, MotionSceneKind, MotionScreen, MotionStoryboard, MotionStoryboardScene, MotionVisual, SceneOf } from './storyboard/motion-storyboard.schema';
+
+export { buildAutoStoryboardRequest } from './auto/build-auto-storyboard-request';
+export type { AutoStoryboardRequest } from './auto/build-auto-storyboard-request';
+export { checkStoryboardAgainstBrief, enforceBrief } from './auto/check-storyboard-against-brief';
+export type { StoryboardIssue } from './auto/check-storyboard-against-brief';
+export { generateMotionStoryboard } from './auto/generate-motion-storyboard';
+export type { AskResponse, AskStoryboardAgent, AskUsage, GeneratedStoryboard } from './auto/generate-motion-storyboard';
+export { briefImageRef, MotionBriefSchema, parseMotionBrief } from './auto/motion-brief';
+export type { MotionBrief } from './auto/motion-brief';
+export { SCENE_GUIDE } from './auto/scene-guide';

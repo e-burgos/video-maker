@@ -29,6 +29,15 @@ describe('fitBeatGrid', () => {
     expect(grid.bpm).toBeCloseTo(122, 0);
   });
 
+  it('reads the tempo from a regular eighth-note train whose off-beats cancel the phase coherence', () => {
+    const strengths = [0.46, 0.3, 0.53, 0.43, 0.3, 0.29, 0.31, 0.24];
+    const eighths = Array.from({ length: 500 }, (_, i) => ({ time: 0.221 + i * 0.246, strength: strengths[i % strengths.length] ?? 0.3 }));
+    const grid = fitBeatGrid(eighths, 120);
+    expect(grid.bpm).toBeCloseTo(121.95, 1);
+    expect(grid.phase).toBeCloseTo(0.221, 2);
+    expect(grid.confidence).toBeGreaterThan(0.9);
+  });
+
   it('lists every beat of the grid up to the duration, without drift', () => {
     const grid = fitBeatGrid(pulse(120, 0.1, 100), 10);
     expect(grid.beats[0]).toBeCloseTo(0.1, 2);

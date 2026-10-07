@@ -51,7 +51,8 @@
           ]
         ],
         "skew": 6,
-        "rotate": 4
+        "rotate": 4,
+        "aspect": 0.8078
       }
     },
     "core-pro": {

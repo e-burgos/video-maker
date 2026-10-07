@@ -1,0 +1,34 @@
+{
+  "$schema": "../../../../schemas/cycle.schema.json",
+  "cycle": 3,
+  "module": "motion-mode",
+  "spec": "spec-e-burgos-020-motion-mode",
+  "apps": [
+    "libs/motion-graphics",
+    "tools/motion-studio"
+  ],
+  "phase": "auto-storyboard",
+  "flow": "full",
+  "objectives": [
+    "Contrato MotionBrief y verificación cruzada storyboard ↔ brief ↔ marca",
+    "Pedido a la IA generado desde el catálogo y la marca; generateMotionStoryboard con una reparación",
+    "Comando auto en motion-studio con adaptador Claude CLI y corrida real con un guion nuevo de DisplayAds"
+  ],
+  "status": "in-progress",
+  "started_at": "2026-10-07",
+  "completed_at": null,
+  "documents": {
+    "brief": "sdd/specs/spec-e-burgos-020-motion-mode/cycles/cycle-03/brief.yaml",
+    "functional": "sdd/specs/spec-e-burgos-020-motion-mode/cycles/cycle-03/functional.md",
+    "planner": "sdd/specs/spec-e-burgos-020-motion-mode/cycles/cycle-03/planner.md",
+    "architect": "sdd/specs/spec-e-burgos-020-motion-mode/cycles/cycle-03/architect.md",
+    "tasks": "sdd/specs/spec-e-burgos-020-motion-mode/cycles/cycle-03/tasks.json"
+  },
+  "artifacts": [],
+  "metrics": null,
+  "tables_created": [],
+  "endpoints_implemented": [],
+  "components_created": [],
+  "issues_found": [],
+  "reviewer_report": null
+}

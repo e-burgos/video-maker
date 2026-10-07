@@ -42,4 +42,8 @@ describe('parseMotionStoryboard', () => {
     expect(SCENE_KINDS).toHaveLength(16);
     for (const kind of SCENE_KINDS) expect(schema).toContain(`"${kind}"`);
   });
+
+  it('tells the AI that an accent follows the title instead of highlighting part of it', () => {
+    expect(JSON.stringify(motionStoryboardJsonSchema())).toContain('right AFTER the title');
+  });
 });

@@ -5,7 +5,7 @@ import { MotionStudioError } from '../errors/motion-studio-error';
 import { ICON_NAMES } from '../storyboard/motion-storyboard.schema';
 import { ICON_PATHS, iconSprite } from './icons';
 import { renderScene } from './render-scene';
-import { animAttrs, esc, screenInner } from './scene-html';
+import { animAttrs, esc, headline, screenInner } from './scene-html';
 import type { SceneContext } from './scene-html';
 
 const ctx: SceneContext = { brand: testBrand, format: '16:9', imageUrl: (ref) => (ref.startsWith('brand:') ? `assets/brand/${ref.slice(6)}` : ref) };
@@ -34,6 +34,12 @@ describe('scene html helpers', () => {
     const list = { type: 'list' as const, title: 'Redes', items: ['A'], select: 0, field: 'Clave', button: 'Ir' };
     expect(screenInner(list, ctx, 'red')).toContain('data-cue="red" data-after="2.4"');
     expect(screenInner(list, ctx, undefined)).toContain('data-beat="6"');
+  });
+});
+
+describe('headline', () => {
+  it('keeps hyphenated words on one line', () => {
+    expect(headline('Configurá el Wi-Fi', 'desde el celular-app')).toBe('<h2 class="mg-h " data-anim="rise">Configurá el Wi\u2011Fi <span class="mg-grad">desde el celular\u2011app</span></h2>');
   });
 });
 
@@ -118,6 +124,22 @@ describe('renderScene', () => {
     expect(out).toContain('data-anim="swap" data-cue="todo"');
     expect(html('product-box')).not.toContain('clip-path');
     expect(html('product-flat')).toContain('skewY(0deg) rotate(0deg)');
+  });
+
+  it('ui screens on a device sit on the screen quad instead of the whole device image', () => {
+    const list = { type: 'list' as const, title: 'Redes', items: ['Local'], select: 0 };
+    const product = scene('product');
+    const onDevice = (device: string) => renderScene({ ...product, props: { ...product.props, visual: { kind: 'device', device, states: [{ screen: list }] } } } as never, ctx);
+    expect(onDevice('counter')).toContain('<div class="mg-device-screen" style="left:20%;top:10%;width:41.5%;height:80.5%;transform:matrix(1, 0.0625, 0.2025, 1, 0, 0);transform-origin:0 0"><div class="mg-screen"><div class="mg-ui">');
+    expect(onDevice('flat')).toContain('style="left:0%;top:0%;width:101.5%;height:101.5%;transform:skewY(0deg) rotate(0deg);transform-origin:0 0"');
+  });
+
+  it('ignores an accent that comes without its own tagline so it never trails the brand tagline', () => {
+    const orphanAccent = (id: string) => {
+      const found = scene(id);
+      return renderScene({ ...found, props: { ...found.props, tagline: undefined, accent: 'hoy mismo' } } as never, ctx);
+    };
+    for (const id of ['cta', 'reveal']) expect(orphanAccent(id)).not.toContain('hoy mismo');
   });
 
   it('device visuals fail when the brand lacks the device', () => {

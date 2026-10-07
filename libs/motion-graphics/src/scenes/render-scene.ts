@@ -35,7 +35,7 @@ const problem: Renderer<'problem'> = ({ props }) => {
 
 const brandReveal: Renderer<'brand-reveal'> = ({ props }, ctx) => {
   const tagline = props.tagline ?? ctx.brand.tagline;
-  const accent = props.accent ?? (props.tagline ? undefined : ctx.brand.taglineAccent);
+  const accent = props.tagline ? props.accent : ctx.brand.taglineAccent;
   const chips = (props.chips ?? []).map((c) => `<span class="mg-chip"${animAttrs({ anim: 'rise' })}>${esc(c)}</span>`).join('');
   return frame(`<div class="mg-center"><div class="mg-ring"${animAttrs({ anim: 'pop', at: 0, dur: 1.6 })}></div><img class="mg-logo" src="${esc(ctx.imageUrl(`brand:${ctx.brand.logo}`))}" alt="${esc(ctx.brand.name)}"${animAttrs({ anim: 'blur', at: 0 })} />${headline(tagline, accent, '', { anim: 'rise', at: 0.9 })}${chips ? `<div class="mg-chips" style="justify-content:center">${chips}</div>` : ''}</div>`);
 };
@@ -179,7 +179,7 @@ const doDont: Renderer<'do-dont'> = ({ props }) => {
 
 const cta: Renderer<'cta'> = ({ props }, ctx) => {
   const tagline = props.tagline ?? ctx.brand.tagline;
-  const accent = props.accent ?? (props.tagline ? undefined : ctx.brand.taglineAccent);
+  const accent = props.tagline ? props.accent : ctx.brand.taglineAccent;
   const url = props.url ?? ctx.brand.url;
   return frame(`<div class="mg-center"><img class="mg-logo" style="width:min(900px,88%)" src="${esc(ctx.imageUrl(`brand:${ctx.brand.logo}`))}" alt="${esc(ctx.brand.name)}"${animAttrs({ anim: 'blur', at: 0 })} />${headline(tagline, accent, '', { anim: 'rise', at: 1 })}<div class="mg-cta-row"${animAttrs({ anim: 'rise', cue: props.buttonCue, at: props.buttonCue ? undefined : 2 })}><span class="mg-btn"${animAttrs({ anim: 'glow', cue: props.buttonCue, at: props.buttonCue ? undefined : 2.5, parallel: true })}>${esc(props.button)}</span>${url ? `<span class="mg-url-chip">${esc(url)}</span>` : ''}</div></div>`);
 };
