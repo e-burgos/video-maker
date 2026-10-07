@@ -485,6 +485,20 @@
           "tasks_done": 8
         }
       }
+    },
+    "spec-e-burgos-020-motion-mode": {
+      "cycles": {
+        "cycle-01": {
+          "file": "sdd/specs/spec-e-burgos-020-motion-mode/cycles/cycle-01/tasks.json",
+          "module": "motion-mode",
+          "apps": [
+            "apps/motion-editor"
+          ],
+          "status": "completed",
+          "tasks_total": 4,
+          "tasks_done": 4
+        }
+      }
     }
   }
 }

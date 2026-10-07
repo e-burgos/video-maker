@@ -1,0 +1,124 @@
+{
+  "$schema": "../../../../schemas/cycle-tasks.schema.json",
+  "spec": "spec-e-burgos-020-motion-mode",
+  "cycle": 1,
+  "module": "motion-mode",
+  "apps": [
+    "apps/motion-editor"
+  ],
+  "flow": "lite",
+  "user_stories_generated": true,
+  "prerequisites": {
+    "tasks_generated": true
+  },
+  "tasks": [
+    {
+      "id": "TASK-001",
+      "title": "Copy apps/video-manager into apps/motion-editor with its engine, editor, videos, fonts, assets, vite plugins and guides, renaming the project",
+      "user_stories": [
+        "US-020-101"
+      ],
+      "estimation_hours": 1.5,
+      "story_points": 1,
+      "depends_on": [],
+      "status": "done",
+      "files": [
+        "apps/motion-editor/project.json",
+        "apps/motion-editor/vite.config.mts",
+        "apps/motion-editor/README.md"
+      ],
+      "usage": {
+        "provider_model": "claude/opus",
+        "effort": "high",
+        "agent": "orchestrator",
+        "tokens_in": 60000,
+        "tokens_out": 6000,
+        "approx": true,
+        "source": "declared-estimate",
+        "recorded_at": "2026-10-07"
+      }
+    },
+    {
+      "id": "TASK-002",
+      "title": "Align the app with the Video Maker workspace (tsconfig, Nx inferred targets, lint config, root scripts, ports) until typecheck, test, lint and build pass",
+      "user_stories": [
+        "US-020-101"
+      ],
+      "estimation_hours": 2,
+      "story_points": 2,
+      "depends_on": [
+        "TASK-001"
+      ],
+      "status": "done",
+      "files": [
+        "apps/motion-editor/tsconfig.json",
+        "apps/motion-editor/tsconfig.app.json",
+        "package.json"
+      ],
+      "usage": {
+        "provider_model": "claude/opus",
+        "effort": "high",
+        "agent": "orchestrator",
+        "tokens_in": 90000,
+        "tokens_out": 9000,
+        "approx": true,
+        "source": "declared-estimate",
+        "recorded_at": "2026-10-07"
+      }
+    },
+    {
+      "id": "TASK-003",
+      "title": "Exercise the editor in a real browser: every video loads and an exported frame matches the scene",
+      "user_stories": [
+        "US-020-102"
+      ],
+      "estimation_hours": 1,
+      "story_points": 1,
+      "depends_on": [
+        "TASK-002"
+      ],
+      "status": "done",
+      "files": [
+        "apps/motion-editor/SKILLS/VIDEO-CREATOR.md"
+      ],
+      "usage": {
+        "provider_model": "claude/opus",
+        "effort": "high",
+        "agent": "orchestrator",
+        "tokens_in": 40000,
+        "tokens_out": 4000,
+        "approx": true,
+        "source": "declared-estimate",
+        "recorded_at": "2026-10-07"
+      }
+    },
+    {
+      "id": "TASK-004",
+      "title": "Close the cycle: context for apps/motion-editor, global rows, validate",
+      "user_stories": [
+        "US-020-101",
+        "US-020-102"
+      ],
+      "estimation_hours": 0.5,
+      "story_points": 1,
+      "depends_on": [
+        "TASK-003"
+      ],
+      "status": "done",
+      "files": [
+        "sdd/context/apps/motion-editor/constitution.md",
+        "sdd/context/apps/motion-editor/context_prompt.md"
+      ],
+      "usage": {
+        "provider_model": "claude/opus",
+        "effort": "high",
+        "agent": "orchestrator",
+        "tokens_in": 30000,
+        "tokens_out": 4000,
+        "approx": true,
+        "source": "declared-estimate",
+        "recorded_at": "2026-10-07"
+      }
+    }
+  ]
+}

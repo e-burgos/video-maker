@@ -185,7 +185,22 @@
       "completed_at": "2026-10-07"
     }
   ],
-  "in_progress_modules": [],
+  "in_progress_modules": [
+    {
+      "module": "motion-mode",
+      "spec": "spec-e-burgos-020-motion-mode",
+      "apps": [
+        "apps/motion-editor",
+        "libs/motion-graphics",
+        "tools/motion-studio",
+        "apps/render-api",
+        "apps/web",
+        "libs/producer-tools",
+        "apps/desktop"
+      ],
+      "description": "Modo motion graphics de punta a punta: video-manager unificado como apps/motion-editor, catálogo de escenas y storyboard de motion en libs/motion-graphics, storyboard automático desde guion e imágenes, job motion en render-api y elección de modo al crear el proyecto"
+    }
+  ],
   "pending_modules": [
     {
       "module": "scene-assembly",

@@ -1,0 +1,90 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="utf-8" />
+    <title>DisplayAds — Video Manager</title>
+    <base href="/" />
+
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link rel="icon" href="/favicon.ico" sizes="32x32" />
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+
+    <!--
+      Fuentes auto-hospedadas (DEC-73-006, Ciclo 73): sólo subset `latin`
+      (acentos, ñ, ¿¡, — – … " " − viven todos en U+0000-206F, cubiertos acá).
+      Reemplaza el <link> a Google Fonts + los dos <preconnect>: reduce de
+      26 a 6 @font-face lo que `useInlineFontsInto` (animations-v2.jsx) copia
+      y convierte a data: URL en CADA frame del export (INV-LOCAL-33-5: el
+      motor no se toca, la única palanca es qué @font-face hay en la página).
+      Pesos hospedados = los que usa `src/theme.ts` (F.sans/F.mono) de verdad:
+      Outfit 400/500/600/700, JetBrains Mono 400/700 (nunca se usa 500 mono).
+      Un archivo woff2 ESTÁTICO por peso (no variable): la variante variable
+      que sirve Google por defecto reutiliza el MISMO archivo para los 4
+      pesos de Outfit, y `useInlineFontsInto` (el inliner vendorizado) copia
+      ese archivo una vez POR CADA @font-face — con estático son ~129 KB
+      inlineados; con variable-reusado hubiesen sido ~250 KB (ver medición
+      en reviewer.md). Archivos en public/fonts/, ver public/fonts/OFL.txt
+      (SIL OFL 1.1) para licencia y comando de regeneración.
+    -->
+    <style>
+      @font-face {
+        font-family: 'Outfit';
+        font-style: normal;
+        font-weight: 400;
+        font-display: swap;
+        src: url('/fonts/outfit-400.woff2') format('woff2');
+        unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+      }
+      @font-face {
+        font-family: 'Outfit';
+        font-style: normal;
+        font-weight: 500;
+        font-display: swap;
+        src: url('/fonts/outfit-500.woff2') format('woff2');
+        unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+      }
+      @font-face {
+        font-family: 'Outfit';
+        font-style: normal;
+        font-weight: 600;
+        font-display: swap;
+        src: url('/fonts/outfit-600.woff2') format('woff2');
+        unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+      }
+      @font-face {
+        font-family: 'Outfit';
+        font-style: normal;
+        font-weight: 700;
+        font-display: swap;
+        src: url('/fonts/outfit-700.woff2') format('woff2');
+        unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+      }
+      @font-face {
+        font-family: 'JetBrains Mono';
+        font-style: normal;
+        font-weight: 400;
+        font-display: swap;
+        src: url('/fonts/jetbrains-mono-400.woff2') format('woff2');
+        unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+      }
+      @font-face {
+        font-family: 'JetBrains Mono';
+        font-style: normal;
+        font-weight: 700;
+        font-display: swap;
+        src: url('/fonts/jetbrains-mono-700.woff2') format('woff2');
+        unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+      }
+
+      html, body { margin: 0; padding: 0; background: #050506; overflow: hidden; }
+      #root { width: 100vw; height: 100vh; }
+      a { color: #38bdf8; text-decoration: none; }
+      a:hover { color: #0ea5e9; }
+    </style>
+
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>

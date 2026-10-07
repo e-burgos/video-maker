@@ -1,0 +1,34 @@
+[
+  {
+    "name": "Apertura",
+    "dur": 7
+  },
+  {
+    "name": "Ubicacion",
+    "dur": 8
+  },
+  {
+    "name": "EncendidoKiosco",
+    "dur": 9
+  },
+  {
+    "name": "Reintentando",
+    "dur": 9
+  },
+  {
+    "name": "PantallaRecuperacion",
+    "dur": 13
+  },
+  {
+    "name": "Reconexion",
+    "dur": 9
+  },
+  {
+    "name": "Reconectado",
+    "dur": 8
+  },
+  {
+    "name": "Verificacion",
+    "dur": 9
+  }
+]

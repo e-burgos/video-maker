@@ -1,0 +1,34 @@
+[
+  {
+    "name": "Apertura",
+    "dur": 7
+  },
+  {
+    "name": "ConexionVideo",
+    "dur": 9
+  },
+  {
+    "name": "ConexionRed",
+    "dur": 8
+  },
+  {
+    "name": "Encendido",
+    "dur": 9
+  },
+  {
+    "name": "RedConfiguracion",
+    "dur": 10
+  },
+  {
+    "name": "PantallaConfig",
+    "dur": 12
+  },
+  {
+    "name": "Transicion",
+    "dur": 8
+  },
+  {
+    "name": "Verificacion",
+    "dur": 9
+  }
+]
