@@ -72,6 +72,7 @@ function renderPage(client: Partial<RenderApiClient>) {
       probeFailures: [],
     }),
     putMotionBrief: vi.fn().mockImplementation(async (_slug: string, brief: MotionBrief) => brief),
+    listGenerated: vi.fn().mockResolvedValue({ slug: 'promo', roots: ['out'], files: [] }),
     ...client,
   };
   render(
@@ -261,5 +262,24 @@ describe('MotionPage', () => {
     );
     expect(player.textContent).toContain('out/video.mp4 · 42s');
     expect(screen.getByTestId('motion-music-credit').textContent).toBe('For the post description: Music: "Tema" Autor · CC BY 4.0');
+  });
+
+  it('shows the video already rendered in out/ with its music credit when the page opens', async () => {
+    renderPage({
+      listGenerated: vi.fn().mockResolvedValue({
+        slug: 'promo',
+        roots: ['out'],
+        files: [
+          { path: 'out/old.mp4', sizeBytes: 10, modifiedAtMs: 1 },
+          { path: 'out/video.mp4', sizeBytes: 10, modifiedAtMs: 2 },
+          { path: 'out/video.credits.txt', sizeBytes: 10, modifiedAtMs: 2 },
+        ],
+      }),
+      getProjectFile: vi.fn().mockResolvedValue('Música: "Tema" Autor · CC BY 4.0\n'),
+    });
+
+    const player = await screen.findByTestId('motion-video');
+    expect(player.querySelector('video')?.getAttribute('src')).toBe('/api/projects/promo/files/out/video.mp4');
+    expect((await screen.findByTestId('motion-music-credit')).textContent).toBe('For the post description: Music: "Tema" Autor · CC BY 4.0');
   });
 });
