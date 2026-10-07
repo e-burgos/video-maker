@@ -1,4 +1,4 @@
-import type { TakeTranscript } from '../voice/pick-best-take';
+import type { TakeTranscript } from '@video-maker/motion-graphics';
 
 export interface RenderRequest {
   projectDir: string;
@@ -9,6 +9,7 @@ export interface RenderRequest {
 
 export interface MotionDependencies {
   templatesRoot: string;
+  assetsRoot: string;
   readText(path: string): Promise<string>;
   readBytes(path: string): Promise<Uint8Array>;
   writeText(path: string, content: string): Promise<void>;

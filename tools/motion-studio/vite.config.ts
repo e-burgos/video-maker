@@ -7,6 +7,7 @@ export default defineConfig({
   resolve: {
     alias: {
       '@video-maker/timeline-core': fileURLToPath(new URL('../../libs/timeline-core/src/index.ts', import.meta.url)),
+      '@video-maker/motion-graphics': fileURLToPath(new URL('../../libs/motion-graphics/src/index.ts', import.meta.url)),
       '@video-maker/media-local': fileURLToPath(new URL('../../libs/media-local/src/index.ts', import.meta.url)),
     },
   },

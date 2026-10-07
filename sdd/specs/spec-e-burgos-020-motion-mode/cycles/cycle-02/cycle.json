@@ -1,0 +1,34 @@
+{
+  "$schema": "../../../../schemas/cycle.schema.json",
+  "cycle": 2,
+  "module": "motion-mode",
+  "spec": "spec-e-burgos-020-motion-mode",
+  "apps": [
+    "libs/motion-graphics",
+    "tools/motion-studio"
+  ],
+  "phase": "scene-catalog",
+  "flow": "full",
+  "objectives": [
+    "Crear libs/motion-graphics con la lógica de Motion Studio y el contrato MotionStoryboard",
+    "Catálogo de 16 escenas y animador declarativo",
+    "Re-expresar y renderizar los tres videos de la spec-019 como storyboards"
+  ],
+  "status": "in-progress",
+  "started_at": "2026-10-07",
+  "completed_at": null,
+  "documents": {
+    "brief": "sdd/specs/spec-e-burgos-020-motion-mode/cycles/cycle-02/brief.yaml",
+    "functional": "sdd/specs/spec-e-burgos-020-motion-mode/cycles/cycle-02/functional.md",
+    "planner": "sdd/specs/spec-e-burgos-020-motion-mode/cycles/cycle-02/planner.md",
+    "architect": "sdd/specs/spec-e-burgos-020-motion-mode/cycles/cycle-02/architect.md",
+    "tasks": "sdd/specs/spec-e-burgos-020-motion-mode/cycles/cycle-02/tasks.json"
+  },
+  "artifacts": [],
+  "metrics": null,
+  "tables_created": [],
+  "endpoints_implemented": [],
+  "components_created": [],
+  "issues_found": [],
+  "reviewer_report": null
+}

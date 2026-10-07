@@ -1,0 +1,38 @@
+# sdd/specs/spec-e-burgos-020-motion-mode/cycles/cycle-02/brief.yaml
+# Generado por: sdd-orchestrator
+# Al: iniciar el ciclo
+
+cycle: 2
+module: motion-mode
+phase: scene-catalog
+date: 2026-10-07
+flow: full
+app_context: sdd/context/tools/motion-studio/context_prompt.md
+
+objective: |
+  Nace libs/motion-graphics: la lógica de Motion Studio (grilla de golpes, escenas sobre la grilla,
+  ducking, mejor toma, armado de la plantilla) pasa de tools/motion-studio a una lib que también va a
+  consumir apps/render-api, y se le suma lo que faltaba para no escribir HTML a mano: un contrato
+  MotionStoryboard (lista de escenas de un catálogo, cada una con su texto de voz y sus campos) y el
+  compositor que lo convierte en un proyecto de HyperFrames con la marca. Los tres videos de la
+  spec-019 se re-expresan como storyboards y se renderizan con la CLI.
+
+scope:
+  - libs/motion-graphics con beats/, timeline/, voice/, template/, script/ movidos desde la tool, sus tests intactos.
+  - Contrato MotionStoryboard (zod + JSON Schema) con 16 tipos de escena derivados de los videos de la spec-019
+    y de apps/motion-editor.
+  - Kit de marca como manifiesto (brand.json: nombre, logos, dispositivos con su pantalla, música, tagline) y
+    runtime compartido (kit.js con animador declarativo por atributos data-anim, scenes.css, GSAP, sfx).
+  - composeStoryboard(storyboard, brand) → index.html.tpl + script.json; desde ahí el pipeline voice/plan/compose/render ya existente.
+  - tools/motion-studio: comando `storyboard` y `init --storyboard`; las plantillas a mano siguen funcionando.
+  - Storyboards de presentacion, counter-15 y core-pro en assets/storyboards/displayads/ renderizados y revisados.
+
+out_of_scope:
+  - El storyboard automático desde un guion (cycle-03).
+  - render-api, web, productor y app de escritorio (cycle-04).
+  - Formato 9:16 renderizado: el contrato lo admite y el CSS usa layouts que se reacomodan, pero la verificación visual vertical es cycle-04.
+
+invariants:
+  - Una sola timeline GSAP por composición; nada de tl.call para cambiar estado.
+  - Un storyboard inválido nunca llega a HyperFrames: se rechaza con el camino del campo.
+  - Ninguna escena depende de que Whisper reconozca una palabra: cue ausente → orden y golpes.

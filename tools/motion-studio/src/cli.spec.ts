@@ -26,21 +26,85 @@ function projectFiles(extra: Record<string, string | Uint8Array> = {}) {
   };
 }
 
+const brand = {
+  id: 'acme',
+  name: 'Acme',
+  spokenName: 'Acme',
+  tagline: 'Todo bajo control.',
+  logo: 'img/logo.svg',
+  isotipo: 'img/iso.svg',
+  css: 'brand.css',
+  fonts: [{ family: 'Inter', file: 'fonts/inter.woff2' }],
+  devices: {},
+  images: {},
+  music: [{ id: 'tema', file: 'music/tema.mp3', credit: 'Tema · CC BY 4.0', bpm: 120, mood: 'energetic', drop: 10 }],
+  voice: { id: 'es_AR-daniela-high', lengthScale: 1.08 },
+};
+const storyboard = {
+  version: 1,
+  title: 'Promo',
+  brand: 'acme',
+  format: '16:9',
+  beatSync: true,
+  music: { track: 'tema' },
+  scenes: [
+    { id: 'hook', kind: 'feature', vo: 'Mirá tu local', props: { title: 'Tu local', bullets: [], visual: { kind: 'image', src: 'images/local.jpg' } } },
+    { id: 'cierre', kind: 'cta', vo: 'Probalo hoy', anchor: 'drop', props: { button: 'Probalo' } },
+  ],
+};
+const brandFiles = () => ({ '/repo/assets/runtime/gsap.min.js': 'gsap', '/repo/assets/brands/acme/brand.json': JSON.stringify(brand), '/repo/assets/brands/acme/music/tema.mp3': 'mp3' });
+
 describe('runCli', () => {
-  it('init copies the brand kit, the video template and its music into the project', async () => {
+  it('init copies the shared runtime, the brand kit, the hand template and its music into the project', async () => {
     const deps = createFakeMotionDependencies({
       files: {
+        '/repo/assets/runtime/gsap.min.js': 'gsap',
+        '/repo/assets/brands/acme/brand.json': '{}',
+        '/repo/assets/brands/acme/music/tema.mp3': 'mp3',
         '/repo/templates/acme/_brand/brand/kit.css': 'css',
         '/repo/templates/acme/promo/script.json': JSON.stringify(script),
         '/repo/templates/acme/promo/index.html.tpl': 'tpl',
-        '/repo/templates/acme/_music/tema.mp3': 'mp3',
       },
     });
     const outcome = await runCli(['init', 'acme/promo', P], resolvePath, deps);
     expect(outcome.exitCode).toBe(0);
+    expect(deps.files.get(`${P}/assets/runtime/gsap.min.js`)).toBe('gsap');
     expect(deps.files.get(`${P}/assets/brand/kit.css`)).toBe('css');
     expect(deps.files.get(`${P}/index.html.tpl`)).toBe('tpl');
     expect(deps.files.get(`${P}/assets/music/tema.mp3`)).toBe('mp3');
+  });
+
+  it('storyboard composes the template and script from the catalog and copies brand, music and images', async () => {
+    const deps = createFakeMotionDependencies({ files: { ...brandFiles(), '/in/sb.json': JSON.stringify(storyboard), '/in/images/local.jpg': 'jpg' } });
+    const outcome = await runCli(['storyboard', '/in/sb.json', P], resolvePath, deps);
+    expect(outcome.exitCode).toBe(0);
+    expect(outcome.stdout[0]).toContain('2 scenes · 16:9 · music tema.mp3');
+    expect(String(deps.files.get(`${P}/index.html.tpl`))).toContain('data-scene="hook"');
+    const written = JSON.parse(String(deps.files.get(`${P}/script.json`)));
+    expect(written.music).toEqual({ file: 'tema.mp3', credit: 'Tema · CC BY 4.0' });
+    expect(written.scenes[1]).toMatchObject({ id: 'cierre', anchor: 10 });
+    expect(deps.files.get(`${P}/assets/music/tema.mp3`)).toBe('mp3');
+    expect(deps.files.get(`${P}/images/local.jpg`)).toBe('jpg');
+    expect(deps.files.has(`${P}/storyboard.json`)).toBe(true);
+  });
+
+  it('storyboard fails on a missing image, an unknown brand or an invalid storyboard', async () => {
+    const missing = createFakeMotionDependencies({ files: { ...brandFiles(), '/in/sb.json': JSON.stringify(storyboard) } });
+    expect((await runCli(['storyboard', '/in/sb.json', P], resolvePath, missing)).stderr[0]).toContain('image "images/local.jpg" not found');
+    const noBrand = createFakeMotionDependencies({ files: { '/in/sb.json': JSON.stringify(storyboard) } });
+    expect((await runCli(['storyboard', '/in/sb.json', P], resolvePath, noBrand)).stderr[0]).toContain('brand "acme" not found');
+    const invalid = createFakeMotionDependencies({ files: { ...brandFiles(), '/in/sb.json': JSON.stringify({ ...storyboard, scenes: [] }) } });
+    expect((await runCli(['storyboard', '/in/sb.json', P], resolvePath, invalid)).exitCode).toBe(1);
+    expect((await runCli(['storyboard', '/in/sb.json'], resolvePath, invalid)).exitCode).toBe(2);
+  });
+
+  it('storyboard inside the project checks images in place and keeps the storyboard where it is', async () => {
+    const silent = { ...storyboard, music: null };
+    const deps = createFakeMotionDependencies({ files: { ...brandFiles(), [`${P}/storyboard.json`]: JSON.stringify(silent), [`${P}/images/local.jpg`]: 'jpg' } });
+    const outcome = await runCli(['storyboard', `${P}/storyboard.json`, P], resolvePath, deps);
+    expect(outcome.exitCode).toBe(0);
+    expect(JSON.parse(String(deps.files.get(`${P}/script.json`))).music).toBeNull();
+    expect(deps.files.has(`${P}/assets/music/tema.mp3`)).toBe(false);
   });
 
   it('init rejects an unknown template or a missing video name', async () => {
@@ -88,6 +152,14 @@ describe('runCli', () => {
     const timeline = JSON.parse(String(deps.files.get(`${P}/timeline.json`)));
     expect(timeline.beatSync).toBe(false);
     expect(timeline.scenes[0].end).toBe(3.8);
+  });
+
+  it('plan without music paces scenes on a silent grid and skips beats and trimming', async () => {
+    const deps = createFakeMotionDependencies({ files: projectFiles({ [`${P}/script.json`]: JSON.stringify({ ...script, music: null }) }) });
+    const outcome = await runCli(['plan', P], resolvePath, deps);
+    expect(outcome.stdout[0]).toMatch(/^plan: no music · 120 BPM pacing grid/u);
+    expect(deps.calls.filter((c) => c.startsWith('detectBeats') || c.startsWith('trimAudio'))).toEqual([]);
+    expect(JSON.parse(String(deps.files.get(`${P}/timeline.json`))).musicCredit).toBe('');
   });
 
   it('compose writes index.html from the template with the planned timing', async () => {

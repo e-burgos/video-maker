@@ -1,0 +1,114 @@
+{
+  "$schema": "../../../../schemas/cycle-tasks.schema.json",
+  "spec": "spec-e-burgos-020-motion-mode",
+  "cycle": 3,
+  "module": "motion-mode",
+  "apps": [
+    "libs/motion-graphics",
+    "tools/motion-studio"
+  ],
+  "flow": "full",
+  "user_stories_generated": true,
+  "prerequisites": {
+    "tasks_generated": true
+  },
+  "tasks": [
+    {
+      "id": "TASK-001",
+      "title": "Define the MotionBrief contract, enforce brief fields over the answer and cross-check the storyboard against brief and brand",
+      "user_stories": [
+        "HU-02",
+        "HU-03"
+      ],
+      "estimation_hours": 2,
+      "story_points": 3,
+      "depends_on": [],
+      "status": "pending",
+      "files": [
+        "libs/motion-graphics/src/auto/motion-brief.ts",
+        "libs/motion-graphics/src/auto/check-storyboard-against-brief.ts"
+      ]
+    },
+    {
+      "id": "TASK-002",
+      "title": "Build the AI request from the scene catalog guide, the brand and the brief",
+      "user_stories": [
+        "HU-01"
+      ],
+      "estimation_hours": 2,
+      "story_points": 3,
+      "depends_on": [
+        "TASK-001"
+      ],
+      "status": "pending",
+      "files": [
+        "libs/motion-graphics/src/auto/build-auto-storyboard-request.ts",
+        "libs/motion-graphics/src/auto/scene-guide.ts"
+      ]
+    },
+    {
+      "id": "TASK-003",
+      "title": "Generate the storyboard with one repair attempt and summed usage",
+      "user_stories": [
+        "HU-03",
+        "HU-04"
+      ],
+      "estimation_hours": 1,
+      "story_points": 2,
+      "depends_on": [
+        "TASK-002"
+      ],
+      "status": "pending",
+      "files": [
+        "libs/motion-graphics/src/auto/generate-motion-storyboard.ts"
+      ]
+    },
+    {
+      "id": "TASK-004",
+      "title": "Add the auto command and a Claude CLI adapter to motion-studio",
+      "user_stories": [
+        "HU-01"
+      ],
+      "estimation_hours": 2,
+      "story_points": 3,
+      "depends_on": [
+        "TASK-003"
+      ],
+      "status": "pending",
+      "files": [
+        "tools/motion-studio/src/cli.ts",
+        "tools/motion-studio/src/deps/node-motion-dependencies.ts"
+      ]
+    },
+    {
+      "id": "TASK-005",
+      "title": "Run a new DisplayAds script end to end with the real agent, render and review",
+      "user_stories": [
+        "HU-05"
+      ],
+      "estimation_hours": 2,
+      "story_points": 3,
+      "depends_on": [
+        "TASK-004"
+      ],
+      "status": "pending",
+      "files": [
+        "libs/motion-graphics/assets/briefs/displayads/plataforma-60s.json"
+      ]
+    },
+    {
+      "id": "TASK-006",
+      "title": "Close the cycle: context, validate, lint/test/build",
+      "user_stories": [],
+      "estimation_hours": 1,
+      "story_points": 1,
+      "depends_on": [
+        "TASK-005"
+      ],
+      "status": "pending",
+      "files": [
+        "sdd/context/libs/motion-graphics/updates/"
+      ]
+    }
+  ]
+}

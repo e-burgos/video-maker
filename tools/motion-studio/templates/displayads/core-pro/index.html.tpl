@@ -4,14 +4,14 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=1920, height=1080" />
     <title>DisplayAds — Instructivo Core Pro</title>
-    <script src="assets/vendor/gsap.min.js"></script>
+    <script src="assets/runtime/gsap.min.js"></script>
     <script src="assets/brand/kit.js"></script>
     <link rel="stylesheet" href="assets/brand/displayads.css" />
     <link rel="stylesheet" href="assets/brand/tutorial.css" />
     <style>
-      @font-face { font-family: "Outfit"; src: url("assets/fonts/outfit-latin-wght-normal.woff2") format("woff2"); font-weight: 100 900; }
-      @font-face { font-family: "Geist"; src: url("assets/fonts/geist-latin-wght-normal.woff2") format("woff2"); font-weight: 100 900; }
-      @font-face { font-family: "Geist Mono"; src: url("assets/fonts/geist-mono-latin-wght-normal.woff2") format("woff2"); font-weight: 100 900; }
+      @font-face { font-family: "Outfit"; src: url("assets/brand/fonts/outfit-latin-wght-normal.woff2") format("woff2"); font-weight: 100 900; }
+      @font-face { font-family: "Geist"; src: url("assets/brand/fonts/geist-latin-wght-normal.woff2") format("woff2"); font-weight: 100 900; }
+      @font-face { font-family: "Geist Mono"; src: url("assets/brand/fonts/geist-mono-latin-wght-normal.woff2") format("woff2"); font-weight: 100 900; }
 
       #hero-glow { left: 940px; top: 120px; }
       #hero { left: 900px; top: 250px; width: 900px; }
@@ -92,7 +92,7 @@
       <section id="intro" class="clip scene" data-start="{{start:intro}}" data-duration="{{dur:intro}}" data-track-index="1">
         <div class="scene-in" id="intro-in">
           <div class="abs da-glow" id="hero-glow"></div>
-          <img class="abs" id="hero" src="assets/img/core-pro.png" alt="Core Pro" />
+          <img class="abs" id="hero" src="assets/brand/img/core-pro.png" alt="Core Pro" />
           <div class="abs" id="intro-copy">
             <span class="da-label">Instructivo · equipos</span>
             <h1 class="da-title">Core <span class="da-grad">Pro</span></h1>
@@ -109,11 +109,11 @@
         </svg>
         <div class="tv"><div class="face">
           <div class="tv-msg" id="tv-nosignal">SIN SEÑAL</div>
-          <div class="tv-msg" id="tv-logo"><img src="assets/img/logo.svg" alt="" /></div>
+          <div class="tv-msg" id="tv-logo"><img src="assets/brand/img/logo.svg" alt="" /></div>
           <div class="fill-sky" id="tv-ad"><span class="da-label" style="color: #e0f2fe">Promo primavera</span><span class="p">-20%</span><span class="s">en toda la tienda</span></div>
         </div></div>
         <div class="tv-foot"></div>
-        <img class="abs" id="core" src="assets/img/core-pro.png" alt="Core Pro" />
+        <img class="abs" id="core" src="assets/brand/img/core-pro.png" alt="Core Pro" />
         <div class="abs" id="led"></div>
         <div class="box" id="router"><svg class="da-icon"><use href="#i-router" /></svg>Router del local</div>
         <div class="box" id="psu"><svg class="da-icon"><use href="#i-plug" /></svg>Fuente USB-C</div>
@@ -204,14 +204,14 @@
             <div class="abs da-glass" id="status"><span class="da-dot"></span><span class="n">Core Pro · Vidriera</span><span style="color: var(--da-text-2)">Palermo</span><span class="st">EN LÍNEA</span></div>
           </div>
           <div id="check-b" class="layer">
-            <div class="abs" id="end-logo"><img src="assets/img/logo.svg" alt="DisplayAds" /></div>
+            <div class="abs" id="end-logo"><img src="assets/brand/img/logo.svg" alt="DisplayAds" /></div>
             <div class="abs" id="end-row"><span class="da-chip"><svg class="da-icon" style="color: var(--da-sky-400)"><use href="#i-msg" /></svg>¿Dudas? Escribile a soporte</span><span class="da-chip">displayads.com.ar</span></div>
           </div>
         </div>
       </section>
 
       <div class="layer" id="hud">
-        <div id="bug"><img src="assets/img/isotipo.svg" alt="" /><span>DisplayAds</span><em>Core Pro</em></div>
+        <div id="bug"><img src="assets/brand/img/isotipo.svg" alt="" /><span>DisplayAds</span><em>Core Pro</em></div>
         <div id="chapter"></div>
         <div id="beat-ticks"><i></i><i></i><i></i><i></i></div>
         <div id="credit">Música: {{music_credit}}</div>

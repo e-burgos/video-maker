@@ -1,0 +1,138 @@
+{
+  "$schema": "../../../../schemas/cycle-tasks.schema.json",
+  "spec": "spec-e-burgos-020-motion-mode",
+  "cycle": 2,
+  "module": "motion-mode",
+  "apps": [
+    "libs/motion-graphics",
+    "tools/motion-studio"
+  ],
+  "flow": "full",
+  "user_stories_generated": true,
+  "prerequisites": {
+    "tasks_generated": true
+  },
+  "tasks": [
+    {
+      "id": "TASK-001",
+      "title": "Create libs/motion-graphics and move beats, timeline, voice, template and script logic with their tests from tools/motion-studio",
+      "user_stories": [
+        "HU-04"
+      ],
+      "estimation_hours": 2,
+      "story_points": 2,
+      "depends_on": [],
+      "status": "pending",
+      "files": [
+        "libs/motion-graphics/src/index.ts",
+        "libs/motion-graphics/project.json",
+        "tsconfig.base.json"
+      ]
+    },
+    {
+      "id": "TASK-002",
+      "title": "Define the MotionStoryboard and BrandManifest contracts with zod, JSON Schema and field-path errors",
+      "user_stories": [
+        "HU-01",
+        "HU-03"
+      ],
+      "estimation_hours": 2,
+      "story_points": 3,
+      "depends_on": [
+        "TASK-001"
+      ],
+      "status": "pending",
+      "files": [
+        "libs/motion-graphics/src/storyboard/motion-storyboard.schema.ts",
+        "libs/motion-graphics/src/brand/brand-manifest.ts"
+      ]
+    },
+    {
+      "id": "TASK-003",
+      "title": "Write the shared runtime: declarative data-anim animator in kit.js and scenes.css with layouts that reflow for 9:16",
+      "user_stories": [
+        "HU-01"
+      ],
+      "estimation_hours": 3,
+      "story_points": 3,
+      "depends_on": [
+        "TASK-002"
+      ],
+      "status": "pending",
+      "files": [
+        "libs/motion-graphics/assets/runtime/kit.js",
+        "libs/motion-graphics/assets/runtime/scenes.css"
+      ]
+    },
+    {
+      "id": "TASK-004",
+      "title": "Render the 16 scene kinds to markup with tests per kind",
+      "user_stories": [
+        "HU-02"
+      ],
+      "estimation_hours": 5,
+      "story_points": 5,
+      "depends_on": [
+        "TASK-003"
+      ],
+      "status": "pending",
+      "files": [
+        "libs/motion-graphics/src/scenes/render-scene.ts"
+      ]
+    },
+    {
+      "id": "TASK-005",
+      "title": "Compose a storyboard into index.html.tpl and script.json and expose storyboard and init --storyboard in the CLI",
+      "user_stories": [
+        "HU-01"
+      ],
+      "estimation_hours": 3,
+      "story_points": 3,
+      "depends_on": [
+        "TASK-004"
+      ],
+      "status": "pending",
+      "files": [
+        "libs/motion-graphics/src/compose/compose-storyboard.ts",
+        "tools/motion-studio/src/cli.ts"
+      ]
+    },
+    {
+      "id": "TASK-006",
+      "title": "Ship the DisplayAds brand manifest and the three storyboards, render them and review frames",
+      "user_stories": [
+        "HU-02",
+        "HU-03"
+      ],
+      "estimation_hours": 4,
+      "story_points": 5,
+      "depends_on": [
+        "TASK-005"
+      ],
+      "status": "pending",
+      "files": [
+        "libs/motion-graphics/assets/brands/displayads/brand.json",
+        "libs/motion-graphics/assets/storyboards/displayads/presentacion.json"
+      ]
+    },
+    {
+      "id": "TASK-007",
+      "title": "Close the cycle: context, validate, lint/test/build",
+      "user_stories": [
+        "HU-01",
+        "HU-02",
+        "HU-03",
+        "HU-04"
+      ],
+      "estimation_hours": 1,
+      "story_points": 1,
+      "depends_on": [
+        "TASK-006"
+      ],
+      "status": "pending",
+      "files": [
+        "sdd/context/libs/motion-graphics/constitution.md"
+      ]
+    }
+  ]
+}

@@ -8,6 +8,6 @@
 Descargados de `https://incompetech.com/music/royalty-free/mp3-royaltyfree/` el 2026-10-07. CC BY exige
 el crédito visible: las plantillas lo muestran con `{{music_credit}}`.
 
-Efectos de sonido (`_brand/sfx/`): biblioteca incluida en las skills de HyperFrames (Apache 2.0).
-Fuentes (`_brand/fonts/`): Outfit y Geist / Geist Mono, SIL Open Font License, vía Fontsource.
-GSAP (`_brand/vendor/`): GSAP 3.14.2, licencia estándar gratuita de GSAP.
+Efectos de sonido (`assets/runtime/sfx/`): biblioteca incluida en las skills de HyperFrames (Apache 2.0).
+Fuentes (`fonts/`): Outfit y Geist / Geist Mono, SIL Open Font License, vía Fontsource.
+GSAP (`assets/runtime/gsap.min.js`): GSAP 3.14.2, licencia estándar gratuita de GSAP.

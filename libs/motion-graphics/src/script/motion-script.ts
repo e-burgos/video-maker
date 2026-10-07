@@ -17,7 +17,7 @@ export interface MotionSfx {
 export interface MotionScript {
   voice: string;
   lengthScale: number;
-  music: { file: string; credit: string };
+  music: { file: string; credit: string } | null;
   noWhooshOn: string[];
   scenes: MotionScene[];
   sfx: MotionSfx[];
@@ -69,7 +69,7 @@ function parseSfx(raw: unknown, index: number, sceneIds: Set<string>): MotionSfx
 
 export function parseMotionScript(raw: unknown): MotionScript {
   const script = asRecord(raw, 'root');
-  const music = asRecord(script['music'], 'music');
+  const music = script['music'] === null ? null : asRecord(script['music'], 'music');
   if (!Array.isArray(script['scenes']) || script['scenes'].length === 0) fail('scenes must be a non-empty array');
   const scenes = script['scenes'].map(parseScene);
   const sceneIds = new Set(scenes.map((scene) => scene.id));
@@ -81,7 +81,7 @@ export function parseMotionScript(raw: unknown): MotionScript {
   return {
     voice: asString(script['voice'], 'voice'),
     lengthScale: asNumber(script['lengthScale'], 'lengthScale', 1),
-    music: { file: asString(music['file'], 'music.file'), credit: asString(music['credit'], 'music.credit') },
+    music: music === null ? null : { file: asString(music['file'], 'music.file'), credit: asString(music['credit'], 'music.credit') },
     noWhooshOn: noWhooshOn as string[],
     scenes,
     sfx: rawSfx.map((entry, index) => parseSfx(entry, index, sceneIds)),

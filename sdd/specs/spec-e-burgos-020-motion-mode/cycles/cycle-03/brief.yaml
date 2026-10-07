@@ -1,0 +1,34 @@
+# sdd/specs/spec-e-burgos-020-motion-mode/cycles/cycle-03/brief.yaml
+# Generado por: sdd-orchestrator
+# Al: iniciar el ciclo
+
+cycle: 3
+module: motion-mode
+phase: auto-storyboard
+date: 2026-10-07
+flow: full
+app_context: sdd/context/libs/motion-graphics/context_prompt.md
+
+objective: |
+  El Video Maker arma solo el storyboard de un video de motion graphics a partir de un brief: el guion en
+  texto plano, las imágenes con una línea que diga qué muestran y la marca. La IA (el mismo puerto del
+  productor: Claude CLI u OpenRouter) elige escenas del catálogo de la cycle-02 y completa sus campos; nunca
+  escribe HTML. Lo que devuelve se valida contra el contrato y contra el brief, con un intento de reparación,
+  y desde ahí el pipeline de la cycle-02 hace el video.
+
+scope:
+  - Contrato MotionBrief (zod + JSON Schema) en libs/motion-graphics: marca, formato, golpes, música (auto, un tema o ninguna), guion, imágenes con descripción.
+  - Prompt del sistema y del usuario generados desde el catálogo y la marca (escenas, equipos, imágenes, temas, nombre hablado).
+  - Verificación cruzada storyboard ↔ brief ↔ marca: imágenes listadas, equipos existentes, cues presentes en la voz, tema existente.
+  - generateMotionStoryboard(agente, brief, marca) con un intento de reparación y suma de consumo.
+  - tools/motion-studio: comando `auto <brief.json> <proyecto>` con un adaptador de Claude CLI propio.
+  - Corrida real con un guion nuevo de DisplayAds.
+
+out_of_scope:
+  - Job motion en render-api, pantallas del estudio y recipe del productor (cycle-04).
+  - Describir imágenes automáticamente con visión: el brief trae la descripción (el puerto de IA del repo es de texto).
+
+invariants:
+  - La IA nunca escribe HTML ni CSS: sólo datos del contrato.
+  - Lo que fija el brief (marca, formato, golpes, música elegida) gana sobre lo que diga la IA.
+  - Un storyboard que no pasa la verificación nunca llega a componer: error con el camino del campo.

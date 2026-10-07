@@ -1,0 +1,130 @@
+{
+  "version": 1,
+  "title": "Counter 15 — instalación y uso",
+  "brand": "displayads",
+  "format": "16:9",
+  "beatSync": true,
+  "music": { "track": "newer-wave" },
+  "scenes": [
+    {
+      "id": "intro",
+      "kind": "product",
+      "chapter": "Counter 15",
+      "vo": "Este es el Counter quince, la pantalla de mostrador de Display Ads. Te mostramos cómo se instala y cómo funciona en tu local.",
+      "props": {
+        "kicker": "Instructivo",
+        "name": "Counter 15",
+        "text": "La pantalla de mostrador, todo en uno.",
+        "visual": { "kind": "device", "device": "counter-15", "states": [{ "screen": { "type": "promo", "kicker": "Bienvenido", "big": "Hola", "small": "Así se instala", "tone": "sky" } }] }
+      }
+    },
+    {
+      "id": "place",
+      "kind": "step",
+      "chapter": "Instalación",
+      "vo": "Ubicala sobre el mostrador, de frente al público. La base viene integrada: no hay nada que armar.",
+      "props": {
+        "n": 1,
+        "label": "Ubicación",
+        "title": "Sobre el mostrador,",
+        "accent": "de frente al público.",
+        "chips": [{ "text": "Base integrada", "tone": "ok", "cue": "base" }, { "text": "Nada que armar", "tone": "ok", "cue": "nada" }],
+        "visual": { "kind": "image", "src": "brand:escena-04" }
+      }
+    },
+    {
+      "id": "power",
+      "kind": "step",
+      "vo": "Enchufala y dejala siempre conectada. Al encenderse, arranca directo en la aplicación de cartelería. No tenés que instalar nada ni iniciar sesión.",
+      "props": {
+        "n": 2,
+        "label": "Encendido",
+        "title": "Enchufala y",
+        "accent": "arranca sola.",
+        "chips": [{ "text": "Siempre conectada", "icon": "plug", "cue": "siempre" }, { "text": "Sin instalar nada", "tone": "ok", "cue": "instalar" }, { "text": "Sin iniciar sesión", "tone": "ok", "cue": "sesión" }],
+        "visual": {
+          "kind": "device",
+          "device": "counter-15",
+          "states": [{ "screen": { "type": "off" } }, { "screen": { "type": "boot" }, "cue": "encenderse" }, { "screen": { "type": "promo", "kicker": "Hoy", "big": "2x1", "small": "en cafés", "tone": "sky" }, "cue": "aplicación" }]
+        }
+      }
+    },
+    {
+      "id": "content",
+      "kind": "remote-update",
+      "chapter": "Contenido",
+      "vo": "Desde el panel de Display Ads elegís qué campañas se muestran, y la pantalla las reproduce sola.",
+      "props": {
+        "title": "Vos elegís,",
+        "accent": "la pantalla reproduce.",
+        "publishCue": "campañas",
+        "campaign": { "name": "Promo de invierno", "meta": "Counter 15 · Mostrador", "badge": "-20%" },
+        "screens": [{ "label": "Counter 15 · Mostrador", "before": "Promo anterior", "after": "Café + medialuna", "kicker": "Invierno" }]
+      }
+    },
+    {
+      "id": "wifi",
+      "kind": "feature",
+      "chapter": "Wi-Fi",
+      "vo": "¿Cambiaste el wifi del local? No hace falta un técnico. Durante el primer minuto y medio, la pantalla sigue mostrando tu contenido e intenta reconectarse sola.",
+      "props": {
+        "kicker": "¿Cambiaste el Wi-Fi?",
+        "title": "Sin técnico.",
+        "accent": "Se reconecta sola.",
+        "bullets": [{ "text": "Sigue mostrando tu contenido", "tone": "ok", "cue": "sigue" }, { "text": "Reintenta sola", "icon": "wifi", "cue": "reconectarse" }],
+        "visual": { "kind": "timer", "labels": ["0:00", "0:30", "1:00", "1:30"], "caption": "reintentando", "cue": "minuto" }
+      }
+    },
+    {
+      "id": "recover",
+      "kind": "step",
+      "minBars": 4,
+      "vo": "Si la red no vuelve, aparece una pantalla con las redes disponibles. Tocá la red del local, escribí la contraseña, y listo: vuelve sola a mostrar tu contenido.",
+      "props": {
+        "n": 3,
+        "label": "Reconexión",
+        "title": "Elegí la red",
+        "accent": "y listo.",
+        "visual": {
+          "kind": "device",
+          "device": "counter-15",
+          "states": [
+            { "screen": { "type": "promo", "kicker": "Hoy", "big": "2x1", "small": "en cafés", "tone": "sky" } },
+            { "screen": { "type": "list", "sub": "Sin conexión", "title": "Elegí una red", "items": ["Local-WiFi", "Vecino-5G", "Invitados"], "select": 0, "field": "Contraseña", "button": "Conectar" }, "cue": "aparece" },
+            { "screen": { "type": "promo", "kicker": "Conectada", "big": "2x1", "small": "en cafés", "tone": "teal" }, "cue": "listo" }
+          ]
+        }
+      }
+    },
+    {
+      "id": "kiosk",
+      "kind": "feature",
+      "chapter": "Seguridad",
+      "vo": "Esa pantalla sólo sirve para reconectar el wifi. Nadie puede salir de la aplicación ni usar la tablet para otra cosa.",
+      "props": {
+        "title": "Bloqueada",
+        "accent": "para otra cosa.",
+        "bullets": [{ "text": "Sólo reconectar el Wi-Fi", "icon": "wifi", "cue": "reconectar" }, { "text": "Nadie sale de la aplicación", "icon": "lock", "cue": "salir" }],
+        "visual": { "kind": "icon", "icon": "shield" }
+      }
+    },
+    {
+      "id": "help",
+      "kind": "do-dont",
+      "chapter": "Ayuda",
+      "vo": "¿Quedó en negro o congelada? Desenchufala, esperá diez segundos y volvé a enchufarla. Si sigue igual, escribile al soporte de Display Ads.",
+      "props": {
+        "title": "¿Quedó en negro",
+        "accent": "o congelada?",
+        "bad": { "title": "Si sigue igual", "items": ["Escribile al soporte"], "cue": "sigue" },
+        "good": { "title": "Reiniciala", "items": ["Desenchufala", "Esperá 10 segundos", "Volvé a enchufarla"], "cue": "desenchufala" }
+      }
+    },
+    {
+      "id": "cta",
+      "kind": "cta",
+      "vo": "Display Ads. Cada pantalla, bajo control.",
+      "props": { "button": "Soporte Display Ads" }
+    }
+  ]
+}

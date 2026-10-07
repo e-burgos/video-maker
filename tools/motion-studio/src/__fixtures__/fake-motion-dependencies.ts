@@ -1,7 +1,8 @@
 import { dirname } from 'node:path';
 
+import type { TakeTranscript } from '@video-maker/motion-graphics';
+
 import type { MotionDependencies, RenderRequest } from '../deps/motion-dependencies';
-import type { TakeTranscript } from '../voice/pick-best-take';
 
 export function wavBytes(seconds: number): Uint8Array {
   const dataSize = Math.round(seconds * 1000) * 2;
@@ -44,6 +45,7 @@ export function createFakeMotionDependencies(init: {
     calls,
     renders,
     templatesRoot: '/repo/templates',
+    assetsRoot: '/repo/assets',
     readText: async (path) => String(get(path)),
     readBytes: async (path) => {
       const value = get(path);
@@ -52,7 +54,7 @@ export function createFakeMotionDependencies(init: {
     writeText: async (path, content) => {
       files.set(path, content);
     },
-    exists: async (path) => files.has(path),
+    exists: async (path) => files.has(path) || [...files.keys()].some((k) => k.startsWith(`${path}/`)),
     copyTree: async (from, to) => {
       calls.push(`copyTree ${from} → ${to}`);
       for (const [path, value] of [...files]) if (path.startsWith(`${from}/`)) files.set(`${to}${path.slice(from.length)}`, value);

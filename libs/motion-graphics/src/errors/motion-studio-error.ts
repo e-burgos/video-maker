@@ -4,7 +4,10 @@ export type MotionStudioErrorCode =
   | 'WORD_NOT_FOUND'
   | 'TEMPLATE_VALUE_MISSING'
   | 'CLI_USAGE'
-  | 'STAGE_FAILED';
+  | 'STAGE_FAILED'
+  | 'STORYBOARD_INVALID'
+  | 'BRAND_INVALID'
+  | 'ASSET_MISSING';
 
 export class MotionStudioError extends Error {
   readonly code: MotionStudioErrorCode;

@@ -1,0 +1,342 @@
+{
+  "version": 1,
+  "title": "DisplayAds — presentación de la plataforma",
+  "brand": "displayads",
+  "format": "16:9",
+  "beatSync": true,
+  "music": {
+    "track": "voxel-revolution"
+  },
+  "scenes": [
+    {
+      "id": "hook",
+      "kind": "hook",
+      "vo": "¿Cuánto te cuesta una pantalla apagada? ¿O una promo que terminó hace dos semanas y todavía sigue en pantalla?",
+      "props": {
+        "lines": [
+          {
+            "title": "¿Cuánto te cuesta una pantalla",
+            "accent": "apagada?"
+          },
+          {
+            "title": "¿Y una promo",
+            "accent": "vencida?",
+            "cue": "promo"
+          }
+        ],
+        "screen": {
+          "kicker": "Promo de verano",
+          "text": "2x1 en helados",
+          "stamp": "VENCIDA",
+          "offCue": "apagada",
+          "stampCue": "semanas"
+        }
+      }
+    },
+    {
+      "id": "pain",
+      "kind": "problem",
+      "vo": "Hoy son pendrives, llamadas al local y pantallas que nadie controla.",
+      "props": {
+        "kicker": "Así se hace hoy",
+        "strike": true,
+        "items": [
+          {
+            "icon": "usb",
+            "label": "Pendrives",
+            "cue": "pendrives"
+          },
+          {
+            "icon": "phone",
+            "label": "Llamadas al local",
+            "cue": "llamadas"
+          },
+          {
+            "icon": "monitor-off",
+            "label": "Pantallas sin control",
+            "cue": "pantallas"
+          }
+        ]
+      }
+    },
+    {
+      "id": "reveal",
+      "kind": "brand-reveal",
+      "chapter": "La plataforma",
+      "anchor": "drop",
+      "vo": "Esto es Display Ads: cartelería digital en la nube, con inteligencia artificial.",
+      "props": {
+        "chips": [
+          "Cartelería digital",
+          "En la nube",
+          "Con IA"
+        ]
+      }
+    },
+    {
+      "id": "remote",
+      "kind": "remote-update",
+      "chapter": "Control remoto",
+      "minBars": 4,
+      "vo": "Cambiá el contenido de todas tus sucursales desde el celular, en segundos.",
+      "props": {
+        "title": "Todas tus sucursales,",
+        "accent": "en segundos.",
+        "publishCue": "celular",
+        "campaign": {
+          "name": "Promo de invierno",
+          "meta": "3 sucursales · hoy 08:00",
+          "badge": "-20%"
+        },
+        "screens": [
+          {
+            "label": "Sucursal Centro",
+            "before": "Promo vencida",
+            "after": "Café + medialuna",
+            "kicker": "Invierno"
+          },
+          {
+            "label": "Sucursal Norte",
+            "before": "Promo vencida",
+            "after": "Chocolate caliente",
+            "kicker": "Invierno"
+          },
+          {
+            "label": "Sucursal Shopping",
+            "before": "Promo vencida",
+            "after": "Combo merienda",
+            "kicker": "Invierno"
+          }
+        ]
+      }
+    },
+    {
+      "id": "schedule",
+      "kind": "schedule",
+      "chapter": "Programación",
+      "minBars": 4,
+      "vo": "Programá tus campañas por horario, por día o por sucursal. Nada de repetir siempre lo mismo: son campañas con reglas.",
+      "props": {
+        "title": "Campañas",
+        "accent": "con reglas.",
+        "axis": {
+          "from": 7,
+          "to": 24
+        },
+        "days": {
+          "on": [
+            "LUN",
+            "MAR",
+            "MIÉ",
+            "JUE",
+            "VIE"
+          ],
+          "highlight": [
+            "SÁB",
+            "DOM"
+          ],
+          "cue": "día"
+        },
+        "blocks": [
+          {
+            "label": "Desayuno",
+            "start": 7,
+            "end": 11,
+            "tone": "sky",
+            "cue": "horario"
+          },
+          {
+            "label": "Almuerzo",
+            "start": 12,
+            "end": 15,
+            "tone": "teal"
+          },
+          {
+            "label": "After office",
+            "start": 18,
+            "end": 21,
+            "tone": "warm",
+            "row": 1
+          },
+          {
+            "label": "Cena",
+            "start": 20,
+            "end": 24,
+            "tone": "sky"
+          }
+        ],
+        "tags": [
+          {
+            "text": "Sólo Sucursal Centro",
+            "cue": "sucursal"
+          }
+        ]
+      }
+    },
+    {
+      "id": "monitor",
+      "kind": "dashboard",
+      "chapter": "Monitoreo",
+      "vo": "Y sabés en todo momento qué pantalla está en línea y qué está reproduciendo. Nunca más te enterás tarde de que una pantalla está apagada.",
+      "props": {
+        "title": "Todo",
+        "accent": "en tiempo real.",
+        "rows": [
+          {
+            "name": "Mostrador",
+            "place": "Centro",
+            "now": "Café + medialuna"
+          },
+          {
+            "name": "Vidriera",
+            "place": "Norte",
+            "now": "Chocolate caliente"
+          },
+          {
+            "name": "Salón",
+            "place": "Shopping",
+            "now": "Combo merienda"
+          },
+          {
+            "name": "Caja",
+            "place": "Centro",
+            "now": "Promo de invierno"
+          }
+        ],
+        "stat": {
+          "label": "Pantallas en línea",
+          "value": 4,
+          "total": 4,
+          "cue": "línea"
+        },
+        "alert": {
+          "row": 2,
+          "title": "Salón · Shopping sin conexión",
+          "detail": "Te avisamos al instante",
+          "cue": "tarde"
+        }
+      }
+    },
+    {
+      "id": "ai",
+      "kind": "ai-generate",
+      "chapter": "Inteligencia artificial",
+      "minBars": 4,
+      "vo": "La inteligencia artificial crea imágenes y videos para tu promo en segundos.",
+      "props": {
+        "title": "Tu promo,",
+        "accent": "creada con IA.",
+        "prompt": "Promo de café con medialunas para una mañana fría",
+        "result": {
+          "image": "brand:escena-04"
+        },
+        "badge": "Lista en segundos",
+        "resultCue": "segundos"
+      }
+    },
+    {
+      "id": "context",
+      "kind": "context",
+      "minBars": 4,
+      "vo": "Mira el clima, los feriados y a tus competidores a quinientos metros, y te sugiere qué mostrar.",
+      "props": {
+        "title": "Entiende",
+        "accent": "tu contexto.",
+        "chips": [
+          {
+            "text": "Clima: 8 °C, lluvia",
+            "icon": "cloud",
+            "cue": "clima"
+          },
+          {
+            "text": "Feriado el lunes",
+            "icon": "calendar",
+            "cue": "feriados"
+          },
+          {
+            "text": "3 competidores cerca",
+            "icon": "pin",
+            "cue": "competidores"
+          }
+        ],
+        "radar": {
+          "label": "500 m",
+          "pins": 3,
+          "cue": "competidores"
+        }
+      }
+    },
+    {
+      "id": "devices",
+      "kind": "product",
+      "chapter": "Equipos propios",
+      "minBars": 4,
+      "vo": "Funciona con equipos propios. El Core Pro convierte cualquier televisor en una pantalla inteligente.",
+      "props": {
+        "kicker": "Equipos propios",
+        "name": "Core Pro",
+        "text": "Convierte cualquier televisor en una pantalla inteligente.",
+        "specs": [
+          "HDMI",
+          "Wi-Fi o cable",
+          "Sin mantenimiento"
+        ],
+        "visual": {
+          "kind": "device",
+          "device": "core-pro"
+        },
+        "textCue": "Core"
+      }
+    },
+    {
+      "id": "counter",
+      "kind": "product",
+      "minBars": 4,
+      "vo": "El Counter quince es la pantalla de mostrador, todo en uno. Y si se corta internet, siguen reproduciendo.",
+      "props": {
+        "kicker": "Pantalla de mostrador",
+        "name": "Counter 15",
+        "text": "Todo en uno. Y si se corta internet, sigue reproduciendo.",
+        "specs": [
+          "15 pulgadas",
+          "Todo en uno",
+          "Funciona sin internet"
+        ],
+        "visual": {
+          "kind": "device",
+          "device": "counter-15",
+          "states": [
+            {
+              "screen": {
+                "type": "promo",
+                "kicker": "Hoy",
+                "big": "2x1",
+                "small": "en cafés",
+                "tone": "sky"
+              }
+            },
+            {
+              "screen": {
+                "type": "promo",
+                "kicker": "Sin internet",
+                "big": "Sigue",
+                "small": "reproduciendo",
+                "tone": "teal"
+              },
+              "cue": "corta"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "cta",
+      "kind": "cta",
+      "vo": "Con Display Ads, cada pantalla está bajo control. Con inteligencia artificial. Pedí tu cotización en nuestra web.",
+      "props": {
+        "button": "Pedí tu cotización",
+        "buttonCue": "cotización"
+      }
+    }
+  ]
+}

@@ -15,7 +15,8 @@ import {
 } from '@video-maker/media-local';
 import type { AssetId } from '@video-maker/timeline-core';
 
-import { MotionStudioError } from '../errors/motion-studio-error';
+import { MotionStudioError } from '@video-maker/motion-graphics';
+
 import type { MotionDependencies } from './motion-dependencies';
 
 export const HYPERFRAMES_VERSION = '0.8.139';
@@ -38,6 +39,7 @@ export function createNodeMotionDependencies(env: NodeJS.ProcessEnv, workspaceRo
 
   return {
     templatesRoot: env['MOTION_STUDIO_TEMPLATES'] ?? resolve(workspaceRoot, 'tools', 'motion-studio', 'templates'),
+    assetsRoot: env['MOTION_STUDIO_ASSETS'] ?? resolve(workspaceRoot, 'libs', 'motion-graphics', 'assets'),
     readText: (path) => readFile(path, 'utf8'),
     readBytes: async (path) => new Uint8Array(await readFile(path)),
     writeText: async (path, content) => {

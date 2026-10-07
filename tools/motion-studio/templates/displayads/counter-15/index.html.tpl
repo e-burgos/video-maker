@@ -4,14 +4,14 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=1920, height=1080" />
     <title>DisplayAds — Instructivo Counter 15</title>
-    <script src="assets/vendor/gsap.min.js"></script>
+    <script src="assets/runtime/gsap.min.js"></script>
     <script src="assets/brand/kit.js"></script>
     <link rel="stylesheet" href="assets/brand/displayads.css" />
     <link rel="stylesheet" href="assets/brand/tutorial.css" />
     <style>
-      @font-face { font-family: "Outfit"; src: url("assets/fonts/outfit-latin-wght-normal.woff2") format("woff2"); font-weight: 100 900; }
-      @font-face { font-family: "Geist"; src: url("assets/fonts/geist-latin-wght-normal.woff2") format("woff2"); font-weight: 100 900; }
-      @font-face { font-family: "Geist Mono"; src: url("assets/fonts/geist-mono-latin-wght-normal.woff2") format("woff2"); font-weight: 100 900; }
+      @font-face { font-family: "Outfit"; src: url("assets/brand/fonts/outfit-latin-wght-normal.woff2") format("woff2"); font-weight: 100 900; }
+      @font-face { font-family: "Geist"; src: url("assets/brand/fonts/geist-latin-wght-normal.woff2") format("woff2"); font-weight: 100 900; }
+      @font-face { font-family: "Geist Mono"; src: url("assets/brand/fonts/geist-mono-latin-wght-normal.woff2") format("woff2"); font-weight: 100 900; }
 
       #dev { left: 1100px; top: 150px; }
       #dev-glow { left: 980px; top: 140px; }
@@ -95,11 +95,11 @@
       <div class="layer" id="device-stage">
         <div class="abs da-glow" id="dev-glow"></div>
         <div class="c15" id="dev">
-          <img src="assets/img/counter-15.png" alt="Counter 15" />
+          <img src="assets/brand/img/counter-15.png" alt="Counter 15" />
           <div class="c15-screen">
             <div class="c15-layer fill-sky" id="scr-brand"><div class="c15-ad"><span class="k">BIENVENIDOS</span><span class="p">Menú</span><span class="s">del día · $ 8.900</span></div></div>
             <div class="c15-layer fill-boot" id="scr-off"></div>
-            <div class="c15-layer fill-boot" id="scr-boot"><img src="assets/img/isotipo.svg" alt="" style="width: 26%; transform: skewY(6deg) rotate(4deg)" id="boot-logo" /></div>
+            <div class="c15-layer fill-boot" id="scr-boot"><img src="assets/brand/img/isotipo.svg" alt="" style="width: 26%; transform: skewY(6deg) rotate(4deg)" id="boot-logo" /></div>
             <div class="c15-layer fill-warm" id="scr-new"><div class="c15-ad"><span class="k">MERIENDA</span><span class="p">2x1</span><span class="s">en licuados</span></div></div>
           </div>
         </div>
@@ -123,7 +123,7 @@
             <p>De frente al público. La base viene integrada al equipo.</p>
             <div class="chips"><span class="da-chip" id="pl-c1"><svg class="da-icon"><use href="#i-box" /></svg>Nada que armar</span><span class="da-chip" id="pl-c2"><svg class="da-icon"><use href="#i-pin" /></svg>De frente al público</span></div>
           </div>
-          <div class="abs" id="place-photo"><img src="assets/img/escena-04.png" alt="" id="place-img" /></div>
+          <div class="abs" id="place-photo"><img src="assets/brand/img/escena-04.png" alt="" id="place-img" /></div>
         </div>
       </section>
 
@@ -231,14 +231,14 @@
             </div>
           </div>
           <div id="help-b" class="layer">
-            <div class="abs" id="end-logo"><img src="assets/img/logo.svg" alt="DisplayAds" /></div>
+            <div class="abs" id="end-logo"><img src="assets/brand/img/logo.svg" alt="DisplayAds" /></div>
             <div class="abs" id="end-row"><span class="da-chip"><svg class="da-icon" style="color: var(--da-sky-400)"><use href="#i-msg" /></svg>¿Dudas? Escribile a soporte</span><span class="da-chip">displayads.com.ar</span></div>
           </div>
         </div>
       </section>
 
       <div class="layer" id="hud">
-        <div id="bug"><img src="assets/img/isotipo.svg" alt="" /><span>DisplayAds</span><em>Counter 15</em></div>
+        <div id="bug"><img src="assets/brand/img/isotipo.svg" alt="" /><span>DisplayAds</span><em>Counter 15</em></div>
         <div id="chapter"></div>
         <div id="beat-ticks"><i></i><i></i><i></i><i></i></div>
         <div id="credit">Música: {{music_credit}}</div>

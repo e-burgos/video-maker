@@ -1,0 +1,92 @@
+{
+  "id": "displayads",
+  "name": "DisplayAds",
+  "spokenName": "Display Ads",
+  "tagline": "Cada pantalla, bajo control.",
+  "taglineAccent": "Con IA.",
+  "url": "displayads.com.ar",
+  "logo": "img/logo.svg",
+  "isotipo": "img/isotipo.svg",
+  "css": "brand.css",
+  "fonts": [
+    {
+      "family": "Outfit",
+      "file": "fonts/outfit-latin-wght-normal.woff2"
+    },
+    {
+      "family": "Outfit",
+      "file": "fonts/outfit-latin-ext-wght-normal.woff2"
+    },
+    {
+      "family": "Geist",
+      "file": "fonts/geist-latin-wght-normal.woff2"
+    },
+    {
+      "family": "Geist Mono",
+      "file": "fonts/geist-mono-latin-wght-normal.woff2"
+    }
+  ],
+  "devices": {
+    "counter-15": {
+      "name": "Counter 15",
+      "image": "img/counter-15.png",
+      "kind": "counter",
+      "screen": {
+        "polygon": [
+          [
+            22.6,
+            9.9
+          ],
+          [
+            63.8,
+            12.1
+          ],
+          [
+            81.1,
+            86.2
+          ],
+          [
+            39.6,
+            89.3
+          ]
+        ],
+        "skew": 6,
+        "rotate": 4
+      }
+    },
+    "core-pro": {
+      "name": "Core Pro",
+      "image": "img/core-pro.png",
+      "kind": "box"
+    }
+  },
+  "images": {
+    "escena-04": "img/escena-04.png",
+    "escena-05": "img/escena-05.jpg",
+    "escena-06": "img/escena-06.jpg",
+    "escena-08": "img/escena-08.jpg",
+    "escena-09": "img/escena-09.jpg",
+    "escena-12": "img/escena-12.jpg"
+  },
+  "music": [
+    {
+      "id": "voxel-revolution",
+      "file": "music/Voxel Revolution.mp3",
+      "credit": "\"Voxel Revolution\" Kevin MacLeod (incompetech.com) · CC BY 4.0",
+      "bpm": 122,
+      "mood": "energetic",
+      "drop": 13.8
+    },
+    {
+      "id": "newer-wave",
+      "file": "music/Newer Wave.mp3",
+      "credit": "\"Newer Wave\" Kevin MacLeod (incompetech.com) · CC BY 4.0",
+      "bpm": 110,
+      "mood": "calm"
+    }
+  ],
+  "voice": {
+    "id": "es_AR-daniela-high",
+    "lengthScale": 1.08
+  }
+}

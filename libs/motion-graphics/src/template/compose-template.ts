@@ -34,13 +34,18 @@ function whooshTracks(timeline: MotionTimeline, script: MotionScript): string {
   return timeline.scenes
     .slice(1)
     .filter((s) => !script.noWhooshOn.includes(s.id))
-    .map((s) => `<audio id="sfx-whoosh-${s.id}" src="assets/sfx/whoosh.mp3" data-start="${round(Math.max(0, s.start - WHOOSH_LEAD))}" data-duration="0.57" data-track-index="13" data-volume="0.35"></audio>`)
+    .map((s) => `<audio id="sfx-whoosh-${s.id}" src="assets/runtime/sfx/whoosh.mp3" data-start="${round(Math.max(0, s.start - WHOOSH_LEAD))}" data-duration="0.57" data-track-index="13" data-volume="0.35"></audio>`)
     .join('\n      ');
 }
 
 function withSceneText(timeline: MotionTimeline, script: MotionScript): MotionTimeline {
   const text = new Map(script.scenes.map((scene) => [scene.id, scene.vo]));
   return { ...timeline, scenes: timeline.scenes.map((slot) => ({ ...slot, vo: text.get(slot.id) ?? '' })) };
+}
+
+function musicTrack(timeline: MotionTimeline, script: MotionScript): string {
+  if (script.music === null) return '';
+  return `<audio id="music" src="assets/audio/music.wav" data-start="0" data-duration="${timeline.duration}" data-track-index="10" data-volume="0.8" data-automation='${JSON.stringify(timeline.musicAutomation)}'></audio>`;
 }
 
 export function templateValues(script: MotionScript, timeline: MotionTimeline, words: SceneWords): Map<string, string> {
@@ -50,6 +55,7 @@ export function templateValues(script: MotionScript, timeline: MotionTimeline, w
     ['whoosh_tracks', whooshTracks(timeline, script)],
     ['music_automation', JSON.stringify(timeline.musicAutomation)],
     ['music_credit', timeline.musicCredit],
+    ['music_track', musicTrack(timeline, script)],
     ['timeline_json', JSON.stringify(withSceneText(timeline, script))],
     ['words_json', JSON.stringify(words)],
   ]);

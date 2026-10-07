@@ -27,7 +27,7 @@ completa a partir del guion y las imágenes.
 | O-2 | `libs/motion-graphics`: la lógica de Motion Studio como lib + catálogo de escenas parametrizables + contrato `MotionStoryboard`; los tres videos de la spec-019 re-expresados como storyboards | cycle-02 |
 | O-3 | Storyboard automático: guion + imágenes + marca → `MotionStoryboard` validado, con el motor del productor (Claude CLI u OpenRouter) | cycle-03 |
 | O-4 | El estudio ofrece de entrada "motion graphics" o "material crudo"; job `motion` en render-api; recipe y tool del productor; corre en la app de escritorio | cycle-04 |
-| O-5 | display-ads pide videos animados con un brief armado desde sus manuales y retira `apps/video-manager` | cycle-05 |
+| O-5 | display-ads entrega a video-maker los dos tipos de pedido por un único contrato: video de **motion graphics** (`MotionBrief`: guion + imágenes descriptas + marca) o **tutorial grabado** (material crudo de `platform-video-capture`). La skill `video-maker-material-contract` cubre ambos modos; una skill de display-ads decide el modo por video desde su índice de tutoriales y arma el paquete; se retira `apps/video-manager` | cycle-05 |
 
 ## Decisiones de la spec
 
