@@ -4,21 +4,42 @@
   "brand": "displayads",
   "format": "16:9",
   "beatSync": true,
-  "music": { "track": "newer-wave" },
+  "music": {
+    "track": "newer-wave"
+  },
   "scenes": [
     {
       "id": "intro",
       "kind": "product",
       "chapter": "Core Pro",
       "vo": "El Core Pro convierte cualquier televisor en una pantalla de Display Ads. Así se instala en tu local.",
-      "props": { "kicker": "Instructivo", "name": "Core Pro", "text": "Cualquier televisor, una pantalla inteligente.", "visual": { "kind": "device", "device": "core-pro" } }
+      "props": {
+        "kicker": "Instructivo",
+        "name": "Core Pro",
+        "text": "Cualquier televisor, una pantalla inteligente.",
+        "visual": {
+          "kind": "device",
+          "device": "core-pro"
+        }
+      }
     },
     {
       "id": "hdmi",
       "kind": "connections",
       "chapter": "Conexión",
       "vo": "Conectá el cable micro hdmi en el puerto que está junto a la alimentación, y el otro extremo al televisor.",
-      "props": { "title": "Micro HDMI", "accent": "al televisor.", "device": "core-pro", "links": [{ "to": "tv", "label": "Micro HDMI → HDMI", "cue": "televisor" }] }
+      "props": {
+        "title": "Micro HDMI",
+        "accent": "al televisor.",
+        "device": "core-pro",
+        "links": [
+          {
+            "to": "tv",
+            "label": "Micro HDMI → HDMI",
+            "cue": "televisor"
+          }
+        ]
+      }
     },
     {
       "id": "lan",
@@ -28,7 +49,17 @@
         "title": "Cable de red,",
         "accent": "lo más estable.",
         "device": "core-pro",
-        "links": [{ "to": "tv", "label": "HDMI" }, { "to": "router", "label": "Cable de red", "cue": "cable" }]
+        "links": [
+          {
+            "to": "tv",
+            "label": "HDMI"
+          },
+          {
+            "to": "router",
+            "label": "Cable de red",
+            "cue": "cable"
+          }
+        ]
       }
     },
     {
@@ -39,8 +70,45 @@
         "title": "Enchufá la fuente",
         "accent": "y listo.",
         "device": "core-pro",
-        "links": [{ "to": "tv", "label": "HDMI" }, { "to": "router", "label": "Cable de red" }, { "to": "power", "label": "Fuente", "cue": "fuente" }],
-        "tv": [{ "screen": { "type": "off", "text": "SIN SEÑAL" } }, { "screen": { "type": "boot" }, "cue": "fuente" }, { "screen": { "type": "promo", "kicker": "Hoy", "big": "2x1", "small": "en cafés", "tone": "sky" }, "cue": "reproducir" }]
+        "links": [
+          {
+            "to": "tv",
+            "label": "HDMI"
+          },
+          {
+            "to": "router",
+            "label": "Cable de red"
+          },
+          {
+            "to": "power",
+            "label": "Fuente",
+            "cue": "fuente"
+          }
+        ],
+        "tv": [
+          {
+            "screen": {
+              "type": "off",
+              "text": "SIN SEÑAL"
+            }
+          },
+          {
+            "screen": {
+              "type": "boot"
+            },
+            "cue": "fuente"
+          },
+          {
+            "screen": {
+              "type": "promo",
+              "kicker": "Hoy",
+              "big": "2x1",
+              "small": "en cafés",
+              "tone": "sky"
+            },
+            "cue": "reproducir"
+          }
+        ]
       }
     },
     {
@@ -53,8 +121,31 @@
         "kicker": "¿No tenés cable?",
         "title": "Configurá el Wi-Fi",
         "accent": "desde el celular.",
-        "bullets": [{ "text": "Red: DisplayAds-Setup", "icon": "wifi", "cue": "propia" }, { "text": "Contraseña única por equipo", "icon": "lock", "cue": "contraseña" }],
-        "visual": { "kind": "tv", "states": [{ "screen": { "type": "status", "title": "DisplayAds-Setup", "status": "Conectate a esta red", "ok": false } }] }
+        "bullets": [
+          {
+            "text": "Red: DisplayAds-Setup",
+            "icon": "wifi",
+            "cue": "propia"
+          },
+          {
+            "text": "Contraseña única por equipo",
+            "icon": "lock",
+            "cue": "contraseña"
+          }
+        ],
+        "visual": {
+          "kind": "tv",
+          "states": [
+            {
+              "screen": {
+                "type": "status",
+                "title": "DisplayAds-Setup",
+                "status": "Conectate a esta red",
+                "ok": false
+              }
+            }
+          ]
+        }
       }
     },
     {
@@ -67,8 +158,26 @@
         "label": "Desde el celular",
         "title": "Abrí el",
         "accent": "navegador.",
-        "chips": [{ "text": "Apagá los datos móviles", "tone": "warn", "cue": "datos" }],
-        "visual": { "kind": "phone", "states": [{ "screen": { "type": "url", "toggle": "Datos móviles", "url": "http://10.42.0.1" }, "cue": "apagá" }] }
+        "chips": [
+          {
+            "text": "Apagá los datos móviles",
+            "tone": "warn",
+            "cue": "datos"
+          }
+        ],
+        "visual": {
+          "kind": "phone",
+          "states": [
+            {
+              "screen": {
+                "type": "url",
+                "toggle": "Datos móviles",
+                "url": "http://10.42.0.1"
+              },
+              "cue": "apagá"
+            }
+          ]
+        }
       }
     },
     {
@@ -84,8 +193,30 @@
         "visual": {
           "kind": "phone",
           "states": [
-            { "screen": { "type": "list", "sub": "Display Ads", "title": "Elegí la red", "items": ["Local-WiFi", "Vecino-5G", "Invitados"], "select": 0, "field": "Contraseña", "button": "Conectar dispositivo" }, "cue": "elegí" },
-            { "screen": { "type": "status", "title": "Core Pro", "status": "Conectado" }, "cue": "segundos" }
+            {
+              "screen": {
+                "type": "list",
+                "sub": "Display Ads",
+                "title": "Elegí la red",
+                "items": [
+                  "Local-WiFi",
+                  "Vecino-5G",
+                  "Invitados"
+                ],
+                "select": 0,
+                "field": "Contraseña",
+                "button": "Conectar dispositivo"
+              },
+              "cue": "elegí"
+            },
+            {
+              "screen": {
+                "type": "status",
+                "title": "Core Pro",
+                "status": "Conectado"
+              },
+              "cue": "segundos"
+            }
           ]
         }
       }
@@ -97,8 +228,23 @@
       "props": {
         "title": "Ojo con",
         "accent": "las redes públicas.",
-        "bad": { "title": "No funcionan", "items": ["Hoteles", "Shoppings", "Redes con inicio de sesión"], "cue": "hoteles" },
-        "good": { "title": "Usá", "items": ["Una red privada", "El cable de red"], "cue": "privada" }
+        "bad": {
+          "title": "No funcionan",
+          "items": [
+            "Hoteles",
+            "Shoppings",
+            "Redes con inicio de sesión"
+          ],
+          "cue": "hoteles"
+        },
+        "good": {
+          "title": "Usá",
+          "items": [
+            "Una red privada",
+            "El cable de red"
+          ],
+          "cue": "privada"
+        }
       }
     },
     {
@@ -109,15 +255,29 @@
       "props": {
         "title": "Verificá",
         "accent": "en el panel.",
-        "rows": [{ "name": "Core Pro", "place": "Salón", "now": "Promo de invierno" }],
-        "stat": { "label": "En línea", "value": 1, "total": 1, "cue": "línea" }
+        "rows": [
+          {
+            "name": "Core Pro",
+            "place": "Salón",
+            "now": "Promo de invierno"
+          }
+        ],
+        "stat": {
+          "label": "En línea",
+          "value": 1,
+          "total": 1,
+          "cue": "línea"
+        }
       }
     },
     {
       "id": "cta",
       "kind": "cta",
-      "vo": "Display Ads. Cada pantalla, bajo control.",
-      "props": { "button": "Soporte Display Ads" }
+      "vo": "Esto es Display Ads. Cada pantalla, bajo control.",
+      "props": {
+        "button": "Soporte Display Ads"
+      },
+      "minBars": 4
     }
   ]
 }

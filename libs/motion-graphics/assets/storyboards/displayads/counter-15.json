@@ -4,7 +4,9 @@
   "brand": "displayads",
   "format": "16:9",
   "beatSync": true,
-  "music": { "track": "newer-wave" },
+  "music": {
+    "track": "newer-wave"
+  },
   "scenes": [
     {
       "id": "intro",
@@ -15,7 +17,21 @@
         "kicker": "Instructivo",
         "name": "Counter 15",
         "text": "La pantalla de mostrador, todo en uno.",
-        "visual": { "kind": "device", "device": "counter-15", "states": [{ "screen": { "type": "promo", "kicker": "Bienvenido", "big": "Hola", "small": "Así se instala", "tone": "sky" } }] }
+        "visual": {
+          "kind": "device",
+          "device": "counter-15",
+          "states": [
+            {
+              "screen": {
+                "type": "promo",
+                "kicker": "Bienvenido",
+                "big": "Hola",
+                "small": "Así se instala",
+                "tone": "sky"
+              }
+            }
+          ]
+        }
       }
     },
     {
@@ -28,8 +44,22 @@
         "label": "Ubicación",
         "title": "Sobre el mostrador,",
         "accent": "de frente al público.",
-        "chips": [{ "text": "Base integrada", "tone": "ok", "cue": "base" }, { "text": "Nada que armar", "tone": "ok", "cue": "nada" }],
-        "visual": { "kind": "image", "src": "brand:escena-04" }
+        "chips": [
+          {
+            "text": "Base integrada",
+            "tone": "ok",
+            "cue": "base"
+          },
+          {
+            "text": "Nada que armar",
+            "tone": "ok",
+            "cue": "nada"
+          }
+        ],
+        "visual": {
+          "kind": "image",
+          "src": "brand:escena-04"
+        }
       }
     },
     {
@@ -41,11 +71,49 @@
         "label": "Encendido",
         "title": "Enchufala y",
         "accent": "arranca sola.",
-        "chips": [{ "text": "Siempre conectada", "icon": "plug", "cue": "siempre" }, { "text": "Sin instalar nada", "tone": "ok", "cue": "instalar" }, { "text": "Sin iniciar sesión", "tone": "ok", "cue": "sesión" }],
+        "chips": [
+          {
+            "text": "Siempre conectada",
+            "icon": "plug",
+            "cue": "siempre"
+          },
+          {
+            "text": "Sin instalar nada",
+            "tone": "ok",
+            "cue": "instalar"
+          },
+          {
+            "text": "Sin iniciar sesión",
+            "tone": "ok",
+            "cue": "sesión"
+          }
+        ],
         "visual": {
           "kind": "device",
           "device": "counter-15",
-          "states": [{ "screen": { "type": "off" } }, { "screen": { "type": "boot" }, "cue": "encenderse" }, { "screen": { "type": "promo", "kicker": "Hoy", "big": "2x1", "small": "en cafés", "tone": "sky" }, "cue": "aplicación" }]
+          "states": [
+            {
+              "screen": {
+                "type": "off"
+              }
+            },
+            {
+              "screen": {
+                "type": "boot"
+              },
+              "cue": "encenderse"
+            },
+            {
+              "screen": {
+                "type": "promo",
+                "kicker": "Hoy",
+                "big": "2x1",
+                "small": "en cafés",
+                "tone": "sky"
+              },
+              "cue": "aplicación"
+            }
+          ]
         }
       }
     },
@@ -58,8 +126,19 @@
         "title": "Vos elegís,",
         "accent": "la pantalla reproduce.",
         "publishCue": "campañas",
-        "campaign": { "name": "Promo de invierno", "meta": "Counter 15 · Mostrador", "badge": "-20%" },
-        "screens": [{ "label": "Counter 15 · Mostrador", "before": "Promo anterior", "after": "Café + medialuna", "kicker": "Invierno" }]
+        "campaign": {
+          "name": "Promo de invierno",
+          "meta": "Counter 15 · Mostrador",
+          "badge": "-20%"
+        },
+        "screens": [
+          {
+            "label": "Counter 15 · Mostrador",
+            "before": "Promo anterior",
+            "after": "Café + medialuna",
+            "kicker": "Invierno"
+          }
+        ]
       }
     },
     {
@@ -71,8 +150,29 @@
         "kicker": "¿Cambiaste el Wi-Fi?",
         "title": "Sin técnico.",
         "accent": "Se reconecta sola.",
-        "bullets": [{ "text": "Sigue mostrando tu contenido", "tone": "ok", "cue": "sigue" }, { "text": "Reintenta sola", "icon": "wifi", "cue": "reconectarse" }],
-        "visual": { "kind": "timer", "labels": ["0:00", "0:30", "1:00", "1:30"], "caption": "reintentando", "cue": "minuto" }
+        "bullets": [
+          {
+            "text": "Sigue mostrando tu contenido",
+            "tone": "ok",
+            "cue": "sigue"
+          },
+          {
+            "text": "Reintenta sola",
+            "icon": "wifi",
+            "cue": "reconectarse"
+          }
+        ],
+        "visual": {
+          "kind": "timer",
+          "labels": [
+            "0:00",
+            "0:30",
+            "1:00",
+            "1:30"
+          ],
+          "caption": "reintentando",
+          "cue": "minuto"
+        }
       }
     },
     {
@@ -89,9 +189,41 @@
           "kind": "device",
           "device": "counter-15",
           "states": [
-            { "screen": { "type": "promo", "kicker": "Hoy", "big": "2x1", "small": "en cafés", "tone": "sky" } },
-            { "screen": { "type": "list", "sub": "Sin conexión", "title": "Elegí una red", "items": ["Local-WiFi", "Vecino-5G", "Invitados"], "select": 0, "field": "Contraseña", "button": "Conectar" }, "cue": "aparece" },
-            { "screen": { "type": "promo", "kicker": "Conectada", "big": "2x1", "small": "en cafés", "tone": "teal" }, "cue": "listo" }
+            {
+              "screen": {
+                "type": "promo",
+                "kicker": "Hoy",
+                "big": "2x1",
+                "small": "en cafés",
+                "tone": "sky"
+              }
+            },
+            {
+              "screen": {
+                "type": "list",
+                "sub": "Sin conexión",
+                "title": "Elegí una red",
+                "items": [
+                  "Local-WiFi",
+                  "Vecino-5G",
+                  "Invitados"
+                ],
+                "select": 0,
+                "field": "Contraseña",
+                "button": "Conectar"
+              },
+              "cue": "aparece"
+            },
+            {
+              "screen": {
+                "type": "promo",
+                "kicker": "Conectada",
+                "big": "2x1",
+                "small": "en cafés",
+                "tone": "teal"
+              },
+              "cue": "listo"
+            }
           ]
         }
       }
@@ -104,8 +236,22 @@
       "props": {
         "title": "Bloqueada",
         "accent": "para otra cosa.",
-        "bullets": [{ "text": "Sólo reconectar el Wi-Fi", "icon": "wifi", "cue": "reconectar" }, { "text": "Nadie sale de la aplicación", "icon": "lock", "cue": "salir" }],
-        "visual": { "kind": "icon", "icon": "shield" }
+        "bullets": [
+          {
+            "text": "Sólo reconectar el Wi-Fi",
+            "icon": "wifi",
+            "cue": "reconectar"
+          },
+          {
+            "text": "Nadie sale de la aplicación",
+            "icon": "lock",
+            "cue": "salir"
+          }
+        ],
+        "visual": {
+          "kind": "icon",
+          "icon": "shield"
+        }
       }
     },
     {
@@ -116,15 +262,32 @@
       "props": {
         "title": "¿Quedó en negro",
         "accent": "o congelada?",
-        "bad": { "title": "Si sigue igual", "items": ["Escribile al soporte"], "cue": "sigue" },
-        "good": { "title": "Reiniciala", "items": ["Desenchufala", "Esperá 10 segundos", "Volvé a enchufarla"], "cue": "desenchufala" }
+        "bad": {
+          "title": "Si sigue igual",
+          "items": [
+            "Escribile al soporte"
+          ],
+          "cue": "sigue"
+        },
+        "good": {
+          "title": "Reiniciala",
+          "items": [
+            "Desenchufala",
+            "Esperá 10 segundos",
+            "Volvé a enchufarla"
+          ],
+          "cue": "desenchufala"
+        }
       }
     },
     {
       "id": "cta",
       "kind": "cta",
-      "vo": "Display Ads. Cada pantalla, bajo control.",
-      "props": { "button": "Soporte Display Ads" }
+      "vo": "Esto es Display Ads. Cada pantalla, bajo control.",
+      "props": {
+        "button": "Soporte Display Ads"
+      },
+      "minBars": 4
     }
   ]
 }

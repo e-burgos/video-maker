@@ -56,4 +56,4 @@ media/
 # apps/desktop vendor binaries are reproducible (apps/desktop/scripts/vendor-binaries.mjs) —
 # only the manifest and notices travel with the repo
 apps/desktop/vendor/darwin-arm64/
-apps/desktop/.vendor-cache/
+apps/desktop/.vendor-cache/previews/
