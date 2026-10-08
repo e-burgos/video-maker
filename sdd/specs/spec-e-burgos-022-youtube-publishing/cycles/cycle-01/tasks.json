@@ -1,0 +1,179 @@
+{
+  "$schema": "../../../../schemas/cycle-tasks.schema.json",
+  "spec": "spec-e-burgos-022-youtube-publishing",
+  "cycle": 1,
+  "module": "youtube-publishing",
+  "apps": [
+    "apps/render-api",
+    "libs/local-store",
+    "apps/web"
+  ],
+  "flow": "lite",
+  "user_stories_generated": true,
+  "prerequisites": {
+    "tasks_generated": true
+  },
+  "tasks": [
+    {
+      "id": "TASK-001",
+      "title": "YouTube OAuth: client settings in the secret store, connect with PKCE and local redirect, refresh, channel status, disconnect",
+      "user_stories": [
+        "US-022-101"
+      ],
+      "estimation_hours": 3,
+      "story_points": 5,
+      "depends_on": [],
+      "status": "done",
+      "files": [
+        "apps/render-api/src/youtube/youtube-oauth.ts",
+        "apps/render-api/src/http/handlers/youtube-integration-handler.ts"
+      ],
+      "usage": {
+        "provider_model": "claude/sonnet",
+        "effort": "medium",
+        "agent": "implementor-back",
+        "tokens_in": 63643,
+        "tokens_out": 11231,
+        "approx": true,
+        "source": "agent-usage-notification",
+        "recorded_at": "2026-10-08"
+      }
+    },
+    {
+      "id": "TASK-002",
+      "title": "Resumable YouTube upload as a publish job with progress, cancel and resume; thumbnail, playlist and music credits",
+      "user_stories": [
+        "US-022-102"
+      ],
+      "estimation_hours": 3,
+      "story_points": 5,
+      "depends_on": [
+        "TASK-001"
+      ],
+      "status": "done",
+      "files": [
+        "apps/render-api/src/youtube/youtube-client.ts",
+        "apps/render-api/src/jobs/run-publish-pipeline.ts"
+      ],
+      "usage": {
+        "provider_model": "claude/sonnet",
+        "effort": "medium",
+        "agent": "implementor-back",
+        "tokens_in": 63643,
+        "tokens_out": 11231,
+        "approx": true,
+        "source": "agent-usage-notification",
+        "recorded_at": "2026-10-08"
+      }
+    },
+    {
+      "id": "TASK-003",
+      "title": "Producer-drafted metadata: title, description and tags from script and brand",
+      "user_stories": [
+        "US-022-103"
+      ],
+      "estimation_hours": 1.5,
+      "story_points": 2,
+      "depends_on": [],
+      "status": "done",
+      "files": [
+        "apps/render-api/src/youtube/draft-youtube-metadata.ts"
+      ],
+      "usage": {
+        "provider_model": "claude/sonnet",
+        "effort": "medium",
+        "agent": "implementor-back",
+        "tokens_in": 63643,
+        "tokens_out": 11231,
+        "approx": true,
+        "source": "agent-usage-notification",
+        "recorded_at": "2026-10-08"
+      }
+    },
+    {
+      "id": "TASK-004",
+      "title": "publications table, project publications endpoint and published state in the project list",
+      "user_stories": [
+        "US-022-104"
+      ],
+      "estimation_hours": 1.5,
+      "story_points": 2,
+      "depends_on": [],
+      "status": "done",
+      "files": [
+        "libs/local-store/src/database/migrations.ts",
+        "libs/local-store/src/repositories/publications-repository.ts"
+      ],
+      "usage": {
+        "provider_model": "claude/sonnet",
+        "effort": "medium",
+        "agent": "implementor-back",
+        "tokens_in": 63643,
+        "tokens_out": 11231,
+        "approx": true,
+        "source": "agent-usage-notification",
+        "recorded_at": "2026-10-08"
+      }
+    },
+    {
+      "id": "TASK-005",
+      "title": "Web: Settings YouTube section and Publish to YouTube dialog with draft, edit, progress and link",
+      "user_stories": [
+        "US-022-101",
+        "US-022-102",
+        "US-022-103",
+        "US-022-104"
+      ],
+      "estimation_hours": 4,
+      "story_points": 5,
+      "depends_on": [
+        "TASK-001",
+        "TASK-002",
+        "TASK-003",
+        "TASK-004"
+      ],
+      "status": "done",
+      "files": [
+        "apps/web/src/components/youtube-settings.tsx",
+        "apps/web/src/components/youtube-publish-dialog.tsx"
+      ],
+      "usage": {
+        "provider_model": "claude/sonnet",
+        "effort": "medium",
+        "agent": "implementor-front",
+        "tokens_in": 216478,
+        "tokens_out": 38202,
+        "approx": true,
+        "source": "agent-usage-notification",
+        "recorded_at": "2026-10-08"
+      }
+    },
+    {
+      "id": "TASK-006",
+      "title": "Real verification: connect the dev account and upload a short private video",
+      "user_stories": [
+        "US-022-101",
+        "US-022-102"
+      ],
+      "estimation_hours": 1,
+      "story_points": 2,
+      "depends_on": [
+        "TASK-005"
+      ],
+      "status": "done",
+      "files": [
+        "sdd/specs/spec-e-burgos-022-youtube-publishing/cycles/cycle-01/artifacts/verification.md"
+      ],
+      "usage": {
+        "provider_model": "claude/sonnet",
+        "effort": "medium",
+        "agent": "implementor-back",
+        "tokens_in": 63643,
+        "tokens_out": 11231,
+        "approx": true,
+        "source": "agent-usage-notification",
+        "recorded_at": "2026-10-08"
+      }
+    }
+  ]
+}

@@ -183,7 +183,7 @@ describe('applyMigrations', () => {
     sqlite.exec(`INSERT INTO projects (slug, created_at, updated_at) VALUES ('legacy', 't', 't')`);
 
     applyMigrations(sqlite, MIGRATIONS);
-    expect(currentUserVersion(sqlite)).toBe(5);
+    expect(currentUserVersion(sqlite)).toBe(MIGRATIONS[MIGRATIONS.length - 1]?.version);
 
     const row = sqlite.prepare('select slug, mode from projects where slug = ?').get('legacy');
     expect(row).toEqual({ slug: 'legacy', mode: 'footage' });
@@ -252,6 +252,34 @@ describe('applyMigrations', () => {
       }
     }
 
+    sqlite.close();
+  });
+
+  it('migrates from v5 to v6 creating the publications table', () => {
+    const sqlite = new Database(':memory:');
+    sqlite.pragma('foreign_keys = ON');
+    applyMigrations(sqlite, MIGRATIONS.filter((migration) => migration.version <= 5));
+    sqlite.exec(`INSERT INTO projects (slug, created_at, updated_at) VALUES ('legacy', 't', 't')`);
+
+    applyMigrations(sqlite, MIGRATIONS);
+
+    expect(currentUserVersion(sqlite)).toBe(6);
+    const columns = sqlite.prepare('PRAGMA table_info(publications)').all() as { name: string }[];
+    expect(columns.map((column) => column.name).sort()).toEqual([
+      'created_at',
+      'file',
+      'id',
+      'job_id',
+      'platform',
+      'privacy',
+      'publish_at',
+      'published_at',
+      'slug',
+      'status',
+      'title',
+      'url',
+      'video_id',
+    ]);
     sqlite.close();
   });
 });

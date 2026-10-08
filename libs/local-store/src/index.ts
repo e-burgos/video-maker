@@ -54,3 +54,12 @@ export type {
   AssetStatus,
   NewPendingAssetRecord,
 } from './repositories/assets-repository';
+
+export { PUBLICATION_STATUSES, createPublicationsRepository } from './repositories/publications-repository';
+export type {
+  NewPublicationRecord,
+  PublicationRecord,
+  PublicationStatus,
+  PublicationsRepository,
+  PublicationUpdate,
+} from './repositories/publications-repository';

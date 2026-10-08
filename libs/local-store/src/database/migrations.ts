@@ -104,6 +104,27 @@ export const MIGRATIONS: readonly Migration[] = [
     version: 5,
     statements: [`ALTER TABLE projects ADD COLUMN brand TEXT`],
   },
+  {
+    version: 6,
+    statements: [
+      `CREATE TABLE publications (
+        id TEXT PRIMARY KEY,
+        slug TEXT NOT NULL REFERENCES projects(slug) ON DELETE CASCADE,
+        platform TEXT NOT NULL,
+        file TEXT NOT NULL,
+        title TEXT NOT NULL,
+        video_id TEXT,
+        url TEXT,
+        privacy TEXT NOT NULL,
+        status TEXT NOT NULL,
+        publish_at TEXT,
+        published_at TEXT,
+        job_id TEXT,
+        created_at TEXT NOT NULL
+      )`,
+      `CREATE INDEX publications_slug_created_at_idx ON publications (slug, created_at)`,
+    ],
+  },
 ];
 
 export function currentUserVersion(sqlite: Database.Database): number {

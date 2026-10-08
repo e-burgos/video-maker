@@ -110,3 +110,25 @@ export const assets = sqliteTable(
   },
   (table) => [index('assets_slug_status_idx').on(table.slug, table.status)],
 );
+
+export const publications = sqliteTable(
+  'publications',
+  {
+    id: text('id').primaryKey(),
+    slug: text('slug')
+      .notNull()
+      .references(() => projects.slug, { onDelete: 'cascade' }),
+    platform: text('platform').notNull(),
+    file: text('file').notNull(),
+    title: text('title').notNull(),
+    videoId: text('video_id'),
+    url: text('url'),
+    privacy: text('privacy').notNull(),
+    status: text('status').notNull(),
+    publishAt: text('publish_at'),
+    publishedAt: text('published_at'),
+    jobId: text('job_id'),
+    createdAt: text('created_at').notNull(),
+  },
+  (table) => [index('publications_slug_created_at_idx').on(table.slug, table.createdAt)],
+);

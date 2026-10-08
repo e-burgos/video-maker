@@ -43,6 +43,10 @@ import type {
   MotionPhase,
   PhotoArollJobProgress,
   PhotoArollJobReport,
+  PublishJobProgress,
+  PublishJobReport,
+  PublishPlatform,
+  PublishPrivacy,
   RenderJobProgress,
   RenderJobState,
   StoryboardJobProgress,
@@ -51,6 +55,13 @@ import type {
   VoiceJobReport,
 } from './render-job';
 import { runMontagePipeline } from './run-montage-pipeline';
+import { completePublishJobProgress, mergePublishUploadProgress, startPublishJobStage } from './publish-job-progress';
+import { isPublishPipelineCanceled } from './publish-pipeline-observer';
+import type { PublishPipelineObserver } from './publish-pipeline-observer';
+import { runPublishPipeline } from './run-publish-pipeline';
+import type { PublishPipelineOptions } from './run-publish-pipeline';
+import { createYoutubeServices } from '../youtube/youtube-services';
+import type { YoutubeClient } from '../youtube/youtube-client';
 
 const PROGRESS_PERSIST_THROTTLE_MS = 1_000;
 const JOB_INTERRUPTED_MESSAGE = 'The service restarted while this job was still in progress.';
@@ -81,6 +92,8 @@ export function recoverInterruptedJobs(deps: RenderApiDependencies): void {
   if (unfinished.length === 0) {
     return;
   }
+
+  deps.localStore.publications.failUploadingForJobs(unfinished.map((job) => job.id));
 
   const errorPayload: RenderApiErrorPayload = {
     code: 'JOB_INTERRUPTED',
@@ -166,17 +179,39 @@ interface MotionJobRecord extends JobRecordBase {
   report: MotionJobReport | null;
 }
 
+interface PublishJobRecord extends JobRecordBase {
+  readonly kind: 'publish';
+  readonly retryOf: string | null;
+  readonly platform: PublishPlatform;
+  readonly file: string;
+  readonly title: string;
+  readonly description: string;
+  readonly tags: readonly string[];
+  readonly privacy: PublishPrivacy;
+  readonly publishAt: string | null;
+  readonly playlistId: string | null;
+  readonly thumbnail: string | null;
+  readonly categoryId: string;
+  readonly madeForKids: boolean;
+  readonly defaultLanguage: string;
+  progress: PublishJobProgress | null;
+  report: PublishJobReport | null;
+}
+
 type JobRecord =
   | RenderJobRecord
   | MontageJobRecord
   | StoryboardJobRecord
   | VoiceJobRecord
   | PhotoArollJobRecord
-  | MotionJobRecord;
+  | MotionJobRecord
+  | PublishJobRecord;
 
 export function createRenderJobQueue(
   deps: RenderApiDependencies,
   resolveProjectBrand: ProjectBrandResolver = async () => null,
+  youtube: YoutubeClient = createYoutubeServices(deps).client,
+  publishOptions: Omit<PublishPipelineOptions, 'youtube'> = {},
 ): RenderJobQueue {
   const jobsStore = deps.localStore.jobs;
   const records = new Map<string, JobRecord>();
@@ -437,6 +472,56 @@ export function createRenderJobQueue(
     settle(record, report, failure);
   }
 
+  async function runPublishJob(record: PublishJobRecord): Promise<void> {
+    const observer: PublishPipelineObserver = {
+      stageStarted: (stage) => {
+        record.progress = startPublishJobStage(record.progress, stage);
+        persistProgress(record, false);
+      },
+      bytesUploaded: (uploadedBytes, totalBytes) => {
+        record.progress = mergePublishUploadProgress(record.progress, uploadedBytes, totalBytes);
+        persistProgress(record, false);
+      },
+      cancellationRequested: () => record.state === 'canceling',
+    };
+
+    let report: PublishJobReport | null = null;
+    let failure: RenderApiErrorPayload | null = null;
+
+    try {
+      report = await runPublishPipeline(
+        {
+          jobId: record.id,
+          slug: record.slug,
+          project: resolveMediaProject(record.projectRoot),
+          resume: record.retryOf !== null,
+          platform: record.platform,
+          file: record.file,
+          title: record.title,
+          description: record.description,
+          tags: record.tags,
+          privacy: record.privacy,
+          publishAt: record.publishAt,
+          playlistId: record.playlistId,
+          thumbnail: record.thumbnail,
+          categoryId: record.categoryId,
+          madeForKids: record.madeForKids,
+          defaultLanguage: record.defaultLanguage,
+        },
+        deps,
+        observer,
+        { ...publishOptions, youtube },
+      );
+    } catch (cause) {
+      failure = isPublishPipelineCanceled(cause) ? null : toErrorPayload(cause);
+    }
+
+    if (report !== null) {
+      record.progress = completePublishJobProgress(record.progress);
+    }
+    settle(record, report, failure);
+  }
+
   async function runJob(record: JobRecord): Promise<void> {
     switch (record.kind) {
       case 'render':
@@ -456,6 +541,9 @@ export function createRenderJobQueue(
         break;
       case 'motion':
         await runMotionJob(record);
+        break;
+      case 'publish':
+        await runPublishJob(record);
         break;
     }
 
@@ -495,7 +583,11 @@ export function createRenderJobQueue(
     resolveIdle();
   }
 
-  function createJobRecord(base: Omit<JobRecordBase, never>, input: CreateJobInput): JobRecord {
+  function createJobRecord(
+    base: Omit<JobRecordBase, never>,
+    input: CreateJobInput,
+    retryOf: string | null,
+  ): JobRecord {
     switch (input.kind) {
       case 'render':
         return { ...base, kind: 'render', timeline: input.timeline, progress: null, report: null };
@@ -556,6 +648,26 @@ export function createRenderJobQueue(
           progress: null,
           report: null,
         };
+      case 'publish':
+        return {
+          ...base,
+          kind: 'publish',
+          retryOf,
+          platform: input.platform,
+          file: input.file,
+          title: input.title,
+          description: input.description,
+          tags: input.tags,
+          privacy: input.privacy,
+          publishAt: input.publishAt,
+          playlistId: input.playlistId,
+          thumbnail: input.thumbnail,
+          categoryId: input.categoryId,
+          madeForKids: input.madeForKids,
+          defaultLanguage: input.defaultLanguage,
+          progress: null,
+          report: null,
+        };
     }
   }
 
@@ -573,7 +685,7 @@ export function createRenderJobQueue(
       error: null,
     };
 
-    const record = createJobRecord(base, input);
+    const record = createJobRecord(base, input, retryOf);
 
     records.set(id, record);
     pending.push(id);

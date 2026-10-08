@@ -41,7 +41,7 @@ async function caughtErrorPayload(promise: Promise<unknown>): Promise<ReturnType
   );
 }
 
-const PROJECT_SUMMARY_KEYS = ['brand', 'layout', 'mode', 'slug'];
+const PROJECT_SUMMARY_KEYS = ['brand', 'lastPublication', 'layout', 'mode', 'slug'];
 const PROJECT_DETAIL_KEYS = ['assetCounts', 'assetSource', 'brand', 'brandMissing', 'captionTheme', 'layout', 'mode', 'slug'];
 const PLACEMENT_BODY_KEYS = ['placement', 'slug'];
 const PLACEMENT_KEYS = ['archived', 'categoryId', 'folderId'];
@@ -79,6 +79,31 @@ describe('handleListProjects', () => {
     const deps = createFakeRenderApiDependencies(callLog, { storage });
     deps.localStore.projects.insert('zeta-project');
     deps.localStore.projects.insert('acme-launch');
+    deps.localStore.publications.insert({
+      id: 'pub-old',
+      slug: 'acme-launch',
+      platform: 'youtube',
+      file: 'out/final.mp4',
+      title: 'Old',
+      privacy: 'public',
+      status: 'failed',
+      publishAt: null,
+      jobId: null,
+      createdAt: '2026-10-08T09:00:00.000Z',
+    });
+    deps.localStore.publications.insert({
+      id: 'pub-new',
+      slug: 'acme-launch',
+      platform: 'youtube',
+      file: 'out/final.mp4',
+      title: 'New',
+      privacy: 'public',
+      status: 'published',
+      publishAt: null,
+      jobId: null,
+      createdAt: '2026-10-08T10:00:00.000Z',
+    });
+    deps.localStore.publications.update('pub-new', { status: 'published', url: 'https://youtu.be/abc' });
 
     const response = await handleListProjects(deps, STORE);
 
@@ -88,11 +113,13 @@ describe('handleListProjects', () => {
         mode: 'footage',
         brand: null,
         layout: { raw: true, catalog: true, timeline: false, edl: false, out: true },
+        lastPublication: { platform: 'youtube', url: 'https://youtu.be/abc', status: 'published' },
       },
       {
         slug: 'zeta-project',
         mode: 'footage',
         brand: null,
+        lastPublication: null,
         layout: { raw: false, catalog: false, timeline: false, edl: false, out: false },
       },
     ]);
@@ -118,6 +145,7 @@ describe('handleListProjects', () => {
         slug: 'valid-project',
         mode: 'footage',
         brand: null,
+        lastPublication: null,
         layout: { raw: false, catalog: false, timeline: false, edl: false, out: false },
       },
     ]);

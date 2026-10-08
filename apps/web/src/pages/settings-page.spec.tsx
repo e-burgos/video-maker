@@ -12,6 +12,7 @@ function renderPage(client: Partial<RenderApiClient>) {
   const withDefaults: Partial<RenderApiClient> = {
     getProducerSettings: vi.fn().mockResolvedValue(producerSettings()),
     getOpenRouterModels: vi.fn().mockResolvedValue(openRouterModelsResult()),
+    getYouTubeIntegration: vi.fn().mockResolvedValue({ clientConfigured: false, connected: false, channel: null }),
     ...client,
   };
 

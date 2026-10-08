@@ -7,7 +7,7 @@ import {
 } from '@video-maker/auto-montage';
 import type { MediaProject } from '@video-maker/auto-montage';
 import { PROJECT_MODES } from '@video-maker/local-store';
-import type { ProjectMode } from '@video-maker/local-store';
+import type { ProjectMode, PublicationRecord } from '@video-maker/local-store';
 import type { CaptionTheme } from '@video-maker/timeline-core';
 import { join } from 'node:path/posix';
 
@@ -32,14 +32,21 @@ import type { HttpRequestLine, HttpResponse } from '../http-message';
 import { MAX_JSON_BODY_BYTES, readJsonBody } from '../read-json-body';
 import type { RouteParams } from '../router';
 
+export interface ProjectLastPublication {
+  readonly platform: string;
+  readonly url: string | null;
+  readonly status: string;
+}
+
 export interface ProjectSummary {
   readonly slug: string;
   readonly mode: ProjectMode;
   readonly brand: string | null;
   readonly layout: ProjectLayoutFlags;
+  readonly lastPublication: ProjectLastPublication | null;
 }
 
-export interface ProjectDetail extends ProjectSummary {
+export interface ProjectDetail extends Omit<ProjectSummary, 'lastPublication'> {
   readonly brandMissing: boolean;
   readonly captionTheme: CaptionTheme | null;
   readonly assetSource: 'catalog' | 'raw-scan';
@@ -136,11 +143,16 @@ async function buildProjectDetail(
   };
 }
 
+function toLastPublication(record: PublicationRecord | undefined): ProjectLastPublication | null {
+  return record === undefined ? null : { platform: record.platform, url: record.url, status: record.status };
+}
+
 export async function handleListProjects(
   deps: RenderApiDependencies,
   store: StoreConfig,
 ): Promise<HttpResponse> {
   const summaries: ProjectSummary[] = [];
+  const latestPublications = deps.localStore.publications.latestByProject();
 
   for (const record of deps.localStore.projects.list()) {
     const project = resolveMediaProject(join(store.mediaRoot, record.slug));
@@ -153,6 +165,7 @@ export async function handleListProjects(
       mode: record.mode,
       brand: record.brand,
       layout: await computeLayoutFlags(deps.storage, project),
+      lastPublication: toLastPublication(latestPublications.get(record.slug)),
     });
   }
 

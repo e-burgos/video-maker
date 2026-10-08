@@ -1,10 +1,10 @@
-import type { MontageStage, MotionStage, StoryboardStage, VoiceStage } from '../jobs/render-job';
+import type { MontageStage, MotionStage, PublishStage, StoryboardStage, VoiceStage } from '../jobs/render-job';
 
 export const RENDER_PIPELINE_STAGES = ['prepare', 'render', 'mix', 'mux', 'verify'] as const;
 
 export type RenderPipelineStage = (typeof RENDER_PIPELINE_STAGES)[number];
 
-export type RenderApiErrorStage = RenderPipelineStage | MontageStage | StoryboardStage | VoiceStage | MotionStage;
+export type RenderApiErrorStage = RenderPipelineStage | MontageStage | StoryboardStage | VoiceStage | MotionStage | PublishStage;
 
 export const RENDER_API_ERROR_CODES = [
   'INVALID_TIMELINE',
@@ -139,6 +139,11 @@ export const RENDER_API_ERROR_CODES = [
   'STORYBOARD_MISSING',
   'MOTION_JOB_INPUT_INVALID',
   'MOTION_PIPELINE_FAILED',
+  'YOUTUBE_NOT_CONNECTED',
+  'YOUTUBE_CLIENT_MISSING',
+  'YOUTUBE_UPLOAD_FAILED',
+  'YOUTUBE_QUOTA_EXCEEDED',
+  'PUBLISH_FILE_INVALID',
 ] as const;
 
 export type RenderApiErrorCode = (typeof RENDER_API_ERROR_CODES)[number];

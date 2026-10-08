@@ -276,6 +276,21 @@ function isMotionJobReport(value: unknown): boolean {
   );
 }
 
+function isPublishJobProgress(value: unknown): boolean {
+  return isRecord(value) && typeof value['stage'] === 'string' && isNumberOrNull(value['percent'] ?? null);
+}
+
+function isPublishJobReport(value: unknown): boolean {
+  return (
+    isRecord(value) &&
+    typeof value['videoId'] === 'string' &&
+    typeof value['url'] === 'string' &&
+    typeof value['privacy'] === 'string' &&
+    isStringOrNull(value['publishAt'] ?? null) &&
+    typeof value['title'] === 'string'
+  );
+}
+
 function isRenderApiErrorPayload(value: unknown): value is RenderApiErrorPayload {
   return isRecord(value) && typeof value['code'] === 'string' && typeof value['message'] === 'string';
 }
@@ -317,6 +332,13 @@ function isJob(value: unknown): value is Job {
     return (
       (value['progress'] === null || isMotionJobProgress(value['progress'])) &&
       (value['report'] === null || isMotionJobReport(value['report']))
+    );
+  }
+
+  if (value['kind'] === 'publish') {
+    return (
+      (value['progress'] === null || isPublishJobProgress(value['progress'])) &&
+      (value['report'] === null || isPublishJobReport(value['report']))
     );
   }
 
@@ -388,6 +410,7 @@ function isRenderJobSummary(value: unknown): value is RenderJobSummary {
       isMontageStage(value['stage']) ||
       isStoryboardStage(value['stage']) ||
       isVoiceStage(value['stage']) ||
+      (value['kind'] === 'publish' && typeof value['stage'] === 'string') ||
       (MOTION_STAGES as readonly string[]).includes(value['stage'] as string)) &&
     isStringOrNull(value['errorCode']) &&
     typeof value['createdAt'] === 'string' &&

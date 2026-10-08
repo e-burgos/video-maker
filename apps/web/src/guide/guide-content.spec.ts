@@ -24,6 +24,7 @@ const REQUIRED_SECTIONS = [
   'voice',
   'preview',
   'presets',
+  'youtube',
   'flows',
 ];
 

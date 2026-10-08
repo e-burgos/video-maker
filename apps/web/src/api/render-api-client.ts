@@ -25,6 +25,14 @@ import {
   parseVoiceSceneWriteResult,
 } from './parse-voice';
 import {
+  parsePublications,
+  parsePublishJob,
+  parseYouTubeConnectStart,
+  parseYouTubeDraft,
+  parseYouTubeIntegration,
+  parseYouTubePublishOptions,
+} from './parse-youtube';
+import {
   RenderApiError,
   fromErrorResponse,
   responseShapeUnexpected,
@@ -87,6 +95,17 @@ import type {
   MotionOverview,
   MotionStoryboard,
 } from './motion-types';
+
+import type {
+  Publication,
+  PublishJob,
+  YouTubeClientCredentials,
+  YouTubeConnectStart,
+  YouTubeDraft,
+  YouTubeIntegration,
+  YouTubePublishInput,
+  YouTubePublishOptions,
+} from './youtube-types';
 
 export type FetchLike = (input: string, init?: RequestInit) => Promise<Response>;
 
@@ -175,6 +194,14 @@ export type RenderApiClient = {
   getRenderJob: (jobId: string) => Promise<Job>;
   cancelRenderJob: (jobId: string) => Promise<RenderJobCancelOutcome>;
   retryJob: (jobId: string) => Promise<Job>;
+  getYouTubeIntegration: () => Promise<YouTubeIntegration>;
+  putYouTubeClient: (credentials: YouTubeClientCredentials) => Promise<YouTubeIntegration>;
+  connectYouTube: () => Promise<YouTubeConnectStart>;
+  disconnectYouTube: () => Promise<void>;
+  getYouTubePublishOptions: (slug: string) => Promise<YouTubePublishOptions>;
+  draftYouTubeMetadata: (slug: string, file: string) => Promise<YouTubeDraft>;
+  createPublishJob: (slug: string, input: YouTubePublishInput) => Promise<PublishJob>;
+  listPublications: (slug: string) => Promise<Publication[]>;
 };
 
 export type UploadAssetInput = {
@@ -1017,6 +1044,95 @@ export function createRenderApiClient(fetchImpl: FetchLike): RenderApiClient {
         (value) => isRecord(value),
       );
       return parseJob(body);
+    },
+
+    async getYouTubeIntegration(): Promise<YouTubeIntegration> {
+      const body = await requestJson(
+        '/integrations/youtube',
+        undefined,
+        'a youtube integration document',
+        (value) => isRecord(value),
+      );
+      return parseYouTubeIntegration(body);
+    },
+
+    async putYouTubeClient(credentials: YouTubeClientCredentials): Promise<YouTubeIntegration> {
+      const body = await requestJson(
+        '/integrations/youtube/client',
+        {
+          method: 'PUT',
+          headers: { 'content-type': 'application/json' },
+          body: JSON.stringify(credentials),
+        },
+        'a youtube integration document',
+        (value) => isRecord(value),
+      );
+      return parseYouTubeIntegration(body);
+    },
+
+    async connectYouTube(): Promise<YouTubeConnectStart> {
+      const body = await requestJson(
+        '/integrations/youtube/connect',
+        { method: 'POST' },
+        'a youtube connect document',
+        (value) => isRecord(value),
+      );
+      return parseYouTubeConnectStart(body);
+    },
+
+    async disconnectYouTube(): Promise<void> {
+      const response = await send('/integrations/youtube', { method: 'DELETE' });
+      if (!response.ok) {
+        throw fromErrorResponse(response.status, await readJson(response));
+      }
+    },
+
+    async getYouTubePublishOptions(slug: string): Promise<YouTubePublishOptions> {
+      const body = await requestJson(
+        `/projects/${encodeURIComponent(slug)}/publish/youtube/options`,
+        undefined,
+        'a youtube publish options document',
+        (value) => isRecord(value),
+      );
+      return parseYouTubePublishOptions(body);
+    },
+
+    async draftYouTubeMetadata(slug: string, file: string): Promise<YouTubeDraft> {
+      const body = await requestJson(
+        `/projects/${encodeURIComponent(slug)}/publish/youtube/draft`,
+        {
+          method: 'POST',
+          headers: { 'content-type': 'application/json' },
+          body: JSON.stringify({ file }),
+        },
+        'a youtube metadata draft',
+        (value) => isRecord(value),
+      );
+      return parseYouTubeDraft(body);
+    },
+
+    async createPublishJob(slug: string, input: YouTubePublishInput): Promise<PublishJob> {
+      const body = await requestJson(
+        `/projects/${encodeURIComponent(slug)}/jobs`,
+        {
+          method: 'POST',
+          headers: { 'content-type': 'application/json' },
+          body: JSON.stringify({ kind: 'publish', platform: 'youtube', ...input }),
+        },
+        'a publish job document',
+        (value) => isRecord(value),
+      );
+      return parsePublishJob(body);
+    },
+
+    async listPublications(slug: string): Promise<Publication[]> {
+      const body = await requestJson(
+        `/projects/${encodeURIComponent(slug)}/publications`,
+        undefined,
+        'a publication listing',
+        (value) => Array.isArray(value),
+      );
+      return parsePublications(body);
     },
   };
 }

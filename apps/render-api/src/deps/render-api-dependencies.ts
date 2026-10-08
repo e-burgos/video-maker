@@ -5,6 +5,7 @@ import type {
   OrganizationRepository,
   ProducerRepository,
   ProjectsRepository,
+  PublicationsRepository,
   SettingsRepository,
 } from '@video-maker/local-store';
 import type {
@@ -90,7 +91,9 @@ export type ProbeAssetPort = (input: ProbeAssetInput) => Promise<MediaAsset>;
 export type CreateCommandRunnerPort = () => Promise<CommandRunner>;
 
 export interface FetchRemoteInit {
+  readonly method?: 'GET' | 'POST' | 'PUT';
   readonly headers?: Readonly<Record<string, string>>;
+  readonly body?: Uint8Array | string;
   readonly timeoutMs: number;
 }
 
@@ -262,6 +265,7 @@ export interface LocalStorePort {
   readonly jobs: JobsRepository;
   readonly settings: SettingsRepository;
   readonly assets: AssetsRepository;
+  readonly publications: PublicationsRepository;
   readonly schemaVersion: number;
   readonly close: () => void;
 }
@@ -299,6 +303,20 @@ export interface RasterizeSvgInput {
 }
 
 export type RasterizeSvgPort = (input: RasterizeSvgInput) => Promise<void>;
+
+export type OAuthLoopbackHandler = (query: Readonly<Record<string, string>>) => Promise<string>;
+
+export interface StartOAuthLoopbackInput {
+  readonly handler: OAuthLoopbackHandler;
+  readonly timeoutMs: number;
+}
+
+export interface OAuthLoopbackHandle {
+  readonly port: number;
+  readonly close: () => void;
+}
+
+export type StartOAuthLoopbackPort = (input: StartOAuthLoopbackInput) => Promise<OAuthLoopbackHandle>;
 
 export type HashTextPort = (text: string) => string;
 
@@ -342,4 +360,5 @@ export interface RenderApiDependencies {
   readonly motionPorts: CreateMotionPortsPort;
   readonly runHyperframes: RunHyperframesPort;
   readonly rasterizeSvg: RasterizeSvgPort;
+  readonly startOAuthLoopback: StartOAuthLoopbackPort;
 }

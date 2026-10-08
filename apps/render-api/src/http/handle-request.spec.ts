@@ -132,9 +132,9 @@ describe('handleRequest', () => {
       const request = requestLine({ method: route.method, path, body: emptyJsonBody() });
 
       const response = await handleRequest(request, deps, STORE, runtime, CONFIG);
-      const body = response.body as { error?: { code?: string } };
+      const body = response.body as { error?: { code?: string } } | undefined;
 
-      expect(body.error?.code).not.toBe('ROUTE_NOT_FOUND');
+      expect(body?.error?.code).not.toBe('ROUTE_NOT_FOUND');
     }
   });
 });

@@ -10,6 +10,7 @@ import type {
   CreateMontageJobInput,
   CreateMotionJobInput,
   CreatePhotoArollJobInput,
+  CreatePublishJobInput,
   CreateRenderJobInput,
   CreateStoryboardJobInput,
   CreateVoiceJobInput,
@@ -22,6 +23,10 @@ import type {
   MotionPhase,
   PhotoArollJobProgress,
   PhotoArollJobReport,
+  PublishJobProgress,
+  PublishJobReport,
+  PublishPlatform,
+  PublishPrivacy,
   RenderJobProgress,
   RenderJobState,
   StoryboardJobProgress,
@@ -29,7 +34,7 @@ import type {
   VoiceJobProgress,
   VoiceJobReport,
 } from './render-job';
-import { MOTION_PHASES, RENDER_JOB_STATES } from './render-job';
+import { MOTION_PHASES, PUBLISH_PLATFORMS, PUBLISH_PRIVACIES, RENDER_JOB_STATES } from './render-job';
 
 export type StoredJobParams =
   | Omit<CreateRenderJobInput, 'slug' | 'projectRoot'>
@@ -37,7 +42,8 @@ export type StoredJobParams =
   | Omit<CreateStoryboardJobInput, 'slug' | 'projectRoot'>
   | Omit<CreateVoiceJobInput, 'slug' | 'projectRoot'>
   | Omit<CreatePhotoArollJobInput, 'slug' | 'projectRoot'>
-  | Omit<CreateMotionJobInput, 'slug' | 'projectRoot'>;
+  | Omit<CreateMotionJobInput, 'slug' | 'projectRoot'>
+  | Omit<CreatePublishJobInput, 'slug' | 'projectRoot'>;
 
 function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === 'object' && value !== null && !Array.isArray(value);
@@ -59,6 +65,7 @@ function isJobKind(value: string): value is JobKind {
     case 'voice':
     case 'photo-aroll':
     case 'motion':
+    case 'publish':
       return true;
     default:
       return false;
@@ -67,6 +74,14 @@ function isJobKind(value: string): value is JobKind {
 
 function isMotionPhase(value: unknown): value is MotionPhase {
   return typeof value === 'string' && (MOTION_PHASES as readonly string[]).includes(value);
+}
+
+function isPublishPlatform(value: unknown): value is PublishPlatform {
+  return typeof value === 'string' && (PUBLISH_PLATFORMS as readonly string[]).includes(value);
+}
+
+function isPublishPrivacy(value: unknown): value is PublishPrivacy {
+  return typeof value === 'string' && (PUBLISH_PRIVACIES as readonly string[]).includes(value);
 }
 
 function isRenderJobState(value: string): value is RenderJobState {
@@ -104,6 +119,22 @@ export function toStoredParams(input: CreateJobInput): StoredJobParams {
       return { kind: 'photo-aroll', photos: input.photos, output: input.output, fps: input.fps };
     case 'motion':
       return { kind: 'motion', phase: input.phase, output: input.output, takes: input.takes };
+    case 'publish':
+      return {
+        kind: 'publish',
+        platform: input.platform,
+        file: input.file,
+        title: input.title,
+        description: input.description,
+        tags: input.tags,
+        privacy: input.privacy,
+        publishAt: input.publishAt,
+        playlistId: input.playlistId,
+        thumbnail: input.thumbnail,
+        categoryId: input.categoryId,
+        madeForKids: input.madeForKids,
+        defaultLanguage: input.defaultLanguage,
+      };
   }
 }
 
@@ -177,6 +208,36 @@ export function parseStoredParams(kind: JobKind, value: unknown): StoredJobParam
       }
       return { kind: 'motion', phase, output, takes };
     }
+    case 'publish': {
+      const { platform, file, title, description, tags, privacy, publishAt, playlistId, thumbnail, categoryId, madeForKids, defaultLanguage } = value;
+      if (!isPublishPlatform(platform) || typeof file !== 'string' || typeof title !== 'string') {
+        return null;
+      }
+      if (typeof description !== 'string' || !isStringArray(tags) || !isPublishPrivacy(privacy)) {
+        return null;
+      }
+      if (!isStringOrNull(publishAt) || !isStringOrNull(playlistId) || !isStringOrNull(thumbnail)) {
+        return null;
+      }
+      if (typeof categoryId !== 'string' || typeof madeForKids !== 'boolean' || typeof defaultLanguage !== 'string') {
+        return null;
+      }
+      return {
+        kind: 'publish',
+        platform,
+        file,
+        title,
+        description,
+        tags,
+        privacy,
+        publishAt,
+        playlistId,
+        thumbnail,
+        categoryId,
+        madeForKids,
+        defaultLanguage,
+      };
+    }
   }
 }
 
@@ -217,6 +278,8 @@ function buildInvalidJob(row: StoredJobRow, kind: JobKind): Job {
     case 'photo-aroll':
       return { ...base, kind, progress: null, report: null };
     case 'motion':
+      return { ...base, kind, progress: null, report: null };
+    case 'publish':
       return { ...base, kind, progress: null, report: null };
   }
 }
@@ -259,6 +322,8 @@ function buildTypedJob(row: StoredJobRow, kind: JobKind, state: RenderJobState):
       };
     case 'motion':
       return { ...base, kind, progress: progress as MotionJobProgress | null, report: report as MotionJobReport | null };
+    case 'publish':
+      return { ...base, kind, progress: progress as PublishJobProgress | null, report: report as PublishJobReport | null };
   }
 }
 

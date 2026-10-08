@@ -145,6 +145,21 @@ export const GUIDE_EN: GuideContent = {
       ].join('\n'),
     },
     {
+      id: 'youtube',
+      title: 'Publish on YouTube — connect your channel and upload',
+      body: [
+        'The studio uploads the finished video to your channel without leaving the app. You connect once, in **Settings › YouTube**, with a Google credential of your own (the studio never shares one).',
+        '',
+        '- **Create the credential**: in Google Cloud create a project, enable the **YouTube Data API v3** and create an OAuth client of type **Desktop app**. If the consent screen is in "Testing" mode, add your account as a test user.',
+        '- **Connect**: paste the Client ID and secret, press **Connect with YouTube**, allow access in the Google window and come back: the channel shows up with its name and picture. **Disconnect** revokes access.',
+        '- **Publish**: in the preview, in Deliveries or on the Motion page, the **Publish on YouTube** button opens the dialog. Pick the MP4 (short vertical videos are flagged as Shorts) and press **Propose with the producer** so it writes the title, the description (with the music credit) and the tags; edit whatever you like.',
+        '- **Visibility**: public, unlisted or private. **Schedule** uploads the video as private and YouTube publishes it at the chosen time. Before publishing publicly the studio asks you to confirm which channel it goes to.',
+        '- **Follow-up**: the upload shows its progress and can be canceled or retried (it resumes where it stopped). Every published video is recorded in the project with its link, and the video card marks it as published.',
+        '',
+        'Each new video counts against the daily YouTube API quota; if it runs out the studio says so and you can retry the next day.',
+      ].join('\n'),
+    },
+    {
       id: 'flows',
       title: 'Three flows that work',
       body: [

@@ -29,6 +29,7 @@ import { RenderTrigger } from '../components/render-trigger';
 import { TimelineIssueList } from '../components/timeline-issue-list';
 import { TimelinePlayer } from '../components/timeline-player';
 import { TimelineSaveBar } from '../components/timeline-save-bar';
+import { YouTubePublishSection } from '../components/youtube-publish-section';
 import { MotionPreviewView } from '../components/motion-preview-view';
 import { ProjectModeGate } from '../components/project-mode-gate';
 
@@ -261,6 +262,13 @@ function StudioView({ slug, initialTimeline }: StudioViewProps) {
           jobId={selectedJobId}
           onRetried={(job) => setSelectedJobId(job.id)}
         />
+      </div>
+
+      <div className="space-y-2">
+        <h2 className="font-mono text-xs uppercase tracking-wide text-slate-500">
+          {t('youtube.publish.section')}
+        </h2>
+        <YouTubePublishSection slug={slug} />
       </div>
     </>
   );
