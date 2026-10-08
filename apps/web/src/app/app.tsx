@@ -11,6 +11,14 @@ const AssetLibraryPage = lazy(async () => ({
   default: (await import('../pages/asset-library-page')).AssetLibraryPage,
 }));
 
+const BrandsPage = lazy(async () => ({
+  default: (await import('../pages/brands-page')).BrandsPage,
+}));
+
+const BrandEditorPage = lazy(async () => ({
+  default: (await import('../pages/brand-editor-page')).BrandEditorPage,
+}));
+
 const GuidePage = lazy(async () => ({
   default: (await import('../pages/guide-page')).GuidePage,
 }));
@@ -62,6 +70,22 @@ export function App() {
                 element={
                   <Suspense fallback={<RouteFallback messageKey="app.loading.guide" />}>
                     <GuidePage />
+                  </Suspense>
+                }
+              />
+              <Route
+                path="/brands"
+                element={
+                  <Suspense fallback={<RouteFallback messageKey="brands.loading" />}>
+                    <BrandsPage />
+                  </Suspense>
+                }
+              />
+              <Route
+                path="/brands/:id"
+                element={
+                  <Suspense fallback={<RouteFallback messageKey="brands.loading" />}>
+                    <BrandEditorPage />
                   </Suspense>
                 }
               />

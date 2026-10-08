@@ -26,6 +26,7 @@ const PROJECT_SECTIONS: readonly ProjectSection[] = [
 ];
 
 const HEADER_LINKS = [
+  { to: '/brands', testId: 'brands-nav', labelKey: 'nav.brands' },
   { to: '/settings', testId: 'settings-nav', labelKey: 'nav.settings' },
   { to: '/guide', testId: 'guide-nav', labelKey: 'nav.guide' },
 ] as const satisfies readonly { to: string; testId: string; labelKey: TranslationKey }[];

@@ -23,6 +23,7 @@ export interface RenderApiRuntime {
   readonly producer: ProducerConfig;
   readonly uploadSerializer: KeyedSerializer;
   readonly voicePreviewSerializer: KeyedSerializer;
+  readonly brandPreviewSerializer: KeyedSerializer;
   readonly musicSearchCache: MusicSearchCache;
   readonly freeMediaSearchCache: FreeMediaSearchCache;
   readonly openRouterModelCatalog: OpenRouterModelCatalog;
@@ -44,6 +45,7 @@ export function createRenderApiRuntime(
     producer,
     uploadSerializer: createKeyedSerializer(),
     voicePreviewSerializer: createKeyedSerializer(),
+    brandPreviewSerializer: createKeyedSerializer(),
     musicSearchCache: createMusicSearchCache(),
     freeMediaSearchCache: createFreeMediaSearchCache(),
     openRouterModelCatalog: createOpenRouterModelCatalog(),

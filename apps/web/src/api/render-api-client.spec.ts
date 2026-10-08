@@ -9,6 +9,7 @@ import {
   succeededTurn,
 } from './__fixtures__/producer';
 import { VOICE_MODELS, voiceDocument, voiceJob, voiceTrack } from './__fixtures__/voice';
+import { brandDetail, brandSummary } from './__fixtures__/brand';
 import { createRenderApiClient } from './render-api-client';
 import { RenderApiError } from './render-api-error';
 import type { FetchLike } from './render-api-client';
@@ -1361,5 +1362,71 @@ describe('createRenderApiClient — listGenerated y getProjectFile (FIX-006-001,
       voice: 'es_AR-daniela-high',
       scriptPath: 'work/producer/script.txt',
     });
+  });
+  it('lista, lee, crea, guarda y borra marcas contra /brands', async () => {
+    const detail = brandDetail();
+    const { fetchImpl, calls } = recordingFetch(() => jsonResponse([brandSummary()]));
+    await createRenderApiClient(fetchImpl).listBrands();
+    expect(calls[0]?.url).toBe('/api/brands');
+
+    const detailFetch = recordingFetch(() => jsonResponse(detail, 201));
+    const client = createRenderApiClient(detailFetch.fetchImpl);
+    await client.getBrand('mine');
+    await client.createBrand({ name: 'Mine', duplicateFrom: 'displayads' });
+    await client.putBrand('mine', detail.manifest);
+    await client.addBrandGoogleFont('mine', 'Poppins');
+
+    expect(detailFetch.calls.map((call) => [call.init?.method ?? 'GET', call.url])).toEqual([
+      ['GET', '/api/brands/mine'],
+      ['POST', '/api/brands'],
+      ['PUT', '/api/brands/mine'],
+      ['POST', '/api/brands/mine/fonts'],
+    ]);
+    expect(JSON.parse(String(detailFetch.calls[1]?.init?.body))).toEqual({
+      name: 'Mine',
+      duplicateFrom: 'displayads',
+    });
+    expect(JSON.parse(String(detailFetch.calls[3]?.init?.body))).toEqual({ family: 'Poppins' });
+
+    const removal = recordingFetch(() => new Response(null, { status: 204 }));
+    await expect(createRenderApiClient(removal.fetchImpl).deleteBrand('mine')).resolves.toBeUndefined();
+    expect(removal.calls[0]).toMatchObject({ url: '/api/brands/mine', init: { method: 'DELETE' } });
+  });
+
+  it('sube archivos de marca como cuerpo crudo y devuelve su ruta', async () => {
+    const { fetchImpl, calls } = recordingFetch(() => jsonResponse({ path: 'img/logo-2.png' }, 201));
+    const body = new Blob(['x']);
+
+    const result = await createRenderApiClient(fetchImpl).uploadBrandFile({
+      id: 'mine',
+      kind: 'logo',
+      filename: 'logo-2.png',
+      contentType: 'image/png',
+      body,
+    });
+
+    expect(result).toEqual({ path: 'img/logo-2.png' });
+    expect(calls[0]?.url).toBe('/api/brands/mine/files/logo/logo-2.png');
+    expect(calls[0]?.init).toMatchObject({ method: 'PUT', body });
+  });
+
+  it('propaga el código del error de una marca de sólo lectura', async () => {
+    const { fetchImpl } = recordingFetch(() =>
+      jsonResponse({ error: { code: 'BRAND_READ_ONLY', message: 'read only' } }, 409),
+    );
+
+    const error = await createRenderApiClient(fetchImpl)
+      .putBrand('displayads', brandDetail().manifest)
+      .catch((caught: unknown) => caught);
+
+    expect((error as RenderApiError).code).toBe('BRAND_READ_ONLY');
+  });
+
+  it('compone la vista previa de una marca', async () => {
+    const preview = { url: '/brands/mine/preview/index.html', composedAt: 'now', durationSec: 8 };
+    const { fetchImpl, calls } = recordingFetch(() => jsonResponse(preview));
+
+    await expect(createRenderApiClient(fetchImpl).composeBrandPreview('mine')).resolves.toEqual(preview);
+    expect(calls[0]?.url).toBe('/api/brands/mine/preview');
   });
 });

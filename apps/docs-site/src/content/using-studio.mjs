@@ -31,6 +31,15 @@ música y renderiza, mostrando el avance. El video queda en el proyecto y se ve 
 página. También se lo podés pedir al productor en la conversación.
 </p>
 ${screenshotFigure(depth, 'motion-video.png', 'Video terminado en la página Motion, con el crédito de la música para la descripción')}
+<h2>Marcas: tu identidad en cada video</h2>
+<p>
+El acceso <strong>Marcas</strong> del encabezado lista las marcas incluidas y las tuyas. Con
+"Nueva marca" armás una desde cero; con "Duplicar" partís de una existente (las incluidas son de
+solo lectura). El editor tiene una sección por tema — identidad, logo, colores, tipografías (también
+de Google Fonts, que se descargan dentro de la marca), voz, música, fotos y productos — y una vista
+previa en vivo con la apertura y el cierre: los colores se actualizan al instante y el logo o las
+tipografías recomponen la vista. Una marca borrada pasa a <code>brands/.trash</code>, no se pierde.
+</p>
 <h2>Ajustar un video de motion graphics conversando</h2>
 <p>
 Desde la página Motion, el botón <strong>"Ajustar con el productor"</strong> abre el chat de ese video.

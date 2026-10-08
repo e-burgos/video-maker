@@ -34,6 +34,21 @@ export const GUIDE_EN: GuideContent = {
       ].join('\n'),
     },
     {
+      id: 'brands',
+      title: 'Brands — the identity of your videos',
+      body: [
+        'The **Brands** link in the header lists the included brands and your own. **New brand** builds one from scratch; **Duplicate** starts from an existing one. Included brands are read-only: duplicate them to edit.',
+        '',
+        '- **Sections**: identity (name, spoken name, tagline), logo and isotype, colors, fonts, voice, music, photos and products. Each section has its own Save button.',
+        '- **Live preview**: shows the opening and the closing with the brand. Colors update instantly; logo and font changes recompose the preview.',
+        '- **Fonts**: pick one of the brand fonts, add one from Google Fonts (it is downloaded into the brand, so rendering needs no internet) or upload your own file.',
+        '- **Photos and music**: the AI picks each photo by its description, and every track needs its credit.',
+        '- **Products**: upload the photo and, for screens, click the four corners of the display.',
+        '',
+        'Deleting a brand moves it to `brands/.trash`: it can be recovered by hand.',
+      ].join('\n'),
+    },
+    {
       id: 'library',
       title: 'Library — the raw material and what each role does',
       body: [

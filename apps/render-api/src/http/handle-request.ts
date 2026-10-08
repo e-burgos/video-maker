@@ -81,6 +81,9 @@ import {
   handleGetBrandFile,
   handleListBrands,
   handlePutBrand,
+  handleGetBrandPreviewFile,
+  handlePostBrandFont,
+  handlePostBrandPreview,
   handlePutBrandFile,
 } from './handlers/brands-handler';
 import { handleGetVoice, handlePutVoiceScene } from './handlers/voice-handler';
@@ -237,6 +240,12 @@ async function dispatchRoute(
         return await handlePutBrandFile(deps, store, params, request);
       case 'brands.files.get':
         return await handleGetBrandFile(deps, store, params, request);
+      case 'brands.preview.create':
+        return await handlePostBrandPreview(deps, store, runtime, params, request);
+      case 'brands.preview.get':
+        return await handleGetBrandPreviewFile(deps, store, params, request);
+      case 'brands.fonts.add':
+        return await handlePostBrandFont(deps, store, params, request);
       case 'folders.list':
         return await handleListFolders(deps);
       case 'folders.create':
