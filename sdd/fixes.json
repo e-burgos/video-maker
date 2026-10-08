@@ -2410,6 +2410,53 @@
           }
         ]
       }
+    },
+    {
+      "id": "FIX-e-burgos-008",
+      "author": "e-burgos",
+      "spec_id": "spec-e-burgos-022-youtube-publishing",
+      "fix_document": "sdd/fixes/fix-e-burgos-008.md",
+      "type": "BUGFIX",
+      "severity": "high",
+      "created_at": "2026-10-08",
+      "resolved_at": "2026-10-08",
+      "validated_at": null,
+      "title": "Los videos de material crudo se publicaban en YouTube sin el crédito de su música CC BY",
+      "estimation_hours": 0.5,
+      "description": "El borrador y el job publish sólo leían out/<video>.credits.txt (motion); los tutoriales guardan su música en work/credits.json.",
+      "justification": "Requisito de la licencia CC BY antes de publicar la tanda de tutoriales; cambio interno sin contratos nuevos.",
+      "related_modules": [
+        "youtube-publishing"
+      ],
+      "affected_files": [
+        "apps/render-api/src/youtube/publish-credits.ts",
+        "apps/render-api/src/youtube/publish-credits.spec.ts"
+      ],
+      "test_reference": "render-api lint/test/build verde (1874); tests de los dos formatos y de la preferencia por el .credits.txt.",
+      "status": "implemented",
+      "cycle": null,
+      "process_note": "Encontrado al preparar la publicación de los tutoriales de display-ads.",
+      "usage": {
+        "provider_model": "claude/opus",
+        "effort": "high",
+        "tokens_in": 30000,
+        "tokens_out": 5000,
+        "approx": true,
+        "source": "declared-estimate",
+        "recorded_at": "2026-10-08",
+        "by_agent": [
+          {
+            "agent": "orchestrator",
+            "provider_model": "claude/opus",
+            "effort": "high",
+            "tokens_in": 30000,
+            "tokens_out": 5000,
+            "approx": true,
+            "source": "declared-estimate",
+            "recorded_at": "2026-10-08"
+          }
+        ]
+      }
     }
   ]
 }
