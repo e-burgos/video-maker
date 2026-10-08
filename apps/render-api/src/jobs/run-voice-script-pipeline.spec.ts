@@ -220,13 +220,16 @@ describe('runVoicePipeline con guion suelto (FIX-e-burgos-009-001)', () => {
     const words = await readVoiceWords(harness.storage);
     const manifest = await readScriptManifest(harness.storage);
 
-    expect(words.words).toEqual([
-      { text: 'hola', startMs: 0, endMs: 400 },
-      { text: 'mundo', startMs: 400, endMs: 900 },
-      { text: 'hola', startMs: 1900, endMs: 2300 },
-      { text: 'mundo', startMs: 2300, endMs: 2800 },
-      { text: 'hola', startMs: 4800, endMs: 5200 },
-      { text: 'mundo', startMs: 5200, endMs: 5700 },
+    expect(words.words.map((word) => word.text)).toEqual([
+      'Primera', 'frase', 'del', 'guion.',
+      'Segunda', 'frase', 'del', 'guion.',
+      'Tercera', 'frase', 'del', 'guion.',
+    ]);
+    const lineSpans = [0, 4, 8].map((first) => [words.words[first]?.startMs, words.words[first + 3]?.endMs]);
+    expect(lineSpans).toEqual([
+      [0, 900],
+      [1900, 2800],
+      [4800, 5700],
     ]);
     expect(words.segments).toEqual([]);
     manifest.lines.forEach((line) => {

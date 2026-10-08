@@ -2,6 +2,7 @@ import type { MediaProject } from '@video-maker/auto-montage';
 import type { Transcription, VoiceScriptWordsSource, Word } from '@video-maker/timeline-core';
 
 import type { RenderApiDependencies } from '../deps/render-api-dependencies';
+import { alignScriptTextToWords } from './align-script-text-to-words';
 import { whisperLanguageFor } from './voice-language';
 import { transcribeVoiceTrackDocument } from './voice-synthesis-steps';
 
@@ -76,10 +77,10 @@ export async function transcribeVoiceScriptLine(
   project: MediaProject,
 ): Promise<VoiceScriptLineWords> {
   const transcription = await transcribeWindow(window, language, deps, project);
-  const words = transcription === null ? [] : clampWordsToWindow(transcription.words, window);
+  const heard = transcription === null ? [] : clampWordsToWindow(transcription.words, window);
 
-  if (words.length > 0) {
-    return { words, source: 'whisper', transcription };
+  if (heard.length > 0) {
+    return { words: alignScriptTextToWords(window.text, heard), source: 'whisper', transcription };
   }
 
   return { words: spreadScriptTextOverWindow(window), source: 'script', transcription };
