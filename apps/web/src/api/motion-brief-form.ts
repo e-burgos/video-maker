@@ -20,11 +20,12 @@ export type BriefDraft = {
   images: Record<string, BriefImageDraft>;
 };
 
-export function emptyBriefDraft(brands: readonly MotionBrand[]): BriefDraft {
+export function emptyBriefDraft(brands: readonly MotionBrand[], preferredBrand: string | null = null): BriefDraft {
+  const brand = brands.find((candidate) => candidate.id === preferredBrand) ?? brands[0];
   return {
-    brand: brands[0]?.id ?? '',
+    brand: brand?.id ?? '',
     format: '16:9',
-    music: MUSIC_AUTO,
+    music: brand !== undefined && brand.music.length === 0 ? MUSIC_NONE : MUSIC_AUTO,
     beatSync: true,
     title: '',
     goal: '',
@@ -73,4 +74,15 @@ export function draftToBrief(draft: BriefDraft, availableImages: readonly string
 
 export function imageFileName(assetPath: string): string {
   return assetPath.split('/').pop() ?? assetPath;
+}
+
+export function musicAfterBrandChange(current: string, brand: MotionBrand | undefined): string {
+  if (brand === undefined || current === MUSIC_NONE) {
+    return current;
+  }
+  if (brand.music.length === 0) {
+    return MUSIC_NONE;
+  }
+  const keepable = current === MUSIC_AUTO || brand.music.some((track) => track.id === current);
+  return keepable ? current : MUSIC_AUTO;
 }

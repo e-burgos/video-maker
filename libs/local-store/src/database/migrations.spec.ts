@@ -183,10 +183,23 @@ describe('applyMigrations', () => {
     sqlite.exec(`INSERT INTO projects (slug, created_at, updated_at) VALUES ('legacy', 't', 't')`);
 
     applyMigrations(sqlite, MIGRATIONS);
-    expect(currentUserVersion(sqlite)).toBe(4);
+    expect(currentUserVersion(sqlite)).toBe(5);
 
     const row = sqlite.prepare('select slug, mode from projects where slug = ?').get('legacy');
     expect(row).toEqual({ slug: 'legacy', mode: 'footage' });
+    sqlite.close();
+  });
+
+  it('migrates from v4 to v5 adding a nullable brand column', () => {
+    const sqlite = new Database(':memory:');
+    sqlite.pragma('foreign_keys = ON');
+    applyMigrations(sqlite, MIGRATIONS.filter((migration) => migration.version <= 4));
+    sqlite.exec(`INSERT INTO projects (slug, created_at, updated_at) VALUES ('legacy', 't', 't')`);
+
+    applyMigrations(sqlite, MIGRATIONS);
+
+    const row = sqlite.prepare('select slug, brand from projects where slug = ?').get('legacy');
+    expect(row).toEqual({ slug: 'legacy', brand: null });
     sqlite.close();
   });
 

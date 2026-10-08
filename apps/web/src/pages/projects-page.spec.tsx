@@ -28,8 +28,9 @@ const DISPLAY_ADS: VideoOrganization = {
 };
 
 function renderPage(client: Partial<RenderApiClient>) {
+  const withBrands = { listBrands: vi.fn().mockResolvedValue([]), ...client };
   render(
-    <RenderApiProvider client={client as RenderApiClient}>
+    <RenderApiProvider client={withBrands as RenderApiClient}>
       <MemoryRouter>
         <ProjectsPage />
       </MemoryRouter>

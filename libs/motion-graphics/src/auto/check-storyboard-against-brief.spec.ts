@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import { testBrand } from '../__fixtures__/catalog-storyboard';
+import { minimalBrand, testBrand } from '../__fixtures__/catalog-storyboard';
 import type { MotionStoryboard } from '../storyboard/motion-storyboard.schema';
 import { checkStoryboardAgainstBrief, enforceBrief } from './check-storyboard-against-brief';
 import type { MotionBrief } from './motion-brief';
@@ -125,5 +125,34 @@ describe('checkStoryboardAgainstBrief', () => {
   it('flags a music track outside the brand and accepts silence', () => {
     expect(checkStoryboardAgainstBrief({ ...validStoryboard, music: { track: 'ghost' } }, brief, testBrand)[0]?.path).toBe('music.track');
     expect(checkStoryboardAgainstBrief({ ...validStoryboard, music: null }, brief, testBrand)).toEqual([]);
+  });
+});
+
+describe('checkStoryboardAgainstBrief with a minimal brand', () => {
+  const minimalBrief: MotionBrief = { ...brief, brand: 'minimal', images: [] };
+  const textOnly: MotionStoryboard = {
+    ...validStoryboard,
+    brand: 'minimal',
+    music: null,
+    scenes: [
+      { id: 'uno', kind: 'hook', vo: 'Una pantalla apagada', props: { lines: [{ title: 'Apagada', cue: 'apag' }] } },
+      { id: 'dos', kind: 'cta', vo: 'Probalo hoy', props: { button: 'Probalo' } },
+    ],
+  };
+
+  it('accepts a silent text-only storyboard', () => {
+    expect(checkStoryboardAgainstBrief(textOnly, minimalBrief, minimalBrand)).toEqual([]);
+  });
+
+  it('rejects a track, a device and brand photos the brand does not have', () => {
+    const invented: MotionStoryboard = {
+      ...textOnly,
+      music: { track: 'beat' },
+      scenes: [{ id: 'uno', kind: 'product', vo: 'El Counter', props: { name: 'Counter', text: 'x', visual: { kind: 'device', device: 'counter' } } }, { id: 'dos', kind: 'gallery', vo: 'Locales', props: { images: ['brand:local', 'brand:cafe'] } }],
+    };
+
+    const paths = checkStoryboardAgainstBrief(invented, minimalBrief, minimalBrand).map((issue) => issue.path);
+
+    expect(paths).toEqual(['music.track', 'scenes[0].props.visual.device', 'scenes[1].props.images[0]', 'scenes[1].props.images[1]']);
   });
 });

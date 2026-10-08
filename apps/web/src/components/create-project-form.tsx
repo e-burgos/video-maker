@@ -1,10 +1,12 @@
-import { useId, useState } from 'react';
+import { useCallback, useId, useState } from 'react';
 
 import { slugifyFileName, uniqueProjectSlug } from '../api/project-slug';
 import { useRenderApi } from '../api/render-api-context';
 import type { ProjectMode } from '../api/render-api-types';
 import { RenderApiError, serviceUnreachable } from '../api/render-api-error';
+import { useAsyncResource } from '../hooks/use-async-resource';
 import { useT } from '../i18n/language-context';
+import { BrandPicker } from './brand-picker';
 import { Button } from './ui/button';
 import { ErrorNotice } from './error-notice';
 
@@ -34,8 +36,16 @@ export function CreateProjectForm({ existingSlugs, onCreated, onCancel }: Create
   const [serviceError, setServiceError] = useState<RenderApiError | null>(null);
   const [submitting, setSubmitting] = useState(false);
   const [mode, setMode] = useState<ProjectMode>('footage');
+  const [chosenBrand, setChosenBrand] = useState<string | null>(null);
   const t = useT();
   const modeLabelId = useId();
+  const brandLabelId = useId();
+  const brands = useAsyncResource(
+    useCallback(() => client.listBrands(), [client]),
+    'create-project-brands',
+  );
+  const brandList = brands.data ?? [];
+  const brand = chosenBrand ?? (mode === 'motion' ? (brandList[0]?.id ?? null) : null);
 
   async function submit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -51,7 +61,7 @@ export function CreateProjectForm({ existingSlugs, onCreated, onCancel }: Create
     const slug = uniqueProjectSlug(slugifyFileName(trimmed), existingSlugs);
     setSubmitting(true);
     try {
-      const detail = await client.createProject({ slug, mode });
+      const detail = await client.createProject({ slug, mode, ...(brand === null ? {} : { brand }) });
       setName('');
       onCreated(detail.slug);
     } catch (cause) {
@@ -108,6 +118,19 @@ export function CreateProjectForm({ existingSlugs, onCreated, onCancel }: Create
             </label>
           ))}
         </div>
+      </div>
+      <div className="space-y-2">
+        <p id={brandLabelId} className="text-sm text-ink-faint">
+          {t('createProject.brand.label')}
+        </p>
+        <BrandPicker
+          brands={brandList}
+          value={brand}
+          allowNone={mode !== 'motion'}
+          name="project-brand"
+          labelledBy={brandLabelId}
+          onChange={setChosenBrand}
+        />
       </div>
       {localProblem && (
         <p role="alert" className="text-sm text-warning">

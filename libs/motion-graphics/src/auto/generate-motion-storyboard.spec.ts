@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import { testBrand } from '../__fixtures__/catalog-storyboard';
+import { minimalBrand, testBrand } from '../__fixtures__/catalog-storyboard';
 import { MotionStudioError } from '../errors/motion-studio-error';
 import type { MotionStoryboard } from '../storyboard/motion-storyboard.schema';
 import { generateMotionStoryboard } from './generate-motion-storyboard';
@@ -61,6 +61,15 @@ describe('generateMotionStoryboard', () => {
     expect(onDrop.storyboard.scenes[1]?.anchor).toBe('drop');
     const noDrop = await generateMotionStoryboard(scriptedAsk([response(withReveal({ track: 'calm' }))]).ask, brief, testBrand);
     expect(noDrop.storyboard.scenes[1]?.anchor).toBeUndefined();
+  });
+
+  it('generates a storyboard without music for a minimal brand even when the answer picks a track', async () => {
+    const minimalBrief: MotionBrief = { ...brief, brand: 'minimal', images: [] };
+    const reveal = { id: 'logo', kind: 'brand-reveal' as const, vo: 'Esto es Minimal', props: {} };
+    const answer = { ...goodStoryboard, brand: 'minimal', music: { track: 'beat' }, scenes: [goodStoryboard.scenes[0], reveal, goodStoryboard.scenes[1]] };
+    const { storyboard } = await generateMotionStoryboard(scriptedAsk([response(answer)]).ask, minimalBrief, minimalBrand);
+    expect(storyboard.music).toBeNull();
+    expect(storyboard.scenes[1]?.anchor).toBeUndefined();
   });
 
   it('drops a copied brand tagline and its accent from brand-reveal and cta so the brand tagline applies', async () => {

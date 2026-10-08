@@ -51,6 +51,7 @@ import {
   handleDeleteProject,
   handleGetProject,
   handleListProjects,
+  handlePutProjectBrand,
   handlePutProjectPlacement,
 } from './handlers/projects-handler';
 import {
@@ -226,6 +227,8 @@ async function dispatchRoute(
         return await handleDeleteProject(deps, store, params);
       case 'projects.placement.put':
         return await handlePutProjectPlacement(deps, store, params, request);
+      case 'projects.brand.put':
+        return await handlePutProjectBrand(deps, store, params, request);
       case 'brands.list':
         return await handleListBrands(deps, store);
       case 'brands.create':

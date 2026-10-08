@@ -14,6 +14,7 @@ export type MotionMusicTrack = {
 export type MotionBrand = {
   id: string;
   name: string;
+  source?: 'built-in' | 'user';
   formats: MotionFormat[];
   music: MotionMusicTrack[];
 };

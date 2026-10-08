@@ -114,6 +114,7 @@ export type RenderApiClient = {
   listProjects: () => Promise<ProjectSummary[]>;
   createProject: (input: CreateProjectInput) => Promise<ProjectDetail>;
   getProject: (slug: string) => Promise<ProjectDetail>;
+  putProjectBrand: (slug: string, brand: string | null) => Promise<ProjectDetail>;
   getOrganization: () => Promise<VideoOrganization>;
   createFolder: (name: string) => Promise<VideoFolder>;
   renameFolder: (folderId: string, name: string) => Promise<VideoFolder>;
@@ -311,6 +312,20 @@ export function createRenderApiClient(fetchImpl: FetchLike): RenderApiClient {
           method: 'POST',
           headers: { 'content-type': 'application/json' },
           body: JSON.stringify(input),
+        },
+        'a project detail',
+        (value) => isRecord(value) && typeof value['slug'] === 'string',
+      );
+      return body as ProjectDetail;
+    },
+
+    async putProjectBrand(slug: string, brand: string | null): Promise<ProjectDetail> {
+      const body = await requestJson(
+        `/projects/${encodeURIComponent(slug)}/brand`,
+        {
+          method: 'PUT',
+          headers: { 'content-type': 'application/json' },
+          body: JSON.stringify({ brand }),
         },
         'a project detail',
         (value) => isRecord(value) && typeof value['slug'] === 'string',

@@ -8,6 +8,7 @@ export const projects = sqliteTable('projects', {
   updatedAt: text('updated_at').notNull(),
   importedAt: text('imported_at'),
   mode: text('mode').$type<ProjectMode>().notNull().default('footage'),
+  brand: text('brand'),
 });
 
 export const folders = sqliteTable('folders', {

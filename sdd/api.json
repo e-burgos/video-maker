@@ -1987,6 +1987,37 @@
             "change": "Created in spec-e-burgos-021-brand-kit cycle-02."
           }
         ]
+      },
+      {
+        "id": "EP-059",
+        "method": "PUT",
+        "path": "/projects/:slug/brand",
+        "module": "brand-kit",
+        "spec": "sdd/specs/spec-e-burgos-021-brand-kit",
+        "status": "implemented",
+        "created_in_cycle": 3,
+        "updated_in_cycle": null,
+        "description": "Sets or clears the project brand (must exist in the brand library); the project detail also reports brand and brandMissing.",
+        "path_params": [
+          "slug"
+        ],
+        "required_headers": [],
+        "request_body": {
+          "content-type": "application/json",
+          "schema": "{ brand: string | null }"
+        },
+        "responses": {
+          "200": "application/json: project detail { slug, mode, brand, brandMissing, layout, assetSource, assetCounts }",
+          "404": "PROJECT_NOT_FOUND or BRAND_UNKNOWN",
+          "422": "INVALID_INPUT"
+        },
+        "changelog": [
+          {
+            "cycle": 3,
+            "date": "2026-10-08",
+            "change": "Created in spec-e-burgos-021-brand-kit cycle-03."
+          }
+        ]
       }
     ]
   }

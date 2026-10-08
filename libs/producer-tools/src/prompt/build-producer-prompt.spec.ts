@@ -302,3 +302,41 @@ describe('motion delivery', () => {
   });
 });
 });
+
+describe('buildProducerPrompt brand section', () => {
+  const brand = {
+    id: 'acme',
+    name: 'Acme',
+    spokenName: 'Acme Ei',
+    tagline: 'Todo bajo control.',
+    url: 'acme.test',
+    voice: 'es_AR-daniela-high',
+    hasMusic: false,
+    photos: 3,
+    devices: ['Counter', 'Box'],
+  };
+
+  it('describes the project brand with its spoken name, tagline, web and assets', () => {
+    const section = buildProducerProjectSection({ ...CONTEXT, mode: 'motion', brand });
+    expect(section).toContain('## Brand');
+    expect(section).toContain('"Acme" (id acme)');
+    expect(section).toContain('"Acme Ei"');
+    expect(section).toContain('Todo bajo control.');
+    expect(section).toContain('web: acme.test');
+    expect(section).toContain('no music; 3 photos; devices: Counter, Box');
+    expect(section).toContain('use this brand, unless the user asks for another');
+    expect(section).toContain('Marcas page');
+  });
+
+  it('omits the motion brief sentence for footage and the whole section without a brand', () => {
+    expect(buildProducerProjectSection({ ...CONTEXT, mode: 'footage', brand })).not.toContain('motion brief');
+    expect(buildProducerProjectSection({ ...CONTEXT, brand: null })).not.toContain('## Brand');
+    expect(buildProducerProjectSection(CONTEXT)).not.toContain('## Brand');
+  });
+
+  it('tells the motion recipe to take music null for a brand with no tracks and to read user brands', () => {
+    const prompt = buildProducerPrompt({ ...CONTEXT, mode: 'motion', brand });
+    expect(prompt).toContain('music: null');
+    expect(prompt).toContain('user-made');
+  });
+});

@@ -7,6 +7,7 @@ import { useAsyncResource } from '../hooks/use-async-resource';
 import { useT } from '../i18n/language-context';
 import type { TranslationKey } from '../i18n/messages-en';
 import { LanguageSwitch } from './language-switch';
+import { ProjectBrandControl } from './project-brand-control';
 import { ServiceHealthBadge } from './service-health-badge';
 
 type ProjectSection = {
@@ -98,6 +99,11 @@ export function StudioLayout() {
                 {t(section.labelKey)}
               </NavLink>
             ))}
+            {project.data !== null && (
+              <div className="ml-auto">
+                <ProjectBrandControl slug={slug} project={project.data} onChanged={project.reload} />
+              </div>
+            )}
           </nav>
         )}
       </header>

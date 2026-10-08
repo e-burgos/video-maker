@@ -1,6 +1,6 @@
 import { useId } from 'react';
 
-import { MUSIC_AUTO, MUSIC_NONE, imageFileName } from '../api/motion-brief-form';
+import { MUSIC_AUTO, MUSIC_NONE, imageFileName, musicAfterBrandChange } from '../api/motion-brief-form';
 import type { BriefDraft } from '../api/motion-brief-form';
 import { MOTION_FORMATS } from '../api/motion-types';
 import type { MotionBrand } from '../api/motion-types';
@@ -35,6 +35,7 @@ export function MotionBriefForm({
   const formatLabelId = useId();
   const brand = brands.find((candidate) => candidate.id === draft.brand);
   const formats = brand?.formats ?? MOTION_FORMATS;
+  const musicTracks = brand?.music ?? [];
   const files = imageAssets.map((asset) => imageFileName(asset.path));
 
   function patch(change: Partial<BriefDraft>): void {
@@ -53,12 +54,20 @@ export function MotionBriefForm({
           <span>{t('motion.brief.brand')}</span>
           <select
             value={draft.brand}
-            onChange={(event) => patch({ brand: event.target.value })}
+            onChange={(event) =>
+              patch({
+                brand: event.target.value,
+                music: musicAfterBrandChange(
+                  draft.music,
+                  brands.find((candidate) => candidate.id === event.target.value),
+                ),
+              })
+            }
             className={FIELD_CLASS}
           >
             {brands.map((option) => (
               <option key={option.id} value={option.id}>
-                {option.name}
+                {option.source === 'user' ? t('motion.brief.brandUser', { name: option.name }) : option.name}
               </option>
             ))}
           </select>
@@ -95,8 +104,8 @@ export function MotionBriefForm({
             onChange={(event) => patch({ music: event.target.value })}
             className={FIELD_CLASS}
           >
-            <option value={MUSIC_AUTO}>{t('motion.brief.music.auto')}</option>
-            {(brand?.music ?? []).map((track) => (
+            {musicTracks.length > 0 && <option value={MUSIC_AUTO}>{t('motion.brief.music.auto')}</option>}
+            {musicTracks.map((track) => (
               <option key={track.id} value={track.id}>
                 {t('motion.brief.music.track', { mood: track.mood, bpm: track.bpm })}
               </option>

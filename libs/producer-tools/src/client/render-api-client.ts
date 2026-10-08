@@ -3,6 +3,7 @@ export type RenderApiProjectMode = 'footage' | 'motion';
 export interface RenderApiMotionBrand {
   readonly id: string;
   readonly name: string;
+  readonly source?: 'built-in' | 'user';
   readonly formats: readonly string[];
   readonly music: readonly {
     readonly id: string;

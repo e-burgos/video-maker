@@ -2,6 +2,7 @@ import { activeDeviceIds, brandImageCaption } from '../brand/brand-manifest';
 import type { BrandManifest } from '../brand/brand-manifest';
 import { motionStoryboardJsonSchema } from '../storyboard/parse-motion-storyboard';
 import { SCENE_KINDS } from '../storyboard/motion-storyboard.schema';
+import type { MotionSceneKind } from '../storyboard/motion-storyboard.schema';
 import { briefImageRef } from './motion-brief';
 import type { MotionBrief } from './motion-brief';
 import { SCENE_GUIDE } from './scene-guide';
@@ -15,11 +16,23 @@ export interface AutoStoryboardRequest {
 const MIN_SCENES = 6;
 const MAX_SCENES = 12;
 
-function sceneGuideLines(): string {
-  return SCENE_KINDS.map((kind) => `- ${kind}: ${SCENE_GUIDE[kind]}`).join('\n');
+const MIN_GALLERY_IMAGES = 2;
+
+function availableImageCount(brief: MotionBrief, brand: BrandManifest): number {
+  return brief.images.length + Object.keys(brand.images).length;
 }
 
-function systemPrompt(): string {
+function offeredSceneKinds(brief: MotionBrief, brand: BrandManifest): readonly MotionSceneKind[] {
+  const hasDevices = activeDeviceIds(brand).length > 0;
+  const hasGalleryImages = availableImageCount(brief, brand) >= MIN_GALLERY_IMAGES;
+  return SCENE_KINDS.filter((kind) => (kind !== 'connections' || hasDevices) && (kind !== 'gallery' || hasGalleryImages));
+}
+
+function sceneGuideLines(kinds: readonly MotionSceneKind[]): string {
+  return kinds.map((kind) => `- ${kind}: ${SCENE_GUIDE[kind]}`).join('\n');
+}
+
+function systemPrompt(kinds: readonly MotionSceneKind[]): string {
   return [
     'You are the storyboard director of a motion-graphics video maker. You turn a script, described photos and a brand kit into a storyboard made only of scenes from a fixed catalog.',
     'Hard rules:',
@@ -32,7 +45,7 @@ function systemPrompt(): string {
     '- Keep on-screen texts short, in the language of the script, and consistent with the voice.',
     '- Never invent a URL: leave `url` out so the brand url applies. Leave `voice` out: the brand voice applies. In `brand-reveal` and `cta` leave `tagline` and `accent` out to show the brand tagline; set them only for a different phrase.',
     'Scene catalog (what each kind is for):',
-    sceneGuideLines(),
+    sceneGuideLines(kinds),
   ].join('\n');
 }
 
@@ -60,9 +73,27 @@ function brandSection(brand: BrandManifest): string {
   ].join('\n');
 }
 
-function briefSection(brief: MotionBrief): string {
-  const musicInstruction =
-    brief.music === 'auto' ? 'choose the track that fits the mood of the script' : brief.music === null ? 'no music (use music: null)' : `use the track "${brief.music}"`;
+function assetLimitsSection(brief: MotionBrief, brand: BrandManifest): string[] {
+  const limits: string[] = [];
+  if (activeDeviceIds(brand).length === 0) {
+    limits.push('This brand has no devices: never use a `device` visual or the `connections` scene; show products with an `icon` visual or an image instead.');
+  }
+  if (availableImageCount(brief, brand) === 0) {
+    limits.push('There are no images at all: never use an `image` visual or screen, and build every scene from text, icons and the other visuals.');
+  }
+  if (brand.music.length === 0) {
+    limits.push('This brand has no music tracks: use `music: null` and never set an `anchor`.');
+  }
+  return limits.length === 0 ? [] : ['ASSET LIMITS', ...limits.map((limit) => `- ${limit}`)];
+}
+
+function briefSection(brief: MotionBrief, brand: BrandManifest): string {
+  const silent = brief.music === null || (brief.music === 'auto' && brand.music.length === 0);
+  const musicInstruction = silent
+    ? 'no music (use music: null)'
+    : brief.music === 'auto'
+      ? 'choose the track that fits the mood of the script'
+      : `use the track "${brief.music}"`;
   const images = brief.images.map((image) => `- ${briefImageRef(image.file)}: ${image.caption}`);
   return [
     'BRIEF',
@@ -78,8 +109,10 @@ function briefSection(brief: MotionBrief): string {
 
 export function buildAutoStoryboardRequest(brief: MotionBrief, brand: BrandManifest): AutoStoryboardRequest {
   return {
-    systemPrompt: systemPrompt(),
-    userPrompt: [brandSection(brand), briefSection(brief), `SCRIPT\n${brief.script}`].join('\n\n'),
+    systemPrompt: systemPrompt(offeredSceneKinds(brief, brand)),
+    userPrompt: [brandSection(brand), assetLimitsSection(brief, brand).join('\n'), briefSection(brief, brand), `SCRIPT\n${brief.script}`]
+      .filter((section) => section !== '')
+      .join('\n\n'),
     jsonSchema: motionStoryboardJsonSchema(),
   };
 }

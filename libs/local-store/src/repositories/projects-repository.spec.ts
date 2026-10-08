@@ -32,6 +32,7 @@ describe('createProjectsRepository', () => {
       updatedAt: '2026-09-23T00:00:00.000Z',
       importedAt: null,
       mode: 'footage',
+      brand: null,
     });
     expect(repository.exists('my-video')).toBe(true);
     expect(repository.exists('missing')).toBe(false);
@@ -54,6 +55,18 @@ describe('createProjectsRepository', () => {
       ['footage-one', 'footage'],
       ['motion-one', 'motion'],
     ]);
+  });
+
+  it('stores the brand on insert and changes it with setBrand', () => {
+    const repository = createProjectsRepository(db);
+    repository.insert('branded', null, 'motion', 'acme');
+    expect(repository.get('branded')?.brand).toBe('acme');
+
+    repository.setBrand('branded', 'other');
+    expect(repository.get('branded')?.brand).toBe('other');
+
+    repository.setBrand('branded', null);
+    expect(repository.get('branded')?.brand).toBeNull();
   });
 
   it('lists projects ordered by slug', () => {
