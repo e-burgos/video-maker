@@ -2362,6 +2362,54 @@
           }
         ]
       }
+    },
+    {
+      "id": "FIX-e-burgos-007",
+      "author": "e-burgos",
+      "spec_id": "spec-e-burgos-017-desktop-app",
+      "fix_document": "sdd/fixes/fix-e-burgos-007.md",
+      "type": "BUGFIX",
+      "severity": "high",
+      "created_at": "2026-10-08",
+      "resolved_at": "2026-10-08",
+      "validated_at": null,
+      "title": "El productor falla al retomar una sesión del CLI de Claude que ya no existe (proyectos con conversaciones previas)",
+      "estimation_hours": 1.5,
+      "description": "Las sesiones del CLI se guardan por carpeta de trabajo; las creadas cuando el productor corría en la raíz del repo (antes de spec-017) o con otro TMPDIR no se encuentran desde la carpeta por proyecto, y --resume termina con \"No conversation found with session ID\": el turno falla en 2 s para siempre en ese proyecto.",
+      "justification": "Bug confirmado en la app instalada (display-ads-asignar-campana); el arreglo es interno del turno del productor, sin contratos nuevos.",
+      "related_modules": [
+        "desktop-app"
+      ],
+      "affected_files": [
+        "apps/render-api/src/producer/producer-session-recovery.ts",
+        "apps/render-api/src/producer/run-producer-turn.ts",
+        "apps/render-api/src/producer/run-producer-turn.spec.ts"
+      ],
+      "test_reference": "render-api lint/test/build verde (1748); test de sesión perdida que falla sin el reintento y pasa con él.",
+      "status": "implemented",
+      "cycle": null,
+      "process_note": "Reportado por el dueño desde la app 0.4.0 local.",
+      "usage": {
+        "provider_model": "claude/opus",
+        "effort": "high",
+        "tokens_in": 60000,
+        "tokens_out": 8000,
+        "approx": true,
+        "source": "declared-estimate",
+        "recorded_at": "2026-10-08",
+        "by_agent": [
+          {
+            "agent": "orchestrator",
+            "provider_model": "claude/opus",
+            "effort": "high",
+            "tokens_in": 60000,
+            "tokens_out": 8000,
+            "approx": true,
+            "source": "declared-estimate",
+            "recorded_at": "2026-10-08"
+          }
+        ]
+      }
     }
   ]
 }

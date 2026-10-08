@@ -24,6 +24,7 @@ import {
 import { buildProducerSystemPrompt } from './build-producer-system-prompt';
 import { collectProducerContext } from './collect-producer-context';
 import { buildProducerHistory } from './producer-history';
+import { messageWithRecoveredHistory, reportsMissingProducerSession } from './producer-session-recovery';
 import { buildProducerMcpConfigJson } from './producer-mcp-config';
 import { createOpenRouterModelCatalog } from './openrouter-model-catalog';
 import type { OpenRouterModelCatalog } from './openrouter-model-catalog';
@@ -188,9 +189,10 @@ export async function startProducerTurn(
   });
   const systemPrompt = buildProducerSystemPrompt(context);
 
-  const sessionId = session?.sessionId ?? deps.randomId();
+  let sessionId = session?.sessionId ?? deps.randomId();
   const rawLines: string[] = [];
   let reportedSessionId: string | null = null;
+  let sessionMissing = false;
   let answerText: string | null = null;
   let rateLimited = false;
   let openRouterErrorCode: string | null = null;
@@ -217,6 +219,10 @@ export async function startProducerTurn(
       rateLimited = signal.rateLimited;
     }
 
+    if (reportsMissingProducerSession(parsed)) {
+      sessionMissing = true;
+    }
+
     if (isRecord(parsed) && parsed.type === 'result') {
       if (typeof parsed.subtype === 'string' && parsed.subtype.startsWith(OPENROUTER_ERROR_SUBTYPE_PREFIX)) {
         const code = parsed.subtype.slice(OPENROUTER_ERROR_SUBTYPE_PREFIX.length);
@@ -228,23 +234,40 @@ export async function startProducerTurn(
     }
   }
 
+  const mcpConfig =
+    engine === 'claude-cli'
+      ? buildProducerMcpConfigJson({
+          repoRoot: context.repoRoot,
+          apiUrl: context.apiUrl,
+          project: context.slug,
+          model,
+          ...(input.config.accessToken === null ? {} : { accessToken: input.config.accessToken }),
+          ...(input.config.studioMcpEntryPath === null ? {} : { compiledEntryPath: input.config.studioMcpEntryPath }),
+        })
+      : '';
+  const cliCwd = producerWorkingDirectory(input.config.cliCwdBase, input.project.slug);
+
+  function startClaudeRun(text: string, resume: boolean): ProducerTurnRun {
+    return deps.producerAgent({ text, model, systemPrompt, sessionId, resume, mcpConfig, cwd: cliCwd }, onLine);
+  }
+
+  async function restartWithFreshSession(): Promise<Awaited<ProducerTurnRun['completed']>> {
+    sessionMissing = false;
+    reportedSessionId = null;
+    answerText = null;
+    rateLimited = false;
+    turnUsage = null;
+    sessionId = deps.randomId();
+    const history = buildProducerHistory(deps, input.project, registry);
+    const fresh = startClaudeRun(messageWithRecoveredHistory(history, input.text), false);
+    registry.attachCanceler(turnId, fresh.cancel);
+    return fresh.completed;
+  }
+
   let run: ProducerTurnRun;
   if (engine === 'claude-cli') {
-    const mcpConfig = buildProducerMcpConfigJson({
-      repoRoot: context.repoRoot,
-      apiUrl: context.apiUrl,
-      project: context.slug,
-      model,
-      ...(input.config.accessToken === null ? {} : { accessToken: input.config.accessToken }),
-      ...(input.config.studioMcpEntryPath === null ? {} : { compiledEntryPath: input.config.studioMcpEntryPath }),
-    });
-    const cwd = producerWorkingDirectory(input.config.cliCwdBase, input.project.slug);
-    await deps.ensureDirectory(cwd);
-
-    run = deps.producerAgent(
-      { text: input.text, model, systemPrompt, sessionId, resume: session !== null, mcpConfig, cwd },
-      onLine,
-    );
+    await deps.ensureDirectory(cliCwd);
+    run = startClaudeRun(input.text, session !== null);
   } else {
     const history = buildProducerHistory(deps, input.project, registry);
     const agent = openRouterAgentFactory({
@@ -313,7 +336,8 @@ export async function startProducerTurn(
   }
 
   async function settleProducerTurn(): Promise<void> {
-    const result = await run.completed;
+    const first = await run.completed;
+    const result = engine === 'claude-cli' && sessionMissing && !first.canceled ? await restartWithFreshSession() : first;
     const finishedAt = deps.clock.nowIso();
 
     await writeProducerTurnLog(deps, input.project, turnId, rawLines);
