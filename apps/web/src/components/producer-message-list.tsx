@@ -6,7 +6,7 @@ import { useLanguage, useT } from '../i18n/language-context';
 
 export type ProducerMessageListProps = {
   messages: readonly ProducerMessage[];
-  onQuickReply: (text: string) => void;
+  onPickReply: (text: string) => void;
   quickRepliesDisabled: boolean;
 };
 
@@ -149,7 +149,7 @@ export function quickRepliesOf(message: ProducerMessage): string[] {
 
 export function ProducerMessageList({
   messages,
-  onQuickReply,
+  onPickReply,
   quickRepliesDisabled,
 }: ProducerMessageListProps) {
   const t = useT();
@@ -200,7 +200,7 @@ export function ProducerMessageList({
               key={reply}
               type="button"
               disabled={quickRepliesDisabled}
-              onClick={() => onQuickReply(reply)}
+              onClick={() => onPickReply(reply)}
               className="rounded-full border border-sky-500/50 bg-sky-500/10 px-3 py-1 text-xs text-sky-100 disabled:opacity-40"
             >
               {reply}

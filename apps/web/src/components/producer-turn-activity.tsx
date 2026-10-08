@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 
+import { stripSuggestionsFence } from '../api/producer-suggestions-fence';
 import { producerFailureKey } from '../api/producer-capability';
 import { useT } from '../i18n/language-context';
 import { ErrorNotice } from './error-notice';
@@ -28,7 +29,7 @@ export function formatElapsed(startedAt: string, now: number): string {
 
 export function eventLabel(event: ProducerEvent): string {
   if (event.type === 'text') {
-    return event.text;
+    return stripSuggestionsFence(event.text);
   }
   if (event.type === 'tool') {
     return `${event.name} · ${event.summary}`;

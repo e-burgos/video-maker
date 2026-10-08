@@ -68,6 +68,7 @@ import {
 } from './handlers/storyboard-handler';
 import {
   handleGetMotionBrief,
+  handleGetMotionOverview,
   handleGetMotionStoryboard,
   handleListMotionBrands,
   handlePutMotionBrief,
@@ -291,6 +292,8 @@ async function dispatchRoute(
         return await handleGetMotionStoryboard(deps, store, params);
       case 'projects.motion.storyboard.put':
         return await handlePutMotionStoryboard(deps, store, params, request);
+      case 'projects.motion.overview.get':
+        return await handleGetMotionOverview(deps, store, params);
       case 'settings.producer.get':
         return await handleGetProducerSettings(deps, runtime);
       case 'settings.producer.put':

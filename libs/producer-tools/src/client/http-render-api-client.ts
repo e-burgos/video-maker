@@ -79,6 +79,15 @@ interface RenderApiErrorPayloadShape {
   readonly code?: unknown;
   readonly hint?: unknown;
   readonly message?: unknown;
+  readonly expected?: unknown;
+}
+
+function describeErrorPayload(payload: RenderApiErrorPayloadShape | null, status: number): string {
+  if (typeof payload?.hint === 'string') {
+    return payload.hint;
+  }
+  const message = typeof payload?.message === 'string' ? payload.message : `render API answered ${status}`;
+  return typeof payload?.expected === 'string' ? `${message} ${payload.expected}` : message;
 }
 
 function extractErrorPayload(body: unknown): RenderApiErrorPayloadShape | null {
@@ -143,10 +152,7 @@ export function createHttpRenderApiClient(options: HttpRenderApiClientOptions): 
     if (!response.ok) {
       const payload = extractErrorPayload(json);
       const code = mapRenderApiErrorCode(typeof payload?.code === 'string' ? payload.code : 'UNKNOWN', context);
-      const rawHint =
-        (typeof payload?.hint === 'string' ? payload.hint : undefined) ??
-        (typeof payload?.message === 'string' ? payload.message : undefined) ??
-        `render API answered ${response.status}`;
+      const rawHint = describeErrorPayload(payload, response.status);
       throw new StudioToolRuntimeError(code, redactAbsolutePaths(rawHint));
     }
 
@@ -232,10 +238,7 @@ export function createHttpRenderApiClient(options: HttpRenderApiClientOptions): 
         }
         const errorPayload = extractErrorPayload(payload);
         const code = mapRenderApiErrorCode(typeof errorPayload?.code === 'string' ? errorPayload.code : 'UNKNOWN', 'default');
-        const rawHint =
-          (typeof errorPayload?.hint === 'string' ? errorPayload.hint : undefined) ??
-          (typeof errorPayload?.message === 'string' ? errorPayload.message : undefined) ??
-          `render API answered ${response.status}`;
+        const rawHint = describeErrorPayload(errorPayload, response.status);
         throw new StudioToolRuntimeError(code, redactAbsolutePaths(rawHint));
       }
 

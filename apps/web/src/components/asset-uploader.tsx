@@ -14,9 +14,10 @@ export type AssetUploaderProps = {
   onUploaded: (entry: AssetListEntry) => void;
   roles?: readonly AssetRole[];
   fileInputLabel?: string;
+  roleHint?: string;
 };
 
-export function AssetUploader({ slug, onUploaded, roles, fileInputLabel }: AssetUploaderProps) {
+export function AssetUploader({ slug, onUploaded, roles, fileInputLabel, roleHint }: AssetUploaderProps) {
   const client = useRenderApi();
   const inputRef = useRef<HTMLInputElement>(null);
   const fieldId = useId();
@@ -64,7 +65,7 @@ export function AssetUploader({ slug, onUploaded, roles, fileInputLabel }: Asset
           <span id={`${fieldId}-role`} className="font-mono text-sm text-slate-100">
             {role}
           </span>
-          <span className="text-xs text-slate-500">{t(assetRoleCopy(role).impactKey)}</span>
+          <span className="text-xs text-slate-500">{roleHint ?? t(assetRoleCopy(role).impactKey)}</span>
         </div>
       ) : (
         <fieldset data-testid="asset-role-choices" className="space-y-2">

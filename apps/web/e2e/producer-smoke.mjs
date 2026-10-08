@@ -312,8 +312,9 @@ async function main() {
         await page.getByRole('button', { name: 'Send' }).click();
         return;
       }
-      record('6', `clicking the chip: "${forward}"`);
+      record('6', `clicking the chip (it fills the composer) and sending: "${forward}"`);
       await page.getByRole('button', { name: forward, exact: true }).click();
+      await page.getByRole('button', { name: 'Send' }).click();
     });
 
     await page.waitForSelector('[data-testid="producer-turn-activity"]');

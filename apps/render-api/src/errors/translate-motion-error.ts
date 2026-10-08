@@ -1,6 +1,7 @@
 import { isMotionStudioError } from '@video-maker/motion-graphics';
 import type { MotionStudioErrorCode } from '@video-maker/motion-graphics';
 
+import { ACCEPTED_IMAGE_REF_FORMAT } from '../motion/validate-storyboard-images';
 import { PipelineStageError } from './pipeline-stage-error';
 import { isRenderApiError } from './render-api-error';
 import type { RenderApiError, RenderApiErrorCode, RenderApiErrorStage } from './render-api-error';
@@ -43,7 +44,7 @@ export function translateMotionError(
     code: OWN_CODE_BY_MOTION_CODE[cause.code],
     stage,
     resource,
-    expected: cause.message,
+    expected: cause.code === 'ASSET_MISSING' ? `${cause.message}; image refs must be ${ACCEPTED_IMAGE_REF_FORMAT}` : cause.message,
     cause,
   });
 }

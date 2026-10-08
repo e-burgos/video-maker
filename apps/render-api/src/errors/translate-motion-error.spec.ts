@@ -9,13 +9,20 @@ describe('translateMotionError', () => {
     ['BRIEF_INVALID', 'BRIEF_INVALID'],
     ['STORYBOARD_INVALID', 'STORYBOARD_INVALID'],
     ['AI_FAILED', 'AI_AGENT_FAILED'],
-    ['ASSET_MISSING', 'FILE_NOT_FOUND'],
     ['BRAND_INVALID', 'SERVER_CONFIG_INVALID'],
     ['STAGE_FAILED', 'MOTION_PIPELINE_FAILED'],
   ] as const)('maps %s to %s keeping the message as expected', (motionCode, apiCode) => {
     const translated = translateMotionError(new MotionStudioError(motionCode, 'boom'), 'plan', 'x');
 
     expect(translated).toMatchObject({ code: apiCode, stage: 'plan', expected: 'boom', resource: 'x' });
+  });
+
+  it('keeps the ASSET_MISSING code and message and adds the accepted image ref format', () => {
+    const translated = translateMotionError(new MotionStudioError('ASSET_MISSING', 'image "images/cafe.jpeg" not found in the project'), 'storyboard', null);
+
+    expect(translated).toMatchObject({ code: 'FILE_NOT_FOUND', stage: 'storyboard' });
+    expect(translated?.expected).toContain('image "images/cafe.jpeg" not found in the project');
+    expect(translated?.expected).toContain('images/<file in raw/images> or brand:<key>');
   });
 
   it('surfaces the agent error that caused AI_FAILED with its own code and provider details', () => {

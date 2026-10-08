@@ -1,3 +1,4 @@
+import type { Ref } from 'react';
 import { Link } from 'react-router-dom';
 
 import type { ProducerEngineId, ProducerModelOption } from '../api/render-api-types';
@@ -18,6 +19,7 @@ export type ProducerComposerProps = {
   onModelChange: (model: string) => void;
   activeEngine?: ProducerEngineId | null;
   placeholder?: string;
+  textareaRef?: Ref<HTMLTextAreaElement>;
 };
 
 export function ProducerComposer({
@@ -31,6 +33,7 @@ export function ProducerComposer({
   onModelChange,
   activeEngine = null,
   placeholder,
+  textareaRef,
 }: ProducerComposerProps) {
   const t = useT();
   const blocked = blockers.length > 0;
@@ -46,6 +49,7 @@ export function ProducerComposer({
       className="space-y-2 rounded-lg border border-slate-800 bg-slate-900/40 p-4"
     >
       <textarea
+        ref={textareaRef}
         aria-label={t('producer.composerLabel')}
         value={value}
         rows={3}

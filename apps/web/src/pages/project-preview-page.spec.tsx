@@ -2,6 +2,7 @@ import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { MemoryRouter, Route, Routes } from 'react-router-dom';
 import { describe, expect, it, vi } from 'vitest';
 
+import { motionOverviewFixture } from '../api/__fixtures__/motion-overview';
 import { previewTimelineFixture } from '../api/__fixtures__/timeline';
 import { RenderApiError } from '../api/render-api-error';
 import { RenderApiProvider } from '../api/render-api-context';
@@ -42,6 +43,7 @@ const { ProjectPreviewPage } = await import('./project-preview-page');
 
 function renderPage(client: Partial<RenderApiClient>) {
   const merged: Partial<RenderApiClient> = {
+    getProject: vi.fn().mockResolvedValue({ slug: 'smoke-ingest' }),
     listRenderJobs: vi.fn().mockResolvedValue({ slug: 'smoke-ingest', jobs: [] }),
     listAssets: vi
       .fn()
@@ -334,4 +336,24 @@ describe('ProjectPreviewPage', () => {
       expect(screen.getByText('No render jobs yet.')).toBeTruthy();
     },
   );
+});
+
+describe('preview page in a motion project', () => {
+  it('renders the read-only motion view and never asks for the classic documents', async () => {
+    const classicLoaders = {
+      getStoryboard: vi.fn(),
+      getVoice: vi.fn(),
+      getTimeline: vi.fn(),
+    };
+    renderPage({
+      getProject: vi.fn().mockResolvedValue({ slug: 'smoke-ingest', mode: 'motion' }),
+      getMotionOverview: vi.fn().mockResolvedValue(motionOverviewFixture()),
+      ...classicLoaders,
+    });
+
+    expect(await screen.findByTestId('motion-preview-view')).toBeTruthy();
+    expect(classicLoaders.getStoryboard).not.toHaveBeenCalled();
+    expect(classicLoaders.getVoice).not.toHaveBeenCalled();
+    expect(classicLoaders.getTimeline).not.toHaveBeenCalled();
+  });
 });

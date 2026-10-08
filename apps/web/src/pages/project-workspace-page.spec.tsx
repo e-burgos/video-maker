@@ -92,21 +92,6 @@ describe('ProjectWorkspacePage', () => {
     expect(screen.queryByTestId('service-health-label')).toBeNull();
   });
 
-  it('links a motion project to its Motion page and a footage project does not', async () => {
-    stubMatchMedia(true);
-    const motionProject = {
-      slug: 'demo-01',
-      mode: 'motion',
-      layout: { raw: true, catalog: true, timeline: false, edl: false, out: false },
-      assetSource: 'catalog',
-      assetCounts: { aroll: 0, broll: 0, image: 0, audio: 0, voice: 0, logo: 0 },
-    };
-    renderWorkspace({ getProject: vi.fn().mockResolvedValue(motionProject) });
-
-    const link = await screen.findByTestId('workspace-motion-link');
-    expect(link.getAttribute('href')).toBe('/projects/demo-01/motion');
-  });
-
   it('shows the motion intro with example chips instead of the footage panels for a motion project', async () => {
     stubMatchMedia(true);
     const motionProject = {
@@ -126,7 +111,6 @@ describe('ProjectWorkspacePage', () => {
     expect(screen.queryByTestId('producer-recipes')).toBeNull();
     expect(screen.queryByTestId('producer-inventory')).toBeNull();
     expect(screen.queryByTestId('workspace-panel-toggle')).toBeNull();
-    expect(screen.getByTestId('workspace-motion-link')).toBeTruthy();
     expect(screen.getByPlaceholderText('Ask for a change to this video…')).toBeTruthy();
   });
 
@@ -152,26 +136,13 @@ describe('ProjectWorkspacePage', () => {
     expect(composer.value).toBe(first.textContent);
   });
 
-  it('does not link a footage project to the Motion page', async () => {
+  it('does not carry its own section menu: the studio layout owns the project nav', async () => {
     stubMatchMedia(true);
     renderWorkspace();
 
     await screen.findByRole('heading', { name: 'Demo 01' });
+    expect(screen.queryByTestId('workspace-advanced-menu')).toBeNull();
     expect(screen.queryByTestId('workspace-motion-link')).toBeNull();
-  });
-
-  it('offers the advanced editing menu with all four destinations', async () => {
-    stubMatchMedia(true);
-    renderWorkspace();
-
-    const menu = screen.getByTestId('workspace-advanced-menu');
-    const hrefs = Array.from(menu.querySelectorAll('a')).map((link) => link.getAttribute('href'));
-    expect(hrefs).toEqual([
-      '/projects/demo-01/library',
-      '/projects/demo-01/storyboard',
-      '/projects/demo-01/voice',
-      '/projects/demo-01/preview',
-    ]);
   });
 
   it('lays the chat and the side panel out side by side on a wide viewport, chat pinned to a full-height column', async () => {

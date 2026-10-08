@@ -8,22 +8,22 @@ import { LANGUAGE_STORAGE_KEY } from '../i18n/language';
 import { LanguageProvider } from '../i18n/language-context';
 
 function renderList(messages: ProducerMessage[], quickRepliesDisabled = false) {
-  const onQuickReply = vi.fn();
+  const onPickReply = vi.fn();
   render(
     <ProducerMessageList
       messages={messages}
-      onQuickReply={onQuickReply}
+      onPickReply={onPickReply}
       quickRepliesDisabled={quickRepliesDisabled}
     />,
   );
-  return onQuickReply;
+  return onPickReply;
 }
 
 async function renderListInLanguage(language: 'en' | 'es', messages: ProducerMessage[]) {
   window.localStorage.setItem(LANGUAGE_STORAGE_KEY, language);
   render(
     <LanguageProvider>
-      <ProducerMessageList messages={messages} onQuickReply={vi.fn()} quickRepliesDisabled={false} />
+      <ProducerMessageList messages={messages} onPickReply={vi.fn()} quickRepliesDisabled={false} />
     </LanguageProvider>,
   );
   await waitFor(() => {
@@ -60,12 +60,12 @@ describe('ProducerMessageList', () => {
     );
   });
 
-  it('sends the suggestion text as written when a chip is clicked', () => {
-    const onQuickReply = renderList([assistant]);
+  it('hands the suggestion text as written to the composer when a chip is clicked', () => {
+    const onPickReply = renderList([assistant]);
 
     fireEvent.click(screen.getByRole('button', { name: 'Dale, avanzá' }));
 
-    expect(onQuickReply).toHaveBeenCalledWith('Dale, avanzá');
+    expect(onPickReply).toHaveBeenCalledWith('Dale, avanzá');
   });
 
   it('turns the numbered options of the answer into quick replies too', () => {

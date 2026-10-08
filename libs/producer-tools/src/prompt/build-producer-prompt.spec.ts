@@ -295,9 +295,9 @@ describe('buildProducerPrompt motion mode', () => {
   });
 
 describe('motion delivery', () => {
-  it('sends the user to the Motion page, not to a Deliveries tab', () => {
+  it('sends the user to the preview and motion pages, not to a Deliveries tab', () => {
     const prompt = buildProducerPrompt({ ...CONTEXT, mode: 'motion' });
-    expect(prompt).toContain('Abrir Motion graphics');
+    expect(prompt).toContain('`vista previa` page');
     expect(prompt).toContain('not in a Deliveries tab');
   });
 });

@@ -37,16 +37,17 @@ export function brandImageUrl(ref: string, brand?: BrandManifest): string {
 
 const BRAND_REF_PREFIX = 'brand:';
 
-function collectImages(value: unknown, found: Set<string>): void {
+function collectImages(value: unknown, found: Set<string>, includeBrandRefs: boolean): void {
   if (Array.isArray(value)) {
-    value.forEach((v) => collectImages(v, found));
+    value.forEach((v) => collectImages(v, found, includeBrandRefs));
     return;
   }
   if (typeof value !== 'object' || value === null) return;
+  const wanted = (ref: string) => includeBrandRefs || !ref.startsWith(BRAND_REF_PREFIX);
   for (const [key, v] of Object.entries(value)) {
-    if ((key === 'src' || key === 'image') && typeof v === 'string' && !v.startsWith('brand:')) found.add(v);
-    else if (key === 'images' && Array.isArray(v)) v.filter((i): i is string => typeof i === 'string' && !i.startsWith('brand:')).forEach((i) => found.add(i));
-    else collectImages(v, found);
+    if ((key === 'src' || key === 'image') && typeof v === 'string' && wanted(v)) found.add(v);
+    else if (key === 'images' && Array.isArray(v)) v.filter((i): i is string => typeof i === 'string' && wanted(i)).forEach((i) => found.add(i));
+    else collectImages(v, found, includeBrandRefs);
   }
 }
 
@@ -74,7 +75,13 @@ function assertBrandPhotosExist(storyboard: MotionStoryboard, brand: BrandManife
 
 export function storyboardImages(storyboard: MotionStoryboard): string[] {
   const found = new Set<string>();
-  collectImages(storyboard.scenes, found);
+  collectImages(storyboard.scenes, found, false);
+  return [...found].sort();
+}
+
+export function storyboardSceneImageRefs(scene: MotionStoryboardScene): string[] {
+  const found = new Set<string>();
+  collectImages(scene, found, true);
   return [...found].sort();
 }
 

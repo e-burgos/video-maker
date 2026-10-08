@@ -45,14 +45,60 @@ export type MotionScene = {
   props: Record<string, unknown>;
 };
 
+export type MotionStoryboardMusic = {
+  track: string;
+  volume?: number;
+};
+
 export type MotionStoryboard = {
   version: number;
   title: string;
   brand: string;
   format: MotionFormat;
   beatSync: boolean;
-  music: string | null;
+  music: MotionStoryboardMusic | null;
   scenes: MotionScene[];
+};
+
+export type MotionOverviewScene = {
+  id: string;
+  startSec: number;
+  endSec: number;
+  voStartSec: number;
+  voDurationSec: number;
+};
+
+export type MotionOverviewTimeline = {
+  durationSec: number;
+  bpm: number | null;
+  beatSync: boolean;
+  musicCredit: string | null;
+  scenes: MotionOverviewScene[];
+};
+
+export type MotionOverviewVoiceScene = {
+  sceneId: string;
+  vo: string;
+  voicedText: string | null;
+  voice: string | null;
+  path: string | null;
+  durationSec: number | null;
+  stale: boolean;
+};
+
+export type MotionOverviewVideo = {
+  path: string;
+  creditsPath: string | null;
+  credits: string | null;
+  modifiedAt: string;
+  outdated: boolean;
+};
+
+export type MotionOverview = {
+  storyboard: MotionStoryboard | null;
+  timeline: MotionOverviewTimeline | null;
+  voice: { scenes: MotionOverviewVoiceScene[] } | null;
+  video: MotionOverviewVideo | null;
 };
 
 export const MOTION_PHASES = ['storyboard', 'video', 'all'] as const;
