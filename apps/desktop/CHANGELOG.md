@@ -4,6 +4,16 @@ Historial de versiones de la app de escritorio, en español, pensado para los am
 instalan. `apps/desktop/scripts/release-desktop.mjs` toma la sección de la versión que publica
 y la usa como notas del release.
 
+## 0.3.3 — Videos de motion graphics completos en el estudio
+
+- Una sola barra en todas las pantallas del video: productor, motion, biblioteca, storyboard, voz y vista previa.
+  Ya no perdés el acceso al chat del productor al entrar a una sección.
+- En los videos de motion graphics, storyboard, voz y vista previa muestran lo que se generó: las escenas con
+  sus textos y fotos, la voz de cada escena para escucharla y el video con botones para saltar a cada escena.
+- Las sugerencias del productor ahora son botones que cargan el texto en la caja: lo podés editar antes de enviar.
+- El productor usa bien tus fotos nuevas en las escenas, sin rehacer el storyboard entero ni cambiar el volumen
+  de la música.
+
 ## 0.3.2 — Ajustá tus videos de motion graphics conversando
 
 - Botón "Ajustar con el productor" en cada video de motion graphics: le pedís cambios en tus palabras
