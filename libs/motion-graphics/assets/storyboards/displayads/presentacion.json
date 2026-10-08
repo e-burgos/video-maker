@@ -5,7 +5,8 @@
   "format": "16:9",
   "beatSync": true,
   "music": {
-    "track": "voxel-revolution"
+    "track": "voxel-revolution",
+    "volume": 0.15
   },
   "scenes": [
     {

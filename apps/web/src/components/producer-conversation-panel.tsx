@@ -217,6 +217,7 @@ export function ProducerConversationPanel({ producer, pinned = false, mode = 'fo
           model={selectedModel}
           onModelChange={setModel}
           activeEngine={effectiveEngine}
+          placeholder={mode === 'motion' ? t('producer.composerPlaceholderMotion') : undefined}
         />
 
         {sendFailure !== null && (

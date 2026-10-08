@@ -23,11 +23,20 @@ function withoutSchemaMarkers(schema: Record<string, unknown>): Record<string, u
   return Object.fromEntries(Object.entries(schema).filter(([key]) => key !== '$schema' && key !== '$id'));
 }
 
+const FAILURE_DETAIL_CHARS = 800;
+const ERROR_LINE = /✗/u;
+
+function hyperframesFailureDetail(stdout: string, stderr: string): string {
+  const errorLines = `${stdout}\n${stderr}`.split('\n').map((line) => line.trim()).filter((line) => ERROR_LINE.test(line));
+  const detail = errorLines.length > 0 ? errorLines.join(' · ') : (stderr.trim() || stdout.trim()).slice(-FAILURE_DETAIL_CHARS);
+  return detail.slice(0, FAILURE_DETAIL_CHARS);
+}
+
 export function createMotionPipelinePorts(deps: RenderApiDependencies, assetsRoot: string): MotionPipelinePorts {
   const hyperframes = async (args: readonly string[], cwd: string): Promise<void> => {
     const result = await deps.runHyperframes({ args, cwd });
     if (result.exitCode !== 0) {
-      throw new MotionStudioError('STAGE_FAILED', `hyperframes ${args[0] ?? ''} failed: ${result.stderr.slice(-800)}`);
+      throw new MotionStudioError('STAGE_FAILED', `hyperframes ${args[0] ?? ''} failed: ${hyperframesFailureDetail(result.stdout, result.stderr)}`);
     }
   };
 

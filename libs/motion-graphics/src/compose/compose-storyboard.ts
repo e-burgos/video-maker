@@ -35,6 +35,8 @@ export function brandImageUrl(ref: string, brand?: BrandManifest): string {
   return `${BRAND_ASSET_DIR}/${(brand === undefined ? undefined : brandImageFile(brand, key)) ?? key}`;
 }
 
+const BRAND_REF_PREFIX = 'brand:';
+
 function collectImages(value: unknown, found: Set<string>): void {
   if (Array.isArray(value)) {
     value.forEach((v) => collectImages(v, found));
@@ -45,6 +47,28 @@ function collectImages(value: unknown, found: Set<string>): void {
     if ((key === 'src' || key === 'image') && typeof v === 'string' && !v.startsWith('brand:')) found.add(v);
     else if (key === 'images' && Array.isArray(v)) v.filter((i): i is string => typeof i === 'string' && !i.startsWith('brand:')).forEach((i) => found.add(i));
     else collectImages(v, found);
+  }
+}
+
+function collectBrandPhotoKeys(value: unknown, found: Set<string>): void {
+  if (Array.isArray(value)) {
+    value.forEach((v) => collectBrandPhotoKeys(v, found));
+    return;
+  }
+  if (typeof value !== 'object' || value === null) return;
+  for (const [key, v] of Object.entries(value)) {
+    const refs = (key === 'src' || key === 'image') && typeof v === 'string' ? [v] : key === 'images' && Array.isArray(v) ? v : null;
+    if (refs === null) collectBrandPhotoKeys(v, found);
+    else refs.filter((ref): ref is string => typeof ref === 'string' && ref.startsWith(BRAND_REF_PREFIX)).forEach((ref) => found.add(ref.slice(BRAND_REF_PREFIX.length)));
+  }
+}
+
+function assertBrandPhotosExist(storyboard: MotionStoryboard, brand: BrandManifest): void {
+  const keys = new Set<string>();
+  collectBrandPhotoKeys(storyboard.scenes, keys);
+  const missing = [...keys].find((key) => brandImageFile(brand, key) === undefined);
+  if (missing !== undefined) {
+    throw new MotionStudioError('ASSET_MISSING', `brand photo "${missing}" is not in the brand kit of "${brand.id}" (available: ${Object.keys(brand.images).join(', ')})`);
   }
 }
 
@@ -67,6 +91,7 @@ function fontFaces(brand: BrandManifest): string {
 
 export function composeStoryboard(storyboard: MotionStoryboard, brand: BrandManifest): ComposedStoryboard {
   if (storyboard.brand !== brand.id) throw new MotionStudioError('BRAND_INVALID', `storyboard asks for brand "${storyboard.brand}" but "${brand.id}" was given`);
+  assertBrandPhotosExist(storyboard, brand);
   const vertical = storyboard.format === '9:16';
   const ctx: SceneContext = { brand, format: storyboard.format, imageUrl: (ref) => brandImageUrl(ref, brand) };
   const track = resolveMusic(storyboard, brand);

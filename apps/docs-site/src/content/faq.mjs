@@ -47,6 +47,11 @@ ${faqItem(
 )}
 
 ${faqItem(
+  '¿Cómo cambio algo de un video de motion graphics que ya hice?',
+  '<p>Abrí el video, tocá "Ajustar con el productor" y pedí el cambio en tus palabras (la música, un texto, una frase de la voz, el orden de las escenas). El productor edita solo esas escenas y rehace el video; la voz se vuelve a grabar únicamente donde cambió el texto, así que un ajuste chico tarda uno o dos minutos.</p>',
+)}
+
+${faqItem(
   '¿El storyboard funciona sin Claude?',
   '<p>Sí. El storyboard (la propuesta de escenas del video: qué se dice y qué se ve en cada una) se genera con el motor de IA que tengas conectado en Configuración — Claude Code u OpenRouter — así que no hace falta tener Claude para usarlo, alcanza con cualquiera de los dos.</p>',
 )}

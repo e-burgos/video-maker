@@ -282,6 +282,7 @@ export interface RunHyperframesInput {
 
 export interface RunHyperframesOutput {
   readonly exitCode: number;
+  readonly stdout: string;
   readonly stderr: string;
 }
 

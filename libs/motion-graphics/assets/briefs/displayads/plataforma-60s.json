@@ -9,7 +9,13 @@
   "audience": "Dueños y encargados de comercios, restaurantes y sucursales con pantallas en el local.",
   "script": "¿Qué ponés hoy en tus pantallas? Pensar una promo nueva todos los días lleva tiempo, y casi siempre termina repitiéndose lo mismo. Display Ads trae inteligencia artificial integrada. Le contás lo que necesitás, por ejemplo un dos por uno en medialunas para la vidriera, y el asistente arma el cartel en el tamaño justo de cada pantalla. Además mira tus campañas y te sugiere cambios: si se viene un fin de semana con lluvia, te propone destacar el delivery. Lo aplicás con un toque, o lo editás antes. También analiza a los competidores que tenés a quinientos metros y te da tácticas concretas para diferenciarte. Sirve para restaurantes, comercios y bancos, en todas tus sucursales. Esto es Display Ads: cartelería digital con inteligencia artificial. Pedí tu cotización en nuestra web.",
   "images": [
-    { "file": "restaurante-menu.jpg", "caption": "Clienta que toca una pantalla de mostrador con el menú del día en un restaurante de comida rápida." },
-    { "file": "banco-turnos.jpg", "caption": "Pantalla de mostrador en la recepción de un banco, con el menú de turnos y bienvenida." }
+    {
+      "file": "almacen-counter.jpg",
+      "caption": "Clienta consultando un Counter 15 en el mostrador de un almacén"
+    },
+    {
+      "file": "banco-turnos-counter.jpg",
+      "caption": "Counter 15 negro como pantalla de turnos en un banco"
+    }
   ]
 }

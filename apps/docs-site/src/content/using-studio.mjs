@@ -31,6 +31,20 @@ música y renderiza, mostrando el avance. El video queda en el proyecto y se ve 
 página. También se lo podés pedir al productor en la conversación.
 </p>
 ${screenshotFigure(depth, 'motion-video.png', 'Video terminado en la página Motion, con el crédito de la música para la descripción')}
+<h2>Ajustar un video de motion graphics conversando</h2>
+<p>
+Desde la página Motion, el botón <strong>"Ajustar con el productor"</strong> abre el chat de ese video.
+Pedile los cambios en tus palabras — "bajá la música", "cambiá el título de la escena 3", "acortá la
+voz del cierre", "sacá la escena del Wi-Fi" — y el productor edita esas escenas, te cuenta qué cambió y
+rehace el video. Nunca vuelve a armar el storyboard desde cero para un ajuste, así que lo que ya
+estaba bien queda igual.
+</p>
+${screenshotFigure(depth, 'motion-adjust-chat.png', 'Chat del productor en un video de motion graphics, con ejemplos de pedidos y el ajuste ya aplicado')}
+<p>
+Rehacer un video ajustado es rápido: solo se vuelve a grabar la voz de las escenas cuyo texto
+cambiaste (bajar la música de un video de un minuto lleva un minuto y medio). Cada video tiene su
+propio volumen de música; si suena alta, pedile que la baje.
+</p>
 <p>
 La música de la marca es de Kevin MacLeod con licencia CC BY: el crédito no se dibuja sobre el
 video, aparece debajo del reproductor (y en <code>out/video.credits.txt</code>) para que lo pegues

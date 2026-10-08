@@ -82,4 +82,11 @@ describe('brandImageUrl', () => {
     expect(brandImageUrl('brand:cafe', testBrand)).toMatch(/\/img\/scenes\/cafe\.jpg$/u);
     expect(brandImageUrl('images/foto.jpg', testBrand)).toBe('images/foto.jpg');
   });
+
+describe('brand photos', () => {
+  it('fails up front, naming the photo, when the storyboard asks for a brand photo that is not in the kit', () => {
+    const withGone = { ...catalogStoryboard, scenes: [{ id: 'g', kind: 'gallery' as const, vo: 'Fotos', props: { images: ['brand:local', 'brand:escena-04'] } }] };
+    expect(() => composeStoryboard(withGone as MotionStoryboard, testBrand)).toThrow(/brand photo "escena-04" is not in the brand kit/u);
+  });
+});
 });

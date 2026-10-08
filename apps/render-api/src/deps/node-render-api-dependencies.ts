@@ -821,7 +821,7 @@ export function createNodeRenderApiDependencies(
         [...invocation.args, ...args],
         { cwd, timeoutMs: HYPERFRAMES_TIMEOUT_MS },
       );
-      return { exitCode: result.exitCode, stderr: result.stderr };
+      return { exitCode: result.exitCode, stdout: result.stdout, stderr: result.stderr };
     },
   };
 
