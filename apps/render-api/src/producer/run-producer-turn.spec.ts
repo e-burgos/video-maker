@@ -170,6 +170,59 @@ describe('startProducerTurn', () => {
     expect(second.starts[0]?.sessionId).toBe(session?.sessionId);
   });
 
+  it('si el CLI ya no encuentra la sesión, reintenta con una sesión nueva y el historial en el mensaje', async () => {
+    let sharedCounter = 0;
+    const sharedRandomId = (): string => {
+      sharedCounter += 1;
+      return `id-${String(sharedCounter).padStart(2, '0')}`;
+    };
+    const first = scenario({ lines: streamOf(ANSWER, 'session-old') }, { randomId: sharedRandomId });
+    await (await startProducerTurn(first.deps, first.registry, { project: PROJECT, text: 'hola', config: CONFIG })).completed;
+
+    const missingSession = [
+      JSON.stringify({
+        type: 'result',
+        subtype: 'error_during_execution',
+        is_error: true,
+        errors: ['No conversation found with session ID: session-old'],
+      }),
+    ];
+    const starts: ProducerTurnStart[] = [];
+    const second = scenario(
+      { lines: [] },
+      {
+        storage: first.storage,
+        localStore: first.deps.localStore,
+        randomId: sharedRandomId,
+        producerAgent: (start, onLine) => {
+          starts.push(start);
+          const lines = starts.length === 1 ? missingSession : streamOf('Sigo con la marca.', 'session-new');
+          for (const line of lines) {
+            onLine(line);
+          }
+          return { cancel: () => undefined, completed: Promise.resolve(starts.length === 1 ? { ...OK_RESULT, exitCode: 1 } : OK_RESULT) };
+        },
+      },
+    );
+
+    const started = await startProducerTurn(second.deps, second.registry, {
+      project: PROJECT,
+      text: 'usá la marca nueva',
+      config: CONFIG,
+    });
+    await started.completed;
+
+    expect(starts.map((start) => [start.resume, start.sessionId === 'session-old'])).toEqual([
+      [true, true],
+      [false, false],
+    ]);
+    expect(starts[1]?.text).toContain('Usuario: hola');
+    expect(starts[1]?.text).toContain('Productor: Tenés un A-roll de 26 s.');
+    expect(starts[1]?.text.endsWith('usá la marca nueva')).toBe(true);
+    expect(second.registry.get(started.turnId).status).toBe('succeeded');
+    expect(readProducerSession(second.deps, PROJECT)?.sessionId).toBe('session-new');
+  });
+
   it('persiste el sessionId que reporta el CLI, no el uuid que le pasamos, y cae al nuestro sin init', async () => {
     const { deps, registry } = scenario({
       lines: [
