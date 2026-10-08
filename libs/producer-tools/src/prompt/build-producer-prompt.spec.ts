@@ -293,4 +293,12 @@ describe('buildProducerPrompt motion mode', () => {
   it('lists the motion tools in every mode', () => {
     expect(buildProducerPrompt(CONTEXT)).toContain('- get_motion_brands:');
   });
+
+describe('motion delivery', () => {
+  it('sends the user to the Motion page, not to a Deliveries tab', () => {
+    const prompt = buildProducerPrompt({ ...CONTEXT, mode: 'motion' });
+    expect(prompt).toContain('Abrir Motion graphics');
+    expect(prompt).toContain('not in a Deliveries tab');
+  });
+});
 });

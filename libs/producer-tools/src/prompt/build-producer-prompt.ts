@@ -317,8 +317,10 @@ function buildProducerMotionRecipeSection(): string {
     '  Do it only if the user explicitly asks for a new storyboard.',
     '- 7) VIDEO. Once the user approves: start_job `{"kind":"motion","phase":"video"}` and',
     '  wait_for_job; the stages are voice, plan, compose and render, so keep waiting while it runs.',
-    '- 8) DELIVER. Tell the user where the video is — the `path` in the job report — and its',
-    '  duration, and offer two or three concrete next steps.',
+    '- 8) DELIVER. The video of a motion project is on its Motion page (the `Abrir Motion graphics`',
+    '  button above the chat), with the music credit under the player — not in a Deliveries tab,',
+    '  which motion projects do not show. Say its duration, remind that the music credit goes in the',
+    '  post description, and offer two or three concrete next steps.',
   ].join('\n');
 }
 
