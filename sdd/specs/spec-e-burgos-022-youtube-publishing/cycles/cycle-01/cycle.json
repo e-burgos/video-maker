@@ -1,0 +1,240 @@
+{
+  "$schema": "../../../../schemas/cycle.schema.json",
+  "cycle": 1,
+  "module": "youtube-publishing",
+  "spec": "spec-e-burgos-022-youtube-publishing",
+  "apps": [
+    "apps/render-api",
+    "libs/local-store",
+    "apps/web"
+  ],
+  "phase": "youtube-connect-publish",
+  "flow": "lite",
+  "objectives": [
+    "Conectar una cuenta de YouTube y publicar un video de un proyecto con metadatos del productor",
+    "Publicaciones registradas en el proyecto"
+  ],
+  "status": "completed",
+  "started_at": "2026-10-08",
+  "completed_at": "2026-10-08",
+  "documents": {
+    "plan": "sdd/specs/spec-e-burgos-022-youtube-publishing/cycles/cycle-01/plan.md",
+    "tasks": "sdd/specs/spec-e-burgos-022-youtube-publishing/cycles/cycle-01/tasks.json"
+  },
+  "artifacts": [
+    "sdd/specs/spec-e-burgos-022-youtube-publishing/cycles/cycle-01/artifacts/verification.md"
+  ],
+  "metrics": {
+    "tasks_total": 6,
+    "tasks_completed": 6,
+    "tasks_skipped": 0,
+    "story_points": 21,
+    "files_created": [
+      "apps/docs-site/src/content/privacy.mjs",
+      "apps/render-api/src/__fixtures__/fake-google.ts",
+      "apps/render-api/src/deps/oauth-loopback.spec.ts",
+      "apps/render-api/src/deps/oauth-loopback.ts",
+      "apps/render-api/src/http/handlers/youtube-handlers.spec.ts",
+      "apps/render-api/src/http/handlers/youtube-integration-handler.ts",
+      "apps/render-api/src/http/handlers/youtube-publish-handler.ts",
+      "apps/render-api/src/http/read-json-object-body.ts",
+      "apps/render-api/src/jobs/publish-job-params.spec.ts",
+      "apps/render-api/src/jobs/publish-job-params.ts",
+      "apps/render-api/src/jobs/publish-job-progress.spec.ts",
+      "apps/render-api/src/jobs/publish-job-progress.ts",
+      "apps/render-api/src/jobs/publish-pipeline-observer.ts",
+      "apps/render-api/src/jobs/recover-publish-jobs.spec.ts",
+      "apps/render-api/src/jobs/run-publish-pipeline.spec.ts",
+      "apps/render-api/src/jobs/run-publish-pipeline.ts",
+      "apps/render-api/src/youtube/draft-youtube-metadata.spec.ts",
+      "apps/render-api/src/youtube/draft-youtube-metadata.ts",
+      "apps/render-api/src/youtube/google-request.spec.ts",
+      "apps/render-api/src/youtube/google-request.ts",
+      "apps/render-api/src/youtube/publish-credits.spec.ts",
+      "apps/render-api/src/youtube/publish-credits.ts",
+      "apps/render-api/src/youtube/publish-preconditions.spec.ts",
+      "apps/render-api/src/youtube/publish-preconditions.ts",
+      "apps/render-api/src/youtube/youtube-api-error.ts",
+      "apps/render-api/src/youtube/youtube-channel.ts",
+      "apps/render-api/src/youtube/youtube-client.spec.ts",
+      "apps/render-api/src/youtube/youtube-client.ts",
+      "apps/render-api/src/youtube/youtube-constants.ts",
+      "apps/render-api/src/youtube/youtube-oauth.spec.ts",
+      "apps/render-api/src/youtube/youtube-oauth.ts",
+      "apps/render-api/src/youtube/youtube-services.ts",
+      "apps/web/src/api/parse-youtube.ts",
+      "apps/web/src/api/publication-status.ts",
+      "apps/web/src/api/render-api-client-youtube.spec.ts",
+      "apps/web/src/api/youtube-publish-form.spec.ts",
+      "apps/web/src/api/youtube-publish-form.ts",
+      "apps/web/src/api/youtube-types.ts",
+      "apps/web/src/components/publications-panel.spec.tsx",
+      "apps/web/src/components/publications-panel.tsx",
+      "apps/web/src/components/youtube-metadata-fields.tsx",
+      "apps/web/src/components/youtube-publish-dialog.spec.tsx",
+      "apps/web/src/components/youtube-publish-dialog.tsx",
+      "apps/web/src/components/youtube-publish-progress.tsx",
+      "apps/web/src/components/youtube-publish-section.tsx",
+      "apps/web/src/components/youtube-settings-section.spec.tsx",
+      "apps/web/src/components/youtube-settings-section.tsx",
+      "apps/web/src/components/youtube-visibility-fields.tsx",
+      "apps/web/src/hooks/use-youtube-connect-flow.ts",
+      "apps/web/src/hooks/use-youtube-integration.ts",
+      "libs/local-store/src/repositories/publications-repository.spec.ts",
+      "libs/local-store/src/repositories/publications-repository.ts"
+    ],
+    "files_modified": [
+      "apps/docs-site/scripts/build.mjs",
+      "apps/docs-site/src/content/using-studio.mjs",
+      "apps/docs-site/src/site-config.mjs",
+      "apps/render-api/src/__fixtures__/fake-render-api-dependencies.ts",
+      "apps/render-api/src/brands/project-brand-context.ts",
+      "apps/render-api/src/deps/node-render-api-dependencies.ts",
+      "apps/render-api/src/deps/render-api-dependencies.ts",
+      "apps/render-api/src/errors/http-status-for.spec.ts",
+      "apps/render-api/src/errors/http-status-for.ts",
+      "apps/render-api/src/errors/render-api-error.ts",
+      "apps/render-api/src/errors/to-error-payload.ts",
+      "apps/render-api/src/http/handle-request.spec.ts",
+      "apps/render-api/src/http/handle-request.ts",
+      "apps/render-api/src/http/handlers/jobs-handler.spec.ts",
+      "apps/render-api/src/http/handlers/jobs-handler.ts",
+      "apps/render-api/src/http/handlers/producer-settings-handler.ts",
+      "apps/render-api/src/http/handlers/projects-handler.spec.ts",
+      "apps/render-api/src/http/handlers/projects-handler.ts",
+      "apps/render-api/src/http/render-api-runtime.ts",
+      "apps/render-api/src/http/routes.ts",
+      "apps/render-api/src/jobs/job-persistence.spec.ts",
+      "apps/render-api/src/jobs/job-persistence.ts",
+      "apps/render-api/src/jobs/render-job-queue.ts",
+      "apps/render-api/src/jobs/render-job.ts",
+      "apps/render-api/src/jobs/run-montage-pipeline.spec.ts",
+      "apps/web/src/api/error-explanations.ts",
+      "apps/web/src/api/format-updated-at.ts",
+      "apps/web/src/api/parse-render-job.ts",
+      "apps/web/src/api/render-api-client.ts",
+      "apps/web/src/api/render-api-types.ts",
+      "apps/web/src/components/modal.tsx",
+      "apps/web/src/components/motion-preview-view.tsx",
+      "apps/web/src/components/video-card.spec.tsx",
+      "apps/web/src/components/video-card.tsx",
+      "apps/web/src/components/workspace-side-panel.tsx",
+      "apps/web/src/guide/guide-content-en.ts",
+      "apps/web/src/guide/guide-content-es.ts",
+      "apps/web/src/guide/guide-content.spec.ts",
+      "apps/web/src/i18n/messages-en.ts",
+      "apps/web/src/i18n/messages-es.ts",
+      "apps/web/src/pages/guide-page.tsx",
+      "apps/web/src/pages/project-preview-page.spec.tsx",
+      "apps/web/src/pages/project-preview-page.tsx",
+      "apps/web/src/pages/settings-page.spec.tsx",
+      "apps/web/src/pages/settings-page.tsx",
+      "libs/local-store/src/database/migrations.spec.ts",
+      "libs/local-store/src/database/migrations.ts",
+      "libs/local-store/src/index.ts",
+      "libs/local-store/src/schema/studio-schema.ts"
+    ],
+    "files_deleted": [],
+    "usage": {
+      "tokens_in": 714693,
+      "tokens_out": 114358,
+      "approx": true,
+      "source": "declared-estimate",
+      "by_agent": [
+        {
+          "agent": "orchestrator",
+          "label": "solo",
+          "provider_model": "claude/opus",
+          "effort": "high",
+          "tokens_in": 180000,
+          "tokens_out": 20000,
+          "tokens_total": 200000,
+          "approx": true,
+          "source": "declared-estimate",
+          "recorded_at": "2026-10-08"
+        },
+        {
+          "agent": "implementor-back",
+          "label": "OAuth, subida, borrador y registro",
+          "provider_model": "claude/sonnet",
+          "effort": "medium",
+          "tokens_in": 318215,
+          "tokens_out": 56156,
+          "tokens_total": 374371,
+          "approx": true,
+          "source": "agent-usage-notification",
+          "recorded_at": "2026-10-08"
+        },
+        {
+          "agent": "implementor-front",
+          "label": "Configuración y diálogo de publicación",
+          "provider_model": "claude/sonnet",
+          "effort": "medium",
+          "tokens_in": 216478,
+          "tokens_out": 38202,
+          "tokens_total": 254680,
+          "approx": true,
+          "source": "agent-usage-notification",
+          "recorded_at": "2026-10-08"
+        }
+      ],
+      "by_tier": {
+        "claude/opus": {
+          "tokens_in": 180000,
+          "tokens_out": 20000,
+          "approx": true,
+          "source": "declared-estimate"
+        },
+        "claude/sonnet": {
+          "tokens_in": 534693,
+          "tokens_out": 94358,
+          "approx": true,
+          "source": "declared-estimate"
+        }
+      }
+    }
+  },
+  "tables_created": [
+    "publications"
+  ],
+  "endpoints_implemented": [
+    "EP-060",
+    "EP-061",
+    "EP-062",
+    "EP-063",
+    "EP-064",
+    "EP-065",
+    "EP-066"
+  ],
+  "components_created": [],
+  "issues_found": [
+    "Google Cloud exige verificación en 2 pasos para usar la consola desde el 7/8/2026.",
+    "El proyecto display-ads sirve el login de la plataforma: se creó un proyecto aparte para no tocar su estado de publicación.",
+    "Pasar a producción exige página principal, política de privacidad y dominio autorizado: se publicó /privacidad.",
+    "El borrador copiaba los nombres escritos para la voz (Isi Pro): se restauran los nombres de la marca.",
+    "La ventana de éxito del OAuth quedaba abierta y bloqueaba el navegador: se cierra sola.",
+    "La página del canal tarda en listar la primera subida aunque el video ya es público."
+  ],
+  "reviewer_report": {
+    "approved": true,
+    "date": "2026-10-08",
+    "ca_results": {
+      "US-022-101": "OK — credencial guardada, conexión real con el canal Display Ads, reconexión después del pase a producción.",
+      "US-022-102": "OK — subida real privada (easy-pro) y pública (presentacion) con progreso por bytes y enlace.",
+      "US-022-103": "OK — borrador real del productor con título, descripción (web y créditos) y 15 etiquetas.",
+      "US-022-104": "OK — publications registradas, panel del proyecto e insignia en las tarjetas."
+    },
+    "tests": {
+      "sdd:validate": "OK",
+      "lint": "render-api, local-store, web, docs-site verdes",
+      "test": "1869 + 71 + 1470 + 15",
+      "build": "verde",
+      "e2e": "subidas reales a YouTube desde pnpm studio"
+    },
+    "notes": "Publicar es una acción pública: el diálogo confirma con el nombre del canal y el productor nunca publica sin OK.",
+    "follow_ups": [
+      "cycle-02: cola escalonada y aviso de video ya publicado",
+      "cycle-03: productor y app de escritorio (abrir el login con shell.openExternal)"
+    ]
+  }
+}

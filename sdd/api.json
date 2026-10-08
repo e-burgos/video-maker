@@ -2018,6 +2018,189 @@
             "change": "Created in spec-e-burgos-021-brand-kit cycle-03."
           }
         ]
+      },
+      {
+        "id": "EP-060",
+        "method": "GET",
+        "path": "/integrations/youtube",
+        "module": "youtube-publishing",
+        "spec": "sdd/specs/spec-e-burgos-022-youtube-publishing",
+        "status": "implemented",
+        "created_in_cycle": 1,
+        "updated_in_cycle": null,
+        "description": "YouTube connection status: client configured, connected and the channel.",
+        "path_params": [],
+        "required_headers": [],
+        "request_body": {},
+        "responses": {
+          "200": "application/json: { clientConfigured, connected, channel: { id, title, thumbnailUrl } | null }"
+        },
+        "changelog": [
+          {
+            "cycle": 1,
+            "date": "2026-10-08",
+            "change": "Created in spec-e-burgos-022-youtube-publishing cycle-01."
+          }
+        ]
+      },
+      {
+        "id": "EP-061",
+        "method": "PUT",
+        "path": "/integrations/youtube/client",
+        "module": "youtube-publishing",
+        "spec": "sdd/specs/spec-e-burgos-022-youtube-publishing",
+        "status": "implemented",
+        "created_in_cycle": 1,
+        "updated_in_cycle": null,
+        "description": "Stores the OAuth desktop client id and secret in the secret store; changing it disconnects.",
+        "path_params": [],
+        "required_headers": [],
+        "request_body": {
+          "content-type": "application/json",
+          "schema": "{ clientId: string, clientSecret: string }"
+        },
+        "responses": {
+          "200": "same as GET /integrations/youtube",
+          "422": "INVALID_INPUT"
+        },
+        "changelog": [
+          {
+            "cycle": 1,
+            "date": "2026-10-08",
+            "change": "Created in spec-e-burgos-022-youtube-publishing cycle-01."
+          }
+        ]
+      },
+      {
+        "id": "EP-062",
+        "method": "POST",
+        "path": "/integrations/youtube/connect",
+        "module": "youtube-publishing",
+        "spec": "sdd/specs/spec-e-burgos-022-youtube-publishing",
+        "status": "implemented",
+        "created_in_cycle": 1,
+        "updated_in_cycle": null,
+        "description": "Starts OAuth for installed apps with PKCE and a one-shot 127.0.0.1 loopback (5 min); stores the refresh token and the channel.",
+        "path_params": [],
+        "required_headers": [],
+        "request_body": {},
+        "responses": {
+          "200": "application/json: { authUrl }",
+          "409": "YOUTUBE_CLIENT_MISSING"
+        },
+        "changelog": [
+          {
+            "cycle": 1,
+            "date": "2026-10-08",
+            "change": "Created in spec-e-burgos-022-youtube-publishing cycle-01."
+          }
+        ]
+      },
+      {
+        "id": "EP-063",
+        "method": "DELETE",
+        "path": "/integrations/youtube",
+        "module": "youtube-publishing",
+        "spec": "sdd/specs/spec-e-burgos-022-youtube-publishing",
+        "status": "implemented",
+        "created_in_cycle": 1,
+        "updated_in_cycle": null,
+        "description": "Revokes the refresh token at Google (best effort) and clears the connection.",
+        "path_params": [],
+        "required_headers": [],
+        "request_body": {},
+        "responses": {
+          "204": "no body"
+        },
+        "changelog": [
+          {
+            "cycle": 1,
+            "date": "2026-10-08",
+            "change": "Created in spec-e-burgos-022-youtube-publishing cycle-01."
+          }
+        ]
+      },
+      {
+        "id": "EP-064",
+        "method": "GET",
+        "path": "/projects/:slug/publish/youtube/options",
+        "module": "youtube-publishing",
+        "spec": "sdd/specs/spec-e-burgos-022-youtube-publishing",
+        "status": "implemented",
+        "created_in_cycle": 1,
+        "updated_in_cycle": null,
+        "description": "Publishable out/*.mp4 files newest first with duration, size and isShort, the channel playlists and the default privacy.",
+        "path_params": [
+          "slug"
+        ],
+        "required_headers": [],
+        "request_body": {},
+        "responses": {
+          "200": "application/json: { files: [{ path, durationSec, width, height, isShort, sizeBytes }], playlists: [{ id, title }], defaults: { privacy } }"
+        },
+        "changelog": [
+          {
+            "cycle": 1,
+            "date": "2026-10-08",
+            "change": "Created in spec-e-burgos-022-youtube-publishing cycle-01."
+          }
+        ]
+      },
+      {
+        "id": "EP-065",
+        "method": "POST",
+        "path": "/projects/:slug/publish/youtube/draft",
+        "module": "youtube-publishing",
+        "spec": "sdd/specs/spec-e-burgos-022-youtube-publishing",
+        "status": "implemented",
+        "created_in_cycle": 1,
+        "updated_in_cycle": null,
+        "description": "Producer-drafted title, description and tags from the project script and brand (spoken names restored), with brand url and music credits.",
+        "path_params": [
+          "slug"
+        ],
+        "required_headers": [],
+        "request_body": {
+          "content-type": "application/json",
+          "schema": "{ file: string }"
+        },
+        "responses": {
+          "200": "application/json: { title, description, tags }",
+          "422": "PUBLISH_FILE_INVALID or AI_AGENT_INVALID_OUTPUT"
+        },
+        "changelog": [
+          {
+            "cycle": 1,
+            "date": "2026-10-08",
+            "change": "Created in spec-e-burgos-022-youtube-publishing cycle-01."
+          }
+        ]
+      },
+      {
+        "id": "EP-066",
+        "method": "GET",
+        "path": "/projects/:slug/publications",
+        "module": "youtube-publishing",
+        "spec": "sdd/specs/spec-e-burgos-022-youtube-publishing",
+        "status": "implemented",
+        "created_in_cycle": 1,
+        "updated_in_cycle": null,
+        "description": "Publications of the project newest first.",
+        "path_params": [
+          "slug"
+        ],
+        "required_headers": [],
+        "request_body": {},
+        "responses": {
+          "200": "application/json: [{ id, platform, file, title, videoId, url, privacy, status, publishAt, publishedAt, createdAt }]"
+        },
+        "changelog": [
+          {
+            "cycle": 1,
+            "date": "2026-10-08",
+            "change": "Created in spec-e-burgos-022-youtube-publishing cycle-01."
+          }
+        ]
       }
     ]
   }

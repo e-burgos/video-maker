@@ -22,4 +22,5 @@ export const NAV_PAGES = [
   { slug: 'usar-el-estudio', navLabel: 'Usar el estudio', fileTitle: 'Usar el estudio' },
   { slug: 'preguntas-frecuentes', navLabel: 'Preguntas frecuentes', fileTitle: 'Preguntas frecuentes' },
   { slug: 'licencias', navLabel: 'Licencias', fileTitle: 'Licencias' },
+  { slug: 'privacidad', navLabel: 'Privacidad', fileTitle: 'Privacidad' },
 ];

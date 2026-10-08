@@ -145,6 +145,21 @@ export const GUIDE_ES: GuideContent = {
       ].join('\n'),
     },
     {
+      id: 'youtube',
+      title: 'Publicar en YouTube — conectar el canal y subir',
+      body: [
+        'El estudio sube el video terminado a tu canal sin salir de la app. La conexión se hace una sola vez, en **Configuración › YouTube**, con una credencial propia de Google (el estudio nunca comparte una).',
+        '',
+        '- **Crear la credencial**: en Google Cloud creá un proyecto, habilitá la **YouTube Data API v3** y creá un cliente OAuth de tipo **Aplicación de escritorio**. Si la pantalla de consentimiento está en modo "Prueba", agregá tu cuenta como usuario de prueba.',
+        '- **Conectar**: pegá el ID de cliente y el secreto, tocá **Conectar con YouTube**, permití el acceso en la ventana de Google y volvé: el canal aparece con su nombre y su foto. **Desconectar** revoca el acceso.',
+        '- **Publicar**: en la vista previa, en Entregas o en la página Motion, el botón **Publicar en YouTube** abre el diálogo. Elegí el MP4 (los verticales cortos se marcan como Short) y tocá **Proponer con el productor** para que escriba título, descripción (con el crédito de la música) y etiquetas; editá lo que quieras.',
+        '- **Visibilidad**: público, oculto o privado. **Programar** sube el video como privado y YouTube lo publica a la hora elegida. Antes de publicar en público el estudio pide confirmar en qué canal sale.',
+        '- **Seguimiento**: la subida muestra su avance y se puede cancelar o reintentar (retoma donde quedó). Cada video publicado queda registrado en el proyecto, con su enlace, y la tarjeta del video lo marca como publicado.',
+        '',
+        'Un video nuevo cuenta contra la cuota diaria de la API de YouTube; si se agota, el estudio lo avisa y podés reintentar al día siguiente.',
+      ].join('\n'),
+    },
+    {
       id: 'flows',
       title: 'Tres flujos que funcionan',
       body: [

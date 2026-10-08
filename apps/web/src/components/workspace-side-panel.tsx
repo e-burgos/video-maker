@@ -21,6 +21,7 @@ import type { AsyncResource } from '../hooks/use-async-resource';
 import { useT, useTn } from '../i18n/language-context';
 import { ErrorNotice } from './error-notice';
 import { TimelinePlayer } from './timeline-player';
+import { YouTubePublishSection } from './youtube-publish-section';
 import { Badge } from './ui/badge';
 import { Card } from './ui/card';
 import { TabPanel, Tabs } from './ui/tabs';
@@ -200,13 +201,17 @@ function DeliveriesTab({ slug, jobs }: { slug: string; jobs: AsyncResource<Rende
 
   if (deliveries.length === 0) {
     return (
-      <p data-testid="workspace-deliveries-empty" className="text-sm text-ink-faint">
-        {t('workspace.deliveries.empty')}
-      </p>
+      <div className="space-y-4">
+        <p data-testid="workspace-deliveries-empty" className="text-sm text-ink-faint">
+          {t('workspace.deliveries.empty')}
+        </p>
+        <YouTubePublishSection slug={slug} />
+      </div>
     );
   }
 
   return (
+    <div className="space-y-4">
     <ul data-testid="workspace-deliveries" className="space-y-3">
       {deliveries.map((job) => (
         <li key={job.id} className="space-y-2 rounded-panel border border-border-subtle bg-surface-raised/40 p-3">
@@ -228,6 +233,8 @@ function DeliveriesTab({ slug, jobs }: { slug: string; jobs: AsyncResource<Rende
         </li>
       ))}
     </ul>
+    <YouTubePublishSection slug={slug} />
+    </div>
   );
 }
 

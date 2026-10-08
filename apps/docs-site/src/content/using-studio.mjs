@@ -110,6 +110,24 @@ Finder — los renders anteriores quedan ahí también, no se pisan entre sí.
 </p>
 ${screenshotFigure(depth, 'workspace-preview.png', 'Conversación con el productor y, a la derecha, la vista previa de un render ya terminado')}
 
+<h2>Publicar en YouTube</h2>
+<p>
+El estudio sube el video terminado a tu canal sin salir de la app. La conexión se hace una sola vez,
+en <strong>Configuración › YouTube</strong>, con una credencial propia de Google: en Google Cloud
+creás un proyecto, habilitás la <strong>YouTube Data API v3</strong> y creás un cliente OAuth de tipo
+"Aplicación de escritorio". Pegás el ID de cliente y el secreto, tocás "Conectar con YouTube", permitís
+el acceso en la ventana de Google y volvés: el canal aparece con su nombre y su foto.
+</p>
+<p>
+Después, el botón <strong>"Publicar en YouTube"</strong> (en la vista previa, en Entregas o en la página
+Motion) abre un diálogo: elegís el MP4, tocás "Proponer con el productor" para que escriba título,
+descripción (con el crédito de la música) y etiquetas, y los editás a gusto. Elegís la visibilidad
+(público, oculto o privado) o programás una fecha — un video programado se sube como privado y YouTube lo
+publica a esa hora. Antes de publicar en público el estudio te pide confirmar en qué canal sale. La subida
+muestra su avance, se puede cancelar o reintentar, y cada video publicado queda registrado en el proyecto
+con su enlace.
+</p>
+
 <h2>Edición avanzada</h2>
 <p>
 Para cuando querés meter mano vos mismo: la biblioteca de material, el storyboard (guion y cortes

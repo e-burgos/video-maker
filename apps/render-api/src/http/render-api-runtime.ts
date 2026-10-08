@@ -16,6 +16,8 @@ import { createOpenRouterModelCatalog } from '../producer/openrouter-model-catal
 import type { OpenRouterModelCatalog } from '../producer/openrouter-model-catalog';
 import { createProducerTurnRegistry } from '../producer/producer-turn-registry';
 import type { ProducerTurnRegistry } from '../producer/producer-turn-registry';
+import { createYoutubeServices } from '../youtube/youtube-services';
+import type { YoutubeServices } from '../youtube/youtube-services';
 import { createKeyedSerializer } from '../store/serialize-by-key';
 import type { KeyedSerializer } from '../store/serialize-by-key';
 
@@ -29,6 +31,7 @@ export interface RenderApiRuntime {
   readonly musicSearchCache: MusicSearchCache;
   readonly freeMediaSearchCache: FreeMediaSearchCache;
   readonly openRouterModelCatalog: OpenRouterModelCatalog;
+  readonly youtube: YoutubeServices;
 }
 
 export function defaultProducerConfig(): ProducerConfig {
@@ -41,9 +44,15 @@ export function createRenderApiRuntime(
   store?: StoreConfig,
 ): RenderApiRuntime {
   recoverInterruptedJobs(deps);
+  const youtube = createYoutubeServices(deps);
 
   return {
-    jobs: createRenderJobQueue(deps, store === undefined ? undefined : createProjectBrandResolver(deps, store)),
+    jobs: createRenderJobQueue(
+      deps,
+      store === undefined ? undefined : createProjectBrandResolver(deps, store),
+      youtube.client,
+    ),
+    youtube,
     producerTurns: createProducerTurnRegistry(),
     producer,
     uploadSerializer: createKeyedSerializer(),

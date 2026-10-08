@@ -5,6 +5,7 @@ import { formatUpdatedAt } from '../api/format-updated-at';
 import { humanizeSlug } from '../api/humanize-slug';
 import { projectHref, projectModeOf } from '../api/project-mode';
 import { projectStatusKey } from '../api/project-status';
+import { PUBLICATION_STATUS_LABEL, PUBLICATION_STATUS_TONE } from '../api/publication-status';
 import type { ProjectStatusKey } from '../api/project-status';
 import type { ProjectSummary, VideoFolder, VideoPlacement } from '../api/render-api-types';
 import { useVideoCardThumbnail } from '../hooks/use-video-card-thumbnail';
@@ -124,6 +125,24 @@ export function VideoCard({ video, placement, folders, onChanged }: VideoCardPro
           )}
         </div>
       </Link>
+
+      {video.lastPublication != null && video.lastPublication.status !== 'failed' && (
+        <div data-testid="video-card-publication" className="flex items-center gap-2 px-4 pb-3">
+          <Badge tone={PUBLICATION_STATUS_TONE[video.lastPublication.status]}>
+            {t(PUBLICATION_STATUS_LABEL[video.lastPublication.status])}
+          </Badge>
+          {video.lastPublication.url !== null && (
+            <a
+              href={video.lastPublication.url}
+              target="_blank"
+              rel="noreferrer noopener"
+              className="text-[11px] text-accent underline hover:text-accent-strong"
+            >
+              {t('publications.open')}
+            </a>
+          )}
+        </div>
+      )}
 
       <button
         type="button"

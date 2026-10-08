@@ -22,6 +22,12 @@ export function GuidePage() {
     };
   }, [language]);
 
+  useEffect(() => {
+    if (content !== null && window.location.hash !== '') {
+      document.getElementById(window.location.hash.slice(1))?.scrollIntoView?.();
+    }
+  }, [content]);
+
   if (content === null) {
     return <p className="text-sm text-slate-500">{t('app.loading.guide')}</p>;
   }

@@ -9,9 +9,10 @@ export type ModalProps = {
   onClose: () => void;
   children: ReactNode;
   footer: ReactNode;
+  wide?: boolean;
 };
 
-export function Modal({ title, testId, onClose, children, footer }: ModalProps) {
+export function Modal({ title, testId, onClose, children, footer, wide = false }: ModalProps) {
   const titleId = useId();
   const panel = useRef<HTMLDivElement>(null);
   const t = useT();
@@ -49,7 +50,7 @@ export function Modal({ title, testId, onClose, children, footer }: ModalProps) 
         aria-modal="true"
         aria-labelledby={titleId}
         tabIndex={-1}
-        className="w-full max-w-md space-y-4 rounded-xl border border-slate-700 bg-slate-900 p-5 shadow-xl outline-none"
+        className={`max-h-[90vh] w-full space-y-4 overflow-y-auto rounded-xl border border-slate-700 bg-slate-900 p-5 shadow-xl outline-none ${wide ? 'max-w-2xl' : 'max-w-md'}`}
       >
         <div className="flex items-start justify-between gap-4">
           <h2 id={titleId} className="text-base font-semibold text-slate-100">

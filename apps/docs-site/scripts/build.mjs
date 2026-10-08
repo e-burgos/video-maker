@@ -10,6 +10,7 @@ import { renderPage as renderConnectAi } from '../src/content/connect-ai.mjs';
 import { renderPage as renderUsingStudio } from '../src/content/using-studio.mjs';
 import { renderPage as renderFaq } from '../src/content/faq.mjs';
 import { renderPage as renderLicenses } from '../src/content/licenses.mjs';
+import { renderPage as renderPrivacy } from '../src/content/privacy.mjs';
 
 const DOCS_SITE_ROOT = resolve(import.meta.dirname, '..');
 const REPO_ROOT = resolve(DOCS_SITE_ROOT, '..', '..');
@@ -24,6 +25,7 @@ const PAGE_RENDERERS = {
   'usar-el-estudio': renderUsingStudio,
   'preguntas-frecuentes': renderFaq,
   licencias: renderLicenses,
+  privacidad: renderPrivacy,
 };
 
 function log(message) {

@@ -219,7 +219,20 @@
       "completed_at": "2026-10-08"
     }
   ],
-  "in_progress_modules": [],
+  "in_progress_modules": [
+    {
+      "module": "youtube-publishing",
+      "spec": "spec-e-burgos-022-youtube-publishing",
+      "apps": [
+        "apps/render-api",
+        "libs/local-store",
+        "apps/web",
+        "libs/producer-tools",
+        "apps/desktop"
+      ],
+      "description": "Publicar videos en YouTube: conexión OAuth de la cuenta, publicación con metadatos del productor, registro de publicaciones y cola programada"
+    }
+  ],
   "pending_modules": [
     {
       "module": "scene-assembly",

@@ -45,6 +45,7 @@ function renderPage(client: Partial<RenderApiClient>) {
   const merged: Partial<RenderApiClient> = {
     getProject: vi.fn().mockResolvedValue({ slug: 'smoke-ingest' }),
     listRenderJobs: vi.fn().mockResolvedValue({ slug: 'smoke-ingest', jobs: [] }),
+    listPublications: vi.fn().mockResolvedValue([]),
     listAssets: vi
       .fn()
       .mockResolvedValue({ slug: 'smoke-ingest', source: 'catalog', assets: [], probeFailures: [] }),

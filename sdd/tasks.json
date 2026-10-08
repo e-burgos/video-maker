@@ -604,6 +604,22 @@
           "tasks_done": 5
         }
       }
+    },
+    "spec-e-burgos-022-youtube-publishing": {
+      "cycles": {
+        "cycle-01": {
+          "file": "sdd/specs/spec-e-burgos-022-youtube-publishing/cycles/cycle-01/tasks.json",
+          "module": "youtube-publishing",
+          "apps": [
+            "apps/render-api",
+            "libs/local-store",
+            "apps/web"
+          ],
+          "status": "completed",
+          "tasks_total": 6,
+          "tasks_done": 6
+        }
+      }
     }
   }
 }

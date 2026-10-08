@@ -538,7 +538,7 @@ describe('runMontagePipeline — marca del proyecto (spec-021 cycle-04)', () => 
     const timeline = await writtenTimeline({
       ...REQUEST,
       captionStyle: 'brand',
-      brand: { ...BRAND, name: 'Acme', spokenName: 'Acme', tagline: 't', url: null, palette: { background: '#09090b', accent: '#0ea5e9', accent2: '#14b8a6', text: '#ffffff' }, voice: { id: 'v', lengthScale: 1 }, brandDir: '/brands/acme', logoFile: '/brands/acme/logo.svg', fontFiles: [] },
+      brand: { ...BRAND, name: 'Acme', spokenName: 'Acme', tagline: 't', url: null, palette: { background: '#09090b', accent: '#0ea5e9', accent2: '#14b8a6', text: '#ffffff' }, voice: { id: 'v', lengthScale: 1 }, brandDir: '/brands/acme', logoFile: '/brands/acme/logo.svg', fontFiles: [], writtenNames: [] },
     });
 
     expect(timeline.captionStyle).toBe('brand');

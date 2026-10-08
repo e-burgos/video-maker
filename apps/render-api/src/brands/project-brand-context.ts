@@ -22,6 +22,20 @@ export interface ProjectBrandContext {
   readonly brandDir: string;
   readonly logoFile: string;
   readonly fontFiles: readonly string[];
+  readonly writtenNames: readonly BrandWrittenName[];
+}
+
+export interface BrandWrittenName {
+  readonly spoken: string;
+  readonly written: string;
+}
+
+export function brandWrittenNames(manifest: BrandManifest): readonly BrandWrittenName[] {
+  const pairs = [
+    { spoken: manifest.spokenName, written: manifest.name },
+    ...Object.values(manifest.devices).map((device) => ({ spoken: device.spokenName ?? device.name, written: device.name })),
+  ];
+  return pairs.filter((pair) => pair.spoken.trim() !== '' && pair.spoken !== pair.written);
 }
 
 export function brandLogoAssetStem(brandId: string): string {
@@ -76,6 +90,7 @@ export function projectBrandContext(brand: LocatedBrand, manifest: BrandManifest
     brandDir: brand.dir,
     logoFile: join(brand.dir, manifest.logo),
     fontFiles: manifest.fonts.filter((font) => families.includes(font.family)).map((font) => font.file),
+    writtenNames: brandWrittenNames(manifest),
   };
 }
 

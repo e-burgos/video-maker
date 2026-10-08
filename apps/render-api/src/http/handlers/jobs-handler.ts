@@ -23,6 +23,15 @@ import { parseMotionJobInput } from '../../jobs/motion-job-params';
 import { parsePhotoArollJobInput } from '../../jobs/photo-aroll-job-params';
 import { parseStoryboardInput, parseStoryboardOverwrite } from '../../jobs/storyboard-job-params';
 import { parseVoiceJobInput } from '../../jobs/voice-job-params';
+import { parsePublishJobInput } from '../../jobs/publish-job-params';
+import { createProjectBrandResolver } from '../../brands/project-brand-resolver';
+import {
+  assertPublishableThumbnail,
+  assertPublishableVideo,
+  assertYoutubeReady,
+  publishLanguageFromVoice,
+} from '../../youtube/publish-preconditions';
+import { YOUTUBE_DEFAULT_LANGUAGE } from '../../youtube/youtube-constants';
 import { assertVoiceTracksNotPersisted, selectVoiceScenes } from '../../voice/select-voice-scenes';
 import {
   assertVoiceScriptTrackNotPersisted,
@@ -32,7 +41,14 @@ import { readVoiceManifestIfUsable } from '../../voice/voice-store';
 import { readStoredStoryboard } from '../../storyboard/storyboard-store';
 import { storyboardPath } from '../../storyboard/storyboard-paths';
 import { storyboardExists } from '../../storyboard/storyboard-store';
-import type { CreateJobInput, Job, JobKind, MotionPhase, RenderJobSummary } from '../../jobs/render-job';
+import type {
+  CreateJobInput,
+  CreatePublishJobInput,
+  Job,
+  JobKind,
+  MotionPhase,
+  RenderJobSummary,
+} from '../../jobs/render-job';
 import { toJobSummary } from '../../jobs/render-job';
 import {
   assertMotionProject,
@@ -82,7 +98,8 @@ function resolveJobKind(value: unknown): JobKind | 'invalid' {
     raw === 'storyboard' ||
     raw === 'voice' ||
     raw === 'photo-aroll' ||
-    raw === 'motion'
+    raw === 'motion' ||
+    raw === 'publish'
   ) {
     return raw;
   }
@@ -263,6 +280,43 @@ async function createMotionJobResponse(
   return jobAcceptedResponse(job);
 }
 
+type PublishParams = Omit<CreatePublishJobInput, 'kind' | 'slug' | 'projectRoot'>;
+
+async function resolvePublishLanguage(
+  deps: RenderApiDependencies,
+  store: StoreConfig,
+  slug: string,
+  requested: string | null,
+): Promise<string> {
+  if (requested !== null) {
+    return requested;
+  }
+  try {
+    const brand = await createProjectBrandResolver(deps, store)(slug);
+    return publishLanguageFromVoice(brand?.voice.id ?? null);
+  } catch {
+    return YOUTUBE_DEFAULT_LANGUAGE;
+  }
+}
+
+async function createPublishJobResponse(
+  deps: RenderApiDependencies,
+  project: MediaProject,
+  runtime: RenderApiRuntime,
+  slug: string,
+  params: PublishParams,
+  retryOf: string | null,
+): Promise<HttpResponse> {
+  await assertPublishableVideo(deps.storage, project, params.file);
+  if (params.thumbnail !== null) {
+    await assertPublishableThumbnail(deps.storage, project, params.thumbnail);
+  }
+  await assertYoutubeReady(runtime.youtube.oauth);
+
+  const job = registerJob(runtime, { kind: 'publish', slug, projectRoot: project.root, ...params }, retryOf);
+  return jobAcceptedResponse(job);
+}
+
 export async function handleCreateRenderJob(
   deps: RenderApiDependencies,
   store: StoreConfig,
@@ -295,7 +349,7 @@ export async function handleCreateRenderJob(
     throw new PipelineStageError({
       code: 'JOB_KIND_INVALID',
       stage: null,
-      expected: "'render', 'montage', 'storyboard', 'voice', 'photo-aroll' or 'motion'",
+      expected: "'render', 'montage', 'storyboard', 'voice', 'photo-aroll', 'motion' or 'publish'",
     });
   }
 
@@ -355,6 +409,19 @@ export async function handleCreateRenderJob(
       slug,
       { phase: input.phase, output: input.output, takes: input.takes },
       input.overwrite,
+      null,
+    );
+  }
+
+  if (jobKind === 'publish') {
+    const input = parsePublishJobInput(bodyObject, Date.parse(deps.clock.nowIso()));
+    const { defaultLanguage, ...rest } = input;
+    return createPublishJobResponse(
+      deps,
+      project,
+      runtime,
+      slug,
+      { ...rest, defaultLanguage: await resolvePublishLanguage(deps, store, slug, defaultLanguage) },
       null,
     );
   }
@@ -499,5 +566,7 @@ export async function handleRetryRenderJob(
       return createPhotoArollJobResponse(deps, project, runtime, job.slug, retryParams, jobId);
     case 'motion':
       return createMotionJobResponse(deps, project, runtime, job.slug, retryParams, true, jobId);
+    case 'publish':
+      return createPublishJobResponse(deps, project, runtime, job.slug, retryParams, jobId);
   }
 }

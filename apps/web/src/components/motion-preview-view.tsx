@@ -5,6 +5,7 @@ import type { MotionOverviewScene } from '../api/motion-types';
 import { useMotionOverview } from '../hooks/use-motion-overview';
 import { useT } from '../i18n/language-context';
 import { MotionViewEmpty, MotionViewShell } from './motion-view-shell';
+import { YouTubePublishSection } from './youtube-publish-section';
 
 export type MotionPreviewViewProps = {
   slug: string;
@@ -105,6 +106,11 @@ export function MotionPreviewView({ slug }: MotionPreviewViewProps) {
               <SceneStrip scenes={timeline.scenes} onSeek={seek} />
             </div>
           )}
+
+          <div className="space-y-2">
+            <h2 className="text-sm font-medium text-ink">{t('youtube.publish.section')}</h2>
+            <YouTubePublishSection slug={slug} />
+          </div>
         </div>
       )}
     </MotionViewShell>

@@ -1,4 +1,4 @@
-import { fireEvent, render, screen, waitFor } from '@testing-library/react';
+import { fireEvent, render, screen, waitFor, within } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
 import { describe, expect, it, vi } from 'vitest';
 
@@ -53,6 +53,43 @@ describe('VideoCard', () => {
     renderCard({});
 
     expect(screen.queryByTestId('video-card-mode-badge')).toBeNull();
+  });
+
+  it('badges a published video with a link to YouTube', () => {
+    renderCard({}, UNPLACED, vi.fn(), {
+      ...VIDEO,
+      lastPublication: { platform: 'youtube', url: 'https://youtu.be/abc123', status: 'published' },
+    });
+
+    const badge = screen.getByTestId('video-card-publication');
+    expect(badge.textContent).toContain('Published');
+    expect(within(badge).getByRole('link').getAttribute('href')).toBe('https://youtu.be/abc123');
+  });
+
+  it('badges a scheduled video and hides the badge of a failed or missing publication', () => {
+    const { unmount } = render(
+      <RenderApiProvider client={{} as RenderApiClient}>
+        <MemoryRouter>
+          <VideoCard
+            video={{
+              ...VIDEO,
+              lastPublication: { platform: 'youtube', url: 'https://youtu.be/abc123', status: 'scheduled' },
+            }}
+            placement={UNPLACED}
+            folders={FOLDERS}
+            onChanged={vi.fn()}
+          />
+        </MemoryRouter>
+      </RenderApiProvider>,
+    );
+    expect(screen.getByTestId('video-card-publication').textContent).toContain('Scheduled');
+    unmount();
+
+    renderCard({}, UNPLACED, vi.fn(), {
+      ...VIDEO,
+      lastPublication: { platform: 'youtube', url: null, status: 'failed' },
+    });
+    expect(screen.queryByTestId('video-card-publication')).toBeNull();
   });
 
   it('badges a motion project and opens its Motion page', () => {

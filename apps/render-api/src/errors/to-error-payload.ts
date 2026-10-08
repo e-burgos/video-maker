@@ -48,7 +48,7 @@ const MESSAGE_BY_CODE: Readonly<Record<RenderApiErrorCode, string>> = {
   JOB_INTERRUPTED: 'The service restarted while this job was still in progress.',
   JOB_RECORD_INVALID: 'The persisted job record exists but could not be read back.',
   JOB_NOT_RETRYABLE: 'Only a job in the failed or canceled state can be retried.',
-  JOB_KIND_INVALID: 'The job kind is not render, montage, storyboard, voice or photo-aroll.',
+  JOB_KIND_INVALID: 'The job kind is not render, montage, storyboard, voice, photo-aroll, motion or publish.',
   JOB_MODEL_INVALID: 'The requested model is not one of the models this service allows.',
   MONTAGE_PRESET_INVALID: 'The montage preset is not one of the known preset names.',
   MONTAGE_SEED_INVALID: 'The montage seed is not a non-negative integer.',
@@ -135,6 +135,11 @@ const MESSAGE_BY_CODE: Readonly<Record<RenderApiErrorCode, string>> = {
   STORYBOARD_MISSING: 'The project has no motion storyboard to build the video from.',
   MOTION_JOB_INPUT_INVALID: 'The motion job parameters are invalid.',
   MOTION_PIPELINE_FAILED: 'A motion pipeline step failed.',
+  YOUTUBE_NOT_CONNECTED: 'No YouTube channel is connected, or Google revoked the stored access.',
+  YOUTUBE_CLIENT_MISSING: 'The Google OAuth client id and secret are not stored yet.',
+  YOUTUBE_UPLOAD_FAILED: 'YouTube refused or could not complete the request.',
+  YOUTUBE_QUOTA_EXCEEDED: 'The YouTube API quota for this Google project is exhausted; it resets daily.',
+  PUBLISH_FILE_INVALID: 'The file or thumbnail to publish is missing, not under the allowed folder or not a supported type.',
 };
 
 export function toErrorPayload(value: unknown): RenderApiErrorPayload {

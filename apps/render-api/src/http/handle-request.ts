@@ -90,6 +90,17 @@ import {
 import { handleGetVoice, handlePutVoiceScene } from './handlers/voice-handler';
 import { handleGetVoicePreview } from './handlers/voice-preview-handler';
 import { handleListVoices } from './handlers/voices-handler';
+import {
+  handleConnectYoutube,
+  handleDisconnectYoutube,
+  handleGetYoutubeIntegration,
+  handlePutYoutubeClient,
+} from './handlers/youtube-integration-handler';
+import {
+  handleDraftYoutubeMetadata,
+  handleGetYoutubePublishOptions,
+  handleListPublications,
+} from './handlers/youtube-publish-handler';
 import { handleHealth } from './health-handler';
 import { JSON_CONTENT_TYPE } from './http-message';
 import type { HttpRequestLine, HttpResponse } from './http-message';
@@ -347,6 +358,20 @@ async function dispatchRoute(
         return await handleGetProducerTurn(params, runtime);
       case 'projects.producer.turn.cancel':
         return await handleCancelProducerTurn(params, runtime);
+      case 'integrations.youtube.get':
+        return await handleGetYoutubeIntegration(runtime);
+      case 'integrations.youtube.client.put':
+        return await handlePutYoutubeClient(runtime, request);
+      case 'integrations.youtube.connect':
+        return await handleConnectYoutube(runtime);
+      case 'integrations.youtube.disconnect':
+        return await handleDisconnectYoutube(runtime);
+      case 'projects.publish.youtube.options':
+        return await handleGetYoutubePublishOptions(deps, store, params, runtime);
+      case 'projects.publish.youtube.draft':
+        return await handleDraftYoutubeMetadata(deps, store, params, request);
+      case 'projects.publications.list':
+        return await handleListPublications(deps, store, params);
       case 'projects.jobs.create':
         return await handleCreateRenderJob(deps, store, params, request, runtime);
       case 'projects.jobs.list':

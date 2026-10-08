@@ -9,6 +9,7 @@ import { useAsyncResource } from '../hooks/use-async-resource';
 import { useT } from '../i18n/language-context';
 import { ErrorNotice } from '../components/error-notice';
 import { OpenRouterModelPicker } from '../components/openrouter-model-picker';
+import { YouTubeSettingsSection } from '../components/youtube-settings-section';
 import type { ProducerEngineId, ProducerSettings, ProducerSettingsUpdate } from '../api/render-api-types';
 
 const OPENROUTER_KEY_PREFIX = 'sk-or-v1-';
@@ -308,6 +309,8 @@ export function SettingsPage() {
           </div>
         </div>
       )}
+
+      <YouTubeSettingsSection />
     </section>
   );
 }

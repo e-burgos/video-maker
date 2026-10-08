@@ -4,6 +4,7 @@ import {
   createOrganizationRepository,
   createProducerRepository,
   createProjectsRepository,
+  createPublicationsRepository,
   createSettingsRepository,
   currentUserVersion,
   openStudioDatabase,
@@ -109,6 +110,7 @@ function createFakeLocalStore(clock: Clock): LocalStorePort {
     jobs: createJobsRepository(database.db),
     settings: createSettingsRepository(database.db, nowIso),
     assets: createAssetsRepository(database.db, nowIso),
+    publications: createPublicationsRepository(database.db),
     schemaVersion: currentUserVersion(database.sqlite),
     close: () => database.close(),
   };
@@ -428,6 +430,14 @@ export function createFakeRenderApiDependencies(
         return;
       }
       await storage.writeTextFile(input.outPath, 'fake-png');
+    },
+
+    startOAuthLoopback: async (input) => {
+      callLog.record('startOAuthLoopback', { timeoutMs: input.timeoutMs });
+      if (overrides?.startOAuthLoopback) {
+        return overrides.startOAuthLoopback(input);
+      }
+      return { port: 49152, close: () => undefined };
     },
   };
 }

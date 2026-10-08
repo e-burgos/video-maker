@@ -29,6 +29,7 @@ import {
   createOrganizationRepository,
   createProducerRepository,
   createProjectsRepository,
+  createPublicationsRepository,
   createSettingsRepository,
   currentUserVersion,
   openStudioDatabase,
@@ -37,6 +38,7 @@ import type { StudioDatabase } from '@video-maker/local-store';
 
 import { listMotionBrandDocuments, createMotionPipelinePorts } from './motion-pipeline-adapters';
 import { HYPERFRAMES_RESOLVE_FROM_ENV_VAR, resolveHyperframesCli } from './hyperframes-cli';
+import { startOAuthLoopbackServer } from './oauth-loopback';
 import { rasterizeSvgWithBrowser, resolveHeadlessBrowser } from './svg-rasterizer';
 import { createClaudeCliAiAgent } from '../ai/claude-cli-ai-agent';
 import { createEffectiveAiAgent } from '../ai/effective-ai-agent';
@@ -441,6 +443,7 @@ export function createNodeRenderApiDependencies(
         jobs: createJobsRepository(database.db),
         settings: createSettingsRepository(database.db, nowIso),
         assets: createAssetsRepository(database.db, nowIso),
+        publications: createPublicationsRepository(database.db),
         schemaVersion: currentUserVersion(database.sqlite),
         close: () => database.close(),
       };
@@ -616,8 +619,12 @@ export function createNodeRenderApiDependencies(
     },
 
     fetchRemote: async (url, init) => {
+      const method = init.method ?? 'GET';
       const response = await fetch(url, {
+        method,
         ...(init.headers === undefined ? {} : { headers: init.headers }),
+        ...(init.body === undefined ? {} : { body: init.body as BodyInit }),
+        ...(method === 'GET' ? {} : { redirect: 'manual' as const }),
         signal: AbortSignal.timeout(init.timeoutMs),
       });
 
@@ -860,6 +867,8 @@ export function createNodeRenderApiDependencies(
         });
       }
     },
+
+    startOAuthLoopback: startOAuthLoopbackServer,
   };
 
   return deps;

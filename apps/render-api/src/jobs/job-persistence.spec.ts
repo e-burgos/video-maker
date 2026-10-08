@@ -157,6 +157,72 @@ describe('toStoredParams / parseStoredParams', () => {
   });
 });
 
+describe('publish job persistence', () => {
+  const PUBLISH_INPUT: CreateJobInput = {
+    kind: 'publish',
+    slug: 'demo-01',
+    projectRoot: '/media/demo-01',
+    platform: 'youtube',
+    file: 'out/video.mp4',
+    title: 'Titulo',
+    description: 'Descripcion',
+    tags: ['a', 'b'],
+    privacy: 'unlisted',
+    publishAt: '2099-01-01T10:00:00.000Z',
+    playlistId: 'PL1',
+    thumbnail: 'work/thumb.png',
+    categoryId: '22',
+    madeForKids: false,
+    defaultLanguage: 'es',
+  };
+
+  it('round-trips the publish parameters without the slug and the project root', () => {
+    const stored = toStoredParams(PUBLISH_INPUT);
+
+    expect(Object.keys(stored).sort()).toEqual([
+      'categoryId',
+      'defaultLanguage',
+      'description',
+      'file',
+      'kind',
+      'madeForKids',
+      'platform',
+      'playlistId',
+      'privacy',
+      'publishAt',
+      'tags',
+      'thumbnail',
+      'title',
+    ]);
+    expect(parseStoredParams('publish', JSON.parse(JSON.stringify(stored)))).toEqual(stored);
+  });
+
+  it('rejects a publish record with an unknown platform or privacy or a wrong type', () => {
+    const stored = JSON.parse(JSON.stringify(toStoredParams(PUBLISH_INPUT))) as Record<string, unknown>;
+
+    expect(parseStoredParams('publish', { ...stored, platform: 'tiktok' })).toBeNull();
+    expect(parseStoredParams('publish', { ...stored, privacy: 'secret' })).toBeNull();
+    expect(parseStoredParams('publish', { ...stored, tags: 'a,b' })).toBeNull();
+    expect(parseStoredParams('publish', { ...stored, madeForKids: 'no' })).toBeNull();
+  });
+
+  it('reads a stored publish job back with its progress and report', () => {
+    const job = parseStoredJob({
+      ...BASE_ROW,
+      kind: 'publish',
+      state: 'succeeded',
+      params: {},
+      progress: { stage: 'upload', uploadedBytes: 10, totalBytes: 10, percent: 100 },
+      report: { videoId: 'abc', url: 'https://youtu.be/abc', privacy: 'public', publishAt: null, title: 'T' },
+      error: null,
+      retryOf: null,
+    });
+
+    expect(job.kind).toBe('publish');
+    expect(job.report).toMatchObject({ videoId: 'abc' });
+  });
+});
+
 describe('parseStoredJob', () => {
   it('builds a render job from a fully valid row', () => {
     const job = parseStoredJob({
