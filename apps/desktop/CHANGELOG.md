@@ -4,6 +4,15 @@ Historial de versiones de la app de escritorio, en español, pensado para los am
 instalan. `apps/desktop/scripts/release-desktop.mjs` toma la sección de la versión que publica
 y la usa como notas del release.
 
+## 0.3.2 — Ajustá tus videos de motion graphics conversando
+
+- Botón "Ajustar con el productor" en cada video de motion graphics: le pedís cambios en tus palabras
+  ("bajá la música", "cambiá el título de la escena 3") y el productor edita las escenas, te muestra el
+  cambio y rehace el video.
+- Rehacer un video ajustado es mucho más rápido: sólo se vuelve a grabar la voz de las escenas que cambiaste.
+- La música suena más baja por defecto y cada video puede tener su propio volumen.
+- Las pantallas de los equipos muestran el contenido con la inclinación real del vidrio.
+
 ## 0.3.1 — Los videos hechos quedan a la vista
 
 - La página Motion muestra el último video que hiciste (y el crédito de su música) apenas la abrís, no
