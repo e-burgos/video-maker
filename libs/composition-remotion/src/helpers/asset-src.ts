@@ -22,8 +22,10 @@ function toFileUrl(path: string): string {
 }
 
 export function assetSrc(asset: MediaAsset): string {
-  const { path } = asset;
+  return pathSrc(asset.path);
+}
 
+export function pathSrc(path: string): string {
   if (URL_SCHEME_PATTERN.test(path)) {
     return path;
   }

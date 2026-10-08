@@ -291,6 +291,15 @@ export interface RunHyperframesOutput {
 
 export type RunHyperframesPort = (input: RunHyperframesInput) => Promise<RunHyperframesOutput>;
 
+export interface RasterizeSvgInput {
+  readonly svgPath: string;
+  readonly outPath: string;
+  readonly widthPx: number;
+  readonly heightPx: number;
+}
+
+export type RasterizeSvgPort = (input: RasterizeSvgInput) => Promise<void>;
+
 export type HashTextPort = (text: string) => string;
 
 export interface RenderApiDependencies {
@@ -332,4 +341,5 @@ export interface RenderApiDependencies {
   readonly listMotionBrands: ListMotionBrandsPort;
   readonly motionPorts: CreateMotionPortsPort;
   readonly runHyperframes: RunHyperframesPort;
+  readonly rasterizeSvg: RasterizeSvgPort;
 }

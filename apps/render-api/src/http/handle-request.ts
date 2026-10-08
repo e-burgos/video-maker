@@ -220,7 +220,7 @@ async function dispatchRoute(
       case 'projects.list':
         return await handleListProjects(deps, store);
       case 'projects.create':
-        return await handleCreateProject(deps, store, params, request);
+        return await handleCreateProject(deps, store, params, request, runtime.uploadSerializer);
       case 'projects.detail':
         return await handleGetProject(deps, store, params);
       case 'projects.delete':
@@ -228,7 +228,7 @@ async function dispatchRoute(
       case 'projects.placement.put':
         return await handlePutProjectPlacement(deps, store, params, request);
       case 'projects.brand.put':
-        return await handlePutProjectBrand(deps, store, params, request);
+        return await handlePutProjectBrand(deps, store, params, request, runtime.uploadSerializer);
       case 'brands.list':
         return await handleListBrands(deps, store);
       case 'brands.create':

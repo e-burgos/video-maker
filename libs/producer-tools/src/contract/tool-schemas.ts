@@ -85,8 +85,7 @@ const MontageLogoModeSchema = z.enum(MONTAGE_LOGO_MODES);
 const MONTAGE_VOICE_SOURCES = ['aroll', 'script'] as const;
 const MontageVoiceSourceSchema = z.enum(MONTAGE_VOICE_SOURCES);
 
-const CAPTION_STYLES = ['bold-impact', 'clean-sans', 'outline-pop', 'subtle-lower', 'off'] as const;
-const CaptionStyleSchema = z.enum(CAPTION_STYLES);
+const CaptionStyleSchema = TimelineCaptionStyleSchema;
 
 export const DEFAULT_PHOTO_AROLL_FPS = 30;
 

@@ -10,14 +10,28 @@ import type { ServiceHealth, VoiceListing, VoiceModel } from '../api/render-api-
 
 function renderTrigger(
   createVoiceJob: RenderApiClient['createVoiceJob'],
-  options: { health?: ServiceHealth; voices?: () => Promise<VoiceListing> } = {},
+  options: {
+    health?: ServiceHealth;
+    voices?: () => Promise<VoiceListing>;
+    brandVoiceId?: string;
+  } = {},
 ) {
   const onCreated = vi.fn();
   const getHealth = vi.fn().mockResolvedValue(options.health ?? healthyVoiceService());
   const listVoices = vi.fn(options.voices ?? (async () => VOICE_MODELS));
 
+  const brandClient =
+    options.brandVoiceId === undefined
+      ? {}
+      : {
+          getProject: vi.fn().mockResolvedValue({ slug: 'smoke-ingest', brand: 'acme' }),
+          getBrand: vi.fn().mockResolvedValue({ manifest: { voice: { id: options.brandVoiceId, lengthScale: 1.08 } } }),
+        };
+
   render(
-    <RenderApiProvider client={{ createVoiceJob, getHealth, listVoices } as unknown as RenderApiClient}>
+    <RenderApiProvider
+      client={{ createVoiceJob, getHealth, listVoices, ...brandClient } as unknown as RenderApiClient}
+    >
       <VoiceTrigger slug="smoke-ingest" onCreated={onCreated} />
     </RenderApiProvider>,
   );
@@ -66,6 +80,38 @@ describe('VoiceTrigger', () => {
       }),
     );
     await waitFor(() => expect(onCreated).toHaveBeenCalledWith(voiceJob()));
+  });
+
+  it('preselects the project brand voice and lets the service apply its pace', async () => {
+    const createVoiceJob = vi.fn().mockResolvedValue(voiceJob());
+    renderTrigger(createVoiceJob, { brandVoiceId: 'es_ES-carlfm-x-low' });
+
+    await waitFor(() =>
+      expect(
+        screen.getAllByTestId('voice-card').find((card) => card.dataset['selected'] === 'true')?.dataset['voiceId'],
+      ).toBe('es_ES-carlfm-x-low'),
+    );
+    fireEvent.click(generateButton());
+
+    await waitFor(() =>
+      expect(createVoiceJob).toHaveBeenCalledWith('smoke-ingest', { voiceId: null, sceneIds: null, overwrite: false }),
+    );
+  });
+
+  it('falls back to the default voice when the brand voice is not installed', async () => {
+    const createVoiceJob = vi.fn().mockResolvedValue(voiceJob());
+    renderTrigger(createVoiceJob, { brandVoiceId: 'es_MX-ausente-high' });
+
+    await waitFor(() => expect(generateButton().disabled).toBe(false));
+    fireEvent.click(generateButton());
+
+    await waitFor(() =>
+      expect(createVoiceJob).toHaveBeenCalledWith('smoke-ingest', {
+        voiceId: 'es_AR-daniela-high',
+        sceneIds: null,
+        overwrite: false,
+      }),
+    );
   });
 
   it('sends the voice the user picked instead of the default', async () => {

@@ -1,5 +1,6 @@
 import type {
   CaptionStyle,
+  CaptionTheme,
   EditDecisionList,
   LogoInput,
   MediaAsset,
@@ -66,6 +67,11 @@ export interface VoiceTrackSummary {
   readonly truncatedMs: number;
 }
 
+export interface MontageBrand {
+  readonly id: string;
+  readonly captionTheme: CaptionTheme;
+}
+
 export interface AutoMontageOptions {
   readonly preset: MontagePresetName | MontagePreset;
   readonly seed: number;
@@ -77,6 +83,7 @@ export interface AutoMontageOptions {
   readonly scriptText?: string;
   readonly voice?: VoiceSource;
   readonly captionStyle?: CaptionStyle;
+  readonly brand?: MontageBrand;
   readonly pruneSilences?: boolean;
   readonly persist?: boolean;
 }
@@ -188,6 +195,7 @@ export async function autoMontage(
         ...(options.arollAssetId !== undefined ? { arollAssetId: options.arollAssetId } : {}),
         ...(options.musicAssetId !== undefined ? { musicAssetId: options.musicAssetId } : {}),
         ...(options.logoAssetId !== undefined ? { logoAssetId: options.logoAssetId } : {}),
+        ...(options.brand !== undefined ? { brandLogoStem: `brand-${options.brand.id}` } : {}),
         includeLogo: options.logo !== 'off',
         ...(options.outputPreset !== undefined ? { outputPreset: options.outputPreset } : {}),
       },
@@ -286,18 +294,19 @@ export async function autoMontage(
   }
 
   const previousTimeline = await readExistingTimeline(project, { readTextFile });
+  const builtTimeline = buildTimeline(
+    edl,
+    assets,
+    toMusicInput(musicAsset, preset),
+    toLogoInput(logoAsset),
+    voiceScriptTrack === null
+      ? undefined
+      : { assetId: voiceScriptTrack.asset.id, durationMs: voiceScriptTrack.asset.durationMs },
+    captionStyle,
+  );
   const timeline = assertValidTimeline(
     preserveBrandDecisions(
-      buildTimeline(
-        edl,
-        assets,
-        toMusicInput(musicAsset, preset),
-        toLogoInput(logoAsset),
-        voiceScriptTrack === null
-          ? undefined
-          : { assetId: voiceScriptTrack.asset.id, durationMs: voiceScriptTrack.asset.durationMs },
-        captionStyle,
-      ),
+      options.brand === undefined ? builtTimeline : { ...builtTimeline, captionTheme: options.brand.captionTheme },
       previousTimeline,
     ),
   );

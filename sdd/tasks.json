@@ -587,6 +587,21 @@
           "status": "completed",
           "tasks_total": 5,
           "tasks_done": 5
+        },
+        "cycle-04": {
+          "file": "sdd/specs/spec-e-burgos-021-brand-kit/cycles/cycle-04/tasks.json",
+          "module": "brand-kit",
+          "apps": [
+            "libs/timeline-core",
+            "libs/composition-remotion",
+            "libs/auto-montage",
+            "apps/render-api",
+            "apps/web",
+            "libs/producer-tools"
+          ],
+          "status": "completed",
+          "tasks_total": 5,
+          "tasks_done": 5
         }
       }
     }

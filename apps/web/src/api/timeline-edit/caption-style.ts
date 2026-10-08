@@ -1,5 +1,5 @@
 import { CAPTION_STYLES } from '@video-maker/timeline-core';
-import type { CaptionStyle, Timeline } from '@video-maker/timeline-core';
+import type { CaptionStyle, CaptionTheme, Timeline } from '@video-maker/timeline-core';
 
 import type { TranslationKey } from '../../i18n/messages-en';
 
@@ -10,6 +10,7 @@ const LABEL_KEY_BY_STYLE: Readonly<Record<CaptionStyle, TranslationKey>> = {
   'clean-sans': 'captionStyle.cleanSans',
   'outline-pop': 'captionStyle.outlinePop',
   'subtle-lower': 'captionStyle.subtleLower',
+  brand: 'captionStyle.brand',
   off: 'captionStyle.off',
 };
 
@@ -19,6 +20,16 @@ export function captionStyleLabelKey(style: CaptionStyle): TranslationKey {
 
 export const DEFAULT_CAPTION_STYLE: CaptionStyle = 'bold-impact';
 
-export function setTimelineCaptionStyle(timeline: Timeline, captionStyle: CaptionStyle): Timeline {
-  return { ...timeline, captionStyle };
+export function captionStyleOptions(brandAvailable: boolean): readonly CaptionStyle[] {
+  return brandAvailable ? CAPTION_STYLE_OPTIONS : CAPTION_STYLE_OPTIONS.filter((style) => style !== 'brand');
+}
+
+export function setTimelineCaptionStyle(
+  timeline: Timeline,
+  captionStyle: CaptionStyle,
+  captionTheme?: CaptionTheme,
+): Timeline {
+  return captionStyle === 'brand' && captionTheme !== undefined
+    ? { ...timeline, captionStyle, captionTheme }
+    : { ...timeline, captionStyle };
 }

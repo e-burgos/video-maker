@@ -170,3 +170,14 @@ export function parseMontageLogo(value: unknown): LogoMode {
 
   return value;
 }
+
+export function assertBrandCaptionStyleHasBrand(captionStyle: CaptionStyle | null | undefined, hasBrand: boolean): void {
+  if (captionStyle === 'brand' && !hasBrand) {
+    throw new PipelineStageError({
+      code: 'MONTAGE_CAPTION_STYLE_INVALID',
+      stage: null,
+      resource: 'captionStyle',
+      expected: 'a project with a brand to use the "brand" caption style',
+    });
+  }
+}

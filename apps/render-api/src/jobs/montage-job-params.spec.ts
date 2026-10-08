@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 
 import {
+  assertBrandCaptionStyleHasBrand,
   parseMontageFormat,
   parseMontageCaptionStyle,
   parseMontageVoice,
@@ -242,7 +243,22 @@ describe('parseMontageCaptionStyle (FIX-e-burgos-003-003)', () => {
       code: 'MONTAGE_CAPTION_STYLE_INVALID',
       stage: null,
       resource: 'captionStyle',
-      expected: 'one of bold-impact, clean-sans, outline-pop, subtle-lower, off',
+      expected: 'one of bold-impact, clean-sans, outline-pop, subtle-lower, brand, off',
     });
+  });
+});
+
+describe('assertBrandCaptionStyleHasBrand (spec-021 cycle-04)', () => {
+  it('rechaza el estilo brand cuando el proyecto no tiene marca', () => {
+    expect(captureError(() => assertBrandCaptionStyleHasBrand('brand', false))).toMatchObject({
+      code: 'MONTAGE_CAPTION_STYLE_INVALID',
+      resource: 'captionStyle',
+    });
+  });
+
+  it('acepta brand con marca y cualquier otro estilo sin ella', () => {
+    expect(() => assertBrandCaptionStyleHasBrand('brand', true)).not.toThrow();
+    expect(() => assertBrandCaptionStyleHasBrand('clean-sans', false)).not.toThrow();
+    expect(() => assertBrandCaptionStyleHasBrand(null, false)).not.toThrow();
   });
 });

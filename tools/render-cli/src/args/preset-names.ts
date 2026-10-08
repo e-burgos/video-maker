@@ -16,4 +16,4 @@ export const VOICE_SOURCE_NAMES = ['aroll', 'script'] as const satisfies readonl
 
 export const DEFAULT_VOICE_SOURCE: VoiceSource = 'aroll';
 
-export const CAPTION_STYLE_NAMES = CAPTION_STYLES;
+export const CAPTION_STYLE_NAMES = CAPTION_STYLES.filter((style) => style !== 'brand');

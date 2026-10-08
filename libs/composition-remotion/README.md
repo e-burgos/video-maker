@@ -138,6 +138,7 @@ en `em` (tipografía) o en fracción del formato (layout) — ver `architect.md`
 | `clean-sans` | Explicativo, subtítulo legible sin ruido visual | Sin contorno, caja mixta, anclado abajo, verde en el impacto |
 | `outline-pop` | Máximo contraste sobre metraje ruidoso | Contorno grueso + `paintOrder`, tres colores saturados |
 | `subtle-lower` | Subtítulo clásico de cine: tutorial, explicación, manual | Sans-serif blanco con contorno fino oscuro y sombra suave, **sin píldora, sin realce y sin animación por palabra**, caja inferior de hasta dos líneas |
+| `brand` | Video de un proyecto con marca | Tipografía y colores de `timeline.captionTheme` (texto, acento en el impacto, píldora con el fondo de la marca); `BrandCaptionFonts` carga los archivos de fuente con `delayRender` desde `work/brand/fonts/` y el estilo exige `captionTheme` en el documento |
 
 `subtle-lower` es el único preset que no es cinético (FIX-e-burgos-003-004): `emphasisColor` y
 `activeColor` valen lo mismo que `color`, `emphasisFontWeight` lo mismo que `fontWeight` y ambas

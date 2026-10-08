@@ -131,6 +131,7 @@ const MESSAGE_BY_CODE: Readonly<Record<RenderApiErrorCode, string>> = {
   BRAND_FILE_INVALID: 'The brand file name, kind or format is not accepted.',
   BRAND_FONT_UNKNOWN: 'Google Fonts has no family with that name.',
   BRAND_FONT_DOWNLOAD_FAILED: 'The font files could not be downloaded from Google Fonts.',
+  BRAND_LOGO_RASTERIZE_FAILED: 'The brand SVG logo could not be converted to a PNG for the video.',
   STORYBOARD_MISSING: 'The project has no motion storyboard to build the video from.',
   MOTION_JOB_INPUT_INVALID: 'The motion job parameters are invalid.',
   MOTION_PIPELINE_FAILED: 'A motion pipeline step failed.',

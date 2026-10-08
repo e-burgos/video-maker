@@ -71,6 +71,20 @@ export const CaptionClipSchema = z.object({
 
 export const CaptionStyleSchema = z.enum(CAPTION_STYLES);
 
+export const CaptionThemeFontFileSchema = z.strictObject({
+  path: z.string().min(1),
+  weight: z.string().min(1).optional(),
+  unicodeRange: z.string().min(1).optional(),
+});
+
+export const CaptionThemeSchema = z.strictObject({
+  fontFamily: z.string().min(1),
+  fontFiles: z.array(CaptionThemeFontFileSchema).min(1),
+  textColor: z.string().regex(/^#[0-9a-fA-F]{6}$/),
+  accentColor: z.string().regex(/^#[0-9a-fA-F]{6}$/),
+  boxColor: z.string().regex(/^#[0-9a-fA-F]{6}$/),
+});
+
 export const TransitionTimingSchema = z.discriminatedUnion('type', [
   z.strictObject({ type: z.literal('linear') }),
   z.strictObject({
@@ -177,11 +191,20 @@ export const TimelineSchema = z
     bumpers: TimelineBumpersSchema.optional(),
     safeZone: SafeZoneSchema.optional(),
     captionStyle: CaptionStyleSchema.optional(),
+    captionTheme: CaptionThemeSchema.optional(),
   })
   .superRefine((timeline, ctx) => {
     validateUniqueClipIds(timeline.tracks, ctx);
+    if (timeline.captionStyle === 'brand' && timeline.captionTheme === undefined) {
+      ctx.addIssue({
+        code: 'custom',
+        path: ['captionTheme'],
+        message: 'El estilo de subtítulos "brand" necesita "captionTheme" con la tipografía y los colores de la marca.',
+      });
+    }
   });
 
+export type CaptionTheme = z.infer<typeof CaptionThemeSchema>;
 export type ClipFit = z.infer<typeof ClipFitSchema>;
 export type ClipTransform = z.infer<typeof ClipTransformSchema>;
 export type VideoClip = z.infer<typeof VideoClipSchema>;

@@ -493,3 +493,78 @@ describe('runVoicePipeline con guion cronometrado (FIX-e-burgos-009-002)', () =>
     ]);
   });
 });
+
+describe('runVoicePipeline con la voz de la marca', () => {
+  function synthesisInputs(harness: ReturnType<typeof createHarness>) {
+    return harness.callLog
+      .entries()
+      .filter((entry) => entry.port === 'synthesizeVoice')
+      .map((entry) => entry.input as { modelPath: string; lengthScale?: number });
+  }
+
+  it('sin voiceId usa la voz de la marca y su velocidad cuando está instalada', async () => {
+    const harness = createHarness();
+
+    await runVoicePipeline(
+      {
+        project: PROJECT,
+        voiceId: null,
+        sceneIds: null,
+        scriptText: SCRIPT,
+        scriptPath: null,
+        gapMs: 900,
+        brandVoice: { id: 'es_ES-sharvard-medium', lengthScale: 1.08 },
+      },
+      harness.deps,
+      harness.observer,
+    );
+
+    const inputs = synthesisInputs(harness);
+    expect(inputs.every((input) => input.modelPath.endsWith('vits-piper-es_ES-sharvard-medium'))).toBe(true);
+    expect(inputs.every((input) => input.lengthScale === 1.08)).toBe(true);
+  });
+
+  it('con la voz de la marca no instalada cae a la voz por defecto sin velocidad', async () => {
+    const harness = createHarness();
+
+    await runVoicePipeline(
+      {
+        project: PROJECT,
+        voiceId: null,
+        sceneIds: null,
+        scriptText: SCRIPT,
+        scriptPath: null,
+        gapMs: 900,
+        brandVoice: { id: 'es_MX-ausente-high', lengthScale: 1.08 },
+      },
+      harness.deps,
+      harness.observer,
+    );
+
+    const inputs = synthesisInputs(harness);
+    expect(inputs.every((input) => input.modelPath.endsWith('vits-piper-es_AR-daniela-high'))).toBe(true);
+    expect(inputs.some((input) => input.lengthScale !== undefined)).toBe(false);
+  });
+
+  it('un voiceId explícito gana sobre la voz de la marca', async () => {
+    const harness = createHarness();
+
+    await runVoicePipeline(
+      {
+        project: PROJECT,
+        voiceId: 'es_AR-daniela-high',
+        sceneIds: null,
+        scriptText: SCRIPT,
+        scriptPath: null,
+        gapMs: 900,
+        brandVoice: { id: 'es_ES-sharvard-medium', lengthScale: 1.08 },
+      },
+      harness.deps,
+      harness.observer,
+    );
+
+    const inputs = synthesisInputs(harness);
+    expect(inputs.every((input) => input.modelPath.endsWith('vits-piper-es_AR-daniela-high'))).toBe(true);
+    expect(inputs.some((input) => input.lengthScale !== undefined)).toBe(false);
+  });
+});

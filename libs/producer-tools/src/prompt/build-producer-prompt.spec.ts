@@ -328,6 +328,18 @@ describe('buildProducerPrompt brand section', () => {
     expect(section).toContain('Marcas page');
   });
 
+  it('tells a footage project to use the brand logo, the brand caption style and the tagline closing', () => {
+    const section = buildProducerProjectSection({ ...CONTEXT, mode: 'footage', brand });
+    expect(section).toContain('brand logo is already in raw/logo');
+    expect(section).toContain('captionStyle: "brand"');
+    expect(section).toContain('close the script with the tagline and the web');
+    expect(buildProducerProjectSection({ ...CONTEXT, mode: 'motion', brand })).not.toContain('captionStyle: "brand"');
+  });
+
+  it('lists the brand caption style among the montage caption styles', () => {
+    expect(buildProducerPrompt(CONTEXT)).toContain('`"subtle-lower"`, `"brand"` or `"off"`');
+  });
+
   it('omits the motion brief sentence for footage and the whole section without a brand', () => {
     expect(buildProducerProjectSection({ ...CONTEXT, mode: 'footage', brand })).not.toContain('motion brief');
     expect(buildProducerProjectSection({ ...CONTEXT, brand: null })).not.toContain('## Brand');

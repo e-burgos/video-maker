@@ -6,6 +6,7 @@ import { blockerId } from '../api/blockers';
 import { useT } from '../i18n/language-context';
 import { useApiAction } from '../hooks/use-api-action';
 import { useAsyncResource } from '../hooks/use-async-resource';
+import { useProjectBrandVoice } from '../hooks/use-project-brand-voice';
 import type { ServiceHealth, VoiceJob, VoiceListing } from '../api/render-api-types';
 import { ErrorNotice } from './error-notice';
 import { VoicePicker } from './voice-picker';
@@ -25,6 +26,13 @@ export function defaultVoiceId(listing: VoiceListing | null): string | null {
   return (listing.voices.find((voice) => voice.isDefault) ?? listing.voices[0])?.id ?? null;
 }
 
+export function brandVoiceIdIn(listing: VoiceListing | null, brandVoiceId: string | null): string | null {
+  if (listing === null || brandVoiceId === null) {
+    return null;
+  }
+  return listing.voices.some((voice) => voice.id === brandVoiceId) ? brandVoiceId : null;
+}
+
 export function VoiceTrigger({ slug, onCreated, scriptPath }: VoiceTriggerProps) {
   const client = useRenderApi();
   const loadHealth = useCallback(() => client.getHealth(), [client]);
@@ -33,6 +41,7 @@ export function VoiceTrigger({ slug, onCreated, scriptPath }: VoiceTriggerProps)
   const voices = useAsyncResource<VoiceListing>(loadVoices, 'voices');
 
   const [picked, setPicked] = useState<string | null>(null);
+  const brandVoice = useProjectBrandVoice(slug);
   const t = useT();
 
   const createAction = useApiAction((overwrite: boolean, voiceId: string | null) =>
@@ -44,10 +53,12 @@ export function VoiceTrigger({ slug, onCreated, scriptPath }: VoiceTriggerProps)
     }),
   );
 
-  const selectedVoiceId = picked ?? defaultVoiceId(voices.data);
+  const installedBrandVoiceId = brandVoiceIdIn(voices.data, brandVoice?.id ?? null);
+  const selectedVoiceId = picked ?? installedBrandVoiceId ?? defaultVoiceId(voices.data);
+  const voiceIdToSend = picked === null && installedBrandVoiceId !== null ? null : selectedVoiceId;
 
   async function generate(overwrite: boolean) {
-    const job = await createAction.run(overwrite, selectedVoiceId);
+    const job = await createAction.run(overwrite, voiceIdToSend);
     if (job !== null) {
       onCreated(job);
     }

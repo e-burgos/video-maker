@@ -5,16 +5,18 @@ import {
   CAPTION_STYLE_OPTIONS,
   DEFAULT_CAPTION_STYLE,
   captionStyleLabelKey,
+  captionStyleOptions,
   setTimelineCaptionStyle,
 } from './caption-style';
 
 describe('CAPTION_STYLE_OPTIONS', () => {
-  it('ofrece los cinco estilos del contrato de la Timeline', () => {
+  it('ofrece los seis estilos del contrato de la Timeline', () => {
     expect([...CAPTION_STYLE_OPTIONS]).toEqual([
       'bold-impact',
       'clean-sans',
       'outline-pop',
       'subtle-lower',
+      'brand',
       'off',
     ]);
   });
@@ -47,5 +49,33 @@ describe('setTimelineCaptionStyle', () => {
     );
 
     expect(next.captionStyle).toBe('clean-sans');
+  });
+});
+
+const THEME = {
+  fontFamily: 'Outfit',
+  fontFiles: [{ path: 'work/brand/fonts/outfit.woff2' }],
+  textColor: '#ffffff',
+  accentColor: '#0ea5e9',
+  boxColor: '#09090b',
+};
+
+describe('estilo de la marca', () => {
+  it('captionStyleOptions ofrece brand sólo cuando hay tema disponible', () => {
+    expect(captionStyleOptions(false)).not.toContain('brand');
+    expect(captionStyleOptions(true)).toContain('brand');
+  });
+
+  it('elegir brand con tema escribe estilo y tema en el documento', () => {
+    const next = setTimelineCaptionStyle(editableTimelineFixture(), 'brand', THEME);
+
+    expect(next.captionStyle).toBe('brand');
+    expect(next.captionTheme).toEqual(THEME);
+  });
+
+  it('otro estilo no toca el tema que ya tenía el documento', () => {
+    const withTheme = setTimelineCaptionStyle(editableTimelineFixture(), 'brand', THEME);
+
+    expect(setTimelineCaptionStyle(withTheme, 'off').captionTheme).toEqual(THEME);
   });
 });

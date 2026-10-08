@@ -81,6 +81,7 @@ export const TimelineComposition: FC<TimelineCompositionProps> = ({
         preset={resolvedCaptionPreset}
         platform={captionPlatform}
         anchor={captionAnchor}
+        theme={timeline.captionTheme}
       />
     ),
   ];

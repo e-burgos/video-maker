@@ -91,6 +91,7 @@ export type { ScriptAlignmentCounts, ScriptAlignmentResult } from './transcript/
 export { autoMontage } from './auto-montage';
 export type {
   AutoMontageOptions,
+  MontageBrand,
   AutoMontageResult,
   LogoMode,
   MontageDependencies,

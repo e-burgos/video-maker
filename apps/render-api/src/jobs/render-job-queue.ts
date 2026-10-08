@@ -14,6 +14,7 @@ import { completeMotionJobProgress, mergeMotionVoiceProgress, startMotionJobStag
 import { isMotionPipelineCanceled } from './motion-pipeline-observer';
 import type { MotionPipelineObserver } from './motion-pipeline-observer';
 import { runMotionPipeline } from './run-motion-pipeline';
+import type { ProjectBrandResolver } from '../brands/project-brand-resolver';
 import { runVoicePipeline } from './run-voice-pipeline';
 import { mergeVoiceJobProgress, startVoiceJobStage } from './voice-job-progress';
 import { isVoicePipelineCanceled } from './voice-pipeline-observer';
@@ -173,7 +174,10 @@ type JobRecord =
   | PhotoArollJobRecord
   | MotionJobRecord;
 
-export function createRenderJobQueue(deps: RenderApiDependencies): RenderJobQueue {
+export function createRenderJobQueue(
+  deps: RenderApiDependencies,
+  resolveProjectBrand: ProjectBrandResolver = async () => null,
+): RenderJobQueue {
   const jobsStore = deps.localStore.jobs;
   const records = new Map<string, JobRecord>();
   const pending: string[] = [];
@@ -282,6 +286,7 @@ export function createRenderJobQueue(deps: RenderApiDependencies): RenderJobQueu
           format: record.format,
           voice: record.voice,
           captionStyle: record.captionStyle,
+          brand: await resolveProjectBrand(record.slug),
         },
         deps,
         observer,
@@ -349,6 +354,7 @@ export function createRenderJobQueue(deps: RenderApiDependencies): RenderJobQueu
           scriptText: record.scriptText,
           scriptPath: record.scriptPath,
           gapMs: record.gapMs,
+          brandVoice: record.voiceId === null ? ((await resolveProjectBrand(record.slug))?.voice ?? null) : null,
         },
         deps,
         observer,

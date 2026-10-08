@@ -174,7 +174,7 @@ interface CreateJobRequestBody {
   readonly scriptText?: string;
   readonly logo?: 'auto' | 'off';
   readonly voice?: 'aroll' | 'script';
-  readonly captionStyle?: 'bold-impact' | 'clean-sans' | 'outline-pop' | 'subtle-lower' | 'off';
+  readonly captionStyle?: 'bold-impact' | 'clean-sans' | 'outline-pop' | 'subtle-lower' | 'brand' | 'off';
 }
 ```
 
@@ -223,7 +223,9 @@ interface CreateJobRequestBody {
   job. Note the overload: on a `voice` job the `voice` field is a voice-model id, on a `montage`
   job it is the speech source.
 - `captionStyle` (FIX-e-burgos-003-003) — `'bold-impact'`, `'clean-sans'`, `'outline-pop'`,
-  `'subtle-lower'` or `'off'`, written into `timeline.captionStyle` and read by the composition to
+  `'subtle-lower'`, `'brand'` or `'off'` (`'brand'` needs a project with a brand: the montage writes
+  the brand `captionTheme` into the timeline, and a project without brand answers
+  `422 MONTAGE_CAPTION_STYLE_INVALID`), written into `timeline.captionStyle` and read by the composition to
   pick the typographic preset (`'off'` renders no captions at all). **Absent, the montage preset
   decides**: `educational` → `'subtle-lower'`, `software-demo` / `hardware` / `recipe` →
   `'bold-impact'` (the behaviour before this fix). `'subtle-lower'` also changes the word grouping
@@ -259,7 +261,7 @@ interface MontageJobReport {
     readonly truncatedMs: number;             // narration that did not fit in the A-roll
   } | null;
   readonly captionStyle:                      // FIX-e-burgos-003-003, always resolved
-    | 'bold-impact' | 'clean-sans' | 'outline-pop' | 'subtle-lower' | 'off';
+    | 'bold-impact' | 'clean-sans' | 'outline-pop' | 'subtle-lower' | 'brand' | 'off';
 }
 ```
 
@@ -1012,3 +1014,15 @@ logic on it.
   §15 — it accumulates the corrections from `cycle-01`/`cycle-02` plus one precision for `cycle-03`:
   `randomId` is now the second port that justifies confining `node:crypto` to
   `node-render-api-dependencies.ts`.
+
+## Marca de un proyecto de material crudo (spec-e-burgos-021 cycle-04)
+
+`POST /projects` con `brand` y `PUT /projects/:slug/brand` aplican la marca a un proyecto `footage`
+(`applyProjectBrand`): el logo de la marca queda en `raw/logo/brand-<id>.png` (un SVG se rasteriza
+con el chrome-headless-shell de Remotion a ~1600 px de ancho con fondo transparente; sin navegador
+responde `503 BRAND_LOGO_RASTERIZE_FAILED` y el proyecto queda intacto), registrado en el catálogo
+como un logo subido; las fuentes de `typography.display` y `typography.body` se copian a
+`work/brand/fonts/`. Cambiar de marca reemplaza ese logo (y repunta `timeline.logo` y el
+`captionTheme` si el estilo es `brand`); quitar la marca borra el logo sólo si ninguna timeline lo
+referencia. El detalle del proyecto suma `captionTheme` (`null` sin marca o en modo motion). Un job
+`voice` sin `voiceId` usa la voz y la velocidad de la marca cuando esa voz está instalada.

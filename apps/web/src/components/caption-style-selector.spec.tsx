@@ -62,3 +62,34 @@ describe('CaptionStyleSelector (FIX-006-001)', () => {
     expect(dispatch).toHaveBeenCalledWith({ type: 'caption-style', captionStyle: 'off' });
   });
 });
+
+describe('CaptionStyleSelector con marca', () => {
+  const theme = {
+    fontFamily: 'Outfit',
+    fontFiles: [{ path: 'work/brand/fonts/outfit.woff2' }],
+    textColor: '#ffffff',
+    accentColor: '#0ea5e9',
+    boxColor: '#09090b',
+  };
+
+  it('ofrece "De la marca" sólo cuando el proyecto tiene tema', () => {
+    render(<CaptionStyleSelector brandTheme={theme} dispatch={vi.fn()} />);
+
+    expect([...select().options].map((option) => option.textContent)).toContain('From the brand — its font and colors');
+  });
+
+  it('elegirlo despacha el estilo con el tema de la marca del proyecto', () => {
+    const dispatch = vi.fn();
+    render(<CaptionStyleSelector brandTheme={theme} dispatch={dispatch} />);
+
+    fireEvent.change(select(), { target: { value: 'brand' } });
+
+    expect(dispatch).toHaveBeenCalledWith({ type: 'caption-style', captionStyle: 'brand', captionTheme: theme });
+  });
+
+  it('un documento que ya trae el tema también ofrece el estilo', () => {
+    render(<CaptionStyleSelector captionStyle="brand" captionTheme={theme} dispatch={vi.fn()} />);
+
+    expect(select().value).toBe('brand');
+  });
+});

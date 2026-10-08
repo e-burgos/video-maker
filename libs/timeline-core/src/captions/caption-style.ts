@@ -5,6 +5,7 @@ export const CAPTION_STYLES = [
   'clean-sans',
   'outline-pop',
   'subtle-lower',
+  'brand',
   'off',
 ] as const;
 

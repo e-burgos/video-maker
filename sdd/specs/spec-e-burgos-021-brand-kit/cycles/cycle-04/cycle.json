@@ -1,0 +1,190 @@
+{
+  "$schema": "../../../../schemas/cycle.schema.json",
+  "cycle": 4,
+  "module": "brand-kit",
+  "spec": "spec-e-burgos-021-brand-kit",
+  "apps": [
+    "libs/timeline-core",
+    "libs/composition-remotion",
+    "libs/auto-montage",
+    "apps/render-api",
+    "apps/web",
+    "libs/producer-tools"
+  ],
+  "phase": "brand-in-footage",
+  "flow": "lite",
+  "objectives": [
+    "Un video de material crudo con marca toma de ella logo, placas, subtítulos, voz y contexto del productor"
+  ],
+  "status": "completed",
+  "started_at": "2026-10-08",
+  "completed_at": "2026-10-08",
+  "documents": {
+    "plan": "sdd/specs/spec-e-burgos-021-brand-kit/cycles/cycle-04/plan.md",
+    "tasks": "sdd/specs/spec-e-burgos-021-brand-kit/cycles/cycle-04/tasks.json"
+  },
+  "artifacts": [
+    "sdd/specs/spec-e-burgos-021-brand-kit/cycles/cycle-04/artifacts/verification.md",
+    "sdd/specs/spec-e-burgos-021-brand-kit/cycles/cycle-04/artifacts/cafe-aroma-crudo-sheet.jpg"
+  ],
+  "metrics": {
+    "tasks_total": 5,
+    "tasks_completed": 5,
+    "tasks_skipped": 0,
+    "story_points": 13,
+    "files_created": [
+      "apps/render-api/src/brands/apply-project-brand.real.spec.ts",
+      "apps/render-api/src/brands/apply-project-brand.spec.ts",
+      "apps/render-api/src/brands/apply-project-brand.ts",
+      "apps/render-api/src/brands/project-brand-context.ts",
+      "apps/render-api/src/brands/project-brand-resolver.ts",
+      "apps/render-api/src/brands/rasterize-svg.spec.ts",
+      "apps/render-api/src/brands/rasterize-svg.ts",
+      "apps/render-api/src/deps/svg-rasterizer.spec.ts",
+      "apps/render-api/src/deps/svg-rasterizer.ts",
+      "apps/web/src/hooks/use-project-brand-voice.ts",
+      "libs/composition-remotion/src/components/brand-caption-fonts.tsx",
+      "libs/composition-remotion/src/helpers/brand-caption-preset.spec.ts",
+      "libs/composition-remotion/src/helpers/brand-caption-preset.ts",
+      "libs/composition-remotion/src/helpers/use-brand-caption-fonts.ts"
+    ],
+    "files_modified": [
+      "apps/render-api/README.md",
+      "apps/render-api/src/__fixtures__/fake-render-api-dependencies.ts",
+      "apps/render-api/src/deps/node-render-api-dependencies.ts",
+      "apps/render-api/src/deps/render-api-dependencies.ts",
+      "apps/render-api/src/errors/http-status-for.spec.ts",
+      "apps/render-api/src/errors/http-status-for.ts",
+      "apps/render-api/src/errors/render-api-error.ts",
+      "apps/render-api/src/errors/to-error-payload.ts",
+      "apps/render-api/src/http/create-render-api-server.ts",
+      "apps/render-api/src/http/handle-request.ts",
+      "apps/render-api/src/http/handlers/jobs-handler.ts",
+      "apps/render-api/src/http/handlers/projects-handler.spec.ts",
+      "apps/render-api/src/http/handlers/projects-handler.ts",
+      "apps/render-api/src/http/render-api-runtime.ts",
+      "apps/render-api/src/jobs/montage-job-params.spec.ts",
+      "apps/render-api/src/jobs/montage-job-params.ts",
+      "apps/render-api/src/jobs/render-job-queue.ts",
+      "apps/render-api/src/jobs/run-montage-pipeline.spec.ts",
+      "apps/render-api/src/jobs/run-montage-pipeline.ts",
+      "apps/render-api/src/jobs/run-voice-pipeline.ts",
+      "apps/render-api/src/jobs/run-voice-script-pipeline.spec.ts",
+      "apps/render-api/src/jobs/run-voice-script-pipeline.ts",
+      "apps/render-api/src/voice/voice-synthesis-steps.ts",
+      "apps/web/src/api/error-explanations.ts",
+      "apps/web/src/api/player-timeline.spec.ts",
+      "apps/web/src/api/player-timeline.ts",
+      "apps/web/src/api/render-api-types.ts",
+      "apps/web/src/api/timeline-edit/caption-style.spec.ts",
+      "apps/web/src/api/timeline-edit/caption-style.ts",
+      "apps/web/src/api/timeline-edit/logo-bumpers.ts",
+      "apps/web/src/api/timeline-edit/timeline-edit-state.spec.ts",
+      "apps/web/src/api/timeline-edit/timeline-edit-state.ts",
+      "apps/web/src/components/caption-style-selector.spec.tsx",
+      "apps/web/src/components/caption-style-selector.tsx",
+      "apps/web/src/components/voice-trigger.spec.tsx",
+      "apps/web/src/components/voice-trigger.tsx",
+      "apps/web/src/i18n/messages-en.ts",
+      "apps/web/src/i18n/messages-es.ts",
+      "apps/web/src/pages/project-preview-page.tsx",
+      "libs/auto-montage/src/auto-montage.spec.ts",
+      "libs/auto-montage/src/auto-montage.ts",
+      "libs/auto-montage/src/index.ts",
+      "libs/auto-montage/src/montage/resolve-montage-inputs.ts",
+      "libs/composition-remotion/README.md",
+      "libs/composition-remotion/src/components/kinetic-captions.tsx",
+      "libs/composition-remotion/src/components/timeline-composition.tsx",
+      "libs/composition-remotion/src/helpers/asset-src.ts",
+      "libs/composition-remotion/src/helpers/caption-preset.ts",
+      "libs/composition-remotion/src/index.ts",
+      "libs/producer-tools/src/contract/tool-schemas.ts",
+      "libs/producer-tools/src/prompt/build-producer-prompt.spec.ts",
+      "libs/producer-tools/src/prompt/build-producer-prompt.ts",
+      "libs/timeline-core/schemas/timeline.schema.json",
+      "libs/timeline-core/src/captions/caption-style.spec.ts",
+      "libs/timeline-core/src/captions/caption-style.ts",
+      "libs/timeline-core/src/index.ts",
+      "libs/timeline-core/src/schemas/schemas.spec.ts",
+      "libs/timeline-core/src/schemas/timeline.schema.ts",
+      "tools/render-cli/src/args/preset-names.ts"
+    ],
+    "files_deleted": [],
+    "usage": {
+      "tokens_in": 398677,
+      "tokens_out": 64472,
+      "approx": true,
+      "source": "declared-estimate",
+      "by_agent": [
+        {
+          "agent": "orchestrator",
+          "label": "solo",
+          "provider_model": "claude/opus",
+          "effort": "high",
+          "tokens_in": 90000,
+          "tokens_out": 10000,
+          "tokens_total": 100000,
+          "approx": true,
+          "source": "declared-estimate",
+          "recorded_at": "2026-10-08"
+        },
+        {
+          "agent": "implementor-back",
+          "label": "material crudo con marca: logo, subtítulos, voz y productor",
+          "provider_model": "claude/sonnet",
+          "effort": "medium",
+          "tokens_in": 308677,
+          "tokens_out": 54472,
+          "tokens_total": 363149,
+          "approx": true,
+          "source": "agent-usage-notification",
+          "recorded_at": "2026-10-08"
+        }
+      ],
+      "by_tier": {
+        "claude/opus": {
+          "tokens_in": 90000,
+          "tokens_out": 10000,
+          "approx": true,
+          "source": "declared-estimate"
+        },
+        "claude/sonnet": {
+          "tokens_in": 308677,
+          "tokens_out": 54472,
+          "approx": true,
+          "source": "declared-estimate"
+        }
+      }
+    }
+  },
+  "tables_created": [],
+  "endpoints_implemented": [],
+  "components_created": [],
+  "issues_found": [
+    "ffmpeg sin decodificador SVG y sin librerías de rasterizado: el logo SVG se rasteriza con el Chrome headless de Remotion.",
+    "El montaje nunca crea placas: el fondo de la marca se aplica donde se crean, en el editor de la web.",
+    "El logo provisorio blanco casi no se ve sobre grabaciones claras."
+  ],
+  "reviewer_report": {
+    "approved": true,
+    "date": "2026-10-08",
+    "ca_results": {
+      "US-021-401": "OK — logo de la marca rasterizado y catalogado como asset logo; el montaje lo usa abajo a la derecha; placa nueva con el fondo de la marca en el editor.",
+      "US-021-402": "OK — subtítulos brand en el render real con la tipografía y los colores de la marca.",
+      "US-021-403": "OK — job de voz sin voiceId usó es_AR-daniela-high de la marca.",
+      "US-021-404": "OK — receta de material crudo con marca en el prompt, con specs."
+    },
+    "tests": {
+      "sdd:validate": "OK",
+      "lint": "nx affected (9 proyectos) verde",
+      "test": "1747 render-api + 1422 web + 397 + 368 + 354 + 347 + 322 + 195 + 16",
+      "build": "nx run-many -t build: 14 proyectos verdes",
+      "e2e": "pnpm studio: proyecto de material crudo con marca, voz, montaje y render real"
+    },
+    "notes": "Cierra la spec: biblioteca, creador, motion y material crudo con marca.",
+    "follow_ups": [
+      "Publicar la app con la spec completa y crear una marca desde la app instalada",
+      "Posible spec siguiente: borrador de marca por IA desde la web o el logo del cliente"
+    ]
+  }
+}

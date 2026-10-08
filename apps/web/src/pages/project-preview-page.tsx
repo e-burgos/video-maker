@@ -123,7 +123,23 @@ function StudioView({ slug, initialTimeline }: StudioViewProps) {
     return previewFormat(withUrls, preset ?? previewPresetFor(withUrls));
   }, [preset, slug, editState.draft]);
 
-  const dispatchAction = useCallback((action: TimelineEditAction) => dispatch(action), []);
+  const client = useRenderApi();
+  const project = useAsyncResource(
+    useCallback(() => client.getProject(slug), [client, slug]),
+    `studio-project:${slug}`,
+  );
+  const brandTheme = project.data?.captionTheme ?? null;
+  const brandBackground = brandTheme?.boxColor;
+
+  const dispatchAction = useCallback(
+    (action: TimelineEditAction) =>
+      dispatch(
+        action.type === 'bumper-enabled' && action.enabled && brandBackground !== undefined
+          ? { ...action, defaultBackgroundColor: brandBackground }
+          : action,
+      ),
+    [brandBackground],
+  );
 
   return (
     <>
@@ -227,6 +243,8 @@ function StudioView({ slug, initialTimeline }: StudioViewProps) {
           {...(editState.draft.captionStyle === undefined
             ? {}
             : { captionStyle: editState.draft.captionStyle })}
+          {...(editState.draft.captionTheme === undefined ? {} : { captionTheme: editState.draft.captionTheme })}
+          brandTheme={brandTheme}
           dispatch={dispatchAction}
         />
         <CaptionEditor captions={editState.draft.tracks.captions} dispatch={dispatchAction} />

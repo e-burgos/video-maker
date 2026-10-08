@@ -131,7 +131,13 @@ function brandContextSection(brand: ProducerPromptBrand, motion: boolean): strin
     `- This project uses the brand "${brand.name}" (id ${brand.id}); say it out loud as "${brand.spokenName}".`,
     `- Tagline: ${brand.tagline}${brand.url === null ? '' : `; web: ${brand.url}`}. Voice: ${brand.voice}. It has ${assets}.`,
     '- Use the brand name, tagline and web in scripts and closings.',
-    ...(motion ? ['- For the motion brief use this brand, unless the user asks for another one.'] : []),
+    ...(motion
+      ? ['- For the motion brief use this brand, unless the user asks for another one.']
+      : [
+          '- Footage: the brand logo is already in raw/logo (`brand-<id>`, transparent) and the montage uses it as the watermark and in the plates: do not ask for another logo.',
+          '- Footage: propose `captionStyle: "brand"` on the montage (the brand font and colors) unless the user wants another style.',
+          '- Footage: close the script with the tagline and the web, in the brand voice.',
+        ]),
     '- Brands are managed on the Marcas page of the studio; you cannot create or edit brands, so point the user there.',
   ].join('\n');
 }
@@ -257,7 +263,8 @@ function buildProducerCraftSection(): string {
     '## Caption style follows the kind of video',
     '',
     '`captionStyle` on the `montage` job is `"bold-impact"`, `"clean-sans"`, `"outline-pop"`,',
-    '`"subtle-lower"` or `"off"`. Tutorial, explainer, manual or long-form video →',
+    '`"subtle-lower"`, `"brand"` or `"off"`. `"brand"` uses the font and colors of the project brand and',
+    'only works when the project has one (see "Brand"). Tutorial, explainer, manual or long-form video →',
     '`"subtle-lower"`: a plain subtitle in the lower box that never covers the interface being',
     'explained. Reel, TikTok, Shorts or ad → the kinetic style of the preset, `"bold-impact"`.',
     'Without `captionStyle` the montage preset decides: `educational` → `"subtle-lower"`, the other',
