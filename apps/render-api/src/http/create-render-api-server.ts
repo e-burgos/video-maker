@@ -68,7 +68,7 @@ export function createRenderApiServer(
   store: StoreConfig,
   producer?: ProducerConfig,
 ): RenderApiServer {
-  const runtime = createRenderApiRuntime(deps, producer);
+  const runtime = createRenderApiRuntime(deps, producer, store);
   const server = createServer((incoming, outgoing) => {
     void (async () => {
       try {

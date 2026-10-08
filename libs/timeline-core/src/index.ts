@@ -49,6 +49,7 @@ export {
   AudioClipSchema,
   CaptionClipSchema,
   CaptionStyleSchema,
+  CaptionThemeSchema,
   DEFAULT_LOGO_BUMPER_BACKGROUND_COLOR,
   DEFAULT_LOGO_BUMPER_DURATION_MS,
   DEFAULT_LOGO_BUMPER_WIDTH_RATIO,
@@ -68,6 +69,7 @@ export {
 export type {
   AudioClip,
   CaptionClip,
+  CaptionTheme,
   LogoBumper,
   LogoBumperAnimation,
   LogoOverlay,

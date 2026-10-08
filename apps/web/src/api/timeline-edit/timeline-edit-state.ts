@@ -1,5 +1,6 @@
 import type {
   CaptionStyle,
+  CaptionTheme,
   LogoPosition,
   TimelineWarning,
   MediaAsset,
@@ -39,9 +40,10 @@ export type TimelineEditAction =
   | { type: 'logo-set'; asset: MediaAsset; position: LogoPosition }
   | { type: 'logo-style'; widthRatio: number; opacity: number }
   | { type: 'logo-clear' }
-  | { type: 'bumper-enabled'; edge: BumperEdge; enabled: boolean }
+  | { type: 'bumper-enabled'; edge: BumperEdge; enabled: boolean; defaultBackgroundColor?: string }
   | { type: 'bumper-style'; edge: BumperEdge; style: BumperStyle }
-  | { type: 'caption-style'; captionStyle: CaptionStyle }
+  | { type: 'caption-style'; captionStyle: CaptionStyle; captionTheme?: CaptionTheme }
+
   | { type: 'saved'; timeline: Timeline }
   | { type: 'reset' };
 
@@ -257,7 +259,7 @@ export function timelineEditReducer(state: TimelineEditState, action: TimelineEd
     case 'bumper-enabled':
       return settle(
         state.saved,
-        setTimelineBumperEnabled(state.draft, action.edge, action.enabled),
+        setTimelineBumperEnabled(state.draft, action.edge, action.enabled, action.defaultBackgroundColor),
         null,
       );
 
@@ -269,7 +271,7 @@ export function timelineEditReducer(state: TimelineEditState, action: TimelineEd
       );
 
     case 'caption-style':
-      return settle(state.saved, setTimelineCaptionStyle(state.draft, action.captionStyle), null);
+      return settle(state.saved, setTimelineCaptionStyle(state.draft, action.captionStyle, action.captionTheme), null);
   }
 }
 

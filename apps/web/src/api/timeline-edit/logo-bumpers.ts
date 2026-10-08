@@ -61,12 +61,17 @@ export function setTimelineBumperEnabled(
   timeline: Timeline,
   edge: BumperEdge,
   enabled: boolean,
+  defaultBackgroundColor?: string,
 ): Timeline {
   if (timeline.logo === undefined && enabled) {
     return timeline;
   }
 
-  const current = bumperOf(timeline, edge) ?? DEFAULT_LOGO_BUMPER;
+  const current =
+    bumperOf(timeline, edge) ??
+    (defaultBackgroundColor === undefined
+      ? DEFAULT_LOGO_BUMPER
+      : { ...DEFAULT_LOGO_BUMPER, backgroundColor: defaultBackgroundColor });
   return withBumper(timeline, edge, { ...current, enabled });
 }
 

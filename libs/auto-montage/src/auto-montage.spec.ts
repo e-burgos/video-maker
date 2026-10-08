@@ -494,6 +494,33 @@ describe('autoMontage — niveles del preset y logo (spec-014)', () => {
     expect(validation.ok ? [] : validation.issues).toEqual([]);
   });
 
+  it('con marca prefiere el logo raw/logo/brand-<id> y escribe captionTheme en la Timeline', async () => {
+    const brandLogo: MediaAsset = { ...logoAsset, id: 'raw/logo/brand-acme.png', path: 'raw/logo/brand-acme.png' };
+    const fileSystem = buildFixtureFileSystem([catalogAsset('logo', brandLogo), catalogAsset('logo', logoAsset)]);
+    const captionTheme = {
+      fontFamily: 'Outfit',
+      fontFiles: [{ path: 'work/brand/fonts/outfit.woff2' }],
+      textColor: '#ffffff',
+      accentColor: '#0ea5e9',
+      boxColor: '#09090b',
+    };
+
+    const result = await run(fileSystem, { preset: 'hardware', seed: 0, brand: { id: 'acme', captionTheme } });
+
+    expect(result.logoAssetId).toBe('raw/logo/brand-acme.png');
+    expect(result.timeline.captionTheme).toEqual(captionTheme);
+    expect(result.captionStyle).toBe('bold-impact');
+  });
+
+  it('sin marca no escribe captionTheme y el estilo por defecto no cambia', async () => {
+    const fileSystem = buildFixtureFileSystem();
+
+    const result = await run(fileSystem, { preset: 'hardware', seed: 0 });
+
+    expect(result.timeline).not.toHaveProperty('captionTheme');
+    expect(result.captionStyle).toBe('bold-impact');
+  });
+
   it('con logo: "off" no incorpora el logo aunque el proyecto tenga uno', async () => {
     const fileSystem = buildFixtureFileSystem([catalogAsset('logo', logoAsset)]);
 

@@ -1,15 +1,17 @@
 import type { FC } from 'react';
 import { Sequence, useCurrentFrame, useVideoConfig } from 'remotion';
-import type { OutputFormat, SafeZone } from '@video-maker/timeline-core';
+import type { CaptionTheme, OutputFormat, SafeZone } from '@video-maker/timeline-core';
 import { captionClipAnimation, captionBlockStyle } from '../helpers/caption-animation';
 import { captionWordRenders } from '../helpers/caption-active-word';
 import type { CaptionAnchor } from '../helpers/caption-box';
 import { captionBoxStyle, captionClipPlan } from '../helpers/caption-clip-plan';
 import type { CaptionBoxSource, CaptionClipPlan } from '../helpers/caption-clip-plan';
+import { brandCaptionPreset } from '../helpers/brand-caption-preset';
 import { captionPreset } from '../helpers/caption-preset';
 import type { CaptionPreset, CaptionPresetId } from '../helpers/caption-preset';
 import type { CaptionPlatform } from '../helpers/caption-safe-zone';
 import { captionWordStyle } from '../helpers/caption-word-style';
+import { BrandCaptionFonts } from './brand-caption-fonts';
 import type { CaptionSequenceProps } from '../helpers/timeline-to-sequence-props';
 
 export interface KineticCaptionsProps {
@@ -20,6 +22,7 @@ export interface KineticCaptionsProps {
   platform?: CaptionPlatform | undefined;
   anchor?: CaptionAnchor | undefined;
   boxSource?: CaptionBoxSource | undefined;
+  theme?: CaptionTheme | undefined;
 }
 
 const CaptionClipBlock: FC<{ plan: CaptionClipPlan; preset: CaptionPreset }> = ({
@@ -54,11 +57,14 @@ export const KineticCaptions: FC<KineticCaptionsProps> = ({
   platform,
   anchor,
   boxSource,
+  theme,
 }) => {
-  const resolvedPreset = captionPreset(preset);
+  const brandTheme = preset === 'brand' ? theme : undefined;
+  const resolvedPreset = brandTheme === undefined ? captionPreset(preset) : brandCaptionPreset(brandTheme);
 
   return (
     <>
+      {brandTheme === undefined ? null : <BrandCaptionFonts theme={brandTheme} />}
       {captionClipPlan({
         clips,
         format,

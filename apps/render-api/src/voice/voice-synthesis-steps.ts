@@ -22,9 +22,19 @@ import {
 } from './voice-paths';
 import { writeVoiceWords } from './voice-store';
 
+export interface BrandVoice {
+  readonly id: string;
+  readonly lengthScale: number;
+}
+
 export interface ResolvedVoiceModel {
   readonly id: string;
   readonly path: string;
+  readonly lengthScale?: number;
+}
+
+export function synthesisLengthScale(model: ResolvedVoiceModel, relativeScale: number): number {
+  return Math.round(relativeScale * (model.lengthScale ?? 1) * 1000) / 1000;
 }
 
 export async function runVoiceStage<T>(
@@ -42,9 +52,21 @@ export async function runVoiceStage<T>(
 export async function resolveVoiceModel(
   deps: RenderApiDependencies,
   voiceId: string | null,
+  brandVoice: BrandVoice | null = null,
 ): Promise<ResolvedVoiceModel> {
   const binaries = await deps.resolveVoiceBinaries();
   const voices = await deps.listVoiceModels();
+
+  if (voiceId === null && brandVoice !== null) {
+    const installed = voices.find((voice) => voice.id === brandVoice.id);
+    if (installed !== undefined) {
+      return {
+        id: installed.id,
+        path: join(binaries.ttsVoicesDir, installed.directory),
+        lengthScale: brandVoice.lengthScale,
+      };
+    }
+  }
 
   if (voiceId === null) {
     const configured = voices.find((voice) => voice.isDefault) ?? voices[0];

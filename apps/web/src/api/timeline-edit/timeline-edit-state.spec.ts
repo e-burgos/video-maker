@@ -507,6 +507,24 @@ describe('timelineEditReducer — logo-style y caption-style (FIX-006-001)', () 
     expect(canSaveTimeline(next)).toBe(true);
   });
 
+  it('caption-style brand con tema deja el documento válido', () => {
+    const base = initialTimelineEditState(editableTimelineFixture());
+    const next = timelineEditReducer(base, {
+      type: 'caption-style',
+      captionStyle: 'brand',
+      captionTheme: {
+        fontFamily: 'Outfit',
+        fontFiles: [{ path: 'work/brand/fonts/outfit.woff2' }],
+        textColor: '#ffffff',
+        accentColor: '#0ea5e9',
+        boxColor: '#09090b',
+      },
+    });
+
+    expect(next.draft.captionStyle).toBe('brand');
+    expect(canSaveTimeline(next)).toBe(true);
+  });
+
   it('volver al estilo guardado deja el borrador limpio otra vez', () => {
     const saved = { ...editableTimelineFixture(), captionStyle: 'off' as const };
     const base = initialTimelineEditState(saved);
@@ -553,6 +571,32 @@ describe('bumpers de logo en el borrador (FIX-e-burgos-006-002)', () => {
     expect(next.dirty).toBe(true);
     expect(canSaveTimeline(next)).toBe(true);
     expect(validateTimeline(next.draft).ok).toBe(true);
+  });
+
+  it('la placa nueva toma el fondo por defecto que pasa la marca', () => {
+    const base = initialTimelineEditState(withLogo());
+
+    const next = timelineEditReducer(base, {
+      type: 'bumper-enabled',
+      edge: 'intro',
+      enabled: true,
+      defaultBackgroundColor: '#101820',
+    });
+
+    expect(next.draft.bumpers?.intro?.backgroundColor).toBe('#101820');
+  });
+
+  it('una placa que ya existe conserva su fondo aunque la marca pase uno', () => {
+    const base = initialTimelineEditState(withLogo());
+    const enabled = timelineEditReducer(base, { type: 'bumper-enabled', edge: 'intro', enabled: true });
+    const toggled = timelineEditReducer(enabled, {
+      type: 'bumper-enabled',
+      edge: 'intro',
+      enabled: false,
+      defaultBackgroundColor: '#101820',
+    });
+
+    expect(toggled.draft.bumpers?.intro?.backgroundColor).toBe('#ffffff');
   });
 
   it('el estilo del bumper viaja al borrador sin tocar el otro extremo', () => {

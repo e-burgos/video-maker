@@ -25,6 +25,27 @@ describe('playerTimeline', () => {
     expect(result.assets.map((asset) => asset.id)).toEqual(timeline.assets.map((asset) => asset.id));
   });
 
+  it('reescribe las fuentes del tema de la marca a URLs same-origin', () => {
+    const timeline = {
+      ...previewTimelineFixture(),
+      captionStyle: 'brand' as const,
+      captionTheme: {
+        fontFamily: 'Outfit',
+        fontFiles: [{ path: 'work/brand/fonts/outfit.woff2', weight: '100 900' }],
+        textColor: '#ffffff',
+        accentColor: '#0ea5e9',
+        boxColor: '#09090b',
+      },
+    };
+
+    const result = playerTimeline(timeline, 'smoke-ingest', ORIGIN);
+
+    expect(result.captionTheme?.fontFiles).toEqual([
+      { path: 'http://localhost:4207/api/projects/smoke-ingest/files/work/brand/fonts/outfit.woff2', weight: '100 900' },
+    ]);
+    expect(timeline.captionTheme.fontFiles[0]?.path).toBe('work/brand/fonts/outfit.woff2');
+  });
+
   it('no muta la timeline recibida', () => {
     const timeline = previewTimelineFixture();
 

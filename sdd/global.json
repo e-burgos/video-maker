@@ -200,9 +200,7 @@
       "description": "Modo motion graphics: video-manager mudado como apps/motion-editor; libs/motion-graphics con catálogo de 16 escenas, kits de marca y storyboard automático por IA desde un brief; el estudio ofrece motion graphics o material crudo al crear, con job motion en render-api, página Motion, receta del productor y HyperFrames empaquetado en desktop; contrato de material con modo B para display-ads",
       "cycles_completed": 5,
       "completed_at": "2026-10-07"
-    }
-  ],
-  "in_progress_modules": [
+    },
     {
       "module": "brand-kit",
       "spec": "spec-e-burgos-021-brand-kit",
@@ -216,9 +214,12 @@
         "libs/composition-remotion",
         "libs/local-store"
       ],
-      "description": "Biblioteca de marcas: crear, duplicar y editar marcas (paleta derivada, logo, tipografías, voz, música, fotos, productos) guardadas junto a los proyectos, y usarlas en motion graphics y en material crudo"
+      "description": "Biblioteca de marcas: crear, duplicar y editar marcas (paleta derivada, logo, tipografías, voz, música, fotos, productos) guardadas junto a los proyectos, y usarlas en motion graphics y en material crudo",
+      "cycles_completed": 4,
+      "completed_at": "2026-10-08"
     }
   ],
+  "in_progress_modules": [],
   "pending_modules": [
     {
       "module": "scene-assembly",

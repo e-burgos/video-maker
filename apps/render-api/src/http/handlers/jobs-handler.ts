@@ -8,6 +8,7 @@ import { PipelineStageError } from '../../errors/pipeline-stage-error';
 import { parseStoredJob, parseStoredParams } from '../../jobs/job-persistence';
 import type { StoredJobParams } from '../../jobs/job-persistence';
 import {
+  assertBrandCaptionStyleHasBrand,
   parseMontageCaptionStyle,
   parseMontageFormat,
   parseMontageLogo,
@@ -378,6 +379,7 @@ export async function handleCreateRenderJob(
   const format = parseMontageFormat(bodyObject.format);
   const voice = parseMontageVoice(bodyObject.voice);
   const captionStyle = parseMontageCaptionStyle(bodyObject.captionStyle);
+  assertBrandCaptionStyleHasBrand(captionStyle, (deps.localStore.projects.get(slug)?.brand ?? null) !== null);
 
   return createMontageJobResponse(
     deps,

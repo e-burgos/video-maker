@@ -34,9 +34,10 @@ import { whisperLanguageFor } from '../voice/voice-language';
 import {
   ensureVoiceDirectories,
   resolveVoiceModel,
+  synthesisLengthScale,
   runVoiceStage,
 } from '../voice/voice-synthesis-steps';
-import type { ResolvedVoiceModel } from '../voice/voice-synthesis-steps';
+import type { BrandVoice, ResolvedVoiceModel } from '../voice/voice-synthesis-steps';
 import { writeVoiceScriptManifest, writeVoiceWords } from '../voice/voice-store';
 import type { VoiceJobReport } from './render-job';
 import { voiceCheckpoint } from './voice-pipeline-observer';
@@ -48,6 +49,7 @@ export interface VoiceScriptPipelineRequest {
   readonly scriptText: string | null;
   readonly scriptPath: string | null;
   readonly gapMs: number;
+  readonly brandVoice?: BrandVoice | null;
 }
 
 interface SynthesizedLine {
@@ -114,7 +116,9 @@ async function synthesizeLine(
     outPath: toAbsolutePath(project, wavPath),
     modelPath: model.path,
     projectRoot: project.root,
-    ...(lengthScale === 1 ? {} : { lengthScale }),
+    ...(synthesisLengthScale(model, lengthScale) === 1
+      ? {}
+      : { lengthScale: synthesisLengthScale(model, lengthScale) }),
   });
 
   const probed = await deps.probeAsset({ path: toAbsolutePath(project, wavPath), assetId: wavPath });
@@ -209,7 +213,7 @@ export async function runVoiceScriptPipeline(
   assertScriptHasLines(lines, request.scriptPath);
   const timed = hasVoiceScriptTimeMarks(lines);
 
-  const model = await runVoiceStage('synthesize', null, () => resolveVoiceModel(deps, request.voiceId));
+  const model = await runVoiceStage('synthesize', null, () => resolveVoiceModel(deps, request.voiceId, request.brandVoice ?? null));
   const language = voiceLanguageFromModelId(model.id);
 
   await runVoiceStage('synthesize', null, () => ensureVoiceDirectories(deps, request.project));

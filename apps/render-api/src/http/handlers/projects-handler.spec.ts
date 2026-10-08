@@ -42,7 +42,7 @@ async function caughtErrorPayload(promise: Promise<unknown>): Promise<ReturnType
 }
 
 const PROJECT_SUMMARY_KEYS = ['brand', 'layout', 'mode', 'slug'];
-const PROJECT_DETAIL_KEYS = ['assetCounts', 'assetSource', 'brand', 'brandMissing', 'layout', 'mode', 'slug'];
+const PROJECT_DETAIL_KEYS = ['assetCounts', 'assetSource', 'brand', 'brandMissing', 'captionTheme', 'layout', 'mode', 'slug'];
 const PLACEMENT_BODY_KEYS = ['placement', 'slug'];
 const PLACEMENT_KEYS = ['archived', 'categoryId', 'folderId'];
 const DELETE_BODY_KEYS = ['deleted', 'slug'];
@@ -156,6 +156,7 @@ describe('handleCreateProject', () => {
       mode: 'footage',
       brand: null,
       brandMissing: false,
+      captionTheme: null,
       layout: { raw: false, catalog: false, timeline: false, edl: false, out: false },
       assetSource: 'raw-scan',
       assetCounts: { aroll: 0, broll: 0, image: 0, audio: 0, voice: 0, logo: 0 },

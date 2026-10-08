@@ -140,6 +140,7 @@ export function createFakeRenderApiDependencies(
   overrides?: Partial<RenderApiDependencies>,
 ): RenderApiDependencies {
   const clock = overrides?.clock ?? { nowIso: () => FIXED_NOW_ISO };
+  const storage = overrides?.storage ?? createFakeObjectStorage(callLog);
 
   return {
     renderMutedVideo: async (input) => {
@@ -207,7 +208,7 @@ export function createFakeRenderApiDependencies(
       ];
     },
 
-    storage: overrides?.storage ?? createFakeObjectStorage(callLog),
+    storage,
 
     localStore: overrides?.localStore ?? createFakeLocalStore(clock),
 
@@ -418,6 +419,15 @@ export function createFakeRenderApiDependencies(
     runHyperframes: async (input) => {
       callLog.record('runHyperframes', input);
       return overrides?.runHyperframes ? overrides.runHyperframes(input) : { exitCode: 0, stdout: '', stderr: '' };
+    },
+
+    rasterizeSvg: async (input) => {
+      callLog.record('rasterizeSvg', input);
+      if (overrides?.rasterizeSvg) {
+        await overrides.rasterizeSvg(input);
+        return;
+      }
+      await storage.writeTextFile(input.outPath, 'fake-png');
     },
   };
 }

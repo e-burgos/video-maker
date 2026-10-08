@@ -3,17 +3,18 @@ import { describe, expect, it } from 'vitest';
 import { CAPTION_STYLES, captionGroupingForStyle, isCaptionStyle } from './caption-style';
 
 describe('caption-style (FIX-e-burgos-003-003)', () => {
-  it('publica los cinco estilos, incluido off', () => {
+  it('publica los seis estilos, incluidos brand y off', () => {
     expect([...CAPTION_STYLES]).toEqual([
       'bold-impact',
       'clean-sans',
       'outline-pop',
       'subtle-lower',
+      'brand',
       'off',
     ]);
   });
 
-  it('isCaptionStyle acepta sólo los cinco valores', () => {
+  it('isCaptionStyle acepta sólo los seis valores', () => {
     expect(CAPTION_STYLES.every(isCaptionStyle)).toBe(true);
     expect(isCaptionStyle('neon')).toBe(false);
     expect(isCaptionStyle(3)).toBe(false);

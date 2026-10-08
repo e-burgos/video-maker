@@ -1,7 +1,7 @@
 import type { CaptionAnchor } from './caption-box';
 import type { CaptionAnimation } from './caption-animation';
 
-export type CaptionPresetId = 'bold-impact' | 'clean-sans' | 'outline-pop' | 'subtle-lower';
+export type CaptionPresetId = 'bold-impact' | 'clean-sans' | 'outline-pop' | 'subtle-lower' | 'brand';
 
 export type CaptionTextTransform = 'none' | 'uppercase';
 
@@ -169,6 +169,37 @@ export const CAPTION_PRESETS: Record<CaptionPresetId, CaptionPreset> = {
       enterDurationFrames: 4,
     },
   },
+  brand: {
+    id: 'brand',
+    fontFamily: "'Inter', 'Helvetica Neue', Arial, sans-serif",
+    fontWeight: 700,
+    emphasisFontWeight: 800,
+    color: '#ffffff',
+    emphasisColor: '#4ade80',
+    activeColor: '#ffffff',
+    emphasisScale: 1.08,
+    activeScale: 1.05,
+    textTransform: 'none',
+    letterSpacingEm: 0,
+    lineHeightEm: 1.2,
+    wordGapEm: 0.28,
+    averageCharWidthEm: 0.54,
+    anchor: 'bottom',
+    maxLines: 1,
+    boxHeightRatio: 0.18,
+    sidePaddingRatio: 0.05,
+    minFontSizeRatio: 0.035,
+    maxFontSizeRatio: 0.07,
+    stroke: null,
+    shadow: null,
+    pill: { color: '#09090b', emphasisColor: '#09090b', paddingXEm: 0.22, paddingYEm: 0.06, radiusEm: 0.2 },
+    animation: {
+      mode: 'rise',
+      spring: { damping: 14, mass: 0.8, stiffness: 120 },
+      enterDurationFrames: 10,
+      riseDistanceEm: 0.5,
+    },
+  },
 };
 
 export const CAPTION_PRESET_IDS: readonly CaptionPresetId[] = [
@@ -176,6 +207,7 @@ export const CAPTION_PRESET_IDS: readonly CaptionPresetId[] = [
   'clean-sans',
   'outline-pop',
   'subtle-lower',
+  'brand',
 ];
 
 export const DEFAULT_CAPTION_PRESET_ID: CaptionPresetId = 'bold-impact';

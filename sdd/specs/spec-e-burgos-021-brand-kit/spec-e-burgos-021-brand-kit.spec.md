@@ -1,6 +1,6 @@
 # SPEC-e-burgos-021: Biblioteca de marcas — crear marcas y usarlas en motion graphics y en material crudo
 
-> Estado: **draft** — registrada el 2026-10-08. Continúa `spec-e-burgos-020-motion-mode`.
+> Estado: **completed** — registrada y cerrada el 2026-10-08 (cuatro ciclos). Continúa `spec-e-burgos-020-motion-mode`.
 > Pedido del dev: un creador de marcas que tome DisplayAds como referencia, para definir cualquier marca y
 > elegirla al generar un video de motion graphics o un video de material crudo.
 

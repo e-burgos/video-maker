@@ -13,6 +13,7 @@ export interface ResolveMontageInputsOptions {
   readonly arollAssetId?: string;
   readonly musicAssetId?: string;
   readonly logoAssetId?: string;
+  readonly brandLogoStem?: string;
   readonly includeLogo?: boolean;
   readonly outputPreset?: OutputPreset;
 }
@@ -103,7 +104,16 @@ function resolveLogoAsset(
     return found;
   }
 
-  return firstAssetByRole(catalog, 'logo');
+  const brandLogo =
+    options.brandLogoStem === undefined ? undefined : brandLogoAsset(catalog, options.brandLogoStem);
+  return brandLogo ?? firstAssetByRole(catalog, 'logo');
+}
+
+function brandLogoAsset(catalog: Catalog, stem: string): MediaAsset | undefined {
+  const prefix = `raw/logo/${stem}.`;
+  return [...catalog.assets]
+    .filter((entry) => entry.role === 'logo' && entry.asset.id.startsWith(prefix))
+    .sort(compareAssetIdAscending)[0]?.asset;
 }
 
 function emptyTranscription(arollAssetId: string): Transcription {

@@ -37,6 +37,7 @@ import type { StudioDatabase } from '@video-maker/local-store';
 
 import { listMotionBrandDocuments, createMotionPipelinePorts } from './motion-pipeline-adapters';
 import { HYPERFRAMES_RESOLVE_FROM_ENV_VAR, resolveHyperframesCli } from './hyperframes-cli';
+import { rasterizeSvgWithBrowser, resolveHeadlessBrowser } from './svg-rasterizer';
 import { createClaudeCliAiAgent } from '../ai/claude-cli-ai-agent';
 import { createEffectiveAiAgent } from '../ai/effective-ai-agent';
 import { readAiAgentConfig } from '../config/ai-agent-config';
@@ -831,6 +832,33 @@ export function createNodeRenderApiDependencies(
         { cwd, timeoutMs: HYPERFRAMES_TIMEOUT_MS },
       );
       return { exitCode: result.exitCode, stdout: result.stdout, stderr: result.stderr };
+    },
+
+    rasterizeSvg: async (input) => {
+      const browser = await resolveHeadlessBrowser(remotion.browserExecutable, process.cwd());
+      if (browser === null) {
+        throw new PipelineStageError({
+          code: 'BRAND_LOGO_RASTERIZE_FAILED',
+          stage: null,
+          resource: input.svgPath,
+          expected: 'a headless browser (REMOTION_BROWSER_EXECUTABLE or the Remotion chrome-headless-shell)',
+        });
+      }
+      const runner = await loadCommandRunner();
+      try {
+        await rasterizeSvgWithBrowser(input, browser, async (binary, args, timeoutMs) => {
+          const result = await runner.run(binary, args, { timeoutMs });
+          return { exitCode: result.exitCode, stderr: result.stderr };
+        });
+      } catch (cause) {
+        throw new PipelineStageError({
+          code: 'BRAND_LOGO_RASTERIZE_FAILED',
+          stage: null,
+          resource: input.svgPath,
+          hint: cause instanceof Error ? cause.message : String(cause),
+          cause,
+        });
+      }
     },
   };
 

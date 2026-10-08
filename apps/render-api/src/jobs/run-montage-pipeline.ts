@@ -2,12 +2,14 @@ import type { LogoMode, MediaProject, MontagePresetName, VoiceSource } from '@vi
 import type { CaptionStyle, OutputPreset } from '@video-maker/timeline-core';
 import { autoMontage, discoverAssets, ingestProject, toAbsolutePath } from '@video-maker/auto-montage';
 
+import type { ProjectBrandContext } from '../brands/project-brand-context';
 import { PipelineStageError } from '../errors/pipeline-stage-error';
 
 import type { RenderApiDependencies } from '../deps/render-api-dependencies';
 import { translateMontageError } from '../errors/translate-montage-error';
 import { assertMontageProjectIsIngestable } from '../store/montage-preconditions';
 import { createStageObservingCommandRunner } from './montage-command-runner-decorator';
+import { assertBrandCaptionStyleHasBrand } from './montage-job-params';
 import { checkpoint } from './montage-pipeline-observer';
 import type { MontagePipelineObserver } from './montage-pipeline-observer';
 import type { MontageJobReport, MontageStage } from './render-job';
@@ -22,6 +24,7 @@ export interface MontagePipelineRequest {
   readonly format?: OutputPreset;
   readonly voice?: VoiceSource;
   readonly captionStyle?: CaptionStyle | null;
+  readonly brand?: ProjectBrandContext | null;
 }
 
 async function resolveScriptText(
@@ -61,6 +64,7 @@ export async function runMontagePipeline(
   deps: RenderApiDependencies,
   observer: MontagePipelineObserver,
 ): Promise<MontageJobReport> {
+  assertBrandCaptionStyleHasBrand(request.captionStyle, (request.brand ?? null) !== null);
   await assertMontageProjectIsIngestable(request.project, deps);
 
   checkpoint(observer, 'discover');
@@ -119,6 +123,9 @@ export async function runMontagePipeline(
         ...(request.captionStyle === undefined || request.captionStyle === null
           ? {}
           : { captionStyle: request.captionStyle }),
+        ...(request.brand === undefined || request.brand === null
+          ? {}
+          : { brand: { id: request.brand.id, captionTheme: request.brand.captionTheme } }),
       },
       {
         readTextFile: deps.storage.readTextFile,

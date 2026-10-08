@@ -1,20 +1,23 @@
-import type { CaptionStyle } from '@video-maker/timeline-core';
+import type { CaptionStyle, CaptionTheme } from '@video-maker/timeline-core';
 
 import {
-  CAPTION_STYLE_OPTIONS,
   DEFAULT_CAPTION_STYLE,
   captionStyleLabelKey,
+  captionStyleOptions,
 } from '../api/timeline-edit/caption-style';
 import type { TimelineEditAction } from '../api/timeline-edit/timeline-edit-state';
 import { useT } from '../i18n/language-context';
 
 export type CaptionStyleSelectorProps = {
   captionStyle?: CaptionStyle;
+  captionTheme?: CaptionTheme;
+  brandTheme?: CaptionTheme | null;
   dispatch: (action: TimelineEditAction) => void;
 };
 
-export function CaptionStyleSelector({ captionStyle, dispatch }: CaptionStyleSelectorProps) {
+export function CaptionStyleSelector({ captionStyle, captionTheme, brandTheme = null, dispatch }: CaptionStyleSelectorProps) {
   const t = useT();
+  const themeToApply = brandTheme ?? captionTheme;
 
   return (
     <div
@@ -27,12 +30,17 @@ export function CaptionStyleSelector({ captionStyle, dispatch }: CaptionStyleSel
         <select
           aria-label={t('captionStyle.label')}
           value={captionStyle ?? DEFAULT_CAPTION_STYLE}
-          onChange={(event) =>
-            dispatch({ type: 'caption-style', captionStyle: event.target.value as CaptionStyle })
-          }
+          onChange={(event) => {
+            const style = event.target.value as CaptionStyle;
+            dispatch(
+              style === 'brand' && themeToApply !== undefined
+                ? { type: 'caption-style', captionStyle: style, captionTheme: themeToApply }
+                : { type: 'caption-style', captionStyle: style },
+            );
+          }}
           className="rounded-md border border-slate-700 bg-slate-900 px-2 py-1 text-xs text-slate-200"
         >
-          {CAPTION_STYLE_OPTIONS.map((style) => (
+          {captionStyleOptions(themeToApply !== undefined || captionStyle === 'brand').map((style) => (
             <option key={style} value={style}>
               {t(captionStyleLabelKey(style))}
             </option>

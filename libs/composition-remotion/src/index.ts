@@ -1,4 +1,5 @@
-export { assetSrc } from './helpers/asset-src';
+export { assetSrc, pathSrc } from './helpers/asset-src';
+export { brandCaptionPreset } from './helpers/brand-caption-preset';
 export { timelineToSequenceProps } from './helpers/timeline-to-sequence-props';
 export type {
   ArollTransitionPlan,

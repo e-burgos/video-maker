@@ -1,0 +1,160 @@
+{
+  "$schema": "../../../../schemas/cycle-tasks.schema.json",
+  "spec": "spec-e-burgos-021-brand-kit",
+  "cycle": 4,
+  "module": "brand-kit",
+  "apps": [
+    "libs/timeline-core",
+    "libs/composition-remotion",
+    "libs/auto-montage",
+    "apps/render-api",
+    "apps/web",
+    "libs/producer-tools"
+  ],
+  "flow": "lite",
+  "user_stories_generated": true,
+  "prerequisites": {
+    "tasks_generated": true
+  },
+  "tasks": [
+    {
+      "id": "TASK-001",
+      "title": "Apply the project brand to footage: brand logo rasterized to PNG into raw/logo and cataloged, brand fonts copied into the project; replaced on brand change",
+      "user_stories": [
+        "US-021-401"
+      ],
+      "estimation_hours": 2.5,
+      "story_points": 3,
+      "depends_on": [],
+      "status": "done",
+      "files": [
+        "apps/render-api/src/brands/apply-project-brand.ts",
+        "apps/render-api/src/brands/rasterize-svg.ts"
+      ],
+      "usage": {
+        "provider_model": "claude/sonnet",
+        "effort": "medium",
+        "agent": "implementor-back",
+        "tokens_in": 61735,
+        "tokens_out": 10894,
+        "approx": true,
+        "source": "agent-usage-notification",
+        "recorded_at": "2026-10-08"
+      }
+    },
+    {
+      "id": "TASK-002",
+      "title": "Timeline captionTheme and brand caption style; Remotion preset loads the brand font and colors; bumpers default to the palette background",
+      "user_stories": [
+        "US-021-401",
+        "US-021-402"
+      ],
+      "estimation_hours": 3,
+      "story_points": 5,
+      "depends_on": [
+        "TASK-001"
+      ],
+      "status": "done",
+      "files": [
+        "libs/timeline-core/src/captions/caption-style.ts",
+        "libs/timeline-core/src/schemas/timeline.schema.ts",
+        "libs/composition-remotion/src/helpers/caption-style-preset.ts",
+        "libs/auto-montage/src/montage/resolve-montage-inputs.ts"
+      ],
+      "usage": {
+        "provider_model": "claude/sonnet",
+        "effort": "medium",
+        "agent": "implementor-back",
+        "tokens_in": 61735,
+        "tokens_out": 10894,
+        "approx": true,
+        "source": "agent-usage-notification",
+        "recorded_at": "2026-10-08"
+      }
+    },
+    {
+      "id": "TASK-003",
+      "title": "Brand voice as default for voice jobs and on the Voice page",
+      "user_stories": [
+        "US-021-403"
+      ],
+      "estimation_hours": 1,
+      "story_points": 2,
+      "depends_on": [
+        "TASK-001"
+      ],
+      "status": "done",
+      "files": [
+        "apps/render-api/src/jobs/run-voice-pipeline.ts",
+        "apps/web/src/pages/voice-page.tsx"
+      ],
+      "usage": {
+        "provider_model": "claude/sonnet",
+        "effort": "medium",
+        "agent": "implementor-back",
+        "tokens_in": 61735,
+        "tokens_out": 10894,
+        "approx": true,
+        "source": "agent-usage-notification",
+        "recorded_at": "2026-10-08"
+      }
+    },
+    {
+      "id": "TASK-004",
+      "title": "Producer footage recipe uses the brand: logo, caption style, closing with tagline and web",
+      "user_stories": [
+        "US-021-404"
+      ],
+      "estimation_hours": 1,
+      "story_points": 1,
+      "depends_on": [
+        "TASK-002"
+      ],
+      "status": "done",
+      "files": [
+        "libs/producer-tools/src/prompt/build-producer-prompt.ts"
+      ],
+      "usage": {
+        "provider_model": "claude/sonnet",
+        "effort": "medium",
+        "agent": "implementor-back",
+        "tokens_in": 61735,
+        "tokens_out": 10894,
+        "approx": true,
+        "source": "agent-usage-notification",
+        "recorded_at": "2026-10-08"
+      }
+    },
+    {
+      "id": "TASK-005",
+      "title": "Verify with pnpm studio: footage project with the test brand, montage, brand captions and short render reviewed frame by frame",
+      "user_stories": [
+        "US-021-401",
+        "US-021-402",
+        "US-021-403",
+        "US-021-404"
+      ],
+      "estimation_hours": 1.5,
+      "story_points": 2,
+      "depends_on": [
+        "TASK-002",
+        "TASK-003",
+        "TASK-004"
+      ],
+      "status": "done",
+      "files": [
+        "sdd/specs/spec-e-burgos-021-brand-kit/cycles/cycle-04/artifacts/verification.md"
+      ],
+      "usage": {
+        "provider_model": "claude/sonnet",
+        "effort": "medium",
+        "agent": "implementor-back",
+        "tokens_in": 61735,
+        "tokens_out": 10894,
+        "approx": true,
+        "source": "agent-usage-notification",
+        "recorded_at": "2026-10-08"
+      }
+    }
+  ]
+}

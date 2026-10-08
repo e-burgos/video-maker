@@ -23,9 +23,10 @@ import {
   ensureVoiceDirectories,
   resolveVoiceModel,
   runVoiceStage,
+  synthesisLengthScale,
   transcribeVoiceTrack,
 } from '../voice/voice-synthesis-steps';
-import type { ResolvedVoiceModel } from '../voice/voice-synthesis-steps';
+import type { BrandVoice, ResolvedVoiceModel } from '../voice/voice-synthesis-steps';
 import { readVoiceManifestIfUsable, writeVoiceManifest } from '../voice/voice-store';
 import type { VoiceJobReport, VoiceJobSceneReport } from './render-job';
 import { runVoiceScriptPipeline } from './run-voice-script-pipeline';
@@ -39,6 +40,7 @@ export interface VoicePipelineRequest {
   readonly scriptText?: string | null;
   readonly scriptPath?: string | null;
   readonly gapMs?: number;
+  readonly brandVoice?: BrandVoice | null;
 }
 
 interface SynthesizedScene {
@@ -68,6 +70,7 @@ async function synthesizeScene(
     outPath: toAbsolutePath(project, sourceWavPath),
     modelPath: model.path,
     projectRoot: project.root,
+    ...(synthesisLengthScale(model, 1) === 1 ? {} : { lengthScale: synthesisLengthScale(model, 1) }),
   });
 
   await deps.extractVoiceAudio({
@@ -106,7 +109,7 @@ export async function runStoryboardVoicePipeline(
   );
   const pending = selected.filter((scene) => !uploaded.has(scene.id));
 
-  const model = await runVoiceStage('synthesize', null, () => resolveVoiceModel(deps, request.voiceId));
+  const model = await runVoiceStage('synthesize', null, () => resolveVoiceModel(deps, request.voiceId, request.brandVoice ?? null));
   await runVoiceStage('synthesize', voiceDirectoryPath(), () => ensureVoiceDirectories(deps, request.project));
 
   voiceCheckpoint(observer, 'synthesize');
@@ -199,6 +202,7 @@ export async function runVoicePipeline(
       scriptText,
       scriptPath,
       gapMs: request.gapMs ?? DEFAULT_VOICE_SCRIPT_GAP_MS,
+      brandVoice: request.brandVoice ?? null,
     },
     deps,
     observer,

@@ -8,12 +8,17 @@ import {
 import type { MediaProject } from '@video-maker/auto-montage';
 import { PROJECT_MODES } from '@video-maker/local-store';
 import type { ProjectMode } from '@video-maker/local-store';
+import type { CaptionTheme } from '@video-maker/timeline-core';
 import { join } from 'node:path/posix';
 
 import type { StoreConfig } from '../../config/store-config';
 import type { ObjectStorage } from '../../deps/object-storage';
 import type { RenderApiDependencies } from '../../deps/render-api-dependencies';
 import { PipelineStageError } from '../../errors/pipeline-stage-error';
+import { applyProjectBrand } from '../../brands/apply-project-brand';
+import { loadProjectBrandContext } from '../../brands/project-brand-context';
+import { createKeyedSerializer } from '../../store/serialize-by-key';
+import type { KeyedSerializer } from '../../store/serialize-by-key';
 import { assertBrandExists, brandExists } from '../../store/project-brand';
 import { isValidProjectSlug } from '../../store/project-slug';
 import { findCategory, findFolder, placementOf } from '../../store/organization';
@@ -36,6 +41,7 @@ export interface ProjectSummary {
 
 export interface ProjectDetail extends ProjectSummary {
   readonly brandMissing: boolean;
+  readonly captionTheme: CaptionTheme | null;
   readonly assetSource: 'catalog' | 'raw-scan';
   readonly assetCounts: Readonly<Record<AssetRole, number>>;
 }
@@ -113,6 +119,7 @@ async function buildProjectDetail(
   mode: ProjectMode,
   brand: string | null,
   brandMissing: boolean,
+  captionTheme: CaptionTheme | null,
 ): Promise<ProjectDetail> {
   const layout = await computeLayoutFlags(storage, project);
   const projectAssets = await resolveProjectAssets(storage, project);
@@ -122,6 +129,7 @@ async function buildProjectDetail(
     mode,
     brand,
     brandMissing,
+    captionTheme,
     layout,
     assetSource: projectAssets.source,
     assetCounts: countAssetsByRole(projectAssets.assets),
@@ -156,6 +164,7 @@ export async function handleCreateProject(
   store: StoreConfig,
   _params: RouteParams | undefined,
   request: HttpRequestLine,
+  serializer: KeyedSerializer = createKeyedSerializer(),
 ): Promise<HttpResponse> {
   const bodyResult = await readJsonBody(request.body.stream(), MAX_JSON_BODY_BYTES);
 
@@ -214,7 +223,18 @@ export async function handleCreateProject(
     await deps.storage.ensureDirectory(directory);
   }
 
-  const detail = await buildProjectDetail(deps.storage, project, slug, mode, brand, false);
+  let captionTheme: CaptionTheme | null = null;
+  if (mode === 'footage' && brand !== null) {
+    try {
+      captionTheme = (await applyProjectBrand(deps, store, serializer, slug, brand)).captionTheme;
+    } catch (cause) {
+      deps.localStore.projects.delete(slug);
+      await deps.storage.removeDirectory(project.root);
+      throw cause;
+    }
+  }
+
+  const detail = await buildProjectDetail(deps.storage, project, slug, mode, brand, false, captionTheme);
 
   return {
     status: 201,
@@ -240,6 +260,21 @@ export async function handleGetProject(
   return jsonResponse(200, await describeStoredProject(deps, store, project, slug));
 }
 
+async function readBrandCaptionTheme(
+  deps: RenderApiDependencies,
+  store: StoreConfig,
+  brand: string,
+): Promise<CaptionTheme | null> {
+  try {
+    return (await loadProjectBrandContext(deps, store, brand)).captionTheme;
+  } catch (cause) {
+    if (cause instanceof PipelineStageError && cause.code === 'BRAND_MANIFEST_INVALID') {
+      return null;
+    }
+    throw cause;
+  }
+}
+
 async function describeStoredProject(
   deps: RenderApiDependencies,
   store: StoreConfig,
@@ -249,7 +284,10 @@ async function describeStoredProject(
   const record = deps.localStore.projects.get(slug);
   const brand = record?.brand ?? null;
   const brandMissing = brand !== null && !(await brandExists(deps, store, brand));
-  return buildProjectDetail(deps.storage, project, slug, record?.mode ?? 'footage', brand, brandMissing);
+  const mode = record?.mode ?? 'footage';
+  const captionTheme =
+    mode === 'footage' && brand !== null && !brandMissing ? await readBrandCaptionTheme(deps, store, brand) : null;
+  return buildProjectDetail(deps.storage, project, slug, mode, brand, brandMissing, captionTheme);
 }
 
 export async function handlePutProjectBrand(
@@ -257,6 +295,7 @@ export async function handlePutProjectBrand(
   store: StoreConfig,
   params: RouteParams,
   request: HttpRequestLine,
+  serializer: KeyedSerializer = createKeyedSerializer(),
 ): Promise<HttpResponse> {
   const slug = params.slug ?? '';
   assertValidProjectSlug(slug);
@@ -287,6 +326,9 @@ export async function handlePutProjectBrand(
 
   if (!deps.localStore.projects.exists(slug)) {
     deps.localStore.projects.insert(slug, deps.clock.nowIso());
+  }
+  if ((deps.localStore.projects.get(slug)?.mode ?? 'footage') === 'footage') {
+    await applyProjectBrand(deps, store, serializer, slug, brand);
   }
   deps.localStore.projects.setBrand(slug, brand);
 

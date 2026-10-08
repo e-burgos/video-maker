@@ -1,5 +1,7 @@
 import { tmpdir } from 'node:os';
 
+import { createProjectBrandResolver } from '../brands/project-brand-resolver';
+import type { StoreConfig } from '../config/store-config';
 import { DEFAULT_HOST, DEFAULT_PORT } from '../config/server-config';
 import { readProducerConfig } from '../config/producer-config';
 import type { ProducerConfig } from '../config/producer-config';
@@ -36,11 +38,12 @@ export function defaultProducerConfig(): ProducerConfig {
 export function createRenderApiRuntime(
   deps: RenderApiDependencies,
   producer: ProducerConfig = defaultProducerConfig(),
+  store?: StoreConfig,
 ): RenderApiRuntime {
   recoverInterruptedJobs(deps);
 
   return {
-    jobs: createRenderJobQueue(deps),
+    jobs: createRenderJobQueue(deps, store === undefined ? undefined : createProjectBrandResolver(deps, store)),
     producerTurns: createProducerTurnRegistry(),
     producer,
     uploadSerializer: createKeyedSerializer(),

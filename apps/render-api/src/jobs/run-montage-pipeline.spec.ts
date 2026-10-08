@@ -508,3 +508,57 @@ describe('runMontagePipeline — guion y logo (spec-014)', () => {
     ).rejects.toMatchObject({ code: 'MONTAGE_SCRIPT_NOT_FOUND', stage: 'plan' });
   });
 });
+
+describe('runMontagePipeline — marca del proyecto (spec-021 cycle-04)', () => {
+  const BRAND = {
+    id: 'acme',
+    captionTheme: {
+      fontFamily: 'Outfit',
+      fontFiles: [{ path: 'work/brand/fonts/outfit.woff2' }],
+      textColor: '#ffffff',
+      accentColor: '#0ea5e9',
+      boxColor: '#09090b',
+    },
+  };
+
+  async function writtenTimeline(request: MontagePipelineRequest): Promise<Record<string, unknown>> {
+    const callLog = createCallLog();
+    const deps = buildIngestibleProjectDeps(callLog);
+    const { observer } = createRecordingObserver();
+    await runMontagePipeline(request, deps, observer);
+    const write = callLog
+      .entries()
+      .filter((entry) => entry.port === 'writeTextFile')
+      .map((entry) => entry.input as { path: string; contents: string })
+      .find((entry) => entry.path.endsWith('work/timeline.json'));
+    return JSON.parse(write?.contents ?? '{}') as Record<string, unknown>;
+  }
+
+  it('escribe captionTheme en el timeline y respeta el estilo brand pedido', async () => {
+    const timeline = await writtenTimeline({
+      ...REQUEST,
+      captionStyle: 'brand',
+      brand: { ...BRAND, name: 'Acme', spokenName: 'Acme', tagline: 't', url: null, palette: { background: '#09090b', accent: '#0ea5e9', accent2: '#14b8a6', text: '#ffffff' }, voice: { id: 'v', lengthScale: 1 }, brandDir: '/brands/acme', logoFile: '/brands/acme/logo.svg', fontFiles: [] },
+    });
+
+    expect(timeline.captionStyle).toBe('brand');
+    expect(timeline.captionTheme).toEqual(BRAND.captionTheme);
+  });
+
+  it('rechaza el estilo brand en un proyecto sin marca antes de tocar el proyecto', async () => {
+    const callLog = createCallLog();
+    const deps = buildIngestibleProjectDeps(callLog);
+    const { observer } = createRecordingObserver();
+
+    await expect(runMontagePipeline({ ...REQUEST, captionStyle: 'brand' }, deps, observer)).rejects.toMatchObject({
+      code: 'MONTAGE_CAPTION_STYLE_INVALID',
+    });
+    expect(callLog.entries().filter((entry) => entry.port === 'writeTextFile')).toEqual([]);
+  });
+
+  it('sin marca el timeline no lleva captionTheme', async () => {
+    const timeline = await writtenTimeline(REQUEST);
+
+    expect(timeline).not.toHaveProperty('captionTheme');
+  });
+});

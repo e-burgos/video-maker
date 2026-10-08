@@ -1,3 +1,5 @@
+import type { CaptionTheme } from '@video-maker/timeline-core';
+
 import type { MotionJob, MotionStage } from './motion-types';
 
 export const ASSET_ROLES = ['aroll', 'broll', 'image', 'audio', 'voice', 'logo'] as const;
@@ -104,6 +106,7 @@ export type AssetCounts = Record<AssetRole, number>;
 
 export type ProjectDetail = ProjectSummary & {
   brandMissing?: boolean;
+  captionTheme?: CaptionTheme | null;
   assetSource: AssetSource;
   assetCounts: AssetCounts;
 };

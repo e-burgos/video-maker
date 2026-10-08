@@ -119,6 +119,7 @@ const PUBLIC_VALUE_EXPORTS = [
   'VoiceScriptManifestSchema',
   'splitVoiceScriptLines',
   'CaptionStyleSchema',
+  'CaptionThemeSchema',
   'CAPTION_STYLES',
   'captionGroupingForStyle',
   'isCaptionStyle',
@@ -975,5 +976,31 @@ describe('normalizeTranscriptionWords (D-08)', () => {
 
   it('devuelve [] para una lista vacía', () => {
     expect(normalizeTranscriptionWords([])).toEqual([]);
+  });
+});
+
+describe('TimelineSchema captionTheme', () => {
+  const captionTheme = {
+    fontFamily: 'Outfit',
+    fontFiles: [{ path: 'work/brand/fonts/outfit.woff2', weight: '100 900' }],
+    textColor: '#ffffff',
+    accentColor: '#0ea5e9',
+    boxColor: '#09090b',
+  };
+
+  it('acepta captionStyle brand con captionTheme', () => {
+    expect(TimelineSchema.safeParse({ ...minimalTimeline, captionStyle: 'brand', captionTheme }).success).toBe(true);
+  });
+
+  it('rechaza captionStyle brand sin captionTheme con un mensaje claro', () => {
+    const result = TimelineSchema.safeParse({ ...minimalTimeline, captionStyle: 'brand' });
+    expect(result.success).toBe(false);
+    expect(result.error?.issues[0]?.path).toEqual(['captionTheme']);
+  });
+
+  it('rechaza un captionTheme con colores que no son hex', () => {
+    expect(
+      TimelineSchema.safeParse({ ...minimalTimeline, captionTheme: { ...captionTheme, textColor: 'white' } }).success,
+    ).toBe(false);
   });
 });
