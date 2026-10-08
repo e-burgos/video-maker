@@ -39,7 +39,7 @@ voz del cierre", "sacá la escena del Wi-Fi" — y el productor edita esas escen
 rehace el video. Nunca vuelve a armar el storyboard desde cero para un ajuste, así que lo que ya
 estaba bien queda igual.
 </p>
-${screenshotFigure(depth, 'motion-adjust-chat.png', 'Chat del productor en un video de motion graphics, con ejemplos de pedidos y el ajuste ya aplicado')}
+${screenshotFigure(depth, 'motion-adjust-chat.png', 'Chat del productor en un video de motion graphics, con ejemplos de pedidos para ajustarlo')}
 <p>
 Rehacer un video ajustado es rápido: solo se vuelve a grabar la voz de las escenas cuyo texto
 cambiaste (bajar la música de un video de un minuto lleva un minuto y medio). Cada video tiene su
