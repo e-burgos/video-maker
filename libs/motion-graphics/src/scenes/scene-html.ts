@@ -1,4 +1,5 @@
 import type { BrandManifest } from '../brand/brand-manifest';
+import { screenHomography } from './screen-perspective';
 import { MotionStudioError } from '../errors/motion-studio-error';
 import type { IconName, MotionChip, MotionScreen, MotionVisual } from '../storyboard/motion-storyboard.schema';
 
@@ -138,6 +139,8 @@ function screenQuadBox(polygon: Array<[number, number]>, aspect: number | undefi
   return `left:${topLeft[0]}%;top:${topLeft[1]}%;width:${round(topRight[0] - topLeft[0] + SCREEN_OVERFILL)}%;height:${round(bottomLeft[1] - topLeft[1] + SCREEN_OVERFILL)}%;transform:${transform};transform-origin:0 0`;
 }
 
+const round2 = (value: number): number => Math.round(value * 100) / 100;
+
 function deviceVisual(deviceId: string, states: Array<{ screen: MotionScreen; cue?: string | undefined }> | undefined, ctx: SceneContext, height: number): string {
   const device = ctx.brand.devices[deviceId];
   if (device === undefined) throw new MotionStudioError('ASSET_MISSING', `brand "${ctx.brand.id}" has no device "${deviceId}"`);
@@ -152,6 +155,17 @@ function deviceVisual(deviceId: string, states: Array<{ screen: MotionScreen; cu
   const clip = `polygon(${pts.map(([x, y]) => `${x}% ${y}%`).join(', ')})`;
   const skew = `skewY(${device.screen.skew ?? 0}deg) rotate(${device.screen.rotate ?? 0}deg)`;
   const box = `left:${left + (Math.max(...xs) - left) * 0.18}%;top:${top + (Math.max(...ys) - top) * 0.36}%;width:${(Math.max(...xs) - left) * 0.62}%;height:${(Math.max(...ys) - top) * 0.4}%;transform:${skew};transform-origin:0 0`;
+  if (aspect !== undefined) {
+    const perspective = screenHomography(pts, height, aspect);
+    const screenLayers = states
+      .map((state, i) => {
+        const anim = i === 0 ? '' : animAttrs({ anim: 'swap', cue: state.cue, beat: state.cue ? undefined : i * 4 });
+        return `<div class="mg-layer"${anim}>${screenInner(state.screen, ctx, i === 0 ? undefined : state.cue)}</div>`;
+      })
+      .join('');
+    const screenStyle = `width:${round2(perspective.width)}px;height:${round2(perspective.height)}px;transform:${perspective.css};transform-origin:0 0`;
+    return `<div class="mg-device${device.plate === true ? ' plate' : ''}" style="height:${height}px"${animAttrs({ anim: 'right' })}><div class="mg-device-glow"></div>${img}<div class="face"><div class="mg-device-screen perspective" style="${screenStyle}">${screenLayers}</div></div></div>`;
+  }
   const layers = states
     .map((state, i) => {
       const anim = i === 0 ? '' : animAttrs({ anim: 'swap', cue: state.cue, beat: state.cue ? undefined : i * 4 });

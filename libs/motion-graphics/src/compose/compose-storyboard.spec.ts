@@ -35,6 +35,11 @@ describe('composeStoryboard', () => {
     expect(musicSource).toBe('assets/brand/music/Beat Song.mp3');
   });
 
+  it('carries the music volume of the storyboard into the script', () => {
+    const { script } = composeStoryboard({ ...base, music: { track: 'beat', volume: 0.3 } }, testBrand);
+    expect(script.music).toEqual({ file: 'Beat Song.mp3', credit: 'Beat · CC BY 4.0', volume: 0.3 });
+  });
+
   it('drops anchors without beat sync and music without a track', () => {
     const silent = composeStoryboard({ ...base, music: null, beatSync: false, voice: { id: 'otra', lengthScale: 1 } }, testBrand);
     expect(silent.script.music).toBeNull();

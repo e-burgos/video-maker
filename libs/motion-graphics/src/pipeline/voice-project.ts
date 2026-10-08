@@ -10,6 +10,7 @@ import { readExistingWords, readScript, toJson, WORDS_FILE } from './project-fil
 export interface VoiceProjectOptions {
   takes: number;
   only?: string[] | undefined;
+  reuseUnchanged?: boolean;
   onLine?: (line: VoicedLine) => void;
 }
 
@@ -21,6 +22,34 @@ export interface VoicedLine {
   heard: string;
   done: number;
   total: number;
+  reused: boolean;
+}
+
+const VOICE_MANIFEST_FILE = 'voice-manifest.json';
+
+interface VoicedLineSource {
+  vo: string;
+  voice: string;
+  lengthScale: number;
+}
+
+type VoiceManifest = Record<string, VoicedLineSource>;
+
+async function readVoiceManifest(ports: MotionPipelinePorts, project: string): Promise<VoiceManifest> {
+  const path = joinPath(project, VOICE_MANIFEST_FILE);
+  return (await ports.exists(path)) ? (JSON.parse(await ports.readText(path)) as VoiceManifest) : {};
+}
+
+function lineSource(scene: MotionScript['scenes'][number], script: MotionScript): VoicedLineSource {
+  return { vo: scene.vo, voice: script.voice, lengthScale: script.lengthScale };
+}
+
+function sameSource(previous: VoicedLineSource | undefined, next: VoicedLineSource): boolean {
+  return previous !== undefined && previous.vo === next.vo && previous.voice === next.voice && previous.lengthScale === next.lengthScale;
+}
+
+function describeLine(line: VoicedLine): string {
+  return line.reused ? `voice ${line.sceneId}: reused` : `voice ${line.sceneId}: take ${line.take}/${line.attempts} · ${line.score} · ${line.heard}`;
 }
 
 export interface VoiceProjectResult {
@@ -39,10 +68,24 @@ function scenesToVoice(script: MotionScript, only: string[] | undefined): Motion
 export async function voiceProject(ports: MotionPipelinePorts, project: string, options: VoiceProjectOptions): Promise<VoiceProjectResult> {
   const script = await readScript(ports, project);
   const scenes = scenesToVoice(script, options.only);
-  const words: SceneWords = options.only === undefined ? {} : await readExistingWords(ports, project);
+  const reuse = options.reuseUnchanged === true && options.only === undefined;
+  const previousWords = reuse || options.only !== undefined ? await readExistingWords(ports, project) : {};
+  const previousManifest = await readVoiceManifest(ports, project);
+  const words: SceneWords = options.only === undefined ? {} : previousWords;
+  const manifest: VoiceManifest = options.only === undefined ? {} : previousManifest;
   const voiced: VoicedLine[] = [];
   for (const scene of scenes) {
     const finalPath = joinPath(project, 'assets', 'audio', `vo-${scene.id}.wav`);
+    const source = lineSource(scene, script);
+    const previousSceneWords = previousWords[scene.id];
+    if (reuse && sameSource(previousManifest[scene.id], source) && previousSceneWords !== undefined && (await ports.exists(finalPath))) {
+      words[scene.id] = previousSceneWords;
+      manifest[scene.id] = source;
+      const reusedLine: VoicedLine = { sceneId: scene.id, take: 0, attempts: 0, score: 1, heard: '', done: voiced.length + 1, total: scenes.length, reused: true };
+      voiced.push(reusedLine);
+      options.onLine?.(reusedLine);
+      continue;
+    }
     const { best, attempts } = await pickBestTake(
       scene.vo,
       {
@@ -58,6 +101,7 @@ export async function voiceProject(ports: MotionPipelinePorts, project: string, 
     await ports.copyFile(best.path, finalPath);
     for (const attempt of attempts) await ports.removeFile(attempt.path);
     words[scene.id] = best.transcript.words.map((w) => ({ w: w.text, t: w.start, e: w.end }));
+    manifest[scene.id] = source;
     const line: VoicedLine = {
       sceneId: scene.id,
       take: best.take + 1,
@@ -66,10 +110,12 @@ export async function voiceProject(ports: MotionPipelinePorts, project: string, 
       heard: best.transcript.text,
       done: voiced.length + 1,
       total: scenes.length,
+      reused: false,
     };
     voiced.push(line);
     options.onLine?.(line);
   }
   await ports.writeText(joinPath(project, WORDS_FILE), toJson(words, 1));
-  return { lines: voiced.map((l) => `voice ${l.sceneId}: take ${l.take}/${l.attempts} · ${l.score} · ${l.heard}`), voiced };
+  await ports.writeText(joinPath(project, VOICE_MANIFEST_FILE), toJson(manifest, 1));
+  return { lines: voiced.map(describeLine), voiced };
 }

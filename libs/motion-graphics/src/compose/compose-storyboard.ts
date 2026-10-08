@@ -16,7 +16,7 @@ const DEFAULT_MIN_BARS: Partial<Record<MotionStoryboardScene['kind'], number>> =
 export interface ScriptDocument {
   voice: string;
   lengthScale: number;
-  music: { file: string; credit: string } | null;
+  music: { file: string; credit: string; volume?: number } | null;
   noWhooshOn: string[];
   scenes: Array<{ id: string; vo: string; minBars: number; anchor?: number }>;
   sfx: Array<{ id: string; scene: string; offset: number }>;
@@ -138,7 +138,7 @@ export function composeStoryboard(storyboard: MotionStoryboard, brand: BrandMani
   const script: ScriptDocument = {
     voice: voice.id,
     lengthScale: voice.lengthScale,
-    music: track ? { file: track.file.split('/').pop() ?? track.file, credit: track.credit } : null,
+    music: track ? { file: track.file.split('/').pop() ?? track.file, credit: track.credit, ...(storyboard.music?.volume === undefined ? {} : { volume: storyboard.music.volume }) } : null,
     noWhooshOn: dropScene ? [dropScene.id] : [],
     scenes: storyboard.scenes.map((scene) => {
       const anchor = scene.anchor === 'drop' ? track?.drop : scene.anchor;

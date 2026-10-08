@@ -172,7 +172,7 @@ export const MotionStoryboardSchema = z
     brand: z.string().regex(/^[a-z][a-z0-9-]*$/u),
     format: z.enum(['16:9', '9:16']),
     beatSync: z.boolean(),
-    music: z.strictObject({ track: Text }).nullable(),
+    music: z.strictObject({ track: Text, volume: z.number().min(0.05).max(1).describe('Music level from 0.05 (barely audible) to 1 (loud); default 0.5. Lower it when the user says the music is too loud').optional() }).nullable(),
     voice: z.strictObject({ id: Text, lengthScale: z.number().min(0.7).max(1.4) }).optional(),
     scenes: z.array(MotionSceneSchema).min(2).max(16),
   })
