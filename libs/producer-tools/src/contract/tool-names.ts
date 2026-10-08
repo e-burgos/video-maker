@@ -23,6 +23,7 @@ export const STUDIO_TOOL_NAMES = [
   'read_motion_brief',
   'write_motion_brief',
   'read_motion_storyboard',
+  'write_motion_storyboard',
 ] as const;
 
 export type StudioToolName = (typeof STUDIO_TOOL_NAMES)[number];

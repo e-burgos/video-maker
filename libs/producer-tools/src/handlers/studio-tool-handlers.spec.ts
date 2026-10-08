@@ -151,6 +151,23 @@ describe('createStudioToolHandlers', () => {
     expect(client.calls).toEqual([{ method: 'putMotionBrief', args: [brief] }]);
   });
 
+  it('write_motion_storyboard sends the storyboard and confirms the save', async () => {
+    const storyboard = { scenes: [{ kind: 'title', vo: 'Hola' }], music: { volume: 0.2 } };
+    const { handlers, client } = handlersWith({ putMotionStoryboard: async () => undefined });
+
+    const result = await handlers.write_motion_storyboard({ storyboard });
+
+    expect(result.data).toEqual({ saved: true });
+    expect(client.calls).toEqual([{ method: 'putMotionStoryboard', args: [storyboard] }]);
+  });
+
+  it('write_motion_storyboard rejects a missing storyboard before calling the client', async () => {
+    const { handlers, client } = handlersWith();
+
+    await expect(handlers.write_motion_storyboard({})).rejects.toMatchObject({ code: 'INVALID_INPUT' });
+    expect(client.calls).toEqual([]);
+  });
+
   it('write_motion_brief rejects a brief with no script before calling the client', async () => {
     const { handlers, client } = handlersWith();
 

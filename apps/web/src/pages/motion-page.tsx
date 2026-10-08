@@ -178,6 +178,13 @@ export function MotionPage() {
         </Link>
         <h1 className="text-2xl font-semibold tracking-tight text-ink">{t('motion.page.title')}</h1>
         <p className="font-mono text-xs text-ink-faint">{humanizeSlug(slug)}</p>
+        <Link
+          to={`/projects/${encodeURIComponent(slug)}`}
+          data-testid="motion-adjust-link"
+          className="inline-block rounded-control border border-accent px-4 py-2 text-sm font-medium text-ink hover:bg-surface-muted"
+        >
+          {t('motion.adjust.link')}
+        </Link>
       </header>
 
       {loading && <p className="text-sm text-ink-faint">{t('motion.loading')}</p>}

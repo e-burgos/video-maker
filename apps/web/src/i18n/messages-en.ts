@@ -179,6 +179,12 @@ export const MESSAGES_EN = {
   'motion.video.path': '{path} · {duration}s',
   'motion.video.credit': 'For the post description: Music: {credit}',
   'motion.workspace.link': 'Open Motion graphics',
+  'motion.adjust.link': 'Adjust with the producer',
+  'motion.workspace.intro': 'Ask the producer for changes to this motion graphics video',
+  'motion.workspace.example.music': 'Lower the music volume',
+  'motion.workspace.example.title': 'Change the title of scene 3',
+  'motion.workspace.example.voice': 'Shorten the closing voice line',
+  'motion.workspace.example.redo': 'Redo the video with these changes',
   'createProject.cancel': 'Cancel',
   'createProject.nameRequired': 'Enter a name for the video.',
 

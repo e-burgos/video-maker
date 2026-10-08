@@ -17,9 +17,10 @@ import type { AssetRole } from '../api/render-api-types';
 export type ProducerConversationPanelProps = {
   producer: UseProducerConversationResult;
   pinned?: boolean;
+  mode?: 'footage' | 'motion';
 };
 
-export function ProducerConversationPanel({ producer, pinned = false }: ProducerConversationPanelProps) {
+export function ProducerConversationPanel({ producer, pinned = false, mode = 'footage' }: ProducerConversationPanelProps) {
   const t = useT();
   const {
     slug,
@@ -131,6 +132,7 @@ export function ProducerConversationPanel({ producer, pinned = false }: Producer
               onDraft={setDraft}
               hasTimedScript={hasTimedScript}
               compact={pendingAssets.length > 0}
+              mode={mode}
             />
           )}
 

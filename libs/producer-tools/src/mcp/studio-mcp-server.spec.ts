@@ -23,7 +23,7 @@ async function connectedPair(overrides: Partial<RenderApiClient> = {}) {
 }
 
 describe('createStudioMcpServer', () => {
-  it('lists exactly the 22 contract tool names', async () => {
+  it('lists exactly the 23 contract tool names', async () => {
     const { client } = await connectedPair();
 
     const { tools } = await client.listTools();

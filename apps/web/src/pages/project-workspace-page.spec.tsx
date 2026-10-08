@@ -107,6 +107,50 @@ describe('ProjectWorkspacePage', () => {
     expect(link.getAttribute('href')).toBe('/projects/demo-01/motion');
   });
 
+  it('shows the motion intro with example chips instead of the footage panels for a motion project', async () => {
+    stubMatchMedia(true);
+    const motionProject = {
+      slug: 'demo-01',
+      mode: 'motion',
+      layout: { raw: true, catalog: true, timeline: false, edl: false, out: false },
+      assetSource: 'catalog',
+      assetCounts: { aroll: 0, broll: 0, image: 0, audio: 0, voice: 0, logo: 0 },
+    };
+    renderWorkspace({
+      getProject: vi.fn().mockResolvedValue(motionProject),
+      getProducer: vi.fn().mockResolvedValue(producerConversation({ messages: [] })),
+    });
+
+    const chips = await screen.findByTestId('motion-examples');
+    expect(chips.querySelectorAll('button')).toHaveLength(4);
+    expect(screen.queryByTestId('producer-recipes')).toBeNull();
+    expect(screen.queryByTestId('producer-inventory')).toBeNull();
+    expect(screen.queryByTestId('workspace-panel-toggle')).toBeNull();
+    expect(screen.getByTestId('workspace-motion-link')).toBeTruthy();
+  });
+
+  it('fills the composer when a motion example chip is clicked', async () => {
+    stubMatchMedia(true);
+    const motionProject = {
+      slug: 'demo-01',
+      mode: 'motion',
+      layout: { raw: true, catalog: true, timeline: false, edl: false, out: false },
+      assetSource: 'catalog',
+      assetCounts: { aroll: 0, broll: 0, image: 0, audio: 0, voice: 0, logo: 0 },
+    };
+    renderWorkspace({
+      getProject: vi.fn().mockResolvedValue(motionProject),
+      getProducer: vi.fn().mockResolvedValue(producerConversation({ messages: [] })),
+    });
+
+    const chips = await screen.findByTestId('motion-examples');
+    const first = chips.querySelector('button') as HTMLButtonElement;
+    fireEvent.click(first);
+
+    const composer = screen.getByRole('textbox') as HTMLTextAreaElement;
+    expect(composer.value).toBe(first.textContent);
+  });
+
   it('does not link a footage project to the Motion page', async () => {
     stubMatchMedia(true);
     renderWorkspace();

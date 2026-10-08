@@ -161,4 +161,5 @@ export interface RenderApiClient {
   getMotionBrief(): Promise<Readonly<Record<string, unknown>>>;
   putMotionBrief(brief: Readonly<Record<string, unknown>>): Promise<void>;
   getMotionStoryboard(): Promise<Readonly<Record<string, unknown>>>;
+  putMotionStoryboard(storyboard: Readonly<Record<string, unknown>>): Promise<void>;
 }

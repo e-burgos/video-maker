@@ -181,6 +181,12 @@ export const MESSAGES_ES: Messages = {
   'motion.video.path': '{path} · {duration} s',
   'motion.video.credit': 'Para la descripción de la publicación: Música: {credit}',
   'motion.workspace.link': 'Abrir Motion graphics',
+  'motion.adjust.link': 'Ajustar con el productor',
+  'motion.workspace.intro': 'Pedile al productor cambios sobre este video de motion graphics',
+  'motion.workspace.example.music': 'Bajá el volumen de la música',
+  'motion.workspace.example.title': 'Cambiá el título de la escena 3',
+  'motion.workspace.example.voice': 'Acortá la voz del cierre',
+  'motion.workspace.example.redo': 'Rehacé el video con estos cambios',
   'createProject.cancel': 'Cancelar',
   'createProject.nameRequired': 'Escribí un nombre para el video.',
 

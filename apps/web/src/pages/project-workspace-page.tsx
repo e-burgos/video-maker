@@ -56,6 +56,7 @@ export function ProjectWorkspacePage() {
   const isWide = useIsWideViewport();
   const [activeTab, setActiveTab] = useAutoSwitchingTab(producer.jobs.data);
   const [drawerOpen, setDrawerOpen] = useState(false);
+  const isMotion = project.data !== null && projectModeOf(project.data) === 'motion';
 
   const sidePanel = (
     <WorkspaceSidePanel
@@ -82,7 +83,7 @@ export function ProjectWorkspacePage() {
             <p className="font-mono text-xs text-ink-faint">{slug}</p>
           </div>
           <div className="flex items-center gap-2">
-            {project.data !== null && projectModeOf(project.data) === 'motion' && (
+            {isMotion && (
               <Link
                 to={`/projects/${encodeURIComponent(slug)}/motion`}
                 data-testid="workspace-motion-link"
@@ -96,7 +97,11 @@ export function ProjectWorkspacePage() {
         </div>
       </header>
 
-      {isWide ? (
+      {isMotion ? (
+        <div className={isWide ? 'min-h-0 flex-1' : ''}>
+          <ProducerConversationPanel producer={producer} pinned={isWide} mode="motion" />
+        </div>
+      ) : isWide ? (
         <div className="grid min-h-0 flex-1 grid-cols-[minmax(0,3fr)_minmax(0,2fr)] gap-6">
           <ProducerConversationPanel producer={producer} pinned />
           <div className="h-full min-h-0 overflow-y-auto">{sidePanel}</div>
