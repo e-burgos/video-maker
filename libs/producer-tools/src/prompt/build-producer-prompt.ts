@@ -13,6 +13,18 @@ export interface ProducerPromptPendingAsset {
   readonly proposalReason: string;
 }
 
+export interface ProducerPromptBrand {
+  readonly id: string;
+  readonly name: string;
+  readonly spokenName: string;
+  readonly tagline: string;
+  readonly url: string | null;
+  readonly voice: string;
+  readonly hasMusic: boolean;
+  readonly photos: number;
+  readonly devices: readonly string[];
+}
+
 export interface ProducerPromptContext {
   readonly assetSource: 'catalog' | 'raw-scan';
   readonly assets: readonly ProducerPromptAsset[];
@@ -20,6 +32,7 @@ export interface ProducerPromptContext {
   readonly hasTimeline: boolean;
   readonly producerScript: 'none' | 'plain' | 'timed';
   readonly mode?: 'footage' | 'motion';
+  readonly brand?: ProducerPromptBrand | null;
 }
 
 const TOOL_DESCRIPTIONS: Readonly<Record<StudioToolName, string>> = {
@@ -51,7 +64,7 @@ const TOOL_DESCRIPTIONS: Readonly<Record<StudioToolName, string>> = {
     'search Wikimedia Commons and the NASA Image and Video Library for freely licensed B-roll video or photos by query and get back candidates.',
   import_media: "bring a searched free media result into the project; its credit is recorded automatically.",
   view_images: 'look at up to 6 photos already in the project. Use this for photos, never extract_frames.',
-  get_motion_brands: 'the brands a motion video can use, with their formats and music tracks. Motion projects only.',
+  get_motion_brands: 'the brands a motion video can use (built-in and user-made, each with its `source`), with their formats and music tracks; a brand may have no music at all. Motion projects only.',
   read_motion_brief: 'read the motion brief saved for this project.',
   write_motion_brief:
     'save the motion brief (brand, script, one caption per image); the studio validates it and names the bad field.',
@@ -106,6 +119,23 @@ function pendingAssetSection(context: ProducerPromptContext): string | null {
   ].join('\n');
 }
 
+function brandContextSection(brand: ProducerPromptBrand, motion: boolean): string {
+  const assets = [
+    brand.hasMusic ? 'its own music' : 'no music',
+    `${String(brand.photos)} photo${brand.photos === 1 ? '' : 's'}`,
+    brand.devices.length === 0 ? 'no devices' : `devices: ${brand.devices.join(', ')}`,
+  ].join('; ');
+  return [
+    '## Brand',
+    '',
+    `- This project uses the brand "${brand.name}" (id ${brand.id}); say it out loud as "${brand.spokenName}".`,
+    `- Tagline: ${brand.tagline}${brand.url === null ? '' : `; web: ${brand.url}`}. Voice: ${brand.voice}. It has ${assets}.`,
+    '- Use the brand name, tagline and web in scripts and closings.',
+    ...(motion ? ['- For the motion brief use this brand, unless the user asks for another one.'] : []),
+    '- Brands are managed on the Marcas page of the studio; you cannot create or edit brands, so point the user there.',
+  ].join('\n');
+}
+
 export function buildProducerProjectSection(context: ProducerPromptContext): string {
   const scriptLines =
     context.producerScript === 'none'
@@ -117,12 +147,14 @@ export function buildProducerProjectSection(context: ProducerPromptContext): str
           '  none, propose the timing after watching frames of the video and confirm it in one round.',
         ];
   const pendingSection = pendingAssetSection(context);
+  const brandSection = context.brand === undefined || context.brand === null ? null : brandContextSection(context.brand, context.mode === 'motion');
 
   return [
     '# This project',
     '',
     `- Timeline: ${context.hasTimeline ? 'already saved — read it with get_timeline before you replace it' : 'none yet'}.`,
     '',
+    ...(brandSection === null ? [] : [brandSection, '']),
     assetSection(context),
     ...(pendingSection === null ? [] : ['', pendingSection]),
     ...scriptLines,
@@ -288,8 +320,9 @@ function buildProducerMotionRecipeSection(): string {
     '',
     '- 1) BRIEF INPUTS. Ask the user, in one round with your recommendation on each point, for the',
     '  goal of the video, the audience, the format (16:9 or 9:16) and the script — or offer to',
-    '  derive them from what they already said. Call get_motion_brands to see the brands and the',
-    '  formats and music tracks each one supports, and pick the brand and music from there.',
+    '  derive them from what they already said. Use the project brand (see "Brand" in this project);',
+    '  call get_motion_brands to see every brand and the formats and music tracks each one supports,',
+    '  and pick the music from there. A brand with no tracks takes `music: null`.',
     '- 2) LOOK AT THE IMAGES. Call get_project_overview, then view_images on every file under',
     '  raw/images/ (up to 6 per call) and write ONE short line per image describing what it shows.',
     '  Those lines are the `caption` of each entry in the brief.',

@@ -3,7 +3,7 @@ import type { MotionBrief, MotionStoryboard } from '@video-maker/motion-graphics
 import { join } from 'node:path/posix';
 
 import type { StoreConfig } from '../../config/store-config';
-import type { MotionBrandDocument, RenderApiDependencies } from '../../deps/render-api-dependencies';
+import type { MotionBrandDocument, MotionBrandSource, RenderApiDependencies } from '../../deps/render-api-dependencies';
 import { readMotionOverview } from '../../motion/read-motion-overview';
 import {
   availableImageRefs,
@@ -34,6 +34,7 @@ export interface MotionBrandMusicSummary {
 export interface MotionBrandSummary {
   readonly id: string;
   readonly name: string;
+  readonly source: MotionBrandSource;
   readonly formats: readonly string[];
   readonly music: readonly MotionBrandMusicSummary[];
 }
@@ -59,6 +60,7 @@ function toBrandSummary(document: MotionBrandDocument): MotionBrandSummary {
   return {
     id: manifest.id,
     name: manifest.name,
+    source: document.source,
     formats: SUPPORTED_FORMATS,
     music: manifest.music.map((track) => ({
       id: track.id,
@@ -208,6 +210,7 @@ export async function handlePutMotionBrief(
 
   await deps.storage.ensureDirectory(join(project.root, 'motion'));
   await deps.storage.writeTextFile(join(project.root, BRIEF_RELATIVE_PATH), `${JSON.stringify(brief, null, 2)}\n`);
+  deps.localStore.projects.setBrand(params.slug ?? '', brief.brand);
   return jsonResponse(200, brief);
 }
 

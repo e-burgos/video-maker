@@ -118,6 +118,20 @@ describe('createRenderApiClient', () => {
     expect(result.assetCounts.aroll).toBe(0);
   });
 
+  it('sets and clears the project brand with a PUT carrying only the brand', async () => {
+    const { fetchImpl, calls } = recordingFetch(() => jsonResponse({ slug: 'a b', brand: 'acme', brandMissing: false }));
+    const client = createRenderApiClient(fetchImpl);
+
+    const result = await client.putProjectBrand('a b', 'acme');
+    await client.putProjectBrand('a b', null);
+
+    expect(calls[0]?.url).toBe('/api/projects/a%20b/brand');
+    expect(calls[0]?.init?.method).toBe('PUT');
+    expect(calls[0]?.init?.body).toBe('{"brand":"acme"}');
+    expect(calls[1]?.init?.body).toBe('{"brand":null}');
+    expect(result.brand).toBe('acme');
+  });
+
   it('reads a project detail from EP-004 with an encoded slug', async () => {
     const { fetchImpl, calls } = recordingFetch(() =>
       jsonResponse({

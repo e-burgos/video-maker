@@ -62,6 +62,10 @@ export function MotionPage() {
     useCallback(() => client.getMotionBrands(), [client]),
     'motion-brands',
   );
+  const project = useAsyncResource(
+    useCallback(() => client.getProject(slug), [client, slug]),
+    `motion-project:${slug}`,
+  );
   const brief = useAsyncResource<MotionBrief | null>(
     useCallback(() => nullWhenMissing(BRIEF_NOT_FOUND, () => client.getMotionBrief(slug)), [client, slug]),
     `motion-brief:${slug}`,
@@ -96,11 +100,21 @@ export function MotionPage() {
   const imageFiles = imageAssets.map((asset) => imageFileName(asset.path));
 
   useEffect(() => {
-    if (draft !== null || brands.status !== 'ready' || brief.status !== 'ready' || brands.data === null) {
+    if (
+      draft !== null ||
+      brands.status !== 'ready' ||
+      brief.status !== 'ready' ||
+      project.status === 'loading' ||
+      brands.data === null
+    ) {
       return;
     }
-    setDraft(brief.data === null ? emptyBriefDraft(brands.data) : draftFromBrief(brief.data));
-  }, [brands.data, brands.status, brief.data, brief.status, draft]);
+    setDraft(
+      brief.data === null
+        ? emptyBriefDraft(brands.data, project.data?.brand ?? null)
+        : draftFromBrief(brief.data),
+    );
+  }, [brands.data, brands.status, brief.data, brief.status, project.data, project.status, draft]);
 
   const poll = useRenderJobPoll(jobId, (id) => client.getRenderJob(id));
   const job = poll.job;
@@ -167,7 +181,8 @@ export function MotionPage() {
   }
 
   const videoPhase: MotionPhase = storyboard.data === null ? 'all' : 'video';
-  const loading = draft === null && (brands.status === 'loading' || brief.status === 'loading');
+  const loading =
+    draft === null && (brands.status === 'loading' || brief.status === 'loading' || project.status === 'loading');
   const loadError = brands.error ?? (brief.status === 'error' ? brief.error : null);
 
   return (

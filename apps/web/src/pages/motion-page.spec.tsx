@@ -62,6 +62,7 @@ function imageAsset(name: string) {
 
 function renderPage(client: Partial<RenderApiClient>) {
   const defaults: Partial<RenderApiClient> = {
+    getProject: vi.fn().mockResolvedValue({ slug: 'promo', mode: 'motion', brand: null }),
     getMotionBrands: vi.fn().mockResolvedValue(BRANDS),
     getMotionBrief: vi.fn().mockRejectedValue(notFound('BRIEF_NOT_FOUND')),
     getMotionStoryboard: vi.fn().mockRejectedValue(notFound('STORYBOARD_NOT_FOUND')),
@@ -107,6 +108,41 @@ describe('MotionPage', () => {
     expect((screen.getByRole('radio', { name: '16:9' }) as HTMLInputElement).checked).toBe(true);
     expect((screen.getByLabelText('Music') as HTMLSelectElement).value).toBe('auto');
     expect((screen.getByLabelText('Sync scenes to the beat') as HTMLInputElement).checked).toBe(true);
+  });
+
+  it('defaults the brief to the project brand when no brief exists, without touching the brief request', async () => {
+    const getMotionBrief = vi.fn().mockRejectedValue(notFound('BRIEF_NOT_FOUND'));
+    renderPage({
+      getProject: vi.fn().mockResolvedValue({ slug: 'promo', mode: 'motion', brand: 'other' }),
+      getMotionBrief,
+    });
+
+    expect(((await screen.findByLabelText('Brand')) as HTMLSelectElement).value).toBe('other');
+    expect((screen.getByLabelText('Music') as HTMLSelectElement).value).toBe('none');
+    expect(getMotionBrief).toHaveBeenCalledTimes(1);
+  });
+
+  it('offers only no music for a brand without tracks and keeps no music when switching back to one with tracks', async () => {
+    renderPage({});
+
+    const brand = (await screen.findByLabelText('Brand')) as HTMLSelectElement;
+    fireEvent.change(brand, { target: { value: 'other' } });
+
+    const music = screen.getByLabelText('Music') as HTMLSelectElement;
+    expect(Array.from(music.options).map((option) => option.value)).toEqual(['none']);
+    expect(music.value).toBe('none');
+
+    fireEvent.change(brand, { target: { value: 'displayads' } });
+    expect(music.value).toBe('none');
+  });
+
+  it('marks the user brands in the select', async () => {
+    renderPage({
+      getMotionBrands: vi.fn().mockResolvedValue([{ ...BRANDS[0], source: 'built-in' }, { ...BRANDS[1], source: 'user' }]),
+    });
+
+    const brand = (await screen.findByLabelText('Brand')) as HTMLSelectElement;
+    expect(Array.from(brand.options).map((option) => option.textContent)).toEqual(['DisplayAds', 'Other (mine)']);
   });
 
   it('loads an existing brief into the form', async () => {

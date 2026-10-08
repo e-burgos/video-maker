@@ -38,7 +38,7 @@ const REAL_ASSETS = fileURLToPath(new URL('../../../../../libs/motion-graphics/a
 const BRAND_JSON = readFileSync(`${REAL_ASSETS}brands/displayads/brand.json`, 'utf8');
 const STORYBOARD_JSON = readFileSync(`${REAL_ASSETS}storyboards/displayads/easy-pro.json`, 'utf8');
 
-const BRAND_SUMMARY_KEYS = ['formats', 'id', 'music', 'name'];
+const BRAND_SUMMARY_KEYS = ['formats', 'id', 'music', 'name', 'source'];
 const MUSIC_SUMMARY_KEYS = ['bpm', 'hasDrop', 'id', 'mood'];
 
 async function* textBody(text: string): AsyncGenerator<Uint8Array> {
@@ -98,6 +98,27 @@ describe('handleListMotionBrands', () => {
     expect(typeof music[0]?.hasDrop).toBe('boolean');
   });
 
+  it('summarizes a minimal user brand with no music and reports its source', async () => {
+    const minimal = {
+      id: 'minimal',
+      name: 'Minimal',
+      spokenName: 'Minimal',
+      tagline: 'Menos es más.',
+      logo: 'img/logo.svg',
+      palette: { background: '#101820', accent: '#ff5500', accent2: '#00aaff', text: '#ffffff' },
+      fonts: [{ family: 'Inter', file: 'fonts/inter.woff2' }],
+      devices: {},
+      images: {},
+      music: [],
+      voice: { id: 'es_AR-daniela-high', lengthScale: 1.08 },
+    };
+    const { deps } = setup('motion', [], [{ id: 'minimal', source: 'user', manifest: minimal }]);
+
+    const response = await handleListMotionBrands(deps);
+
+    expect(response.body).toEqual([{ id: 'minimal', name: 'Minimal', source: 'user', formats: ['16:9', '9:16'], music: [] }]);
+  });
+
   it('answers an empty list when the assets root has no brands', async () => {
     const { deps } = setup('motion', [], []);
 
@@ -126,6 +147,15 @@ describe('motion brief handlers', () => {
     expect(get.body).toEqual(put.body);
     expect(get.body).toMatchObject({ brand: 'displayads', format: '9:16', beatSync: true });
     expect(JSON.parse(await storage.readTextFile('/media/promo/motion/brief.json'))).toEqual(get.body);
+  });
+
+  it('keeps the project brand in sync with the brand of the saved brief', async () => {
+    const { deps } = setup('motion', [{ path: '/media/promo/raw/images/shot.png', contents: 'png' }]);
+    deps.localStore.projects.setBrand('promo', 'other');
+
+    await handlePutMotionBrief(deps, STORE, { slug: 'promo' }, putRequest('/projects/promo/motion/brief', VALID_BRIEF));
+
+    expect(deps.localStore.projects.get('promo')?.brand).toBe('displayads');
   });
 
   it('answers 404 BRIEF_NOT_FOUND before any brief was saved', async () => {

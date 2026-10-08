@@ -82,6 +82,7 @@ describe('StudioLayout project nav', () => {
     const client = {
       getHealth: vi.fn().mockRejectedValue(new Error('not needed here')),
       getProject: vi.fn().mockResolvedValue({ slug: 'smoke-ingest', ...(mode === undefined ? {} : { mode }) }),
+      listBrands: vi.fn().mockResolvedValue([]),
     } as unknown as RenderApiClient;
 
     render(
@@ -106,7 +107,7 @@ describe('StudioLayout project nav', () => {
   }
 
   function navHrefs(): (string | null)[] {
-    return Array.from(screen.getByTestId('project-nav').querySelectorAll('a')).map((link) =>
+    return Array.from(screen.getByTestId('project-nav').querySelectorAll('a:not([data-testid="project-brand-motion-link"])')).map((link) =>
       link.getAttribute('href'),
     );
   }

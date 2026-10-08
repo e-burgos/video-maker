@@ -59,11 +59,13 @@ export type ProjectSummary = {
   slug: string;
   layout: ProjectLayout;
   mode?: ProjectMode;
+  brand?: string | null;
 };
 
 export type CreateProjectInput = {
   slug: string;
   mode?: ProjectMode;
+  brand?: string;
 };
 
 export type VideoCategory = {
@@ -101,6 +103,7 @@ export type VideoDeletion = {
 export type AssetCounts = Record<AssetRole, number>;
 
 export type ProjectDetail = ProjectSummary & {
+  brandMissing?: boolean;
   assetSource: AssetSource;
   assetCounts: AssetCounts;
 };

@@ -100,6 +100,10 @@ export const MIGRATIONS: readonly Migration[] = [
     version: 4,
     statements: [`ALTER TABLE projects ADD COLUMN mode TEXT NOT NULL DEFAULT 'footage'`],
   },
+  {
+    version: 5,
+    statements: [`ALTER TABLE projects ADD COLUMN brand TEXT`],
+  },
 ];
 
 export function currentUserVersion(sqlite: Database.Database): number {

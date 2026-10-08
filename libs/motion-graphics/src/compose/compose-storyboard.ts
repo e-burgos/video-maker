@@ -94,6 +94,11 @@ function resolveMusic(storyboard: MotionStoryboard, brand: BrandManifest) {
 
 const FONT_FORMAT_BY_EXTENSION: Record<string, string> = { woff2: 'woff2', ttf: 'truetype', otf: 'opentype' };
 
+export function cornerBug(brand: BrandManifest): string {
+  const mark = `<img src="${BRAND_ASSET_DIR}/${brandIsotipo(brand)}" alt="" />`;
+  return brand.isotipo === undefined ? mark : `${mark}<span>${esc(brand.name)}</span>`;
+}
+
 function fontFormat(file: string): string {
   return FONT_FORMAT_BY_EXTENSION[file.slice(file.lastIndexOf('.') + 1).toLowerCase()] ?? 'woff2';
 }
@@ -157,7 +162,7 @@ export function composeStoryboard(storyboard: MotionStoryboard, brand: BrandMani
       </div>
       ${sections}
       <div class="mg-layer" id="mg-hud">
-        <div id="mg-bug"><img src="${BRAND_ASSET_DIR}/${brandIsotipo(brand)}" alt="" /><span>${esc(brand.name)}</span></div>
+        <div id="mg-bug">${cornerBug(brand)}</div>
         <div id="mg-chapter"></div>
         <div id="mg-ticks"><i></i><i></i><i></i><i></i></div>
       </div>

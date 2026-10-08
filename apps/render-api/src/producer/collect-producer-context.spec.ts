@@ -80,4 +80,48 @@ describe('collectProducerContext', () => {
       { fileName: 'dropped.mp4', proposedRole: 'aroll', proposalReason: 'has-audio' },
     ]);
   });
+
+  it('summarizes the project brand from the brand library and leaves null when it has none or it is gone', async () => {
+    const callLog = createCallLog();
+    const storage = createFakeObjectStorage(callLog, { directories: ['/media/demo-01', '/media/demo-01/raw', '/media/demo-01/work'] });
+    const manifest = {
+      id: 'acme',
+      name: 'Acme',
+      spokenName: 'Acme Ei',
+      tagline: 'Todo bajo control.',
+      url: 'acme.test',
+      logo: 'img/logo.svg',
+      palette: { background: '#101820', accent: '#ff5500', accent2: '#00aaff', text: '#ffffff' },
+      fonts: [{ family: 'Inter', file: 'fonts/inter.woff2' }],
+      devices: { counter: { name: 'Counter', image: 'img/counter.png', kind: 'counter' }, old: { name: 'Old', image: 'img/old.png', kind: 'box', retired: true } },
+      images: { local: 'img/local.jpg', cafe: 'img/cafe.jpg' },
+      music: [],
+      voice: { id: 'es_AR-daniela-high', lengthScale: 1.08 },
+    };
+    const deps = createFakeRenderApiDependencies(callLog, {
+      storage,
+      listMotionBrands: async () => [{ id: 'acme', source: 'user', manifest }],
+    });
+    deps.localStore.projects.insert('demo-01', null, 'motion', 'acme');
+
+    const context = await collectProducerContext(deps, PROJECT, INPUT);
+
+    expect(Object.keys(context.brand ?? {}).sort()).toEqual(['devices', 'hasMusic', 'id', 'name', 'photos', 'spokenName', 'tagline', 'url', 'voice']);
+    expect(context.brand).toEqual({
+      id: 'acme',
+      name: 'Acme',
+      spokenName: 'Acme Ei',
+      tagline: 'Todo bajo control.',
+      url: 'acme.test',
+      voice: 'es_AR-daniela-high',
+      hasMusic: false,
+      photos: 2,
+      devices: ['Counter'],
+    });
+
+    deps.localStore.projects.setBrand('demo-01', 'gone');
+    expect((await collectProducerContext(deps, PROJECT, INPUT)).brand).toBeNull();
+    deps.localStore.projects.setBrand('demo-01', null);
+    expect((await collectProducerContext(deps, PROJECT, INPUT)).brand).toBeNull();
+  });
 });

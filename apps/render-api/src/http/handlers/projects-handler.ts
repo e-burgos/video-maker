@@ -14,6 +14,7 @@ import type { StoreConfig } from '../../config/store-config';
 import type { ObjectStorage } from '../../deps/object-storage';
 import type { RenderApiDependencies } from '../../deps/render-api-dependencies';
 import { PipelineStageError } from '../../errors/pipeline-stage-error';
+import { assertBrandExists, brandExists } from '../../store/project-brand';
 import { isValidProjectSlug } from '../../store/project-slug';
 import { findCategory, findFolder, placementOf } from '../../store/organization';
 import type { Organization, VideoPlacement } from '../../store/organization';
@@ -29,10 +30,12 @@ import type { RouteParams } from '../router';
 export interface ProjectSummary {
   readonly slug: string;
   readonly mode: ProjectMode;
+  readonly brand: string | null;
   readonly layout: ProjectLayoutFlags;
 }
 
 export interface ProjectDetail extends ProjectSummary {
+  readonly brandMissing: boolean;
   readonly assetSource: 'catalog' | 'raw-scan';
   readonly assetCounts: Readonly<Record<AssetRole, number>>;
 }
@@ -65,6 +68,22 @@ function extractModeFromBody(value: unknown): ProjectMode {
   return candidate as ProjectMode;
 }
 
+function extractBrandFromBody(value: unknown): string | null {
+  const candidate = (value as { brand?: unknown }).brand;
+  if (candidate === undefined || candidate === null) {
+    return null;
+  }
+  if (typeof candidate !== 'string' || candidate.length === 0) {
+    throw new PipelineStageError({
+      code: 'REQUEST_BODY_INVALID_JSON',
+      stage: null,
+      resource: 'brand',
+      expected: 'a brand id string or null',
+    });
+  }
+  return candidate;
+}
+
 function assertValidProjectSlug(slug: string): void {
   if (!isValidProjectSlug(slug)) {
     throw new PipelineStageError({
@@ -92,6 +111,8 @@ async function buildProjectDetail(
   project: MediaProject,
   slug: string,
   mode: ProjectMode,
+  brand: string | null,
+  brandMissing: boolean,
 ): Promise<ProjectDetail> {
   const layout = await computeLayoutFlags(storage, project);
   const projectAssets = await resolveProjectAssets(storage, project);
@@ -99,6 +120,8 @@ async function buildProjectDetail(
   return {
     slug,
     mode,
+    brand,
+    brandMissing,
     layout,
     assetSource: projectAssets.source,
     assetCounts: countAssetsByRole(projectAssets.assets),
@@ -117,7 +140,12 @@ export async function handleListProjects(
     if (projectStat === null || projectStat.kind !== 'directory') {
       continue;
     }
-    summaries.push({ slug: record.slug, mode: record.mode, layout: await computeLayoutFlags(deps.storage, project) });
+    summaries.push({
+      slug: record.slug,
+      mode: record.mode,
+      brand: record.brand,
+      layout: await computeLayoutFlags(deps.storage, project),
+    });
   }
 
   return jsonResponse(200, summaries);
@@ -157,6 +185,10 @@ export async function handleCreateProject(
 
   assertValidProjectSlug(slug);
   const mode = extractModeFromBody(bodyResult.value);
+  const brand = extractBrandFromBody(bodyResult.value);
+  if (brand !== null) {
+    await assertBrandExists(deps, store, brand);
+  }
 
   const project = resolveMediaProject(join(store.mediaRoot, slug));
 
@@ -165,7 +197,7 @@ export async function handleCreateProject(
     throw new PipelineStageError({ code: 'PROJECT_ALREADY_EXISTS', stage: null, resource: slug });
   }
 
-  deps.localStore.projects.insert(slug, null, mode);
+  deps.localStore.projects.insert(slug, null, mode, brand);
 
   const directoriesInOrder = [
     join(project.rawDir, 'aroll'),
@@ -182,7 +214,7 @@ export async function handleCreateProject(
     await deps.storage.ensureDirectory(directory);
   }
 
-  const detail = await buildProjectDetail(deps.storage, project, slug, mode);
+  const detail = await buildProjectDetail(deps.storage, project, slug, mode, brand, false);
 
   return {
     status: 201,
@@ -205,9 +237,60 @@ export async function handleGetProject(
     throw new PipelineStageError({ code: 'PROJECT_NOT_FOUND', stage: null, resource: slug });
   }
 
-  const mode = deps.localStore.projects.get(slug)?.mode ?? 'footage';
+  return jsonResponse(200, await describeStoredProject(deps, store, project, slug));
+}
 
-  return jsonResponse(200, await buildProjectDetail(deps.storage, project, slug, mode));
+async function describeStoredProject(
+  deps: RenderApiDependencies,
+  store: StoreConfig,
+  project: MediaProject,
+  slug: string,
+): Promise<ProjectDetail> {
+  const record = deps.localStore.projects.get(slug);
+  const brand = record?.brand ?? null;
+  const brandMissing = brand !== null && !(await brandExists(deps, store, brand));
+  return buildProjectDetail(deps.storage, project, slug, record?.mode ?? 'footage', brand, brandMissing);
+}
+
+export async function handlePutProjectBrand(
+  deps: RenderApiDependencies,
+  store: StoreConfig,
+  params: RouteParams,
+  request: HttpRequestLine,
+): Promise<HttpResponse> {
+  const slug = params.slug ?? '';
+  assertValidProjectSlug(slug);
+
+  const project = resolveMediaProject(join(store.mediaRoot, slug));
+  await assertProjectDirectoryExists(deps, project, slug);
+
+  const bodyResult = await readJsonBody(request.body.stream(), MAX_JSON_BODY_BYTES);
+  if (bodyResult.kind === 'too-large') {
+    throw new PipelineStageError({
+      code: 'REQUEST_BODY_TOO_LARGE',
+      stage: null,
+      expected: `at most ${MAX_JSON_BODY_BYTES} bytes`,
+    });
+  }
+  if (bodyResult.kind !== 'parsed' || typeof bodyResult.value !== 'object' || bodyResult.value === null || Array.isArray(bodyResult.value)) {
+    throw new PipelineStageError({
+      code: 'REQUEST_BODY_INVALID_JSON',
+      stage: null,
+      expected: 'a JSON object',
+    });
+  }
+
+  const brand = extractBrandFromBody(bodyResult.value);
+  if (brand !== null) {
+    await assertBrandExists(deps, store, brand);
+  }
+
+  if (!deps.localStore.projects.exists(slug)) {
+    deps.localStore.projects.insert(slug, deps.clock.nowIso());
+  }
+  deps.localStore.projects.setBrand(slug, brand);
+
+  return jsonResponse(200, await describeStoredProject(deps, store, project, slug));
 }
 
 function extractPlacementFromBody(value: unknown): {

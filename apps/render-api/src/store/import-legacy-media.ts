@@ -43,6 +43,16 @@ async function hasMotionBrief(deps: RenderApiDependencies, store: StoreConfig, s
   return stat !== null && stat.kind === 'file';
 }
 
+async function readBriefBrand(deps: RenderApiDependencies, store: StoreConfig, slug: string): Promise<string | null> {
+  try {
+    const raw = await deps.storage.readTextFile(join(store.mediaRoot, slug, 'motion', 'brief.json'));
+    const brand = (JSON.parse(raw) as { brand?: unknown }).brand;
+    return typeof brand === 'string' && brand.length > 0 ? brand : null;
+  } catch {
+    return null;
+  }
+}
+
 async function importProjectDirectories(deps: RenderApiDependencies, store: StoreConfig): Promise<number> {
   const entries = await deps.storage.listDirectory(store.mediaRoot);
   const slugs = (entries ?? [])
@@ -52,9 +62,15 @@ async function importProjectDirectories(deps: RenderApiDependencies, store: Stor
   let imported = 0;
   for (const slug of slugs) {
     if (!deps.localStore.projects.exists(slug)) {
-      const mode = (await hasMotionBrief(deps, store, slug)) ? 'motion' : 'footage';
-      deps.localStore.projects.insert(slug, deps.clock.nowIso(), mode);
+      const isMotion = await hasMotionBrief(deps, store, slug);
+      const brand = isMotion ? await readBriefBrand(deps, store, slug) : null;
+      deps.localStore.projects.insert(slug, deps.clock.nowIso(), isMotion ? 'motion' : 'footage', brand);
       imported += 1;
+    } else if (deps.localStore.projects.get(slug)?.brand === null && (await hasMotionBrief(deps, store, slug))) {
+      const brand = await readBriefBrand(deps, store, slug);
+      if (brand !== null) {
+        deps.localStore.projects.setBrand(slug, brand);
+      }
     }
   }
   return imported;

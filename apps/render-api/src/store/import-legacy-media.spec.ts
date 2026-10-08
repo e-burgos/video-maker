@@ -93,6 +93,35 @@ describe('importLegacyMedia', () => {
     expect(deps.localStore.projects.get('plain')?.mode).toBe('footage');
   });
 
+  it('takes the brand of a motion brief for a new row and for an existing row without brand, and leaves footage unbranded', async () => {
+    const { deps } = seed(
+      [
+        { path: `${STORE.mediaRoot}/promo/motion/brief.json`, contents: JSON.stringify({ brand: 'acme' }) },
+        { path: `${STORE.mediaRoot}/known/motion/brief.json`, contents: JSON.stringify({ brand: 'beta' }) },
+        { path: `${STORE.mediaRoot}/fixed/motion/brief.json`, contents: JSON.stringify({ brand: 'beta' }) },
+        { path: `${STORE.mediaRoot}/broken/motion/brief.json`, contents: 'not json' },
+      ],
+      [
+        `${STORE.mediaRoot}/promo`,
+        `${STORE.mediaRoot}/known`,
+        `${STORE.mediaRoot}/fixed`,
+        `${STORE.mediaRoot}/broken`,
+        `${STORE.mediaRoot}/plain`,
+      ],
+    );
+    deps.localStore.projects.insert('known', null, 'motion');
+    deps.localStore.projects.insert('fixed', null, 'motion', 'chosen');
+
+    await importLegacyMedia(deps, STORE);
+    await importLegacyMedia(deps, STORE);
+
+    expect(deps.localStore.projects.get('promo')?.brand).toBe('acme');
+    expect(deps.localStore.projects.get('known')?.brand).toBe('beta');
+    expect(deps.localStore.projects.get('fixed')?.brand).toBe('chosen');
+    expect(deps.localStore.projects.get('broken')?.brand).toBeNull();
+    expect(deps.localStore.projects.get('plain')?.brand).toBeNull();
+  });
+
   it('imports every project directory that does not have a row yet', async () => {
     const { deps } = seed(
       [],

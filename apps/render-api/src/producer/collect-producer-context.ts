@@ -1,5 +1,6 @@
 import { timelinePath, toAbsolutePath } from '@video-maker/auto-montage';
 import type { AssetRole, MediaProject } from '@video-maker/auto-montage';
+import { activeDeviceIds, parseBrandManifest } from '@video-maker/motion-graphics';
 
 import type { RenderApiDependencies } from '../deps/render-api-dependencies';
 import { resolveProjectAssets } from '../store/project-assets';
@@ -16,6 +17,18 @@ export interface ProducerContextPendingAsset {
   readonly proposalReason: string;
 }
 
+export interface ProducerBrandContext {
+  readonly id: string;
+  readonly name: string;
+  readonly spokenName: string;
+  readonly tagline: string;
+  readonly url: string | null;
+  readonly voice: string;
+  readonly hasMusic: boolean;
+  readonly photos: number;
+  readonly devices: readonly string[];
+}
+
 export interface ProducerProjectContext {
   readonly slug: string;
   readonly projectRoot: string;
@@ -27,6 +40,7 @@ export interface ProducerProjectContext {
   readonly hasTimeline: boolean;
   readonly producerScript: 'none' | 'plain' | 'timed';
   readonly mode: 'footage' | 'motion';
+  readonly brand: ProducerBrandContext | null;
 }
 
 export interface ProducerContextInput {
@@ -63,7 +77,34 @@ export async function collectProducerContext(
     hasTimeline: timelineStat !== null && timelineStat.kind === 'file',
     producerScript,
     mode: deps.localStore.projects.get(project.slug)?.mode ?? 'footage',
+    brand: await readProjectBrand(deps, deps.localStore.projects.get(project.slug)?.brand ?? null),
   };
+}
+
+async function readProjectBrand(deps: RenderApiDependencies, brandId: string | null): Promise<ProducerBrandContext | null> {
+  if (brandId === null) {
+    return null;
+  }
+  const document = (await deps.listMotionBrands()).find((candidate) => candidate.id === brandId);
+  if (document === undefined) {
+    return null;
+  }
+  try {
+    const manifest = parseBrandManifest(document.manifest);
+    return {
+      id: manifest.id,
+      name: manifest.name,
+      spokenName: manifest.spokenName,
+      tagline: manifest.tagline,
+      url: manifest.url ?? null,
+      voice: manifest.voice.id,
+      hasMusic: manifest.music.length > 0,
+      photos: Object.keys(manifest.images).length,
+      devices: activeDeviceIds(manifest).map((id) => manifest.devices[id]?.name ?? id),
+    };
+  } catch {
+    return null;
+  }
 }
 
 const TIME_MARK_PATTERN = /^\s*\[\d{1,2}:\d{2}/mu;

@@ -12,6 +12,7 @@ import {
   handleDeleteProject,
   handleGetProject,
   handleListProjects,
+  handlePutProjectBrand,
   handlePutProjectPlacement,
 } from './projects-handler';
 
@@ -40,8 +41,8 @@ async function caughtErrorPayload(promise: Promise<unknown>): Promise<ReturnType
   );
 }
 
-const PROJECT_SUMMARY_KEYS = ['layout', 'mode', 'slug'];
-const PROJECT_DETAIL_KEYS = ['assetCounts', 'assetSource', 'layout', 'mode', 'slug'];
+const PROJECT_SUMMARY_KEYS = ['brand', 'layout', 'mode', 'slug'];
+const PROJECT_DETAIL_KEYS = ['assetCounts', 'assetSource', 'brand', 'brandMissing', 'layout', 'mode', 'slug'];
 const PLACEMENT_BODY_KEYS = ['placement', 'slug'];
 const PLACEMENT_KEYS = ['archived', 'categoryId', 'folderId'];
 const DELETE_BODY_KEYS = ['deleted', 'slug'];
@@ -85,11 +86,13 @@ describe('handleListProjects', () => {
       {
         slug: 'acme-launch',
         mode: 'footage',
+        brand: null,
         layout: { raw: true, catalog: true, timeline: false, edl: false, out: true },
       },
       {
         slug: 'zeta-project',
         mode: 'footage',
+        brand: null,
         layout: { raw: false, catalog: false, timeline: false, edl: false, out: false },
       },
     ]);
@@ -114,6 +117,7 @@ describe('handleListProjects', () => {
       {
         slug: 'valid-project',
         mode: 'footage',
+        brand: null,
         layout: { raw: false, catalog: false, timeline: false, edl: false, out: false },
       },
     ]);
@@ -150,6 +154,8 @@ describe('handleCreateProject', () => {
     expect(response.body).toEqual({
       slug: 'smoke-ingest',
       mode: 'footage',
+      brand: null,
+      brandMissing: false,
       layout: { raw: false, catalog: false, timeline: false, edl: false, out: false },
       assetSource: 'raw-scan',
       assetCounts: { aroll: 0, broll: 0, image: 0, audio: 0, voice: 0, logo: 0 },
@@ -521,5 +527,111 @@ describe('project mode', () => {
     expect(payload.code).toBe('REQUEST_BODY_INVALID_JSON');
     expect(payload.resource).toBe('mode');
     expect(deps.localStore.projects.exists('promo')).toBe(false);
+  });
+});
+
+const ACME_BRAND_FILE = { path: '/brands/acme/brand.json', contents: '{}' };
+
+function brandedFixture(slug: string, brand: string | null = null) {
+  const callLog = createCallLog();
+  const storage = createFakeObjectStorage(callLog, {
+    directories: [`${STORE.mediaRoot}/${slug}`, `${STORE.mediaRoot}/${slug}/raw`, `${STORE.mediaRoot}/${slug}/out`],
+    files: [ACME_BRAND_FILE],
+  });
+  const deps = createFakeRenderApiDependencies(callLog, { storage });
+  deps.localStore.projects.insert(slug, null, 'motion', brand);
+  return { callLog, storage, deps };
+}
+
+describe('project brand', () => {
+  it('creates a project with a library brand and reports it in the detail and the list', async () => {
+    const callLog = createCallLog();
+    const storage = createFakeObjectStorage(callLog, { files: [ACME_BRAND_FILE] });
+    const deps = createFakeRenderApiDependencies(callLog, { storage });
+    const request = requestLine({
+      method: 'POST',
+      path: '/projects',
+      body: jsonBody({ slug: 'con-marca', mode: 'motion', brand: 'acme' }),
+    });
+
+    const response = await handleCreateProject(deps, STORE, undefined, request);
+
+    expect(response.status).toBe(201);
+    expect(Object.keys(response.body as object).sort()).toEqual(PROJECT_DETAIL_KEYS);
+    expect(response.body).toMatchObject({ brand: 'acme', brandMissing: false });
+    const list = await handleListProjects(deps, STORE);
+    expect(Object.keys((list.body as readonly object[])[0] as object).sort()).toEqual(PROJECT_SUMMARY_KEYS);
+    expect(deps.localStore.projects.get('con-marca')?.brand).toBe('acme');
+  });
+
+  it('rejects a brand that is not in the library without creating the project', async () => {
+    const callLog = createCallLog();
+    const deps = createFakeRenderApiDependencies(callLog, { storage: createFakeObjectStorage(callLog) });
+    const request = requestLine({ method: 'POST', path: '/projects', body: jsonBody({ slug: 'sin-marca', brand: 'ghost' }) });
+
+    await expect(handleCreateProject(deps, STORE, undefined, request)).rejects.toMatchObject({ code: 'BRAND_UNKNOWN' });
+    expect(deps.localStore.projects.exists('sin-marca')).toBe(false);
+  });
+
+  it('rejects a non-string brand', async () => {
+    const callLog = createCallLog();
+    const deps = createFakeRenderApiDependencies(callLog, { storage: createFakeObjectStorage(callLog) });
+    const request = requestLine({ method: 'POST', path: '/projects', body: jsonBody({ slug: 'otra', brand: 7 }) });
+
+    await expect(handleCreateProject(deps, STORE, undefined, request)).rejects.toMatchObject({
+      code: 'REQUEST_BODY_INVALID_JSON',
+    });
+  });
+
+  it('changes and clears the brand with PUT and answers the project detail', async () => {
+    const { deps } = brandedFixture('cambiar');
+
+    const set = await handlePutProjectBrand(
+      deps,
+      STORE,
+      { slug: 'cambiar' },
+      requestLine({ method: 'PUT', path: '/projects/cambiar/brand', body: jsonBody({ brand: 'acme' }) }),
+    );
+    expect(set.status).toBe(200);
+    expect(Object.keys(set.body as object).sort()).toEqual(PROJECT_DETAIL_KEYS);
+    expect(set.body).toMatchObject({ slug: 'cambiar', brand: 'acme', brandMissing: false });
+
+    const cleared = await handlePutProjectBrand(
+      deps,
+      STORE,
+      { slug: 'cambiar' },
+      requestLine({ method: 'PUT', path: '/projects/cambiar/brand', body: jsonBody({ brand: null }) }),
+    );
+    expect(cleared.body).toMatchObject({ brand: null, brandMissing: false });
+  });
+
+  it('rejects an unknown brand and a missing project on PUT', async () => {
+    const { deps } = brandedFixture('cambiar');
+
+    await expect(
+      handlePutProjectBrand(
+        deps,
+        STORE,
+        { slug: 'cambiar' },
+        requestLine({ method: 'PUT', path: '/projects/cambiar/brand', body: jsonBody({ brand: 'ghost' }) }),
+      ),
+    ).rejects.toMatchObject({ code: 'BRAND_UNKNOWN' });
+    await expect(
+      handlePutProjectBrand(
+        deps,
+        STORE,
+        { slug: 'no-existe' },
+        requestLine({ method: 'PUT', path: '/projects/no-existe/brand', body: jsonBody({ brand: 'acme' }) }),
+      ),
+    ).rejects.toMatchObject({ code: 'PROJECT_NOT_FOUND' });
+  });
+
+  it('flags a project whose brand was deleted from the library without touching the row', async () => {
+    const { deps } = brandedFixture('huerfano', 'borrada');
+
+    const response = await handleGetProject(deps, STORE, { slug: 'huerfano' });
+
+    expect(response.body).toMatchObject({ brand: 'borrada', brandMissing: true });
+    expect(deps.localStore.projects.get('huerfano')?.brand).toBe('borrada');
   });
 });

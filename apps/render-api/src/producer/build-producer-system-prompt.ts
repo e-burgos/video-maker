@@ -11,6 +11,7 @@ function toPromptContext(context: ProducerProjectContext): ProducerPromptContext
     hasTimeline: context.hasTimeline,
     producerScript: context.producerScript,
     mode: context.mode,
+    brand: context.brand,
   };
 }
 

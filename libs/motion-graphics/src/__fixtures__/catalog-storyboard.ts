@@ -27,6 +27,20 @@ export const testBrand: BrandManifest = {
   voice: { id: 'es_AR-daniela-high', lengthScale: 1.08 },
 };
 
+export const minimalBrand: BrandManifest = {
+  id: 'minimal',
+  name: 'Minimal',
+  spokenName: 'Minimal',
+  tagline: 'Menos es más.',
+  logo: 'img/logo.svg',
+  palette: { background: '#101820', accent: '#ff5500', accent2: '#00aaff', text: '#ffffff' },
+  fonts: [{ family: 'Inter', file: 'fonts/inter.woff2' }],
+  devices: {},
+  images: {},
+  music: [],
+  voice: { id: 'es_AR-daniela-high', lengthScale: 1.08 },
+};
+
 export const catalogStoryboard: MotionStoryboard = {
   version: 1,
   title: 'Catálogo <completo>',

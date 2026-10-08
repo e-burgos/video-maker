@@ -1,21 +1,27 @@
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
+import { MemoryRouter } from 'react-router-dom';
 import { describe, expect, it, vi } from 'vitest';
 
 import { CreateProjectForm } from './create-project-form';
 import { RenderApiError } from '../api/render-api-error';
 import { RenderApiProvider } from '../api/render-api-context';
 import type { RenderApiClient } from '../api/render-api-client';
+import { brandSummary } from '../api/__fixtures__/brand';
+import type { BrandSummary } from '../api/brand-types';
 
 function renderForm(
   createProject: RenderApiClient['createProject'],
   onCreated = vi.fn(),
   existingSlugs: readonly string[] = [],
   onCancel?: () => void,
+  brands: BrandSummary[] = [],
 ) {
-  const client = { createProject } as unknown as RenderApiClient;
+  const client = { createProject, listBrands: vi.fn().mockResolvedValue(brands) } as unknown as RenderApiClient;
   render(
     <RenderApiProvider client={client}>
-      <CreateProjectForm existingSlugs={existingSlugs} onCreated={onCreated} onCancel={onCancel} />
+      <MemoryRouter>
+        <CreateProjectForm existingSlugs={existingSlugs} onCreated={onCreated} onCancel={onCancel} />
+      </MemoryRouter>
     </RenderApiProvider>,
   );
   return onCreated;
@@ -105,5 +111,49 @@ describe('CreateProjectForm', () => {
     typeName('Promo');
 
     await waitFor(() => expect(createProject).toHaveBeenCalledWith({ slug: 'promo', mode: 'motion' }));
+  });
+
+  it('offers the brands with their logo, none selected for raw footage, and links to manage them', async () => {
+    renderForm(vi.fn() as unknown as RenderApiClient['createProject'], vi.fn(), [], undefined, [
+      brandSummary({ id: 'acme', name: 'Acme' }),
+      brandSummary({ id: 'beta', name: 'Beta', logo: null }),
+    ]);
+
+    await waitFor(() => expect(screen.getByRole('radio', { name: 'Acme' })).toBeTruthy());
+    expect((screen.getByRole('radio', { name: 'No brand' }) as HTMLInputElement).checked).toBe(true);
+    expect(screen.getByAltText('Logo of Acme').getAttribute('src')).toContain('/brands/acme/files/img/logo.svg');
+    expect(screen.getByTestId('brand-picker-manage').getAttribute('href')).toBe('/brands');
+  });
+
+  it('sends the chosen brand when creating the video', async () => {
+    const createProject = vi.fn().mockResolvedValue({ slug: 'promo' });
+    renderForm(createProject as unknown as RenderApiClient['createProject'], vi.fn(), [], undefined, [
+      brandSummary({ id: 'acme', name: 'Acme' }),
+    ]);
+
+    fireEvent.click(await screen.findByRole('radio', { name: 'Acme' }));
+    typeName('Promo');
+
+    await waitFor(() =>
+      expect(createProject).toHaveBeenCalledWith({ slug: 'promo', mode: 'footage', brand: 'acme' }),
+    );
+  });
+
+  it('defaults a motion video to the first brand and removes the no-brand option', async () => {
+    const createProject = vi.fn().mockResolvedValue({ slug: 'promo' });
+    renderForm(createProject as unknown as RenderApiClient['createProject'], vi.fn(), [], undefined, [
+      brandSummary({ id: 'acme', name: 'Acme' }),
+      brandSummary({ id: 'beta', name: 'Beta' }),
+    ]);
+
+    await screen.findByRole('radio', { name: 'Acme' });
+    fireEvent.click(screen.getByRole('radio', { name: /Motion graphics/ }));
+
+    expect((screen.getByRole('radio', { name: 'Acme' }) as HTMLInputElement).checked).toBe(true);
+    expect(screen.queryByRole('radio', { name: 'No brand' })).toBeNull();
+    typeName('Promo');
+    await waitFor(() =>
+      expect(createProject).toHaveBeenCalledWith({ slug: 'promo', mode: 'motion', brand: 'acme' }),
+    );
   });
 });

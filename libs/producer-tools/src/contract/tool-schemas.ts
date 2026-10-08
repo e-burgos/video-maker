@@ -462,6 +462,7 @@ const GetMotionBrandsOutputSchema = z.strictObject({
     z.looseObject({
       id: z.string(),
       name: z.string(),
+      source: z.enum(['built-in', 'user']).optional(),
       formats: z.array(z.string()),
       music: z.array(
         z.looseObject({
@@ -649,7 +650,7 @@ export const STUDIO_TOOLS: Readonly<Record<StudioToolName, StudioToolDefinition>
   },
   get_motion_brands: {
     description:
-      'List the brands a motion video can use, with the formats (16:9, 9:16) each supports and its music tracks (id, mood, bpm, hasDrop). Only for motion projects.',
+      'List the brands a motion video can use (built-in and user-made, each with its `source`), with the formats (16:9, 9:16) each supports and its music tracks (id, mood, bpm, hasDrop). Only for motion projects.',
     input: GetMotionBrandsInputSchema,
     output: GetMotionBrandsOutputSchema,
   },

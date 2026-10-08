@@ -1,0 +1,165 @@
+{
+  "$schema": "../../../../schemas/cycle.schema.json",
+  "cycle": 3,
+  "module": "brand-kit",
+  "spec": "spec-e-burgos-021-brand-kit",
+  "apps": [
+    "libs/local-store",
+    "apps/render-api",
+    "apps/web",
+    "libs/producer-tools",
+    "libs/motion-graphics"
+  ],
+  "phase": "brand-in-motion",
+  "flow": "lite",
+  "objectives": [
+    "Cada proyecto guarda su marca y la usa por defecto",
+    "Un video de motion graphics se produce con cualquier marca de la biblioteca"
+  ],
+  "status": "completed",
+  "started_at": "2026-10-08",
+  "completed_at": "2026-10-08",
+  "documents": {
+    "plan": "sdd/specs/spec-e-burgos-021-brand-kit/cycles/cycle-03/plan.md",
+    "tasks": "sdd/specs/spec-e-burgos-021-brand-kit/cycles/cycle-03/tasks.json"
+  },
+  "artifacts": [
+    "sdd/specs/spec-e-burgos-021-brand-kit/cycles/cycle-03/artifacts/verification.md",
+    "sdd/specs/spec-e-burgos-021-brand-kit/cycles/cycle-03/artifacts/cafe-aroma-demo-sheet.jpg"
+  ],
+  "metrics": {
+    "tasks_total": 5,
+    "tasks_completed": 5,
+    "tasks_skipped": 0,
+    "story_points": 12,
+    "files_created": [
+      "apps/render-api/src/store/project-brand.ts",
+      "apps/web/src/components/brand-picker.spec.tsx",
+      "apps/web/src/components/brand-picker.tsx",
+      "apps/web/src/components/project-brand-control.spec.tsx",
+      "apps/web/src/components/project-brand-control.tsx"
+    ],
+    "files_modified": [
+      "apps/render-api/src/http/handle-request.ts",
+      "apps/render-api/src/http/handlers/motion-handler.spec.ts",
+      "apps/render-api/src/http/handlers/motion-handler.ts",
+      "apps/render-api/src/http/handlers/projects-handler.spec.ts",
+      "apps/render-api/src/http/handlers/projects-handler.ts",
+      "apps/render-api/src/http/routes.ts",
+      "apps/render-api/src/producer/build-producer-system-prompt.ts",
+      "apps/render-api/src/producer/collect-producer-context.spec.ts",
+      "apps/render-api/src/producer/collect-producer-context.ts",
+      "apps/render-api/src/store/import-legacy-media.spec.ts",
+      "apps/render-api/src/store/import-legacy-media.ts",
+      "apps/web/src/api/motion-brief-form.ts",
+      "apps/web/src/api/motion-types.ts",
+      "apps/web/src/api/render-api-client.spec.ts",
+      "apps/web/src/api/render-api-client.ts",
+      "apps/web/src/api/render-api-types.ts",
+      "apps/web/src/components/create-project-form.spec.tsx",
+      "apps/web/src/components/create-project-form.tsx",
+      "apps/web/src/components/motion-brief-form.tsx",
+      "apps/web/src/components/studio-layout.spec.tsx",
+      "apps/web/src/components/studio-layout.tsx",
+      "apps/web/src/i18n/messages-en.ts",
+      "apps/web/src/i18n/messages-es.ts",
+      "apps/web/src/pages/motion-page.spec.tsx",
+      "apps/web/src/pages/motion-page.tsx",
+      "apps/web/src/pages/projects-page.spec.tsx",
+      "libs/local-store/src/database/migrations.spec.ts",
+      "libs/local-store/src/database/migrations.ts",
+      "libs/local-store/src/repositories/projects-repository.spec.ts",
+      "libs/local-store/src/repositories/projects-repository.ts",
+      "libs/local-store/src/schema/studio-schema.ts",
+      "libs/motion-graphics/src/__fixtures__/catalog-storyboard.ts",
+      "libs/motion-graphics/src/auto/build-auto-storyboard-request.spec.ts",
+      "libs/motion-graphics/src/auto/build-auto-storyboard-request.ts",
+      "libs/motion-graphics/src/auto/check-storyboard-against-brief.spec.ts",
+      "libs/motion-graphics/src/auto/generate-motion-storyboard.spec.ts",
+      "libs/motion-graphics/src/compose/compose-storyboard.spec.ts",
+      "libs/motion-graphics/src/compose/compose-storyboard.ts",
+      "libs/producer-tools/src/client/render-api-client.ts",
+      "libs/producer-tools/src/contract/tool-schemas.ts",
+      "libs/producer-tools/src/prompt/build-producer-prompt.spec.ts",
+      "libs/producer-tools/src/prompt/build-producer-prompt.ts"
+    ],
+    "files_deleted": [],
+    "usage": {
+      "tokens_in": 355905,
+      "tokens_out": 53630,
+      "approx": true,
+      "source": "declared-estimate",
+      "by_agent": [
+        {
+          "agent": "orchestrator",
+          "label": "solo",
+          "provider_model": "claude/opus",
+          "effort": "high",
+          "tokens_in": 120000,
+          "tokens_out": 12000,
+          "tokens_total": 132000,
+          "approx": true,
+          "source": "declared-estimate",
+          "recorded_at": "2026-10-08"
+        },
+        {
+          "agent": "implementor-back",
+          "label": "marca del proyecto, selector, productor y marcas mínimas",
+          "provider_model": "claude/sonnet",
+          "effort": "medium",
+          "tokens_in": 235905,
+          "tokens_out": 41630,
+          "tokens_total": 277535,
+          "approx": true,
+          "source": "agent-usage-notification",
+          "recorded_at": "2026-10-08"
+        }
+      ],
+      "by_tier": {
+        "claude/opus": {
+          "tokens_in": 120000,
+          "tokens_out": 12000,
+          "approx": true,
+          "source": "declared-estimate"
+        },
+        "claude/sonnet": {
+          "tokens_in": 235905,
+          "tokens_out": 41630,
+          "approx": true,
+          "source": "declared-estimate"
+        }
+      }
+    }
+  },
+  "tables_created": [],
+  "endpoints_implemented": [
+    "EP-059"
+  ],
+  "components_created": [],
+  "issues_found": [
+    "Sin isotipo la esquina del video repetía el nombre de la marca al lado del logo completo: cornerBug muestra sólo el logo.",
+    "Cambiar la marca desde la barra no tocaba el brief ni el storyboard que usa el render: en motion el control lleva al brief.",
+    "Un test de la web falló una vez con la máquina cargada y pasó en dos corridas aisladas."
+  ],
+  "reviewer_report": {
+    "approved": true,
+    "date": "2026-10-08",
+    "ca_results": {
+      "US-021-301": "OK — POST /projects con brand, PUT /projects/:slug/brand, BrandPicker en el alta y control en la barra; el brief toma la marca del proyecto.",
+      "US-021-302": "OK — video motion de 30 s con la marca Cafe Aroma desde un brief, storyboard por IA sin música ni fotos, contexto del productor con la marca.",
+      "US-021-303": "Parcial — BRANDS_ROOT de la app empaquetada verificado por tests (cycle-01); la prueba en la app instalada queda para la publicación al cerrar la spec."
+    },
+    "tests": {
+      "sdd:validate": "OK",
+      "lint": "local-store, render-api, web, producer-tools, motion-graphics verdes",
+      "test": "64 + 1716 + 1410 + 320 + 185",
+      "build": "verde",
+      "e2e": "pnpm studio: video motion real con marca propia"
+    },
+    "notes": "La prueba en la app instalada se hace al publicar la versión con la spec completa.",
+    "follow_ups": [
+      "cycle-04: material crudo con marca",
+      "Publicar la app y crear una marca desde la app instalada"
+    ]
+  }
+}

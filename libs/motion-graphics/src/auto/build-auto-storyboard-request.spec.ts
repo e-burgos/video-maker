@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import { testBrand } from '../__fixtures__/catalog-storyboard';
+import { minimalBrand, testBrand } from '../__fixtures__/catalog-storyboard';
 import { SCENE_KINDS } from '../storyboard/motion-storyboard.schema';
 import { buildAutoStoryboardRequest } from './build-auto-storyboard-request';
 import type { MotionBrief } from './motion-brief';
@@ -81,5 +81,43 @@ describe('buildAutoStoryboardRequest', () => {
   it('attaches the storyboard json schema without identity keys', () => {
     expect(request.jsonSchema).not.toHaveProperty('$schema');
     expect(JSON.stringify(request.jsonSchema)).toContain('"brand-reveal"');
+  });
+});
+
+describe('buildAutoStoryboardRequest with a minimal brand', () => {
+  const noImagesBrief: MotionBrief = { ...brief, images: [] };
+  const request = buildAutoStoryboardRequest(noImagesBrief, minimalBrand);
+
+  it('declares the missing assets and limits what the model may use', () => {
+    expect(request.userPrompt).toContain('devices: none');
+    expect(request.userPrompt).toContain('brand images: none');
+    expect(request.userPrompt).toContain('music tracks: none');
+    expect(request.userPrompt).toContain('ASSET LIMITS');
+    expect(request.userPrompt).toMatch(/no devices[^\n]*connections/u);
+    expect(request.userPrompt).toMatch(/no images at all/u);
+    expect(request.userPrompt).toMatch(/no music tracks: use `music: null`/u);
+  });
+
+  it('asks for silence even when the brief says auto', () => {
+    expect(request.userPrompt).toContain('music: no music (use music: null)');
+    expect(request.userPrompt).not.toContain('choose the track');
+  });
+
+  it('does not offer scenes that need devices or several photos', () => {
+    expect(request.systemPrompt).not.toContain('- connections:');
+    expect(request.systemPrompt).not.toContain('- gallery:');
+    expect(request.systemPrompt).toContain('- hook:');
+    expect(request.systemPrompt).toContain('- cta:');
+  });
+
+  it('offers the gallery once the brief supplies at least two photos', () => {
+    const twoPhotos: MotionBrief = { ...brief, images: [{ file: 'a.jpg', caption: 'A' }, { file: 'b.jpg', caption: 'B' }] };
+    const withPhotos = buildAutoStoryboardRequest(twoPhotos, minimalBrand);
+    expect(withPhotos.systemPrompt).toContain('- gallery:');
+    expect(withPhotos.userPrompt).not.toMatch(/no images at all/u);
+  });
+
+  it('adds no limits section for a complete brand', () => {
+    expect(buildAutoStoryboardRequest(brief, testBrand).userPrompt).not.toContain('ASSET LIMITS');
   });
 });

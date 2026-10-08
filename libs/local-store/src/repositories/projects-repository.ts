@@ -11,6 +11,7 @@ export interface ProjectRecord {
   readonly updatedAt: string;
   readonly importedAt: string | null;
   readonly mode: ProjectMode;
+  readonly brand: string | null;
 }
 
 export type ProjectsClock = () => string;
@@ -38,9 +39,10 @@ export function createProjectsRepository(
     slug: string,
     importedAt: string | null = null,
     mode: ProjectMode = 'footage',
+    brand: string | null = null,
   ): ProjectRecord {
     const timestamp = clock();
-    const record: ProjectRecord = { slug, createdAt: timestamp, updatedAt: timestamp, importedAt, mode };
+    const record: ProjectRecord = { slug, createdAt: timestamp, updatedAt: timestamp, importedAt, mode, brand };
     db.insert(projects).values(record).run();
     return record;
   }
@@ -49,11 +51,15 @@ export function createProjectsRepository(
     db.update(projects).set({ updatedAt: clock() }).where(eq(projects.slug, slug)).run();
   }
 
+  function setBrand(slug: string, brand: string | null): void {
+    db.update(projects).set({ brand, updatedAt: clock() }).where(eq(projects.slug, slug)).run();
+  }
+
   function remove(slug: string): void {
     db.delete(projects).where(eq(projects.slug, slug)).run();
   }
 
-  return { list, get, exists, insert, touch, delete: remove };
+  return { list, get, exists, insert, touch, setBrand, delete: remove };
 }
 
 export type ProjectsRepository = ReturnType<typeof createProjectsRepository>;

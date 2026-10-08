@@ -1,9 +1,9 @@
 import { describe, expect, it } from 'vitest';
 
-import { catalogStoryboard, testBrand } from '../__fixtures__/catalog-storyboard';
+import { catalogStoryboard, minimalBrand, testBrand } from '../__fixtures__/catalog-storyboard';
 import { MotionStudioError } from '../errors/motion-studio-error';
 import type { MotionStoryboard } from '../storyboard/motion-storyboard.schema';
-import { brandImageUrl, composeStoryboard, storyboardImages } from './compose-storyboard';
+import { brandImageUrl, composeStoryboard, cornerBug, storyboardImages } from './compose-storyboard';
 
 const pick = (...ids: string[]): MotionStoryboard => ({ ...catalogStoryboard, scenes: catalogStoryboard.scenes.filter((s) => ids.includes(s.id)) });
 const base = pick('hook', 'reveal', 'gallery', 'cta');
@@ -94,6 +94,18 @@ describe('composeStoryboard', () => {
   });
 });
 
+describe('cornerBug', () => {
+  it('shows the isotipo next to the brand name when the brand has one', () => {
+    expect(cornerBug(testBrand)).toContain(`<span>${testBrand.name}</span>`);
+  });
+
+  it('shows only the full logo when the brand has no isotipo, so the name is not repeated', () => {
+    const bug = cornerBug(minimalBrand);
+
+    expect(bug).toBe(`<img src="assets/brand/${minimalBrand.logo}" alt="" />`);
+  });
+});
+
 describe('brandImageUrl', () => {
   it('resolves plain and captioned brand images to their file', () => {
     expect(brandImageUrl('brand:local', testBrand)).toMatch(/\/img\/local\.jpg$/u);
@@ -107,4 +119,28 @@ describe('brand photos', () => {
     expect(() => composeStoryboard(withGone as MotionStoryboard, testBrand)).toThrow(/brand photo "escena-04" is not in the brand kit/u);
   });
 });
+});
+
+describe('minimal brand', () => {
+  const textOnly: MotionStoryboard = {
+    ...catalogStoryboard,
+    brand: 'minimal',
+    music: null,
+    scenes: [
+      ...catalogStoryboard.scenes.filter((scene) => scene.id === 'hook'),
+      { id: 'reveal', kind: 'brand-reveal', anchor: 'drop', vo: 'Esto es Minimal', props: {} },
+      ...catalogStoryboard.scenes.filter((scene) => scene.id === 'cta'),
+    ],
+  };
+
+  it('composes without music, photos, devices or isotipo, using the logo as isotipo and the brand voice', () => {
+    const { template, script, musicSource, images } = composeStoryboard(textOnly, minimalBrand);
+    expect(script.music).toBeNull();
+    expect(script.sfx).toEqual([]);
+    expect(script.scenes.map((scene) => scene.id)).toEqual(['hook', 'reveal', 'cta']);
+    expect(script.scenes[1]).not.toHaveProperty('anchor');
+    expect(musicSource).toBeNull();
+    expect(images).toEqual([]);
+    expect(template).toContain('assets/brand/img/logo.svg');
+  });
 });

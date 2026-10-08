@@ -9,6 +9,7 @@ export const ROUTES = [
   { id: 'projects.detail', method: 'GET', pattern: '/projects/:slug' },
   { id: 'projects.delete', method: 'DELETE', pattern: '/projects/:slug' },
   { id: 'projects.placement.put', method: 'PUT', pattern: '/projects/:slug/placement' },
+  { id: 'projects.brand.put', method: 'PUT', pattern: '/projects/:slug/brand' },
   { id: 'motion.brands.list', method: 'GET', pattern: '/motion/brands' },
   { id: 'brands.list', method: 'GET', pattern: '/brands' },
   { id: 'brands.create', method: 'POST', pattern: '/brands' },

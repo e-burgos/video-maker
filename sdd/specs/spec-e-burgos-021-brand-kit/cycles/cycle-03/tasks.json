@@ -1,0 +1,156 @@
+{
+  "$schema": "../../../../schemas/cycle-tasks.schema.json",
+  "spec": "spec-e-burgos-021-brand-kit",
+  "cycle": 3,
+  "module": "brand-kit",
+  "apps": [
+    "libs/local-store",
+    "apps/render-api",
+    "apps/web",
+    "libs/producer-tools",
+    "libs/motion-graphics"
+  ],
+  "flow": "lite",
+  "user_stories_generated": true,
+  "prerequisites": {
+    "tasks_generated": true
+  },
+  "tasks": [
+    {
+      "id": "TASK-001",
+      "title": "Project brand: projects.brand column with migration, POST /projects and PATCH /projects/:slug accept it, GET returns it",
+      "user_stories": [
+        "US-021-301"
+      ],
+      "estimation_hours": 2,
+      "story_points": 3,
+      "depends_on": [],
+      "status": "done",
+      "files": [
+        "libs/local-store/src/database/migrations.ts",
+        "libs/local-store/src/repositories/projects-repository.ts",
+        "apps/render-api/src/http/handlers/projects-handler.ts"
+      ],
+      "usage": {
+        "provider_model": "claude/sonnet",
+        "effort": "medium",
+        "agent": "implementor-back",
+        "tokens_in": 47181,
+        "tokens_out": 8326,
+        "approx": true,
+        "source": "agent-usage-notification",
+        "recorded_at": "2026-10-08"
+      }
+    },
+    {
+      "id": "TASK-002",
+      "title": "Web brand picker with logo and colors in project creation and in the motion brief, synced with the project brand",
+      "user_stories": [
+        "US-021-301"
+      ],
+      "estimation_hours": 2,
+      "story_points": 3,
+      "depends_on": [
+        "TASK-001"
+      ],
+      "status": "done",
+      "files": [
+        "apps/web/src/components/brand-picker.tsx",
+        "apps/web/src/components/create-project-form.tsx",
+        "apps/web/src/components/motion-brief-form.tsx"
+      ],
+      "usage": {
+        "provider_model": "claude/sonnet",
+        "effort": "medium",
+        "agent": "implementor-back",
+        "tokens_in": 47181,
+        "tokens_out": 8326,
+        "approx": true,
+        "source": "agent-usage-notification",
+        "recorded_at": "2026-10-08"
+      }
+    },
+    {
+      "id": "TASK-003",
+      "title": "Producer knows the project brand: context, get_motion_brands with user brands, motion recipe",
+      "user_stories": [
+        "US-021-302"
+      ],
+      "estimation_hours": 1.5,
+      "story_points": 2,
+      "depends_on": [
+        "TASK-001"
+      ],
+      "status": "done",
+      "files": [
+        "apps/render-api/src/producer/collect-producer-context.ts",
+        "libs/producer-tools/src/prompt/build-producer-prompt.ts"
+      ],
+      "usage": {
+        "provider_model": "claude/sonnet",
+        "effort": "medium",
+        "agent": "implementor-back",
+        "tokens_in": 47181,
+        "tokens_out": 8326,
+        "approx": true,
+        "source": "agent-usage-notification",
+        "recorded_at": "2026-10-08"
+      }
+    },
+    {
+      "id": "TASK-004",
+      "title": "Minimal brands work end to end: no music, photos, devices or isotipo in auto storyboard and composition",
+      "user_stories": [
+        "US-021-302"
+      ],
+      "estimation_hours": 1.5,
+      "story_points": 2,
+      "depends_on": [],
+      "status": "done",
+      "files": [
+        "libs/motion-graphics/src/auto/build-auto-storyboard-request.ts",
+        "libs/motion-graphics/src/auto/check-storyboard-against-brief.ts"
+      ],
+      "usage": {
+        "provider_model": "claude/sonnet",
+        "effort": "medium",
+        "agent": "implementor-back",
+        "tokens_in": 47181,
+        "tokens_out": 8326,
+        "approx": true,
+        "source": "agent-usage-notification",
+        "recorded_at": "2026-10-08"
+      }
+    },
+    {
+      "id": "TASK-005",
+      "title": "End-to-end verification with pnpm studio: a test brand produces a short motion video, snapshots reviewed",
+      "user_stories": [
+        "US-021-301",
+        "US-021-302",
+        "US-021-303"
+      ],
+      "estimation_hours": 1.5,
+      "story_points": 2,
+      "depends_on": [
+        "TASK-002",
+        "TASK-003",
+        "TASK-004"
+      ],
+      "status": "done",
+      "files": [
+        "sdd/specs/spec-e-burgos-021-brand-kit/cycles/cycle-03/artifacts/verification.md"
+      ],
+      "usage": {
+        "provider_model": "claude/sonnet",
+        "effort": "medium",
+        "agent": "implementor-back",
+        "tokens_in": 47181,
+        "tokens_out": 8326,
+        "approx": true,
+        "source": "agent-usage-notification",
+        "recorded_at": "2026-10-08"
+      }
+    }
+  ]
+}
