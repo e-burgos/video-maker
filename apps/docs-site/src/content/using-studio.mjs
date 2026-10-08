@@ -104,8 +104,10 @@ ${screenshotFigure(depth, 'workspace-preview.png', 'Conversación con el product
 <h2>Edición avanzada</h2>
 <p>
 Para cuando querés meter mano vos mismo: la biblioteca de material, el storyboard (guion y cortes
-palabra por palabra) y la página de voz, todo disponible desde "Edición avanzada" arriba de cada
-proyecto.
+palabra por palabra), la página de voz y la vista previa, todo disponible desde la barra de
+secciones que acompaña a cada proyecto (productor, biblioteca, storyboard, voz y vista previa; en un
+video de motion graphics suma "motion"). En un video de motion graphics, esas páginas muestran el
+guion, la voz y el video ya generados, y para cambiar algo se lo pedís al productor.
 </p>
 `;
 

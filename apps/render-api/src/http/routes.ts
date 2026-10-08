@@ -48,6 +48,7 @@ export const ROUTES = [
   { id: 'projects.motion.brief.put', method: 'PUT', pattern: '/projects/:slug/motion/brief' },
   { id: 'projects.motion.storyboard.get', method: 'GET', pattern: '/projects/:slug/motion/storyboard' },
   { id: 'projects.motion.storyboard.put', method: 'PUT', pattern: '/projects/:slug/motion/storyboard' },
+  { id: 'projects.motion.overview.get', method: 'GET', pattern: '/projects/:slug/motion/overview' },
   { id: 'settings.producer.get', method: 'GET', pattern: '/settings/producer' },
   { id: 'settings.producer.put', method: 'PUT', pattern: '/settings/producer' },
   { id: 'settings.producer.openrouterModels.get', method: 'GET', pattern: '/settings/producer/openrouter-models' },

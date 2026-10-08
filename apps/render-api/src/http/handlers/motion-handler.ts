@@ -1,9 +1,17 @@
 import { briefImageRef, isMotionStudioError, parseBrandManifest, parseMotionBrief, parseMotionStoryboard } from '@video-maker/motion-graphics';
-import type { MotionBrief } from '@video-maker/motion-graphics';
+import type { MotionBrief, MotionStoryboard } from '@video-maker/motion-graphics';
 import { join } from 'node:path/posix';
 
 import type { StoreConfig } from '../../config/store-config';
 import type { MotionBrandDocument, RenderApiDependencies } from '../../deps/render-api-dependencies';
+import { readMotionOverview } from '../../motion/read-motion-overview';
+import {
+  availableImageRefs,
+  describeImageProblem,
+  findStoryboardImageProblem,
+  listRawImages,
+  parseBrandIfValid,
+} from '../../motion/validate-storyboard-images';
 import { PipelineStageError } from '../../errors/pipeline-stage-error';
 import type { RenderApiErrorCode } from '../../errors/render-api-error';
 import { assertMotionProject, assertValidProjectSlug, resolveExistingProject } from '../../store/project-scope';
@@ -219,6 +227,34 @@ export async function handleGetMotionStoryboard(
   return jsonResponse(200, document);
 }
 
+async function assertStoryboardImagesResolve(
+  deps: RenderApiDependencies,
+  rawDir: string,
+  storyboard: MotionStoryboard,
+): Promise<void> {
+  const brandDocument = (await deps.listMotionBrands()).find((document) => document.id === storyboard.brand);
+  const brand = brandDocument === undefined ? null : parseBrandIfValid(brandDocument.manifest);
+  const available = availableImageRefs(await listRawImages(deps.storage, rawDir), brand);
+  const problem = findStoryboardImageProblem(storyboard, available, brand);
+  if (problem !== null) {
+    throw new PipelineStageError({
+      code: 'STORYBOARD_INVALID',
+      stage: null,
+      resource: STORYBOARD_RELATIVE_PATH,
+      expected: describeImageProblem(problem, available),
+    });
+  }
+}
+
+export async function handleGetMotionOverview(
+  deps: RenderApiDependencies,
+  store: StoreConfig,
+  params: RouteParams,
+): Promise<HttpResponse> {
+  const project = await resolveMotionProject(deps, store, params);
+  return jsonResponse(200, await readMotionOverview(deps.storage, project.root));
+}
+
 export async function handlePutMotionStoryboard(
   deps: RenderApiDependencies,
   store: StoreConfig,
@@ -232,6 +268,7 @@ export async function handlePutMotionStoryboard(
     'STORYBOARD_INVALID',
     STORYBOARD_RELATIVE_PATH,
   );
+  await assertStoryboardImagesResolve(deps, project.rawDir, storyboard);
 
   await deps.storage.ensureDirectory(join(project.root, 'motion'));
   await deps.storage.writeTextFile(

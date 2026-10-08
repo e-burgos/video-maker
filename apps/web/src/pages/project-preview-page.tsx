@@ -29,6 +29,8 @@ import { RenderTrigger } from '../components/render-trigger';
 import { TimelineIssueList } from '../components/timeline-issue-list';
 import { TimelinePlayer } from '../components/timeline-player';
 import { TimelineSaveBar } from '../components/timeline-save-bar';
+import { MotionPreviewView } from '../components/motion-preview-view';
+import { ProjectModeGate } from '../components/project-mode-gate';
 
 const PRESET_LABELS: Record<PreviewPreset, string> = {
   'reels-9x16': '9:16',
@@ -246,7 +248,7 @@ function StudioView({ slug, initialTimeline }: StudioViewProps) {
   );
 }
 
-export function ProjectPreviewPage() {
+function ClassicProjectPreviewPage() {
   const client = useRenderApi();
   const { slug = '' } = useParams<{ slug: string }>();
   const load = useCallback(
@@ -283,5 +285,17 @@ export function ProjectPreviewPage() {
         <StudioView key={slug} slug={slug} initialTimeline={timeline.data} />
       )}
     </section>
+  );
+}
+
+export function ProjectPreviewPage() {
+  const { slug = '' } = useParams<{ slug: string }>();
+
+  return (
+    <ProjectModeGate
+      slug={slug}
+      footage={<ClassicProjectPreviewPage />}
+      motion={<MotionPreviewView slug={slug} />}
+    />
   );
 }

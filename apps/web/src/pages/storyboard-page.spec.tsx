@@ -2,6 +2,7 @@ import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { MemoryRouter, Route, Routes } from 'react-router-dom';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
+import { motionOverviewFixture } from '../api/__fixtures__/motion-overview';
 import { storyboardFixture } from '../api/__fixtures__/storyboard';
 import { RenderApiError } from '../api/render-api-error';
 import { RenderApiProvider } from '../api/render-api-context';
@@ -59,6 +60,7 @@ afterEach(() => {
 
 function renderPage(client: Partial<RenderApiClient>) {
   const withDefaults: Partial<RenderApiClient> = {
+    getProject: vi.fn().mockResolvedValue({ slug: 'smoke-ingest' }),
     getHealth: vi.fn().mockResolvedValue(HEALTHY_SERVICE),
     getProjectFile: vi
       .fn()
@@ -245,5 +247,25 @@ describe('StoryboardPage — guion del productor (FIX-009-003)', () => {
 
     await waitFor(() => expect(screen.getByTestId('storyboard-save-bar')).toBeTruthy());
     expect(screen.queryByTestId('producer-script-panel')).toBeNull();
+  });
+});
+
+describe('storyboard page in a motion project', () => {
+  it('renders the read-only motion view and never asks for the classic documents', async () => {
+    const classicLoaders = {
+      getStoryboard: vi.fn(),
+      getVoice: vi.fn(),
+      getTimeline: vi.fn(),
+    };
+    renderPage({
+      getProject: vi.fn().mockResolvedValue({ slug: 'smoke-ingest', mode: 'motion' }),
+      getMotionOverview: vi.fn().mockResolvedValue(motionOverviewFixture()),
+      ...classicLoaders,
+    });
+
+    expect(await screen.findByTestId('motion-storyboard-view')).toBeTruthy();
+    expect(classicLoaders.getStoryboard).not.toHaveBeenCalled();
+    expect(classicLoaders.getVoice).not.toHaveBeenCalled();
+    expect(classicLoaders.getTimeline).not.toHaveBeenCalled();
   });
 });

@@ -48,6 +48,7 @@ const HEALTHY_SERVICE = {
 
 function renderPage(client: Partial<RenderApiClient>) {
   const withHealth: Partial<RenderApiClient> = {
+    getProject: vi.fn().mockResolvedValue({ slug: 'smoke-ingest' }),
     getHealth: vi.fn().mockResolvedValue(HEALTHY_SERVICE),
     listGenerated: vi.fn().mockResolvedValue(EMPTY_GENERATED),
     getVoice: vi.fn().mockRejectedValue(new RenderApiError('VOICE_NOT_FOUND', 'no voice', 404, null)),
@@ -179,6 +180,7 @@ describe('AssetLibraryPage montage', () => {
       <RenderApiProvider
         client={
           {
+            getProject: vi.fn().mockResolvedValue({ slug: 'smoke-ingest' }),
             getHealth: vi.fn().mockResolvedValue(HEALTHY_SERVICE),
             listAssets: vi.fn().mockResolvedValue(listing),
             listGenerated: vi.fn().mockResolvedValue(EMPTY_GENERATED),
@@ -268,5 +270,28 @@ describe('AssetLibraryPage · storyboard', () => {
     expect(screen.getByRole('link', { name: 'open preview' }).getAttribute('href')).toBe(
       '/projects/smoke-ingest/preview',
     );
+  });
+});
+
+describe('AssetLibraryPage in a motion project', () => {
+  const motionProject = { slug: 'smoke-ingest', mode: 'motion' };
+
+  it('keeps the photo uploader and the images, and drops the footage-only controls', async () => {
+    const montageCreate = vi.fn();
+    renderPage({
+      getProject: vi.fn().mockResolvedValue(motionProject),
+      listAssets: vi.fn().mockResolvedValue(listing),
+      createMontageJob: montageCreate,
+    });
+
+    await screen.findByTestId('role-image');
+    expect(screen.getByLabelText('Upload a photo for the video')).toBeTruthy();
+    expect(screen.getByText('The photos of the video: they appear in the storyboard scenes that use them.')).toBeTruthy();
+    expect(screen.queryByText(/B-roll/u)).toBeNull();
+    expect(screen.queryByTestId('role-aroll')).toBeNull();
+    expect(screen.queryByTestId('role-broll')).toBeNull();
+    expect(screen.queryByRole('button', { name: /montage/iu })).toBeNull();
+    expect(screen.queryByTestId('montage-trigger')).toBeNull();
+    expect(montageCreate).not.toHaveBeenCalled();
   });
 });

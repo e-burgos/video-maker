@@ -303,6 +303,17 @@ describe('createHttpRenderApiClient', () => {
     });
   });
 
+  it('surfaces the expected detail of an error that carries no hint', async () => {
+    const { fetchImpl } = createFakeFetch(() =>
+      jsonResponse(422, { error: { code: 'STORYBOARD_INVALID', stage: null, message: 'invalid', expected: 'scene "a": image "x.jpg" must be images/<file> or brand:<key>' } }),
+    );
+
+    await expect(client(fetchImpl).putMotionStoryboard({})).rejects.toMatchObject({
+      code: 'INVALID_INPUT',
+      hint: 'invalid scene "a": image "x.jpg" must be images/<file> or brand:<key>',
+    });
+  });
+
   it('maps BRIEF_INVALID to INVALID_INPUT keeping the field hint', async () => {
     const { fetchImpl } = createFakeFetch(() => errorResponse(400, 'BRIEF_INVALID', 'images.0.caption: required'));
 

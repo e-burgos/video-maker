@@ -14,6 +14,8 @@ import { VoiceTrigger } from '../components/voice-trigger';
 import { PRODUCER_SCRIPT_PATH, VOICE_SCRIPT_MANIFEST_PATH } from '../api/generated-files';
 import { parseVoiceScriptManifest } from '../api/parse-voice-script';
 import type { AssetListing, VoiceDocument, VoiceTrack } from '../api/render-api-types';
+import { MotionVoiceView } from '../components/motion-voice-view';
+import { ProjectModeGate } from '../components/project-mode-gate';
 
 export const VOICE_NOT_FOUND = 'VOICE_NOT_FOUND';
 
@@ -48,7 +50,7 @@ function VoiceEmptyState({ slug }: { slug: string }) {
   );
 }
 
-export function VoicePage() {
+function ClassicVoicePage() {
   const client = useRenderApi();
   const { slug = '' } = useParams<{ slug: string }>();
   const t = useT();
@@ -173,5 +175,17 @@ export function VoicePage() {
         </div>
       )}
     </section>
+  );
+}
+
+export function VoicePage() {
+  const { slug = '' } = useParams<{ slug: string }>();
+
+  return (
+    <ProjectModeGate
+      slug={slug}
+      footage={<ClassicVoicePage />}
+      motion={<MotionVoiceView slug={slug} />}
+    />
   );
 }

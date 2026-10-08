@@ -1,16 +1,29 @@
+import { useCallback } from 'react';
 import { NavLink, Outlet, useLocation } from 'react-router-dom';
 
+import { projectModeOf } from '../api/project-mode';
+import { useRenderApi } from '../api/render-api-context';
+import { useAsyncResource } from '../hooks/use-async-resource';
 import { useT } from '../i18n/language-context';
 import type { TranslationKey } from '../i18n/messages-en';
 import { LanguageSwitch } from './language-switch';
 import { ServiceHealthBadge } from './service-health-badge';
 
-const PROJECT_SECTIONS = [
+type ProjectSection = {
+  path: string;
+  labelKey: TranslationKey;
+  end?: boolean;
+  motionOnly?: boolean;
+};
+
+const PROJECT_SECTIONS: readonly ProjectSection[] = [
+  { path: '', labelKey: 'nav.productor', end: true },
+  { path: '/motion', labelKey: 'nav.motion', motionOnly: true },
   { path: '/library', labelKey: 'nav.library' },
   { path: '/storyboard', labelKey: 'nav.storyboard' },
   { path: '/voice', labelKey: 'nav.voice' },
   { path: '/preview', labelKey: 'nav.preview' },
-] as const satisfies readonly { path: string; labelKey: TranslationKey }[];
+];
 
 const HEADER_LINKS = [
   { to: '/settings', testId: 'settings-nav', labelKey: 'nav.settings' },
@@ -30,16 +43,17 @@ export function projectSlugFromPathname(pathname: string): string | null {
   return match === null ? null : decodeURIComponent(match[1] as string);
 }
 
-export function isProjectWorkspaceRoot(pathname: string, slug: string): boolean {
-  const rest = pathname.slice(`/projects/${encodeURIComponent(slug)}`.length);
-  return rest === '' || rest === '/';
-}
-
 export function StudioLayout() {
   const { pathname } = useLocation();
   const slug = projectSlugFromPathname(pathname);
-  const showProjectNav = slug !== null && !isProjectWorkspaceRoot(pathname, slug);
   const t = useT();
+  const client = useRenderApi();
+  const project = useAsyncResource(
+    useCallback(async () => (slug === null ? null : client.getProject(slug)), [client, slug]),
+    `layout-project:${slug ?? ''}`,
+  );
+  const isMotion = project.data !== null && projectModeOf(project.data) === 'motion';
+  const sections = PROJECT_SECTIONS.filter((section) => isMotion || section.motionOnly !== true);
 
   return (
     <div className="flex h-screen flex-col bg-slate-950 text-slate-100">
@@ -62,15 +76,16 @@ export function StudioLayout() {
           </div>
         </div>
 
-        {showProjectNav && (
+        {slug !== null && (
           <nav
             data-testid="project-nav"
             className="mx-auto flex max-w-6xl items-center gap-3 px-6 pb-3 font-mono text-xs"
           >
-            {PROJECT_SECTIONS.map((section) => (
+            {sections.map((section) => (
               <NavLink
                 key={section.labelKey}
-                to={`/projects/${slug}${section.path}`}
+                to={`/projects/${encodeURIComponent(slug)}${section.path}`}
+                end={section.end}
                 className={({ isActive }) =>
                   `rounded-md border px-2 py-1 ${
                     isActive

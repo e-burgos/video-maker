@@ -139,6 +139,30 @@ describe('runMotionPipeline', () => {
     expect(report.scenes).toBeGreaterThan(0);
   });
 
+  it('carries the previous music volume over when the storyboard is regenerated', async () => {
+    const previous = JSON.parse(readFileSync(STORYBOARD_FIXTURE, 'utf8')) as { music: { volume?: number } };
+    previous.music.volume = 0.3;
+    store.files.set('/media/promo/motion/storyboard.json', JSON.stringify(previous));
+    const { deps, observer } = setup();
+
+    await runMotionPipeline({ project: PROJECT, phase: 'storyboard', output: 'video.mp4', takes: 5 }, deps, observer);
+
+    const stored = JSON.parse(store.files.get('/media/promo/motion/storyboard.json') ?? '{}') as { music: { volume: number } };
+    expect(stored.music.volume).toBe(0.3);
+  });
+
+  it('keeps the drafted music volume when the previous storyboard had none', async () => {
+    const previous = JSON.parse(readFileSync(STORYBOARD_FIXTURE, 'utf8')) as { music: { volume?: number } };
+    delete previous.music.volume;
+    store.files.set('/media/promo/motion/storyboard.json', JSON.stringify(previous));
+    const { deps, observer } = setup();
+
+    await runMotionPipeline({ project: PROJECT, phase: 'storyboard', output: 'video.mp4', takes: 5 }, deps, observer);
+
+    const stored = JSON.parse(store.files.get('/media/promo/motion/storyboard.json') ?? '{}') as { music: { volume: number } };
+    expect(stored.music.volume).toBe(0.15);
+  });
+
   it('voices with reuseUnchanged so only edited scenes are re-synthesized', async () => {
     const { deps, observer } = setup();
 

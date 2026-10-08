@@ -52,6 +52,7 @@ export function ProducerConversationPanel({ producer, pinned = false, mode = 'fo
 
   const [dragActive, setDragActive] = useState(false);
   const dragDepth = useRef(0);
+  const composerRef = useRef<HTMLTextAreaElement>(null);
   const { scrollRef, contentRef, onScroll } = useStickToBottom<HTMLDivElement, HTMLDivElement>(
     messages.length > 0,
   );
@@ -86,6 +87,11 @@ export function ProducerConversationPanel({ producer, pinned = false, mode = 'fo
     if (event.dataTransfer.files.length > 0) {
       void inbox.uploadFiles(event.dataTransfer.files);
     }
+  }
+
+  function pickReply(text: string) {
+    setDraft(text);
+    composerRef.current?.focus();
   }
 
   async function confirmAsset(assetId: string, role: AssetRole) {
@@ -139,7 +145,7 @@ export function ProducerConversationPanel({ producer, pinned = false, mode = 'fo
           {messages.length > 0 && (
             <ProducerMessageList
               messages={messages}
-              onQuickReply={(text) => void send(text)}
+              onPickReply={pickReply}
               quickRepliesDisabled={running || sendPending}
             />
           )}
@@ -210,6 +216,7 @@ export function ProducerConversationPanel({ producer, pinned = false, mode = 'fo
         <ProducerComposer
           value={draft}
           onChange={setDraft}
+          textareaRef={composerRef}
           onSend={() => void send(draft)}
           pending={sendPending || running}
           blockers={blockers}

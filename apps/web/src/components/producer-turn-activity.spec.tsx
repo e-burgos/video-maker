@@ -46,6 +46,9 @@ describe('eventLabel', () => {
       'Bash · ffprobe raw/aroll/clip01.mp4',
     );
     expect(eventLabel({ type: 'text', text: 'reviso el material' })).toBe('reviso el material');
+    expect(
+      eventLabel({ type: 'text', text: 'Listo.\n```suggestions\n["Dale"]\n```\n' }),
+    ).toBe('Listo.');
     expect(eventLabel({ type: 'status', status: 'tool failed' })).toBe('tool failed');
   });
 });

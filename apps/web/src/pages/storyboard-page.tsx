@@ -10,6 +10,8 @@ import { useAsyncResource } from '../hooks/use-async-resource';
 import { useT } from '../i18n/language-context';
 import { ErrorNotice } from '../components/error-notice';
 import { ProducerScriptPanel } from '../components/producer-script-panel';
+import { MotionStoryboardView } from '../components/motion-storyboard-view';
+import { ProjectModeGate } from '../components/project-mode-gate';
 import { StoryboardCharacterSheet } from '../components/storyboard-character-sheet';
 import { StoryboardHeaderEditor } from '../components/storyboard-header-editor';
 import { StoryboardJobPanel } from '../components/storyboard-job-panel';
@@ -38,7 +40,7 @@ function StoryboardEmptyState({ slug }: StoryboardEmptyStateProps) {
   );
 }
 
-export function StoryboardPage() {
+function ClassicStoryboardPage() {
   const client = useRenderApi();
   const { slug = '' } = useParams<{ slug: string }>();
   const load = useCallback(
@@ -149,5 +151,17 @@ export function StoryboardPage() {
         </>
       )}
     </section>
+  );
+}
+
+export function StoryboardPage() {
+  const { slug = '' } = useParams<{ slug: string }>();
+
+  return (
+    <ProjectModeGate
+      slug={slug}
+      footage={<ClassicStoryboardPage />}
+      motion={<MotionStoryboardView slug={slug} />}
+    />
   );
 }

@@ -2,6 +2,7 @@ import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { MemoryRouter, Route, Routes } from 'react-router-dom';
 import { describe, expect, it, vi } from 'vitest';
 
+import { motionOverviewFixture } from '../api/__fixtures__/motion-overview';
 import { storyboardFixture } from '../api/__fixtures__/storyboard';
 import {
   VOICE_MODELS,
@@ -33,6 +34,7 @@ function assetListing(paths: string[]): AssetListing {
 
 function renderPage(client: Partial<RenderApiClient>) {
   const withDefaults: Partial<RenderApiClient> = {
+    getProject: vi.fn().mockResolvedValue({ slug: 'smoke-ingest' }),
     getHealth: vi.fn().mockResolvedValue(healthyVoiceService()),
     listVoices: vi.fn().mockResolvedValue(VOICE_MODELS),
     getStoryboard: vi.fn().mockResolvedValue(storyboardFixture()),
@@ -303,5 +305,25 @@ describe('VoicePage — modo guion (FIX-009-003)', () => {
 
     await waitFor(() => expect(screen.getByText(/tracks/u)).toBeTruthy());
     expect(screen.queryByTestId('voice-script-panel')).toBeNull();
+  });
+});
+
+describe('voice page in a motion project', () => {
+  it('renders the read-only motion view and never asks for the classic documents', async () => {
+    const classicLoaders = {
+      getStoryboard: vi.fn(),
+      getVoice: vi.fn(),
+      getTimeline: vi.fn(),
+    };
+    renderPage({
+      getProject: vi.fn().mockResolvedValue({ slug: 'smoke-ingest', mode: 'motion' }),
+      getMotionOverview: vi.fn().mockResolvedValue(motionOverviewFixture()),
+      ...classicLoaders,
+    });
+
+    expect(await screen.findByTestId('motion-voice-view')).toBeTruthy();
+    expect(classicLoaders.getStoryboard).not.toHaveBeenCalled();
+    expect(classicLoaders.getVoice).not.toHaveBeenCalled();
+    expect(classicLoaders.getTimeline).not.toHaveBeenCalled();
   });
 });

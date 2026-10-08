@@ -75,6 +75,7 @@ import type {
   MotionBrand,
   MotionBrief,
   MotionJob,
+  MotionOverview,
   MotionStoryboard,
 } from './motion-types';
 
@@ -151,6 +152,7 @@ export type RenderApiClient = {
   getMotionBrief: (slug: string) => Promise<MotionBrief>;
   putMotionBrief: (slug: string, brief: MotionBrief) => Promise<MotionBrief>;
   getMotionStoryboard: (slug: string) => Promise<MotionStoryboard>;
+  getMotionOverview: (slug: string) => Promise<MotionOverview>;
   createMotionJob: (slug: string, input: CreateMotionJobInput) => Promise<MotionJob>;
   getRenderJob: (jobId: string) => Promise<Job>;
   cancelRenderJob: (jobId: string) => Promise<RenderJobCancelOutcome>;
@@ -821,6 +823,16 @@ export function createRenderApiClient(fetchImpl: FetchLike): RenderApiClient {
         (value) => isRecord(value) && Array.isArray(value['scenes']),
       );
       return body as MotionStoryboard;
+    },
+
+    async getMotionOverview(slug: string): Promise<MotionOverview> {
+      const body = await requestJson(
+        `/projects/${encodeURIComponent(slug)}/motion/overview`,
+        undefined,
+        'a motion overview',
+        (value) => isRecord(value),
+      );
+      return body as MotionOverview;
     },
 
     async createMotionJob(slug: string, input: CreateMotionJobInput): Promise<MotionJob> {

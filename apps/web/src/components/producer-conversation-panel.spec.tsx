@@ -132,6 +132,38 @@ describe('ProducerConversationPanel', () => {
     expect(send).toHaveBeenCalledWith('hola productor');
   });
 
+  it('puts a clicked suggestion in the composer and focuses it without sending', () => {
+    const send = vi.fn(async () => undefined);
+    const setDraft = vi.fn();
+    const producer = fakeProducer({
+      send,
+      setDraft,
+      conversation: readyResource({
+        slug: 'demo-01',
+        messages: [
+          {
+            id: 'msg-1',
+            role: 'assistant',
+            text: 'Listo.',
+            suggestions: ['Dale, avanzá'],
+            createdAt: '2026-09-10T00:00:00.000Z',
+          },
+        ],
+        models: { default: 'sonnet', allowed: [] },
+        session: null,
+        activeTurn: null,
+      }) as never,
+    });
+
+    renderPanel(producer);
+
+    fireEvent.click(screen.getByRole('button', { name: 'Dale, avanzá' }));
+
+    expect(setDraft).toHaveBeenCalledWith('Dale, avanzá');
+    expect(send).not.toHaveBeenCalled();
+    expect(document.activeElement).toBe(screen.getByLabelText('Message for the producer'));
+  });
+
   it('pins the composer to the bottom of a full-height column when pinned is set', () => {
     renderPanel(fakeProducer(), { pinned: true });
 

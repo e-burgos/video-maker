@@ -7,17 +7,20 @@ import { useAsyncResource } from '../hooks/use-async-resource';
 import { useT, useTn } from '../i18n/language-context';
 import { AssetCard } from '../components/asset-card';
 import { AssetUploader } from '../components/asset-uploader';
+import { ProjectModeGate } from '../components/project-mode-gate';
 import { ErrorNotice } from '../components/error-notice';
 import { GeneratedFilesPanel } from '../components/generated-files-panel';
 import { MontageJobPanel } from '../components/montage-job-panel';
 import { MontageTrigger } from '../components/montage-trigger';
-import type { AssetListing, AssetRole } from '../api/render-api-types';
+import type { AssetListing, AssetRole, ProjectMode } from '../api/render-api-types';
+
+const MOTION_LIBRARY_ROLES: readonly AssetRole[] = ['image'];
 
 function assetsOfRole(listing: AssetListing, role: AssetRole) {
   return listing.assets.filter((asset) => asset.role === role);
 }
 
-export function AssetLibraryPage() {
+function AssetLibraryContent({ mode }: { mode: ProjectMode }) {
   const client = useRenderApi();
   const navigate = useNavigate();
   const { slug = '' } = useParams<{ slug: string }>();
@@ -26,6 +29,8 @@ export function AssetLibraryPage() {
   const [montageJobId, setMontageJobId] = useState<string | null>(null);
   const t = useT();
   const tn = useTn();
+  const isMotion = mode === 'motion';
+  const roles = isMotion ? MOTION_LIBRARY_ROLES : ASSET_ROLES;
 
   const openPreview = useCallback(() => {
     navigate(`/projects/${slug}/preview`);
@@ -68,17 +73,29 @@ export function AssetLibraryPage() {
         )}
       </div>
 
-      <GeneratedFilesPanel slug={slug} assets={listing.data} />
+      {!isMotion && <GeneratedFilesPanel slug={slug} assets={listing.data} />}
 
-      <AssetUploader slug={slug} onUploaded={listing.reload} />
+      {isMotion ? (
+        <AssetUploader
+          slug={slug}
+          roles={MOTION_LIBRARY_ROLES}
+          fileInputLabel={t('motionLibrary.uploadLabel')}
+          roleHint={t('motionLibrary.imageHint')}
+          onUploaded={listing.reload}
+        />
+      ) : (
+        <>
+          <AssetUploader slug={slug} onUploaded={listing.reload} />
 
-      <MontageTrigger slug={slug} onCreated={(job) => setMontageJobId(job.id)} />
+          <MontageTrigger slug={slug} onCreated={(job) => setMontageJobId(job.id)} />
 
-      <MontageJobPanel
-        jobId={montageJobId}
-        onSucceeded={openPreview}
-        onRetried={(job) => setMontageJobId(job.id)}
-      />
+          <MontageJobPanel
+            jobId={montageJobId}
+            onSucceeded={openPreview}
+            onRetried={(job) => setMontageJobId(job.id)}
+          />
+        </>
+      )}
 
       {listing.status === 'loading' && (
         <p className="text-sm text-slate-500">{t('library.loading')}</p>
@@ -102,7 +119,7 @@ export function AssetLibraryPage() {
             </div>
           )}
 
-          {ASSET_ROLES.map((role) => {
+          {roles.map((role) => {
             const assets = assetsOfRole(listing.data as AssetListing, role);
             return (
               <div key={role} data-testid={`role-${role}`} className="space-y-3">
@@ -129,5 +146,17 @@ export function AssetLibraryPage() {
         </>
       )}
     </section>
+  );
+}
+
+export function AssetLibraryPage() {
+  const { slug = '' } = useParams<{ slug: string }>();
+
+  return (
+    <ProjectModeGate
+      slug={slug}
+      footage={<AssetLibraryContent mode="footage" />}
+      motion={<AssetLibraryContent mode="motion" />}
+    />
   );
 }

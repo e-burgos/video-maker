@@ -91,6 +91,21 @@ async function readJson(ports: MotionPipelinePorts, path: string): Promise<unkno
   return JSON.parse(await ports.readText(path)) as unknown;
 }
 
+async function readStoredMusicVolume(ports: MotionPipelinePorts, project: MediaProject): Promise<number | null> {
+  try {
+    return parseMotionStoryboard(await readJson(ports, toAbsolutePath(project, STORYBOARD_PATH))).music?.volume ?? null;
+  } catch {
+    return null;
+  }
+}
+
+function keepMusicVolume(storyboard: MotionStoryboard, volume: number | null): MotionStoryboard {
+  if (volume === null || storyboard.music === null) {
+    return storyboard;
+  }
+  return { ...storyboard, music: { ...storyboard.music, volume } };
+}
+
 async function buildStoryboard(
   ports: MotionPipelinePorts,
   project: MediaProject,
@@ -104,8 +119,10 @@ async function buildStoryboard(
     brief.images.map((image) => briefImageRef(image.file)),
   );
 
+  const previousMusicVolume = await readStoredMusicVolume(ports, project);
   const result = await autoStoryboard(ports, brief, workDirectory, workDirectory);
-  const storyboard = parseMotionStoryboard(await readJson(ports, joinPath(workDirectory, 'storyboard.json')));
+  const generated = parseMotionStoryboard(await readJson(ports, joinPath(workDirectory, 'storyboard.json')));
+  const storyboard = keepMusicVolume(generated, previousMusicVolume);
   await ports.writeText(toAbsolutePath(project, STORYBOARD_PATH), `${JSON.stringify(storyboard, null, 2)}\n`);
 
   return {

@@ -12,37 +12,6 @@ import { useAutoSwitchingTab } from '../hooks/use-auto-switching-tab';
 import { useIsWideViewport } from '../hooks/use-is-wide-viewport';
 import { useProducerConversation } from '../hooks/use-producer-conversation';
 import { useT } from '../i18n/language-context';
-import type { TranslationKey } from '../i18n/messages-en';
-
-const ADVANCED_LINKS = [
-  { path: 'library', labelKey: 'workspace.menu.library' },
-  { path: 'storyboard', labelKey: 'workspace.menu.storyboard' },
-  { path: 'voice', labelKey: 'workspace.menu.voice' },
-  { path: 'preview', labelKey: 'workspace.menu.preview' },
-] as const satisfies readonly { path: string; labelKey: TranslationKey }[];
-
-function AdvancedEditingMenu({ slug }: { slug: string }) {
-  const t = useT();
-
-  return (
-    <details className="relative" data-testid="workspace-advanced-menu">
-      <summary className="cursor-pointer list-none rounded-control border border-border-strong px-3 py-1.5 text-xs text-ink-muted hover:border-ink-faint hover:text-ink">
-        {t('workspace.advancedMenu')}
-      </summary>
-      <nav className="absolute right-0 z-10 mt-2 w-52 space-y-1 rounded-panel border border-border-subtle bg-surface p-2 shadow-lg">
-        {ADVANCED_LINKS.map((link) => (
-          <Link
-            key={link.path}
-            to={`/projects/${encodeURIComponent(slug)}/${link.path}`}
-            className="block rounded-control px-2 py-1.5 text-sm text-ink-muted hover:bg-surface-muted hover:text-ink"
-          >
-            {t(link.labelKey)}
-          </Link>
-        ))}
-      </nav>
-    </details>
-  );
-}
 
 export function ProjectWorkspacePage() {
   const { slug = '' } = useParams<{ slug: string }>();
@@ -81,18 +50,6 @@ export function ProjectWorkspacePage() {
           <div>
             <h1 className="text-2xl font-semibold tracking-tight text-ink">{humanizeSlug(slug)}</h1>
             <p className="font-mono text-xs text-ink-faint">{slug}</p>
-          </div>
-          <div className="flex items-center gap-2">
-            {isMotion && (
-              <Link
-                to={`/projects/${encodeURIComponent(slug)}/motion`}
-                data-testid="workspace-motion-link"
-                className="rounded-control border border-accent px-3 py-1.5 text-xs text-ink hover:bg-surface-muted"
-              >
-                {t('motion.workspace.link')}
-              </Link>
-            )}
-            <AdvancedEditingMenu slug={slug} />
           </div>
         </div>
       </header>
