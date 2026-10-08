@@ -1896,6 +1896,97 @@
             "change": "Created in spec-e-burgos-021-brand-kit cycle-01."
           }
         ]
+      },
+      {
+        "id": "EP-056",
+        "method": "POST",
+        "path": "/brands/:id/preview",
+        "module": "brand-kit",
+        "spec": "sdd/specs/spec-e-burgos-021-brand-kit",
+        "status": "implemented",
+        "created_in_cycle": 2,
+        "updated_in_cycle": null,
+        "description": "Composes the brand opening (brand-reveal) and closing (cta) with a synthetic 9 s timeline, no voice nor music, into BRANDS_ROOT/.preview/<id>/; serialized per brand. The HTML loops the animation, fits the 1920x1080 stage to the window and accepts postMessage { type: 'mg-brand-tokens', tokens }.",
+        "path_params": [
+          "id"
+        ],
+        "required_headers": [],
+        "request_body": {
+          "content-type": "application/json",
+          "schema": "{ tagline?: string, headline?: string }"
+        },
+        "responses": {
+          "200": "application/json: { url, composedAt, durationSec }",
+          "404": "BRAND_UNKNOWN or FILE_NOT_FOUND",
+          "422": "INVALID_INPUT"
+        },
+        "changelog": [
+          {
+            "cycle": 2,
+            "date": "2026-10-08",
+            "change": "Created in spec-e-burgos-021-brand-kit cycle-02."
+          }
+        ]
+      },
+      {
+        "id": "EP-057",
+        "method": "GET",
+        "path": "/brands/:id/preview/*",
+        "module": "brand-kit",
+        "spec": "sdd/specs/spec-e-burgos-021-brand-kit",
+        "status": "implemented",
+        "created_in_cycle": 2,
+        "updated_in_cycle": null,
+        "description": "Serves the composed brand preview files with no-store caching and Range support.",
+        "path_params": [
+          "id"
+        ],
+        "required_headers": [],
+        "request_body": {},
+        "responses": {
+          "200": "file bytes",
+          "404": "BRAND_UNKNOWN or FILE_NOT_FOUND",
+          "422": "ASSET_PATH_INVALID"
+        },
+        "changelog": [
+          {
+            "cycle": 2,
+            "date": "2026-10-08",
+            "change": "Created in spec-e-burgos-021-brand-kit cycle-02."
+          }
+        ]
+      },
+      {
+        "id": "EP-058",
+        "method": "POST",
+        "path": "/brands/:id/fonts",
+        "module": "brand-kit",
+        "spec": "sdd/specs/spec-e-burgos-021-brand-kit",
+        "status": "implemented",
+        "created_in_cycle": 2,
+        "updated_in_cycle": null,
+        "description": "Downloads a Google Fonts family (woff2 latin and latin-ext; variable range or 400/700) into a user brand and replaces that family in manifest.fonts.",
+        "path_params": [
+          "id"
+        ],
+        "required_headers": [],
+        "request_body": {
+          "content-type": "application/json",
+          "schema": "{ family: string }"
+        },
+        "responses": {
+          "200": "application/json: same shape as GET /brands/:id",
+          "409": "BRAND_READ_ONLY",
+          "422": "INVALID_INPUT or BRAND_FONT_UNKNOWN",
+          "502": "BRAND_FONT_DOWNLOAD_FAILED"
+        },
+        "changelog": [
+          {
+            "cycle": 2,
+            "date": "2026-10-08",
+            "change": "Created in spec-e-burgos-021-brand-kit cycle-02."
+          }
+        ]
       }
     ]
   }

@@ -34,6 +34,21 @@ export const GUIDE_ES: GuideContent = {
       ].join('\n'),
     },
     {
+      id: 'brands',
+      title: 'Marcas — la identidad de tus videos',
+      body: [
+        'El acceso **Marcas** del encabezado lista las marcas incluidas y las tuyas. Con **Nueva marca** armás una desde cero; con **Duplicar** partís de una existente. Las incluidas son de solo lectura: duplicalas para editarlas.',
+        '',
+        '- **Secciones**: identidad (nombre, nombre hablado, eslogan), logo e isotipo, colores, tipografías, voz, música, fotos y productos. Cada sección tiene su botón Guardar.',
+        '- **Vista previa en vivo**: muestra la apertura y el cierre con la marca. Los colores se actualizan al instante; el logo y las tipografías recomponen la vista.',
+        '- **Tipografías**: elegí entre las de la marca, agregá una de Google Fonts (se descarga dentro de la marca, así el render no necesita internet) o subí tu archivo.',
+        '- **Fotos y música**: la IA elige cada foto por su descripción, y cada tema necesita su crédito.',
+        '- **Productos**: subí la foto y, en las pantallas, marcá con cuatro clics las esquinas del display.',
+        '',
+        'Borrar una marca la mueve a `brands/.trash`: se puede recuperar a mano.',
+      ].join('\n'),
+    },
+    {
       id: 'library',
       title: 'Biblioteca — el material crudo y qué hace cada rol',
       body: [

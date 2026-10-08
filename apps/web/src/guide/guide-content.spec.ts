@@ -17,6 +17,7 @@ function sectionById(guide: typeof GUIDE_EN, id: string) {
 const REQUIRED_SECTIONS = [
   'projects',
   'motion',
+  'brands',
   'library',
   'producer',
   'storyboard',

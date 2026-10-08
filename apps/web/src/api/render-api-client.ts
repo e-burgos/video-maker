@@ -71,6 +71,15 @@ import type {
   CreateProjectInput,
 } from './render-api-types';
 import type {
+  BrandDetail,
+  BrandManifest,
+  BrandPreview,
+  BrandPreviewInput,
+  BrandSummary,
+  CreateBrandInput,
+  UploadBrandFileInput,
+} from './brand-types';
+import type {
   CreateMotionJobInput,
   MotionBrand,
   MotionBrief,
@@ -154,6 +163,14 @@ export type RenderApiClient = {
   getMotionStoryboard: (slug: string) => Promise<MotionStoryboard>;
   getMotionOverview: (slug: string) => Promise<MotionOverview>;
   createMotionJob: (slug: string, input: CreateMotionJobInput) => Promise<MotionJob>;
+  listBrands: () => Promise<BrandSummary[]>;
+  getBrand: (id: string) => Promise<BrandDetail>;
+  createBrand: (input: CreateBrandInput) => Promise<BrandDetail>;
+  putBrand: (id: string, manifest: BrandManifest) => Promise<BrandDetail>;
+  deleteBrand: (id: string) => Promise<void>;
+  uploadBrandFile: (input: UploadBrandFileInput) => Promise<{ path: string }>;
+  composeBrandPreview: (id: string, input?: BrandPreviewInput) => Promise<BrandPreview>;
+  addBrandGoogleFont: (id: string, family: string) => Promise<BrandDetail>;
   getRenderJob: (jobId: string) => Promise<Job>;
   cancelRenderJob: (jobId: string) => Promise<RenderJobCancelOutcome>;
   retryJob: (jobId: string) => Promise<Job>;
@@ -183,6 +200,16 @@ export type UploadInboxInput = {
 
 function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === 'object' && value !== null && !Array.isArray(value);
+}
+
+function isBrandDetail(value: unknown): boolean {
+  return (
+    isRecord(value) &&
+    typeof value['id'] === 'string' &&
+    isRecord(value['manifest']) &&
+    isRecord(value['tokens']) &&
+    isRecord(value['files'])
+  );
 }
 
 function artifactPath(slug: string, path: string): string {
@@ -851,6 +878,100 @@ export function createRenderApiClient(fetchImpl: FetchLike): RenderApiClient {
         throw responseShapeUnexpected(200, 'a motion job document');
       }
       return job;
+    },
+
+    async listBrands(): Promise<BrandSummary[]> {
+      const body = await requestJson('/brands', undefined, 'a brand array', (value) =>
+        Array.isArray(value),
+      );
+      return body as BrandSummary[];
+    },
+
+    async getBrand(id: string): Promise<BrandDetail> {
+      const body = await requestJson(
+        `/brands/${encodeURIComponent(id)}`,
+        undefined,
+        'a brand detail',
+        isBrandDetail,
+      );
+      return body as BrandDetail;
+    },
+
+    async createBrand(input: CreateBrandInput): Promise<BrandDetail> {
+      const body = await requestJson(
+        '/brands',
+        {
+          method: 'POST',
+          headers: { 'content-type': 'application/json' },
+          body: JSON.stringify(input),
+        },
+        'a brand detail',
+        isBrandDetail,
+      );
+      return body as BrandDetail;
+    },
+
+    async putBrand(id: string, manifest: BrandManifest): Promise<BrandDetail> {
+      const body = await requestJson(
+        `/brands/${encodeURIComponent(id)}`,
+        {
+          method: 'PUT',
+          headers: { 'content-type': 'application/json' },
+          body: JSON.stringify(manifest),
+        },
+        'a brand detail',
+        isBrandDetail,
+      );
+      return body as BrandDetail;
+    },
+
+    async deleteBrand(id: string): Promise<void> {
+      const response = await send(`/brands/${encodeURIComponent(id)}`, { method: 'DELETE' });
+      if (!response.ok) {
+        throw fromErrorResponse(response.status, await readJson(response));
+      }
+    },
+
+    async uploadBrandFile(input: UploadBrandFileInput): Promise<{ path: string }> {
+      const body = await requestJson(
+        `/brands/${encodeURIComponent(input.id)}/files/${input.kind}/${encodeURIComponent(input.filename)}`,
+        {
+          method: 'PUT',
+          headers: { 'content-type': input.contentType },
+          body: input.body,
+        },
+        'a brand file path',
+        (value) => isRecord(value) && typeof value['path'] === 'string',
+      );
+      return { path: (body as { path: string }).path };
+    },
+
+    async composeBrandPreview(id: string, input?: BrandPreviewInput): Promise<BrandPreview> {
+      const body = await requestJson(
+        `/brands/${encodeURIComponent(id)}/preview`,
+        {
+          method: 'POST',
+          headers: { 'content-type': 'application/json' },
+          body: JSON.stringify(input ?? {}),
+        },
+        'a brand preview',
+        (value) => isRecord(value) && typeof value['url'] === 'string',
+      );
+      return body as BrandPreview;
+    },
+
+    async addBrandGoogleFont(id: string, family: string): Promise<BrandDetail> {
+      const body = await requestJson(
+        `/brands/${encodeURIComponent(id)}/fonts`,
+        {
+          method: 'POST',
+          headers: { 'content-type': 'application/json' },
+          body: JSON.stringify({ family }),
+        },
+        'a brand detail',
+        isBrandDetail,
+      );
+      return body as BrandDetail;
     },
 
     async getRenderJob(jobId: string): Promise<Job> {

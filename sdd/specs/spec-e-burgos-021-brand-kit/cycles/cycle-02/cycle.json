@@ -1,0 +1,190 @@
+{
+  "$schema": "../../../../schemas/cycle.schema.json",
+  "cycle": 2,
+  "module": "brand-kit",
+  "spec": "spec-e-burgos-021-brand-kit",
+  "apps": [
+    "apps/web",
+    "apps/render-api",
+    "libs/motion-graphics"
+  ],
+  "phase": "brand-creator",
+  "flow": "lite",
+  "objectives": [
+    "Página Marcas con creador por secciones",
+    "Vista previa en vivo de la apertura y el cierre con la marca"
+  ],
+  "status": "completed",
+  "started_at": "2026-10-08",
+  "completed_at": "2026-10-08",
+  "documents": {
+    "plan": "sdd/specs/spec-e-burgos-021-brand-kit/cycles/cycle-02/plan.md",
+    "tasks": "sdd/specs/spec-e-burgos-021-brand-kit/cycles/cycle-02/tasks.json"
+  },
+  "artifacts": [
+    "sdd/specs/spec-e-burgos-021-brand-kit/cycles/cycle-02/artifacts/verification-backend.md"
+  ],
+  "metrics": {
+    "tasks_total": 5,
+    "tasks_completed": 5,
+    "tasks_skipped": 0,
+    "story_points": 18,
+    "files_created": [
+      "apps/render-api/src/brands/brand-fonts.spec.ts",
+      "apps/render-api/src/brands/brand-fonts.ts",
+      "apps/render-api/src/brands/brand-preview.real.spec.ts",
+      "apps/render-api/src/brands/brand-preview.spec.ts",
+      "apps/render-api/src/brands/brand-preview.ts",
+      "apps/web/src/api/__fixtures__/brand.ts",
+      "apps/web/src/api/brand-files.spec.ts",
+      "apps/web/src/api/brand-files.ts",
+      "apps/web/src/api/brand-manifest-edit.spec.ts",
+      "apps/web/src/api/brand-manifest-edit.ts",
+      "apps/web/src/api/brand-photo-rows.ts",
+      "apps/web/src/api/brand-types.ts",
+      "apps/web/src/api/google-font-families.ts",
+      "apps/web/src/components/brand-card.tsx",
+      "apps/web/src/components/brand-colors-section.tsx",
+      "apps/web/src/components/brand-corner-picker.tsx",
+      "apps/web/src/components/brand-delete-modal.tsx",
+      "apps/web/src/components/brand-devices-section.tsx",
+      "apps/web/src/components/brand-field.tsx",
+      "apps/web/src/components/brand-file-input.tsx",
+      "apps/web/src/components/brand-identity-section.tsx",
+      "apps/web/src/components/brand-logo-section.tsx",
+      "apps/web/src/components/brand-music-section.tsx",
+      "apps/web/src/components/brand-name-modal.tsx",
+      "apps/web/src/components/brand-photos-section.tsx",
+      "apps/web/src/components/brand-preview-pane.tsx",
+      "apps/web/src/components/brand-save-bar.tsx",
+      "apps/web/src/components/brand-typography-section.tsx",
+      "apps/web/src/components/brand-voice-section.tsx",
+      "apps/web/src/hooks/use-brand-editor.ts",
+      "apps/web/src/hooks/use-brand-font-faces.ts",
+      "apps/web/src/hooks/use-brand-upload.ts",
+      "apps/web/src/hooks/use-section-draft.ts",
+      "apps/web/src/pages/brand-editor-page.spec.tsx",
+      "apps/web/src/pages/brand-editor-page.tsx",
+      "apps/web/src/pages/brands-page.spec.tsx",
+      "apps/web/src/pages/brands-page.tsx"
+    ],
+    "files_modified": [
+      "apps/docs-site/src/content/using-studio.mjs",
+      "apps/render-api/src/brands/brand-library.ts",
+      "apps/render-api/src/errors/http-status-for.spec.ts",
+      "apps/render-api/src/errors/http-status-for.ts",
+      "apps/render-api/src/errors/render-api-error.ts",
+      "apps/render-api/src/errors/to-error-payload.ts",
+      "apps/render-api/src/http/handle-request.ts",
+      "apps/render-api/src/http/handlers/brands-handler.ts",
+      "apps/render-api/src/http/render-api-runtime.ts",
+      "apps/render-api/src/http/routes.ts",
+      "apps/web/src/api/error-explanations.ts",
+      "apps/web/src/api/render-api-client.spec.ts",
+      "apps/web/src/api/render-api-client.ts",
+      "apps/web/src/app/app.tsx",
+      "apps/web/src/components/studio-layout.spec.tsx",
+      "apps/web/src/components/studio-layout.tsx",
+      "apps/web/src/guide/guide-content-en.ts",
+      "apps/web/src/guide/guide-content-es.ts",
+      "apps/web/src/guide/guide-content.spec.ts",
+      "apps/web/src/i18n/messages-en.ts",
+      "apps/web/src/i18n/messages-es.ts",
+      "libs/motion-graphics/src/brand/brand-manifest.ts",
+      "libs/motion-graphics/src/compose/compose-storyboard.spec.ts",
+      "libs/motion-graphics/src/compose/compose-storyboard.ts"
+    ],
+    "files_deleted": [],
+    "usage": {
+      "tokens_in": 517450,
+      "tokens_out": 85903,
+      "approx": true,
+      "source": "declared-estimate",
+      "by_agent": [
+        {
+          "agent": "orchestrator",
+          "label": "solo",
+          "provider_model": "claude/opus",
+          "effort": "high",
+          "tokens_in": 110000,
+          "tokens_out": 14000,
+          "tokens_total": 124000,
+          "approx": true,
+          "source": "declared-estimate",
+          "recorded_at": "2026-10-08"
+        },
+        {
+          "agent": "implementor-back",
+          "label": "vista previa y Google Fonts",
+          "provider_model": "claude/sonnet",
+          "effort": "medium",
+          "tokens_in": 209381,
+          "tokens_out": 36950,
+          "tokens_total": 246331,
+          "approx": true,
+          "source": "agent-usage-notification",
+          "recorded_at": "2026-10-08"
+        },
+        {
+          "agent": "implementor-front",
+          "label": "página Marcas y editor",
+          "provider_model": "claude/sonnet",
+          "effort": "medium",
+          "tokens_in": 198069,
+          "tokens_out": 34953,
+          "tokens_total": 233022,
+          "approx": true,
+          "source": "agent-usage-notification",
+          "recorded_at": "2026-10-08"
+        }
+      ],
+      "by_tier": {
+        "claude/opus": {
+          "tokens_in": 110000,
+          "tokens_out": 14000,
+          "approx": true,
+          "source": "declared-estimate"
+        },
+        "claude/sonnet": {
+          "tokens_in": 407450,
+          "tokens_out": 71903,
+          "approx": true,
+          "source": "declared-estimate"
+        }
+      }
+    }
+  },
+  "tables_created": [],
+  "endpoints_implemented": [
+    "EP-056",
+    "EP-057",
+    "EP-058"
+  ],
+  "components_created": [],
+  "issues_found": [
+    "Dos composiciones simultáneas de la misma vista previa (efecto doble de React) daban INTERNAL_ERROR: se serializa por marca; test con disco real que falla sin el serializador.",
+    "Fuera del reproductor de HyperFrames html/body no tienen alto y la vista previa quedaba vacía: lienzo 1920x1080 escalado a la ventana sólo en la vista previa.",
+    "Duplicar fija todas las variables como tokens: el editor, al cambiar un color base, descarta los retoques para que la paleta vuelva a mandar."
+  ],
+  "reviewer_report": {
+    "approved": true,
+    "date": "2026-10-08",
+    "ca_results": {
+      "US-021-201": "OK — pnpm studio: /brands lista DisplayAds incluida; Nueva marca 'Cafe Aroma' crea y abre el editor; duplicar DisplayAds 201 con 19 fotos y 2 temas.",
+      "US-021-202": "OK — colores guardados por PUT (acento #f59e0b, fondo #1c1410) sin overrides; secciones con tests de guardado y subida.",
+      "US-021-203": "OK — iframe recoloreado en vivo (--mg-accent/--mg-bg aplicados) y vista previa directa con fondo, brillo, logo y botón de la marca; 3 POST simultáneos → 200.",
+      "US-021-204": "OK — Playfair Display bajada (latin/latin-ext 400/700, woff2) y aplicada a los títulos en la vista previa."
+    },
+    "tests": {
+      "sdd:validate": "OK",
+      "lint": "web, render-api, motion-graphics, docs-site verdes",
+      "test": "1388 + 1706 + 174 + 15",
+      "build": "verde",
+      "e2e": "pnpm studio: crear, colorear, fuente de Google, duplicar y vista previa"
+    },
+    "notes": "Ciclo lite con dos implementadores en paralelo; el recorrido real encontró la carrera de la vista previa y el lienzo sin alto.",
+    "follow_ups": [
+      "cycle-03: marca del proyecto y motion con marcas propias"
+    ]
+  }
+}

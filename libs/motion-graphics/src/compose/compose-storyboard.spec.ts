@@ -15,6 +15,18 @@ describe('composeStoryboard', () => {
     expect(template).toContain('fonts/brand.otf") format("opentype")');
   });
 
+  it('declares each file of a family with its own weight and unicode range', () => {
+    const fonts = [
+      { family: 'Poppins', file: 'fonts/poppins-latin.woff2', weight: '100 900', unicodeRange: 'U+0000-00FF' },
+      { family: 'Poppins', file: 'fonts/poppins-latin-ext.woff2', weight: '100 900', unicodeRange: 'U+0100-02BA' },
+      { family: 'Mono', file: 'fonts/mono-latin-700.woff2', weight: '700' },
+    ];
+    const { template } = composeStoryboard(base, { ...testBrand, fonts });
+    expect(template).toContain('fonts/poppins-latin.woff2") format("woff2"); font-weight: 100 900; unicode-range: U+0000-00FF; }');
+    expect(template).toContain('fonts/poppins-latin-ext.woff2") format("woff2"); font-weight: 100 900; unicode-range: U+0100-02BA; }');
+    expect(template).toContain('fonts/mono-latin-700.woff2") format("woff2"); font-weight: 700; }');
+  });
+
   it('writes one timed section per scene with chapter, flash and the brand kit', () => {
     const { template } = composeStoryboard(base, testBrand);
     expect(template.match(/<section id="s-/gu)).toHaveLength(4);

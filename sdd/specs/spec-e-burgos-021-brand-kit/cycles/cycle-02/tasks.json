@@ -1,0 +1,145 @@
+{
+  "$schema": "../../../../schemas/cycle-tasks.schema.json",
+  "spec": "spec-e-burgos-021-brand-kit",
+  "cycle": 2,
+  "module": "brand-kit",
+  "apps": [
+    "apps/web",
+    "apps/render-api",
+    "libs/motion-graphics"
+  ],
+  "flow": "lite",
+  "user_stories_generated": true,
+  "prerequisites": {
+    "tasks_generated": true
+  },
+  "tasks": [
+    {
+      "id": "TASK-001",
+      "title": "Brand preview endpoint: compose brand-reveal and cta with a synthetic timeline, serve it, live tokens by postMessage",
+      "user_stories": [
+        "US-021-203"
+      ],
+      "estimation_hours": 2.5,
+      "story_points": 3,
+      "depends_on": [],
+      "status": "done",
+      "files": [
+        "apps/render-api/src/brands/brand-preview.ts",
+        "apps/render-api/src/http/handlers/brands-handler.ts"
+      ],
+      "usage": {
+        "provider_model": "claude/sonnet",
+        "effort": "medium",
+        "agent": "implementor-back",
+        "tokens_in": 104691,
+        "tokens_out": 18475,
+        "approx": true,
+        "source": "agent-usage-notification",
+        "recorded_at": "2026-10-08"
+      }
+    },
+    {
+      "id": "TASK-002",
+      "title": "Google Fonts download into a brand (woff2 latin and latin-ext) and curated family list",
+      "user_stories": [
+        "US-021-204"
+      ],
+      "estimation_hours": 1.5,
+      "story_points": 2,
+      "depends_on": [],
+      "status": "done",
+      "files": [
+        "apps/render-api/src/brands/brand-fonts.ts",
+        "apps/web/src/api/google-font-families.ts"
+      ],
+      "usage": {
+        "provider_model": "claude/sonnet",
+        "effort": "medium",
+        "agent": "implementor-back",
+        "tokens_in": 104691,
+        "tokens_out": 18475,
+        "approx": true,
+        "source": "agent-usage-notification",
+        "recorded_at": "2026-10-08"
+      }
+    },
+    {
+      "id": "TASK-003",
+      "title": "Brands page with list, create, duplicate, delete and header access",
+      "user_stories": [
+        "US-021-201"
+      ],
+      "estimation_hours": 2,
+      "story_points": 3,
+      "depends_on": [],
+      "status": "done",
+      "files": [
+        "apps/web/src/pages/brands-page.tsx",
+        "apps/web/src/components/studio-layout.tsx"
+      ],
+      "usage": {
+        "provider_model": "claude/sonnet",
+        "effort": "medium",
+        "agent": "implementor-front",
+        "tokens_in": 66023,
+        "tokens_out": 11651,
+        "approx": true,
+        "source": "agent-usage-notification",
+        "recorded_at": "2026-10-08"
+      }
+    },
+    {
+      "id": "TASK-004",
+      "title": "Brand editor by sections: identity, logo, colors with advanced tokens, typography, voice, music, photos, devices with screen corners",
+      "user_stories": [
+        "US-021-202"
+      ],
+      "estimation_hours": 5,
+      "story_points": 8,
+      "depends_on": [],
+      "status": "done",
+      "files": [
+        "apps/web/src/pages/brand-editor-page.tsx",
+        "apps/web/src/components/brand-editor"
+      ],
+      "usage": {
+        "provider_model": "claude/sonnet",
+        "effort": "medium",
+        "agent": "implementor-front",
+        "tokens_in": 66023,
+        "tokens_out": 11651,
+        "approx": true,
+        "source": "agent-usage-notification",
+        "recorded_at": "2026-10-08"
+      }
+    },
+    {
+      "id": "TASK-005",
+      "title": "Verify with pnpm studio: create a test brand, live color preview, logo and font upload, duplicate DisplayAds",
+      "user_stories": [
+        "US-021-201",
+        "US-021-202",
+        "US-021-203",
+        "US-021-204"
+      ],
+      "estimation_hours": 1,
+      "story_points": 2,
+      "depends_on": [],
+      "status": "done",
+      "files": [
+        "sdd/specs/spec-e-burgos-021-brand-kit/cycles/cycle-02/artifacts/verification.md"
+      ],
+      "usage": {
+        "provider_model": "claude/sonnet",
+        "effort": "medium",
+        "agent": "implementor-front",
+        "tokens_in": 66023,
+        "tokens_out": 11651,
+        "approx": true,
+        "source": "agent-usage-notification",
+        "recorded_at": "2026-10-08"
+      }
+    }
+  ]
+}

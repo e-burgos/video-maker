@@ -24,7 +24,7 @@ const BrandManifestShape = z.strictObject({
   palette: BrandPaletteSchema.optional(),
   tokens: z.record(z.string().regex(BRAND_TOKEN_NAME), Text).optional(),
   typography: BrandTypographySchema.optional(),
-  fonts: z.array(z.strictObject({ family: Text, file: Text, weight: Text.optional() })).min(1),
+  fonts: z.array(z.strictObject({ family: Text, file: Text, weight: Text.optional(), unicodeRange: Text.optional() })).min(1),
   devices: z.record(
     z.string(),
     z.strictObject({

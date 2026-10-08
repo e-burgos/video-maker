@@ -47,7 +47,7 @@ export interface BrandFileUpload {
   readonly body: AsyncIterable<Uint8Array>;
 }
 
-interface LocatedBrand {
+export interface LocatedBrand {
   readonly id: string;
   readonly source: MotionBrandSource;
   readonly dir: string;
@@ -105,11 +105,11 @@ function assertBrandId(id: string): void {
   }
 }
 
-async function fileExists(deps: RenderApiDependencies, path: string): Promise<boolean> {
+export async function fileExists(deps: RenderApiDependencies, path: string): Promise<boolean> {
   return (await deps.storage.stat(path))?.kind === 'file';
 }
 
-async function locateBrand(deps: RenderApiDependencies, store: StoreConfig, id: string): Promise<LocatedBrand> {
+export async function locateBrand(deps: RenderApiDependencies, store: StoreConfig, id: string): Promise<LocatedBrand> {
   assertBrandId(id);
   const candidates: readonly LocatedBrand[] = [
     { id, source: 'built-in', dir: builtInBrandDir(store, id) },
@@ -134,7 +134,7 @@ function toManifest(raw: unknown, resource: string): BrandManifest {
   }
 }
 
-async function readManifest(deps: RenderApiDependencies, brand: LocatedBrand): Promise<BrandManifest> {
+export async function readManifest(deps: RenderApiDependencies, brand: LocatedBrand): Promise<BrandManifest> {
   const path = join(brand.dir, MANIFEST_FILE);
   let raw: unknown;
   try {
@@ -180,7 +180,7 @@ async function listBrandFiles(deps: RenderApiDependencies, dir: string): Promise
   return { images: [...scenes, ...devices], fonts, music, logos };
 }
 
-async function describeBrand(deps: RenderApiDependencies, brand: LocatedBrand): Promise<BrandDetail> {
+export async function describeBrand(deps: RenderApiDependencies, brand: LocatedBrand): Promise<BrandDetail> {
   const manifest = await readManifest(deps, brand);
   const css = await readAuthoredCss(deps, brand, manifest);
   return {
@@ -256,7 +256,7 @@ async function copyDirectory(deps: RenderApiDependencies, from: string, to: stri
   }
 }
 
-async function writeManifest(deps: RenderApiDependencies, dir: string, manifest: BrandManifest): Promise<void> {
+export async function writeManifest(deps: RenderApiDependencies, dir: string, manifest: BrandManifest): Promise<void> {
   await deps.storage.writeTextFile(join(dir, MANIFEST_FILE), `${JSON.stringify(manifest, null, 2)}\n`);
 }
 
@@ -335,7 +335,7 @@ export async function createBrand(deps: RenderApiDependencies, store: StoreConfi
   return getBrand(deps, store, id);
 }
 
-function assertWritable(brand: LocatedBrand): void {
+export function assertWritable(brand: LocatedBrand): void {
   if (brand.source === 'built-in') {
     fail('BRAND_READ_ONLY', brand.id);
   }
@@ -353,7 +353,7 @@ function referencedFiles(manifest: BrandManifest): string[] {
   ];
 }
 
-function isSafeRelativePath(path: string): boolean {
+export function isSafeRelativePath(path: string): boolean {
   return path !== '' && !path.startsWith('/') && !path.includes('\\') && path.split('/').every((segment) => segment !== '' && segment !== '.' && segment !== '..');
 }
 

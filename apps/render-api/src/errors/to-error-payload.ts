@@ -129,6 +129,8 @@ const MESSAGE_BY_CODE: Readonly<Record<RenderApiErrorCode, string>> = {
   BRAND_READ_ONLY: 'Built-in brands cannot be changed or deleted; duplicate it to customise it.',
   BRAND_MANIFEST_INVALID: 'The brand manifest does not pass validation.',
   BRAND_FILE_INVALID: 'The brand file name, kind or format is not accepted.',
+  BRAND_FONT_UNKNOWN: 'Google Fonts has no family with that name.',
+  BRAND_FONT_DOWNLOAD_FAILED: 'The font files could not be downloaded from Google Fonts.',
   STORYBOARD_MISSING: 'The project has no motion storyboard to build the video from.',
   MOTION_JOB_INPUT_INVALID: 'The motion job parameters are invalid.',
   MOTION_PIPELINE_FAILED: 'A motion pipeline step failed.',

@@ -99,7 +99,12 @@ function fontFormat(file: string): string {
 }
 
 function fontFaces(brand: BrandManifest): string {
-  return brand.fonts.map((f) => `@font-face { font-family: "${f.family}"; src: url("${BRAND_ASSET_DIR}/${f.file}") format("${fontFormat(f.file)}"); font-weight: ${f.weight ?? '100 900'}; }`).join('\n      ');
+  return brand.fonts
+    .map((f) => {
+      const unicodeRange = f.unicodeRange === undefined ? '' : ` unicode-range: ${f.unicodeRange};`;
+      return `@font-face { font-family: "${f.family}"; src: url("${BRAND_ASSET_DIR}/${f.file}") format("${fontFormat(f.file)}"); font-weight: ${f.weight ?? '100 900'};${unicodeRange} }`;
+    })
+    .join('\n      ');
 }
 
 export function composeStoryboard(storyboard: MotionStoryboard, brand: BrandManifest): ComposedStoryboard {
