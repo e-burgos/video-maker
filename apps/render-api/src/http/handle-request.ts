@@ -74,6 +74,15 @@ import {
   handlePutMotionBrief,
   handlePutMotionStoryboard,
 } from './handlers/motion-handler';
+import {
+  handleCreateBrand,
+  handleDeleteBrand,
+  handleGetBrand,
+  handleGetBrandFile,
+  handleListBrands,
+  handlePutBrand,
+  handlePutBrandFile,
+} from './handlers/brands-handler';
 import { handleGetVoice, handlePutVoiceScene } from './handlers/voice-handler';
 import { handleGetVoicePreview } from './handlers/voice-preview-handler';
 import { handleListVoices } from './handlers/voices-handler';
@@ -214,6 +223,20 @@ async function dispatchRoute(
         return await handleDeleteProject(deps, store, params);
       case 'projects.placement.put':
         return await handlePutProjectPlacement(deps, store, params, request);
+      case 'brands.list':
+        return await handleListBrands(deps, store);
+      case 'brands.create':
+        return await handleCreateBrand(deps, store, request);
+      case 'brands.detail':
+        return await handleGetBrand(deps, store, params);
+      case 'brands.update':
+        return await handlePutBrand(deps, store, params, request);
+      case 'brands.delete':
+        return await handleDeleteBrand(deps, store, params);
+      case 'brands.files.put':
+        return await handlePutBrandFile(deps, store, params, request);
+      case 'brands.files.get':
+        return await handleGetBrandFile(deps, store, params, request);
       case 'folders.list':
         return await handleListFolders(deps);
       case 'folders.create':

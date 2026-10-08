@@ -55,7 +55,7 @@ function brandSection(brand: BrandManifest): string {
     `tagline: ${brand.tagline}${brand.taglineAccent === undefined ? '' : ` ${brand.taglineAccent}`}`,
     `devices: ${devices.length === 0 ? 'none' : devices.join('; ')}`,
     `brand images: ${images.length === 0 ? 'none' : images.join('; ')}`,
-    `music tracks: ${music.join('; ')}`,
+    `music tracks: ${music.length === 0 ? 'none' : music.join('; ')}`,
     `voice: ${brand.voice.id}`,
   ].join('\n');
 }

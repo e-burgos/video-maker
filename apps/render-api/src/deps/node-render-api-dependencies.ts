@@ -199,13 +199,18 @@ async function findOnnxFileName(voiceDirPath: string): Promise<string> {
   return onnxFile.name;
 }
 
+function isInside(root: string, path: string): boolean {
+  const relativePath = relative(root, path);
+  return !relativePath.startsWith('..') && !isAbsolute(relativePath);
+}
+
 function assertInsideMediaRoot(store: StoreConfig, path: string): string {
-  const relativePath = relative(store.mediaRoot, path);
-  if (relativePath.startsWith('..') || isAbsolute(relativePath)) {
+  const allowedRoots = [store.mediaRoot, store.brandsRoot, join(store.motionAssetsRoot, 'brands')];
+  if (!allowedRoots.some((root) => isInside(root, path))) {
     throw new PipelineStageError({
       code: 'ASSET_PATH_INVALID',
       stage: null,
-      resource: relativePath,
+      resource: relative(store.mediaRoot, path),
       expected: 'a path inside the configured media root',
     });
   }
@@ -805,9 +810,13 @@ export function createNodeRenderApiDependencies(
 
     secretStore,
 
-    listMotionBrands: () => listMotionBrandDocuments(store.motionAssetsRoot),
+    listMotionBrands: () =>
+      listMotionBrandDocuments(
+        { builtInAssetsRoot: store.motionAssetsRoot, userBrandsRoot: store.brandsRoot },
+        { skipped: ({ id, why }) => deps.logger.error({ event: 'brand-skipped', detail: { id, why } }) },
+      ),
 
-    motionPorts: () => createMotionPipelinePorts(deps, store.motionAssetsRoot),
+    motionPorts: () => createMotionPipelinePorts(deps, store.motionAssetsRoot, store.brandsRoot),
 
     runHyperframes: async ({ args, cwd }) => {
       const invocation = resolveHyperframesCli({

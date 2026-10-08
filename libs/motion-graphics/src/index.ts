@@ -24,6 +24,10 @@ export { wavDurationSec } from './voice/wav-duration';
 
 export { activeDeviceIds, BrandManifestSchema, brandImageCaption, brandImageFile, parseBrandManifest } from './brand/brand-manifest';
 export type { BrandManifest } from './brand/brand-manifest';
+export { brandCss, effectiveBrandTokens, parseCssTokens } from './brand/brand-css';
+export { deriveBrandTokens, tokensToCss } from './brand/derive-brand-tokens';
+export type { BrandPalette, BrandTypography } from './brand/derive-brand-tokens';
+export { brandCssFile, brandIsotipo, BRAND_TOKEN_NAME } from './brand/brand-manifest';
 export { BRAND_ASSET_DIR, brandImageUrl, composeStoryboard, MOTION_COMPOSITION_ID, RUNTIME_ASSET_DIR, storyboardImages, storyboardSceneImageRefs } from './compose/compose-storyboard';
 export type { ComposedStoryboard, ScriptDocument } from './compose/compose-storyboard';
 export { renderScene } from './scenes/render-scene';

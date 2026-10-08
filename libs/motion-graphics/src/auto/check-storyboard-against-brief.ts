@@ -11,12 +11,12 @@ export interface StoryboardIssue {
 
 const BRAND_PREFIX = 'brand:';
 
-export function enforceBrief(raw: unknown, brief: MotionBrief): unknown {
+export function enforceBrief(raw: unknown, brief: MotionBrief, brand?: BrandManifest): unknown {
   if (typeof raw !== 'object' || raw === null || Array.isArray(raw)) return raw;
   const answer = Object.fromEntries(Object.entries(raw).filter(([key]) => key !== 'voice'));
   const enforced: Record<string, unknown> = { ...answer, version: 1, brand: brief.brand, format: brief.format, beatSync: brief.beatSync };
   if (brief.title !== undefined) enforced['title'] = brief.title;
-  if (brief.music === null) enforced['music'] = null;
+  if (brief.music === null || (brief.music === 'auto' && brand?.music.length === 0)) enforced['music'] = null;
   else if (brief.music !== 'auto') enforced['music'] = { track: brief.music };
   return enforced;
 }

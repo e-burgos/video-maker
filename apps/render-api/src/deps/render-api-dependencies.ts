@@ -266,8 +266,11 @@ export interface LocalStorePort {
   readonly close: () => void;
 }
 
+export type MotionBrandSource = 'built-in' | 'user';
+
 export interface MotionBrandDocument {
   readonly id: string;
+  readonly source: MotionBrandSource;
   readonly manifest: unknown;
 }
 

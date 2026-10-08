@@ -3,14 +3,14 @@ import { describe, expect, it } from 'vitest';
 import { initFromTemplate } from './init-from-template';
 import { joinPath } from './join-path';
 import { createFakePipelinePorts } from './__fixtures__/fake-pipeline-ports';
-import { P, script } from './__fixtures__/pipeline-data';
+import { P, brand, script } from './__fixtures__/pipeline-data';
 
 describe('initFromTemplate', () => {
   it('copies the shared runtime, the brand kit, the hand template and its music into the project', async () => {
     const ports = createFakePipelinePorts({
       files: {
         '/repo/assets/runtime/gsap.min.js': 'gsap',
-        '/repo/assets/brands/acme/brand.json': '{}',
+        '/repo/assets/brands/acme/brand.json': JSON.stringify(brand),
         '/repo/assets/brands/acme/music/tema.mp3': 'mp3',
         '/repo/templates/acme/_brand/brand/kit.css': 'css',
         '/repo/templates/acme/promo/script.json': JSON.stringify(script),

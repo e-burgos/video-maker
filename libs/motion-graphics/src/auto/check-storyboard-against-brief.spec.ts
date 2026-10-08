@@ -32,6 +32,13 @@ const validStoryboard: MotionStoryboard = {
 const withScenes = (scenes: MotionStoryboard['scenes'], rest: Partial<MotionStoryboard> = {}): MotionStoryboard => ({ ...validStoryboard, ...rest, scenes });
 
 describe('enforceBrief', () => {
+  it('forces no music when the brief says auto and the brand has no tracks', () => {
+    const answer = { music: { track: 'calm' } };
+
+    expect((enforceBrief(answer, brief, { ...testBrand, music: [] }) as { music: unknown }).music).toBeNull();
+    expect((enforceBrief(answer, brief, testBrand) as { music: unknown }).music).toEqual({ track: 'calm' });
+  });
+
   it('overrides version, brand, format, beat sync and title and keeps the rest', () => {
     const raw = { version: 2, brand: 'other', format: '16:9', beatSync: true, title: 'Mío', music: { track: 'calm' }, scenes: [] };
     expect(enforceBrief(raw, { ...brief, title: 'Del brief' })).toEqual({ version: 1, brand: 'acme', format: '9:16', beatSync: false, title: 'Del brief', music: { track: 'calm' }, scenes: [] });

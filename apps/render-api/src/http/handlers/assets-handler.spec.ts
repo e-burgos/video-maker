@@ -15,7 +15,7 @@ import type { RenderApiErrorCode } from '../../errors/render-api-error';
 import { createRenderApiRuntime } from '../render-api-runtime';
 import { handleDeleteAsset, handleListAssets, handleUploadAsset } from './assets-handler';
 
-const STORE: StoreConfig = { mediaRoot: '/media', dbPath: '/media/.studio/studio.db', maxUploadBytes: 2_147_483_648, objectStore: 'fs', motionAssetsRoot: '/repo/libs/motion-graphics/assets' };
+const STORE: StoreConfig = { mediaRoot: '/media', dbPath: '/media/.studio/studio.db', maxUploadBytes: 2_147_483_648, objectStore: 'fs', motionAssetsRoot: '/repo/libs/motion-graphics/assets', brandsRoot: '/brands' };
 
 async function* singleChunk(bytes: Uint8Array): AsyncGenerator<Uint8Array> {
   yield bytes;

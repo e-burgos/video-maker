@@ -20,4 +20,22 @@ describe('parseBrandManifest', () => {
   it('rejects an invalid manifest with the failing field', () => {
     expect(() => parseBrandManifest({ ...displayads, music: [{ id: 'x' }] })).toThrow(/BRAND_INVALID|music\[0\]/u);
   });
+
+  it('requires css or palette', () => {
+    const bare = Object.fromEntries(Object.entries(displayads).filter(([key]) => key !== 'css' && key !== 'palette'));
+    expect(() => parseBrandManifest(bare)).toThrow(/"css" or "palette"/u);
+    expect(parseBrandManifest({ ...bare, palette: displayads.palette }).css).toBeUndefined();
+  });
+
+  it('accepts a brand with no music, no photos, no devices and no isotipo', () => {
+    const withoutIsotipo = Object.fromEntries(Object.entries(displayads).filter(([key]) => key !== 'isotipo'));
+    const brand = parseBrandManifest({ ...withoutIsotipo, music: [], images: {}, devices: {} });
+    expect(brand.music).toEqual([]);
+  });
+
+  it('rejects token names outside --mg-*, bad palette colors and typography families without a font', () => {
+    expect(() => parseBrandManifest({ ...displayads, tokens: { '--other': '#fff' } })).toThrow(/invalid/u);
+    expect(() => parseBrandManifest({ ...displayads, palette: { ...displayads.palette, accent: 'blue' } })).toThrow(/invalid/u);
+    expect(() => parseBrandManifest({ ...displayads, typography: { display: 'Nope', body: 'Geist' } })).toThrow(/Nope/u);
+  });
 });

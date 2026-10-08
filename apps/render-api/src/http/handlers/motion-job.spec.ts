@@ -18,7 +18,7 @@ const STORE: StoreConfig = {
   dbPath: '/media/.studio/studio.db',
   maxUploadBytes: 2_147_483_648,
   objectStore: 'fs',
-  motionAssetsRoot: '/assets',
+  motionAssetsRoot: '/assets', brandsRoot: '/brands',
 };
 
 const JOB_KEYS = ['createdAt', 'error', 'finishedAt', 'id', 'kind', 'progress', 'report', 'slug', 'startedAt', 'state'];

@@ -13,7 +13,7 @@ const STORE: StoreConfig = {
   dbPath: '/media/.studio/studio.db',
   maxUploadBytes: 2_147_483_648,
   objectStore: 'fs',
-  motionAssetsRoot: '/repo/libs/motion-graphics/assets',
+  motionAssetsRoot: '/repo/libs/motion-graphics/assets', brandsRoot: '/brands',
 };
 
 const WRITE_PORTS = ['writeTextFile', 'ensureDirectory', 'writeTemporary', 'promoteTemporary', 'removeTemporary', 'removeFile', 'removeDirectory'];

@@ -1,0 +1,187 @@
+{
+  "$schema": "../../../../schemas/cycle.schema.json",
+  "cycle": 1,
+  "module": "brand-kit",
+  "spec": "spec-e-burgos-021-brand-kit",
+  "apps": [
+    "libs/motion-graphics",
+    "apps/render-api",
+    "apps/desktop"
+  ],
+  "phase": "brand-library",
+  "flow": "lite",
+  "objectives": [
+    "Biblioteca de marcas por API con paleta derivada y carpeta escribible",
+    "DisplayAds sin cambios visibles"
+  ],
+  "status": "completed",
+  "started_at": "2026-10-08",
+  "completed_at": "2026-10-08",
+  "documents": {
+    "plan": "sdd/specs/spec-e-burgos-021-brand-kit/cycles/cycle-01/plan.md",
+    "tasks": "sdd/specs/spec-e-burgos-021-brand-kit/cycles/cycle-01/tasks.json"
+  },
+  "artifacts": [
+    "sdd/specs/spec-e-burgos-021-brand-kit/cycles/cycle-01/artifacts/verification.md"
+  ],
+  "metrics": {
+    "tasks_total": 5,
+    "tasks_completed": 5,
+    "tasks_skipped": 0,
+    "story_points": 14,
+    "files_created": [
+      "apps/render-api/src/brands/brand-library.ts",
+      "apps/render-api/src/brands/brand-palette.ts",
+      "apps/render-api/src/brands/wordmark-svg.ts",
+      "apps/render-api/src/http/handlers/brands-handler.spec.ts",
+      "apps/render-api/src/http/handlers/brands-handler.ts",
+      "libs/motion-graphics/src/brand/brand-css.spec.ts",
+      "libs/motion-graphics/src/brand/brand-css.ts",
+      "libs/motion-graphics/src/brand/color.ts",
+      "libs/motion-graphics/src/brand/derive-brand-tokens.ts"
+    ],
+    "files_modified": [
+      ".gitignore",
+      "apps/desktop/src/main/render-api-env.spec.ts",
+      "apps/desktop/src/main/render-api-env.ts",
+      "apps/render-api/src/config/store-config.spec.ts",
+      "apps/render-api/src/config/store-config.ts",
+      "apps/render-api/src/deps/motion-pipeline-adapters.spec.ts",
+      "apps/render-api/src/deps/motion-pipeline-adapters.ts",
+      "apps/render-api/src/deps/node-render-api-dependencies.spec.ts",
+      "apps/render-api/src/deps/node-render-api-dependencies.ts",
+      "apps/render-api/src/deps/render-api-dependencies.ts",
+      "apps/render-api/src/errors/http-status-for.spec.ts",
+      "apps/render-api/src/errors/http-status-for.ts",
+      "apps/render-api/src/errors/render-api-error.ts",
+      "apps/render-api/src/errors/to-error-payload.ts",
+      "apps/render-api/src/http/content-type-for.ts",
+      "apps/render-api/src/http/create-render-api-server.spec.ts",
+      "apps/render-api/src/http/handle-request.spec.ts",
+      "apps/render-api/src/http/handle-request.ts",
+      "apps/render-api/src/http/handlers/artifact-handler.spec.ts",
+      "apps/render-api/src/http/handlers/asset-copy-handler.spec.ts",
+      "apps/render-api/src/http/handlers/asset-inbox-handler.spec.ts",
+      "apps/render-api/src/http/handlers/assets-handler.spec.ts",
+      "apps/render-api/src/http/handlers/frames-handler.spec.ts",
+      "apps/render-api/src/http/handlers/free-media-handler.spec.ts",
+      "apps/render-api/src/http/handlers/generated-handler.spec.ts",
+      "apps/render-api/src/http/handlers/image-preview-handler.spec.ts",
+      "apps/render-api/src/http/handlers/jobs-handler.spec.ts",
+      "apps/render-api/src/http/handlers/montage-handler.spec.ts",
+      "apps/render-api/src/http/handlers/motion-handler.spec.ts",
+      "apps/render-api/src/http/handlers/motion-job.spec.ts",
+      "apps/render-api/src/http/handlers/music-handler.spec.ts",
+      "apps/render-api/src/http/handlers/probe-handler.spec.ts",
+      "apps/render-api/src/http/handlers/producer-handler.spec.ts",
+      "apps/render-api/src/http/handlers/project-text-handler.spec.ts",
+      "apps/render-api/src/http/handlers/projects-handler.spec.ts",
+      "apps/render-api/src/http/handlers/storyboard-handler.spec.ts",
+      "apps/render-api/src/http/handlers/voice-handler.spec.ts",
+      "apps/render-api/src/http/health-handler.spec.ts",
+      "apps/render-api/src/http/routes.ts",
+      "apps/render-api/src/store/import-legacy-media.spec.ts",
+      "apps/render-api/src/store/project-scope.spec.ts",
+      "libs/motion-graphics/assets/brands/displayads/brand.json",
+      "libs/motion-graphics/src/auto/build-auto-storyboard-request.ts",
+      "libs/motion-graphics/src/auto/check-storyboard-against-brief.spec.ts",
+      "libs/motion-graphics/src/auto/check-storyboard-against-brief.ts",
+      "libs/motion-graphics/src/auto/generate-motion-storyboard.ts",
+      "libs/motion-graphics/src/brand/brand-manifest.spec.ts",
+      "libs/motion-graphics/src/brand/brand-manifest.ts",
+      "libs/motion-graphics/src/compose/compose-storyboard.spec.ts",
+      "libs/motion-graphics/src/compose/compose-storyboard.ts",
+      "libs/motion-graphics/src/index.ts",
+      "libs/motion-graphics/src/pipeline/compose-from-storyboard.spec.ts",
+      "libs/motion-graphics/src/pipeline/init-from-template.spec.ts",
+      "libs/motion-graphics/src/pipeline/ports.ts",
+      "libs/motion-graphics/src/pipeline/project-files.ts",
+      "libs/motion-graphics/src/scenes/scene-html.ts",
+      "tools/motion-studio/src/deps/node-motion-dependencies.ts"
+    ],
+    "files_deleted": [],
+    "usage": {
+      "tokens_in": 350686,
+      "tokens_out": 58003,
+      "approx": true,
+      "source": "declared-estimate",
+      "by_agent": [
+        {
+          "agent": "orchestrator",
+          "label": "solo",
+          "provider_model": "claude/opus",
+          "effort": "high",
+          "tokens_in": 90000,
+          "tokens_out": 12000,
+          "tokens_total": 102000,
+          "approx": true,
+          "source": "declared-estimate",
+          "recorded_at": "2026-10-08"
+        },
+        {
+          "agent": "implementor-back",
+          "label": "biblioteca de marcas, API y verificación",
+          "provider_model": "claude/sonnet",
+          "effort": "medium",
+          "tokens_in": 260686,
+          "tokens_out": 46003,
+          "tokens_total": 306689,
+          "approx": true,
+          "source": "agent-usage-notification",
+          "recorded_at": "2026-10-08"
+        }
+      ],
+      "by_tier": {
+        "claude/opus": {
+          "tokens_in": 90000,
+          "tokens_out": 12000,
+          "approx": true,
+          "source": "declared-estimate"
+        },
+        "claude/sonnet": {
+          "tokens_in": 260686,
+          "tokens_out": 46003,
+          "approx": true,
+          "source": "declared-estimate"
+        }
+      }
+    }
+  },
+  "tables_created": [],
+  "endpoints_implemented": [
+    "EP-049",
+    "EP-050",
+    "EP-051",
+    "EP-052",
+    "EP-053",
+    "EP-054",
+    "EP-055"
+  ],
+  "components_created": [],
+  "issues_found": [
+    "Los proyectos de referencia tenían el storyboard editado después del último compose: el oráculo se rearmó componiendo los mismos insumos con el código de HEAD.",
+    "El ObjectStorage estaba confinado a media/: se amplió a las dos raíces de marcas.",
+    "La derivación no reproduce los hex exactos de DisplayAds: por eso conserva su css y los duplicados fijan sus variables como tokens."
+  ],
+  "reviewer_report": {
+    "approved": true,
+    "date": "2026-10-08",
+    "ca_results": {
+      "US-021-101": "OK — 7 endpoints con tests de handler; pnpm studio real: crear 201, duplicar 201, subir 201, PUT 200, incluida 409, id repetido 409, borrar 204 a .trash.",
+      "US-021-102": "OK — deriveBrandTokens emite las 35 variables de DisplayAds; tokens ganan (spec y PUT real: acento #e11d48).",
+      "US-021-103": "OK — BRANDS_ROOT default dirname(media)/brands; desktop lo fija junto a la carpeta de proyectos; /brands/ en .gitignore.",
+      "US-021-104": "OK — index.html/tpl/script byte-idénticos contra HEAD y PSNR inf en 10 snapshots; el duplicado también."
+    },
+    "tests": {
+      "sdd:validate": "OK",
+      "lint": "motion-graphics, render-api, desktop, motion-studio verdes",
+      "test": "173 + 1684 + 111 + 16",
+      "build": "verde",
+      "e2e": "pnpm studio: API de marcas de punta a punta"
+    },
+    "notes": "Ciclo lite con un implementador; verificación de no regresión visual por snapshots contra el código de HEAD.",
+    "follow_ups": [
+      "cycle-02: página Marcas y vista previa en vivo"
+    ]
+  }
+}

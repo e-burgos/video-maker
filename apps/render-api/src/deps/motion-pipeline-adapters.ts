@@ -6,7 +6,7 @@ import { MotionStudioError } from '@video-maker/motion-graphics';
 import type { MotionPipelinePorts } from '@video-maker/motion-graphics';
 
 import { PipelineStageError } from '../errors/pipeline-stage-error';
-import type { MotionBrandDocument, RenderApiDependencies } from './render-api-dependencies';
+import type { MotionBrandDocument, MotionBrandSource, RenderApiDependencies } from './render-api-dependencies';
 
 const TRANSCRIPTION_LANGUAGE = 'es';
 const HYPERFRAMES_BEATS_PROJECT =
@@ -32,7 +32,7 @@ function hyperframesFailureDetail(stdout: string, stderr: string): string {
   return detail.slice(0, FAILURE_DETAIL_CHARS);
 }
 
-export function createMotionPipelinePorts(deps: RenderApiDependencies, assetsRoot: string): MotionPipelinePorts {
+export function createMotionPipelinePorts(deps: RenderApiDependencies, assetsRoot: string, userBrandsRoot: string): MotionPipelinePorts {
   const hyperframes = async (args: readonly string[], cwd: string): Promise<void> => {
     const result = await deps.runHyperframes({ args, cwd });
     if (result.exitCode !== 0) {
@@ -42,6 +42,7 @@ export function createMotionPipelinePorts(deps: RenderApiDependencies, assetsRoo
 
   return {
     assetsRoot,
+    userBrandsRoot,
     readText: (path) => readFile(path, 'utf8'),
     readBytes: async (path) => new Uint8Array(await readFile(path)),
     writeText: async (path, content) => {
@@ -146,19 +147,36 @@ export function createMotionPipelinePorts(deps: RenderApiDependencies, assetsRoo
   };
 }
 
-export async function listMotionBrandDocuments(assetsRoot: string): Promise<readonly MotionBrandDocument[]> {
-  const brandsRoot = join(assetsRoot, 'brands');
+export interface MotionBrandRoots {
+  readonly builtInAssetsRoot: string;
+  readonly userBrandsRoot: string;
+}
+
+export interface MotionBrandListingReport {
+  readonly skipped: (reason: { readonly id: string; readonly why: 'collides-with-built-in' | 'unreadable' }) => void;
+}
+
+async function readBrandDocuments(
+  brandsRoot: string,
+  source: MotionBrandSource,
+  tolerateInvalid: boolean,
+  report: MotionBrandListingReport | undefined,
+): Promise<MotionBrandDocument[]> {
   const entries = await readdir(brandsRoot, { withFileTypes: true }).catch(() => []);
   const documents: MotionBrandDocument[] = [];
 
-  for (const entry of entries.filter((candidate) => candidate.isDirectory())) {
+  for (const entry of entries.filter((candidate) => candidate.isDirectory() && !candidate.name.startsWith('.'))) {
     const manifestPath = join(brandsRoot, entry.name, 'brand.json');
     if (!(await pathExists(manifestPath))) {
       continue;
     }
     try {
-      documents.push({ id: entry.name, manifest: JSON.parse(await readFile(manifestPath, 'utf8')) as unknown });
+      documents.push({ id: entry.name, source, manifest: JSON.parse(await readFile(manifestPath, 'utf8')) as unknown });
     } catch (cause) {
+      if (tolerateInvalid) {
+        report?.skipped({ id: entry.name, why: 'unreadable' });
+        continue;
+      }
       throw new PipelineStageError({
         code: 'SERVER_CONFIG_INVALID',
         stage: null,
@@ -170,4 +188,21 @@ export async function listMotionBrandDocuments(assetsRoot: string): Promise<read
   }
 
   return documents;
+}
+
+export async function listMotionBrandDocuments(
+  roots: MotionBrandRoots,
+  report?: MotionBrandListingReport,
+): Promise<readonly MotionBrandDocument[]> {
+  const builtIn = await readBrandDocuments(join(roots.builtInAssetsRoot, 'brands'), 'built-in', false, report);
+  const builtInIds = new Set(builtIn.map((document) => document.id));
+  const user = (await readBrandDocuments(roots.userBrandsRoot, 'user', true, report)).filter((document) => {
+    if (!builtInIds.has(document.id)) {
+      return true;
+    }
+    report?.skipped({ id: document.id, why: 'collides-with-built-in' });
+    return false;
+  });
+
+  return [...builtIn, ...user];
 }

@@ -41,7 +41,7 @@ vi.mock('@video-maker/media-local', () => ({
 
 const ENV: NodeJS.ProcessEnv = {};
 const CWD = '/var/data/media/acme-launch';
-const STORE: StoreConfig = { mediaRoot: '/var/data/media', dbPath: '/var/data/media/.studio/studio.db', maxUploadBytes: 2_147_483_648, objectStore: 'fs', motionAssetsRoot: '/repo/libs/motion-graphics/assets' };
+const STORE: StoreConfig = { mediaRoot: '/var/data/media', dbPath: '/var/data/media/.studio/studio.db', maxUploadBytes: 2_147_483_648, objectStore: 'fs', motionAssetsRoot: '/repo/libs/motion-graphics/assets', brandsRoot: '/brands' };
 
 async function loadMocks() {
   const render = await import('@video-maker/composition-remotion/render');
@@ -724,6 +724,15 @@ describe('createNodeRenderApiDependencies', () => {
     });
   });
 
+  it('also lets the storage reach the user brands root and the built-in brands folder, nothing else beside them', async () => {
+    const deps = createNodeRenderApiDependencies(ENV, STORE);
+
+    await expect(deps.storage.stat(`${STORE.brandsRoot}/missing`)).resolves.toBeNull();
+    await expect(deps.storage.stat(`${STORE.motionAssetsRoot}/brands/missing`)).resolves.toBeNull();
+    await expect(deps.storage.stat(`${STORE.motionAssetsRoot}/runtime`)).rejects.toMatchObject({ code: 'ASSET_PATH_INVALID' });
+    await expect(deps.storage.stat(`${STORE.brandsRoot}/../escape`)).rejects.toMatchObject({ code: 'ASSET_PATH_INVALID' });
+  });
+
   it('writes into work/.uploads and renames onto the final path against a real temporary directory', async () => {
     const base = await mkdtemp(join(tmpdir(), 'render-api-store-'));
 
@@ -733,6 +742,8 @@ describe('createNodeRenderApiDependencies', () => {
         dbPath: join(base, '.studio', 'studio.db'),
         maxUploadBytes: 1024,
         objectStore: 'fs',
+        motionAssetsRoot: join(base, 'assets'),
+        brandsRoot: join(base, 'brands'),
       };
       const deps = createNodeRenderApiDependencies(ENV, store);
       const uploadsDir = join(base, 'work', '.uploads');

@@ -30,7 +30,7 @@ const STORE: StoreConfig = {
   dbPath: '/media/.studio/studio.db',
   maxUploadBytes: 2_147_483_648,
   objectStore: 'fs',
-  motionAssetsRoot: '/assets',
+  motionAssetsRoot: '/assets', brandsRoot: '/brands',
 };
 const CONFIG: ServerConfig = { host: '127.0.0.1', port: 4310, webRoot: null, accessToken: null };
 
@@ -52,7 +52,7 @@ function putRequest(path: string, value: unknown) {
 function setup(
   mode: 'motion' | 'footage',
   files: readonly FakeObjectStorageFileSeed[] = [],
-  brands: readonly MotionBrandDocument[] = [{ id: 'displayads', manifest: JSON.parse(BRAND_JSON) as unknown }],
+  brands: readonly MotionBrandDocument[] = [{ id: 'displayads', source: 'built-in', manifest: JSON.parse(BRAND_JSON) as unknown }],
 ) {
   const callLog = createCallLog();
   const storage = createFakeObjectStorage(callLog, {

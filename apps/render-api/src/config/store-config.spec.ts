@@ -5,6 +5,7 @@ import {
   DB_PATH_ENV_VAR,
   DEFAULT_MAX_UPLOAD_BYTES,
   DEFAULT_MEDIA_ROOT,
+  BRANDS_ROOT_ENV_VAR,
   MAX_UPLOAD_BYTES_ENV_VAR,
   MEDIA_ROOT_ENV_VAR,
   MOTION_ASSETS_ENV_VAR,
@@ -84,5 +85,12 @@ describe('readStoreConfig', () => {
     expect(readStoreConfig({ [MOTION_ASSETS_ENV_VAR]: '/opt/motion-assets' }, CWD).motionAssetsRoot).toBe(
       '/opt/motion-assets',
     );
+  });
+
+  it('defaults the brands root to a brands folder next to the media root and honours BRANDS_ROOT', () => {
+    expect(readStoreConfig({}, CWD).brandsRoot).toBe(`${CWD}/brands`);
+    expect(readStoreConfig({ [MEDIA_ROOT_ENV_VAR]: '/mnt/data/projects' }, CWD).brandsRoot).toBe('/mnt/data/brands');
+    expect(readStoreConfig({ [BRANDS_ROOT_ENV_VAR]: 'my-brands' }, CWD).brandsRoot).toBe(`${CWD}/my-brands`);
+    expect(readStoreConfig({ [BRANDS_ROOT_ENV_VAR]: '/opt/brands' }, CWD).brandsRoot).toBe('/opt/brands');
   });
 });
