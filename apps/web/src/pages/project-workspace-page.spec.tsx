@@ -127,6 +127,7 @@ describe('ProjectWorkspacePage', () => {
     expect(screen.queryByTestId('producer-inventory')).toBeNull();
     expect(screen.queryByTestId('workspace-panel-toggle')).toBeNull();
     expect(screen.getByTestId('workspace-motion-link')).toBeTruthy();
+    expect(screen.getByPlaceholderText('Ask for a change to this video…')).toBeTruthy();
   });
 
   it('fills the composer when a motion example chip is clicked', async () => {

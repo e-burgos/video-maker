@@ -27,6 +27,7 @@ export const GUIDE_EN: GuideContent = {
         '- **Brief**: brand, format (16:9, or 9:16 for reels), music (automatic, one of the brand tracks or none), goal, audience and the script. If you upload photos, write one line saying what each one shows: the AI does not see them, it picks them by that caption.',
         '- **Build storyboard**: the AI drafts the scenes from the brief (a few minutes). Review them before going on: changing the script and drafting again is cheap.',
         '- **Make video**: voice, music and render, with visible progress ("Voice 3/7", "Render…"). The video lands in `out/video.mp4` and shows up when you open the page.',
+        '- **Adjust with the producer**: the button on the Motion page opens the chat of the video. Ask for changes in your own words ("lower the music", "change the title of scene 3") and it edits only those scenes; the voice is re-recorded only where the text changed, so a small adjustment takes one or two minutes.',
         '- **Music credit**: it is not drawn on the video. It stays in `out/video.credits.txt` and under the player: paste it in the description when you publish (the license requires it).',
         '',
         'Files live like in any video: `motion/brief.json` and `motion/storyboard.json`, photos in `raw/images/`, the animated project in `work/motion/` and the result in `out/`. The producer can also build these videos from the conversation.',

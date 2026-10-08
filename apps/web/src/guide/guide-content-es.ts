@@ -27,6 +27,7 @@ export const GUIDE_ES: GuideContent = {
         '- **Brief**: marca, formato (16:9 o 9:16 para reels), música (automática, un tema de la marca o sin música), objetivo, público y el guion. Si subís fotos, escribí en una línea qué muestra cada una: la IA no las ve, elige por esa descripción.',
         '- **Armar storyboard**: la IA arma las escenas a partir del brief (unos minutos). Revisalas antes de seguir: es barato cambiar el guion y volver a armarlas.',
         '- **Hacer video**: voz, música y render, con el avance a la vista ("Voz 3/7", "Render…"). El video queda en `out/video.mp4` y se ve al abrir la página.',
+        '- **Ajustar con el productor**: el botón de la página Motion abre el chat del video. Pedile cambios en tus palabras ("bajá la música", "cambiá el título de la escena 3") y edita sólo esas escenas; la voz se vuelve a grabar únicamente donde cambió el texto, así que un ajuste chico tarda uno o dos minutos.',
         '- **Crédito de la música**: no aparece sobre el video. Queda en `out/video.credits.txt` y debajo del reproductor: pegalo en la descripción cuando publiques (la licencia lo pide).',
         '',
         'Los archivos quedan como en cualquier video: `motion/brief.json` y `motion/storyboard.json`, las fotos en `raw/images/`, el proyecto animado en `work/motion/` y el resultado en `out/`. El productor también sabe armar estos videos desde la conversación.',

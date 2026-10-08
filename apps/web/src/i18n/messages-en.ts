@@ -311,6 +311,7 @@ export const MESSAGES_EN = {
   'producer.starter.freeFootage': 'Look for free footage about ',
   'producer.composerLabel': 'Message for the producer',
   'producer.composerPlaceholder': 'Tell the producer what you want and what material you have…',
+  'producer.composerPlaceholderMotion': 'Ask for a change to this video…',
   'producer.modelLabel': 'Model',
   'producer.model.sonnet.label': 'Sonnet',
   'producer.model.sonnet.description': 'Balanced, faster and cheaper',

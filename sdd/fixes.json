@@ -2171,7 +2171,7 @@
       "validated_at": null,
       "title": "Ajustar videos de motion graphics con el productor, voz parcial, volumen de música y pantalla con perspectiva",
       "estimation_hours": 4,
-      "description": "En un video de motion graphics no se llegaba al chat del productor (la tarjeta y la página Motion no lo enlazaban), el workspace mostraba material crudo y recetas de grabación, y el productor no podía editar escenas (sólo regenerar el storyboard desde el brief, que pisa uno hecho a mano). Además la música sonaba muy alta y el contenido de la pantalla del Counter 15 no seguía su inclinación. Ahora: botón 'Ajustar con el productor' en la página Motion; workspace motion con ejemplos de pedidos; tool write_motion_storyboard y receta de ajuste (leer, editar lo mínimo, mostrar el cambio, OK, fase video); voz parcial (voice-manifest.json: sólo se re-sintetizan las escenas cuyo texto cambió); storyboard.music.volume (default 0,5, ducking 30 % de ese nivel bajo la voz); pantallas de equipos con homografía matrix3d desde las cuatro esquinas del vidrio.",
+      "description": "En un video de motion graphics no se llegaba al chat del productor (la tarjeta y la página Motion no lo enlazaban), el workspace mostraba material crudo y recetas de grabación, y el productor no podía editar escenas (sólo regenerar el storyboard desde el brief, que pisa uno hecho a mano). Además la música sonaba muy alta y el contenido de la pantalla del Counter 15 no seguía su inclinación. Ahora: botón 'Ajustar con el productor' en la página Motion; workspace motion con ejemplos de pedidos; tool write_motion_storyboard y receta de ajuste (leer, editar lo mínimo, mostrar el cambio, OK, fase video); voz parcial (voice-manifest.json: sólo se re-sintetizan las escenas cuyo texto cambió); storyboard.music.volume (default 0,5, ducking 30 % de ese nivel bajo la voz); pantallas de equipos con homografía matrix3d desde las cuatro esquinas del vidrio. Reparación del resto de los videos: Easy Pro, presentación, promo de IA y reel re-renderizados con la pantalla en perspectiva y música a 0,15 (el nivel aprobado en Counter 15), voces reutilizadas. La promo de IA pedía fotos de marca retiradas (escena-04/05) y el render fallaba con un error vacío: ahora la composición falla al instante nombrando la foto que falta, y el job muestra la línea de error de hyperframes lint (stdout). Briefs de ejemplo con fotos aprobadas. El chat de un video motion tiene su propio texto de ayuda.",
       "justification": "Perfil solo: amplía contratos existentes de forma compatible (campos opcionales, una tool nueva del productor sobre un endpoint que ya existía); verificable con tests, renders y prueba en la app; reversible.",
       "related_modules": [
         "motion-mode"
@@ -2188,7 +2188,13 @@
         "apps/web/src/pages/motion-page.tsx",
         "apps/web/src/components/producer-welcome.tsx",
         "apps/desktop/package.json",
-        "apps/desktop/CHANGELOG.md"
+        "apps/desktop/CHANGELOG.md",
+        "libs/motion-graphics/src/compose/compose-storyboard.ts",
+        "apps/render-api/src/deps/motion-pipeline-adapters.ts",
+        "apps/render-api/src/deps/render-api-dependencies.ts",
+        "apps/web/src/components/producer-composer.tsx",
+        "libs/motion-graphics/assets/briefs/displayads/plataforma-60s.json",
+        "apps/docs-site/src/content/using-studio.mjs"
       ],
       "test_reference": "nx affected -t lint test build: verde (5 proyectos). Snapshot de counter-15: promo y lista de redes siguen la inclinación del vidrio.",
       "status": "implemented",

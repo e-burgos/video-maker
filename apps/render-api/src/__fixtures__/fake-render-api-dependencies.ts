@@ -417,7 +417,7 @@ export function createFakeRenderApiDependencies(
 
     runHyperframes: async (input) => {
       callLog.record('runHyperframes', input);
-      return overrides?.runHyperframes ? overrides.runHyperframes(input) : { exitCode: 0, stderr: '' };
+      return overrides?.runHyperframes ? overrides.runHyperframes(input) : { exitCode: 0, stdout: '', stderr: '' };
     },
   };
 }

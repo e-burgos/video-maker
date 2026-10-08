@@ -312,6 +312,7 @@ export const MESSAGES_ES: Messages = {
   'producer.starter.freeFootage': 'Buscá material libre sobre ',
   'producer.composerLabel': 'Mensaje para el productor',
   'producer.composerPlaceholder': 'Contale al productor qué querés y qué material tenés…',
+  'producer.composerPlaceholderMotion': 'Pedile un cambio de este video…',
   'producer.modelLabel': 'Modelo',
   'producer.model.sonnet.label': 'Sonnet',
   'producer.model.sonnet.description': 'Equilibrado, rápido y económico',

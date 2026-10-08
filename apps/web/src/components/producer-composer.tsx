@@ -17,6 +17,7 @@ export type ProducerComposerProps = {
   model: string;
   onModelChange: (model: string) => void;
   activeEngine?: ProducerEngineId | null;
+  placeholder?: string;
 };
 
 export function ProducerComposer({
@@ -29,6 +30,7 @@ export function ProducerComposer({
   model,
   onModelChange,
   activeEngine = null,
+  placeholder,
 }: ProducerComposerProps) {
   const t = useT();
   const blocked = blockers.length > 0;
@@ -48,7 +50,7 @@ export function ProducerComposer({
         value={value}
         rows={3}
         disabled={blocked}
-        placeholder={t('producer.composerPlaceholder')}
+        placeholder={placeholder ?? t('producer.composerPlaceholder')}
         onChange={(event) => onChange(event.target.value)}
         onKeyDown={(event) => {
           if (event.key !== 'Enter' || event.shiftKey) {

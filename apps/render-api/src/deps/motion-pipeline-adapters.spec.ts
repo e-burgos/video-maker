@@ -63,12 +63,27 @@ describe('createMotionPipelinePorts', () => {
     });
   });
 
+  it('reports the lint error lines hyperframes prints on stdout when the lint fails', async () => {
+    const deps = createFakeRenderApiDependencies(createCallLog(), {
+      runHyperframes: async () => ({
+        exitCode: 1,
+        stdout: '  ⚠ timeline_track_too_dense: Track 1 has 8 timed elements\n  ✗ missing_local_asset: <img> element references local file(s) not found in the project: assets/brand/escena-04\n◇  1 error(s), 1 warning(s)',
+        stderr: '',
+      }),
+    });
+    const outDir = await mkdtemp(join(tmpdir(), 'adapters-'));
+
+    await expect(
+      createMotionPipelinePorts(deps, '/assets').render({ projectDir: '/work', outPath: join(outDir, 'v.mp4'), fps: 30, quality: 'delivery' }),
+    ).rejects.toMatchObject({ code: 'STAGE_FAILED', message: expect.stringMatching(/hyperframes lint failed: ✗ missing_local_asset: .*escena-04$/u) });
+  });
+
   it('lints then renders with hyperframes and fails on a non-zero exit', async () => {
     const calls: { args: readonly string[]; cwd: string }[] = [];
     const deps = createFakeRenderApiDependencies(createCallLog(), {
       runHyperframes: async (input) => {
         calls.push(input);
-        return { exitCode: input.args[0] === 'render' ? 1 : 0, stderr: 'chrome crashed' };
+        return { exitCode: input.args[0] === 'render' ? 1 : 0, stdout: '', stderr: 'chrome crashed' };
       },
     });
     const outDir = await mkdtemp(join(tmpdir(), 'adapters-'));
