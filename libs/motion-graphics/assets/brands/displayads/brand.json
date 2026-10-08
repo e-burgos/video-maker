@@ -7,6 +7,17 @@
   "logo": "img/logo.svg",
   "isotipo": "img/isotipo.svg",
   "css": "brand.css",
+  "palette": {
+    "background": "#09090b",
+    "accent": "#0ea5e9",
+    "accent2": "#14b8a6",
+    "text": "#fafafa"
+  },
+  "typography": {
+    "display": "Outfit",
+    "body": "Geist",
+    "mono": "Geist Mono"
+  },
   "fonts": [
     {
       "family": "Outfit",

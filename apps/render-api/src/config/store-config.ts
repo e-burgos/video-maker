@@ -1,4 +1,4 @@
-import { isAbsolute, join } from 'node:path/posix';
+import { dirname, isAbsolute, join } from 'node:path/posix';
 
 import { PipelineStageError } from '../errors/pipeline-stage-error';
 
@@ -7,9 +7,11 @@ export const DB_PATH_ENV_VAR = 'RENDER_API_DB_PATH';
 export const MAX_UPLOAD_BYTES_ENV_VAR = 'RENDER_API_MAX_UPLOAD_BYTES';
 export const OBJECT_STORE_ENV_VAR = 'RENDER_API_OBJECT_STORE';
 export const MOTION_ASSETS_ENV_VAR = 'MOTION_GRAPHICS_ASSETS';
+export const BRANDS_ROOT_ENV_VAR = 'BRANDS_ROOT';
 
 export const DEFAULT_MEDIA_ROOT = 'media';
 export const DEFAULT_MOTION_ASSETS_ROOT = 'libs/motion-graphics/assets';
+const SIBLING_BRANDS_DIRECTORY_NAME = 'brands';
 export const DEFAULT_MAX_UPLOAD_BYTES = 2_147_483_648;
 export const OBJECT_STORE_KINDS = ['fs'] as const;
 const STUDIO_DIRECTORY_NAME = '.studio';
@@ -23,6 +25,7 @@ export interface StoreConfig {
   readonly maxUploadBytes: number;
   readonly objectStore: ObjectStoreKind;
   readonly motionAssetsRoot: string;
+  readonly brandsRoot: string;
 }
 
 function readMediaRoot(env: NodeJS.ProcessEnv, cwd: string): string {
@@ -35,6 +38,14 @@ function readMotionAssetsRoot(env: NodeJS.ProcessEnv, cwd: string): string {
   const value = env[MOTION_ASSETS_ENV_VAR];
   const root = value !== undefined && value !== '' ? value : DEFAULT_MOTION_ASSETS_ROOT;
   return isAbsolute(root) ? root : join(cwd, root);
+}
+
+function readBrandsRoot(env: NodeJS.ProcessEnv, cwd: string, mediaRoot: string): string {
+  const value = env[BRANDS_ROOT_ENV_VAR];
+  if (value === undefined || value === '') {
+    return join(dirname(mediaRoot), SIBLING_BRANDS_DIRECTORY_NAME);
+  }
+  return isAbsolute(value) ? value : join(cwd, value);
 }
 
 function readDbPath(env: NodeJS.ProcessEnv, cwd: string, mediaRoot: string): string {
@@ -90,5 +101,6 @@ export function readStoreConfig(env: NodeJS.ProcessEnv, cwd: string): StoreConfi
     maxUploadBytes: readMaxUploadBytes(env),
     objectStore: readObjectStore(env),
     motionAssetsRoot: readMotionAssetsRoot(env, cwd),
+    brandsRoot: readBrandsRoot(env, cwd, mediaRoot),
   };
 }

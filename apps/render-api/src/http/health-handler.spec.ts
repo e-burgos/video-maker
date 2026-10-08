@@ -19,7 +19,7 @@ const STORE: StoreConfig = {
   dbPath: '/var/data/media/.studio/studio.db',
   maxUploadBytes: 2_147_483_648,
   objectStore: 'fs',
-  motionAssetsRoot: '/repo/libs/motion-graphics/assets',
+  motionAssetsRoot: '/repo/libs/motion-graphics/assets', brandsRoot: '/brands',
 };
 
 const ALL_BINARIES_RESOLVED = [

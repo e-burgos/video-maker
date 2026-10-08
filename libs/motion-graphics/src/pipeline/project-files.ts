@@ -1,5 +1,6 @@
 import { BRAND_ASSET_DIR, RUNTIME_ASSET_DIR } from '../compose/compose-storyboard';
-import { parseBrandManifest } from '../brand/brand-manifest';
+import { brandCss } from '../brand/brand-css';
+import { brandCssFile, parseBrandManifest } from '../brand/brand-manifest';
 import type { BrandManifest } from '../brand/brand-manifest';
 import { MotionStudioError } from '../errors/motion-studio-error';
 import { parseMotionScript } from '../script/motion-script';
@@ -24,10 +25,18 @@ export async function readExistingWords(ports: MotionPipelinePorts, project: str
   return (await ports.exists(path)) ? (JSON.parse(await ports.readText(path)) as SceneWords) : {};
 }
 
+export function brandRoots(ports: MotionPipelinePorts): string[] {
+  const builtIn = joinPath(ports.assetsRoot, 'brands');
+  return ports.userBrandsRoot === undefined ? [builtIn] : [ports.userBrandsRoot, builtIn];
+}
+
 async function requireBrandDir(ports: MotionPipelinePorts, brand: string): Promise<string> {
-  const brandDir = joinPath(ports.assetsRoot, 'brands', brand);
-  if (!(await ports.exists(joinPath(brandDir, BRAND_MANIFEST)))) throw new MotionStudioError('ASSET_MISSING', `brand "${brand}" not found in ${ports.assetsRoot}/brands`);
-  return brandDir;
+  const roots = brandRoots(ports);
+  for (const root of roots) {
+    const brandDir = joinPath(root, brand);
+    if (await ports.exists(joinPath(brandDir, BRAND_MANIFEST))) return brandDir;
+  }
+  throw new MotionStudioError('ASSET_MISSING', `brand "${brand}" not found in ${roots.join(' nor in ')}`);
 }
 
 export async function readBrand(ports: MotionPipelinePorts, brandId: string): Promise<BrandManifest> {
@@ -39,6 +48,14 @@ export async function copySharedAssets(ports: MotionPipelinePorts, brand: string
   const brandDir = await requireBrandDir(ports, brand);
   await ports.copyTree(joinPath(ports.assetsRoot, 'runtime'), joinPath(project, RUNTIME_ASSET_DIR));
   await ports.copyTree(brandDir, joinPath(project, BRAND_ASSET_DIR));
+  await writeGeneratedBrandCss(ports, brandDir, project);
+}
+
+async function writeGeneratedBrandCss(ports: MotionPipelinePorts, brandDir: string, project: string): Promise<void> {
+  const brand = parseBrandManifest(JSON.parse(await ports.readText(joinPath(brandDir, BRAND_MANIFEST))));
+  if (brand.css !== undefined && brand.tokens === undefined) return;
+  const authored = brand.css === undefined ? undefined : await ports.readText(joinPath(brandDir, brand.css));
+  await ports.writeText(joinPath(project, BRAND_ASSET_DIR, brandCssFile(brand)), brandCss(brand, authored));
 }
 
 export async function copyMusic(ports: MotionPipelinePorts, project: string, source: string, file: string): Promise<void> {

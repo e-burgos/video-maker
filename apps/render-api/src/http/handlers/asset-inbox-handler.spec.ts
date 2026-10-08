@@ -14,7 +14,7 @@ import {
   handleUploadToInbox,
 } from './asset-inbox-handler';
 
-const STORE: StoreConfig = { mediaRoot: '/media', dbPath: '/media/.studio/studio.db', maxUploadBytes: 2_147_483_648, objectStore: 'fs', motionAssetsRoot: '/repo/libs/motion-graphics/assets' };
+const STORE: StoreConfig = { mediaRoot: '/media', dbPath: '/media/.studio/studio.db', maxUploadBytes: 2_147_483_648, objectStore: 'fs', motionAssetsRoot: '/repo/libs/motion-graphics/assets', brandsRoot: '/brands' };
 const SLUG = 'smoke-ingest';
 
 async function* singleChunk(bytes: Uint8Array): AsyncGenerator<Uint8Array> {

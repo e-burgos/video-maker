@@ -60,3 +60,6 @@ apps/desktop/.vendor-cache/previews/
 
 # motion-studio CLI working projects (outside the studio media root)
 .motion-work/
+
+# user brand library (BRANDS_ROOT default when running from the repo)
+/brands/

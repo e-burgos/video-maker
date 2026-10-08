@@ -1,4 +1,4 @@
-import { join } from 'node:path';
+import { dirname, join } from 'node:path';
 
 import type { AppPaths } from './app-paths';
 import { mergePathWithDefault, readLoginShellPath, resolveClaudeCli } from './login-shell-path';
@@ -57,6 +57,7 @@ export async function buildRenderApiEnv(
     RENDER_API_HOST: input.host,
     RENDER_API_PORT: String(input.port),
     RENDER_API_MEDIA_ROOT: input.projectsFolder,
+    BRANDS_ROOT: join(dirname(input.projectsFolder), 'brands'),
     RENDER_API_DB_PATH: input.paths.dbPath,
     VIDEO_MAKER_BIN_DIR: input.paths.vendorBinDir,
     VIDEO_MAKER_MODELS_DIR: input.paths.modelsDir,

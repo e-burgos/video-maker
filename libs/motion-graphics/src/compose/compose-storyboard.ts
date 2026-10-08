@@ -1,4 +1,4 @@
-import { brandImageFile } from '../brand/brand-manifest';
+import { brandCssFile, brandImageFile, brandIsotipo } from '../brand/brand-manifest';
 import type { BrandManifest } from '../brand/brand-manifest';
 import { MotionStudioError } from '../errors/motion-studio-error';
 import { renderScene } from '../scenes/render-scene';
@@ -92,8 +92,14 @@ function resolveMusic(storyboard: MotionStoryboard, brand: BrandManifest) {
   return track;
 }
 
+const FONT_FORMAT_BY_EXTENSION: Record<string, string> = { woff2: 'woff2', ttf: 'truetype', otf: 'opentype' };
+
+function fontFormat(file: string): string {
+  return FONT_FORMAT_BY_EXTENSION[file.slice(file.lastIndexOf('.') + 1).toLowerCase()] ?? 'woff2';
+}
+
 function fontFaces(brand: BrandManifest): string {
-  return brand.fonts.map((f) => `@font-face { font-family: "${f.family}"; src: url("${BRAND_ASSET_DIR}/${f.file}") format("woff2"); font-weight: ${f.weight ?? '100 900'}; }`).join('\n      ');
+  return brand.fonts.map((f) => `@font-face { font-family: "${f.family}"; src: url("${BRAND_ASSET_DIR}/${f.file}") format("${fontFormat(f.file)}"); font-weight: ${f.weight ?? '100 900'}; }`).join('\n      ');
 }
 
 export function composeStoryboard(storyboard: MotionStoryboard, brand: BrandManifest): ComposedStoryboard {
@@ -129,7 +135,7 @@ export function composeStoryboard(storyboard: MotionStoryboard, brand: BrandMani
     <title>${esc(storyboard.title)}</title>
     <script src="${RUNTIME_ASSET_DIR}/gsap.min.js"></script>
     <script src="${RUNTIME_ASSET_DIR}/motion-runtime.js"></script>
-    <link rel="stylesheet" href="${BRAND_ASSET_DIR}/${brand.css}" />
+    <link rel="stylesheet" href="${BRAND_ASSET_DIR}/${brandCssFile(brand)}" />
     <link rel="stylesheet" href="${RUNTIME_ASSET_DIR}/scenes.css" />
     <style>
       ${fontFaces(brand)}
@@ -146,7 +152,7 @@ export function composeStoryboard(storyboard: MotionStoryboard, brand: BrandMani
       </div>
       ${sections}
       <div class="mg-layer" id="mg-hud">
-        <div id="mg-bug"><img src="${BRAND_ASSET_DIR}/${brand.isotipo}" alt="" /><span>${esc(brand.name)}</span></div>
+        <div id="mg-bug"><img src="${BRAND_ASSET_DIR}/${brandIsotipo(brand)}" alt="" /><span>${esc(brand.name)}</span></div>
         <div id="mg-chapter"></div>
         <div id="mg-ticks"><i></i><i></i><i></i><i></i></div>
       </div>

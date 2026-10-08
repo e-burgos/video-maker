@@ -2314,8 +2314,8 @@
       "usage": {
         "provider_model": "claude/opus",
         "effort": "high",
-        "tokens_in": 410000,
-        "tokens_out": 62000,
+        "tokens_in": 646941,
+        "tokens_out": 105455,
         "approx": true,
         "source": "declared-estimate",
         "recorded_at": "2026-10-08",

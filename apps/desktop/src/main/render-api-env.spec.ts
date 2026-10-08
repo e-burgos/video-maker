@@ -79,6 +79,8 @@ describe('buildRenderApiEnv', () => {
     expect(env.PATH).toContain('/opt/homebrew/bin');
     expect(env.RENDER_API_HOST).toBe('127.0.0.1');
     expect(env.RENDER_API_PORT).toBe('4310');
+    expect(env.RENDER_API_MEDIA_ROOT).toBe('/user-data/projects');
+    expect(env.BRANDS_ROOT).toBe('/user-data/brands');
     expect(env.RENDER_API_ACCESS_TOKEN).toBe('sekret-token');
     expect(env.VIDEO_MAKER_PARENT_PID).toBe('4242');
     expect(env.VIDEO_MAKER_BIN_DIR).toBe('/resources/bin');

@@ -9,6 +9,12 @@ const pick = (...ids: string[]): MotionStoryboard => ({ ...catalogStoryboard, sc
 const base = pick('hook', 'reveal', 'gallery', 'cta');
 
 describe('composeStoryboard', () => {
+  it('declares the font format from the file extension', () => {
+    const { template } = composeStoryboard(base, { ...testBrand, fonts: [{ family: 'Brand', file: 'fonts/brand.ttf' }, { family: 'Brand2', file: 'fonts/brand.otf' }] });
+    expect(template).toContain('fonts/brand.ttf") format("truetype")');
+    expect(template).toContain('fonts/brand.otf") format("opentype")');
+  });
+
   it('writes one timed section per scene with chapter, flash and the brand kit', () => {
     const { template } = composeStoryboard(base, testBrand);
     expect(template.match(/<section id="s-/gu)).toHaveLength(4);

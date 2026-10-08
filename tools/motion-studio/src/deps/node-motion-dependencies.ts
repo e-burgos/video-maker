@@ -48,6 +48,7 @@ export function createNodeMotionDependencies(env: NodeJS.ProcessEnv, workspaceRo
   return {
     templatesRoot: env['MOTION_STUDIO_TEMPLATES'] ?? resolve(workspaceRoot, 'tools', 'motion-studio', 'templates'),
     assetsRoot: env['MOTION_STUDIO_ASSETS'] ?? resolve(workspaceRoot, 'libs', 'motion-graphics', 'assets'),
+    userBrandsRoot: resolve(workspaceRoot, env['BRANDS_ROOT'] ?? 'brands'),
     readText: (path) => readFile(path, 'utf8'),
     readBytes: async (path) => new Uint8Array(await readFile(path)),
     writeText: async (path, content) => {

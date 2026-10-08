@@ -1,3 +1,4 @@
+import { brandIsotipo } from '../brand/brand-manifest';
 import type { BrandManifest } from '../brand/brand-manifest';
 import { screenHomography } from './screen-perspective';
 import { MotionStudioError } from '../errors/motion-studio-error';
@@ -82,7 +83,7 @@ export function screenInner(screen: MotionScreen, ctx: SceneContext, firstCue: s
     case 'promo':
       return `<div class="mg-screen ${toneClass(screen.tone)}">${promo(screen.kicker, screen.big, screen.small)}</div>`;
     case 'boot':
-      return `<div class="mg-screen boot"><img src="${esc(ctx.imageUrl(`brand:${ctx.brand.isotipo}`))}" alt=""${animAttrs({ anim: 'pop', cue: firstCue, at: firstCue ? undefined : 0.4 })} /></div>`;
+      return `<div class="mg-screen boot"><img src="${esc(ctx.imageUrl(`brand:${brandIsotipo(ctx.brand)}`))}" alt=""${animAttrs({ anim: 'pop', cue: firstCue, at: firstCue ? undefined : 0.4 })} /></div>`;
     case 'off':
       return `<div class="mg-screen off">${screen.text ? `<span>${esc(screen.text)}</span>` : ''}</div>`;
     case 'image':

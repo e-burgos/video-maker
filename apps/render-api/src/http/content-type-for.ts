@@ -26,6 +26,8 @@ const CONTENT_TYPE_BY_EXTENSION: Readonly<Record<string, string>> = {
   '.ico': 'image/x-icon',
   '.woff': 'font/woff',
   '.woff2': 'font/woff2',
+  '.ttf': 'font/ttf',
+  '.otf': 'font/otf',
   '.webmanifest': 'application/manifest+json',
 };
 

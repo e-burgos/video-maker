@@ -14,7 +14,7 @@ import { voiceManifestPath, voiceTrackPath, voiceWordsPath } from '../../voice/v
 import { handleGetVoice, handlePutVoiceScene } from './voice-handler';
 import type { VoiceBody, VoiceSceneBody } from './voice-handler';
 
-const STORE: StoreConfig = { mediaRoot: '/var/data/media', dbPath: '/var/data/media/.studio/studio.db', maxUploadBytes: 2_147_483_648, objectStore: 'fs', motionAssetsRoot: '/repo/libs/motion-graphics/assets' };
+const STORE: StoreConfig = { mediaRoot: '/var/data/media', dbPath: '/var/data/media/.studio/studio.db', maxUploadBytes: 2_147_483_648, objectStore: 'fs', motionAssetsRoot: '/repo/libs/motion-graphics/assets', brandsRoot: '/brands' };
 const SLUG = 'acme-launch';
 const PROJECT_ROOT = `${STORE.mediaRoot}/${SLUG}`;
 const DOCUMENT = buildStoryboardDocument();

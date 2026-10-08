@@ -202,7 +202,23 @@
       "completed_at": "2026-10-07"
     }
   ],
-  "in_progress_modules": [],
+  "in_progress_modules": [
+    {
+      "module": "brand-kit",
+      "spec": "spec-e-burgos-021-brand-kit",
+      "apps": [
+        "libs/motion-graphics",
+        "apps/render-api",
+        "apps/web",
+        "apps/desktop",
+        "libs/producer-tools",
+        "libs/timeline-core",
+        "libs/composition-remotion",
+        "libs/local-store"
+      ],
+      "description": "Biblioteca de marcas: crear, duplicar y editar marcas (paleta derivada, logo, tipografías, voz, música, fotos, productos) guardadas junto a los proyectos, y usarlas en motion graphics y en material crudo"
+    }
+  ],
   "pending_modules": [
     {
       "module": "scene-assembly",

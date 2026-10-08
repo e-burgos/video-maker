@@ -1484,9 +1484,9 @@
         },
         "responses": {
           "201": "application/json, location: /projects/:slug/files/raw/inbox/<finalFileName>: { asset: { id, fileName, path, proposedRole, proposalReason, probe: { kind, durationMs, width?, height?, hasAudio?, hasAlpha? }, status: 'pending' } }.",
+          "400": "ASSET_CONTENT_TYPE_REQUIRED without a content-type header, or ASSET_UPLOAD_ABORTED when the source stream is cut short. application/json: { error: { code, stage: null, message, resource } }.",
           "404": "PROJECT_NOT_FOUND when the project directory does not exist. application/json: { error: { code, stage: null, message, resource? } }.",
           "411": "ASSET_CONTENT_LENGTH_REQUIRED without a content-length header. application/json: { error: { code, stage: null, message, resource } }.",
-          "400": "ASSET_CONTENT_TYPE_REQUIRED without a content-type header, or ASSET_UPLOAD_ABORTED when the source stream is cut short. application/json: { error: { code, stage: null, message, resource } }.",
           "413": "ASSET_TOO_LARGE when content-length or the actual byte count exceeds the configured upload limit. application/json: { error: { code, stage: null, message, resource, expected } }.",
           "415": "UNSUPPORTED_MEDIA_TYPE when the filename extension is not a supported video, image or audio format. application/json: { error: { code, stage: null, message, resource, expected } }.",
           "422": "ASSET_PATH_INVALID when filename is not a single portable path segment. application/json: { error: { code, stage: null, message, resource, expected } }.",
@@ -1689,6 +1689,211 @@
             "cycle": 3,
             "date": "2026-09-25",
             "change": "Created in spec-e-burgos-018-producer-free-tier cycle-03: ffmpeg image downsizing for the producer's view_images MCP tool (US-018-301), via a new resizeImage port (extractFrame's -ss breaks single-frame image2 inputs, found while verifying against real imported photos)."
+          }
+        ]
+      },
+      {
+        "id": "EP-049",
+        "method": "GET",
+        "path": "/brands",
+        "module": "brand-kit",
+        "spec": "sdd/specs/spec-e-burgos-021-brand-kit",
+        "status": "implemented",
+        "created_in_cycle": 1,
+        "updated_in_cycle": null,
+        "description": "Lists the studio brand library: built-in brands (read-only) first, then user brands from BRANDS_ROOT, by name.",
+        "path_params": [],
+        "required_headers": [],
+        "request_body": {},
+        "responses": {
+          "200": "application/json: [{ id, name, source: 'built-in'|'user', logo: string|null, palette: { background, accent, accent2, text }|null, updatedAt: string|null }]"
+        },
+        "changelog": [
+          {
+            "cycle": 1,
+            "date": "2026-10-08",
+            "change": "Created in spec-e-burgos-021-brand-kit cycle-01."
+          }
+        ]
+      },
+      {
+        "id": "EP-050",
+        "method": "GET",
+        "path": "/brands/:id",
+        "module": "brand-kit",
+        "spec": "sdd/specs/spec-e-burgos-021-brand-kit",
+        "status": "implemented",
+        "created_in_cycle": 1,
+        "updated_in_cycle": null,
+        "description": "One brand with its manifest, effective --mg-* tokens (parsed css or derived palette plus overrides) and file lists.",
+        "path_params": [
+          "id"
+        ],
+        "required_headers": [],
+        "request_body": {},
+        "responses": {
+          "200": "application/json: { id, source, manifest, tokens, files: { images, fonts, music, logos } }",
+          "404": "BRAND_UNKNOWN"
+        },
+        "changelog": [
+          {
+            "cycle": 1,
+            "date": "2026-10-08",
+            "change": "Created in spec-e-burgos-021-brand-kit cycle-01."
+          }
+        ]
+      },
+      {
+        "id": "EP-051",
+        "method": "POST",
+        "path": "/brands",
+        "module": "brand-kit",
+        "spec": "sdd/specs/spec-e-burgos-021-brand-kit",
+        "status": "implemented",
+        "created_in_cycle": 1,
+        "updated_in_cycle": null,
+        "description": "Creates a user brand from scratch (DisplayAds palette and fonts, wordmark logo) or duplicating another brand (tokens fixed to the source effective variables).",
+        "path_params": [],
+        "required_headers": [],
+        "request_body": {
+          "content-type": "application/json",
+          "schema": "{ name: string, id?: string, duplicateFrom?: string }"
+        },
+        "responses": {
+          "201": "application/json: same shape as GET /brands/:id, location header",
+          "404": "BRAND_UNKNOWN for duplicateFrom",
+          "409": "BRAND_EXISTS",
+          "422": "INVALID_INPUT"
+        },
+        "changelog": [
+          {
+            "cycle": 1,
+            "date": "2026-10-08",
+            "change": "Created in spec-e-burgos-021-brand-kit cycle-01."
+          }
+        ]
+      },
+      {
+        "id": "EP-052",
+        "method": "PUT",
+        "path": "/brands/:id",
+        "module": "brand-kit",
+        "spec": "sdd/specs/spec-e-burgos-021-brand-kit",
+        "status": "implemented",
+        "created_in_cycle": 1,
+        "updated_in_cycle": null,
+        "description": "Replaces a user brand manifest after validating the schema and that every referenced file exists inside the brand.",
+        "path_params": [
+          "id"
+        ],
+        "required_headers": [],
+        "request_body": {
+          "content-type": "application/json",
+          "schema": "BrandManifest"
+        },
+        "responses": {
+          "200": "application/json: same shape as GET /brands/:id",
+          "404": "BRAND_UNKNOWN",
+          "409": "BRAND_READ_ONLY",
+          "422": "BRAND_MANIFEST_INVALID"
+        },
+        "changelog": [
+          {
+            "cycle": 1,
+            "date": "2026-10-08",
+            "change": "Created in spec-e-burgos-021-brand-kit cycle-01."
+          }
+        ]
+      },
+      {
+        "id": "EP-053",
+        "method": "DELETE",
+        "path": "/brands/:id",
+        "module": "brand-kit",
+        "spec": "sdd/specs/spec-e-burgos-021-brand-kit",
+        "status": "implemented",
+        "created_in_cycle": 1,
+        "updated_in_cycle": null,
+        "description": "Moves a user brand folder to BRANDS_ROOT/.trash/<id>-<timestamp>.",
+        "path_params": [
+          "id"
+        ],
+        "required_headers": [],
+        "request_body": {},
+        "responses": {
+          "204": "no body",
+          "404": "BRAND_UNKNOWN",
+          "409": "BRAND_READ_ONLY"
+        },
+        "changelog": [
+          {
+            "cycle": 1,
+            "date": "2026-10-08",
+            "change": "Created in spec-e-burgos-021-brand-kit cycle-01."
+          }
+        ]
+      },
+      {
+        "id": "EP-054",
+        "method": "PUT",
+        "path": "/brands/:id/files/:kind/:name",
+        "module": "brand-kit",
+        "spec": "sdd/specs/spec-e-burgos-021-brand-kit",
+        "status": "implemented",
+        "created_in_cycle": 1,
+        "updated_in_cycle": null,
+        "description": "Uploads a raw file into a user brand (logo, image, device, font, music) with extension and size checks; the manifest is not edited.",
+        "path_params": [
+          "id",
+          "kind",
+          "name"
+        ],
+        "required_headers": [],
+        "request_body": {
+          "content-type": "application/octet-stream",
+          "schema": "raw file bytes with content-length"
+        },
+        "responses": {
+          "201": "application/json: { path }",
+          "409": "BRAND_READ_ONLY",
+          "411": "content-length missing",
+          "413": "ASSET_TOO_LARGE",
+          "422": "BRAND_FILE_INVALID"
+        },
+        "changelog": [
+          {
+            "cycle": 1,
+            "date": "2026-10-08",
+            "change": "Created in spec-e-burgos-021-brand-kit cycle-01."
+          }
+        ]
+      },
+      {
+        "id": "EP-055",
+        "method": "GET",
+        "path": "/brands/:id/files/*",
+        "module": "brand-kit",
+        "spec": "sdd/specs/spec-e-burgos-021-brand-kit",
+        "status": "implemented",
+        "created_in_cycle": 1,
+        "updated_in_cycle": null,
+        "description": "Streams a file of a brand (built-in or user) with its content type and Range support.",
+        "path_params": [
+          "id"
+        ],
+        "required_headers": [],
+        "request_body": {},
+        "responses": {
+          "200": "file bytes",
+          "206": "partial content",
+          "403": "ASSET_PATH_INVALID",
+          "404": "BRAND_UNKNOWN or FILE_NOT_FOUND"
+        },
+        "changelog": [
+          {
+            "cycle": 1,
+            "date": "2026-10-08",
+            "change": "Created in spec-e-burgos-021-brand-kit cycle-01."
           }
         ]
       }

@@ -11,7 +11,7 @@ import type { StoreConfig } from '../../config/store-config';
 import { createRenderApiRuntime } from '../render-api-runtime';
 import { handleImportMusic, handleSearchFreeMusic } from './music-handler';
 
-const STORE: StoreConfig = { mediaRoot: '/media', dbPath: '/media/.studio/studio.db', maxUploadBytes: 2_147_483_648, objectStore: 'fs', motionAssetsRoot: '/repo/libs/motion-graphics/assets' };
+const STORE: StoreConfig = { mediaRoot: '/media', dbPath: '/media/.studio/studio.db', maxUploadBytes: 2_147_483_648, objectStore: 'fs', motionAssetsRoot: '/repo/libs/motion-graphics/assets', brandsRoot: '/brands' };
 const PROJECT_ROOT = `${STORE.mediaRoot}/pitch-deck`;
 const SEARCH_OUTPUT_SHAPE = (STUDIO_TOOLS.search_free_music.output as ZodObject).shape;
 const SEARCH_OUTPUT_KEYS = Object.keys(SEARCH_OUTPUT_SHAPE).sort();

@@ -10,6 +10,7 @@ export interface RenderRequest {
 
 export interface MotionPipelinePorts {
   assetsRoot: string;
+  userBrandsRoot?: string;
   readText(path: string): Promise<string>;
   readBytes(path: string): Promise<Uint8Array>;
   writeText(path: string, content: string): Promise<void>;

@@ -58,7 +58,7 @@ function useBrandTaglineWhenCopied(storyboard: MotionStoryboard, brand: BrandMan
 }
 
 function validate(raw: unknown, brief: MotionBrief, brand: BrandManifest): Validation {
-  const parsed = MotionStoryboardSchema.safeParse(enforceBrief(raw, brief));
+  const parsed = MotionStoryboardSchema.safeParse(enforceBrief(raw, brief, brand));
   if (!parsed.success) return { ok: false, issues: parsed.error.issues.map((issue) => ({ path: formatIssuePath(issue.path) || 'storyboard', message: issue.message })) };
   const issues = checkStoryboardAgainstBrief(parsed.data, brief, brand);
   return issues.length === 0 ? { ok: true, storyboard: useBrandTaglineWhenCopied(anchorBrandRevealOnDrop(parsed.data, brand), brand) } : { ok: false, issues };

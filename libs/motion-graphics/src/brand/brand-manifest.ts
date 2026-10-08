@@ -4,9 +4,14 @@ import { MotionStudioError } from '../errors/motion-studio-error';
 import { formatIssuePath } from '../storyboard/parse-motion-storyboard';
 
 const Text = z.string().trim().min(1);
+const HexColor = z.string().regex(/^#[0-9a-fA-F]{6}$/u);
 const Point = z.tuple([z.number().min(0).max(100), z.number().min(0).max(100)]);
 
-export const BrandManifestSchema = z.strictObject({
+const BrandPaletteSchema = z.strictObject({ background: HexColor, accent: HexColor, accent2: HexColor, text: HexColor });
+const BrandTypographySchema = z.strictObject({ display: Text, body: Text, mono: Text.optional() });
+export const BRAND_TOKEN_NAME = /^--mg-[a-z0-9-]+$/u;
+
+const BrandManifestShape = z.strictObject({
   id: z.string().regex(/^[a-z][a-z0-9-]*$/u),
   name: Text,
   spokenName: Text.describe('How the voice must write the brand name to pronounce it right'),
@@ -14,8 +19,11 @@ export const BrandManifestSchema = z.strictObject({
   taglineAccent: Text.optional(),
   url: Text.optional(),
   logo: Text,
-  isotipo: Text,
-  css: Text,
+  isotipo: Text.optional(),
+  css: Text.optional(),
+  palette: BrandPaletteSchema.optional(),
+  tokens: z.record(z.string().regex(BRAND_TOKEN_NAME), Text).optional(),
+  typography: BrandTypographySchema.optional(),
   fonts: z.array(z.strictObject({ family: Text, file: Text, weight: Text.optional() })).min(1),
   devices: z.record(
     z.string(),
@@ -30,13 +38,23 @@ export const BrandManifestSchema = z.strictObject({
     }),
   ),
   images: z.record(z.string(), z.union([Text, z.strictObject({ file: Text, caption: Text })])),
-  music: z
-    .array(z.strictObject({ id: z.string(), file: Text, credit: Text, bpm: z.number().positive(), mood: Text, drop: z.number().nonnegative().optional() }))
-    .min(1),
+  music: z.array(z.strictObject({ id: z.string(), file: Text, credit: Text, bpm: z.number().positive(), mood: Text, drop: z.number().nonnegative().optional() })),
   voice: z.strictObject({ id: Text, lengthScale: z.number().min(0.7).max(1.4) }),
 });
 
+export const BrandManifestSchema = BrandManifestShape.superRefine((brand, ctx) => {
+  if (brand.css === undefined && brand.palette === undefined) {
+    ctx.addIssue({ code: 'custom', path: ['palette'], message: 'a brand needs "css" or "palette"' });
+  }
+  const families = new Set(brand.fonts.map((font) => font.family));
+  for (const [role, family] of Object.entries(brand.typography ?? {}) as Array<[string, string | undefined]>) {
+    if (family !== undefined && !families.has(family)) ctx.addIssue({ code: 'custom', path: ['typography', role], message: `font family "${family}" is not in "fonts"` });
+  }
+});
+
 export type BrandManifest = z.infer<typeof BrandManifestSchema>;
+export const brandIsotipo = (brand: BrandManifest): string => brand.isotipo ?? brand.logo;
+export const brandCssFile = (brand: BrandManifest): string => brand.css ?? 'brand.css';
 
 export function parseBrandManifest(raw: unknown): BrandManifest {
   const result = BrandManifestSchema.safeParse(raw);
