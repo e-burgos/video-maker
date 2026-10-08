@@ -2457,6 +2457,56 @@
           }
         ]
       }
+    },
+    {
+      "id": "FIX-e-burgos-009",
+      "author": "e-burgos",
+      "spec_id": "spec-e-burgos-022-youtube-publishing",
+      "fix_document": "sdd/fixes/fix-e-burgos-009.md",
+      "type": "BUGFIX",
+      "severity": "high",
+      "created_at": "2026-10-08",
+      "resolved_at": "2026-10-08",
+      "validated_at": null,
+      "title": "Los subtítulos de voz desde guion mostraban errores de Whisper (Displayance, franca horaria) en vez del texto del guion",
+      "estimation_hours": 1.5,
+      "description": "Con voz sintetizada desde guion, voice.words.json salía de la transcripción de Whisper; los subtítulos heredaban sus errores.",
+      "justification": "Bloquea la publicación de la tanda de tutoriales de display-ads; cambio interno del job de voz.",
+      "related_modules": [
+        "youtube-publishing"
+      ],
+      "affected_files": [
+        "apps/render-api/src/voice/align-script-text-to-words.ts",
+        "apps/render-api/src/voice/align-script-text-to-words.spec.ts",
+        "apps/render-api/src/voice/transcribe-voice-script-lines.ts",
+        "apps/render-api/src/voice/transcribe-voice-script-lines.spec.ts",
+        "apps/render-api/src/jobs/run-voice-script-pipeline.spec.ts"
+      ],
+      "test_reference": "render-api lint/test/build verde (1879).",
+      "status": "implemented",
+      "cycle": null,
+      "process_note": "Encontrado revisando cuadros del primer tutorial de la tanda.",
+      "usage": {
+        "provider_model": "claude/opus",
+        "effort": "high",
+        "tokens_in": 50000,
+        "tokens_out": 9000,
+        "approx": true,
+        "source": "declared-estimate",
+        "recorded_at": "2026-10-08",
+        "by_agent": [
+          {
+            "agent": "orchestrator",
+            "provider_model": "claude/opus",
+            "effort": "high",
+            "tokens_in": 50000,
+            "tokens_out": 9000,
+            "approx": true,
+            "source": "declared-estimate",
+            "recorded_at": "2026-10-08"
+          }
+        ]
+      }
     }
   ]
 }

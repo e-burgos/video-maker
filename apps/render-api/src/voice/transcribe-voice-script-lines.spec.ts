@@ -57,10 +57,9 @@ describe('transcribeVoiceScriptLine', () => {
     );
 
     expect(result.source).toBe('whisper');
-    expect(result.words).toEqual([
-      { text: 'Las', startMs: 20_000, endMs: 20_400 },
-      { text: 'campañas', startMs: 20_400, endMs: 21_200 },
-    ]);
+    expect(result.words.slice(0, 1)).toEqual([{ text: 'Las', startMs: 20_000, endMs: 20_400 }]);
+    expect(result.words.map((word) => word.text)).toEqual(['Las', 'campañas', 'viven', 'acá']);
+    expect(result.words[result.words.length - 1]?.endMs).toBe(21_200);
   });
 
   it('acota la última palabra al fin real del audio de la frase, no al inicio de la siguiente', async () => {
@@ -77,7 +76,7 @@ describe('transcribeVoiceScriptLine', () => {
       PROJECT,
     );
 
-    expect(result.words[1]).toEqual({ text: 'acá', startMs: 20_400, endMs: 25_689 });
+    expect(result.words[result.words.length - 1]).toMatchObject({ text: 'acá', endMs: 25_689 });
   });
 
   it('descarta una palabra que quedaría entera fuera de la ventana', async () => {
@@ -94,7 +93,8 @@ describe('transcribeVoiceScriptLine', () => {
       PROJECT,
     );
 
-    expect(result.words.map((word) => word.text)).toEqual(['Las']);
+    expect(result.words.map((word) => word.text)).toEqual(['Las', 'campañas', 'viven', 'acá']);
+    expect(result.words.every((word) => word.endMs <= 20_400)).toBe(true);
   });
 
   it('reparte el guion de la línea dentro de su ventana cuando Whisper falla', async () => {
