@@ -2169,7 +2169,7 @@
       "created_at": "2026-10-07",
       "resolved_at": "2026-10-07",
       "validated_at": null,
-      "title": "Ajustar videos de motion graphics con el productor: acceso al chat, edición de escenas, voz parcial, volumen de música y pantalla del equipo con perspectiva real",
+      "title": "Ajustar videos de motion graphics con el productor, voz parcial, volumen de música y pantalla con perspectiva",
       "estimation_hours": 4,
       "description": "En un video de motion graphics no se llegaba al chat del productor (la tarjeta y la página Motion no lo enlazaban), el workspace mostraba material crudo y recetas de grabación, y el productor no podía editar escenas (sólo regenerar el storyboard desde el brief, que pisa uno hecho a mano). Además la música sonaba muy alta y el contenido de la pantalla del Counter 15 no seguía su inclinación. Ahora: botón 'Ajustar con el productor' en la página Motion; workspace motion con ejemplos de pedidos; tool write_motion_storyboard y receta de ajuste (leer, editar lo mínimo, mostrar el cambio, OK, fase video); voz parcial (voice-manifest.json: sólo se re-sintetizan las escenas cuyo texto cambió); storyboard.music.volume (default 0,5, ducking 30 % de ese nivel bajo la voz); pantallas de equipos con homografía matrix3d desde las cuatro esquinas del vidrio.",
       "justification": "Perfil solo: amplía contratos existentes de forma compatible (campos opcionales, una tool nueva del productor sobre un endpoint que ya existía); verificable con tests, renders y prueba en la app; reversible.",
