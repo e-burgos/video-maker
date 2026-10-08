@@ -323,5 +323,9 @@ export function createHttpRenderApiClient(options: HttpRenderApiClientOptions): 
 
     getMotionStoryboard: async () =>
       (await request('GET', `/projects/${slug}/motion/storyboard`)) as Record<string, unknown>,
+
+    putMotionStoryboard: async (storyboard) => {
+      await request('PUT', `/projects/${slug}/motion/storyboard`, storyboard);
+    },
   };
 }

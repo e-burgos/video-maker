@@ -15,6 +15,7 @@ export type ProducerWelcomeProps = {
   onDraft: (text: string) => void;
   hasTimedScript?: boolean;
   compact?: boolean;
+  mode?: 'footage' | 'motion';
 };
 
 export type InventoryEntry = {
@@ -33,6 +34,40 @@ export const STARTER_KEYS_WITHOUT_MATERIAL = [
   'producer.starter.platform',
   'producer.starter.freeFootage',
 ] as const satisfies readonly TranslationKey[];
+
+export const MOTION_EXAMPLE_KEYS = [
+  'motion.workspace.example.music',
+  'motion.workspace.example.title',
+  'motion.workspace.example.voice',
+  'motion.workspace.example.redo',
+] as const satisfies readonly TranslationKey[];
+
+function MotionWelcome({ onDraft }: { onDraft: (text: string) => void }) {
+  const t = useT();
+
+  return (
+    <div
+      data-testid="producer-welcome"
+      data-mode="motion"
+      className="space-y-3 rounded-lg border border-slate-800 bg-slate-900/40 p-5"
+    >
+      <p className="text-sm font-medium text-ink">{t('motion.workspace.intro')}</p>
+      <ul data-testid="motion-examples" className="flex flex-wrap gap-2">
+        {MOTION_EXAMPLE_KEYS.map((key) => (
+          <li key={key}>
+            <button
+              type="button"
+              onClick={() => onDraft(t(key))}
+              className="rounded-full border border-sky-500/50 bg-sky-500/10 px-3 py-1 text-xs text-sky-100"
+            >
+              {t(key)}
+            </button>
+          </li>
+        ))}
+      </ul>
+    </div>
+  );
+}
 
 export function inventoryOf(assets: AssetListing | null): InventoryEntry[] {
   if (assets === null) {
@@ -66,6 +101,7 @@ export function ProducerWelcome({
   onDraft,
   hasTimedScript = false,
   compact = false,
+  mode = 'footage',
 }: ProducerWelcomeProps) {
   const t = useT();
   const tn = useTn();
@@ -76,6 +112,10 @@ export function ProducerWelcome({
 
   async function draftRecipe(id: ProducerRecipeId) {
     onDraft(await loadRecipePrompt(id, language, { hasTimedScript }));
+  }
+
+  if (mode === 'motion') {
+    return <MotionWelcome onDraft={onDraft} />;
   }
 
   if (compact) {

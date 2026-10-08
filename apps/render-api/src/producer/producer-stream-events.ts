@@ -129,6 +129,8 @@ function summarizeStudioTool(tool: StudioToolName, input: Record<string, unknown
       return 'Saving the motion brief';
     case 'read_motion_storyboard':
       return 'Reading the motion storyboard';
+    case 'write_motion_storyboard':
+      return 'Saving the motion storyboard';
   }
 }
 

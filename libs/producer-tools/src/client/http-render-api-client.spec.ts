@@ -289,6 +289,20 @@ describe('createHttpRenderApiClient', () => {
     expect(JSON.parse(String(calls[0]?.init?.body))).toEqual({ version: 1, brand: 'acme' });
   });
 
+  it('putMotionStoryboard PUTs the storyboard and maps STORYBOARD_INVALID keeping the hint', async () => {
+    const ok = createFakeFetch(() => jsonResponse(200, { ok: true }));
+    await client(ok.fetchImpl).putMotionStoryboard({ scenes: [] });
+    expect(ok.calls[0]?.init?.method).toBe('PUT');
+    expect(ok.calls[0]?.url).toBe('http://127.0.0.1:4599/projects/pitch-deck/motion/storyboard');
+    expect(JSON.parse(String(ok.calls[0]?.init?.body))).toEqual({ scenes: [] });
+
+    const bad = createFakeFetch(() => errorResponse(400, 'STORYBOARD_INVALID', 'music.volume: too big'));
+    await expect(client(bad.fetchImpl).putMotionStoryboard({})).rejects.toMatchObject({
+      code: 'INVALID_INPUT',
+      hint: 'music.volume: too big',
+    });
+  });
+
   it('maps BRIEF_INVALID to INVALID_INPUT keeping the field hint', async () => {
     const { fetchImpl } = createFakeFetch(() => errorResponse(400, 'BRIEF_INVALID', 'images.0.caption: required'));
 

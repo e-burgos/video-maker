@@ -359,6 +359,12 @@ export function createStudioToolHandlers(
       const storyboard = await client.getMotionStoryboard();
       return withOutput('read_motion_storyboard', { storyboard });
     },
+
+    write_motion_storyboard: async (rawInput) => {
+      const input = parseInput<{ storyboard: Record<string, unknown> }>(STUDIO_TOOLS.write_motion_storyboard.input, rawInput);
+      await client.putMotionStoryboard(input.storyboard);
+      return withOutput('write_motion_storyboard', { saved: true });
+    },
   };
 
   return handlers;

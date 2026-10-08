@@ -1,5 +1,7 @@
 import { MotionStudioError } from '../errors/motion-studio-error';
 
+export const DEFAULT_MUSIC_VOLUME = 0.5;
+
 export interface MotionScene {
   id: string;
   vo: string;
@@ -17,7 +19,7 @@ export interface MotionSfx {
 export interface MotionScript {
   voice: string;
   lengthScale: number;
-  music: { file: string; credit: string } | null;
+  music: { file: string; credit: string; volume?: number } | null;
   noWhooshOn: string[];
   scenes: MotionScene[];
   sfx: MotionSfx[];
@@ -81,7 +83,7 @@ export function parseMotionScript(raw: unknown): MotionScript {
   return {
     voice: asString(script['voice'], 'voice'),
     lengthScale: asNumber(script['lengthScale'], 'lengthScale', 1),
-    music: music === null ? null : { file: asString(music['file'], 'music.file'), credit: asString(music['credit'], 'music.credit') },
+    music: music === null ? null : { file: asString(music['file'], 'music.file'), credit: asString(music['credit'], 'music.credit'), ...(music['volume'] === undefined ? {} : { volume: asNumber(music['volume'], 'music.volume', DEFAULT_MUSIC_VOLUME) }) },
     noWhooshOn: noWhooshOn as string[],
     scenes,
     sfx: rawSfx.map((entry, index) => parseSfx(entry, index, sceneIds)),

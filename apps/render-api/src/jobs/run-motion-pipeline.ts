@@ -148,6 +148,7 @@ async function renderVideo(
   await runMotionStage('voice', () =>
     voiceProject(ports, workDirectory, {
       takes: request.takes,
+      reuseUnchanged: true,
       onLine: (line) => observer.lineVoiced(line.done, line.total),
     }),
   );

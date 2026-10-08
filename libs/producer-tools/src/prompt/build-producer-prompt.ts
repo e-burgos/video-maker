@@ -56,6 +56,8 @@ const TOOL_DESCRIPTIONS: Readonly<Record<StudioToolName, string>> = {
   write_motion_brief:
     'save the motion brief (brand, script, one caption per image); the studio validates it and names the bad field.',
   read_motion_storyboard: 'read the motion storyboard (scenes with their kind and voice line) once the storyboard phase made it.',
+  write_motion_storyboard:
+    'save an edited motion storyboard (the full JSON with your minimal changes); the studio validates it and names the bad field.',
 };
 
 function buildProducerToolsSection(): string {
@@ -303,10 +305,22 @@ function buildProducerMotionRecipeSection(): string {
     '  before the user agrees.',
     '- 6) CHANGES. If the user wants a different script, images or captions, rewrite the brief and',
     '  run the storyboard phase again with `"overwrite":true`.',
+    '- 6b) ADJUST. When the project already has a storyboard and the user asks for changes to the',
+    '  video (a voice line, an on-screen text, the music volume, the order or removal of scenes),',
+    '  read_motion_storyboard and apply the MINIMAL edit to that JSON: `vo` lines, on-screen texts',
+    '  inside `props`, scene order or removal, `music.volume` (0.05 to 1, lower is quieter, default',
+    '  0.5), `music.track` and `minBars`. Summarize the diff to the user in plain language and wait',
+    '  for an OK; then write_motion_storyboard with the whole edited JSON and start_job',
+    '  `{"kind":"motion","phase":"video","overwrite":true}`. Only the scenes whose voice text',
+    '  changed are re-voiced, so small edits are fast. NEVER run the storyboard phase (phase',
+    '  "storyboard" or "all") to apply an adjustment: it would destroy the hand-made storyboard.',
+    '  Do it only if the user explicitly asks for a new storyboard.',
     '- 7) VIDEO. Once the user approves: start_job `{"kind":"motion","phase":"video"}` and',
     '  wait_for_job; the stages are voice, plan, compose and render, so keep waiting while it runs.',
-    '- 8) DELIVER. Tell the user where the video is — the `path` in the job report — and its',
-    '  duration, and offer two or three concrete next steps.',
+    '- 8) DELIVER. The video of a motion project is on its Motion page (the `Abrir Motion graphics`',
+    '  button above the chat), with the music credit under the player — not in a Deliveries tab,',
+    '  which motion projects do not show. Say its duration, remind that the music credit goes in the',
+    '  post description, and offer two or three concrete next steps.',
   ].join('\n');
 }
 

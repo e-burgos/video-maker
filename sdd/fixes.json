@@ -2158,6 +2158,73 @@
           }
         ]
       }
+    },
+    {
+      "id": "FIX-e-burgos-005",
+      "author": "e-burgos",
+      "spec_id": "spec-e-burgos-020-motion-mode",
+      "fix_document": "sdd/fixes/fix-e-burgos-005.md",
+      "type": "IMPROVEMENT",
+      "severity": "high",
+      "created_at": "2026-10-07",
+      "resolved_at": "2026-10-07",
+      "validated_at": null,
+      "title": "Ajustar videos de motion graphics con el productor, voz parcial, volumen de música y pantalla con perspectiva",
+      "estimation_hours": 4,
+      "description": "En un video de motion graphics no se llegaba al chat del productor (la tarjeta y la página Motion no lo enlazaban), el workspace mostraba material crudo y recetas de grabación, y el productor no podía editar escenas (sólo regenerar el storyboard desde el brief, que pisa uno hecho a mano). Además la música sonaba muy alta y el contenido de la pantalla del Counter 15 no seguía su inclinación. Ahora: botón 'Ajustar con el productor' en la página Motion; workspace motion con ejemplos de pedidos; tool write_motion_storyboard y receta de ajuste (leer, editar lo mínimo, mostrar el cambio, OK, fase video); voz parcial (voice-manifest.json: sólo se re-sintetizan las escenas cuyo texto cambió); storyboard.music.volume (default 0,5, ducking 30 % de ese nivel bajo la voz); pantallas de equipos con homografía matrix3d desde las cuatro esquinas del vidrio.",
+      "justification": "Perfil solo: amplía contratos existentes de forma compatible (campos opcionales, una tool nueva del productor sobre un endpoint que ya existía); verificable con tests, renders y prueba en la app; reversible.",
+      "related_modules": [
+        "motion-mode"
+      ],
+      "affected_files": [
+        "libs/motion-graphics/src/scenes/screen-perspective.ts",
+        "libs/motion-graphics/src/scenes/scene-html.ts",
+        "libs/motion-graphics/src/pipeline/voice-project.ts",
+        "libs/motion-graphics/src/pipeline/plan-project.ts",
+        "libs/motion-graphics/src/storyboard/motion-storyboard.schema.ts",
+        "libs/producer-tools/src/contract/tool-schemas.ts",
+        "libs/producer-tools/src/prompt/build-producer-prompt.ts",
+        "apps/render-api/src/jobs/run-motion-pipeline.ts",
+        "apps/web/src/pages/motion-page.tsx",
+        "apps/web/src/components/producer-welcome.tsx",
+        "apps/desktop/package.json",
+        "apps/desktop/CHANGELOG.md"
+      ],
+      "test_reference": "nx affected -t lint test build: verde (5 proyectos). Snapshot de counter-15: promo y lista de redes siguen la inclinación del vidrio.",
+      "status": "implemented",
+      "cycle": null,
+      "process_note": "Pedido del dueño revisando display-ads-counter-15 desde la app.",
+      "usage": {
+        "provider_model": "claude/opus",
+        "effort": "high",
+        "tokens_in": 160000,
+        "tokens_out": 16000,
+        "approx": true,
+        "source": "declared-estimate",
+        "recorded_at": "2026-10-07",
+        "by_agent": [
+          {
+            "agent": "orchestrator",
+            "provider_model": "claude/opus",
+            "effort": "high",
+            "tokens_in": 40000,
+            "tokens_out": 5000,
+            "approx": true,
+            "source": "declared-estimate",
+            "recorded_at": "2026-10-07"
+          },
+          {
+            "agent": "implementor-front",
+            "provider_model": "claude/sonnet",
+            "effort": "medium",
+            "tokens_in": 119537,
+            "tokens_out": 21095,
+            "approx": false,
+            "source": "agent-usage-notification",
+            "recorded_at": "2026-10-07"
+          }
+        ]
+      }
     }
   ]
 }

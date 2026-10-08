@@ -515,6 +515,14 @@ const ReadMotionStoryboardOutputSchema = z.strictObject({
   storyboard: z.record(z.string(), z.unknown()),
 });
 
+const WriteMotionStoryboardInputSchema = z.strictObject({
+  storyboard: z.record(z.string(), z.unknown()),
+});
+
+const WriteMotionStoryboardOutputSchema = z.strictObject({
+  saved: z.literal(true),
+});
+
 export interface StudioToolDefinition<Input extends z.ZodTypeAny = z.ZodTypeAny, Output extends z.ZodTypeAny = z.ZodTypeAny> {
   readonly description: string;
   readonly input: Input;
@@ -663,5 +671,11 @@ export const STUDIO_TOOLS: Readonly<Record<StudioToolName, StudioToolDefinition>
       'Read the motion storyboard (the scenes, each with its kind and voice line) that the storyboard phase produced. Fails with FILE_NOT_FOUND when it does not exist yet.',
     input: ReadMotionStoryboardInputSchema,
     output: ReadMotionStoryboardOutputSchema,
+  },
+  write_motion_storyboard: {
+    description:
+      'Save an edited motion storyboard (the whole JSON read with read_motion_storyboard, with your minimal changes), replacing the previous one. The studio validates it and answers with the offending field in the hint when it is invalid: fix that field and call again. Then re-render with start_job {"kind":"motion","phase":"video","overwrite":true}.',
+    input: WriteMotionStoryboardInputSchema,
+    output: WriteMotionStoryboardOutputSchema,
   },
 };

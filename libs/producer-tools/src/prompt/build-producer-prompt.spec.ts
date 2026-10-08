@@ -73,8 +73,8 @@ describe('buildProducerProjectSection', () => {
 describe('buildProducerPrompt — herramientas del estudio', () => {
   const prompt = buildProducerPrompt(CONTEXT);
 
-  it('nombra las 22 herramientas del contrato', () => {
-    expect(STUDIO_TOOL_NAMES).toHaveLength(22);
+  it('nombra las 23 herramientas del contrato', () => {
+    expect(STUDIO_TOOL_NAMES).toHaveLength(23);
     for (const tool of STUDIO_TOOL_NAMES) {
       expect(prompt).toContain(tool);
     }
@@ -271,6 +271,13 @@ describe('buildProducerPrompt motion mode', () => {
     expect(motionPrompt).toContain('wait for an OK');
   });
 
+  it('adds an adjust branch that edits the storyboard instead of regenerating it', () => {
+    expect(motionPrompt).toContain('write_motion_storyboard');
+    expect(motionPrompt).toContain('"phase":"video","overwrite":true');
+    expect(motionPrompt).toContain('music.volume');
+    expect(motionPrompt).toContain('NEVER run the storyboard phase');
+  });
+
   it('drops the footage recipes in a motion project', () => {
     expect(motionPrompt).not.toContain('## Tutorial recipe');
     expect(motionPrompt).not.toContain('## Product ad recipe');
@@ -286,4 +293,12 @@ describe('buildProducerPrompt motion mode', () => {
   it('lists the motion tools in every mode', () => {
     expect(buildProducerPrompt(CONTEXT)).toContain('- get_motion_brands:');
   });
+
+describe('motion delivery', () => {
+  it('sends the user to the Motion page, not to a Deliveries tab', () => {
+    const prompt = buildProducerPrompt({ ...CONTEXT, mode: 'motion' });
+    expect(prompt).toContain('Abrir Motion graphics');
+    expect(prompt).toContain('not in a Deliveries tab');
+  });
+});
 });

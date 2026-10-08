@@ -2,6 +2,7 @@ import { fitBeatGrid } from '../beats/fit-beat-grid';
 import type { BeatGrid } from '../beats/fit-beat-grid';
 import { parseHyperframesBeats } from '../beats/parse-hyperframes-beats';
 import type { MotionTimeline } from '../template/motion-timeline';
+import { DEFAULT_MUSIC_VOLUME } from '../script/motion-script';
 import { buildDuckAutomation } from '../timeline/build-duck-automation';
 import { layoutScenes } from '../timeline/layout-scenes';
 import { wavDurationSec } from '../voice/wav-duration';
@@ -16,6 +17,12 @@ function silentGrid(durationSec: number): BeatGrid {
   const period = 60 / SILENT_BPM;
   const beats = Array.from({ length: Math.ceil(durationSec / period) + 1 }, (_, i) => Math.round(i * period * 1000) / 1000);
   return { bpm: SILENT_BPM, period, phase: 0, confidence: 0, beats };
+}
+
+const DUCK_RATIO = 0.3;
+
+function musicLevels(volume: number): { bedLevel: number; duckLevel: number } {
+  return { bedLevel: volume, duckLevel: Math.round(volume * DUCK_RATIO * 1000) / 1000 };
 }
 
 export async function planProject(ports: MotionPipelinePorts, project: string, options: { beatSync: boolean }): Promise<{ lines: string[]; timeline: MotionTimeline }> {
@@ -37,7 +44,7 @@ export async function planProject(ports: MotionPipelinePorts, project: string, o
     beatLength: grid.period,
     beats: grid.beats.filter((b) => b <= duration),
     scenes: slots,
-    musicAutomation: buildDuckAutomation(slots, duration),
+    musicAutomation: buildDuckAutomation(slots, duration, musicLevels(script.music?.volume ?? DEFAULT_MUSIC_VOLUME)),
     musicCredit: script.music?.credit ?? '',
   };
   await ports.writeText(joinPath(project, TIMELINE_FILE), toJson(timeline, 2));

@@ -9,7 +9,7 @@ import { createCallLog } from '../__fixtures__/call-log';
 import { createFakeRenderApiDependencies } from '../__fixtures__/fake-render-api-dependencies';
 import { toErrorPayload } from '../errors/to-error-payload';
 
-const steps = vi.hoisted(() => ({ order: [] as string[], failAt: null as string | null }));
+const steps = vi.hoisted(() => ({ order: [] as string[], failAt: null as string | null, voiceOptions: null as Record<string, unknown> | null }));
 const store = vi.hoisted(() => ({ files: new Map<string, string>(), copies: [] as string[][] }));
 
 vi.mock('@video-maker/motion-graphics', async (importOriginal) => {
@@ -32,7 +32,8 @@ vi.mock('@video-maker/motion-graphics', async (importOriginal) => {
       return { lines: [], repaired: true, usage: { inputTokens: 1200, outputTokens: 300, costUsd: 0.42 } };
     },
     composeFromStoryboard: step('composeFromStoryboard', { lines: [] }),
-    voiceProject: async (_ports: unknown, _dir: string, options: { onLine?: (line: unknown) => void }) => {
+    voiceProject: async (_ports: unknown, _dir: string, options: { onLine?: (line: unknown) => void } & Record<string, unknown>) => {
+      steps.voiceOptions = options;
       steps.order.push('voiceProject');
       options.onLine?.({ done: 1, total: 2 });
       options.onLine?.({ done: 2, total: 2 });
@@ -110,6 +111,7 @@ function setup(cancelAfter?: number) {
 beforeEach(() => {
   steps.order.length = 0;
   steps.failAt = null;
+  steps.voiceOptions = null;
   store.files.clear();
   store.copies.length = 0;
   store.files.set('/media/promo/motion/brief.json', JSON.stringify(BRIEF));
@@ -135,6 +137,14 @@ describe('runMotionPipeline', () => {
       storyboard: { repaired: true, tokensIn: 1200, tokensOut: 300, costUsd: 0.42 },
     });
     expect(report.scenes).toBeGreaterThan(0);
+  });
+
+  it('voices with reuseUnchanged so only edited scenes are re-synthesized', async () => {
+    const { deps, observer } = setup();
+
+    await runMotionPipeline({ project: PROJECT, phase: 'video', output: 'promo.mp4', takes: 3 }, deps, observer);
+
+    expect(steps.voiceOptions).toMatchObject({ takes: 3, reuseUnchanged: true });
   });
 
   it('phase video runs compose, voice, plan, compose and render in order with voice progress', async () => {

@@ -92,6 +92,14 @@ async function fillScript(text: string) {
 }
 
 describe('MotionPage', () => {
+  it('links to the producer workspace to adjust the video', async () => {
+    renderPage({});
+
+    const link = await screen.findByTestId('motion-adjust-link');
+    expect(link.getAttribute('href')).toBe('/projects/promo');
+    expect(link.textContent).toBe('Adjust with the producer');
+  });
+
   it('starts from defaults when no brief exists', async () => {
     renderPage({});
 

@@ -27,6 +27,16 @@ describe('planProject', () => {
     expect(timeline.scenes[0].end).toBe(3.8);
   });
 
+  it('keeps the music bed at its volume and ducks it well under the voice, default volume 0.5', async () => {
+    const levels = async (music: unknown) => {
+      const ports = createFakePipelinePorts({ files: projectFiles({ [`${P}/script.json`]: JSON.stringify({ ...script, music }) }) });
+      const { timeline } = await planProject(ports, P, { beatSync: true });
+      return Math.max(...timeline.musicAutomation.lanes[0].points.map((p) => p.v));
+    };
+    expect(await levels({ file: 'tema.mp3', credit: 'Tema · CC BY 4.0' })).toBe(0.5);
+    expect(await levels({ file: 'tema.mp3', credit: 'Tema · CC BY 4.0', volume: 0.2 })).toBe(0.2);
+  });
+
   it('without music paces scenes on a silent grid and skips beats and trimming', async () => {
     const ports = createFakePipelinePorts({ files: projectFiles({ [`${P}/script.json`]: JSON.stringify({ ...script, music: null }) }) });
     const { lines } = await planProject(ports, P, { beatSync: true });

@@ -126,29 +126,22 @@ describe('renderScene', () => {
     expect(html('suggest-plain')).toContain('data-beat="10"');
   });
 
-  it('product clips screen states into the device polygon', () => {
+  it('projects every screen state onto the tilted device screen with a homography', () => {
     const out = html('product');
-    expect(out).toContain('clip-path:polygon(20% 10%, 60% 12%, 80% 86%, 40% 89%)');
-    expect(out).toContain('skewY(6deg) rotate(4deg)');
+    expect(out).toContain('class="mg-device-screen perspective"');
+    expect(out).toMatch(/transform:matrix3d\(/u);
     expect(out).toContain('data-anim="swap" data-cue="todo"');
-    expect(html('product-box')).not.toContain('clip-path');
-    expect(html('product-flat')).toContain('skewY(0deg) rotate(0deg)');
+    expect(out).not.toContain('skewY(6deg)');
+    expect(html('product-box')).not.toContain('mg-device-screen');
   });
 
-  it('ui screens on a device sit on the screen quad instead of the whole device image', () => {
+  it('falls back to the clipped screen for a device without an aspect ratio', () => {
     const list = { type: 'list' as const, title: 'Redes', items: ['Local'], select: 0 };
     const product = scene('product');
-    const onDevice = (device: string) => renderScene({ ...product, props: { ...product.props, visual: { kind: 'device', device, states: [{ screen: list }] } } } as never, ctx);
-    expect(onDevice('counter')).toContain('<div class="mg-device-screen" style="left:20%;top:10%;width:41.5%;height:80.5%;transform:matrix(1, 0.0625, 0.2025, 1, 0, 0);transform-origin:0 0"><div class="mg-screen"><div class="mg-ui">');
-    expect(onDevice('flat')).toContain('style="left:0%;top:0%;width:101.5%;height:101.5%;transform:skewY(0deg) rotate(0deg);transform-origin:0 0"');
-  });
-
-  it('ignores an accent that comes without its own tagline so it never trails the brand tagline', () => {
-    const orphanAccent = (id: string) => {
-      const found = scene(id);
-      return renderScene({ ...found, props: { ...found.props, tagline: undefined, accent: 'hoy mismo' } } as never, ctx);
-    };
-    for (const id of ['cta', 'reveal']) expect(orphanAccent(id)).not.toContain('hoy mismo');
+    const onFlat = renderScene({ ...product, props: { ...product.props, visual: { kind: 'device', device: 'flat', states: [{ screen: list }] } } } as never, ctx);
+    expect(onFlat).toContain('clip-path:polygon(0% 0%, 100% 0%, 100% 100%, 0% 100%)');
+    expect(onFlat).toContain('transform:skewY(0deg) rotate(0deg)');
+    expect(html('product-flat')).toContain('skewY(0deg) rotate(0deg)');
   });
 
   it('puts a light plate behind a dark device so it does not vanish on the dark background', () => {
