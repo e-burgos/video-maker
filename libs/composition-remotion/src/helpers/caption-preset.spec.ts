@@ -4,7 +4,9 @@ import {
   CAPTION_PRESETS,
   CAPTION_PRESET_IDS,
   DEFAULT_CAPTION_PRESET_ID,
+  PORTRAIT_MAX_SIDE_PADDING_RATIO,
   captionPreset,
+  captionPresetForFrame,
 } from './caption-preset';
 
 const FONT_FAMILY_GENERIC_FALLBACK = /(?:^|,\s*)(sans-serif|serif)$/;
@@ -61,10 +63,22 @@ describe('CAPTION_PRESETS[subtle-lower] — subtítulo clásico (FIX-003-004)', 
     expect(preset.activeScale).toBe(1);
   });
 
-  it('se lee por contorno fino oscuro y sombra suave, nunca por píldora', () => {
+  it('se lee sobre una caja oscura semitransparente detrás de las líneas, sin píldora por palabra ni contorno', () => {
     expect(preset.pill).toBeNull();
-    expect(preset.stroke).toEqual({ widthEm: 0.045, color: 'rgba(0, 0, 0, 0.9)' });
+    expect(preset.stroke).toBeNull();
     expect(preset.shadow).not.toBeNull();
+    expect(preset.backdrop).toEqual({
+      color: 'rgba(0, 0, 0, 0.55)',
+      paddingXEm: 0.6,
+      paddingYEm: 0.35,
+      radiusEm: 0.35,
+    });
+  });
+
+  it('los demás presets no llevan caja detrás de las líneas', () => {
+    for (const id of CAPTION_PRESET_IDS.filter((candidate) => candidate !== 'subtle-lower')) {
+      expect(CAPTION_PRESETS[id].backdrop).toBeNull();
+    }
   });
 
   it('vive en una caja inferior de hasta dos líneas, en tamaño de subtítulo', () => {
@@ -153,5 +167,20 @@ describe('captionPreset', () => {
     expect(captionPreset('neon' as CaptionPresetId)).toBe(
       CAPTION_PRESETS[DEFAULT_CAPTION_PRESET_ID],
     );
+  });
+});
+
+describe('captionPresetForFrame', () => {
+  it('narrows the side padding of a wide preset in a portrait frame so captions do not wrap word by word', () => {
+    const preset = captionPreset('subtle-lower');
+
+    expect(captionPresetForFrame(preset, { width: 1080, height: 1920 }).sidePaddingRatio).toBe(PORTRAIT_MAX_SIDE_PADDING_RATIO);
+    expect(captionPresetForFrame(preset, { width: 1920, height: 1080 })).toBe(preset);
+  });
+
+  it('keeps presets that are already narrow enough untouched in portrait', () => {
+    const preset = captionPreset('bold-impact');
+
+    expect(captionPresetForFrame(preset, { width: 1080, height: 1920 })).toBe(preset);
   });
 });

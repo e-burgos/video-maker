@@ -183,4 +183,22 @@ describe('captionBlockStyle', () => {
       transformOrigin: '50% 50%',
     });
   });
+
+  it('pinta la caja del backdrop alrededor del bloque con padding y radio en em cuando el preset la define', () => {
+    const animation = captionClipAnimation({
+      frame: 0,
+      durationInFrames: DURATION_IN_FRAMES,
+      fps: FPS,
+      preset: FADE_PRESET,
+    });
+
+    const style = captionBlockStyle(animation, FADE_PRESET);
+
+    expect(style).toMatchObject({
+      boxSizing: 'border-box',
+      backgroundColor: 'rgba(0, 0, 0, 0.55)',
+      padding: '0.35em 0.6em',
+      borderRadius: '0.35em',
+    });
+  });
 });

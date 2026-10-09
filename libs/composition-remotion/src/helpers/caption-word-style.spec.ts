@@ -171,14 +171,13 @@ describe('captionWordStyle — ramas condicionales de stroke/shadow/pill (R-7)',
     expect('backgroundColor' in style).toBe(false);
   });
 
-  it('subtle-lower se lee por contorno y sombra, sin píldora (FIX-003-004)', () => {
+  it('subtle-lower se lee por sombra sobre la caja del bloque, sin píldora ni contorno por palabra', () => {
     const preset = captionPreset('subtle-lower');
 
     const normal = captionWordStyle(preset, { isEmphasis: false, isActive: false });
     const emphasis = captionWordStyle(preset, { isEmphasis: true, isActive: false });
 
-    expect(normal.WebkitTextStroke).toBe('0.045em rgba(0, 0, 0, 0.9)');
-    expect(normal.paintOrder).toBe('stroke fill');
+    expect('WebkitTextStroke' in normal).toBe(false);
     expect(normal.textShadow).toBe('0 0.03em 0.08em rgba(0, 0, 0, 0.75)');
     expect('backgroundColor' in normal).toBe(false);
     expect('padding' in normal).toBe(false);

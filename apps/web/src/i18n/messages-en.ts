@@ -896,7 +896,7 @@ export const MESSAGES_EN = {
   'error.YOUTUBE_NOT_CONNECTED': 'No YouTube account is connected. Connect it in Settings and try again.',
   'error.YOUTUBE_CLIENT_MISSING': 'The Google credential (Client ID and secret) is not loaded yet. Add it in Settings › YouTube.',
   'error.YOUTUBE_UPLOAD_FAILED': 'YouTube did not accept the upload. Nothing was lost: run it again and the upload resumes where it stopped.',
-  'error.YOUTUBE_QUOTA_EXCEEDED': 'The daily YouTube API quota is used up. Try again tomorrow, or schedule the video for later.',
+  'error.YOUTUBE_QUOTA_EXCEEDED': 'YouTube is not accepting more uploads today: the channel reached its daily upload limit or the API quota is used up. It resets within 24 hours; verifying the channel by phone raises the limit.',
   'error.PUBLISH_FILE_INVALID': 'That file cannot be published: pick a finished MP4 video from this project.',
   'youtube.settings.heading': 'YouTube',
   'youtube.settings.description': 'Connect your channel to publish finished videos straight from the studio.',

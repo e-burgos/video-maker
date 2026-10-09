@@ -19,7 +19,11 @@ export function fitCaptionFontSize(
   });
   const activeReserveEm =
     emphasisIndex === undefined ? 0 : Math.max(0, ...wordWidthsEm) * (preset.activeScale - 1);
+  const lines = Math.max(1, preset.maxLines);
+  const backdropWidthEm = preset.backdrop === null ? 0 : 2 * preset.backdrop.paddingXEm * lines;
+  const backdropHeightEm = preset.backdrop === null ? 0 : 2 * preset.backdrop.paddingYEm;
   const widthEm =
+    backdropWidthEm +
     wordWidthsEm.reduce((total, widthEm) => total + widthEm, 0) +
     wordGaps * preset.wordGapEm +
     activeReserveEm;
@@ -28,9 +32,8 @@ export function fitCaptionFontSize(
     return maxFontSize;
   }
 
-  const lines = Math.max(1, preset.maxLines);
   const availableWidth = Math.max(0, box.width * (1 - 2 * preset.sidePaddingRatio)) * lines;
-  const heightCap = Math.floor(box.height / (preset.lineHeightEm * lines));
+  const heightCap = Math.floor(box.height / (preset.lineHeightEm * lines + backdropHeightEm));
   const rawFontSize = Math.min(availableWidth / widthEm, heightCap);
 
   return Math.min(maxFontSize, Math.max(minFontSize, Math.floor(rawFontSize)));

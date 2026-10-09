@@ -88,5 +88,13 @@ export function captionBlockStyle(
     opacity: animation.opacity,
     transform: animation.transform,
     transformOrigin: '50% 50%',
+    ...(preset.backdrop === null
+      ? {}
+      : {
+          boxSizing: 'border-box',
+          backgroundColor: preset.backdrop.color,
+          padding: `${preset.backdrop.paddingYEm}em ${preset.backdrop.paddingXEm}em`,
+          borderRadius: `${preset.backdrop.radiusEm}em`,
+        }),
   };
 }

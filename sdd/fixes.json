@@ -2507,6 +2507,80 @@
           }
         ]
       }
+    },
+    {
+      "id": "FIX-e-burgos-010",
+      "author": "e-burgos",
+      "spec_id": "spec-e-burgos-022-youtube-publishing",
+      "fix_document": "sdd/fixes/fix-e-burgos-010.md",
+      "type": "IMPROVEMENT",
+      "severity": "high",
+      "created_at": "2026-10-08",
+      "resolved_at": "2026-10-08",
+      "validated_at": null,
+      "title": "Volumen de entrega en -14 LUFS, subtítulos subtle-lower legibles y mensaje claro del límite de subidas de YouTube",
+      "estimation_hours": 3,
+      "description": "Los tutoriales salían a -18 LUFS, los subtítulos subtle-lower no se leían sobre UI clara y el límite de subidas del canal se informaba como cuota del proyecto.",
+      "justification": "Pedido del dueño antes de publicar la tanda de tutoriales; cambios internos sin contratos nuevos.",
+      "related_modules": [
+        "youtube-publishing"
+      ],
+      "affected_files": [
+        "apps/render-api/src/deps/node-render-api-dependencies.spec.ts",
+        "apps/render-api/src/deps/node-render-api-dependencies.ts",
+        "apps/render-api/src/errors/to-error-payload.ts",
+        "apps/web/src/guide/guide-content-en.ts",
+        "apps/web/src/guide/guide-content-es.ts",
+        "apps/web/src/i18n/messages-en.ts",
+        "apps/web/src/i18n/messages-es.ts",
+        "libs/composition-remotion/README.md",
+        "libs/composition-remotion/src/components/kinetic-captions.tsx",
+        "libs/composition-remotion/src/helpers/caption-animation.spec.ts",
+        "libs/composition-remotion/src/helpers/caption-animation.ts",
+        "libs/composition-remotion/src/helpers/caption-font-size.spec.ts",
+        "libs/composition-remotion/src/helpers/caption-font-size.ts",
+        "libs/composition-remotion/src/helpers/caption-preset.spec.ts",
+        "libs/composition-remotion/src/helpers/caption-preset.ts",
+        "libs/composition-remotion/src/helpers/caption-word-style.spec.ts",
+        "libs/media-local/src/index.ts",
+        "libs/media-local/src/ffmpeg/normalize-master-loudness.spec.ts",
+        "libs/media-local/src/ffmpeg/normalize-master-loudness.ts"
+      ],
+      "test_reference": "media-local, render-api, composition-remotion, web lint/test/build verde; render real -14,1 LUFS / -1,45 dBTP withinTolerance true.",
+      "status": "implemented",
+      "cycle": null,
+      "process_note": "Pedido del dueño mientras la cola de publicación esperaba el límite del canal.",
+      "usage": {
+        "provider_model": "claude/opus",
+        "effort": "high",
+        "tokens_in": 220000,
+        "tokens_out": 41000,
+        "approx": true,
+        "source": "declared-estimate",
+        "recorded_at": "2026-10-08",
+        "by_agent": [
+          {
+            "agent": "orchestrator",
+            "provider_model": "claude/opus",
+            "effort": "high",
+            "tokens_in": 62000,
+            "tokens_out": 13000,
+            "approx": true,
+            "source": "declared-estimate",
+            "recorded_at": "2026-10-08"
+          },
+          {
+            "agent": "implementor-back",
+            "provider_model": "claude/sonnet",
+            "effort": "medium",
+            "tokens_in": 157445,
+            "tokens_out": 27784,
+            "approx": true,
+            "source": "agent-usage-notification",
+            "recorded_at": "2026-10-08"
+          }
+        ]
+      }
     }
   ]
 }

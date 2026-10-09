@@ -177,6 +177,17 @@ export type { MissingStreamKind } from './errors/missing-media-stream-error';
 
 export { MASTER_BUS_TRUE_PEAK_MARGIN_DB } from './ffmpeg/master-bus-limiter';
 
+export {
+  buildMasterNormalizationGraph,
+  MASTER_NORMALIZATION_TOLERANCE_LU,
+  needsMasterNormalization,
+  normalizeMasterLoudness,
+} from './ffmpeg/normalize-master-loudness';
+export type {
+  NormalizeMasterLoudnessOptions,
+  NormalizeMasterLoudnessResult,
+} from './ffmpeg/normalize-master-loudness';
+
 export { parseWhisperCppJson } from './whisper/parse-whisper-cpp-json';
 export type { ParseTranscriptionOptions } from './whisper/parse-whisper-cpp-json';
 export { parseFasterWhisperJson } from './whisper/parse-faster-whisper-json';

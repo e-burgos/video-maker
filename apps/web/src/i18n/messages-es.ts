@@ -892,7 +892,7 @@ export const MESSAGES_ES: Messages = {
   'error.YOUTUBE_NOT_CONNECTED': 'No hay una cuenta de YouTube conectada. Conectala en Configuración y volvé a intentar.',
   'error.YOUTUBE_CLIENT_MISSING': 'Todavía no cargaste la credencial de Google (ID de cliente y secreto). Agregala en Configuración › YouTube.',
   'error.YOUTUBE_UPLOAD_FAILED': 'YouTube no aceptó la subida. No se perdió nada: volvé a ejecutarla y retoma desde donde quedó.',
-  'error.YOUTUBE_QUOTA_EXCEEDED': 'Se agotó la cuota diaria de la API de YouTube. Probá de nuevo mañana o programá el video para más tarde.',
+  'error.YOUTUBE_QUOTA_EXCEEDED': 'YouTube no acepta más subidas por hoy: el canal llegó a su límite diario de subidas o se agotó la cuota de la API. Se renueva dentro de las 24 horas; verificar el canal con el teléfono sube el límite.',
   'error.PUBLISH_FILE_INVALID': 'Ese archivo no se puede publicar: elegí un video MP4 terminado de este proyecto.',
   'youtube.settings.heading': 'YouTube',
   'youtube.settings.description': 'Conectá tu canal para publicar los videos terminados directo desde el estudio.',

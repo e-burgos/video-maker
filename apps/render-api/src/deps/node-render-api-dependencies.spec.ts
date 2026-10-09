@@ -35,6 +35,7 @@ vi.mock('@video-maker/media-local', () => ({
   VOICE_ESPEAK_DATA_DIR_NAME: 'espeak-ng-data',
   VOICE_TOKENS_FILE_NAME: 'tokens.txt',
   mixTimelineAudio: vi.fn(),
+  normalizeMasterLoudness: vi.fn(),
   muxAudioIntoVideo: vi.fn(),
   verifyMixLoudness: vi.fn(),
 }));
@@ -52,6 +53,7 @@ async function loadMocks() {
     resolveBinaryMock: vi.mocked(mediaLocal.resolveBinary),
     resolveBinariesMock: vi.mocked(mediaLocal.resolveBinaries),
     mixTimelineAudioMock: vi.mocked(mediaLocal.mixTimelineAudio),
+    normalizeMasterLoudnessMock: vi.mocked(mediaLocal.normalizeMasterLoudness),
     muxAudioIntoVideoMock: vi.mocked(mediaLocal.muxAudioIntoVideo),
     verifyMixLoudnessMock: vi.mocked(mediaLocal.verifyMixLoudness),
     resolveVoiceBinariesMock: vi.mocked(mediaLocal.resolveVoiceBinaries),
@@ -71,6 +73,7 @@ beforeEach(async () => {
   mocks.resolveBinaryMock.mockReset();
   mocks.resolveBinariesMock.mockReset();
   mocks.mixTimelineAudioMock.mockReset();
+  mocks.normalizeMasterLoudnessMock.mockReset();
   mocks.muxAudioIntoVideoMock.mockReset();
   mocks.verifyMixLoudnessMock.mockReset();
   mocks.resolveVoiceBinariesMock.mockReset();
@@ -294,6 +297,24 @@ describe('createNodeRenderApiDependencies', () => {
       { ffmpegPath: '/opt/homebrew/bin/ffmpeg', runOptions: { cwd: CWD } },
     );
     expect(result).toEqual({ outputPath: '/work/renders/r1/master.wav', filterComplex: '[0:a]anull[out]' });
+  });
+
+  it('normalizes the mixed master to the timeline voice target after mixing', async () => {
+    mocks.mixTimelineAudioMock.mockResolvedValue({
+      outputPath: '/work/renders/r1/master.wav',
+      filterComplex: '[0:a]anull[out]',
+    });
+    const deps = createNodeRenderApiDependencies(ENV, STORE);
+    const timeline = buildMinimalTimeline();
+
+    await deps.mixTimelineAudio({ timeline, outPath: '/work/renders/r1/master.wav', projectRoot: CWD });
+
+    expect(mocks.normalizeMasterLoudnessMock).toHaveBeenCalledWith(
+      '/work/renders/r1/master.wav',
+      timeline.audioMix.voice,
+      expect.any(mocks.ExecaCommandRunner),
+      { ffmpegPath: '/opt/homebrew/bin/ffmpeg', runOptions: { cwd: CWD } },
+    );
   });
 
   it('feeds muxAudioIntoVideo with the flattened video, audio and out paths plus the resolved binaries', async () => {
