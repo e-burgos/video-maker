@@ -187,6 +187,7 @@ export type {
   NormalizeMasterLoudnessOptions,
   NormalizeMasterLoudnessResult,
 } from './ffmpeg/normalize-master-loudness';
+export { normalizeVideoMasterLoudness, videoMasterNormalizationArgs } from './ffmpeg/normalize-video-master-loudness';
 
 export { parseWhisperCppJson } from './whisper/parse-whisper-cpp-json';
 export type { ParseTranscriptionOptions } from './whisper/parse-whisper-cpp-json';
