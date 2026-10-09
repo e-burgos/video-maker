@@ -41,7 +41,8 @@ const DEFAULT_MAX_DURATION_MS: Ms = 1200;
 const DEFAULT_MIN_DURATION_MS: Ms = 300;
 const DEFAULT_MAX_GAP_MS: Ms = 500;
 const SENTENCE_END_PATTERN = /[.!?…]["»)]?$/u;
-const CLAUSE_END_PATTERN = /[,;:]["»)]?$/u;
+const STRONG_CLAUSE_END_PATTERN = /[;:]["»)]?$/u;
+const COMMA_END_PATTERN = /,["»)]?$/u;
 const MIN_PHRASE_PIECE_WORDS = 3;
 const CLAUSE_OPENING_WORDS = new Set([
   'que', 'y', 'e', 'o', 'u', 'pero', 'para', 'cuando', 'porque', 'como', 'donde', 'si', 'con', 'sin',
@@ -53,18 +54,23 @@ const WORDS_THAT_CANNOT_CLOSE_A_LINE = new Set([
 ]);
 
 enum PhraseSplitQuality {
-  AfterClausePunctuation = 0,
-  BeforeClauseOpening = 1,
-  BetweenContentWords = 2,
-  AfterFunctionWord = 3,
+  AfterColonOrSemicolon = 0,
+  AfterComma = 1,
+  BeforeClauseOpening = 2,
+  BetweenContentWords = 3,
+  AfterFunctionWord = 4,
 }
 
 function endsSentence(word: TranscriptWord): boolean {
   return SENTENCE_END_PATTERN.test(word.text.trim());
 }
 
-function endsClause(word: TranscriptWord): boolean {
-  return CLAUSE_END_PATTERN.test(word.text.trim());
+function endsWithColonOrSemicolon(word: TranscriptWord): boolean {
+  return STRONG_CLAUSE_END_PATTERN.test(word.text.trim());
+}
+
+function endsWithComma(word: TranscriptWord): boolean {
+  return COMMA_END_PATTERN.test(word.text.trim());
 }
 
 function wordDurationMs(word: TranscriptWord): Ms {
@@ -243,12 +249,16 @@ function splitIntoPhraseRuns(
 interface SplitCandidate {
   readonly index: number;
   readonly quality: PhraseSplitQuality;
+  readonly piecesThatStillDoNotFit: number;
   readonly imbalance: number;
 }
 
 function phraseSplitQuality(lastWord: TranscriptWord, nextWord: TranscriptWord): PhraseSplitQuality {
-  if (endsClause(lastWord)) {
-    return PhraseSplitQuality.AfterClausePunctuation;
+  if (endsWithColonOrSemicolon(lastWord)) {
+    return PhraseSplitQuality.AfterColonOrSemicolon;
+  }
+  if (endsWithComma(lastWord)) {
+    return PhraseSplitQuality.AfterComma;
   }
   if (WORDS_THAT_CANNOT_CLOSE_A_LINE.has(normalizeWordText(lastWord.text))) {
     return PhraseSplitQuality.AfterFunctionWord;
@@ -266,10 +276,13 @@ function isBetterSplit(candidate: SplitCandidate, best: SplitCandidate | undefin
   if (candidate.quality !== best.quality) {
     return candidate.quality < best.quality;
   }
+  if (candidate.piecesThatStillDoNotFit !== best.piecesThatStillDoNotFit) {
+    return candidate.piecesThatStillDoNotFit < best.piecesThatStillDoNotFit;
+  }
   return candidate.imbalance < best.imbalance;
 }
 
-function bestPhraseSplitIndex(words: readonly TranscriptWord[]): number {
+function bestPhraseSplitIndex(words: readonly TranscriptWord[], boundaries: PhraseBoundaries): number {
   const minPieceWords = Math.max(1, Math.min(MIN_PHRASE_PIECE_WORDS, Math.floor(words.length / 2)));
   let best: SplitCandidate | undefined;
 
@@ -277,6 +290,9 @@ function bestPhraseSplitIndex(words: readonly TranscriptWord[]): number {
     const candidate: SplitCandidate = {
       index,
       quality: phraseSplitQuality(words[index - 1] as TranscriptWord, words[index] as TranscriptWord),
+      piecesThatStillDoNotFit: [words.slice(0, index), words.slice(index)].filter(
+        (piece) => !fitsOnePhraseGroup(piece, boundaries),
+      ).length,
       imbalance: Math.abs(textLength(words.slice(0, index)) - textLength(words.slice(index))),
     };
     if (isBetterSplit(candidate, best)) {
@@ -295,7 +311,7 @@ function splitRunIntoFittingPhrases(
     return [[...words]];
   }
 
-  const splitIndex = bestPhraseSplitIndex(words);
+  const splitIndex = bestPhraseSplitIndex(words, boundaries);
   return [
     ...splitRunIntoFittingPhrases(words.slice(0, splitIndex), boundaries),
     ...splitRunIntoFittingPhrases(words.slice(splitIndex), boundaries),

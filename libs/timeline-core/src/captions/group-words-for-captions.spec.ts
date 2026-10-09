@@ -84,6 +84,20 @@ describe('groupWordsForCaptions — respectPhrases (FIX-e-burgos-011)', () => {
     expect(groups.join(' ')).toContain('análisis de competencia:');
   });
 
+  it('entre cortes de igual calidad prefiere el que deja ambas mitades en una línea', () => {
+    const groups = groupTexts(
+      spokenWords(
+        'Una campaña pasa por cuatro estados: Borrador, Activa, Pausada y Finalizada, que llega sola con la fecha de fin.',
+      ),
+    );
+
+    expect(groups).toEqual([
+      'Una campaña pasa por cuatro estados:',
+      'Borrador, Activa, Pausada y Finalizada,',
+      'que llega sola con la fecha de fin.',
+    ]);
+  });
+
   it('un silencio largo corta aunque no haya puntuación', () => {
     const first = spokenWords('Elegí la sucursal');
     const second = spokenWords('y tocá Analizar', 5000);
