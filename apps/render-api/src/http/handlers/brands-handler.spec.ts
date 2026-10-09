@@ -122,7 +122,7 @@ describe('GET /brands', () => {
     expect(response.status).toBe(200);
     expect(items.map((item) => `${item.source}:${item.id}`)).toEqual(['built-in:displayads', 'user:mine', 'user:zeta']);
     for (const item of items) expect(Object.keys(item).sort()).toEqual(LIST_ITEM_KEYS);
-    expect(items[0]).toMatchObject({ name: 'DisplayAds', logo: 'img/logo.svg', updatedAt: null });
+    expect(items[0]).toMatchObject({ name: 'Display Ads', logo: 'img/logo.svg', updatedAt: null });
     expect(items[0]?.palette).toEqual({ background: '#09090b', accent: '#0ea5e9', accent2: '#14b8a6', text: '#fafafa' });
     expect(items[1]?.updatedAt).toBe(new Date(1_757_289_600_000).toISOString());
   });

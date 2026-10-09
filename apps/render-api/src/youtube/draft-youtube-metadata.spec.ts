@@ -231,4 +231,16 @@ describe('spoken brand names', () => {
     expect(draft.description.startsWith('Con DisplayAds y el Easy Pro.')).toBe(true);
     expect(draft.tags).toEqual(['Easy Pro', 'DisplayAds']);
   });
+
+  it('keeps the brand written with a space when its written name is "Display Ads" (FIX-e-burgos-013)', () => {
+    const brand = { ...BRAND, writtenNames: [{ spoken: 'Isi Pro', written: 'Easy Pro' }] } as unknown as ProjectBrandContext;
+
+    const draft = finalizeDraft(
+      { title: 'Cómo instalar el Isi Pro en Display Ads', description: 'Display Ads y el isi pro.', tags: ['display ads'] },
+      input({ brand }),
+    );
+
+    expect(draft.title).toBe('Cómo instalar el Easy Pro en Display Ads');
+    expect(draft.description.startsWith('Display Ads y el Easy Pro.')).toBe(true);
+  });
 });
