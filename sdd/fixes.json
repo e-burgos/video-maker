@@ -2646,6 +2646,60 @@
           }
         ]
       }
+    },
+    {
+      "id": "FIX-e-burgos-012",
+      "author": "e-burgos",
+      "spec_id": "spec-e-burgos-022-youtube-publishing",
+      "fix_document": "sdd/fixes/fix-e-burgos-012.md",
+      "type": "BUGFIX",
+      "severity": "high",
+      "created_at": "2026-10-09",
+      "resolved_at": "2026-10-09",
+      "validated_at": null,
+      "title": "Permiso de listas de YouTube (youtube.force-ssl) y endpoints para crear listas y sumar videos publicados",
+      "estimation_hours": 2,
+      "description": "Con los scopes youtube.upload y youtube.readonly la API rechaza playlistItems.insert y playlists.insert: el paso playlist de la publicación fallaba y no se podían crear las listas del canal.",
+      "justification": "Pedido del dueño: espejar en YouTube las categorías del studio; cambio interno de render-api sin contratos consumidos por otros subproyectos.",
+      "related_modules": [
+        "youtube-publishing"
+      ],
+      "affected_files": [
+        "apps/render-api/src/http/handle-request.ts",
+        "apps/render-api/src/http/handlers/youtube-handlers.spec.ts",
+        "apps/render-api/src/http/handlers/youtube-integration-handler.ts",
+        "apps/render-api/src/http/routes.ts",
+        "apps/render-api/src/youtube/youtube-api-error.ts",
+        "apps/render-api/src/youtube/youtube-client.spec.ts",
+        "apps/render-api/src/youtube/youtube-client.ts",
+        "apps/render-api/src/youtube/youtube-constants.ts",
+        "apps/render-api/src/youtube/youtube-oauth.spec.ts"
+      ],
+      "test_reference": "render-api lint/test/build verde (1888 tests), con tests nuevos de scope, creación de listas, alta de videos y 403 por scope insuficiente.",
+      "status": "implemented",
+      "cycle": null,
+      "process_note": "Las listas se crean recién cuando display-ads confirme que todos los videos están listos (regla del dueño).",
+      "usage": {
+        "provider_model": "claude/opus",
+        "effort": "high",
+        "tokens_in": 70000,
+        "tokens_out": 15000,
+        "approx": true,
+        "source": "declared-estimate",
+        "recorded_at": "2026-10-09",
+        "by_agent": [
+          {
+            "agent": "orchestrator",
+            "provider_model": "claude/opus",
+            "effort": "high",
+            "tokens_in": 70000,
+            "tokens_out": 15000,
+            "approx": true,
+            "source": "declared-estimate",
+            "recorded_at": "2026-10-09"
+          }
+        ]
+      }
     }
   ]
 }

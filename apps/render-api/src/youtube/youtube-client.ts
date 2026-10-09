@@ -24,13 +24,21 @@ export interface YoutubePlaylist {
   readonly title: string;
 }
 
+export type YoutubePrivacyStatus = 'public' | 'unlisted' | 'private';
+
+export interface YoutubePlaylistDraft {
+  readonly title: string;
+  readonly description: string;
+  readonly privacyStatus: YoutubePrivacyStatus;
+}
+
 export interface YoutubeVideoMetadata {
   readonly title: string;
   readonly description: string;
   readonly tags: readonly string[];
   readonly categoryId: string;
   readonly defaultLanguage: string;
-  readonly privacyStatus: 'public' | 'unlisted' | 'private';
+  readonly privacyStatus: YoutubePrivacyStatus;
   readonly publishAt: string | null;
   readonly madeForKids: boolean;
 }
@@ -43,6 +51,7 @@ export type UploadProgress =
 
 export interface YoutubeClient {
   readonly listPlaylists: () => Promise<readonly YoutubePlaylist[]>;
+  readonly createPlaylist: (draft: YoutubePlaylistDraft) => Promise<YoutubePlaylist>;
   readonly initiateUpload: (metadata: YoutubeVideoMetadata, sizeBytes: number) => Promise<string>;
   readonly uploadChunk: (sessionUri: string, bytes: Uint8Array, offset: number, totalBytes: number) => Promise<UploadProgress>;
   readonly queryUploadStatus: (sessionUri: string, totalBytes: number) => Promise<UploadProgress>;
@@ -151,6 +160,31 @@ export function createYoutubeClient(deps: RenderApiDependencies, oauth: YoutubeO
     return playlists;
   }
 
+  async function createPlaylist(draft: YoutubePlaylistDraft): Promise<YoutubePlaylist> {
+    const text = await expectOk(
+      await authorized((token) => ({
+        url: `${YOUTUBE_API_URL}/playlists?part=snippet,status`,
+        method: 'POST',
+        headers: { authorization: `Bearer ${token}`, 'content-type': JSON_CONTENT_TYPE },
+        body: JSON.stringify({
+          snippet: { title: draft.title, description: draft.description },
+          status: { privacyStatus: draft.privacyStatus },
+        }),
+        timeoutMs: GOOGLE_API_TIMEOUT_MS,
+      })),
+    );
+    const body = parseJsonObject(text);
+    if (typeof body?.id !== 'string') {
+      throw new PipelineStageError({
+        code: 'YOUTUBE_UPLOAD_FAILED',
+        stage: null,
+        resource: 'youtube',
+        hint: 'YouTube did not return the id of the new playlist',
+      });
+    }
+    return { id: body.id, title: draft.title };
+  }
+
   async function initiateUpload(metadata: YoutubeVideoMetadata, sizeBytes: number): Promise<string> {
     const result = await authorized((token) => ({
       url: `${YOUTUBE_UPLOAD_API_URL}/videos?uploadType=resumable&part=snippet,status`,
@@ -236,5 +270,5 @@ export function createYoutubeClient(deps: RenderApiDependencies, oauth: YoutubeO
     );
   }
 
-  return { listPlaylists, initiateUpload, uploadChunk, queryUploadStatus, setThumbnail, addToPlaylist };
+  return { listPlaylists, createPlaylist, initiateUpload, uploadChunk, queryUploadStatus, setThumbnail, addToPlaylist };
 }

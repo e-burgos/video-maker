@@ -109,7 +109,7 @@ describe('youtube oauth connect', () => {
       client_id: 'client-id',
       redirect_uri: 'http://127.0.0.1:51000',
       response_type: 'code',
-      scope: 'https://www.googleapis.com/auth/youtube.upload https://www.googleapis.com/auth/youtube.readonly',
+      scope: 'https://www.googleapis.com/auth/youtube.upload https://www.googleapis.com/auth/youtube.readonly https://www.googleapis.com/auth/youtube.force-ssl',
       access_type: 'offline',
       prompt: 'consent',
       code_challenge_method: 'S256',
