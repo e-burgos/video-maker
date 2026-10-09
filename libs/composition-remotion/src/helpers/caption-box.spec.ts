@@ -47,7 +47,7 @@ describe('captionBoxFor â€” valores exactos de tiktok-9x16 + tiktok (verificaciÃ
     ['bold-impact', 461, 280, 610, 939],
     ['clean-sans', 346, 280, 667, 1054],
     ['outline-pop', 422, 280, 629, 978],
-    ['subtle-lower', 288, 280, 696, 1112],
+    ['subtle-lower', 154, 280, 763, 1246],
   ] as const)('%s: height=%i, top=%i, center=%i, bottom=%i', (id, height, top, center, bottom) => {
     const preset = captionPreset(id);
 

@@ -17,14 +17,18 @@ export interface CaptionStyleGrouping {
   readonly minDurationMs: Ms;
   readonly maxDurationMs: Ms;
   readonly maxGapMs: Ms;
+  readonly maxChars?: number;
+  readonly respectPhrases?: boolean;
 }
 
 const SUBTITLE_GROUPING: CaptionStyleGrouping = {
-  minWords: 6,
+  minWords: 3,
   maxWords: 10,
   minDurationMs: 2000,
   maxDurationMs: 4000,
   maxGapMs: 900,
+  maxChars: 52,
+  respectPhrases: true,
 };
 
 export function isCaptionStyle(value: unknown): value is CaptionStyle {

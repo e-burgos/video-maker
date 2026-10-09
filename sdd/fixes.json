@@ -2581,6 +2581,71 @@
           }
         ]
       }
+    },
+    {
+      "id": "FIX-e-burgos-011",
+      "author": "e-burgos",
+      "spec_id": "spec-e-burgos-022-youtube-publishing",
+      "fix_document": "sdd/fixes/fix-e-burgos-011.md",
+      "type": "IMPROVEMENT",
+      "severity": "high",
+      "created_at": "2026-10-09",
+      "resolved_at": "2026-10-09",
+      "validated_at": null,
+      "title": "Subtítulos subtle-lower que respetan la frase en una línea compacta y logo propio de los bumpers",
+      "estimation_hours": 3,
+      "description": "Los subtítulos subtle-lower cortaban frases por cantidad de palabras y su caja de dos líneas tapaba botones narrados; los bumpers no podían mostrar un logo distinto al del cuerpo.",
+      "justification": "Revisión de contenido de la tanda de tutoriales de Display Ads y pedido del dueño (isotipo en el cuerpo); cambios internos sin contratos nuevos entre subproyectos.",
+      "related_modules": [
+        "youtube-publishing"
+      ],
+      "affected_files": [
+        "apps/web/src/api/timeline-edit/issue-severity.ts",
+        "libs/auto-montage/src/montage/plan-caption-groups.ts",
+        "libs/auto-montage/src/montage/preserve-brand-decisions.spec.ts",
+        "libs/auto-montage/src/montage/preserve-brand-decisions.ts",
+        "libs/composition-remotion/src/components/timeline-composition.tsx",
+        "libs/composition-remotion/src/helpers/caption-box.spec.ts",
+        "libs/composition-remotion/src/helpers/caption-font-size.spec.ts",
+        "libs/composition-remotion/src/helpers/caption-preset.spec.ts",
+        "libs/composition-remotion/src/helpers/caption-preset.ts",
+        "libs/composition-remotion/src/helpers/sequence-props.spec.ts",
+        "libs/composition-remotion/src/helpers/timeline-to-sequence-props.ts",
+        "libs/timeline-core/schemas/timeline.schema.json",
+        "libs/timeline-core/src/captions/caption-style.spec.ts",
+        "libs/timeline-core/src/captions/caption-style.ts",
+        "libs/timeline-core/src/captions/group-words-for-captions.spec.ts",
+        "libs/timeline-core/src/captions/group-words-for-captions.ts",
+        "libs/timeline-core/src/schemas/timeline.schema.ts",
+        "libs/timeline-core/src/timeline/bumper-frames.spec.ts",
+        "libs/timeline-core/src/timeline/validate-timeline.spec.ts",
+        "libs/timeline-core/src/timeline/validate-timeline.ts"
+      ],
+      "test_reference": "nx run-many -t lint test build verde (15 proyectos); render real de display-ads-chat-ia con isotipo y bumpers con logo largo.",
+      "status": "implemented",
+      "cycle": null,
+      "process_note": "Pedido del dueño tras la revisión detallada de display-ads; los 4 tutoriales aprobados esperan este fix para re-renderizarse antes de publicarse.",
+      "usage": {
+        "provider_model": "claude/opus",
+        "effort": "high",
+        "tokens_in": 150000,
+        "tokens_out": 30000,
+        "approx": true,
+        "source": "declared-estimate",
+        "recorded_at": "2026-10-09",
+        "by_agent": [
+          {
+            "agent": "orchestrator",
+            "provider_model": "claude/opus",
+            "effort": "high",
+            "tokens_in": 150000,
+            "tokens_out": 30000,
+            "approx": true,
+            "source": "declared-estimate",
+            "recorded_at": "2026-10-09"
+          }
+        ]
+      }
     }
   ]
 }

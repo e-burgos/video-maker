@@ -26,7 +26,9 @@ export type TimelineIssueCode =
   | 'TRANSITION_CLIP_NOT_FOUND'
   | 'CAPTION_OUT_OF_SAFE_ZONE'
   | 'LOGO_ASSET_NOT_FOUND'
-  | 'LOGO_ASSET_NOT_IMAGE';
+  | 'LOGO_ASSET_NOT_IMAGE'
+  | 'BUMPER_LOGO_ASSET_NOT_FOUND'
+  | 'BUMPER_LOGO_ASSET_NOT_IMAGE';
 
 export type TimelineWarningCode = 'BUMPER_WITHOUT_LOGO';
 
@@ -333,12 +335,47 @@ function collectLogoIssues(
 
 const BUMPER_EDGES = ['intro', 'outro'] as const;
 
+function collectBumperLogoIssues(
+  timeline: Timeline,
+  assetsById: ReadonlyMap<AssetId, MediaAsset>,
+): TimelineIssue[] {
+  return BUMPER_EDGES.flatMap((edge): TimelineIssue[] => {
+    const assetId = timeline.bumpers?.[edge]?.logoAssetId;
+    if (assetId === undefined) {
+      return [];
+    }
+    const asset = assetsById.get(assetId);
+    if (asset === undefined) {
+      return [
+        {
+          code: 'BUMPER_LOGO_ASSET_NOT_FOUND',
+          path: `bumpers.${edge}.logoAssetId`,
+          message: `El bumper de ${edge} referencia el asset "${assetId}", que no existe en assets.`,
+        },
+      ];
+    }
+    if (asset.kind !== 'image') {
+      return [
+        {
+          code: 'BUMPER_LOGO_ASSET_NOT_IMAGE',
+          path: `bumpers.${edge}.logoAssetId`,
+          message: `El bumper de ${edge} referencia el asset "${assetId}", que es kind=${asset.kind} y no image.`,
+        },
+      ];
+    }
+    return [];
+  });
+}
+
 export function timelineWarnings(timeline: Timeline): TimelineWarning[] {
   if (timeline.logo !== undefined) {
     return [];
   }
 
-  return BUMPER_EDGES.filter((edge) => timeline.bumpers?.[edge]?.enabled === true).map((edge) => ({
+  return BUMPER_EDGES.filter(
+    (edge) =>
+      timeline.bumpers?.[edge]?.enabled === true && timeline.bumpers[edge]?.logoAssetId === undefined,
+  ).map((edge) => ({
     code: 'BUMPER_WITHOUT_LOGO' as const,
     path: `bumpers.${edge}`,
     message: `El bumper de ${edge} está activo pero la Timeline no tiene logo: se verá sólo el fondo de color.`,
@@ -358,6 +395,7 @@ export function validateTimeline(timeline: Timeline): TimelineValidationResult {
     ...collectTransitionIssues(parsed.data),
     ...collectCaptionSafeZoneIssues(parsed.data),
     ...collectLogoIssues(parsed.data, assetsById),
+    ...collectBumperLogoIssues(parsed.data, assetsById),
   ];
 
   return issues.length === 0 ? { ok: true } : { ok: false, issues };

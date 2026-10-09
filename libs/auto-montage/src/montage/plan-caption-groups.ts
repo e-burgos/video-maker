@@ -63,6 +63,8 @@ export function planCaptionGroups(
     minDurationMs: grouping?.minDurationMs ?? preset.captions.minDurationMs,
     maxGapMs: grouping?.maxGapMs ?? preset.captions.maxGapMs,
     ...(grouping === null ? {} : { minWords: grouping.minWords }),
+    ...(grouping?.maxChars === undefined ? {} : { maxChars: grouping.maxChars }),
+    ...(grouping?.respectPhrases === true ? { respectPhrases: true } : {}),
     forcedBreaksMs: lineWindows.map((window) => window.startMs),
     emphasisKeywords: emphasisKeywordsFor(concepts),
   });

@@ -141,6 +141,7 @@ export const LogoBumperSchema = z.strictObject({
   backgroundColor: HexColorSchema.default(DEFAULT_LOGO_BUMPER_BACKGROUND_COLOR),
   animation: LogoBumperAnimationSchema.default('zoom'),
   logoWidthRatio: z.number().gt(0).max(1).default(DEFAULT_LOGO_BUMPER_WIDTH_RATIO),
+  logoAssetId: IdSchema.optional(),
 });
 
 export const TimelineBumpersSchema = z.strictObject({

@@ -246,3 +246,52 @@ describe('validateTimeline — capa de logo', () => {
     }
   });
 });
+
+describe('validateTimeline — logo propio de los bumpers (FIX-e-burgos-011)', () => {
+  const bumper = {
+    enabled: true,
+    durationMs: 2000,
+    backgroundColor: '#ffffff',
+    animation: 'zoom' as const,
+    logoWidthRatio: 0.4,
+  };
+
+  it('acepta un bumper que referencia un asset de imagen', () => {
+    const timeline: Timeline = {
+      ...referenceTimeline(),
+      bumpers: { intro: { ...bumper, logoAssetId: 'broll-shot-01' } },
+    };
+
+    expect(validateTimeline(timeline)).toEqual({ ok: true });
+  });
+
+  it('BUMPER_LOGO_ASSET_NOT_FOUND cuando el asset no está en assets', () => {
+    const timeline: Timeline = {
+      ...referenceTimeline(),
+      bumpers: { outro: { ...bumper, logoAssetId: 'logo-inexistente' } },
+    };
+
+    const result = validateTimeline(timeline);
+    expect(result.ok).toBe(false);
+    if (!result.ok) {
+      expect(result.issues).toContainEqual(
+        expect.objectContaining({ code: 'BUMPER_LOGO_ASSET_NOT_FOUND', path: 'bumpers.outro.logoAssetId' }),
+      );
+    }
+  });
+
+  it('BUMPER_LOGO_ASSET_NOT_IMAGE cuando el asset no es una imagen', () => {
+    const timeline: Timeline = {
+      ...referenceTimeline(),
+      bumpers: { intro: { ...bumper, logoAssetId: 'music-bed-01' } },
+    };
+
+    const result = validateTimeline(timeline);
+    expect(result.ok).toBe(false);
+    if (!result.ok) {
+      expect(result.issues.map((issue) => issue.code)).toContain<TimelineIssueCode>(
+        'BUMPER_LOGO_ASSET_NOT_IMAGE',
+      );
+    }
+  });
+});

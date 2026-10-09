@@ -92,7 +92,13 @@ export interface SequencePropsPlan {
   music: readonly AudioSequenceProps[];
   captions: readonly CaptionSequenceProps[];
   logo: LogoSequenceProps | null;
+  bumperLogoSrc: BumperLogoSources;
   unresolvedAssetIds: readonly AssetId[];
+}
+
+export interface BumperLogoSources {
+  intro: string | null;
+  outro: string | null;
 }
 
 function resolveAsset(assets: readonly MediaAsset[], assetId: AssetId): MediaAsset | undefined {
@@ -211,6 +217,35 @@ function mapLogo(
   return { assetId: logo.assetId, src: assetSrc(asset), overlay: logo, format: timeline.format };
 }
 
+function bumperLogoSrcFor(
+  timeline: Timeline,
+  assetId: AssetId | undefined,
+  fallbackSrc: string | null,
+  unresolvedAssetIds: Set<AssetId>,
+): string | null {
+  if (assetId === undefined) {
+    return fallbackSrc;
+  }
+  const asset = resolveAsset(timeline.assets, assetId);
+  if (asset === undefined) {
+    unresolvedAssetIds.add(assetId);
+    return fallbackSrc;
+  }
+  return assetSrc(asset);
+}
+
+function mapBumperLogos(
+  timeline: Timeline,
+  logo: LogoSequenceProps | null,
+  unresolvedAssetIds: Set<AssetId>,
+): BumperLogoSources {
+  const fallbackSrc = logo === null ? null : logo.src;
+  return {
+    intro: bumperLogoSrcFor(timeline, timeline.bumpers?.intro?.logoAssetId, fallbackSrc, unresolvedAssetIds),
+    outro: bumperLogoSrcFor(timeline, timeline.bumpers?.outro?.logoAssetId, fallbackSrc, unresolvedAssetIds),
+  };
+}
+
 function mapArollTransitions(transitions: readonly TimelineTransition[]): ArollTransitionPlan[] {
   const plans: ArollTransitionPlan[] = [];
 
@@ -248,6 +283,7 @@ export function timelineToSequenceProps(timeline: Timeline): SequencePropsPlan {
   );
   const captions = timeline.tracks.captions.map(toCaptionSequenceProps);
   const logo = mapLogo(timeline, unresolvedAssetIds);
+  const bumperLogoSrc = mapBumperLogos(timeline, logo, unresolvedAssetIds);
   const arollTransitions = mapArollTransitions(timeline.transitions ?? []);
 
   return {
@@ -262,6 +298,7 @@ export function timelineToSequenceProps(timeline: Timeline): SequencePropsPlan {
     music,
     captions,
     logo,
+    bumperLogoSrc,
     unresolvedAssetIds: [...unresolvedAssetIds],
   };
 }

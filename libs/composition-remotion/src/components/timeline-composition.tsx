@@ -92,7 +92,6 @@ export const TimelineComposition: FC<TimelineCompositionProps> = ({
 
   const intro = timeline.bumpers?.intro;
   const outro = timeline.bumpers?.outro;
-  const logoSrc = plan.logo === null ? null : plan.logo.src;
 
   return (
     <AbsoluteFill>
@@ -102,7 +101,7 @@ export const TimelineComposition: FC<TimelineCompositionProps> = ({
             bumper={intro}
             format={timeline.format}
             durationInFrames={introFrames}
-            logoSrc={logoSrc}
+            logoSrc={plan.bumperLogoSrc.intro}
           />
         </Sequence>
       )}
@@ -115,7 +114,7 @@ export const TimelineComposition: FC<TimelineCompositionProps> = ({
             bumper={outro}
             format={timeline.format}
             durationInFrames={outroFrames}
-            logoSrc={logoSrc}
+            logoSrc={plan.bumperLogoSrc.outro}
           />
         </Sequence>
       )}

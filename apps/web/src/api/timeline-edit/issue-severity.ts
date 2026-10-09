@@ -26,6 +26,8 @@ const TIMELINE_ISSUE_SEVERITY: Record<
   CAPTION_OUT_OF_SAFE_ZONE: 'render-blocking',
   LOGO_ASSET_NOT_FOUND: 'render-blocking',
   LOGO_ASSET_NOT_IMAGE: 'render-blocking',
+  BUMPER_LOGO_ASSET_NOT_FOUND: 'render-blocking',
+  BUMPER_LOGO_ASSET_NOT_IMAGE: 'render-blocking',
 };
 
 export function issueSeverity(code: UiIssueCode): TimelineIssueSeverity {
