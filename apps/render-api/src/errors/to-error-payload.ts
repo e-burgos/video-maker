@@ -138,7 +138,7 @@ const MESSAGE_BY_CODE: Readonly<Record<RenderApiErrorCode, string>> = {
   YOUTUBE_NOT_CONNECTED: 'No YouTube channel is connected, or Google revoked the stored access.',
   YOUTUBE_CLIENT_MISSING: 'The Google OAuth client id and secret are not stored yet.',
   YOUTUBE_UPLOAD_FAILED: 'YouTube refused or could not complete the request.',
-  YOUTUBE_QUOTA_EXCEEDED: 'The YouTube API quota for this Google project is exhausted; it resets daily.',
+  YOUTUBE_QUOTA_EXCEEDED: 'YouTube is not accepting more uploads today: either the API quota of the Google project or the daily upload limit of the channel is used up (the hint says which); it resets within 24 hours.',
   PUBLISH_FILE_INVALID: 'The file or thumbnail to publish is missing, not under the allowed folder or not a supported type.',
 };
 

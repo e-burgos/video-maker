@@ -185,6 +185,28 @@ describe('fitCaptionFontSize — maxLines (FIX-003-004)', () => {
     expect(fontSize * preset.lineHeightEm * preset.maxLines).toBeLessThanOrEqual(box.height);
   });
 
+  it('con backdrop, el alto de las dos líneas más su padding vertical entra en la caja', () => {
+    const preset = captionPreset('subtle-lower');
+    const format = defaultFormat('youtube-16x9');
+    const safeZone = captionSafeZone(format);
+    const box = captionBoxFor(safeZone, format, preset);
+    const fontSize = fitCaptionFontSize(SENTENCE, box, preset, format);
+    const paddingYEm = preset.backdrop?.paddingYEm ?? 0;
+
+    expect(fontSize * (preset.lineHeightEm * preset.maxLines + 2 * paddingYEm)).toBeLessThanOrEqual(box.height);
+  });
+
+  it('el backdrop reserva ancho: un preset con caja nunca da un tamaño mayor que el mismo sin caja', () => {
+    const withBackdrop = captionPreset('subtle-lower');
+    const withoutBackdrop = { ...withBackdrop, backdrop: null };
+    const format = defaultFormat('reels-9x16');
+    const box = captionBoxFor(captionSafeZone(format), format, withBackdrop);
+
+    expect(fitCaptionFontSize(SENTENCE, box, withBackdrop, format)).toBeLessThanOrEqual(
+      fitCaptionFontSize(SENTENCE, box, withoutBackdrop, format),
+    );
+  });
+
   it('maxLines 1 deja la fórmula anterior intacta para los cinéticos', () => {
     const preset = captionPreset('bold-impact');
 

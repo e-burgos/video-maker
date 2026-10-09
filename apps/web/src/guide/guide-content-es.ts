@@ -156,7 +156,7 @@ export const GUIDE_ES: GuideContent = {
         '- **Visibilidad**: público, oculto o privado. **Programar** sube el video como privado y YouTube lo publica a la hora elegida. Antes de publicar en público el estudio pide confirmar en qué canal sale.',
         '- **Seguimiento**: la subida muestra su avance y se puede cancelar o reintentar (retoma donde quedó). Cada video publicado queda registrado en el proyecto, con su enlace, y la tarjeta del video lo marca como publicado.',
         '',
-        'Un video nuevo cuenta contra la cuota diaria de la API de YouTube; si se agota, el estudio lo avisa y podés reintentar al día siguiente.',
+        'Cada subida cuenta contra el límite diario del canal (más bajo en canales nuevos o sin verificar por teléfono) y la cuota de la API; si se llega al tope, el estudio lo avisa y podés reintentar dentro de las 24 horas.',
       ].join('\n'),
     },
     {

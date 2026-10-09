@@ -156,7 +156,7 @@ export const GUIDE_EN: GuideContent = {
         '- **Visibility**: public, unlisted or private. **Schedule** uploads the video as private and YouTube publishes it at the chosen time. Before publishing publicly the studio asks you to confirm which channel it goes to.',
         '- **Follow-up**: the upload shows its progress and can be canceled or retried (it resumes where it stopped). Every published video is recorded in the project with its link, and the video card marks it as published.',
         '',
-        'Each new video counts against the daily YouTube API quota; if it runs out the studio says so and you can retry the next day.',
+        'Each upload counts against the channel daily upload limit (lower for new channels or channels not verified by phone) and the API quota; when the cap is reached the studio says so and you can retry within 24 hours.',
       ].join('\n'),
     },
     {

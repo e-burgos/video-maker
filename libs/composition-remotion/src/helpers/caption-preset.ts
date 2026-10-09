@@ -18,6 +18,13 @@ export interface CaptionPill {
   radiusEm: number;
 }
 
+export interface CaptionBackdrop {
+  color: string;
+  paddingXEm: number;
+  paddingYEm: number;
+  radiusEm: number;
+}
+
 export interface CaptionPreset {
   id: CaptionPresetId;
   fontFamily: string;
@@ -42,6 +49,7 @@ export interface CaptionPreset {
   stroke: CaptionStroke | null;
   shadow: string | null;
   pill: CaptionPill | null;
+  backdrop: CaptionBackdrop | null;
   animation: CaptionAnimation;
 }
 
@@ -70,6 +78,7 @@ export const CAPTION_PRESETS: Record<CaptionPresetId, CaptionPreset> = {
     stroke: { widthEm: 0.02, color: '#000000' },
     shadow: '0 0.04em 0.12em rgba(0, 0, 0, 0.85)',
     pill: null,
+    backdrop: null,
     animation: {
       mode: 'pop',
       spring: { damping: 9, mass: 0.6, stiffness: 140 },
@@ -101,6 +110,7 @@ export const CAPTION_PRESETS: Record<CaptionPresetId, CaptionPreset> = {
     stroke: null,
     shadow: '0 0.03em 0.1em rgba(0, 0, 0, 0.7)',
     pill: null,
+    backdrop: null,
     animation: {
       mode: 'rise',
       spring: { damping: 14, mass: 0.8, stiffness: 120 },
@@ -132,6 +142,7 @@ export const CAPTION_PRESETS: Record<CaptionPresetId, CaptionPreset> = {
     stroke: { widthEm: 0.045, color: '#101010' },
     shadow: '0 0.05em 0.14em rgba(0, 0, 0, 0.6)',
     pill: null,
+    backdrop: null,
     animation: {
       mode: 'pop',
       spring: { damping: 10, mass: 0.7, stiffness: 160 },
@@ -160,9 +171,10 @@ export const CAPTION_PRESETS: Record<CaptionPresetId, CaptionPreset> = {
     sidePaddingRatio: 0.2,
     minFontSizeRatio: 0.03,
     maxFontSizeRatio: 0.042,
-    stroke: { widthEm: 0.045, color: 'rgba(0, 0, 0, 0.9)' },
+    stroke: null,
     shadow: '0 0.03em 0.08em rgba(0, 0, 0, 0.75)',
     pill: null,
+    backdrop: { color: 'rgba(0, 0, 0, 0.55)', paddingXEm: 0.6, paddingYEm: 0.35, radiusEm: 0.35 },
     animation: {
       mode: 'fade',
       spring: { damping: 30, mass: 1, stiffness: 120 },
@@ -193,6 +205,7 @@ export const CAPTION_PRESETS: Record<CaptionPresetId, CaptionPreset> = {
     stroke: null,
     shadow: null,
     pill: { color: '#09090b', emphasisColor: '#09090b', paddingXEm: 0.22, paddingYEm: 0.06, radiusEm: 0.2 },
+    backdrop: null,
     animation: {
       mode: 'rise',
       spring: { damping: 14, mass: 0.8, stiffness: 120 },
@@ -214,4 +227,13 @@ export const DEFAULT_CAPTION_PRESET_ID: CaptionPresetId = 'bold-impact';
 
 export function captionPreset(id: CaptionPresetId = DEFAULT_CAPTION_PRESET_ID): CaptionPreset {
   return CAPTION_PRESETS[id] ?? CAPTION_PRESETS[DEFAULT_CAPTION_PRESET_ID];
+}
+
+export const PORTRAIT_MAX_SIDE_PADDING_RATIO = 0.06;
+
+export function captionPresetForFrame(preset: CaptionPreset, frame: { readonly width: number; readonly height: number }): CaptionPreset {
+  if (frame.height <= frame.width || preset.sidePaddingRatio <= PORTRAIT_MAX_SIDE_PADDING_RATIO) {
+    return preset;
+  }
+  return { ...preset, sidePaddingRatio: PORTRAIT_MAX_SIDE_PADDING_RATIO };
 }

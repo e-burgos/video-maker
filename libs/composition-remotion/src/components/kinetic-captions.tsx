@@ -7,7 +7,7 @@ import type { CaptionAnchor } from '../helpers/caption-box';
 import { captionBoxStyle, captionClipPlan } from '../helpers/caption-clip-plan';
 import type { CaptionBoxSource, CaptionClipPlan } from '../helpers/caption-clip-plan';
 import { brandCaptionPreset } from '../helpers/brand-caption-preset';
-import { captionPreset } from '../helpers/caption-preset';
+import { captionPreset, captionPresetForFrame } from '../helpers/caption-preset';
 import type { CaptionPreset, CaptionPresetId } from '../helpers/caption-preset';
 import type { CaptionPlatform } from '../helpers/caption-safe-zone';
 import { captionWordStyle } from '../helpers/caption-word-style';
@@ -60,7 +60,10 @@ export const KineticCaptions: FC<KineticCaptionsProps> = ({
   theme,
 }) => {
   const brandTheme = preset === 'brand' ? theme : undefined;
-  const resolvedPreset = brandTheme === undefined ? captionPreset(preset) : brandCaptionPreset(brandTheme);
+  const resolvedPreset = captionPresetForFrame(
+    brandTheme === undefined ? captionPreset(preset) : brandCaptionPreset(brandTheme),
+    format,
+  );
 
   return (
     <>

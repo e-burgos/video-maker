@@ -523,12 +523,11 @@ export function createNodeRenderApiDependencies(
     },
 
     mixTimelineAudio: async ({ timeline, outPath, projectRoot }) => {
-      const { mixTimelineAudio } = await loadMediaLocal();
+      const { mixTimelineAudio, normalizeMasterLoudness } = await loadMediaLocal();
       const [{ ffmpeg }, runner] = await Promise.all([loadBinaries(), loadCommandRunner()]);
-      const result = await mixTimelineAudio(timeline, outPath, runner, {
-        ffmpegPath: ffmpeg,
-        runOptions: { cwd: projectRoot },
-      });
+      const options = { ffmpegPath: ffmpeg, runOptions: { cwd: projectRoot } };
+      const result = await mixTimelineAudio(timeline, outPath, runner, options);
+      await normalizeMasterLoudness(result.outputPath, timeline.audioMix.voice, runner, options);
       return { outputPath: result.outputPath, filterComplex: result.filterComplex };
     },
 
