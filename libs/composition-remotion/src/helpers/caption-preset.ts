@@ -235,5 +235,12 @@ export function captionPresetForFrame(preset: CaptionPreset, frame: { readonly w
   if (frame.height <= frame.width || preset.sidePaddingRatio <= PORTRAIT_MAX_SIDE_PADDING_RATIO) {
     return preset;
   }
-  return { ...preset, sidePaddingRatio: PORTRAIT_MAX_SIDE_PADDING_RATIO };
+  const shortSideScale = frame.width / frame.height;
+  return {
+    ...preset,
+    sidePaddingRatio: PORTRAIT_MAX_SIDE_PADDING_RATIO,
+    minFontSizeRatio: preset.minFontSizeRatio * shortSideScale,
+    maxFontSizeRatio: preset.maxFontSizeRatio * shortSideScale,
+    boxHeightRatio: preset.boxHeightRatio * shortSideScale,
+  };
 }

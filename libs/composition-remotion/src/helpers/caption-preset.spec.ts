@@ -179,6 +179,15 @@ describe('captionPresetForFrame', () => {
     expect(captionPresetForFrame(preset, { width: 1920, height: 1080 })).toBe(preset);
   });
 
+  it('sizes the subtitle box and font to the short side in portrait, like in a landscape frame (FIX-e-burgos-011)', () => {
+    const preset = captionPreset('subtle-lower');
+    const portrait = captionPresetForFrame(preset, { width: 1080, height: 1920 });
+
+    expect(Math.round(portrait.maxFontSizeRatio * 1920)).toBe(Math.round(preset.maxFontSizeRatio * 1080));
+    expect(Math.round(portrait.minFontSizeRatio * 1920)).toBe(Math.round(preset.minFontSizeRatio * 1080));
+    expect(Math.round(portrait.boxHeightRatio * 1920)).toBe(Math.round(preset.boxHeightRatio * 1080));
+  });
+
   it('keeps presets that are already narrow enough untouched in portrait', () => {
     const preset = captionPreset('bold-impact');
 
