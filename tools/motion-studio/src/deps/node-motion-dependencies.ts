@@ -5,6 +5,7 @@ import { basename, dirname, join, resolve } from 'node:path';
 import {
   DEFAULT_VOICE_TARGET,
   ExecaCommandRunner,
+  normalizeAudioLoudness,
   normalizeVideoMasterLoudness,
   resolveBinaries,
   resolveBinary,
@@ -115,11 +116,12 @@ export function createNodeMotionDependencies(env: NodeJS.ProcessEnv, workspaceRo
       await hyperframes(['beats', '.', '--json'], dir);
       return readFile(join(dir, 'beats', 'music.mp3.json'), 'utf8');
     },
-    trimAudio: async ({ from, to, durationSec }) => {
+    trimAudio: async ({ from, to, durationSec, targetLufs }) => {
       const ffmpeg = await resolveBinary('ffmpeg', env);
       await mkdir(dirname(to), { recursive: true });
       const result = await runner.run(ffmpeg, ['-v', 'error', '-y', '-i', from, '-t', String(durationSec), '-ar', '48000', to]);
       if (result.exitCode !== 0) throw new MotionStudioError('STAGE_FAILED', `ffmpeg trim failed: ${result.stderr.slice(-400)}`);
+      await normalizeAudioLoudness(to, targetLufs, runner, { ffmpegPath: ffmpeg });
     },
     render: async ({ projectDir, outPath, fps, quality }) => {
       await hyperframes(['lint'], projectDir);

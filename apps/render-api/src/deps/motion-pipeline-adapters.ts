@@ -105,7 +105,7 @@ export function createMotionPipelinePorts(deps: RenderApiDependencies, assetsRoo
       await hyperframes(['beats', '.', '--json'], directory);
       return readFile(join(directory, 'beats', 'music.mp3.json'), 'utf8');
     },
-    trimAudio: async ({ from, to, durationSec }) => {
+    trimAudio: async ({ from, to, durationSec, targetLufs }) => {
       const [{ ffmpeg }, runner] = await Promise.all([deps.resolveMontageBinaries(), deps.createCommandRunner()]);
       await mkdir(dirname(to), { recursive: true });
       const result = await runner.run(ffmpeg, [
@@ -123,6 +123,8 @@ export function createMotionPipelinePorts(deps: RenderApiDependencies, assetsRoo
       if (result.exitCode !== 0) {
         throw new MotionStudioError('STAGE_FAILED', `ffmpeg trim failed: ${result.stderr.slice(-400)}`);
       }
+      const { normalizeAudioLoudness } = await import('@video-maker/media-local');
+      await normalizeAudioLoudness(to, targetLufs, runner, { ffmpegPath: ffmpeg });
     },
     render: async ({ projectDir, outPath, fps, quality }) => {
       await mkdir(dirname(outPath), { recursive: true });

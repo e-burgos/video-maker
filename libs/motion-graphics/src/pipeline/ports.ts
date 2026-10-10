@@ -21,7 +21,7 @@ export interface MotionPipelinePorts {
   synthesize(request: { text: string; voice: string; lengthScale: number; outPath: string }): Promise<void>;
   transcribe(wavPath: string): Promise<TakeTranscript>;
   detectBeats(musicPath: string): Promise<string>;
-  trimAudio(request: { from: string; to: string; durationSec: number }): Promise<void>;
+  trimAudio(request: { from: string; to: string; durationSec: number; targetLufs: number }): Promise<void>;
   render(request: RenderRequest): Promise<void>;
   askAgent: AskStoryboardAgent;
 }

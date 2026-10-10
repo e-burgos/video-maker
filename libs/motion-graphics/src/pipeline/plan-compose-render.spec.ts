@@ -17,6 +17,7 @@ describe('planProject', () => {
     expect(written.scenes[0].end).toBe(10.04);
     expect(written.musicCredit).toBe('Tema · CC BY 4.0');
     expect(ports.calls.some((c) => c.startsWith(`trimAudio ${P}/assets/audio/music.wav ${written.duration + 0.5}`))).toBe(true);
+    expect(ports.calls.some((c) => c === `trimAudio ${P}/assets/audio/music.wav ${written.duration + 0.5} -24`)).toBe(true);
   });
 
   it('with beatSync off follows the voice', async () => {
