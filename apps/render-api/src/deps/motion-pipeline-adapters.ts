@@ -128,6 +128,12 @@ export function createMotionPipelinePorts(deps: RenderApiDependencies, assetsRoo
       await mkdir(dirname(outPath), { recursive: true });
       await hyperframes(['lint'], projectDir);
       await hyperframes(['render', '-f', String(fps), '-q', quality, '-o', outPath], projectDir);
+      const [{ DEFAULT_VOICE_TARGET, normalizeVideoMasterLoudness }, { ffmpeg }, runner] = await Promise.all([
+        import('@video-maker/media-local'),
+        deps.resolveMontageBinaries(),
+        deps.createCommandRunner(),
+      ]);
+      await normalizeVideoMasterLoudness(outPath, DEFAULT_VOICE_TARGET, runner, { ffmpegPath: ffmpeg });
     },
     askAgent: async (request) => {
       const response = await deps.aiAgent({

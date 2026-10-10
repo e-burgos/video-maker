@@ -3,7 +3,9 @@ import { tmpdir } from 'node:os';
 import { basename, dirname, join, resolve } from 'node:path';
 
 import {
+  DEFAULT_VOICE_TARGET,
   ExecaCommandRunner,
+  normalizeVideoMasterLoudness,
   resolveBinaries,
   resolveBinary,
   resolveVoiceBinaries,
@@ -122,6 +124,8 @@ export function createNodeMotionDependencies(env: NodeJS.ProcessEnv, workspaceRo
     render: async ({ projectDir, outPath, fps, quality }) => {
       await hyperframes(['lint'], projectDir);
       await hyperframes(['render', '-f', String(fps), '-q', quality, '-o', outPath], projectDir);
+      const ffmpeg = await resolveBinary('ffmpeg', env);
+      await normalizeVideoMasterLoudness(outPath, DEFAULT_VOICE_TARGET, runner, { ffmpegPath: ffmpeg });
     },
     askAgent: createClaudeCliAskAgent({
       runner: new ExecaCommandRunner({ env: subscriptionOnlyEnv(env) }),

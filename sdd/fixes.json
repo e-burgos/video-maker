@@ -2748,6 +2748,56 @@
           }
         ]
       }
+    },
+    {
+      "id": "FIX-e-burgos-014",
+      "author": "e-burgos",
+      "spec_id": "spec-e-burgos-022-youtube-publishing",
+      "fix_document": "sdd/fixes/fix-e-burgos-014.md",
+      "type": "BUGFIX",
+      "severity": "high",
+      "created_at": "2026-10-09",
+      "resolved_at": "2026-10-09",
+      "validated_at": null,
+      "title": "Los videos motion se normalizan a -14 LUFS al renderizar",
+      "estimation_hours": 1,
+      "description": "El render de motion no normalizaba el máster: los videos salían entre -20 y -24 LUFS mientras los tutoriales salen a -14.",
+      "justification": "Consistencia de volumen de la tanda que se publica en YouTube; cambio interno sin contratos nuevos.",
+      "related_modules": [
+        "youtube-publishing"
+      ],
+      "affected_files": [
+        "apps/render-api/src/deps/motion-pipeline-adapters.ts",
+        "libs/media-local/src/ffmpeg/normalize-video-master-loudness.spec.ts",
+        "libs/media-local/src/ffmpeg/normalize-video-master-loudness.ts",
+        "libs/media-local/src/index.ts",
+        "tools/motion-studio/src/deps/node-motion-dependencies.ts"
+      ],
+      "test_reference": "media-local, motion-studio, render-api y motion-graphics lint/test/build verde; renders reales re-medidos.",
+      "status": "implemented",
+      "cycle": null,
+      "process_note": "Detectado al re-renderizar los 5 videos de Conocé Display Ads tras la revisión de display-ads.",
+      "usage": {
+        "provider_model": "claude/opus",
+        "effort": "high",
+        "tokens_in": 40000,
+        "tokens_out": 9000,
+        "approx": true,
+        "source": "declared-estimate",
+        "recorded_at": "2026-10-09",
+        "by_agent": [
+          {
+            "agent": "orchestrator",
+            "provider_model": "claude/opus",
+            "effort": "high",
+            "tokens_in": 40000,
+            "tokens_out": 9000,
+            "approx": true,
+            "source": "declared-estimate",
+            "recorded_at": "2026-10-09"
+          }
+        ]
+      }
     }
   ]
 }
