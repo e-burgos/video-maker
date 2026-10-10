@@ -2700,6 +2700,54 @@
           }
         ]
       }
+    },
+    {
+      "id": "FIX-e-burgos-013",
+      "author": "e-burgos",
+      "spec_id": "spec-e-burgos-022-youtube-publishing",
+      "fix_document": "sdd/fixes/fix-e-burgos-013.md",
+      "type": "BUGFIX",
+      "severity": "medium",
+      "created_at": "2026-10-09",
+      "resolved_at": "2026-10-09",
+      "validated_at": null,
+      "title": "La marca DisplayAds se escribe \"Display Ads\" en la etiqueta de los videos motion y en los borradores de YouTube",
+      "estimation_hours": 0.5,
+      "description": "brand.json tenía name \"DisplayAds\": se mostraba así en la etiqueta de los videos motion y el borrador de YouTube reescribía \"Display Ads\" como \"DisplayAds\".",
+      "justification": "Regla de marca del dueño (todo texto con espacio) marcada en la revisión de display-ads; cambio de un asset de marca sin contratos nuevos.",
+      "related_modules": [
+        "youtube-publishing"
+      ],
+      "affected_files": [
+        "apps/render-api/src/http/handlers/brands-handler.spec.ts",
+        "apps/render-api/src/youtube/draft-youtube-metadata.spec.ts",
+        "libs/motion-graphics/assets/brands/displayads/brand.json"
+      ],
+      "test_reference": "render-api y motion-graphics lint/test/build verde.",
+      "status": "implemented",
+      "cycle": null,
+      "process_note": "Los 5 videos de Conocé Display Ads se re-renderizan con la etiqueta corregida.",
+      "usage": {
+        "provider_model": "claude/opus",
+        "effort": "high",
+        "tokens_in": 25000,
+        "tokens_out": 5000,
+        "approx": true,
+        "source": "declared-estimate",
+        "recorded_at": "2026-10-09",
+        "by_agent": [
+          {
+            "agent": "orchestrator",
+            "provider_model": "claude/opus",
+            "effort": "high",
+            "tokens_in": 25000,
+            "tokens_out": 5000,
+            "approx": true,
+            "source": "declared-estimate",
+            "recorded_at": "2026-10-09"
+          }
+        ]
+      }
     }
   ]
 }
