@@ -119,4 +119,21 @@ describe('createYoutubeClient', () => {
 
     await expect(h.youtube.addToPlaylist('PL1', 'vid')).rejects.toMatchObject({ code: 'YOUTUBE_QUOTA_EXCEEDED' });
   });
+
+  it('creates a playlist and answers its id and title (FIX-e-burgos-012)', async () => {
+    const h = client(() => jsonRoute(200, { id: 'PLnew', snippet: { title: 'Medios' } }));
+
+    expect(await h.youtube.createPlaylist({ title: 'Medios', description: '', privacyStatus: 'public' })).toEqual({
+      id: 'PLnew',
+      title: 'Medios',
+    });
+  });
+
+  it('fails when YouTube answers a playlist without id', async () => {
+    const h = client(() => jsonRoute(200, {}));
+
+    await expect(
+      h.youtube.createPlaylist({ title: 'Medios', description: '', privacyStatus: 'public' }),
+    ).rejects.toMatchObject({ code: 'YOUTUBE_UPLOAD_FAILED' });
+  });
 });

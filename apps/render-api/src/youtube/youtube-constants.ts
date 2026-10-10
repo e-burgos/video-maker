@@ -13,6 +13,7 @@ export const YOUTUBE_UPLOAD_API_URL = 'https://www.googleapis.com/upload/youtube
 export const YOUTUBE_SCOPES = [
   'https://www.googleapis.com/auth/youtube.upload',
   'https://www.googleapis.com/auth/youtube.readonly',
+  'https://www.googleapis.com/auth/youtube.force-ssl',
 ] as const;
 
 export const OAUTH_CONNECT_TIMEOUT_MS = 5 * 60 * 1000;

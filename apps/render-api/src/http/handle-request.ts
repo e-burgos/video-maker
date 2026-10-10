@@ -91,9 +91,12 @@ import { handleGetVoice, handlePutVoiceScene } from './handlers/voice-handler';
 import { handleGetVoicePreview } from './handlers/voice-preview-handler';
 import { handleListVoices } from './handlers/voices-handler';
 import {
+  handleAddVideoToYoutubePlaylist,
   handleConnectYoutube,
+  handleCreateYoutubePlaylist,
   handleDisconnectYoutube,
   handleGetYoutubeIntegration,
+  handleListYoutubePlaylists,
   handlePutYoutubeClient,
 } from './handlers/youtube-integration-handler';
 import {
@@ -366,6 +369,12 @@ async function dispatchRoute(
         return await handleConnectYoutube(runtime);
       case 'integrations.youtube.disconnect':
         return await handleDisconnectYoutube(runtime);
+      case 'integrations.youtube.playlists.list':
+        return await handleListYoutubePlaylists(runtime);
+      case 'integrations.youtube.playlists.create':
+        return await handleCreateYoutubePlaylist(runtime, request);
+      case 'integrations.youtube.playlists.items.add':
+        return await handleAddVideoToYoutubePlaylist(runtime, params, request);
       case 'projects.publish.youtube.options':
         return await handleGetYoutubePublishOptions(deps, store, params, runtime);
       case 'projects.publish.youtube.draft':

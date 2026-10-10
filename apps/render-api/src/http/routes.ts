@@ -77,6 +77,13 @@ export const ROUTES = [
   { id: 'integrations.youtube.client.put', method: 'PUT', pattern: '/integrations/youtube/client' },
   { id: 'integrations.youtube.connect', method: 'POST', pattern: '/integrations/youtube/connect' },
   { id: 'integrations.youtube.disconnect', method: 'DELETE', pattern: '/integrations/youtube' },
+  { id: 'integrations.youtube.playlists.list', method: 'GET', pattern: '/integrations/youtube/playlists' },
+  { id: 'integrations.youtube.playlists.create', method: 'POST', pattern: '/integrations/youtube/playlists' },
+  {
+    id: 'integrations.youtube.playlists.items.add',
+    method: 'POST',
+    pattern: '/integrations/youtube/playlists/:playlistId/items',
+  },
   { id: 'projects.publish.youtube.options', method: 'GET', pattern: '/projects/:slug/publish/youtube/options' },
   { id: 'projects.publish.youtube.draft', method: 'POST', pattern: '/projects/:slug/publish/youtube/draft' },
   { id: 'projects.publications.list', method: 'GET', pattern: '/projects/:slug/publications' },

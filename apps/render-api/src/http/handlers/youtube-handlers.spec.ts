@@ -218,6 +218,97 @@ describe('youtube integration endpoints', () => {
 
 });
 
+const PLAYLIST_ANSWER: FakeFetchRemoteAnswer = (remote) => {
+  if (remote.url.includes('/youtube/v3/playlists?part=snippet,status') && remote.init.method === 'POST') {
+    return jsonRoute(200, { id: 'PLnew' });
+  }
+  if (remote.url.includes('/youtube/v3/playlistItems')) {
+    return jsonRoute(200, { id: 'item-1' });
+  }
+  return DEFAULT_ANSWER(remote);
+};
+
+function sentJson(h: ReturnType<typeof harness>, fragment: string): unknown {
+  const sent = h.google.calls.find((entry) => entry.url.includes(fragment));
+  return JSON.parse(String(sent?.init.body));
+}
+
+describe('youtube playlist endpoints (FIX-e-burgos-012)', () => {
+  it('asks Google for the playlist permission when connecting', async () => {
+    const h = harness();
+    await call(h, 'PUT', '/integrations/youtube/client', { clientId: 'id', clientSecret: 'secret' });
+
+    const connect = await call(h, 'POST', '/integrations/youtube/connect');
+    const scope = new URL((connect.body as { authUrl: string }).authUrl).searchParams.get('scope') ?? '';
+
+    expect(scope.split(' ')).toContain('https://www.googleapis.com/auth/youtube.force-ssl');
+  });
+
+  it('GET lists the playlists of the connected channel', async () => {
+    const h = harness();
+    await h.connect();
+
+    const response = await call(h, 'GET', '/integrations/youtube/playlists');
+
+    expect(response.status).toBe(200);
+    expect(response.body).toEqual({ playlists: [{ id: 'PL1', title: 'Tutoriales' }] });
+  });
+
+  it('POST creates a playlist, private by default, and answers 201 {id, title}', async () => {
+    const h = harness({ answer: PLAYLIST_ANSWER });
+    await h.connect();
+
+    const response = await call(h, 'POST', '/integrations/youtube/playlists', { title: ' Campañas ', description: 'Tutoriales' });
+
+    expect(response.status).toBe(201);
+    expect(response.body).toEqual({ id: 'PLnew', title: 'Campañas' });
+    expect(sentJson(h, 'playlists?part=snippet,status')).toEqual({
+      snippet: { title: 'Campañas', description: 'Tutoriales' },
+      status: { privacyStatus: 'private' },
+    });
+  });
+
+  it('POST rejects an empty title and an unknown privacy with INVALID_INPUT', async () => {
+    const h = harness({ answer: PLAYLIST_ANSWER });
+    await h.connect();
+
+    const noTitle = await call(h, 'POST', '/integrations/youtube/playlists', { title: '' });
+    const badPrivacy = await call(h, 'POST', '/integrations/youtube/playlists', { title: 'Medios', privacy: 'friends' });
+
+    expect((noTitle.body as { error: { code: string } }).error.code).toBe('INVALID_INPUT');
+    expect((badPrivacy.body as { error: { code: string } }).error.code).toBe('INVALID_INPUT');
+  });
+
+  it('POST items adds an already published video to a playlist', async () => {
+    const h = harness({ answer: PLAYLIST_ANSWER });
+    await h.connect();
+
+    const response = await call(h, 'POST', '/integrations/youtube/playlists/PL1/items', { videoId: 'cQ3KhQZIVV4' });
+
+    expect(response.status).toBe(201);
+    expect(response.body).toEqual({ playlistId: 'PL1', videoId: 'cQ3KhQZIVV4' });
+    expect(sentJson(h, 'playlistItems')).toEqual({
+      snippet: { playlistId: 'PL1', resourceId: { kind: 'youtube#video', videoId: 'cQ3KhQZIVV4' } },
+    });
+  });
+
+  it('asks to reconnect when the channel was connected without the playlist permission', async () => {
+    const h = harness({
+      answer: (remote) =>
+        remote.url.includes('/youtube/v3/playlists?part=snippet,status')
+          ? jsonRoute(403, { error: { message: 'Request had insufficient authentication scopes.', errors: [{ reason: 'insufficientPermissions' }] } })
+          : DEFAULT_ANSWER(remote),
+    });
+    await h.connect();
+
+    const response = await call(h, 'POST', '/integrations/youtube/playlists', { title: 'Medios' });
+    const error = (response.body as { error: { code: string; hint: string } }).error;
+
+    expect(error.code).toBe('YOUTUBE_NOT_CONNECTED');
+    expect(error.hint).toMatch(/connect YouTube again/u);
+  });
+});
+
 describe('GET /projects/:slug/publish/youtube/options', () => {
   it('lists the mp4 files of out/ newest first with their probe data, and the playlists when connected', async () => {
     const h = harness({

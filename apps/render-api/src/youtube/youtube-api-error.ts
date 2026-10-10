@@ -8,6 +8,9 @@ const QUOTA_REASONS: readonly string[] = [
   'userRateLimitExceeded',
   'uploadLimitExceeded',
 ];
+const MISSING_SCOPE_REASONS: readonly string[] = ['insufficientPermissions', 'ACCESS_TOKEN_SCOPE_INSUFFICIENT'];
+const RECONNECT_FOR_SCOPE_HINT =
+  'the connected channel did not grant the playlist permission: disconnect and connect YouTube again';
 const HINT_MAX_LENGTH = 300;
 const GOOGLE_RESOURCE = 'youtube';
 
@@ -42,6 +45,14 @@ export function youtubeApiError(status: number, bodyText: string): PipelineStage
 
   if (reason !== null && QUOTA_REASONS.includes(reason)) {
     return new PipelineStageError({ code: 'YOUTUBE_QUOTA_EXCEEDED', stage: null, resource: GOOGLE_RESOURCE, hint });
+  }
+  if (status === 403 && reason !== null && MISSING_SCOPE_REASONS.includes(reason)) {
+    return new PipelineStageError({
+      code: 'YOUTUBE_NOT_CONNECTED',
+      stage: null,
+      resource: GOOGLE_RESOURCE,
+      hint: `${RECONNECT_FOR_SCOPE_HINT} (${hint})`.slice(0, HINT_MAX_LENGTH),
+    });
   }
   if (status === 401) {
     return new PipelineStageError({ code: 'YOUTUBE_NOT_CONNECTED', stage: null, resource: GOOGLE_RESOURCE, hint });
