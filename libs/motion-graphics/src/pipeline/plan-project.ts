@@ -11,6 +11,7 @@ import type { MotionPipelinePorts } from './ports';
 import { readScript, TIMELINE_FILE, toJson } from './project-files';
 
 const MUSIC_TAIL = 0.5;
+export const MUSIC_REFERENCE_LUFS = -24;
 const SILENT_BPM = 120;
 
 function silentGrid(durationSec: number): BeatGrid {
@@ -36,7 +37,7 @@ export async function planProject(ports: MotionPipelinePorts, project: string, o
   const grid = musicSource === null ? silentGrid(roughTotal) : fitBeatGrid(parseHyperframesBeats(await ports.detectBeats(musicSource)), roughTotal);
   const slots = layoutScenes(script.scenes, voDurations, { beatSync, beats: grid.beats });
   const duration = slots.at(-1)?.end ?? 0;
-  if (musicSource !== null) await ports.trimAudio({ from: musicSource, to: joinPath(project, 'assets', 'audio', 'music.wav'), durationSec: duration + MUSIC_TAIL });
+  if (musicSource !== null) await ports.trimAudio({ from: musicSource, to: joinPath(project, 'assets', 'audio', 'music.wav'), durationSec: duration + MUSIC_TAIL, targetLufs: MUSIC_REFERENCE_LUFS });
   const timeline: MotionTimeline = {
     beatSync,
     duration,
