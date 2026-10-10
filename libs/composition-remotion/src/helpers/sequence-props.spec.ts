@@ -224,4 +224,40 @@ describe('timelineToSequenceProps — normalización de la música y capa de log
     expect(plan.logo).toBeNull();
     expect(plan.unresolvedAssetIds).toContain('logo-inexistente');
   });
+  it('cada bumper usa su propio logo y, sin logo propio, cae al logo del cuerpo (FIX-e-burgos-011)', () => {
+    const bumper = {
+      enabled: true,
+      durationMs: 2000,
+      backgroundColor: '#ffffff',
+      animation: 'zoom' as const,
+      logoWidthRatio: 0.4,
+    };
+    const withBumperLogo: Timeline = {
+      ...timeline,
+      bumpers: { intro: { ...bumper, logoAssetId: 'broll-shot-01' }, outro: bumper },
+    };
+
+    const plan = timelineToSequenceProps(withBumperLogo);
+
+    expect(plan.bumperLogoSrc.intro?.length).toBeGreaterThan(0);
+    expect(plan.bumperLogoSrc.outro).toBeNull();
+    expect(plan.logo).toBeNull();
+  });
+
+  it('sin logo propio en los bumpers, ambos muestran el logo del cuerpo', () => {
+    const withLogo: Timeline = {
+      ...timeline,
+      logo: {
+        assetId: 'broll-shot-01',
+        position: 'bottom-right',
+        widthRatio: 0.32,
+        marginRatio: 0.035,
+        opacity: 1,
+      },
+    };
+
+    const plan = timelineToSequenceProps(withLogo);
+
+    expect(plan.bumperLogoSrc).toEqual({ intro: plan.logo?.src, outro: plan.logo?.src });
+  });
 });

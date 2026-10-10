@@ -90,6 +90,19 @@ describe('preserveBrandDecisions', () => {
     expect(preserveBrandDecisions(next, previous)).not.toHaveProperty('logo');
   });
 
+  it('arrastra el asset del logo propio de los bumpers aunque el montaje nuevo no lo use (FIX-e-burgos-011)', () => {
+    const bumperLogo: MediaAsset = { ...LOGO_ASSET, id: 'raw/logo/largo.png', path: 'raw/logo/largo.png' };
+    const previous = timeline({
+      assets: [LOGO_ASSET, bumperLogo],
+      bumpers: { intro: { ...BUMPER, logoAssetId: bumperLogo.id } },
+    });
+
+    const preserved = preserveBrandDecisions(timeline(), previous);
+
+    expect(preserved.assets.map((asset) => asset.id)).toEqual([LOGO_ASSET.id, bumperLogo.id]);
+    expect(preserved.bumpers?.intro?.logoAssetId).toBe(bumperLogo.id);
+  });
+
   it('sin decisiones de marca previas no agrega campos vacíos', () => {
     const preserved = preserveBrandDecisions(timeline(), timeline());
 

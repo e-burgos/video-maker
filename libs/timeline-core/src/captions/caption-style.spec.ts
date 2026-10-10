@@ -20,13 +20,15 @@ describe('caption-style (FIX-e-burgos-003-003)', () => {
     expect(isCaptionStyle(3)).toBe(false);
   });
 
-  it('subtle-lower agrupa como subtítulo: 6 a 10 palabras en 2 a 4 segundos', () => {
+  it('subtle-lower agrupa como subtítulo de una línea que respeta las frases (FIX-e-burgos-011)', () => {
     expect(captionGroupingForStyle('subtle-lower')).toEqual({
-      minWords: 6,
+      minWords: 3,
       maxWords: 10,
       minDurationMs: 2000,
       maxDurationMs: 4000,
       maxGapMs: 900,
+      maxChars: 52,
+      respectPhrases: true,
     });
   });
 

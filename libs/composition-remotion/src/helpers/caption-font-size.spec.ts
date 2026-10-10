@@ -164,8 +164,8 @@ describe('fitCaptionFontSize — maxLines (FIX-003-004)', () => {
     .map(word);
 
   it('un preset de dos líneas admite un tamaño mayor que el mismo preset de una', () => {
-    const twoLines = captionPreset('subtle-lower');
-    const oneLine = { ...twoLines, maxLines: 1 };
+    const oneLine = captionPreset('subtle-lower');
+    const twoLines = { ...oneLine, maxLines: 2, boxHeightRatio: 0.15 };
     const format = defaultFormat('youtube-16x9');
     const safeZone = captionSafeZone(format);
     const box = captionBoxFor(safeZone, format, twoLines);

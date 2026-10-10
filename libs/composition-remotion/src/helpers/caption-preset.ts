@@ -166,11 +166,11 @@ export const CAPTION_PRESETS: Record<CaptionPresetId, CaptionPreset> = {
     wordGapEm: 0.26,
     averageCharWidthEm: 0.52,
     anchor: 'bottom',
-    maxLines: 2,
-    boxHeightRatio: 0.15,
+    maxLines: 1,
+    boxHeightRatio: 0.08,
     sidePaddingRatio: 0.2,
     minFontSizeRatio: 0.03,
-    maxFontSizeRatio: 0.042,
+    maxFontSizeRatio: 0.038,
     stroke: null,
     shadow: '0 0.03em 0.08em rgba(0, 0, 0, 0.75)',
     pill: null,
@@ -235,5 +235,12 @@ export function captionPresetForFrame(preset: CaptionPreset, frame: { readonly w
   if (frame.height <= frame.width || preset.sidePaddingRatio <= PORTRAIT_MAX_SIDE_PADDING_RATIO) {
     return preset;
   }
-  return { ...preset, sidePaddingRatio: PORTRAIT_MAX_SIDE_PADDING_RATIO };
+  const shortSideScale = frame.width / frame.height;
+  return {
+    ...preset,
+    sidePaddingRatio: PORTRAIT_MAX_SIDE_PADDING_RATIO,
+    minFontSizeRatio: preset.minFontSizeRatio * shortSideScale,
+    maxFontSizeRatio: preset.maxFontSizeRatio * shortSideScale,
+    boxHeightRatio: preset.boxHeightRatio * shortSideScale,
+  };
 }

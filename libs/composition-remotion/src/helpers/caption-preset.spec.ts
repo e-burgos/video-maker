@@ -81,14 +81,15 @@ describe('CAPTION_PRESETS[subtle-lower] — subtítulo clásico (FIX-003-004)', 
     }
   });
 
-  it('vive en una caja inferior de hasta dos líneas, en tamaño de subtítulo', () => {
+  it('vive en una caja inferior compacta de una sola línea para no tapar la UI (FIX-e-burgos-011)', () => {
     expect(preset.anchor).toBe('bottom');
-    expect(preset.maxLines).toBe(2);
+    expect(preset.maxLines).toBe(1);
+    expect(preset.boxHeightRatio).toBeLessThanOrEqual(0.08);
     expect(preset.boxHeightRatio).toBeGreaterThanOrEqual(
-      2 * preset.maxFontSizeRatio * preset.lineHeightEm,
+      preset.maxFontSizeRatio * (preset.lineHeightEm + 2 * (preset.backdrop?.paddingYEm ?? 0)),
     );
     expect(preset.minFontSizeRatio).toBeGreaterThanOrEqual(0.03);
-    expect(preset.maxFontSizeRatio).toBeLessThanOrEqual(0.045);
+    expect(preset.maxFontSizeRatio).toBeLessThanOrEqual(0.04);
   });
 
   it('entra con un fundido corto, sin pop ni rise', () => {
@@ -176,6 +177,15 @@ describe('captionPresetForFrame', () => {
 
     expect(captionPresetForFrame(preset, { width: 1080, height: 1920 }).sidePaddingRatio).toBe(PORTRAIT_MAX_SIDE_PADDING_RATIO);
     expect(captionPresetForFrame(preset, { width: 1920, height: 1080 })).toBe(preset);
+  });
+
+  it('sizes the subtitle box and font to the short side in portrait, like in a landscape frame (FIX-e-burgos-011)', () => {
+    const preset = captionPreset('subtle-lower');
+    const portrait = captionPresetForFrame(preset, { width: 1080, height: 1920 });
+
+    expect(Math.round(portrait.maxFontSizeRatio * 1920)).toBe(Math.round(preset.maxFontSizeRatio * 1080));
+    expect(Math.round(portrait.minFontSizeRatio * 1920)).toBe(Math.round(preset.minFontSizeRatio * 1080));
+    expect(Math.round(portrait.boxHeightRatio * 1920)).toBe(Math.round(preset.boxHeightRatio * 1080));
   });
 
   it('keeps presets that are already narrow enough untouched in portrait', () => {

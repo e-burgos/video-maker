@@ -116,6 +116,14 @@ describe('timelineWarnings', () => {
     ]);
   });
 
+  it('no avisa por un bumper que trae su propio logo (FIX-e-burgos-011)', () => {
+    const timeline = withBumpers(referenceTimeline(), {
+      intro: bumper({ logoAssetId: 'broll-shot-01' }),
+    });
+
+    expect(timelineWarnings(timeline)).toEqual([]);
+  });
+
   it('no avisa por un bumper apagado', () => {
     const timeline = withBumpers(referenceTimeline(), { intro: bumper({ enabled: false }) });
 
