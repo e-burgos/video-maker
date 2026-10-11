@@ -34,6 +34,8 @@ export type {
   ResolveBinariesOptions,
 } from './binaries/resolve-binaries';
 
+export { appendTrailingSilence } from './ffmpeg/append-trailing-silence';
+export type { AppendTrailingSilenceOptions } from './ffmpeg/append-trailing-silence';
 export { narrationToSingleLine, synthesizeSpeech } from './tts/synthesize-speech';
 export type { SynthesizeSpeechOptions } from './tts/synthesize-speech';
 export {

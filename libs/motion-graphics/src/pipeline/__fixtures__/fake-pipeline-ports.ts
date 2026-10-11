@@ -2,7 +2,7 @@ import type { AskStoryboardAgent } from '../../auto/generate-motion-storyboard';
 import type { AutoStoryboardRequest } from '../../auto/build-auto-storyboard-request';
 import type { TakeTranscript } from '../../voice/pick-best-take';
 
-import type { MotionPipelinePorts, RenderRequest } from '../ports';
+import type { MotionPipelinePorts, RenderRequest, SynthesizeRequest } from '../ports';
 
 export function wavBytes(seconds: number): Uint8Array {
   const dataSize = Math.round(seconds * 1000) * 2;
@@ -24,6 +24,7 @@ export interface FakePipelinePorts extends MotionPipelinePorts {
   calls: string[];
   renders: RenderRequest[];
   asked: AutoStoryboardRequest[];
+  synthesized: SynthesizeRequest[];
 }
 
 export function createFakePipelinePorts(init: {
@@ -38,6 +39,7 @@ export function createFakePipelinePorts(init: {
   const calls: string[] = [];
   const renders: RenderRequest[] = [];
   const asked: AutoStoryboardRequest[] = [];
+  const synthesized: SynthesizeRequest[] = [];
   const spoken = new Map<string, { text: string; take: number }>();
   const get = (path: string) => {
     const value = files.get(path);
@@ -49,6 +51,7 @@ export function createFakePipelinePorts(init: {
     calls,
     renders,
     asked,
+    synthesized,
     assetsRoot: '/repo/assets',
     readText: async (path) => String(get(path)),
     readBytes: async (path) => {
@@ -69,7 +72,9 @@ export function createFakePipelinePorts(init: {
     removeFile: async (path) => {
       files.delete(path);
     },
-    synthesize: async ({ text, outPath }) => {
+    synthesize: async (request) => {
+      const { text, outPath } = request;
+      synthesized.push(request);
       const take = Number(/take(\d+)/u.exec(outPath)?.[1] ?? 0);
       spoken.set(outPath, { text, take });
       calls.push(`synthesize ${outPath.slice(0, outPath.lastIndexOf('/'))} take${take}`);

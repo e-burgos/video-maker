@@ -1,3 +1,5 @@
+import type { VoiceDirection } from '@video-maker/timeline-core';
+
 import { brandCssFile, brandImageFile, brandIsotipo } from '../brand/brand-manifest';
 import type { BrandManifest } from '../brand/brand-manifest';
 import { MotionStudioError } from '../errors/motion-studio-error';
@@ -18,7 +20,7 @@ export interface ScriptDocument {
   lengthScale: number;
   music: { file: string; credit: string; volume?: number } | null;
   noWhooshOn: string[];
-  scenes: Array<{ id: string; vo: string; minBars: number; anchor?: number }>;
+  scenes: Array<{ id: string; vo: string; minBars: number; anchor?: number; direction?: VoiceDirection }>;
   sfx: Array<{ id: string; scene: string; offset: number }>;
 }
 
@@ -195,6 +197,7 @@ export function composeStoryboard(storyboard: MotionStoryboard, brand: BrandMani
         vo: scene.vo,
         minBars: scene.minBars ?? DEFAULT_MIN_BARS[scene.kind] ?? 3,
         ...(anchor === undefined || !storyboard.beatSync ? {} : { anchor }),
+        ...(scene.direction === undefined ? {} : { direction: scene.direction }),
       };
     }),
     sfx: dropScene && track ? [{ id: 'riser', scene: dropScene.id, offset: -3.4 }] : [],

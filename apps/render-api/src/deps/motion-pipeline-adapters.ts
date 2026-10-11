@@ -59,7 +59,7 @@ export function createMotionPipelinePorts(deps: RenderApiDependencies, assetsRoo
       await copyFile(from, to);
     },
     removeFile: (path) => rm(path, { force: true }),
-    synthesize: async ({ text, voice, lengthScale, outPath }) => {
+    synthesize: async ({ text, voice, lengthScale, outPath, noiseScale, noiseScaleW, trailingPauseMs }) => {
       const [{ ttsVoicesDir }, models] = await Promise.all([deps.resolveVoiceBinaries(), deps.listVoiceModels()]);
       const model = models.find((candidate) => candidate.id === voice);
       if (model === undefined) {
@@ -78,6 +78,9 @@ export function createMotionPipelinePorts(deps: RenderApiDependencies, assetsRoo
         outPath,
         modelPath: join(ttsVoicesDir, model.directory),
         lengthScale,
+        ...(noiseScale === undefined ? {} : { noiseScale }),
+        ...(noiseScaleW === undefined ? {} : { noiseScaleW }),
+        ...(trailingPauseMs === undefined ? {} : { trailingPauseMs }),
         projectRoot: dirname(outPath),
       });
     },

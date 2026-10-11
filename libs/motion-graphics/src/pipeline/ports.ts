@@ -8,6 +8,16 @@ export interface RenderRequest {
   quality: string;
 }
 
+export interface SynthesizeRequest {
+  text: string;
+  voice: string;
+  lengthScale: number;
+  outPath: string;
+  noiseScale?: number;
+  noiseScaleW?: number;
+  trailingPauseMs?: number;
+}
+
 export interface MotionPipelinePorts {
   assetsRoot: string;
   userBrandsRoot?: string;
@@ -18,7 +28,7 @@ export interface MotionPipelinePorts {
   copyTree(from: string, to: string): Promise<void>;
   copyFile(from: string, to: string): Promise<void>;
   removeFile(path: string): Promise<void>;
-  synthesize(request: { text: string; voice: string; lengthScale: number; outPath: string }): Promise<void>;
+  synthesize(request: SynthesizeRequest): Promise<void>;
   transcribe(wavPath: string): Promise<TakeTranscript>;
   detectBeats(musicPath: string): Promise<string>;
   trimAudio(request: { from: string; to: string; durationSec: number; targetLufs: number }): Promise<void>;

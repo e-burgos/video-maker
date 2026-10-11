@@ -1,3 +1,4 @@
+import { VoiceDirectionSchema } from '@video-maker/timeline-core';
 import { z } from 'zod';
 
 export const ICON_NAMES = [
@@ -174,6 +175,7 @@ const sceneBase = {
   vo: Text.describe('Exact voice-over line for this scene, spoken in the target language'),
   minBars: z.number().positive().max(16).optional(),
   anchor: z.union([z.literal('drop'), z.number().nonnegative()]).optional(),
+  direction: VoiceDirectionSchema.describe('How this voice-over line is delivered: pace, energy, pause after the line and words to stress. Omit it for the voice default').optional(),
 };
 
 const scene = <K extends string, P extends z.ZodTypeAny>(kind: K, props: P) =>

@@ -91,6 +91,88 @@ describe('synthesizeSpeech (US-09-004, US-017-201)', () => {
     expect(runner.calls[0]?.args).not.toContain('--vits-length-scale');
   });
 
+  it('pasa --vits-noise-scale y --vits-noise-scale-w solo cuando la dirección los pide', async () => {
+    const runner = new FixtureCommandRunner([{ bin: 'sherpa-onnx-offline-tts', response: { exitCode: 0 } }]);
+
+    await synthesizeSpeech(
+      '/out.wav',
+      {
+        modelPath: MODEL_PATH,
+        tokensPath: TOKENS_PATH,
+        dataDirPath: DATA_DIR_PATH,
+        textPath: '/in.txt',
+        noiseScale: 0.8,
+        noiseScaleW: 1,
+        readTextFile: fakeReadTextFile('Texto.'),
+      },
+      runner,
+    );
+
+    expect(runner.calls[0]?.args).toEqual([
+      `--vits-model=${MODEL_PATH}`,
+      `--vits-tokens=${TOKENS_PATH}`,
+      `--vits-data-dir=${DATA_DIR_PATH}`,
+      '--vits-noise-scale=0.8',
+      '--vits-noise-scale-w=1',
+      '--output-filename=/out.wav',
+      'Texto.',
+    ]);
+  });
+
+  it('con pausa final sintetiza a un wav intermedio, le agrega silencio con ffmpeg y lo descarta', async () => {
+    const runner = new FixtureCommandRunner([
+      { bin: 'sherpa-onnx-offline-tts', response: { exitCode: 0 } },
+      { bin: 'ffmpeg', response: { exitCode: 0 } },
+    ]);
+    const removed: string[] = [];
+
+    const out = await synthesizeSpeech(
+      '/out.wav',
+      {
+        modelPath: MODEL_PATH,
+        tokensPath: TOKENS_PATH,
+        dataDirPath: DATA_DIR_PATH,
+        textPath: '/in.txt',
+        trailingPauseMs: 600,
+        ffmpegPath: '/opt/ffmpeg',
+        removeFile: (path) => {
+          removed.push(path);
+          return Promise.resolve();
+        },
+        readTextFile: fakeReadTextFile('Texto.'),
+      },
+      runner,
+    );
+
+    expect(out).toBe('/out.wav');
+    expect(runner.calls[0]?.args).toContain('--output-filename=/out.wav.speech.wav');
+    expect(runner.calls[1]).toMatchObject({ bin: '/opt/ffmpeg' });
+    expect(runner.calls[1]?.args).toEqual(
+      expect.arrayContaining(['-i', '/out.wav.speech.wav', '-af', 'apad=pad_dur=0.6', '/out.wav']),
+    );
+    expect(removed).toEqual(['/out.wav.speech.wav']);
+  });
+
+  it('sin pausa no invoca ffmpeg ni cambia el destino (bytes idénticos)', async () => {
+    const runner = new FixtureCommandRunner([{ bin: 'sherpa-onnx-offline-tts', response: { exitCode: 0 } }]);
+
+    await synthesizeSpeech(
+      '/out.wav',
+      {
+        modelPath: MODEL_PATH,
+        tokensPath: TOKENS_PATH,
+        dataDirPath: DATA_DIR_PATH,
+        textPath: '/in.txt',
+        trailingPauseMs: 0,
+        readTextFile: fakeReadTextFile('Texto.'),
+      },
+      runner,
+    );
+
+    expect(runner.calls).toHaveLength(1);
+    expect(runner.calls[0]?.args).toContain('--output-filename=/out.wav');
+  });
+
   it('colapsa saltos de línea del texto leído antes de pasarlo como argumento', async () => {
     const runner = new FixtureCommandRunner([{ bin: 'sherpa-onnx-offline-tts', response: { exitCode: 0 } }]);
 

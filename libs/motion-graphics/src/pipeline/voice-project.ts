@@ -1,10 +1,13 @@
+import { directedLengthScale, hasVoiceDirection, voiceDirectionSynthesis } from '@video-maker/timeline-core';
+import type { VoiceDirection } from '@video-maker/timeline-core';
+
 import { MotionStudioError } from '../errors/motion-studio-error';
 import type { MotionScript } from '../script/motion-script';
 import type { SceneWords } from '../template/motion-timeline';
 import { pickBestTake } from '../voice/pick-best-take';
 import { wavDurationSec } from '../voice/wav-duration';
 import { joinPath } from './join-path';
-import type { MotionPipelinePorts } from './ports';
+import type { MotionPipelinePorts, SynthesizeRequest } from './ports';
 import { readExistingWords, readScript, toJson, WORDS_FILE } from './project-files';
 
 export interface VoiceProjectOptions {
@@ -31,6 +34,7 @@ interface VoicedLineSource {
   vo: string;
   voice: string;
   lengthScale: number;
+  direction?: VoiceDirection;
 }
 
 type VoiceManifest = Record<string, VoicedLineSource>;
@@ -41,15 +45,28 @@ async function readVoiceManifest(ports: MotionPipelinePorts, project: string): P
 }
 
 function lineSource(scene: MotionScript['scenes'][number], script: MotionScript): VoicedLineSource {
-  return { vo: scene.vo, voice: script.voice, lengthScale: script.lengthScale };
+  return { vo: scene.vo, voice: script.voice, lengthScale: script.lengthScale, ...(hasVoiceDirection(scene.direction) ? { direction: scene.direction } : {}) };
 }
 
 function sameSource(previous: VoicedLineSource | undefined, next: VoicedLineSource): boolean {
-  return previous !== undefined && previous.vo === next.vo && previous.voice === next.voice && previous.lengthScale === next.lengthScale;
+  return previous !== undefined && previous.vo === next.vo && previous.voice === next.voice && previous.lengthScale === next.lengthScale && JSON.stringify(previous.direction) === JSON.stringify(next.direction);
 }
 
 function describeLine(line: VoicedLine): string {
   return line.reused ? `voice ${line.sceneId}: reused` : `voice ${line.sceneId}: take ${line.take}/${line.attempts} · ${line.score} · ${line.heard}`;
+}
+
+function synthesisRequest(scene: MotionScript['scenes'][number], script: MotionScript, outPath: string): SynthesizeRequest {
+  const { noiseScale, noiseScaleW, trailingPauseMs } = voiceDirectionSynthesis(scene.direction);
+  return {
+    text: scene.vo,
+    voice: script.voice,
+    lengthScale: directedLengthScale(script.lengthScale, scene.direction),
+    outPath,
+    ...(noiseScale === undefined ? {} : { noiseScale }),
+    ...(noiseScaleW === undefined ? {} : { noiseScaleW }),
+    ...(trailingPauseMs > 0 ? { trailingPauseMs } : {}),
+  };
 }
 
 export interface VoiceProjectResult {
@@ -91,7 +108,7 @@ export async function voiceProject(ports: MotionPipelinePorts, project: string, 
       {
         synthesizeTake: async (take) => {
           const path = joinPath(project, 'assets', 'audio', `vo-${scene.id}.take${take}.wav`);
-          await ports.synthesize({ text: scene.vo, voice: script.voice, lengthScale: script.lengthScale, outPath: path });
+          await ports.synthesize(synthesisRequest(scene, script, path));
           return { path, durationSec: wavDurationSec(await ports.readBytes(path)) };
         },
         transcribeTake: (path) => ports.transcribe(path),

@@ -55,6 +55,8 @@ export const ROUTES = [
   { id: 'projects.storyboard.prompts', method: 'GET', pattern: '/projects/:slug/storyboard/prompts' },
   { id: 'projects.voice.get', method: 'GET', pattern: '/projects/:slug/voice' },
   { id: 'projects.voice.scene.put', method: 'PUT', pattern: '/projects/:slug/voice/scenes/:sceneId' },
+  { id: 'projects.voice.direction.get', method: 'GET', pattern: '/projects/:slug/voice/direction' },
+  { id: 'projects.voice.direction.put', method: 'PUT', pattern: '/projects/:slug/voice/direction' },
   { id: 'projects.motion.brief.get', method: 'GET', pattern: '/projects/:slug/motion/brief' },
   { id: 'projects.motion.brief.put', method: 'PUT', pattern: '/projects/:slug/motion/brief' },
   { id: 'projects.motion.storyboard.get', method: 'GET', pattern: '/projects/:slug/motion/storyboard' },

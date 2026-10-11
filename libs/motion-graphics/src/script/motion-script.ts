@@ -1,3 +1,6 @@
+import { VoiceDirectionSchema } from '@video-maker/timeline-core';
+import type { VoiceDirection } from '@video-maker/timeline-core';
+
 import { MotionStudioError } from '../errors/motion-studio-error';
 
 export const DEFAULT_MUSIC_VOLUME = 0.5;
@@ -7,6 +10,7 @@ export interface MotionScene {
   vo: string;
   minBars: number;
   anchor: number | null;
+  direction?: VoiceDirection;
 }
 
 export interface MotionSfx {
@@ -47,6 +51,13 @@ function asNumber(value: unknown, where: string, fallback: number | null = null)
   return value;
 }
 
+function parseDirection(raw: unknown, where: string): { direction?: VoiceDirection } {
+  if (raw === undefined) return {};
+  const parsed = VoiceDirectionSchema.safeParse(raw);
+  if (!parsed.success) fail(`${where} is not a valid voice direction: ${parsed.error.issues.map((issue) => issue.message).join('; ')}`);
+  return { direction: parsed.data };
+}
+
 function parseScene(raw: unknown, index: number): MotionScene {
   const scene = asRecord(raw, `scenes[${index}]`);
   const id = asString(scene['id'], `scenes[${index}].id`);
@@ -54,7 +65,13 @@ function parseScene(raw: unknown, index: number): MotionScene {
   const minBars = asNumber(scene['minBars'], `scenes[${index}].minBars`, 2);
   if (minBars <= 0) fail(`scenes[${index}].minBars must be positive`);
   const anchor = scene['anchor'] === undefined ? null : asNumber(scene['anchor'], `scenes[${index}].anchor`);
-  return { id, vo: asString(scene['vo'], `scenes[${index}].vo`), minBars, anchor };
+  return {
+    id,
+    vo: asString(scene['vo'], `scenes[${index}].vo`),
+    minBars,
+    anchor,
+    ...parseDirection(scene['direction'], `scenes[${index}].direction`),
+  };
 }
 
 function parseSfx(raw: unknown, index: number, sceneIds: Set<string>): MotionSfx {

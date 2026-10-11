@@ -68,8 +68,9 @@ export function createNodeMotionDependencies(env: NodeJS.ProcessEnv, workspaceRo
       await copyFile(from, to);
     },
     removeFile: (path) => rm(path, { force: true }),
-    synthesize: async ({ text, voice, lengthScale, outPath }) => {
+    synthesize: async ({ text, voice, lengthScale, outPath, noiseScale, noiseScaleW, trailingPauseMs }) => {
       const { ttsCli, ttsVoicesDir } = await resolveVoiceBinaries(env);
+      const ffmpegPath = trailingPauseMs === undefined ? undefined : (await resolveBinaries(env)).ffmpeg;
       const voiceDir = join(ttsVoicesDir, voiceDirectoryName(voice));
       const ownData = join(voiceDir, VOICE_ESPEAK_DATA_DIR_NAME);
       const textPath = join(await mkdtemp(join(tmpdir(), 'motion-voice-')), 'line.txt');
@@ -83,6 +84,9 @@ export function createNodeMotionDependencies(env: NodeJS.ProcessEnv, workspaceRo
           dataDirPath: (await exists(ownData)) ? ownData : join(ttsVoicesDir, VOICE_ESPEAK_DATA_DIR_NAME),
           textPath,
           lengthScale,
+          ...(noiseScale === undefined ? {} : { noiseScale }),
+          ...(noiseScaleW === undefined ? {} : { noiseScaleW }),
+          ...(trailingPauseMs === undefined || ffmpegPath === undefined ? {} : { trailingPauseMs, ffmpegPath }),
           ttsPath: ttsCli,
         },
         runner,

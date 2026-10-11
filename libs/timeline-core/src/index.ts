@@ -210,6 +210,23 @@ export type {
 
 export { hashNarration } from './voice/hash-narration';
 export {
+  directedLengthScale,
+  hasVoiceDirection,
+  MAX_VOICE_PAUSE_AFTER_MS,
+  VOICE_ENERGIES,
+  VOICE_PACES,
+  VoiceDirectionSchema,
+  voiceDirectionSynthesis,
+  VoiceScriptDirectionsSchema,
+} from './voice/voice-direction';
+export type {
+  VoiceDirection,
+  VoiceDirectionSynthesis,
+  VoiceEnergy,
+  VoicePace,
+  VoiceScriptDirections,
+} from './voice/voice-direction';
+export {
   hasVoiceScriptTimeMarks,
   parseVoiceScriptLines,
   stripVoiceScriptTimeMarks,
