@@ -1,0 +1,85 @@
+{
+  "$schema": "../../../../schemas/cycle-tasks.schema.json",
+  "spec": "spec-e-burgos-023-production-quality",
+  "cycle": 2,
+  "module": "production-quality",
+  "apps": [
+    "libs/motion-graphics",
+    "tools/motion-studio",
+    "apps/render-api"
+  ],
+  "flow": "lite",
+  "user_stories_generated": true,
+  "prerequisites": {
+    "tasks_generated": true
+  },
+  "tasks": [
+    {
+      "id": "TASK-001",
+      "title": "motion-graphics: escena ui-walkthrough en el schema del storyboard (captura de UI, marco browser/phone/none, hasta 8 pasos move/click/type/highlight/callout/zoom con coordenadas normalizadas 0-1 y cue) y su renderer HTML",
+      "user_stories": [
+        "US-023-201",
+        "US-023-202"
+      ],
+      "estimation_hours": 4,
+      "story_points": 8,
+      "depends_on": [],
+      "status": "pending",
+      "files": [
+        "libs/motion-graphics/src/storyboard/motion-storyboard.schema.ts",
+        "libs/motion-graphics/src/scenes/render-scene.ts"
+      ]
+    },
+    {
+      "id": "TASK-002",
+      "title": "motion-graphics: animaciones de runtime para la escena (cursor que viaja, pulso de clic, tipeo, recuadro de resaltado, globo, zoom a una región) declarativas y deterministas para el render paralelo, más estilos",
+      "user_stories": [
+        "US-023-201"
+      ],
+      "estimation_hours": 4,
+      "story_points": 8,
+      "depends_on": [
+        "TASK-001"
+      ],
+      "status": "pending",
+      "files": [
+        "libs/motion-graphics/assets/runtime/motion-runtime.js",
+        "libs/motion-graphics/assets/runtime/scenes.css"
+      ]
+    },
+    {
+      "id": "TASK-003",
+      "title": "motion-graphics: guía de la escena para el storyboard automático y verificación cruzada (imagen existente, coordenadas válidas, cues de la voz)",
+      "user_stories": [
+        "US-023-202"
+      ],
+      "estimation_hours": 2,
+      "story_points": 3,
+      "depends_on": [
+        "TASK-001"
+      ],
+      "status": "pending",
+      "files": [
+        "libs/motion-graphics/src/auto/scene-guide.ts"
+      ]
+    },
+    {
+      "id": "TASK-004",
+      "title": "Verificación: render real de un motion de prueba con una captura de la plataforma Display Ads explicada con cursor, clic, tipeo, resaltado y globo; cuadros revisados y job review sin críticos",
+      "user_stories": [
+        "US-023-201",
+        "US-023-202"
+      ],
+      "estimation_hours": 2,
+      "story_points": 3,
+      "depends_on": [
+        "TASK-002",
+        "TASK-003"
+      ],
+      "status": "pending",
+      "files": [
+        "sdd/specs/spec-e-burgos-023-production-quality/cycles/cycle-02/artifacts/verification.md"
+      ]
+    }
+  ]
+}
