@@ -231,6 +231,19 @@
         "apps/desktop"
       ],
       "description": "Publicar videos en YouTube: conexión OAuth de la cuenta, publicación con metadatos del productor, registro de publicaciones y cola programada"
+    },
+    {
+      "module": "production-quality",
+      "spec": "spec-e-burgos-023-production-quality",
+      "apps": [
+        "libs/media-local",
+        "apps/render-api",
+        "apps/web",
+        "libs/producer-tools",
+        "libs/motion-graphics",
+        "libs/timeline-core"
+      ],
+      "description": "Calidad de producción: revisión automática de renders (niveles por pista, cuadros, subtítulos, contrato de entrega), escena de UI en motion, dirección de voz, propuesta con muestra y video de referencia"
     }
   ],
   "pending_modules": [

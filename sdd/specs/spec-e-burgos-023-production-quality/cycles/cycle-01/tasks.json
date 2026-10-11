@@ -1,0 +1,128 @@
+{
+  "$schema": "../../../../schemas/cycle-tasks.schema.json",
+  "spec": "spec-e-burgos-023-production-quality",
+  "cycle": 1,
+  "module": "production-quality",
+  "apps": [
+    "libs/media-local",
+    "libs/timeline-core",
+    "apps/render-api",
+    "apps/web",
+    "libs/producer-tools"
+  ],
+  "flow": "lite",
+  "user_stories_generated": true,
+  "prerequisites": {
+    "tasks_generated": true
+  },
+  "tasks": [
+    {
+      "id": "TASK-001",
+      "title": "media-local: análisis de medios para la revisión — loudness por tramo (ebur128 sobre atrim), cuadros negros (blackdetect), congelados (freezedetect) y silencios (silencedetect) con parseo tipado",
+      "user_stories": [
+        "US-023-101"
+      ],
+      "estimation_hours": 3,
+      "story_points": 5,
+      "depends_on": [],
+      "status": "pending",
+      "files": [
+        "libs/media-local/src/ffmpeg/measure-segment-loudness.ts",
+        "libs/media-local/src/ffmpeg/detect-video-defects.ts",
+        "libs/media-local/src/index.ts"
+      ]
+    },
+    {
+      "id": "TASK-002",
+      "title": "timeline-core: contrato de entrega opcional en la Timeline (kind tutorial/motion/short, voz y subtítulos requeridos, duración máxima) y modelo ReviewReport (checks, severidad, tramo, arreglo propuesto)",
+      "user_stories": [
+        "US-023-102",
+        "US-023-103"
+      ],
+      "estimation_hours": 2,
+      "story_points": 3,
+      "depends_on": [],
+      "status": "pending",
+      "files": [
+        "libs/timeline-core/src/schemas/timeline.schema.ts",
+        "libs/timeline-core/src/review/review-report.ts",
+        "libs/timeline-core/schemas/timeline.schema.json"
+      ]
+    },
+    {
+      "id": "TASK-003",
+      "title": "render-api: motor de reglas de revisión (máster y pico, margen voz/música por tramo con ganancias declaradas, duración, cuadros negros/congelados fuera de bumpers, silencios, subtítulos de una línea y en zona segura, recursos faltantes, contrato) para material crudo y motion",
+      "user_stories": [
+        "US-023-101",
+        "US-023-102"
+      ],
+      "estimation_hours": 5,
+      "story_points": 8,
+      "depends_on": [
+        "TASK-001",
+        "TASK-002"
+      ],
+      "status": "pending",
+      "files": [
+        "apps/render-api/src/review/review-rules.ts",
+        "apps/render-api/src/review/collect-review-inputs.ts"
+      ]
+    },
+    {
+      "id": "TASK-004",
+      "title": "render-api: job review (cola, progreso, reintento), out/<render>.review.json, disparo automático al terminar render y motion, GET de la revisión y bloqueo de publicación con críticos salvo override explícito",
+      "user_stories": [
+        "US-023-101",
+        "US-023-103"
+      ],
+      "estimation_hours": 4,
+      "story_points": 5,
+      "depends_on": [
+        "TASK-003"
+      ],
+      "status": "pending",
+      "files": [
+        "apps/render-api/src/jobs/run-review-pipeline.ts",
+        "apps/render-api/src/jobs/review-job-params.ts",
+        "apps/render-api/src/youtube/publish-preconditions.ts"
+      ]
+    },
+    {
+      "id": "TASK-005",
+      "title": "web y productor: panel Revisión en las entregas del proyecto (estado, hallazgos por severidad con tramo y arreglo), aviso y override en el diálogo de publicación, y tool get_render_review para el productor",
+      "user_stories": [
+        "US-023-103",
+        "US-023-104"
+      ],
+      "estimation_hours": 4,
+      "story_points": 5,
+      "depends_on": [
+        "TASK-004"
+      ],
+      "status": "pending",
+      "files": [
+        "apps/web/src/components/render-review-panel.tsx",
+        "libs/producer-tools/src/tools/get-render-review.ts"
+      ]
+    },
+    {
+      "id": "TASK-006",
+      "title": "Verificación: revisar los renders reales de la tanda Display Ads (aprobados deben pasar sin críticos) y el backup motion con la música alta (debe dar crítico de margen voz/música)",
+      "user_stories": [
+        "US-023-101",
+        "US-023-102",
+        "US-023-103",
+        "US-023-104"
+      ],
+      "estimation_hours": 2,
+      "story_points": 3,
+      "depends_on": [
+        "TASK-005"
+      ],
+      "status": "pending",
+      "files": [
+        "sdd/specs/spec-e-burgos-023-production-quality/cycles/cycle-01/artifacts/verification.md"
+      ]
+    }
+  ]
+}
