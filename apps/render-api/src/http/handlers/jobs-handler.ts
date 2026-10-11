@@ -24,10 +24,12 @@ import { parsePhotoArollJobInput } from '../../jobs/photo-aroll-job-params';
 import { parseStoryboardInput, parseStoryboardOverwrite } from '../../jobs/storyboard-job-params';
 import { parseVoiceJobInput } from '../../jobs/voice-job-params';
 import { parsePublishJobInput } from '../../jobs/publish-job-params';
+import { parseReviewJobInput } from '../../jobs/review-job-params';
 import { createProjectBrandResolver } from '../../brands/project-brand-resolver';
 import {
   assertPublishableThumbnail,
   assertPublishableVideo,
+  assertRenderReviewAllowsPublish,
   assertYoutubeReady,
   publishLanguageFromVoice,
 } from '../../youtube/publish-preconditions';
@@ -44,6 +46,7 @@ import { storyboardExists } from '../../storyboard/storyboard-store';
 import type {
   CreateJobInput,
   CreatePublishJobInput,
+  CreateReviewJobInput,
   Job,
   JobKind,
   MotionPhase,
@@ -99,7 +102,8 @@ function resolveJobKind(value: unknown): JobKind | 'invalid' {
     raw === 'voice' ||
     raw === 'photo-aroll' ||
     raw === 'motion' ||
-    raw === 'publish'
+    raw === 'publish' ||
+    raw === 'review'
   ) {
     return raw;
   }
@@ -299,6 +303,29 @@ async function resolvePublishLanguage(
   }
 }
 
+type ReviewParams = Omit<CreateReviewJobInput, 'kind' | 'slug' | 'projectRoot'>;
+
+async function createReviewJobResponse(
+  deps: RenderApiDependencies,
+  project: MediaProject,
+  runtime: RenderApiRuntime,
+  slug: string,
+  params: ReviewParams,
+  retryOf: string | null,
+): Promise<HttpResponse> {
+  const stat = await deps.storage.stat(toAbsolutePath(project, params.file));
+  if (stat === null || stat.kind !== 'file') {
+    throw new PipelineStageError({
+      code: 'REVIEW_FILE_INVALID',
+      stage: null,
+      resource: params.file,
+      expected: 'an existing .mp4 under out/',
+    });
+  }
+  const job = registerJob(runtime, { kind: 'review', slug, projectRoot: project.root, ...params }, retryOf);
+  return jobAcceptedResponse(job);
+}
+
 async function createPublishJobResponse(
   deps: RenderApiDependencies,
   project: MediaProject,
@@ -308,6 +335,7 @@ async function createPublishJobResponse(
   retryOf: string | null,
 ): Promise<HttpResponse> {
   await assertPublishableVideo(deps.storage, project, params.file);
+  await assertRenderReviewAllowsPublish(deps.storage, project, params.file, params.ignoreReview);
   if (params.thumbnail !== null) {
     await assertPublishableThumbnail(deps.storage, project, params.thumbnail);
   }
@@ -349,7 +377,7 @@ export async function handleCreateRenderJob(
     throw new PipelineStageError({
       code: 'JOB_KIND_INVALID',
       stage: null,
-      expected: "'render', 'montage', 'storyboard', 'voice', 'photo-aroll', 'motion' or 'publish'",
+      expected: "'render', 'montage', 'storyboard', 'voice', 'photo-aroll', 'motion', 'publish' or 'review'",
     });
   }
 
@@ -424,6 +452,10 @@ export async function handleCreateRenderJob(
       { ...rest, defaultLanguage: await resolvePublishLanguage(deps, store, slug, defaultLanguage) },
       null,
     );
+  }
+
+  if (jobKind === 'review') {
+    return createReviewJobResponse(deps, project, runtime, slug, parseReviewJobInput(bodyObject), null);
   }
 
   if (jobKind === 'photo-aroll') {
@@ -568,5 +600,7 @@ export async function handleRetryRenderJob(
       return createMotionJobResponse(deps, project, runtime, job.slug, retryParams, true, jobId);
     case 'publish':
       return createPublishJobResponse(deps, project, runtime, job.slug, retryParams, jobId);
+    case 'review':
+      return createReviewJobResponse(deps, project, runtime, job.slug, retryParams, jobId);
   }
 }

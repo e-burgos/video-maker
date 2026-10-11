@@ -1,20 +1,15 @@
 import { musicNormalizationGainDb } from '@video-maker/timeline-core';
 import type { AudioClip, GainKeyframe, Timeline } from '@video-maker/timeline-core';
 
+import { meanPowerDb, sampleTimes } from './gain-statistics';
 import type { LevelPlan, SourceSlice } from './level-plan';
 import type { SecondsRange } from './review-inputs';
 
-const GAIN_SAMPLES_PER_SEGMENT = 8;
-const SILENT_VOLUME_FLOOR = 1e-6;
 const MIN_DUCKED_SEGMENT_SEC = 0.5;
 
 type MediaLocal = typeof import('@video-maker/media-local');
 
 export type ResolveAssetPath = (assetId: string) => string | null;
-
-function volumeToDb(volume: number): number {
-  return 20 * Math.log10(Math.max(volume, SILENT_VOLUME_FLOOR));
-}
 
 function framesToSec(frames: number, fps: number): number {
   return frames / fps;
@@ -52,14 +47,10 @@ export function duckedSegments(timeline: Timeline): SecondsRange[] {
     .filter((segment) => segment.endSec - segment.startSec >= MIN_DUCKED_SEGMENT_SEC);
 }
 
-function peakAutomationGainDb(media: MediaLocal, timeline: Timeline, segment: SecondsRange): number {
+function effectiveAutomationGainDb(media: MediaLocal, timeline: Timeline, segment: SecondsRange): number {
   const { buildGainAutomationCurve, evaluateGainAutomationCurve } = media;
   const curve = buildGainAutomationCurve(timeline.audioMix.automation, timeline.format.fps);
-  const step = (segment.endSec - segment.startSec) / GAIN_SAMPLES_PER_SEGMENT;
-  const volumes = Array.from({ length: GAIN_SAMPLES_PER_SEGMENT + 1 }, (_, index) =>
-    evaluateGainAutomationCurve(curve, segment.startSec + step * index),
-  );
-  return volumeToDb(Math.max(...volumes));
+  return meanPowerDb(sampleTimes(segment.startSec, segment.endSec).map((second) => evaluateGainAutomationCurve(curve, second)));
 }
 
 function clipContaining(clips: readonly AudioClip[], second: number, fps: number): AudioClip | null {
@@ -97,7 +88,7 @@ function musicGainDb(media: MediaLocal, timeline: Timeline, clip: AudioClip | nu
   const measuredLufs = timeline.assets.find((asset) => asset.id === clip.assetId)?.audio?.integratedLufs;
   const normalizationDb = musicNormalizationGainDb(measuredLufs, timeline.audioMix.music.referenceLufs);
   const mixDb =
-    timeline.audioMix.automation.length > 0 ? peakAutomationGainDb(media, timeline, segment) : clip.gainDb;
+    timeline.audioMix.automation.length > 0 ? effectiveAutomationGainDb(media, timeline, segment) : clip.gainDb;
   return normalizationDb + mixDb;
 }
 

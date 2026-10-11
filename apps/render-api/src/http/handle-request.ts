@@ -104,6 +104,7 @@ import {
   handleGetYoutubePublishOptions,
   handleListPublications,
 } from './handlers/youtube-publish-handler';
+import { handleGetRenderReviews } from './handlers/reviews-handler';
 import { handleHealth } from './health-handler';
 import { JSON_CONTENT_TYPE } from './http-message';
 import type { HttpRequestLine, HttpResponse } from './http-message';
@@ -381,6 +382,8 @@ async function dispatchRoute(
         return await handleDraftYoutubeMetadata(deps, store, params, request);
       case 'projects.publications.list':
         return await handleListPublications(deps, store, params);
+      case 'projects.reviews.get':
+        return await handleGetRenderReviews(deps, store, params, request);
       case 'projects.jobs.create':
         return await handleCreateRenderJob(deps, store, params, request, runtime);
       case 'projects.jobs.list':

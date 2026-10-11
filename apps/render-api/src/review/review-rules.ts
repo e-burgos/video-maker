@@ -8,21 +8,26 @@ import { blackFrameFindings, frozenFrameFindings } from './picture-rules';
 import type { FindingDraft } from './review-finding-builder';
 import { formatSeconds, lengthSec, numbered } from './review-finding-builder';
 import type { ReviewInputs, SecondsRange } from './review-inputs';
+import { FOOTAGE_DURATION_TOLERANCE_FRAMES, MOTION_DURATION_TOLERANCE_FRAMES } from './review-thresholds';
 import { voiceMusicMarginFindings, voiceMusicMargins, worstMarginDb } from './voice-music-margin-rule';
 
 function totalSeconds(ranges: readonly SecondsRange[]): number {
   return ranges.reduce((sum, range) => sum + lengthSec(range), 0);
 }
 
+function durationToleranceFrames(inputs: ReviewInputs): number {
+  return inputs.mode === 'motion' ? MOTION_DURATION_TOLERANCE_FRAMES : FOOTAGE_DURATION_TOLERANCE_FRAMES;
+}
+
 function durationFindings(inputs: ReviewInputs): FindingDraft[] {
   const differenceSec = inputs.actualDurationSec - inputs.expectedDurationSec;
-  if (Math.abs(differenceSec) <= 1 / inputs.fps + 1e-6) {
+  if (Math.abs(differenceSec) <= durationToleranceFrames(inputs) / inputs.fps + 1e-6) {
     return [];
   }
   return [{
     check: 'duration',
     severity: 'critical',
-    message: `El render dura ${formatSeconds(inputs.actualDurationSec)} y debería durar ${formatSeconds(inputs.expectedDurationSec)} (diferencia ${formatSeconds(Math.abs(differenceSec))}, más de un cuadro).`,
+    message: `El render dura ${formatSeconds(inputs.actualDurationSec)} y debería durar ${formatSeconds(inputs.expectedDurationSec)} (diferencia ${formatSeconds(Math.abs(differenceSec))}, más de ${String(durationToleranceFrames(inputs))} cuadro(s)).`,
     proposedFix: 'Volver a renderizar el video: el archivo parece cortado o desfasado respecto de la Timeline.',
   }];
 }

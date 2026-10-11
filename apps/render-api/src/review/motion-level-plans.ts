@@ -1,11 +1,10 @@
 import { MOTION_MUSIC_TRACK_VOLUME } from '@video-maker/motion-graphics';
 import { z } from 'zod';
 
+import { meanPowerDb, sampleTimes } from './gain-statistics';
 import type { LevelPlan } from './level-plan';
 import type { SecondsRange } from './review-inputs';
 
-const GAIN_SAMPLES_PER_SEGMENT = 8;
-const SILENT_VOLUME_FLOOR = 1e-6;
 export const MOTION_AUDIO_DIRECTORY = 'assets/audio';
 export const MOTION_MUSIC_FILE = `${MOTION_AUDIO_DIRECTORY}/music.wav`;
 
@@ -42,13 +41,12 @@ function volumeAt(points: readonly AutomationPoint[], second: number): number {
   return previous.v + ((next.v - previous.v) * (second - previous.t)) / (next.t - previous.t);
 }
 
-export function peakMotionMusicGainDb(timeline: MotionReviewTimeline, segment: SecondsRange): number {
+export function effectiveMotionMusicGainDb(timeline: MotionReviewTimeline, segment: SecondsRange): number {
   const points = timeline.musicAutomation.lanes.find((lane) => lane.target === 'volume')?.points ?? [];
-  const step = (segment.endSec - segment.startSec) / GAIN_SAMPLES_PER_SEGMENT;
-  const peak = Math.max(
-    ...Array.from({ length: GAIN_SAMPLES_PER_SEGMENT + 1 }, (_, index) => volumeAt(points, segment.startSec + step * index)),
+  const volumes = sampleTimes(segment.startSec, segment.endSec).map(
+    (second) => MOTION_MUSIC_TRACK_VOLUME * volumeAt(points, second),
   );
-  return 20 * Math.log10(Math.max(MOTION_MUSIC_TRACK_VOLUME * peak, SILENT_VOLUME_FLOOR));
+  return meanPowerDb(volumes);
 }
 
 export function buildMotionLevelPlans(
@@ -63,7 +61,7 @@ export function buildMotionLevelPlans(
       voice: { path: `${workDirectory}/${motionVoiceFile(scene.id)}`, startSec: 0, endSec: scene.voDuration },
       voiceNormalization: null,
       music: hasMusic ? { path: `${workDirectory}/${MOTION_MUSIC_FILE}`, ...segment } : null,
-      musicGainDb: peakMotionMusicGainDb(timeline, segment),
+      musicGainDb: effectiveMotionMusicGainDb(timeline, segment),
     };
   });
 }

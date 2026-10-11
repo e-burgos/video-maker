@@ -49,11 +49,18 @@ import type {
   PublishPrivacy,
   RenderJobProgress,
   RenderJobState,
+  ReviewJobProgress,
+  ReviewJobReport,
   StoryboardJobProgress,
   StoryboardJobReport,
   VoiceJobProgress,
   VoiceJobReport,
 } from './render-job';
+import { completeReviewJobProgress, startReviewJobStage } from './review-job-progress';
+import { isReviewPipelineCanceled } from './review-pipeline-observer';
+import type { ReviewPipelineObserver } from './review-pipeline-observer';
+import { runReviewPipeline } from './run-review-pipeline';
+import type { ReviewPipelineOptions } from './run-review-pipeline';
 import { runMontagePipeline } from './run-montage-pipeline';
 import { completePublishJobProgress, mergePublishUploadProgress, startPublishJobStage } from './publish-job-progress';
 import { isPublishPipelineCanceled } from './publish-pipeline-observer';
@@ -194,8 +201,16 @@ interface PublishJobRecord extends JobRecordBase {
   readonly categoryId: string;
   readonly madeForKids: boolean;
   readonly defaultLanguage: string;
+  readonly ignoreReview: boolean;
   progress: PublishJobProgress | null;
   report: PublishJobReport | null;
+}
+
+interface ReviewJobRecord extends JobRecordBase {
+  readonly kind: 'review';
+  readonly file: string;
+  progress: ReviewJobProgress | null;
+  report: ReviewJobReport | null;
 }
 
 type JobRecord =
@@ -205,13 +220,15 @@ type JobRecord =
   | VoiceJobRecord
   | PhotoArollJobRecord
   | MotionJobRecord
-  | PublishJobRecord;
+  | PublishJobRecord
+  | ReviewJobRecord;
 
 export function createRenderJobQueue(
   deps: RenderApiDependencies,
   resolveProjectBrand: ProjectBrandResolver = async () => null,
   youtube: YoutubeClient = createYoutubeServices(deps).client,
   publishOptions: Omit<PublishPipelineOptions, 'youtube'> = {},
+  reviewOptions: ReviewPipelineOptions = {},
 ): RenderJobQueue {
   const jobsStore = deps.localStore.jobs;
   const records = new Map<string, JobRecord>();
@@ -522,6 +539,64 @@ export function createRenderJobQueue(
     settle(record, report, failure);
   }
 
+  async function runReviewJob(record: ReviewJobRecord): Promise<void> {
+    const observer: ReviewPipelineObserver = {
+      stageStarted: (stage) => {
+        record.progress = startReviewJobStage(record.progress, stage);
+        persistProgress(record, false);
+      },
+      cancellationRequested: () => record.state === 'canceling',
+    };
+
+    let report: ReviewJobReport | null = null;
+    let failure: RenderApiErrorPayload | null = null;
+
+    try {
+      report = await runReviewPipeline(
+        {
+          project: resolveMediaProject(record.projectRoot),
+          file: record.file,
+          mode: deps.localStore.projects.get(record.slug)?.mode === 'motion' ? 'motion' : 'footage',
+        },
+        deps,
+        observer,
+        reviewOptions,
+      );
+    } catch (cause) {
+      failure = isReviewPipelineCanceled(cause) ? null : toErrorPayload(cause);
+    }
+
+    if (report !== null) {
+      record.progress = completeReviewJobProgress(record.progress);
+    }
+    settle(record, report, failure);
+  }
+
+  function reviewableFile(record: JobRecord): string | null {
+    if (record.state !== 'succeeded') {
+      return null;
+    }
+    if (record.kind === 'render') {
+      return record.report?.deliverable.resource ?? null;
+    }
+    return record.kind === 'motion' ? (record.report?.path ?? null) : null;
+  }
+
+  function enqueueReviewFor(record: JobRecord): void {
+    const file = reviewableFile(record);
+    if (file === null) {
+      return;
+    }
+    try {
+      registerJob({ kind: 'review', slug: record.slug, projectRoot: record.projectRoot, file }, null);
+    } catch (cause) {
+      deps.logger.error({
+        event: 'review-job-enqueue-failed',
+        detail: { level: 'warning', jobId: record.id, slug: record.slug, file, reason: cause instanceof Error ? cause.message : String(cause) },
+      });
+    }
+  }
+
   async function runJob(record: JobRecord): Promise<void> {
     switch (record.kind) {
       case 'render':
@@ -545,8 +620,12 @@ export function createRenderJobQueue(
       case 'publish':
         await runPublishJob(record);
         break;
+      case 'review':
+        await runReviewJob(record);
+        break;
     }
 
+    enqueueReviewFor(record);
     activeId = null;
     dispatchNext();
   }
@@ -665,9 +744,12 @@ export function createRenderJobQueue(
           categoryId: input.categoryId,
           madeForKids: input.madeForKids,
           defaultLanguage: input.defaultLanguage,
+          ignoreReview: input.ignoreReview,
           progress: null,
           report: null,
         };
+      case 'review':
+        return { ...base, kind: 'review', file: input.file, progress: null, report: null };
     }
   }
 
@@ -687,9 +769,6 @@ export function createRenderJobQueue(
 
     const record = createJobRecord(base, input, retryOf);
 
-    records.set(id, record);
-    pending.push(id);
-
     jobsStore.insert({
       id,
       slug: input.slug,
@@ -699,6 +778,9 @@ export function createRenderJobQueue(
       createdAt,
       retryOf,
     });
+
+    records.set(id, record);
+    pending.push(id);
 
     dispatchNext();
 

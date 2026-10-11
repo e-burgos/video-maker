@@ -33,10 +33,21 @@ function collectFacts(request: ReviewRequest, storage: ReviewStoragePort): Promi
     : collectFootageFacts(request.project, storage);
 }
 
+export function collectReviewFacts(request: ReviewRequest, storage: ReviewStoragePort): Promise<ReviewFacts> {
+  return collectFacts(request, storage);
+}
+
 export async function collectReviewInputs(request: ReviewRequest, ports: ReviewInputPorts): Promise<ReviewInputs> {
+  return measureReviewInputs(request, await collectFacts(request, ports.storage), ports);
+}
+
+export async function measureReviewInputs(
+  request: ReviewRequest,
+  facts: ReviewFacts,
+  ports: ReviewInputPorts,
+): Promise<ReviewInputs> {
   const { measurements } = ports;
   const renderPath = toAbsolutePath(request.project, request.file);
-  const facts = await collectFacts(request, ports.storage);
   const actualDurationSec = await measurements.probeDurationSec(renderPath);
 
   return {

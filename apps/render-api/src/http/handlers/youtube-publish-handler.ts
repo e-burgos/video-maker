@@ -1,3 +1,4 @@
+import type { ReviewStatus } from '@video-maker/timeline-core';
 import { toAbsolutePath } from '@video-maker/auto-montage';
 import type { MediaProject } from '@video-maker/auto-montage';
 import { join } from 'node:path/posix';
@@ -8,6 +9,7 @@ import type { RenderApiDependencies } from '../../deps/render-api-dependencies';
 import { PipelineStageError } from '../../errors/pipeline-stage-error';
 import { parsePublishFile } from '../../jobs/publish-job-params';
 import { assertValidProjectSlug, resolveExistingProject } from '../../store/project-scope';
+import { readReview } from '../../review/review-store';
 import { readCreditsText } from '../../youtube/publish-credits';
 import { assertPublishableVideo } from '../../youtube/publish-preconditions';
 import { draftYoutubeMetadata, isShortVideo } from '../../youtube/draft-youtube-metadata';
@@ -24,6 +26,7 @@ interface PublishFileOption {
   readonly height: number;
   readonly isShort: boolean;
   readonly sizeBytes: number;
+  readonly reviewStatus: ReviewStatus | null;
 }
 
 interface PublishPlaylistOption {
@@ -101,6 +104,7 @@ async function listPublishFiles(deps: RenderApiDependencies, project: MediaProje
       height: probed.height,
       isShort: isShortVideo(probed.width, probed.height, probed.durationSec),
       sizeBytes: stat.sizeBytes,
+      reviewStatus: (await readReview(deps.storage, project, path))?.report.status ?? null,
       modifiedAtMs: stat.modifiedAtMs,
     });
   }
@@ -114,6 +118,7 @@ async function listPublishFiles(deps: RenderApiDependencies, project: MediaProje
       height: file.height,
       isShort: file.isShort,
       sizeBytes: file.sizeBytes,
+      reviewStatus: file.reviewStatus,
     }));
 }
 

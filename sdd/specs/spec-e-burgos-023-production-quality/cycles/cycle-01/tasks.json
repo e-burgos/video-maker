@@ -133,12 +133,37 @@
       "depends_on": [
         "TASK-003"
       ],
-      "status": "pending",
+      "status": "done",
       "files": [
         "apps/render-api/src/jobs/run-review-pipeline.ts",
         "apps/render-api/src/jobs/review-job-params.ts",
-        "apps/render-api/src/youtube/publish-preconditions.ts"
-      ]
+        "apps/render-api/src/jobs/review-job-progress.ts",
+        "apps/render-api/src/jobs/review-pipeline-observer.ts",
+        "apps/render-api/src/jobs/render-job-queue.ts",
+        "apps/render-api/src/jobs/render-job.ts",
+        "apps/render-api/src/jobs/job-persistence.ts",
+        "apps/render-api/src/jobs/publish-job-params.ts",
+        "apps/render-api/src/review/review-store.ts",
+        "apps/render-api/src/http/handlers/reviews-handler.ts",
+        "apps/render-api/src/http/handlers/jobs-handler.ts",
+        "apps/render-api/src/http/handlers/youtube-publish-handler.ts",
+        "apps/render-api/src/http/routes.ts",
+        "apps/render-api/src/youtube/publish-preconditions.ts",
+        "apps/render-api/src/errors/render-api-error.ts",
+        "apps/web/src/api/error-explanations.ts",
+        "apps/web/src/i18n/messages-es.ts",
+        "apps/web/src/i18n/messages-en.ts"
+      ],
+      "usage": {
+        "provider_model": "claude/sonnet",
+        "effort": "medium",
+        "agent": "implementor-back",
+        "tokens_in": 260000,
+        "tokens_out": 45000,
+        "approx": true,
+        "source": "declared-estimate",
+        "recorded_at": "2026-10-11"
+      }
     },
     {
       "id": "TASK-005",

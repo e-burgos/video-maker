@@ -108,6 +108,16 @@ describe('duration', () => {
   });
 });
 
+describe('duration tolerance by mode', () => {
+  it('tolerates two frames in motion and not in footage', () => {
+    const twoFramesLong = { actualDurationSec: 30.06 };
+
+    expect(findingsOf(reviewRender(motionReviewInputs(twoFramesLong)), 'duration')).toEqual([]);
+    expect(findingsOf(reviewRender(footageReviewInputs({ ...twoFramesLong, actualDurationSec: 60.06 })), 'duration')).toHaveLength(1);
+    expect(findingsOf(reviewRender(motionReviewInputs({ actualDurationSec: 30.1 })), 'duration')).toHaveLength(1);
+  });
+});
+
 describe('black-frames', () => {
   it('ignores black inside the bumpers', () => {
     const report = reviewRender(footageReviewInputs({ blackSegments: [{ startSec: 0, endSec: 1.5 }] }));

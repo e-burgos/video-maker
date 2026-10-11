@@ -410,7 +410,7 @@ function isRenderJobSummary(value: unknown): value is RenderJobSummary {
       isMontageStage(value['stage']) ||
       isStoryboardStage(value['stage']) ||
       isVoiceStage(value['stage']) ||
-      (value['kind'] === 'publish' && typeof value['stage'] === 'string') ||
+      ((value['kind'] === 'publish' || value['kind'] === 'review') && typeof value['stage'] === 'string') ||
       (MOTION_STAGES as readonly string[]).includes(value['stage'] as string)) &&
     isStringOrNull(value['errorCode']) &&
     typeof value['createdAt'] === 'string' &&

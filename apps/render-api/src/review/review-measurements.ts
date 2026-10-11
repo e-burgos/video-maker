@@ -25,6 +25,28 @@ const MILLISECONDS_PER_SECOND = 1000;
 
 const loadMediaLocal = (): Promise<typeof import('@video-maker/media-local')> => import('@video-maker/media-local');
 
+const VIDEO_STREAM_DURATION_ARGS = [
+  '-v',
+  'error',
+  '-select_streams',
+  'v:0',
+  '-show_entries',
+  'stream=duration',
+  '-of',
+  'csv=p=0',
+] as const;
+
+async function probeVideoStreamDurationSec(path: string, runner: CommandRunner, ffprobePath: string): Promise<number> {
+  const args = [...VIDEO_STREAM_DURATION_ARGS, path];
+  const result = await runner.run(ffprobePath, args);
+  const seconds = Number(result.stdout.trim());
+  if (result.exitCode === 0 && Number.isFinite(seconds) && seconds > 0) {
+    return seconds;
+  }
+  const { probeMedia } = await loadMediaLocal();
+  return (await probeMedia(path, runner, { ffprobePath })).durationMs / MILLISECONDS_PER_SECOND;
+}
+
 export function createFfmpegReviewMeasurements(
   runner: CommandRunner,
   binaries: FfmpegReviewBinaries,
@@ -36,11 +58,7 @@ export function createFfmpegReviewMeasurements(
       const measured = await measureLoudness(path, runner, { target: DEFAULT_VOICE_TARGET, ffmpegPath });
       return { integratedLufs: measured.integratedLufs, truePeakDbtp: measured.truePeakDbtp };
     },
-    probeDurationSec: async (path) => {
-      const { probeMedia } = await loadMediaLocal();
-      const probed = await probeMedia(path, runner, { ffprobePath });
-      return probed.durationMs / MILLISECONDS_PER_SECOND;
-    },
+    probeDurationSec: (path) => probeVideoStreamDurationSec(path, runner, ffprobePath),
     detectBlack: async (path, minDurationSec) => {
       const { detectBlackSegments } = await loadMediaLocal();
       return detectBlackSegments(path, runner, { minDurationSec, ffmpegPath });

@@ -278,7 +278,7 @@ export const RENDER_PIPELINE_STAGES = ['prepare', 'render', 'mix', 'mux', 'verif
 
 export type RenderPipelineStage = (typeof RENDER_PIPELINE_STAGES)[number];
 
-export const JOB_KINDS = ['render', 'montage', 'storyboard', 'voice', 'motion', 'publish'] as const;
+export const JOB_KINDS = ['render', 'montage', 'storyboard', 'voice', 'motion', 'publish', 'review'] as const;
 
 export type JobKind = (typeof JOB_KINDS)[number];
 

@@ -4,6 +4,7 @@ import type { MediaProject } from '@video-maker/auto-montage';
 import type { ObjectStorage } from '../deps/object-storage';
 import { PipelineStageError } from '../errors/pipeline-stage-error';
 import { PUBLISH_THUMBNAIL_MAX_BYTES } from '../jobs/publish-job-params';
+import { readReview } from '../review/review-store';
 import { resolveProducerPath } from '../store/producer-writable-paths';
 import type { YoutubeOAuth } from './youtube-oauth';
 import { YOUTUBE_DEFAULT_LANGUAGE } from './youtube-constants';
@@ -59,4 +60,26 @@ export async function assertYoutubeReady(oauth: YoutubeOAuth): Promise<void> {
 export function publishLanguageFromVoice(voiceId: string | null): string {
   const language = voiceId?.split(/[_-]/u)[0] ?? '';
   return /^[a-z]{2,3}$/u.test(language) ? language : YOUTUBE_DEFAULT_LANGUAGE;
+}
+
+export async function assertRenderReviewAllowsPublish(
+  storage: ObjectStorage,
+  project: MediaProject,
+  file: string,
+  ignoreReview: boolean,
+): Promise<void> {
+  if (ignoreReview) {
+    return;
+  }
+  const review = await readReview(storage, project, file);
+  if (review === null || review.report.status !== 'fail') {
+    return;
+  }
+  const criticals = review.report.findings.filter((finding) => finding.severity === 'critical');
+  throw new PipelineStageError({
+    code: 'RENDER_REVIEW_FAILED',
+    stage: null,
+    resource: file,
+    hint: `${String(criticals.length)} critical finding(s): ${criticals.map((finding) => finding.message).join(' | ')}`,
+  });
 }
