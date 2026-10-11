@@ -24,11 +24,25 @@
       "estimation_hours": 4,
       "story_points": 8,
       "depends_on": [],
-      "status": "pending",
+      "status": "done",
       "files": [
         "libs/motion-graphics/src/storyboard/motion-storyboard.schema.ts",
-        "libs/motion-graphics/src/scenes/render-scene.ts"
-      ]
+        "libs/motion-graphics/src/scenes/ui-walkthrough-html.ts",
+        "libs/motion-graphics/src/scenes/render-scene.ts",
+        "libs/motion-graphics/src/scenes/render-scene.spec.ts",
+        "libs/motion-graphics/src/storyboard/parse-motion-storyboard.spec.ts",
+        "libs/motion-graphics/src/__fixtures__/catalog-storyboard.ts"
+      ],
+      "usage": {
+        "tokens_in": 60000,
+        "tokens_out": 14000,
+        "provider_model": "claude/sonnet",
+        "effort": "medium",
+        "agent": "implementor-front",
+        "approx": true,
+        "source": "declared-estimate",
+        "recorded_at": "2026-10-11"
+      }
     },
     {
       "id": "TASK-002",
@@ -41,11 +55,21 @@
       "depends_on": [
         "TASK-001"
       ],
-      "status": "pending",
+      "status": "done",
       "files": [
         "libs/motion-graphics/assets/runtime/motion-runtime.js",
         "libs/motion-graphics/assets/runtime/scenes.css"
-      ]
+      ],
+      "usage": {
+        "tokens_in": 60000,
+        "tokens_out": 14000,
+        "provider_model": "claude/sonnet",
+        "effort": "medium",
+        "agent": "implementor-front",
+        "approx": true,
+        "source": "declared-estimate",
+        "recorded_at": "2026-10-11"
+      }
     },
     {
       "id": "TASK-003",
@@ -58,10 +82,24 @@
       "depends_on": [
         "TASK-001"
       ],
-      "status": "pending",
+      "status": "done",
       "files": [
-        "libs/motion-graphics/src/auto/scene-guide.ts"
-      ]
+        "libs/motion-graphics/src/auto/scene-guide.ts",
+        "libs/motion-graphics/src/auto/build-auto-storyboard-request.ts",
+        "libs/motion-graphics/src/auto/build-auto-storyboard-request.spec.ts",
+        "libs/motion-graphics/src/auto/check-storyboard-against-brief.spec.ts",
+        "sdd/skills/motion-studio/SKILL.md"
+      ],
+      "usage": {
+        "tokens_in": 60000,
+        "tokens_out": 14000,
+        "provider_model": "claude/sonnet",
+        "effort": "medium",
+        "agent": "implementor-front",
+        "approx": true,
+        "source": "declared-estimate",
+        "recorded_at": "2026-10-11"
+      }
     },
     {
       "id": "TASK-004",
@@ -76,10 +114,20 @@
         "TASK-002",
         "TASK-003"
       ],
-      "status": "pending",
+      "status": "done",
       "files": [
         "sdd/specs/spec-e-burgos-023-production-quality/cycles/cycle-02/artifacts/verification.md"
-      ]
+      ],
+      "usage": {
+        "tokens_in": 60000,
+        "tokens_out": 14000,
+        "provider_model": "claude/sonnet",
+        "effort": "medium",
+        "agent": "implementor-front",
+        "approx": true,
+        "source": "declared-estimate",
+        "recorded_at": "2026-10-11"
+      }
     }
   ]
 }
