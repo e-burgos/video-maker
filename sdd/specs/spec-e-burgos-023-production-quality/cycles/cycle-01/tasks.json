@@ -25,12 +25,25 @@
       "estimation_hours": 3,
       "story_points": 5,
       "depends_on": [],
-      "status": "pending",
+      "status": "done",
       "files": [
         "libs/media-local/src/ffmpeg/measure-segment-loudness.ts",
         "libs/media-local/src/ffmpeg/detect-video-defects.ts",
+        "libs/media-local/src/ffmpeg/detect-silence-segments.ts",
+        "libs/media-local/src/ffmpeg/run-ffmpeg-for-stderr.ts",
+        "libs/media-local/src/ffmpeg/time-segment.ts",
         "libs/media-local/src/index.ts"
-      ]
+      ],
+      "usage": {
+        "provider_model": "claude/sonnet",
+        "effort": "medium",
+        "agent": "implementor-back",
+        "tokens_in": 60000,
+        "tokens_out": 12000,
+        "approx": true,
+        "source": "declared-estimate",
+        "recorded_at": "2026-10-11"
+      }
     },
     {
       "id": "TASK-002",

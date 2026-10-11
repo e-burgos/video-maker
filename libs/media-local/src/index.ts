@@ -208,3 +208,20 @@ export type {
   VoiceTarget,
   Word,
 } from '@video-maker/timeline-core';
+
+export { measureSegmentLoudness, parseEbur128IntegratedLufs, segmentLoudnessArgs } from './ffmpeg/measure-segment-loudness';
+export type { MeasureSegmentLoudnessOptions } from './ffmpeg/measure-segment-loudness';
+export {
+  blackDetectArgs,
+  DEFAULT_BLACK_PIXEL_THRESHOLD,
+  DEFAULT_FREEZE_NOISE_DB,
+  detectBlackSegments,
+  detectFrozenSegments,
+  freezeDetectArgs,
+  parseBlackDetect,
+  parseFreezeDetect,
+} from './ffmpeg/detect-video-defects';
+export type { DetectBlackSegmentsOptions, DetectFrozenSegmentsOptions } from './ffmpeg/detect-video-defects';
+export { detectSilences, parseSilenceSegments, silenceDetectArgs } from './ffmpeg/detect-silence-segments';
+export type { DetectSilencesOptions } from './ffmpeg/detect-silence-segments';
+export type { DetectedSegment, TimeSegment } from './ffmpeg/time-segment';
