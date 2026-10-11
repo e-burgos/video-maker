@@ -193,4 +193,55 @@ describe('renderScene', () => {
     expect(html('dd')).toContain('card bad');
     expect(html('dd')).toContain('card good');
   });
+
+  describe('ui-walkthrough', () => {
+    it('puts the capture in a browser frame with the url and a stepped overlay positioned by percentage', () => {
+      const out = html('walk');
+      expect(out).toContain('mg-ui-device browser');
+      expect(out).toContain('<span class="mg-ui-url">acme.test/grupos</span>');
+      expect(out).toContain('<img src="images/foto.jpg" alt="" />');
+      expect(out).toContain('class="mg-ui-type" style="left:30%;top:40%;width:40%;height:8%"');
+      expect(out).toContain('data-text="Sucursal Centro"');
+      expect(out).toContain('class="mg-ui-highlight" style="left:10%;top:60%;width:30%;height:10%"');
+      expect(out).toContain('class="mg-ui-anchor" style="left:90%;top:90%"');
+      expect(out).toContain('with-title');
+    });
+
+    it('anchors steps to their cue, then to seconds, then spreads the rest over the scene', () => {
+      const out = html('walk');
+      expect(out).toContain('data-ui-step="move" data-anim="ui-mark" data-parallel="1" data-slot="0" data-count="6"');
+      expect(out).toContain('data-ui-step="click" data-anim="ui-click" data-cue="grupo"');
+      expect(out).toContain('data-ui-step="highlight" data-anim="ui-highlight" data-at="6"');
+      expect(out).not.toMatch(/data-ui-step="click"[^>]*data-slot/u);
+    });
+
+    it('sends the cursor to the click, the field and the highlighted box but not to the zoom', () => {
+      const out = html('walk');
+      expect(out).toContain('data-ui-step="click" data-anim="ui-click" data-cue="grupo" data-parallel="1" data-px="0.8" data-py="0.1"');
+      expect(out).toContain('data-px="0.34" data-py="0.44" data-text="Sucursal Centro"');
+      expect(out).toContain('data-px="0.25" data-py="0.65"');
+      expect(out).toMatch(/data-ui-step="zoom"(?![^>]*data-px)/u);
+      expect(out).toContain('<svg class="mg-ui-cursor"');
+    });
+
+    it('zooms into the region with a capped scale, or twice around a bare point', () => {
+      const out = html('walk');
+      expect(out).toContain('data-scale="3" data-cx="0.625" data-cy="0.6"');
+      expect(html('walk-phone')).toContain('data-scale="2" data-cx="0.4" data-cy="0.6"');
+    });
+
+    it('places the callout bubble away from the edges of the capture', () => {
+      expect(html('walk')).toContain('mg-ui-bubble h-end v-above');
+      expect(html('walk-phone')).toContain('mg-ui-bubble h-mid v-below');
+    });
+
+    it('uses a phone bezel without a browser bar or title when asked', () => {
+      const out = html('walk-phone');
+      expect(out).toContain('mg-ui-device phone');
+      expect(out).not.toContain('mg-ui-bar');
+      expect(out).toContain('no-title');
+      expect(out).not.toContain('<h2');
+      expect(out).toContain('assets/brand/local');
+    });
+  });
 });

@@ -2,6 +2,7 @@ import { MotionStudioError } from '../errors/motion-studio-error';
 import type { MotionStoryboardScene, SceneOf } from '../storyboard/motion-storyboard.schema';
 import { animAttrs, chip, esc, headline, icon, promo, screenStates, toneClass, visual } from './scene-html';
 import type { SceneContext } from './scene-html';
+import { uiWalkthrough } from './ui-walkthrough-html';
 
 type Renderer<K extends MotionStoryboardScene['kind']> = (scene: SceneOf<K>, ctx: SceneContext) => string;
 
@@ -171,6 +172,8 @@ const connections: Renderer<'connections'> = ({ props }, ctx) => {
   return frame(`${headline(props.title, props.accent)}<div class="mg-conn"><svg class="mg-links" data-links="1">${paths}</svg><div class="dev${device.plate === true ? ' plate' : ''}" id="cx-dev"${animAttrs({ anim: 'left' })}><img src="${esc(deviceImg)}" alt="" /></div>${tv}<div class="peers">${peersHtml}</div></div>`);
 };
 
+const uiWalkthroughScene: Renderer<'ui-walkthrough'> = ({ props }, ctx) => frame(uiWalkthrough(props, ctx));
+
 const doDont: Renderer<'do-dont'> = ({ props }) => {
   const card = (side: 'bad' | 'good', c: typeof props.bad) =>
     `<div class="mg-glass card ${side}"${animAttrs({ anim: 'rise', cue: c.cue })}><span class="big">${icon(side === 'bad' ? 'alert' : 'check')}</span><h3>${esc(c.title)}</h3><div class="mg-chips col">${c.items.map((i) => `<span class="mg-chip ${side === 'bad' ? 'no' : 'ok'}">${icon(side === 'bad' ? 'x' : 'check')}${esc(i)}</span>`).join('')}</div></div>`;
@@ -199,6 +202,7 @@ const RENDERERS: { [K in MotionStoryboardScene['kind']]: Renderer<K> } = {
   gallery,
   step,
   connections,
+  'ui-walkthrough': uiWalkthroughScene,
   'do-dont': doDont,
   cta,
 };

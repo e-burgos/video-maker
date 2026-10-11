@@ -39,8 +39,52 @@ describe('parseMotionStoryboard', () => {
 
   it('exposes a json schema with the whole scene catalog for the AI', () => {
     const schema = JSON.stringify(motionStoryboardJsonSchema());
-    expect(SCENE_KINDS).toHaveLength(16);
+    expect(SCENE_KINDS).toHaveLength(17);
     for (const kind of SCENE_KINDS) expect(schema).toContain(`"${kind}"`);
+  });
+
+  describe('ui-walkthrough', () => {
+    const walkthrough = (steps: unknown[], props: Record<string, unknown> = {}) => ({
+      ...counter15,
+      scenes: [{ id: 'uno', kind: 'ui-walkthrough', vo: 'Tocá el botón', props: { image: 'images/captura.png', steps, ...props } }, counter15.scenes[1]],
+    });
+
+    it('accepts the six actions with defaults for the frame', () => {
+      const parsed = parseMotionStoryboard(
+        walkthrough([
+          { action: 'move', x: 0, y: 1 },
+          { action: 'click', x: 0.5, y: 0.5 },
+          { action: 'type', x: 0.1, y: 0.1, w: 0.5, h: 0.1, text: 'Hola' },
+          { action: 'highlight', x: 0.1, y: 0.1 },
+          { action: 'callout', x: 0.5, y: 0.5, text: 'Acá' },
+          { action: 'zoom', x: 0.5, y: 0.5, cue: 'tocá' },
+        ]),
+      );
+      expect(parsed.scenes[0]?.kind).toBe('ui-walkthrough');
+    });
+
+    it.each([
+      ['coordinates beyond 1', [{ action: 'click', x: 1.2, y: 0.5 }], /scenes\[0\]\.props\.steps\[0\]\.x/u],
+      ['negative coordinates', [{ action: 'move', x: 0.5, y: -0.1 }], /steps\[0\]\.y/u],
+      ['a zero size box', [{ action: 'highlight', x: 0.1, y: 0.1, w: 0, h: 0.1 }], /steps\[0\]\.w/u],
+      ['a box that leaves the capture on x', [{ action: 'highlight', x: 0.8, y: 0.1, w: 0.4, h: 0.1 }], /steps\[0\]\.w: box leaves the capture/u],
+      ['a box that leaves the capture on y', [{ action: 'zoom', x: 0.1, y: 0.9, w: 0.2, h: 0.2 }], /steps\[0\]\.h: box leaves the capture/u],
+      ['type without text', [{ action: 'type', x: 0.1, y: 0.1, w: 0.2, h: 0.1 }], /steps\[0\]\.text: text is required when action is "type"/u],
+      ['callout without text', [{ action: 'callout', x: 0.1, y: 0.1 }], /steps\[0\]\.text: text is required when action is "callout"/u],
+      ['a size on a click', [{ action: 'click', x: 0.1, y: 0.1, w: 0.1, h: 0.1 }], /steps\[0\]\.w: w and h only apply/u],
+      ['no steps', [], /steps/u],
+      ['nine steps', Array.from({ length: 9 }, () => ({ action: 'move', x: 0.5, y: 0.5 })), /steps/u],
+    ])('rejects %s naming scene and field', (_, steps, expected) => {
+      expect(() => parseMotionStoryboard(walkthrough(steps))).toThrow(expected);
+    });
+
+    it('rejects an unknown frame', () => {
+      expect(() => parseMotionStoryboard(walkthrough([{ action: 'move', x: 0.5, y: 0.5 }], { frame: 'tv' }))).toThrow(/props\.frame/u);
+    });
+
+    it('describes the coordinate convention to the AI', () => {
+      expect(JSON.stringify(motionStoryboardJsonSchema())).toContain('0 = left edge, 1 = right edge');
+    });
   });
 
   it('tells the AI that an accent follows the title instead of highlighting part of it', () => {
