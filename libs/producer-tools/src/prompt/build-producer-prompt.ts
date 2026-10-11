@@ -64,6 +64,8 @@ const TOOL_DESCRIPTIONS: Readonly<Record<StudioToolName, string>> = {
     'search Wikimedia Commons and the NASA Image and Video Library for freely licensed B-roll video or photos by query and get back candidates.',
   import_media: "bring a searched free media result into the project; its credit is recorded automatically.",
   view_images: 'look at up to 6 photos already in the project. Use this for photos, never extract_frames.',
+  get_render_review:
+    'read the automatic review of a finished render (status, master loudness, voice/music margin and the findings with their proposed fix); use it to propose fixes before publishing.',
   get_motion_brands: 'the brands a motion video can use (built-in and user-made, each with its `source`), with their formats and music tracks; a brand may have no music at all. Motion projects only.',
   read_motion_brief: 'read the motion brief saved for this project.',
   write_motion_brief:

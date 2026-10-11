@@ -336,6 +336,18 @@ export function createStudioToolHandlers(
       return { data: parseOutput(STUDIO_TOOLS.view_images.output, { previews }), images };
     },
 
+    get_render_review: async (rawInput) => {
+      const input = parseInput<{ file?: string }>(STUDIO_TOOLS.get_render_review.input, rawInput);
+      const review = await client.getRenderReview(input.file);
+      if (review === null) {
+        throw new StudioToolRuntimeError(
+          'FILE_NOT_FOUND',
+          'no render of this project has been reviewed yet; start_job {"kind":"render"} reviews its result automatically',
+        );
+      }
+      return withOutput('get_render_review', review);
+    },
+
     get_motion_brands: async (rawInput) => {
       parseInput(STUDIO_TOOLS.get_motion_brands.input, rawInput);
       const brands = await client.listMotionBrands();

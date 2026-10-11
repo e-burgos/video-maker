@@ -5,6 +5,7 @@ import {
   AudioMixPlanSchema,
   CaptionStyleSchema as TimelineCaptionStyleSchema,
   LogoOverlaySchema,
+  ReviewReportSchema,
   SafeZoneSchema,
   TimelineBumpersSchema,
   TimelineSchema,
@@ -454,6 +455,21 @@ const ViewImagesOutputSchema = z.strictObject({
   ),
 });
 
+const GetRenderReviewInputSchema = z.strictObject({
+  file: z
+    .string()
+    .regex(/^out\/[^/\\]+\.mp4$/u, 'file must be an .mp4 directly under out/, for example out/video.mp4')
+    .optional(),
+});
+
+const GetRenderReviewOutputSchema = ReviewReportSchema.pick({
+  file: true,
+  status: true,
+  createdAt: true,
+  metrics: true,
+  findings: true,
+});
+
 const GetMotionBrandsInputSchema = z.strictObject({});
 
 const GetMotionBrandsOutputSchema = z.strictObject({
@@ -646,6 +662,12 @@ export const STUDIO_TOOLS: Readonly<Record<StudioToolName, StudioToolDefinition>
       'Look at up to 6 photos already in the project and get them back as images. Use this to see a photo instead of extract_frames, which only works on video.',
     input: ViewImagesInputSchema,
     output: ViewImagesOutputSchema,
+  },
+  get_render_review: {
+    description:
+      'Read the automatic review of a finished render: its status (pass, warn, fail), the key metrics (master LUFS and true peak, voice/music margin) and the findings by severity (critical, suggestion, nitpick), each with its time range and the proposed fix. Without `file` it returns the most recent review; with `file` (for example out/video.mp4) that render\'s. Fails with FILE_NOT_FOUND when the render was never reviewed.',
+    input: GetRenderReviewInputSchema,
+    output: GetRenderReviewOutputSchema,
   },
   get_motion_brands: {
     description:

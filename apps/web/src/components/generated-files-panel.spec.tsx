@@ -49,6 +49,7 @@ function renderPanel(options: {
   scriptMode?: boolean;
 }) {
   const client = {
+    getRenderReview: vi.fn().mockResolvedValue(null),
     listGenerated: options.failGenerated === true
       ? vi.fn().mockRejectedValue(
           new RenderApiError('PROJECT_NOT_FOUND', 'no project', 404, null),
@@ -98,6 +99,13 @@ describe('GeneratedFilesPanel (FIX-006-001)', () => {
     expect((await screen.findByTestId('generated-deliverable-video')).getAttribute('src')).toBe(
       '/api/projects/display-ads/files/out/display-ads.mp4',
     );
+  });
+
+  it('muestra el panel de revisión de cada entregable', async () => {
+    renderPanel({});
+
+    const panel = await screen.findByTestId('render-review');
+    expect(panel.getAttribute('data-file')).toBe('out/display-ads.mp4');
   });
 
   it('dice que no hay nada generado cuando el motor no produjo nada', async () => {

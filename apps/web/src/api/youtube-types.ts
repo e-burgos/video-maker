@@ -1,3 +1,4 @@
+import type { ReviewStatus } from '@video-maker/timeline-core';
 import type { PublicationStatus, RenderApiErrorPayload, RenderJobState } from './render-api-types';
 
 export const YOUTUBE_PRIVACIES = ['public', 'unlisted', 'private'] as const;
@@ -32,6 +33,7 @@ export type YouTubePublishFile = {
   height: number;
   isShort: boolean;
   sizeBytes: number;
+  reviewStatus: ReviewStatus | null;
 };
 
 export type YouTubePlaylist = {
@@ -60,6 +62,7 @@ export type YouTubePublishInput = {
   publishAt?: string;
   playlistId?: string;
   thumbnail?: string;
+  ignoreReview?: true;
 };
 
 export type Publication = {

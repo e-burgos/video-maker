@@ -177,11 +177,51 @@
       "depends_on": [
         "TASK-004"
       ],
-      "status": "pending",
+      "status": "done",
       "files": [
         "apps/web/src/components/render-review-panel.tsx",
-        "libs/producer-tools/src/tools/get-render-review.ts"
-      ]
+        "apps/web/src/components/render-review-panel.spec.tsx",
+        "apps/web/src/components/publish-review-notice.tsx",
+        "apps/web/src/components/generated-files-panel.tsx",
+        "apps/web/src/components/generated-files-panel.spec.tsx",
+        "apps/web/src/components/motion-preview-view.tsx",
+        "apps/web/src/components/youtube-publish-dialog.tsx",
+        "apps/web/src/components/youtube-publish-dialog.spec.tsx",
+        "apps/web/src/api/review-types.ts",
+        "apps/web/src/api/review-format.ts",
+        "apps/web/src/api/parse-review.ts",
+        "apps/web/src/api/parse-render-job.ts",
+        "apps/web/src/api/parse-youtube.ts",
+        "apps/web/src/api/render-api-client.ts",
+        "apps/web/src/api/render-api-client-youtube.spec.ts",
+        "apps/web/src/api/render-api-types.ts",
+        "apps/web/src/api/youtube-publish-form.ts",
+        "apps/web/src/api/youtube-types.ts",
+        "apps/web/src/i18n/messages-es.ts",
+        "apps/web/src/i18n/messages-en.ts",
+        "libs/producer-tools/src/contract/tool-names.ts",
+        "libs/producer-tools/src/contract/tool-names.spec.ts",
+        "libs/producer-tools/src/contract/tool-schemas.ts",
+        "libs/producer-tools/src/handlers/studio-tool-handlers.ts",
+        "libs/producer-tools/src/handlers/studio-tool-handlers.spec.ts",
+        "libs/producer-tools/src/client/render-api-client.ts",
+        "libs/producer-tools/src/client/http-render-api-client.ts",
+        "libs/producer-tools/src/client/http-render-api-client.spec.ts",
+        "libs/producer-tools/src/__fixtures__/fake-render-api-client.ts",
+        "libs/producer-tools/src/prompt/build-producer-prompt.ts",
+        "libs/producer-tools/src/prompt/build-producer-prompt.spec.ts",
+        "apps/render-api/src/producer/producer-stream-events.ts"
+      ],
+      "usage": {
+        "provider_model": "claude/sonnet",
+        "effort": "medium",
+        "agent": "implementor-front",
+        "tokens_in": 420000,
+        "tokens_out": 60000,
+        "approx": true,
+        "source": "declared-estimate",
+        "recorded_at": "2026-10-11"
+      }
     },
     {
       "id": "TASK-006",

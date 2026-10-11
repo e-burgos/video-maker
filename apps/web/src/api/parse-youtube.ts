@@ -1,3 +1,4 @@
+import type { ReviewStatus } from '@video-maker/timeline-core';
 import { responseShapeUnexpected } from './render-api-error';
 import { YOUTUBE_PRIVACIES } from './youtube-types';
 import type {
@@ -67,6 +68,10 @@ export function parseYouTubeConnectStart(value: unknown): YouTubeConnectStart {
   return { authUrl: value['authUrl'] };
 }
 
+function isReviewStatus(value: unknown): value is ReviewStatus {
+  return value === 'pass' || value === 'warn' || value === 'fail';
+}
+
 function isPublishFile(value: unknown): value is YouTubePublishFile {
   return (
     isRecord(value) &&
@@ -75,7 +80,8 @@ function isPublishFile(value: unknown): value is YouTubePublishFile {
     typeof value['width'] === 'number' &&
     typeof value['height'] === 'number' &&
     typeof value['isShort'] === 'boolean' &&
-    typeof value['sizeBytes'] === 'number'
+    typeof value['sizeBytes'] === 'number' &&
+    (value['reviewStatus'] === undefined || value['reviewStatus'] === null || isReviewStatus(value['reviewStatus']))
   );
 }
 
@@ -99,7 +105,7 @@ export function parseYouTubePublishOptions(value: unknown): YouTubePublishOption
     isRecord(defaults) && isYouTubePrivacy(defaults['privacy']) ? defaults['privacy'] : 'public';
 
   return {
-    files: value['files'],
+    files: value['files'].map((file) => ({ ...file, reviewStatus: file.reviewStatus ?? null })),
     playlists: value['playlists'],
     defaults: { privacy },
   };

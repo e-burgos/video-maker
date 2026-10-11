@@ -110,7 +110,7 @@ export function localDateTimeValue(date: Date): string {
   return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}T${pad(date.getHours())}:${pad(date.getMinutes())}`;
 }
 
-export function buildPublishInput(values: YouTubePublishFormValues): YouTubePublishInput {
+export function buildPublishInput(values: YouTubePublishFormValues, ignoreReview = false): YouTubePublishInput {
   const scheduledAt = values.scheduled ? parseLocalDateTime(values.publishAtLocal) : null;
 
   return {
@@ -122,6 +122,7 @@ export function buildPublishInput(values: YouTubePublishFormValues): YouTubePubl
     ...(scheduledAt === null ? {} : { publishAt: scheduledAt.toISOString() }),
     ...(values.playlistId === '' ? {} : { playlistId: values.playlistId }),
     ...(values.thumbnail === '' ? {} : { thumbnail: values.thumbnail }),
+    ...(ignoreReview ? { ignoreReview: true as const } : {}),
   };
 }
 
