@@ -1,4 +1,4 @@
-import { fireEvent, render, screen, waitFor } from '@testing-library/react';
+import { fireEvent, render, screen, waitFor, within } from '@testing-library/react';
 import { describe, expect, it, vi } from 'vitest';
 
 import { RenderApiProvider } from '../api/render-api-context';
@@ -97,17 +97,59 @@ describe('MontageTrigger', () => {
     );
   });
 
+  it('keeps the continuous bed by default and hides the music floor', async () => {
+    renderTrigger(vi.fn());
+
+    await waitFor(() => expect(generateButton().disabled).toBe(false));
+
+    expect((screen.getByRole('combobox', { name: 'Music mode' }) as HTMLSelectElement).value).toBe('bed');
+    expect(screen.queryByLabelText('Music floor while speaking (dB)')).toBeNull();
+  });
+
+  it('sends the segmented music mode with its floor', async () => {
+    const createMontageJob = vi.fn().mockResolvedValue(montageJob());
+    renderTrigger(createMontageJob);
+
+    await waitFor(() => expect(generateButton().disabled).toBe(false));
+    fireEvent.change(screen.getByRole('combobox', { name: 'Music mode' }), { target: { value: 'segments' } });
+    expect((screen.getByLabelText('Music floor while speaking (dB)') as HTMLInputElement).value).toBe('-30');
+    fireEvent.change(screen.getByLabelText('Music floor while speaking (dB)'), { target: { value: '-24' } });
+    fireEvent.click(generateButton());
+
+    await waitFor(() =>
+      expect(createMontageJob).toHaveBeenCalledWith('smoke-ingest', {
+        preset: 'software-demo',
+        seed: 0,
+        overwrite: false,
+        musicMode: 'segments',
+        musicFloorDb: -24,
+      }),
+    );
+  });
+
+  it('blocks the montage while the segmented floor is outside -60..-6 dB', async () => {
+    renderTrigger(vi.fn());
+
+    await waitFor(() => expect(generateButton().disabled).toBe(false));
+    fireEvent.change(screen.getByRole('combobox', { name: 'Music mode' }), { target: { value: 'segments' } });
+    fireEvent.change(screen.getByLabelText('Music floor while speaking (dB)'), { target: { value: '-3' } });
+
+    expect(screen.getByRole('alert').textContent).toBe('The floor has to be a number between -60 and -6 dB.');
+    expect(generateButton().disabled).toBe(true);
+  });
+
   it('offers the four presets of the engine', async () => {
     renderTrigger(vi.fn());
 
     await waitFor(() => expect(generateButton().disabled).toBe(false));
-    const options = screen
+    const presets = within(screen.getByRole('combobox', { name: 'Montage preset' }));
+    const options = presets
       .getAllByRole('option')
       .map((option) => (option as HTMLOptionElement).value);
 
     expect(options).toEqual(['software-demo', 'hardware', 'recipe', 'educational']);
     expect(
-      screen.getAllByRole('option').map((option) => (option as HTMLOptionElement).textContent),
+      presets.getAllByRole('option').map((option) => (option as HTMLOptionElement).textContent),
     ).toEqual(['Software tutorial', 'Product ad', 'Step by step', 'Explainer or class']);
   });
 

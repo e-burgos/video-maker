@@ -1,4 +1,4 @@
-import type { StoryboardDocument, Timeline } from '@video-maker/timeline-core';
+import type { StoryboardDocument, Timeline, VoiceScriptDirections } from '@video-maker/timeline-core';
 import { RENDER_API_BASE_PATH } from './artifact-url';
 import { parseGeneratedListing } from './parse-generated';
 import {
@@ -95,6 +95,7 @@ import type {
   MotionJob,
   MotionOverview,
   MotionStoryboard,
+  MusicMode,
 } from './motion-types';
 
 import type {
@@ -117,6 +118,17 @@ export type CreateMontageJobInput = {
   preset: MontagePresetName;
   seed: number;
   overwrite: boolean;
+  musicMode?: MusicMode;
+  musicFloorDb?: number;
+};
+
+export type VoiceDirectionLine = { index: number; text: string };
+
+export type VoiceDirectionDocument = {
+  slug: string;
+  path: string;
+  directions: VoiceScriptDirections;
+  lines: VoiceDirectionLine[];
 };
 
 export type CreateStoryboardJobInput =
@@ -183,6 +195,9 @@ export type RenderApiClient = {
   getMotionBrief: (slug: string) => Promise<MotionBrief>;
   putMotionBrief: (slug: string, brief: MotionBrief) => Promise<MotionBrief>;
   getMotionStoryboard: (slug: string) => Promise<MotionStoryboard>;
+  putMotionStoryboard: (slug: string, storyboard: MotionStoryboard) => Promise<MotionStoryboard>;
+  getVoiceDirection: (slug: string) => Promise<VoiceDirectionDocument>;
+  putVoiceDirection: (slug: string, directions: VoiceScriptDirections) => Promise<VoiceDirectionDocument>;
   getMotionOverview: (slug: string) => Promise<MotionOverview>;
   createMotionJob: (slug: string, input: CreateMotionJobInput) => Promise<MotionJob>;
   listBrands: () => Promise<BrandSummary[]>;
@@ -232,6 +247,10 @@ export type UploadInboxInput = {
 
 function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === 'object' && value !== null && !Array.isArray(value);
+}
+
+function isVoiceDirectionDocument(value: unknown): boolean {
+  return isRecord(value) && isRecord(value['directions']) && Array.isArray(value['lines']);
 }
 
 function isBrandDetail(value: unknown): boolean {
@@ -618,6 +637,12 @@ export function createRenderApiClient(fetchImpl: FetchLike): RenderApiClient {
             preset: input.preset,
             seed: input.seed,
             overwrite: input.overwrite,
+            ...(input.musicMode === 'segments'
+              ? {
+                  musicMode: 'segments',
+                  ...(input.musicFloorDb === undefined ? {} : { musicFloorDb: input.musicFloorDb }),
+                }
+              : {}),
           }),
         },
         'a montage job document',
@@ -896,6 +921,47 @@ export function createRenderApiClient(fetchImpl: FetchLike): RenderApiClient {
         (value) => isRecord(value) && Array.isArray(value['scenes']),
       );
       return body as MotionStoryboard;
+    },
+
+    async putMotionStoryboard(slug: string, storyboard: MotionStoryboard): Promise<MotionStoryboard> {
+      const body = await requestJson(
+        `/projects/${encodeURIComponent(slug)}/motion/storyboard`,
+        {
+          method: 'PUT',
+          headers: { 'content-type': 'application/json' },
+          body: JSON.stringify(storyboard),
+        },
+        'a motion storyboard',
+        (value) => isRecord(value) && Array.isArray(value['scenes']),
+      );
+      return body as MotionStoryboard;
+    },
+
+    async getVoiceDirection(slug: string): Promise<VoiceDirectionDocument> {
+      const body = await requestJson(
+        `/projects/${encodeURIComponent(slug)}/voice/direction`,
+        undefined,
+        'a voice direction document',
+        isVoiceDirectionDocument,
+      );
+      return body as VoiceDirectionDocument;
+    },
+
+    async putVoiceDirection(
+      slug: string,
+      directions: VoiceScriptDirections,
+    ): Promise<VoiceDirectionDocument> {
+      const body = await requestJson(
+        `/projects/${encodeURIComponent(slug)}/voice/direction`,
+        {
+          method: 'PUT',
+          headers: { 'content-type': 'application/json' },
+          body: JSON.stringify({ directions }),
+        },
+        'a voice direction document',
+        isVoiceDirectionDocument,
+      );
+      return body as VoiceDirectionDocument;
     },
 
     async getMotionOverview(slug: string): Promise<MotionOverview> {

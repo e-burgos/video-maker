@@ -1,5 +1,6 @@
 import { useCallback, useState } from 'react';
 
+import { floorTextOf, parseFloorDb } from '../api/music-mode';
 import { montageBlockers } from '../api/montage-capability';
 import { MONTAGE_PRESET_DETAILS, montagePresetDetail } from '../api/montage-presets';
 import { useRenderApi } from '../api/render-api-context';
@@ -7,8 +8,10 @@ import { useApiAction } from '../hooks/use-api-action';
 import { useAsyncResource } from '../hooks/use-async-resource';
 import { useT } from '../i18n/language-context';
 import { blockerId } from '../api/blockers';
+import type { MusicMode } from '../api/motion-types';
 import type { MontageJob, MontagePresetName, ServiceHealth } from '../api/render-api-types';
 import { ErrorNotice } from './error-notice';
+import { MusicModeFields } from './music-mode-fields';
 
 export const TIMELINE_ALREADY_EXISTS = 'TIMELINE_ALREADY_EXISTS';
 
@@ -28,10 +31,21 @@ export function MontageTrigger({ slug, onCreated }: MontageTriggerProps) {
 
   const [preset, setPreset] = useState<MontagePresetName>('software-demo');
   const [seed, setSeed] = useState('0');
+  const [musicMode, setMusicMode] = useState<MusicMode>('bed');
+  const [floorText, setFloorText] = useState(floorTextOf(undefined));
   const t = useT();
 
+  const floorDb = parseFloorDb(floorText);
+
   const createAction = useApiAction((overwrite: boolean) =>
-    client.createMontageJob(slug, { preset, seed: Number(seed), overwrite }),
+    client.createMontageJob(slug, {
+      preset,
+      seed: Number(seed),
+      overwrite,
+      ...(musicMode === 'segments' && floorDb !== null
+        ? { musicMode: 'segments' as const, musicFloorDb: floorDb }
+        : {}),
+    }),
   );
 
   async function generate(overwrite: boolean) {
@@ -44,7 +58,9 @@ export function MontageTrigger({ slug, onCreated }: MontageTriggerProps) {
   const blockers = montageBlockers(health.data);
   const seedValid = isSeedValid(seed);
   const needsConfirmation = createAction.error?.code === TIMELINE_ALREADY_EXISTS;
-  const disabled = blockers.length > 0 || !seedValid || createAction.status === 'pending';
+  const floorValid = musicMode === 'bed' || floorDb !== null;
+  const disabled =
+    blockers.length > 0 || !seedValid || !floorValid || createAction.status === 'pending';
 
   return (
     <div
@@ -92,6 +108,13 @@ export function MontageTrigger({ slug, onCreated }: MontageTriggerProps) {
           {createAction.status === 'pending' ? t('montage.generating') : t('montage.generate')}
         </button>
       </div>
+
+      <MusicModeFields
+        mode={musicMode}
+        floorText={floorText}
+        onModeChange={setMusicMode}
+        onFloorTextChange={setFloorText}
+      />
 
       <p data-testid="montage-preset-description" className="text-xs text-slate-400">
         <span className="font-mono text-slate-500">{preset}</span> ·{' '}

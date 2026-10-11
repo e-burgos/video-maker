@@ -83,17 +83,51 @@
       "depends_on": [
         "TASK-001"
       ],
-      "status": "in-progress",
+      "status": "done",
       "files": [
         "apps/render-api/src/http/handlers/project-text-handler.spec.ts",
         "apps/render-api/src/http/handlers/project-text-handler.ts",
+        "apps/web/src/api/__fixtures__/voice.ts",
+        "apps/web/src/api/motion-storyboard-draft.ts",
+        "apps/web/src/api/motion-types.ts",
+        "apps/web/src/api/music-mode.spec.ts",
+        "apps/web/src/api/music-mode.ts",
+        "apps/web/src/api/render-api-client.spec.ts",
+        "apps/web/src/api/render-api-client.ts",
+        "apps/web/src/api/voice-direction-i18n.ts",
+        "apps/web/src/api/voice-direction.spec.ts",
+        "apps/web/src/api/voice-direction.ts",
+        "apps/web/src/components/montage-trigger.spec.tsx",
+        "apps/web/src/components/montage-trigger.tsx",
+        "apps/web/src/components/motion-storyboard-view.spec.tsx",
+        "apps/web/src/components/motion-storyboard-view.tsx",
+        "apps/web/src/components/music-mode-fields.tsx",
+        "apps/web/src/components/voice-direction-editor.spec.tsx",
+        "apps/web/src/components/voice-direction-editor.tsx",
+        "apps/web/src/components/voice-script-panel.tsx",
+        "apps/web/src/components/voice-script-section.tsx",
+        "apps/web/src/hooks/use-motion-storyboard-draft.ts",
+        "apps/web/src/i18n/messages-en.ts",
+        "apps/web/src/i18n/messages-es.ts",
+        "apps/web/src/pages/voice-page.spec.tsx",
+        "apps/web/src/pages/voice-page.tsx",
         "libs/motion-graphics/src/auto/build-auto-storyboard-request.spec.ts",
         "libs/motion-graphics/src/auto/build-auto-storyboard-request.ts",
         "libs/motion-graphics/src/storyboard/motion-storyboard.schema.ts",
         "libs/motion-graphics/src/storyboard/parse-motion-storyboard.spec.ts",
         "libs/producer-tools/src/prompt/build-producer-prompt.spec.ts",
         "libs/producer-tools/src/prompt/build-producer-prompt.ts"
-      ]
+      ],
+      "usage": {
+        "tokens_in": 220000,
+        "tokens_out": 45000,
+        "provider_model": "claude/sonnet",
+        "effort": "medium",
+        "agent": "implementor-front",
+        "approx": true,
+        "source": "declared-estimate",
+        "recorded_at": "2026-10-11"
+      }
     },
     {
       "id": "TASK-003",

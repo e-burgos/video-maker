@@ -9,7 +9,7 @@ import { useT } from '../i18n/language-context';
 import { ErrorNotice } from '../components/error-notice';
 import { VoiceJobPanel } from '../components/voice-job-panel';
 import { VoiceSceneCard, takeFileName } from '../components/voice-scene-card';
-import { VoiceScriptPanel } from '../components/voice-script-panel';
+import { VoiceScriptSection } from '../components/voice-script-section';
 import { VoiceTrigger } from '../components/voice-trigger';
 import { PRODUCER_SCRIPT_PATH, VOICE_SCRIPT_MANIFEST_PATH } from '../api/generated-files';
 import { parseVoiceScriptManifest } from '../api/parse-voice-script';
@@ -134,7 +134,9 @@ function ClassicVoicePage() {
 
       {missing && <VoiceEmptyState slug={slug} />}
 
-      {scriptMode && manifest !== null && <VoiceScriptPanel slug={slug} manifest={manifest} />}
+      {scriptMode && manifest !== null && (
+        <VoiceScriptSection slug={slug} manifest={manifest} onJobCreated={(job) => setJobId(job.id)} />
+      )}
 
       {voice.status === 'error' && voice.error !== null && !missing && (
         <ErrorNotice error={voice.error} onRetry={voice.reload} />
