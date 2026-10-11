@@ -1,0 +1,43 @@
+{
+  "$schema": "../../../../schemas/cycle.schema.json",
+  "cycle": 3,
+  "module": "production-quality",
+  "spec": "spec-e-burgos-023-production-quality",
+  "apps": [
+    "libs/media-local",
+    "libs/motion-graphics",
+    "libs/auto-montage",
+    "libs/timeline-core",
+    "libs/producer-tools",
+    "apps/render-api",
+    "apps/web"
+  ],
+  "phase": "voice-direction-music-segments",
+  "flow": "lite",
+  "objectives": [
+    "Dirección de voz por frase escrita por el productor y aplicada al motor de voz",
+    "Música por tramos con fundidos como alternativa a la cama continua"
+  ],
+  "status": "in-progress",
+  "started_at": "2026-10-11",
+  "completed_at": null,
+  "documents": {
+    "plan": "sdd/specs/spec-e-burgos-023-production-quality/cycles/cycle-03/plan.md",
+    "tasks": "sdd/specs/spec-e-burgos-023-production-quality/cycles/cycle-03/tasks.json"
+  },
+  "artifacts": [],
+  "metrics": {
+    "tasks_total": 4,
+    "tasks_completed": 0,
+    "tasks_skipped": 0,
+    "story_points": 24,
+    "files_created": [],
+    "files_modified": [],
+    "files_deleted": []
+  },
+  "tables_created": [],
+  "endpoints_implemented": [],
+  "components_created": [],
+  "issues_found": [],
+  "reviewer_report": null
+}
