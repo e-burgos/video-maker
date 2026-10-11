@@ -288,6 +288,48 @@ describe('autoMontage (CA-011)', () => {
     ).rejects.toMatchObject({ reason: 'catalog-missing' });
   });
 
+  describe('modo de música (US-023-303)', () => {
+    async function montageWithMusic(extra: { readonly musicMode?: 'bed' | 'segments'; readonly musicFloorDb?: number }) {
+      const aroll = videoAsset({ id: 'raw/aroll/a-clip.mp4', path: 'raw/aroll/a-clip.mp4', durationMs: 5000 });
+      const music: MediaAsset = {
+        id: 'raw/audio/a.mp3',
+        kind: 'audio',
+        path: 'raw/audio/a.mp3',
+        durationMs: 10_000,
+        hasAudio: true,
+        probedAt: '2026-01-01T00:00:00.000Z',
+      };
+      const catalog: Catalog = {
+        schemaVersion: CATALOG_SCHEMA_VERSION,
+        projectSlug: project.slug,
+        assets: [catalogAsset('aroll', aroll), catalogAsset('audio', music)],
+        transcripts: [],
+        ignored: [],
+        probeFailures: [],
+      };
+      const fileSystem = createFakeFileSystem([
+        { path: toAbsolutePath(project, catalogPath()), contents: JSON.stringify(catalog) },
+      ]);
+      return autoMontage(
+        project,
+        { preset: 'software-demo', seed: 1, musicAssetId: 'raw/audio/a.mp3', persist: false, ...extra },
+        { readTextFile: fileSystem.readTextFile },
+      );
+    }
+
+    it('sin musicMode el mix es el del preset, sin la clave mode', async () => {
+      const result = await montageWithMusic({});
+      expect(Object.keys(result.timeline.audioMix.music)).not.toContain('mode');
+    });
+
+    it("con musicMode 'segments' el mix baja al piso configurado y anota el modo", async () => {
+      const result = await montageWithMusic({ musicMode: 'segments', musicFloorDb: -24 });
+      const { music } = result.timeline.audioMix;
+      expect(music.mode).toBe('segments');
+      expect(music.duckedGainDb).toBe(music.baseGainDb - 24);
+    });
+  });
+
   it('respeta arollAssetId, musicAssetId y outputPreset explícitos', async () => {
     const arollA = videoAsset({ id: 'raw/aroll/a-clip.mp4', path: 'raw/aroll/a-clip.mp4', durationMs: 5000 });
     const arollB = videoAsset({ id: 'raw/aroll/b-clip.mp4', path: 'raw/aroll/b-clip.mp4', durationMs: 5000 });

@@ -1,6 +1,6 @@
 import type { MediaProject } from '@video-maker/auto-montage';
 import { toAbsolutePath } from '@video-maker/auto-montage';
-import type { Timeline } from '@video-maker/timeline-core';
+import type { MusicMode, Timeline } from '@video-maker/timeline-core';
 
 import type { StoreConfig } from '../../config/store-config';
 import type { RenderApiDependencies } from '../../deps/render-api-dependencies';
@@ -10,6 +10,7 @@ import type { StoredJobParams } from '../../jobs/job-persistence';
 import {
   assertBrandCaptionStyleHasBrand,
   parseMontageCaptionStyle,
+  parseMontageMusic,
   parseMontageFormat,
   parseMontageLogo,
   parseMontageOverwrite,
@@ -130,6 +131,8 @@ interface MontageParams {
   readonly format: ReturnType<typeof parseMontageFormat>;
   readonly voice: ReturnType<typeof parseMontageVoice>;
   readonly captionStyle: ReturnType<typeof parseMontageCaptionStyle>;
+  readonly musicMode?: MusicMode;
+  readonly musicFloorDb?: number;
 }
 
 async function createMontageJobResponse(
@@ -479,6 +482,7 @@ export async function handleCreateRenderJob(
   const voice = parseMontageVoice(bodyObject.voice);
   const captionStyle = parseMontageCaptionStyle(bodyObject.captionStyle);
   assertBrandCaptionStyleHasBrand(captionStyle, (deps.localStore.projects.get(slug)?.brand ?? null) !== null);
+  const music = parseMontageMusic(bodyObject.musicMode, bodyObject.musicFloorDb);
 
   return createMontageJobResponse(
     deps,
@@ -494,6 +498,7 @@ export async function handleCreateRenderJob(
       format,
       voice,
       captionStyle,
+      ...music,
     },
     overwrite,
     null,

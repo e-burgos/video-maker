@@ -149,6 +149,14 @@ export { CAPTION_STYLES, captionGroupingForStyle, isCaptionStyle } from './capti
 export type { CaptionStyle, CaptionStyleGrouping } from './captions/caption-style';
 
 export { DEFAULT_AUDIO_MIX_PLAN, DEFAULT_MUSIC_MIX, planDucking } from './ducking/plan-ducking';
+export {
+  DEFAULT_SEGMENTED_MUSIC_FLOOR_DB,
+  planSegmentedMusic,
+  SEGMENTED_MUSIC_FADE_MS,
+  SEGMENTED_MUSIC_MIN_GAP_MS,
+  segmentedMusicMix,
+} from './ducking/plan-segmented-music';
+export type { MusicMode, SegmentedMusicOptions } from './ducking/plan-segmented-music';
 export type { DuckDecisionPlan, DuckingPlanResult, VoiceRange } from './ducking/plan-ducking';
 
 export { buildJsonSchemaBundle, serializeJsonSchemaFile, timelineToJsonSchema } from './schemas/json-schema';

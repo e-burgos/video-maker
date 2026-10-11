@@ -109,8 +109,14 @@ export function planDucking(
   plan: MusicMixSettings,
   fps: Fps,
 ): DuckingPlanResult {
-  const valleys = mergeVoiceRanges(voiceRanges, plan.holdMs);
+  return planDuckingOverValleys(mergeVoiceRanges(voiceRanges, plan.holdMs), plan, fps);
+}
 
+export function planDuckingOverValleys(
+  valleys: readonly VoiceRange[],
+  plan: MusicMixSettings,
+  fps: Fps,
+): DuckingPlanResult {
   if (valleys.length === 0) {
     return { automation: [], decisions: [] };
   }

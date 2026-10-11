@@ -1,4 +1,4 @@
-import type { VoiceDirection } from '@video-maker/timeline-core';
+import type { MusicMode, VoiceDirection } from '@video-maker/timeline-core';
 
 import { brandCssFile, brandImageFile, brandIsotipo } from '../brand/brand-manifest';
 import type { BrandManifest } from '../brand/brand-manifest';
@@ -18,7 +18,7 @@ const DEFAULT_MIN_BARS: Partial<Record<MotionStoryboardScene['kind'], number>> =
 export interface ScriptDocument {
   voice: string;
   lengthScale: number;
-  music: { file: string; credit: string; volume?: number } | null;
+  music: { file: string; credit: string; volume?: number; mode?: MusicMode; floorDb?: number } | null;
   noWhooshOn: string[];
   scenes: Array<{ id: string; vo: string; minBars: number; anchor?: number; direction?: VoiceDirection }>;
   sfx: Array<{ id: string; scene: string; offset: number }>;
@@ -188,7 +188,7 @@ export function composeStoryboard(storyboard: MotionStoryboard, brand: BrandMani
   const script: ScriptDocument = {
     voice: voice.id,
     lengthScale: voice.lengthScale,
-    music: track ? { file: track.file.split('/').pop() ?? track.file, credit: track.credit, ...(storyboard.music?.volume === undefined ? {} : { volume: storyboard.music.volume }) } : null,
+    music: track ? { file: track.file.split('/').pop() ?? track.file, credit: track.credit, ...(storyboard.music?.volume === undefined ? {} : { volume: storyboard.music.volume }), ...(storyboard.music?.mode === undefined ? {} : { mode: storyboard.music.mode }), ...(storyboard.music?.floorDb === undefined ? {} : { floorDb: storyboard.music.floorDb }) } : null,
     noWhooshOn: dropScene ? [dropScene.id] : [],
     scenes: storyboard.scenes.map((scene) => {
       const anchor = scene.anchor === 'drop' ? track?.drop : scene.anchor;

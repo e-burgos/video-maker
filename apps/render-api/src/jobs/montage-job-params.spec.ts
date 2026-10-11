@@ -4,6 +4,7 @@ import {
   assertBrandCaptionStyleHasBrand,
   parseMontageFormat,
   parseMontageCaptionStyle,
+  parseMontageMusic,
   parseMontageVoice,
   parseMontageLogo,
   parseMontageOverwrite,
@@ -245,6 +246,28 @@ describe('parseMontageCaptionStyle (FIX-e-burgos-003-003)', () => {
       resource: 'captionStyle',
       expected: 'one of bold-impact, clean-sans, outline-pop, subtle-lower, brand, off',
     });
+  });
+});
+
+describe('parseMontageMusic (US-023-303)', () => {
+  it('without parameters or with bed returns nothing so the montage is the one of before', () => {
+    expect(parseMontageMusic(undefined, undefined)).toEqual({});
+    expect(parseMontageMusic('bed', undefined)).toEqual({});
+  });
+
+  it('accepts segments with the default or a custom floor', () => {
+    expect(parseMontageMusic('segments', undefined)).toEqual({ musicMode: 'segments' });
+    expect(parseMontageMusic('segments', -24)).toEqual({ musicMode: 'segments', musicFloorDb: -24 });
+  });
+
+  it.each([
+    [['loud', undefined], 'musicMode'],
+    [['segments', -80], 'musicFloorDb'],
+    [['segments', '-30'], 'musicFloorDb'],
+    [['bed', -30], 'musicFloorDb'],
+    [[undefined, -30], 'musicFloorDb'],
+  ] as const)('rejects %j naming %s', ([mode, floor], resource) => {
+    expect(captureError(() => parseMontageMusic(mode, floor))).toMatchObject({ code: 'INVALID_INPUT', resource });
   });
 });
 

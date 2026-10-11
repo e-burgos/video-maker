@@ -29,6 +29,7 @@ import { framesToMs, msToFrames } from '../units/units';
 import { pickEmphasisIndex } from '../captions/group-words-for-captions';
 import type { CaptionStyle } from '../captions/caption-style';
 import { DEFAULT_AUDIO_MIX_PLAN, DEFAULT_MUSIC_MIX, planDucking } from '../ducking/plan-ducking';
+import { planSegmentedMusic } from '../ducking/plan-segmented-music';
 import type { VoiceRange } from '../ducking/plan-ducking';
 import type { PunchInAnchor } from '../punch-in/plan-punch-ins';
 import { sequentialId } from './ids';
@@ -460,7 +461,12 @@ export function buildTimeline(
   const duckRanges = buildDuckVoiceRanges(duckDecisions, arollTrack.placements, fps);
   const musicMix = { ...(music?.mix ?? DEFAULT_MUSIC_MIX) };
   const automation =
-    music !== undefined ? planDucking(duckRanges, musicMix, fps).automation : [];
+    music === undefined
+      ? []
+      : (musicMix.mode === 'segments'
+          ? planSegmentedMusic(duckRanges, musicMix, fps)
+          : planDucking(duckRanges, musicMix, fps)
+        ).automation;
   const audioMix = {
     voice: { ...DEFAULT_AUDIO_MIX_PLAN.voice },
     music: musicMix,

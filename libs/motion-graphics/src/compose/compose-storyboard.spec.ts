@@ -42,6 +42,13 @@ describe('composeStoryboard', () => {
     expect(template).not.toContain('{{music_credit}}');
   });
 
+  it('carries the music mode and floor into the script and omits them for the default bed', () => {
+    const { script: bed } = composeStoryboard(base, testBrand);
+    expect(bed.music).not.toHaveProperty('mode');
+    const { script: segmented } = composeStoryboard({ ...base, music: { ...(base.music as object), mode: 'segments', floorDb: -24 } as NonNullable<typeof base.music> }, testBrand);
+    expect(segmented.music).toMatchObject({ mode: 'segments', floorDb: -24 });
+  });
+
   it('carries the scene voice direction into the script and leaves undirected scenes untouched', () => {
     const directedBase = { ...base, scenes: base.scenes.map((scene, index) => (index === 0 ? { ...scene, direction: { pace: 'slow' as const, pauseAfterMs: 300 } } : scene)) };
     const { script } = composeStoryboard(directedBase, testBrand);

@@ -1,7 +1,7 @@
 import type { LogoMode, MontagePresetName, VoiceSource } from '@video-maker/auto-montage';
 import type { JobRecord as StoredJobRow } from '@video-maker/local-store';
 import { TimelineSchema } from '@video-maker/timeline-core';
-import type { CaptionStyle, OutputPreset } from '@video-maker/timeline-core';
+import type { CaptionStyle, MusicMode, OutputPreset } from '@video-maker/timeline-core';
 
 import type { RenderApiErrorPayload } from '../errors/render-api-error';
 import type { RenderPipelineReport } from '../pipeline/run-render-pipeline';
@@ -108,6 +108,8 @@ export function toStoredParams(input: CreateJobInput): StoredJobParams {
         format: input.format,
         voice: input.voice,
         captionStyle: input.captionStyle,
+        ...(input.musicMode === undefined ? {} : { musicMode: input.musicMode }),
+        ...(input.musicFloorDb === undefined ? {} : { musicFloorDb: input.musicFloorDb }),
       };
     case 'storyboard':
       return { kind: 'storyboard', brief: input.brief, scriptText: input.scriptText, model: input.model };
@@ -170,6 +172,13 @@ export function parseStoredParams(kind: JobKind, value: unknown): StoredJobParam
       if (captionStyle !== null && typeof captionStyle !== 'string') {
         return null;
       }
+      const { musicMode, musicFloorDb } = value;
+      if (musicMode !== undefined && musicMode !== 'bed' && musicMode !== 'segments') {
+        return null;
+      }
+      if (musicFloorDb !== undefined && typeof musicFloorDb !== 'number') {
+        return null;
+      }
       return {
         kind: 'montage',
         preset: preset as MontagePresetName,
@@ -180,6 +189,8 @@ export function parseStoredParams(kind: JobKind, value: unknown): StoredJobParam
         format: format as OutputPreset,
         voice: voice as VoiceSource,
         captionStyle: captionStyle as CaptionStyle | null,
+        ...(musicMode === undefined ? {} : { musicMode: musicMode as MusicMode }),
+        ...(musicFloorDb === undefined ? {} : { musicFloorDb }),
       };
     }
     case 'storyboard': {

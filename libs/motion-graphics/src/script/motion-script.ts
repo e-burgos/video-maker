@@ -1,5 +1,5 @@
 import { VoiceDirectionSchema } from '@video-maker/timeline-core';
-import type { VoiceDirection } from '@video-maker/timeline-core';
+import type { MusicMode, VoiceDirection } from '@video-maker/timeline-core';
 
 import { MotionStudioError } from '../errors/motion-studio-error';
 
@@ -23,7 +23,7 @@ export interface MotionSfx {
 export interface MotionScript {
   voice: string;
   lengthScale: number;
-  music: { file: string; credit: string; volume?: number } | null;
+  music: { file: string; credit: string; volume?: number; mode?: MusicMode; floorDb?: number } | null;
   noWhooshOn: string[];
   scenes: MotionScene[];
   sfx: MotionSfx[];
@@ -86,6 +86,22 @@ function parseSfx(raw: unknown, index: number, sceneIds: Set<string>): MotionSfx
   };
 }
 
+function parseMusicMode(raw: unknown): { mode?: MusicMode } {
+  if (raw === undefined) return {};
+  if (raw !== 'bed' && raw !== 'segments') fail('music.mode must be "bed" or "segments"');
+  return { mode: raw };
+}
+
+function parseMusic(music: Record<string, unknown>): NonNullable<MotionScript['music']> {
+  return {
+    file: asString(music['file'], 'music.file'),
+    credit: asString(music['credit'], 'music.credit'),
+    ...(music['volume'] === undefined ? {} : { volume: asNumber(music['volume'], 'music.volume', DEFAULT_MUSIC_VOLUME) }),
+    ...parseMusicMode(music['mode']),
+    ...(music['floorDb'] === undefined ? {} : { floorDb: asNumber(music['floorDb'], 'music.floorDb') }),
+  };
+}
+
 export function parseMotionScript(raw: unknown): MotionScript {
   const script = asRecord(raw, 'root');
   const music = script['music'] === null ? null : asRecord(script['music'], 'music');
@@ -100,7 +116,7 @@ export function parseMotionScript(raw: unknown): MotionScript {
   return {
     voice: asString(script['voice'], 'voice'),
     lengthScale: asNumber(script['lengthScale'], 'lengthScale', 1),
-    music: music === null ? null : { file: asString(music['file'], 'music.file'), credit: asString(music['credit'], 'music.credit'), ...(music['volume'] === undefined ? {} : { volume: asNumber(music['volume'], 'music.volume', DEFAULT_MUSIC_VOLUME) }) },
+    music: music === null ? null : parseMusic(music),
     noWhooshOn: noWhooshOn as string[],
     scenes,
     sfx: rawSfx.map((entry, index) => parseSfx(entry, index, sceneIds)),

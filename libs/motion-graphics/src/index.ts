@@ -13,6 +13,8 @@ export { composeTemplate, MOTION_MUSIC_TRACK_VOLUME, templateValues, WHOOSH_LEAD
 export type { MotionTimeline, SceneWords, SpokenWord } from './template/motion-timeline';
 
 export { buildDuckAutomation } from './timeline/build-duck-automation';
+export { buildSegmentedAutomation } from './timeline/build-segmented-automation';
+export type { SegmentedOptions } from './timeline/build-segmented-automation';
 export type { AutomationPoint, DuckOptions, VolumeAutomation } from './timeline/build-duck-automation';
 export { DEFAULT_VO_LEAD_IN, DEFAULT_VO_TAIL, layoutScenes } from './timeline/layout-scenes';
 export type { LayoutOptions, SceneSlot } from './timeline/layout-scenes';

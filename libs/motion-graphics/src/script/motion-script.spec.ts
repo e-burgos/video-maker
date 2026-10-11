@@ -28,6 +28,14 @@ describe('parseMotionScript', () => {
     expect(script.scenes[1]).not.toHaveProperty('direction');
   });
 
+  it('parses the music mode and floor and rejects an unknown mode', () => {
+    const music = { file: 'a.mp3', credit: 'c', mode: 'segments', floorDb: -24 };
+    expect(parseMotionScript({ ...valid, music }).music).toEqual(music);
+    expect(parseMotionScript(valid).music).not.toHaveProperty('mode');
+    expect(() => parseMotionScript({ ...valid, music: { ...music, mode: 'loud' } })).toThrow('music.mode');
+    expect(() => parseMotionScript({ ...valid, music: { ...music, floorDb: 'x' } })).toThrow('music.floorDb');
+  });
+
   it('rejects an invalid voice direction naming the scene', () => {
     expect(() => parseMotionScript({ ...valid, scenes: [{ id: 'hook', vo: 'Hola', direction: { pace: 'turbo' } }] })).toThrow('scenes[0].direction');
   });

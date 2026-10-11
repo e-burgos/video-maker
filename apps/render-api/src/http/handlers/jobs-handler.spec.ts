@@ -404,6 +404,37 @@ describe('handleCreateRenderJob', () => {
       await runtime.jobs.whenIdle();
     });
 
+    it('rejects an unknown musicMode with INVALID_INPUT and registers no job (US-023-303)', async () => {
+      const { deps, runtime } = createMontageDeps();
+
+      await expect(
+        handleCreateRenderJob(
+          deps,
+          STORE,
+          { slug: 'acme-launch' },
+          jsonBodyRequest('acme-launch', { kind: 'montage', musicMode: 'loud' }),
+          runtime,
+        ),
+      ).rejects.toMatchObject({ code: 'INVALID_INPUT', resource: 'musicMode' });
+      expect(runtime.jobs.listBySlug('acme-launch')).toEqual([]);
+    });
+
+    it('accepts musicMode segments with a custom floor and registers the job (US-023-303)', async () => {
+      const { deps, runtime } = createMontageDeps();
+
+      const response = await handleCreateRenderJob(
+        deps,
+        STORE,
+        { slug: 'acme-launch' },
+        jsonBodyRequest('acme-launch', { kind: 'montage', musicMode: 'segments', musicFloorDb: -24 }),
+        runtime,
+      );
+
+      expect(response.status).toBe(202);
+      expect(runtime.jobs.listBySlug('acme-launch')).toHaveLength(1);
+      await runtime.jobs.whenIdle();
+    });
+
     it('answers 422 MONTAGE_OVERWRITE_INVALID and registers no job', async () => {
       const { deps, runtime } = createMontageDeps();
 
