@@ -89,6 +89,21 @@ describe('checkStoryboardAgainstBrief', () => {
     expect(checkStoryboardAgainstBrief(withScenes(scenes), brief, testBrand).map((i) => i.path)).toEqual(['scenes[0].props.images[0]', 'scenes[1].props.result.image']);
   });
 
+  it('flags a walkthrough capture that is not in the brief and a step cue the voice never says', () => {
+    const scenes: MotionStoryboard['scenes'] = [
+      {
+        id: 'tour',
+        kind: 'ui-walkthrough',
+        vo: 'Tocá el botón verde',
+        props: { image: 'images/ghost.png', steps: [{ action: 'click', x: 0.5, y: 0.5, cue: 'botón' }, { action: 'callout', x: 0.2, y: 0.2, text: 'Acá', cue: 'guardar' }] },
+      },
+      { id: 'ok', kind: 'ui-walkthrough', vo: 'Mirá', props: { image: 'images/local.jpg', steps: [{ action: 'move', x: 0.1, y: 0.1, cue: 'mirá' }] } },
+    ];
+    const issues = checkStoryboardAgainstBrief(withScenes(scenes), brief, testBrand);
+    expect(issues.map((i) => i.path)).toEqual(['scenes[0].props.image', 'scenes[0].props.steps[1].cue']);
+    expect(issues[1]?.message).toContain('scene "tour"');
+  });
+
   it('flags a device missing from the brand, including connections', () => {
     const scenes: MotionStoryboard['scenes'] = [
       { id: 'p', kind: 'product', vo: 'Equipo', props: { name: 'X', text: 'x', visual: { kind: 'device', device: 'ghost' } } },

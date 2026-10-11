@@ -15,6 +15,8 @@ export const SCENE_GUIDE: Record<MotionSceneKind, string> = {
   gallery: 'Two to four real photos with an optional caption; use the brief images or brand images.',
   step: 'One numbered step of a how-to with a headline, optional chips and a phone, tablet or tv visual with screen states.',
   connections: 'Wiring diagram of a brand device linked to tv, router, power or phone.',
+  'ui-walkthrough':
+    'Explains a real interface: a capture from the brief images inside a browser, phone or no frame, with 1 to 8 steps run in order (move, click, type, highlight, callout, zoom). Coordinates x,y are fractions 0-1 of the capture (0,0 top-left); type, highlight and zoom boxes add w,h and must stay inside it (x+w<=1, y+h<=1); type and callout need text; anchor each step to a word the scene voice says with cue.',
   'do-dont': 'Two columns, what to avoid and what to do, with up to three items each.',
   cta: 'Closing call to action with the tagline, a button and optionally the url. Always the last scene.',
 };

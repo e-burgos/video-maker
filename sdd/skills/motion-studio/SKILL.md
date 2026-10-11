@@ -9,7 +9,7 @@ Hay tres caminos para el primer paso; desde ahí el pipeline es el mismo:
 
 - **Brief (automático):** `brief.json` con el guion, las imágenes descriptas y la marca; la IA (Claude CLI)
   elige escenas del catálogo y escribe el `storyboard.json`. Ver "Storyboard automático".
-- **Storyboard (recomendado):** un `storyboard.json` elige escenas de un catálogo de 16 tipos y las
+- **Storyboard (recomendado):** un `storyboard.json` elige escenas de un catálogo de 17 tipos y las
   llena con textos, imágenes y equipos de la marca. No se escribe HTML: la biblioteca
   la lib `libs/motion-graphics` lo compone con el kit de la marca y un runtime de animación declarativo.
   Es lo que un agente puede generar solo desde un guion e imágenes.
@@ -63,6 +63,7 @@ reales están en `libs/motion-graphics/assets/storyboards/displayads/`.
 | `gallery` | 2–4 fotos con Ken Burns |
 | `step` | Paso numerado de un instructivo |
 | `connections` | Cables del equipo a la tele, router, fuente o celular |
+| `ui-walkthrough` | Una captura de la interfaz (marco browser, phone o ninguno) con cursor, clics, tipeo, resaltados, globos y zoom; hasta 8 pasos con coordenadas 0–1 sobre la imagen |
 | `do-dont` | Lo que no y lo que sí |
 | `cta` | Cierre con logo, botón y web |
 

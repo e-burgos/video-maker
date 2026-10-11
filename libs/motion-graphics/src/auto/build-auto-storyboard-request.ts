@@ -25,7 +25,7 @@ function availableImageCount(brief: MotionBrief, brand: BrandManifest): number {
 function offeredSceneKinds(brief: MotionBrief, brand: BrandManifest): readonly MotionSceneKind[] {
   const hasDevices = activeDeviceIds(brand).length > 0;
   const hasGalleryImages = availableImageCount(brief, brand) >= MIN_GALLERY_IMAGES;
-  return SCENE_KINDS.filter((kind) => (kind !== 'connections' || hasDevices) && (kind !== 'gallery' || hasGalleryImages));
+  return SCENE_KINDS.filter((kind) => (kind !== 'connections' || hasDevices) && (kind !== 'gallery' || hasGalleryImages) && (kind !== 'ui-walkthrough' || brief.images.length > 0));
 }
 
 function sceneGuideLines(kinds: readonly MotionSceneKind[]): string {

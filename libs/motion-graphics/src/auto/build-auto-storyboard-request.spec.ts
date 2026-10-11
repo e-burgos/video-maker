@@ -33,6 +33,11 @@ describe('buildAutoStoryboardRequest', () => {
     for (const kind of SCENE_KINDS) expect(request.systemPrompt).toContain(`- ${kind}: ${SCENE_GUIDE[kind]}`);
   });
 
+  it('offers the ui walkthrough only when the brief brings a capture to explain', () => {
+    expect(request.systemPrompt).toContain('- ui-walkthrough:');
+    expect(buildAutoStoryboardRequest({ ...brief, images: [] }, testBrand).systemPrompt).not.toContain('- ui-walkthrough:');
+  });
+
   it('states the hard rules of the contract', () => {
     expect(request.systemPrompt).toMatch(/ONLY a JSON object/u);
     expect(request.systemPrompt).toMatch(/number.*as words/u);

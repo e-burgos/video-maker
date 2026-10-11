@@ -133,6 +133,41 @@ const ConnectionsProps = z.strictObject({
 const DoDontProps = z.strictObject({ ...Headline, bad: z.strictObject({ title: Text, items: z.array(Text).min(1).max(3), cue: Cue.optional() }), good: z.strictObject({ title: Text, items: z.array(Text).min(1).max(3), cue: Cue.optional() }) });
 const CtaProps = z.strictObject({ tagline: Text.optional(), accent: Accent.optional(), button: Text, url: Text.optional(), buttonCue: Cue.optional() });
 
+const Unit = z.number().min(0).max(1);
+const UnitSize = z.number().gt(0).max(1);
+
+export const WALKTHROUGH_ACTIONS = ['move', 'click', 'type', 'highlight', 'callout', 'zoom'] as const;
+const TEXT_ACTIONS: ReadonlySet<string> = new Set(['type', 'callout']);
+const BOX_ACTIONS: ReadonlySet<string> = new Set(['type', 'highlight', 'zoom']);
+const OVERFLOW_TOLERANCE = 1e-6;
+
+const WalkthroughStep = z
+  .strictObject({
+    action: z.enum(WALKTHROUGH_ACTIONS).describe('move: cursor travels to x,y. click: cursor clicks at x,y. type: text is typed inside the field box. highlight: outlines the box. callout: speech bubble with text anchored at x,y. zoom: magnifies the region and returns'),
+    x: Unit.describe('Horizontal position over the capture, 0 = left edge, 1 = right edge. For boxes (type, highlight, zoom) it is the left edge of the box'),
+    y: Unit.describe('Vertical position over the capture, 0 = top edge, 1 = bottom edge. For boxes it is the top edge of the box'),
+    w: UnitSize.describe('Box width as a fraction of the capture width (type, highlight, zoom)').optional(),
+    h: UnitSize.describe('Box height as a fraction of the capture height (type, highlight, zoom)').optional(),
+    text: Text.describe('Required for type (the text typed) and callout (the bubble text)').optional(),
+    cue: Cue.optional(),
+    at: z.number().nonnegative().describe('Seconds from the scene start when the step happens; used only when there is no cue').optional(),
+  })
+  .superRefine((step, ctx) => {
+    if (TEXT_ACTIONS.has(step.action) && step.text === undefined) ctx.addIssue({ code: 'custom', path: ['text'], message: `text is required when action is "${step.action}"` });
+    if ((step.w !== undefined || step.h !== undefined) && !BOX_ACTIONS.has(step.action)) ctx.addIssue({ code: 'custom', path: ['w'], message: `w and h only apply to type, highlight and zoom, not "${step.action}"` });
+    if (step.w !== undefined && step.x + step.w > 1 + OVERFLOW_TOLERANCE) ctx.addIssue({ code: 'custom', path: ['w'], message: `box leaves the capture: x + w = ${step.x + step.w} must be at most 1` });
+    if (step.h !== undefined && step.y + step.h > 1 + OVERFLOW_TOLERANCE) ctx.addIssue({ code: 'custom', path: ['h'], message: `box leaves the capture: y + h = ${step.y + step.h} must be at most 1` });
+  });
+
+const UiWalkthroughProps = z.strictObject({
+  title: Text.optional(),
+  accent: Accent.optional(),
+  image: ImageRef.describe('Capture of the interface: project image path or brand asset. All step coordinates are fractions of this image'),
+  frame: z.enum(['browser', 'phone', 'none']).describe('Frame around the capture; default browser').optional(),
+  url: Text.describe('Address shown in the browser bar; only with frame browser').optional(),
+  steps: z.array(WalkthroughStep).min(1).max(8),
+});
+
 const sceneBase = {
   id: z.string().regex(/^[a-z][a-z0-9-]*$/u, 'kebab-case id'),
   chapter: Text.optional(),
@@ -159,6 +194,7 @@ export const MotionSceneSchema = z.discriminatedUnion('kind', [
   scene('gallery', GalleryProps),
   scene('step', StepProps),
   scene('connections', ConnectionsProps),
+  scene('ui-walkthrough', UiWalkthroughProps),
   scene('do-dont', DoDontProps),
   scene('cta', CtaProps),
 ]);
@@ -186,6 +222,7 @@ export const MotionStoryboardSchema = z
 
 export type MotionScreen = z.infer<typeof ScreenSchema>;
 export type MotionVisual = z.infer<typeof VisualSchema>;
+export type WalkthroughStepSpec = z.infer<typeof WalkthroughStep>;
 export type MotionChip = z.infer<typeof Chip>;
 export type MotionStoryboardScene = z.infer<typeof MotionSceneSchema>;
 export type MotionSceneKind = MotionStoryboardScene['kind'];
