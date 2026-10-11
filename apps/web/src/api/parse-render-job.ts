@@ -291,6 +291,16 @@ function isPublishJobReport(value: unknown): boolean {
   );
 }
 
+function isReviewJobReport(value: unknown): boolean {
+  return (
+    isRecord(value) &&
+    typeof value['file'] === 'string' &&
+    typeof value['reviewFile'] === 'string' &&
+    (value['status'] === 'pass' || value['status'] === 'warn' || value['status'] === 'fail') &&
+    isRecord(value['counts'])
+  );
+}
+
 function isRenderApiErrorPayload(value: unknown): value is RenderApiErrorPayload {
   return isRecord(value) && typeof value['code'] === 'string' && typeof value['message'] === 'string';
 }
@@ -339,6 +349,13 @@ function isJob(value: unknown): value is Job {
     return (
       (value['progress'] === null || isPublishJobProgress(value['progress'])) &&
       (value['report'] === null || isPublishJobReport(value['report']))
+    );
+  }
+
+  if (value['kind'] === 'review') {
+    return (
+      (value['progress'] === null || isPublishJobProgress(value['progress'])) &&
+      (value['report'] === null || isReviewJobReport(value['report']))
     );
   }
 
@@ -410,7 +427,7 @@ function isRenderJobSummary(value: unknown): value is RenderJobSummary {
       isMontageStage(value['stage']) ||
       isStoryboardStage(value['stage']) ||
       isVoiceStage(value['stage']) ||
-      (value['kind'] === 'publish' && typeof value['stage'] === 'string') ||
+      ((value['kind'] === 'publish' || value['kind'] === 'review') && typeof value['stage'] === 'string') ||
       (MOTION_STAGES as readonly string[]).includes(value['stage'] as string)) &&
     isStringOrNull(value['errorCode']) &&
     typeof value['createdAt'] === 'string' &&

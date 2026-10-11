@@ -178,6 +178,16 @@ function validateUniqueClipIds(tracks: z.infer<typeof TimelineTracksSchema>, ctx
   });
 }
 
+export const DELIVERY_KINDS = ['tutorial', 'motion', 'short'] as const;
+
+export const DeliveryContractSchema = z.strictObject({
+  kind: z.enum(DELIVERY_KINDS),
+  requiresVoice: z.boolean().optional(),
+  requiresCaptions: z.boolean().optional(),
+  maxDurationSec: z.number().positive().optional(),
+  format: z.string().min(1).optional(),
+});
+
 export const TimelineSchema = z
   .strictObject({
     schemaVersion: z.literal(1),
@@ -193,6 +203,7 @@ export const TimelineSchema = z
     safeZone: SafeZoneSchema.optional(),
     captionStyle: CaptionStyleSchema.optional(),
     captionTheme: CaptionThemeSchema.optional(),
+    delivery: DeliveryContractSchema.optional(),
   })
   .superRefine((timeline, ctx) => {
     validateUniqueClipIds(timeline.tracks, ctx);
@@ -205,6 +216,8 @@ export const TimelineSchema = z
     }
   });
 
+export type DeliveryKind = (typeof DELIVERY_KINDS)[number];
+export type DeliveryContract = z.infer<typeof DeliveryContractSchema>;
 export type CaptionTheme = z.infer<typeof CaptionThemeSchema>;
 export type ClipFit = z.infer<typeof ClipFitSchema>;
 export type ClipTransform = z.infer<typeof ClipTransformSchema>;

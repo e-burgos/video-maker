@@ -174,6 +174,7 @@ describe('publish job persistence', () => {
     categoryId: '22',
     madeForKids: false,
     defaultLanguage: 'es',
+    ignoreReview: true,
   };
 
   it('round-trips the publish parameters without the slug and the project root', () => {
@@ -184,6 +185,7 @@ describe('publish job persistence', () => {
       'defaultLanguage',
       'description',
       'file',
+      'ignoreReview',
       'kind',
       'madeForKids',
       'platform',
@@ -328,5 +330,46 @@ describe('parseStoredJob', () => {
     });
 
     expect(job.error).toEqual({ code: 'AI_AGENT_FAILED', stage: null, message: 'boom' });
+  });
+});
+
+describe('review job persistence', () => {
+  const REVIEW_INPUT: CreateJobInput = {
+    kind: 'review',
+    slug: 'demo-01',
+    projectRoot: '/media/demo-01',
+    file: 'out/video.mp4',
+  };
+
+  it('stores only the file and reads it back', () => {
+    const stored = toStoredParams(REVIEW_INPUT);
+
+    expect(stored).toEqual({ kind: 'review', file: 'out/video.mp4' });
+    expect(parseStoredParams('review', JSON.parse(JSON.stringify(stored)))).toEqual(stored);
+    expect(parseStoredParams('review', { file: 5 })).toBeNull();
+  });
+
+  it('reads a publish record stored before ignoreReview existed as not ignoring the review', () => {
+    const full = toStoredParams({
+      kind: 'publish',
+      slug: 'demo-01',
+      projectRoot: '/media/demo-01',
+      platform: 'youtube',
+      file: 'out/video.mp4',
+      title: 'T',
+      description: '',
+      tags: [],
+      privacy: 'public',
+      publishAt: null,
+      playlistId: null,
+      thumbnail: null,
+      categoryId: '22',
+      madeForKids: false,
+      defaultLanguage: 'es',
+      ignoreReview: true,
+    }) as Record<string, unknown>;
+    const legacy = Object.fromEntries(Object.entries(full).filter(([key]) => key !== 'ignoreReview'));
+
+    expect(parseStoredParams('publish', legacy)).toMatchObject({ ignoreReview: false });
   });
 });

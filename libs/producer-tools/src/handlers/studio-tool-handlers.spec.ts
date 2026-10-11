@@ -199,6 +199,70 @@ describe('createStudioToolHandlers', () => {
     expect(client.calls).toEqual([{ method: 'getMotionStoryboard', args: [] }]);
   });
 
+  describe('get_render_review', () => {
+    const review = {
+      file: 'out/video.mp4',
+      status: 'fail' as const,
+      createdAt: '2026-10-11T10:00:00.000Z',
+      metrics: { masterIntegratedLufs: -17.2, voiceMusicMarginDb: null },
+      findings: [
+        {
+          id: 'f1',
+          check: 'master',
+          severity: 'critical' as const,
+          message: 'Master too quiet',
+          timeRange: { startSec: 1, endSec: 2 },
+          proposedFix: 'Raise the master gain',
+        },
+      ],
+    };
+
+    it('returns the summary of the review the client found', async () => {
+      const { handlers, client } = handlersWith({ getRenderReview: async () => review });
+
+      const result = await handlers.get_render_review({ file: 'out/video.mp4' });
+
+      expect(result.data).toEqual({
+        file: 'out/video.mp4',
+        status: 'fail',
+        createdAt: '2026-10-11T10:00:00.000Z',
+        metrics: review.metrics,
+        findings: [
+          {
+            id: 'f1',
+            check: 'master',
+            severity: 'critical',
+            message: 'Master too quiet',
+            timeRange: { startSec: 1, endSec: 2 },
+            proposedFix: 'Raise the master gain',
+          },
+        ],
+      });
+      expect(client.calls).toEqual([{ method: 'getRenderReview', args: ['out/video.mp4'] }]);
+    });
+
+    it('asks for the latest review when no file is given', async () => {
+      const { handlers, client } = handlersWith({ getRenderReview: async () => review });
+
+      await handlers.get_render_review({});
+
+      expect(client.calls).toEqual([{ method: 'getRenderReview', args: [undefined] }]);
+    });
+
+    it('says nothing was reviewed when the client finds no review', async () => {
+      const { handlers } = handlersWith({ getRenderReview: async () => null });
+
+      await expect(handlers.get_render_review({})).rejects.toMatchObject({ code: 'FILE_NOT_FOUND' });
+    });
+
+    it('rejects a file outside out/ before calling the client', async () => {
+      const { handlers, client } = handlersWith();
+
+      await expect(handlers.get_render_review({ file: 'raw/video.mp4' })).rejects.toMatchObject({ code: 'INVALID_INPUT' });
+      expect(client.calls).toEqual([]);
+    });
+  });
+
   it('probe_media forwards the path and returns the client result', async () => {
     const { handlers, client } = handlersWith({
       probeMedia: async (path) => ({ path, durationMs: 1000, video: null, audio: null }),

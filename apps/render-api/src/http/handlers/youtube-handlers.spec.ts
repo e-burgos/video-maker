@@ -1,4 +1,4 @@
-import type { MediaAsset } from '@video-maker/timeline-core';
+import type { MediaAsset, ReviewReport } from '@video-maker/timeline-core';
 import { describe, expect, it } from 'vitest';
 
 import { createCallLog } from '../../__fixtures__/call-log';
@@ -326,8 +326,8 @@ describe('GET /projects/:slug/publish/youtube/options', () => {
 
     expect(Object.keys(body).sort()).toEqual(['defaults', 'files', 'playlists']);
     expect(body.files.map((file) => file.path)).toEqual(['out/short.mp4', 'out/video.mp4']);
-    expect(Object.keys(body.files[0] ?? {}).sort()).toEqual(['durationSec', 'height', 'isShort', 'path', 'sizeBytes', 'width']);
-    expect(body.files[0]).toEqual({ path: 'out/short.mp4', durationSec: 30, width: 1080, height: 1920, isShort: true, sizeBytes: 3 });
+    expect(Object.keys(body.files[0] ?? {}).sort()).toEqual(['durationSec', 'height', 'isShort', 'path', 'reviewStatus', 'sizeBytes', 'width']);
+    expect(body.files[0]).toEqual({ path: 'out/short.mp4', durationSec: 30, width: 1080, height: 1920, isShort: true, sizeBytes: 3, reviewStatus: null });
     expect(body.files[1]).toMatchObject({ path: 'out/video.mp4', durationSec: 42, isShort: false, sizeBytes: 10 });
     expect(body.playlists).toEqual([{ id: 'PL1', title: 'Tutoriales' }]);
     expect(body.defaults).toEqual({ privacy: 'public' });
@@ -620,5 +620,176 @@ describe('GET /projects/:slug/publications and the project list', () => {
       url: 'https://youtu.be/vid123',
       status: 'published',
     });
+  });
+});
+
+function reviewReport(status: ReviewReport['status']): ReviewReport {
+  const critical: ReviewReport['findings'] = [
+    {
+      id: 'voice-music-margin-01',
+      check: 'voice-music-margin',
+      severity: 'critical',
+      message: 'La música tapa la voz.',
+      timeRange: { startSec: 1, endSec: 4 },
+      proposedFix: 'Bajar la música 6 dB.',
+    },
+  ];
+  const suggestion: ReviewReport['findings'] = [
+    { id: 'master-loudness-01', check: 'master-loudness', severity: 'suggestion', message: 'Máster alto.' },
+  ];
+  return {
+    version: 1,
+    file: 'out/video.mp4',
+    createdAt: '2026-10-11T12:00:00.000Z',
+    status,
+    delivery: { kind: 'tutorial' },
+    metrics: { masterIntegratedLufs: -14.2, voiceMusicMarginDb: status === 'fail' ? 4.4 : null },
+    findings: status === 'fail' ? [...critical, ...suggestion] : status === 'warn' ? suggestion : [],
+  };
+}
+
+function reviewFileSeed(status: ReviewReport['status']): FakeObjectStorageFileSeed {
+  return { path: '/media/promo/out/video.review.json', contents: JSON.stringify(reviewReport(status)) };
+}
+
+describe('GET /projects/:slug/reviews', () => {
+  it('lists the reviews of out/ with exactly file, reviewFile, status, counts and createdAt', async () => {
+    const h = harness({ files: [reviewFileSeed('fail')] });
+
+    const response = await call(h, 'GET', '/projects/promo/reviews');
+    const body = response.body as { reviews: Array<Record<string, unknown>> };
+
+    expect(response.status).toBe(200);
+    expect(Object.keys(body)).toEqual(['reviews']);
+    expect(Object.keys(body.reviews[0] ?? {}).sort()).toEqual(['counts', 'createdAt', 'file', 'reviewFile', 'status']);
+    expect(body.reviews[0]).toEqual({
+      file: 'out/video.mp4',
+      reviewFile: 'out/video.review.json',
+      status: 'fail',
+      counts: { critical: 1, suggestion: 1, nitpick: 0 },
+      createdAt: '2026-10-11T12:00:00.000Z',
+    });
+  });
+
+  it('answers an empty list when there are no reviews and skips unreadable review files', async () => {
+    const broken: FakeObjectStorageFileSeed = { path: '/media/promo/out/broken.review.json', contents: '{"nope":true}' };
+    const h = harness({ files: [broken] });
+
+    const response = await call(h, 'GET', '/projects/promo/reviews');
+
+    expect(response.body).toEqual({ reviews: [] });
+  });
+
+  it('returns the full report for ?file=', async () => {
+    const h = harness({ files: [reviewFileSeed('fail')] });
+
+    const response = await call(h, 'GET', '/projects/promo/reviews?file=out/video.mp4');
+    const body = response.body as ReviewReport;
+
+    expect(response.status).toBe(200);
+    expect(Object.keys(body).sort()).toEqual(['createdAt', 'delivery', 'file', 'findings', 'metrics', 'status', 'version']);
+    expect(Object.keys(body.findings[0] ?? {}).sort()).toEqual(['check', 'id', 'message', 'proposedFix', 'severity', 'timeRange']);
+  });
+
+  it('answers 404 REVIEW_NOT_FOUND for a render without review and 422 for an invalid file', async () => {
+    const h = harness();
+
+    const missing = await call(h, 'GET', '/projects/promo/reviews?file=out/video.mp4');
+    expect(missing.status).toBe(404);
+    expect((missing.body as { error: { code: string } }).error.code).toBe('REVIEW_NOT_FOUND');
+
+    const invalid = await call(h, 'GET', '/projects/promo/reviews?file=raw/video.mp4');
+    expect(invalid.status).toBe(422);
+    expect((invalid.body as { error: { code: string } }).error.code).toBe('REVIEW_FILE_INVALID');
+  });
+});
+
+describe('publish options reviewStatus', () => {
+  it('adds the review status of each mp4 and null when it has none', async () => {
+    const h = harness({
+      files: [reviewFileSeed('warn'), { path: '/media/promo/out/other.mp4', contents: 'abc' }],
+    });
+
+    const response = await call(h, 'GET', '/projects/promo/publish/youtube/options');
+    const files = (response.body as { files: Array<{ path: string; reviewStatus: string | null }> }).files;
+
+    expect(files.map((file) => [file.path, file.reviewStatus]).sort()).toEqual([
+      ['out/other.mp4', null],
+      ['out/video.mp4', 'warn'],
+    ]);
+  });
+});
+
+describe('publish precondition RENDER_REVIEW_FAILED', () => {
+  it('blocks a publish whose review failed with 409 and the critical findings in the hint', async () => {
+    const h = harness({ files: [reviewFileSeed('fail')] });
+    await h.connect();
+
+    const payload = await errorOf(createJob(h, {}));
+
+    expect(payload.code).toBe('RENDER_REVIEW_FAILED');
+    expect(payload.hint).toContain('La música tapa la voz.');
+    expect(httpStatusFor(payload.code)).toBe(409);
+  });
+
+  it('lets the publish through with ignoreReview true', async () => {
+    const h = harness({ files: [reviewFileSeed('fail')] });
+    await h.connect();
+
+    const response = await createJob(h, { ignoreReview: true });
+
+    expect(response.status).toBe(202);
+    await h.runtime.jobs.whenIdle();
+  });
+
+  it('does not block on a warn review, on a pass review or without any review', async () => {
+    for (const files of [[reviewFileSeed('warn')], [reviewFileSeed('pass')], []]) {
+      const h = harness({ files });
+      await h.connect();
+
+      expect((await createJob(h, {})).status).toBe(202);
+      await h.runtime.jobs.whenIdle();
+    }
+  });
+
+  it('rejects a non-boolean ignoreReview', async () => {
+    const h = harness();
+    await h.connect();
+
+    const payload = await errorOf(createJob(h, { ignoreReview: 'yes' }));
+
+    expect(payload.code).toBe('INVALID_INPUT');
+  });
+});
+
+describe('review job creation', () => {
+  function createReview(h: ReturnType<typeof harness>, file: unknown) {
+    return handleCreateRenderJob(
+      h.deps,
+      STORE,
+      { slug: 'promo' },
+      requestLine({ method: 'POST', path: '/projects/promo/jobs', body: jsonBody({ kind: 'review', file }) }),
+      h.runtime,
+    );
+  }
+
+  it('answers 202 with a review job for an existing mp4 and settles with the report shape', async () => {
+    const h = harness();
+
+    const response = await createReview(h, 'out/video.mp4');
+    await h.runtime.jobs.whenIdle();
+    const settled = h.runtime.jobs.get((response.body as Job).id);
+
+    expect(response.status).toBe(202);
+    expect((response.body as Job).kind).toBe('review');
+    expect(settled?.state).toBe('failed');
+    expect(settled?.error?.code).toBe('REVIEW_INPUTS_UNAVAILABLE');
+  });
+
+  it('rejects a path outside out/ or a missing file with REVIEW_FILE_INVALID', async () => {
+    const h = harness();
+
+    expect((await errorOf(createReview(h, 'raw/video.mp4'))).code).toBe('REVIEW_FILE_INVALID');
+    expect((await errorOf(createReview(h, 'out/missing.mp4'))).code).toBe('REVIEW_FILE_INVALID');
   });
 });

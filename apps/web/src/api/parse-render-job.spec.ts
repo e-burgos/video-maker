@@ -162,6 +162,26 @@ describe('parseRenderJob', () => {
 });
 
 describe('parseRenderJobListing', () => {
+  it('accepts the automatic review jobs that follow a render', () => {
+    const listing = {
+      slug: 'smoke-ingest',
+      jobs: [
+        {
+          id: 'job-0002',
+          kind: 'review' as const,
+          state: 'running' as const,
+          stage: 'measure',
+          errorCode: null,
+          createdAt: '2026-10-11T10:00:00.000Z',
+          startedAt: '2026-10-11T10:00:01.000Z',
+          finishedAt: null,
+        },
+      ],
+    };
+
+    expect(parseRenderJobListing(listing)).toEqual(listing);
+  });
+
   it('narrows a listing of job summaries', () => {
     const listing = {
       slug: 'smoke-ingest',

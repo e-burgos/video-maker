@@ -120,6 +120,14 @@ const PUBLIC_VALUE_EXPORTS = [
   'splitVoiceScriptLines',
   'CaptionStyleSchema',
   'CaptionThemeSchema',
+  'DELIVERY_KINDS',
+  'DeliveryContractSchema',
+  'REVIEW_SEVERITIES',
+  'ReviewFindingSchema',
+  'ReviewReportSchema',
+  'ReviewSeveritySchema',
+  'ReviewStatusSchema',
+  'reviewStatusFor',
   'CAPTION_STYLES',
   'captionGroupingForStyle',
   'isCaptionStyle',
@@ -1002,5 +1010,28 @@ describe('TimelineSchema captionTheme', () => {
     expect(
       TimelineSchema.safeParse({ ...minimalTimeline, captionTheme: { ...captionTheme, textColor: 'white' } }).success,
     ).toBe(false);
+  });
+});
+
+describe('Timeline delivery contract', () => {
+  it('acepta una Timeline sin contrato de entrega', () => {
+    expect(TimelineSchema.safeParse(minimalTimeline).success).toBe(true);
+  });
+
+  it('acepta un contrato de entrega completo', () => {
+    const delivery = {
+      kind: 'short',
+      requiresVoice: true,
+      requiresCaptions: true,
+      maxDurationSec: 180,
+      format: 'vertical-1080x1920',
+    };
+
+    expect(TimelineSchema.safeParse({ ...minimalTimeline, delivery }).success).toBe(true);
+  });
+
+  it('rechaza un kind desconocido y claves extra', () => {
+    expect(TimelineSchema.safeParse({ ...minimalTimeline, delivery: { kind: 'podcast' } }).success).toBe(false);
+    expect(TimelineSchema.safeParse({ ...minimalTimeline, delivery: { kind: 'short', extra: 1 } }).success).toBe(false);
   });
 });

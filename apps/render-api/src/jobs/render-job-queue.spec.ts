@@ -663,7 +663,7 @@ describe('createRenderJobQueue — persistence across a restart', () => {
     const restarted = createRenderJobQueue(deps);
 
     expect(restarted.get(job.id)).toMatchObject({ id: job.id, state: 'succeeded' });
-    expect(restarted.listBySlug('acme-launch').map((entry) => entry.id)).toEqual([job.id]);
+    expect(restarted.listBySlug('acme-launch').filter((entry) => entry.kind === 'render').map((entry) => entry.id)).toEqual([job.id]);
   });
 
   it('after a restart, the new queue sees the old job from the store and a new one live in its own map', async () => {
@@ -684,7 +684,7 @@ describe('createRenderJobQueue — persistence across a restart', () => {
     const newJob = restartedQueue.create(createInput(liveDeps, 'acme-launch'));
 
     const listed = restartedQueue.listBySlug('acme-launch');
-    expect(listed.map((entry) => entry.id)).toEqual([oldJob.id, newJob.id]);
+    expect(listed.filter((entry) => entry.kind === 'render').map((entry) => entry.id)).toEqual([oldJob.id, newJob.id]);
 
     controllable.resolve(DEFAULT_RENDER_OUTPUT);
     await restartedQueue.whenIdle();

@@ -29,6 +29,7 @@ export interface PublishJobInput {
   readonly categoryId: string;
   readonly madeForKids: boolean;
   readonly defaultLanguage: string | null;
+  readonly ignoreReview: boolean;
 }
 
 function invalid(resource: string, expected: string): PipelineStageError {
@@ -120,6 +121,16 @@ function parseThumbnail(value: unknown): string | null {
   return thumbnail;
 }
 
+function parseIgnoreReview(value: unknown): boolean {
+  if (value === undefined) {
+    return false;
+  }
+  if (typeof value !== 'boolean') {
+    throw invalid('ignoreReview', 'a boolean');
+  }
+  return value;
+}
+
 function parseMadeForKids(value: unknown): boolean {
   if (value === undefined) {
     return false;
@@ -149,5 +160,6 @@ export function parsePublishJobInput(body: Readonly<Record<string, unknown>>, no
     categoryId: parseOptionalText(body.categoryId, 'categoryId') ?? YOUTUBE_DEFAULT_CATEGORY_ID,
     madeForKids: parseMadeForKids(body.madeForKids),
     defaultLanguage: parseOptionalText(body.defaultLanguage, 'defaultLanguage'),
+    ignoreReview: parseIgnoreReview(body.ignoreReview),
   };
 }

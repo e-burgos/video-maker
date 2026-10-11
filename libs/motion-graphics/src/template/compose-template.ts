@@ -6,6 +6,8 @@ import type { MotionTimeline, SceneWords } from './motion-timeline';
 export const WHOOSH_LEAD = 0.28;
 const PLACEHOLDER = /\{\{([a-z_:0-9-]+)\}\}/gu;
 
+export const MOTION_MUSIC_TRACK_VOLUME = 0.8;
+
 const round = (value: number): number => Math.round(value * 1000) / 1000;
 
 export function wordTime(timeline: MotionTimeline, words: SceneWords, sceneId: string, prefix: string): number {
@@ -45,7 +47,7 @@ function withSceneText(timeline: MotionTimeline, script: MotionScript): MotionTi
 
 function musicTrack(timeline: MotionTimeline, script: MotionScript): string {
   if (script.music === null) return '';
-  return `<audio id="music" src="assets/audio/music.wav" data-start="0" data-duration="${timeline.duration}" data-track-index="10" data-volume="0.8" data-automation='${JSON.stringify(timeline.musicAutomation)}'></audio>`;
+  return `<audio id="music" src="assets/audio/music.wav" data-start="0" data-duration="${timeline.duration}" data-track-index="10" data-volume="${MOTION_MUSIC_TRACK_VOLUME}" data-automation='${JSON.stringify(timeline.musicAutomation)}'></audio>`;
 }
 
 export function templateValues(script: MotionScript, timeline: MotionTimeline, words: SceneWords): Map<string, string> {

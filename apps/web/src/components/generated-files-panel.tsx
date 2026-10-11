@@ -15,6 +15,7 @@ import { useRenderApi } from '../api/render-api-context';
 import { useAsyncResource } from '../hooks/use-async-resource';
 import { useT } from '../i18n/language-context';
 import { ErrorNotice } from './error-notice';
+import { RenderReviewPanel } from './render-review-panel';
 import type { VoiceScriptManifest } from '@video-maker/timeline-core';
 import type { AssetListing, GeneratedFile, GeneratedListing, VoiceDocument } from '../api/render-api-types';
 
@@ -135,7 +136,7 @@ export function GeneratedFilesPanel({ slug, assets }: GeneratedFilesPanelProps) 
       {group.deliverables.length > 0 && (
         <div data-testid="generated-deliverables" className="space-y-2">
           <p className="text-sm text-slate-300">{t('generated.deliverables')}</p>
-          <ul className="grid gap-3 sm:grid-cols-2">
+          <ul className="grid gap-3">
             {group.deliverables.map((file) => (
               <li key={file.path} className="space-y-1 rounded-lg border border-slate-800 bg-slate-900/40 p-3">
                 <video
@@ -151,6 +152,7 @@ export function GeneratedFilesPanel({ slug, assets }: GeneratedFilesPanelProps) 
                   </a>
                   <FileMeta file={file} />
                 </div>
+                <RenderReviewPanel slug={slug} file={file.path} />
               </li>
             ))}
           </ul>

@@ -138,6 +138,10 @@ const STATUS_BY_CODE: Readonly<Record<RenderApiErrorCode, number>> = {
   YOUTUBE_UPLOAD_FAILED: 502,
   YOUTUBE_QUOTA_EXCEEDED: 429,
   PUBLISH_FILE_INVALID: 422,
+  REVIEW_FILE_INVALID: 422,
+  REVIEW_INPUTS_UNAVAILABLE: 409,
+  REVIEW_NOT_FOUND: 404,
+  RENDER_REVIEW_FAILED: 409,
 };
 
 export function httpStatusFor(code: RenderApiErrorCode): number {

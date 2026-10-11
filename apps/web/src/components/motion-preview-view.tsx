@@ -5,6 +5,7 @@ import type { MotionOverviewScene } from '../api/motion-types';
 import { useMotionOverview } from '../hooks/use-motion-overview';
 import { useT } from '../i18n/language-context';
 import { MotionViewEmpty, MotionViewShell } from './motion-view-shell';
+import { RenderReviewPanel } from './render-review-panel';
 import { YouTubePublishSection } from './youtube-publish-section';
 
 export type MotionPreviewViewProps = {
@@ -92,6 +93,8 @@ export function MotionPreviewView({ slug }: MotionPreviewViewProps) {
             {timeline !== null &&
               ` · ${t('motionPreview.duration', { seconds: timeline.durationSec.toFixed(1) })}`}
           </p>
+
+          <RenderReviewPanel slug={slug} file={video.path} />
 
           {video.credits !== null && (
             <div data-testid="motion-preview-credits" className="space-y-1">

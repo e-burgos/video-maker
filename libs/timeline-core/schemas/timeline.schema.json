@@ -731,6 +731,37 @@
         "boxColor"
       ],
       "additionalProperties": false
+    },
+    "delivery": {
+      "type": "object",
+      "properties": {
+        "kind": {
+          "type": "string",
+          "enum": [
+            "tutorial",
+            "motion",
+            "short"
+          ]
+        },
+        "requiresVoice": {
+          "type": "boolean"
+        },
+        "requiresCaptions": {
+          "type": "boolean"
+        },
+        "maxDurationSec": {
+          "type": "number",
+          "exclusiveMinimum": 0
+        },
+        "format": {
+          "type": "string",
+          "minLength": 1
+        }
+      },
+      "required": [
+        "kind"
+      ],
+      "additionalProperties": false
     }
   },
   "required": [

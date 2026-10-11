@@ -63,7 +63,7 @@ describe('render api client — youtube', () => {
   it('reads the publish options and the metadata draft', async () => {
     const options = clientAnswering(() =>
       json({
-        files: [{ path: 'out/v.mp4', durationSec: 10, width: 1920, height: 1080, isShort: false, sizeBytes: 5 }],
+        files: [{ path: 'out/v.mp4', durationSec: 10, width: 1920, height: 1080, isShort: false, sizeBytes: 5, reviewStatus: null }],
         playlists: [{ id: 'PL1', title: 'List' }],
         defaults: { privacy: 'public' },
       }),

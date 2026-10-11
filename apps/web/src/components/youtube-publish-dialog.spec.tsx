@@ -16,8 +16,8 @@ const CONNECTED: YouTubeIntegration = {
 
 const OPTIONS: YouTubePublishOptions = {
   files: [
-    { path: 'out/short.mp4', durationSec: 45, width: 1080, height: 1920, isShort: true, sizeBytes: 4_200_000 },
-    { path: 'out/video.mp4', durationSec: 125, width: 1920, height: 1080, isShort: false, sizeBytes: 21_000_000 },
+    { path: 'out/short.mp4', durationSec: 45, width: 1080, height: 1920, isShort: true, sizeBytes: 4_200_000, reviewStatus: null },
+    { path: 'out/video.mp4', durationSec: 125, width: 1920, height: 1080, isShort: false, sizeBytes: 21_000_000, reviewStatus: null },
   ],
   playlists: [{ id: 'PL1', title: 'Tutorials' }],
   defaults: { privacy: 'public' },
@@ -354,5 +354,77 @@ describe('YouTubePublishDialog', () => {
 
     await waitFor(() => expect(retryJob).toHaveBeenCalledWith('job-1'));
     await waitFor(() => expect(screen.queryByRole('alert')).toBeNull());
+  });
+
+  describe('automatic review', () => {
+    const FAILING_OPTIONS: YouTubePublishOptions = {
+      ...OPTIONS,
+      files: OPTIONS.files.map((file, index) => ({ ...file, reviewStatus: index === 0 ? 'fail' : 'warn' })),
+    };
+    const FAILING_REPORT = {
+      version: 1,
+      file: 'out/short.mp4',
+      createdAt: '2026-10-11T10:00:00.000Z',
+      status: 'fail',
+      delivery: { kind: 'short', requiresVoice: false, requiresCaptions: false },
+      metrics: {},
+      findings: [
+        { id: 'f1', check: 'master', severity: 'critical', message: 'Master too loud', proposedFix: 'Lower it' },
+        { id: 'f2', check: 'captions', severity: 'suggestion', message: 'Caption too long' },
+      ],
+    };
+
+    function reviewClient(createPublishJob = vi.fn().mockResolvedValue(job())) {
+      return baseClient({
+        getYouTubePublishOptions: vi.fn().mockResolvedValue(FAILING_OPTIONS),
+        getRenderReview: vi.fn().mockResolvedValue(FAILING_REPORT),
+        createPublishJob,
+        getRenderJob: vi.fn().mockResolvedValue(job()),
+      });
+    }
+
+    it('lists the critical findings and blocks publishing until the review is ignored explicitly', async () => {
+      const createPublishJob = vi.fn().mockResolvedValue(job());
+      renderDialog(reviewClient(createPublishJob));
+
+      await waitForForm();
+      fireEvent.change(screen.getByLabelText('Title'), { target: { value: 'Risky' } });
+      fireEvent.click(screen.getByLabelText('Private'));
+
+      await waitFor(() => expect(screen.getByText('Master too loud')).toBeTruthy());
+      expect(screen.queryByText('Caption too long')).toBeNull();
+      expect((screen.getByTestId('youtube-publish-submit') as HTMLButtonElement).disabled).toBe(true);
+
+      fireEvent.click(screen.getByRole('checkbox', { name: 'Publish anyway (ignore the review)' }));
+      fireEvent.click(screen.getByTestId('youtube-publish-submit'));
+
+      await waitFor(() => expect(createPublishJob).toHaveBeenCalledTimes(1));
+      expect(createPublishJob).toHaveBeenCalledWith('demo', expect.objectContaining({ ignoreReview: true }));
+    });
+
+    it('only warns softly when the review has suggestions and never sends ignoreReview', async () => {
+      const createPublishJob = vi.fn().mockResolvedValue(job());
+      renderDialog(reviewClient(createPublishJob));
+
+      await waitForForm();
+      fireEvent.change(screen.getByLabelText('Video'), { target: { value: 'out/video.mp4' } });
+      fireEvent.change(screen.getByLabelText('Title'), { target: { value: 'Fine' } });
+      fireEvent.click(screen.getByLabelText('Private'));
+
+      expect(screen.getByTestId('youtube-review-warn')).toBeTruthy();
+      expect(screen.queryByRole('checkbox', { name: 'Publish anyway (ignore the review)' })).toBeNull();
+
+      fireEvent.click(screen.getByTestId('youtube-publish-submit'));
+      await waitFor(() => expect(createPublishJob).toHaveBeenCalledTimes(1));
+      expect(createPublishJob.mock.calls[0]?.[1]).not.toHaveProperty('ignoreReview');
+    });
+
+    it('shows no review notice for files without a failing or warning review', async () => {
+      renderDialog(baseClient());
+
+      await waitForForm();
+      expect(screen.queryByTestId('youtube-review-fail')).toBeNull();
+      expect(screen.queryByTestId('youtube-review-warn')).toBeNull();
+    });
   });
 });

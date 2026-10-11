@@ -57,6 +57,8 @@ export {
   LOGO_BUMPER_ANIMATIONS,
   LogoBumperAnimationSchema,
   LogoBumperSchema,
+  DELIVERY_KINDS,
+  DeliveryContractSchema,
   LogoOverlaySchema,
   LogoPositionSchema,
   MAX_LOGO_BUMPER_DURATION_MS,
@@ -70,6 +72,8 @@ export type {
   AudioClip,
   CaptionClip,
   CaptionTheme,
+  DeliveryContract,
+  DeliveryKind,
   LogoBumper,
   LogoBumperAnimation,
   LogoOverlay,
@@ -227,3 +231,13 @@ export {
   upsertVoiceTrack,
 } from './voice/merge-voice-manifest';
 
+
+export {
+  ReviewFindingSchema,
+  ReviewReportSchema,
+  ReviewSeveritySchema,
+  ReviewStatusSchema,
+  REVIEW_SEVERITIES,
+  reviewStatusFor,
+} from './review/review-report';
+export type { ReviewFinding, ReviewReport, ReviewSeverity, ReviewStatus } from './review/review-report';

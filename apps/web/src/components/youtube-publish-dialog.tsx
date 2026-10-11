@@ -19,6 +19,7 @@ import type { TranslationKey } from '../i18n/messages-en';
 import { ErrorNotice } from './error-notice';
 import { Modal } from './modal';
 import { Badge } from './ui/badge';
+import { PublishReviewNotice } from './publish-review-notice';
 import { YouTubeMetadataFields } from './youtube-metadata-fields';
 import { YouTubePublishProgress } from './youtube-publish-progress';
 import { YouTubeVisibilityFields } from './youtube-visibility-fields';
@@ -110,6 +111,7 @@ export function YouTubePublishDialog({ slug, onClose, onPublished }: YouTubePubl
   const [phase, setPhase] = useState<Phase>('form');
   const [jobId, setJobId] = useState<string | null>(null);
   const [attempt, setAttempt] = useState(0);
+  const [ignoreReview, setIgnoreReview] = useState(false);
 
   const optionsData = options.data;
   const initialValues = useMemo(
@@ -132,7 +134,9 @@ export function YouTubePublishDialog({ slug, onClose, onPublished }: YouTubePubl
 
   const issues = publishIssues(values, new Date());
   const visibleIssues = issues.filter((issue) => issue !== 'titleEmpty' && issue !== 'fileMissing');
-  const canSubmit = issues.length === 0 && publish.status !== 'pending';
+  const selectedFile = optionsData?.files.find((file) => file.path === values.file) ?? null;
+  const reviewBlocksPublish = selectedFile?.reviewStatus === 'fail' && !ignoreReview;
+  const canSubmit = issues.length === 0 && publish.status !== 'pending' && !reviewBlocksPublish;
 
   function close(): void {
     if (jobId !== null) {
@@ -149,7 +153,7 @@ export function YouTubePublishDialog({ slug, onClose, onPublished }: YouTubePubl
   }
 
   async function startUpload() {
-    const job = await publish.run(buildPublishInput(values));
+    const job = await publish.run(buildPublishInput(values, ignoreReview && selectedFile?.reviewStatus === 'fail'));
     if (job !== null) {
       setJobId(job.id);
       setPhase('job');
@@ -255,7 +259,10 @@ export function YouTubePublishDialog({ slug, onClose, onPublished }: YouTubePubl
                   id="youtube-file"
                   value={values.file}
                   disabled={formDisabled}
-                  onChange={(event) => patch({ file: event.target.value })}
+                  onChange={(event) => {
+                    patch({ file: event.target.value });
+                    setIgnoreReview(false);
+                  }}
                   className={SELECT_CLASS}
                 >
                   {optionsData.files.map((file) => (
@@ -266,6 +273,17 @@ export function YouTubePublishDialog({ slug, onClose, onPublished }: YouTubePubl
                 </select>
                 <SelectedFileSummary options={optionsData} path={values.file} />
               </div>
+
+              {selectedFile !== null && selectedFile.reviewStatus !== null && selectedFile.reviewStatus !== 'pass' && (
+                <PublishReviewNotice
+                  slug={slug}
+                  file={selectedFile.path}
+                  status={selectedFile.reviewStatus}
+                  ignoreReview={ignoreReview}
+                  disabled={formDisabled}
+                  onIgnoreReviewChange={setIgnoreReview}
+                />
+              )}
 
               <div className="space-y-2">
                 <button

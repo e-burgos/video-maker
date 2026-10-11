@@ -123,6 +123,21 @@ export interface RenderApiImagePreview {
   readonly previewPath: string;
 }
 
+export interface RenderApiRenderReview {
+  readonly file: string;
+  readonly status: 'pass' | 'warn' | 'fail';
+  readonly createdAt: string;
+  readonly metrics: Readonly<Record<string, number | null>>;
+  readonly findings: readonly {
+    readonly id: string;
+    readonly check: string;
+    readonly severity: 'critical' | 'suggestion' | 'nitpick';
+    readonly message: string;
+    readonly timeRange?: { readonly startSec: number; readonly endSec: number };
+    readonly proposedFix?: string;
+  }[];
+}
+
 export interface RenderApiClient {
   getProjectDetail(): Promise<RenderApiProjectDetail>;
   listProjectAssets(): Promise<readonly RenderApiAssetEntry[]>;
@@ -157,6 +172,8 @@ export interface RenderApiClient {
   ): Promise<readonly RenderApiFreeMediaResult[]>;
   importMedia(resultId: string): Promise<{ readonly path: string; readonly credit: Readonly<Record<string, unknown>> }>;
   previewImages(paths: readonly string[]): Promise<readonly RenderApiImagePreview[]>;
+
+  getRenderReview(file: string | undefined): Promise<RenderApiRenderReview | null>;
 
   listMotionBrands(): Promise<readonly RenderApiMotionBrand[]>;
   getMotionBrief(): Promise<Readonly<Record<string, unknown>>>;

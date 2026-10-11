@@ -15,6 +15,7 @@ import type {
   RenderApiPendingAsset,
   RenderApiProbeResult,
   RenderApiProjectDetail,
+  RenderApiRenderReview,
   RenderApiVoice,
 } from './render-api-client';
 
@@ -52,6 +53,12 @@ const MOTION_MISSING_DOCUMENT_ERROR_CODES: ReadonlySet<string> = new Set([
 function mapRenderApiErrorCode(code: string, context: ErrorContext): StudioToolErrorCode {
   if (isKnownStudioErrorCode(code)) {
     return code;
+  }
+  if (code === 'REVIEW_NOT_FOUND') {
+    return 'FILE_NOT_FOUND';
+  }
+  if (code === 'REVIEW_FILE_INVALID') {
+    return 'INVALID_INPUT';
   }
   if (code === 'TIMELINE_NOT_FOUND') {
     return 'FILE_NOT_FOUND';
@@ -309,6 +316,20 @@ export function createHttpRenderApiClient(options: HttpRenderApiClientOptions): 
         previews: readonly RenderApiImagePreview[];
       };
       return json.previews;
+    },
+
+    getRenderReview: async (file) => {
+      if (file !== undefined) {
+        return (await request('GET', `/projects/${slug}/reviews?file=${encodeURIComponent(file)}`)) as RenderApiRenderReview;
+      }
+      const listing = (await request('GET', `/projects/${slug}/reviews`)) as {
+        reviews: readonly { file: string; createdAt: string }[];
+      };
+      const latest = [...listing.reviews].sort((a, b) => b.createdAt.localeCompare(a.createdAt))[0];
+      if (latest === undefined) {
+        return null;
+      }
+      return (await request('GET', `/projects/${slug}/reviews?file=${encodeURIComponent(latest.file)}`)) as RenderApiRenderReview;
     },
 
     listMotionBrands: async () => {

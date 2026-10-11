@@ -266,6 +266,43 @@ describe('createHttpRenderApiClient', () => {
     expect(calls[0]?.url).toBe('http://127.0.0.1:4599/motion/brands');
   });
 
+  it('getRenderReview with a file reads that review', async () => {
+    const { fetchImpl, calls } = createFakeFetch(() => jsonResponse(200, { file: 'out/a.mp4', status: 'pass' }));
+
+    await client(fetchImpl).getRenderReview('out/a.mp4');
+
+    expect(calls[0]?.url).toBe('http://127.0.0.1:4599/projects/pitch-deck/reviews?file=out%2Fa.mp4');
+  });
+
+  it('getRenderReview without a file reads the most recent review', async () => {
+    const { fetchImpl, calls } = createFakeFetch((call) =>
+      call.url.includes('?file=')
+        ? jsonResponse(200, { file: 'out/new.mp4', status: 'warn' })
+        : jsonResponse(200, {
+            reviews: [
+              { file: 'out/old.mp4', createdAt: '2026-10-01T00:00:00.000Z' },
+              { file: 'out/new.mp4', createdAt: '2026-10-10T00:00:00.000Z' },
+            ],
+          }),
+    );
+
+    const review = await client(fetchImpl).getRenderReview(undefined);
+
+    expect(review).toMatchObject({ file: 'out/new.mp4' });
+    expect(calls.map((call) => call.url)).toEqual([
+      'http://127.0.0.1:4599/projects/pitch-deck/reviews',
+      'http://127.0.0.1:4599/projects/pitch-deck/reviews?file=out%2Fnew.mp4',
+    ]);
+  });
+
+  it('getRenderReview answers null when no render was reviewed and maps a missing review to FILE_NOT_FOUND', async () => {
+    const empty = createFakeFetch(() => jsonResponse(200, { reviews: [] }));
+    const missing = createFakeFetch(() => errorResponse(404, 'REVIEW_NOT_FOUND'));
+
+    expect(await client(empty.fetchImpl).getRenderReview(undefined)).toBeNull();
+    await expect(client(missing.fetchImpl).getRenderReview('out/a.mp4')).rejects.toMatchObject({ code: 'FILE_NOT_FOUND' });
+  });
+
   it('getMotionBrief and getMotionStoryboard read the project motion routes', async () => {
     const { fetchImpl, calls } = createFakeFetch(() => jsonResponse(200, { version: 1 }));
     const api = client(fetchImpl);

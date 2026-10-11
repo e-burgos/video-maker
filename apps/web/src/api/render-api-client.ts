@@ -24,6 +24,7 @@ import {
   parseVoiceListing,
   parseVoiceSceneWriteResult,
 } from './parse-voice';
+import { parseReviewJob, parseReviewReport } from './parse-review';
 import {
   parsePublications,
   parsePublishJob,
@@ -106,6 +107,7 @@ import type {
   YouTubePublishInput,
   YouTubePublishOptions,
 } from './youtube-types';
+import type { ReviewJob, ReviewReport } from './review-types';
 
 export type FetchLike = (input: string, init?: RequestInit) => Promise<Response>;
 
@@ -201,6 +203,8 @@ export type RenderApiClient = {
   getYouTubePublishOptions: (slug: string) => Promise<YouTubePublishOptions>;
   draftYouTubeMetadata: (slug: string, file: string) => Promise<YouTubeDraft>;
   createPublishJob: (slug: string, input: YouTubePublishInput) => Promise<PublishJob>;
+  getRenderReview: (slug: string, file: string) => Promise<ReviewReport | null>;
+  createReviewJob: (slug: string, file: string) => Promise<ReviewJob>;
   listPublications: (slug: string) => Promise<Publication[]>;
 };
 
@@ -1123,6 +1127,37 @@ export function createRenderApiClient(fetchImpl: FetchLike): RenderApiClient {
         (value) => isRecord(value),
       );
       return parsePublishJob(body);
+    },
+
+    async getRenderReview(slug: string, file: string): Promise<ReviewReport | null> {
+      try {
+        const body = await requestJson(
+          `/projects/${encodeURIComponent(slug)}/reviews?file=${encodeURIComponent(file)}`,
+          undefined,
+          'a render review document',
+          (value) => isRecord(value),
+        );
+        return parseReviewReport(body);
+      } catch (cause) {
+        if (cause instanceof RenderApiError && cause.code === 'REVIEW_NOT_FOUND') {
+          return null;
+        }
+        throw cause;
+      }
+    },
+
+    async createReviewJob(slug: string, file: string): Promise<ReviewJob> {
+      const body = await requestJson(
+        `/projects/${encodeURIComponent(slug)}/jobs`,
+        {
+          method: 'POST',
+          headers: { 'content-type': 'application/json' },
+          body: JSON.stringify({ kind: 'review', file }),
+        },
+        'a review job document',
+        (value) => isRecord(value),
+      );
+      return parseReviewJob(body);
     },
 
     async listPublications(slug: string): Promise<Publication[]> {

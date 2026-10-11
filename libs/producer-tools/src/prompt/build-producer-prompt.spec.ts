@@ -73,8 +73,8 @@ describe('buildProducerProjectSection', () => {
 describe('buildProducerPrompt — herramientas del estudio', () => {
   const prompt = buildProducerPrompt(CONTEXT);
 
-  it('nombra las 23 herramientas del contrato', () => {
-    expect(STUDIO_TOOL_NAMES).toHaveLength(23);
+  it('nombra las 24 herramientas del contrato', () => {
+    expect(STUDIO_TOOL_NAMES).toHaveLength(24);
     for (const tool of STUDIO_TOOL_NAMES) {
       expect(prompt).toContain(tool);
     }

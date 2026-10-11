@@ -1,6 +1,7 @@
 import type { LogoMode, MontagePresetName, VoiceSource } from '@video-maker/auto-montage';
 import type {
   CaptionStyle,
+  ReviewStatus,
   OutputPreset,
   StoryboardSource,
   Timeline,
@@ -27,7 +28,7 @@ export function isTerminalRenderJobState(state: RenderJobState): boolean {
   return TERMINAL_RENDER_JOB_STATES.some((terminal) => terminal === state);
 }
 
-export type JobKind = 'render' | 'montage' | 'storyboard' | 'voice' | 'photo-aroll' | 'motion' | 'publish';
+export type JobKind = 'render' | 'montage' | 'storyboard' | 'voice' | 'photo-aroll' | 'motion' | 'publish' | 'review';
 
 export const MONTAGE_STAGES = ['discover', 'probe', 'transcribe', 'plan'] as const;
 export type MontageStage = (typeof MONTAGE_STAGES)[number];
@@ -46,6 +47,9 @@ export type MotionStage = (typeof MOTION_STAGES)[number];
 
 export const PUBLISH_STAGES = ['prepare', 'upload', 'thumbnail', 'playlist'] as const;
 export type PublishStage = (typeof PUBLISH_STAGES)[number];
+
+export const REVIEW_STAGES = ['collect', 'measure', 'rules', 'write'] as const;
+export type ReviewStage = (typeof REVIEW_STAGES)[number];
 
 export const PUBLISH_PLATFORMS = ['youtube'] as const;
 export type PublishPlatform = (typeof PUBLISH_PLATFORMS)[number];
@@ -91,6 +95,24 @@ export interface PublishJobReport {
   readonly privacy: PublishPrivacy;
   readonly publishAt: string | null;
   readonly title: string;
+}
+
+export interface ReviewJobProgress {
+  readonly stage: ReviewStage;
+  readonly percent: number | null;
+}
+
+export interface ReviewJobCounts {
+  readonly critical: number;
+  readonly suggestion: number;
+  readonly nitpick: number;
+}
+
+export interface ReviewJobReport {
+  readonly file: string;
+  readonly reviewFile: string;
+  readonly status: ReviewStatus;
+  readonly counts: ReviewJobCounts;
 }
 
 export interface RenderJobProgress {
@@ -259,13 +281,19 @@ export type PublishJob = JobBase & {
   readonly report: PublishJobReport | null;
 };
 
-export type Job = RenderJob | MontageJob | StoryboardJob | VoiceJob | PhotoArollJob | MotionJob | PublishJob;
+export type ReviewJob = JobBase & {
+  readonly kind: 'review';
+  readonly progress: ReviewJobProgress | null;
+  readonly report: ReviewJobReport | null;
+};
+
+export type Job = RenderJob | MontageJob | StoryboardJob | VoiceJob | PhotoArollJob | MotionJob | PublishJob | ReviewJob;
 
 export interface JobSummary {
   readonly id: string;
   readonly kind: JobKind;
   readonly state: RenderJobState;
-  readonly stage: RenderPipelineStage | MontageStage | StoryboardStage | VoiceStage | PhotoArollStage | MotionStage | PublishStage | null;
+  readonly stage: RenderPipelineStage | MontageStage | StoryboardStage | VoiceStage | PhotoArollStage | MotionStage | PublishStage | ReviewStage | null;
   readonly errorCode: RenderApiErrorCode | null;
   readonly createdAt: string;
   readonly startedAt: string | null;
@@ -281,7 +309,8 @@ export type CreateJobInput =
   | CreateVoiceJobInput
   | CreatePhotoArollJobInput
   | CreateMotionJobInput
-  | CreatePublishJobInput;
+  | CreatePublishJobInput
+  | CreateReviewJobInput;
 
 export interface CreateRenderJobInput {
   readonly kind: 'render';
@@ -342,6 +371,13 @@ export interface CreateMotionJobInput {
   readonly takes: number;
 }
 
+export interface CreateReviewJobInput {
+  readonly kind: 'review';
+  readonly slug: string;
+  readonly projectRoot: string;
+  readonly file: string;
+}
+
 export interface CreatePublishJobInput {
   readonly kind: 'publish';
   readonly slug: string;
@@ -358,6 +394,7 @@ export interface CreatePublishJobInput {
   readonly categoryId: string;
   readonly madeForKids: boolean;
   readonly defaultLanguage: string;
+  readonly ignoreReview: boolean;
 }
 
 export function toJob(record: RenderJob): RenderJob;
@@ -367,6 +404,7 @@ export function toJob(record: VoiceJob): VoiceJob;
 export function toJob(record: PhotoArollJob): PhotoArollJob;
 export function toJob(record: MotionJob): MotionJob;
 export function toJob(record: PublishJob): PublishJob;
+export function toJob(record: ReviewJob): ReviewJob;
 export function toJob(record: Job): Job;
 export function toJob(record: Job): Job {
   switch (record.kind) {
@@ -453,6 +491,19 @@ export function toJob(record: Job): Job {
         id: record.id,
         slug: record.slug,
         kind: 'publish',
+        state: record.state,
+        createdAt: record.createdAt,
+        startedAt: record.startedAt,
+        finishedAt: record.finishedAt,
+        progress: record.progress,
+        report: record.report,
+        error: record.error,
+      };
+    case 'review':
+      return {
+        id: record.id,
+        slug: record.slug,
+        kind: 'review',
         state: record.state,
         createdAt: record.createdAt,
         startedAt: record.startedAt,

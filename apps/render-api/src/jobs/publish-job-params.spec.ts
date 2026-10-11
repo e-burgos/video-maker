@@ -20,6 +20,7 @@ describe('parsePublishJobInput', () => {
       categoryId: '22',
       madeForKids: false,
       defaultLanguage: null,
+      ignoreReview: false,
     });
   });
 
