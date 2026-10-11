@@ -237,10 +237,20 @@
       "depends_on": [
         "TASK-005"
       ],
-      "status": "pending",
+      "status": "done",
       "files": [
         "sdd/specs/spec-e-burgos-023-production-quality/cycles/cycle-01/artifacts/verification.md"
-      ]
+      ],
+      "usage": {
+        "provider_model": "claude/opus",
+        "effort": "high",
+        "agent": "orchestrator",
+        "tokens_in": 90000,
+        "tokens_out": 15000,
+        "approx": true,
+        "source": "declared-estimate",
+        "recorded_at": "2026-10-11"
+      }
     }
   ]
 }

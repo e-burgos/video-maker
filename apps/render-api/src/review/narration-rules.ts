@@ -3,6 +3,10 @@ import { formatSeconds, lengthSec } from './review-finding-builder';
 import type { ReviewCaption, ReviewFrame, SecondsRange } from './review-inputs';
 import { SILENCE_DETECT_MIN_SEC, SUBTITLE_MAX_CHARS, SUBTITLE_MIN_DURATION_SEC } from './review-thresholds';
 
+function truncatedSeconds(seconds: number): string {
+  return (Math.floor(seconds * 100) / 100).toFixed(2);
+}
+
 export function voiceSilenceFindings(
   silences: readonly SecondsRange[],
   voiceSegments: readonly SecondsRange[],
@@ -59,7 +63,7 @@ function captionFindings(caption: ReviewCaption, frame: ReviewFrame | null, sing
     findings.push({
       check: 'captions',
       severity: 'nitpick',
-      message: `El subtítulo "${caption.text}" dura ${lengthSec(caption).toFixed(2)} s y se lee mal por debajo de ${String(SUBTITLE_MIN_DURATION_SEC)} s.`,
+      message: `El subtítulo "${caption.text}" dura ${truncatedSeconds(lengthSec(caption))} s y se lee mal por debajo de ${String(SUBTITLE_MIN_DURATION_SEC)} s.`,
       timeRange,
     });
   }

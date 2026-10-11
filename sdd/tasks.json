@@ -633,9 +633,9 @@
             "apps/web",
             "libs/producer-tools"
           ],
-          "status": "in-progress",
+          "status": "completed",
           "tasks_total": 6,
-          "tasks_done": 5
+          "tasks_done": 6
         }
       }
     }
