@@ -68,18 +68,27 @@ describe('voice-music-margin', () => {
     expect(report.status).toBe('fail');
   });
 
-  it('suggests between 15 and 18 dB and reports the worst segment', () => {
+  it('suggests between 10 and 15 dB and reports the worst segment', () => {
     const report = reviewRender(
       footageReviewInputs({
         voiceSegments: [
           { startSec: 3, endSec: 10, voiceLufs: -14, musicLufs: -16, musicGainDb: -18 },
-          { startSec: 20, endSec: 30, voiceLufs: -14, musicLufs: -16, musicGainDb: -15.5 },
+          { startSec: 20, endSec: 30, voiceLufs: -14, musicLufs: -16, musicGainDb: -11.5 },
         ],
       }),
     );
 
     expect(findingsOf(report, 'voice-music-margin').map((finding) => finding.severity)).toEqual(['suggestion']);
-    expect(report.metrics['voiceMusicMarginDb']).toBe(17.5);
+    expect(report.metrics['voiceMusicMarginDb']).toBe(13.5);
+  });
+
+  it('accepts the owner-approved motion mix at 13 dB as a suggestion, not a failure', () => {
+    const report = reviewRender(
+      motionReviewInputs({ voiceSegments: [{ startSec: 0.25, endSec: 5.26, voiceLufs: -26, musicLufs: -24, musicGainDb: -15 }] }),
+    );
+
+    expect(findingsOf(report, 'voice-music-margin').map((finding) => finding.severity)).toEqual(['suggestion']);
+    expect(report.status).not.toBe('fail');
   });
 
   it('skips segments without measurable voice or music and leaves the metric null', () => {
