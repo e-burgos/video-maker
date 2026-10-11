@@ -13,26 +13,97 @@
   "objectives": [
     "Escena de interfaz en motion con cursor, clics, tipeo, resaltado, globo y zoom sobre una captura"
   ],
-  "status": "in-progress",
+  "status": "completed",
   "started_at": "2026-10-11",
-  "completed_at": null,
+  "completed_at": "2026-10-11",
   "documents": {
     "plan": "sdd/specs/spec-e-burgos-023-production-quality/cycles/cycle-02/plan.md",
     "tasks": "sdd/specs/spec-e-burgos-023-production-quality/cycles/cycle-02/tasks.json"
   },
-  "artifacts": [],
+  "artifacts": [
+    "sdd/specs/spec-e-burgos-023-production-quality/cycles/cycle-02/artifacts/verification.md",
+    "sdd/specs/spec-e-burgos-023-production-quality/cycles/cycle-02/artifacts/01-cursor-viaja.jpg",
+    "sdd/specs/spec-e-burgos-023-production-quality/cycles/cycle-02/artifacts/03-tipeo.jpg",
+    "sdd/specs/spec-e-burgos-023-production-quality/cycles/cycle-02/artifacts/05-globo.jpg",
+    "sdd/specs/spec-e-burgos-023-production-quality/cycles/cycle-02/artifacts/06-zoom.jpg",
+    "sdd/specs/spec-e-burgos-023-production-quality/cycles/cycle-02/artifacts/08-vertical-9x16.jpg"
+  ],
   "metrics": {
     "tasks_total": 4,
-    "tasks_completed": 0,
+    "tasks_completed": 4,
     "tasks_skipped": 0,
     "story_points": 22,
-    "files_created": [],
-    "files_modified": [],
-    "files_deleted": []
+    "files_created": [
+      "libs/motion-graphics/src/scenes/ui-walkthrough-html.ts"
+    ],
+    "files_modified": [
+      "libs/motion-graphics/assets/runtime/motion-runtime.js",
+      "libs/motion-graphics/assets/runtime/scenes.css",
+      "libs/motion-graphics/src/__fixtures__/catalog-storyboard.ts",
+      "libs/motion-graphics/src/auto/build-auto-storyboard-request.spec.ts",
+      "libs/motion-graphics/src/auto/build-auto-storyboard-request.ts",
+      "libs/motion-graphics/src/auto/check-storyboard-against-brief.spec.ts",
+      "libs/motion-graphics/src/auto/scene-guide.ts",
+      "libs/motion-graphics/src/scenes/render-scene.spec.ts",
+      "libs/motion-graphics/src/scenes/render-scene.ts",
+      "libs/motion-graphics/src/storyboard/motion-storyboard.schema.ts",
+      "libs/motion-graphics/src/storyboard/parse-motion-storyboard.spec.ts"
+    ],
+    "files_deleted": [],
+    "usage": {
+      "tokens_in": 260000,
+      "tokens_out": 45000,
+      "approx": true,
+      "source": "declared-estimate",
+      "by_agent": [
+        {
+          "agent": "orchestrator",
+          "label": "solo",
+          "provider_model": "claude/opus",
+          "effort": "high",
+          "tokens_in": 40000,
+          "tokens_out": 8000,
+          "tokens_total": 48000,
+          "approx": true,
+          "source": "declared-estimate",
+          "recorded_at": "2026-10-11"
+        },
+        {
+          "agent": "implementor-front",
+          "label": "escena ui-walkthrough",
+          "provider_model": "claude/sonnet",
+          "effort": "medium",
+          "tokens_in": 207000,
+          "tokens_out": 36000,
+          "tokens_total": 243000,
+          "approx": true,
+          "source": "agent-usage-notification",
+          "recorded_at": "2026-10-11"
+        }
+      ]
+    }
   },
   "tables_created": [],
   "endpoints_implemented": [],
   "components_created": [],
-  "issues_found": [],
-  "reviewer_report": null
+  "issues_found": [
+    "Tween del cursor en tiempo negativo cuando el primer cue es la primera palabra (corregido: arranca en S(id)+0.05)"
+  ],
+  "reviewer_report": {
+    "approved": true,
+    "date": "2026-10-11",
+    "ca_results": {
+      "US-023-201": "OK — render real 16:9 y 9:16: cursor, clic, tipeo, resaltado, globo y zoom alineados con la captura (verification.md).",
+      "US-023-202": "OK — guía de escena y validación (schema con superRefine por paso + verificación cruzada de imagen y cue)."
+    },
+    "tests": {
+      "sdd:validate": "OK",
+      "lint": "motion-graphics, motion-studio, render-api verdes",
+      "test": "verdes",
+      "build": "verde",
+      "e2e": "render real del CLI"
+    },
+    "notes": "Patrón nuevo documentado en el fragmento de motion-graphics.",
+    "follow_ups": []
+  }
 }
