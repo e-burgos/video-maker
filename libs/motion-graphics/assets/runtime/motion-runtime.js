@@ -25,16 +25,29 @@ window.createMotionRuntime = function createMotionRuntime(T, W, compositionId) {
     return after[Math.max(0, n)] ?? t;
   };
 
+  const UI_LEAD = 0.9;
+  const UI_TAIL = 1.4;
+  const clamp = (value, min, max) => Math.min(max, Math.max(min, value));
+
   const timeFor = (el, id, order) => {
     const start = S(id);
     if (el.dataset.cue) return Math.max(start + 0.05, wordAt(id, el.dataset.cue) - 0.12);
     if (el.dataset.at) return start + Number(el.dataset.at);
+    if (el.dataset.slot !== undefined) return start + UI_LEAD + (Math.max(1, E(id) - start - UI_LEAD - UI_TAIL) * Number(el.dataset.slot)) / Math.max(1, Number(el.dataset.count));
     if (el.dataset.beat) return beatFrom(start, Number(el.dataset.beat));
     return start + 0.15 + order * (L / 2);
   };
 
   const dur = (el, fallback) => (el.dataset.dur ? Number(el.dataset.dur) : fallback);
   const sceneLength = (id) => E(id) - S(id);
+
+  const nextUiStepTime = (el, id) => {
+    let next = el.nextElementSibling;
+    while (next && !next.hasAttribute('data-ui-step')) next = next.nextElementSibling;
+    return next ? timeFor(next, id, 0) : null;
+  };
+  const uiHoldEnd = (el, id, t, fallbackHold) => Math.min(E(id) - 0.5, Math.max(t + 0.9, nextUiStepTime(el, id) ?? t + fallbackHold));
+  const uiRest = { scale: 1, xPercent: 0, yPercent: 0 };
 
   const ANIMS = {
     rise: (el, t) => tl.fromTo(el, { opacity: 0, y: 46 }, { opacity: 1, y: 0, duration: dur(el, 0.6), ease: 'power3.out' }, t),
@@ -83,6 +96,54 @@ window.createMotionRuntime = function createMotionRuntime(T, W, compositionId) {
       const state = { n: from };
       el.textContent = String(from);
       tl.to(state, { n: to, duration: dur(el, 1.3), ease: 'power2.out', onUpdate: () => { el.textContent = String(Math.round(state.n)); } }, t);
+    },
+    'ui-mark': () => undefined,
+    'ui-click': (el, t) => {
+      tl.fromTo(el, { opacity: 0, scale: 0.25 }, { opacity: 1, scale: 1, duration: 0.18, ease: 'power2.out' }, t);
+      tl.to(el, { opacity: 0, scale: 1.5, duration: 0.45, ease: 'power1.out' }, t + 0.18);
+    },
+    'ui-type': (el, t) => {
+      const text = el.dataset.text || '';
+      const target = el.firstElementChild;
+      const state = { i: 0 };
+      target.textContent = '';
+      tl.fromTo(el, { opacity: 0 }, { opacity: 1, duration: 0.2 }, t);
+      tl.to(state, { i: text.length, duration: Math.min(2.4, 0.06 * text.length + 0.3), ease: 'none', onUpdate: () => { target.textContent = text.slice(0, Math.round(state.i)); } }, t + 0.2);
+    },
+    'ui-highlight': (el, t, id) => {
+      tl.fromTo(el, { opacity: 0, scale: 1.12 }, { opacity: 1, scale: 1, duration: 0.35, ease: 'back.out(1.8)' }, t);
+      tl.to(el, { opacity: 0, duration: 0.3 }, uiHoldEnd(el, id, t, 2.4));
+    },
+    'ui-callout': (el, t, id) => {
+      tl.fromTo(el, { opacity: 0, scale: 0.8, y: 10 }, { opacity: 1, scale: 1, y: 0, duration: 0.35, ease: 'back.out(2)' }, t);
+      tl.to(el, { opacity: 0, duration: 0.3 }, uiHoldEnd(el, id, t, 3));
+    },
+    'ui-zoom': (el, t, id) => {
+      const zoom = el.closest('.mg-ui-zoom');
+      const scale = Number(el.dataset.scale);
+      const focus = { scale, xPercent: clamp((0.5 - scale * Number(el.dataset.cx)) * 100, (1 - scale) * 100, 0), yPercent: clamp((0.5 - scale * Number(el.dataset.cy)) * 100, (1 - scale) * 100, 0) };
+      tl.fromTo(zoom, uiRest, { ...focus, duration: 0.8, ease: 'power2.inOut', immediateRender: false }, t);
+      tl.fromTo(zoom, focus, { ...uiRest, duration: 0.7, ease: 'power2.inOut', immediateRender: false }, Math.max(t + 1.7, uiHoldEnd(el, id, t, 2.8) - 0.35));
+    },
+    'ui-cursor': (el, t, id) => {
+      const waypoints = Array.from(el.closest('[data-scene]').querySelectorAll('[data-ui-step][data-px]'))
+        .map((step) => ({ t: timeFor(step, id, 0), x: Number(step.dataset.px), y: Number(step.dataset.py), click: step.dataset.uiStep === 'click' }))
+        .sort((a, b) => a.t - b.t);
+      if (!waypoints.length) return;
+      const arrow = el.firstElementChild;
+      const first = waypoints[0];
+      let previous = { x: clamp(first.x - 0.14, 0, 1), y: clamp(first.y + 0.14, 0, 1), t: first.t - 0.9 };
+      gsap.set(el, { xPercent: previous.x * 100, yPercent: previous.y * 100 });
+      tl.fromTo(el, { opacity: 0 }, { opacity: 1, duration: 0.25 }, Math.max(S(id) + 0.05, first.t - 0.9));
+      waypoints.forEach((point) => {
+        const travelStart = Math.max(previous.t + 0.12, point.t - 0.75, S(id) + 0.05);
+        tl.fromTo(el, { xPercent: previous.x * 100, yPercent: previous.y * 100 }, { xPercent: point.x * 100, yPercent: point.y * 100, duration: Math.max(0.12, point.t - travelStart), ease: 'power2.inOut', immediateRender: false }, travelStart);
+        if (point.click) {
+          tl.to(arrow, { scale: 0.8, duration: 0.08, ease: 'power2.in' }, point.t);
+          tl.to(arrow, { scale: 1, duration: 0.2, ease: 'back.out(3)' }, point.t + 0.08);
+        }
+        previous = point;
+      });
     },
     seq: (el, t) => {
       const items = Array.from(el.children);
@@ -172,7 +233,7 @@ window.createMotionRuntime = function createMotionRuntime(T, W, compositionId) {
     const id = section.dataset.scene;
     let order = 0;
     section.querySelectorAll('[data-anim]').forEach((el) => {
-      const timed = el.dataset.cue || el.dataset.at || el.dataset.beat;
+      const timed = el.dataset.cue || el.dataset.at || el.dataset.beat || el.dataset.slot;
       const t = timeFor(el, id, timed ? 0 : order) + Number(el.dataset.after || 0);
       if (!timed && !el.dataset.parallel) order += 1;
       el.dataset.anim.split(' ').forEach((name) => ANIMS[name] && ANIMS[name](el, t, id));
