@@ -35,7 +35,7 @@ const BRIEF_PATH = 'motion/brief.json';
 const STORYBOARD_PATH = 'motion/storyboard.json';
 const RAW_IMAGES_DIRECTORY = 'raw/images';
 const OUT_DIRECTORY = 'out';
-const RENDER_FPS = 30;
+export const RENDER_FPS = 30;
 const RENDER_QUALITY = 'delivery';
 
 function withStage(error: PipelineStageError, stage: MotionStage): PipelineStageError {

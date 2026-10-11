@@ -86,11 +86,40 @@
         "TASK-001",
         "TASK-002"
       ],
-      "status": "pending",
+      "status": "done",
       "files": [
         "apps/render-api/src/review/review-rules.ts",
-        "apps/render-api/src/review/collect-review-inputs.ts"
-      ]
+        "apps/render-api/src/review/collect-review-inputs.ts",
+        "apps/render-api/src/review/review-inputs.ts",
+        "apps/render-api/src/review/review-measurements.ts",
+        "apps/render-api/src/review/review-thresholds.ts",
+        "apps/render-api/src/review/review-finding-builder.ts",
+        "apps/render-api/src/review/master-loudness-rule.ts",
+        "apps/render-api/src/review/voice-music-margin-rule.ts",
+        "apps/render-api/src/review/picture-rules.ts",
+        "apps/render-api/src/review/narration-rules.ts",
+        "apps/render-api/src/review/delivery-rules.ts",
+        "apps/render-api/src/review/footage-level-plans.ts",
+        "apps/render-api/src/review/motion-level-plans.ts",
+        "apps/render-api/src/review/level-plan.ts",
+        "apps/render-api/src/review/collect-footage-facts.ts",
+        "apps/render-api/src/review/collect-motion-facts.ts",
+        "apps/render-api/src/review/infer-delivery.ts",
+        "apps/render-api/src/review/review-facts.ts",
+        "apps/render-api/src/review/review-errors.ts",
+        "libs/motion-graphics/src/template/compose-template.ts",
+        "apps/render-api/src/jobs/run-motion-pipeline.ts"
+      ],
+      "usage": {
+        "provider_model": "claude/sonnet",
+        "effort": "medium",
+        "agent": "implementor-back",
+        "tokens_in": 150000,
+        "tokens_out": 30000,
+        "approx": true,
+        "source": "declared-estimate",
+        "recorded_at": "2026-10-11"
+      }
     },
     {
       "id": "TASK-004",

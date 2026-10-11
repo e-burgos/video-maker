@@ -9,7 +9,7 @@ export type { MotionStudioErrorCode } from './errors/motion-studio-error';
 export { parseMotionScript } from './script/motion-script';
 export type { MotionScene, MotionScript, MotionSfx } from './script/motion-script';
 
-export { composeTemplate, templateValues, WHOOSH_LEAD, wordTime } from './template/compose-template';
+export { composeTemplate, MOTION_MUSIC_TRACK_VOLUME, templateValues, WHOOSH_LEAD, wordTime } from './template/compose-template';
 export type { MotionTimeline, SceneWords, SpokenWord } from './template/motion-timeline';
 
 export { buildDuckAutomation } from './timeline/build-duck-automation';
