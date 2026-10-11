@@ -55,12 +55,23 @@
       "estimation_hours": 2,
       "story_points": 3,
       "depends_on": [],
-      "status": "pending",
+      "status": "done",
       "files": [
         "libs/timeline-core/src/schemas/timeline.schema.ts",
         "libs/timeline-core/src/review/review-report.ts",
-        "libs/timeline-core/schemas/timeline.schema.json"
-      ]
+        "libs/timeline-core/schemas/timeline.schema.json",
+        "libs/timeline-core/src/index.ts"
+      ],
+      "usage": {
+        "provider_model": "claude/sonnet",
+        "effort": "medium",
+        "agent": "implementor-back",
+        "tokens_in": 60000,
+        "tokens_out": 12000,
+        "approx": true,
+        "source": "declared-estimate",
+        "recorded_at": "2026-10-11"
+      }
     },
     {
       "id": "TASK-003",
