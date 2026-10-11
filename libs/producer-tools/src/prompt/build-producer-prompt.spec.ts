@@ -259,6 +259,23 @@ describe('buildProducerPrompt — dónde está cada cosa', () => {
   });
 });
 
+describe('buildProducerPrompt — dirección de voz y música por tramos', () => {
+  const prompt = buildProducerPrompt(CONTEXT);
+
+  it('explica el archivo de dirección por número de línea con sus campos y sus topes', () => {
+    expect(prompt).toContain('work/producer/voice-direction.json');
+    expect(prompt).toContain('`pauseAfterMs` (0 to 2000');
+    expect(prompt).toContain('`pace` (slow, normal, fast)');
+    expect(prompt).toContain('a direction on');
+  });
+
+  it('ofrece la música por tramos con su piso configurable y deja el bed como defecto', () => {
+    expect(prompt).toContain('"musicMode":"segments"');
+    expect(prompt).toContain('`"musicFloorDb"`');
+    expect(prompt).toContain('Leave it out for the usual continuous bed');
+  });
+});
+
 describe('buildProducerPrompt motion mode', () => {
   const motionPrompt = buildProducerPrompt({ ...CONTEXT, mode: 'motion' });
 
@@ -276,6 +293,11 @@ describe('buildProducerPrompt motion mode', () => {
     expect(motionPrompt).toContain('"phase":"video","overwrite":true');
     expect(motionPrompt).toContain('music.volume');
     expect(motionPrompt).toContain('NEVER run the storyboard phase');
+  });
+
+  it('teaches the voice direction and the music mode in the adjust branch', () => {
+    expect(motionPrompt).toContain('`direction` (`pace`, `energy`, `pauseAfterMs`');
+    expect(motionPrompt).toContain('`music.mode`');
   });
 
   it('drops the footage recipes in a motion project', () => {

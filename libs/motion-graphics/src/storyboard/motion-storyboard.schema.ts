@@ -226,6 +226,10 @@ export const MotionStoryboardSchema = z
     storyboard.scenes.forEach((s, index) => {
       if (seen.has(s.id)) ctx.addIssue({ code: 'custom', path: ['scenes', index, 'id'], message: `duplicated scene id "${s.id}"` });
       seen.add(s.id);
+      const voice = s.vo.toLowerCase();
+      (s.direction?.emphasis ?? []).forEach((word, wordIndex) => {
+        if (!voice.includes(word.toLowerCase())) ctx.addIssue({ code: 'custom', path: ['scenes', index, 'direction', 'emphasis', wordIndex], message: `emphasis "${word}" is not in the vo of scene "${s.id}"` });
+      });
     });
   });
 

@@ -32,6 +32,29 @@ describe('parseMotionStoryboard', () => {
     expect(() => parseMotionStoryboard(dup)).toThrow(/duplicated scene id "intro"/u);
   });
 
+  describe('voice direction and music mode', () => {
+    const withDirection = (direction: unknown) => ({ ...counter15, scenes: [{ ...counter15.scenes[0], direction }, ...counter15.scenes.slice(1)] });
+
+    it('accepts a scene direction and a music mode', () => {
+      const parsed = parseMotionStoryboard({ ...withDirection({ pace: 'slow', energy: 'calm', pauseAfterMs: 600 }), music: { track: 'x', mode: 'segments', floorDb: -24 } });
+      expect(parsed.scenes[0]?.direction).toEqual({ pace: 'slow', energy: 'calm', pauseAfterMs: 600 });
+      expect(parsed.music).toMatchObject({ mode: 'segments', floorDb: -24 });
+    });
+
+    it('rejects an out-of-range direction naming its path', () => {
+      expect(() => parseMotionStoryboard(withDirection({ pauseAfterMs: 9000 }))).toThrow(/scenes\[0\]\.direction\.pauseAfterMs/u);
+      expect(() => parseMotionStoryboard(withDirection({ pace: 'turbo' }))).toThrow(/scenes\[0\]\.direction\.pace/u);
+    });
+
+    it('rejects an emphasis word that is not in the vo of the scene', () => {
+      expect(() => parseMotionStoryboard(withDirection({ emphasis: ['zzzzzz'] }))).toThrow(/emphasis "zzzzzz" is not in the vo/u);
+    });
+
+    it('rejects a music floor outside the range', () => {
+      expect(() => parseMotionStoryboard({ ...counter15, music: { track: 'x', mode: 'segments', floorDb: -2 } })).toThrow(/music\.floorDb/u);
+    });
+  });
+
   it('formats issue paths', () => {
     expect(formatIssuePath([])).toBe('');
     expect(formatIssuePath(['scenes', 2, 'props', 'title'])).toBe('scenes[2].props.title');

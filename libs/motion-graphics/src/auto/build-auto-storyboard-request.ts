@@ -42,6 +42,8 @@ function systemPrompt(kinds: readonly MotionSceneKind[]): string {
     `- Use between ${MIN_SCENES} and ${MAX_SCENES} scenes. Start with a \`hook\` and finish with a \`cta\`. Use \`brand-reveal\` once, with \`anchor: "drop"\` when the chosen music track has a drop.`,
     '- Every `cue` must be the beginning of a word that appears in the `vo` of the same scene: the element shows up when the voice says it.',
     '- Use only the images listed in the brief (as images/<file>) or the brand images (as brand:<key>), and only the devices and music tracks of the brand. Never invent files.',
+    '- Direct the voice with the optional `direction` of a scene only where the line asks for it: `pace` slow for a claim to land or fast for a list, `energy` lively for the hook and the cta or calm for reassurance, `pauseAfterMs` (0-2000) for a breath before a reveal, `emphasis` with words that appear in that same `vo`. Most lines need none: leave `direction` out of neutral lines, and never give every scene the same direction.',
+    '- Leave `music.mode` out (the music runs under the voice). Set it to `segments` only when the brief asks for the music to breathe: full in the intro, the outro and the silences between lines, and very low while the voice speaks.',
     '- Keep on-screen texts short, in the language of the script, and consistent with the voice.',
     '- Never invent a URL: leave `url` out so the brand url applies. Leave `voice` out: the brand voice applies. In `brand-reveal` and `cta` leave `tagline` and `accent` out to show the brand tagline; set them only for a different phrase.',
     'Scene catalog (what each kind is for):',

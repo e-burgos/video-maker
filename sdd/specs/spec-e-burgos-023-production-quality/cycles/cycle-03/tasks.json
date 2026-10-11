@@ -83,10 +83,16 @@
       "depends_on": [
         "TASK-001"
       ],
-      "status": "pending",
+      "status": "in-progress",
       "files": [
-        "libs/producer-tools/src/prompt/build-producer-prompt.ts",
-        "libs/motion-graphics/src/auto/build-auto-storyboard-request.ts"
+        "apps/render-api/src/http/handlers/project-text-handler.spec.ts",
+        "apps/render-api/src/http/handlers/project-text-handler.ts",
+        "libs/motion-graphics/src/auto/build-auto-storyboard-request.spec.ts",
+        "libs/motion-graphics/src/auto/build-auto-storyboard-request.ts",
+        "libs/motion-graphics/src/storyboard/motion-storyboard.schema.ts",
+        "libs/motion-graphics/src/storyboard/parse-motion-storyboard.spec.ts",
+        "libs/producer-tools/src/prompt/build-producer-prompt.spec.ts",
+        "libs/producer-tools/src/prompt/build-producer-prompt.ts"
       ]
     },
     {

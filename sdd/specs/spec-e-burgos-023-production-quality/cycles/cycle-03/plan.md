@@ -28,3 +28,9 @@
 ## Decisiones técnicas
 - Mapeo de energía a `--vits-noise-scale` / `--vits-noise-scale-w` de sherpa-onnx (verificar flags reales del binario).
 - La dirección viaja en script.json (motion) y en `work/voice/script-manifest.json` (material crudo); la timeline no cambia.
+
+## Pendiente de documentar en contexto
+- timeline-core: `VoiceDirectionSchema`/`voiceDirectionSynthesis` (voice/voice-direction.ts), `VoiceScriptDirectionsSchema`, `MusicMixSettings.mode`, `planSegmentedMusic`/`segmentedMusicMix`; `VoiceScriptLine.direction` en el manifiesto de voz por líneas.
+- media-local: `synthesizeSpeech` acepta `noiseScale`/`noiseScaleW`/`trailingPauseMs` (+`ffmpegPath`) y `appendTrailingSilence`; la salida de sherpa/VITS no es determinista byte a byte, el invariante "sin dirección" se fija sobre la línea de comando.
+- motion-graphics: dependencia nueva de `@video-maker/timeline-core` (alias en vite.config.ts); `buildSegmentedAutomation`; `scene.direction` en script/storyboard; `music.mode`/`music.floorDb`.
+- render-api: `work/producer/voice-direction.json` (clave = nº de línea del guion), `GET|PUT /projects/:slug/voice/direction`, validación al escribirlo por `write_project_text`; params `musicMode`/`musicFloorDb` del job montage.
