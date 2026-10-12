@@ -10,8 +10,11 @@ export interface ClaudeCliAskAgentOptions {
   runner: CommandRunner;
   binaryPath: string;
   model: string;
+  effort?: string;
   timeoutMs: number;
 }
+
+export const DEFAULT_STORYBOARD_EFFORT = 'low';
 
 const DEFAULT_DETAIL_CHARS = 400;
 
@@ -23,7 +26,7 @@ function count(value: unknown): number {
   return typeof value === 'number' && Number.isFinite(value) ? Math.trunc(value) : 0;
 }
 
-export function claudeCliArgs(request: AutoStoryboardRequest, model: string): string[] {
+export function claudeCliArgs(request: AutoStoryboardRequest, model: string, effort: string = DEFAULT_STORYBOARD_EFFORT): string[] {
   const schema = Object.fromEntries(Object.entries(request.jsonSchema).filter(([key]) => key !== '$schema' && key !== '$id'));
   return [
     '--print',
@@ -45,6 +48,8 @@ export function claudeCliArgs(request: AutoStoryboardRequest, model: string): st
     '--no-session-persistence',
     '--model',
     model,
+    '--effort',
+    effort,
   ];
 }
 
@@ -76,7 +81,7 @@ export function createClaudeCliAskAgent(options: ClaudeCliAskAgentOptions): AskS
   return async (request) => {
     const workDir = await mkdtemp(join(tmpdir(), 'motion-auto-'));
     try {
-      const result = await options.runner.run(options.binaryPath, claudeCliArgs(request, options.model), { cwd: workDir, timeoutMs: options.timeoutMs });
+      const result = await options.runner.run(options.binaryPath, claudeCliArgs(request, options.model, options.effort), { cwd: workDir, timeoutMs: options.timeoutMs });
       if (result.exitCode !== 0) throw new MotionStudioError('AI_FAILED', `the claude CLI exited with ${result.exitCode}: ${(result.stderr || result.stdout).slice(-DEFAULT_DETAIL_CHARS)}`);
       return readResponse(result.stdout);
     } finally {

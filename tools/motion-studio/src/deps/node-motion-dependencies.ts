@@ -22,11 +22,11 @@ import { MotionStudioError } from '@video-maker/motion-graphics';
 
 import { resolveHyperframesCli } from './hyperframes-cli';
 
-import { createClaudeCliAskAgent } from './claude-cli-ask-agent';
+import { DEFAULT_STORYBOARD_EFFORT, createClaudeCliAskAgent } from './claude-cli-ask-agent';
 import type { MotionDependencies } from './motion-dependencies';
 
 const HYPERFRAMES_TIMEOUT_MS = 3 * 60 * 60 * 1000;
-const ASK_AGENT_TIMEOUT_MS = 10 * 60 * 1000;
+const ASK_AGENT_TIMEOUT_MS = 15 * 60 * 1000;
 
 const exists = async (path: string): Promise<boolean> =>
   access(path).then(
@@ -137,6 +137,7 @@ export function createNodeMotionDependencies(env: NodeJS.ProcessEnv, workspaceRo
       runner: new ExecaCommandRunner({ env: subscriptionOnlyEnv(env) }),
       binaryPath: env['CLAUDE_CLI_PATH'] ?? 'claude',
       model: env['MOTION_STUDIO_MODEL'] ?? 'sonnet',
+      effort: env['MOTION_STUDIO_EFFORT'] ?? DEFAULT_STORYBOARD_EFFORT,
       timeoutMs: ASK_AGENT_TIMEOUT_MS,
     }),
   };

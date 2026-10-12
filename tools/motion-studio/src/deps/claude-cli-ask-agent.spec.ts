@@ -40,6 +40,12 @@ describe('claudeCliArgs', () => {
     expect(args).toContain('--strict-mcp-config');
     expect(args).toContain('--no-session-persistence');
   });
+
+  it('asks for low effort by default so a long storyboard does not spend the timeout thinking', () => {
+    expect(claudeCliArgs(request, 'sonnet')[claudeCliArgs(request, 'sonnet').indexOf('--effort') + 1]).toBe('low');
+    const args = claudeCliArgs(request, 'sonnet', 'medium');
+    expect(args[args.indexOf('--effort') + 1]).toBe('medium');
+  });
 });
 
 describe('createClaudeCliAskAgent', () => {

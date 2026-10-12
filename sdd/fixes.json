@@ -2852,6 +2852,54 @@
           }
         ]
       }
+    },
+    {
+      "id": "FIX-e-burgos-016",
+      "author": "e-burgos",
+      "spec_id": "spec-e-burgos-023-production-quality",
+      "fix_document": "sdd/fixes/fix-e-burgos-016.md",
+      "type": "BUGFIX",
+      "severity": "high",
+      "created_at": "2026-10-12",
+      "resolved_at": "2026-10-12",
+      "validated_at": null,
+      "title": "El storyboard automático de motion pide esfuerzo bajo y ya no agota el tiempo pensando",
+      "estimation_hours": 1,
+      "description": "La llamada al CLI de Claude para el storyboard motion razonaba más de 13 minutos con briefs de 16 escenas y el límite de 10 minutos la cortaba (AI_AGENT_FAILED).",
+      "justification": "Bloqueaba el video de prueba de compra pedido por el dueño; cambio interno sin contratos nuevos.",
+      "related_modules": [
+        "production-quality"
+      ],
+      "affected_files": [
+        "tools/motion-studio/src/deps/claude-cli-ask-agent.ts",
+        "tools/motion-studio/src/deps/claude-cli-ask-agent.spec.ts",
+        "tools/motion-studio/src/deps/node-motion-dependencies.ts"
+      ],
+      "test_reference": "motion-studio y render-api lint/test/build verde; mismo pedido real en 3 min 42 s con 16 escenas.",
+      "status": "implemented",
+      "cycle": null,
+      "process_note": "Hallado en el video de prueba comprar-producto.",
+      "usage": {
+        "provider_model": "claude/opus",
+        "effort": "high",
+        "tokens_in": 60000,
+        "tokens_out": 8000,
+        "approx": true,
+        "source": "declared-estimate",
+        "recorded_at": "2026-10-12",
+        "by_agent": [
+          {
+            "agent": "orchestrator",
+            "provider_model": "claude/opus",
+            "effort": "high",
+            "tokens_in": 60000,
+            "tokens_out": 8000,
+            "approx": true,
+            "source": "declared-estimate",
+            "recorded_at": "2026-10-12"
+          }
+        ]
+      }
     }
   ]
 }
