@@ -25,6 +25,7 @@ import {
   parseVoiceSceneWriteResult,
 } from './parse-voice';
 import { parseProposalDocument } from './parse-proposal';
+import { parseReferenceBrief, parseReferenceJob, parseReferenceListing } from './parse-reference';
 import { parseReviewJob, parseReviewReport } from './parse-review';
 import {
   parsePublications,
@@ -109,6 +110,7 @@ import type {
   YouTubePublishInput,
   YouTubePublishOptions,
 } from './youtube-types';
+import type { ReferenceBrief, ReferenceJob, ReferenceSummary } from './reference-types';
 import type { ReviewJob, ReviewReport } from './review-types';
 import type { ProposalDocument, SampleSpec } from './proposal-types';
 
@@ -224,6 +226,9 @@ export type RenderApiClient = {
   createPublishJob: (slug: string, input: YouTubePublishInput) => Promise<PublishJob>;
   getRenderReview: (slug: string, file: string) => Promise<ReviewReport | null>;
   createReviewJob: (slug: string, file: string) => Promise<ReviewJob>;
+  listReferences: (slug: string) => Promise<ReferenceSummary[]>;
+  getReference: (slug: string, name: string) => Promise<ReferenceBrief>;
+  createReferenceJob: (slug: string, file: string) => Promise<ReferenceJob>;
   listPublications: (slug: string) => Promise<Publication[]>;
 };
 
@@ -1258,6 +1263,40 @@ export function createRenderApiClient(fetchImpl: FetchLike): RenderApiClient {
         (value) => isRecord(value),
       );
       return parseReviewJob(body);
+    },
+
+    async listReferences(slug: string): Promise<ReferenceSummary[]> {
+      const body = await requestJson(
+        `/projects/${encodeURIComponent(slug)}/references`,
+        undefined,
+        'a reference listing',
+        (value) => isRecord(value),
+      );
+      return parseReferenceListing(body);
+    },
+
+    async getReference(slug: string, name: string): Promise<ReferenceBrief> {
+      const body = await requestJson(
+        `/projects/${encodeURIComponent(slug)}/references/${encodeURIComponent(name)}`,
+        undefined,
+        'a reference brief document',
+        (value) => isRecord(value),
+      );
+      return parseReferenceBrief(body);
+    },
+
+    async createReferenceJob(slug: string, file: string): Promise<ReferenceJob> {
+      const body = await requestJson(
+        `/projects/${encodeURIComponent(slug)}/jobs`,
+        {
+          method: 'POST',
+          headers: { 'content-type': 'application/json' },
+          body: JSON.stringify({ kind: 'reference', file }),
+        },
+        'a reference job document',
+        (value) => isRecord(value),
+      );
+      return parseReferenceJob(body);
     },
 
     async listPublications(slug: string): Promise<Publication[]> {

@@ -1,6 +1,7 @@
 import { formatBytes, formatDuration } from '../api/asset-media-kind';
 import { AssetDeleteControl } from './asset-delete-control';
 import { AssetPreview } from './asset-preview';
+import { ReferenceAnalysis } from './reference-analysis';
 import type { AssetDeletion, AssetListEntry } from '../api/render-api-types';
 
 export type AssetCardProps = {
@@ -36,7 +37,7 @@ export function AssetCard({ slug, asset, onDeleted }: AssetCardProps) {
     <li
       data-testid="asset-card"
       data-asset-path={asset.path}
-      className="space-y-2 rounded-lg border border-slate-800 bg-slate-900/60 p-3"
+      className="min-w-0 space-y-2 rounded-lg border border-slate-800 bg-slate-900/60 p-3"
     >
       <AssetPreview slug={slug} path={asset.path} />
       <p className="truncate font-mono text-xs text-slate-200" title={asset.path}>
@@ -45,6 +46,7 @@ export function AssetCard({ slug, asset, onDeleted }: AssetCardProps) {
       <p className="font-mono text-[11px] text-slate-500">
         {[formatBytes(asset.fingerprint.sizeBytes), ...mediaFacts(asset)].join(' · ')}
       </p>
+      {asset.role === 'reference' && <ReferenceAnalysis slug={slug} assetPath={asset.path} />}
       <AssetDeleteControl slug={slug} role={asset.role} path={asset.path} onDeleted={onDeleted} />
     </li>
   );

@@ -129,7 +129,7 @@ function AssetLibraryContent({ mode }: { mode: ProjectMode }) {
                 {assets.length === 0 ? (
                   <p className="text-sm text-slate-600">{t('library.roleEmpty', { role })}</p>
                 ) : (
-                  <ul className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+                  <ul className={role === 'reference' ? 'grid gap-3' : 'grid gap-3 sm:grid-cols-2 lg:grid-cols-3'}>
                     {assets.map((asset) => (
                       <AssetCard
                         key={asset.path}
