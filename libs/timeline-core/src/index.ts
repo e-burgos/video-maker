@@ -266,3 +266,24 @@ export {
   reviewStatusFor,
 } from './review/review-report';
 export type { ReviewFinding, ReviewReport, ReviewSeverity, ReviewStatus } from './review/review-report';
+
+export {
+  MAX_PROPOSAL_CONCEPTS,
+  MAX_PROPOSAL_DURATION_SEC,
+  MAX_PROPOSAL_SCENES,
+  MIN_PROPOSAL_CONCEPTS,
+  PRODUCTION_PROPOSAL_STATUSES,
+  PRODUCTION_PROPOSAL_VERSION,
+  PROPOSAL_MUSIC_MODES,
+  ProductionProposalDraftSchema,
+  ProductionProposalSchema,
+  ProposalConceptSchema,
+  approveProposalConcept,
+  pendingProposalFrom,
+} from './proposal/production-proposal';
+export type {
+  ProductionProposal,
+  ProductionProposalDraft,
+  ProductionProposalStatus,
+  ProposalConcept,
+} from './proposal/production-proposal';

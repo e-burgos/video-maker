@@ -148,6 +148,7 @@ export const RENDER_API_ERROR_CODES = [
   'REVIEW_INPUTS_UNAVAILABLE',
   'REVIEW_NOT_FOUND',
   'RENDER_REVIEW_FAILED',
+  'PROPOSAL_NOT_FOUND',
 ] as const;
 
 export type RenderApiErrorCode = (typeof RENDER_API_ERROR_CODES)[number];

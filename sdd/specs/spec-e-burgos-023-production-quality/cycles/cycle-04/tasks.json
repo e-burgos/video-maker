@@ -25,11 +25,42 @@
       "estimation_hours": 4,
       "story_points": 8,
       "depends_on": [],
-      "status": "pending",
+      "status": "done",
       "files": [
+        "apps/render-api/src/errors/http-status-for.spec.ts",
+        "apps/render-api/src/errors/http-status-for.ts",
+        "apps/render-api/src/errors/render-api-error.ts",
+        "apps/render-api/src/errors/to-error-payload.ts",
+        "apps/render-api/src/http/handle-request.ts",
+        "apps/render-api/src/http/handlers/proposal-handler.spec.ts",
+        "apps/render-api/src/http/handlers/proposal-handler.ts",
+        "apps/render-api/src/http/routes.ts",
+        "apps/render-api/src/proposal/estimate-engine.ts",
+        "apps/render-api/src/proposal/estimate-production.spec.ts",
         "apps/render-api/src/proposal/estimate-production.ts",
-        "apps/render-api/src/http/handlers/proposal-handler.ts"
-      ]
+        "apps/render-api/src/proposal/job-history.spec.ts",
+        "apps/render-api/src/proposal/job-history.ts",
+        "apps/render-api/src/proposal/proposal-paths.ts",
+        "apps/render-api/src/proposal/proposal-store.ts",
+        "apps/render-api/src/store/producer-writable-paths.spec.ts",
+        "apps/render-api/src/store/producer-writable-paths.ts",
+        "libs/local-store/src/repositories/jobs-repository.spec.ts",
+        "libs/local-store/src/repositories/jobs-repository.ts",
+        "libs/timeline-core/src/index.ts",
+        "libs/timeline-core/src/proposal/production-proposal.spec.ts",
+        "libs/timeline-core/src/proposal/production-proposal.ts",
+        "libs/timeline-core/src/schemas/schemas.spec.ts"
+      ],
+      "usage": {
+        "tokens_in": 260000,
+        "tokens_out": 40000,
+        "provider_model": "claude/sonnet",
+        "effort": "medium",
+        "agent": "implementor-back",
+        "approx": true,
+        "source": "declared-estimate",
+        "recorded_at": "2026-10-12"
+      }
     },
     {
       "id": "TASK-002",

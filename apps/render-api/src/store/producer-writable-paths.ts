@@ -10,6 +10,7 @@ export const READABLE_PROJECT_TEXT_EXTENSIONS = ['.txt', '.md', '.json', '.srt']
 export const MAX_READABLE_PROJECT_TEXT_BYTES = 256 * 1024;
 const WRITABLE_TEXT_DIRECTORY = 'work/producer/';
 const WRITABLE_TEXT_EXACT_FILE = 'work/credits.json';
+const PROPOSAL_FILE = 'work/producer/proposal.json';
 
 export interface ResolvedProducerPath {
   readonly relativePath: string;
@@ -94,6 +95,15 @@ export function assertReadableProjectText(relativePath: string): void {
 }
 
 export function assertWritableProjectText(relativePath: string): void {
+  if (relativePath === PROPOSAL_FILE) {
+    throw new PipelineStageError({
+      code: 'PATH_NOT_WRITABLE',
+      stage: null,
+      resource: relativePath,
+      expected: 'the production proposal endpoints; its approval is never written as text',
+    });
+  }
+
   const isAllowed =
     relativePath === WRITABLE_TEXT_EXACT_FILE || relativePath.startsWith(WRITABLE_TEXT_DIRECTORY);
 
