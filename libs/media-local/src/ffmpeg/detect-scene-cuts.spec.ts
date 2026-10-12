@@ -1,44 +1,79 @@
 import { describe, expect, it } from 'vitest';
 
 import { FixtureCommandRunner } from '../runner/fixture-command-runner';
-import { detectSceneCuts, mergeCloseCuts, parseShowinfoCutTimes, sceneCutArgs } from './detect-scene-cuts';
+import { adaptiveSceneThreshold, detectSceneCuts, parseSceneScores, pickSceneCuts, sceneScoreArgs } from './detect-scene-cuts';
 import { buildScenesFromCuts, extractSceneKeyframes, sceneMidpointSec } from './extract-scene-keyframes';
 
-const SHOWINFO_STDERR = `Input #0, mov,mp4, from 'v.mp4':
-[Parsed_showinfo_1 @ 0x6000] n:   0 pts:  76800 pts_time:3.2     duration:   512 duration_time:0.0213333 fmt:yuv420p
-[Parsed_showinfo_1 @ 0x6000] n:   1 pts: 153600 pts_time:6.4     duration:   512 duration_time:0.0213333 fmt:yuv420p
-[Parsed_showinfo_1 @ 0x6000] n:   2 pts: 156000 pts_time:6.5     duration:   512 duration_time:0.0213333 fmt:yuv420p
-frame=  150 fps=0.0
+const METADATA_STDERR = `Input #0, mov,mp4, from 'v.mp4':
+[Parsed_metadata_3 @ 0x6000] frame:0    pts:0       pts_time:0
+[Parsed_metadata_3 @ 0x6000] lavfi.scene_score=0.000000
+[Parsed_metadata_3 @ 0x6000] frame:1    pts:1       pts_time:0.25
+[Parsed_metadata_3 @ 0x6000] lavfi.scene_score=0.010000
+[Parsed_metadata_3 @ 0x6000] frame:2    pts:2       pts_time:2.5
+[Parsed_metadata_3 @ 0x6000] lavfi.scene_score=0.120000
+[Parsed_metadata_3 @ 0x6000] frame:3    pts:3       pts_time:2.75
+[Parsed_metadata_3 @ 0x6000] lavfi.scene_score=0.080000
+[Parsed_metadata_3 @ 0x6000] frame:4    pts:4       pts_time:5
+[Parsed_metadata_3 @ 0x6000] lavfi.scene_score=0.900000
+[Parsed_metadata_3 @ 0x6000] frame:5    pts:5       pts_time:5.25
+[Parsed_metadata_3 @ 0x6000] lavfi.scene_score=0.010000
+frame=  6 fps=0.0
 `;
 
-describe('parseShowinfoCutTimes', () => {
-  it('reads pts_time of each selected frame', () => {
-    expect(parseShowinfoCutTimes(SHOWINFO_STDERR)).toEqual([3.2, 6.4, 6.5]);
+function scoresAt(...pairs: [number, number][]) {
+  return pairs.map(([atSec, score]) => ({ atSec, score }));
+}
+
+describe('parseSceneScores', () => {
+  it('pairs each sampled frame time with its scene score', () => {
+    expect(parseSceneScores(METADATA_STDERR)).toEqual(
+      scoresAt([0, 0], [0.25, 0.01], [2.5, 0.12], [2.75, 0.08], [5, 0.9], [5.25, 0.01]),
+    );
   });
 
-  it('returns nothing when ffmpeg selected no frame', () => {
-    expect(parseShowinfoCutTimes('frame=  150 fps=0.0')).toEqual([]);
+  it('returns nothing when ffmpeg printed no frame', () => {
+    expect(parseSceneScores('frame=  150 fps=0.0')).toEqual([]);
   });
 });
 
-describe('mergeCloseCuts', () => {
-  it('drops cuts closer than the minimum scene length to the previous cut', () => {
-    expect(mergeCloseCuts([3.2, 6.4, 6.5], 0.4)).toEqual([3.2, 6.4]);
+describe('adaptiveSceneThreshold', () => {
+  it('stays at the floor for a calm video so soft transitions still count', () => {
+    const calm = scoresAt(...Array.from({ length: 40 }, (_, index): [number, number] => [index / 4, 0.005]));
+    expect(adaptiveSceneThreshold(calm)).toBe(0.05);
   });
 
-  it('drops a cut too close to the start of the video', () => {
-    expect(mergeCloseCuts([0.1, 2], 0.4)).toEqual([2]);
+  it('never rises above the ceiling so hard cuts survive in busy footage', () => {
+    const busy = scoresAt(...Array.from({ length: 40 }, (_, index): [number, number] => [index / 4, index % 2 === 0 ? 0 : 0.9]));
+    expect(adaptiveSceneThreshold(busy)).toBe(0.3);
+  });
+});
+
+describe('pickSceneCuts', () => {
+  it('keeps local peaks above the threshold and drops the start of the video', () => {
+    const scores = scoresAt([0, 0], [0.25, 0.4], [0.5, 0], [2.5, 0.12], [2.75, 0.08], [5, 0.9], [5.25, 0.01]);
+    expect(pickSceneCuts(scores, 0.05, 1.5)).toEqual([2.5, 5]);
+  });
+
+  it('keeps only the strongest peak of a transition spread over several frames', () => {
+    const scores = scoresAt([4, 0.1], [4.25, 0.02], [4.5, 0.3], [4.75, 0.01], [9, 0.2]);
+    expect(pickSceneCuts(scores, 0.05, 1.5)).toEqual([4.5, 9]);
   });
 });
 
 describe('detectSceneCuts', () => {
-  it('builds the select filter with the threshold and merges the result', async () => {
+  it('samples scene scores and picks cuts with the adaptive threshold', async () => {
     const runner = new FixtureCommandRunner([
-      { bin: 'ffmpeg', argsPattern: [/select='gt\(scene,0\.3\)',showinfo/], response: { stderr: SHOWINFO_STDERR, exitCode: 0 } },
+      { bin: 'ffmpeg', argsPattern: [/fps=4,scale=320:-2,select='gte\(scene,0\)',metadata=print/], response: { stderr: METADATA_STDERR, exitCode: 0 } },
     ]);
 
-    await expect(detectSceneCuts('/v.mp4', runner)).resolves.toEqual([3.2, 6.4]);
-    expect(sceneCutArgs('/v.mp4', 0.5)).toContain("select='gt(scene,0.5)',showinfo");
+    await expect(detectSceneCuts('/v.mp4', runner)).resolves.toEqual([5]);
+    expect(sceneScoreArgs('/v.mp4')).toContain('-an');
+  });
+
+  it('uses a fixed threshold when one is given', async () => {
+    const runner = new FixtureCommandRunner([{ bin: 'ffmpeg', argsPattern: [], response: { stderr: METADATA_STDERR, exitCode: 0 } }]);
+
+    await expect(detectSceneCuts('/v.mp4', runner, { threshold: 0.1 })).resolves.toEqual([2.5, 5]);
   });
 });
 

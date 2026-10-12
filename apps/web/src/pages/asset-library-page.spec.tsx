@@ -285,6 +285,7 @@ describe('AssetLibraryPage in a motion project', () => {
     });
 
     await screen.findByTestId('role-image');
+    expect(screen.getByTestId('role-reference')).toBeTruthy();
     expect(screen.getByLabelText('Upload a photo for the video')).toBeTruthy();
     expect(screen.getByText('The photos of the video: they appear in the storyboard scenes that use them.')).toBeTruthy();
     expect(screen.queryByText(/B-roll/u)).toBeNull();

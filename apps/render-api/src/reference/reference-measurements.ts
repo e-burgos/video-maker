@@ -30,7 +30,7 @@ export interface FfmpegReferenceBinaries {
   readonly ffprobePath: string;
 }
 
-export const REFERENCE_MIN_SCENE_SEC = 0.4;
+export const REFERENCE_MIN_SCENE_SEC = 1.5;
 export const REFERENCE_LONG_SILENCE_SEC = 1.5;
 export const REFERENCE_SILENCE_NOISE_DB = -35;
 const MILLISECONDS_PER_SECOND = 1000;

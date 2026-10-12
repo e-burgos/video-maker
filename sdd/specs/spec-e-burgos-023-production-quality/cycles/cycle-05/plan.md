@@ -30,5 +30,5 @@
 - TASK-005 — verificación con un video real del estudio.
 
 ## Decisiones técnicas
-- Umbral de corte 0,3 con escena mínima de 0,4 s (cortes más cercanos se funden).
+- Cortes por umbral adaptativo sobre puntajes de escena muestreados a 4 cuadros por segundo (media + 2 desvíos, entre 0,05 y 0,3) con escena mínima de 1,5 s: un umbral fijo de 0,3 sólo veía cortes secos y daba 1 escena en motion con transiciones suaves (verificación).
 - El resumen es determinista (plantilla con los números), no lo escribe una IA: el productor ya interpreta.

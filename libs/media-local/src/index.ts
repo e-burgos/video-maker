@@ -229,11 +229,11 @@ export type { DetectSilencesOptions } from './ffmpeg/detect-silence-segments';
 export type { DetectedSegment, TimeSegment } from './ffmpeg/time-segment';
 export {
   DEFAULT_MIN_SCENE_SEC,
-  DEFAULT_SCENE_CUT_THRESHOLD,
+  adaptiveSceneThreshold,
   detectSceneCuts,
-  mergeCloseCuts,
-  parseShowinfoCutTimes,
-  sceneCutArgs,
+  parseSceneScores,
+  pickSceneCuts,
+  sceneScoreArgs,
 } from './ffmpeg/detect-scene-cuts';
 export type { DetectSceneCutsOptions } from './ffmpeg/detect-scene-cuts';
 export { buildScenesFromCuts, extractSceneKeyframes, sceneMidpointSec } from './ffmpeg/extract-scene-keyframes';
