@@ -230,10 +230,22 @@
         "TASK-002",
         "TASK-004"
       ],
-      "status": "pending",
+      "status": "done",
       "files": [
-        "sdd/specs/spec-e-burgos-023-production-quality/cycles/cycle-04/artifacts/verification.md"
-      ]
+        "sdd/specs/spec-e-burgos-023-production-quality/cycles/cycle-04/artifacts/verification.md",
+        "sdd/specs/spec-e-burgos-023-production-quality/cycles/cycle-04/artifacts/web-propuesta-aprobada.jpg",
+        "sdd/specs/spec-e-burgos-023-production-quality/cycles/cycle-04/artifacts/web-muestra-footage.jpg"
+      ],
+      "usage": {
+        "tokens_in": 90000,
+        "tokens_out": 12000,
+        "provider_model": "claude/opus",
+        "effort": "high",
+        "agent": "orchestrator",
+        "approx": true,
+        "source": "declared-estimate",
+        "recorded_at": "2026-10-12"
+      }
     }
   ]
 }

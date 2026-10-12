@@ -674,9 +674,9 @@
             "libs/composition-remotion",
             "apps/web"
           ],
-          "status": "in-progress",
+          "status": "completed",
           "tasks_total": 5,
-          "tasks_done": 4
+          "tasks_done": 5
         }
       }
     }
