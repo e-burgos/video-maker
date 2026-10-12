@@ -58,7 +58,7 @@ function mapRenderApiErrorCode(code: string, context: ErrorContext): StudioToolE
   if (isKnownStudioErrorCode(code)) {
     return code;
   }
-  if (code === 'MATERIAL_REVIEW_INVALID') {
+  if (code === 'MATERIAL_REVIEW_INVALID' || code === 'VISUAL_REVIEW_INVALID') {
     return 'INVALID_INPUT';
   }
   if (code === 'REVIEW_NOT_FOUND') {
@@ -327,6 +327,9 @@ export function createHttpRenderApiClient(options: HttpRenderApiClientOptions): 
       };
       return json.previews;
     },
+
+    putVisualReview: async (file, scenes) =>
+      (await request('PUT', `/projects/${slug}/reviews/visual?file=${encodeURIComponent(file)}`, { scenes })) as RenderApiRenderReview,
 
     getRenderReview: async (file) => {
       if (file !== undefined) {

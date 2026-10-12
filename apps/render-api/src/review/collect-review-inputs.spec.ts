@@ -19,6 +19,7 @@ function storageWith(files: Record<string, string>): ReviewInputPorts['storage']
   return {
     stat: (path) => Promise.resolve(path in files ? { kind: 'file' as const } : null),
     readTextFile: (path) => Promise.resolve(files[path] ?? ''),
+    ensureDirectory: () => Promise.resolve(),
   };
 }
 
@@ -184,5 +185,84 @@ describe('collectReviewInputs: motion', () => {
 
     expect(inputs.missingAssets).toEqual(['work/motion/assets/audio/vo-cta.wav']);
     expect(inputs.hasVoice).toBe(true);
+  });
+
+  describe('scene frames and delivery promise (US-023-603)', () => {
+    const storyboard = JSON.stringify({ scenes: [{ id: 'hook', vo: '  ¿Querés sumar pantallas?  ' }, { id: 'cta' }] });
+    const proposal = JSON.stringify({
+      version: 1,
+      status: 'approved',
+      recommendedId: 'directo',
+      approvedConceptId: 'directo',
+      approvedAt: '2026-10-12T09:00:00.000Z',
+      concepts: [
+        { id: 'directo', title: 'Directo', angle: 'Al grano', format: 'youtube-16x9', durationSec: 60, scenes: 2, delivery: { kind: 'motion', maxDurationSec: 80 } },
+        { id: 'largo', title: 'Largo', angle: 'Detallado', format: 'youtube-16x9', durationSec: 120, scenes: 4, delivery: { kind: 'motion' } },
+      ],
+    });
+
+    function recordingPorts(files: Record<string, string>) {
+      const extracted: Array<{ atSec: number; outPath: string; maxLongSidePx: number }> = [];
+      const base = motionPorts(undefined, { ...motionFiles, ...files });
+      const ports: ReviewInputPorts = {
+        ...base,
+        measurements: {
+          ...base.measurements,
+          extractFrame: (_video, atSec, outPath, maxLongSidePx) => {
+            extracted.push({ atSec, outPath, maxLongSidePx });
+            return Promise.resolve();
+          },
+        },
+      };
+      return { ports, extracted };
+    }
+
+    it('extracts one frame at the middle of each scene and carries the scene voice', async () => {
+      const { ports, extracted } = recordingPorts({ '/media/demo/work/motion/storyboard.json': storyboard });
+
+      const inputs = await collectReviewInputs({ project, file: 'out/motion.mp4', mode: 'motion' }, ports);
+
+      expect(extracted).toEqual([
+        { atSec: 2.5, outPath: '/media/demo/out/motion.review/scene-01.jpg', maxLongSidePx: 960 },
+        { atSec: 8.5, outPath: '/media/demo/out/motion.review/scene-02.jpg', maxLongSidePx: 960 },
+      ]);
+      expect(inputs.sceneFrames).toEqual([
+        { sceneId: 'hook', index: 1, startSec: 0, endSec: 5, atSec: 2.5, frame: 'out/motion.review/scene-01.jpg', voice: '¿Querés sumar pantallas?' },
+        { sceneId: 'cta', index: 2, startSec: 5, endSec: 12, atSec: 8.5, frame: 'out/motion.review/scene-02.jpg' },
+      ]);
+      expect(reviewRender(inputs).findings.some((finding) => finding.check === 'visual-not-reviewed')).toBe(true);
+    });
+
+    it('still extracts frames when the storyboard is missing, without voice text', async () => {
+      const { ports } = recordingPorts({});
+
+      const inputs = await collectReviewInputs({ project, file: 'out/motion.mp4', mode: 'motion' }, ports);
+
+      expect(inputs.sceneFrames.map((frame) => frame.voice)).toEqual([undefined, undefined]);
+    });
+
+    it('reads the approved concept as the delivery promise', async () => {
+      const { ports } = recordingPorts({ '/media/demo/work/producer/proposal.json': proposal });
+
+      const inputs = await collectReviewInputs({ project, file: 'out/motion.mp4', mode: 'motion' }, ports);
+
+      expect(inputs.promise).toEqual({ conceptId: 'directo', title: 'Directo', durationSec: 60, maxDurationSec: 80 });
+    });
+
+    it('has no promise for a pending proposal or an unreadable one', async () => {
+      const pending = JSON.stringify({ ...JSON.parse(proposal), status: 'pending', approvedConceptId: undefined, approvedAt: undefined });
+
+      for (const contents of [pending, '{not json']) {
+        const { ports } = recordingPorts({ '/media/demo/work/producer/proposal.json': contents });
+        const inputs = await collectReviewInputs({ project, file: 'out/motion.mp4', mode: 'motion' }, ports);
+        expect(inputs.promise).toBeNull();
+      }
+    });
+
+    it('has no scene frames for a footage render', async () => {
+      const inputs = await collectReviewInputs({ project, file: 'out/demo.mp4', mode: 'footage' }, footagePorts({ durationSec: 34 }));
+
+      expect(inputs.sceneFrames).toEqual([]);
+    });
   });
 });

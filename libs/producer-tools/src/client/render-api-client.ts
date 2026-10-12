@@ -1,4 +1,4 @@
-import type { MaterialReview, ReferenceBrief } from '@video-maker/timeline-core';
+import type { MaterialReview, ReferenceBrief, SceneFrame, SceneVisualReview, VisualReview } from '@video-maker/timeline-core';
 
 export type RenderApiProjectMode = 'footage' | 'motion';
 
@@ -138,6 +138,8 @@ export interface RenderApiRenderReview {
     readonly timeRange?: { readonly startSec: number; readonly endSec: number };
     readonly proposedFix?: string;
   }[];
+  readonly sceneFrames?: readonly SceneFrame[];
+  readonly visualReview?: VisualReview;
 }
 
 export interface RenderApiReferenceSummary {
@@ -193,6 +195,7 @@ export interface RenderApiClient {
   previewImages(paths: readonly string[]): Promise<readonly RenderApiImagePreview[]>;
 
   getRenderReview(file: string | undefined): Promise<RenderApiRenderReview | null>;
+  putVisualReview(file: string, scenes: readonly SceneVisualReview[]): Promise<RenderApiRenderReview>;
 
   listReferences(): Promise<readonly RenderApiReferenceSummary[]>;
   getReference(name: string): Promise<ReferenceBrief>;

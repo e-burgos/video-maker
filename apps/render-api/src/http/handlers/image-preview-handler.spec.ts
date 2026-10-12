@@ -223,4 +223,21 @@ describe('handlePreviewImages', () => {
       ).rejects.toMatchObject({ code: 'INVALID_INPUT' });
     });
   });
+
+  it('previews a render scene frame and records it as viewed (US-023-603)', async () => {
+    const callLog = createCallLog();
+    const storage = createFakeObjectStorage(callLog, {
+      directories: [PROJECT_ROOT],
+      files: [{ path: `${PROJECT_ROOT}/out/video.review/scene-01.jpg`, contents: 'bytes' }],
+    });
+    const deps = createFakeRenderApiDependencies(callLog, { storage, clock: { nowIso: () => '2026-10-12T10:00:00.000Z' } });
+    deps.localStore.projects.insert('pitch-deck');
+
+    const response = await handlePreviewImages(deps, STORE, { slug: 'pitch-deck' }, previewRequest('pitch-deck', { paths: ['out/video.review/scene-01.jpg'] }));
+
+    expect(response.status).toBe(200);
+    expect((response.body as { previews: { path: string }[] }).previews[0]?.path).toBe('out/video.review/scene-01.jpg');
+    const viewed = JSON.parse(await storage.readTextFile(`${PROJECT_ROOT}/work/producer/viewed-images.json`)) as { images: { path: string; viewedAt: string }[] };
+    expect(viewed.images).toEqual([{ path: 'out/video.review/scene-01.jpg', viewedAt: '2026-10-12T10:00:00.000Z' }]);
+  });
 });

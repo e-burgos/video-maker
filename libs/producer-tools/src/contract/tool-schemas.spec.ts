@@ -431,3 +431,23 @@ describe('material review tools (US-023-601)', () => {
     expect(STUDIO_TOOLS.review_material.input.safeParse({ items: [], gaps: [], version: 1 }).success).toBe(false);
   });
 });
+
+describe('visual review tools (US-023-603)', () => {
+  const scene = { sceneId: 'hook', shows: 'Título', matchesVoice: true, legible: true, couldBeOtherProduct: false, verdict: 'ok', note: '' };
+
+  it('get_render_review output carries the scene frames, the visual review and its state', () => {
+    const shape = (STUDIO_TOOLS.get_render_review.output as unknown as ZodObject).shape;
+
+    expect(Object.keys(shape).sort()).toEqual(['createdAt', 'file', 'findings', 'metrics', 'sceneFrames', 'status', 'visualReview', 'visualReviewState']);
+  });
+
+  it('record_visual_review takes scenes and an optional file, and nothing the studio stamps', () => {
+    const shape = (STUDIO_TOOLS.record_visual_review.input as unknown as ZodObject).shape;
+
+    expect(Object.keys(shape).sort()).toEqual(['file', 'scenes']);
+    expect(STUDIO_TOOLS.record_visual_review.input.safeParse({ scenes: [scene] }).success).toBe(true);
+    expect(STUDIO_TOOLS.record_visual_review.input.safeParse({ scenes: [scene], recordedAt: 'x' }).success).toBe(false);
+    expect(STUDIO_TOOLS.record_visual_review.input.safeParse({ scenes: [{ ...scene, verdict: 'maybe' }] }).success).toBe(false);
+    expect(STUDIO_TOOLS.record_visual_review.description).toContain('VISUAL_REVIEW_NOT_VIEWED');
+  });
+});

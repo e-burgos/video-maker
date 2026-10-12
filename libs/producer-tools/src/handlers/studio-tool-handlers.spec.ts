@@ -334,8 +334,30 @@ describe('createStudioToolHandlers', () => {
             proposedFix: 'Raise the master gain',
           },
         ],
+        visualReviewState: 'not-applicable',
       });
       expect(client.calls).toEqual([{ method: 'getRenderReview', args: ['out/video.mp4'] }]);
+    });
+
+    const sceneFrames = [
+      { sceneId: 'hook', index: 1, startSec: 0, endSec: 4, atSec: 2, frame: 'out/video.review/scene-01.jpg', voice: 'Hola' },
+    ];
+
+    it('lists the scene frames and says the visual review is pending (US-023-603)', async () => {
+      const { handlers } = handlersWith({ getRenderReview: async () => ({ ...review, sceneFrames }) });
+
+      const result = await handlers.get_render_review({});
+
+      expect(result.data).toMatchObject({ sceneFrames, visualReviewState: 'pending' });
+    });
+
+    it('reports a recorded visual review', async () => {
+      const visualReview = { recordedAt: '2026-10-12T11:00:00.000Z', scenes: [{ sceneId: 'hook', shows: 'Título', matchesVoice: true, legible: true, couldBeOtherProduct: false, verdict: 'ok' as const, note: '' }] };
+      const { handlers } = handlersWith({ getRenderReview: async () => ({ ...review, sceneFrames, visualReview }) });
+
+      const result = await handlers.get_render_review({});
+
+      expect(result.data).toMatchObject({ visualReview, visualReviewState: 'recorded' });
     });
 
     it('asks for the latest review when no file is given', async () => {
@@ -950,6 +972,72 @@ describe('createStudioToolHandlers', () => {
 
       expect(result.data).toEqual({ saved: true, items: 2, fits: 1, doubtful: 0, unfit: 1, gaps: 1 });
       expect(client.calls).toEqual([{ method: 'putMaterialReview', args: [draft] }]);
+    });
+
+    describe('record_visual_review (US-023-603)', () => {
+      const scenes = [
+        { sceneId: 'hook', shows: 'Título', matchesVoice: true, legible: true, couldBeOtherProduct: false, verdict: 'ok' as const, note: '' },
+        { sceneId: 'cta', shows: 'Una foto de comida', matchesVoice: true, legible: true, couldBeOtherProduct: true, verdict: 'fix' as const, note: 'Usar el equipo' },
+      ];
+      const report = {
+        file: 'out/video.mp4',
+        status: 'fail' as const,
+        createdAt: '2026-10-12T10:00:00.000Z',
+        metrics: {},
+        findings: [{ id: 'visual-review-01', check: 'visual-review', severity: 'critical' as const, message: 'Escena cta: podría ser de otro producto', proposedFix: 'Usar el equipo' }],
+      };
+
+      it('sends the scenes for the given file and answers what is still critical', async () => {
+        const { handlers, client } = handlersWith({ putVisualReview: async () => report });
+
+        const result = await handlers.record_visual_review({ file: 'out/video.mp4', scenes });
+
+        expect(result.data).toEqual({
+          saved: true,
+          file: 'out/video.mp4',
+          status: 'fail',
+          scenes: 2,
+          flaggedScenes: 1,
+          criticalFindings: ['Escena cta: podría ser de otro producto'],
+        });
+        expect(client.calls).toEqual([{ method: 'putVisualReview', args: ['out/video.mp4', scenes] }]);
+      });
+
+      it('uses the most recent review when no file is given', async () => {
+        const { handlers, client } = handlersWith({ getRenderReview: async () => report, putVisualReview: async () => report });
+
+        await handlers.record_visual_review({ scenes });
+
+        expect(client.calls.map((call) => call.method)).toEqual(['getRenderReview', 'putVisualReview']);
+      });
+
+      it('says there is nothing to review when no render was reviewed', async () => {
+        const { handlers } = handlersWith({ getRenderReview: async () => null });
+
+        await expect(handlers.record_visual_review({ scenes })).rejects.toMatchObject({ code: 'FILE_NOT_FOUND' });
+      });
+
+      it('propagates VISUAL_REVIEW_NOT_VIEWED from the studio', async () => {
+        const { handlers } = handlersWith({
+          putVisualReview: async () => {
+            throw new StudioToolRuntimeError('VISUAL_REVIEW_NOT_VIEWED', 'look at these with view_images: out/video.review/scene-02.jpg');
+          },
+        });
+
+        await expect(handlers.record_visual_review({ file: 'out/video.mp4', scenes })).rejects.toMatchObject({ code: 'VISUAL_REVIEW_NOT_VIEWED' });
+      });
+
+      it.each([
+        [{ scenes: [] }],
+        [{ scenes: [{ ...scenes[0], verdict: 'maybe' }] }],
+        [{ scenes, file: 'raw/video.mp4' }],
+        [{ file: 'out/video.mp4' }],
+      ])('rejects a malformed review before calling the studio (%#)', async (input) => {
+        const { handlers, client } = handlersWith();
+
+        await expect(handlers.record_visual_review(input)).rejects.toMatchObject({ code: 'INVALID_INPUT' });
+        expect(client.calls).toEqual([]);
+      });
     });
 
     it.each([

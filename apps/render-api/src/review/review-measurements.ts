@@ -13,6 +13,7 @@ export interface ReviewMeasurements {
     noiseDb: number,
     audioDurationSec: number,
   ) => Promise<readonly SecondsRange[]>;
+  readonly extractFrame: (videoPath: string, atSec: number, outPath: string, maxLongSidePx: number) => Promise<void>;
   readonly measureSegments: (path: string, segments: readonly TimeSegment[]) => Promise<ReadonlyArray<number | null>>;
 }
 
@@ -70,6 +71,10 @@ export function createFfmpegReviewMeasurements(
     detectSilences: async (path, minDurationSec, noiseDb, audioDurationSec) => {
       const { detectSilences } = await loadMediaLocal();
       return detectSilences(path, runner, { minDurationSec, noiseDb, audioDurationSec, ffmpegPath });
+    },
+    extractFrame: async (videoPath, atSec, outPath, maxLongSidePx) => {
+      const { extractFrame } = await loadMediaLocal();
+      await extractFrame(videoPath, atSec, outPath, runner, { maxLongSidePx, ffmpegPath });
     },
     measureSegments: async (path, segments) => {
       const { measureSegmentLoudness } = await loadMediaLocal();

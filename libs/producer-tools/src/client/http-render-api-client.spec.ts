@@ -376,6 +376,23 @@ describe('createHttpRenderApiClient', () => {
     await expect(client(invalid.fetchImpl).putMaterialReview({})).rejects.toMatchObject({ code: 'INVALID_INPUT' });
   });
 
+  it('putVisualReview sends the scenes to the visual route of that render and maps its errors (US-023-603)', async () => {
+    const stored = { file: 'out/video.mp4', status: 'pass', createdAt: '2026-10-12T10:00:00.000Z', metrics: {}, findings: [] };
+    const ok = createFakeFetch(() => jsonResponse(200, stored));
+    const scenes = [{ sceneId: 'hook', shows: 'Título', matchesVoice: true, legible: true, couldBeOtherProduct: false, verdict: 'ok' as const, note: '' }];
+
+    const saved = await client(ok.fetchImpl).putVisualReview('out/video.mp4', scenes);
+
+    expect(saved).toEqual(stored);
+    expect(ok.calls[0]?.init?.method).toBe('PUT');
+    expect(ok.calls[0]?.url).toBe('http://127.0.0.1:4599/projects/pitch-deck/reviews/visual?file=out%2Fvideo.mp4');
+    expect(JSON.parse(String(ok.calls[0]?.init?.body))).toEqual({ scenes });
+    const notViewed = createFakeFetch(() => errorResponse(422, 'VISUAL_REVIEW_NOT_VIEWED', 'look at these with view_images: out/video.review/scene-01.jpg'));
+    const invalid = createFakeFetch(() => errorResponse(422, 'VISUAL_REVIEW_INVALID'));
+    await expect(client(notViewed.fetchImpl).putVisualReview('out/video.mp4', scenes)).rejects.toMatchObject({ code: 'VISUAL_REVIEW_NOT_VIEWED', hint: expect.stringContaining('scene-01') });
+    await expect(client(invalid.fetchImpl).putVisualReview('out/video.mp4', scenes)).rejects.toMatchObject({ code: 'INVALID_INPUT' });
+  });
+
   it('getMotionBrief and getMotionStoryboard read the project motion routes', async () => {
     const { fetchImpl, calls } = createFakeFetch(() => jsonResponse(200, { version: 1 }));
     const api = client(fetchImpl);

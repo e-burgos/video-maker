@@ -10,7 +10,7 @@ export const MOTION_MUSIC_FILE = `${MOTION_AUDIO_DIRECTORY}/music.wav`;
 
 export const MotionReviewTimelineSchema = z.object({
   duration: z.number().positive(),
-  scenes: z.array(z.object({ id: z.string().min(1), voStart: z.number(), voDuration: z.number().positive() })),
+  scenes: z.array(z.object({ id: z.string().min(1), start: z.number(), end: z.number(), voStart: z.number(), voDuration: z.number().positive() })),
   musicAutomation: z.object({
     lanes: z.array(z.object({ target: z.string(), points: z.array(z.object({ t: z.number(), v: z.number() })) })),
   }),

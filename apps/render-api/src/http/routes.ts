@@ -95,6 +95,7 @@ export const ROUTES = [
   { id: 'projects.publish.youtube.draft', method: 'POST', pattern: '/projects/:slug/publish/youtube/draft' },
   { id: 'projects.publications.list', method: 'GET', pattern: '/projects/:slug/publications' },
   { id: 'projects.reviews.get', method: 'GET', pattern: '/projects/:slug/reviews' },
+  { id: 'projects.reviews.visual.put', method: 'PUT', pattern: '/projects/:slug/reviews/visual' },
   { id: 'projects.references.list', method: 'GET', pattern: '/projects/:slug/references' },
   { id: 'projects.references.get', method: 'GET', pattern: '/projects/:slug/references/:name' },
   { id: 'projects.jobs.create', method: 'POST', pattern: '/projects/:slug/jobs' },

@@ -3,11 +3,13 @@ import type { MediaProject } from '@video-maker/auto-montage';
 
 import { collectFootageFacts } from './collect-footage-facts';
 import { collectMotionFacts } from './collect-motion-facts';
+import { readDeliveryPromise } from './delivery-promise';
 import { resolveDelivery } from './infer-delivery';
 import { measureLevelPlans } from './level-plan';
 import type { ReviewFacts, ReviewStoragePort } from './review-facts';
 import type { ReviewInputs, ReviewMode } from './review-inputs';
 import type { ReviewMeasurements } from './review-measurements';
+import { extractSceneFrames } from './scene-frames';
 import {
   BLACK_DETECT_MIN_SEC,
   FROZEN_DETECT_MIN_SEC,
@@ -27,10 +29,12 @@ export interface ReviewInputPorts {
   readonly nowIso: () => string;
 }
 
-function collectFacts(request: ReviewRequest, storage: ReviewStoragePort): Promise<ReviewFacts> {
-  return request.mode === 'motion'
-    ? collectMotionFacts(request.project, storage)
-    : collectFootageFacts(request.project, storage);
+async function collectFacts(request: ReviewRequest, storage: ReviewStoragePort): Promise<ReviewFacts> {
+  const facts =
+    request.mode === 'motion'
+      ? await collectMotionFacts(request.project, storage)
+      : await collectFootageFacts(request.project, storage);
+  return { ...facts, promise: await readDeliveryPromise(request.project, storage) };
 }
 
 export function collectReviewFacts(request: ReviewRequest, storage: ReviewStoragePort): Promise<ReviewFacts> {
@@ -79,5 +83,11 @@ export async function measureReviewInputs(
       actualDurationSec,
     ),
     missingAssets: facts.missingAssets,
+    sceneFrames: await extractSceneFrames(
+      { project: request.project, file: request.file, scenes: facts.scenes, durationSec: actualDurationSec },
+      ports.storage,
+      measurements,
+    ),
+    promise: facts.promise,
   };
 }

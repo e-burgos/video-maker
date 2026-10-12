@@ -1,12 +1,14 @@
 import { reviewStatusFor } from '@video-maker/timeline-core';
 import type { ReviewReport } from '@video-maker/timeline-core';
 
+import { deliveryPromiseFindings } from './delivery-promise';
 import { deliveryFindings } from './delivery-rules';
 import { masterLoudnessFindings } from './master-loudness-rule';
 import { allCaptionFindings, voiceSilenceFindings } from './narration-rules';
 import { blackFrameFindings, frozenFrameFindings } from './picture-rules';
 import type { FindingDraft } from './review-finding-builder';
 import { formatSeconds, lengthSec, numbered } from './review-finding-builder';
+import { visualNotReviewedFindings } from './scene-frames';
 import type { ReviewInputs, SecondsRange } from './review-inputs';
 import { FOOTAGE_DURATION_TOLERANCE_FRAMES, MOTION_DURATION_TOLERANCE_FRAMES } from './review-thresholds';
 import { voiceMusicMarginFindings, voiceMusicMargins, worstMarginDb } from './voice-music-margin-rule';
@@ -52,6 +54,8 @@ export function reviewRender(inputs: ReviewInputs): ReviewReport {
     ...voiceSilenceFindings(inputs.silences, inputs.voiceSegments),
     ...allCaptionFindings(inputs.captions, inputs.frame, inputs.captionStyle),
     ...missingAssetFindings(inputs.missingAssets),
+    ...deliveryPromiseFindings(inputs.promise, inputs.actualDurationSec),
+    ...visualNotReviewedFindings(inputs.sceneFrames),
     ...deliveryFindings({
       delivery: inputs.delivery,
       actualDurationSec: inputs.actualDurationSec,
@@ -80,5 +84,6 @@ export function reviewRender(inputs: ReviewInputs): ReviewReport {
       missingAssetCount: inputs.missingAssets.length,
     },
     findings,
+    ...(inputs.sceneFrames.length > 0 ? { sceneFrames: [...inputs.sceneFrames] } : {}),
   };
 }

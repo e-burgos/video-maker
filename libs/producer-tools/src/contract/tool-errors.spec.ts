@@ -22,6 +22,7 @@ describe('STUDIO_TOOL_ERROR_CODES', () => {
         'PROPOSAL_NOT_APPROVED',
         'MATERIAL_NOT_REVIEWED',
         'MATERIAL_NOT_VIEWED',
+        'VISUAL_REVIEW_NOT_VIEWED',
       ].sort(),
     );
   });

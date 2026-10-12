@@ -101,5 +101,7 @@ export async function collectFootageFacts(project: MediaProject, storage: Review
       safeZone: timeline.safeZone ?? safeZoneFor(timeline.format),
     },
     missingAssets: await findMissingAssets(timeline, project, storage),
+    scenes: [],
+    promise: null,
   };
 }

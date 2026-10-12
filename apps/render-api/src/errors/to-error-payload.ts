@@ -150,6 +150,8 @@ const MESSAGE_BY_CODE: Readonly<Record<RenderApiErrorCode, string>> = {
   PROPOSAL_NOT_FOUND: 'The project has no production proposal yet.',
   MATERIAL_NOT_VIEWED: 'The material review names images that were never previewed with view_images; look at each one first.',
   MATERIAL_REVIEW_INVALID: 'The material review does not follow the expected shape.',
+  VISUAL_REVIEW_INVALID: 'The visual review does not cover every scene of the render or does not follow the expected shape.',
+  VISUAL_REVIEW_NOT_VIEWED: 'The visual review covers scene frames that were never previewed with view_images after the review was created; look at each one first.',
 };
 
 export function toErrorPayload(value: unknown): RenderApiErrorPayload {

@@ -1,7 +1,8 @@
 import { z } from 'zod';
 
 import { TimelineSchema, canonicalMaterialPath } from '@video-maker/timeline-core';
-import type { MaterialReview, Timeline } from '@video-maker/timeline-core';
+import type { MaterialReview, SceneVisualReview, Timeline } from '@video-maker/timeline-core';
+import type { RenderApiRenderReview } from '../client/render-api-client';
 
 import { PATCH_TIMELINE_SECTIONS, STUDIO_TOOLS } from '../contract/tool-schemas';
 import type { PatchTimelineInput, PatchTimelineSection } from '../contract/tool-schemas';
@@ -33,6 +34,13 @@ function isFullRender(job: StartJobRequest): boolean {
 
 function withoutSkipProposal(job: StartJobRequest): Record<string, unknown> {
   return Object.fromEntries(Object.entries(job).filter(([key]) => key !== 'skipProposal'));
+}
+
+function visualReviewStateOf(review: RenderApiRenderReview): 'not-applicable' | 'pending' | 'recorded' {
+  if (review.visualReview !== undefined) {
+    return 'recorded';
+  }
+  return (review.sceneFrames ?? []).length > 0 ? 'pending' : 'not-applicable';
 }
 
 function countVerdict(review: MaterialReview, verdict: 'fits' | 'doubtful' | 'unfit'): number {
@@ -430,7 +438,24 @@ export function createStudioToolHandlers(
           'that render has not been reviewed: every full render or motion video is reviewed by a job of kind review that starts right after it; list the recent jobs and wait for it',
         );
       }
-      return withOutput('get_render_review', review);
+      return withOutput('get_render_review', { ...review, visualReviewState: visualReviewStateOf(review) });
+    },
+
+    record_visual_review: async (rawInput) => {
+      const input = parseInput<{ file?: string; scenes: readonly SceneVisualReview[] }>(STUDIO_TOOLS.record_visual_review.input, rawInput);
+      const file = input.file ?? (await client.getRenderReview(undefined))?.file;
+      if (file === undefined) {
+        throw new StudioToolRuntimeError('FILE_NOT_FOUND', 'there is no reviewed render yet: render the video and read get_render_review first');
+      }
+      const report = await client.putVisualReview(file, input.scenes);
+      return withOutput('record_visual_review', {
+        saved: true,
+        file: report.file,
+        status: report.status,
+        scenes: input.scenes.length,
+        flaggedScenes: report.findings.filter((finding) => finding.check === 'visual-review').length,
+        criticalFindings: report.findings.filter((finding) => finding.severity === 'critical').map((finding) => finding.message),
+      });
     },
 
     get_reference_brief: async (rawInput) => {

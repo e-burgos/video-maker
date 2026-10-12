@@ -148,6 +148,8 @@ const STATUS_BY_CODE: Readonly<Record<RenderApiErrorCode, number>> = {
   PROPOSAL_NOT_FOUND: 404,
   MATERIAL_NOT_VIEWED: 422,
   MATERIAL_REVIEW_INVALID: 422,
+  VISUAL_REVIEW_INVALID: 422,
+  VISUAL_REVIEW_NOT_VIEWED: 422,
 };
 
 export function httpStatusFor(code: RenderApiErrorCode): number {

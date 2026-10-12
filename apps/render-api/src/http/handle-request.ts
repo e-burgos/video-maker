@@ -109,6 +109,7 @@ import {
 } from './handlers/youtube-publish-handler';
 import { handleGetReference, handleListReferences } from './handlers/references-handler';
 import { handleGetRenderReviews } from './handlers/reviews-handler';
+import { handlePutVisualReview } from './handlers/visual-review-handler';
 import { handleHealth } from './health-handler';
 import { JSON_CONTENT_TYPE } from './http-message';
 import type { HttpRequestLine, HttpResponse } from './http-message';
@@ -402,6 +403,8 @@ async function dispatchRoute(
         return await handleListPublications(deps, store, params);
       case 'projects.reviews.get':
         return await handleGetRenderReviews(deps, store, params, request);
+      case 'projects.reviews.visual.put':
+        return await handlePutVisualReview(deps, store, params, request);
       case 'projects.references.list':
         return await handleListReferences(deps, store, params);
       case 'projects.references.get':

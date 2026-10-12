@@ -1,4 +1,6 @@
-import type { DeliveryContract } from '@video-maker/timeline-core';
+import type { DeliveryContract, SceneFrame } from '@video-maker/timeline-core';
+
+import type { DeliveryPromise } from './review-facts';
 
 export type ReviewMode = 'footage' | 'motion';
 
@@ -49,4 +51,6 @@ export interface ReviewInputs {
   readonly frozenSegments: readonly SecondsRange[];
   readonly silences: readonly SecondsRange[];
   readonly missingAssets: readonly string[];
+  readonly sceneFrames: readonly SceneFrame[];
+  readonly promise: DeliveryPromise | null;
 }

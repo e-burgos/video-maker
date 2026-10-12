@@ -82,6 +82,26 @@ describe('createStudioMcpServer', () => {
     expect(result.structuredContent).toEqual({ saved: true, items: 1, fits: 0, doubtful: 0, unfit: 1, gaps: 0 });
   });
 
+  it('exposes record_visual_review with an object root input and answers the critical findings left (US-023-603)', async () => {
+    const report = {
+      file: 'out/video.mp4',
+      status: 'fail' as const,
+      createdAt: '2026-10-12T10:00:00.000Z',
+      metrics: {},
+      findings: [{ id: 'visual-review-01', check: 'visual-review', severity: 'critical' as const, message: 'Escena hook: no se lee bien', proposedFix: 'Agrandar' }],
+    };
+    const { client } = await connectedPair({ getRenderReview: async () => report, putVisualReview: async () => report });
+    const scenes = [{ sceneId: 'hook', shows: 'Título', matchesVoice: true, legible: false, couldBeOtherProduct: false, verdict: 'fix', note: 'Agrandar' }];
+
+    const { tools } = await client.listTools();
+    const tool = tools.find((candidate) => candidate.name === 'record_visual_review');
+    const result = await client.callTool({ name: 'record_visual_review', arguments: { scenes } });
+
+    expect(tool?.inputSchema.type).toBe('object');
+    expect(Object.keys(tool?.inputSchema.properties ?? {}).sort()).toEqual(['file', 'scenes']);
+    expect(result.structuredContent).toEqual({ saved: true, file: 'out/video.mp4', status: 'fail', scenes: 1, flaggedScenes: 1, criticalFindings: ['Escena hook: no se lee bien'] });
+  });
+
   it('answers propose_production without a material review as an isError MATERIAL_NOT_REVIEWED the model can read', async () => {
     const { client } = await connectedPair({ getMaterialReview: async () => null, listProjectAssets: async () => [] });
 

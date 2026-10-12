@@ -162,6 +162,8 @@ export const RENDER_API_ERROR_CODES = [
   'PROPOSAL_NOT_FOUND',
   'MATERIAL_NOT_VIEWED',
   'MATERIAL_REVIEW_INVALID',
+  'VISUAL_REVIEW_INVALID',
+  'VISUAL_REVIEW_NOT_VIEWED',
 ] as const;
 
 export type RenderApiErrorCode = (typeof RENDER_API_ERROR_CODES)[number];

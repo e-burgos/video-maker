@@ -66,6 +66,8 @@ const TOOL_DESCRIPTIONS: Readonly<Record<StudioToolName, string>> = {
   view_images: 'look at up to 6 photos already in the project, or of the project brand as brand:<key>. Use this for photos, never extract_frames.',
   get_render_review:
     'read the automatic review of a finished render (status, master loudness, voice/music margin and the findings with their proposed fix); use it to propose fixes before publishing.',
+  record_visual_review:
+    'record, scene by scene, what each frame of a finished render really shows and whether it matches the voice, reads well and could pass for another product; only frames you viewed count.',
   review_material:
     'record what each image you looked at really shows and whether it fits, plus the gaps of the material; propose_production refuses to run without it.',
   propose_production:
@@ -220,6 +222,19 @@ function buildProducerCraftSection(): string {
     'cropped photos. Boxes or coordinates the user or the brief give are data: use them as given and',
     'never estimate positions yourself. Never claim a check you did not run: if a tool says something',
     'is missing, report the exact answer of the tool.',
+    '',
+    '## Reviewing a finished render',
+    '',
+    'After every full render (not a sample) read get_render_review: it waits for the review job. A',
+    'motion video lists `sceneFrames`, one frame at the middle of each scene with its voice text, and',
+    'the critical finding `visual-not-reviewed` stays until you record the visual review. View every',
+    'frame with view_images (6 per call), then call record_visual_review with, for each scene, what',
+    'the frame really shows, whether it matches the voice, whether it is legible, whether it could',
+    'pass for another product, a verdict (`ok` or `fix`) and a note saying what to change. Be honest:',
+    'describe what you see, not what you intended. Fix every `fix` scene and render again before you',
+    'call the video done. The review also compares the duration with the approved proposal; if it',
+    'exceeds the promised maximum, tell the user and fix it. Never say a check passed unless the tool',
+    'output says so, and never say a render has no review without calling get_render_review.',
     '',
     '## The production proposal and the sample',
     '',

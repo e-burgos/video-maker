@@ -263,9 +263,30 @@ export {
   ReviewSeveritySchema,
   ReviewStatusSchema,
   REVIEW_SEVERITIES,
+  SceneFrameSchema,
+  SceneVisualReviewSchema,
+  VISUAL_VERDICTS,
+  VisualReviewSchema,
   reviewStatusFor,
 } from './review/review-report';
-export type { ReviewFinding, ReviewReport, ReviewSeverity, ReviewStatus } from './review/review-report';
+export type {
+  ReviewFinding,
+  ReviewReport,
+  ReviewSeverity,
+  ReviewStatus,
+  SceneFrame,
+  SceneVisualReview,
+  VisualReview,
+} from './review/review-report';
+export {
+  VISUAL_NOT_REVIEWED_CHECK,
+  VISUAL_REVIEW_CHECK,
+  VisualReviewDraftSchema,
+  isSceneFlagged,
+  visualReviewProblems,
+  withVisualReview,
+} from './review/visual-review';
+export type { VisualReviewDraft } from './review/visual-review';
 
 export {
   MATERIAL_REVIEW_SOURCES,

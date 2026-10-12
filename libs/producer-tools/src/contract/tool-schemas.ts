@@ -12,6 +12,7 @@ import {
   SafeZoneSchema,
   TimelineBumpersSchema,
   TimelineSchema,
+  VisualReviewDraftSchema,
 } from '@video-maker/timeline-core';
 
 import type { StudioToolName } from './tool-names';
@@ -515,12 +516,32 @@ const GetRenderReviewInputSchema = z.strictObject({
     .optional(),
 });
 
+export const VISUAL_REVIEW_STATES = ['not-applicable', 'pending', 'recorded'] as const;
+
 const GetRenderReviewOutputSchema = ReviewReportSchema.pick({
   file: true,
   status: true,
   createdAt: true,
   metrics: true,
   findings: true,
+  sceneFrames: true,
+  visualReview: true,
+}).extend({ visualReviewState: z.enum(VISUAL_REVIEW_STATES) });
+
+const RecordVisualReviewInputSchema = VisualReviewDraftSchema.extend({
+  file: z
+    .string()
+    .regex(/^out\/[^/\\]+\.mp4$/u, 'file must be an .mp4 directly under out/, for example out/video.mp4')
+    .optional(),
+});
+
+const RecordVisualReviewOutputSchema = z.strictObject({
+  saved: z.literal(true),
+  file: z.string(),
+  status: z.enum(['pass', 'warn', 'fail']),
+  scenes: z.number().int().min(1),
+  flaggedScenes: z.number().int().min(0),
+  criticalFindings: z.array(z.string()),
 });
 
 const GetReferenceBriefInputSchema = z.strictObject({
@@ -766,9 +787,18 @@ export const STUDIO_TOOLS: Readonly<Record<StudioToolName, StudioToolDefinition>
   },
   get_render_review: {
     description:
-      'Read the automatic review of a finished render: its status (pass, warn, fail), the key metrics (master LUFS and true peak, voice/music margin) and the findings by severity (critical, suggestion, nitpick), each with its time range and the proposed fix. Without `file` it returns the most recent review; with `file` (for example out/video.mp4) that render\'s. Fails with FILE_NOT_FOUND when the render was never reviewed.',
+      'Read the automatic review of a finished render: its status (pass, warn, fail), the key metrics (master LUFS and true peak, voice/music margin) and the findings by severity (critical, suggestion, nitpick), each with its time range and the proposed fix. For a motion video it also lists `sceneFrames` (the frame of each scene to look at with view_images) and `visualReviewState` (pending until record_visual_review is called). Without `file` it returns the most recent review; with `file` (for example out/video.mp4) that render\'s. Fails with FILE_NOT_FOUND when the render was never reviewed.',
     input: GetRenderReviewInputSchema,
     output: GetRenderReviewOutputSchema,
+  },
+  record_visual_review: {
+    description:
+      'Record, with evidence, that you looked at every scene of a render. After get_render_review lists `sceneFrames` (one frame at the middle of each scene, with the voice text), look at them with view_images (up to 6 per call) and send `scenes`: one entry per sceneId with `shows` (what the frame really shows, one line), ' +
+      '`matchesVoice`, `legible`, `couldBeOtherProduct` (booleans), `verdict` (ok or fix) and `note` (required when the scene is flagged: what to change). ' +
+      'The studio refuses a review that misses a scene or covers a frame you did not view after the review was created (VISUAL_REVIEW_NOT_VIEWED). ' +
+      'The critical finding visual-not-reviewed disappears; every scene marked fix, off the voice, illegible or ambiguous becomes a critical finding that blocks publishing until you fix it and re-render. Without `file` it uses the most recent review.',
+    input: RecordVisualReviewInputSchema,
+    output: RecordVisualReviewOutputSchema,
   },
   review_material: {
     description:
