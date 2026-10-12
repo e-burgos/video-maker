@@ -14,7 +14,9 @@ import { useApiAction } from '../hooks/use-api-action';
 import type { AsyncResource } from '../hooks/use-async-resource';
 import { useT, useTn } from '../i18n/language-context';
 import type { TranslationKey } from '../i18n/messages-en';
+import type { MaterialReviewDocument } from '../api/material-review-types';
 import { ErrorNotice } from './error-notice';
+import { MaterialNotReviewedNote, MaterialReviewTable, MaterialWarningsBlock } from './material-review-block';
 import { Badge } from './ui/badge';
 import { Button } from './ui/button';
 import { Card } from './ui/card';
@@ -22,6 +24,7 @@ import { Card } from './ui/card';
 export type ProposalCardProps = {
   slug: string;
   proposal: AsyncResource<ProposalDocument>;
+  materialReview?: AsyncResource<MaterialReviewDocument>;
 };
 
 function EstimateLines({ estimate }: { estimate: ProposalEstimate | undefined }) {
@@ -123,7 +126,7 @@ function ConceptItem({ concept, estimate, recommended, approved, approving, onAp
   );
 }
 
-export function ProposalCard({ slug, proposal }: ProposalCardProps) {
+export function ProposalCard({ slug, proposal, materialReview }: ProposalCardProps) {
   const client = useRenderApi();
   const t = useT();
   const approveAction = useApiAction((conceptId: string) => client.approveProposal(slug, conceptId));
@@ -140,8 +143,13 @@ export function ProposalCard({ slug, proposal }: ProposalCardProps) {
     }
   }
 
+  const review = materialReview?.data?.review ?? null;
+  const warnings = document.materialWarnings ?? materialReview?.data?.warnings ?? null;
+  const reviewMissing = materialReview?.data != null && review === null && document.materialWarnings === undefined;
+
   return (
     <Card data-testid="proposal-card" className="space-y-3 p-4">
+      {warnings !== null && <MaterialWarningsBlock slug={slug} warnings={warnings} />}
       <div className="space-y-1">
         <div className="flex flex-wrap items-center gap-2">
           <h2 className="text-sm font-medium text-ink">{t('proposal.heading')}</h2>
@@ -151,6 +159,8 @@ export function ProposalCard({ slug, proposal }: ProposalCardProps) {
         </div>
         <p className="text-xs text-ink-faint">{t('proposal.hint')}</p>
       </div>
+      {review !== null && <MaterialReviewTable review={review} />}
+      {reviewMissing && <MaterialNotReviewedNote />}
       <ul className="space-y-3">
         {document.concepts.map((concept) => (
           <ConceptItem

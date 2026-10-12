@@ -20,8 +20,11 @@ import type {
   RenderJobListing,
   ServiceHealth,
 } from '../api/render-api-types';
+import type { MaterialReviewDocument } from '../api/material-review-types';
 import type { ProposalDocument } from '../api/proposal-types';
 import type { RenderApiError } from '../api/render-api-error';
+
+export type QueuedMessage = { text: string; replaced: boolean };
 
 export type UseProducerConversationResult = {
   slug: string;
@@ -31,6 +34,7 @@ export type UseProducerConversationResult = {
   jobs: AsyncResource<RenderJobListing>;
   generated: AsyncResource<GeneratedListing>;
   proposal: AsyncResource<ProposalDocument>;
+  materialReview: AsyncResource<MaterialReviewDocument>;
   hasTimedScript: boolean;
   draft: string;
   setDraft: (value: string) => void;
@@ -41,6 +45,9 @@ export type UseProducerConversationResult = {
   blockers: readonly Blocker[];
   running: boolean;
   send: (text: string) => Promise<void>;
+  submit: (text: string) => void;
+  queuedMessage: QueuedMessage | null;
+  cancelQueued: () => void;
   sendPending: boolean;
   sendFailure: RenderApiError | null;
   sendFailureKey: ReturnType<typeof producerFailureKey>;
@@ -60,6 +67,7 @@ export function useProducerConversation(slug: string): UseProducerConversationRe
   const loadJobs = useCallback(() => client.listRenderJobs(slug), [client, slug]);
   const loadGenerated = useCallback(() => client.listGenerated(slug), [client, slug]);
   const loadProposal = useCallback(async () => client.getProposal(slug), [client, slug]);
+  const loadMaterialReview = useCallback(async () => client.getMaterialReview(slug), [client, slug]);
   const loadProducerSettings = useCallback(() => client.getProducerSettings(), [client]);
 
   const conversation = useAsyncResource<ProducerConversation>(loadConversation, `producer:${slug}`);
@@ -68,11 +76,13 @@ export function useProducerConversation(slug: string): UseProducerConversationRe
   const jobs = useAsyncResource<RenderJobListing>(loadJobs, `jobs:${slug}`);
   const generated = useAsyncResource<GeneratedListing>(loadGenerated, `generated:${slug}`);
   const proposal = useAsyncResource<ProposalDocument>(loadProposal, `proposal:${slug}`);
+  const materialReview = useAsyncResource<MaterialReviewDocument>(loadMaterialReview, `material-review:${slug}`);
   const producerSettings = useAsyncResource<ProducerSettings>(loadProducerSettings, 'producer-settings');
   const hasTimedScript = hasProducerScript(generated.data);
 
   const [draft, setDraft] = useState('');
   const [model, setModel] = useState<string | null>(null);
+  const [queuedMessage, setQueuedMessage] = useState<QueuedMessage | null>(null);
   const [turnId, setTurnId] = useState<string | null>(null);
   const adoptedActiveTurnRef = useRef<string | null>(null);
   const settledTurnRef = useRef<string | null>(null);
@@ -104,14 +114,16 @@ export function useProducerConversation(slug: string): UseProducerConversationRe
   const reloadConversation = conversation.reload;
   const reloadGenerated = generated.reload;
   const reloadProposal = proposal.reload;
+  const reloadMaterialReview = materialReview.reload;
 
   useEffect(() => {
     if (poll.polling) {
       reloadJobs();
       reloadGenerated();
       reloadProposal();
+      reloadMaterialReview();
     }
-  }, [eventCount, poll.polling, reloadJobs, reloadGenerated, reloadProposal]);
+  }, [eventCount, poll.polling, reloadJobs, reloadGenerated, reloadProposal, reloadMaterialReview]);
 
   const settledTurnId = poll.stopReason === 'terminal' ? (poll.turn?.turnId ?? null) : null;
   useEffect(() => {
@@ -122,8 +134,17 @@ export function useProducerConversation(slug: string): UseProducerConversationRe
       reloadJobs();
       reloadGenerated();
       reloadProposal();
+      reloadMaterialReview();
     }
-  }, [settledTurnId, reloadAssets, reloadConversation, reloadJobs, reloadGenerated, reloadProposal]);
+  }, [
+    settledTurnId,
+    reloadAssets,
+    reloadConversation,
+    reloadJobs,
+    reloadGenerated,
+    reloadProposal,
+    reloadMaterialReview,
+  ]);
 
   const blockers = producerBlockers(health.data);
   const running = poll.polling;
@@ -167,20 +188,58 @@ export function useProducerConversation(slug: string): UseProducerConversationRe
     }
   }, [model, models]);
 
-  async function send(text: string) {
-    const trimmed = text.trim();
-    if (trimmed === '' || running) {
-      return;
-    }
-
+  async function sendNow(trimmed: string, restoreDraftOnFailure: boolean) {
     const accepted = await sendAction.run(trimmed, selectedModel);
     if (accepted !== null) {
       setDraft('');
       setTurnId(accepted.turnId);
       adoptedActiveTurnRef.current = accepted.turnId;
       reloadConversation();
+    } else if (restoreDraftOnFailure) {
+      setDraft((current) => (current === '' ? trimmed : current));
     }
   }
+
+  async function send(text: string) {
+    const trimmed = text.trim();
+    if (trimmed === '' || running) {
+      return;
+    }
+
+    await sendNow(trimmed, false);
+  }
+
+  function submit(text: string) {
+    const trimmed = text.trim();
+    if (trimmed === '') {
+      return;
+    }
+
+    if (running) {
+      setQueuedMessage((current) => ({ text: trimmed, replaced: current !== null }));
+      setDraft('');
+      return;
+    }
+
+    void send(trimmed);
+  }
+
+  function cancelQueued() {
+    setQueuedMessage(null);
+  }
+
+  const dispatchQueuedRef = useRef<(message: QueuedMessage) => void>(() => undefined);
+  dispatchQueuedRef.current = (message) => {
+    setQueuedMessage(null);
+    void sendNow(message.text, true);
+  };
+
+  const sendInFlight = sendAction.status === 'pending';
+  useEffect(() => {
+    if (queuedMessage !== null && !running && !sendInFlight) {
+      dispatchQueuedRef.current(queuedMessage);
+    }
+  }, [queuedMessage, running, sendInFlight]);
 
   async function cancel() {
     if (turnId !== null) {
@@ -198,6 +257,7 @@ export function useProducerConversation(slug: string): UseProducerConversationRe
     jobs,
     generated,
     proposal,
+    materialReview,
     hasTimedScript,
     draft,
     setDraft,
@@ -208,6 +268,9 @@ export function useProducerConversation(slug: string): UseProducerConversationRe
     blockers,
     running,
     send,
+    submit,
+    queuedMessage,
+    cancelQueued,
     sendPending: sendAction.status === 'pending',
     sendFailure,
     sendFailureKey: sendFailure === null ? null : producerFailureKey(sendFailure.code),

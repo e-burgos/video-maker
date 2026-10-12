@@ -1,10 +1,12 @@
 import { fireEvent, render, screen, waitFor, within } from '@testing-library/react';
 import { describe, expect, it, vi } from 'vitest';
 
+import { materialReview, materialReviewDocument } from '../api/__fixtures__/material-review';
 import { proposalDocument, proposalEstimate, productionProposal } from '../api/__fixtures__/proposal';
 import { RenderApiError } from '../api/render-api-error';
 import type { RenderApiClient } from '../api/render-api-client';
 import { RenderApiProvider } from '../api/render-api-context';
+import type { MaterialReviewDocument } from '../api/material-review-types';
 import type { ProposalDocument } from '../api/proposal-types';
 import type { AsyncResource } from '../hooks/use-async-resource';
 import { ProposalCard } from './proposal-card';
@@ -13,10 +15,18 @@ function resource(data: ProposalDocument | null): AsyncResource<ProposalDocument
   return { status: data === null ? 'loading' : 'ready', data, error: null, isRefreshing: false, reload: vi.fn() };
 }
 
-function renderCard(proposal: AsyncResource<ProposalDocument>, client: Partial<RenderApiClient> = {}) {
+function reviewResource(data: MaterialReviewDocument): AsyncResource<MaterialReviewDocument> {
+  return { status: 'ready', data, error: null, isRefreshing: false, reload: vi.fn() };
+}
+
+function renderCard(
+  proposal: AsyncResource<ProposalDocument>,
+  client: Partial<RenderApiClient> = {},
+  review?: AsyncResource<MaterialReviewDocument>,
+) {
   render(
     <RenderApiProvider client={client as RenderApiClient}>
-      <ProposalCard slug="demo-01" proposal={proposal} />
+      <ProposalCard slug="demo-01" proposal={proposal} materialReview={review} />
     </RenderApiProvider>,
   );
 }
@@ -117,5 +127,81 @@ describe('ProposalCard', () => {
     fireEvent.click(screen.getAllByRole('button', { name: /Approve this approach/u })[0] as HTMLElement);
 
     expect(await screen.findByText(/PROPOSAL_NOT_FOUND/u)).toBeTruthy();
+  });
+
+  describe('material review', () => {
+    const base = productionProposal();
+
+    it('shows the warning block first with each unfit or doubtful image and each gap', () => {
+      renderCard(resource(proposalDocument(base)), {}, reviewResource(materialReviewDocument()));
+
+      const card = screen.getByTestId('proposal-card');
+      const warnings = within(screen.getByTestId('material-warnings'));
+      expect(card.firstElementChild).toBe(screen.getByTestId('material-warnings'));
+      expect(warnings.getByText('The material does not quite fit the idea')).toBeTruthy();
+
+      const items = screen.getAllByTestId('material-warning-item');
+      expect(items).toHaveLength(2);
+      const selfie = within(items[0] as HTMLElement);
+      expect(selfie.getByText('Does not fit')).toBeTruthy();
+      expect(selfie.getByText('Shows: Una selfie en la oficina')).toBeTruthy();
+      expect(selfie.getByText('No muestra el producto.')).toBeTruthy();
+      expect(selfie.getByRole('img').getAttribute('src')).toBe('/api/projects/demo-01/files/raw/images/selfie.png');
+
+      const brand = within(items[1] as HTMLElement);
+      expect(brand.getByText('Doubtful')).toBeTruthy();
+      expect(brand.getByText('Brand image logo')).toBeTruthy();
+      expect(brand.queryByRole('img')).toBeNull();
+
+      expect(screen.getByTestId('material-gap').textContent).toBe(
+        'Captura del formulario de pago: No hay ninguna imagen del paso final.',
+      );
+    });
+
+    it('uses the warnings stored in the proposal when the review is not loaded', () => {
+      const warnings = materialReviewDocument().warnings;
+      renderCard(resource(proposalDocument({ ...base, ...(warnings === null ? {} : { materialWarnings: warnings }) })));
+
+      expect(screen.getAllByTestId('material-warning-item')).toHaveLength(2);
+    });
+
+    it('lists the full review with verdict chips and what each image is for', () => {
+      renderCard(resource(proposalDocument(base)), {}, reviewResource(materialReviewDocument()));
+
+      const rows = screen.getAllByTestId('material-review-row');
+      expect(rows).toHaveLength(3);
+      const fits = within(rows[0] as HTMLElement);
+      expect(fits.getByText('images/dashboard.png')).toBeTruthy();
+      expect(fits.getByText('Panel de ventas con gráficos')).toBeTruthy();
+      expect(fits.getByText('Fits')).toBeTruthy();
+      expect(fits.getByText('escena del resumen')).toBeTruthy();
+      expect(screen.getByText('Full material review (3)')).toBeTruthy();
+    });
+
+    it('shows no warning block when everything fits', () => {
+      const allFit = materialReview({
+        items: materialReview().items.slice(0, 1),
+        gaps: [],
+      });
+      renderCard(resource(proposalDocument(base)), {}, reviewResource(materialReviewDocument(allFit)));
+
+      expect(screen.queryByTestId('material-warnings')).toBeNull();
+      expect(screen.getAllByTestId('material-review-row')).toHaveLength(1);
+    });
+
+    it('notes that the producer has not reviewed the material yet', () => {
+      renderCard(resource(proposalDocument(base)), {}, reviewResource(materialReviewDocument(null)));
+
+      expect(screen.getByTestId('material-not-reviewed').textContent).toBe(
+        'The producer has not reviewed the material yet.',
+      );
+      expect(screen.queryByTestId('material-warnings')).toBeNull();
+    });
+
+    it('stays quiet while the review is still loading', () => {
+      renderCard(resource(proposalDocument(base)));
+
+      expect(screen.queryByTestId('material-not-reviewed')).toBeNull();
+    });
   });
 });

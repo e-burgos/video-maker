@@ -28,10 +28,13 @@ export function ProducerConversationPanel({ producer, pinned = false, mode = 'fo
     conversation,
     assets,
     proposal,
+    materialReview,
     hasTimedScript,
     draft,
     setDraft,
-    send,
+    submit,
+    queuedMessage,
+    cancelQueued,
     running,
     sendPending,
     sendFailure,
@@ -152,7 +155,7 @@ export function ProducerConversationPanel({ producer, pinned = false, mode = 'fo
             />
           )}
 
-          <ProposalCard slug={slug} proposal={proposal} />
+          <ProposalCard slug={slug} proposal={proposal} materialReview={materialReview} />
 
           <ProducerTurnActivity
             turn={poll.turn}
@@ -217,12 +220,30 @@ export function ProducerConversationPanel({ producer, pinned = false, mode = 'fo
 
         <ChatDropZone onFiles={(files) => void inbox.uploadFiles(files)} />
 
+        {queuedMessage !== null && (
+          <div
+            data-testid="producer-queued-message"
+            className="space-y-1 rounded-control border border-warning/50 bg-warning/10 p-2 text-xs"
+          >
+            <p className="text-warning">{t('producer.queued.notice')}</p>
+            {queuedMessage.replaced && <p className="text-ink-muted">{t('producer.queued.replaced')}</p>}
+            <p className="whitespace-pre-wrap text-ink">
+              <span className="font-medium">{t('producer.queued.label')}: </span>
+              {queuedMessage.text}
+            </p>
+            <button type="button" onClick={cancelQueued} className="text-ink-faint underline">
+              {t('producer.queued.cancel')}
+            </button>
+          </div>
+        )}
+
         <ProducerComposer
           value={draft}
           onChange={setDraft}
           textareaRef={composerRef}
-          onSend={() => void send(draft)}
-          pending={sendPending || running}
+          onSend={() => submit(draft)}
+          pending={sendPending}
+          busy={running}
           blockers={blockers}
           models={models}
           model={selectedModel}

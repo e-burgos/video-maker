@@ -8,6 +8,7 @@ import type { AsyncResource } from '../hooks/use-async-resource';
 import type { UseProducerConversationResult } from '../hooks/use-producer-conversation';
 import { ProducerConversationPanel } from './producer-conversation-panel';
 import type { InboxAsset } from '../api/render-api-types';
+import { materialReviewDocument } from '../api/__fixtures__/material-review';
 import { proposalDocument, productionProposal } from '../api/__fixtures__/proposal';
 
 function readyResource<T>(data: T): AsyncResource<T> {
@@ -33,6 +34,7 @@ function fakeProducer(overrides: Partial<UseProducerConversationResult> = {}): U
     jobs: readyResource({ slug: 'demo-01', jobs: [] }),
     generated: readyResource({ slug: 'demo-01', roots: [], files: [] }),
     proposal: readyResource(proposalDocument(null)),
+    materialReview: readyResource(materialReviewDocument(null)),
     hasTimedScript: false,
     draft: '',
     setDraft: vi.fn(),
@@ -43,6 +45,9 @@ function fakeProducer(overrides: Partial<UseProducerConversationResult> = {}): U
     blockers: [],
     running: false,
     send: vi.fn(async () => undefined),
+    submit: vi.fn(),
+    queuedMessage: null,
+    cancelQueued: vi.fn(),
     sendPending: false,
     sendFailure: null,
     sendFailureKey: null,
@@ -124,14 +129,14 @@ describe('ProducerConversationPanel', () => {
   });
 
   it('sends the draft when the composer send action fires', () => {
-    const send = vi.fn(async () => undefined);
-    const producer = fakeProducer({ draft: 'hola productor', send });
+    const submit = vi.fn();
+    const producer = fakeProducer({ draft: 'hola productor', submit });
 
     renderPanel(producer);
 
     fireEvent.click(screen.getByText('Send'));
 
-    expect(send).toHaveBeenCalledWith('hola productor');
+    expect(submit).toHaveBeenCalledWith('hola productor');
   });
 
   it('puts a clicked suggestion in the composer and focuses it without sending', () => {
@@ -339,5 +344,43 @@ describe('ProducerConversationPanel', () => {
     fireEvent.click(screen.getByText('Dismiss'));
 
     expect(screen.queryByTestId('inbox-upload-list')).toBeNull();
+  });
+
+  it('submits on Enter while the producer is running instead of ignoring the message', () => {
+    const submit = vi.fn();
+    renderPanel(fakeProducer({ running: true, draft: 'hola', submit }));
+
+    fireEvent.keyDown(screen.getByLabelText('Message for the producer'), { key: 'Enter' });
+
+    expect(submit).toHaveBeenCalledWith('hola');
+  });
+
+  it('shows the queued message with its notice and lets the dev cancel it', () => {
+    const cancelQueued = vi.fn();
+    renderPanel(
+      fakeProducer({ running: true, queuedMessage: { text: 'segundo pedido', replaced: false }, cancelQueued }),
+    );
+
+    const queued = screen.getByTestId('producer-queued-message');
+    expect(queued.textContent).toContain('The producer is working; your message is sent when it finishes.');
+    expect(queued.textContent).toContain('segundo pedido');
+
+    fireEvent.click(screen.getByRole('button', { name: 'Cancel queued message' }));
+
+    expect(cancelQueued).toHaveBeenCalled();
+  });
+
+  it('says so when a new message replaced the queued one', () => {
+    renderPanel(fakeProducer({ running: true, queuedMessage: { text: 'tercero', replaced: true } }));
+
+    expect(screen.getByTestId('producer-queued-message').textContent).toContain(
+      'It replaced the message that was waiting.',
+    );
+  });
+
+  it('shows no queued notice when nothing is waiting', () => {
+    renderPanel(fakeProducer({ running: true }));
+
+    expect(screen.queryByTestId('producer-queued-message')).toBeNull();
   });
 });
