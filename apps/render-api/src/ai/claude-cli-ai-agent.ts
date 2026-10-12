@@ -163,6 +163,7 @@ export function claudeCliArgs(request: AiAgentRequest, config: AiAgentConfig): r
     '--no-session-persistence',
     '--model',
     request.model ?? config.model,
+    ...(request.effort === undefined ? [] : ['--effort', request.effort]),
   ];
 }
 

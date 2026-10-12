@@ -24,6 +24,7 @@ function withoutSchemaMarkers(schema: Record<string, unknown>): Record<string, u
 }
 
 const FAILURE_DETAIL_CHARS = 800;
+const MOTION_STORYBOARD_EFFORT = 'low';
 const ERROR_LINE = /✗/u;
 
 function hyperframesFailureDetail(stdout: string, stderr: string): string {
@@ -145,6 +146,7 @@ export function createMotionPipelinePorts(deps: RenderApiDependencies, assetsRoo
         systemPrompt: request.systemPrompt,
         userPrompt: request.userPrompt,
         jsonSchema: withoutSchemaMarkers(request.jsonSchema),
+        effort: MOTION_STORYBOARD_EFFORT,
       });
       return {
         json: response.json,

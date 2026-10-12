@@ -2865,14 +2865,20 @@
       "validated_at": null,
       "title": "El storyboard automático de motion pide esfuerzo bajo y ya no agota el tiempo pensando",
       "estimation_hours": 1,
-      "description": "La llamada al CLI de Claude para el storyboard motion razonaba más de 13 minutos con briefs de 16 escenas y el límite de 10 minutos la cortaba (AI_AGENT_FAILED).",
+      "description": "La llamada al CLI de Claude para el storyboard motion razonaba más de 13 minutos con briefs de 16 escenas y el límite de 10 minutos la cortaba (AI_AGENT_FAILED). El job motion del studio arma la llamada por el agente de IA de render-api (no por el CLI de motion), con su propio límite de 10 minutos.",
       "justification": "Bloqueaba el video de prueba de compra pedido por el dueño; cambio interno sin contratos nuevos.",
       "related_modules": [
         "production-quality"
       ],
       "affected_files": [
-        "tools/motion-studio/src/deps/claude-cli-ask-agent.ts",
+        "apps/render-api/src/ai/claude-cli-ai-agent.spec.ts",
+        "apps/render-api/src/ai/claude-cli-ai-agent.ts",
+        "apps/render-api/src/config/ai-agent-config.ts",
+        "apps/render-api/src/deps/motion-pipeline-adapters.spec.ts",
+        "apps/render-api/src/deps/motion-pipeline-adapters.ts",
+        "apps/render-api/src/deps/render-api-dependencies.ts",
         "tools/motion-studio/src/deps/claude-cli-ask-agent.spec.ts",
+        "tools/motion-studio/src/deps/claude-cli-ask-agent.ts",
         "tools/motion-studio/src/deps/node-motion-dependencies.ts"
       ],
       "test_reference": "motion-studio y render-api lint/test/build verde; mismo pedido real en 3 min 42 s con 16 escenas.",

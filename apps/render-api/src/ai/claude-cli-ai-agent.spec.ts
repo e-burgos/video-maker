@@ -98,6 +98,11 @@ describe('claudeCliArgs', () => {
   it('el modelo del pedido gana sobre el del servicio', () => {
     expect(claudeCliArgs({ ...REQUEST, model: 'haiku' }, CONFIG).slice(-2)).toEqual(['--model', 'haiku']);
   });
+
+  it('pasa el esfuerzo del pedido sólo cuando viene', () => {
+    expect(claudeCliArgs({ ...REQUEST, effort: 'low' }, CONFIG).slice(-2)).toEqual(['--effort', 'low']);
+    expect(claudeCliArgs(REQUEST, CONFIG)).not.toContain('--effort');
+  });
 });
 
 describe('createClaudeCliAiAgent', () => {
