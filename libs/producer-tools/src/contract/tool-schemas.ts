@@ -614,9 +614,20 @@ const ReadMotionBriefOutputSchema = z.strictObject({
   brief: z.record(z.string(), z.unknown()),
 });
 
+const UNIT_FRACTION = z.number().min(0).max(1);
+
+export const MotionBriefImageBoxSchema = z.strictObject({
+  name: z.string().min(1),
+  x: UNIT_FRACTION,
+  y: UNIT_FRACTION,
+  w: UNIT_FRACTION,
+  h: UNIT_FRACTION,
+});
+
 export const MotionBriefImageSchema = z.strictObject({
   file: z.string().min(1),
   caption: z.string(),
+  boxes: z.array(MotionBriefImageBoxSchema).optional(),
 });
 
 export const MotionBriefInputSchema = z.looseObject({
@@ -847,7 +858,9 @@ export const STUDIO_TOOLS: Readonly<Record<StudioToolName, StudioToolDefinition>
   write_motion_brief: {
     description:
       'Save the motion brief (version 1, brand, script and one captioned entry per image in raw/images/) for ' +
-      'this project, replacing the previous one. The studio validates it and answers with the offending field ' +
+      'this project, replacing the previous one. When the user or the material gives the position of elements in an ' +
+      'image (buttons, fields, cards), copy them into that image `boxes` as {name, x, y, w, h} fractions 0-1 exactly ' +
+      'as given: the storyboard then points highlights, zooms and clicks at those boxes by name. The studio validates it and answers with the offending field ' +
       'in the hint when it is invalid: fix that field and call again.',
     input: WriteMotionBriefInputSchema,
     output: WriteMotionBriefOutputSchema,

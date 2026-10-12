@@ -168,6 +168,20 @@ describe('createStudioToolHandlers', () => {
     expect(client.calls).toEqual([]);
   });
 
+  it('write_motion_brief keeps the named boxes of an image', async () => {
+    const { handlers, client } = handlersWith({ putMotionBrief: async () => undefined });
+    const brief = {
+      version: 1 as const,
+      brand: 'acme',
+      script: 'Hola',
+      images: [{ file: 'images/a.png', caption: 'Cotizador', boxes: [{ name: 'Plan Propio', x: 0.175, y: 0.358, w: 0.308, h: 0.104 }] }],
+    };
+
+    await handlers.write_motion_brief({ brief });
+
+    expect(client.calls).toEqual([{ method: 'putMotionBrief', args: [brief] }]);
+  });
+
   it('write_motion_brief rejects a brief with no script before calling the client', async () => {
     const { handlers, client } = handlersWith();
 
