@@ -303,6 +303,23 @@ describe('createHttpRenderApiClient', () => {
     await expect(client(missing.fetchImpl).getRenderReview('out/a.mp4')).rejects.toMatchObject({ code: 'FILE_NOT_FOUND' });
   });
 
+  it('listReferences reads the summaries and getReference the full brief', async () => {
+    const summary = { name: 'modelo', file: 'raw/reference/modelo.mp4', briefFile: 'work/reference/modelo.brief.json' };
+    const list = createFakeFetch(() => jsonResponse(200, { references: [summary] }));
+    const one = createFakeFetch(() => jsonResponse(200, { file: 'raw/reference/modelo.mp4' }));
+
+    expect(await client(list.fetchImpl).listReferences()).toEqual([summary]);
+    expect(list.calls[0]?.url).toBe('http://127.0.0.1:4599/projects/pitch-deck/references');
+    expect(await client(one.fetchImpl).getReference('modelo')).toEqual({ file: 'raw/reference/modelo.mp4' });
+    expect(one.calls[0]?.url).toBe('http://127.0.0.1:4599/projects/pitch-deck/references/modelo');
+  });
+
+  it('maps REFERENCE_NOT_FOUND to FILE_NOT_FOUND', async () => {
+    const missing = createFakeFetch(() => errorResponse(404, 'REFERENCE_NOT_FOUND'));
+
+    await expect(client(missing.fetchImpl).getReference('nada')).rejects.toMatchObject({ code: 'FILE_NOT_FOUND' });
+  });
+
   it('getProposalState reads the state of the proposal, and null when there is none', async () => {
     const approved = createFakeFetch(() => jsonResponse(200, { proposal: { status: 'approved', approvedConceptId: 'reel', concepts: [] }, estimates: {} }));
     const none = createFakeFetch(() => jsonResponse(200, { proposal: null, estimates: {} }));

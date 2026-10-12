@@ -73,8 +73,8 @@ describe('buildProducerProjectSection', () => {
 describe('buildProducerPrompt — herramientas del estudio', () => {
   const prompt = buildProducerPrompt(CONTEXT);
 
-  it('nombra las 25 herramientas del contrato', () => {
-    expect(STUDIO_TOOL_NAMES).toHaveLength(25);
+  it('nombra las 26 herramientas del contrato', () => {
+    expect(STUDIO_TOOL_NAMES).toHaveLength(26);
     for (const tool of STUDIO_TOOL_NAMES) {
       expect(prompt).toContain(tool);
     }
@@ -85,6 +85,15 @@ describe('buildProducerPrompt — herramientas del estudio', () => {
     expect(prompt).toContain('PROPOSAL_NOT_APPROVED');
     expect(prompt).toContain('never start a full render until');
     expect(prompt).toContain('Never write time or cost');
+  });
+
+  it('indica analizar la referencia y basar la propuesta en su ritmo, duración y estructura (US-023-503)', () => {
+    expect(prompt).toContain('## A reference video');
+    expect(prompt).toContain('role `reference`');
+    expect(prompt).toContain('"raw/reference/<name>.mp4"');
+    expect(prompt).toContain('Base propose_production on that brief');
+    expect(prompt).toContain('name the reference in the');
+    expect(prompt).toContain('`angle`');
   });
 
   it('ofrece la muestra y aclara que no se publica ni se revisa (US-023-404)', () => {

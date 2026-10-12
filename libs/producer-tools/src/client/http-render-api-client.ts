@@ -1,3 +1,5 @@
+import type { ReferenceBrief } from '@video-maker/timeline-core';
+
 import { STUDIO_TOOL_ERROR_CODES } from '../contract/tool-errors';
 import type { StudioToolErrorCode } from '../contract/tool-errors';
 import { StudioToolRuntimeError } from '../errors/studio-tool-runtime-error';
@@ -16,6 +18,7 @@ import type {
   RenderApiProbeResult,
   RenderApiProjectDetail,
   RenderApiProposalState,
+  RenderApiReferenceSummary,
   RenderApiRenderReview,
   RenderApiVoice,
 } from './render-api-client';
@@ -56,6 +59,9 @@ function mapRenderApiErrorCode(code: string, context: ErrorContext): StudioToolE
     return code;
   }
   if (code === 'REVIEW_NOT_FOUND') {
+    return 'FILE_NOT_FOUND';
+  }
+  if (code === 'REFERENCE_NOT_FOUND') {
     return 'FILE_NOT_FOUND';
   }
   if (code === 'REVIEW_FILE_INVALID') {
@@ -332,6 +338,16 @@ export function createHttpRenderApiClient(options: HttpRenderApiClientOptions): 
       }
       return (await request('GET', `/projects/${slug}/reviews?file=${encodeURIComponent(latest.file)}`)) as RenderApiRenderReview;
     },
+
+    listReferences: async () => {
+      const json = (await request('GET', `/projects/${slug}/references`)) as {
+        references: readonly RenderApiReferenceSummary[];
+      };
+      return json.references;
+    },
+
+    getReference: async (name) =>
+      (await request('GET', `/projects/${slug}/references/${encodeURIComponent(name)}`)) as ReferenceBrief,
 
     getProposalState: async () => {
       const json = (await request('GET', `/projects/${slug}/proposal`)) as { proposal: RenderApiProposalState | null };

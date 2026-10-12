@@ -6,6 +6,7 @@ import {
   CaptionStyleSchema as TimelineCaptionStyleSchema,
   LogoOverlaySchema,
   ProductionProposalDraftSchema,
+  ReferenceBriefSchema,
   ReviewReportSchema,
   SafeZoneSchema,
   TimelineBumpersSchema,
@@ -44,9 +45,12 @@ export const FREE_MEDIA_SOURCES = ['commons', 'nasa'] as const;
 export type FreeMediaSource = (typeof FREE_MEDIA_SOURCES)[number];
 export const FreeMediaSourceSchema = z.enum(FREE_MEDIA_SOURCES);
 
-export const STUDIO_JOB_KINDS = ['render', 'montage', 'storyboard', 'voice', 'photo-aroll', 'motion'] as const;
+export const STUDIO_JOB_KINDS = ['render', 'montage', 'storyboard', 'voice', 'photo-aroll', 'motion', 'reference'] as const;
 export type StudioJobKind = (typeof STUDIO_JOB_KINDS)[number];
 export const StudioJobKindSchema = z.enum(STUDIO_JOB_KINDS);
+
+export const STUDIO_BACKGROUND_JOB_KINDS = ['publish', 'review'] as const;
+export const StudioListedJobKindSchema = z.enum([...STUDIO_JOB_KINDS, ...STUDIO_BACKGROUND_JOB_KINDS]);
 
 export const STUDIO_JOB_STATUSES = [
   'queued',
@@ -196,6 +200,15 @@ const StartPhotoArollJobSchema = z.strictObject({
   fps: z.literal(DEFAULT_PHOTO_AROLL_FPS).optional(),
 });
 
+export const REFERENCE_FILE_PATTERN = /^raw\/reference\/[^/\\]+$/u;
+
+const StartReferenceJobSchema = z.strictObject({
+  kind: z.literal('reference'),
+  file: z
+    .string()
+    .regex(REFERENCE_FILE_PATTERN, 'file must be a video directly under raw/reference/, for example raw/reference/modelo.mp4'),
+});
+
 export const MOTION_JOB_PHASES = ['storyboard', 'video', 'all'] as const;
 export const MIN_MOTION_TAKES = 1;
 export const MAX_MOTION_TAKES = 8;
@@ -217,6 +230,7 @@ export const StartJobInputSchema = z.discriminatedUnion('kind', [
   StartVoiceJobSchema,
   StartPhotoArollJobSchema,
   StartMotionJobSchema,
+  StartReferenceJobSchema,
 ]);
 
 export type StartJobInput = z.infer<typeof StartJobInputSchema>;
@@ -261,7 +275,7 @@ const GetProjectOverviewOutputSchema = z.strictObject({
   recentJobs: z.array(
     z.strictObject({
       jobId: z.string(),
-      kind: StudioJobKindSchema,
+      kind: StudioListedJobKindSchema,
       status: StudioJobStatusSchema,
     }),
   ),
@@ -508,6 +522,30 @@ const GetRenderReviewOutputSchema = ReviewReportSchema.pick({
   findings: true,
 });
 
+const GetReferenceBriefInputSchema = z.strictObject({
+  name: z
+    .string()
+    .regex(/^[^/\\]+$/u, 'name is the reference file name without folder or extension, for example modelo')
+    .optional(),
+});
+
+const ReferenceSummarySchema = z.strictObject({
+  name: z.string(),
+  file: z.string(),
+  briefFile: z.string(),
+  durationSec: z.number(),
+  scenes: z.number().int(),
+  cutsPerMinute: z.number(),
+  hasVoice: z.boolean(),
+  summary: z.string(),
+  createdAt: z.string(),
+});
+
+const GetReferenceBriefOutputSchema = z.strictObject({
+  references: z.array(ReferenceSummarySchema),
+  brief: ReferenceBriefSchema.nullable(),
+});
+
 const ProposeProductionInputSchema = ProductionProposalDraftSchema;
 
 const ProposeProductionOutputSchema = z.strictObject({
@@ -637,7 +675,8 @@ export const STUDIO_TOOLS: Readonly<Record<StudioToolName, StudioToolDefinition>
     description:
       'Start an asynchronous render engine job and get back its id and initial status. Poll it with ' +
       'wait_for_job. Pass the job under "job"; its "kind" — render, montage, storyboard, voice, ' +
-      'photo-aroll or motion — picks the shape of the rest of the object. The motion kind (only in a ' +
+      'photo-aroll, motion or reference — picks the shape of the rest of the object. The reference kind ' +
+      'takes the file raw/reference/<name>.mp4 and analyses it into a brief (get_reference_brief). The motion kind (only in a ' +
       'motion project) takes phase "storyboard", "video" or "all" (default), an optional output file ' +
       'name, takes 1 to 8 and overwrite. A full render (kind render, or motion with phase "video" or ' +
       '"all") is refused with PROPOSAL_NOT_APPROVED until the user approves a production proposal; ' +
@@ -726,6 +765,18 @@ export const STUDIO_TOOLS: Readonly<Record<StudioToolName, StudioToolDefinition>
       'in the studio. Time and cost estimates are computed by the studio, never by you.',
     input: ProposeProductionInputSchema,
     output: ProposeProductionOutputSchema,
+  },
+  get_reference_brief: {
+    description:
+      'Read what the studio learned from a reference video (a file under raw/reference/ that the user wants ' +
+      'theirs to feel like). `references` always lists every analysed reference with its summary; without ' +
+      '`name`, `brief` is null; with `name` (the file name without extension, for example modelo) `brief` is ' +
+      'its full analysis: duration, format, the scenes with start, end and keyframe image, the pace (cuts per ' +
+      'minute, mean and median scene length), the voice (transcript phrases with times, words per minute, ' +
+      'speech ratio) and the audio (loudness, long silences). Fails with FILE_NOT_FOUND when that reference ' +
+      'was never analysed: start_job {"kind":"reference","file":"raw/reference/<name>.mp4"} analyses it.',
+    input: GetReferenceBriefInputSchema,
+    output: GetReferenceBriefOutputSchema,
   },
   get_motion_brands: {
     description:

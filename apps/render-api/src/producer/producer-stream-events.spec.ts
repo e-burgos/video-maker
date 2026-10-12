@@ -3,6 +3,13 @@ import { describe, expect, it } from 'vitest';
 import { interpretProducerStreamLine, summarizeToolUse } from './producer-stream-events';
 
 describe('summarizeToolUse', () => {
+  it('describes reading the reference analyses', () => {
+    expect(summarizeToolUse('mcp__studio__get_reference_brief', {})).toBe('Listing the analysed references');
+    expect(summarizeToolUse('mcp__studio__get_reference_brief', { name: 'modelo' })).toBe(
+      'Reading the analysis of modelo',
+    );
+  });
+
   it('mide un archivo con probe_media', () => {
     expect(summarizeToolUse('mcp__studio__probe_media', { path: 'raw/broll/lentes.mp4' })).toBe(
       'Measuring raw/broll/lentes.mp4',
