@@ -3,6 +3,7 @@ import type { MotionStoryboard } from '@video-maker/motion-graphics';
 import { join } from 'node:path/posix';
 
 import type { ObjectStorage } from '../deps/object-storage';
+import { isSampleVideoName } from '../jobs/sample-job-params';
 
 const STORYBOARD_PATH = 'motion/storyboard.json';
 const TIMELINE_PATH = 'work/motion/timeline.json';
@@ -209,7 +210,7 @@ async function newestVideo(
   if (entries === null) {
     return null;
   }
-  const candidates = entries.filter((entry) => entry.isFile && !entry.name.startsWith('.') && entry.name.endsWith('.mp4'));
+  const candidates = entries.filter((entry) => entry.isFile && !entry.name.startsWith('.') && entry.name.endsWith('.mp4') && !isSampleVideoName(entry.name));
   const withTimes = await Promise.all(
     candidates.map(async (entry) => ({
       name: entry.name,

@@ -103,4 +103,43 @@ describe('renderProject', () => {
     expect(ports.renders).toEqual([{ projectDir: P, outPath: '/out/v.mp4', fps: 60, quality: 'draft' }]);
     expect(result).toEqual({ lines: ['render: /out/v.mp4'], outPath: '/out/v.mp4', creditsPath: null, musicCredit: null });
   });
+
+  it('renders a sample from the composition cut to the requested duration and puts the full one back afterwards', async () => {
+    const html = '<div data-composition-id="motion" data-duration="60"></div>';
+    const ports = createFakePipelinePorts({ files: { [`${P}/index.html`]: html } });
+    let seenByTheRender = '';
+    const render = ports.render.bind(ports);
+    ports.render = async (request) => {
+      seenByTheRender = String(ports.files.get(`${P}/index.html`));
+      await render(request);
+    };
+
+    await renderProject(ports, P, { outPath: '/out/v.sample.mp4', fps: 30, quality: 'delivery', sampleSeconds: 10 });
+
+    expect(seenByTheRender).toBe('<div data-composition-id="motion" data-duration="10"></div>');
+    expect(ports.files.get(`${P}/index.html`)).toBe(html);
+    expect(ports.renders).toEqual([{ projectDir: P, outPath: '/out/v.sample.mp4', fps: 30, quality: 'delivery' }]);
+  });
+
+  it('leaves no credits file next to a sample', async () => {
+    const files = { [`${P}/index.html`]: '<div data-composition-id="motion" data-duration="60"></div>', [`${P}/timeline.json`]: JSON.stringify({ musicCredit: 'Tema · CC BY 4.0' }) };
+    const ports = createFakePipelinePorts({ files });
+
+    const result = await renderProject(ports, P, { outPath: '/out/v.sample.mp4', fps: 30, quality: 'delivery', sampleSeconds: 10 });
+
+    expect(ports.files.has('/out/v.sample.credits.txt')).toBe(false);
+    expect(result.creditsPath).toBeNull();
+  });
+
+  it('puts the full composition back even when the sample render fails', async () => {
+    const html = '<div data-composition-id="motion" data-duration="60"></div>';
+    const ports = createFakePipelinePorts({ files: { [`${P}/index.html`]: html } });
+    ports.render = async () => {
+      throw new Error('chrome crashed');
+    };
+
+    await expect(renderProject(ports, P, { outPath: '/out/v.sample.mp4', fps: 30, quality: 'delivery', sampleSeconds: 10 })).rejects.toThrow('chrome crashed');
+
+    expect(ports.files.get(`${P}/index.html`)).toBe(html);
+  });
 });

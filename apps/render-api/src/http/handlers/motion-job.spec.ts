@@ -148,6 +148,25 @@ describe('motion job creation', () => {
     expect(payload.code).toBe('MOTION_JOB_INPUT_INVALID');
   });
 
+  it('queues a motion sample with the stored seconds and lets it ignore an existing output', async () => {
+    const h = harness('motion', [STORYBOARD_FILE, OUTPUT_FILE]);
+
+    const response = await create(h, { phase: 'video', sample: { seconds: 10 } });
+    await h.runtime.jobs.whenIdle();
+
+    expect(response.status).toBe(202);
+    const row = h.deps.localStore.jobs.get((response.body as Job).id);
+    expect(row?.params).toMatchObject({ kind: 'motion', phase: 'video', sample: { seconds: 10 } });
+  });
+
+  it('rejects a sample outside 8 to 20 seconds with INVALID_INPUT and a sample of the storyboard phase', async () => {
+    const h = harness('motion', [BRIEF_FILE, STORYBOARD_FILE]);
+
+    expect((await errorOf(create(h, { phase: 'video', sample: { seconds: 5 } }))).code).toBe('INVALID_INPUT');
+    expect((await errorOf(create(h, { phase: 'storyboard', overwrite: true, sample: { seconds: 10 } }))).code).toBe('MOTION_JOB_INPUT_INVALID');
+    expect(h.runtime.jobs.listBySlug('promo')).toEqual([]);
+  });
+
   it('retries a failed motion job with the stored parameters', async () => {
     const h = harness('motion', [BRIEF_FILE]);
     const first = await create(h, { phase: 'storyboard', takes: 3, overwrite: true });

@@ -51,6 +51,7 @@ import type {
   RenderJobState,
   ReviewJobProgress,
   ReviewJobReport,
+  SampleSpec,
   StoryboardJobProgress,
   StoryboardJobReport,
   VoiceJobProgress,
@@ -130,6 +131,7 @@ interface JobRecordBase {
 interface RenderJobRecord extends JobRecordBase {
   readonly kind: 'render';
   readonly timeline: Timeline;
+  readonly sample?: SampleSpec;
   progress: RenderJobProgress | null;
   report: RenderPipelineReport | null;
 }
@@ -184,6 +186,7 @@ interface MotionJobRecord extends JobRecordBase {
   readonly phase: MotionPhase;
   readonly output: string;
   readonly takes: number;
+  readonly sample?: SampleSpec;
   progress: MotionJobProgress | null;
   report: MotionJobReport | null;
 }
@@ -301,7 +304,12 @@ export function createRenderJobQueue(
 
     try {
       report = await runRenderPipeline(
-        { renderId: record.id, projectRoot: record.projectRoot, timeline: record.timeline },
+        {
+          renderId: record.id,
+          projectRoot: record.projectRoot,
+          timeline: record.timeline,
+          ...(record.sample === undefined ? {} : { sampleSeconds: record.sample.seconds }),
+        },
         deps,
         observer,
       );
@@ -479,6 +487,7 @@ export function createRenderJobQueue(
           phase: record.phase,
           output: record.output,
           takes: record.takes,
+          ...(record.sample === undefined ? {} : { sampleSeconds: record.sample.seconds }),
         },
         deps,
         observer,
@@ -581,9 +590,12 @@ export function createRenderJobQueue(
       return null;
     }
     if (record.kind === 'render') {
-      return record.report?.deliverable.resource ?? null;
+      return record.report?.sample === true ? null : (record.report?.deliverable.resource ?? null);
     }
-    return record.kind === 'motion' ? (record.report?.path ?? null) : null;
+    if (record.kind === 'motion') {
+      return record.report?.sample === true ? null : (record.report?.path ?? null);
+    }
+    return null;
   }
 
   function enqueueReviewFor(record: JobRecord): void {
@@ -673,7 +685,14 @@ export function createRenderJobQueue(
   ): JobRecord {
     switch (input.kind) {
       case 'render':
-        return { ...base, kind: 'render', timeline: input.timeline, progress: null, report: null };
+        return {
+          ...base,
+          kind: 'render',
+          timeline: input.timeline,
+          ...(input.sample === undefined ? {} : { sample: input.sample }),
+          progress: null,
+          report: null,
+        };
       case 'montage':
         return {
           ...base,
@@ -730,6 +749,7 @@ export function createRenderJobQueue(
           phase: input.phase,
           output: input.output,
           takes: input.takes,
+          ...(input.sample === undefined ? {} : { sample: input.sample }),
           progress: null,
           report: null,
         };

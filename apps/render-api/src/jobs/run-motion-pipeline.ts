@@ -19,6 +19,7 @@ import type { RenderApiDependencies } from '../deps/render-api-dependencies';
 import { PipelineStageError } from '../errors/pipeline-stage-error';
 import { isRenderApiError } from '../errors/render-api-error';
 import { translateMotionError } from '../errors/translate-motion-error';
+import { sampleOutputName } from './sample-job-params';
 import { motionCheckpoint } from './motion-pipeline-observer';
 import type { MotionPipelineObserver } from './motion-pipeline-observer';
 import type { MotionJobReport, MotionJobStoryboardReport, MotionPhase, MotionStage } from './render-job';
@@ -28,6 +29,7 @@ export interface MotionPipelineRequest {
   readonly phase: MotionPhase;
   readonly output: string;
   readonly takes: number;
+  readonly sampleSeconds?: number;
 }
 
 const MOTION_WORK_DIRECTORY = workPath('motion');
@@ -180,16 +182,18 @@ async function renderVideo(
 
   motionCheckpoint(observer, 'render');
   observer.stageStarted('render');
-  const outputRelativePath = `${OUT_DIRECTORY}/${request.output}`;
+  const outputRelativePath = `${OUT_DIRECTORY}/${request.sampleSeconds === undefined ? request.output : sampleOutputName(request.output)}`;
   const rendered = await runMotionStage('render', () =>
     renderProject(ports, workDirectory, {
       outPath: toAbsolutePath(project, outputRelativePath),
       fps: RENDER_FPS,
       quality: RENDER_QUALITY,
+      ...(request.sampleSeconds === undefined ? {} : { sampleSeconds: request.sampleSeconds }),
     }),
   );
 
-  return { path: outputRelativePath, durationSec: composed.durationSec, scenes: composed.scenes, musicCredit: rendered.musicCredit };
+  const durationSec = request.sampleSeconds === undefined ? composed.durationSec : Math.min(composed.durationSec, request.sampleSeconds);
+  return { path: outputRelativePath, durationSec, scenes: composed.scenes, musicCredit: rendered.musicCredit };
 }
 
 export async function runMotionPipeline(
@@ -216,5 +220,5 @@ export async function runMotionPipeline(
   }
 
   const video = await renderVideo(ports, request, workDirectory, observer);
-  return { ...video, storyboard: storyboardReport };
+  return { ...video, storyboard: storyboardReport, ...(request.sampleSeconds === undefined ? {} : { sample: true as const }) };
 }

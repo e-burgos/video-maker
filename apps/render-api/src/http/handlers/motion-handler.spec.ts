@@ -434,6 +434,18 @@ describe('handleGetMotionOverview', () => {
     expect(body.video).toMatchObject({ outdated: true, creditsPath: null, credits: null });
   });
 
+  it('never takes a newer sample for the video of the project', async () => {
+    const { deps } = setup('motion', [
+      storyboardFile,
+      { path: '/media/promo/out/video.mp4', contents: 'b', modifiedAtMs: 4_000 },
+      { path: '/media/promo/out/video.sample.mp4', contents: 's', modifiedAtMs: 9_000 },
+    ]);
+
+    const body = (await handleGetMotionOverview(deps, STORE, { slug: 'promo' })).body as { video: { path: string; outdated: boolean } };
+
+    expect(body.video).toMatchObject({ path: 'out/video.mp4', outdated: true });
+  });
+
   it('lists the manifest scenes when there is no storyboard and ignores an unparsable timeline', async () => {
     const { deps } = setup('motion', [
       workFiles[0] as { path: string; contents: string },

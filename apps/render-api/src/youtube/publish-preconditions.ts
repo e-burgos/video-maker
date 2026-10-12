@@ -4,6 +4,7 @@ import type { MediaProject } from '@video-maker/auto-montage';
 import type { ObjectStorage } from '../deps/object-storage';
 import { PipelineStageError } from '../errors/pipeline-stage-error';
 import { PUBLISH_THUMBNAIL_MAX_BYTES } from '../jobs/publish-job-params';
+import { isSampleVideoName } from '../jobs/sample-job-params';
 import { readReview } from '../review/review-store';
 import { resolveProducerPath } from '../store/producer-writable-paths';
 import type { YoutubeOAuth } from './youtube-oauth';
@@ -18,6 +19,9 @@ export async function assertPublishableVideo(
   project: MediaProject,
   file: string,
 ): Promise<void> {
+  if (isSampleVideoName(file)) {
+    throw invalidFile(file, 'a full render: a sample is only for previewing and is never published');
+  }
   const resolved = await resolveProducerPath(storage, project, file);
   const stat = await storage.stat(resolved.absolutePath);
   if (stat === null || stat.kind !== 'file' || stat.sizeBytes === 0) {

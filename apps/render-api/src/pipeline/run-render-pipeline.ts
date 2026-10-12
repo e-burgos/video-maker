@@ -11,6 +11,7 @@ export interface RenderPipelineRequest {
   readonly renderId: string;
   readonly projectRoot: string;
   readonly timeline: Timeline;
+  readonly sampleSeconds?: number;
 }
 
 export interface RenderDeliverableReport {
@@ -41,6 +42,7 @@ export interface RenderPipelineReport {
   readonly deliverable: RenderDeliverableReport;
   readonly intermediates: RenderIntermediatesReport;
   readonly loudness: RenderLoudnessReport;
+  readonly sample?: true;
 }
 
 async function runStage<T>(
@@ -68,7 +70,7 @@ export async function runRenderPipeline(
   deps: RenderApiDependencies,
   observer?: RenderPipelineObserver,
 ): Promise<RenderPipelineReport> {
-  const paths = resolveRenderPipelinePaths(request.projectRoot, request.renderId);
+  const paths = resolveRenderPipelinePaths(request.projectRoot, request.renderId, request.sampleSeconds !== undefined);
   const startedAt = deps.clock.nowIso();
 
   observer?.stageStarted('prepare');
@@ -84,6 +86,7 @@ export async function runRenderPipeline(
       timeline: request.timeline,
       outPath: paths.mutedVideo.path,
       publicDir: paths.publicDir,
+      ...(request.sampleSeconds === undefined ? {} : { sampleSeconds: request.sampleSeconds }),
       ...(observer === undefined ? {} : { onProgress: observer.renderProgressed }),
     }),
   );
@@ -136,5 +139,6 @@ export async function runRenderPipeline(
       integratedDeltaLu: verified.integratedDeltaLu,
       truePeakDeltaDb: verified.truePeakDeltaDb,
     },
+    ...(request.sampleSeconds === undefined ? {} : { sample: true as const }),
   };
 }

@@ -75,12 +75,17 @@ export interface MotionJobStoryboardReport {
   readonly costUsd: number | null;
 }
 
+export interface SampleSpec {
+  readonly seconds: number;
+}
+
 export interface MotionJobReport {
   readonly path: string | null;
   readonly durationSec: number | null;
   readonly scenes: number;
   readonly musicCredit: string | null;
   readonly storyboard: MotionJobStoryboardReport | null;
+  readonly sample?: true;
 }
 
 export interface PublishJobProgress {
@@ -318,6 +323,7 @@ export interface CreateRenderJobInput {
   readonly slug: string;
   readonly projectRoot: string;
   readonly timeline: Timeline;
+  readonly sample?: SampleSpec;
 }
 
 export interface CreateMontageJobInput {
@@ -372,6 +378,7 @@ export interface CreateMotionJobInput {
   readonly phase: MotionPhase;
   readonly output: string;
   readonly takes: number;
+  readonly sample?: SampleSpec;
 }
 
 export interface CreateReviewJobInput {

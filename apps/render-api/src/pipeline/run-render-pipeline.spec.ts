@@ -290,4 +290,25 @@ describe('runRenderPipeline', () => {
       expect(callLog.ports()).not.toContain(port);
     },
   );
+
+  it('renders only the sample, writes it next to the full renders as <id>.sample.mp4 and flags the report', async () => {
+    const callLog = createCallLog();
+    const deps = createFakeRenderApiDependencies(callLog);
+
+    const report = await runRenderPipeline({ renderId: RENDER_ID, projectRoot: PROJECT_ROOT, timeline: buildMinimalTimeline(), sampleSeconds: 10 }, deps);
+
+    const entries = callLog.entries();
+    expect(entries.find((entry) => entry.port === 'renderMutedVideo')?.input).toMatchObject({ sampleSeconds: 10 });
+    expect(entries.find((entry) => entry.port === 'muxAudioIntoVideo')?.input).toMatchObject({ outPath: `${OUT_DIR_PATH}/${RENDER_ID}.sample.mp4` });
+    expect(report.deliverable.resource).toBe(`out/${RENDER_ID}.sample.mp4`);
+    expect(report.sample).toBe(true);
+  });
+
+  it('leaves the report without a sample key for a full render', async () => {
+    const deps = createFakeRenderApiDependencies(createCallLog());
+
+    const report = await runRenderPipeline({ renderId: RENDER_ID, projectRoot: PROJECT_ROOT, timeline: buildMinimalTimeline() }, deps);
+
+    expect(report).not.toHaveProperty('sample');
+  });
 });
