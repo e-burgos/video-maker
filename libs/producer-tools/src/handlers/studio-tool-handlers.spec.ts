@@ -360,13 +360,13 @@ describe('createStudioToolHandlers', () => {
 
     await handlers.start_job({ job: { kind: 'voice' } });
     await handlers.start_job({ job: { kind: 'storyboard', brief: 'idea' } });
-    await handlers.start_job({ job: { kind: 'render' } });
+    await handlers.start_job({ job: { kind: 'render', sample: { seconds: 10 } } });
     await handlers.start_job({ job: { kind: 'montage' } });
 
     const bodies = client.calls.map((call) => call.args[0] as Record<string, unknown>);
     expect(bodies[0]).toMatchObject({ kind: 'voice', model: 'sonnet' });
     expect(bodies[1]).toMatchObject({ kind: 'storyboard', model: 'sonnet' });
-    expect(bodies[2]).toEqual({ kind: 'render' });
+    expect(bodies[2]).toEqual({ kind: 'render', sample: { seconds: 10 } });
     expect(bodies[3]).toEqual({ kind: 'montage' });
   });
 
@@ -698,5 +698,104 @@ describe('createStudioToolHandlers', () => {
       handlers.view_images({ paths: ['a.jpg', 'b.jpg', 'c.jpg', 'd.jpg', 'e.jpg', 'f.jpg', 'g.jpg'] }),
     ).rejects.toMatchObject({ code: 'INVALID_INPUT' });
     expect(client.calls).toEqual([]);
+  });
+
+  describe('production proposal (US-023-401, US-023-403)', () => {
+    const job = { id: 'job-1', kind: 'render', state: 'queued', progress: null, report: null, error: null };
+    const startable = (proposal: { status: 'pending' | 'approved' } | null) =>
+      handlersWith({ getProposalState: async () => proposal, createJob: async () => job });
+
+    it.each([
+      ['no proposal', null],
+      ['a pending proposal', { status: 'pending' as const }],
+    ])('refuses a full render with PROPOSAL_NOT_APPROVED and %s, without calling createJob', async (_label, proposal) => {
+      const { handlers, client } = startable(proposal);
+
+      await expect(handlers.start_job({ job: { kind: 'render' } })).rejects.toMatchObject({ code: 'PROPOSAL_NOT_APPROVED', hint: expect.stringContaining('Proposal card') });
+      expect(client.calls.map((call) => call.method)).toEqual(['getProposalState']);
+    });
+
+    it.each([
+      [{ kind: 'motion' }],
+      [{ kind: 'motion', phase: 'video' }],
+      [{ kind: 'motion', phase: 'all', overwrite: true }],
+    ])('refuses the full motion render %j until the proposal is approved', async (input) => {
+      const { handlers } = startable(null);
+
+      await expect(handlers.start_job({ job: input })).rejects.toMatchObject({ code: 'PROPOSAL_NOT_APPROVED' });
+    });
+
+    it.each([
+      [{ kind: 'render' }],
+      [{ kind: 'motion', phase: 'video' }],
+    ])('starts %j once the proposal is approved', async (input) => {
+      const { handlers, client } = startable({ status: 'approved' });
+
+      const result = await handlers.start_job({ job: input });
+
+      expect(result.data).toMatchObject({ jobId: 'job-1', status: 'queued' });
+      expect(client.calls.map((call) => call.method)).toEqual(['getProposalState', 'createJob']);
+    });
+
+    it.each([
+      [{ kind: 'render', sample: { seconds: 10 } }],
+      [{ kind: 'motion', phase: 'video', sample: { seconds: 8 } }],
+      [{ kind: 'motion', phase: 'storyboard' }],
+      [{ kind: 'montage' }],
+      [{ kind: 'voice' }],
+    ])('never checks the proposal for %j', async (input) => {
+      const { handlers, client } = startable(null);
+
+      await handlers.start_job({ job: input });
+
+      expect(client.calls.map((call) => call.method)).toEqual(['createJob']);
+    });
+
+    it('lets the user override the block explicitly and does not forward the flag to the studio', async () => {
+      const { handlers, client } = startable(null);
+
+      await handlers.start_job({ job: { kind: 'render', skipProposal: true } });
+
+      expect(client.calls).toEqual([{ method: 'createJob', args: [{ kind: 'render' }] }]);
+    });
+
+    it.each([[{ kind: 'render', sample: { seconds: 5 } }], [{ kind: 'render', sample: { seconds: 25 } }], [{ kind: 'render', skipProposal: false }]])(
+      'rejects the invalid job %j before calling the client',
+      async (input) => {
+        const { handlers, client } = startable({ status: 'approved' });
+
+        await expect(handlers.start_job({ job: input })).rejects.toMatchObject({ code: 'INVALID_INPUT' });
+        expect(client.calls).toEqual([]);
+      },
+    );
+
+    const DRAFT = {
+      recommendedId: 'directo',
+      concepts: [
+        { id: 'directo', title: 'Directo', angle: 'Paso a paso', format: 'youtube-16x9', durationSec: 90, scenes: 8, delivery: { kind: 'tutorial', requiresVoice: true } },
+        { id: 'reel', title: 'Reel', angle: 'Un gesto', format: 'reels-9x16', durationSec: 30, scenes: 4, delivery: { kind: 'short' }, musicMode: 'segments' },
+      ],
+    };
+
+    it('propose_production sends the draft to the studio and reports it pending', async () => {
+      const { handlers, client } = handlersWith({ putProposal: async () => ({ concepts: 2 }) });
+
+      const result = await handlers.propose_production(DRAFT);
+
+      expect(result.data).toEqual({ saved: true, status: 'pending', concepts: 2 });
+      expect(client.calls).toEqual([{ method: 'putProposal', args: [DRAFT] }]);
+    });
+
+    it.each([
+      [{ ...DRAFT, concepts: [DRAFT.concepts[0]] }],
+      [{ ...DRAFT, recommendedId: 'otro' }],
+      [{ ...DRAFT, status: 'approved' }],
+      [{ ...DRAFT, concepts: [{ ...DRAFT.concepts[0], format: 'cinema' }, DRAFT.concepts[1]] }],
+    ])('propose_production rejects an invalid proposal before calling the studio (%#)', async (input) => {
+      const { handlers, client } = handlersWith();
+
+      await expect(handlers.propose_production(input)).rejects.toMatchObject({ code: 'INVALID_INPUT' });
+      expect(client.calls).toEqual([]);
+    });
   });
 });

@@ -23,12 +23,43 @@ async function connectedPair(overrides: Partial<RenderApiClient> = {}) {
 }
 
 describe('createStudioMcpServer', () => {
-  it('lists exactly the 23 contract tool names', async () => {
+  it('lists exactly the contract tool names', async () => {
     const { client } = await connectedPair();
 
     const { tools } = await client.listTools();
 
     expect(tools.map((tool) => tool.name).sort()).toEqual([...STUDIO_TOOL_NAMES].sort());
+  });
+
+  it('exposes propose_production with an object root schema the model can fill, and answers it', async () => {
+    const { client } = await connectedPair({ putProposal: async () => ({ concepts: 2 }) });
+
+    const { tools } = await client.listTools();
+    const tool = tools.find((candidate) => candidate.name === 'propose_production');
+    const result = await client.callTool({
+      name: 'propose_production',
+      arguments: {
+        recommendedId: 'directo',
+        concepts: [
+          { id: 'directo', title: 'Directo', angle: 'Paso a paso', format: 'youtube-16x9', durationSec: 90, scenes: 8, delivery: { kind: 'tutorial' } },
+          { id: 'reel', title: 'Reel', angle: 'Un gesto', format: 'reels-9x16', durationSec: 30, scenes: 4, delivery: { kind: 'short' } },
+        ],
+      },
+    });
+
+    expect(tool?.inputSchema.type).toBe('object');
+    expect(Object.keys(tool?.inputSchema.properties ?? {}).sort()).toEqual(['concepts', 'recommendedId']);
+    expect(result.structuredContent).toEqual({ saved: true, status: 'pending', concepts: 2 });
+  });
+
+  it('answers a full render without an approved proposal as an isError PROPOSAL_NOT_APPROVED the model can read', async () => {
+    const { client } = await connectedPair({ getProposalState: async () => null });
+
+    const result = await client.callTool({ name: 'start_job', arguments: { job: { kind: 'render' } } });
+
+    expect(result.isError).toBe(true);
+    const content = result.content as readonly { type: string; text?: string }[];
+    expect(JSON.parse(content[0]?.text ?? '')).toMatchObject({ code: 'PROPOSAL_NOT_APPROVED' });
   });
 
   it('answers get_timeline with structuredContent matching the contract shape', async () => {

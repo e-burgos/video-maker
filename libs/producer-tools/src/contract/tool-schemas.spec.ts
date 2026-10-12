@@ -121,6 +121,14 @@ describe('StartJobInputSchema', () => {
     expect(StartJobInputSchema.safeParse({ kind: 'montage', musicMode: 'segments', musicFloorDb: -90 }).success).toBe(false);
   });
 
+  it('accepts a sample of 8 to 20 seconds on render and motion only', () => {
+    expect(StartJobInputSchema.safeParse({ kind: 'render', sample: { seconds: 8 } }).success).toBe(true);
+    expect(StartJobInputSchema.safeParse({ kind: 'motion', phase: 'video', sample: { seconds: 20 } }).success).toBe(true);
+    expect(StartJobInputSchema.safeParse({ kind: 'render', sample: { seconds: 7 } }).success).toBe(false);
+    expect(StartJobInputSchema.safeParse({ kind: 'motion', sample: { seconds: 21 } }).success).toBe(false);
+    expect(StartJobInputSchema.safeParse({ kind: 'montage', sample: { seconds: 10 } }).success).toBe(false);
+  });
+
   it('rejects a montage job with both scriptPath and scriptText', () => {
     const result = StartJobInputSchema.safeParse({
       kind: 'montage',

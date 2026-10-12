@@ -15,6 +15,7 @@ import type {
   RenderApiPendingAsset,
   RenderApiProbeResult,
   RenderApiProjectDetail,
+  RenderApiProposalState,
   RenderApiRenderReview,
   RenderApiVoice,
 } from './render-api-client';
@@ -330,6 +331,16 @@ export function createHttpRenderApiClient(options: HttpRenderApiClientOptions): 
         return null;
       }
       return (await request('GET', `/projects/${slug}/reviews?file=${encodeURIComponent(latest.file)}`)) as RenderApiRenderReview;
+    },
+
+    getProposalState: async () => {
+      const json = (await request('GET', `/projects/${slug}/proposal`)) as { proposal: RenderApiProposalState | null };
+      return json.proposal === null ? null : { status: json.proposal.status, ...(json.proposal.approvedConceptId === undefined ? {} : { approvedConceptId: json.proposal.approvedConceptId }) };
+    },
+
+    putProposal: async (draft) => {
+      const json = (await request('PUT', `/projects/${slug}/proposal`, draft)) as { proposal: { concepts: readonly unknown[] } };
+      return { concepts: json.proposal.concepts.length };
     },
 
     listMotionBrands: async () => {

@@ -27,3 +27,9 @@
 ## Decisiones técnicas
 - La propuesta es un documento del proyecto (como el guion), no una tabla.
 - El bloqueo vive en la tool del productor (el humano siempre puede renderizar desde la UI).
+
+## Pendiente de documentar en contexto
+- timeline-core: `ProductionProposal`/`ProductionProposalDraftSchema` (`proposal/production-proposal.ts`); el documento vive en `work/producer/proposal.json` y solo lo escriben los endpoints `/projects/:slug/proposal` (el texto del productor lo rechaza con PATH_NOT_WRITABLE).
+- render-api: `proposal/` (estimador `estimateProduction` sobre `JobsRepository.listSucceededByKinds`), jobs `render`/`motion` con `sample {seconds 8-20}`, salida `*.sample.mp4`, reporte `sample: true`, sin job de revisión y excluida de publicar y de la vista motion.
+- motion-graphics: la muestra recorta el `data-duration` raíz de `index.html` durante el render y lo restaura (HyperFrames no tiene rango de cuadros y rechaza dos composiciones raíz).
+- producer-tools: tool `propose_production`, error `PROPOSAL_NOT_APPROVED` y bloqueo de `start_job` render/motion completo sin propuesta aprobada (`skipProposal: true` solo a pedido explícito del dev; `sample` nunca se bloquea).

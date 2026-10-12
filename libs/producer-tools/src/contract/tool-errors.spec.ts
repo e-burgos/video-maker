@@ -19,6 +19,7 @@ describe('STUDIO_TOOL_ERROR_CODES', () => {
         'MUSIC_RESULT_UNKNOWN',
         'MEDIA_SOURCE_UNAVAILABLE',
         'MEDIA_RESULT_UNKNOWN',
+        'PROPOSAL_NOT_APPROVED',
       ].sort(),
     );
   });

@@ -15,6 +15,37 @@ export const RECENT_JOBS_LIMIT = 5;
 const TERMINAL_JOB_STATES: ReadonlySet<string> = new Set(['succeeded', 'failed', 'canceled']);
 const JOB_KINDS_THAT_TAKE_MODEL: ReadonlySet<string> = new Set(['voice', 'storyboard']);
 
+interface StartJobRequest extends Record<string, unknown> {
+  readonly kind: string;
+  readonly sample?: unknown;
+  readonly phase?: unknown;
+  readonly skipProposal?: unknown;
+}
+
+function isFullRender(job: StartJobRequest): boolean {
+  if (job.sample !== undefined) {
+    return false;
+  }
+  return job.kind === 'render' || (job.kind === 'motion' && job.phase !== 'storyboard');
+}
+
+function withoutSkipProposal(job: StartJobRequest): Record<string, unknown> {
+  return Object.fromEntries(Object.entries(job).filter(([key]) => key !== 'skipProposal'));
+}
+
+async function assertProposalApproved(client: RenderApiClient): Promise<void> {
+  const proposal = await client.getProposalState();
+  if (proposal?.status === 'approved') {
+    return;
+  }
+  throw new StudioToolRuntimeError(
+    'PROPOSAL_NOT_APPROVED',
+    proposal === null
+      ? 'this project has no production proposal yet: present 2 or 3 approaches with propose_production, then ask the user to approve one in the studio (the Proposal card) before any full render. A sample (job.sample = {seconds: 8 to 20}) is not blocked.'
+      : 'the production proposal is still pending: ask the user to approve one of its concepts in the studio (the Proposal card) before any full render. A sample (job.sample = {seconds: 8 to 20}) is not blocked.',
+  );
+}
+
 export interface StudioToolHandlerResult {
   readonly data: unknown;
   readonly images?: readonly { readonly mimeType: string; readonly base64: string }[];
@@ -204,13 +235,14 @@ export function createStudioToolHandlers(
     },
 
     start_job: async (rawInput) => {
-      const { job: jobInput } = parseInput<{ job: Record<string, unknown> & { kind: string } }>(
-        STUDIO_TOOLS.start_job.input,
-        rawInput,
-      );
+      const { job: jobInput } = parseInput<{ job: StartJobRequest }>(STUDIO_TOOLS.start_job.input, rawInput);
+      if (isFullRender(jobInput) && jobInput.skipProposal !== true) {
+        await assertProposalApproved(client);
+      }
+      const requestBody = withoutSkipProposal(jobInput);
       const body: Record<string, unknown> = JOB_KINDS_THAT_TAKE_MODEL.has(jobInput.kind)
-        ? { ...jobInput, model }
-        : jobInput;
+        ? { ...requestBody, model }
+        : requestBody;
       const job = await client.createJob(body);
       return withOutput('start_job', { jobId: job.id, kind: job.kind, status: job.state });
     },
@@ -346,6 +378,12 @@ export function createStudioToolHandlers(
         );
       }
       return withOutput('get_render_review', review);
+    },
+
+    propose_production: async (rawInput) => {
+      const draft = parseInput<Record<string, unknown>>(STUDIO_TOOLS.propose_production.input, rawInput);
+      const saved = await client.putProposal(draft);
+      return withOutput('propose_production', { saved: true, status: 'pending', concepts: saved.concepts });
     },
 
     get_motion_brands: async (rawInput) => {

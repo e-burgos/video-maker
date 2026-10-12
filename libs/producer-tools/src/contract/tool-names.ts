@@ -25,6 +25,7 @@ export const STUDIO_TOOL_NAMES = [
   'read_motion_storyboard',
   'write_motion_storyboard',
   'get_render_review',
+  'propose_production',
 ] as const;
 
 export type StudioToolName = (typeof STUDIO_TOOL_NAMES)[number];
