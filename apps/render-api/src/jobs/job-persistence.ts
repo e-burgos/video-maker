@@ -12,6 +12,7 @@ import type {
   CreatePhotoArollJobInput,
   CreatePublishJobInput,
   CreateRenderJobInput,
+  CreateReferenceJobInput,
   CreateReviewJobInput,
   CreateStoryboardJobInput,
   CreateVoiceJobInput,
@@ -28,6 +29,8 @@ import type {
   PublishJobReport,
   PublishPlatform,
   PublishPrivacy,
+  ReferenceJobProgress,
+  ReferenceJobReport,
   RenderJobProgress,
   RenderJobState,
   ReviewJobProgress,
@@ -48,7 +51,8 @@ export type StoredJobParams =
   | Omit<CreatePhotoArollJobInput, 'slug' | 'projectRoot'>
   | Omit<CreateMotionJobInput, 'slug' | 'projectRoot'>
   | Omit<CreatePublishJobInput, 'slug' | 'projectRoot'>
-  | Omit<CreateReviewJobInput, 'slug' | 'projectRoot'>;
+  | Omit<CreateReviewJobInput, 'slug' | 'projectRoot'>
+  | Omit<CreateReferenceJobInput, 'slug' | 'projectRoot'>;
 
 function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === 'object' && value !== null && !Array.isArray(value);
@@ -72,6 +76,7 @@ function isJobKind(value: string): value is JobKind {
     case 'motion':
     case 'publish':
     case 'review':
+    case 'reference':
       return true;
     default:
       return false;
@@ -152,6 +157,8 @@ export function toStoredParams(input: CreateJobInput): StoredJobParams {
       };
     case 'review':
       return { kind: 'review', file: input.file };
+    case 'reference':
+      return { kind: 'reference', file: input.file };
   }
 }
 
@@ -274,6 +281,9 @@ export function parseStoredParams(kind: JobKind, value: unknown): StoredJobParam
     case 'review': {
       return typeof value.file === 'string' ? { kind: 'review', file: value.file } : null;
     }
+    case 'reference': {
+      return typeof value.file === 'string' ? { kind: 'reference', file: value.file } : null;
+    }
   }
 }
 
@@ -318,6 +328,8 @@ function buildInvalidJob(row: StoredJobRow, kind: JobKind): Job {
     case 'publish':
       return { ...base, kind, progress: null, report: null };
     case 'review':
+      return { ...base, kind, progress: null, report: null };
+    case 'reference':
       return { ...base, kind, progress: null, report: null };
   }
 }
@@ -364,6 +376,13 @@ function buildTypedJob(row: StoredJobRow, kind: JobKind, state: RenderJobState):
       return { ...base, kind, progress: progress as PublishJobProgress | null, report: report as PublishJobReport | null };
     case 'review':
       return { ...base, kind, progress: progress as ReviewJobProgress | null, report: report as ReviewJobReport | null };
+    case 'reference':
+      return {
+        ...base,
+        kind,
+        progress: progress as ReferenceJobProgress | null,
+        report: report as ReferenceJobReport | null,
+      };
   }
 }
 

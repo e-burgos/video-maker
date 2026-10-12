@@ -691,7 +691,37 @@ describe('handleCreateRenderJob', () => {
       expect(runtime.jobs.listBySlug('smoke-ingest')).toEqual([]);
     });
 
-    it('rejects an unknown kind and names the eight valid ones', async () => {
+    it('answers 202 with kind reference for an existing video under raw/reference', async () => {
+      const { deps, runtime } = storyboardHarness({
+        files: [{ path: `${STORE.mediaRoot}/smoke-ingest/raw/reference/modelo.mp4`, contents: 'video' }],
+      });
+
+      const response = await handleCreateRenderJob(
+        deps,
+        STORE,
+        { slug: 'smoke-ingest' },
+        jsonBodyRequest('smoke-ingest', { kind: 'reference', file: 'raw/reference/modelo.mp4' }),
+        runtime,
+      );
+
+      expect(response.status).toBe(202);
+      expect((response.body as Job).kind).toBe('reference');
+      expect(runtime.jobs.listBySlug('smoke-ingest')).toHaveLength(1);
+    });
+
+    it('rejects a reference outside raw/reference with REFERENCE_FILE_INVALID and a missing one with REFERENCE_FILE_NOT_FOUND', async () => {
+      const { deps, runtime } = storyboardHarness();
+
+      await expect(
+        handleCreateRenderJob(deps, STORE, { slug: 'smoke-ingest' }, jsonBodyRequest('smoke-ingest', { kind: 'reference', file: 'out/modelo.mp4' }), runtime),
+      ).rejects.toMatchObject({ code: 'REFERENCE_FILE_INVALID' });
+      await expect(
+        handleCreateRenderJob(deps, STORE, { slug: 'smoke-ingest' }, jsonBodyRequest('smoke-ingest', { kind: 'reference', file: 'raw/reference/nada.mp4' }), runtime),
+      ).rejects.toMatchObject({ code: 'REFERENCE_FILE_NOT_FOUND' });
+      expect(runtime.jobs.listBySlug('smoke-ingest')).toEqual([]);
+    });
+
+    it('rejects an unknown kind and names the nine valid ones', async () => {
       const { deps, runtime } = storyboardHarness();
 
       await expect(
@@ -704,7 +734,7 @@ describe('handleCreateRenderJob', () => {
         ),
       ).rejects.toMatchObject({
         code: 'JOB_KIND_INVALID',
-        expected: "'render', 'montage', 'storyboard', 'voice', 'photo-aroll', 'motion', 'publish' or 'review'",
+        expected: "'render', 'montage', 'storyboard', 'voice', 'photo-aroll', 'motion', 'publish', 'review' or 'reference'",
       });
       expect(runtime.jobs.listBySlug('smoke-ingest')).toEqual([]);
     });

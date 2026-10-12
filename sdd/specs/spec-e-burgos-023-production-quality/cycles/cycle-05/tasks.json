@@ -81,8 +81,49 @@
       "depends_on": [
         "TASK-001"
       ],
-      "status": "pending",
-      "files": []
+      "status": "done",
+      "files": [
+        "apps/render-api/src/__fixtures__/fake-reference-measurements.ts",
+        "apps/render-api/src/errors/http-status-for.spec.ts",
+        "apps/render-api/src/errors/http-status-for.ts",
+        "apps/render-api/src/errors/render-api-error.ts",
+        "apps/render-api/src/errors/to-error-payload.ts",
+        "apps/render-api/src/http/handle-request.ts",
+        "apps/render-api/src/http/handlers/jobs-handler.spec.ts",
+        "apps/render-api/src/http/handlers/jobs-handler.ts",
+        "apps/render-api/src/http/handlers/references-handler.spec.ts",
+        "apps/render-api/src/http/handlers/references-handler.ts",
+        "apps/render-api/src/http/routes.ts",
+        "apps/render-api/src/jobs/job-persistence.spec.ts",
+        "apps/render-api/src/jobs/job-persistence.ts",
+        "apps/render-api/src/jobs/reference-job-params.spec.ts",
+        "apps/render-api/src/jobs/reference-job-params.ts",
+        "apps/render-api/src/jobs/reference-job-progress.ts",
+        "apps/render-api/src/jobs/reference-pipeline-observer.ts",
+        "apps/render-api/src/jobs/render-job-queue-reference.spec.ts",
+        "apps/render-api/src/jobs/render-job-queue.ts",
+        "apps/render-api/src/jobs/render-job.ts",
+        "apps/render-api/src/jobs/run-reference-pipeline.spec.ts",
+        "apps/render-api/src/jobs/run-reference-pipeline.ts",
+        "apps/render-api/src/reference/build-reference-brief.spec.ts",
+        "apps/render-api/src/reference/build-reference-brief.ts",
+        "apps/render-api/src/reference/reference-measurements.ts",
+        "apps/render-api/src/reference/reference-paths.spec.ts",
+        "apps/render-api/src/reference/reference-paths.ts",
+        "apps/render-api/src/reference/reference-store.ts",
+        "libs/timeline-core/src/reference/reference-brief.spec.ts",
+        "libs/timeline-core/src/reference/reference-brief.ts"
+      ],
+      "usage": {
+        "tokens_in": 230000,
+        "tokens_out": 40000,
+        "provider_model": "claude/sonnet",
+        "effort": "medium",
+        "agent": "implementor-back",
+        "approx": true,
+        "source": "declared-estimate",
+        "recorded_at": "2026-10-12"
+      }
     },
     {
       "id": "TASK-003",

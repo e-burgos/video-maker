@@ -79,6 +79,17 @@ describe('buildReferenceSummary', () => {
     );
   });
 
+  it('counts long silences with the right plural', () => {
+    const silence = { startSec: 1, endSec: 3 };
+
+    expect(buildReferenceSummary({ ...FACTS, audio: { integratedLufs: null, longSilences: [silence] } })).toContain(
+      'sin sonoridad medible, 1 silencio largo.',
+    );
+    expect(buildReferenceSummary({ ...FACTS, audio: { integratedLufs: null, longSilences: [silence, silence] } })).toContain(
+      '2 silencios largos.',
+    );
+  });
+
   it('says so when there is no speech', () => {
     expect(buildReferenceSummary({ ...FACTS, voice: null })).toContain('Sin voz hablada detectada.');
   });

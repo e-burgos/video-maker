@@ -1,10 +1,18 @@
-import type { MontageStage, MotionStage, PublishStage, ReviewStage, StoryboardStage, VoiceStage } from '../jobs/render-job';
+import type {
+  MontageStage,
+  MotionStage,
+  PublishStage,
+  ReferenceStage,
+  ReviewStage,
+  StoryboardStage,
+  VoiceStage,
+} from '../jobs/render-job';
 
 export const RENDER_PIPELINE_STAGES = ['prepare', 'render', 'mix', 'mux', 'verify'] as const;
 
 export type RenderPipelineStage = (typeof RENDER_PIPELINE_STAGES)[number];
 
-export type RenderApiErrorStage = RenderPipelineStage | MontageStage | StoryboardStage | VoiceStage | MotionStage | PublishStage | ReviewStage;
+export type RenderApiErrorStage = RenderPipelineStage | MontageStage | StoryboardStage | VoiceStage | MotionStage | PublishStage | ReviewStage | ReferenceStage;
 
 export const RENDER_API_ERROR_CODES = [
   'INVALID_TIMELINE',
@@ -148,6 +156,9 @@ export const RENDER_API_ERROR_CODES = [
   'REVIEW_INPUTS_UNAVAILABLE',
   'REVIEW_NOT_FOUND',
   'RENDER_REVIEW_FAILED',
+  'REFERENCE_FILE_INVALID',
+  'REFERENCE_FILE_NOT_FOUND',
+  'REFERENCE_NOT_FOUND',
   'PROPOSAL_NOT_FOUND',
 ] as const;
 

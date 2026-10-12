@@ -127,9 +127,16 @@ function voiceSentence(voice: ReferenceVoice | null): string {
   return `Voz de ${voice.wordsPerMinute} palabras por minuto, con habla en el ${speechPercent}% del video.`;
 }
 
+function silenceLabel(count: number): string {
+  if (count === 0) {
+    return 'sin silencios largos';
+  }
+  return count === 1 ? '1 silencio largo' : `${count} silencios largos`;
+}
+
 function audioSentence(audio: ReferenceAudio): string {
   const loudness = audio.integratedLufs === null ? 'sin sonoridad medible' : `sonoridad ${audio.integratedLufs} LUFS`;
-  const silences = audio.longSilences.length === 0 ? 'sin silencios largos' : `${audio.longSilences.length} silencios largos`;
+  const silences = silenceLabel(audio.longSilences.length);
   return `Audio: ${loudness}, ${silences}.`;
 }
 

@@ -48,7 +48,7 @@ const MESSAGE_BY_CODE: Readonly<Record<RenderApiErrorCode, string>> = {
   JOB_INTERRUPTED: 'The service restarted while this job was still in progress.',
   JOB_RECORD_INVALID: 'The persisted job record exists but could not be read back.',
   JOB_NOT_RETRYABLE: 'Only a job in the failed or canceled state can be retried.',
-  JOB_KIND_INVALID: 'The job kind is not render, montage, storyboard, voice, photo-aroll, motion, publish or review.',
+  JOB_KIND_INVALID: 'The job kind is not render, montage, storyboard, voice, photo-aroll, motion, publish, review or reference.',
   JOB_MODEL_INVALID: 'The requested model is not one of the models this service allows.',
   MONTAGE_PRESET_INVALID: 'The montage preset is not one of the known preset names.',
   MONTAGE_SEED_INVALID: 'The montage seed is not a non-negative integer.',
@@ -143,6 +143,9 @@ const MESSAGE_BY_CODE: Readonly<Record<RenderApiErrorCode, string>> = {
   REVIEW_FILE_INVALID: 'The file to review must be an .mp4 directly under out/.',
   REVIEW_INPUTS_UNAVAILABLE: 'The project is missing the timeline or the files needed to review this render.',
   REVIEW_NOT_FOUND: 'That render has no review yet.',
+  REFERENCE_FILE_INVALID: 'The reference must be a video directly under raw/reference/.',
+  REFERENCE_FILE_NOT_FOUND: 'The reference video does not exist under raw/reference/.',
+  REFERENCE_NOT_FOUND: 'That reference has no analysis yet.',
   RENDER_REVIEW_FAILED: 'The automatic review found critical problems in this render; fix them or publish with ignoreReview.',
   PROPOSAL_NOT_FOUND: 'The project has no production proposal yet.',
 };

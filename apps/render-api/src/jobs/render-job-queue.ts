@@ -49,6 +49,8 @@ import type {
   PublishPrivacy,
   RenderJobProgress,
   RenderJobState,
+  ReferenceJobProgress,
+  ReferenceJobReport,
   ReviewJobProgress,
   ReviewJobReport,
   SampleSpec,
@@ -57,9 +59,14 @@ import type {
   VoiceJobProgress,
   VoiceJobReport,
 } from './render-job';
+import { completeReferenceJobProgress, startReferenceJobStage } from './reference-job-progress';
+import { isReferencePipelineCanceled } from './reference-pipeline-observer';
+import type { ReferencePipelineObserver } from './reference-pipeline-observer';
 import { completeReviewJobProgress, startReviewJobStage } from './review-job-progress';
 import { isReviewPipelineCanceled } from './review-pipeline-observer';
 import type { ReviewPipelineObserver } from './review-pipeline-observer';
+import { runReferencePipeline } from './run-reference-pipeline';
+import type { ReferencePipelineOptions } from './run-reference-pipeline';
 import { runReviewPipeline } from './run-review-pipeline';
 import type { ReviewPipelineOptions } from './run-review-pipeline';
 import { runMontagePipeline } from './run-montage-pipeline';
@@ -218,6 +225,13 @@ interface ReviewJobRecord extends JobRecordBase {
   report: ReviewJobReport | null;
 }
 
+interface ReferenceJobRecord extends JobRecordBase {
+  readonly kind: 'reference';
+  readonly file: string;
+  progress: ReferenceJobProgress | null;
+  report: ReferenceJobReport | null;
+}
+
 type JobRecord =
   | RenderJobRecord
   | MontageJobRecord
@@ -226,7 +240,8 @@ type JobRecord =
   | PhotoArollJobRecord
   | MotionJobRecord
   | PublishJobRecord
-  | ReviewJobRecord;
+  | ReviewJobRecord
+  | ReferenceJobRecord;
 
 export function createRenderJobQueue(
   deps: RenderApiDependencies,
@@ -234,6 +249,7 @@ export function createRenderJobQueue(
   youtube: YoutubeClient = createYoutubeServices(deps).client,
   publishOptions: Omit<PublishPipelineOptions, 'youtube'> = {},
   reviewOptions: ReviewPipelineOptions = {},
+  referenceOptions: ReferencePipelineOptions = {},
 ): RenderJobQueue {
   const jobsStore = deps.localStore.jobs;
   const records = new Map<string, JobRecord>();
@@ -585,6 +601,35 @@ export function createRenderJobQueue(
     settle(record, report, failure);
   }
 
+  async function runReferenceJob(record: ReferenceJobRecord): Promise<void> {
+    const observer: ReferencePipelineObserver = {
+      stageStarted: (stage) => {
+        record.progress = startReferenceJobStage(record.progress, stage);
+        persistProgress(record, false);
+      },
+      cancellationRequested: () => record.state === 'canceling',
+    };
+
+    let report: ReferenceJobReport | null = null;
+    let failure: RenderApiErrorPayload | null = null;
+
+    try {
+      report = await runReferencePipeline(
+        { project: resolveMediaProject(record.projectRoot), file: record.file },
+        deps,
+        observer,
+        referenceOptions,
+      );
+    } catch (cause) {
+      failure = isReferencePipelineCanceled(cause) ? null : toErrorPayload(cause);
+    }
+
+    if (report !== null) {
+      record.progress = completeReferenceJobProgress(record.progress);
+    }
+    settle(record, report, failure);
+  }
+
   function reviewableFile(record: JobRecord): string | null {
     if (record.state !== 'succeeded') {
       return null;
@@ -638,6 +683,9 @@ export function createRenderJobQueue(
         break;
       case 'review':
         await runReviewJob(record);
+        break;
+      case 'reference':
+        await runReferenceJob(record);
         break;
     }
 
@@ -776,6 +824,8 @@ export function createRenderJobQueue(
         };
       case 'review':
         return { ...base, kind: 'review', file: input.file, progress: null, report: null };
+      case 'reference':
+        return { ...base, kind: 'reference', file: input.file, progress: null, report: null };
     }
   }
 
