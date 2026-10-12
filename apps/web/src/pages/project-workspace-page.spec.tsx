@@ -59,7 +59,7 @@ function renderWorkspace(client: Partial<RenderApiClient> = {}) {
       slug: 'demo-01',
       layout: { raw: true, catalog: true, timeline: false, edl: false, out: false },
       assetSource: 'catalog',
-      assetCounts: { aroll: 0, broll: 0, image: 0, audio: 0, voice: 0, logo: 0 },
+      assetCounts: { aroll: 0, broll: 0, image: 0, audio: 0, voice: 0, logo: 0, reference: 0 },
     }),
     getTimeline: vi.fn().mockRejectedValue(new RenderApiError('TIMELINE_NOT_FOUND', 'none', 404, null)),
     listInbox: vi.fn().mockResolvedValue({ assets: [] }),
@@ -101,7 +101,7 @@ describe('ProjectWorkspacePage', () => {
       mode: 'motion',
       layout: { raw: true, catalog: true, timeline: false, edl: false, out: false },
       assetSource: 'catalog',
-      assetCounts: { aroll: 0, broll: 0, image: 0, audio: 0, voice: 0, logo: 0 },
+      assetCounts: { aroll: 0, broll: 0, image: 0, audio: 0, voice: 0, logo: 0, reference: 0 },
     };
     renderWorkspace({
       getProject: vi.fn().mockResolvedValue(motionProject),
@@ -123,7 +123,7 @@ describe('ProjectWorkspacePage', () => {
       mode: 'motion',
       layout: { raw: true, catalog: true, timeline: false, edl: false, out: false },
       assetSource: 'catalog',
-      assetCounts: { aroll: 0, broll: 0, image: 0, audio: 0, voice: 0, logo: 0 },
+      assetCounts: { aroll: 0, broll: 0, image: 0, audio: 0, voice: 0, logo: 0, reference: 0 },
     };
     renderWorkspace({
       getProject: vi.fn().mockResolvedValue(motionProject),

@@ -227,3 +227,14 @@ export type { DetectBlackSegmentsOptions, DetectFrozenSegmentsOptions } from './
 export { detectSilences, parseSilenceSegments, silenceDetectArgs } from './ffmpeg/detect-silence-segments';
 export type { DetectSilencesOptions } from './ffmpeg/detect-silence-segments';
 export type { DetectedSegment, TimeSegment } from './ffmpeg/time-segment';
+export {
+  DEFAULT_MIN_SCENE_SEC,
+  DEFAULT_SCENE_CUT_THRESHOLD,
+  detectSceneCuts,
+  mergeCloseCuts,
+  parseShowinfoCutTimes,
+  sceneCutArgs,
+} from './ffmpeg/detect-scene-cuts';
+export type { DetectSceneCutsOptions } from './ffmpeg/detect-scene-cuts';
+export { buildScenesFromCuts, extractSceneKeyframes, sceneMidpointSec } from './ffmpeg/extract-scene-keyframes';
+export type { SceneKeyframe, VideoScene } from './ffmpeg/extract-scene-keyframes';

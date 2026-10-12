@@ -62,6 +62,7 @@ export const GUIDE_ES: GuideContent = {
         '| Música | `raw/audio/` | La cama que suena bajo todo el video, atenuada sola cada vez que alguien habla. Hacela más larga que el montaje. |',
         '| Locución | `raw/voice/` | Una narración que grabaste vos. Reemplaza la voz sintetizada de una escena. |',
         '| Logo | `raw/logo/` | Un PNG con transparencia dibujado sobre el video terminado. Se enciende desde la página de vista previa. |',
+        '| Referencia | `raw/reference/` | Un video con el que querés que se parezca el tuyo. No entra al montaje: el productor analiza su ritmo, su voz y su estructura. |',
         '',
         '**Los nombres de archivo son conceptos.** El B-roll y las imágenes se eligen comparando su nombre de archivo contra las palabras que repite la narración, así que `terminal.mp4` se usa y `IMG_2931.mp4` no se usa nunca. Nombrá cada archivo por lo que muestra.',
         '',

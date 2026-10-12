@@ -1,5 +1,13 @@
-import { catalogPath, readCatalog, toAbsolutePath } from '@video-maker/auto-montage';
-import type { AssetRole, MediaProject, TranscriptRef } from '@video-maker/auto-montage';
+import {
+  catalogPath,
+  readCatalog,
+  toAbsolutePath,
+} from '@video-maker/auto-montage';
+import type {
+  AssetRole,
+  MediaProject,
+  TranscriptRef,
+} from '@video-maker/auto-montage';
 import { TranscriptionSchema } from '@video-maker/timeline-core';
 import type { MediaKind, StoryboardDocument } from '@video-maker/timeline-core';
 
@@ -31,12 +39,16 @@ async function readCatalogIfPresent(
   project: MediaProject,
 ): Promise<Awaited<ReturnType<typeof readCatalog>>> {
   const relativePath = catalogPath();
-  if ((await deps.storage.stat(toAbsolutePath(project, relativePath))) === null) {
+  if (
+    (await deps.storage.stat(toAbsolutePath(project, relativePath))) === null
+  ) {
     return null;
   }
 
   try {
-    return await readCatalog(project, { readTextFile: deps.storage.readTextFile });
+    return await readCatalog(project, {
+      readTextFile: deps.storage.readTextFile,
+    });
   } catch (cause) {
     throw new PipelineStageError({
       code: 'CATALOG_UNREADABLE',
@@ -58,7 +70,9 @@ async function readTranscriptText(
   }
 
   try {
-    const parsed = TranscriptionSchema.safeParse(JSON.parse(await deps.storage.readTextFile(absolutePath)));
+    const parsed = TranscriptionSchema.safeParse(
+      JSON.parse(await deps.storage.readTextFile(absolutePath)),
+    );
     if (!parsed.success) {
       return null;
     }
@@ -83,12 +97,14 @@ export async function collectStoryboardInventory(
     return { assets: [], transcript: null, previousStoryboard };
   }
 
-  const assets = catalog.assets.map((entry) => ({
-    id: entry.asset.id,
-    role: entry.role,
-    kind: entry.asset.kind,
-    durationMs: entry.asset.durationMs,
-  }));
+  const assets = catalog.assets
+    .filter((entry) => entry.role !== 'reference')
+    .map((entry) => ({
+      id: entry.asset.id,
+      role: entry.role,
+      kind: entry.asset.kind,
+      durationMs: entry.asset.durationMs,
+    }));
 
   const transcriptTexts: string[] = [];
   for (const transcript of catalog.transcripts) {
@@ -100,7 +116,8 @@ export async function collectStoryboardInventory(
 
   return {
     assets,
-    transcript: transcriptTexts.length === 0 ? null : transcriptTexts.join('\n\n'),
+    transcript:
+      transcriptTexts.length === 0 ? null : transcriptTexts.join('\n\n'),
     previousStoryboard,
   };
 }

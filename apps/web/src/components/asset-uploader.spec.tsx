@@ -144,6 +144,7 @@ describe('AssetUploader role descriptions (US-016-004)', () => {
       'audio',
       'voice',
       'logo',
+      'reference',
     ]);
     expect(choices[0]?.textContent).toContain('A-roll · main footage');
     expect(choices[0]?.textContent).toContain('sets how long the video lasts');

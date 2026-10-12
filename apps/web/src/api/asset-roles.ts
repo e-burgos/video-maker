@@ -14,7 +14,7 @@ export const BROLL_MATCHING_HINT_KEY: TranslationKey = 'assetRole.brollHint';
 
 const REQUIRED_ROLES: readonly AssetRole[] = ['aroll'];
 
-const IMPORTANCE: readonly AssetRole[] = ['aroll', 'broll', 'image', 'audio', 'voice', 'logo'];
+const IMPORTANCE: readonly AssetRole[] = ['aroll', 'broll', 'image', 'audio', 'voice', 'logo', 'reference'];
 
 export function assetRoleCopy(role: AssetRole): AssetRoleCopy {
   return {

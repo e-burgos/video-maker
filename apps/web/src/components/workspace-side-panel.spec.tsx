@@ -19,7 +19,7 @@ function projectDetail(overrides: Partial<ProjectDetail> = {}): ProjectDetail {
     slug: 'demo-01',
     layout: { raw: true, catalog: true, timeline: false, edl: false, out: false },
     assetSource: 'catalog',
-    assetCounts: { aroll: 0, broll: 0, image: 0, audio: 0, voice: 0, logo: 0 },
+    assetCounts: { aroll: 0, broll: 0, image: 0, audio: 0, voice: 0, logo: 0, reference: 0 },
     ...overrides,
   };
 }

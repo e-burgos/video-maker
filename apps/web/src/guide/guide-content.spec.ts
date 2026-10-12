@@ -65,6 +65,7 @@ describe('guide content', () => {
       audio: 'audio',
       voice: 'voice',
       logo: 'logo',
+      reference: 'reference',
     };
 
     for (const role of ASSET_ROLES) {

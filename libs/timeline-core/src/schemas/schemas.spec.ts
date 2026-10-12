@@ -167,6 +167,19 @@ const PUBLIC_VALUE_EXPORTS = [
   'ProposalConceptSchema',
   'approveProposalConcept',
   'pendingProposalFrom',
+  'REFERENCE_BRIEF_VERSION',
+  'REFERENCE_ORIENTATIONS',
+  'ReferenceAudioSchema',
+  'ReferenceBriefSchema',
+  'ReferenceFormatSchema',
+  'ReferencePaceSchema',
+  'ReferencePhraseSchema',
+  'ReferenceSceneSchema',
+  'ReferenceVoiceSchema',
+  'buildReferenceSummary',
+  'orientationFor',
+  'paceFromScenes',
+  'wordsPerMinuteFor',
 ].sort();
 
 const minimalTimeline: Timeline = {
