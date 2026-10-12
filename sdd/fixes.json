@@ -2953,6 +2953,53 @@
           }
         ]
       }
+    },
+    {
+      "id": "FIX-e-burgos-018",
+      "author": "e-burgos",
+      "spec_id": "spec-e-burgos-023-production-quality",
+      "fix_document": "sdd/fixes/fix-e-burgos-018.md",
+      "type": "BUGFIX",
+      "severity": "medium",
+      "created_at": "2026-10-12",
+      "resolved_at": "2026-10-12",
+      "validated_at": null,
+      "title": "get_render_review espera el job de revisión en curso en vez de decir que no hay revisión",
+      "estimation_hours": 1,
+      "description": "El productor pedía la revisión antes de que terminara el job review que sigue al render y concluía que los videos motion no se revisan.",
+      "justification": "El productor le dio información falsa al dev en el video de prueba; cambio interno sin contratos nuevos.",
+      "related_modules": [
+        "production-quality"
+      ],
+      "affected_files": [
+        "libs/producer-tools/src/handlers/studio-tool-handlers.ts",
+        "libs/producer-tools/src/handlers/studio-tool-handlers.spec.ts"
+      ],
+      "test_reference": "producer-tools lint/test/build verde.",
+      "status": "implemented",
+      "cycle": null,
+      "process_note": "Hallado en el video de prueba comprar-producto.",
+      "usage": {
+        "provider_model": "claude/opus",
+        "effort": "high",
+        "tokens_in": 20000,
+        "tokens_out": 4000,
+        "approx": true,
+        "source": "declared-estimate",
+        "recorded_at": "2026-10-12",
+        "by_agent": [
+          {
+            "agent": "orchestrator",
+            "provider_model": "claude/opus",
+            "effort": "high",
+            "tokens_in": 20000,
+            "tokens_out": 4000,
+            "approx": true,
+            "source": "declared-estimate",
+            "recorded_at": "2026-10-12"
+          }
+        ]
+      }
     }
   ]
 }

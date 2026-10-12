@@ -13,6 +13,8 @@ export const DEFAULT_WAIT_FOR_JOB_POLL_INTERVAL_MS = 2000;
 export const RECENT_JOBS_LIMIT = 5;
 
 const TERMINAL_JOB_STATES: ReadonlySet<string> = new Set(['succeeded', 'failed', 'canceled']);
+const PENDING_REVIEW_WAIT_MS = 180_000;
+const RECENT_JOBS_FOR_PENDING_REVIEW = 10;
 const JOB_KINDS_THAT_TAKE_MODEL: ReadonlySet<string> = new Set(['voice', 'storyboard']);
 
 interface StartJobRequest extends Record<string, unknown> {
@@ -158,6 +160,23 @@ export function createStudioToolHandlers(
     return { data: parseOutput(STUDIO_TOOLS[name].output, data) };
   }
 
+  async function pollJobUntilSettled(jobId: string, deadline: number) {
+    let job = await client.getJob(jobId);
+    while (!TERMINAL_JOB_STATES.has(job.state) && clock() < deadline) {
+      await sleep(pollIntervalMs);
+      job = await client.getJob(jobId);
+    }
+    return job;
+  }
+
+  async function waitForPendingReview(): Promise<boolean> {
+    const jobs = await client.listRecentJobs(RECENT_JOBS_FOR_PENDING_REVIEW);
+    const pending = jobs.find((job) => job.kind === 'review' && !TERMINAL_JOB_STATES.has(job.state));
+    if (pending === undefined) return false;
+    await pollJobUntilSettled(pending.id, clock() + PENDING_REVIEW_WAIT_MS);
+    return true;
+  }
+
   const handlers: Record<StudioToolName, StudioToolHandler> = {
     get_project_overview: async (rawInput) => {
       parseInput(STUDIO_TOOLS.get_project_overview.input, rawInput);
@@ -263,13 +282,7 @@ export function createStudioToolHandlers(
 
     wait_for_job: async (rawInput) => {
       const input = parseInput<{ jobId: string; timeoutSeconds: number }>(STUDIO_TOOLS.wait_for_job.input, rawInput);
-      const deadline = clock() + input.timeoutSeconds * 1000;
-
-      let job = await client.getJob(input.jobId);
-      while (!TERMINAL_JOB_STATES.has(job.state) && clock() < deadline) {
-        await sleep(pollIntervalMs);
-        job = await client.getJob(input.jobId);
-      }
+      const job = await pollJobUntilSettled(input.jobId, clock() + input.timeoutSeconds * 1000);
 
       return withOutput('wait_for_job', {
         jobId: job.id,
@@ -384,11 +397,14 @@ export function createStudioToolHandlers(
 
     get_render_review: async (rawInput) => {
       const input = parseInput<{ file?: string }>(STUDIO_TOOLS.get_render_review.input, rawInput);
-      const review = await client.getRenderReview(input.file);
+      let review = await client.getRenderReview(input.file);
+      if (review === null && (await waitForPendingReview())) {
+        review = await client.getRenderReview(input.file);
+      }
       if (review === null) {
         throw new StudioToolRuntimeError(
           'FILE_NOT_FOUND',
-          'no render of this project has been reviewed yet; start_job {"kind":"render"} reviews its result automatically',
+          'that render has not been reviewed: every full render or motion video is reviewed by a job of kind review that starts right after it; list the recent jobs and wait for it',
         );
       }
       return withOutput('get_render_review', review);

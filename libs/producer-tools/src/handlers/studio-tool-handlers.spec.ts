@@ -346,10 +346,27 @@ describe('createStudioToolHandlers', () => {
       expect(client.calls).toEqual([{ method: 'getRenderReview', args: [undefined] }]);
     });
 
-    it('says nothing was reviewed when the client finds no review', async () => {
-      const { handlers } = handlersWith({ getRenderReview: async () => null });
+    it('says nothing was reviewed when the client finds no review and no review job is pending', async () => {
+      const { handlers } = handlersWith({ getRenderReview: async () => null, listRecentJobs: async () => [] });
 
       await expect(handlers.get_render_review({})).rejects.toMatchObject({ code: 'FILE_NOT_FOUND' });
+    });
+
+    it('waits for the review job that is still running after the render and then returns its review', async () => {
+      let reviewDone = false;
+      const client = createFakeRenderApiClient({
+        getRenderReview: async () => (reviewDone ? review : null),
+        listRecentJobs: async () => [{ id: 'job-review', kind: 'review', state: 'running', createdAt: '2026-10-12T21:21:00.000Z' }],
+        getJob: async () => {
+          reviewDone = true;
+          return { id: 'job-review', kind: 'review', state: 'succeeded' } as Awaited<ReturnType<typeof client.getJob>>;
+        },
+      });
+      const handlers = createStudioToolHandlers({ client, model: 'sonnet', sleep: async () => undefined });
+
+      const result = await handlers.get_render_review({ file: 'out/video.mp4' });
+
+      expect(result.data).toMatchObject({ file: 'out/video.mp4', status: 'fail' });
     });
 
     it('rejects a file outside out/ before calling the client', async () => {
