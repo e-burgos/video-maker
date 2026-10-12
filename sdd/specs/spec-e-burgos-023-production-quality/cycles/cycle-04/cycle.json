@@ -1,0 +1,40 @@
+{
+  "$schema": "../../../../schemas/cycle.schema.json",
+  "cycle": 4,
+  "module": "production-quality",
+  "spec": "spec-e-burgos-023-production-quality",
+  "apps": [
+    "libs/producer-tools",
+    "apps/render-api",
+    "libs/composition-remotion",
+    "apps/web"
+  ],
+  "phase": "proposal-approval-sample",
+  "flow": "lite",
+  "objectives": [
+    "Propuesta con 2–3 conceptos, estimación y aprobación antes del render completo",
+    "Muestra corta antes del render completo"
+  ],
+  "status": "in-progress",
+  "started_at": "2026-10-12",
+  "completed_at": null,
+  "documents": {
+    "plan": "sdd/specs/spec-e-burgos-023-production-quality/cycles/cycle-04/plan.md",
+    "tasks": "sdd/specs/spec-e-burgos-023-production-quality/cycles/cycle-04/tasks.json"
+  },
+  "artifacts": [],
+  "metrics": {
+    "tasks_total": 5,
+    "tasks_completed": 0,
+    "tasks_skipped": 0,
+    "story_points": 26,
+    "files_created": [],
+    "files_modified": [],
+    "files_deleted": []
+  },
+  "tables_created": [],
+  "endpoints_implemented": [],
+  "components_created": [],
+  "issues_found": [],
+  "reviewer_report": null
+}

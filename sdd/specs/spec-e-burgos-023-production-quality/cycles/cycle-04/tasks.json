@@ -1,0 +1,104 @@
+{
+  "$schema": "../../../../schemas/cycle-tasks.schema.json",
+  "spec": "spec-e-burgos-023-production-quality",
+  "cycle": 4,
+  "module": "production-quality",
+  "apps": [
+    "libs/producer-tools",
+    "apps/render-api",
+    "libs/composition-remotion",
+    "apps/web"
+  ],
+  "flow": "lite",
+  "user_stories_generated": true,
+  "prerequisites": {
+    "tasks_generated": true
+  },
+  "tasks": [
+    {
+      "id": "TASK-001",
+      "title": "Propuesta: modelo ProductionProposal (2–3 conceptos con ángulo, formato, duración, contrato de entrega, voz, modo de música y estimación) en work/producer/proposal.json, estimador de tiempo/costo a partir del historial de jobs y del motor del productor, endpoints GET/PUT y POST approve",
+      "user_stories": [
+        "US-023-401",
+        "US-023-402"
+      ],
+      "estimation_hours": 4,
+      "story_points": 8,
+      "depends_on": [],
+      "status": "pending",
+      "files": [
+        "apps/render-api/src/proposal/estimate-production.ts",
+        "apps/render-api/src/http/handlers/proposal-handler.ts"
+      ]
+    },
+    {
+      "id": "TASK-002",
+      "title": "Productor: tool propose_production que escribe la propuesta, prompt que exige presentarla y esperar la aprobación antes del render completo, y bloqueo de start_job de render/motion completo sin propuesta aprobada (override explícito del dev)",
+      "user_stories": [
+        "US-023-401",
+        "US-023-403"
+      ],
+      "estimation_hours": 3,
+      "story_points": 5,
+      "depends_on": [
+        "TASK-001"
+      ],
+      "status": "pending",
+      "files": [
+        "libs/producer-tools/src/prompt/build-producer-prompt.ts"
+      ]
+    },
+    {
+      "id": "TASK-003",
+      "title": "Muestra: render corto (primeros N s, 8–20) para material crudo y motion antes del render completo, marcado como muestra en out/ y excluido de publicar",
+      "user_stories": [
+        "US-023-404"
+      ],
+      "estimation_hours": 4,
+      "story_points": 5,
+      "depends_on": [],
+      "status": "pending",
+      "files": [
+        "apps/render-api/src/jobs/render-job-params.ts"
+      ]
+    },
+    {
+      "id": "TASK-004",
+      "title": "Web: tarjeta Propuesta en el productor (conceptos con estimación, elegir y aprobar, generar muestra y verla) y estado de aprobación visible en el proyecto",
+      "user_stories": [
+        "US-023-402",
+        "US-023-404"
+      ],
+      "estimation_hours": 3,
+      "story_points": 5,
+      "depends_on": [
+        "TASK-001",
+        "TASK-003"
+      ],
+      "status": "pending",
+      "files": [
+        "apps/web/src/components/production-proposal-card.tsx"
+      ]
+    },
+    {
+      "id": "TASK-005",
+      "title": "Verificación: propuesta escrita por el productor real (o a mano si la suscripción no está disponible), aprobación desde la web, muestra de un motion y de un tutorial, bloqueo sin aprobación",
+      "user_stories": [
+        "US-023-401",
+        "US-023-402",
+        "US-023-403",
+        "US-023-404"
+      ],
+      "estimation_hours": 2,
+      "story_points": 3,
+      "depends_on": [
+        "TASK-002",
+        "TASK-004"
+      ],
+      "status": "pending",
+      "files": [
+        "sdd/specs/spec-e-burgos-023-production-quality/cycles/cycle-04/artifacts/verification.md"
+      ]
+    }
+  ]
+}
