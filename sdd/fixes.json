@@ -2906,6 +2906,53 @@
           }
         ]
       }
+    },
+    {
+      "id": "FIX-e-burgos-017",
+      "author": "e-burgos",
+      "spec_id": "spec-e-burgos-023-production-quality",
+      "fix_document": "sdd/fixes/fix-e-burgos-017.md",
+      "type": "IMPROVEMENT",
+      "severity": "medium",
+      "created_at": "2026-10-12",
+      "resolved_at": "2026-10-12",
+      "validated_at": null,
+      "title": "El zoom de la escena de interfaz se mantiene hasta el próximo zoom o el final de la escena",
+      "estimation_hours": 1,
+      "description": "El zoom de ui-walkthrough volvía atrás al empezar el paso siguiente, así que resaltados y clics nunca se veían ampliados.",
+      "justification": "Legibilidad de la interfaz en el video de prueba de compra; cambio interno del runtime sin contratos nuevos.",
+      "related_modules": [
+        "production-quality"
+      ],
+      "affected_files": [
+        "libs/motion-graphics/assets/runtime/motion-runtime.js",
+        "libs/motion-graphics/src/auto/scene-guide.ts"
+      ],
+      "test_reference": "motion-graphics lint/test/build verde; muestra real revisada.",
+      "status": "implemented",
+      "cycle": null,
+      "process_note": "Hallado en el video de prueba comprar-producto.",
+      "usage": {
+        "provider_model": "claude/opus",
+        "effort": "high",
+        "tokens_in": 25000,
+        "tokens_out": 4000,
+        "approx": true,
+        "source": "declared-estimate",
+        "recorded_at": "2026-10-12",
+        "by_agent": [
+          {
+            "agent": "orchestrator",
+            "provider_model": "claude/opus",
+            "effort": "high",
+            "tokens_in": 25000,
+            "tokens_out": 4000,
+            "approx": true,
+            "source": "declared-estimate",
+            "recorded_at": "2026-10-12"
+          }
+        ]
+      }
     }
   ]
 }

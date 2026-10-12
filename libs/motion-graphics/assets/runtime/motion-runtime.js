@@ -46,6 +46,12 @@ window.createMotionRuntime = function createMotionRuntime(T, W, compositionId) {
     while (next && !next.hasAttribute('data-ui-step')) next = next.nextElementSibling;
     return next ? timeFor(next, id, 0) : null;
   };
+  const nextUiZoomTime = (el, id) => {
+    let next = el.nextElementSibling;
+    while (next && next.dataset.uiStep !== 'zoom') next = next.nextElementSibling;
+    return next ? timeFor(next, id, 0) : null;
+  };
+  const uiZoomHoldEnd = (el, id, t) => Math.max(t + 1.7, Math.min(E(id) - 0.5, nextUiZoomTime(el, id) ?? E(id)) - 0.35);
   const uiHoldEnd = (el, id, t, fallbackHold) => Math.min(E(id) - 0.5, Math.max(t + 0.9, nextUiStepTime(el, id) ?? t + fallbackHold));
   const uiRest = { scale: 1, xPercent: 0, yPercent: 0 };
 
@@ -123,7 +129,7 @@ window.createMotionRuntime = function createMotionRuntime(T, W, compositionId) {
       const scale = Number(el.dataset.scale);
       const focus = { scale, xPercent: clamp((0.5 - scale * Number(el.dataset.cx)) * 100, (1 - scale) * 100, 0), yPercent: clamp((0.5 - scale * Number(el.dataset.cy)) * 100, (1 - scale) * 100, 0) };
       tl.fromTo(zoom, uiRest, { ...focus, duration: 0.8, ease: 'power2.inOut', immediateRender: false }, t);
-      tl.fromTo(zoom, focus, { ...uiRest, duration: 0.7, ease: 'power2.inOut', immediateRender: false }, Math.max(t + 1.7, uiHoldEnd(el, id, t, 2.8) - 0.35));
+      tl.fromTo(zoom, focus, { ...uiRest, duration: 0.7, ease: 'power2.inOut', immediateRender: false }, uiZoomHoldEnd(el, id, t));
     },
     'ui-cursor': (el, t, id) => {
       const waypoints = Array.from(el.closest('[data-scene]').querySelectorAll('[data-ui-step][data-px]'))
