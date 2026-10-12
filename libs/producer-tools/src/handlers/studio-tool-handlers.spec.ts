@@ -891,13 +891,76 @@ describe('createStudioToolHandlers', () => {
       ],
     };
 
-    it('propose_production sends the draft to the studio and reports it pending', async () => {
-      const { handlers, client } = handlersWith({ putProposal: async () => ({ concepts: 2 }) });
+    const REVIEW = {
+      version: 1 as const,
+      reviewedAt: '2026-10-12T10:00:00.000Z',
+      items: [
+        { file: 'images/a.png', source: 'project' as const, shows: 'El equipo', verdict: 'fits' as const, reason: 'Sirve' },
+        { file: 'brand:counter-15', source: 'brand' as const, shows: 'Un menu', verdict: 'unfit' as const, reason: 'No es un equipo' },
+      ],
+      gaps: [{ need: 'Easy Pro en un TV', note: 'sin foto' }],
+    };
+    const IMAGE_ASSETS = [
+      { path: 'raw/images/a.png', role: 'image', media: null },
+      { path: 'raw/aroll/clip.mp4', role: 'aroll', media: null },
+      { path: 'raw/logo/l.png', role: 'logo', media: null },
+    ];
+
+    it('propose_production sends the draft to the studio and reports it pending once the material was reviewed', async () => {
+      const { handlers, client } = handlersWith({
+        getMaterialReview: async () => REVIEW,
+        listProjectAssets: async () => IMAGE_ASSETS,
+        putProposal: async () => ({ concepts: 2 }),
+      });
 
       const result = await handlers.propose_production(DRAFT);
 
       expect(result.data).toEqual({ saved: true, status: 'pending', concepts: 2 });
-      expect(client.calls).toEqual([{ method: 'putProposal', args: [DRAFT] }]);
+      expect(client.calls.map((call) => call.method)).toEqual(['getMaterialReview', 'listProjectAssets', 'putProposal']);
+      expect(client.calls.find((call) => call.method === 'putProposal')?.args).toEqual([DRAFT]);
+    });
+
+    it('propose_production fails with MATERIAL_NOT_REVIEWED when the project has no review, without saving', async () => {
+      const { handlers, client } = handlersWith({ getMaterialReview: async () => null, listProjectAssets: async () => IMAGE_ASSETS });
+
+      await expect(handlers.propose_production(DRAFT)).rejects.toMatchObject({
+        code: 'MATERIAL_NOT_REVIEWED',
+        hint: expect.stringContaining('review_material'),
+      });
+      expect(client.calls.map((call) => call.method)).not.toContain('putProposal');
+    });
+
+    it('propose_production names the project images the review leaves out, whichever alias it used', async () => {
+      const { handlers } = handlersWith({
+        getMaterialReview: async () => ({ ...REVIEW, items: [REVIEW.items[1] as (typeof REVIEW.items)[number]] }),
+        listProjectAssets: async () => [...IMAGE_ASSETS, { path: 'raw/images/b.png', role: 'image', media: null }],
+      });
+
+      await expect(handlers.propose_production(DRAFT)).rejects.toMatchObject({
+        code: 'MATERIAL_NOT_REVIEWED',
+        hint: expect.stringContaining('raw/images/a.png, raw/images/b.png'),
+      });
+    });
+
+    it('review_material sends the review to the studio and counts the verdicts', async () => {
+      const { handlers, client } = handlersWith({ putMaterialReview: async () => REVIEW });
+      const draft = { items: REVIEW.items, gaps: REVIEW.gaps };
+
+      const result = await handlers.review_material(draft);
+
+      expect(result.data).toEqual({ saved: true, items: 2, fits: 1, doubtful: 0, unfit: 1, gaps: 1 });
+      expect(client.calls).toEqual([{ method: 'putMaterialReview', args: [draft] }]);
+    });
+
+    it.each([
+      [{ items: [{ ...REVIEW.items[0], verdict: 'great' }], gaps: [] }],
+      [{ items: [] }],
+      [{ items: [{ ...REVIEW.items[1], source: 'project' }], gaps: [] }],
+    ])('review_material rejects a malformed review before calling the studio (%#)', async (input) => {
+      const { handlers, client } = handlersWith();
+
+      await expect(handlers.review_material(input)).rejects.toMatchObject({ code: 'INVALID_INPUT' });
+      expect(client.calls).toEqual([]);
     });
 
     it.each([

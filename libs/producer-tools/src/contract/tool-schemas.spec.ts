@@ -31,6 +31,7 @@ const EXPECTED_OUTPUT_FIELDS: Record<(typeof STUDIO_TOOL_NAMES)[number], readonl
   put_timeline: ['saved'],
   search_free_music: ['results'],
   import_music: ['path', 'credit'],
+  review_material: ['saved', 'items', 'fits', 'doubtful', 'unfit', 'gaps'],
 };
 
 describe('STUDIO_TOOLS', () => {
@@ -414,5 +415,19 @@ describe('RenderApiJobErrorSchema', () => {
   it('rejects a payload missing the required message', () => {
     const result = RenderApiJobErrorSchema.safeParse({ code: 'VOICE_SYNTHESIS_FAILED', stage: 'synthesize' });
     expect(result.success).toBe(false);
+  });
+});
+
+describe('material review tools (US-023-601)', () => {
+  it('view_images documents brand:<key> and accepts it as a path', () => {
+    expect(STUDIO_TOOLS.view_images.description).toContain('brand:<key>');
+    expect(STUDIO_TOOLS.view_images.input.safeParse({ paths: ['brand:counter-15', 'raw/images/a.png'] }).success).toBe(true);
+  });
+
+  it('review_material takes items and gaps and nothing the studio stamps itself', () => {
+    const shape = (STUDIO_TOOLS.review_material.input as unknown as ZodObject).shape;
+
+    expect(Object.keys(shape).sort()).toEqual(['gaps', 'items']);
+    expect(STUDIO_TOOLS.review_material.input.safeParse({ items: [], gaps: [], version: 1 }).success).toBe(false);
   });
 });

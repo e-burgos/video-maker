@@ -13,6 +13,8 @@ export const STUDIO_TOOL_ERROR_CODES = [
   'MEDIA_SOURCE_UNAVAILABLE',
   'MEDIA_RESULT_UNKNOWN',
   'PROPOSAL_NOT_APPROVED',
+  'MATERIAL_NOT_REVIEWED',
+  'MATERIAL_NOT_VIEWED',
 ] as const;
 
 export type StudioToolErrorCode = (typeof STUDIO_TOOL_ERROR_CODES)[number];

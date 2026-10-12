@@ -1,4 +1,4 @@
-import type { ReferenceBrief } from '@video-maker/timeline-core';
+import type { MaterialReview, ReferenceBrief } from '@video-maker/timeline-core';
 
 export type RenderApiProjectMode = 'footage' | 'motion';
 
@@ -199,6 +199,9 @@ export interface RenderApiClient {
 
   getProposalState(): Promise<RenderApiProposalState | null>;
   putProposal(draft: Readonly<Record<string, unknown>>): Promise<{ readonly concepts: number }>;
+
+  getMaterialReview(): Promise<MaterialReview | null>;
+  putMaterialReview(draft: Readonly<Record<string, unknown>>): Promise<MaterialReview>;
 
   listMotionBrands(): Promise<readonly RenderApiMotionBrand[]>;
   getMotionBrief(): Promise<Readonly<Record<string, unknown>>>;

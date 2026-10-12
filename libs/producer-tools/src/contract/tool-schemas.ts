@@ -5,6 +5,7 @@ import {
   AudioMixPlanSchema,
   CaptionStyleSchema as TimelineCaptionStyleSchema,
   LogoOverlaySchema,
+  MaterialReviewDraftSchema,
   ProductionProposalDraftSchema,
   ReferenceBriefSchema,
   ReviewReportSchema,
@@ -546,6 +547,17 @@ const GetReferenceBriefOutputSchema = z.strictObject({
   brief: ReferenceBriefSchema.nullable(),
 });
 
+const ReviewMaterialInputSchema = MaterialReviewDraftSchema;
+
+const ReviewMaterialOutputSchema = z.strictObject({
+  saved: z.literal(true),
+  items: z.number().int().min(0),
+  fits: z.number().int().min(0),
+  doubtful: z.number().int().min(0),
+  unfit: z.number().int().min(0),
+  gaps: z.number().int().min(0),
+});
+
 const ProposeProductionInputSchema = ProductionProposalDraftSchema;
 
 const ProposeProductionOutputSchema = z.strictObject({
@@ -746,7 +758,9 @@ export const STUDIO_TOOLS: Readonly<Record<StudioToolName, StudioToolDefinition>
   },
   view_images: {
     description:
-      'Look at up to 6 photos already in the project and get them back as images. Use this to see a photo instead of extract_frames, which only works on video.',
+      'Look at up to 6 photos already in the project and get them back as images. Use this to see a photo instead of extract_frames, which only works on video. ' +
+      'Besides project paths (raw/images/x.png) it accepts brand:<key> to see a photo of the project brand (the keys come with their caption in the brand section of the project). ' +
+      'The studio records every image you actually looked at: review_material only accepts those.',
     input: ViewImagesInputSchema,
     output: ViewImagesOutputSchema,
   },
@@ -756,12 +770,23 @@ export const STUDIO_TOOLS: Readonly<Record<StudioToolName, StudioToolDefinition>
     input: GetRenderReviewInputSchema,
     output: GetRenderReviewOutputSchema,
   },
+  review_material: {
+    description:
+      'Record, with evidence, what the supplied material really is before you propose anything. `items` has one entry per image you looked at with view_images: ' +
+      '`file` (the project path, for example raw/images/x.png, or brand:<key>), `source` (project or brand), `shows` (what the image actually shows, one line), ' +
+      '`useFor` (the scene or role you would give it, optional), `verdict` (fits, doubtful or unfit) and `reason`. `gaps` lists what the idea needs and the material does not bring ' +
+      '(`need`, `note`); send [] when there is none. The studio refuses an image you did not view (MATERIAL_NOT_VIEWED). ' +
+      'propose_production fails with MATERIAL_NOT_REVIEWED until this review covers every project image.',
+    input: ReviewMaterialInputSchema,
+    output: ReviewMaterialOutputSchema,
+  },
   propose_production: {
     description:
       'Save the production proposal the user must approve before the first full render: 2 or 3 concepts, ' +
       'each with an id, title, angle, output format preset, durationSec, scenes, delivery contract ' +
       '({kind: tutorial, motion or short, ...}), and optionally voiceId, musicMode and notes, plus the ' +
-      'recommendedId. It replaces any earlier proposal and leaves it pending: only the user approves it, ' +
+      'recommendedId. It first requires review_material to cover every project image (MATERIAL_NOT_REVIEWED) and the studio copies the unfit and doubtful images and the gaps into the proposal as warnings. ' +
+      'It replaces any earlier proposal and leaves it pending: only the user approves it, ' +
       'in the studio. Time and cost estimates are computed by the studio, never by you.',
     input: ProposeProductionInputSchema,
     output: ProposeProductionOutputSchema,

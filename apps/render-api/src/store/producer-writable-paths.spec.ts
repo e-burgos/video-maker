@@ -157,6 +157,10 @@ describe('assertWritableProjectText', () => {
     );
   });
 
+  it.each(['work/producer/material-review.json', 'work/producer/viewed-images.json'])('rejects %s, whose evidence only the studio records', (path) => {
+    expect(() => assertWritableProjectText(path)).toThrow(expect.objectContaining({ code: 'PATH_NOT_WRITABLE' }));
+  });
+
   it('rejects a path directly under work/, outside work/producer/', () => {
     expect(() => assertWritableProjectText('work/timeline.json')).toThrow(
       expect.objectContaining({ code: 'PATH_NOT_WRITABLE' }),

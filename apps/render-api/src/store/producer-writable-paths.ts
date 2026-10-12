@@ -11,6 +11,7 @@ export const MAX_READABLE_PROJECT_TEXT_BYTES = 256 * 1024;
 const WRITABLE_TEXT_DIRECTORY = 'work/producer/';
 const WRITABLE_TEXT_EXACT_FILE = 'work/credits.json';
 const PROPOSAL_FILE = 'work/producer/proposal.json';
+const MATERIAL_EVIDENCE_FILES: readonly string[] = ['work/producer/material-review.json', 'work/producer/viewed-images.json'];
 
 export interface ResolvedProducerPath {
   readonly relativePath: string;
@@ -101,6 +102,15 @@ export function assertWritableProjectText(relativePath: string): void {
       stage: null,
       resource: relativePath,
       expected: 'the production proposal endpoints; its approval is never written as text',
+    });
+  }
+
+  if (MATERIAL_EVIDENCE_FILES.includes(relativePath)) {
+    throw new PipelineStageError({
+      code: 'PATH_NOT_WRITABLE',
+      stage: null,
+      resource: relativePath,
+      expected: 'view_images records what was viewed and review_material stores the review; neither is written as text',
     });
   }
 

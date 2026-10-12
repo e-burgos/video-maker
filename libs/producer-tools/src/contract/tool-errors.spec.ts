@@ -20,6 +20,8 @@ describe('STUDIO_TOOL_ERROR_CODES', () => {
         'MEDIA_SOURCE_UNAVAILABLE',
         'MEDIA_RESULT_UNKNOWN',
         'PROPOSAL_NOT_APPROVED',
+        'MATERIAL_NOT_REVIEWED',
+        'MATERIAL_NOT_VIEWED',
       ].sort(),
     );
   });

@@ -59,6 +59,8 @@ export const ROUTES = [
   { id: 'projects.voice.direction.put', method: 'PUT', pattern: '/projects/:slug/voice/direction' },
   { id: 'projects.proposal.get', method: 'GET', pattern: '/projects/:slug/proposal' },
   { id: 'projects.proposal.put', method: 'PUT', pattern: '/projects/:slug/proposal' },
+  { id: 'projects.material-review.get', method: 'GET', pattern: '/projects/:slug/material-review' },
+  { id: 'projects.material-review.put', method: 'PUT', pattern: '/projects/:slug/material-review' },
   { id: 'projects.proposal.approve', method: 'POST', pattern: '/projects/:slug/proposal/approve' },
   { id: 'projects.motion.brief.get', method: 'GET', pattern: '/projects/:slug/motion/brief' },
   { id: 'projects.motion.brief.put', method: 'PUT', pattern: '/projects/:slug/motion/brief' },

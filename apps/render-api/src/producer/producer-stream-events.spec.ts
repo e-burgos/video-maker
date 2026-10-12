@@ -58,6 +58,7 @@ describe('summarizeToolUse', () => {
     expect(summarizeToolUse('mcp__studio__get_timeline', {})).toBe('Checking the timeline');
     expect(summarizeToolUse('mcp__studio__put_timeline', { timeline: {} })).toBe('Saving the timeline');
     expect(summarizeToolUse('mcp__studio__import_music', { resultId: 'r1' })).toBe('Importing music');
+    expect(summarizeToolUse('mcp__studio__review_material', { items: [], gaps: [] })).toBe('Reviewing the supplied material');
   });
 
   it('nombra las secciones que patch_timeline va a reemplazar', () => {

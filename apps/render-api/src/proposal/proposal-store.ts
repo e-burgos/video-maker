@@ -1,7 +1,7 @@
 import { serializeMontageDocument, toAbsolutePath } from '@video-maker/auto-montage';
 import type { MediaProject } from '@video-maker/auto-montage';
 import { ProductionProposalDraftSchema, ProductionProposalSchema, pendingProposalFrom } from '@video-maker/timeline-core';
-import type { ProductionProposal } from '@video-maker/timeline-core';
+import type { MaterialWarnings, ProductionProposal } from '@video-maker/timeline-core';
 import { dirname } from 'node:path/posix';
 
 import type { RenderApiDependencies } from '../deps/render-api-dependencies';
@@ -21,12 +21,12 @@ function describeIssues(error: { readonly issues: readonly { readonly path: read
   return error.issues.map((issue) => `${issue.path.map(String).join('.')} ${issue.message}`).join('; ');
 }
 
-export function parsePendingProposal(value: unknown): ProductionProposal {
+export function parsePendingProposal(value: unknown, warnings?: MaterialWarnings): ProductionProposal {
   const parsed = ProductionProposalDraftSchema.safeParse(value);
   if (!parsed.success) {
     throw invalidProposal(`{ recommendedId, concepts: 2 to 3 concepts }: ${describeIssues(parsed.error)}`);
   }
-  return pendingProposalFrom(parsed.data);
+  return pendingProposalFrom(parsed.data, warnings);
 }
 
 export async function readProductionProposal(

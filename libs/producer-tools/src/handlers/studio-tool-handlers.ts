@@ -1,7 +1,7 @@
 import { z } from 'zod';
 
-import { TimelineSchema } from '@video-maker/timeline-core';
-import type { Timeline } from '@video-maker/timeline-core';
+import { TimelineSchema, canonicalMaterialPath } from '@video-maker/timeline-core';
+import type { MaterialReview, Timeline } from '@video-maker/timeline-core';
 
 import { PATCH_TIMELINE_SECTIONS, STUDIO_TOOLS } from '../contract/tool-schemas';
 import type { PatchTimelineInput, PatchTimelineSection } from '../contract/tool-schemas';
@@ -33,6 +33,29 @@ function isFullRender(job: StartJobRequest): boolean {
 
 function withoutSkipProposal(job: StartJobRequest): Record<string, unknown> {
   return Object.fromEntries(Object.entries(job).filter(([key]) => key !== 'skipProposal'));
+}
+
+function countVerdict(review: MaterialReview, verdict: 'fits' | 'doubtful' | 'unfit'): number {
+  return review.items.filter((item) => item.verdict === verdict).length;
+}
+
+const MATERIAL_HINT =
+  'view_images every image of the project (get_project_overview lists them) and every brand photo (brand:<key>) you plan to use, ' +
+  'then call review_material with what each one really shows and whether it fits the idea, and the gaps the idea has; then propose again.';
+
+async function assertMaterialReviewed(client: RenderApiClient): Promise<void> {
+  const [review, assets] = await Promise.all([client.getMaterialReview(), client.listProjectAssets()]);
+  if (review === null) {
+    throw new StudioToolRuntimeError('MATERIAL_NOT_REVIEWED', `this project has no material review yet: ${MATERIAL_HINT}`);
+  }
+  const reviewed = new Set(review.items.map((item) => canonicalMaterialPath(item.file)));
+  const missing = assets
+    .filter((asset) => asset.role === 'image')
+    .map((asset) => canonicalMaterialPath(asset.path))
+    .filter((path) => !reviewed.has(path));
+  if (missing.length > 0) {
+    throw new StudioToolRuntimeError('MATERIAL_NOT_REVIEWED', `the material review does not cover ${missing.join(', ')}: ${MATERIAL_HINT}`);
+  }
 }
 
 async function assertProposalApproved(client: RenderApiClient): Promise<void> {
@@ -419,8 +442,22 @@ export function createStudioToolHandlers(
       return withOutput('get_reference_brief', { references, brief: await readReferenceBriefOrExplain(client, input.name) });
     },
 
+    review_material: async (rawInput) => {
+      const draft = parseInput<Record<string, unknown>>(STUDIO_TOOLS.review_material.input, rawInput);
+      const review = await client.putMaterialReview(draft);
+      return withOutput('review_material', {
+        saved: true,
+        items: review.items.length,
+        fits: countVerdict(review, 'fits'),
+        doubtful: countVerdict(review, 'doubtful'),
+        unfit: countVerdict(review, 'unfit'),
+        gaps: review.gaps.length,
+      });
+    },
+
     propose_production: async (rawInput) => {
       const draft = parseInput<Record<string, unknown>>(STUDIO_TOOLS.propose_production.input, rawInput);
+      await assertMaterialReviewed(client);
       const saved = await client.putProposal(draft);
       return withOutput('propose_production', { saved: true, status: 'pending', concepts: saved.concepts });
     },

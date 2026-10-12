@@ -87,6 +87,7 @@ import {
   handlePostBrandPreview,
   handlePutBrandFile,
 } from './handlers/brands-handler';
+import { handleGetMaterialReview, handlePutMaterialReview } from './handlers/material-review-handler';
 import { handleApproveProposal, handleGetProposal, handlePutProposal } from './handlers/proposal-handler';
 import { handleGetVoiceDirection, handlePutVoiceDirection } from './handlers/voice-direction-handler';
 import { handleGetVoice, handlePutVoiceScene } from './handlers/voice-handler';
@@ -343,6 +344,10 @@ async function dispatchRoute(
         return await handleGetProposal(deps, store, params, runtime);
       case 'projects.proposal.put':
         return await handlePutProposal(deps, store, params, request, runtime);
+      case 'projects.material-review.get':
+        return await handleGetMaterialReview(deps, store, params);
+      case 'projects.material-review.put':
+        return await handlePutMaterialReview(deps, store, params, request);
       case 'projects.proposal.approve':
         return await handleApproveProposal(deps, store, params, request, runtime);
       case 'motion.brands.list':

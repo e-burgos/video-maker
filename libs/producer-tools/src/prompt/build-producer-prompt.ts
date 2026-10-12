@@ -63,9 +63,11 @@ const TOOL_DESCRIPTIONS: Readonly<Record<StudioToolName, string>> = {
   search_free_media:
     'search Wikimedia Commons and the NASA Image and Video Library for freely licensed B-roll video or photos by query and get back candidates.',
   import_media: "bring a searched free media result into the project; its credit is recorded automatically.",
-  view_images: 'look at up to 6 photos already in the project. Use this for photos, never extract_frames.',
+  view_images: 'look at up to 6 photos already in the project, or of the project brand as brand:<key>. Use this for photos, never extract_frames.',
   get_render_review:
     'read the automatic review of a finished render (status, master loudness, voice/music margin and the findings with their proposed fix); use it to propose fixes before publishing.',
+  review_material:
+    'record what each image you looked at really shows and whether it fits, plus the gaps of the material; propose_production refuses to run without it.',
   propose_production:
     'save the 2 or 3 approaches (concepts) the user must choose from and approve before the first full render. The studio adds the time and cost estimate; you never write one.',
   get_reference_brief:
@@ -203,6 +205,21 @@ function buildProducerCraftSection(): string {
     '   estimate a duration by eye — then extract_frames on three or four timestamps and look at them',
     '   before telling the user it is done.',
     '6. DELIVER. Say where each thing is (below) and offer two or three concrete next steps.',
+    '',
+    '## Material',
+    '',
+    'Before you propose, view_images every image supplied in the project and every brand photo you',
+    'intend to use (`brand:<key>`). Never choose a photo by its key or its caption alone: look at it.',
+    'Then call review_material with, for each image, what it really shows, the scene or role you would',
+    'give it and whether it fits (`fits`, `doubtful`, `unfit`) with the reason; propose_production',
+    'fails with MATERIAL_NOT_REVIEWED until that review covers every project image.',
+    'If any image is unfit or doubtful, or the idea needs a visual the material lacks (for example a',
+    'device connected to a TV that no photo shows), say so at the top of the proposal message, list it',
+    'under `gaps` and ask the user what to do before going on.',
+    'For devices of the brand prefer the `product` scene (the device with animated screens) over',
+    'cropped photos. Boxes or coordinates the user or the brief give are data: use them as given and',
+    'never estimate positions yourself. Never claim a check you did not run: if a tool says something',
+    'is missing, report the exact answer of the tool.',
     '',
     '## The production proposal and the sample',
     '',

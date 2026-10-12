@@ -32,7 +32,7 @@ describe('createStudioMcpServer', () => {
   });
 
   it('exposes propose_production with an object root schema the model can fill, and answers it', async () => {
-    const { client } = await connectedPair({ putProposal: async () => ({ concepts: 2 }) });
+    const { client } = await connectedPair({ getMaterialReview: async () => ({ version: 1, reviewedAt: '2026-10-12T10:00:00.000Z', items: [], gaps: [] }), listProjectAssets: async () => [], putProposal: async () => ({ concepts: 2 }) });
 
     const { tools } = await client.listTools();
     const tool = tools.find((candidate) => candidate.name === 'propose_production');
@@ -62,6 +62,43 @@ describe('createStudioMcpServer', () => {
     expect(tool?.inputSchema.type).toBe('object');
     expect(Object.keys(tool?.inputSchema.properties ?? {})).toEqual(['name']);
     expect(result.structuredContent).toEqual({ references: [], brief: null });
+  });
+
+  it('exposes review_material and answers the counts of the verdicts', async () => {
+    const review = {
+      version: 1 as const,
+      reviewedAt: '2026-10-12T10:00:00.000Z',
+      items: [{ file: 'brand:counter-15', source: 'brand' as const, shows: 'Un menu', verdict: 'unfit' as const, reason: 'No es un equipo' }],
+      gaps: [],
+    };
+    const { client } = await connectedPair({ putMaterialReview: async () => review });
+
+    const { tools } = await client.listTools();
+    const tool = tools.find((candidate) => candidate.name === 'review_material');
+    const result = await client.callTool({ name: 'review_material', arguments: { items: review.items, gaps: [] } });
+
+    expect(tool?.inputSchema.type).toBe('object');
+    expect(Object.keys(tool?.inputSchema.properties ?? {}).sort()).toEqual(['gaps', 'items']);
+    expect(result.structuredContent).toEqual({ saved: true, items: 1, fits: 0, doubtful: 0, unfit: 1, gaps: 0 });
+  });
+
+  it('answers propose_production without a material review as an isError MATERIAL_NOT_REVIEWED the model can read', async () => {
+    const { client } = await connectedPair({ getMaterialReview: async () => null, listProjectAssets: async () => [] });
+
+    const result = await client.callTool({
+      name: 'propose_production',
+      arguments: {
+        recommendedId: 'directo',
+        concepts: [
+          { id: 'directo', title: 'Directo', angle: 'Paso a paso', format: 'youtube-16x9', durationSec: 90, scenes: 8, delivery: { kind: 'tutorial' } },
+          { id: 'reel', title: 'Reel', angle: 'Un gesto', format: 'reels-9x16', durationSec: 30, scenes: 4, delivery: { kind: 'short' } },
+        ],
+      },
+    });
+
+    expect(result.isError).toBe(true);
+    const content = result.content as readonly { type: string; text?: string }[];
+    expect(JSON.parse(content[0]?.text ?? '')).toMatchObject({ code: 'MATERIAL_NOT_REVIEWED' });
   });
 
   it('answers a full render without an approved proposal as an isError PROPOSAL_NOT_APPROVED the model can read', async () => {
