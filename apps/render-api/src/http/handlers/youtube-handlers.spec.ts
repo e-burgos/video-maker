@@ -316,6 +316,7 @@ describe('GET /projects/:slug/publish/youtube/options', () => {
         { path: '/media/promo/out/short.mp4', contents: 'abc', modifiedAtMs: 2_000_000_000_000 },
         { path: '/media/promo/out/notes.txt', contents: 'n' },
         { path: '/media/promo/out/.hidden.mp4', contents: 'n' },
+        { path: '/media/promo/out/short.sample.mp4', contents: 'n' },
       ],
       assets: { '/media/promo/out/short.mp4': asset('short', 1080, 1920, 30_000) },
     });
@@ -542,6 +543,7 @@ describe('publish job creation', () => {
     expect(await code({ madeForKids: 'no' })).toBe('INVALID_INPUT');
     expect(await code({ file: 'raw/a.mp4' })).toBe('PUBLISH_FILE_INVALID');
     expect(await code({ file: 'out/missing.mp4' })).toBe('PUBLISH_FILE_INVALID');
+    expect(await code({ file: 'out/video.sample.mp4' })).toBe('PUBLISH_FILE_INVALID');
     expect(await code({ thumbnail: 'work/missing.png' })).toBe('PUBLISH_FILE_INVALID');
     expect(await code({ thumbnail: 'work/big.png' })).toBe('PUBLISH_FILE_INVALID');
     expect(await code({ thumbnail: 'work/a.bmp' })).toBe('PUBLISH_FILE_INVALID');

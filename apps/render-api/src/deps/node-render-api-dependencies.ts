@@ -498,7 +498,7 @@ export function createNodeRenderApiDependencies(
   };
 
   const deps: RenderApiDependencies = {
-    renderMutedVideo: async ({ timeline, outPath, publicDir, onProgress }) => {
+    renderMutedVideo: async ({ timeline, outPath, publicDir, sampleSeconds, onProgress }) => {
       const { renderTimeline } = await loadRender();
       const serveUrl =
         remotion.serveUrl === null ? null : await loadWritableRemotionServeUrl(remotion.serveUrl);
@@ -509,6 +509,7 @@ export function createNodeRenderApiDependencies(
         outPath,
         publicDir,
         audio: 'muted',
+        ...(sampleSeconds === undefined ? {} : { sampleSeconds }),
         ...(serveUrl === null ? {} : { serveUrl }),
         ...(remotion.browserExecutable === null ? {} : { browserExecutable: remotion.browserExecutable }),
         ...(onProgress === undefined ? {} : { onProgress }),

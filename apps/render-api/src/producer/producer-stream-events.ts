@@ -123,6 +123,8 @@ function summarizeStudioTool(tool: StudioToolName, input: Record<string, unknown
     }
     case 'get_render_review':
       return 'Reading the render review';
+    case 'propose_production':
+      return 'Saving the production proposal';
     case 'get_motion_brands':
       return 'Listing the available brands';
     case 'read_motion_brief':

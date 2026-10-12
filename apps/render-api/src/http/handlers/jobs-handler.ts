@@ -26,6 +26,7 @@ import { parseStoryboardInput, parseStoryboardOverwrite } from '../../jobs/story
 import { parseVoiceJobInput } from '../../jobs/voice-job-params';
 import { parsePublishJobInput } from '../../jobs/publish-job-params';
 import { parseReviewJobInput } from '../../jobs/review-job-params';
+import { parseSampleInput } from '../../jobs/sample-job-params';
 import { createProjectBrandResolver } from '../../brands/project-brand-resolver';
 import {
   assertPublishableThumbnail,
@@ -52,6 +53,7 @@ import type {
   JobKind,
   MotionPhase,
   RenderJobSummary,
+  SampleSpec,
 } from '../../jobs/render-job';
 import { toJobSummary } from '../../jobs/render-job';
 import {
@@ -116,9 +118,14 @@ async function createRenderJobResponse(
   slug: string,
   projectRoot: string,
   timeline: Timeline,
+  sample: SampleSpec | undefined,
   retryOf: string | null,
 ): Promise<HttpResponse> {
-  const job = registerJob(runtime, { kind: 'render', slug, projectRoot, timeline }, retryOf);
+  const job = registerJob(
+    runtime,
+    { kind: 'render', slug, projectRoot, timeline, ...(sample === undefined ? {} : { sample }) },
+    retryOf,
+  );
   return jobAcceptedResponse(job);
 }
 
@@ -241,6 +248,7 @@ interface MotionParams {
   readonly phase: MotionPhase;
   readonly output: string;
   readonly takes: number;
+  readonly sample?: SampleSpec;
 }
 
 async function assertMotionJobPreconditions(
@@ -251,6 +259,15 @@ async function assertMotionJobPreconditions(
   overwrite: boolean,
 ): Promise<void> {
   assertMotionProject(deps, slug);
+
+  if (params.sample !== undefined && params.phase === 'storyboard') {
+    throw new PipelineStageError({
+      code: 'MOTION_JOB_INPUT_INVALID',
+      stage: null,
+      resource: 'sample',
+      expected: "a sample needs phase 'video' or 'all': the storyboard phase renders no video",
+    });
+  }
 
   const exists = async (relativePath: string): Promise<boolean> =>
     (await deps.storage.stat(toAbsolutePath(project, relativePath))) !== null;
@@ -267,7 +284,7 @@ async function assertMotionJobPreconditions(
   if (params.phase !== 'video' && (await exists('motion/storyboard.json'))) {
     throw new PipelineStageError({ code: 'STORYBOARD_ALREADY_EXISTS', stage: null, resource: 'motion/storyboard.json' });
   }
-  if (params.phase !== 'storyboard' && (await exists(`out/${params.output}`))) {
+  if (params.phase !== 'storyboard' && params.sample === undefined && (await exists(`out/${params.output}`))) {
     throw new PipelineStageError({ code: 'ASSET_EXISTS', stage: null, resource: `out/${params.output}` });
   }
 }
@@ -387,12 +404,13 @@ export async function handleCreateRenderJob(
   assertValidProjectSlug(slug);
   const project = await resolveExistingProject(deps, store, slug);
 
-  if (jobKind === 'render') {
-    const timeline = await readStoredTimeline(deps, project);
-    return createRenderJobResponse(runtime, slug, project.root, timeline, null);
-  }
-
   const bodyObject = value as Record<string, unknown>;
+
+  if (jobKind === 'render') {
+    const sample = parseSampleInput(bodyObject.sample);
+    const timeline = await readStoredTimeline(deps, project);
+    return createRenderJobResponse(runtime, slug, project.root, timeline, sample, null);
+  }
 
   if (jobKind === 'storyboard') {
     const input = parseStoryboardInput(bodyObject);
@@ -433,12 +451,13 @@ export async function handleCreateRenderJob(
 
   if (jobKind === 'motion') {
     const input = parseMotionJobInput(bodyObject);
+    const sample = parseSampleInput(bodyObject.sample);
     return createMotionJobResponse(
       deps,
       project,
       runtime,
       slug,
-      { phase: input.phase, output: input.output, takes: input.takes },
+      { phase: input.phase, output: input.output, takes: input.takes, ...(sample === undefined ? {} : { sample }) },
       input.overwrite,
       null,
     );
@@ -592,7 +611,7 @@ export async function handleRetryRenderJob(
 
   switch (retryParams.kind) {
     case 'render':
-      return createRenderJobResponse(runtime, job.slug, project.root, retryParams.timeline, jobId);
+      return createRenderJobResponse(runtime, job.slug, project.root, retryParams.timeline, retryParams.sample, jobId);
     case 'montage':
       return createMontageJobResponse(deps, project, runtime, job.slug, retryParams, false, jobId);
     case 'storyboard':

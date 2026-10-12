@@ -11,9 +11,9 @@ import { previewFormat, previewPresetFor } from '../api/preview-format';
 import { useRenderApi } from '../api/render-api-context';
 import { renderJobDeliverableUrl } from '../api/render-job-artifact';
 import {
+  fullRenderJobsNewestFirst,
   groupAssetsByRole,
   latestSucceededJobOfKind,
-  succeededJobsOfKindNewestFirst,
 } from '../api/workspace-panel';
 import type { WorkspaceTabId } from '../api/workspace-panel';
 import { useAsyncResource } from '../hooks/use-async-resource';
@@ -26,7 +26,7 @@ import { Badge } from './ui/badge';
 import { Card } from './ui/card';
 import { TabPanel, Tabs } from './ui/tabs';
 import type { TabItem } from './ui/tabs';
-import type { AssetListing, ProjectDetail, RenderJobListing } from '../api/render-api-types';
+import type { AssetListing, GeneratedListing, ProjectDetail, RenderJobListing } from '../api/render-api-types';
 
 export type WorkspaceSidePanelProps = {
   slug: string;
@@ -34,6 +34,7 @@ export type WorkspaceSidePanelProps = {
   onTabChange: (tab: WorkspaceTabId) => void;
   assets: AsyncResource<AssetListing>;
   jobs: AsyncResource<RenderJobListing>;
+  generated?: GeneratedListing | null;
 };
 
 function MaterialThumbnail({ slug, path }: { slug: string; path: string }) {
@@ -62,10 +63,18 @@ function MaterialThumbnail({ slug, path }: { slug: string; path: string }) {
   );
 }
 
-function PreviewTab({ slug, jobs }: { slug: string; jobs: AsyncResource<RenderJobListing> }) {
+function PreviewTab({
+  slug,
+  jobs,
+  generated,
+}: {
+  slug: string;
+  jobs: AsyncResource<RenderJobListing>;
+  generated: GeneratedListing | null;
+}) {
   const client = useRenderApi();
   const t = useT();
-  const latestRender = latestSucceededJobOfKind(jobs.data, 'render');
+  const latestRender = fullRenderJobsNewestFirst(jobs.data, generated)[0] ?? null;
   const latestMontage = latestSucceededJobOfKind(jobs.data, 'montage');
 
   const project = useAsyncResource<ProjectDetail>(
@@ -186,7 +195,15 @@ function MaterialTab({ slug, assets }: { slug: string; assets: AsyncResource<Ass
   );
 }
 
-function DeliveriesTab({ slug, jobs }: { slug: string; jobs: AsyncResource<RenderJobListing> }) {
+function DeliveriesTab({
+  slug,
+  jobs,
+  generated,
+}: {
+  slug: string;
+  jobs: AsyncResource<RenderJobListing>;
+  generated: GeneratedListing | null;
+}) {
   const t = useT();
 
   if (jobs.status === 'loading') {
@@ -197,7 +214,7 @@ function DeliveriesTab({ slug, jobs }: { slug: string; jobs: AsyncResource<Rende
     return <ErrorNotice error={jobs.error} onRetry={jobs.reload} />;
   }
 
-  const deliveries = succeededJobsOfKindNewestFirst(jobs.data, 'render');
+  const deliveries = fullRenderJobsNewestFirst(jobs.data, generated);
 
   if (deliveries.length === 0) {
     return (
@@ -238,7 +255,14 @@ function DeliveriesTab({ slug, jobs }: { slug: string; jobs: AsyncResource<Rende
   );
 }
 
-export function WorkspaceSidePanel({ slug, activeTab, onTabChange, assets, jobs }: WorkspaceSidePanelProps) {
+export function WorkspaceSidePanel({
+  slug,
+  activeTab,
+  onTabChange,
+  assets,
+  jobs,
+  generated = null,
+}: WorkspaceSidePanelProps) {
   const t = useT();
   const tabs: readonly TabItem<WorkspaceTabId>[] = [
     { id: 'preview', label: t('workspace.tab.preview') },
@@ -251,13 +275,13 @@ export function WorkspaceSidePanel({ slug, activeTab, onTabChange, assets, jobs 
       <Tabs tabs={tabs} value={activeTab} onChange={onTabChange} idPrefix="workspace" />
 
       <TabPanel id="preview" value={activeTab} idPrefix="workspace">
-        <PreviewTab slug={slug} jobs={jobs} />
+        <PreviewTab slug={slug} jobs={jobs} generated={generated} />
       </TabPanel>
       <TabPanel id="material" value={activeTab} idPrefix="workspace">
         <MaterialTab slug={slug} assets={assets} />
       </TabPanel>
       <TabPanel id="deliveries" value={activeTab} idPrefix="workspace">
-        <DeliveriesTab slug={slug} jobs={jobs} />
+        <DeliveriesTab slug={slug} jobs={jobs} generated={generated} />
       </TabPanel>
     </Card>
   );

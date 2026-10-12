@@ -5,6 +5,7 @@ import {
   AudioMixPlanSchema,
   CaptionStyleSchema as TimelineCaptionStyleSchema,
   LogoOverlaySchema,
+  ProductionProposalDraftSchema,
   ReviewReportSchema,
   SafeZoneSchema,
   TimelineBumpersSchema,
@@ -90,8 +91,27 @@ const CaptionStyleSchema = TimelineCaptionStyleSchema;
 
 export const DEFAULT_PHOTO_AROLL_FPS = 30;
 
+export const MIN_SAMPLE_SECONDS = 8;
+export const MAX_SAMPLE_SECONDS = 20;
+
+const SampleSchema = z
+  .strictObject({
+    seconds: z.number().min(MIN_SAMPLE_SECONDS).max(MAX_SAMPLE_SECONDS),
+  })
+  .describe(
+    'Render only the first N seconds (8 to 20) to out/<name>.sample.mp4 instead of the whole video. A sample is never blocked by the proposal approval, is not reviewed and can never be published.',
+  );
+
+const SkipProposalSchema = z
+  .literal(true)
+  .describe(
+    'Only when the user explicitly asked, in this chat, to render without approving a proposal first. Never set it on your own.',
+  );
+
 const StartRenderJobSchema = z.strictObject({
   kind: z.literal('render'),
+  sample: SampleSchema.optional(),
+  skipProposal: SkipProposalSchema.optional(),
 });
 
 const StartMontageJobSchema = z
@@ -186,6 +206,8 @@ const StartMotionJobSchema = z.strictObject({
   output: z.string().min(1).optional(),
   takes: z.number().int().min(MIN_MOTION_TAKES).max(MAX_MOTION_TAKES).optional(),
   overwrite: z.boolean().optional(),
+  sample: SampleSchema.optional(),
+  skipProposal: SkipProposalSchema.optional(),
 });
 
 export const StartJobInputSchema = z.discriminatedUnion('kind', [
@@ -486,6 +508,14 @@ const GetRenderReviewOutputSchema = ReviewReportSchema.pick({
   findings: true,
 });
 
+const ProposeProductionInputSchema = ProductionProposalDraftSchema;
+
+const ProposeProductionOutputSchema = z.strictObject({
+  saved: z.literal(true),
+  status: z.literal('pending'),
+  concepts: z.number().int().min(2).max(3),
+});
+
 const GetMotionBrandsInputSchema = z.strictObject({});
 
 const GetMotionBrandsOutputSchema = z.strictObject({
@@ -609,7 +639,9 @@ export const STUDIO_TOOLS: Readonly<Record<StudioToolName, StudioToolDefinition>
       'wait_for_job. Pass the job under "job"; its "kind" — render, montage, storyboard, voice, ' +
       'photo-aroll or motion — picks the shape of the rest of the object. The motion kind (only in a ' +
       'motion project) takes phase "storyboard", "video" or "all" (default), an optional output file ' +
-      'name, takes 1 to 8 and overwrite.',
+      'name, takes 1 to 8 and overwrite. A full render (kind render, or motion with phase "video" or ' +
+      '"all") is refused with PROPOSAL_NOT_APPROVED until the user approves a production proposal; ' +
+      'render and motion also take sample {seconds: 8 to 20} for a short preview that is never blocked.',
     input: StartJobToolInputSchema,
     output: StartJobOutputSchema,
   },
@@ -684,6 +716,16 @@ export const STUDIO_TOOLS: Readonly<Record<StudioToolName, StudioToolDefinition>
       'Read the automatic review of a finished render: its status (pass, warn, fail), the key metrics (master LUFS and true peak, voice/music margin) and the findings by severity (critical, suggestion, nitpick), each with its time range and the proposed fix. Without `file` it returns the most recent review; with `file` (for example out/video.mp4) that render\'s. Fails with FILE_NOT_FOUND when the render was never reviewed.',
     input: GetRenderReviewInputSchema,
     output: GetRenderReviewOutputSchema,
+  },
+  propose_production: {
+    description:
+      'Save the production proposal the user must approve before the first full render: 2 or 3 concepts, ' +
+      'each with an id, title, angle, output format preset, durationSec, scenes, delivery contract ' +
+      '({kind: tutorial, motion or short, ...}), and optionally voiceId, musicMode and notes, plus the ' +
+      'recommendedId. It replaces any earlier proposal and leaves it pending: only the user approves it, ' +
+      'in the studio. Time and cost estimates are computed by the studio, never by you.',
+    input: ProposeProductionInputSchema,
+    output: ProposeProductionOutputSchema,
   },
   get_motion_brands: {
     description:

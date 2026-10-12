@@ -37,6 +37,7 @@ import type {
   VoiceJobProgress,
   VoiceJobReport,
 } from './render-job';
+import { isSampleSpec } from './sample-job-params';
 import { MOTION_PHASES, PUBLISH_PLATFORMS, PUBLISH_PRIVACIES, RENDER_JOB_STATES } from './render-job';
 
 export type StoredJobParams =
@@ -96,7 +97,7 @@ function isRenderJobState(value: string): value is RenderJobState {
 export function toStoredParams(input: CreateJobInput): StoredJobParams {
   switch (input.kind) {
     case 'render':
-      return { kind: 'render', timeline: input.timeline };
+      return { kind: 'render', timeline: input.timeline, ...(input.sample === undefined ? {} : { sample: input.sample }) };
     case 'montage':
       return {
         kind: 'montage',
@@ -125,7 +126,13 @@ export function toStoredParams(input: CreateJobInput): StoredJobParams {
     case 'photo-aroll':
       return { kind: 'photo-aroll', photos: input.photos, output: input.output, fps: input.fps };
     case 'motion':
-      return { kind: 'motion', phase: input.phase, output: input.output, takes: input.takes };
+      return {
+        kind: 'motion',
+        phase: input.phase,
+        output: input.output,
+        takes: input.takes,
+        ...(input.sample === undefined ? {} : { sample: input.sample }),
+      };
     case 'publish':
       return {
         kind: 'publish',
@@ -156,7 +163,10 @@ export function parseStoredParams(kind: JobKind, value: unknown): StoredJobParam
   switch (kind) {
     case 'render': {
       const result = TimelineSchema.safeParse(value.timeline);
-      return result.success ? { kind: 'render', timeline: result.data } : null;
+      if (!result.success || (value.sample !== undefined && !isSampleSpec(value.sample))) {
+        return null;
+      }
+      return { kind: 'render', timeline: result.data, ...(value.sample === undefined ? {} : { sample: { seconds: value.sample.seconds } }) };
     }
     case 'montage': {
       const { preset, seed, scriptPath, scriptText, logo, format, voice, captionStyle } = value;
@@ -225,7 +235,10 @@ export function parseStoredParams(kind: JobKind, value: unknown): StoredJobParam
       if (!isMotionPhase(phase) || typeof output !== 'string' || typeof takes !== 'number') {
         return null;
       }
-      return { kind: 'motion', phase, output, takes };
+      if (value.sample !== undefined && !isSampleSpec(value.sample)) {
+        return null;
+      }
+      return { kind: 'motion', phase, output, takes, ...(value.sample === undefined ? {} : { sample: { seconds: value.sample.seconds } }) };
     }
     case 'publish': {
       const { platform, file, title, description, tags, privacy, publishAt, playlistId, thumbnail, categoryId, madeForKids, defaultLanguage } = value;

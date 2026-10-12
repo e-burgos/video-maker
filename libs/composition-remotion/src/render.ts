@@ -38,6 +38,7 @@ export interface RenderTimelineOptions {
   publicDir?: string | null;
   serveUrl?: string;
   browserExecutable?: string;
+  sampleSeconds?: number;
   onProgress?: (renderedFrames: number, totalFrames: number) => void;
 }
 
@@ -94,6 +95,7 @@ export interface RenderTimelineDeps {
     outputLocation: string;
     concurrency: number;
     inputProps: TimelineInputProps;
+    frameRange?: readonly [number, number];
     browserExecutable?: string;
     onProgress?: (renderedFrames: number, totalFrames: number) => void;
   }): Promise<void>;
@@ -122,6 +124,7 @@ export const remotionRenderDeps: RenderTimelineDeps = {
     outputLocation,
     concurrency,
     inputProps,
+    frameRange,
     browserExecutable,
     onProgress,
   }) {
@@ -134,13 +137,31 @@ export const remotionRenderDeps: RenderTimelineDeps = {
       concurrency,
       inputProps,
       licenseKey: 'free-license',
+      ...(frameRange === undefined ? {} : { frameRange: [frameRange[0], frameRange[1]] as [number, number] }),
       ...(browserExecutable === undefined ? {} : { browserExecutable }),
       ...(onProgress === undefined
         ? {}
-        : { onProgress: (progress) => onProgress(progress.renderedFrames, composition.durationInFrames) }),
+        : {
+            onProgress: (progress) =>
+              onProgress(
+                progress.renderedFrames,
+                frameRange === undefined ? composition.durationInFrames : frameRange[1] - frameRange[0] + 1,
+              ),
+          }),
     });
   },
 };
+
+export function sampleFrameRange(
+  sampleSeconds: number | undefined,
+  composition: Pick<CompositionMetadata, 'fps' | 'durationInFrames'>,
+): readonly [number, number] | undefined {
+  if (sampleSeconds === undefined) {
+    return undefined;
+  }
+  const sampleFrames = Math.min(Math.round(sampleSeconds * composition.fps), composition.durationInFrames);
+  return sampleFrames >= composition.durationInFrames ? undefined : [0, sampleFrames - 1];
+}
 
 async function runStage<T>(code: RenderTimelineErrorCode, fn: () => Promise<T>): Promise<T> {
   try {
@@ -187,6 +208,8 @@ export async function renderTimeline(
     }),
   );
 
+  const frameRange = sampleFrameRange(options.sampleSeconds, composition);
+
   await runStage('RENDER_FAILED', () =>
     deps.renderTimelineMedia({
       composition,
@@ -195,6 +218,7 @@ export async function renderTimeline(
       outputLocation: options.outPath,
       concurrency,
       inputProps,
+      ...(frameRange === undefined ? {} : { frameRange }),
       ...(browserExecutable === undefined ? {} : { browserExecutable }),
       ...(options.onProgress === undefined ? {} : { onProgress: options.onProgress }),
     }),
@@ -206,6 +230,6 @@ export async function renderTimeline(
     width: composition.width,
     height: composition.height,
     fps: composition.fps,
-    durationInFrames: composition.durationInFrames,
+    durationInFrames: frameRange === undefined ? composition.durationInFrames : frameRange[1] + 1,
   };
 }

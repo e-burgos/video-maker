@@ -73,11 +73,23 @@ describe('buildProducerProjectSection', () => {
 describe('buildProducerPrompt — herramientas del estudio', () => {
   const prompt = buildProducerPrompt(CONTEXT);
 
-  it('nombra las 24 herramientas del contrato', () => {
-    expect(STUDIO_TOOL_NAMES).toHaveLength(24);
+  it('nombra las 25 herramientas del contrato', () => {
+    expect(STUDIO_TOOL_NAMES).toHaveLength(25);
     for (const tool of STUDIO_TOOL_NAMES) {
       expect(prompt).toContain(tool);
     }
+  });
+
+  it('exige proponer antes del primer render completo y esperar la aprobación (US-023-401, US-023-403)', () => {
+    expect(prompt).toContain('Before the first full render of a project, call propose_production with 2 or 3 concepts');
+    expect(prompt).toContain('PROPOSAL_NOT_APPROVED');
+    expect(prompt).toContain('never start a full render until');
+    expect(prompt).toContain('Never write time or cost');
+  });
+
+  it('ofrece la muestra y aclara que no se publica ni se revisa (US-023-404)', () => {
+    expect(prompt).toContain('"sample":{"seconds":10}');
+    expect(prompt).toContain('never be published');
   });
 
   it('dice que patch_timeline reemplaza secciones sin tocar los subtítulos', () => {

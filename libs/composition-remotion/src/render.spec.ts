@@ -6,6 +6,7 @@ import {
   RenderTimelineError,
   remotionRenderDeps,
   renderTimeline,
+  sampleFrameRange,
 } from './render';
 import type { CompositionMetadata, RenderTimelineDeps } from './render';
 
@@ -286,5 +287,48 @@ describe('renderTimeline', () => {
     const renderArgs = (deps.renderTimelineMedia as ReturnType<typeof vi.fn>).mock.calls[0]?.[0];
     expect(selectArgs).not.toHaveProperty('browserExecutable');
     expect(renderArgs).not.toHaveProperty('browserExecutable');
+  });
+});
+
+describe('sampleSeconds', () => {
+  it('renders only the first frames of the composition and reports them as the rendered duration', async () => {
+    const deps = createRecordingDeps();
+
+    const result = await renderTimeline(
+      buildExampleTimeline('reels-9x16'),
+      { outPath: 'out/example.sample.mp4', sampleSeconds: 8 },
+      deps,
+    );
+
+    expect(deps.renderTimelineMedia).toHaveBeenCalledWith(expect.objectContaining({ frameRange: [0, 239] }));
+    expect(result.durationInFrames).toBe(240);
+  });
+
+  it('renders the whole composition when it is not longer than the sample', async () => {
+    const deps = createRecordingDeps({ selectTimelineComposition: vi.fn(async () => fakeComposition({ durationInFrames: 150 })) });
+
+    const result = await renderTimeline(buildExampleTimeline('reels-9x16'), { outPath: 'out/e.mp4', sampleSeconds: 8 }, deps);
+
+    expect(deps.renderTimelineMedia).toHaveBeenCalledWith(expect.not.objectContaining({ frameRange: expect.anything() }));
+    expect(result.durationInFrames).toBe(150);
+  });
+
+  it('does not send a frame range without a sample', async () => {
+    const deps = createRecordingDeps();
+
+    await renderTimeline(buildExampleTimeline('reels-9x16'), { outPath: 'out/e.mp4' }, deps);
+
+    expect(deps.renderTimelineMedia).toHaveBeenCalledWith(expect.not.objectContaining({ frameRange: expect.anything() }));
+  });
+});
+
+describe('sampleFrameRange', () => {
+  it.each([
+    [undefined, 900, undefined],
+    [10, 900, [0, 299]],
+    [10, 300, undefined],
+    [10, 120, undefined],
+  ])('sample %s s over %s frames at 30 fps gives %j', (seconds, durationInFrames, expected) => {
+    expect(sampleFrameRange(seconds, { fps: 30, durationInFrames })).toEqual(expected);
   });
 });

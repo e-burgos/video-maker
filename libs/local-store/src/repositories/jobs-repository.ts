@@ -1,4 +1,4 @@
-import { desc, eq, inArray } from 'drizzle-orm';
+import { and, desc, eq, inArray } from 'drizzle-orm';
 import type { BetterSQLite3Database } from 'drizzle-orm/better-sqlite3';
 
 import { jobs } from '../schema/studio-schema';
@@ -145,6 +145,17 @@ export function createJobsRepository(db: BetterSQLite3Database<typeof schema>) {
       .map(toJobRecord);
   }
 
+  function listSucceededByKinds(kinds: readonly string[], limit: number): readonly JobRecord[] {
+    return db
+      .select()
+      .from(jobs)
+      .where(and(eq(jobs.state, 'succeeded'), inArray(jobs.kind, [...kinds])))
+      .orderBy(desc(jobs.finishedAt))
+      .limit(limit)
+      .all()
+      .map(toJobRecord);
+  }
+
   function markInterrupted(ids: readonly string[], errorPayload: unknown, finishedAt: string): void {
     db.transaction((tx) => {
       for (const id of ids) {
@@ -165,6 +176,7 @@ export function createJobsRepository(db: BetterSQLite3Database<typeof schema>) {
     get,
     listByProject,
     listUnfinished,
+    listSucceededByKinds,
     markInterrupted,
   };
 }

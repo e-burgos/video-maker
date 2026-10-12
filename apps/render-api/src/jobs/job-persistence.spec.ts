@@ -31,6 +31,26 @@ describe('toStoredParams / parseStoredParams', () => {
     expect(parsed).toEqual({ kind: 'render', timeline: TIMELINE });
   });
 
+  it('round-trips the sample of a render job and omits it when absent', () => {
+    const input: CreateJobInput = { kind: 'render', slug: 'demo-01', projectRoot: '/media/demo-01', timeline: TIMELINE, sample: { seconds: 12 } };
+
+    const stored = toStoredParams(input);
+
+    expect(stored).toEqual({ kind: 'render', timeline: TIMELINE, sample: { seconds: 12 } });
+    expect(parseStoredParams('render', JSON.parse(JSON.stringify(stored)))).toEqual(stored);
+    expect(toStoredParams({ ...input, sample: undefined })).not.toHaveProperty('sample');
+  });
+
+  it('round-trips the sample of a motion job and rejects one outside 8 to 20 seconds', () => {
+    const input: CreateJobInput = { kind: 'motion', slug: 'demo-01', projectRoot: '/media/demo-01', phase: 'video', output: 'video.mp4', takes: 5, sample: { seconds: 10 } };
+
+    const stored = toStoredParams(input);
+
+    expect(parseStoredParams('motion', JSON.parse(JSON.stringify(stored)))).toEqual(stored);
+    expect(parseStoredParams('motion', { ...stored, sample: { seconds: 60 } })).toBeNull();
+    expect(parseStoredParams('render', { kind: 'render', timeline: TIMELINE, sample: { seconds: 1 } })).toBeNull();
+  });
+
   it('round-trips a montage job', () => {
     const input: CreateJobInput = {
       kind: 'montage',

@@ -57,6 +57,7 @@ export { joinPath } from './pipeline/join-path';
 export { planProject } from './pipeline/plan-project';
 export type { MotionPipelinePorts, RenderRequest } from './pipeline/ports';
 export { renderProject } from './pipeline/render-project';
+export { truncateCompositionDuration } from './pipeline/sample-composition';
 export type { RenderProjectOptions } from './pipeline/render-project';
 export { voiceProject } from './pipeline/voice-project';
 export type { VoicedLine, VoiceProjectOptions, VoiceProjectResult } from './pipeline/voice-project';

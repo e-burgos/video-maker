@@ -87,6 +87,7 @@ import {
   handlePostBrandPreview,
   handlePutBrandFile,
 } from './handlers/brands-handler';
+import { handleApproveProposal, handleGetProposal, handlePutProposal } from './handlers/proposal-handler';
 import { handleGetVoiceDirection, handlePutVoiceDirection } from './handlers/voice-direction-handler';
 import { handleGetVoice, handlePutVoiceScene } from './handlers/voice-handler';
 import { handleGetVoicePreview } from './handlers/voice-preview-handler';
@@ -337,6 +338,12 @@ async function dispatchRoute(
         return await handleGetVoiceDirection(deps, store, params);
       case 'projects.voice.direction.put':
         return await handlePutVoiceDirection(deps, store, params, request);
+      case 'projects.proposal.get':
+        return await handleGetProposal(deps, store, params, runtime);
+      case 'projects.proposal.put':
+        return await handlePutProposal(deps, store, params, request, runtime);
+      case 'projects.proposal.approve':
+        return await handleApproveProposal(deps, store, params, request, runtime);
       case 'motion.brands.list':
         return await handleListMotionBrands(deps);
       case 'projects.motion.brief.get':

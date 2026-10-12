@@ -9,6 +9,7 @@ import type { PreviewPreset } from '../api/preview-format';
 import { useRenderApi } from '../api/render-api-context';
 import { BUMPER_EDGES, bumperSeconds } from '../api/timeline-edit/logo-bumpers';
 import {
+  canStartRender,
   initialTimelineEditState,
   timelineEditReducer,
 } from '../api/timeline-edit/timeline-edit-state';
@@ -26,6 +27,7 @@ import { OutputPresetSelector } from '../components/output-preset-selector';
 import { RenderJobList } from '../components/render-job-list';
 import { RenderJobPanel } from '../components/render-job-panel';
 import { RenderTrigger } from '../components/render-trigger';
+import { SampleTrigger } from '../components/sample-trigger';
 import { TimelineIssueList } from '../components/timeline-issue-list';
 import { TimelinePlayer } from '../components/timeline-player';
 import { TimelineSaveBar } from '../components/timeline-save-bar';
@@ -256,6 +258,7 @@ function StudioView({ slug, initialTimeline }: StudioViewProps) {
           {t('preview.section.render')}
         </h2>
         <RenderTrigger slug={slug} state={editState} onCreated={(job) => setSelectedJobId(job.id)} />
+        <SampleTrigger slug={slug} kind="render" disabled={!canStartRender(editState)} />
         <RenderJobList slug={slug} onSelect={setSelectedJobId} />
         <RenderJobPanel
           slug={slug}

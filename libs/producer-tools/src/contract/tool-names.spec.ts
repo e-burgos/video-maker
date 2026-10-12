@@ -3,8 +3,8 @@ import { describe, expect, it } from 'vitest';
 import { STUDIO_MCP_SERVER_NAME, STUDIO_TOOL_NAMES, claudeCodeToolName, isStudioToolName } from './tool-names';
 
 describe('STUDIO_TOOL_NAMES', () => {
-  it('has 24 unique tool names', () => {
-    expect(STUDIO_TOOL_NAMES.length).toBe(24);
+  it('has 25 unique tool names', () => {
+    expect(STUDIO_TOOL_NAMES.length).toBe(25);
     expect(new Set(STUDIO_TOOL_NAMES).size).toBe(STUDIO_TOOL_NAMES.length);
   });
 });

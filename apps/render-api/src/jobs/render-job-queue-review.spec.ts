@@ -104,6 +104,20 @@ describe('automatic review after a render', () => {
     });
   });
 
+  it('does not queue a review for a sample, rendered or motion', async () => {
+    vi.mocked(runMotionPipeline).mockResolvedValue({ path: 'out/motion.sample.mp4', durationSec: 10, scenes: 2, musicCredit: null, storyboard: null, sample: true });
+    const { deps } = harness(footageProjectFiles());
+    const queue = queueFor(deps);
+
+    queue.create({ kind: 'render', slug: 'demo', projectRoot: REVIEW_PROJECT_ROOT, timeline: buildMinimalTimeline(), sample: { seconds: 8 } });
+    queue.create({ kind: 'motion', slug: 'demo', projectRoot: REVIEW_PROJECT_ROOT, phase: 'video', output: 'motion.mp4', takes: 1, sample: { seconds: 8 } });
+    await queue.whenIdle();
+
+    const jobs = queue.listBySlug('demo');
+    expect(jobs.map((job) => job.kind).sort()).toEqual(['motion', 'render']);
+    expect(jobs.find((job) => job.kind === 'render')?.report).toMatchObject({ sample: true, deliverable: { resource: expect.stringMatching(/\.sample\.mp4$/u) } });
+  });
+
   it('does not queue a review for a motion job that only built the storyboard', async () => {
     vi.mocked(runMotionPipeline).mockResolvedValue({ path: null, durationSec: null, scenes: 2, musicCredit: null, storyboard: null });
     const { deps } = harness(motionProjectFiles(), 'motion');

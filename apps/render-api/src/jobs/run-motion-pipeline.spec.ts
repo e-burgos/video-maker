@@ -9,7 +9,7 @@ import { createCallLog } from '../__fixtures__/call-log';
 import { createFakeRenderApiDependencies } from '../__fixtures__/fake-render-api-dependencies';
 import { toErrorPayload } from '../errors/to-error-payload';
 
-const steps = vi.hoisted(() => ({ order: [] as string[], failAt: null as string | null, voiceOptions: null as Record<string, unknown> | null }));
+const steps = vi.hoisted(() => ({ order: [] as string[], failAt: null as string | null, voiceOptions: null as Record<string, unknown> | null, renderOptions: null as Record<string, unknown> | null }));
 const store = vi.hoisted(() => ({ files: new Map<string, string>(), copies: [] as string[][] }));
 
 vi.mock('@video-maker/motion-graphics', async (importOriginal) => {
@@ -44,7 +44,10 @@ vi.mock('@video-maker/motion-graphics', async (importOriginal) => {
     },
     planProject: step('planProject', { lines: [] }),
     composeProject: step('composeProject', { lines: [], scenes: 9, durationSec: 61.5 }),
-    renderProject: step('renderProject', { lines: [], outPath: '', creditsPath: null, musicCredit: '"Tema" Autor · CC BY 4.0' }),
+    renderProject: async (_ports: unknown, _dir: string, options: Record<string, unknown>) => {
+      steps.renderOptions = options;
+      return step('renderProject', { lines: [], outPath: '', creditsPath: null, musicCredit: '"Tema" Autor · CC BY 4.0' })();
+    },
   };
 });
 
@@ -112,6 +115,7 @@ beforeEach(() => {
   steps.order.length = 0;
   steps.failAt = null;
   steps.voiceOptions = null;
+  steps.renderOptions = null;
   store.files.clear();
   store.copies.length = 0;
   store.files.set('/media/promo/motion/brief.json', JSON.stringify(BRIEF));
@@ -194,6 +198,28 @@ describe('runMotionPipeline', () => {
     ]);
     expect(Object.keys(report).sort()).toEqual(REPORT_KEYS);
     expect(report).toEqual({ path: 'out/promo.mp4', durationSec: 61.5, scenes: 9, musicCredit: '"Tema" Autor · CC BY 4.0', storyboard: null });
+  });
+
+  it('renders a sample to out/<name>.sample.mp4, cut to the requested seconds, and flags the report', async () => {
+    const { deps, observer } = setup();
+
+    const report = await runMotionPipeline(
+      { project: PROJECT, phase: 'video', output: 'promo.mp4', takes: 3, sampleSeconds: 10 },
+      deps,
+      observer,
+    );
+
+    expect(steps.renderOptions).toMatchObject({ outPath: '/media/promo/out/promo.sample.mp4', sampleSeconds: 10 });
+    expect(report).toMatchObject({ path: 'out/promo.sample.mp4', sample: true, durationSec: 10 });
+  });
+
+  it('renders the full video without a sample key in the options or the report', async () => {
+    const { deps, observer } = setup();
+
+    const report = await runMotionPipeline({ project: PROJECT, phase: 'video', output: 'promo.mp4', takes: 3 }, deps, observer);
+
+    expect(steps.renderOptions).not.toHaveProperty('sampleSeconds');
+    expect(report).not.toHaveProperty('sample');
   });
 
   it('phase all chains the storyboard step and the video steps and reports the storyboard usage', async () => {

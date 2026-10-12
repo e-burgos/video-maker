@@ -155,6 +155,18 @@ const PUBLIC_VALUE_EXPORTS = [
   'findVoiceTrack',
   'isVoiceTrackStale',
   'upsertVoiceTrack',
+  'MAX_PROPOSAL_CONCEPTS',
+  'MAX_PROPOSAL_DURATION_SEC',
+  'MAX_PROPOSAL_SCENES',
+  'MIN_PROPOSAL_CONCEPTS',
+  'PRODUCTION_PROPOSAL_STATUSES',
+  'PRODUCTION_PROPOSAL_VERSION',
+  'PROPOSAL_MUSIC_MODES',
+  'ProductionProposalDraftSchema',
+  'ProductionProposalSchema',
+  'ProposalConceptSchema',
+  'approveProposalConcept',
+  'pendingProposalFrom',
 ].sort();
 
 const minimalTimeline: Timeline = {

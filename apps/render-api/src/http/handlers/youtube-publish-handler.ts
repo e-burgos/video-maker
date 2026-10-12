@@ -4,6 +4,7 @@ import type { MediaProject } from '@video-maker/auto-montage';
 import { join } from 'node:path/posix';
 
 import { createProjectBrandResolver } from '../../brands/project-brand-resolver';
+import { isSampleVideoName } from '../../jobs/sample-job-params';
 import type { StoreConfig } from '../../config/store-config';
 import type { RenderApiDependencies } from '../../deps/render-api-dependencies';
 import { PipelineStageError } from '../../errors/pipeline-stage-error';
@@ -86,7 +87,7 @@ async function probeVideo(deps: RenderApiDependencies, file: string, absolutePat
 
 async function listPublishFiles(deps: RenderApiDependencies, project: MediaProject): Promise<PublishFileOption[]> {
   const entries = (await deps.storage.listDirectory(project.outDir)) ?? [];
-  const candidates = entries.filter((entry) => entry.isFile && !entry.name.startsWith('.') && entry.name.endsWith('.mp4'));
+  const candidates = entries.filter((entry) => entry.isFile && !entry.name.startsWith('.') && entry.name.endsWith('.mp4') && !isSampleVideoName(entry.name));
   const files: (PublishFileOption & { readonly modifiedAtMs: number })[] = [];
 
   for (const entry of candidates) {

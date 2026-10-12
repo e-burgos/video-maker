@@ -143,6 +143,22 @@ describe('createJobsRepository', () => {
     }
   });
 
+  it('lists only succeeded jobs of the requested kinds, newest finish first, up to the limit', () => {
+    const repository = createJobsRepository(db);
+    const succeeded = (id: string, kind: string, finishedAt: string): void => {
+      repository.insert({ id, slug: 'video-a', kind, state: 'queued', params: {}, createdAt: id });
+      repository.updateState(id, 'succeeded', undefined, finishedAt);
+    };
+    succeeded('job-1', 'render', '2026-01-01T00:00:01.000Z');
+    succeeded('job-2', 'motion', '2026-01-01T00:00:03.000Z');
+    succeeded('job-3', 'render', '2026-01-01T00:00:02.000Z');
+    succeeded('job-4', 'voice', '2026-01-01T00:00:04.000Z');
+    repository.insert({ id: 'job-5', slug: 'video-a', kind: 'render', state: 'failed', params: {}, createdAt: 'e' });
+
+    expect(repository.listSucceededByKinds(['render', 'motion'], 10).map((job) => job.id)).toEqual(['job-2', 'job-3', 'job-1']);
+    expect(repository.listSucceededByKinds(['render', 'motion'], 2).map((job) => job.id)).toEqual(['job-2', 'job-3']);
+  });
+
   it('cascades job deletion when its project is removed', () => {
     const repository = createJobsRepository(db);
     repository.insert({ id: 'job-1', slug: 'video-a', kind: 'render', state: 'queued', params: {}, createdAt: 'a' });

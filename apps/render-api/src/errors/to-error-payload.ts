@@ -144,6 +144,7 @@ const MESSAGE_BY_CODE: Readonly<Record<RenderApiErrorCode, string>> = {
   REVIEW_INPUTS_UNAVAILABLE: 'The project is missing the timeline or the files needed to review this render.',
   REVIEW_NOT_FOUND: 'That render has no review yet.',
   RENDER_REVIEW_FAILED: 'The automatic review found critical problems in this render; fix them or publish with ignoreReview.',
+  PROPOSAL_NOT_FOUND: 'The project has no production proposal yet.',
 };
 
 export function toErrorPayload(value: unknown): RenderApiErrorPayload {

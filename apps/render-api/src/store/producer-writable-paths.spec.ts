@@ -151,6 +151,12 @@ describe('assertWritableProjectText', () => {
     );
   });
 
+  it('rejects the production proposal, whose approval only the proposal endpoints write', () => {
+    expect(() => assertWritableProjectText('work/producer/proposal.json')).toThrow(
+      expect.objectContaining({ code: 'PATH_NOT_WRITABLE' }),
+    );
+  });
+
   it('rejects a path directly under work/, outside work/producer/', () => {
     expect(() => assertWritableProjectText('work/timeline.json')).toThrow(
       expect.objectContaining({ code: 'PATH_NOT_WRITABLE' }),

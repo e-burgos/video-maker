@@ -1,0 +1,251 @@
+{
+  "$schema": "../../../../schemas/cycle-tasks.schema.json",
+  "spec": "spec-e-burgos-023-production-quality",
+  "cycle": 4,
+  "module": "production-quality",
+  "apps": [
+    "libs/producer-tools",
+    "apps/render-api",
+    "libs/composition-remotion",
+    "apps/web"
+  ],
+  "flow": "lite",
+  "user_stories_generated": true,
+  "prerequisites": {
+    "tasks_generated": true
+  },
+  "tasks": [
+    {
+      "id": "TASK-001",
+      "title": "Propuesta: modelo ProductionProposal (2–3 conceptos con ángulo, formato, duración, contrato de entrega, voz, modo de música y estimación) en work/producer/proposal.json, estimador de tiempo/costo a partir del historial de jobs y del motor del productor, endpoints GET/PUT y POST approve",
+      "user_stories": [
+        "US-023-401",
+        "US-023-402"
+      ],
+      "estimation_hours": 4,
+      "story_points": 8,
+      "depends_on": [],
+      "status": "done",
+      "files": [
+        "apps/render-api/src/errors/http-status-for.spec.ts",
+        "apps/render-api/src/errors/http-status-for.ts",
+        "apps/render-api/src/errors/render-api-error.ts",
+        "apps/render-api/src/errors/to-error-payload.ts",
+        "apps/render-api/src/http/handle-request.ts",
+        "apps/render-api/src/http/handlers/proposal-handler.spec.ts",
+        "apps/render-api/src/http/handlers/proposal-handler.ts",
+        "apps/render-api/src/http/routes.ts",
+        "apps/render-api/src/proposal/estimate-engine.ts",
+        "apps/render-api/src/proposal/estimate-production.spec.ts",
+        "apps/render-api/src/proposal/estimate-production.ts",
+        "apps/render-api/src/proposal/job-history.spec.ts",
+        "apps/render-api/src/proposal/job-history.ts",
+        "apps/render-api/src/proposal/proposal-paths.ts",
+        "apps/render-api/src/proposal/proposal-store.ts",
+        "apps/render-api/src/store/producer-writable-paths.spec.ts",
+        "apps/render-api/src/store/producer-writable-paths.ts",
+        "libs/local-store/src/repositories/jobs-repository.spec.ts",
+        "libs/local-store/src/repositories/jobs-repository.ts",
+        "libs/timeline-core/src/index.ts",
+        "libs/timeline-core/src/proposal/production-proposal.spec.ts",
+        "libs/timeline-core/src/proposal/production-proposal.ts",
+        "libs/timeline-core/src/schemas/schemas.spec.ts"
+      ],
+      "usage": {
+        "tokens_in": 260000,
+        "tokens_out": 40000,
+        "provider_model": "claude/sonnet",
+        "effort": "medium",
+        "agent": "implementor-back",
+        "approx": true,
+        "source": "declared-estimate",
+        "recorded_at": "2026-10-12"
+      }
+    },
+    {
+      "id": "TASK-002",
+      "title": "Productor: tool propose_production que escribe la propuesta, prompt que exige presentarla y esperar la aprobación antes del render completo, y bloqueo de start_job de render/motion completo sin propuesta aprobada (override explícito del dev)",
+      "user_stories": [
+        "US-023-401",
+        "US-023-403"
+      ],
+      "estimation_hours": 3,
+      "story_points": 5,
+      "depends_on": [
+        "TASK-001"
+      ],
+      "status": "done",
+      "files": [
+        "apps/render-api/src/producer/producer-stream-events.ts",
+        "libs/producer-tools/src/__fixtures__/fake-render-api-client.ts",
+        "libs/producer-tools/src/client/http-render-api-client.spec.ts",
+        "libs/producer-tools/src/client/http-render-api-client.ts",
+        "libs/producer-tools/src/client/render-api-client.ts",
+        "libs/producer-tools/src/contract/tool-errors.spec.ts",
+        "libs/producer-tools/src/contract/tool-errors.ts",
+        "libs/producer-tools/src/contract/tool-names.spec.ts",
+        "libs/producer-tools/src/contract/tool-names.ts",
+        "libs/producer-tools/src/contract/tool-schemas.spec.ts",
+        "libs/producer-tools/src/contract/tool-schemas.ts",
+        "libs/producer-tools/src/handlers/studio-tool-handlers.spec.ts",
+        "libs/producer-tools/src/handlers/studio-tool-handlers.ts",
+        "libs/producer-tools/src/mcp/studio-mcp-server.spec.ts",
+        "libs/producer-tools/src/prompt/build-producer-prompt.spec.ts",
+        "libs/producer-tools/src/prompt/build-producer-prompt.ts"
+      ],
+      "usage": {
+        "tokens_in": 180000,
+        "tokens_out": 30000,
+        "provider_model": "claude/sonnet",
+        "effort": "medium",
+        "agent": "implementor-back",
+        "approx": true,
+        "source": "declared-estimate",
+        "recorded_at": "2026-10-12"
+      }
+    },
+    {
+      "id": "TASK-003",
+      "title": "Muestra: render corto (primeros N s, 8–20) para material crudo y motion antes del render completo, marcado como muestra en out/ y excluido de publicar",
+      "user_stories": [
+        "US-023-404"
+      ],
+      "estimation_hours": 4,
+      "story_points": 5,
+      "depends_on": [],
+      "status": "done",
+      "files": [
+        "apps/render-api/src/deps/node-render-api-dependencies.ts",
+        "apps/render-api/src/deps/render-api-dependencies.ts",
+        "apps/render-api/src/http/handlers/jobs-handler.spec.ts",
+        "apps/render-api/src/http/handlers/jobs-handler.ts",
+        "apps/render-api/src/http/handlers/motion-handler.spec.ts",
+        "apps/render-api/src/http/handlers/motion-job.spec.ts",
+        "apps/render-api/src/http/handlers/youtube-handlers.spec.ts",
+        "apps/render-api/src/http/handlers/youtube-publish-handler.ts",
+        "apps/render-api/src/jobs/job-persistence.spec.ts",
+        "apps/render-api/src/jobs/job-persistence.ts",
+        "apps/render-api/src/jobs/render-job-queue-review.spec.ts",
+        "apps/render-api/src/jobs/render-job-queue.ts",
+        "apps/render-api/src/jobs/render-job.ts",
+        "apps/render-api/src/jobs/run-motion-pipeline.spec.ts",
+        "apps/render-api/src/jobs/run-motion-pipeline.ts",
+        "apps/render-api/src/jobs/sample-job-params.spec.ts",
+        "apps/render-api/src/jobs/sample-job-params.ts",
+        "apps/render-api/src/motion/read-motion-overview.ts",
+        "apps/render-api/src/pipeline/render-pipeline-paths.ts",
+        "apps/render-api/src/pipeline/run-render-pipeline.spec.ts",
+        "apps/render-api/src/pipeline/run-render-pipeline.ts",
+        "apps/render-api/src/youtube/publish-preconditions.ts",
+        "libs/composition-remotion/src/render.spec.ts",
+        "libs/composition-remotion/src/render.ts",
+        "libs/motion-graphics/src/index.ts",
+        "libs/motion-graphics/src/pipeline/plan-compose-render.spec.ts",
+        "libs/motion-graphics/src/pipeline/render-project.ts",
+        "libs/motion-graphics/src/pipeline/sample-composition.spec.ts",
+        "libs/motion-graphics/src/pipeline/sample-composition.ts"
+      ],
+      "usage": {
+        "tokens_in": 300000,
+        "tokens_out": 45000,
+        "provider_model": "claude/sonnet",
+        "effort": "medium",
+        "agent": "implementor-back",
+        "approx": true,
+        "source": "declared-estimate",
+        "recorded_at": "2026-10-12"
+      }
+    },
+    {
+      "id": "TASK-004",
+      "title": "Web: tarjeta Propuesta en el productor (conceptos con estimación, elegir y aprobar, generar muestra y verla) y estado de aprobación visible en el proyecto",
+      "user_stories": [
+        "US-023-402",
+        "US-023-404"
+      ],
+      "estimation_hours": 3,
+      "story_points": 5,
+      "depends_on": [
+        "TASK-001",
+        "TASK-003"
+      ],
+      "status": "done",
+      "files": [
+        "apps/web/src/api/__fixtures__/proposal.ts",
+        "apps/web/src/api/motion-types.ts",
+        "apps/web/src/api/parse-proposal.ts",
+        "apps/web/src/api/proposal-format.spec.ts",
+        "apps/web/src/api/proposal-format.ts",
+        "apps/web/src/api/proposal-types.ts",
+        "apps/web/src/api/render-api-client.spec.ts",
+        "apps/web/src/api/render-api-client.ts",
+        "apps/web/src/api/render-api-types.ts",
+        "apps/web/src/api/render-job-artifact.ts",
+        "apps/web/src/api/workspace-panel.spec.ts",
+        "apps/web/src/api/workspace-panel.ts",
+        "apps/web/src/components/generated-files-panel.spec.tsx",
+        "apps/web/src/components/generated-files-panel.tsx",
+        "apps/web/src/components/motion-preview-view.spec.tsx",
+        "apps/web/src/components/motion-preview-view.tsx",
+        "apps/web/src/components/producer-conversation-panel.spec.tsx",
+        "apps/web/src/components/producer-conversation-panel.tsx",
+        "apps/web/src/components/proposal-card.spec.tsx",
+        "apps/web/src/components/proposal-card.tsx",
+        "apps/web/src/components/proposal-status-badge.spec.tsx",
+        "apps/web/src/components/proposal-status-badge.tsx",
+        "apps/web/src/components/render-job-panel.tsx",
+        "apps/web/src/components/sample-trigger.spec.tsx",
+        "apps/web/src/components/sample-trigger.tsx",
+        "apps/web/src/components/workspace-side-panel.tsx",
+        "apps/web/src/hooks/use-producer-conversation.ts",
+        "apps/web/src/i18n/messages-en.ts",
+        "apps/web/src/i18n/messages-es.ts",
+        "apps/web/src/pages/project-preview-page.tsx",
+        "apps/web/src/pages/project-workspace-page.spec.tsx",
+        "apps/web/src/pages/project-workspace-page.tsx"
+      ],
+      "usage": {
+        "tokens_in": 330000,
+        "tokens_out": 50000,
+        "provider_model": "claude/sonnet",
+        "effort": "medium",
+        "agent": "implementor-front",
+        "approx": true,
+        "source": "declared-estimate",
+        "recorded_at": "2026-10-12"
+      }
+    },
+    {
+      "id": "TASK-005",
+      "title": "Verificación: propuesta escrita por el productor real (o a mano si la suscripción no está disponible), aprobación desde la web, muestra de un motion y de un tutorial, bloqueo sin aprobación",
+      "user_stories": [
+        "US-023-401",
+        "US-023-402",
+        "US-023-403",
+        "US-023-404"
+      ],
+      "estimation_hours": 2,
+      "story_points": 3,
+      "depends_on": [
+        "TASK-002",
+        "TASK-004"
+      ],
+      "status": "done",
+      "files": [
+        "sdd/specs/spec-e-burgos-023-production-quality/cycles/cycle-04/artifacts/verification.md",
+        "sdd/specs/spec-e-burgos-023-production-quality/cycles/cycle-04/artifacts/web-propuesta-aprobada.jpg",
+        "sdd/specs/spec-e-burgos-023-production-quality/cycles/cycle-04/artifacts/web-muestra-footage.jpg"
+      ],
+      "usage": {
+        "tokens_in": 90000,
+        "tokens_out": 12000,
+        "provider_model": "claude/opus",
+        "effort": "high",
+        "agent": "orchestrator",
+        "approx": true,
+        "source": "declared-estimate",
+        "recorded_at": "2026-10-12"
+      }
+    }
+  ]
+}

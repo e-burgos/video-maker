@@ -6,6 +6,7 @@ import { useRenderApi } from '../api/render-api-context';
 import { useAsyncResource } from '../hooks/use-async-resource';
 import { humanizeSlug } from '../api/humanize-slug';
 import { ProducerConversationPanel } from '../components/producer-conversation-panel';
+import { ProposalStatusBadge } from '../components/proposal-status-badge';
 import { Button } from '../components/ui/button';
 import { WorkspaceSidePanel } from '../components/workspace-side-panel';
 import { useAutoSwitchingTab } from '../hooks/use-auto-switching-tab';
@@ -34,6 +35,7 @@ export function ProjectWorkspacePage() {
       onTabChange={setActiveTab}
       assets={producer.assets}
       jobs={producer.jobs}
+      generated={producer.generated.data}
     />
   );
 
@@ -51,6 +53,7 @@ export function ProjectWorkspacePage() {
             <h1 className="text-2xl font-semibold tracking-tight text-ink">{humanizeSlug(slug)}</h1>
             <p className="font-mono text-xs text-ink-faint">{slug}</p>
           </div>
+          <ProposalStatusBadge proposal={producer.proposal.data?.proposal ?? null} />
         </div>
       </header>
 

@@ -30,6 +30,7 @@ export interface RenderMutedVideoInput {
   readonly timeline: Timeline;
   readonly outPath: string;
   readonly publicDir: string;
+  readonly sampleSeconds?: number;
   readonly onProgress?: RenderProgressListener;
 }
 

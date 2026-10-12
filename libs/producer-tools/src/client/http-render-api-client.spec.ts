@@ -303,6 +303,32 @@ describe('createHttpRenderApiClient', () => {
     await expect(client(missing.fetchImpl).getRenderReview('out/a.mp4')).rejects.toMatchObject({ code: 'FILE_NOT_FOUND' });
   });
 
+  it('getProposalState reads the state of the proposal, and null when there is none', async () => {
+    const approved = createFakeFetch(() => jsonResponse(200, { proposal: { status: 'approved', approvedConceptId: 'reel', concepts: [] }, estimates: {} }));
+    const none = createFakeFetch(() => jsonResponse(200, { proposal: null, estimates: {} }));
+
+    expect(await client(approved.fetchImpl).getProposalState()).toEqual({ status: 'approved', approvedConceptId: 'reel' });
+    expect(approved.calls[0]?.url).toBe('http://127.0.0.1:4599/projects/pitch-deck/proposal');
+    expect(await client(none.fetchImpl).getProposalState()).toBeNull();
+  });
+
+  it('putProposal PUTs the draft and answers how many concepts the studio stored', async () => {
+    const { fetchImpl, calls } = createFakeFetch(() => jsonResponse(200, { proposal: { status: 'pending', concepts: [{}, {}, {}] } }));
+
+    const saved = await client(fetchImpl).putProposal({ recommendedId: 'a', concepts: [] });
+
+    expect(saved).toEqual({ concepts: 3 });
+    expect(calls[0]?.init?.method).toBe('PUT');
+    expect(calls[0]?.url).toBe('http://127.0.0.1:4599/projects/pitch-deck/proposal');
+    expect(JSON.parse(String(calls[0]?.init?.body))).toEqual({ recommendedId: 'a', concepts: [] });
+  });
+
+  it('putProposal maps the studio INVALID_INPUT to the tool error with its detail', async () => {
+    const { fetchImpl } = createFakeFetch(() => errorResponse(422, 'INVALID_INPUT'));
+
+    await expect(client(fetchImpl).putProposal({})).rejects.toMatchObject({ code: 'INVALID_INPUT' });
+  });
+
   it('getMotionBrief and getMotionStoryboard read the project motion routes', async () => {
     const { fetchImpl, calls } = createFakeFetch(() => jsonResponse(200, { version: 1 }));
     const api = client(fetchImpl);

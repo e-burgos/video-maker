@@ -138,6 +138,11 @@ export interface RenderApiRenderReview {
   }[];
 }
 
+export interface RenderApiProposalState {
+  readonly status: 'pending' | 'approved';
+  readonly approvedConceptId?: string;
+}
+
 export interface RenderApiClient {
   getProjectDetail(): Promise<RenderApiProjectDetail>;
   listProjectAssets(): Promise<readonly RenderApiAssetEntry[]>;
@@ -174,6 +179,9 @@ export interface RenderApiClient {
   previewImages(paths: readonly string[]): Promise<readonly RenderApiImagePreview[]>;
 
   getRenderReview(file: string | undefined): Promise<RenderApiRenderReview | null>;
+
+  getProposalState(): Promise<RenderApiProposalState | null>;
+  putProposal(draft: Readonly<Record<string, unknown>>): Promise<{ readonly concepts: number }>;
 
   listMotionBrands(): Promise<readonly RenderApiMotionBrand[]>;
   getMotionBrief(): Promise<Readonly<Record<string, unknown>>>;

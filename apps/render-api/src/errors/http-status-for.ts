@@ -142,6 +142,7 @@ const STATUS_BY_CODE: Readonly<Record<RenderApiErrorCode, number>> = {
   REVIEW_INPUTS_UNAVAILABLE: 409,
   REVIEW_NOT_FOUND: 404,
   RENDER_REVIEW_FAILED: 409,
+  PROPOSAL_NOT_FOUND: 404,
 };
 
 export function httpStatusFor(code: RenderApiErrorCode): number {

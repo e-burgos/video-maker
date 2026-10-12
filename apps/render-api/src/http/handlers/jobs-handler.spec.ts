@@ -1445,3 +1445,65 @@ describe('handleRetryRenderJob', () => {
     ).rejects.toMatchObject({ code: 'TIMELINE_ALREADY_EXISTS' });
   });
 });
+
+describe('render sample (US-023-404)', () => {
+  function sampleHarness() {
+    const callLog = createCallLog();
+    const storage = createFakeObjectStorage(callLog, {
+      directories: [`${STORE.mediaRoot}/smoke-ingest`],
+      files: [{ path: `${STORE.mediaRoot}/smoke-ingest/work/timeline.json`, contents: JSON.stringify(buildMinimalTimeline()) }],
+    });
+    const deps = withProjects(callLog, { storage });
+    return { deps, runtime: createRenderApiRuntime(deps) };
+  }
+
+  function createWith(h: ReturnType<typeof sampleHarness>, body: unknown) {
+    return handleCreateRenderJob(
+      h.deps,
+      STORE,
+      { slug: 'smoke-ingest' },
+      requestLine({ method: 'POST', path: '/projects/smoke-ingest/jobs', body: toChunks([JSON.stringify(body)]) }),
+      h.runtime,
+    );
+  }
+
+  it('queues a render with the sample seconds, stores them and settles with a flagged report', async () => {
+    const h = sampleHarness();
+
+    const response = await createWith(h, { kind: 'render', sample: { seconds: 12 } });
+    await h.runtime.jobs.whenIdle();
+
+    const job = h.runtime.jobs.get((response.body as Job).id);
+    expect(h.deps.localStore.jobs.get((response.body as Job).id)?.params).toMatchObject({ kind: 'render', sample: { seconds: 12 } });
+    expect(job).toMatchObject({ state: 'succeeded', report: { sample: true } });
+  });
+
+  it('keeps the full render free of any sample', async () => {
+    const h = sampleHarness();
+
+    const response = await createWith(h, { kind: 'render' });
+    await h.runtime.jobs.whenIdle();
+
+    expect(h.deps.localStore.jobs.get((response.body as Job).id)?.params).not.toHaveProperty('sample');
+    expect(h.runtime.jobs.get((response.body as Job).id)?.report).not.toHaveProperty('sample');
+  });
+
+  it.each([[{ seconds: 3 }], [{ seconds: 30 }], ['ten']])('rejects the sample %j with INVALID_INPUT and registers no job', async (sample) => {
+    const h = sampleHarness();
+
+    await expect(createWith(h, { kind: 'render', sample })).rejects.toMatchObject({ code: 'INVALID_INPUT', resource: 'sample' });
+    expect(h.runtime.jobs.listBySlug('smoke-ingest')).toEqual([]);
+  });
+
+  it('retries a failed sample as a sample', async () => {
+    const h = sampleHarness();
+    const original = await createWith(h, { kind: 'render', sample: { seconds: 9 } });
+    await h.runtime.jobs.whenIdle();
+    h.deps.localStore.jobs.updateState((original.body as Job).id, 'failed', undefined, undefined, { code: 'RENDER_FAILED' });
+
+    const retry = await handleRetryRenderJob(h.deps, STORE, { jobId: (original.body as Job).id }, h.runtime);
+    await h.runtime.jobs.whenIdle();
+
+    expect(h.deps.localStore.jobs.get((retry.body as Job).id)?.params).toMatchObject({ sample: { seconds: 9 } });
+  });
+});
