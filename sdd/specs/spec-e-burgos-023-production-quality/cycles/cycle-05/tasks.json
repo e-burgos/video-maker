@@ -1,0 +1,97 @@
+{
+  "$schema": "../../../../schemas/cycle-tasks.schema.json",
+  "spec": "spec-e-burgos-023-production-quality",
+  "cycle": 5,
+  "module": "production-quality",
+  "apps": [
+    "libs/media-local",
+    "libs/timeline-core",
+    "libs/auto-montage",
+    "apps/render-api",
+    "libs/producer-tools",
+    "apps/web"
+  ],
+  "flow": "lite",
+  "user_stories_generated": true,
+  "prerequisites": {
+    "tasks_generated": true
+  },
+  "tasks": [
+    {
+      "id": "TASK-001",
+      "title": "Base: detectSceneCuts en media-local, ReferenceBrief en timeline-core y rol de asset reference en catálogo, ingesta y store (ignorado por el montaje)",
+      "user_stories": [
+        "US-023-501",
+        "US-023-502"
+      ],
+      "estimation_hours": 4,
+      "story_points": 5,
+      "depends_on": [],
+      "status": "pending",
+      "files": []
+    },
+    {
+      "id": "TASK-002",
+      "title": "render-api: job reference (probe, escenas, transcripción, cuadros clave, persist) y endpoints de lectura de briefs",
+      "user_stories": [
+        "US-023-502"
+      ],
+      "estimation_hours": 4,
+      "story_points": 8,
+      "depends_on": [
+        "TASK-001"
+      ],
+      "status": "pending",
+      "files": []
+    },
+    {
+      "id": "TASK-003",
+      "title": "Productor: tool get_reference_brief, start_job reference y prompt que propone a partir de la referencia",
+      "user_stories": [
+        "US-023-503"
+      ],
+      "estimation_hours": 2,
+      "story_points": 3,
+      "depends_on": [
+        "TASK-002"
+      ],
+      "status": "pending",
+      "files": []
+    },
+    {
+      "id": "TASK-004",
+      "title": "Web: rol reference en subida y bandeja, botón Analizar y panel del brief con escenas y cuadros clave",
+      "user_stories": [
+        "US-023-501",
+        "US-023-504"
+      ],
+      "estimation_hours": 3,
+      "story_points": 5,
+      "depends_on": [
+        "TASK-002"
+      ],
+      "status": "pending",
+      "files": []
+    },
+    {
+      "id": "TASK-005",
+      "title": "Verificación con un video real del estudio como referencia",
+      "user_stories": [
+        "US-023-501",
+        "US-023-502",
+        "US-023-503",
+        "US-023-504"
+      ],
+      "estimation_hours": 1,
+      "story_points": 3,
+      "depends_on": [
+        "TASK-003",
+        "TASK-004"
+      ],
+      "status": "pending",
+      "files": [
+        "sdd/specs/spec-e-burgos-023-production-quality/cycles/cycle-05/artifacts/verification.md"
+      ]
+    }
+  ]
+}
