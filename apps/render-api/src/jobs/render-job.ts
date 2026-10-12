@@ -1,6 +1,7 @@
 import type { LogoMode, MontagePresetName, VoiceSource } from '@video-maker/auto-montage';
 import type {
   CaptionStyle,
+  MusicMode,
   ReviewStatus,
   OutputPreset,
   StoryboardSource,
@@ -331,6 +332,8 @@ export interface CreateMontageJobInput {
   readonly format: OutputPreset;
   readonly voice: VoiceSource;
   readonly captionStyle: CaptionStyle | null;
+  readonly musicMode?: MusicMode;
+  readonly musicFloorDb?: number;
 }
 
 export interface CreateStoryboardJobInput {

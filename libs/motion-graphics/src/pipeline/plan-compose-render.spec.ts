@@ -38,6 +38,23 @@ describe('planProject', () => {
     expect(await levels({ file: 'tema.mp3', credit: 'Tema · CC BY 4.0', volume: 0.2 })).toBe(0.2);
   });
 
+  it("music.mode 'segments' plans the music by segments and 'bed' or no mode keeps the duck bed", async () => {
+    const plan = async (music: unknown) => {
+      const ports = createFakePipelinePorts({ files: projectFiles({ [`${P}/script.json`]: JSON.stringify({ ...script, music }) }) });
+      const { timeline } = await planProject(ports, P, { beatSync: true });
+      return timeline.musicAutomation;
+    };
+    const base = { file: 'tema.mp3', credit: 'Tema · CC BY 4.0' };
+    const bed = await plan(base);
+    expect(await plan({ ...base, mode: 'bed' })).toEqual(bed);
+    const segments = await plan({ ...base, mode: 'segments' });
+    expect(segments).not.toEqual(bed);
+    expect(Math.min(...segments.lanes[0].points.map((p) => p.v))).toBe(0);
+    expect(segments.lanes[0].points.some((p) => p.v === 0.0158)).toBe(true);
+    const customFloor = await plan({ ...base, mode: 'segments', floorDb: -20 });
+    expect(customFloor.lanes[0].points.some((p) => p.v === 0.05)).toBe(true);
+  });
+
   it('without music paces scenes on a silent grid and skips beats and trimming', async () => {
     const ports = createFakePipelinePorts({ files: projectFiles({ [`${P}/script.json`]: JSON.stringify({ ...script, music: null }) }) });
     const { lines } = await planProject(ports, P, { beatSync: true });

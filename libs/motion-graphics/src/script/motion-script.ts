@@ -1,3 +1,6 @@
+import { VoiceDirectionSchema } from '@video-maker/timeline-core';
+import type { MusicMode, VoiceDirection } from '@video-maker/timeline-core';
+
 import { MotionStudioError } from '../errors/motion-studio-error';
 
 export const DEFAULT_MUSIC_VOLUME = 0.5;
@@ -7,6 +10,7 @@ export interface MotionScene {
   vo: string;
   minBars: number;
   anchor: number | null;
+  direction?: VoiceDirection;
 }
 
 export interface MotionSfx {
@@ -19,7 +23,7 @@ export interface MotionSfx {
 export interface MotionScript {
   voice: string;
   lengthScale: number;
-  music: { file: string; credit: string; volume?: number } | null;
+  music: { file: string; credit: string; volume?: number; mode?: MusicMode; floorDb?: number } | null;
   noWhooshOn: string[];
   scenes: MotionScene[];
   sfx: MotionSfx[];
@@ -47,6 +51,13 @@ function asNumber(value: unknown, where: string, fallback: number | null = null)
   return value;
 }
 
+function parseDirection(raw: unknown, where: string): { direction?: VoiceDirection } {
+  if (raw === undefined) return {};
+  const parsed = VoiceDirectionSchema.safeParse(raw);
+  if (!parsed.success) fail(`${where} is not a valid voice direction: ${parsed.error.issues.map((issue) => issue.message).join('; ')}`);
+  return { direction: parsed.data };
+}
+
 function parseScene(raw: unknown, index: number): MotionScene {
   const scene = asRecord(raw, `scenes[${index}]`);
   const id = asString(scene['id'], `scenes[${index}].id`);
@@ -54,7 +65,13 @@ function parseScene(raw: unknown, index: number): MotionScene {
   const minBars = asNumber(scene['minBars'], `scenes[${index}].minBars`, 2);
   if (minBars <= 0) fail(`scenes[${index}].minBars must be positive`);
   const anchor = scene['anchor'] === undefined ? null : asNumber(scene['anchor'], `scenes[${index}].anchor`);
-  return { id, vo: asString(scene['vo'], `scenes[${index}].vo`), minBars, anchor };
+  return {
+    id,
+    vo: asString(scene['vo'], `scenes[${index}].vo`),
+    minBars,
+    anchor,
+    ...parseDirection(scene['direction'], `scenes[${index}].direction`),
+  };
 }
 
 function parseSfx(raw: unknown, index: number, sceneIds: Set<string>): MotionSfx {
@@ -66,6 +83,22 @@ function parseSfx(raw: unknown, index: number, sceneIds: Set<string>): MotionSfx
     scene,
     word: sfx['word'] === undefined ? null : asString(sfx['word'], `sfx[${index}].word`),
     offset: asNumber(sfx['offset'], `sfx[${index}].offset`, 0),
+  };
+}
+
+function parseMusicMode(raw: unknown): { mode?: MusicMode } {
+  if (raw === undefined) return {};
+  if (raw !== 'bed' && raw !== 'segments') fail('music.mode must be "bed" or "segments"');
+  return { mode: raw };
+}
+
+function parseMusic(music: Record<string, unknown>): NonNullable<MotionScript['music']> {
+  return {
+    file: asString(music['file'], 'music.file'),
+    credit: asString(music['credit'], 'music.credit'),
+    ...(music['volume'] === undefined ? {} : { volume: asNumber(music['volume'], 'music.volume', DEFAULT_MUSIC_VOLUME) }),
+    ...parseMusicMode(music['mode']),
+    ...(music['floorDb'] === undefined ? {} : { floorDb: asNumber(music['floorDb'], 'music.floorDb') }),
   };
 }
 
@@ -83,7 +116,7 @@ export function parseMotionScript(raw: unknown): MotionScript {
   return {
     voice: asString(script['voice'], 'voice'),
     lengthScale: asNumber(script['lengthScale'], 'lengthScale', 1),
-    music: music === null ? null : { file: asString(music['file'], 'music.file'), credit: asString(music['credit'], 'music.credit'), ...(music['volume'] === undefined ? {} : { volume: asNumber(music['volume'], 'music.volume', DEFAULT_MUSIC_VOLUME) }) },
+    music: music === null ? null : parseMusic(music),
     noWhooshOn: noWhooshOn as string[],
     scenes,
     sfx: rawSfx.map((entry, index) => parseSfx(entry, index, sceneIds)),

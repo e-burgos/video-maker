@@ -1,0 +1,219 @@
+{
+  "$schema": "../../../../schemas/cycle-tasks.schema.json",
+  "spec": "spec-e-burgos-023-production-quality",
+  "cycle": 3,
+  "module": "production-quality",
+  "apps": [
+    "libs/media-local",
+    "libs/motion-graphics",
+    "libs/auto-montage",
+    "libs/timeline-core",
+    "libs/producer-tools",
+    "apps/render-api",
+    "apps/web"
+  ],
+  "flow": "lite",
+  "user_stories_generated": true,
+  "prerequisites": {
+    "tasks_generated": true
+  },
+  "tasks": [
+    {
+      "id": "TASK-001",
+      "title": "Dirección de voz por frase: modelo VoiceDirection (intent, pace slow/normal/fast, energy calm/neutral/lively, pauseAfterMs, emphasis) en el guion motion (script.json) y en el manifiesto de voz por líneas de material crudo, y mapeo a Piper (lengthScale por frase, noise-scale/noise-w por energía, pausa añadida) en media-local",
+      "user_stories": [
+        "US-023-301"
+      ],
+      "estimation_hours": 5,
+      "story_points": 8,
+      "depends_on": [],
+      "status": "done",
+      "files": [
+        "apps/render-api/src/deps/motion-pipeline-adapters.ts",
+        "apps/render-api/src/deps/node-render-api-dependencies.ts",
+        "apps/render-api/src/deps/render-api-dependencies.ts",
+        "apps/render-api/src/http/handle-request.ts",
+        "apps/render-api/src/http/handlers/voice-direction-handler.spec.ts",
+        "apps/render-api/src/http/handlers/voice-direction-handler.ts",
+        "apps/render-api/src/http/routes.ts",
+        "apps/render-api/src/jobs/run-voice-script-pipeline.spec.ts",
+        "apps/render-api/src/jobs/run-voice-script-pipeline.ts",
+        "apps/render-api/src/voice/voice-direction-store.ts",
+        "apps/render-api/src/voice/voice-paths.ts",
+        "libs/media-local/src/ffmpeg/append-trailing-silence.ts",
+        "libs/media-local/src/index.ts",
+        "libs/media-local/src/tts/synthesize-speech.spec.ts",
+        "libs/media-local/src/tts/synthesize-speech.ts",
+        "libs/motion-graphics/src/compose/compose-storyboard.spec.ts",
+        "libs/motion-graphics/src/compose/compose-storyboard.ts",
+        "libs/motion-graphics/src/pipeline/__fixtures__/fake-pipeline-ports.ts",
+        "libs/motion-graphics/src/pipeline/ports.ts",
+        "libs/motion-graphics/src/pipeline/voice-project.spec.ts",
+        "libs/motion-graphics/src/pipeline/voice-project.ts",
+        "libs/motion-graphics/src/script/motion-script.spec.ts",
+        "libs/motion-graphics/src/script/motion-script.ts",
+        "libs/motion-graphics/src/storyboard/motion-storyboard.schema.ts",
+        "libs/motion-graphics/vite.config.ts",
+        "libs/timeline-core/src/index.ts",
+        "libs/timeline-core/src/schemas/schemas.spec.ts",
+        "libs/timeline-core/src/schemas/voice-script-manifest.schema.ts",
+        "libs/timeline-core/src/voice/voice-direction.spec.ts",
+        "libs/timeline-core/src/voice/voice-direction.ts",
+        "tools/motion-studio/src/deps/node-motion-dependencies.ts"
+      ],
+      "usage": {
+        "tokens_in": 150000,
+        "tokens_out": 25000,
+        "provider_model": "claude/sonnet",
+        "effort": "medium",
+        "agent": "implementor-back",
+        "approx": true,
+        "source": "declared-estimate",
+        "recorded_at": "2026-10-11"
+      }
+    },
+    {
+      "id": "TASK-002",
+      "title": "El productor escribe la dirección: storyboard motion y guion de tutoriales con dirección por frase validada; prompt y schema del productor y del storyboard automático; la dirección se ve y se edita en la web (voz)",
+      "user_stories": [
+        "US-023-302"
+      ],
+      "estimation_hours": 4,
+      "story_points": 5,
+      "depends_on": [
+        "TASK-001"
+      ],
+      "status": "done",
+      "files": [
+        "apps/render-api/src/http/handlers/project-text-handler.spec.ts",
+        "apps/render-api/src/http/handlers/project-text-handler.ts",
+        "apps/web/src/api/__fixtures__/voice.ts",
+        "apps/web/src/api/motion-storyboard-draft.ts",
+        "apps/web/src/api/motion-types.ts",
+        "apps/web/src/api/music-mode.spec.ts",
+        "apps/web/src/api/music-mode.ts",
+        "apps/web/src/api/render-api-client.spec.ts",
+        "apps/web/src/api/render-api-client.ts",
+        "apps/web/src/api/voice-direction-i18n.ts",
+        "apps/web/src/api/voice-direction.spec.ts",
+        "apps/web/src/api/voice-direction.ts",
+        "apps/web/src/components/montage-trigger.spec.tsx",
+        "apps/web/src/components/montage-trigger.tsx",
+        "apps/web/src/components/motion-storyboard-view.spec.tsx",
+        "apps/web/src/components/motion-storyboard-view.tsx",
+        "apps/web/src/components/music-mode-fields.tsx",
+        "apps/web/src/components/voice-direction-editor.spec.tsx",
+        "apps/web/src/components/voice-direction-editor.tsx",
+        "apps/web/src/components/voice-script-panel.tsx",
+        "apps/web/src/components/voice-script-section.tsx",
+        "apps/web/src/hooks/use-motion-storyboard-draft.ts",
+        "apps/web/src/i18n/messages-en.ts",
+        "apps/web/src/i18n/messages-es.ts",
+        "apps/web/src/pages/voice-page.spec.tsx",
+        "apps/web/src/pages/voice-page.tsx",
+        "libs/motion-graphics/src/auto/build-auto-storyboard-request.spec.ts",
+        "libs/motion-graphics/src/auto/build-auto-storyboard-request.ts",
+        "libs/motion-graphics/src/storyboard/motion-storyboard.schema.ts",
+        "libs/motion-graphics/src/storyboard/parse-motion-storyboard.spec.ts",
+        "libs/producer-tools/src/prompt/build-producer-prompt.spec.ts",
+        "libs/producer-tools/src/prompt/build-producer-prompt.ts"
+      ],
+      "usage": {
+        "tokens_in": 220000,
+        "tokens_out": 45000,
+        "provider_model": "claude/sonnet",
+        "effort": "medium",
+        "agent": "implementor-front",
+        "approx": true,
+        "source": "declared-estimate",
+        "recorded_at": "2026-10-11"
+      }
+    },
+    {
+      "id": "TASK-003",
+      "title": "Música por tramos: modo music 'segments' (la música suena en intro, cierre y huecos sin voz de más de N s, con fundidos, y baja a silencio o a un piso bajo durante la voz) en la automatización motion y en el montaje de material crudo; el modo actual 'bed' sigue por defecto",
+      "user_stories": [
+        "US-023-303"
+      ],
+      "estimation_hours": 4,
+      "story_points": 8,
+      "depends_on": [],
+      "status": "done",
+      "files": [
+        "apps/render-api/src/http/handlers/jobs-handler.spec.ts",
+        "apps/render-api/src/http/handlers/jobs-handler.ts",
+        "apps/render-api/src/jobs/job-persistence.spec.ts",
+        "apps/render-api/src/jobs/job-persistence.ts",
+        "apps/render-api/src/jobs/montage-job-params.spec.ts",
+        "apps/render-api/src/jobs/montage-job-params.ts",
+        "apps/render-api/src/jobs/render-job-queue.ts",
+        "apps/render-api/src/jobs/render-job.ts",
+        "apps/render-api/src/jobs/run-montage-pipeline.ts",
+        "libs/auto-montage/src/auto-montage.spec.ts",
+        "libs/auto-montage/src/auto-montage.ts",
+        "libs/motion-graphics/src/compose/compose-storyboard.spec.ts",
+        "libs/motion-graphics/src/compose/compose-storyboard.ts",
+        "libs/motion-graphics/src/index.ts",
+        "libs/motion-graphics/src/pipeline/plan-compose-render.spec.ts",
+        "libs/motion-graphics/src/pipeline/plan-project.ts",
+        "libs/motion-graphics/src/script/motion-script.spec.ts",
+        "libs/motion-graphics/src/script/motion-script.ts",
+        "libs/motion-graphics/src/storyboard/motion-storyboard.schema.ts",
+        "libs/motion-graphics/src/timeline/build-duck-automation.ts",
+        "libs/motion-graphics/src/timeline/build-segmented-automation.spec.ts",
+        "libs/motion-graphics/src/timeline/build-segmented-automation.ts",
+        "libs/motion-graphics/src/timeline/normalize-automation-points.ts",
+        "libs/producer-tools/src/contract/tool-schemas.spec.ts",
+        "libs/producer-tools/src/contract/tool-schemas.ts",
+        "libs/timeline-core/schemas/audio-mix-plan.schema.json",
+        "libs/timeline-core/src/ducking/plan-ducking.ts",
+        "libs/timeline-core/src/ducking/plan-segmented-music.spec.ts",
+        "libs/timeline-core/src/ducking/plan-segmented-music.ts",
+        "libs/timeline-core/src/index.ts",
+        "libs/timeline-core/src/schemas/audio-mix-plan.schema.ts",
+        "libs/timeline-core/src/schemas/schemas.spec.ts",
+        "libs/timeline-core/src/timeline/build-timeline.spec.ts",
+        "libs/timeline-core/src/timeline/build-timeline.ts"
+      ],
+      "usage": {
+        "tokens_in": 110000,
+        "tokens_out": 20000,
+        "provider_model": "claude/sonnet",
+        "effort": "medium",
+        "agent": "implementor-back",
+        "approx": true,
+        "source": "declared-estimate",
+        "recorded_at": "2026-10-11"
+      }
+    },
+    {
+      "id": "TASK-004",
+      "title": "Verificación: re-render de un motion y de un tutorial con dirección de voz y música por tramos; comparación A/B de la voz, job review sin críticos y cuadros/espectro revisados",
+      "user_stories": [
+        "US-023-301",
+        "US-023-302",
+        "US-023-303"
+      ],
+      "estimation_hours": 2,
+      "story_points": 3,
+      "depends_on": [
+        "TASK-002",
+        "TASK-003"
+      ],
+      "status": "done",
+      "files": [
+        "sdd/specs/spec-e-burgos-023-production-quality/cycles/cycle-03/artifacts/verification.md"
+      ],
+      "usage": {
+        "provider_model": "claude/opus",
+        "effort": "high",
+        "agent": "orchestrator",
+        "tokens_in": 60000,
+        "tokens_out": 10000,
+        "approx": true,
+        "source": "declared-estimate",
+        "recorded_at": "2026-10-12"
+      }
+    }
+  ]
+}

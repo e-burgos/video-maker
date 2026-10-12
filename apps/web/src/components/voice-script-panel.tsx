@@ -1,4 +1,5 @@
-import type { VoiceScriptManifest } from '@video-maker/timeline-core';
+import type { ReactNode } from 'react';
+import type { VoiceScriptLine, VoiceScriptManifest } from '@video-maker/timeline-core';
 
 import { artifactUrl } from '../api/artifact-url';
 import {
@@ -13,9 +14,10 @@ import { useT } from '../i18n/language-context';
 export type VoiceScriptPanelProps = {
   slug: string;
   manifest: VoiceScriptManifest;
+  renderLineExtra?: (line: VoiceScriptLine) => ReactNode;
 };
 
-export function VoiceScriptPanel({ slug, manifest }: VoiceScriptPanelProps) {
+export function VoiceScriptPanel({ slug, manifest, renderLineExtra }: VoiceScriptPanelProps) {
   const t = useT();
 
   return (
@@ -71,6 +73,7 @@ export function VoiceScriptPanel({ slug, manifest }: VoiceScriptPanelProps) {
                 {t('voice.script.overflow', { ms: overflowOf(line) })}
               </p>
             )}
+            {renderLineExtra?.(line)}
           </li>
         ))}
       </ul>

@@ -114,6 +114,13 @@ describe('StartJobInputSchema', () => {
     expect(result.success).toBe(true);
   });
 
+  it('accepts music by segments with a custom floor and rejects a floor without segments', () => {
+    expect(StartJobInputSchema.safeParse({ kind: 'montage', musicMode: 'segments', musicFloorDb: -24 }).success).toBe(true);
+    expect(StartJobInputSchema.safeParse({ kind: 'montage', musicFloorDb: -24 }).success).toBe(false);
+    expect(StartJobInputSchema.safeParse({ kind: 'montage', musicMode: 'loud' }).success).toBe(false);
+    expect(StartJobInputSchema.safeParse({ kind: 'montage', musicMode: 'segments', musicFloorDb: -90 }).success).toBe(false);
+  });
+
   it('rejects a montage job with both scriptPath and scriptText', () => {
     const result = StartJobInputSchema.safeParse({
       kind: 'montage',

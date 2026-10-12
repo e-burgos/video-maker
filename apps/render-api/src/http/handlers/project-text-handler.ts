@@ -3,6 +3,8 @@ import { dirname } from 'node:path/posix';
 import type { StoreConfig } from '../../config/store-config';
 import type { RenderApiDependencies } from '../../deps/render-api-dependencies';
 import { PipelineStageError } from '../../errors/pipeline-stage-error';
+import { parseVoiceDirections } from '../../voice/voice-direction-store';
+import { voiceDirectionPath } from '../../voice/voice-paths';
 import { assertValidProjectSlug, resolveExistingProject } from '../../store/project-scope';
 import {
   MAX_READABLE_PROJECT_TEXT_BYTES,
@@ -81,6 +83,20 @@ function parsePutProjectTextBody(value: unknown): PutProjectTextRequestBody {
   return { path, content };
 }
 
+function assertValidVoiceDirectionDocument(relativePath: string, content: string): void {
+  if (relativePath !== voiceDirectionPath()) {
+    return;
+  }
+
+  let parsed: unknown;
+  try {
+    parsed = JSON.parse(content);
+  } catch {
+    throw invalidInput(relativePath, 'valid JSON keyed by script line number');
+  }
+  parseVoiceDirections(parsed);
+}
+
 export async function handlePutProjectText(
   deps: RenderApiDependencies,
   store: StoreConfig,
@@ -96,6 +112,7 @@ export async function handlePutProjectText(
   const project = await resolveExistingProject(deps, store, slug);
   const resolved = await resolveProducerPath(deps.storage, project, path);
   assertWritableProjectText(resolved.relativePath);
+  assertValidVoiceDirectionDocument(resolved.relativePath, content);
 
   await deps.storage.ensureDirectory(dirname(resolved.absolutePath));
   await deps.storage.writeTextFile(resolved.absolutePath, content);

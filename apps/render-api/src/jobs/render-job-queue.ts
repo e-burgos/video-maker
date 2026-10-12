@@ -1,6 +1,6 @@
 import { resolveMediaProject } from '@video-maker/auto-montage';
 import type { LogoMode, MontagePresetName, VoiceSource } from '@video-maker/auto-montage';
-import type { CaptionStyle, OutputPreset, Timeline } from '@video-maker/timeline-core';
+import type { CaptionStyle, MusicMode, OutputPreset, Timeline } from '@video-maker/timeline-core';
 
 import type { RenderApiDependencies } from '../deps/render-api-dependencies';
 import type { RenderApiErrorPayload } from '../errors/render-api-error';
@@ -144,6 +144,8 @@ interface MontageJobRecord extends JobRecordBase {
   readonly format: OutputPreset;
   readonly voice: VoiceSource;
   readonly captionStyle: CaptionStyle | null;
+  readonly musicMode?: MusicMode;
+  readonly musicFloorDb?: number;
   progress: MontageJobProgress | null;
   report: MontageJobReport | null;
 }
@@ -338,6 +340,8 @@ export function createRenderJobQueue(
           format: record.format,
           voice: record.voice,
           captionStyle: record.captionStyle,
+          ...(record.musicMode === undefined ? {} : { musicMode: record.musicMode }),
+          ...(record.musicFloorDb === undefined ? {} : { musicFloorDb: record.musicFloorDb }),
           brand: await resolveProjectBrand(record.slug),
         },
         deps,
@@ -682,6 +686,8 @@ export function createRenderJobQueue(
           format: input.format,
           voice: input.voice,
           captionStyle: input.captionStyle,
+          ...(input.musicMode === undefined ? {} : { musicMode: input.musicMode }),
+          ...(input.musicFloorDb === undefined ? {} : { musicFloorDb: input.musicFloorDb }),
           progress: null,
           report: null,
         };

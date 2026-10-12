@@ -59,6 +59,14 @@
           "type": "integer",
           "minimum": -9007199254740991,
           "maximum": 9007199254740991
+        },
+        "mode": {
+          "description": "segments: music plays full in the intro, the outro and the voice-free gaps of 2 s or more and drops to duckedGainDb while someone speaks; absent means the continuous bed.",
+          "type": "string",
+          "enum": [
+            "bed",
+            "segments"
+          ]
         }
       },
       "required": [

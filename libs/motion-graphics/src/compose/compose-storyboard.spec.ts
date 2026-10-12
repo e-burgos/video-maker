@@ -42,6 +42,20 @@ describe('composeStoryboard', () => {
     expect(template).not.toContain('{{music_credit}}');
   });
 
+  it('carries the music mode and floor into the script and omits them for the default bed', () => {
+    const { script: bed } = composeStoryboard(base, testBrand);
+    expect(bed.music).not.toHaveProperty('mode');
+    const { script: segmented } = composeStoryboard({ ...base, music: { ...(base.music as object), mode: 'segments', floorDb: -24 } as NonNullable<typeof base.music> }, testBrand);
+    expect(segmented.music).toMatchObject({ mode: 'segments', floorDb: -24 });
+  });
+
+  it('carries the scene voice direction into the script and leaves undirected scenes untouched', () => {
+    const directedBase = { ...base, scenes: base.scenes.map((scene, index) => (index === 0 ? { ...scene, direction: { pace: 'slow' as const, pauseAfterMs: 300 } } : scene)) };
+    const { script } = composeStoryboard(directedBase, testBrand);
+    expect(script.scenes[0]?.direction).toEqual({ pace: 'slow', pauseAfterMs: 300 });
+    expect(script.scenes[1]).not.toHaveProperty('direction');
+  });
+
   it('builds the script with the brand voice, default bars and the drop anchor from the track', () => {
     const { script, musicSource } = composeStoryboard(base, testBrand);
     expect(script.voice).toBe('es_AR-daniela-high');

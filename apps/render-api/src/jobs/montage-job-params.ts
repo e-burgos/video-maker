@@ -1,7 +1,7 @@
 import { MONTAGE_PRESETS } from '@video-maker/auto-montage';
 import type { LogoMode, MontagePresetName, VoiceSource } from '@video-maker/auto-montage';
 import { CAPTION_STYLES, isCaptionStyle } from '@video-maker/timeline-core';
-import type { CaptionStyle, OutputPreset } from '@video-maker/timeline-core';
+import type { CaptionStyle, MusicMode, OutputPreset } from '@video-maker/timeline-core';
 import { OUTPUT_PRESETS } from '@video-maker/timeline-core';
 
 import { PipelineStageError } from '../errors/pipeline-stage-error';
@@ -89,6 +89,37 @@ export function parseMontageCaptionStyle(value: unknown): CaptionStyle | null {
   }
 
   return value;
+}
+
+export const MONTAGE_MUSIC_FLOOR_RANGE_DB = { min: -60, max: -6 } as const;
+
+export interface MontageMusicParams {
+  readonly musicMode?: MusicMode;
+  readonly musicFloorDb?: number;
+}
+
+function invalidMusicParam(resource: string, expected: string): PipelineStageError {
+  return new PipelineStageError({ code: 'INVALID_INPUT', stage: null, resource, expected });
+}
+
+export function parseMontageMusic(modeValue: unknown, floorValue: unknown): MontageMusicParams {
+  if (modeValue !== undefined && modeValue !== 'bed' && modeValue !== 'segments') {
+    throw invalidMusicParam('musicMode', "one of 'bed', 'segments'");
+  }
+
+  if (floorValue === undefined) {
+    return modeValue === 'segments' ? { musicMode: 'segments' } : {};
+  }
+
+  const { min, max } = MONTAGE_MUSIC_FLOOR_RANGE_DB;
+  if (typeof floorValue !== 'number' || !Number.isFinite(floorValue) || floorValue < min || floorValue > max) {
+    throw invalidMusicParam('musicFloorDb', `a number of dB between ${min} and ${max}`);
+  }
+  if (modeValue !== 'segments') {
+    throw invalidMusicParam('musicFloorDb', "musicMode 'segments' to be set");
+  }
+
+  return { musicMode: 'segments', musicFloorDb: floorValue };
 }
 
 export function parseMontageSeed(value: unknown): number {

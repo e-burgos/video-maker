@@ -2,12 +2,15 @@ import { toAbsolutePath } from '@video-maker/auto-montage';
 import type { MediaProject } from '@video-maker/auto-montage';
 import {
   VOICE_SCRIPT_MANIFEST_SCHEMA_VERSION,
+  hasVoiceDirection,
   hasVoiceScriptTimeMarks,
   parseVoiceScriptLines,
   planVoiceScriptPlacements,
+  voiceDirectionSynthesis,
 } from '@video-maker/timeline-core';
 import type {
   ParsedVoiceScriptLine,
+  VoiceDirection,
   VoiceScriptLine,
   VoiceScriptManifest,
   VoiceScriptPlacement,
@@ -38,6 +41,7 @@ import {
   runVoiceStage,
 } from '../voice/voice-synthesis-steps';
 import type { BrandVoice, ResolvedVoiceModel } from '../voice/voice-synthesis-steps';
+import { readVoiceDirections } from '../voice/voice-direction-store';
 import { writeVoiceScriptManifest, writeVoiceWords } from '../voice/voice-store';
 import type { VoiceJobReport } from './render-job';
 import { voiceCheckpoint } from './voice-pipeline-observer';
@@ -60,6 +64,7 @@ interface SynthesizedLine {
   readonly requestedStartMs: number | null;
   readonly requestedEndMs: number | null;
   readonly lengthScale: number;
+  readonly direction?: VoiceDirection;
 }
 
 async function resolveScriptText(
@@ -97,9 +102,20 @@ function assertScriptHasLines(
   }
 }
 
+interface LineToSynthesize {
+  readonly text: string;
+  readonly requestedStartMs: number | null;
+  readonly requestedEndMs: number | null;
+  readonly direction?: VoiceDirection;
+}
+
+function pauseOf(line: { readonly direction?: VoiceDirection }): number {
+  return voiceDirectionSynthesis(line.direction).trailingPauseMs;
+}
+
 async function synthesizeLine(
   index: number,
-  line: ParsedVoiceScriptLine,
+  line: LineToSynthesize,
   lengthScale: number,
   model: ResolvedVoiceModel,
   deps: RenderApiDependencies,
@@ -108,6 +124,8 @@ async function synthesizeLine(
   const lineId = voiceScriptLineId(index);
   const textPath = voiceNarrationTextPath(lineId);
   const wavPath = voiceSourceWavPath(lineId);
+  const { lengthScaleFactor, noiseScale, noiseScaleW, trailingPauseMs } = voiceDirectionSynthesis(line.direction);
+  const directedScale = synthesisLengthScale(model, lengthScale * lengthScaleFactor);
 
   await deps.storage.writeTextFile(toAbsolutePath(project, textPath), `${line.text}\n`);
 
@@ -116,9 +134,10 @@ async function synthesizeLine(
     outPath: toAbsolutePath(project, wavPath),
     modelPath: model.path,
     projectRoot: project.root,
-    ...(synthesisLengthScale(model, lengthScale) === 1
-      ? {}
-      : { lengthScale: synthesisLengthScale(model, lengthScale) }),
+    ...(directedScale === 1 ? {} : { lengthScale: directedScale }),
+    ...(noiseScale === undefined ? {} : { noiseScale }),
+    ...(noiseScaleW === undefined ? {} : { noiseScaleW }),
+    ...(trailingPauseMs > 0 ? { trailingPauseMs } : {}),
   });
 
   const probed = await deps.probeAsset({ path: toAbsolutePath(project, wavPath), assetId: wavPath });
@@ -131,14 +150,19 @@ async function synthesizeLine(
     requestedStartMs: line.requestedStartMs,
     requestedEndMs: line.requestedEndMs,
     lengthScale,
+    ...(hasVoiceDirection(line.direction) ? { direction: line.direction } : {}),
   };
 }
 
-function toPlacementRequests(lines: readonly SynthesizedLine[]) {
+function directionOf(direction: VoiceDirection | undefined): { direction?: VoiceDirection } {
+  return hasVoiceDirection(direction) ? { direction } : {};
+}
+
+function toPlacementRequests(lines: readonly SynthesizedLine[], timed: boolean) {
   return lines.map((line) => ({
     requestedStartMs: line.requestedStartMs,
     requestedEndMs: line.requestedEndMs,
-    durationMs: line.durationMs,
+    durationMs: timed ? line.durationMs - pauseOf(line) : line.durationMs,
   }));
 }
 
@@ -159,6 +183,7 @@ function toManifestLines(
       requestedStartMs: placement.requestedStartMs,
       overflowMs: placement.overflowMs,
       ...(line.lengthScale === 1 ? {} : { lengthScale: line.lengthScale }),
+      ...(line.direction === undefined ? {} : { direction: line.direction }),
       ...(lineWords[position] === undefined ? {} : { wordsSource: lineWords[position].source }),
     };
   });
@@ -184,7 +209,7 @@ async function fitTimedLinesIntoTheirWindows(
   deps: RenderApiDependencies,
   project: MediaProject,
 ): Promise<readonly SynthesizedLine[]> {
-  const planned = planVoiceScriptPlacements(toPlacementRequests(lines), { gapMs });
+  const planned = planVoiceScriptPlacements(toPlacementRequests(lines, true), { gapMs });
   const fitted: SynthesizedLine[] = [];
 
   for (const [position, line] of lines.entries()) {
@@ -218,6 +243,8 @@ export async function runVoiceScriptPipeline(
 
   await runVoiceStage('synthesize', null, () => ensureVoiceDirectories(deps, request.project));
 
+  const directions = await runVoiceStage('synthesize', null, () => readVoiceDirections(deps, request.project));
+
   voiceCheckpoint(observer, 'synthesize');
   observer.stageStarted('synthesize');
 
@@ -226,7 +253,7 @@ export async function runVoiceScriptPipeline(
     voiceCheckpoint(observer, 'synthesize');
     synthesized.push(
       await runVoiceStage('synthesize', voiceScriptLineId(position + 1), () =>
-        synthesizeLine(position + 1, line, 1, model, deps, request.project),
+        synthesizeLine(position + 1, { ...line, ...directionOf(directions[String(position + 1)]) }, 1, model, deps, request.project),
       ),
     );
     observer.sceneProcessed('synthesize', synthesized.length, lines.length);
@@ -242,7 +269,7 @@ export async function runVoiceScriptPipeline(
       )
     : synthesized;
 
-  const placements = planVoiceScriptPlacements(toPlacementRequests(fitted), {
+  const placements = planVoiceScriptPlacements(toPlacementRequests(fitted, timed), {
     gapMs: request.gapMs,
     allowSpeedUp: false,
   });

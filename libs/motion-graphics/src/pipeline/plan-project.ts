@@ -3,8 +3,12 @@ import type { BeatGrid } from '../beats/fit-beat-grid';
 import { parseHyperframesBeats } from '../beats/parse-hyperframes-beats';
 import type { MotionTimeline } from '../template/motion-timeline';
 import { DEFAULT_MUSIC_VOLUME } from '../script/motion-script';
+import type { MotionScript } from '../script/motion-script';
 import { buildDuckAutomation } from '../timeline/build-duck-automation';
+import type { VolumeAutomation } from '../timeline/build-duck-automation';
+import { buildSegmentedAutomation } from '../timeline/build-segmented-automation';
 import { layoutScenes } from '../timeline/layout-scenes';
+import type { SceneSlot } from '../timeline/layout-scenes';
 import { wavDurationSec } from '../voice/wav-duration';
 import { joinPath } from './join-path';
 import type { MotionPipelinePorts } from './ports';
@@ -26,6 +30,14 @@ function musicLevels(volume: number): { bedLevel: number; duckLevel: number } {
   return { bedLevel: volume, duckLevel: Math.round(volume * DUCK_RATIO * 1000) / 1000 };
 }
 
+function musicAutomation(script: MotionScript, slots: SceneSlot[], duration: number): VolumeAutomation {
+  const volume = script.music?.volume ?? DEFAULT_MUSIC_VOLUME;
+  if (script.music?.mode === 'segments') {
+    return buildSegmentedAutomation(slots, duration, { bedLevel: volume, ...(script.music.floorDb === undefined ? {} : { floorDb: script.music.floorDb }) });
+  }
+  return buildDuckAutomation(slots, duration, musicLevels(volume));
+}
+
 export async function planProject(ports: MotionPipelinePorts, project: string, options: { beatSync: boolean }): Promise<{ lines: string[]; timeline: MotionTimeline }> {
   const { beatSync } = options;
   const script = await readScript(ports, project);
@@ -45,7 +57,7 @@ export async function planProject(ports: MotionPipelinePorts, project: string, o
     beatLength: grid.period,
     beats: grid.beats.filter((b) => b <= duration),
     scenes: slots,
-    musicAutomation: buildDuckAutomation(slots, duration, musicLevels(script.music?.volume ?? DEFAULT_MUSIC_VOLUME)),
+    musicAutomation: musicAutomation(script, slots, duration),
     musicCredit: script.music?.credit ?? '',
   };
   await ports.writeText(joinPath(project, TIMELINE_FILE), toJson(timeline, 2));

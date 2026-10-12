@@ -83,6 +83,14 @@ describe('buildAutoStoryboardRequest', () => {
     expect(buildAutoStoryboardRequest({ ...brief, music: null, images: [] }, testBrand).userPrompt).toMatch(/music: no music[\s\S]*images: none/u);
   });
 
+  it('teaches the optional voice direction and the music mode without forcing them', () => {
+    expect(request.systemPrompt).toContain('`direction`');
+    expect(request.systemPrompt).toContain('leave `direction` out of neutral lines');
+    expect(request.systemPrompt).toContain('Leave `music.mode` out');
+    expect(JSON.stringify(request.jsonSchema)).toContain('pauseAfterMs');
+    expect(JSON.stringify(request.jsonSchema)).toContain('segments');
+  });
+
   it('attaches the storyboard json schema without identity keys', () => {
     expect(request.jsonSchema).not.toHaveProperty('$schema');
     expect(JSON.stringify(request.jsonSchema)).toContain('"brand-reveal"');

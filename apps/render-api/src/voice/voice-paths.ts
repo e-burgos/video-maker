@@ -12,9 +12,14 @@ export {
   voiceWordsPath,
 } from '@video-maker/auto-montage';
 
+export const VOICE_DIRECTION_FILE_NAME = 'voice-direction.json';
 export const VOICE_MANIFEST_FILE_NAME = 'manifest.json';
 export const VOICE_SOURCES_DIRECTORY_NAME = 'sources';
 export const VOICE_WHISPER_DIRECTORY_NAME = 'whisper';
+
+export function voiceDirectionPath(): string {
+  return workPath('producer', VOICE_DIRECTION_FILE_NAME);
+}
 
 export function voiceManifestPath(): string {
   return workPath(VOICE_DIRECTORY_NAME, VOICE_MANIFEST_FILE_NAME);

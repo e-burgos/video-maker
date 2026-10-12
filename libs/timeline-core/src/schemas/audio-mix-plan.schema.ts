@@ -16,6 +16,7 @@ export const MusicMixSettingsSchema = z.object({
   attackMs: z.number().int().default(150),
   releaseMs: z.number().int().default(400),
   holdMs: z.number().int().default(250),
+  mode: z.enum(['bed', 'segments']).optional().describe('segments: music plays full in the intro, the outro and the voice-free gaps of 2 s or more and drops to duckedGainDb while someone speaks; absent means the continuous bed.'),
 });
 
 export const GainKeyframeSchema = z.strictObject({

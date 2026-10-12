@@ -1,5 +1,5 @@
 import type { LogoMode, MediaProject, MontagePresetName, VoiceSource } from '@video-maker/auto-montage';
-import type { CaptionStyle, OutputPreset } from '@video-maker/timeline-core';
+import type { CaptionStyle, MusicMode, OutputPreset } from '@video-maker/timeline-core';
 import { autoMontage, discoverAssets, ingestProject, toAbsolutePath } from '@video-maker/auto-montage';
 
 import type { ProjectBrandContext } from '../brands/project-brand-context';
@@ -24,6 +24,8 @@ export interface MontagePipelineRequest {
   readonly format?: OutputPreset;
   readonly voice?: VoiceSource;
   readonly captionStyle?: CaptionStyle | null;
+  readonly musicMode?: MusicMode;
+  readonly musicFloorDb?: number;
   readonly brand?: ProjectBrandContext | null;
 }
 
@@ -123,6 +125,8 @@ export async function runMontagePipeline(
         ...(request.captionStyle === undefined || request.captionStyle === null
           ? {}
           : { captionStyle: request.captionStyle }),
+        ...(request.musicMode === undefined ? {} : { musicMode: request.musicMode }),
+        ...(request.musicFloorDb === undefined ? {} : { musicFloorDb: request.musicFloorDb }),
         ...(request.brand === undefined || request.brand === null
           ? {}
           : { brand: { id: request.brand.id, captionTheme: request.brand.captionTheme } }),

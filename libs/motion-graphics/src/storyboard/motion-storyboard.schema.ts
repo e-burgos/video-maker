@@ -1,3 +1,4 @@
+import { VoiceDirectionSchema } from '@video-maker/timeline-core';
 import { z } from 'zod';
 
 export const ICON_NAMES = [
@@ -174,6 +175,7 @@ const sceneBase = {
   vo: Text.describe('Exact voice-over line for this scene, spoken in the target language'),
   minBars: z.number().positive().max(16).optional(),
   anchor: z.union([z.literal('drop'), z.number().nonnegative()]).optional(),
+  direction: VoiceDirectionSchema.describe('How this voice-over line is delivered: pace, energy, pause after the line and words to stress. Omit it for the voice default').optional(),
 };
 
 const scene = <K extends string, P extends z.ZodTypeAny>(kind: K, props: P) =>
@@ -208,7 +210,14 @@ export const MotionStoryboardSchema = z
     brand: z.string().regex(/^[a-z][a-z0-9-]*$/u),
     format: z.enum(['16:9', '9:16']),
     beatSync: z.boolean(),
-    music: z.strictObject({ track: Text, volume: z.number().min(0.05).max(1).describe('Music level from 0.05 (barely audible) to 1 (loud); default 0.5. Lower it when the user says the music is too loud').optional() }).nullable(),
+    music: z
+      .strictObject({
+        track: Text,
+        volume: z.number().min(0.05).max(1).describe('Music level from 0.05 (barely audible) to 1 (loud); default 0.5. Lower it when the user says the music is too loud').optional(),
+        mode: z.enum(['bed', 'segments']).describe('bed (default): the music runs under the voice, ducked while it speaks. segments: the music plays full in the intro, the outro and the voice-free gaps of 2 s or more, with 0.6 s fades, and drops to a very low floor while the voice speaks').optional(),
+        floorDb: z.number().min(-60).max(-6).describe('Only with mode segments: dB below the full music level while the voice speaks; default -30').optional(),
+      })
+      .nullable(),
     voice: z.strictObject({ id: Text, lengthScale: z.number().min(0.7).max(1.4) }).optional(),
     scenes: z.array(MotionSceneSchema).min(2).max(16),
   })
@@ -217,6 +226,10 @@ export const MotionStoryboardSchema = z
     storyboard.scenes.forEach((s, index) => {
       if (seen.has(s.id)) ctx.addIssue({ code: 'custom', path: ['scenes', index, 'id'], message: `duplicated scene id "${s.id}"` });
       seen.add(s.id);
+      const voice = s.vo.toLowerCase();
+      (s.direction?.emphasis ?? []).forEach((word, wordIndex) => {
+        if (!voice.includes(word.toLowerCase())) ctx.addIssue({ code: 'custom', path: ['scenes', index, 'direction', 'emphasis', wordIndex], message: `emphasis "${word}" is not in the vo of scene "${s.id}"` });
+      });
     });
   });
 

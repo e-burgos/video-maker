@@ -106,10 +106,26 @@ const StartMontageJobSchema = z
     format: OutputPresetSchema.optional(),
     voice: MontageVoiceSourceSchema.optional(),
     captionStyle: CaptionStyleSchema.optional(),
+    musicMode: z
+      .enum(['bed', 'segments'])
+      .describe(
+        "bed (default): the music runs under everything and ducks while someone speaks. segments: the music plays full in the intro, the outro and the voice-free gaps of 2 s or more, with 0.6 s fades, and drops to a very low floor while someone speaks",
+      )
+      .optional(),
+    musicFloorDb: z
+      .number()
+      .min(-60)
+      .max(-6)
+      .describe('Only with musicMode segments: how many dB below the full music level it sits while someone speaks; default -30')
+      .optional(),
   })
   .refine((value) => value.scriptPath === undefined || value.scriptText === undefined, {
     message: 'at most one of scriptPath or scriptText',
     path: ['scriptText'],
+  })
+  .refine((value) => value.musicFloorDb === undefined || value.musicMode === 'segments', {
+    message: "musicFloorDb only with musicMode 'segments'",
+    path: ['musicFloorDb'],
   });
 
 const StartStoryboardJobSchema = z

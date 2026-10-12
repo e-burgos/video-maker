@@ -735,7 +735,7 @@ export function createNodeRenderApiDependencies(
       return buildVoiceCatalog(files);
     },
 
-    synthesizeVoice: async ({ textPath, outPath, modelPath: voiceDirPath, lengthScale, projectRoot }) => {
+    synthesizeVoice: async ({ textPath, outPath, modelPath: voiceDirPath, lengthScale, noiseScale, noiseScaleW, trailingPauseMs, projectRoot }) => {
       const { synthesizeSpeech, VOICE_ESPEAK_DATA_DIR_NAME, VOICE_TOKENS_FILE_NAME } = await loadMediaLocal();
       const [{ ttsCli }, runner] = await Promise.all([loadVoiceBinaries(), loadCommandRunner()]);
       const voicesDirectory = dirname(voiceDirPath);
@@ -755,6 +755,9 @@ export function createNodeRenderApiDependencies(
           ttsPath: ttsCli,
           runOptions: { cwd: projectRoot },
           ...(lengthScale === undefined ? {} : { lengthScale }),
+          ...(noiseScale === undefined ? {} : { noiseScale }),
+          ...(noiseScaleW === undefined ? {} : { noiseScaleW }),
+          ...(trailingPauseMs === undefined ? {} : { trailingPauseMs, ffmpegPath: (await loadBinaries()).ffmpeg }),
         },
         runner,
       );

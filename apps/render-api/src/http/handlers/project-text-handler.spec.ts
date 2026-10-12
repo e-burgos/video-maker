@@ -160,6 +160,34 @@ describe('handlePutProjectText', () => {
     expect(response.status).toBe(200);
   });
 
+  describe('voice direction document (US-023-302)', () => {
+    async function put(content: string) {
+      const callLog = createCallLog();
+      const storage = createFakeObjectStorage(callLog, { directories: [PROJECT_ROOT] });
+      const deps = createFakeRenderApiDependencies(callLog, { storage });
+      return handlePutProjectText(
+        deps,
+        STORE,
+        { slug: 'pitch-deck' },
+        putTextRequest('pitch-deck', { path: 'work/producer/voice-direction.json', content }),
+      );
+    }
+
+    it('stores a valid direction document', async () => {
+      const response = await put(JSON.stringify({ '1': { pace: 'slow', pauseAfterMs: 500 } }));
+      expect(response.status).toBe(200);
+    });
+
+    it.each([
+      ['not json'],
+      [JSON.stringify({ '1': { pace: 'turbo' } })],
+      [JSON.stringify({ first: { pace: 'slow' } })],
+      [JSON.stringify({ '1': { pauseAfterMs: 5000 } })],
+    ])('rejects an invalid direction document with 422 INVALID_INPUT (%#)', async (content) => {
+      await expect(put(content)).rejects.toMatchObject({ code: 'INVALID_INPUT', resource: 'work/producer/voice-direction.json' });
+    });
+  });
+
   it('rejects a path under raw/ with 403 PATH_NOT_WRITABLE', async () => {
     const callLog = createCallLog();
     const storage = createFakeObjectStorage(callLog, { directories: [PROJECT_ROOT] });

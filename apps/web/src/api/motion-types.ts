@@ -1,3 +1,5 @@
+import type { VoiceDirection } from '@video-maker/timeline-core';
+
 import type { RenderApiErrorPayload, RenderJobState } from './render-api-types';
 
 export const MOTION_FORMATS = ['16:9', '9:16'] as const;
@@ -43,12 +45,23 @@ export type MotionScene = {
   vo: string;
   chapter?: string;
   anchor?: string;
+  direction?: VoiceDirection;
   props: Record<string, unknown>;
 };
+
+export const MUSIC_MODES = ['bed', 'segments'] as const;
+
+export type MusicMode = (typeof MUSIC_MODES)[number];
+
+export const MUSIC_FLOOR_DB_MIN = -60;
+export const MUSIC_FLOOR_DB_MAX = -6;
+export const MUSIC_FLOOR_DB_DEFAULT = -30;
 
 export type MotionStoryboardMusic = {
   track: string;
   volume?: number;
+  mode?: MusicMode;
+  floorDb?: number;
 };
 
 export type MotionStoryboard = {

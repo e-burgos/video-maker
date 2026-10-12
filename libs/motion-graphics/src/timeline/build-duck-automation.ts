@@ -1,9 +1,8 @@
+import { normalizeAutomationPoints } from './normalize-automation-points';
+import type { AutomationPoint } from './normalize-automation-points';
 import type { SceneSlot } from './layout-scenes';
 
-export interface AutomationPoint {
-  t: number;
-  v: number;
-}
+export type { AutomationPoint } from './normalize-automation-points';
 
 export interface VolumeAutomation {
   version: 1;
@@ -17,8 +16,6 @@ export interface DuckOptions {
   fadeIn?: number;
   fadeOut?: number;
 }
-
-const round = (value: number): number => Math.round(value * 1000) / 1000;
 
 export function buildDuckAutomation(slots: SceneSlot[], duration: number, opts: DuckOptions = {}): VolumeAutomation {
   const bed = opts.bedLevel ?? 0.85;
@@ -37,12 +34,5 @@ export function buildDuckAutomation(slots: SceneSlot[], duration: number, opts: 
     );
   }
   raw.push({ t: duration - fadeOut, v: bed }, { t: duration, v: 0 });
-
-  const points: AutomationPoint[] = [];
-  for (const point of [...raw].sort((a, b) => a.t - b.t)) {
-    const previous = points.at(-1);
-    const t = previous && point.t <= previous.t ? previous.t + 0.01 : Math.max(0, point.t);
-    points.push({ t: round(t), v: point.v });
-  }
-  return { version: 1, lanes: [{ target: 'volume', points }] };
+  return { version: 1, lanes: [{ target: 'volume', points: normalizeAutomationPoints(raw) }] };
 }

@@ -5,6 +5,7 @@ import type {
   LogoInput,
   MediaAsset,
   MusicInput,
+  MusicMode,
   OutputPreset,
   Timeline,
   Word,
@@ -15,6 +16,7 @@ import {
   framesToMs,
   planPunchIns,
   remapMsAfterCuts,
+  segmentedMusicMix,
   splitVoiceScriptLines,
   stripVoiceScriptTimeMarks,
 } from '@video-maker/timeline-core';
@@ -78,6 +80,8 @@ export interface AutoMontageOptions {
   readonly outputPreset?: OutputPreset;
   readonly arollAssetId?: string;
   readonly musicAssetId?: string;
+  readonly musicMode?: MusicMode;
+  readonly musicFloorDb?: number;
   readonly logoAssetId?: string;
   readonly logo?: LogoMode;
   readonly scriptText?: string;
@@ -125,8 +129,17 @@ function brollAssetsUsedBy(
 function toMusicInput(
   musicAsset: MediaAsset | undefined,
   preset: MontagePreset,
+  options: Pick<AutoMontageOptions, 'musicMode' | 'musicFloorDb'>,
 ): MusicInput | undefined {
-  return musicAsset === undefined ? undefined : { assetId: musicAsset.id, mix: { ...preset.audio } };
+  if (musicAsset === undefined) {
+    return undefined;
+  }
+
+  const mix =
+    options.musicMode === 'segments'
+      ? segmentedMusicMix(preset.audio, options.musicFloorDb === undefined ? {} : { floorDb: options.musicFloorDb })
+      : { ...preset.audio };
+  return { assetId: musicAsset.id, mix };
 }
 
 function toAlignmentCounts(alignment: ScriptAlignmentResult): ScriptAlignmentCounts {
@@ -297,7 +310,7 @@ export async function autoMontage(
   const builtTimeline = buildTimeline(
     edl,
     assets,
-    toMusicInput(musicAsset, preset),
+    toMusicInput(musicAsset, preset, options),
     toLogoInput(logoAsset),
     voiceScriptTrack === null
       ? undefined

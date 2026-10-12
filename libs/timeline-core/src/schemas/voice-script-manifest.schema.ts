@@ -1,5 +1,6 @@
 import { z } from 'zod';
 
+import { VoiceDirectionSchema } from '../voice/voice-direction';
 import { IdSchema, MsSchema } from './primitives';
 
 export const VOICE_SCRIPT_MANIFEST_SCHEMA_VERSION = 1;
@@ -27,6 +28,7 @@ export const VoiceScriptLineSchema = z.strictObject({
     .max(1)
     .optional()
     .describe('--vits-length-scale used for this line; absent or 1 means the natural pace.'),
+  direction: VoiceDirectionSchema.optional().describe('Voice direction applied to this line; absent when the line was read with the voice defaults.'),
   wordsSource: VoiceScriptWordsSourceSchema.optional().describe(
     'Where the word timings of this line came from: whisper over its own wav, or the script spread evenly over its window.',
   ),

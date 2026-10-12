@@ -3,6 +3,7 @@ import { describe, expect, it } from 'vitest';
 import { ca013Assets, arollAsset } from '../__fixtures__/assets';
 import { ca013Edl, ca013Format } from '../__fixtures__/edl';
 import { DEFAULT_AUDIO_MIX_PLAN, DEFAULT_MUSIC_MIX, planDucking } from '../ducking/plan-ducking';
+import { planSegmentedMusic, segmentedMusicMix } from '../ducking/plan-segmented-music';
 import type { EditDecisionList } from '../schemas/edit-decision-list.schema';
 import { TimelineSchema } from '../schemas/timeline.schema';
 import { framesToMs } from '../units/units';
@@ -285,6 +286,26 @@ describe('buildTimeline — música y ducking', () => {
 
     expect(timeline.audioMix.automation).toEqual(expectedAutomation);
     expect(timeline.audioMix.automation.length).toBeGreaterThan(0);
+  });
+
+  it("con mix.mode 'segments' delega en planSegmentedMusic y anota el modo en el mix", () => {
+    const mix = segmentedMusicMix(DEFAULT_MUSIC_MIX);
+    const timeline = buildTimeline(duckEdl, ca013Assets, { assetId: 'music-bed-01', mix });
+
+    expect(timeline.audioMix.music.mode).toBe('segments');
+    expect(timeline.audioMix.automation).toEqual(
+      planSegmentedMusic([{ startMs: 1000, endMs: 2000 }], mix, 30).automation,
+    );
+    parseOrThrow(timeline);
+  });
+
+  it("sin mode ('bed') el mix y la automatización no cambian ni llevan la clave mode", () => {
+    const timeline = buildTimeline(duckEdl, ca013Assets, { assetId: 'music-bed-01' });
+
+    expect(Object.keys(timeline.audioMix.music)).not.toContain('mode');
+    expect(timeline.audioMix.automation).toEqual(
+      planDucking([{ startMs: 1000, endMs: 2000 }], DEFAULT_MUSIC_MIX, 30).automation,
+    );
   });
 
   it('agrega un único clip de música con los defaults del mix cuando no se pasan overrides', () => {

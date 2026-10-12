@@ -62,6 +62,31 @@ describe('toStoredParams / parseStoredParams', () => {
     });
   });
 
+  it('round-trips the music mode of a montage job and omits it when absent', () => {
+    const base: CreateJobInput = {
+      kind: 'montage',
+      slug: 'demo-01',
+      projectRoot: '/media/demo-01',
+      preset: 'software-demo',
+      seed: 7,
+      scriptPath: null,
+      scriptText: null,
+      logo: 'auto',
+      format: 'reels-9x16',
+      voice: 'aroll',
+      captionStyle: null,
+    };
+    const withMusic: CreateJobInput = { ...base, musicMode: 'segments', musicFloorDb: -24 };
+
+    expect(parseStoredParams('montage', JSON.parse(JSON.stringify(toStoredParams(withMusic))))).toMatchObject({
+      musicMode: 'segments',
+      musicFloorDb: -24,
+    });
+    expect(Object.keys(toStoredParams(base))).not.toContain('musicMode');
+    expect(parseStoredParams('montage', { ...toStoredParams(base) })).not.toHaveProperty('musicMode');
+    expect(parseStoredParams('montage', { ...toStoredParams(base), musicMode: 'loud' })).toBeNull();
+  });
+
   it('round-trips a storyboard job', () => {
     const input: CreateJobInput = {
       kind: 'storyboard',

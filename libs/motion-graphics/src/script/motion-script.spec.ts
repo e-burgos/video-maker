@@ -22,6 +22,24 @@ describe('parseMotionScript', () => {
     expect(script.sfx[0]).toEqual({ id: 'riser', scene: 'reveal', word: null, offset: -3.4 });
   });
 
+  it('parses the optional voice direction of a scene and omits it otherwise', () => {
+    const script = parseMotionScript({ ...valid, sfx: [], scenes: [{ id: 'hook', vo: 'Hola', direction: { pace: 'slow', energy: 'calm', pauseAfterMs: 500 } }, { id: 'end', vo: 'Chau' }] });
+    expect(script.scenes[0]?.direction).toEqual({ pace: 'slow', energy: 'calm', pauseAfterMs: 500 });
+    expect(script.scenes[1]).not.toHaveProperty('direction');
+  });
+
+  it('parses the music mode and floor and rejects an unknown mode', () => {
+    const music = { file: 'a.mp3', credit: 'c', mode: 'segments', floorDb: -24 };
+    expect(parseMotionScript({ ...valid, music }).music).toEqual(music);
+    expect(parseMotionScript(valid).music).not.toHaveProperty('mode');
+    expect(() => parseMotionScript({ ...valid, music: { ...music, mode: 'loud' } })).toThrow('music.mode');
+    expect(() => parseMotionScript({ ...valid, music: { ...music, floorDb: 'x' } })).toThrow('music.floorDb');
+  });
+
+  it('rejects an invalid voice direction naming the scene', () => {
+    expect(() => parseMotionScript({ ...valid, scenes: [{ id: 'hook', vo: 'Hola', direction: { pace: 'turbo' } }] })).toThrow('scenes[0].direction');
+  });
+
   it.each([
     [{ ...valid, scenes: [] }, 'scenes must be a non-empty array'],
     [{ ...valid, scenes: [{ id: 'Hook', vo: 'x' }] }, 'kebab-case'],

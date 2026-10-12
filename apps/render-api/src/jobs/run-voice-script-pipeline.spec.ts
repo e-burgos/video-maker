@@ -571,3 +571,59 @@ describe('runVoicePipeline con la voz de la marca', () => {
     expect(inputs.some((input) => input.lengthScale !== undefined)).toBe(false);
   });
 });
+
+describe('runVoicePipeline con dirección de voz por línea (US-023-301)', () => {
+  const DIRECTION_PATH = 'work/producer/voice-direction.json';
+
+  async function runWithDirections(directions: unknown) {
+    const harness = createHarness();
+    await harness.storage.writeTextFile(absolute(DIRECTION_PATH), JSON.stringify(directions));
+    await runVoicePipeline(
+      { project: PROJECT, voiceId: null, sceneIds: null, scriptText: SCRIPT, scriptPath: null, gapMs: 900 },
+      harness.deps,
+      harness.observer,
+    );
+    return harness;
+  }
+
+  function synthesisCalls(harness: ReturnType<typeof createHarness>) {
+    return harness.callLog
+      .entries()
+      .filter((entry) => entry.port === 'synthesizeVoice')
+      .map((entry) => entry.input as Record<string, unknown>);
+  }
+
+  it('sin archivo de dirección las llamadas de síntesis no llevan ningún parámetro nuevo', async () => {
+    const harness = createHarness();
+    await runVoicePipeline(
+      { project: PROJECT, voiceId: null, sceneIds: null, scriptText: SCRIPT, scriptPath: null, gapMs: 900 },
+      harness.deps,
+      harness.observer,
+    );
+
+    for (const call of synthesisCalls(harness)) {
+      expect(Object.keys(call).sort()).toEqual(['modelPath', 'outPath', 'projectRoot', 'textPath']);
+    }
+    const manifest = await readScriptManifest(harness.storage);
+    expect(manifest.lines.some((line) => line.direction !== undefined)).toBe(false);
+  });
+
+  it('aplica ritmo, energía y pausa solo a la línea dirigida y los anota en el manifiesto', async () => {
+    const harness = await runWithDirections({ '2': { pace: 'slow', energy: 'lively', pauseAfterMs: 500 } });
+
+    const [first, second, third] = synthesisCalls(harness);
+    expect(second).toMatchObject({ lengthScale: 1.12, noiseScale: 0.8, noiseScaleW: 1, trailingPauseMs: 500 });
+    expect(Object.keys(first ?? {})).not.toContain('noiseScale');
+    expect(Object.keys(third ?? {})).not.toContain('trailingPauseMs');
+    const manifest = await readScriptManifest(harness.storage);
+    expect(manifest.lines[1]?.direction).toEqual({ pace: 'slow', energy: 'lively', pauseAfterMs: 500 });
+    expect(manifest.lines[0]?.direction).toBeUndefined();
+  });
+
+  it('un archivo de dirección inválido falla nombrando el archivo', async () => {
+    await expect(runWithDirections({ '1': { pace: 'turbo' } })).rejects.toMatchObject({
+      code: 'INVALID_INPUT',
+      resource: DIRECTION_PATH,
+    });
+  });
+});

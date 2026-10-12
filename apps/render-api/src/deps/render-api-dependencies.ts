@@ -190,6 +190,9 @@ export interface SynthesizeVoiceInput {
   readonly outPath: string;
   readonly modelPath: string;
   readonly lengthScale?: number;
+  readonly noiseScale?: number;
+  readonly noiseScaleW?: number;
+  readonly trailingPauseMs?: number;
   readonly projectRoot: string;
 }
 

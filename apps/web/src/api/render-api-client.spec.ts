@@ -522,6 +522,55 @@ describe('createRenderApiClient', () => {
     expect(result.kind).toBe('montage');
   });
 
+  it('sends the segmented music mode and floor only when asked for', async () => {
+    const { fetchImpl, calls } = recordingFetch(() => jsonResponse(montageJob(), 202));
+    const client = createRenderApiClient(fetchImpl);
+
+    await client.createMontageJob('smoke-ingest', {
+      preset: 'software-demo',
+      seed: 0,
+      overwrite: false,
+      musicMode: 'segments',
+      musicFloorDb: -24,
+    });
+    await client.createMontageJob('smoke-ingest', {
+      preset: 'software-demo',
+      seed: 0,
+      overwrite: false,
+      musicMode: 'bed',
+      musicFloorDb: -24,
+    });
+
+    expect(JSON.parse(String(calls[0]?.init?.body))).toMatchObject({ musicMode: 'segments', musicFloorDb: -24 });
+    expect(JSON.parse(String(calls[1]?.init?.body))).not.toHaveProperty('musicMode');
+    expect(JSON.parse(String(calls[1]?.init?.body))).not.toHaveProperty('musicFloorDb');
+  });
+
+  it('reads and writes the voice direction of a project', async () => {
+    const document = { slug: 'smoke-ingest', path: 'work/producer/voice-direction.json', directions: { '2': { pace: 'slow' } }, lines: [{ index: 2, text: 'Hola.' }] };
+    const { fetchImpl, calls } = recordingFetch(() => jsonResponse(document));
+    const client = createRenderApiClient(fetchImpl);
+
+    expect(await client.getVoiceDirection('smoke-ingest')).toEqual(document);
+    await client.putVoiceDirection('smoke-ingest', { '2': { pace: 'slow' } });
+
+    expect(calls[0]?.url).toBe('/api/projects/smoke-ingest/voice/direction');
+    expect(calls[1]?.url).toBe('/api/projects/smoke-ingest/voice/direction');
+    expect(calls[1]?.init?.method).toBe('PUT');
+    expect(JSON.parse(String(calls[1]?.init?.body))).toEqual({ directions: { '2': { pace: 'slow' } } });
+  });
+
+  it('puts the motion storyboard as is', async () => {
+    const storyboard = { version: 1, title: 'x', brand: 'b', format: '16:9', beatSync: false, music: null, scenes: [] };
+    const { fetchImpl, calls } = recordingFetch(() => jsonResponse(storyboard));
+
+    await createRenderApiClient(fetchImpl).putMotionStoryboard('promo', storyboard as never);
+
+    expect(calls[0]?.url).toBe('/api/projects/promo/motion/storyboard');
+    expect(calls[0]?.init?.method).toBe('PUT');
+    expect(JSON.parse(String(calls[0]?.init?.body))).toEqual(storyboard);
+  });
+
   it('sends overwrite: true when the caller confirms the regeneration', async () => {
     const { fetchImpl, calls } = recordingFetch(() => jsonResponse(montageJob(), 202));
 

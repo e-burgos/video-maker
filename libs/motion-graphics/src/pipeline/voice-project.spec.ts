@@ -63,6 +63,43 @@ describe('voiceProject', () => {
     expect(result.lines.every((line) => !line.includes('reused'))).toBe(true);
   });
 
+  describe('voice direction', () => {
+    const directed = {
+      ...script,
+      scenes: script.scenes.map((scene) => (scene.id === 'hook' ? { ...scene, direction: { pace: 'slow', energy: 'lively', pauseAfterMs: 400 } } : scene)),
+    };
+
+    it('without direction the synthesis request is exactly the one of before', async () => {
+      const ports = createFakePipelinePorts({ files: { [`${P}/script.json`]: JSON.stringify(script) } });
+      await voiceProject(ports, P, { takes: 1 });
+      expect(ports.synthesized.map((request) => Object.keys(request).sort())).toEqual([
+        ['lengthScale', 'outPath', 'text', 'voice'],
+        ['lengthScale', 'outPath', 'text', 'voice'],
+      ]);
+      expect(ports.synthesized.every((request) => request.lengthScale === 1.08)).toBe(true);
+      expect(JSON.parse(String(ports.files.get(`${P}/voice-manifest.json`))).hook).not.toHaveProperty('direction');
+    });
+
+    it('applies pace, energy and pause only to the directed scene', async () => {
+      const ports = createFakePipelinePorts({ files: { [`${P}/script.json`]: JSON.stringify(directed) } });
+      await voiceProject(ports, P, { takes: 1 });
+      expect(ports.synthesized[0]).toMatchObject({ lengthScale: 1.21, noiseScale: 0.8, noiseScaleW: 1, trailingPauseMs: 400 });
+      expect(Object.keys(ports.synthesized[1] ?? {}).sort()).toEqual(['lengthScale', 'outPath', 'text', 'voice']);
+    });
+
+    it('reuseUnchanged re-voices a scene whose direction changed', async () => {
+      const ports = createFakePipelinePorts({ files: { [`${P}/script.json`]: JSON.stringify(directed) } });
+      await voiceProject(ports, P, { takes: 1 });
+      const again = await voiceProject(ports, P, { takes: 1, reuseUnchanged: true });
+      expect(again.lines.every((line) => line.includes('reused'))).toBe(true);
+      const redirected = { ...script, scenes: script.scenes.map((scene) => (scene.id === 'hook' ? { ...scene, direction: { pace: 'fast' } } : scene)) };
+      ports.files.set(`${P}/script.json`, JSON.stringify(redirected));
+      const third = await voiceProject(ports, P, { takes: 1, reuseUnchanged: true });
+      expect(third.lines[0]).toMatch(/^voice hook: take/u);
+      expect(third.lines[1]).toMatch(/reused/u);
+    });
+  });
+
   it('--only rejects a scene id that is not in the script', async () => {
     const ports = createFakePipelinePorts({ files: projectFiles() });
     await expect(voiceProject(ports, P, { takes: 5, only: ['reveal', 'nope'] })).rejects.toThrow('unknown scene "nope"');

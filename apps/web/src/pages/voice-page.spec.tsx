@@ -1,4 +1,4 @@
-import { fireEvent, render, screen, waitFor } from '@testing-library/react';
+import { fireEvent, render, screen, waitFor, within } from '@testing-library/react';
 import { MemoryRouter, Route, Routes } from 'react-router-dom';
 import { describe, expect, it, vi } from 'vitest';
 
@@ -8,6 +8,7 @@ import {
   VOICE_MODELS,
   VOICE_SCRIPT_MANIFEST_JSON,
   healthyVoiceService,
+  voiceDirectionDocument,
   voiceDocument,
   voiceJob,
   voiceTrack,
@@ -233,6 +234,7 @@ describe('VoicePage — modo guion (FIX-009-003)', () => {
       getStoryboard: vi.fn().mockRejectedValue(NO_STORYBOARD),
       getVoice: vi.fn().mockRejectedValue(NO_VOICE_MANIFEST),
       getProjectFile: vi.fn().mockResolvedValue(VOICE_SCRIPT_MANIFEST_JSON),
+      getVoiceDirection: vi.fn().mockResolvedValue(voiceDirectionDocument()),
       ...overrides,
     });
   }
@@ -325,5 +327,100 @@ describe('voice page in a motion project', () => {
     expect(classicLoaders.getStoryboard).not.toHaveBeenCalled();
     expect(classicLoaders.getVoice).not.toHaveBeenCalled();
     expect(classicLoaders.getTimeline).not.toHaveBeenCalled();
+  });
+});
+
+describe('VoicePage — dirección de voz en modo guion', () => {
+  const NO_STORYBOARD = new RenderApiError('STORYBOARD_NOT_FOUND', 'nothing yet', 404, null);
+  const NO_VOICE_MANIFEST = new RenderApiError('VOICE_NOT_FOUND', 'nothing yet', 404, null);
+
+  function renderScriptMode(overrides: Partial<RenderApiClient> = {}) {
+    return renderPage({
+      getStoryboard: vi.fn().mockRejectedValue(NO_STORYBOARD),
+      getVoice: vi.fn().mockRejectedValue(NO_VOICE_MANIFEST),
+      getProjectFile: vi.fn().mockResolvedValue(VOICE_SCRIPT_MANIFEST_JSON),
+      getVoiceDirection: vi.fn().mockResolvedValue(voiceDirectionDocument()),
+      ...overrides,
+    });
+  }
+
+  async function lineTwo(): Promise<HTMLElement> {
+    const lines = await screen.findAllByTestId('voice-script-line');
+    return lines[1] as HTMLElement;
+  }
+
+  it('loads the saved directions and flags the lines that have one', async () => {
+    renderScriptMode({
+      getVoiceDirection: vi
+        .fn()
+        .mockResolvedValue(voiceDirectionDocument({ directions: { '2': { pace: 'slow', emphasis: ['editor'] } } })),
+    });
+
+    const line = within(await lineTwo());
+    await waitFor(() => expect(line.getByTestId('voice-direction-badge')).toBeTruthy());
+    expect((line.getByRole('combobox', { name: 'Pace of line 2' }) as HTMLSelectElement).value).toBe('slow');
+    expect(line.getByRole('button', { name: 'editor' }).getAttribute('aria-pressed')).toBe('true');
+    expect(within(await lineOne()).queryByTestId('voice-direction-badge')).toBeNull();
+    expect(screen.getByTestId('voice-direction-count').textContent).toBe('(Lines with direction: 1)');
+  });
+
+  async function lineOne(): Promise<HTMLElement> {
+    const lines = await screen.findAllByTestId('voice-script-line');
+    return lines[0] as HTMLElement;
+  }
+
+  it('saves only the edited directions, keyed by line number', async () => {
+    const putVoiceDirection = vi.fn().mockResolvedValue(voiceDirectionDocument());
+    renderScriptMode({ putVoiceDirection });
+
+    const line = within(await lineTwo());
+    const save = await screen.findByRole('button', { name: 'Save direction' });
+    await waitFor(() => expect(line.getByRole('combobox', { name: 'Pace of line 2' })).toBeTruthy());
+    expect((save as HTMLButtonElement).disabled).toBe(true);
+
+    fireEvent.change(line.getByRole('combobox', { name: 'Pace of line 2' }), { target: { value: 'fast' } });
+    fireEvent.click(line.getByRole('button', { name: 'editor' }));
+    expect((screen.getByRole('button', { name: 'Save direction' }) as HTMLButtonElement).disabled).toBe(false);
+    fireEvent.click(screen.getByRole('button', { name: 'Save direction' }));
+
+    await waitFor(() =>
+      expect(putVoiceDirection).toHaveBeenCalledWith('smoke-ingest', {
+        '2': { pace: 'fast', emphasis: ['editor'] },
+      }),
+    );
+    expect(await screen.findByText('Direction saved.')).toBeTruthy();
+  });
+
+  it('regenerates the voice with the saved direction, overwriting, from the producer script', async () => {
+    const putVoiceDirection = vi.fn().mockResolvedValue(voiceDirectionDocument());
+    const createVoiceJob = vi.fn().mockResolvedValue(voiceJob());
+    renderScriptMode({ putVoiceDirection, createVoiceJob });
+
+    const line = within(await lineTwo());
+    await waitFor(() => expect(line.getByRole('combobox', { name: 'Energy of line 2' })).toBeTruthy());
+    fireEvent.change(line.getByRole('combobox', { name: 'Energy of line 2' }), { target: { value: 'calm' } });
+    fireEvent.click(screen.getByRole('button', { name: 'Regenerate voice with the direction' }));
+
+    await waitFor(() =>
+      expect(createVoiceJob).toHaveBeenCalledWith('smoke-ingest', {
+        voiceId: 'es_AR-daniela-high',
+        sceneIds: null,
+        overwrite: true,
+        scriptPath: 'work/producer/script.txt',
+      }),
+    );
+    expect(putVoiceDirection).toHaveBeenCalledWith('smoke-ingest', { '2': { energy: 'calm' } });
+  });
+
+  it('warns when the saved direction is not in the audio yet', async () => {
+    renderScriptMode({
+      getVoiceDirection: vi
+        .fn()
+        .mockResolvedValue(voiceDirectionDocument({ directions: { '1': { energy: 'lively' } } })),
+    });
+
+    const line = within(await lineOne());
+    expect(await line.findByTestId('voice-direction-unapplied')).toBeTruthy();
+    expect(within(await lineTwo()).queryByTestId('voice-direction-unapplied')).toBeNull();
   });
 });

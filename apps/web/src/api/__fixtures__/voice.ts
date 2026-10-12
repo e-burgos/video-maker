@@ -1,3 +1,4 @@
+import type { VoiceDirectionDocument } from '../render-api-client';
 import type {
   ServiceHealth,
   VoiceDocument,
@@ -164,3 +165,15 @@ export const VOICE_SCRIPT_MANIFEST = {
 } as const;
 
 export const VOICE_SCRIPT_MANIFEST_JSON = JSON.stringify(VOICE_SCRIPT_MANIFEST);
+
+export function voiceDirectionDocument(
+  overrides: Partial<VoiceDirectionDocument> = {},
+): VoiceDirectionDocument {
+  return {
+    slug: 'smoke-ingest',
+    path: 'work/producer/voice-direction.json',
+    directions: {},
+    lines: VOICE_SCRIPT_MANIFEST.lines.map((line) => ({ index: line.index, text: line.text })),
+    ...overrides,
+  };
+}
