@@ -62,4 +62,17 @@ describe('MotionPreviewView', () => {
     expect(within(empty).getByRole('link').getAttribute('href')).toBe('/projects/promo/motion');
     expect(container.querySelector('video')).toBeNull();
   });
+
+  it('offers the sample button when a storyboard exists, even before the first render', async () => {
+    renderView(motionOverviewFixture({ video: null }));
+
+    expect(await screen.findByRole('button', { name: 'Generate sample (10 s)' })).toBeTruthy();
+  });
+
+  it('hides the sample button when there is no storyboard to render', async () => {
+    renderView(motionOverviewFixture({ storyboard: null, video: null }));
+
+    await screen.findByTestId('motion-preview-empty');
+    expect(screen.queryByRole('button', { name: 'Generate sample (10 s)' })).toBeNull();
+  });
 });

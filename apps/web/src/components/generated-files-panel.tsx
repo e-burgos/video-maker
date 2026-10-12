@@ -10,12 +10,14 @@ import {
   hasGeneratedOutput,
 } from '../api/generated-files';
 import { parseVoiceScriptManifest } from '../api/parse-voice-script';
+import { isSampleVideoPath } from '../api/render-job-artifact';
 import { logoAssetsWithoutAlpha } from '../api/timeline-edit/logo-overlay';
 import { useRenderApi } from '../api/render-api-context';
 import { useAsyncResource } from '../hooks/use-async-resource';
 import { useT } from '../i18n/language-context';
 import { ErrorNotice } from './error-notice';
 import { RenderReviewPanel } from './render-review-panel';
+import { Badge } from './ui/badge';
 import type { VoiceScriptManifest } from '@video-maker/timeline-core';
 import type { AssetListing, GeneratedFile, GeneratedListing, VoiceDocument } from '../api/render-api-types';
 
@@ -147,12 +149,13 @@ export function GeneratedFilesPanel({ slug, assets }: GeneratedFilesPanelProps) 
                   className="aspect-video w-full rounded-md bg-black"
                 />
                 <div className="flex flex-wrap items-center gap-3">
+                  {isSampleVideoPath(file.path) && <Badge tone="accent">{t('sample.badge')}</Badge>}
                   <a href={artifactUrl(slug, file.path)} className="font-mono text-xs text-sky-300 underline">
                     {t('generated.download')}
                   </a>
                   <FileMeta file={file} />
                 </div>
-                <RenderReviewPanel slug={slug} file={file.path} />
+                {!isSampleVideoPath(file.path) && <RenderReviewPanel slug={slug} file={file.path} />}
               </li>
             ))}
           </ul>

@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest';
 
 import { assetEntry, assetListing, jobListing, pendingJob, succeededJob } from './__fixtures__/workspace';
 import {
+  fullRenderJobsNewestFirst,
   groupAssetsByRole,
   latestSucceededJobOfKind,
   succeededJobsOfKindNewestFirst,
@@ -108,5 +109,29 @@ describe('tabForNewlySucceededJob', () => {
     const current = jobListing([job]);
 
     expect(tabForNewlySucceededJob(previous, current)).toBeNull();
+  });
+});
+
+describe('fullRenderJobsNewestFirst', () => {
+  const listing = jobListing([
+    succeededJob('render', 'job-0001', '2026-09-10T10:00:00.000Z'),
+    succeededJob('render', 'job-0002', '2026-09-10T11:00:00.000Z'),
+  ]);
+
+  it('keeps every succeeded render when the generated listing is not known yet', () => {
+    expect(fullRenderJobsNewestFirst(listing, null).map((job) => job.id)).toEqual(['job-0002', 'job-0001']);
+  });
+
+  it('drops renders without a full output, which are samples', () => {
+    const generated = {
+      slug: 'demo-01',
+      roots: ['out'],
+      files: [
+        { path: 'out/job-0001.mp4', sizeBytes: 1, modifiedAtMs: 1 },
+        { path: 'out/job-0002.sample.mp4', sizeBytes: 1, modifiedAtMs: 2 },
+      ],
+    };
+
+    expect(fullRenderJobsNewestFirst(listing, generated).map((job) => job.id)).toEqual(['job-0001']);
   });
 });

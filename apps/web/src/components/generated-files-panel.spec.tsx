@@ -179,4 +179,23 @@ describe('GeneratedFilesPanel (FIX-006-001)', () => {
     expect(await screen.findByTestId('generated-empty')).toBeTruthy();
     expect(client.getVoice).not.toHaveBeenCalled();
   });
+
+  it('marca la muestra, la reproduce y no le ofrece revisión', async () => {
+    renderPanel({
+      generated: {
+        ...GENERATED,
+        files: [
+          ...GENERATED.files,
+          { path: 'out/job-0009.sample.mp4', sizeBytes: 2_000_000, modifiedAtMs: 2 },
+        ],
+      },
+    });
+
+    const videos = await screen.findAllByTestId('generated-deliverable-video');
+    expect(videos.map((video) => video.getAttribute('src'))).toContain(
+      '/api/projects/display-ads/files/out/job-0009.sample.mp4',
+    );
+    expect(screen.getAllByText('Sample')).toHaveLength(1);
+    expect(screen.getAllByTestId('render-review').length).toBe(1);
+  });
 });

@@ -20,6 +20,7 @@ import type {
   RenderJobListing,
   ServiceHealth,
 } from '../api/render-api-types';
+import type { ProposalDocument } from '../api/proposal-types';
 import type { RenderApiError } from '../api/render-api-error';
 
 export type UseProducerConversationResult = {
@@ -29,6 +30,7 @@ export type UseProducerConversationResult = {
   health: AsyncResource<ServiceHealth>;
   jobs: AsyncResource<RenderJobListing>;
   generated: AsyncResource<GeneratedListing>;
+  proposal: AsyncResource<ProposalDocument>;
   hasTimedScript: boolean;
   draft: string;
   setDraft: (value: string) => void;
@@ -57,6 +59,7 @@ export function useProducerConversation(slug: string): UseProducerConversationRe
   const loadHealth = useCallback(() => client.getHealth(), [client]);
   const loadJobs = useCallback(() => client.listRenderJobs(slug), [client, slug]);
   const loadGenerated = useCallback(() => client.listGenerated(slug), [client, slug]);
+  const loadProposal = useCallback(async () => client.getProposal(slug), [client, slug]);
   const loadProducerSettings = useCallback(() => client.getProducerSettings(), [client]);
 
   const conversation = useAsyncResource<ProducerConversation>(loadConversation, `producer:${slug}`);
@@ -64,6 +67,7 @@ export function useProducerConversation(slug: string): UseProducerConversationRe
   const health = useAsyncResource(loadHealth, 'health');
   const jobs = useAsyncResource<RenderJobListing>(loadJobs, `jobs:${slug}`);
   const generated = useAsyncResource<GeneratedListing>(loadGenerated, `generated:${slug}`);
+  const proposal = useAsyncResource<ProposalDocument>(loadProposal, `proposal:${slug}`);
   const producerSettings = useAsyncResource<ProducerSettings>(loadProducerSettings, 'producer-settings');
   const hasTimedScript = hasProducerScript(generated.data);
 
@@ -98,12 +102,16 @@ export function useProducerConversation(slug: string): UseProducerConversationRe
   const reloadJobs = jobs.reload;
   const reloadAssets = assets.reload;
   const reloadConversation = conversation.reload;
+  const reloadGenerated = generated.reload;
+  const reloadProposal = proposal.reload;
 
   useEffect(() => {
     if (poll.polling) {
       reloadJobs();
+      reloadGenerated();
+      reloadProposal();
     }
-  }, [eventCount, poll.polling, reloadJobs]);
+  }, [eventCount, poll.polling, reloadJobs, reloadGenerated, reloadProposal]);
 
   const settledTurnId = poll.stopReason === 'terminal' ? (poll.turn?.turnId ?? null) : null;
   useEffect(() => {
@@ -112,8 +120,10 @@ export function useProducerConversation(slug: string): UseProducerConversationRe
       reloadConversation();
       reloadAssets();
       reloadJobs();
+      reloadGenerated();
+      reloadProposal();
     }
-  }, [settledTurnId, reloadAssets, reloadConversation, reloadJobs]);
+  }, [settledTurnId, reloadAssets, reloadConversation, reloadJobs, reloadGenerated, reloadProposal]);
 
   const blockers = producerBlockers(health.data);
   const running = poll.polling;
@@ -187,6 +197,7 @@ export function useProducerConversation(slug: string): UseProducerConversationRe
     health,
     jobs,
     generated,
+    proposal,
     hasTimedScript,
     draft,
     setDraft,

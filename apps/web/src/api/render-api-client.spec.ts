@@ -1,3 +1,4 @@
+import { productionProposal, proposalDocument } from './__fixtures__/proposal';
 import { describe, expect, it, vi } from 'vitest';
 
 import { RAW_PREVIEW_TIMELINE, previewTimelineFixture } from './__fixtures__/timeline';
@@ -487,6 +488,64 @@ describe('createRenderApiClient', () => {
     expect(calls[0]?.init?.headers).toBeUndefined();
     expect(calls[0]?.init?.body).toBeUndefined();
     expect(result.state).toBe('queued');
+  });
+
+  it('creates a render sample job with the kind and the sample seconds in the body', async () => {
+    const { fetchImpl, calls } = recordingFetch(() => jsonResponse(jobWithState('queued'), 202));
+
+    await createRenderApiClient(fetchImpl).createRenderJob('demo', { sample: { seconds: 10 } });
+
+    expect(calls[0]?.init?.headers).toEqual({ 'content-type': 'application/json' });
+    expect(JSON.parse(String(calls[0]?.init?.body))).toEqual({ kind: 'render', sample: { seconds: 10 } });
+  });
+
+  it('reads the production proposal with its estimates', async () => {
+    const { fetchImpl, calls } = recordingFetch(() => jsonResponse(proposalDocument(productionProposal())));
+
+    const result = await createRenderApiClient(fetchImpl).getProposal('demo');
+
+    expect(calls[0]?.url).toBe('/api/projects/demo/proposal');
+    expect(result.proposal?.recommendedId).toBe('directo');
+  });
+
+  it('returns a null proposal when none was written yet', async () => {
+    const { fetchImpl } = recordingFetch(() => jsonResponse(proposalDocument(null)));
+
+    expect((await createRenderApiClient(fetchImpl).getProposal('demo')).proposal).toBeNull();
+  });
+
+  it('rejects a proposal that does not match the schema', async () => {
+    const { fetchImpl } = recordingFetch(() =>
+      jsonResponse({ ...proposalDocument(null), proposal: { version: 1, status: 'pending' } }),
+    );
+
+    const error = await createRenderApiClient(fetchImpl)
+      .getProposal('demo')
+      .catch((caught: unknown) => caught);
+
+    expect((error as RenderApiError).code).toBe('RESPONSE_SHAPE_UNEXPECTED');
+  });
+
+  it('approves a concept by posting its id', async () => {
+    const { fetchImpl, calls } = recordingFetch(() => jsonResponse(proposalDocument(productionProposal())));
+
+    await createRenderApiClient(fetchImpl).approveProposal('demo', 'reel');
+
+    expect(calls[0]?.url).toBe('/api/projects/demo/proposal/approve');
+    expect(calls[0]?.init?.method).toBe('POST');
+    expect(JSON.parse(String(calls[0]?.init?.body))).toEqual({ conceptId: 'reel' });
+  });
+
+  it('maps PROPOSAL_NOT_FOUND on approve with its code', async () => {
+    const { fetchImpl } = recordingFetch(() =>
+      jsonResponse({ error: { code: 'PROPOSAL_NOT_FOUND', stage: null, message: 'none' } }, 404),
+    );
+
+    const error = await createRenderApiClient(fetchImpl)
+      .approveProposal('demo', 'reel')
+      .catch((caught: unknown) => caught);
+
+    expect((error as RenderApiError).code).toBe('PROPOSAL_NOT_FOUND');
   });
 
   it('maps TIMELINE_NOT_FOUND from EP-012 with its code', async () => {

@@ -8,6 +8,7 @@ import type { AsyncResource } from '../hooks/use-async-resource';
 import type { UseProducerConversationResult } from '../hooks/use-producer-conversation';
 import { ProducerConversationPanel } from './producer-conversation-panel';
 import type { InboxAsset } from '../api/render-api-types';
+import { proposalDocument, productionProposal } from '../api/__fixtures__/proposal';
 
 function readyResource<T>(data: T): AsyncResource<T> {
   return { status: 'ready', data, error: null, isRefreshing: false, reload: vi.fn() };
@@ -31,6 +32,7 @@ function fakeProducer(overrides: Partial<UseProducerConversationResult> = {}): U
     health: loadingResource(),
     jobs: readyResource({ slug: 'demo-01', jobs: [] }),
     generated: readyResource({ slug: 'demo-01', roots: [], files: [] }),
+    proposal: readyResource(proposalDocument(null)),
     hasTimedScript: false,
     draft: '',
     setDraft: vi.fn(),

@@ -12,6 +12,7 @@ import { ProducerComposer } from './producer-composer';
 import { ProducerMessageList } from './producer-message-list';
 import { ProducerTurnActivity } from './producer-turn-activity';
 import { ProducerWelcome } from './producer-welcome';
+import { ProposalCard } from './proposal-card';
 import type { AssetRole } from '../api/render-api-types';
 
 export type ProducerConversationPanelProps = {
@@ -26,6 +27,7 @@ export function ProducerConversationPanel({ producer, pinned = false, mode = 'fo
     slug,
     conversation,
     assets,
+    proposal,
     hasTimedScript,
     draft,
     setDraft,
@@ -149,6 +151,8 @@ export function ProducerConversationPanel({ producer, pinned = false, mode = 'fo
               quickRepliesDisabled={running || sendPending}
             />
           )}
+
+          <ProposalCard slug={slug} proposal={proposal} />
 
           <ProducerTurnActivity
             turn={poll.turn}

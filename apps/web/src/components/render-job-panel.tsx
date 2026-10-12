@@ -4,7 +4,7 @@ import {
   showsFrameProgress,
 } from '../api/parse-render-job';
 import { useRenderApi } from '../api/render-api-context';
-import { renderJobDeliverableUrl } from '../api/render-job-artifact';
+import { renderJobDeliverableUrl, renderJobSampleUrl } from '../api/render-job-artifact';
 import { useApiAction } from '../hooks/use-api-action';
 import { useRenderJobPoll } from '../hooks/use-render-job-poll';
 import { useT } from '../i18n/language-context';
@@ -99,7 +99,11 @@ export function RenderJobPanel({ slug, jobId, onRetried }: RenderJobPanelProps) 
 
       {job.kind === 'render' && job.state === 'succeeded' && (
         <a
-          href={renderJobDeliverableUrl(slug, job.id)}
+          href={
+            job.report?.sample === true
+              ? renderJobSampleUrl(slug, job.id)
+              : renderJobDeliverableUrl(slug, job.id)
+          }
           className="inline-block rounded-md border border-emerald-500/50 px-3 py-1 text-sm text-emerald-100"
         >
           {t('renderJob.download')}

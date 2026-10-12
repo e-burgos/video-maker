@@ -3,6 +3,7 @@ import { MemoryRouter, Route, Routes } from 'react-router-dom';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
 import { producerConversation, producerSettings } from '../api/__fixtures__/producer';
+import { productionProposal, proposalDocument, proposalEstimate } from '../api/__fixtures__/proposal';
 import { RenderApiProvider } from '../api/render-api-context';
 import { RenderApiError } from '../api/render-api-error';
 import { ProjectWorkspacePage } from './project-workspace-page';
@@ -62,6 +63,7 @@ function renderWorkspace(client: Partial<RenderApiClient> = {}) {
     }),
     getTimeline: vi.fn().mockRejectedValue(new RenderApiError('TIMELINE_NOT_FOUND', 'none', 404, null)),
     listInbox: vi.fn().mockResolvedValue({ assets: [] }),
+    getProposal: vi.fn().mockResolvedValue(proposalDocument(null)),
     ...client,
   };
 
@@ -166,5 +168,27 @@ describe('ProjectWorkspacePage', () => {
     fireEvent.click(screen.getByTestId('workspace-panel-toggle'));
 
     expect(screen.getByTestId('workspace-side-panel')).toBeTruthy();
+  });
+
+  it('shows the Proposal card and a pending status in the header when the producer proposed', async () => {
+    stubMatchMedia(true);
+    renderWorkspace({
+      getProposal: vi
+        .fn()
+        .mockResolvedValue(proposalDocument(productionProposal(), { directo: proposalEstimate() })),
+    });
+
+    expect(await screen.findByTestId('proposal-card')).toBeTruthy();
+    expect((await screen.findByTestId('proposal-status')).getAttribute('data-status')).toBe('pending');
+    expect(screen.getAllByRole('button', { name: /Approve this approach/u })).toHaveLength(2);
+  });
+
+  it('shows neither the card nor the status when there is no proposal', async () => {
+    stubMatchMedia(true);
+    renderWorkspace();
+
+    await screen.findByRole('heading', { name: 'Demo 01' });
+    expect(screen.queryByTestId('proposal-card')).toBeNull();
+    expect(screen.queryByTestId('proposal-status')).toBeNull();
   });
 });

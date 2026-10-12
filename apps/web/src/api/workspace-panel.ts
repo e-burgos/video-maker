@@ -1,6 +1,7 @@
 import { orderedAssetRoles } from './asset-roles';
 import type {
   AssetListEntry,
+  GeneratedListing,
   AssetListing,
   AssetRole,
   JobKind,
@@ -48,6 +49,18 @@ export function succeededJobsOfKindNewestFirst(
   return jobs
     .filter((job) => job.kind === kind && job.state === 'succeeded')
     .sort((a, b) => jobTimestamp(b) - jobTimestamp(a));
+}
+
+export function fullRenderJobsNewestFirst(
+  listing: RenderJobListing | null,
+  generated: GeneratedListing | null,
+): RenderJobSummary[] {
+  const jobs = succeededJobsOfKindNewestFirst(listing, 'render');
+  if (generated === null) {
+    return jobs;
+  }
+  const outputs = new Set(generated.files.map((file) => file.path));
+  return jobs.filter((job) => outputs.has(`out/${job.id}.mp4`));
 }
 
 export function latestSucceededJobOfKind(

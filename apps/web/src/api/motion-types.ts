@@ -128,6 +128,7 @@ export type CreateMotionJobInput = {
   output?: string;
   takes?: number;
   overwrite?: boolean;
+  sample?: { seconds: number };
 };
 
 export type MotionJobProgress = {
@@ -149,6 +150,7 @@ export type MotionJobReport = {
   scenes: number;
   musicCredit?: string | null;
   storyboard: MotionStoryboardReport | null;
+  sample?: true;
 };
 
 export type MotionJob = {

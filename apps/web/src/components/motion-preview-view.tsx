@@ -6,6 +6,7 @@ import { useMotionOverview } from '../hooks/use-motion-overview';
 import { useT } from '../i18n/language-context';
 import { MotionViewEmpty, MotionViewShell } from './motion-view-shell';
 import { RenderReviewPanel } from './render-review-panel';
+import { SampleTrigger } from './sample-trigger';
 import { YouTubePublishSection } from './youtube-publish-section';
 
 export type MotionPreviewViewProps = {
@@ -68,6 +69,12 @@ export function MotionPreviewView({ slug }: MotionPreviewViewProps) {
         <MotionViewEmpty slug={slug} testId="motion-preview-empty" message={t('motionPreview.empty')} />
       )}
 
+      {overview.data?.storyboard != null && (
+        <div data-testid="motion-preview-sample" className="space-y-2">
+          <SampleTrigger slug={slug} kind="motion" />
+        </div>
+      )}
+
       {video !== null && (
         <div className="space-y-4">
           {video.outdated && (
@@ -95,6 +102,7 @@ export function MotionPreviewView({ slug }: MotionPreviewViewProps) {
           </p>
 
           <RenderReviewPanel slug={slug} file={video.path} />
+
 
           {video.credits !== null && (
             <div data-testid="motion-preview-credits" className="space-y-1">

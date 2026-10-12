@@ -24,6 +24,7 @@ import {
   parseVoiceListing,
   parseVoiceSceneWriteResult,
 } from './parse-voice';
+import { parseProposalDocument } from './parse-proposal';
 import { parseReviewJob, parseReviewReport } from './parse-review';
 import {
   parsePublications,
@@ -109,6 +110,7 @@ import type {
   YouTubePublishOptions,
 } from './youtube-types';
 import type { ReviewJob, ReviewReport } from './review-types';
+import type { ProposalDocument, SampleSpec } from './proposal-types';
 
 export type FetchLike = (input: string, init?: RequestInit) => Promise<Response>;
 
@@ -167,7 +169,9 @@ export type RenderApiClient = {
   confirmInboxAsset: (slug: string, assetId: string, role: AssetRole) => Promise<InboxAsset>;
   discardInboxAsset: (slug: string, assetId: string) => Promise<InboxDeletion>;
   putTimeline: (slug: string, timeline: Timeline) => Promise<TimelineWriteResult>;
-  createRenderJob: (slug: string) => Promise<RenderJob>;
+  createRenderJob: (slug: string, input?: { sample?: SampleSpec }) => Promise<RenderJob>;
+  getProposal: (slug: string) => Promise<ProposalDocument>;
+  approveProposal: (slug: string, conceptId: string) => Promise<ProposalDocument>;
   createMontageJob: (slug: string, input: CreateMontageJobInput) => Promise<MontageJob>;
   createStoryboardJob: (slug: string, input: CreateStoryboardJobInput) => Promise<StoryboardJob>;
   getStoryboard: (slug: string) => Promise<StoryboardDocument>;
@@ -616,10 +620,40 @@ export function createRenderApiClient(fetchImpl: FetchLike): RenderApiClient {
       return body as TimelineWriteResult;
     },
 
-    async createRenderJob(slug: string): Promise<RenderJob> {
+    async getProposal(slug: string): Promise<ProposalDocument> {
+      const body = await requestJson(
+        `/projects/${encodeURIComponent(slug)}/proposal`,
+        undefined,
+        'a production proposal document',
+        (value) => isRecord(value),
+      );
+      return parseProposalDocument(body);
+    },
+
+    async approveProposal(slug: string, conceptId: string): Promise<ProposalDocument> {
+      const body = await requestJson(
+        `/projects/${encodeURIComponent(slug)}/proposal/approve`,
+        {
+          method: 'POST',
+          headers: { 'content-type': 'application/json' },
+          body: JSON.stringify({ conceptId }),
+        },
+        'a production proposal document',
+        (value) => isRecord(value),
+      );
+      return parseProposalDocument(body);
+    },
+
+    async createRenderJob(slug: string, input?: { sample?: SampleSpec }): Promise<RenderJob> {
       const body = await requestJson(
         `/projects/${encodeURIComponent(slug)}/jobs`,
-        { method: 'POST' },
+        input?.sample === undefined
+          ? { method: 'POST' }
+          : {
+              method: 'POST',
+              headers: { 'content-type': 'application/json' },
+              body: JSON.stringify({ kind: 'render', sample: input.sample }),
+            },
         'a render job document',
         (value) => isRecord(value),
       );

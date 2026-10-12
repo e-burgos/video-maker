@@ -342,6 +342,7 @@ export type RenderPipelineReport = {
   deliverable: RenderDeliverableReport;
   intermediates: RenderIntermediatesReport;
   loudness: RenderLoudnessReport;
+  sample?: true;
 };
 
 export type MontageJobProgress = {

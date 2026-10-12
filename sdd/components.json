@@ -1492,6 +1492,51 @@
             "change": "TASK-004: getVoice se gatea con la existencia de work/voice/voice.wav en el listado ya obtenido (EP-028), en vez de pedirlo siempre y aceptar el 404 esperado."
           }
         ]
+      },
+      {
+        "id": "COMP-064",
+        "name": "ProposalCard",
+        "type": "component",
+        "module": "production-quality",
+        "spec": "sdd/specs/spec-e-burgos-023-production-quality",
+        "path": "src/components/proposal-card.tsx",
+        "status": "implemented",
+        "created_in_cycle": 4,
+        "updated_in_cycle": null,
+        "description": "Tarjeta Propuesta del productor: 2-3 conceptos con estimacion (render, voz, tokens, USD, base historica), marca de recomendado y aprobacion por concepto.",
+        "consumes": [],
+        "created_at": "2026-10-12",
+        "changelog": []
+      },
+      {
+        "id": "COMP-065",
+        "name": "ProposalStatusBadge",
+        "type": "component",
+        "module": "production-quality",
+        "spec": "sdd/specs/spec-e-burgos-023-production-quality",
+        "path": "src/components/proposal-status-badge.tsx",
+        "status": "implemented",
+        "created_in_cycle": 4,
+        "updated_in_cycle": null,
+        "description": "Indicador Propuesta aprobada / pendiente del encabezado del proyecto.",
+        "consumes": [],
+        "created_at": "2026-10-12",
+        "changelog": []
+      },
+      {
+        "id": "COMP-066",
+        "name": "SampleTrigger",
+        "type": "component",
+        "module": "production-quality",
+        "spec": "sdd/specs/spec-e-burgos-023-production-quality",
+        "path": "src/components/sample-trigger.tsx",
+        "status": "implemented",
+        "created_in_cycle": 4,
+        "updated_in_cycle": null,
+        "description": "Boton Generar muestra (10 s) para render y motion: encola el job con sample, muestra el progreso y reproduce la muestra.",
+        "consumes": [],
+        "created_at": "2026-10-12",
+        "changelog": []
       }
     ]
   }
