@@ -1,6 +1,7 @@
 import { z } from 'zod';
 
 import { MotionStudioError } from '../errors/motion-studio-error';
+import { ImageBoxListSchema } from '../storyboard/image-box';
 import { formatIssuePath } from '../storyboard/parse-motion-storyboard';
 
 const Text = z.string().trim().min(1);
@@ -15,7 +16,7 @@ export const MotionBriefSchema = z.strictObject({
   goal: Text.optional(),
   audience: Text.optional(),
   script: Text,
-  images: z.array(z.strictObject({ file: Text, caption: Text })).max(12).default([]),
+  images: z.array(z.strictObject({ file: Text, caption: Text, boxes: ImageBoxListSchema.optional() })).max(12).default([]),
 });
 
 export type MotionBrief = z.infer<typeof MotionBriefSchema>;

@@ -43,4 +43,25 @@ describe('layoutScenes', () => {
     expect(slotAt(slots, 1).start).toBe(2.8);
     expect(slotAt(slots, 1).end).toBe(4.6);
   });
+
+  describe('minSec', () => {
+    const timed = (id: string, minSec: number): MotionScene => ({ id, vo: 'x', minBars: 1, minSec, anchor: null });
+
+    it('keeps a scene at least minSec long without beat sync, with the voice intact', () => {
+      const slots = layoutScenes([timed('a', 6), scene('b')], [1, 1], { beatSync: false, beats });
+      expect(slotAt(slots, 0).end - slotAt(slots, 0).start).toBe(6);
+      expect(slotAt(slots, 1).start).toBe(6);
+    });
+
+    it('never cuts the voice when it is longer than minSec', () => {
+      const slot = slotAt(layoutScenes([timed('a', 2)], [5], { beatSync: false, beats }), 0);
+      expect(slot.end).toBe(5.8);
+    });
+
+    it('lands on a beat with beat sync and still honors minSec', () => {
+      const slot = slotAt(layoutScenes([timed('a', 7.2)], [1], { beatSync: true, beats }), 0);
+      expect(beats).toContain(slot.end);
+      expect(slot.end - slot.start).toBeGreaterThanOrEqual(7.2 - 1e-6);
+    });
+  });
 });

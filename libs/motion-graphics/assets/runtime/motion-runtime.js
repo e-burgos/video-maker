@@ -106,7 +106,7 @@ window.createMotionRuntime = function createMotionRuntime(T, W, compositionId) {
     'ui-mark': () => undefined,
     'ui-click': (el, t) => {
       tl.fromTo(el, { opacity: 0, scale: 0.25 }, { opacity: 1, scale: 1, duration: 0.18, ease: 'power2.out' }, t);
-      tl.to(el, { opacity: 0, scale: 1.5, duration: 0.45, ease: 'power1.out' }, t + 0.18);
+      tl.to(el, { opacity: 0, scale: 1.3, duration: 0.45, ease: 'power1.out' }, t + 0.18);
     },
     'ui-type': (el, t) => {
       const text = el.dataset.text || '';
@@ -117,7 +117,7 @@ window.createMotionRuntime = function createMotionRuntime(T, W, compositionId) {
       tl.to(state, { i: text.length, duration: Math.min(2.4, 0.06 * text.length + 0.3), ease: 'none', onUpdate: () => { target.textContent = text.slice(0, Math.round(state.i)); } }, t + 0.2);
     },
     'ui-highlight': (el, t, id) => {
-      tl.fromTo(el, { opacity: 0, scale: 1.12 }, { opacity: 1, scale: 1, duration: 0.35, ease: 'back.out(1.8)' }, t);
+      tl.fromTo(el, { opacity: 0, scale: 1.04 }, { opacity: 1, scale: 1, duration: 0.35, ease: 'power2.out' }, t);
       tl.to(el, { opacity: 0, duration: 0.3 }, uiHoldEnd(el, id, t, 2.4));
     },
     'ui-callout': (el, t, id) => {

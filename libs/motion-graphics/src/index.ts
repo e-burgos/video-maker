@@ -35,11 +35,14 @@ export type { ComposedStoryboard, ScriptDocument } from './compose/compose-story
 export { renderScene } from './scenes/render-scene';
 export type { SceneContext } from './scenes/scene-html';
 export { formatIssuePath, motionStoryboardJsonSchema, parseMotionStoryboard } from './storyboard/parse-motion-storyboard';
+export { ImageBoxSchema } from './storyboard/image-box';
+export type { ImageBox } from './storyboard/image-box';
 export { ICON_NAMES, MotionSceneSchema, MotionStoryboardSchema, SCENE_KINDS } from './storyboard/motion-storyboard.schema';
 export type { IconName, MotionChip, MotionSceneKind, MotionScreen, MotionStoryboard, MotionStoryboardScene, MotionVisual, SceneOf } from './storyboard/motion-storyboard.schema';
 
 export { buildAutoStoryboardRequest } from './auto/build-auto-storyboard-request';
 export type { AutoStoryboardRequest } from './auto/build-auto-storyboard-request';
+export { applyBriefBoxes, BOX_MATCH_TOLERANCE, checkStoryboardBoxes } from './auto/brief-boxes';
 export { checkStoryboardAgainstBrief, enforceBrief } from './auto/check-storyboard-against-brief';
 export type { StoryboardIssue } from './auto/check-storyboard-against-brief';
 export { generateMotionStoryboard } from './auto/generate-motion-storyboard';

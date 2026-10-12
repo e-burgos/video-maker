@@ -134,3 +134,23 @@ describe('buildAutoStoryboardRequest with a minimal brand', () => {
     expect(buildAutoStoryboardRequest(brief, testBrand).userPrompt).not.toContain('ASSET LIMITS');
   });
 });
+
+describe('measured boxes in the request', () => {
+  const withBoxes: MotionBrief = { ...brief, images: [{ file: 'local.jpg', caption: 'Un local', boxes: [{ name: 'Plan Propio', x: 0.175, y: 0.358, w: 0.308, h: 0.104 }] }] };
+
+  it('lists each image box with its numbers and tells the AI to use box names', () => {
+    const { userPrompt } = buildAutoStoryboardRequest(withBoxes, testBrand);
+    expect(userPrompt).toContain('* "Plan Propio": x 0.175, y 0.358, w 0.308, h 0.104');
+    expect(userPrompt).toContain('box: "<name>"');
+  });
+
+  it('mentions neither boxes nor the instruction when no image has them', () => {
+    expect(buildAutoStoryboardRequest(brief, testBrand).userPrompt).not.toContain('measured boxes');
+  });
+
+  it('teaches box and minSec in the walkthrough guide', () => {
+    expect(SCENE_GUIDE['ui-walkthrough']).toContain('box (the name)');
+    expect(SCENE_GUIDE['ui-walkthrough']).toContain('minSec');
+  });
+});
+

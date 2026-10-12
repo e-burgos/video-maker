@@ -105,6 +105,24 @@ describe('parseMotionStoryboard', () => {
       expect(() => parseMotionStoryboard(walkthrough([{ action: 'move', x: 0.5, y: 0.5 }], { frame: 'tv' }))).toThrow(/props\.frame/u);
     });
 
+    it('accepts a step that points at a box instead of coordinates', () => {
+      const parsed = parseMotionStoryboard(walkthrough([{ action: 'highlight', box: 'Plan Propio' }], { boxes: [{ name: 'Plan Propio', x: 0.1, y: 0.1, w: 0.2, h: 0.1 }] }));
+      expect(parsed.scenes[0]?.kind === 'ui-walkthrough' && parsed.scenes[0].props.steps[0]?.box).toBe('Plan Propio');
+    });
+
+    it.each([
+      ['a box together with coordinates', [{ action: 'highlight', box: 'A', x: 0.1, y: 0.1 }], /steps\[0\]\.box: a step uses either box or x,y,w,h/u],
+      ['a step with neither box nor position', [{ action: 'highlight' }], /steps\[0\]\.x: x and y are required unless box is set/u],
+    ])('rejects %s', (_, steps, expected) => {
+      expect(() => parseMotionStoryboard(walkthrough(steps))).toThrow(expected);
+    });
+
+    it('accepts minSec on any scene and rejects a non positive one', () => {
+      const withMinSec = (minSec: number) => ({ ...counter15, scenes: [{ ...counter15.scenes[0], minSec }, counter15.scenes[1]] });
+      expect(parseMotionStoryboard(withMinSec(4.5)).scenes[0]?.minSec).toBe(4.5);
+      expect(() => parseMotionStoryboard(withMinSec(0))).toThrow(/minSec/u);
+    });
+
     it('describes the coordinate convention to the AI', () => {
       expect(JSON.stringify(motionStoryboardJsonSchema())).toContain('0 = left edge, 1 = right edge');
     });

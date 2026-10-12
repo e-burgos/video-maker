@@ -230,6 +230,22 @@ describe('renderScene', () => {
       expect(html('walk-phone')).toContain('data-scale="2" data-cx="0.4" data-cy="0.6"');
     });
 
+    it('resolves box names against the boxes of the scene: areas cover the box, points go to its center', () => {
+      const base = scene('walk');
+      if (base.kind !== 'ui-walkthrough') throw new Error('walk');
+      const boxes = [{ name: 'Plan Propio', x: 0.2, y: 0.4, w: 0.3, h: 0.1 }];
+      const out = renderScene({ ...base, props: { ...base.props, boxes, steps: [{ action: 'highlight', box: 'Plan Propio' }, { action: 'click', box: 'Plan Propio' }, { action: 'zoom', box: 'Plan Propio' }] } }, ctx);
+      expect(out).toContain('class="mg-ui-highlight" style="left:20%;top:40%;width:30%;height:10%"');
+      expect(out).toContain('class="mg-ui-click" style="left:35%;top:45%"');
+      expect(out).toContain('data-cx="0.35" data-cy="0.45"');
+    });
+
+    it('fails with the box name when a step points at a box the scene does not have', () => {
+      const base = scene('walk');
+      if (base.kind !== 'ui-walkthrough') throw new Error('walk');
+      expect(() => renderScene({ ...base, props: { ...base.props, steps: [{ action: 'highlight', box: 'Fantasma' }] } }, ctx)).toThrow(/box "Fantasma"/u);
+    });
+
     it('places the callout bubble away from the edges of the capture', () => {
       expect(html('walk')).toContain('mg-ui-bubble h-end v-above');
       expect(html('walk-phone')).toContain('mg-ui-bubble h-mid v-below');

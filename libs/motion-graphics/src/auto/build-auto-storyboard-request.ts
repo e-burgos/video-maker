@@ -89,6 +89,14 @@ function assetLimitsSection(brief: MotionBrief, brand: BrandManifest): string[] 
   return limits.length === 0 ? [] : ['ASSET LIMITS', ...limits.map((limit) => `- ${limit}`)];
 }
 
+function boxLines(boxes: MotionBrief['images'][number]['boxes']): string[] {
+  if (boxes === undefined || boxes.length === 0) return [];
+  return [
+    '  measured boxes (fractions of the image; in a ui-walkthrough step write `box: "<name>"` instead of x,y,w,h, and never estimate a position these boxes already give):',
+    ...boxes.map((box) => `  * "${box.name}": x ${box.x}, y ${box.y}, w ${box.w}, h ${box.h}`),
+  ];
+}
+
 function briefSection(brief: MotionBrief, brand: BrandManifest): string {
   const silent = brief.music === null || (brief.music === 'auto' && brand.music.length === 0);
   const musicInstruction = silent
@@ -96,7 +104,7 @@ function briefSection(brief: MotionBrief, brand: BrandManifest): string {
     : brief.music === 'auto'
       ? 'choose the track that fits the mood of the script'
       : `use the track "${brief.music}"`;
-  const images = brief.images.map((image) => `- ${briefImageRef(image.file)}: ${image.caption}`);
+  const images = brief.images.flatMap((image) => [`- ${briefImageRef(image.file)}: ${image.caption}`, ...boxLines(image.boxes)]);
   return [
     'BRIEF',
     ...(brief.title === undefined ? [] : [`title: ${brief.title}`]),

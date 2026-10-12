@@ -1,4 +1,7 @@
-import type { SceneOf, WalkthroughStepSpec } from '../storyboard/motion-storyboard.schema';
+import { MotionStudioError } from '../errors/motion-studio-error';
+import type { SceneOf } from '../storyboard/motion-storyboard.schema';
+import { resolveWalkthroughStep } from '../storyboard/resolve-walkthrough-boxes';
+import type { ResolvedWalkthroughStep } from '../storyboard/resolve-walkthrough-boxes';
 import { animAttrs, esc, headline } from './scene-html';
 import type { SceneContext } from './scene-html';
 
@@ -23,7 +26,7 @@ const fraction = (value: number): string => String(Math.round(value * 10000) / 1
 const clamp = (value: number, min: number, max: number): number => Math.min(max, Math.max(min, value));
 const percentStyle = (entries: Record<string, number>): string => Object.entries(entries).map(([key, value]) => `${key}:${fraction(value)}%`).join(';');
 
-export function resolveStepGeometry(step: WalkthroughStepSpec): StepGeometry {
+export function resolveStepGeometry(step: ResolvedWalkthroughStep): StepGeometry {
   const sized = (fallback: { w: number; h: number }) => ({ x: step.x, y: step.y, w: Math.min(step.w ?? fallback.w, 1 - step.x), h: Math.min(step.h ?? fallback.h, 1 - step.y) });
   switch (step.action) {
     case 'move':
@@ -47,19 +50,19 @@ export function resolveStepGeometry(step: WalkthroughStepSpec): StepGeometry {
   }
 }
 
-function stepAttrs(step: WalkthroughStepSpec, index: number, count: number, anim: string, geometry: StepGeometry, extra: Record<string, string | number> = {}): string {
+function stepAttrs(step: ResolvedWalkthroughStep, index: number, count: number, anim: string, geometry: StepGeometry, extra: Record<string, string | number> = {}): string {
   const cursor = geometry.cursor ? { px: Math.round(geometry.cursor.x * 10000) / 10000, py: Math.round(geometry.cursor.y * 10000) / 10000 } : {};
   const slot = step.cue === undefined && step.at === undefined ? { slot: index, count } : {};
   return ` data-ui-step="${step.action}"${animAttrs({ anim, cue: step.cue, at: step.cue === undefined ? step.at : undefined, parallel: true, extra: { ...slot, ...cursor, ...extra } })}`;
 }
 
-function calloutPlacement(step: WalkthroughStepSpec): string {
+function calloutPlacement(step: ResolvedWalkthroughStep): string {
   const horizontal = step.x < CALLOUT_ALIGN_EDGE ? 'h-start' : step.x > 1 - CALLOUT_ALIGN_EDGE ? 'h-end' : 'h-mid';
   const vertical = step.y < CALLOUT_BELOW_UNTIL ? 'v-below' : 'v-above';
   return `${horizontal} ${vertical}`;
 }
 
-function stepHtml(step: WalkthroughStepSpec, index: number, count: number): string {
+function stepHtml(step: ResolvedWalkthroughStep, index: number, count: number): string {
   const geometry = resolveStepGeometry(step);
   const { box } = geometry;
   switch (step.action) {
@@ -87,7 +90,12 @@ function browserBar(url: string | undefined): string {
 
 export function uiWalkthrough(props: WalkthroughProps, ctx: SceneContext): string {
   const kind = props.frame ?? 'browser';
-  const steps = props.steps.map((step, index) => stepHtml(step, index, props.steps.length)).join('');
+  const resolved = props.steps.map((step, index) => {
+    const result = resolveWalkthroughStep(step, props.boxes);
+    if (result === null) throw new MotionStudioError('STORYBOARD_INVALID', `ui-walkthrough step ${index + 1}: box "${step.box ?? ''}" is not among the boxes of the image ${props.image}`);
+    return result;
+  });
+  const steps = resolved.map((step, index) => stepHtml(step, index, resolved.length)).join('');
   const layer = `<div class="mg-ui-layer">${steps}<div class="mg-ui-track" data-ui-cursor="1"${animAttrs({ anim: 'ui-cursor', parallel: true })}>${CURSOR_SVG}</div></div>`;
   const shot = `<div class="mg-ui-shot"><div class="mg-ui-zoom"><img src="${esc(ctx.imageUrl(props.image))}" alt="" />${layer}</div></div>`;
   const device = `<div class="mg-ui-device ${kind}"${animAttrs({ anim: 'rise', parallel: true })}>${kind === 'browser' ? browserBar(props.url) : ''}${shot}</div>`;

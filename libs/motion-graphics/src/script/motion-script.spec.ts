@@ -40,11 +40,16 @@ describe('parseMotionScript', () => {
     expect(() => parseMotionScript({ ...valid, scenes: [{ id: 'hook', vo: 'Hola', direction: { pace: 'turbo' } }] })).toThrow('scenes[0].direction');
   });
 
+  it('reads minSec when a scene sets it', () => {
+    expect(parseMotionScript({ ...valid, sfx: [], scenes: [{ id: 'a', vo: 'x', minSec: 4.5 }] }).scenes[0]).toMatchObject({ minSec: 4.5 });
+  });
+
   it.each([
     [{ ...valid, scenes: [] }, 'scenes must be a non-empty array'],
     [{ ...valid, scenes: [{ id: 'Hook', vo: 'x' }] }, 'kebab-case'],
     [{ ...valid, scenes: [{ id: 'a', vo: 'x' }, { id: 'a', vo: 'y' }] }, 'unique'],
     [{ ...valid, scenes: [{ id: 'a', vo: 'x', minBars: 0 }] }, 'minBars must be positive'],
+    [{ ...valid, scenes: [{ id: 'a', vo: 'x', minSec: 0 }] }, 'minSec must be positive'],
     [{ ...valid, sfx: [{ id: 's', scene: 'nope' }] }, 'is not a scene id'],
     [{ ...valid, sfx: 'x' }, 'sfx must be an array'],
     [{ ...valid, noWhooshOn: [1] }, 'noWhooshOn'],

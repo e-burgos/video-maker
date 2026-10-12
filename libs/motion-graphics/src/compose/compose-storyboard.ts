@@ -20,7 +20,7 @@ export interface ScriptDocument {
   lengthScale: number;
   music: { file: string; credit: string; volume?: number; mode?: MusicMode; floorDb?: number } | null;
   noWhooshOn: string[];
-  scenes: Array<{ id: string; vo: string; minBars: number; anchor?: number; direction?: VoiceDirection }>;
+  scenes: Array<{ id: string; vo: string; minBars: number; minSec?: number; anchor?: number; direction?: VoiceDirection }>;
   sfx: Array<{ id: string; scene: string; offset: number }>;
 }
 
@@ -196,6 +196,7 @@ export function composeStoryboard(storyboard: MotionStoryboard, brand: BrandMani
         id: scene.id,
         vo: scene.vo,
         minBars: scene.minBars ?? DEFAULT_MIN_BARS[scene.kind] ?? 3,
+        ...(scene.minSec === undefined ? {} : { minSec: scene.minSec }),
         ...(anchor === undefined || !storyboard.beatSync ? {} : { anchor }),
         ...(scene.direction === undefined ? {} : { direction: scene.direction }),
       };
