@@ -17,6 +17,7 @@ import { useRenderJobPoll } from '../hooks/use-render-job-poll';
 import { useT } from '../i18n/language-context';
 import { ErrorNotice } from './error-notice';
 import { Badge } from './ui/badge';
+import { VisualReviewSection } from './visual-review-section';
 import type { ReviewFinding, ReviewReport, ReviewSeverity } from '../api/review-types';
 
 export type RenderReviewPanelProps = {
@@ -94,7 +95,7 @@ function KeyMetrics({ report }: { report: ReviewReport }) {
   );
 }
 
-function ReportBody({ report }: { report: ReviewReport }) {
+function ReportBody({ slug, report }: { slug: string; report: ReviewReport }) {
   const t = useT();
   const counts = reviewCounts(report);
 
@@ -106,6 +107,7 @@ function ReportBody({ report }: { report: ReviewReport }) {
         ).join(' · ')}
       </p>
       <KeyMetrics report={report} />
+      <VisualReviewSection slug={slug} report={report} />
       {REVIEW_SEVERITY_ORDER.map((severity) => (
         <SeverityGroup key={severity} report={report} severity={severity} />
       ))}
@@ -172,7 +174,7 @@ export function RenderReviewPanel({ slug, file }: RenderReviewPanelProps) {
           {failedJob.error.code}: {failedJob.error.message}
         </p>
       )}
-      {report.data !== null && <ReportBody report={report.data} />}
+      {report.data !== null && <ReportBody slug={slug} report={report.data} />}
     </section>
   );
 }

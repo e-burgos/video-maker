@@ -99,4 +99,68 @@ describe('RenderReviewPanel', () => {
     await waitFor(() => expect(screen.getByRole('alert')).toBeTruthy());
     expect(screen.getByRole('alert').textContent).toContain('REVIEW_INPUTS_UNAVAILABLE');
   });
+
+  describe('visual review by scene', () => {
+    const frames = [
+      { sceneId: 's1', index: 1, startSec: 0, endSec: 8, atSec: 4, frame: 'out/video.review/scene-01.jpg', voice: 'Abrí el panel' },
+      { sceneId: 's2', index: 2, startSec: 8, endSec: 15, atSec: 11.5, frame: 'out/video.review/scene-02.jpg' },
+    ];
+
+    function renderWith(report: ReviewReport) {
+      renderPanel({ getRenderReview: vi.fn().mockResolvedValue(report) });
+    }
+
+    it('shows the unreviewed banner and a sin revisar mark per scene', async () => {
+      renderWith({
+        ...REPORT,
+        sceneFrames: frames,
+        findings: [
+          { id: 'v0', check: 'visual-not-reviewed', severity: 'critical', message: 'Nadie miró las escenas' },
+        ],
+      });
+
+      expect(await screen.findByTestId('visual-not-reviewed-banner')).toBeTruthy();
+      expect(screen.getByText('Nobody has looked at the scenes of this render yet.')).toBeTruthy();
+      expect(screen.getAllByTestId('visual-scene')).toHaveLength(2);
+      expect(screen.getAllByTestId('visual-scene-unreviewed')).toHaveLength(2);
+    });
+
+    it('shows frame, time range, voice and the recorded verdict of each scene', async () => {
+      renderWith({
+        ...REPORT,
+        sceneFrames: frames,
+        visualReview: {
+          recordedAt: '2026-10-12T21:00:00.000Z',
+          scenes: [
+            { sceneId: 's1', shows: 'Panel de ventas', matchesVoice: true, legible: true, couldBeOtherProduct: false, verdict: 'ok', note: 'Se entiende.' },
+            { sceneId: 's2', shows: 'Un menú genérico', matchesVoice: false, legible: true, couldBeOtherProduct: true, verdict: 'fix', note: 'No es el producto.' },
+          ],
+        },
+      });
+
+      const scenes = await screen.findAllByTestId('visual-scene');
+      const first = within(scenes[0] as HTMLElement);
+      expect(first.getByRole('img').getAttribute('src')).toBe('/api/projects/demo/files/out/video.review/scene-01.jpg');
+      expect(first.getByText('Scene 1')).toBeTruthy();
+      expect(first.getByText('0:00–0:08')).toBeTruthy();
+      expect(first.getByText('Abrí el panel')).toBeTruthy();
+      expect(first.getByText('OK')).toBeTruthy();
+      expect(first.getByText('Shows: Panel de ventas')).toBeTruthy();
+
+      const second = within(scenes[1] as HTMLElement);
+      expect(second.getByText('Fix')).toBeTruthy();
+      expect(second.getByText('Could be another product').getAttribute('data-good')).toBe('false');
+      expect(second.getByText('Matches the voice').getAttribute('data-good')).toBe('false');
+      expect(second.getByText('No es el producto.')).toBeTruthy();
+      expect(screen.queryByTestId('visual-not-reviewed-banner')).toBeNull();
+      expect(screen.queryByTestId('visual-scene-unreviewed')).toBeNull();
+    });
+
+    it('renders no visual section for a report without scene frames', async () => {
+      renderWith(REPORT);
+
+      await screen.findByTestId('review-status');
+      expect(screen.queryByTestId('visual-review')).toBeNull();
+    });
+  });
 });
