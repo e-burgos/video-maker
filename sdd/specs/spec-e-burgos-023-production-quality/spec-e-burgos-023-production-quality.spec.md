@@ -1,6 +1,6 @@
 # SPEC-e-burgos-023: Calidad de producción — control automático, escena de UI, dirección de voz, propuesta y referencia
 
-> Estado: **in-progress** — registrada el 2026-10-11.
+> Estado: **completed** — registrada el 2026-10-11, cerrada el 2026-10-12 (5 ciclos).
 > Pedido del dev: incorporar a video-maker las ideas que suman de la revisión de OpenMontage (calesthio/OpenMontage,
 > AGPL-3.0). **Ninguna línea de código de OpenMontage entra al repo**: video-maker se distribuye como app de escritorio
 > y la AGPL obligaría a liberarlo. Sólo se reimplementan ideas con diseño propio.
