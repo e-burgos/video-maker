@@ -25,6 +25,7 @@ import { parsePhotoArollJobInput } from '../../jobs/photo-aroll-job-params';
 import { parseStoryboardInput, parseStoryboardOverwrite } from '../../jobs/storyboard-job-params';
 import { parseVoiceJobInput } from '../../jobs/voice-job-params';
 import { parsePublishJobInput } from '../../jobs/publish-job-params';
+import { parseReferenceJobInput } from '../../jobs/reference-job-params';
 import { parseReviewJobInput } from '../../jobs/review-job-params';
 import { parseSampleInput } from '../../jobs/sample-job-params';
 import { createProjectBrandResolver } from '../../brands/project-brand-resolver';
@@ -48,6 +49,7 @@ import { storyboardExists } from '../../storyboard/storyboard-store';
 import type {
   CreateJobInput,
   CreatePublishJobInput,
+  CreateReferenceJobInput,
   CreateReviewJobInput,
   Job,
   JobKind,
@@ -106,7 +108,8 @@ function resolveJobKind(value: unknown): JobKind | 'invalid' {
     raw === 'photo-aroll' ||
     raw === 'motion' ||
     raw === 'publish' ||
-    raw === 'review'
+    raw === 'review' ||
+    raw === 'reference'
   ) {
     return raw;
   }
@@ -346,6 +349,29 @@ async function createReviewJobResponse(
   return jobAcceptedResponse(job);
 }
 
+type ReferenceParams = Omit<CreateReferenceJobInput, 'kind' | 'slug' | 'projectRoot'>;
+
+async function createReferenceJobResponse(
+  deps: RenderApiDependencies,
+  project: MediaProject,
+  runtime: RenderApiRuntime,
+  slug: string,
+  params: ReferenceParams,
+  retryOf: string | null,
+): Promise<HttpResponse> {
+  const stat = await deps.storage.stat(toAbsolutePath(project, params.file));
+  if (stat === null || stat.kind !== 'file') {
+    throw new PipelineStageError({
+      code: 'REFERENCE_FILE_NOT_FOUND',
+      stage: null,
+      resource: params.file,
+      expected: 'an existing video under raw/reference/',
+    });
+  }
+  const job = registerJob(runtime, { kind: 'reference', slug, projectRoot: project.root, ...params }, retryOf);
+  return jobAcceptedResponse(job);
+}
+
 async function createPublishJobResponse(
   deps: RenderApiDependencies,
   project: MediaProject,
@@ -397,7 +423,7 @@ export async function handleCreateRenderJob(
     throw new PipelineStageError({
       code: 'JOB_KIND_INVALID',
       stage: null,
-      expected: "'render', 'montage', 'storyboard', 'voice', 'photo-aroll', 'motion', 'publish' or 'review'",
+      expected: "'render', 'montage', 'storyboard', 'voice', 'photo-aroll', 'motion', 'publish', 'review' or 'reference'",
     });
   }
 
@@ -478,6 +504,10 @@ export async function handleCreateRenderJob(
 
   if (jobKind === 'review') {
     return createReviewJobResponse(deps, project, runtime, slug, parseReviewJobInput(bodyObject), null);
+  }
+
+  if (jobKind === 'reference') {
+    return createReferenceJobResponse(deps, project, runtime, slug, parseReferenceJobInput(bodyObject), null);
   }
 
   if (jobKind === 'photo-aroll') {
@@ -626,5 +656,7 @@ export async function handleRetryRenderJob(
       return createPublishJobResponse(deps, project, runtime, job.slug, retryParams, jobId);
     case 'review':
       return createReviewJobResponse(deps, project, runtime, job.slug, retryParams, jobId);
+    case 'reference':
+      return createReferenceJobResponse(deps, project, runtime, job.slug, retryParams, jobId);
   }
 }

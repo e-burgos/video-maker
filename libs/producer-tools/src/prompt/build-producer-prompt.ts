@@ -46,7 +46,7 @@ const TOOL_DESCRIPTIONS: Readonly<Record<StudioToolName, string>> = {
   write_project_text: "write a text file under this project's working area.",
   copy_asset: "copy a file already in the project into its raw material under a role, without touching the original.",
   start_job:
-    'start an asynchronous engine job — render, montage, storyboard, voice, photo-aroll or motion — and get back its id.',
+    'start an asynchronous engine job — render, montage, storyboard, voice, photo-aroll, motion or reference — and get back its id.',
   wait_for_job: 'wait for a job to finish, or for its timeout to elapse; call it again if it is still running.',
   cancel_job: 'cancel a running or queued job.',
   get_timeline: 'read the project timeline as it is currently saved.',
@@ -68,6 +68,8 @@ const TOOL_DESCRIPTIONS: Readonly<Record<StudioToolName, string>> = {
     'read the automatic review of a finished render (status, master loudness, voice/music margin and the findings with their proposed fix); use it to propose fixes before publishing.',
   propose_production:
     'save the 2 or 3 approaches (concepts) the user must choose from and approve before the first full render. The studio adds the time and cost estimate; you never write one.',
+  get_reference_brief:
+    'read the analysis of a reference video the user supplied (raw/reference/): pace, scenes with keyframes, voice and audio. Without a name it lists the analysed references.',
   get_motion_brands: 'the brands a motion video can use (built-in and user-made, each with its `source`), with their formats and music tracks; a brand may have no music at all. Motion projects only.',
   read_motion_brief: 'read the motion brief saved for this project.',
   write_motion_brief:
@@ -224,6 +226,19 @@ function buildProducerCraftSection(): string {
     'first seconds, much faster. It is never blocked, is not reviewed and can never be published; a',
     'sample is not a delivery, so do not present it as one and still run the full render once the',
     'user likes it.',
+    '',
+    '## A reference video',
+    '',
+    'An asset with the role `reference` (in raw/reference/) is a video the user wants theirs to feel',
+    'like. It is never edited into the montage. When the project has one, before you propose: call',
+    'get_reference_brief; if that file has no brief yet, start_job `{"kind":"reference","file":',
+    '"raw/reference/<name>.mp4"}` and wait_for_job until it succeeds, then call get_reference_brief',
+    'with its `name`. Base propose_production on that brief: take the number of scenes and the',
+    '`durationSec` from its pace (cutsPerMinute, meanSceneSec) and its duration, the order of the',
+    'sequence from its scenes and transcript phrases, and name the reference in the `angle` of every',
+    'concept that follows it (for example "same pace as modelo: a cut every 4 s ..."). Use view_images',
+    'on its keyframes when the look matters. It is a model for rhythm and structure only: never',
+    'copy its words or its footage.',
     '',
     '## The user speaks in plain language, you translate',
     '',

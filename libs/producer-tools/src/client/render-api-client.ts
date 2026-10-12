@@ -1,3 +1,5 @@
+import type { ReferenceBrief } from '@video-maker/timeline-core';
+
 export type RenderApiProjectMode = 'footage' | 'motion';
 
 export interface RenderApiMotionBrand {
@@ -138,6 +140,18 @@ export interface RenderApiRenderReview {
   }[];
 }
 
+export interface RenderApiReferenceSummary {
+  readonly name: string;
+  readonly file: string;
+  readonly briefFile: string;
+  readonly durationSec: number;
+  readonly scenes: number;
+  readonly cutsPerMinute: number;
+  readonly hasVoice: boolean;
+  readonly summary: string;
+  readonly createdAt: string;
+}
+
 export interface RenderApiProposalState {
   readonly status: 'pending' | 'approved';
   readonly approvedConceptId?: string;
@@ -179,6 +193,9 @@ export interface RenderApiClient {
   previewImages(paths: readonly string[]): Promise<readonly RenderApiImagePreview[]>;
 
   getRenderReview(file: string | undefined): Promise<RenderApiRenderReview | null>;
+
+  listReferences(): Promise<readonly RenderApiReferenceSummary[]>;
+  getReference(name: string): Promise<ReferenceBrief>;
 
   getProposalState(): Promise<RenderApiProposalState | null>;
   putProposal(draft: Readonly<Record<string, unknown>>): Promise<{ readonly concepts: number }>;

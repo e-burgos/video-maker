@@ -214,6 +214,17 @@ describe('StartJobInputSchema', () => {
     expect(StartJobInputSchema.safeParse({ kind: 'motion', takes: 9 }).success).toBe(false);
   });
 
+  it('accepts a reference job for a video directly under raw/reference/', () => {
+    expect(StartJobInputSchema.safeParse({ kind: 'reference', file: 'raw/reference/modelo.mp4' }).success).toBe(true);
+  });
+
+  it('rejects a reference job outside raw/reference/ or without a file', () => {
+    for (const file of ['raw/aroll/a.mp4', 'raw/reference/sub/a.mp4', 'out/a.mp4', '../a.mp4']) {
+      expect(StartJobInputSchema.safeParse({ kind: 'reference', file }).success).toBe(false);
+    }
+    expect(StartJobInputSchema.safeParse({ kind: 'reference' }).success).toBe(false);
+  });
+
   it('accepts a photo-aroll job', () => {
     const result = StartJobInputSchema.safeParse({
       kind: 'photo-aroll',

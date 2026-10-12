@@ -1,3 +1,4 @@
+import { referenceBrief, referenceJob, referenceSummary } from './__fixtures__/reference';
 import { productionProposal, proposalDocument } from './__fixtures__/proposal';
 import { describe, expect, it, vi } from 'vitest';
 
@@ -1550,5 +1551,54 @@ describe('createRenderApiClient — listGenerated y getProjectFile (FIX-006-001,
 
     await expect(createRenderApiClient(fetchImpl).composeBrandPreview('mine')).resolves.toEqual(preview);
     expect(calls[0]?.url).toBe('/api/brands/mine/preview');
+  });
+  it('lists the reference summaries of a project', async () => {
+    const { fetchImpl, calls } = recordingFetch(() => jsonResponse({ references: [referenceSummary()] }));
+
+    const result = await createRenderApiClient(fetchImpl).listReferences('demo');
+
+    expect(calls[0]?.url).toBe('/api/projects/demo/references');
+    expect(result.map((entry) => entry.name)).toEqual(['demo']);
+  });
+
+  it('rejects a reference listing with a malformed entry', async () => {
+    const { fetchImpl } = recordingFetch(() => jsonResponse({ references: [{ name: 'demo' }] }));
+
+    const error = await createRenderApiClient(fetchImpl)
+      .listReferences('demo')
+      .catch((caught: unknown) => caught);
+
+    expect((error as RenderApiError).code).toBe('RESPONSE_SHAPE_UNEXPECTED');
+  });
+
+  it('reads one reference brief by name', async () => {
+    const { fetchImpl, calls } = recordingFetch(() => jsonResponse(referenceBrief()));
+
+    const brief = await createRenderApiClient(fetchImpl).getReference('demo', 'my clip');
+
+    expect(calls[0]?.url).toBe('/api/projects/demo/references/my%20clip');
+    expect(brief.scenes).toHaveLength(2);
+  });
+
+  it('maps REFERENCE_NOT_FOUND with its code', async () => {
+    const { fetchImpl } = recordingFetch(() =>
+      jsonResponse({ error: { code: 'REFERENCE_NOT_FOUND', stage: null, message: 'none' } }, 404),
+    );
+
+    const error = await createRenderApiClient(fetchImpl)
+      .getReference('demo', 'x')
+      .catch((caught: unknown) => caught);
+
+    expect((error as RenderApiError).code).toBe('REFERENCE_NOT_FOUND');
+  });
+
+  it('queues a reference job with the asset path', async () => {
+    const { fetchImpl, calls } = recordingFetch(() => jsonResponse(referenceJob({ state: 'queued' }), 202));
+
+    const job = await createRenderApiClient(fetchImpl).createReferenceJob('demo', 'raw/reference/demo.mp4');
+
+    expect(calls[0]?.url).toBe('/api/projects/demo/jobs');
+    expect(JSON.parse(String(calls[0]?.init?.body))).toEqual({ kind: 'reference', file: 'raw/reference/demo.mp4' });
+    expect(job.kind).toBe('reference');
   });
 });

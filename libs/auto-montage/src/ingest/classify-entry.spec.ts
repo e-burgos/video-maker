@@ -122,3 +122,20 @@ describe('classifyTopLevelEntry / classifyFileEntry — rol logo (spec-014)', ()
     });
   });
 });
+
+describe('classifyTopLevelEntry / classifyFileEntry — rol reference', () => {
+  it('raw/reference/ es un directorio de rol conocido', () => {
+    expect(classifyTopLevelEntry({ name: 'reference', isDirectory: true })).toEqual({
+      kind: 'role',
+      role: 'reference',
+    });
+  });
+
+  it('acepta solo video dentro de raw/reference/', () => {
+    expect(classifyFileEntry('modelo.mp4', 'reference')).toEqual({ kind: 'asset' });
+    expect(classifyFileEntry('modelo.png', 'reference')).toEqual({
+      kind: 'ignored',
+      reason: 'extension-role-mismatch',
+    });
+  });
+});

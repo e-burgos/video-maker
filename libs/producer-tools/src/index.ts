@@ -74,6 +74,7 @@ export type {
   RenderApiProbeResult,
   RenderApiProjectDetail,
   RenderApiProjectMode,
+  RenderApiReferenceSummary,
   RenderApiVoice,
 } from './client/render-api-client';
 export { createHttpRenderApiClient, DEFAULT_HTTP_RENDER_API_CLIENT_TIMEOUT_MS } from './client/http-render-api-client';

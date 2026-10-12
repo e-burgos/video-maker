@@ -44,7 +44,7 @@ export const ProjectRelativePathSchema = z
     message: 'La ruta debe ser POSIX y relativa a la raíz del proyecto de medios.',
   });
 
-export const AssetRoleSchema = z.enum(['aroll', 'broll', 'image', 'audio', 'voice', 'logo']);
+export const AssetRoleSchema = z.enum(['aroll', 'broll', 'image', 'audio', 'voice', 'logo', 'reference']);
 
 export const AssetFingerprintSchema = z.strictObject({
   sizeBytes: z.number().int().nonnegative(),

@@ -418,3 +418,20 @@ describe('review job persistence', () => {
     expect(parseStoredParams('publish', legacy)).toMatchObject({ ignoreReview: false });
   });
 });
+
+describe('reference job persistence', () => {
+  const REFERENCE_INPUT: CreateJobInput = {
+    kind: 'reference',
+    slug: 'demo-01',
+    projectRoot: '/media/demo-01',
+    file: 'raw/reference/modelo.mp4',
+  };
+
+  it('stores only the file and reads it back', () => {
+    const stored = toStoredParams(REFERENCE_INPUT);
+
+    expect(stored).toEqual({ kind: 'reference', file: 'raw/reference/modelo.mp4' });
+    expect(parseStoredParams('reference', JSON.parse(JSON.stringify(stored)))).toEqual(stored);
+    expect(parseStoredParams('reference', { file: 5 })).toBeNull();
+  });
+});

@@ -199,6 +199,103 @@ describe('createStudioToolHandlers', () => {
     expect(client.calls).toEqual([{ method: 'getMotionStoryboard', args: [] }]);
   });
 
+  describe('get_reference_brief', () => {
+    const summary = {
+      name: 'modelo',
+      file: 'raw/reference/modelo.mp4',
+      briefFile: 'work/reference/modelo.brief.json',
+      durationSec: 30,
+      scenes: 1,
+      cutsPerMinute: 0,
+      hasVoice: false,
+      summary: 'Referencia de prueba.',
+      createdAt: '2026-10-12T10:00:00.000Z',
+    };
+    const brief = {
+      version: 1 as const,
+      file: 'raw/reference/modelo.mp4',
+      durationSec: 30,
+      format: { width: 1080, height: 1920, fps: 30, orientation: 'portrait' as const },
+      scenes: [{ index: 0, startSec: 0, endSec: 30, durationSec: 30, keyframe: 'work/reference/modelo/scene-00.jpg' }],
+      pace: { cutsPerMinute: 0, meanSceneSec: 30, medianSceneSec: 30 },
+      voice: null,
+      audio: { integratedLufs: -14, longSilences: [] },
+      summary: 'Referencia de prueba.',
+      createdAt: '2026-10-12T10:00:00.000Z',
+    };
+
+    it('lists the analysed references when no name is given', async () => {
+      const { handlers, client } = handlersWith({ listReferences: async () => [summary] });
+
+      const result = await handlers.get_reference_brief({});
+
+      expect(result.data).toEqual({ references: [summary], brief: null });
+      expect(Object.keys(result.data as object).sort()).toEqual(['brief', 'references']);
+      expect(client.calls.map((call) => call.method)).toEqual(['listReferences']);
+    });
+
+    it('returns the full brief of the named reference next to the list', async () => {
+      const { handlers, client } = handlersWith({ listReferences: async () => [summary], getReference: async () => brief });
+
+      const result = await handlers.get_reference_brief({ name: 'modelo' });
+
+      expect(result.data).toEqual({ references: [summary], brief });
+      expect(client.calls.find((call) => call.method === 'getReference')?.args).toEqual(['modelo']);
+    });
+
+    it('explains how to analyse a reference that has no brief yet', async () => {
+      const { handlers } = handlersWith({
+        listReferences: async () => [],
+        getReference: () => Promise.reject(new StudioToolRuntimeError('FILE_NOT_FOUND', 'That reference has no analysis yet.')),
+      });
+
+      await expect(handlers.get_reference_brief({ name: 'modelo' })).rejects.toMatchObject({
+        code: 'FILE_NOT_FOUND',
+        hint: expect.stringContaining('start_job {"kind":"reference"'),
+      });
+    });
+
+    it('rejects a name with a folder', async () => {
+      const { handlers } = handlersWith();
+
+      await expect(handlers.get_reference_brief({ name: 'raw/reference/modelo' })).rejects.toMatchObject({ code: 'INVALID_INPUT' });
+    });
+  });
+
+  it('start_job passes a reference job through with its file and no model', async () => {
+    const { handlers, client } = handlersWith({ createJob: async () => ({ id: 'job-9', kind: 'reference', state: 'queued', progress: null, report: null, error: null }) });
+
+    const result = await handlers.start_job({ job: { kind: 'reference', file: 'raw/reference/modelo.mp4' } });
+
+    expect(result.data).toEqual({ jobId: 'job-9', kind: 'reference', status: 'queued' });
+    expect(client.calls.find((call) => call.method === 'createJob')?.args).toEqual([{ kind: 'reference', file: 'raw/reference/modelo.mp4' }]);
+  });
+
+  it('get_project_overview accepts review and publish jobs among the recent ones', async () => {
+    const { handlers } = handlersWith({
+      getProjectDetail: async () => ({
+        slug: 'p',
+        layout: { raw: true, catalog: true, timeline: true, edl: false, out: false },
+        assetSource: 'catalog',
+        assetCounts: {},
+      }),
+      listProjectAssets: async () => [],
+      listPendingAssets: async () => [],
+      listRecentJobs: async () => [
+        { id: 'a', kind: 'review', state: 'succeeded', createdAt: '2026-01-02' },
+        { id: 'b', kind: 'reference', state: 'running', createdAt: '2026-01-01' },
+      ],
+      readProducerScriptState: async () => 'none',
+    });
+
+    const result = await handlers.get_project_overview({});
+
+    expect((result.data as { recentJobs: unknown[] }).recentJobs).toEqual([
+      { jobId: 'a', kind: 'review', status: 'succeeded' },
+      { jobId: 'b', kind: 'reference', status: 'running' },
+    ]);
+  });
+
   describe('get_render_review', () => {
     const review = {
       file: 'out/video.mp4',

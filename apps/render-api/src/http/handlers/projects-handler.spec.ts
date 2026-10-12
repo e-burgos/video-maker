@@ -187,7 +187,7 @@ describe('handleCreateProject', () => {
       captionTheme: null,
       layout: { raw: false, catalog: false, timeline: false, edl: false, out: false },
       assetSource: 'raw-scan',
-      assetCounts: { aroll: 0, broll: 0, image: 0, audio: 0, voice: 0, logo: 0 },
+      assetCounts: { aroll: 0, broll: 0, image: 0, audio: 0, voice: 0, logo: 0, reference: 0 },
     });
     expect(deps.localStore.projects.exists('smoke-ingest')).toBe(true);
 

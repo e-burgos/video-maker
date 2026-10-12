@@ -3,8 +3,9 @@ import type { CaptionTheme } from '@video-maker/timeline-core';
 import type { MotionJob, MotionStage } from './motion-types';
 import type { ReviewJob } from './review-types';
 import type { PublishJob, PublishStage } from './youtube-types';
+import type { ReferenceJob, ReferenceStage } from './reference-types';
 
-export const ASSET_ROLES = ['aroll', 'broll', 'image', 'audio', 'voice', 'logo'] as const;
+export const ASSET_ROLES = ['aroll', 'broll', 'image', 'audio', 'voice', 'logo', 'reference'] as const;
 
 export type AssetRole = (typeof ASSET_ROLES)[number];
 
@@ -279,7 +280,7 @@ export const RENDER_PIPELINE_STAGES = ['prepare', 'render', 'mix', 'mux', 'verif
 
 export type RenderPipelineStage = (typeof RENDER_PIPELINE_STAGES)[number];
 
-export const JOB_KINDS = ['render', 'montage', 'storyboard', 'voice', 'motion', 'publish', 'review'] as const;
+export const JOB_KINDS = ['render', 'montage', 'storyboard', 'voice', 'motion', 'publish', 'review', 'reference'] as const;
 
 export type JobKind = (typeof JOB_KINDS)[number];
 
@@ -470,13 +471,29 @@ export type VoiceJob = {
   error: RenderApiErrorPayload | null;
 };
 
-export type Job = RenderJob | MontageJob | StoryboardJob | VoiceJob | MotionJob | PublishJob | ReviewJob;
+export type Job =
+  | RenderJob
+  | MontageJob
+  | StoryboardJob
+  | VoiceJob
+  | MotionJob
+  | PublishJob
+  | ReviewJob
+  | ReferenceJob;
 
 export type RenderJobSummary = {
   id: string;
   kind: JobKind;
   state: RenderJobState;
-  stage: RenderPipelineStage | MontageStage | StoryboardStage | VoiceStage | MotionStage | PublishStage | null;
+  stage:
+    | RenderPipelineStage
+    | MontageStage
+    | StoryboardStage
+    | VoiceStage
+    | MotionStage
+    | PublishStage
+    | ReferenceStage
+    | null;
   errorCode: string | null;
   createdAt: string;
   startedAt: string | null;

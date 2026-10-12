@@ -287,3 +287,29 @@ export type {
   ProductionProposalStatus,
   ProposalConcept,
 } from './proposal/production-proposal';
+
+export {
+  REFERENCE_BRIEF_VERSION,
+  REFERENCE_ORIENTATIONS,
+  ReferenceAudioSchema,
+  ReferenceBriefSchema,
+  ReferenceFormatSchema,
+  ReferencePaceSchema,
+  ReferencePhraseSchema,
+  ReferenceSceneSchema,
+  ReferenceVoiceSchema,
+  buildReferenceSummary,
+  orientationFor,
+  paceFromScenes,
+  wordsPerMinuteFor,
+} from './reference/reference-brief';
+export type {
+  ReferenceAudio,
+  ReferenceBrief,
+  ReferenceBriefFacts,
+  ReferenceFormat,
+  ReferencePace,
+  ReferencePhrase,
+  ReferenceScene,
+  ReferenceVoice,
+} from './reference/reference-brief';

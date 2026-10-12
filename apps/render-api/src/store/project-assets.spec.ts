@@ -119,6 +119,6 @@ describe('countAssetsByRole', () => {
       { role: 'logo' },
     ]);
 
-    expect(counts).toEqual({ aroll: 2, broll: 1, image: 0, audio: 0, voice: 1, logo: 1 });
+    expect(counts).toEqual({ aroll: 2, broll: 1, image: 0, audio: 0, voice: 1, logo: 1, reference: 0 });
   });
 });

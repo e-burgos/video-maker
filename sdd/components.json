@@ -383,13 +383,19 @@
         "module": "web-studio",
         "spec": "sdd/specs/spec-e-burgos-006-web-studio",
         "path": "src/components/asset-card.tsx",
-        "status": "implemented",
+        "status": "updated",
         "created_in_cycle": 1,
-        "updated_in_cycle": null,
+        "updated_in_cycle": 5,
         "description": "Tarjeta de un asset: preview, path y los datos de media del catalogo (tamano, kind, dimensiones, duracion, fps, audio).",
         "consumes": [],
         "created_at": "2026-09-09",
-        "changelog": []
+        "changelog": [
+          {
+            "cycle": 5,
+            "date": "2026-10-12",
+            "change": "spec-e-burgos-023 cycle-05: los assets de rol reference suman el panel ReferenceAnalysis."
+          }
+        ]
       },
       {
         "id": "COMP-008",
@@ -1534,6 +1540,51 @@
         "created_in_cycle": 4,
         "updated_in_cycle": null,
         "description": "Boton Generar muestra (10 s) para render y motion: encola el job con sample, muestra el progreso y reproduce la muestra.",
+        "consumes": [],
+        "created_at": "2026-10-12",
+        "changelog": []
+      },
+      {
+        "id": "COMP-067",
+        "name": "ReferenceAnalysis",
+        "type": "component",
+        "module": "production-quality",
+        "spec": "sdd/specs/spec-e-burgos-023-production-quality",
+        "path": "src/components/reference-analysis.tsx",
+        "status": "implemented",
+        "created_in_cycle": 5,
+        "updated_in_cycle": null,
+        "description": "Panel Referencia de la tarjeta de asset reference en la Biblioteca: boton Analizar referencia o Volver a analizar, progreso por etapa del job reference y el brief cuando existe.",
+        "consumes": [],
+        "created_at": "2026-10-12",
+        "changelog": []
+      },
+      {
+        "id": "COMP-068",
+        "name": "ReferenceBriefView",
+        "type": "component",
+        "module": "production-quality",
+        "spec": "sdd/specs/spec-e-burgos-023-production-quality",
+        "path": "src/components/reference-brief-view.tsx",
+        "status": "implemented",
+        "created_in_cycle": 5,
+        "updated_in_cycle": null,
+        "description": "Resumen, formato, duracion, ritmo, voz con transcripcion colapsable y audio del ReferenceBrief.",
+        "consumes": [],
+        "created_at": "2026-10-12",
+        "changelog": []
+      },
+      {
+        "id": "COMP-069",
+        "name": "ReferenceSceneStrip",
+        "type": "component",
+        "module": "production-quality",
+        "spec": "sdd/specs/spec-e-burgos-023-production-quality",
+        "path": "src/components/reference-scene-strip.tsx",
+        "status": "implemented",
+        "created_in_cycle": 5,
+        "updated_in_cycle": null,
+        "description": "Tira horizontal de escenas de la referencia con cuadro clave, tiempos y duracion.",
         "consumes": [],
         "created_at": "2026-10-12",
         "changelog": []

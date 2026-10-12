@@ -677,6 +677,21 @@
           "status": "completed",
           "tasks_total": 5,
           "tasks_done": 5
+        },
+        "cycle-05": {
+          "file": "sdd/specs/spec-e-burgos-023-production-quality/cycles/cycle-05/tasks.json",
+          "module": "production-quality",
+          "apps": [
+            "libs/media-local",
+            "libs/timeline-core",
+            "libs/auto-montage",
+            "apps/render-api",
+            "libs/producer-tools",
+            "apps/web"
+          ],
+          "status": "completed",
+          "tasks_total": 5,
+          "tasks_done": 5
         }
       }
     }

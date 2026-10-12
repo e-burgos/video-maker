@@ -17,7 +17,7 @@ function renderZone(client: Partial<RenderApiClient> = {}, existingSlugs: readon
       slug: 'my-video-ad',
       layout: { raw: true, catalog: false, timeline: false, edl: false, out: false },
       assetSource: 'raw-scan',
-      assetCounts: { aroll: 0, broll: 0, image: 0, audio: 0, voice: 0, logo: 0 },
+      assetCounts: { aroll: 0, broll: 0, image: 0, audio: 0, voice: 0, logo: 0, reference: 0 },
     }),
     uploadToInbox: vi.fn().mockResolvedValue({
       id: 'inbox-0001',

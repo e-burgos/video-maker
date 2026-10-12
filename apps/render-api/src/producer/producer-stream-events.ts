@@ -125,6 +125,10 @@ function summarizeStudioTool(tool: StudioToolName, input: Record<string, unknown
       return 'Reading the render review';
     case 'propose_production':
       return 'Saving the production proposal';
+    case 'get_reference_brief': {
+      const name = stringField(input, 'name');
+      return name === null ? 'Listing the analysed references' : truncate(`Reading the analysis of ${name}`);
+    }
     case 'get_motion_brands':
       return 'Listing the available brands';
     case 'read_motion_brief':

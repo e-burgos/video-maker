@@ -1,4 +1,5 @@
 import { MOTION_STAGES } from './motion-types';
+import { isReferenceStage } from './reference-types';
 import { responseShapeUnexpected } from './render-api-error';
 import {
   JOB_KINDS,
@@ -301,6 +302,20 @@ function isReviewJobReport(value: unknown): boolean {
   );
 }
 
+function isReferenceJobProgress(value: unknown): boolean {
+  return isRecord(value) && isReferenceStage(value['stage']) && isNumberOrNull(value['percent'] ?? null);
+}
+
+function isReferenceJobReport(value: unknown): boolean {
+  return (
+    isRecord(value) &&
+    typeof value['file'] === 'string' &&
+    typeof value['name'] === 'string' &&
+    typeof value['briefFile'] === 'string' &&
+    typeof value['durationSec'] === 'number'
+  );
+}
+
 function isRenderApiErrorPayload(value: unknown): value is RenderApiErrorPayload {
   return isRecord(value) && typeof value['code'] === 'string' && typeof value['message'] === 'string';
 }
@@ -356,6 +371,13 @@ function isJob(value: unknown): value is Job {
     return (
       (value['progress'] === null || isPublishJobProgress(value['progress'])) &&
       (value['report'] === null || isReviewJobReport(value['report']))
+    );
+  }
+
+  if (value['kind'] === 'reference') {
+    return (
+      (value['progress'] === null || isReferenceJobProgress(value['progress'])) &&
+      (value['report'] === null || isReferenceJobReport(value['report']))
     );
   }
 
@@ -428,6 +450,7 @@ function isRenderJobSummary(value: unknown): value is RenderJobSummary {
       isStoryboardStage(value['stage']) ||
       isVoiceStage(value['stage']) ||
       ((value['kind'] === 'publish' || value['kind'] === 'review') && typeof value['stage'] === 'string') ||
+      isReferenceStage(value['stage']) ||
       (MOTION_STAGES as readonly string[]).includes(value['stage'] as string)) &&
     isStringOrNull(value['errorCode']) &&
     typeof value['createdAt'] === 'string' &&

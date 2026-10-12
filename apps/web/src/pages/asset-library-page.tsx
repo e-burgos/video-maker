@@ -14,7 +14,9 @@ import { MontageJobPanel } from '../components/montage-job-panel';
 import { MontageTrigger } from '../components/montage-trigger';
 import type { AssetListing, AssetRole, ProjectMode } from '../api/render-api-types';
 
-const MOTION_LIBRARY_ROLES: readonly AssetRole[] = ['image'];
+const MOTION_UPLOAD_ROLES: readonly AssetRole[] = ['image'];
+const MOTION_REFERENCE_ROLES: readonly AssetRole[] = ['reference'];
+const MOTION_LIBRARY_ROLES: readonly AssetRole[] = [...MOTION_UPLOAD_ROLES, ...MOTION_REFERENCE_ROLES];
 
 function assetsOfRole(listing: AssetListing, role: AssetRole) {
   return listing.assets.filter((asset) => asset.role === role);
@@ -76,13 +78,16 @@ function AssetLibraryContent({ mode }: { mode: ProjectMode }) {
       {!isMotion && <GeneratedFilesPanel slug={slug} assets={listing.data} />}
 
       {isMotion ? (
-        <AssetUploader
-          slug={slug}
-          roles={MOTION_LIBRARY_ROLES}
-          fileInputLabel={t('motionLibrary.uploadLabel')}
-          roleHint={t('motionLibrary.imageHint')}
-          onUploaded={listing.reload}
-        />
+        <>
+          <AssetUploader
+            slug={slug}
+            roles={MOTION_UPLOAD_ROLES}
+            fileInputLabel={t('motionLibrary.uploadLabel')}
+            roleHint={t('motionLibrary.imageHint')}
+            onUploaded={listing.reload}
+          />
+          <AssetUploader slug={slug} roles={MOTION_REFERENCE_ROLES} onUploaded={listing.reload} />
+        </>
       ) : (
         <>
           <AssetUploader slug={slug} onUploaded={listing.reload} />
@@ -129,7 +134,7 @@ function AssetLibraryContent({ mode }: { mode: ProjectMode }) {
                 {assets.length === 0 ? (
                   <p className="text-sm text-slate-600">{t('library.roleEmpty', { role })}</p>
                 ) : (
-                  <ul className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+                  <ul className={role === 'reference' ? 'grid gap-3' : 'grid gap-3 sm:grid-cols-2 lg:grid-cols-3'}>
                     {assets.map((asset) => (
                       <AssetCard
                         key={asset.path}

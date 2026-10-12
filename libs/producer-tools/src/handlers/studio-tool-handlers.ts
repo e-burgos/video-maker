@@ -46,6 +46,20 @@ async function assertProposalApproved(client: RenderApiClient): Promise<void> {
   );
 }
 
+async function readReferenceBriefOrExplain(client: RenderApiClient, name: string): Promise<unknown> {
+  try {
+    return await client.getReference(name);
+  } catch (cause) {
+    if (cause instanceof StudioToolRuntimeError && cause.code === 'FILE_NOT_FOUND') {
+      throw new StudioToolRuntimeError(
+        'FILE_NOT_FOUND',
+        `the reference "${name}" was never analysed; start_job {"kind":"reference","file":"raw/reference/${name}.mp4"} (use the real file name with its extension) and wait_for_job until it succeeds`,
+      );
+    }
+    throw cause;
+  }
+}
+
 export interface StudioToolHandlerResult {
   readonly data: unknown;
   readonly images?: readonly { readonly mimeType: string; readonly base64: string }[];
@@ -378,6 +392,15 @@ export function createStudioToolHandlers(
         );
       }
       return withOutput('get_render_review', review);
+    },
+
+    get_reference_brief: async (rawInput) => {
+      const input = parseInput<{ name?: string }>(STUDIO_TOOLS.get_reference_brief.input, rawInput);
+      const references = await client.listReferences();
+      if (input.name === undefined) {
+        return withOutput('get_reference_brief', { references, brief: null });
+      }
+      return withOutput('get_reference_brief', { references, brief: await readReferenceBriefOrExplain(client, input.name) });
     },
 
     propose_production: async (rawInput) => {

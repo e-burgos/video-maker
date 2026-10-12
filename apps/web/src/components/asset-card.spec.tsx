@@ -113,4 +113,17 @@ describe('AssetCard deletion', () => {
     expect(open.getAttribute('aria-label')).toBe('Delete clip01.mp4');
     expect(open.textContent).toBe('Delete');
   });
+
+  it('offers the reference analysis only on reference assets', () => {
+    const getReference = vi.fn().mockRejectedValue(new Error('pending'));
+    renderCard({ ...videoAsset, role: 'reference', path: 'raw/reference/demo.mp4' }, { getReference });
+
+    expect(screen.getByTestId('reference-analysis')).toBeTruthy();
+  });
+
+  it('does not show the reference analysis on other roles', () => {
+    renderCard(videoAsset);
+
+    expect(screen.queryByTestId('reference-analysis')).toBeNull();
+  });
 });

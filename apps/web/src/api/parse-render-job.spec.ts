@@ -1,5 +1,7 @@
 import { describe, expect, it } from 'vitest';
 
+import { referenceJob } from './__fixtures__/reference';
+
 import {
   isJobKind,
   isMontageStage,
@@ -498,5 +500,36 @@ describe('parseJob for motion jobs', () => {
   it('accepts the video phase report with its path and duration', () => {
     const report = { path: 'out/video.mp4', durationSec: 31.2, scenes: 7, storyboard: null };
     expect(parseJob(motionJob(report))).toMatchObject({ report });
+  });
+});
+
+describe('reference jobs', () => {
+  it('accepts a reference job with its stage progress', () => {
+    expect(isJobKind('reference')).toBe(true);
+    expect(parseJob(referenceJob()).kind).toBe('reference');
+  });
+
+  it('rejects a reference job with an unknown stage', () => {
+    expect(() => parseJob(referenceJob({ progress: { stage: 'nope' as 'probe', percent: 1 } }))).toThrow();
+  });
+
+  it('accepts a job listing entry in a reference stage', () => {
+    const listing = {
+      slug: 'demo',
+      jobs: [
+        {
+          id: 'j1',
+          kind: 'reference',
+          state: 'running',
+          stage: 'keyframes',
+          errorCode: null,
+          createdAt: '2026-10-12T10:00:00.000Z',
+          startedAt: null,
+          finishedAt: null,
+        },
+      ],
+    };
+
+    expect(parseRenderJobListing(listing).jobs[0]?.stage).toBe('keyframes');
   });
 });

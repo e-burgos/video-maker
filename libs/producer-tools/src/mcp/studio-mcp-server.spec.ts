@@ -52,6 +52,18 @@ describe('createStudioMcpServer', () => {
     expect(result.structuredContent).toEqual({ saved: true, status: 'pending', concepts: 2 });
   });
 
+  it('exposes get_reference_brief with an object root input and answers the list with an empty brief', async () => {
+    const { client } = await connectedPair({ listReferences: async () => [] });
+
+    const { tools } = await client.listTools();
+    const tool = tools.find((candidate) => candidate.name === 'get_reference_brief');
+    const result = await client.callTool({ name: 'get_reference_brief', arguments: {} });
+
+    expect(tool?.inputSchema.type).toBe('object');
+    expect(Object.keys(tool?.inputSchema.properties ?? {})).toEqual(['name']);
+    expect(result.structuredContent).toEqual({ references: [], brief: null });
+  });
+
   it('answers a full render without an approved proposal as an isError PROPOSAL_NOT_APPROVED the model can read', async () => {
     const { client } = await connectedPair({ getProposalState: async () => null });
 
@@ -186,6 +198,6 @@ describe('createStudioMcpServer', () => {
     const job = properties?.job as Record<string, unknown> | undefined;
     expect(job).toBeDefined();
     const union = (job?.anyOf ?? job?.oneOf) as readonly unknown[] | undefined;
-    expect(union?.length).toBe(6);
+    expect(union?.length).toBe(7);
   });
 });

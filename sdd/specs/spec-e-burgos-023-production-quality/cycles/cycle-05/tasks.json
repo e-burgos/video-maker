@@ -1,0 +1,255 @@
+{
+  "$schema": "../../../../schemas/cycle-tasks.schema.json",
+  "spec": "spec-e-burgos-023-production-quality",
+  "cycle": 5,
+  "module": "production-quality",
+  "apps": [
+    "libs/media-local",
+    "libs/timeline-core",
+    "libs/auto-montage",
+    "apps/render-api",
+    "libs/producer-tools",
+    "apps/web"
+  ],
+  "flow": "lite",
+  "user_stories_generated": true,
+  "prerequisites": {
+    "tasks_generated": true
+  },
+  "tasks": [
+    {
+      "id": "TASK-001",
+      "title": "Base: detectSceneCuts en media-local, ReferenceBrief en timeline-core y rol de asset reference en catálogo, ingesta y store (ignorado por el montaje)",
+      "user_stories": [
+        "US-023-501",
+        "US-023-502"
+      ],
+      "estimation_hours": 4,
+      "story_points": 5,
+      "depends_on": [],
+      "status": "done",
+      "files": [
+        "apps/render-api/src/http/handlers/projects-handler.spec.ts",
+        "apps/render-api/src/store/asset-path.ts",
+        "apps/render-api/src/store/project-assets.spec.ts",
+        "apps/render-api/src/store/project-assets.ts",
+        "apps/render-api/src/storyboard/collect-storyboard-inventory.ts",
+        "apps/web/src/api/asset-roles.spec.ts",
+        "apps/web/src/api/asset-roles.ts",
+        "apps/web/src/api/render-api-types.ts",
+        "apps/web/src/components/asset-uploader.spec.tsx",
+        "apps/web/src/components/create-project-by-drop.spec.tsx",
+        "apps/web/src/components/project-brand-control.spec.tsx",
+        "apps/web/src/components/workspace-side-panel.spec.tsx",
+        "apps/web/src/guide/guide-content-en.ts",
+        "apps/web/src/guide/guide-content-es.ts",
+        "apps/web/src/guide/guide-content.spec.ts",
+        "apps/web/src/i18n/messages-en.ts",
+        "apps/web/src/i18n/messages-es.ts",
+        "apps/web/src/pages/project-workspace-page.spec.tsx",
+        "libs/auto-montage/src/catalog/catalog.schema.ts",
+        "libs/auto-montage/src/ingest/classify-entry.spec.ts",
+        "libs/auto-montage/src/ingest/classify-entry.ts",
+        "libs/media-local/src/ffmpeg/detect-scene-cuts.spec.ts",
+        "libs/media-local/src/ffmpeg/detect-scene-cuts.ts",
+        "libs/media-local/src/ffmpeg/extract-scene-keyframes.ts",
+        "libs/media-local/src/index.ts",
+        "libs/timeline-core/src/index.ts",
+        "libs/timeline-core/src/reference/reference-brief.spec.ts",
+        "libs/timeline-core/src/reference/reference-brief.ts",
+        "libs/timeline-core/src/schemas/schemas.spec.ts"
+      ],
+      "usage": {
+        "tokens_in": 150000,
+        "tokens_out": 25000,
+        "provider_model": "claude/sonnet",
+        "effort": "medium",
+        "agent": "implementor-back",
+        "approx": true,
+        "source": "declared-estimate",
+        "recorded_at": "2026-10-12"
+      }
+    },
+    {
+      "id": "TASK-002",
+      "title": "render-api: job reference (probe, escenas, transcripción, cuadros clave, persist) y endpoints de lectura de briefs",
+      "user_stories": [
+        "US-023-502"
+      ],
+      "estimation_hours": 4,
+      "story_points": 8,
+      "depends_on": [
+        "TASK-001"
+      ],
+      "status": "done",
+      "files": [
+        "apps/render-api/src/__fixtures__/fake-reference-measurements.ts",
+        "apps/render-api/src/errors/http-status-for.spec.ts",
+        "apps/render-api/src/errors/http-status-for.ts",
+        "apps/render-api/src/errors/render-api-error.ts",
+        "apps/render-api/src/errors/to-error-payload.ts",
+        "apps/render-api/src/http/handle-request.ts",
+        "apps/render-api/src/http/handlers/jobs-handler.spec.ts",
+        "apps/render-api/src/http/handlers/jobs-handler.ts",
+        "apps/render-api/src/http/handlers/references-handler.spec.ts",
+        "apps/render-api/src/http/handlers/references-handler.ts",
+        "apps/render-api/src/http/routes.ts",
+        "apps/render-api/src/jobs/job-persistence.spec.ts",
+        "apps/render-api/src/jobs/job-persistence.ts",
+        "apps/render-api/src/jobs/reference-job-params.spec.ts",
+        "apps/render-api/src/jobs/reference-job-params.ts",
+        "apps/render-api/src/jobs/reference-job-progress.ts",
+        "apps/render-api/src/jobs/reference-pipeline-observer.ts",
+        "apps/render-api/src/jobs/render-job-queue-reference.spec.ts",
+        "apps/render-api/src/jobs/render-job-queue.ts",
+        "apps/render-api/src/jobs/render-job.ts",
+        "apps/render-api/src/jobs/run-reference-pipeline.spec.ts",
+        "apps/render-api/src/jobs/run-reference-pipeline.ts",
+        "apps/render-api/src/reference/build-reference-brief.spec.ts",
+        "apps/render-api/src/reference/build-reference-brief.ts",
+        "apps/render-api/src/reference/reference-measurements.ts",
+        "apps/render-api/src/reference/reference-paths.spec.ts",
+        "apps/render-api/src/reference/reference-paths.ts",
+        "apps/render-api/src/reference/reference-store.ts",
+        "libs/timeline-core/src/reference/reference-brief.spec.ts",
+        "libs/timeline-core/src/reference/reference-brief.ts"
+      ],
+      "usage": {
+        "tokens_in": 230000,
+        "tokens_out": 40000,
+        "provider_model": "claude/sonnet",
+        "effort": "medium",
+        "agent": "implementor-back",
+        "approx": true,
+        "source": "declared-estimate",
+        "recorded_at": "2026-10-12"
+      }
+    },
+    {
+      "id": "TASK-003",
+      "title": "Productor: tool get_reference_brief, start_job reference y prompt que propone a partir de la referencia",
+      "user_stories": [
+        "US-023-503"
+      ],
+      "estimation_hours": 2,
+      "story_points": 3,
+      "depends_on": [
+        "TASK-002"
+      ],
+      "status": "done",
+      "files": [
+        "apps/render-api/src/producer/producer-stream-events.spec.ts",
+        "apps/render-api/src/producer/producer-stream-events.ts",
+        "libs/producer-tools/src/__fixtures__/fake-render-api-client.ts",
+        "libs/producer-tools/src/client/http-render-api-client.spec.ts",
+        "libs/producer-tools/src/client/http-render-api-client.ts",
+        "libs/producer-tools/src/client/render-api-client.ts",
+        "libs/producer-tools/src/contract/tool-names.spec.ts",
+        "libs/producer-tools/src/contract/tool-names.ts",
+        "libs/producer-tools/src/contract/tool-schemas.spec.ts",
+        "libs/producer-tools/src/contract/tool-schemas.ts",
+        "libs/producer-tools/src/handlers/studio-tool-handlers.spec.ts",
+        "libs/producer-tools/src/handlers/studio-tool-handlers.ts",
+        "libs/producer-tools/src/index.ts",
+        "libs/producer-tools/src/mcp/studio-mcp-server.spec.ts",
+        "libs/producer-tools/src/prompt/build-producer-prompt.spec.ts",
+        "libs/producer-tools/src/prompt/build-producer-prompt.ts"
+      ],
+      "usage": {
+        "tokens_in": 120000,
+        "tokens_out": 22000,
+        "provider_model": "claude/sonnet",
+        "effort": "medium",
+        "agent": "implementor-back",
+        "approx": true,
+        "source": "declared-estimate",
+        "recorded_at": "2026-10-12"
+      }
+    },
+    {
+      "id": "TASK-004",
+      "title": "Web: rol reference en subida y bandeja, botón Analizar y panel del brief con escenas y cuadros clave",
+      "user_stories": [
+        "US-023-501",
+        "US-023-504"
+      ],
+      "estimation_hours": 3,
+      "story_points": 5,
+      "depends_on": [
+        "TASK-002"
+      ],
+      "status": "done",
+      "files": [
+        "apps/web/src/api/__fixtures__/reference.ts",
+        "apps/web/src/api/error-explanations.ts",
+        "apps/web/src/api/parse-reference.ts",
+        "apps/web/src/api/parse-render-job.spec.ts",
+        "apps/web/src/api/parse-render-job.ts",
+        "apps/web/src/api/reference-format.ts",
+        "apps/web/src/api/reference-types.ts",
+        "apps/web/src/api/render-api-client.spec.ts",
+        "apps/web/src/api/render-api-client.ts",
+        "apps/web/src/api/render-api-types.ts",
+        "apps/web/src/components/asset-card.spec.tsx",
+        "apps/web/src/components/asset-card.tsx",
+        "apps/web/src/components/reference-analysis.spec.tsx",
+        "apps/web/src/components/reference-analysis.tsx",
+        "apps/web/src/components/reference-brief-view.spec.tsx",
+        "apps/web/src/components/reference-brief-view.tsx",
+        "apps/web/src/components/reference-scene-strip.spec.tsx",
+        "apps/web/src/components/reference-scene-strip.tsx",
+        "apps/web/src/i18n/messages-en.ts",
+        "apps/web/src/i18n/messages-es.ts",
+        "apps/web/src/pages/asset-library-page.tsx",
+        "sdd/components.json"
+      ],
+      "usage": {
+        "tokens_in": 150000,
+        "tokens_out": 25000,
+        "provider_model": "claude/sonnet",
+        "effort": "medium",
+        "agent": "implementor-front",
+        "approx": true,
+        "source": "declared-estimate",
+        "recorded_at": "2026-10-12"
+      }
+    },
+    {
+      "id": "TASK-005",
+      "title": "Verificación con un video real del estudio como referencia",
+      "user_stories": [
+        "US-023-501",
+        "US-023-502",
+        "US-023-503",
+        "US-023-504"
+      ],
+      "estimation_hours": 1,
+      "story_points": 3,
+      "depends_on": [
+        "TASK-003",
+        "TASK-004"
+      ],
+      "status": "done",
+      "files": [
+        "sdd/specs/spec-e-burgos-023-production-quality/cycles/cycle-05/artifacts/verification.md",
+        "sdd/specs/spec-e-burgos-023-production-quality/cycles/cycle-05/artifacts/web-referencia-escenas.jpg",
+        "sdd/specs/spec-e-burgos-023-production-quality/cycles/cycle-05/artifacts/web-referencia-transcripcion.jpg",
+        "libs/media-local/src/ffmpeg/detect-scene-cuts.ts",
+        "libs/media-local/src/ffmpeg/detect-scene-cuts.spec.ts",
+        "apps/render-api/src/reference/reference-measurements.ts",
+        "apps/web/src/pages/asset-library-page.tsx",
+        "apps/web/src/pages/asset-library-page.spec.tsx"
+      ],
+      "usage": {
+        "tokens_in": 180000,
+        "tokens_out": 25000,
+        "provider_model": "claude/opus",
+        "effort": "high",
+        "agent": "orchestrator",
+        "approx": true,
+        "source": "declared-estimate",
+        "recorded_at": "2026-10-12"
+      }
+    }
+  ]
+}

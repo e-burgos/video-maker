@@ -9,7 +9,7 @@ describe('asset role copy (US-016-004)', () => {
     expect(orderedAssetRoles().map((entry) => entry.role).sort()).toEqual([...ASSET_ROLES].sort());
   });
 
-  it('orders the roles by importance, with A-roll first and the logo last', () => {
+  it('orders the roles by importance, with A-roll first and the reference last', () => {
     expect(orderedAssetRoles().map((entry) => entry.role)).toEqual([
       'aroll',
       'broll',
@@ -17,6 +17,7 @@ describe('asset role copy (US-016-004)', () => {
       'audio',
       'voice',
       'logo',
+      'reference',
     ]);
   });
 

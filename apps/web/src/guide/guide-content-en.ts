@@ -62,6 +62,7 @@ export const GUIDE_EN: GuideContent = {
         '| Music | `raw/audio/` | The bed under the whole video, ducked automatically whenever someone speaks. Make it longer than the edit. |',
         '| Voice-over | `raw/voice/` | A narration you recorded yourself. It replaces the synthesized voice of a scene. |',
         '| Logo | `raw/logo/` | A PNG with transparency drawn over the finished video. You turn it on from the preview page. |',
+        '| Reference | `raw/reference/` | A video you want yours to feel like. It never enters the montage: the producer analyses its pace, voice and structure. |',
         '',
         '**File names are concepts.** B-roll and images are chosen by matching their file name against the words the narration repeats, so `terminal.mp4` is used while `IMG_2931.mp4` never is. Name each file after what it shows.',
         '',

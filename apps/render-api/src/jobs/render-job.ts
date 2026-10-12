@@ -29,7 +29,7 @@ export function isTerminalRenderJobState(state: RenderJobState): boolean {
   return TERMINAL_RENDER_JOB_STATES.some((terminal) => terminal === state);
 }
 
-export type JobKind = 'render' | 'montage' | 'storyboard' | 'voice' | 'photo-aroll' | 'motion' | 'publish' | 'review';
+export type JobKind = 'render' | 'montage' | 'storyboard' | 'voice' | 'photo-aroll' | 'motion' | 'publish' | 'review' | 'reference';
 
 export const MONTAGE_STAGES = ['discover', 'probe', 'transcribe', 'plan'] as const;
 export type MontageStage = (typeof MONTAGE_STAGES)[number];
@@ -51,6 +51,9 @@ export type PublishStage = (typeof PUBLISH_STAGES)[number];
 
 export const REVIEW_STAGES = ['collect', 'measure', 'rules', 'write'] as const;
 export type ReviewStage = (typeof REVIEW_STAGES)[number];
+
+export const REFERENCE_STAGES = ['probe', 'scenes', 'transcribe', 'keyframes', 'persist'] as const;
+export type ReferenceStage = (typeof REFERENCE_STAGES)[number];
 
 export const PUBLISH_PLATFORMS = ['youtube'] as const;
 export type PublishPlatform = (typeof PUBLISH_PLATFORMS)[number];
@@ -119,6 +122,21 @@ export interface ReviewJobReport {
   readonly reviewFile: string;
   readonly status: ReviewStatus;
   readonly counts: ReviewJobCounts;
+}
+
+export interface ReferenceJobProgress {
+  readonly stage: ReferenceStage;
+  readonly percent: number | null;
+}
+
+export interface ReferenceJobReport {
+  readonly file: string;
+  readonly name: string;
+  readonly briefFile: string;
+  readonly durationSec: number;
+  readonly scenes: number;
+  readonly cutsPerMinute: number;
+  readonly hasVoice: boolean;
 }
 
 export interface RenderJobProgress {
@@ -293,13 +311,28 @@ export type ReviewJob = JobBase & {
   readonly report: ReviewJobReport | null;
 };
 
-export type Job = RenderJob | MontageJob | StoryboardJob | VoiceJob | PhotoArollJob | MotionJob | PublishJob | ReviewJob;
+export type ReferenceJob = JobBase & {
+  readonly kind: 'reference';
+  readonly progress: ReferenceJobProgress | null;
+  readonly report: ReferenceJobReport | null;
+};
+
+export type Job =
+  | RenderJob
+  | MontageJob
+  | StoryboardJob
+  | VoiceJob
+  | PhotoArollJob
+  | MotionJob
+  | PublishJob
+  | ReviewJob
+  | ReferenceJob;
 
 export interface JobSummary {
   readonly id: string;
   readonly kind: JobKind;
   readonly state: RenderJobState;
-  readonly stage: RenderPipelineStage | MontageStage | StoryboardStage | VoiceStage | PhotoArollStage | MotionStage | PublishStage | ReviewStage | null;
+  readonly stage: RenderPipelineStage | MontageStage | StoryboardStage | VoiceStage | PhotoArollStage | MotionStage | PublishStage | ReviewStage | ReferenceStage | null;
   readonly errorCode: RenderApiErrorCode | null;
   readonly createdAt: string;
   readonly startedAt: string | null;
@@ -316,7 +349,8 @@ export type CreateJobInput =
   | CreatePhotoArollJobInput
   | CreateMotionJobInput
   | CreatePublishJobInput
-  | CreateReviewJobInput;
+  | CreateReviewJobInput
+  | CreateReferenceJobInput;
 
 export interface CreateRenderJobInput {
   readonly kind: 'render';
@@ -388,6 +422,13 @@ export interface CreateReviewJobInput {
   readonly file: string;
 }
 
+export interface CreateReferenceJobInput {
+  readonly kind: 'reference';
+  readonly slug: string;
+  readonly projectRoot: string;
+  readonly file: string;
+}
+
 export interface CreatePublishJobInput {
   readonly kind: 'publish';
   readonly slug: string;
@@ -415,6 +456,7 @@ export function toJob(record: PhotoArollJob): PhotoArollJob;
 export function toJob(record: MotionJob): MotionJob;
 export function toJob(record: PublishJob): PublishJob;
 export function toJob(record: ReviewJob): ReviewJob;
+export function toJob(record: ReferenceJob): ReferenceJob;
 export function toJob(record: Job): Job;
 export function toJob(record: Job): Job {
   switch (record.kind) {
@@ -514,6 +556,19 @@ export function toJob(record: Job): Job {
         id: record.id,
         slug: record.slug,
         kind: 'review',
+        state: record.state,
+        createdAt: record.createdAt,
+        startedAt: record.startedAt,
+        finishedAt: record.finishedAt,
+        progress: record.progress,
+        report: record.report,
+        error: record.error,
+      };
+    case 'reference':
+      return {
+        id: record.id,
+        slug: record.slug,
+        kind: 'reference',
         state: record.state,
         createdAt: record.createdAt,
         startedAt: record.startedAt,
