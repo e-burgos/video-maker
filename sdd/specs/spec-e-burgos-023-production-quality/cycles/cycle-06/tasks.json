@@ -1,0 +1,97 @@
+{
+  "$schema": "../../../../schemas/cycle-tasks.schema.json",
+  "spec": "spec-e-burgos-023-production-quality",
+  "cycle": 6,
+  "module": "production-quality",
+  "apps": [
+    "libs/timeline-core",
+    "libs/motion-graphics",
+    "libs/producer-tools",
+    "apps/render-api",
+    "apps/web"
+  ],
+  "flow": "lite",
+  "user_stories_generated": true,
+  "prerequisites": {
+    "tasks_generated": true
+  },
+  "tasks": [
+    {
+      "id": "TASK-001",
+      "title": "Revisión de material: view_images con brand:<clave> y constancia de lo visto, review_material, MaterialReview, gate MATERIAL_NOT_REVIEWED en propose_production y materialWarnings en la propuesta",
+      "user_stories": [
+        "US-023-601",
+        "US-023-606"
+      ],
+      "estimation_hours": 5,
+      "story_points": 8,
+      "depends_on": [],
+      "status": "pending",
+      "files": []
+    },
+    {
+      "id": "TASK-002",
+      "title": "Cajas con nombre en el brief motion y pasos con box, verificación que rechaza cajas estimadas, minSec por escena sin depender de los golpes y resaltados sobrios",
+      "user_stories": [
+        "US-023-602",
+        "US-023-604"
+      ],
+      "estimation_hours": 5,
+      "story_points": 8,
+      "depends_on": [],
+      "status": "pending",
+      "files": []
+    },
+    {
+      "id": "TASK-003",
+      "title": "Revisión visual con evidencia: cuadros por escena, record_visual_review sobre cuadros vistos, críticos visual-not-reviewed y escenas fix, duración contra la propuesta aprobada",
+      "user_stories": [
+        "US-023-603",
+        "US-023-606"
+      ],
+      "estimation_hours": 5,
+      "story_points": 8,
+      "depends_on": [
+        "TASK-001"
+      ],
+      "status": "pending",
+      "files": []
+    },
+    {
+      "id": "TASK-004",
+      "title": "Web: revisión de material en la tarjeta Propuesta, cuadros y veredictos por escena en Revisión, mensaje del chat en espera mientras el productor trabaja",
+      "user_stories": [
+        "US-023-605"
+      ],
+      "estimation_hours": 3,
+      "story_points": 5,
+      "depends_on": [
+        "TASK-001",
+        "TASK-003"
+      ],
+      "status": "pending",
+      "files": []
+    },
+    {
+      "id": "TASK-005",
+      "title": "Verificación: rehacer el video de compra sólo con aprobaciones del dev",
+      "user_stories": [
+        "US-023-601",
+        "US-023-602",
+        "US-023-603",
+        "US-023-604",
+        "US-023-605",
+        "US-023-606"
+      ],
+      "estimation_hours": 2,
+      "story_points": 5,
+      "depends_on": [
+        "TASK-002",
+        "TASK-003",
+        "TASK-004"
+      ],
+      "status": "pending",
+      "files": []
+    }
+  ]
+}

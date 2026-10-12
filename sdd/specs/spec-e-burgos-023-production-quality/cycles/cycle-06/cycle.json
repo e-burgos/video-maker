@@ -1,0 +1,42 @@
+{
+  "$schema": "../../../../schemas/cycle.schema.json",
+  "cycle": 6,
+  "module": "production-quality",
+  "spec": "spec-e-burgos-023-production-quality",
+  "apps": [
+    "libs/timeline-core",
+    "libs/motion-graphics",
+    "libs/producer-tools",
+    "apps/render-api",
+    "apps/web"
+  ],
+  "phase": "visual-judgement",
+  "flow": "lite",
+  "objectives": [
+    "El productor revisa y califica todo el material antes de proponer y avisa lo que no encaja",
+    "Posiciones dadas como dato y revisión visual del render con evidencia",
+    "Resaltados sobrios, duración mínima por escena y lecciones del video de prueba"
+  ],
+  "status": "in-progress",
+  "started_at": "2026-10-12",
+  "completed_at": null,
+  "documents": {
+    "plan": "sdd/specs/spec-e-burgos-023-production-quality/cycles/cycle-06/plan.md",
+    "tasks": "sdd/specs/spec-e-burgos-023-production-quality/cycles/cycle-06/tasks.json"
+  },
+  "artifacts": [],
+  "metrics": {
+    "tasks_total": 5,
+    "tasks_completed": 0,
+    "tasks_skipped": 0,
+    "story_points": 34,
+    "files_created": [],
+    "files_modified": [],
+    "files_deleted": []
+  },
+  "tables_created": [],
+  "endpoints_implemented": [],
+  "components_created": [],
+  "issues_found": [],
+  "reviewer_report": null
+}
