@@ -192,6 +192,56 @@ function reviewSummaryFields(review: RenderApiRenderReview) {
   };
 }
 
+type BriefRecord = Record<string, unknown>;
+
+const isRecord = (value: unknown): value is BriefRecord => typeof value === 'object' && value !== null && !Array.isArray(value);
+const imageRefOf = (file: unknown): string => (typeof file === 'string' && file.startsWith('images/') ? file : `images/${String(file)}`);
+const MEASURED_BY_PRODUCER = 'producer';
+
+function boxesByImageAndName(brief: BriefRecord): Map<string, BriefRecord> {
+  const found = new Map<string, BriefRecord>();
+  const images = Array.isArray(brief['images']) ? brief['images'] : [];
+  for (const image of images) {
+    if (!isRecord(image) || !Array.isArray(image['boxes'])) continue;
+    for (const box of image['boxes']) if (isRecord(box)) found.set(`${imageRefOf(image['file'])}\u0000${String(box['name'])}`, box);
+  }
+  return found;
+}
+
+function hasBoxes(brief: BriefRecord): boolean {
+  return Array.isArray(brief['images']) && brief['images'].some((image) => isRecord(image) && Array.isArray(image['boxes']) && image['boxes'].length > 0);
+}
+
+function reconcileBox(box: BriefRecord, image: string, previous: BriefRecord | undefined, nowIso: string): BriefRecord {
+  if (box['source'] !== 'measured') {
+    if (previous?.['source'] !== 'measured' || box['source'] === 'given') return box;
+    return { ...box, source: 'measured', measuredBy: previous['measuredBy'], measuredAt: previous['measuredAt'] };
+  }
+  if (previous !== undefined && previous['source'] !== 'measured') {
+    throw new StudioToolRuntimeError(
+      'INVALID_INPUT',
+      `box "${String(box['name'])}" of ${image} is given and cannot be replaced by a measured one: keep the given box, or use another name for yours`);
+  }
+  return {
+    ...box,
+    measuredBy: box['measuredBy'] ?? previous?.['measuredBy'] ?? MEASURED_BY_PRODUCER,
+    measuredAt: box['measuredAt'] ?? previous?.['measuredAt'] ?? nowIso,
+  };
+}
+
+async function stampMeasuredBoxes(client: RenderApiClient, brief: BriefRecord, nowIso: string): Promise<BriefRecord> {
+  if (!hasBoxes(brief)) return brief;
+  const stored = await client.getMotionBrief().catch(() => ({}));
+  const previousBoxes = boxesByImageAndName(stored);
+  const images = (brief['images'] as unknown[]).map((image) => {
+    if (!isRecord(image) || !Array.isArray(image['boxes'])) return image;
+    const ref = imageRefOf(image['file']);
+    const boxes = image['boxes'].map((box) => (isRecord(box) ? reconcileBox(box, ref, previousBoxes.get(`${ref}\u0000${String(box['name'])}`), nowIso) : box));
+    return { ...image, boxes };
+  });
+  return { ...brief, images };
+}
+
 export function createStudioToolHandlers(
   options: StudioToolHandlersOptions,
 ): Readonly<Record<StudioToolName, StudioToolHandler>> {
@@ -514,7 +564,8 @@ export function createStudioToolHandlers(
 
     write_motion_brief: async (rawInput) => {
       const input = parseInput<{ brief: Record<string, unknown> }>(STUDIO_TOOLS.write_motion_brief.input, rawInput);
-      await client.putMotionBrief(input.brief);
+      const brief = await stampMeasuredBoxes(client, input.brief, new Date(clock()).toISOString());
+      await client.putMotionBrief(brief);
       return withOutput('write_motion_brief', { saved: true });
     },
 
@@ -528,6 +579,12 @@ export function createStudioToolHandlers(
       const input = parseInput<{ storyboard: Record<string, unknown> }>(STUDIO_TOOLS.write_motion_storyboard.input, rawInput);
       await client.putMotionStoryboard(input.storyboard);
       return withOutput('write_motion_storyboard', { saved: true });
+    },
+
+    set_voice_direction: async (rawInput) => {
+      const input = parseInput<Record<string, unknown>>(STUDIO_TOOLS.set_voice_direction.input, rawInput);
+      await client.putVoiceDirection(input);
+      return withOutput('set_voice_direction', { saved: true });
     },
   };
 

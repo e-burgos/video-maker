@@ -3,8 +3,10 @@ import type { MediaProject } from '@video-maker/auto-montage';
 import {
   DEFAULT_VOICE_SCRIPT_GAP_MS,
   emptyVoiceManifest,
-  hashNarration,
+  hashDirectedNarration,
+  hasVoiceDirection,
   upsertVoiceTrack,
+  voiceDirectionSynthesis,
 } from '@video-maker/timeline-core';
 import type { StoryboardScene, VoiceManifest, VoiceTrack } from '@video-maker/timeline-core';
 
@@ -65,12 +67,18 @@ async function synthesizeScene(
     `${scene.narration.replace(/\s+/gu, ' ').trim()}\n`,
   );
 
+  const { lengthScaleFactor, noiseScale, noiseScaleW, trailingPauseMs } = voiceDirectionSynthesis(scene.direction);
+  const directedScale = synthesisLengthScale(model, lengthScaleFactor);
+
   await deps.synthesizeVoice({
     textPath: toAbsolutePath(project, textPath),
     outPath: toAbsolutePath(project, sourceWavPath),
     modelPath: model.path,
     projectRoot: project.root,
-    ...(synthesisLengthScale(model, 1) === 1 ? {} : { lengthScale: synthesisLengthScale(model, 1) }),
+    ...(directedScale === 1 ? {} : { lengthScale: directedScale }),
+    ...(noiseScale === undefined ? {} : { noiseScale }),
+    ...(noiseScaleW === undefined ? {} : { noiseScaleW }),
+    ...(trailingPauseMs > 0 ? { trailingPauseMs } : {}),
   });
 
   await deps.extractVoiceAudio({
@@ -148,7 +156,8 @@ export async function runStoryboardVoicePipeline(
       durationMs: entry.durationMs,
       sampleRate: entry.sampleRate,
       voiceId: model.id,
-      narrationHash: hashNarration(entry.scene.narration),
+      narrationHash: hashDirectedNarration(entry.scene.narration, entry.scene.direction),
+      ...(hasVoiceDirection(entry.scene.direction) ? { direction: entry.scene.direction } : {}),
       updatedAt: deps.clock.nowIso(),
     };
 

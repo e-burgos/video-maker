@@ -622,6 +622,9 @@ export const MotionBriefImageBoxSchema = z.strictObject({
   y: UNIT_FRACTION,
   w: UNIT_FRACTION,
   h: UNIT_FRACTION,
+  source: z.enum(['given', 'measured']).optional(),
+  measuredBy: z.string().min(1).optional(),
+  measuredAt: z.string().min(1).optional(),
 });
 
 export const MotionBriefImageSchema = z.strictObject({
@@ -664,6 +667,23 @@ const WriteMotionStoryboardInputSchema = z.strictObject({
 });
 
 const WriteMotionStoryboardOutputSchema = z.strictObject({
+  saved: z.literal(true),
+});
+
+const SetVoiceDirectionInputSchema = z
+  .strictObject({
+    directions: z
+      .record(z.string(), z.record(z.string(), z.unknown()))
+      .optional()
+      .describe('Script-line directions keyed by line number; replaces the whole file, so send every directed line.'),
+    sceneDirections: z
+      .record(z.string(), z.record(z.string(), z.unknown()).nullable())
+      .optional()
+      .describe('Storyboard-scene directions keyed by scene id; null clears that scene. Scenes you leave out keep theirs.'),
+  })
+  .refine((value) => value.directions !== undefined || value.sceneDirections !== undefined, 'send directions, sceneDirections or both');
+
+const SetVoiceDirectionOutputSchema = z.strictObject({
   saved: z.literal(true),
 });
 
@@ -798,15 +818,15 @@ export const STUDIO_TOOLS: Readonly<Record<StudioToolName, StudioToolDefinition>
   },
   get_render_review: {
     description:
-      'Read the automatic review of a finished render: its status (pass, warn, fail), the key metrics (master LUFS and true peak, voice/music margin) and the findings by severity (critical, suggestion, nitpick), each with its time range and the proposed fix. For a motion video it also lists `sceneFrames` (the frame of each scene to look at with view_images) and `visualReviewState` (pending until record_visual_review is called). Without `file` it returns the most recent review; with `file` (for example out/video.mp4) that render\'s. Fails with FILE_NOT_FOUND when the render was never reviewed.',
+      'Read the automatic review of a finished render: its status (pass, warn, fail), the key metrics (master LUFS and true peak, voice/music margin) and the findings by severity (critical, suggestion, nitpick), each with its time range and the proposed fix. For a motion video it also lists `sceneFrames` (the frames of each scene — several when it is long or names more than one thing — to look at with view_images) and `visualReviewState` (pending until record_visual_review is called). Without `file` it returns the most recent review; with `file` (for example out/video.mp4) that render\'s. Fails with FILE_NOT_FOUND when the render was never reviewed.',
     input: GetRenderReviewInputSchema,
     output: GetRenderReviewOutputSchema,
   },
   record_visual_review: {
     description:
-      'Record, with evidence, that you looked at every scene of a render. After get_render_review lists `sceneFrames` (one frame at the middle of each scene, with the voice text), look at them with view_images (up to 6 per call) and send `scenes`: one entry per sceneId with `shows` (what the frame really shows, one line), ' +
+      'Record, with evidence, that you looked at every scene of a render. After get_render_review lists `sceneFrames` (the frames of each scene, with the voice text), look at them with view_images (up to 6 per call) and send `scenes`: one entry per sceneId with `shows` (what the frame really shows, one line), ' +
       '`matchesVoice`, `legible`, `couldBeOtherProduct` (booleans), `verdict` (ok or fix) and `note` (required when the scene is flagged: what to change). ' +
-      'The studio refuses a review that misses a scene or covers a frame you did not view after the review was created (VISUAL_REVIEW_NOT_VIEWED). ' +
+      'The studio refuses a review that misses a scene or leaves any frame of any scene unviewed after the review was created (VISUAL_REVIEW_NOT_VIEWED). ' +
       'The critical finding visual-not-reviewed disappears; every scene marked fix, off the voice, illegible or ambiguous becomes a critical finding that blocks publishing until you fix it and re-render. Without `file` it uses the most recent review.',
     input: RecordVisualReviewInputSchema,
     output: RecordVisualReviewOutputSchema,
@@ -860,7 +880,9 @@ export const STUDIO_TOOLS: Readonly<Record<StudioToolName, StudioToolDefinition>
       'Save the motion brief (version 1, brand, script and one captioned entry per image in raw/images/) for ' +
       'this project, replacing the previous one. When the user or the material gives the position of elements in an ' +
       'image (buttons, fields, cards), copy them into that image `boxes` as {name, x, y, w, h} fractions 0-1 exactly ' +
-      'as given: the storyboard then points highlights, zooms and clicks at those boxes by name. The studio validates it and answers with the offending field ' +
+      'as given: the storyboard then points highlights, zooms and clicks at those boxes by name. A box you measured yourself ' +
+      'on a capture (not given by the user or the material) must carry `source: "measured"`; the studio stamps who and when, and a measured ' +
+      'box can never replace a given one of the same name. The studio validates it and answers with the offending field ' +
       'in the hint when it is invalid: fix that field and call again.',
     input: WriteMotionBriefInputSchema,
     output: WriteMotionBriefOutputSchema,
@@ -876,5 +898,11 @@ export const STUDIO_TOOLS: Readonly<Record<StudioToolName, StudioToolDefinition>
       'Save an edited motion storyboard (the whole JSON read with read_motion_storyboard, with your minimal changes), replacing the previous one. The studio validates it and answers with the offending field in the hint when it is invalid: fix that field and call again. Then re-render with start_job {"kind":"motion","phase":"video","overwrite":true}.',
     input: WriteMotionStoryboardInputSchema,
     output: WriteMotionStoryboardOutputSchema,
+  },
+  set_voice_direction: {
+    description:
+      'Direct how the voice is delivered. directions: { "<script line number>": direction } for a scripted narration; sceneDirections: { "<scene id>": direction | null } for the scenes of a narrated storyboard (work/storyboard.json). A direction carries pace (slow, normal, fast), energy (calm, neutral, lively), pauseAfterMs (0 to 2000), intent and emphasis (words that appear in that line or scene narration). The studio names the bad field when invalid. Then run the voice job with overwrite true so the directed lines or scenes are re-voiced.',
+    input: SetVoiceDirectionInputSchema,
+    output: SetVoiceDirectionOutputSchema,
   },
 };

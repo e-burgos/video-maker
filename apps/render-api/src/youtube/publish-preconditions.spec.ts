@@ -31,7 +31,7 @@ describe('assertRenderReviewAllowsPublish with the visual review (US-023-603)', 
     delivery: { kind: 'motion' },
     metrics: {},
     findings: [{ id: 'visual-not-reviewed-01', check: 'visual-not-reviewed', severity: 'critical', message: 'Nadie miró las escenas', proposedFix: 'Mirar' }],
-    sceneFrames: [{ sceneId: 'hook', index: 1, startSec: 0, endSec: 4, atSec: 2, frame: 'out/video.review/scene-01.jpg' }],
+    sceneFrames: [{ sceneId: 'hook', index: 1, startSec: 0, endSec: 4, frames: [{ atSec: 2, frame: 'out/video.review/scene-01.jpg' }] }],
   };
 
   function storageWith(stored: ReviewReport) {

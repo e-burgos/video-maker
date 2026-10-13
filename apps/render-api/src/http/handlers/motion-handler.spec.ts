@@ -353,7 +353,7 @@ describe('motion storyboard measured boxes', () => {
 
     expect(response.status).toBe(200);
     const stored = JSON.parse(await storage.readTextFile('/media/promo/motion/storyboard.json')) as { scenes: { id: string; props: { boxes?: unknown } }[] };
-    expect(stored.scenes.find((scene) => scene.id === 'cotizador')?.props.boxes).toEqual(BOXES);
+    expect(stored.scenes.find((scene) => scene.id === 'cotizador')?.props.boxes).toMatchObject(BOXES);
   });
 
   it('rejects an estimated highlight naming the measured box and stores nothing', async () => {
@@ -379,7 +379,7 @@ describe('motion storyboard measured boxes', () => {
   });
 });
 
-const OVERVIEW_KEYS = ['storyboard', 'timeline', 'video', 'voice'];
+const OVERVIEW_KEYS = ['measuredBoxes', 'storyboard', 'timeline', 'video', 'voice'];
 const TIMELINE_KEYS = ['beatSync', 'bpm', 'durationSec', 'musicCredit', 'scenes'];
 const TIMELINE_SCENE_KEYS = ['endSec', 'id', 'startSec', 'voDurationSec', 'voStartSec'];
 const VOICE_SCENE_KEYS = ['durationSec', 'path', 'sceneId', 'stale', 'vo', 'voice', 'voicedText'];
@@ -413,7 +413,7 @@ describe('handleGetMotionOverview', () => {
     const response = await handleGetMotionOverview(deps, STORE, { slug: 'promo' });
 
     expect(response.status).toBe(200);
-    expect(response.body).toEqual({ storyboard: null, timeline: null, voice: null, video: null });
+    expect(response.body).toEqual({ storyboard: null, timeline: null, voice: null, video: null, measuredBoxes: [] });
   });
 
   it('assembles storyboard, timeline, voice and the newest video with their exact keys', async () => {

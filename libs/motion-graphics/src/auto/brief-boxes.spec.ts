@@ -3,7 +3,7 @@ import { describe, expect, it } from 'vitest';
 import { minimalBrand } from '../__fixtures__/catalog-storyboard';
 import { parseMotionStoryboard } from '../storyboard/parse-motion-storyboard';
 import type { MotionStoryboard } from '../storyboard/motion-storyboard.schema';
-import { applyBriefBoxes, checkStoryboardBoxes } from './brief-boxes';
+import { applyBriefBoxes, checkStoryboardBoxes, listMeasuredBoxes } from './brief-boxes';
 import { checkStoryboardAgainstBrief } from './check-storyboard-against-brief';
 import { parseMotionBrief } from './motion-brief';
 
@@ -90,12 +90,56 @@ describe('applyBriefBoxes', () => {
   it('copies the boxes of the brief image into a walkthrough that points at them', () => {
     const applied = applyBriefBoxes(storyboardWith([{ action: 'highlight', box: 'Plan Flex' }]), brief);
     const scene = applied.scenes[0];
-    expect(scene?.kind === 'ui-walkthrough' && scene.props.boxes).toEqual(boxes);
+    expect(scene?.kind === 'ui-walkthrough' && scene.props.boxes).toMatchObject(boxes);
     expect(checkStoryboardBoxes(applied, brief)).toEqual([]);
   });
 
   it('leaves walkthroughs that use raw coordinates untouched', () => {
     const storyboard = storyboardWith([{ action: 'highlight', x: 0.175, y: 0.358, w: 0.308, h: 0.104 }]);
     expect(applyBriefBoxes(storyboard, brief)).toEqual(storyboard);
+  });
+});
+
+describe('measured boxes', () => {
+  const measuredBrief = parseMotionBrief({
+    version: 1,
+    brand: 'acme',
+    script: 'Guion',
+    images: [
+      {
+        file: 'cotizador.png',
+        caption: 'Cotizador',
+        boxes: [
+          { name: 'Plan Propio', x: 0.175, y: 0.358, w: 0.308, h: 0.104 },
+          { name: 'Boton', x: 0.6, y: 0.8, w: 0.2, h: 0.1, source: 'measured', measuredBy: 'producer', measuredAt: '2026-10-13T10:00:00.000Z' },
+        ],
+      },
+    ],
+  });
+
+  it('defaults to given when a stored brief has no source', () => {
+    expect(brief.images[0]?.boxes?.every((box) => box.source === 'given')).toBe(true);
+  });
+
+  it('requires measuredBy and measuredAt on a measured box and forbids them on a given one', () => {
+    const image = (box: unknown) => () => parseMotionBrief({ version: 1, brand: 'acme', script: 'x', images: [{ file: 'a.png', caption: 'a', boxes: [box] }] });
+    const base = { name: 'A', x: 0, y: 0, w: 0.1, h: 0.1 };
+    expect(image({ ...base, source: 'measured' })).toThrow(/needs measuredBy/u);
+    expect(image({ ...base, measuredBy: 'producer', measuredAt: '2026-10-13T10:00:00.000Z' })).toThrow(/source is given/u);
+  });
+
+  it('lists only the measured boxes apart, as measured by the producer on a date', () => {
+    expect(listMeasuredBoxes(measuredBrief)).toEqual([
+      { image: 'images/cotizador.png', name: 'Boton', measuredBy: 'producer', measuredAt: '2026-10-13T10:00:00.000Z', message: 'Caja "Boton" de images/cotizador.png: medida por el productor el 13/10/2026; confirmala con el dueño.' },
+    ]);
+    expect(listMeasuredBoxes(brief)).toEqual([]);
+    expect(listMeasuredBoxes(null)).toEqual([]);
+  });
+
+  it('tells the origin of a measured box when a step names a box that does not exist', () => {
+    const storyboard = storyboardWith([{ action: 'highlight', box: 'Nada' }]);
+    const [issue] = checkStoryboardBoxes(storyboard, measuredBrief);
+    expect(issue?.message).toContain('"Boton" (medida por el productor el 13/10/2026)');
+    expect(issue?.message).toContain('"Plan Propio"');
   });
 });

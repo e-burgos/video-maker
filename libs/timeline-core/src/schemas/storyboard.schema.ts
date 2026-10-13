@@ -1,6 +1,7 @@
 import { z } from 'zod';
 
 import type { JsonObject } from './json-schema';
+import { VoiceDirectionSchema } from '../voice/voice-direction';
 import { IdSchema, MsSchema } from './primitives';
 
 export const STORYBOARD_SCHEMA_VERSION = 1;
@@ -103,6 +104,7 @@ const SCENE_FIELDS = {
     'Rough duration of the scene in milliseconds. The real duration is later taken from the voice track.',
   ),
   captionsStyle: z.string().min(1).optional().describe('Overrides the storyboard caption style for this scene only.'),
+  direction: VoiceDirectionSchema.optional().describe('How this scene narration is delivered: pace, energy, pause after the line and words to stress. Emphasis words must appear in the narration. Omit it for the voice default.'),
   musicTags: z.array(z.string().min(1)).describe('Mood tags used to pick a music bed, lowercase english words.'),
   sfxTags: z.array(z.string().min(1)).describe('Sound effect tags for this scene, lowercase english words.'),
 };
@@ -191,6 +193,8 @@ interface RefinableScene {
   readonly visualSource: z.infer<typeof VisualSourceSchema>;
   readonly assetId?: string | undefined;
   readonly remotionScene?: z.infer<typeof RemotionSceneSchema> | undefined;
+  readonly narration: string;
+  readonly direction?: z.infer<typeof VoiceDirectionSchema> | undefined;
 }
 
 function refineScene(scene: RefinableScene, ctx: z.RefinementCtx, path: (string | number)[]): void {
@@ -210,6 +214,12 @@ function refineScene(scene: RefinableScene, ctx: z.RefinementCtx, path: (string 
       `Una escena visualSource=${scene.visualSource} no declara remotionScene.`,
     );
   }
+  const narration = scene.narration.toLowerCase();
+  (scene.direction?.emphasis ?? []).forEach((word, wordIndex) => {
+    if (!narration.includes(word.toLowerCase())) {
+      addIssue(ctx, [...path, 'direction', 'emphasis', wordIndex], `emphasis "${word}" is not in the narration of the scene.`);
+    }
+  });
   if (scene.remotionScene !== undefined) {
     refineRemotionScene(scene.remotionScene, ctx, [...path, 'remotionScene']);
   }
@@ -339,6 +349,7 @@ export function toStoryboardDocument(
       ...(scene.remotionScene === undefined ? {} : { remotionScene: scene.remotionScene }),
       estimatedDurationMs: scene.estimatedDurationMs,
       ...(scene.captionsStyle === undefined ? {} : { captionsStyle: scene.captionsStyle }),
+      ...(scene.direction === undefined ? {} : { direction: scene.direction }),
       musicTags: scene.musicTags,
       sfxTags: scene.sfxTags,
     })),

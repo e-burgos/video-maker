@@ -4,6 +4,7 @@ import { createCallLog } from '../../__fixtures__/call-log';
 import { createFakeObjectStorage } from '../../__fixtures__/fake-object-storage';
 import { createFakeRenderApiDependencies } from '../../__fixtures__/fake-render-api-dependencies';
 import { requestLine } from '../../__fixtures__/http-request';
+import { buildStoryboardDocument } from '../../__fixtures__/storyboard-fixtures';
 import type { StoreConfig } from '../../config/store-config';
 import { voiceDirectionPath } from '../../voice/voice-paths';
 import { handleGetVoiceDirection, handlePutVoiceDirection } from './voice-direction-handler';
@@ -62,6 +63,41 @@ describe('voice direction handlers (US-023-301, US-023-302)', () => {
     expect(response.status).toBe(200);
     expect(JSON.parse(await storage.readTextFile(`${PROJECT_ROOT}/${voiceDirectionPath()}`))).toEqual({ '1': { pace: 'fast', pauseAfterMs: 400 } });
     expect((response.body as VoiceDirectionBody).directions).toEqual({ '1': { pace: 'fast', pauseAfterMs: 400 } });
+  });
+
+  describe('scene directions of a narrated storyboard', () => {
+    const storyboard = () => JSON.stringify(buildStoryboardDocument());
+
+    async function put(deps: ReturnType<typeof createDeps>['deps'], payload: unknown) {
+      const request = requestLine({ method: 'PUT', path: `/projects/${SLUG}/voice/direction`, body: jsonBody(payload) });
+      return handlePutVoiceDirection(deps, STORE, { slug: SLUG }, request);
+    }
+
+    it('writes the direction into the scene of work/storyboard.json and clears it with null', async () => {
+      const { deps, storage } = createDeps([{ path: 'work/storyboard.json', contents: storyboard() }]);
+      const first = buildStoryboardDocument().scenes[0];
+      const word = (first?.narration ?? '').split(' ')[0] ?? '';
+
+      const response = await put(deps, { sceneDirections: { 'scene-01': { pace: 'slow', emphasis: [word] } } });
+
+      const stored = JSON.parse(await storage.readTextFile(`${PROJECT_ROOT}/work/storyboard.json`));
+      expect(stored.scenes[0].direction).toEqual({ pace: 'slow', emphasis: [word] });
+      expect(stored.scenes[1]).not.toHaveProperty('direction');
+      expect((response.body as VoiceDirectionBody).sceneDirections).toEqual({ 'scene-01': { pace: 'slow', emphasis: [word] } });
+
+      await put(deps, { sceneDirections: { 'scene-01': null } });
+      const cleared = JSON.parse(await storage.readTextFile(`${PROJECT_ROOT}/work/storyboard.json`));
+      expect(cleared.scenes[0]).not.toHaveProperty('direction');
+    });
+
+    it.each([
+      [{ sceneDirections: { 'scene-01': { emphasis: ['palabra-inexistente-zzz'] } } }],
+      [{ sceneDirections: { 'scene-99': { pace: 'slow' } } }],
+    ])('rejects an unknown scene or an emphasis outside the narration (%#)', async (payload) => {
+      const { deps } = createDeps([{ path: 'work/storyboard.json', contents: storyboard() }]);
+
+      await expect(put(deps, payload)).rejects.toMatchObject({ code: 'INVALID_INPUT' });
+    });
   });
 
   it.each([

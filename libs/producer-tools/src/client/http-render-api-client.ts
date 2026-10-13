@@ -394,5 +394,9 @@ export function createHttpRenderApiClient(options: HttpRenderApiClientOptions): 
     putMotionStoryboard: async (storyboard) => {
       await request('PUT', `/projects/${slug}/motion/storyboard`, storyboard);
     },
+
+    putVoiceDirection: async (input) => {
+      await request('PUT', `/projects/${slug}/voice/direction`, input);
+    },
   };
 }

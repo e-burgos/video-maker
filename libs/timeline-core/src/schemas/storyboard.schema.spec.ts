@@ -441,3 +441,32 @@ describe('StoryboardProposalSchema', () => {
     expect(result.error?.issues[0]?.path).toEqual(['scenes', 0, 'assetId']);
   });
 });
+
+describe('dirección de voz por escena', () => {
+  it('acepta direction con emphasis presente en la narración, sin distinguir mayúsculas', () => {
+    const base = structuredClone(minimalStoryboardDocument).scenes[0] as { narration: string };
+    const direction = { pace: 'slow', pauseAfterMs: 400, emphasis: [base.narration.split(' ')[0]?.toUpperCase()] };
+
+    const result = StoryboardDocumentSchema.safeParse(documentWithScenes([sceneWith({ direction })] as never));
+
+    expect(result.success).toBe(true);
+  });
+
+  it('rechaza un emphasis que no está en la narración', () => {
+    const result = StoryboardDocumentSchema.safeParse(
+      documentWithScenes([sceneWith({ direction: { emphasis: ['palabra-inexistente-zzz'] } })] as never),
+    );
+
+    expect(result.success).toBe(false);
+    expect(result.error?.issues[0]?.path).toEqual(['scenes', 0, 'direction', 'emphasis', 0]);
+  });
+
+  it('toStoryboardDocument conserva la dirección de la escena', () => {
+    const proposal = structuredClone(minimalStoryboardProposal);
+    const scenes = [{ ...proposal.scenes[0], direction: { energy: 'calm' } }] as never;
+
+    const document = toStoryboardDocument({ ...proposal, scenes }, storyboardIdentity);
+
+    expect(document.scenes[0]?.direction).toEqual({ energy: 'calm' });
+  });
+});

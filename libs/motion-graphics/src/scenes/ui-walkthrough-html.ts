@@ -130,7 +130,7 @@ function stepHtml(step: ResolvedWalkthroughStep, index: number, count: number, c
 }
 
 const CURSOR_SVG =
-  '<svg class="mg-ui-cursor" viewBox="0 0 24 32" aria-hidden="true"><path d="M2 2 L2 25 L8 19.6 L12.2 29.4 L16.4 27.6 L12.2 18 L20.6 18 Z" fill="#fff" stroke="#0b0d12" stroke-width="2" stroke-linejoin="round" /></svg>';
+  '<span class="mg-ui-pin"><svg class="mg-ui-cursor" viewBox="0 0 24 32" aria-hidden="true"><path d="M2 2 L2 25 L8 19.6 L12.2 29.4 L16.4 27.6 L12.2 18 L20.6 18 Z" fill="#fff" stroke="#0b0d12" stroke-width="2" stroke-linejoin="round" /></svg></span>';
 
 function browserBar(url: string | undefined): string {
   return `<div class="mg-ui-bar"><i></i><i></i><i></i><span class="mg-ui-url">${url ? esc(url) : ''}</span></div>`;

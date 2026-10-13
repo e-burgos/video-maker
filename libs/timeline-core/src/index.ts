@@ -216,7 +216,7 @@ export type {
   VoiceScriptWordsSource,
 } from './schemas/voice-script-manifest.schema';
 
-export { hashNarration } from './voice/hash-narration';
+export { hashDirectedNarration, hashNarration } from './voice/hash-narration';
 export {
   directedLengthScale,
   hasVoiceDirection,
@@ -264,6 +264,7 @@ export {
   ReviewStatusSchema,
   REVIEW_SEVERITIES,
   SceneFrameSchema,
+  SceneFrameShotSchema,
   SceneVisualReviewSchema,
   VISUAL_VERDICTS,
   VisualReviewSchema,
@@ -275,6 +276,7 @@ export type {
   ReviewSeverity,
   ReviewStatus,
   SceneFrame,
+  SceneFrameShot,
   SceneVisualReview,
   VisualReview,
 } from './review/review-report';

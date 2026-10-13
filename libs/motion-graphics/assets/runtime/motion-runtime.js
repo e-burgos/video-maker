@@ -135,6 +135,8 @@ window.createMotionRuntime = function createMotionRuntime(T, W, compositionId) {
       const zoom = el.closest('.mg-ui-zoom');
       const scene = el.closest('[data-scene]');
       const bodies = Array.from(scene.querySelectorAll('.mg-ui-bubble-body'));
+      const anchors = Array.from(scene.querySelectorAll('.mg-ui-anchor'));
+      const pin = scene.querySelector('.mg-ui-pin');
       const keyframes = Array.from(scene.querySelectorAll('[data-cam-scale]'))
         .map((step) => ({ t: timeFor(step, id, 0), scale: Number(step.dataset.camScale), cx: Number(step.dataset.camCx), cy: Number(step.dataset.camCy) }))
         .sort((a, b) => a.t - b.t)
@@ -148,6 +150,8 @@ window.createMotionRuntime = function createMotionRuntime(T, W, compositionId) {
         const timing = { duration, ease: 'power2.inOut', immediateRender: false };
         tl.fromTo(zoom, uiFocus(previous), { ...uiFocus(frame), ...timing }, start);
         bodies.forEach((body) => tl.fromTo(body, { scale: 1 / previous.scale }, { scale: 1 / frame.scale, ...timing }, start));
+        anchors.forEach((anchor) => tl.fromTo(anchor, { '--mg-inv': 1 / previous.scale }, { '--mg-inv': 1 / frame.scale, ...timing }, start));
+        if (pin) tl.fromTo(pin, { scale: 1 / previous.scale }, { scale: 1 / frame.scale, ...timing }, start);
         previous = frame;
         previousArrival = arrival;
       });
@@ -157,7 +161,7 @@ window.createMotionRuntime = function createMotionRuntime(T, W, compositionId) {
         .map((step) => ({ t: timeFor(step, id, 0), x: Number(step.dataset.px), y: Number(step.dataset.py), click: step.dataset.uiStep === 'click' }))
         .sort((a, b) => a.t - b.t);
       if (!waypoints.length) return;
-      const arrow = el.firstElementChild;
+      const arrow = el.querySelector('.mg-ui-cursor');
       const first = waypoints[0];
       let previous = { x: clamp(first.x - 0.14, 0, 1), y: clamp(first.y + 0.14, 0, 1), t: first.t - 0.9 };
       gsap.set(el, { xPercent: previous.x * 100, yPercent: previous.y * 100 });

@@ -24,6 +24,7 @@ export const STUDIO_TOOL_NAMES = [
   'write_motion_brief',
   'read_motion_storyboard',
   'write_motion_storyboard',
+  'set_voice_direction',
   'get_render_review',
   'record_visual_review',
   'review_material',

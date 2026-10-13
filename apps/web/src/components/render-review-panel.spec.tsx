@@ -102,8 +102,8 @@ describe('RenderReviewPanel', () => {
 
   describe('visual review by scene', () => {
     const frames = [
-      { sceneId: 's1', index: 1, startSec: 0, endSec: 8, atSec: 4, frame: 'out/video.review/scene-01.jpg', voice: 'Abrí el panel' },
-      { sceneId: 's2', index: 2, startSec: 8, endSec: 15, atSec: 11.5, frame: 'out/video.review/scene-02.jpg' },
+      { sceneId: 's1', index: 1, startSec: 0, endSec: 8, frames: [{ atSec: 4, frame: 'out/video.review/scene-01.jpg' }], voice: 'Abrí el panel' },
+      { sceneId: 's2', index: 2, startSec: 8, endSec: 15, frames: [{ atSec: 11.5, frame: 'out/video.review/scene-02.jpg' }] },
     ];
 
     function renderWith(report: ReviewReport) {

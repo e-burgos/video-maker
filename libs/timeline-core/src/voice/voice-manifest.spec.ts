@@ -6,7 +6,7 @@ import {
   VoiceManifestSchema,
 } from '../schemas/voice-manifest.schema';
 import type { VoiceManifest, VoiceTrack } from '../schemas/voice-manifest.schema';
-import { hashNarration } from './hash-narration';
+import { hashDirectedNarration, hashNarration } from './hash-narration';
 import {
   dropVoiceTracksOutsideScenes,
   findVoiceTrack,
@@ -149,6 +149,19 @@ describe('merge del manifest (US-09-005, US-09-006)', () => {
 
     expect(isVoiceTrackStale(existing, NARRATION)).toBe(false);
     expect(isVoiceTrackStale(existing, `${NARRATION} Y algo más.`)).toBe(true);
+  });
+
+  it('la dirección entra al hash sólo cuando existe: sin dirección el hash es el de siempre y cambiarla vuelve la pista stale', () => {
+    const existing = track();
+    const direction = { pace: 'slow' as const };
+
+    expect(hashDirectedNarration(NARRATION, undefined)).toBe(hashNarration(NARRATION));
+    expect(hashDirectedNarration(NARRATION, {})).toBe(hashNarration(NARRATION));
+    expect(isVoiceTrackStale(existing, NARRATION, undefined)).toBe(false);
+    expect(isVoiceTrackStale(existing, NARRATION, direction)).toBe(true);
+    const directed = track({ narrationHash: hashDirectedNarration(NARRATION, direction) });
+    expect(isVoiceTrackStale(directed, NARRATION, direction)).toBe(false);
+    expect(isVoiceTrackStale(directed, NARRATION, { pace: 'fast' })).toBe(true);
   });
 
   it('dropVoiceTracksOutsideScenes borra las pistas de escenas que ya no están en el storyboard', () => {

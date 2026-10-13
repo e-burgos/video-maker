@@ -1,11 +1,12 @@
-import { parseMotionStoryboard } from '@video-maker/motion-graphics';
-import type { MotionStoryboard } from '@video-maker/motion-graphics';
+import { listMeasuredBoxes, parseMotionBrief, parseMotionStoryboard } from '@video-maker/motion-graphics';
+import type { MeasuredBoxNotice, MotionStoryboard } from '@video-maker/motion-graphics';
 import { join } from 'node:path/posix';
 
 import type { ObjectStorage } from '../deps/object-storage';
 import { createSampleFileClassifier } from '../jobs/sample-files';
 import type { SampleFileClassifier } from '../jobs/sample-files';
 
+const BRIEF_PATH = 'motion/brief.json';
 const STORYBOARD_PATH = 'motion/storyboard.json';
 const TIMELINE_PATH = 'work/motion/timeline.json';
 const VOICE_MANIFEST_PATH = 'work/motion/voice-manifest.json';
@@ -52,6 +53,7 @@ export interface MotionOverview {
   readonly timeline: MotionOverviewTimeline | null;
   readonly voice: { readonly scenes: readonly MotionOverviewVoiceScene[] } | null;
   readonly video: MotionOverviewVideo | null;
+  readonly measuredBoxes: readonly MeasuredBoxNotice[];
 }
 
 interface ManifestLine {
@@ -240,6 +242,16 @@ async function readVideo(storage: ObjectStorage, root: string, isSample: SampleF
   };
 }
 
+async function readMeasuredBoxes(storage: ObjectStorage, root: string): Promise<readonly MeasuredBoxNotice[]> {
+  const raw = await readJsonIfPresent(storage, join(root, BRIEF_PATH));
+  if (raw === null) return [];
+  try {
+    return listMeasuredBoxes(parseMotionBrief(raw));
+  } catch {
+    return [];
+  }
+}
+
 export async function readMotionOverview(
   storage: ObjectStorage,
   root: string,
@@ -249,5 +261,6 @@ export async function readMotionOverview(
   const timeline = await readTimeline(storage, root);
   const voice = await readVoice(storage, root, storyboard, timeline);
   const video = await readVideo(storage, root, isSample);
-  return { storyboard, timeline, voice, video };
+  const measuredBoxes = await readMeasuredBoxes(storage, root);
+  return { storyboard, timeline, voice, video, measuredBoxes };
 }

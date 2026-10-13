@@ -17,6 +17,11 @@ export const MIN_FOCUS_SIDE = 0.45;
 export const FULL_VIEW_FROM_SIDE = 0.85;
 export const EDGE_PADDING_RATIO = 0.06;
 export const MIN_EDGE_PADDING = 0.015;
+export const STRIP_MIN_ASPECT = 5;
+export const STRIP_MAX_HEIGHT = 0.07;
+export const STRIP_READABLE_HEIGHT_RATIO = 0.08;
+export const STRIP_MAX_SIDE = 0.8;
+export const STRIP_MIN_SIDE = 0.33;
 export const SHARED_KEYFRAME_OVERLAP = 0.6;
 export const SHARED_KEYFRAME_MAX_SCALE_RATIO = 1.25;
 
@@ -58,7 +63,22 @@ export function padRectToSize(rect: UnitRect): UnitRect {
   return { x: left, y: top, w: right - left, h: bottom - top };
 }
 
+export function isThinStrip(rect: UnitRect): boolean {
+  return rect.h <= STRIP_MAX_HEIGHT && rect.w / rect.h >= STRIP_MIN_ASPECT;
+}
+
+function stripFocus(rect: UnitRect): CameraFocus {
+  const side = clamp(rect.h / STRIP_READABLE_HEIGHT_RATIO, STRIP_MIN_SIDE, STRIP_MAX_SIDE);
+  const left = rect.x - edgePadding(side);
+  return {
+    scale: 1 / side,
+    cx: clamp(left + side / 2, side / 2, 1 - side / 2),
+    cy: clamp(rect.y + rect.h / 2, side / 2, 1 - side / 2),
+  };
+}
+
 export function focusOn(rect: UnitRect): CameraFocus {
+  if (isThinStrip(rect)) return stripFocus(rect);
   const padded = padRectToSize(rect);
   const side = Math.max(padded.w, padded.h, MIN_FOCUS_SIDE);
   if (side >= FULL_VIEW_FROM_SIDE) return FULL_VIEW;
@@ -102,7 +122,7 @@ export function cameraKeyframes(rects: readonly UnitRect[]): CameraFocus[] {
   };
   for (const rect of rects) {
     const own = focusOn(rect);
-    if (groupFocus !== null && sharesKeyframe(groupFocus, own)) {
+    if (groupFocus !== null && !isThinStrip(rect) && !group.some(isThinStrip) && sharesKeyframe(groupFocus, own)) {
       const merged = focusOn(unionRects([...group, rect]) ?? rect);
       if (isFullView(merged) === isFullView(own)) {
         group.push(rect);

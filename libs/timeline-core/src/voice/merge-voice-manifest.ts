@@ -1,12 +1,13 @@
 import type { VoiceManifest, VoiceTrack } from '../schemas/voice-manifest.schema';
-import { hashNarration } from './hash-narration';
+import { hashDirectedNarration } from './hash-narration';
+import type { VoiceDirection } from './voice-direction';
 
 export function findVoiceTrack(manifest: VoiceManifest, sceneId: string): VoiceTrack | null {
   return manifest.tracks.find((track) => track.sceneId === sceneId) ?? null;
 }
 
-export function isVoiceTrackStale(track: VoiceTrack, narration: string): boolean {
-  return track.narrationHash !== hashNarration(narration);
+export function isVoiceTrackStale(track: VoiceTrack, narration: string, direction?: VoiceDirection): boolean {
+  return track.narrationHash !== hashDirectedNarration(narration, direction);
 }
 
 export function upsertVoiceTrack(manifest: VoiceManifest, track: VoiceTrack): VoiceManifest {

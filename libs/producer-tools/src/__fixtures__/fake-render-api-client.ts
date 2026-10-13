@@ -61,5 +61,6 @@ export function createFakeRenderApiClient(overrides: Partial<RenderApiClient> = 
     putMotionBrief: (...args) => record('putMotionBrief', args, overrides.putMotionBrief),
     getMotionStoryboard: (...args) => record('getMotionStoryboard', args, overrides.getMotionStoryboard),
     putMotionStoryboard: (...args) => record('putMotionStoryboard', args, overrides.putMotionStoryboard),
+    putVoiceDirection: (...args) => record('putVoiceDirection', args, overrides.putVoiceDirection),
   };
 }

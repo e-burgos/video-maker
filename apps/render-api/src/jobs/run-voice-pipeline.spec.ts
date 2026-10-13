@@ -288,6 +288,26 @@ describe('runVoicePipeline regeneración parcial (US-09-005)', () => {
     expect(manifest.tracks.find((track) => track.sceneId === 'scene-02')).toEqual(uploaded);
   });
 
+  it('aplica la dirección de la escena a su síntesis y la registra en el manifest; las demás no cambian', async () => {
+    const [first, ...rest] = DOCUMENT.scenes;
+    const direction = { pace: 'slow' as const, energy: 'lively' as const, pauseAfterMs: 500 };
+    const harness = createHarness({
+      storyboard: { ...DOCUMENT, scenes: [{ ...first, direction }, ...rest] },
+    });
+
+    await runVoicePipeline({ project: PROJECT, voiceId: null, sceneIds: null }, harness.deps, harness.observer);
+
+    const calls = harness.callLog.entries().filter((entry) => entry.port === 'synthesizeVoice');
+    expect(calls[0]?.input).toMatchObject({ lengthScale: 1.12, noiseScale: 0.8, noiseScaleW: 1, trailingPauseMs: 500 });
+    const plain = calls[1]?.input as Record<string, unknown>;
+    expect(plain).not.toHaveProperty('lengthScale');
+    expect(plain).not.toHaveProperty('noiseScale');
+    expect(plain).not.toHaveProperty('trailingPauseMs');
+    const manifest = await readManifest(harness.storage);
+    expect(manifest.tracks[0]?.direction).toEqual(direction);
+    expect(manifest.tracks[1]).not.toHaveProperty('direction');
+  });
+
   it('elige la voz pedida y la resuelve contra el directorio de voces configurado', async () => {
     const harness = createHarness();
 
