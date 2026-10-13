@@ -1,9 +1,6 @@
 # Constitución — libs/media-local
 
-> Versión 1.1 | Última actualización: spec-e-burgos-016 cycle-01 | Fecha: 2026-09-11
-> Consolidada al cerrar `cycle-01` de `spec-e-burgos-016-studio-usability` (fundió los fragmentos de
-> `spec-009 cycle-01`, `spec-014 cycle-01`, `FIX-006-001`, `FIX-009-002` y el propio `cycle-01`).
-> Las actualizaciones por ciclo/fix van como fragmentos aditivos en `updates/`.
+> Versión 2.0 | Última actualización: consolidación de fragmentos | Fecha: 2026-10-13
 
 ## 1. Propósito
 
@@ -58,7 +55,7 @@
   `place-speech-segments.ts` y `concat-speech-segments.ts`, las dos rutas de armado de la pista de
   voz). `ffprobe-output.schema.ts`/`parse-ffprobe-json.ts` leen también `pix_fmt` y derivan
   `hasAlpha` para assets de imagen.
-- `src/piper/` — `synthesizeSpeech` (wrapper del binario Piper TTS) y `buildVoiceCatalog` +
+- `src/tts/` — `synthesizeSpeech` (wrapper de sherpa-onnx 1.13.8, que reemplazó a Piper) y `buildVoiceCatalog` +
   `describeVoiceModel` (deriva metadata de voz del `.onnx.json` sidecar de cada modelo, sin mapa
   hardcodeado de nombres).
 - `src/mix/` — capa **pura** de mezcla: traduce un `AudioMixPlan` + `Timeline` a un `FilterGraph`
@@ -139,16 +136,37 @@
 - **`MissingMediaStreamError`** (`code: 'MISSING_MEDIA_STREAM'`) es un solo error tipado para las dos
   direcciones de `muxAudioIntoVideo` (`stream: 'audio' | 'video'`, mensaje distinto por cada una);
   `muxAudioIntoVideo` verifica el stream de video con `probeMedia` antes de invocar ffmpeg
-- **Binarios ensanchados a seis**: `piperCli` (`PIPER_PATH`, fallback por `PATH` a `piper`) y
-  `piperModel` (`PIPER_MODEL_PATH`, `.onnx` legible, **sin** fallback por `PATH`, mismo contrato que
-  `whisperModel`). La distinción binario/modelo es la lista `MODEL_BINARY_NAMES` con su type guard,
-  no un `if`: agregar otro modelo no vuelve a tocar dos ramas. `resolveBinaries` sigue devolviendo
-  los cuatro de montaje; `resolveVoiceBinaries` devuelve esos cuatro más los dos de Piper.
-- **`synthesizeSpeech` le pasa la narración a Piper por archivo, no por stdin** (el `CommandRunner`
-  no tiene canal de entrada): Piper trata cada línea como una emisión separada, así que
-  `narrationToSingleLine` colapsa el texto a una línea antes de escribirlo. `lengthScale?` agrega
-  `--length-scale <n>` entre `-i` y `-f`; con `undefined` o `1` los args quedan igual que antes.
-  Piper entrega 22 050 Hz mono: quien lo consuma remuestrea con `extractAudioForTranscription`.
+- **Resolución de binarios**: precedencia variable específica > `VIDEO_MAKER_BIN_DIR/<comando>` > `PATH`; modelos:
+  `VIDEO_MAKER_MODELS_DIR/whisper-model.bin` y `.../voices/`. Los modelos (`whisperModel`, el directorio de voces) no
+  se resuelven por `PATH` (lista `MODEL_BINARY_NAMES` con su type guard, no un `if`). `resolveBinaries` devuelve los
+  cuatro de montaje; `resolveVoiceBinaries` suma el CLI de voz. `ExecaCommandRunner` acepta `env` y lo usa con
+  `extendEnv: false`. `pnpm fetch:dev-voices` baja sherpa-onnx y las voces para desarrollo.
+- **`synthesizeSpeech`** pasa `--vits-model/--vits-tokens/--vits-data-dir/--vits-length-scale/--output-filename` y el
+  texto como argumento (lo lee de `textPath`; `narrationToSingleLine` colapsa el texto a una línea). **sherpa-onnx
+  (parser estilo kaldi) sólo acepta `--flag=valor`**: con dos argumentos lee un valor vacío y sale 255; todo flag nuevo
+  va con `=`. Dirección de voz: lengthScale por ritmo, `--vits-noise-scale`/`--vits-noise-scale-w` por energía y pausa
+  final con `appendTrailingSilence`; sin dirección la línea de comando es la de siempre. `VoiceModel.directory`
+  (`vits-piper-<id>/`), `DEFAULT_VOICE_ID = 'es_AR-daniela-high'`. Las descripciones de voz siguen sin i18n.
+- **Wrappers ffmpeg para el productor y la revisión**: `extract-frame.ts` (un JPEG con `-ss` antes de `-i`,
+  `-frames:v 1`, escala por lado mayor), `resize-image.ts` (misma invocación **sin `-ss`**: sobre una imagen fija ffmpeg
+  sale 0 sin escribir el archivo), `ken-burns-clip.ts` (`buildKenBurnsClip` en FRAMES —el mismo número en `zoompan d=`
+  y en `-frames:v`, nunca `-t`—, escala previa a 2160x3840), `concat-video-clips.ts` (demuxer concat con `-c copy`),
+  `normalize-video-master-loudness.ts` (`normalizeVideoMasterLoudness`: -14 LUFS sobre el audio de un MP4 ya
+  renderizado, video copiado, loudnorm lineal; lo usa el render motion), `normalize-audio-loudness.ts`
+  (`normalizeAudioLoudness`: ganancia lineal medida a un objetivo; recorte de música de motion, -24 LUFS),
+  `append-trailing-silence.ts`.
+- **Mediciones de la revisión de renders**: `measureSegmentLoudness` (LUFS integrado por tramo, Summary de ebur128),
+  `detectBlackSegments`, `detectFrozenSegments`, `detectSilences` (blackdetect/freezedetect/silencedetect con parseo
+  tipado; tramos abiertos se cierran con la duración pasada), apoyadas en `run-ffmpeg-for-stderr.ts` y
+  `time-segment.ts`; `detectSceneCuts` muestrea puntajes a 4 cuadros/s (`metadata=print`) y elige picos locales sobre
+  un umbral adaptativo (media + 2 desvíos, entre 0,05 y 0,3) con escena mínima de 1,5 s (detecta transiciones suaves
+  de motion); `extractSceneKeyframes` saca un cuadro en la mitad de cada escena.
+- **La mezcla acompaña a los bumpers**: `mix/shift-timeline-audio-for-bumpers.ts` (pura; devuelve la misma Timeline si
+  no hay bumpers; si los hay corre `tracks.voice`, `tracks.music` y `audioMix.automation` por `introBumperFrames` y lleva
+  `durationFrames` a `timelineTotalFrames`); `build-audio-mix-graph.ts` la aplica tras parsear. La salida del `amix`
+  gana `apad=whole_dur=<total>` **sin `atrim`**: `loudnorm` desplaza el PTS de la voz y un `atrim=end` cortaba 66 ms
+  del final; el `-shortest` del mux recorta contra el video. Sin bumpers el grafo es idéntico carácter por carácter
+  (test dedicado).
 - **Dos rutas para armar la pista de voz, deliberadamente sin unificar**: `concatSpeechSegments`
   (guion sin marcas de tiempo, concatena) y `placeSpeechSegments` (guion cronometrado, coloca cada
   segmento en su `startMs` absoluto vía `adelay` + `amix=inputs=N:normalize=0:duration=longest` —
@@ -158,7 +176,7 @@
 - **`buildVoiceCatalog` deriva metadata de voz, no la nombra**: recibe `VoiceModelFile[]`
   (`{ fileName, config }`) y `describeVoiceModel` deriva `language { code, region }` (BCP47),
   `quality`, `label` y `description` del `.onnx.json` — sin mapa hardcodeado, y **sin publicar
-  género, edad ni carácter** porque Piper no los documenta y deducirlos del dataset sería inventar.
+  género, edad ni carácter** porque los modelos no los documentan y deducirlos del dataset sería inventar.
   Un `config` que no es objeto se trata como ausente.
 - **`buildMusicBedChain` normaliza la cama musical antes de las ganancias del preset**: antepone
   `volume=<g>dB` cuando el asset trae `audio.integratedLufs` medido (`g =

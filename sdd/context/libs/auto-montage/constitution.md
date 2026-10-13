@@ -1,9 +1,6 @@
 # Constitución — libs/auto-montage
 
-> Versión 1.2 | Última actualización: FIX-e-burgos-009-002 | Fecha: 2026-09-11
-> Consolidada al cerrar `FIX-e-burgos-009-002` (fundió los fragmentos de
-> `spec-009 cycle-01`, `spec-014 cycle-01`, `FIX-003-003`, `FIX-007-002` y `FIX-009-002`).
-> Las actualizaciones por ciclo/fix van como fragmentos aditivos en `updates/`.
+> Versión 1.3 | Última actualización: consolidación de fragmentos | Fecha: 2026-10-13
 
 ## 1. Propósito
 
@@ -57,11 +54,26 @@
   (`keep | cut | punch-in | transition | caption-group | duck`) que define `EditDecisionList` en
   `timeline-core` — no hay arrays separados por tipo (`keeps`, `punchIns`, ...); confirmado
   consumiendo la lib desde `tools/render-cli` (cycle-03 de spec-002).
+- `src/montage/read-existing-timeline.ts` y `preserve-brand-decisions.ts`: `autoMontage` lee su propia salida
+  anterior (`work/timeline.json`; cualquier fallo devuelve `null`) y, antes de `assertValidTimeline`, copia `logo`
+  (solo si su asset sigue en la timeline nueva: con `logo: 'off'` no revive) y `bumpers`. Todo campo nuevo que el
+  usuario edite en la web y el montaje no sepa recalcular se suma a `preserveBrandDecisions`, o se pierde en el
+  próximo re-montaje.
+- `AutoMontageOptions.brand` (`MontageBrand`): el montaje escribe `captionTheme` y `logo: 'auto'` prefiere
+  `raw/logo/brand-<id>.*`; sin marca nada cambia. `musicMode` / `musicFloorDb` activan música por tramos sobre la
+  automatización de timeline-core.
+- Se exportan `mediaKindForExtension` e `isSupportedExtension`.
 - `src/errors/` — `AutoMontageError` como raíz + errores tipados con `code` estable:
   `CatalogUnreadableError`, `MontageInputError` (`MONTAGE_INPUT_INVALID`, con `reason`),
   `EditDecisionListInvalidError`, `TimelineInvalidError`.
 - `src/transcript/` — `tokenizeScript` y `alignTranscriptToScript(words, scriptText)`: alinea la
-  transcripción de Whisper contra un guion escrito por LCS sobre tokens normalizados. `autoMontage`
+  transcripción de Whisper contra un guion escrito por LCS sobre tokens normalizados; los tokens insertados se pegan
+  al run anterior dentro de `min(hueco, 1500 ms)` y `replaceWhisperRun` no extiende el fin más allá de la última
+  palabra que reemplaza. Con manifiesto de voz por guion y misma cantidad de líneas, `autoMontage` alinea línea por
+  línea (`alignTranscriptToScriptLines`, tipo `ScriptLineWindow`, ambos en el índice público); si no coinciden, cae
+  a la alineación global. `planCaptionGroups` recibe las ventanas de línea (sus `startMs` son cortes obligatorios y
+  el fin de cada grupo se acota al fin de la ventana donde empieza; fuera de toda ventana no se acota).
+  `VoiceScriptTrack` expone `lineWindows`. `autoMontage`
   lo aplica **antes** de podar silencios, así que captions/conceptos/ducking ven el mismo texto.
 - `src/voice/` — fuente de verdad de `work/voice/voice.wav`, `work/voice/voice.words.json` y
   `work/voice/script-manifest.json` (`voice-script-paths.ts`, re-exportado por
@@ -102,9 +114,10 @@
   segunda corrida sin cambios produce un `catalog.json` idéntico byte a byte (D-6); no lleva
   `generatedAt` (D-7). Un catálogo anterior ilegible degrada a ingesta completa con
   `staleCatalogReplaced: true` (D-8).
-- **`AssetRole` es un tipo suma de seis miembros** (`aroll`, `broll`, `music`, `image`, `voice`,
-  `logo`): ensancharlo es un cambio global, todo `Record<AssetRole, …>` nuevo (en esta lib o en un
-  consumidor) tiene que contemplar los seis. `raw/voice/` espera `MediaKind: 'audio'`; `raw/logo/`
+- **`AssetRole` es un tipo suma de siete miembros** (`aroll`, `broll`, `music`, `image`, `voice`,
+  `logo`, `reference`): ensancharlo es un cambio global, todo `Record<AssetRole, …>` nuevo (en esta lib o en un
+  consumidor) tiene que contemplar los siete. `raw/reference/` es sólo video, entra al catálogo y la ingesta y el
+  montaje lo ignora; `raw/inbox/` se ignora en la ingesta (test que lo fija). `raw/voice/` espera `MediaKind: 'audio'`; `raw/logo/`
   espera png/jpg/webp (`.svg` ⇒ `unsupported-extension`). `DEFAULT_TRANSCRIBE_ROLES` sigue siendo
   `['aroll']`: la ingesta no transcribe `raw/voice/` (lo hace el job `voice` de `apps/render-api`
   cuando se asocia a una escena).

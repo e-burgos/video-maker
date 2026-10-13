@@ -1,8 +1,6 @@
 # Constitución — tools/render-cli
 
-> Versión 1.5 | Última actualización: consolidación de `updates/` hasta FIX-007-002 | Fecha: 2026-09-11
-> Creada por el orquestador al abrir `cycle-01` de `spec-e-burgos-002-auto-montage-pipeline`.
-> Las actualizaciones por ciclo/fix van como fragmentos aditivos en `updates/`.
+> Versión 1.6 | Última actualización: consolidación de fragmentos | Fecha: 2026-10-13
 
 ## 1. Propósito
 
@@ -100,11 +98,19 @@ src/__fixtures__/            fake-cli-dependencies, media-project
   `expected:`, `cause:`, `hint:`) — la superficie de salida dejó de ser bilingüe salvo por la línea
   `cause:`, cuyo contenido no lo genera la CLI: viene tal cual del `message` de los errores de
   `libs/media-local` y `libs/composition-remotion`, y traducirlo es cambio de esas libs, no de acá.
-- **`plan`/`run` aceptan siete opciones de planificación** (`--preset`, `--seed`, `--script`,
-  `--no-logo`, `--format <reels-9x16|tiktok-9x16|shorts-9x16|youtube-16x9>`, `--voice
+- **`plan`/`run` aceptan ocho opciones de planificación** (`--preset`, `--seed`, `--script`,
+  `--no-logo`, `--caption-style <CAPTION_STYLE_NAMES>`, `--format <reels-9x16|tiktok-9x16|shorts-9x16|youtube-16x9>`, `--voice
   <aroll|script>`, `--prune-silences`); `ingest`/`render` las rechazan todas como
   `unexpected-option`. `--prune-silences` es un booleano de tres estados (`true`/ausente): ausente
   delega el default en la librería (`aroll` poda, `script` no).
+- `--caption-style`: `args/preset-names.ts` define `CAPTION_STYLE_NAMES = CAPTION_STYLES` (reexporta el union de
+  `timeline-core`, no una copia); `parseCaptionStyle` falla con `reason: 'unknown-caption-style'`; `'caption-style'`
+  está en `PLAN_ONLY_OPTIONS`, en `assertNoPlanOptions` y en `args/stage-for-argument.ts` (fila en los cuatro comandos);
+  `plan-command.ts` lo pasa a `autoMontage` sólo si está definido, para que sin bandera decida el preset de montaje.
+  El reporte de `plan` no imprime el estilo resuelto: se lee en `work/timeline.json`.
+- La CLI no tiene comando `voice`: el guion cronometrado se sintetiza con el job `voice` de `apps/render-api` (offline
+  sería un comando nuevo). Con `--voice script` la duración depende de si el guion era cronometrado: con marcas el
+  montaje dura el A-roll completo (`truncated 0`), sin marcas sigue `min(voz, A-roll)` (documentado en el README).
 - La ruta de `--script` se resuelve igual que `<project-root>` (contra la raíz del workspace, no
   del proyecto de medios); si no se puede leer, el error es `STAGE_INPUT_MISSING` con
   `reason: 'script-missing'` en la etapa `plan`. `PlanReport` imprime `logo: <assetId>|none`

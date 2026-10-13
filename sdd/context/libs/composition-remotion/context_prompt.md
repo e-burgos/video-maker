@@ -2,11 +2,11 @@
 
 > Entry point para agentes que trabajen sobre `libs/composition-remotion`.
 > Leer junto con `constitution.md` de este directorio **+ `updates/*.md` en orden de nombre**.
-> Última actualización: FIX-e-burgos-003-004 | Fecha: 2026-09-11
-> Consolidado al cerrar `FIX-e-burgos-003-004` (fundió los fragmentos de `FIX-001-002`,
-> `spec-006 cycle-02`, `spec-006 cycle-03`, `spec-014 cycle-01`, `FIX-003-003` y `FIX-003-004`).
+> Última actualización: consolidación de fragmentos | Fecha: 2026-10-13
 
 - **Tipo:** lib React 19 + Remotion 4
+- **Desde spec-017/021/023:** render desde bundle precompilado, preset `brand`, bumpers de logo, rango de cuadros para
+  muestras y geometría delegada en timeline-core (detalle en `constitution.md` §3).
 - **Estado:** completa y libre, sin ciclo abierto sobre esta lib. `spec-e-burgos-001` (3 ciclos),
   `spec-e-burgos-003` (2 ciclos, kinetic captions), `spec-e-burgos-006-web-studio` (`cycle-02` y
   `cycle-03`, Player de `apps/web`) y `spec-e-burgos-014-production-quality` (`cycle-01`, logo y
@@ -28,7 +28,7 @@
   `cycle-03`: alineó el encuadre del preview al del render) y
   `sdd/specs/spec-e-burgos-014-production-quality` (`cycle-01`: `LogoOverlay` y normalización de
   música en `AudioTrack`)
-- **Depende de:** `@video-maker/timeline-core` (ver `sdd/context/libs/timeline-core/` + `updates/`)
+- **Depende de:** `@video-maker/timeline-core` (ver `sdd/context/libs/timeline-core/`)
 - **Cómo correr y testear:** `pnpm nx test composition-remotion`, `pnpm nx lint composition-remotion`,
   `pnpm nx build composition-remotion`; manuales: `pnpm nx run composition-remotion:studio`,
   `pnpm nx run composition-remotion:smoke` (genera `out/example-9x16.mp4`, gitignoreado; ambos pueden
