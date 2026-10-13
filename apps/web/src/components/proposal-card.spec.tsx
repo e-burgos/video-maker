@@ -37,7 +37,7 @@ const estimates = {
     usd: 0.31,
   }),
   reel: proposalEstimate({
-    basis: { mode: 'raw', render: { source: 'default', samples: 0, processSecPerMediaSec: 3 }, voice: null },
+    basis: { mode: 'raw', render: { source: 'default', samples: 0, processSecPerMediaSec: 3, rough: true }, voice: null },
   }),
 };
 
@@ -83,6 +83,25 @@ describe('ProposalCard', () => {
     expect(reel.queryByText(/tokens/u)).toBeNull();
     expect(reel.queryByText(/US\$/u)).toBeNull();
     expect(reel.getByText('default estimate')).toBeTruthy();
+  });
+
+  it('flags a rough estimate with its explanation and leaves a history-based one unflagged', () => {
+    const studio = proposalEstimate({
+      basis: { mode: 'raw', render: { source: 'history-studio', samples: 2, processSecPerMediaSec: 3, rough: true }, voice: null },
+    });
+    renderCard(resource(proposalDocument(productionProposal(), { directo: proposalEstimate(), reel: studio })));
+
+    const [direct, reel] = screen.getAllByTestId('proposal-estimate').map((node) => within(node));
+    expect(direct?.queryByText('Rough estimate')).toBeNull();
+    expect(reel?.getByText('Rough estimate')).toBeTruthy();
+    expect(reel?.getByTestId('proposal-estimate-rough').textContent).toContain('fewer than 3 videos');
+  });
+
+  it('explains that there are no studio videos yet when the rough estimate uses reference values', () => {
+    renderCard(resource(proposalDocument(productionProposal(), estimates)));
+
+    const reel = within(screen.getAllByTestId('proposal-estimate')[1] as HTMLElement);
+    expect(reel.getByTestId('proposal-estimate-rough').textContent).toContain('has not made any videos yet');
   });
 
   it('says so when a concept has no estimate', () => {

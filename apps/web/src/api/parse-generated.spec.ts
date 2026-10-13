@@ -5,7 +5,7 @@ import { parseGeneratedListing } from './parse-generated';
 const VALID = {
   slug: 'display-ads',
   roots: ['work/voice', 'work/producer', 'out'],
-  files: [{ path: 'out/display-ads.mp4', sizeBytes: 10, modifiedAtMs: 1 }],
+  files: [{ path: 'out/display-ads.mp4', sizeBytes: 10, modifiedAtMs: 1, sample: false }],
 };
 
 describe('parseGeneratedListing', () => {
@@ -25,7 +25,8 @@ describe('parseGeneratedListing', () => {
     ['sin files', { ...VALID, files: {} }],
     ['con un archivo sin path', { ...VALID, files: [{ sizeBytes: 1, modifiedAtMs: 1 }] }],
     ['con un tamaño que no es número', { ...VALID, files: [{ path: 'a', sizeBytes: '1', modifiedAtMs: 1 }] }],
-    ['con un mtime que no es número', { ...VALID, files: [{ path: 'a', sizeBytes: 1, modifiedAtMs: null }] }],
+    ['con un mtime que no es número', { ...VALID, files: [{ path: 'a', sizeBytes: 1, modifiedAtMs: null, sample: false }] }],
+    ['sin la marca de muestra', { ...VALID, files: [{ path: 'a', sizeBytes: 1, modifiedAtMs: 1 }] }],
   ])('rechaza un documento %s', (_name, value) => {
     expect(() => parseGeneratedListing(value)).toThrowError(/generated listing/u);
   });

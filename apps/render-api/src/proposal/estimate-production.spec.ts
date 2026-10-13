@@ -3,6 +3,7 @@ import { describe, expect, it } from 'vitest';
 
 import {
   DEFAULT_PRODUCER_TOKENS_BASE,
+  MIN_HISTORY_SAMPLES,
   DEFAULT_PRODUCER_TOKENS_PER_SCENE,
   DEFAULT_RENDER_PROCESS_SEC_PER_VIDEO_SEC,
   DEFAULT_VOICE_PROCESS_SEC_PER_AUDIO_SEC,
@@ -38,13 +39,13 @@ describe('estimateProduction rates', () => {
   it('falls back to the declared constants without history', () => {
     const estimate = estimateProduction(concept(), [], CLAUDE);
 
-    expect(estimate.basis.render).toEqual({ source: 'default', samples: 0, processSecPerMediaSec: DEFAULT_RENDER_PROCESS_SEC_PER_VIDEO_SEC.footage });
-    expect(estimate.basis.voice).toEqual({ source: 'default', samples: 0, processSecPerMediaSec: DEFAULT_VOICE_PROCESS_SEC_PER_AUDIO_SEC });
+    expect(estimate.basis.render).toEqual({ source: 'default', samples: 0, processSecPerMediaSec: DEFAULT_RENDER_PROCESS_SEC_PER_VIDEO_SEC.footage, rough: true });
+    expect(estimate.basis.voice).toEqual({ source: 'default', samples: 0, processSecPerMediaSec: DEFAULT_VOICE_PROCESS_SEC_PER_AUDIO_SEC, rough: true });
     expect(estimate.renderMinutes).toBe(4);
     expect(estimate.voiceMinutes).toBe(1.5);
   });
 
-  it('uses the median of the same format when it has at least two samples', () => {
+  it('uses the median of the same format when it has at least three samples', () => {
     const history = [
       render(1, 'youtube-16x9', '2026-10-01T00:00:00Z'),
       render(3, 'youtube-16x9', '2026-10-02T00:00:00Z'),
@@ -54,16 +55,49 @@ describe('estimateProduction rates', () => {
 
     const estimate = estimateProduction(concept(), history, CLAUDE);
 
-    expect(estimate.basis.render).toEqual({ source: 'history-format', samples: 3, processSecPerMediaSec: 2 });
+    expect(estimate.basis.render).toEqual({ source: 'history-format', samples: 3, processSecPerMediaSec: 2, rough: false });
     expect(estimate.renderMinutes).toBe(4);
   });
 
-  it('falls back to every footage render when the format has a single sample', () => {
-    const history = [render(2, 'youtube-16x9', '2026-10-01T00:00:00Z'), render(4, 'reels-9x16', '2026-10-02T00:00:00Z')];
+  it('uses the mode median, not rough, when the format has fewer than three samples but the mode has three', () => {
+    const history = [
+      render(2, 'youtube-16x9', '2026-10-01T00:00:00Z'),
+      render(4, 'reels-9x16', '2026-10-02T00:00:00Z'),
+      render(6, 'reels-9x16', '2026-10-03T00:00:00Z'),
+    ];
 
     const estimate = estimateProduction(concept(), history, CLAUDE);
 
-    expect(estimate.basis.render).toMatchObject({ source: 'history-mode', samples: 2, processSecPerMediaSec: 3 });
+    expect(estimate.basis.render).toEqual({ source: 'history-mode', samples: 3, processSecPerMediaSec: 4, rough: false });
+  });
+
+  it.each([1, 2])('falls back to the studio median, flagged rough, with %i sample(s) of the mode', (count) => {
+    const footage = Array.from({ length: count }, (_, index) => render(2, 'youtube-16x9', `2026-10-0${index + 1}T00:00:00Z`));
+    const history = [...footage, render(8, null, '2026-10-05T00:00:00Z', 'motion'), render(14, null, '2026-10-06T00:00:00Z', 'motion')];
+
+    const estimate = estimateProduction(concept(), history, CLAUDE);
+
+    expect(estimate.basis.render.source).toBe('history-studio');
+    expect(estimate.basis.render.samples).toBe(count + 2);
+    expect(estimate.basis.render.rough).toBe(true);
+  });
+
+  it('uses motion samples of the studio for a footage concept that has none of its own', () => {
+    const estimate = estimateProduction(concept(), [render(5, null, '2026-10-01T00:00:00Z', 'motion')], CLAUDE);
+
+    expect(estimate.basis.render).toEqual({ source: 'history-studio', samples: 1, processSecPerMediaSec: 5, rough: true });
+  });
+
+  it('keeps the same payload keys for every source', () => {
+    const sources = [
+      estimateProduction(concept(), [], CLAUDE),
+      estimateProduction(concept(), [render(2, null, '2026-10-01T00:00:00Z', 'motion')], CLAUDE),
+      estimateProduction(concept(), Array.from({ length: MIN_HISTORY_SAMPLES }, () => render(2, 'youtube-16x9', '2026-10-01T00:00:00Z')), CLAUDE),
+    ];
+
+    for (const estimate of sources) {
+      expect(Object.keys(estimate.basis.render).sort()).toEqual(['processSecPerMediaSec', 'rough', 'samples', 'source']);
+    }
   });
 
   it('keeps only the newest samples inside the window', () => {
@@ -76,11 +110,16 @@ describe('estimateProduction rates', () => {
   });
 
   it('ignores motion history for a footage concept and the other way around', () => {
-    const history = [render(8, null, '2026-10-01T00:00:00Z', 'motion'), render(2, 'youtube-16x9', '2026-10-02T00:00:00Z'), render(2, 'youtube-16x9', '2026-10-03T00:00:00Z')];
+    const history = [
+      render(8, null, '2026-10-01T00:00:00Z', 'motion'),
+      render(2, 'youtube-16x9', '2026-10-02T00:00:00Z'),
+      render(2, 'youtube-16x9', '2026-10-03T00:00:00Z'),
+      render(2, 'youtube-16x9', '2026-10-04T00:00:00Z'),
+    ];
 
     expect(estimateProduction(concept(), history, CLAUDE).basis.render.processSecPerMediaSec).toBe(2);
     const motion = estimateProduction(concept({ delivery: { kind: 'motion' } }), history, CLAUDE);
-    expect(motion.basis.render).toMatchObject({ source: 'history-mode', samples: 1, processSecPerMediaSec: 8 });
+    expect(motion.basis.render).toMatchObject({ source: 'history-studio', samples: 4, rough: true });
   });
 });
 
@@ -100,7 +139,7 @@ describe('estimateProduction voice', () => {
   it('prices the voice with the history of voice jobs', () => {
     const estimate = estimateProduction(concept({ durationSec: 100 }), [voice(0.6, '2026-10-01T00:00:00Z')], CLAUDE);
 
-    expect(estimate.basis.voice).toMatchObject({ source: 'history-mode', processSecPerMediaSec: 0.6 });
+    expect(estimate.basis.voice).toMatchObject({ source: 'history-studio', processSecPerMediaSec: 0.6, rough: true });
     expect(estimate.voiceMinutes).toBe(0.9);
   });
 });

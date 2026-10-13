@@ -1,4 +1,4 @@
-import type { SecondsRange, VoiceSegmentLevels } from './review-inputs';
+import type { SecondsRange, SfxLevel, VoiceSegmentLevels } from './review-inputs';
 import type { ReviewMeasurements } from './review-measurements';
 
 export interface SourceSlice {
@@ -7,11 +7,17 @@ export interface SourceSlice {
   readonly endSec: number;
 }
 
+export interface SfxSlice {
+  readonly slice: SourceSlice;
+  readonly gainDb: number;
+}
+
 export interface LevelPlan extends SecondsRange {
   readonly voice: SourceSlice | null;
   readonly voiceNormalization: { readonly whole: SourceSlice; readonly targetLufs: number } | null;
   readonly music: SourceSlice | null;
   readonly musicGainDb: number;
+  readonly sfx?: readonly SfxSlice[];
 }
 
 async function measureSlice(
@@ -47,6 +53,21 @@ async function voiceLufsFor(
   return whole === null ? null : plan.voiceNormalization.targetLufs + (raw - whole);
 }
 
+async function sfxLevelsFor(
+  plan: LevelPlan,
+  measurements: ReviewMeasurements,
+  cache: Map<string, Promise<number | null>>,
+): Promise<SfxLevel[]> {
+  const levels: SfxLevel[] = [];
+  for (const { slice, gainDb } of plan.sfx ?? []) {
+    const lufs = await measureSlice(slice, measurements, cache);
+    if (lufs !== null) {
+      levels.push({ lufs, gainDb });
+    }
+  }
+  return levels;
+}
+
 export async function measureLevelPlans(
   plans: readonly LevelPlan[],
   measurements: ReviewMeasurements,
@@ -55,12 +76,14 @@ export async function measureLevelPlans(
   const cache = new Map<string, Promise<number | null>>();
   const levels: VoiceSegmentLevels[] = [];
   for (const plan of plans) {
+    const sfx = await sfxLevelsFor(plan, measurements, cache);
     levels.push({
       startSec: plan.startSec + bumperOffsetSec,
       endSec: plan.endSec + bumperOffsetSec,
       voiceLufs: await voiceLufsFor(plan, measurements, cache),
       musicLufs: await measureSlice(plan.music, measurements, cache),
       musicGainDb: plan.musicGainDb,
+      ...(sfx.length > 0 ? { sfx } : {}),
     });
   }
   return levels;

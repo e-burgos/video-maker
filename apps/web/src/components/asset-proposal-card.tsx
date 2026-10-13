@@ -3,17 +3,20 @@ import { useState } from 'react';
 import { artifactUrl } from '../api/artifact-url';
 import { orderedAssetRoles } from '../api/asset-roles';
 import { inboxReasonKey } from '../api/inbox';
+import { referenceSuggestionReasonKey, suggestReferenceReason } from '../api/reference-suggestion';
 import { RenderApiError, serviceUnreachable } from '../api/render-api-error';
 import { useT } from '../i18n/language-context';
 import { ErrorNotice } from './error-notice';
 import { Button } from './ui/button';
-import type { AssetRole, InboxAsset } from '../api/render-api-types';
+import type { AssetRole, InboxAsset, ProjectMode } from '../api/render-api-types';
 
 export type AssetProposalCardProps = {
   slug: string;
   asset: InboxAsset;
   onConfirm: (assetId: string, role: AssetRole) => Promise<void>;
   onDiscard: (assetId: string) => Promise<void>;
+  mode?: ProjectMode;
+  requestText?: string;
 };
 
 function ProposalThumbnail({ slug, asset }: { slug: string; asset: InboxAsset }) {
@@ -51,9 +54,22 @@ function ProposalThumbnail({ slug, asset }: { slug: string; asset: InboxAsset })
   );
 }
 
-export function AssetProposalCard({ slug, asset, onConfirm, onDiscard }: AssetProposalCardProps) {
+export function AssetProposalCard({
+  slug,
+  asset,
+  onConfirm,
+  onDiscard,
+  mode,
+  requestText,
+}: AssetProposalCardProps) {
   const t = useT();
-  const [role, setRole] = useState<AssetRole>(asset.proposedRole);
+  const isVideo = asset.probe.kind === 'video';
+  const [suggestedReason] = useState(() =>
+    suggestReferenceReason({ fileName: asset.fileName, kind: asset.probe.kind, mode, requestText }),
+  );
+  const [role, setRole] = useState<AssetRole>(
+    suggestedReason !== null ? 'reference' : asset.proposedRole,
+  );
   const [confirming, setConfirming] = useState(false);
   const [discarding, setDiscarding] = useState(false);
   const [error, setError] = useState<RenderApiError | null>(null);
@@ -110,7 +126,9 @@ export function AssetProposalCard({ slug, asset, onConfirm, onDiscard }: AssetPr
             onChange={(event) => setRole(event.target.value as AssetRole)}
             className="rounded-control border border-border-strong bg-surface px-2 py-1 text-xs text-ink"
           >
-            {orderedAssetRoles().map((choice) => (
+            {orderedAssetRoles()
+              .filter((choice) => choice.role !== 'reference' || isVideo)
+              .map((choice) => (
               <option key={choice.role} value={choice.role}>
                 {t(choice.shortNameKey)}
               </option>
@@ -134,6 +152,22 @@ export function AssetProposalCard({ slug, asset, onConfirm, onDiscard }: AssetPr
             {discarding ? t('inbox.card.discarding') : t('inbox.card.discard')}
           </Button>
         </div>
+
+        {isVideo && role === 'reference' && (
+          <div data-testid="asset-proposal-reference-note" className="space-y-1">
+            {suggestedReason !== null && (
+              <p
+                data-testid="asset-proposal-reference-suggestion"
+                className="text-xs font-medium text-accent-strong"
+              >
+                {t('assetRole.reference.suggested', {
+                  reason: t(referenceSuggestionReasonKey(suggestedReason)),
+                })}
+              </p>
+            )}
+            <p className="text-xs text-ink-faint">{t('assetRole.reference.explain')}</p>
+          </div>
+        )}
 
         {error !== null && <ErrorNotice error={error} />}
       </div>

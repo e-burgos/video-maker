@@ -1,14 +1,12 @@
 import type { CSSProperties, FC } from 'react';
 import { AbsoluteFill, Img, Sequence } from 'remotion';
+import { PIP_MARGIN_RATIO, PIP_WIDTH_RATIO } from '@video-maker/timeline-core';
 import type { VideoSequenceProps } from '../helpers/timeline-to-sequence-props';
 import { TimelineVideo } from './timeline-video';
 
 export interface BrollTrackProps {
   clips: readonly VideoSequenceProps[];
 }
-
-const PIP_WIDTH_RATIO = 0.32;
-const PIP_MARGIN_RATIO = 0.05;
 
 const COVER_MEDIA_STYLE: CSSProperties = { width: '100%', height: '100%', objectFit: 'cover' };
 const CONTAIN_MEDIA_STYLE: CSSProperties = { width: '100%', height: '100%', objectFit: 'contain' };

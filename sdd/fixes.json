@@ -3102,6 +3102,298 @@
           }
         ]
       }
+    },
+    {
+      "id": "FIX-e-burgos-021",
+      "author": "e-burgos",
+      "spec_id": "spec-e-burgos-023-production-quality",
+      "fix_document": "sdd/fixes/fix-e-burgos-021.md",
+      "type": "IMPROVEMENT",
+      "severity": "medium",
+      "created_at": "2026-10-13",
+      "resolved_at": "2026-10-13",
+      "validated_at": null,
+      "title": "Las muestras se reconocen por el dato del render y no por el nombre del archivo",
+      "estimation_hours": 2,
+      "description": "La web (Biblioteca, Entregas, Vista previa, publicar) y render-api deducían que un mp4 es muestra por el sufijo .sample.mp4; el render ya guarda sample: true en su reporte.",
+      "justification": "Evitar que un archivo renombrado se trate mal; cambio interno sin contratos nuevos fuera del estudio.",
+      "related_modules": [
+        "production-quality"
+      ],
+      "affected_files": [
+        "apps/render-api/src/http/handle-request.ts",
+        "apps/render-api/src/http/handlers/generated-handler.spec.ts",
+        "apps/render-api/src/http/handlers/generated-handler.ts",
+        "apps/render-api/src/http/handlers/jobs-handler.spec.ts",
+        "apps/render-api/src/http/handlers/jobs-handler.ts",
+        "apps/render-api/src/http/handlers/motion-handler.spec.ts",
+        "apps/render-api/src/http/handlers/motion-handler.ts",
+        "apps/render-api/src/http/handlers/youtube-publish-handler.ts",
+        "apps/render-api/src/jobs/render-job.spec.ts",
+        "apps/render-api/src/jobs/render-job.ts",
+        "apps/render-api/src/jobs/sample-files.spec.ts",
+        "apps/render-api/src/jobs/sample-files.ts",
+        "apps/render-api/src/jobs/voice-job.spec.ts",
+        "apps/render-api/src/motion/read-motion-overview.ts",
+        "apps/render-api/src/youtube/publish-preconditions.spec.ts",
+        "apps/render-api/src/youtube/publish-preconditions.ts",
+        "apps/web/src/api/__fixtures__/workspace.ts",
+        "apps/web/src/api/generated-files.spec.ts",
+        "apps/web/src/api/parse-generated.spec.ts",
+        "apps/web/src/api/parse-generated.ts",
+        "apps/web/src/api/parse-render-job.spec.ts",
+        "apps/web/src/api/parse-render-job.ts",
+        "apps/web/src/api/render-api-client.spec.ts",
+        "apps/web/src/api/render-api-types.ts",
+        "apps/web/src/api/render-job-artifact.ts",
+        "apps/web/src/api/workspace-panel.spec.ts",
+        "apps/web/src/api/workspace-panel.ts",
+        "apps/web/src/components/generated-files-panel.spec.tsx",
+        "apps/web/src/components/generated-files-panel.tsx"
+      ],
+      "test_reference": "render-api y web lint/test/build verde; GET generated en el studio marca out/video.sample.mp4 por el job y la Biblioteca muestra la insignia Muestra.",
+      "status": "implemented",
+      "cycle": null,
+      "process_note": "Pendiente posterior al video de prueba comprar-producto (plan aprobado por el dueño, tanda A).",
+      "usage": {
+        "provider_model": "claude/sonnet",
+        "effort": "medium",
+        "tokens_in": 138319,
+        "tokens_out": 23762,
+        "approx": true,
+        "source": "agent-usage-notification",
+        "recorded_at": "2026-10-13",
+        "by_agent": [
+          {
+            "agent": "implementor-back",
+            "provider_model": "claude/sonnet",
+            "effort": "medium",
+            "tokens_in": 123319,
+            "tokens_out": 21762,
+            "approx": true,
+            "source": "agent-usage-notification",
+            "recorded_at": "2026-10-13"
+          },
+          {
+            "agent": "orchestrator",
+            "provider_model": "claude/opus",
+            "effort": "low",
+            "tokens_in": 15000,
+            "tokens_out": 2000,
+            "approx": true,
+            "source": "declared-estimate",
+            "recorded_at": "2026-10-13"
+          }
+        ]
+      }
+    },
+    {
+      "id": "FIX-e-burgos-022",
+      "author": "e-burgos",
+      "spec_id": "spec-e-burgos-023-production-quality",
+      "fix_document": "sdd/fixes/fix-e-burgos-022.md",
+      "type": "IMPROVEMENT",
+      "severity": "medium",
+      "created_at": "2026-10-13",
+      "resolved_at": "2026-10-13",
+      "validated_at": null,
+      "title": "La revisión automática suma los efectos de sonido al margen voz/música y controla la zona segura de los subtítulos",
+      "estimation_hours": 2,
+      "description": "El margen voz/música por tramo no contaba whooshes ni sfx, y nada controlaba que los subtítulos queden tapados por el isotipo, el chat o recuadros superpuestos.",
+      "justification": "Lecciones del lote de tutoriales (PROTOCOLO-ENTREGA §1) y del video de prueba; cambio interno de la revisión.",
+      "related_modules": [
+        "production-quality"
+      ],
+      "affected_files": [
+        "apps/render-api/src/review/caption-layout-facts.spec.ts",
+        "apps/render-api/src/review/caption-layout-facts.ts",
+        "apps/render-api/src/review/caption-safe-zone-rule.spec.ts",
+        "apps/render-api/src/review/caption-safe-zone-rule.ts",
+        "apps/render-api/src/review/collect-footage-facts.ts",
+        "apps/render-api/src/review/collect-motion-facts.ts",
+        "apps/render-api/src/review/collect-review-inputs.ts",
+        "apps/render-api/src/review/level-plan.ts",
+        "apps/render-api/src/review/motion-level-plans.ts",
+        "apps/render-api/src/review/motion-sfx-cues.spec.ts",
+        "apps/render-api/src/review/motion-sfx-cues.ts",
+        "apps/render-api/src/review/review-facts.ts",
+        "apps/render-api/src/review/review-inputs.ts",
+        "apps/render-api/src/review/review-rules.ts",
+        "apps/render-api/src/review/review-thresholds.ts",
+        "apps/render-api/src/review/voice-music-margin-rule.spec.ts",
+        "apps/render-api/src/review/voice-music-margin-rule.ts",
+        "libs/composition-remotion/src/components/broll-track.tsx",
+        "libs/composition-remotion/src/helpers/caption-box.ts",
+        "libs/composition-remotion/src/helpers/caption-font-size.ts",
+        "libs/composition-remotion/src/helpers/caption-preset.ts",
+        "libs/timeline-core/src/captions/caption-geometry.spec.ts",
+        "libs/timeline-core/src/captions/caption-geometry.ts",
+        "libs/timeline-core/src/index.ts",
+        "libs/timeline-core/src/schemas/schemas.spec.ts"
+      ],
+      "test_reference": "render-api, timeline-core y composition-remotion lint/test/build verde (render sin cambios en sus tests). Prueba real sobre copias: tutorial con isotipo agrandado → crítico caption-safe-zone; motion v2 con un whoosh dentro de una frase → crítico voice-music-margin que pide bajar el efecto; sin tocar, ambos sin hallazgos nuevos.",
+      "status": "implemented",
+      "cycle": null,
+      "process_note": "Pendiente posterior al video de prueba comprar-producto (plan aprobado por el dueño, tanda A).",
+      "usage": {
+        "provider_model": "claude/sonnet",
+        "effort": "medium",
+        "tokens_in": 315458,
+        "tokens_out": 55022,
+        "approx": true,
+        "source": "agent-usage-notification",
+        "recorded_at": "2026-10-13",
+        "by_agent": [
+          {
+            "agent": "implementor-back",
+            "provider_model": "claude/sonnet",
+            "effort": "medium",
+            "tokens_in": 300458,
+            "tokens_out": 53022,
+            "approx": true,
+            "source": "agent-usage-notification",
+            "recorded_at": "2026-10-13"
+          },
+          {
+            "agent": "orchestrator",
+            "provider_model": "claude/opus",
+            "effort": "low",
+            "tokens_in": 15000,
+            "tokens_out": 2000,
+            "approx": true,
+            "source": "declared-estimate",
+            "recorded_at": "2026-10-13"
+          }
+        ]
+      }
+    },
+    {
+      "id": "FIX-e-burgos-023",
+      "author": "e-burgos",
+      "spec_id": "spec-e-burgos-023-production-quality",
+      "fix_document": "sdd/fixes/fix-e-burgos-023.md",
+      "type": "IMPROVEMENT",
+      "severity": "medium",
+      "created_at": "2026-10-13",
+      "resolved_at": "2026-10-13",
+      "validated_at": null,
+      "title": "La bandeja de arrastrar y soltar propone el rol reference para videos de referencia",
+      "estimation_hours": 2,
+      "description": "Al soltar un video que parece una referencia (no material propio) la bandeja no ofrecía el rol reference ni explicaba qué hace.",
+      "justification": "Facilitar el flujo «un video como este»; cambio de UI sin contratos nuevos.",
+      "related_modules": [
+        "production-quality"
+      ],
+      "affected_files": [
+        "apps/web/src/api/reference-suggestion.ts",
+        "apps/web/src/components/asset-proposal-card.spec.tsx",
+        "apps/web/src/components/asset-proposal-card.tsx",
+        "apps/web/src/components/producer-conversation-panel.tsx",
+        "apps/web/src/i18n/messages-en.ts",
+        "apps/web/src/i18n/messages-es.ts"
+      ],
+      "test_reference": "web lint/test/build verde (5 casos nuevos en asset-proposal-card).",
+      "status": "implemented",
+      "cycle": null,
+      "process_note": "Pendiente posterior al video de prueba comprar-producto (plan aprobado por el dueño, tanda A).",
+      "usage": {
+        "provider_model": "claude/sonnet",
+        "effort": "medium",
+        "tokens_in": 103129,
+        "tokens_out": 17552,
+        "approx": true,
+        "source": "agent-usage-notification",
+        "recorded_at": "2026-10-13",
+        "by_agent": [
+          {
+            "agent": "implementor-front",
+            "provider_model": "claude/sonnet",
+            "effort": "medium",
+            "tokens_in": 88129,
+            "tokens_out": 15552,
+            "approx": true,
+            "source": "agent-usage-notification",
+            "recorded_at": "2026-10-13"
+          },
+          {
+            "agent": "orchestrator",
+            "provider_model": "claude/opus",
+            "effort": "low",
+            "tokens_in": 15000,
+            "tokens_out": 2000,
+            "approx": true,
+            "source": "declared-estimate",
+            "recorded_at": "2026-10-13"
+          }
+        ]
+      }
+    },
+    {
+      "id": "FIX-e-burgos-024",
+      "author": "e-burgos",
+      "spec_id": "spec-e-burgos-023-production-quality",
+      "fix_document": "sdd/fixes/fix-e-burgos-024.md",
+      "type": "IMPROVEMENT",
+      "severity": "medium",
+      "created_at": "2026-10-13",
+      "resolved_at": "2026-10-13",
+      "validated_at": null,
+      "title": "La estimación de la propuesta usa el promedio general del estudio cuando hay pocos renders del modo o formato",
+      "estimation_hours": 2,
+      "description": "Con menos de 3 renders del modo/formato la estimación salía de 1–2 muestras o de valores por defecto sin avisar que era gruesa.",
+      "justification": "Estimaciones engañosas en proyectos nuevos; cambio interno sin contratos nuevos fuera del estudio.",
+      "related_modules": [
+        "production-quality"
+      ],
+      "affected_files": [
+        "apps/render-api/src/http/handlers/proposal-handler.spec.ts",
+        "apps/render-api/src/proposal/estimate-production.spec.ts",
+        "apps/render-api/src/proposal/estimate-production.ts",
+        "apps/web/src/api/__fixtures__/proposal.ts",
+        "apps/web/src/api/proposal-format.spec.ts",
+        "apps/web/src/api/proposal-types.ts",
+        "apps/web/src/components/asset-proposal-card.spec.tsx",
+        "apps/web/src/components/asset-proposal-card.tsx",
+        "apps/web/src/components/proposal-card.spec.tsx",
+        "apps/web/src/components/proposal-card.tsx",
+        "apps/web/src/i18n/messages-en.ts",
+        "apps/web/src/i18n/messages-es.ts"
+      ],
+      "test_reference": "render-api y web lint/test/build verde; la propuesta real de comprar-producto-v2 sale con history-mode (20 muestras, rough false).",
+      "status": "implemented",
+      "cycle": null,
+      "process_note": "Pendiente posterior al video de prueba comprar-producto (plan aprobado por el dueño, tanda A).",
+      "usage": {
+        "provider_model": "claude/sonnet",
+        "effort": "medium",
+        "tokens_in": 106115,
+        "tokens_out": 18079,
+        "approx": true,
+        "source": "agent-usage-notification",
+        "recorded_at": "2026-10-13",
+        "by_agent": [
+          {
+            "agent": "implementor-back",
+            "provider_model": "claude/sonnet",
+            "effort": "medium",
+            "tokens_in": 91115,
+            "tokens_out": 16079,
+            "approx": true,
+            "source": "agent-usage-notification",
+            "recorded_at": "2026-10-13"
+          },
+          {
+            "agent": "orchestrator",
+            "provider_model": "claude/opus",
+            "effort": "low",
+            "tokens_in": 15000,
+            "tokens_out": 2000,
+            "approx": true,
+            "source": "declared-estimate",
+            "recorded_at": "2026-10-13"
+          }
+        ]
+      }
     }
   ]
 }

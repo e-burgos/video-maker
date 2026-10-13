@@ -3,7 +3,7 @@ import type { ProposalConcept } from '@video-maker/timeline-core';
 export type ProductionMode = 'footage' | 'motion';
 
 export const HISTORY_WINDOW = 20;
-export const MIN_FORMAT_SAMPLES = 2;
+export const MIN_HISTORY_SAMPLES = 3;
 
 export const DEFAULT_RENDER_PROCESS_SEC_PER_VIDEO_SEC: Readonly<Record<ProductionMode, number>> = {
   footage: 2,
@@ -37,12 +37,13 @@ export type ProducerEngineForEstimate =
     }
   | { readonly kind: 'none' };
 
-export type EstimateSource = 'history-format' | 'history-mode' | 'default';
+export type EstimateSource = 'history-format' | 'history-mode' | 'history-studio' | 'default';
 
 export interface RateBasis {
   readonly source: EstimateSource;
   readonly samples: number;
   readonly processSecPerMediaSec: number;
+  readonly rough: boolean;
 }
 
 export interface ProductionEstimate {
@@ -81,19 +82,24 @@ function roundTo(value: number, decimals: number): number {
 }
 
 function rateFrom(
-  samples: readonly HistorySample[],
+  modeSamples: readonly HistorySample[],
+  studioSamples: readonly HistorySample[],
   format: string | null,
   fallback: number,
 ): RateBasis {
-  const sameFormat = format === null ? [] : newestRatios(samples.filter((sample) => sample.format === format));
-  if (sameFormat.length >= MIN_FORMAT_SAMPLES) {
-    return { source: 'history-format', samples: sameFormat.length, processSecPerMediaSec: roundTo(median(sameFormat), 3) };
+  const sameFormat = format === null ? [] : newestRatios(modeSamples.filter((sample) => sample.format === format));
+  if (sameFormat.length >= MIN_HISTORY_SAMPLES) {
+    return { source: 'history-format', samples: sameFormat.length, processSecPerMediaSec: roundTo(median(sameFormat), 3), rough: false };
   }
-  const sameMode = newestRatios(samples);
-  if (sameMode.length > 0) {
-    return { source: 'history-mode', samples: sameMode.length, processSecPerMediaSec: roundTo(median(sameMode), 3) };
+  const sameMode = newestRatios(modeSamples);
+  if (sameMode.length >= MIN_HISTORY_SAMPLES) {
+    return { source: 'history-mode', samples: sameMode.length, processSecPerMediaSec: roundTo(median(sameMode), 3), rough: false };
   }
-  return { source: 'default', samples: 0, processSecPerMediaSec: fallback };
+  const studio = newestRatios(studioSamples);
+  if (studio.length > 0) {
+    return { source: 'history-studio', samples: studio.length, processSecPerMediaSec: roundTo(median(studio), 3), rough: true };
+  }
+  return { source: 'default', samples: 0, processSecPerMediaSec: fallback, rough: true };
 }
 
 function producerTokensFor(concept: ProposalConcept): { input: number; output: number } {
@@ -123,17 +129,20 @@ export function estimateProduction(
 ): ProductionEstimate {
   const mode = productionModeOf(concept);
 
+  const renders = history.filter((sample) => sample.kind === 'render');
   const render = rateFrom(
-    history.filter((sample) => sample.kind === 'render' && sample.mode === mode),
+    renders.filter((sample) => sample.mode === mode),
+    renders,
     mode === 'footage' ? concept.format : null,
     DEFAULT_RENDER_PROCESS_SEC_PER_VIDEO_SEC[mode],
   );
   const renderMinutes = roundTo((concept.durationSec * render.processSecPerMediaSec) / SECONDS_PER_MINUTE, 1);
 
+  const voices = history.filter((sample) => sample.kind === 'voice');
   const voice =
     mode === 'motion' || concept.delivery.requiresVoice === false
       ? null
-      : rateFrom(history.filter((sample) => sample.kind === 'voice'), null, DEFAULT_VOICE_PROCESS_SEC_PER_AUDIO_SEC);
+      : rateFrom(voices, voices, null, DEFAULT_VOICE_PROCESS_SEC_PER_AUDIO_SEC);
   const voiceMinutes =
     voice === null
       ? 0

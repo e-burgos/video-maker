@@ -337,6 +337,7 @@ export interface JobSummary {
   readonly createdAt: string;
   readonly startedAt: string | null;
   readonly finishedAt: string | null;
+  readonly sample: boolean;
 }
 
 export type RenderJobSummary = JobSummary;
@@ -580,6 +581,10 @@ export function toJob(record: Job): Job {
   }
 }
 
+function isSampleJob(job: Job): boolean {
+  return (job.kind === 'render' || job.kind === 'motion') && job.report?.sample === true;
+}
+
 export function toJobSummary(job: Job): JobSummary {
   return {
     id: job.id,
@@ -590,5 +595,6 @@ export function toJobSummary(job: Job): JobSummary {
     createdAt: job.createdAt,
     startedAt: job.startedAt,
     finishedAt: job.finishedAt,
+    sample: isSampleJob(job),
   };
 }

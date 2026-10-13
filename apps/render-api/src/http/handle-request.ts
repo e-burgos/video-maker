@@ -326,7 +326,7 @@ async function dispatchRoute(
       case 'projects.files.get':
         return await handleGetArtifact(deps, store, params, request);
       case 'projects.generated.get':
-        return await handleGetGenerated(deps, store, params);
+        return await handleGetGenerated(deps, store, params, runtime.jobs);
       case 'projects.storyboard.get':
         return await handleGetStoryboard(deps, store, params);
       case 'projects.storyboard.put':
@@ -362,7 +362,7 @@ async function dispatchRoute(
       case 'projects.motion.storyboard.put':
         return await handlePutMotionStoryboard(deps, store, params, request);
       case 'projects.motion.overview.get':
-        return await handleGetMotionOverview(deps, store, params);
+        return await handleGetMotionOverview(deps, store, params, runtime.jobs);
       case 'settings.producer.get':
         return await handleGetProducerSettings(deps, runtime);
       case 'settings.producer.put':
@@ -398,7 +398,7 @@ async function dispatchRoute(
       case 'projects.publish.youtube.options':
         return await handleGetYoutubePublishOptions(deps, store, params, runtime);
       case 'projects.publish.youtube.draft':
-        return await handleDraftYoutubeMetadata(deps, store, params, request);
+        return await handleDraftYoutubeMetadata(deps, store, params, request, runtime.jobs);
       case 'projects.publications.list':
         return await handleListPublications(deps, store, params);
       case 'projects.reviews.get':

@@ -59,7 +59,7 @@ const RENDER_JOB_RESPONSE_KEYS = [
   'report',
 ].sort();
 
-const JOB_SUMMARY_RESPONSE_KEYS = ['id', 'kind', 'state', 'stage', 'errorCode', 'createdAt', 'startedAt', 'finishedAt'].sort();
+const JOB_SUMMARY_RESPONSE_KEYS = ['id', 'kind', 'state', 'stage', 'errorCode', 'createdAt', 'startedAt', 'finishedAt', 'sample'].sort();
 
 const WRITE_PORTS = ['writeTextFile', 'ensureDirectory', 'writeTemporary', 'promoteTemporary', 'removeTemporary'];
 

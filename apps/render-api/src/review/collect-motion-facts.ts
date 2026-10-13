@@ -13,6 +13,8 @@ import { ReviewInputsUnavailableError } from './review-errors';
 import type { ReviewFacts, ReviewScene, ReviewStoragePort } from './review-facts';
 import { fileExists } from './review-facts';
 import { readMotionSceneVoices } from './motion-scene-voices';
+import { parseMotionSfxCues } from './motion-sfx-cues';
+import type { MotionSfxCue } from './motion-sfx-cues';
 
 export const MOTION_TIMELINE_PATH = workPath('motion', 'timeline.json');
 
@@ -28,6 +30,23 @@ async function motionScenes(
     endSec: scene.end,
     voice: voices.get(scene.id) ?? null,
   }));
+}
+
+const MOTION_COMPOSITION_FILE = 'index.html';
+
+async function existingSfxCues(workDirectory: string, storage: ReviewStoragePort): Promise<MotionSfxCue[]> {
+  const compositionPath = `${workDirectory}/${MOTION_COMPOSITION_FILE}`;
+  if (!(await fileExists(storage, compositionPath))) {
+    return [];
+  }
+  const cues = parseMotionSfxCues(await storage.readTextFile(compositionPath));
+  const present: MotionSfxCue[] = [];
+  for (const cue of cues) {
+    if (await fileExists(storage, `${workDirectory}/${cue.src}`)) {
+      present.push(cue);
+    }
+  }
+  return present;
 }
 
 export async function collectMotionFacts(project: MediaProject, storage: ReviewStoragePort): Promise<ReviewFacts> {
@@ -53,7 +72,7 @@ export async function collectMotionFacts(project: MediaProject, storage: ReviewS
     expectedDurationSec: timeline.duration,
     bumpers: [],
     bumperOffsetSec: 0,
-    levelPlans: buildMotionLevelPlans(timeline, workDirectory, hasMusic),
+    levelPlans: buildMotionLevelPlans(timeline, workDirectory, hasMusic, await existingSfxCues(workDirectory, storage)),
     hasVoice: timeline.scenes.length > 0 && missingAssets.length < timeline.scenes.length,
     captionStyle: null,
     captions: [],

@@ -55,6 +55,12 @@ function EstimateLines({ estimate }: { estimate: ProposalEstimate | undefined })
           ? t('proposal.estimate.basis.default')
           : tn('proposal.estimate.basis.samples', samples)}
       </li>
+      {estimate.basis.render.rough && (
+        <li data-testid="proposal-estimate-rough" className="text-warning">
+          <span className="font-medium">{t('proposal.estimate.rough')}</span>{' '}
+          {t(samples === null ? 'proposal.estimate.rough.default' : 'proposal.estimate.rough.studio')}
+        </li>
+      )}
     </ul>
   );
 }

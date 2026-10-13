@@ -2,7 +2,8 @@ import { MOTION_MUSIC_TRACK_VOLUME } from '@video-maker/motion-graphics';
 import { z } from 'zod';
 
 import { meanPowerDb, sampleTimes } from './gain-statistics';
-import type { LevelPlan } from './level-plan';
+import type { LevelPlan, SfxSlice } from './level-plan';
+import type { MotionSfxCue } from './motion-sfx-cues';
 import type { SecondsRange } from './review-inputs';
 
 export const MOTION_AUDIO_DIRECTORY = 'assets/audio';
@@ -49,10 +50,30 @@ export function effectiveMotionMusicGainDb(timeline: MotionReviewTimeline, segme
   return meanPowerDb(volumes);
 }
 
+const MIN_SFX_OVERLAP_SEC = 0.05;
+
+function sfxSlicesWithin(cues: readonly MotionSfxCue[], segment: SecondsRange, workDirectory: string): SfxSlice[] {
+  return cues.flatMap((cue) => {
+    const startSec = Math.max(segment.startSec, cue.startSec);
+    const endSec = Math.min(segment.endSec, cue.endSec);
+    return endSec - startSec < MIN_SFX_OVERLAP_SEC
+      ? []
+      : [{
+          slice: {
+            path: `${workDirectory}/${cue.src}`,
+            startSec: cue.mediaStartSec + startSec - cue.startSec,
+            endSec: cue.mediaStartSec + endSec - cue.startSec,
+          },
+          gainDb: 20 * Math.log10(cue.volume),
+        }];
+  });
+}
+
 export function buildMotionLevelPlans(
   timeline: MotionReviewTimeline,
   workDirectory: string,
   hasMusic: boolean,
+  sfxCues: readonly MotionSfxCue[] = [],
 ): LevelPlan[] {
   return timeline.scenes.map((scene) => {
     const segment = { startSec: scene.voStart, endSec: scene.voStart + scene.voDuration };
@@ -62,6 +83,7 @@ export function buildMotionLevelPlans(
       voiceNormalization: null,
       music: hasMusic ? { path: `${workDirectory}/${MOTION_MUSIC_FILE}`, ...segment } : null,
       musicGainDb: effectiveMotionMusicGainDb(timeline, segment),
+      sfx: sfxSlicesWithin(sfxCues, segment, workDirectory),
     };
   });
 }

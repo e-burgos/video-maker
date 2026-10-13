@@ -74,6 +74,7 @@ export async function measureReviewInputs(
     captionStyle: facts.captionStyle,
     captions: facts.captions,
     frame: facts.frame,
+    captionLayout: facts.captionLayout ?? null,
     blackSegments: await measurements.detectBlack(renderPath, BLACK_DETECT_MIN_SEC),
     frozenSegments: await measurements.detectFrozen(renderPath, FROZEN_DETECT_MIN_SEC, actualDurationSec),
     silences: await measurements.detectSilences(

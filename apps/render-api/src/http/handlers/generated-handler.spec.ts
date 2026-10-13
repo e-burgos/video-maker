@@ -4,6 +4,7 @@ import { createCallLog } from '../../__fixtures__/call-log';
 import { createFakeObjectStorage } from '../../__fixtures__/fake-object-storage';
 import { createFakeRenderApiDependencies } from '../../__fixtures__/fake-render-api-dependencies';
 import type { StoreConfig } from '../../config/store-config';
+import type { Job } from '../../jobs/render-job';
 import { GENERATED_ROOTS, handleGetGenerated } from './generated-handler';
 import type { GeneratedBody } from './generated-handler';
 
@@ -66,8 +67,33 @@ describe('handleGetGenerated (EP-028, FIX-006-001)', () => {
     expect(Object.keys(body.files[0] ?? {}).sort()).toEqual([
       'modifiedAtMs',
       'path',
+      'sample',
       'sizeBytes',
     ]);
+  });
+
+  it('marca como muestra por el reporte del job, con el sufijo sólo como respaldo', async () => {
+    const { deps } = dependencies([
+      ...SEED,
+      { path: `${PROJECT_ROOT}/out/job-0001.mp4`, contents: 'a' },
+      { path: `${PROJECT_ROOT}/out/job-0002.sample.mp4`, contents: 'b' },
+      { path: `${PROJECT_ROOT}/out/legacy.sample.mp4`, contents: 'c' },
+    ]);
+    const jobs = {
+      listBySlug: () =>
+        [
+          { kind: 'render', report: { deliverable: { resource: 'out/job-0001.mp4' }, sample: true } },
+          { kind: 'render', report: { deliverable: { resource: 'out/job-0002.sample.mp4' } } },
+        ] as unknown as readonly Job[],
+    };
+
+    const body = (await handleGetGenerated(deps, STORE, { slug: 'display-ads' }, jobs)).body as GeneratedBody;
+    const sampleOf = (path: string) => body.files.find((file) => file.path === path)?.sample;
+
+    expect(sampleOf('out/job-0001.mp4')).toBe(true);
+    expect(sampleOf('out/job-0002.sample.mp4')).toBe(false);
+    expect(sampleOf('out/legacy.sample.mp4')).toBe(true);
+    expect(sampleOf('out/display-ads.mp4')).toBe(false);
   });
 
   it('informa el tamaño real de cada archivo', async () => {

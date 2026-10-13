@@ -4,6 +4,8 @@ import { join } from 'node:path/posix';
 
 import type { StoreConfig } from '../../config/store-config';
 import type { MotionBrandDocument, MotionBrandSource, RenderApiDependencies } from '../../deps/render-api-dependencies';
+import { sampleFileClassifierFor } from '../../jobs/sample-files';
+import type { JobsBySlug } from '../../jobs/sample-files';
 import { readMotionOverview } from '../../motion/read-motion-overview';
 import {
   availableImageRefs,
@@ -280,9 +282,10 @@ export async function handleGetMotionOverview(
   deps: RenderApiDependencies,
   store: StoreConfig,
   params: RouteParams,
+  jobs?: JobsBySlug,
 ): Promise<HttpResponse> {
   const project = await resolveMotionProject(deps, store, params);
-  return jsonResponse(200, await readMotionOverview(deps.storage, project.root));
+  return jsonResponse(200, await readMotionOverview(deps.storage, project.root, sampleFileClassifierFor(jobs, params.slug ?? '')));
 }
 
 export async function handlePutMotionStoryboard(
