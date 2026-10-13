@@ -267,8 +267,29 @@
         "TASK-003",
         "TASK-004"
       ],
-      "status": "pending",
-      "files": []
+      "status": "done",
+      "files": [
+        "sdd/specs/spec-e-burgos-023-production-quality/cycles/cycle-06/artifacts/verification.md",
+        "sdd/specs/spec-e-burgos-023-production-quality/cycles/cycle-06/artifacts/web-material-avisos.jpg",
+        "sdd/specs/spec-e-burgos-023-production-quality/cycles/cycle-06/artifacts/v2-hoja-de-contacto.jpg",
+        "sdd/specs/spec-e-burgos-023-production-quality/cycles/cycle-06/artifacts/v2-escena-easy-pro.jpg",
+        "libs/producer-tools/src/contract/tool-schemas.ts",
+        "libs/producer-tools/src/handlers/studio-tool-handlers.ts",
+        "libs/producer-tools/src/handlers/studio-tool-handlers.spec.ts",
+        "libs/producer-tools/src/prompt/build-producer-prompt.ts",
+        "apps/render-api/src/review/motion-scene-voices.ts",
+        "apps/render-api/src/review/collect-review-inputs.spec.ts"
+      ],
+      "usage": {
+        "tokens_in": 420000,
+        "tokens_out": 45000,
+        "provider_model": "claude/opus",
+        "effort": "high",
+        "agent": "orchestrator",
+        "approx": true,
+        "source": "declared-estimate",
+        "recorded_at": "2026-10-12"
+      }
     }
   ]
 }

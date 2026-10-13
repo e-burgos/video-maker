@@ -217,20 +217,6 @@
       "description": "Biblioteca de marcas: crear, duplicar y editar marcas (paleta derivada, logo, tipografías, voz, música, fotos, productos) guardadas junto a los proyectos, y usarlas en motion graphics y en material crudo",
       "cycles_completed": 4,
       "completed_at": "2026-10-08"
-    }
-  ],
-  "in_progress_modules": [
-    {
-      "module": "youtube-publishing",
-      "spec": "spec-e-burgos-022-youtube-publishing",
-      "apps": [
-        "apps/render-api",
-        "libs/local-store",
-        "apps/web",
-        "libs/producer-tools",
-        "apps/desktop"
-      ],
-      "description": "Publicar videos en YouTube: conexión OAuth de la cuenta, publicación con metadatos del productor, registro de publicaciones y cola programada"
     },
     {
       "module": "production-quality",
@@ -247,7 +233,23 @@
         "libs/timeline-core",
         "tools/motion-studio"
       ],
-      "description": "Calidad de producción: revisión automática de renders (niveles por pista, cuadros, subtítulos, contrato de entrega), escena de UI en motion, dirección de voz y música por tramos, propuesta con aprobación y muestra, y análisis de un video de referencia local"
+      "description": "Calidad de producción: revisión automática de renders (niveles por pista, cuadros, subtítulos, contrato de entrega), escena de UI en motion, dirección de voz y música por tramos, propuesta con aprobación y muestra, y análisis de un video de referencia local, y criterio visual del productor (revisión de material, cajas como dato, revisión visual por escena con evidencia)",
+      "cycles_completed": 6,
+      "completed_at": "2026-10-12"
+    }
+  ],
+  "in_progress_modules": [
+    {
+      "module": "youtube-publishing",
+      "spec": "spec-e-burgos-022-youtube-publishing",
+      "apps": [
+        "apps/render-api",
+        "libs/local-store",
+        "apps/web",
+        "libs/producer-tools",
+        "apps/desktop"
+      ],
+      "description": "Publicar videos en YouTube: conexión OAuth de la cuenta, publicación con metadatos del productor, registro de publicaciones y cola programada"
     }
   ],
   "pending_modules": [
