@@ -297,3 +297,58 @@ describe('report shape', () => {
     expect(ReviewReportSchema.safeParse(report).success).toBe(true);
   });
 });
+
+describe('visual-not-reviewed (US-023-603)', () => {
+  const sceneFrames = [
+    { sceneId: 'hook', index: 1, startSec: 0, endSec: 4, atSec: 2, frame: 'out/motion.review/scene-01.jpg', voice: 'Hola' },
+    { sceneId: 'cta', index: 2, startSec: 4, endSec: 10, atSec: 7, frame: 'out/motion.review/scene-02.jpg' },
+  ];
+
+  it('is critical with a fix while scene frames exist, and lists them in the report', () => {
+    const report = reviewRender(motionReviewInputs({ sceneFrames }));
+
+    const [finding] = findingsOf(report, 'visual-not-reviewed');
+    expect(finding).toMatchObject({ severity: 'critical', message: expect.stringContaining('2 escenas') as string });
+    expect(finding?.proposedFix).toContain('record_visual_review');
+    expect(report.status).toBe('fail');
+    expect(report.sceneFrames).toEqual(sceneFrames);
+    expect(ReviewReportSchema.safeParse(report).success).toBe(true);
+  });
+
+  it('does not appear nor add sceneFrames when the render has no scenes', () => {
+    const report = reviewRender(motionReviewInputs());
+
+    expect(findingsOf(report, 'visual-not-reviewed')).toEqual([]);
+    expect(Object.keys(report)).not.toContain('sceneFrames');
+  });
+});
+
+describe('delivery-promise (US-023-603)', () => {
+  const promise = { conceptId: 'directo', title: 'Directo', durationSec: 60, maxDurationSec: 80 };
+
+  it('is critical with a fix when the render exceeds the approved maximum', () => {
+    const report = reviewRender(motionReviewInputs({ promise, actualDurationSec: 101, expectedDurationSec: 101 }));
+
+    const [finding] = findingsOf(report, 'delivery-promise');
+    expect(finding).toMatchObject({ severity: 'critical' });
+    expect(finding?.message).toContain('80.0 s');
+    expect(finding?.proposedFix).toContain('80.0 s');
+  });
+
+  it('suggests when the render is more than 10% under the promised duration', () => {
+    const report = reviewRender(motionReviewInputs({ promise, actualDurationSec: 50, expectedDurationSec: 50 }));
+
+    expect(findingsOf(report, 'delivery-promise').map((finding) => finding.severity)).toEqual(['suggestion']);
+  });
+
+  it('is silent inside the promise or without an approved proposal', () => {
+    expect(findingsOf(reviewRender(motionReviewInputs({ promise, actualDurationSec: 72, expectedDurationSec: 72 })), 'delivery-promise')).toEqual([]);
+    expect(findingsOf(reviewRender(motionReviewInputs({ promise: null, actualDurationSec: 500, expectedDurationSec: 500 })), 'delivery-promise')).toEqual([]);
+  });
+
+  it('only compares the minimum when the concept has no maximum', () => {
+    const open = { ...promise, maxDurationSec: null };
+
+    expect(findingsOf(reviewRender(motionReviewInputs({ promise: open, actualDurationSec: 500, expectedDurationSec: 500 })), 'delivery-promise')).toEqual([]);
+  });
+});

@@ -1,4 +1,5 @@
 import { referenceBrief, referenceJob, referenceSummary } from './__fixtures__/reference';
+import { materialReviewDocument } from './__fixtures__/material-review';
 import { productionProposal, proposalDocument } from './__fixtures__/proposal';
 import { describe, expect, it, vi } from 'vitest';
 
@@ -522,6 +523,37 @@ describe('createRenderApiClient', () => {
 
     const error = await createRenderApiClient(fetchImpl)
       .getProposal('demo')
+      .catch((caught: unknown) => caught);
+
+    expect((error as RenderApiError).code).toBe('RESPONSE_SHAPE_UNEXPECTED');
+  });
+
+  it('reads the material review of a project', async () => {
+    const { fetchImpl, calls } = recordingFetch(() => jsonResponse(materialReviewDocument()));
+
+    const result = await createRenderApiClient(fetchImpl).getMaterialReview('demo');
+
+    expect(calls[0]?.url).toBe('/api/projects/demo/material-review');
+    expect(result.review?.items).toHaveLength(3);
+    expect(result.warnings?.items).toHaveLength(2);
+  });
+
+  it('returns a null review when the material was not reviewed yet', async () => {
+    const { fetchImpl } = recordingFetch(() => jsonResponse(materialReviewDocument(null)));
+
+    const result = await createRenderApiClient(fetchImpl).getMaterialReview('demo');
+
+    expect(result.review).toBeNull();
+    expect(result.warnings).toBeNull();
+  });
+
+  it('rejects a material review that does not match the schema', async () => {
+    const { fetchImpl } = recordingFetch(() =>
+      jsonResponse({ ...materialReviewDocument(), review: { version: 1, items: 'x' } }),
+    );
+
+    const error = await createRenderApiClient(fetchImpl)
+      .getMaterialReview('demo')
       .catch((caught: unknown) => caught);
 
     expect((error as RenderApiError).code).toBe('RESPONSE_SHAPE_UNEXPECTED');

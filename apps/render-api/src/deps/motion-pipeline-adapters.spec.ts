@@ -10,7 +10,7 @@ import { createFakeRenderApiDependencies } from '../__fixtures__/fake-render-api
 import { createMotionPipelinePorts, listMotionBrandDocuments } from './motion-pipeline-adapters';
 
 describe('createMotionPipelinePorts', () => {
-  it('maps the effective agent usage to the lib shape and strips schema markers', async () => {
+  it('maps the effective agent usage to the lib shape, strips schema markers and asks for low effort', async () => {
     const callLog = createCallLog();
     let received: unknown;
     const deps = createFakeRenderApiDependencies(callLog, {
@@ -27,7 +27,7 @@ describe('createMotionPipelinePorts', () => {
     });
 
     expect(response).toEqual({ json: { ok: true }, usage: { inputTokens: 10, outputTokens: 4, costUsd: 0.5 } });
-    expect(received).toEqual({ systemPrompt: 's', userPrompt: 'u', jsonSchema: { type: 'object' } });
+    expect(received).toEqual({ systemPrompt: 's', userPrompt: 'u', jsonSchema: { type: 'object' }, effort: 'low' });
   });
 
   it('transcribes through the voice deps and converts milliseconds to seconds', async () => {

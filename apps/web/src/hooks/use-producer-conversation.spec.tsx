@@ -6,7 +6,9 @@ import {
   producerConversation,
   producerSettings,
   producerTurn,
+  succeededTurn,
 } from '../api/__fixtures__/producer';
+import { materialReviewDocument } from '../api/__fixtures__/material-review';
 import { RenderApiProvider } from '../api/render-api-context';
 import { useProducerConversation } from './use-producer-conversation';
 import type { RenderApiClient } from '../api/render-api-client';
@@ -41,6 +43,7 @@ function clientWith(overrides: Partial<RenderApiClient>): RenderApiClient {
     listRenderJobs: vi.fn().mockResolvedValue({ slug: 'demo-01', jobs: [] }),
     listGenerated: vi.fn().mockResolvedValue({ slug: 'demo-01', roots: [], files: [] }),
     getProducer: vi.fn().mockResolvedValue(producerConversation()),
+    getMaterialReview: vi.fn().mockResolvedValue(materialReviewDocument(null)),
     getProducerSettings: vi.fn().mockResolvedValue(producerSettings()),
     sendProducerMessage: vi.fn(),
     cancelProducerTurn: vi.fn(),
@@ -124,5 +127,79 @@ describe('useProducerConversation', () => {
     });
 
     expect(client.sendProducerMessage).not.toHaveBeenCalled();
+  });
+
+  describe('message queued while the producer works', () => {
+    function workingClient() {
+      let finished = false;
+      const client = clientWith({
+        sendProducerMessage: vi.fn().mockResolvedValue({
+          slug: 'demo-01',
+          turnId: 'turn-9001',
+          startedAt: '2026-09-10T10:00:00.000Z',
+          status: 'running',
+        }),
+        getProducerTurn: vi.fn(async () =>
+          finished ? succeededTurn({ turnId: 'turn-9001' }) : producerTurn({ turnId: 'turn-9001' }),
+        ),
+      });
+      return {
+        client,
+        finishTurn: () => {
+          finished = true;
+        },
+      };
+    }
+
+    async function startWorkingTurn(client: RenderApiClient) {
+      const rendered = renderHook(() => useProducerConversation('demo-01'), { wrapper: wrapperWith(client) });
+      await waitFor(() => expect(rendered.result.current.conversation.status).toBe('ready'));
+      act(() => rendered.result.current.submit('primero'));
+      await waitFor(() => expect(rendered.result.current.running).toBe(true));
+      return rendered;
+    }
+
+    it('holds a message submitted while running and sends it when the turn ends', async () => {
+      const { client, finishTurn } = workingClient();
+      const { result } = await startWorkingTurn(client);
+
+      act(() => {
+        result.current.setDraft('segundo');
+        result.current.submit('segundo');
+      });
+
+      expect(result.current.queuedMessage).toEqual({ text: 'segundo', replaced: false });
+      expect(result.current.draft).toBe('');
+      expect(client.sendProducerMessage).toHaveBeenCalledTimes(1);
+
+      finishTurn();
+
+      await waitFor(() => expect(client.sendProducerMessage).toHaveBeenCalledTimes(2), { timeout: 8000 });
+      expect(client.sendProducerMessage).toHaveBeenLastCalledWith('demo-01', 'segundo', 'sonnet');
+      expect(result.current.queuedMessage).toBeNull();
+    }, 12000);
+
+    it('replaces the queued message on a second submit', async () => {
+      const { client } = workingClient();
+      const { result } = await startWorkingTurn(client);
+
+      act(() => result.current.submit('segundo'));
+      act(() => result.current.submit('tercero'));
+
+      expect(result.current.queuedMessage).toEqual({ text: 'tercero', replaced: true });
+    });
+
+    it('drops the queued message when cancelled and never sends it', async () => {
+      const { client, finishTurn } = workingClient();
+      const { result } = await startWorkingTurn(client);
+
+      act(() => result.current.submit('segundo'));
+      act(() => result.current.cancelQueued());
+      finishTurn();
+
+      await waitFor(() => expect(result.current.running).toBe(false), { timeout: 8000 });
+      expect(result.current.queuedMessage).toBeNull();
+      expect(client.sendProducerMessage).toHaveBeenCalledTimes(1);
+    }, 12000);
   });
 });

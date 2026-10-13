@@ -100,7 +100,7 @@ describe('automatic review after a render', () => {
     const review = queue.listBySlug('demo').find((job) => job.kind === 'review');
     expect(review).toMatchObject({
       state: 'succeeded',
-      report: { file: 'out/motion.mp4', reviewFile: 'out/motion.review.json', status: 'pass' },
+      report: { file: 'out/motion.mp4', reviewFile: 'out/motion.review.json', status: 'fail', counts: { critical: 1 } },
     });
   });
 

@@ -8,11 +8,27 @@ import {
   motionVoiceFile,
   MotionReviewTimelineSchema,
 } from './motion-level-plans';
+import type { MotionReviewTimeline } from './motion-level-plans';
 import { ReviewInputsUnavailableError } from './review-errors';
-import type { ReviewFacts, ReviewStoragePort } from './review-facts';
+import type { ReviewFacts, ReviewScene, ReviewStoragePort } from './review-facts';
 import { fileExists } from './review-facts';
+import { readMotionSceneVoices } from './motion-scene-voices';
 
 export const MOTION_TIMELINE_PATH = workPath('motion', 'timeline.json');
+
+async function motionScenes(
+  project: MediaProject,
+  storage: ReviewStoragePort,
+  timeline: MotionReviewTimeline,
+): Promise<ReviewScene[]> {
+  const voices = await readMotionSceneVoices(project, storage);
+  return timeline.scenes.map((scene) => ({
+    id: scene.id,
+    startSec: scene.start,
+    endSec: scene.end,
+    voice: voices.get(scene.id) ?? null,
+  }));
+}
 
 export async function collectMotionFacts(project: MediaProject, storage: ReviewStoragePort): Promise<ReviewFacts> {
   const timelinePath = toAbsolutePath(project, MOTION_TIMELINE_PATH);
@@ -43,5 +59,7 @@ export async function collectMotionFacts(project: MediaProject, storage: ReviewS
     captions: [],
     frame: null,
     missingAssets,
+    scenes: await motionScenes(project, storage, timeline),
+    promise: null,
   };
 }

@@ -46,8 +46,15 @@ window.createMotionRuntime = function createMotionRuntime(T, W, compositionId) {
     while (next && !next.hasAttribute('data-ui-step')) next = next.nextElementSibling;
     return next ? timeFor(next, id, 0) : null;
   };
+  const nextUiZoomTime = (el, id) => {
+    let next = el.nextElementSibling;
+    while (next && next.dataset.uiStep !== 'zoom') next = next.nextElementSibling;
+    return next ? timeFor(next, id, 0) : null;
+  };
+  const uiZoomHoldEnd = (el, id, t) => Math.max(t + 1.7, Math.min(E(id) - 0.5, nextUiZoomTime(el, id) ?? E(id)) - 0.35);
   const uiHoldEnd = (el, id, t, fallbackHold) => Math.min(E(id) - 0.5, Math.max(t + 0.9, nextUiStepTime(el, id) ?? t + fallbackHold));
   const uiRest = { scale: 1, xPercent: 0, yPercent: 0 };
+  const uiFocus = ({ scale, cx, cy }) => ({ scale, xPercent: clamp((0.5 - scale * cx) * 100, (1 - scale) * 100, 0), yPercent: clamp((0.5 - scale * cy) * 100, (1 - scale) * 100, 0) });
 
   const ANIMS = {
     rise: (el, t) => tl.fromTo(el, { opacity: 0, y: 46 }, { opacity: 1, y: 0, duration: dur(el, 0.6), ease: 'power3.out' }, t),
@@ -100,7 +107,7 @@ window.createMotionRuntime = function createMotionRuntime(T, W, compositionId) {
     'ui-mark': () => undefined,
     'ui-click': (el, t) => {
       tl.fromTo(el, { opacity: 0, scale: 0.25 }, { opacity: 1, scale: 1, duration: 0.18, ease: 'power2.out' }, t);
-      tl.to(el, { opacity: 0, scale: 1.5, duration: 0.45, ease: 'power1.out' }, t + 0.18);
+      tl.to(el, { opacity: 0, scale: 1.3, duration: 0.45, ease: 'power1.out' }, t + 0.18);
     },
     'ui-type': (el, t) => {
       const text = el.dataset.text || '';
@@ -111,7 +118,7 @@ window.createMotionRuntime = function createMotionRuntime(T, W, compositionId) {
       tl.to(state, { i: text.length, duration: Math.min(2.4, 0.06 * text.length + 0.3), ease: 'none', onUpdate: () => { target.textContent = text.slice(0, Math.round(state.i)); } }, t + 0.2);
     },
     'ui-highlight': (el, t, id) => {
-      tl.fromTo(el, { opacity: 0, scale: 1.12 }, { opacity: 1, scale: 1, duration: 0.35, ease: 'back.out(1.8)' }, t);
+      tl.fromTo(el, { opacity: 0, scale: 1.04 }, { opacity: 1, scale: 1, duration: 0.35, ease: 'power2.out' }, t);
       tl.to(el, { opacity: 0, duration: 0.3 }, uiHoldEnd(el, id, t, 2.4));
     },
     'ui-callout': (el, t, id) => {
@@ -120,10 +127,30 @@ window.createMotionRuntime = function createMotionRuntime(T, W, compositionId) {
     },
     'ui-zoom': (el, t, id) => {
       const zoom = el.closest('.mg-ui-zoom');
-      const scale = Number(el.dataset.scale);
-      const focus = { scale, xPercent: clamp((0.5 - scale * Number(el.dataset.cx)) * 100, (1 - scale) * 100, 0), yPercent: clamp((0.5 - scale * Number(el.dataset.cy)) * 100, (1 - scale) * 100, 0) };
+      const focus = uiFocus({ scale: Number(el.dataset.scale), cx: Number(el.dataset.cx), cy: Number(el.dataset.cy) });
       tl.fromTo(zoom, uiRest, { ...focus, duration: 0.8, ease: 'power2.inOut', immediateRender: false }, t);
-      tl.fromTo(zoom, focus, { ...uiRest, duration: 0.7, ease: 'power2.inOut', immediateRender: false }, Math.max(t + 1.7, uiHoldEnd(el, id, t, 2.8) - 0.35));
+      tl.fromTo(zoom, focus, { ...uiRest, duration: 0.7, ease: 'power2.inOut', immediateRender: false }, uiZoomHoldEnd(el, id, t));
+    },
+    'ui-autocamera': (el, t, id) => {
+      const zoom = el.closest('.mg-ui-zoom');
+      const scene = el.closest('[data-scene]');
+      const bodies = Array.from(scene.querySelectorAll('.mg-ui-bubble-body'));
+      const keyframes = Array.from(scene.querySelectorAll('[data-cam-scale]'))
+        .map((step) => ({ t: timeFor(step, id, 0), scale: Number(step.dataset.camScale), cx: Number(step.dataset.camCx), cy: Number(step.dataset.camCy) }))
+        .sort((a, b) => a.t - b.t)
+        .filter((frame, i, all) => i === 0 || frame.scale !== all[i - 1].scale || frame.cx !== all[i - 1].cx || frame.cy !== all[i - 1].cy);
+      let previous = { scale: 1, cx: 0.5, cy: 0.5 };
+      let previousArrival = S(id) + 0.3;
+      keyframes.forEach((frame) => {
+        const arrival = Math.max(previousArrival + 0.3, frame.t - 0.12);
+        const start = Math.max(previousArrival + 0.05, arrival - 0.75);
+        const duration = arrival - start;
+        const timing = { duration, ease: 'power2.inOut', immediateRender: false };
+        tl.fromTo(zoom, uiFocus(previous), { ...uiFocus(frame), ...timing }, start);
+        bodies.forEach((body) => tl.fromTo(body, { scale: 1 / previous.scale }, { scale: 1 / frame.scale, ...timing }, start));
+        previous = frame;
+        previousArrival = arrival;
+      });
     },
     'ui-cursor': (el, t, id) => {
       const waypoints = Array.from(el.closest('[data-scene]').querySelectorAll('[data-ui-step][data-px]'))

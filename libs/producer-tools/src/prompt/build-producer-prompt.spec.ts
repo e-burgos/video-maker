@@ -73,8 +73,8 @@ describe('buildProducerProjectSection', () => {
 describe('buildProducerPrompt — herramientas del estudio', () => {
   const prompt = buildProducerPrompt(CONTEXT);
 
-  it('nombra las 26 herramientas del contrato', () => {
-    expect(STUDIO_TOOL_NAMES).toHaveLength(26);
+  it('nombra las 28 herramientas del contrato', () => {
+    expect(STUDIO_TOOL_NAMES).toHaveLength(28);
     for (const tool of STUDIO_TOOL_NAMES) {
       expect(prompt).toContain(tool);
     }
@@ -94,6 +94,31 @@ describe('buildProducerPrompt — herramientas del estudio', () => {
     expect(prompt).toContain('Base propose_production on that brief');
     expect(prompt).toContain('name the reference in the');
     expect(prompt).toContain('`angle`');
+  });
+
+  it('obliga a mirar el material y revisarlo antes de proponer, avisar lo que no sirve y no inventar controles (US-023-601, US-023-606)', () => {
+    expect(prompt).toContain('## Material');
+    expect(prompt).toContain('view_images every image supplied in the project and every brand photo');
+    expect(prompt).toContain('`brand:<key>`');
+    expect(prompt).toContain('Never choose a photo by its key or its caption alone');
+    expect(prompt).toContain('MATERIAL_NOT_REVIEWED');
+    expect(prompt).toContain('say so at the top of the proposal message');
+    expect(prompt).toContain('prefer the `product` scene');
+    expect(prompt).toContain('never estimate positions yourself');
+    expect(prompt).toContain('Never claim a check you did not run');
+    expect(prompt.indexOf('## Material')).toBeLessThan(prompt.indexOf('## The production proposal and the sample'));
+  });
+
+  it('obliga a mirar cada escena del render, registrar la revisión visual con honestidad y corregir las escenas fix (US-023-603, US-023-606)', () => {
+    expect(prompt).toContain('## Reviewing a finished render');
+    expect(prompt).toContain('`sceneFrames`');
+    expect(prompt).toContain('visual-not-reviewed');
+    expect(prompt).toContain('View every');
+    expect(prompt).toContain('record_visual_review');
+    expect(prompt).toContain('Fix every `fix` scene');
+    expect(prompt).toContain('exceeds the promised maximum');
+    expect(prompt).toContain('Never say a check passed unless the tool');
+    expect(prompt).toContain('record, scene by scene, what each frame of a finished render really shows');
   });
 
   it('ofrece la muestra y aclara que no se publica ni se revisa (US-023-404)', () => {

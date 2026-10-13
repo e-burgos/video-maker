@@ -346,6 +346,53 @@ describe('createHttpRenderApiClient', () => {
     await expect(client(fetchImpl).putProposal({})).rejects.toMatchObject({ code: 'INVALID_INPUT' });
   });
 
+  it('getMaterialReview reads the review of the project, and null when there is none', async () => {
+    const review = { version: 1, reviewedAt: '2026-10-12T10:00:00.000Z', items: [], gaps: [] };
+    const present = createFakeFetch(() => jsonResponse(200, { review, warnings: { items: [], gaps: [] } }));
+    const none = createFakeFetch(() => jsonResponse(200, { review: null, warnings: null }));
+
+    expect(await client(present.fetchImpl).getMaterialReview()).toEqual(review);
+    expect(present.calls[0]?.url).toBe('http://127.0.0.1:4599/projects/pitch-deck/material-review');
+    expect(await client(none.fetchImpl).getMaterialReview()).toBeNull();
+  });
+
+  it('putMaterialReview PUTs the review and answers the stored one', async () => {
+    const stored = { version: 1, reviewedAt: '2026-10-12T10:00:00.000Z', items: [], gaps: [] };
+    const { fetchImpl, calls } = createFakeFetch(() => jsonResponse(200, { review: stored }));
+
+    const saved = await client(fetchImpl).putMaterialReview({ items: [], gaps: [] });
+
+    expect(saved).toEqual(stored);
+    expect(calls[0]?.init?.method).toBe('PUT');
+    expect(calls[0]?.url).toBe('http://127.0.0.1:4599/projects/pitch-deck/material-review');
+    expect(JSON.parse(String(calls[0]?.init?.body))).toEqual({ items: [], gaps: [] });
+  });
+
+  it('putMaterialReview keeps MATERIAL_NOT_VIEWED with its hint and maps a malformed review to INVALID_INPUT', async () => {
+    const notViewed = createFakeFetch(() => errorResponse(422, 'MATERIAL_NOT_VIEWED', 'look at these with view_images before reviewing them: brand:x'));
+    const invalid = createFakeFetch(() => errorResponse(422, 'MATERIAL_REVIEW_INVALID'));
+
+    await expect(client(notViewed.fetchImpl).putMaterialReview({})).rejects.toMatchObject({ code: 'MATERIAL_NOT_VIEWED', hint: expect.stringContaining('brand:x') });
+    await expect(client(invalid.fetchImpl).putMaterialReview({})).rejects.toMatchObject({ code: 'INVALID_INPUT' });
+  });
+
+  it('putVisualReview sends the scenes to the visual route of that render and maps its errors (US-023-603)', async () => {
+    const stored = { file: 'out/video.mp4', status: 'pass', createdAt: '2026-10-12T10:00:00.000Z', metrics: {}, findings: [] };
+    const ok = createFakeFetch(() => jsonResponse(200, stored));
+    const scenes = [{ sceneId: 'hook', shows: 'Título', matchesVoice: true, legible: true, couldBeOtherProduct: false, verdict: 'ok' as const, note: '' }];
+
+    const saved = await client(ok.fetchImpl).putVisualReview('out/video.mp4', scenes);
+
+    expect(saved).toEqual(stored);
+    expect(ok.calls[0]?.init?.method).toBe('PUT');
+    expect(ok.calls[0]?.url).toBe('http://127.0.0.1:4599/projects/pitch-deck/reviews/visual?file=out%2Fvideo.mp4');
+    expect(JSON.parse(String(ok.calls[0]?.init?.body))).toEqual({ scenes });
+    const notViewed = createFakeFetch(() => errorResponse(422, 'VISUAL_REVIEW_NOT_VIEWED', 'look at these with view_images: out/video.review/scene-01.jpg'));
+    const invalid = createFakeFetch(() => errorResponse(422, 'VISUAL_REVIEW_INVALID'));
+    await expect(client(notViewed.fetchImpl).putVisualReview('out/video.mp4', scenes)).rejects.toMatchObject({ code: 'VISUAL_REVIEW_NOT_VIEWED', hint: expect.stringContaining('scene-01') });
+    await expect(client(invalid.fetchImpl).putVisualReview('out/video.mp4', scenes)).rejects.toMatchObject({ code: 'INVALID_INPUT' });
+  });
+
   it('getMotionBrief and getMotionStoryboard read the project motion routes', async () => {
     const { fetchImpl, calls } = createFakeFetch(() => jsonResponse(200, { version: 1 }));
     const api = client(fetchImpl);

@@ -168,6 +168,20 @@ describe('createStudioToolHandlers', () => {
     expect(client.calls).toEqual([]);
   });
 
+  it('write_motion_brief keeps the named boxes of an image', async () => {
+    const { handlers, client } = handlersWith({ putMotionBrief: async () => undefined });
+    const brief = {
+      version: 1 as const,
+      brand: 'acme',
+      script: 'Hola',
+      images: [{ file: 'images/a.png', caption: 'Cotizador', boxes: [{ name: 'Plan Propio', x: 0.175, y: 0.358, w: 0.308, h: 0.104 }] }],
+    };
+
+    await handlers.write_motion_brief({ brief });
+
+    expect(client.calls).toEqual([{ method: 'putMotionBrief', args: [brief] }]);
+  });
+
   it('write_motion_brief rejects a brief with no script before calling the client', async () => {
     const { handlers, client } = handlersWith();
 
@@ -334,8 +348,40 @@ describe('createStudioToolHandlers', () => {
             proposedFix: 'Raise the master gain',
           },
         ],
+        visualReviewState: 'not-applicable',
       });
       expect(client.calls).toEqual([{ method: 'getRenderReview', args: ['out/video.mp4'] }]);
+    });
+
+    const sceneFrames = [
+      { sceneId: 'hook', index: 1, startSec: 0, endSec: 4, atSec: 2, frame: 'out/video.review/scene-01.jpg', voice: 'Hola' },
+    ];
+
+    it('lists the scene frames and says the visual review is pending (US-023-603)', async () => {
+      const { handlers } = handlersWith({ getRenderReview: async () => ({ ...review, sceneFrames }) });
+
+      const result = await handlers.get_render_review({});
+
+      expect(result.data).toMatchObject({ sceneFrames, visualReviewState: 'pending' });
+    });
+
+    it('reports a recorded visual review', async () => {
+      const visualReview = { recordedAt: '2026-10-12T11:00:00.000Z', scenes: [{ sceneId: 'hook', shows: 'Título', matchesVoice: true, legible: true, couldBeOtherProduct: false, verdict: 'ok' as const, note: '' }] };
+      const { handlers } = handlersWith({ getRenderReview: async () => ({ ...review, sceneFrames, visualReview }) });
+
+      const result = await handlers.get_render_review({});
+
+      expect(result.data).toMatchObject({ visualReview, visualReviewState: 'recorded' });
+    });
+
+    it('reports a stored review that carries version and delivery like the studio writes it', async () => {
+      const stored = { ...review, version: 1, delivery: { kind: 'motion' } } as unknown as typeof review;
+      const { handlers } = handlersWith({ getRenderReview: async () => stored });
+
+      const result = await handlers.get_render_review({ file: 'out/video.mp4' });
+
+      expect(result.data).toMatchObject({ file: 'out/video.mp4', status: 'fail' });
+      expect(result.data).not.toHaveProperty('version');
     });
 
     it('asks for the latest review when no file is given', async () => {
@@ -346,10 +392,27 @@ describe('createStudioToolHandlers', () => {
       expect(client.calls).toEqual([{ method: 'getRenderReview', args: [undefined] }]);
     });
 
-    it('says nothing was reviewed when the client finds no review', async () => {
-      const { handlers } = handlersWith({ getRenderReview: async () => null });
+    it('says nothing was reviewed when the client finds no review and no review job is pending', async () => {
+      const { handlers } = handlersWith({ getRenderReview: async () => null, listRecentJobs: async () => [] });
 
       await expect(handlers.get_render_review({})).rejects.toMatchObject({ code: 'FILE_NOT_FOUND' });
+    });
+
+    it('waits for the review job that is still running after the render and then returns its review', async () => {
+      let reviewDone = false;
+      const client = createFakeRenderApiClient({
+        getRenderReview: async () => (reviewDone ? review : null),
+        listRecentJobs: async () => [{ id: 'job-review', kind: 'review', state: 'running', createdAt: '2026-10-12T21:21:00.000Z' }],
+        getJob: async () => {
+          reviewDone = true;
+          return { id: 'job-review', kind: 'review', state: 'succeeded' } as Awaited<ReturnType<typeof client.getJob>>;
+        },
+      });
+      const handlers = createStudioToolHandlers({ client, model: 'sonnet', sleep: async () => undefined });
+
+      const result = await handlers.get_render_review({ file: 'out/video.mp4' });
+
+      expect(result.data).toMatchObject({ file: 'out/video.mp4', status: 'fail' });
     });
 
     it('rejects a file outside out/ before calling the client', async () => {
@@ -874,13 +937,142 @@ describe('createStudioToolHandlers', () => {
       ],
     };
 
-    it('propose_production sends the draft to the studio and reports it pending', async () => {
-      const { handlers, client } = handlersWith({ putProposal: async () => ({ concepts: 2 }) });
+    const REVIEW = {
+      version: 1 as const,
+      reviewedAt: '2026-10-12T10:00:00.000Z',
+      items: [
+        { file: 'images/a.png', source: 'project' as const, shows: 'El equipo', verdict: 'fits' as const, reason: 'Sirve' },
+        { file: 'brand:counter-15', source: 'brand' as const, shows: 'Un menu', verdict: 'unfit' as const, reason: 'No es un equipo' },
+      ],
+      gaps: [{ need: 'Easy Pro en un TV', note: 'sin foto' }],
+    };
+    const IMAGE_ASSETS = [
+      { path: 'raw/images/a.png', role: 'image', media: null },
+      { path: 'raw/aroll/clip.mp4', role: 'aroll', media: null },
+      { path: 'raw/logo/l.png', role: 'logo', media: null },
+    ];
+
+    it('propose_production sends the draft to the studio and reports it pending once the material was reviewed', async () => {
+      const { handlers, client } = handlersWith({
+        getMaterialReview: async () => REVIEW,
+        listProjectAssets: async () => IMAGE_ASSETS,
+        putProposal: async () => ({ concepts: 2 }),
+      });
 
       const result = await handlers.propose_production(DRAFT);
 
       expect(result.data).toEqual({ saved: true, status: 'pending', concepts: 2 });
-      expect(client.calls).toEqual([{ method: 'putProposal', args: [DRAFT] }]);
+      expect(client.calls.map((call) => call.method)).toEqual(['getMaterialReview', 'listProjectAssets', 'putProposal']);
+      expect(client.calls.find((call) => call.method === 'putProposal')?.args).toEqual([DRAFT]);
+    });
+
+    it('propose_production fails with MATERIAL_NOT_REVIEWED when the project has no review, without saving', async () => {
+      const { handlers, client } = handlersWith({ getMaterialReview: async () => null, listProjectAssets: async () => IMAGE_ASSETS });
+
+      await expect(handlers.propose_production(DRAFT)).rejects.toMatchObject({
+        code: 'MATERIAL_NOT_REVIEWED',
+        hint: expect.stringContaining('review_material'),
+      });
+      expect(client.calls.map((call) => call.method)).not.toContain('putProposal');
+    });
+
+    it('propose_production names the project images the review leaves out, whichever alias it used', async () => {
+      const { handlers } = handlersWith({
+        getMaterialReview: async () => ({ ...REVIEW, items: [REVIEW.items[1] as (typeof REVIEW.items)[number]] }),
+        listProjectAssets: async () => [...IMAGE_ASSETS, { path: 'raw/images/b.png', role: 'image', media: null }],
+      });
+
+      await expect(handlers.propose_production(DRAFT)).rejects.toMatchObject({
+        code: 'MATERIAL_NOT_REVIEWED',
+        hint: expect.stringContaining('raw/images/a.png, raw/images/b.png'),
+      });
+    });
+
+    it('review_material sends the review to the studio and counts the verdicts', async () => {
+      const { handlers, client } = handlersWith({ putMaterialReview: async () => REVIEW });
+      const draft = { items: REVIEW.items, gaps: REVIEW.gaps };
+
+      const result = await handlers.review_material(draft);
+
+      expect(result.data).toEqual({ saved: true, items: 2, fits: 1, doubtful: 0, unfit: 1, gaps: 1 });
+      expect(client.calls).toEqual([{ method: 'putMaterialReview', args: [draft] }]);
+    });
+
+    describe('record_visual_review (US-023-603)', () => {
+      const scenes = [
+        { sceneId: 'hook', shows: 'Título', matchesVoice: true, legible: true, couldBeOtherProduct: false, verdict: 'ok' as const, note: '' },
+        { sceneId: 'cta', shows: 'Una foto de comida', matchesVoice: true, legible: true, couldBeOtherProduct: true, verdict: 'fix' as const, note: 'Usar el equipo' },
+      ];
+      const report = {
+        file: 'out/video.mp4',
+        status: 'fail' as const,
+        createdAt: '2026-10-12T10:00:00.000Z',
+        metrics: {},
+        findings: [{ id: 'visual-review-01', check: 'visual-review', severity: 'critical' as const, message: 'Escena cta: podría ser de otro producto', proposedFix: 'Usar el equipo' }],
+      };
+
+      it('sends the scenes for the given file and answers what is still critical', async () => {
+        const { handlers, client } = handlersWith({ putVisualReview: async () => report });
+
+        const result = await handlers.record_visual_review({ file: 'out/video.mp4', scenes });
+
+        expect(result.data).toEqual({
+          saved: true,
+          file: 'out/video.mp4',
+          status: 'fail',
+          scenes: 2,
+          flaggedScenes: 1,
+          criticalFindings: ['Escena cta: podría ser de otro producto'],
+        });
+        expect(client.calls).toEqual([{ method: 'putVisualReview', args: ['out/video.mp4', scenes] }]);
+      });
+
+      it('uses the most recent review when no file is given', async () => {
+        const { handlers, client } = handlersWith({ getRenderReview: async () => report, putVisualReview: async () => report });
+
+        await handlers.record_visual_review({ scenes });
+
+        expect(client.calls.map((call) => call.method)).toEqual(['getRenderReview', 'putVisualReview']);
+      });
+
+      it('says there is nothing to review when no render was reviewed', async () => {
+        const { handlers } = handlersWith({ getRenderReview: async () => null });
+
+        await expect(handlers.record_visual_review({ scenes })).rejects.toMatchObject({ code: 'FILE_NOT_FOUND' });
+      });
+
+      it('propagates VISUAL_REVIEW_NOT_VIEWED from the studio', async () => {
+        const { handlers } = handlersWith({
+          putVisualReview: async () => {
+            throw new StudioToolRuntimeError('VISUAL_REVIEW_NOT_VIEWED', 'look at these with view_images: out/video.review/scene-02.jpg');
+          },
+        });
+
+        await expect(handlers.record_visual_review({ file: 'out/video.mp4', scenes })).rejects.toMatchObject({ code: 'VISUAL_REVIEW_NOT_VIEWED' });
+      });
+
+      it.each([
+        [{ scenes: [] }],
+        [{ scenes: [{ ...scenes[0], verdict: 'maybe' }] }],
+        [{ scenes, file: 'raw/video.mp4' }],
+        [{ file: 'out/video.mp4' }],
+      ])('rejects a malformed review before calling the studio (%#)', async (input) => {
+        const { handlers, client } = handlersWith();
+
+        await expect(handlers.record_visual_review(input)).rejects.toMatchObject({ code: 'INVALID_INPUT' });
+        expect(client.calls).toEqual([]);
+      });
+    });
+
+    it.each([
+      [{ items: [{ ...REVIEW.items[0], verdict: 'great' }], gaps: [] }],
+      [{ items: [] }],
+      [{ items: [{ ...REVIEW.items[1], source: 'project' }], gaps: [] }],
+    ])('review_material rejects a malformed review before calling the studio (%#)', async (input) => {
+      const { handlers, client } = handlersWith();
+
+      await expect(handlers.review_material(input)).rejects.toMatchObject({ code: 'INVALID_INPUT' });
+      expect(client.calls).toEqual([]);
     });
 
     it.each([

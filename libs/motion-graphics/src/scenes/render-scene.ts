@@ -6,7 +6,7 @@ import { uiWalkthrough } from './ui-walkthrough-html';
 
 type Renderer<K extends MotionStoryboardScene['kind']> = (scene: SceneOf<K>, ctx: SceneContext) => string;
 
-const frame = (body: string) => `<div class="mg-frame">${body}</div>`;
+const frame = (body: string, modifier = '') => `<div class="mg-frame${modifier}">${body}</div>`;
 const split = (copy: string, side: string, wide = false) => `<div class="mg-split${wide ? ' wide-visual' : ''}"><div class="mg-copy">${copy}</div><div class="mg-visual">${side}</div></div>`;
 const kicker = (text: string | undefined) => (text ? `<span class="mg-kicker"${animAttrs({ anim: 'fade' })}>${esc(text)}</span>` : '');
 
@@ -172,7 +172,7 @@ const connections: Renderer<'connections'> = ({ props }, ctx) => {
   return frame(`${headline(props.title, props.accent)}<div class="mg-conn"><svg class="mg-links" data-links="1">${paths}</svg><div class="dev${device.plate === true ? ' plate' : ''}" id="cx-dev"${animAttrs({ anim: 'left' })}><img src="${esc(deviceImg)}" alt="" /></div>${tv}<div class="peers">${peersHtml}</div></div>`);
 };
 
-const uiWalkthroughScene: Renderer<'ui-walkthrough'> = ({ props }, ctx) => frame(uiWalkthrough(props, ctx));
+const uiWalkthroughScene: Renderer<'ui-walkthrough'> = ({ props }, ctx) => frame(uiWalkthrough(props, ctx), ' ui');
 
 const doDont: Renderer<'do-dont'> = ({ props }) => {
   const card = (side: 'bad' | 'good', c: typeof props.bad) =>

@@ -1,6 +1,7 @@
 # SPEC-e-burgos-023: Calidad de producción — control automático, escena de UI, dirección de voz, propuesta y referencia
 
-> Estado: **completed** — registrada el 2026-10-11, cerrada el 2026-10-12 (5 ciclos).
+> Estado: **completed** — registrada el 2026-10-11; reabierta y cerrada el 2026-10-12 con el ciclo 06 (criterio visual),
+> tras el video de prueba «cómo comprar un equipo de Display Ads».
 > Pedido del dev: incorporar a video-maker las ideas que suman de la revisión de OpenMontage (calesthio/OpenMontage,
 > AGPL-3.0). **Ninguna línea de código de OpenMontage entra al repo**: video-maker se distribuye como app de escritorio
 > y la AGPL obligaría a liberarlo. Sólo se reimplementan ideas con diseño propio.
@@ -24,6 +25,7 @@
 | O-4 | Dirección de voz por frase (intención, ritmo, energía, pausas, énfasis) escrita por el productor y aplicada al motor de voz; música por tramos con fundidos en lugar de una cama continua | cycle-03 |
 | O-5 | Propuesta con aprobación: el productor presenta 2–3 enfoques con duración, costo y tiempo estimados y genera una muestra corta antes del render completo | cycle-04 |
 | O-6 | Video de referencia: a partir de un archivo local, transcripción, escenas, ritmo y cuadros clave en un brief que el productor usa para proponer | cycle-05 |
+| O-7 | Criterio visual: el productor mira y califica todo el material antes de proponer y avisa si no encaja con la idea, usa las posiciones dadas sin estimarlas, revisa el render escena por escena con evidencia, resaltados sobrios y lecciones del video de prueba | cycle-06 |
 
 ## Decisiones de la spec
 

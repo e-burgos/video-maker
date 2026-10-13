@@ -1,4 +1,4 @@
-import type { ReferenceBrief } from '@video-maker/timeline-core';
+import type { MaterialReview, ReferenceBrief } from '@video-maker/timeline-core';
 
 import { STUDIO_TOOL_ERROR_CODES } from '../contract/tool-errors';
 import type { StudioToolErrorCode } from '../contract/tool-errors';
@@ -57,6 +57,9 @@ const MOTION_MISSING_DOCUMENT_ERROR_CODES: ReadonlySet<string> = new Set([
 function mapRenderApiErrorCode(code: string, context: ErrorContext): StudioToolErrorCode {
   if (isKnownStudioErrorCode(code)) {
     return code;
+  }
+  if (code === 'MATERIAL_REVIEW_INVALID' || code === 'VISUAL_REVIEW_INVALID') {
+    return 'INVALID_INPUT';
   }
   if (code === 'REVIEW_NOT_FOUND') {
     return 'FILE_NOT_FOUND';
@@ -325,6 +328,9 @@ export function createHttpRenderApiClient(options: HttpRenderApiClientOptions): 
       return json.previews;
     },
 
+    putVisualReview: async (file, scenes) =>
+      (await request('PUT', `/projects/${slug}/reviews/visual?file=${encodeURIComponent(file)}`, { scenes })) as RenderApiRenderReview,
+
     getRenderReview: async (file) => {
       if (file !== undefined) {
         return (await request('GET', `/projects/${slug}/reviews?file=${encodeURIComponent(file)}`)) as RenderApiRenderReview;
@@ -357,6 +363,16 @@ export function createHttpRenderApiClient(options: HttpRenderApiClientOptions): 
     putProposal: async (draft) => {
       const json = (await request('PUT', `/projects/${slug}/proposal`, draft)) as { proposal: { concepts: readonly unknown[] } };
       return { concepts: json.proposal.concepts.length };
+    },
+
+    getMaterialReview: async () => {
+      const json = (await request('GET', `/projects/${slug}/material-review`)) as { review: MaterialReview | null };
+      return json.review;
+    },
+
+    putMaterialReview: async (draft) => {
+      const json = (await request('PUT', `/projects/${slug}/material-review`, draft)) as { review: MaterialReview };
+      return json.review;
     },
 
     listMotionBrands: async () => {

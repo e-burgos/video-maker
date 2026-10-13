@@ -331,6 +331,53 @@ describe('motion storyboard image refs', () => {
   );
 });
 
+describe('motion storyboard measured boxes', () => {
+  const BOXES = [{ name: 'Plan Propio', x: 0.175, y: 0.358, w: 0.308, h: 0.104 }];
+  const BRIEF = { version: 1, brand: 'displayads', script: 'Guion', images: [{ file: 'cotizador.png', caption: 'Cotizador', boxes: BOXES }] };
+  const seeds = [
+    { path: '/media/promo/raw/images/cotizador.png', contents: 'png' },
+    { path: '/media/promo/motion/brief.json', contents: JSON.stringify(BRIEF) },
+  ];
+
+  function walkthroughStoryboard(steps: unknown[]): unknown {
+    const base = JSON.parse(STORYBOARD_JSON) as { scenes: Record<string, unknown>[] };
+    const walkthrough = { id: 'cotizador', kind: 'ui-walkthrough', vo: 'Elegí el plan propio.', props: { image: 'images/cotizador.png', steps } };
+    return { ...base, scenes: [base.scenes[0], walkthrough, ...base.scenes.slice(1)] };
+  }
+
+  it('stores a box step with the boxes of the brief image copied into the scene', async () => {
+    const { deps, storage } = setup('motion', seeds);
+
+    const response = await handlePutMotionStoryboard(deps, STORE, { slug: 'promo' }, putRequest('/p', walkthroughStoryboard([{ action: 'highlight', box: 'Plan Propio' }])));
+
+    expect(response.status).toBe(200);
+    const stored = JSON.parse(await storage.readTextFile('/media/promo/motion/storyboard.json')) as { scenes: { id: string; props: { boxes?: unknown } }[] };
+    expect(stored.scenes.find((scene) => scene.id === 'cotizador')?.props.boxes).toEqual(BOXES);
+  });
+
+  it('rejects an estimated highlight naming the measured box and stores nothing', async () => {
+    const { deps, storage } = setup('motion', seeds);
+
+    const payload = await caught(
+      handlePutMotionStoryboard(deps, STORE, { slug: 'promo' }, putRequest('/p', walkthroughStoryboard([{ action: 'highlight', x: 0.24, y: 0.375, w: 0.18, h: 0.1 }]))),
+    );
+
+    expect(payload.code).toBe('STORYBOARD_INVALID');
+    expect(payload.expected).toContain('use box "Plan Propio"');
+    expect(await storage.stat('/media/promo/motion/storyboard.json')).toBeNull();
+  });
+
+  it('rejects a box step when the video has no brief boxes', async () => {
+    const { deps } = setup('motion', [seeds[0] as (typeof seeds)[number]]);
+
+    const payload = await caught(
+      handlePutMotionStoryboard(deps, STORE, { slug: 'promo' }, putRequest('/p', walkthroughStoryboard([{ action: 'highlight', box: 'Plan Propio' }]))),
+    );
+
+    expect(payload.expected).toContain('the image has no measured boxes');
+  });
+});
+
 const OVERVIEW_KEYS = ['storyboard', 'timeline', 'video', 'voice'];
 const TIMELINE_KEYS = ['beatSync', 'bpm', 'durationSec', 'musicCredit', 'scenes'];
 const TIMELINE_SCENE_KEYS = ['endSec', 'id', 'startSec', 'voDurationSec', 'voStartSec'];

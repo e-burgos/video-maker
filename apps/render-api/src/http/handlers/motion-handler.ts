@@ -1,4 +1,4 @@
-import { briefImageRef, isMotionStudioError, parseBrandManifest, parseMotionBrief, parseMotionStoryboard } from '@video-maker/motion-graphics';
+import { applyBriefBoxes, briefImageRef, checkStoryboardBoxes, isMotionStudioError, parseBrandManifest, parseMotionBrief, parseMotionStoryboard } from '@video-maker/motion-graphics';
 import type { MotionBrief, MotionStoryboard } from '@video-maker/motion-graphics';
 import { join } from 'node:path/posix';
 
@@ -249,6 +249,33 @@ async function assertStoryboardImagesResolve(
   }
 }
 
+async function readStoredBrief(deps: RenderApiDependencies, projectRoot: string): Promise<MotionBrief | null> {
+  const path = join(projectRoot, BRIEF_RELATIVE_PATH);
+  const stat = await deps.storage.stat(path);
+  if (stat === null || stat.kind !== 'file') {
+    return null;
+  }
+  try {
+    return parseMotionBrief(JSON.parse(await deps.storage.readTextFile(path)));
+  } catch {
+    return null;
+  }
+}
+
+function resolveStoryboardBoxes(storyboard: MotionStoryboard, brief: MotionBrief | null): MotionStoryboard {
+  const resolved = brief === null ? storyboard : applyBriefBoxes(storyboard, brief);
+  const issues = checkStoryboardBoxes(resolved, brief);
+  if (issues.length > 0) {
+    throw new PipelineStageError({
+      code: 'STORYBOARD_INVALID',
+      stage: null,
+      resource: STORYBOARD_RELATIVE_PATH,
+      expected: issues.map((issue) => `${issue.path}: ${issue.message}`).join('\n'),
+    });
+  }
+  return resolved;
+}
+
 export async function handleGetMotionOverview(
   deps: RenderApiDependencies,
   store: StoreConfig,
@@ -265,13 +292,14 @@ export async function handlePutMotionStoryboard(
   request: HttpRequestLine,
 ): Promise<HttpResponse> {
   const project = await resolveMotionProject(deps, store, params);
-  const storyboard = parseOrThrow(
+  const parsed = parseOrThrow(
     parseMotionStoryboard,
     await readRequestJson(request),
     'STORYBOARD_INVALID',
     STORYBOARD_RELATIVE_PATH,
   );
-  await assertStoryboardImagesResolve(deps, project.rawDir, storyboard);
+  await assertStoryboardImagesResolve(deps, project.rawDir, parsed);
+  const storyboard = resolveStoryboardBoxes(parsed, await readStoredBrief(deps, project.root));
 
   await deps.storage.ensureDirectory(join(project.root, 'motion'));
   await deps.storage.writeTextFile(

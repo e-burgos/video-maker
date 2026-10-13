@@ -67,6 +67,13 @@ describe('composeStoryboard', () => {
     expect(musicSource).toBe('assets/brand/music/Beat Song.mp3');
   });
 
+  it('carries minSec into the script only on the scenes that set it', () => {
+    const timed = { ...base, scenes: base.scenes.map((scene, index) => (index === 0 ? { ...scene, minSec: 5 } : scene)) };
+    const { script } = composeStoryboard(timed, testBrand);
+    expect(script.scenes[0]?.minSec).toBe(5);
+    expect(script.scenes[1]).not.toHaveProperty('minSec');
+  });
+
   it('carries the music volume of the storyboard into the script', () => {
     const { script } = composeStoryboard({ ...base, music: { track: 'beat', volume: 0.3 } }, testBrand);
     expect(script.music).toEqual({ file: 'Beat Song.mp3', credit: 'Beat · CC BY 4.0', volume: 0.3 });

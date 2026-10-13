@@ -88,6 +88,29 @@ describe('proposal handlers (US-023-401, US-023-402, US-023-403)', () => {
     expect(stored.status).toBe('pending');
   });
 
+  it('copies the warnings of the stored material review into the proposal, and none when everything fits', async () => {
+    const review = {
+      version: 1,
+      reviewedAt: NOW,
+      items: [
+        { file: 'brand:counter-15', source: 'brand', shows: 'Un menú', verdict: 'unfit', reason: 'No es un equipo' },
+        { file: 'images/a.png', source: 'project', shows: 'El equipo', verdict: 'fits', reason: 'Sirve' },
+      ],
+      gaps: [{ need: 'Easy Pro en un TV', note: 'sin foto' }],
+    };
+    const { deps, runtime } = setup({ files: [{ path: 'work/producer/material-review.json', contents: JSON.stringify(review) }] });
+
+    const response = await handlePutProposal(deps, STORE, { slug: SLUG }, put(DRAFT), runtime);
+
+    const proposal = (response.body as ProposalBody).proposal;
+    expect(proposal?.materialWarnings?.items.map((entry) => entry.file)).toEqual(['brand:counter-15']);
+    expect(proposal?.materialWarnings?.gaps).toEqual(review.gaps);
+
+    const clean = setup({ files: [{ path: 'work/producer/material-review.json', contents: JSON.stringify({ ...review, items: [review.items[1]], gaps: [] }) }] });
+    const cleanResponse = await handlePutProposal(clean.deps, STORE, { slug: SLUG }, put(DRAFT), clean.runtime);
+    expect((cleanResponse.body as ProposalBody).proposal).not.toHaveProperty('materialWarnings');
+  });
+
   it('resets an approved proposal to pending when it is written again, ignoring a status in the body', async () => {
     const { deps, runtime } = setup();
     await handlePutProposal(deps, STORE, { slug: SLUG }, put(DRAFT), runtime);

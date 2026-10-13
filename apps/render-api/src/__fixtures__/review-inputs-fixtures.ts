@@ -33,6 +33,8 @@ export function footageReviewInputs(overrides?: Partial<ReviewInputs>): ReviewIn
     frozenSegments: [],
     silences: [],
     missingAssets: [],
+    sceneFrames: [],
+    promise: null,
     ...overrides,
   };
 }
@@ -60,6 +62,8 @@ export function motionReviewInputs(overrides?: Partial<ReviewInputs>): ReviewInp
     frozenSegments: [],
     silences: [],
     missingAssets: [],
+    sceneFrames: [],
+    promise: null,
     ...overrides,
   };
 }

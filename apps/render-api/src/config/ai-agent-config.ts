@@ -6,7 +6,7 @@ export const AI_AGENT_TIMEOUT_ENV_VAR = 'CLAUDE_CLI_TIMEOUT_MS';
 export const AI_AGENT_MODEL_ENV_VAR = 'CLAUDE_CLI_MODEL';
 
 export const DEFAULT_AI_AGENT_BINARY = 'claude';
-export const DEFAULT_AI_AGENT_TIMEOUT_MS = 600_000;
+export const DEFAULT_AI_AGENT_TIMEOUT_MS = 900_000;
 export const DEFAULT_AI_AGENT_MODEL = 'sonnet';
 
 export interface AiAgentConfig {

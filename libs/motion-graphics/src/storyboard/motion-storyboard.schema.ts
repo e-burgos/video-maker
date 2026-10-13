@@ -1,6 +1,8 @@
 import { VoiceDirectionSchema } from '@video-maker/timeline-core';
 import { z } from 'zod';
 
+import { ImageBoxListSchema } from './image-box';
+
 export const ICON_NAMES = [
   'alert',
   'bell',
@@ -145,8 +147,9 @@ const OVERFLOW_TOLERANCE = 1e-6;
 const WalkthroughStep = z
   .strictObject({
     action: z.enum(WALKTHROUGH_ACTIONS).describe('move: cursor travels to x,y. click: cursor clicks at x,y. type: text is typed inside the field box. highlight: outlines the box. callout: speech bubble with text anchored at x,y. zoom: magnifies the region and returns'),
-    x: Unit.describe('Horizontal position over the capture, 0 = left edge, 1 = right edge. For boxes (type, highlight, zoom) it is the left edge of the box'),
-    y: Unit.describe('Vertical position over the capture, 0 = top edge, 1 = bottom edge. For boxes it is the top edge of the box'),
+    box: Text.describe('Name of a measured box of the capture (see boxes). Use it instead of x,y,w,h whenever the brief gives the box: move, click and callout go to its center, type, highlight and zoom cover it').optional(),
+    x: Unit.describe('Horizontal position over the capture, 0 = left edge, 1 = right edge. For boxes (type, highlight, zoom) it is the left edge of the box. Omit when box is set').optional(),
+    y: Unit.describe('Vertical position over the capture, 0 = top edge, 1 = bottom edge. For boxes it is the top edge of the box. Omit when box is set').optional(),
     w: UnitSize.describe('Box width as a fraction of the capture width (type, highlight, zoom)').optional(),
     h: UnitSize.describe('Box height as a fraction of the capture height (type, highlight, zoom)').optional(),
     text: Text.describe('Required for type (the text typed) and callout (the bubble text)').optional(),
@@ -155,9 +158,14 @@ const WalkthroughStep = z
   })
   .superRefine((step, ctx) => {
     if (TEXT_ACTIONS.has(step.action) && step.text === undefined) ctx.addIssue({ code: 'custom', path: ['text'], message: `text is required when action is "${step.action}"` });
+    if (step.box !== undefined) {
+      if (step.x !== undefined || step.y !== undefined || step.w !== undefined || step.h !== undefined) ctx.addIssue({ code: 'custom', path: ['box'], message: 'a step uses either box or x,y,w,h, not both' });
+      return;
+    }
+    if (step.x === undefined || step.y === undefined) ctx.addIssue({ code: 'custom', path: ['x'], message: 'x and y are required unless box is set' });
     if ((step.w !== undefined || step.h !== undefined) && !BOX_ACTIONS.has(step.action)) ctx.addIssue({ code: 'custom', path: ['w'], message: `w and h only apply to type, highlight and zoom, not "${step.action}"` });
-    if (step.w !== undefined && step.x + step.w > 1 + OVERFLOW_TOLERANCE) ctx.addIssue({ code: 'custom', path: ['w'], message: `box leaves the capture: x + w = ${step.x + step.w} must be at most 1` });
-    if (step.h !== undefined && step.y + step.h > 1 + OVERFLOW_TOLERANCE) ctx.addIssue({ code: 'custom', path: ['h'], message: `box leaves the capture: y + h = ${step.y + step.h} must be at most 1` });
+    if (step.x !== undefined && step.w !== undefined && step.x + step.w > 1 + OVERFLOW_TOLERANCE) ctx.addIssue({ code: 'custom', path: ['w'], message: `box leaves the capture: x + w = ${step.x + step.w} must be at most 1` });
+    if (step.y !== undefined && step.h !== undefined && step.y + step.h > 1 + OVERFLOW_TOLERANCE) ctx.addIssue({ code: 'custom', path: ['h'], message: `box leaves the capture: y + h = ${step.y + step.h} must be at most 1` });
   });
 
 const UiWalkthroughProps = z.strictObject({
@@ -166,6 +174,8 @@ const UiWalkthroughProps = z.strictObject({
   image: ImageRef.describe('Capture of the interface: project image path or brand asset. All step coordinates are fractions of this image'),
   frame: z.enum(['browser', 'phone', 'none']).describe('Frame around the capture; default browser').optional(),
   url: Text.describe('Address shown in the browser bar; only with frame browser').optional(),
+  boxes: ImageBoxListSchema.describe('Measured boxes of the capture, copied from the brief image; steps point at them by name with box').optional(),
+  autoZoom: z.boolean().describe('The studio camera follows the steps (zooms into each one and pans between them) when the scene has no zoom step; set false to keep the full capture in view').optional(),
   steps: z.array(WalkthroughStep).min(1).max(8),
 });
 
@@ -174,6 +184,7 @@ const sceneBase = {
   chapter: Text.optional(),
   vo: Text.describe('Exact voice-over line for this scene, spoken in the target language'),
   minBars: z.number().positive().max(16).optional(),
+  minSec: z.number().positive().max(60).describe('Minimum scene length in seconds, kept with or without beat sync and never cutting the voice; use it for scenes that carry several visual steps').optional(),
   anchor: z.union([z.literal('drop'), z.number().nonnegative()]).optional(),
   direction: VoiceDirectionSchema.describe('How this voice-over line is delivered: pace, energy, pause after the line and words to stress. Omit it for the voice default').optional(),
 };

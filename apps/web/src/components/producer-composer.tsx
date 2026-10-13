@@ -13,6 +13,7 @@ export type ProducerComposerProps = {
   onChange: (value: string) => void;
   onSend: () => void;
   pending: boolean;
+  busy?: boolean;
   blockers: readonly Blocker[];
   models: readonly ProducerModelOption[];
   model: string;
@@ -27,6 +28,7 @@ export function ProducerComposer({
   onChange,
   onSend,
   pending,
+  busy = false,
   blockers,
   models,
   model,
@@ -77,7 +79,7 @@ export function ProducerComposer({
             id="producer-model"
             data-testid="producer-model-picker"
             value={model}
-            disabled={blocked || pending}
+            disabled={blocked || pending || busy}
             title={chosen?.description ?? ''}
             onChange={(event) => onModelChange(event.target.value)}
             className="rounded-md border border-slate-700 bg-slate-950 px-2 py-1 text-xs text-slate-100 disabled:opacity-40"
@@ -102,7 +104,7 @@ export function ProducerComposer({
           onClick={onSend}
           className="rounded-md border border-sky-500/50 bg-sky-500/10 px-3 py-1.5 text-sm text-sky-100 disabled:opacity-40"
         >
-          {pending ? t('producer.sending') : t('producer.send')}
+          {pending ? t('producer.sending') : busy ? t('producer.queue') : t('producer.send')}
         </button>
       </div>
 

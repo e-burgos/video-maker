@@ -2,6 +2,8 @@ import { z } from 'zod';
 
 import { OutputPresetSchema } from '../schemas/output-format.schema';
 import { DeliveryContractSchema } from '../schemas/timeline.schema';
+import { MaterialWarningsSchema, hasMaterialWarnings } from './material-review';
+import type { MaterialWarnings } from './material-review';
 
 export const PRODUCTION_PROPOSAL_VERSION = 1;
 export const PRODUCTION_PROPOSAL_STATUSES = ['pending', 'approved'] as const;
@@ -51,6 +53,7 @@ export const ProductionProposalSchema = z
     approvedAt: z.iso.datetime().optional(),
     recommendedId: ConceptIdSchema,
     concepts: z.array(ProposalConceptSchema).min(MIN_PROPOSAL_CONCEPTS).max(MAX_PROPOSAL_CONCEPTS),
+    materialWarnings: MaterialWarningsSchema.optional(),
   })
   .superRefine((proposal, ctx) => {
     const ids = proposal.concepts.map((concept) => concept.id);
@@ -79,12 +82,13 @@ export type ProductionProposalDraft = z.infer<typeof ProductionProposalDraftSche
 export type ProductionProposal = z.infer<typeof ProductionProposalSchema>;
 export type ProductionProposalStatus = (typeof PRODUCTION_PROPOSAL_STATUSES)[number];
 
-export function pendingProposalFrom(draft: ProductionProposalDraft): ProductionProposal {
+export function pendingProposalFrom(draft: ProductionProposalDraft, warnings?: MaterialWarnings): ProductionProposal {
   return {
     version: PRODUCTION_PROPOSAL_VERSION,
     status: 'pending',
     recommendedId: draft.recommendedId,
     concepts: draft.concepts,
+    ...(warnings === undefined || !hasMaterialWarnings(warnings) ? {} : { materialWarnings: warnings }),
   };
 }
 

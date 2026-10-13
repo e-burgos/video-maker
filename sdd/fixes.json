@@ -2852,6 +2852,208 @@
           }
         ]
       }
+    },
+    {
+      "id": "FIX-e-burgos-016",
+      "author": "e-burgos",
+      "spec_id": "spec-e-burgos-023-production-quality",
+      "fix_document": "sdd/fixes/fix-e-burgos-016.md",
+      "type": "BUGFIX",
+      "severity": "high",
+      "created_at": "2026-10-12",
+      "resolved_at": "2026-10-12",
+      "validated_at": null,
+      "title": "El storyboard automático de motion pide esfuerzo bajo y ya no agota el tiempo pensando",
+      "estimation_hours": 1,
+      "description": "La llamada al CLI de Claude para el storyboard motion razonaba más de 13 minutos con briefs de 16 escenas y el límite de 10 minutos la cortaba (AI_AGENT_FAILED). El job motion del studio arma la llamada por el agente de IA de render-api (no por el CLI de motion), con su propio límite de 10 minutos.",
+      "justification": "Bloqueaba el video de prueba de compra pedido por el dueño; cambio interno sin contratos nuevos.",
+      "related_modules": [
+        "production-quality"
+      ],
+      "affected_files": [
+        "apps/render-api/src/ai/claude-cli-ai-agent.spec.ts",
+        "apps/render-api/src/ai/claude-cli-ai-agent.ts",
+        "apps/render-api/src/config/ai-agent-config.ts",
+        "apps/render-api/src/deps/motion-pipeline-adapters.spec.ts",
+        "apps/render-api/src/deps/motion-pipeline-adapters.ts",
+        "apps/render-api/src/deps/render-api-dependencies.ts",
+        "tools/motion-studio/src/deps/claude-cli-ask-agent.spec.ts",
+        "tools/motion-studio/src/deps/claude-cli-ask-agent.ts",
+        "tools/motion-studio/src/deps/node-motion-dependencies.ts"
+      ],
+      "test_reference": "motion-studio y render-api lint/test/build verde; mismo pedido real en 3 min 42 s con 16 escenas.",
+      "status": "implemented",
+      "cycle": null,
+      "process_note": "Hallado en el video de prueba comprar-producto.",
+      "usage": {
+        "provider_model": "claude/opus",
+        "effort": "high",
+        "tokens_in": 60000,
+        "tokens_out": 8000,
+        "approx": true,
+        "source": "declared-estimate",
+        "recorded_at": "2026-10-12",
+        "by_agent": [
+          {
+            "agent": "orchestrator",
+            "provider_model": "claude/opus",
+            "effort": "high",
+            "tokens_in": 60000,
+            "tokens_out": 8000,
+            "approx": true,
+            "source": "declared-estimate",
+            "recorded_at": "2026-10-12"
+          }
+        ]
+      }
+    },
+    {
+      "id": "FIX-e-burgos-017",
+      "author": "e-burgos",
+      "spec_id": "spec-e-burgos-023-production-quality",
+      "fix_document": "sdd/fixes/fix-e-burgos-017.md",
+      "type": "IMPROVEMENT",
+      "severity": "medium",
+      "created_at": "2026-10-12",
+      "resolved_at": "2026-10-12",
+      "validated_at": null,
+      "title": "El zoom de la escena de interfaz se mantiene hasta el próximo zoom o el final de la escena",
+      "estimation_hours": 1,
+      "description": "El zoom de ui-walkthrough volvía atrás al empezar el paso siguiente, así que resaltados y clics nunca se veían ampliados.",
+      "justification": "Legibilidad de la interfaz en el video de prueba de compra; cambio interno del runtime sin contratos nuevos.",
+      "related_modules": [
+        "production-quality"
+      ],
+      "affected_files": [
+        "libs/motion-graphics/assets/runtime/motion-runtime.js",
+        "libs/motion-graphics/src/auto/scene-guide.ts"
+      ],
+      "test_reference": "motion-graphics lint/test/build verde; muestra real revisada.",
+      "status": "implemented",
+      "cycle": null,
+      "process_note": "Hallado en el video de prueba comprar-producto.",
+      "usage": {
+        "provider_model": "claude/opus",
+        "effort": "high",
+        "tokens_in": 25000,
+        "tokens_out": 4000,
+        "approx": true,
+        "source": "declared-estimate",
+        "recorded_at": "2026-10-12",
+        "by_agent": [
+          {
+            "agent": "orchestrator",
+            "provider_model": "claude/opus",
+            "effort": "high",
+            "tokens_in": 25000,
+            "tokens_out": 4000,
+            "approx": true,
+            "source": "declared-estimate",
+            "recorded_at": "2026-10-12"
+          }
+        ]
+      }
+    },
+    {
+      "id": "FIX-e-burgos-018",
+      "author": "e-burgos",
+      "spec_id": "spec-e-burgos-023-production-quality",
+      "fix_document": "sdd/fixes/fix-e-burgos-018.md",
+      "type": "BUGFIX",
+      "severity": "medium",
+      "created_at": "2026-10-12",
+      "resolved_at": "2026-10-12",
+      "validated_at": null,
+      "title": "get_render_review espera el job de revisión en curso en vez de decir que no hay revisión",
+      "estimation_hours": 1,
+      "description": "El productor pedía la revisión antes de que terminara el job review que sigue al render y concluía que los videos motion no se revisan.",
+      "justification": "El productor le dio información falsa al dev en el video de prueba; cambio interno sin contratos nuevos.",
+      "related_modules": [
+        "production-quality"
+      ],
+      "affected_files": [
+        "libs/producer-tools/src/handlers/studio-tool-handlers.ts",
+        "libs/producer-tools/src/handlers/studio-tool-handlers.spec.ts"
+      ],
+      "test_reference": "producer-tools lint/test/build verde.",
+      "status": "implemented",
+      "cycle": null,
+      "process_note": "Hallado en el video de prueba comprar-producto.",
+      "usage": {
+        "provider_model": "claude/opus",
+        "effort": "high",
+        "tokens_in": 20000,
+        "tokens_out": 4000,
+        "approx": true,
+        "source": "declared-estimate",
+        "recorded_at": "2026-10-12",
+        "by_agent": [
+          {
+            "agent": "orchestrator",
+            "provider_model": "claude/opus",
+            "effort": "high",
+            "tokens_in": 20000,
+            "tokens_out": 4000,
+            "approx": true,
+            "source": "declared-estimate",
+            "recorded_at": "2026-10-12"
+          }
+        ]
+      }
+    },
+    {
+      "id": "FIX-e-burgos-019",
+      "author": "e-burgos",
+      "spec_id": "spec-e-burgos-023-production-quality",
+      "fix_document": "sdd/fixes/fix-e-burgos-019.md",
+      "type": "IMPROVEMENT",
+      "severity": "medium",
+      "created_at": "2026-10-12",
+      "resolved_at": "2026-10-12",
+      "validated_at": null,
+      "title": "Las escenas de interfaz se ven grandes y una cámara automática sigue la acción",
+      "estimation_hours": 3,
+      "description": "Las capturas de ui-walkthrough ocupaban ~55 % del ancho y el texto quedaba chico; ahora el marco es más grande y, sin zoom explícito, el estudio mueve una cámara que hace zoom a cada paso y panea entre ellos, con globos de tamaño constante.",
+      "justification": "Legibilidad de la interfaz en el video de prueba de compra; cambio del runtime y del HTML de la escena sin contratos nuevos salvo el opcional autoZoom.",
+      "related_modules": [
+        "production-quality"
+      ],
+      "affected_files": [
+        "libs/motion-graphics/assets/runtime/motion-runtime.js",
+        "libs/motion-graphics/assets/runtime/scenes.css",
+        "libs/motion-graphics/src/scenes/ui-auto-zoom.ts",
+        "libs/motion-graphics/src/scenes/ui-auto-zoom.spec.ts",
+        "libs/motion-graphics/src/scenes/ui-walkthrough-html.ts",
+        "libs/motion-graphics/src/scenes/render-scene.ts",
+        "libs/motion-graphics/src/scenes/render-scene.spec.ts",
+        "libs/motion-graphics/src/storyboard/motion-storyboard.schema.ts",
+        "libs/motion-graphics/src/auto/scene-guide.ts"
+      ],
+      "test_reference": "motion-graphics lint/test/build verde; muestra real revisada (zoom-automatico.jpg).",
+      "status": "implemented",
+      "cycle": null,
+      "process_note": "Hallado en la verificación del video de prueba comprar-producto (cycle-06).",
+      "usage": {
+        "provider_model": "claude/sonnet",
+        "effort": "medium",
+        "tokens_in": 260000,
+        "tokens_out": 34000,
+        "approx": true,
+        "source": "declared-estimate",
+        "recorded_at": "2026-10-12",
+        "by_agent": [
+          {
+            "provider_model": "claude/sonnet",
+            "effort": "medium",
+            "agent": "implementor-back",
+            "tokens_in": 260000,
+            "tokens_out": 34000,
+            "approx": true,
+            "source": "declared-estimate",
+            "recorded_at": "2026-10-12"
+          }
+        ]
+      }
     }
   ]
 }

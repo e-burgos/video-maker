@@ -1,4 +1,4 @@
-import { approveProposalConcept } from '@video-maker/timeline-core';
+import { approveProposalConcept, materialWarnings } from '@video-maker/timeline-core';
 import type { ProductionProposal } from '@video-maker/timeline-core';
 
 import type { StoreConfig } from '../../config/store-config';
@@ -8,6 +8,7 @@ import { resolveProducerEngineForEstimate } from '../../proposal/estimate-engine
 import { estimateProduction } from '../../proposal/estimate-production';
 import type { ProductionEstimate } from '../../proposal/estimate-production';
 import { HISTORY_JOB_KINDS, HISTORY_ROW_LIMIT, historySamplesFrom } from '../../proposal/job-history';
+import { readMaterialReview } from '../../material/material-store';
 import { productionProposalPath } from '../../proposal/proposal-paths';
 import { parsePendingProposal, readProductionProposal, writeProductionProposal } from '../../proposal/proposal-store';
 import { assertValidProjectSlug, resolveExistingProject } from '../../store/project-scope';
@@ -79,9 +80,11 @@ export async function handlePutProposal(
   assertValidProjectSlug(slug);
 
   const body = await readJsonObjectBody(request);
-  const proposal = parsePendingProposal({ recommendedId: body.recommendedId, concepts: body.concepts });
+  const draft = { recommendedId: body.recommendedId, concepts: body.concepts };
 
   const project = await resolveExistingProject(deps, store, slug);
+  const review = await readMaterialReview(deps, project);
+  const proposal = parsePendingProposal(draft, review === null ? undefined : materialWarnings(review));
   await writeProductionProposal(deps, project, proposal);
 
   return jsonResponse(200, await buildProposalBody(deps, runtime, slug, proposal));

@@ -24,6 +24,7 @@ import {
   parseVoiceListing,
   parseVoiceSceneWriteResult,
 } from './parse-voice';
+import { parseMaterialReviewDocument } from './parse-material-review';
 import { parseProposalDocument } from './parse-proposal';
 import { parseReferenceBrief, parseReferenceJob, parseReferenceListing } from './parse-reference';
 import { parseReviewJob, parseReviewReport } from './parse-review';
@@ -112,6 +113,7 @@ import type {
 } from './youtube-types';
 import type { ReferenceBrief, ReferenceJob, ReferenceSummary } from './reference-types';
 import type { ReviewJob, ReviewReport } from './review-types';
+import type { MaterialReviewDocument } from './material-review-types';
 import type { ProposalDocument, SampleSpec } from './proposal-types';
 
 export type FetchLike = (input: string, init?: RequestInit) => Promise<Response>;
@@ -173,6 +175,7 @@ export type RenderApiClient = {
   putTimeline: (slug: string, timeline: Timeline) => Promise<TimelineWriteResult>;
   createRenderJob: (slug: string, input?: { sample?: SampleSpec }) => Promise<RenderJob>;
   getProposal: (slug: string) => Promise<ProposalDocument>;
+  getMaterialReview: (slug: string) => Promise<MaterialReviewDocument>;
   approveProposal: (slug: string, conceptId: string) => Promise<ProposalDocument>;
   createMontageJob: (slug: string, input: CreateMontageJobInput) => Promise<MontageJob>;
   createStoryboardJob: (slug: string, input: CreateStoryboardJobInput) => Promise<StoryboardJob>;
@@ -633,6 +636,16 @@ export function createRenderApiClient(fetchImpl: FetchLike): RenderApiClient {
         (value) => isRecord(value),
       );
       return parseProposalDocument(body);
+    },
+
+    async getMaterialReview(slug: string): Promise<MaterialReviewDocument> {
+      const body = await requestJson(
+        `/projects/${encodeURIComponent(slug)}/material-review`,
+        undefined,
+        'a material review document',
+        (value) => isRecord(value),
+      );
+      return parseMaterialReviewDocument(body);
     },
 
     async approveProposal(slug: string, conceptId: string): Promise<ProposalDocument> {

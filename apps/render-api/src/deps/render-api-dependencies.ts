@@ -150,6 +150,7 @@ export interface AiAgentRequest {
   readonly userPrompt: string;
   readonly jsonSchema: unknown;
   readonly model?: string | null;
+  readonly effort?: string;
 }
 
 export interface AiAgentUsage {

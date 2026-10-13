@@ -1,7 +1,8 @@
 import { z } from 'zod';
 
-import { TimelineSchema } from '@video-maker/timeline-core';
-import type { Timeline } from '@video-maker/timeline-core';
+import { TimelineSchema, canonicalMaterialPath } from '@video-maker/timeline-core';
+import type { MaterialReview, SceneVisualReview, Timeline } from '@video-maker/timeline-core';
+import type { RenderApiRenderReview } from '../client/render-api-client';
 
 import { PATCH_TIMELINE_SECTIONS, STUDIO_TOOLS } from '../contract/tool-schemas';
 import type { PatchTimelineInput, PatchTimelineSection } from '../contract/tool-schemas';
@@ -13,6 +14,8 @@ export const DEFAULT_WAIT_FOR_JOB_POLL_INTERVAL_MS = 2000;
 export const RECENT_JOBS_LIMIT = 5;
 
 const TERMINAL_JOB_STATES: ReadonlySet<string> = new Set(['succeeded', 'failed', 'canceled']);
+const PENDING_REVIEW_WAIT_MS = 180_000;
+const RECENT_JOBS_FOR_PENDING_REVIEW = 10;
 const JOB_KINDS_THAT_TAKE_MODEL: ReadonlySet<string> = new Set(['voice', 'storyboard']);
 
 interface StartJobRequest extends Record<string, unknown> {
@@ -31,6 +34,36 @@ function isFullRender(job: StartJobRequest): boolean {
 
 function withoutSkipProposal(job: StartJobRequest): Record<string, unknown> {
   return Object.fromEntries(Object.entries(job).filter(([key]) => key !== 'skipProposal'));
+}
+
+function visualReviewStateOf(review: RenderApiRenderReview): 'not-applicable' | 'pending' | 'recorded' {
+  if (review.visualReview !== undefined) {
+    return 'recorded';
+  }
+  return (review.sceneFrames ?? []).length > 0 ? 'pending' : 'not-applicable';
+}
+
+function countVerdict(review: MaterialReview, verdict: 'fits' | 'doubtful' | 'unfit'): number {
+  return review.items.filter((item) => item.verdict === verdict).length;
+}
+
+const MATERIAL_HINT =
+  'view_images every image of the project (get_project_overview lists them) and every brand photo (brand:<key>) you plan to use, ' +
+  'then call review_material with what each one really shows and whether it fits the idea, and the gaps the idea has; then propose again.';
+
+async function assertMaterialReviewed(client: RenderApiClient): Promise<void> {
+  const [review, assets] = await Promise.all([client.getMaterialReview(), client.listProjectAssets()]);
+  if (review === null) {
+    throw new StudioToolRuntimeError('MATERIAL_NOT_REVIEWED', `this project has no material review yet: ${MATERIAL_HINT}`);
+  }
+  const reviewed = new Set(review.items.map((item) => canonicalMaterialPath(item.file)));
+  const missing = assets
+    .filter((asset) => asset.role === 'image')
+    .map((asset) => canonicalMaterialPath(asset.path))
+    .filter((path) => !reviewed.has(path));
+  if (missing.length > 0) {
+    throw new StudioToolRuntimeError('MATERIAL_NOT_REVIEWED', `the material review does not cover ${missing.join(', ')}: ${MATERIAL_HINT}`);
+  }
 }
 
 async function assertProposalApproved(client: RenderApiClient): Promise<void> {
@@ -146,6 +179,19 @@ function patchTimelineSummary(sections: readonly PatchTimelineSection[]): string
   return `Updated ${sections.join(', ')}.`;
 }
 
+function reviewSummaryFields(review: RenderApiRenderReview) {
+  const { file, status, createdAt, metrics, findings, sceneFrames, visualReview } = review;
+  return {
+    file,
+    status,
+    createdAt,
+    metrics,
+    findings,
+    ...(sceneFrames === undefined ? {} : { sceneFrames }),
+    ...(visualReview === undefined ? {} : { visualReview }),
+  };
+}
+
 export function createStudioToolHandlers(
   options: StudioToolHandlersOptions,
 ): Readonly<Record<StudioToolName, StudioToolHandler>> {
@@ -156,6 +202,23 @@ export function createStudioToolHandlers(
 
   function withOutput(name: StudioToolName, data: unknown): StudioToolHandlerResult {
     return { data: parseOutput(STUDIO_TOOLS[name].output, data) };
+  }
+
+  async function pollJobUntilSettled(jobId: string, deadline: number) {
+    let job = await client.getJob(jobId);
+    while (!TERMINAL_JOB_STATES.has(job.state) && clock() < deadline) {
+      await sleep(pollIntervalMs);
+      job = await client.getJob(jobId);
+    }
+    return job;
+  }
+
+  async function waitForPendingReview(): Promise<boolean> {
+    const jobs = await client.listRecentJobs(RECENT_JOBS_FOR_PENDING_REVIEW);
+    const pending = jobs.find((job) => job.kind === 'review' && !TERMINAL_JOB_STATES.has(job.state));
+    if (pending === undefined) return false;
+    await pollJobUntilSettled(pending.id, clock() + PENDING_REVIEW_WAIT_MS);
+    return true;
   }
 
   const handlers: Record<StudioToolName, StudioToolHandler> = {
@@ -263,13 +326,7 @@ export function createStudioToolHandlers(
 
     wait_for_job: async (rawInput) => {
       const input = parseInput<{ jobId: string; timeoutSeconds: number }>(STUDIO_TOOLS.wait_for_job.input, rawInput);
-      const deadline = clock() + input.timeoutSeconds * 1000;
-
-      let job = await client.getJob(input.jobId);
-      while (!TERMINAL_JOB_STATES.has(job.state) && clock() < deadline) {
-        await sleep(pollIntervalMs);
-        job = await client.getJob(input.jobId);
-      }
+      const job = await pollJobUntilSettled(input.jobId, clock() + input.timeoutSeconds * 1000);
 
       return withOutput('wait_for_job', {
         jobId: job.id,
@@ -384,14 +441,34 @@ export function createStudioToolHandlers(
 
     get_render_review: async (rawInput) => {
       const input = parseInput<{ file?: string }>(STUDIO_TOOLS.get_render_review.input, rawInput);
-      const review = await client.getRenderReview(input.file);
+      let review = await client.getRenderReview(input.file);
+      if (review === null && (await waitForPendingReview())) {
+        review = await client.getRenderReview(input.file);
+      }
       if (review === null) {
         throw new StudioToolRuntimeError(
           'FILE_NOT_FOUND',
-          'no render of this project has been reviewed yet; start_job {"kind":"render"} reviews its result automatically',
+          'that render has not been reviewed: every full render or motion video is reviewed by a job of kind review that starts right after it; list the recent jobs and wait for it',
         );
       }
-      return withOutput('get_render_review', review);
+      return withOutput('get_render_review', { ...reviewSummaryFields(review), visualReviewState: visualReviewStateOf(review) });
+    },
+
+    record_visual_review: async (rawInput) => {
+      const input = parseInput<{ file?: string; scenes: readonly SceneVisualReview[] }>(STUDIO_TOOLS.record_visual_review.input, rawInput);
+      const file = input.file ?? (await client.getRenderReview(undefined))?.file;
+      if (file === undefined) {
+        throw new StudioToolRuntimeError('FILE_NOT_FOUND', 'there is no reviewed render yet: render the video and read get_render_review first');
+      }
+      const report = await client.putVisualReview(file, input.scenes);
+      return withOutput('record_visual_review', {
+        saved: true,
+        file: report.file,
+        status: report.status,
+        scenes: input.scenes.length,
+        flaggedScenes: report.findings.filter((finding) => finding.check === 'visual-review').length,
+        criticalFindings: report.findings.filter((finding) => finding.severity === 'critical').map((finding) => finding.message),
+      });
     },
 
     get_reference_brief: async (rawInput) => {
@@ -403,8 +480,22 @@ export function createStudioToolHandlers(
       return withOutput('get_reference_brief', { references, brief: await readReferenceBriefOrExplain(client, input.name) });
     },
 
+    review_material: async (rawInput) => {
+      const draft = parseInput<Record<string, unknown>>(STUDIO_TOOLS.review_material.input, rawInput);
+      const review = await client.putMaterialReview(draft);
+      return withOutput('review_material', {
+        saved: true,
+        items: review.items.length,
+        fits: countVerdict(review, 'fits'),
+        doubtful: countVerdict(review, 'doubtful'),
+        unfit: countVerdict(review, 'unfit'),
+        gaps: review.gaps.length,
+      });
+    },
+
     propose_production: async (rawInput) => {
       const draft = parseInput<Record<string, unknown>>(STUDIO_TOOLS.propose_production.input, rawInput);
+      await assertMaterialReviewed(client);
       const saved = await client.putProposal(draft);
       return withOutput('propose_production', { saved: true, status: 'pending', concepts: saved.concepts });
     },

@@ -54,9 +54,10 @@ export function layoutScenes(scenes: MotionScene[], voDurations: number[], opts:
     }
     const voStart = start + leadIn;
     const voEnd = voStart + voDuration;
+    const minSecEnd = start + (scene.minSec ?? 0);
     const end = opts.beatSync && opts.beats.length > 0
-      ? nextGridPoint(opts.beats, Math.max(start + scene.minBars * beatsPerBar * beatLength, voEnd + tail))
-      : voEnd + tail;
+      ? nextGridPoint(opts.beats, Math.max(start + scene.minBars * beatsPerBar * beatLength, voEnd + tail, minSecEnd))
+      : Math.max(voEnd + tail, minSecEnd);
     slots.push({ id: scene.id, start: round(start), end: round(end), voStart: round(voStart), voDuration: round(voDuration) });
     cursor = end;
   });

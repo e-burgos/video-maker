@@ -87,6 +87,7 @@ import {
   handlePostBrandPreview,
   handlePutBrandFile,
 } from './handlers/brands-handler';
+import { handleGetMaterialReview, handlePutMaterialReview } from './handlers/material-review-handler';
 import { handleApproveProposal, handleGetProposal, handlePutProposal } from './handlers/proposal-handler';
 import { handleGetVoiceDirection, handlePutVoiceDirection } from './handlers/voice-direction-handler';
 import { handleGetVoice, handlePutVoiceScene } from './handlers/voice-handler';
@@ -108,6 +109,7 @@ import {
 } from './handlers/youtube-publish-handler';
 import { handleGetReference, handleListReferences } from './handlers/references-handler';
 import { handleGetRenderReviews } from './handlers/reviews-handler';
+import { handlePutVisualReview } from './handlers/visual-review-handler';
 import { handleHealth } from './health-handler';
 import { JSON_CONTENT_TYPE } from './http-message';
 import type { HttpRequestLine, HttpResponse } from './http-message';
@@ -343,6 +345,10 @@ async function dispatchRoute(
         return await handleGetProposal(deps, store, params, runtime);
       case 'projects.proposal.put':
         return await handlePutProposal(deps, store, params, request, runtime);
+      case 'projects.material-review.get':
+        return await handleGetMaterialReview(deps, store, params);
+      case 'projects.material-review.put':
+        return await handlePutMaterialReview(deps, store, params, request);
       case 'projects.proposal.approve':
         return await handleApproveProposal(deps, store, params, request, runtime);
       case 'motion.brands.list':
@@ -397,6 +403,8 @@ async function dispatchRoute(
         return await handleListPublications(deps, store, params);
       case 'projects.reviews.get':
         return await handleGetRenderReviews(deps, store, params, request);
+      case 'projects.reviews.visual.put':
+        return await handlePutVisualReview(deps, store, params, request);
       case 'projects.references.list':
         return await handleListReferences(deps, store, params);
       case 'projects.references.get':

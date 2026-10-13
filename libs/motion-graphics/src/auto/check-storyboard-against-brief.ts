@@ -1,6 +1,7 @@
 import { activeDeviceIds } from '../brand/brand-manifest';
 import type { BrandManifest } from '../brand/brand-manifest';
 import type { MotionStoryboard } from '../storyboard/motion-storyboard.schema';
+import { checkStoryboardBoxes } from './brief-boxes';
 import { briefImageRef } from './motion-brief';
 import type { MotionBrief } from './motion-brief';
 
@@ -84,5 +85,5 @@ export function checkStoryboardAgainstBrief(storyboard: MotionStoryboard, brief:
       }
     }
   });
-  return issues;
+  return [...issues, ...checkStoryboardBoxes(storyboard, brief)];
 }

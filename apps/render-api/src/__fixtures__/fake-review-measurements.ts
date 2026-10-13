@@ -13,6 +13,7 @@ export function createFakeReviewMeasurements(init: FakeReviewMeasurementsInit): 
     detectBlack: () => Promise.resolve([]),
     detectFrozen: () => Promise.resolve([]),
     detectSilences: () => Promise.resolve([]),
+    extractFrame: () => Promise.resolve(),
     measureSegments: (path, segments) =>
       Promise.resolve(segments.map((segment) => init.levels?.(path, segment.startSec) ?? -20)),
   };

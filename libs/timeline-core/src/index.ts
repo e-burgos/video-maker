@@ -263,9 +263,55 @@ export {
   ReviewSeveritySchema,
   ReviewStatusSchema,
   REVIEW_SEVERITIES,
+  SceneFrameSchema,
+  SceneVisualReviewSchema,
+  VISUAL_VERDICTS,
+  VisualReviewSchema,
   reviewStatusFor,
 } from './review/review-report';
-export type { ReviewFinding, ReviewReport, ReviewSeverity, ReviewStatus } from './review/review-report';
+export type {
+  ReviewFinding,
+  ReviewReport,
+  ReviewSeverity,
+  ReviewStatus,
+  SceneFrame,
+  SceneVisualReview,
+  VisualReview,
+} from './review/review-report';
+export {
+  VISUAL_NOT_REVIEWED_CHECK,
+  VISUAL_REVIEW_CHECK,
+  VisualReviewDraftSchema,
+  isSceneFlagged,
+  visualReviewProblems,
+  withVisualReview,
+} from './review/visual-review';
+export type { VisualReviewDraft } from './review/visual-review';
+
+export {
+  MATERIAL_REVIEW_SOURCES,
+  MATERIAL_REVIEW_VERSION,
+  MATERIAL_VERDICTS,
+  MAX_MATERIAL_REVIEW_GAPS,
+  MAX_MATERIAL_REVIEW_ITEMS,
+  MaterialGapSchema,
+  MaterialReviewDraftSchema,
+  MaterialReviewItemSchema,
+  MaterialReviewSchema,
+  MaterialWarningsSchema,
+  canonicalMaterialPath,
+  hasMaterialWarnings,
+  materialReviewFrom,
+  materialWarnings,
+} from './proposal/material-review';
+export type {
+  MaterialGap,
+  MaterialReview,
+  MaterialReviewDraft,
+  MaterialReviewItem,
+  MaterialVerdict,
+  MaterialWarnings,
+} from './proposal/material-review';
 
 export {
   MAX_PROPOSAL_CONCEPTS,

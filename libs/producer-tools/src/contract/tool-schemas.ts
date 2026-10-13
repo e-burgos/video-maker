@@ -5,12 +5,14 @@ import {
   AudioMixPlanSchema,
   CaptionStyleSchema as TimelineCaptionStyleSchema,
   LogoOverlaySchema,
+  MaterialReviewDraftSchema,
   ProductionProposalDraftSchema,
   ReferenceBriefSchema,
   ReviewReportSchema,
   SafeZoneSchema,
   TimelineBumpersSchema,
   TimelineSchema,
+  VisualReviewDraftSchema,
 } from '@video-maker/timeline-core';
 
 import type { StudioToolName } from './tool-names';
@@ -514,12 +516,32 @@ const GetRenderReviewInputSchema = z.strictObject({
     .optional(),
 });
 
+export const VISUAL_REVIEW_STATES = ['not-applicable', 'pending', 'recorded'] as const;
+
 const GetRenderReviewOutputSchema = ReviewReportSchema.pick({
   file: true,
   status: true,
   createdAt: true,
   metrics: true,
   findings: true,
+  sceneFrames: true,
+  visualReview: true,
+}).extend({ visualReviewState: z.enum(VISUAL_REVIEW_STATES) });
+
+const RecordVisualReviewInputSchema = VisualReviewDraftSchema.extend({
+  file: z
+    .string()
+    .regex(/^out\/[^/\\]+\.mp4$/u, 'file must be an .mp4 directly under out/, for example out/video.mp4')
+    .optional(),
+});
+
+const RecordVisualReviewOutputSchema = z.strictObject({
+  saved: z.literal(true),
+  file: z.string(),
+  status: z.enum(['pass', 'warn', 'fail']),
+  scenes: z.number().int().min(1),
+  flaggedScenes: z.number().int().min(0),
+  criticalFindings: z.array(z.string()),
 });
 
 const GetReferenceBriefInputSchema = z.strictObject({
@@ -544,6 +566,17 @@ const ReferenceSummarySchema = z.strictObject({
 const GetReferenceBriefOutputSchema = z.strictObject({
   references: z.array(ReferenceSummarySchema),
   brief: ReferenceBriefSchema.nullable(),
+});
+
+const ReviewMaterialInputSchema = MaterialReviewDraftSchema;
+
+const ReviewMaterialOutputSchema = z.strictObject({
+  saved: z.literal(true),
+  items: z.number().int().min(0),
+  fits: z.number().int().min(0),
+  doubtful: z.number().int().min(0),
+  unfit: z.number().int().min(0),
+  gaps: z.number().int().min(0),
 });
 
 const ProposeProductionInputSchema = ProductionProposalDraftSchema;
@@ -581,9 +614,20 @@ const ReadMotionBriefOutputSchema = z.strictObject({
   brief: z.record(z.string(), z.unknown()),
 });
 
+const UNIT_FRACTION = z.number().min(0).max(1);
+
+export const MotionBriefImageBoxSchema = z.strictObject({
+  name: z.string().min(1),
+  x: UNIT_FRACTION,
+  y: UNIT_FRACTION,
+  w: UNIT_FRACTION,
+  h: UNIT_FRACTION,
+});
+
 export const MotionBriefImageSchema = z.strictObject({
   file: z.string().min(1),
   caption: z.string(),
+  boxes: z.array(MotionBriefImageBoxSchema).optional(),
 });
 
 export const MotionBriefInputSchema = z.looseObject({
@@ -746,22 +790,44 @@ export const STUDIO_TOOLS: Readonly<Record<StudioToolName, StudioToolDefinition>
   },
   view_images: {
     description:
-      'Look at up to 6 photos already in the project and get them back as images. Use this to see a photo instead of extract_frames, which only works on video.',
+      'Look at up to 6 photos already in the project and get them back as images. Use this to see a photo instead of extract_frames, which only works on video. ' +
+      'Besides project paths (raw/images/x.png) it accepts brand:<key> to see a photo of the project brand (the keys come with their caption in the brand section of the project). ' +
+      'The studio records every image you actually looked at: review_material only accepts those.',
     input: ViewImagesInputSchema,
     output: ViewImagesOutputSchema,
   },
   get_render_review: {
     description:
-      'Read the automatic review of a finished render: its status (pass, warn, fail), the key metrics (master LUFS and true peak, voice/music margin) and the findings by severity (critical, suggestion, nitpick), each with its time range and the proposed fix. Without `file` it returns the most recent review; with `file` (for example out/video.mp4) that render\'s. Fails with FILE_NOT_FOUND when the render was never reviewed.',
+      'Read the automatic review of a finished render: its status (pass, warn, fail), the key metrics (master LUFS and true peak, voice/music margin) and the findings by severity (critical, suggestion, nitpick), each with its time range and the proposed fix. For a motion video it also lists `sceneFrames` (the frame of each scene to look at with view_images) and `visualReviewState` (pending until record_visual_review is called). Without `file` it returns the most recent review; with `file` (for example out/video.mp4) that render\'s. Fails with FILE_NOT_FOUND when the render was never reviewed.',
     input: GetRenderReviewInputSchema,
     output: GetRenderReviewOutputSchema,
+  },
+  record_visual_review: {
+    description:
+      'Record, with evidence, that you looked at every scene of a render. After get_render_review lists `sceneFrames` (one frame at the middle of each scene, with the voice text), look at them with view_images (up to 6 per call) and send `scenes`: one entry per sceneId with `shows` (what the frame really shows, one line), ' +
+      '`matchesVoice`, `legible`, `couldBeOtherProduct` (booleans), `verdict` (ok or fix) and `note` (required when the scene is flagged: what to change). ' +
+      'The studio refuses a review that misses a scene or covers a frame you did not view after the review was created (VISUAL_REVIEW_NOT_VIEWED). ' +
+      'The critical finding visual-not-reviewed disappears; every scene marked fix, off the voice, illegible or ambiguous becomes a critical finding that blocks publishing until you fix it and re-render. Without `file` it uses the most recent review.',
+    input: RecordVisualReviewInputSchema,
+    output: RecordVisualReviewOutputSchema,
+  },
+  review_material: {
+    description:
+      'Record, with evidence, what the supplied material really is before you propose anything. `items` has one entry per image you looked at with view_images: ' +
+      '`file` (the project path, for example raw/images/x.png, or brand:<key>), `source` (project or brand), `shows` (what the image actually shows, one line), ' +
+      '`useFor` (the scene or role you would give it, optional), `verdict` (fits, doubtful or unfit) and `reason`. `gaps` lists what the idea needs and the material does not bring ' +
+      '(`need`, `note`); send [] when there is none. The studio refuses an image you did not view (MATERIAL_NOT_VIEWED). ' +
+      'propose_production fails with MATERIAL_NOT_REVIEWED until this review covers every project image.',
+    input: ReviewMaterialInputSchema,
+    output: ReviewMaterialOutputSchema,
   },
   propose_production: {
     description:
       'Save the production proposal the user must approve before the first full render: 2 or 3 concepts, ' +
       'each with an id, title, angle, output format preset, durationSec, scenes, delivery contract ' +
       '({kind: tutorial, motion or short, ...}), and optionally voiceId, musicMode and notes, plus the ' +
-      'recommendedId. It replaces any earlier proposal and leaves it pending: only the user approves it, ' +
+      'recommendedId. It first requires review_material to cover every project image (MATERIAL_NOT_REVIEWED) and the studio copies the unfit and doubtful images and the gaps into the proposal as warnings. ' +
+      'It replaces any earlier proposal and leaves it pending: only the user approves it, ' +
       'in the studio. Time and cost estimates are computed by the studio, never by you.',
     input: ProposeProductionInputSchema,
     output: ProposeProductionOutputSchema,
@@ -792,7 +858,9 @@ export const STUDIO_TOOLS: Readonly<Record<StudioToolName, StudioToolDefinition>
   write_motion_brief: {
     description:
       'Save the motion brief (version 1, brand, script and one captioned entry per image in raw/images/) for ' +
-      'this project, replacing the previous one. The studio validates it and answers with the offending field ' +
+      'this project, replacing the previous one. When the user or the material gives the position of elements in an ' +
+      'image (buttons, fields, cards), copy them into that image `boxes` as {name, x, y, w, h} fractions 0-1 exactly ' +
+      'as given: the storyboard then points highlights, zooms and clicks at those boxes by name. The studio validates it and answers with the offending field ' +
       'in the hint when it is invalid: fix that field and call again.',
     input: WriteMotionBriefInputSchema,
     output: WriteMotionBriefOutputSchema,

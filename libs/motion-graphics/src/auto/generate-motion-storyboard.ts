@@ -5,6 +5,7 @@ import type { MotionStoryboard } from '../storyboard/motion-storyboard.schema';
 import { formatIssuePath } from '../storyboard/parse-motion-storyboard';
 import { buildAutoStoryboardRequest } from './build-auto-storyboard-request';
 import type { AutoStoryboardRequest } from './build-auto-storyboard-request';
+import { applyBriefBoxes } from './brief-boxes';
 import { checkStoryboardAgainstBrief, enforceBrief } from './check-storyboard-against-brief';
 import type { StoryboardIssue } from './check-storyboard-against-brief';
 import type { MotionBrief } from './motion-brief';
@@ -60,8 +61,9 @@ function useBrandTaglineWhenCopied(storyboard: MotionStoryboard, brand: BrandMan
 function validate(raw: unknown, brief: MotionBrief, brand: BrandManifest): Validation {
   const parsed = MotionStoryboardSchema.safeParse(enforceBrief(raw, brief, brand));
   if (!parsed.success) return { ok: false, issues: parsed.error.issues.map((issue) => ({ path: formatIssuePath(issue.path) || 'storyboard', message: issue.message })) };
-  const issues = checkStoryboardAgainstBrief(parsed.data, brief, brand);
-  return issues.length === 0 ? { ok: true, storyboard: useBrandTaglineWhenCopied(anchorBrandRevealOnDrop(parsed.data, brand), brand) } : { ok: false, issues };
+  const withBoxes = applyBriefBoxes(parsed.data, brief);
+  const issues = checkStoryboardAgainstBrief(withBoxes, brief, brand);
+  return issues.length === 0 ? { ok: true, storyboard: useBrandTaglineWhenCopied(anchorBrandRevealOnDrop(withBoxes, brand), brand) } : { ok: false, issues };
 }
 
 function formatIssues(issues: StoryboardIssue[]): string {
