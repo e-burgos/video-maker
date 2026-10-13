@@ -172,51 +172,5 @@
       "file": "tools.schema.json"
     }
   ],
-  "memory": [
-    {
-      "file": "2026-10-13-fix-e-burgos-027.md"
-    },
-    {
-      "file": "2026-10-12-spec-e-burgos-023-production-quality-cycle-06.md"
-    },
-    {
-      "file": "2026-10-12-spec-e-burgos-023-production-quality-cycle-05.md"
-    },
-    {
-      "file": "2026-10-12-spec-e-burgos-023-production-quality-cycle-04.md"
-    },
-    {
-      "file": "2026-10-11-spec-e-burgos-023-production-quality-cycle-01.md"
-    },
-    {
-      "file": "2026-10-10-fix-e-burgos-015.md"
-    },
-    {
-      "file": "2026-10-08-spec-e-burgos-021-brand-kit-cycle-02.md"
-    },
-    {
-      "file": "2026-10-08-fix-e-burgos-006.md"
-    },
-    {
-      "file": "2026-10-07-spec-e-burgos-020-motion-mode-cycle-04.md"
-    },
-    {
-      "file": "2026-10-07-spec-e-burgos-020-motion-mode-cycle-03.md"
-    },
-    {
-      "file": "2026-10-07-spec-e-burgos-020-motion-mode-cycle-02.md"
-    },
-    {
-      "file": "2026-10-07-spec-e-burgos-019-motion-studio-cycle-01.md"
-    },
-    {
-      "file": "2026-09-26-spec-e-burgos-018-producer-free-tier-cycle-04.md"
-    },
-    {
-      "file": "2026-09-25-spec-e-burgos-018-producer-free-tier-cycle-03.md"
-    },
-    {
-      "file": "2026-09-25-spec-e-burgos-018-producer-free-tier-cycle-02.md"
-    }
-  ]
+  "memory": []
 }
