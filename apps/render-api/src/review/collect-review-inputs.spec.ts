@@ -218,7 +218,7 @@ describe('collectReviewInputs: motion', () => {
     }
 
     it('extracts one frame at the middle of each scene and carries the scene voice', async () => {
-      const { ports, extracted } = recordingPorts({ '/media/demo/work/motion/storyboard.json': storyboard });
+      const { ports, extracted } = recordingPorts({ '/media/demo/motion/storyboard.json': storyboard });
 
       const inputs = await collectReviewInputs({ project, file: 'out/motion.mp4', mode: 'motion' }, ports);
 
@@ -231,6 +231,19 @@ describe('collectReviewInputs: motion', () => {
         { sceneId: 'cta', index: 2, startSec: 5, endSec: 12, atSec: 8.5, frame: 'out/motion.review/scene-02.jpg' },
       ]);
       expect(reviewRender(inputs).findings.some((finding) => finding.check === 'visual-not-reviewed')).toBe(true);
+    });
+
+    it('takes the voice that was actually synthesized over an older storyboard', async () => {
+      const staleStoryboard = JSON.stringify({ scenes: [{ id: 'hook', vo: 'Una frase vieja que ya no se dice.' }] });
+      const voiceManifest = JSON.stringify({ hook: { vo: '¿Querés sumar pantallas?' } });
+      const { ports } = recordingPorts({
+        '/media/demo/motion/storyboard.json': staleStoryboard,
+        '/media/demo/work/motion/voice-manifest.json': voiceManifest,
+      });
+
+      const inputs = await collectReviewInputs({ project, file: 'out/motion.mp4', mode: 'motion' }, ports);
+
+      expect(inputs.sceneFrames[0]?.voice).toBe('¿Querés sumar pantallas?');
     });
 
     it('still extracts frames when the storyboard is missing, without voice text', async () => {
