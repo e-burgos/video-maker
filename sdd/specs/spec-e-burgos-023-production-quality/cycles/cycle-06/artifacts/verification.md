@@ -37,3 +37,13 @@ Prueba: rehacer el video «cómo comprar un equipo de Display Ads» en un proyec
 - La verificación de material no detecta por sí sola cuando la voz nombra algo que el cuadro del medio no muestra
   (sólo hay un cuadro por escena).
 - El turno del productor que hace storyboard + voz + muestra + render supera los 30 minutos y se corta.
+
+## Zoom (FIX-e-burgos-019, pedido del dueño antes de mergear)
+- La captura pasó de ~55 % a ~69 % del ancho (con título) y el estudio encuadra solo cada escena de interfaz con una
+  cámara que sigue cada paso; los globos mantienen su tamaño (`zoom-automatico.jpg`).
+- Render v2 con la cámara: el texto de Modalidad, Tu Negocio, Crear cuenta y Checkout se lee; la cámara dejaba afuera
+  la foto del Easy Pro y del Counter 15 (sólo había caja del título) y el productor lo dio por bueno. Con la regla nueva
+  del prompt, a pedido, encuadró la tarjeta completa con cajas que él midió mirando la captura — no venían en el brief —
+  y que calzan (`v2-hoja-de-contacto-camara.jpg`). 79,5 s, revisión `pass`.
+- Sigue chico: el aviso de validar email (franja ancha y fina) y la sección Equipos y acceso; el cursor y el punto del
+  globo se agrandan con el zoom.

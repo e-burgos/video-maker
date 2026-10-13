@@ -29,7 +29,9 @@
     "sdd/specs/spec-e-burgos-023-production-quality/cycles/cycle-06/artifacts/highlight-sobrio.jpg",
     "sdd/specs/spec-e-burgos-023-production-quality/cycles/cycle-06/artifacts/web-material-avisos.jpg",
     "sdd/specs/spec-e-burgos-023-production-quality/cycles/cycle-06/artifacts/v2-hoja-de-contacto.jpg",
-    "sdd/specs/spec-e-burgos-023-production-quality/cycles/cycle-06/artifacts/v2-escena-easy-pro.jpg"
+    "sdd/specs/spec-e-burgos-023-production-quality/cycles/cycle-06/artifacts/v2-escena-easy-pro.jpg",
+    "sdd/specs/spec-e-burgos-023-production-quality/cycles/cycle-06/artifacts/zoom-automatico.jpg",
+    "sdd/specs/spec-e-burgos-023-production-quality/cycles/cycle-06/artifacts/v2-hoja-de-contacto-camara.jpg"
   ],
   "metrics": {
     "tasks_total": 5,
@@ -221,9 +223,10 @@
     },
     "notes": "Ver verification.md.",
     "follow_ups": [
-      "Zoom automático o exigido en escenas de interfaz con capturas chicas",
       "Varios cuadros por escena cuando la voz nombra más de un elemento",
-      "Partir el turno de producción completa o subir PRODUCER_TURN_TIMEOUT_MS"
+      "Partir el turno de producción completa o subir PRODUCER_TURN_TIMEOUT_MS",
+      "Encuadre de franjas anchas (aviso de email) y cursor que no se agrande con la cámara",
+      "Cajas que el productor mide cuando el brief no las trae: registrarlas como medidas por él"
     ]
   }
 }
