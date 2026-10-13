@@ -1,0 +1,39 @@
+{
+  "$schema": "../../../../schemas/cycle.schema.json",
+  "cycle": 2,
+  "module": "youtube-publishing",
+  "spec": "spec-e-burgos-022-youtube-publishing",
+  "apps": [
+    "libs/local-store",
+    "apps/render-api",
+    "apps/web"
+  ],
+  "phase": "youtube-publish-queue",
+  "flow": "lite",
+  "objectives": [
+    "Cola de publicación programada dentro del estudio: límite diario del canal, reintento horario, aviso de ya publicado y listas por categoría",
+    "Reemplazar publish-queue.sh y publish.sh y migrar la cola actual sin publicar"
+  ],
+  "status": "in-progress",
+  "started_at": "2026-10-13",
+  "completed_at": null,
+  "documents": {
+    "plan": "sdd/specs/spec-e-burgos-022-youtube-publishing/cycles/cycle-02/plan.md",
+    "tasks": "sdd/specs/spec-e-burgos-022-youtube-publishing/cycles/cycle-02/tasks.json"
+  },
+  "artifacts": [],
+  "metrics": {
+    "tasks_total": 4,
+    "tasks_completed": 0,
+    "tasks_skipped": 0,
+    "story_points": 18,
+    "files_created": [],
+    "files_modified": [],
+    "files_deleted": []
+  },
+  "tables_created": [],
+  "endpoints_implemented": [],
+  "components_created": [],
+  "issues_found": [],
+  "reviewer_report": null
+}

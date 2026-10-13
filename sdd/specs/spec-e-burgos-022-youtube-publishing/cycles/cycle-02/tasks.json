@@ -1,0 +1,92 @@
+{
+  "$schema": "../../../../schemas/cycle-tasks.schema.json",
+  "spec": "spec-e-burgos-022-youtube-publishing",
+  "cycle": 2,
+  "module": "youtube-publishing",
+  "apps": [
+    "libs/local-store",
+    "apps/render-api",
+    "apps/web"
+  ],
+  "flow": "lite",
+  "user_stories_generated": true,
+  "prerequisites": {
+    "tasks_generated": true
+  },
+  "tasks": [
+    {
+      "id": "TASK-001",
+      "title": "publish_queue table (migration v7) and repository",
+      "user_stories": [
+        "US-022-201"
+      ],
+      "estimation_hours": 2,
+      "story_points": 3,
+      "depends_on": [],
+      "status": "pending",
+      "files": [
+        "libs/local-store/src/database/migrations.ts",
+        "libs/local-store/src/schema/studio-schema.ts",
+        "libs/local-store/src/repositories/publish-queue-repository.ts"
+      ]
+    },
+    {
+      "id": "TASK-002",
+      "title": "Queue scheduler in render-api: daily limit, hourly retry on quota, already-published skip, playlists by category, HTTP routes",
+      "user_stories": [
+        "US-022-201",
+        "US-022-202",
+        "US-022-203"
+      ],
+      "estimation_hours": 5,
+      "story_points": 8,
+      "depends_on": [
+        "TASK-001"
+      ],
+      "status": "pending",
+      "files": [
+        "apps/render-api/src/youtube/publish-queue-scheduler.ts",
+        "apps/render-api/src/http/handlers/publish-queue-handler.ts",
+        "apps/render-api/src/jobs/run-publish-pipeline.ts",
+        "apps/render-api/src/jobs/publish-job-params.ts"
+      ]
+    },
+    {
+      "id": "TASK-003",
+      "title": "Web: Publication queue page, add-to-queue in the publish dialog, category playlists in YouTube settings",
+      "user_stories": [
+        "US-022-201",
+        "US-022-202",
+        "US-022-203"
+      ],
+      "estimation_hours": 4,
+      "story_points": 5,
+      "depends_on": [
+        "TASK-002"
+      ],
+      "status": "pending",
+      "files": [
+        "apps/web/src/pages/publish-queue-page.tsx",
+        "apps/web/src/components/youtube-publish-dialog.tsx",
+        "apps/web/src/components/youtube-settings-section.tsx"
+      ]
+    },
+    {
+      "id": "TASK-004",
+      "title": "Migrate the current queue (8 tutorials + comprar-producto-v2) paused, retire the shell scripts, verify in the studio",
+      "user_stories": [
+        "US-022-204"
+      ],
+      "estimation_hours": 1,
+      "story_points": 2,
+      "depends_on": [
+        "TASK-002",
+        "TASK-003"
+      ],
+      "status": "pending",
+      "files": [
+        "sdd/specs/spec-e-burgos-022-youtube-publishing/cycles/cycle-02/artifacts/verification.md"
+      ]
+    }
+  ]
+}
