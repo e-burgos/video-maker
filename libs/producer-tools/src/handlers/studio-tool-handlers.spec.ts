@@ -1153,4 +1153,74 @@ describe('createStudioToolHandlers', () => {
       expect(client.calls).toEqual([]);
     });
   });
+
+  describe('publicación en YouTube', () => {
+    const QUEUED_ITEM = { id: 'q1', slug: 'pitch-deck', file: 'out/a.mp4', metadata: { title: 'Mi video' }, status: 'queued', url: null, nextAttemptAt: null, lastError: { message: 'cuota' } };
+    const QUEUE = {
+      settings: { paused: true, dailyLimit: 6 },
+      publishedLast24h: 2,
+      nextAttemptAt: null,
+      items: [QUEUED_ITEM],
+    };
+    const PROPOSAL = { title: 'Mi video', description: 'Texto', tags: ['a'], privacy: 'unlisted' as const };
+
+    it('draft_publication usa el render más reciente cuando no se indica archivo', async () => {
+      const { handlers, client } = handlersWith({
+        listPublishableFiles: async () => ['out/nuevo.mp4', 'out/viejo.mp4'],
+        draftPublication: async () => ({ title: 'T', description: 'D', tags: ['x'] }),
+      });
+
+      expect(await handlers.draft_publication({})).toEqual({ data: { file: 'out/nuevo.mp4', title: 'T', description: 'D', tags: ['x'] } });
+      expect(client.calls.find((call) => call.method === 'draftPublication')?.args).toEqual(['out/nuevo.mp4']);
+    });
+
+    it('draft_publication respeta el archivo pedido y avisa si no hay renders', async () => {
+      const given = handlersWith({ draftPublication: async () => ({ title: 'T', description: 'D', tags: [] }) });
+      expect(await given.handlers.draft_publication({ file: 'out/b.mp4' })).toMatchObject({ data: { file: 'out/b.mp4' } });
+
+      const none = handlersWith({ listPublishableFiles: async () => [] });
+      await expect(none.handlers.draft_publication({})).rejects.toMatchObject({ code: 'FILE_NOT_FOUND' });
+    });
+
+    it('list_publications junta publicaciones, ítems de la cola y estado', async () => {
+      const { handlers } = handlersWith({
+        listPublications: async () => [{ file: 'out/a.mp4', url: 'https://youtu.be/x' }],
+        getPublishQueue: async () => QUEUE,
+      });
+
+      expect(await handlers.list_publications({})).toEqual({
+        data: {
+        publications: [{ file: 'out/a.mp4', url: 'https://youtu.be/x' }],
+        queue: {
+          paused: true,
+          dailyLimit: 6,
+          publishedLast24h: 2,
+          nextAttemptAt: null,
+          items: [{ id: 'q1', file: 'out/a.mp4', title: 'Mi video', status: 'queued', url: null, nextAttemptAt: null, lastError: 'cuota' }],
+        },
+        },
+      });
+    });
+
+    it('queue_publication encola con la confirmación y nunca crea jobs', async () => {
+      const { handlers, client } = handlersWith({
+        queuePublication: async () => ({ item: QUEUED_ITEM, alreadyPublished: null }),
+        getPublishQueue: async () => QUEUE,
+      });
+
+      const result = await handlers.queue_publication({ ...PROPOSAL, file: 'out/a.mp4', userConfirmation: 'sí, publicalo así' });
+
+      expect(result).toMatchObject({ data: { alreadyPublished: null, queuePaused: true } });
+      const queued = client.calls.find((call) => call.method === 'queuePublication');
+      expect(queued?.args).toEqual([{ ...PROPOSAL, file: 'out/a.mp4' }]);
+      expect(client.calls.some((call) => call.method === 'createJob')).toBe(false);
+    });
+
+    it.each([[''], ['   '], [undefined]])('queue_publication rechaza sin confirmación (%j)', async (userConfirmation) => {
+      const { handlers, client } = handlersWith();
+
+      await expect(handlers.queue_publication({ ...PROPOSAL, userConfirmation })).rejects.toMatchObject({ code: 'INVALID_INPUT' });
+      expect(client.calls).toEqual([]);
+    });
+  });
 });

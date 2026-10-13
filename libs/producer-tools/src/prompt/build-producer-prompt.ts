@@ -74,6 +74,10 @@ const TOOL_DESCRIPTIONS: Readonly<Record<StudioToolName, string>> = {
     'save the 2 or 3 approaches (concepts) the user must choose from and approve before the first full render. The studio adds the time and cost estimate; you never write one.',
   get_reference_brief:
     'read the analysis of a reference video the user supplied (raw/reference/): pace, scenes with keyframes, voice and audio. Without a name it lists the analysed references.',
+  draft_publication: 'draft the YouTube title, description and tags of a finished render; nothing is published.',
+  list_publications: 'what the project already published on YouTube, its items in the publish queue and the queue state (paused, daily limit).',
+  queue_publication:
+    'add a video to the YouTube publish queue (never publishes directly); requires the verbatim quote of the user explicit yes in userConfirmation.',
   get_motion_brands: 'the brands a motion video can use (built-in and user-made, each with its `source`), with their formats and music tracks; a brand may have no music at all. Motion projects only.',
   read_motion_brief: 'read the motion brief saved for this project.',
   write_motion_brief:
@@ -272,6 +276,15 @@ function buildProducerCraftSection(): string {
     'first seconds, much faster. It is never blocked, is not reviewed and can never be published; a',
     'sample is not a delivery, so do not present it as one and still run the full render once the',
     'user likes it.',
+    '',
+    '## Publishing on YouTube',
+    '',
+    'To publish a video on YouTube, first call list_publications and draft_publication. Show the user',
+    'the title, description, tags, visibility and lists (if they name none, the queue uses the list of',
+    'the project category plus the general one), warn if that file is already published, and say if the',
+    'queue is paused (the user resumes it from `Publicación`). Call queue_publication ONLY after an',
+    'explicit yes from the user to that proposal, quoting that message in `userConfirmation`. It only',
+    'queues: never queue on your own initiative and never publish directly.',
     '',
     '## A reference video',
     '',

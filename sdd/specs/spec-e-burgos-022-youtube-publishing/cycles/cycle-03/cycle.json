@@ -1,0 +1,140 @@
+{
+  "$schema": "../../../../schemas/cycle.schema.json",
+  "cycle": 3,
+  "module": "youtube-publishing",
+  "spec": "spec-e-burgos-022-youtube-publishing",
+  "apps": [
+    "libs/producer-tools",
+    "apps/render-api",
+    "apps/desktop"
+  ],
+  "phase": "youtube-producer-desktop",
+  "flow": "lite",
+  "objectives": [
+    "El productor prepara publicaciones y las pone en la cola sólo con confirmación explícita del usuario",
+    "La app de escritorio abre el login de Google en el navegador del sistema"
+  ],
+  "status": "completed",
+  "started_at": "2026-10-13",
+  "completed_at": "2026-10-13",
+  "documents": {
+    "plan": "sdd/specs/spec-e-burgos-022-youtube-publishing/cycles/cycle-03/plan.md",
+    "tasks": "sdd/specs/spec-e-burgos-022-youtube-publishing/cycles/cycle-03/tasks.json"
+  },
+  "artifacts": [
+    "sdd/specs/spec-e-burgos-022-youtube-publishing/cycles/cycle-03/artifacts/verification.md"
+  ],
+  "metrics": {
+    "tasks_total": 3,
+    "tasks_completed": 3,
+    "tasks_skipped": 0,
+    "story_points": 10,
+    "files_created": [
+      "apps/desktop/src/main/external-navigation.spec.ts",
+      "apps/desktop/src/main/external-navigation.ts"
+    ],
+    "files_modified": [
+      "apps/desktop/src/main/main.ts",
+      "apps/render-api/src/producer/producer-stream-events.ts",
+      "apps/render-api/src/youtube/draft-youtube-metadata.spec.ts",
+      "apps/render-api/src/youtube/draft-youtube-metadata.ts",
+      "libs/producer-tools/src/__fixtures__/fake-render-api-client.ts",
+      "libs/producer-tools/src/client/http-render-api-client.spec.ts",
+      "libs/producer-tools/src/client/http-render-api-client.ts",
+      "libs/producer-tools/src/client/render-api-client.ts",
+      "libs/producer-tools/src/contract/tool-names.spec.ts",
+      "libs/producer-tools/src/contract/tool-names.ts",
+      "libs/producer-tools/src/contract/tool-schemas.ts",
+      "libs/producer-tools/src/handlers/studio-tool-handlers.spec.ts",
+      "libs/producer-tools/src/handlers/studio-tool-handlers.ts",
+      "libs/producer-tools/src/prompt/build-producer-prompt.spec.ts",
+      "libs/producer-tools/src/prompt/build-producer-prompt.ts"
+    ],
+    "files_deleted": [],
+    "usage": {
+      "tokens_in": 217917,
+      "tokens_out": 38455,
+      "approx": true,
+      "source": "declared-estimate",
+      "by_agent": [
+        {
+          "agent": "implementor-back",
+          "label": "Tools de publicación del productor",
+          "provider_model": "claude/sonnet",
+          "effort": "medium",
+          "tokens_in": 108010,
+          "tokens_out": 19060,
+          "tokens_total": 127070,
+          "approx": true,
+          "source": "agent-usage-notification",
+          "recorded_at": "2026-10-13"
+        },
+        {
+          "agent": "implementor-front",
+          "label": "Navegación externa en la app de escritorio",
+          "provider_model": "claude/sonnet",
+          "effort": "medium",
+          "tokens_in": 71657,
+          "tokens_out": 12645,
+          "tokens_total": 84302,
+          "approx": true,
+          "source": "agent-usage-notification",
+          "recorded_at": "2026-10-13"
+        },
+        {
+          "agent": "orchestrator",
+          "label": "solo",
+          "provider_model": "claude/opus",
+          "effort": "high",
+          "tokens_in": 38250,
+          "tokens_out": 6750,
+          "tokens_total": 45000,
+          "approx": true,
+          "source": "declared-estimate",
+          "recorded_at": "2026-10-13"
+        }
+      ],
+      "by_tier": {
+        "claude/opus": {
+          "tokens_in": 38250,
+          "tokens_out": 6750,
+          "approx": true,
+          "source": "declared-estimate"
+        },
+        "claude/sonnet": {
+          "tokens_in": 179667,
+          "tokens_out": 31705,
+          "approx": true,
+          "source": "declared-estimate"
+        }
+      }
+    }
+  },
+  "tables_created": [],
+  "endpoints_implemented": [],
+  "components_created": [],
+  "issues_found": [
+    "list_publications devolvía la cola de todos los proyectos: el productor confundió un ítem ajeno con el video del proyecto (corregido filtrando por slug).",
+    "El borrador de YouTube copiaba la grafía fonética del guion de voz («Isi Pro»): ahora usa los textos en pantalla para los nombres."
+  ],
+  "reviewer_report": {
+    "approved": true,
+    "date": "2026-10-13",
+    "ca_results": {
+      "US-022-301": "OK — turno real: borrador y aviso de cola pausada sin encolar; con un sí explícito encoló citando la confirmación; nunca lanzó un job publish.",
+      "US-022-302": "OK en tests — consentimiento de Google y enlaces externos van a shell.openExternal; sin prueba de clic en la app empaquetada."
+    },
+    "tests": {
+      "sdd:validate": "OK",
+      "lint": "producer-tools, render-api, desktop verdes",
+      "test": "445 + 2220 + 121",
+      "build": "verde",
+      "e2e": "dos turnos reales del productor en el studio"
+    },
+    "notes": "Ciclo lite de un solo actor; spec-022 completa sus tres objetivos.",
+    "follow_ups": [
+      "Punto 13: reactivar la cola y verificar la publicación real",
+      "Probar «Conectar YouTube» en la app de escritorio empaquetada en la próxima versión"
+    ]
+  }
+}

@@ -10,14 +10,7 @@ import { createFakeObjectStorage } from '../__fixtures__/fake-object-storage';
 import { createFakeRenderApiDependencies } from '../__fixtures__/fake-render-api-dependencies';
 import type { ProjectBrandContext } from '../brands/project-brand-context';
 import { toErrorPayload } from '../errors/to-error-payload';
-import {
-  DRAFT_MAX_TAGS,
-  draftYoutubeMetadata,
-  finalizeDraft,
-  isShortVideo,
-  normalizeTags,
-  youtubeDraftJsonSchema,
-} from './draft-youtube-metadata';
+import { buildYoutubeDraftSystemPrompt, DRAFT_MAX_TAGS, draftYoutubeMetadata, finalizeDraft, isShortVideo, normalizeTags, onScreenTextsOf, youtubeDraftJsonSchema } from './draft-youtube-metadata';
 import type { YoutubeDraftInput } from './draft-youtube-metadata';
 
 const REAL_ASSETS = fileURLToPath(new URL('../../../../libs/motion-graphics/assets/', import.meta.url));
@@ -242,5 +235,23 @@ describe('spoken brand names', () => {
 
     expect(draft.title).toBe('Cómo instalar el Easy Pro en Display Ads');
     expect(draft.description.startsWith('Display Ads y el Easy Pro.')).toBe(true);
+  });
+});
+
+describe('on-screen text for the YouTube draft', () => {
+  it('collects titles, step texts and item names of a scene', () => {
+    expect(
+      onScreenTextsOf({
+        title: 'Easy Pro',
+        image: 'images/a.png',
+        steps: [{ action: 'callout', text: 'Convierte tu TV' }, { action: 'click', x: 0.1 }],
+        items: [{ name: 'Counter 15' }],
+      }),
+    ).toEqual(['Easy Pro', 'Convierte tu TV', 'Counter 15']);
+    expect(onScreenTextsOf(null)).toEqual([]);
+  });
+
+  it('tells the model to spell names as they appear on screen, not as the voice says them', () => {
+    expect(buildYoutubeDraftSystemPrompt()).toContain('as it appears in the on-screen text');
   });
 });

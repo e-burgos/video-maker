@@ -73,8 +73,8 @@ describe('buildProducerProjectSection', () => {
 describe('buildProducerPrompt — herramientas del estudio', () => {
   const prompt = buildProducerPrompt(CONTEXT);
 
-  it('nombra las 29 herramientas del contrato', () => {
-    expect(STUDIO_TOOL_NAMES).toHaveLength(29);
+  it('nombra las 32 herramientas del contrato', () => {
+    expect(STUDIO_TOOL_NAMES).toHaveLength(32);
     for (const tool of STUDIO_TOOL_NAMES) {
       expect(prompt).toContain(tool);
     }
@@ -418,5 +418,17 @@ describe('buildProducerPrompt brand section', () => {
     const prompt = buildProducerPrompt({ ...CONTEXT, mode: 'motion', brand });
     expect(prompt).toContain('music: null');
     expect(prompt).toContain('user-made');
+  });
+});
+
+describe('buildProducerPrompt — publicación en YouTube', () => {
+  const prompt = buildProducerPrompt(CONTEXT);
+
+  it('exige confirmación explícita citada antes de encolar', () => {
+    expect(prompt).toContain('list_publications and draft_publication');
+    expect(prompt).toContain('ONLY after an');
+    expect(prompt).toContain('`userConfirmation`');
+    expect(prompt).toContain('never queue on your own initiative');
+    expect(prompt).toContain('queue is paused');
   });
 });

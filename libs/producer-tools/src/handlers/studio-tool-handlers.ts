@@ -2,7 +2,7 @@ import { z } from 'zod';
 
 import { TimelineSchema, canonicalMaterialPath } from '@video-maker/timeline-core';
 import type { MaterialReview, SceneVisualReview, Timeline } from '@video-maker/timeline-core';
-import type { RenderApiRenderReview } from '../client/render-api-client';
+import type { RenderApiQueuePublicationRequest, RenderApiRenderReview } from '../client/render-api-client';
 
 import { PATCH_TIMELINE_SECTIONS, STUDIO_TOOLS } from '../contract/tool-schemas';
 import type { PatchTimelineInput, PatchTimelineSection } from '../contract/tool-schemas';
@@ -548,6 +548,59 @@ export function createStudioToolHandlers(
       await assertMaterialReviewed(client);
       const saved = await client.putProposal(draft);
       return withOutput('propose_production', { saved: true, status: 'pending', concepts: saved.concepts });
+    },
+
+    draft_publication: async (rawInput) => {
+      const input = parseInput<{ file?: string }>(STUDIO_TOOLS.draft_publication.input, rawInput);
+      const file = input.file ?? (await client.listPublishableFiles())[0];
+      if (file === undefined) {
+        throw new StudioToolRuntimeError('FILE_NOT_FOUND', 'este proyecto no tiene ningún render completo en out/ para publicar: renderizá el video primero');
+      }
+      const draft = await client.draftPublication(file);
+      return withOutput('draft_publication', { file, title: draft.title, description: draft.description, tags: [...draft.tags] });
+    },
+
+    list_publications: async (rawInput) => {
+      parseInput(STUDIO_TOOLS.list_publications.input, rawInput);
+      const [publications, queue] = await Promise.all([client.listPublications(), client.getPublishQueue()]);
+      return withOutput('list_publications', {
+        publications,
+        queue: {
+          paused: queue.settings.paused,
+          dailyLimit: queue.settings.dailyLimit,
+          publishedLast24h: queue.publishedLast24h,
+          nextAttemptAt: queue.nextAttemptAt,
+          items: queue.items.map((item) => ({
+            id: item.id,
+            file: item.file,
+            title: typeof item.metadata?.title === 'string' ? item.metadata.title : null,
+            status: item.status,
+            url: item.url,
+            nextAttemptAt: item.nextAttemptAt,
+            lastError: item.lastError?.message ?? null,
+          })),
+        },
+      });
+    },
+
+    queue_publication: async (rawInput) => {
+      const { userConfirmation, ...publication } = parseInput<{ userConfirmation: string } & RenderApiQueuePublicationRequest>(
+        STUDIO_TOOLS.queue_publication.input,
+        rawInput,
+      );
+      if (userConfirmation.trim().length === 0) {
+        throw new StudioToolRuntimeError(
+          'INVALID_INPUT',
+          'falta la confirmación del usuario: pedile un «sí» explícito a esta propuesta de publicación y citá su mensaje textual en userConfirmation',
+        );
+      }
+      const queued = await client.queuePublication(publication);
+      const queue = await client.getPublishQueue();
+      return withOutput('queue_publication', {
+        item: queued.item,
+        alreadyPublished: queued.alreadyPublished,
+        queuePaused: queue.settings.paused,
+      });
     },
 
     get_motion_brands: async (rawInput) => {

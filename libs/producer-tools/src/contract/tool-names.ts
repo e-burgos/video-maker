@@ -30,6 +30,9 @@ export const STUDIO_TOOL_NAMES = [
   'review_material',
   'propose_production',
   'get_reference_brief',
+  'draft_publication',
+  'list_publications',
+  'queue_publication',
 ] as const;
 
 export type StudioToolName = (typeof STUDIO_TOOL_NAMES)[number];

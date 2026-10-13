@@ -62,5 +62,10 @@ export function createFakeRenderApiClient(overrides: Partial<RenderApiClient> = 
     getMotionStoryboard: (...args) => record('getMotionStoryboard', args, overrides.getMotionStoryboard),
     putMotionStoryboard: (...args) => record('putMotionStoryboard', args, overrides.putMotionStoryboard),
     putVoiceDirection: (...args) => record('putVoiceDirection', args, overrides.putVoiceDirection),
+    listPublishableFiles: (...args) => record('listPublishableFiles', args, overrides.listPublishableFiles),
+    draftPublication: (...args) => record('draftPublication', args, overrides.draftPublication),
+    listPublications: (...args) => record('listPublications', args, overrides.listPublications),
+    getPublishQueue: (...args) => record('getPublishQueue', args, overrides.getPublishQueue),
+    queuePublication: (...args) => record('queuePublication', args, overrides.queuePublication),
   };
 }

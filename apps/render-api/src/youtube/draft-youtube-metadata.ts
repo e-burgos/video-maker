@@ -75,6 +75,7 @@ export function buildYoutubeDraftSystemPrompt(): string {
     'Write in Spanish as spoken in Argentina (rioplatense, voseo), warm and direct.',
     `The title has at most ${String(PUBLISH_TITLE_MAX_LENGTH)} characters, states what the video is about, and is never clickbait: no invented promises, no ALL CAPS, no more than one emoji.`,
     'The description has two to four short paragraphs: what the video shows, why it matters, and a closing line. Mention the brand tagline and website when they are given. Do not invent facts that are not in the script.',
+    'The script is written for a text-to-speech voice and may spell names as they sound (for example "Isi Pro" for "Easy Pro"): write every product and brand name as it appears in the on-screen text.',
     `Give at most ${String(DRAFT_MAX_TAGS)} tags, specific to the topic, lowercase, without the # sign.`,
     'Answer only with the JSON object that matches the requested schema.',
   ].join('\n');
@@ -172,10 +173,30 @@ async function readMotionScript(deps: RenderApiDependencies, project: MediaProje
   }
   try {
     const storyboard = parseMotionStoryboard(JSON.parse(await deps.storage.readTextFile(path)));
-    return [storyboard.title, ...storyboard.scenes.map((scene) => scene.vo)].join('\n');
+    const narration = [storyboard.title, ...storyboard.scenes.map((scene) => scene.vo)].join('\n');
+    const onScreen = [...new Set(storyboard.scenes.flatMap((scene) => onScreenTextsOf(scene.props)))];
+    return onScreen.length === 0 ? narration : `${narration}\nOn-screen text:\n${onScreen.join('\n')}`;
   } catch {
     return '';
   }
+}
+
+const ON_SCREEN_TEXT_PROPS: readonly string[] = ['title', 'subtitle', 'headline', 'kicker', 'text', 'caption', 'label', 'name'];
+
+function stringsAt(record: Record<string, unknown>, keys: readonly string[]): string[] {
+  return keys.flatMap((key) => {
+    const value = record[key];
+    return typeof value === 'string' && value.trim() !== '' ? [value.trim()] : [];
+  });
+}
+
+export function onScreenTextsOf(props: unknown): string[] {
+  if (!isRecord(props)) {
+    return [];
+  }
+  const steps = Array.isArray(props.steps) ? props.steps.filter(isRecord) : [];
+  const items = Array.isArray(props.items) ? props.items.filter(isRecord) : [];
+  return [...stringsAt(props, ON_SCREEN_TEXT_PROPS), ...steps.flatMap((step) => stringsAt(step, ['text'])), ...items.flatMap((item) => stringsAt(item, ON_SCREEN_TEXT_PROPS))];
 }
 
 async function readFootageScript(deps: RenderApiDependencies, project: MediaProject): Promise<string> {

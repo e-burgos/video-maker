@@ -687,6 +687,64 @@ const SetVoiceDirectionOutputSchema = z.strictObject({
   saved: z.literal(true),
 });
 
+const PublicationFileSchema = z
+  .string()
+  .regex(/^out\/[^/]+\.mp4$/u, 'file is a finished render such as out/video.mp4');
+
+const DraftPublicationInputSchema = z.strictObject({
+  file: PublicationFileSchema.optional().describe('Finished render to publish; the most recent full render when omitted.'),
+});
+
+const DraftPublicationOutputSchema = z.strictObject({
+  file: z.string(),
+  title: z.string(),
+  description: z.string(),
+  tags: z.array(z.string()),
+});
+
+const ListPublicationsInputSchema = z.strictObject({});
+
+const ListPublicationsOutputSchema = z.strictObject({
+  publications: z.array(z.looseObject({})),
+  queue: z.strictObject({
+    paused: z.boolean(),
+    dailyLimit: z.number(),
+    publishedLast24h: z.number(),
+    nextAttemptAt: z.string().nullable(),
+    items: z.array(
+      z.strictObject({
+        id: z.string(),
+        file: z.string(),
+        title: z.string().nullable(),
+        status: z.string(),
+        url: z.string().nullable(),
+        nextAttemptAt: z.string().nullable(),
+        lastError: z.string().nullable(),
+      }),
+    ),
+  }),
+});
+
+const QueuePublicationInputSchema = z.strictObject({
+  file: PublicationFileSchema.optional(),
+  title: z.string().trim().min(1).max(100),
+  description: z.string().max(5000).optional(),
+  tags: z.array(z.string().min(1)).optional(),
+  privacy: z.enum(['public', 'unlisted', 'private']),
+  publishAt: z.string().min(1).optional().describe('ISO 8601 moment in the future; omit to publish as soon as the queue allows.'),
+  playlistIds: z.array(z.string().min(1)).optional(),
+  userConfirmation: z
+    .string()
+    .min(1, 'userConfirmation must quote the user message that authorises publishing this video')
+    .describe('Verbatim quote of the user message that explicitly approves publishing THIS video with this proposal.'),
+});
+
+const QueuePublicationOutputSchema = z.strictObject({
+  item: z.looseObject({}),
+  alreadyPublished: z.strictObject({ url: z.string().nullable() }).nullable(),
+  queuePaused: z.boolean(),
+});
+
 export interface StudioToolDefinition<Input extends z.ZodTypeAny = z.ZodTypeAny, Output extends z.ZodTypeAny = z.ZodTypeAny> {
   readonly description: string;
   readonly input: Input;
@@ -863,6 +921,24 @@ export const STUDIO_TOOLS: Readonly<Record<StudioToolName, StudioToolDefinition>
       'was never analysed: start_job {"kind":"reference","file":"raw/reference/<name>.mp4"} analyses it.',
     input: GetReferenceBriefInputSchema,
     output: GetReferenceBriefOutputSchema,
+  },
+  draft_publication: {
+    description:
+      'Ask the studio for a YouTube title, description and tags drafted from the video itself. Without `file` it uses the most recent full render. Nothing is published or queued: show the draft to the user.',
+    input: DraftPublicationInputSchema,
+    output: DraftPublicationOutputSchema,
+  },
+  list_publications: {
+    description:
+      'List what this project already published on YouTube, its items waiting in the publish queue (status, url, nextAttemptAt, lastError) and the queue state (paused, dailyLimit, publishedLast24h). Call it before proposing a publication.',
+    input: ListPublicationsInputSchema,
+    output: ListPublicationsOutputSchema,
+  },
+  queue_publication: {
+    description:
+      'Add a video to the YouTube publish queue; it never publishes directly. Call it ONLY after the user explicitly said yes to the exact proposal (title, description, tags, privacy, lists) and quote that message in `userConfirmation`; without it the call is rejected. Without playlistIds the queue uses the list of the project category plus the general one. The queue may be paused: the user resumes it from the Publication view.',
+    input: QueuePublicationInputSchema,
+    output: QueuePublicationOutputSchema,
   },
   get_motion_brands: {
     description:

@@ -1,0 +1,109 @@
+{
+  "$schema": "../../../../schemas/cycle-tasks.schema.json",
+  "spec": "spec-e-burgos-022-youtube-publishing",
+  "cycle": 3,
+  "module": "youtube-publishing",
+  "apps": [
+    "libs/producer-tools",
+    "apps/render-api",
+    "apps/desktop"
+  ],
+  "flow": "lite",
+  "user_stories_generated": true,
+  "prerequisites": {
+    "tasks_generated": true
+  },
+  "tasks": [
+    {
+      "id": "TASK-001",
+      "title": "Producer tools: draft_publication, list_publications and queue_publication (explicit user confirmation required)",
+      "user_stories": [
+        "US-022-301"
+      ],
+      "estimation_hours": 3,
+      "story_points": 5,
+      "depends_on": [],
+      "status": "done",
+      "files": [
+        "apps/render-api/src/producer/producer-stream-events.ts",
+        "apps/render-api/src/youtube/draft-youtube-metadata.spec.ts",
+        "apps/render-api/src/youtube/draft-youtube-metadata.ts",
+        "libs/producer-tools/src/__fixtures__/fake-render-api-client.ts",
+        "libs/producer-tools/src/client/http-render-api-client.spec.ts",
+        "libs/producer-tools/src/client/http-render-api-client.ts",
+        "libs/producer-tools/src/client/render-api-client.ts",
+        "libs/producer-tools/src/contract/tool-names.spec.ts",
+        "libs/producer-tools/src/contract/tool-names.ts",
+        "libs/producer-tools/src/contract/tool-schemas.ts",
+        "libs/producer-tools/src/handlers/studio-tool-handlers.spec.ts",
+        "libs/producer-tools/src/handlers/studio-tool-handlers.ts",
+        "libs/producer-tools/src/prompt/build-producer-prompt.spec.ts",
+        "libs/producer-tools/src/prompt/build-producer-prompt.ts"
+      ],
+      "usage": {
+        "provider_model": "claude/sonnet",
+        "effort": "medium",
+        "agent": "implementor-back",
+        "tokens_in": 108010,
+        "tokens_out": 19060,
+        "approx": true,
+        "source": "agent-usage-notification",
+        "recorded_at": "2026-10-13"
+      }
+    },
+    {
+      "id": "TASK-002",
+      "title": "Desktop: external links and the Google consent URL open in the system browser (shell.openExternal)",
+      "user_stories": [
+        "US-022-302"
+      ],
+      "estimation_hours": 2,
+      "story_points": 3,
+      "depends_on": [],
+      "status": "done",
+      "files": [
+        "apps/desktop/src/main/external-navigation.spec.ts",
+        "apps/desktop/src/main/external-navigation.ts",
+        "apps/desktop/src/main/main.ts"
+      ],
+      "usage": {
+        "provider_model": "claude/sonnet",
+        "effort": "medium",
+        "agent": "implementor-front",
+        "tokens_in": 71657,
+        "tokens_out": 12645,
+        "approx": true,
+        "source": "agent-usage-notification",
+        "recorded_at": "2026-10-13"
+      }
+    },
+    {
+      "id": "TASK-003",
+      "title": "Verification: real producer turn that prepares and queues a publication (queue paused) and desktop build",
+      "user_stories": [
+        "US-022-301",
+        "US-022-302"
+      ],
+      "estimation_hours": 1,
+      "story_points": 2,
+      "depends_on": [
+        "TASK-001",
+        "TASK-002"
+      ],
+      "status": "done",
+      "files": [
+        "sdd/specs/spec-e-burgos-022-youtube-publishing/cycles/cycle-03/artifacts/verification.md"
+      ],
+      "usage": {
+        "provider_model": "claude/opus",
+        "effort": "high",
+        "agent": "orchestrator",
+        "tokens_in": 38250,
+        "tokens_out": 6750,
+        "approx": true,
+        "source": "declared-estimate",
+        "recorded_at": "2026-10-13"
+      }
+    }
+  ]
+}
