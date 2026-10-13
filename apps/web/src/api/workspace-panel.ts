@@ -55,7 +55,7 @@ export function fullRenderJobsNewestFirst(
   listing: RenderJobListing | null,
   generated: GeneratedListing | null,
 ): RenderJobSummary[] {
-  const jobs = succeededJobsOfKindNewestFirst(listing, 'render');
+  const jobs = succeededJobsOfKindNewestFirst(listing, 'render').filter((job) => !job.sample);
   if (generated === null) {
     return jobs;
   }

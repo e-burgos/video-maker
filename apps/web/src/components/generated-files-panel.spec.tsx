@@ -12,10 +12,10 @@ const GENERATED: GeneratedListing = {
   slug: 'display-ads',
   roots: ['work/voice', 'work/producer', 'out'],
   files: [
-    { path: 'work/voice/voice.wav', sizeBytes: 6_100_000, modifiedAtMs: 1 },
-    { path: 'work/voice/voice.words.json', sizeBytes: 40_000, modifiedAtMs: 1 },
-    { path: 'work/producer/script.txt', sizeBytes: 1_200, modifiedAtMs: 1 },
-    { path: 'out/display-ads.mp4', sizeBytes: 24_000_000, modifiedAtMs: 1 },
+    { path: 'work/voice/voice.wav', sizeBytes: 6_100_000, modifiedAtMs: 1, sample: false },
+    { path: 'work/voice/voice.words.json', sizeBytes: 40_000, modifiedAtMs: 1, sample: false },
+    { path: 'work/producer/script.txt', sizeBytes: 1_200, modifiedAtMs: 1, sample: false },
+    { path: 'out/display-ads.mp4', sizeBytes: 24_000_000, modifiedAtMs: 1, sample: false },
   ],
 };
 
@@ -66,7 +66,7 @@ function renderPanel(options: {
   if (options.scriptMode === true && client.listGenerated !== undefined) {
     (client.listGenerated as ReturnType<typeof vi.fn>).mockResolvedValue({
       ...(options.generated ?? GENERATED),
-      files: [...(options.generated ?? GENERATED).files, { path: 'work/voice/script-manifest.json', sizeBytes: 500, modifiedAtMs: 1 }],
+      files: [...(options.generated ?? GENERATED).files, { path: 'work/voice/script-manifest.json', sizeBytes: 500, modifiedAtMs: 1, sample: false }],
     });
   }
 
@@ -186,7 +186,7 @@ describe('GeneratedFilesPanel (FIX-006-001)', () => {
         ...GENERATED,
         files: [
           ...GENERATED.files,
-          { path: 'out/job-0009.sample.mp4', sizeBytes: 2_000_000, modifiedAtMs: 2 },
+          { path: 'out/job-0009.sample.mp4', sizeBytes: 2_000_000, modifiedAtMs: 2, sample: true },
         ],
       },
     });
@@ -195,6 +195,22 @@ describe('GeneratedFilesPanel (FIX-006-001)', () => {
     expect(videos.map((video) => video.getAttribute('src'))).toContain(
       '/api/projects/display-ads/files/out/job-0009.sample.mp4',
     );
+    expect(screen.getAllByText('Sample')).toHaveLength(1);
+    expect(screen.getAllByTestId('render-review').length).toBe(1);
+  });
+
+  it('trata como muestra un archivo de nombre normal cuando el render lo marca', async () => {
+    renderPanel({
+      generated: {
+        ...GENERATED,
+        files: [
+          ...GENERATED.files,
+          { path: 'out/job-0010.mp4', sizeBytes: 2_000_000, modifiedAtMs: 2, sample: true },
+        ],
+      },
+    });
+
+    await screen.findAllByTestId('generated-deliverable-video');
     expect(screen.getAllByText('Sample')).toHaveLength(1);
     expect(screen.getAllByTestId('render-review').length).toBe(1);
   });

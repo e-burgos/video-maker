@@ -177,6 +177,7 @@ describe('parseRenderJobListing', () => {
           createdAt: '2026-10-11T10:00:00.000Z',
           startedAt: '2026-10-11T10:00:01.000Z',
           finishedAt: null,
+          sample: false,
         },
       ],
     };
@@ -197,6 +198,7 @@ describe('parseRenderJobListing', () => {
           createdAt: '2026-09-09T10:00:00.000Z',
           startedAt: null,
           finishedAt: null,
+          sample: false,
         },
         {
           id: 'job-0002',
@@ -207,6 +209,7 @@ describe('parseRenderJobListing', () => {
           createdAt: '2026-09-09T10:05:00.000Z',
           startedAt: '2026-09-09T10:05:01.000Z',
           finishedAt: null,
+          sample: false,
         },
       ],
     };
@@ -470,6 +473,7 @@ describe('parseStoryboardJob', () => {
           createdAt: '2026-09-09T12:00:00.000Z',
           startedAt: '2026-09-09T12:00:00.500Z',
           finishedAt: null,
+          sample: false,
         },
       ],
     };
@@ -526,6 +530,7 @@ describe('reference jobs', () => {
           createdAt: '2026-10-12T10:00:00.000Z',
           startedAt: null,
           finishedAt: null,
+          sample: false,
         },
       ],
     };

@@ -10,7 +10,8 @@ function isGeneratedFile(value: unknown): value is GeneratedFile {
     isRecord(value) &&
     typeof value['path'] === 'string' &&
     typeof value['sizeBytes'] === 'number' &&
-    typeof value['modifiedAtMs'] === 'number'
+    typeof value['modifiedAtMs'] === 'number' &&
+    typeof value['sample'] === 'boolean'
   );
 }
 

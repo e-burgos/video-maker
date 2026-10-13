@@ -6,6 +6,7 @@ import type { StoreConfig } from '../../config/store-config';
 import type { RenderApiDependencies } from '../../deps/render-api-dependencies';
 import { PipelineStageError } from '../../errors/pipeline-stage-error';
 import { parseStoredJob, parseStoredParams } from '../../jobs/job-persistence';
+import { sampleFileClassifierFor } from '../../jobs/sample-files';
 import type { StoredJobParams } from '../../jobs/job-persistence';
 import {
   assertBrandCaptionStyleHasBrand,
@@ -380,7 +381,7 @@ async function createPublishJobResponse(
   params: PublishParams,
   retryOf: string | null,
 ): Promise<HttpResponse> {
-  await assertPublishableVideo(deps.storage, project, params.file);
+  await assertPublishableVideo(deps.storage, project, params.file, sampleFileClassifierFor(runtime.jobs, slug));
   await assertRenderReviewAllowsPublish(deps.storage, project, params.file, params.ignoreReview);
   if (params.thumbnail !== null) {
     await assertPublishableThumbnail(deps.storage, project, params.thumbnail);

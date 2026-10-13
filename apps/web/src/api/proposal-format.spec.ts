@@ -15,7 +15,7 @@ function estimateWith(source: ProposalEstimate['basis']['render']['source'], sam
     voiceMinutes: 1,
     producerTokens: null,
     usd: null,
-    basis: { mode: 'raw', render: { source, samples, processSecPerMediaSec: 3 }, voice: null },
+    basis: { mode: 'raw', render: { source, samples, processSecPerMediaSec: 3, rough: false }, voice: null },
   };
 }
 
@@ -40,6 +40,7 @@ describe('proposal format', () => {
 
   it('reports render samples only when the estimate comes from history', () => {
     expect(estimateBasisSamples(estimateWith('history-format', 5))).toBe(5);
+    expect(estimateBasisSamples(estimateWith('history-studio', 1))).toBe(1);
     expect(estimateBasisSamples(estimateWith('default', 0))).toBeNull();
   });
 });

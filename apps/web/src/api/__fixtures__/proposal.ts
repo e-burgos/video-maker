@@ -40,7 +40,7 @@ export function proposalEstimate(overrides: Partial<ProposalEstimate> = {}): Pro
     usd: null,
     basis: {
       mode: 'raw',
-      render: { source: 'history-format', samples: 3, processSecPerMediaSec: 2.7 },
+      render: { source: 'history-format', samples: 3, processSecPerMediaSec: 2.7, rough: false },
       voice: null,
     },
     ...overrides,

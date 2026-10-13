@@ -3,7 +3,8 @@ import type { MotionStoryboard } from '@video-maker/motion-graphics';
 import { join } from 'node:path/posix';
 
 import type { ObjectStorage } from '../deps/object-storage';
-import { isSampleVideoName } from '../jobs/sample-job-params';
+import { createSampleFileClassifier } from '../jobs/sample-files';
+import type { SampleFileClassifier } from '../jobs/sample-files';
 
 const STORYBOARD_PATH = 'motion/storyboard.json';
 const TIMELINE_PATH = 'work/motion/timeline.json';
@@ -205,12 +206,13 @@ async function readCredits(
 async function newestVideo(
   storage: ObjectStorage,
   root: string,
+  isSample: SampleFileClassifier,
 ): Promise<{ readonly name: string; readonly modifiedAtMs: number } | null> {
   const entries = await storage.listDirectory(join(root, OUT_DIRECTORY));
   if (entries === null) {
     return null;
   }
-  const candidates = entries.filter((entry) => entry.isFile && !entry.name.startsWith('.') && entry.name.endsWith('.mp4') && !isSampleVideoName(entry.name));
+  const candidates = entries.filter((entry) => entry.isFile && !entry.name.startsWith('.') && entry.name.endsWith('.mp4') && !isSample(`${OUT_DIRECTORY}/${entry.name}`));
   const withTimes = await Promise.all(
     candidates.map(async (entry) => ({
       name: entry.name,
@@ -223,8 +225,8 @@ async function newestVideo(
   );
 }
 
-async function readVideo(storage: ObjectStorage, root: string): Promise<MotionOverviewVideo | null> {
-  const newest = await newestVideo(storage, root);
+async function readVideo(storage: ObjectStorage, root: string, isSample: SampleFileClassifier): Promise<MotionOverviewVideo | null> {
+  const newest = await newestVideo(storage, root, isSample);
   if (newest === null) {
     return null;
   }
@@ -238,10 +240,14 @@ async function readVideo(storage: ObjectStorage, root: string): Promise<MotionOv
   };
 }
 
-export async function readMotionOverview(storage: ObjectStorage, root: string): Promise<MotionOverview> {
+export async function readMotionOverview(
+  storage: ObjectStorage,
+  root: string,
+  isSample: SampleFileClassifier = createSampleFileClassifier([]),
+): Promise<MotionOverview> {
   const storyboard = await readStoryboard(storage, root);
   const timeline = await readTimeline(storage, root);
   const voice = await readVoice(storage, root, storyboard, timeline);
-  const video = await readVideo(storage, root);
+  const video = await readVideo(storage, root, isSample);
   return { storyboard, timeline, voice, video };
 }

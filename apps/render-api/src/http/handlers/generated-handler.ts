@@ -8,6 +8,8 @@ import type { RenderApiDependencies } from '../../deps/render-api-dependencies';
 import { PRODUCER_DIRECTORY_NAME } from '../../producer/producer-paths';
 import { assertValidProjectSlug, resolveExistingProject } from '../../store/project-scope';
 import { VOICE_DIRECTORY_NAME } from '../../voice/voice-paths';
+import { sampleFileClassifierFor } from '../../jobs/sample-files';
+import type { JobsBySlug, SampleFileClassifier } from '../../jobs/sample-files';
 import { JSON_CONTENT_TYPE } from '../http-message';
 import type { HttpResponse } from '../http-message';
 import type { RouteParams } from '../router';
@@ -24,6 +26,7 @@ export interface GeneratedFile {
   readonly path: string;
   readonly sizeBytes: number;
   readonly modifiedAtMs: number;
+  readonly sample: boolean;
 }
 
 export interface GeneratedBody {
@@ -36,6 +39,7 @@ async function listFilesUnder(
   storage: ObjectStorage,
   project: MediaProject,
   relativeDirectory: string,
+  isSample: SampleFileClassifier,
 ): Promise<GeneratedFile[]> {
   const entries = await storage.listDirectory(toAbsolutePath(project, relativeDirectory));
   if (entries === null) {
@@ -46,7 +50,7 @@ async function listFilesUnder(
   for (const entry of [...entries].sort((left, right) => left.name.localeCompare(right.name))) {
     const relativePath = join(relativeDirectory, entry.name);
     if (entry.isDirectory) {
-      files.push(...(await listFilesUnder(storage, project, relativePath)));
+      files.push(...(await listFilesUnder(storage, project, relativePath, isSample)));
       continue;
     }
     const stat = await storage.stat(toAbsolutePath(project, relativePath));
@@ -55,6 +59,7 @@ async function listFilesUnder(
         path: relativePath,
         sizeBytes: stat.sizeBytes,
         modifiedAtMs: stat.modifiedAtMs,
+        sample: isSample(relativePath),
       });
     }
   }
@@ -66,14 +71,16 @@ export async function handleGetGenerated(
   deps: RenderApiDependencies,
   store: StoreConfig,
   params: RouteParams,
+  jobs?: JobsBySlug,
 ): Promise<HttpResponse> {
   const slug = params.slug ?? '';
   assertValidProjectSlug(slug);
   const project = await resolveExistingProject(deps, store, slug);
 
+  const isSample = sampleFileClassifierFor(jobs, slug);
   const files: GeneratedFile[] = [];
   for (const root of GENERATED_ROOTS) {
-    files.push(...(await listFilesUnder(deps.storage, project, root)));
+    files.push(...(await listFilesUnder(deps.storage, project, root, isSample)));
   }
 
   const body: GeneratedBody = { slug, roots: [...GENERATED_ROOTS], files };

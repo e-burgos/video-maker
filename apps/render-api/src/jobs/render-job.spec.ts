@@ -155,6 +155,15 @@ describe('toJob', () => {
 });
 
 describe('toJobSummary', () => {
+  it('exposes sample from the report of the job, never from names', () => {
+    const sampleReport = { ...SAMPLE_RENDER_REPORT, sample: true as const };
+    const sampleJob = toJob(buildRenderRecordLike({ state: 'succeeded', report: sampleReport, error: null }));
+    const fullJob = toJob(buildRenderRecordLike({ state: 'succeeded', report: SAMPLE_RENDER_REPORT, error: null }));
+
+    expect(toJobSummary(sampleJob).sample).toBe(true);
+    expect(toJobSummary(fullJob).sample).toBe(false);
+  });
+
   it('projects a render job to a summary with kind, id, state, stage and errorCode', () => {
     const job = toJob(buildRenderRecordLike({ state: 'failed', report: null, error: SAMPLE_ERROR }));
 
@@ -169,6 +178,7 @@ describe('toJobSummary', () => {
       createdAt: '2026-09-08T00:00:00.000Z',
       startedAt: '2026-09-08T00:00:00.000Z',
       finishedAt: '2026-09-08T00:04:11.000Z',
+      sample: false,
     });
     expect(summary).not.toHaveProperty('report');
     expect(summary).not.toHaveProperty('timeline');
@@ -189,6 +199,7 @@ describe('toJobSummary', () => {
       createdAt: '2026-09-08T00:00:00.000Z',
       startedAt: '2026-09-08T00:00:00.000Z',
       finishedAt: '2026-09-08T00:04:11.000Z',
+      sample: false,
     });
   });
 

@@ -209,6 +209,7 @@ describe('proyección del job de voz (US-09-004)', () => {
       createdAt: '2026-09-09T12:00:00.000Z',
       startedAt: '2026-09-09T12:00:01.000Z',
       finishedAt: null,
+      sample: false,
     });
   });
 });

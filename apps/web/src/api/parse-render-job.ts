@@ -455,7 +455,8 @@ function isRenderJobSummary(value: unknown): value is RenderJobSummary {
     isStringOrNull(value['errorCode']) &&
     typeof value['createdAt'] === 'string' &&
     isStringOrNull(value['startedAt']) &&
-    isStringOrNull(value['finishedAt'])
+    isStringOrNull(value['finishedAt']) &&
+    typeof value['sample'] === 'boolean'
   );
 }
 

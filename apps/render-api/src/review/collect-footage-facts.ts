@@ -5,6 +5,7 @@ import type { MediaProject } from '@video-maker/auto-montage';
 import { introBumperFrames, outroBumperFrames, safeZoneFor, TimelineSchema, timelineTotalFrames } from '@video-maker/timeline-core';
 import type { Timeline } from '@video-maker/timeline-core';
 
+import { buildCaptionLayoutFacts } from './caption-layout-facts';
 import { buildFootageLevelPlans } from './footage-level-plans';
 import { ReviewInputsUnavailableError } from './review-errors';
 import type { ReviewFacts, ReviewStoragePort } from './review-facts';
@@ -100,6 +101,7 @@ export async function collectFootageFacts(project: MediaProject, storage: Review
       height: timeline.format.height,
       safeZone: timeline.safeZone ?? safeZoneFor(timeline.format),
     },
+    captionLayout: buildCaptionLayoutFacts(timeline),
     missingAssets: await findMissingAssets(timeline, project, storage),
     scenes: [],
     promise: null,

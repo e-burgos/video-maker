@@ -190,6 +190,7 @@ export type GeneratedFile = {
   path: string;
   sizeBytes: number;
   modifiedAtMs: number;
+  sample: boolean;
 };
 
 export type GeneratedListing = {
@@ -498,6 +499,7 @@ export type RenderJobSummary = {
   createdAt: string;
   startedAt: string | null;
   finishedAt: string | null;
+  sample: boolean;
 };
 
 export type RenderJobListing = {

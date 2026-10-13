@@ -735,6 +735,7 @@ describe('createRenderApiClient', () => {
           createdAt: '2026-09-09T10:00:00.000Z',
           startedAt: '2026-09-09T10:00:01.000Z',
           finishedAt: '2026-09-09T10:01:00.000Z',
+          sample: false,
         },
       ],
     };
@@ -750,6 +751,7 @@ describe('createRenderApiClient', () => {
       'finishedAt',
       'id',
       'kind',
+      'sample',
       'stage',
       'startedAt',
       'state',
@@ -1430,7 +1432,7 @@ describe('createRenderApiClient — listGenerated y getProjectFile (FIX-006-001,
   const LISTING = {
     slug: 'display-ads',
     roots: ['work/voice', 'work/producer', 'out'],
-    files: [{ path: 'out/display-ads.mp4', sizeBytes: 10, modifiedAtMs: 1 }],
+    files: [{ path: 'out/display-ads.mp4', sizeBytes: 10, modifiedAtMs: 1, sample: false }],
   };
 
   it('pide el listado de lo generado a EP-028', async () => {

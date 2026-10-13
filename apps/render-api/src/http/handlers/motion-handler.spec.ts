@@ -14,6 +14,7 @@ import type { ServerConfig } from '../../config/server-config';
 import type { StoreConfig } from '../../config/store-config';
 import { httpStatusFor } from '../../errors/http-status-for';
 import { toErrorPayload } from '../../errors/to-error-payload';
+import type { Job } from '../../jobs/render-job';
 import { handleRequest } from '../handle-request';
 import { createRenderApiRuntime } from '../render-api-runtime';
 import {
@@ -491,6 +492,19 @@ describe('handleGetMotionOverview', () => {
     const body = (await handleGetMotionOverview(deps, STORE, { slug: 'promo' })).body as { video: { path: string; outdated: boolean } };
 
     expect(body.video).toMatchObject({ path: 'out/video.mp4', outdated: true });
+  });
+
+  it('skips a regularly named file whose job reported a sample', async () => {
+    const { deps } = setup('motion', [
+      storyboardFile,
+      { path: '/media/promo/out/video.mp4', contents: 'b', modifiedAtMs: 4_000 },
+      { path: '/media/promo/out/promo.mp4', contents: 's', modifiedAtMs: 9_000 },
+    ]);
+    const jobs = { listBySlug: () => [{ kind: 'motion', report: { path: 'out/promo.mp4', sample: true } }] as unknown as readonly Job[] };
+
+    const body = (await handleGetMotionOverview(deps, STORE, { slug: 'promo' }, jobs)).body as { video: { path: string } };
+
+    expect(body.video.path).toBe('out/video.mp4');
   });
 
   it('lists the manifest scenes when there is no storyboard and ignores an unparsable timeline', async () => {

@@ -95,4 +95,109 @@ describe('AssetProposalCard', () => {
 
     await waitFor(() => expect(screen.getByRole('alert')).toBeTruthy());
   });
+
+  it('proposes reference with its explanation for a video named like an example', () => {
+    render(
+      <AssetProposalCard
+        slug="demo-01"
+        asset={inboxAsset({ fileName: 'referencia-ritmo.mp4' })}
+        onConfirm={vi.fn()}
+        onDiscard={vi.fn()}
+      />,
+    );
+
+    expect((screen.getByTestId('asset-proposal-role') as HTMLSelectElement).value).toBe('reference');
+    expect(screen.getByTestId('asset-proposal-reference-suggestion').textContent).toContain(
+      'file name looks like an example',
+    );
+    expect(screen.getByTestId('asset-proposal-reference-note').textContent).toContain(
+      'not used as editing material',
+    );
+  });
+
+  it('confirms a suggested reference with the reference role', async () => {
+    const onConfirm = vi.fn().mockResolvedValue(undefined);
+    render(
+      <AssetProposalCard
+        slug="demo-01"
+        asset={inboxAsset({ fileName: 'ejemplo.mp4' })}
+        onConfirm={onConfirm}
+        onDiscard={vi.fn()}
+      />,
+    );
+
+    fireEvent.click(screen.getByTestId('asset-proposal-confirm'));
+
+    await waitFor(() => expect(onConfirm).toHaveBeenCalledWith('inbox-0001', 'reference'));
+  });
+
+  it('offers but does not propose reference for a plain video in a footage project', () => {
+    render(
+      <AssetProposalCard
+        slug="demo-01"
+        asset={inboxAsset()}
+        mode="footage"
+        onConfirm={vi.fn()}
+        onDiscard={vi.fn()}
+      />,
+    );
+
+    const select = screen.getByTestId('asset-proposal-role') as HTMLSelectElement;
+    expect(select.value).toBe('aroll');
+    expect(Array.from(select.options).map((option) => option.value)).toContain('reference');
+    expect(screen.queryByTestId('asset-proposal-reference-suggestion')).toBeNull();
+
+    fireEvent.change(select, { target: { value: 'reference' } });
+    expect(screen.getByTestId('asset-proposal-reference-note')).toBeTruthy();
+    expect(screen.queryByTestId('asset-proposal-reference-suggestion')).toBeNull();
+  });
+
+  it('proposes reference for a video in a motion project and when the request says like this one', () => {
+    const { unmount } = render(
+      <AssetProposalCard
+        slug="demo-01"
+        asset={inboxAsset()}
+        mode="motion"
+        onConfirm={vi.fn()}
+        onDiscard={vi.fn()}
+      />,
+    );
+    expect((screen.getByTestId('asset-proposal-role') as HTMLSelectElement).value).toBe('reference');
+    unmount();
+
+    render(
+      <AssetProposalCard
+        slug="demo-01"
+        asset={inboxAsset()}
+        requestText="Quiero un video como este"
+        onConfirm={vi.fn()}
+        onDiscard={vi.fn()}
+      />,
+    );
+    expect((screen.getByTestId('asset-proposal-role') as HTMLSelectElement).value).toBe('reference');
+    expect(screen.getByTestId('asset-proposal-reference-suggestion').textContent).toContain(
+      'a video like this one',
+    );
+  });
+
+  it('never offers reference for an image', () => {
+    render(
+      <AssetProposalCard
+        slug="demo-01"
+        asset={inboxAsset({
+          fileName: 'referencia.png',
+          proposedRole: 'image',
+          proposalReason: 'image',
+          probe: { kind: 'image', durationMs: 0 },
+        })}
+        mode="motion"
+        onConfirm={vi.fn()}
+        onDiscard={vi.fn()}
+      />,
+    );
+
+    const select = screen.getByTestId('asset-proposal-role') as HTMLSelectElement;
+    expect(select.value).toBe('image');
+    expect(Array.from(select.options).map((option) => option.value)).not.toContain('reference');
+  });
 });

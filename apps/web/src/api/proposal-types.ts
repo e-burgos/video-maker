@@ -4,12 +4,13 @@ export const SAMPLE_SECONDS = 10;
 
 export type SampleSpec = { seconds: number };
 
-export type ProposalEstimateBasisSource = 'history-format' | 'history-mode' | 'default';
+export type ProposalEstimateBasisSource = 'history-format' | 'history-mode' | 'history-studio' | 'default';
 
 export type ProposalRenderBasis = {
   source: ProposalEstimateBasisSource;
   samples: number;
   processSecPerMediaSec: number;
+  rough: boolean;
 };
 
 export type ProposalEstimate = {

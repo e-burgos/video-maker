@@ -161,14 +161,14 @@ describe('proposal handlers (US-023-401, US-023-402, US-023-403)', () => {
     const before = (await handleGetProposal(deps, STORE, { slug: SLUG }, runtime)).body as ProposalBody;
     expect(before.estimates.directo?.basis.render.source).toBe('default');
 
-    for (const [id, processSec] of [['job-a', 60], ['job-b', 60]] as const) {
+    for (const [id, processSec] of [['job-a', 60], ['job-b', 60], ['job-c', 60]] as const) {
       deps.localStore.jobs.insert({ id, slug: SLUG, kind: 'render', state: 'queued', params: { kind: 'render', timeline: { format: { preset: 'youtube-16x9' } } }, createdAt: NOW });
       deps.localStore.jobs.updateState(id, 'succeeded', '2026-10-12T09:00:00.000Z', new Date(Date.parse('2026-10-12T09:00:00.000Z') + processSec * 1000).toISOString());
       deps.localStore.jobs.setReport(id, { deliverable: { durationInFrames: 900, fps: 30 } });
     }
     const after = (await handleGetProposal(deps, STORE, { slug: SLUG }, runtime)).body as ProposalBody;
 
-    expect(after.estimates.directo?.basis.render).toEqual({ source: 'history-format', samples: 2, processSecPerMediaSec: 2 });
+    expect(after.estimates.directo?.basis.render).toEqual({ source: 'history-format', samples: 3, processSecPerMediaSec: 2, rough: false });
     expect(after.estimates.directo?.renderMinutes).toBe(4);
   });
 

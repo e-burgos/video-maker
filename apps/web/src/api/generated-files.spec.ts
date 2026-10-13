@@ -13,7 +13,7 @@ function listing(paths: readonly string[]): GeneratedListing {
   return {
     slug: 'display-ads',
     roots: ['work/voice', 'work/producer', 'out'],
-    files: paths.map((path) => ({ path, sizeBytes: 2_500_000, modifiedAtMs: 1 })),
+    files: paths.map((path) => ({ path, sizeBytes: 2_500_000, modifiedAtMs: 1, sample: path.endsWith('.sample.mp4') })),
   };
 }
 

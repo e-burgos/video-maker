@@ -4,7 +4,8 @@ import type { MediaProject } from '@video-maker/auto-montage';
 import { join } from 'node:path/posix';
 
 import { createProjectBrandResolver } from '../../brands/project-brand-resolver';
-import { isSampleVideoName } from '../../jobs/sample-job-params';
+import { sampleFileClassifierFor } from '../../jobs/sample-files';
+import type { JobsBySlug, SampleFileClassifier } from '../../jobs/sample-files';
 import type { StoreConfig } from '../../config/store-config';
 import type { RenderApiDependencies } from '../../deps/render-api-dependencies';
 import { PipelineStageError } from '../../errors/pipeline-stage-error';
@@ -85,9 +86,13 @@ async function probeVideo(deps: RenderApiDependencies, file: string, absolutePat
   }
 }
 
-async function listPublishFiles(deps: RenderApiDependencies, project: MediaProject): Promise<PublishFileOption[]> {
+async function listPublishFiles(
+  deps: RenderApiDependencies,
+  project: MediaProject,
+  isSample: SampleFileClassifier,
+): Promise<PublishFileOption[]> {
   const entries = (await deps.storage.listDirectory(project.outDir)) ?? [];
-  const candidates = entries.filter((entry) => entry.isFile && !entry.name.startsWith('.') && entry.name.endsWith('.mp4') && !isSampleVideoName(entry.name));
+  const candidates = entries.filter((entry) => entry.isFile && !entry.name.startsWith('.') && entry.name.endsWith('.mp4') && !isSample(`${OUT_DIRECTORY}/${entry.name}`));
   const files: (PublishFileOption & { readonly modifiedAtMs: number })[] = [];
 
   for (const entry of candidates) {
@@ -146,7 +151,7 @@ export async function handleGetYoutubePublishOptions(
   const project = await resolveExistingProject(deps, store, slug);
 
   const body: YoutubePublishOptionsBody = {
-    files: await listPublishFiles(deps, project),
+    files: await listPublishFiles(deps, project, sampleFileClassifierFor(runtime.jobs, slug)),
     playlists: await listPlaylistsIfConnected(runtime),
     defaults: { privacy: 'public' },
   };
@@ -158,13 +163,14 @@ export async function handleDraftYoutubeMetadata(
   store: StoreConfig,
   params: RouteParams,
   request: HttpRequestLine,
+  jobs?: JobsBySlug,
 ): Promise<HttpResponse> {
   const slug = params.slug ?? '';
   assertValidProjectSlug(slug);
   const project = await resolveExistingProject(deps, store, slug);
 
   const file = parsePublishFile((await readJsonObjectBody(request)).file);
-  await assertPublishableVideo(deps.storage, project, file);
+  await assertPublishableVideo(deps.storage, project, file, sampleFileClassifierFor(jobs, slug));
 
   const probed = await probeVideo(deps, file, toAbsolutePath(project, file));
   if (probed === null) {

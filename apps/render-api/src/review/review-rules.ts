@@ -1,6 +1,7 @@
 import { reviewStatusFor } from '@video-maker/timeline-core';
 import type { ReviewReport } from '@video-maker/timeline-core';
 
+import { captionSafeZoneFindings } from './caption-safe-zone-rule';
 import { deliveryPromiseFindings } from './delivery-promise';
 import { deliveryFindings } from './delivery-rules';
 import { masterLoudnessFindings } from './master-loudness-rule';
@@ -53,6 +54,7 @@ export function reviewRender(inputs: ReviewInputs): ReviewReport {
     ...frozenFrameFindings(inputs.frozenSegments, inputs.voiceSegments, inputs.delivery),
     ...voiceSilenceFindings(inputs.silences, inputs.voiceSegments),
     ...allCaptionFindings(inputs.captions, inputs.frame, inputs.captionStyle),
+    ...captionSafeZoneFindings(inputs.captionLayout ?? null),
     ...missingAssetFindings(inputs.missingAssets),
     ...deliveryPromiseFindings(inputs.promise, inputs.actualDurationSec),
     ...visualNotReviewedFindings(inputs.sceneFrames),

@@ -180,6 +180,8 @@ export function ProducerConversationPanel({ producer, pinned = false, mode = 'fo
                 asset={asset}
                 onConfirm={confirmAsset}
                 onDiscard={inbox.discard}
+                mode={mode}
+                requestText={draft}
               />
             ))}
           </div>

@@ -6,7 +6,7 @@ import type { ReviewReport } from '@video-maker/timeline-core';
 
 import { createCallLog } from '../__fixtures__/call-log';
 import { createFakeObjectStorage } from '../__fixtures__/fake-object-storage';
-import { assertRenderReviewAllowsPublish, publishLanguageFromVoice } from './publish-preconditions';
+import { assertPublishableVideo, assertRenderReviewAllowsPublish, publishLanguageFromVoice } from './publish-preconditions';
 
 describe('publishLanguageFromVoice', () => {
   it('takes the language prefix of the brand voice id', () => {
@@ -58,5 +58,30 @@ describe('assertRenderReviewAllowsPublish with the visual review (US-023-603)', 
 
     await expect(assertRenderReviewAllowsPublish(storageWith(flagged), project, 'out/video.mp4', false)).rejects.toMatchObject({ code: 'RENDER_REVIEW_FAILED' });
     await expect(assertRenderReviewAllowsPublish(storageWith(clean), project, 'out/video.mp4', false)).resolves.toBeUndefined();
+  });
+});
+
+describe('assertPublishableVideo samples', () => {
+  const project = resolveMediaProject('/media/demo');
+  const storage = createFakeObjectStorage(createCallLog(), {
+    directories: ['/media/demo'],
+    files: [
+      { path: '/media/demo/out/job-0001.mp4', contents: 'mp4' },
+      { path: '/media/demo/out/old.sample.mp4', contents: 'mp4' },
+    ],
+  });
+
+  it('refuses a regularly named file that its job reported as a sample', async () => {
+    await expect(assertPublishableVideo(storage, project, 'out/job-0001.mp4', (path) => path === 'out/job-0001.mp4')).rejects.toMatchObject({
+      code: 'PUBLISH_FILE_INVALID',
+    });
+  });
+
+  it('refuses a .sample.mp4 file without a known job by its name', async () => {
+    await expect(assertPublishableVideo(storage, project, 'out/old.sample.mp4')).rejects.toMatchObject({ code: 'PUBLISH_FILE_INVALID' });
+  });
+
+  it('accepts a full render', async () => {
+    await expect(assertPublishableVideo(storage, project, 'out/job-0001.mp4', () => false)).resolves.toBeUndefined();
   });
 });

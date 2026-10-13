@@ -359,3 +359,24 @@ export type {
   ReferenceScene,
   ReferenceVoice,
 } from './reference/reference-brief';
+export {
+  CAPTION_GEOMETRY,
+  DEFAULT_CAPTION_GEOMETRY_ID,
+  PIP_MARGIN_RATIO,
+  PIP_WIDTH_RATIO,
+  PORTRAIT_MAX_SIDE_PADDING_RATIO,
+  captionBoxRect,
+  captionGeometryForFrame,
+  captionTextRect,
+  captionTextWidthEm,
+  fitCaptionFontSizeFor,
+  pipRect,
+} from './captions/caption-geometry';
+export type {
+  CaptionAnchor,
+  CaptionBackdropPadding,
+  CaptionFrame,
+  CaptionGeometry,
+  CaptionGeometryId,
+  CaptionRect,
+} from './captions/caption-geometry';
