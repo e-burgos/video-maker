@@ -103,6 +103,15 @@ import {
   handlePutYoutubeClient,
 } from './handlers/youtube-integration-handler';
 import {
+  handleCreatePublishQueueItem,
+  handleDeletePublishQueueItem,
+  handleGetCategoryPlaylists,
+  handleGetPublishQueue,
+  handlePutCategoryPlaylists,
+  handlePutPublishQueueSettings,
+  handleUpdatePublishQueueItem,
+} from './handlers/publish-queue-handler';
+import {
   handleDraftYoutubeMetadata,
   handleGetYoutubePublishOptions,
   handleListPublications,
@@ -395,6 +404,20 @@ async function dispatchRoute(
         return await handleCreateYoutubePlaylist(runtime, request);
       case 'integrations.youtube.playlists.items.add':
         return await handleAddVideoToYoutubePlaylist(runtime, params, request);
+      case 'integrations.youtube.categoryPlaylists.get':
+        return handleGetCategoryPlaylists(deps);
+      case 'integrations.youtube.categoryPlaylists.put':
+        return await handlePutCategoryPlaylists(deps, request);
+      case 'publishQueue.get':
+        return handleGetPublishQueue(deps);
+      case 'publishQueue.items.create':
+        return await handleCreatePublishQueueItem(deps, store, request, runtime);
+      case 'publishQueue.items.update':
+        return await handleUpdatePublishQueueItem(deps, params, request, runtime);
+      case 'publishQueue.items.delete':
+        return await handleDeletePublishQueueItem(deps, params, runtime);
+      case 'publishQueue.settings.put':
+        return await handlePutPublishQueueSettings(deps, request, runtime);
       case 'projects.publish.youtube.options':
         return await handleGetYoutubePublishOptions(deps, store, params, runtime);
       case 'projects.publish.youtube.draft':

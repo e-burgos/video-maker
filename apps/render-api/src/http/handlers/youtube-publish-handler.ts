@@ -86,7 +86,7 @@ async function probeVideo(deps: RenderApiDependencies, file: string, absolutePat
   }
 }
 
-async function listPublishFiles(
+export async function listPublishFiles(
   deps: RenderApiDependencies,
   project: MediaProject,
   isSample: SampleFileClassifier,

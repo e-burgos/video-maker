@@ -23,12 +23,27 @@
       "estimation_hours": 2,
       "story_points": 3,
       "depends_on": [],
-      "status": "pending",
+      "status": "done",
       "files": [
+        "libs/local-store/src/database/migrations.spec.ts",
         "libs/local-store/src/database/migrations.ts",
-        "libs/local-store/src/schema/studio-schema.ts",
-        "libs/local-store/src/repositories/publish-queue-repository.ts"
-      ]
+        "libs/local-store/src/index.ts",
+        "libs/local-store/src/repositories/publications-repository.spec.ts",
+        "libs/local-store/src/repositories/publications-repository.ts",
+        "libs/local-store/src/repositories/publish-queue-repository.spec.ts",
+        "libs/local-store/src/repositories/publish-queue-repository.ts",
+        "libs/local-store/src/schema/studio-schema.ts"
+      ],
+      "usage": {
+        "provider_model": "claude/sonnet",
+        "effort": "medium",
+        "agent": "implementor-back",
+        "tokens_in": 55640,
+        "tokens_out": 9819,
+        "approx": true,
+        "source": "agent-usage-notification",
+        "recorded_at": "2026-10-13"
+      }
     },
     {
       "id": "TASK-002",
@@ -43,13 +58,50 @@
       "depends_on": [
         "TASK-001"
       ],
-      "status": "pending",
+      "status": "done",
       "files": [
-        "apps/render-api/src/youtube/publish-queue-scheduler.ts",
+        "apps/render-api/src/__fixtures__/fake-render-api-dependencies.ts",
+        "apps/render-api/src/deps/node-render-api-dependencies.ts",
+        "apps/render-api/src/deps/render-api-dependencies.ts",
+        "apps/render-api/src/errors/http-status-for.spec.ts",
+        "apps/render-api/src/errors/http-status-for.ts",
+        "apps/render-api/src/errors/render-api-error.ts",
+        "apps/render-api/src/errors/to-error-payload.ts",
+        "apps/render-api/src/http/create-render-api-server.ts",
+        "apps/render-api/src/http/handle-request.ts",
+        "apps/render-api/src/http/handlers/jobs-handler.ts",
+        "apps/render-api/src/http/handlers/publish-queue-handler.spec.ts",
         "apps/render-api/src/http/handlers/publish-queue-handler.ts",
+        "apps/render-api/src/http/handlers/youtube-handlers.spec.ts",
+        "apps/render-api/src/http/handlers/youtube-publish-handler.ts",
+        "apps/render-api/src/http/render-api-runtime.ts",
+        "apps/render-api/src/http/routes.ts",
+        "apps/render-api/src/jobs/job-persistence.spec.ts",
+        "apps/render-api/src/jobs/job-persistence.ts",
+        "apps/render-api/src/jobs/publish-job-params.spec.ts",
+        "apps/render-api/src/jobs/publish-job-params.ts",
+        "apps/render-api/src/jobs/render-job-queue.ts",
+        "apps/render-api/src/jobs/render-job.ts",
+        "apps/render-api/src/jobs/run-publish-pipeline.spec.ts",
         "apps/render-api/src/jobs/run-publish-pipeline.ts",
-        "apps/render-api/src/jobs/publish-job-params.ts"
-      ]
+        "apps/render-api/src/youtube/publish-queue-job-launcher.spec.ts",
+        "apps/render-api/src/youtube/publish-queue-job-launcher.ts",
+        "apps/render-api/src/youtube/publish-queue-scheduler.spec.ts",
+        "apps/render-api/src/youtube/publish-queue-scheduler.ts",
+        "apps/render-api/src/youtube/publish-queue-settings.ts",
+        "apps/render-api/src/youtube/resolve-publish-language.ts",
+        "apps/web/src/api/render-api-client.ts"
+      ],
+      "usage": {
+        "provider_model": "claude/sonnet",
+        "effort": "medium",
+        "agent": "implementor-back",
+        "tokens_in": 129826,
+        "tokens_out": 22911,
+        "approx": true,
+        "source": "agent-usage-notification",
+        "recorded_at": "2026-10-13"
+      }
     },
     {
       "id": "TASK-003",
@@ -64,12 +116,38 @@
       "depends_on": [
         "TASK-002"
       ],
-      "status": "pending",
+      "status": "done",
       "files": [
-        "apps/web/src/pages/publish-queue-page.tsx",
+        "apps/web/src/api/__fixtures__/publish-queue.ts",
+        "apps/web/src/api/parse-publish-queue.spec.ts",
+        "apps/web/src/api/parse-publish-queue.ts",
+        "apps/web/src/api/publish-queue-types.ts",
+        "apps/web/src/api/publish-queue-view.ts",
+        "apps/web/src/api/render-api-client.ts",
+        "apps/web/src/api/youtube-publish-form.ts",
+        "apps/web/src/app/app.tsx",
+        "apps/web/src/components/studio-layout.tsx",
+        "apps/web/src/components/youtube-category-playlists-section.spec.tsx",
+        "apps/web/src/components/youtube-category-playlists-section.tsx",
+        "apps/web/src/components/youtube-publish-dialog.spec.tsx",
         "apps/web/src/components/youtube-publish-dialog.tsx",
-        "apps/web/src/components/youtube-settings-section.tsx"
-      ]
+        "apps/web/src/components/youtube-settings-section.tsx",
+        "apps/web/src/hooks/use-polled-resource.ts",
+        "apps/web/src/i18n/messages-en.ts",
+        "apps/web/src/i18n/messages-es.ts",
+        "apps/web/src/pages/publish-queue-page.spec.tsx",
+        "apps/web/src/pages/publish-queue-page.tsx"
+      ],
+      "usage": {
+        "provider_model": "claude/sonnet",
+        "effort": "medium",
+        "agent": "implementor-front",
+        "tokens_in": 141358,
+        "tokens_out": 24946,
+        "approx": true,
+        "source": "agent-usage-notification",
+        "recorded_at": "2026-10-13"
+      }
     },
     {
       "id": "TASK-004",
@@ -83,10 +161,20 @@
         "TASK-002",
         "TASK-003"
       ],
-      "status": "pending",
+      "status": "done",
       "files": [
         "sdd/specs/spec-e-burgos-022-youtube-publishing/cycles/cycle-02/artifacts/verification.md"
-      ]
+      ],
+      "usage": {
+        "provider_model": "claude/opus",
+        "effort": "high",
+        "agent": "orchestrator",
+        "tokens_in": 34000,
+        "tokens_out": 6000,
+        "approx": true,
+        "source": "declared-estimate",
+        "recorded_at": "2026-10-13"
+      }
     }
   ]
 }

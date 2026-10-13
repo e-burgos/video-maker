@@ -127,7 +127,7 @@ function request(overrides: Partial<PublishPipelineRequest> = {}): PublishPipeli
     tags: ['uno', 'dos'],
     privacy: 'public',
     publishAt: null,
-    playlistId: null,
+    playlistIds: [],
     thumbnail: null,
     categoryId: '22',
     madeForKids: false,
@@ -401,7 +401,7 @@ describe('runPublishPipeline thumbnail and playlist', () => {
     const h = harness({}, [THUMBNAIL]);
     const watcher = observer();
 
-    await run(h, { thumbnail: 'work/thumb.png', playlistId: 'PL1' }, watcher);
+    await run(h, { thumbnail: 'work/thumb.png', playlistIds: ['PL1'] }, watcher);
 
     const thumbnailCall = h.google.calls.find((call) => call.url.includes('/thumbnails/set'));
     expect(thumbnailCall?.url).toContain('videoId=vid123');
@@ -411,6 +411,17 @@ describe('runPublishPipeline thumbnail and playlist', () => {
       snippet: { playlistId: 'PL1', resourceId: { kind: 'youtube#video', videoId: 'vid123' } },
     });
     expect(watcher.log.stages).toEqual(['prepare', 'upload', 'thumbnail', 'playlist']);
+  });
+
+  it('adds the video to every playlist in order', async () => {
+    const h = harness();
+
+    await run(h, { playlistIds: ['PL1', 'PL2'] }, observer());
+
+    const playlistBodies = h.google.calls
+      .filter((call) => call.url.includes('/playlistItems'))
+      .map((call) => (bodyJson(call) as { snippet: { playlistId: string } }).snippet.playlistId);
+    expect(playlistBodies).toEqual(['PL1', 'PL2']);
   });
 
   it('keeps the uploaded video published when the thumbnail fails and a retry finishes without uploading again', async () => {

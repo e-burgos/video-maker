@@ -125,6 +125,27 @@ export const MIGRATIONS: readonly Migration[] = [
       `CREATE INDEX publications_slug_created_at_idx ON publications (slug, created_at)`,
     ],
   },
+  {
+    version: 7,
+    statements: [
+      `CREATE TABLE publish_queue (
+        id TEXT PRIMARY KEY,
+        slug TEXT NOT NULL REFERENCES projects(slug) ON DELETE CASCADE,
+        file TEXT NOT NULL,
+        metadata TEXT NOT NULL,
+        position INTEGER NOT NULL,
+        status TEXT NOT NULL,
+        attempts INTEGER NOT NULL DEFAULT 0,
+        last_error TEXT,
+        next_attempt_at TEXT,
+        job_id TEXT,
+        url TEXT,
+        created_at TEXT NOT NULL,
+        updated_at TEXT NOT NULL
+      )`,
+      `CREATE INDEX publish_queue_status_position_idx ON publish_queue (status, position)`,
+    ],
+  },
 ];
 
 export function currentUserVersion(sqlite: Database.Database): number {

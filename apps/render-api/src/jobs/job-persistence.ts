@@ -148,7 +148,7 @@ export function toStoredParams(input: CreateJobInput): StoredJobParams {
         tags: input.tags,
         privacy: input.privacy,
         publishAt: input.publishAt,
-        playlistId: input.playlistId,
+        playlistIds: input.playlistIds,
         thumbnail: input.thumbnail,
         categoryId: input.categoryId,
         madeForKids: input.madeForKids,
@@ -248,17 +248,21 @@ export function parseStoredParams(kind: JobKind, value: unknown): StoredJobParam
       return { kind: 'motion', phase, output, takes, ...(value.sample === undefined ? {} : { sample: { seconds: value.sample.seconds } }) };
     }
     case 'publish': {
-      const { platform, file, title, description, tags, privacy, publishAt, playlistId, thumbnail, categoryId, madeForKids, defaultLanguage } = value;
+      const { platform, file, title, description, tags, privacy, publishAt, playlistId, playlistIds, thumbnail, categoryId, madeForKids, defaultLanguage } = value;
       if (!isPublishPlatform(platform) || typeof file !== 'string' || typeof title !== 'string') {
         return null;
       }
       if (typeof description !== 'string' || !isStringArray(tags) || !isPublishPrivacy(privacy)) {
         return null;
       }
-      if (!isStringOrNull(publishAt) || !isStringOrNull(playlistId) || !isStringOrNull(thumbnail)) {
+      if (!isStringOrNull(publishAt) || (playlistId !== undefined && !isStringOrNull(playlistId)) || !isStringOrNull(thumbnail)) {
         return null;
       }
       if (typeof categoryId !== 'string' || typeof madeForKids !== 'boolean' || typeof defaultLanguage !== 'string') {
+        return null;
+      }
+      const storedPlaylistIds = playlistIds === undefined ? (typeof playlistId === 'string' ? [playlistId] : []) : playlistIds;
+      if (!isStringArray(storedPlaylistIds)) {
         return null;
       }
       return {
@@ -270,7 +274,7 @@ export function parseStoredParams(kind: JobKind, value: unknown): StoredJobParam
         tags,
         privacy,
         publishAt,
-        playlistId,
+        playlistIds: storedPlaylistIds,
         thumbnail,
         categoryId,
         madeForKids,

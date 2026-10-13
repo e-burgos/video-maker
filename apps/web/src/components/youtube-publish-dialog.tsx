@@ -7,6 +7,7 @@ import { formatDateTime } from '../api/format-updated-at';
 import { useRenderApi } from '../api/render-api-context';
 import {
   buildPublishInput,
+  buildQueueInput,
   emptyPublishFormValues,
   formatPublishDuration,
   publishIssues,
@@ -25,6 +26,7 @@ import { YouTubePublishProgress } from './youtube-publish-progress';
 import { YouTubeVisibilityFields } from './youtube-visibility-fields';
 import type { AssetListEntry } from '../api/render-api-types';
 import type { YouTubePublishFormValues, YouTubePublishIssue } from '../api/youtube-publish-form';
+import type { PublishQueueAddResult } from '../api/publish-queue-types';
 import type { YouTubePublishOptions } from '../api/youtube-types';
 
 export type YouTubePublishDialogProps = {
@@ -33,7 +35,7 @@ export type YouTubePublishDialogProps = {
   onPublished: () => void;
 };
 
-type Phase = 'form' | 'confirm' | 'job';
+type Phase = 'form' | 'confirm' | 'job' | 'queued';
 
 const ISSUE_MESSAGE: Readonly<Record<YouTubePublishIssue, TranslationKey>> = {
   fileMissing: 'youtube.publish.issue.fileMissing',
@@ -112,6 +114,7 @@ export function YouTubePublishDialog({ slug, onClose, onPublished }: YouTubePubl
   const [jobId, setJobId] = useState<string | null>(null);
   const [attempt, setAttempt] = useState(0);
   const [ignoreReview, setIgnoreReview] = useState(false);
+  const [queued, setQueued] = useState<PublishQueueAddResult | null>(null);
 
   const optionsData = options.data;
   const initialValues = useMemo(
@@ -125,6 +128,8 @@ export function YouTubePublishDialog({ slug, onClose, onPublished }: YouTubePubl
     client.createPublishJob(slug, input),
   );
 
+  const enqueue = useApiAction((input: ReturnType<typeof buildQueueInput>) => client.addToPublishQueue(input));
+
   const patch = useCallback(
     (change: Partial<YouTubePublishFormValues>) => {
       setEdited((current) => ({ ...(current ?? initialValues), ...change }));
@@ -136,7 +141,8 @@ export function YouTubePublishDialog({ slug, onClose, onPublished }: YouTubePubl
   const visibleIssues = issues.filter((issue) => issue !== 'titleEmpty' && issue !== 'fileMissing');
   const selectedFile = optionsData?.files.find((file) => file.path === values.file) ?? null;
   const reviewBlocksPublish = selectedFile?.reviewStatus === 'fail' && !ignoreReview;
-  const canSubmit = issues.length === 0 && publish.status !== 'pending' && !reviewBlocksPublish;
+  const canSubmit =
+    issues.length === 0 && publish.status !== 'pending' && enqueue.status !== 'pending' && !reviewBlocksPublish;
 
   function close(): void {
     if (jobId !== null) {
@@ -157,6 +163,14 @@ export function YouTubePublishDialog({ slug, onClose, onPublished }: YouTubePubl
     if (job !== null) {
       setJobId(job.id);
       setPhase('job');
+    }
+  }
+
+  async function addToQueue() {
+    const result = await enqueue.run(buildQueueInput(slug, values, ignoreReview && selectedFile?.reviewStatus === 'fail'));
+    if (result !== null) {
+      setQueued(result);
+      setPhase('queued');
     }
   }
 
@@ -185,11 +199,12 @@ export function YouTubePublishDialog({ slug, onClose, onPublished }: YouTubePubl
 
   const loading = integration.status === 'loading' || (connected && options.status === 'loading');
   const loadError = integration.error ?? options.error;
-  const formDisabled = draft.status === 'pending' || publish.status === 'pending';
+  const formDisabled =
+    draft.status === 'pending' || publish.status === 'pending' || enqueue.status === 'pending';
   const noFiles = optionsData !== null && optionsData.files.length === 0;
 
   let footer: ReactNode;
-  if (phase === 'job') {
+  if (phase === 'job' || phase === 'queued') {
     footer = (
       <button type="button" onClick={close} className={SECONDARY_BUTTON_CLASS}>
         {t('youtube.publish.close')}
@@ -217,6 +232,15 @@ export function YouTubePublishDialog({ slug, onClose, onPublished }: YouTubePubl
       <>
         <button type="button" onClick={close} className={SECONDARY_BUTTON_CLASS}>
           {t('youtube.publish.cancel')}
+        </button>
+        <button
+          type="button"
+          data-testid="youtube-publish-queue"
+          disabled={!connected || !canSubmit}
+          onClick={() => void addToQueue()}
+          className={SECONDARY_BUTTON_CLASS}
+        >
+          {enqueue.status === 'pending' ? t('youtube.publish.addingToQueue') : t('youtube.publish.addToQueue')}
         </button>
         <button
           type="button"
@@ -356,6 +380,7 @@ export function YouTubePublishDialog({ slug, onClose, onPublished }: YouTubePubl
               )}
 
               {publish.error !== null && <ErrorNotice error={publish.error} />}
+              {enqueue.error !== null && <ErrorNotice error={enqueue.error} />}
             </>
           )}
         </div>
@@ -367,6 +392,34 @@ export function YouTubePublishDialog({ slug, onClose, onPublished }: YouTubePubl
             {confirmationText()}
           </p>
           {publish.error !== null && <ErrorNotice error={publish.error} />}
+        </div>
+      )}
+
+      {phase === 'queued' && queued !== null && (
+        <div data-testid="youtube-queued" className="space-y-3">
+          <p className="text-slate-100">{t('youtube.publish.queued')}</p>
+          {queued.alreadyPublished !== null && (
+            <p data-testid="youtube-queued-already-published" role="alert" className="text-amber-300">
+              {queued.alreadyPublished.url === null ? (
+                t('youtube.publish.queuedAlreadyPublishedNoLink')
+              ) : (
+                <>
+                  {t('youtube.publish.queuedAlreadyPublished')}{' '}
+                  <a
+                    href={queued.alreadyPublished.url}
+                    target="_blank"
+                    rel="noreferrer noopener"
+                    className="underline hover:text-amber-200"
+                  >
+                    {queued.alreadyPublished.url}
+                  </a>
+                </>
+              )}
+            </p>
+          )}
+          <Link to="/publish-queue" className="text-sky-300 underline hover:text-sky-200">
+            {t('youtube.publish.goToQueue')}
+          </Link>
         </div>
       )}
 

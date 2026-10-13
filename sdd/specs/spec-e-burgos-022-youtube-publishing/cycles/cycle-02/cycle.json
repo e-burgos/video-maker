@@ -14,26 +14,179 @@
     "Cola de publicación programada dentro del estudio: límite diario del canal, reintento horario, aviso de ya publicado y listas por categoría",
     "Reemplazar publish-queue.sh y publish.sh y migrar la cola actual sin publicar"
   ],
-  "status": "in-progress",
+  "status": "completed",
   "started_at": "2026-10-13",
-  "completed_at": null,
+  "completed_at": "2026-10-13",
   "documents": {
     "plan": "sdd/specs/spec-e-burgos-022-youtube-publishing/cycles/cycle-02/plan.md",
     "tasks": "sdd/specs/spec-e-burgos-022-youtube-publishing/cycles/cycle-02/tasks.json"
   },
-  "artifacts": [],
+  "artifacts": [
+    "sdd/specs/spec-e-burgos-022-youtube-publishing/cycles/cycle-02/artifacts/verification.md"
+  ],
   "metrics": {
     "tasks_total": 4,
-    "tasks_completed": 0,
+    "tasks_completed": 4,
     "tasks_skipped": 0,
     "story_points": 18,
-    "files_created": [],
-    "files_modified": [],
-    "files_deleted": []
+    "files_created": [
+      "apps/render-api/src/http/handlers/publish-queue-handler.spec.ts",
+      "apps/render-api/src/http/handlers/publish-queue-handler.ts",
+      "apps/render-api/src/youtube/publish-queue-job-launcher.spec.ts",
+      "apps/render-api/src/youtube/publish-queue-job-launcher.ts",
+      "apps/render-api/src/youtube/publish-queue-scheduler.spec.ts",
+      "apps/render-api/src/youtube/publish-queue-scheduler.ts",
+      "apps/render-api/src/youtube/publish-queue-settings.ts",
+      "apps/render-api/src/youtube/resolve-publish-language.ts",
+      "apps/web/src/api/__fixtures__/publish-queue.ts",
+      "apps/web/src/api/parse-publish-queue.spec.ts",
+      "apps/web/src/api/parse-publish-queue.ts",
+      "apps/web/src/api/publish-queue-types.ts",
+      "apps/web/src/api/publish-queue-view.ts",
+      "apps/web/src/components/youtube-category-playlists-section.spec.tsx",
+      "apps/web/src/components/youtube-category-playlists-section.tsx",
+      "apps/web/src/hooks/use-polled-resource.ts",
+      "apps/web/src/pages/publish-queue-page.spec.tsx",
+      "apps/web/src/pages/publish-queue-page.tsx",
+      "libs/local-store/src/repositories/publish-queue-repository.spec.ts",
+      "libs/local-store/src/repositories/publish-queue-repository.ts"
+    ],
+    "files_modified": [
+      "apps/render-api/src/__fixtures__/fake-render-api-dependencies.ts",
+      "apps/render-api/src/deps/node-render-api-dependencies.ts",
+      "apps/render-api/src/deps/render-api-dependencies.ts",
+      "apps/render-api/src/errors/http-status-for.spec.ts",
+      "apps/render-api/src/errors/http-status-for.ts",
+      "apps/render-api/src/errors/render-api-error.ts",
+      "apps/render-api/src/errors/to-error-payload.ts",
+      "apps/render-api/src/http/create-render-api-server.ts",
+      "apps/render-api/src/http/handle-request.ts",
+      "apps/render-api/src/http/handlers/jobs-handler.ts",
+      "apps/render-api/src/http/handlers/youtube-handlers.spec.ts",
+      "apps/render-api/src/http/handlers/youtube-publish-handler.ts",
+      "apps/render-api/src/http/render-api-runtime.ts",
+      "apps/render-api/src/http/routes.ts",
+      "apps/render-api/src/jobs/job-persistence.spec.ts",
+      "apps/render-api/src/jobs/job-persistence.ts",
+      "apps/render-api/src/jobs/publish-job-params.spec.ts",
+      "apps/render-api/src/jobs/publish-job-params.ts",
+      "apps/render-api/src/jobs/render-job-queue.ts",
+      "apps/render-api/src/jobs/render-job.ts",
+      "apps/render-api/src/jobs/run-publish-pipeline.spec.ts",
+      "apps/render-api/src/jobs/run-publish-pipeline.ts",
+      "apps/web/src/api/render-api-client.ts",
+      "apps/web/src/api/youtube-publish-form.ts",
+      "apps/web/src/app/app.tsx",
+      "apps/web/src/components/studio-layout.tsx",
+      "apps/web/src/components/youtube-publish-dialog.spec.tsx",
+      "apps/web/src/components/youtube-publish-dialog.tsx",
+      "apps/web/src/components/youtube-settings-section.tsx",
+      "apps/web/src/i18n/messages-en.ts",
+      "apps/web/src/i18n/messages-es.ts",
+      "libs/local-store/src/database/migrations.spec.ts",
+      "libs/local-store/src/database/migrations.ts",
+      "libs/local-store/src/index.ts",
+      "libs/local-store/src/repositories/publications-repository.spec.ts",
+      "libs/local-store/src/repositories/publications-repository.ts",
+      "libs/local-store/src/schema/studio-schema.ts"
+    ],
+    "files_deleted": [],
+    "usage": {
+      "tokens_in": 360824,
+      "tokens_out": 63676,
+      "approx": true,
+      "source": "declared-estimate",
+      "by_agent": [
+        {
+          "agent": "orchestrator",
+          "label": "solo",
+          "provider_model": "claude/opus",
+          "effort": "high",
+          "tokens_in": 34000,
+          "tokens_out": 6000,
+          "tokens_total": 40000,
+          "approx": true,
+          "source": "declared-estimate",
+          "recorded_at": "2026-10-13"
+        },
+        {
+          "agent": "implementor-back",
+          "label": "Tabla, scheduler y rutas de la cola",
+          "provider_model": "claude/sonnet",
+          "effort": "medium",
+          "tokens_in": 185467,
+          "tokens_out": 32729,
+          "tokens_total": 218196,
+          "approx": true,
+          "source": "agent-usage-notification",
+          "recorded_at": "2026-10-13"
+        },
+        {
+          "agent": "implementor-front",
+          "label": "Página de la cola, diálogo y listas por categoría",
+          "provider_model": "claude/sonnet",
+          "effort": "medium",
+          "tokens_in": 141358,
+          "tokens_out": 24946,
+          "tokens_total": 166304,
+          "approx": true,
+          "source": "agent-usage-notification",
+          "recorded_at": "2026-10-13"
+        }
+      ],
+      "by_tier": {
+        "claude/opus": {
+          "tokens_in": 34000,
+          "tokens_out": 6000,
+          "approx": true,
+          "source": "declared-estimate"
+        },
+        "claude/sonnet": {
+          "tokens_in": 326825,
+          "tokens_out": 57675,
+          "approx": true,
+          "source": "declared-estimate"
+        }
+      }
+    }
   },
-  "tables_created": [],
-  "endpoints_implemented": [],
+  "tables_created": [
+    "publish_queue"
+  ],
+  "endpoints_implemented": [
+    "EP-067",
+    "EP-068",
+    "EP-069",
+    "EP-070",
+    "EP-071",
+    "EP-072",
+    "EP-073"
+  ],
   "components_created": [],
-  "issues_found": [],
-  "reviewer_report": null
+  "issues_found": [
+    "Al retomar un subagente, su conteo de tokens es acumulado: no sumar los informes de cada tramo.",
+    "El studio en marcha corre el backend viejo hasta reiniciarlo: la integración web se verifica recién tras el reinicio."
+  ],
+  "reviewer_report": {
+    "approved": true,
+    "date": "2026-10-13",
+    "ca_results": {
+      "US-022-201": "OK — cola en SQLite, publicador único, pausar/reanudar, reordenar (probado en el studio), quitar y reintentar con tests.",
+      "US-022-202": "OK en tests (cuota → +1 h a toda la cola; not connected → pausa); sin publicación real hasta el punto 13.",
+      "US-022-203": "OK — mapeo de 7 categorías + general guardado y visible; aviso de ya publicado en el diálogo y en la API (tests).",
+      "US-022-204": "OK — 9 videos migrados en orden, pausada, scripts retirados."
+    },
+    "notes": "Ciclo lite de un solo actor (orquestador) con implementadores; verificación en artifacts/verification.md.",
+    "tests": {
+      "sdd:validate": "OK",
+      "lint": "local-store, render-api, web verdes",
+      "test": "80 + 2218 + 1633",
+      "build": "verde (incluye desktop)",
+      "e2e": "studio real: cola migrada y pausada, reordenar, listas por categoría"
+    },
+    "follow_ups": [
+      "cycle-03: tool del productor para publicar y apertura del login de Google con shell.openExternal en la app de escritorio",
+      "Punto 13: reactivar la cola y verificar la publicación real"
+    ]
+  }
 }

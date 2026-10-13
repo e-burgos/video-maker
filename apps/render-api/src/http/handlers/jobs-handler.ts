@@ -29,15 +29,13 @@ import { parsePublishJobInput } from '../../jobs/publish-job-params';
 import { parseReferenceJobInput } from '../../jobs/reference-job-params';
 import { parseReviewJobInput } from '../../jobs/review-job-params';
 import { parseSampleInput } from '../../jobs/sample-job-params';
-import { createProjectBrandResolver } from '../../brands/project-brand-resolver';
 import {
   assertPublishableThumbnail,
   assertPublishableVideo,
   assertRenderReviewAllowsPublish,
   assertYoutubeReady,
-  publishLanguageFromVoice,
 } from '../../youtube/publish-preconditions';
-import { YOUTUBE_DEFAULT_LANGUAGE } from '../../youtube/youtube-constants';
+import { resolvePublishLanguage } from '../../youtube/resolve-publish-language';
 import { assertVoiceTracksNotPersisted, selectVoiceScenes } from '../../voice/select-voice-scenes';
 import {
   assertVoiceScriptTrackNotPersisted,
@@ -309,23 +307,6 @@ async function createMotionJobResponse(
 }
 
 type PublishParams = Omit<CreatePublishJobInput, 'kind' | 'slug' | 'projectRoot'>;
-
-async function resolvePublishLanguage(
-  deps: RenderApiDependencies,
-  store: StoreConfig,
-  slug: string,
-  requested: string | null,
-): Promise<string> {
-  if (requested !== null) {
-    return requested;
-  }
-  try {
-    const brand = await createProjectBrandResolver(deps, store)(slug);
-    return publishLanguageFromVoice(brand?.voice.id ?? null);
-  } catch {
-    return YOUTUBE_DEFAULT_LANGUAGE;
-  }
-}
 
 type ReviewParams = Omit<CreateReviewJobInput, 'kind' | 'slug' | 'projectRoot'>;
 

@@ -32,7 +32,7 @@ export interface PublishPipelineRequest {
   readonly tags: readonly string[];
   readonly privacy: PublishPrivacy;
   readonly publishAt: string | null;
-  readonly playlistId: string | null;
+  readonly playlistIds: readonly string[];
   readonly thumbnail: string | null;
   readonly categoryId: string;
   readonly madeForKids: boolean;
@@ -323,12 +323,20 @@ export async function runPublishPipeline(
       );
     }
 
-    if (request.playlistId !== null) {
-      const playlistId = request.playlistId;
+    if (request.playlistIds.length > 0) {
+      const playlistIds = request.playlistIds;
       const publishedId = videoId;
       publishCheckpoint(observer, 'playlist');
       observer.stageStarted('playlist');
-      await runPublishStage('playlist', () => options.youtube.addToPlaylist(playlistId, publishedId), afterUploadHint);
+      await runPublishStage(
+        'playlist',
+        async () => {
+          for (const playlistId of playlistIds) {
+            await options.youtube.addToPlaylist(playlistId, publishedId);
+          }
+        },
+        afterUploadHint,
+      );
     }
   } catch (cause) {
     if (videoId === null) {

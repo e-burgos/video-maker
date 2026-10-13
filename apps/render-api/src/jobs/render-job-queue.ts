@@ -208,7 +208,7 @@ interface PublishJobRecord extends JobRecordBase {
   readonly tags: readonly string[];
   readonly privacy: PublishPrivacy;
   readonly publishAt: string | null;
-  readonly playlistId: string | null;
+  readonly playlistIds: readonly string[];
   readonly thumbnail: string | null;
   readonly categoryId: string;
   readonly madeForKids: boolean;
@@ -548,7 +548,7 @@ export function createRenderJobQueue(
           tags: record.tags,
           privacy: record.privacy,
           publishAt: record.publishAt,
-          playlistId: record.playlistId,
+          playlistIds: record.playlistIds,
           thumbnail: record.thumbnail,
           categoryId: record.categoryId,
           madeForKids: record.madeForKids,
@@ -813,7 +813,7 @@ export function createRenderJobQueue(
           tags: input.tags,
           privacy: input.privacy,
           publishAt: input.publishAt,
-          playlistId: input.playlistId,
+          playlistIds: input.playlistIds,
           thumbnail: input.thumbnail,
           categoryId: input.categoryId,
           madeForKids: input.madeForKids,

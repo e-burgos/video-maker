@@ -441,7 +441,7 @@ export interface CreatePublishJobInput {
   readonly tags: readonly string[];
   readonly privacy: PublishPrivacy;
   readonly publishAt: string | null;
-  readonly playlistId: string | null;
+  readonly playlistIds: readonly string[];
   readonly thumbnail: string | null;
   readonly categoryId: string;
   readonly madeForKids: boolean;

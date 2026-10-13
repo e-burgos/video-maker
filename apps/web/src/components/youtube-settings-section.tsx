@@ -9,6 +9,7 @@ import { useYouTubeIntegration } from '../hooks/use-youtube-integration';
 import { useT } from '../i18n/language-context';
 import { ErrorNotice } from './error-notice';
 import { Modal } from './modal';
+import { YouTubeCategoryPlaylistsSection } from './youtube-category-playlists-section';
 import type { YouTubeIntegration } from '../api/youtube-types';
 
 const GOOGLE_CLOUD_CREDENTIALS_URL = 'https://console.cloud.google.com/apis/credentials';
@@ -225,6 +226,8 @@ export function YouTubeSettingsSection() {
           </div>
         </div>
       )}
+
+      {data !== null && data.connected && !editingClient && <YouTubeCategoryPlaylistsSection />}
 
       {saveClient.error !== null && <ErrorNotice error={saveClient.error} />}
       {disconnect.error !== null && <ErrorNotice error={disconnect.error} />}

@@ -427,4 +427,40 @@ describe('YouTubePublishDialog', () => {
       expect(screen.queryByTestId('youtube-review-warn')).toBeNull();
     });
   });
+
+  it('adds the file to the queue with the form metadata and links to the queue', async () => {
+    const addToPublishQueue = vi.fn().mockResolvedValue({
+      item: { id: 'q1' },
+      alreadyPublished: null,
+    });
+    renderDialog(baseClient({ addToPublishQueue }));
+
+    await waitForForm();
+    fireEvent.change(screen.getByLabelText('Title'), { target: { value: 'Queued title' } });
+    fireEvent.change(screen.getByLabelText('Playlist (optional)'), { target: { value: 'PL1' } });
+    fireEvent.click(screen.getByTestId('youtube-publish-queue'));
+
+    await waitFor(() => expect(screen.getByTestId('youtube-queued')).toBeTruthy());
+    expect(addToPublishQueue).toHaveBeenCalledWith(
+      expect.objectContaining({ slug: 'demo', file: 'out/short.mp4', title: 'Queued title', playlistIds: ['PL1'] }),
+    );
+    expect(screen.queryByTestId('youtube-queued-already-published')).toBeNull();
+    expect(screen.getByRole('link', { name: 'Go to the publish queue' }).getAttribute('href')).toBe('/publish-queue');
+  });
+
+  it('warns with the link when the queued file is already published', async () => {
+    const addToPublishQueue = vi.fn().mockResolvedValue({
+      item: { id: 'q1' },
+      alreadyPublished: { url: 'https://youtu.be/abc' },
+    });
+    renderDialog(baseClient({ addToPublishQueue }));
+
+    await waitForForm();
+    fireEvent.change(screen.getByLabelText('Title'), { target: { value: 'Again' } });
+    fireEvent.click(screen.getByTestId('youtube-publish-queue'));
+
+    await waitFor(() => expect(screen.getByTestId('youtube-queued-already-published')).toBeTruthy());
+    expect(screen.getByTestId('youtube-queued-already-published').textContent).toContain('This file is already published:');
+    expect(screen.getByRole('link', { name: 'https://youtu.be/abc' }).getAttribute('href')).toBe('https://youtu.be/abc');
+  });
 });

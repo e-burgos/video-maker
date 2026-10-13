@@ -109,8 +109,27 @@ import type {
   YouTubeDraft,
   YouTubeIntegration,
   YouTubePublishInput,
+  YouTubePlaylist,
   YouTubePublishOptions,
 } from './youtube-types';
+import type {
+  CategoryPlaylists,
+  PublishQueue,
+  PublishQueueAddInput,
+  PublishQueueAddResult,
+  PublishQueueItem,
+  PublishQueueItemPatch,
+  PublishQueueSettings,
+  PublishQueueSettingsPatch,
+} from './publish-queue-types';
+import {
+  parseCategoryPlaylists,
+  parsePublishQueue,
+  parsePublishQueueAddResult,
+  parsePublishQueueItem,
+  parsePublishQueueSettings,
+  parseYouTubePlaylistListing,
+} from './parse-publish-queue';
 import type { ReferenceBrief, ReferenceJob, ReferenceSummary } from './reference-types';
 import type { ReviewJob, ReviewReport } from './review-types';
 import type { MaterialReviewDocument } from './material-review-types';
@@ -227,6 +246,14 @@ export type RenderApiClient = {
   getYouTubePublishOptions: (slug: string) => Promise<YouTubePublishOptions>;
   draftYouTubeMetadata: (slug: string, file: string) => Promise<YouTubeDraft>;
   createPublishJob: (slug: string, input: YouTubePublishInput) => Promise<PublishJob>;
+  listYouTubePlaylists: () => Promise<YouTubePlaylist[]>;
+  getPublishQueue: () => Promise<PublishQueue>;
+  addToPublishQueue: (input: PublishQueueAddInput) => Promise<PublishQueueAddResult>;
+  updatePublishQueueItem: (id: string, patch: PublishQueueItemPatch) => Promise<PublishQueueItem>;
+  removePublishQueueItem: (id: string) => Promise<void>;
+  updatePublishQueueSettings: (patch: PublishQueueSettingsPatch) => Promise<PublishQueueSettings>;
+  getCategoryPlaylists: () => Promise<CategoryPlaylists>;
+  putCategoryPlaylists: (input: CategoryPlaylists) => Promise<CategoryPlaylists>;
   getRenderReview: (slug: string, file: string) => Promise<ReviewReport | null>;
   createReviewJob: (slug: string, file: string) => Promise<ReviewJob>;
   listReferences: (slug: string) => Promise<ReferenceSummary[]>;
@@ -1245,6 +1272,96 @@ export function createRenderApiClient(fetchImpl: FetchLike): RenderApiClient {
         (value) => isRecord(value),
       );
       return parsePublishJob(body);
+    },
+
+    async listYouTubePlaylists(): Promise<YouTubePlaylist[]> {
+      const body = await requestJson(
+        '/integrations/youtube/playlists',
+        undefined,
+        'a youtube playlist listing',
+        (value) => isRecord(value),
+      );
+      return parseYouTubePlaylistListing(body);
+    },
+
+    async getPublishQueue(): Promise<PublishQueue> {
+      const body = await requestJson('/publish-queue', undefined, 'a publish queue document', (value) =>
+        isRecord(value),
+      );
+      return parsePublishQueue(body);
+    },
+
+    async addToPublishQueue(input: PublishQueueAddInput): Promise<PublishQueueAddResult> {
+      const body = await requestJson(
+        '/publish-queue/items',
+        {
+          method: 'POST',
+          headers: { 'content-type': 'application/json' },
+          body: JSON.stringify(input),
+        },
+        'a publish queue add result',
+        (value) => isRecord(value),
+      );
+      return parsePublishQueueAddResult(body);
+    },
+
+    async updatePublishQueueItem(id: string, patch: PublishQueueItemPatch): Promise<PublishQueueItem> {
+      const body = await requestJson(
+        `/publish-queue/items/${encodeURIComponent(id)}`,
+        {
+          method: 'PATCH',
+          headers: { 'content-type': 'application/json' },
+          body: JSON.stringify(patch),
+        },
+        'a publish queue item',
+        (value) => isRecord(value),
+      );
+      return parsePublishQueueItem(body);
+    },
+
+    async removePublishQueueItem(id: string): Promise<void> {
+      const response = await send(`/publish-queue/items/${encodeURIComponent(id)}`, { method: 'DELETE' });
+      if (!response.ok) {
+        throw fromErrorResponse(response.status, await readJson(response));
+      }
+    },
+
+    async updatePublishQueueSettings(patch: PublishQueueSettingsPatch): Promise<PublishQueueSettings> {
+      const body = await requestJson(
+        '/publish-queue/settings',
+        {
+          method: 'PUT',
+          headers: { 'content-type': 'application/json' },
+          body: JSON.stringify(patch),
+        },
+        'publish queue settings',
+        (value) => isRecord(value),
+      );
+      return parsePublishQueueSettings(body);
+    },
+
+    async getCategoryPlaylists(): Promise<CategoryPlaylists> {
+      const body = await requestJson(
+        '/integrations/youtube/category-playlists',
+        undefined,
+        'a category playlists document',
+        (value) => isRecord(value),
+      );
+      return parseCategoryPlaylists(body);
+    },
+
+    async putCategoryPlaylists(input: CategoryPlaylists): Promise<CategoryPlaylists> {
+      const body = await requestJson(
+        '/integrations/youtube/category-playlists',
+        {
+          method: 'PUT',
+          headers: { 'content-type': 'application/json' },
+          body: JSON.stringify(input),
+        },
+        'a category playlists document',
+        (value) => isRecord(value),
+      );
+      return parseCategoryPlaylists(body);
     },
 
     async getRenderReview(slug: string, file: string): Promise<ReviewReport | null> {

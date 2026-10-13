@@ -6,6 +6,7 @@ import type {
   ProducerRepository,
   ProjectsRepository,
   PublicationsRepository,
+  PublishQueueRepository,
   SettingsRepository,
 } from '@video-maker/local-store';
 import type {
@@ -271,6 +272,7 @@ export interface LocalStorePort {
   readonly settings: SettingsRepository;
   readonly assets: AssetsRepository;
   readonly publications: PublicationsRepository;
+  readonly publishQueue: PublishQueueRepository;
   readonly schemaVersion: number;
   readonly close: () => void;
 }

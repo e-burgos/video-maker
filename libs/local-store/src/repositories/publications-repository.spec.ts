@@ -127,4 +127,13 @@ describe('createPublicationsRepository', () => {
 
     expect(repository.listByProject('demo')).toEqual([]);
   });
+
+  it('counts the publications created since an instant with the given statuses', () => {
+    const repository = createPublicationsRepository(db);
+    repository.insert(newPublication({ id: 'pub-1', status: 'published', createdAt: '2026-10-08T09:00:00.000Z' }));
+    repository.insert(newPublication({ id: 'pub-2', status: 'scheduled', createdAt: '2026-10-08T11:00:00.000Z' }));
+    repository.insert(newPublication({ id: 'pub-3', status: 'failed', createdAt: '2026-10-08T12:00:00.000Z' }));
+
+    expect(repository.countCreatedSince('2026-10-08T10:00:00.000Z', ['published', 'scheduled'])).toBe(1);
+  });
 });

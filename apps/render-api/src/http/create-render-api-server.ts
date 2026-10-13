@@ -88,12 +88,14 @@ export function createRenderApiServer(
     listen: () =>
       new Promise((resolve) => {
         server.listen(config.port, config.host, () => {
+          runtime.publishQueue.start();
           const address = server.address() as AddressInfo;
           resolve({ host: address.address, port: address.port });
         });
       }),
 
     close: () => {
+      runtime.publishQueue.stop();
       runtime.producerTurns.cancelAll();
       return new Promise((resolve, reject) => {
         server.close((cause) => {
