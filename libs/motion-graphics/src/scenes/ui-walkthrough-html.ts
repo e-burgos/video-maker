@@ -4,7 +4,7 @@ import { resolveWalkthroughStep } from '../storyboard/resolve-walkthrough-boxes'
 import type { ResolvedWalkthroughStep } from '../storyboard/resolve-walkthrough-boxes';
 import { animAttrs, esc, headline } from './scene-html';
 import type { SceneContext } from './scene-html';
-import { cameraKeyframes, pointRect } from './ui-auto-zoom';
+import { cameraKeyframes, focusWindow, pointRect } from './ui-auto-zoom';
 import type { CameraFocus, UnitRect } from './ui-auto-zoom';
 
 type WalkthroughProps = SceneOf<'ui-walkthrough'>['props'];
@@ -59,10 +59,33 @@ function stepAttrs(step: ResolvedWalkthroughStep, index: number, count: number, 
   return ` data-ui-step="${step.action}"${animAttrs({ anim, cue: step.cue, at: step.cue === undefined ? step.at : undefined, parallel: true, extra: { ...slot, ...cursor, ...extra } })}`;
 }
 
-function calloutPlacement(step: ResolvedWalkthroughStep): string {
-  const horizontal = step.x < CALLOUT_ALIGN_EDGE ? 'h-start' : step.x > 1 - CALLOUT_ALIGN_EDGE ? 'h-end' : 'h-mid';
-  const vertical = step.y < CALLOUT_BELOW_UNTIL ? 'v-below' : 'v-above';
+const FULL_CAPTURE: UnitRect = { x: 0, y: 0, w: 1, h: 1 };
+
+function calloutPlacement(step: ResolvedWalkthroughStep, view: UnitRect = FULL_CAPTURE): string {
+  const x = (step.x - view.x) / view.w;
+  const y = (step.y - view.y) / view.h;
+  const horizontal = x < CALLOUT_ALIGN_EDGE ? 'h-start' : x > 1 - CALLOUT_ALIGN_EDGE ? 'h-end' : 'h-mid';
+  const vertical = y < CALLOUT_BELOW_UNTIL ? 'v-below' : 'v-above';
   return `${horizontal} ${vertical}`;
+}
+
+function insideCapture(view: UnitRect): UnitRect {
+  const w = Math.min(view.w, 1);
+  const h = Math.min(view.h, 1);
+  return { x: Math.min(Math.max(view.x, 0), 1 - w), y: Math.min(Math.max(view.y, 0), 1 - h), w, h };
+}
+
+export function visibleViews(steps: readonly ResolvedWalkthroughStep[], camera: readonly (CameraFocus | null)[] | null): UnitRect[] {
+  let current: UnitRect = FULL_CAPTURE;
+  return steps.map((step, index) => {
+    const focus = camera?.[index];
+    if (focus) current = insideCapture(focusWindow(focus));
+    if (step.action === 'zoom') {
+      const zoom = resolveStepGeometry(step).zoom;
+      if (zoom) current = insideCapture(focusWindow({ scale: zoom.scale, cx: zoom.cx, cy: zoom.cy }));
+    }
+    return current;
+  });
 }
 
 function stepRect(step: ResolvedWalkthroughStep): UnitRect | null {
@@ -86,7 +109,7 @@ function cameraAttrs(focus: CameraFocus | null | undefined): Record<string, numb
   return { 'cam-scale': round(focus.scale), 'cam-cx': round(focus.cx), 'cam-cy': round(focus.cy) };
 }
 
-function stepHtml(step: ResolvedWalkthroughStep, index: number, count: number, camera?: CameraFocus | null): string {
+function stepHtml(step: ResolvedWalkthroughStep, index: number, count: number, camera?: CameraFocus | null, view?: UnitRect): string {
   const geometry = resolveStepGeometry(step);
   const cam = cameraAttrs(camera);
   const { box } = geometry;
@@ -100,7 +123,7 @@ function stepHtml(step: ResolvedWalkthroughStep, index: number, count: number, c
     case 'highlight':
       return box ? `<div class="mg-ui-highlight" style="${percentStyle({ left: box.x, top: box.y, width: box.w, height: box.h })}"${stepAttrs(step, index, count, 'ui-highlight', geometry, cam)}></div>` : '';
     case 'callout':
-      return `<div class="mg-ui-anchor" style="${percentStyle({ left: step.x, top: step.y })}"${stepAttrs(step, index, count, 'ui-callout', geometry, cam)}><div class="mg-ui-bubble ${calloutPlacement(step)}"><div class="mg-ui-bubble-body">${esc(step.text ?? '')}</div></div></div>`;
+      return `<div class="mg-ui-anchor" style="${percentStyle({ left: step.x, top: step.y })}"${stepAttrs(step, index, count, 'ui-callout', geometry, cam)}><div class="mg-ui-bubble ${calloutPlacement(step, view)}"><div class="mg-ui-bubble-body">${esc(step.text ?? '')}</div></div></div>`;
     case 'zoom':
       return geometry.zoom ? `<i class="mg-ui-mark"${stepAttrs(step, index, count, 'ui-zoom', geometry, { scale: geometry.zoom.scale, cx: geometry.zoom.cx, cy: geometry.zoom.cy })}></i>` : '';
   }
@@ -121,7 +144,8 @@ export function uiWalkthrough(props: WalkthroughProps, ctx: SceneContext): strin
     return result;
   });
   const camera = resolveAutoCamera(resolved, props.autoZoom);
-  const steps = resolved.map((step, index) => stepHtml(step, index, resolved.length, camera?.[index])).join('');
+  const views = visibleViews(resolved, camera);
+  const steps = resolved.map((step, index) => stepHtml(step, index, resolved.length, camera?.[index], views[index])).join('');
   const layer = `<div class="mg-ui-layer">${camera ? AUTO_CAMERA_MARK : ''}${steps}<div class="mg-ui-track" data-ui-cursor="1"${animAttrs({ anim: 'ui-cursor', parallel: true })}>${CURSOR_SVG}</div></div>`;
   const shot = `<div class="mg-ui-shot"><div class="mg-ui-zoom"><img src="${esc(ctx.imageUrl(props.image))}" alt="" />${layer}</div></div>`;
   const device = `<div class="mg-ui-device ${kind}"${animAttrs({ anim: 'rise', parallel: true })}>${kind === 'browser' ? browserBar(props.url) : ''}${shot}</div>`;
