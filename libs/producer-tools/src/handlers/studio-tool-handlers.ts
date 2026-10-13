@@ -51,6 +51,19 @@ const MATERIAL_HINT =
   'view_images every image of the project (get_project_overview lists them) and every brand photo (brand:<key>) you plan to use, ' +
   'then call review_material with what each one really shows and whether it fits the idea, and the gaps the idea has; then propose again.';
 
+function isEmptyList(value: unknown): boolean {
+  return !Array.isArray(value) || value.length === 0;
+}
+
+function assertMaterialReviewIsNotEmpty(draft: Readonly<Record<string, unknown>>): void {
+  if (isEmptyList(draft.items) && isEmptyList(draft.gaps)) {
+    throw new StudioToolRuntimeError(
+      'INVALID_INPUT',
+      'an empty material review is not a review: list every image you viewed (project images and the brand photos you intend to use, after view_images) in items, and what the idea needs that the project does not bring (screen captures, product photos) in gaps',
+    );
+  }
+}
+
 async function assertMaterialReviewed(client: RenderApiClient): Promise<void> {
   const [review, assets] = await Promise.all([client.getMaterialReview(), client.listProjectAssets()]);
   if (review === null) {
@@ -532,6 +545,7 @@ export function createStudioToolHandlers(
 
     review_material: async (rawInput) => {
       const draft = parseInput<Record<string, unknown>>(STUDIO_TOOLS.review_material.input, rawInput);
+      assertMaterialReviewIsNotEmpty(draft);
       const review = await client.putMaterialReview(draft);
       return withOutput('review_material', {
         saved: true,
