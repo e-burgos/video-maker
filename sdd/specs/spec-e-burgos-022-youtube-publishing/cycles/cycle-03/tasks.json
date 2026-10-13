@@ -23,13 +23,33 @@
       "estimation_hours": 3,
       "story_points": 5,
       "depends_on": [],
-      "status": "pending",
+      "status": "done",
       "files": [
+        "apps/render-api/src/producer/producer-stream-events.ts",
+        "apps/render-api/src/youtube/draft-youtube-metadata.spec.ts",
+        "apps/render-api/src/youtube/draft-youtube-metadata.ts",
+        "libs/producer-tools/src/__fixtures__/fake-render-api-client.ts",
+        "libs/producer-tools/src/client/http-render-api-client.spec.ts",
+        "libs/producer-tools/src/client/http-render-api-client.ts",
+        "libs/producer-tools/src/client/render-api-client.ts",
+        "libs/producer-tools/src/contract/tool-names.spec.ts",
         "libs/producer-tools/src/contract/tool-names.ts",
         "libs/producer-tools/src/contract/tool-schemas.ts",
+        "libs/producer-tools/src/handlers/studio-tool-handlers.spec.ts",
         "libs/producer-tools/src/handlers/studio-tool-handlers.ts",
+        "libs/producer-tools/src/prompt/build-producer-prompt.spec.ts",
         "libs/producer-tools/src/prompt/build-producer-prompt.ts"
-      ]
+      ],
+      "usage": {
+        "provider_model": "claude/sonnet",
+        "effort": "medium",
+        "agent": "implementor-back",
+        "tokens_in": 108010,
+        "tokens_out": 19060,
+        "approx": true,
+        "source": "agent-usage-notification",
+        "recorded_at": "2026-10-13"
+      }
     },
     {
       "id": "TASK-002",
@@ -40,11 +60,22 @@
       "estimation_hours": 2,
       "story_points": 3,
       "depends_on": [],
-      "status": "pending",
+      "status": "done",
       "files": [
-        "apps/desktop/src/main/main.ts",
-        "apps/desktop/src/main/external-navigation.ts"
-      ]
+        "apps/desktop/src/main/external-navigation.spec.ts",
+        "apps/desktop/src/main/external-navigation.ts",
+        "apps/desktop/src/main/main.ts"
+      ],
+      "usage": {
+        "provider_model": "claude/sonnet",
+        "effort": "medium",
+        "agent": "implementor-front",
+        "tokens_in": 71657,
+        "tokens_out": 12645,
+        "approx": true,
+        "source": "agent-usage-notification",
+        "recorded_at": "2026-10-13"
+      }
     },
     {
       "id": "TASK-003",
@@ -59,10 +90,20 @@
         "TASK-001",
         "TASK-002"
       ],
-      "status": "pending",
+      "status": "done",
       "files": [
         "sdd/specs/spec-e-burgos-022-youtube-publishing/cycles/cycle-03/artifacts/verification.md"
-      ]
+      ],
+      "usage": {
+        "provider_model": "claude/opus",
+        "effort": "high",
+        "agent": "orchestrator",
+        "tokens_in": 38250,
+        "tokens_out": 6750,
+        "approx": true,
+        "source": "declared-estimate",
+        "recorded_at": "2026-10-13"
+      }
     }
   ]
 }

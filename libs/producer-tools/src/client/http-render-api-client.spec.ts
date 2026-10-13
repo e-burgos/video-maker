@@ -536,4 +536,34 @@ describe('createHttpRenderApiClient', () => {
     const headers = calls[0]?.init?.headers as Record<string, string> | undefined;
     expect(headers?.[STUDIO_TOKEN_HEADER]).toBe('secret-token');
   });
+
+  it('las rutas de publicación apuntan al proyecto y a la cola', async () => {
+    const ownItem = { id: 'q1', slug: 'pitch-deck', file: 'out/a.mp4', status: 'queued', url: null, nextAttemptAt: null, lastError: null };
+    const otherItem = { ...ownItem, id: 'q2', slug: 'otro-proyecto' };
+    const queue = { settings: { paused: false, dailyLimit: 6 }, publishedLast24h: 0, nextAttemptAt: null, items: [ownItem, otherItem] };
+    const fake = createFakeFetch((call) => {
+      if (call.url.endsWith('/publish/youtube/options')) return jsonResponse(200, { files: [{ path: 'out/a.mp4' }, { path: 'out/b.mp4' }] });
+      if (call.url.endsWith('/publish/youtube/draft')) return jsonResponse(200, { title: 'T', description: 'D', tags: [] });
+      if (call.url.endsWith('/publications')) return jsonResponse(200, [{ file: 'out/a.mp4' }]);
+      if (call.url.endsWith('/publish-queue')) return jsonResponse(200, queue);
+      return jsonResponse(201, { item: { id: 'q1' }, alreadyPublished: null });
+    });
+    const api = client(fake.fetchImpl);
+
+    expect(await api.listPublishableFiles()).toEqual(['out/a.mp4', 'out/b.mp4']);
+    await api.draftPublication('out/a.mp4');
+    expect(await api.listPublications()).toEqual([{ file: 'out/a.mp4' }]);
+    expect(await api.getPublishQueue()).toEqual({ ...queue, items: [ownItem] });
+    await api.queuePublication({ title: 'T', privacy: 'public' });
+
+    expect(fake.calls.map((call) => `${call.init?.method} ${call.url}`)).toEqual([
+      'GET http://127.0.0.1:4599/projects/pitch-deck/publish/youtube/options',
+      'POST http://127.0.0.1:4599/projects/pitch-deck/publish/youtube/draft',
+      'GET http://127.0.0.1:4599/projects/pitch-deck/publications',
+      'GET http://127.0.0.1:4599/publish-queue',
+      'POST http://127.0.0.1:4599/publish-queue/items',
+    ]);
+    expect(JSON.parse(String(fake.calls[1]?.init?.body))).toEqual({ file: 'out/a.mp4' });
+    expect(JSON.parse(String(fake.calls[4]?.init?.body))).toEqual({ slug: 'pitch-deck', title: 'T', privacy: 'public' });
+  });
 });

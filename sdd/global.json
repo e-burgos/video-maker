@@ -236,9 +236,7 @@
       "description": "Calidad de producción: revisión automática de renders (niveles por pista, cuadros, subtítulos, contrato de entrega), escena de UI en motion, dirección de voz y música por tramos, propuesta con aprobación y muestra, y análisis de un video de referencia local, y criterio visual del productor (revisión de material, cajas como dato, revisión visual por escena con evidencia)",
       "cycles_completed": 6,
       "completed_at": "2026-10-12"
-    }
-  ],
-  "in_progress_modules": [
+    },
     {
       "module": "youtube-publishing",
       "spec": "spec-e-burgos-022-youtube-publishing",
@@ -249,9 +247,12 @@
         "libs/producer-tools",
         "apps/desktop"
       ],
-      "description": "Publicar videos en YouTube: conexión OAuth de la cuenta, publicación con metadatos del productor, registro de publicaciones y cola programada"
+      "description": "Publicar videos en YouTube: conexión OAuth de la cuenta, publicación con metadatos del productor, registro de publicaciones, cola programada del estudio (límite diario, reintento horario, listas por categoría) y publicación preparada por el productor con confirmación explícita; la app de escritorio abre el login de Google en el navegador del sistema",
+      "cycles_completed": 3,
+      "completed_at": "2026-10-13"
     }
   ],
+  "in_progress_modules": [],
   "pending_modules": [
     {
       "module": "scene-assembly",

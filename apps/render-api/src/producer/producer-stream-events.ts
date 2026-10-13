@@ -133,6 +133,12 @@ function summarizeStudioTool(tool: StudioToolName, input: Record<string, unknown
       const name = stringField(input, 'name');
       return name === null ? 'Listing the analysed references' : truncate(`Reading the analysis of ${name}`);
     }
+    case 'draft_publication':
+      return 'Drafting the YouTube title, description and tags';
+    case 'list_publications':
+      return 'Checking the publications and the publish queue';
+    case 'queue_publication':
+      return 'Adding the video to the publish queue';
     case 'get_motion_brands':
       return 'Listing the available brands';
     case 'read_motion_brief':

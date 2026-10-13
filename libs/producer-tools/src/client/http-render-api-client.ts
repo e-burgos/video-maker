@@ -18,6 +18,10 @@ import type {
   RenderApiProbeResult,
   RenderApiProjectDetail,
   RenderApiProposalState,
+  RenderApiPublicationDraft,
+  RenderApiPublicationRecord,
+  RenderApiPublishQueue,
+  RenderApiQueuedPublication,
   RenderApiReferenceSummary,
   RenderApiRenderReview,
   RenderApiVoice,
@@ -398,5 +402,24 @@ export function createHttpRenderApiClient(options: HttpRenderApiClientOptions): 
     putVoiceDirection: async (input) => {
       await request('PUT', `/projects/${slug}/voice/direction`, input);
     },
+
+    listPublishableFiles: async () => {
+      const json = (await request('GET', `/projects/${slug}/publish/youtube/options`)) as { files: readonly { path: string }[] };
+      return json.files.map((file) => file.path);
+    },
+
+    draftPublication: async (file) =>
+      (await request('POST', `/projects/${slug}/publish/youtube/draft`, { file })) as RenderApiPublicationDraft,
+
+    listPublications: async () =>
+      (await request('GET', `/projects/${slug}/publications`)) as readonly RenderApiPublicationRecord[],
+
+    getPublishQueue: async () => {
+      const queue = (await request('GET', '/publish-queue')) as RenderApiPublishQueue;
+      return { ...queue, items: queue.items.filter((item) => item.slug === slug) };
+    },
+
+    queuePublication: async (publication) =>
+      (await request('POST', '/publish-queue/items', { slug, ...publication })) as RenderApiQueuedPublication,
   };
 }

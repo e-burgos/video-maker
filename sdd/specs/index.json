@@ -367,10 +367,10 @@
       "file": "sdd/specs/spec-e-burgos-022-youtube-publishing/spec-e-burgos-022-youtube-publishing.spec.md",
       "module": "youtube-publishing",
       "app": "apps/render-api",
-      "status": "in-progress",
+      "status": "completed",
       "title": "Publicar videos en YouTube desde el estudio: conexión OAuth, publicación con metadatos del productor y cola programada",
       "created_at": "2026-10-08",
-      "completed_at": null,
+      "completed_at": "2026-10-13",
       "depends_on": [
         "spec-e-burgos-021-brand-kit"
       ]

@@ -13,6 +13,7 @@ import type { DownloadOutcome, SetupInitialData } from './ipc-contract';
 import { readLoginShellPath, resolveClaudeCli } from './login-shell-path';
 import { buildDownloadPlan, downloadAllModels } from './model-downloads';
 import type { ManifestModels } from './model-downloads';
+import { externalUrlToOpen } from './external-navigation';
 import { killProcessGroup, startRenderApiProcess } from './render-api-process';
 import type { LaunchCommand, RenderApiHandle } from './render-api-process';
 import {
@@ -413,6 +414,7 @@ async function startStudio(input: {
       },
     });
     mainWindow = window;
+    routeExternalNavigationToSystemBrowser(window, new URL(target).origin);
     window.on('closed', () => {
       mainWindow = null;
       app.quit();
@@ -424,6 +426,20 @@ async function startStudio(input: {
   } else {
     await mainWindow.loadURL(target);
   }
+}
+
+function routeExternalNavigationToSystemBrowser(window: BrowserWindow, appOrigin: string): void {
+  window.webContents.setWindowOpenHandler(({ url }) => {
+    const external = externalUrlToOpen(url, appOrigin);
+    if (external !== null) void shell.openExternal(external);
+    return { action: 'deny' };
+  });
+  window.webContents.on('will-navigate', (event, url) => {
+    const external = externalUrlToOpen(url, appOrigin);
+    if (external === null) return;
+    event.preventDefault();
+    void shell.openExternal(external);
+  });
 }
 
 async function changeProjectsFolder(paths: AppPaths, repoRoot: string, port: number): Promise<void> {

@@ -159,6 +159,49 @@ export interface RenderApiProposalState {
   readonly approvedConceptId?: string;
 }
 
+export interface RenderApiPublicationDraft {
+  readonly title: string;
+  readonly description: string;
+  readonly tags: readonly string[];
+}
+
+export interface RenderApiPublicationRecord extends Readonly<Record<string, unknown>> {
+  readonly file: string;
+}
+
+export interface RenderApiPublishQueueItem {
+  readonly id: string;
+  readonly slug: string;
+  readonly file: string;
+  readonly metadata?: Readonly<Record<string, unknown>>;
+  readonly status: string;
+  readonly url: string | null;
+  readonly nextAttemptAt: string | null;
+  readonly lastError: { readonly message: string } | null;
+}
+
+export interface RenderApiPublishQueue {
+  readonly settings: { readonly paused: boolean; readonly dailyLimit: number };
+  readonly publishedLast24h: number;
+  readonly nextAttemptAt: string | null;
+  readonly items: readonly RenderApiPublishQueueItem[];
+}
+
+export interface RenderApiQueuePublicationRequest {
+  readonly file?: string;
+  readonly title: string;
+  readonly description?: string;
+  readonly tags?: readonly string[];
+  readonly privacy: 'public' | 'unlisted' | 'private';
+  readonly publishAt?: string;
+  readonly playlistIds?: readonly string[];
+}
+
+export interface RenderApiQueuedPublication {
+  readonly item: RenderApiPublishQueueItem;
+  readonly alreadyPublished: { readonly url: string | null } | null;
+}
+
 export interface RenderApiClient {
   getProjectDetail(): Promise<RenderApiProjectDetail>;
   listProjectAssets(): Promise<readonly RenderApiAssetEntry[]>;
@@ -212,4 +255,10 @@ export interface RenderApiClient {
   getMotionStoryboard(): Promise<Readonly<Record<string, unknown>>>;
   putMotionStoryboard(storyboard: Readonly<Record<string, unknown>>): Promise<void>;
   putVoiceDirection(input: Readonly<Record<string, unknown>>): Promise<void>;
+
+  listPublishableFiles(): Promise<readonly string[]>;
+  draftPublication(file: string): Promise<RenderApiPublicationDraft>;
+  listPublications(): Promise<readonly RenderApiPublicationRecord[]>;
+  getPublishQueue(): Promise<RenderApiPublishQueue>;
+  queuePublication(request: RenderApiQueuePublicationRequest): Promise<RenderApiQueuedPublication>;
 }
