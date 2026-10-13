@@ -3102,6 +3102,98 @@
           }
         ]
       }
+    },
+    {
+      "id": "FIX-e-burgos-021",
+      "author": "e-burgos",
+      "spec_id": "spec-e-burgos-023-production-quality",
+      "fix_document": "sdd/fixes/fix-e-burgos-021.md",
+      "type": "IMPROVEMENT",
+      "severity": "medium",
+      "created_at": "2026-10-13",
+      "resolved_at": null,
+      "validated_at": null,
+      "title": "Las muestras se reconocen por el dato del render y no por el nombre del archivo",
+      "estimation_hours": 2,
+      "description": "La web (Biblioteca, Entregas, Vista previa, publicar) y render-api deducían que un mp4 es muestra por el sufijo .sample.mp4; el render ya guarda sample: true en su reporte.",
+      "justification": "Evitar que un archivo renombrado se trate mal; cambio interno sin contratos nuevos fuera del estudio.",
+      "related_modules": [
+        "production-quality"
+      ],
+      "affected_files": [],
+      "test_reference": "",
+      "status": "in-progress",
+      "cycle": null,
+      "process_note": "Pendiente posterior al video de prueba comprar-producto (plan aprobado por el dueño, tanda A)."
+    },
+    {
+      "id": "FIX-e-burgos-022",
+      "author": "e-burgos",
+      "spec_id": "spec-e-burgos-023-production-quality",
+      "fix_document": "sdd/fixes/fix-e-burgos-022.md",
+      "type": "IMPROVEMENT",
+      "severity": "medium",
+      "created_at": "2026-10-13",
+      "resolved_at": null,
+      "validated_at": null,
+      "title": "La revisión automática suma los efectos de sonido al margen voz/música y controla la zona segura de los subtítulos",
+      "estimation_hours": 2,
+      "description": "El margen voz/música por tramo no contaba whooshes ni sfx, y nada controlaba que los subtítulos queden tapados por el isotipo, el chat o recuadros superpuestos.",
+      "justification": "Lecciones del lote de tutoriales (PROTOCOLO-ENTREGA §1) y del video de prueba; cambio interno de la revisión.",
+      "related_modules": [
+        "production-quality"
+      ],
+      "affected_files": [],
+      "test_reference": "",
+      "status": "in-progress",
+      "cycle": null,
+      "process_note": "Pendiente posterior al video de prueba comprar-producto (plan aprobado por el dueño, tanda A)."
+    },
+    {
+      "id": "FIX-e-burgos-023",
+      "author": "e-burgos",
+      "spec_id": "spec-e-burgos-023-production-quality",
+      "fix_document": "sdd/fixes/fix-e-burgos-023.md",
+      "type": "IMPROVEMENT",
+      "severity": "medium",
+      "created_at": "2026-10-13",
+      "resolved_at": null,
+      "validated_at": null,
+      "title": "La bandeja de arrastrar y soltar propone el rol reference para videos de referencia",
+      "estimation_hours": 2,
+      "description": "Al soltar un video que parece una referencia (no material propio) la bandeja no ofrecía el rol reference ni explicaba qué hace.",
+      "justification": "Facilitar el flujo «un video como este»; cambio de UI sin contratos nuevos.",
+      "related_modules": [
+        "production-quality"
+      ],
+      "affected_files": [],
+      "test_reference": "",
+      "status": "in-progress",
+      "cycle": null,
+      "process_note": "Pendiente posterior al video de prueba comprar-producto (plan aprobado por el dueño, tanda A)."
+    },
+    {
+      "id": "FIX-e-burgos-024",
+      "author": "e-burgos",
+      "spec_id": "spec-e-burgos-023-production-quality",
+      "fix_document": "sdd/fixes/fix-e-burgos-024.md",
+      "type": "IMPROVEMENT",
+      "severity": "medium",
+      "created_at": "2026-10-13",
+      "resolved_at": null,
+      "validated_at": null,
+      "title": "La estimación de la propuesta usa el promedio general del estudio cuando hay pocos renders del modo o formato",
+      "estimation_hours": 2,
+      "description": "Con menos de 3 renders del modo/formato la estimación salía de 1–2 muestras o de valores por defecto sin avisar que era gruesa.",
+      "justification": "Estimaciones engañosas en proyectos nuevos; cambio interno sin contratos nuevos fuera del estudio.",
+      "related_modules": [
+        "production-quality"
+      ],
+      "affected_files": [],
+      "test_reference": "",
+      "status": "in-progress",
+      "cycle": null,
+      "process_note": "Pendiente posterior al video de prueba comprar-producto (plan aprobado por el dueño, tanda A)."
     }
   ]
 }
