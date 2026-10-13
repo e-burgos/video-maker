@@ -630,6 +630,18 @@
           "status": "completed",
           "tasks_total": 4,
           "tasks_done": 4
+        },
+        "cycle-03": {
+          "file": "sdd/specs/spec-e-burgos-022-youtube-publishing/cycles/cycle-03/tasks.json",
+          "module": "youtube-publishing",
+          "apps": [
+            "libs/producer-tools",
+            "apps/render-api",
+            "apps/desktop"
+          ],
+          "status": "in-progress",
+          "tasks_total": 3,
+          "tasks_done": 0
         }
       }
     },

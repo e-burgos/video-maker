@@ -1,0 +1,39 @@
+{
+  "$schema": "../../../../schemas/cycle.schema.json",
+  "cycle": 3,
+  "module": "youtube-publishing",
+  "spec": "spec-e-burgos-022-youtube-publishing",
+  "apps": [
+    "libs/producer-tools",
+    "apps/render-api",
+    "apps/desktop"
+  ],
+  "phase": "youtube-producer-desktop",
+  "flow": "lite",
+  "objectives": [
+    "El productor prepara publicaciones y las pone en la cola sólo con confirmación explícita del usuario",
+    "La app de escritorio abre el login de Google en el navegador del sistema"
+  ],
+  "status": "in-progress",
+  "started_at": "2026-10-13",
+  "completed_at": null,
+  "documents": {
+    "plan": "sdd/specs/spec-e-burgos-022-youtube-publishing/cycles/cycle-03/plan.md",
+    "tasks": "sdd/specs/spec-e-burgos-022-youtube-publishing/cycles/cycle-03/tasks.json"
+  },
+  "artifacts": [],
+  "metrics": {
+    "tasks_total": 3,
+    "tasks_completed": 0,
+    "tasks_skipped": 0,
+    "story_points": 10,
+    "files_created": [],
+    "files_modified": [],
+    "files_deleted": []
+  },
+  "tables_created": [],
+  "endpoints_implemented": [],
+  "components_created": [],
+  "issues_found": [],
+  "reviewer_report": null
+}
