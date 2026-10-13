@@ -31,3 +31,7 @@
 - motion-graphics y motion-studio lint/test/build verde; geometría pura probada en `ui-auto-zoom.spec.ts` y atributos
   HTML en `render-scene.spec.ts`; muestra real del storyboard v2 en
   `sdd/specs/spec-e-burgos-023-production-quality/cycles/cycle-06/artifacts/zoom-automatico.jpg`.
+
+## Ajuste (2026-10-13)
+- El margen de cada foco es proporcional a la caja (`edgePadding`: 6 % del lado, entre 0,015 y 0,08): un bloque
+  de 0,52 de ancho pasa de 1,47× a ~1,75×. Hallado en la revisión de Display Ads (escena «Equipos y acceso»).

@@ -11,7 +11,7 @@ export const STUDIO_MCP_ENTRY_ENV_VAR = 'STUDIO_MCP_ENTRY';
 export const DEFAULT_PRODUCER_MODEL = 'sonnet';
 export const DEFAULT_PRODUCER_MODELS = ['sonnet', 'opus', 'haiku'] as const;
 
-export const DEFAULT_PRODUCER_TURN_TIMEOUT_MS = 1_800_000;
+export const DEFAULT_PRODUCER_TURN_TIMEOUT_MS = 3_600_000;
 
 const PRODUCER_MODEL_CATALOG: Readonly<Record<string, { label: string; description: string }>> = {
   sonnet: { label: 'Sonnet', description: 'Balanced · faster, cheaper' },
