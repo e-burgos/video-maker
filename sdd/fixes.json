@@ -3394,6 +3394,98 @@
           }
         ]
       }
+    },
+    {
+      "id": "FIX-e-burgos-025",
+      "author": "e-burgos",
+      "spec_id": "spec-e-burgos-023-production-quality",
+      "fix_document": "sdd/fixes/fix-e-burgos-025.md",
+      "type": "IMPROVEMENT",
+      "severity": "medium",
+      "created_at": "2026-10-13",
+      "resolved_at": null,
+      "validated_at": null,
+      "title": "Dirección de voz por frase en los storyboards de escenas narradas",
+      "estimation_hours": 2,
+      "description": "Los storyboards de material crudo y generativo (work/storyboard.json) no aceptaban dirección de voz por frase, como sí motion y el guion por línea.",
+      "justification": "Paridad de calidad de voz entre modos; cambio interno sin contratos externos.",
+      "related_modules": [
+        "production-quality"
+      ],
+      "affected_files": [],
+      "test_reference": "",
+      "status": "in-progress",
+      "cycle": null,
+      "process_note": "Pendiente posterior al video de prueba comprar-producto (plan aprobado por el dueño, tanda B)."
+    },
+    {
+      "id": "FIX-e-burgos-026",
+      "author": "e-burgos",
+      "spec_id": "spec-e-burgos-023-production-quality",
+      "fix_document": "sdd/fixes/fix-e-burgos-026.md",
+      "type": "IMPROVEMENT",
+      "severity": "medium",
+      "created_at": "2026-10-13",
+      "resolved_at": null,
+      "validated_at": null,
+      "title": "La revisión visual extrae varios cuadros por escena y exige verlos",
+      "estimation_hours": 2,
+      "description": "Con un solo cuadro por escena la revisión no veía cuando la voz nombra algo que aparece en otro momento de la escena (caso Easy Pro del video de prueba).",
+      "justification": "Hallado en cycle-06 de spec-023 («Lo que todavía no está bien»); cambio interno de revisión y tool del productor.",
+      "related_modules": [
+        "production-quality"
+      ],
+      "affected_files": [],
+      "test_reference": "",
+      "status": "in-progress",
+      "cycle": null,
+      "process_note": "Pendiente posterior al video de prueba comprar-producto (plan aprobado por el dueño, tanda B)."
+    },
+    {
+      "id": "FIX-e-burgos-027",
+      "author": "e-burgos",
+      "spec_id": "spec-e-burgos-023-production-quality",
+      "fix_document": "sdd/fixes/fix-e-burgos-027.md",
+      "type": "IMPROVEMENT",
+      "severity": "medium",
+      "created_at": "2026-10-13",
+      "resolved_at": null,
+      "validated_at": null,
+      "title": "El cursor no crece con el zoom de la cámara y las franjas anchas y finas se encuadran legibles",
+      "estimation_hours": 2,
+      "description": "El cursor y el punto del globo se agrandaban con el zoom automático, y franjas como «Falta validar tu email» quedaban chicas porque la cámara encuadraba toda la franja.",
+      "justification": "Pendientes visuales de FIX-e-burgos-019 en el video de prueba; cambio del runtime motion.",
+      "related_modules": [
+        "production-quality"
+      ],
+      "affected_files": [],
+      "test_reference": "",
+      "status": "in-progress",
+      "cycle": null,
+      "process_note": "Pendiente posterior al video de prueba comprar-producto (plan aprobado por el dueño, tanda B)."
+    },
+    {
+      "id": "FIX-e-burgos-028",
+      "author": "e-burgos",
+      "spec_id": "spec-e-burgos-023-production-quality",
+      "fix_document": "sdd/fixes/fix-e-burgos-028.md",
+      "type": "IMPROVEMENT",
+      "severity": "medium",
+      "created_at": "2026-10-13",
+      "resolved_at": null,
+      "validated_at": null,
+      "title": "Las cajas que el productor mide sobre una captura quedan registradas como medidas",
+      "estimation_hours": 2,
+      "description": "Las cajas medidas por el productor mirando la captura (no venían en el brief) no se distinguían de las dadas, y la verificación no podía separarlas.",
+      "justification": "Trazabilidad de datos visuales tras el video de prueba; cambio interno del brief motion.",
+      "related_modules": [
+        "production-quality"
+      ],
+      "affected_files": [],
+      "test_reference": "",
+      "status": "in-progress",
+      "cycle": null,
+      "process_note": "Pendiente posterior al video de prueba comprar-producto (plan aprobado por el dueño, tanda B)."
     }
   ]
 }
