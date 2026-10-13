@@ -15,6 +15,8 @@ export const POINT_RADIUS = 0.03;
 export const FOCUS_PADDING = 0.08;
 export const MIN_FOCUS_SIDE = 0.45;
 export const FULL_VIEW_FROM_SIDE = 0.85;
+export const EDGE_PADDING_RATIO = 0.06;
+export const MIN_EDGE_PADDING = 0.015;
 export const SHARED_KEYFRAME_OVERLAP = 0.6;
 export const SHARED_KEYFRAME_MAX_SCALE_RATIO = 1.25;
 
@@ -42,8 +44,22 @@ export function padRect(rect: UnitRect, padding = FOCUS_PADDING): UnitRect {
   return { x: left, y: top, w: right - left, h: bottom - top };
 }
 
+export function edgePadding(size: number): number {
+  return clamp(size * EDGE_PADDING_RATIO, MIN_EDGE_PADDING, FOCUS_PADDING);
+}
+
+export function padRectToSize(rect: UnitRect): UnitRect {
+  const padX = edgePadding(rect.w);
+  const padY = edgePadding(rect.h);
+  const left = clamp(rect.x - padX, 0, 1);
+  const top = clamp(rect.y - padY, 0, 1);
+  const right = clamp(rect.x + rect.w + padX, 0, 1);
+  const bottom = clamp(rect.y + rect.h + padY, 0, 1);
+  return { x: left, y: top, w: right - left, h: bottom - top };
+}
+
 export function focusOn(rect: UnitRect): CameraFocus {
-  const padded = padRect(rect);
+  const padded = padRectToSize(rect);
   const side = Math.max(padded.w, padded.h, MIN_FOCUS_SIDE);
   if (side >= FULL_VIEW_FROM_SIDE) return FULL_VIEW;
   return {

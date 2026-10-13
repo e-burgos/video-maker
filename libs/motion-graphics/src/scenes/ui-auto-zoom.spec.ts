@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import { cameraKeyframes, focusOn, focusWindow, FOCUS_PADDING, MIN_FOCUS_SIDE, padRect, pointRect, POINT_RADIUS, unionRects, windowOverlap } from './ui-auto-zoom';
+import { cameraKeyframes, edgePadding, focusOn, focusWindow, FOCUS_PADDING, MIN_EDGE_PADDING, MIN_FOCUS_SIDE, padRect, pointRect, POINT_RADIUS, unionRects, windowOverlap } from './ui-auto-zoom';
 
 describe('geometry of the camera', () => {
   it('turns a point into a small square around it', () => {
@@ -32,8 +32,9 @@ describe('focusOn', () => {
   });
 
   it('uses the capture aspect: the side is the larger padded dimension', () => {
-    expect(focusOn({ x: 0.2, y: 0.4, w: 0.3, h: 0.1 }).scale).toBeCloseTo(1 / 0.46);
-    expect(focusOn({ x: 0.4, y: 0.1, w: 0.05, h: 0.4 }).scale).toBeCloseTo(1 / 0.56);
+    expect(focusOn({ x: 0.2, y: 0.4, w: 0.3, h: 0.1 }).scale).toBeCloseTo(1 / MIN_FOCUS_SIDE);
+    expect(focusOn({ x: 0.2, y: 0.2, w: 0.6, h: 0.1 }).scale).toBeCloseTo(1 / (0.6 + 2 * 0.036));
+    expect(focusOn({ x: 0.4, y: 0.1, w: 0.05, h: 0.6 }).scale).toBeCloseTo(1 / (0.6 + 2 * 0.036));
   });
 
   it('keeps the window inside the capture near the edges', () => {
@@ -69,7 +70,7 @@ describe('cameraKeyframes', () => {
 
   it('keeps a tight step apart from a wide one that contains it', () => {
     const [wide, tight] = cameraKeyframes([{ x: 0.1, y: 0.4, w: 0.6, h: 0.05 }, pointRect(0.5, 0.42)]);
-    expect(tight.scale).toBeGreaterThan(wide.scale * 1.5);
+    expect(tight.scale).toBeGreaterThan(wide.scale * 1.3);
   });
 
   it('measures overlap against the smaller window', () => {
@@ -77,5 +78,15 @@ describe('cameraKeyframes', () => {
     expect(windowOverlap(a, a)).toBeCloseTo(1);
     expect(windowOverlap(focusOn(pointRect(0.2, 0.2)), focusOn(pointRect(0.8, 0.8)))).toBe(0);
     expect(cameraKeyframes([])).toEqual([]);
+  });
+});
+
+describe('wide and thin boxes', () => {
+  it('pads each side in proportion to the box so a wide block still gets zoom', () => {
+    expect(edgePadding(0.517)).toBeCloseTo(0.031, 3);
+    expect(edgePadding(0.02)).toBe(MIN_EDGE_PADDING);
+    expect(edgePadding(2)).toBe(FOCUS_PADDING);
+    const focus = focusOn({ x: 0.242, y: 0.86, w: 0.517, h: 0.11 });
+    expect(focus.scale).toBeGreaterThan(1.7);
   });
 });

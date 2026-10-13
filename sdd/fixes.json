@@ -3013,7 +3013,7 @@
       "validated_at": null,
       "title": "Las escenas de interfaz se ven grandes y una cámara automática sigue la acción",
       "estimation_hours": 3,
-      "description": "Las capturas de ui-walkthrough ocupaban ~55 % del ancho y el texto quedaba chico; ahora el marco es más grande y, sin zoom explícito, el estudio mueve una cámara que hace zoom a cada paso y panea entre ellos, con globos de tamaño constante.",
+      "description": "Las capturas de ui-walkthrough ocupaban ~55 % del ancho y el texto quedaba chico; ahora el marco es más grande y, sin zoom explícito, el estudio mueve una cámara que hace zoom a cada paso y panea entre ellos, con globos de tamaño constante. Ajuste posterior: el margen del encuadre es proporcional a la caja (6 %, entre 0,015 y 0,08) para que bloques anchos y bajos ganen zoom.",
       "justification": "Legibilidad de la interfaz en el video de prueba de compra; cambio del runtime y del HTML de la escena sin contratos nuevos salvo el opcional autoZoom.",
       "related_modules": [
         "production-quality"
