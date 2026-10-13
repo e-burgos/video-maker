@@ -4,8 +4,8 @@ import { resolveWalkthroughStep } from '../storyboard/resolve-walkthrough-boxes'
 import type { ResolvedWalkthroughStep } from '../storyboard/resolve-walkthrough-boxes';
 import { animAttrs, esc, headline } from './scene-html';
 import type { SceneContext } from './scene-html';
-import { autoZoomFocus, calloutRect, pointRect } from './ui-auto-zoom';
-import type { AutoZoomFocus, CalloutPlacementSide, UnitRect } from './ui-auto-zoom';
+import { cameraKeyframes, pointRect } from './ui-auto-zoom';
+import type { CameraFocus, UnitRect } from './ui-auto-zoom';
 
 type WalkthroughProps = SceneOf<'ui-walkthrough'>['props'];
 
@@ -23,7 +23,7 @@ const MAX_ZOOM_SCALE = 3;
 const ZOOM_REGION_MARGIN = 0.9;
 const CALLOUT_ALIGN_EDGE = 0.28;
 const CALLOUT_BELOW_UNTIL = 0.25;
-const AUTO_ZOOM_DELAY = 0.5;
+const AUTO_CAMERA_MARK = '<i class="mg-ui-mark" data-ui-autocamera="1" data-anim="ui-autocamera" data-parallel="1"></i>';
 
 const fraction = (value: number): string => String(Math.round(value * 10000) / 100);
 const clamp = (value: number, min: number, max: number): number => Math.min(max, Math.max(min, value));
@@ -59,51 +59,48 @@ function stepAttrs(step: ResolvedWalkthroughStep, index: number, count: number, 
   return ` data-ui-step="${step.action}"${animAttrs({ anim, cue: step.cue, at: step.cue === undefined ? step.at : undefined, parallel: true, extra: { ...slot, ...cursor, ...extra } })}`;
 }
 
-function calloutSides(step: ResolvedWalkthroughStep): CalloutPlacementSide {
-  return {
-    horizontal: step.x < CALLOUT_ALIGN_EDGE ? 'start' : step.x > 1 - CALLOUT_ALIGN_EDGE ? 'end' : 'mid',
-    vertical: step.y < CALLOUT_BELOW_UNTIL ? 'below' : 'above',
-  };
-}
-
 function calloutPlacement(step: ResolvedWalkthroughStep): string {
-  const { horizontal, vertical } = calloutSides(step);
-  return `h-${horizontal} v-${vertical}`;
+  const horizontal = step.x < CALLOUT_ALIGN_EDGE ? 'h-start' : step.x > 1 - CALLOUT_ALIGN_EDGE ? 'h-end' : 'h-mid';
+  const vertical = step.y < CALLOUT_BELOW_UNTIL ? 'v-below' : 'v-above';
+  return `${horizontal} ${vertical}`;
 }
 
-function stepRects(step: ResolvedWalkthroughStep): UnitRect[] {
+function stepRect(step: ResolvedWalkthroughStep): UnitRect | null {
   const geometry = resolveStepGeometry(step);
-  if (step.action === 'callout') return [calloutRect(step.x, step.y, step.text ?? '', calloutSides(step))];
-  if (geometry.box) return [geometry.box];
-  if (geometry.cursor) return [pointRect(geometry.cursor.x, geometry.cursor.y)];
-  return [];
+  if (geometry.box) return geometry.box;
+  return geometry.cursor ? pointRect(geometry.cursor.x, geometry.cursor.y) : null;
 }
 
-export function resolveAutoZoom(steps: readonly ResolvedWalkthroughStep[], autoZoom: boolean | undefined): AutoZoomFocus | null {
+export function resolveAutoCamera(steps: readonly ResolvedWalkthroughStep[], autoZoom: boolean | undefined): (CameraFocus | null)[] | null {
   if (autoZoom === false || steps.some((step) => step.action === 'zoom')) return null;
-  return autoZoomFocus(steps.flatMap(stepRects));
+  const rects = steps.map(stepRect);
+  const keyframes = cameraKeyframes(rects.filter((rect): rect is UnitRect => rect !== null));
+  let next = 0;
+  const perStep = rects.map((rect) => (rect === null ? null : (keyframes[next++] ?? null)));
+  return perStep.some((focus) => focus !== null && focus.scale > 1) ? perStep : null;
 }
 
-function autoZoomMark(focus: AutoZoomFocus | null): string {
-  if (focus === null) return '';
+function cameraAttrs(focus: CameraFocus | null | undefined): Record<string, number> {
+  if (!focus) return {};
   const round = (value: number): number => Math.round(value * 10000) / 10000;
-  return `<i class="mg-ui-mark" data-ui-autozoom="1"${animAttrs({ anim: 'ui-autozoom', at: AUTO_ZOOM_DELAY, parallel: true, extra: { scale: round(focus.scale), cx: round(focus.cx), cy: round(focus.cy) } })}></i>`;
+  return { 'cam-scale': round(focus.scale), 'cam-cx': round(focus.cx), 'cam-cy': round(focus.cy) };
 }
 
-function stepHtml(step: ResolvedWalkthroughStep, index: number, count: number): string {
+function stepHtml(step: ResolvedWalkthroughStep, index: number, count: number, camera?: CameraFocus | null): string {
   const geometry = resolveStepGeometry(step);
+  const cam = cameraAttrs(camera);
   const { box } = geometry;
   switch (step.action) {
     case 'move':
-      return `<i class="mg-ui-mark"${stepAttrs(step, index, count, 'ui-mark', geometry)}></i>`;
+      return `<i class="mg-ui-mark"${stepAttrs(step, index, count, 'ui-mark', geometry, cam)}></i>`;
     case 'click':
-      return `<div class="mg-ui-click" style="${percentStyle({ left: step.x, top: step.y })}"${stepAttrs(step, index, count, 'ui-click', geometry)}><i></i></div>`;
+      return `<div class="mg-ui-click" style="${percentStyle({ left: step.x, top: step.y })}"${stepAttrs(step, index, count, 'ui-click', geometry, cam)}><i></i></div>`;
     case 'type':
-      return box ? `<div class="mg-ui-type" style="${percentStyle({ left: box.x, top: box.y, width: box.w, height: box.h })}"${stepAttrs(step, index, count, 'ui-type', geometry, { text: step.text ?? '' })}><span></span></div>` : '';
+      return box ? `<div class="mg-ui-type" style="${percentStyle({ left: box.x, top: box.y, width: box.w, height: box.h })}"${stepAttrs(step, index, count, 'ui-type', geometry, { ...cam, text: step.text ?? '' })}><span></span></div>` : '';
     case 'highlight':
-      return box ? `<div class="mg-ui-highlight" style="${percentStyle({ left: box.x, top: box.y, width: box.w, height: box.h })}"${stepAttrs(step, index, count, 'ui-highlight', geometry)}></div>` : '';
+      return box ? `<div class="mg-ui-highlight" style="${percentStyle({ left: box.x, top: box.y, width: box.w, height: box.h })}"${stepAttrs(step, index, count, 'ui-highlight', geometry, cam)}></div>` : '';
     case 'callout':
-      return `<div class="mg-ui-anchor" style="${percentStyle({ left: step.x, top: step.y })}"${stepAttrs(step, index, count, 'ui-callout', geometry)}><div class="mg-ui-bubble ${calloutPlacement(step)}">${esc(step.text ?? '')}</div></div>`;
+      return `<div class="mg-ui-anchor" style="${percentStyle({ left: step.x, top: step.y })}"${stepAttrs(step, index, count, 'ui-callout', geometry, cam)}><div class="mg-ui-bubble ${calloutPlacement(step)}"><div class="mg-ui-bubble-body">${esc(step.text ?? '')}</div></div></div>`;
     case 'zoom':
       return geometry.zoom ? `<i class="mg-ui-mark"${stepAttrs(step, index, count, 'ui-zoom', geometry, { scale: geometry.zoom.scale, cx: geometry.zoom.cx, cy: geometry.zoom.cy })}></i>` : '';
   }
@@ -123,8 +120,9 @@ export function uiWalkthrough(props: WalkthroughProps, ctx: SceneContext): strin
     if (result === null) throw new MotionStudioError('STORYBOARD_INVALID', `ui-walkthrough step ${index + 1}: box "${step.box ?? ''}" is not among the boxes of the image ${props.image}`);
     return result;
   });
-  const steps = resolved.map((step, index) => stepHtml(step, index, resolved.length)).join('');
-  const layer = `<div class="mg-ui-layer">${autoZoomMark(resolveAutoZoom(resolved, props.autoZoom))}${steps}<div class="mg-ui-track" data-ui-cursor="1"${animAttrs({ anim: 'ui-cursor', parallel: true })}>${CURSOR_SVG}</div></div>`;
+  const camera = resolveAutoCamera(resolved, props.autoZoom);
+  const steps = resolved.map((step, index) => stepHtml(step, index, resolved.length, camera?.[index])).join('');
+  const layer = `<div class="mg-ui-layer">${camera ? AUTO_CAMERA_MARK : ''}${steps}<div class="mg-ui-track" data-ui-cursor="1"${animAttrs({ anim: 'ui-cursor', parallel: true })}>${CURSOR_SVG}</div></div>`;
   const shot = `<div class="mg-ui-shot"><div class="mg-ui-zoom"><img src="${esc(ctx.imageUrl(props.image))}" alt="" />${layer}</div></div>`;
   const device = `<div class="mg-ui-device ${kind}"${animAttrs({ anim: 'rise', parallel: true })}>${kind === 'browser' ? browserBar(props.url) : ''}${shot}</div>`;
   const head = props.title ? headline(props.title, props.accent) : '';

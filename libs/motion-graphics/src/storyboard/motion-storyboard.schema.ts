@@ -175,7 +175,7 @@ const UiWalkthroughProps = z.strictObject({
   frame: z.enum(['browser', 'phone', 'none']).describe('Frame around the capture; default browser').optional(),
   url: Text.describe('Address shown in the browser bar; only with frame browser').optional(),
   boxes: ImageBoxListSchema.describe('Measured boxes of the capture, copied from the brief image; steps point at them by name with box').optional(),
-  autoZoom: z.boolean().describe('The studio zooms into the area the steps act on when the scene has no zoom step; set false to keep the full capture in view').optional(),
+  autoZoom: z.boolean().describe('The studio camera follows the steps (zooms into each one and pans between them) when the scene has no zoom step; set false to keep the full capture in view').optional(),
   steps: z.array(WalkthroughStep).min(1).max(8),
 });
 

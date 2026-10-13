@@ -246,40 +246,51 @@ describe('renderScene', () => {
       expect(() => renderScene({ ...base, props: { ...base.props, steps: [{ action: 'highlight', box: 'Fantasma' }] } }, ctx)).toThrow(/box "Fantasma"/u);
     });
 
-    describe('automatic framing', () => {
+    describe('follow-the-action camera', () => {
       const base = () => {
         const found = scene('walk');
         if (found.kind !== 'ui-walkthrough') throw new Error('walk');
         return found;
       };
-      const withSteps = (steps: Parameters<typeof renderScene>[0] extends never ? never : unknown[], extra: Record<string, unknown> = {}) =>
-        renderScene({ ...base(), props: { ...base().props, steps, ...extra } } as Parameters<typeof renderScene>[0], ctx);
-      const compactSteps = [{ action: 'highlight', x: 0.4, y: 0.4, w: 0.1, h: 0.08 }, { action: 'click', x: 0.45, y: 0.5 }];
+      const withSteps = (steps: unknown[], extra: Record<string, unknown> = {}) => renderScene({ ...base(), props: { ...base().props, steps, ...extra } } as Parameters<typeof renderScene>[0], ctx);
+      const farSteps = [{ action: 'highlight', x: 0.1, y: 0.1, w: 0.1, h: 0.08 }, { action: 'click', x: 0.8, y: 0.8 }];
 
-      it('zooms into the area of the steps when the scene has no zoom step', () => {
-        const out = withSteps(compactSteps);
-        expect(out).toMatch(/data-ui-autozoom="1" data-anim="ui-autozoom" data-at="0.5" data-parallel="1" data-scale="[\d.]+" data-cx="0.45" data-cy="0.4/u);
-        expect(out).not.toContain('data-ui-step="zoom"');
+      it('gives every step its own keyframe and marks the scene for the camera', () => {
+        const out = withSteps(farSteps);
+        expect(out).toContain('data-ui-autocamera="1" data-anim="ui-autocamera"');
+        expect(out).toMatch(/data-ui-step="highlight"[^>]*data-cam-scale="2.2222" data-cam-cx="0.225" data-cam-cy="0.225"/u);
+        expect(out).toMatch(/data-ui-step="click"[^>]*data-cam-scale="2.2222" data-cam-cx="0.775" data-cam-cy="0.775"/u);
       });
 
-      it('leaves the full capture when the steps already cover most of it', () => {
-        expect(withSteps([{ action: 'highlight', x: 0.05, y: 0.1, w: 0.9, h: 0.1 }])).not.toContain('data-ui-autozoom');
+      it('shares one keyframe between steps whose regions overlap strongly', () => {
+        const out = withSteps([{ action: 'highlight', x: 0.4, y: 0.4, w: 0.1, h: 0.08 }, { action: 'click', x: 0.45, y: 0.45 }]);
+        const keys = [...out.matchAll(/data-cam-scale="([\d.]+)" data-cam-cx="([\d.]+)" data-cam-cy="([\d.]+)"/gu)].map((m) => m.slice(1).join('|'));
+        expect(keys).toHaveLength(2);
+        expect(keys[0]).toBe(keys[1]);
+      });
+
+      it('shows the full capture for a step that needs most of it, and skips the camera when nothing zooms', () => {
+        const out = withSteps([{ action: 'highlight', x: 0.05, y: 0.1, w: 0.9, h: 0.1 }, { action: 'click', x: 0.5, y: 0.8 }]);
+        expect(out).toMatch(/data-ui-step="highlight"[^>]*data-cam-scale="1" data-cam-cx="0.5"/u);
+        expect(withSteps([{ action: 'highlight', x: 0.05, y: 0.1, w: 0.9, h: 0.9 }])).not.toContain('data-ui-autocamera');
       });
 
       it('respects autoZoom false', () => {
-        expect(withSteps(compactSteps, { autoZoom: false })).not.toContain('data-ui-autozoom');
+        const out = withSteps(farSteps, { autoZoom: false });
+        expect(out).not.toContain('data-ui-autocamera');
+        expect(out).not.toContain('data-cam-scale');
       });
 
       it('lets an explicit zoom step take over', () => {
-        const out = withSteps([...compactSteps, { action: 'zoom', x: 0.4, y: 0.4, w: 0.2, h: 0.2 }]);
-        expect(out).not.toContain('data-ui-autozoom');
+        const out = withSteps([...farSteps, { action: 'zoom', x: 0.4, y: 0.4, w: 0.2, h: 0.2 }]);
+        expect(out).not.toContain('data-ui-autocamera');
         expect(out).toContain('data-ui-step="zoom"');
       });
 
-      it('keeps the cursor waypoints in capture fractions so they land inside the zoomed layer', () => {
-        const out = withSteps(compactSteps);
-        expect(out).toContain('data-px="0.45" data-py="0.5"');
-        expect(out.indexOf('data-ui-autozoom')).toBeLessThan(out.indexOf('mg-ui-highlight'));
+      it('keeps the cursor waypoints in capture fractions and wraps callout text in a body that can be counter-scaled', () => {
+        const out = withSteps([...farSteps, { action: 'callout', x: 0.5, y: 0.5, text: 'Ojo' }]);
+        expect(out).toContain('data-px="0.8" data-py="0.8"');
+        expect(out).toContain('<div class="mg-ui-bubble h-mid v-above"><div class="mg-ui-bubble-body">Ojo</div></div>');
       });
 
       it('marks the frame of interface scenes so the stage can be larger', () => {

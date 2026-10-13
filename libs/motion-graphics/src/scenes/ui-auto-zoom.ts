@@ -5,38 +5,28 @@ export interface UnitRect {
   h: number;
 }
 
-export interface AutoZoomFocus {
+export interface CameraFocus {
   scale: number;
   cx: number;
   cy: number;
 }
 
-export type CalloutPlacementSide = { horizontal: 'start' | 'mid' | 'end'; vertical: 'above' | 'below' };
-
 export const POINT_RADIUS = 0.03;
-export const CAPTURE_PADDING = 0.07;
-export const SKIP_WHEN_REGION_AT_LEAST = 0.7;
-export const MIN_AUTO_SCALE = 1.15;
-export const MAX_AUTO_SCALE = 2.2;
-export const BUBBLE_MAX_WIDTH = 0.4;
-export const BUBBLE_HEIGHT = 0.14;
-export const BUBBLE_CHAR_WIDTH = 0.012;
-export const BUBBLE_BASE_WIDTH = 0.08;
+export const FOCUS_PADDING = 0.08;
+export const MIN_FOCUS_SIDE = 0.45;
+export const FULL_VIEW_FROM_SIDE = 0.85;
+export const SHARED_KEYFRAME_OVERLAP = 0.6;
+export const SHARED_KEYFRAME_MAX_SCALE_RATIO = 1.25;
 
 const clamp = (value: number, min: number, max: number): number => Math.min(max, Math.max(min, value));
+const FULL_VIEW: CameraFocus = { scale: 1, cx: 0.5, cy: 0.5 };
 
 export function pointRect(x: number, y: number, radius = POINT_RADIUS): UnitRect {
   return { x: x - radius, y: y - radius, w: radius * 2, h: radius * 2 };
 }
 
-export function calloutRect(x: number, y: number, text: string, placement: CalloutPlacementSide): UnitRect {
-  const width = clamp(BUBBLE_BASE_WIDTH + text.length * BUBBLE_CHAR_WIDTH, 0.15, BUBBLE_MAX_WIDTH);
-  const left = placement.horizontal === 'start' ? x : placement.horizontal === 'end' ? x - width : x - width / 2;
-  const top = placement.vertical === 'above' ? y - BUBBLE_HEIGHT : y;
-  return boundsOf([pointRect(x, y), { x: left, y: top, w: width, h: BUBBLE_HEIGHT }]);
-}
-
-function boundsOf(rects: readonly UnitRect[]): UnitRect {
+export function unionRects(rects: readonly UnitRect[]): UnitRect | null {
+  if (rects.length === 0) return null;
   const left = Math.min(...rects.map((r) => r.x));
   const top = Math.min(...rects.map((r) => r.y));
   const right = Math.max(...rects.map((r) => r.x + r.w));
@@ -44,11 +34,7 @@ function boundsOf(rects: readonly UnitRect[]): UnitRect {
   return { x: left, y: top, w: right - left, h: bottom - top };
 }
 
-export function unionRects(rects: readonly UnitRect[]): UnitRect | null {
-  return rects.length === 0 ? null : boundsOf(rects);
-}
-
-export function padRect(rect: UnitRect, padding = CAPTURE_PADDING): UnitRect {
+export function padRect(rect: UnitRect, padding = FOCUS_PADDING): UnitRect {
   const left = clamp(rect.x - padding, 0, 1);
   const top = clamp(rect.y - padding, 0, 1);
   const right = clamp(rect.x + rect.w + padding, 0, 1);
@@ -56,18 +42,62 @@ export function padRect(rect: UnitRect, padding = CAPTURE_PADDING): UnitRect {
   return { x: left, y: top, w: right - left, h: bottom - top };
 }
 
-export function squareAroundCenter(rect: UnitRect): { side: number; cx: number; cy: number } {
-  const side = Math.max(rect.w, rect.h);
-  return { side, cx: clamp(rect.x + rect.w / 2, side / 2, 1 - side / 2), cy: clamp(rect.y + rect.h / 2, side / 2, 1 - side / 2) };
+export function focusOn(rect: UnitRect): CameraFocus {
+  const padded = padRect(rect);
+  const side = Math.max(padded.w, padded.h, MIN_FOCUS_SIDE);
+  if (side >= FULL_VIEW_FROM_SIDE) return FULL_VIEW;
+  return {
+    scale: 1 / side,
+    cx: clamp(padded.x + padded.w / 2, side / 2, 1 - side / 2),
+    cy: clamp(padded.y + padded.h / 2, side / 2, 1 - side / 2),
+  };
 }
 
-export function autoZoomFocus(rects: readonly UnitRect[]): AutoZoomFocus | null {
-  const union = unionRects(rects);
-  if (union === null) return null;
-  const { side, cx, cy } = squareAroundCenter(padRect(union));
-  if (side >= SKIP_WHEN_REGION_AT_LEAST) return null;
-  const scale = Math.min(1 / side, MAX_AUTO_SCALE);
-  if (scale < MIN_AUTO_SCALE) return null;
-  const window = 1 / scale;
-  return { scale, cx: clamp(cx, window / 2, 1 - window / 2), cy: clamp(cy, window / 2, 1 - window / 2) };
+export function focusWindow(focus: CameraFocus): UnitRect {
+  const side = 1 / focus.scale;
+  return { x: focus.cx - side / 2, y: focus.cy - side / 2, w: side, h: side };
+}
+
+export function windowOverlap(a: CameraFocus, b: CameraFocus): number {
+  const wa = focusWindow(a);
+  const wb = focusWindow(b);
+  const width = Math.min(wa.x + wa.w, wb.x + wb.w) - Math.max(wa.x, wb.x);
+  const height = Math.min(wa.y + wa.h, wb.y + wb.h) - Math.max(wa.y, wb.y);
+  if (width <= 0 || height <= 0) return 0;
+  return (width * height) / Math.min(wa.w * wa.h, wb.w * wb.h);
+}
+
+const isFullView = (focus: CameraFocus): boolean => focus.scale === 1;
+
+function sharesKeyframe(a: CameraFocus, b: CameraFocus): boolean {
+  if (isFullView(a) !== isFullView(b)) return false;
+  if (Math.max(a.scale, b.scale) / Math.min(a.scale, b.scale) > SHARED_KEYFRAME_MAX_SCALE_RATIO) return false;
+  return windowOverlap(a, b) >= SHARED_KEYFRAME_OVERLAP;
+}
+
+export function cameraKeyframes(rects: readonly UnitRect[]): CameraFocus[] {
+  const keyframes: CameraFocus[] = [];
+  let group: UnitRect[] = [];
+  let groupFocus: CameraFocus | null = null;
+  const flush = (): void => {
+    if (groupFocus !== null) for (let i = 0; i < group.length; i += 1) keyframes.push(groupFocus);
+    group = [];
+    groupFocus = null;
+  };
+  for (const rect of rects) {
+    const own = focusOn(rect);
+    if (groupFocus !== null && sharesKeyframe(groupFocus, own)) {
+      const merged = focusOn(unionRects([...group, rect]) ?? rect);
+      if (isFullView(merged) === isFullView(own)) {
+        group.push(rect);
+        groupFocus = merged;
+        continue;
+      }
+    }
+    flush();
+    group = [rect];
+    groupFocus = own;
+  }
+  flush();
+  return keyframes;
 }
