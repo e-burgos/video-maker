@@ -35,3 +35,8 @@
 ## Ajuste (2026-10-13)
 - El margen de cada foco es proporcional a la caja (`edgePadding`: 6 % del lado, entre 0,015 y 0,08): un bloque
   de 0,52 de ancho pasa de 1,47× a ~1,75×. Hallado en la revisión de Display Ads (escena «Equipos y acceso»).
+
+## Ajuste (2026-10-13, globos)
+- El lado hacia donde se abre cada globo (`calloutPlacement`) se calcula sobre la vista visible de la cámara (zoom
+  explícito o automático, `visibleViews`) y no sobre la captura completa: en el checkout el globo «Licencia mensual
+  cancelable» se salía por el borde izquierdo de la vista.
