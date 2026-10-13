@@ -4,6 +4,26 @@ Historial de versiones de la app de escritorio, en español, pensado para los am
 instalan. `apps/desktop/scripts/release-desktop.mjs` toma la sección de la versión que publica
 y la usa como notas del release.
 
+## 0.4.0 — Tus marcas, publicar en YouTube y un productor con más criterio
+
+- Nueva página **Marcas**: creá una marca de cero o duplicando una existente, con nombre, logo, colores, tipografías,
+  voz, música, fotos y productos, y elegila al crear cada video. Los videos de motion graphics y los de material
+  crudo usan su logo, sus colores y su voz.
+- **Publicar en YouTube** desde el estudio: conectás tu canal y publicás cada video con título, descripción y
+  créditos de música.
+- **Revisión automática** de cada video: volumen de la voz y de la música por tramo, cuadros negros o congelados,
+  silencios largos y duración contra lo prometido. Si encuentra algo grave, no te deja publicar sin avisarte.
+- **Propuesta antes de producir**: el productor te ofrece dos o tres enfoques con su duración y el tiempo estimado,
+  vos elegís uno y ves una muestra corta antes del video completo.
+- El productor **mira tu material** antes de proponer y te avisa si alguna foto o captura no sirve para la idea o si
+  falta algo; después del render revisa el video escena por escena y te dice qué corregir.
+- Escenas que explican una **interfaz** con cursor, clics y resaltados sobrios; la cámara sigue cada paso para que
+  el texto se lea.
+- **Dirección de voz** por frase (ritmo, energía y pausas) y música por tramos que baja mientras se habla.
+- **Video de referencia**: subí un video que te guste y el estudio analiza sus escenas, su ritmo y su voz para que el
+  productor proponga algo parecido.
+- Si escribís mientras el productor trabaja, tu mensaje queda en espera y se envía solo cuando termina.
+
 ## 0.3.3 — Videos de motion graphics completos en el estudio
 
 - Una sola barra en todas las pantallas del video: productor, motion, biblioteca, storyboard, voz y vista previa.
