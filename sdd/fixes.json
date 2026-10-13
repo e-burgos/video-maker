@@ -3000,6 +3000,60 @@
           }
         ]
       }
+    },
+    {
+      "id": "FIX-e-burgos-019",
+      "author": "e-burgos",
+      "spec_id": "spec-e-burgos-023-production-quality",
+      "fix_document": "sdd/fixes/fix-e-burgos-019.md",
+      "type": "IMPROVEMENT",
+      "severity": "medium",
+      "created_at": "2026-10-12",
+      "resolved_at": "2026-10-12",
+      "validated_at": null,
+      "title": "Las escenas de interfaz se ven grandes y el estudio encuadra la acción solo",
+      "estimation_hours": 3,
+      "description": "Las capturas de ui-walkthrough ocupaban ~55 % del ancho y el texto quedaba chico; ahora el marco es más grande y, sin zoom explícito, el estudio hace un zoom persistente sobre el área de los pasos.",
+      "justification": "Legibilidad de la interfaz en el video de prueba de compra; cambio del runtime y del HTML de la escena sin contratos nuevos salvo el opcional autoZoom.",
+      "related_modules": [
+        "production-quality"
+      ],
+      "affected_files": [
+        "libs/motion-graphics/assets/runtime/motion-runtime.js",
+        "libs/motion-graphics/assets/runtime/scenes.css",
+        "libs/motion-graphics/src/scenes/ui-auto-zoom.ts",
+        "libs/motion-graphics/src/scenes/ui-auto-zoom.spec.ts",
+        "libs/motion-graphics/src/scenes/ui-walkthrough-html.ts",
+        "libs/motion-graphics/src/scenes/render-scene.ts",
+        "libs/motion-graphics/src/scenes/render-scene.spec.ts",
+        "libs/motion-graphics/src/storyboard/motion-storyboard.schema.ts",
+        "libs/motion-graphics/src/auto/scene-guide.ts"
+      ],
+      "test_reference": "motion-graphics lint/test/build verde; muestra real revisada (zoom-automatico.jpg).",
+      "status": "implemented",
+      "cycle": null,
+      "process_note": "Hallado en la verificación del video de prueba comprar-producto (cycle-06).",
+      "usage": {
+        "provider_model": "claude/sonnet",
+        "effort": "medium",
+        "tokens_in": 150000,
+        "tokens_out": 20000,
+        "approx": true,
+        "source": "declared-estimate",
+        "recorded_at": "2026-10-12",
+        "by_agent": [
+          {
+            "provider_model": "claude/sonnet",
+            "effort": "medium",
+            "agent": "implementor-back",
+            "tokens_in": 150000,
+            "tokens_out": 20000,
+            "approx": true,
+            "source": "declared-estimate",
+            "recorded_at": "2026-10-12"
+          }
+        ]
+      }
     }
   ]
 }

@@ -54,7 +54,7 @@ describe('headline', () => {
 
 describe('renderScene', () => {
   it('renders every scene of the catalog fixture', () => {
-    for (const s of catalogStoryboard.scenes) expect(renderScene(s, ctx)).toContain('class="mg-frame"');
+    for (const s of catalogStoryboard.scenes) expect(renderScene(s, ctx)).toMatch(/class="mg-frame( ui)?"/u);
   });
 
   it('hook swaps the first line out when the second is spoken and turns the screen off on its cue', () => {
@@ -244,6 +244,47 @@ describe('renderScene', () => {
       const base = scene('walk');
       if (base.kind !== 'ui-walkthrough') throw new Error('walk');
       expect(() => renderScene({ ...base, props: { ...base.props, steps: [{ action: 'highlight', box: 'Fantasma' }] } }, ctx)).toThrow(/box "Fantasma"/u);
+    });
+
+    describe('automatic framing', () => {
+      const base = () => {
+        const found = scene('walk');
+        if (found.kind !== 'ui-walkthrough') throw new Error('walk');
+        return found;
+      };
+      const withSteps = (steps: Parameters<typeof renderScene>[0] extends never ? never : unknown[], extra: Record<string, unknown> = {}) =>
+        renderScene({ ...base(), props: { ...base().props, steps, ...extra } } as Parameters<typeof renderScene>[0], ctx);
+      const compactSteps = [{ action: 'highlight', x: 0.4, y: 0.4, w: 0.1, h: 0.08 }, { action: 'click', x: 0.45, y: 0.5 }];
+
+      it('zooms into the area of the steps when the scene has no zoom step', () => {
+        const out = withSteps(compactSteps);
+        expect(out).toMatch(/data-ui-autozoom="1" data-anim="ui-autozoom" data-at="0.5" data-parallel="1" data-scale="[\d.]+" data-cx="0.45" data-cy="0.4/u);
+        expect(out).not.toContain('data-ui-step="zoom"');
+      });
+
+      it('leaves the full capture when the steps already cover most of it', () => {
+        expect(withSteps([{ action: 'highlight', x: 0.05, y: 0.1, w: 0.9, h: 0.1 }])).not.toContain('data-ui-autozoom');
+      });
+
+      it('respects autoZoom false', () => {
+        expect(withSteps(compactSteps, { autoZoom: false })).not.toContain('data-ui-autozoom');
+      });
+
+      it('lets an explicit zoom step take over', () => {
+        const out = withSteps([...compactSteps, { action: 'zoom', x: 0.4, y: 0.4, w: 0.2, h: 0.2 }]);
+        expect(out).not.toContain('data-ui-autozoom');
+        expect(out).toContain('data-ui-step="zoom"');
+      });
+
+      it('keeps the cursor waypoints in capture fractions so they land inside the zoomed layer', () => {
+        const out = withSteps(compactSteps);
+        expect(out).toContain('data-px="0.45" data-py="0.5"');
+        expect(out.indexOf('data-ui-autozoom')).toBeLessThan(out.indexOf('mg-ui-highlight'));
+      });
+
+      it('marks the frame of interface scenes so the stage can be larger', () => {
+        expect(html('walk')).toContain('class="mg-frame ui"');
+      });
     });
 
     it('places the callout bubble away from the edges of the capture', () => {

@@ -131,6 +131,11 @@ window.createMotionRuntime = function createMotionRuntime(T, W, compositionId) {
       tl.fromTo(zoom, uiRest, { ...focus, duration: 0.8, ease: 'power2.inOut', immediateRender: false }, t);
       tl.fromTo(zoom, focus, { ...uiRest, duration: 0.7, ease: 'power2.inOut', immediateRender: false }, uiZoomHoldEnd(el, id, t));
     },
+    'ui-autozoom': (el, t) => {
+      const scale = Number(el.dataset.scale);
+      const focus = { scale, xPercent: clamp((0.5 - scale * Number(el.dataset.cx)) * 100, (1 - scale) * 100, 0), yPercent: clamp((0.5 - scale * Number(el.dataset.cy)) * 100, (1 - scale) * 100, 0) };
+      tl.fromTo(el.closest('.mg-ui-zoom'), uiRest, { ...focus, duration: 0.9, ease: 'power2.inOut', immediateRender: false }, t);
+    },
     'ui-cursor': (el, t, id) => {
       const waypoints = Array.from(el.closest('[data-scene]').querySelectorAll('[data-ui-step][data-px]'))
         .map((step) => ({ t: timeFor(step, id, 0), x: Number(step.dataset.px), y: Number(step.dataset.py), click: step.dataset.uiStep === 'click' }))

@@ -4,6 +4,8 @@ import { resolveWalkthroughStep } from '../storyboard/resolve-walkthrough-boxes'
 import type { ResolvedWalkthroughStep } from '../storyboard/resolve-walkthrough-boxes';
 import { animAttrs, esc, headline } from './scene-html';
 import type { SceneContext } from './scene-html';
+import { autoZoomFocus, calloutRect, pointRect } from './ui-auto-zoom';
+import type { AutoZoomFocus, CalloutPlacementSide, UnitRect } from './ui-auto-zoom';
 
 type WalkthroughProps = SceneOf<'ui-walkthrough'>['props'];
 
@@ -21,6 +23,7 @@ const MAX_ZOOM_SCALE = 3;
 const ZOOM_REGION_MARGIN = 0.9;
 const CALLOUT_ALIGN_EDGE = 0.28;
 const CALLOUT_BELOW_UNTIL = 0.25;
+const AUTO_ZOOM_DELAY = 0.5;
 
 const fraction = (value: number): string => String(Math.round(value * 10000) / 100);
 const clamp = (value: number, min: number, max: number): number => Math.min(max, Math.max(min, value));
@@ -56,10 +59,35 @@ function stepAttrs(step: ResolvedWalkthroughStep, index: number, count: number, 
   return ` data-ui-step="${step.action}"${animAttrs({ anim, cue: step.cue, at: step.cue === undefined ? step.at : undefined, parallel: true, extra: { ...slot, ...cursor, ...extra } })}`;
 }
 
+function calloutSides(step: ResolvedWalkthroughStep): CalloutPlacementSide {
+  return {
+    horizontal: step.x < CALLOUT_ALIGN_EDGE ? 'start' : step.x > 1 - CALLOUT_ALIGN_EDGE ? 'end' : 'mid',
+    vertical: step.y < CALLOUT_BELOW_UNTIL ? 'below' : 'above',
+  };
+}
+
 function calloutPlacement(step: ResolvedWalkthroughStep): string {
-  const horizontal = step.x < CALLOUT_ALIGN_EDGE ? 'h-start' : step.x > 1 - CALLOUT_ALIGN_EDGE ? 'h-end' : 'h-mid';
-  const vertical = step.y < CALLOUT_BELOW_UNTIL ? 'v-below' : 'v-above';
-  return `${horizontal} ${vertical}`;
+  const { horizontal, vertical } = calloutSides(step);
+  return `h-${horizontal} v-${vertical}`;
+}
+
+function stepRects(step: ResolvedWalkthroughStep): UnitRect[] {
+  const geometry = resolveStepGeometry(step);
+  if (step.action === 'callout') return [calloutRect(step.x, step.y, step.text ?? '', calloutSides(step))];
+  if (geometry.box) return [geometry.box];
+  if (geometry.cursor) return [pointRect(geometry.cursor.x, geometry.cursor.y)];
+  return [];
+}
+
+export function resolveAutoZoom(steps: readonly ResolvedWalkthroughStep[], autoZoom: boolean | undefined): AutoZoomFocus | null {
+  if (autoZoom === false || steps.some((step) => step.action === 'zoom')) return null;
+  return autoZoomFocus(steps.flatMap(stepRects));
+}
+
+function autoZoomMark(focus: AutoZoomFocus | null): string {
+  if (focus === null) return '';
+  const round = (value: number): number => Math.round(value * 10000) / 10000;
+  return `<i class="mg-ui-mark" data-ui-autozoom="1"${animAttrs({ anim: 'ui-autozoom', at: AUTO_ZOOM_DELAY, parallel: true, extra: { scale: round(focus.scale), cx: round(focus.cx), cy: round(focus.cy) } })}></i>`;
 }
 
 function stepHtml(step: ResolvedWalkthroughStep, index: number, count: number): string {
@@ -96,7 +124,7 @@ export function uiWalkthrough(props: WalkthroughProps, ctx: SceneContext): strin
     return result;
   });
   const steps = resolved.map((step, index) => stepHtml(step, index, resolved.length)).join('');
-  const layer = `<div class="mg-ui-layer">${steps}<div class="mg-ui-track" data-ui-cursor="1"${animAttrs({ anim: 'ui-cursor', parallel: true })}>${CURSOR_SVG}</div></div>`;
+  const layer = `<div class="mg-ui-layer">${autoZoomMark(resolveAutoZoom(resolved, props.autoZoom))}${steps}<div class="mg-ui-track" data-ui-cursor="1"${animAttrs({ anim: 'ui-cursor', parallel: true })}>${CURSOR_SVG}</div></div>`;
   const shot = `<div class="mg-ui-shot"><div class="mg-ui-zoom"><img src="${esc(ctx.imageUrl(props.image))}" alt="" />${layer}</div></div>`;
   const device = `<div class="mg-ui-device ${kind}"${animAttrs({ anim: 'rise', parallel: true })}>${kind === 'browser' ? browserBar(props.url) : ''}${shot}</div>`;
   const head = props.title ? headline(props.title, props.accent) : '';

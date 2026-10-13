@@ -271,8 +271,12 @@ body { margin: 0; background: var(--mg-bg); color: var(--mg-text); font-family: 
 .mg-device.plate > img, .mg-conn .dev.plate > img { position: relative; z-index: 1; }
 .mg-device-screen.perspective { left: 0; top: 0; font-size: 20px; }
 
-.mg-ui-stage { flex: 1; min-height: 0; display: flex; align-items: center; justify-content: center; --ui-w: 1560px; --ui-h: 600px; }
-.mg-ui-stage.no-title { --ui-h: 700px; }
+.mg-frame.ui { padding: 118px 90px 92px; gap: 12px; }
+.mg-frame.ui .mg-h { font-size: 52px; }
+.fmt-9x16 .mg-frame.ui { padding: 200px 70px 190px; gap: 56px; }
+.fmt-9x16 .mg-frame.ui .mg-h { font-size: 78px; }
+.mg-ui-stage { flex: 1; min-height: 0; display: flex; align-items: center; justify-content: center; --ui-w: 1740px; --ui-h: 750px; }
+.mg-ui-stage.no-title { --ui-h: 815px; }
 .fmt-9x16 .mg-ui-stage { --ui-w: 940px; --ui-h: 1100px; }
 .fmt-9x16 .mg-ui-stage.no-title { --ui-h: 1250px; }
 .mg-ui-device { position: relative; display: flex; flex-direction: column; max-width: 100%; border-radius: 22px; border: 1px solid var(--mg-border-strong); background: #0c0c0e; overflow: hidden; box-shadow: 0 40px 100px rgba(0,0,0,0.65); }
