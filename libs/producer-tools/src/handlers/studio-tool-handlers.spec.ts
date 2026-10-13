@@ -161,6 +161,23 @@ describe('createStudioToolHandlers', () => {
     expect(client.calls).toEqual([{ method: 'putMotionStoryboard', args: [storyboard] }]);
   });
 
+  it('set_voice_direction forwards the line and scene directions and confirms the save', async () => {
+    const input = { directions: { '1': { pace: 'slow' } }, sceneDirections: { 'scene-01': { energy: 'calm' }, 'scene-02': null } };
+    const { handlers, client } = handlersWith({ putVoiceDirection: async () => undefined });
+
+    const result = await handlers.set_voice_direction(input);
+
+    expect(result.data).toEqual({ saved: true });
+    expect(client.calls).toEqual([{ method: 'putVoiceDirection', args: [input] }]);
+  });
+
+  it('set_voice_direction rejects an empty input before calling the client', async () => {
+    const { handlers, client } = handlersWith();
+
+    await expect(handlers.set_voice_direction({})).rejects.toMatchObject({ code: 'INVALID_INPUT' });
+    expect(client.calls).toEqual([]);
+  });
+
   it('write_motion_storyboard rejects a missing storyboard before calling the client', async () => {
     const { handlers, client } = handlersWith();
 
@@ -169,7 +186,7 @@ describe('createStudioToolHandlers', () => {
   });
 
   it('write_motion_brief keeps the named boxes of an image', async () => {
-    const { handlers, client } = handlersWith({ putMotionBrief: async () => undefined });
+    const { handlers, client } = handlersWith({ putMotionBrief: async () => undefined, getMotionBrief: async () => ({}) });
     const brief = {
       version: 1 as const,
       brand: 'acme',
@@ -179,7 +196,42 @@ describe('createStudioToolHandlers', () => {
 
     await handlers.write_motion_brief({ brief });
 
-    expect(client.calls).toEqual([{ method: 'putMotionBrief', args: [brief] }]);
+    expect(client.calls.at(-1)).toEqual({ method: 'putMotionBrief', args: [brief] });
+  });
+
+  describe('write_motion_brief measured boxes', () => {
+    const box = { name: 'Boton', x: 0.6, y: 0.8, w: 0.2, h: 0.1 };
+    const briefWith = (boxes: unknown[]) => ({ version: 1 as const, brand: 'acme', script: 'Hola', images: [{ file: 'a.png', caption: 'Cotizador', boxes }] });
+    const storedWith = (boxes: unknown[]) => async () => ({ ...briefWith(boxes), images: [{ file: 'images/a.png', caption: 'Cotizador', boxes }] });
+
+    it('stamps who and when on a box the producer marks as measured', async () => {
+      const { handlers, client } = handlersWith({ putMotionBrief: async () => undefined, getMotionBrief: async () => ({}) });
+
+      await handlers.write_motion_brief({ brief: briefWith([{ ...box, source: 'measured' }]) });
+
+      const sent = client.calls.at(-1)?.args[0] as { images: { boxes: unknown[] }[] };
+      expect(sent.images[0]?.boxes).toEqual([{ ...box, source: 'measured', measuredBy: 'producer', measuredAt: expect.stringMatching(/^\d{4}-\d{2}-\d{2}T/u) }]);
+    });
+
+    it('refuses to replace a given box with a measured one of the same name', async () => {
+      const { handlers, client } = handlersWith({ putMotionBrief: async () => undefined, getMotionBrief: storedWith([box]) });
+
+      await expect(handlers.write_motion_brief({ brief: briefWith([{ ...box, x: 0.5, source: 'measured' }]) })).rejects.toMatchObject({
+        code: 'INVALID_INPUT',
+        hint: expect.stringContaining('given and cannot be replaced by a measured one'),
+      });
+      expect(client.calls.some((call) => call.method === 'putMotionBrief')).toBe(false);
+    });
+
+    it('keeps a measured box measured when the producer rewrites it without the source', async () => {
+      const measured = { ...box, source: 'measured', measuredBy: 'producer', measuredAt: '2026-10-13T10:00:00.000Z' };
+      const { handlers, client } = handlersWith({ putMotionBrief: async () => undefined, getMotionBrief: storedWith([measured]) });
+
+      await handlers.write_motion_brief({ brief: briefWith([box]) });
+
+      const sent = client.calls.at(-1)?.args[0] as { images: { boxes: unknown[] }[] };
+      expect(sent.images[0]?.boxes).toEqual([measured]);
+    });
   });
 
   it('write_motion_brief rejects a brief with no script before calling the client', async () => {
@@ -354,7 +406,7 @@ describe('createStudioToolHandlers', () => {
     });
 
     const sceneFrames = [
-      { sceneId: 'hook', index: 1, startSec: 0, endSec: 4, atSec: 2, frame: 'out/video.review/scene-01.jpg', voice: 'Hola' },
+      { sceneId: 'hook', index: 1, startSec: 0, endSec: 4, frames: [{ atSec: 2, frame: 'out/video.review/scene-01.jpg' }], voice: 'Hola' },
     ];
 
     it('lists the scene frames and says the visual review is pending (US-023-603)', async () => {
@@ -1039,6 +1091,20 @@ describe('createStudioToolHandlers', () => {
         const { handlers } = handlersWith({ getRenderReview: async () => null });
 
         await expect(handlers.record_visual_review({ scenes })).rejects.toMatchObject({ code: 'FILE_NOT_FOUND' });
+      });
+
+      it('relays a refusal that names the scene and its missing frames', async () => {
+        const hint = 'Faltan cuadros por mirar con view_images antes de registrar la revisión visual: escena "hook": out/video.review/scene-01-f2.jpg';
+        const { handlers } = handlersWith({
+          putVisualReview: async () => {
+            throw new StudioToolRuntimeError('VISUAL_REVIEW_NOT_VIEWED', hint);
+          },
+        });
+
+        await expect(handlers.record_visual_review({ file: 'out/video.mp4', scenes })).rejects.toMatchObject({
+          code: 'VISUAL_REVIEW_NOT_VIEWED',
+          message: expect.stringContaining('escena "hook"') as string,
+        });
       });
 
       it('propagates VISUAL_REVIEW_NOT_VIEWED from the studio', async () => {

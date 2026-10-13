@@ -1,5 +1,6 @@
 import { z } from 'zod';
 
+import { VoiceDirectionSchema } from '../voice/voice-direction';
 import { IdSchema, MsSchema } from './primitives';
 
 export const VOICE_MANIFEST_SCHEMA_VERSION = 1;
@@ -19,6 +20,7 @@ export const VoiceTrackSchema = z.strictObject({
     .string()
     .min(1)
     .describe('Hash of the narration this track was produced from, to detect a later text edit.'),
+  direction: VoiceDirectionSchema.optional().describe('Voice direction applied to this scene; absent when it was read with the voice defaults.'),
   updatedAt: z.iso.datetime(),
 });
 

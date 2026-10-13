@@ -29,8 +29,8 @@ const REPORT: ReviewReport = {
   metrics: {},
   findings: [{ id: 'visual-not-reviewed-01', check: 'visual-not-reviewed', severity: 'critical', message: 'Nadie miró', proposedFix: 'Mirar' }],
   sceneFrames: [
-    { sceneId: 'hook', index: 1, startSec: 0, endSec: 4, atSec: 2, frame: FRAME_ONE, voice: 'Hola' },
-    { sceneId: 'cta', index: 2, startSec: 4, endSec: 10, atSec: 7, frame: FRAME_TWO },
+    { sceneId: 'hook', index: 1, startSec: 0, endSec: 4, frames: [{ atSec: 2, frame: FRAME_ONE }], voice: 'Hola' },
+    { sceneId: 'cta', index: 2, startSec: 4, endSec: 10, frames: [{ atSec: 7, frame: FRAME_TWO }] },
   ],
 };
 
@@ -108,6 +108,22 @@ describe('PUT /projects/:slug/reviews/visual (US-023-603)', () => {
     await expect(attempt).rejects.toMatchObject({ code: 'VISUAL_REVIEW_NOT_VIEWED', resource: FRAME_TWO });
     expect(httpStatusFor('VISUAL_REVIEW_NOT_VIEWED')).toBe(422);
     expect((await storedReport(storage)).visualReview).toBeUndefined();
+  });
+
+  it('names the scene and every frame still unseen when a scene has several frames', async () => {
+    const extra = 'out/video.review/scene-02-f2.jpg';
+    const report: ReviewReport = {
+      ...REPORT,
+      sceneFrames: [
+        ...(REPORT.sceneFrames ?? []).slice(0, 1),
+        { sceneId: 'cta', index: 2, startSec: 4, endSec: 10, frames: [{ atSec: 5, frame: FRAME_TWO }, { atSec: 8, frame: extra }] },
+      ],
+    };
+    const { deps } = setup({ report, viewed: [{ path: FRAME_ONE, viewedAt: AFTER }, { path: FRAME_TWO, viewedAt: AFTER }] });
+
+    const attempt = handlePutVisualReview(deps, STORE, { slug: SLUG }, put({ scenes: [scene('hook'), scene('cta')] }));
+
+    await expect(attempt).rejects.toMatchObject({ code: 'VISUAL_REVIEW_NOT_VIEWED', resource: extra, hint: expect.stringContaining(`escena "cta": ${extra}`) as string });
   });
 
   it('refuses frames viewed before the review was created', async () => {

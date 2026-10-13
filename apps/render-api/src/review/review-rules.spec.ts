@@ -300,8 +300,8 @@ describe('report shape', () => {
 
 describe('visual-not-reviewed (US-023-603)', () => {
   const sceneFrames = [
-    { sceneId: 'hook', index: 1, startSec: 0, endSec: 4, atSec: 2, frame: 'out/motion.review/scene-01.jpg', voice: 'Hola' },
-    { sceneId: 'cta', index: 2, startSec: 4, endSec: 10, atSec: 7, frame: 'out/motion.review/scene-02.jpg' },
+    { sceneId: 'hook', index: 1, startSec: 0, endSec: 4, frames: [{ atSec: 2, frame: 'out/motion.review/scene-01.jpg' }], voice: 'Hola' },
+    { sceneId: 'cta', index: 2, startSec: 4, endSec: 10, frames: [{ atSec: 7, frame: 'out/motion.review/scene-02.jpg' }] },
   ];
 
   it('is critical with a fix while scene frames exist, and lists them in the report', () => {

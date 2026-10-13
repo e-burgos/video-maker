@@ -430,6 +430,14 @@ describe('createHttpRenderApiClient', () => {
     });
   });
 
+  it('putVoiceDirection PUTs the directions to the voice direction route', async () => {
+    const ok = createFakeFetch(() => jsonResponse(200, { ok: true }));
+    await client(ok.fetchImpl).putVoiceDirection({ sceneDirections: { 'scene-01': null } });
+    expect(ok.calls[0]?.init?.method).toBe('PUT');
+    expect(ok.calls[0]?.url).toBe('http://127.0.0.1:4599/projects/pitch-deck/voice/direction');
+    expect(JSON.parse(String(ok.calls[0]?.init?.body))).toEqual({ sceneDirections: { 'scene-01': null } });
+  });
+
   it('surfaces the expected detail of an error that carries no hint', async () => {
     const { fetchImpl } = createFakeFetch(() =>
       jsonResponse(422, { error: { code: 'STORYBOARD_INVALID', stage: null, message: 'invalid', expected: 'scene "a": image "x.jpg" must be images/<file> or brand:<key>' } }),

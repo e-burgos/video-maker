@@ -2,16 +2,17 @@ import { useEffect, useRef, useState } from 'react';
 import type { VoiceDirection } from '@video-maker/timeline-core';
 
 import { artifactUrl } from '../api/artifact-url';
+import { formatUpdatedAt } from '../api/format-updated-at';
 import { directedSceneCount } from '../api/motion-storyboard-draft';
 import { motionImagePath, motionPropEntries } from '../api/motion-scene-props';
 import type { MotionPropValue } from '../api/motion-scene-props';
-import type { MotionOverviewScene, MotionScene, MotionStoryboard } from '../api/motion-types';
+import type { MotionMeasuredBox, MotionOverviewScene, MotionScene, MotionStoryboard } from '../api/motion-types';
 import { useRenderApi } from '../api/render-api-context';
 import { hasDirection } from '../api/voice-direction';
 import { useMotionOverview } from '../hooks/use-motion-overview';
 import { useMotionStoryboardDraft } from '../hooks/use-motion-storyboard-draft';
 import { useRenderJobPoll } from '../hooks/use-render-job-poll';
-import { useT } from '../i18n/language-context';
+import { useLanguage, useT } from '../i18n/language-context';
 import { ErrorNotice } from './error-notice';
 import { MotionJobStatus } from './motion-job-status';
 import { MotionViewEmpty, MotionViewShell } from './motion-view-shell';
@@ -66,6 +67,29 @@ function PropValue({ slug, value }: { slug: string; value: MotionPropValue }) {
     );
   }
   return <span className="text-sm text-ink">{value.text}</span>;
+}
+
+function MeasuredBoxesList({ boxes }: { boxes: readonly MotionMeasuredBox[] }) {
+  const t = useT();
+  const { language } = useLanguage();
+  if (boxes.length === 0) return null;
+  return (
+    <section data-testid="motion-measured-boxes" className="space-y-1 rounded-panel border border-warning p-3">
+      <h3 className="text-sm font-medium text-ink">{t('motionStoryboard.measuredBoxes.heading')}</h3>
+      <ul className="space-y-1">
+        {boxes.map((box) => (
+          <li key={`${box.image}-${box.name}`} className="text-xs text-ink-muted">
+            {t('motionStoryboard.measuredBoxes.item', {
+              name: box.name,
+              image: box.image,
+              who: box.measuredBy === 'producer' ? t('motionStoryboard.measuredBoxes.producer') : box.measuredBy,
+              date: box.measuredAt === null ? t('motionStoryboard.measuredBoxes.unknownDate') : formatUpdatedAt(Date.parse(box.measuredAt), language),
+            })}
+          </li>
+        ))}
+      </ul>
+    </section>
+  );
 }
 
 function SceneCard({
@@ -208,6 +232,8 @@ export function MotionStoryboardView({ slug }: MotionStoryboardViewProps) {
           message={t('motionStoryboard.empty')}
         />
       )}
+
+      <MeasuredBoxesList boxes={overview.data?.measuredBoxes ?? []} />
 
       {storyboard !== null && (
         <>

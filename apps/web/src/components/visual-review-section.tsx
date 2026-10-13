@@ -50,12 +50,17 @@ function SceneCard({ slug, frame, verdict }: { slug: string; frame: SceneFrame; 
 
   return (
     <li data-testid="visual-scene" data-scene-id={frame.sceneId} className="space-y-1.5 rounded-md border border-slate-800 p-2">
-      <img
-        src={artifactUrl(slug, frame.frame)}
-        alt={t('review.visual.frameAlt', { index: String(frame.index) })}
-        loading="lazy"
-        className="aspect-video w-full rounded-control border border-border-subtle object-cover"
-      />
+      <div className="grid grid-cols-2 gap-1">
+        {frame.frames.map((shot) => (
+          <img
+            key={shot.frame}
+            src={artifactUrl(slug, shot.frame)}
+            alt={t('review.visual.frameAlt', { index: String(frame.index) })}
+            loading="lazy"
+            className="aspect-video w-full rounded-control border border-border-subtle object-cover first:col-span-2 only:col-span-2"
+          />
+        ))}
+      </div>
       <p className="text-xs font-medium text-slate-200">
         {t('review.visual.scene', { index: String(frame.index) })}
         <span className="ml-2 font-mono text-slate-500">

@@ -19,11 +19,24 @@ function invalidVisualReview(resource: string, expected: string): PipelineStageE
   return new PipelineStageError({ code: 'VISUAL_REVIEW_INVALID', stage: null, resource, expected });
 }
 
-function framesNotViewedSince(report: ReviewReport, viewed: ViewedImages): string[] {
+interface UnviewedSceneFrames {
+  readonly sceneId: string;
+  readonly frames: readonly string[];
+}
+
+function framesNotViewedSince(report: ReviewReport, viewed: ViewedImages): UnviewedSceneFrames[] {
   const viewedAtByPath = new Map(viewed.images.map((entry) => [entry.path, entry.viewedAt]));
   return (report.sceneFrames ?? [])
-    .map((scene) => scene.frame)
-    .filter((frame) => (viewedAtByPath.get(frame) ?? '') < report.createdAt);
+    .map((scene) => ({
+      sceneId: scene.sceneId,
+      frames: scene.frames.map((shot) => shot.frame).filter((frame) => (viewedAtByPath.get(frame) ?? '') < report.createdAt),
+    }))
+    .filter((scene) => scene.frames.length > 0);
+}
+
+function unviewedHint(unviewed: readonly UnviewedSceneFrames[]): string {
+  const detail = unviewed.map((scene) => `escena "${scene.sceneId}": ${scene.frames.join(', ')}`).join('; ');
+  return `Faltan cuadros por mirar con view_images antes de registrar la revisión visual: ${detail}`;
 }
 
 export async function handlePutVisualReview(
@@ -64,9 +77,9 @@ export async function handlePutVisualReview(
     throw new PipelineStageError({
       code: 'VISUAL_REVIEW_NOT_VIEWED',
       stage: null,
-      resource: notViewed.join(', '),
-      expected: 'every scene frame previewed with view_images after the review was created',
-      hint: `look at these with view_images before recording the visual review: ${notViewed.join(', ')}`,
+      resource: notViewed.flatMap((scene) => scene.frames).join(', '),
+      expected: 'every frame of every scene previewed with view_images after the review was created',
+      hint: unviewedHint(notViewed),
     });
   }
 

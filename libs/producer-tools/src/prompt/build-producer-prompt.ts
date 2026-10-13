@@ -67,7 +67,7 @@ const TOOL_DESCRIPTIONS: Readonly<Record<StudioToolName, string>> = {
   get_render_review:
     'read the automatic review of a finished render (status, master loudness, voice/music margin and the findings with their proposed fix); use it to propose fixes before publishing.',
   record_visual_review:
-    'record, scene by scene, what each frame of a finished render really shows and whether it matches the voice, reads well and could pass for another product; only frames you viewed count.',
+    'record, scene by scene, what each frame of a finished render really shows and whether it matches the voice, reads well and could pass for another product; only frames you viewed count, all the frames of every scene.',
   review_material:
     'record what each image you looked at really shows and whether it fits, plus the gaps of the material; propose_production refuses to run without it.',
   propose_production:
@@ -81,6 +81,8 @@ const TOOL_DESCRIPTIONS: Readonly<Record<StudioToolName, string>> = {
   read_motion_storyboard: 'read the motion storyboard (scenes with their kind and voice line) once the storyboard phase made it.',
   write_motion_storyboard:
     'save an edited motion storyboard (the full JSON with your minimal changes); the studio validates it and names the bad field.',
+  set_voice_direction:
+    'set the delivery of the voice per script line (`directions`) or per narrated-storyboard scene (`sceneDirections`); the studio names the bad field.',
 };
 
 function buildProducerToolsSection(): string {
@@ -221,6 +223,8 @@ function buildProducerCraftSection(): string {
     'For devices of the brand prefer the `product` scene (the device with animated screens) over',
     'cropped photos. Boxes or coordinates the user or the brief give are data: copy every one into the',
     '`boxes` of its image in write_motion_brief, use them as given and never estimate positions yourself;',
+    'a box you measured yourself on a capture goes with `source: "measured"` and the user confirms it,',
+    'while a given box is never replaced by a measured one;',
     'after the storyboard is generated, check that each interface step uses a `box` and that every',
     'device scene is a `product` scene, and fix it with write_motion_storyboard before the voice. Never claim a check you did not run: if a tool says something',
     'is missing, report the exact answer of the tool. Write the material review and the visual review in',
@@ -229,15 +233,15 @@ function buildProducerCraftSection(): string {
     '## Reviewing a finished render',
     '',
     'After every full render (not a sample) read get_render_review: it waits for the review job. A',
-    'motion video lists `sceneFrames`, one frame at the middle of each scene with its voice text, and',
-    'the critical finding `visual-not-reviewed` stays until you record the visual review. View every',
+    'motion video lists `sceneFrames`: each scene has one or more frames (several when it is long or its voice names more than one thing) with its voice text, and',
+    'the critical finding `visual-not-reviewed` stays until you record the visual review, which the studio refuses until you viewed EVERY frame of EVERY scene. View every',
     'frame with view_images (6 per call), then call record_visual_review with, for each scene, what',
     'the frame really shows, whether it matches the voice, whether it is legible, whether it could',
     'pass for another product, a verdict (`ok` or `fix`) and a note saying what to change. Be honest:',
     'describe what you see, not what you intended. A scene matches the voice only when everything the',
-    'voice names (each product, screen, button or step) is visible in it; one frame is the middle of',
-    'the scene, so when the voice names two things, extract more frames of that scene to check both.',
-    'Interface text that cannot be read at a glance is not legible: add a zoom on the box of the action.',
+    'voice names (each product, screen, button or step) is visible in some frame of it; when none shows it, the scene does not',
+    'match, and you can extract more frames of that scene to check.',
+    'Interface text that cannot be read at a glance is not legible: point the step at the box of the text itself (a wide thin banner gets its own highlight) and let the camera frame it; do not add zoom steps for legibility.',
     'The studio frames interface scenes by itself with a camera that follows each step; when that camera',
     'leaves out what the scene is about (a product photo next to a highlighted title, for example), the',
     'scene does not match the voice: set `autoZoom: false` on it or add a zoom step on the bigger area.',
@@ -350,6 +354,7 @@ function buildProducerCraftSection(): string {
     'every line is no direction. The next `voice` job with `"overwrite":true` applies it, and an',
     'unmarked line keeps the voice as it was. The timed windows still win: a long pause never pushes',
     'a sentence out of its window.',
+    'A narrated storyboard scene takes the same direction: set it with set_voice_direction `sceneDirections` {"<scene id>": direction | null}; its `emphasis` words must appear in that scene narration. A scripted line can also be set with `directions`.',
     '',
     'The `montage` job takes `"musicMode":"segments"` to let the music breathe: full in the intro, the',
     'outro and every silence of 2 seconds or more, with 0.6 s fades, and very low while someone',

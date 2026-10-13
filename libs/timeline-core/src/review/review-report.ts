@@ -28,15 +28,37 @@ export const ReviewFindingSchema = z
 
 export const VISUAL_VERDICTS = ['ok', 'fix'] as const;
 
-export const SceneFrameSchema = z.strictObject({
+export const SceneFrameShotSchema = z.strictObject({
+  atSec: z.number().min(0),
+  frame: z.string().min(1),
+});
+
+const SceneFrameShape = z.strictObject({
   sceneId: z.string().min(1),
   index: z.number().int().min(1),
   startSec: z.number().min(0),
   endSec: z.number().min(0),
-  atSec: z.number().min(0),
-  frame: z.string().min(1),
+  frames: z.array(SceneFrameShotSchema).min(1),
   voice: z.string().min(1).optional(),
 });
+
+function isLegacySingleFrame(value: unknown): value is Record<string, unknown> & { atSec: number; frame: string } {
+  if (typeof value !== 'object' || value === null || 'frames' in value) {
+    return false;
+  }
+  const candidate = value as { atSec?: unknown; frame?: unknown };
+  return typeof candidate.atSec === 'number' && typeof candidate.frame === 'string';
+}
+
+function upgradeLegacySingleFrame(value: unknown): unknown {
+  if (!isLegacySingleFrame(value)) {
+    return value;
+  }
+  const { atSec, frame, ...rest } = value;
+  return { ...rest, frames: [{ atSec, frame }] };
+}
+
+export const SceneFrameSchema = z.preprocess(upgradeLegacySingleFrame, SceneFrameShape);
 
 export const SceneVisualReviewSchema = z.strictObject({
   sceneId: z.string().min(1),
@@ -65,7 +87,8 @@ export const ReviewReportSchema = z.strictObject({
   visualReview: VisualReviewSchema.optional(),
 });
 
-export type SceneFrame = z.infer<typeof SceneFrameSchema>;
+export type SceneFrame = z.infer<typeof SceneFrameShape>;
+export type SceneFrameShot = z.infer<typeof SceneFrameShotSchema>;
 export type SceneVisualReview = z.infer<typeof SceneVisualReviewSchema>;
 export type VisualReview = z.infer<typeof VisualReviewSchema>;
 export type ReviewSeverity = z.infer<typeof ReviewSeveritySchema>;

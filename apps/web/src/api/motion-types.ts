@@ -108,11 +108,19 @@ export type MotionOverviewVideo = {
   outdated: boolean;
 };
 
+export type MotionMeasuredBox = {
+  image: string;
+  name: string;
+  measuredBy: string;
+  measuredAt: string | null;
+};
+
 export type MotionOverview = {
   storyboard: MotionStoryboard | null;
   timeline: MotionOverviewTimeline | null;
   voice: { scenes: MotionOverviewVoiceScene[] } | null;
   video: MotionOverviewVideo | null;
+  measuredBoxes?: MotionMeasuredBox[];
 };
 
 export const MOTION_PHASES = ['storyboard', 'video', 'all'] as const;

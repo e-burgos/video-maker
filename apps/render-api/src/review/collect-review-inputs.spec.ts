@@ -217,18 +217,30 @@ describe('collectReviewInputs: motion', () => {
       return { ports, extracted };
     }
 
-    it('extracts one frame at the middle of each scene and carries the scene voice', async () => {
+    it('extracts one frame for a short scene and several for a long one, and carries the scene voice', async () => {
       const { ports, extracted } = recordingPorts({ '/media/demo/motion/storyboard.json': storyboard });
 
       const inputs = await collectReviewInputs({ project, file: 'out/motion.mp4', mode: 'motion' }, ports);
 
       expect(extracted).toEqual([
         { atSec: 2.5, outPath: '/media/demo/out/motion.review/scene-01.jpg', maxLongSidePx: 960 },
-        { atSec: 8.5, outPath: '/media/demo/out/motion.review/scene-02.jpg', maxLongSidePx: 960 },
+        { atSec: 5 + (7 * 0.5) / 3, outPath: '/media/demo/out/motion.review/scene-02-f1.jpg', maxLongSidePx: 960 },
+        { atSec: 8.5, outPath: '/media/demo/out/motion.review/scene-02-f2.jpg', maxLongSidePx: 960 },
+        { atSec: 5 + (7 * 2.5) / 3, outPath: '/media/demo/out/motion.review/scene-02-f3.jpg', maxLongSidePx: 960 },
       ]);
       expect(inputs.sceneFrames).toEqual([
-        { sceneId: 'hook', index: 1, startSec: 0, endSec: 5, atSec: 2.5, frame: 'out/motion.review/scene-01.jpg', voice: '¿Querés sumar pantallas?' },
-        { sceneId: 'cta', index: 2, startSec: 5, endSec: 12, atSec: 8.5, frame: 'out/motion.review/scene-02.jpg' },
+        { sceneId: 'hook', index: 1, startSec: 0, endSec: 5, frames: [{ atSec: 2.5, frame: 'out/motion.review/scene-01.jpg' }], voice: '¿Querés sumar pantallas?' },
+        {
+          sceneId: 'cta',
+          index: 2,
+          startSec: 5,
+          endSec: 12,
+          frames: [
+            { atSec: 5 + (7 * 0.5) / 3, frame: 'out/motion.review/scene-02-f1.jpg' },
+            { atSec: 8.5, frame: 'out/motion.review/scene-02-f2.jpg' },
+            { atSec: 5 + (7 * 2.5) / 3, frame: 'out/motion.review/scene-02-f3.jpg' },
+          ],
+        },
       ]);
       expect(reviewRender(inputs).findings.some((finding) => finding.check === 'visual-not-reviewed')).toBe(true);
     });

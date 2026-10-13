@@ -1,6 +1,6 @@
 import { toAbsolutePath } from '@video-maker/auto-montage';
 import type { MediaProject } from '@video-maker/auto-montage';
-import { emptyVoiceManifest, hashNarration, isVoiceTrackStale, upsertVoiceTrack } from '@video-maker/timeline-core';
+import { emptyVoiceManifest, hashDirectedNarration, isVoiceTrackStale, upsertVoiceTrack } from '@video-maker/timeline-core';
 import type { StoryboardDocument, VoiceManifest, VoiceTrack } from '@video-maker/timeline-core';
 import { join } from 'node:path/posix';
 
@@ -49,7 +49,7 @@ function toSceneStatuses(
       sceneId: track.sceneId,
       index: track.index,
       source: track.source,
-      stale: scene === undefined ? null : isVoiceTrackStale(track, scene.narration),
+      stale: scene === undefined ? null : isVoiceTrackStale(track, scene.narration, scene.direction),
     };
   });
 }
@@ -182,7 +182,7 @@ export async function handlePutVoiceScene(
         durationMs: probed.durationMs,
         sampleRate: probed.audio?.sampleRate ?? VOICE_TRACK_SAMPLE_RATE,
         voiceId: null,
-        narrationHash: hashNarration(scene.narration),
+        narrationHash: hashDirectedNarration(scene.narration, scene.direction),
         updatedAt: deps.clock.nowIso(),
       };
     } catch (cause) {

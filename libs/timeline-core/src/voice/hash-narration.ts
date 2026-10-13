@@ -1,3 +1,6 @@
+import { hasVoiceDirection } from './voice-direction';
+import type { VoiceDirection } from './voice-direction';
+
 const FNV_OFFSET_BASIS = 0xcbf29ce484222325n;
 const FNV_PRIME = 0x100000001b3n;
 const MASK_64 = 0xffffffffffffffffn;
@@ -13,4 +16,12 @@ export function hashNarration(narration: string): string {
   }
 
   return hash.toString(16).padStart(HASH_HEX_LENGTH, '0');
+}
+
+function canonicalDirection(direction: VoiceDirection): string {
+  return JSON.stringify(Object.fromEntries(Object.entries(direction).sort(([left], [right]) => left.localeCompare(right))));
+}
+
+export function hashDirectedNarration(narration: string, direction: VoiceDirection | undefined): string {
+  return hasVoiceDirection(direction) ? hashNarration(`${narration}\u0000${canonicalDirection(direction)}`) : hashNarration(narration);
 }

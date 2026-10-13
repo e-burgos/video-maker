@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 
-import { cameraKeyframes, edgePadding, focusOn, focusWindow, FOCUS_PADDING, MIN_EDGE_PADDING, MIN_FOCUS_SIDE, padRect, pointRect, POINT_RADIUS, unionRects, windowOverlap } from './ui-auto-zoom';
+import type { CameraFocus } from './ui-auto-zoom';
+import { cameraKeyframes, STRIP_MIN_SIDE, edgePadding, focusOn, isThinStrip, STRIP_READABLE_HEIGHT_RATIO, focusWindow, FOCUS_PADDING, MIN_EDGE_PADDING, MIN_FOCUS_SIDE, padRect, pointRect, POINT_RADIUS, unionRects, windowOverlap } from './ui-auto-zoom';
 
 describe('geometry of the camera', () => {
   it('turns a point into a small square around it', () => {
@@ -45,7 +46,7 @@ describe('focusOn', () => {
   });
 
   it('falls back to the full capture when the step needs almost all of it', () => {
-    expect(focusOn({ x: 0.05, y: 0.4, w: 0.9, h: 0.05 })).toEqual({ scale: 1, cx: 0.5, cy: 0.5 });
+    expect(focusOn({ x: 0.05, y: 0.2, w: 0.9, h: 0.5 })).toEqual({ scale: 1, cx: 0.5, cy: 0.5 });
     expect(focusOn({ x: 0.1, y: 0.4, w: 0.6, h: 0.05 }).scale).toBeGreaterThan(1);
   });
 });
@@ -63,7 +64,7 @@ describe('cameraKeyframes', () => {
   });
 
   it('does not mix a full view with a zoomed one even when they overlap', () => {
-    const [a, b] = cameraKeyframes([{ x: 0.02, y: 0.4, w: 0.96, h: 0.05 }, pointRect(0.5, 0.45)]);
+    const [a, b] = cameraKeyframes([{ x: 0.02, y: 0.2, w: 0.96, h: 0.5 }, pointRect(0.5, 0.45)]);
     expect(a.scale).toBe(1);
     expect(b.scale).toBeGreaterThan(1);
   });
@@ -88,5 +89,49 @@ describe('wide and thin boxes', () => {
     expect(edgePadding(2)).toBe(FOCUS_PADDING);
     const focus = focusOn({ x: 0.242, y: 0.86, w: 0.517, h: 0.11 });
     expect(focus.scale).toBeGreaterThan(1.7);
+  });
+});
+
+describe('thin wide strips', () => {
+  const strip = { x: 0.05, y: 0.3, w: 0.9, h: 0.05 };
+
+  it('only treats very wide and short boxes as strips', () => {
+    expect(isThinStrip(strip)).toBe(true);
+    expect(isThinStrip({ x: 0.1, y: 0.1, w: 0.4, h: 0.3 })).toBe(false);
+    expect(isThinStrip({ x: 0.05, y: 0.3, w: 0.9, h: 0.2 })).toBe(false);
+    expect(isThinStrip({ x: 0.05, y: 0.3, w: 0.2, h: 0.05 })).toBe(false);
+  });
+
+  it('keeps a normal box framing unchanged', () => {
+    const focus = focusOn({ x: 0.3, y: 0.3, w: 0.2, h: 0.2 });
+    expect(focus.scale).toBeCloseTo(1 / 0.2 / 1.12 > 1 / MIN_FOCUS_SIDE ? 1 / MIN_FOCUS_SIDE : 1 / (0.2 * 1.12), 1);
+  });
+
+  it('crops to the start of the strip instead of showing all of it', () => {
+    const focus = focusOn(strip);
+    expect(focus.scale).toBeGreaterThan(1);
+    const window = focusWindow(focus);
+    expect(window.x).toBeLessThanOrEqual(strip.x);
+    expect(window.x + window.w).toBeLessThan(strip.x + strip.w);
+    expect(window.y).toBeLessThanOrEqual(strip.y);
+    expect(window.y + window.h).toBeGreaterThanOrEqual(strip.y + strip.h);
+  });
+
+  it('makes the strip height readable without passing the strip zoom limit', () => {
+    const focus = focusOn(strip);
+    expect(strip.h * focus.scale).toBeGreaterThanOrEqual(STRIP_READABLE_HEIGHT_RATIO - 1e-9);
+    expect(focus.scale).toBeLessThanOrEqual(1 / STRIP_MIN_SIDE + 1e-9);
+    expect(focusOn({ ...strip, h: 0.01 }).scale).toBeCloseTo(1 / STRIP_MIN_SIDE);
+  });
+
+  it('gives a strip its own keyframe instead of sharing it with a nearby step', () => {
+    const banner = { x: 0.194, y: 0.105, w: 0.559, h: 0.019 };
+    const button = { x: 0.76, y: 0.098, w: 0.063, h: 0.031 };
+    const [bannerFocus, buttonFocus] = cameraKeyframes([banner, button]);
+    expect(bannerFocus).toEqual(focusOn(banner));
+    expect(buttonFocus).toEqual(focusOn(button));
+    const buttonWindow = focusWindow(buttonFocus as CameraFocus);
+    expect(buttonWindow.x).toBeLessThanOrEqual(button.x);
+    expect(buttonWindow.x + buttonWindow.w).toBeGreaterThanOrEqual(button.x + button.w);
   });
 });

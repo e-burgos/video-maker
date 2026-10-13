@@ -3394,6 +3394,294 @@
           }
         ]
       }
+    },
+    {
+      "id": "FIX-e-burgos-025",
+      "author": "e-burgos",
+      "spec_id": "spec-e-burgos-023-production-quality",
+      "fix_document": "sdd/fixes/fix-e-burgos-025.md",
+      "type": "IMPROVEMENT",
+      "severity": "medium",
+      "created_at": "2026-10-13",
+      "resolved_at": "2026-10-13",
+      "validated_at": null,
+      "title": "Dirección de voz por frase en los storyboards de escenas narradas",
+      "estimation_hours": 2,
+      "description": "Los storyboards de material crudo y generativo (work/storyboard.json) no aceptaban dirección de voz por frase, como sí motion y el guion por línea.",
+      "justification": "Paridad de calidad de voz entre modos; cambio interno sin contratos externos.",
+      "related_modules": [
+        "production-quality"
+      ],
+      "affected_files": [
+        "apps/render-api/src/http/handlers/voice-direction-handler.spec.ts",
+        "apps/render-api/src/http/handlers/voice-direction-handler.ts",
+        "apps/render-api/src/http/handlers/voice-handler.ts",
+        "apps/render-api/src/jobs/run-voice-pipeline.spec.ts",
+        "apps/render-api/src/jobs/run-voice-pipeline.ts",
+        "apps/render-api/src/producer/producer-stream-events.ts",
+        "libs/producer-tools/src/__fixtures__/fake-render-api-client.ts",
+        "libs/producer-tools/src/client/http-render-api-client.spec.ts",
+        "libs/producer-tools/src/client/http-render-api-client.ts",
+        "libs/producer-tools/src/client/render-api-client.ts",
+        "libs/producer-tools/src/contract/tool-names.spec.ts",
+        "libs/producer-tools/src/contract/tool-names.ts",
+        "libs/producer-tools/src/contract/tool-schemas.ts",
+        "libs/producer-tools/src/handlers/studio-tool-handlers.spec.ts",
+        "libs/producer-tools/src/handlers/studio-tool-handlers.ts",
+        "libs/producer-tools/src/prompt/build-producer-prompt.spec.ts",
+        "libs/producer-tools/src/prompt/build-producer-prompt.ts",
+        "libs/timeline-core/src/index.ts",
+        "libs/timeline-core/src/schemas/schemas.spec.ts",
+        "libs/timeline-core/src/schemas/storyboard.schema.spec.ts",
+        "libs/timeline-core/src/schemas/storyboard.schema.ts",
+        "libs/timeline-core/src/schemas/voice-manifest.schema.ts",
+        "libs/timeline-core/src/voice/hash-narration.ts",
+        "libs/timeline-core/src/voice/merge-voice-manifest.ts",
+        "libs/timeline-core/src/voice/voice-manifest.spec.ts"
+      ],
+      "test_reference": "timeline-core, producer-tools y render-api lint/test/build verde (dirección por escena en schema, síntesis, hash y endpoint).",
+      "status": "implemented",
+      "cycle": null,
+      "process_note": "Pendiente posterior al video de prueba comprar-producto (plan aprobado por el dueño, tanda B).",
+      "usage": {
+        "provider_model": "claude/sonnet",
+        "effort": "medium",
+        "tokens_in": 247166,
+        "tokens_out": 43500,
+        "approx": true,
+        "source": "agent-usage-notification",
+        "recorded_at": "2026-10-13",
+        "by_agent": [
+          {
+            "agent": "implementor-back",
+            "provider_model": "claude/sonnet",
+            "effort": "medium",
+            "tokens_in": 235166,
+            "tokens_out": 41500,
+            "approx": true,
+            "source": "agent-usage-notification",
+            "recorded_at": "2026-10-13"
+          },
+          {
+            "agent": "orchestrator",
+            "provider_model": "claude/opus",
+            "effort": "low",
+            "tokens_in": 12000,
+            "tokens_out": 2000,
+            "approx": true,
+            "source": "declared-estimate",
+            "recorded_at": "2026-10-13"
+          }
+        ]
+      }
+    },
+    {
+      "id": "FIX-e-burgos-026",
+      "author": "e-burgos",
+      "spec_id": "spec-e-burgos-023-production-quality",
+      "fix_document": "sdd/fixes/fix-e-burgos-026.md",
+      "type": "IMPROVEMENT",
+      "severity": "medium",
+      "created_at": "2026-10-13",
+      "resolved_at": "2026-10-13",
+      "validated_at": null,
+      "title": "La revisión visual extrae varios cuadros por escena y exige verlos",
+      "estimation_hours": 2,
+      "description": "Con un solo cuadro por escena la revisión no veía cuando la voz nombra algo que aparece en otro momento de la escena (caso Easy Pro del video de prueba).",
+      "justification": "Hallado en cycle-06 de spec-023 («Lo que todavía no está bien»); cambio interno de revisión y tool del productor.",
+      "related_modules": [
+        "production-quality"
+      ],
+      "affected_files": [
+        "apps/render-api/src/http/handlers/visual-review-handler.spec.ts",
+        "apps/render-api/src/http/handlers/visual-review-handler.ts",
+        "apps/render-api/src/review/collect-review-inputs.spec.ts",
+        "apps/render-api/src/review/review-rules.spec.ts",
+        "apps/render-api/src/review/review-thresholds.ts",
+        "apps/render-api/src/review/scene-frame-plan.spec.ts",
+        "apps/render-api/src/review/scene-frame-plan.ts",
+        "apps/render-api/src/review/scene-frames.spec.ts",
+        "apps/render-api/src/review/scene-frames.ts",
+        "apps/render-api/src/youtube/publish-preconditions.spec.ts",
+        "apps/web/src/components/render-review-panel.spec.tsx",
+        "apps/web/src/components/visual-review-section.tsx",
+        "libs/producer-tools/src/contract/tool-schemas.ts",
+        "libs/producer-tools/src/handlers/studio-tool-handlers.spec.ts",
+        "libs/producer-tools/src/handlers/studio-tool-handlers.ts",
+        "libs/producer-tools/src/prompt/build-producer-prompt.spec.ts",
+        "libs/producer-tools/src/prompt/build-producer-prompt.ts",
+        "libs/timeline-core/src/index.ts",
+        "libs/timeline-core/src/review/review-report.ts",
+        "libs/timeline-core/src/review/visual-review.spec.ts"
+      ],
+      "test_reference": "render-api, timeline-core, producer-tools y web lint/test/build verde.",
+      "status": "implemented",
+      "cycle": null,
+      "process_note": "Pendiente posterior al video de prueba comprar-producto (plan aprobado por el dueño, tanda B).",
+      "usage": {
+        "provider_model": "claude/sonnet",
+        "effort": "medium",
+        "tokens_in": 132346,
+        "tokens_out": 23238,
+        "approx": true,
+        "source": "agent-usage-notification",
+        "recorded_at": "2026-10-13",
+        "by_agent": [
+          {
+            "agent": "implementor-back",
+            "provider_model": "claude/sonnet",
+            "effort": "medium",
+            "tokens_in": 120346,
+            "tokens_out": 21238,
+            "approx": true,
+            "source": "agent-usage-notification",
+            "recorded_at": "2026-10-13"
+          },
+          {
+            "agent": "orchestrator",
+            "provider_model": "claude/opus",
+            "effort": "low",
+            "tokens_in": 12000,
+            "tokens_out": 2000,
+            "approx": true,
+            "source": "declared-estimate",
+            "recorded_at": "2026-10-13"
+          }
+        ]
+      }
+    },
+    {
+      "id": "FIX-e-burgos-027",
+      "author": "e-burgos",
+      "spec_id": "spec-e-burgos-023-production-quality",
+      "fix_document": "sdd/fixes/fix-e-burgos-027.md",
+      "type": "IMPROVEMENT",
+      "severity": "medium",
+      "created_at": "2026-10-13",
+      "resolved_at": "2026-10-13",
+      "validated_at": null,
+      "title": "El cursor no crece con el zoom de la cámara y las franjas anchas y finas se encuadran legibles",
+      "estimation_hours": 2,
+      "description": "El cursor y el punto del globo se agrandaban con el zoom automático, y franjas como «Falta validar tu email» quedaban chicas porque la cámara encuadraba toda la franja.",
+      "justification": "Pendientes visuales de FIX-e-burgos-019 en el video de prueba; cambio del runtime motion.",
+      "related_modules": [
+        "production-quality"
+      ],
+      "affected_files": [
+        "libs/motion-graphics/assets/runtime/motion-runtime.js",
+        "libs/motion-graphics/assets/runtime/scenes.css",
+        "libs/motion-graphics/src/auto/scene-guide.ts",
+        "libs/motion-graphics/src/scenes/ui-auto-zoom.spec.ts",
+        "libs/motion-graphics/src/scenes/ui-auto-zoom.ts",
+        "libs/motion-graphics/src/scenes/ui-walkthrough-html.ts",
+        "libs/producer-tools/src/prompt/build-producer-prompt.ts"
+      ],
+      "test_reference": "motion-graphics y producer-tools lint/test/build verde. Render real sobre copia del v2 (hoja de contacto antes/después): el cursor queda de tamaño fijo (~45 px en 1080p) durante el zoom; el aviso «Falta validar tu email…» se lee con zoom 3× al inicio de la franja y el clic en «Reenviar email» tiene su propio encuadre.",
+      "status": "implemented",
+      "cycle": null,
+      "process_note": "Pendiente posterior al video de prueba comprar-producto (plan aprobado por el dueño, tanda B).",
+      "usage": {
+        "provider_model": "claude/sonnet",
+        "effort": "medium",
+        "tokens_in": 101363,
+        "tokens_out": 17770,
+        "approx": true,
+        "source": "agent-usage-notification",
+        "recorded_at": "2026-10-13",
+        "by_agent": [
+          {
+            "agent": "implementor-front",
+            "provider_model": "claude/sonnet",
+            "effort": "medium",
+            "tokens_in": 89363,
+            "tokens_out": 15770,
+            "approx": true,
+            "source": "agent-usage-notification",
+            "recorded_at": "2026-10-13"
+          },
+          {
+            "agent": "orchestrator",
+            "provider_model": "claude/opus",
+            "effort": "low",
+            "tokens_in": 12000,
+            "tokens_out": 2000,
+            "approx": true,
+            "source": "declared-estimate",
+            "recorded_at": "2026-10-13"
+          }
+        ]
+      }
+    },
+    {
+      "id": "FIX-e-burgos-028",
+      "author": "e-burgos",
+      "spec_id": "spec-e-burgos-023-production-quality",
+      "fix_document": "sdd/fixes/fix-e-burgos-028.md",
+      "type": "IMPROVEMENT",
+      "severity": "medium",
+      "created_at": "2026-10-13",
+      "resolved_at": "2026-10-13",
+      "validated_at": null,
+      "title": "Las cajas que el productor mide sobre una captura quedan registradas como medidas",
+      "estimation_hours": 2,
+      "description": "Las cajas medidas por el productor mirando la captura (no venían en el brief) no se distinguían de las dadas, y la verificación no podía separarlas.",
+      "justification": "Trazabilidad de datos visuales tras el video de prueba; cambio interno del brief motion.",
+      "related_modules": [
+        "production-quality"
+      ],
+      "affected_files": [
+        "apps/render-api/src/http/handlers/motion-handler.spec.ts",
+        "apps/render-api/src/motion/read-motion-overview.ts",
+        "apps/web/src/api/motion-types.ts",
+        "apps/web/src/components/motion-storyboard-view.spec.tsx",
+        "apps/web/src/components/motion-storyboard-view.tsx",
+        "apps/web/src/i18n/messages-en.ts",
+        "apps/web/src/i18n/messages-es.ts",
+        "libs/motion-graphics/src/auto/brief-boxes.spec.ts",
+        "libs/motion-graphics/src/auto/brief-boxes.ts",
+        "libs/motion-graphics/src/index.ts",
+        "libs/motion-graphics/src/storyboard/image-box.ts",
+        "libs/producer-tools/src/contract/tool-schemas.ts",
+        "libs/producer-tools/src/handlers/studio-tool-handlers.spec.ts",
+        "libs/producer-tools/src/handlers/studio-tool-handlers.ts",
+        "libs/producer-tools/src/prompt/build-producer-prompt.spec.ts",
+        "libs/producer-tools/src/prompt/build-producer-prompt.ts"
+      ],
+      "test_reference": "motion-graphics, producer-tools, render-api y web lint/test/build verde. Studio real: GET motion/overview devuelve measuredBoxes y la vista del storyboard lista «Cajas medidas por el productor (a confirmar)» con la fecha en el idioma de la interfaz.",
+      "status": "implemented",
+      "cycle": null,
+      "process_note": "Pendiente posterior al video de prueba comprar-producto (plan aprobado por el dueño, tanda B).",
+      "usage": {
+        "provider_model": "claude/sonnet",
+        "effort": "medium",
+        "tokens_in": 224616,
+        "tokens_out": 39521,
+        "approx": true,
+        "source": "agent-usage-notification",
+        "recorded_at": "2026-10-13",
+        "by_agent": [
+          {
+            "agent": "implementor-back",
+            "provider_model": "claude/sonnet",
+            "effort": "medium",
+            "tokens_in": 212616,
+            "tokens_out": 37521,
+            "approx": true,
+            "source": "agent-usage-notification",
+            "recorded_at": "2026-10-13"
+          },
+          {
+            "agent": "orchestrator",
+            "provider_model": "claude/opus",
+            "effort": "low",
+            "tokens_in": 12000,
+            "tokens_out": 2000,
+            "approx": true,
+            "source": "declared-estimate",
+            "recorded_at": "2026-10-13"
+          }
+        ]
+      }
     }
   ]
 }

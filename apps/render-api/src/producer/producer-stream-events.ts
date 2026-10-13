@@ -143,6 +143,8 @@ function summarizeStudioTool(tool: StudioToolName, input: Record<string, unknown
       return 'Reading the motion storyboard';
     case 'write_motion_storyboard':
       return 'Saving the motion storyboard';
+    case 'set_voice_direction':
+      return 'Setting the voice direction';
   }
 }
 

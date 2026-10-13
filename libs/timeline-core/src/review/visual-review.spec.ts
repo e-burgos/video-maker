@@ -5,8 +5,8 @@ import type { ReviewReport, SceneFrame, SceneVisualReview } from './review-repor
 import { VisualReviewDraftSchema, isSceneFlagged, visualReviewProblems, withVisualReview } from './visual-review';
 
 const FRAMES: SceneFrame[] = [
-  { sceneId: 'hook', index: 1, startSec: 0, endSec: 4, atSec: 2, frame: 'out/v.review/scene-01.jpg', voice: 'Hola' },
-  { sceneId: 'cta', index: 2, startSec: 4, endSec: 10, atSec: 7, frame: 'out/v.review/scene-02.jpg' },
+  { sceneId: 'hook', index: 1, startSec: 0, endSec: 4, frames: [{ atSec: 2, frame: 'out/v.review/scene-01.jpg' }], voice: 'Hola' },
+  { sceneId: 'cta', index: 2, startSec: 4, endSec: 10, frames: [{ atSec: 7, frame: 'out/v.review/scene-02.jpg' }] },
 ];
 
 function scene(sceneId: string, overrides: Partial<SceneVisualReview> = {}): SceneVisualReview {
@@ -103,5 +103,15 @@ describe('withVisualReview', () => {
 
     expect(second.findings.some((finding) => finding.check === 'visual-review')).toBe(false);
     expect(second.status).toBe('warn');
+  });
+});
+
+describe('SceneFrameSchema legacy single-frame reports', () => {
+  it('reads the old one-frame shape as a list of one', async () => {
+    const { SceneFrameSchema } = await import('./review-report');
+    const parsed = SceneFrameSchema.parse({ sceneId: 'a', index: 1, startSec: 0, endSec: 4, atSec: 2, frame: 'out/v.review/scene-01.jpg' });
+
+    expect(Object.keys(parsed).sort()).toEqual(['endSec', 'frames', 'index', 'sceneId', 'startSec']);
+    expect(parsed.frames).toEqual([{ atSec: 2, frame: 'out/v.review/scene-01.jpg' }]);
   });
 });

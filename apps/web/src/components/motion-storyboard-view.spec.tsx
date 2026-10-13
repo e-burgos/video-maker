@@ -78,6 +78,14 @@ describe('MotionStoryboardView', () => {
     expect(within(empty).getByRole('link').getAttribute('href')).toBe('/projects/promo/motion');
   });
 
+  it('lists apart the boxes the producer measured, to be confirmed', async () => {
+    renderView(motionOverviewFixture({ measuredBoxes: [{ image: 'images/a.png', name: 'Boton', measuredBy: 'producer', measuredAt: '2026-10-13T10:00:00.000Z' }] }));
+
+    const list = await screen.findByTestId('motion-measured-boxes');
+    expect(list.textContent).toContain('Boton');
+    expect(list.textContent).toContain('images/a.png');
+  });
+
   it('surfaces a load failure', async () => {
     const client = {
       getMotionOverview: vi.fn().mockRejectedValue(new Error('down')),
