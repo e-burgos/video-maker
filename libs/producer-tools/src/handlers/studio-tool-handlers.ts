@@ -179,6 +179,19 @@ function patchTimelineSummary(sections: readonly PatchTimelineSection[]): string
   return `Updated ${sections.join(', ')}.`;
 }
 
+function reviewSummaryFields(review: RenderApiRenderReview) {
+  const { file, status, createdAt, metrics, findings, sceneFrames, visualReview } = review;
+  return {
+    file,
+    status,
+    createdAt,
+    metrics,
+    findings,
+    ...(sceneFrames === undefined ? {} : { sceneFrames }),
+    ...(visualReview === undefined ? {} : { visualReview }),
+  };
+}
+
 export function createStudioToolHandlers(
   options: StudioToolHandlersOptions,
 ): Readonly<Record<StudioToolName, StudioToolHandler>> {
@@ -438,7 +451,7 @@ export function createStudioToolHandlers(
           'that render has not been reviewed: every full render or motion video is reviewed by a job of kind review that starts right after it; list the recent jobs and wait for it',
         );
       }
-      return withOutput('get_render_review', { ...review, visualReviewState: visualReviewStateOf(review) });
+      return withOutput('get_render_review', { ...reviewSummaryFields(review), visualReviewState: visualReviewStateOf(review) });
     },
 
     record_visual_review: async (rawInput) => {

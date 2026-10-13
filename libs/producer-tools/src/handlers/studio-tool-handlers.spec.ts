@@ -374,6 +374,16 @@ describe('createStudioToolHandlers', () => {
       expect(result.data).toMatchObject({ visualReview, visualReviewState: 'recorded' });
     });
 
+    it('reports a stored review that carries version and delivery like the studio writes it', async () => {
+      const stored = { ...review, version: 1, delivery: { kind: 'motion' } } as unknown as typeof review;
+      const { handlers } = handlersWith({ getRenderReview: async () => stored });
+
+      const result = await handlers.get_render_review({ file: 'out/video.mp4' });
+
+      expect(result.data).toMatchObject({ file: 'out/video.mp4', status: 'fail' });
+      expect(result.data).not.toHaveProperty('version');
+    });
+
     it('asks for the latest review when no file is given', async () => {
       const { handlers, client } = handlersWith({ getRenderReview: async () => review });
 
