@@ -63,3 +63,13 @@ export type {
   PublicationsRepository,
   PublicationUpdate,
 } from './repositories/publications-repository';
+
+export { PUBLISH_QUEUE_STATUSES, createPublishQueueRepository } from './repositories/publish-queue-repository';
+export type {
+  NewPublishQueueRecord,
+  PublishQueueMetadata,
+  PublishQueueRecord,
+  PublishQueueRepository,
+  PublishQueueStatus,
+  PublishQueueUpdate,
+} from './repositories/publish-queue-repository';

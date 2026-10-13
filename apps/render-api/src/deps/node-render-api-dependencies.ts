@@ -30,6 +30,7 @@ import {
   createProducerRepository,
   createProjectsRepository,
   createPublicationsRepository,
+  createPublishQueueRepository,
   createSettingsRepository,
   currentUserVersion,
   openStudioDatabase,
@@ -444,6 +445,7 @@ export function createNodeRenderApiDependencies(
         settings: createSettingsRepository(database.db, nowIso),
         assets: createAssetsRepository(database.db, nowIso),
         publications: createPublicationsRepository(database.db),
+        publishQueue: createPublishQueueRepository(database.db),
         schemaVersion: currentUserVersion(database.sqlite),
         close: () => database.close(),
       };

@@ -1,0 +1,180 @@
+{
+  "$schema": "../../../../schemas/cycle-tasks.schema.json",
+  "spec": "spec-e-burgos-022-youtube-publishing",
+  "cycle": 2,
+  "module": "youtube-publishing",
+  "apps": [
+    "libs/local-store",
+    "apps/render-api",
+    "apps/web"
+  ],
+  "flow": "lite",
+  "user_stories_generated": true,
+  "prerequisites": {
+    "tasks_generated": true
+  },
+  "tasks": [
+    {
+      "id": "TASK-001",
+      "title": "publish_queue table (migration v7) and repository",
+      "user_stories": [
+        "US-022-201"
+      ],
+      "estimation_hours": 2,
+      "story_points": 3,
+      "depends_on": [],
+      "status": "done",
+      "files": [
+        "libs/local-store/src/database/migrations.spec.ts",
+        "libs/local-store/src/database/migrations.ts",
+        "libs/local-store/src/index.ts",
+        "libs/local-store/src/repositories/publications-repository.spec.ts",
+        "libs/local-store/src/repositories/publications-repository.ts",
+        "libs/local-store/src/repositories/publish-queue-repository.spec.ts",
+        "libs/local-store/src/repositories/publish-queue-repository.ts",
+        "libs/local-store/src/schema/studio-schema.ts"
+      ],
+      "usage": {
+        "provider_model": "claude/sonnet",
+        "effort": "medium",
+        "agent": "implementor-back",
+        "tokens_in": 55640,
+        "tokens_out": 9819,
+        "approx": true,
+        "source": "agent-usage-notification",
+        "recorded_at": "2026-10-13"
+      }
+    },
+    {
+      "id": "TASK-002",
+      "title": "Queue scheduler in render-api: daily limit, hourly retry on quota, already-published skip, playlists by category, HTTP routes",
+      "user_stories": [
+        "US-022-201",
+        "US-022-202",
+        "US-022-203"
+      ],
+      "estimation_hours": 5,
+      "story_points": 8,
+      "depends_on": [
+        "TASK-001"
+      ],
+      "status": "done",
+      "files": [
+        "apps/render-api/src/__fixtures__/fake-render-api-dependencies.ts",
+        "apps/render-api/src/deps/node-render-api-dependencies.ts",
+        "apps/render-api/src/deps/render-api-dependencies.ts",
+        "apps/render-api/src/errors/http-status-for.spec.ts",
+        "apps/render-api/src/errors/http-status-for.ts",
+        "apps/render-api/src/errors/render-api-error.ts",
+        "apps/render-api/src/errors/to-error-payload.ts",
+        "apps/render-api/src/http/create-render-api-server.ts",
+        "apps/render-api/src/http/handle-request.ts",
+        "apps/render-api/src/http/handlers/jobs-handler.ts",
+        "apps/render-api/src/http/handlers/publish-queue-handler.spec.ts",
+        "apps/render-api/src/http/handlers/publish-queue-handler.ts",
+        "apps/render-api/src/http/handlers/youtube-handlers.spec.ts",
+        "apps/render-api/src/http/handlers/youtube-publish-handler.ts",
+        "apps/render-api/src/http/render-api-runtime.ts",
+        "apps/render-api/src/http/routes.ts",
+        "apps/render-api/src/jobs/job-persistence.spec.ts",
+        "apps/render-api/src/jobs/job-persistence.ts",
+        "apps/render-api/src/jobs/publish-job-params.spec.ts",
+        "apps/render-api/src/jobs/publish-job-params.ts",
+        "apps/render-api/src/jobs/render-job-queue.ts",
+        "apps/render-api/src/jobs/render-job.ts",
+        "apps/render-api/src/jobs/run-publish-pipeline.spec.ts",
+        "apps/render-api/src/jobs/run-publish-pipeline.ts",
+        "apps/render-api/src/youtube/publish-queue-job-launcher.spec.ts",
+        "apps/render-api/src/youtube/publish-queue-job-launcher.ts",
+        "apps/render-api/src/youtube/publish-queue-scheduler.spec.ts",
+        "apps/render-api/src/youtube/publish-queue-scheduler.ts",
+        "apps/render-api/src/youtube/publish-queue-settings.ts",
+        "apps/render-api/src/youtube/resolve-publish-language.ts",
+        "apps/web/src/api/render-api-client.ts"
+      ],
+      "usage": {
+        "provider_model": "claude/sonnet",
+        "effort": "medium",
+        "agent": "implementor-back",
+        "tokens_in": 129826,
+        "tokens_out": 22911,
+        "approx": true,
+        "source": "agent-usage-notification",
+        "recorded_at": "2026-10-13"
+      }
+    },
+    {
+      "id": "TASK-003",
+      "title": "Web: Publication queue page, add-to-queue in the publish dialog, category playlists in YouTube settings",
+      "user_stories": [
+        "US-022-201",
+        "US-022-202",
+        "US-022-203"
+      ],
+      "estimation_hours": 4,
+      "story_points": 5,
+      "depends_on": [
+        "TASK-002"
+      ],
+      "status": "done",
+      "files": [
+        "apps/web/src/api/__fixtures__/publish-queue.ts",
+        "apps/web/src/api/parse-publish-queue.spec.ts",
+        "apps/web/src/api/parse-publish-queue.ts",
+        "apps/web/src/api/publish-queue-types.ts",
+        "apps/web/src/api/publish-queue-view.ts",
+        "apps/web/src/api/render-api-client.ts",
+        "apps/web/src/api/youtube-publish-form.ts",
+        "apps/web/src/app/app.tsx",
+        "apps/web/src/components/studio-layout.tsx",
+        "apps/web/src/components/youtube-category-playlists-section.spec.tsx",
+        "apps/web/src/components/youtube-category-playlists-section.tsx",
+        "apps/web/src/components/youtube-publish-dialog.spec.tsx",
+        "apps/web/src/components/youtube-publish-dialog.tsx",
+        "apps/web/src/components/youtube-settings-section.tsx",
+        "apps/web/src/hooks/use-polled-resource.ts",
+        "apps/web/src/i18n/messages-en.ts",
+        "apps/web/src/i18n/messages-es.ts",
+        "apps/web/src/pages/publish-queue-page.spec.tsx",
+        "apps/web/src/pages/publish-queue-page.tsx"
+      ],
+      "usage": {
+        "provider_model": "claude/sonnet",
+        "effort": "medium",
+        "agent": "implementor-front",
+        "tokens_in": 141358,
+        "tokens_out": 24946,
+        "approx": true,
+        "source": "agent-usage-notification",
+        "recorded_at": "2026-10-13"
+      }
+    },
+    {
+      "id": "TASK-004",
+      "title": "Migrate the current queue (8 tutorials + comprar-producto-v2) paused, retire the shell scripts, verify in the studio",
+      "user_stories": [
+        "US-022-204"
+      ],
+      "estimation_hours": 1,
+      "story_points": 2,
+      "depends_on": [
+        "TASK-002",
+        "TASK-003"
+      ],
+      "status": "done",
+      "files": [
+        "sdd/specs/spec-e-burgos-022-youtube-publishing/cycles/cycle-02/artifacts/verification.md"
+      ],
+      "usage": {
+        "provider_model": "claude/opus",
+        "effort": "high",
+        "agent": "orchestrator",
+        "tokens_in": 34000,
+        "tokens_out": 6000,
+        "approx": true,
+        "source": "declared-estimate",
+        "recorded_at": "2026-10-13"
+      }
+    }
+  ]
+}

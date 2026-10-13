@@ -35,6 +35,10 @@ const MotionPage = lazy(async () => ({
   default: (await import('../pages/motion-page')).MotionPage,
 }));
 
+const PublishQueuePage = lazy(async () => ({
+  default: (await import('../pages/publish-queue-page')).PublishQueuePage,
+}));
+
 const SettingsPage = lazy(async () => ({
   default: (await import('../pages/settings-page')).SettingsPage,
 }));
@@ -86,6 +90,14 @@ export function App() {
                 element={
                   <Suspense fallback={<RouteFallback messageKey="brands.loading" />}>
                     <BrandEditorPage />
+                  </Suspense>
+                }
+              />
+              <Route
+                path="/publish-queue"
+                element={
+                  <Suspense fallback={<RouteFallback messageKey="publishQueue.loading" />}>
+                    <PublishQueuePage />
                   </Suspense>
                 }
               />

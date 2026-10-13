@@ -1,3 +1,4 @@
+import type { PublishQueueAddInput } from './publish-queue-types';
 import type { YouTubePrivacy, YouTubePublishInput } from './youtube-types';
 
 export const YOUTUBE_TITLE_MAX = 100;
@@ -123,6 +124,27 @@ export function buildPublishInput(values: YouTubePublishFormValues, ignoreReview
     ...(values.playlistId === '' ? {} : { playlistId: values.playlistId }),
     ...(values.thumbnail === '' ? {} : { thumbnail: values.thumbnail }),
     ...(ignoreReview ? { ignoreReview: true as const } : {}),
+  };
+}
+
+export function buildQueueInput(
+  slug: string,
+  values: YouTubePublishFormValues,
+  ignoreReview = false,
+): PublishQueueAddInput {
+  const scheduledAt = values.scheduled ? parseLocalDateTime(values.publishAtLocal) : null;
+
+  return {
+    slug,
+    file: values.file,
+    title: values.title.trim(),
+    description: values.description,
+    tags: [...values.tags],
+    privacy: values.privacy,
+    ...(scheduledAt === null ? {} : { publishAt: scheduledAt.toISOString() }),
+    ...(values.playlistId === '' ? {} : { playlistIds: [values.playlistId] }),
+    ...(values.thumbnail === '' ? {} : { thumbnail: values.thumbnail }),
+    ...(ignoreReview ? { ignoreReview: true } : {}),
   };
 }
 

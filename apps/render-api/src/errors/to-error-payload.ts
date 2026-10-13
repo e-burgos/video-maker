@@ -140,6 +140,8 @@ const MESSAGE_BY_CODE: Readonly<Record<RenderApiErrorCode, string>> = {
   YOUTUBE_UPLOAD_FAILED: 'YouTube refused or could not complete the request.',
   YOUTUBE_QUOTA_EXCEEDED: 'YouTube is not accepting more uploads today: either the API quota of the Google project or the daily upload limit of the channel is used up (the hint says which); it resets within 24 hours.',
   PUBLISH_FILE_INVALID: 'The file or thumbnail to publish is missing, not under the allowed folder or not a supported type.',
+  PUBLISH_QUEUE_ITEM_NOT_FOUND: 'No item with that id is in the publish queue.',
+  PUBLISH_QUEUE_ITEM_BUSY: 'The queue item is being published right now and cannot be changed or removed.',
   REVIEW_FILE_INVALID: 'The file to review must be an .mp4 directly under out/.',
   REVIEW_INPUTS_UNAVAILABLE: 'The project is missing the timeline or the files needed to review this render.',
   REVIEW_NOT_FOUND: 'That render has no review yet.',

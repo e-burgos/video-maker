@@ -263,7 +263,7 @@ describe('applyMigrations', () => {
 
     applyMigrations(sqlite, MIGRATIONS);
 
-    expect(currentUserVersion(sqlite)).toBe(6);
+    expect(currentUserVersion(sqlite)).toBe(MIGRATIONS[MIGRATIONS.length - 1]?.version);
     const columns = sqlite.prepare('PRAGMA table_info(publications)').all() as { name: string }[];
     expect(columns.map((column) => column.name).sort()).toEqual([
       'created_at',
@@ -279,6 +279,33 @@ describe('applyMigrations', () => {
       'title',
       'url',
       'video_id',
+    ]);
+    sqlite.close();
+  });
+
+  it('migrates from v6 to v7 creating the publish_queue table', () => {
+    const sqlite = new Database(':memory:');
+    sqlite.pragma('foreign_keys = ON');
+    applyMigrations(sqlite, MIGRATIONS.filter((migration) => migration.version <= 6));
+
+    applyMigrations(sqlite, MIGRATIONS);
+
+    expect(currentUserVersion(sqlite)).toBe(7);
+    const columns = sqlite.prepare('PRAGMA table_info(publish_queue)').all() as { name: string }[];
+    expect(columns.map((column) => column.name).sort()).toEqual([
+      'attempts',
+      'created_at',
+      'file',
+      'id',
+      'job_id',
+      'last_error',
+      'metadata',
+      'next_attempt_at',
+      'position',
+      'slug',
+      'status',
+      'updated_at',
+      'url',
     ]);
     sqlite.close();
   });

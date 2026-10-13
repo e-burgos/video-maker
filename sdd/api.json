@@ -2201,6 +2201,201 @@
             "change": "Created in spec-e-burgos-022-youtube-publishing cycle-01."
           }
         ]
+      },
+      {
+        "id": "EP-067",
+        "method": "GET",
+        "path": "/publish-queue",
+        "module": "youtube-publishing",
+        "spec": "sdd/specs/spec-e-burgos-022-youtube-publishing",
+        "status": "implemented",
+        "created_in_cycle": 2,
+        "updated_in_cycle": null,
+        "description": "Publication queue state and items in order.",
+        "path_params": [],
+        "required_headers": [],
+        "request_body": {},
+        "responses": {
+          "200": "application/json: { settings: { paused, dailyLimit }, publishedLast24h, nextAttemptAt, items: [{ id, slug, file, metadata, position, status, attempts, lastError, nextAttemptAt, jobId, url }] }"
+        },
+        "changelog": [
+          {
+            "cycle": 2,
+            "date": "2026-10-13",
+            "change": "Created in spec-e-burgos-022-youtube-publishing cycle-02."
+          }
+        ]
+      },
+      {
+        "id": "EP-068",
+        "method": "POST",
+        "path": "/publish-queue/items",
+        "module": "youtube-publishing",
+        "spec": "sdd/specs/spec-e-burgos-022-youtube-publishing",
+        "status": "implemented",
+        "created_in_cycle": 2,
+        "updated_in_cycle": null,
+        "description": "Adds a video to the end of the queue; warns when the file is already published.",
+        "path_params": [],
+        "required_headers": [],
+        "request_body": {
+          "slug": "string",
+          "file": "string?",
+          "title": "string",
+          "description": "string?",
+          "tags": "string[]?",
+          "privacy": "public|unlisted|private",
+          "publishAt": "string?",
+          "playlistIds": "string[]?",
+          "thumbnail": "string?",
+          "ignoreReview": "boolean?"
+        },
+        "responses": {
+          "201": "application/json: { item: { id, slug, file, metadata, position, status, attempts, lastError, nextAttemptAt, jobId, url }, alreadyPublished: { url } | null }"
+        },
+        "changelog": [
+          {
+            "cycle": 2,
+            "date": "2026-10-13",
+            "change": "Created in spec-e-burgos-022-youtube-publishing cycle-02."
+          }
+        ]
+      },
+      {
+        "id": "EP-069",
+        "method": "PATCH",
+        "path": "/publish-queue/items/:itemId",
+        "module": "youtube-publishing",
+        "spec": "sdd/specs/spec-e-burgos-022-youtube-publishing",
+        "status": "implemented",
+        "created_in_cycle": 2,
+        "updated_in_cycle": null,
+        "description": "Moves an item, edits its metadata or retries a failed one.",
+        "path_params": [
+          "itemId"
+        ],
+        "required_headers": [],
+        "request_body": {
+          "position": "number?",
+          "metadata": "partial?",
+          "status": "'queued'?"
+        },
+        "responses": {
+          "200": "application/json: { id, slug, file, metadata, position, status, attempts, lastError, nextAttemptAt, jobId, url }",
+          "409": "PUBLISH_QUEUE_ITEM_BUSY"
+        },
+        "changelog": [
+          {
+            "cycle": 2,
+            "date": "2026-10-13",
+            "change": "Created in spec-e-burgos-022-youtube-publishing cycle-02."
+          }
+        ]
+      },
+      {
+        "id": "EP-070",
+        "method": "DELETE",
+        "path": "/publish-queue/items/:itemId",
+        "module": "youtube-publishing",
+        "spec": "sdd/specs/spec-e-burgos-022-youtube-publishing",
+        "status": "implemented",
+        "created_in_cycle": 2,
+        "updated_in_cycle": null,
+        "description": "Removes an item that is not publishing.",
+        "path_params": [
+          "itemId"
+        ],
+        "required_headers": [],
+        "request_body": {},
+        "responses": {
+          "204": "no content",
+          "409": "PUBLISH_QUEUE_ITEM_BUSY"
+        },
+        "changelog": [
+          {
+            "cycle": 2,
+            "date": "2026-10-13",
+            "change": "Created in spec-e-burgos-022-youtube-publishing cycle-02."
+          }
+        ]
+      },
+      {
+        "id": "EP-071",
+        "method": "PUT",
+        "path": "/publish-queue/settings",
+        "module": "youtube-publishing",
+        "spec": "sdd/specs/spec-e-burgos-022-youtube-publishing",
+        "status": "implemented",
+        "created_in_cycle": 2,
+        "updated_in_cycle": null,
+        "description": "Pauses/resumes the queue and sets the daily upload limit (1-100).",
+        "path_params": [],
+        "required_headers": [],
+        "request_body": {
+          "paused": "boolean?",
+          "dailyLimit": "number?"
+        },
+        "responses": {
+          "200": "application/json: { paused, dailyLimit }"
+        },
+        "changelog": [
+          {
+            "cycle": 2,
+            "date": "2026-10-13",
+            "change": "Created in spec-e-burgos-022-youtube-publishing cycle-02."
+          }
+        ]
+      },
+      {
+        "id": "EP-072",
+        "method": "GET",
+        "path": "/integrations/youtube/category-playlists",
+        "module": "youtube-publishing",
+        "spec": "sdd/specs/spec-e-burgos-022-youtube-publishing",
+        "status": "implemented",
+        "created_in_cycle": 2,
+        "updated_in_cycle": null,
+        "description": "Playlist per folder category and general playlist.",
+        "path_params": [],
+        "required_headers": [],
+        "request_body": {},
+        "responses": {
+          "200": "application/json: { categoryPlaylists: { [categoryId]: playlistId }, generalPlaylistId }"
+        },
+        "changelog": [
+          {
+            "cycle": 2,
+            "date": "2026-10-13",
+            "change": "Created in spec-e-burgos-022-youtube-publishing cycle-02."
+          }
+        ]
+      },
+      {
+        "id": "EP-073",
+        "method": "PUT",
+        "path": "/integrations/youtube/category-playlists",
+        "module": "youtube-publishing",
+        "spec": "sdd/specs/spec-e-burgos-022-youtube-publishing",
+        "status": "implemented",
+        "created_in_cycle": 2,
+        "updated_in_cycle": null,
+        "description": "Saves the playlist per category and the general playlist.",
+        "path_params": [],
+        "required_headers": [],
+        "request_body": {
+          "categoryPlaylists": "record",
+          "generalPlaylistId": "string|null"
+        },
+        "responses": {
+          "200": "application/json: { categoryPlaylists, generalPlaylistId }"
+        },
+        "changelog": [
+          {
+            "cycle": 2,
+            "date": "2026-10-13",
+            "change": "Created in spec-e-burgos-022-youtube-publishing cycle-02."
+          }
+        ]
       }
     ]
   }

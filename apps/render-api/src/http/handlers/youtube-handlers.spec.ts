@@ -558,7 +558,7 @@ describe('publish job creation', () => {
     await h.runtime.jobs.whenIdle();
 
     const stored = h.deps.localStore.jobs.listByProject('promo')[0]?.params as Record<string, unknown>;
-    expect(stored).toMatchObject({ categoryId: '22', madeForKids: false, defaultLanguage: 'es', playlistId: null, thumbnail: null, publishAt: null });
+    expect(stored).toMatchObject({ categoryId: '22', madeForKids: false, defaultLanguage: 'es', playlistIds: [], thumbnail: null, publishAt: null });
   });
 
   it('accepts a future publishAt and keeps it normalized in the stored params', async () => {

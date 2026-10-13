@@ -24,7 +24,7 @@ export interface PublishJobInput {
   readonly tags: readonly string[];
   readonly privacy: PublishPrivacy;
   readonly publishAt: string | null;
-  readonly playlistId: string | null;
+  readonly playlistIds: readonly string[];
   readonly thumbnail: string | null;
   readonly categoryId: string;
   readonly madeForKids: boolean;
@@ -113,6 +113,15 @@ function parseOptionalText(value: unknown, resource: string): string | null {
   return value.trim();
 }
 
+function parsePlaylistIds(single: unknown, many: unknown): readonly string[] {
+  const first = parseOptionalText(single, 'playlistId');
+  if (many !== undefined && (!Array.isArray(many) || many.some((id) => typeof id !== 'string' || id.trim() === ''))) {
+    throw invalid('playlistIds', 'an array of non-empty strings');
+  }
+  const ids = [...(first === null ? [] : [first]), ...((many as string[] | undefined) ?? []).map((id) => id.trim())];
+  return [...new Set(ids)];
+}
+
 function parseThumbnail(value: unknown): string | null {
   const thumbnail = parseOptionalText(value, 'thumbnail');
   if (thumbnail !== null && thumbnailContentType(thumbnail) === null) {
@@ -155,7 +164,7 @@ export function parsePublishJobInput(body: Readonly<Record<string, unknown>>, no
     tags: parseTags(body.tags ?? []),
     privacy: parsePrivacy(body.privacy),
     publishAt: parsePublishAt(body.publishAt, nowMs),
-    playlistId: parseOptionalText(body.playlistId, 'playlistId'),
+    playlistIds: parsePlaylistIds(body.playlistId, body.playlistIds),
     thumbnail: parseThumbnail(body.thumbnail),
     categoryId: parseOptionalText(body.categoryId, 'categoryId') ?? YOUTUBE_DEFAULT_CATEGORY_ID,
     madeForKids: parseMadeForKids(body.madeForKids),

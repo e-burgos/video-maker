@@ -132,3 +132,25 @@ export const publications = sqliteTable(
   },
   (table) => [index('publications_slug_created_at_idx').on(table.slug, table.createdAt)],
 );
+
+export const publishQueue = sqliteTable(
+  'publish_queue',
+  {
+    id: text('id').primaryKey(),
+    slug: text('slug')
+      .notNull()
+      .references(() => projects.slug, { onDelete: 'cascade' }),
+    file: text('file').notNull(),
+    metadata: text('metadata').notNull(),
+    position: integer('position').notNull(),
+    status: text('status').notNull(),
+    attempts: integer('attempts').notNull().default(0),
+    lastError: text('last_error'),
+    nextAttemptAt: text('next_attempt_at'),
+    jobId: text('job_id'),
+    url: text('url'),
+    createdAt: text('created_at').notNull(),
+    updatedAt: text('updated_at').notNull(),
+  },
+  (table) => [index('publish_queue_status_position_idx').on(table.status, table.position)],
+);

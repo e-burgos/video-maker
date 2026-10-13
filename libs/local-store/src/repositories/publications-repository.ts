@@ -1,4 +1,4 @@
-import { and, desc, eq, inArray } from 'drizzle-orm';
+import { and, desc, eq, gte, inArray } from 'drizzle-orm';
 import type { BetterSQLite3Database } from 'drizzle-orm/better-sqlite3';
 
 import { publications } from '../schema/studio-schema';
@@ -100,7 +100,15 @@ export function createPublicationsRepository(db: BetterSQLite3Database<typeof sc
     return latest;
   }
 
-  return { insert, update, failUploadingForJobs, get, listByProject, latestByProject };
+  function countCreatedSince(sinceIso: string, statuses: readonly PublicationStatus[]): number {
+    return db
+      .select()
+      .from(publications)
+      .where(and(gte(publications.createdAt, sinceIso), inArray(publications.status, [...statuses])))
+      .all().length;
+  }
+
+  return { insert, update, failUploadingForJobs, get, listByProject, latestByProject, countCreatedSince };
 }
 
 export type PublicationsRepository = ReturnType<typeof createPublicationsRepository>;

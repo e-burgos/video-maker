@@ -214,13 +214,23 @@ describe('publish job persistence', () => {
     tags: ['a', 'b'],
     privacy: 'unlisted',
     publishAt: '2099-01-01T10:00:00.000Z',
-    playlistId: 'PL1',
+    playlistIds: ['PL1'],
     thumbnail: 'work/thumb.png',
     categoryId: '22',
     madeForKids: false,
     defaultLanguage: 'es',
     ignoreReview: true,
   };
+
+  it('reads the single playlistId of a job stored before playlistIds existed', () => {
+    const withoutPlaylistIds: Record<string, unknown> = { ...toStoredParams(PUBLISH_INPUT) };
+    delete withoutPlaylistIds.playlistIds;
+
+    const legacy = parseStoredParams('publish', { ...withoutPlaylistIds, playlistId: 'PL_OLD' });
+
+    expect(legacy).toMatchObject({ playlistIds: ['PL_OLD'] });
+    expect(parseStoredParams('publish', { ...withoutPlaylistIds, playlistId: null })).toMatchObject({ playlistIds: [] });
+  });
 
   it('round-trips the publish parameters without the slug and the project root', () => {
     const stored = toStoredParams(PUBLISH_INPUT);
@@ -234,7 +244,7 @@ describe('publish job persistence', () => {
       'kind',
       'madeForKids',
       'platform',
-      'playlistId',
+      'playlistIds',
       'privacy',
       'publishAt',
       'tags',
@@ -406,7 +416,7 @@ describe('review job persistence', () => {
       tags: [],
       privacy: 'public',
       publishAt: null,
-      playlistId: null,
+      playlistIds: [],
       thumbnail: null,
       categoryId: '22',
       madeForKids: false,

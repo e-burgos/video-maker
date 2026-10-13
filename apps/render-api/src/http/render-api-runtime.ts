@@ -16,6 +16,9 @@ import { createOpenRouterModelCatalog } from '../producer/openrouter-model-catal
 import type { OpenRouterModelCatalog } from '../producer/openrouter-model-catalog';
 import { createProducerTurnRegistry } from '../producer/producer-turn-registry';
 import type { ProducerTurnRegistry } from '../producer/producer-turn-registry';
+import { createPublishQueueJobLauncher } from '../youtube/publish-queue-job-launcher';
+import { createPublishQueueScheduler, createRealPublishQueueTimer } from '../youtube/publish-queue-scheduler';
+import type { PublishQueueScheduler } from '../youtube/publish-queue-scheduler';
 import { createYoutubeServices } from '../youtube/youtube-services';
 import type { YoutubeServices } from '../youtube/youtube-services';
 import { createKeyedSerializer } from '../store/serialize-by-key';
@@ -32,6 +35,7 @@ export interface RenderApiRuntime {
   readonly freeMediaSearchCache: FreeMediaSearchCache;
   readonly openRouterModelCatalog: OpenRouterModelCatalog;
   readonly youtube: YoutubeServices;
+  readonly publishQueue: PublishQueueScheduler;
 }
 
 export function defaultProducerConfig(): ProducerConfig {
@@ -46,13 +50,23 @@ export function createRenderApiRuntime(
   recoverInterruptedJobs(deps);
   const youtube = createYoutubeServices(deps);
 
+  const jobs = createRenderJobQueue(
+    deps,
+    store === undefined ? undefined : createProjectBrandResolver(deps, store),
+    youtube.client,
+  );
+  const publishQueue = createPublishQueueScheduler({
+    localStore: deps.localStore,
+    clock: deps.clock,
+    timer: createRealPublishQueueTimer(),
+    jobs,
+    launchPublishJob: createPublishQueueJobLauncher(deps, store, jobs, youtube.oauth),
+  });
+
   return {
-    jobs: createRenderJobQueue(
-      deps,
-      store === undefined ? undefined : createProjectBrandResolver(deps, store),
-      youtube.client,
-    ),
+    jobs,
     youtube,
+    publishQueue,
     producerTurns: createProducerTurnRegistry(),
     producer,
     uploadSerializer: createKeyedSerializer(),
