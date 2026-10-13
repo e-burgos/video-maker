@@ -1134,11 +1134,18 @@ describe('createStudioToolHandlers', () => {
       [{ items: [{ ...REVIEW.items[0], verdict: 'great' }], gaps: [] }],
       [{ items: [] }],
       [{ items: [{ ...REVIEW.items[1], source: 'project' }], gaps: [] }],
+      [{ items: [], gaps: [] }],
     ])('review_material rejects a malformed review before calling the studio (%#)', async (input) => {
       const { handlers, client } = handlersWith();
 
       await expect(handlers.review_material(input)).rejects.toMatchObject({ code: 'INVALID_INPUT' });
       expect(client.calls).toEqual([]);
+    });
+
+    it('review_material accepts a project without images when the gaps say what the idea needs', async () => {
+      const { handlers } = handlersWith({ putMaterialReview: async () => ({ ...REVIEW, items: [] }) });
+
+      await expect(handlers.review_material({ items: [], gaps: [{ need: 'capturas del cotizador con el Plan Flex elegido', note: 'el proyecto no trae material' }] })).resolves.toBeDefined();
     });
 
     it.each([

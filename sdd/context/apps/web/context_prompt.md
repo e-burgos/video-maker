@@ -1,8 +1,8 @@
 # Context Prompt — apps/web
 
 > Entry point para agentes que trabajen sobre `apps/web`.
-> Leer junto con `constitution.md` de este directorio **+ `updates/*.md` en orden de nombre**.
-> Última actualización: consolidación spec-017 cycle-02/03/04/05 + spec-018 cycle-02 | Fecha: 2026-09-25
+> Leer junto con `constitution.md` de este directorio **+ `updates/*.md` en orden de nombre, si los hay**.
+> Última actualización: consolidación de fragmentos | Fecha: 2026-10-13
 
 - **Tipo:** app React 19 (SPA local sobre `apps/render-api`)
 - **Estado:** **producto completo de punta a punta, en español (default) e inglés.** La pantalla por
@@ -28,7 +28,8 @@
   la tabla de presets de salida y tres flujos típicos, en los dos idiomas. Consume `EP-001`..`EP-008`,
   `EP-011`..`EP-026`, `EP-028` y `EP-036`. Suite con cobertura piso 80 % (`coverage.include` sin
   recortar; no remedida en esta consolidación). Cero dependencias npm propias además de
-  `@remotion/player`.
+  `@remotion/player`. Desde spec-018 suma modo motion, marcas, YouTube y su cola, revisión de renders, propuesta,
+  muestras, referencias y dirección de voz (ver `constitution.md` §5).
 - **Descopado a propósito:** la **edición del EDL (`EP-009`/`EP-010`)**, porque `buildTimeline` sólo
   se invoca desde `libs/auto-montage` y guardar un EDL editado escribiría `work/edl.json` sin efecto
   observable ni en el Player ni en un render. La edición de la Timeline cubre
@@ -42,8 +43,9 @@
   uploader; `cycle-02`: i18n `en`/`es` y sección de guía) · `spec-017-desktop-app` (`cycle-02`:
   reintento de jobs interrumpidos; `cycle-03`: español default, carpetas, i18n de modelos;
   `cycle-04`: `/settings` y motor OpenRouter; `cycle-05`: workspace centrado en el chat) ·
-  `spec-018-producer-free-tier` (`cycle-02`: storyboard explica los códigos de falta de OpenRouter).
-- **Backend único:** `apps/render-api` (ver `sdd/context/apps/render-api/` + `updates/`), por el
+  `spec-018-producer-free-tier` · `spec-020-motion-mode` · `spec-021-brand-kit` · `spec-022-youtube-publishing` ·
+  `spec-023-production-quality`.
+- **Backend único:** `apps/render-api` (ver `sdd/context/apps/render-api/`), por el
   proxy `/api` del dev-server. `sdd/api.json` es el contrato.
 - **Cómo correr y testear:** `pnpm nx test web` (jsdom + cobertura), `pnpm nx lint web`,
   `pnpm nx build web`; en desarrollo `pnpm nx dev web` con `apps/render-api` levantado.

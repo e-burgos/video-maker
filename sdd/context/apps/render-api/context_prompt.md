@@ -2,15 +2,12 @@
 
 > Entry point para agentes que trabajen sobre `apps/render-api`.
 > Leer junto con `constitution.md` de este directorio **+ `updates/*.md` en orden de nombre**.
-> Última actualización: consolidado hasta spec-e-burgos-017-desktop-app cycle-04 | Fecha: 2026-09-24
-> Consolidado al cerrar `cycle-04` de `spec-e-burgos-017-desktop-app` (fundió los fragmentos de
-> `FIX-009-004` y de `cycle-01`..`cycle-04`).
+> Última actualización: consolidación de fragmentos | Fecha: 2026-10-13
 
 - **Tipo:** app Node (servicio HTTP local, headless, mono-usuario)
-- **Estado:** **completo.** 41 rutas, 112 códigos de error, 116 archivos de test. Verificado contra
+- **Estado:** **completo.** Rutas `EP-001`..`EP-073`. Verificado contra
   binarios reales (Remotion, FFmpeg, whisper-cli, el CLI de voz sherpa-onnx y `claude -p`) en smokes
-  manuales, nunca en CI. `cycle-04` de `spec-017` además corrió el flujo de producción real
-  empaquetado con OpenRouter.
+  manuales, nunca en CI. El flujo de producción real empaquetado se corrió con OpenRouter.
 - **Specs que la gobiernan:** `spec-003-kinetic-captions` (`FIX-003-003` sumó `captionStyle` a
   `montage`) · `spec-005-render-service` (la creó; `FIX-005-001` sumó `EP-027`) ·
   `spec-006-web-studio` (`FIX-006-001` sumó `EP-028`) · `spec-007-web-montage` (job `montage`) ·
@@ -21,7 +18,11 @@
   voces, `EP-019`/`EP-026`) · **`spec-017-desktop-app`** (empaquetado Electron: `cycle-01` productor a
   MCP sin shell + job `photo-aroll`, `EP-029`..`EP-035`; `cycle-02` persistencia SQLite +
   `EP-036` retry; `cycle-03` bundle CJS, web bajo `/api`, guardia de acceso, Piper → sherpa-onnx;
-  `cycle-04` motor OpenRouter del productor, `EP-037`..`EP-041`).
+  `cycle-04` motor OpenRouter del productor, `EP-037`..`EP-041`; `cycle-05` bandeja de assets `EP-042`..`EP-045`) ·
+  `spec-018-producer-free-tier` (storyboard sobre OpenRouter, material libre `EP-046`..`EP-048`) ·
+  `spec-020-motion-mode` (job `motion`) · `spec-021-brand-kit` (marcas) · `spec-022-youtube-publishing`
+  (publicación y cola, `EP-067`..`EP-073`) · `spec-023-production-quality` (revisión, propuesta, referencias,
+  dirección de voz, muestras).
 - **Rol en el sistema:** la puerta HTTP del motor. Es **el único subproyecto del monorepo que puede
   depender a la vez de `libs/media-local` (`type:util`) y `libs/composition-remotion` (`type:ui`)**:
   los `depConstraints` del `eslint.config.mjs` raíz impiden que esas dos libs se importen entre sí, y
@@ -52,9 +53,9 @@ src/
   deps/                        contrato de puertos + puerto ObjectStorage + adaptador de producción
   ai/                          claude-cli-ai-agent (request/response con --json-schema, storyboard)
   engine/                      nombres de módulos de motor y de binarios de media
-  errors/                      112 códigos, etapas por tipo de job, PipelineStageError y traducciones
+  errors/                      códigos, etapas por tipo de job, PipelineStageError y traducciones
   pipeline/                    runRenderPipeline (prepare → render → mix → mux → verify) + observer
-  jobs/                        unión discriminada (render|montage|storyboard|voice|photo-aroll),
+  jobs/                        unión discriminada (render|montage|storyboard|voice|photo-aroll|motion|publish|review|reference),
                                máquina de estados pura, cola FIFO, job-persistence (SQLite),
                                run-photo-aroll-pipeline (Ken Burns + mux)
   storyboard/                  documento, inventario, prompt y export numerado de prompts
@@ -70,12 +71,13 @@ src/
   http/                        router, handlers (incl. generated, voice-preview, probe/frames/
                                project-text/asset-copy/music, producer-settings, openrouter-models),
                                static-web-handler, local-access-guard, health, runtime, servidor
+  motion/ brands/ review/ proposal/ reference/ material/ media-search/ youtube/ music/   (ver constitution §3)
   __fixtures__/                call-log ordenado y dobles de todos los puertos
 ```
 
 ## Contrato y comportamiento que hay que respetar
 
-- **41 endpoints, registrados campo a campo en `sdd/api.json`** (`EP-001`..`EP-041`). Es el contrato
+- **Endpoints registrados campo a campo en `sdd/api.json`** (`EP-001`..`EP-073`). Es el contrato
   que `apps/web`/`apps/desktop` consumen: ningún campo publicado cambia de nombre, tipo ni semántica
   sin un ciclo que lo declare. Toda aserción de forma se hace con `Object.keys(body).sort()` contra
   la interfaz, nunca campo por campo contra lo que el handler ya emite.
@@ -105,6 +107,9 @@ src/
   payload. **`GET /openrouter/models` (`EP-041`)** sirve el catálogo en vivo (caché 1 h, sirve stale)
   con recomendados marcados (`config/recommended-openrouter-models.ts`, un `isDefault`: hoy DeepSeek
   v4.1 Flash). El storyboard sigue usando siempre su propio agente Claude.
+- Las capacidades añadidas desde `spec-017` (motion, marcas, material libre, bandeja, revisión, propuesta, referencias,
+  YouTube y su cola, dirección de voz, muestras) están descritas en `constitution.md` §3; el contrato de cada ruta, en
+  `sdd/api.json`.
 - **`GET /health`** reporta módulos de motor, los binarios de media (por nombre lógico y variable de
   entorno, **nunca** por ruta resuelta: `ffmpeg`/`ffprobe`/`whisper-cli`/el CLI de voz sherpa-onnx),
   `capabilities`, `jobs: { running, queued }` y `store: { schemaVersion, dbPath }`. El bloque `jobs`
@@ -113,7 +118,7 @@ src/
   `binaries` porque volvería `degraded` toda máquina sin Claude Code, CI incluido (D-12 de
   `spec-008`). El CLI de voz sí está, y una máquina sin él (o sin voces bajo `TTS_VOICES_DIR`)
   reporta `degraded`.
-- **Cola de jobs:** FIFO, **concurrencia 1**, para los cinco `kind`, **persistida en SQLite**
+- **Cola de jobs:** FIFO, **concurrencia 1**, para todos los `kind` (render, montage, storyboard, voice, photo-aroll, motion, publish, review, reference), **persistida en SQLite**
   (`@video-maker/local-store`) así que sobrevive a un reinicio. Seis estados
   (`queued`/`running`/`canceling`/`succeeded`/`failed`/`canceled`). Al arrancar, todo job que quedó
   sin terminar pasa a `failed` con `JOB_INTERRUPTED`; `EP-036` lo reintenta. Cancelación
@@ -147,6 +152,8 @@ src/
 | `RENDER_API_OBJECT_STORE` | `fs` | Sólo `fs` (D-11, MinIO descopado). Cualquier otro valor ⇒ exit 78. |
 | `RENDER_API_URL` | `http://<host>:<port>` | La URL que se le dice al productor para encolar jobs en este mismo servicio. Gana `/api` cuando `RENDER_API_WEB_ROOT` está seteada. |
 | `RENDER_API_WEB_ROOT` | — | Sin setear: sólo API. Seteada: sirve la web estática y mueve la API a `/api` (`GET /health` queda afuera del prefijo). |
+| `BRANDS_ROOT` | `dirname(MEDIA_ROOT)/brands` | Marcas del usuario (las incluidas son de sólo lectura). |
+| `MOTION_GRAPHICS_ASSETS` / `HYPERFRAMES_RESOLVE_FROM` | — | Assets de motion-graphics y raíz desde la que se resuelve `hyperframes` (empaquetado). |
 | `RENDER_API_ACCESS_TOKEN` | — | Sin setear: sin guardia de acceso (dev local). Seteada: toda ruta exige la cookie `vm_session` o el header `x-studio-token` más un `Host` local. |
 | `VIDEO_MAKER_PARENT_PID` | — | Watchdog: si el PID del padre (Electron) deja de existir, el watchdog mata el árbol de procesos propio, incluido Chrome huérfano de Remotion. |
 | `FFMPEG_PATH` / `FFPROBE_PATH` / `WHISPER_CPP_PATH` | — | Sin la variable, se resuelven por `PATH`. |

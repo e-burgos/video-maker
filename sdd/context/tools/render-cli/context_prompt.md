@@ -2,7 +2,7 @@
 
 > Entry point para agentes que trabajen sobre `tools/render-cli`.
 > Leer junto con `constitution.md` de este directorio **+ `updates/*.md` en orden de nombre**.
-> Última actualización: consolidación de `updates/` hasta FIX-007-002 | Fecha: 2026-09-11
+> Última actualización: consolidación de fragmentos | Fecha: 2026-10-13
 
 - **Tipo:** tool Node ejecutable (CLI headless)
 - **Estado:** existe y está completo, y creció en cada spec/fix posterior sin romper el contrato

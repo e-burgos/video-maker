@@ -2,29 +2,27 @@
 
 > Entry point para agentes que trabajen sobre `libs/media-local`.
 > Leer junto con `constitution.md` de este directorio **+ `updates/*.md` en orden de nombre**.
-> Última actualización: spec-e-burgos-016 cycle-01 | Fecha: 2026-09-11
-> Consolidado al cerrar `cycle-01` de `spec-e-burgos-016-studio-usability` (fundió los fragmentos de
-> `spec-009 cycle-01`, `spec-014 cycle-01`, `FIX-006-001`, `FIX-009-002` y el propio `cycle-01`).
+> Última actualización: consolidación de fragmentos | Fecha: 2026-10-13
 
 - **Tipo:** lib Node TypeScript (wrappers de binarios locales + mezcla/mastering de audio + voz)
 - **Estado:** completa para su alcance, sin ciclo abierto, y en crecimiento activo vía ciclos de
-  otras specs y fixes. Cubre wrappers de ffprobe/ffmpeg/whisper/piper, la capa pura de mezcla
+  otras specs y fixes. Cubre wrappers de ffprobe/ffmpeg/whisper/sherpa-onnx (voz), la capa pura de mezcla
   (`src/mix/`) y su ejecución (`mixTimelineAudio`, `verifyMixLoudness`, `muxAudioIntoVideo`), síntesis
   de voz (`synthesizeSpeech`, dos rutas de armado de pista: concatenada y cronometrada) y el catálogo
   de voces con metadata derivada del `.onnx.json` de cada modelo.
-- **Suite:** 29 archivos / 348 tests, 98,79 % stmts · 94,51 % branch · 98,88 % funcs.
+- **Desde entonces:** sherpa-onnx en lugar de Piper, wrappers de ffmpeg del productor, normalización de loudness y
+  mediciones para la revisión de renders (detalle en `constitution.md` §3–4).
 - **Ciclos y fixes:** `cycle-02` de `spec-e-burgos-001` y `cycle-02` de `spec-e-burgos-004` cerraron
   el núcleo (wrappers + mezcla/mastering). Desde entonces: `spec-e-burgos-009-voice-over` `cycle-01`
-  (binarios de Piper, `synthesizeSpeech`, `buildVoiceCatalog`), `spec-e-burgos-014-production-quality`
+  (binarios de voz, `synthesizeSpeech`, `buildVoiceCatalog`), `spec-e-burgos-014-production-quality`
   `cycle-01` (normalización de la cama musical antes de las ganancias del preset), `FIX-006-001`
   (canal alfa declarado en el probe de imágenes, usado por la regla de logo del productor en
-  `apps/render-api`), `FIX-009-002` (`placeSpeechSegments` para guion cronometrado, `--length-scale`
-  de Piper) y `spec-e-burgos-016-studio-usability` `cycle-01` (metadata de voces por `.onnx.json`).
+  `apps/render-api`), `FIX-009-002` (`placeSpeechSegments` para guion cronometrado, `--length-scale`) y `spec-e-burgos-016-studio-usability` `cycle-01` (metadata de voces por `.onnx.json`).
 - **Specs que la gobiernan:**
   - `sdd/specs/spec-e-burgos-001-core-composition-media-pipeline/spec-e-burgos-001-core-composition-media-pipeline.spec.md` (sección "Wrappers locales (libs/media-local)")
   - `sdd/specs/spec-e-burgos-004-audio-mix-mastering/spec-e-burgos-004-audio-mix-mastering.spec.md`
     (capa de mezcla/mastering; contrato de API pública en `cycles/cycle-02/architect.md` §15)
-  - `sdd/specs/spec-e-burgos-009-voice-over` (binarios y wrapper de Piper)
+  - `sdd/specs/spec-e-burgos-009-voice-over` (binarios y wrapper de voz)
   - `sdd/specs/spec-e-burgos-014-production-quality` (normalización de música, canal alfa de logo)
   - `sdd/specs/spec-e-burgos-016-studio-usability` (`cycle-01`: catálogo de voces enriquecido,
     consumido por `EP-019` de `apps/render-api`)

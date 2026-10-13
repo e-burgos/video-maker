@@ -1,7 +1,6 @@
 # Constitución — apps/motion-editor
 
-> Versión 1.0 | Última actualización: creación (mudanza desde display-ads/apps/video-manager) | Fecha: 2026-10-07
-> Creada por el orquestador al abrir `cycle-01` de `spec-e-burgos-020-motion-mode`.
+> Versión 1.1 | Última actualización: consolidación de fragmentos | Fecha: 2026-10-13
 
 ## 1. Propósito
 
@@ -21,3 +20,13 @@
 - Importar el motor siempre desde `src/engine/api.ts`; nunca editar los `.jsx` vendorizados.
 - Descubrimiento de videos por convención (`import.meta.glob`): no hay registro central.
 - Sin `package.json` propio: las dependencias viven en la raíz del workspace.
+
+## 4. Estado y estructura
+
+- Trae tres videos ("Cómo funciona DisplayAds" 2:00, "Conectá tu Core Pro" 1:12, "Conectá tu Mostrador" 1:12), editor,
+  motor vendorizado, guías y 62 tests.
+- Renombre técnico `video-manager` → `motion-editor` (proyecto, rutas, endpoint dev-only `/__motion-editor/save-timeline`).
+  Targets explícitos en `project.json` (el workspace no infiere). `eslint.config.mjs` propio: habilita JSX y no
+  reporta los `eslint-disable` de los dos `.jsx` vendorizados.
+- Dependencia: `mp4-muxer` 5.2 en la raíz (export a MP4). Sin dependencias de libs del workspace.
+- El export de este editor es mudo: la voz, la música y los cortes al golpe viven en `libs/motion-graphics`.

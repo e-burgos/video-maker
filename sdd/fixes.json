@@ -3682,6 +3682,53 @@
           }
         ]
       }
+    },
+    {
+      "id": "FIX-e-burgos-029",
+      "author": "e-burgos",
+      "spec_id": "spec-e-burgos-023-production-quality",
+      "fix_document": "sdd/fixes/fix-e-burgos-029.md",
+      "type": "BUGFIX",
+      "severity": "medium",
+      "created_at": "2026-10-13",
+      "resolved_at": "2026-10-13",
+      "validated_at": null,
+      "title": "La revisión de material no puede quedar vacía",
+      "estimation_hours": 1,
+      "description": "En la prueba con video de referencia (punto 12) el productor registró una revisión de material sin imágenes ni faltantes y propuso un recorrido del cotizador sin capturas: el aviso de material faltante no llegó a la tarjeta Propuesta.",
+      "justification": "Hallado en el turno real con referencia; cambio interno de una tool del productor sin contratos nuevos.",
+      "related_modules": [
+        "production-quality"
+      ],
+      "affected_files": [
+        "libs/producer-tools/src/handlers/studio-tool-handlers.ts",
+        "libs/producer-tools/src/handlers/studio-tool-handlers.spec.ts"
+      ],
+      "test_reference": "producer-tools lint/test/build verde (447): revisión vacía rechazada, proyecto sin imágenes con faltantes aceptado.",
+      "status": "implemented",
+      "cycle": null,
+      "process_note": "Prueba real del productor con referencia (tanda D, punto 12).",
+      "usage": {
+        "provider_model": "claude/opus",
+        "effort": "high",
+        "tokens_in": 20000,
+        "tokens_out": 3000,
+        "approx": true,
+        "source": "declared-estimate",
+        "recorded_at": "2026-10-13",
+        "by_agent": [
+          {
+            "agent": "orchestrator",
+            "provider_model": "claude/opus",
+            "effort": "high",
+            "tokens_in": 20000,
+            "tokens_out": 3000,
+            "approx": true,
+            "source": "declared-estimate",
+            "recorded_at": "2026-10-13"
+          }
+        ]
+      }
     }
   ]
 }

@@ -2,14 +2,12 @@
 
 > Entry point para agentes que trabajen sobre `libs/auto-montage`.
 > Leer junto con `constitution.md` de este directorio **+ `updates/*.md` en orden de nombre**.
-> Última actualización: FIX-e-burgos-009-002 | Fecha: 2026-09-11
-> Consolidado al cerrar `FIX-e-burgos-009-002` (fundió los fragmentos de `spec-009 cycle-01`,
-> `spec-014 cycle-01`, `FIX-003-003`, `FIX-007-002` y `FIX-009-002`).
+> Última actualización: consolidación de fragmentos | Fecha: 2026-10-13
 
 - **Tipo:** lib Node TypeScript (orquestación del pipeline, sin render)
 - **Estado:** operativa de punta a punta en el plano de decisión y en desarrollo activo vía fixes.
-  `ingestProject` descubre y clasifica `raw/` (seis roles: `aroll`, `broll`, `music`, `image`,
-  `voice`, `logo`), sondea vía `probeMedia` (mide loudness de todo asset `audio`), transcribe el
+  `ingestProject` descubre y clasifica `raw/` (siete roles: `aroll`, `broll`, `music`, `image`,
+  `voice`, `logo`, `reference`), sondea vía `probeMedia` (mide loudness de todo asset `audio`), transcribe el
   A-roll de forma incremental y persiste `work/catalog.json`.
   `autoMontage(project, { preset, seed, voice, captionStyle }, deps)` lee el catálogo, resuelve
   A-roll/música/transcripción/formato/logo, elige la fuente de habla (`aroll` o `script`, ver

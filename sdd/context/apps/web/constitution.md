@@ -1,8 +1,6 @@
 # Constitución — apps/web
 
-> Versión 2.5 | Última actualización: consolidación spec-017 cycle-02/03/04/05 + spec-018 cycle-02 | Fecha: 2026-09-25
-> Las actualizaciones por ciclo/fix van como fragmentos aditivos en `updates/` —
-> este archivo base solo lo modifica la consolidación (ver `sdd/context/context_prompt.md` sección 6).
+> Versión 3.0 | Última actualización: consolidación de fragmentos | Fecha: 2026-10-13
 
 ## 1. Propósito
 
@@ -376,3 +374,59 @@ e2e/            smoke-helpers.mjs (compartido) · studio-smoke.mjs · montage-sm
   sólo `*.spec.*`, `main.tsx` y `test-setup.ts`.
 - Los componentes se registran en `sdd/components.json` bajo la app-key `apps/web` con su
   `consumes` de endpoints.
+
+## 5. Superficies añadidas desde spec-018 (rutas, componentes y reglas)
+
+Todos bajo `src/` de la app; copy `es`/`en` en `src/i18n/`; el contrato de cada endpoint está en `sdd/api.json`.
+
+- **Barra única del proyecto** (`StudioLayout` carga el modo): productor · motion (sólo motion) · biblioteca ·
+  storyboard · voz · vista previa; ya no hay "Edición avanzada" ni "Abrir Motion graphics". Las páginas clásicas son
+  `Classic…Page` detrás de `components/project-mode-gate.tsx`.
+- **Modo motion**: al crear un proyecto se elige "Motion graphics" o "Material crudo" (radiogroup, default crudo); la
+  tarjeta lleva insignia y va a `/projects/:slug/motion`. `pages/motion-page.tsx` (brief: marca, formato, música,
+  golpes, título, objetivo, público, guion, imágenes de `raw/images`; "Armar storyboard"; "Hacer video" con progreso
+  "Voz 3/7" y reproductor), `components/{motion-brief-form,motion-job-status,motion-scene-list}.tsx`,
+  `api/{motion-types,motion-brief-form,project-mode,null-when-missing,motion-scene-props,producer-suggestions-fence}.ts`.
+  En proyectos motion, storyboard, voz y vista previa muestran lo que dejó el pipeline vía `GET /motion/overview`
+  (`motion-view-shell`, `motion-storyboard-view`, `motion-voice-view`, `motion-preview-view`,
+  `hooks/use-motion-overview.ts`); la biblioteca sólo las fotos. El storyboard motion es editable
+  (`use-motion-storyboard-draft.ts`) y lista aparte las «Cajas medidas por el productor (a confirmar)».
+  `MotionStoryboard.music` es `{track, volume?} | null`. Las sugerencias del productor cargan la caja de texto (no
+  envían) y el bloque `suggestions` no se muestra crudo en la actividad del turno.
+- **Marcas**: `/brands` (propias e incluidas, nueva, duplicar, borrar) y `/brands/:id` (identidad, logo, colores —4 base
+  + avanzado por variable; cambiar un color base recalcula todos y descarta retoques—, tipografías, voz, música, fotos
+  y productos) con vista previa en vivo en un iframe (colores por `postMessage` `mg-brand-tokens` + recompuesta
+  diferida). Una incluida es de sólo lectura con "Duplicar". `pages/brands-page.tsx`, `brand-editor-page.tsx`, 17
+  `components/brand-*.tsx`, hooks `use-brand-editor`, `use-section-draft`, `use-brand-upload`, `use-brand-font-faces`,
+  `use-project-brand-voice`; `api/brand-*.ts`, `google-font-families.ts`. `components/brand-picker.tsx` en el alta
+  (crudo: opcional; motion: obligatoria) y `project-brand-control.tsx` en la barra (en motion la marca se cambia en el
+  brief; una marca sin música sólo ofrece "Sin música"). El selector de subtítulos ofrece "De la marca" y la página Voz
+  preselecciona la voz de la marca.
+- **YouTube**: Configuración › YouTube (credencial del cliente, conectar con sondeo, desconectar, "Listas por
+  categoría" en `youtube-category-playlists-section.tsx`); diálogo "Publicar en YouTube" en vista previa y Entregas
+  (borrador del productor, contadores, visibilidad, programación, lista, miniatura, confirmación con el nombre del canal
+  al publicar público, progreso por bytes, enlace, reintento, «Agregar a la cola» con aviso de ya publicado); panel de
+  publicaciones e insignia en la tarjeta. `components/youtube-*.tsx`, `publications-panel.tsx`, hooks
+  `use-youtube-integration`, `use-youtube-connect-flow`, `use-polled-resource`; `api/youtube-*.ts`,
+  `publication-status.ts`. Página `/publish-queue` («Publicación» en el header, polling de 10 s):
+  `pages/publish-queue-page.tsx`, `api/{publish-queue-types,parse-publish-queue,publish-queue-view}.ts`.
+- **Calidad de producción**: panel "Revisión" por MP4 en Biblioteca › Entregables y en la vista previa motion
+  (`render-review-panel.tsx`, `api/review-{types,format}.ts`, `parse-review.ts`); el diálogo de publicar alerta los
+  críticos y exige "Publicar igual" para mandar `ignoreReview` (`publish-review-notice.tsx`); `review` es un kind de
+  la lista de jobs. «Revisión visual por escena» (`visual-review-section.tsx`, muestra todos los cuadros de cada
+  escena); avisos de material arriba de la propuesta (`material-review-block.tsx`). Tarjeta `Propuesta`
+  (`proposal-card.tsx`, `proposal-status-badge.tsx`, `api/proposal-*.ts`; «Estimación gruesa» cuando `rough: true`),
+  `sample-trigger.tsx` en Vista previa y etiqueta `Muestra` en la Biblioteca; Entregas y Vista previa laterales ocultan
+  las muestras (siempre por el dato del API: `file.sample`/`job.sample`). `voice-direction-editor.tsx` (por línea en
+  material crudo, por escena en motion) y `music-mode-fields.tsx` (Cama continua / Por tramos). Panel `Referencia`
+  (`reference-analysis.tsx`, `reference-brief-view.tsx`, `reference-scene-strip.tsx`, `api/reference-*.ts`,
+  `parse-reference.ts`) en la tarjeta de cada asset `reference`; la tarjeta de propuesta de archivos del chat ofrece
+  `reference` sólo para videos y lo sugiere con motivo (`api/reference-suggestion.ts`). El chat deja el mensaje en
+  espera mientras el productor trabaja y lo envía al terminar.
+- **Layout del workspace**: grid `grid-cols-[minmax(0,3fr)_minmax(0,2fr)]` y `min-w-0` en el panel de conversación y en
+  la actividad del turno (con `fr` a secas el mínimo automático dejaba crecer la columna del chat); eventos del turno y
+  bloques de código de los mensajes con `whitespace-pre-wrap break-words [overflow-wrap:anywhere]`.
+- **Tests**: `settings-page.spec.tsx` espera hasta 5 s (con 7 proyectos en paralelo el timeout de 1 s era intermitente).
+- **Pendientes vigentes**: copy propio para el uploader de imágenes en la página Motion (hoy usa el del modo crudo);
+  el reporte de la fase storyboard trae `path`/`durationSec` null; la bandeja de arrastrar y soltar no propone el
+  rol `reference`.

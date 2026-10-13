@@ -1,9 +1,6 @@
 # Constitución — libs/composition-remotion
 
-> Versión 1.1 | Última actualización: FIX-e-burgos-003-004 | Fecha: 2026-09-11
-> Consolidada al cerrar `FIX-e-burgos-003-004` (fundió los fragmentos de `FIX-001-002`,
-> `spec-006 cycle-02`, `spec-006 cycle-03`, `spec-014 cycle-01`, `FIX-003-003` y `FIX-003-004`).
-> Las actualizaciones por ciclo/fix van como fragmentos aditivos en `updates/`.
+> Versión 1.2 | Última actualización: consolidación de fragmentos | Fecha: 2026-10-13
 
 ## 1. Propósito
 
@@ -40,6 +37,26 @@
   declaran `audio`, así que el preview de `remotion studio` y del `<Player>` sigue mostrándose con
   audio (`AudioTrack` montado)
 - `src/render.ts` — entrada Node (`renderTimeline`) separada del barrel React
+- **Bumpers de logo**: `components/logo-bumper-scene.tsx` (`LogoBumperScene`: `AbsoluteFill` con el fondo del bumper y
+  el logo centrado a `logoWidthRatio × format.width`) y `helpers/logo-bumper-style.ts` (`logoBumperLogoStyle`, pura;
+  entrada de 600 ms `fade`/`zoom` desde 0.8/`slide-up` desde 12 % con easing `1-(1-p)³`, salida con fade de 300 ms;
+  en un bumper corto la entrada se recorta para que la salida entre siempre). Con bumpers activos,
+  `timeline-composition.tsx` arma `Sequence`s: placa de intro, **todo el contenido** dentro de
+  `<Sequence from={introFrames}>` y placa de outro; sin bumpers el árbol montado es el de siempre (los hijos van como
+  array con `key`, no como Fragment). `computeTimelineMetadata().durationInFrames` = `timelineTotalFrames` (intro +
+  contenido + outro), en el render y en el `<Player>`. El overlay de logo y las captions viven dentro de la secuencia
+  de contenido: nunca se dibujan sobre los bumpers.
+- **Preset de subtítulos `brand`** (`helpers/brand-caption-preset.ts`, `helpers/use-brand-caption-fonts.ts`,
+  `components/brand-caption-fonts.tsx`): carga las fuentes de la marca con `FontFace` + `delayRender` (rutas con
+  `pathSrc`, misma lógica que `assetSrc`) y usa texto, acento (palabra destacada) y caja de `captionTheme`.
+- **Render desde bundle precompilado**: con `serveUrl` no se llama a `bundleProject`, y `browserExecutable` se pasa a
+  `selectComposition`/`renderMedia`. Target Nx `bundle` (`src/bundle.ts`) deja el bundle en
+  `dist/libs/composition-remotion/bundle` (el desktop lo reconstruye en cada publicación). `public/fonts` y
+  `public/example` quedan tapados por el `public` que re-apunta render-api. Chrome for Testing headless-shell
+  149.0.7790.0 (la que espera Remotion 4.0.522), descargado por la app.
+- **Muestras**: `render` acepta un rango de cuadros (primeros N s).
+- **Geometría compartida**: `caption-preset.ts`, `caption-box.ts`, `caption-font-size.ts` y `broll-track.tsx`
+  delegan los números en `@video-maker/timeline-core` (`CAPTION_GEOMETRY`, `pipRect`); el render no cambia.
 - `src/__fixtures__/` — Timeline de ejemplo construida con `buildTimeline`
 - **Tooling de `smoke` aislado de `tsc`/`build`:** `tsconfig.smoke.json` (extiende
   `tsconfig.lib.json`, `baseUrl: "../.."`) y `src/smoke-register.cjs` (acota el registro de

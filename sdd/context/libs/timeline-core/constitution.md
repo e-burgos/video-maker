@@ -1,8 +1,6 @@
 # Constitución — libs/timeline-core
 
-> Versión 1.1 | Última actualización: spec-008 c01 + spec-009 c01 + spec-014 c01 + fixes 003-003 / 007-002 / 009-002 | Fecha: 2026-09-11
-> Creada por el orquestador al abrir `cycle-01` de `spec-e-burgos-001-core-composition-media-pipeline`.
-> Las actualizaciones por ciclo/fix van como fragmentos aditivos en `updates/`.
+> Versión 1.2 | Última actualización: consolidación de fragmentos | Fecha: 2026-10-13
 
 ## 1. Propósito
 
@@ -47,3 +45,46 @@
 - Las funciones públicas devuelven objetos propios: `safeZoneFor` y `buildTimeline` no comparten estado entre llamadas (regla 6 de `architect.md` §12)
 - Tags Nx: `scope:engine`, `type:domain`. Boundaries Nx: `type:domain` → `onlyDependOnLibsWithTags: []` (no depende de ninguna otra lib del repo)
 - Alias de import: **`@video-maker/timeline-core`** (scope `@video-maker/*`, no el `@shared-utils` heredado); declarado en `tsconfig.base.json → paths`, apuntando a `src/index.ts` (consumo por source, sin bundler)
+
+## 5. Contratos añadidos desde spec-009 / spec-018 / spec-021 / spec-023
+
+- **Logo y bumpers**: `defaultLogoWidthRatio(format)` en `timeline/logo-defaults.ts` (`LANDSCAPE_LOGO_WIDTH_RATIO` 0.18
+  si `width >= height`, `PORTRAIT_LOGO_WIDTH_RATIO` 0.28; el default del `LogoOverlaySchema` sigue en 0.32: lo que
+  cambia es lo que se construye de cero). `MediaAsset.hasAlpha?` refleja el canal declarado por `pix_fmt`, no píxeles
+  transparentes. `Timeline.bumpers?: { intro?, outro? }` con `LogoBumperSchema` (`enabled` default false, `durationMs`
+  500–6000 default 2000, `backgroundColor` hex default `#ffffff`, `animation` `fade|zoom|slide-up` default `zoom`,
+  `logoWidthRatio` (0,1] default 0.4, `logoAssetId` opcional validado con `BUMPER_LOGO_ASSET_NOT_FOUND`/
+  `BUMPER_LOGO_ASSET_NOT_IMAGE`), `TimelineBumpersSchema`, `HexColorSchema`. `durationFrames` sigue siendo el
+  contenido; `timeline/bumper-frames.ts` (`logoBumperFrames`, `introBumperFrames`, `outroBumperFrames`,
+  `timelineTotalFrames`, `round(durationMs / 1000 * fps)`). `timelineWarnings(timeline)` devuelve
+  `BUMPER_WITHOUT_LOGO` como aviso (`validateTimeline` no cambia de contrato). El bumper dibuja el logo de
+  `timeline.logo`.
+- **Subtítulos**: `groupWordsForCaptions` acepta `forcedBreaksMs` (instantes que obligan a cerrar el grupo),
+  `respectPhrases` y `maxChars` (corta en fin de oración y silencios; parte oraciones largas en el mejor punto de frase,
+  nunca tras artículo o preposición; `subtle-lower` lo activa con 52 caracteres y una línea). `VoiceScriptLineSchema`
+  gana `wordsSource` (`'whisper' | 'script'`), aditivo (se exporta sólo el tipo). `CAPTION_STYLES` suma `'brand'`;
+  `Timeline.captionTheme` (familia, archivos de fuente del proyecto, colores de texto, acento y caja) y el schema
+  rechaza `captionStyle: 'brand'` sin `captionTheme`. `captions/caption-geometry.ts` es la **única fuente** de la
+  geometría de subtítulos (presets por estilo, caja, ajuste de fuente, `captionTextRect`) y del recuadro pip
+  (`pipRect`): la usan composition-remotion y la revisión de render-api; todo cambio visual de subtítulos o pip se
+  hace acá, nunca en la composición.
+- **Storyboard para el modelo**: `StoryboardProposalForModelSchema` (`assetId` y `remotionScene` requeridos y nullable;
+  `remotionScene` unión discriminada por `kind` con ramas estrictas); `storyboardProposalJsonSchema()` sale de él y
+  `normalizeStoryboardProposalInput()` quita las claves en `null` antes del `safeParse` real. Patrón para cualquier
+  contrato con salida estructurada: una regla de `superRefine` no llega al JSON Schema; en el schema para el modelo lo
+  condicional va requerido + nullable y se normaliza antes de validar. El contrato guardado no cambió.
+- **Producción y revisión**: `Timeline.delivery` opcional (tutorial | motion | short, voz/subtítulos requeridos,
+  duración máxima, formato). `review/review-report.ts`: `ReviewReport` / `ReviewFinding` (severidad
+  critical/suggestion/nitpick, crítico exige `proposedFix`), `reviewStatusFor`; `ReviewReport` gana `sceneFrames`
+  (`SceneFrame.frames: [{atSec, frame}]`; el formato viejo de un cuadro se lee como lista de uno) y `visualReview`
+  (`review/visual-review.ts`). `proposal/production-proposal.ts`: `ProductionProposal` / `ProductionProposalDraftSchema`
+  (2–3 conceptos con ángulo, formato, duración, escenas, contrato de entrega, voz, modo de música y estimación; estado
+  pending/approved; `materialWarnings` opcional); `proposal/material-review.ts`: `MaterialReview`. `reference/
+  reference-brief.ts`: `ReferenceBrief` (`ReferenceBriefSchema`, version 1; formato, escenas, ritmo, voz, audio,
+  `buildReferenceSummary` en castellano).
+- **Voz y música**: `voice/voice-direction.ts` (`VoiceDirection`: pace, energy, pauseAfterMs, emphasis, intent;
+  `voiceDirectionSynthesis`, `directedLengthScale`); `StoryboardScene.direction` opcional; `voice/hash-narration.ts`
+  (`hashDirectedNarration` suma la dirección al hash sólo si existe; la pista del manifiesto registra `direction`).
+  `MusicMixSettings.mode` ('bed'|'segments') y `ducking/plan-segmented-music.ts` (`planSegmentedMusic`: huecos ≥2 s,
+  fundidos 0,6 s, piso configurable).
+- Los JSON Schemas de `schemas/` se regeneran (`pnpm nx run timeline-core:schemas`) tras cada cambio de schema Zod.

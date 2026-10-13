@@ -2,9 +2,11 @@
 
 > Entry point para agentes que trabajen sobre `libs/timeline-core`.
 > Leer junto con `constitution.md` de este directorio **+ `updates/*.md` en orden de nombre**.
-> Última actualización: spec-008 c01 + spec-009 c01 + spec-014 c01 + fixes 003-003 / 007-002 / 009-002 | Fecha: 2026-09-11
+> Última actualización: consolidación de fragmentos | Fecha: 2026-10-13
 
 - **Tipo:** lib de dominio TypeScript (sin I/O, sin React)
+- **Contratos recientes** (bumpers, `captionTheme`, geometría de subtítulos, revisión, propuesta, referencia, dirección de
+  voz, música por tramos): `constitution.md` §5.
 - **Estado:** completa para su alcance acumulado. Los contratos Zod del motor (`OutputFormat`,
   `MediaAsset`, `Transcription`, `EditDecisionList`, `AudioMixPlan`, `Timeline`) con sus
   invariantes, más los contratos del modo generativo (`StoryboardDocument` + propuesta y JSON Schema
