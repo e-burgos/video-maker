@@ -197,7 +197,7 @@ describe('createClaudeCodeProducerAgent', () => {
     const { spawner, timeouts, agent, lines } = agentWith();
     const run = agent(producerTurnStartFixture(), (line) => lines.push(line));
 
-    timeouts.fire(1_800_000);
+    timeouts.fire(3_600_000);
     expect(spawner.last().signals()).toEqual(['SIGTERM']);
 
     spawner.last().exit(null, 'SIGTERM');

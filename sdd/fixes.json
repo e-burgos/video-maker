@@ -3054,6 +3054,54 @@
           }
         ]
       }
+    },
+    {
+      "id": "FIX-e-burgos-020",
+      "author": "e-burgos",
+      "spec_id": "spec-e-burgos-023-production-quality",
+      "fix_document": "sdd/fixes/fix-e-burgos-020.md",
+      "type": "IMPROVEMENT",
+      "severity": "medium",
+      "created_at": "2026-10-13",
+      "resolved_at": "2026-10-13",
+      "validated_at": null,
+      "title": "El turno del productor dura hasta 60 minutos",
+      "estimation_hours": 1,
+      "description": "Con la revisión visual por escena, corregir, renderizar y revisar no entra en 30 minutos y el turno se cortaba sin registrar la revisión.",
+      "justification": "Tres turnos cortados en el video de prueba; cambio de un valor por defecto sin contratos nuevos.",
+      "related_modules": [
+        "production-quality"
+      ],
+      "affected_files": [
+        "apps/render-api/src/config/producer-config.ts",
+        "apps/render-api/src/config/producer-config.spec.ts",
+        "apps/render-api/src/producer/claude-code-producer-agent.spec.ts"
+      ],
+      "test_reference": "render-api lint/test/build verde.",
+      "status": "implemented",
+      "cycle": null,
+      "process_note": "Hallado en el video de prueba comprar-producto.",
+      "usage": {
+        "provider_model": "claude/opus",
+        "effort": "high",
+        "tokens_in": 15000,
+        "tokens_out": 2000,
+        "approx": true,
+        "source": "declared-estimate",
+        "recorded_at": "2026-10-13",
+        "by_agent": [
+          {
+            "agent": "orchestrator",
+            "provider_model": "claude/opus",
+            "effort": "high",
+            "tokens_in": 15000,
+            "tokens_out": 2000,
+            "approx": true,
+            "source": "declared-estimate",
+            "recorded_at": "2026-10-13"
+          }
+        ]
+      }
     }
   ]
 }

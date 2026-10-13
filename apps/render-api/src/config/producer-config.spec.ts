@@ -27,7 +27,7 @@ describe('readProducerConfig', () => {
       studioMcpEntryPath: null,
     });
     expect(DEFAULT_PRODUCER_MODEL).toBe('sonnet');
-    expect(DEFAULT_PRODUCER_TURN_TIMEOUT_MS).toBe(1_800_000);
+    expect(DEFAULT_PRODUCER_TURN_TIMEOUT_MS).toBe(3_600_000);
   });
 
   it('reusa CLAUDE_CLI_PATH de spec-008 en vez de una variable propia del productor', () => {
