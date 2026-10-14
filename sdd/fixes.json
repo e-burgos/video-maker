@@ -3855,6 +3855,29 @@
           }
         ]
       }
+    },
+    {
+      "id": "FIX-e-burgos-031",
+      "author": "e-burgos",
+      "spec_id": "spec-e-burgos-023-production-quality",
+      "fix_document": "sdd/fixes/fix-e-burgos-031.md",
+      "type": "BUGFIX",
+      "severity": "medium",
+      "created_at": "2026-10-14",
+      "resolved_at": null,
+      "validated_at": null,
+      "title": "Mezcla de los videos motion: música audible y golpe de la marca sin tapar la voz",
+      "estimation_hours": 3,
+      "description": "En la presentación de Display Ads la música queda ~30 dB bajo la voz (0,15 sin voz ≈ −42 LUFS, 0,045 bajo la voz) y el golpe de bajo de la revelación de marca suena 13–17 dB por encima de «Esto es Display Ads».",
+      "justification": "Pedido del dueño al escuchar la prueba con Malena (música baja) y crítico de la revisión automática (voice-music-margin con sfx); cambio interno de la mezcla motion.",
+      "related_modules": [
+        "production-quality"
+      ],
+      "affected_files": [],
+      "test_reference": "",
+      "status": "in-progress",
+      "cycle": null,
+      "process_note": "Prueba de la presentación con Malena (zz-prueba-malena-presentacion); nada se publica mientras se prueba."
     }
   ]
 }
