@@ -39,7 +39,7 @@ export function readKeychainServiceName(env: NodeJS.ProcessEnv): string {
 export function createNodeSecretStoreCommandRunner(): SecretStoreCommandRunner {
   return (bin, args, stdin) =>
     new Promise((resolve, reject) => {
-      const child = spawn(bin, [...args]);
+      const child = spawn(bin, [...args], { detached: true });
       const stdoutChunks: Buffer[] = [];
       const stderrChunks: Buffer[] = [];
 

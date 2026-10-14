@@ -465,6 +465,29 @@ describe('runVoicePipeline con guion cronometrado (FIX-e-burgos-009-002)', () =>
     expect(manifest.lines[0]?.overflowMs).toBe(0);
   });
 
+  it('vuelve a acelerar con la duración real cuando la primera aceleración no alcanza', async () => {
+    const harness = createTimedHarness(
+      new Map<string, readonly number[]>([
+        ['work/voice/sources/line-01.wav', [21_000, 20_500, 19_000]],
+        ['work/voice/sources/line-02.wav', [6000]],
+        ['work/voice/sources/line-03.wav', [3000]],
+      ]),
+      31_000,
+    );
+
+    await runTimed(harness);
+
+    const scales = harness.callLog
+      .entries()
+      .filter((entry) => entry.port === 'synthesizeVoice')
+      .map((entry) => (entry.input as { lengthScale?: number }).lengthScale);
+    const manifest = await readScriptManifest(harness.storage);
+
+    expect(scales).toEqual([undefined, undefined, undefined, 0.95, 0.92]);
+    expect(manifest.lines[0]?.lengthScale).toBe(0.92);
+    expect(manifest.lines[0]?.overflowMs).toBe(0);
+  });
+
   it('desplaza la línea siguiente y reporta el sobrante cuando la aceleración no alcanza', async () => {
     const harness = createTimedHarness(
       new Map<string, readonly number[]>([

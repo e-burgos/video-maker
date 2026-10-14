@@ -12,6 +12,7 @@ export const VOICE_MODELS: VoiceListing = {
   voices: [
     {
       id: 'es_AR-daniela-high',
+      engine: 'piper',
       directory: 'vits-piper-es_AR-daniela-high',
       fileName: 'es_AR-daniela-high.onnx',
       isDefault: true,
@@ -24,6 +25,7 @@ export const VOICE_MODELS: VoiceListing = {
     },
     {
       id: 'es_ES-carlfm-x-low',
+      engine: 'piper',
       directory: 'vits-piper-es_ES-carlfm-x-low',
       fileName: 'es_ES-carlfm-x-low.onnx',
       isDefault: false,

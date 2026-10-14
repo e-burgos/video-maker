@@ -12,6 +12,7 @@ function renderPage(client: Partial<RenderApiClient>) {
   const withDefaults: Partial<RenderApiClient> = {
     getProducerSettings: vi.fn().mockResolvedValue(producerSettings()),
     getOpenRouterModels: vi.fn().mockResolvedValue(openRouterModelsResult()),
+    getElevenLabsSettings: vi.fn().mockResolvedValue({ keyConfigured: false, voices: [] }),
     getYouTubeIntegration: vi.fn().mockResolvedValue({ clientConfigured: false, connected: false, channel: null }),
     ...client,
   };
@@ -172,5 +173,73 @@ describe('SettingsPage', () => {
     fireEvent.click(screen.getByTestId('settings-key-remove-accept'));
 
     await waitFor(() => expect(deleteOpenRouterKey).toHaveBeenCalledTimes(1));
+  });
+
+  describe('ElevenLabs voices', () => {
+    const lucia = { id: 'abc123', label: 'Lucia', description: 'Warm' };
+
+    it('loads the key and shows the plan the service reports', async () => {
+      const putElevenLabsKey = vi.fn().mockResolvedValue({ keyConfigured: true, tier: 'creator' });
+      const getElevenLabsSettings = vi
+        .fn()
+        .mockResolvedValueOnce({ keyConfigured: false, voices: [] })
+        .mockResolvedValue({ keyConfigured: true, voices: [] });
+      renderPage({ putElevenLabsKey, getElevenLabsSettings });
+
+      await waitFor(() => expect(screen.getByTestId('settings-elevenlabs-key-form')).toBeTruthy());
+      const input = screen.getByLabelText('ElevenLabs API key') as HTMLInputElement;
+      expect(input.type).toBe('password');
+      fireEvent.change(input, { target: { value: 'xi-secret' } });
+      fireEvent.click(screen.getByRole('button', { name: 'Save ElevenLabs key' }));
+
+      await waitFor(() => expect(putElevenLabsKey).toHaveBeenCalledWith('xi-secret'));
+      expect(input.value).toBe('');
+      await waitFor(() =>
+        expect(screen.getByTestId('settings-elevenlabs-key-loaded').textContent).toBe('Key loaded · creator plan'),
+      );
+    });
+
+    it('shows the service message when ElevenLabs rejects the key', async () => {
+      const putElevenLabsKey = vi
+        .fn()
+        .mockRejectedValue(new RenderApiError('VOICE_ENGINE_NOT_CONFIGURED', 'la key no es válida', 401, null));
+      renderPage({ putElevenLabsKey });
+
+      await waitFor(() => expect(screen.getByTestId('settings-elevenlabs-key-form')).toBeTruthy());
+      fireEvent.change(screen.getByLabelText('ElevenLabs API key'), { target: { value: 'bad' } });
+      fireEvent.click(screen.getByRole('button', { name: 'Save ElevenLabs key' }));
+
+      await waitFor(() => {
+        const alerts = screen.getAllByRole('alert').map((node) => node.textContent ?? '');
+        expect(alerts.some((text) => text.includes('VOICE_ENGINE_NOT_CONFIGURED') && text.includes('la key no es válida'))).toBe(true);
+      });
+    });
+
+    it('adds a voice by id and name and saves the whole list', async () => {
+      const putElevenLabsVoices = vi.fn().mockResolvedValue([lucia]);
+      renderPage({ putElevenLabsVoices });
+
+      await waitFor(() => expect(screen.getByLabelText('Voice ID')).toBeTruthy());
+      fireEvent.change(screen.getByLabelText('Voice ID'), { target: { value: 'abc123' } });
+      fireEvent.change(screen.getByLabelText('Voice name'), { target: { value: 'Lucia' } });
+      fireEvent.click(screen.getByRole('button', { name: 'Add voice' }));
+
+      await waitFor(() =>
+        expect(putElevenLabsVoices).toHaveBeenCalledWith([{ id: 'abc123', label: 'Lucia', description: '' }]),
+      );
+    });
+
+    it('removes a voice and saves the remaining list', async () => {
+      const putElevenLabsVoices = vi.fn().mockResolvedValue([]);
+      renderPage({
+        putElevenLabsVoices,
+        getElevenLabsSettings: vi.fn().mockResolvedValue({ keyConfigured: true, voices: [lucia] }),
+      });
+
+      await waitFor(() => expect(screen.getByTestId('settings-elevenlabs-voices').textContent).toContain('abc123'));
+      fireEvent.click(screen.getByRole('button', { name: 'Remove Lucia' }));
+
+      await waitFor(() => expect(putElevenLabsVoices).toHaveBeenCalledWith([]));
+    });
   });
 });

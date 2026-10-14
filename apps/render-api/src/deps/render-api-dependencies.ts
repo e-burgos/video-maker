@@ -196,6 +196,8 @@ export interface SynthesizeVoiceInput {
   readonly noiseScale?: number;
   readonly noiseScaleW?: number;
   readonly trailingPauseMs?: number;
+  readonly voiceId?: string;
+  readonly languageCode?: string;
   readonly projectRoot: string;
 }
 

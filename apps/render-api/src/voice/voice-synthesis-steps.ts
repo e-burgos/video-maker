@@ -11,6 +11,7 @@ import {
   VOICE_TRANSCRIPTION_CHANNELS,
   VOICE_TRANSCRIPTION_SAMPLE_RATE,
 } from './voice-format';
+import { isElevenLabsKeyConfigured, isElevenLabsVoiceId } from './elevenlabs-voice';
 import { whisperLanguageFor } from './voice-language';
 import {
   voiceDirectoryPath,
@@ -49,11 +50,31 @@ export async function runVoiceStage<T>(
   }
 }
 
+export const ELEVENLABS_VOICE_MODEL_PATH = '';
+
+export function elevenLabsVoiceModel(voiceId: string, lengthScale?: number): ResolvedVoiceModel {
+  return { id: voiceId, path: ELEVENLABS_VOICE_MODEL_PATH, ...(lengthScale === undefined ? {} : { lengthScale }) };
+}
+
+export function engineVoiceFields(
+  model: ResolvedVoiceModel,
+  language: string,
+): { voiceId?: string; languageCode?: string } {
+  return isElevenLabsVoiceId(model.id) ? { voiceId: model.id, languageCode: whisperLanguageFor(language) } : {};
+}
+
 export async function resolveVoiceModel(
   deps: RenderApiDependencies,
   voiceId: string | null,
   brandVoice: BrandVoice | null = null,
 ): Promise<ResolvedVoiceModel> {
+  if (voiceId !== null && isElevenLabsVoiceId(voiceId)) {
+    return elevenLabsVoiceModel(voiceId);
+  }
+  if (voiceId === null && brandVoice !== null && isElevenLabsVoiceId(brandVoice.id) && (await isElevenLabsKeyConfigured(deps))) {
+    return elevenLabsVoiceModel(brandVoice.id, brandVoice.lengthScale);
+  }
+
   const binaries = await deps.resolveVoiceBinaries();
   const voices = await deps.listVoiceModels();
 

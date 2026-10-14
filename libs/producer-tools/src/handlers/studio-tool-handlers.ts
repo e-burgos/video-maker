@@ -12,6 +12,7 @@ import type { RenderApiClient } from '../client/render-api-client';
 
 export const DEFAULT_WAIT_FOR_JOB_POLL_INTERVAL_MS = 2000;
 export const RECENT_JOBS_LIMIT = 5;
+export const ELEVENLABS_CREDITS_NOTE = 'usa créditos de ElevenLabs';
 
 const TERMINAL_JOB_STATES: ReadonlySet<string> = new Set(['succeeded', 'failed', 'canceled']);
 const PENDING_REVIEW_WAIT_MS = 180_000;
@@ -348,6 +349,8 @@ export function createStudioToolHandlers(
           language: voice.language.code,
           quality: voice.quality ?? 'unknown',
           description: voice.description,
+          engine: voice.engine ?? 'piper',
+          ...(voice.engine === 'elevenlabs' ? { note: ELEVENLABS_CREDITS_NOTE } : {}),
         })),
         defaultVoiceId,
       });

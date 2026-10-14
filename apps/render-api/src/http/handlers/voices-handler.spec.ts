@@ -24,6 +24,7 @@ describe('handleListVoices (US-09-003, US-016-001)', () => {
       [
         'description',
         'directory',
+        'engine',
         'fileName',
         'id',
         'isDefault',
@@ -35,6 +36,7 @@ describe('handleListVoices (US-09-003, US-016-001)', () => {
       [
         'description',
         'directory',
+        'engine',
         'fileName',
         'id',
         'isDefault',

@@ -82,6 +82,8 @@ const MESSAGE_BY_CODE: Readonly<Record<RenderApiErrorCode, string>> = {
   VOICE_ALREADY_EXISTS: 'A voice track already exists for one of the requested scenes.',
   VOICE_SCENE_NOT_FOUND: 'The requested scene is not part of the stored storyboard.',
   VOICE_ID_INVALID: 'The voice parameter is not a known voice model id.',
+  VOICE_ENGINE_NOT_CONFIGURED: 'The ElevenLabs voice engine has no valid API key stored in the keychain.',
+  VOICE_ENGINE_QUOTA_EXCEEDED: 'ElevenLabs refused the request because the account ran out of credits or hit its rate limit.',
   VOICE_SCENE_IDS_INVALID: 'The sceneIds parameter is not a non-empty array of scene ids.',
   VOICE_OVERWRITE_INVALID: 'The overwrite flag is not a boolean.',
   VOICE_ASSET_NOT_FOUND: 'The referenced locution file is not under the raw voice directory.',

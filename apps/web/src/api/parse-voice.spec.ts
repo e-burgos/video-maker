@@ -26,6 +26,7 @@ describe('parseVoiceListing', () => {
     expect(Object.keys(listing.voices[0] as object).sort()).toEqual([
       'description',
       'directory',
+      'engine',
       'fileName',
       'id',
       'isDefault',
@@ -43,6 +44,34 @@ describe('parseVoiceListing', () => {
     );
 
     expect(() => parseVoiceListing({ voices: [withoutLabel] })).toThrow();
+  });
+
+  it('requires the engine on every voice', () => {
+    const [first] = VOICE_MODELS.voices;
+    const withoutEngine = Object.fromEntries(
+      Object.entries(first as Record<string, unknown>).filter(([key]) => key !== 'engine'),
+    );
+
+    expectShapeRefusal(() => parseVoiceListing({ voices: [withoutEngine] }));
+    expectShapeRefusal(() => parseVoiceListing({ voices: [{ ...first, engine: 'azure' }] }));
+  });
+
+  it('accepts an elevenlabs voice without local model files', () => {
+    const listing = parseVoiceListing({
+      voices: [
+        {
+          id: 'elevenlabs:abc123',
+          engine: 'elevenlabs',
+          label: 'Lucia',
+          description: 'Warm',
+          language: { code: 'es', region: null },
+          isDefault: false,
+          previewUrl: '/voices/elevenlabs%3Aabc123/preview',
+        },
+      ],
+    });
+
+    expect(listing.voices[0]?.engine).toBe('elevenlabs');
   });
 
   it('rejects a quality the contract does not declare instead of rendering it raw', () => {

@@ -18,6 +18,7 @@ function tEs(key: TranslationKey, params?: TranslationParams): string {
 
 const DANIELA: VoiceModel = {
   id: 'es_AR-daniela-high',
+  engine: 'piper',
   directory: 'es_AR',
   fileName: 'es_AR-daniela-high.onnx',
   isDefault: true,

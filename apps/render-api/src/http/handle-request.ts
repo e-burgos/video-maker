@@ -92,6 +92,12 @@ import { handleApproveProposal, handleGetProposal, handlePutProposal } from './h
 import { handleGetVoiceDirection, handlePutVoiceDirection } from './handlers/voice-direction-handler';
 import { handleGetVoice, handlePutVoiceScene } from './handlers/voice-handler';
 import { handleGetVoicePreview } from './handlers/voice-preview-handler';
+import {
+  handleDeleteElevenLabsKey,
+  handleGetElevenLabsSettings,
+  handlePutElevenLabsKey,
+  handlePutElevenLabsVoices,
+} from './handlers/elevenlabs-settings-handler';
 import { handleListVoices } from './handlers/voices-handler';
 import {
   handleAddVideoToYoutubePlaylist,
@@ -382,6 +388,14 @@ async function dispatchRoute(
         return await handlePutOpenRouterKey(deps, request);
       case 'settings.producer.openrouterKey.delete':
         return await handleDeleteOpenRouterKey(deps);
+      case 'settings.voice.elevenlabs.get':
+        return await handleGetElevenLabsSettings(deps);
+      case 'settings.voice.elevenlabsKey.put':
+        return await handlePutElevenLabsKey(deps, request);
+      case 'settings.voice.elevenlabsKey.delete':
+        return await handleDeleteElevenLabsKey(deps);
+      case 'settings.voice.elevenlabsVoices.put':
+        return await handlePutElevenLabsVoices(deps, request);
       case 'projects.producer.get':
         return await handleGetProducer(deps, store, params, runtime);
       case 'projects.producer.messages':

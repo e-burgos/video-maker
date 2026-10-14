@@ -7,6 +7,7 @@ import { useRenderApi } from '../api/render-api-context';
 import { useApiAction } from '../hooks/use-api-action';
 import { useAsyncResource } from '../hooks/use-async-resource';
 import { useT } from '../i18n/language-context';
+import { ElevenLabsSettingsSection } from '../components/elevenlabs-settings-section';
 import { ErrorNotice } from '../components/error-notice';
 import { OpenRouterModelPicker } from '../components/openrouter-model-picker';
 import { YouTubeSettingsSection } from '../components/youtube-settings-section';
@@ -309,6 +310,8 @@ export function SettingsPage() {
           </div>
         </div>
       )}
+
+      <ElevenLabsSettingsSection />
 
       <YouTubeSettingsSection />
     </section>

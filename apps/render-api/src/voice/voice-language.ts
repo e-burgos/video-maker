@@ -1,3 +1,5 @@
+import { isElevenLabsVoiceId } from './elevenlabs-voice';
+
 const BCP47_PRIMARY_SUBTAG = /^[A-Za-z]{2,3}/u;
 const WHISPER_AUTO_LANGUAGE = 'auto';
 
@@ -11,6 +13,10 @@ export function whisperLanguageFor(languageTag: string): string {
 }
 
 export function voiceLanguageFromModelId(voiceModelId: string): string {
+  if (isElevenLabsVoiceId(voiceModelId)) {
+    return DEFAULT_VOICE_LANGUAGE;
+  }
+
   const match = VOICE_MODEL_LOCALE.exec(voiceModelId);
   if (match === null) {
     return DEFAULT_VOICE_LANGUAGE;

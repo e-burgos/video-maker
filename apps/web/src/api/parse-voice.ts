@@ -1,7 +1,9 @@
 import { isVoiceTrackSource } from './parse-render-job';
-import { VOICE_QUALITIES } from './render-api-types';
+import { VOICE_ENGINES, VOICE_QUALITIES } from './render-api-types';
 import { responseShapeUnexpected } from './render-api-error';
 import type {
+  ElevenLabsKeyResult,
+  ElevenLabsVoicesSettings,
   VoiceDocument,
   VoiceListing,
   VoiceManifest,
@@ -26,15 +28,23 @@ function isVoiceQuality(value: unknown): boolean {
   return value === null || (VOICE_QUALITIES as readonly unknown[]).includes(value);
 }
 
+function hasLocalModelFiles(value: Record<string, unknown>): boolean {
+  return (
+    value['engine'] !== 'piper' ||
+    (typeof value['directory'] === 'string' &&
+      typeof value['fileName'] === 'string' &&
+      isVoiceQuality(value['quality']))
+  );
+}
+
 function isVoiceModel(value: unknown): boolean {
   return (
     isRecord(value) &&
     typeof value['id'] === 'string' &&
-    typeof value['directory'] === 'string' &&
-    typeof value['fileName'] === 'string' &&
+    (VOICE_ENGINES as readonly unknown[]).includes(value['engine']) &&
+    hasLocalModelFiles(value) &&
     typeof value['isDefault'] === 'boolean' &&
     isVoiceLanguage(value['language']) &&
-    isVoiceQuality(value['quality']) &&
     typeof value['label'] === 'string' &&
     typeof value['description'] === 'string' &&
     typeof value['previewUrl'] === 'string'
@@ -111,4 +121,39 @@ export function parseVoiceSceneWriteResult(value: unknown): VoiceSceneWriteResul
   }
 
   return value as VoiceSceneWriteResult;
+}
+
+function isElevenLabsVoiceEntry(value: unknown): boolean {
+  return (
+    isRecord(value) &&
+    typeof value['id'] === 'string' &&
+    typeof value['label'] === 'string' &&
+    typeof value['description'] === 'string'
+  );
+}
+
+export function parseElevenLabsVoicesSettings(value: unknown): ElevenLabsVoicesSettings {
+  if (
+    !isRecord(value) ||
+    typeof value['keyConfigured'] !== 'boolean' ||
+    !Array.isArray(value['voices']) ||
+    !value['voices'].every(isElevenLabsVoiceEntry)
+  ) {
+    throw responseShapeUnexpected(200, 'elevenlabs voice settings');
+  }
+  return value as ElevenLabsVoicesSettings;
+}
+
+export function parseElevenLabsKeyResult(value: unknown): ElevenLabsKeyResult {
+  if (!isRecord(value) || typeof value['keyConfigured'] !== 'boolean' || typeof value['tier'] !== 'string') {
+    throw responseShapeUnexpected(200, 'an elevenlabs key result');
+  }
+  return value as ElevenLabsKeyResult;
+}
+
+export function parseElevenLabsVoicesWriteResult(value: unknown): { voices: ElevenLabsVoicesSettings['voices'] } {
+  if (!isRecord(value) || !Array.isArray(value['voices']) || !value['voices'].every(isElevenLabsVoiceEntry)) {
+    throw responseShapeUnexpected(200, 'an elevenlabs voices result');
+  }
+  return value as { voices: ElevenLabsVoicesSettings['voices'] };
 }

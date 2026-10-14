@@ -2,6 +2,7 @@ import { toAbsolutePath } from '@video-maker/auto-montage';
 import type { MediaProject } from '@video-maker/auto-montage';
 import {
   VOICE_SCRIPT_MANIFEST_SCHEMA_VERSION,
+  VOICE_SCRIPT_MIN_LENGTH_SCALE,
   hasVoiceDirection,
   hasVoiceScriptTimeMarks,
   parseVoiceScriptLines,
@@ -36,6 +37,7 @@ import type { VoiceScriptLineWords } from '../voice/transcribe-voice-script-line
 import { whisperLanguageFor } from '../voice/voice-language';
 import {
   ensureVoiceDirectories,
+  engineVoiceFields,
   resolveVoiceModel,
   synthesisLengthScale,
   runVoiceStage,
@@ -118,6 +120,7 @@ async function synthesizeLine(
   line: LineToSynthesize,
   lengthScale: number,
   model: ResolvedVoiceModel,
+  language: string,
   deps: RenderApiDependencies,
   project: MediaProject,
 ): Promise<SynthesizedLine> {
@@ -134,6 +137,7 @@ async function synthesizeLine(
     outPath: toAbsolutePath(project, wavPath),
     modelPath: model.path,
     projectRoot: project.root,
+    ...engineVoiceFields(model, language),
     ...(directedScale === 1 ? {} : { lengthScale: directedScale }),
     ...(noiseScale === undefined ? {} : { noiseScale }),
     ...(noiseScaleW === undefined ? {} : { noiseScaleW }),
@@ -202,10 +206,11 @@ function declaredWindowEndMs(
   return declaredEndMs > narrationEndMs ? declaredEndMs : null;
 }
 
-async function fitTimedLinesIntoTheirWindows(
+async function refitOverflowingLines(
   lines: readonly SynthesizedLine[],
   gapMs: number,
   model: ResolvedVoiceModel,
+  language: string,
   deps: RenderApiDependencies,
   project: MediaProject,
 ): Promise<readonly SynthesizedLine[]> {
@@ -213,16 +218,34 @@ async function fitTimedLinesIntoTheirWindows(
   const fitted: SynthesizedLine[] = [];
 
   for (const [position, line] of lines.entries()) {
-    const lengthScale = planned[position]?.lengthScale ?? 1;
+    const speedUp = planned[position]?.lengthScale ?? 1;
+    const lengthScale = Math.max(VOICE_SCRIPT_MIN_LENGTH_SCALE, Math.round(line.lengthScale * speedUp * 100) / 100);
     fitted.push(
-      lengthScale === 1
+      speedUp === 1 || lengthScale >= line.lengthScale
         ? line
         : await runVoiceStage('synthesize', voiceScriptLineId(line.index), () =>
-            synthesizeLine(line.index, line, lengthScale, model, deps, project),
+            synthesizeLine(line.index, line, lengthScale, model, language, deps, project),
           ),
     );
   }
 
+  return fitted;
+}
+
+const TIMED_FIT_PASSES = 2;
+
+async function fitTimedLinesIntoTheirWindows(
+  lines: readonly SynthesizedLine[],
+  gapMs: number,
+  model: ResolvedVoiceModel,
+  language: string,
+  deps: RenderApiDependencies,
+  project: MediaProject,
+): Promise<readonly SynthesizedLine[]> {
+  let fitted = lines;
+  for (let pass = 0; pass < TIMED_FIT_PASSES; pass += 1) {
+    fitted = await refitOverflowingLines(fitted, gapMs, model, language, deps, project);
+  }
   return fitted;
 }
 
@@ -253,7 +276,7 @@ export async function runVoiceScriptPipeline(
     voiceCheckpoint(observer, 'synthesize');
     synthesized.push(
       await runVoiceStage('synthesize', voiceScriptLineId(position + 1), () =>
-        synthesizeLine(position + 1, { ...line, ...directionOf(directions[String(position + 1)]) }, 1, model, deps, request.project),
+        synthesizeLine(position + 1, { ...line, ...directionOf(directions[String(position + 1)]) }, 1, model, language, deps, request.project),
       ),
     );
     observer.sceneProcessed('synthesize', synthesized.length, lines.length);
@@ -264,6 +287,7 @@ export async function runVoiceScriptPipeline(
         synthesized,
         request.gapMs,
         model,
+        language,
         deps,
         request.project,
       )

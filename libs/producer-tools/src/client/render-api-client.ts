@@ -76,6 +76,7 @@ export interface RenderApiVoice {
   readonly quality: string | null;
   readonly description: string;
   readonly isDefault: boolean;
+  readonly engine?: 'piper' | 'elevenlabs';
 }
 
 export interface RenderApiProbeResult {

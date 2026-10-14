@@ -85,7 +85,7 @@ function VoiceCard({
     }
   }
 
-  const qualityKey = voiceQualityKey(voice.quality);
+  const qualityKey = voiceQualityKey(voice.quality ?? null);
   const quality = qualityKey === null ? null : t(qualityKey);
 
   return (
@@ -117,6 +117,14 @@ function VoiceCard({
               {quality === null ? '' : ` · ${quality}`}
               {voice.isDefault ? ` · ${t('voicePicker.default')}` : ''}
             </span>
+            {voice.engine === 'elevenlabs' && (
+              <span
+                data-testid="voice-engine-badge"
+                className="mt-1 inline-block rounded-full border border-amber-500/40 bg-amber-500/10 px-2 py-0.5 font-mono text-[11px] text-amber-200"
+              >
+                {t('voicePicker.elevenlabsBadge')}
+              </span>
+            )}
           </span>
         </label>
 
