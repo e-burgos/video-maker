@@ -3729,6 +3729,29 @@
           }
         ]
       }
+    },
+    {
+      "id": "FIX-e-burgos-030",
+      "author": "e-burgos",
+      "spec_id": "spec-e-burgos-023-production-quality",
+      "fix_document": "sdd/fixes/fix-e-burgos-030.md",
+      "type": "IMPROVEMENT",
+      "severity": "medium",
+      "created_at": "2026-10-14",
+      "resolved_at": null,
+      "validated_at": null,
+      "title": "ElevenLabs como segundo motor de voz del estudio (Malena como voz de la marca Display Ads)",
+      "estimation_hours": 6,
+      "description": "El dueño eligió la voz Malena de ElevenLabs (plan Starter, uso comercial) frente a Daniela (Piper) y a un clon propio con Chatterbox. El estudio sólo sintetizaba con Piper local.",
+      "justification": "Decisión del dueño 2026-10-14 tras la comparación A/B; mejora de calidad de voz sin contratos externos nuevos fuera del estudio.",
+      "related_modules": [
+        "production-quality"
+      ],
+      "affected_files": [],
+      "test_reference": "",
+      "status": "in-progress",
+      "cycle": null,
+      "process_note": "Tanda D punto 14 (prueba de voz): Chatterbox descartado por el dueño; clonar Malena descartado por derechos de la locutora; plan Starter contratado por el dueño."
     }
   ]
 }
