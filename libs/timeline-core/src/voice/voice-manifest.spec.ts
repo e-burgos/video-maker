@@ -151,6 +151,14 @@ describe('merge del manifest (US-09-005, US-09-006)', () => {
     expect(isVoiceTrackStale(existing, `${NARRATION} Y algo más.`)).toBe(true);
   });
 
+  it('isVoiceTrackStale marca stale la pista cuando cambia el voiceId y no cuando es el mismo', () => {
+    const existing = track({ voiceId: 'es_AR-daniela-high' });
+
+    expect(isVoiceTrackStale(existing, NARRATION, undefined, 'es_AR-daniela-high')).toBe(false);
+    expect(isVoiceTrackStale(existing, NARRATION, undefined, 'elevenlabs:abc')).toBe(true);
+    expect(isVoiceTrackStale(existing, NARRATION)).toBe(false);
+  });
+
   it('la dirección entra al hash sólo cuando existe: sin dirección el hash es el de siempre y cambiarla vuelve la pista stale', () => {
     const existing = track();
     const direction = { pace: 'slow' as const };

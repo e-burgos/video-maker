@@ -20,6 +20,9 @@ import {
   parseProducerSettings,
 } from './parse-producer-settings';
 import {
+  parseElevenLabsKeyResult,
+  parseElevenLabsVoicesSettings,
+  parseElevenLabsVoicesWriteResult,
   parseVoiceDocument,
   parseVoiceListing,
   parseVoiceSceneWriteResult,
@@ -55,6 +58,9 @@ import type {
   Job,
   MontageJob,
   MontagePresetName,
+  ElevenLabsKeyResult,
+  ElevenLabsVoiceEntry,
+  ElevenLabsVoicesSettings,
   OpenRouterKeyResult,
   OpenRouterModelsResult,
   ProducerConversation,
@@ -218,6 +224,10 @@ export type RenderApiClient = {
   getOpenRouterModels: (query?: GetOpenRouterModelsQuery) => Promise<OpenRouterModelsResult>;
   putOpenRouterKey: (apiKey: string) => Promise<OpenRouterKeyResult>;
   deleteOpenRouterKey: () => Promise<OpenRouterKeyResult>;
+  getElevenLabsSettings: () => Promise<ElevenLabsVoicesSettings>;
+  putElevenLabsKey: (key: string) => Promise<ElevenLabsKeyResult>;
+  deleteElevenLabsKey: () => Promise<void>;
+  putElevenLabsVoices: (voices: ElevenLabsVoiceEntry[]) => Promise<ElevenLabsVoiceEntry[]>;
   listRenderJobs: (slug: string) => Promise<RenderJobListing>;
   getMotionBrands: () => Promise<MotionBrand[]>;
   getMotionBrief: (slug: string) => Promise<MotionBrief>;
@@ -949,6 +959,51 @@ export function createRenderApiClient(fetchImpl: FetchLike): RenderApiClient {
         (value) => isRecord(value),
       );
       return parseOpenRouterKeyResult(body);
+    },
+
+    async getElevenLabsSettings(): Promise<ElevenLabsVoicesSettings> {
+      const body = await requestJson(
+        '/settings/voice/elevenlabs',
+        undefined,
+        'elevenlabs voice settings',
+        (value) => isRecord(value),
+      );
+      return parseElevenLabsVoicesSettings(body);
+    },
+
+    async putElevenLabsKey(key: string): Promise<ElevenLabsKeyResult> {
+      const body = await requestJson(
+        '/settings/voice/elevenlabs-key',
+        {
+          method: 'PUT',
+          headers: { 'content-type': 'application/json' },
+          body: JSON.stringify({ key }),
+        },
+        'an elevenlabs key result',
+        (value) => isRecord(value),
+      );
+      return parseElevenLabsKeyResult(body);
+    },
+
+    async deleteElevenLabsKey(): Promise<void> {
+      const response = await send('/settings/voice/elevenlabs-key', { method: 'DELETE' });
+      if (!response.ok) {
+        throw fromErrorResponse(response.status, await readJson(response));
+      }
+    },
+
+    async putElevenLabsVoices(voices: ElevenLabsVoiceEntry[]): Promise<ElevenLabsVoiceEntry[]> {
+      const body = await requestJson(
+        '/settings/voice/elevenlabs-voices',
+        {
+          method: 'PUT',
+          headers: { 'content-type': 'application/json' },
+          body: JSON.stringify({ voices }),
+        },
+        'an elevenlabs voices result',
+        (value) => isRecord(value),
+      );
+      return parseElevenLabsVoicesWriteResult(body).voices;
     },
 
     async listRenderJobs(slug: string): Promise<RenderJobListing> {

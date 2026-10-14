@@ -23,6 +23,7 @@ import {
 import { selectVoiceScenes } from '../voice/select-voice-scenes';
 import {
   ensureVoiceDirectories,
+  engineVoiceFields,
   resolveVoiceModel,
   runVoiceStage,
   synthesisLengthScale,
@@ -55,6 +56,7 @@ interface SynthesizedScene {
 async function synthesizeScene(
   scene: StoryboardScene,
   model: ResolvedVoiceModel,
+  language: string,
   deps: RenderApiDependencies,
   project: MediaProject,
 ): Promise<SynthesizedScene> {
@@ -75,6 +77,7 @@ async function synthesizeScene(
     outPath: toAbsolutePath(project, sourceWavPath),
     modelPath: model.path,
     projectRoot: project.root,
+    ...engineVoiceFields(model, language),
     ...(directedScale === 1 ? {} : { lengthScale: directedScale }),
     ...(noiseScale === undefined ? {} : { noiseScale }),
     ...(noiseScaleW === undefined ? {} : { noiseScaleW }),
@@ -128,7 +131,7 @@ export async function runStoryboardVoicePipeline(
     voiceCheckpoint(observer, 'synthesize');
     synthesized.push(
       await runVoiceStage('synthesize', scene.id, () =>
-        synthesizeScene(scene, model, deps, request.project),
+        synthesizeScene(scene, model, document.language, deps, request.project),
       ),
     );
     observer.sceneProcessed('synthesize', synthesized.length, pending.length);

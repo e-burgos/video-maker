@@ -30,7 +30,7 @@ export function translateVoiceDescription(
   uiLanguage: string,
   t: TranslateFn,
 ): string {
-  if (uiLanguage === 'en') {
+  if (uiLanguage === 'en' || voice.engine === 'elevenlabs') {
     return voice.description;
   }
 
@@ -40,7 +40,7 @@ export function translateVoiceDescription(
   }
 
   const region = regionDisplayName(voice.language.region, uiLanguage);
-  const qualityKey = voiceQualityKey(voice.quality);
+  const qualityKey = voiceQualityKey(voice.quality ?? null);
   const quality = qualityKey === null ? t('voicePicker.qualityUnknown') : t(qualityKey);
 
   return t('voicePicker.descriptionTemplate', {

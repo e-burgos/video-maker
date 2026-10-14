@@ -336,6 +336,8 @@ const ListVoicesOutputSchema = z.strictObject({
       language: z.string(),
       quality: z.string(),
       description: z.string(),
+      engine: z.enum(['piper', 'elevenlabs']),
+      note: z.string().optional(),
     }),
   ),
   defaultVoiceId: z.string(),

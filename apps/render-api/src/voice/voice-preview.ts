@@ -3,6 +3,7 @@ import { join } from 'node:path/posix';
 import type { RenderApiDependencies } from '../deps/render-api-dependencies';
 import { PipelineStageError } from '../errors/pipeline-stage-error';
 import { translateVoiceError } from '../errors/translate-voice-error';
+import { isElevenLabsVoiceId, readConfiguredElevenLabsVoices } from './elevenlabs-voice';
 import { runVoiceStage } from './voice-synthesis-steps';
 
 export const VOICE_PREVIEW_PHRASE = 'Hola, soy la voz de tu video. Así sueno leyendo tu guion.';
@@ -35,10 +36,62 @@ async function modelModifiedAtMs(deps: RenderApiDependencies, modelPath: string)
   }
 }
 
+function previewFileStem(voiceId: string): string {
+  return voiceId.replace(/[^A-Za-z0-9_.-]/gu, '_');
+}
+
+async function buildElevenLabsVoicePreview(
+  deps: RenderApiDependencies,
+  voiceId: string,
+): Promise<VoicePreviewFile> {
+  if (!readConfiguredElevenLabsVoices(deps).some((voice) => voice.id === voiceId)) {
+    throw new PipelineStageError({
+      code: 'VOICE_NOT_FOUND',
+      stage: null,
+      resource: voiceId,
+      expected: 'a voice model id listed by GET /voices',
+    });
+  }
+
+  const cache = deps.voicePreviewCache;
+  const stem = previewFileStem(voiceId);
+  const wavPath = previewWavPath(cache.directory, stem);
+  const cached = await cache.stat(wavPath);
+  if (cached !== null && cached.sizeBytes > 0) {
+    return { path: wavPath, sizeBytes: cached.sizeBytes, fromCache: true };
+  }
+
+  const textPath = previewTextPath(cache.directory, stem);
+  await cache.ensureDirectory(cache.directory);
+  await cache.writeTextFile(textPath, `${VOICE_PREVIEW_PHRASE}\n`);
+  await deps.synthesizeVoice({
+    textPath,
+    outPath: wavPath,
+    modelPath: '',
+    voiceId,
+    projectRoot: cache.directory,
+  });
+
+  const written = await cache.stat(wavPath);
+  if (written === null || written.sizeBytes === 0) {
+    throw new PipelineStageError({
+      code: 'VOICE_SYNTHESIS_FAILED',
+      stage: 'synthesize',
+      resource: voiceId,
+      expected: 'a playable wav preview written to the preview cache',
+    });
+  }
+  return { path: wavPath, sizeBytes: written.sizeBytes, fromCache: false };
+}
+
 export async function buildVoicePreview(
   deps: RenderApiDependencies,
   requestedVoiceId: string,
 ): Promise<VoicePreviewFile> {
+  if (isElevenLabsVoiceId(requestedVoiceId)) {
+    return buildElevenLabsVoicePreview(deps, requestedVoiceId);
+  }
+
   const voices = await runVoicesLookup(deps);
   const voice = voices.find((candidate) => candidate.id === requestedVoiceId);
 

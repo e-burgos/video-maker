@@ -531,6 +531,7 @@ describe('createStudioToolHandlers', () => {
       listVoices: async () => ({
         voices: [
           { id: 'a', label: 'A', language: { code: 'es-AR', region: 'AR' }, quality: 'high', description: 'd', isDefault: true },
+          { id: 'elevenlabs:x', label: 'X', language: { code: 'es', region: null }, quality: null, description: 'e', isDefault: false, engine: 'elevenlabs' },
         ],
         defaultVoiceId: 'a',
       }),
@@ -539,7 +540,18 @@ describe('createStudioToolHandlers', () => {
     const result = await handlers.list_voices({});
 
     expect(result.data).toEqual({
-      voices: [{ id: 'a', label: 'A', language: 'es-AR', quality: 'high', description: 'd' }],
+      voices: [
+        { id: 'a', label: 'A', language: 'es-AR', quality: 'high', description: 'd', engine: 'piper' },
+        {
+          id: 'elevenlabs:x',
+          label: 'X',
+          language: 'es',
+          quality: 'unknown',
+          description: 'e',
+          engine: 'elevenlabs',
+          note: 'usa créditos de ElevenLabs',
+        },
+      ],
       defaultVoiceId: 'a',
     });
   });

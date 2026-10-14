@@ -41,7 +41,8 @@ const TOOL_DESCRIPTIONS: Readonly<Record<StudioToolName, string>> = {
   probe_media:
     "measure a media file already in the project: duration, video width/height/fps/frame count/codec/alpha, audio channels/sample rate/codec.",
   extract_frames: 'pull up to 12 still frames from a video at chosen timestamps and see them.',
-  list_voices: 'the text-to-speech voices you can offer the user, with the default one marked.',
+  list_voices:
+    'the text-to-speech voices you can offer the user, with the default one marked; prefer the brand voice, and ElevenLabs voices (`engine: elevenlabs`) spend paid credits, so never re-synthesize without a change.',
   read_project_text: 'read a small text, markdown, JSON or SRT file already in the project.',
   write_project_text: "write a text file under this project's working area.",
   copy_asset: "copy a file already in the project into its raw material under a role, without touching the original.",

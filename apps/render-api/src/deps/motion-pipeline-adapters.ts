@@ -6,6 +6,7 @@ import { MotionStudioError } from '@video-maker/motion-graphics';
 import type { MotionPipelinePorts } from '@video-maker/motion-graphics';
 
 import { PipelineStageError } from '../errors/pipeline-stage-error';
+import { isElevenLabsVoiceId } from '../voice/elevenlabs-voice';
 import type { MotionBrandDocument, MotionBrandSource, RenderApiDependencies } from './render-api-dependencies';
 
 const TRANSCRIPTION_LANGUAGE = 'es';
@@ -61,9 +62,12 @@ export function createMotionPipelinePorts(deps: RenderApiDependencies, assetsRoo
     },
     removeFile: (path) => rm(path, { force: true }),
     synthesize: async ({ text, voice, lengthScale, outPath, noiseScale, noiseScaleW, trailingPauseMs }) => {
-      const [{ ttsVoicesDir }, models] = await Promise.all([deps.resolveVoiceBinaries(), deps.listVoiceModels()]);
-      const model = models.find((candidate) => candidate.id === voice);
-      if (model === undefined) {
+      const elevenLabs = isElevenLabsVoiceId(voice);
+      const [{ ttsVoicesDir }, models] = elevenLabs
+        ? [{ ttsVoicesDir: '' }, []]
+        : await Promise.all([deps.resolveVoiceBinaries(), deps.listVoiceModels()]);
+      const model = elevenLabs ? undefined : models.find((candidate) => candidate.id === voice);
+      if (!elevenLabs && model === undefined) {
         throw new PipelineStageError({
           code: 'VOICE_ASSET_NOT_FOUND',
           stage: null,
@@ -77,7 +81,8 @@ export function createMotionPipelinePorts(deps: RenderApiDependencies, assetsRoo
       await deps.synthesizeVoice({
         textPath,
         outPath,
-        modelPath: join(ttsVoicesDir, model.directory),
+        modelPath: model === undefined ? '' : join(ttsVoicesDir, model.directory),
+        ...(elevenLabs ? { voiceId: voice } : {}),
         lengthScale,
         ...(noiseScale === undefined ? {} : { noiseScale }),
         ...(noiseScaleW === undefined ? {} : { noiseScaleW }),

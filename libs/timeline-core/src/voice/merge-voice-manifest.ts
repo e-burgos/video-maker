@@ -6,8 +6,14 @@ export function findVoiceTrack(manifest: VoiceManifest, sceneId: string): VoiceT
   return manifest.tracks.find((track) => track.sceneId === sceneId) ?? null;
 }
 
-export function isVoiceTrackStale(track: VoiceTrack, narration: string, direction?: VoiceDirection): boolean {
-  return track.narrationHash !== hashDirectedNarration(narration, direction);
+export function isVoiceTrackStale(
+  track: VoiceTrack,
+  narration: string,
+  direction?: VoiceDirection,
+  voiceId?: string,
+): boolean {
+  const voiceChanged = voiceId !== undefined && track.voiceId !== null && track.voiceId !== voiceId;
+  return voiceChanged || track.narrationHash !== hashDirectedNarration(narration, direction);
 }
 
 export function upsertVoiceTrack(manifest: VoiceManifest, track: VoiceTrack): VoiceManifest {

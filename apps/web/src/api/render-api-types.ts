@@ -526,16 +526,37 @@ export type VoiceLanguage = {
   region: string | null;
 };
 
+export const VOICE_ENGINES = ['piper', 'elevenlabs'] as const;
+
+export type VoiceEngineId = (typeof VOICE_ENGINES)[number];
+
 export type VoiceModel = {
   id: string;
-  directory: string;
-  fileName: string;
+  engine: VoiceEngineId;
+  directory?: string;
+  fileName?: string;
   isDefault: boolean;
   language: VoiceLanguage;
-  quality: VoiceQuality | null;
+  quality?: VoiceQuality | null;
   label: string;
   description: string;
   previewUrl: string;
+};
+
+export type ElevenLabsVoiceEntry = {
+  id: string;
+  label: string;
+  description: string;
+};
+
+export type ElevenLabsVoicesSettings = {
+  keyConfigured: boolean;
+  voices: ElevenLabsVoiceEntry[];
+};
+
+export type ElevenLabsKeyResult = {
+  keyConfigured: boolean;
+  tier: string;
 };
 
 export type VoiceListing = {

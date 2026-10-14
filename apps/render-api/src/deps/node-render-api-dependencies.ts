@@ -17,7 +17,7 @@ import {
   writeFile,
 } from 'node:fs/promises';
 import { createHash, randomUUID } from 'node:crypto';
-import { tmpdir } from 'node:os';
+import { homedir, tmpdir } from 'node:os';
 import { dirname, isAbsolute, join, relative } from 'node:path/posix';
 import { Readable } from 'node:stream';
 import type { ReadableStream as NodeReadableStreamWeb } from 'node:stream/web';
@@ -49,6 +49,9 @@ import { readProducerConfig } from '../config/producer-config';
 import { readRemotionConfig } from '../config/remotion-config';
 import { readServerConfig } from '../config/server-config';
 import { readVoicePreviewConfig } from '../config/voice-preview-config';
+import { readElevenLabsCacheDirectory } from '../config/voice-synthesis-cache-config';
+import { createNodeElevenLabsSynthesizer } from '../voice/node-elevenlabs-synthesizer';
+import { createVoiceSynthesisDispatcher } from '../voice/synthesize-voice-dispatch';
 import { createClaudeCodeProducerAgent } from '../producer/claude-code-producer-agent';
 import { createOpenRouterModelCatalog } from '../producer/openrouter-model-catalog';
 import type { SpawnedProducerProcess, SpawnProducerProcessInput } from '../producer/producer-agent';
@@ -66,7 +69,13 @@ import {
 import type { CommandRunner, ResolvedVoiceBinaries } from '@video-maker/media-local';
 
 import type { ByteRange, ObjectStorage, WriteTemporaryInput, WriteTemporaryOutcome } from './object-storage';
-import type { AiAgentPort, LocalStorePort, RenderApiDependencies, VoicePreviewCache } from './render-api-dependencies';
+import type {
+  AiAgentPort,
+  LocalStorePort,
+  RenderApiDependencies,
+  SynthesizeVoicePort,
+  VoicePreviewCache,
+} from './render-api-dependencies';
 
 const HYPERFRAMES_TIMEOUT_MS = 3 * 60 * 60 * 1000;
 const HYPERFRAMES_PASSTHROUGH_KEYS = ['REMOTION_BROWSER_EXECUTABLE', HYPERFRAMES_RESOLVE_FROM_ENV_VAR] as const;
@@ -499,6 +508,49 @@ export function createNodeRenderApiDependencies(
     return writableRemotionServeUrl;
   };
 
+  const synthesizePiperVoice: SynthesizeVoicePort = async ({ textPath, outPath, modelPath: voiceDirPath, lengthScale, noiseScale, noiseScaleW, trailingPauseMs, projectRoot }) => {
+    const { synthesizeSpeech, VOICE_ESPEAK_DATA_DIR_NAME, VOICE_TOKENS_FILE_NAME } = await loadMediaLocal();
+    const [{ ttsCli }, runner] = await Promise.all([loadVoiceBinaries(), loadCommandRunner()]);
+    const voicesDirectory = dirname(voiceDirPath);
+    const ownDataDirPath = join(voiceDirPath, VOICE_ESPEAK_DATA_DIR_NAME);
+    const dataDirPath = (await directoryExists(ownDataDirPath))
+      ? ownDataDirPath
+      : join(voicesDirectory, VOICE_ESPEAK_DATA_DIR_NAME);
+    const onnxFileName = await findOnnxFileName(voiceDirPath);
+
+    await synthesizeSpeech(
+      outPath,
+      {
+        modelPath: join(voiceDirPath, onnxFileName),
+        tokensPath: join(voiceDirPath, VOICE_TOKENS_FILE_NAME),
+        dataDirPath,
+        textPath,
+        ttsPath: ttsCli,
+        runOptions: { cwd: projectRoot },
+        ...(lengthScale === undefined ? {} : { lengthScale }),
+        ...(noiseScale === undefined ? {} : { noiseScale }),
+        ...(noiseScaleW === undefined ? {} : { noiseScaleW }),
+        ...(trailingPauseMs === undefined ? {} : { trailingPauseMs, ffmpegPath: (await loadBinaries()).ffmpeg }),
+      },
+      runner,
+    );
+  };
+
+  const synthesizeVoiceByEngine = createVoiceSynthesisDispatcher({
+    piper: synthesizePiperVoice,
+    elevenlabs: createNodeElevenLabsSynthesizer({
+      fetchRemote: (url, init) => deps.fetchRemote(url, init),
+      readSecret: (name) => secretStore.get(name),
+      cacheDirectory: readElevenLabsCacheDirectory(env, homedir()),
+      ffmpegPath: async () => (await loadBinaries()).ffmpeg,
+      commandRunner: loadCommandRunner,
+      appendSilence: async (inputPath, outPath, silenceMs, ffmpegPath, runner) => {
+        const { appendTrailingSilence } = await loadMediaLocal();
+        await appendTrailingSilence(inputPath, outPath, { silenceMs, ffmpegPath }, runner);
+      },
+    }),
+  });
+
   const deps: RenderApiDependencies = {
     renderMutedVideo: async ({ timeline, outPath, publicDir, sampleSeconds, onProgress }) => {
       const { renderTimeline } = await loadRender();
@@ -738,33 +790,7 @@ export function createNodeRenderApiDependencies(
       return buildVoiceCatalog(files);
     },
 
-    synthesizeVoice: async ({ textPath, outPath, modelPath: voiceDirPath, lengthScale, noiseScale, noiseScaleW, trailingPauseMs, projectRoot }) => {
-      const { synthesizeSpeech, VOICE_ESPEAK_DATA_DIR_NAME, VOICE_TOKENS_FILE_NAME } = await loadMediaLocal();
-      const [{ ttsCli }, runner] = await Promise.all([loadVoiceBinaries(), loadCommandRunner()]);
-      const voicesDirectory = dirname(voiceDirPath);
-      const ownDataDirPath = join(voiceDirPath, VOICE_ESPEAK_DATA_DIR_NAME);
-      const dataDirPath = (await directoryExists(ownDataDirPath))
-        ? ownDataDirPath
-        : join(voicesDirectory, VOICE_ESPEAK_DATA_DIR_NAME);
-      const onnxFileName = await findOnnxFileName(voiceDirPath);
-
-      await synthesizeSpeech(
-        outPath,
-        {
-          modelPath: join(voiceDirPath, onnxFileName),
-          tokensPath: join(voiceDirPath, VOICE_TOKENS_FILE_NAME),
-          dataDirPath,
-          textPath,
-          ttsPath: ttsCli,
-          runOptions: { cwd: projectRoot },
-          ...(lengthScale === undefined ? {} : { lengthScale }),
-          ...(noiseScale === undefined ? {} : { noiseScale }),
-          ...(noiseScaleW === undefined ? {} : { noiseScaleW }),
-          ...(trailingPauseMs === undefined ? {} : { trailingPauseMs, ffmpegPath: (await loadBinaries()).ffmpeg }),
-        },
-        runner,
-      );
-    },
+    synthesizeVoice: (input) => synthesizeVoiceByEngine(input),
 
     extractVoiceAudio: async ({ inputPath, outPath, sampleRate, channels, projectRoot }) => {
       const { extractAudioForTranscription } = await loadMediaLocal();

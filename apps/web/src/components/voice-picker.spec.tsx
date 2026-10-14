@@ -8,6 +8,7 @@ import type { VoiceModel } from '../api/render-api-types';
 
 const DANIELA: VoiceModel = {
   id: 'es_AR-daniela-high',
+  engine: 'piper',
   fileName: 'es_AR-daniela-high.onnx',
   isDefault: true,
   language: { code: 'es-AR', region: 'AR' },
@@ -19,6 +20,7 @@ const DANIELA: VoiceModel = {
 
 const DAVEFX: VoiceModel = {
   id: 'es_ES-davefx-medium',
+  engine: 'piper',
   fileName: 'es_ES-davefx-medium.onnx',
   isDefault: false,
   language: { code: 'es-ES', region: 'ES' },
@@ -63,7 +65,27 @@ beforeEach(() => {
 
 afterEach(cleanup);
 
+const LUCIA: VoiceModel = {
+  id: 'elevenlabs:abc123',
+  engine: 'elevenlabs',
+  isDefault: false,
+  language: { code: 'es', region: null },
+  label: 'Lucia',
+  description: 'Warm narrator',
+  previewUrl: '/voices/elevenlabs%3Aabc123/preview',
+};
+
 describe('VoicePicker (US-016-003)', () => {
+  it('badges ElevenLabs voices as credit-consuming and keeps their preview source', () => {
+    render(<VoicePicker voices={[DANIELA, LUCIA]} selectedId={DANIELA.id} onSelect={() => undefined} />);
+
+    expect(cardOf(LUCIA.id).querySelector('[data-testid="voice-engine-badge"]')?.textContent).toBe(
+      'ElevenLabs · uses credits',
+    );
+    expect(cardOf(DANIELA.id).querySelector('[data-testid="voice-engine-badge"]')).toBeNull();
+    expect(audioOf(LUCIA.id).getAttribute('src')).toContain('/voices/elevenlabs%3Aabc123/preview');
+  });
+
   it('renders one card per installed voice with its label, language, quality and description', () => {
     render(<VoicePicker voices={VOICES} selectedId={DANIELA.id} onSelect={() => undefined} />);
 
