@@ -3937,6 +3937,56 @@
           }
         ]
       }
+    },
+    {
+      "id": "FIX-e-burgos-032",
+      "author": "e-burgos",
+      "spec_id": "spec-e-burgos-023-production-quality",
+      "fix_document": "sdd/fixes/fix-e-burgos-032.md",
+      "type": "IMPROVEMENT",
+      "severity": "low",
+      "created_at": "2026-10-14",
+      "resolved_at": "2026-10-14",
+      "validated_at": null,
+      "title": "Malena es la voz por defecto del estudio cuando hay key de ElevenLabs",
+      "estimation_hours": 1,
+      "description": "El dueño pidió aplicar Malena a todos los videos; sin voz elegida ni voz de marca el estudio seguía usando Daniela.",
+      "justification": "Pedido explícito del dueño 2026-10-14 tras escuchar las pruebas; sin contratos nuevos.",
+      "related_modules": [
+        "production-quality"
+      ],
+      "affected_files": [
+        "apps/render-api/src/voice/elevenlabs-voice.ts",
+        "apps/render-api/src/voice/voice-synthesis-steps.ts",
+        "apps/render-api/src/http/handlers/voices-handler.ts",
+        "apps/render-api/src/voice/synthesize-voice-dispatch.spec.ts",
+        "apps/render-api/src/http/handlers/elevenlabs-settings-handler.spec.ts"
+      ],
+      "test_reference": "render-api (2255) y producer-tools lint/test verde: con key, GET /voices marca a Malena como única voz por defecto y resolveVoiceModel(null) la elige; sin key, Daniela.",
+      "status": "implemented",
+      "cycle": null,
+      "process_note": "Fuera del repo, la receta tutorial.sh usa Malena por defecto (VOICE).",
+      "usage": {
+        "provider_model": "claude/opus",
+        "effort": "high",
+        "tokens_in": 15000,
+        "tokens_out": 2500,
+        "approx": true,
+        "source": "declared-estimate",
+        "recorded_at": "2026-10-14",
+        "by_agent": [
+          {
+            "agent": "orchestrator",
+            "provider_model": "claude/opus",
+            "effort": "high",
+            "tokens_in": 15000,
+            "tokens_out": 2500,
+            "approx": true,
+            "source": "declared-estimate",
+            "recorded_at": "2026-10-14"
+          }
+        ]
+      }
     }
   ]
 }

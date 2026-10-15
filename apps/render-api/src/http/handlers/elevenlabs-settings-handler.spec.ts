@@ -137,9 +137,11 @@ describe('GET /voices with ElevenLabs', () => {
     ]);
     expect(eleven[0]).toMatchObject({
       id: 'elevenlabs:p7AwDmKvTdoHTBuueGvP',
-      isDefault: false,
+      isDefault: true,
       language: { code: 'es', region: null },
       previewUrl: '/voices/elevenlabs%3Ap7AwDmKvTdoHTBuueGvP/preview',
     });
+    expect(withKey.voices.filter((voice) => voice.isDefault).map((voice) => voice.id)).toEqual(['elevenlabs:p7AwDmKvTdoHTBuueGvP']);
+    expect(without.voices.some((voice) => voice.isDefault)).toBe(true);
   });
 });

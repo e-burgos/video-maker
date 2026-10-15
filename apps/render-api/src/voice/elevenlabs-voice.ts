@@ -54,3 +54,10 @@ export function readConfiguredElevenLabsVoices(deps: RenderApiDependencies): rea
 export async function isElevenLabsKeyConfigured(deps: RenderApiDependencies): Promise<boolean> {
   return (await deps.secretStore.get(ELEVENLABS_SECRET_NAME)) !== null;
 }
+
+export async function defaultElevenLabsVoiceId(deps: RenderApiDependencies): Promise<string | null> {
+  if (!(await isElevenLabsKeyConfigured(deps))) {
+    return null;
+  }
+  return readConfiguredElevenLabsVoices(deps)[0]?.id ?? null;
+}
