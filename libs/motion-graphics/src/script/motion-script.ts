@@ -11,6 +11,7 @@ export interface MotionScene {
   minBars: number;
   minSec?: number;
   anchor: number | null;
+  voLeadIn?: number;
   direction?: VoiceDirection;
 }
 
@@ -67,6 +68,8 @@ function parseScene(raw: unknown, index: number): MotionScene {
   if (minBars <= 0) fail(`scenes[${index}].minBars must be positive`);
   const minSec = scene['minSec'] === undefined ? undefined : asNumber(scene['minSec'], `scenes[${index}].minSec`);
   if (minSec !== undefined && minSec <= 0) fail(`scenes[${index}].minSec must be positive`);
+  const voLeadIn = scene['voLeadIn'] === undefined ? undefined : asNumber(scene['voLeadIn'], `scenes[${index}].voLeadIn`);
+  if (voLeadIn !== undefined && voLeadIn < 0) fail(`scenes[${index}].voLeadIn must not be negative`);
   const anchor = scene['anchor'] === undefined ? null : asNumber(scene['anchor'], `scenes[${index}].anchor`);
   return {
     id,
@@ -74,6 +77,7 @@ function parseScene(raw: unknown, index: number): MotionScene {
     minBars,
     ...(minSec === undefined ? {} : { minSec }),
     anchor,
+    ...(voLeadIn === undefined ? {} : { voLeadIn }),
     ...parseDirection(scene['direction'], `scenes[${index}].direction`),
   };
 }

@@ -5,6 +5,7 @@ import { basename, dirname, join, resolve } from 'node:path';
 import {
   DEFAULT_VOICE_TARGET,
   ExecaCommandRunner,
+  measureLoudness,
   normalizeAudioLoudness,
   normalizeVideoMasterLoudness,
   resolveBinaries,
@@ -119,6 +120,10 @@ export function createNodeMotionDependencies(env: NodeJS.ProcessEnv, workspaceRo
       );
       await hyperframes(['beats', '.', '--json'], dir);
       return readFile(join(dir, 'beats', 'music.mp3.json'), 'utf8');
+    },
+    measureLoudness: async (wavPath) => {
+      const ffmpeg = await resolveBinary('ffmpeg', env);
+      return (await measureLoudness(wavPath, runner, { ffmpegPath: ffmpeg })).integratedLufs;
     },
     trimAudio: async ({ from, to, durationSec, targetLufs }) => {
       const ffmpeg = await resolveBinary('ffmpeg', env);

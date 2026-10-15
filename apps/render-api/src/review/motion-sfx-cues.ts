@@ -4,6 +4,7 @@ export interface MotionSfxCue extends SecondsRange {
   readonly src: string;
   readonly mediaStartSec: number;
   readonly volume: number;
+  readonly automation: readonly { readonly t: number; readonly v: number }[];
 }
 
 const SFX_AUDIO_TAG = /<audio\b[^>]*\bid="sfx-[^"]*"[^>]*>/gu;
@@ -17,6 +18,21 @@ function numberAttribute(tag: string, name: string, fallback: number): number {
   return attributeOf(tag, name) === null || !Number.isFinite(value) ? fallback : value;
 }
 
+const AUTOMATION_ATTRIBUTE = /\bdata-automation='([^']*)'/u;
+
+function volumeAutomationOf(tag: string): MotionSfxCue['automation'] {
+  const raw = AUTOMATION_ATTRIBUTE.exec(tag)?.[1];
+  if (raw === undefined) {
+    return [];
+  }
+  try {
+    const lanes = (JSON.parse(raw) as { lanes?: { target: string; points: { t: number; v: number }[] }[] }).lanes ?? [];
+    return lanes.find((lane) => lane.target === 'volume')?.points ?? [];
+  } catch {
+    return [];
+  }
+}
+
 function cueOf(tag: string): MotionSfxCue | null {
   const src = attributeOf(tag, 'src');
   const startSec = numberAttribute(tag, 'data-start', 0);
@@ -24,7 +40,7 @@ function cueOf(tag: string): MotionSfxCue | null {
   const volume = numberAttribute(tag, 'data-volume', 1);
   return src === null || durationSec <= 0 || volume <= 0
     ? null
-    : { src, startSec, endSec: startSec + durationSec, mediaStartSec: numberAttribute(tag, 'data-media-start', 0), volume };
+    : { src, startSec, endSec: startSec + durationSec, mediaStartSec: numberAttribute(tag, 'data-media-start', 0), volume, automation: volumeAutomationOf(tag) };
 }
 
 export function parseMotionSfxCues(html: string): MotionSfxCue[] {

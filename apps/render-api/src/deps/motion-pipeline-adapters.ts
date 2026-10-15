@@ -114,6 +114,10 @@ export function createMotionPipelinePorts(deps: RenderApiDependencies, assetsRoo
       await hyperframes(['beats', '.', '--json'], directory);
       return readFile(join(directory, 'beats', 'music.mp3.json'), 'utf8');
     },
+    measureLoudness: async (wavPath) => {
+      const [{ ffmpeg }, runner, { measureLoudness }] = await Promise.all([deps.resolveMontageBinaries(), deps.createCommandRunner(), import('@video-maker/media-local')]);
+      return (await measureLoudness(wavPath, runner, { ffmpegPath: ffmpeg })).integratedLufs;
+    },
     trimAudio: async ({ from, to, durationSec, targetLufs }) => {
       const [{ ffmpeg }, runner] = await Promise.all([deps.resolveMontageBinaries(), deps.createCommandRunner()]);
       await mkdir(dirname(to), { recursive: true });

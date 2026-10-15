@@ -39,6 +39,7 @@ describe('composeStoryboard', () => {
     expect(template).toContain('data-width="1920" data-height="1080"');
     expect(template).toContain('{{music_track}}');
     expect(template).toContain('id="sfx-impact"');
+    expect(template).toContain('data-volume="0.8" data-automation=');
     expect(template).not.toContain('{{music_credit}}');
   });
 

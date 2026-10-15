@@ -43,6 +43,7 @@ function unreadablePorts(): MotionPipelinePorts {
     synthesize: fail,
     transcribe: fail,
     detectBeats: fail,
+    measureLoudness: fail,
     trimAudio: fail,
     render: fail,
     askAgent: fail,

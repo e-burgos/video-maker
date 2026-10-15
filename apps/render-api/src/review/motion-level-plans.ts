@@ -50,6 +50,12 @@ export function effectiveMotionMusicGainDb(timeline: MotionReviewTimeline, segme
   return meanPowerDb(volumes);
 }
 
+function effectiveSfxGainDb(cue: MotionSfxCue, startSec: number, endSec: number): number {
+  return meanPowerDb(
+    sampleTimes(startSec, endSec).map((second) => cue.volume * (cue.automation.length === 0 ? 1 : volumeAt(cue.automation, second - cue.startSec))),
+  );
+}
+
 const MIN_SFX_OVERLAP_SEC = 0.05;
 
 function sfxSlicesWithin(cues: readonly MotionSfxCue[], segment: SecondsRange, workDirectory: string): SfxSlice[] {
@@ -64,7 +70,7 @@ function sfxSlicesWithin(cues: readonly MotionSfxCue[], segment: SecondsRange, w
             startSec: cue.mediaStartSec + startSec - cue.startSec,
             endSec: cue.mediaStartSec + endSec - cue.startSec,
           },
-          gainDb: 20 * Math.log10(cue.volume),
+          gainDb: effectiveSfxGainDb(cue, startSec, endSec),
         }];
   });
 }

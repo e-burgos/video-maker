@@ -18,6 +18,12 @@ describe('layoutScenes', () => {
     expect(slotAt(slots, 0).voStart).toBe(0.25);
   });
 
+  it('starts the voice of a scene after its own lead-in instead of the default one', () => {
+    const slots = layoutScenes([scene('a'), { ...scene('b'), voLeadIn: 0.8 }], [2, 2], { beatSync: false, beats: [] });
+    expect(slotAt(slots, 0).voStart).toBe(0.25);
+    expect(slotAt(slots, 1).voStart).toBeCloseTo(slotAt(slots, 0).end + 0.8, 3);
+  });
+
   it('keeps a scene at least minBars long and never cuts the voice', () => {
     const slot = slotAt(layoutScenes([scene('a', 3)], [1], { beatSync: true, beats }), 0);
     expect(slot.end - slot.start).toBeGreaterThanOrEqual(6 - 1e-6);

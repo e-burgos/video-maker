@@ -224,7 +224,7 @@ export const MotionStoryboardSchema = z
     music: z
       .strictObject({
         track: Text,
-        volume: z.number().min(0.05).max(1).describe('Music level from 0.05 (barely audible) to 1 (loud); default 0.5. Lower it when the user says the music is too loud').optional(),
+        volume: z.number().min(0.05).max(1).describe('Legacy music level; the real level is calibrated automatically (about -27 LUFS without voice, 14.5 dB lower under the voice) and this value does not change it').optional(),
         mode: z.enum(['bed', 'segments']).describe('bed (default): the music runs under the voice, ducked while it speaks. segments: the music plays full in the intro, the outro and the voice-free gaps of 2 s or more, with 0.6 s fades, and drops to a very low floor while the voice speaks').optional(),
         floorDb: z.number().min(-60).max(-6).describe('Only with mode segments: dB below the full music level while the voice speaks; default -30').optional(),
       })
