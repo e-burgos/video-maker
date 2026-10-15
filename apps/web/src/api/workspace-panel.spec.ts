@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest';
 
 import { assetEntry, assetListing, jobListing, pendingJob, renderJobSummary, succeededJob } from './__fixtures__/workspace';
 import {
-  fullRenderJobsNewestFirst,
+  renderDeliveriesNewestFirst,
   groupAssetsByRole,
   latestSucceededJobOfKind,
   succeededJobsOfKindNewestFirst,
@@ -112,43 +112,62 @@ describe('tabForNewlySucceededJob', () => {
   });
 });
 
-describe('fullRenderJobsNewestFirst', () => {
+describe('renderDeliveriesNewestFirst', () => {
   const listing = jobListing([
     succeededJob('render', 'job-0001', '2026-09-10T10:00:00.000Z'),
     succeededJob('render', 'job-0002', '2026-09-10T11:00:00.000Z'),
   ]);
+  const file = (path: string, modifiedAtMs: number, sample = false) => ({ path, sizeBytes: 1, modifiedAtMs, sample });
+  const generated = (...files: ReturnType<typeof file>[]) => ({ slug: 'demo-01', roots: ['out'], files });
 
   it('keeps every succeeded render when the generated listing is not known yet', () => {
-    expect(fullRenderJobsNewestFirst(listing, null).map((job) => job.id)).toEqual(['job-0002', 'job-0001']);
+    expect(renderDeliveriesNewestFirst(listing, null).map((d) => d.path)).toEqual([
+      'out/job-0002.mp4',
+      'out/job-0001.mp4',
+    ]);
   });
 
-  it('drops renders flagged as samples even when their file has a regular name', () => {
+  it('includes a file without a known job and puts the newest file first', () => {
+    const result = renderDeliveriesNewestFirst(
+      listing,
+      generated(file('out/job-0001.mp4', 10), file('out/job-0002.mp4', 20), file('out/external.mp4', 30)),
+    );
+
+    expect(result.map((d) => d.path)).toEqual(['out/external.mp4', 'out/job-0002.mp4', 'out/job-0001.mp4']);
+    expect(result[0]?.job).toBeNull();
+  });
+
+  it('orders by file date, not by job date', () => {
+    const result = renderDeliveriesNewestFirst(
+      listing,
+      generated(file('out/job-0001.mp4', 50), file('out/job-0002.mp4', 20)),
+    );
+
+    expect(result.map((d) => d.path)).toEqual(['out/job-0001.mp4', 'out/job-0002.mp4']);
+  });
+
+  it('excludes samples, including jobs flagged as sample with a regular name', () => {
     const withSample = jobListing([
       succeededJob('render', 'job-0001', '2026-09-10T10:00:00.000Z'),
       renderJobSummary({ id: 'job-0002', sample: true, finishedAt: '2026-09-10T11:00:00.000Z' }),
     ]);
-    const generated = {
-      slug: 'demo-01',
-      roots: ['out'],
-      files: [
-        { path: 'out/job-0001.mp4', sizeBytes: 1, modifiedAtMs: 1, sample: false },
-        { path: 'out/job-0002.mp4', sizeBytes: 1, modifiedAtMs: 2, sample: true },
-      ],
-    };
+    const result = renderDeliveriesNewestFirst(
+      withSample,
+      generated(
+        file('out/job-0001.mp4', 1),
+        file('out/job-0002.mp4', 2),
+        file('out/job-0003.sample.mp4', 3, true),
+        file('out/notes.txt', 4),
+      ),
+    );
 
-    expect(fullRenderJobsNewestFirst(withSample, generated).map((job) => job.id)).toEqual(['job-0001']);
+    expect(result.map((d) => d.path)).toEqual(['out/job-0001.mp4']);
   });
 
-  it('drops renders without a full output, which are samples', () => {
-    const generated = {
-      slug: 'demo-01',
-      roots: ['out'],
-      files: [
-        { path: 'out/job-0001.mp4', sizeBytes: 1, modifiedAtMs: 1, sample: false },
-        { path: 'out/job-0002.sample.mp4', sizeBytes: 1, modifiedAtMs: 2, sample: true },
-      ],
-    };
+  it('keeps the job data for files that belong to a known job', () => {
+    const result = renderDeliveriesNewestFirst(listing, generated(file('out/job-0001.mp4', 10)));
 
-    expect(fullRenderJobsNewestFirst(listing, generated).map((job) => job.id)).toEqual(['job-0001']);
+    expect(result[0]?.job?.id).toBe('job-0001');
+    expect(result[0]?.finishedAt).toBe('2026-09-10T10:00:00.000Z');
   });
 });

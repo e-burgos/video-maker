@@ -3996,7 +3996,7 @@
       "type": "BUGFIX",
       "severity": "medium",
       "created_at": "2026-10-15",
-      "resolved_at": null,
+      "resolved_at": "2026-10-15",
       "validated_at": null,
       "title": "La vista previa y las Entregas muestran los renders que no hizo esta instancia del estudio",
       "estimation_hours": 2,
@@ -4005,11 +4005,47 @@
       "related_modules": [
         "production-quality"
       ],
-      "affected_files": [],
-      "test_reference": "",
-      "status": "in-progress",
+      "affected_files": [
+        "apps/web/src/api/workspace-panel.spec.ts",
+        "apps/web/src/api/workspace-panel.ts",
+        "apps/web/src/components/workspace-side-panel.spec.tsx",
+        "apps/web/src/components/workspace-side-panel.tsx"
+      ],
+      "test_reference": "web lint/test/build verde, con tests del archivo sin job más nuevo como vista previa, muestras excluidas, orden por fecha y datos del job conservados.",
+      "status": "implemented",
       "cycle": null,
-      "process_note": "Hallado al pedir el dueño revisar los videos con Malena en la app instalada."
+      "process_note": "Hallado al pedir el dueño revisar los videos con Malena en la app instalada.",
+      "usage": {
+        "provider_model": "claude/sonnet",
+        "effort": "medium",
+        "tokens_in": 98584,
+        "tokens_out": 17279,
+        "approx": true,
+        "source": "agent-usage-notification",
+        "recorded_at": "2026-10-15",
+        "by_agent": [
+          {
+            "agent": "implementor-front",
+            "provider_model": "claude/sonnet",
+            "effort": "medium",
+            "tokens_in": 86584,
+            "tokens_out": 15279,
+            "approx": true,
+            "source": "agent-usage-notification",
+            "recorded_at": "2026-10-15"
+          },
+          {
+            "agent": "orchestrator",
+            "provider_model": "claude/opus",
+            "effort": "high",
+            "tokens_in": 12000,
+            "tokens_out": 2000,
+            "approx": true,
+            "source": "declared-estimate",
+            "recorded_at": "2026-10-15"
+          }
+        ]
+      }
     }
   ]
 }
