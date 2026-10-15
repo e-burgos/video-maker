@@ -4,6 +4,23 @@ Historial de versiones de la app de escritorio, en español, pensado para los am
 instalan. `apps/desktop/scripts/release-desktop.mjs` toma la sección de la versión que publica
 y la usa como notas del release.
 
+## 0.4.1 — Voces de ElevenLabs, mejor mezcla y revisión más completa
+
+- **Voces de ElevenLabs**: cargá tu key en Configuración › Voces de ElevenLabs y elegí voces de su biblioteca (por
+  ejemplo Malena, rioplatense) junto a las voces locales. El estudio guarda cada frase generada para no gastar
+  créditos dos veces y te avisa si la key no es válida o se acabaron los créditos.
+- **Mezcla de motion graphics**: la música se escucha clara cuando no hay voz y baja lo justo mientras se habla, según
+  el volumen de cada voz; el golpe de la revelación de marca ya no tapa la frase.
+- **Revisión automática** más completa: suma los efectos de sonido al volumen de la voz, avisa si los subtítulos
+  quedan tapados por el logo, el chat o un recuadro, y mira varios cuadros por escena.
+- **Cola de publicación**: encolá varios videos para YouTube; el estudio los sube de a uno respetando el límite diario
+  del canal, reintenta si YouTube no acepta más subidas y los agrega a la lista de su categoría.
+- El productor puede **preparar la publicación** (título, descripción, etiquetas) y la encola sólo con tu confirmación.
+- La vista previa y las Entregas muestran **todos los videos terminados** del proyecto, aunque se hayan hecho en otra
+  instalación del estudio.
+- **Conectar YouTube** abre el login de Google en tu navegador.
+- La cámara de las escenas de interfaz mantiene el cursor del mismo tamaño y encuadra bien los avisos anchos.
+
 ## 0.4.0 — Tus marcas, publicar en YouTube y un productor con más criterio
 
 - Nueva página **Marcas**: creá una marca de cero o duplicando una existente, con nombre, logo, colores, tipografías,
