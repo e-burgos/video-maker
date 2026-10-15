@@ -9,9 +9,8 @@ import { parseTimelineDocument } from '../api/parse-timeline';
 import { playerTimeline } from '../api/player-timeline';
 import { previewFormat, previewPresetFor } from '../api/preview-format';
 import { useRenderApi } from '../api/render-api-context';
-import { renderJobDeliverableUrl } from '../api/render-job-artifact';
 import {
-  fullRenderJobsNewestFirst,
+  renderDeliveriesNewestFirst,
   groupAssetsByRole,
   latestSucceededJobOfKind,
 } from '../api/workspace-panel';
@@ -20,6 +19,7 @@ import { useAsyncResource } from '../hooks/use-async-resource';
 import type { AsyncResource } from '../hooks/use-async-resource';
 import { useT, useTn } from '../i18n/language-context';
 import { ErrorNotice } from './error-notice';
+import { RenderReviewPanel } from './render-review-panel';
 import { TimelinePlayer } from './timeline-player';
 import { YouTubePublishSection } from './youtube-publish-section';
 import { Badge } from './ui/badge';
@@ -74,7 +74,7 @@ function PreviewTab({
 }) {
   const client = useRenderApi();
   const t = useT();
-  const latestRender = fullRenderJobsNewestFirst(jobs.data, generated)[0] ?? null;
+  const latestRender = renderDeliveriesNewestFirst(jobs.data, generated)[0] ?? null;
   const latestMontage = latestSucceededJobOfKind(jobs.data, 'montage');
 
   const project = useAsyncResource<ProjectDetail>(
@@ -99,13 +99,13 @@ function PreviewTab({
       <div className="space-y-2">
         <video
           data-testid="workspace-preview-video"
-          src={renderJobDeliverableUrl(slug, latestRender.id)}
+          src={artifactUrl(slug, latestRender.path)}
           controls
           preload="metadata"
           className="aspect-video w-full rounded-panel bg-black"
         />
         <p className="text-xs text-ink-faint">
-          {t('workspace.preview.latestRender')} · {latestRender.finishedAt ?? latestRender.createdAt}
+          {t('workspace.preview.latestRender')} · {latestRender.finishedAt}
         </p>
       </div>
     );
@@ -214,7 +214,7 @@ function DeliveriesTab({
     return <ErrorNotice error={jobs.error} onRetry={jobs.reload} />;
   }
 
-  const deliveries = fullRenderJobsNewestFirst(jobs.data, generated);
+  const deliveries = renderDeliveriesNewestFirst(jobs.data, generated);
 
   if (deliveries.length === 0) {
     return (
@@ -230,23 +230,24 @@ function DeliveriesTab({
   return (
     <div className="space-y-4">
     <ul data-testid="workspace-deliveries" className="space-y-3">
-      {deliveries.map((job) => (
-        <li key={job.id} className="space-y-2 rounded-panel border border-border-subtle bg-surface-raised/40 p-3">
+      {deliveries.map((delivery) => (
+        <li key={delivery.path} className="space-y-2 rounded-panel border border-border-subtle bg-surface-raised/40 p-3">
           <video
-            src={renderJobDeliverableUrl(slug, job.id)}
+            src={artifactUrl(slug, delivery.path)}
             controls
             preload="metadata"
             className="aspect-video w-full rounded-control bg-black"
           />
           <div className="flex flex-wrap items-center justify-between gap-2 text-xs text-ink-faint">
-            <span>{t('workspace.deliveries.finishedAt', { date: job.finishedAt ?? job.createdAt })}</span>
+            <span>{t('workspace.deliveries.finishedAt', { date: delivery.finishedAt })}</span>
             <a
-              href={renderJobDeliverableUrl(slug, job.id)}
+              href={artifactUrl(slug, delivery.path)}
               className="text-accent underline hover:text-accent-strong"
             >
               {t('renderJob.download')}
             </a>
           </div>
+          {delivery.job === null && <RenderReviewPanel slug={slug} file={delivery.path} />}
         </li>
       ))}
     </ul>

@@ -8,7 +8,7 @@ import { RenderApiProvider } from '../api/render-api-context';
 import { WorkspaceSidePanel } from './workspace-side-panel';
 import type { RenderApiClient } from '../api/render-api-client';
 import type { AsyncResource } from '../hooks/use-async-resource';
-import type { AssetListing, ProjectDetail, RenderJobListing } from '../api/render-api-types';
+import type { AssetListing, GeneratedListing, ProjectDetail, RenderJobListing } from '../api/render-api-types';
 
 function readyResource<T>(data: T): AsyncResource<T> {
   return { status: 'ready', data, error: null, isRefreshing: false, reload: vi.fn() };
@@ -29,10 +29,12 @@ function renderPanel(options: {
   assets?: AsyncResource<AssetListing>;
   jobs?: AsyncResource<RenderJobListing>;
   activeTab?: 'preview' | 'material' | 'deliveries';
+  generated?: GeneratedListing;
 } = {}) {
   const client = {
     getProject: vi.fn().mockResolvedValue(projectDetail()),
     getTimeline: vi.fn(),
+    getRenderReview: vi.fn().mockResolvedValue(null),
     ...options.client,
   } as unknown as RenderApiClient;
 
@@ -47,6 +49,7 @@ function renderPanel(options: {
           onTabChange={onTabChange}
           assets={options.assets ?? readyResource(assetListing([]))}
           jobs={options.jobs ?? readyResource(jobListing([]))}
+          generated={options.generated ?? null}
         />
       </MemoryRouter>
     </RenderApiProvider>,
@@ -141,5 +144,44 @@ describe('WorkspaceSidePanel', () => {
     renderPanel({ activeTab: 'deliveries' });
 
     expect(screen.getByTestId('workspace-deliveries-empty')).toBeTruthy();
+  });
+
+  it('previews the newest full file in out even when no known job produced it', async () => {
+    renderPanel({
+      jobs: readyResource(jobListing([succeededJob('render', 'job-1', '2026-09-10T10:00:00.000Z')])),
+      generated: {
+        slug: 'demo-01',
+        roots: ['out'],
+        files: [
+          { path: 'out/job-1.mp4', sizeBytes: 1, modifiedAtMs: 100, sample: false },
+          { path: 'out/otra-instancia.mp4', sizeBytes: 1, modifiedAtMs: 200, sample: false },
+          { path: 'out/muestra.sample.mp4', sizeBytes: 1, modifiedAtMs: 300, sample: true },
+        ],
+      },
+    });
+
+    await waitFor(() =>
+      expect(screen.getByTestId('workspace-preview-video').getAttribute('src')).toContain('otra-instancia.mp4'),
+    );
+  });
+
+  it('lists files without a known job in deliveries, with a review panel only for them', async () => {
+    renderPanel({
+      activeTab: 'deliveries',
+      jobs: readyResource(jobListing([succeededJob('render', 'job-1', '2026-09-10T10:00:00.000Z')])),
+      generated: {
+        slug: 'demo-01',
+        roots: ['out'],
+        files: [
+          { path: 'out/job-1.mp4', sizeBytes: 1, modifiedAtMs: 100, sample: false },
+          { path: 'out/otra-instancia.mp4', sizeBytes: 1, modifiedAtMs: 200, sample: false },
+        ],
+      },
+    });
+
+    expect(screen.getAllByRole('listitem').length).toBeGreaterThanOrEqual(2);
+    expect(screen.getAllByText('Download')[0]?.getAttribute('href')).toContain('otra-instancia.mp4');
+    await waitFor(() => expect(screen.getAllByTestId('render-review')).toHaveLength(1));
+    expect(screen.getByTestId('render-review').getAttribute('data-file')).toBe('out/otra-instancia.mp4');
   });
 });

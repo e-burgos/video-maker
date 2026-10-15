@@ -1,6 +1,7 @@
 import { orderedAssetRoles } from './asset-roles';
 import type {
   AssetListEntry,
+  GeneratedFile,
   GeneratedListing,
   AssetListing,
   AssetRole,
@@ -51,16 +52,48 @@ export function succeededJobsOfKindNewestFirst(
     .sort((a, b) => jobTimestamp(b) - jobTimestamp(a));
 }
 
-export function fullRenderJobsNewestFirst(
+export type RenderDelivery = {
+  path: string;
+  finishedAt: string;
+  timestampMs: number;
+  job: RenderJobSummary | null;
+};
+
+function deliveryFromJob(job: RenderJobSummary): RenderDelivery {
+  return {
+    path: `out/${job.id}.mp4`,
+    finishedAt: job.finishedAt ?? job.createdAt,
+    timestampMs: jobTimestamp(job),
+    job,
+  };
+}
+
+function isFullOutputVideo(file: GeneratedFile): boolean {
+  return file.path.startsWith('out/') && file.path.endsWith('.mp4') && !file.sample;
+}
+
+export function renderDeliveriesNewestFirst(
   listing: RenderJobListing | null,
   generated: GeneratedListing | null,
-): RenderJobSummary[] {
-  const jobs = succeededJobsOfKindNewestFirst(listing, 'render').filter((job) => !job.sample);
+): RenderDelivery[] {
+  const renderJobs = succeededJobsOfKindNewestFirst(listing, 'render');
   if (generated === null) {
-    return jobs;
+    return renderJobs.filter((job) => !job.sample).map(deliveryFromJob);
   }
-  const outputs = new Set(generated.files.map((file) => file.path));
-  return jobs.filter((job) => outputs.has(`out/${job.id}.mp4`));
+  const jobByPath = new Map(renderJobs.map((job) => [`out/${job.id}.mp4`, job]));
+  return generated.files
+    .filter(isFullOutputVideo)
+    .filter((file) => jobByPath.get(file.path)?.sample !== true)
+    .map((file): RenderDelivery => {
+      const job = jobByPath.get(file.path) ?? null;
+      return {
+        path: file.path,
+        finishedAt: job === null ? new Date(file.modifiedAtMs).toISOString() : (job.finishedAt ?? job.createdAt),
+        timestampMs: file.modifiedAtMs,
+        job,
+      };
+    })
+    .sort((a, b) => b.timestampMs - a.timestampMs);
 }
 
 export function latestSucceededJobOfKind(
