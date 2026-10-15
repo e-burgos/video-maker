@@ -93,6 +93,7 @@ function fakePorts(): MotionPipelinePorts {
     synthesize: unused,
     transcribe: unused,
     detectBeats: unused,
+    measureLoudness: unused,
     trimAudio: unused,
     render: unused,
     askAgent: unused,

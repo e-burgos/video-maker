@@ -3855,6 +3855,138 @@
           }
         ]
       }
+    },
+    {
+      "id": "FIX-e-burgos-031",
+      "author": "e-burgos",
+      "spec_id": "spec-e-burgos-023-production-quality",
+      "fix_document": "sdd/fixes/fix-e-burgos-031.md",
+      "type": "BUGFIX",
+      "severity": "medium",
+      "created_at": "2026-10-14",
+      "resolved_at": "2026-10-14",
+      "validated_at": null,
+      "title": "Mezcla de los videos motion: música audible y golpe de la marca sin tapar la voz",
+      "estimation_hours": 3,
+      "description": "En la presentación de Display Ads la música queda ~30 dB bajo la voz (0,15 sin voz ≈ −42 LUFS, 0,045 bajo la voz) y el golpe de bajo de la revelación de marca suena 13–17 dB por encima de «Esto es Display Ads».",
+      "justification": "Pedido del dueño al escuchar la prueba con Malena (música baja) y crítico de la revisión automática (voice-music-margin con sfx); cambio interno de la mezcla motion.",
+      "related_modules": [
+        "production-quality"
+      ],
+      "affected_files": [
+        "apps/render-api/src/brands/brand-preview.spec.ts",
+        "apps/render-api/src/deps/motion-pipeline-adapters.ts",
+        "apps/render-api/src/http/handlers/motion-job.spec.ts",
+        "apps/render-api/src/jobs/run-motion-pipeline.spec.ts",
+        "apps/render-api/src/review/motion-level-plans.spec.ts",
+        "apps/render-api/src/review/motion-level-plans.ts",
+        "apps/render-api/src/review/motion-sfx-cues.spec.ts",
+        "apps/render-api/src/review/motion-sfx-cues.ts",
+        "libs/motion-graphics/src/compose/compose-storyboard.spec.ts",
+        "libs/motion-graphics/src/compose/compose-storyboard.ts",
+        "libs/motion-graphics/src/compose/impact-sfx.spec.ts",
+        "libs/motion-graphics/src/compose/impact-sfx.ts",
+        "libs/motion-graphics/src/pipeline/__fixtures__/fake-pipeline-ports.ts",
+        "libs/motion-graphics/src/pipeline/plan-compose-render.spec.ts",
+        "libs/motion-graphics/src/pipeline/plan-project.ts",
+        "libs/motion-graphics/src/pipeline/ports.ts",
+        "libs/motion-graphics/src/script/motion-script.ts",
+        "libs/motion-graphics/src/storyboard/motion-storyboard.schema.ts",
+        "libs/motion-graphics/src/template/compose-template.ts",
+        "libs/motion-graphics/src/timeline/build-duck-automation.spec.ts",
+        "libs/motion-graphics/src/timeline/build-duck-automation.ts",
+        "libs/motion-graphics/src/timeline/layout-scenes.spec.ts",
+        "libs/motion-graphics/src/timeline/layout-scenes.ts",
+        "libs/motion-graphics/src/timeline/music-levels.spec.ts",
+        "libs/motion-graphics/src/timeline/music-levels.ts",
+        "tools/motion-studio/src/__fixtures__/fake-motion-dependencies.ts",
+        "tools/motion-studio/src/deps/node-motion-dependencies.ts"
+      ],
+      "test_reference": "motion-graphics, render-api y motion-studio lint/test/build verde. Render real de la presentación de Display Ads en copias: Malena margen mínimo 15,2 dB y Daniela 12,9 dB (sugerencia en la escena de la marca), sin críticos de audio; máster −14,2/−14,4 LUFS; música sin voz audible. El dueño las escuchó: «quedaron muy bien».",
+      "status": "implemented",
+      "cycle": null,
+      "process_note": "Prueba de la presentación con Malena (zz-prueba-malena-presentacion); nada se publica mientras se prueba.",
+      "usage": {
+        "provider_model": "claude/sonnet",
+        "effort": "medium",
+        "tokens_in": 161440,
+        "tokens_out": 28490,
+        "approx": true,
+        "source": "agent-usage-notification",
+        "recorded_at": "2026-10-14",
+        "by_agent": [
+          {
+            "agent": "implementor-back",
+            "provider_model": "claude/sonnet",
+            "effort": "medium",
+            "tokens_in": 127440,
+            "tokens_out": 22490,
+            "approx": true,
+            "source": "agent-usage-notification",
+            "recorded_at": "2026-10-14"
+          },
+          {
+            "agent": "orchestrator",
+            "provider_model": "claude/opus",
+            "effort": "high",
+            "tokens_in": 34000,
+            "tokens_out": 6000,
+            "approx": true,
+            "source": "declared-estimate",
+            "recorded_at": "2026-10-14"
+          }
+        ]
+      }
+    },
+    {
+      "id": "FIX-e-burgos-032",
+      "author": "e-burgos",
+      "spec_id": "spec-e-burgos-023-production-quality",
+      "fix_document": "sdd/fixes/fix-e-burgos-032.md",
+      "type": "IMPROVEMENT",
+      "severity": "low",
+      "created_at": "2026-10-14",
+      "resolved_at": "2026-10-14",
+      "validated_at": null,
+      "title": "Malena es la voz por defecto del estudio cuando hay key de ElevenLabs",
+      "estimation_hours": 1,
+      "description": "El dueño pidió aplicar Malena a todos los videos; sin voz elegida ni voz de marca el estudio seguía usando Daniela.",
+      "justification": "Pedido explícito del dueño 2026-10-14 tras escuchar las pruebas; sin contratos nuevos.",
+      "related_modules": [
+        "production-quality"
+      ],
+      "affected_files": [
+        "apps/render-api/src/voice/elevenlabs-voice.ts",
+        "apps/render-api/src/voice/voice-synthesis-steps.ts",
+        "apps/render-api/src/http/handlers/voices-handler.ts",
+        "apps/render-api/src/voice/synthesize-voice-dispatch.spec.ts",
+        "apps/render-api/src/http/handlers/elevenlabs-settings-handler.spec.ts"
+      ],
+      "test_reference": "render-api (2255) y producer-tools lint/test verde: con key, GET /voices marca a Malena como única voz por defecto y resolveVoiceModel(null) la elige; sin key, Daniela.",
+      "status": "implemented",
+      "cycle": null,
+      "process_note": "Fuera del repo, la receta tutorial.sh usa Malena por defecto (VOICE).",
+      "usage": {
+        "provider_model": "claude/opus",
+        "effort": "high",
+        "tokens_in": 15000,
+        "tokens_out": 2500,
+        "approx": true,
+        "source": "declared-estimate",
+        "recorded_at": "2026-10-14",
+        "by_agent": [
+          {
+            "agent": "orchestrator",
+            "provider_model": "claude/opus",
+            "effort": "high",
+            "tokens_in": 15000,
+            "tokens_out": 2500,
+            "approx": true,
+            "source": "declared-estimate",
+            "recorded_at": "2026-10-14"
+          }
+        ]
+      }
     }
   ]
 }

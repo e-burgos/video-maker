@@ -85,6 +85,7 @@ export function createFakeMotionDependencies(init: {
       calls.push(`detectBeats ${path}`);
       return init.beatsJson ?? JSON.stringify({ version: 1, beats: Array.from({ length: 400 }, (_, i) => ({ time: 0.04 + i * 0.5, strength: i % 4 === 0 ? 0.9 : 0.5 })) });
     },
+    measureLoudness: async () => -22,
     trimAudio: async ({ to, durationSec }) => {
       calls.push(`trimAudio ${to} ${durationSec}`);
       files.set(to, wavBytes(durationSec));

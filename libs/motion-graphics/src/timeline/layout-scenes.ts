@@ -52,7 +52,7 @@ export function layoutScenes(scenes: MotionScene[], voDurations: number[], opts:
         if (previous) previous.end = round(start);
       }
     }
-    const voStart = start + leadIn;
+    const voStart = start + (scene.voLeadIn ?? leadIn);
     const voEnd = voStart + voDuration;
     const minSecEnd = start + (scene.minSec ?? 0);
     const end = opts.beatSync && opts.beats.length > 0

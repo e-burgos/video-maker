@@ -11,7 +11,7 @@ import {
   VOICE_TRANSCRIPTION_CHANNELS,
   VOICE_TRANSCRIPTION_SAMPLE_RATE,
 } from './voice-format';
-import { isElevenLabsKeyConfigured, isElevenLabsVoiceId } from './elevenlabs-voice';
+import { defaultElevenLabsVoiceId, isElevenLabsKeyConfigured, isElevenLabsVoiceId } from './elevenlabs-voice';
 import { whisperLanguageFor } from './voice-language';
 import {
   voiceDirectoryPath,
@@ -87,6 +87,11 @@ export async function resolveVoiceModel(
         lengthScale: brandVoice.lengthScale,
       };
     }
+  }
+
+  const elevenLabsDefault = voiceId === null ? await defaultElevenLabsVoiceId(deps) : null;
+  if (elevenLabsDefault !== null) {
+    return elevenLabsVoiceModel(elevenLabsDefault);
   }
 
   if (voiceId === null) {

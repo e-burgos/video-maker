@@ -75,6 +75,7 @@ function setup(composeFailure?: Error) {
     synthesize: async () => undefined,
     transcribe: async () => ({ text: '', words: [] }),
     detectBeats: async () => '',
+    measureLoudness: async () => -22,
     trimAudio: async () => undefined,
     render: async () => undefined,
     askAgent: async () => {

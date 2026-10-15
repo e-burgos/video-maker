@@ -32,6 +32,7 @@ export function createFakePipelinePorts(init: {
   heard?: (text: string, take: number) => string;
   takeSeconds?: (text: string, take: number) => number;
   beatsJson?: string;
+  voiceLufs?: number;
   answers?: Array<unknown | Error>;
   usage?: { inputTokens: number; outputTokens: number };
 }): FakePipelinePorts {
@@ -89,6 +90,7 @@ export function createFakePipelinePorts(init: {
       calls.push(`detectBeats ${path}`);
       return init.beatsJson ?? JSON.stringify({ version: 1, beats: Array.from({ length: 400 }, (_, i) => ({ time: 0.04 + i * 0.5, strength: i % 4 === 0 ? 0.9 : 0.5 })) });
     },
+    measureLoudness: async () => init.voiceLufs ?? -22,
     trimAudio: async ({ to, durationSec, targetLufs }) => {
       calls.push(`trimAudio ${to} ${durationSec} ${targetLufs}`);
       files.set(to, wavBytes(durationSec));

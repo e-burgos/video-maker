@@ -2,6 +2,7 @@ import type { MusicMode, VoiceDirection } from '@video-maker/timeline-core';
 
 import { brandCssFile, brandImageFile, brandIsotipo } from '../brand/brand-manifest';
 import type { BrandManifest } from '../brand/brand-manifest';
+import { impactTrack, IMPACT_VOICE_LEAD_IN_SEC } from './impact-sfx';
 import { MotionStudioError } from '../errors/motion-studio-error';
 import { renderScene } from '../scenes/render-scene';
 import { esc } from '../scenes/scene-html';
@@ -20,7 +21,7 @@ export interface ScriptDocument {
   lengthScale: number;
   music: { file: string; credit: string; volume?: number; mode?: MusicMode; floorDb?: number } | null;
   noWhooshOn: string[];
-  scenes: Array<{ id: string; vo: string; minBars: number; minSec?: number; anchor?: number; direction?: VoiceDirection }>;
+  scenes: Array<{ id: string; vo: string; minBars: number; minSec?: number; anchor?: number; voLeadIn?: number; direction?: VoiceDirection }>;
   sfx: Array<{ id: string; scene: string; offset: number }>;
 }
 
@@ -134,7 +135,7 @@ export function composeStoryboard(storyboard: MotionStoryboard, brand: BrandMani
 
   const sfx = dropScene && track
     ? `<audio id="sfx-riser" src="${RUNTIME_ASSET_DIR}/sfx/riser.mp3" data-start="{{sfx:riser}}" data-duration="3.4" data-media-start="6.6" data-track-index="12" data-volume="0.55"></audio>
-      <audio id="sfx-impact" src="${RUNTIME_ASSET_DIR}/sfx/impact-bass-1.mp3" data-start="{{start:${dropScene.id}}}" data-duration="2" data-track-index="13" data-volume="0.8"></audio>`
+      ${impactTrack(`{{start:${dropScene.id}}}`, RUNTIME_ASSET_DIR)}`
     : '';
 
   const width = vertical ? 1080 : 1920;
@@ -199,6 +200,7 @@ export function composeStoryboard(storyboard: MotionStoryboard, brand: BrandMani
         ...(scene.minSec === undefined ? {} : { minSec: scene.minSec }),
         ...(anchor === undefined || !storyboard.beatSync ? {} : { anchor }),
         ...(scene.direction === undefined ? {} : { direction: scene.direction }),
+        ...(scene === dropScene && track ? { voLeadIn: IMPACT_VOICE_LEAD_IN_SEC } : {}),
       };
     }),
     sfx: dropScene && track ? [{ id: 'riser', scene: dropScene.id, offset: -3.4 }] : [],

@@ -51,6 +51,23 @@ describe('ElevenLabs voice resolution', () => {
     expect(model).toEqual({ id: 'elevenlabs:abc', path: '', lengthScale: 1.1 });
   });
 
+  it('uses the first configured ElevenLabs voice as the default when the key is configured and nothing else is chosen', async () => {
+    const deps = createFakeRenderApiDependencies(createCallLog());
+    await deps.secretStore.set('elevenlabs', 'key');
+
+    const model = await resolveVoiceModel(deps, null);
+
+    expect(model.id).toBe('elevenlabs:p7AwDmKvTdoHTBuueGvP');
+  });
+
+  it('keeps the default Piper voice when there is no ElevenLabs key', async () => {
+    const deps = createFakeRenderApiDependencies(createCallLog());
+
+    const model = await resolveVoiceModel(deps, null);
+
+    expect(model.id).not.toMatch(/^elevenlabs:/);
+  });
+
   it('falls back to the default Piper voice when the brand voice is from ElevenLabs and there is no key', async () => {
     const deps = createFakeRenderApiDependencies(createCallLog());
 

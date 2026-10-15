@@ -28,14 +28,19 @@ describe('planProject', () => {
     expect(timeline.scenes[0].end).toBe(3.8);
   });
 
-  it('keeps the music bed at its volume and ducks it well under the voice, default volume 0.5', async () => {
+  it.each([
+    ['ElevenLabs voice at -22 LUFS', -22, 0.198],
+    ['Piper voice at -25.5 LUFS', -25.5, 0.132],
+  ])('plans the music at the calibrated bed and a duck derived from a %s, whatever the script volume', async (_label, voiceLufs, duck) => {
     const levels = async (music: unknown) => {
-      const ports = createFakePipelinePorts({ files: projectFiles({ [`${P}/script.json`]: JSON.stringify({ ...script, music }) }) });
+      const ports = createFakePipelinePorts({ voiceLufs, files: projectFiles({ [`${P}/script.json`]: JSON.stringify({ ...script, music }) }) });
       const { timeline } = await planProject(ports, P, { beatSync: true });
-      return Math.max(...timeline.musicAutomation.lanes[0].points.map((p) => p.v));
+      const values = timeline.musicAutomation.lanes[0].points.map((p) => p.v);
+      return { max: Math.max(...values), under: Math.min(...values.filter((v) => v > 0)) };
     };
-    expect(await levels({ file: 'tema.mp3', credit: 'Tema · CC BY 4.0' })).toBe(0.5);
-    expect(await levels({ file: 'tema.mp3', credit: 'Tema · CC BY 4.0', volume: 0.2 })).toBe(0.2);
+    const base = { file: 'tema.mp3', credit: 'Tema · CC BY 4.0' };
+    expect(await levels(base)).toEqual({ max: 0.885, under: duck });
+    expect(await levels({ ...base, volume: 0.15 })).toEqual({ max: 0.885, under: duck });
   });
 
   it("music.mode 'segments' plans the music by segments and 'bed' or no mode keeps the duck bed", async () => {
@@ -50,9 +55,9 @@ describe('planProject', () => {
     const segments = await plan({ ...base, mode: 'segments' });
     expect(segments).not.toEqual(bed);
     expect(Math.min(...segments.lanes[0].points.map((p) => p.v))).toBe(0);
-    expect(segments.lanes[0].points.some((p) => p.v === 0.0158)).toBe(true);
+    expect(segments.lanes[0].points.some((p) => p.v === 0.198)).toBe(true);
     const customFloor = await plan({ ...base, mode: 'segments', floorDb: -20 });
-    expect(customFloor.lanes[0].points.some((p) => p.v === 0.05)).toBe(true);
+    expect(customFloor.lanes[0].points.some((p) => p.v === 0.0885)).toBe(true);
   });
 
   it('without music paces scenes on a silent grid and skips beats and trimming', async () => {

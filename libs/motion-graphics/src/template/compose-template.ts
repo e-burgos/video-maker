@@ -1,12 +1,13 @@
 import { MotionStudioError } from '../errors/motion-studio-error';
 import type { MotionScript, MotionSfx } from '../script/motion-script';
+import { MUSIC_TRACK_VOLUME } from '../timeline/music-levels';
 import { normalizeWords } from '../voice/intelligibility-score';
 import type { MotionTimeline, SceneWords } from './motion-timeline';
 
 export const WHOOSH_LEAD = 0.28;
 const PLACEHOLDER = /\{\{([a-z_:0-9-]+)\}\}/gu;
 
-export const MOTION_MUSIC_TRACK_VOLUME = 0.8;
+export const MOTION_MUSIC_TRACK_VOLUME = MUSIC_TRACK_VOLUME;
 
 const round = (value: number): number => Math.round(value * 1000) / 1000;
 

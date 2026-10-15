@@ -23,7 +23,9 @@ export function buildDuckAutomation(slots: SceneSlot[], duration: number, opts: 
   const ramp = opts.ramp ?? 0.25;
   const fadeIn = opts.fadeIn ?? 0.6;
   const fadeOut = opts.fadeOut ?? 2.5;
-  const raw: AutomationPoint[] = [{ t: 0, v: 0 }, { t: fadeIn, v: bed }];
+  const voiced = slots.map((slot) => ({ from: slot.voStart, to: slot.voStart + slot.voDuration + 0.1 }));
+  const outsideVoice = (point: AutomationPoint): boolean => !voiced.some(({ from, to }) => point.t > from && point.t < to);
+  const raw: AutomationPoint[] = [{ t: 0, v: 0 }, ...[{ t: fadeIn, v: bed }].filter(outsideVoice)];
   for (const slot of slots) {
     const release = slot.voStart + slot.voDuration + 0.1;
     raw.push(
@@ -33,6 +35,6 @@ export function buildDuckAutomation(slots: SceneSlot[], duration: number, opts: 
       { t: release + ramp, v: bed },
     );
   }
-  raw.push({ t: duration - fadeOut, v: bed }, { t: duration, v: 0 });
+  raw.push(...[{ t: duration - fadeOut, v: bed }].filter(outsideVoice), { t: duration, v: 0 });
   return { version: 1, lanes: [{ target: 'volume', points: normalizeAutomationPoints(raw) }] };
 }
