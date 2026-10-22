@@ -85,6 +85,15 @@ window.createMotionRuntime = function createMotionRuntime(T, W, compositionId) {
     float: (el, t, id) => tl.fromTo(el, { y: 0 }, { y: -16, duration: Math.max(1, sceneLength(id) - (t - S(id))), ease: 'sine.inOut', immediateRender: false }, t),
     kenburns: (el, t, id) => tl.fromTo(el, { scale: 1.14 }, { scale: 1, duration: Math.max(1, E(id) - t), ease: 'none' }, t),
     sweep: (el, t, id) => tl.fromTo(el, { rotate: 0 }, { rotate: 720, duration: Math.max(1, E(id) - t), ease: 'none' }, t),
+    scroll: (el, t, id) => tl.fromTo(el, { objectPosition: '50% 0%' }, { objectPosition: '50% 80%', duration: Math.max(1, E(id) - t - 0.6), ease: 'sine.inOut' }, t),
+    drive: (el, t) => tl.fromTo(el, { x: -520, opacity: 0 }, { x: 0, opacity: 1, duration: dur(el, 1.6), ease: 'power2.out' }, t),
+    spin: (el, t) => tl.fromTo(el, { rotation: 0 }, { rotation: 900, transformOrigin: '50% 50%', duration: dur(el, 1.6), ease: 'power2.out' }, t),
+    shackle: (el, t) => tl.fromTo(el, { y: -22 }, { y: 0, duration: dur(el, 0.35), ease: 'back.in(2)' }, t),
+    advance: (el, t) => {
+      const step = Number(el.dataset.step || 200);
+      tl.to(el, { x: step, duration: 0.55, ease: 'power3.inOut' }, t);
+      tl.to(el, { x: step * 2, duration: 0.55, ease: 'power3.inOut' }, t + 0.9);
+    },
     type: (el, t) => {
       const text = el.dataset.text || '';
       const state = { i: 0 };

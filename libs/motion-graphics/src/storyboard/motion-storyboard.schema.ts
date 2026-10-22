@@ -37,6 +37,8 @@ export const ICON_NAMES = [
   'zap',
 ] as const;
 
+export const ANIMATION_NAMES = ['delivery', 'payment', 'orders', 'secure-cloud', 'domain', 'publish'] as const;
+
 const Text = z.string().trim().min(1);
 const Cue = Text.describe('Prefix of a word spoken in this scene voice line; the element appears when the voice says it');
 const Icon = z.enum(ICON_NAMES);
@@ -61,7 +63,11 @@ const UrlScreen = z.strictObject({ type: z.literal('url'), url: Text, toggle: Te
 const StatusScreen = z.strictObject({ type: z.literal('status'), title: Text, status: Text, ok: z.boolean().optional() });
 const BootScreen = z.strictObject({ type: z.literal('boot') });
 const OffScreen = z.strictObject({ type: z.literal('off'), text: Text.optional() });
-const ImageScreen = z.strictObject({ type: z.literal('image'), src: ImageRef });
+const ImageScreen = z.strictObject({
+  type: z.literal('image'),
+  src: ImageRef,
+  scroll: z.boolean().describe('Scroll the capture from its top to its bottom during the scene; use a full-page capture').optional(),
+});
 
 export const ScreenSchema = z.discriminatedUnion('type', [PromoScreen, ListScreen, UrlScreen, StatusScreen, BootScreen, OffScreen, ImageScreen]);
 const ScreenState = z.strictObject({ screen: ScreenSchema, cue: Cue.optional() });
@@ -74,9 +80,19 @@ const VisualTablet = z.strictObject({ kind: z.literal('tablet'), states: ScreenS
 const VisualTv = z.strictObject({ kind: z.literal('tv'), states: ScreenStates });
 const VisualIcon = z.strictObject({ kind: z.literal('icon'), icon: Icon });
 const VisualCountdown = z.strictObject({ kind: z.literal('countdown'), seconds: z.number().int().min(2).max(30), cue: Cue.optional(), icon: Icon.optional() });
+const VisualDevices = z.strictObject({
+  kind: z.literal('devices'),
+  images: z.tuple([ImageRef, ImageRef, ImageRef]).describe('Full-page captures of the same site for [desktop monitor, tablet, phone]'),
+  scroll: z.boolean().describe('Scroll each capture inside its frame during the scene').optional(),
+});
+const VisualAnimation = z.strictObject({
+  kind: z.literal('animation'),
+  name: z.enum(ANIMATION_NAMES).describe('Animated illustration: delivery (a van reaching the store pin), payment (a payment landing in the account), orders (cards moving across status columns), secure-cloud (a padlock closing on a cloud), domain (an address typed in a browser bar), publish (a draft switching to published)'),
+  cue: Cue.optional(),
+});
 const VisualTimer = z.strictObject({ kind: z.literal('timer'), labels: z.array(Text).min(2).max(6), caption: Text.optional(), cue: Cue.optional() });
 
-export const VisualSchema = z.discriminatedUnion('kind', [VisualImage, VisualDevice, VisualPhone, VisualTablet, VisualTv, VisualIcon, VisualCountdown, VisualTimer]);
+export const VisualSchema = z.discriminatedUnion('kind', [VisualImage, VisualDevice, VisualPhone, VisualTablet, VisualTv, VisualIcon, VisualCountdown, VisualTimer, VisualDevices, VisualAnimation]);
 
 const Chip = z.strictObject({ text: Text, icon: Icon.optional(), tone: z.enum(['ok', 'no', 'warn']).optional(), cue: Cue.optional() });
 
@@ -253,3 +269,4 @@ export type MotionSceneKind = MotionStoryboardScene['kind'];
 export type MotionStoryboard = z.infer<typeof MotionStoryboardSchema>;
 export type SceneOf<K extends MotionSceneKind> = Extract<MotionStoryboardScene, { kind: K }>;
 export type IconName = (typeof ICON_NAMES)[number];
+export type AnimationName = (typeof ANIMATION_NAMES)[number];

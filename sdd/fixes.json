@@ -4046,6 +4046,59 @@
           }
         ]
       }
+    },
+    {
+      "id": "FIX-e-burgos-034",
+      "author": "e-burgos",
+      "spec_id": "spec-e-burgos-023-production-quality",
+      "fix_document": "sdd/fixes/fix-e-burgos-034.md",
+      "type": "IMPROVEMENT",
+      "severity": "medium",
+      "created_at": "2026-10-22",
+      "resolved_at": "2026-10-22",
+      "validated_at": null,
+      "title": "Motion: scroll de capturas en los marcos, monitor + tablet + celular juntos y animaciones ilustradas",
+      "estimation_hours": 4,
+      "description": "Los clips de desarrollo web mostraban las webs recortadas en una galería, los marcos con capturas quietas e íconos estáticos. El dueño pidió ver la web adaptándose en monitor, tablet y celular, con scroll dentro de cada marco y animaciones en lugar de íconos.",
+      "justification": "Pedido del dueño sobre los 3 Clips verticales de desarrollo web para Mercado Libre; amplía el storyboard motion con props opcionales sin romper los existentes.",
+      "related_modules": [
+        "production-quality"
+      ],
+      "affected_files": [
+        "libs/motion-graphics/src/storyboard/motion-storyboard.schema.ts",
+        "libs/motion-graphics/src/scenes/scene-html.ts",
+        "libs/motion-graphics/src/scenes/animations.ts",
+        "libs/motion-graphics/src/scenes/animations.spec.ts",
+        "libs/motion-graphics/src/compose/compose-storyboard.spec.ts",
+        "libs/motion-graphics/src/index.ts",
+        "libs/motion-graphics/assets/runtime/motion-runtime.js",
+        "libs/motion-graphics/assets/runtime/scenes.css"
+      ],
+      "test_reference": "motion-graphics, producer-tools y render-api lint/test verde (308 tests en motion-graphics); los 3 clips renderizados en el studio y revisados cuadro por cuadro (review visual pass).",
+      "status": "implemented",
+      "cycle": null,
+      "process_note": "Los clips se rehicieron con capturas de página completa en claro y oscuro de Display Ads, Bandurria Deco, Óptica San Martín y Siochana Vision.",
+      "usage": {
+        "provider_model": "claude/opus",
+        "effort": "high",
+        "tokens_in": 420000,
+        "tokens_out": 38000,
+        "approx": true,
+        "source": "declared-estimate",
+        "recorded_at": "2026-10-22",
+        "by_agent": [
+          {
+            "agent": "orchestrator",
+            "provider_model": "claude/opus",
+            "effort": "high",
+            "tokens_in": 420000,
+            "tokens_out": 38000,
+            "approx": true,
+            "source": "declared-estimate",
+            "recorded_at": "2026-10-22"
+          }
+        ]
+      }
     }
   ]
 }

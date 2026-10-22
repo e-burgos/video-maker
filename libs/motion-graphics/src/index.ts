@@ -37,7 +37,7 @@ export type { SceneContext } from './scenes/scene-html';
 export { formatIssuePath, motionStoryboardJsonSchema, parseMotionStoryboard } from './storyboard/parse-motion-storyboard';
 export { ImageBoxSchema, describeMeasuredBox, isMeasuredBox } from './storyboard/image-box';
 export type { ImageBox } from './storyboard/image-box';
-export { ICON_NAMES, MotionSceneSchema, MotionStoryboardSchema, SCENE_KINDS } from './storyboard/motion-storyboard.schema';
+export { ANIMATION_NAMES, ICON_NAMES, MotionSceneSchema, MotionStoryboardSchema, SCENE_KINDS } from './storyboard/motion-storyboard.schema';
 export type { IconName, MotionChip, MotionSceneKind, MotionScreen, MotionStoryboard, MotionStoryboardScene, MotionVisual, SceneOf } from './storyboard/motion-storyboard.schema';
 
 export { buildAutoStoryboardRequest } from './auto/build-auto-storyboard-request';

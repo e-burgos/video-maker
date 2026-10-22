@@ -108,6 +108,14 @@ describe('composeStoryboard', () => {
     expect(storyboardImages(catalogStoryboard)).toEqual(['images/foto.jpg', 'images/otra.jpg']);
   });
 
+  it('lists the captures of a devices visual so they reach the render', () => {
+    const devices = {
+      ...catalogStoryboard,
+      scenes: [{ id: 'd', kind: 'feature' as const, vo: 'Pantallas', props: { title: 'En todas', bullets: [], visual: { kind: 'devices' as const, images: ['images/d.png', 'images/t.png', 'images/p.png'] as [string, string, string], scroll: true } } }],
+    };
+    expect(storyboardImages(devices)).toEqual(['images/d.png', 'images/p.png', 'images/t.png']);
+  });
+
   it('resolves brand image refs through the manifest', () => {
     expect(brandImageUrl('brand:local', testBrand)).toBe('assets/brand/img/local.jpg');
     expect(brandImageUrl('brand:img/x.png', testBrand)).toBe('assets/brand/img/x.png');
