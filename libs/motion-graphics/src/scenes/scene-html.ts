@@ -1,5 +1,6 @@
 import { brandIsotipo } from '../brand/brand-manifest';
 import type { BrandManifest } from '../brand/brand-manifest';
+import { animationVisual } from './animations';
 import { screenHomography } from './screen-perspective';
 import { MotionStudioError } from '../errors/motion-studio-error';
 import type { IconName, MotionChip, MotionScreen, MotionVisual } from '../storyboard/motion-storyboard.schema';
@@ -87,7 +88,7 @@ export function screenInner(screen: MotionScreen, ctx: SceneContext, firstCue: s
     case 'off':
       return `<div class="mg-screen off">${screen.text ? `<span>${esc(screen.text)}</span>` : ''}</div>`;
     case 'image':
-      return `<div class="mg-screen image"><img src="${esc(ctx.imageUrl(screen.src))}" alt="" /></div>`;
+      return screen.scroll === true ? scrollingCapture(screen.src, ctx, 0.6) : `<div class="mg-screen image"><img src="${esc(ctx.imageUrl(screen.src))}" alt="" /></div>`;
     case 'status':
       return `<div class="mg-screen"><div class="mg-status"><span${animAttrs({ anim: 'pop', cue: firstCue, parallel: true })}>${icon(screen.ok === false ? 'alert' : 'check')}</span><b>${esc(screen.title)}</b><span class="mg-label">${esc(screen.status)}</span></div></div>`;
     case 'url':
@@ -111,6 +112,24 @@ export function screenInner(screen: MotionScreen, ctx: SceneContext, firstCue: s
       return `<div class="mg-screen"><div class="mg-ui">${screen.sub ? `<span class="sub">${esc(screen.sub)}</span>` : ''}<h4>${esc(screen.title)}</h4>${rows}${field}${button}</div></div>`;
     }
   }
+}
+
+function scrollingCapture(src: string, ctx: SceneContext, at: number): string {
+  return `<div class="mg-screen image scroll"><img src="${esc(ctx.imageUrl(src))}" alt=""${animAttrs({ anim: 'scroll', at, parallel: true })} /></div>`;
+}
+
+function deviceScreen(src: string, ctx: SceneContext, scroll: boolean, at: number): string {
+  return scroll ? scrollingCapture(src, ctx, at) : `<div class="mg-screen image"><img src="${esc(ctx.imageUrl(src))}" alt="" /></div>`;
+}
+
+const DEVICE_SCROLL_STARTS = [0.7, 1.05, 1.4] as const;
+
+function devicesVisual(images: readonly [string, string, string], scroll: boolean, ctx: SceneContext): string {
+  const [desktop, tablet, phone] = images;
+  const monitor = `<div class="mg-monitor"${animAttrs({ anim: 'rise', at: 0.1 })}><div class="face">${deviceScreen(desktop, ctx, scroll, DEVICE_SCROLL_STARTS[0])}</div><i class="stand"></i></div>`;
+  const tabletFrame = `<div class="mg-tablet"${animAttrs({ anim: 'left', at: 0.35 })}><div class="face">${deviceScreen(tablet, ctx, scroll, DEVICE_SCROLL_STARTS[1])}</div></div>`;
+  const phoneFrame = `<div class="mg-phone"${animAttrs({ anim: 'right', at: 0.55 })}><div class="face"><div class="notch"></div>${deviceScreen(phone, ctx, scroll, DEVICE_SCROLL_STARTS[2])}</div></div>`;
+  return `<div class="mg-devices">${monitor}${tabletFrame}${phoneFrame}</div>`;
 }
 
 export function screenStates(states: Array<{ screen: MotionScreen; cue?: string | undefined }>, ctx: SceneContext): string {
@@ -195,6 +214,10 @@ export function visual(v: MotionVisual, ctx: SceneContext): string {
       return `<div class="mg-tablet"${animAttrs({ anim: 'rise' })}><div class="face">${screenStates(v.states, ctx)}</div></div>`;
     case 'tv':
       return `<div class="mg-tv"${animAttrs({ anim: 'right' })}><div class="face">${screenStates(v.states, ctx)}</div></div>`;
+    case 'devices':
+      return devicesVisual(v.images, v.scroll === true, ctx);
+    case 'animation':
+      return animationVisual(v.name, v.cue);
     case 'icon':
       return `<div class="mg-big-icon"${animAttrs({ anim: 'pop' })}>${icon(v.icon)}</div>`;
     case 'countdown': {
