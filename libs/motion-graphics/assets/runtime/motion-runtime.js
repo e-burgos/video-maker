@@ -203,10 +203,13 @@ window.createMotionRuntime = function createMotionRuntime(T, W, compositionId) {
     const mx = (a.x + b.x) / 2;
     return `M${a.x} ${a.y} C ${mx} ${a.y}, ${mx} ${b.y}, ${b.x} ${b.y}`;
   };
+  const renderScale = () => root.getBoundingClientRect().width / (root.offsetWidth || 1) || 1;
   const anchorPoint = (el, side, base) => {
-    const r = el.getBoundingClientRect();
-    const x = r.left - base.left;
-    const y = r.top - base.top;
+    const k = renderScale();
+    const box = el.getBoundingClientRect();
+    const r = { width: box.width / k, height: box.height / k };
+    const x = (box.left - base.left) / k;
+    const y = (box.top - base.top) / k;
     if (side === 'right') return { x: x + r.width, y: y + r.height / 2 };
     if (side === 'left') return { x, y: y + r.height / 2 };
     if (side === 'top') return { x: x + r.width / 2, y };
@@ -216,14 +219,19 @@ window.createMotionRuntime = function createMotionRuntime(T, W, compositionId) {
   const drawLinks = () => {
     const vertical = root.classList.contains('fmt-9x16');
     document.querySelectorAll('svg[data-links]').forEach((svg) => {
+      if (svg.getClientRects().length === 0) return;
       const scope = svg.closest('.scene-in');
       const base = svg.getBoundingClientRect();
       svg.querySelectorAll('path[data-from]').forEach((path) => {
         const from = scope.querySelector(path.dataset.from);
         const to = scope.querySelector(path.dataset.to);
         if (!from || !to) return;
-        const a = anchorPoint(from, vertical ? 'bottom' : path.dataset.fromSide || 'right', base);
-        const b = anchorPoint(to, vertical ? 'top' : path.dataset.toSide || 'left', base);
+        const fromBox = from.getBoundingClientRect();
+        const toBox = to.getBoundingClientRect();
+        const targetAbove = toBox.top + toBox.height / 2 < fromBox.top + fromBox.height / 2;
+        const insideSide = (el, side) => (el.classList.contains('mg-box') || (el.classList.contains('dev') && (side === 'top' || side === 'bottom')) ? 'center' : side);
+        const a = anchorPoint(from, insideSide(from, vertical ? (targetAbove ? 'top' : 'bottom') : path.dataset.fromSide || 'right'), base);
+        const b = anchorPoint(to, insideSide(to, vertical ? (targetAbove ? 'bottom' : 'top') : path.dataset.toSide || 'left'), base);
         path.setAttribute('d', curve(a, b, vertical));
       });
     });
@@ -289,6 +297,7 @@ window.createMotionRuntime = function createMotionRuntime(T, W, compositionId) {
   });
   tl.to('#mg-hud', { opacity: 0, duration: 1 }, T.duration - 1.2);
 
+  tl.eventCallback('onUpdate', drawLinks);
   window.__timelines[compositionId] = tl;
   return tl;
 };
