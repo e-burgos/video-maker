@@ -4099,6 +4099,52 @@
           }
         ]
       }
+    },
+    {
+      "id": "FIX-e-burgos-035",
+      "author": "e-burgos",
+      "spec_id": "spec-e-burgos-023-production-quality",
+      "fix_document": "sdd/fixes/fix-e-burgos-035.md",
+      "type": "BUGFIX",
+      "severity": "medium",
+      "created_at": "2026-10-22",
+      "resolved_at": "2026-10-22",
+      "validated_at": null,
+      "title": "Motion: los cables de la escena de conexiones no llegan a la tele, al equipo ni a la fuente",
+      "estimation_hours": 2,
+      "description": "En el Short vertical de Easy Pro el cable HDMI salía de la parte de abajo del equipo hacia arriba de la tele (dejando una punta suelta sobre la tele) y el cable de la fuente se superponía o quedaba corto; en 16:9 el cable de la fuente era una punta que no llegaba al equipo.",
+      "justification": "Defecto visible reportado por el dueño en un video publicado; cambio interno del runtime sin contratos nuevos.",
+      "related_modules": [
+        "production-quality"
+      ],
+      "affected_files": [
+        "libs/motion-graphics/assets/runtime/motion-runtime.js"
+      ],
+      "test_reference": "motion-graphics lint/test verde; Short vertical de Easy Pro y prueba 16:9 de Easy Pro renderizados y revisados en las escenas de HDMI y fuente.",
+      "status": "implemented",
+      "cycle": null,
+      "process_note": "Los cables se recalculan en cada cuadro con la posición real de cada elemento y la escala del render; en vertical salen del lado que mira al otro elemento y terminan dentro del equipo o de la etiqueta.",
+      "usage": {
+        "provider_model": "claude/opus",
+        "effort": "high",
+        "tokens_in": 160000,
+        "tokens_out": 14000,
+        "approx": true,
+        "source": "declared-estimate",
+        "recorded_at": "2026-10-22",
+        "by_agent": [
+          {
+            "agent": "orchestrator",
+            "provider_model": "claude/opus",
+            "effort": "high",
+            "tokens_in": 160000,
+            "tokens_out": 14000,
+            "approx": true,
+            "source": "declared-estimate",
+            "recorded_at": "2026-10-22"
+          }
+        ]
+      }
     }
   ]
 }
