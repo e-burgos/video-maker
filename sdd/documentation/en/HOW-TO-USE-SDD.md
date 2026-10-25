@@ -128,6 +128,26 @@ it with a `git pull`. The switch lives in `sdd/tools.json` and is operated with
 just uncompressed. Savings show up in `rtk gain --project` or in `pnpm sdd:docs` → Costs → **RTK**
 tab (per-machine, estimated numbers).
 
+### sdd-mod — SDD inside Claude Code (optional, off by default)
+
+Claude Code only. `sdd/skills/sdd-mod/` is a mod Claude Code loads on its own from
+`.claude/skills/` (once the project folder is trusted). When on, it shows a band above the
+prompt with the cycle in progress (spec · cycle · flow · tasks done), adds `/sdd` with the task
+and open-fix detail, and applies the SPEC GATE to code edits: with no `in-progress` cycle and no
+open fix, `Edit`/`Write` on code are rejected (or only warned about, with `--gate=warn`). `sdd/`,
+the harness folders and root markdown stay free.
+
+```bash
+pnpm sdd:mod -- --status       # on/off, gate mode, link in .claude/skills
+pnpm sdd:mod -- --enable       # turn it on (re-read every turn, no restart)
+pnpm sdd:mod -- --gate=warn    # warn instead of blocking (block is the default)
+pnpm sdd:mod -- --disable      # turn it off
+```
+
+Copilot, Gemini and the other agents do not see it and do not change: they follow the same
+rules from `AGENTS.md`/`GEMINI.md`/`copilot-instructions.md`, and `pnpm sdd:validate` stays the
+shared safety net in CI. The mod's gate does not cover shell commands.
+
 ---
 
 ## 3. Normal flow — New functionality
@@ -138,11 +158,11 @@ Before starting, run **SPEC GATE A** on the spec: it answers the whole state in 
 no registry read by hand.
 
 ```bash
-pnpm sdd:gate <spec-id|slug>    # one line per condition (✔/✘) + APROBADO / BLOQUEADO
+pnpm sdd:gate <spec-id|slug>    # one line per condition (✔/✘) + APPROVED / BLOCKED
 cat sdd/global.json             # if you want the raw state
 ```
 
-`BLOQUEADO` → complete what the script points at before continuing. `APROBADO` → it also prints
+`BLOCKED` → complete what the script points at before continuing. `APPROVED` → it also prints
 the next `cycle-XX`, the suggested flow and the active profile. **Paste the output** as the gate
 report in the message to the Orchestrator.
 
@@ -176,7 +196,7 @@ Attached references:
 ```
 
 **The Orchestrator automatically generates** (after running `pnpm sdd:gate <spec-id>` and pasting
-its `APROBADO` output; if the spec does not exist yet, it creates and registers it first):
+its `APPROVED` output; if the spec does not exist yet, it creates and registers it first):
 
 1. The `.spec.md` spec file with goal, context, scope and acceptance criteria.
 2. The corresponding entry in `sdd/specs/index.json`.
@@ -243,7 +263,9 @@ The Architect reads `functional.md`, `brief.yaml`, `sdd/schema.json` and `sdd/ap
 (e.g. a task mentions an endpoint the architect did not define), tell each agent to fix it.
 
 > Supporting documents (diagrams, endpoint examples, code exploration) produced by the Architect:
-> → **always** store them in `cycle-01/artifacts/` and reference them in `cycle.json["artifacts"]`.
+> → **always** store them in `cycle-01/artifacts/` and reference them in `cycle.json["artifacts"]`
+> with the path relative to the cycle (`artifacts/api-samples/`); directories are accepted, and so
+> is a path from the repo root.
 
 ---
 
@@ -255,7 +277,7 @@ With the cycle documents ready and approved, **before the first line of code** r
 pnpm sdd:gate <spec-id|slug> cycle-01   # reads the cycle's flow and requires THAT flow's documents
 ```
 
-`BLOQUEADO` → zero code until what is missing is completed. On `APROBADO` (paste the output) the
+`BLOCKED` → zero code until what is missing is completed. On `APPROVED` (paste the output) the
 implementors are invoked **task by task**. One task per conversation, no batching. The stack is
 defined by the subproject's `constitution.md`.
 
@@ -343,7 +365,7 @@ written in their `cycle.json`.
 
 **What the cycle looks like:**
 
-1. `pnpm sdd:gate <spec-id>` → `APROBADO` (the same GATE A as in `full`; paste the output).
+1. `pnpm sdd:gate <spec-id>` → `APPROVED` (the same GATE A as in `full`; paste the output).
 2. Open `cycle.json` with `status: "in-progress"`, `flow: "lite"` and `metrics` with
    `usage.by_agent: []`; move the module to `in_progress_modules`.
 3. Write **`plan.md`**, which replaces `brief.yaml` + `functional.md` + `planner.md` +
@@ -353,7 +375,7 @@ written in their `cycle.json`.
    exactly as in `full`).
 4. Create `tasks.json` with `flow: "lite"` (`user_stories` may be `[]`) and run
    `pnpm sdd:rebuild-tasks-index`.
-5. `pnpm sdd:gate <spec-id> cycle-XX` → `APROBADO` (GATE B) and only then implement, one task at a
+5. `pnpm sdd:gate <spec-id> cycle-XX` → `APPROVED` (GATE B) and only then implement, one task at a
    time, each moving to `done` with its `usage`.
 6. Close as reviewer: `pnpm sdd:validate` green, `cycle.json` `completed` with `reviewer_report`,
    CONTEXTO GATE (additive fragment) and MEMORIA GATE if there was a lesson.
@@ -608,7 +630,7 @@ pnpm sdd:gate <spec-id|slug> --json     # same answer, structured for agents
   brief/functional/planner/architect · reduced → brief · lite → `plan.md`) · B5 `constitution.md`
   for every subproject in `cycle.json → apps[]`.
 
-**`BLOQUEADO` → STOP. Complete what the script points at before continuing** (exit `0` passes,
+**`BLOCKED` → STOP. Complete what the script points at before continuing** (exit `0` passes,
 `1` blocked, `2` usage error). The four invariants hold in every flow and every profile: spec
 registered, module in `global.json`, `cycle.json` in-progress before the code, `tasks.json` with
 tasks and no task `done` without its `usage`.
@@ -650,9 +672,10 @@ And if point 4 is NO, something is wrong: only consolidation touches the bases (
   (`pnpm sdd:rtk -- --disable` is the developer's call).
 - **Workspace invariants** (guaranteed by the `init-nx-workspace` skill; breaking them fails
   silently): pnpm is the only package manager; projects live in `apps/`, `libs/` and `tools/`
-  — never in `packages/` —; `customConditions` in `tsconfig.base.json` is **identical** to the
-  root `package.json` `name`; and `.nxignore` contains `sdd/templates` so the blueprints stay
-  out of the project graph.
+  — never in `packages/` —; if the repo uses the TS solution setup, `customConditions` in
+  `tsconfig.base.json` is **identical** to the root `package.json` `name` (the kit's template uses
+  `paths` and does not declare it; `sdd:validate` warns when they differ); and `.nxignore`
+  contains `sdd/templates` so the blueprints stay out of the project graph.
 - **The project name and description live ONLY in `sdd/global.json`** (`project` /
   `description`). No other file in `sdd/` hardcodes them — that is what keeps `sdd/` portable,
   and `pnpm sdd:validate` fails if the value leaks into the kit's documents.
@@ -917,13 +940,13 @@ without losing what you had expanded. On static hosting it falls back to manual 
 │                                                                 │
 │  Dev asks with [LITE] (or global.json → profile: "solo")       │
 │         ↓                                                       │
-│  pnpm sdd:gate <spec-id>  → GATE A APROBADO                    │
+│  pnpm sdd:gate <spec-id>  → GATE A APPROVED                    │
 │         ↓                                                       │
 │  A SINGLE ACTOR → cycle.json (in-progress, flow "lite")        │
 │                 → plan.md (replaces brief/functional/          │
 │                   planner/architect) + tasks.json               │
 │         ↓                                                       │
-│  pnpm sdd:gate <spec-id> cycle-XX → GATE B APROBADO            │
+│  pnpm sdd:gate <spec-id> cycle-XX → GATE B APPROVED            │
 │         ↓                                                       │
 │  Implements task by task (done + usage on each one)             │
 │         ↓                                                       │

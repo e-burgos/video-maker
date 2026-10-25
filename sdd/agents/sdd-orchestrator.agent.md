@@ -191,9 +191,9 @@ pnpm sdd:gate <spec-id|slug>     # A1 spec registrada · A2 módulo en global.js
                                  # ciclo in-progress de la spec · A4 depends_on completed · A5 spec abierta
 ```
 
-Pegar la salida como reporte del gate. `BLOQUEADO` → comunicar qué falta y NO continuar (si la
+Pegar la salida como reporte del gate. `BLOCKED` → comunicar qué falta y NO continuar (si la
 spec no existe: `harness add spec`; si falta el ModuleEntry: agregarlo a `pending_modules`).
-`APROBADO` → fijar el **flow** (tabla de arriba) y seguir. Otros devs pueden tener sus propias
+`APPROVED` → fijar el **flow** (tabla de arriba) y seguir. Otros devs pueden tener sus propias
 specs en progreso en paralelo — el gate es por spec.
 
 ### PASO 1 — Leer estado y especificación
@@ -235,7 +235,9 @@ de Claude Code), la notificación de cierre trae el conteo exacto de tokens
 `approx: false`). Capturalo al recibirla y volcalo en dos lugares: la entrada de
 `cycle.json → metrics.usage.by_agent[]` correspondiente a ese agente, y — si el subagente era un
 implementor — en `usage` de su task en `tasks.json` (sobrescribiendo la estimación propia del
-implementor si la tenía, porque este número es exacto). **No marqués ni des por cerrada una task
+implementor si la tenía, porque este número es exacto). Ojo al reanudar: si seguís con el mismo
+subagente vía `SendMessage`, cada notificación trae el **acumulado** del agente desde que lo
+lanzaste, no lo de esa task — registrá la diferencia con la notificación anterior. **No marqués ni des por cerrada una task
 como `done` sin que su `usage` esté escrito** — si el implementor cerró sin registrarlo, el
 ciclo queda con una unidad de trabajo sin telemetría y el reviewer no puede cerrar limpio.
 

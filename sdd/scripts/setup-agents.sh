@@ -33,17 +33,66 @@ write_new() {
 
 # link_item TARGET REL_SOURCE ABS_SOURCE LABEL
 # symlink → refresh · missing → create · real file/dir → keep + .new
+# same_content A B — byte-equal ignoring line endings (a copy Git converted to CRLF still matches).
+same_content() {
+  [ -f "$1" ] && [ -f "$2" ] || return 1
+  cmp -s <(tr -d '\r' < "$1") <(tr -d '\r' < "$2")
+}
+
 link_item() {
   local target="$1" rel="$2" abs="$3" label="$4"
   if [ -L "$target" ]; then
-    ln -sfn "$rel" "$target"
-    echo "refreshed symlink : $label"
+    if [ "$(readlink "$target")" = "$rel" ]; then
+      echo "kept     symlink : $label (already points at the kit)"
+    else
+      ln -sfn "$rel" "$target"
+      echo "refreshed symlink : $label"
+    fi
   elif [ -e "$target" ]; then
-    write_new "$target" "$abs" "$label"
+    # A real file with the kit's exact content is the kit's own copy (`harness configure sdd`
+    # writes one while absorbing, and leaves one when linking failed): link it, don't keep it.
+    if same_content "$target" "$abs"; then
+      rm -f "$target"
+      ln -sfn "$rel" "$target"
+      echo "replaced copy    : $label (same content as the kit file)"
+    else
+      write_new "$target" "$abs" "$label"
+    fi
   else
     ln -sfn "$rel" "$target"
     echo "created  symlink : $label"
   fi
+}
+
+# prune_stale_links DIR
+# Two kinds of link into sdd/ are always ours and always wrong, and both survive a plain
+# re-run because nothing ever removed them:
+#   · dangling — what is left after a `*.new` conflict is resolved and the file deleted.
+#   · named `*.new` — created by setup-agents before it learned to skip merge artifacts;
+#     while the `.new` still exists the entry is a duplicate skill/agent/prompt that every
+#     harness discovers.
+# Links resolving outside sdd/ are the user's and are never touched.
+prune_stale_links() {
+  local dir="$1"
+  [ -d "$dir" ] || return 0
+  for entry in "$dir"/* "$dir"/.[!.]*; do
+    [ -L "$entry" ] || continue
+    case "$(readlink "$entry")" in
+      */sdd/*|sdd/*) ;;
+      *) continue ;;
+    esac
+    if [ ! -e "$entry" ]; then
+      rm -f "$entry"
+      echo "pruned dangling  : ${entry#"$ROOT"/}"
+    else
+      case "$(basename "$entry")" in
+        *.new)
+          rm -f "$entry"
+          echo "pruned .new link : ${entry#"$ROOT"/}"
+          ;;
+      esac
+    fi
+  done
 }
 
 # link_items DIR REL_BASE ABS_SOURCE_DIR LABEL
@@ -51,10 +100,23 @@ link_item() {
 link_items() {
   local dir="$1" relbase="$2" src="$3" label="$4"
   mkdir -p "$dir"
+  prune_stale_links "$dir"
   for item in "$src"/*; do
     [ -e "$item" ] || continue
     local name
     name="$(basename "$item")"
+    # `*.new` is a merge artifact of `update sdd`, not a surface: linking it would expose a
+    # duplicate skill/agent/prompt to every harness, and leave a dangling link once resolved.
+    case "$name" in
+      *.new) continue ;;
+    esac
+    # A Claude Code plugin (sdd/skills/sdd-mod) has no SKILL.md: only .claude/ gets it.
+    if [ -d "$item/.claude-plugin" ]; then
+      case "$label" in
+        .claude/*) ;;
+        *) continue ;;
+      esac
+    fi
     link_item "$dir/$name" "$relbase/$name" "$item" "$label/$name"
   done
 }
@@ -67,6 +129,12 @@ link_dir() {
   local target="$1" rel="$2" relitems="$3" abs="$4" label="$5"
   mkdir -p "$(dirname "$target")"
   if [ -L "$target" ]; then
+    # Igual que link_item: si ya apunta al kit, no tocarlo (cada re-creación imprimía
+    # "refreshed" para cada uno de los 5 symlinks de directorio, en cada corrida).
+    if [ "$(readlink "$target")" = "$rel" ]; then
+      echo "kept     symlink : $label (already points at the kit)"
+      return 0
+    fi
     ln -sfn "$rel" "$target"
     echo "refreshed symlink : $label"
   elif [ -d "$target" ]; then
@@ -155,7 +223,8 @@ EOF
   echo "generated        : .gemini/commands/$stem.toml"
 done
 
-# .gemini/settings.json: make Gemini CLI also read AGENTS.md (merge, never clobber)
+# .gemini/settings.json: make Gemini CLI also read AGENTS.md (merge, never clobber, and do not
+# rewrite it when both names are already there — setup-rtk.mjs formats the same file its own way)
 if command -v node >/dev/null 2>&1; then
   node -e '
     const fs = require("fs");

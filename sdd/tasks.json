@@ -732,6 +732,20 @@
           "tasks_done": 5
         }
       }
+    },
+    "spec-e-burgos-024-docs-site-redesign": {
+      "cycles": {
+        "cycle-01": {
+          "file": "sdd/specs/spec-e-burgos-024-docs-site-redesign/cycles/cycle-01/tasks.json",
+          "module": "docs-site-redesign",
+          "apps": [
+            "apps/docs-site"
+          ],
+          "status": "completed",
+          "tasks_total": 7,
+          "tasks_done": 7
+        }
+      }
     }
   }
 }

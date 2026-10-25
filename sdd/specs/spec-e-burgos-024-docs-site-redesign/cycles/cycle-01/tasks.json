@@ -1,0 +1,239 @@
+{
+  "$schema": "../../../../schemas/cycle-tasks.schema.json",
+  "spec": "spec-e-burgos-024-docs-site-redesign",
+  "cycle": 1,
+  "module": "docs-site-redesign",
+  "apps": [
+    "apps/docs-site"
+  ],
+  "flow": "lite",
+  "user_stories_generated": true,
+  "prerequisites": {
+    "tasks_generated": true
+  },
+  "tasks": [
+    {
+      "id": "TASK-001",
+      "title": "docs-site: i18n del generador (rutas /… y /en/…, diccionario de UI es/en, hreflang, lang, canonical, Open Graph, sitemap) y layout nuevo (header con repo, idioma y tema; sub-navegación de la guía; footer con repo y licencia)",
+      "user_stories": [
+        "US-024-101",
+        "US-024-102",
+        "US-024-105"
+      ],
+      "estimation_hours": 5,
+      "story_points": 8,
+      "depends_on": [],
+      "status": "done",
+      "files": [
+        "apps/docs-site/src/site-config.mjs",
+        "apps/docs-site/src/routes.mjs",
+        "apps/docs-site/src/routes.spec.mjs",
+        "apps/docs-site/src/i18n.mjs",
+        "apps/docs-site/src/icons.mjs",
+        "apps/docs-site/src/render.mjs",
+        "apps/docs-site/src/site-files.mjs",
+        "apps/docs-site/scripts/build.mjs",
+        "apps/docs-site/src/site.spec.mjs"
+      ],
+      "usage": {
+        "tokens_in": 45000,
+        "tokens_out": 10000,
+        "provider_model": "claude/opus",
+        "effort": "high",
+        "agent": "implementor-front",
+        "approx": true,
+        "source": "declared-estimate",
+        "recorded_at": "2026-10-25"
+      }
+    },
+    {
+      "id": "TASK-002",
+      "title": "docs-site: sistema visual (tokens claro/oscuro, Outfit auto-hospedada, componentes, animaciones con prefers-reduced-motion) y JS vanilla de mejora progresiva (tema, idioma recordado, menú móvil, reveal, tabs y stepper)",
+      "user_stories": [
+        "US-024-101"
+      ],
+      "estimation_hours": 5,
+      "story_points": 8,
+      "depends_on": [
+        "TASK-001"
+      ],
+      "status": "done",
+      "files": [
+        "apps/docs-site/src/styles.css",
+        "apps/docs-site/src/client/site.mjs",
+        "apps/docs-site/src/client/site-logic.mjs",
+        "apps/docs-site/src/client/site-logic.spec.mjs",
+        "apps/docs-site/public/fonts/outfit-400.woff2",
+        "apps/docs-site/public/fonts/outfit-600.woff2",
+        "apps/docs-site/public/fonts/outfit-700.woff2",
+        "apps/docs-site/public/fonts/OFL.txt",
+        "apps/docs-site/public/favicon.svg"
+      ],
+      "usage": {
+        "tokens_in": 50000,
+        "tokens_out": 14000,
+        "provider_model": "claude/opus",
+        "effort": "high",
+        "agent": "implementor-front",
+        "approx": true,
+        "source": "declared-estimate",
+        "recorded_at": "2026-10-25"
+      }
+    },
+    {
+      "id": "TASK-003",
+      "title": "docs-site: home rediseñada (hero, dos caminos, pipeline, código abierto) y páginas Cómo funciona (diagrama animado + stepper de los dos caminos con capturas reales) y Código abierto, en es y en",
+      "user_stories": [
+        "US-024-101",
+        "US-024-102",
+        "US-024-104"
+      ],
+      "estimation_hours": 5,
+      "story_points": 8,
+      "depends_on": [
+        "TASK-002"
+      ],
+      "status": "done",
+      "files": [
+        "apps/docs-site/src/components.mjs",
+        "apps/docs-site/src/content/journeys.mjs",
+        "apps/docs-site/src/content/home.mjs",
+        "apps/docs-site/src/content/how-it-works.mjs",
+        "apps/docs-site/src/content/open-source.mjs"
+      ],
+      "usage": {
+        "tokens_in": 50000,
+        "tokens_out": 12000,
+        "provider_model": "claude/opus",
+        "effort": "high",
+        "agent": "implementor-front",
+        "approx": true,
+        "source": "declared-estimate",
+        "recorded_at": "2026-10-25"
+      }
+    },
+    {
+      "id": "TASK-004",
+      "title": "docs-site: página Tecnología sobre un inventario de datos verificado por test contra THIRD_PARTY_NOTICES.md, node_modules y los subproyectos reales",
+      "user_stories": [
+        "US-024-103"
+      ],
+      "estimation_hours": 4,
+      "story_points": 5,
+      "depends_on": [
+        "TASK-001"
+      ],
+      "status": "done",
+      "files": [
+        "apps/docs-site/src/tech-inventory.mjs",
+        "apps/docs-site/src/tech-inventory.spec.mjs",
+        "apps/docs-site/src/content/technology.mjs"
+      ],
+      "usage": {
+        "tokens_in": 45000,
+        "tokens_out": 9000,
+        "provider_model": "claude/opus",
+        "effort": "high",
+        "agent": "implementor-front",
+        "approx": true,
+        "source": "declared-estimate",
+        "recorded_at": "2026-10-25"
+      }
+    },
+    {
+      "id": "TASK-005",
+      "title": "docs-site: versión en inglés de las páginas existentes (instalación, primer arranque, conectar la IA, usar el estudio, FAQ, licencias, privacidad) y paridad es/en verificada por test y por check-links",
+      "user_stories": [
+        "US-024-105"
+      ],
+      "estimation_hours": 5,
+      "story_points": 8,
+      "depends_on": [
+        "TASK-001"
+      ],
+      "status": "done",
+      "files": [
+        "apps/docs-site/src/content/installation.mjs",
+        "apps/docs-site/src/content/first-run.mjs",
+        "apps/docs-site/src/content/connect-ai.mjs",
+        "apps/docs-site/src/content/using-studio.mjs",
+        "apps/docs-site/src/content/faq.mjs",
+        "apps/docs-site/src/content/licenses.mjs",
+        "apps/docs-site/src/content/privacy.mjs",
+        "apps/docs-site/scripts/check-links.mjs",
+        "apps/docs-site/scripts/check-links.spec.mjs"
+      ],
+      "usage": {
+        "tokens_in": 55000,
+        "tokens_out": 11000,
+        "provider_model": "claude/opus",
+        "effort": "high",
+        "agent": "implementor-front",
+        "approx": true,
+        "source": "declared-estimate",
+        "recorded_at": "2026-10-25"
+      }
+    },
+    {
+      "id": "TASK-006",
+      "title": "repo: LICENSE MIT (Esteban Burgos) y README raíz para repo público",
+      "user_stories": [
+        "US-024-102"
+      ],
+      "estimation_hours": 1,
+      "story_points": 2,
+      "depends_on": [],
+      "status": "done",
+      "files": [
+        "LICENSE",
+        "README.md"
+      ],
+      "usage": {
+        "tokens_in": 5000,
+        "tokens_out": 1000,
+        "provider_model": "claude/opus",
+        "effort": "high",
+        "agent": "implementor-front",
+        "approx": true,
+        "source": "declared-estimate",
+        "recorded_at": "2026-10-25"
+      }
+    },
+    {
+      "id": "TASK-007",
+      "title": "docs-site: verificación (test, build, check-links, capturas Playwright desktop y mobile en los dos temas e idiomas) y cierre SDD",
+      "user_stories": [
+        "US-024-101",
+        "US-024-102",
+        "US-024-103",
+        "US-024-104",
+        "US-024-105"
+      ],
+      "estimation_hours": 2,
+      "story_points": 3,
+      "depends_on": [
+        "TASK-003",
+        "TASK-004",
+        "TASK-005",
+        "TASK-006"
+      ],
+      "status": "done",
+      "files": [
+        "apps/docs-site/scripts/serve-dist.mjs",
+        "apps/docs-site/scripts/capture-screenshots.mjs",
+        "apps/docs-site/scripts/smoke-interactions.mjs",
+        "apps/docs-site/vite.config.ts"
+      ],
+      "usage": {
+        "tokens_in": 20000,
+        "tokens_out": 3000,
+        "provider_model": "claude/opus",
+        "effort": "high",
+        "agent": "implementor-front",
+        "approx": true,
+        "source": "declared-estimate",
+        "recorded_at": "2026-10-25"
+      }
+    }
+  ]
+}

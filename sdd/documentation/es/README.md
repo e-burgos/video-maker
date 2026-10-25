@@ -128,7 +128,8 @@ sdd/
 │   ├── rebuild-catalog.mjs            ← Regenera el manifest del visor (pnpm sdd:rebuild-catalog)
 │   ├── setup-rtk.mjs                  ← Instala/mergea los hooks de rtk (pnpm sdd:rtk)
 │   ├── rtk-hook.mjs                   ← Puente que llaman los hooks; si falla, pasa el comando sin tocar
-│   └── rtk-common.mjs                 ← Helpers de rtk (versión fijada, resolución del binario)
+│   ├── rtk-common.mjs                 ← Helpers de rtk (versión fijada, resolución del binario)
+│   └── rule-zero-hook.mjs             ← Hook SessionStart (Claude Code): reinyecta la regla cero (modelo/esfuerzo/contexto)
 │
 ├── templates/                         ← Blueprints de scaffolding (NO son proyectos Nx)
 │   ├── nx-workspace/                  ← Config raíz: nx.json, package.json, npmrc, pnpm-workspace
@@ -310,7 +311,7 @@ pnpm sdd:gate <spec-id|slug> cycle-XX   # GATE B — ¿se puede escribir código
 pnpm sdd:gate <spec-id|slug> --json     # misma respuesta, estructurada para agentes
 ```
 
-El script imprime una línea por condición (✔/✘) y cierra en `APROBADO` o `BLOQUEADO`
+El script imprime una línea por condición (✔/✘) y cierra en `APPROVED` o `BLOCKED`
 (exit `0` si pasa, `1` si está bloqueado, `2` ante un error de uso). **No escribe nada:** solo
 responde. La salida se pega como reporte del gate.
 
@@ -324,7 +325,7 @@ responde. La salida se pega como reporte del gate.
 | A4  | Sus `depends_on` están `completed`                                          |
 | A5  | La spec no está `completed` ni `cancelled`                                  |
 
-`APROBADO` en A imprime además el próximo `cycle-XX`, el flow sugerido y el perfil activo. Recién
+`APPROVED` en A imprime además el próximo `cycle-XX`, el flow sugerido y el perfil activo. Recién
 ahí el orquestador crea `cycle.json` (`status: "in-progress"`, `flow`, `metrics` con
 `usage.by_agent: []`), mueve el módulo a `in_progress_modules` y, si es `cycle-01`, pasa la spec
 de `draft` a `in-progress`. Solo el reviewer lo pasa después a `status: "completed"`.
@@ -339,7 +340,7 @@ de `draft` a `in-progress`. Solo el reviewer lo pasa después a `status: "comple
 | B4  | Documentos del `flow`: full → brief/functional/planner/architect · reduced → brief · lite → plan.md |
 | B5  | `constitution.md` de cada subproyecto en `cycle.json → apps[]`                                       |
 
-**`BLOQUEADO` → cero líneas de código** hasta completar lo que el script señala.
+**`BLOCKED` → cero líneas de código** hasta completar lo que el script señala.
 
 ### Flow del ciclo — full · reduced · lite
 
@@ -1085,7 +1086,9 @@ acción del dev.
   reporta estado, `-- --disable` / `-- --enable` apagan y prenden.
 - **Hooks**: `.claude/settings.json` (`PreToolUse` sobre `Bash`) y `.gemini/settings.json`
   (`BeforeTool` sobre `run_shell_command`) — versionados, así que el equipo los recibe con un
-  `git pull`. Copilot y Antigravity todavía no tienen hook y funcionan igual sin él.
+  `git pull`. Copilot y Antigravity todavía no tienen hook y funcionan igual sin él. El kit
+  instala **solo** este hook: cualquier otro `PreToolUse` (por ejemplo `block-no-verify` de un
+  plugin de terceros) viene de la configuración o los plugins del usuario, no de `sdd/`.
 - **Best effort**: si el binario falta o el hook falla, el comando pasa sin comprimir; nunca
   bloquea. El binario se instala fuera del repo (`~/.local/bin`) y su historial es **por
   máquina**, así que el ahorro es el de quien corre el visor.
@@ -1206,6 +1209,22 @@ ls sdd/context/*/*/updates/*.md 2>/dev/null | wc -l
 ---
 
 ## Changelog
+
+### v5.6 (2026-10-07) — sdd-mod: el SDD dentro de Claude Code (opcional)
+
+- ✅ **Mod de Claude Code en el kit** (kit v0.16.0): `sdd/skills/sdd-mod/`. Claude Code lo carga
+  solo desde `.claude/skills/` cuando la carpeta del proyecto es de confianza — sin marketplace
+  ni instalación aparte. Viene **apagado**: `pnpm sdd:mod -- --enable` lo prende.
+- ✅ **Franja sobre el prompt** con el ciclo en curso (spec · ciclo · flow · tareas hechas) y
+  **`/sdd`** con el detalle de tareas y fixes abiertos.
+- ✅ **SPEC GATE aplicado a las ediciones**: sin un ciclo `in-progress` ni un fix abierto,
+  `Edit`/`Write`/`NotebookEdit` sobre código se rechazan (`gate: "block"`, default) o solo avisan
+  (`gate: "warn"`). `sdd/`, las carpetas de los arneses y el markdown raíz quedan libres; si el mod
+  no puede leer `sdd/`, deja pasar (la red sigue siendo `sdd:validate`). No cubre comandos de shell.
+- ✅ **Interruptor en `sdd/tools.json → claude_mod`** (schema estricto, protegido del `update
+  sdd`), releído en cada turno. Nueva entrada en el steward: Playbook 7.
+- ✅ **Los demás arneses no cambian**: `setup-agents` enlaza el mod solo en `.claude/`; Copilot,
+  Antigravity y Gemini CLI siguen las mismas reglas desde sus archivos.
 
 ### v5.5 (2026-09-06) — rtk activo por defecto, Costos en 4 pestañas con gráficos
 

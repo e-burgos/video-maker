@@ -8,6 +8,10 @@ const CONTENT_TYPES = {
   '.png': 'image/png',
   '.jpg': 'image/jpeg',
   '.svg': 'image/svg+xml',
+  '.js': 'text/javascript; charset=utf-8',
+  '.woff2': 'font/woff2',
+  '.xml': 'application/xml; charset=utf-8',
+  '.txt': 'text/plain; charset=utf-8',
 };
 
 function resolveRequestedPath(rootDir, requestUrl) {

@@ -8,6 +8,6 @@ export default defineConfig({
   test: {
     globals: false,
     environment: 'node',
-    include: ['functions/**/*.spec.mjs', 'scripts/**/*.spec.mjs'],
+    include: ['functions/**/*.spec.mjs', 'scripts/**/*.spec.mjs', 'src/**/*.spec.mjs'],
   },
 });

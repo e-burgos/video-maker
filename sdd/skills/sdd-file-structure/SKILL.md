@@ -602,7 +602,8 @@ fijas; la cuarta es **obligatoria** si el ciclo toca `schema.json`, `api.json` o
 
 Reglas: historias en 1–2 líneas cada una (sin narrativa), tasks en prosa espejo de
 `tasks.json` (`user_stories` puede ir `[]` si las historias no se numeran), nada de secciones
-extra — lo que no entra acá va a `artifacts/`.
+extra — lo que no entra acá va a `artifacts/`. `cycle.json → artifacts[]` lista archivos o
+directorios con ruta relativa al ciclo (`artifacts/…`); también vale la ruta desde la raíz del repo.
 
 ---
 
@@ -632,7 +633,7 @@ canónica del gate: `sdd/dual-harness/rules/sdd-gates.md`.
 
 ```
 SPEC GATE A:
-[ ] 1. pnpm sdd:gate <spec-id> → APROBADO (pegar la salida: A1–A5)
+[ ] 1. pnpm sdd:gate <spec-id> → APPROVED (pegar la salida: A1–A5)
 
 APERTURA (flow según profile / prefijo [LITE]|[FULL]):
 [ ] 2. Crear cycle-[XX]/cycle.json ← status: "in-progress", flow, metrics con contadores en 0
@@ -646,7 +647,7 @@ APERTURA (flow según profile / prefijo [LITE]|[FULL]):
 → full: invocar sdd-functional. lite: pnpm sdd:gate <spec-id> cycle-[XX] (GATE B) e implementar.
 ```
 
-> ⛔ Si el gate da BLOQUEADO → DETENER y comunicar qué falta. No continuar.
+> ⛔ Si el gate da BLOCKED → DETENER y comunicar qué falta. No continuar.
 
 ---
 
