@@ -252,7 +252,16 @@
       "completed_at": "2026-10-13"
     }
   ],
-  "in_progress_modules": [],
+  "in_progress_modules": [
+    {
+      "module": "docs-site-redesign",
+      "spec": "spec-e-burgos-024-docs-site-redesign",
+      "apps": [
+        "apps/docs-site"
+      ],
+      "description": "Rediseño visual de la web pública con identidad propia, acceso al repositorio de código abierto, página de tecnología con inventario y licencias verificadas, y guía interactiva del pipeline y de los dos caminos"
+    }
+  ],
   "pending_modules": [
     {
       "module": "scene-assembly",

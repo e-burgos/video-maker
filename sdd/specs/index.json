@@ -390,6 +390,22 @@
       "depends_on": [
         "spec-e-burgos-020-motion-mode"
       ]
+    },
+    {
+      "id": "spec-e-burgos-024-docs-site-redesign",
+      "author": "e-burgos",
+      "slug": "docs-site-redesign",
+      "folder": "sdd/specs/spec-e-burgos-024-docs-site-redesign",
+      "file": "sdd/specs/spec-e-burgos-024-docs-site-redesign/spec-e-burgos-024-docs-site-redesign.spec.md",
+      "module": "docs-site-redesign",
+      "app": "apps/docs-site",
+      "status": "in-progress",
+      "title": "Rediseño de la web, código abierto, inventario de tecnología y guía interactiva",
+      "created_at": "2026-10-25",
+      "completed_at": null,
+      "depends_on": [
+        "spec-e-burgos-017-desktop-app"
+      ]
     }
   ]
 }
