@@ -2,7 +2,7 @@ import { existsSync, readFileSync, readdirSync, statSync } from 'node:fs';
 import { dirname, join, resolve } from 'node:path';
 import { pathToFileURL } from 'node:url';
 
-import { DOWNLOAD_URL, SITE_URL, STABLE_DMG_FILE_NAME } from '../src/site-config.mjs';
+import { DOWNLOAD_URL, LOCALES, LOCALE_PATH_PREFIX, SITE_URL, STABLE_DMG_FILE_NAME } from '../src/site-config.mjs';
 
 const DOCS_SITE_ROOT = resolve(import.meta.dirname, '..');
 const REPO_ROOT = resolve(DOCS_SITE_ROOT, '..', '..');
@@ -46,6 +46,9 @@ export function classifyReference(reference) {
   if (/^https?:\/\//.test(reference)) {
     return 'external';
   }
+  if (/^(mailto|data|tel):/.test(reference)) {
+    return 'non-navigable';
+  }
   if (reference.startsWith('#')) {
     return 'fragment';
   }
@@ -59,6 +62,72 @@ function resolveInternalReference(reference, htmlFileDir) {
     return join(resolved, 'index.html');
   }
   return resolved;
+}
+
+export function extractAlternates(html) {
+  const alternates = [];
+  const linkPattern = /<link rel="alternate" hreflang="([^"]+)" href="([^"]+)" \/>/g;
+  let match = linkPattern.exec(html);
+  while (match !== null) {
+    alternates.push({ hreflang: match[1], href: match[2] });
+    match = linkPattern.exec(html);
+  }
+  return alternates;
+}
+
+export function extractHtmlLang(html) {
+  const match = /<html lang="([^"]+)"/.exec(html);
+  return match === null ? null : match[1];
+}
+
+export function sitePathForAbsoluteUrl(url) {
+  if (!url.startsWith(`${SITE_URL}/`)) {
+    return null;
+  }
+  return url.slice(SITE_URL.length + 1);
+}
+
+export function localeForSitePath(sitePath) {
+  const prefixed = LOCALES.find((locale) => LOCALE_PATH_PREFIX[locale] !== '' && sitePath.startsWith(LOCALE_PATH_PREFIX[locale]));
+  return prefixed ?? LOCALES.find((locale) => LOCALE_PATH_PREFIX[locale] === '');
+}
+
+function htmlFileForSitePath(distDir, sitePath) {
+  return join(distDir, sitePath, 'index.html');
+}
+
+export function checkLocaleAlternates(distDir, htmlFiles) {
+  const problems = [];
+  for (const htmlFile of htmlFiles) {
+    const html = readFileSync(htmlFile, 'utf8');
+    const ownSitePath = dirname(htmlFile).slice(distDir.length + 1);
+    const ownPath = ownSitePath === '' ? '' : `${ownSitePath}/`;
+    const expectedLang = localeForSitePath(ownPath);
+    if (extractHtmlLang(html) !== expectedLang) {
+      problems.push(`${ownPath || '/'}: <html lang> is ${extractHtmlLang(html)}, expected ${expectedLang}`);
+    }
+    const alternates = extractAlternates(html);
+    for (const locale of [...LOCALES, 'x-default']) {
+      const alternate = alternates.find((candidate) => candidate.hreflang === locale);
+      if (alternate === undefined) {
+        problems.push(`${ownPath || '/'}: missing hreflang="${locale}"`);
+        continue;
+      }
+      const targetPath = sitePathForAbsoluteUrl(alternate.href);
+      if (targetPath === null || !existsSync(htmlFileForSitePath(distDir, targetPath))) {
+        problems.push(`${ownPath || '/'}: hreflang="${locale}" points to a page that was not built (${alternate.href})`);
+        continue;
+      }
+      if (locale !== 'x-default' && localeForSitePath(targetPath) !== locale) {
+        problems.push(`${ownPath || '/'}: hreflang="${locale}" points to a ${localeForSitePath(targetPath)} page`);
+      }
+      const reciprocal = extractAlternates(readFileSync(htmlFileForSitePath(distDir, targetPath), 'utf8'));
+      if (!reciprocal.some((candidate) => sitePathForAbsoluteUrl(candidate.href) === ownPath)) {
+        problems.push(`${ownPath || '/'}: ${targetPath} does not link back with hreflang`);
+      }
+    }
+  }
+  return problems;
 }
 
 async function headStatus(url) {
@@ -88,7 +157,7 @@ export async function checkBuiltSite(distDir) {
     for (const reference of extractReferences(html)) {
       const kind = classifyReference(reference);
 
-      if (kind === 'fragment') {
+      if (kind === 'fragment' || kind === 'non-navigable') {
         continue;
       }
 
@@ -110,6 +179,7 @@ export async function checkBuiltSite(distDir) {
     }
   }
 
+  const localeProblems = checkLocaleAlternates(distDir, htmlFiles);
   const downloadUrlShapeOk = EXPECTED_DOWNLOAD_URL_PATTERN.test(DOWNLOAD_URL) && DOWNLOAD_URL.endsWith(STABLE_DMG_FILE_NAME);
 
   return {
@@ -118,6 +188,7 @@ export async function checkBuiltSite(distDir) {
     externalResults,
     downloadUrlFound,
     downloadUrlShapeOk,
+    localeProblems,
   };
 }
 
@@ -138,7 +209,12 @@ async function main() {
   log(`download URL present in the built site: ${report.downloadUrlFound}`);
   log(`download URL has the expected shape: ${report.downloadUrlShapeOk} (${DOWNLOAD_URL})`);
 
-  if (report.brokenInternal.length > 0 || !report.downloadUrlFound || !report.downloadUrlShapeOk) {
+  log(`hreflang / lang problems: ${report.localeProblems.length}`);
+  for (const problem of report.localeProblems) {
+    log(`  LOCALE: ${problem}`);
+  }
+
+  if (report.brokenInternal.length > 0 || report.localeProblems.length > 0 || !report.downloadUrlFound || !report.downloadUrlShapeOk) {
     process.exitCode = 1;
   }
 }

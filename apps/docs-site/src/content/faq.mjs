@@ -1,8 +1,9 @@
 import { APPLICATION_SUPPORT_PATH } from '../site-config.mjs';
 import { faqItem } from '../render.mjs';
+import { pageHref } from '../routes.mjs';
 
-export function renderPage() {
-  const bodyHtml = `
+function bodyEs(ctx) {
+  return `
 <h1>Preguntas frecuentes</h1>
 
 ${faqItem(
@@ -33,7 +34,12 @@ ${faqItem(
 
 ${faqItem(
   '¿Sale algo de mi material a internet?',
-  '<p>No. La transcripción, la generación de voz y el render final corren con binarios instalados localmente (ffmpeg, whisper.cpp, sherpa-onnx, Remotion). Lo único que sale de tu máquina es el texto de la conversación con el productor, hacia Claude o hacia OpenRouter, según cuál hayas conectado.</p>',
+  '<p>No. La transcripción, la generación de voz y el render final corren con binarios instalados localmente (ffmpeg, whisper.cpp, sherpa-onnx, Remotion, HyperFrames). Lo que sale de tu máquina es el texto de la conversación con el productor, hacia Claude o hacia OpenRouter según cuál hayas conectado — y, sólo si los usás, el texto de la locución hacia ElevenLabs y el video que elegís publicar hacia YouTube.</p>',
+)}
+
+${faqItem(
+  '¿El código es abierto?',
+  `<p>Sí, con licencia MIT. El repositorio, cómo correrlo y cómo contribuir están en <a href="${pageHref(ctx, 'open-source')}">Código abierto</a>; qué usa cada parte y con qué licencia, en <a href="${pageHref(ctx, 'technology')}">Tecnología</a>.</p>`,
 )}
 
 ${faqItem(
@@ -56,10 +62,83 @@ ${faqItem(
   '<p>Sí. El storyboard (la propuesta de escenas del video: qué se dice y qué se ve en cada una) se genera con el motor de IA que tengas conectado en Configuración — Claude Code u OpenRouter — así que no hace falta tener Claude para usarlo, alcanza con cualquiera de los dos.</p>',
 )}
 `;
+}
 
-  return {
+function bodyEn(ctx) {
+  return `
+<h1>Frequently asked questions</h1>
+
+${faqItem(
+  'Where do my material and my videos live?',
+  `<p>By default, in a folder inside <code>${APPLICATION_SUPPORT_PATH}</code> — you choose (or confirm) it on the
+first run, and you can change it later from the app menu ("Preferencias" → "Carpeta de proyectos…", the desktop
+menus are in Spanish). Every project is a folder with your raw material, what the producer makes and the final renders.</p>`,
+)}
+
+${faqItem(
+  'Where are the logs if something fails?',
+  `<p>From the app menu: "Ayuda" (Help) → "Abrir carpeta de logs" (Open logs folder). That is where the log of the
+local service doing the heavy lifting (transcription, rendering, etc.) lives — useful when reporting a problem.</p>`,
+)}
+
+${faqItem(
+  'How do I uninstall it completely?',
+  `<p>Three steps: (1) drag "Video Maker" from Applications to the Trash; (2) if you entered an OpenRouter key,
+open the "Keychain Access" app, find the <strong>"Video Maker"</strong> item and delete it; (3) if you also want to
+delete your projects and the downloaded models, delete the whole <code>${APPLICATION_SUPPORT_PATH}</code> folder — only
+do it if you do not mind losing your videos and their material.</p>`,
+)}
+
+${faqItem(
+  'How do I update to a new version?',
+  '<p>Download the newest .dmg from the same download page and drag it to Applications again, replacing the previous one. There is no auto-update (Electron’s ad hoc signature does not allow it on macOS) — your projects and settings are not touched, they live apart from the app.</p>',
+)}
+
+${faqItem(
+  'Does any of my material go to the internet?',
+  '<p>No. Transcription, voice generation and the final render run with binaries installed locally (ffmpeg, whisper.cpp, sherpa-onnx, Remotion, HyperFrames). What leaves your machine is the text of your conversation with the producer, to Claude or to OpenRouter depending on which one you connected — and, only if you use them, the voice-over text to ElevenLabs and the video you choose to publish to YouTube.</p>',
+)}
+
+${faqItem(
+  'Is the code open source?',
+  `<p>Yes, under the MIT license. The repository, how to run it and how to contribute are on <a href="${pageHref(ctx, 'open-source')}">Open source</a>; what each part uses and under which license, on <a href="${pageHref(ctx, 'technology')}">Technology</a>.</p>`,
+)}
+
+${faqItem(
+  'Why does the video not show the music credit?',
+  '<p>Because it fits better in the description. The brand tracks are by Kevin MacLeod under CC BY 4.0, which requires naming the author: the exact text appears below the player on the Motion page and in <code>out/video.credits.txt</code> in every project. Paste it into the description every time you publish the video.</p>',
+)}
+
+${faqItem(
+  'What do I need for a motion graphics video?',
+  '<p>A script and, if you like, a few photos with one line saying what they show. The AI builds the storyboard with the engine you connected (Claude with your subscription or OpenRouter); the voice, the music and the render run on your Mac. A one-minute video takes a few minutes for the storyboard and another five to ten for voice and rendering.</p>',
+)}
+
+${faqItem(
+  'How do I change something in a motion graphics video I already made?',
+  '<p>Open the video, tap "Adjust with the producer" and ask for the change in your own words (the music, a text, a line of the voice, the order of the scenes). The producer edits only those scenes and remakes the video; the voice is recorded again only where the text changed, so a small adjustment takes one or two minutes.</p>',
+)}
+
+${faqItem(
+  'Does the storyboard work without Claude?',
+  '<p>Yes. The storyboard (the proposed scenes of the video: what is said and what is shown in each one) is generated with the AI engine you connected in Settings — Claude Code or OpenRouter — so you do not need Claude to use it, either one is enough.</p>',
+)}
+`;
+}
+
+const PAGES = {
+  es: (ctx) => ({
     title: 'Preguntas frecuentes',
     description: 'Dónde vive tu material, cómo desinstalar Video Maker por completo y otras dudas frecuentes.',
-    bodyHtml,
-  };
+    bodyHtml: bodyEs(ctx),
+  }),
+  en: (ctx) => ({
+    title: 'FAQ',
+    description: 'Where your material lives, how to uninstall Video Maker completely and other common questions.',
+    bodyHtml: bodyEn(ctx),
+  }),
+};
+
+export function renderPage(ctx) {
+  return PAGES[ctx.locale](ctx);
 }
