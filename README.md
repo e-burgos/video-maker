@@ -11,6 +11,47 @@ voice, mixing and rendering run on your Mac.*
 - Cómo funciona: https://video.estebanburgos.com.ar/como-funciona/ · [How it works](https://video.estebanburgos.com.ar/en/how-it-works/)
 - Tecnología y licencias: https://video.estebanburgos.com.ar/tecnologia/ · [Technology](https://video.estebanburgos.com.ar/en/technology/)
 
+## Descargar
+
+La app de escritorio es para **macOS 13 o posterior, Apple Silicon (M1 o superior)**. Bajá el `.dmg` desde la
+[web](https://video.estebanburgos.com.ar) y seguí la guía de [instalación](https://video.estebanburgos.com.ar/instalacion/)
+(no tiene firma de Apple Developer, así que hay un paso extra la primera vez). Necesita un motor de IA: Claude Code con tu
+suscripción **o** una API key de OpenRouter.
+
+*Download the macOS Apple Silicon `.dmg` from the [website](https://video.estebanburgos.com.ar/en/); the
+[install guide](https://video.estebanburgos.com.ar/en/installation/) covers the first-run steps.*
+
+## Cómo se usa
+
+Dos caminos, los dos conversando con el productor de IA:
+
+1. **Motion graphics:** escribís el guion y sumás unas fotos; el estudio diseña las escenas animadas con tu marca,
+   genera la voz en español rioplatense y elige la música.
+2. **Material crudo:** soltás tus grabaciones; el estudio poda silencios, sube subtítulos animados, arma el B-roll por
+   las palabras clave de la locución y mezcla la música con ducking.
+
+En los dos, el pipeline es el mismo: **idea o guion → voz → escenas → música → render a MP4** (vertical 9:16 o
+horizontal 16:9). La web tiene un recorrido interactivo paso a paso:
+[Cómo funciona](https://video.estebanburgos.com.ar/como-funciona/) · [How it works](https://video.estebanburgos.com.ar/en/how-it-works/).
+
+## Qué usa por dentro
+
+Todo el procesamiento pesado corre en la máquina del usuario; solo el texto que se le pasa a la IA sale de ella.
+
+| Capa | Tecnología |
+| --- | --- |
+| Escritorio y estudio | Electron, React 19, Vite, Tailwind |
+| Render y composición | Remotion 4, HyperFrames (motion graphics) |
+| Audio y video | FFmpeg / ffprobe |
+| Transcripción | whisper.cpp |
+| Voz | Piper y sherpa-onnx (voces en español rioplatense) |
+| Productor de IA | Claude Code u OpenRouter |
+| Datos | SQLite local, esquemas con Zod |
+| Monorepo | Nx, pnpm, TypeScript estricto, Vitest |
+
+El inventario completo, con qué hace cada pieza y su licencia, está en la página de
+[Tecnología](https://video.estebanburgos.com.ar/tecnologia/) · [Technology](https://video.estebanburgos.com.ar/en/technology/).
+
 ## Qué hay en el repo
 
 Monorepo [Nx](https://nx.dev) con pnpm, todo en TypeScript estricto.
@@ -50,12 +91,27 @@ El productor usa Claude Code (CLI `claude` con tu suscripción) u OpenRouter (tu
 
 La app de escritorio: `pnpm desktop:dist` (macOS Apple Silicon).
 
+La web pública (`apps/docs-site`) es HTML estático y bilingüe (es en la raíz, en `/en/`):
+
+```bash
+pnpm nx build docs-site         # genera dist/apps/docs-site (22 páginas)
+pnpm nx test docs-site          # tests, incluida la paridad es/en
+```
+
+## Skills para agentes
+
+Si usás Claude Code (u otro agente compatible), el repo trae skills listas en `.claude/skills/`:
+`video-producer` (producir un video conversando), `motion-studio` (motion graphics con la marca) y
+`video-maker-material-contract` (cómo preparar el material desde otro proyecto).
+
 ## Contribuir
 
 1. Abrí un [issue](https://github.com/e-burgos/video-maker/issues) con el problema o la idea.
 2. El repo usa **Spec-Driven Development**: las funcionalidades nacen de una spec en `sdd/specs/` y los arreglos se
    registran en `sdd/fixes.json`. Punto de entrada: [`sdd/context/context_prompt.md`](sdd/context/context_prompt.md)
    (también para agentes: `AGENTS.md` / `CLAUDE.md` / `GEMINI.md`).
+   El kit SDD está en la versión 0.16.1 e incluye la Regla Cero (declarar modelo y esfuerzo antes de actuar) y el mod
+   opcional `sdd-mod`; `pnpm setup:agents` deja listos los arneses de Claude, Gemini y Copilot.
 3. Código sin comentarios narrativos: nombres declarativos y funciones cortas.
 4. Antes del PR, todo en verde:
 
