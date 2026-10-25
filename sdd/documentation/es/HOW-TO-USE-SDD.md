@@ -127,6 +127,27 @@ antes de que el agente la lea: 60–90% menos texto, sin tocar la lectura de arc
 está, el comando corre igual, sin comprimir. El ahorro se ve con `rtk gain --project` o en
 `pnpm sdd:docs` → Costos → pestaña **RTK** (números por máquina y estimados).
 
+### sdd-mod — el SDD dentro de Claude Code (opcional, apagado por defecto)
+
+Solo para quien usa Claude Code. `sdd/skills/sdd-mod/` es un mod que Claude Code carga solo
+desde `.claude/skills/` (cuando la carpeta del proyecto es de confianza). Prendido, muestra una
+franja sobre el prompt con el ciclo en curso (spec · ciclo · flow · tareas hechas), suma `/sdd`
+con el detalle de tareas y fixes abiertos, y aplica el SPEC GATE a las ediciones de código: sin
+un ciclo `in-progress` ni un fix abierto, `Edit`/`Write` sobre código se rechazan (o solo
+avisan, con `--gate=warn`). `sdd/`, las carpetas de los arneses y el markdown de la raíz quedan
+libres.
+
+```bash
+pnpm sdd:mod -- --status       # prendido/apagado, modo del gate, link en .claude/skills
+pnpm sdd:mod -- --enable       # prenderlo (se relee en cada turno, sin reiniciar)
+pnpm sdd:mod -- --gate=warn    # avisar en vez de bloquear (block es el default)
+pnpm sdd:mod -- --disable      # apagarlo
+```
+
+Copilot, Gemini y el resto de los agentes no lo ven y no cambian: siguen las mismas reglas desde
+`AGENTS.md`/`GEMINI.md`/`copilot-instructions.md`, y `pnpm sdd:validate` sigue siendo la red de
+seguridad común en CI. El gate del mod no cubre comandos de shell.
+
 ---
 
 ## 3. Flujo normal — Funcionalidad nueva
@@ -137,11 +158,11 @@ Antes de empezar, correr el **SPEC GATE A** sobre la spec: contesta el estado en
 salida, sin leer registros a mano.
 
 ```bash
-pnpm sdd:gate <spec-id|slug>    # una línea por condición (✔/✘) + APROBADO / BLOQUEADO
+pnpm sdd:gate <spec-id|slug>    # una línea por condición (✔/✘) + APPROVED / BLOCKED
 cat sdd/global.json             # si querés el estado crudo
 ```
 
-`BLOQUEADO` → completar lo que el script señala antes de seguir. `APROBADO` → imprime además el
+`BLOCKED` → completar lo que el script señala antes de seguir. `APPROVED` → imprime además el
 próximo `cycle-XX`, el flow sugerido y el perfil activo. **Pegar la salida** como reporte del gate
 en el mensaje al Orquestador.
 
@@ -173,7 +194,7 @@ Referencias adjuntas:
 ```
 
 **El Orquestador genera automáticamente** (después de correr `pnpm sdd:gate <spec-id>` y pegar
-su salida en `APROBADO`; si la spec todavía no existe, primero la crea y la registra):
+su salida en `APPROVED`; si la spec todavía no existe, primero la crea y la registra):
 
 1. El archivo de spec `.spec.md` con objetivo, contexto, alcance y criterios de aceptación.
 2. La entrada correspondiente en `sdd/specs/index.json`.
@@ -237,7 +258,9 @@ El Arquitecto lee `functional.md`, `brief.yaml`, `sdd/schema.json` y `sdd/api.js
 **El dev revisa ambos documentos.** Si hay inconsistencias entre planner y architect (ej. una task menciona un endpoint que el arquitecto no definió), se le indica a cada agente que lo corrija.
 
 > Documentos de apoyo (diagramas, ejemplos de endpoints, exploración de código) que el Arquitecto genere:
-> → guardar **siempre** en `cycle-01/artifacts/` y referenciar en `cycle.json["artifacts"]`.
+> → guardar **siempre** en `cycle-01/artifacts/` y referenciar en `cycle.json["artifacts"]` con la
+> ruta relativa al ciclo (`artifacts/api-samples/`); se aceptan directorios, y también la ruta desde
+> la raíz del repo.
 
 ---
 
@@ -250,7 +273,7 @@ el **SPEC GATE B**:
 pnpm sdd:gate <spec-id|slug> cycle-01   # lee el flow del ciclo y exige los documentos de ESE flow
 ```
 
-`BLOQUEADO` → cero código hasta completar lo que falta. Con `APROBADO` (pegar la salida) se
+`BLOCKED` → cero código hasta completar lo que falta. Con `APPROVED` (pegar la salida) se
 invocan los implementadores **task por task**. Una task por conversación, sin agrupar. El stack lo
 define la `constitution.md` del subproyecto.
 
@@ -337,7 +360,7 @@ el `flow` que tienen escrito en su `cycle.json`.
 
 **Cómo es el ciclo:**
 
-1. `pnpm sdd:gate <spec-id>` → `APROBADO` (mismo GATE A que en `full`; pegar la salida).
+1. `pnpm sdd:gate <spec-id>` → `APPROVED` (mismo GATE A que en `full`; pegar la salida).
 2. Abrir `cycle.json` con `status: "in-progress"`, `flow: "lite"` y `metrics` con
    `usage.by_agent: []`; mover el módulo a `in_progress_modules`.
 3. Escribir **`plan.md`**, que reemplaza a `brief.yaml` + `functional.md` + `planner.md` +
@@ -347,7 +370,7 @@ el `flow` que tienen escrito en su `cycle.json`.
    que en `full`).
 4. Crear `tasks.json` con `flow: "lite"` (`user_stories` puede ir `[]`) y correr
    `pnpm sdd:rebuild-tasks-index`.
-5. `pnpm sdd:gate <spec-id> cycle-XX` → `APROBADO` (GATE B) y recién ahí implementar, una task a
+5. `pnpm sdd:gate <spec-id> cycle-XX` → `APPROVED` (GATE B) y recién ahí implementar, una task a
    la vez, cada una a `done` con su `usage`.
 6. Cerrar como reviewer: `pnpm sdd:validate` en verde, `cycle.json` en `completed` con
    `reviewer_report`, CONTEXTO GATE (fragmento aditivo) y MEMORIA GATE si hubo lección.
@@ -603,7 +626,7 @@ pnpm sdd:gate <spec-id|slug> --json     # misma respuesta, estructurada para age
   brief/functional/planner/architect · reduced → brief · lite → `plan.md`) · B5 `constitution.md`
   de cada subproyecto de `cycle.json → apps[]`.
 
-**`BLOQUEADO` → DETENER. Completar lo que el script señala antes de continuar** (exit `0` pasa,
+**`BLOCKED` → DETENER. Completar lo que el script señala antes de continuar** (exit `0` pasa,
 `1` bloqueado, `2` error de uso). Los cuatro invariantes valen en todo flow y todo perfil: spec
 registrada, módulo en `global.json`, `cycle.json` in-progress antes del código, `tasks.json` con
 tasks y ninguna task `done` sin su `usage`.
@@ -645,9 +668,10 @@ Y si el punto 4 es NO, hay un error: los base solo los toca la consolidación (v
   (`pnpm sdd:rtk -- --disable` es decisión del dev).
 - **Invariantes del workspace** (los garantiza la skill `init-nx-workspace`, y romperlos falla en
   silencio): pnpm es el único package manager; los proyectos viven en `apps/`, `libs/` y `tools/`
-  —nunca en `packages/`—; `customConditions` de `tsconfig.base.json` es **idéntico** al `name` del
-  `package.json` raíz; y `.nxignore` contiene `sdd/templates` para que los blueprints no entren al
-  project graph.
+  —nunca en `packages/`—; si el repo usa el TS solution setup, `customConditions` de
+  `tsconfig.base.json` es **idéntico** al `name` del `package.json` raíz (el template del kit usa
+  `paths` y no lo declara; `sdd:validate` avisa si divergen); y `.nxignore` contiene
+  `sdd/templates` para que los blueprints no entren al project graph.
 - **El nombre y la descripción del proyecto viven SOLO en `sdd/global.json`** (`project` /
   `description`). Ningún otro archivo de `sdd/` los hardcodea — eso es lo que mantiene `sdd/`
   portable, y `pnpm sdd:validate` falla si el valor se filtra a los documentos del kit.
@@ -915,13 +939,13 @@ refresh manual.
 │                                                                 │
 │  Dev pide con [LITE] (o global.json → profile: "solo")         │
 │         ↓                                                       │
-│  pnpm sdd:gate <spec-id>  → GATE A APROBADO                    │
+│  pnpm sdd:gate <spec-id>  → GATE A APPROVED                    │
 │         ↓                                                       │
 │  UN SOLO ACTOR → cycle.json (in-progress, flow "lite")         │
 │                → plan.md (reemplaza brief/functional/          │
 │                  planner/architect) + tasks.json                │
 │         ↓                                                       │
-│  pnpm sdd:gate <spec-id> cycle-XX → GATE B APROBADO            │
+│  pnpm sdd:gate <spec-id> cycle-XX → GATE B APPROVED            │
 │         ↓                                                       │
 │  Implementa task por task (done + usage en cada una)            │
 │         ↓                                                       │

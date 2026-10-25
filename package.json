@@ -28,7 +28,8 @@
     "sdd:rtk": "node sdd/scripts/setup-rtk.mjs",
     "postinstall": "node -e \"const f='sdd/scripts/setup-rtk.mjs';if(require('fs').existsSync(f)){require('child_process').execFileSync(process.execPath,[f],{stdio:'inherit'})}\"",
     "sdd:gate": "node sdd/scripts/spec-gate.mjs",
-    "motion-editor": "nx dev motion-editor"
+    "motion-editor": "nx dev motion-editor",
+    "sdd:mod": "node sdd/scripts/sdd-mod.mjs"
   },
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.30.1",
