@@ -128,7 +128,8 @@ sdd/
 │   ├── rebuild-catalog.mjs            ← Regenerates the viewer manifest (pnpm sdd:rebuild-catalog)
 │   ├── setup-rtk.mjs                  ← Installs/merges the rtk hooks (pnpm sdd:rtk)
 │   ├── rtk-hook.mjs                   ← Bridge the hooks call; on any failure the command passes through
-│   └── rtk-common.mjs                 ← rtk helpers (pinned version, binary resolution)
+│   ├── rtk-common.mjs                 ← rtk helpers (pinned version, binary resolution)
+│   └── rule-zero-hook.mjs             ← SessionStart hook (Claude Code): re-injects rule zero (model/effort/context)
 │
 ├── templates/                         ← Scaffolding blueprints (NOT Nx projects)
 │   ├── nx-workspace/                  ← Root config: nx.json, package.json, npmrc, pnpm-workspace
@@ -310,7 +311,7 @@ pnpm sdd:gate <spec-id|slug> cycle-XX   # GATE B — can code be written? (whoev
 pnpm sdd:gate <spec-id|slug> --json     # same answer, structured for agents
 ```
 
-The script prints one line per condition (✔/✘) and ends in `APROBADO` or `BLOQUEADO`
+The script prints one line per condition (✔/✘) and ends in `APPROVED` or `BLOCKED`
 (exit `0` when it passes, `1` when blocked, `2` on a usage error). **It writes nothing:** it only
 answers. Paste its output as the gate report.
 
@@ -324,7 +325,7 @@ answers. Paste its output as the gate report.
 | A4  | Its `depends_on` are `completed`                                               |
 | A5  | The spec is neither `completed` nor `cancelled`                                |
 
-`APROBADO` in A also prints the next `cycle-XX`, the suggested flow and the active profile. Only
+`APPROVED` in A also prints the next `cycle-XX`, the suggested flow and the active profile. Only
 then does the orchestrator create `cycle.json` (`status: "in-progress"`, `flow`, `metrics` with
 `usage.by_agent: []`), move the module to `in_progress_modules` and, if it is `cycle-01`, move the
 spec from `draft` to `in-progress`. Only the reviewer later moves it to `status: "completed"`.
@@ -339,7 +340,7 @@ spec from `draft` to `in-progress`. Only the reviewer later moves it to `status:
 | B4  | Documents of the `flow`: full → brief/functional/planner/architect · reduced → brief · lite → plan.md |
 | B5  | `constitution.md` for every subproject in `cycle.json → apps[]`                                         |
 
-**`BLOQUEADO` → zero lines of code** until what the script points at is completed.
+**`BLOCKED` → zero lines of code** until what the script points at is completed.
 
 ### Cycle flow — full · reduced · lite
 
@@ -1084,7 +1085,9 @@ reading is untouched. It ships **on by default since kit v0.12.0**, with zero de
   reports the state, `-- --disable` / `-- --enable` turn it off and on.
 - **Hooks**: `.claude/settings.json` (`PreToolUse` on `Bash`) and `.gemini/settings.json`
   (`BeforeTool` on `run_shell_command`) — versioned files, so the whole team gets them with a
-  `git pull`. Copilot and Antigravity have no hook yet and work exactly the same without it.
+  `git pull`. Copilot and Antigravity have no hook yet and work exactly the same without it. The
+  kit installs **only** this hook: any other `PreToolUse` (for instance `block-no-verify` from a
+  third-party plugin) comes from the user's own settings or plugins, not from `sdd/`.
 - **Best effort**: if the binary is missing or the hook fails, the command runs uncompressed; it
   never blocks. The binary is installed outside the repo (`~/.local/bin`) and its history is
   **per machine**, so the savings shown are those of whoever runs the viewer.
@@ -1208,7 +1211,7 @@ ls sdd/context/*/*/updates/*.md 2>/dev/null | wc -l
 
 > The version history below is kept in Spanish in
 > [documentation/es/README.md](../es/README.md#changelog) — it is the historical record of how
-> this system evolved (rtk on by default plus the 4-tab Costs dashboard with charts in v5.5,
+> this system evolved (the optional Claude Code mod `sdd-mod` — cycle band, `/sdd` and the SPEC GATE on edits — in v5.6, rtk on by default plus the 4-tab Costs dashboard with charts in v5.5,
 > mandatory telemetry with declared estimates — `approx`/`source` — and
 > `skipped` counted as resolved in v5.4, Gemini/Antigravity as a third harness provider with
 > provider-namespaced cost telemetry and a bilingual viewer in v5.3, skills back to uppercase `SKILL.md` — the Agent

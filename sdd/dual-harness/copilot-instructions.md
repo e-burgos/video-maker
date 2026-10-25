@@ -14,10 +14,13 @@ de cualquier cambio; al iniciar sesión leer también `sdd/memory/lessons.md`.
 
 Reglas mínimas no negociables:
 
+0. **REGLA CERO** (⓪ de AGENTS.md): antes de cualquier acción de una tarea nueva, una línea
+   visible `Regla cero → tier · modelo · esfuerzo`; el tier más barato que cumpla.
+
 1. **SPEC GATE** (fuente: `sdd/dual-harness/rules/sdd-gates.md`): ninguna línea de código de
    implementación sin spec registrada, `cycle.json` in-progress y `tasks.json`. Lo responde un
    comando: `pnpm sdd:gate <spec-id>` (abrir ciclo) · `pnpm sdd:gate <spec-id> cycle-XX`
-   (implementar). `BLOQUEADO` = cero código.
+   (implementar). `BLOCKED` = cero código.
 2. **Flow del ciclo**: `full` (brief/functional/planner/architect), `reduced` o `lite` (un solo
    actor, `plan.md`). Lo fija `sdd/global.json → profile` (`team`/`solo`) o el prefijo
    `[LITE]`/`[FULL]`; queda escrito en `cycle.json → flow`.

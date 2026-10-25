@@ -3,6 +3,7 @@
 // plus cross-registry consistency rules. Run with: pnpm sdd:validate
 // Exits non-zero on any error so it can gate CI or a pre-commit hook.
 import { readFileSync, readdirSync, existsSync } from 'fs';
+import { createHash } from 'crypto';
 import { join, resolve } from 'path';
 import { fileURLToPath } from 'url';
 import { execFileSync } from 'child_process';
@@ -10,6 +11,19 @@ import Ajv from 'ajv';
 import addFormats from 'ajv-formats';
 
 const __dirname = fileURLToPath(new URL('.', import.meta.url));
+
+/** CRLF -> LF for text content (a NUL byte in the first 8 KB means binary: untouched). */
+function normalizeEol(content) {
+  if (content.subarray(0, 8192).includes(0)) return content;
+  if (!content.includes(0x0d)) return content;
+  const out = Buffer.allocUnsafe(content.length);
+  let j = 0;
+  for (let i = 0; i < content.length; i++) {
+    if (content[i] === 0x0d && content[i + 1] === 0x0a) continue;
+    out[j++] = content[i];
+  }
+  return out.subarray(0, j);
+}
 const SDD = resolve(__dirname, '..');
 const REPO = resolve(SDD, '..');
 
@@ -361,9 +375,11 @@ for (const [file, c] of cycles) {
         `flow: lite created ${c.tables_created.length} table(s) / ${c.endpoints_implemented.length} endpoint(s) — contracts other subprojects consume deserve a full cycle: open the next cycle of this spec as flow: full`,
       );
   }
+  // artifacts[]: paths relative to the cycle directory (`artifacts/x`, what the docs suggest)
+  // or to the repo root; a directory counts. Until v0.15.0 only repo-relative paths resolved.
   for (const art of c.artifacts) {
-    if (!existsSync(join(REPO, art)))
-      fail(file, `artifact does not exist: ${art}`);
+    if (!existsSync(join(cycleDir, art)) && !existsSync(join(REPO, art)))
+      fail(file, `artifact does not exist: ${art} (looked relative to the cycle directory and to the repo root)`);
   }
 }
 
@@ -617,10 +633,71 @@ if (existsSync(join(SDD, 'tools.json'))) {
   validate('tools.json', 'tools.schema.json');
 }
 
+// ---- 12b. Rule zero (model/effort/context) — warning only: repos from before v0.17 lack it ----
+{
+  const START = '<!-- regla-cero:start -->';
+  const END = '<!-- regla-cero:end -->';
+  for (const name of ['CLAUDE.md', 'AGENTS.md', 'GEMINI.md']) {
+    const file = join(REPO, name);
+    if (!existsSync(file)) continue;
+    const text = readFileSync(file, 'utf8');
+    if (!text.includes(START) || !text.includes(END))
+      warn(
+        name,
+        'rule-zero block (<!-- regla-cero:start/end -->) is missing — run `harness update sdd` (a hybrid file keeps your copy; the kit version lands next to it as *.new)',
+      );
+  }
+  const claudeSettings = join(REPO, '.claude', 'settings.json');
+  if (existsSync(join(REPO, '.claude'))) {
+    let installed = false;
+    try {
+      const hooks = JSON.parse(readFileSync(claudeSettings, 'utf8').replace(/^﻿/, ''))?.hooks?.SessionStart;
+      installed =
+        Array.isArray(hooks) &&
+        hooks.some((entry) =>
+          (entry?.hooks ?? []).some((h) => typeof h?.command === 'string' && h.command.includes('rule-zero-hook.mjs')),
+        );
+    } catch {
+      // missing or non-JSON settings: reported as not installed below
+    }
+    if (!installed)
+      warn(
+        '.claude/settings.json',
+        'SessionStart hook for rule zero is missing — run `pnpm setup:agents` (installs sdd/scripts/rule-zero-hook.mjs so the model/effort rule is re-injected on every session start)',
+      );
+  }
+}
+
+// ---- 13. Workspace invariant promised by init-nx-workspace (TS solution setup only) ----
+// When tsconfig.base.json declares `customConditions`, Nx keys every lib's conditional exports
+// with the root package.json `name`: if they differ, TypeScript resolves to dist instead of src.
+// The kit's own nx-workspace template uses legacy `paths` and has no customConditions, so a
+// repo generated from it is not checked. Warning, not failure: the kit never breaks a repo
+// over a workspace setting it did not write.
+{
+  const tsBase = join(REPO, 'tsconfig.base.json');
+  const rootPkg = join(REPO, 'package.json');
+  if (existsSync(tsBase) && existsSync(rootPkg)) {
+    try {
+      const conditions = JSON.parse(readFileSync(tsBase, 'utf8'))?.compilerOptions?.customConditions;
+      const name = JSON.parse(readFileSync(rootPkg, 'utf8'))?.name;
+      if (Array.isArray(conditions) && typeof name === 'string' && !conditions.includes(name))
+        warn(
+          'tsconfig.base.json',
+          `customConditions [${conditions.join(', ')}] does not include the root package.json name "${name}" — with the TS solution setup Nx keys the libs' conditional exports with that name, so types resolve to dist instead of src (init-nx-workspace invariant)`,
+        );
+    } catch {
+      // JSONC or a file the kit does not own: nothing to check.
+    }
+  }
+}
+
 // ---- Content catalog: schema + freshness vs filesystem (viewer depends on it) ----
 const catalogJson = validate('catalog.json', 'catalog.schema.json');
 if (catalogJson) {
-  const { buildCatalog } = await import(join(__dirname, 'rebuild-catalog.mjs'));
+  // A URL, not a path: Node's ESM loader rejects absolute Windows paths ("C:\..." is read as
+  // protocol "c:" — ERR_UNSUPPORTED_ESM_URL_SCHEME). On POSIX a bare path only worked by accident.
+  const { buildCatalog } = await import(new URL('./rebuild-catalog.mjs', import.meta.url));
   const expected = buildCatalog();
   for (const section of ['agents', 'skills', 'prompts', 'schemas', 'memory']) {
     const have = JSON.stringify(catalogJson[section] ?? []);
@@ -676,10 +753,34 @@ if (globalJson) {
     ([, value]) => typeof value === 'string' && value.trim().length >= 5,
   );
 
+  // A kit file that is byte-identical to what the kit shipped CANNOT have leaked the
+  // project name: whatever it says, it said before this repo existed. Skipping those
+  // kills a whole class of false positives — a project named `legacy`, `example` or
+  // `catalog` used to fail here because the kit's own prose contains the word — without
+  // weakening the rule: a generator writing the name into a kit file changes its hash,
+  // so it is still caught. Installs with no manifest keep the previous behaviour.
+  let pristine = new Set();
+  const manifestPath = join(SDD, 'kit.json');
+  if (existsSync(manifestPath)) {
+    try {
+      const manifest = JSON.parse(readFileSync(manifestPath, 'utf8'));
+      for (const [rel, hash] of Object.entries(manifest.files ?? {})) {
+        const abs = join(SDD, rel);
+        if (!existsSync(abs)) continue;
+        // Same rule as the CLI's kit-manifest: CRLF folded to LF for text files, so a Windows
+        // checkout with core.autocrlf=true still matches the hash the kit shipped.
+        const actual = createHash('sha256').update(normalizeEol(readFileSync(abs))).digest('hex');
+        if (actual === hash) pristine.add(abs);
+      }
+    } catch {
+      pristine = new Set();
+    }
+  }
+
   const kitFiles = [
     ...KIT_FILES.map((file) => join(SDD, file)),
     ...KIT_DIRS.flatMap((dir) => walkTextFiles(join(SDD, dir))),
-  ].filter((path) => existsSync(path));
+  ].filter((path) => existsSync(path) && !pristine.has(path));
 
   // Word-boundary match: a project named "shop" must not be reported because an app is
   // called "shop-api", and a subproject legitimately named after the repo is not a leak.

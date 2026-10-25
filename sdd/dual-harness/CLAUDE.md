@@ -12,11 +12,37 @@ Por favor, lee este archivo antes de realizar cualquier cambio en el repositorio
 
 ---
 
+<!-- regla-cero:start -->
+## ⓪ REGLA CERO — modelo, esfuerzo y contexto (INVIOLABLE, antes de cualquier acción)
+
+> [!IMPORTANT]
+> **Antes de CUALQUIER acción de una tarea nueva —incluida la primera de la sesión, antes de
+> verificar el workspace, leer archivos o editar— escribí UNA línea visible:**
+>
+> `Regla cero → tier: <económico|estándar|alto|máximo> · modelo: <…> · esfuerzo: <…>`
+>
+> Sin esa línea no se empieza. Tabla de tiers y detalle: sección «⚙️ Selección de modelo y
+> esfuerzo» (anexo de esta regla, más abajo).
+
+- **Subagentes y workflows:** cada `Agent`/`Workflow` lleva `model` Y `effort` explícitos y los
+  declarás en la misma línea (tier + modelo + esfuerzo de cada uno). Fan-out de lectores →
+  económico; la síntesis → alto. Nunca un fleet entero en el tier caro por defecto.
+- **Modelo activo del main loop:** si es MÁS caro que el tier que pide el trabajo (p. ej. opus
+  para leer estado o editar mecánico), delegá ese trabajo a un subagente más barato o pedile al
+  usuario `/model` y `/effort`; nunca quemes en silencio el tier caro. Si es MÁS barato que el
+  necesario, avisá y escalá (subagente `opus`/`high` o `/model`).
+- **Contexto mínimo:** si existe `graphify-out/graph.json`, consultalo antes de grep/lecturas a
+  ciegas; no releas lo ya establecido en la sesión ni narres opciones que no vas a seguir.
+<!-- regla-cero:end -->
+
+---
+
 ## 🚀 Estructura del workspace — skill `init-nx-workspace` (AL INICIAR SESIÓN)
 
 > [!IMPORTANT]
-> **Al iniciar cualquier sesión, antes de la primera acción, verificá que el workspace esté
-> montado.** Es un solo comando y define si podés trabajar o si primero hay que inicializar:
+> **Primero la regla cero (⓪, arriba): su línea de declaración va antes que cualquier acción,
+> incluido este chequeo.** Después, antes de la primera acción de trabajo, verificá que el
+> workspace esté montado. Es un solo comando y define si podés trabajar o si primero hay que inicializar:
 >
 > ```bash
 > ls nx.json pnpm-workspace.yaml .npmrc .nxignore 2>&1; ls package-lock.json yarn.lock 2>/dev/null
@@ -36,8 +62,11 @@ Invariantes que la skill garantiza y que **ningún cambio puede romper**:
   `npm install` ni `yarn` en este repo — generan un lockfile rival y Nx infiere el PM del lockfile.
 - **Los proyectos viven en `apps/`, `libs/` y `tools/`** — nunca en `packages/`. Los globs de
   `pnpm-workspace.yaml` y todo el sistema SDD asumen eso.
-- **`customConditions` de `tsconfig.base.json` === `name` del `package.json` raíz.** Nx lo deriva
-  literal de ahí; si divergen, TypeScript resuelve a `dist` en vez de a `src`.
+- **Si el repo usa el TS solution setup (`customConditions` en `tsconfig.base.json`), ese valor
+  === `name` del `package.json` raíz.** Nx lo deriva literal de ahí; si divergen, TypeScript
+  resuelve a `dist` en vez de a `src`. El template del kit (`sdd/templates/nx-workspace/`) usa el
+  wiring legacy `paths` y no declara `customConditions`: ahí no aplica. `pnpm sdd:validate` avisa
+  si divergen.
 - **`.nxignore` contiene `sdd/templates`** — son blueprints, no proyectos Nx.
 - **Crear apps/libs es otra skill:** `scaffold-nx`, y siempre dentro de un ciclo SDD.
 
@@ -78,7 +107,20 @@ transparente: pedís `git status` y se ejecuta `rtk git status`.
   effort y por máquina: sin binario o con hook roto el comando pasa **sin comprimir** y nunca
   se bloquea.
 
-## ⚙️ Selección de modelo y esfuerzo (OBLIGATORIO — optimización de tokens/contexto)
+## 🧩 sdd-mod — el SDD dentro de Claude Code (OPCIONAL, apagado por defecto)
+
+`sdd/skills/sdd-mod/` es un mod de Claude Code que se carga solo desde `.claude/skills/`. Con
+`claude_mod.enabled: true` en `sdd/tools.json` muestra el ciclo en curso sobre el prompt, suma
+`/sdd` y aplica el SPEC GATE a `Edit`/`Write`/`NotebookEdit` sobre código.
+
+- **Si una edición vuelve rechazada con `SPEC GATE: …`**, no la reintentes ni la rodees con
+  comandos de shell: no hay ciclo `in-progress` ni fix abierto. Seguí el camino que indica el
+  mensaje (abrir el ciclo vía `sdd-orchestrator`, o el FIX GATE).
+- **Nunca lo prendas, apagues ni cambies su modo por tu cuenta**: es decisión del dev
+  (`pnpm sdd:mod -- --status | --enable | --disable | --gate=warn|block`; el sdd-steward lo
+  opera a pedido).
+
+## ⚙️ Selección de modelo y esfuerzo — anexo de la REGLA CERO (OBLIGATORIO — optimización de tokens/contexto)
 
 > [!IMPORTANT]
 > **Antes de encarar CUALQUIER tarea nueva —sin importar con qué proveedor o modelo
@@ -242,7 +284,7 @@ pnpm sdd:gate <spec-id|slug>            # GATE A — ¿se puede abrir un ciclo? 
 pnpm sdd:gate <spec-id|slug> cycle-XX   # GATE B — ¿se puede escribir código? (quien implementa)
 ```
 
-`BLOQUEADO` → detener y completar lo que el script señala. `APROBADO` en A → el orquestador
+`BLOCKED` → detener y completar lo que el script señala. `APPROVED` en A → el orquestador
 decide el **flow** del ciclo y lo escribe en `cycle.json`/`tasks.json`; en B → implementar.
 
 **Flow del ciclo (la forma del gate, no su fondo):** `full` (brief + functional + planner +
