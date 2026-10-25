@@ -741,9 +741,9 @@
           "apps": [
             "apps/docs-site"
           ],
-          "status": "in-progress",
+          "status": "completed",
           "tasks_total": 7,
-          "tasks_done": 0
+          "tasks_done": 7
         }
       }
     }

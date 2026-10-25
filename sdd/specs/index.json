@@ -399,10 +399,10 @@
       "file": "sdd/specs/spec-e-burgos-024-docs-site-redesign/spec-e-burgos-024-docs-site-redesign.spec.md",
       "module": "docs-site-redesign",
       "app": "apps/docs-site",
-      "status": "in-progress",
+      "status": "completed",
       "title": "Rediseño de la web, código abierto, inventario de tecnología y guía interactiva",
       "created_at": "2026-10-25",
-      "completed_at": null,
+      "completed_at": "2026-10-25",
       "depends_on": [
         "spec-e-burgos-017-desktop-app"
       ]

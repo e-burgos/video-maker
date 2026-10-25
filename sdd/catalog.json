@@ -172,5 +172,9 @@
       "file": "tools.schema.json"
     }
   ],
-  "memory": []
+  "memory": [
+    {
+      "file": "2026-10-25-spec-e-burgos-024-docs-site-redesign-cycle-01.md"
+    }
+  ]
 }

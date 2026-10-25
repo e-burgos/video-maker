@@ -23,15 +23,28 @@
       "estimation_hours": 5,
       "story_points": 8,
       "depends_on": [],
-      "status": "pending",
+      "status": "done",
       "files": [
         "apps/docs-site/src/site-config.mjs",
+        "apps/docs-site/src/routes.mjs",
+        "apps/docs-site/src/routes.spec.mjs",
         "apps/docs-site/src/i18n.mjs",
+        "apps/docs-site/src/icons.mjs",
         "apps/docs-site/src/render.mjs",
+        "apps/docs-site/src/site-files.mjs",
         "apps/docs-site/scripts/build.mjs",
-        "apps/docs-site/src/render.spec.mjs",
-        "apps/docs-site/src/i18n.spec.mjs"
-      ]
+        "apps/docs-site/src/site.spec.mjs"
+      ],
+      "usage": {
+        "tokens_in": 45000,
+        "tokens_out": 10000,
+        "provider_model": "claude/opus",
+        "effort": "high",
+        "agent": "implementor-front",
+        "approx": true,
+        "source": "declared-estimate",
+        "recorded_at": "2026-10-25"
+      }
     },
     {
       "id": "TASK-002",
@@ -44,14 +57,28 @@
       "depends_on": [
         "TASK-001"
       ],
-      "status": "pending",
+      "status": "done",
       "files": [
         "apps/docs-site/src/styles.css",
-        "apps/docs-site/src/client/site.js",
-        "apps/docs-site/src/client/site-logic.js",
+        "apps/docs-site/src/client/site.mjs",
+        "apps/docs-site/src/client/site-logic.mjs",
         "apps/docs-site/src/client/site-logic.spec.mjs",
-        "apps/docs-site/public/fonts"
-      ]
+        "apps/docs-site/public/fonts/outfit-400.woff2",
+        "apps/docs-site/public/fonts/outfit-600.woff2",
+        "apps/docs-site/public/fonts/outfit-700.woff2",
+        "apps/docs-site/public/fonts/OFL.txt",
+        "apps/docs-site/public/favicon.svg"
+      ],
+      "usage": {
+        "tokens_in": 50000,
+        "tokens_out": 14000,
+        "provider_model": "claude/opus",
+        "effort": "high",
+        "agent": "implementor-front",
+        "approx": true,
+        "source": "declared-estimate",
+        "recorded_at": "2026-10-25"
+      }
     },
     {
       "id": "TASK-003",
@@ -66,12 +93,24 @@
       "depends_on": [
         "TASK-002"
       ],
-      "status": "pending",
+      "status": "done",
       "files": [
+        "apps/docs-site/src/components.mjs",
+        "apps/docs-site/src/content/journeys.mjs",
         "apps/docs-site/src/content/home.mjs",
         "apps/docs-site/src/content/how-it-works.mjs",
         "apps/docs-site/src/content/open-source.mjs"
-      ]
+      ],
+      "usage": {
+        "tokens_in": 50000,
+        "tokens_out": 12000,
+        "provider_model": "claude/opus",
+        "effort": "high",
+        "agent": "implementor-front",
+        "approx": true,
+        "source": "declared-estimate",
+        "recorded_at": "2026-10-25"
+      }
     },
     {
       "id": "TASK-004",
@@ -84,12 +123,22 @@
       "depends_on": [
         "TASK-001"
       ],
-      "status": "pending",
+      "status": "done",
       "files": [
         "apps/docs-site/src/tech-inventory.mjs",
         "apps/docs-site/src/tech-inventory.spec.mjs",
         "apps/docs-site/src/content/technology.mjs"
-      ]
+      ],
+      "usage": {
+        "tokens_in": 45000,
+        "tokens_out": 9000,
+        "provider_model": "claude/opus",
+        "effort": "high",
+        "agent": "implementor-front",
+        "approx": true,
+        "source": "declared-estimate",
+        "recorded_at": "2026-10-25"
+      }
     },
     {
       "id": "TASK-005",
@@ -102,7 +151,7 @@
       "depends_on": [
         "TASK-001"
       ],
-      "status": "pending",
+      "status": "done",
       "files": [
         "apps/docs-site/src/content/installation.mjs",
         "apps/docs-site/src/content/first-run.mjs",
@@ -113,7 +162,17 @@
         "apps/docs-site/src/content/privacy.mjs",
         "apps/docs-site/scripts/check-links.mjs",
         "apps/docs-site/scripts/check-links.spec.mjs"
-      ]
+      ],
+      "usage": {
+        "tokens_in": 55000,
+        "tokens_out": 11000,
+        "provider_model": "claude/opus",
+        "effort": "high",
+        "agent": "implementor-front",
+        "approx": true,
+        "source": "declared-estimate",
+        "recorded_at": "2026-10-25"
+      }
     },
     {
       "id": "TASK-006",
@@ -124,11 +183,21 @@
       "estimation_hours": 1,
       "story_points": 2,
       "depends_on": [],
-      "status": "pending",
+      "status": "done",
       "files": [
         "LICENSE",
         "README.md"
-      ]
+      ],
+      "usage": {
+        "tokens_in": 5000,
+        "tokens_out": 1000,
+        "provider_model": "claude/opus",
+        "effort": "high",
+        "agent": "implementor-front",
+        "approx": true,
+        "source": "declared-estimate",
+        "recorded_at": "2026-10-25"
+      }
     },
     {
       "id": "TASK-007",
@@ -148,11 +217,23 @@
         "TASK-005",
         "TASK-006"
       ],
-      "status": "pending",
+      "status": "done",
       "files": [
         "apps/docs-site/scripts/serve-dist.mjs",
+        "apps/docs-site/scripts/capture-screenshots.mjs",
+        "apps/docs-site/scripts/smoke-interactions.mjs",
         "apps/docs-site/vite.config.ts"
-      ]
+      ],
+      "usage": {
+        "tokens_in": 20000,
+        "tokens_out": 3000,
+        "provider_model": "claude/opus",
+        "effort": "high",
+        "agent": "implementor-front",
+        "approx": true,
+        "source": "declared-estimate",
+        "recorded_at": "2026-10-25"
+      }
     }
   ]
 }

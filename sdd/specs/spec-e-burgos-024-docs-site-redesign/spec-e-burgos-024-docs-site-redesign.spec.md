@@ -1,6 +1,6 @@
 # SPEC-e-burgos-024: Rediseño de la web, código abierto, inventario de tecnología y guía interactiva
 
-> Estado: **in-progress** — registrada el 2026-10-25.
+> Estado: **completed** — registrada y cerrada el 2026-10-25 con el cycle-01 (lite).
 > Pedido del dev: el repositorio `e-burgos/video-maker` pasa a ser público. La web `apps/docs-site` deja de ser un
 > sitio de docs sobrio pensado sólo para bajar el `.dmg` y se convierte en la cara pública del proyecto.
 

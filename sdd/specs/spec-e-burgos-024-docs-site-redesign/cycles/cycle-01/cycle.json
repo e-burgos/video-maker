@@ -11,33 +11,143 @@
   "objectives": [
     "Web pública bilingüe es/en con identidad propia, acceso al repositorio, página de tecnología verificada y guía interactiva"
   ],
-  "status": "in-progress",
+  "status": "completed",
   "started_at": "2026-10-25",
-  "completed_at": null,
+  "completed_at": "2026-10-25",
   "documents": {
     "plan": "sdd/specs/spec-e-burgos-024-docs-site-redesign/cycles/cycle-01/plan.md",
     "tasks": "sdd/specs/spec-e-burgos-024-docs-site-redesign/cycles/cycle-01/tasks.json"
   },
-  "artifacts": [],
+  "artifacts": [
+    "sdd/specs/spec-e-burgos-024-docs-site-redesign/cycles/cycle-01/artifacts/site-home-en-dark-desktop.png",
+    "sdd/specs/spec-e-burgos-024-docs-site-redesign/cycles/cycle-01/artifacts/site-home-en-dark-mobile.png",
+    "sdd/specs/spec-e-burgos-024-docs-site-redesign/cycles/cycle-01/artifacts/site-home-en-light-desktop.png",
+    "sdd/specs/spec-e-burgos-024-docs-site-redesign/cycles/cycle-01/artifacts/site-home-en-light-mobile.png",
+    "sdd/specs/spec-e-burgos-024-docs-site-redesign/cycles/cycle-01/artifacts/site-home-es-dark-desktop.png",
+    "sdd/specs/spec-e-burgos-024-docs-site-redesign/cycles/cycle-01/artifacts/site-home-es-dark-mobile.png",
+    "sdd/specs/spec-e-burgos-024-docs-site-redesign/cycles/cycle-01/artifacts/site-home-es-light-desktop.png",
+    "sdd/specs/spec-e-burgos-024-docs-site-redesign/cycles/cycle-01/artifacts/site-home-es-light-mobile.png",
+    "sdd/specs/spec-e-burgos-024-docs-site-redesign/cycles/cycle-01/artifacts/site-how-it-works-es-light-desktop.png",
+    "sdd/specs/spec-e-burgos-024-docs-site-redesign/cycles/cycle-01/artifacts/site-technology-es-light-desktop.png"
+  ],
   "metrics": {
-    "tasks_total": 0,
-    "tasks_completed": 0,
+    "tasks_total": 7,
+    "tasks_completed": 7,
     "tasks_skipped": 0,
-    "story_points": 0,
-    "files_created": [],
-    "files_modified": [],
+    "story_points": 42,
+    "files_created": [
+      "LICENSE",
+      "apps/docs-site/public/favicon.svg",
+      "apps/docs-site/public/fonts/outfit-400.woff2",
+      "apps/docs-site/public/fonts/outfit-600.woff2",
+      "apps/docs-site/public/fonts/outfit-700.woff2",
+      "apps/docs-site/public/fonts/OFL.txt",
+      "apps/docs-site/scripts/check-links.spec.mjs",
+      "apps/docs-site/scripts/smoke-interactions.mjs",
+      "apps/docs-site/src/client/site.mjs",
+      "apps/docs-site/src/client/site-logic.mjs",
+      "apps/docs-site/src/client/site-logic.spec.mjs",
+      "apps/docs-site/src/components.mjs",
+      "apps/docs-site/src/content/how-it-works.mjs",
+      "apps/docs-site/src/content/journeys.mjs",
+      "apps/docs-site/src/content/open-source.mjs",
+      "apps/docs-site/src/content/technology.mjs",
+      "apps/docs-site/src/i18n.mjs",
+      "apps/docs-site/src/icons.mjs",
+      "apps/docs-site/src/routes.mjs",
+      "apps/docs-site/src/routes.spec.mjs",
+      "apps/docs-site/src/site-files.mjs",
+      "apps/docs-site/src/site.spec.mjs",
+      "apps/docs-site/src/tech-inventory.mjs",
+      "apps/docs-site/src/tech-inventory.spec.mjs",
+      "sdd/context/apps/docs-site/updates/2026-10-25-spec-e-burgos-024-docs-site-redesign-cycle-01.md",
+      "sdd/memory/journal/2026-10-25-spec-e-burgos-024-docs-site-redesign-cycle-01.md"
+    ],
+    "files_modified": [
+      "README.md",
+      "apps/docs-site/scripts/build.mjs",
+      "apps/docs-site/scripts/capture-screenshots.mjs",
+      "apps/docs-site/scripts/check-links.mjs",
+      "apps/docs-site/scripts/serve-dist.mjs",
+      "apps/docs-site/src/content/connect-ai.mjs",
+      "apps/docs-site/src/content/faq.mjs",
+      "apps/docs-site/src/content/first-run.mjs",
+      "apps/docs-site/src/content/home.mjs",
+      "apps/docs-site/src/content/installation.mjs",
+      "apps/docs-site/src/content/licenses.mjs",
+      "apps/docs-site/src/content/privacy.mjs",
+      "apps/docs-site/src/content/using-studio.mjs",
+      "apps/docs-site/src/render.mjs",
+      "apps/docs-site/src/site-config.mjs",
+      "apps/docs-site/src/styles.css",
+      "apps/docs-site/vite.config.ts",
+      "sdd/context/constitution.md",
+      "sdd/global.json"
+    ],
     "files_deleted": [],
     "usage": {
-      "tokens_in": 0,
-      "tokens_out": 0,
+      "tokens_in": 330000,
+      "tokens_out": 70000,
       "approx": true,
       "source": "declared-estimate",
-      "by_agent": []
+      "by_agent": [
+        {
+          "agent": "orchestrator",
+          "label": "solo",
+          "provider_model": "claude/opus",
+          "effort": "high",
+          "tokens_in": 60000,
+          "tokens_out": 10000,
+          "tokens_total": 70000,
+          "approx": true,
+          "source": "declared-estimate",
+          "recorded_at": "2026-10-25"
+        },
+        {
+          "agent": "implementor-front",
+          "label": "solo — TASK-001..007",
+          "provider_model": "claude/opus",
+          "effort": "high",
+          "tokens_in": 270000,
+          "tokens_out": 60000,
+          "tokens_total": 330000,
+          "approx": true,
+          "source": "declared-estimate",
+          "recorded_at": "2026-10-25"
+        }
+      ]
     }
   },
   "tables_created": [],
   "endpoints_implemented": [],
   "components_created": [],
-  "issues_found": [],
-  "reviewer_report": null
+  "issues_found": [
+    "Overflow horizontal a 390 px en Instalación (506 px) y Código abierto (14 px): grids sin grid-template-columns crecían al ancho de pre/code (corregido con minmax(0, 1fr); el script de capturas ahora lo mide por página)",
+    "La CLI de check-links trataba mailto: como enlace interno (la página de privacidad ya lo tenía): ahora se ignoran mailto:, data: y tel:",
+    "Los enlaces al repositorio dan 404 mientras el repo sea privado; check-links los informa sin fallar (externos)"
+  ],
+  "reviewer_report": {
+    "approved": true,
+    "date": "2026-10-25",
+    "ca_results": {
+      "US-024-101": "OK — hero con maqueta animada y captura real, Outfit auto-hospedada, tema claro/oscuro elegible y recordado (smoke), reduced-motion, 0 px de overflow en las 22 páginas a 390 px (capture-screenshots), foco visible y skip-link.",
+      "US-024-102": "OK — repo en header, hero y footer (site.spec), página Código abierto con correr/contribuir/licencia, LICENSE MIT Esteban Burgos y README raíz.",
+      "US-024-103": "OK — 35 componentes en 6 categorías con qué es, para qué y licencia; tech-inventory.spec cruza THIRD_PARTY_NOTICES (licencia+versión), node_modules, package.json, menciones en cada usedBy y los 15 subproyectos; aviso de Remotion para empresas.",
+      "US-024-104": "OK — pipeline animado en 5 etapas, tabs + stepper de los dos caminos con 9 capturas reales; smoke: sin JS 9 pasos visibles, con JS stepper y tabs por teclado.",
+      "US-024-105": "OK — 22 páginas (11 × es/en), lang/canonical/hreflang/x-default/Open Graph/sitemap; paridad de claves y de estructura por página (site.spec, sondeada rompiéndola); check-links valida pares hreflang recíprocos; preferencia de idioma recordada (smoke)."
+    },
+    "tests": {
+      "sdd:validate": "OK",
+      "lint": "docs-site no tiene target lint",
+      "test": "nx test docs-site: 54 tests verdes (6 archivos)",
+      "build": "nx build docs-site verde (22 páginas)",
+      "e2e": "check-links 0 rotos / 0 problemas de hreflang; smoke-interactions 13/13; capturas Playwright desktop y mobile, claro y oscuro, es y en"
+    },
+    "notes": "Ciclo lite de un solo actor. Sin comentarios en el código. Dominio, wrangler.toml y workflow de deploy sin cambios.",
+    "follow_ups": [
+      "Recapturar las capturas de la app en inglés para /en/",
+      "Revisar THIRD_PARTY_NOTICES (Remotion: 'shared with friends… non-commercially') ahora que el repo es público",
+      "Confirmar con el dev la nota 'la versión en español prevalece' de la política de privacidad en inglés"
+    ]
+  }
 }
