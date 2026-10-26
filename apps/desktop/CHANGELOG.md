@@ -4,6 +4,14 @@ Historial de versiones de la app de escritorio, en español, pensado para los am
 instalan. `apps/desktop/scripts/release-desktop.mjs` toma la sección de la versión que publica
 y la usa como notas del release.
 
+## 0.4.2 — Motion graphics con capturas que se desplazan, varios dispositivos y animaciones
+
+- **Capturas con scroll**: una captura de página completa baja sola dentro del marco del dispositivo, para mostrar
+  toda la web en una escena.
+- **Monitor, tablet y celular a la vez**: la misma web en los tres dispositivos, con el desplazamiento escalonado.
+- **Animaciones ilustradas** sincronizadas con la voz: envío, pago, pedidos, nube segura, dominio y publicación.
+- En la escena de conexiones, los **cables llegan a la tele, al equipo y a la fuente** en lugar de quedar flotando.
+
 ## 0.4.1 — Voces de ElevenLabs, mejor mezcla y revisión más completa
 
 - **Voces de ElevenLabs**: cargá tu key en Configuración › Voces de ElevenLabs y elegí voces de su biblioteca (por
