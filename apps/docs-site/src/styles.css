@@ -2162,3 +2162,23 @@ ul.plain {
     display: none;
   }
 }
+
+.tutorial-video {
+  margin: 0;
+}
+
+.tutorial-video video {
+  display: block;
+  width: 100%;
+  height: auto;
+  aspect-ratio: 16 / 9;
+  border-radius: 1rem;
+  border: 1px solid var(--border);
+  background: #05040a;
+}
+
+.tutorial-video figcaption {
+  margin-top: 0.75rem;
+  font-size: 0.85rem;
+  color: var(--text-muted);
+}

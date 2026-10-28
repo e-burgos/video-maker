@@ -1,10 +1,12 @@
-import { APPROX_DMG_SIZE_LABEL, APP_DISPLAY_NAME, REPO_URL } from '../site-config.mjs';
+import { APPROX_DMG_SIZE_LABEL, APP_DISPLAY_NAME, REPO_URL, TUTORIAL_MUSIC_SOURCE_URL } from '../site-config.mjs';
 import { pick, t } from '../i18n.mjs';
 import { icon } from '../icons.mjs';
-import { pageHref } from '../routes.mjs';
+import { assetHref, pageHref } from '../routes.mjs';
 import { downloadButton, escapeHtml, githubButton, infoTable, screenshotFigure, sectionHeader } from '../render.mjs';
 import { featureGrid, pipelineDiagram } from '../components.mjs';
 import { pipelineStages } from './journeys.mjs';
+
+const TUTORIAL_VIDEO_PATH = '/tutoriales/Tutorial-Video-Maker.mp4';
 
 const COPY = {
   es: {
@@ -20,6 +22,11 @@ const COPY = {
     heroAlt: 'Un video de motion graphics terminado dentro de Video Maker',
     tracks: ['Voz', 'Escenas', 'Música', 'Texto'],
     chips: ['Voz es_AR · local', '−14 LUFS', '16:9 · 9:16', 'Render en tu Mac'],
+    tutorialEyebrow: 'Mirá cómo funciona',
+    tutorialTitle: 'De la marca al video, en poco más de dos minutos',
+    tutorialLede: 'Un recorrido real por el estudio: se crea una marca, se adjuntan las fotos, el productor arma el video y se publica. Las esperas del productor van aceleradas.',
+    tutorialLabel: 'Video tutorial de Video Maker de punta a punta',
+    tutorialNote: 'Voz: Malena · Música:',
     pathsEyebrow: 'Dos caminos',
     pathsTitle: 'Elegí cómo nace tu video',
     pathsLede: 'Los dos terminan en un MP4 listo para publicar, con voz, música y subtítulos.',
@@ -87,6 +94,11 @@ const COPY = {
     heroAlt: 'A finished motion graphics video inside Video Maker',
     tracks: ['Voice', 'Scenes', 'Music', 'Text'],
     chips: ['es_AR voice · local', '−14 LUFS', '16:9 · 9:16', 'Rendered on your Mac'],
+    tutorialEyebrow: 'See how it works',
+    tutorialTitle: 'From brand to finished video, in a little over two minutes',
+    tutorialLede: 'A real walkthrough of the studio: create a brand, attach the photos, let the producer build the video and publish it. The producer's waits are sped up; narrated and captioned in Spanish.',
+    tutorialLabel: 'Video Maker end-to-end tutorial video',
+    tutorialNote: 'Voice: Malena · Music:',
     pathsEyebrow: 'Two paths',
     pathsTitle: 'Choose how your video is born',
     pathsLede: 'Both end in an MP4 ready to publish, with voice, music and captions.',
@@ -187,6 +199,21 @@ ${miniTimeline(copy)}
 </div>
 ${chips}
 </div>
+</div>
+</section>`;
+}
+
+function tutorialSection(ctx, copy) {
+  const poster = assetHref(ctx, 'assets/screenshots/tutorial-poster.jpg');
+  return `<section class="section section--tinted" aria-labelledby="home-tutorial">
+<div class="container container--narrow">
+${sectionHeader({ eyebrow: copy.tutorialEyebrow, title: copy.tutorialTitle, lede: escapeHtml(copy.tutorialLede), id: 'home-tutorial' })}
+<figure class="tutorial-video reveal">
+<video controls preload="none" playsinline poster="${poster}" aria-label="${escapeHtml(copy.tutorialLabel)}" width="1920" height="1080">
+<source src="${TUTORIAL_VIDEO_PATH}" type="video/mp4" />
+</video>
+<figcaption>${escapeHtml(copy.tutorialNote)} <a href="${TUTORIAL_MUSIC_SOURCE_URL}" rel="noopener">Inspiring Advertising - Upbeat Summer Corporate</a>, Rafael Krux, CC BY 4.0</figcaption>
+</figure>
 </div>
 </section>`;
 }
@@ -293,6 +320,7 @@ export function renderPage(ctx) {
   const copy = pick(ctx.locale, COPY);
   const bodyHtml = [
     hero(ctx, copy),
+    tutorialSection(ctx, copy),
     pathsSection(ctx, copy),
     pipelineSection(ctx, copy),
     featuresSection(copy),
