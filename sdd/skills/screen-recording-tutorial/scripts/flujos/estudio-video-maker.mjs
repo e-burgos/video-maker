@@ -73,9 +73,13 @@ const pegarTexto = (valor) => page.evaluate((v) => {
   t.dispatchEvent(new Event('input', { bubbles: true }));
 }, valor);
 const ocultarSecretos = () => page.evaluate(() => {
-  for (const el of document.querySelectorAll('*')) {
-    if (el.children.length === 0 && /••••/.test(el.textContent ?? '')) el.textContent = 'Key cargada';
-  }
+  const enmascarar = () => {
+    for (const el of document.querySelectorAll('*')) {
+      if (el.children.length === 0 && /••••/.test(el.textContent ?? '')) el.textContent = 'Key cargada';
+    }
+  };
+  enmascarar();
+  new MutationObserver(enmascarar).observe(document.body, { subtree: true, childList: true, characterData: true });
 });
 const desplazarChat = (hacia) => page.evaluate((h) => {
   const caja = [...document.querySelectorAll('*')].find((e) => e.scrollHeight > e.clientHeight + 50 && getComputedStyle(e).overflowY !== 'visible' && e.clientHeight > 200);
@@ -223,8 +227,9 @@ async function resultado_() {
   await completarVentana();
 
   escena(12, 'Configuración y guía');
-  await clic(page, enlace('Configuración'), 900);
   await ocultarSecretos();
+  await clic(page, enlace('Configuración'), 900);
+  await page.getByText(/key de openrouter/i).first().waitFor({ timeout: 20000 });
   await aire(page, 1.8);
   await clic(page, enlace('Guía'), 600);
   await page.getByText(/cómo se usa el studio/i).first().waitFor({ timeout: 30000 });

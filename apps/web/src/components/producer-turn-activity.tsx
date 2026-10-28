@@ -4,6 +4,7 @@ import { stripSuggestionsFence } from '../api/producer-suggestions-fence';
 import { producerFailureKey } from '../api/producer-capability';
 import { useT } from '../i18n/language-context';
 import { ErrorNotice } from './error-notice';
+import { ProducerMarkdown } from './producer-message-list';
 import type { RenderApiError } from '../api/render-api-error';
 import type { ProducerEvent, ProducerTurn } from '../api/render-api-types';
 
@@ -113,7 +114,7 @@ export function ProducerTurnActivity({
       >
         {turn?.events.map((event, index) => (
           <li key={index} data-event-type={event.type} className="whitespace-pre-wrap break-words [overflow-wrap:anywhere]">
-            {eventLabel(event)}
+            {event.type === 'text' ? <ProducerMarkdown text={eventLabel(event)} /> : eventLabel(event)}
           </li>
         ))}
         {eventCount === 0 && (

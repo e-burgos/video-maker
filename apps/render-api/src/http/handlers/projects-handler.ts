@@ -42,6 +42,7 @@ export interface ProjectSummary {
   readonly slug: string;
   readonly mode: ProjectMode;
   readonly brand: string | null;
+  readonly title: string | null;
   readonly layout: ProjectLayoutFlags;
   readonly lastPublication: ProjectLastPublication | null;
 }
@@ -79,6 +80,24 @@ function extractModeFromBody(value: unknown): ProjectMode {
     });
   }
   return candidate as ProjectMode;
+}
+
+const MAX_PROJECT_TITLE_LENGTH = 120;
+
+function extractTitleFromBody(value: unknown): string | null {
+  const candidate = (value as { title?: unknown }).title;
+  if (candidate === undefined || candidate === null) {
+    return null;
+  }
+  if (typeof candidate !== 'string' || candidate.trim().length === 0 || candidate.trim().length > MAX_PROJECT_TITLE_LENGTH) {
+    throw new PipelineStageError({
+      code: 'REQUEST_BODY_INVALID_JSON',
+      stage: null,
+      resource: 'title',
+      expected: `a non-empty title string of at most ${String(MAX_PROJECT_TITLE_LENGTH)} characters or null`,
+    });
+  }
+  return candidate.trim();
 }
 
 function extractBrandFromBody(value: unknown): string | null {
@@ -125,6 +144,7 @@ async function buildProjectDetail(
   slug: string,
   mode: ProjectMode,
   brand: string | null,
+  title: string | null,
   brandMissing: boolean,
   captionTheme: CaptionTheme | null,
 ): Promise<ProjectDetail> {
@@ -135,6 +155,7 @@ async function buildProjectDetail(
     slug,
     mode,
     brand,
+    title,
     brandMissing,
     captionTheme,
     layout,
@@ -164,6 +185,7 @@ export async function handleListProjects(
       slug: record.slug,
       mode: record.mode,
       brand: record.brand,
+      title: record.title,
       layout: await computeLayoutFlags(deps.storage, project),
       lastPublication: toLastPublication(latestPublications.get(record.slug)),
     });
@@ -208,6 +230,7 @@ export async function handleCreateProject(
   assertValidProjectSlug(slug);
   const mode = extractModeFromBody(bodyResult.value);
   const brand = extractBrandFromBody(bodyResult.value);
+  const title = extractTitleFromBody(bodyResult.value);
   if (brand !== null) {
     await assertBrandExists(deps, store, brand);
   }
@@ -219,7 +242,7 @@ export async function handleCreateProject(
     throw new PipelineStageError({ code: 'PROJECT_ALREADY_EXISTS', stage: null, resource: slug });
   }
 
-  deps.localStore.projects.insert(slug, null, mode, brand);
+  deps.localStore.projects.insert(slug, null, mode, brand, title);
 
   const directoriesInOrder = [
     join(project.rawDir, 'aroll'),
@@ -247,7 +270,7 @@ export async function handleCreateProject(
     }
   }
 
-  const detail = await buildProjectDetail(deps.storage, project, slug, mode, brand, false, captionTheme);
+  const detail = await buildProjectDetail(deps.storage, project, slug, mode, brand, title, false, captionTheme);
 
   return {
     status: 201,
@@ -300,7 +323,7 @@ async function describeStoredProject(
   const mode = record?.mode ?? 'footage';
   const captionTheme =
     mode === 'footage' && brand !== null && !brandMissing ? await readBrandCaptionTheme(deps, store, brand) : null;
-  return buildProjectDetail(deps.storage, project, slug, mode, brand, brandMissing, captionTheme);
+  return buildProjectDetail(deps.storage, project, slug, mode, brand, record?.title ?? null, brandMissing, captionTheme);
 }
 
 export async function handlePutProjectBrand(

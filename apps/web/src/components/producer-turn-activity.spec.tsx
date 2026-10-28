@@ -75,6 +75,14 @@ describe('ProducerTurnActivity', () => {
     expect(items[1]?.textContent).toBe('Bash · ffprobe raw/aroll/clip01.mp4');
   });
 
+  it('renders the markdown of a text event instead of showing it raw', () => {
+    renderActivity({ turn: producerTurn({ events: [{ type: 'text', text: 'Listo, **material** revisado' }] }) });
+
+    const item = screen.getByTestId('producer-turn-events').querySelector('li');
+    expect(item?.textContent).toBe('Listo, material revisado');
+    expect(item?.querySelector('strong')?.textContent).toBe('material');
+  });
+
   it('says it is waiting while the turn has not reported a step yet', () => {
     renderActivity({ turn: producerTurn({ events: [] }) });
 

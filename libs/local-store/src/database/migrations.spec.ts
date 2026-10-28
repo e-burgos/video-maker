@@ -290,7 +290,7 @@ describe('applyMigrations', () => {
 
     applyMigrations(sqlite, MIGRATIONS);
 
-    expect(currentUserVersion(sqlite)).toBe(7);
+    expect(currentUserVersion(sqlite)).toBe(MIGRATIONS[MIGRATIONS.length - 1]?.version);
     const columns = sqlite.prepare('PRAGMA table_info(publish_queue)').all() as { name: string }[];
     expect(columns.map((column) => column.name).sort()).toEqual([
       'attempts',

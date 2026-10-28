@@ -24,5 +24,7 @@
 - Tests del agente CLI y del prompt del productor.
 - Ensayo de grabación del studio: A-roll 1920×1080, 30 fps, yuv420p, sin audio, 11 frases con marca.
 
-## Pendiente (mejora, no incluida)
-- El título de un video se deriva del slug (`humanizeSlug`) y pierde las tildes («Cafe aroma»): guardar un nombre para mostrar requiere una columna nueva y cambios en API y web.
+## Mejoras del studio incluidas
+- **Nombre para mostrar**: migración 8 agrega `projects.title`; `POST /projects` acepta `title` (1–120 caracteres, recortado) y el resumen y el detalle lo devuelven. El formulario de creación lo envía y la tarjeta y la cabecera del espacio de trabajo muestran `projectDisplayName` (título con tildes; si no hay, el slug humanizado).
+- **Panel de turno del productor**: los eventos de texto se renderizan con `ProducerMarkdown` en vez de mostrar el markdown crudo.
+- **`pnpm studio:stop`**: ya no usa `pkill -f` (mataba cualquier studio de la máquina, incluidos los de otras sesiones); detiene sólo los procesos que escuchan en `RENDER_API_PORT` y `WEB_PORT`.

@@ -7,3 +7,8 @@ export function humanizeSlug(slug: string): string {
   const joined = words.join(' ');
   return joined.charAt(0).toUpperCase() + joined.slice(1);
 }
+
+export function projectDisplayName(project: { readonly slug: string; readonly title?: string | null }): string {
+  const title = project.title?.trim();
+  return title !== undefined && title !== '' ? title : humanizeSlug(project.slug);
+}

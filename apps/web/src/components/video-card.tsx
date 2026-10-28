@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 
 import { formatUpdatedAt } from '../api/format-updated-at';
-import { humanizeSlug } from '../api/humanize-slug';
+import { projectDisplayName } from '../api/humanize-slug';
 import { projectHref, projectModeOf } from '../api/project-mode';
 import { projectStatusKey } from '../api/project-status';
 import { PUBLICATION_STATUS_LABEL, PUBLICATION_STATUS_TONE } from '../api/publication-status';
@@ -111,7 +111,7 @@ export function VideoCard({ video, placement, folders, onChanged }: VideoCardPro
       >
         <VideoCardMedia slug={video.slug} />
         <div>
-          <p className="truncate text-sm font-medium text-ink">{humanizeSlug(video.slug)}</p>
+          <p className="truncate text-sm font-medium text-ink">{projectDisplayName(video)}</p>
           <p className="truncate font-mono text-[11px] text-ink-faint">{video.slug}</p>
         </div>
         <div className="flex flex-wrap gap-1.5">

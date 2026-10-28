@@ -41,8 +41,8 @@ async function caughtErrorPayload(promise: Promise<unknown>): Promise<ReturnType
   );
 }
 
-const PROJECT_SUMMARY_KEYS = ['brand', 'lastPublication', 'layout', 'mode', 'slug'];
-const PROJECT_DETAIL_KEYS = ['assetCounts', 'assetSource', 'brand', 'brandMissing', 'captionTheme', 'layout', 'mode', 'slug'];
+const PROJECT_SUMMARY_KEYS = ['brand', 'lastPublication', 'layout', 'mode', 'slug', 'title'];
+const PROJECT_DETAIL_KEYS = ['assetCounts', 'assetSource', 'brand', 'brandMissing', 'captionTheme', 'layout', 'mode', 'slug', 'title'];
 const PLACEMENT_BODY_KEYS = ['placement', 'slug'];
 const PLACEMENT_KEYS = ['archived', 'categoryId', 'folderId'];
 const DELETE_BODY_KEYS = ['deleted', 'slug'];
@@ -112,6 +112,7 @@ describe('handleListProjects', () => {
         slug: 'acme-launch',
         mode: 'footage',
         brand: null,
+        title: null,
         layout: { raw: true, catalog: true, timeline: false, edl: false, out: true },
         lastPublication: { platform: 'youtube', url: 'https://youtu.be/abc', status: 'published' },
       },
@@ -119,6 +120,7 @@ describe('handleListProjects', () => {
         slug: 'zeta-project',
         mode: 'footage',
         brand: null,
+        title: null,
         lastPublication: null,
         layout: { raw: false, catalog: false, timeline: false, edl: false, out: false },
       },
@@ -145,6 +147,7 @@ describe('handleListProjects', () => {
         slug: 'valid-project',
         mode: 'footage',
         brand: null,
+        title: null,
         lastPublication: null,
         layout: { raw: false, catalog: false, timeline: false, edl: false, out: false },
       },
@@ -183,6 +186,7 @@ describe('handleCreateProject', () => {
       slug: 'smoke-ingest',
       mode: 'footage',
       brand: null,
+      title: null,
       brandMissing: false,
       captionTheme: null,
       layout: { raw: false, catalog: false, timeline: false, edl: false, out: false },
@@ -571,6 +575,33 @@ function brandedFixture(slug: string, brand: string | null = null) {
   deps.localStore.projects.insert(slug, null, 'motion', brand);
   return { callLog, storage, deps };
 }
+
+describe('project title', () => {
+  it('keeps the accented title given at creation and reports it in the detail and the list', async () => {
+    const callLog = createCallLog();
+    const deps = createFakeRenderApiDependencies(callLog, { storage: createFakeObjectStorage(callLog) });
+    const request = requestLine({
+      method: 'POST',
+      path: '/projects',
+      body: jsonBody({ slug: 'cafe-aroma', title: '  Café Aroma  ' }),
+    });
+
+    const response = await handleCreateProject(deps, STORE, undefined, request);
+
+    expect(response.status).toBe(201);
+    expect(response.body).toMatchObject({ slug: 'cafe-aroma', title: 'Café Aroma' });
+    const list = await handleListProjects(deps, STORE);
+    expect((list.body as readonly { title: string | null }[])[0]?.title).toBe('Café Aroma');
+  });
+
+  it('rejects a blank title', async () => {
+    const callLog = createCallLog();
+    const deps = createFakeRenderApiDependencies(callLog, { storage: createFakeObjectStorage(callLog) });
+    const request = requestLine({ method: 'POST', path: '/projects', body: jsonBody({ slug: 'sin-titulo', title: '   ' }) });
+
+    await expect(handleCreateProject(deps, STORE, undefined, request)).rejects.toThrow();
+  });
+});
 
 describe('project brand', () => {
   it('creates a project with a library brand and reports it in the detail and the list', async () => {

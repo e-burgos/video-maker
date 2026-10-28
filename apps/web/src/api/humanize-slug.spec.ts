@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import { humanizeSlug } from './humanize-slug';
+import { humanizeSlug, projectDisplayName } from './humanize-slug';
 
 describe('humanizeSlug', () => {
   it('turns hyphens into spaces and capitalizes only the first letter', () => {

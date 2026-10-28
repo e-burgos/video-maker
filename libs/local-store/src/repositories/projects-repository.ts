@@ -12,6 +12,7 @@ export interface ProjectRecord {
   readonly importedAt: string | null;
   readonly mode: ProjectMode;
   readonly brand: string | null;
+  readonly title: string | null;
 }
 
 export type ProjectsClock = () => string;
@@ -40,9 +41,10 @@ export function createProjectsRepository(
     importedAt: string | null = null,
     mode: ProjectMode = 'footage',
     brand: string | null = null,
+    title: string | null = null,
   ): ProjectRecord {
     const timestamp = clock();
-    const record: ProjectRecord = { slug, createdAt: timestamp, updatedAt: timestamp, importedAt, mode, brand };
+    const record: ProjectRecord = { slug, createdAt: timestamp, updatedAt: timestamp, importedAt, mode, brand, title };
     db.insert(projects).values(record).run();
     return record;
   }

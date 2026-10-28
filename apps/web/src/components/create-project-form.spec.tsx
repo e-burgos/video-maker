@@ -50,7 +50,7 @@ describe('CreateProjectForm', () => {
     typeName('My next reel!');
 
     await waitFor(() => expect(onCreated).toHaveBeenCalledWith('my-next-reel'));
-    expect(createProject).toHaveBeenCalledWith({ slug: 'my-next-reel', mode: 'footage' });
+    expect(createProject).toHaveBeenCalledWith({ slug: 'my-next-reel', title: 'My next reel!', mode: 'footage' });
     expect((screen.getByLabelText('Video name') as HTMLInputElement).value).toBe('');
   });
 
@@ -60,7 +60,7 @@ describe('CreateProjectForm', () => {
 
     typeName('My next reel');
 
-    await waitFor(() => expect(createProject).toHaveBeenCalledWith({ slug: 'my-next-reel-2', mode: 'footage' }));
+    await waitFor(() => expect(createProject).toHaveBeenCalledWith({ slug: 'my-next-reel-2', title: 'My next reel', mode: 'footage' }));
   });
 
   it('shows the service error code and does not report a creation', async () => {
@@ -110,7 +110,7 @@ describe('CreateProjectForm', () => {
     fireEvent.click(screen.getByRole('radio', { name: /Motion graphics/ }));
     typeName('Promo');
 
-    await waitFor(() => expect(createProject).toHaveBeenCalledWith({ slug: 'promo', mode: 'motion' }));
+    await waitFor(() => expect(createProject).toHaveBeenCalledWith({ slug: 'promo', title: 'Promo', mode: 'motion' }));
   });
 
   it('offers the brands with their logo, none selected for raw footage, and links to manage them', async () => {
@@ -135,7 +135,7 @@ describe('CreateProjectForm', () => {
     typeName('Promo');
 
     await waitFor(() =>
-      expect(createProject).toHaveBeenCalledWith({ slug: 'promo', mode: 'footage', brand: 'acme' }),
+      expect(createProject).toHaveBeenCalledWith({ slug: 'promo', title: 'Promo', mode: 'footage', brand: 'acme' }),
     );
   });
 
@@ -153,7 +153,7 @@ describe('CreateProjectForm', () => {
     expect(screen.queryByRole('radio', { name: 'No brand' })).toBeNull();
     typeName('Promo');
     await waitFor(() =>
-      expect(createProject).toHaveBeenCalledWith({ slug: 'promo', mode: 'motion', brand: 'acme' }),
+      expect(createProject).toHaveBeenCalledWith({ slug: 'promo', title: 'Promo', mode: 'motion', brand: 'acme' }),
     );
   });
 });
