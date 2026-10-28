@@ -73,11 +73,13 @@ export type ProjectSummary = {
   layout: ProjectLayout;
   mode?: ProjectMode;
   brand?: string | null;
+  title?: string | null;
   lastPublication?: LastPublication | null;
 };
 
 export type CreateProjectInput = {
   slug: string;
+  title?: string;
   mode?: ProjectMode;
   brand?: string;
 };

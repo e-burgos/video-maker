@@ -190,6 +190,24 @@ function readUsage(payload: CliResultPayload): AiAgentUsage {
   };
 }
 
+const JSON_FENCE_PATTERN = /^```(?:json)?\s*([\s\S]*?)\s*```$/i;
+
+function parseJsonFromResultText(result: unknown): Record<string, unknown> | null {
+  if (typeof result !== 'string') {
+    return null;
+  }
+
+  const trimmed = result.trim();
+  const fenced = JSON_FENCE_PATTERN.exec(trimmed);
+
+  try {
+    const parsed: unknown = JSON.parse(fenced === null ? trimmed : (fenced[1] ?? ''));
+    return isRecord(parsed) ? parsed : null;
+  } catch {
+    return null;
+  }
+}
+
 export function createClaudeCliAiAgent(runner: CommandRunner, config: AiAgentConfig): AiAgentPort {
   return async (request: AiAgentRequest): Promise<AiAgentResponse> => {
     let stdout: string;
@@ -223,10 +241,12 @@ export function createClaudeCliAiAgent(runner: CommandRunner, config: AiAgentCon
       throw mentionsRateLimit(payload) ? rateLimited() : failedWithProviderDetail(payload);
     }
 
-    if (!isRecord(payload.structured_output)) {
+    const structured = isRecord(payload.structured_output) ? payload.structured_output : parseJsonFromResultText(payload.result);
+
+    if (structured === null) {
       throw invalidOutput('a structured_output object matching the requested JSON Schema');
     }
 
-    return { json: payload.structured_output, usage: readUsage(payload) };
+    return { json: structured, usage: readUsage(payload) };
   };
 }

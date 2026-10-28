@@ -70,6 +70,16 @@ describe('buildProducerProjectSection', () => {
   });
 });
 
+describe('buildProducerPrompt — idioma del texto del usuario', () => {
+  it('limita el ASCII a los argumentos técnicos y exige conservar tildes y eñes en el texto del video', () => {
+    const prompt = buildProducerPrompt(CONTEXT);
+
+    expect(prompt).toContain('Only technical tool arguments');
+    expect(prompt).toContain('accents and ñ: never strip them');
+    expect(prompt).not.toContain('any text you write stay in');
+  });
+});
+
 describe('buildProducerPrompt — herramientas del estudio', () => {
   const prompt = buildProducerPrompt(CONTEXT);
 

@@ -386,6 +386,16 @@ Lo mismo desde la CLI: `pnpm nx run render-cli:cli -- run media/<slug> --preset 
   `format.duration`) y mirá 3 o 4 frames (`ffmpeg -ss N -frames:v 1`) antes de entregar.
 - Si algo falla dos veces en el mismo punto, parás y se lo contás al usuario con el error literal.
 
+## 8 bis. Dos tipos de video: decidilo antes de producir
+
+- **Con A-roll** (grabación de pantalla o material crudo del usuario): es este skill. La grabación de una UI con
+  Playwright (skill `screen-recording-tutorial`) deja el A-roll mudo y el `script.txt` cronometrado en
+  `media/<slug>/`; de ahí en más es el caso «Pantalla grabada muda + guion» de §9.
+- **Motion graphics** (guion + imágenes, proyecto `mode: "motion"`): skill `motion-video-brief`.
+
+Si el espectador tiene que repetir clics en una UI real, es el primero; si se presenta un producto o una idea, el
+segundo. Si no está claro, preguntale al usuario con las dos opciones y esperá.
+
 ## 9. Casos típicos
 
 - **Tutorial con pantalla grabada y voz**: la grabación es el A-roll. Preset `software-demo`.

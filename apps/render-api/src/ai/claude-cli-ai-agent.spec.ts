@@ -196,6 +196,29 @@ describe('createClaudeCliAiAgent', () => {
     expect(await codeOf(agent(REQUEST))).toBe('AI_AGENT_INVALID_OUTPUT');
   });
 
+  it('toma el JSON de result cuando el CLI no llena structured_output y lo entrega en un bloque ```json', async () => {
+    const { agent } = agentWith({
+      stdout: JSON.stringify({
+        type: 'result',
+        subtype: 'success',
+        is_error: false,
+        result: '```json\n{ "title": "Café Aroma" }\n```',
+      }),
+    });
+
+    const response = await agent(REQUEST);
+
+    expect(response.json).toEqual({ title: 'Café Aroma' });
+  });
+
+  it('toma el JSON de result cuando llega sin cerco', async () => {
+    const { agent } = agentWith({
+      stdout: JSON.stringify({ type: 'result', subtype: 'success', is_error: false, result: '{"title":"Nx"}' }),
+    });
+
+    expect((await agent(REQUEST)).json).toEqual({ title: 'Nx' });
+  });
+
   it('reporta consumo en cero cuando el CLI no publica usage', async () => {
     const { agent } = agentWith({
       stdout: JSON.stringify({ type: 'result', is_error: false, structured_output: { title: 'Nx' } }),

@@ -33,6 +33,7 @@ describe('createProjectsRepository', () => {
       importedAt: null,
       mode: 'footage',
       brand: null,
+      title: null,
     });
     expect(repository.exists('my-video')).toBe(true);
     expect(repository.exists('missing')).toBe(false);
@@ -55,6 +56,13 @@ describe('createProjectsRepository', () => {
       ['footage-one', 'footage'],
       ['motion-one', 'motion'],
     ]);
+  });
+
+  it('stores the display title with its accents on insert', () => {
+    const repository = createProjectsRepository(db);
+    repository.insert('cafe-aroma', null, 'motion', null, 'Café Aroma');
+    expect(repository.get('cafe-aroma')?.title).toBe('Café Aroma');
+    expect(repository.list().find((record) => record.slug === 'cafe-aroma')?.title).toBe('Café Aroma');
   });
 
   it('stores the brand on insert and changes it with setBrand', () => {

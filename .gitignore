@@ -63,3 +63,6 @@ apps/desktop/.vendor-cache/previews/
 
 # user brand library (BRANDS_ROOT default when running from the repo)
 /brands/
+
+# Material intermedio de la grabación de tutoriales (screen-recording-tutorial)
+scratch/

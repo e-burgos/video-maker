@@ -4,6 +4,13 @@ Historial de versiones de la app de escritorio, en español, pensado para los am
 instalan. `apps/desktop/scripts/release-desktop.mjs` toma la sección de la versión que publica
 y la usa como notas del release.
 
+## 0.4.3 — Storyboard de motion graphics que funciona y mejor español
+
+- **Motion graphics**: el storyboard fallaba con las versiones nuevas del CLI de Claude y el productor se quedaba sin
+  poder armar el video; ahora se genera bien y la validación sigue siendo la misma.
+- El productor **conserva las tildes y las eñes** en las propuestas, los guiones y los subtítulos.
+- Las **fotos libres** que baja el productor se guardan con nombres sin tildes ni paréntesis.
+
 ## 0.4.2 — Motion graphics con capturas que se desplazan, varios dispositivos y animaciones
 
 - **Capturas con scroll**: una captura de página completa baja sola dentro del marco del dispositivo, para mostrar

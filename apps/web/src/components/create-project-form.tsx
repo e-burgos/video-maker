@@ -61,7 +61,7 @@ export function CreateProjectForm({ existingSlugs, onCreated, onCancel }: Create
     const slug = uniqueProjectSlug(slugifyFileName(trimmed), existingSlugs);
     setSubmitting(true);
     try {
-      const detail = await client.createProject({ slug, mode, ...(brand === null ? {} : { brand }) });
+      const detail = await client.createProject({ slug, title: trimmed, mode, ...(brand === null ? {} : { brand }) });
       setName('');
       onCreated(detail.slug);
     } catch (cause) {

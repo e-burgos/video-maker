@@ -4,7 +4,7 @@ import { Link, useParams } from 'react-router-dom';
 import { projectModeOf } from '../api/project-mode';
 import { useRenderApi } from '../api/render-api-context';
 import { useAsyncResource } from '../hooks/use-async-resource';
-import { humanizeSlug } from '../api/humanize-slug';
+import { humanizeSlug, projectDisplayName } from '../api/humanize-slug';
 import { ProducerConversationPanel } from '../components/producer-conversation-panel';
 import { ProposalStatusBadge } from '../components/proposal-status-badge';
 import { Button } from '../components/ui/button';
@@ -50,7 +50,7 @@ export function ProjectWorkspacePage() {
         </Link>
         <div className="flex flex-wrap items-center justify-between gap-3">
           <div>
-            <h1 className="text-2xl font-semibold tracking-tight text-ink">{humanizeSlug(slug)}</h1>
+            <h1 className="text-2xl font-semibold tracking-tight text-ink">{project.data === null ? humanizeSlug(slug) : projectDisplayName(project.data)}</h1>
             <p className="font-mono text-xs text-ink-faint">{slug}</p>
           </div>
           <ProposalStatusBadge proposal={producer.proposal.data?.proposal ?? null} />

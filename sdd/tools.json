@@ -4,5 +4,9 @@
   "rtk": {
     "enabled": true,
     "auto_install": true
+  },
+  "claude_mod": {
+    "enabled": true,
+    "gate": "block"
   }
 }

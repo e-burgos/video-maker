@@ -146,6 +146,10 @@ export const MIGRATIONS: readonly Migration[] = [
       `CREATE INDEX publish_queue_status_position_idx ON publish_queue (status, position)`,
     ],
   },
+  {
+    version: 8,
+    statements: [`ALTER TABLE projects ADD COLUMN title TEXT`],
+  },
 ];
 
 export function currentUserVersion(sqlite: Database.Database): number {
