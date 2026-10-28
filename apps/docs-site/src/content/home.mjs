@@ -96,7 +96,7 @@ const COPY = {
     chips: ['es_AR voice · local', '−14 LUFS', '16:9 · 9:16', 'Rendered on your Mac'],
     tutorialEyebrow: 'See how it works',
     tutorialTitle: 'From brand to finished video, in a little over two minutes',
-    tutorialLede: 'A real walkthrough of the studio: create a brand, attach the photos, let the producer build the video and publish it. The producer's waits are sped up; narrated and captioned in Spanish.',
+    tutorialLede: 'A real walkthrough of the studio: create a brand, attach the photos, let the producer build the video and publish it. The long waits for the producer are sped up; narrated and captioned in Spanish.',
     tutorialLabel: 'Video Maker end-to-end tutorial video',
     tutorialNote: 'Voice: Malena · Music:',
     pathsEyebrow: 'Two paths',
