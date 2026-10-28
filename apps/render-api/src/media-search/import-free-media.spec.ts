@@ -82,6 +82,22 @@ describe('downloadFreeMediaFile', () => {
     expect(await storage.stat(`${PROJECT_ROOT}/raw/broll/Ocean_Waves.mp4`)).not.toBeNull();
   });
 
+  it('guarda el archivo con nombre ASCII: sin tildes, espacios ni paréntesis', async () => {
+    const callLog = createCallLog();
+    const storage = createFakeObjectStorage(callLog, { directories: [PROJECT_ROOT] });
+    const bytes = textBodyChunks('image-bytes');
+    const { fetchRemote } = createFakeFetchRemote({
+      status: 200,
+      headers: { 'content-length': String(bytes[0]?.byteLength ?? 0) },
+      bodyChunks: bytes,
+    });
+    const result = { ...imageResult(), downloadUrl: 'https://upload.wikimedia.org/x/Caff%C3%A8_espresso_variet%C3%A0_(Unsplash).jpg' };
+
+    const downloaded = await downloadFreeMediaFile(storage, fetchRemote, project(), result);
+
+    expect(downloaded.relativePath).toBe('raw/images/Caffe_espresso_varieta_-Unsplash.jpg');
+  });
+
   it('downloads an image into raw/images/', async () => {
     const callLog = createCallLog();
     const storage = createFakeObjectStorage(callLog, { directories: [PROJECT_ROOT] });

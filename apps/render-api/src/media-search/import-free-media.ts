@@ -38,11 +38,20 @@ function fallbackExtensionFor(kind: FreeMediaKind): string {
   return kind === 'video' ? '.mp4' : '.jpg';
 }
 
+function toAsciiFileName(name: string): string {
+  return name
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .replace(/[^A-Za-z0-9._~-]+/g, '-')
+    .replace(/-+(?=\.)/g, '')
+    .replace(/^[-.]+/, '');
+}
+
 function fileNameFromDownloadUrl(downloadUrl: string, fallbackBaseName: string, kind: FreeMediaKind): string {
   const pathname = new URL(downloadUrl).pathname;
   const lastSegment = pathname.split('/').pop() ?? '';
-  const decoded = decodeURIComponent(lastSegment);
-  return isPortableFileName(decoded) ? decoded : `${fallbackBaseName}${fallbackExtensionFor(kind)}`;
+  const ascii = toAsciiFileName(decodeURIComponent(lastSegment));
+  return isPortableFileName(ascii) && ascii !== '' ? ascii : `${fallbackBaseName}${fallbackExtensionFor(kind)}`;
 }
 
 export async function downloadFreeMediaFile(

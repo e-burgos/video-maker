@@ -6,6 +6,7 @@ import type { MotionSceneKind } from '../storyboard/motion-storyboard.schema';
 import { briefImageRef } from './motion-brief';
 import type { MotionBrief } from './motion-brief';
 import { SCENE_GUIDE } from './scene-guide';
+import { toAgentJsonSchema } from './to-agent-json-schema';
 
 export interface AutoStoryboardRequest {
   systemPrompt: string;
@@ -123,6 +124,6 @@ export function buildAutoStoryboardRequest(brief: MotionBrief, brand: BrandManif
     userPrompt: [brandSection(brand), assetLimitsSection(brief, brand).join('\n'), briefSection(brief, brand), `SCRIPT\n${brief.script}`]
       .filter((section) => section !== '')
       .join('\n\n'),
-    jsonSchema: motionStoryboardJsonSchema(),
+    jsonSchema: toAgentJsonSchema(motionStoryboardJsonSchema()),
   };
 }
