@@ -16,6 +16,11 @@ export const STABLE_DMG_FILE_NAME = 'Video-Maker-arm64.dmg';
 
 export const DOWNLOAD_URL = `${SITE_URL}/descargas/${STABLE_DMG_FILE_NAME}`;
 
+
+
+export const TUTORIAL_MUSIC_SOURCE_URL =
+  'https://commons.wikimedia.org/wiki/File:Rafael_Krux_-_Inspiring_Advertising_-_Upbeat_Summer_Corporate_(cc-by)_(filmmusic).mp3';
+
 export const APP_DISPLAY_NAME = 'Video Maker';
 
 export const APPROX_DMG_SIZE_LABEL = '≈311 MB';
