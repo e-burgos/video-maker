@@ -40,6 +40,7 @@ const BrandManifestShape = z.strictObject({
   ),
   images: z.record(z.string(), z.union([Text, z.strictObject({ file: Text, caption: Text })])),
   music: z.array(BrandTrackSchema),
+  musicFrom: z.string().regex(/^[a-z][a-z0-9-]*$/u).describe('Brand whose music bank this brand also uses').optional(),
   voice: z.strictObject({ id: Text, lengthScale: z.number().min(0.7).max(1.4) }),
 });
 

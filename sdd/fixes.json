@@ -4313,6 +4313,58 @@
           }
         ]
       }
+    },
+    {
+      "id": "FIX-e-burgos-042",
+      "author": "e-burgos",
+      "spec_id": null,
+      "fix_document": "sdd/fixes/fix-e-burgos-042.md",
+      "type": "IMPROVEMENT",
+      "severity": "low",
+      "created_at": "2026-11-11",
+      "resolved_at": "2026-11-11",
+      "validated_at": null,
+      "title": "Las submarcas de Display Ads usan el banco de música de la marca madre (campo musicFrom)",
+      "estimation_hours": 1,
+      "description": "Las submarcas (Webs para negocios, Clientes, Tu negocio online) eran copias de Display Ads con sus 2 temas viejos. El manifiesto suma el campo opcional musicFrom: la marca hereda los temas de la madre, del repo y locales, sin duplicar archivos; los suyos tienen prioridad por id. Motion, search_free_music, import_music y la lista de marcas resuelven cada archivo en la marca dueña (brand-music/<marca>/<archivo>). Un ciclo de musicFrom se rechaza.",
+      "justification": "Lo pidió el dev después de la prueba real del banco; es un campo opcional del manifiesto, sin contratos nuevos entre subproyectos.",
+      "related_modules": [
+        "production-quality"
+      ],
+      "affected_files": [
+        "libs/motion-graphics/src/brand/brand-music.ts",
+        "libs/motion-graphics/src/brand/brand-manifest.ts",
+        "libs/motion-graphics/src/pipeline/project-files.ts",
+        "libs/motion-graphics/src/index.ts",
+        "apps/render-api/src/music/brand-music-readers.ts",
+        "apps/render-api/src/music/brand-music-bank.ts",
+        "apps/render-api/src/http/handlers/motion-handler.ts"
+      ],
+      "test_reference": "nx test/lint en verde: motion-graphics 326, render-api 2266, producer-tools 448. Prueba real: las 3 submarcas listan 37 temas, la búsqueda de opticagestion-clientes devuelve el banco con duraciones reales y un video motion de displayads-webs-para-negocios eligió y copió «The Corporate Upbeat» de la madre (voz 17,3 dB sobre la música, -14,2 LUFS).",
+      "status": "implemented",
+      "cycle": null,
+      "process_note": "Los brand.json de las submarcas viven en brands/ (fuera de git): se les agregó musicFrom: displayads a mano. Esteban Burgos queda afuera porque no es submarca.",
+      "usage": {
+        "provider_model": "claude/opus",
+        "effort": "low",
+        "tokens_in": 900000,
+        "tokens_out": 40000,
+        "approx": true,
+        "source": "declared-estimate",
+        "recorded_at": "2026-11-11",
+        "by_agent": [
+          {
+            "agent": "orchestrator",
+            "provider_model": "claude/opus",
+            "effort": "low",
+            "tokens_in": 900000,
+            "tokens_out": 40000,
+            "approx": true,
+            "source": "declared-estimate",
+            "recorded_at": "2026-11-11"
+          }
+        ]
+      }
     }
   ]
 }

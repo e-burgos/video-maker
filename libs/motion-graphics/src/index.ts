@@ -28,17 +28,23 @@ export { activeDeviceIds, BrandManifestSchema, brandImageCaption, brandImageFile
 export type { BrandManifest } from './brand/brand-manifest';
 export {
   brandTrackSourcePath,
+  collectBrandMusic,
+  INHERITED_MUSIC_FILE_PREFIX,
   isLocalMusicFile,
+  isLocalMusicTrackFile,
   LOCAL_MUSIC_DIRECTORY,
   LOCAL_MUSIC_FILE_PREFIX,
   LOCAL_MUSIC_LIST_FILE,
   localMusicDirectory,
   MUSIC_VIDEO_TYPES,
+  parseInheritedMusicFile,
   parseLocalMusicList,
+  resolveBrandTrackSource,
   trackFitsVideoType,
+  withInheritedMusic,
   withLocalMusic,
 } from './brand/brand-music';
-export type { BrandTrack, MusicVideoType } from './brand/brand-music';
+export type { BrandMusicReaders, BrandMusicSource, BrandTrack, InheritedMusicFile, MusicVideoType } from './brand/brand-music';
 export { brandCss, effectiveBrandTokens, parseCssTokens } from './brand/brand-css';
 export { deriveBrandTokens, tokensToCss } from './brand/derive-brand-tokens';
 export type { BrandPalette, BrandTypography } from './brand/derive-brand-tokens';

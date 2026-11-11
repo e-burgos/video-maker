@@ -1,13 +1,12 @@
 import { basename } from 'node:path';
 
-import { brandTrackSourcePath, parseBrandManifest, withLocalMusic } from '@video-maker/motion-graphics';
+import { collectBrandMusic, parseBrandManifest, resolveBrandTrackSource } from '@video-maker/motion-graphics';
 import type { BrandTrack } from '@video-maker/motion-graphics';
 
 import type { StoreConfig } from '../config/store-config';
 import type { RenderApiDependencies } from '../deps/render-api-dependencies';
-import { locateBrand } from '../brands/brand-library';
 import type { CommonsMusicResult } from './commons-music-search';
-import { readLocalMusicTracks } from './local-music';
+import { brandDirLocator, brandMusicReaders } from './brand-music-readers';
 import { lastUseByTrack } from './music-usage-log';
 
 export const BRAND_BANK_RESULT_PREFIX = 'bank-';
@@ -56,14 +55,12 @@ function rankCandidates(left: BankCandidate, right: BankCandidate): number {
   return right.score - left.score || left.lastUsedAt.localeCompare(right.lastUsedAt);
 }
 
-async function readBrandMusic(deps: RenderApiDependencies, store: StoreConfig, brandId: string): Promise<{ readonly dir: string; readonly music: readonly BrandTrack[] } | null> {
+async function readBrandMusic(deps: RenderApiDependencies, store: StoreConfig, brandId: string): Promise<readonly BrandTrack[] | null> {
   const document = (await deps.listMotionBrands()).find((candidate) => candidate.id === brandId);
   if (document === undefined) {
     return null;
   }
-  const manifest = withLocalMusic(parseBrandManifest(document.manifest), await readLocalMusicTracks(deps.storage, store.brandsRoot, brandId));
-  const { dir } = await locateBrand(deps, store, brandId);
-  return { dir, music: manifest.music };
+  return collectBrandMusic(brandMusicReaders(deps, store), brandId, parseBrandManifest(document.manifest));
 }
 
 async function durationOf(deps: RenderApiDependencies, path: string, trackId: string): Promise<number> {
@@ -84,13 +81,13 @@ export async function searchBrandMusicBank(
   if (brandId === null) {
     return [];
   }
-  const brand = await readBrandMusic(deps, store, brandId);
-  if (brand === null) {
+  const music = await readBrandMusic(deps, store, brandId);
+  if (music === null) {
     return [];
   }
   const words = queryWords(mood);
   const lastUse = await lastUseByTrack(deps.storage, store.mediaRoot, brandId);
-  const picked = brand.music
+  const picked = music
     .map((track) => ({ track, score: matchScore(track, words), lastUsedAt: lastUse.get(track.id) ?? '' }))
     .filter((candidate) => candidate.score > 0)
     .sort(rankCandidates)
@@ -98,7 +95,7 @@ export async function searchBrandMusicBank(
 
   return Promise.all(
     picked.map(async ({ track }) => {
-      const localPath = brandTrackSourcePath(brand.dir, store.brandsRoot, brandId, track.file);
+      const localPath = await resolveBrandTrackSource(brandDirLocator(deps, store), store.brandsRoot, brandId, track.file);
       const { title, author, license } = splitCredit(track);
       return {
         resultId: `${BRAND_BANK_RESULT_PREFIX}${track.id}`,

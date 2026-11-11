@@ -2,14 +2,14 @@ import {
   applyBriefBoxes,
   briefImageRef,
   checkStoryboardBoxes,
-  isLocalMusicFile,
+  collectBrandMusic,
+  isLocalMusicTrackFile,
   isMotionStudioError,
   parseBrandManifest,
   parseMotionBrief,
   parseMotionStoryboard,
-  withLocalMusic,
 } from '@video-maker/motion-graphics';
-import type { BrandTrack, MotionBrief, MotionStoryboard, MusicVideoType } from '@video-maker/motion-graphics';
+import type { BrandManifest, BrandTrack, MotionBrief, MotionStoryboard, MusicVideoType } from '@video-maker/motion-graphics';
 import { join } from 'node:path/posix';
 
 import type { StoreConfig } from '../../config/store-config';
@@ -17,7 +17,7 @@ import type { MotionBrandDocument, MotionBrandSource, RenderApiDependencies } fr
 import { sampleFileClassifierFor } from '../../jobs/sample-files';
 import type { JobsBySlug } from '../../jobs/sample-files';
 import { readMotionOverview } from '../../motion/read-motion-overview';
-import { readLocalMusicTracks } from '../../music/local-music';
+import { brandMusicReaders } from '../../music/brand-music-readers';
 import {
   availableImageRefs,
   describeImageProblem,
@@ -58,10 +58,9 @@ function jsonResponse(status: number, body: unknown): HttpResponse {
   return { status, headers: { 'content-type': JSON_CONTENT_TYPE }, body };
 }
 
-function toBrandSummary(document: MotionBrandDocument, localTracks: readonly BrandTrack[]): MotionBrandSummary {
-  let manifest;
+function parseSummaryManifest(document: MotionBrandDocument): BrandManifest {
   try {
-    manifest = parseBrandManifest(document.manifest);
+    return parseBrandManifest(document.manifest);
   } catch (cause) {
     throw new PipelineStageError({
       code: 'SERVER_CONFIG_INVALID',
@@ -71,19 +70,21 @@ function toBrandSummary(document: MotionBrandDocument, localTracks: readonly Bra
       cause,
     });
   }
+}
 
+function toBrandSummary(document: MotionBrandDocument, manifest: BrandManifest, music: readonly BrandTrack[]): MotionBrandSummary {
   return {
     id: manifest.id,
     name: manifest.name,
     source: document.source,
     formats: SUPPORTED_FORMATS,
-    music: withLocalMusic(manifest, localTracks).music.map((track) => ({
+    music: music.map((track) => ({
       id: track.id,
       mood: track.mood,
       bpm: track.bpm,
       hasDrop: track.drop !== undefined,
       videoTypes: track.videoTypes ?? null,
-      local: isLocalMusicFile(track.file),
+      local: isLocalMusicTrackFile(track.file),
     })),
   };
 }
@@ -91,7 +92,10 @@ function toBrandSummary(document: MotionBrandDocument, localTracks: readonly Bra
 export async function handleListMotionBrands(deps: RenderApiDependencies, store: StoreConfig): Promise<HttpResponse> {
   const documents = await deps.listMotionBrands();
   const summaries = await Promise.all(
-    documents.map(async (document) => toBrandSummary(document, await readLocalMusicTracks(deps.storage, store.brandsRoot, document.id))),
+    documents.map(async (document) => {
+      const manifest = parseSummaryManifest(document);
+      return toBrandSummary(document, manifest, await collectBrandMusic(brandMusicReaders(deps, store), document.id, manifest));
+    }),
   );
   summaries.sort((left, right) => left.id.localeCompare(right.id));
   return jsonResponse(200, summaries);

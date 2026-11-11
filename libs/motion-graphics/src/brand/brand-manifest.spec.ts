@@ -25,6 +25,11 @@ describe('parseBrandManifest', () => {
     for (const [key, image] of Object.entries(brand.images)) expect(typeof image === 'string' ? key : image.caption.length > 0).toBe(true);
   });
 
+  it('names the brand whose music bank it shares and rejects a malformed brand id', () => {
+    expect(parseBrandManifest({ ...displayads, id: 'displayads-clientes', musicFrom: 'displayads' }).musicFrom).toBe('displayads');
+    expect(() => parseBrandManifest({ ...displayads, musicFrom: 'Display Ads' })).toThrow(/musicFrom/u);
+  });
+
   it('rejects an invalid manifest with the failing field', () => {
     expect(() => parseBrandManifest({ ...displayads, music: [{ id: 'x' }] })).toThrow(/BRAND_INVALID|music\[0\]/u);
   });

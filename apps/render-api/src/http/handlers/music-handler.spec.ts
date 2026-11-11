@@ -236,9 +236,10 @@ const BANK_BRAND = {
   ],
   voice: { id: 'es_AR-daniela-high', lengthScale: 1.08 },
 };
+const CHILD_BRAND = { ...BANK_BRAND, id: 'acme-tutoriales', name: 'Acme Tutoriales', music: [], musicFrom: 'acme' };
 const LOCAL_TRACK = { id: 'pulsar', file: 'Pulsar.mp3', credit: '"Pulsar" The Grey Room · Biblioteca de audio de YouTube', bpm: 104, mood: 'calm ambient', videoTypes: ['tutorial'] };
 
-function bankSetup(commons: Parameters<typeof createFakeFetchRemote>[0], usage: Record<string, string> = {}) {
+function bankSetup(commons: Parameters<typeof createFakeFetchRemote>[0], usage: Record<string, string> = {}, projectBrand = 'acme') {
   const callLog = createCallLog();
   const storage = createFakeObjectStorage(callLog, {
     directories: [PROJECT_ROOT],
@@ -248,6 +249,7 @@ function bankSetup(commons: Parameters<typeof createFakeFetchRemote>[0], usage: 
       { path: `${BANK_BRAND_DIR}/music/Serena.mp3`, contents: 'serena' },
       { path: '/brands/.local-music/acme/music.json', contents: JSON.stringify([LOCAL_TRACK]) },
       { path: '/brands/.local-music/acme/Pulsar.mp3', contents: 'pulsar' },
+      { path: '/brands/acme-tutoriales/brand.json', contents: JSON.stringify(CHILD_BRAND) },
       { path: '/media/.music-usage.json', contents: JSON.stringify(usage) },
     ],
   });
@@ -255,9 +257,12 @@ function bankSetup(commons: Parameters<typeof createFakeFetchRemote>[0], usage: 
   const deps = createFakeRenderApiDependencies(callLog, {
     storage,
     fetchRemote,
-    listMotionBrands: async () => [{ id: 'acme', source: 'built-in', manifest: BANK_BRAND }],
+    listMotionBrands: async () => [
+      { id: 'acme', source: 'built-in', manifest: BANK_BRAND },
+      { id: 'acme-tutoriales', source: 'user', manifest: CHILD_BRAND },
+    ],
   });
-  deps.localStore.projects.insert('pitch-deck', null, 'footage', 'acme');
+  deps.localStore.projects.insert('pitch-deck', null, 'footage', projectBrand);
   return { deps, storage, runtime: createRenderApiRuntime(deps) };
 }
 
@@ -298,5 +303,17 @@ describe('the brand music bank in search_free_music and import_music', () => {
     expect(response.body).toMatchObject({ path: 'raw/audio/Pulsar.mp3', credit: { title: 'Pulsar', author: 'The Grey Room', license: 'Biblioteca de audio de YouTube' } });
     expect(await storage.readTextFile(`${PROJECT_ROOT}/raw/audio/Pulsar.mp3`)).toBe('pulsar');
     expect(JSON.parse(await storage.readTextFile('/media/.music-usage.json'))).toEqual({ 'acme/pulsar': '2026-09-08T00:00:00.000Z' });
+  });
+
+  it('lets a brand that takes its music from another one search and import that bank', async () => {
+    const { deps, storage, runtime } = bankSetup(new Error('offline'), {}, 'acme-tutoriales');
+
+    const search = await handleSearchFreeMusic(deps, STORE, { slug: 'pitch-deck' }, searchRequest('pitch-deck', 'mood=calm&maxResults=5'), runtime);
+    const response = await handleImportMusic(deps, STORE, { slug: 'pitch-deck' }, importRequest('pitch-deck', { resultId: 'bank-pulsar' }), runtime);
+
+    expect((search.body as { results: readonly { resultId: string }[] }).results.map((result) => result.resultId)).toEqual(['bank-calma', 'bank-serena', 'bank-pulsar']);
+    expect(response.body).toMatchObject({ path: 'raw/audio/Pulsar.mp3' });
+    expect(await storage.readTextFile(`${PROJECT_ROOT}/raw/audio/Pulsar.mp3`)).toBe('pulsar');
+    expect(JSON.parse(await storage.readTextFile('/media/.music-usage.json'))).toEqual({ 'acme-tutoriales/pulsar': '2026-09-08T00:00:00.000Z' });
   });
 });
