@@ -250,6 +250,9 @@
                   "spring",
                   "linear"
                 ]
+              },
+              "handles": {
+                "type": "boolean"
               }
             },
             "required": [

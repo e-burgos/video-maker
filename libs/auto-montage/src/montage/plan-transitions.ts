@@ -65,6 +65,7 @@ export function planTransitions(
     const direction = directionFor(kind, next);
 
     transitions.push({
+      ...(previousKeep.endMs === keep.startMs ? { handles: true } : {}),
       id: sequentialId('trans', n),
       type: 'transition',
       atMs: keep.startMs,

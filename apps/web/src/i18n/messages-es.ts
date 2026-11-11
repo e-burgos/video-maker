@@ -289,6 +289,8 @@ export const MESSAGES_ES: Messages = {
   'montage.description': 'Ingestá el material crudo y armá la timeline con el motor de auto-montaje, sin salir del studio.',
   'montage.presetLabel': 'Preset de montaje',
   'montage.seedLabel': 'Semilla',
+  'montage.seedAuto': 'automática',
+  'montage.seedHint': 'Vacía, cada video sale con su propia semilla y sus transiciones rotan distinto. Escribí un número para repetir un montaje.',
   'montage.generate': 'Generar el montaje',
   'montage.generating': 'Arrancando el montaje…',
   'montage.seedInvalid': 'La semilla tiene que ser un entero no negativo.',

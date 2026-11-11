@@ -4681,6 +4681,60 @@
       }
     },
     {
+      "id": "FIX-e-burgos-046",
+      "author": "e-burgos",
+      "spec_id": null,
+      "fix_document": "sdd/fixes/fix-e-burgos-046.md",
+      "type": "IMPROVEMENT",
+      "severity": "medium",
+      "created_at": "2026-11-11",
+      "resolved_at": "2026-11-11",
+      "validated_at": null,
+      "title": "Tutoriales con voz por guion: keeps por línea con transiciones sin desincronizar la voz, y semilla automática en la web",
+      "estimation_hours": 4,
+      "description": "Con voice script el montaje dejaba un solo keep y el video salía sin transiciones. Se parte el keep por las líneas del guion, con una transición cada 2 líneas y handles en el EDL para que la timeline no se acorte ni la voz se desincronice; la voz salta la entrada del handle. El formulario de montaje de la web deja la semilla vacía (automática).",
+      "justification": "Pedido por el orquestador con el plan aprobado por el dev; el campo handles es opcional y sin él el comportamiento no cambia.",
+      "related_modules": [
+        "production-quality"
+      ],
+      "affected_files": [
+        "libs/auto-montage/src/montage/split-keep-at-script-lines.ts",
+        "libs/auto-montage/src/auto-montage.ts",
+        "libs/auto-montage/src/montage/plan-transitions.ts",
+        "libs/timeline-core/src/schemas/edit-decision-list.schema.ts",
+        "libs/timeline-core/schemas/edit-decision-list.schema.json",
+        "libs/timeline-core/src/timeline/build-timeline.ts",
+        "apps/web/src/components/montage-trigger.tsx",
+        "apps/web/src/api/render-api-client.ts",
+        "apps/web/src/i18n/messages-es.ts",
+        "apps/web/src/i18n/messages-en.ts"
+      ],
+      "test_reference": "nx test/lint/build en verde: timeline-core 455, auto-montage 380, composition-remotion 368, render-api 2266, web 1648; render real de media/prueba-motion-guion con voz contigua.",
+      "status": "implemented",
+      "cycle": null,
+      "usage": {
+        "provider_model": "claude/opus",
+        "effort": "medium",
+        "tokens_in": 450000,
+        "tokens_out": 30000,
+        "approx": true,
+        "source": "declared-estimate",
+        "recorded_at": "2026-11-11",
+        "by_agent": [
+          {
+            "agent": "orchestrator",
+            "provider_model": "claude/opus",
+            "effort": "medium",
+            "tokens_in": 450000,
+            "tokens_out": 30000,
+            "approx": true,
+            "source": "declared-estimate",
+            "recorded_at": "2026-11-11"
+          }
+        ]
+      }
+    },
+    {
       "id": "FIX-e-burgos-047",
       "author": "e-burgos",
       "spec_id": null,

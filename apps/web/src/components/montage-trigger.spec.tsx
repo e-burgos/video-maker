@@ -62,7 +62,7 @@ function generateButton(): HTMLButtonElement {
 }
 
 describe('MontageTrigger', () => {
-  it('creates a montage job with the default preset and seed of the spec', async () => {
+  it('creates a montage job with the default preset and no seed, so the studio picks one per video', async () => {
     const createMontageJob = vi.fn().mockResolvedValue(montageJob());
     const onCreated = renderTrigger(createMontageJob);
 
@@ -72,7 +72,6 @@ describe('MontageTrigger', () => {
     await waitFor(() =>
       expect(createMontageJob).toHaveBeenCalledWith('smoke-ingest', {
         preset: 'software-demo',
-        seed: 0,
         overwrite: false,
       }),
     );
@@ -119,7 +118,6 @@ describe('MontageTrigger', () => {
     await waitFor(() =>
       expect(createMontageJob).toHaveBeenCalledWith('smoke-ingest', {
         preset: 'software-demo',
-        seed: 0,
         overwrite: false,
         musicMode: 'segments',
         musicFloorDb: -24,
@@ -246,7 +244,6 @@ describe('MontageTrigger', () => {
     await waitFor(() => expect(onCreated).toHaveBeenCalledWith(montageJob()));
     expect(createMontageJob).toHaveBeenNthCalledWith(2, 'smoke-ingest', {
       preset: 'software-demo',
-      seed: 0,
       overwrite: true,
     });
   });

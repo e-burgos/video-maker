@@ -59,6 +59,7 @@ export const TransitionDecisionSchema = z.strictObject({
   kind: TransitionKindSchema,
   direction: TransitionDirectionSchema.optional(),
   timing: TransitionTimingKindSchema.optional(),
+  handles: z.boolean().optional(),
 });
 
 export const CaptionGroupWordSchema = z.strictObject({

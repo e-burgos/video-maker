@@ -323,6 +323,28 @@ describe('autoMontage — guion cronometrado, alineación y captions por frase (
     ]);
   }
 
+  it('parte el A-roll por las líneas del guion para que haya transiciones, sin acortar el video ni hacer punch-in', async () => {
+    const result = await run(threeLineFileSystem(), { preset: 'educational', scriptText: THREE_LINE_SCRIPT });
+    const keeps = result.edl.decisions.filter((decision) => decision.type === 'keep');
+    const transitions = result.edl.decisions.filter((decision) => decision.type === 'transition');
+    const aroll = result.timeline.tracks.aroll;
+    const lastClip = aroll[aroll.length - 1];
+    const validation = validateTimeline(result.timeline);
+
+    expect(validation.ok ? [] : validation.issues).toEqual([]);
+    expect(keeps.map((k) => [k.startMs, k.endMs])).toEqual([
+      [0, 2000],
+      [2000, 4900],
+      [4900, keeps[2]?.endMs],
+    ]);
+    expect(transitions).toHaveLength(1);
+    expect(transitions[0]).toMatchObject({ atMs: 4900, handles: true });
+    expect(result.edl.decisions.filter((decision) => decision.type === 'punch-in')).toHaveLength(0);
+    expect((lastClip?.from ?? 0) + (lastClip?.durationFrames ?? 0)).toBe(result.timeline.durationFrames);
+    expect(result.timeline.durationFrames).toBe(Math.round(((keeps[2]?.endMs ?? 0) / 1000) * result.timeline.format.fps));
+    expect(result.timeline.tracks.voice[0]?.from).toBe(0);
+  });
+
   it('ninguna caption cruza el límite de una línea del manifiesto', async () => {
     const result = await run(threeLineFileSystem(), {
       preset: 'educational',
