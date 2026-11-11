@@ -56,8 +56,19 @@ describe('composeTemplate', () => {
     expect(html).toContain('id="sfx-whoosh-end" src="assets/sfx-bank/whoosh-1.mp3" data-start="6.22" data-duration="0.6"');
   });
 
-  it('fills the riser and impact of the drop from the picked bank variants, with the riser ending on the drop', () => {
-    const picks = { ...testSfxPicks(), accents: { ...testSfxPicks().accents, riser: { ...testSfxPicks().accents.riser, durationSec: 2 } } };
+  it('starts the riser so its loudest moment, not its end, lands on the drop', () => {
+    const base = testSfxPicks().accents.riser;
+    if (base === undefined) throw new Error('fixture has no riser');
+    const early = { ...testSfxPicks(), accents: { ...testSfxPicks().accents, riser: { ...base, durationSec: 2, entry: { ...base.entry, durationMs: 2000, peakMs: 990 } } } };
+    const html = composeTemplate('{{sfx:riser}}', script, timeline, words, early);
+
+    expect(Number(html)).toBeCloseTo(4 - 0.99, 3);
+  });
+
+  it('fills the riser and impact of the drop from the picked bank variants, with the riser peaking on the drop', () => {
+    const base = testSfxPicks().accents.riser;
+    if (base === undefined) throw new Error('fixture has no riser');
+    const picks = { ...testSfxPicks(), accents: { ...testSfxPicks().accents, riser: { ...base, durationSec: 2, entry: { ...base.entry, durationMs: 2000, peakMs: 2000 } } } };
     const html = composeTemplate('{{sfx_src:riser}}|{{sfx_dur:riser}}|{{sfx:riser}}|{{sfx_src:impact}}|{{sfx_dur:impact}}', script, timeline, words, picks);
 
     expect(html).toBe('assets/sfx-bank/riser-1.mp3|2|2|assets/sfx-bank/impact-2.mp3|2');

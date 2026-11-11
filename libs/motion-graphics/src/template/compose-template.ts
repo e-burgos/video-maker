@@ -51,7 +51,7 @@ function whooshTracks(timeline: MotionTimeline, script: MotionScript, sfx: Motio
 
 function withAccentTiming(script: MotionScript, sfx: MotionSfxPicks): MotionScript {
   const riser = sfx.accents.riser;
-  return riser === undefined ? script : { ...script, sfx: script.sfx.map((cue) => (cue.id === 'riser' ? { ...cue, offset: -round(riser.durationSec) } : cue)) };
+  return riser === undefined ? script : { ...script, sfx: script.sfx.map((cue) => (cue.id === 'riser' ? { ...cue, offset: -round(riser.entry.peakMs / 1000) } : cue)) };
 }
 
 function accentDurationSec(key: string, durationSec: number): number {

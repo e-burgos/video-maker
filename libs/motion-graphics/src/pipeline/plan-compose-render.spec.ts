@@ -90,7 +90,8 @@ describe('composeProject', () => {
     await planProject(ports, P, { beatSync: true });
     const result = await composeProject(ports, P);
     const [riserStart = '', riserDur = '', riserSrc = ''] = String(ports.files.get(`${P}/index.html`)).replace(/^<i data-start="10.04">|<\/i>$/gu, '').split('|');
-    expect(Number(riserStart) + Number(riserDur)).toBeCloseTo(10.04, 2);
+    expect(Number(riserStart)).toBeLessThan(10.04);
+    expect(Number(riserStart) + Number(riserDur)).toBeGreaterThanOrEqual(10.04);
     expect(riserSrc).toMatch(/^assets\/sfx-bank\/riser-\d\.mp3$/u);
     expect(ports.files.has(`${P}/assets/sfx-bank/sfx-bank.json`)).toBe(true);
     expect(JSON.parse(String(ports.files.get(`${P}/sfx-credits.json`)))).toEqual(expect.any(Array));

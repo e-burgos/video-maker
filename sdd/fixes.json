@@ -6102,6 +6102,52 @@
           }
         ]
       }
+    },
+    {
+      "id": "FIX-e-burgos-075",
+      "author": "e-burgos",
+      "spec_id": null,
+      "fix_document": "sdd/fixes/fix-e-burgos-075.md",
+      "type": "BUGFIX",
+      "severity": "low",
+      "created_at": "2026-11-11",
+      "resolved_at": "2026-11-11",
+      "validated_at": null,
+      "title": "El riser del modo B se alinea al drop por su cresta (peakMs) y no por el final del archivo",
+      "estimation_hours": 0.5,
+      "description": "El riser arrancaba su duración antes del drop y riser-2 llegaba con la cresta 1 s antes. Ahora arranca peakMs antes del drop; las tres variantes llegan con la cresta en el drop. Se corrige el spec de impact-sfx con el argumento viejo.",
+      "justification": "Pendiente propio autorizado por la sesión orquestadora; usa el peakMs del FIX-e-burgos-074.",
+      "related_modules": [
+        "production-quality"
+      ],
+      "affected_files": [
+        "libs/motion-graphics/src/template/compose-template.ts",
+        "libs/motion-graphics/src/compose/impact-sfx.spec.ts"
+      ],
+      "test_reference": "nx test/lint/build en verde: motion-graphics 345; cresta de riser-1/2/3 en el drop (0 ms).",
+      "status": "implemented",
+      "cycle": null,
+      "usage": {
+        "provider_model": "claude/opus",
+        "effort": "medium",
+        "tokens_in": 120000,
+        "tokens_out": 6000,
+        "approx": true,
+        "source": "declared-estimate",
+        "recorded_at": "2026-11-11",
+        "by_agent": [
+          {
+            "agent": "orchestrator",
+            "provider_model": "claude/opus",
+            "effort": "medium",
+            "tokens_in": 120000,
+            "tokens_out": 6000,
+            "approx": true,
+            "source": "declared-estimate",
+            "recorded_at": "2026-11-11"
+          }
+        ]
+      }
     }
   ]
 }
