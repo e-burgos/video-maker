@@ -138,8 +138,8 @@ export function composeStoryboard(storyboard: MotionStoryboard, brand: BrandMani
     .join('\n      ');
 
   const sfx = dropScene && track
-    ? `<audio id="sfx-riser" src="${RUNTIME_ASSET_DIR}/sfx/riser.mp3" data-start="{{sfx:riser}}" data-duration="3.4" data-media-start="6.6" data-track-index="12" data-volume="0.55"></audio>
-      ${impactTrack(`{{start:${dropScene.id}}}`, RUNTIME_ASSET_DIR)}`
+    ? `<audio id="sfx-riser" src="{{sfx_src:riser}}" data-start="{{sfx:riser}}" data-duration="{{sfx_dur:riser}}" data-track-index="12" data-volume="0.55"></audio>
+      ${impactTrack(`{{start:${dropScene.id}}}`)}`
     : '';
 
   const width = vertical ? 1080 : 1920;
