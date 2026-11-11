@@ -223,13 +223,20 @@ placa de color con el logo centrado.
 
 ```json
 "bumpers": {
-  "intro": { "enabled": true, "durationMs": 2000, "backgroundColor": "#ffffff", "animation": "zoom", "logoWidthRatio": 0.4 },
-  "outro": { "enabled": true, "durationMs": 2000, "backgroundColor": "#0b1020", "animation": "fade", "logoWidthRatio": 0.4 }
+  "intro": { "enabled": true, "durationMs": 2000, "logoWidthRatio": 0.4 },
+  "outro": { "enabled": true, "durationMs": 2000, "logoWidthRatio": 0.4 }
 }
 ```
 
-- `durationMs` entre 500 y 6000 (la web ofrece 1,5 / 2 / 3 / 4 s), `backgroundColor` hex `#rrggbb`,
-  `animation` `fade` | `zoom` | `slide-up`, `logoWidthRatio` 0.3 / 0.4 / 0.55.
+- `durationMs` entre 500 y 6000 (la web ofrece 1,5 / 2 / 3 / 4 s), `logoWidthRatio` 0.3 / 0.4 / 0.55.
+- **Prendelos sin `background`, `reveal` ni `caption`, y no mandes `bumpers.style`.** El montaje
+  escribe `style` con `rotate: true`, una semilla por video y el estilo de la marca (paleta, web y el
+  bloque `bumpers` del `brand.json`). Así, cada video rota el fondo animado (`solid` | `gradient` |
+  `noise` | `shapes` | `glow`), el revelado del logo (`fade` | `zoom` | `slide-up` | `wipe` | `blur-in`
+  | `pop`) y el remate del outro (la web de la marca), que cambian de un video a otro.
+- Con la rotación activa, `background` y `reveal` propios de un bumper no se aplican. Sí se respetan
+  `caption` (hasta 60 caracteres), `backgroundColor` y `accentColor`: usalos solo si el usuario pide
+  ese texto o ese color. `animation` es el campo viejo: no lo uses.
 - Usa el logo de `timeline.logo`: si el proyecto no tiene logo, la placa sale **sólo con el fondo de
   color**. Primero conseguí el logo (§4).
 - `timeline.durationFrames` **no cambia**: sigue siendo el contenido. El video final dura

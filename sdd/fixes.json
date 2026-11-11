@@ -4988,6 +4988,52 @@
           }
         ]
       }
+    },
+    {
+      "id": "FIX-e-burgos-052",
+      "author": "e-burgos",
+      "spec_id": null,
+      "fix_document": "sdd/fixes/fix-e-burgos-052.md",
+      "type": "IMPROVEMENT",
+      "severity": "low",
+      "created_at": "2026-11-11",
+      "resolved_at": "2026-11-11",
+      "validated_at": null,
+      "title": "El SKILL.md del productor explica los bumpers por piezas: prenderlos sin look propio y dejar que el montaje rote",
+      "estimation_hours": 0.25,
+      "description": "La sección de bumpers del SKILL.md seguía con el ejemplo de backgroundColor + animation (fade | zoom | slide-up). Ahora pide prender intro y outro solo con enabled, durationMs y logoWidthRatio, sin bumpers.style, y explica que el montaje rota fondo animado, revelado y remate por video con la paleta y la web de la marca (FIX-050 y FIX-051).",
+      "justification": "Pedido de la sesión de motion al cerrar la etapa 2 de bumpers; solo documentación.",
+      "related_modules": [
+        "production-quality"
+      ],
+      "affected_files": [
+        "sdd/skills/video-producer/SKILL.md"
+      ],
+      "test_reference": "Sin código. Contrastado con timeline.schema.ts (LogoBumperSchema, BumperStyleSchema), resolve-bumper-look.ts y auto-montage.ts (style con rotate y seed).",
+      "status": "implemented",
+      "cycle": null,
+      "process_note": "Con rotate: true, background y reveal propios del bumper no se aplican; caption, backgroundColor y accentColor sí.",
+      "usage": {
+        "provider_model": "claude/opus",
+        "effort": "low",
+        "tokens_in": 120000,
+        "tokens_out": 6000,
+        "approx": true,
+        "source": "declared-estimate",
+        "recorded_at": "2026-11-11",
+        "by_agent": [
+          {
+            "agent": "orchestrator",
+            "provider_model": "claude/opus",
+            "effort": "low",
+            "tokens_in": 120000,
+            "tokens_out": 6000,
+            "approx": true,
+            "source": "declared-estimate",
+            "recorded_at": "2026-11-11"
+          }
+        ]
+      }
     }
   ]
 }
