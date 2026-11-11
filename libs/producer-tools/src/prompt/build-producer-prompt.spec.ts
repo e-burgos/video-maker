@@ -199,6 +199,14 @@ describe('buildProducerPrompt — quita la regla de model (el server lo inyecta)
   });
 });
 
+describe('buildProducerPrompt — sonido de los bumpers', () => {
+  it('deja el efecto de los bumpers en automático salvo pedido del usuario', () => {
+    const prompt = buildProducerPrompt(CONTEXT);
+    expect(prompt).toContain('Leave `sfxKind` and `sfx` out unless the user asks for a specific');
+    expect(prompt).toContain('`"sfxKind":"none"`');
+  });
+});
+
 describe('buildProducerPrompt — checklist de parámetros de las tres recetas', () => {
   const prompt = buildProducerPrompt(CONTEXT);
 

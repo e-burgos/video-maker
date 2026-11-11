@@ -5276,7 +5276,7 @@
       "validated_at": null,
       "title": "Selector de sonido de los bumpers en el editor web y entrada del logo sincronizada con el contrato",
       "estimation_hours": 1.5,
-      "description": "El editor de bumpers permite elegir el efecto (automático, whoosh, golpe, brillo, clicks o sin sonido) y la composición toma el tiempo de entrada del logo del contrato de SFX.",
+      "description": "El editor de bumpers permite elegir el efecto (automático, whoosh, golpe, brillo, clicks o sin sonido) y la composición toma el tiempo de entrada del logo del contrato de SFX. El prompt del productor deja el efecto en automático salvo pedido del usuario.",
       "justification": "Parte de la tarea de efectos de sonido pedida por el dev vía la sesión orquestadora.",
       "related_modules": [
         "production-quality"
@@ -5287,9 +5287,10 @@
         "apps/web/src/i18n/messages-es.ts",
         "apps/web/src/i18n/messages-en.ts",
         "libs/composition-remotion/src/helpers/logo-bumper-style.ts",
-        "libs/composition-remotion/src/components/logo-bumper-scene.tsx"
+        "libs/composition-remotion/src/components/logo-bumper-scene.tsx",
+        "libs/producer-tools/src/prompt/build-producer-prompt.ts"
       ],
-      "test_reference": "nx test/lint/build en verde: composition-remotion 379, web 1653.",
+      "test_reference": "nx test/lint/build en verde: composition-remotion 379, web 1653, producer-tools 449.",
       "status": "implemented",
       "cycle": null,
       "usage": {
