@@ -437,13 +437,13 @@
 
       <audio id="music" src="assets/audio/music.wav" data-start="0" data-duration="{{duration}}" data-track-index="10" data-volume="1" data-automation='{{music_automation}}'></audio>
       {{voice_tracks}}
-      <audio id="sfx-riser" src="assets/runtime/sfx/riser.mp3" data-start="{{sfx:riser}}" data-duration="3.4" data-media-start="6.6" data-track-index="12" data-volume="0.55"></audio>
-      <audio id="sfx-impact" src="assets/runtime/sfx/impact-bass-1.mp3" data-start="{{start:reveal}}" data-duration="2" data-track-index="13" data-volume="0.8"></audio>
+      <audio id="sfx-riser" src="{{sfx_src:riser}}" data-start="{{sfx:riser}}" data-duration="{{sfx_dur:riser}}" data-track-index="12" data-volume="0.55"></audio>
+      <audio id="sfx-impact" src="{{sfx_src:impact}}" data-start="{{start:reveal}}" data-duration="{{sfx_dur:impact}}" data-track-index="13" data-volume="0.8"></audio>
       {{whoosh_tracks}}
-      <audio id="sfx-click" src="assets/runtime/sfx/click-soft.mp3" data-start="{{sfx:click}}" data-duration="0.36" data-track-index="14" data-volume="0.7"></audio>
-      <audio id="sfx-notif" src="assets/runtime/sfx/notification.mp3" data-start="{{sfx:notif}}" data-duration="1.4" data-track-index="14" data-volume="0.45"></audio>
-      <audio id="sfx-pop" src="assets/runtime/sfx/pop.mp3" data-start="{{sfx:pop}}" data-duration="0.7" data-track-index="14" data-volume="0.5"></audio>
-      <audio id="sfx-chime" src="assets/runtime/sfx/chime.mp3" data-start="{{sfx:chime}}" data-duration="2.4" data-track-index="14" data-volume="0.4"></audio>
+      <audio id="sfx-click" src="{{sfx_src:click}}" data-start="{{sfx:click}}" data-duration="{{sfx_dur:click}}" data-track-index="14" data-volume="0.7"></audio>
+      <audio id="sfx-notif" src="{{sfx_src:shimmer}}" data-start="{{sfx:notif}}" data-duration="{{sfx_dur:shimmer}}" data-track-index="14" data-volume="0.45"></audio>
+      <audio id="sfx-pop" src="{{sfx_src:click:2}}" data-start="{{sfx:pop}}" data-duration="{{sfx_dur:click:2}}" data-track-index="14" data-volume="0.5"></audio>
+      <audio id="sfx-chime" src="{{sfx_src:shimmer:2}}" data-start="{{sfx:chime}}" data-duration="{{sfx_dur:shimmer:2}}" data-track-index="14" data-volume="0.4"></audio>
     </div>
 
     <script>

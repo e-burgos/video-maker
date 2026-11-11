@@ -54,12 +54,14 @@ function withAccentTiming(script: MotionScript, sfx: MotionSfxPicks): MotionScri
   return riser === undefined ? script : { ...script, sfx: script.sfx.map((cue) => (cue.id === 'riser' ? { ...cue, offset: -round(riser.durationSec) } : cue)) };
 }
 
+function accentDurationSec(key: string, durationSec: number): number {
+  return key === 'impact' ? Math.min(IMPACT_DURATION_SEC, durationSec) : durationSec;
+}
+
 function accentValues(sfx: MotionSfxPicks): Array<[string, string]> {
-  const { riser, impact } = sfx.accents;
-  return [
-    ...(riser === undefined ? [] : ([['sfx_src:riser', riser.src], ['sfx_dur:riser', String(round(riser.durationSec))]] as Array<[string, string]>)),
-    ...(impact === undefined ? [] : ([['sfx_src:impact', impact.src], ['sfx_dur:impact', String(round(Math.min(IMPACT_DURATION_SEC, impact.durationSec)))]] as Array<[string, string]>)),
-  ];
+  return Object.entries(sfx.accents).flatMap(([key, pick]): Array<[string, string]> =>
+    pick === undefined ? [] : [[`sfx_src:${key}`, pick.src], [`sfx_dur:${key}`, String(round(accentDurationSec(key, pick.durationSec)))]],
+  );
 }
 
 function withSceneText(timeline: MotionTimeline, script: MotionScript): MotionTimeline {

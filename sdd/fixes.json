@@ -5615,6 +5615,57 @@
           }
         ]
       }
+    },
+    {
+      "id": "FIX-e-burgos-065",
+      "author": "e-burgos",
+      "spec_id": null,
+      "fix_document": "sdd/fixes/fix-e-burgos-065.md",
+      "type": "BUGFIX",
+      "severity": "high",
+      "created_at": "2026-11-11",
+      "resolved_at": "2026-11-11",
+      "validated_at": null,
+      "title": "Fuera los efectos de Pixabay: la plantilla de presentación usa el banco CC0/CC BY y se borran de runtime/sfx",
+      "estimation_hours": 2,
+      "description": "Los 8 efectos de runtime/sfx eran de Pixabay y no se podían redistribuir. La plantilla a mano de presentación pasa al banco con marcadores por tipo y variante, se acreditan solo los CC BY usados, se borran los archivos y se corrige el CREDITS.md que los daba por Apache.",
+      "justification": "Decisión del dev («Sí, las tres») transmitida por la sesión orquestadora; licencia que impide distribuir los archivos.",
+      "related_modules": [
+        "production-quality"
+      ],
+      "affected_files": [
+        "libs/motion-graphics/src/sfx/motion-sfx-picks.ts",
+        "libs/motion-graphics/src/template/compose-template.ts",
+        "libs/motion-graphics/src/pipeline/compose-project.ts",
+        "tools/motion-studio/templates/displayads/presentacion/index.html.tpl",
+        "libs/motion-graphics/assets/runtime/sfx",
+        "libs/motion-graphics/assets/brands/displayads/music/CREDITS.md"
+      ],
+      "test_reference": "nx test/lint/build en verde: motion-graphics 342, motion-studio 17, render-api 2291; render de la plantilla de presentación sin destellos, −14,3 LUFS, pico −2,0 dBTP.",
+      "status": "implemented",
+      "cycle": null,
+      "process_note": "Quedan menciones a runtime/sfx en el SKILL video-producer y en dos specs de review, que son de la sesión de música.",
+      "usage": {
+        "provider_model": "claude/opus",
+        "effort": "medium",
+        "tokens_in": 300000,
+        "tokens_out": 15000,
+        "approx": true,
+        "source": "declared-estimate",
+        "recorded_at": "2026-11-11",
+        "by_agent": [
+          {
+            "agent": "orchestrator",
+            "provider_model": "claude/opus",
+            "effort": "medium",
+            "tokens_in": 300000,
+            "tokens_out": 15000,
+            "approx": true,
+            "source": "declared-estimate",
+            "recorded_at": "2026-11-11"
+          }
+        ]
+      }
     }
   ]
 }

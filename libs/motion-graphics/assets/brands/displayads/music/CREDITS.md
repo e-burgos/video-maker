@@ -34,6 +34,6 @@ los tiene.
 `videoTypes` en `brand.json` dice para qué videos sirve cada tema: `tutorial` (grabación de pantalla con voz
 larga), `product` (producto y motion), `vertical` (Shorts y promos cortas) e `institutional` (marca y cierre).
 
-Efectos de sonido del modo B (`assets/runtime/sfx/`): vienen de las skills de HyperFrames, pero los archivos son de [Pixabay](https://pixabay.com/sound-effects/) bajo la Pixabay Content License, no Apache 2.0 (el Apache 2.0 cubre el código de HyperFrames). Esa licencia no permite distribuirlos sueltos: están pendientes de reemplazo por el banco CC0/CC BY de `assets/sfx-bank/`.
+Efectos de sonido del modo B: salen del banco CC0/CC BY de `assets/sfx-bank/` (créditos en su `CREDITS.md`); los CC BY que usa cada video se acreditan en su `<video>.credits.txt`. Los ocho archivos que traía `assets/runtime/sfx/` desde las skills de HyperFrames eran de Pixabay (Pixabay Content License, no Apache 2.0: el Apache 2.0 cubre solo el código de HyperFrames) y se borraron del repo porque esa licencia no permite distribuirlos sueltos.
 Fuentes (`fonts/`): Outfit y Geist / Geist Mono, SIL Open Font License, vía Fontsource.
 GSAP (`assets/runtime/gsap.min.js`): GSAP 3.14.2, licencia estándar gratuita de GSAP.

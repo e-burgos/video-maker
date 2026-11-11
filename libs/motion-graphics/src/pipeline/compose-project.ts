@@ -28,6 +28,6 @@ export async function composeProject(ports: MotionPipelinePorts, project: string
   const sfx = bank === null ? NO_SFX_PICKS : pickMotionSfx(bank, timeline, script, project);
   const html = composeTemplate(await ports.readText(joinPath(project, 'index.html.tpl')), script, timeline, words, sfx);
   await ports.writeText(joinPath(project, 'index.html'), html);
-  await ports.writeText(joinPath(project, SFX_CREDITS_FILE), JSON.stringify(sfxCreditLines(sfx), null, 2));
+  await ports.writeText(joinPath(project, SFX_CREDITS_FILE), JSON.stringify(sfxCreditLines(sfx, html), null, 2));
   return { lines: [`compose: index.html · ${timeline.scenes.length} scenes · ${timeline.duration} s`], scenes: timeline.scenes.length, durationSec: timeline.duration };
 }

@@ -23,17 +23,28 @@ describe('pickMotionSfx', () => {
 
   it('usa solo archivos del banco nuevo, nunca los de runtime/sfx', () => {
     const picks = pickMotionSfx(bank, timeline, script, 'video-a');
-    const sources = [...picks.whooshByScene.values(), picks.accents.riser, picks.accents.impact].map((pick) => pick.src);
+    const sources = [...picks.whooshByScene.values(), ...Object.values(picks.accents)].map((pick) => pick?.src ?? '');
 
     expect(sources.every((src) => src.startsWith('assets/sfx-bank/'))).toBe(true);
   });
 
-  it('es determinista por video y acredita solo los CC BY usados', () => {
+  it("es determinista por video y acredita solo los CC BY que aparecen en el html", () => {
     const a = pickMotionSfx(bank, timeline, script, 'video-a');
 
     expect([...pickMotionSfx(bank, timeline, script, 'video-a').whooshByScene.values()].map((p) => p.entry.id)).toEqual(
       [...a.whooshByScene.values()].map((p) => p.entry.id),
     );
-    sfxCreditLines(a).forEach((line) => expect(line).toMatch(/^Efecto de sonido: «.+» de .+ \(CC BY [\d.]+\) — https?:\/\//u));
+    const html = [...a.whooshByScene.values(), ...Object.values(a.accents)].map((p) => `src="${p?.src}"`).join(' ');
+    expect(sfxCreditLines(a, '')).toEqual([]);
+    sfxCreditLines(a, html).forEach((line) => expect(line).toMatch(/^Efecto de sonido: «.+» de .+ \(CC BY [\d.]+\) — https?:\/\//u));
+  });
+
+  it('ofrece dos variantes distintas de cada tipo del banco para las plantillas a mano', () => {
+    const picks = pickMotionSfx(bank, timeline, script, 'video-a');
+
+    for (const kind of ['whoosh', 'impact', 'shimmer', 'riser', 'typing', 'click']) {
+      expect(picks.accents[kind]?.entry.kind).toBe(kind);
+      expect(picks.accents[`${kind}:2`]?.entry.id).not.toBe(picks.accents[kind]?.entry.id);
+    }
   });
 });
