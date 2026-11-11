@@ -4206,6 +4206,54 @@
           }
         ]
       }
+    },
+    {
+      "id": "FIX-e-burgos-037",
+      "author": "e-burgos",
+      "spec_id": null,
+      "fix_document": "sdd/fixes/fix-e-burgos-037.md",
+      "type": "IMPROVEMENT",
+      "severity": "medium",
+      "created_at": "2026-11-10",
+      "resolved_at": "2026-11-10",
+      "validated_at": null,
+      "title": "Daniela (Piper) pronuncia «Display Ads»: reescritura fonética solo para voces Piper en español",
+      "estimation_hours": 1,
+      "description": "espeak-ng en español lee «Display» como dis-PLAI (acento final y «ay» como «ai»), y la marca se pierde en todos los videos con Daniela. Antes de llamar a sherpa-onnx, las voces Piper es_* reciben «Díspley» en lugar de «Display» (fonemas dˈisplˌeɪ). El guion, los subtítulos y ElevenLabs (Malena) no cambian.",
+      "justification": "La marca del canal sale mal pronunciada; el dev eligió la variante a ciegas entre siete.",
+      "related_modules": [
+        "production-quality"
+      ],
+      "affected_files": [
+        "libs/media-local/src/tts/piper-spanish-pronunciation.ts",
+        "libs/media-local/src/tts/synthesize-speech.ts",
+        "libs/media-local/src/tts/synthesize-speech.spec.ts"
+      ],
+      "test_reference": "nx test media-local (445) y lint en verde; build de media-local y render-api; síntesis real con synthesizeSpeech y Daniela: Whisper oye «Display As».",
+      "status": "implemented",
+      "cycle": null,
+      "process_note": "Fonemas inspeccionados con el espeakbridge de piper-tts usando el espeak-ng-data de la voz.",
+      "usage": {
+        "provider_model": "claude/opus",
+        "effort": "low",
+        "tokens_in": 300000,
+        "tokens_out": 25000,
+        "approx": true,
+        "source": "declared-estimate",
+        "recorded_at": "2026-11-10",
+        "by_agent": [
+          {
+            "agent": "orchestrator",
+            "provider_model": "claude/opus",
+            "effort": "low",
+            "tokens_in": 300000,
+            "tokens_out": 25000,
+            "approx": true,
+            "source": "declared-estimate",
+            "recorded_at": "2026-11-10"
+          }
+        ]
+      }
     }
   ]
 }

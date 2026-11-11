@@ -4,6 +4,7 @@ import { nodeReadTextFile } from '../fs/read-text-file';
 import { rm } from 'node:fs/promises';
 
 import { appendTrailingSilence } from '../ffmpeg/append-trailing-silence';
+import { isSpanishPiperModel, respellForSpanishPiper } from './piper-spanish-pronunciation';
 import type { CommandOptions, CommandRunner } from '../runner/command-runner';
 
 export interface SynthesizeSpeechOptions {
@@ -43,7 +44,8 @@ export async function synthesizeSpeech(
   ];
   const trailingPauseMs = opts.trailingPauseMs ?? 0;
   const speechPath = trailingPauseMs > 0 ? `${outPath}.speech.wav` : outPath;
-  const narration = narrationToSingleLine(await readTextFile(opts.textPath));
+  const singleLine = narrationToSingleLine(await readTextFile(opts.textPath));
+  const narration = isSpanishPiperModel(opts.modelPath) ? respellForSpanishPiper(singleLine) : singleLine;
   const args = [
     `--vits-model=${opts.modelPath}`,
     `--vits-tokens=${opts.tokensPath}`,

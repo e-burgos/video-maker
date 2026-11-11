@@ -191,6 +191,42 @@ describe('synthesizeSpeech (US-09-004, US-017-201)', () => {
     expect(runner.calls[0]?.args.at(-1)).toBe('Primera oración. Segunda oración. Tercera.');
   });
 
+  it('con una voz Piper en español reescribe «Display» como se pronuncia y deja el resto igual', async () => {
+    const runner = new FixtureCommandRunner([{ bin: 'sherpa-onnx-offline-tts', response: { exitCode: 0 } }]);
+
+    await synthesizeSpeech(
+      '/out.wav',
+      {
+        modelPath: MODEL_PATH,
+        tokensPath: TOKENS_PATH,
+        dataDirPath: DATA_DIR_PATH,
+        textPath: '/in.txt',
+        readTextFile: fakeReadTextFile('Gracias por mirar este tutorial de Display Ads, webs para negocios.'),
+      },
+      runner,
+    );
+
+    expect(runner.calls[0]?.args.at(-1)).toBe('Gracias por mirar este tutorial de Díspley Ads, webs para negocios.');
+  });
+
+  it('con una voz Piper que no es española no toca el texto', async () => {
+    const runner = new FixtureCommandRunner([{ bin: 'sherpa-onnx-offline-tts', response: { exitCode: 0 } }]);
+
+    await synthesizeSpeech(
+      '/out.wav',
+      {
+        modelPath: '/voices/vits-piper-en_US-amy-medium/en_US-amy-medium.onnx',
+        tokensPath: TOKENS_PATH,
+        dataDirPath: DATA_DIR_PATH,
+        textPath: '/in.txt',
+        readTextFile: fakeReadTextFile('Welcome to Display Ads.'),
+      },
+      runner,
+    );
+
+    expect(runner.calls[0]?.args.at(-1)).toBe('Welcome to Display Ads.');
+  });
+
   it('sin ttsPath usa el comando sherpa-onnx-offline-tts del PATH', async () => {
     const runner = new FixtureCommandRunner([{ bin: 'sherpa-onnx-offline-tts', response: { exitCode: 0 } }]);
 
