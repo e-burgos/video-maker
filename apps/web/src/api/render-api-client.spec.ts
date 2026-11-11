@@ -614,6 +614,14 @@ describe('createRenderApiClient', () => {
     expect(result.kind).toBe('montage');
   });
 
+  it('leaves the seed out when none was chosen, so the studio derives one per video', async () => {
+    const { fetchImpl, calls } = recordingFetch(() => jsonResponse(montageJob(), 202));
+
+    await createRenderApiClient(fetchImpl).createMontageJob('smoke-ingest', { preset: 'educational', overwrite: false });
+
+    expect(JSON.parse(String(calls[0]?.init?.body))).toEqual({ kind: 'montage', preset: 'educational', overwrite: false });
+  });
+
   it('sends the segmented music mode and floor only when asked for', async () => {
     const { fetchImpl, calls } = recordingFetch(() => jsonResponse(montageJob(), 202));
     const client = createRenderApiClient(fetchImpl);

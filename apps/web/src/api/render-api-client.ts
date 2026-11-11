@@ -147,7 +147,7 @@ export type RenderJobCancelOutcome = { status: 200 | 202; job: Job };
 
 export type CreateMontageJobInput = {
   preset: MontagePresetName;
-  seed: number;
+  seed?: number;
   overwrite: boolean;
   musicMode?: MusicMode;
   musicFloorDb?: number;
@@ -724,7 +724,7 @@ export function createRenderApiClient(fetchImpl: FetchLike): RenderApiClient {
           body: JSON.stringify({
             kind: 'montage',
             preset: input.preset,
-            seed: input.seed,
+            ...(input.seed === undefined ? {} : { seed: input.seed }),
             overwrite: input.overwrite,
             ...(input.musicMode === 'segments'
               ? {

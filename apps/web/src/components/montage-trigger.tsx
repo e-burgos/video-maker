@@ -21,7 +21,11 @@ export type MontageTriggerProps = {
 };
 
 function isSeedValid(seed: string): boolean {
-  return /^\d+$/.test(seed);
+  return seed.trim() === '' || /^\d+$/.test(seed.trim());
+}
+
+function chosenSeed(seed: string): { seed: number } | Record<string, never> {
+  return seed.trim() === '' ? {} : { seed: Number(seed.trim()) };
 }
 
 export function MontageTrigger({ slug, onCreated }: MontageTriggerProps) {
@@ -30,7 +34,7 @@ export function MontageTrigger({ slug, onCreated }: MontageTriggerProps) {
   const health = useAsyncResource<ServiceHealth>(loadHealth, 'health');
 
   const [preset, setPreset] = useState<MontagePresetName>('software-demo');
-  const [seed, setSeed] = useState('0');
+  const [seed, setSeed] = useState('');
   const [musicMode, setMusicMode] = useState<MusicMode>('bed');
   const [floorText, setFloorText] = useState(floorTextOf(undefined));
   const t = useT();
@@ -40,7 +44,7 @@ export function MontageTrigger({ slug, onCreated }: MontageTriggerProps) {
   const createAction = useApiAction((overwrite: boolean) =>
     client.createMontageJob(slug, {
       preset,
-      seed: Number(seed),
+      ...chosenSeed(seed),
       overwrite,
       ...(musicMode === 'segments' && floorDb !== null
         ? { musicMode: 'segments' as const, musicFloorDb: floorDb }
@@ -94,6 +98,8 @@ export function MontageTrigger({ slug, onCreated }: MontageTriggerProps) {
           <input
             value={seed}
             inputMode="numeric"
+            placeholder={t('montage.seedAuto')}
+            title={t('montage.seedHint')}
             onChange={(event) => setSeed(event.target.value)}
             className="w-24 rounded-md border border-slate-700 bg-slate-900 px-2 py-1 font-mono text-xs text-slate-200"
           />

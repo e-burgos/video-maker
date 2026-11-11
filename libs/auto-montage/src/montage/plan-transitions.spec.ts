@@ -63,6 +63,15 @@ describe('planTransitions (§6 paso 7)', () => {
     expect(sequence(1)).not.toEqual(sequence(2));
   });
 
+  it('marca handles solo cuando los keeps vecinos son contiguos (sin corte entre ellos)', () => {
+    const contiguous = [keep('keep-0001', 0, 5000), keep('keep-0002', 5000, 10_000)];
+    const withCut = [keep('keep-0001', 0, 5000), keep('keep-0002', 6000, 10_000)];
+    const preset = presetWithTransitions({ every: 1, durationMs: 300, kinds: ['fade'] });
+
+    expect(planTransitions(contiguous, preset, FPS, 0)[0]?.handles).toBe(true);
+    expect(planTransitions(withCut, preset, FPS, 0)[0]).not.toHaveProperty('handles');
+  });
+
   it('no depende del orden de entrada de los keeps (se ordenan por startMs antes de decidir)', () => {
     const keeps = [
       keep('keep-0001', 0, 5000),

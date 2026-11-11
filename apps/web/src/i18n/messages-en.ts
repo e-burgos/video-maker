@@ -286,6 +286,8 @@ export const MESSAGES_EN = {
   'montage.description': 'Ingest the raw material and build the timeline with the auto-montage engine, without leaving the studio.',
   'montage.presetLabel': 'Montage preset',
   'montage.seedLabel': 'Seed',
+  'montage.seedAuto': 'automatic',
+  'montage.seedHint': 'Leave it empty and each video gets its own seed, so its transitions rotate differently. Type a number to repeat a montage.',
   'montage.generate': 'Generate montage',
   'montage.generating': 'Starting montage…',
   'montage.seedInvalid': 'The seed must be a non-negative integer.',

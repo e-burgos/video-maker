@@ -157,6 +157,23 @@ function splitKeepByPunchIns(
   return subRanges;
 }
 
+function isContiguousWithPrevious(keeps: readonly KeepDecision[], keepIndex: number): boolean {
+  const previous = keeps[keepIndex - 1];
+  return previous !== undefined && previous.endMs === keeps[keepIndex]?.startMs;
+}
+
+function handleFramesFor(
+  keeps: readonly KeepDecision[],
+  keepIndex: number,
+  enteringTransition: TransitionDecision | undefined,
+  fps: Fps,
+): Frame {
+  if (keepIndex === 0 || enteringTransition?.handles !== true || !isContiguousWithPrevious(keeps, keepIndex)) {
+    return 0;
+  }
+  return msToFrames(enteringTransition.durationMs, fps);
+}
+
 function buildArollTrack(
   keeps: readonly KeepDecision[],
   punches: readonly PunchInDecision[],
@@ -170,25 +187,25 @@ function buildArollTrack(
   let cursorFrame = 0;
 
   keeps.forEach((keep, keepIndex) => {
-    if (keepIndex > 0) {
-      const enteringTransition = transitionEnteringKeep(transitions, keep);
-      if (enteringTransition !== undefined) {
-        cursorFrame -= msToFrames(enteringTransition.durationMs, fps);
-      }
+    const enteringTransition = keepIndex > 0 ? transitionEnteringKeep(transitions, keep) : undefined;
+    const handleFrames = handleFramesFor(keeps, keepIndex, enteringTransition, fps);
+    if (enteringTransition !== undefined && handleFrames === 0) {
+      cursorFrame -= msToFrames(enteringTransition.durationMs, fps);
     }
 
     const firstClipFrame = cursorFrame;
     const subRanges = splitKeepByPunchIns(keep, punchInsWithinKeep(punches, keep));
     const clipIds: ClipId[] = [];
 
-    for (const subRange of subRanges) {
+    subRanges.forEach((subRange, subRangeIndex) => {
+      const leadFrames = subRangeIndex === 0 ? handleFrames : 0;
       const durationFrames = Math.max(1, msToFrames(subRange.endMs - subRange.startMs, fps));
       const clip: VideoClip = {
         id: sequentialId('aroll', clips.length),
         assetId: sourceAssetId,
-        from: cursorFrame,
-        durationFrames,
-        trimStartMs: subRange.startMs,
+        from: cursorFrame - leadFrames,
+        durationFrames: durationFrames + leadFrames,
+        trimStartMs: Math.max(0, subRange.startMs - framesToMs(leadFrames, fps)),
         muted: true,
         transform: {
           scale: subRange.scale,
@@ -200,7 +217,7 @@ function buildArollTrack(
       clips.push(clip);
       clipIds.push(clip.id);
       cursorFrame += durationFrames;
-    }
+    });
 
     clipIdsByKeep.set(keep.id, clipIds);
     placements.push({ keep, firstClipFrame });
@@ -221,12 +238,34 @@ function voiceClipDurationFrames(clip: VideoClip, voice: VoiceInput, fps: Fps): 
   return Math.min(clip.durationFrames, framesFittingInto(voice.durationMs - clip.trimStartMs, fps));
 }
 
+function handleLeadFrames(previous: VideoClip | undefined, clip: VideoClip, fps: Fps): Frame {
+  if (previous === undefined) {
+    return 0;
+  }
+  const previousEndFrame = previous.from + previous.durationFrames;
+  const previousSourceEndMs = previous.trimStartMs + framesToMs(previous.durationFrames, fps);
+  const replaysPreviousSource = clip.trimStartMs < previousSourceEndMs;
+  return replaysPreviousSource && clip.from < previousEndFrame ? previousEndFrame - clip.from : 0;
+}
+
+function withoutHandleLead(clip: VideoClip, leadFrames: Frame, fps: Fps): VideoClip {
+  return leadFrames === 0
+    ? clip
+    : {
+        ...clip,
+        from: clip.from + leadFrames,
+        durationFrames: clip.durationFrames - leadFrames,
+        trimStartMs: clip.trimStartMs + framesToMs(leadFrames, fps),
+      };
+}
+
 function buildVoiceTrack(
   arollClips: readonly VideoClip[],
   voice: VoiceInput | undefined,
   fps: Fps,
 ): AudioClip[] {
-  return arollClips.flatMap((clip, index) => {
+  return arollClips.flatMap((arollClip, index) => {
+    const clip = withoutHandleLead(arollClip, handleLeadFrames(arollClips[index - 1], arollClip, fps), fps);
     const durationFrames =
       voice === undefined ? clip.durationFrames : voiceClipDurationFrames(clip, voice, fps);
 
