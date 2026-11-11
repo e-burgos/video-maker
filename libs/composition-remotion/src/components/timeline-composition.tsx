@@ -12,6 +12,8 @@ import { timelineToSequenceProps } from '../helpers/timeline-to-sequence-props';
 import { ArollSeries } from './aroll-series';
 import { BrollTrack } from './broll-track';
 import { AudioTrack } from './audio-track';
+import { BumperSfxTrack } from './bumper-sfx-track';
+import type { PreviewSfxCue } from './bumper-sfx-track';
 import { KineticCaptions } from './kinetic-captions';
 import { LogoBumperScene } from './logo-bumper-scene';
 import { LogoOverlay } from './logo-overlay';
@@ -21,6 +23,7 @@ export type TimelineAudioMode = 'mix' | 'muted';
 export type TimelineCompositionProps = {
   timeline: Timeline;
   audio?: TimelineAudioMode | undefined;
+  bumperSfx?: readonly PreviewSfxCue[] | undefined;
   captionPreset?: CaptionPresetId | undefined;
   captionPlatform?: CaptionPlatform | undefined;
   captionAnchor?: CaptionAnchor | undefined;
@@ -45,6 +48,7 @@ export const calculateTimelineMetadata: CalculateMetadataFunction<TimelineCompos
 export const TimelineComposition: FC<TimelineCompositionProps> = ({
   timeline,
   audio,
+  bumperSfx,
   captionPreset,
   captionPlatform,
   captionAnchor,
@@ -86,6 +90,11 @@ export const TimelineComposition: FC<TimelineCompositionProps> = ({
     ),
   ];
 
+  const sfx =
+    audio === 'muted' || bumperSfx === undefined || bumperSfx.length === 0 ? null : (
+      <BumperSfxTrack cues={bumperSfx} fps={timeline.format.fps} />
+    );
+
   if (introFrames === 0 && outroFrames === 0) {
     return <AbsoluteFill>{content}</AbsoluteFill>;
   }
@@ -124,6 +133,7 @@ export const TimelineComposition: FC<TimelineCompositionProps> = ({
           />
         </Sequence>
       )}
+      {sfx}
     </AbsoluteFill>
   );
 };

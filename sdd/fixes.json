@@ -5863,6 +5863,56 @@
           }
         ]
       }
+    },
+    {
+      "id": "FIX-e-burgos-070",
+      "author": "e-burgos",
+      "spec_id": null,
+      "fix_document": "sdd/fixes/fix-e-burgos-070.md",
+      "type": "IMPROVEMENT",
+      "severity": "low",
+      "created_at": "2026-11-11",
+      "resolved_at": "2026-11-11",
+      "validated_at": null,
+      "title": "La vista previa del studio reproduce los efectos de los bumpers sin duplicarlos en el render",
+      "estimation_hours": 3,
+      "description": "La composición acepta cues de efectos para la vista previa y los reproduce solo con audio; la web los resuelve con la misma semilla y variante que la mezcla del máster y empaqueta el banco con Vite. Los renders siguen muteados y sin esos cues.",
+      "justification": "Pendiente propio aprobado por el dev («Pendientes propios») vía la sesión orquestadora.",
+      "related_modules": [
+        "production-quality"
+      ],
+      "affected_files": [
+        "libs/composition-remotion/src/components/bumper-sfx-track.tsx",
+        "libs/composition-remotion/src/components/timeline-composition.tsx",
+        "libs/composition-remotion/src/index.ts",
+        "apps/web/src/api/preview-bumper-sfx.ts",
+        "apps/web/src/components/timeline-player.tsx"
+      ],
+      "test_reference": "nx test/lint/build en verde: composition-remotion 380, web 1657.",
+      "status": "implemented",
+      "cycle": null,
+      "process_note": "Sin escucha real en el navegador.",
+      "usage": {
+        "provider_model": "claude/opus",
+        "effort": "medium",
+        "tokens_in": 450000,
+        "tokens_out": 25000,
+        "approx": true,
+        "source": "declared-estimate",
+        "recorded_at": "2026-11-11",
+        "by_agent": [
+          {
+            "agent": "orchestrator",
+            "provider_model": "claude/opus",
+            "effort": "medium",
+            "tokens_in": 450000,
+            "tokens_out": 25000,
+            "approx": true,
+            "source": "declared-estimate",
+            "recorded_at": "2026-11-11"
+          }
+        ]
+      }
     }
   ]
 }

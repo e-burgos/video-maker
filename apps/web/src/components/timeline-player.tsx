@@ -8,6 +8,7 @@ import {
   computeTimelineMetadata,
 } from '@video-maker/composition-remotion';
 import type { TimelineCompositionProps } from '@video-maker/composition-remotion';
+import { bundledPreviewBumperSfx } from '../api/preview-bumper-sfx';
 
 export type TimelinePlayerProps = {
   timeline: Timeline;
@@ -24,7 +25,7 @@ const PlayerComposition: FC<TimelineCompositionProps> = (props) => (
 export function TimelinePlayer({ timeline, initialFrame, controls = true }: TimelinePlayerProps) {
   const metadata = useMemo(() => computeTimelineMetadata(timeline), [timeline]);
   const inputProps = useMemo<TimelineCompositionProps>(
-    () => ({ timeline: metadata.timeline }),
+    () => ({ timeline: metadata.timeline, bumperSfx: bundledPreviewBumperSfx(metadata.timeline) }),
     [metadata],
   );
 

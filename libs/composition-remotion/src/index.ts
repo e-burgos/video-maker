@@ -111,3 +111,5 @@ export type { CaptionBoxSource, CaptionClipPlan } from './helpers/caption-clip-p
 
 export { KineticCaptions } from './components/kinetic-captions';
 export type { KineticCaptionsProps } from './components/kinetic-captions';
+export { BumperSfxTrack } from './components/bumper-sfx-track';
+export type { PreviewSfxCue } from './components/bumper-sfx-track';

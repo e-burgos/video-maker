@@ -3,6 +3,7 @@ import type { ReactElement } from 'react';
 import { describe, expect, it } from 'vitest';
 import { Sequence } from 'remotion';
 import type { BumperLook, LogoBumper, Timeline } from '@video-maker/timeline-core';
+import { BumperSfxTrack } from './bumper-sfx-track';
 import { LogoBumperScene } from './logo-bumper-scene';
 import { buildExampleTimeline } from '../__fixtures__/example-timeline';
 import { AudioTrack } from './audio-track';
@@ -291,6 +292,25 @@ describe('TimelineComposition — bumpers de logo (FIX-e-burgos-001-003)', () =>
 
   it('un bumper apagado no monta ninguna placa', () => {
     expect(sequencesOf(withBumpers({ intro: { ...BUMPER, enabled: false } }))).toHaveLength(0);
+  });
+
+  function sfxTrackOf(props: TimelineCompositionProps): ReactElement | undefined {
+    const tree = TimelineComposition(props);
+    if (!isValidElement(tree)) {
+      throw new Error('expected TimelineComposition to return an AbsoluteFill element');
+    }
+    return Children.toArray((tree.props as { children?: unknown }).children as never).find(
+      (child): child is ReactElement => isValidElement(child) && child.type === BumperSfxTrack,
+    );
+  }
+
+  it('la vista previa suena los efectos de los bumpers y el render muteado nunca los incluye', () => {
+    const cues = [{ src: '/sfx/whoosh-1.mp3', atMs: 0, durationMs: 600, volume: 0.4 }];
+    const withSfx = { ...withBumpers({ intro: BUMPER }), bumperSfx: cues };
+
+    expect(sfxTrackOf(withSfx)?.props).toMatchObject({ cues });
+    expect(sfxTrackOf({ ...withSfx, audio: 'muted' })).toBeUndefined();
+    expect(sfxTrackOf(withBumpers({ intro: BUMPER }))).toBeUndefined();
   });
 
   it('la placa recibe el look resuelto del bumper, el formato y el src del logo de la Timeline', () => {
