@@ -6186,9 +6186,11 @@
         "apps/web/src/components/text-overlay-editor.tsx",
         "apps/web/src/pages/project-preview-page.tsx",
         "apps/web/src/i18n/messages-es.ts",
-        "apps/web/src/i18n/messages-en.ts"
+        "apps/web/src/i18n/messages-en.ts",
+        "apps/web/src/components/timeline-player.tsx",
+        "apps/web/src/api/last-valid-timeline.ts"
       ],
-      "test_reference": "nx test/lint/build en verde: timeline-core 478, composition-remotion 394, producer-tools 452, web 1664. Render de prueba media/prueba-titulos-a revisado cuadro a cuadro.",
+      "test_reference": "nx test/lint/build en verde: timeline-core 478, composition-remotion 394, producer-tools 452, web 1666. Render de prueba media/prueba-titulos-a revisado cuadro a cuadro. Editor web probado en el navegador (agregar, editar, pisado bloqueado, guardar, vista previa, quitar).",
       "status": "implemented",
       "cycle": null,
       "usage": {
