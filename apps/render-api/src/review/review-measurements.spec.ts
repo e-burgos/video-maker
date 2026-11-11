@@ -1,9 +1,10 @@
-import { describe, expect, it } from 'vitest';
+import { beforeAll, describe, expect, it } from 'vitest';
 
 import { createFakeCommandRunner } from '../__fixtures__/fake-command-runner';
 import { createFfmpegReviewMeasurements } from './review-measurements';
 
 const BINARIES = { ffmpegPath: 'ffmpeg', ffprobePath: 'ffprobe' };
+const MEDIA_LOCAL_COLD_IMPORT_TIMEOUT_MS = 60_000;
 
 const FFPROBE_FULL_JSON = JSON.stringify({
   streams: [{ index: 0, codec_type: 'video', codec_name: 'h264', width: 1920, height: 1080, r_frame_rate: '30/1', duration: '10.000000', pix_fmt: 'yuv420p' }],
@@ -11,6 +12,10 @@ const FFPROBE_FULL_JSON = JSON.stringify({
 });
 
 describe('createFfmpegReviewMeasurements.probeDurationSec', () => {
+  beforeAll(async () => {
+    await import('@video-maker/media-local');
+  }, MEDIA_LOCAL_COLD_IMPORT_TIMEOUT_MS);
+
   it('uses the video stream duration so audio padding does not count', async () => {
     const runner = createFakeCommandRunner([{ bin: 'ffprobe', response: { stdout: '84.333333\n', exitCode: 0 } }]);
 

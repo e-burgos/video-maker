@@ -15,8 +15,8 @@ const STORE: StoreConfig = { mediaRoot: '/media', dbPath: '/media/.studio/studio
 const PROJECT_ROOT = `${STORE.mediaRoot}/pitch-deck`;
 const SEARCH_OUTPUT_SHAPE = (STUDIO_TOOLS.search_free_music.output as ZodObject).shape;
 const SEARCH_OUTPUT_KEYS = Object.keys(SEARCH_OUTPUT_SHAPE).sort();
-const SEARCH_RESULT_ITEM_KEYS = Object.keys((SEARCH_OUTPUT_SHAPE.results as ZodArray).element.shape).sort();
-const IMPORT_OUTPUT_KEYS = Object.keys(STUDIO_TOOLS.import_music.output.shape).sort();
+const SEARCH_RESULT_ITEM_KEYS = Object.keys(((SEARCH_OUTPUT_SHAPE.results as ZodArray).element as ZodObject).shape).sort();
+const IMPORT_OUTPUT_KEYS = Object.keys((STUDIO_TOOLS.import_music.output as ZodObject).shape).sort();
 
 async function* toChunks(values: readonly string[]): AsyncGenerator<Uint8Array> {
   const encoder = new TextEncoder();

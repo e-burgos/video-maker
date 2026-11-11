@@ -5860,6 +5860,54 @@
           }
         ]
       }
+    },
+    {
+      "id": "FIX-e-burgos-072",
+      "author": "e-burgos",
+      "spec_id": null,
+      "fix_document": "sdd/fixes/fix-e-burgos-072.md",
+      "type": "BUGFIX",
+      "severity": "low",
+      "created_at": "2026-11-11",
+      "resolved_at": "2026-11-11",
+      "validated_at": null,
+      "title": "review-measurements ya no hace timeout en corridas paralelas y dos specs de render-api quedan sin errores de tipos",
+      "estimation_hours": 0.25,
+      "description": "El test del fallback de duración de review-measurements cargaba @video-maker/media-local en frío dentro del caso y pasaba los 5 s con mucha carga: ahora la carga se precalienta en un beforeAll con margen. music-handler.spec.ts y motion-level-plans.spec.ts quedan sin errores de tsc (casts de ZodObject y acceso opcional a sfx).",
+      "justification": "Pendientes propios de la PR («Pendientes propios»).",
+      "related_modules": [
+        "production-quality"
+      ],
+      "affected_files": [
+        "apps/render-api/src/review/review-measurements.spec.ts",
+        "apps/render-api/src/http/handlers/music-handler.spec.ts",
+        "apps/render-api/src/review/motion-level-plans.spec.ts"
+      ],
+      "test_reference": "Specs afectados en verde; tsc del tsconfig.spec de render-api baja de 132 a 129 errores, todos en otros specs anteriores a esta PR.",
+      "status": "implemented",
+      "cycle": null,
+      "process_note": "Quedan 129 errores de tipos en 18 specs de render-api (producer, storyboard, handle-request, etc.), todos previos: no entran en esta PR.",
+      "usage": {
+        "provider_model": "claude/opus",
+        "effort": "low",
+        "tokens_in": 120000,
+        "tokens_out": 6000,
+        "approx": true,
+        "source": "declared-estimate",
+        "recorded_at": "2026-11-11",
+        "by_agent": [
+          {
+            "agent": "orchestrator",
+            "provider_model": "claude/opus",
+            "effort": "low",
+            "tokens_in": 120000,
+            "tokens_out": 6000,
+            "approx": true,
+            "source": "declared-estimate",
+            "recorded_at": "2026-11-11"
+          }
+        ]
+      }
     }
   ]
 }
