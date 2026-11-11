@@ -4,13 +4,11 @@ import type { VoiceTarget } from '@video-maker/timeline-core';
 
 import { CommandFailedError } from '../errors/command-failed-error';
 import type { CommandRunner } from '../runner/command-runner';
-import { AUDIO_MIX_SAMPLE_RATE } from '../mix/audio-mix-format';
-import { buildLoudnormFilter } from './build-loudnorm-filter';
 import { FIRST_AUDIO_STREAM, measureLoudness } from './measure-loudness';
-import { masterLoudnessTarget, needsMasterNormalization } from './normalize-master-loudness';
+import { masterLoudnessTarget, masterNormalizationFilters, needsMasterNormalization } from './normalize-master-loudness';
 import type { NormalizeMasterLoudnessOptions, NormalizeMasterLoudnessResult } from './normalize-master-loudness';
 import type { LoudnessMeasurement } from './parse-loudnorm-json';
-import { encoderOvershootDb, targetBelowOvershoot } from './true-peak-guard';
+import { masterRetryFor } from './true-peak-guard';
 
 export const VIDEO_NORMALIZATION_TEMP_SUFFIX = '.normalized.mp4';
 export const VIDEO_MASTER_AUDIO_BITRATE = '192k';
@@ -34,7 +32,7 @@ export function videoMasterNormalizationArgs(
     '-c:v',
     'copy',
     '-af',
-    `${buildLoudnormFilter(target, measured)},aresample=${String(AUDIO_MIX_SAMPLE_RATE)}`,
+    masterNormalizationFilters(target, measured).join(','),
     '-c:a',
     'aac',
     '-b:a',
@@ -63,13 +61,13 @@ async function encodeNormalizedVideo(
   return args;
 }
 
-async function measureEncodedTruePeak(
+async function measureEncodedLevels(
   path: string,
   target: VoiceTarget,
   runner: CommandRunner,
   ffmpegPath: string,
   opts: NormalizeMasterLoudnessOptions | undefined,
-): Promise<number> {
+): Promise<LoudnessMeasurement> {
   try {
     const measured = await measureLoudness(path, runner, {
       target,
@@ -77,7 +75,7 @@ async function measureEncodedTruePeak(
       audioStreamSpecifier: FIRST_AUDIO_STREAM,
       ...(opts?.runOptions !== undefined ? { runOptions: opts.runOptions } : {}),
     });
-    return measured.truePeakDbtp;
+    return measured;
   } catch (cause) {
     await rm(path, { force: true });
     throw cause;
@@ -105,13 +103,13 @@ export async function normalizeVideoMasterLoudness(
 
   const temporaryPath = `${videoPath}${VIDEO_NORMALIZATION_TEMP_SUFFIX}`;
   let args = await encodeNormalizedVideo(videoPath, temporaryPath, target, measuredBefore, runner, ffmpegPath, opts);
-  const encodedPeak = await measureEncodedTruePeak(temporaryPath, target, runner, ffmpegPath, opts);
-  const overshootDb = encoderOvershootDb(encodedPeak, target.truePeakDbtp, deliveryTarget.truePeakDbtp);
-  if (overshootDb > 0) {
-    args = await encodeNormalizedVideo(videoPath, temporaryPath, targetBelowOvershoot(target, overshootDb), measuredBefore, runner, ffmpegPath, opts);
+  const encoded = await measureEncodedLevels(temporaryPath, target, runner, ffmpegPath, opts);
+  const retry = masterRetryFor(target, deliveryTarget, target.truePeakDbtp, encoded);
+  if (retry.kind !== 'none') {
+    args = await encodeNormalizedVideo(videoPath, temporaryPath, retry.target, measuredBefore, runner, ffmpegPath, opts);
   }
 
   await rename(temporaryPath, videoPath);
 
-  return { applied: true, measuredBefore, args, truePeakRetried: overshootDb > 0 };
+  return { applied: true, measuredBefore, args, truePeakRetried: retry.kind === 'true-peak' };
 }

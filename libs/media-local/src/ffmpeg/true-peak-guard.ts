@@ -11,3 +11,14 @@ export function targetBelowOvershoot(target: VoiceTarget, overshootDb: number): 
   const lowered = Math.round((target.truePeakDbtp - overshootDb) * 100) / 100;
   return { ...target, truePeakDbtp: Math.max(LOUDNORM_MIN_TRUE_PEAK_DBTP, lowered) };
 }
+
+export interface EncodedMasterLevels {
+  readonly truePeakDbtp: number;
+}
+
+export type MasterRetry = { readonly kind: 'none' } | { readonly kind: 'true-peak'; readonly target: VoiceTarget };
+
+export function masterRetryFor(target: VoiceTarget, deliveryTarget: VoiceTarget, plannedPeakDbtp: number, encoded: EncodedMasterLevels): MasterRetry {
+  const overshootDb = encoderOvershootDb(encoded.truePeakDbtp, plannedPeakDbtp, deliveryTarget.truePeakDbtp);
+  return overshootDb > 0 ? { kind: 'true-peak', target: targetBelowOvershoot(target, overshootDb) } : { kind: 'none' };
+}

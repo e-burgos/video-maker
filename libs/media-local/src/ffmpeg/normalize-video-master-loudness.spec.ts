@@ -39,9 +39,9 @@ describe('videoMasterNormalizationArgs (FIX-e-burgos-014)', () => {
     targetOffsetDb: 0.1,
   });
 
-  it('copies the video stream and re-encodes only the first audio stream with a linear loudnorm', () => {
+  it('copies the video stream and re-encodes only the first audio stream with one linear gain and an oversampled limiter', () => {
     expect(args.slice(args.indexOf('-map'), args.indexOf('-map') + 6)).toEqual(['-map', '0:v:0', '-map', '0:a:0', '-c:v', 'copy']);
-    expect(args[args.indexOf('-af') + 1]).toMatch(/^loudnorm=I=-14:TP=-1\.5:.*measured_I=-20\.10:.*linear=true.*,aresample=48000$/u);
+    expect(args[args.indexOf('-af') + 1]).toBe('volume=6.1dB,aresample=192000,alimiter=limit=0.8414:attack=1:release=60:level=false:latency=true,aresample=48000');
     expect(args.at(-1)).toBe('/out/video.mp4.normalized.mp4');
   });
 });
@@ -112,8 +112,8 @@ describe('normalizeVideoMasterLoudness (FIX-e-burgos-014)', () => {
     const encodes = runner.calls.filter((call) => call.args.includes('copy'));
     expect(result).toMatchObject({ applied: true, truePeakRetried: true });
     expect(encodes).toHaveLength(2);
-    expect(encodes[0]?.args[encodes[0].args.indexOf('-af') + 1]).toContain('TP=-1.5:');
-    expect(encodes[1]?.args[encodes[1].args.indexOf('-af') + 1]).toContain('TP=-3.56:');
+    expect(encodes[0]?.args[encodes[0].args.indexOf('-af') + 1]).toContain('limit=0.8414:');
+    expect(encodes[1]?.args[encodes[1].args.indexOf('-af') + 1]).toContain('limit=0.6637:');
     expect(encodes[1]?.args).toContain(videoPath);
     expect(await readFile(videoPath, 'utf8')).toBe('normalized');
     expect(existsSync(temporaryPath)).toBe(false);

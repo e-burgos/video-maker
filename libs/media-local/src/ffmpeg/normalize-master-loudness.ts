@@ -11,7 +11,7 @@ import type { CommandOptions, CommandRunner } from '../runner/command-runner';
 import { FIRST_AUDIO_STREAM, measureLoudness } from './measure-loudness';
 import { MUX_AUDIO_BITRATE, MUX_AUDIO_CODEC } from './mux-audio-into-video';
 import type { LoudnessMeasurement } from './parse-loudnorm-json';
-import { encoderOvershootDb, targetBelowOvershoot } from './true-peak-guard';
+import { masterRetryFor } from './true-peak-guard';
 
 export const MASTER_NORMALIZATION_TOLERANCE_LU = 0.5;
 export const MASTER_NORMALIZATION_TEMP_SUFFIX = '.normalized.wav';
@@ -52,6 +52,15 @@ function limiterCeiling(target: VoiceTarget): number {
   return Math.round(10 ** (target.truePeakDbtp / 20) * 10_000) / 10_000;
 }
 
+export function masterNormalizationFilters(target: VoiceTarget, measured: LoudnessMeasurement): string[] {
+  return [
+    `volume=${formatFilterNumber(masterGainDb(target, measured))}dB`,
+    `aresample=${LIMITER_OVERSAMPLE_RATE}`,
+    `alimiter=limit=${formatFilterNumber(limiterCeiling(target))}:attack=${LIMITER_ATTACK_MS}:release=${LIMITER_RELEASE_MS}:level=false:latency=true`,
+    `aresample=${AUDIO_MIX_SAMPLE_RATE}`,
+  ];
+}
+
 export function buildMasterNormalizationGraph(
   inputPath: string,
   target: VoiceTarget,
@@ -62,12 +71,7 @@ export function buildMasterNormalizationGraph(
     chains: [
       {
         inputLabels: ['0:a'],
-        filters: [
-          `volume=${formatFilterNumber(masterGainDb(target, measured))}dB`,
-          `aresample=${LIMITER_OVERSAMPLE_RATE}`,
-          `alimiter=limit=${formatFilterNumber(limiterCeiling(target))}:attack=${LIMITER_ATTACK_MS}:release=${LIMITER_RELEASE_MS}:level=false:latency=true`,
-          `aresample=${AUDIO_MIX_SAMPLE_RATE}`,
-        ],
+        filters: masterNormalizationFilters(target, measured),
         outputLabels: ['master'],
       },
     ],
@@ -97,13 +101,13 @@ export function aacProbeArgs(inputPath: string, outputPath: string): string[] {
   return ['-hide_banner', '-nostats', '-y', '-i', inputPath, '-c:a', MUX_AUDIO_CODEC, '-b:a', MUX_AUDIO_BITRATE, outputPath];
 }
 
-async function measureTruePeakAfterAac(
+async function measureLevelsAfterAac(
   wavPath: string,
   target: VoiceTarget,
   runner: CommandRunner,
   ffmpegPath: string,
   opts: NormalizeMasterLoudnessOptions | undefined,
-): Promise<number> {
+): Promise<LoudnessMeasurement> {
   const probePath = `${wavPath}${AAC_PROBE_SUFFIX}`;
   try {
     const args = aacProbeArgs(wavPath, probePath);
@@ -117,7 +121,7 @@ async function measureTruePeakAfterAac(
       audioStreamSpecifier: FIRST_AUDIO_STREAM,
       ...(opts?.runOptions !== undefined ? { runOptions: opts.runOptions } : {}),
     });
-    return measured.truePeakDbtp;
+    return measured;
   } finally {
     await rm(probePath, { force: true });
   }
@@ -143,13 +147,13 @@ export async function normalizeMasterLoudness(
   let args = normalized ? await writeNormalizedMaster(masterPath, temporaryPath, target, measuredBefore, runner, ffmpegPath, opts) : null;
 
   const plannedPeak = normalized ? target.truePeakDbtp : measuredBefore.truePeakDbtp;
-  const encodedPeak = await measureTruePeakAfterAac(normalized ? temporaryPath : masterPath, target, runner, ffmpegPath, opts).catch(async (cause: unknown) => {
+  const encoded = await measureLevelsAfterAac(normalized ? temporaryPath : masterPath, target, runner, ffmpegPath, opts).catch(async (cause: unknown) => {
     await rm(temporaryPath, { force: true });
     throw cause;
   });
-  const overshootDb = encoderOvershootDb(encodedPeak, plannedPeak, deliveryTarget.truePeakDbtp);
-  if (overshootDb > 0) {
-    args = await writeNormalizedMaster(masterPath, temporaryPath, targetBelowOvershoot(target, overshootDb), measuredBefore, runner, ffmpegPath, opts);
+  const retry = masterRetryFor(target, deliveryTarget, plannedPeak, encoded);
+  if (retry.kind !== 'none') {
+    args = await writeNormalizedMaster(masterPath, temporaryPath, retry.target, measuredBefore, runner, ffmpegPath, opts);
   }
 
   if (args === null) {
@@ -158,5 +162,5 @@ export async function normalizeMasterLoudness(
 
   await rename(temporaryPath, masterPath);
 
-  return { applied: true, measuredBefore, args, truePeakRetried: overshootDb > 0 };
+  return { applied: true, measuredBefore, args, truePeakRetried: retry.kind === 'true-peak' };
 }
