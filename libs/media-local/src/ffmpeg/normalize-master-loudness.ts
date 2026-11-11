@@ -5,9 +5,9 @@ import type { VoiceTarget } from '@video-maker/timeline-core';
 import { CommandFailedError } from '../errors/command-failed-error';
 import { AUDIO_MIX_SAMPLE_RATE } from '../mix/audio-mix-format';
 import { audioMixFfmpegArgs } from '../mix/audio-mix-ffmpeg-args';
+import { formatFilterNumber } from '../mix/format-filter-number';
 import type { FilterGraph } from '../mix/filter-graph';
 import type { CommandOptions, CommandRunner } from '../runner/command-runner';
-import { buildLoudnormFilter } from './build-loudnorm-filter';
 import { FIRST_AUDIO_STREAM, measureLoudness } from './measure-loudness';
 import { MUX_AUDIO_BITRATE, MUX_AUDIO_CODEC } from './mux-audio-into-video';
 import type { LoudnessMeasurement } from './parse-loudnorm-json';
@@ -17,6 +17,9 @@ export const MASTER_NORMALIZATION_TOLERANCE_LU = 0.5;
 export const MASTER_NORMALIZATION_TEMP_SUFFIX = '.normalized.wav';
 export const ENCODER_TRUE_PEAK_HEADROOM_DB = 0.5;
 export const AAC_PROBE_SUFFIX = '.aac-probe.m4a';
+export const LIMITER_OVERSAMPLE_RATE = 192_000;
+export const LIMITER_ATTACK_MS = 1;
+export const LIMITER_RELEASE_MS = 60;
 
 export function masterLoudnessTarget(target: VoiceTarget): VoiceTarget {
   return { ...target, truePeakDbtp: target.truePeakDbtp - ENCODER_TRUE_PEAK_HEADROOM_DB };
@@ -41,6 +44,14 @@ export function needsMasterNormalization(measured: LoudnessMeasurement, target: 
   );
 }
 
+export function masterGainDb(target: VoiceTarget, measured: LoudnessMeasurement): number {
+  return Math.round((target.integratedLufs - measured.integratedLufs) * 100) / 100;
+}
+
+function limiterCeiling(target: VoiceTarget): number {
+  return Math.round(10 ** (target.truePeakDbtp / 20) * 10_000) / 10_000;
+}
+
 export function buildMasterNormalizationGraph(
   inputPath: string,
   target: VoiceTarget,
@@ -51,7 +62,12 @@ export function buildMasterNormalizationGraph(
     chains: [
       {
         inputLabels: ['0:a'],
-        filters: [buildLoudnormFilter(target, measured), `aresample=${AUDIO_MIX_SAMPLE_RATE}`],
+        filters: [
+          `volume=${formatFilterNumber(masterGainDb(target, measured))}dB`,
+          `aresample=${LIMITER_OVERSAMPLE_RATE}`,
+          `alimiter=limit=${formatFilterNumber(limiterCeiling(target))}:attack=${LIMITER_ATTACK_MS}:release=${LIMITER_RELEASE_MS}:level=false:latency=true`,
+          `aresample=${AUDIO_MIX_SAMPLE_RATE}`,
+        ],
         outputLabels: ['master'],
       },
     ],

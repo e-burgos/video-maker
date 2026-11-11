@@ -61,14 +61,23 @@ describe('needsMasterNormalization', () => {
 });
 
 describe('buildMasterNormalizationGraph', () => {
-  it('runs a second-pass linear loudnorm with the measured master values and resamples to 48k', () => {
+  it('applies one linear gain to the target loudness and catches peaks with an oversampled limiter, never a dynamic loudnorm', () => {
     const graph = buildMasterNormalizationGraph('/out/master.wav', DEFAULT_VOICE_TARGET, QUIET_MASTER);
 
     expect(graph.inputs).toEqual(['/out/master.wav']);
     expect(graph.chains[0]?.filters).toEqual([
-      'loudnorm=I=-14:TP=-1:LRA=11:measured_I=-18.14:measured_TP=-3.17:measured_LRA=9.00:measured_thresh=-28.50:offset=0.10:linear=true:print_format=json',
+      'volume=4.14dB',
+      'aresample=192000',
+      'alimiter=limit=0.8913:attack=1:release=60:level=false:latency=true',
       'aresample=48000',
     ]);
+    expect(graph.chains[0]?.filters.join(',')).not.toContain('loudnorm');
+  });
+
+  it('lowers the limiter ceiling with the true-peak target the retry asks for', () => {
+    const graph = buildMasterNormalizationGraph('/out/master.wav', { ...DEFAULT_VOICE_TARGET, truePeakDbtp: -3.56 }, QUIET_MASTER);
+
+    expect(graph.chains[0]?.filters[2]).toBe('alimiter=limit=0.6637:attack=1:release=60:level=false:latency=true');
   });
 
   it('never closes the chain with atrim', () => {
@@ -135,7 +144,7 @@ describe('normalizeMasterLoudness', () => {
     const [pass] = normalizationCalls(runner);
     expect(pass?.args).toContain(masterPath);
     expect(pass?.args.at(-1)).toBe(temporaryPath);
-    expect(pass?.args.join(' ')).toContain('measured_I=-18.14');
+    expect(pass?.args.join(' ')).toContain('volume=4.14dB');
     expect(runner.calls.find((call) => call.args.includes('aac'))?.args).toContain(temporaryPath);
     expect(await readFile(masterPath, 'utf8')).toBe('normalized');
     expect(existsSync(temporaryPath)).toBe(false);
@@ -149,8 +158,8 @@ describe('normalizeMasterLoudness', () => {
     expect(result).toMatchObject({ applied: true, truePeakRetried: true });
     const passes = normalizationCalls(runner);
     expect(passes).toHaveLength(2);
-    expect(passes[0]?.args.join(' ')).toContain('TP=-1.5:');
-    expect(passes[1]?.args.join(' ')).toContain('TP=-3.56:');
+    expect(passes[0]?.args.join(' ')).toContain('limit=0.8414:');
+    expect(passes[1]?.args.join(' ')).toContain('limit=0.6637:');
     expect(await readFile(masterPath, 'utf8')).toBe('normalized');
   });
 
@@ -162,7 +171,7 @@ describe('normalizeMasterLoudness', () => {
     expect(result).toMatchObject({ applied: true, truePeakRetried: true });
     const passes = normalizationCalls(runner);
     expect(passes).toHaveLength(1);
-    expect(passes[0]?.args.join(' ')).toContain('TP=-3.1:');
+    expect(passes[0]?.args.join(' ')).toContain('limit=0.6998:');
     expect(await readFile(masterPath, 'utf8')).toBe('normalized');
   });
 
