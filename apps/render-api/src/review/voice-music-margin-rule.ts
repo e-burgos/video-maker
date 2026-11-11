@@ -1,7 +1,7 @@
 import type { FindingDraft } from './review-finding-builder';
 import { formatDb } from './review-finding-builder';
 import type { VoiceSegmentLevels } from './review-inputs';
-import { VOICE_MUSIC_CRITICAL_MARGIN_DB, VOICE_MUSIC_SUGGESTION_MARGIN_DB } from './review-thresholds';
+import { VOICE_MUSIC_MIN_MARGIN_DB } from './review-thresholds';
 
 const CHECK = 'voice-music-margin';
 
@@ -32,7 +32,7 @@ function causeOf(voiceLufs: number, musicDb: number | null, effectsDb: number | 
   if (effectsDb === null) {
     return 'music';
   }
-  const musicAloneIsEnough = musicDb !== null && voiceLufs - musicDb >= VOICE_MUSIC_SUGGESTION_MARGIN_DB;
+  const musicAloneIsEnough = musicDb !== null && voiceLufs - musicDb >= VOICE_MUSIC_MIN_MARGIN_DB;
   return musicDb === null || musicAloneIsEnough || effectsDb >= musicDb ? 'sound-effects' : 'music';
 }
 
@@ -58,11 +58,11 @@ export function worstMarginDb(margins: readonly SegmentMargin[]): number | null 
 
 function marginMessage({ marginDb, cause }: SegmentMargin): string {
   const competitor = cause === 'music' ? 'a la música' : 'a la música y los efectos de sonido';
-  return `En este tramo la voz supera ${competitor} solo por ${formatDb(marginDb)} dB y se pide al menos ${String(VOICE_MUSIC_CRITICAL_MARGIN_DB)} dB.`;
+  return `En este tramo la voz supera ${competitor} solo por ${formatDb(marginDb)} dB y se pide al menos ${String(VOICE_MUSIC_MIN_MARGIN_DB)} dB.`;
 }
 
 function criticalFix({ marginDb, cause }: SegmentMargin): string {
-  const missingDb = formatDb(VOICE_MUSIC_SUGGESTION_MARGIN_DB - marginDb);
+  const missingDb = formatDb(VOICE_MUSIC_MIN_MARGIN_DB - marginDb);
   return cause === 'music'
     ? `Bajar la música bajo la voz al menos ${missingDb} dB en este tramo (nivel de ducking más profundo o música más baja).`
     : `Bajar el efecto de sonido que suena en este tramo al menos ${missingDb} dB (volumen más bajo o quitarlo) para que no tape la voz.`;
@@ -71,12 +71,8 @@ function criticalFix({ marginDb, cause }: SegmentMargin): string {
 function marginFinding(margin: SegmentMargin): FindingDraft | null {
   const { segment, marginDb } = margin;
   const timeRange = { startSec: segment.startSec, endSec: segment.endSec };
-  const message = marginMessage(margin);
-  if (marginDb < VOICE_MUSIC_CRITICAL_MARGIN_DB) {
-    return { check: CHECK, severity: 'critical', message, timeRange, proposedFix: criticalFix(margin) };
-  }
-  return marginDb < VOICE_MUSIC_SUGGESTION_MARGIN_DB
-    ? { check: CHECK, severity: 'suggestion', message: `${message} Lo recomendable son ${String(VOICE_MUSIC_SUGGESTION_MARGIN_DB)} dB.`, timeRange }
+  return marginDb < VOICE_MUSIC_MIN_MARGIN_DB
+    ? { check: CHECK, severity: 'critical', message: marginMessage(margin), timeRange, proposedFix: criticalFix(margin) }
     : null;
 }
 

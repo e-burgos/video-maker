@@ -68,7 +68,7 @@ describe('voice-music-margin', () => {
     expect(report.status).toBe('fail');
   });
 
-  it('suggests between 10 and 15 dB and reports the worst segment', () => {
+  it('is critical under 15 dB, passes from 15 dB up and reports the worst segment', () => {
     const report = reviewRender(
       footageReviewInputs({
         voiceSegments: [
@@ -78,17 +78,21 @@ describe('voice-music-margin', () => {
       }),
     );
 
-    expect(findingsOf(report, 'voice-music-margin').map((finding) => finding.severity)).toEqual(['suggestion']);
+    expect(findingsOf(report, 'voice-music-margin').map((finding) => finding.severity)).toEqual(['critical']);
+    expect(findingsOf(report, 'voice-music-margin')[0]?.timeRange).toEqual({ startSec: 20, endSec: 30 });
     expect(report.metrics['voiceMusicMarginDb']).toBe(13.5);
   });
 
-  it('accepts the owner-approved motion mix at 13 dB as a suggestion, not a failure', () => {
+  it('fails a motion mix at 13 dB, the level once approved by ear, since the owner set 15 dB as the floor', () => {
     const report = reviewRender(
       motionReviewInputs({ voiceSegments: [{ startSec: 0.25, endSec: 5.26, voiceLufs: -26, musicLufs: -24, musicGainDb: -15 }] }),
     );
 
-    expect(findingsOf(report, 'voice-music-margin').map((finding) => finding.severity)).toEqual(['suggestion']);
-    expect(report.status).not.toBe('fail');
+    const [finding] = findingsOf(report, 'voice-music-margin');
+    expect(finding?.severity).toBe('critical');
+    expect(finding?.message).toContain('al menos 15 dB');
+    expect(finding?.proposedFix).toContain('2.0 dB');
+    expect(report.status).toBe('fail');
   });
 
   it('skips segments without measurable voice or music and leaves the metric null', () => {

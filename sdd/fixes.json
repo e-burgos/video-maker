@@ -4784,6 +4784,53 @@
           }
         ]
       }
+    },
+    {
+      "id": "FIX-e-burgos-048",
+      "author": "e-burgos",
+      "spec_id": null,
+      "fix_document": "sdd/fixes/fix-e-burgos-048.md",
+      "type": "IMPROVEMENT",
+      "severity": "medium",
+      "created_at": "2026-11-11",
+      "resolved_at": "2026-11-11",
+      "validated_at": null,
+      "title": "El review marca crítico el margen voz/música debajo de 15 dB (antes 10 crítico y 15 sugerencia)",
+      "estimation_hours": 0.25,
+      "description": "VOICE_MUSIC_CRITICAL_MARGIN_DB (10) y VOICE_MUSIC_SUGGESTION_MARGIN_DB (15) pasan a un único VOICE_MUSIC_MIN_MARGIN_DB = 15: cualquier tramo con la voz a menos de 15 dB sobre la música (y los efectos) es crítico y propone cuánto bajarla. Ya no hay banda de sugerencia.",
+      "justification": "Etapa 0 del informe de audio. Decisión del dev el 2026-11-11 («Seguir de acuerdo a tu recomendación»), alineada con la regla previa a publicar de FIX-015; reemplaza la calibración del 2026-10-11 que aceptaba 13 dB.",
+      "related_modules": [
+        "production-quality"
+      ],
+      "affected_files": [
+        "apps/render-api/src/review/review-thresholds.ts",
+        "apps/render-api/src/review/voice-music-margin-rule.ts"
+      ],
+      "test_reference": "nx test/lint de render-api en verde (2273); el test de la mezcla de 13 dB ahora exige falla crítica con el arreglo de 2,0 dB.",
+      "status": "implemented",
+      "cycle": null,
+      "process_note": "Videos que antes pasaban con 10–15 dB ahora fallan el review: hay que bajar la música antes de entregar.",
+      "usage": {
+        "provider_model": "claude/opus",
+        "effort": "low",
+        "tokens_in": 120000,
+        "tokens_out": 6000,
+        "approx": true,
+        "source": "declared-estimate",
+        "recorded_at": "2026-11-11",
+        "by_agent": [
+          {
+            "agent": "orchestrator",
+            "provider_model": "claude/opus",
+            "effort": "low",
+            "tokens_in": 120000,
+            "tokens_out": 6000,
+            "approx": true,
+            "source": "declared-estimate",
+            "recorded_at": "2026-11-11"
+          }
+        ]
+      }
     }
   ]
 }
