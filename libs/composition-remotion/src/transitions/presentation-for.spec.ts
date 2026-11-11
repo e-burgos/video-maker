@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { fade } from '@remotion/transitions/fade';
+import { lightLeak } from './light-leak';
 import { presentationFor } from './presentation-for';
 import type { TransitionKind } from '../helpers/timeline-types';
 
@@ -38,10 +39,11 @@ describe('presentationFor', () => {
     expect(presentation.props).toEqual({ direction: 'from-right' });
   });
 
-  it('degrades kind "light-leak" to the same presentation as fade()', () => {
+  it('returns the light-leak presentation, not fade(), for kind "light-leak"', () => {
     const presentation = presentationFor('light-leak', null);
 
-    expect(presentation.component).toBe(fade().component);
+    expect(presentation.component).toBe(lightLeak().component);
+    expect(presentation.component).not.toBe(fade().component);
   });
 
   it('defensively degrades an unknown kind to fade()', () => {

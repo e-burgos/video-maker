@@ -4206,6 +4206,67 @@
           }
         ]
       }
+    },
+    {
+      "id": "FIX-e-burgos-039",
+      "author": "e-burgos",
+      "spec_id": null,
+      "fix_document": "sdd/fixes/fix-e-burgos-039.md",
+      "type": "IMPROVEMENT",
+      "severity": "medium",
+      "created_at": "2026-11-11",
+      "resolved_at": "2026-11-11",
+      "validated_at": null,
+      "title": "Motion graphics etapa 0: salidas de escena rotativas (modo B), transiciones con semilla (modo A) y light-leak real",
+      "estimation_hours": 6,
+      "description": "Las escenas del modo B salían todas igual y los presets del modo A alternaban siempre los mismos dos tipos; con seed 0 dos videos del mismo preset quedaban idénticos y light-leak era un fade. Se agrega un generador con semilla en timeline-core, rotación sin repetir en planTransitions, pools de tres tipos por preset, una presentación light-leak propia en CSS y data-exit por escena en motion-graphics con plan por semilla de marca + título.",
+      "justification": "Etapa 0 aprobada por el dev del informe docs/research/2026-11-10-motion-graphics-productor.md; sin dependencias nuevas y el campo exit es opcional.",
+      "related_modules": [
+        "production-quality"
+      ],
+      "affected_files": [
+        "libs/timeline-core/src/random/seeded-random.ts",
+        "libs/timeline-core/src/punch-in/plan-punch-ins.ts",
+        "libs/timeline-core/src/index.ts",
+        "libs/auto-montage/src/montage/plan-transitions.ts",
+        "libs/auto-montage/src/auto-montage.ts",
+        "libs/auto-montage/src/presets/software-demo.preset.ts",
+        "libs/auto-montage/src/presets/educational.preset.ts",
+        "libs/auto-montage/src/presets/hardware.preset.ts",
+        "libs/auto-montage/src/presets/recipe.preset.ts",
+        "libs/composition-remotion/src/transitions/light-leak.tsx",
+        "libs/composition-remotion/src/transitions/light-leak-style.ts",
+        "libs/composition-remotion/src/transitions/presentation-for.ts",
+        "libs/motion-graphics/src/storyboard/motion-storyboard.schema.ts",
+        "libs/motion-graphics/src/compose/plan-scene-exits.ts",
+        "libs/motion-graphics/src/compose/compose-storyboard.ts",
+        "libs/motion-graphics/assets/runtime/motion-runtime.js"
+      ],
+      "test_reference": "nx test/lint/build en verde: timeline-core 452, auto-montage 366, composition-remotion 375, motion-graphics 326.",
+      "status": "implemented",
+      "cycle": null,
+      "process_note": "lightLeak() de Remotion no está instalado; se implementó en CSS para no sumar dependencias en la etapa 0.",
+      "usage": {
+        "provider_model": "claude/opus",
+        "effort": "medium",
+        "tokens_in": 900000,
+        "tokens_out": 60000,
+        "approx": true,
+        "source": "declared-estimate",
+        "recorded_at": "2026-11-11",
+        "by_agent": [
+          {
+            "agent": "orchestrator",
+            "provider_model": "claude/opus",
+            "effort": "medium",
+            "tokens_in": 900000,
+            "tokens_out": 60000,
+            "approx": true,
+            "source": "declared-estimate",
+            "recorded_at": "2026-11-11"
+          }
+        ]
+      }
     }
   ]
 }

@@ -1,19 +1,22 @@
 import type { Fps, KeepRange, TransitionDecision } from '@video-maker/timeline-core';
-import { msToFrames } from '@video-maker/timeline-core';
+import type { RandomGenerator } from '@video-maker/timeline-core';
+import { createSeededRandom, hashStringToSeed, msToFrames, pickAvoidingPrevious, pickFromPool } from '@video-maker/timeline-core';
 
 import type { MontagePreset } from '../presets/montage-preset';
 
 const DIRECTED_TRANSITION_KINDS = new Set<TransitionDecision['kind']>(['slide', 'whip-pan']);
-const DIRECTION_CYCLE: readonly ['from-left', 'from-right'] = ['from-left', 'from-right'];
+const DIRECTION_POOL: readonly ['from-left', 'from-right'] = ['from-left', 'from-right'];
 
 function sequentialId(prefix: string, index: number): string {
   return `${prefix}-${String(index + 1).padStart(4, '0')}`;
 }
 
-function cyclicPick<T>(nonEmpty: readonly [T, ...T[]], index: number): T {
-  const [first] = nonEmpty;
-  const position = index % nonEmpty.length;
-  return nonEmpty.reduce((selected, candidate, i) => (i === position ? candidate : selected), first);
+function transitionRandom(seed: number): RandomGenerator {
+  return createSeededRandom(hashStringToSeed(`transitions:${seed}`));
+}
+
+function directionFor(kind: TransitionDecision['kind'], next: RandomGenerator): TransitionDecision['direction'] {
+  return DIRECTED_TRANSITION_KINDS.has(kind) ? pickFromPool(DIRECTION_POOL, next) : undefined;
 }
 
 function keepDurationMs(keep: KeepRange): number {
@@ -37,7 +40,9 @@ export function planTransitions(
   keeps: readonly KeepRange[],
   preset: MontagePreset,
   fps: Fps,
+  seed: number,
 ): readonly TransitionDecision[] {
+  const next = transitionRandom(seed);
   const sortedKeeps = [...keeps].sort((left, right) => left.startMs - right.startMs);
   const transitions: TransitionDecision[] = [];
 
@@ -55,8 +60,8 @@ export function planTransitions(
     }
 
     const n = transitions.length;
-    const kind = cyclicPick(preset.transitions.kinds, n);
-    const direction = DIRECTED_TRANSITION_KINDS.has(kind) ? cyclicPick(DIRECTION_CYCLE, n) : undefined;
+    const kind = pickAvoidingPrevious(preset.transitions.kinds, transitions[n - 1]?.kind, next);
+    const direction = directionFor(kind, next);
 
     transitions.push({
       id: sequentialId('trans', n),

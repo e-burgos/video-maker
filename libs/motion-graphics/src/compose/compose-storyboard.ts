@@ -3,6 +3,7 @@ import type { MusicMode, VoiceDirection } from '@video-maker/timeline-core';
 import { brandCssFile, brandImageFile, brandIsotipo } from '../brand/brand-manifest';
 import type { BrandManifest } from '../brand/brand-manifest';
 import { impactTrack, IMPACT_VOICE_LEAD_IN_SEC } from './impact-sfx';
+import { planSceneExits } from './plan-scene-exits';
 import { MotionStudioError } from '../errors/motion-studio-error';
 import { renderScene } from '../scenes/render-scene';
 import { esc } from '../scenes/scene-html';
@@ -122,12 +123,15 @@ export function composeStoryboard(storyboard: MotionStoryboard, brand: BrandMani
   const ctx: SceneContext = { brand, format: storyboard.format, imageUrl: (ref) => brandImageUrl(ref, brand) };
   const track = resolveMusic(storyboard, brand);
   const dropScene = storyboard.scenes.find((s) => s.anchor === 'drop');
+  const exits = planSceneExits(storyboard);
 
   const sections = storyboard.scenes
     .map((scene) => {
       const flash = scene.anchor === 'drop' && storyboard.beatSync ? ' data-flash="1"' : '';
       const chapter = scene.chapter ? ` data-chapter="${esc(scene.chapter)}"` : scene.kind === 'cta' ? ' data-chapter-end="1"' : '';
-      return `<section id="s-${scene.id}" class="clip scene" data-scene="${scene.id}"${chapter}${flash} data-start="{{start:${scene.id}}}" data-duration="{{dur:${scene.id}}}" data-track-index="1">
+      const exit = exits.get(scene.id);
+      const exitAttr = exit === undefined ? '' : ` data-exit="${exit}"`;
+      return `<section id="s-${scene.id}" class="clip scene" data-scene="${scene.id}"${chapter}${flash}${exitAttr} data-start="{{start:${scene.id}}}" data-duration="{{dur:${scene.id}}}" data-track-index="1">
         <div class="scene-in">${renderScene(scene, ctx)}</div>
       </section>`;
     })

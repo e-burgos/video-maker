@@ -23,7 +23,7 @@ export const hardwarePreset: MontagePreset = {
   transitions: {
     every: 3,
     durationMs: 260,
-    kinds: ['slide', 'fade'],
+    kinds: ['slide', 'fade', 'whip-pan'],
     timing: 'spring',
   },
   audio: { baseGainDb: -4, duckedGainDb: -12, referenceLufs: -16, attackMs: 150, releaseMs: 400, holdMs: 250 },
