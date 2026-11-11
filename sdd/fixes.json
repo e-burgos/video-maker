@@ -5812,6 +5812,57 @@
           }
         ]
       }
+    },
+    {
+      "id": "FIX-e-burgos-069",
+      "author": "e-burgos",
+      "spec_id": null,
+      "fix_document": "sdd/fixes/fix-e-burgos-069.md",
+      "type": "IMPROVEMENT",
+      "severity": "medium",
+      "created_at": "2026-11-11",
+      "resolved_at": "2026-11-11",
+      "validated_at": null,
+      "title": "render-cli flash-scan: el escaneo de destellos marca solo saltos breves y lista aparte los tramos blancos sostenidos",
+      "estimation_hours": 2,
+      "description": "El escaneo manual de destellos contaba como destello cualquier tramo casi blanco, incluidos bumpers blancos e interfaces claras. render-cli flash-scan escanea el último render y separa destellos (< 0,5 s) de tramos claros sostenidos.",
+      "justification": "Pendiente propio aprobado por el dev («Pendientes propios») vía la sesión orquestadora; el escaneo no vivía en el review de render-api.",
+      "related_modules": [
+        "production-quality"
+      ],
+      "affected_files": [
+        "tools/render-cli/src/commands/flash-scan-command.ts",
+        "tools/render-cli/src/cli.ts",
+        "tools/render-cli/src/args/parse-cli-args.ts",
+        "tools/render-cli/src/args/preset-names.ts",
+        "tools/render-cli/src/args/stage-for-argument.ts",
+        "tools/render-cli/src/report/cli-report.ts",
+        "tools/render-cli/src/report/format-report.ts"
+      ],
+      "test_reference": "nx test/lint/build en verde: render-cli 198; renders reales sin falsos positivos.",
+      "status": "implemented",
+      "cycle": null,
+      "usage": {
+        "provider_model": "claude/opus",
+        "effort": "medium",
+        "tokens_in": 250000,
+        "tokens_out": 12000,
+        "approx": true,
+        "source": "declared-estimate",
+        "recorded_at": "2026-11-11",
+        "by_agent": [
+          {
+            "agent": "orchestrator",
+            "provider_model": "claude/opus",
+            "effort": "medium",
+            "tokens_in": 250000,
+            "tokens_out": 12000,
+            "approx": true,
+            "source": "declared-estimate",
+            "recorded_at": "2026-11-11"
+          }
+        ]
+      }
     }
   ]
 }
