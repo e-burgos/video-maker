@@ -109,14 +109,14 @@ describe('resolveMontagePreset (D-20)', () => {
 
 describe('niveles de música por preset (spec-014)', () => {
   it('hardware es el preset de publicidad: música presente bajo la voz', () => {
-    expect(MONTAGE_PRESETS.hardware.audio.baseGainDb).toBe(-4);
-    expect(MONTAGE_PRESETS.hardware.audio.duckedGainDb).toBe(-12);
+    expect(MONTAGE_PRESETS.hardware.audio.baseGainDb).toBe(-6);
+    expect(MONTAGE_PRESETS.hardware.audio.duckedGainDb).toBe(-14);
   });
 
   it('los presets de tutorial dejan la música más discreta', () => {
     for (const name of ['software-demo', 'educational', 'recipe'] as const) {
-      expect(MONTAGE_PRESETS[name].audio.baseGainDb).toBe(-8);
-      expect(MONTAGE_PRESETS[name].audio.duckedGainDb).toBe(-18);
+      expect(MONTAGE_PRESETS[name].audio.baseGainDb).toBe(-10);
+      expect(MONTAGE_PRESETS[name].audio.duckedGainDb).toBe(-20);
     }
   });
 

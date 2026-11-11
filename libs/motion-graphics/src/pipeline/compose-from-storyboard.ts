@@ -3,7 +3,7 @@ import { MotionStudioError } from '../errors/motion-studio-error';
 import type { MotionStoryboard } from '../storyboard/motion-storyboard.schema';
 import { joinPath } from './join-path';
 import type { MotionPipelinePorts } from './ports';
-import { copyMusic, copySharedAssets, readBrand, SCRIPT_FILE, toJson } from './project-files';
+import { brandTrackPath, copyMusic, copySharedAssets, readBrand, SCRIPT_FILE, toJson } from './project-files';
 
 export async function composeFromStoryboard(
   ports: MotionPipelinePorts,
@@ -22,7 +22,7 @@ export async function composeFromStoryboard(
       await ports.copyFile(source, target);
     } else if (!(await ports.exists(target))) throw new MotionStudioError('ASSET_MISSING', `image "${image}" not found in the project`);
   }
-  if (composed.musicSource !== null && composed.script.music !== null) await copyMusic(ports, project, composed.musicSource, composed.script.music.file);
+  if (composed.musicSource !== null && composed.script.music !== null) await copyMusic(ports, project, await brandTrackPath(ports, storyboard.brand, composed.musicSource), composed.script.music.file);
   await ports.writeText(joinPath(project, 'index.html.tpl'), composed.template);
   await ports.writeText(joinPath(project, SCRIPT_FILE), toJson(composed.script, 2));
   if (sourceDir !== project) await ports.writeText(joinPath(project, 'storyboard.json'), toJson(storyboard, 2));

@@ -165,18 +165,201 @@
       "credit": "\"Voxel Revolution\" Kevin MacLeod (incompetech.com) · CC BY 4.0",
       "bpm": 122,
       "mood": "energetic",
-      "drop": 13.8
+      "drop": 13.8,
+      "videoTypes": [
+        "product",
+        "vertical"
+      ]
     },
     {
       "id": "newer-wave",
       "file": "music/Newer Wave.mp3",
       "credit": "\"Newer Wave\" Kevin MacLeod (incompetech.com) · CC BY 4.0",
       "bpm": 110,
-      "mood": "calm"
+      "mood": "calm",
+      "videoTypes": [
+        "tutorial",
+        "product"
+      ]
+    },
+    {
+      "id": "late-night-radio",
+      "file": "music/Late Night Radio.mp3",
+      "credit": "\"Late Night Radio\" Kevin MacLeod (incompetech.com) · CC BY 4.0",
+      "bpm": 72,
+      "mood": "calm lo-fi",
+      "videoTypes": [
+        "tutorial"
+      ]
+    },
+    {
+      "id": "pleasant-porridge",
+      "file": "music/Pleasant Porridge.mp3",
+      "credit": "\"Pleasant Porridge\" Kevin MacLeod (incompetech.com) · CC BY 4.0",
+      "bpm": 119,
+      "mood": "light playful",
+      "videoTypes": [
+        "tutorial"
+      ]
+    },
+    {
+      "id": "screen-saver",
+      "file": "music/Screen Saver.mp3",
+      "credit": "\"Screen Saver\" Kevin MacLeod (incompetech.com) · CC BY 4.0",
+      "bpm": 120,
+      "mood": "calm electronic",
+      "videoTypes": [
+        "tutorial"
+      ]
+    },
+    {
+      "id": "aerosol-of-my-love",
+      "file": "music/Aerosol of my Love.mp3",
+      "credit": "\"Aerosol of my Love\" Kevin MacLeod (incompetech.com) · CC BY 4.0",
+      "bpm": 100,
+      "mood": "warm relaxed",
+      "videoTypes": [
+        "tutorial"
+      ]
+    },
+    {
+      "id": "upbeat-lounge-background",
+      "file": "music/Upbeat Lounge Background.mp3",
+      "credit": "\"Upbeat Lounge Background\" Soundrider/Dope (jamendo.com) · CC BY 3.0",
+      "bpm": 120,
+      "mood": "relaxed lounge",
+      "videoTypes": [
+        "tutorial"
+      ]
+    },
+    {
+      "id": "motionless-land",
+      "file": "music/Motionless Land (Instrumental).mp3",
+      "credit": "\"Motionless Land (Instrumental)\" Josh Woodward (jamendo.com) · CC BY 3.0",
+      "bpm": 138,
+      "mood": "calm acoustic",
+      "videoTypes": [
+        "tutorial"
+      ]
+    },
+    {
+      "id": "getting-it-done",
+      "file": "music/Getting it Done.mp3",
+      "credit": "\"Getting it Done\" Kevin MacLeod (incompetech.com) · CC BY 4.0",
+      "bpm": 135,
+      "mood": "upbeat energetic",
+      "videoTypes": [
+        "product"
+      ]
+    },
+    {
+      "id": "werq",
+      "file": "music/Werq.mp3",
+      "credit": "\"Werq\" Kevin MacLeod (incompetech.com) · CC BY 4.0",
+      "bpm": 125,
+      "mood": "funky upbeat",
+      "videoTypes": [
+        "product"
+      ]
+    },
+    {
+      "id": "bleeping-demo",
+      "file": "music/Bleeping Demo.mp3",
+      "credit": "\"Bleeping Demo\" Kevin MacLeod (incompetech.com) · CC BY 4.0",
+      "bpm": 74,
+      "mood": "quirky tech",
+      "videoTypes": [
+        "product"
+      ]
+    },
+    {
+      "id": "loopster",
+      "file": "music/Loopster.mp3",
+      "credit": "\"Loopster\" Kevin MacLeod (incompetech.com) · CC BY 4.0",
+      "bpm": 108,
+      "mood": "light tech",
+      "videoTypes": [
+        "product"
+      ]
+    },
+    {
+      "id": "inspiring-technology",
+      "file": "music/Inspiring Technology.mp3",
+      "credit": "\"Inspiring Technology\" Soundrider/Dope (jamendo.com) · CC BY 3.0",
+      "bpm": 128,
+      "mood": "inspiring tech",
+      "videoTypes": [
+        "product"
+      ]
+    },
+    {
+      "id": "cloud-dancer",
+      "file": "music/Cloud Dancer.mp3",
+      "credit": "\"Cloud Dancer\" Kevin MacLeod (incompetech.com) · CC BY 4.0",
+      "bpm": 107,
+      "mood": "energetic bright",
+      "videoTypes": [
+        "vertical"
+      ]
+    },
+    {
+      "id": "neon-laser-horizon",
+      "file": "music/Neon Laser Horizon.mp3",
+      "credit": "\"Neon Laser Horizon\" Kevin MacLeod (incompetech.com) · CC BY 4.0",
+      "bpm": 160,
+      "mood": "energetic synthwave",
+      "videoTypes": [
+        "vertical"
+      ]
+    },
+    {
+      "id": "the-corporate-upbeat",
+      "file": "music/The Corporate Upbeat.mp3",
+      "credit": "\"The Corporate Upbeat\" Soundrider/Dope (jamendo.com) · CC BY 3.0",
+      "bpm": 130,
+      "mood": "upbeat corporate",
+      "videoTypes": [
+        "vertical"
+      ]
+    },
+    {
+      "id": "inspiring-corporate",
+      "file": "music/Inspiring Corporate.mp3",
+      "credit": "\"Inspiring Corporate\" Soundrider/Dope (jamendo.com) · CC BY 3.0",
+      "bpm": 80,
+      "mood": "inspiring corporate",
+      "videoTypes": [
+        "institutional"
+      ]
+    },
+    {
+      "id": "thanks-for-coming",
+      "file": "music/Thanks for Coming (Instrumental).mp3",
+      "credit": "\"Thanks for Coming (Instrumental)\" Josh Woodward (jamendo.com) · CC BY 3.0",
+      "bpm": 80,
+      "mood": "warm hopeful",
+      "videoTypes": [
+        "institutional"
+      ]
     }
   ],
   "voice": {
     "id": "elevenlabs:p7AwDmKvTdoHTBuueGvP",
     "lengthScale": 1
+  },
+  "bumpers": {
+    "backgrounds": [
+      "gradient",
+      "noise",
+      "shapes",
+      "glow"
+    ],
+    "reveals": [
+      "zoom",
+      "slide-up",
+      "wipe",
+      "blur-in",
+      "pop"
+    ]
   }
 }

@@ -41,6 +41,7 @@ describe('buildAutoStoryboardRequest', () => {
   it('states the hard rules of the contract', () => {
     expect(request.systemPrompt).toMatch(/ONLY a JSON object/u);
     expect(request.systemPrompt).toMatch(/number.*as words/u);
+    expect(request.systemPrompt).toMatch(/never put two scenes of the same `kind` in a row/u);
     expect(request.systemPrompt).toMatch(/never the first words of a line/u);
     expect(request.systemPrompt).toMatch(/hook.*cta/u);
     expect(request.systemPrompt).toMatch(/anchor: "drop"/u);
@@ -81,6 +82,22 @@ describe('buildAutoStoryboardRequest', () => {
     expect(request.userPrompt).toContain('choose the track');
     expect(buildAutoStoryboardRequest({ ...brief, music: 'calm' }, testBrand).userPrompt).toContain('use the track "calm"');
     expect(buildAutoStoryboardRequest({ ...brief, music: null, images: [] }, testBrand).userPrompt).toMatch(/music: no music[\s\S]*images: none/u);
+  });
+
+  it('asks for a track made for the kind of video and away from the ones the last videos used', () => {
+    const tagged = {
+      ...testBrand,
+      music: [
+        { id: 'calma', file: 'music/calma.mp3', credit: 'Calma · CC BY 4.0', bpm: 90, mood: 'calm', videoTypes: ['tutorial' as const] },
+        { id: 'pulso', file: 'music/pulso.mp3', credit: 'Pulso · CC BY 4.0', bpm: 128, mood: 'energetic', videoTypes: ['vertical' as const, 'product' as const] },
+      ],
+    };
+    const prompt = buildAutoStoryboardRequest(brief, tagged, { recentTracks: ['pulso', 'borrado'] }).userPrompt;
+    expect(prompt).toContain('pulso (energetic, 128 BPM, no drop, for vertical/product videos)');
+    expect(prompt).toContain('a 9:16 video is vertical');
+    expect(prompt).toContain('the last videos used pulso: pick a different one unless none other fits');
+    expect(prompt).not.toContain('borrado');
+    expect(buildAutoStoryboardRequest({ ...brief, format: '16:9' }, tagged).userPrompt).toContain('tutorial for a step-by-step walkthrough');
   });
 
   it('teaches the optional voice direction and the music mode without forcing them', () => {

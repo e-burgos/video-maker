@@ -45,6 +45,23 @@ export interface RenderMutedVideoOutput {
 
 export type RenderMutedVideoPort = (input: RenderMutedVideoInput) => Promise<RenderMutedVideoOutput>;
 
+export interface MixSfxCue {
+  readonly path: string;
+  readonly atMs: number;
+  readonly gainDb: number;
+  readonly durationMs: number;
+  readonly fadeInMs?: number;
+  readonly fadeOutMs?: number;
+}
+
+export interface MixedSfxCredit {
+  readonly file: string;
+  readonly title: string;
+  readonly author: string;
+  readonly license: string;
+  readonly sourceUrl: string;
+}
+
 export interface MixTimelineAudioInput {
   readonly timeline: Timeline;
   readonly outPath: string;
@@ -54,6 +71,7 @@ export interface MixTimelineAudioInput {
 export interface MixTimelineAudioOutput {
   readonly outputPath: string;
   readonly filterComplex: string;
+  readonly sfxCredits?: readonly MixedSfxCredit[];
 }
 
 export type MixTimelineAudioPort = (input: MixTimelineAudioInput) => Promise<MixTimelineAudioOutput>;

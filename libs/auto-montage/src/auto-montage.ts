@@ -1,4 +1,5 @@
 import type {
+  BumperStyle,
   CaptionStyle,
   CaptionTheme,
   EditDecisionList,
@@ -39,6 +40,7 @@ import { preserveBrandDecisions } from './montage/preserve-brand-decisions';
 import { readExistingTimeline } from './montage/read-existing-timeline';
 import { planDuckRanges } from './montage/plan-duck-ranges';
 import { planTransitions } from './montage/plan-transitions';
+import { splitKeepAtScriptLines } from './montage/split-keep-at-script-lines';
 import type { TranscriptionSource } from './montage/resolve-montage-inputs';
 import { resolveMontageInputs } from './montage/resolve-montage-inputs';
 import { writeEditDecisionList } from './montage/write-edit-decision-list';
@@ -72,6 +74,7 @@ export interface VoiceTrackSummary {
 export interface MontageBrand {
   readonly id: string;
   readonly captionTheme: CaptionTheme;
+  readonly bumperStyle?: Omit<BumperStyle, 'rotate' | 'seed'>;
 }
 
 export interface AutoMontageOptions {
@@ -182,6 +185,16 @@ function alignScript(
     : alignTranscriptToScript(words, spokenScript);
 }
 
+function rotatingBumperStyle(seed: number, brand: MontageBrand | undefined): BumperStyle {
+  return { rotate: true, seed, ...(brand?.bumperStyle ?? {}) };
+}
+
+const SCRIPT_LINE_TRANSITION_EVERY = 2;
+
+function withScriptLineTransitionCadence(preset: MontagePreset): MontagePreset {
+  return { ...preset, transitions: { ...preset.transitions, every: SCRIPT_LINE_TRANSITION_EVERY } };
+}
+
 function toLogoInput(logoAsset: MediaAsset | undefined): LogoInput | undefined {
   return logoAsset === undefined ? undefined : { assetId: logoAsset.id };
 }
@@ -240,20 +253,29 @@ export async function autoMontage(
       ? arollAsset.durationMs
       : Math.min(arollAsset.durationMs, voiceScriptTrack.asset.durationMs);
 
-  const { pruneDurationMs, keeps, cuts } = pruneSilencesWithFrameMargin(
+  const pruned = pruneSilencesWithFrameMargin(
     project.root,
     alignedTranscription,
     preset,
     fps,
     { sourceDurationMs, prune: options.pruneSilences ?? voiceSource === 'aroll' },
   );
+  const { pruneDurationMs, cuts } = pruned;
+  const keeps =
+    voiceScriptTrack === null
+      ? pruned.keeps
+      : splitKeepAtScriptLines(pruned.keeps, voiceScriptTrack.lineWindows, preset.silence.minKeepMs);
+  const keepsSplitByScript = keeps !== pruned.keeps;
 
-  const punchIns = planPunchIns(keeps, {
-    seed: options.seed,
-    every: preset.punchIn.every,
-    scales: preset.punchIn.scales,
-    anchor: preset.punchIn.anchor,
-  });
+
+  const punchIns = keepsSplitByScript
+    ? []
+    : planPunchIns(keeps, {
+        seed: options.seed,
+        every: preset.punchIn.every,
+        scales: preset.punchIn.scales,
+        anchor: preset.punchIn.anchor,
+      });
 
   const { concepts, stopwordLanguage } = spotConcepts(alignedTranscription, preset);
 
@@ -277,7 +299,7 @@ export async function autoMontage(
     voiceScriptTrack?.lineWindows ?? [],
   );
   const duckDecisions = planDuckRanges(alignedTranscription.words, keeps, preset, fps);
-  const transitions = planTransitions(keeps, preset, fps);
+  const transitions = planTransitions(keeps, keepsSplitByScript ? withScriptLineTransitionCadence(preset) : preset, fps, options.seed);
 
   const edl = assertValidEditDecisionList(
     buildEditDecisionList({
@@ -317,9 +339,11 @@ export async function autoMontage(
       : { assetId: voiceScriptTrack.asset.id, durationMs: voiceScriptTrack.asset.durationMs },
     captionStyle,
   );
+  const brandedTimeline =
+    options.brand === undefined ? builtTimeline : { ...builtTimeline, captionTheme: options.brand.captionTheme };
   const timeline = assertValidTimeline(
     preserveBrandDecisions(
-      options.brand === undefined ? builtTimeline : { ...builtTimeline, captionTheme: options.brand.captionTheme },
+      { ...brandedTimeline, bumpers: { style: rotatingBumperStyle(options.seed, options.brand) } },
       previousTimeline,
     ),
   );

@@ -561,3 +561,42 @@ describe('buildTimeline — niveles del preset y logo', () => {
     });
   });
 });
+
+describe('buildTimeline — transiciones con handles entre keeps contiguos', () => {
+  const format = { preset: 'youtube-16x9', width: 1920, height: 1080, fps: 30 } as const;
+  const asset = { id: 'aroll-cam-01', kind: 'video', path: 'raw/aroll/a.mp4', durationMs: 9000, fps: 30, width: 1920, height: 1080, hasAudio: true, probedAt: '2026-11-11T00:00:00.000Z' } as const;
+
+  function edlWith(handles: boolean | undefined): EditDecisionList {
+    return {
+      schemaVersion: 1,
+      sourceAssetId: 'aroll-cam-01',
+      format: format as never,
+      generatedBy: { tool: 'fixture', params: {} },
+      decisions: [
+        { id: 'keep-0001', type: 'keep', startMs: 0, endMs: 3000 },
+        { id: 'trans-0001', type: 'transition', atMs: 3000, kind: 'iris', durationMs: 500, ...(handles === undefined ? {} : { handles }) },
+        { id: 'keep-0002', type: 'keep', startMs: 3000, endMs: 6000 },
+      ],
+    };
+  }
+
+  it('con handles la timeline no se acorta: el clip entrante arranca antes y recorta antes', () => {
+    const timeline = buildTimeline(edlWith(true), [asset as never]);
+
+    expect(timeline.tracks.aroll[0]).toMatchObject({ from: 0, durationFrames: 90, trimStartMs: 0 });
+    expect(timeline.tracks.aroll[1]).toMatchObject({ from: 75, durationFrames: 105, trimStartMs: 2500 });
+    expect(timeline.durationFrames).toBe(180);
+    expect(timeline.tracks.voice.map((v) => [v.from, v.durationFrames, v.trimStartMs])).toEqual([
+      [0, 90, 0],
+      [90, 90, 3000],
+    ]);
+    parseOrThrow(timeline);
+  });
+
+  it('sin handles conserva el solapamiento de siempre', () => {
+    const timeline = buildTimeline(edlWith(undefined), [asset as never]);
+
+    expect(timeline.tracks.aroll[1]).toMatchObject({ from: 75, durationFrames: 90, trimStartMs: 3000 });
+    expect(timeline.durationFrames).toBe(165);
+  });
+});

@@ -810,6 +810,69 @@ describe('createStudioToolHandlers', () => {
       expect((saved as Timeline).tracks.captions).toEqual(current.tracks.captions);
     });
 
+    it('keeps the rotating bumper style when the patch only brings intro and outro', async () => {
+      const current = { ...buildMinimalTimeline(), bumpers: { style: { rotate: true, seed: 12, accentColor: '#0ea5e9' } } };
+      let saved: unknown = null;
+      const { handlers } = handlersWith({
+        getTimeline: async () => current,
+        putTimeline: async (timeline) => {
+          saved = timeline;
+        },
+      });
+      const intro = { enabled: true, durationMs: 2000, backgroundColor: '#ffffff', animation: 'zoom' as const, logoWidthRatio: 0.4 };
+
+      await handlers.patch_timeline({ bumpers: { intro } });
+
+      expect((saved as Timeline).bumpers).toEqual({ intro, style: current.bumpers.style });
+    });
+
+    it('merges a partial bumper style into the saved one, so the seed and the brand colors survive', async () => {
+      const current = { ...buildMinimalTimeline(), bumpers: { style: { rotate: true, seed: 4242, accentColor: '#0ea5e9' } } };
+      let saved: unknown = null;
+      const { handlers } = handlersWith({
+        getTimeline: async () => current,
+        putTimeline: async (timeline) => {
+          saved = timeline;
+        },
+      });
+      const intro = { enabled: true, durationMs: 2000, backgroundColor: '#ffffff', animation: 'zoom' as const, logoWidthRatio: 0.4 };
+
+      await handlers.patch_timeline({ bumpers: { intro, style: { rotate: true } } });
+
+      expect((saved as Timeline).bumpers?.style).toEqual({ rotate: true, seed: 4242, accentColor: '#0ea5e9' });
+    });
+
+    it('replaces the text overlays, reports them as changed and removes them with null', async () => {
+      const current = buildMinimalTimeline();
+      let saved: unknown = null;
+      const { handlers } = handlersWith({
+        getTimeline: async () => (saved as Timeline | null) ?? current,
+        putTimeline: async (timeline) => {
+          saved = timeline;
+        },
+      });
+      const textOverlays = [{ id: 'chapter-1', kind: 'chapter-title' as const, startMs: 0, durationMs: 1500, text: 'Ventas', eyebrow: '01' }];
+
+      const result = await handlers.patch_timeline({ textOverlays });
+
+      expect((saved as Timeline).textOverlays).toEqual(textOverlays);
+      expect((saved as Timeline).tracks).toEqual(current.tracks);
+      expect(result.data).toEqual({ changed: ['textOverlays'], summary: 'Updated textOverlays.' });
+
+      await handlers.patch_timeline({ textOverlays: null });
+      expect((saved as Timeline).textOverlays).toBeUndefined();
+    });
+
+    it('rejects text overlays that do not fit the timeline', async () => {
+      const { handlers } = handlersWith({ getTimeline: async () => buildMinimalTimeline() });
+
+      await expect(
+        handlers.patch_timeline({
+          textOverlays: [{ id: 'late', kind: 'lower-third', startMs: 3_600_000, durationMs: 1500, text: 'Tarde' }],
+        }),
+      ).rejects.toThrow(/termina en/);
+    });
+
     it('replaces the music track and audioMix together and reports both as changed', async () => {
       const current = buildMinimalTimeline();
       let saved: unknown = null;

@@ -238,3 +238,5 @@ export {
 export type { DetectSceneCutsOptions } from './ffmpeg/detect-scene-cuts';
 export { buildScenesFromCuts, extractSceneKeyframes, sceneMidpointSec } from './ffmpeg/extract-scene-keyframes';
 export type { SceneKeyframe, VideoScene } from './ffmpeg/extract-scene-keyframes';
+export { buildSfxChain } from './mix/build-sfx-chain';
+export type { SfxMixCue } from './mix/build-sfx-chain';

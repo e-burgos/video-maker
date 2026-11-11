@@ -8,7 +8,7 @@ type IssueCtx = z.core.$RefinementCtx<unknown>;
 export const CutReasonSchema = z.enum(['silence', 'manual', 'filler-word']);
 export const BrollFitSchema = z.enum(['cover', 'contain', 'pip']);
 export const PunchInAnchorSchema = z.enum(['center', 'top', 'face-hint']);
-export const TransitionKindSchema = z.enum(['fade', 'slide', 'whip-pan', 'light-leak']);
+export const TransitionKindSchema = z.enum(['fade', 'slide', 'whip-pan', 'light-leak', 'wipe', 'flip', 'clock-wipe', 'iris']);
 export const TransitionDirectionSchema = z.enum([
   'from-left',
   'from-right',
@@ -59,6 +59,7 @@ export const TransitionDecisionSchema = z.strictObject({
   kind: TransitionKindSchema,
   direction: TransitionDirectionSchema.optional(),
   timing: TransitionTimingKindSchema.optional(),
+  handles: z.boolean().optional(),
 });
 
 export const CaptionGroupWordSchema = z.strictObject({

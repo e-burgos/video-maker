@@ -8,6 +8,7 @@ import { PREVIEW_PRESETS, previewFormat, previewPresetFor } from '../api/preview
 import type { PreviewPreset } from '../api/preview-format';
 import { useRenderApi } from '../api/render-api-context';
 import { BUMPER_EDGES, bumperSeconds } from '../api/timeline-edit/logo-bumpers';
+import { canAddTextOverlay } from '../api/timeline-edit/text-overlays';
 import {
   canStartRender,
   initialTimelineEditState,
@@ -31,6 +32,7 @@ import { SampleTrigger } from '../components/sample-trigger';
 import { TimelineIssueList } from '../components/timeline-issue-list';
 import { TimelinePlayer } from '../components/timeline-player';
 import { TimelineSaveBar } from '../components/timeline-save-bar';
+import { TextOverlayEditor } from '../components/text-overlay-editor';
 import { YouTubePublishSection } from '../components/youtube-publish-section';
 import { MotionPreviewView } from '../components/motion-preview-view';
 import { ProjectModeGate } from '../components/project-mode-gate';
@@ -251,6 +253,17 @@ function StudioView({ slug, initialTimeline }: StudioViewProps) {
           dispatch={dispatchAction}
         />
         <CaptionEditor captions={editState.draft.tracks.captions} dispatch={dispatchAction} />
+      </div>
+
+      <div className="space-y-2">
+        <h2 className="font-mono text-xs uppercase tracking-wide text-slate-500">
+          {t('preview.section.textOverlays')}
+        </h2>
+        <TextOverlayEditor
+          {...(editState.draft.textOverlays === undefined ? {} : { overlays: editState.draft.textOverlays })}
+          canAdd={canAddTextOverlay(editState.draft)}
+          dispatch={dispatchAction}
+        />
       </div>
 
       <div className="space-y-2">

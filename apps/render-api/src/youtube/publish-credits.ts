@@ -20,7 +20,7 @@ interface CreditFields {
   readonly license: string;
 }
 
-const CREDIT_LABELS: Readonly<Record<string, string>> = { music: 'Música', video: 'Video', image: 'Imagen' };
+const CREDIT_LABELS: Readonly<Record<string, string>> = { music: 'Música', video: 'Video', image: 'Imagen', sfx: 'Efecto de sonido' };
 
 function field(entry: Record<string, unknown>, ...names: readonly string[]): string {
   const found = names.map((name) => entry[name]).find((value) => typeof value === 'string' && value.trim() !== '');

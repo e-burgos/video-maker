@@ -3,6 +3,8 @@ import type { MusicMode, VoiceDirection } from '@video-maker/timeline-core';
 import { brandCssFile, brandImageFile, brandIsotipo } from '../brand/brand-manifest';
 import type { BrandManifest } from '../brand/brand-manifest';
 import { impactTrack, IMPACT_VOICE_LEAD_IN_SEC } from './impact-sfx';
+import { planSceneExits } from './plan-scene-exits';
+import { planTitleStyles } from './plan-title-styles';
 import { MotionStudioError } from '../errors/motion-studio-error';
 import { renderScene } from '../scenes/render-scene';
 import { esc } from '../scenes/scene-html';
@@ -122,20 +124,25 @@ export function composeStoryboard(storyboard: MotionStoryboard, brand: BrandMani
   const ctx: SceneContext = { brand, format: storyboard.format, imageUrl: (ref) => brandImageUrl(ref, brand) };
   const track = resolveMusic(storyboard, brand);
   const dropScene = storyboard.scenes.find((s) => s.anchor === 'drop');
+  const exits = planSceneExits(storyboard);
+  const titleStyles = planTitleStyles(storyboard);
 
   const sections = storyboard.scenes
     .map((scene) => {
       const flash = scene.anchor === 'drop' && storyboard.beatSync ? ' data-flash="1"' : '';
       const chapter = scene.chapter ? ` data-chapter="${esc(scene.chapter)}"` : scene.kind === 'cta' ? ' data-chapter-end="1"' : '';
-      return `<section id="s-${scene.id}" class="clip scene" data-scene="${scene.id}"${chapter}${flash} data-start="{{start:${scene.id}}}" data-duration="{{dur:${scene.id}}}" data-track-index="1">
+      const exit = exits.get(scene.id);
+      const exitAttr = exit === undefined ? '' : ` data-exit="${exit}"`;
+      const titleAttr = ` data-title-style="${titleStyles.get(scene.id) ?? 'split-words'}"`;
+      return `<section id="s-${scene.id}" class="clip scene" data-scene="${scene.id}"${chapter}${flash}${exitAttr}${titleAttr} data-start="{{start:${scene.id}}}" data-duration="{{dur:${scene.id}}}" data-track-index="1">
         <div class="scene-in">${renderScene(scene, ctx)}</div>
       </section>`;
     })
     .join('\n      ');
 
   const sfx = dropScene && track
-    ? `<audio id="sfx-riser" src="${RUNTIME_ASSET_DIR}/sfx/riser.mp3" data-start="{{sfx:riser}}" data-duration="3.4" data-media-start="6.6" data-track-index="12" data-volume="0.55"></audio>
-      ${impactTrack(`{{start:${dropScene.id}}}`, RUNTIME_ASSET_DIR)}`
+    ? `<audio id="sfx-riser" src="{{sfx_src:riser}}" data-start="{{sfx:riser}}" data-duration="{{sfx_dur:riser}}" data-track-index="12" data-volume="0.55"></audio>
+      ${impactTrack(`{{start:${dropScene.id}}}`)}`
     : '';
 
   const width = vertical ? 1080 : 1920;
@@ -147,6 +154,7 @@ export function composeStoryboard(storyboard: MotionStoryboard, brand: BrandMani
     <meta name="viewport" content="width=${width}, height=${height}" />
     <title>${esc(storyboard.title)}</title>
     <script src="${RUNTIME_ASSET_DIR}/gsap.min.js"></script>
+    <script src="${RUNTIME_ASSET_DIR}/SplitText.min.js"></script>
     <script src="${RUNTIME_ASSET_DIR}/motion-runtime.js"></script>
     <link rel="stylesheet" href="${BRAND_ASSET_DIR}/${brandCssFile(brand)}" />
     <link rel="stylesheet" href="${RUNTIME_ASSET_DIR}/scenes.css" />
@@ -206,5 +214,5 @@ export function composeStoryboard(storyboard: MotionStoryboard, brand: BrandMani
     sfx: dropScene && track ? [{ id: 'riser', scene: dropScene.id, offset: -3.4 }] : [],
   };
 
-  return { template, script, images: storyboardImages(storyboard), musicSource: track ? `${BRAND_ASSET_DIR}/${track.file}` : null };
+  return { template, script, images: storyboardImages(storyboard), musicSource: track ? track.file : null };
 }

@@ -26,6 +26,25 @@ export { wavDurationSec } from './voice/wav-duration';
 
 export { activeDeviceIds, BrandManifestSchema, brandImageCaption, brandImageFile, parseBrandManifest } from './brand/brand-manifest';
 export type { BrandManifest } from './brand/brand-manifest';
+export {
+  brandTrackSourcePath,
+  collectBrandMusic,
+  INHERITED_MUSIC_FILE_PREFIX,
+  isLocalMusicFile,
+  isLocalMusicTrackFile,
+  LOCAL_MUSIC_DIRECTORY,
+  LOCAL_MUSIC_FILE_PREFIX,
+  LOCAL_MUSIC_LIST_FILE,
+  localMusicDirectory,
+  MUSIC_VIDEO_TYPES,
+  parseInheritedMusicFile,
+  parseLocalMusicList,
+  resolveBrandTrackSource,
+  trackFitsVideoType,
+  withInheritedMusic,
+  withLocalMusic,
+} from './brand/brand-music';
+export type { BrandMusicReaders, BrandMusicSource, BrandTrack, InheritedMusicFile, MusicVideoType } from './brand/brand-music';
 export { brandCss, effectiveBrandTokens, parseCssTokens } from './brand/brand-css';
 export { deriveBrandTokens, tokensToCss } from './brand/derive-brand-tokens';
 export type { BrandPalette, BrandTypography } from './brand/derive-brand-tokens';
@@ -37,11 +56,11 @@ export type { SceneContext } from './scenes/scene-html';
 export { formatIssuePath, motionStoryboardJsonSchema, parseMotionStoryboard } from './storyboard/parse-motion-storyboard';
 export { ImageBoxSchema, describeMeasuredBox, isMeasuredBox } from './storyboard/image-box';
 export type { ImageBox } from './storyboard/image-box';
-export { ANIMATION_NAMES, ICON_NAMES, MotionSceneSchema, MotionStoryboardSchema, SCENE_KINDS } from './storyboard/motion-storyboard.schema';
+export { ANIMATION_NAMES, ICON_NAMES, MotionSceneSchema, MotionStoryboardSchema, SCENE_EXITS, SCENE_KINDS, TITLE_STYLES } from './storyboard/motion-storyboard.schema';
 export type { IconName, MotionChip, MotionSceneKind, MotionScreen, MotionStoryboard, MotionStoryboardScene, MotionVisual, SceneOf } from './storyboard/motion-storyboard.schema';
 
 export { buildAutoStoryboardRequest } from './auto/build-auto-storyboard-request';
-export type { AutoStoryboardRequest } from './auto/build-auto-storyboard-request';
+export type { AutoStoryboardOptions, AutoStoryboardRequest } from './auto/build-auto-storyboard-request';
 export type { MeasuredBoxNotice } from './auto/brief-boxes';
 export { applyBriefBoxes, BOX_MATCH_TOLERANCE, checkStoryboardBoxes, listMeasuredBoxes } from './auto/brief-boxes';
 export { checkStoryboardAgainstBrief, enforceBrief } from './auto/check-storyboard-against-brief';
@@ -67,3 +86,15 @@ export { voiceProject } from './pipeline/voice-project';
 export type { VoicedLine, VoiceProjectOptions, VoiceProjectResult } from './pipeline/voice-project';
 export { HYPERFRAMES_VERSION, hyperframesInvocation } from './pipeline/hyperframes-invocation';
 export type { HyperframesInvocation, HyperframesInvocationInput } from './pipeline/hyperframes-invocation';
+export {
+  parseSfxBank,
+  pickSfxVariant,
+  SFX_BANK_DIRECTORY,
+  SFX_BANK_MANIFEST,
+  SFX_KINDS,
+  SfxBankSchema,
+  sfxBankDirectory,
+  sfxFilePath,
+  sfxOfKind,
+} from './sfx/sfx-bank';
+export type { SfxBank, SfxEntry, SfxKind } from './sfx/sfx-bank';

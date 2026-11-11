@@ -6,10 +6,11 @@ import type { MotionPipelinePorts } from '@video-maker/motion-graphics';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { createCallLog } from '../__fixtures__/call-log';
+import { createFakeObjectStorage } from '../__fixtures__/fake-object-storage';
 import { createFakeRenderApiDependencies } from '../__fixtures__/fake-render-api-dependencies';
 import { toErrorPayload } from '../errors/to-error-payload';
 
-const steps = vi.hoisted(() => ({ order: [] as string[], failAt: null as string | null, voiceOptions: null as Record<string, unknown> | null, renderOptions: null as Record<string, unknown> | null }));
+const steps = vi.hoisted(() => ({ order: [] as string[], failAt: null as string | null, voiceOptions: null as Record<string, unknown> | null, renderOptions: null as Record<string, unknown> | null, storyboardOptions: null as Record<string, unknown> | null }));
 const store = vi.hoisted(() => ({ files: new Map<string, string>(), copies: [] as string[][] }));
 
 vi.mock('@video-maker/motion-graphics', async (importOriginal) => {
@@ -23,8 +24,9 @@ vi.mock('@video-maker/motion-graphics', async (importOriginal) => {
   };
   return {
     ...original,
-    autoStoryboard: async (_ports: unknown, _brief: unknown, sourceDir: string) => {
+    autoStoryboard: async (_ports: unknown, _brief: unknown, sourceDir: string, _project: string, options: Record<string, unknown>) => {
       steps.order.push('autoStoryboard');
+      steps.storyboardOptions = options;
       store.files.set(`${sourceDir}/storyboard.json`, readFileSync(STORYBOARD_FIXTURE, 'utf8'));
       if (steps.failAt === 'autoStoryboard') {
         throw new original.MotionStudioError('AI_FAILED', 'agent down');
@@ -117,6 +119,7 @@ beforeEach(() => {
   steps.failAt = null;
   steps.voiceOptions = null;
   steps.renderOptions = null;
+  steps.storyboardOptions = null;
   store.files.clear();
   store.copies.length = 0;
   store.files.set('/media/promo/motion/brief.json', JSON.stringify(BRIEF));
@@ -142,6 +145,18 @@ describe('runMotionPipeline', () => {
       storyboard: { repaired: true, tokensIn: 1200, tokensOut: 300, costUsd: 0.42 },
     });
     expect(report.scenes).toBeGreaterThan(0);
+  });
+
+  it('tells the storyboard which tracks the last videos of the brand used and logs the one it picked', async () => {
+    const callLog = createCallLog();
+    const usage = { 'displayads/werq': '2026-11-01T00:00:00.000Z', 'displayads/loopster': '2026-11-03T00:00:00.000Z', 'otra/pulso': '2026-11-04T00:00:00.000Z' };
+    const storage = createFakeObjectStorage(callLog, { directories: ['/media'], files: [{ path: '/media/.music-usage.json', contents: JSON.stringify(usage) }] });
+    const deps = createFakeRenderApiDependencies(callLog, { storage, motionPorts: () => fakePorts() });
+
+    await runMotionPipeline({ project: PROJECT, phase: 'storyboard', output: 'video.mp4', takes: 5 }, deps, setup().observer);
+
+    expect(steps.storyboardOptions).toEqual({ recentTracks: ['loopster', 'werq'] });
+    expect(JSON.parse(await storage.readTextFile('/media/.music-usage.json'))).toMatchObject({ 'displayads/newer-wave': '2026-09-08T00:00:00.000Z', 'displayads/werq': '2026-11-01T00:00:00.000Z' });
   });
 
   it('carries the previous music volume over when the storyboard is regenerated', async () => {

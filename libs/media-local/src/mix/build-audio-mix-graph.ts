@@ -4,6 +4,8 @@ import { framesToMs, TimelineSchema } from '@video-maker/timeline-core';
 import type { LoudnessMeasurement } from '../ffmpeg/parse-loudnorm-json';
 import { UnresolvedAudioAssetError } from '../errors/unresolved-audio-asset-error';
 import { buildMusicBedChain } from './build-music-bed-chain';
+import { buildSfxChain } from './build-sfx-chain';
+import type { SfxMixCue } from './build-sfx-chain';
 import { buildVoiceChain } from './build-voice-chain';
 import { shiftTimelineAudioForBumpers } from './shift-timeline-audio-for-bumpers';
 import type { FilterChain, FilterGraph } from './filter-graph';
@@ -17,6 +19,7 @@ const AudioMixTimelineSchema = TimelineSchema.refine(
 export interface AudioMixGraphSpec {
   readonly timeline: Timeline;
   readonly voiceMeasuredByAssetId?: ReadonlyMap<AssetId, LoudnessMeasurement>;
+  readonly sfx?: readonly SfxMixCue[];
 }
 
 type AudioTrack = 'voice' | 'music';
@@ -115,14 +118,17 @@ export function buildAudioMixGraph(spec: AudioMixGraphSpec): FilterGraph {
       : formatFilterNumber(timeline.durationFrames / timeline.format.fps);
   const entries = collectAudioTrackEntries(timeline);
 
-  const inputs = entries.map((entry) => resolveAssetPath(entry, timeline));
-  const chains = entries.map((entry, index) =>
-    buildClipChain(entry, timeline, spec.voiceMeasuredByAssetId, audioStreamLabel(index)),
-  );
+  const sfx = spec.sfx ?? [];
+  const sfxLabels = sfx.map((_, index) => `sfx${index}`);
+  const inputs = [...entries.map((entry) => resolveAssetPath(entry, timeline)), ...sfx.map((cue) => cue.path)];
+  const chains = [
+    ...entries.map((entry, index) => buildClipChain(entry, timeline, spec.voiceMeasuredByAssetId, audioStreamLabel(index))),
+    ...sfx.map((cue, index) => buildSfxChain(cue, audioStreamLabel(entries.length + index), sfxLabels[index] ?? `sfx${index}`)),
+  ];
 
   const amixChain: FilterChain = {
-    inputLabels: entries.map((entry) => entry.label),
-    filters: buildAmixFilters(entries.length, padToSeconds),
+    inputLabels: [...entries.map((entry) => entry.label), ...sfxLabels],
+    filters: buildAmixFilters(entries.length + sfx.length, padToSeconds),
     outputLabels: ['mix'],
   };
 

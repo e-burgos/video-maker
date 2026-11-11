@@ -2,7 +2,8 @@ import { Children, isValidElement } from 'react';
 import type { ReactElement } from 'react';
 import { describe, expect, it } from 'vitest';
 import { Sequence } from 'remotion';
-import type { LogoBumper, Timeline } from '@video-maker/timeline-core';
+import type { BumperLook, LogoBumper, Timeline } from '@video-maker/timeline-core';
+import { BumperSfxTrack } from './bumper-sfx-track';
 import { LogoBumperScene } from './logo-bumper-scene';
 import { buildExampleTimeline } from '../__fixtures__/example-timeline';
 import { AudioTrack } from './audio-track';
@@ -293,16 +294,37 @@ describe('TimelineComposition — bumpers de logo (FIX-e-burgos-001-003)', () =>
     expect(sequencesOf(withBumpers({ intro: { ...BUMPER, enabled: false } }))).toHaveLength(0);
   });
 
-  it('la placa recibe el bumper, el formato y el src del logo de la Timeline', () => {
+  function sfxTrackOf(props: TimelineCompositionProps): ReactElement | undefined {
+    const tree = TimelineComposition(props);
+    if (!isValidElement(tree)) {
+      throw new Error('expected TimelineComposition to return an AbsoluteFill element');
+    }
+    return Children.toArray((tree.props as { children?: unknown }).children as never).find(
+      (child): child is ReactElement => isValidElement(child) && child.type === BumperSfxTrack,
+    );
+  }
+
+  it('la vista previa suena los efectos de los bumpers y el render muteado nunca los incluye', () => {
+    const cues = [{ src: '/sfx/whoosh-1.mp3', atMs: 0, durationMs: 600, volume: 0.4 }];
+    const withSfx = { ...withBumpers({ intro: BUMPER }), bumperSfx: cues };
+
+    expect(sfxTrackOf(withSfx)?.props).toMatchObject({ cues });
+    expect(sfxTrackOf({ ...withSfx, audio: 'muted' })).toBeUndefined();
+    expect(sfxTrackOf(withBumpers({ intro: BUMPER }))).toBeUndefined();
+  });
+
+  it('la placa recibe el look resuelto del bumper, el formato y el src del logo de la Timeline', () => {
     const intro = sequencesOf(withBumpers({ intro: BUMPER }))[0];
     const scene = childOf(intro) as ReactElement<{
-      bumper: LogoBumper;
+      look: BumperLook;
+      logoWidthRatio: number;
       logoSrc: string | null;
       durationInFrames: number;
     }>;
 
     expect(scene.type).toBe(LogoBumperScene);
-    expect(scene.props.bumper).toEqual(BUMPER);
+    expect(scene.props.look).toMatchObject({ background: 'solid', reveal: BUMPER.animation, baseColor: BUMPER.backgroundColor });
+    expect(scene.props.logoWidthRatio).toBe(BUMPER.logoWidthRatio);
     expect(scene.props.durationInFrames).toBe(INTRO_FRAMES);
     expect(scene.props.logoSrc).toBe('/example/broll.jpg');
   });

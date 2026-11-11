@@ -1,15 +1,15 @@
-import type { CommonsMusicResult } from './commons-music-search';
+import type { FreeMusicResult } from './brand-music-bank';
 
 export const MUSIC_SEARCH_CACHE_TTL_MS = 60 * 60 * 1000;
 
 export interface MusicSearchCache {
-  readonly store: (slug: string, results: readonly CommonsMusicResult[], nowMs: number) => void;
-  readonly resolve: (slug: string, resultId: string, nowMs: number) => CommonsMusicResult | null;
+  readonly store: (slug: string, results: readonly FreeMusicResult[], nowMs: number) => void;
+  readonly resolve: (slug: string, resultId: string, nowMs: number) => FreeMusicResult | null;
 }
 
 interface MusicSearchCacheRecord {
   readonly expiresAtMs: number;
-  readonly byResultId: ReadonlyMap<string, CommonsMusicResult>;
+  readonly byResultId: ReadonlyMap<string, FreeMusicResult>;
 }
 
 export function createMusicSearchCache(ttlMs: number = MUSIC_SEARCH_CACHE_TTL_MS): MusicSearchCache {

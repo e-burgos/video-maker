@@ -9,6 +9,7 @@ import { CommandFailedError } from '../errors/command-failed-error';
 import { FixtureCommandRunner } from '../runner/fixture-command-runner';
 import { DEFAULT_VOICE_TARGET } from './measure-loudness';
 import {
+  AAC_PROBE_SUFFIX,
   ENCODER_TRUE_PEAK_HEADROOM_DB,
   buildMasterNormalizationGraph,
   masterLoudnessTarget,
@@ -60,14 +61,23 @@ describe('needsMasterNormalization', () => {
 });
 
 describe('buildMasterNormalizationGraph', () => {
-  it('runs a second-pass linear loudnorm with the measured master values and resamples to 48k', () => {
+  it('applies one linear gain to the target loudness and catches peaks with an oversampled limiter, never a dynamic loudnorm', () => {
     const graph = buildMasterNormalizationGraph('/out/master.wav', DEFAULT_VOICE_TARGET, QUIET_MASTER);
 
     expect(graph.inputs).toEqual(['/out/master.wav']);
     expect(graph.chains[0]?.filters).toEqual([
-      'loudnorm=I=-14:TP=-1:LRA=11:measured_I=-18.14:measured_TP=-3.17:measured_LRA=9.00:measured_thresh=-28.50:offset=0.10:linear=true:print_format=json',
+      'volume=4.14dB',
+      'aresample=192000',
+      'alimiter=limit=0.8913:attack=1:release=60:level=false:latency=true',
       'aresample=48000',
     ]);
+    expect(graph.chains[0]?.filters.join(',')).not.toContain('loudnorm');
+  });
+
+  it('lowers the limiter ceiling with the true-peak target the retry asks for', () => {
+    const graph = buildMasterNormalizationGraph('/out/master.wav', { ...DEFAULT_VOICE_TARGET, truePeakDbtp: -3.56 }, QUIET_MASTER);
+
+    expect(graph.chains[0]?.filters[2]).toBe('alimiter=limit=0.6637:attack=1:release=60:level=false:latency=true');
   });
 
   it('never closes the chain with atrim', () => {
@@ -91,46 +101,78 @@ describe('normalizeMasterLoudness', () => {
     await rm(directory, { recursive: true, force: true });
   });
 
-  it('measures only and leaves the master untouched when it is already on target', async () => {
-    const runner = new FixtureCommandRunner([
-      { bin: 'ffmpeg', response: { stderr: loudnormJson(-14.2, -1.6), exitCode: 0 } },
-    ]);
-
-    const result = await normalizeMasterLoudness(masterPath, DEFAULT_VOICE_TARGET, runner);
-
-    expect(result.applied).toBe(false);
-    expect(runner.calls).toHaveLength(1);
-    expect(await readFile(masterPath, 'utf8')).toBe('original');
-  });
-
-  it('measures, normalizes into a temp file and replaces the master when it is 4 LU low', async () => {
-    const temporaryPath = `${masterPath}${MASTER_NORMALIZATION_TEMP_SUFFIX}`;
-    const runner = new FixtureCommandRunner([
-      {
-        bin: 'ffmpeg',
-        argsPattern: ['-f', 'null'],
-        response: { stderr: loudnormJson(-18.14, -3.17), exitCode: 0 },
-      },
+  function routes(masterLoudness: string, aacTruePeak: number, onNormalize?: () => void) {
+    return [
+      { bin: 'ffmpeg', argsPattern: [/\.aac-probe\.m4a$/u, 'null'], response: { stderr: loudnormJson(-14.1, aacTruePeak), exitCode: 0 } },
+      { bin: 'ffmpeg', argsPattern: ['-c:a', 'aac'], response: { stderr: '', exitCode: 0 } },
+      { bin: 'ffmpeg', argsPattern: ['-f', 'null'], response: { stderr: masterLoudness, exitCode: 0 } },
       {
         bin: 'ffmpeg',
         argsPattern: ['-filter_complex'],
         response: () => {
-          writeFileSync(temporaryPath, 'normalized');
+          writeFileSync(`${masterPath}${MASTER_NORMALIZATION_TEMP_SUFFIX}`, 'normalized');
+          onNormalize?.();
           return { stderr: '', exitCode: 0 };
         },
       },
-    ]);
+    ];
+  }
+
+  function normalizationCalls(runner: FixtureCommandRunner) {
+    return runner.calls.filter((call) => call.args.includes('-filter_complex'));
+  }
+
+  it('leaves the master untouched when it is on target and stays under the ceiling after the AAC encode', async () => {
+    const runner = new FixtureCommandRunner(routes(loudnormJson(-14.2, -1.6), -1.3));
 
     const result = await normalizeMasterLoudness(masterPath, DEFAULT_VOICE_TARGET, runner);
 
-    expect(result.applied).toBe(true);
+    expect(result).toMatchObject({ applied: false, truePeakRetried: false });
+    expect(runner.calls.map((call) => call.args.includes('aac'))).toEqual([false, true, false]);
+    expect(await readFile(masterPath, 'utf8')).toBe('original');
+    expect(existsSync(`${masterPath}${AAC_PROBE_SUFFIX}`)).toBe(false);
+  });
+
+  it('measures, normalizes into a temp file and replaces the master when it is 4 LU low', async () => {
+    const temporaryPath = `${masterPath}${MASTER_NORMALIZATION_TEMP_SUFFIX}`;
+    const runner = new FixtureCommandRunner(routes(loudnormJson(-18.14, -3.17), -1.4));
+
+    const result = await normalizeMasterLoudness(masterPath, DEFAULT_VOICE_TARGET, runner);
+
+    expect(result).toMatchObject({ applied: true, truePeakRetried: false });
     expect(result.measuredBefore.integratedLufs).toBe(-18.14);
-    expect(runner.calls).toHaveLength(2);
-    expect(runner.calls[1]?.args).toContain(masterPath);
-    expect(runner.calls[1]?.args.at(-1)).toBe(temporaryPath);
-    expect(runner.calls[1]?.args.join(' ')).toContain('measured_I=-18.14');
+    const [pass] = normalizationCalls(runner);
+    expect(pass?.args).toContain(masterPath);
+    expect(pass?.args.at(-1)).toBe(temporaryPath);
+    expect(pass?.args.join(' ')).toContain('volume=4.14dB');
+    expect(runner.calls.find((call) => call.args.includes('aac'))?.args).toContain(temporaryPath);
     expect(await readFile(masterPath, 'utf8')).toBe('normalized');
     expect(existsSync(temporaryPath)).toBe(false);
+  });
+
+  it('redoes the normalization once with the target lowered by what the AAC encode added plus a safety margin when it crosses -1 dBTP', async () => {
+    const runner = new FixtureCommandRunner(routes(loudnormJson(-18.14, -3.17), 0.06));
+
+    const result = await normalizeMasterLoudness(masterPath, DEFAULT_VOICE_TARGET, runner);
+
+    expect(result).toMatchObject({ applied: true, truePeakRetried: true });
+    const passes = normalizationCalls(runner);
+    expect(passes).toHaveLength(2);
+    expect(passes[0]?.args.join(' ')).toContain('limit=0.8414:');
+    expect(passes[1]?.args.join(' ')).toContain('limit=0.6637:');
+    expect(await readFile(masterPath, 'utf8')).toBe('normalized');
+  });
+
+  it('normalizes a master that was on target when only its AAC encode crosses the ceiling', async () => {
+    const runner = new FixtureCommandRunner(routes(loudnormJson(-14.2, -1.6), -0.5));
+
+    const result = await normalizeMasterLoudness(masterPath, DEFAULT_VOICE_TARGET, runner);
+
+    expect(result).toMatchObject({ applied: true, truePeakRetried: true });
+    const passes = normalizationCalls(runner);
+    expect(passes).toHaveLength(1);
+    expect(passes[0]?.args.join(' ')).toContain('limit=0.6998:');
+    expect(await readFile(masterPath, 'utf8')).toBe('normalized');
   });
 
   it('throws CommandFailedError and keeps the original master when the normalization pass fails', async () => {

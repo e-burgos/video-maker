@@ -464,11 +464,11 @@ describe('autoMontage — niveles del preset y logo (spec-014)', () => {
 
     const result = await run(fileSystem, { preset: 'hardware', seed: 0 });
 
-    expect(result.timeline.audioMix.music.baseGainDb).toBe(-4);
-    expect(result.timeline.audioMix.music.duckedGainDb).toBe(-12);
+    expect(result.timeline.audioMix.music.baseGainDb).toBe(-6);
+    expect(result.timeline.audioMix.music.duckedGainDb).toBe(-14);
     expect(result.timeline.audioMix.music.referenceLufs).toBe(-16);
-    expect(result.timeline.tracks.music[0]?.gainDb).toBe(-4);
-    expect(result.timeline.audioMix.automation.some((keyframe) => keyframe.gainDb === -12)).toBe(true);
+    expect(result.timeline.tracks.music[0]?.gainDb).toBe(-6);
+    expect(result.timeline.audioMix.automation.some((keyframe) => keyframe.gainDb === -14)).toBe(true);
     expect(result.timeline.audioMix.automation.some((keyframe) => keyframe.gainDb === -24)).toBe(false);
   });
 
@@ -477,8 +477,20 @@ describe('autoMontage — niveles del preset y logo (spec-014)', () => {
 
     const result = await run(fileSystem, { preset: 'software-demo', seed: 0 });
 
-    expect(result.timeline.audioMix.music.baseGainDb).toBe(-8);
-    expect(result.timeline.audioMix.music.duckedGainDb).toBe(-18);
+    expect(result.timeline.audioMix.music.baseGainDb).toBe(-10);
+    expect(result.timeline.audioMix.music.duckedGainDb).toBe(-20);
+  });
+
+  it('un montaje nuevo deja los bumpers listos para rotar con la semilla del video y los colores de la marca', async () => {
+    const plain = await run(buildFixtureFileSystem(), { preset: 'software-demo', seed: 4821 });
+    const branded = await run(buildFixtureFileSystem(), {
+      preset: 'software-demo',
+      seed: 7,
+      brand: { id: 'acme', captionTheme: plain.timeline.captionTheme as never, bumperStyle: { accentColor: '#ff0000', outroCaption: 'acme.test' } },
+    });
+
+    expect(plain.timeline.bumpers).toEqual({ style: { rotate: true, seed: 4821 } });
+    expect(branded.timeline.bumpers?.style).toEqual({ rotate: true, seed: 7, accentColor: '#ff0000', outroCaption: 'acme.test' });
   });
 
   it('un re-montaje conserva el logo y los bumpers que el usuario editó (FIX-e-burgos-001-003)', async () => {

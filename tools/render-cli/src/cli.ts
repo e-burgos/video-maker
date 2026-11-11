@@ -3,6 +3,7 @@ import type { MediaProject } from '@video-maker/auto-montage';
 
 import { parseCliArgs } from './args/parse-cli-args';
 import type { ParsedCommand } from './args/parse-cli-args';
+import { flashScanCommand } from './commands/flash-scan-command';
 import { ingestCommand } from './commands/ingest-command';
 import { planCommand } from './commands/plan-command';
 import { renderCommand } from './commands/render-command';
@@ -29,6 +30,8 @@ async function dispatch(parsed: ParsedCommand, project: MediaProject, deps: CliD
       return renderCommand(project, deps);
     case 'run':
       return runCommand(project, parsed.options, deps);
+    case 'flash-scan':
+      return flashScanCommand(project, deps);
   }
 }
 

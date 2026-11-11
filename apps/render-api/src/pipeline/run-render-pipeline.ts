@@ -1,7 +1,10 @@
+import { resolveMediaProject } from '@video-maker/auto-montage';
 import type { Timeline } from '@video-maker/timeline-core';
 
-import type { RenderApiDependencies } from '../deps/render-api-dependencies';
+import type { MixedSfxCredit, RenderApiDependencies } from '../deps/render-api-dependencies';
 import { translateEngineError } from '../errors/translate-engine-error';
+import { appendMediaCreditsOnce } from '../music/project-credits';
+import type { MediaCreditEntry } from '../music/project-credits';
 import type { RenderPipelineStage } from '../errors/render-api-error';
 import { RenderPipelineCanceledError } from './render-pipeline-observer';
 import type { RenderPipelineObserver } from './render-pipeline-observer';
@@ -59,6 +62,25 @@ async function runStage<T>(
   }
 }
 
+const SFX_CREDIT_PATH_PREFIX = 'sfx-bank/';
+
+async function creditAttributedSfx(deps: RenderApiDependencies, projectRoot: string, credits: readonly MixedSfxCredit[]): Promise<void> {
+  const attributed: MediaCreditEntry[] = credits
+    .filter((credit) => credit.license.startsWith('CC BY'))
+    .map((credit) => ({
+      kind: 'sfx',
+      path: `${SFX_CREDIT_PATH_PREFIX}${credit.file}`,
+      title: credit.title,
+      author: credit.author,
+      license: credit.license,
+      sourceUrl: credit.sourceUrl,
+      importedAt: deps.clock.nowIso(),
+    }));
+  if (attributed.length > 0) {
+    await appendMediaCreditsOnce(deps.storage, resolveMediaProject(projectRoot), attributed);
+  }
+}
+
 function checkpoint(observer: RenderPipelineObserver | undefined, stage: RenderPipelineStage): void {
   if (observer?.cancellationRequested() === true) {
     throw new RenderPipelineCanceledError(stage);
@@ -93,13 +115,14 @@ export async function runRenderPipeline(
 
   checkpoint(observer, 'mix');
   observer?.stageStarted('mix');
-  await runStage('mix', paths.masterAudio.resource, () =>
+  const mixed = await runStage('mix', paths.masterAudio.resource, () =>
     deps.mixTimelineAudio({
       timeline: request.timeline,
       outPath: paths.masterAudio.path,
       projectRoot: paths.publicDir,
     }),
   );
+  await creditAttributedSfx(deps, request.projectRoot, mixed.sfxCredits ?? []);
 
   checkpoint(observer, 'mux');
   observer?.stageStarted('mux');

@@ -10,6 +10,8 @@ import {
   ReferenceBriefSchema,
   ReviewReportSchema,
   SafeZoneSchema,
+  MAX_TEXT_OVERLAYS,
+  TextOverlaySchema,
   TimelineBumpersSchema,
   TimelineSchema,
   VisualReviewDraftSchema,
@@ -414,7 +416,7 @@ const PutTimelineOutputSchema = z.strictObject({
   saved: z.literal(true),
 });
 
-export const PATCH_TIMELINE_SECTIONS = ['logo', 'bumpers', 'audioMix', 'captionStyle', 'safeZone', 'music'] as const;
+export const PATCH_TIMELINE_SECTIONS = ['logo', 'bumpers', 'audioMix', 'captionStyle', 'safeZone', 'music', 'textOverlays'] as const;
 export type PatchTimelineSection = (typeof PATCH_TIMELINE_SECTIONS)[number];
 const PatchTimelineSectionSchema = z.enum(PATCH_TIMELINE_SECTIONS);
 
@@ -426,6 +428,12 @@ const PatchTimelineInputSchema = z
     captionStyle: TimelineCaptionStyleSchema.nullable().optional(),
     safeZone: SafeZoneSchema.nullable().optional(),
     music: z.array(AudioClipSchema).optional(),
+    textOverlays: z
+      .array(TextOverlaySchema)
+      .max(MAX_TEXT_OVERLAYS)
+      .nullable()
+      .describe('The whole list of on-screen texts (lower thirds, chapter titles, kinetic phrases); null removes them all.')
+      .optional(),
   })
   .refine(
     (value) => PATCH_TIMELINE_SECTIONS.some((section) => value[section] !== undefined),
@@ -453,6 +461,7 @@ const SearchFreeMusicOutputSchema = z.strictObject({
       license: z.string(),
       author: z.string(),
       pageUrl: z.string(),
+      source: z.enum(['brand-bank', 'openverse', 'commons']).optional(),
     }),
   ),
 });
@@ -837,22 +846,23 @@ export const STUDIO_TOOLS: Readonly<Record<StudioToolName, StudioToolDefinition>
   patch_timeline: {
     description:
       'Replace only the given sections of the already saved timeline — logo, bumpers, audioMix, ' +
-      'captionStyle, safeZone and/or the music track — without touching captions, voice or any other word. ' +
+      'captionStyle, safeZone, the music track and/or the textOverlays (lower thirds, chapter titles, kinetic ' +
+      'phrases) — without touching captions, voice or any other word. ' +
       'Reads the current timeline, replaces just those sections, validates the result and saves it. Use this ' +
-      'for a logo, an intro/outro plate, the music level or the caption style instead of put_timeline, which ' +
+      'for a logo, an intro/outro plate, the music level, the caption style or on-screen titles instead of put_timeline, which ' +
       'forces you to re-send every caption word. Fails if the project has no timeline yet.',
     input: PatchTimelineInputSchema,
     output: PatchTimelineOutputSchema,
   },
   search_free_music: {
     description:
-      'Search Wikimedia Commons for freely licensed music matching a mood, up to maxResults results. Use the returned resultId with import_music.',
+      "Search freely licensed music matching a mood, up to maxResults results: first the music bank of the project's brand (source brand-bank, already tagged for tutorial, product, vertical or institutional videos and ordered so the least recently used come first), then Openverse (Jamendo music under CC BY, CC0 or public domain; never share-alike) and last Wikimedia Commons. Put the kind of video in the mood (e.g. \"calm tutorial\"). Use the returned resultId with import_music.",
     input: SearchFreeMusicInputSchema,
     output: SearchFreeMusicOutputSchema,
   },
   import_music: {
     description:
-      'Download a previously searched music result into raw/audio/ and record its credit in work/credits.json.',
+      'Bring a previously searched music result into raw/audio/ and record its credit in work/credits.json.',
     input: ImportMusicInputSchema,
     output: ImportMusicOutputSchema,
   },

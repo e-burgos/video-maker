@@ -14,6 +14,7 @@ model: sonnet
 | -------------------------- | ------------------------------------------- | -------------------------------------------------------------------------------------------------------- |
 | `sdd-implementor-front`    | `sdd/skills/sdd-implementor-front/SKILL.md` | Guía completa del rol: protocolo task-by-task, verificaciones, actualización de components.json          |
 | `generate-*` (según stack) | `sdd/skills/generate-*/SKILL.md`            | Elegir la skill del stack frontend del subproyecto (`constitution.md`): `generate-react-component`, etc. |
+| `crafted-motion`           | `sdd/skills/crafted-motion/SKILL.md`        | Si la task toca motion, animaciones o dirección visual: capas, tokens, recetas, transiciones de pasos y QA |
 | `sdd-data-schemas`         | `sdd/skills/sdd-data-schemas/SKILL.md`      | Schema de components.json y del tasks.json per-cycle para actualizar al finalizar cada task              |
 
 ---
@@ -62,6 +63,13 @@ Antes de escribir cualquier código (fuente canónica: `sdd/dual-harness/rules/s
 ```bash
 pnpm sdd:gate <spec-id> cycle-[XX]   # GATE B — lee el flow del ciclo y exige SUS documentos
 ```
+
+Corré el GATE B en **la sesión que va a implementar**: al dar `APPROVED` ata esa sesión al ciclo
+(línea `SDD-BIND`). Para un fix: `pnpm sdd:use FIX-…`. Con varias specs en paralelo, sin atadura
+el mod rechaza la edición (`sdd-gates.md` § Sesiones paralelas).
+Si una edición vuelve con `SDD reserva: …`, ese archivo lo tiene otra sesión: no lo rodees con
+comandos de shell; seguí con otra task o esperá. Si te llega un pedido de otra sesión por un
+archivo tuyo y ya no lo vas a tocar, liberalo con `pnpm sdd:release <archivo>`.
 
 Además de `APPROVED`, verificar:
 

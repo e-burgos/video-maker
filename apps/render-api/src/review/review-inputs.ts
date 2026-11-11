@@ -14,6 +14,11 @@ export interface SfxLevel {
   readonly gainDb: number;
 }
 
+export interface SfxEvent {
+  readonly sound: string;
+  readonly startSec: number;
+}
+
 export interface VoiceSegmentLevels extends SecondsRange {
   readonly voiceLufs: number | null;
   readonly musicLufs: number | null;
@@ -78,6 +83,7 @@ export interface ReviewInputs {
   readonly captions: readonly ReviewCaption[];
   readonly frame: ReviewFrame | null;
   readonly captionLayout?: CaptionLayoutFacts | null;
+  readonly sfxEvents?: readonly SfxEvent[];
   readonly blackSegments: readonly SecondsRange[];
   readonly frozenSegments: readonly SecondsRange[];
   readonly silences: readonly SecondsRange[];

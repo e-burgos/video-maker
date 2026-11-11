@@ -15,6 +15,10 @@ export { LogoOverlay } from './components/logo-overlay';
 export type { LogoOverlayProps } from './components/logo-overlay';
 export { LogoBumperScene } from './components/logo-bumper-scene';
 export type { LogoBumperSceneProps } from './components/logo-bumper-scene';
+export { TextOverlayTrack } from './components/text-overlays/text-overlay-track';
+export type { TextOverlayTrackProps } from './components/text-overlays/text-overlay-track';
+export { textOverlayLayout } from './helpers/text-overlay-layout';
+export type { TextOverlayLayout } from './helpers/text-overlay-layout';
 export {
   LOGO_BUMPER_ENTER_MS,
   LOGO_BUMPER_EXIT_MS,
@@ -111,3 +115,5 @@ export type { CaptionBoxSource, CaptionClipPlan } from './helpers/caption-clip-p
 
 export { KineticCaptions } from './components/kinetic-captions';
 export type { KineticCaptionsProps } from './components/kinetic-captions';
+export { BumperSfxTrack } from './components/bumper-sfx-track';
+export type { PreviewSfxCue } from './components/bumper-sfx-track';

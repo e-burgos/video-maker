@@ -41,6 +41,7 @@ function systemPrompt(kinds: readonly MotionSceneKind[]): string {
     '- The `vo` of every scene is the exact voice-over line, written in the language of the script. Split or rephrase the script so it sounds natural when spoken.',
     '- Write every number in `vo` as words (never digits). Say the brand with its spoken name and introduce it and keep talking after it, preferably "Esto es <spoken name>: …": the brand name is never the first words of a line, never its last words and never a line on its own, because the voice engine garbles it without context on both sides.',
     `- Use between ${MIN_SCENES} and ${MAX_SCENES} scenes. Start with a \`hook\` and finish with a \`cta\`. Use \`brand-reveal\` once, with \`anchor: "drop"\` when the chosen music track has a drop.`,
+    '- Variety: never put two scenes of the same `kind` in a row (they enter with the same animation). Leave `exit` out so the studio rotates how scenes leave; never set the same `exit` on two scenes in a row.',
     '- Every `cue` must be the beginning of a word that appears in the `vo` of the same scene: the element shows up when the voice says it.',
     '- Use only the images listed in the brief (as images/<file>) or the brand images (as brand:<key>), and only the devices and music tracks of the brand. Never invent files.',
     '- Direct the voice with the optional `direction` of a scene only where the line asks for it: `pace` slow for a claim to land or fast for a list, `energy` lively for the hook and the cta or calm for reassurance, `pauseAfterMs` (0-2000) for a breath before a reveal, `emphasis` with words that appear in that same `vo`. Most lines need none: leave `direction` out of neutral lines, and never give every scene the same direction.',
@@ -62,7 +63,7 @@ function brandSection(brand: BrandManifest): string {
     const caption = brandImageCaption(brand, key);
     return caption === undefined ? `brand:${key}` : `brand:${key} (${caption})`;
   });
-  const music = brand.music.map((track) => `${track.id} (${track.mood}, ${track.bpm} BPM${track.drop === undefined ? ', no drop' : `, drop at ${track.drop}s`})`);
+  const music = brand.music.map((track) => `${track.id} (${track.mood}, ${track.bpm} BPM${track.drop === undefined ? ', no drop' : `, drop at ${track.drop}s`}${track.videoTypes === undefined ? '' : `, for ${track.videoTypes.join('/')} videos`})`);
   return [
     'BRAND',
     `name: ${brand.name}`,
@@ -98,12 +99,21 @@ function boxLines(boxes: MotionBrief['images'][number]['boxes']): string[] {
   ];
 }
 
-function briefSection(brief: MotionBrief, brand: BrandManifest): string {
+function autoMusicInstruction(brief: MotionBrief, brand: BrandManifest, recentTracks: readonly string[]): string {
+  const typed = brand.music.some((track) => track.videoTypes !== undefined);
+  const fit = typed
+    ? `choose a track made for this kind of video (${brief.format === '9:16' ? 'a 9:16 video is vertical' : 'product for a product or feature video, tutorial for a step-by-step walkthrough, institutional for a brand or company video'}) whose mood fits the script`
+    : 'choose the track that fits the mood of the script';
+  const recent = recentTracks.filter((id) => brand.music.some((track) => track.id === id));
+  return recent.length === 0 ? fit : `${fit}; the last videos used ${recent.join(', ')}: pick a different one unless none other fits`;
+}
+
+function briefSection(brief: MotionBrief, brand: BrandManifest, recentTracks: readonly string[]): string {
   const silent = brief.music === null || (brief.music === 'auto' && brand.music.length === 0);
   const musicInstruction = silent
     ? 'no music (use music: null)'
     : brief.music === 'auto'
-      ? 'choose the track that fits the mood of the script'
+      ? autoMusicInstruction(brief, brand, recentTracks)
       : `use the track "${brief.music}"`;
   const images = brief.images.flatMap((image) => [`- ${briefImageRef(image.file)}: ${image.caption}`, ...boxLines(image.boxes)]);
   return [
@@ -118,10 +128,14 @@ function briefSection(brief: MotionBrief, brand: BrandManifest): string {
   ].join('\n');
 }
 
-export function buildAutoStoryboardRequest(brief: MotionBrief, brand: BrandManifest): AutoStoryboardRequest {
+export interface AutoStoryboardOptions {
+  readonly recentTracks?: readonly string[];
+}
+
+export function buildAutoStoryboardRequest(brief: MotionBrief, brand: BrandManifest, options: AutoStoryboardOptions = {}): AutoStoryboardRequest {
   return {
     systemPrompt: systemPrompt(offeredSceneKinds(brief, brand)),
-    userPrompt: [brandSection(brand), assetLimitsSection(brief, brand).join('\n'), briefSection(brief, brand), `SCRIPT\n${brief.script}`]
+    userPrompt: [brandSection(brand), assetLimitsSection(brief, brand).join('\n'), briefSection(brief, brand, options.recentTracks ?? []), `SCRIPT\n${brief.script}`]
       .filter((section) => section !== '')
       .join('\n\n'),
     jsonSchema: toAgentJsonSchema(motionStoryboardJsonSchema()),

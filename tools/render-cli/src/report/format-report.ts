@@ -1,4 +1,4 @@
-import type { CliReport, IngestReport, PlanReport, RenderReport } from './cli-report';
+import type { CliReport, FlashScanReport, FlashScanSegment, IngestReport, PlanReport, RenderReport } from './cli-report';
 
 function formatIngestReport(report: IngestReport): string[] {
   const assetsLine = report.assetCounts.map((entry) => `${entry.role}=${entry.count}`).join(' ');
@@ -76,6 +76,20 @@ function formatRenderReport(report: RenderReport): string[] {
   ];
 }
 
+function formatSegment(segment: FlashScanSegment): string {
+  return `${segment.startSec.toFixed(2)}–${segment.endSec.toFixed(2)} s (${segment.durationSec.toFixed(2)} s)`;
+}
+
+function formatFlashScanReport(report: FlashScanReport): readonly string[] {
+  return [
+    `${report.flashes.length === 0 ? 'ok' : 'FLASHES'} [flash-scan] ${report.videoPath}`,
+    `  flashes (< ${report.maxFlashSec} s): ${report.flashes.length}`,
+    ...report.flashes.map((segment) => `    ${formatSegment(segment)}`),
+    `  bright stretches (not flashes): ${report.brightStretches.length}`,
+    ...report.brightStretches.map((segment) => `    ${formatSegment(segment)}`),
+  ];
+}
+
 export function formatReport(report: CliReport): readonly string[] {
   switch (report.kind) {
     case 'ingest':
@@ -84,6 +98,8 @@ export function formatReport(report: CliReport): readonly string[] {
       return formatPlanReport(report);
     case 'render':
       return formatRenderReport(report);
+    case 'flash-scan':
+      return formatFlashScanReport(report);
     case 'run':
       return [
         ...formatReport(report.ingest),

@@ -1,5 +1,6 @@
 import type { FetchRemotePort } from '../deps/render-api-dependencies';
 import { collectBytes, isFreeCommercialLicense, stableResultId, stripHtml } from '../media-search/commons-shared';
+import { isPublishableMusicLicense } from './music-license';
 
 export { isFreeCommercialLicense, stripHtml };
 
@@ -9,6 +10,8 @@ export const COMMONS_SEARCH_TIMEOUT_MS = 10_000;
 export const MAX_COMMONS_RESPONSE_BYTES = 5 * 1024 * 1024;
 export const MAX_COMMONS_FETCH_LIMIT = 50;
 export const COMMONS_FETCH_LIMIT_MULTIPLIER = 4;
+export const MIN_COMMONS_MUSIC_DURATION_SEC = 30;
+export const MAX_COMMONS_MUSIC_DURATION_SEC = 600;
 
 export const ALLOWED_AUDIO_MIME_TYPES = [
   'audio/mpeg',
@@ -65,6 +68,10 @@ function metadataValue(extmetadata: Readonly<Record<string, CommonsExtMetadataFi
   return typeof field?.value === 'string' ? field.value : undefined;
 }
 
+function isMusicBedLength(durationSeconds: number): boolean {
+  return durationSeconds >= MIN_COMMONS_MUSIC_DURATION_SEC && durationSeconds <= MAX_COMMONS_MUSIC_DURATION_SEC;
+}
+
 function parseCommonsPage(page: CommonsPage): CommonsMusicResult | null {
   const fileTitle = typeof page.title === 'string' ? page.title : null;
   const imageInfo = page.imageinfo?.[0];
@@ -81,12 +88,16 @@ function parseCommonsPage(page: CommonsPage): CommonsMusicResult | null {
     return null;
   }
 
+  if (!isMusicBedLength(durationSeconds)) {
+    return null;
+  }
+
   if (!(ALLOWED_AUDIO_MIME_TYPES as readonly string[]).includes(mime)) {
     return null;
   }
 
   const license = metadataValue(imageInfo.extmetadata, 'LicenseShortName');
-  if (!isFreeCommercialLicense(license)) {
+  if (!isPublishableMusicLicense(license)) {
     return null;
   }
 
@@ -124,12 +135,16 @@ export function parseCommonsSearchPayload(payload: unknown): readonly CommonsMus
   return results;
 }
 
+function musicSearchTerms(mood: string): string {
+  return /\bmusic\b/iu.test(mood) ? mood : `${mood} music`;
+}
+
 export function buildCommonsSearchUrl(mood: string, fetchLimit: number): string {
   const url = new URL(COMMONS_API_URL);
   url.searchParams.set('action', 'query');
   url.searchParams.set('generator', 'search');
   url.searchParams.set('gsrnamespace', '6');
-  url.searchParams.set('gsrsearch', `${mood} filetype:audio`);
+  url.searchParams.set('gsrsearch', `${musicSearchTerms(mood)} filetype:audio`);
   url.searchParams.set('gsrlimit', String(fetchLimit));
   url.searchParams.set('prop', 'imageinfo');
   url.searchParams.set('iiprop', 'url|size|mime|extmetadata');

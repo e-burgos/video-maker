@@ -71,4 +71,18 @@ export interface RunReport {
   readonly render: RenderReport;
 }
 
-export type CliReport = IngestReport | PlanReport | RenderReport | RunReport;
+export interface FlashScanSegment {
+  readonly startSec: number;
+  readonly endSec: number;
+  readonly durationSec: number;
+}
+
+export interface FlashScanReport {
+  readonly kind: 'flash-scan';
+  readonly videoPath: string;
+  readonly maxFlashSec: number;
+  readonly flashes: readonly FlashScanSegment[];
+  readonly brightStretches: readonly FlashScanSegment[];
+}
+
+export type CliReport = IngestReport | PlanReport | RenderReport | RunReport | FlashScanReport;

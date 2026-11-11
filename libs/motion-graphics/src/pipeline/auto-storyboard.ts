@@ -1,5 +1,6 @@
 import { generateMotionStoryboard } from '../auto/generate-motion-storyboard';
 import type { AskUsage } from '../auto/generate-motion-storyboard';
+import type { AutoStoryboardOptions } from '../auto/build-auto-storyboard-request';
 import type { MotionBrief } from '../auto/motion-brief';
 import { composeFromStoryboard } from './compose-from-storyboard';
 import { joinPath } from './join-path';
@@ -12,9 +13,15 @@ export interface AutoStoryboardResult {
   usage: AskUsage;
 }
 
-export async function autoStoryboard(ports: MotionPipelinePorts, brief: MotionBrief, sourceDir: string, project: string): Promise<AutoStoryboardResult> {
+export async function autoStoryboard(
+  ports: MotionPipelinePorts,
+  brief: MotionBrief,
+  sourceDir: string,
+  project: string,
+  options: AutoStoryboardOptions = {},
+): Promise<AutoStoryboardResult> {
   const brand = await readBrand(ports, brief.brand);
-  const generated = await generateMotionStoryboard(ports.askAgent, brief, brand);
+  const generated = await generateMotionStoryboard(ports.askAgent, brief, brand, options);
   await ports.writeText(joinPath(project, 'storyboard.json'), toJson(generated.storyboard, 2));
   const composeReport = await composeFromStoryboard(ports, generated.storyboard, sourceDir, project);
   const { inputTokens, outputTokens, costUsd } = generated.usage;

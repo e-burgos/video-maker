@@ -12,9 +12,9 @@ const timeline = {
 describe('buildMotionLevelPlans', () => {
   it('gives the effect the automated gain instead of its track volume while it overlaps the voice', () => {
     const automation = { version: 1, lanes: [{ target: 'volume', points: [{ t: 0, v: 1 }, { t: 0.8, v: 0.03 }, { t: 2, v: 0.03 }] }] };
-    const html = `<audio id="sfx-impact" src="assets/runtime/sfx/impact-bass-1.mp3" data-start="10" data-duration="2" data-volume="0.8" data-automation='${JSON.stringify(automation)}'></audio>`;
+    const html = `<audio id="sfx-impact" src="assets/sfx-bank/impact-1.mp3" data-start="10" data-duration="2" data-volume="0.8" data-automation='${JSON.stringify(automation)}'></audio>`;
     const [plan] = buildMotionLevelPlans(timeline, '/w', true, parseMotionSfxCues(html));
-    const gainDb = plan?.sfx[0]?.gainDb ?? 0;
+    const gainDb = plan?.sfx?.[0]?.gainDb ?? 0;
     expect(gainDb).toBeCloseTo(20 * Math.log10(0.8 * 0.03), 0);
   });
 

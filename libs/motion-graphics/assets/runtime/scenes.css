@@ -375,3 +375,5 @@ body { margin: 0; background: var(--mg-bg); color: var(--mg-text); font-family: 
 .mg-anim-editor .pill { font-family: var(--mg-font-mono); font-size: 26px; padding: 10px 22px; border-radius: 999px; }
 .mg-anim-editor .pill.draft { background: rgba(255,255,255,0.1); color: var(--mg-text-2); }
 .mg-anim-editor .pill.live { position: absolute; left: 0; background: var(--mg-ok); color: #052e16; opacity: 0; }
+.mg-h .mg-split-char, .mg-h .mg-split-word { will-change: transform, opacity; }
+.mg-grad .mg-split-char, .mg-grad .mg-split-word { background: var(--mg-accent-grad-text); -webkit-background-clip: text; background-clip: text; color: transparent; }

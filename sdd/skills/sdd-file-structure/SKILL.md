@@ -23,7 +23,7 @@ description: >
 sdd/
 ├── global.json                    ← Estado general del proyecto (fuente de verdad — solo specs mergeadas a master)
 ├── schema.json                    ← Tablas de BD definidas hasta el momento
-├── schemas/                       ← JSON Schemas estrictos de TODOS los registros (fuente de verdad de máquina)
+├── schemas/                       ← JSON Schemas estrictos de TODOS los registros (fuente de verdad de máquina; incluye session-binding, file-lease y session-request: ataduras, reservas y buzón locales de sesiones)
 ├── api.json                       ← Endpoints implementados hasta el momento
 ├── components.json                ← Componentes frontend creados
 ├── tasks.json                     ← ÍNDICE de tasks (generado — canónico: cycles/cycle-XX/tasks.json)
@@ -107,6 +107,9 @@ sdd/
 │   │   └── SKILL.md
 │   ├── generate-react-component/
 │   │   └── SKILL.md
+│   ├── crafted-motion/
+│   │   ├── SKILL.md
+│   │   └── references/
 │   ├── generate-api-contract/
 │   │   └── SKILL.md
 │   ├── generate-nestjs-module/
@@ -745,6 +748,7 @@ Manifest **generado** que enumera agents, skills, prompts y schemas para el viso
 | Specs registradas                   | `sdd/specs/index.json`                              |
 | Crear API Spring Boot               | `sdd/skills/generate-springboot-api/SKILL.md`       |
 | Crear componente React              | `sdd/skills/generate-react-component/SKILL.md`      |
+| Motion / animaciones / dirección visual | `sdd/skills/crafted-motion/SKILL.md`            |
 | Ver visor SDD en vivo (sin build)   | `pnpm sdd:docs` → `sdd/docs/`                       |
 
 ---

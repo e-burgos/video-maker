@@ -43,6 +43,25 @@ describe('composeStoryboard', () => {
     expect(template).not.toContain('{{music_credit}}');
   });
 
+  it('gives every scene but the last its own data-exit, never the same twice in a row', () => {
+    const { template } = composeStoryboard(base, testBrand);
+    const exits = [...template.matchAll(/data-scene="([^"]+)"[^>]*?data-exit="([^"]+)"/gu)].map((m) => [m[1], m[2]]);
+
+    expect(exits.map(([id]) => id)).toEqual(['hook', 'reveal', 'gallery']);
+    expect(template).not.toMatch(/data-scene="cta"[^>]*data-exit/u);
+    exits.slice(1).forEach(([, exit], i) => expect(exit).not.toBe(exits[i]?.[1]));
+  });
+
+  it('loads SplitText after gsap and gives every scene a title style, never one of the two before', () => {
+    const { template } = composeStoryboard(base, testBrand);
+    const styles = [...template.matchAll(/data-scene="[^"]+"[^>]*?data-title-style="([^"]+)"/gu)].map((m) => m[1]);
+
+    expect(template.indexOf('gsap.min.js')).toBeLessThan(template.indexOf('SplitText.min.js'));
+    expect(template.indexOf('SplitText.min.js')).toBeLessThan(template.indexOf('motion-runtime.js'));
+    expect(styles).toHaveLength(base.scenes.length);
+    styles.forEach((style, i) => expect(styles.slice(Math.max(0, i - 2), i)).not.toContain(style));
+  });
+
   it('carries the music mode and floor into the script and omits them for the default bed', () => {
     const { script: bed } = composeStoryboard(base, testBrand);
     expect(bed.music).not.toHaveProperty('mode');
@@ -65,7 +84,7 @@ describe('composeStoryboard', () => {
     expect(script.scenes[1]).toMatchObject({ id: 'reveal', anchor: 12.5 });
     expect(script.noWhooshOn).toEqual(['reveal']);
     expect(script.sfx).toEqual([{ id: 'riser', scene: 'reveal', offset: -3.4 }]);
-    expect(musicSource).toBe('assets/brand/music/Beat Song.mp3');
+    expect(musicSource).toBe('music/Beat Song.mp3');
   });
 
   it('carries minSec into the script only on the scenes that set it', () => {

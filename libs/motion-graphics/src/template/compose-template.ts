@@ -1,10 +1,14 @@
+import { IMPACT_DURATION_SEC } from '../compose/impact-sfx';
 import { MotionStudioError } from '../errors/motion-studio-error';
+import { whooshSceneIds } from '../sfx/motion-sfx-picks';
+import type { MotionSfxPicks } from '../sfx/motion-sfx-picks';
 import type { MotionScript, MotionSfx } from '../script/motion-script';
 import { MUSIC_TRACK_VOLUME } from '../timeline/music-levels';
 import { normalizeWords } from '../voice/intelligibility-score';
 import type { MotionTimeline, SceneWords } from './motion-timeline';
 
 export const WHOOSH_LEAD = 0.28;
+const WHOOSH_VOLUME = 0.35;
 const PLACEHOLDER = /\{\{([a-z_:0-9-]+)\}\}/gu;
 
 export const MOTION_MUSIC_TRACK_VOLUME = MUSIC_TRACK_VOLUME;
@@ -33,12 +37,31 @@ function voiceTracks(timeline: MotionTimeline): string {
     .join('\n      ');
 }
 
-function whooshTracks(timeline: MotionTimeline, script: MotionScript): string {
-  return timeline.scenes
-    .slice(1)
-    .filter((s) => !script.noWhooshOn.includes(s.id))
-    .map((s) => `<audio id="sfx-whoosh-${s.id}" src="assets/runtime/sfx/whoosh.mp3" data-start="${round(Math.max(0, s.start - WHOOSH_LEAD))}" data-duration="0.57" data-track-index="13" data-volume="0.35"></audio>`)
+function whooshTracks(timeline: MotionTimeline, script: MotionScript, sfx: MotionSfxPicks): string {
+  return whooshSceneIds(timeline, script)
+    .flatMap((id) => {
+      const scene = timeline.scenes.find((s) => s.id === id);
+      const pick = sfx.whooshByScene.get(id);
+      return scene === undefined || pick === undefined
+        ? []
+        : [`<audio id="sfx-whoosh-${id}" src="${pick.src}" data-start="${round(Math.max(0, scene.start - WHOOSH_LEAD))}" data-duration="${round(pick.durationSec)}" data-track-index="13" data-volume="${WHOOSH_VOLUME}"></audio>`];
+    })
     .join('\n      ');
+}
+
+function withAccentTiming(script: MotionScript, sfx: MotionSfxPicks): MotionScript {
+  const riser = sfx.accents.riser;
+  return riser === undefined ? script : { ...script, sfx: script.sfx.map((cue) => (cue.id === 'riser' ? { ...cue, offset: -round(riser.entry.peakMs / 1000) } : cue)) };
+}
+
+function accentDurationSec(key: string, durationSec: number): number {
+  return key === 'impact' ? Math.min(IMPACT_DURATION_SEC, durationSec) : durationSec;
+}
+
+function accentValues(sfx: MotionSfxPicks): Array<[string, string]> {
+  return Object.entries(sfx.accents).flatMap(([key, pick]): Array<[string, string]> =>
+    pick === undefined ? [] : [[`sfx_src:${key}`, pick.src], [`sfx_dur:${key}`, String(round(accentDurationSec(key, pick.durationSec)))]],
+  );
 }
 
 function withSceneText(timeline: MotionTimeline, script: MotionScript): MotionTimeline {
@@ -51,11 +74,13 @@ function musicTrack(timeline: MotionTimeline, script: MotionScript): string {
   return `<audio id="music" src="assets/audio/music.wav" data-start="0" data-duration="${timeline.duration}" data-track-index="10" data-volume="${MOTION_MUSIC_TRACK_VOLUME}" data-automation='${JSON.stringify(timeline.musicAutomation)}'></audio>`;
 }
 
-export function templateValues(script: MotionScript, timeline: MotionTimeline, words: SceneWords): Map<string, string> {
+export function templateValues(rawScript: MotionScript, timeline: MotionTimeline, words: SceneWords, sfx: MotionSfxPicks): Map<string, string> {
+  const script = withAccentTiming(rawScript, sfx);
   const values = new Map<string, string>([
     ['duration', String(timeline.duration)],
     ['voice_tracks', voiceTracks(timeline)],
-    ['whoosh_tracks', whooshTracks(timeline, script)],
+    ['whoosh_tracks', whooshTracks(timeline, script, sfx)],
+    ...accentValues(sfx),
     ['music_automation', JSON.stringify(timeline.musicAutomation)],
     ['music_credit', timeline.musicCredit],
     ['music_track', musicTrack(timeline, script)],
@@ -70,8 +95,8 @@ export function templateValues(script: MotionScript, timeline: MotionTimeline, w
   return values;
 }
 
-export function composeTemplate(template: string, script: MotionScript, timeline: MotionTimeline, words: SceneWords): string {
-  const values = templateValues(script, timeline, words);
+export function composeTemplate(template: string, script: MotionScript, timeline: MotionTimeline, words: SceneWords, sfx: MotionSfxPicks): string {
+  const values = templateValues(script, timeline, words, sfx);
   return template.replace(PLACEHOLDER, (_, key: string) => {
     const value = values.get(key);
     if (value === undefined) throw new MotionStudioError('TEMPLATE_VALUE_MISSING', `template placeholder {{${key}}} has no value`);

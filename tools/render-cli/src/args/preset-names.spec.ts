@@ -10,8 +10,8 @@ describe('PRESET_NAMES', () => {
 });
 
 describe('COMMAND_NAMES', () => {
-  it('lists the four commands in the fixed order used by usage messages', () => {
-    expect(COMMAND_NAMES).toEqual(['ingest', 'plan', 'render', 'run']);
+  it('lists the five commands in the fixed order used by usage messages', () => {
+    expect(COMMAND_NAMES).toEqual(['ingest', 'plan', 'render', 'run', 'flash-scan']);
   });
 });
 

@@ -2,7 +2,7 @@ import type { FC } from 'react';
 import type { CalculateMetadataFunction } from 'remotion';
 import { AbsoluteFill, Sequence } from 'remotion';
 import type { Timeline } from '@video-maker/timeline-core';
-import { introBumperFrames, outroBumperFrames, safeZoneFor } from '@video-maker/timeline-core';
+import { introBumperFrames, outroBumperFrames, resolveBumperLook, safeZoneFor } from '@video-maker/timeline-core';
 import { captionPresetIdForStyle } from '../helpers/caption-style-preset';
 import type { CaptionAnchor } from '../helpers/caption-box';
 import type { CaptionPresetId } from '../helpers/caption-preset';
@@ -12,15 +12,19 @@ import { timelineToSequenceProps } from '../helpers/timeline-to-sequence-props';
 import { ArollSeries } from './aroll-series';
 import { BrollTrack } from './broll-track';
 import { AudioTrack } from './audio-track';
+import { BumperSfxTrack } from './bumper-sfx-track';
+import type { PreviewSfxCue } from './bumper-sfx-track';
 import { KineticCaptions } from './kinetic-captions';
 import { LogoBumperScene } from './logo-bumper-scene';
 import { LogoOverlay } from './logo-overlay';
+import { TextOverlayTrack } from './text-overlays/text-overlay-track';
 
 export type TimelineAudioMode = 'mix' | 'muted';
 
 export type TimelineCompositionProps = {
   timeline: Timeline;
   audio?: TimelineAudioMode | undefined;
+  bumperSfx?: readonly PreviewSfxCue[] | undefined;
   captionPreset?: CaptionPresetId | undefined;
   captionPlatform?: CaptionPlatform | undefined;
   captionAnchor?: CaptionAnchor | undefined;
@@ -45,6 +49,7 @@ export const calculateTimelineMetadata: CalculateMetadataFunction<TimelineCompos
 export const TimelineComposition: FC<TimelineCompositionProps> = ({
   timeline,
   audio,
+  bumperSfx,
   captionPreset,
   captionPlatform,
   captionAnchor,
@@ -84,7 +89,18 @@ export const TimelineComposition: FC<TimelineCompositionProps> = ({
         theme={timeline.captionTheme}
       />
     ),
+    <TextOverlayTrack
+      key="text-overlays"
+      timeline={timeline}
+      safeZone={safeZone}
+      reserveCaptionBand={resolvedCaptionPreset !== null && plan.captions.length > 0}
+    />,
   ];
+
+  const sfx =
+    audio === 'muted' || bumperSfx === undefined || bumperSfx.length === 0 ? null : (
+      <BumperSfxTrack cues={bumperSfx} fps={timeline.format.fps} />
+    );
 
   if (introFrames === 0 && outroFrames === 0) {
     return <AbsoluteFill>{content}</AbsoluteFill>;
@@ -92,32 +108,39 @@ export const TimelineComposition: FC<TimelineCompositionProps> = ({
 
   const intro = timeline.bumpers?.intro;
   const outro = timeline.bumpers?.outro;
+  const introLook = timeline.bumpers === undefined ? null : resolveBumperLook(timeline.bumpers, 'intro', timeline.id);
+  const outroLook = timeline.bumpers === undefined ? null : resolveBumperLook(timeline.bumpers, 'outro', timeline.id);
 
   return (
     <AbsoluteFill>
-      {introFrames === 0 || intro === undefined ? null : (
+      {introFrames === 0 || intro === undefined || introLook === null ? null : (
         <Sequence from={0} durationInFrames={introFrames}>
           <LogoBumperScene
-            bumper={intro}
+            look={introLook}
+            logoWidthRatio={intro.logoWidthRatio}
             format={timeline.format}
             durationInFrames={introFrames}
             logoSrc={plan.bumperLogoSrc.intro}
+            noiseSeed={`${timeline.id}:intro`}
           />
         </Sequence>
       )}
       <Sequence from={introFrames} durationInFrames={timeline.durationFrames}>
         {content}
       </Sequence>
-      {outroFrames === 0 || outro === undefined ? null : (
+      {outroFrames === 0 || outro === undefined || outroLook === null ? null : (
         <Sequence from={introFrames + timeline.durationFrames} durationInFrames={outroFrames}>
           <LogoBumperScene
-            bumper={outro}
+            look={outroLook}
+            logoWidthRatio={outro.logoWidthRatio}
             format={timeline.format}
             durationInFrames={outroFrames}
             logoSrc={plan.bumperLogoSrc.outro}
+            noiseSeed={`${timeline.id}:outro`}
           />
         </Sequence>
       )}
+      {sfx}
     </AbsoluteFill>
   );
 };

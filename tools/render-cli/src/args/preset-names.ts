@@ -4,7 +4,7 @@ import type { OutputPreset } from '@video-maker/timeline-core';
 
 export const PRESET_NAMES = ['software-demo', 'hardware', 'recipe', 'educational'] as const satisfies readonly MontagePresetName[];
 
-export const COMMAND_NAMES = ['ingest', 'plan', 'render', 'run'] as const;
+export const COMMAND_NAMES = ['ingest', 'plan', 'render', 'run', 'flash-scan'] as const;
 
 export const DEFAULT_SEED = 0;
 

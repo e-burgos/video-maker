@@ -40,7 +40,7 @@ const BRAND_JSON = readFileSync(`${REAL_ASSETS}brands/displayads/brand.json`, 'u
 const STORYBOARD_JSON = readFileSync(`${REAL_ASSETS}storyboards/displayads/easy-pro.json`, 'utf8');
 
 const BRAND_SUMMARY_KEYS = ['formats', 'id', 'music', 'name', 'source'];
-const MUSIC_SUMMARY_KEYS = ['bpm', 'hasDrop', 'id', 'mood'];
+const MUSIC_SUMMARY_KEYS = ['bpm', 'hasDrop', 'id', 'local', 'mood', 'videoTypes'];
 
 async function* textBody(text: string): AsyncGenerator<Uint8Array> {
   yield new TextEncoder().encode(text);
@@ -86,7 +86,7 @@ describe('handleListMotionBrands', () => {
   it('lists each brand directory with id, name, formats and music summary', async () => {
     const { deps } = setup('motion');
 
-    const response = await handleListMotionBrands(deps);
+    const response = await handleListMotionBrands(deps, STORE);
 
     const brands = response.body as Record<string, unknown>[];
     expect(response.status).toBe(200);
@@ -115,15 +115,26 @@ describe('handleListMotionBrands', () => {
     };
     const { deps } = setup('motion', [], [{ id: 'minimal', source: 'user', manifest: minimal }]);
 
-    const response = await handleListMotionBrands(deps);
+    const response = await handleListMotionBrands(deps, STORE);
 
     expect(response.body).toEqual([{ id: 'minimal', name: 'Minimal', source: 'user', formats: ['16:9', '9:16'], music: [] }]);
+  });
+
+  it('adds the tracks of the local music folder after the shipped ones and marks them as local', async () => {
+    const localTrack = { id: 'pulsar', file: 'Pulsar.mp3', credit: '"Pulsar" The Grey Room · Biblioteca de audio de YouTube', bpm: 104, mood: 'calm ambient', videoTypes: ['tutorial'] };
+    const { deps } = setup('motion', [{ path: '/brands/.local-music/displayads/music.json', contents: JSON.stringify([localTrack]) }]);
+
+    const response = await handleListMotionBrands(deps, STORE);
+
+    const music = (response.body as { music: Record<string, unknown>[] }[])[0]?.music ?? [];
+    expect(music[0]).toMatchObject({ local: false });
+    expect(music.at(-1)).toEqual({ id: 'pulsar', mood: 'calm ambient', bpm: 104, hasDrop: false, videoTypes: ['tutorial'], local: true });
   });
 
   it('answers an empty list when the assets root has no brands', async () => {
     const { deps } = setup('motion', [], []);
 
-    const response = await handleListMotionBrands(deps);
+    const response = await handleListMotionBrands(deps, STORE);
 
     expect(response.body).toEqual([]);
   });
@@ -131,7 +142,7 @@ describe('handleListMotionBrands', () => {
   it('rejects a brand.json that does not parse as a manifest', async () => {
     const { deps } = setup('motion', [], [{ id: 'broken', manifest: { id: 'x' } }]);
 
-    await expect(caught(handleListMotionBrands(deps))).resolves.toMatchObject({
+    await expect(caught(handleListMotionBrands(deps, STORE))).resolves.toMatchObject({
       code: 'SERVER_CONFIG_INVALID',
     });
   });

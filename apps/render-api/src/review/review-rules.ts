@@ -13,6 +13,7 @@ import { visualNotReviewedFindings } from './scene-frames';
 import type { ReviewInputs, SecondsRange } from './review-inputs';
 import { FOOTAGE_DURATION_TOLERANCE_FRAMES, MOTION_DURATION_TOLERANCE_FRAMES } from './review-thresholds';
 import { voiceMusicMarginFindings, voiceMusicMargins, worstMarginDb } from './voice-music-margin-rule';
+import { sfxDensityFindings, sfxRepetitionFindings } from './sfx-pattern-rules';
 
 function totalSeconds(ranges: readonly SecondsRange[]): number {
   return ranges.reduce((sum, range) => sum + lengthSec(range), 0);
@@ -56,6 +57,8 @@ export function reviewRender(inputs: ReviewInputs): ReviewReport {
     ...allCaptionFindings(inputs.captions, inputs.frame, inputs.captionStyle),
     ...captionSafeZoneFindings(inputs.captionLayout ?? null),
     ...missingAssetFindings(inputs.missingAssets),
+    ...sfxRepetitionFindings(inputs.sfxEvents ?? []),
+    ...sfxDensityFindings(inputs.sfxEvents ?? [], inputs.actualDurationSec),
     ...deliveryPromiseFindings(inputs.promise, inputs.actualDurationSec),
     ...visualNotReviewedFindings(inputs.sceneFrames),
     ...deliveryFindings({

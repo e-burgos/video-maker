@@ -199,6 +199,15 @@ describe('buildProducerPrompt — quita la regla de model (el server lo inyecta)
   });
 });
 
+describe('buildProducerPrompt — sonido de los bumpers', () => {
+  it('deja el efecto de los bumpers en automático salvo pedido del usuario', () => {
+    const prompt = buildProducerPrompt(CONTEXT);
+    expect(prompt).toContain('Leave `sfxKind` and `sfx` out unless the user asks for a specific');
+    expect(prompt).toContain('`"sfxKind":"none"`');
+    expect(prompt).toContain('is not asking for a specific one: they already sound, so leave');
+  });
+});
+
 describe('buildProducerPrompt — checklist de parámetros de las tres recetas', () => {
   const prompt = buildProducerPrompt(CONTEXT);
 
@@ -207,7 +216,7 @@ describe('buildProducerPrompt — checklist de parámetros de las tres recetas',
   const TUTORIAL_RECIPE_CHECKLIST: ReadonlyArray<readonly [string, string]> = [
     ['Formato', '"format":"youtube-16x9"'],
     ['Preset', '"preset":"educational"'],
-    ['Seed', '"seed":0'],
+    ['Seed', '`"preset":"educational"`, no `seed`'],
     ['Voz del montaje', '"voice":"script"'],
     ['Subtítulos', '"captionStyle":"subtle-lower"'],
     ['Voz de síntesis', '"voice":"es_AR-daniela-high"'],
@@ -216,10 +225,9 @@ describe('buildProducerPrompt — checklist de parámetros de las tres recetas',
     ['Duración de bumpers', '"durationMs":2000'],
     ['Color de fondo de bumpers', '"backgroundColor":"#ffffff"'],
     ['Ancho del logo en bumpers', '"logoWidthRatio":0.4'],
-    ['Animación de intro', '"animation":"slide-up"'],
-    ['Animación de outro', '"animation":"zoom"'],
+    ['Bumpers rotativos', 'with no\n  `background`, `reveal` or `caption`: the studio rotates them per video'],
     ['Despedida obligatoria', '¡Gracias por ver este tutorial! Nos vemos en el próximo.'],
-    ['Niveles de música del preset educational', '-8 dB base, -18 dB ducked'],
+    ['Niveles de música del preset educational', '-10 dB base, -20 dB ducked'],
   ];
 
   const VERTICAL_TUTORIAL_RECIPE_CHECKLIST: ReadonlyArray<readonly [string, string]> = [
@@ -237,8 +245,8 @@ describe('buildProducerPrompt — checklist de parámetros de las tres recetas',
     ['Preset', '"preset":"recipe"'],
     ['Voz del montaje', '"voice":"aroll"'],
     ['Subtítulos', '"captionStyle":"bold-impact"'],
-    ['Nivel base de música', '"baseGainDb":-4'],
-    ['Nivel de música agachada', '"duckedGainDb":-12'],
+    ['Nivel base de música', '"baseGainDb":-6'],
+    ['Nivel de música agachada', '"duckedGainDb":-14'],
     [
       'Logo del anuncio (opacidad completa)',
       '"position":"top-left","widthRatio":0.18,"marginRatio":0.06,"opacity":1',

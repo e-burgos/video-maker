@@ -57,9 +57,13 @@ comandos van en inglés/ASCII.
 | Bancos libres sin key: NASA Images API, Wikimedia Commons; con key opcional: Pexels (`PEXELS_API_KEY`) | Solo cuando el usuario lo pide o no aportó material para un concepto. Receta en §7. El usuario también puede darte URLs directas de descarga. |
 | Presets de montaje: `software-demo`, `educational`, `recipe`, `hardware` | Ritmo, cortes, transiciones, densidad de B-roll, palabras por caption. Tabla en §5.            |
 
-**Lo que el motor NO hace todavía** (decilo si el usuario lo pide): captions fuera del centro
-(hoy un solo estilo, cinético y centrado), escenas sin A-roll (todo video nace de un A-roll con
-voz), elegir B-roll por semántica (entra **solo** por nombre de archivo, ver §4), efectos de audio.
+**Lo que el montador (modo footage) NO hace todavía** (decilo si el usuario lo pide): captions
+fuera del centro (hoy un solo estilo, cinético y centrado), escenas sin A-roll (todo video de
+montaje nace de un A-roll con voz), elegir B-roll por semántica (entra **solo** por nombre de
+archivo, ver §4), efectos de audio. Los videos **motion graphics** (§8 bis) sí llevan efectos:
+whoosh en los cambios de escena, impacto en el drop de la música y los `sfx` del guion anclados a
+una escena o palabra. Los sonidos salen del banco CC0/CC BY de `libs/motion-graphics/assets/sfx-bank/`, y el review
+los mide contra la voz.
 El logo **sí** se maneja desde la web desde `spec-015` `cycle-02`: el usuario lo sube con el rol
 `logo` y elige mostrarlo y en qué esquina desde la página de preview, que reescribe `timeline.logo`.
 
@@ -219,13 +223,21 @@ placa de color con el logo centrado.
 
 ```json
 "bumpers": {
-  "intro": { "enabled": true, "durationMs": 2000, "backgroundColor": "#ffffff", "animation": "zoom", "logoWidthRatio": 0.4 },
-  "outro": { "enabled": true, "durationMs": 2000, "backgroundColor": "#0b1020", "animation": "fade", "logoWidthRatio": 0.4 }
+  "intro": { "enabled": true, "durationMs": 2000, "logoWidthRatio": 0.4 },
+  "outro": { "enabled": true, "durationMs": 2000, "logoWidthRatio": 0.4 }
 }
 ```
 
-- `durationMs` entre 500 y 6000 (la web ofrece 1,5 / 2 / 3 / 4 s), `backgroundColor` hex `#rrggbb`,
-  `animation` `fade` | `zoom` | `slide-up`, `logoWidthRatio` 0.3 / 0.4 / 0.55.
+- `durationMs` entre 500 y 6000 (la web ofrece 1,5 / 2 / 3 / 4 s), `logoWidthRatio` 0.3 / 0.4 / 0.55.
+- **Prendelos sin `background`, `reveal` ni `caption`, y no mandes `bumpers.style`.** El montaje
+  escribe `style` con `rotate: true`, una semilla por video y el estilo de la marca (paleta, web y el
+  bloque `bumpers` del `brand.json`). Así, cada video rota el fondo animado (`gradient` | `noise` |
+  `shapes` | `glow`), el revelado del logo (`zoom` | `slide-up` | `wipe` | `blur-in` | `pop`) y el
+  remate del outro (la web de la marca), que cambian de un video a otro. La rotación nunca cae en la
+  placa lisa con fundido; si la marca define sus propios pools en `bumpers`, rota entre esos.
+- Lo que fijes a mano en un bumper **gana sobre la rotación**: `background` (también `solid`),
+  `reveal` (también `fade`), `caption` (hasta 60 caracteres), `backgroundColor` y `accentColor`.
+  Fijalos solo si el usuario pide ese look puntual. `animation` es el campo viejo: no lo uses.
 - Usa el logo de `timeline.logo`: si el proyecto no tiene logo, la placa sale **sólo con el fondo de
   color**. Primero conseguí el logo (§4).
 - `timeline.durationFrames` **no cambia**: sigue siendo el contenido. El video final dura
@@ -238,16 +250,26 @@ placa de color con el logo centrado.
 
 | Preset          | Úsalo para                                   | Rasgos                                                                   | Música |
 | --------------- | -------------------------------------------- | ------------------------------------------------------------------------ | ------ |
-| `software-demo` | tutoriales de software, pantallas grabadas, reels dinámicos | cortes por silencios ≥400 ms, punch-in cada 3, B-roll a pantalla completa hasta 35 %, captions de 3 palabras, whip-pan | -8 / -18 dB |
-| `educational`   | explicaciones, clases, publicidad sobria     | silencios ≥600 ms, B-roll picture-in-picture hasta 20 %, prefiere fotos, fades lentos | -8 / -18 dB |
-| `recipe`        | paso a paso con muchas tomas de apoyo        | más B-roll, cortes medios                                                | -8 / -18 dB |
-| `hardware`      | producto físico, unboxing, **publicidad**    | punch-ins fuertes, B-roll de producto                                    | **-4 / -12 dB** |
+| `software-demo` | tutoriales de software, pantallas grabadas, reels dinámicos | cortes por silencios ≥400 ms, punch-in cada 3, B-roll a pantalla completa hasta 35 %, captions de 3 palabras, whip-pan | -10 / -20 dB |
+| `educational`   | explicaciones, clases, publicidad sobria     | silencios ≥600 ms, B-roll picture-in-picture hasta 20 %, prefiere fotos, fades lentos | -10 / -20 dB |
+| `recipe`        | paso a paso con muchas tomas de apoyo        | más B-roll, cortes medios                                                | -10 / -20 dB |
+| `hardware`      | producto físico, unboxing, **publicidad**    | punch-ins fuertes, B-roll de producto                                    | **-6 / -14 dB** |
 
 La columna de música es `baseGainDb / duckedGainDb` sobre la cama ya normalizada a -16 LUFS.
 `hardware` es el preset de publicidad: la música se escucha ~13 dB bajo la voz. Los otros tres
 la dejan más discreta, que es lo que quiere un tutorial.
 
-`--seed N` cambia qué B-roll y qué transición se eligen sin cambiar las reglas.
+`--seed N` cambia qué punch-ins y qué transiciones salen sin cambiar las reglas. Cada preset rota un pool
+de cinco transiciones (`fade`, `slide`, `whip-pan`, `light-leak`, `wipe`, `flip`, `clock-wipe`, `iris`) sin
+repetir la del corte anterior.
+
+### Variedad: nunca dos videos iguales (FIX-e-burgos-041)
+
+- **No mandes `seed` en el job `montage`.** El studio deriva una semilla del slug del video, así que dos
+  videos del mismo preset no repiten la secuencia de transiciones. Mandá un `seed` solo para reproducir
+  un montaje que el usuario ya aprobó, o uno nuevo cuando pida "otra versión" del mismo video.
+- Con el CLI, `--seed` vale 0 si no lo pasás: pasá uno distinto al del video anterior de la misma lista.
+- Nunca fijes a mano la misma transición en dos cortes seguidos de la timeline.
 
 ### Estilo de subtítulos: seguí el tipo de video (FIX-e-burgos-003-003)
 
@@ -376,7 +398,7 @@ Lo mismo desde la CLI: `pnpm nx run render-cli:cli -- run media/<slug> --preset 
 
 - Gate antes de transcribir o renderizar: `pgrep -fl 'ffmpeg|whisper-cli|chrome-headless|piper'`
   vacío, `memory_pressure` con ≥35 % libre, `df -h /` con ≥2 GB. Nunca dos jobs pesados a la vez.
-- `pnpm nx run render-cli:cli -- run media/<slug> --preset <p> --seed 0 --script media/<slug>/work/producer/script.txt`.
+- `pnpm nx run render-cli:cli -- run media/<slug> --preset <p> --seed <n distinto al del video anterior> --script media/<slug>/work/producer/script.txt`.
   Leé el reporte: `transcription-failures` debe ser 0, `concepts` debe listar tus conceptos,
   `broll-overlays > 0`, `logo` debe nombrar el archivo si el proyecto tiene uno, y
   `script-corrections` te dice cuántas palabras se arreglaron contra el guion.
@@ -425,13 +447,13 @@ elegidos**: aplicalos y **no vuelvas a preguntar por ninguno**.
 | Decisión              | Valor                                                                        |
 | --------------------- | ---------------------------------------------------------------------------- |
 | Formato               | `format: youtube-16x9`                                                        |
-| Preset                | `educational`, `seed: 0`                                                      |
+| Preset                | `educational`, sin `seed` (el studio la deriva del video)                     |
 | Voz del montaje       | `voice: script`                                                               |
 | Subtítulos            | `captionStyle: subtle-lower`                                                  |
 | Narración             | job `voice` con `voiceId: es_AR-daniela-high`, `gapMs: 900` y guion con marcas `[m:ss]`, una línea por escena |
-| Música                | pista libre suave de Commons, acreditada en `work/credits.json`, a los niveles de `educational` (-8 dB base / -18 dB duckeado): no los pises |
+| Música                | `search_free_music` con mood «calm tutorial»: primero el banco de la marca, después Openverse y Commons; `import_music` la acredita en `work/credits.json`. Niveles de `educational` (-10 dB base / -20 dB duckeado): no los pises |
 | Logo                  | archivo de `raw/logo/` **con alfa** (§4), `position: bottom-right`, `widthRatio: 0.18`, `opacity: 0.5` |
-| Inicio y cierre       | `bumpers` intro y outro por `PUT` de la timeline: `durationMs: 2000`, `backgroundColor: "#ffffff"`, `logoWidthRatio: 0.4`, intro `slide-up`, outro `zoom` |
+| Inicio y cierre       | `bumpers` intro y outro por `PUT` de la timeline: `enabled: true`, `durationMs: 2000`, `logoWidthRatio: 0.4`, sin `background`, `reveal` ni `style`: el montaje rota el look por video (ver «Inicio y fin con el logo») |
 
 El logo y los dos bumpers viajan en el **mismo `PUT`** del documento completo de la timeline, después
 del montaje y antes del `render`.

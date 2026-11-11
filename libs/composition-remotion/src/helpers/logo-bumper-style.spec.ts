@@ -1,3 +1,4 @@
+import type { LogoBumperReveal } from '@video-maker/timeline-core';
 import { describe, expect, it } from 'vitest';
 import {
   LOGO_BUMPER_ZOOM_FROM,
@@ -9,7 +10,7 @@ import {
 const FPS = 30;
 const TWO_SECONDS = 60;
 
-function styleAt(frame: number, animation: 'fade' | 'zoom' | 'slide-up' = 'zoom') {
+function styleAt(frame: number, animation: LogoBumperReveal = 'zoom') {
   return logoBumperLogoStyle({ animation, frame, fps: FPS, durationInFrames: TWO_SECONDS });
 }
 
@@ -56,5 +57,27 @@ describe('logoBumperLogoStyle', () => {
     expect(logoBumperEnterFrames(FPS, 15) + logoBumperExitFrames(FPS, 15)).toBeLessThanOrEqual(15);
     expect(logoBumperLogoStyle({ ...shortBumper, frame: 0 }).opacity).toBe(0);
     expect(logoBumperLogoStyle({ ...shortBumper, frame: 15 }).opacity).toBe(0);
+  });
+
+  it('wipe muestra el logo entero pero recortado de derecha a izquierda', () => {
+    expect(styleAt(0, 'wipe').clipPath).toBe('inset(0% 100% 0% 0%)');
+    expect(styleAt(18, 'wipe').clipPath).toBe('inset(0% 0% 0% 0%)');
+    expect(styleAt(9, 'wipe').opacity).toBe(1);
+  });
+
+  it('blur-in arranca desenfocado y apenas grande, y termina nítido', () => {
+    expect(styleAt(0, 'blur-in').filter).toBe('blur(24px)');
+    expect(styleAt(18, 'blur-in')).toMatchObject({ filter: 'blur(0px)', transform: 'scale(1)' });
+  });
+
+  it('pop se pasa un poco del tamaño final antes de asentarse', () => {
+    const scales = [6, 9, 12, 15].map((frame) => Number(/scale\(([\d.]+)\)/u.exec(styleAt(frame, 'pop').transform)?.[1]));
+
+    expect(Math.max(...scales)).toBeGreaterThan(1);
+    expect(styleAt(18, 'pop').transform).toBe('scale(1)');
+  });
+
+  it('los revelados viejos no usan filtro ni recorte', () => {
+    expect(styleAt(9, 'zoom')).toMatchObject({ filter: 'none', clipPath: 'none' });
   });
 });

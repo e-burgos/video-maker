@@ -242,10 +242,10 @@ function normalizeBrandName(name: string): string {
   return normalized;
 }
 
-async function copyDirectory(deps: RenderApiDependencies, from: string, to: string): Promise<void> {
+async function copyDirectory(deps: RenderApiDependencies, from: string, to: string, skippedEntries: readonly string[] = []): Promise<void> {
   await deps.storage.ensureDirectory(to);
   for (const entry of (await deps.storage.listDirectory(from)) ?? []) {
-    if (entry.name.startsWith('.')) {
+    if (entry.name.startsWith('.') || skippedEntries.includes(entry.name)) {
       continue;
     }
     if (entry.isDirectory) {
@@ -274,13 +274,13 @@ async function duplicateBrand(deps: RenderApiDependencies, store: StoreConfig, i
   const sourceTokens = effectiveBrandTokens(sourceManifest, await readAuthoredCss(deps, source, sourceManifest));
   const target = userBrandDir(store, id);
 
-  await copyDirectory(deps, source.dir, target);
+  await copyDirectory(deps, source.dir, target, [FILE_KIND_RULES.music.folder]);
   if (sourceManifest.css !== undefined) {
     await deps.storage.removeFile(join(target, sourceManifest.css));
   }
   const withoutCss = Object.fromEntries(Object.entries(sourceManifest).filter(([key]) => key !== 'css'));
   const manifest = toManifest(
-    { ...withoutCss, id, name, palette: sourceManifest.palette ?? brandPaletteFromTokens(sourceTokens), tokens: sourceTokens },
+    { ...withoutCss, id, name, palette: sourceManifest.palette ?? brandPaletteFromTokens(sourceTokens), tokens: sourceTokens, music: [], musicFrom: sourceId },
     id,
   );
   await writeManifest(deps, target, manifest);

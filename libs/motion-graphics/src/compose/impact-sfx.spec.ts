@@ -3,7 +3,7 @@ import { describe, expect, it } from 'vitest';
 import { IMPACT_DURATION_SEC, IMPACT_TRACK_VOLUME, IMPACT_UNDER_VOICE_LEVEL, IMPACT_VOICE_LEAD_IN_SEC, impactTrack } from './impact-sfx';
 
 describe('impact sound effect', () => {
-  const tag = impactTrack('{{start:reveal}}', 'assets/runtime');
+  const tag = impactTrack('{{start:reveal}}');
   const automation = JSON.parse(/data-automation='([^']*)'/u.exec(tag)?.[1] ?? '{}');
 
   it('plays full until the voice lead-in and sits well under the voice afterwards', () => {

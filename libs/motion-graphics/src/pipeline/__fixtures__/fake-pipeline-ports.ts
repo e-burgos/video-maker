@@ -63,9 +63,10 @@ export function createFakePipelinePorts(init: {
       files.set(path, content);
     },
     exists: async (path) => files.has(path) || [...files.keys()].some((k) => k.startsWith(`${path}/`)),
-    copyTree: async (from, to) => {
+    copyTree: async (from, to, excludeTopLevel = []) => {
       calls.push(`copyTree ${from} → ${to}`);
-      for (const [path, value] of [...files]) if (path.startsWith(`${from}/`)) files.set(`${to}${path.slice(from.length)}`, value);
+      const excluded = (path: string) => excludeTopLevel.some((name) => path.startsWith(`${from}/${name}/`));
+      for (const [path, value] of [...files]) if (path.startsWith(`${from}/`) && !excluded(path)) files.set(`${to}${path.slice(from.length)}`, value);
     },
     copyFile: async (from, to) => {
       files.set(to, get(from));

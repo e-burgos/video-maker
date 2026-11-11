@@ -5,6 +5,7 @@ import { MissingMediaStreamError } from '../errors/missing-media-stream-error';
 import { UnresolvedAudioAssetError } from '../errors/unresolved-audio-asset-error';
 import { audioMixFfmpegArgs } from '../mix/audio-mix-ffmpeg-args';
 import { buildAudioMixGraph } from '../mix/build-audio-mix-graph';
+import type { SfxMixCue } from '../mix/build-sfx-chain';
 import { serializeFilterGraph } from '../mix/serialize-filter-graph';
 import type { CommandOptions, CommandRunner } from '../runner/command-runner';
 import { FIRST_AUDIO_STREAM, measureLoudness } from './measure-loudness';
@@ -14,6 +15,7 @@ import type { LoudnessMeasurement } from './parse-loudnorm-json';
 export interface MixTimelineAudioOptions {
   ffmpegPath?: string;
   runOptions?: CommandOptions;
+  sfx?: readonly SfxMixCue[];
 }
 
 export interface MixTimelineAudioResult {
@@ -98,7 +100,7 @@ export async function mixTimelineAudio(
     opts?.runOptions,
   );
 
-  const mixGraph = buildAudioMixGraph({ timeline, voiceMeasuredByAssetId: voiceMeasured });
+  const mixGraph = buildAudioMixGraph({ timeline, voiceMeasuredByAssetId: voiceMeasured, ...(opts?.sfx === undefined ? {} : { sfx: opts.sfx }) });
   const graph = withMasterBusLimiter(mixGraph, timeline.audioMix.voice);
   const args = audioMixFfmpegArgs(graph, out);
 

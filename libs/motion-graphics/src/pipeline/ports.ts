@@ -25,7 +25,7 @@ export interface MotionPipelinePorts {
   readBytes(path: string): Promise<Uint8Array>;
   writeText(path: string, content: string): Promise<void>;
   exists(path: string): Promise<boolean>;
-  copyTree(from: string, to: string): Promise<void>;
+  copyTree(from: string, to: string, excludeTopLevel?: readonly string[]): Promise<void>;
   copyFile(from: string, to: string): Promise<void>;
   removeFile(path: string): Promise<void>;
   synthesize(request: SynthesizeRequest): Promise<void>;

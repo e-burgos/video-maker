@@ -103,6 +103,7 @@ export interface RenderApiMusicResult {
   readonly license: string;
   readonly author: string;
   readonly pageUrl: string;
+  readonly source?: 'brand-bank' | 'openverse' | 'commons';
 }
 
 export type RenderApiFreeMediaKind = 'video' | 'image';

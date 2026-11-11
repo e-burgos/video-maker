@@ -6,7 +6,7 @@ import type { ObjectStorage } from '../deps/object-storage';
 
 export const CREDITS_FILE_PATH = 'work/credits.json';
 
-export const CREDIT_KINDS = ['music', 'video', 'image'] as const;
+export const CREDIT_KINDS = ['music', 'video', 'image', 'sfx'] as const;
 export type CreditKind = (typeof CREDIT_KINDS)[number];
 
 export interface MediaCreditEntry {
@@ -63,3 +63,18 @@ export async function appendMediaCredit(
 }
 
 export const appendMusicCredit = appendMediaCredit;
+
+export async function appendMediaCreditsOnce(
+  storage: ObjectStorage,
+  project: MediaProject,
+  entries: readonly MediaCreditEntry[],
+): Promise<void> {
+  const absolutePath = toAbsolutePath(project, CREDITS_FILE_PATH);
+  const existing = await readCreditEntries(storage, absolutePath);
+  const fresh = entries.filter((entry) => !existing.some((credit) => credit.kind === entry.kind && credit.path === entry.path));
+  if (fresh.length === 0) {
+    return;
+  }
+  await storage.ensureDirectory(dirname(absolutePath));
+  await storage.writeTextFile(absolutePath, `${JSON.stringify([...existing, ...fresh], null, 2)}\n`);
+}

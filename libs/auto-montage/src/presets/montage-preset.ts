@@ -1,8 +1,8 @@
-import type { PunchInAnchor, Scale, VideoClip } from '@video-maker/timeline-core';
+import type { PunchInAnchor, Scale, TransitionDecision, VideoClip } from '@video-maker/timeline-core';
 
 export type MontagePresetName = 'software-demo' | 'hardware' | 'recipe' | 'educational';
 export type BrollRolePriority = readonly ['broll', 'image'] | readonly ['image', 'broll'];
-export type TransitionKind = 'fade' | 'slide' | 'whip-pan' | 'light-leak';
+export type TransitionKind = TransitionDecision['kind'];
 export type ClipFit = NonNullable<VideoClip['fit']>;
 
 export interface MontagePreset {

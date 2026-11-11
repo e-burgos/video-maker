@@ -1,8 +1,7 @@
-import { BRAND_ASSET_DIR } from '../compose/compose-storyboard';
 import { MotionStudioError } from '../errors/motion-studio-error';
 import { joinPath } from './join-path';
 import type { MotionPipelinePorts } from './ports';
-import { copyMusic, copySharedAssets, readScript, SCRIPT_FILE } from './project-files';
+import { brandTrackPath, copyMusic, copySharedAssets, readScript, SCRIPT_FILE } from './project-files';
 
 export async function initFromTemplate(ports: MotionPipelinePorts, templatesRoot: string, template: string, project: string): Promise<{ lines: string[] }> {
   const [brand, video] = template.split('/');
@@ -14,6 +13,6 @@ export async function initFromTemplate(ports: MotionPipelinePorts, templatesRoot
   if (await ports.exists(handKit)) await ports.copyTree(handKit, joinPath(project, 'assets'));
   await ports.copyTree(videoDir, project);
   const script = await readScript(ports, project);
-  if (script.music !== null) await copyMusic(ports, project, joinPath(BRAND_ASSET_DIR, 'music', script.music.file), script.music.file);
+  if (script.music !== null) await copyMusic(ports, project, await brandTrackPath(ports, brand, `music/${script.music.file}`), script.music.file);
   return { lines: [`init: ${template} → ${project}`] };
 }

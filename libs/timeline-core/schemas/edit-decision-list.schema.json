@@ -228,7 +228,11 @@
                   "fade",
                   "slide",
                   "whip-pan",
-                  "light-leak"
+                  "light-leak",
+                  "wipe",
+                  "flip",
+                  "clock-wipe",
+                  "iris"
                 ]
               },
               "direction": {
@@ -246,6 +250,9 @@
                   "spring",
                   "linear"
                 ]
+              },
+              "handles": {
+                "type": "boolean"
               }
             },
             "required": [

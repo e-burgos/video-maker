@@ -23,8 +23,8 @@ export const educationalPreset: MontagePreset = {
   transitions: {
     every: 6,
     durationMs: 340,
-    kinds: ['fade'],
+    kinds: ['fade', 'light-leak', 'wipe', 'iris', 'slide'],
     timing: 'linear',
   },
-  audio: { baseGainDb: -8, duckedGainDb: -18, referenceLufs: -16, attackMs: 200, releaseMs: 500, holdMs: 320 },
+  audio: { baseGainDb: -10, duckedGainDb: -20, referenceLufs: -16, attackMs: 200, releaseMs: 500, holdMs: 320 },
 };

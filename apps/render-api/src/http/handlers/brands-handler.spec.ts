@@ -236,7 +236,10 @@ describe('POST /brands', () => {
     expect(Object.keys(body.manifest.images)).toHaveLength(Object.keys(JSON.parse(BRAND_JSON).images).length);
     expect(body.files.images).toEqual(['img/scenes/easy-pro-cafe.jpg']);
     expect(await storage.stat('/brands/copia/brand.css')).toBeNull();
-    expect(await storage.stat('/brands/copia/music/Voxel Revolution.mp3')).not.toBeNull();
+    expect(await storage.stat('/brands/copia/music/Voxel Revolution.mp3')).toBeNull();
+    expect(body.manifest.music).toEqual([]);
+    expect(body.manifest.musicFrom).toBe('displayads');
+    expect(body.files.music).toEqual([]);
   });
 
   it('derives the palette of a duplicated brand that has only a stylesheet', async () => {

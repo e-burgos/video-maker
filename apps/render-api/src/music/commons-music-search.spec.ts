@@ -76,7 +76,8 @@ describe('buildCommonsSearchUrl', () => {
     expect(url.origin + url.pathname).toBe(COMMONS_API_URL);
     expect(url.searchParams.get('generator')).toBe('search');
     expect(url.searchParams.get('gsrnamespace')).toBe('6');
-    expect(url.searchParams.get('gsrsearch')).toBe('calm piano filetype:audio');
+    expect(url.searchParams.get('gsrsearch')).toBe('calm piano music filetype:audio');
+    expect(new URL(buildCommonsSearchUrl('lo-fi Music', 12)).searchParams.get('gsrsearch')).toBe('lo-fi Music filetype:audio');
     expect(url.searchParams.get('gsrlimit')).toBe('12');
     expect(url.searchParams.get('prop')).toBe('imageinfo');
     expect(url.searchParams.get('iiprop')).toBe('url|size|mime|extmetadata');
@@ -99,6 +100,11 @@ describe('parseCommonsSearchPayload', () => {
         downloadUrl: 'https://upload.wikimedia.org/wikipedia/commons/a/aa/Calm_Piano.mp3',
       },
     ]);
+  });
+
+  it('drops share-alike music, which would force the whole video under CC BY-SA', () => {
+    const results = parseCommonsSearchPayload({ query: { pages: [commonsPage({ license: 'CC BY-SA 4.0' }), commonsPage({ license: 'CC BY 4.0' })] } });
+    expect(results.map((result) => result.license)).toEqual(['CC BY 4.0']);
   });
 
   it('drops a result with a non-commercial license', () => {
@@ -126,6 +132,11 @@ describe('parseCommonsSearchPayload', () => {
     const page = commonsPage({});
     delete (page.imageinfo[0] as Record<string, unknown>).duration;
     expect(parseCommonsSearchPayload({ query: { pages: [page] } })).toEqual([]);
+  });
+
+  it('drops recordings too short or too long to be a music bed, like a 99-minute interview', () => {
+    const pages = [commonsPage({ duration: 12 }), commonsPage({ duration: 5950 }), commonsPage({ duration: 30 }), commonsPage({ duration: 600 })];
+    expect(parseCommonsSearchPayload({ query: { pages } }).map((result) => result.durationMs)).toEqual([30000, 600000]);
   });
 
   it('is stable: the same file title always maps to the same resultId', () => {

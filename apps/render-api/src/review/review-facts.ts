@@ -1,7 +1,7 @@
 import type { DeliveryContract } from '@video-maker/timeline-core';
 
 import type { LevelPlan } from './level-plan';
-import type { CaptionLayoutFacts, ReviewCaption, ReviewFrame, SecondsRange } from './review-inputs';
+import type { CaptionLayoutFacts, ReviewCaption, ReviewFrame, SecondsRange, SfxEvent } from './review-inputs';
 
 export interface ReviewScene {
   readonly id: string;
@@ -30,6 +30,7 @@ export interface ReviewFacts {
   readonly captions: readonly ReviewCaption[];
   readonly frame: ReviewFrame | null;
   readonly captionLayout?: CaptionLayoutFacts | null;
+  readonly sfxEvents?: readonly SfxEvent[];
   readonly missingAssets: readonly string[];
   readonly scenes: readonly ReviewScene[];
   readonly promise: DeliveryPromise | null;

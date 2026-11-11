@@ -4206,6 +4206,2065 @@
           }
         ]
       }
+    },
+    {
+      "id": "FIX-e-burgos-037",
+      "author": "e-burgos",
+      "spec_id": null,
+      "fix_document": "sdd/fixes/fix-e-burgos-037.md",
+      "type": "IMPROVEMENT",
+      "severity": "medium",
+      "created_at": "2026-11-10",
+      "resolved_at": "2026-11-10",
+      "validated_at": null,
+      "title": "Daniela (Piper) pronuncia «Display Ads»: reescritura fonética solo para voces Piper en español",
+      "estimation_hours": 1,
+      "description": "espeak-ng en español lee «Display» como dis-PLAI (acento final y «ay» como «ai»), y la marca se pierde en todos los videos con Daniela. Antes de llamar a sherpa-onnx, las voces Piper es_* reciben «Díspley» en lugar de «Display» (fonemas dˈisplˌeɪ). El guion, los subtítulos y ElevenLabs (Malena) no cambian.",
+      "justification": "La marca del canal sale mal pronunciada; el dev eligió la variante a ciegas entre siete.",
+      "related_modules": [
+        "production-quality"
+      ],
+      "affected_files": [
+        "libs/media-local/src/tts/piper-spanish-pronunciation.ts",
+        "libs/media-local/src/tts/synthesize-speech.ts",
+        "libs/media-local/src/tts/synthesize-speech.spec.ts"
+      ],
+      "test_reference": "nx test media-local (445) y lint en verde; build de media-local y render-api; síntesis real con synthesizeSpeech y Daniela: Whisper oye «Display As».",
+      "status": "implemented",
+      "cycle": null,
+      "process_note": "Fonemas inspeccionados con el espeakbridge de piper-tts usando el espeak-ng-data de la voz.",
+      "usage": {
+        "provider_model": "claude/opus",
+        "effort": "low",
+        "tokens_in": 300000,
+        "tokens_out": 25000,
+        "approx": true,
+        "source": "declared-estimate",
+        "recorded_at": "2026-11-10",
+        "by_agent": [
+          {
+            "agent": "orchestrator",
+            "provider_model": "claude/opus",
+            "effort": "low",
+            "tokens_in": 300000,
+            "tokens_out": 25000,
+            "approx": true,
+            "source": "declared-estimate",
+            "recorded_at": "2026-11-10"
+          }
+        ]
+      }
+    },
+    {
+      "id": "FIX-e-burgos-038",
+      "author": "e-burgos",
+      "spec_id": null,
+      "fix_document": "sdd/fixes/fix-e-burgos-038.md",
+      "type": "IMPROVEMENT",
+      "severity": "medium",
+      "created_at": "2026-11-10",
+      "resolved_at": "2026-11-10",
+      "validated_at": null,
+      "title": "Banco de música por tipo de video con rotación: 16 temas CC BY en el repo y 19 de YouTube solo locales",
+      "estimation_hours": 4,
+      "description": "Los videos salían siempre con los mismos dos temas. La marca Display Ads suma 16 temas CC BY etiquetados con videoTypes; los 19 de la Biblioteca de audio de YouTube viven en brands/.local-music, fuera de git, y se suman en runtime. Motion elige por tipo y evita los temas usados hace poco (media/.music-usage.json); search_free_music devuelve primero el banco de la marca y import_music lo copia. Cada proyecto de motion deja de copiar la carpeta music entera.",
+      "justification": "Lo pidió el dev tras escuchar el banco a ciegas; no crea contratos entre subproyectos más allá de un campo opcional en la salida de search_free_music.",
+      "related_modules": [
+        "production-quality"
+      ],
+      "affected_files": [
+        "libs/motion-graphics/assets/brands/displayads/brand.json",
+        "libs/motion-graphics/assets/brands/displayads/music/CREDITS.md",
+        "libs/motion-graphics/src/brand/brand-music.ts",
+        "libs/motion-graphics/src/brand/brand-manifest.ts",
+        "libs/motion-graphics/src/auto/build-auto-storyboard-request.ts",
+        "libs/motion-graphics/src/pipeline/project-files.ts",
+        "apps/render-api/src/music/brand-music-bank.ts",
+        "apps/render-api/src/music/music-usage-log.ts",
+        "apps/render-api/src/music/local-music.ts",
+        "apps/render-api/src/http/handlers/music-handler.ts",
+        "apps/render-api/src/http/handlers/motion-handler.ts",
+        "apps/render-api/src/jobs/run-motion-pipeline.ts",
+        "libs/producer-tools/src/contract/tool-schemas.ts",
+        "libs/producer-tools/src/prompt/build-producer-prompt.ts"
+      ],
+      "test_reference": "nx test/lint en verde: motion-graphics 321, producer-tools 448, render-api 2265, web 1647; banco real (brand.json + .local-music) parseado con los 37 archivos presentes.",
+      "status": "implemented",
+      "cycle": null,
+      "process_note": "BPM de los temas sin catálogo medido con un estimador de flujo de energía validado contra los BPM publicados de Incompetech; los mayores a 160 se pasaron a la mitad.",
+      "usage": {
+        "provider_model": "claude/opus",
+        "effort": "medium",
+        "tokens_in": 1500000,
+        "tokens_out": 90000,
+        "approx": true,
+        "source": "declared-estimate",
+        "recorded_at": "2026-11-10",
+        "by_agent": [
+          {
+            "agent": "orchestrator",
+            "provider_model": "claude/opus",
+            "effort": "medium",
+            "tokens_in": 1500000,
+            "tokens_out": 90000,
+            "approx": true,
+            "source": "declared-estimate",
+            "recorded_at": "2026-11-10"
+          }
+        ]
+      }
+    },
+    {
+      "id": "FIX-e-burgos-039",
+      "author": "e-burgos",
+      "spec_id": null,
+      "fix_document": "sdd/fixes/fix-e-burgos-039.md",
+      "type": "IMPROVEMENT",
+      "severity": "medium",
+      "created_at": "2026-11-11",
+      "resolved_at": "2026-11-11",
+      "validated_at": null,
+      "title": "Motion graphics etapa 0: salidas de escena rotativas (modo B), transiciones con semilla (modo A) y light-leak real",
+      "estimation_hours": 6,
+      "description": "Las escenas del modo B salían todas igual y los presets del modo A alternaban siempre los mismos dos tipos; con seed 0 dos videos del mismo preset quedaban idénticos y light-leak era un fade. Se agrega un generador con semilla en timeline-core, rotación sin repetir en planTransitions, pools de tres tipos por preset, una presentación light-leak propia en CSS y data-exit por escena en motion-graphics con plan por semilla de marca + título.",
+      "justification": "Etapa 0 aprobada por el dev del informe docs/research/2026-11-10-motion-graphics-productor.md; sin dependencias nuevas y el campo exit es opcional.",
+      "related_modules": [
+        "production-quality"
+      ],
+      "affected_files": [
+        "libs/timeline-core/src/random/seeded-random.ts",
+        "libs/timeline-core/src/punch-in/plan-punch-ins.ts",
+        "libs/timeline-core/src/index.ts",
+        "libs/auto-montage/src/montage/plan-transitions.ts",
+        "libs/auto-montage/src/auto-montage.ts",
+        "libs/auto-montage/src/presets/software-demo.preset.ts",
+        "libs/auto-montage/src/presets/educational.preset.ts",
+        "libs/auto-montage/src/presets/hardware.preset.ts",
+        "libs/auto-montage/src/presets/recipe.preset.ts",
+        "libs/composition-remotion/src/transitions/light-leak.tsx",
+        "libs/composition-remotion/src/transitions/light-leak-style.ts",
+        "libs/composition-remotion/src/transitions/presentation-for.ts",
+        "libs/motion-graphics/src/storyboard/motion-storyboard.schema.ts",
+        "libs/motion-graphics/src/compose/plan-scene-exits.ts",
+        "libs/motion-graphics/src/compose/compose-storyboard.ts",
+        "libs/motion-graphics/assets/runtime/motion-runtime.js"
+      ],
+      "test_reference": "nx test/lint/build en verde: timeline-core 453, auto-montage 375, composition-remotion 366, motion-graphics 318.",
+      "status": "implemented",
+      "cycle": null,
+      "process_note": "lightLeak() de Remotion no está instalado; se implementó en CSS para no sumar dependencias en la etapa 0.",
+      "usage": {
+        "provider_model": "claude/opus",
+        "effort": "medium",
+        "tokens_in": 900000,
+        "tokens_out": 60000,
+        "approx": true,
+        "source": "declared-estimate",
+        "recorded_at": "2026-11-11",
+        "by_agent": [
+          {
+            "agent": "orchestrator",
+            "provider_model": "claude/opus",
+            "effort": "medium",
+            "tokens_in": 900000,
+            "tokens_out": 60000,
+            "approx": true,
+            "source": "declared-estimate",
+            "recorded_at": "2026-11-11"
+          }
+        ]
+      }
+    },
+    {
+      "id": "FIX-e-burgos-040",
+      "author": "e-burgos",
+      "spec_id": null,
+      "fix_document": "sdd/fixes/fix-e-burgos-040.md",
+      "type": "IMPROVEMENT",
+      "severity": "medium",
+      "created_at": "2026-11-11",
+      "resolved_at": "2026-11-11",
+      "validated_at": null,
+      "title": "Motion graphics etapa 1: transiciones wipe, flip, clock-wipe e iris de @remotion/transitions en el modo A",
+      "estimation_hours": 3,
+      "description": "El enum de transiciones del Timeline y del EDL suma wipe, flip, clock-wipe e iris; presentationFor las arma con @remotion/transitions 4.0.522 (ya instalado), con dirección para wipe/flip y el tamaño del cuadro para clock-wipe/iris. Cada preset rota un pool de cinco tipos. zoomBlur, zoomInOut y filmBurn quedan fuera: son HTML-in-Canvas y exigen Chrome 148 con un flag experimental.",
+      "justification": "Etapa 1 aprobada por el dev del informe docs/research/2026-11-10-motion-graphics-productor.md; amplía un enum con valores nuevos, compatible hacia atrás con las timelines existentes.",
+      "related_modules": [
+        "production-quality"
+      ],
+      "affected_files": [
+        "libs/timeline-core/src/schemas/timeline.schema.ts",
+        "libs/timeline-core/src/schemas/edit-decision-list.schema.ts",
+        "libs/timeline-core/schemas/timeline.schema.json",
+        "libs/timeline-core/schemas/edit-decision-list.schema.json",
+        "libs/auto-montage/src/presets/montage-preset.ts",
+        "libs/auto-montage/src/montage/plan-transitions.ts",
+        "libs/auto-montage/src/presets/software-demo.preset.ts",
+        "libs/auto-montage/src/presets/educational.preset.ts",
+        "libs/auto-montage/src/presets/hardware.preset.ts",
+        "libs/auto-montage/src/presets/recipe.preset.ts",
+        "libs/composition-remotion/src/transitions/presentation-for.ts",
+        "libs/composition-remotion/src/components/aroll-series.tsx",
+        "libs/producer-tools/src/prompt/build-producer-prompt.ts"
+      ],
+      "test_reference": "nx test/lint/build en verde: timeline-core 452, auto-montage 375, composition-remotion 368, motion-graphics 318, producer-tools 448, render-api 2260, web 1646 (settings-page.spec falla solo bajo carga y pasa aislado; no toca transiciones).",
+      "status": "implemented",
+      "cycle": null,
+      "process_note": "El paquete instalado trae además book-flip, dissolve, ripple y otras; las que dependen de HTML-in-Canvas tiran error sin el flag de Chrome, así que no se habilitan.",
+      "usage": {
+        "provider_model": "claude/opus",
+        "effort": "medium",
+        "tokens_in": 400000,
+        "tokens_out": 25000,
+        "approx": true,
+        "source": "declared-estimate",
+        "recorded_at": "2026-11-11",
+        "by_agent": [
+          {
+            "agent": "orchestrator",
+            "provider_model": "claude/opus",
+            "effort": "medium",
+            "tokens_in": 400000,
+            "tokens_out": 25000,
+            "approx": true,
+            "source": "declared-estimate",
+            "recorded_at": "2026-11-11"
+          }
+        ]
+      }
+    },
+    {
+      "id": "FIX-e-burgos-041",
+      "author": "e-burgos",
+      "spec_id": null,
+      "fix_document": "sdd/fixes/fix-e-burgos-041.md",
+      "type": "IMPROVEMENT",
+      "severity": "medium",
+      "created_at": "2026-11-11",
+      "resolved_at": "2026-11-11",
+      "validated_at": null,
+      "title": "Motion graphics etapa 7: regla de variedad del productor y semilla de montaje derivada del video",
+      "estimation_hours": 2,
+      "description": "Las recetas mandaban seed 0 y ninguna skill pedía variedad. render-api deriva la semilla del slug cuando el montaje no la trae; el prompt del productor, el prompt del storyboard automático y las skills motion-studio y video-producer prohíben repetir kind, exit o transición seguidas y piden no fijar seed para que cada video rote distinto.",
+      "justification": "Etapa 7 aprobada por el dev del informe docs/research/2026-11-10-motion-graphics-productor.md; cambia solo el default de un parámetro opcional del job montage.",
+      "related_modules": [
+        "production-quality"
+      ],
+      "affected_files": [
+        "apps/render-api/src/jobs/montage-job-params.ts",
+        "apps/render-api/src/http/handlers/jobs-handler.ts",
+        "libs/producer-tools/src/prompt/build-producer-prompt.ts",
+        "libs/motion-graphics/src/auto/build-auto-storyboard-request.ts",
+        "sdd/skills/motion-studio/SKILL.md",
+        "sdd/skills/video-producer/SKILL.md"
+      ],
+      "test_reference": "nx test/lint en verde: producer-tools 448, render-api 2260, motion-graphics 318.",
+      "status": "implemented",
+      "cycle": null,
+      "process_note": "El productor no ve el video anterior de la lista (sus tools son por proyecto), por eso la variedad entre videos se garantiza en código (semilla por slug, salidas por marca + título) y no solo en el prompt.",
+      "usage": {
+        "provider_model": "claude/opus",
+        "effort": "medium",
+        "tokens_in": 350000,
+        "tokens_out": 20000,
+        "approx": true,
+        "source": "declared-estimate",
+        "recorded_at": "2026-11-11",
+        "by_agent": [
+          {
+            "agent": "orchestrator",
+            "provider_model": "claude/opus",
+            "effort": "medium",
+            "tokens_in": 350000,
+            "tokens_out": 20000,
+            "approx": true,
+            "source": "declared-estimate",
+            "recorded_at": "2026-11-11"
+          }
+        ]
+      }
+    },
+    {
+      "id": "FIX-e-burgos-042",
+      "author": "e-burgos",
+      "spec_id": null,
+      "fix_document": "sdd/fixes/fix-e-burgos-042.md",
+      "type": "IMPROVEMENT",
+      "severity": "low",
+      "created_at": "2026-11-11",
+      "resolved_at": "2026-11-11",
+      "validated_at": null,
+      "title": "Las submarcas de Display Ads usan el banco de música de la marca madre (campo musicFrom)",
+      "estimation_hours": 1,
+      "description": "Las submarcas (Webs para negocios, Clientes, Tu negocio online) eran copias de Display Ads con sus 2 temas viejos. El manifiesto suma el campo opcional musicFrom: la marca hereda los temas de la madre, del repo y locales, sin duplicar archivos; los suyos tienen prioridad por id. Motion, search_free_music, import_music y la lista de marcas resuelven cada archivo en la marca dueña (brand-music/<marca>/<archivo>). Un ciclo de musicFrom se rechaza.",
+      "justification": "Lo pidió el dev después de la prueba real del banco; es un campo opcional del manifiesto, sin contratos nuevos entre subproyectos.",
+      "related_modules": [
+        "production-quality"
+      ],
+      "affected_files": [
+        "libs/motion-graphics/src/brand/brand-music.ts",
+        "libs/motion-graphics/src/brand/brand-manifest.ts",
+        "libs/motion-graphics/src/pipeline/project-files.ts",
+        "libs/motion-graphics/src/index.ts",
+        "apps/render-api/src/music/brand-music-readers.ts",
+        "apps/render-api/src/music/brand-music-bank.ts",
+        "apps/render-api/src/http/handlers/motion-handler.ts"
+      ],
+      "test_reference": "nx test/lint en verde: motion-graphics 326, render-api 2266, producer-tools 448. Prueba real: las 3 submarcas listan 37 temas, la búsqueda de opticagestion-clientes devuelve el banco con duraciones reales y un video motion de displayads-webs-para-negocios eligió y copió «The Corporate Upbeat» de la madre (voz 17,3 dB sobre la música, -14,2 LUFS).",
+      "status": "implemented",
+      "cycle": null,
+      "process_note": "Los brand.json de las submarcas viven en brands/ (fuera de git): se les agregó musicFrom: displayads a mano. Esteban Burgos queda afuera porque no es submarca.",
+      "usage": {
+        "provider_model": "claude/opus",
+        "effort": "low",
+        "tokens_in": 900000,
+        "tokens_out": 40000,
+        "approx": true,
+        "source": "declared-estimate",
+        "recorded_at": "2026-11-11",
+        "by_agent": [
+          {
+            "agent": "orchestrator",
+            "provider_model": "claude/opus",
+            "effort": "low",
+            "tokens_in": 900000,
+            "tokens_out": 40000,
+            "approx": true,
+            "source": "declared-estimate",
+            "recorded_at": "2026-11-11"
+          }
+        ]
+      }
+    },
+    {
+      "id": "FIX-e-burgos-043",
+      "author": "e-burgos",
+      "spec_id": null,
+      "fix_document": "sdd/fixes/fix-e-burgos-043.md",
+      "type": "IMPROVEMENT",
+      "severity": "low",
+      "created_at": "2026-11-10",
+      "resolved_at": "2026-11-10",
+      "validated_at": null,
+      "title": "Carpetas y categorías plegables en la lista de proyectos del studio",
+      "estimation_hours": 1,
+      "description": "La lista de proyectos del studio se hacía larga con muchas carpetas. Cada carpeta y cada categoría suma un botón para contraerla o expandirla; el estado queda guardado en el navegador (localStorage) por carpeta y categoría.",
+      "justification": "Mejora de UX pedida por el dev; no toca la API ni contratos.",
+      "related_modules": [
+        "production-quality"
+      ],
+      "affected_files": [
+        "apps/web/src/hooks/use-collapsed-sections.ts",
+        "apps/web/src/components/collapse-toggle.tsx",
+        "apps/web/src/components/folder-heading.tsx",
+        "apps/web/src/pages/projects-page.tsx",
+        "apps/web/src/i18n/messages-es.ts",
+        "apps/web/src/i18n/messages-en.ts"
+      ],
+      "test_reference": "nx test/lint de web en verde (sin tests propios del componente).",
+      "status": "implemented",
+      "cycle": null,
+      "process_note": "Hecho en la sesión «Carpetas y categorías plegables en el Studio»; registrado y commiteado al juntar todo para el PR único.",
+      "usage": {
+        "provider_model": "claude/opus",
+        "effort": "low",
+        "tokens_in": 200000,
+        "tokens_out": 15000,
+        "approx": true,
+        "source": "declared-estimate",
+        "recorded_at": "2026-11-11",
+        "by_agent": [
+          {
+            "agent": "orchestrator",
+            "provider_model": "claude/opus",
+            "effort": "low",
+            "tokens_in": 200000,
+            "tokens_out": 15000,
+            "approx": true,
+            "source": "declared-estimate",
+            "recorded_at": "2026-11-11"
+          }
+        ]
+      }
+    },
+    {
+      "id": "FIX-e-burgos-044",
+      "author": "e-burgos",
+      "spec_id": null,
+      "fix_document": "sdd/fixes/fix-e-burgos-044.md",
+      "type": "IMPROVEMENT",
+      "severity": "low",
+      "created_at": "2026-11-11",
+      "resolved_at": "2026-11-11",
+      "validated_at": null,
+      "title": "El SKILL.md del productor aclara que los efectos de audio faltan solo en el montaje; motion sí los tiene",
+      "estimation_hours": 0.25,
+      "description": "El SKILL.md de video-producer decía que el motor no hace efectos de audio ni escenas sin A-roll, sin aclarar que eso vale para el montaje (modo footage). Ahora lo acota al montador y dice que motion graphics lleva whoosh en los cambios de escena, impacto en el drop y los sfx del guion.",
+      "justification": "Etapa 0 del informe de audio (docs/research/2026-11-10-audio-tools-productor.md); solo documentación.",
+      "related_modules": [
+        "production-quality"
+      ],
+      "affected_files": [
+        "sdd/skills/video-producer/SKILL.md"
+      ],
+      "test_reference": "Sin código. Verificado contra compose-template.ts (whoosh por escena), impact-sfx.ts y motion-script.ts (sfx con escena, palabra y offset).",
+      "status": "implemented",
+      "cycle": null,
+      "process_note": "La otra mitad de la etapa 0 (15 dB como margen crítico) espera decisión del dev: contradice la calibración de 2026-10-11 con una mezcla aprobada a 13 dB.",
+      "usage": {
+        "provider_model": "claude/opus",
+        "effort": "low",
+        "tokens_in": 120000,
+        "tokens_out": 6000,
+        "approx": true,
+        "source": "declared-estimate",
+        "recorded_at": "2026-11-11",
+        "by_agent": [
+          {
+            "agent": "orchestrator",
+            "provider_model": "claude/opus",
+            "effort": "low",
+            "tokens_in": 120000,
+            "tokens_out": 6000,
+            "approx": true,
+            "source": "declared-estimate",
+            "recorded_at": "2026-11-11"
+          }
+        ]
+      }
+    },
+    {
+      "id": "FIX-e-burgos-045",
+      "author": "e-burgos",
+      "spec_id": null,
+      "fix_document": "sdd/fixes/fix-e-burgos-045.md",
+      "type": "IMPROVEMENT",
+      "severity": "low",
+      "created_at": "2026-11-11",
+      "resolved_at": "2026-11-11",
+      "validated_at": null,
+      "title": "Commons solo devuelve audio con largo de música y busca con la palabra music; duplicar una marca hereda su música",
+      "estimation_hours": 0.5,
+      "description": "El relleno de Wikimedia Commons en search_free_music traía discursos y una entrevista de 99 minutos. Ahora descarta audio de menos de 30 s o más de 10 min y agrega «music» a la búsqueda si el mood no lo trae. Duplicar una marca ya no copia la carpeta music/ (49 MB en Display Ads): la copia queda con music vacío y musicFrom apuntando a la marca de origen.",
+      "justification": "Pendientes del banco de música (FIX-038 y FIX-042) detectados en la prueba real; sin contratos nuevos.",
+      "related_modules": [
+        "production-quality"
+      ],
+      "affected_files": [
+        "apps/render-api/src/music/commons-music-search.ts",
+        "apps/render-api/src/brands/brand-library.ts"
+      ],
+      "test_reference": "nx test/lint de render-api en verde (2267; un timeout suelto de review-measurements al primer intento, pasa al repetir). Consulta real a Commons: «corporate institutional» pasó de discursos y una entrevista de 99 min a música; «calm music» trae Kevin MacLeod.",
+      "status": "implemented",
+      "cycle": null,
+      "process_note": "Commons sigue siendo una fuente pobre para música: lo de fondo se resuelve con Openverse (siguiente fix).",
+      "usage": {
+        "provider_model": "claude/opus",
+        "effort": "low",
+        "tokens_in": 120000,
+        "tokens_out": 6000,
+        "approx": true,
+        "source": "declared-estimate",
+        "recorded_at": "2026-11-11",
+        "by_agent": [
+          {
+            "agent": "orchestrator",
+            "provider_model": "claude/opus",
+            "effort": "low",
+            "tokens_in": 120000,
+            "tokens_out": 6000,
+            "approx": true,
+            "source": "declared-estimate",
+            "recorded_at": "2026-11-11"
+          }
+        ]
+      }
+    },
+    {
+      "id": "FIX-e-burgos-046",
+      "author": "e-burgos",
+      "spec_id": null,
+      "fix_document": "sdd/fixes/fix-e-burgos-046.md",
+      "type": "IMPROVEMENT",
+      "severity": "medium",
+      "created_at": "2026-11-11",
+      "resolved_at": "2026-11-11",
+      "validated_at": null,
+      "title": "Tutoriales con voz por guion: keeps por línea con transiciones sin desincronizar la voz, y semilla automática en la web",
+      "estimation_hours": 4,
+      "description": "Con voice script el montaje dejaba un solo keep y el video salía sin transiciones. Se parte el keep por las líneas del guion, con una transición cada 2 líneas y handles en el EDL para que la timeline no se acorte ni la voz se desincronice; la voz salta la entrada del handle. El formulario de montaje de la web deja la semilla vacía (automática).",
+      "justification": "Pedido por el orquestador con el plan aprobado por el dev; el campo handles es opcional y sin él el comportamiento no cambia.",
+      "related_modules": [
+        "production-quality"
+      ],
+      "affected_files": [
+        "libs/auto-montage/src/montage/split-keep-at-script-lines.ts",
+        "libs/auto-montage/src/auto-montage.ts",
+        "libs/auto-montage/src/montage/plan-transitions.ts",
+        "libs/timeline-core/src/schemas/edit-decision-list.schema.ts",
+        "libs/timeline-core/schemas/edit-decision-list.schema.json",
+        "libs/timeline-core/src/timeline/build-timeline.ts",
+        "apps/web/src/components/montage-trigger.tsx",
+        "apps/web/src/api/render-api-client.ts",
+        "apps/web/src/i18n/messages-es.ts",
+        "apps/web/src/i18n/messages-en.ts"
+      ],
+      "test_reference": "nx test/lint/build en verde: timeline-core 455, auto-montage 380, composition-remotion 368, render-api 2266, web 1648; render real de media/prueba-motion-guion con voz contigua.",
+      "status": "implemented",
+      "cycle": null,
+      "usage": {
+        "provider_model": "claude/opus",
+        "effort": "medium",
+        "tokens_in": 450000,
+        "tokens_out": 30000,
+        "approx": true,
+        "source": "declared-estimate",
+        "recorded_at": "2026-11-11",
+        "by_agent": [
+          {
+            "agent": "orchestrator",
+            "provider_model": "claude/opus",
+            "effort": "medium",
+            "tokens_in": 450000,
+            "tokens_out": 30000,
+            "approx": true,
+            "source": "declared-estimate",
+            "recorded_at": "2026-11-11"
+          }
+        ]
+      }
+    },
+    {
+      "id": "FIX-e-burgos-047",
+      "author": "e-burgos",
+      "spec_id": null,
+      "fix_document": "sdd/fixes/fix-e-burgos-047.md",
+      "type": "IMPROVEMENT",
+      "severity": "medium",
+      "created_at": "2026-11-11",
+      "resolved_at": "2026-11-11",
+      "validated_at": null,
+      "title": "Openverse como fuente de música libre en search_free_music, entre el banco de la marca y Commons",
+      "estimation_hours": 1.5,
+      "description": "search_free_music completa ahora en este orden: banco de la marca, Openverse (música de Jamendo con licencia CC BY, CC BY-SA, CC0 o dominio público, de 30 s a 10 min, solo desde hosts permitidos) y por último Wikimedia Commons. Si la búsqueda completa no encuentra nada, prueba con palabras sueltas (hasta 3 pedidos, por el límite anónimo de Openverse). import_music descarga desde Jamendo con nombre de archivo legible y deja el crédito con la página del tema. Si una fuente falla se pasa a la siguiente; solo da 503 si fallan todas y no hubo banco.",
+      "justification": "Etapa 1 del informe de audio (docs/research/2026-11-10-audio-tools-productor.md), parte música; Commons devolvía discursos o nada.",
+      "related_modules": [
+        "production-quality"
+      ],
+      "affected_files": [
+        "apps/render-api/src/music/openverse-music-search.ts",
+        "apps/render-api/src/music/import-music.ts",
+        "apps/render-api/src/music/brand-music-bank.ts",
+        "apps/render-api/src/http/handlers/music-handler.ts",
+        "libs/producer-tools/src/contract/tool-schemas.ts",
+        "libs/producer-tools/src/client/render-api-client.ts"
+      ],
+      "test_reference": "nx test/lint en verde: render-api 2273, producer-tools 448. Real: proyecto de Café Aroma (sin banco) busca «calm tutorial» y «upbeat product» y recibe música de Jamendo; import real de «Lo-fi Love Song» (FABENZ, CC BY-SA 3.0) en prueba-banco-musica, MP3 válido de 141 s.",
+      "status": "implemented",
+      "cycle": null,
+      "process_note": "Los SFX de Openverse quedan para después: el montaje no tiene pista de efectos y motion usa su propio banco; conectarlo es trabajo de la sesión de motion (sfxTags).",
+      "usage": {
+        "provider_model": "claude/opus",
+        "effort": "low",
+        "tokens_in": 400000,
+        "tokens_out": 25000,
+        "approx": true,
+        "source": "declared-estimate",
+        "recorded_at": "2026-11-11",
+        "by_agent": [
+          {
+            "agent": "orchestrator",
+            "provider_model": "claude/opus",
+            "effort": "low",
+            "tokens_in": 400000,
+            "tokens_out": 25000,
+            "approx": true,
+            "source": "declared-estimate",
+            "recorded_at": "2026-11-11"
+          }
+        ]
+      }
+    },
+    {
+      "id": "FIX-e-burgos-048",
+      "author": "e-burgos",
+      "spec_id": null,
+      "fix_document": "sdd/fixes/fix-e-burgos-048.md",
+      "type": "IMPROVEMENT",
+      "severity": "medium",
+      "created_at": "2026-11-11",
+      "resolved_at": "2026-11-11",
+      "validated_at": null,
+      "title": "El review marca crítico el margen voz/música debajo de 15 dB (antes 10 crítico y 15 sugerencia)",
+      "estimation_hours": 0.25,
+      "description": "VOICE_MUSIC_CRITICAL_MARGIN_DB (10) y VOICE_MUSIC_SUGGESTION_MARGIN_DB (15) pasan a un único VOICE_MUSIC_MIN_MARGIN_DB = 15: cualquier tramo con la voz a menos de 15 dB sobre la música (y los efectos) es crítico y propone cuánto bajarla. Ya no hay banda de sugerencia.",
+      "justification": "Etapa 0 del informe de audio. Decisión del dev el 2026-11-11 («Seguir de acuerdo a tu recomendación»), alineada con la regla previa a publicar de FIX-015; reemplaza la calibración del 2026-10-11 que aceptaba 13 dB.",
+      "related_modules": [
+        "production-quality"
+      ],
+      "affected_files": [
+        "apps/render-api/src/review/review-thresholds.ts",
+        "apps/render-api/src/review/voice-music-margin-rule.ts"
+      ],
+      "test_reference": "nx test/lint de render-api en verde (2273); el test de la mezcla de 13 dB ahora exige falla crítica con el arreglo de 2,0 dB.",
+      "status": "implemented",
+      "cycle": null,
+      "process_note": "Videos que antes pasaban con 10–15 dB ahora fallan el review: hay que bajar la música antes de entregar.",
+      "usage": {
+        "provider_model": "claude/opus",
+        "effort": "low",
+        "tokens_in": 120000,
+        "tokens_out": 6000,
+        "approx": true,
+        "source": "declared-estimate",
+        "recorded_at": "2026-11-11",
+        "by_agent": [
+          {
+            "agent": "orchestrator",
+            "provider_model": "claude/opus",
+            "effort": "low",
+            "tokens_in": 120000,
+            "tokens_out": 6000,
+            "approx": true,
+            "source": "declared-estimate",
+            "recorded_at": "2026-11-11"
+          }
+        ]
+      }
+    },
+    {
+      "id": "FIX-e-burgos-049",
+      "author": "e-burgos",
+      "spec_id": null,
+      "fix_document": "sdd/fixes/fix-e-burgos-049.md",
+      "type": "IMPROVEMENT",
+      "severity": "medium",
+      "created_at": "2026-11-11",
+      "resolved_at": "2026-11-11",
+      "validated_at": null,
+      "title": "Los dos másters miden el true peak después del AAC y rehacen el loudnorm una vez si pasa de -1 dBTP",
+      "estimation_hours": 1,
+      "description": "El encoder AAC a 192k sumaba hasta 1,5-1,8 dB de pico sobre lo que dejaba loudnorm (un vertical salió a -0,28 dBTP con techo -1). normalizeVideoMasterLoudness (motion) mide el MP4 recién codificado y normalizeMasterLoudness (montaje) codifica una sonda AAC con el mismo códec y bitrate del mux; si el pico supera el techo, rehacen el loudnorm una sola vez con el target bajado en lo que sumó el encoder más 0,5 dB de margen. El margen general de 0,5 dB no cambia.",
+      "justification": "Diagnóstico del pico del vertical de la prueba conjunta; asignado por el orquestador con la regla de medir y reintentar una vez, sin subir el margen para todos.",
+      "related_modules": [
+        "production-quality"
+      ],
+      "affected_files": [
+        "libs/media-local/src/ffmpeg/true-peak-guard.ts",
+        "libs/media-local/src/ffmpeg/normalize-video-master-loudness.ts",
+        "libs/media-local/src/ffmpeg/normalize-master-loudness.ts"
+      ],
+      "test_reference": "nx test/lint de media-local (448) y render-api (2273) en verde; review-measurements tuvo un timeout suelto en la corrida paralela y pasa solo. Real sobre el audio del vertical (peor caso, doble AAC): motion pasa de +1,01 a -1,08 dBTP y el montaje queda en -1,59 dBTP después del AAC; ambos reintentaron.",
+      "status": "implemented",
+      "cycle": null,
+      "process_note": "Sin el margen de 0,5 dB el reintento quedaba en -0,93 y -0,83: el sobrepico del AAC crece cuando loudnorm limita más. El costo es que el integrado baja hasta ~-15 LUFS en ese peor caso (sugerencia del review, no crítico).",
+      "usage": {
+        "provider_model": "claude/opus",
+        "effort": "low",
+        "tokens_in": 120000,
+        "tokens_out": 6000,
+        "approx": true,
+        "source": "declared-estimate",
+        "recorded_at": "2026-11-11",
+        "by_agent": [
+          {
+            "agent": "orchestrator",
+            "provider_model": "claude/opus",
+            "effort": "low",
+            "tokens_in": 120000,
+            "tokens_out": 6000,
+            "approx": true,
+            "source": "declared-estimate",
+            "recorded_at": "2026-11-11"
+          }
+        ]
+      }
+    },
+    {
+      "id": "FIX-e-burgos-050",
+      "author": "e-burgos",
+      "spec_id": null,
+      "fix_document": "sdd/fixes/fix-e-burgos-050.md",
+      "type": "IMPROVEMENT",
+      "severity": "medium",
+      "created_at": "2026-11-11",
+      "resolved_at": "2026-11-11",
+      "validated_at": null,
+      "title": "Motion graphics etapa 2: bumpers por piezas (fondo animado, revelado y remate) que rotan por video",
+      "estimation_hours": 12,
+      "description": "Los bumpers del modo A eran una placa lisa con zoom. Se suman fondos animados (gradient, noise, shapes, glow), revelados (wipe, blur-in, pop y los de siempre) y un remate tipeado; bumpers.style rota por semilla del video con intro y outro distintos, toma pools y colores de la marca y el editor web los expone. Nuevas deps @remotion/noise y @remotion/shapes 4.0.522.",
+      "justification": "Etapa 2 aprobada por el dev vía la sesión orquestadora; campos opcionales y sin style.rotate el comportamiento no cambia.",
+      "related_modules": [
+        "production-quality"
+      ],
+      "affected_files": [
+        "libs/timeline-core/src/schemas/timeline.schema.ts",
+        "libs/timeline-core/src/timeline/resolve-bumper-look.ts",
+        "libs/composition-remotion/src/components/logo-bumper-scene.tsx",
+        "libs/composition-remotion/src/components/bumper-background.tsx",
+        "libs/composition-remotion/src/helpers/logo-bumper-style.ts",
+        "libs/composition-remotion/src/helpers/bumper-background-style.ts",
+        "libs/composition-remotion/src/components/timeline-composition.tsx",
+        "libs/auto-montage/src/auto-montage.ts",
+        "libs/motion-graphics/src/brand/brand-manifest.ts",
+        "libs/motion-graphics/assets/brands/displayads/brand.json",
+        "libs/producer-tools/src/handlers/studio-tool-handlers.ts",
+        "apps/web/src/components/logo-bumper-editor.tsx",
+        "apps/web/src/api/timeline-edit/logo-bumpers.ts",
+        "package.json",
+        "pnpm-lock.yaml",
+        "apps/desktop/scripts/build-desktop.mjs",
+        "apps/render-api/project.json"
+      ],
+      "test_reference": "nx test/lint/build en verde: timeline-core 461, auto-montage 381, composition-remotion 379, motion-graphics 331, producer-tools 449, render-api 2267, web 1651; renders de bumpers con semillas 101, 202 y 316 sin destellos.",
+      "status": "implemented",
+      "cycle": null,
+      "process_note": "Falta pasar paleta y url de la marca desde render-api (espera OK de la sesión de música) y actualizar las recetas del prompt compartido.",
+      "usage": {
+        "provider_model": "claude/opus",
+        "effort": "medium",
+        "tokens_in": 900000,
+        "tokens_out": 60000,
+        "approx": true,
+        "source": "declared-estimate",
+        "recorded_at": "2026-11-11",
+        "by_agent": [
+          {
+            "agent": "orchestrator",
+            "provider_model": "claude/opus",
+            "effort": "medium",
+            "tokens_in": 900000,
+            "tokens_out": 60000,
+            "approx": true,
+            "source": "declared-estimate",
+            "recorded_at": "2026-11-11"
+          }
+        ]
+      }
+    },
+    {
+      "id": "FIX-e-burgos-051",
+      "author": "e-burgos",
+      "spec_id": null,
+      "fix_document": "sdd/fixes/fix-e-burgos-051.md",
+      "type": "IMPROVEMENT",
+      "severity": "low",
+      "created_at": "2026-11-11",
+      "resolved_at": "2026-11-11",
+      "validated_at": null,
+      "title": "Bumpers con la paleta y la web de la marca, y recetas del productor que no fijan su animación",
+      "estimation_hours": 2,
+      "description": "render-api arma el estilo de bumpers desde el manifiesto de la marca (paleta, web o outroCaption, pools) y lo pasa al montaje; las recetas del prompt prenden los bumpers sin background, reveal ni caption para que el studio los rote.",
+      "justification": "Pendiente del FIX-e-burgos-050; autorizado por la sesión orquestadora y por la sesión de música para los archivos de render-api y el prompt compartido.",
+      "related_modules": [
+        "production-quality"
+      ],
+      "affected_files": [
+        "apps/render-api/src/brands/project-brand-context.ts",
+        "apps/render-api/src/jobs/run-montage-pipeline.ts",
+        "libs/producer-tools/src/prompt/build-producer-prompt.ts"
+      ],
+      "test_reference": "nx test/lint en verde: render-api 2277, producer-tools 448.",
+      "status": "implemented",
+      "cycle": null,
+      "usage": {
+        "provider_model": "claude/opus",
+        "effort": "medium",
+        "tokens_in": 250000,
+        "tokens_out": 15000,
+        "approx": true,
+        "source": "declared-estimate",
+        "recorded_at": "2026-11-11",
+        "by_agent": [
+          {
+            "agent": "orchestrator",
+            "provider_model": "claude/opus",
+            "effort": "medium",
+            "tokens_in": 250000,
+            "tokens_out": 15000,
+            "approx": true,
+            "source": "declared-estimate",
+            "recorded_at": "2026-11-11"
+          }
+        ]
+      }
+    },
+    {
+      "id": "FIX-e-burgos-052",
+      "author": "e-burgos",
+      "spec_id": null,
+      "fix_document": "sdd/fixes/fix-e-burgos-052.md",
+      "type": "IMPROVEMENT",
+      "severity": "low",
+      "created_at": "2026-11-11",
+      "resolved_at": "2026-11-11",
+      "validated_at": null,
+      "title": "El SKILL.md del productor explica los bumpers por piezas: prenderlos sin look propio y dejar que el montaje rote",
+      "estimation_hours": 0.25,
+      "description": "La sección de bumpers del SKILL.md seguía con el ejemplo de backgroundColor + animation (fade | zoom | slide-up). Ahora pide prender intro y outro solo con enabled, durationMs y logoWidthRatio, sin bumpers.style, y explica que el montaje rota fondo animado, revelado y remate por video con la paleta y la web de la marca (FIX-050 y FIX-051).",
+      "justification": "Pedido de la sesión de motion al cerrar la etapa 2 de bumpers; solo documentación.",
+      "related_modules": [
+        "production-quality"
+      ],
+      "affected_files": [
+        "sdd/skills/video-producer/SKILL.md"
+      ],
+      "test_reference": "Sin código. Contrastado con timeline.schema.ts (LogoBumperSchema, BumperStyleSchema), resolve-bumper-look.ts y auto-montage.ts (style con rotate y seed).",
+      "status": "implemented",
+      "cycle": null,
+      "process_note": "Con rotate: true, background y reveal propios del bumper no se aplican; caption, backgroundColor y accentColor sí.",
+      "usage": {
+        "provider_model": "claude/opus",
+        "effort": "low",
+        "tokens_in": 120000,
+        "tokens_out": 6000,
+        "approx": true,
+        "source": "declared-estimate",
+        "recorded_at": "2026-11-11",
+        "by_agent": [
+          {
+            "agent": "orchestrator",
+            "provider_model": "claude/opus",
+            "effort": "low",
+            "tokens_in": 120000,
+            "tokens_out": 6000,
+            "approx": true,
+            "source": "declared-estimate",
+            "recorded_at": "2026-11-11"
+          }
+        ]
+      }
+    },
+    {
+      "id": "FIX-e-burgos-053",
+      "author": "e-burgos",
+      "spec_id": null,
+      "fix_document": "sdd/fixes/fix-e-burgos-053.md",
+      "type": "IMPROVEMENT",
+      "severity": "medium",
+      "created_at": "2026-11-11",
+      "resolved_at": "2026-11-11",
+      "validated_at": null,
+      "title": "La música libre no acepta CC BY-SA: Openverse y Commons solo devuelven CC BY, CC0 o dominio público",
+      "estimation_hours": 0.25,
+      "description": "CC BY-SA trata la sincronización de música con imagen como obra derivada, así que obligaría a publicar el video entero bajo CC BY-SA (cualquiera podría reutilizarlo comercialmente, y YouTube no ofrece esa licencia). isPublishableMusicLicense descarta share-alike en la música de Commons y Openverse (license=by,cc0,pdm). La búsqueda de B-roll de Commons no cambia.",
+      "justification": "Decisión del dev el 2026-11-11 tras medir la pérdida («vamos con tu recomendación»): en Openverse se pierde ~40–60% de calm, ambient e inspiring, pero sigue habiendo decenas o cientos de temas y el banco de la marca va primero.",
+      "related_modules": [
+        "production-quality"
+      ],
+      "affected_files": [
+        "apps/render-api/src/music/music-license.ts",
+        "apps/render-api/src/music/openverse-music-search.ts",
+        "apps/render-api/src/music/commons-music-search.ts",
+        "libs/producer-tools/src/contract/tool-schemas.ts"
+      ],
+      "test_reference": "nx test/lint en verde: producer-tools 448, render-api 2277 (review-measurements dio el timeout suelto conocido y pasa solo). Real: «calm tutorial» desde Café Aroma devuelve 8 temas CC BY 3.0, ninguno BY-SA.",
+      "status": "implemented",
+      "cycle": null,
+      "process_note": "El banco de Display Ads ya no tenía temas BY-SA (18 CC BY + 19 YouTube). El único BY-SA importado es «Lo-fi Love Song» en el proyecto de prueba prueba-banco-musica, que no se publica.",
+      "usage": {
+        "provider_model": "claude/opus",
+        "effort": "low",
+        "tokens_in": 120000,
+        "tokens_out": 6000,
+        "approx": true,
+        "source": "declared-estimate",
+        "recorded_at": "2026-11-11",
+        "by_agent": [
+          {
+            "agent": "orchestrator",
+            "provider_model": "claude/opus",
+            "effort": "low",
+            "tokens_in": 120000,
+            "tokens_out": 6000,
+            "approx": true,
+            "source": "declared-estimate",
+            "recorded_at": "2026-11-11"
+          }
+        ]
+      }
+    },
+    {
+      "id": "FIX-e-burgos-054",
+      "author": "e-burgos",
+      "spec_id": null,
+      "fix_document": "sdd/fixes/fix-e-burgos-054.md",
+      "type": "IMPROVEMENT",
+      "severity": "low",
+      "created_at": "2026-11-11",
+      "resolved_at": "2026-11-11",
+      "validated_at": null,
+      "title": "pnpm ci:local: la verificación corre en la Mac y el CI de GitHub se saltea con el status ci-local",
+      "estimation_hours": 2,
+      "description": "La cuenta superó en octubre los 3000 min de Actions del plan; video-maker consumió 991. El CI corre `nx run-many -t lint test build` completo en cada PR y otra vez en el push a main del merge (~7 min cada uno). `pnpm ci:local` corre en la Mac sdd:validate y `nx affected -t lint test build`, pushea la rama y publica el commit status `ci-local`. El CI lo lee y se saltea en el PR y en el merge cuyo PR tiene el mismo árbol. CI ignora docs, sdd y md; SDD validate sólo corre con cambios en sdd/; Deploy Docs Site suma concurrency.",
+      "justification": "Cambia sólo workflows y scripts de CI; sin contratos ni entidades; reversible revirtiendo el commit. Sin status ci-local el CI corre completo como antes.",
+      "related_modules": [
+        "ci"
+      ],
+      "affected_files": [
+        "scripts/ci/ci-local.sh",
+        "scripts/ci/ci-local-verified.sh",
+        "package.json",
+        ".github/workflows/ci.yml",
+        ".github/workflows/sdd-validate.yml",
+        ".github/workflows/deploy-docs-site.yml",
+        "sdd/fixes.json",
+        "sdd/fixes/fix-e-burgos-037.md"
+      ],
+      "test_reference": "YAML de 3 workflows parseado; pnpm ci:local sobre la rama chore/ci-local publicó ci-local y el CI del PR salteó la verificación",
+      "status": "implemented",
+      "cycle": null,
+      "usage": {
+        "provider_model": "claude/opus",
+        "effort": "medium",
+        "tokens_in": 90000,
+        "tokens_out": 12000,
+        "approx": true,
+        "source": "declared-estimate",
+        "recorded_at": "2026-11-11"
+      }
+    },
+    {
+      "id": "FIX-e-burgos-055",
+      "author": "e-burgos",
+      "spec_id": null,
+      "fix_document": "sdd/fixes/fix-e-burgos-055.md",
+      "type": "BUGFIX",
+      "severity": "low",
+      "created_at": "2026-11-11",
+      "resolved_at": "2026-11-11",
+      "validated_at": null,
+      "title": "La rotación de bumpers sin pools de marca no elige fondo liso ni fundido",
+      "estimation_hours": 0.5,
+      "description": "En la prueba del productor en el studio, un proyecto sin marca rotó al look viejo (solid + fade). La rotación por defecto usa solo fondos animados y revelados con movimiento; solid y fade quedan para elección explícita o pools de marca.",
+      "justification": "Defecto encontrado en la verificación del punto 3 del plan aprobado; no cambia contratos.",
+      "related_modules": [
+        "production-quality"
+      ],
+      "affected_files": [
+        "libs/timeline-core/src/timeline/resolve-bumper-look.ts"
+      ],
+      "test_reference": "nx test/lint/build en verde: timeline-core 462, composition-remotion 379.",
+      "status": "implemented",
+      "cycle": null,
+      "usage": {
+        "provider_model": "claude/opus",
+        "effort": "medium",
+        "tokens_in": 200000,
+        "tokens_out": 8000,
+        "approx": true,
+        "source": "declared-estimate",
+        "recorded_at": "2026-11-11",
+        "by_agent": [
+          {
+            "agent": "orchestrator",
+            "provider_model": "claude/opus",
+            "effort": "medium",
+            "tokens_in": 200000,
+            "tokens_out": 8000,
+            "approx": true,
+            "source": "declared-estimate",
+            "recorded_at": "2026-11-11"
+          }
+        ]
+      }
+    },
+    {
+      "id": "FIX-e-burgos-056",
+      "author": "e-burgos",
+      "spec_id": null,
+      "fix_document": "sdd/fixes/fix-e-burgos-056.md",
+      "type": "IMPROVEMENT",
+      "severity": "low",
+      "created_at": "2026-11-11",
+      "resolved_at": "2026-11-11",
+      "validated_at": null,
+      "title": "El SKILL.md del productor: lo fijado a mano gana sobre la rotación de bumpers y la receta Tutorial no fija su look",
+      "estimation_hours": 0.25,
+      "description": "FIX-052 decía que, con la rotación activa, background y reveal propios no se aplicaban; es al revés: resolve-bumper-look usa lo fijado en el bumper antes de rotar. Además la rotación por defecto ya no incluye solid ni fade (FIX-055). La receta Tutorial pasa de intro slide-up / outro zoom a prender los bumpers sin look propio, y su fila de música apunta a search_free_music (banco, Openverse, Commons).",
+      "justification": "Pedido del orquestador tras la prueba de motion en el studio (FIX-055).",
+      "related_modules": [
+        "production-quality"
+      ],
+      "affected_files": [
+        "sdd/skills/video-producer/SKILL.md"
+      ],
+      "test_reference": "Sin código. Contrastado con libs/timeline-core/src/timeline/resolve-bumper-look.ts (bumpers.intro?.background ?? pick…, ROTATING_BACKGROUNDS sin solid, ROTATING_REVEALS sin fade).",
+      "status": "implemented",
+      "cycle": null,
+      "process_note": "Corrige un error de FIX-052: había leído fixedChoice como lo único que mira los campos propios.",
+      "usage": {
+        "provider_model": "claude/opus",
+        "effort": "low",
+        "tokens_in": 120000,
+        "tokens_out": 6000,
+        "approx": true,
+        "source": "declared-estimate",
+        "recorded_at": "2026-11-11",
+        "by_agent": [
+          {
+            "agent": "orchestrator",
+            "provider_model": "claude/opus",
+            "effort": "low",
+            "tokens_in": 120000,
+            "tokens_out": 6000,
+            "approx": true,
+            "source": "declared-estimate",
+            "recorded_at": "2026-11-11"
+          }
+        ]
+      }
+    },
+    {
+      "id": "FIX-e-burgos-057",
+      "author": "e-burgos",
+      "spec_id": null,
+      "fix_document": "sdd/fixes/fix-e-burgos-057.md",
+      "type": "IMPROVEMENT",
+      "severity": "medium",
+      "created_at": "2026-11-11",
+      "resolved_at": "2026-11-11",
+      "validated_at": null,
+      "title": "Contrato de efectos de sonido en los bumpers: sfxKind, cues explícitos y planBumperSfx para la mezcla",
+      "estimation_hours": 3,
+      "description": "Los bumpers declaran sfxKind (whoosh, impact, shimmer, click o none) y cues explícitos con asset, ganancia y fades. El revelado pide un efecto, el outro no repite el del intro y la elección a mano gana; planBumperSfx entrega los cues en tiempo absoluto para que la mezcla elija el archivo del banco.",
+      "justification": "Pedido del dev («Efectos de sonido primero») vía la sesión orquestadora; campos opcionales y los bumpers sin rotación siguen mudos.",
+      "related_modules": [
+        "production-quality"
+      ],
+      "affected_files": [
+        "libs/timeline-core/src/schemas/timeline.schema.ts",
+        "libs/timeline-core/src/timeline/resolve-bumper-look.ts",
+        "libs/timeline-core/src/timeline/plan-bumper-sfx.ts",
+        "libs/timeline-core/src/index.ts",
+        "libs/timeline-core/schemas/timeline.schema.json"
+      ],
+      "test_reference": "nx test/lint/build en verde: timeline-core 469, composition-remotion 379, auto-montage 381, producer-tools 448, web 1651.",
+      "status": "implemented",
+      "cycle": null,
+      "usage": {
+        "provider_model": "claude/opus",
+        "effort": "medium",
+        "tokens_in": 300000,
+        "tokens_out": 20000,
+        "approx": true,
+        "source": "declared-estimate",
+        "recorded_at": "2026-11-11",
+        "by_agent": [
+          {
+            "agent": "orchestrator",
+            "provider_model": "claude/opus",
+            "effort": "medium",
+            "tokens_in": 300000,
+            "tokens_out": 20000,
+            "approx": true,
+            "source": "declared-estimate",
+            "recorded_at": "2026-11-11"
+          }
+        ]
+      }
+    },
+    {
+      "id": "FIX-e-burgos-058",
+      "author": "e-burgos",
+      "spec_id": null,
+      "fix_document": "sdd/fixes/fix-e-burgos-058.md",
+      "type": "IMPROVEMENT",
+      "severity": "low",
+      "created_at": "2026-11-11",
+      "resolved_at": "2026-11-11",
+      "validated_at": null,
+      "title": "Selector de sonido de los bumpers en el editor web y entrada del logo sincronizada con el contrato",
+      "estimation_hours": 1.5,
+      "description": "El editor de bumpers permite elegir el efecto (automático, whoosh, golpe, brillo, clicks o sin sonido) y la composición toma el tiempo de entrada del logo del contrato de SFX. El prompt del productor deja el efecto en automático salvo pedido del usuario.",
+      "justification": "Parte de la tarea de efectos de sonido pedida por el dev vía la sesión orquestadora.",
+      "related_modules": [
+        "production-quality"
+      ],
+      "affected_files": [
+        "apps/web/src/components/logo-bumper-editor.tsx",
+        "apps/web/src/api/timeline-edit/logo-bumpers.ts",
+        "apps/web/src/i18n/messages-es.ts",
+        "apps/web/src/i18n/messages-en.ts",
+        "libs/composition-remotion/src/helpers/logo-bumper-style.ts",
+        "libs/composition-remotion/src/components/logo-bumper-scene.tsx",
+        "libs/producer-tools/src/prompt/build-producer-prompt.ts"
+      ],
+      "test_reference": "nx test/lint/build en verde: composition-remotion 379, web 1653, producer-tools 449.",
+      "status": "implemented",
+      "cycle": null,
+      "usage": {
+        "provider_model": "claude/opus",
+        "effort": "medium",
+        "tokens_in": 120000,
+        "tokens_out": 8000,
+        "approx": true,
+        "source": "declared-estimate",
+        "recorded_at": "2026-11-11",
+        "by_agent": [
+          {
+            "agent": "orchestrator",
+            "provider_model": "claude/opus",
+            "effort": "medium",
+            "tokens_in": 120000,
+            "tokens_out": 8000,
+            "approx": true,
+            "source": "declared-estimate",
+            "recorded_at": "2026-11-11"
+          }
+        ]
+      }
+    },
+    {
+      "id": "FIX-e-burgos-059",
+      "author": "e-burgos",
+      "spec_id": null,
+      "fix_document": "sdd/fixes/fix-e-burgos-059.md",
+      "type": "IMPROVEMENT",
+      "severity": "medium",
+      "created_at": "2026-11-11",
+      "resolved_at": "2026-11-11",
+      "validated_at": null,
+      "title": "Banco de efectos de sonido CC0/CC BY para cualquier marca: whoosh, impacto, brillo, riser, tipeo y click",
+      "estimation_hours": 2,
+      "description": "18 efectos curados de Freesound vía Openverse (3 por tipo), solo CC0 o CC BY, recortados y nivelados a -18 LUFS de loudness momentáneo máximo con pico ≤ -2 dBTP, en libs/motion-graphics/assets/sfx-bank/ con sfx-bank.json y CREDITS.md. parseSfxBank rechaza licencias que no permiten redistribuir y pickSfxVariant elige la variante con semilla evitando las recientes. Los créditos aceptan kind sfx («Efecto de sonido» al publicar). music/CREDITS.md deja de llamar Apache 2.0 a los SFX de Pixabay del modo B.",
+      "justification": "Pedido del dev («Efectos de sonido primero»), etapa 1 del plan de SFX; sin búsqueda en vivo por render.",
+      "related_modules": [
+        "production-quality"
+      ],
+      "affected_files": [
+        "libs/motion-graphics/assets/sfx-bank/",
+        "libs/motion-graphics/src/sfx/sfx-bank.ts",
+        "libs/motion-graphics/src/index.ts",
+        "apps/render-api/src/music/project-credits.ts",
+        "apps/render-api/src/youtube/publish-credits.ts",
+        "libs/motion-graphics/assets/brands/displayads/music/CREDITS.md"
+      ],
+      "test_reference": "nx test/lint en verde: motion-graphics 336 (banco real: archivos, licencias, picos; parser rechaza SA/ND/NC/Pixabay; variante determinista), render-api 2278. Curación por medición (envolvente, ataque, subida, transitorios, piso de ruido) sobre 146 candidatos; página de escucha https://claude.ai/artifact/AA4WU45ioxFvQmwDQXV5Yq.",
+      "status": "implemented",
+      "cycle": null,
+      "process_note": "Elegidos por medición, no a oído: el dev puede cambiar cualquiera desde la página de escucha. Los 8 SFX de runtime/sfx (Pixabay) siguen en el repo hasta que motion pase el modo B al banco nuevo.",
+      "usage": {
+        "provider_model": "claude/opus",
+        "effort": "medium",
+        "tokens_in": 700000,
+        "tokens_out": 45000,
+        "approx": true,
+        "source": "declared-estimate",
+        "recorded_at": "2026-11-11",
+        "by_agent": [
+          {
+            "agent": "orchestrator",
+            "provider_model": "claude/opus",
+            "effort": "medium",
+            "tokens_in": 700000,
+            "tokens_out": 45000,
+            "approx": true,
+            "source": "declared-estimate",
+            "recorded_at": "2026-11-11"
+          }
+        ]
+      }
+    },
+    {
+      "id": "FIX-e-burgos-060",
+      "author": "e-burgos",
+      "spec_id": null,
+      "fix_document": "sdd/fixes/fix-e-burgos-060.md",
+      "type": "IMPROVEMENT",
+      "severity": "medium",
+      "created_at": "2026-11-11",
+      "resolved_at": "2026-11-11",
+      "validated_at": null,
+      "title": "El máster del montaje mezcla los efectos de sonido de los bumpers y acredita los CC BY usados",
+      "estimation_hours": 1.5,
+      "description": "render-api resuelve planBumperSfx (contrato de motion, FIX-057) contra el banco de FIX-059: cada cue automático elige variante con semilla del video sin repetir seguidas y su gain deja el efecto gainDb por debajo del target de voz (según el nivel medido en el banco); los cues explícitos usan su asset y su gain. media-local suma cada efecto al amix con fundidos y adelay en tiempo absoluto; el limitador y FIX-049 cuidan el pico. Después de mezclar, los efectos CC BY usados entran a work/credits.json como kind sfx, sin duplicar entre renders.",
+      "justification": "Etapa 2 del plan de SFX pedido por el dev.",
+      "related_modules": [
+        "production-quality"
+      ],
+      "affected_files": [
+        "libs/media-local/src/mix/build-sfx-chain.ts",
+        "libs/media-local/src/mix/build-audio-mix-graph.ts",
+        "libs/media-local/src/ffmpeg/mix-timeline-audio.ts",
+        "apps/render-api/src/sfx/resolve-bumper-sfx.ts",
+        "apps/render-api/src/sfx/load-sfx-bank.ts",
+        "apps/render-api/src/deps/node-render-api-dependencies.ts",
+        "apps/render-api/src/deps/render-api-dependencies.ts",
+        "apps/render-api/src/pipeline/run-render-pipeline.ts",
+        "apps/render-api/src/music/project-credits.ts"
+      ],
+      "test_reference": "nx test/lint en verde: media-local 449 (grafo con efectos: entradas, fundidos, gain, adelay, amix), render-api 2282 (resolución de cues, variantes sin repetir, cues explícitos, créditos solo CC BY y sin duplicar).",
+      "status": "implemented",
+      "cycle": null,
+      "process_note": "gainDb del contrato = dB por debajo del target de voz; con la voz a -14 LUFS el whoosh queda en -28, el impacto en -26, el brillo en -30 y los clicks en -38 de loudness momentáneo.",
+      "usage": {
+        "provider_model": "claude/opus",
+        "effort": "medium",
+        "tokens_in": 700000,
+        "tokens_out": 45000,
+        "approx": true,
+        "source": "declared-estimate",
+        "recorded_at": "2026-11-11",
+        "by_agent": [
+          {
+            "agent": "orchestrator",
+            "provider_model": "claude/opus",
+            "effort": "medium",
+            "tokens_in": 700000,
+            "tokens_out": 45000,
+            "approx": true,
+            "source": "declared-estimate",
+            "recorded_at": "2026-11-11"
+          }
+        ]
+      }
+    },
+    {
+      "id": "FIX-e-burgos-061",
+      "author": "e-burgos",
+      "spec_id": null,
+      "fix_document": "sdd/fixes/fix-e-burgos-061.md",
+      "type": "IMPROVEMENT",
+      "severity": "medium",
+      "created_at": "2026-11-11",
+      "resolved_at": "2026-11-11",
+      "validated_at": null,
+      "title": "El review avisa cuando los efectos de sonido suenan como ametralladora: 5+ iguales seguidos o demasiado densos",
+      "estimation_hours": 0.75,
+      "description": "Reglas sfx-repetition (5 o más efectos iguales seguidos) y sfx-density (más de 4 en 3 s o más de 20 por minuto), tomadas del criterio de Real SFX. Ven los efectos del modo B (los audio sfx-* del index.html) y los de los bumpers del montaje (planBumperSfx). Son sugerencias, no críticas.",
+      "justification": "Etapa 3 del plan de SFX pedido por el dev.",
+      "related_modules": [
+        "production-quality"
+      ],
+      "affected_files": [
+        "apps/render-api/src/review/sfx-pattern-rules.ts",
+        "apps/render-api/src/review/review-thresholds.ts",
+        "apps/render-api/src/review/review-inputs.ts",
+        "apps/render-api/src/review/review-facts.ts",
+        "apps/render-api/src/review/review-rules.ts",
+        "apps/render-api/src/review/collect-motion-facts.ts",
+        "apps/render-api/src/review/collect-footage-facts.ts",
+        "apps/render-api/src/review/collect-review-inputs.ts"
+      ],
+      "test_reference": "nx test/lint de render-api en verde (2288), con el caso real del modo B (6 whoosh iguales seguidos). Calibrado sobre 3 videos motion: rachas de 5, 6 y 8 whoosh idénticos, densidad máxima 1 efecto cada 3 s.",
+      "status": "implemented",
+      "cycle": null,
+      "process_note": "Hoy todo video motion dispara sfx-repetition porque compose-template usa el mismo whoosh.mp3 en cada corte; por eso es sugerencia. El arreglo es de motion: rotar variantes del banco de FIX-059.",
+      "usage": {
+        "provider_model": "claude/opus",
+        "effort": "medium",
+        "tokens_in": 350000,
+        "tokens_out": 20000,
+        "approx": true,
+        "source": "declared-estimate",
+        "recorded_at": "2026-11-11",
+        "by_agent": [
+          {
+            "agent": "orchestrator",
+            "provider_model": "claude/opus",
+            "effort": "medium",
+            "tokens_in": 350000,
+            "tokens_out": 20000,
+            "approx": true,
+            "source": "declared-estimate",
+            "recorded_at": "2026-11-11"
+          }
+        ]
+      }
+    },
+    {
+      "id": "FIX-e-burgos-062",
+      "author": "e-burgos",
+      "spec_id": null,
+      "fix_document": "sdd/fixes/fix-e-burgos-062.md",
+      "type": "IMPROVEMENT",
+      "severity": "medium",
+      "created_at": "2026-11-11",
+      "resolved_at": "2026-11-11",
+      "validated_at": null,
+      "title": "El modo B rota whoosh, riser e impacto del banco CC0/CC BY y acredita los CC BY",
+      "estimation_hours": 3,
+      "description": "Cada corte del modo B usaba el mismo whoosh de Pixabay y disparaba sfx-repetition. composeProject copia el banco nuevo al proyecto, rota el whoosh sin repetir los dos anteriores, elige riser e impacto por semilla y suma los créditos CC BY al archivo de créditos.",
+      "justification": "Pedido por la sesión de música tras medir la regla sfx-repetition; usa el banco del FIX-e-burgos-059 y deja de referenciar los SFX de Pixabay desde las plantillas generadas.",
+      "related_modules": [
+        "production-quality"
+      ],
+      "affected_files": [
+        "libs/motion-graphics/src/sfx/motion-sfx-picks.ts",
+        "libs/motion-graphics/src/template/compose-template.ts",
+        "libs/motion-graphics/src/compose/compose-storyboard.ts",
+        "libs/motion-graphics/src/compose/impact-sfx.ts",
+        "libs/motion-graphics/src/pipeline/compose-project.ts",
+        "libs/motion-graphics/src/pipeline/render-project.ts"
+      ],
+      "test_reference": "nx test/lint/build en verde: motion-graphics 341, render-api 2288, motion-studio 17; render real con 9 whooshes rotando, −14,1 LUFS, pico −1,3 dBTP, 0 destellos.",
+      "status": "implemented",
+      "cycle": null,
+      "process_note": "Los SFX de Pixabay de runtime/sfx/ y la plantilla a mano presentacion siguen en el repo hasta que el dev decida.",
+      "usage": {
+        "provider_model": "claude/opus",
+        "effort": "medium",
+        "tokens_in": 400000,
+        "tokens_out": 25000,
+        "approx": true,
+        "source": "declared-estimate",
+        "recorded_at": "2026-11-11",
+        "by_agent": [
+          {
+            "agent": "orchestrator",
+            "provider_model": "claude/opus",
+            "effort": "medium",
+            "tokens_in": 400000,
+            "tokens_out": 25000,
+            "approx": true,
+            "source": "declared-estimate",
+            "recorded_at": "2026-11-11"
+          }
+        ]
+      }
+    },
+    {
+      "id": "FIX-e-burgos-063",
+      "author": "e-burgos",
+      "spec_id": null,
+      "fix_document": "sdd/fixes/fix-e-burgos-063.md",
+      "type": "IMPROVEMENT",
+      "severity": "low",
+      "created_at": "2026-11-11",
+      "resolved_at": "2026-11-11",
+      "validated_at": null,
+      "title": "La mezcla de SFX sigue el contrato de motion: semilla de bumpers.style y cues explícitos con id del banco",
+      "estimation_hours": 0.25,
+      "description": "resolveBumperSfx elige la variante con bumpers.style.seed (timeline.id si no hay), acepta en los cues explícitos un assetId que sea id del banco (whoosh-2) además de un asset de la timeline, y saltea un tipo que el banco no tenga en vez de tumbar el render.",
+      "justification": "Alinear FIX-060 con los detalles del contrato de FIX-057 que motion mandó después.",
+      "related_modules": [
+        "production-quality"
+      ],
+      "affected_files": [
+        "apps/render-api/src/sfx/resolve-bumper-sfx.ts"
+      ],
+      "test_reference": "nx test/lint de render-api en verde (2291), con tests de id del banco, semilla del estilo y tipo faltante.",
+      "status": "implemented",
+      "cycle": null,
+      "process_note": "gainDb se mantiene como dB por debajo del target de voz; motion ofreció ajustar sus valores si hace falta.",
+      "usage": {
+        "provider_model": "claude/opus",
+        "effort": "low",
+        "tokens_in": 120000,
+        "tokens_out": 6000,
+        "approx": true,
+        "source": "declared-estimate",
+        "recorded_at": "2026-11-11",
+        "by_agent": [
+          {
+            "agent": "orchestrator",
+            "provider_model": "claude/opus",
+            "effort": "low",
+            "tokens_in": 120000,
+            "tokens_out": 6000,
+            "approx": true,
+            "source": "declared-estimate",
+            "recorded_at": "2026-11-11"
+          }
+        ]
+      }
+    },
+    {
+      "id": "FIX-e-burgos-064",
+      "author": "e-burgos",
+      "spec_id": null,
+      "fix_document": "sdd/fixes/fix-e-burgos-064.md",
+      "type": "IMPROVEMENT",
+      "severity": "medium",
+      "created_at": "2026-11-11",
+      "resolved_at": "2026-11-11",
+      "validated_at": null,
+      "title": "El máster del montaje normaliza con una ganancia lineal y un limitador de pico, nunca con loudnorm dinámico",
+      "estimation_hours": 1,
+      "description": "normalizeMasterLoudness aplicaba loudnorm en dos pasadas, que cae a modo dinámico cuando el pico no deja normalizar lineal: funciona como un control automático de ganancia y subía unos 11 dB los efectos del intro casi mudo. Ahora aplica una sola ganancia lineal hasta -14 LUFS y un alimiter a 192 kHz (para atrapar picos entre muestras) con techo en el target de pico; se mantienen la sonda AAC y el reintento de FIX-049, que ahora bajan el techo del limitador.",
+      "justification": "Aprobado por el dev («Sí, las tres») a partir de la prueba de SFX de FIX-060.",
+      "related_modules": [
+        "production-quality"
+      ],
+      "affected_files": [
+        "libs/media-local/src/ffmpeg/normalize-master-loudness.ts"
+      ],
+      "test_reference": "nx test/lint en verde: media-local 450, render-api 2291 (review-measurements dio el timeout suelto conocido y pasa solo). Antes/después sobre 3 másters reales (Webs publicado, Display Ads publicado, prueba con bumpers): I -14,1/-14,0/-14,0 → -14,0/-13,9/-14,0; pico -1,4/-1,3/-1,4 → -1,5/-1,5/-1,4 dBTP; LRA conservado (9,3/8,6/4,7 → 10,4/10,6/5,0, igual a la mezcla cruda); SFX del intro -14,8 → -18,2 LUFS momentáneo.",
+      "status": "implemented",
+      "cycle": null,
+      "process_note": "Solo el máster del montaje: el del modo B (normalizeVideoMasterLoudness) sigue con loudnorm, sin bumpers de timeline.",
+      "usage": {
+        "provider_model": "claude/opus",
+        "effort": "low",
+        "tokens_in": 120000,
+        "tokens_out": 6000,
+        "approx": true,
+        "source": "declared-estimate",
+        "recorded_at": "2026-11-11",
+        "by_agent": [
+          {
+            "agent": "orchestrator",
+            "provider_model": "claude/opus",
+            "effort": "low",
+            "tokens_in": 120000,
+            "tokens_out": 6000,
+            "approx": true,
+            "source": "declared-estimate",
+            "recorded_at": "2026-11-11"
+          }
+        ]
+      }
+    },
+    {
+      "id": "FIX-e-burgos-065",
+      "author": "e-burgos",
+      "spec_id": null,
+      "fix_document": "sdd/fixes/fix-e-burgos-065.md",
+      "type": "BUGFIX",
+      "severity": "high",
+      "created_at": "2026-11-11",
+      "resolved_at": "2026-11-11",
+      "validated_at": null,
+      "title": "Fuera los efectos de Pixabay: la plantilla de presentación usa el banco CC0/CC BY y se borran de runtime/sfx",
+      "estimation_hours": 2,
+      "description": "Los 8 efectos de runtime/sfx eran de Pixabay y no se podían redistribuir. La plantilla a mano de presentación pasa al banco con marcadores por tipo y variante, se acreditan solo los CC BY usados, se borran los archivos y se corrige el CREDITS.md que los daba por Apache.",
+      "justification": "Decisión del dev («Sí, las tres») transmitida por la sesión orquestadora; licencia que impide distribuir los archivos.",
+      "related_modules": [
+        "production-quality"
+      ],
+      "affected_files": [
+        "libs/motion-graphics/src/sfx/motion-sfx-picks.ts",
+        "libs/motion-graphics/src/template/compose-template.ts",
+        "libs/motion-graphics/src/pipeline/compose-project.ts",
+        "tools/motion-studio/templates/displayads/presentacion/index.html.tpl",
+        "libs/motion-graphics/assets/runtime/sfx",
+        "libs/motion-graphics/assets/brands/displayads/music/CREDITS.md"
+      ],
+      "test_reference": "nx test/lint/build en verde: motion-graphics 342, motion-studio 17, render-api 2291; render de la plantilla de presentación sin destellos, −14,3 LUFS, pico −2,0 dBTP.",
+      "status": "implemented",
+      "cycle": null,
+      "process_note": "Quedan menciones a runtime/sfx en el SKILL video-producer y en dos specs de review, que son de la sesión de música.",
+      "usage": {
+        "provider_model": "claude/opus",
+        "effort": "medium",
+        "tokens_in": 300000,
+        "tokens_out": 15000,
+        "approx": true,
+        "source": "declared-estimate",
+        "recorded_at": "2026-11-11",
+        "by_agent": [
+          {
+            "agent": "orchestrator",
+            "provider_model": "claude/opus",
+            "effort": "medium",
+            "tokens_in": 300000,
+            "tokens_out": 15000,
+            "approx": true,
+            "source": "declared-estimate",
+            "recorded_at": "2026-11-11"
+          }
+        ]
+      }
+    },
+    {
+      "id": "FIX-e-burgos-066",
+      "author": "e-burgos",
+      "spec_id": null,
+      "fix_document": "sdd/fixes/fix-e-burgos-066.md",
+      "type": "IMPROVEMENT",
+      "severity": "low",
+      "created_at": "2026-11-11",
+      "resolved_at": "2026-11-11",
+      "validated_at": null,
+      "title": "Sin menciones a los SFX de Pixabay: el SKILL, los specs y el informe apuntan al banco CC0/CC BY",
+      "estimation_hours": 0.1,
+      "description": "Después de FIX-065 (motion borró runtime/sfx/), el SKILL.md del productor dice que los sonidos salen de assets/sfx-bank/, los specs del review usan rutas de ejemplo del banco y el informe de audio corrige que esos 8 archivos eran Pixabay, no Apache 2.0.",
+      "justification": "Pedido de la sesión de motion al cerrar FIX-065.",
+      "related_modules": [
+        "production-quality"
+      ],
+      "affected_files": [
+        "sdd/skills/video-producer/SKILL.md",
+        "apps/render-api/src/review/motion-sfx-cues.spec.ts",
+        "apps/render-api/src/review/motion-level-plans.spec.ts",
+        "docs/research/2026-11-10-audio-tools-productor.md"
+      ],
+      "test_reference": "Specs del review afectados en verde (4); sin cambios de código.",
+      "status": "implemented",
+      "cycle": null,
+      "process_note": "",
+      "usage": {
+        "provider_model": "claude/opus",
+        "effort": "low",
+        "tokens_in": 120000,
+        "tokens_out": 6000,
+        "approx": true,
+        "source": "declared-estimate",
+        "recorded_at": "2026-11-11",
+        "by_agent": [
+          {
+            "agent": "orchestrator",
+            "provider_model": "claude/opus",
+            "effort": "low",
+            "tokens_in": 120000,
+            "tokens_out": 6000,
+            "approx": true,
+            "source": "declared-estimate",
+            "recorded_at": "2026-11-11"
+          }
+        ]
+      }
+    },
+    {
+      "id": "FIX-e-burgos-067",
+      "author": "e-burgos",
+      "spec_id": null,
+      "fix_document": "sdd/fixes/fix-e-burgos-067.md",
+      "type": "IMPROVEMENT",
+      "severity": "medium",
+      "created_at": "2026-11-11",
+      "resolved_at": "2026-11-11",
+      "validated_at": null,
+      "title": "La cama de música de los presets del montaje baja 2 dB para dejar la voz holgada sobre 15 dB",
+      "estimation_hours": 1,
+      "description": "Los presets de tutorial pasan a −10/−20 dB y hardware a −6/−14 dB, para que el margen voz/música del review quede en 16 dB o más con la normalización lineal del máster.",
+      "justification": "Aprobado por el dev («Sí, las tres») vía la sesión orquestadora.",
+      "related_modules": [
+        "production-quality"
+      ],
+      "affected_files": [
+        "libs/auto-montage/src/presets/software-demo.preset.ts",
+        "libs/auto-montage/src/presets/educational.preset.ts",
+        "libs/auto-montage/src/presets/recipe.preset.ts",
+        "libs/auto-montage/src/presets/hardware.preset.ts"
+      ],
+      "test_reference": "nx test/lint/build en verde: auto-montage 381, render-api 2291, web 1653.",
+      "status": "implemented",
+      "cycle": null,
+      "process_note": "Faltan los números de la receta Tutorial en el prompt compartido y en el SKILL video-producer (sesión de música).",
+      "usage": {
+        "provider_model": "claude/opus",
+        "effort": "medium",
+        "tokens_in": 150000,
+        "tokens_out": 8000,
+        "approx": true,
+        "source": "declared-estimate",
+        "recorded_at": "2026-11-11",
+        "by_agent": [
+          {
+            "agent": "orchestrator",
+            "provider_model": "claude/opus",
+            "effort": "medium",
+            "tokens_in": 150000,
+            "tokens_out": 8000,
+            "approx": true,
+            "source": "declared-estimate",
+            "recorded_at": "2026-11-11"
+          }
+        ]
+      }
+    },
+    {
+      "id": "FIX-e-burgos-068",
+      "author": "e-burgos",
+      "spec_id": null,
+      "fix_document": "sdd/fixes/fix-e-burgos-068.md",
+      "type": "IMPROVEMENT",
+      "severity": "low",
+      "created_at": "2026-11-11",
+      "resolved_at": "2026-11-11",
+      "validated_at": null,
+      "title": "El SKILL y el prompt del productor usan los niveles nuevos de la cama de música (-10/-20 y -6/-14 dB)",
+      "estimation_hours": 0.1,
+      "description": "Tras FIX-067 (motion bajó 2 dB la cama de los presets), la tabla de presets y la receta Tutorial del SKILL.md, y las recetas Tutorial y Publicidad de build-producer-prompt.ts pasan de -8/-18 a -10/-20 dB y de -4/-12 a -6/-14 dB.",
+      "justification": "Pedido del orquestador al cerrar FIX-067; build-producer-prompt.ts autorizado para esta sesión.",
+      "related_modules": [
+        "production-quality"
+      ],
+      "affected_files": [
+        "sdd/skills/video-producer/SKILL.md",
+        "libs/producer-tools/src/prompt/build-producer-prompt.ts",
+        "libs/producer-tools/src/prompt/build-producer-prompt.spec.ts"
+      ],
+      "test_reference": "producer-tools 449 en verde (checklist de las recetas actualizado); auto-montage 381, render-api 2291.",
+      "status": "implemented",
+      "cycle": null,
+      "process_note": "",
+      "usage": {
+        "provider_model": "claude/opus",
+        "effort": "low",
+        "tokens_in": 120000,
+        "tokens_out": 6000,
+        "approx": true,
+        "source": "declared-estimate",
+        "recorded_at": "2026-11-11",
+        "by_agent": [
+          {
+            "agent": "orchestrator",
+            "provider_model": "claude/opus",
+            "effort": "low",
+            "tokens_in": 120000,
+            "tokens_out": 6000,
+            "approx": true,
+            "source": "declared-estimate",
+            "recorded_at": "2026-11-11"
+          }
+        ]
+      }
+    },
+    {
+      "id": "FIX-e-burgos-069",
+      "author": "e-burgos",
+      "spec_id": null,
+      "fix_document": "sdd/fixes/fix-e-burgos-069.md",
+      "type": "IMPROVEMENT",
+      "severity": "medium",
+      "created_at": "2026-11-11",
+      "resolved_at": "2026-11-11",
+      "validated_at": null,
+      "title": "render-cli flash-scan: el escaneo de destellos marca solo saltos breves y lista aparte los tramos blancos sostenidos",
+      "estimation_hours": 2,
+      "description": "El escaneo manual de destellos contaba como destello cualquier tramo casi blanco, incluidos bumpers blancos e interfaces claras. render-cli flash-scan escanea el último render y separa destellos (< 0,5 s) de tramos claros sostenidos.",
+      "justification": "Pendiente propio aprobado por el dev («Pendientes propios») vía la sesión orquestadora; el escaneo no vivía en el review de render-api.",
+      "related_modules": [
+        "production-quality"
+      ],
+      "affected_files": [
+        "tools/render-cli/src/commands/flash-scan-command.ts",
+        "tools/render-cli/src/cli.ts",
+        "tools/render-cli/src/args/parse-cli-args.ts",
+        "tools/render-cli/src/args/preset-names.ts",
+        "tools/render-cli/src/args/stage-for-argument.ts",
+        "tools/render-cli/src/report/cli-report.ts",
+        "tools/render-cli/src/report/format-report.ts"
+      ],
+      "test_reference": "nx test/lint/build en verde: render-cli 198; renders reales sin falsos positivos.",
+      "status": "implemented",
+      "cycle": null,
+      "usage": {
+        "provider_model": "claude/opus",
+        "effort": "medium",
+        "tokens_in": 250000,
+        "tokens_out": 12000,
+        "approx": true,
+        "source": "declared-estimate",
+        "recorded_at": "2026-11-11",
+        "by_agent": [
+          {
+            "agent": "orchestrator",
+            "provider_model": "claude/opus",
+            "effort": "medium",
+            "tokens_in": 250000,
+            "tokens_out": 12000,
+            "approx": true,
+            "source": "declared-estimate",
+            "recorded_at": "2026-11-11"
+          }
+        ]
+      }
+    },
+    {
+      "id": "FIX-e-burgos-070",
+      "author": "e-burgos",
+      "spec_id": null,
+      "fix_document": "sdd/fixes/fix-e-burgos-070.md",
+      "type": "IMPROVEMENT",
+      "severity": "low",
+      "created_at": "2026-11-11",
+      "resolved_at": "2026-11-11",
+      "validated_at": null,
+      "title": "La vista previa del studio reproduce los efectos de los bumpers sin duplicarlos en el render",
+      "estimation_hours": 3,
+      "description": "La composición acepta cues de efectos para la vista previa y los reproduce solo con audio; la web los resuelve con la misma semilla y variante que la mezcla del máster y empaqueta el banco con Vite. Los renders siguen muteados y sin esos cues.",
+      "justification": "Pendiente propio aprobado por el dev («Pendientes propios») vía la sesión orquestadora.",
+      "related_modules": [
+        "production-quality"
+      ],
+      "affected_files": [
+        "libs/composition-remotion/src/components/bumper-sfx-track.tsx",
+        "libs/composition-remotion/src/components/timeline-composition.tsx",
+        "libs/composition-remotion/src/index.ts",
+        "apps/web/src/api/preview-bumper-sfx.ts",
+        "apps/web/src/components/timeline-player.tsx"
+      ],
+      "test_reference": "nx test/lint/build en verde: composition-remotion 380, web 1657.",
+      "status": "implemented",
+      "cycle": null,
+      "process_note": "Sin escucha real en el navegador.",
+      "usage": {
+        "provider_model": "claude/opus",
+        "effort": "medium",
+        "tokens_in": 450000,
+        "tokens_out": 25000,
+        "approx": true,
+        "source": "declared-estimate",
+        "recorded_at": "2026-11-11",
+        "by_agent": [
+          {
+            "agent": "orchestrator",
+            "provider_model": "claude/opus",
+            "effort": "medium",
+            "tokens_in": 450000,
+            "tokens_out": 25000,
+            "approx": true,
+            "source": "declared-estimate",
+            "recorded_at": "2026-11-11"
+          }
+        ]
+      }
+    },
+    {
+      "id": "FIX-e-burgos-071",
+      "author": "e-burgos",
+      "spec_id": null,
+      "fix_document": "sdd/fixes/fix-e-burgos-071.md",
+      "type": "IMPROVEMENT",
+      "severity": "medium",
+      "created_at": "2026-11-11",
+      "resolved_at": "2026-11-11",
+      "validated_at": null,
+      "title": "El máster del modo B también normaliza con ganancia lineal y limitador, sin loudnorm dinámico",
+      "estimation_hours": 0.75,
+      "description": "normalizeVideoMasterLoudness (máster de los videos motion) deja el loudnorm de dos pasadas y usa la misma cadena que el montaje (FIX-064): una ganancia lineal hasta -14 LUFS y un alimiter a 192 kHz con techo en el target de pico, extraída a masterNormalizationFilters. Se mantiene la medición del MP4 codificado y el reintento de pico de FIX-049 (masterRetryFor).",
+      "justification": "Pedido del orquestador dentro de los pendientes propios de la PR («Pendientes propios»).",
+      "related_modules": [
+        "production-quality"
+      ],
+      "affected_files": [
+        "libs/media-local/src/ffmpeg/normalize-video-master-loudness.ts",
+        "libs/media-local/src/ffmpeg/normalize-master-loudness.ts",
+        "libs/media-local/src/ffmpeg/true-peak-guard.ts"
+      ],
+      "test_reference": "nx test/lint de media-local en verde (452). Antes/después con renders reales de modo B (prueba-integracion-16x9 y -vertical): 16x9 -14,0/-1,3 → -14,0/-1,4 dBTP, LRA 4,1 igual; vertical -15,8/-3,4 → -14,8/-1,5 dBTP, LRA 4,4 → 4,5; 0 destellos.",
+      "status": "implemented",
+      "cycle": null,
+      "process_note": "Se probó un reintento de compensación de loudness (subir la ganancia si el limitador deja el máster más de 0,5 LU bajo): en el vertical empujó el pico a -0,9 dBTP y solo ganó 0,1 LU, así que se descartó. Un video con picos muy densos puede quedar hasta ~1 LU bajo -14, dentro de la tolerancia del review.",
+      "usage": {
+        "provider_model": "claude/opus",
+        "effort": "low",
+        "tokens_in": 120000,
+        "tokens_out": 6000,
+        "approx": true,
+        "source": "declared-estimate",
+        "recorded_at": "2026-11-11",
+        "by_agent": [
+          {
+            "agent": "orchestrator",
+            "provider_model": "claude/opus",
+            "effort": "low",
+            "tokens_in": 120000,
+            "tokens_out": 6000,
+            "approx": true,
+            "source": "declared-estimate",
+            "recorded_at": "2026-11-11"
+          }
+        ]
+      }
+    },
+    {
+      "id": "FIX-e-burgos-072",
+      "author": "e-burgos",
+      "spec_id": null,
+      "fix_document": "sdd/fixes/fix-e-burgos-072.md",
+      "type": "BUGFIX",
+      "severity": "low",
+      "created_at": "2026-11-11",
+      "resolved_at": "2026-11-11",
+      "validated_at": null,
+      "title": "review-measurements ya no hace timeout en corridas paralelas y dos specs de render-api quedan sin errores de tipos",
+      "estimation_hours": 0.25,
+      "description": "El test del fallback de duración de review-measurements cargaba @video-maker/media-local en frío dentro del caso y pasaba los 5 s con mucha carga: ahora la carga se precalienta en un beforeAll con margen. music-handler.spec.ts y motion-level-plans.spec.ts quedan sin errores de tsc (casts de ZodObject y acceso opcional a sfx).",
+      "justification": "Pendientes propios de la PR («Pendientes propios»).",
+      "related_modules": [
+        "production-quality"
+      ],
+      "affected_files": [
+        "apps/render-api/src/review/review-measurements.spec.ts",
+        "apps/render-api/src/http/handlers/music-handler.spec.ts",
+        "apps/render-api/src/review/motion-level-plans.spec.ts"
+      ],
+      "test_reference": "Specs afectados en verde; tsc del tsconfig.spec de render-api baja de 132 a 129 errores, todos en otros specs anteriores a esta PR.",
+      "status": "implemented",
+      "cycle": null,
+      "process_note": "Quedan 129 errores de tipos en 18 specs de render-api (producer, storyboard, handle-request, etc.), todos previos: no entran en esta PR.",
+      "usage": {
+        "provider_model": "claude/opus",
+        "effort": "low",
+        "tokens_in": 120000,
+        "tokens_out": 6000,
+        "approx": true,
+        "source": "declared-estimate",
+        "recorded_at": "2026-11-11",
+        "by_agent": [
+          {
+            "agent": "orchestrator",
+            "provider_model": "claude/opus",
+            "effort": "low",
+            "tokens_in": 120000,
+            "tokens_out": 6000,
+            "approx": true,
+            "source": "declared-estimate",
+            "recorded_at": "2026-11-11"
+          }
+        ]
+      }
+    },
+    {
+      "id": "FIX-e-burgos-073",
+      "author": "e-burgos",
+      "spec_id": null,
+      "fix_document": "sdd/fixes/fix-e-burgos-073.md",
+      "type": "BUGFIX",
+      "severity": "low",
+      "created_at": "2026-11-11",
+      "resolved_at": "2026-11-11",
+      "validated_at": null,
+      "title": "El prompt aclara que pedir que los bumpers suenen no es pedir un efecto concreto: sfxKind queda afuera",
+      "estimation_hours": 0.3,
+      "description": "En la verificación del studio el productor fijó sfxKind a mano cuando el usuario solo pidió que los bumpers tuvieran sonido. El prompt aclara que eso no es pedir un sonido concreto y que sfxKind se fija solo si el usuario lo nombra o pide silencio. El schema de bumpers describe sfxKind y sfx para que la herramienta patch_timeline le diga al modelo que los deje afuera. patch_timeline mezcla un style parcial con el guardado para no perder la semilla ni los colores de la marca.",
+      "justification": "Autorizado por la sesión orquestadora como pendiente propio de la PR; la sesión de música no toca el prompt.",
+      "related_modules": [
+        "production-quality"
+      ],
+      "affected_files": [
+        "libs/producer-tools/src/prompt/build-producer-prompt.ts",
+        "libs/timeline-core/src/schemas/timeline.schema.ts",
+        "libs/timeline-core/schemas/timeline.schema.json",
+        "libs/producer-tools/src/handlers/studio-tool-handlers.ts"
+      ],
+      "test_reference": "nx test/lint en verde: producer-tools 450, timeline-core 469; verificado en el studio (9ed865c) en prueba-motion-guion-limpio: bumpers sin sfxKind.",
+      "status": "implemented",
+      "cycle": null,
+      "usage": {
+        "provider_model": "claude/opus",
+        "effort": "medium",
+        "tokens_in": 80000,
+        "tokens_out": 4000,
+        "approx": true,
+        "source": "declared-estimate",
+        "recorded_at": "2026-11-11",
+        "by_agent": [
+          {
+            "agent": "orchestrator",
+            "provider_model": "claude/opus",
+            "effort": "medium",
+            "tokens_in": 80000,
+            "tokens_out": 4000,
+            "approx": true,
+            "source": "declared-estimate",
+            "recorded_at": "2026-11-11"
+          }
+        ]
+      }
+    },
+    {
+      "id": "FIX-e-burgos-074",
+      "author": "e-burgos",
+      "spec_id": null,
+      "fix_document": "sdd/fixes/fix-e-burgos-074.md",
+      "type": "IMPROVEMENT",
+      "severity": "low",
+      "created_at": "2026-11-11",
+      "resolved_at": "2026-11-11",
+      "validated_at": null,
+      "title": "El banco de SFX registra peakMs, dónde cada efecto suena más fuerte, para alinear la cresta y no el inicio",
+      "estimation_hours": 0.5,
+      "description": "sfx-bank.json suma peakMs a los 18 efectos, medido con una envolvente RMS de 100 ms que avanza de a 10 ms. El schema lo exige y rechaza una cresta pasada la duración. riser-2 es un build-up con golpe: su cresta cae a 990 ms de 2000, no al final como riser-1 (1510/1570) y riser-3 (2230/2410).",
+      "justification": "Motion vio en el studio que riser-2 adelantaba la subida respecto del drop; el orquestador pidió peakMs en todo el banco.",
+      "related_modules": [
+        "production-quality"
+      ],
+      "affected_files": [
+        "libs/motion-graphics/assets/sfx-bank/sfx-bank.json",
+        "libs/motion-graphics/src/sfx/sfx-bank.ts",
+        "libs/motion-graphics/src/__fixtures__/sfx-picks.ts"
+      ],
+      "test_reference": "nx test/lint en verde: motion-graphics 344 (cresta de impactos, risers y validación), render-api 2291.",
+      "status": "implemented",
+      "cycle": null,
+      "process_note": "La envolvente de 10 ms marcaba transitorios sueltos (riser-3 a 405 ms del final); la de 100 ms coincide con lo que se oye (180 ms).",
+      "usage": {
+        "provider_model": "claude/opus",
+        "effort": "low",
+        "tokens_in": 120000,
+        "tokens_out": 6000,
+        "approx": true,
+        "source": "declared-estimate",
+        "recorded_at": "2026-11-11",
+        "by_agent": [
+          {
+            "agent": "orchestrator",
+            "provider_model": "claude/opus",
+            "effort": "low",
+            "tokens_in": 120000,
+            "tokens_out": 6000,
+            "approx": true,
+            "source": "declared-estimate",
+            "recorded_at": "2026-11-11"
+          }
+        ]
+      }
+    },
+    {
+      "id": "FIX-e-burgos-075",
+      "author": "e-burgos",
+      "spec_id": null,
+      "fix_document": "sdd/fixes/fix-e-burgos-075.md",
+      "type": "BUGFIX",
+      "severity": "low",
+      "created_at": "2026-11-11",
+      "resolved_at": "2026-11-11",
+      "validated_at": null,
+      "title": "El riser del modo B se alinea al drop por su cresta (peakMs) y no por el final del archivo",
+      "estimation_hours": 0.5,
+      "description": "El riser arrancaba su duración antes del drop y riser-2 llegaba con la cresta 1 s antes. Ahora arranca peakMs antes del drop; las tres variantes llegan con la cresta en el drop. Se corrige el spec de impact-sfx con el argumento viejo.",
+      "justification": "Pendiente propio autorizado por la sesión orquestadora; usa el peakMs del FIX-e-burgos-074.",
+      "related_modules": [
+        "production-quality"
+      ],
+      "affected_files": [
+        "libs/motion-graphics/src/template/compose-template.ts",
+        "libs/motion-graphics/src/compose/impact-sfx.spec.ts"
+      ],
+      "test_reference": "nx test/lint/build en verde: motion-graphics 345; cresta de riser-1/2/3 en el drop (0 ms).",
+      "status": "implemented",
+      "cycle": null,
+      "usage": {
+        "provider_model": "claude/opus",
+        "effort": "medium",
+        "tokens_in": 120000,
+        "tokens_out": 6000,
+        "approx": true,
+        "source": "declared-estimate",
+        "recorded_at": "2026-11-11",
+        "by_agent": [
+          {
+            "agent": "orchestrator",
+            "provider_model": "claude/opus",
+            "effort": "medium",
+            "tokens_in": 120000,
+            "tokens_out": 6000,
+            "approx": true,
+            "source": "declared-estimate",
+            "recorded_at": "2026-11-11"
+          }
+        ]
+      }
+    },
+    {
+      "id": "FIX-e-burgos-076",
+      "author": "e-burgos",
+      "spec_id": null,
+      "fix_document": "sdd/fixes/fix-e-burgos-076.md",
+      "type": "IMPROVEMENT",
+      "severity": "medium",
+      "created_at": "2026-11-11",
+      "resolved_at": "2026-11-11",
+      "validated_at": null,
+      "title": "Modo A: pista de textos en pantalla (lower third, título de capítulo y texto cinético) con rotación por semilla",
+      "estimation_hours": 6,
+      "description": "Etapa 5 del informe de motion graphics. Tres piezas adaptadas de Onda (MIT, aviso conservado) en composition-remotion, con 3 variantes cada una que rotan por video sin repetir la anterior del mismo tipo, tokens de la marca (captionTheme) y márgenes seguros que esquivan la banda de subtítulos. La timeline suma textOverlays; patch_timeline la acepta, el prompt del productor explica cuándo usarla y el editor de la web permite agregarlos, editarlos y quitarlos.",
+      "justification": "El dev eligió las etapas 5 y 3 del informe docs/research/2026-11-10-motion-graphics-productor.md.",
+      "related_modules": [
+        "production-quality"
+      ],
+      "affected_files": [
+        "libs/timeline-core/src/schemas/timeline.schema.ts",
+        "libs/timeline-core/src/timeline/resolve-text-overlays.ts",
+        "libs/timeline-core/schemas/timeline.schema.json",
+        "libs/composition-remotion/src/components/text-overlays/",
+        "libs/composition-remotion/src/helpers/text-overlay-motion.ts",
+        "libs/composition-remotion/src/helpers/text-overlay-layout.ts",
+        "libs/composition-remotion/src/components/timeline-composition.tsx",
+        "libs/producer-tools/src/contract/tool-schemas.ts",
+        "libs/producer-tools/src/handlers/studio-tool-handlers.ts",
+        "libs/producer-tools/src/prompt/build-producer-prompt.ts",
+        "apps/web/src/api/timeline-edit/text-overlays.ts",
+        "apps/web/src/api/timeline-edit/timeline-edit-state.ts",
+        "apps/web/src/api/timeline-edit/timeline-document.ts",
+        "apps/web/src/components/text-overlay-editor.tsx",
+        "apps/web/src/pages/project-preview-page.tsx",
+        "apps/web/src/i18n/messages-es.ts",
+        "apps/web/src/i18n/messages-en.ts",
+        "apps/web/src/components/timeline-player.tsx",
+        "apps/web/src/api/last-valid-timeline.ts"
+      ],
+      "test_reference": "nx test/lint/build en verde: timeline-core 478, composition-remotion 394, producer-tools 452, web 1666. Render de prueba media/prueba-titulos-a revisado cuadro a cuadro. Editor web probado en el navegador (agregar, editar, pisado bloqueado, guardar, vista previa, quitar).",
+      "status": "implemented",
+      "cycle": null,
+      "usage": {
+        "provider_model": "claude/opus",
+        "effort": "medium",
+        "tokens_in": 900000,
+        "tokens_out": 60000,
+        "approx": true,
+        "source": "declared-estimate",
+        "recorded_at": "2026-11-11",
+        "by_agent": [
+          {
+            "agent": "orchestrator",
+            "provider_model": "claude/opus",
+            "effort": "medium",
+            "tokens_in": 900000,
+            "tokens_out": 60000,
+            "approx": true,
+            "source": "declared-estimate",
+            "recorded_at": "2026-11-11"
+          }
+        ]
+      }
+    },
+    {
+      "id": "FIX-e-burgos-077",
+      "author": "e-burgos",
+      "spec_id": null,
+      "fix_document": "sdd/fixes/fix-e-burgos-077.md",
+      "type": "IMPROVEMENT",
+      "severity": "medium",
+      "created_at": "2026-11-11",
+      "resolved_at": "2026-11-11",
+      "validated_at": null,
+      "title": "Modo B: tipografía cinética con GSAP SplitText y titleStyle por escena que rota sin repetir las dos anteriores",
+      "estimation_hours": 3,
+      "description": "Etapa 3 del informe. El gsap.min.js empaquetado (3.14.2) no traía SplitText: se suma SplitText.min.js 3.14.2 al runtime. Primitivas split-chars, split-words, split-lines, mask-up y scramble (determinista por cuadro); las líneas se recortan con autoSplit para respetar la fuente de la marca. El storyboard suma titleStyle por escena; compose lo rota con semilla sin repetir las dos anteriores. Nota legal pendiente para el dev: la licencia de GSAP excluye los productos competidores; leerla antes de empaquetar en el instalador.",
+      "justification": "El dev eligió las etapas 5 y 3 del informe docs/research/2026-11-10-motion-graphics-productor.md.",
+      "related_modules": [
+        "production-quality"
+      ],
+      "affected_files": [
+        "libs/motion-graphics/assets/runtime/SplitText.min.js",
+        "libs/motion-graphics/assets/runtime/motion-runtime.js",
+        "libs/motion-graphics/assets/runtime/scenes.css",
+        "libs/motion-graphics/src/storyboard/motion-storyboard.schema.ts",
+        "libs/motion-graphics/src/compose/plan-title-styles.ts",
+        "libs/motion-graphics/src/compose/compose-storyboard.ts",
+        "libs/producer-tools/src/prompt/build-producer-prompt.ts"
+      ],
+      "test_reference": "nx test/lint/build en verde: motion-graphics 349, producer-tools 452. Render de prueba media/prueba-titulos-b revisado cuadro a cuadro.",
+      "status": "implemented",
+      "cycle": null,
+      "usage": {
+        "provider_model": "claude/opus",
+        "effort": "medium",
+        "tokens_in": 300000,
+        "tokens_out": 20000,
+        "approx": true,
+        "source": "declared-estimate",
+        "recorded_at": "2026-11-11",
+        "by_agent": [
+          {
+            "agent": "orchestrator",
+            "provider_model": "claude/opus",
+            "effort": "medium",
+            "tokens_in": 300000,
+            "tokens_out": 20000,
+            "approx": true,
+            "source": "declared-estimate",
+            "recorded_at": "2026-11-11"
+          }
+        ]
+      }
     }
   ]
 }

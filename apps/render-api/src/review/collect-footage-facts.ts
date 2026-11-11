@@ -2,7 +2,7 @@ import { isAbsolute } from 'node:path';
 
 import { toAbsolutePath } from '@video-maker/auto-montage';
 import type { MediaProject } from '@video-maker/auto-montage';
-import { introBumperFrames, outroBumperFrames, safeZoneFor, TimelineSchema, timelineTotalFrames } from '@video-maker/timeline-core';
+import { introBumperFrames, outroBumperFrames, planBumperSfx, safeZoneFor, TimelineSchema, timelineTotalFrames } from '@video-maker/timeline-core';
 import type { Timeline } from '@video-maker/timeline-core';
 
 import { buildCaptionLayoutFacts } from './caption-layout-facts';
@@ -10,7 +10,7 @@ import { buildFootageLevelPlans } from './footage-level-plans';
 import { ReviewInputsUnavailableError } from './review-errors';
 import type { ReviewFacts, ReviewStoragePort } from './review-facts';
 import { fileExists } from './review-facts';
-import type { ReviewCaption, SecondsRange } from './review-inputs';
+import type { ReviewCaption, SecondsRange, SfxEvent } from './review-inputs';
 
 export const FOOTAGE_TIMELINE_PATH = 'work/timeline.json';
 
@@ -55,6 +55,10 @@ function bumperRanges(timeline: Timeline): SecondsRange[] {
     ...(intro > 0 ? [{ startSec: 0, endSec: intro / fps }] : []),
     ...(outro > 0 ? [{ startSec: (total - outro) / fps, endSec: total / fps }] : []),
   ];
+}
+
+function bumperSfxEvents(timeline: Timeline): SfxEvent[] {
+  return planBumperSfx(timeline).map((item) => ({ sound: item.source === 'auto' ? item.kind : item.assetId, startSec: item.atMs / 1000 }));
 }
 
 function captionsOf(timeline: Timeline): ReviewCaption[] {
@@ -102,6 +106,7 @@ export async function collectFootageFacts(project: MediaProject, storage: Review
       safeZone: timeline.safeZone ?? safeZoneFor(timeline.format),
     },
     captionLayout: buildCaptionLayoutFacts(timeline),
+    sfxEvents: bumperSfxEvents(timeline),
     missingAssets: await findMissingAssets(timeline, project, storage),
     scenes: [],
     promise: null,
