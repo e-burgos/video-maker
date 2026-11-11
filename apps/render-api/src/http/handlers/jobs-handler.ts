@@ -505,7 +505,7 @@ export async function handleCreateRenderJob(
   }
 
   const preset = parseMontagePreset(bodyObject.preset);
-  const seed = parseMontageSeed(bodyObject.seed);
+  const seed = parseMontageSeed(bodyObject.seed, slug);
   const overwrite = parseMontageOverwrite(bodyObject.overwrite);
   const script = parseMontageScript(bodyObject.scriptPath, bodyObject.scriptText);
   const logo = parseMontageLogo(bodyObject.logo);

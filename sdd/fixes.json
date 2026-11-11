@@ -4325,6 +4325,57 @@
           }
         ]
       }
+    },
+    {
+      "id": "FIX-e-burgos-041",
+      "author": "e-burgos",
+      "spec_id": null,
+      "fix_document": "sdd/fixes/fix-e-burgos-041.md",
+      "type": "IMPROVEMENT",
+      "severity": "medium",
+      "created_at": "2026-11-11",
+      "resolved_at": "2026-11-11",
+      "validated_at": null,
+      "title": "Motion graphics etapa 7: regla de variedad del productor y semilla de montaje derivada del video",
+      "estimation_hours": 2,
+      "description": "Las recetas mandaban seed 0 y ninguna skill pedía variedad. render-api deriva la semilla del slug cuando el montaje no la trae; el prompt del productor, el prompt del storyboard automático y las skills motion-studio y video-producer prohíben repetir kind, exit o transición seguidas y piden no fijar seed para que cada video rote distinto.",
+      "justification": "Etapa 7 aprobada por el dev del informe docs/research/2026-11-10-motion-graphics-productor.md; cambia solo el default de un parámetro opcional del job montage.",
+      "related_modules": [
+        "production-quality"
+      ],
+      "affected_files": [
+        "apps/render-api/src/jobs/montage-job-params.ts",
+        "apps/render-api/src/http/handlers/jobs-handler.ts",
+        "libs/producer-tools/src/prompt/build-producer-prompt.ts",
+        "libs/motion-graphics/src/auto/build-auto-storyboard-request.ts",
+        "sdd/skills/motion-studio/SKILL.md",
+        "sdd/skills/video-producer/SKILL.md"
+      ],
+      "test_reference": "nx test/lint en verde: producer-tools 448, render-api 2265, motion-graphics 326.",
+      "status": "implemented",
+      "cycle": null,
+      "process_note": "El productor no ve el video anterior de la lista (sus tools son por proyecto), por eso la variedad entre videos se garantiza en código (semilla por slug, salidas por marca + título) y no solo en el prompt.",
+      "usage": {
+        "provider_model": "claude/opus",
+        "effort": "medium",
+        "tokens_in": 350000,
+        "tokens_out": 20000,
+        "approx": true,
+        "source": "declared-estimate",
+        "recorded_at": "2026-11-11",
+        "by_agent": [
+          {
+            "agent": "orchestrator",
+            "provider_model": "claude/opus",
+            "effort": "medium",
+            "tokens_in": 350000,
+            "tokens_out": 20000,
+            "approx": true,
+            "source": "declared-estimate",
+            "recorded_at": "2026-11-11"
+          }
+        ]
+      }
     }
   ]
 }

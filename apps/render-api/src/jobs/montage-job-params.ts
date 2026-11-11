@@ -1,6 +1,6 @@
 import { MONTAGE_PRESETS } from '@video-maker/auto-montage';
 import type { LogoMode, MontagePresetName, VoiceSource } from '@video-maker/auto-montage';
-import { CAPTION_STYLES, isCaptionStyle } from '@video-maker/timeline-core';
+import { CAPTION_STYLES, hashStringToSeed, isCaptionStyle } from '@video-maker/timeline-core';
 import type { CaptionStyle, MusicMode, OutputPreset } from '@video-maker/timeline-core';
 import { OUTPUT_PRESETS } from '@video-maker/timeline-core';
 
@@ -9,7 +9,7 @@ import { PipelineStageError } from '../errors/pipeline-stage-error';
 const MONTAGE_PRESET_NAMES = Object.keys(MONTAGE_PRESETS) as readonly MontagePresetName[];
 
 const DEFAULT_MONTAGE_PRESET: MontagePresetName = 'software-demo';
-const DEFAULT_MONTAGE_SEED = 0;
+const VIDEO_SEED_RANGE = 10_000;
 const DEFAULT_MONTAGE_OVERWRITE = false;
 const DEFAULT_MONTAGE_LOGO: LogoMode = 'auto';
 const DEFAULT_MONTAGE_FORMAT: OutputPreset = 'reels-9x16';
@@ -122,9 +122,13 @@ export function parseMontageMusic(modeValue: unknown, floorValue: unknown): Mont
   return { musicMode: 'segments', musicFloorDb: floorValue };
 }
 
-export function parseMontageSeed(value: unknown): number {
+export function seedForVideo(slug: string): number {
+  return hashStringToSeed(slug) % VIDEO_SEED_RANGE;
+}
+
+export function parseMontageSeed(value: unknown, slug: string): number {
   if (value === undefined) {
-    return DEFAULT_MONTAGE_SEED;
+    return seedForVideo(slug);
   }
 
   if (typeof value !== 'number' || !Number.isInteger(value) || value < 0) {

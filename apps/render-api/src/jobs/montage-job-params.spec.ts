@@ -11,6 +11,7 @@ import {
   parseMontagePreset,
   parseMontageScript,
   parseMontageSeed,
+  seedForVideo,
 } from './montage-job-params';
 import { PipelineStageError } from '../errors/pipeline-stage-error';
 
@@ -52,35 +53,38 @@ describe('parseMontagePreset', () => {
 });
 
 describe('parseMontageSeed', () => {
-  it('defaults to 0 when the value is absent', () => {
-    expect(parseMontageSeed(undefined)).toBe(0);
+  it('derives a stable seed from the video slug when the value is absent, so two videos differ', () => {
+    expect(parseMontageSeed(undefined, 'tutorial-uno')).toBe(seedForVideo('tutorial-uno'));
+    expect(parseMontageSeed(undefined, 'tutorial-uno')).toBe(parseMontageSeed(undefined, 'tutorial-uno'));
+    expect(parseMontageSeed(undefined, 'tutorial-uno')).not.toBe(parseMontageSeed(undefined, 'tutorial-dos'));
+    expect(seedForVideo('tutorial-uno')).toBeLessThan(10_000);
   });
 
   it('passes through a non-zero non-negative integer unchanged', () => {
-    expect(parseMontageSeed(7)).toBe(7);
+    expect(parseMontageSeed(7, 'slug')).toBe(7);
   });
 
   it('rejects a negative integer', () => {
-    expect(captureError(() => parseMontageSeed(-1))).toMatchObject({
+    expect(captureError(() => parseMontageSeed(-1, 'slug'))).toMatchObject({
       code: 'MONTAGE_SEED_INVALID',
       stage: null,
     });
   });
 
   it('rejects a non-integer number', () => {
-    expect(captureError(() => parseMontageSeed(1.5))).toMatchObject({ code: 'MONTAGE_SEED_INVALID' });
+    expect(captureError(() => parseMontageSeed(1.5, 'slug'))).toMatchObject({ code: 'MONTAGE_SEED_INVALID' });
   });
 
   it('rejects a numeric string', () => {
-    expect(captureError(() => parseMontageSeed('0'))).toMatchObject({ code: 'MONTAGE_SEED_INVALID' });
+    expect(captureError(() => parseMontageSeed('0', 'slug'))).toMatchObject({ code: 'MONTAGE_SEED_INVALID' });
   });
 
   it('rejects NaN', () => {
-    expect(captureError(() => parseMontageSeed(Number.NaN))).toMatchObject({ code: 'MONTAGE_SEED_INVALID' });
+    expect(captureError(() => parseMontageSeed(Number.NaN, 'slug'))).toMatchObject({ code: 'MONTAGE_SEED_INVALID' });
   });
 
   it('rejects Infinity', () => {
-    expect(captureError(() => parseMontageSeed(Number.POSITIVE_INFINITY))).toMatchObject({
+    expect(captureError(() => parseMontageSeed(Number.POSITIVE_INFINITY, 'slug'))).toMatchObject({
       code: 'MONTAGE_SEED_INVALID',
     });
   });

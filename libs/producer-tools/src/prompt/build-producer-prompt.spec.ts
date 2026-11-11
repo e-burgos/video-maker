@@ -207,7 +207,7 @@ describe('buildProducerPrompt — checklist de parámetros de las tres recetas',
   const TUTORIAL_RECIPE_CHECKLIST: ReadonlyArray<readonly [string, string]> = [
     ['Formato', '"format":"youtube-16x9"'],
     ['Preset', '"preset":"educational"'],
-    ['Seed', '"seed":0'],
+    ['Seed', '`"preset":"educational"`, no `seed`'],
     ['Voz del montaje', '"voice":"script"'],
     ['Subtítulos', '"captionStyle":"subtle-lower"'],
     ['Voz de síntesis', '"voice":"es_AR-daniela-high"'],

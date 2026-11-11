@@ -247,7 +247,17 @@ La columna de música es `baseGainDb / duckedGainDb` sobre la cama ya normalizad
 `hardware` es el preset de publicidad: la música se escucha ~13 dB bajo la voz. Los otros tres
 la dejan más discreta, que es lo que quiere un tutorial.
 
-`--seed N` cambia qué B-roll y qué transición se eligen sin cambiar las reglas.
+`--seed N` cambia qué punch-ins y qué transiciones salen sin cambiar las reglas. Cada preset rota un pool
+de cinco transiciones (`fade`, `slide`, `whip-pan`, `light-leak`, `wipe`, `flip`, `clock-wipe`, `iris`) sin
+repetir la del corte anterior.
+
+### Variedad: nunca dos videos iguales (FIX-e-burgos-041)
+
+- **No mandes `seed` en el job `montage`.** El studio deriva una semilla del slug del video, así que dos
+  videos del mismo preset no repiten la secuencia de transiciones. Mandá un `seed` solo para reproducir
+  un montaje que el usuario ya aprobó, o uno nuevo cuando pida "otra versión" del mismo video.
+- Con el CLI, `--seed` vale 0 si no lo pasás: pasá uno distinto al del video anterior de la misma lista.
+- Nunca fijes a mano la misma transición en dos cortes seguidos de la timeline.
 
 ### Estilo de subtítulos: seguí el tipo de video (FIX-e-burgos-003-003)
 
@@ -376,7 +386,7 @@ Lo mismo desde la CLI: `pnpm nx run render-cli:cli -- run media/<slug> --preset 
 
 - Gate antes de transcribir o renderizar: `pgrep -fl 'ffmpeg|whisper-cli|chrome-headless|piper'`
   vacío, `memory_pressure` con ≥35 % libre, `df -h /` con ≥2 GB. Nunca dos jobs pesados a la vez.
-- `pnpm nx run render-cli:cli -- run media/<slug> --preset <p> --seed 0 --script media/<slug>/work/producer/script.txt`.
+- `pnpm nx run render-cli:cli -- run media/<slug> --preset <p> --seed <n distinto al del video anterior> --script media/<slug>/work/producer/script.txt`.
   Leé el reporte: `transcription-failures` debe ser 0, `concepts` debe listar tus conceptos,
   `broll-overlays > 0`, `logo` debe nombrar el archivo si el proyecto tiene uno, y
   `script-corrections` te dice cuántas palabras se arreglaron contra el guion.
@@ -425,7 +435,7 @@ elegidos**: aplicalos y **no vuelvas a preguntar por ninguno**.
 | Decisión              | Valor                                                                        |
 | --------------------- | ---------------------------------------------------------------------------- |
 | Formato               | `format: youtube-16x9`                                                        |
-| Preset                | `educational`, `seed: 0`                                                      |
+| Preset                | `educational`, sin `seed` (el studio la deriva del video)                     |
 | Voz del montaje       | `voice: script`                                                               |
 | Subtítulos            | `captionStyle: subtle-lower`                                                  |
 | Narración             | job `voice` con `voiceId: es_AR-daniela-high`, `gapMs: 900` y guion con marcas `[m:ss]`, una línea por escena |
