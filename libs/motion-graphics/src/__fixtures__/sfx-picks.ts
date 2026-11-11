@@ -11,6 +11,7 @@ function entry(id: string, kind: SfxEntry['kind'], durationMs: number, license =
     license,
     sourceUrl: `https://example.test/${id}`,
     durationMs,
+    peakMs: durationMs,
     momentaryMaxLufs: -20,
     truePeakDbtp: -2,
   };

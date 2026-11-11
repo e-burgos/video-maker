@@ -6009,6 +6009,54 @@
           }
         ]
       }
+    },
+    {
+      "id": "FIX-e-burgos-074",
+      "author": "e-burgos",
+      "spec_id": null,
+      "fix_document": "sdd/fixes/fix-e-burgos-074.md",
+      "type": "IMPROVEMENT",
+      "severity": "low",
+      "created_at": "2026-11-11",
+      "resolved_at": "2026-11-11",
+      "validated_at": null,
+      "title": "El banco de SFX registra peakMs, dónde cada efecto suena más fuerte, para alinear la cresta y no el inicio",
+      "estimation_hours": 0.5,
+      "description": "sfx-bank.json suma peakMs a los 18 efectos, medido con una envolvente RMS de 100 ms que avanza de a 10 ms. El schema lo exige y rechaza una cresta pasada la duración. riser-2 es un build-up con golpe: su cresta cae a 990 ms de 2000, no al final como riser-1 (1510/1570) y riser-3 (2230/2410).",
+      "justification": "Motion vio en el studio que riser-2 adelantaba la subida respecto del drop; el orquestador pidió peakMs en todo el banco.",
+      "related_modules": [
+        "production-quality"
+      ],
+      "affected_files": [
+        "libs/motion-graphics/assets/sfx-bank/sfx-bank.json",
+        "libs/motion-graphics/src/sfx/sfx-bank.ts",
+        "libs/motion-graphics/src/__fixtures__/sfx-picks.ts"
+      ],
+      "test_reference": "nx test/lint en verde: motion-graphics 344 (cresta de impactos, risers y validación), render-api 2291.",
+      "status": "implemented",
+      "cycle": null,
+      "process_note": "La envolvente de 10 ms marcaba transitorios sueltos (riser-3 a 405 ms del final); la de 100 ms coincide con lo que se oye (180 ms).",
+      "usage": {
+        "provider_model": "claude/opus",
+        "effort": "low",
+        "tokens_in": 120000,
+        "tokens_out": 6000,
+        "approx": true,
+        "source": "declared-estimate",
+        "recorded_at": "2026-11-11",
+        "by_agent": [
+          {
+            "agent": "orchestrator",
+            "provider_model": "claude/opus",
+            "effort": "low",
+            "tokens_in": 120000,
+            "tokens_out": 6000,
+            "approx": true,
+            "source": "declared-estimate",
+            "recorded_at": "2026-11-11"
+          }
+        ]
+      }
     }
   ]
 }

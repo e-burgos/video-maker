@@ -24,6 +24,7 @@ export const SfxEntrySchema = z.strictObject({
   license: z.string().regex(REDISTRIBUTABLE_LICENSE, 'only CC0, CC BY or Public Domain Mark can ship in the repo'),
   sourceUrl: z.string().url(),
   durationMs: z.number().int().positive(),
+  peakMs: z.number().int().nonnegative().describe('Where the effect is loudest, on a 100 ms envelope: align this, not the file start, with the visual hit'),
   momentaryMaxLufs: z.number().nullable(),
   truePeakDbtp: z.number().max(-1),
 });
@@ -37,6 +38,9 @@ export const SfxBankSchema = z
     sfx: z.array(SfxEntrySchema).min(1),
   })
   .superRefine((bank, ctx) => {
+    bank.sfx.forEach((entry, index) => {
+      if (entry.peakMs > entry.durationMs) ctx.addIssue({ code: 'custom', path: ['sfx', index, 'peakMs'], message: `peakMs ${String(entry.peakMs)} is past the end of the effect (${String(entry.durationMs)} ms)` });
+    });
     const ids = bank.sfx.map((entry) => entry.id);
     ids.forEach((id, index) => {
       if (ids.indexOf(id) !== index) ctx.addIssue({ code: 'custom', path: ['sfx', index, 'id'], message: `duplicated sfx id "${id}"` });

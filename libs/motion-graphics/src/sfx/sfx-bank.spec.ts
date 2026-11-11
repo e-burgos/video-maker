@@ -20,15 +20,26 @@ describe('shipped sfx bank', () => {
     expect(bank.sfx.every((entry) => entry.license === 'CC0' || /^CC BY \d/u.test(entry.license))).toBe(true);
     expect(bank.sfx.every((entry) => entry.truePeakDbtp <= -2)).toBe(true);
   });
+
+  it('records where each effect peaks: impacts hit at once, the build-up risers crest at their end and riser-2 hits mid-file', () => {
+    const peakOf = (id: string) => bank.sfx.find((entry) => entry.id === id);
+    for (const entry of sfxOfKind(bank, 'impact')) expect(entry.peakMs).toBeLessThan(150);
+    for (const id of ['riser-1', 'riser-3']) expect((peakOf(id)?.durationMs ?? 0) - (peakOf(id)?.peakMs ?? 0)).toBeLessThan(250);
+    expect((peakOf('riser-2')?.durationMs ?? 0) - (peakOf('riser-2')?.peakMs ?? 0)).toBeGreaterThan(700);
+  });
 });
 
 describe('parseSfxBank', () => {
-  const entry = { id: 'whoosh-1', kind: 'whoosh', file: 'whoosh-1.mp3', title: 'w', author: 'a', license: 'CC0', sourceUrl: 'https://freesound.org/s/1', durationMs: 500, momentaryMaxLufs: -18, truePeakDbtp: -3 };
+  const entry = { id: 'whoosh-1', kind: 'whoosh', file: 'whoosh-1.mp3', title: 'w', author: 'a', license: 'CC0', sourceUrl: 'https://freesound.org/s/1', durationMs: 500, peakMs: 200, momentaryMaxLufs: -18, truePeakDbtp: -3 };
 
   it('rejects share-alike, no-derivatives and non-commercial licenses', () => {
     for (const license of ['CC BY-SA 4.0', 'CC BY-ND 4.0', 'CC BY-NC 4.0', 'Pixabay Content License']) {
       expect(() => parseSfxBank({ version: 1, referenceMomentaryLufs: -18, sfx: [{ ...entry, license }] })).toThrow('only CC0, CC BY or Public Domain Mark');
     }
+  });
+
+  it('rejects a crest past the end of the effect', () => {
+    expect(() => parseSfxBank({ version: 1, referenceMomentaryLufs: -18, sfx: [{ ...entry, peakMs: 600 }] })).toThrow('past the end of the effect');
   });
 
   it('rejects duplicated ids', () => {

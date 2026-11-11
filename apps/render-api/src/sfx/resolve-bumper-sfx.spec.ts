@@ -5,7 +5,7 @@ import { describe, expect, it } from 'vitest';
 
 import { resolveBumperSfx } from './resolve-bumper-sfx';
 
-const ENTRY = { title: 't', author: 'a', sourceUrl: 'https://freesound.org/s/1', truePeakDbtp: -3 };
+const ENTRY = { title: 't', author: 'a', sourceUrl: 'https://freesound.org/s/1', peakMs: 0, truePeakDbtp: -3 };
 const BANK = parseSfxBank({
   version: 1,
   referenceMomentaryLufs: -18,

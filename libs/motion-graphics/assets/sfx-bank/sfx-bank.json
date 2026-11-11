@@ -11,6 +11,7 @@
       "license": "CC0",
       "sourceUrl": "https://freesound.org/people/LloydEvans09/sounds/332003",
       "durationMs": 579,
+      "peakMs": 240,
       "momentaryMaxLufs": -18.2,
       "truePeakDbtp": -5.5
     },
@@ -23,6 +24,7 @@
       "license": "CC0",
       "sourceUrl": "https://freesound.org/people/martian/sounds/19307",
       "durationMs": 690,
+      "peakMs": 230,
       "momentaryMaxLufs": -18.3,
       "truePeakDbtp": -4.4
     },
@@ -35,6 +37,7 @@
       "license": "CC BY 4.0",
       "sourceUrl": "https://freesound.org/people/Vilkas_Sound/sounds/460476",
       "durationMs": 710,
+      "peakMs": 210,
       "momentaryMaxLufs": -19.3,
       "truePeakDbtp": -2.3
     },
@@ -47,6 +50,7 @@
       "license": "CC0",
       "sourceUrl": "https://freesound.org/people/Kievinay/sounds/512389",
       "durationMs": 2080,
+      "peakMs": 80,
       "momentaryMaxLufs": -18.2,
       "truePeakDbtp": -5.4
     },
@@ -59,6 +63,7 @@
       "license": "CC BY 4.0",
       "sourceUrl": "https://freesound.org/people/MeijstroAudio/sounds/377303",
       "durationMs": 1660,
+      "peakMs": 50,
       "momentaryMaxLufs": -18.3,
       "truePeakDbtp": -3.0
     },
@@ -71,6 +76,7 @@
       "license": "CC BY 4.0",
       "sourceUrl": "https://freesound.org/people/klankbeeld/sounds/195790",
       "durationMs": 2960,
+      "peakMs": 60,
       "momentaryMaxLufs": -18.3,
       "truePeakDbtp": -4.9
     },
@@ -83,6 +89,7 @@
       "license": "CC0",
       "sourceUrl": "https://freesound.org/people/MATRIXXX_/sounds/462095",
       "durationMs": 2220,
+      "peakMs": 270,
       "momentaryMaxLufs": -18.2,
       "truePeakDbtp": -9.5
     },
@@ -95,6 +102,7 @@
       "license": "CC0",
       "sourceUrl": "https://freesound.org/people/tec_studio/sounds/360830",
       "durationMs": 2120,
+      "peakMs": 290,
       "momentaryMaxLufs": -18.2,
       "truePeakDbtp": -14.2
     },
@@ -107,6 +115,7 @@
       "license": "CC0",
       "sourceUrl": "https://freesound.org/people/nomiqbomi/sounds/578803",
       "durationMs": 2460,
+      "peakMs": 150,
       "momentaryMaxLufs": -18.2,
       "truePeakDbtp": -10.3
     },
@@ -119,6 +128,7 @@
       "license": "CC0",
       "sourceUrl": "https://freesound.org/people/Rizzard/sounds/561207",
       "durationMs": 1570,
+      "peakMs": 1510,
       "momentaryMaxLufs": -18.2,
       "truePeakDbtp": -4.3
     },
@@ -131,6 +141,7 @@
       "license": "CC0",
       "sourceUrl": "https://freesound.org/people/RutgerMuller/sounds/367664",
       "durationMs": 2000,
+      "peakMs": 990,
       "momentaryMaxLufs": -18.3,
       "truePeakDbtp": -9.2
     },
@@ -143,6 +154,7 @@
       "license": "CC0",
       "sourceUrl": "https://freesound.org/people/MadMaxSFX/sounds/327993",
       "durationMs": 2410,
+      "peakMs": 2230,
       "momentaryMaxLufs": -18.3,
       "truePeakDbtp": -8.3
     },
@@ -155,6 +167,7 @@
       "license": "CC0",
       "sourceUrl": "https://freesound.org/people/ristooooo1/sounds/539146",
       "durationMs": 2500,
+      "peakMs": 820,
       "momentaryMaxLufs": -26.5,
       "truePeakDbtp": -2.3
     },
@@ -167,6 +180,7 @@
       "license": "CC0",
       "sourceUrl": "https://freesound.org/people/cabled_mess/sounds/361639",
       "durationMs": 2500,
+      "peakMs": 210,
       "momentaryMaxLufs": -27.2,
       "truePeakDbtp": -2.3
     },
@@ -179,6 +193,7 @@
       "license": "CC0",
       "sourceUrl": "https://freesound.org/people/FrostyFrost/sounds/348369",
       "durationMs": 2500,
+      "peakMs": 770,
       "momentaryMaxLufs": -22.1,
       "truePeakDbtp": -2.2
     },
@@ -191,6 +206,7 @@
       "license": "CC0",
       "sourceUrl": "https://freesound.org/people/Weak_Hero/sounds/790532",
       "durationMs": 266,
+      "peakMs": 90,
       "momentaryMaxLufs": null,
       "truePeakDbtp": -2.3
     },
@@ -203,6 +219,7 @@
       "license": "CC0",
       "sourceUrl": "https://freesound.org/people/Ranner/sounds/488534",
       "durationMs": 410,
+      "peakMs": 70,
       "momentaryMaxLufs": -26.1,
       "truePeakDbtp": -2.4
     },
@@ -215,6 +232,7 @@
       "license": "CC0",
       "sourceUrl": "https://freesound.org/people/Gee-Jay/sounds/172503",
       "durationMs": 300,
+      "peakMs": 60,
       "momentaryMaxLufs": null,
       "truePeakDbtp": -2.1
     }
