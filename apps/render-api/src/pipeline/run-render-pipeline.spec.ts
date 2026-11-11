@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 
 import { createCallLog } from '../__fixtures__/call-log';
+import { createFakeObjectStorage } from '../__fixtures__/fake-object-storage';
 import { createFakeRenderApiDependencies } from '../__fixtures__/fake-render-api-dependencies';
 import { buildMinimalTimeline } from '../__fixtures__/minimal-timeline';
 import type { MixTimelineAudioInput, RenderMutedVideoInput } from '../deps/render-api-dependencies';
@@ -310,5 +311,29 @@ describe('runRenderPipeline', () => {
     const report = await runRenderPipeline({ renderId: RENDER_ID, projectRoot: PROJECT_ROOT, timeline: buildMinimalTimeline() }, deps);
 
     expect(report).not.toHaveProperty('sample');
+  });
+});
+
+describe('runRenderPipeline sound effect credits', () => {
+  const credits = [
+    { file: 'impact-2.mp3', title: 'Deep Cinematic Impact', author: 'MeijstroAudio', license: 'CC BY 4.0', sourceUrl: 'https://freesound.org/s/377303' },
+    { file: 'whoosh-1.mp3', title: 'whoosh.wav', author: 'LloydEvans09', license: 'CC0', sourceUrl: 'https://freesound.org/s/1' },
+  ];
+
+  it('credits only the attribution-required effects the mix used, once across renders', async () => {
+    const callLog = createCallLog();
+    const storage = createFakeObjectStorage(callLog, { directories: [PROJECT_ROOT] });
+    const deps = createFakeRenderApiDependencies(callLog, {
+      storage,
+      mixTimelineAudio: async (input) => ({ outputPath: input.outPath, filterComplex: '', sfxCredits: credits }),
+    });
+
+    await runRenderPipeline({ renderId: RENDER_ID, projectRoot: PROJECT_ROOT, timeline: buildMinimalTimeline() }, deps);
+    await runRenderPipeline({ renderId: RENDER_ID, projectRoot: PROJECT_ROOT, timeline: buildMinimalTimeline() }, deps);
+
+    const written = JSON.parse(await storage.readTextFile(`${PROJECT_ROOT}/work/credits.json`)) as unknown[];
+    expect(written).toEqual([
+      expect.objectContaining({ kind: 'sfx', path: 'sfx-bank/impact-2.mp3', title: 'Deep Cinematic Impact', author: 'MeijstroAudio', license: 'CC BY 4.0' }),
+    ]);
   });
 });

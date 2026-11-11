@@ -68,6 +68,9 @@ import {
 } from '../secrets/keychain-secret-store';
 import type { CommandRunner, ResolvedVoiceBinaries } from '@video-maker/media-local';
 
+import { loadSfxBank } from '../sfx/load-sfx-bank';
+import { resolveBumperSfx, toMixedSfxCredit } from '../sfx/resolve-bumper-sfx';
+
 import type { ByteRange, ObjectStorage, WriteTemporaryInput, WriteTemporaryOutcome } from './object-storage';
 import type {
   AiAgentPort,
@@ -579,11 +582,12 @@ export function createNodeRenderApiDependencies(
 
     mixTimelineAudio: async ({ timeline, outPath, projectRoot }) => {
       const { mixTimelineAudio, normalizeMasterLoudness } = await loadMediaLocal();
-      const [{ ffmpeg }, runner] = await Promise.all([loadBinaries(), loadCommandRunner()]);
+      const [{ ffmpeg }, runner, bank] = await Promise.all([loadBinaries(), loadCommandRunner(), loadSfxBank(store.motionAssetsRoot)]);
       const options = { ffmpegPath: ffmpeg, runOptions: { cwd: projectRoot } };
-      const result = await mixTimelineAudio(timeline, outPath, runner, options);
+      const sfx = bank === null ? { cues: [], used: [] } : resolveBumperSfx(timeline, bank, store.motionAssetsRoot);
+      const result = await mixTimelineAudio(timeline, outPath, runner, { ...options, sfx: sfx.cues });
       await normalizeMasterLoudness(result.outputPath, timeline.audioMix.voice, runner, options);
-      return { outputPath: result.outputPath, filterComplex: result.filterComplex };
+      return { outputPath: result.outputPath, filterComplex: result.filterComplex, sfxCredits: sfx.used.map(toMixedSfxCredit) };
     },
 
     muxAudioIntoVideo: async ({ videoPath, audioPath, outPath }) => {

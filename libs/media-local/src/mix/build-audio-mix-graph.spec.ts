@@ -118,6 +118,29 @@ describe('buildAudioMixGraph', () => {
     expect(graph.outputLabel).toBe('mix');
   });
 
+  it('suma cada efecto de sonido como una entrada más del amix, con su gain, sus fundidos y su tiempo absoluto', () => {
+    const timeline = buildFixtureTimeline();
+
+    const graph = buildAudioMixGraph({
+      timeline,
+      sfx: [
+        { path: '/bank/whoosh-1.mp3', atMs: 0, gainDb: -12.5, durationMs: 580, fadeOutMs: 200 },
+        { path: '/bank/click-1.mp3', atMs: 2600, gainDb: -30, durationMs: 270, fadeInMs: 5, fadeOutMs: 60 },
+      ],
+    });
+
+    expect(graph.inputs.slice(-2)).toEqual(['/bank/whoosh-1.mp3', '/bank/click-1.mp3']);
+    const [whoosh, click, amix] = graph.chains.slice(-3);
+    expect(whoosh).toEqual({
+      inputLabels: ['2:a'],
+      filters: ['aresample=48000', 'aformat=channel_layouts=stereo', 'afade=t=out:st=0.38:d=0.2', 'volume=-12.5dB', 'adelay=0:all=1'],
+      outputLabels: ['sfx0'],
+    });
+    expect(click?.filters).toEqual(['aresample=48000', 'aformat=channel_layouts=stereo', 'afade=t=in:d=0.005', 'afade=t=out:st=0.21:d=0.06', 'volume=-30dB', 'adelay=2600:all=1']);
+    expect(amix?.inputLabels).toEqual(['voice0', 'music0', 'sfx0', 'sfx1']);
+    expect(amix?.filters).toEqual(['amix=inputs=4:duration=longest:normalize=0']);
+  });
+
   it('con voiceMeasuredByAssetId usa buildLoudnormFilter de segunda pasada indexado por assetId', () => {
     const timeline = buildFixtureTimeline();
     const measured: LoudnessMeasurement = {

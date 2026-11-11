@@ -5365,6 +5365,60 @@
           }
         ]
       }
+    },
+    {
+      "id": "FIX-e-burgos-060",
+      "author": "e-burgos",
+      "spec_id": null,
+      "fix_document": "sdd/fixes/fix-e-burgos-060.md",
+      "type": "IMPROVEMENT",
+      "severity": "medium",
+      "created_at": "2026-11-11",
+      "resolved_at": "2026-11-11",
+      "validated_at": null,
+      "title": "El máster del montaje mezcla los efectos de sonido de los bumpers y acredita los CC BY usados",
+      "estimation_hours": 1.5,
+      "description": "render-api resuelve planBumperSfx (contrato de motion, FIX-057) contra el banco de FIX-059: cada cue automático elige variante con semilla del video sin repetir seguidas y su gain deja el efecto gainDb por debajo del target de voz (según el nivel medido en el banco); los cues explícitos usan su asset y su gain. media-local suma cada efecto al amix con fundidos y adelay en tiempo absoluto; el limitador y FIX-049 cuidan el pico. Después de mezclar, los efectos CC BY usados entran a work/credits.json como kind sfx, sin duplicar entre renders.",
+      "justification": "Etapa 2 del plan de SFX pedido por el dev.",
+      "related_modules": [
+        "production-quality"
+      ],
+      "affected_files": [
+        "libs/media-local/src/mix/build-sfx-chain.ts",
+        "libs/media-local/src/mix/build-audio-mix-graph.ts",
+        "libs/media-local/src/ffmpeg/mix-timeline-audio.ts",
+        "apps/render-api/src/sfx/resolve-bumper-sfx.ts",
+        "apps/render-api/src/sfx/load-sfx-bank.ts",
+        "apps/render-api/src/deps/node-render-api-dependencies.ts",
+        "apps/render-api/src/deps/render-api-dependencies.ts",
+        "apps/render-api/src/pipeline/run-render-pipeline.ts",
+        "apps/render-api/src/music/project-credits.ts"
+      ],
+      "test_reference": "nx test/lint en verde: media-local 449 (grafo con efectos: entradas, fundidos, gain, adelay, amix), render-api 2282 (resolución de cues, variantes sin repetir, cues explícitos, créditos solo CC BY y sin duplicar).",
+      "status": "implemented",
+      "cycle": null,
+      "process_note": "gainDb del contrato = dB por debajo del target de voz; con la voz a -14 LUFS el whoosh queda en -28, el impacto en -26, el brillo en -30 y los clicks en -38 de loudness momentáneo.",
+      "usage": {
+        "provider_model": "claude/opus",
+        "effort": "medium",
+        "tokens_in": 700000,
+        "tokens_out": 45000,
+        "approx": true,
+        "source": "declared-estimate",
+        "recorded_at": "2026-11-11",
+        "by_agent": [
+          {
+            "agent": "orchestrator",
+            "provider_model": "claude/opus",
+            "effort": "medium",
+            "tokens_in": 700000,
+            "tokens_out": 45000,
+            "approx": true,
+            "source": "declared-estimate",
+            "recorded_at": "2026-11-11"
+          }
+        ]
+      }
     }
   ]
 }

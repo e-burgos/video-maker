@@ -294,9 +294,9 @@ describe('createNodeRenderApiDependencies', () => {
       timeline,
       '/work/renders/r1/master.wav',
       expect.any(mocks.ExecaCommandRunner),
-      { ffmpegPath: '/opt/homebrew/bin/ffmpeg', runOptions: { cwd: CWD } },
+      { ffmpegPath: '/opt/homebrew/bin/ffmpeg', runOptions: { cwd: CWD }, sfx: [] },
     );
-    expect(result).toEqual({ outputPath: '/work/renders/r1/master.wav', filterComplex: '[0:a]anull[out]' });
+    expect(result).toEqual({ outputPath: '/work/renders/r1/master.wav', filterComplex: '[0:a]anull[out]', sfxCredits: [] });
   });
 
   it('normalizes the mixed master to the timeline voice target after mixing', async () => {
