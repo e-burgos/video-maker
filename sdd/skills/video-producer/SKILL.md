@@ -62,7 +62,7 @@ fuera del centro (hoy un solo estilo, cinético y centrado), escenas sin A-roll 
 montaje nace de un A-roll con voz), elegir B-roll por semántica (entra **solo** por nombre de
 archivo, ver §4), efectos de audio. Los videos **motion graphics** (§8 bis) sí llevan efectos:
 whoosh en los cambios de escena, impacto en el drop de la música y los `sfx` del guion anclados a
-una escena o palabra. Los sonidos salen de `libs/motion-graphics/assets/runtime/sfx/`, y el review
+una escena o palabra. Los sonidos salen del banco CC0/CC BY de `libs/motion-graphics/assets/sfx-bank/`, y el review
 los mide contra la voz.
 El logo **sí** se maneja desde la web desde `spec-015` `cycle-02`: el usuario lo sube con el rol
 `logo` y elige mostrarlo y en qué esquina desde la página de preview, que reescribe `timeline.logo`.
