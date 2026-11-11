@@ -21,7 +21,7 @@ describe('planSceneExits', () => {
 
     expect(exits.has('s11')).toBe(false);
     expect(sequence.every((exit) => exit !== undefined)).toBe(true);
-    sequence.slice(1).forEach((exit, i) => expect(exit).not.toBe(sequence[i]));
+    sequence.slice(2).forEach((exit, i) => expect([sequence[i], sequence[i + 1]]).not.toContain(exit));
     expect(new Set(sequence).size).toBeGreaterThan(2);
   });
 

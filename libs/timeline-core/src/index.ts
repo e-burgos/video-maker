@@ -386,6 +386,7 @@ export {
   createSeededRandom,
   hashStringToSeed,
   pickAvoidingPrevious,
+  pickAvoidingRecent,
   pickFromPool,
 } from './random/seeded-random';
 export type { RandomGenerator } from './random/seeded-random';

@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import { createSeededRandom, hashStringToSeed, pickAvoidingPrevious, pickFromPool } from './seeded-random';
+import { createSeededRandom, hashStringToSeed, pickAvoidingPrevious, pickAvoidingRecent, pickFromPool } from './seeded-random';
 
 describe('seeded-random', () => {
   it('repite la misma secuencia con la misma semilla y cambia con otra', () => {
@@ -34,6 +34,16 @@ describe('seeded-random', () => {
 
   it('pickAvoidingPrevious devuelve el único elemento aunque sea el anterior', () => {
     expect(pickAvoidingPrevious(['a'], 'a', createSeededRandom(1))).toBe('a');
+  });
+
+  it('pickAvoidingRecent no repite ninguno de los recientes y, si el pool no alcanza, solo evita el último', () => {
+    const next = createSeededRandom(5);
+    const pool = ['a', 'b', 'c', 'd'] as const;
+    const picked: string[] = [];
+
+    for (let i = 0; i < 40; i += 1) picked.push(pickAvoidingRecent(pool, picked.slice(-2) as never, next));
+    picked.slice(2).forEach((value, i) => expect([picked[i], picked[i + 1]]).not.toContain(value));
+    expect(pickAvoidingRecent(['a', 'b'], ['a', 'b'], next)).toBe('a');
   });
 
   it('hashStringToSeed es estable y distingue textos', () => {
