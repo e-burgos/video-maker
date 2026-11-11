@@ -5123,6 +5123,51 @@
         "source": "declared-estimate",
         "recorded_at": "2026-11-11"
       }
+    },
+    {
+      "id": "FIX-e-burgos-055",
+      "author": "e-burgos",
+      "spec_id": null,
+      "fix_document": "sdd/fixes/fix-e-burgos-055.md",
+      "type": "BUGFIX",
+      "severity": "low",
+      "created_at": "2026-11-11",
+      "resolved_at": "2026-11-11",
+      "validated_at": null,
+      "title": "La rotación de bumpers sin pools de marca no elige fondo liso ni fundido",
+      "estimation_hours": 0.5,
+      "description": "En la prueba del productor en el studio, un proyecto sin marca rotó al look viejo (solid + fade). La rotación por defecto usa solo fondos animados y revelados con movimiento; solid y fade quedan para elección explícita o pools de marca.",
+      "justification": "Defecto encontrado en la verificación del punto 3 del plan aprobado; no cambia contratos.",
+      "related_modules": [
+        "production-quality"
+      ],
+      "affected_files": [
+        "libs/timeline-core/src/timeline/resolve-bumper-look.ts"
+      ],
+      "test_reference": "nx test/lint/build en verde: timeline-core 462, composition-remotion 379.",
+      "status": "implemented",
+      "cycle": null,
+      "usage": {
+        "provider_model": "claude/opus",
+        "effort": "medium",
+        "tokens_in": 200000,
+        "tokens_out": 8000,
+        "approx": true,
+        "source": "declared-estimate",
+        "recorded_at": "2026-11-11",
+        "by_agent": [
+          {
+            "agent": "orchestrator",
+            "provider_model": "claude/opus",
+            "effort": "medium",
+            "tokens_in": 200000,
+            "tokens_out": 8000,
+            "approx": true,
+            "source": "declared-estimate",
+            "recorded_at": "2026-11-11"
+          }
+        ]
+      }
     }
   ]
 }

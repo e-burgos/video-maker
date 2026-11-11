@@ -1,5 +1,4 @@
 import { createSeededRandom, hashStringToSeed, pickAvoidingPrevious } from '../random/seeded-random';
-import { LOGO_BUMPER_BACKGROUNDS, LOGO_BUMPER_REVEALS } from '../schemas/timeline.schema';
 import type {
   LogoBumper,
   LogoBumperBackground,
@@ -19,6 +18,8 @@ export interface BumperLook {
 }
 
 const DEFAULT_ACCENT_COLOR = '#38bdf8';
+const ROTATING_BACKGROUNDS: readonly [LogoBumperBackground, ...LogoBumperBackground[]] = ['gradient', 'noise', 'shapes', 'glow'];
+const ROTATING_REVEALS: readonly [LogoBumperReveal, ...LogoBumperReveal[]] = ['zoom', 'slide-up', 'wipe', 'blur-in', 'pop'];
 const DEFAULT_SECONDARY_COLOR = '#14b8a6';
 
 function nonEmpty<T>(values: readonly T[] | undefined, fallback: readonly [T, ...T[]]): readonly [T, ...T[]] {
@@ -32,8 +33,8 @@ function rotatedChoices(
 ): Record<BumperEdge, { background: LogoBumperBackground; reveal: LogoBumperReveal }> {
   const key = bumpers.style?.seed === undefined ? videoKey : String(bumpers.style.seed);
   const next = createSeededRandom(hashStringToSeed(`bumpers:${key}`));
-  const backgrounds = nonEmpty(bumpers.style?.backgrounds, LOGO_BUMPER_BACKGROUNDS);
-  const reveals = nonEmpty(bumpers.style?.reveals, LOGO_BUMPER_REVEALS);
+  const backgrounds = nonEmpty(bumpers.style?.backgrounds, ROTATING_BACKGROUNDS);
+  const reveals = nonEmpty(bumpers.style?.reveals, ROTATING_REVEALS);
   const introBackground = bumpers.intro?.background ?? pickAvoidingPrevious(backgrounds, undefined, next);
   const introReveal = bumpers.intro?.reveal ?? pickAvoidingPrevious(reveals, undefined, next);
   return {

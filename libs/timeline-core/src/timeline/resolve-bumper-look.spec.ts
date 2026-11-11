@@ -23,6 +23,17 @@ describe('resolveBumperLook', () => {
     }
   });
 
+  it('sin pools de marca la rotación nunca cae en el look viejo: ni fondo liso ni fundido', () => {
+    const bumpers = both({ style: { rotate: true } });
+    for (let seed = 0; seed < 60; seed += 1) {
+      for (const edge of ['intro', 'outro'] as const) {
+        const look = resolveBumperLook({ ...bumpers, style: { rotate: true, seed } }, edge, 'v');
+        expect(look?.background).not.toBe('solid');
+        expect(look?.reveal).not.toBe('fade');
+      }
+    }
+  });
+
   it('con rotate cada video sale distinto y el mismo video siempre igual', () => {
     const bumpers = both({ style: { rotate: true } });
     const looks = ['v1', 'v2', 'v3', 'v4', 'v5', 'v6'].map((key) => {
