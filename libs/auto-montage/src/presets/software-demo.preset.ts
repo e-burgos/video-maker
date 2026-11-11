@@ -26,5 +26,5 @@ export const softwareDemoPreset: MontagePreset = {
     kinds: ['whip-pan', 'wipe', 'fade', 'slide', 'flip'],
     timing: 'spring',
   },
-  audio: { baseGainDb: -8, duckedGainDb: -18, referenceLufs: -16, attackMs: 150, releaseMs: 400, holdMs: 250 },
+  audio: { baseGainDb: -10, duckedGainDb: -20, referenceLufs: -16, attackMs: 150, releaseMs: 400, holdMs: 250 },
 };

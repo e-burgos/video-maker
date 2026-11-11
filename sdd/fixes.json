@@ -5666,6 +5666,55 @@
           }
         ]
       }
+    },
+    {
+      "id": "FIX-e-burgos-067",
+      "author": "e-burgos",
+      "spec_id": null,
+      "fix_document": "sdd/fixes/fix-e-burgos-067.md",
+      "type": "IMPROVEMENT",
+      "severity": "medium",
+      "created_at": "2026-11-11",
+      "resolved_at": "2026-11-11",
+      "validated_at": null,
+      "title": "La cama de música de los presets del montaje baja 2 dB para dejar la voz holgada sobre 15 dB",
+      "estimation_hours": 1,
+      "description": "Los presets de tutorial pasan a −10/−20 dB y hardware a −6/−14 dB, para que el margen voz/música del review quede en 16 dB o más con la normalización lineal del máster.",
+      "justification": "Aprobado por el dev («Sí, las tres») vía la sesión orquestadora.",
+      "related_modules": [
+        "production-quality"
+      ],
+      "affected_files": [
+        "libs/auto-montage/src/presets/software-demo.preset.ts",
+        "libs/auto-montage/src/presets/educational.preset.ts",
+        "libs/auto-montage/src/presets/recipe.preset.ts",
+        "libs/auto-montage/src/presets/hardware.preset.ts"
+      ],
+      "test_reference": "nx test/lint/build en verde: auto-montage 381, render-api 2291, web 1653.",
+      "status": "implemented",
+      "cycle": null,
+      "process_note": "Faltan los números de la receta Tutorial en el prompt compartido y en el SKILL video-producer (sesión de música).",
+      "usage": {
+        "provider_model": "claude/opus",
+        "effort": "medium",
+        "tokens_in": 150000,
+        "tokens_out": 8000,
+        "approx": true,
+        "source": "declared-estimate",
+        "recorded_at": "2026-11-11",
+        "by_agent": [
+          {
+            "agent": "orchestrator",
+            "provider_model": "claude/opus",
+            "effort": "medium",
+            "tokens_in": 150000,
+            "tokens_out": 8000,
+            "approx": true,
+            "source": "declared-estimate",
+            "recorded_at": "2026-11-11"
+          }
+        ]
+      }
     }
   ]
 }
