@@ -6009,6 +6009,51 @@
           }
         ]
       }
+    },
+    {
+      "id": "FIX-e-burgos-073",
+      "author": "e-burgos",
+      "spec_id": null,
+      "fix_document": "sdd/fixes/fix-e-burgos-073.md",
+      "type": "BUGFIX",
+      "severity": "low",
+      "created_at": "2026-11-11",
+      "resolved_at": "2026-11-11",
+      "validated_at": null,
+      "title": "El prompt aclara que pedir que los bumpers suenen no es pedir un efecto concreto: sfxKind queda afuera",
+      "estimation_hours": 0.3,
+      "description": "En la verificación del studio el productor fijó sfxKind a mano cuando el usuario solo pidió que los bumpers tuvieran sonido. El prompt aclara que eso no es pedir un sonido concreto y que sfxKind se fija solo si el usuario lo nombra o pide silencio.",
+      "justification": "Autorizado por la sesión orquestadora como pendiente propio de la PR; la sesión de música no toca el prompt.",
+      "related_modules": [
+        "production-quality"
+      ],
+      "affected_files": [
+        "libs/producer-tools/src/prompt/build-producer-prompt.ts"
+      ],
+      "test_reference": "nx test/lint en verde: producer-tools 449.",
+      "status": "implemented",
+      "cycle": null,
+      "usage": {
+        "provider_model": "claude/opus",
+        "effort": "medium",
+        "tokens_in": 80000,
+        "tokens_out": 4000,
+        "approx": true,
+        "source": "declared-estimate",
+        "recorded_at": "2026-11-11",
+        "by_agent": [
+          {
+            "agent": "orchestrator",
+            "provider_model": "claude/opus",
+            "effort": "medium",
+            "tokens_in": 80000,
+            "tokens_out": 4000,
+            "approx": true,
+            "source": "declared-estimate",
+            "recorded_at": "2026-11-11"
+          }
+        ]
+      }
     }
   ]
 }
