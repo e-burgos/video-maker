@@ -19,4 +19,4 @@ El review del FIX-e-burgos-048 exige que la voz quede 15 dB por encima de la mú
 
 ## Verificación
 - `nx test`, `lint` y `build` en verde: auto-montage 381, render-api 2291 (un test de probe de medios hace timeout bajo carga y pasa aislado), web 1653.
-- Margen medido en el tutorial de prueba: ver la sección siguiente.
+- Review del studio sobre `media/prueba-motion-guion`, re-montado con los presets nuevos: margen voz/música de 16,6 dB (antes 14,6, que era crítico), estado `pass`, máster en −14,18 LUFS y pico −1,45 dBTP. La música sigue en la mezcla a −10 dB en los tramos sin voz.
