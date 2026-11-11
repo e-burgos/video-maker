@@ -250,10 +250,10 @@ placa de color con el logo centrado.
 
 | Preset          | Úsalo para                                   | Rasgos                                                                   | Música |
 | --------------- | -------------------------------------------- | ------------------------------------------------------------------------ | ------ |
-| `software-demo` | tutoriales de software, pantallas grabadas, reels dinámicos | cortes por silencios ≥400 ms, punch-in cada 3, B-roll a pantalla completa hasta 35 %, captions de 3 palabras, whip-pan | -8 / -18 dB |
-| `educational`   | explicaciones, clases, publicidad sobria     | silencios ≥600 ms, B-roll picture-in-picture hasta 20 %, prefiere fotos, fades lentos | -8 / -18 dB |
-| `recipe`        | paso a paso con muchas tomas de apoyo        | más B-roll, cortes medios                                                | -8 / -18 dB |
-| `hardware`      | producto físico, unboxing, **publicidad**    | punch-ins fuertes, B-roll de producto                                    | **-4 / -12 dB** |
+| `software-demo` | tutoriales de software, pantallas grabadas, reels dinámicos | cortes por silencios ≥400 ms, punch-in cada 3, B-roll a pantalla completa hasta 35 %, captions de 3 palabras, whip-pan | -10 / -20 dB |
+| `educational`   | explicaciones, clases, publicidad sobria     | silencios ≥600 ms, B-roll picture-in-picture hasta 20 %, prefiere fotos, fades lentos | -10 / -20 dB |
+| `recipe`        | paso a paso con muchas tomas de apoyo        | más B-roll, cortes medios                                                | -10 / -20 dB |
+| `hardware`      | producto físico, unboxing, **publicidad**    | punch-ins fuertes, B-roll de producto                                    | **-6 / -14 dB** |
 
 La columna de música es `baseGainDb / duckedGainDb` sobre la cama ya normalizada a -16 LUFS.
 `hardware` es el preset de publicidad: la música se escucha ~13 dB bajo la voz. Los otros tres
@@ -451,7 +451,7 @@ elegidos**: aplicalos y **no vuelvas a preguntar por ninguno**.
 | Voz del montaje       | `voice: script`                                                               |
 | Subtítulos            | `captionStyle: subtle-lower`                                                  |
 | Narración             | job `voice` con `voiceId: es_AR-daniela-high`, `gapMs: 900` y guion con marcas `[m:ss]`, una línea por escena |
-| Música                | `search_free_music` con mood «calm tutorial»: primero el banco de la marca, después Openverse y Commons; `import_music` la acredita en `work/credits.json`. Niveles de `educational` (-8 dB base / -18 dB duckeado): no los pises |
+| Música                | `search_free_music` con mood «calm tutorial»: primero el banco de la marca, después Openverse y Commons; `import_music` la acredita en `work/credits.json`. Niveles de `educational` (-10 dB base / -20 dB duckeado): no los pises |
 | Logo                  | archivo de `raw/logo/` **con alfa** (§4), `position: bottom-right`, `widthRatio: 0.18`, `opacity: 0.5` |
 | Inicio y cierre       | `bumpers` intro y outro por `PUT` de la timeline: `enabled: true`, `durationMs: 2000`, `logoWidthRatio: 0.4`, sin `background`, `reveal` ni `style`: el montaje rota el look por video (ver «Inicio y fin con el logo») |
 

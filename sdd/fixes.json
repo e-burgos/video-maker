@@ -5764,6 +5764,54 @@
           }
         ]
       }
+    },
+    {
+      "id": "FIX-e-burgos-068",
+      "author": "e-burgos",
+      "spec_id": null,
+      "fix_document": "sdd/fixes/fix-e-burgos-068.md",
+      "type": "IMPROVEMENT",
+      "severity": "low",
+      "created_at": "2026-11-11",
+      "resolved_at": "2026-11-11",
+      "validated_at": null,
+      "title": "El SKILL y el prompt del productor usan los niveles nuevos de la cama de música (-10/-20 y -6/-14 dB)",
+      "estimation_hours": 0.1,
+      "description": "Tras FIX-067 (motion bajó 2 dB la cama de los presets), la tabla de presets y la receta Tutorial del SKILL.md, y las recetas Tutorial y Publicidad de build-producer-prompt.ts pasan de -8/-18 a -10/-20 dB y de -4/-12 a -6/-14 dB.",
+      "justification": "Pedido del orquestador al cerrar FIX-067; build-producer-prompt.ts autorizado para esta sesión.",
+      "related_modules": [
+        "production-quality"
+      ],
+      "affected_files": [
+        "sdd/skills/video-producer/SKILL.md",
+        "libs/producer-tools/src/prompt/build-producer-prompt.ts",
+        "libs/producer-tools/src/prompt/build-producer-prompt.spec.ts"
+      ],
+      "test_reference": "producer-tools 449 en verde (checklist de las recetas actualizado); auto-montage 381, render-api 2291.",
+      "status": "implemented",
+      "cycle": null,
+      "process_note": "",
+      "usage": {
+        "provider_model": "claude/opus",
+        "effort": "low",
+        "tokens_in": 120000,
+        "tokens_out": 6000,
+        "approx": true,
+        "source": "declared-estimate",
+        "recorded_at": "2026-11-11",
+        "by_agent": [
+          {
+            "agent": "orchestrator",
+            "provider_model": "claude/opus",
+            "effort": "low",
+            "tokens_in": 120000,
+            "tokens_out": 6000,
+            "approx": true,
+            "source": "declared-estimate",
+            "recorded_at": "2026-11-11"
+          }
+        ]
+      }
     }
   ]
 }
