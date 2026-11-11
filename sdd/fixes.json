@@ -4632,6 +4632,53 @@
           }
         ]
       }
+    },
+    {
+      "id": "FIX-e-burgos-045",
+      "author": "e-burgos",
+      "spec_id": null,
+      "fix_document": "sdd/fixes/fix-e-burgos-045.md",
+      "type": "IMPROVEMENT",
+      "severity": "low",
+      "created_at": "2026-11-11",
+      "resolved_at": "2026-11-11",
+      "validated_at": null,
+      "title": "Commons solo devuelve audio con largo de música y busca con la palabra music; duplicar una marca hereda su música",
+      "estimation_hours": 0.5,
+      "description": "El relleno de Wikimedia Commons en search_free_music traía discursos y una entrevista de 99 minutos. Ahora descarta audio de menos de 30 s o más de 10 min y agrega «music» a la búsqueda si el mood no lo trae. Duplicar una marca ya no copia la carpeta music/ (49 MB en Display Ads): la copia queda con music vacío y musicFrom apuntando a la marca de origen.",
+      "justification": "Pendientes del banco de música (FIX-038 y FIX-042) detectados en la prueba real; sin contratos nuevos.",
+      "related_modules": [
+        "production-quality"
+      ],
+      "affected_files": [
+        "apps/render-api/src/music/commons-music-search.ts",
+        "apps/render-api/src/brands/brand-library.ts"
+      ],
+      "test_reference": "nx test/lint de render-api en verde (2267; un timeout suelto de review-measurements al primer intento, pasa al repetir). Consulta real a Commons: «corporate institutional» pasó de discursos y una entrevista de 99 min a música; «calm music» trae Kevin MacLeod.",
+      "status": "implemented",
+      "cycle": null,
+      "process_note": "Commons sigue siendo una fuente pobre para música: lo de fondo se resuelve con Openverse (siguiente fix).",
+      "usage": {
+        "provider_model": "claude/opus",
+        "effort": "low",
+        "tokens_in": 120000,
+        "tokens_out": 6000,
+        "approx": true,
+        "source": "declared-estimate",
+        "recorded_at": "2026-11-11",
+        "by_agent": [
+          {
+            "agent": "orchestrator",
+            "provider_model": "claude/opus",
+            "effort": "low",
+            "tokens_in": 120000,
+            "tokens_out": 6000,
+            "approx": true,
+            "source": "declared-estimate",
+            "recorded_at": "2026-11-11"
+          }
+        ]
+      }
     }
   ]
 }
