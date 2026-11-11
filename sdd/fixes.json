@@ -4586,6 +4586,52 @@
           }
         ]
       }
+    },
+    {
+      "id": "FIX-e-burgos-044",
+      "author": "e-burgos",
+      "spec_id": null,
+      "fix_document": "sdd/fixes/fix-e-burgos-044.md",
+      "type": "IMPROVEMENT",
+      "severity": "low",
+      "created_at": "2026-11-11",
+      "resolved_at": "2026-11-11",
+      "validated_at": null,
+      "title": "El SKILL.md del productor aclara que los efectos de audio faltan solo en el montaje; motion sí los tiene",
+      "estimation_hours": 0.25,
+      "description": "El SKILL.md de video-producer decía que el motor no hace efectos de audio ni escenas sin A-roll, sin aclarar que eso vale para el montaje (modo footage). Ahora lo acota al montador y dice que motion graphics lleva whoosh en los cambios de escena, impacto en el drop y los sfx del guion.",
+      "justification": "Etapa 0 del informe de audio (docs/research/2026-11-10-audio-tools-productor.md); solo documentación.",
+      "related_modules": [
+        "production-quality"
+      ],
+      "affected_files": [
+        "sdd/skills/video-producer/SKILL.md"
+      ],
+      "test_reference": "Sin código. Verificado contra compose-template.ts (whoosh por escena), impact-sfx.ts y motion-script.ts (sfx con escena, palabra y offset).",
+      "status": "implemented",
+      "cycle": null,
+      "process_note": "La otra mitad de la etapa 0 (15 dB como margen crítico) espera decisión del dev: contradice la calibración de 2026-10-11 con una mezcla aprobada a 13 dB.",
+      "usage": {
+        "provider_model": "claude/opus",
+        "effort": "low",
+        "tokens_in": 120000,
+        "tokens_out": 6000,
+        "approx": true,
+        "source": "declared-estimate",
+        "recorded_at": "2026-11-11",
+        "by_agent": [
+          {
+            "agent": "orchestrator",
+            "provider_model": "claude/opus",
+            "effort": "low",
+            "tokens_in": 120000,
+            "tokens_out": 6000,
+            "approx": true,
+            "source": "declared-estimate",
+            "recorded_at": "2026-11-11"
+          }
+        ]
+      }
     }
   ]
 }

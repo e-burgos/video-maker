@@ -57,9 +57,13 @@ comandos van en inglés/ASCII.
 | Bancos libres sin key: NASA Images API, Wikimedia Commons; con key opcional: Pexels (`PEXELS_API_KEY`) | Solo cuando el usuario lo pide o no aportó material para un concepto. Receta en §7. El usuario también puede darte URLs directas de descarga. |
 | Presets de montaje: `software-demo`, `educational`, `recipe`, `hardware` | Ritmo, cortes, transiciones, densidad de B-roll, palabras por caption. Tabla en §5.            |
 
-**Lo que el motor NO hace todavía** (decilo si el usuario lo pide): captions fuera del centro
-(hoy un solo estilo, cinético y centrado), escenas sin A-roll (todo video nace de un A-roll con
-voz), elegir B-roll por semántica (entra **solo** por nombre de archivo, ver §4), efectos de audio.
+**Lo que el montador (modo footage) NO hace todavía** (decilo si el usuario lo pide): captions
+fuera del centro (hoy un solo estilo, cinético y centrado), escenas sin A-roll (todo video de
+montaje nace de un A-roll con voz), elegir B-roll por semántica (entra **solo** por nombre de
+archivo, ver §4), efectos de audio. Los videos **motion graphics** (§8 bis) sí llevan efectos:
+whoosh en los cambios de escena, impacto en el drop de la música y los `sfx` del guion anclados a
+una escena o palabra. Los sonidos salen de `libs/motion-graphics/assets/runtime/sfx/`, y el review
+los mide contra la voz.
 El logo **sí** se maneja desde la web desde `spec-015` `cycle-02`: el usuario lo sube con el rol
 `logo` y elige mostrarlo y en qué esquina desde la página de preview, que reescribe `timeline.logo`.
 
