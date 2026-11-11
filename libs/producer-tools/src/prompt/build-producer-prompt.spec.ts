@@ -204,6 +204,7 @@ describe('buildProducerPrompt — sonido de los bumpers', () => {
     const prompt = buildProducerPrompt(CONTEXT);
     expect(prompt).toContain('Leave `sfxKind` and `sfx` out unless the user asks for a specific');
     expect(prompt).toContain('`"sfxKind":"none"`');
+    expect(prompt).toContain('is not asking for a specific one: they already sound, so leave');
   });
 });
 
