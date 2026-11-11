@@ -569,7 +569,7 @@ function buildProducerRecipesSection(): string {
     '- 3) Montage: `"format":"shorts-9x16"`, `"preset":"recipe"`, `"seed":0`, `"voice":"aroll"`,',
     '  `"captionStyle":"bold-impact"` and the script path, so the captions carry the words you wrote',
     '  instead of what was transcribed. `recipe` is the fastest preset in the registry — a cut and a',
-    '  transition every 2 clips, light-leak and whip-pan, captions of 2 words — and it is the one',
+    '  transition every 2 clips rotating light-leak, whip-pan, iris, clock-wipe and slide, captions of 2 words — and it is the one',
     '  that looks like an ad.',
     '- 4) Timeline: one patch_timeline call — read the current audioMix with get_timeline first,',
     '  raise its music to `"baseGainDb":-4` and `"duckedGainDb":-12` and keep the rest of it as is,',

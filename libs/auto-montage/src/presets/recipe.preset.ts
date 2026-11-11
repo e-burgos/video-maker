@@ -23,7 +23,7 @@ export const recipePreset: MontagePreset = {
   transitions: {
     every: 2,
     durationMs: 160,
-    kinds: ['light-leak', 'whip-pan', 'slide'],
+    kinds: ['light-leak', 'whip-pan', 'iris', 'clock-wipe', 'slide'],
     timing: 'spring',
   },
   audio: { baseGainDb: -8, duckedGainDb: -18, referenceLufs: -16, attackMs: 100, releaseMs: 300, holdMs: 180 },

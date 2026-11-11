@@ -4,7 +4,7 @@ import { createSeededRandom, hashStringToSeed, msToFrames, pickAvoidingPrevious,
 
 import type { MontagePreset } from '../presets/montage-preset';
 
-const DIRECTED_TRANSITION_KINDS = new Set<TransitionDecision['kind']>(['slide', 'whip-pan']);
+const DIRECTED_TRANSITION_KINDS = new Set<TransitionDecision['kind']>(['slide', 'whip-pan', 'wipe', 'flip']);
 const DIRECTION_POOL: readonly ['from-left', 'from-right'] = ['from-left', 'from-right'];
 
 function sequentialId(prefix: string, index: number): string {
