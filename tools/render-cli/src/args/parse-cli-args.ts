@@ -33,6 +33,7 @@ export type ParsedCommand =
   | { readonly command: 'ingest'; readonly projectRoot: string }
   | { readonly command: 'plan'; readonly projectRoot: string; readonly options: PlanOptions }
   | { readonly command: 'render'; readonly projectRoot: string }
+  | { readonly command: 'flash-scan'; readonly projectRoot: string }
   | { readonly command: 'run'; readonly projectRoot: string; readonly options: PlanOptions };
 
 type CommandName = (typeof COMMAND_NAMES)[number];
@@ -274,7 +275,7 @@ const PLAN_ONLY_OPTIONS = [
   'prune-silences',
 ] as const;
 
-function assertNoPlanOptions(command: 'ingest' | 'render', values: RawPlanValues): void {
+function assertNoPlanOptions(command: 'ingest' | 'render' | 'flash-scan', values: RawPlanValues): void {
   const present: readonly [(typeof PLAN_ONLY_OPTIONS)[number], unknown][] = [
     ['preset', values.preset],
     ['seed', values.seed],
@@ -332,7 +333,7 @@ export function parseCliArgs(argv: readonly string[]): ParsedCommand {
     'prune-silences': rawPruneSilences,
   } = parsed.values;
 
-  if (rawCommand === 'ingest' || rawCommand === 'render') {
+  if (rawCommand === 'ingest' || rawCommand === 'render' || rawCommand === 'flash-scan') {
     assertNoPlanOptions(rawCommand, {
       preset: rawPreset,
       seed: rawSeed,

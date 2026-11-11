@@ -48,6 +48,17 @@ const STAGE_FOR_ARGUMENT: Record<CommandName, Record<CliArgument, Stage>> = {
     'caption-style': 'render',
     'prune-silences': 'render',
   },
+  'flash-scan': {
+    'project-root': 'render',
+    preset: 'render',
+    seed: 'render',
+    script: 'render',
+    logo: 'render',
+    format: 'render',
+    voice: 'render',
+    'caption-style': 'render',
+    'prune-silences': 'render',
+  },
   run: {
     'project-root': 'ingest',
     preset: 'plan',
