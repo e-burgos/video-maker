@@ -453,6 +453,7 @@ const SearchFreeMusicOutputSchema = z.strictObject({
       license: z.string(),
       author: z.string(),
       pageUrl: z.string(),
+      source: z.enum(['brand-bank', 'commons']).optional(),
     }),
   ),
 });
@@ -846,13 +847,13 @@ export const STUDIO_TOOLS: Readonly<Record<StudioToolName, StudioToolDefinition>
   },
   search_free_music: {
     description:
-      'Search Wikimedia Commons for freely licensed music matching a mood, up to maxResults results. Use the returned resultId with import_music.',
+      "Search freely licensed music matching a mood, up to maxResults results: first the music bank of the project's brand (source brand-bank, already tagged for tutorial, product, vertical or institutional videos and ordered so the least recently used come first), then Wikimedia Commons. Put the kind of video in the mood (e.g. \"calm tutorial\"). Use the returned resultId with import_music.",
     input: SearchFreeMusicInputSchema,
     output: SearchFreeMusicOutputSchema,
   },
   import_music: {
     description:
-      'Download a previously searched music result into raw/audio/ and record its credit in work/credits.json.',
+      'Bring a previously searched music result into raw/audio/ and record its credit in work/credits.json.',
     input: ImportMusicInputSchema,
     output: ImportMusicOutputSchema,
   },

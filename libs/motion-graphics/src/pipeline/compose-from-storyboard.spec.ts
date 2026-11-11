@@ -27,6 +27,28 @@ describe('composeFromStoryboard', () => {
     expect(ports.files.has(`${P}/storyboard.json`)).toBe(true);
   });
 
+  it('copies only the chosen track, never the whole brand music folder', async () => {
+    const files = { ...brandFiles(), '/repo/assets/brands/acme/music/otro.mp3': 'otro', '/in/images/local.jpg': 'jpg' };
+    const ports = createFakePipelinePorts({ files });
+    await composeFromStoryboard(ports, storyboard, '/in', P);
+    expect(ports.files.get(`${P}/assets/music/tema.mp3`)).toBe('mp3');
+    expect([...ports.files.keys()].some((path) => path.startsWith(`${P}/assets/brand/music/`))).toBe(false);
+  });
+
+  it('plays a track from the local music folder next to the user brands', async () => {
+    const localTrack = { id: 'pulsar', file: 'Pulsar.mp3', credit: 'Pulsar · YouTube', bpm: 104, mood: 'calm ambient', videoTypes: ['tutorial'] };
+    const files = {
+      ...brandFiles(),
+      '/user/brands/.local-music/acme/music.json': JSON.stringify([localTrack]),
+      '/user/brands/.local-music/acme/Pulsar.mp3': 'pulsar',
+      '/in/images/local.jpg': 'jpg',
+    };
+    const ports = { ...createFakePipelinePorts({ files }), userBrandsRoot: '/user/brands' };
+    await composeFromStoryboard(ports, { ...storyboard, music: { track: 'pulsar' } }, '/in', P);
+    expect(ports.files.get(`${P}/assets/music/Pulsar.mp3`)).toBe('pulsar');
+    expect(JSON.parse(String(ports.files.get(`${P}/script.json`))).music).toEqual({ file: 'Pulsar.mp3', credit: 'Pulsar · YouTube' });
+  });
+
   it('fails on a missing image or an unknown brand', async () => {
     const missing = createFakePipelinePorts({ files: brandFiles() });
     await expect(composeFromStoryboard(missing, storyboard, '/in', P)).rejects.toThrow('image "images/local.jpg" not found');

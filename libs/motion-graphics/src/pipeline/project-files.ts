@@ -1,6 +1,8 @@
 import { BRAND_ASSET_DIR, RUNTIME_ASSET_DIR } from '../compose/compose-storyboard';
 import { brandCss } from '../brand/brand-css';
 import { brandCssFile, parseBrandManifest } from '../brand/brand-manifest';
+import { brandTrackSourcePath, LOCAL_MUSIC_LIST_FILE, localMusicDirectory, parseLocalMusicList, withLocalMusic } from '../brand/brand-music';
+import type { BrandTrack } from '../brand/brand-music';
 import type { BrandManifest } from '../brand/brand-manifest';
 import { MotionStudioError } from '../errors/motion-studio-error';
 import { parseMotionScript } from '../script/motion-script';
@@ -13,6 +15,7 @@ export const SCRIPT_FILE = 'script.json';
 export const TIMELINE_FILE = 'timeline.json';
 export const WORDS_FILE = 'words.json';
 const BRAND_MANIFEST = 'brand.json';
+const BRAND_MUSIC_DIRECTORY = 'music';
 
 export const toJson = (value: unknown, indent: number): string => `${JSON.stringify(value, null, indent)}\n`;
 
@@ -41,13 +44,25 @@ async function requireBrandDir(ports: MotionPipelinePorts, brand: string): Promi
 
 export async function readBrand(ports: MotionPipelinePorts, brandId: string): Promise<BrandManifest> {
   const brandDir = await requireBrandDir(ports, brandId);
-  return parseBrandManifest(JSON.parse(await ports.readText(joinPath(brandDir, BRAND_MANIFEST))));
+  const brand = parseBrandManifest(JSON.parse(await ports.readText(joinPath(brandDir, BRAND_MANIFEST))));
+  return withLocalMusic(brand, await readLocalMusic(ports, brandId));
+}
+
+async function readLocalMusic(ports: MotionPipelinePorts, brandId: string): Promise<BrandTrack[]> {
+  if (ports.userBrandsRoot === undefined) return [];
+  const listPath = joinPath(localMusicDirectory(ports.userBrandsRoot, brandId), LOCAL_MUSIC_LIST_FILE);
+  if (!(await ports.exists(listPath))) return [];
+  return parseLocalMusicList(JSON.parse(await ports.readText(listPath)));
+}
+
+export async function brandTrackPath(ports: MotionPipelinePorts, brandId: string, trackFile: string): Promise<string> {
+  return brandTrackSourcePath(await requireBrandDir(ports, brandId), ports.userBrandsRoot, brandId, trackFile);
 }
 
 export async function copySharedAssets(ports: MotionPipelinePorts, brand: string, project: string): Promise<void> {
   const brandDir = await requireBrandDir(ports, brand);
   await ports.copyTree(joinPath(ports.assetsRoot, 'runtime'), joinPath(project, RUNTIME_ASSET_DIR));
-  await ports.copyTree(brandDir, joinPath(project, BRAND_ASSET_DIR));
+  await ports.copyTree(brandDir, joinPath(project, BRAND_ASSET_DIR), [BRAND_MUSIC_DIRECTORY]);
   await writeGeneratedBrandCss(ports, brandDir, project);
 }
 
@@ -59,5 +74,5 @@ async function writeGeneratedBrandCss(ports: MotionPipelinePorts, brandDir: stri
 }
 
 export async function copyMusic(ports: MotionPipelinePorts, project: string, source: string, file: string): Promise<void> {
-  await ports.copyFile(joinPath(project, source), joinPath(project, 'assets', 'music', file));
+  await ports.copyFile(source, joinPath(project, 'assets', 'music', file));
 }

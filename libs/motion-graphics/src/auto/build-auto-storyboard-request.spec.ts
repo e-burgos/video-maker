@@ -83,6 +83,22 @@ describe('buildAutoStoryboardRequest', () => {
     expect(buildAutoStoryboardRequest({ ...brief, music: null, images: [] }, testBrand).userPrompt).toMatch(/music: no music[\s\S]*images: none/u);
   });
 
+  it('asks for a track made for the kind of video and away from the ones the last videos used', () => {
+    const tagged = {
+      ...testBrand,
+      music: [
+        { id: 'calma', file: 'music/calma.mp3', credit: 'Calma · CC BY 4.0', bpm: 90, mood: 'calm', videoTypes: ['tutorial' as const] },
+        { id: 'pulso', file: 'music/pulso.mp3', credit: 'Pulso · CC BY 4.0', bpm: 128, mood: 'energetic', videoTypes: ['vertical' as const, 'product' as const] },
+      ],
+    };
+    const prompt = buildAutoStoryboardRequest(brief, tagged, { recentTracks: ['pulso', 'borrado'] }).userPrompt;
+    expect(prompt).toContain('pulso (energetic, 128 BPM, no drop, for vertical/product videos)');
+    expect(prompt).toContain('a 9:16 video is vertical');
+    expect(prompt).toContain('the last videos used pulso: pick a different one unless none other fits');
+    expect(prompt).not.toContain('borrado');
+    expect(buildAutoStoryboardRequest({ ...brief, format: '16:9' }, tagged).userPrompt).toContain('tutorial for a step-by-step walkthrough');
+  });
+
   it('teaches the optional voice direction and the music mode without forcing them', () => {
     expect(request.systemPrompt).toContain('`direction`');
     expect(request.systemPrompt).toContain('leave `direction` out of neutral lines');

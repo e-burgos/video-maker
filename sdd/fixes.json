@@ -4254,6 +4254,65 @@
           }
         ]
       }
+    },
+    {
+      "id": "FIX-e-burgos-038",
+      "author": "e-burgos",
+      "spec_id": null,
+      "fix_document": "sdd/fixes/fix-e-burgos-038.md",
+      "type": "IMPROVEMENT",
+      "severity": "medium",
+      "created_at": "2026-11-10",
+      "resolved_at": "2026-11-10",
+      "validated_at": null,
+      "title": "Banco de música por tipo de video con rotación: 16 temas CC BY en el repo y 19 de YouTube solo locales",
+      "estimation_hours": 4,
+      "description": "Los videos salían siempre con los mismos dos temas. La marca Display Ads suma 16 temas CC BY etiquetados con videoTypes; los 19 de la Biblioteca de audio de YouTube viven en brands/.local-music, fuera de git, y se suman en runtime. Motion elige por tipo y evita los temas usados hace poco (media/.music-usage.json); search_free_music devuelve primero el banco de la marca y import_music lo copia. Cada proyecto de motion deja de copiar la carpeta music entera.",
+      "justification": "Lo pidió el dev tras escuchar el banco a ciegas; no crea contratos entre subproyectos más allá de un campo opcional en la salida de search_free_music.",
+      "related_modules": [
+        "production-quality"
+      ],
+      "affected_files": [
+        "libs/motion-graphics/assets/brands/displayads/brand.json",
+        "libs/motion-graphics/assets/brands/displayads/music/CREDITS.md",
+        "libs/motion-graphics/src/brand/brand-music.ts",
+        "libs/motion-graphics/src/brand/brand-manifest.ts",
+        "libs/motion-graphics/src/auto/build-auto-storyboard-request.ts",
+        "libs/motion-graphics/src/pipeline/project-files.ts",
+        "apps/render-api/src/music/brand-music-bank.ts",
+        "apps/render-api/src/music/music-usage-log.ts",
+        "apps/render-api/src/music/local-music.ts",
+        "apps/render-api/src/http/handlers/music-handler.ts",
+        "apps/render-api/src/http/handlers/motion-handler.ts",
+        "apps/render-api/src/jobs/run-motion-pipeline.ts",
+        "libs/producer-tools/src/contract/tool-schemas.ts",
+        "libs/producer-tools/src/prompt/build-producer-prompt.ts"
+      ],
+      "test_reference": "nx test/lint en verde: motion-graphics 321, producer-tools 448, render-api 2265, web 1647; banco real (brand.json + .local-music) parseado con los 37 archivos presentes.",
+      "status": "implemented",
+      "cycle": null,
+      "process_note": "BPM de los temas sin catálogo medido con un estimador de flujo de energía validado contra los BPM publicados de Incompetech; los mayores a 160 se pasaron a la mitad.",
+      "usage": {
+        "provider_model": "claude/opus",
+        "effort": "medium",
+        "tokens_in": 1500000,
+        "tokens_out": 90000,
+        "approx": true,
+        "source": "declared-estimate",
+        "recorded_at": "2026-11-10",
+        "by_agent": [
+          {
+            "agent": "orchestrator",
+            "provider_model": "claude/opus",
+            "effort": "medium",
+            "tokens_in": 1500000,
+            "tokens_out": 90000,
+            "approx": true,
+            "source": "declared-estimate",
+            "recorded_at": "2026-11-10"
+          }
+        ]
+      }
     }
   ]
 }

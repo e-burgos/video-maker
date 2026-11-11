@@ -4,7 +4,7 @@ import { MotionStoryboardSchema } from '../storyboard/motion-storyboard.schema';
 import type { MotionStoryboard } from '../storyboard/motion-storyboard.schema';
 import { formatIssuePath } from '../storyboard/parse-motion-storyboard';
 import { buildAutoStoryboardRequest } from './build-auto-storyboard-request';
-import type { AutoStoryboardRequest } from './build-auto-storyboard-request';
+import type { AutoStoryboardOptions, AutoStoryboardRequest } from './build-auto-storyboard-request';
 import { applyBriefBoxes } from './brief-boxes';
 import { checkStoryboardAgainstBrief, enforceBrief } from './check-storyboard-against-brief';
 import type { StoryboardIssue } from './check-storyboard-against-brief';
@@ -91,8 +91,13 @@ async function askOrFail(ask: AskStoryboardAgent, request: AutoStoryboardRequest
   }
 }
 
-export async function generateMotionStoryboard(ask: AskStoryboardAgent, brief: MotionBrief, brand: BrandManifest): Promise<GeneratedStoryboard> {
-  const request = buildAutoStoryboardRequest(brief, brand);
+export async function generateMotionStoryboard(
+  ask: AskStoryboardAgent,
+  brief: MotionBrief,
+  brand: BrandManifest,
+  options: AutoStoryboardOptions = {},
+): Promise<GeneratedStoryboard> {
+  const request = buildAutoStoryboardRequest(brief, brand, options);
   const first = await askOrFail(ask, request);
   const firstValidation = validate(first.json, brief, brand);
   if (firstValidation.ok) return { storyboard: firstValidation.storyboard, usage: sumUsage([first.usage]), repaired: false };

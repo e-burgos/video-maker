@@ -65,7 +65,7 @@ describe('composeStoryboard', () => {
     expect(script.scenes[1]).toMatchObject({ id: 'reveal', anchor: 12.5 });
     expect(script.noWhooshOn).toEqual(['reveal']);
     expect(script.sfx).toEqual([{ id: 'riser', scene: 'reveal', offset: -3.4 }]);
-    expect(musicSource).toBe('assets/brand/music/Beat Song.mp3');
+    expect(musicSource).toBe('music/Beat Song.mp3');
   });
 
   it('carries minSec into the script only on the scenes that set it', () => {

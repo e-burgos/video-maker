@@ -1,3 +1,5 @@
+import { dirname } from 'node:path';
+
 import { toAbsolutePath, workPath } from '@video-maker/auto-montage';
 import type { MediaProject } from '@video-maker/auto-montage';
 import {
@@ -19,6 +21,7 @@ import type { RenderApiDependencies } from '../deps/render-api-dependencies';
 import { PipelineStageError } from '../errors/pipeline-stage-error';
 import { isRenderApiError } from '../errors/render-api-error';
 import { translateMotionError } from '../errors/translate-motion-error';
+import { recentlyUsedTracks, recordMusicUse } from '../music/music-usage-log';
 import { sampleOutputName } from './sample-job-params';
 import { motionCheckpoint } from './motion-pipeline-observer';
 import type { MotionPipelineObserver } from './motion-pipeline-observer';
@@ -109,10 +112,12 @@ function keepMusicVolume(storyboard: MotionStoryboard, volume: number | null): M
 }
 
 async function buildStoryboard(
+  deps: RenderApiDependencies,
   ports: MotionPipelinePorts,
   project: MediaProject,
   workDirectory: string,
 ): Promise<{ readonly storyboard: MotionStoryboard; readonly report: MotionJobStoryboardReport }> {
+  const mediaRoot = dirname(project.root);
   const brief = parseMotionBrief(await readJson(ports, toAbsolutePath(project, BRIEF_PATH)));
   await copyImagesIntoWorkDirectory(
     ports,
@@ -122,10 +127,14 @@ async function buildStoryboard(
   );
 
   const previousMusicVolume = await readStoredMusicVolume(ports, project);
-  const result = await autoStoryboard(ports, brief, workDirectory, workDirectory);
+  const recentTracks = await recentlyUsedTracks(deps.storage, mediaRoot, brief.brand);
+  const result = await autoStoryboard(ports, brief, workDirectory, workDirectory, { recentTracks });
   const generated = parseMotionStoryboard(await readJson(ports, joinPath(workDirectory, 'storyboard.json')));
   const storyboard = keepMusicVolume(generated, previousMusicVolume);
   await ports.writeText(toAbsolutePath(project, STORYBOARD_PATH), `${JSON.stringify(storyboard, null, 2)}\n`);
+  if (storyboard.music !== null) {
+    await recordMusicUse(deps.storage, mediaRoot, storyboard.brand, storyboard.music.track, deps.clock.nowIso());
+  }
 
   return {
     storyboard,
@@ -210,7 +219,7 @@ export async function runMotionPipeline(
   if (request.phase !== 'video') {
     motionCheckpoint(observer, 'storyboard');
     observer.stageStarted('storyboard');
-    const built = await runMotionStage('storyboard', () => buildStoryboard(ports, request.project, workDirectory));
+    const built = await runMotionStage('storyboard', () => buildStoryboard(deps, ports, request.project, workDirectory));
     storyboardReport = built.report;
     storyboardScenes = built.storyboard.scenes.length;
   }

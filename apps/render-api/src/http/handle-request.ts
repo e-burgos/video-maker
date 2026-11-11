@@ -367,7 +367,7 @@ async function dispatchRoute(
       case 'projects.proposal.approve':
         return await handleApproveProposal(deps, store, params, request, runtime);
       case 'motion.brands.list':
-        return await handleListMotionBrands(deps);
+        return await handleListMotionBrands(deps, store);
       case 'projects.motion.brief.get':
         return await handleGetMotionBrief(deps, store, params);
       case 'projects.motion.brief.put':

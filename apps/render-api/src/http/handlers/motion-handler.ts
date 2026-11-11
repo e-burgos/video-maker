@@ -1,5 +1,15 @@
-import { applyBriefBoxes, briefImageRef, checkStoryboardBoxes, isMotionStudioError, parseBrandManifest, parseMotionBrief, parseMotionStoryboard } from '@video-maker/motion-graphics';
-import type { MotionBrief, MotionStoryboard } from '@video-maker/motion-graphics';
+import {
+  applyBriefBoxes,
+  briefImageRef,
+  checkStoryboardBoxes,
+  isLocalMusicFile,
+  isMotionStudioError,
+  parseBrandManifest,
+  parseMotionBrief,
+  parseMotionStoryboard,
+  withLocalMusic,
+} from '@video-maker/motion-graphics';
+import type { BrandTrack, MotionBrief, MotionStoryboard, MusicVideoType } from '@video-maker/motion-graphics';
 import { join } from 'node:path/posix';
 
 import type { StoreConfig } from '../../config/store-config';
@@ -7,6 +17,7 @@ import type { MotionBrandDocument, MotionBrandSource, RenderApiDependencies } fr
 import { sampleFileClassifierFor } from '../../jobs/sample-files';
 import type { JobsBySlug } from '../../jobs/sample-files';
 import { readMotionOverview } from '../../motion/read-motion-overview';
+import { readLocalMusicTracks } from '../../music/local-music';
 import {
   availableImageRefs,
   describeImageProblem,
@@ -31,6 +42,8 @@ export interface MotionBrandMusicSummary {
   readonly mood: string;
   readonly bpm: number;
   readonly hasDrop: boolean;
+  readonly videoTypes: readonly MusicVideoType[] | null;
+  readonly local: boolean;
 }
 
 export interface MotionBrandSummary {
@@ -45,7 +58,7 @@ function jsonResponse(status: number, body: unknown): HttpResponse {
   return { status, headers: { 'content-type': JSON_CONTENT_TYPE }, body };
 }
 
-function toBrandSummary(document: MotionBrandDocument): MotionBrandSummary {
+function toBrandSummary(document: MotionBrandDocument, localTracks: readonly BrandTrack[]): MotionBrandSummary {
   let manifest;
   try {
     manifest = parseBrandManifest(document.manifest);
@@ -64,17 +77,22 @@ function toBrandSummary(document: MotionBrandDocument): MotionBrandSummary {
     name: manifest.name,
     source: document.source,
     formats: SUPPORTED_FORMATS,
-    music: manifest.music.map((track) => ({
+    music: withLocalMusic(manifest, localTracks).music.map((track) => ({
       id: track.id,
       mood: track.mood,
       bpm: track.bpm,
       hasDrop: track.drop !== undefined,
+      videoTypes: track.videoTypes ?? null,
+      local: isLocalMusicFile(track.file),
     })),
   };
 }
 
-export async function handleListMotionBrands(deps: RenderApiDependencies): Promise<HttpResponse> {
-  const summaries = (await deps.listMotionBrands()).map(toBrandSummary);
+export async function handleListMotionBrands(deps: RenderApiDependencies, store: StoreConfig): Promise<HttpResponse> {
+  const documents = await deps.listMotionBrands();
+  const summaries = await Promise.all(
+    documents.map(async (document) => toBrandSummary(document, await readLocalMusicTracks(deps.storage, store.brandsRoot, document.id))),
+  );
   summaries.sort((left, right) => left.id.localeCompare(right.id));
   return jsonResponse(200, summaries);
 }

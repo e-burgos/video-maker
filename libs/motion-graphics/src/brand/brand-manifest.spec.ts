@@ -7,7 +7,15 @@ describe('parseBrandManifest', () => {
   it('accepts the shipped DisplayAds manifest', () => {
     const brand = parseBrandManifest(displayads);
     expect(brand.devices['counter-15']?.screen?.polygon).toHaveLength(4);
-    expect(brand.music.map((m) => m.bpm)).toEqual([122, 110]);
+    expect(brand.music.slice(0, 2).map((m) => m.bpm)).toEqual([122, 110]);
+  });
+
+  it('tags every shipped DisplayAds track with the kinds of video it fits and keeps the YouTube library out of the repo', () => {
+    const brand = parseBrandManifest(displayads);
+    expect(brand.music).toHaveLength(18);
+    expect(brand.music.every((track) => (track.videoTypes?.length ?? 0) > 0)).toBe(true);
+    expect(brand.music.some((track) => track.credit.includes('YouTube'))).toBe(false);
+    expect(new Set(brand.music.flatMap((track) => track.videoTypes ?? []))).toEqual(new Set(['tutorial', 'product', 'vertical', 'institutional']));
   });
 
   it('marks the retired device, the device that needs a light plate and describes every scene photo', () => {

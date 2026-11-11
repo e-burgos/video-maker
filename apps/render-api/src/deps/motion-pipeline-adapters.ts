@@ -52,9 +52,10 @@ export function createMotionPipelinePorts(deps: RenderApiDependencies, assetsRoo
       await writeFile(path, content);
     },
     exists: pathExists,
-    copyTree: async (from, to) => {
+    copyTree: async (from, to, excludeTopLevel = []) => {
       await mkdir(to, { recursive: true });
-      await cp(from, to, { recursive: true });
+      const excluded = new Set(excludeTopLevel.map((name) => join(from, name)));
+      await cp(from, to, { recursive: true, filter: (source) => !excluded.has(source) });
     },
     copyFile: async (from, to) => {
       await mkdir(dirname(to), { recursive: true });

@@ -62,7 +62,7 @@ function brandSection(brand: BrandManifest): string {
     const caption = brandImageCaption(brand, key);
     return caption === undefined ? `brand:${key}` : `brand:${key} (${caption})`;
   });
-  const music = brand.music.map((track) => `${track.id} (${track.mood}, ${track.bpm} BPM${track.drop === undefined ? ', no drop' : `, drop at ${track.drop}s`})`);
+  const music = brand.music.map((track) => `${track.id} (${track.mood}, ${track.bpm} BPM${track.drop === undefined ? ', no drop' : `, drop at ${track.drop}s`}${track.videoTypes === undefined ? '' : `, for ${track.videoTypes.join('/')} videos`})`);
   return [
     'BRAND',
     `name: ${brand.name}`,
@@ -98,12 +98,21 @@ function boxLines(boxes: MotionBrief['images'][number]['boxes']): string[] {
   ];
 }
 
-function briefSection(brief: MotionBrief, brand: BrandManifest): string {
+function autoMusicInstruction(brief: MotionBrief, brand: BrandManifest, recentTracks: readonly string[]): string {
+  const typed = brand.music.some((track) => track.videoTypes !== undefined);
+  const fit = typed
+    ? `choose a track made for this kind of video (${brief.format === '9:16' ? 'a 9:16 video is vertical' : 'product for a product or feature video, tutorial for a step-by-step walkthrough, institutional for a brand or company video'}) whose mood fits the script`
+    : 'choose the track that fits the mood of the script';
+  const recent = recentTracks.filter((id) => brand.music.some((track) => track.id === id));
+  return recent.length === 0 ? fit : `${fit}; the last videos used ${recent.join(', ')}: pick a different one unless none other fits`;
+}
+
+function briefSection(brief: MotionBrief, brand: BrandManifest, recentTracks: readonly string[]): string {
   const silent = brief.music === null || (brief.music === 'auto' && brand.music.length === 0);
   const musicInstruction = silent
     ? 'no music (use music: null)'
     : brief.music === 'auto'
-      ? 'choose the track that fits the mood of the script'
+      ? autoMusicInstruction(brief, brand, recentTracks)
       : `use the track "${brief.music}"`;
   const images = brief.images.flatMap((image) => [`- ${briefImageRef(image.file)}: ${image.caption}`, ...boxLines(image.boxes)]);
   return [
@@ -118,10 +127,14 @@ function briefSection(brief: MotionBrief, brand: BrandManifest): string {
   ].join('\n');
 }
 
-export function buildAutoStoryboardRequest(brief: MotionBrief, brand: BrandManifest): AutoStoryboardRequest {
+export interface AutoStoryboardOptions {
+  readonly recentTracks?: readonly string[];
+}
+
+export function buildAutoStoryboardRequest(brief: MotionBrief, brand: BrandManifest, options: AutoStoryboardOptions = {}): AutoStoryboardRequest {
   return {
     systemPrompt: systemPrompt(offeredSceneKinds(brief, brand)),
-    userPrompt: [brandSection(brand), assetLimitsSection(brief, brand).join('\n'), briefSection(brief, brand), `SCRIPT\n${brief.script}`]
+    userPrompt: [brandSection(brand), assetLimitsSection(brief, brand).join('\n'), briefSection(brief, brand, options.recentTracks ?? []), `SCRIPT\n${brief.script}`]
       .filter((section) => section !== '')
       .join('\n\n'),
     jsonSchema: toAgentJsonSchema(motionStoryboardJsonSchema()),

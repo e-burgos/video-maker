@@ -26,6 +26,19 @@ export { wavDurationSec } from './voice/wav-duration';
 
 export { activeDeviceIds, BrandManifestSchema, brandImageCaption, brandImageFile, parseBrandManifest } from './brand/brand-manifest';
 export type { BrandManifest } from './brand/brand-manifest';
+export {
+  brandTrackSourcePath,
+  isLocalMusicFile,
+  LOCAL_MUSIC_DIRECTORY,
+  LOCAL_MUSIC_FILE_PREFIX,
+  LOCAL_MUSIC_LIST_FILE,
+  localMusicDirectory,
+  MUSIC_VIDEO_TYPES,
+  parseLocalMusicList,
+  trackFitsVideoType,
+  withLocalMusic,
+} from './brand/brand-music';
+export type { BrandTrack, MusicVideoType } from './brand/brand-music';
 export { brandCss, effectiveBrandTokens, parseCssTokens } from './brand/brand-css';
 export { deriveBrandTokens, tokensToCss } from './brand/derive-brand-tokens';
 export type { BrandPalette, BrandTypography } from './brand/derive-brand-tokens';
@@ -41,7 +54,7 @@ export { ANIMATION_NAMES, ICON_NAMES, MotionSceneSchema, MotionStoryboardSchema,
 export type { IconName, MotionChip, MotionSceneKind, MotionScreen, MotionStoryboard, MotionStoryboardScene, MotionVisual, SceneOf } from './storyboard/motion-storyboard.schema';
 
 export { buildAutoStoryboardRequest } from './auto/build-auto-storyboard-request';
-export type { AutoStoryboardRequest } from './auto/build-auto-storyboard-request';
+export type { AutoStoryboardOptions, AutoStoryboardRequest } from './auto/build-auto-storyboard-request';
 export type { MeasuredBoxNotice } from './auto/brief-boxes';
 export { applyBriefBoxes, BOX_MATCH_TOLERANCE, checkStoryboardBoxes, listMeasuredBoxes } from './auto/brief-boxes';
 export { checkStoryboardAgainstBrief, enforceBrief } from './auto/check-storyboard-against-brief';

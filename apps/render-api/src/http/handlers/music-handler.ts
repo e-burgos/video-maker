@@ -1,11 +1,16 @@
+import { toAbsolutePath } from '@video-maker/auto-montage';
+import type { MediaProject } from '@video-maker/auto-montage';
 import { MAX_SEARCH_FREE_MUSIC_RESULTS, MIN_SEARCH_FREE_MUSIC_RESULTS } from '@video-maker/producer-tools';
 
 import type { StoreConfig } from '../../config/store-config';
 import type { RenderApiDependencies } from '../../deps/render-api-dependencies';
 import { PipelineStageError } from '../../errors/pipeline-stage-error';
+import { resolveUniqueFileName } from '../../media-search/download-shared';
+import { brandBankFileName, searchBrandMusicBank } from '../../music/brand-music-bank';
+import type { FreeMusicResult } from '../../music/brand-music-bank';
 import { downloadCommonsAudioFile } from '../../music/import-music';
 import { searchCommonsMusic } from '../../music/commons-music-search';
-import type { CommonsMusicResult } from '../../music/commons-music-search';
+import { recordMusicUse } from '../../music/music-usage-log';
 import { appendMusicCredit } from '../../music/project-credits';
 import type { MusicCreditEntry } from '../../music/project-credits';
 import { assertValidProjectSlug, resolveExistingProject } from '../../store/project-scope';
@@ -33,7 +38,7 @@ function musicSourceUnavailable(cause: unknown): PipelineStageError {
   });
 }
 
-function toPublicResult(result: CommonsMusicResult): Omit<CommonsMusicResult, 'downloadUrl'> {
+function toPublicResult(result: FreeMusicResult) {
   return {
     resultId: result.resultId,
     title: result.title,
@@ -41,7 +46,23 @@ function toPublicResult(result: CommonsMusicResult): Omit<CommonsMusicResult, 'd
     license: result.license,
     author: result.author,
     pageUrl: result.pageUrl,
+    source: result.source,
   };
+}
+
+async function searchCommonsToFill(deps: RenderApiDependencies, mood: string, slots: number, bankFound: boolean): Promise<FreeMusicResult[]> {
+  if (slots === 0) {
+    return [];
+  }
+  try {
+    const found = await searchCommonsMusic(deps.fetchRemote, mood, slots);
+    return found.map((result) => ({ ...result, source: 'commons' as const }));
+  } catch (cause) {
+    if (bankFound) {
+      return [];
+    }
+    throw musicSourceUnavailable(cause);
+  }
 }
 
 export async function handleSearchFreeMusic(
@@ -74,12 +95,9 @@ export async function handleSearchFreeMusic(
 
   await resolveExistingProject(deps, store, slug);
 
-  let results: readonly CommonsMusicResult[];
-  try {
-    results = await searchCommonsMusic(deps.fetchRemote, mood, maxResults);
-  } catch (cause) {
-    throw musicSourceUnavailable(cause);
-  }
+  const brandId = deps.localStore.projects.get(slug)?.brand ?? null;
+  const bank = await searchBrandMusicBank(deps, store, brandId, mood, maxResults);
+  const results = [...bank, ...(await searchCommonsToFill(deps, mood, maxResults - bank.length, bank.length > 0))];
 
   const nowMs = Date.parse(deps.clock.nowIso());
   runtime.musicSearchCache.store(slug, results, nowMs);
@@ -127,16 +145,17 @@ export async function handleImportMusic(
   }
 
   return runtime.uploadSerializer.run(slug, async () => {
-    const downloaded = await downloadCommonsAudioFile(deps.storage, deps.fetchRemote, project, result).catch(
-      (cause: unknown) => {
-        throw musicSourceUnavailable(cause);
-      },
-    );
+    const downloaded =
+      result.source === 'brand-bank'
+        ? await copyBrandBankTrack(deps, project, result)
+        : await downloadCommonsAudioFile(deps.storage, deps.fetchRemote, project, result).catch((cause: unknown) => {
+            throw musicSourceUnavailable(cause);
+          });
 
     const credit: MusicCreditEntry = {
       kind: 'music',
       path: downloaded.relativePath,
-      title: result.title,
+      title: result.creditTitle ?? result.title,
       author: result.author,
       license: result.license,
       sourceUrl: result.pageUrl,
@@ -144,7 +163,27 @@ export async function handleImportMusic(
     };
 
     await appendMusicCredit(deps.storage, project, credit);
+    if (result.brandId !== undefined && result.trackId !== undefined) {
+      await recordMusicUse(deps.storage, store.mediaRoot, result.brandId, result.trackId, deps.clock.nowIso());
+    }
 
     return jsonResponse(200, { path: downloaded.relativePath, credit });
   });
+}
+
+async function copyBrandBankTrack(
+  deps: RenderApiDependencies,
+  project: MediaProject,
+  result: FreeMusicResult,
+): Promise<{ readonly relativePath: string; readonly absolutePath: string }> {
+  if (result.localPath === undefined || (await deps.storage.stat(result.localPath))?.kind !== 'file') {
+    throw new PipelineStageError({ code: 'MUSIC_RESULT_UNKNOWN', stage: null, resource: result.resultId, expected: 'a brand music track that is still on disk' });
+  }
+  const audioDirectory = toAbsolutePath(project, 'raw/audio');
+  await deps.storage.ensureDirectory(audioDirectory);
+  const fileName = await resolveUniqueFileName(deps.storage, audioDirectory, brandBankFileName(result));
+  const relativePath = `raw/audio/${fileName}`;
+  const absolutePath = toAbsolutePath(project, relativePath);
+  await deps.storage.copyFile(result.localPath, absolutePath);
+  return { relativePath, absolutePath };
 }

@@ -2,6 +2,7 @@ import { z } from 'zod';
 
 import { MotionStudioError } from '../errors/motion-studio-error';
 import { formatIssuePath } from '../storyboard/parse-motion-storyboard';
+import { BrandTrackSchema } from './brand-music';
 
 const Text = z.string().trim().min(1);
 const HexColor = z.string().regex(/^#[0-9a-fA-F]{6}$/u);
@@ -38,7 +39,7 @@ const BrandManifestShape = z.strictObject({
     }),
   ),
   images: z.record(z.string(), z.union([Text, z.strictObject({ file: Text, caption: Text })])),
-  music: z.array(z.strictObject({ id: z.string(), file: Text, credit: Text, bpm: z.number().positive(), mood: Text, drop: z.number().nonnegative().optional() })),
+  music: z.array(BrandTrackSchema),
   voice: z.strictObject({ id: Text, lengthScale: z.number().min(0.7).max(1.4) }),
 });
 

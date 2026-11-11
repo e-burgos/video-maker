@@ -206,5 +206,5 @@ export function composeStoryboard(storyboard: MotionStoryboard, brand: BrandMani
     sfx: dropScene && track ? [{ id: 'riser', scene: dropScene.id, offset: -3.4 }] : [],
   };
 
-  return { template, script, images: storyboardImages(storyboard), musicSource: track ? `${BRAND_ASSET_DIR}/${track.file}` : null };
+  return { template, script, images: storyboardImages(storyboard), musicSource: track ? track.file : null };
 }
