@@ -4831,6 +4831,54 @@
           }
         ]
       }
+    },
+    {
+      "id": "FIX-e-burgos-049",
+      "author": "e-burgos",
+      "spec_id": null,
+      "fix_document": "sdd/fixes/fix-e-burgos-049.md",
+      "type": "IMPROVEMENT",
+      "severity": "medium",
+      "created_at": "2026-11-11",
+      "resolved_at": "2026-11-11",
+      "validated_at": null,
+      "title": "Los dos másters miden el true peak después del AAC y rehacen el loudnorm una vez si pasa de -1 dBTP",
+      "estimation_hours": 1,
+      "description": "El encoder AAC a 192k sumaba hasta 1,5-1,8 dB de pico sobre lo que dejaba loudnorm (un vertical salió a -0,28 dBTP con techo -1). normalizeVideoMasterLoudness (motion) mide el MP4 recién codificado y normalizeMasterLoudness (montaje) codifica una sonda AAC con el mismo códec y bitrate del mux; si el pico supera el techo, rehacen el loudnorm una sola vez con el target bajado en lo que sumó el encoder más 0,5 dB de margen. El margen general de 0,5 dB no cambia.",
+      "justification": "Diagnóstico del pico del vertical de la prueba conjunta; asignado por el orquestador con la regla de medir y reintentar una vez, sin subir el margen para todos.",
+      "related_modules": [
+        "production-quality"
+      ],
+      "affected_files": [
+        "libs/media-local/src/ffmpeg/true-peak-guard.ts",
+        "libs/media-local/src/ffmpeg/normalize-video-master-loudness.ts",
+        "libs/media-local/src/ffmpeg/normalize-master-loudness.ts"
+      ],
+      "test_reference": "nx test/lint de media-local (448) y render-api (2273) en verde; review-measurements tuvo un timeout suelto en la corrida paralela y pasa solo. Real sobre el audio del vertical (peor caso, doble AAC): motion pasa de +1,01 a -1,08 dBTP y el montaje queda en -1,59 dBTP después del AAC; ambos reintentaron.",
+      "status": "implemented",
+      "cycle": null,
+      "process_note": "Sin el margen de 0,5 dB el reintento quedaba en -0,93 y -0,83: el sobrepico del AAC crece cuando loudnorm limita más. El costo es que el integrado baja hasta ~-15 LUFS en ese peor caso (sugerencia del review, no crítico).",
+      "usage": {
+        "provider_model": "claude/opus",
+        "effort": "low",
+        "tokens_in": 120000,
+        "tokens_out": 6000,
+        "approx": true,
+        "source": "declared-estimate",
+        "recorded_at": "2026-11-11",
+        "by_agent": [
+          {
+            "agent": "orchestrator",
+            "provider_model": "claude/opus",
+            "effort": "low",
+            "tokens_in": 120000,
+            "tokens_out": 6000,
+            "approx": true,
+            "source": "declared-estimate",
+            "recorded_at": "2026-11-11"
+          }
+        ]
+      }
     }
   ]
 }

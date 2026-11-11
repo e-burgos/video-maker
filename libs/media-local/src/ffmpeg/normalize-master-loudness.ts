@@ -9,11 +9,14 @@ import type { FilterGraph } from '../mix/filter-graph';
 import type { CommandOptions, CommandRunner } from '../runner/command-runner';
 import { buildLoudnormFilter } from './build-loudnorm-filter';
 import { FIRST_AUDIO_STREAM, measureLoudness } from './measure-loudness';
+import { MUX_AUDIO_BITRATE, MUX_AUDIO_CODEC } from './mux-audio-into-video';
 import type { LoudnessMeasurement } from './parse-loudnorm-json';
+import { encoderOvershootDb, targetBelowOvershoot } from './true-peak-guard';
 
 export const MASTER_NORMALIZATION_TOLERANCE_LU = 0.5;
 export const MASTER_NORMALIZATION_TEMP_SUFFIX = '.normalized.wav';
 export const ENCODER_TRUE_PEAK_HEADROOM_DB = 0.5;
+export const AAC_PROBE_SUFFIX = '.aac-probe.m4a';
 
 export function masterLoudnessTarget(target: VoiceTarget): VoiceTarget {
   return { ...target, truePeakDbtp: target.truePeakDbtp - ENCODER_TRUE_PEAK_HEADROOM_DB };
@@ -28,6 +31,7 @@ export interface NormalizeMasterLoudnessResult {
   readonly applied: boolean;
   readonly measuredBefore: LoudnessMeasurement;
   readonly args: readonly string[] | null;
+  readonly truePeakRetried: boolean;
 }
 
 export function needsMasterNormalization(measured: LoudnessMeasurement, target: VoiceTarget): boolean {
@@ -55,6 +59,54 @@ export function buildMasterNormalizationGraph(
   };
 }
 
+async function writeNormalizedMaster(
+  masterPath: string,
+  temporaryPath: string,
+  target: VoiceTarget,
+  measured: LoudnessMeasurement,
+  runner: CommandRunner,
+  ffmpegPath: string,
+  opts: NormalizeMasterLoudnessOptions | undefined,
+): Promise<readonly string[]> {
+  const args = audioMixFfmpegArgs(buildMasterNormalizationGraph(masterPath, target, measured), temporaryPath);
+  const result = await runner.run(ffmpegPath, args, opts?.runOptions);
+  if (result.exitCode !== 0) {
+    await rm(temporaryPath, { force: true });
+    throw new CommandFailedError({ command: ffmpegPath, args, exitCode: result.exitCode, stderr: result.stderr });
+  }
+  return args;
+}
+
+export function aacProbeArgs(inputPath: string, outputPath: string): string[] {
+  return ['-hide_banner', '-nostats', '-y', '-i', inputPath, '-c:a', MUX_AUDIO_CODEC, '-b:a', MUX_AUDIO_BITRATE, outputPath];
+}
+
+async function measureTruePeakAfterAac(
+  wavPath: string,
+  target: VoiceTarget,
+  runner: CommandRunner,
+  ffmpegPath: string,
+  opts: NormalizeMasterLoudnessOptions | undefined,
+): Promise<number> {
+  const probePath = `${wavPath}${AAC_PROBE_SUFFIX}`;
+  try {
+    const args = aacProbeArgs(wavPath, probePath);
+    const result = await runner.run(ffmpegPath, args, opts?.runOptions);
+    if (result.exitCode !== 0) {
+      throw new CommandFailedError({ command: ffmpegPath, args, exitCode: result.exitCode, stderr: result.stderr });
+    }
+    const measured = await measureLoudness(probePath, runner, {
+      target,
+      ffmpegPath,
+      audioStreamSpecifier: FIRST_AUDIO_STREAM,
+      ...(opts?.runOptions !== undefined ? { runOptions: opts.runOptions } : {}),
+    });
+    return measured.truePeakDbtp;
+  } finally {
+    await rm(probePath, { force: true });
+  }
+}
+
 export async function normalizeMasterLoudness(
   masterPath: string,
   deliveryTarget: VoiceTarget,
@@ -70,20 +122,25 @@ export async function normalizeMasterLoudness(
     ...(opts?.runOptions !== undefined ? { runOptions: opts.runOptions } : {}),
   });
 
-  if (!needsMasterNormalization(measuredBefore, target)) {
-    return { applied: false, measuredBefore, args: null };
+  const temporaryPath = `${masterPath}${MASTER_NORMALIZATION_TEMP_SUFFIX}`;
+  const normalized = needsMasterNormalization(measuredBefore, target);
+  let args = normalized ? await writeNormalizedMaster(masterPath, temporaryPath, target, measuredBefore, runner, ffmpegPath, opts) : null;
+
+  const plannedPeak = normalized ? target.truePeakDbtp : measuredBefore.truePeakDbtp;
+  const encodedPeak = await measureTruePeakAfterAac(normalized ? temporaryPath : masterPath, target, runner, ffmpegPath, opts).catch(async (cause: unknown) => {
+    await rm(temporaryPath, { force: true });
+    throw cause;
+  });
+  const overshootDb = encoderOvershootDb(encodedPeak, plannedPeak, deliveryTarget.truePeakDbtp);
+  if (overshootDb > 0) {
+    args = await writeNormalizedMaster(masterPath, temporaryPath, targetBelowOvershoot(target, overshootDb), measuredBefore, runner, ffmpegPath, opts);
   }
 
-  const temporaryPath = `${masterPath}${MASTER_NORMALIZATION_TEMP_SUFFIX}`;
-  const args = audioMixFfmpegArgs(buildMasterNormalizationGraph(masterPath, target, measuredBefore), temporaryPath);
-  const result = await runner.run(ffmpegPath, args, opts?.runOptions);
-
-  if (result.exitCode !== 0) {
-    await rm(temporaryPath, { force: true });
-    throw new CommandFailedError({ command: ffmpegPath, args, exitCode: result.exitCode, stderr: result.stderr });
+  if (args === null) {
+    return { applied: false, measuredBefore, args: null, truePeakRetried: false };
   }
 
   await rename(temporaryPath, masterPath);
 
-  return { applied: true, measuredBefore, args };
+  return { applied: true, measuredBefore, args, truePeakRetried: overshootDb > 0 };
 }

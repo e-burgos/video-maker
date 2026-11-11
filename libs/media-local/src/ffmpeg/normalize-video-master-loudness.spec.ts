@@ -92,6 +92,33 @@ describe('normalizeVideoMasterLoudness (FIX-e-burgos-014)', () => {
     expect(existsSync(temporaryPath)).toBe(false);
   });
 
+  it('re-encodes once with the target lowered by the AAC overshoot when the encoded master crosses -1 dBTP', async () => {
+    const temporaryPath = `${videoPath}${VIDEO_NORMALIZATION_TEMP_SUFFIX}`;
+    const runner = new FixtureCommandRunner([
+      { bin: 'ffmpeg', argsPattern: [/\.normalized\.mp4$/u, 'null'], response: { stderr: loudnormJson(-14.2, 0.06), exitCode: 0 } },
+      { bin: 'ffmpeg', argsPattern: ['-f', 'null'], response: { stderr: loudnormJson(-20.1, -4.2), exitCode: 0 } },
+      {
+        bin: 'ffmpeg',
+        argsPattern: ['-c:v', 'copy'],
+        response: () => {
+          writeFileSync(temporaryPath, 'normalized');
+          return { stderr: '', exitCode: 0 };
+        },
+      },
+    ]);
+
+    const result = await normalizeVideoMasterLoudness(videoPath, DEFAULT_VOICE_TARGET, runner);
+
+    const encodes = runner.calls.filter((call) => call.args.includes('copy'));
+    expect(result).toMatchObject({ applied: true, truePeakRetried: true });
+    expect(encodes).toHaveLength(2);
+    expect(encodes[0]?.args[encodes[0].args.indexOf('-af') + 1]).toContain('TP=-1.5:');
+    expect(encodes[1]?.args[encodes[1].args.indexOf('-af') + 1]).toContain('TP=-3.56:');
+    expect(encodes[1]?.args).toContain(videoPath);
+    expect(await readFile(videoPath, 'utf8')).toBe('normalized');
+    expect(existsSync(temporaryPath)).toBe(false);
+  });
+
   it('keeps the original video and throws when the normalization pass fails', async () => {
     const runner = new FixtureCommandRunner([
       { bin: 'ffmpeg', argsPattern: ['-f', 'null'], response: { stderr: loudnormJson(-20.1, -4.2), exitCode: 0 } },
