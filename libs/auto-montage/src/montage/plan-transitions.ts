@@ -1,10 +1,11 @@
 import type { Fps, KeepRange, TransitionDecision } from '@video-maker/timeline-core';
 import type { RandomGenerator } from '@video-maker/timeline-core';
-import { createSeededRandom, hashStringToSeed, msToFrames, pickAvoidingPrevious, pickFromPool } from '@video-maker/timeline-core';
+import { createSeededRandom, hashStringToSeed, msToFrames, pickAvoidingRecent, pickFromPool } from '@video-maker/timeline-core';
 
 import type { MontagePreset } from '../presets/montage-preset';
 
 const DIRECTED_TRANSITION_KINDS = new Set<TransitionDecision['kind']>(['slide', 'whip-pan', 'wipe', 'flip']);
+const RECENT_KINDS_TO_AVOID = 2;
 const DIRECTION_POOL: readonly ['from-left', 'from-right'] = ['from-left', 'from-right'];
 
 function sequentialId(prefix: string, index: number): string {
@@ -60,7 +61,7 @@ export function planTransitions(
     }
 
     const n = transitions.length;
-    const kind = pickAvoidingPrevious(preset.transitions.kinds, transitions[n - 1]?.kind, next);
+    const kind = pickAvoidingRecent(preset.transitions.kinds, transitions.slice(-RECENT_KINDS_TO_AVOID).map((t) => t.kind), next);
     const direction = directionFor(kind, next);
 
     transitions.push({

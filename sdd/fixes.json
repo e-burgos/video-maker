@@ -4242,7 +4242,7 @@
         "libs/motion-graphics/src/compose/compose-storyboard.ts",
         "libs/motion-graphics/assets/runtime/motion-runtime.js"
       ],
-      "test_reference": "nx test/lint/build en verde: timeline-core 452, auto-montage 375, composition-remotion 366, motion-graphics 318.",
+      "test_reference": "nx test/lint/build en verde: timeline-core 453, auto-montage 375, composition-remotion 366, motion-graphics 318.",
       "status": "implemented",
       "cycle": null,
       "process_note": "lightLeak() de Remotion no está instalado; se implementó en CSS para no sumar dependencias en la etapa 0.",

@@ -29,6 +29,15 @@ export function pickAvoidingPrevious<T>(
   return first === undefined ? pickFromPool(pool, next) : pickFromPool([first, ...rest], next);
 }
 
+export function pickAvoidingRecent<T>(
+  pool: readonly [T, ...T[]],
+  recent: readonly T[],
+  next: RandomGenerator,
+): T {
+  const [first, ...rest] = pool.filter((candidate) => !recent.includes(candidate));
+  return first === undefined ? pickAvoidingPrevious(pool, recent[recent.length - 1], next) : pickFromPool([first, ...rest], next);
+}
+
 export function hashStringToSeed(text: string): number {
   let hash = 0x811c9dc5;
   for (let index = 0; index < text.length; index += 1) {

@@ -61,6 +61,7 @@ const PUBLIC_VALUE_EXPORTS = [
   'createSeededRandom',
   'hashStringToSeed',
   'pickAvoidingPrevious',
+  'pickAvoidingRecent',
   'pickFromPool',
   'remapMsAfterCuts',
   'LogoOverlaySchema',

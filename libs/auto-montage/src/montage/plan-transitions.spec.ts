@@ -51,7 +51,7 @@ describe('planTransitions (§6 paso 7)', () => {
     const again = planTransitions(keeps, preset, FPS, 4);
 
     expect(again).toEqual(first);
-    first.slice(1).forEach((t, i) => expect(t.kind).not.toBe(first[i]?.kind));
+    first.slice(2).forEach((t, i) => expect([first[i]?.kind, first[i + 1]?.kind]).not.toContain(t.kind));
     expect(new Set(first.map((t) => t.kind)).size).toBe(3);
   });
 
