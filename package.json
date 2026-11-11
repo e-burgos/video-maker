@@ -19,6 +19,7 @@
     "desktop:release": "node apps/desktop/scripts/release-desktop.mjs",
     "sdd:docs": "node sdd/docs/serve.mjs",
     "sdd:validate": "node sdd/scripts/validate-sdd.mjs",
+    "ci:local": "bash scripts/ci/ci-local.sh",
     "sdd:rebuild-tasks-index": "node sdd/scripts/rebuild-tasks-index.mjs",
     "sdd:rebuild-catalog": "node sdd/scripts/rebuild-catalog.mjs",
     "web": "nx serve web",

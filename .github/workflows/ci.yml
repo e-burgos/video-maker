@@ -3,11 +3,30 @@ name: CI
 on:
   push:
     branches: [main]
+    paths-ignore:
+      - 'docs/**'
+      - 'sdd/**'
+      - '**/*.md'
   pull_request:
+    paths-ignore:
+      - 'docs/**'
+      - 'sdd/**'
+      - '**/*.md'
+  workflow_dispatch:
+    inputs:
+      force:
+        description: 'Ignorar el status ci-local y correr todo el CI'
+        type: boolean
+        default: false
 
 concurrency:
-  group: ci-${{ github.ref }}
+  group: ci-${{ github.event.pull_request.number || github.ref }}
   cancel-in-progress: true
+
+permissions:
+  contents: read
+  statuses: read
+  pull-requests: read
 
 env:
   NX_DAEMON: 'false'
@@ -23,24 +42,37 @@ jobs:
         with:
           fetch-depth: 0
 
+      - name: ¿Ya verificado con pnpm ci:local?
+        id: local
+        if: ${{ !inputs.force }}
+        env:
+          GH_TOKEN: ${{ github.token }}
+          CI_LOCAL_WAIT_TIMEOUT: ${{ github.event_name == 'pull_request' && '45' || '0' }}
+        run: bash scripts/ci/ci-local-verified.sh "${{ github.repository }}" "${{ github.event.pull_request.head.sha || github.sha }}" >> "$GITHUB_OUTPUT"
+
       - uses: pnpm/action-setup@v4
+        if: ${{ steps.local.outputs.verified != 'true' }}
 
       - uses: actions/setup-node@v4
+        if: ${{ steps.local.outputs.verified != 'true' }}
         with:
           node-version: 22
           cache: pnpm
 
       - name: Install dependencies
+        if: ${{ steps.local.outputs.verified != 'true' }}
         run: pnpm install --frozen-lockfile
 
       - name: Validate SDD registry
+        if: ${{ steps.local.outputs.verified != 'true' }}
         run: pnpm sdd:validate
 
       - name: Lint, test and build every project
+        if: ${{ steps.local.outputs.verified != 'true' }}
         run: pnpm exec nx run-many -t lint test build --parallel=3
 
       - name: Upload coverage reports
-        if: always()
+        if: ${{ always() && steps.local.outputs.verified != 'true' }}
         uses: actions/upload-artifact@v4
         with:
           name: coverage
