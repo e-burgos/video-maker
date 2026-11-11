@@ -6212,6 +6212,57 @@
           }
         ]
       }
+    },
+    {
+      "id": "FIX-e-burgos-077",
+      "author": "e-burgos",
+      "spec_id": null,
+      "fix_document": "sdd/fixes/fix-e-burgos-077.md",
+      "type": "IMPROVEMENT",
+      "severity": "medium",
+      "created_at": "2026-11-11",
+      "resolved_at": "2026-11-11",
+      "validated_at": null,
+      "title": "Modo B: tipografía cinética con GSAP SplitText y titleStyle por escena que rota sin repetir las dos anteriores",
+      "estimation_hours": 3,
+      "description": "Etapa 3 del informe. El gsap.min.js empaquetado (3.14.2) no traía SplitText: se suma SplitText.min.js 3.14.2 al runtime. Primitivas split-chars, split-words, split-lines, mask-up y scramble (determinista por cuadro); las líneas se recortan con autoSplit para respetar la fuente de la marca. El storyboard suma titleStyle por escena; compose lo rota con semilla sin repetir las dos anteriores. Nota legal pendiente para el dev: la licencia de GSAP excluye los productos competidores; leerla antes de empaquetar en el instalador.",
+      "justification": "El dev eligió las etapas 5 y 3 del informe docs/research/2026-11-10-motion-graphics-productor.md.",
+      "related_modules": [
+        "production-quality"
+      ],
+      "affected_files": [
+        "libs/motion-graphics/assets/runtime/SplitText.min.js",
+        "libs/motion-graphics/assets/runtime/motion-runtime.js",
+        "libs/motion-graphics/assets/runtime/scenes.css",
+        "libs/motion-graphics/src/storyboard/motion-storyboard.schema.ts",
+        "libs/motion-graphics/src/compose/plan-title-styles.ts",
+        "libs/motion-graphics/src/compose/compose-storyboard.ts",
+        "libs/producer-tools/src/prompt/build-producer-prompt.ts"
+      ],
+      "test_reference": "nx test/lint/build en verde: motion-graphics 349, producer-tools 452. Render de prueba media/prueba-titulos-b revisado cuadro a cuadro.",
+      "status": "implemented",
+      "cycle": null,
+      "usage": {
+        "provider_model": "claude/opus",
+        "effort": "medium",
+        "tokens_in": 300000,
+        "tokens_out": 20000,
+        "approx": true,
+        "source": "declared-estimate",
+        "recorded_at": "2026-11-11",
+        "by_agent": [
+          {
+            "agent": "orchestrator",
+            "provider_model": "claude/opus",
+            "effort": "medium",
+            "tokens_in": 300000,
+            "tokens_out": 20000,
+            "approx": true,
+            "source": "declared-estimate",
+            "recorded_at": "2026-11-11"
+          }
+        ]
+      }
     }
   ]
 }

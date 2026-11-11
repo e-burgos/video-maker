@@ -4,6 +4,7 @@ import { brandCssFile, brandImageFile, brandIsotipo } from '../brand/brand-manif
 import type { BrandManifest } from '../brand/brand-manifest';
 import { impactTrack, IMPACT_VOICE_LEAD_IN_SEC } from './impact-sfx';
 import { planSceneExits } from './plan-scene-exits';
+import { planTitleStyles } from './plan-title-styles';
 import { MotionStudioError } from '../errors/motion-studio-error';
 import { renderScene } from '../scenes/render-scene';
 import { esc } from '../scenes/scene-html';
@@ -124,6 +125,7 @@ export function composeStoryboard(storyboard: MotionStoryboard, brand: BrandMani
   const track = resolveMusic(storyboard, brand);
   const dropScene = storyboard.scenes.find((s) => s.anchor === 'drop');
   const exits = planSceneExits(storyboard);
+  const titleStyles = planTitleStyles(storyboard);
 
   const sections = storyboard.scenes
     .map((scene) => {
@@ -131,7 +133,8 @@ export function composeStoryboard(storyboard: MotionStoryboard, brand: BrandMani
       const chapter = scene.chapter ? ` data-chapter="${esc(scene.chapter)}"` : scene.kind === 'cta' ? ' data-chapter-end="1"' : '';
       const exit = exits.get(scene.id);
       const exitAttr = exit === undefined ? '' : ` data-exit="${exit}"`;
-      return `<section id="s-${scene.id}" class="clip scene" data-scene="${scene.id}"${chapter}${flash}${exitAttr} data-start="{{start:${scene.id}}}" data-duration="{{dur:${scene.id}}}" data-track-index="1">
+      const titleAttr = ` data-title-style="${titleStyles.get(scene.id) ?? 'split-words'}"`;
+      return `<section id="s-${scene.id}" class="clip scene" data-scene="${scene.id}"${chapter}${flash}${exitAttr}${titleAttr} data-start="{{start:${scene.id}}}" data-duration="{{dur:${scene.id}}}" data-track-index="1">
         <div class="scene-in">${renderScene(scene, ctx)}</div>
       </section>`;
     })
@@ -151,6 +154,7 @@ export function composeStoryboard(storyboard: MotionStoryboard, brand: BrandMani
     <meta name="viewport" content="width=${width}, height=${height}" />
     <title>${esc(storyboard.title)}</title>
     <script src="${RUNTIME_ASSET_DIR}/gsap.min.js"></script>
+    <script src="${RUNTIME_ASSET_DIR}/SplitText.min.js"></script>
     <script src="${RUNTIME_ASSET_DIR}/motion-runtime.js"></script>
     <link rel="stylesheet" href="${BRAND_ASSET_DIR}/${brandCssFile(brand)}" />
     <link rel="stylesheet" href="${RUNTIME_ASSET_DIR}/scenes.css" />

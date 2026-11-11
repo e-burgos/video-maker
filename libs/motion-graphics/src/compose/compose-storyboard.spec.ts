@@ -52,6 +52,16 @@ describe('composeStoryboard', () => {
     exits.slice(1).forEach(([, exit], i) => expect(exit).not.toBe(exits[i]?.[1]));
   });
 
+  it('loads SplitText after gsap and gives every scene a title style, never one of the two before', () => {
+    const { template } = composeStoryboard(base, testBrand);
+    const styles = [...template.matchAll(/data-scene="[^"]+"[^>]*?data-title-style="([^"]+)"/gu)].map((m) => m[1]);
+
+    expect(template.indexOf('gsap.min.js')).toBeLessThan(template.indexOf('SplitText.min.js'));
+    expect(template.indexOf('SplitText.min.js')).toBeLessThan(template.indexOf('motion-runtime.js'));
+    expect(styles).toHaveLength(base.scenes.length);
+    styles.forEach((style, i) => expect(styles.slice(Math.max(0, i - 2), i)).not.toContain(style));
+  });
+
   it('carries the music mode and floor into the script and omits them for the default bed', () => {
     const { script: bed } = composeStoryboard(base, testBrand);
     expect(bed.music).not.toHaveProperty('mode');

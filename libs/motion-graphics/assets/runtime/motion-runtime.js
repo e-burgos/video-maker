@@ -56,7 +56,53 @@ window.createMotionRuntime = function createMotionRuntime(T, W, compositionId) {
   const uiRest = { scale: 1, xPercent: 0, yPercent: 0 };
   const uiFocus = ({ scale, cx, cy }) => ({ scale, xPercent: clamp((0.5 - scale * cx) * 100, (1 - scale) * 100, 0), yPercent: clamp((0.5 - scale * cy) * 100, (1 - scale) * 100, 0) });
 
+  const canSplit = typeof SplitText !== 'undefined';
+  if (canSplit) gsap.registerPlugin(SplitText);
+  const TITLE_ENTRANCES = new Set(['rise', 'left', 'right', 'pop', 'fade', 'blur']);
+  const SCRAMBLE_GLYPHS = 'ABCDEFGHJKLMNPQRSTUVWXYZ0123456789#%&*+=?';
+  const scrambleGlyph = (index, step) => SCRAMBLE_GLYPHS[((Math.imul(index + 1, 2654435761) ^ Math.imul(step + 7, 40503)) >>> 0) % SCRAMBLE_GLYPHS.length];
+  const splitStagger = (count, total, max) => Math.min(max, total / Math.max(1, count));
+  const splitTitle = (el, t, vars, build) => {
+    if (!canSplit) return ANIMS.rise(el, t);
+    const byLines = /lines/.test(vars.type);
+    SplitText.create(el, {
+      ...vars,
+      ...(byLines ? { autoSplit: true } : {}),
+      onSplit: (self) => {
+        const tween = build(self);
+        tl.add(tween, t);
+        return tween;
+      },
+    });
+  };
+  const scrambleChars = (chars, duration) => {
+    const finals = chars.map((c) => c.textContent);
+    const state = { p: 0 };
+    const paint = () => {
+      const step = Math.floor(state.p * 36);
+      chars.forEach((c, i) => {
+        const reveal = (i + 1) / chars.length;
+        const shown = state.p >= reveal;
+        const scrambling = !shown && state.p > reveal - 0.45;
+        c.textContent = shown ? finals[i] : scrambleGlyph(i, step);
+        c.style.opacity = shown || scrambling ? '1' : '0';
+      });
+    };
+    paint();
+    return gsap.to(state, { p: 1, duration, ease: 'none', onUpdate: paint, onComplete: paint });
+  };
+
   const ANIMS = {
+    'split-chars': (el, t) => splitTitle(el, t, { type: 'words,chars', charsClass: 'mg-split-char' }, (self) =>
+      gsap.from(self.chars, { opacity: 0, yPercent: 70, rotate: 6, duration: dur(el, 0.5), ease: 'back.out(1.7)', stagger: splitStagger(self.chars.length, 0.7, 0.035) })),
+    'split-words': (el, t) => splitTitle(el, t, { type: 'words', wordsClass: 'mg-split-word' }, (self) =>
+      gsap.from(self.words, { opacity: 0, y: 38, filter: 'blur(8px)', duration: dur(el, 0.55), ease: 'power3.out', stagger: splitStagger(self.words.length, 0.6, 0.09) })),
+    'split-lines': (el, t) => splitTitle(el, t, { type: 'lines', linesClass: 'mg-split-line' }, (self) =>
+      gsap.from(self.lines, { opacity: 0, x: -70, duration: dur(el, 0.6), ease: 'power3.out', stagger: 0.14 })),
+    'mask-up': (el, t) => splitTitle(el, t, { type: 'lines', mask: 'lines', linesClass: 'mg-split-line' }, (self) =>
+      gsap.from(self.lines, { yPercent: 110, duration: dur(el, 0.75), ease: 'expo.out', stagger: 0.12 })),
+    scramble: (el, t) => splitTitle(el, t, { type: 'words,chars', charsClass: 'mg-split-char' }, (self) =>
+      scrambleChars(self.chars, dur(el, Math.min(1.2, 0.35 + 0.03 * self.chars.length)))),
     rise: (el, t) => tl.fromTo(el, { opacity: 0, y: 46 }, { opacity: 1, y: 0, duration: dur(el, 0.6), ease: 'power3.out' }, t),
     left: (el, t) => tl.fromTo(el, { opacity: 0, x: -70 }, { opacity: 1, x: 0, duration: dur(el, 0.65), ease: 'power3.out' }, t),
     right: (el, t) => tl.fromTo(el, { opacity: 0, x: 90 }, { opacity: 1, x: 0, duration: dur(el, 0.7), ease: 'power3.out' }, t),
@@ -286,6 +332,12 @@ window.createMotionRuntime = function createMotionRuntime(T, W, compositionId) {
     iris: (inner, end) => tl.fromTo(inner, { clipPath: 'circle(80% at 50% 50%)' }, { clipPath: 'circle(0% at 50% 50%)', duration: 0.5, ease: 'power2.in', immediateRender: false }, end - 0.5),
   };
 
+  const animNamesFor = (el, titleStyle) => {
+    const names = el.dataset.anim.split(' ');
+    if (!titleStyle || !el.classList.contains('mg-h')) return names;
+    return names.map((name) => (TITLE_ENTRANCES.has(name) ? titleStyle : name));
+  };
+
   document.querySelectorAll('[data-scene]').forEach((section) => {
     const id = section.dataset.scene;
     let order = 0;
@@ -293,7 +345,7 @@ window.createMotionRuntime = function createMotionRuntime(T, W, compositionId) {
       const timed = el.dataset.cue || el.dataset.at || el.dataset.beat || el.dataset.slot;
       const t = timeFor(el, id, timed ? 0 : order) + Number(el.dataset.after || 0);
       if (!timed && !el.dataset.parallel) order += 1;
-      el.dataset.anim.split(' ').forEach((name) => ANIMS[name] && ANIMS[name](el, t, id));
+      animNamesFor(el, section.dataset.titleStyle).forEach((name) => ANIMS[name] && ANIMS[name](el, t, id));
     });
     if (section.dataset.flash) {
       tl.fromTo('#mg-flash', { opacity: 0 }, { opacity: 0.85, duration: 0.06 }, S(id));
