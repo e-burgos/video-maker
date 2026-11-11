@@ -5,6 +5,11 @@ export const MASTER_TRUE_PEAK_CEILING_DBTP = -1;
 
 export const VOICE_MUSIC_MIN_MARGIN_DB = 15;
 
+export const SFX_MAX_SAME_IN_A_ROW = 5;
+export const SFX_DENSITY_WINDOW_SEC = 3;
+export const SFX_MAX_EVENTS_IN_WINDOW = 4;
+export const SFX_MAX_EVENTS_PER_MINUTE = 20;
+
 export const BLACK_DETECT_MIN_SEC = 1;
 export const BLACK_CRITICAL_SEC = 3;
 export const FROZEN_DETECT_MIN_SEC = 8;

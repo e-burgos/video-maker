@@ -5419,6 +5419,59 @@
           }
         ]
       }
+    },
+    {
+      "id": "FIX-e-burgos-061",
+      "author": "e-burgos",
+      "spec_id": null,
+      "fix_document": "sdd/fixes/fix-e-burgos-061.md",
+      "type": "IMPROVEMENT",
+      "severity": "medium",
+      "created_at": "2026-11-11",
+      "resolved_at": "2026-11-11",
+      "validated_at": null,
+      "title": "El review avisa cuando los efectos de sonido suenan como ametralladora: 5+ iguales seguidos o demasiado densos",
+      "estimation_hours": 0.75,
+      "description": "Reglas sfx-repetition (5 o más efectos iguales seguidos) y sfx-density (más de 4 en 3 s o más de 20 por minuto), tomadas del criterio de Real SFX. Ven los efectos del modo B (los audio sfx-* del index.html) y los de los bumpers del montaje (planBumperSfx). Son sugerencias, no críticas.",
+      "justification": "Etapa 3 del plan de SFX pedido por el dev.",
+      "related_modules": [
+        "production-quality"
+      ],
+      "affected_files": [
+        "apps/render-api/src/review/sfx-pattern-rules.ts",
+        "apps/render-api/src/review/review-thresholds.ts",
+        "apps/render-api/src/review/review-inputs.ts",
+        "apps/render-api/src/review/review-facts.ts",
+        "apps/render-api/src/review/review-rules.ts",
+        "apps/render-api/src/review/collect-motion-facts.ts",
+        "apps/render-api/src/review/collect-footage-facts.ts",
+        "apps/render-api/src/review/collect-review-inputs.ts"
+      ],
+      "test_reference": "nx test/lint de render-api en verde (2288), con el caso real del modo B (6 whoosh iguales seguidos). Calibrado sobre 3 videos motion: rachas de 5, 6 y 8 whoosh idénticos, densidad máxima 1 efecto cada 3 s.",
+      "status": "implemented",
+      "cycle": null,
+      "process_note": "Hoy todo video motion dispara sfx-repetition porque compose-template usa el mismo whoosh.mp3 en cada corte; por eso es sugerencia. El arreglo es de motion: rotar variantes del banco de FIX-059.",
+      "usage": {
+        "provider_model": "claude/opus",
+        "effort": "medium",
+        "tokens_in": 350000,
+        "tokens_out": 20000,
+        "approx": true,
+        "source": "declared-estimate",
+        "recorded_at": "2026-11-11",
+        "by_agent": [
+          {
+            "agent": "orchestrator",
+            "provider_model": "claude/opus",
+            "effort": "medium",
+            "tokens_in": 350000,
+            "tokens_out": 20000,
+            "approx": true,
+            "source": "declared-estimate",
+            "recorded_at": "2026-11-11"
+          }
+        ]
+      }
     }
   ]
 }
