@@ -4941,6 +4941,53 @@
           }
         ]
       }
+    },
+    {
+      "id": "FIX-e-burgos-051",
+      "author": "e-burgos",
+      "spec_id": null,
+      "fix_document": "sdd/fixes/fix-e-burgos-051.md",
+      "type": "IMPROVEMENT",
+      "severity": "low",
+      "created_at": "2026-11-11",
+      "resolved_at": "2026-11-11",
+      "validated_at": null,
+      "title": "Bumpers con la paleta y la web de la marca, y recetas del productor que no fijan su animación",
+      "estimation_hours": 2,
+      "description": "render-api arma el estilo de bumpers desde el manifiesto de la marca (paleta, web o outroCaption, pools) y lo pasa al montaje; las recetas del prompt prenden los bumpers sin background, reveal ni caption para que el studio los rote.",
+      "justification": "Pendiente del FIX-e-burgos-050; autorizado por la sesión orquestadora y por la sesión de música para los archivos de render-api y el prompt compartido.",
+      "related_modules": [
+        "production-quality"
+      ],
+      "affected_files": [
+        "apps/render-api/src/brands/project-brand-context.ts",
+        "apps/render-api/src/jobs/run-montage-pipeline.ts",
+        "libs/producer-tools/src/prompt/build-producer-prompt.ts"
+      ],
+      "test_reference": "nx test/lint en verde: render-api 2277, producer-tools 448.",
+      "status": "implemented",
+      "cycle": null,
+      "usage": {
+        "provider_model": "claude/opus",
+        "effort": "medium",
+        "tokens_in": 250000,
+        "tokens_out": 15000,
+        "approx": true,
+        "source": "declared-estimate",
+        "recorded_at": "2026-11-11",
+        "by_agent": [
+          {
+            "agent": "orchestrator",
+            "provider_model": "claude/opus",
+            "effort": "medium",
+            "tokens_in": 250000,
+            "tokens_out": 15000,
+            "approx": true,
+            "source": "declared-estimate",
+            "recorded_at": "2026-11-11"
+          }
+        ]
+      }
     }
   ]
 }

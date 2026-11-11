@@ -1,4 +1,6 @@
 import type { BrandManifest, BrandPalette } from '@video-maker/motion-graphics';
+import type { MontageBrand } from '@video-maker/auto-montage';
+import { MAX_LOGO_BUMPER_CAPTION_LENGTH } from '@video-maker/timeline-core';
 import type { CaptionTheme } from '@video-maker/timeline-core';
 import { basename, join } from 'node:path/posix';
 
@@ -23,6 +25,26 @@ export interface ProjectBrandContext {
   readonly logoFile: string;
   readonly fontFiles: readonly string[];
   readonly writtenNames: readonly BrandWrittenName[];
+  readonly bumperStyle?: BrandBumperStyle;
+}
+
+export type BrandBumperStyle = NonNullable<MontageBrand['bumperStyle']>;
+
+const SIX_DIGIT_HEX = /^#[0-9a-fA-F]{6}$/u;
+
+function hexField<K extends string>(key: K, color: string): Partial<Record<K, string>> {
+  return (SIX_DIGIT_HEX.test(color) ? { [key]: color } : {}) as Partial<Record<K, string>>;
+}
+
+export function brandBumperStyle(manifest: BrandManifest, palette: BrandPalette): BrandBumperStyle {
+  const outroCaption = manifest.bumpers?.outroCaption ?? manifest.url;
+  return {
+    ...hexField('accentColor', palette.accent),
+    ...hexField('secondaryColor', palette.accent2),
+    ...(outroCaption === undefined || outroCaption.length > MAX_LOGO_BUMPER_CAPTION_LENGTH ? {} : { outroCaption }),
+    ...(manifest.bumpers?.backgrounds === undefined ? {} : { backgrounds: manifest.bumpers.backgrounds }),
+    ...(manifest.bumpers?.reveals === undefined ? {} : { reveals: manifest.bumpers.reveals }),
+  };
 }
 
 export interface BrandWrittenName {
@@ -91,6 +113,7 @@ export function projectBrandContext(brand: LocatedBrand, manifest: BrandManifest
     logoFile: join(brand.dir, manifest.logo),
     fontFiles: manifest.fonts.filter((font) => families.includes(font.family)).map((font) => font.file),
     writtenNames: brandWrittenNames(manifest),
+    bumperStyle: brandBumperStyle(manifest, palette),
   };
 }
 

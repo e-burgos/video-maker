@@ -129,7 +129,13 @@ export async function runMontagePipeline(
         ...(request.musicFloorDb === undefined ? {} : { musicFloorDb: request.musicFloorDb }),
         ...(request.brand === undefined || request.brand === null
           ? {}
-          : { brand: { id: request.brand.id, captionTheme: request.brand.captionTheme } }),
+          : {
+              brand: {
+                id: request.brand.id,
+                captionTheme: request.brand.captionTheme,
+                ...(request.brand.bumperStyle === undefined ? {} : { bumperStyle: request.brand.bumperStyle }),
+              },
+            }),
       },
       {
         readTextFile: deps.storage.readTextFile,

@@ -545,6 +545,17 @@ describe('runMontagePipeline — marca del proyecto (spec-021 cycle-04)', () => 
     expect(timeline.captionTheme).toEqual(BRAND.captionTheme);
   });
 
+  it('lleva los colores y la web de la marca al estilo rotativo de los bumpers', async () => {
+    const timeline = await writtenTimeline({
+      ...REQUEST,
+      brand: { ...BRAND, name: 'Acme', spokenName: 'Acme', tagline: 't', url: 'acme.test', palette: { background: '#09090b', accent: '#0ea5e9', accent2: '#14b8a6', text: '#ffffff' }, voice: { id: 'v', lengthScale: 1 }, brandDir: '/brands/acme', logoFile: '/brands/acme/logo.svg', fontFiles: [], writtenNames: [], bumperStyle: { accentColor: '#0ea5e9', secondaryColor: '#14b8a6', outroCaption: 'acme.test' } },
+    });
+
+    expect(timeline.bumpers).toEqual({
+      style: { rotate: true, seed: REQUEST.seed, accentColor: '#0ea5e9', secondaryColor: '#14b8a6', outroCaption: 'acme.test' },
+    });
+  });
+
   it('rechaza el estilo brand en un proyecto sin marca antes de tocar el proyecto', async () => {
     const callLog = createCallLog();
     const deps = buildIngestibleProjectDeps(callLog);
