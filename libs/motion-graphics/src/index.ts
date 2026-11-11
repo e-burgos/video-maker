@@ -86,3 +86,15 @@ export { voiceProject } from './pipeline/voice-project';
 export type { VoicedLine, VoiceProjectOptions, VoiceProjectResult } from './pipeline/voice-project';
 export { HYPERFRAMES_VERSION, hyperframesInvocation } from './pipeline/hyperframes-invocation';
 export type { HyperframesInvocation, HyperframesInvocationInput } from './pipeline/hyperframes-invocation';
+export {
+  parseSfxBank,
+  pickSfxVariant,
+  SFX_BANK_DIRECTORY,
+  SFX_BANK_MANIFEST,
+  SFX_KINDS,
+  SfxBankSchema,
+  sfxBankDirectory,
+  sfxFilePath,
+  sfxOfKind,
+} from './sfx/sfx-bank';
+export type { SfxBank, SfxEntry, SfxKind } from './sfx/sfx-bank';

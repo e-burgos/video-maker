@@ -5214,6 +5214,57 @@
           }
         ]
       }
+    },
+    {
+      "id": "FIX-e-burgos-059",
+      "author": "e-burgos",
+      "spec_id": null,
+      "fix_document": "sdd/fixes/fix-e-burgos-059.md",
+      "type": "IMPROVEMENT",
+      "severity": "medium",
+      "created_at": "2026-11-11",
+      "resolved_at": "2026-11-11",
+      "validated_at": null,
+      "title": "Banco de efectos de sonido CC0/CC BY para cualquier marca: whoosh, impacto, brillo, riser, tipeo y click",
+      "estimation_hours": 2,
+      "description": "18 efectos curados de Freesound vía Openverse (3 por tipo), solo CC0 o CC BY, recortados y nivelados a -18 LUFS de loudness momentáneo máximo con pico ≤ -2 dBTP, en libs/motion-graphics/assets/sfx-bank/ con sfx-bank.json y CREDITS.md. parseSfxBank rechaza licencias que no permiten redistribuir y pickSfxVariant elige la variante con semilla evitando las recientes. Los créditos aceptan kind sfx («Efecto de sonido» al publicar). music/CREDITS.md deja de llamar Apache 2.0 a los SFX de Pixabay del modo B.",
+      "justification": "Pedido del dev («Efectos de sonido primero»), etapa 1 del plan de SFX; sin búsqueda en vivo por render.",
+      "related_modules": [
+        "production-quality"
+      ],
+      "affected_files": [
+        "libs/motion-graphics/assets/sfx-bank/",
+        "libs/motion-graphics/src/sfx/sfx-bank.ts",
+        "libs/motion-graphics/src/index.ts",
+        "apps/render-api/src/music/project-credits.ts",
+        "apps/render-api/src/youtube/publish-credits.ts",
+        "libs/motion-graphics/assets/brands/displayads/music/CREDITS.md"
+      ],
+      "test_reference": "nx test/lint en verde: motion-graphics 336 (banco real: archivos, licencias, picos; parser rechaza SA/ND/NC/Pixabay; variante determinista), render-api 2278. Curación por medición (envolvente, ataque, subida, transitorios, piso de ruido) sobre 146 candidatos; página de escucha https://claude.ai/artifact/AA4WU45ioxFvQmwDQXV5Yq.",
+      "status": "implemented",
+      "cycle": null,
+      "process_note": "Elegidos por medición, no a oído: el dev puede cambiar cualquiera desde la página de escucha. Los 8 SFX de runtime/sfx (Pixabay) siguen en el repo hasta que motion pase el modo B al banco nuevo.",
+      "usage": {
+        "provider_model": "claude/opus",
+        "effort": "medium",
+        "tokens_in": 700000,
+        "tokens_out": 45000,
+        "approx": true,
+        "source": "declared-estimate",
+        "recorded_at": "2026-11-11",
+        "by_agent": [
+          {
+            "agent": "orchestrator",
+            "provider_model": "claude/opus",
+            "effort": "medium",
+            "tokens_in": 700000,
+            "tokens_out": 45000,
+            "approx": true,
+            "source": "declared-estimate",
+            "recorded_at": "2026-11-11"
+          }
+        ]
+      }
     }
   ]
 }

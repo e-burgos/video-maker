@@ -6,7 +6,7 @@ import type { ObjectStorage } from '../deps/object-storage';
 
 export const CREDITS_FILE_PATH = 'work/credits.json';
 
-export const CREDIT_KINDS = ['music', 'video', 'image'] as const;
+export const CREDIT_KINDS = ['music', 'video', 'image', 'sfx'] as const;
 export type CreditKind = (typeof CREDIT_KINDS)[number];
 
 export interface MediaCreditEntry {
