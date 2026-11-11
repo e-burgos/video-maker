@@ -6,6 +6,8 @@ import { archivedVideos, groupVideos, placementFor } from '../api/video-grouping
 import type { VideoGroup } from '../api/video-grouping';
 import { useT } from '../i18n/language-context';
 import { useAsyncResource } from '../hooks/use-async-resource';
+import { categorySectionKey, folderSectionKey, useCollapsedSections } from '../hooks/use-collapsed-sections';
+import { CollapseToggle } from '../components/collapse-toggle';
 import { CreateFolderForm } from '../components/create-folder-form';
 import { CreateProjectByDrop } from '../components/create-project-by-drop';
 import { CreateProjectForm } from '../components/create-project-form';
@@ -45,41 +47,73 @@ function FolderSection({
   group,
   organization,
   onChanged,
+  isCollapsed,
+  toggle,
 }: {
   group: VideoGroup;
   organization: VideoOrganization;
   onChanged: () => void;
+  isCollapsed: (key: string) => boolean;
+  toggle: (key: string) => void;
 }) {
   const t = useT();
+  const folderId = group.folder?.id ?? 'unassigned';
+  const folderKey = folderSectionKey(folderId);
+  const folderCollapsed = isCollapsed(folderKey);
 
   return (
     <section
       data-testid="folder-section"
-      data-folder={group.folder?.id ?? 'unassigned'}
+      data-folder={folderId}
+      data-collapsed={folderCollapsed}
       className="space-y-3 rounded-xl border border-slate-800/80 p-4"
     >
-      <FolderHeading folder={group.folder} total={group.total} onChanged={onChanged} />
+      <FolderHeading
+        folder={group.folder}
+        total={group.total}
+        onChanged={onChanged}
+        collapsed={folderCollapsed}
+        onToggleCollapsed={() => toggle(folderKey)}
+      />
 
-      {group.total === 0 ? (
+      {folderCollapsed ? null : group.total === 0 ? (
         <p data-testid="folder-empty" className="text-sm text-slate-500">
           {t('projects.folderEmpty')}
         </p>
       ) : (
         group.buckets
           .filter((bucket) => bucket.videos.length > 0)
-          .map((bucket) => (
-            <div
-              key={bucket.category?.id ?? 'uncategorized'}
-              data-testid="category-bucket"
-              data-category={bucket.category?.id ?? 'uncategorized'}
-              className="space-y-2"
-            >
-              <h4 className="text-xs font-medium tracking-wide text-ink-faint">
-                {bucket.category === null ? t('projects.noCategory') : bucket.category.name}
-              </h4>
-              <VideoGrid videos={bucket.videos} organization={organization} onChanged={onChanged} />
-            </div>
-          ))
+          .map((bucket) => {
+            const categoryId = bucket.category?.id ?? 'uncategorized';
+            const categoryName = bucket.category === null ? t('projects.noCategory') : bucket.category.name;
+            const categoryKey = categorySectionKey(folderId, categoryId);
+            const categoryCollapsed = isCollapsed(categoryKey);
+            return (
+              <div
+                key={categoryId}
+                data-testid="category-bucket"
+                data-category={categoryId}
+                data-collapsed={categoryCollapsed}
+                className="space-y-2"
+              >
+                <div className="flex items-center gap-1">
+                  <CollapseToggle
+                    name={categoryName}
+                    collapsed={categoryCollapsed}
+                    onToggle={() => toggle(categoryKey)}
+                    testId="category-collapse-toggle"
+                  />
+                  <h4 className="text-xs font-medium tracking-wide text-ink-faint">
+                    {categoryName}{' '}
+                    <span className="text-slate-600">({bucket.videos.length})</span>
+                  </h4>
+                </div>
+                {!categoryCollapsed && (
+                  <VideoGrid videos={bucket.videos} organization={organization} onChanged={onChanged} />
+                )}
+              </div>
+            );
+          })
       )}
     </section>
   );
@@ -96,6 +130,7 @@ function ReadyProjects({
 }) {
   const t = useT();
   const [showArchived, setShowArchived] = useState(false);
+  const { isCollapsed, toggle } = useCollapsedSections();
   const archived = archivedVideos(videos, organization);
   const groups = groupVideos(videos, organization);
 
@@ -119,6 +154,8 @@ function ReadyProjects({
             group={group}
             organization={organization}
             onChanged={onChanged}
+            isCollapsed={isCollapsed}
+            toggle={toggle}
           />
         ))}
       </div>

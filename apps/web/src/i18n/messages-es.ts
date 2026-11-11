@@ -86,6 +86,8 @@ export const MESSAGES_ES: Messages = {
   'createFolder.placeholder': 'Display Ads',
   'createFolder.submit': 'Crear carpeta',
   'createFolder.submitting': 'Creando…',
+  'section.collapse': 'Contraer {name}',
+  'section.expand': 'Expandir {name}',
   'folder.rename': 'Renombrar carpeta',
   'folder.renameNameLabel': 'Nombre de la carpeta',
   'folder.renameSubmit': 'Guardar',

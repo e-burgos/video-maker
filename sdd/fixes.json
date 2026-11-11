@@ -4535,6 +4535,57 @@
           }
         ]
       }
+    },
+    {
+      "id": "FIX-e-burgos-043",
+      "author": "e-burgos",
+      "spec_id": null,
+      "fix_document": "sdd/fixes/fix-e-burgos-043.md",
+      "type": "IMPROVEMENT",
+      "severity": "low",
+      "created_at": "2026-11-10",
+      "resolved_at": "2026-11-10",
+      "validated_at": null,
+      "title": "Carpetas y categorías plegables en la lista de proyectos del studio",
+      "estimation_hours": 1,
+      "description": "La lista de proyectos del studio se hacía larga con muchas carpetas. Cada carpeta y cada categoría suma un botón para contraerla o expandirla; el estado queda guardado en el navegador (localStorage) por carpeta y categoría.",
+      "justification": "Mejora de UX pedida por el dev; no toca la API ni contratos.",
+      "related_modules": [
+        "production-quality"
+      ],
+      "affected_files": [
+        "apps/web/src/hooks/use-collapsed-sections.ts",
+        "apps/web/src/components/collapse-toggle.tsx",
+        "apps/web/src/components/folder-heading.tsx",
+        "apps/web/src/pages/projects-page.tsx",
+        "apps/web/src/i18n/messages-es.ts",
+        "apps/web/src/i18n/messages-en.ts"
+      ],
+      "test_reference": "nx test/lint de web en verde (sin tests propios del componente).",
+      "status": "implemented",
+      "cycle": null,
+      "process_note": "Hecho en la sesión «Carpetas y categorías plegables en el Studio»; registrado y commiteado al juntar todo para el PR único.",
+      "usage": {
+        "provider_model": "claude/opus",
+        "effort": "low",
+        "tokens_in": 200000,
+        "tokens_out": 15000,
+        "approx": true,
+        "source": "declared-estimate",
+        "recorded_at": "2026-11-11",
+        "by_agent": [
+          {
+            "agent": "orchestrator",
+            "provider_model": "claude/opus",
+            "effort": "low",
+            "tokens_in": 200000,
+            "tokens_out": 15000,
+            "approx": true,
+            "source": "declared-estimate",
+            "recorded_at": "2026-11-11"
+          }
+        ]
+      }
     }
   ]
 }

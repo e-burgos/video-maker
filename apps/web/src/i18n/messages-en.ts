@@ -84,6 +84,8 @@ export const MESSAGES_EN = {
   'createFolder.placeholder': 'Display Ads',
   'createFolder.submit': 'Create folder',
   'createFolder.submitting': 'Creating…',
+  'section.collapse': 'Collapse {name}',
+  'section.expand': 'Expand {name}',
   'folder.rename': 'Rename folder',
   'folder.renameNameLabel': 'Folder name',
   'folder.renameSubmit': 'Save',

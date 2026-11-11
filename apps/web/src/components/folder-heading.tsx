@@ -4,15 +4,24 @@ import { useRenderApi } from '../api/render-api-context';
 import { RenderApiError, serviceUnreachable } from '../api/render-api-error';
 import type { VideoFolder } from '../api/render-api-types';
 import { useT } from '../i18n/language-context';
+import { CollapseToggle } from './collapse-toggle';
 import { ErrorNotice } from './error-notice';
 
 export type FolderHeadingProps = {
   folder: VideoFolder | null;
   total: number;
   onChanged: () => void;
+  collapsed?: boolean;
+  onToggleCollapsed?: () => void;
 };
 
-export function FolderHeading({ folder, total, onChanged }: FolderHeadingProps) {
+export function FolderHeading({
+  folder,
+  total,
+  onChanged,
+  collapsed = false,
+  onToggleCollapsed,
+}: FolderHeadingProps) {
   const client = useRenderApi();
   const t = useT();
   const [categoryName, setCategoryName] = useState('');
@@ -41,12 +50,22 @@ export function FolderHeading({ folder, total, onChanged }: FolderHeadingProps) 
   return (
     <div className="space-y-2">
       <div className="flex flex-wrap items-center justify-between gap-2">
-        <h3 className="text-sm font-semibold text-slate-100">
-          {title}{' '}
-          <span data-testid="folder-count" className="font-normal text-slate-500">
-            ({total})
-          </span>
-        </h3>
+        <div className="flex items-center gap-1.5">
+          {onToggleCollapsed !== undefined && (
+            <CollapseToggle
+              name={title}
+              collapsed={collapsed}
+              onToggle={onToggleCollapsed}
+              testId="folder-collapse-toggle"
+            />
+          )}
+          <h3 className="text-sm font-semibold text-slate-100">
+            {title}{' '}
+            <span data-testid="folder-count" className="font-normal text-slate-500">
+              ({total})
+            </span>
+          </h3>
+        </div>
 
         {folder !== null && (
           <div className="flex flex-wrap items-center gap-2">
@@ -192,7 +211,7 @@ export function FolderHeading({ folder, total, onChanged }: FolderHeadingProps) 
         </div>
       )}
 
-      {folder !== null && folder.categories.length > 0 && (
+      {folder !== null && !collapsed && folder.categories.length > 0 && (
         <ul data-testid="folder-categories" className="flex flex-wrap gap-1.5">
           {folder.categories.map((category) => (
             <li key={category.id} className="flex items-center gap-1 rounded border border-slate-700 px-1.5 py-0.5">
