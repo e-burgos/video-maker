@@ -128,6 +128,14 @@ it with a `git pull`. The switch lives in `sdd/tools.json` and is operated with
 just uncompressed. Savings show up in `rtk gain --project` or in `pnpm sdd:docs` → Costs → **RTK**
 tab (per-machine, estimated numbers).
 
+### tucu-ui — design skill and MCP (optional, off by default)
+
+For repos with a React or Next frontend. `pnpm sdd:tucu -- --enable` installs the `tucu-ui-design`
+skill and the `tucu-ui` MCP on all four harnesses without overwriting your MCP files; `--status`
+reports the state with no network and `--disable` cleans up only what the kit wrote. Turning it on
+or off is the developer's call (also `harness init --tucu-ui` while generating the project; `harness configure sdd
+--tucu-ui` is only for repos without the kit and resets `sdd/` if it exists). Details in [TUCU-UI.md](TUCU-UI.md).
+
 ### sdd-mod — SDD inside Claude Code (optional, off by default)
 
 Claude Code only. `sdd/skills/sdd-mod/` is a mod Claude Code loads on its own from
@@ -147,6 +155,23 @@ pnpm sdd:mod -- --disable      # turn it off
 Copilot, Gemini and the other agents do not see it and do not change: they follow the same
 rules from `AGENTS.md`/`GEMINI.md`/`copilot-instructions.md`, and `pnpm sdd:validate` stays the
 shared safety net in CI. The mod's gate does not cover shell commands.
+
+**Parallel sessions.** You can run several specs at once, one per Claude Code session. The band
+shows "this session: <spec> · <cycle> …" and "others: …". A session binds itself when it runs
+GATE B (`pnpm sdd:gate <spec> cycle-XX`, which prints `SDD-BIND`), when there is a single open
+unit, or when the branch names the spec; by hand: `pnpm sdd:use <spec> cycle-XX` or
+`pnpm sdd:use <FIX-id>`. Unbound with several open units, the gate rejects the edit and lists them.
+Bindings live in `<git-common-dir>/sdd-sessions/` (local, outside git) and expire after 30 min idle.
+If two sessions go for the same file, the first one to edit it reserves it and the other, in the same
+folder, gets `SDD reserva: …` naming the holder (from another worktree, only a warning); the holder
+sees the request on its next action and releases it with `pnpm sdd:release <file>`. Leases expire
+after 30 min without edits and are released when the session ends.
+
+**Project on GitHub.** With `gh` installed and logged in, `harness github connect` creates the repo,
+pushes the kit CI and sets `origin`; `--protect` (or `harness github protect`) requires
+`sdd:validate`. With profile `team` each cycle opens its branch with `pnpm sdd:branch <spec> cycle-XX`
+and closes with `pnpm sdd:pr <spec> cycle-XX` (without `--yes` it shows the plan; with `--yes` it
+pushes and opens the PR).
 
 ---
 
@@ -670,6 +695,8 @@ And if point 4 is NO, something is wrong: only consolidation touches the bases (
 - **rtk is on** and compresses command output: never prefix commands with `rtk` by hand, use
   `rtk proxy <cmd>` when you need the raw output, and never turn it off on your own
   (`pnpm sdd:rtk -- --disable` is the developer's call).
+- **tucu-ui is optional** (`pnpm sdd:tucu`): turning it on or off is the developer's call; do not
+  change it on your own.
 - **Workspace invariants** (guaranteed by the `init-nx-workspace` skill; breaking them fails
   silently): pnpm is the only package manager; projects live in `apps/`, `libs/` and `tools/`
   — never in `packages/` —; if the repo uses the TS solution setup, `customConditions` in
