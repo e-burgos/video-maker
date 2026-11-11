@@ -4,8 +4,6 @@ on:
   pull_request:
     paths:
       - 'sdd/**'
-      - 'package.json'
-      - 'pnpm-lock.yaml'
       - '.github/workflows/sdd-validate.yml'
   push:
     branches: [main]

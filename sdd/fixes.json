@@ -4206,6 +4206,46 @@
           }
         ]
       }
+    },
+    {
+      "id": "FIX-e-burgos-037",
+      "author": "e-burgos",
+      "spec_id": null,
+      "fix_document": "sdd/fixes/fix-e-burgos-037.md",
+      "type": "IMPROVEMENT",
+      "severity": "low",
+      "created_at": "2026-11-11",
+      "resolved_at": "2026-11-11",
+      "validated_at": null,
+      "title": "pnpm ci:local: la verificación corre en la Mac y el CI de GitHub se saltea con el status ci-local",
+      "estimation_hours": 2,
+      "description": "La cuenta superó en octubre los 3000 min de Actions del plan; video-maker consumió 991. El CI corre `nx run-many -t lint test build` completo en cada PR y otra vez en el push a main del merge (~7 min cada uno). `pnpm ci:local` corre en la Mac sdd:validate y `nx affected -t lint test build`, pushea la rama y publica el commit status `ci-local`. El CI lo lee y se saltea en el PR y en el merge cuyo PR tiene el mismo árbol. CI ignora docs, sdd y md; SDD validate sólo corre con cambios en sdd/; Deploy Docs Site suma concurrency.",
+      "justification": "Cambia sólo workflows y scripts de CI; sin contratos ni entidades; reversible revirtiendo el commit. Sin status ci-local el CI corre completo como antes.",
+      "related_modules": [
+        "ci"
+      ],
+      "affected_files": [
+        "scripts/ci/ci-local.sh",
+        "scripts/ci/ci-local-verified.sh",
+        "package.json",
+        ".github/workflows/ci.yml",
+        ".github/workflows/sdd-validate.yml",
+        ".github/workflows/deploy-docs-site.yml",
+        "sdd/fixes.json",
+        "sdd/fixes/fix-e-burgos-037.md"
+      ],
+      "test_reference": "YAML de 3 workflows parseado; pnpm ci:local sobre la rama chore/ci-local publicó ci-local y el CI del PR salteó la verificación",
+      "status": "implemented",
+      "cycle": null,
+      "usage": {
+        "provider_model": "claude/opus",
+        "effort": "medium",
+        "tokens_in": 90000,
+        "tokens_out": 12000,
+        "approx": true,
+        "source": "declared-estimate",
+        "recorded_at": "2026-11-11"
+      }
     }
   ]
 }
