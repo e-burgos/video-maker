@@ -14,7 +14,7 @@ Etapa 0 de `docs/research/2026-11-10-motion-graphics-productor.md`. En el modo B
 ## Solución
 - **timeline-core.** `random/seeded-random.ts`: mulberry32 (el de los punch-ins), `pickAvoidingPrevious` y `hashStringToSeed`. Los punch-ins lo reusan sin cambiar su salida.
 - **Modo A.** `planTransitions` recibe la semilla del montaje y elige el tipo sin repetir el del corte anterior; la dirección de `slide`/`whip-pan` también sale de la semilla. Los pools de los presets pasan a tres tipos: `software-demo` whip-pan/fade/slide, `educational` fade/light-leak/slide, `hardware` slide/fade/whip-pan, `recipe` light-leak/whip-pan/slide.
-- **light-leak.** `lightLeak()` de Remotion no está instalado (`@remotion/effects` y `@remotion/light-leaks` no están en el repo). Se implementa una presentación propia en CSS (`transitions/light-leak.tsx`): fundido con un destello cálido ámbar/rosa que viaja de izquierda a derecha, pico 0,5 de opacidad a mitad del corte y sin blanco.
+- **light-leak.** `lightLeak()` de Remotion no está instalado (`@remotion/effects` y `@remotion/light-leaks` no están en el repo). Se implementa una presentación propia en CSS (`transitions/light-leak.tsx`): fundido con un destello cálido ámbar/rosa que viaja de izquierda a derecha, pico 0,6 de opacidad a mitad del corte y sin blanco.
 - **Modo B.** Campo opcional `exit` por escena (`blur-up`, `slide-left`, `scale-down`, `drop`, `wipe`, `iris`). El compositor completa los que faltan con una semilla derivada de marca + título, sin repetir la salida anterior, y antes de un capítulo nuevo usa un corte fuerte (`wipe`, `iris`, `slide-left`). El runtime lee `data-exit`; la última escena sigue con su fundido.
 
 ## Verificación

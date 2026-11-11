@@ -9,8 +9,10 @@ describe('lightLeakStyle', () => {
 
   it('el destello arranca y termina en cero y tiene su pico a mitad del corte', () => {
     expect(lightLeakOpacity(0)).toBe(0);
-    expect(lightLeakOpacity(1)).toBeCloseTo(0, 10);
-    expect(lightLeakOpacity(0.5)).toBeCloseTo(0.5, 10);
+    expect(lightLeakOpacity(1)).toBeCloseTo(0, 4);
+    expect(lightLeakOpacity(1.08)).toBeCloseTo(0, 4);
+    expect(lightLeakOpacity(0.9)).toBeGreaterThan(0.35);
+    expect(lightLeakOpacity(0.5)).toBeCloseTo(0.6, 10);
     expect(lightLeakOpacity(0.5, 0.3)).toBeCloseTo(0.3, 10);
   });
 

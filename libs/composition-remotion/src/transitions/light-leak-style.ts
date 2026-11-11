@@ -1,8 +1,13 @@
 import type { CSSProperties } from 'react';
 import type { PresentationDirection } from './whip-pan-style';
 
-const DEFAULT_MAX_LEAK_OPACITY = 0.5;
+const DEFAULT_MAX_LEAK_OPACITY = 0.6;
 const LEAK_TRAVEL_PERCENT = 60;
+const LEAK_PLATEAU_EXPONENT = 0.35;
+
+function clampProgress(presentationProgress: number): number {
+  return Math.min(1, Math.max(0, presentationProgress));
+}
 
 export function lightLeakSceneStyle(
   presentationDirection: PresentationDirection,
@@ -12,7 +17,7 @@ export function lightLeakSceneStyle(
 }
 
 export function lightLeakOpacity(presentationProgress: number, maxOpacity: number = DEFAULT_MAX_LEAK_OPACITY): number {
-  return maxOpacity * Math.sin(Math.PI * presentationProgress);
+  return maxOpacity * Math.sin(Math.PI * clampProgress(presentationProgress)) ** LEAK_PLATEAU_EXPONENT;
 }
 
 export function lightLeakOverlayStyle(

@@ -13,8 +13,8 @@ function LightLeakPresentation({
   passedProps,
 }: TransitionPresentationComponentProps<LightLeakProps>) {
   return (
-    <AbsoluteFill style={lightLeakSceneStyle(presentationDirection, presentationProgress)}>
-      {children}
+    <AbsoluteFill>
+      <AbsoluteFill style={lightLeakSceneStyle(presentationDirection, presentationProgress)}>{children}</AbsoluteFill>
       {presentationDirection === 'entering' ? (
         <AbsoluteFill style={lightLeakOverlayStyle(presentationProgress, passedProps.maxOpacity)} />
       ) : null}
