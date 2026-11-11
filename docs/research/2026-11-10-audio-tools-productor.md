@@ -14,10 +14,13 @@ Objetivo del dev: que el productor **busque** el sonido, lo **ubique en su cuadr
 - **Medios visuales:** Commons + NASA (+ Pexels con key) en `apps/render-api/src/media-search/`.
 - **Efectos de sonido:** el SKILL.md dice que el motor "no hace efectos de audio", pero eso es
   verdad solo a medias:
-  - El modo B (motion graphics, `libs/motion-graphics`) trae **8 SFX empaquetados** de HyperFrames
-    (Apache 2.0, `assets/runtime/sfx/`: chime, click-soft, impact-bass-1, notification, pop, riser,
-    whoosh, whoosh-short) y ya usa uno: el impacto del arranque (`compose/impact-sfx.ts`), con
-    automatización de volumen que lo baja bajo la voz.
+  - El modo B (motion graphics, `libs/motion-graphics`) traía **8 SFX empaquetados** de HyperFrames
+    (`assets/runtime/sfx/`: chime, click-soft, impact-bass-1, notification, pop, riser, whoosh,
+    whoosh-short) y ya usaba uno: el impacto del arranque (`compose/impact-sfx.ts`), con
+    automatización de volumen que lo baja bajo la voz. *Corrección del 2026-11-11:* esos archivos
+    eran de Pixabay, no Apache 2.0 (el Apache cubre solo el código de HyperFrames), y su licencia no
+    permite distribuirlos sueltos. Se reemplazaron por el banco CC0/CC BY de `assets/sfx-bank/`
+    (FIX-059 y FIX-062) y se borraron (FIX-065).
   - El storyboard ya le pide al modelo `sfxTags` por escena ("palabras en inglés para buscar en una
     librería de audio stock", `build-storyboard-prompt.ts`), pero **nadie los consume**: se generan
     y se tiran.

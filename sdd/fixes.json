@@ -5668,6 +5668,55 @@
       }
     },
     {
+      "id": "FIX-e-burgos-066",
+      "author": "e-burgos",
+      "spec_id": null,
+      "fix_document": "sdd/fixes/fix-e-burgos-066.md",
+      "type": "IMPROVEMENT",
+      "severity": "low",
+      "created_at": "2026-11-11",
+      "resolved_at": "2026-11-11",
+      "validated_at": null,
+      "title": "Sin menciones a los SFX de Pixabay: el SKILL, los specs y el informe apuntan al banco CC0/CC BY",
+      "estimation_hours": 0.1,
+      "description": "Después de FIX-065 (motion borró runtime/sfx/), el SKILL.md del productor dice que los sonidos salen de assets/sfx-bank/, los specs del review usan rutas de ejemplo del banco y el informe de audio corrige que esos 8 archivos eran Pixabay, no Apache 2.0.",
+      "justification": "Pedido de la sesión de motion al cerrar FIX-065.",
+      "related_modules": [
+        "production-quality"
+      ],
+      "affected_files": [
+        "sdd/skills/video-producer/SKILL.md",
+        "apps/render-api/src/review/motion-sfx-cues.spec.ts",
+        "apps/render-api/src/review/motion-level-plans.spec.ts",
+        "docs/research/2026-11-10-audio-tools-productor.md"
+      ],
+      "test_reference": "Specs del review afectados en verde (4); sin cambios de código.",
+      "status": "implemented",
+      "cycle": null,
+      "process_note": "",
+      "usage": {
+        "provider_model": "claude/opus",
+        "effort": "low",
+        "tokens_in": 120000,
+        "tokens_out": 6000,
+        "approx": true,
+        "source": "declared-estimate",
+        "recorded_at": "2026-11-11",
+        "by_agent": [
+          {
+            "agent": "orchestrator",
+            "provider_model": "claude/opus",
+            "effort": "low",
+            "tokens_in": 120000,
+            "tokens_out": 6000,
+            "approx": true,
+            "source": "declared-estimate",
+            "recorded_at": "2026-11-11"
+          }
+        ]
+      }
+    },
+    {
       "id": "FIX-e-burgos-067",
       "author": "e-burgos",
       "spec_id": null,
