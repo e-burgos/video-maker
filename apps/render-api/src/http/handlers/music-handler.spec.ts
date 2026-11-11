@@ -29,6 +29,13 @@ function searchRequest(slug: string, query: string): ReturnType<typeof requestLi
   return requestLine({ method: 'GET', path: `/projects/${slug}/music/search?${query}` });
 }
 
+function searchAnswer(url: string): { status: number; bodyChunks: readonly Uint8Array[] } | null {
+  if (url.startsWith('https://api.openverse.org/')) {
+    return { status: 200, bodyChunks: jsonBodyChunks({ results: [] }) };
+  }
+  return url.startsWith('https://commons.wikimedia.org/') ? { status: 200, bodyChunks: jsonBodyChunks(COMMONS_SEARCH_PAYLOAD) } : null;
+}
+
 function importRequest(slug: string, payload: unknown): ReturnType<typeof requestLine> {
   return requestLine({
     method: 'POST',
@@ -146,11 +153,10 @@ describe('handleImportMusic', () => {
     const callLog = createCallLog();
     const storage = createFakeObjectStorage(callLog, { directories: [PROJECT_ROOT] });
     const audioBytes = textBodyChunks('audio-bytes');
-    let call = 0;
-    const { fetchRemote } = createFakeFetchRemote(() => {
-      call += 1;
-      if (call === 1) {
-        return { status: 200, bodyChunks: jsonBodyChunks(COMMONS_SEARCH_PAYLOAD) };
+    const { fetchRemote } = createFakeFetchRemote(({ url }) => {
+      const search = searchAnswer(url);
+      if (search !== null) {
+        return search;
       }
       return {
         status: 200,
@@ -192,14 +198,7 @@ describe('handleImportMusic', () => {
   it('answers 503 MUSIC_SOURCE_UNAVAILABLE when the download fails', async () => {
     const callLog = createCallLog();
     const storage = createFakeObjectStorage(callLog, { directories: [PROJECT_ROOT] });
-    let call = 0;
-    const { fetchRemote } = createFakeFetchRemote(() => {
-      call += 1;
-      if (call === 1) {
-        return { status: 200, bodyChunks: jsonBodyChunks(COMMONS_SEARCH_PAYLOAD) };
-      }
-      return { status: 500, bodyChunks: textBodyChunks('down') };
-    });
+    const { fetchRemote } = createFakeFetchRemote(({ url }) => searchAnswer(url) ?? { status: 500, bodyChunks: textBodyChunks('down') });
     const deps = createFakeRenderApiDependencies(callLog, { storage, fetchRemote });
     const runtime = createRenderApiRuntime(deps);
 
@@ -315,5 +314,37 @@ describe('the brand music bank in search_free_music and import_music', () => {
     expect(response.body).toMatchObject({ path: 'raw/audio/Pulsar.mp3' });
     expect(await storage.readTextFile(`${PROJECT_ROOT}/raw/audio/Pulsar.mp3`)).toBe('pulsar');
     expect(JSON.parse(await storage.readTextFile('/media/.music-usage.json'))).toEqual({ 'acme-tutoriales/pulsar': '2026-09-08T00:00:00.000Z' });
+  });
+
+  it('fills after the bank with Openverse first, then Commons, and imports an Openverse track with its credit', async () => {
+    const openverseTrack = {
+      id: 'ov-1',
+      title: 'Calm Morning',
+      creator: 'Ana Ruiz',
+      license: 'by',
+      license_version: '3.0',
+      duration: 150_000,
+      url: 'https://prod-1.storage.jamendo.com/?trackid=1&format=mp32',
+      foreign_landing_url: 'https://www.jamendo.com/track/1',
+      filetype: 'mp32',
+    };
+    const { deps, storage, runtime } = bankSetup(({ url }) => {
+      if (url.startsWith('https://api.openverse.org/')) {
+        return { status: 200, bodyChunks: jsonBodyChunks({ results: [openverseTrack] }) };
+      }
+      if (url.startsWith('https://commons.wikimedia.org/')) {
+        return { status: 200, bodyChunks: jsonBodyChunks(COMMONS_SEARCH_PAYLOAD) };
+      }
+      return { status: 200, headers: { 'content-length': '7' }, bodyChunks: textBodyChunks('jamendo') };
+    });
+
+    const search = await handleSearchFreeMusic(deps, STORE, { slug: 'pitch-deck' }, searchRequest('pitch-deck', 'mood=calm&maxResults=5'), runtime);
+    const results = (search.body as { results: readonly { resultId: string; source: string }[] }).results;
+    const openverseId = results.find((result) => result.source === 'openverse')?.resultId;
+    const response = await handleImportMusic(deps, STORE, { slug: 'pitch-deck' }, importRequest('pitch-deck', { resultId: openverseId }), runtime);
+
+    expect(results.map((result) => result.source)).toEqual(['brand-bank', 'brand-bank', 'brand-bank', 'openverse', 'commons']);
+    expect(response.body).toMatchObject({ path: 'raw/audio/Calm Morning.mp3', credit: { title: 'Calm Morning', author: 'Ana Ruiz', license: 'CC BY 3.0', sourceUrl: 'https://www.jamendo.com/track/1' } });
+    expect(await storage.readTextFile(`${PROJECT_ROOT}/raw/audio/Calm Morning.mp3`)).toBe('jamendo');
   });
 });

@@ -9,6 +9,7 @@ import { COMMONS_USER_AGENT } from './commons-music-search';
 import type { CommonsMusicResult } from './commons-music-search';
 
 export const MUSIC_DOWNLOAD_HOST = 'upload.wikimedia.org';
+const JAMENDO_STORAGE_HOST = /^prod-\d+\.storage\.jamendo\.com$/u;
 export const MAX_MUSIC_DOWNLOAD_BYTES = 50 * 1024 * 1024;
 export const MUSIC_DOWNLOAD_TIMEOUT_MS = 30_000;
 
@@ -19,7 +20,8 @@ export interface DownloadedCommonsAudio {
 
 export function isAllowedMusicDownloadHost(url: string): boolean {
   try {
-    return new URL(url).host === MUSIC_DOWNLOAD_HOST;
+    const { host, protocol } = new URL(url);
+    return protocol === 'https:' && (host === MUSIC_DOWNLOAD_HOST || JAMENDO_STORAGE_HOST.test(host));
   } catch {
     return false;
   }
@@ -36,10 +38,10 @@ export async function downloadCommonsAudioFile(
   storage: ObjectStorage,
   fetchRemote: FetchRemotePort,
   project: MediaProject,
-  result: CommonsMusicResult,
+  result: CommonsMusicResult & { readonly fileName?: string },
 ): Promise<DownloadedCommonsAudio> {
   if (!isAllowedMusicDownloadHost(result.downloadUrl)) {
-    throw new Error('Wikimedia Commons download host mismatch');
+    throw new Error('Music download host is not an allowed free music source');
   }
 
   const response = await fetchRemote(result.downloadUrl, {
@@ -48,21 +50,21 @@ export async function downloadCommonsAudioFile(
   });
 
   if (response.status !== 200) {
-    throw new Error(`Wikimedia Commons download responded with status ${response.status}`);
+    throw new Error(`Music download responded with status ${response.status}`);
   }
 
   const contentLength = Number(response.headers['content-length']);
   if (!Number.isFinite(contentLength) || contentLength <= 0) {
-    throw new Error('Wikimedia Commons download did not report a usable content-length');
+    throw new Error('Music download did not report a usable content-length');
   }
   if (contentLength > MAX_MUSIC_DOWNLOAD_BYTES) {
-    throw new Error('Wikimedia Commons file exceeds the download size limit');
+    throw new Error('Music file exceeds the download size limit');
   }
 
   const audioDirectory = toAbsolutePath(project, 'raw/audio');
   await storage.ensureDirectory(audioDirectory);
 
-  const baseName = fileNameFromDownloadUrl(result.downloadUrl, result.resultId);
+  const baseName = result.fileName ?? fileNameFromDownloadUrl(result.downloadUrl, result.resultId);
   const fileName = await resolveUniqueFileName(storage, audioDirectory, baseName);
   const relativePath = `raw/audio/${fileName}`;
 
@@ -77,7 +79,7 @@ export async function downloadCommonsAudioFile(
   });
 
   if (outcome.kind !== 'written') {
-    throw new Error('Wikimedia Commons download did not complete');
+    throw new Error('Music download did not complete');
   }
 
   const absolutePath = toAbsolutePath(project, relativePath);

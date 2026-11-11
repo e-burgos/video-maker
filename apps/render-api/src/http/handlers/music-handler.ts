@@ -10,6 +10,7 @@ import { brandBankFileName, searchBrandMusicBank } from '../../music/brand-music
 import type { FreeMusicResult } from '../../music/brand-music-bank';
 import { downloadCommonsAudioFile } from '../../music/import-music';
 import { searchCommonsMusic } from '../../music/commons-music-search';
+import { searchOpenverseMusic } from '../../music/openverse-music-search';
 import { recordMusicUse } from '../../music/music-usage-log';
 import { appendMusicCredit } from '../../music/project-credits';
 import type { MusicCreditEntry } from '../../music/project-credits';
@@ -33,7 +34,7 @@ function musicSourceUnavailable(cause: unknown): PipelineStageError {
   return new PipelineStageError({
     code: 'MUSIC_SOURCE_UNAVAILABLE',
     stage: null,
-    hint: 'Wikimedia Commons did not answer with a usable response',
+    hint: 'No free music source (Openverse, Wikimedia Commons) answered with a usable response',
     cause,
   });
 }
@@ -50,19 +51,34 @@ function toPublicResult(result: FreeMusicResult) {
   };
 }
 
-async function searchCommonsToFill(deps: RenderApiDependencies, mood: string, slots: number, bankFound: boolean): Promise<FreeMusicResult[]> {
-  if (slots === 0) {
-    return [];
-  }
-  try {
-    const found = await searchCommonsMusic(deps.fetchRemote, mood, slots);
-    return found.map((result) => ({ ...result, source: 'commons' as const }));
-  } catch (cause) {
-    if (bankFound) {
-      return [];
+type FreeMusicSource = (slots: number) => Promise<readonly FreeMusicResult[]>;
+
+function freeMusicSources(deps: RenderApiDependencies, mood: string): readonly FreeMusicSource[] {
+  return [
+    (slots) => searchOpenverseMusic(deps.fetchRemote, mood, slots),
+    async (slots) => (await searchCommonsMusic(deps.fetchRemote, mood, slots)).map((result) => ({ ...result, source: 'commons' as const })),
+  ];
+}
+
+async function searchFreeSourcesToFill(deps: RenderApiDependencies, mood: string, slots: number, bankFound: boolean): Promise<FreeMusicResult[]> {
+  const found: FreeMusicResult[] = [];
+  const failures: unknown[] = [];
+  for (const search of freeMusicSources(deps, mood)) {
+    const missing = slots - found.length;
+    if (missing <= 0) {
+      break;
     }
-    throw musicSourceUnavailable(cause);
+    try {
+      found.push(...(await search(missing)));
+    } catch (cause) {
+      failures.push(cause);
+    }
   }
+  const everySourceFailed = failures.length === freeMusicSources(deps, mood).length;
+  if (everySourceFailed && !bankFound) {
+    throw musicSourceUnavailable(failures.at(-1));
+  }
+  return found;
 }
 
 export async function handleSearchFreeMusic(
@@ -97,7 +113,7 @@ export async function handleSearchFreeMusic(
 
   const brandId = deps.localStore.projects.get(slug)?.brand ?? null;
   const bank = await searchBrandMusicBank(deps, store, brandId, mood, maxResults);
-  const results = [...bank, ...(await searchCommonsToFill(deps, mood, maxResults - bank.length, bank.length > 0))];
+  const results = [...bank, ...(await searchFreeSourcesToFill(deps, mood, maxResults - bank.length, bank.length > 0))];
 
   const nowMs = Date.parse(deps.clock.nowIso());
   runtime.musicSearchCache.store(slug, results, nowMs);

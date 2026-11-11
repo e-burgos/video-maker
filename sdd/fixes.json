@@ -4679,6 +4679,57 @@
           }
         ]
       }
+    },
+    {
+      "id": "FIX-e-burgos-047",
+      "author": "e-burgos",
+      "spec_id": null,
+      "fix_document": "sdd/fixes/fix-e-burgos-047.md",
+      "type": "IMPROVEMENT",
+      "severity": "medium",
+      "created_at": "2026-11-11",
+      "resolved_at": "2026-11-11",
+      "validated_at": null,
+      "title": "Openverse como fuente de música libre en search_free_music, entre el banco de la marca y Commons",
+      "estimation_hours": 1.5,
+      "description": "search_free_music completa ahora en este orden: banco de la marca, Openverse (música de Jamendo con licencia CC BY, CC BY-SA, CC0 o dominio público, de 30 s a 10 min, solo desde hosts permitidos) y por último Wikimedia Commons. Si la búsqueda completa no encuentra nada, prueba con palabras sueltas (hasta 3 pedidos, por el límite anónimo de Openverse). import_music descarga desde Jamendo con nombre de archivo legible y deja el crédito con la página del tema. Si una fuente falla se pasa a la siguiente; solo da 503 si fallan todas y no hubo banco.",
+      "justification": "Etapa 1 del informe de audio (docs/research/2026-11-10-audio-tools-productor.md), parte música; Commons devolvía discursos o nada.",
+      "related_modules": [
+        "production-quality"
+      ],
+      "affected_files": [
+        "apps/render-api/src/music/openverse-music-search.ts",
+        "apps/render-api/src/music/import-music.ts",
+        "apps/render-api/src/music/brand-music-bank.ts",
+        "apps/render-api/src/http/handlers/music-handler.ts",
+        "libs/producer-tools/src/contract/tool-schemas.ts",
+        "libs/producer-tools/src/client/render-api-client.ts"
+      ],
+      "test_reference": "nx test/lint en verde: render-api 2273, producer-tools 448. Real: proyecto de Café Aroma (sin banco) busca «calm tutorial» y «upbeat product» y recibe música de Jamendo; import real de «Lo-fi Love Song» (FABENZ, CC BY-SA 3.0) en prueba-banco-musica, MP3 válido de 141 s.",
+      "status": "implemented",
+      "cycle": null,
+      "process_note": "Los SFX de Openverse quedan para después: el montaje no tiene pista de efectos y motion usa su propio banco; conectarlo es trabajo de la sesión de motion (sfxTags).",
+      "usage": {
+        "provider_model": "claude/opus",
+        "effort": "low",
+        "tokens_in": 400000,
+        "tokens_out": 25000,
+        "approx": true,
+        "source": "declared-estimate",
+        "recorded_at": "2026-11-11",
+        "by_agent": [
+          {
+            "agent": "orchestrator",
+            "provider_model": "claude/opus",
+            "effort": "low",
+            "tokens_in": 400000,
+            "tokens_out": 25000,
+            "approx": true,
+            "source": "declared-estimate",
+            "recorded_at": "2026-11-11"
+          }
+        ]
+      }
     }
   ]
 }

@@ -12,7 +12,8 @@ import { lastUseByTrack } from './music-usage-log';
 export const BRAND_BANK_RESULT_PREFIX = 'bank-';
 
 export interface FreeMusicResult extends CommonsMusicResult {
-  readonly source: 'brand-bank' | 'commons';
+  readonly source: 'brand-bank' | 'openverse' | 'commons';
+  readonly fileName?: string;
   readonly localPath?: string;
   readonly creditTitle?: string;
   readonly brandId?: string;
