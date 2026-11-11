@@ -608,6 +608,54 @@
               "type": "string",
               "minLength": 1,
               "maxLength": 60
+            },
+            "sfxKind": {
+              "type": "string",
+              "enum": [
+                "whoosh",
+                "impact",
+                "shimmer",
+                "click",
+                "none"
+              ]
+            },
+            "sfx": {
+              "maxItems": 6,
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "atMs": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 9007199254740991
+                  },
+                  "assetId": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "gainDb": {
+                    "type": "number",
+                    "maximum": 0
+                  },
+                  "fadeInMs": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 9007199254740991
+                  },
+                  "fadeOutMs": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 9007199254740991
+                  }
+                },
+                "required": [
+                  "atMs",
+                  "assetId",
+                  "gainDb"
+                ],
+                "additionalProperties": false
+              }
             }
           },
           "required": [
@@ -685,6 +733,54 @@
               "type": "string",
               "minLength": 1,
               "maxLength": 60
+            },
+            "sfxKind": {
+              "type": "string",
+              "enum": [
+                "whoosh",
+                "impact",
+                "shimmer",
+                "click",
+                "none"
+              ]
+            },
+            "sfx": {
+              "maxItems": 6,
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "atMs": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 9007199254740991
+                  },
+                  "assetId": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "gainDb": {
+                    "type": "number",
+                    "maximum": 0
+                  },
+                  "fadeInMs": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 9007199254740991
+                  },
+                  "fadeOutMs": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 9007199254740991
+                  }
+                },
+                "required": [
+                  "atMs",
+                  "assetId",
+                  "gainDb"
+                ],
+                "additionalProperties": false
+              }
             }
           },
           "required": [

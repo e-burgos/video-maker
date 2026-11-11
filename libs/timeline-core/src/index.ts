@@ -54,7 +54,12 @@ export {
   DEFAULT_LOGO_BUMPER_DURATION_MS,
   DEFAULT_LOGO_BUMPER_WIDTH_RATIO,
   HexColorSchema,
+  BumperSfxCueSchema,
   BumperStyleSchema,
+  LOGO_BUMPER_SFX_KINDS,
+  LogoBumperSfxChoiceSchema,
+  LogoBumperSfxKindSchema,
+  MAX_BUMPER_SFX_CUES,
   LOGO_BUMPER_ANIMATIONS,
   LOGO_BUMPER_BACKGROUNDS,
   LOGO_BUMPER_REVEALS,
@@ -80,7 +85,10 @@ export type {
   CaptionTheme,
   DeliveryContract,
   DeliveryKind,
+  BumperSfxCue,
   BumperStyle,
+  LogoBumperSfxChoice,
+  LogoBumperSfxKind,
   LogoBumper,
   LogoBumperAnimation,
   LogoBumperBackground,
@@ -401,3 +409,5 @@ export {
 export type { RandomGenerator } from './random/seeded-random';
 export { resolveBumperLook } from './timeline/resolve-bumper-look';
 export type { BumperEdge, BumperLook } from './timeline/resolve-bumper-look';
+export { BUMPER_REVEAL_ENTER_MS, MAX_BUMPER_CAPTION_CLICKS, planBumperSfx } from './timeline/plan-bumper-sfx';
+export type { BumperSfxAssetCue, BumperSfxAutoCue, BumperSfxPlanItem } from './timeline/plan-bumper-sfx';
