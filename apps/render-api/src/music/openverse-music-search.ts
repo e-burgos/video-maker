@@ -1,12 +1,13 @@
 import type { FetchRemotePort } from '../deps/render-api-dependencies';
-import { collectBytes, isFreeCommercialLicense, stableResultId } from '../media-search/commons-shared';
+import { collectBytes, stableResultId } from '../media-search/commons-shared';
 import { isPortableFileName } from '../store/asset-path';
 import type { FreeMusicResult } from './brand-music-bank';
 import { COMMONS_USER_AGENT, MAX_COMMONS_MUSIC_DURATION_SEC, MIN_COMMONS_MUSIC_DURATION_SEC } from './commons-music-search';
 import { isAllowedMusicDownloadHost } from './import-music';
+import { isPublishableMusicLicense } from './music-license';
 
 export const OPENVERSE_AUDIO_API_URL = 'https://api.openverse.org/v1/audio/';
-export const OPENVERSE_LICENSES = 'by,by-sa,cc0,pdm';
+export const OPENVERSE_LICENSES = 'by,cc0,pdm';
 export const OPENVERSE_SEARCH_TIMEOUT_MS = 10_000;
 export const MAX_OPENVERSE_RESPONSE_BYTES = 2 * 1024 * 1024;
 export const MAX_OPENVERSE_QUERIES = 3;
@@ -16,7 +17,6 @@ const MIN_QUERY_WORD_LENGTH = 3;
 
 const LICENSE_NAMES: Readonly<Record<string, string>> = {
   by: 'CC BY',
-  'by-sa': 'CC BY-SA',
   cc0: 'CC0',
   pdm: 'Public Domain Mark',
 };
@@ -65,7 +65,7 @@ function parseOpenverseAudio(audio: OpenverseAudio): FreeMusicResult | null {
   if (id === null || title === null || downloadUrl === null || pageUrl === null || license === null || durationMs === null) {
     return null;
   }
-  if (!isFreeCommercialLicense(license) || !isMusicBedLength(durationMs) || !isAllowedMusicDownloadHost(downloadUrl)) {
+  if (!isPublishableMusicLicense(license) || !isMusicBedLength(durationMs) || !isAllowedMusicDownloadHost(downloadUrl)) {
     return null;
   }
   return {

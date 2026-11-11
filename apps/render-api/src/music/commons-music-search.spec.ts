@@ -102,6 +102,11 @@ describe('parseCommonsSearchPayload', () => {
     ]);
   });
 
+  it('drops share-alike music, which would force the whole video under CC BY-SA', () => {
+    const results = parseCommonsSearchPayload({ query: { pages: [commonsPage({ license: 'CC BY-SA 4.0' }), commonsPage({ license: 'CC BY 4.0' })] } });
+    expect(results.map((result) => result.license)).toEqual(['CC BY 4.0']);
+  });
+
   it('drops a result with a non-commercial license', () => {
     const results = parseCommonsSearchPayload({ query: { pages: [commonsPage({ license: 'CC BY-NC 4.0' })] } });
     expect(results).toEqual([]);

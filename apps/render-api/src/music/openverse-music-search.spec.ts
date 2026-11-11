@@ -32,12 +32,13 @@ describe('parseOpenverseSearchPayload', () => {
     });
   });
 
-  it('keeps CC0 and public domain, and drops no-derivatives licenses, wrong lengths and unknown hosts', () => {
+  it('keeps CC0 and public domain, and drops share-alike and no-derivatives licenses, wrong lengths and unknown hosts', () => {
     const results = parseOpenverseSearchPayload({
       results: [
         audio({ id: 'cc0', license: 'cc0', license_version: '1.0' }),
         audio({ id: 'pdm', license: 'pdm', license_version: '1.0' }),
         audio({ id: 'nd', license: 'by-nd' }),
+        audio({ id: 'sa', license: 'by-sa' }),
         audio({ id: 'short', duration: 12_000 }),
         audio({ id: 'long', duration: 5_950_000 }),
         audio({ id: 'host', url: 'https://cdn.example.com/track.mp3' }),
@@ -54,7 +55,7 @@ describe('parseOpenverseSearchPayload', () => {
 describe('searchOpenverseMusic', () => {
   it('asks for commercial-safe music only', () => {
     const url = new URL(buildOpenverseSearchUrl('calm', 12));
-    expect(url.searchParams.get('license')).toBe('by,by-sa,cc0,pdm');
+    expect(url.searchParams.get('license')).toBe('by,cc0,pdm');
     expect(url.searchParams.get('category')).toBe('music');
     expect(url.searchParams.get('page_size')).toBe('12');
   });

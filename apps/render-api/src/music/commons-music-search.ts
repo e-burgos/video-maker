@@ -1,5 +1,6 @@
 import type { FetchRemotePort } from '../deps/render-api-dependencies';
 import { collectBytes, isFreeCommercialLicense, stableResultId, stripHtml } from '../media-search/commons-shared';
+import { isPublishableMusicLicense } from './music-license';
 
 export { isFreeCommercialLicense, stripHtml };
 
@@ -96,7 +97,7 @@ function parseCommonsPage(page: CommonsPage): CommonsMusicResult | null {
   }
 
   const license = metadataValue(imageInfo.extmetadata, 'LicenseShortName');
-  if (!isFreeCommercialLicense(license)) {
+  if (!isPublishableMusicLicense(license)) {
     return null;
   }
 

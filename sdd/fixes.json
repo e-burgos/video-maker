@@ -5034,6 +5034,55 @@
           }
         ]
       }
+    },
+    {
+      "id": "FIX-e-burgos-053",
+      "author": "e-burgos",
+      "spec_id": null,
+      "fix_document": "sdd/fixes/fix-e-burgos-053.md",
+      "type": "IMPROVEMENT",
+      "severity": "medium",
+      "created_at": "2026-11-11",
+      "resolved_at": "2026-11-11",
+      "validated_at": null,
+      "title": "La música libre no acepta CC BY-SA: Openverse y Commons solo devuelven CC BY, CC0 o dominio público",
+      "estimation_hours": 0.25,
+      "description": "CC BY-SA trata la sincronización de música con imagen como obra derivada, así que obligaría a publicar el video entero bajo CC BY-SA (cualquiera podría reutilizarlo comercialmente, y YouTube no ofrece esa licencia). isPublishableMusicLicense descarta share-alike en la música de Commons y Openverse (license=by,cc0,pdm). La búsqueda de B-roll de Commons no cambia.",
+      "justification": "Decisión del dev el 2026-11-11 tras medir la pérdida («vamos con tu recomendación»): en Openverse se pierde ~40–60% de calm, ambient e inspiring, pero sigue habiendo decenas o cientos de temas y el banco de la marca va primero.",
+      "related_modules": [
+        "production-quality"
+      ],
+      "affected_files": [
+        "apps/render-api/src/music/music-license.ts",
+        "apps/render-api/src/music/openverse-music-search.ts",
+        "apps/render-api/src/music/commons-music-search.ts",
+        "libs/producer-tools/src/contract/tool-schemas.ts"
+      ],
+      "test_reference": "nx test/lint en verde: producer-tools 448, render-api 2277 (review-measurements dio el timeout suelto conocido y pasa solo). Real: «calm tutorial» desde Café Aroma devuelve 8 temas CC BY 3.0, ninguno BY-SA.",
+      "status": "implemented",
+      "cycle": null,
+      "process_note": "El banco de Display Ads ya no tenía temas BY-SA (18 CC BY + 19 YouTube). El único BY-SA importado es «Lo-fi Love Song» en el proyecto de prueba prueba-banco-musica, que no se publica.",
+      "usage": {
+        "provider_model": "claude/opus",
+        "effort": "low",
+        "tokens_in": 120000,
+        "tokens_out": 6000,
+        "approx": true,
+        "source": "declared-estimate",
+        "recorded_at": "2026-11-11",
+        "by_agent": [
+          {
+            "agent": "orchestrator",
+            "provider_model": "claude/opus",
+            "effort": "low",
+            "tokens_in": 120000,
+            "tokens_out": 6000,
+            "approx": true,
+            "source": "declared-estimate",
+            "recorded_at": "2026-11-11"
+          }
+        ]
+      }
     }
   ]
 }

@@ -847,7 +847,7 @@ export const STUDIO_TOOLS: Readonly<Record<StudioToolName, StudioToolDefinition>
   },
   search_free_music: {
     description:
-      "Search freely licensed music matching a mood, up to maxResults results: first the music bank of the project's brand (source brand-bank, already tagged for tutorial, product, vertical or institutional videos and ordered so the least recently used come first), then Openverse (Jamendo music under CC BY, CC BY-SA, CC0 or public domain) and last Wikimedia Commons. Put the kind of video in the mood (e.g. \"calm tutorial\"). Use the returned resultId with import_music.",
+      "Search freely licensed music matching a mood, up to maxResults results: first the music bank of the project's brand (source brand-bank, already tagged for tutorial, product, vertical or institutional videos and ordered so the least recently used come first), then Openverse (Jamendo music under CC BY, CC0 or public domain; never share-alike) and last Wikimedia Commons. Put the kind of video in the mood (e.g. \"calm tutorial\"). Use the returned resultId with import_music.",
     input: SearchFreeMusicInputSchema,
     output: SearchFreeMusicOutputSchema,
   },
