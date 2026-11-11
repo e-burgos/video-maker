@@ -617,7 +617,8 @@
                 "shimmer",
                 "click",
                 "none"
-              ]
+              ],
+              "description": "Leave it out: the bumper already sounds by itself, following its logo reveal. Set it only when the user names a sound (whoosh, impact, shimmer, click) or asks for silence (none)."
             },
             "sfx": {
               "maxItems": 6,
@@ -655,7 +656,8 @@
                   "gainDb"
                 ],
                 "additionalProperties": false
-              }
+              },
+              "description": "Explicit sound cues with a sound bank id; leave it out unless the user asks for an exact sound at an exact moment."
             }
           },
           "required": [
@@ -742,7 +744,8 @@
                 "shimmer",
                 "click",
                 "none"
-              ]
+              ],
+              "description": "Leave it out: the bumper already sounds by itself, following its logo reveal. Set it only when the user names a sound (whoosh, impact, shimmer, click) or asks for silence (none)."
             },
             "sfx": {
               "maxItems": 6,
@@ -780,7 +783,8 @@
                   "gainDb"
                 ],
                 "additionalProperties": false
-              }
+              },
+              "description": "Explicit sound cues with a sound bank id; leave it out unless the user asks for an exact sound at an exact moment."
             }
           },
           "required": [

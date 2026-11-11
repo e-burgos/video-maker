@@ -167,8 +167,14 @@ export const LogoBumperSchema = z.strictObject({
   reveal: LogoBumperRevealSchema.optional(),
   accentColor: HexColorSchema.optional(),
   caption: z.string().trim().min(1).max(MAX_LOGO_BUMPER_CAPTION_LENGTH).optional(),
-  sfxKind: LogoBumperSfxChoiceSchema.optional(),
-  sfx: z.array(BumperSfxCueSchema).max(MAX_BUMPER_SFX_CUES).optional(),
+  sfxKind: LogoBumperSfxChoiceSchema.describe(
+    'Leave it out: the bumper already sounds by itself, following its logo reveal. Set it only when the user names a sound (whoosh, impact, shimmer, click) or asks for silence (none).',
+  ).optional(),
+  sfx: z
+    .array(BumperSfxCueSchema)
+    .max(MAX_BUMPER_SFX_CUES)
+    .describe('Explicit sound cues with a sound bank id; leave it out unless the user asks for an exact sound at an exact moment.')
+    .optional(),
 });
 
 export const BumperStyleSchema = z.strictObject({
