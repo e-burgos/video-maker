@@ -6022,7 +6022,7 @@
       "validated_at": null,
       "title": "El prompt aclara que pedir que los bumpers suenen no es pedir un efecto concreto: sfxKind queda afuera",
       "estimation_hours": 0.3,
-      "description": "En la verificación del studio el productor fijó sfxKind a mano cuando el usuario solo pidió que los bumpers tuvieran sonido. El prompt aclara que eso no es pedir un sonido concreto y que sfxKind se fija solo si el usuario lo nombra o pide silencio. El schema de bumpers describe sfxKind y sfx para que la herramienta patch_timeline le diga al modelo que los deje afuera.",
+      "description": "En la verificación del studio el productor fijó sfxKind a mano cuando el usuario solo pidió que los bumpers tuvieran sonido. El prompt aclara que eso no es pedir un sonido concreto y que sfxKind se fija solo si el usuario lo nombra o pide silencio. El schema de bumpers describe sfxKind y sfx para que la herramienta patch_timeline le diga al modelo que los deje afuera. patch_timeline mezcla un style parcial con el guardado para no perder la semilla ni los colores de la marca.",
       "justification": "Autorizado por la sesión orquestadora como pendiente propio de la PR; la sesión de música no toca el prompt.",
       "related_modules": [
         "production-quality"
@@ -6030,9 +6030,10 @@
       "affected_files": [
         "libs/producer-tools/src/prompt/build-producer-prompt.ts",
         "libs/timeline-core/src/schemas/timeline.schema.ts",
-        "libs/timeline-core/schemas/timeline.schema.json"
+        "libs/timeline-core/schemas/timeline.schema.json",
+        "libs/producer-tools/src/handlers/studio-tool-handlers.ts"
       ],
-      "test_reference": "nx test/lint en verde: producer-tools 449, timeline-core 469.",
+      "test_reference": "nx test/lint en verde: producer-tools 450, timeline-core 469; verificado en el studio (9ed865c) en prueba-motion-guion-limpio: bumpers sin sfxKind.",
       "status": "implemented",
       "cycle": null,
       "usage": {

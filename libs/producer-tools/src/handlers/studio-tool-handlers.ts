@@ -263,7 +263,7 @@ function bumpersKeepingStyle(
   if (patched === null) {
     return undefined;
   }
-  const style = patched.style ?? current?.style;
+  const style = patched.style === undefined ? current?.style : { ...current?.style, ...patched.style };
   return style === undefined ? patched : { ...patched, style };
 }
 

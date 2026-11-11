@@ -826,6 +826,22 @@ describe('createStudioToolHandlers', () => {
       expect((saved as Timeline).bumpers).toEqual({ intro, style: current.bumpers.style });
     });
 
+    it('merges a partial bumper style into the saved one, so the seed and the brand colors survive', async () => {
+      const current = { ...buildMinimalTimeline(), bumpers: { style: { rotate: true, seed: 4242, accentColor: '#0ea5e9' } } };
+      let saved: unknown = null;
+      const { handlers } = handlersWith({
+        getTimeline: async () => current,
+        putTimeline: async (timeline) => {
+          saved = timeline;
+        },
+      });
+      const intro = { enabled: true, durationMs: 2000, backgroundColor: '#ffffff', animation: 'zoom' as const, logoWidthRatio: 0.4 };
+
+      await handlers.patch_timeline({ bumpers: { intro, style: { rotate: true } } });
+
+      expect((saved as Timeline).bumpers?.style).toEqual({ rotate: true, seed: 4242, accentColor: '#0ea5e9' });
+    });
+
     it('replaces the music track and audioMix together and reports both as changed', async () => {
       const current = buildMinimalTimeline();
       let saved: unknown = null;
