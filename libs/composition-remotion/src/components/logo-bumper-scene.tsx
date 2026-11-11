@@ -37,7 +37,12 @@ export const LogoBumperScene: FC<LogoBumperSceneProps> = ({
       : typedCaption(look.caption, frame, enterFrames, look.caption.length * CAPTION_TYPING_FRAMES_PER_CHAR);
 
   return (
-    <AbsoluteFill data-testid="logo-bumper-scene" data-background={look.background} data-reveal={look.reveal}>
+    <AbsoluteFill
+      data-testid="logo-bumper-scene"
+      data-background={look.background}
+      data-reveal={look.reveal}
+      data-sfx={look.sfxKind ?? 'none'}
+    >
       <BumperBackground
         kind={look.background}
         colors={{ base: look.baseColor, accent: look.accentColor, secondary: look.secondaryColor }}

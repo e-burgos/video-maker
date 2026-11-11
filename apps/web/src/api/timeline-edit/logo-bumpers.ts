@@ -6,12 +6,14 @@ import {
   LOGO_BUMPER_BACKGROUNDS,
   LOGO_BUMPER_REVEALS,
   MAX_LOGO_BUMPER_CAPTION_LENGTH,
+  LOGO_BUMPER_SFX_KINDS,
 } from '@video-maker/timeline-core';
 import type {
   LogoBumper,
   LogoBumperAnimation,
   LogoBumperBackground,
   LogoBumperReveal,
+  LogoBumperSfxChoice,
   Timeline,
 } from '@video-maker/timeline-core';
 
@@ -51,6 +53,16 @@ export function styleForRevealChoice(choice: string): BumperStyle {
 
 export function styleForBackdropChoice(choice: string): BumperStyle {
   return { background: choice === AUTO_CHOICE ? undefined : (choice as LogoBumperBackground) };
+}
+
+export const BUMPER_SFX_CHOICES: readonly LogoBumperSfxChoice[] = [...LOGO_BUMPER_SFX_KINDS, 'none'];
+
+export function sfxChoiceOf(bumper: LogoBumper, rotating: boolean): string {
+  return bumper.sfxKind ?? (rotating ? AUTO_CHOICE : 'none');
+}
+
+export function styleForSfxChoice(choice: string): BumperStyle {
+  return { sfxKind: choice === AUTO_CHOICE ? undefined : (choice as LogoBumperSfxChoice) };
 }
 
 export function styleForCaption(text: string): BumperStyle {

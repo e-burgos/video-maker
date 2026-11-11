@@ -5,12 +5,15 @@ import {
   BUMPER_BACKDROPS,
   BUMPER_DURATIONS_MS,
   BUMPER_REVEALS,
+  BUMPER_SFX_CHOICES,
   MAX_BUMPER_CAPTION_LENGTH,
   backdropChoiceOf,
   revealChoiceOf,
+  sfxChoiceOf,
   styleForBackdropChoice,
   styleForCaption,
   styleForRevealChoice,
+  styleForSfxChoice,
   BUMPER_EDGES,
   BUMPER_LOGO_SIZES,
   BUMPER_LOGO_WIDTH_RATIO_BY_SIZE,
@@ -120,6 +123,23 @@ function BumperSettings({ edge, bumper, rotating, dispatch, t }: BumperSettingsP
           {BUMPER_BACKDROPS.map((backdrop) => (
             <option key={backdrop} value={backdrop}>
               {t(`bumper.backdrop.${backdrop}`)}
+            </option>
+          ))}
+        </select>
+      </label>
+
+      <label className="flex items-center gap-2 text-xs text-slate-400">
+        {t('bumper.sfx')}
+        <select
+          aria-label={t(`bumper.sfx.${edge}`)}
+          value={sfxChoiceOf(bumper, rotating)}
+          onChange={(event) => restyle(styleForSfxChoice(event.target.value))}
+          className={SELECT_CLASS}
+        >
+          {rotating && <option value={AUTO_CHOICE}>{t('bumper.auto')}</option>}
+          {BUMPER_SFX_CHOICES.map((choice) => (
+            <option key={choice} value={choice}>
+              {t(`bumper.sfx.${choice}`)}
             </option>
           ))}
         </select>

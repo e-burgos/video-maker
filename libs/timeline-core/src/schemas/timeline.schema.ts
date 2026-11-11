@@ -130,6 +130,19 @@ export const LogoBumperRevealSchema = z.enum(LOGO_BUMPER_REVEALS);
 
 export const MAX_LOGO_BUMPER_CAPTION_LENGTH = 60;
 
+export const LOGO_BUMPER_SFX_KINDS = ['whoosh', 'impact', 'shimmer', 'click'] as const;
+export const LogoBumperSfxKindSchema = z.enum(LOGO_BUMPER_SFX_KINDS);
+export const LogoBumperSfxChoiceSchema = z.enum([...LOGO_BUMPER_SFX_KINDS, 'none']);
+export const MAX_BUMPER_SFX_CUES = 6;
+
+export const BumperSfxCueSchema = z.strictObject({
+  atMs: MsSchema,
+  assetId: IdSchema,
+  gainDb: DbSchema.max(0),
+  fadeInMs: MsSchema.optional(),
+  fadeOutMs: MsSchema.optional(),
+});
+
 export const HexColorSchema = z.string().regex(/^#[0-9a-fA-F]{6}$/);
 
 export const DEFAULT_LOGO_BUMPER_DURATION_MS = 2000;
@@ -154,6 +167,8 @@ export const LogoBumperSchema = z.strictObject({
   reveal: LogoBumperRevealSchema.optional(),
   accentColor: HexColorSchema.optional(),
   caption: z.string().trim().min(1).max(MAX_LOGO_BUMPER_CAPTION_LENGTH).optional(),
+  sfxKind: LogoBumperSfxChoiceSchema.optional(),
+  sfx: z.array(BumperSfxCueSchema).max(MAX_BUMPER_SFX_CUES).optional(),
 });
 
 export const BumperStyleSchema = z.strictObject({
@@ -259,5 +274,8 @@ export type TimelineBumpers = z.infer<typeof TimelineBumpersSchema>;
 export type LogoBumperBackground = z.infer<typeof LogoBumperBackgroundSchema>;
 export type LogoBumperReveal = z.infer<typeof LogoBumperRevealSchema>;
 export type BumperStyle = z.infer<typeof BumperStyleSchema>;
+export type LogoBumperSfxKind = z.infer<typeof LogoBumperSfxKindSchema>;
+export type LogoBumperSfxChoice = z.infer<typeof LogoBumperSfxChoiceSchema>;
+export type BumperSfxCue = z.infer<typeof BumperSfxCueSchema>;
 export type TimelineTracks = z.infer<typeof TimelineTracksSchema>;
 export type Timeline = z.infer<typeof TimelineSchema>;

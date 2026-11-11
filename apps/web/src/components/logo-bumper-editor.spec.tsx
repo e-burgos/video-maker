@@ -170,4 +170,20 @@ describe('LogoBumperEditor', () => {
     fireEvent.change(screen.getByLabelText('Text under the intro logo'), { target: { value: '   ' } });
     expect(dispatch).toHaveBeenCalledWith({ type: 'bumper-style', edge: 'intro', style: { caption: undefined } });
   });
+
+  it('el sonido arranca sin sonido sin rotación, ofrece automático con rotación y la elección a mano se despacha', () => {
+    renderEditor({ bumpers: { intro: INTRO } });
+    expect((screen.getByLabelText('Intro sound') as HTMLSelectElement).value).toBe('none');
+  });
+
+  it('con rotación el sonido muestra automático y volver a automático lo borra', () => {
+    const dispatch = renderEditor({ bumpers: { intro: { ...INTRO, sfxKind: 'impact' }, style: { rotate: true } } });
+
+    expect((screen.getByLabelText('Intro sound') as HTMLSelectElement).value).toBe('impact');
+    fireEvent.change(screen.getByLabelText('Intro sound'), { target: { value: 'auto' } });
+    expect(dispatch).toHaveBeenCalledWith({ type: 'bumper-style', edge: 'intro', style: { sfxKind: undefined } });
+
+    fireEvent.change(screen.getByLabelText('Intro sound'), { target: { value: 'none' } });
+    expect(dispatch).toHaveBeenCalledWith({ type: 'bumper-style', edge: 'intro', style: { sfxKind: 'none' } });
+  });
 });

@@ -3,6 +3,7 @@ import type {
   LogoBumper,
   LogoBumperBackground,
   LogoBumperReveal,
+  LogoBumperSfxKind,
   TimelineBumpers,
 } from '../schemas/timeline.schema';
 
@@ -15,6 +16,40 @@ export interface BumperLook {
   readonly accentColor: string;
   readonly secondaryColor: string;
   readonly caption: string | null;
+  readonly sfxKind: LogoBumperSfxKind | null;
+}
+
+const SFX_BY_REVEAL: Readonly<Record<LogoBumperReveal, readonly [LogoBumperSfxKind, ...LogoBumperSfxKind[]]>> = {
+  wipe: ['whoosh', 'shimmer'],
+  'slide-up': ['whoosh', 'impact'],
+  pop: ['impact', 'whoosh'],
+  zoom: ['impact', 'shimmer'],
+  'blur-in': ['shimmer', 'whoosh'],
+  fade: ['shimmer', 'whoosh'],
+};
+
+function sfxCandidates(reveal: LogoBumperReveal, background: LogoBumperBackground): readonly [LogoBumperSfxKind, ...LogoBumperSfxKind[]] {
+  const byReveal = SFX_BY_REVEAL[reveal];
+  return background === 'glow' && byReveal[0] !== 'shimmer' ? ['shimmer', ...byReveal.filter((kind) => kind !== 'shimmer')] : byReveal;
+}
+
+function explicitSfx(bumper: LogoBumper): LogoBumperSfxKind | null | undefined {
+  return bumper.sfxKind === undefined ? undefined : bumper.sfxKind === 'none' ? null : bumper.sfxKind;
+}
+
+function rotatedSfx(
+  edge: BumperEdge,
+  choice: { background: LogoBumperBackground; reveal: LogoBumperReveal },
+  bumpers: TimelineBumpers,
+  videoKey: string,
+): LogoBumperSfxKind {
+  const [first, ...rest] = sfxCandidates(choice.reveal, choice.background);
+  if (edge === 'intro') {
+    return first;
+  }
+  const introLook = bumpers.intro === undefined ? null : resolveBumperLook(bumpers, 'intro', videoKey);
+  const avoided = introLook?.sfxKind ?? null;
+  return [first, ...rest].find((kind) => kind !== avoided) ?? first;
 }
 
 const DEFAULT_ACCENT_COLOR = '#38bdf8';
@@ -59,9 +94,13 @@ export function resolveBumperLook(bumpers: TimelineBumpers, edge: BumperEdge, vi
   if (bumper === undefined) {
     return null;
   }
-  const choice = bumpers.style?.rotate === true ? rotatedChoices(bumpers, videoKey)[edge] : fixedChoice(bumper);
+  const rotating = bumpers.style?.rotate === true;
+  const choice = rotating ? rotatedChoices(bumpers, videoKey)[edge] : fixedChoice(bumper);
+  const explicit = explicitSfx(bumper);
+  const sfxKind = explicit !== undefined ? explicit : rotating ? rotatedSfx(edge, choice, bumpers, videoKey) : null;
   return {
     ...choice,
+    sfxKind,
     baseColor: bumper.backgroundColor,
     accentColor: bumper.accentColor ?? bumpers.style?.accentColor ?? DEFAULT_ACCENT_COLOR,
     secondaryColor: bumpers.style?.secondaryColor ?? DEFAULT_SECONDARY_COLOR,
