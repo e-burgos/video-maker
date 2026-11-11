@@ -19,4 +19,4 @@ Etapa 7 de `docs/research/2026-11-10-motion-graphics-productor.md`. Ni las skill
 - **Fuera de alcance:** los bumpers de las recetas siguen fijos (`slide-up` y `zoom`). Rotarlos es la etapa 2. El formulario manual de montaje de la web sigue proponiendo semilla 0.
 
 ## Verificación
-- `nx test` y `lint` en verde para producer-tools (448), render-api (2265) y motion-graphics (326).
+- `nx test` y `lint` en verde para producer-tools (448), render-api (2260) y motion-graphics (318).

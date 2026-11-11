@@ -4242,7 +4242,7 @@
         "libs/motion-graphics/src/compose/compose-storyboard.ts",
         "libs/motion-graphics/assets/runtime/motion-runtime.js"
       ],
-      "test_reference": "nx test/lint/build en verde: timeline-core 452, auto-montage 375, composition-remotion 366, motion-graphics 326.",
+      "test_reference": "nx test/lint/build en verde: timeline-core 452, auto-montage 375, composition-remotion 366, motion-graphics 318.",
       "status": "implemented",
       "cycle": null,
       "process_note": "lightLeak() de Remotion no está instalado; se implementó en CSS para no sumar dependencias en la etapa 0.",
@@ -4300,7 +4300,7 @@
         "libs/composition-remotion/src/components/aroll-series.tsx",
         "libs/producer-tools/src/prompt/build-producer-prompt.ts"
       ],
-      "test_reference": "nx test/lint/build en verde: timeline-core 452, auto-montage 375, composition-remotion 368, motion-graphics 326, producer-tools 448, render-api 2265, web 1646 (settings-page.spec falla solo bajo carga y pasa aislado; no toca transiciones).",
+      "test_reference": "nx test/lint/build en verde: timeline-core 452, auto-montage 375, composition-remotion 368, motion-graphics 318, producer-tools 448, render-api 2260, web 1646 (settings-page.spec falla solo bajo carga y pasa aislado; no toca transiciones).",
       "status": "implemented",
       "cycle": null,
       "process_note": "El paquete instalado trae además book-flip, dissolve, ripple y otras; las que dependen de HTML-in-Canvas tiran error sin el flag de Chrome, así que no se habilitan.",
@@ -4351,7 +4351,7 @@
         "sdd/skills/motion-studio/SKILL.md",
         "sdd/skills/video-producer/SKILL.md"
       ],
-      "test_reference": "nx test/lint en verde: producer-tools 448, render-api 2265, motion-graphics 326.",
+      "test_reference": "nx test/lint en verde: producer-tools 448, render-api 2260, motion-graphics 318.",
       "status": "implemented",
       "cycle": null,
       "process_note": "El productor no ve el video anterior de la lista (sus tools son por proyecto), por eso la variedad entre videos se garantiza en código (semilla por slug, salidas por marca + título) y no solo en el prompt.",
