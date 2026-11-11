@@ -3,8 +3,17 @@ import {
   DEFAULT_LOGO_BUMPER_DURATION_MS,
   DEFAULT_LOGO_BUMPER_WIDTH_RATIO,
   LOGO_BUMPER_ANIMATIONS,
+  LOGO_BUMPER_BACKGROUNDS,
+  LOGO_BUMPER_REVEALS,
+  MAX_LOGO_BUMPER_CAPTION_LENGTH,
 } from '@video-maker/timeline-core';
-import type { LogoBumper, LogoBumperAnimation, Timeline } from '@video-maker/timeline-core';
+import type {
+  LogoBumper,
+  LogoBumperAnimation,
+  LogoBumperBackground,
+  LogoBumperReveal,
+  Timeline,
+} from '@video-maker/timeline-core';
 
 export const BUMPER_EDGES = ['intro', 'outro'] as const;
 
@@ -13,6 +22,43 @@ export type BumperEdge = (typeof BUMPER_EDGES)[number];
 export type BumperStyle = Partial<Omit<LogoBumper, 'enabled'>>;
 
 export const BUMPER_ANIMATIONS: readonly LogoBumperAnimation[] = LOGO_BUMPER_ANIMATIONS;
+
+export const BUMPER_REVEALS: readonly LogoBumperReveal[] = LOGO_BUMPER_REVEALS;
+
+export const BUMPER_BACKDROPS: readonly LogoBumperBackground[] = LOGO_BUMPER_BACKGROUNDS;
+
+export const AUTO_CHOICE = 'auto';
+
+function isLegacyAnimation(value: string): value is LogoBumperAnimation {
+  return (LOGO_BUMPER_ANIMATIONS as readonly string[]).includes(value);
+}
+
+export function revealChoiceOf(bumper: LogoBumper, rotating: boolean): string {
+  return bumper.reveal ?? (rotating ? AUTO_CHOICE : bumper.animation);
+}
+
+export function backdropChoiceOf(bumper: LogoBumper, rotating: boolean): string {
+  return bumper.background ?? (rotating ? AUTO_CHOICE : 'solid');
+}
+
+export function styleForRevealChoice(choice: string): BumperStyle {
+  if (choice === AUTO_CHOICE) {
+    return { reveal: undefined };
+  }
+  const reveal = choice as LogoBumperReveal;
+  return isLegacyAnimation(reveal) ? { reveal, animation: reveal } : { reveal };
+}
+
+export function styleForBackdropChoice(choice: string): BumperStyle {
+  return { background: choice === AUTO_CHOICE ? undefined : (choice as LogoBumperBackground) };
+}
+
+export function styleForCaption(text: string): BumperStyle {
+  const caption = text.trim();
+  return { caption: caption === '' ? undefined : text.slice(0, MAX_BUMPER_CAPTION_LENGTH) };
+}
+
+export const MAX_BUMPER_CAPTION_LENGTH = MAX_LOGO_BUMPER_CAPTION_LENGTH;
 
 export const BUMPER_DURATIONS_MS = [1500, 2000, 3000, 4000] as const;
 

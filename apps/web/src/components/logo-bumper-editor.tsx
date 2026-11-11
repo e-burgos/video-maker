@@ -1,8 +1,16 @@
-import type { LogoBumper, LogoBumperAnimation, TimelineBumpers } from '@video-maker/timeline-core';
+import type { LogoBumper, TimelineBumpers } from '@video-maker/timeline-core';
 
 import {
-  BUMPER_ANIMATIONS,
+  AUTO_CHOICE,
+  BUMPER_BACKDROPS,
   BUMPER_DURATIONS_MS,
+  BUMPER_REVEALS,
+  MAX_BUMPER_CAPTION_LENGTH,
+  backdropChoiceOf,
+  revealChoiceOf,
+  styleForBackdropChoice,
+  styleForCaption,
+  styleForRevealChoice,
   BUMPER_EDGES,
   BUMPER_LOGO_SIZES,
   BUMPER_LOGO_WIDTH_RATIO_BY_SIZE,
@@ -23,6 +31,7 @@ export type LogoBumperEditorProps = {
 type BumperSettingsProps = {
   edge: BumperEdge;
   bumper: LogoBumper;
+  rotating: boolean;
   dispatch: (action: TimelineEditAction) => void;
   t: TranslateFn;
 };
@@ -31,7 +40,9 @@ function durationLabel(durationMs: number, t: TranslateFn): string {
   return t('bumper.durationOption', { seconds: (durationMs / 1000).toFixed(1) });
 }
 
-function BumperSettings({ edge, bumper, dispatch, t }: BumperSettingsProps) {
+const SELECT_CLASS = 'rounded-md border border-slate-700 bg-slate-900 px-2 py-1 font-mono text-xs text-slate-200';
+
+function BumperSettings({ edge, bumper, rotating, dispatch, t }: BumperSettingsProps) {
   function restyle(style: BumperStyle) {
     dispatch({ type: 'bumper-style', edge, style });
   }
@@ -84,16 +95,47 @@ function BumperSettings({ edge, bumper, dispatch, t }: BumperSettingsProps) {
         {t('bumper.animation')}
         <select
           aria-label={t(`bumper.animation.${edge}`)}
-          value={bumper.animation}
-          onChange={(event) => restyle({ animation: event.target.value as LogoBumperAnimation })}
-          className="rounded-md border border-slate-700 bg-slate-900 px-2 py-1 font-mono text-xs text-slate-200"
+          value={revealChoiceOf(bumper, rotating)}
+          onChange={(event) => restyle(styleForRevealChoice(event.target.value))}
+          className={SELECT_CLASS}
         >
-          {BUMPER_ANIMATIONS.map((animation) => (
-            <option key={animation} value={animation}>
-              {t(`bumper.animation.${animation}`)}
+          {rotating && <option value={AUTO_CHOICE}>{t('bumper.auto')}</option>}
+          {BUMPER_REVEALS.map((reveal) => (
+            <option key={reveal} value={reveal}>
+              {t(`bumper.animation.${reveal}`)}
             </option>
           ))}
         </select>
+      </label>
+
+      <label className="flex items-center gap-2 text-xs text-slate-400">
+        {t('bumper.backdrop')}
+        <select
+          aria-label={t(`bumper.backdrop.${edge}`)}
+          value={backdropChoiceOf(bumper, rotating)}
+          onChange={(event) => restyle(styleForBackdropChoice(event.target.value))}
+          className={SELECT_CLASS}
+        >
+          {rotating && <option value={AUTO_CHOICE}>{t('bumper.auto')}</option>}
+          {BUMPER_BACKDROPS.map((backdrop) => (
+            <option key={backdrop} value={backdrop}>
+              {t(`bumper.backdrop.${backdrop}`)}
+            </option>
+          ))}
+        </select>
+      </label>
+
+      <label className="flex items-center gap-2 text-xs text-slate-400">
+        {t('bumper.caption')}
+        <input
+          type="text"
+          aria-label={t(`bumper.caption.${edge}`)}
+          value={bumper.caption ?? ''}
+          maxLength={MAX_BUMPER_CAPTION_LENGTH}
+          placeholder={t('bumper.captionPlaceholder')}
+          onChange={(event) => restyle(styleForCaption(event.target.value))}
+          className="w-44 rounded-md border border-slate-700 bg-slate-900 px-2 py-1 text-xs text-slate-200"
+        />
       </label>
 
       <label className="flex items-center gap-2 text-xs text-slate-400">
@@ -145,7 +187,13 @@ export function LogoBumperEditor({ bumpers, logoAvailable, dispatch }: LogoBumpe
             </label>
 
             {enabled && bumper !== undefined && (
-              <BumperSettings edge={edge} bumper={bumper} dispatch={dispatch} t={t} />
+              <BumperSettings
+                edge={edge}
+                bumper={bumper}
+                rotating={bumpers?.style?.rotate === true}
+                dispatch={dispatch}
+                t={t}
+              />
             )}
           </div>
         );

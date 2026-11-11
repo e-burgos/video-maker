@@ -1,4 +1,5 @@
 import type {
+  BumperStyle,
   CaptionStyle,
   CaptionTheme,
   EditDecisionList,
@@ -73,6 +74,7 @@ export interface VoiceTrackSummary {
 export interface MontageBrand {
   readonly id: string;
   readonly captionTheme: CaptionTheme;
+  readonly bumperStyle?: Omit<BumperStyle, 'rotate' | 'seed'>;
 }
 
 export interface AutoMontageOptions {
@@ -181,6 +183,10 @@ function alignScript(
   return voiceScriptTrack !== null && scriptLines.length === voiceScriptTrack.lineWindows.length
     ? alignTranscriptToScriptLines(words, scriptLines, voiceScriptTrack.lineWindows)
     : alignTranscriptToScript(words, spokenScript);
+}
+
+function rotatingBumperStyle(seed: number, brand: MontageBrand | undefined): BumperStyle {
+  return { rotate: true, seed, ...(brand?.bumperStyle ?? {}) };
 }
 
 const SCRIPT_LINE_TRANSITION_EVERY = 2;
@@ -333,9 +339,11 @@ export async function autoMontage(
       : { assetId: voiceScriptTrack.asset.id, durationMs: voiceScriptTrack.asset.durationMs },
     captionStyle,
   );
+  const brandedTimeline =
+    options.brand === undefined ? builtTimeline : { ...builtTimeline, captionTheme: options.brand.captionTheme };
   const timeline = assertValidTimeline(
     preserveBrandDecisions(
-      options.brand === undefined ? builtTimeline : { ...builtTimeline, captionTheme: options.brand.captionTheme },
+      { ...brandedTimeline, bumpers: { style: rotatingBumperStyle(options.seed, options.brand) } },
       previousTimeline,
     ),
   );

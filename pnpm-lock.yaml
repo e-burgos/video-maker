@@ -20,10 +20,16 @@ importers:
       '@remotion/cli':
         specifier: 4.0.522
         version: 4.0.522(@swc/core@1.15.47(@swc/helpers@0.5.23))(@swc/helpers@0.5.23)(postcss@8.5.28)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)(typescript@6.0.3)
+      '@remotion/noise':
+        specifier: 4.0.522
+        version: 4.0.522(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
       '@remotion/player':
         specifier: 4.0.522
         version: 4.0.522(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
       '@remotion/renderer':
+        specifier: 4.0.522
+        version: 4.0.522(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
+      '@remotion/shapes':
         specifier: 4.0.522
         version: 4.0.522(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
       '@remotion/transitions':
@@ -1931,6 +1937,9 @@ packages:
     peerDependencies:
       react: '>=16.8.0'
       react-dom: '>=16.8.0'
+
+  '@remotion/noise@4.0.522':
+    resolution: {integrity: sha512-zsNnNL4YcOvFpPVbrbAj3DjQQE3Z/B4G2Yoxzl/1XTbsIjks5qhrGTTp9rhAFbXZvfW9cF9voHl5YvGp82U+LQ==}
 
   '@remotion/paths@4.0.522':
     resolution: {integrity: sha512-G8Nsc5QvKP8rlHF7duxPQB2RbJBIa4Pi0vzhNic9HrSrWZ1y335zZWe66WgSYCHY8CJTGfvs8zmmM6AvRaRW8g==}
@@ -5564,6 +5573,9 @@ packages:
     resolution: {integrity: sha512-a2B9Y0KlNXl9u/vsW6sTIu9vGEpfKu2wRV6l1H3XEas/0gUIzGzBoP/IouTcUQbm9JWZLH3COxyn03TYlFax6w==}
     engines: {node: '>=10'}
 
+  simplex-noise@4.0.1:
+    resolution: {integrity: sha512-zl/+bdSqW7HJOQ0oDbxrNYaF4F5ik0i7M6YOYmEoIJNtg16NpvWaTTM1Y7oV/7T0jFljawLgYPS81Uu2rsfo1A==}
+
   sirv@3.0.2:
     resolution: {integrity: sha512-2wcC/oGxHis/BoHkkPwldgiPSYcpZK3JU28WoMVv55yHJgcZ8rlXvuG9iZggz+sU1d4bRgIGASwyWqjxu3FM0g==}
     engines: {node: '>=18'}
@@ -8252,6 +8264,14 @@ snapshots:
       react-dom: 19.2.8(react@19.2.8)
       remotion: 4.0.522(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
       zod: 4.5.4
+
+  '@remotion/noise@4.0.522(react-dom@19.2.8(react@19.2.8))(react@19.2.8)':
+    dependencies:
+      remotion: 4.0.522(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
+      simplex-noise: 4.0.1
+    transitivePeerDependencies:
+      - react
+      - react-dom
 
   '@remotion/paths@4.0.522': {}
 
@@ -12221,6 +12241,8 @@ snapshots:
   simple-update-notifier@2.0.0:
     dependencies:
       semver: 7.8.5
+
+  simplex-noise@4.0.1: {}
 
   sirv@3.0.2:
     dependencies:

@@ -578,6 +578,36 @@
             "logoAssetId": {
               "type": "string",
               "minLength": 1
+            },
+            "background": {
+              "type": "string",
+              "enum": [
+                "solid",
+                "gradient",
+                "noise",
+                "shapes",
+                "glow"
+              ]
+            },
+            "reveal": {
+              "type": "string",
+              "enum": [
+                "fade",
+                "zoom",
+                "slide-up",
+                "wipe",
+                "blur-in",
+                "pop"
+              ]
+            },
+            "accentColor": {
+              "type": "string",
+              "pattern": "^#[0-9a-fA-F]{6}$"
+            },
+            "caption": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 60
             }
           },
           "required": [
@@ -625,6 +655,36 @@
             "logoAssetId": {
               "type": "string",
               "minLength": 1
+            },
+            "background": {
+              "type": "string",
+              "enum": [
+                "solid",
+                "gradient",
+                "noise",
+                "shapes",
+                "glow"
+              ]
+            },
+            "reveal": {
+              "type": "string",
+              "enum": [
+                "fade",
+                "zoom",
+                "slide-up",
+                "wipe",
+                "blur-in",
+                "pop"
+              ]
+            },
+            "accentColor": {
+              "type": "string",
+              "pattern": "^#[0-9a-fA-F]{6}$"
+            },
+            "caption": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 60
             }
           },
           "required": [
@@ -633,6 +693,65 @@
             "backgroundColor",
             "animation",
             "logoWidthRatio"
+          ],
+          "additionalProperties": false
+        },
+        "style": {
+          "type": "object",
+          "properties": {
+            "rotate": {
+              "type": "boolean"
+            },
+            "seed": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 9007199254740991
+            },
+            "backgrounds": {
+              "minItems": 1,
+              "type": "array",
+              "items": {
+                "type": "string",
+                "enum": [
+                  "solid",
+                  "gradient",
+                  "noise",
+                  "shapes",
+                  "glow"
+                ]
+              }
+            },
+            "reveals": {
+              "minItems": 1,
+              "type": "array",
+              "items": {
+                "type": "string",
+                "enum": [
+                  "fade",
+                  "zoom",
+                  "slide-up",
+                  "wipe",
+                  "blur-in",
+                  "pop"
+                ]
+              }
+            },
+            "accentColor": {
+              "type": "string",
+              "pattern": "^#[0-9a-fA-F]{6}$"
+            },
+            "secondaryColor": {
+              "type": "string",
+              "pattern": "^#[0-9a-fA-F]{6}$"
+            },
+            "outroCaption": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 60
+            }
+          },
+          "required": [
+            "rotate"
           ],
           "additionalProperties": false
         }

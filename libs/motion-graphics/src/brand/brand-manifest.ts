@@ -2,6 +2,8 @@ import { z } from 'zod';
 
 import { MotionStudioError } from '../errors/motion-studio-error';
 import { formatIssuePath } from '../storyboard/parse-motion-storyboard';
+import { LOGO_BUMPER_BACKGROUNDS, LOGO_BUMPER_REVEALS } from '@video-maker/timeline-core';
+
 import { BrandTrackSchema } from './brand-music';
 
 const Text = z.string().trim().min(1);
@@ -9,6 +11,11 @@ const HexColor = z.string().regex(/^#[0-9a-fA-F]{6}$/u);
 const Point = z.tuple([z.number().min(0).max(100), z.number().min(0).max(100)]);
 
 const BrandPaletteSchema = z.strictObject({ background: HexColor, accent: HexColor, accent2: HexColor, text: HexColor });
+export const BrandBumpersSchema = z.strictObject({
+  backgrounds: z.array(z.enum(LOGO_BUMPER_BACKGROUNDS)).min(1).describe('Animated backgrounds the intro and outro rotate between').optional(),
+  reveals: z.array(z.enum(LOGO_BUMPER_REVEALS)).min(1).describe('Logo reveals the intro and outro rotate between').optional(),
+  outroCaption: Text.max(60).describe('Text typed under the outro logo; defaults to the brand url').optional(),
+});
 const BrandTypographySchema = z.strictObject({ display: Text, body: Text, mono: Text.optional() });
 export const BRAND_TOKEN_NAME = /^--mg-[a-z0-9-]+$/u;
 
@@ -40,6 +47,7 @@ const BrandManifestShape = z.strictObject({
   ),
   images: z.record(z.string(), z.union([Text, z.strictObject({ file: Text, caption: Text })])),
   music: z.array(BrandTrackSchema),
+  bumpers: BrandBumpersSchema.optional(),
   musicFrom: z.string().regex(/^[a-z][a-z0-9-]*$/u).describe('Brand whose music bank this brand also uses').optional(),
   voice: z.strictObject({ id: Text, lengthScale: z.number().min(0.7).max(1.4) }),
 });

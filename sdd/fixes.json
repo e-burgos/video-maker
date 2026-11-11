@@ -4879,6 +4879,68 @@
           }
         ]
       }
+    },
+    {
+      "id": "FIX-e-burgos-050",
+      "author": "e-burgos",
+      "spec_id": null,
+      "fix_document": "sdd/fixes/fix-e-burgos-050.md",
+      "type": "IMPROVEMENT",
+      "severity": "medium",
+      "created_at": "2026-11-11",
+      "resolved_at": "2026-11-11",
+      "validated_at": null,
+      "title": "Motion graphics etapa 2: bumpers por piezas (fondo animado, revelado y remate) que rotan por video",
+      "estimation_hours": 12,
+      "description": "Los bumpers del modo A eran una placa lisa con zoom. Se suman fondos animados (gradient, noise, shapes, glow), revelados (wipe, blur-in, pop y los de siempre) y un remate tipeado; bumpers.style rota por semilla del video con intro y outro distintos, toma pools y colores de la marca y el editor web los expone. Nuevas deps @remotion/noise y @remotion/shapes 4.0.522.",
+      "justification": "Etapa 2 aprobada por el dev vía la sesión orquestadora; campos opcionales y sin style.rotate el comportamiento no cambia.",
+      "related_modules": [
+        "production-quality"
+      ],
+      "affected_files": [
+        "libs/timeline-core/src/schemas/timeline.schema.ts",
+        "libs/timeline-core/src/timeline/resolve-bumper-look.ts",
+        "libs/composition-remotion/src/components/logo-bumper-scene.tsx",
+        "libs/composition-remotion/src/components/bumper-background.tsx",
+        "libs/composition-remotion/src/helpers/logo-bumper-style.ts",
+        "libs/composition-remotion/src/helpers/bumper-background-style.ts",
+        "libs/composition-remotion/src/components/timeline-composition.tsx",
+        "libs/auto-montage/src/auto-montage.ts",
+        "libs/motion-graphics/src/brand/brand-manifest.ts",
+        "libs/motion-graphics/assets/brands/displayads/brand.json",
+        "libs/producer-tools/src/handlers/studio-tool-handlers.ts",
+        "apps/web/src/components/logo-bumper-editor.tsx",
+        "apps/web/src/api/timeline-edit/logo-bumpers.ts",
+        "package.json",
+        "pnpm-lock.yaml",
+        "apps/desktop/scripts/build-desktop.mjs",
+        "apps/render-api/project.json"
+      ],
+      "test_reference": "nx test/lint/build en verde: timeline-core 461, auto-montage 381, composition-remotion 379, motion-graphics 331, producer-tools 449, render-api 2267, web 1651; renders de bumpers con semillas 101, 202 y 316 sin destellos.",
+      "status": "implemented",
+      "cycle": null,
+      "process_note": "Falta pasar paleta y url de la marca desde render-api (espera OK de la sesión de música) y actualizar las recetas del prompt compartido.",
+      "usage": {
+        "provider_model": "claude/opus",
+        "effort": "medium",
+        "tokens_in": 900000,
+        "tokens_out": 60000,
+        "approx": true,
+        "source": "declared-estimate",
+        "recorded_at": "2026-11-11",
+        "by_agent": [
+          {
+            "agent": "orchestrator",
+            "provider_model": "claude/opus",
+            "effort": "medium",
+            "tokens_in": 900000,
+            "tokens_out": 60000,
+            "approx": true,
+            "source": "declared-estimate",
+            "recorded_at": "2026-11-11"
+          }
+        ]
+      }
     }
   ]
 }

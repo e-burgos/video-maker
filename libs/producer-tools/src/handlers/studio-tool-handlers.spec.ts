@@ -810,6 +810,22 @@ describe('createStudioToolHandlers', () => {
       expect((saved as Timeline).tracks.captions).toEqual(current.tracks.captions);
     });
 
+    it('keeps the rotating bumper style when the patch only brings intro and outro', async () => {
+      const current = { ...buildMinimalTimeline(), bumpers: { style: { rotate: true, seed: 12, accentColor: '#0ea5e9' } } };
+      let saved: unknown = null;
+      const { handlers } = handlersWith({
+        getTimeline: async () => current,
+        putTimeline: async (timeline) => {
+          saved = timeline;
+        },
+      });
+      const intro = { enabled: true, durationMs: 2000, backgroundColor: '#ffffff', animation: 'zoom' as const, logoWidthRatio: 0.4 };
+
+      await handlers.patch_timeline({ bumpers: { intro } });
+
+      expect((saved as Timeline).bumpers).toEqual({ intro, style: current.bumpers.style });
+    });
+
     it('replaces the music track and audioMix together and reports both as changed', async () => {
       const current = buildMinimalTimeline();
       let saved: unknown = null;

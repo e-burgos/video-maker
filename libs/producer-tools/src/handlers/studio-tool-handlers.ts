@@ -1,7 +1,7 @@
 import { z } from 'zod';
 
 import { TimelineSchema, canonicalMaterialPath } from '@video-maker/timeline-core';
-import type { MaterialReview, SceneVisualReview, Timeline } from '@video-maker/timeline-core';
+import type { MaterialReview, SceneVisualReview, Timeline, TimelineBumpers } from '@video-maker/timeline-core';
 import type { RenderApiQueuePublicationRequest, RenderApiRenderReview } from '../client/render-api-client';
 
 import { PATCH_TIMELINE_SECTIONS, STUDIO_TOOLS } from '../contract/tool-schemas';
@@ -256,6 +256,17 @@ async function stampMeasuredBoxes(client: RenderApiClient, brief: BriefRecord, n
   return { ...brief, images };
 }
 
+function bumpersKeepingStyle(
+  patched: TimelineBumpers | null,
+  current: TimelineBumpers | undefined,
+): TimelineBumpers | undefined {
+  if (patched === null) {
+    return undefined;
+  }
+  const style = patched.style ?? current?.style;
+  return style === undefined ? patched : { ...patched, style };
+}
+
 export function createStudioToolHandlers(
   options: StudioToolHandlersOptions,
 ): Readonly<Record<StudioToolName, StudioToolHandler>> {
@@ -448,7 +459,7 @@ export function createStudioToolHandlers(
       const patched: Timeline = {
         ...current,
         ...(input.logo !== undefined ? { logo: input.logo ?? undefined } : {}),
-        ...(input.bumpers !== undefined ? { bumpers: input.bumpers ?? undefined } : {}),
+        ...(input.bumpers !== undefined ? { bumpers: bumpersKeepingStyle(input.bumpers, current.bumpers) } : {}),
         ...(input.audioMix !== undefined ? { audioMix: input.audioMix } : {}),
         ...(input.captionStyle !== undefined ? { captionStyle: input.captionStyle ?? undefined } : {}),
         ...(input.safeZone !== undefined ? { safeZone: input.safeZone ?? undefined } : {}),

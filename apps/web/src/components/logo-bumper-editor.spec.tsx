@@ -13,7 +13,7 @@ const INTRO: LogoBumper = {
 };
 
 function renderEditor(options: {
-  bumpers?: { intro?: LogoBumper; outro?: LogoBumper };
+  bumpers?: { intro?: LogoBumper; outro?: LogoBumper; style?: { rotate: boolean } };
   logoAvailable?: boolean;
 }) {
   const dispatch = vi.fn();
@@ -121,7 +121,7 @@ describe('LogoBumperEditor', () => {
     });
   });
 
-  it('la animación ofrece las tres y el tamaño del logo mapea a su ratio', () => {
+  it('la animación ofrece los revelados y el tamaño del logo mapea a su ratio', () => {
     const dispatch = renderEditor({ bumpers: { outro: { ...INTRO, logoWidthRatio: 0.55 } } });
 
     expect((screen.getByLabelText('Outro logo size') as HTMLSelectElement).value).toBe('large');
@@ -130,7 +130,7 @@ describe('LogoBumperEditor', () => {
     expect(dispatch).toHaveBeenCalledWith({
       type: 'bumper-style',
       edge: 'outro',
-      style: { animation: 'slide-up' },
+      style: { reveal: 'slide-up', animation: 'slide-up' },
     });
 
     fireEvent.change(screen.getByLabelText('Outro logo size'), { target: { value: 'small' } });
@@ -139,5 +139,35 @@ describe('LogoBumperEditor', () => {
       edge: 'outro',
       style: { logoWidthRatio: 0.3 },
     });
+  });
+
+  it('sin rotación no ofrece automático: el fondo arranca liso y el revelado es el de animation', () => {
+    renderEditor({ bumpers: { intro: INTRO } });
+
+    expect((screen.getByLabelText('Intro animated background') as HTMLSelectElement).value).toBe('solid');
+    expect(screen.queryAllByRole('option', { name: 'automatic (changes per video)' })).toHaveLength(0);
+  });
+
+  it('con rotación muestra automático y elegir un fondo o volver a automático despacha el estilo', () => {
+    const dispatch = renderEditor({ bumpers: { intro: INTRO, style: { rotate: true } } });
+
+    expect((screen.getByLabelText('Intro animated background') as HTMLSelectElement).value).toBe('auto');
+    expect((screen.getByLabelText('Intro animation') as HTMLSelectElement).value).toBe('auto');
+
+    fireEvent.change(screen.getByLabelText('Intro animated background'), { target: { value: 'noise' } });
+    expect(dispatch).toHaveBeenCalledWith({ type: 'bumper-style', edge: 'intro', style: { background: 'noise' } });
+
+    fireEvent.change(screen.getByLabelText('Intro animation'), { target: { value: 'pop' } });
+    expect(dispatch).toHaveBeenCalledWith({ type: 'bumper-style', edge: 'intro', style: { reveal: 'pop' } });
+  });
+
+  it('el texto debajo del logo se despacha y vacío se borra', () => {
+    const dispatch = renderEditor({ bumpers: { intro: { ...INTRO, caption: 'acme.test' } } });
+
+    fireEvent.change(screen.getByLabelText('Text under the intro logo'), { target: { value: 'otra.web' } });
+    expect(dispatch).toHaveBeenCalledWith({ type: 'bumper-style', edge: 'intro', style: { caption: 'otra.web' } });
+
+    fireEvent.change(screen.getByLabelText('Text under the intro logo'), { target: { value: '   ' } });
+    expect(dispatch).toHaveBeenCalledWith({ type: 'bumper-style', edge: 'intro', style: { caption: undefined } });
   });
 });

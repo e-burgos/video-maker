@@ -2,7 +2,7 @@ import { Children, isValidElement } from 'react';
 import type { ReactElement } from 'react';
 import { describe, expect, it } from 'vitest';
 import { Sequence } from 'remotion';
-import type { LogoBumper, Timeline } from '@video-maker/timeline-core';
+import type { BumperLook, LogoBumper, Timeline } from '@video-maker/timeline-core';
 import { LogoBumperScene } from './logo-bumper-scene';
 import { buildExampleTimeline } from '../__fixtures__/example-timeline';
 import { AudioTrack } from './audio-track';
@@ -293,16 +293,18 @@ describe('TimelineComposition — bumpers de logo (FIX-e-burgos-001-003)', () =>
     expect(sequencesOf(withBumpers({ intro: { ...BUMPER, enabled: false } }))).toHaveLength(0);
   });
 
-  it('la placa recibe el bumper, el formato y el src del logo de la Timeline', () => {
+  it('la placa recibe el look resuelto del bumper, el formato y el src del logo de la Timeline', () => {
     const intro = sequencesOf(withBumpers({ intro: BUMPER }))[0];
     const scene = childOf(intro) as ReactElement<{
-      bumper: LogoBumper;
+      look: BumperLook;
+      logoWidthRatio: number;
       logoSrc: string | null;
       durationInFrames: number;
     }>;
 
     expect(scene.type).toBe(LogoBumperScene);
-    expect(scene.props.bumper).toEqual(BUMPER);
+    expect(scene.props.look).toMatchObject({ background: 'solid', reveal: BUMPER.animation, baseColor: BUMPER.backgroundColor });
+    expect(scene.props.logoWidthRatio).toBe(BUMPER.logoWidthRatio);
     expect(scene.props.durationInFrames).toBe(INTRO_FRAMES);
     expect(scene.props.logoSrc).toBe('/example/broll.jpg');
   });

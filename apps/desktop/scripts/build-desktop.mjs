@@ -19,6 +19,8 @@ const RENDER_API_RUNTIME_DEPS = {
   '@remotion/player': '4.0.522',
   '@remotion/renderer': '4.0.522',
   '@remotion/transitions': '4.0.522',
+  '@remotion/noise': '4.0.522',
+  '@remotion/shapes': '4.0.522',
   remotion: '4.0.522',
   hyperframes: '0.8.139',
 };

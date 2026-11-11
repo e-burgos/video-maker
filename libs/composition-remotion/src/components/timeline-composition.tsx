@@ -2,7 +2,7 @@ import type { FC } from 'react';
 import type { CalculateMetadataFunction } from 'remotion';
 import { AbsoluteFill, Sequence } from 'remotion';
 import type { Timeline } from '@video-maker/timeline-core';
-import { introBumperFrames, outroBumperFrames, safeZoneFor } from '@video-maker/timeline-core';
+import { introBumperFrames, outroBumperFrames, resolveBumperLook, safeZoneFor } from '@video-maker/timeline-core';
 import { captionPresetIdForStyle } from '../helpers/caption-style-preset';
 import type { CaptionAnchor } from '../helpers/caption-box';
 import type { CaptionPresetId } from '../helpers/caption-preset';
@@ -92,29 +92,35 @@ export const TimelineComposition: FC<TimelineCompositionProps> = ({
 
   const intro = timeline.bumpers?.intro;
   const outro = timeline.bumpers?.outro;
+  const introLook = timeline.bumpers === undefined ? null : resolveBumperLook(timeline.bumpers, 'intro', timeline.id);
+  const outroLook = timeline.bumpers === undefined ? null : resolveBumperLook(timeline.bumpers, 'outro', timeline.id);
 
   return (
     <AbsoluteFill>
-      {introFrames === 0 || intro === undefined ? null : (
+      {introFrames === 0 || intro === undefined || introLook === null ? null : (
         <Sequence from={0} durationInFrames={introFrames}>
           <LogoBumperScene
-            bumper={intro}
+            look={introLook}
+            logoWidthRatio={intro.logoWidthRatio}
             format={timeline.format}
             durationInFrames={introFrames}
             logoSrc={plan.bumperLogoSrc.intro}
+            noiseSeed={`${timeline.id}:intro`}
           />
         </Sequence>
       )}
       <Sequence from={introFrames} durationInFrames={timeline.durationFrames}>
         {content}
       </Sequence>
-      {outroFrames === 0 || outro === undefined ? null : (
+      {outroFrames === 0 || outro === undefined || outroLook === null ? null : (
         <Sequence from={introFrames + timeline.durationFrames} durationInFrames={outroFrames}>
           <LogoBumperScene
-            bumper={outro}
+            look={outroLook}
+            logoWidthRatio={outro.logoWidthRatio}
             format={timeline.format}
             durationInFrames={outroFrames}
             logoSrc={plan.bumperLogoSrc.outro}
+            noiseSeed={`${timeline.id}:outro`}
           />
         </Sequence>
       )}

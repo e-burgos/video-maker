@@ -54,9 +54,15 @@ export {
   DEFAULT_LOGO_BUMPER_DURATION_MS,
   DEFAULT_LOGO_BUMPER_WIDTH_RATIO,
   HexColorSchema,
+  BumperStyleSchema,
   LOGO_BUMPER_ANIMATIONS,
+  LOGO_BUMPER_BACKGROUNDS,
+  LOGO_BUMPER_REVEALS,
   LogoBumperAnimationSchema,
+  LogoBumperBackgroundSchema,
+  LogoBumperRevealSchema,
   LogoBumperSchema,
+  MAX_LOGO_BUMPER_CAPTION_LENGTH,
   DELIVERY_KINDS,
   DeliveryContractSchema,
   LogoOverlaySchema,
@@ -74,8 +80,11 @@ export type {
   CaptionTheme,
   DeliveryContract,
   DeliveryKind,
+  BumperStyle,
   LogoBumper,
   LogoBumperAnimation,
+  LogoBumperBackground,
+  LogoBumperReveal,
   LogoOverlay,
   LogoPosition,
   Timeline,
@@ -390,3 +399,5 @@ export {
   pickFromPool,
 } from './random/seeded-random';
 export type { RandomGenerator } from './random/seeded-random';
+export { resolveBumperLook } from './timeline/resolve-bumper-look';
+export type { BumperEdge, BumperLook } from './timeline/resolve-bumper-look';

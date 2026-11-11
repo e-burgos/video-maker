@@ -481,6 +481,18 @@ describe('autoMontage — niveles del preset y logo (spec-014)', () => {
     expect(result.timeline.audioMix.music.duckedGainDb).toBe(-18);
   });
 
+  it('un montaje nuevo deja los bumpers listos para rotar con la semilla del video y los colores de la marca', async () => {
+    const plain = await run(buildFixtureFileSystem(), { preset: 'software-demo', seed: 4821 });
+    const branded = await run(buildFixtureFileSystem(), {
+      preset: 'software-demo',
+      seed: 7,
+      brand: { id: 'acme', captionTheme: plain.timeline.captionTheme as never, bumperStyle: { accentColor: '#ff0000', outroCaption: 'acme.test' } },
+    });
+
+    expect(plain.timeline.bumpers).toEqual({ style: { rotate: true, seed: 4821 } });
+    expect(branded.timeline.bumpers?.style).toEqual({ rotate: true, seed: 7, accentColor: '#ff0000', outroCaption: 'acme.test' });
+  });
+
   it('un re-montaje conserva el logo y los bumpers que el usuario editó (FIX-e-burgos-001-003)', async () => {
     const fileSystem = buildFixtureFileSystem([catalogAsset('logo', logoAsset)]);
     const first = await run(fileSystem, { preset: 'hardware', seed: 0 });

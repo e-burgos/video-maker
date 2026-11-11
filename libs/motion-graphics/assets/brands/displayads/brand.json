@@ -346,5 +346,20 @@
   "voice": {
     "id": "elevenlabs:p7AwDmKvTdoHTBuueGvP",
     "lengthScale": 1
+  },
+  "bumpers": {
+    "backgrounds": [
+      "gradient",
+      "noise",
+      "shapes",
+      "glow"
+    ],
+    "reveals": [
+      "zoom",
+      "slide-up",
+      "wipe",
+      "blur-in",
+      "pop"
+    ]
   }
 }
