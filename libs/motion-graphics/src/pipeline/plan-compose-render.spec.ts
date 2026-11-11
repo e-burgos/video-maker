@@ -5,6 +5,10 @@ import { planProject } from './plan-project';
 import { renderProject } from './render-project';
 import { createFakePipelinePorts } from './__fixtures__/fake-pipeline-ports';
 import { P, projectFiles, script } from './__fixtures__/pipeline-data';
+import { readFileSync } from 'node:fs';
+import { join } from 'node:path';
+
+const SFX_BANK_JSON = readFileSync(join(__dirname, '../../assets/sfx-bank/sfx-bank.json'), 'utf8');
 
 describe('planProject', () => {
   it('fits the grid, anchors the drop on a bar, trims the music and writes the timeline', async () => {
@@ -77,11 +81,19 @@ describe('planProject', () => {
 describe('composeProject', () => {
   it('writes index.html from the template with the planned timing', async () => {
     const ports = createFakePipelinePorts({
-      files: projectFiles({ [`${P}/index.html.tpl`]: '<i data-start="{{start:reveal}}">{{sfx:riser}}</i>', [`${P}/words.json`]: '{}' }),
+      files: projectFiles({
+        [`${P}/index.html.tpl`]: '<i data-start="{{start:reveal}}">{{sfx:riser}}|{{sfx_dur:riser}}|{{sfx_src:riser}}</i>',
+        [`${P}/words.json`]: '{}',
+        '/repo/assets/sfx-bank/sfx-bank.json': SFX_BANK_JSON,
+      }),
     });
     await planProject(ports, P, { beatSync: true });
     const result = await composeProject(ports, P);
-    expect(ports.files.get(`${P}/index.html`)).toBe('<i data-start="10.04">8.04</i>');
+    const [riserStart = '', riserDur = '', riserSrc = ''] = String(ports.files.get(`${P}/index.html`)).replace(/^<i data-start="10.04">|<\/i>$/gu, '').split('|');
+    expect(Number(riserStart) + Number(riserDur)).toBeCloseTo(10.04, 2);
+    expect(riserSrc).toMatch(/^assets\/sfx-bank\/riser-\d\.mp3$/u);
+    expect(ports.files.has(`${P}/assets/sfx-bank/sfx-bank.json`)).toBe(true);
+    expect(JSON.parse(String(ports.files.get(`${P}/sfx-credits.json`)))).toEqual(expect.any(Array));
     expect(result.scenes).toBe(2);
     expect(result.lines[0]).toBe(`compose: index.html · 2 scenes · ${result.durationSec} s`);
   });
@@ -106,7 +118,16 @@ describe('renderProject', () => {
     const ports = createFakePipelinePorts({});
     const result = await renderProject(ports, P, { outPath: '/out/v.mp4', fps: 60, quality: 'draft' });
     expect(ports.renders).toEqual([{ projectDir: P, outPath: '/out/v.mp4', fps: 60, quality: 'draft' }]);
-    expect(result).toEqual({ lines: ['render: /out/v.mp4'], outPath: '/out/v.mp4', creditsPath: null, musicCredit: null });
+    expect(result).toEqual({ lines: ['render: /out/v.mp4'], outPath: '/out/v.mp4', creditsPath: null, musicCredit: null, sfxCredits: [] });
+  });
+
+  it('suma los créditos de los efectos CC BY al archivo de créditos, aunque no haya música', async () => {
+    const line = 'Efecto de sonido: «Hit» de Autor (CC BY 4.0) — https://example.test/hit';
+    const ports = createFakePipelinePorts({ files: { [`${P}/timeline.json`]: JSON.stringify({ musicCredit: '' }), [`${P}/sfx-credits.json`]: JSON.stringify([line]) } });
+    const result = await renderProject(ports, P, { outPath: '/out/v.mp4', fps: 30, quality: 'delivery' });
+
+    expect(ports.files.get('/out/v.credits.txt')).toBe(`${line}\n`);
+    expect(result.sfxCredits).toEqual([line]);
   });
 
   it('renders a sample from the composition cut to the requested duration and puts the full one back afterwards', async () => {

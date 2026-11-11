@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
+import { testSfxPicks } from '../__fixtures__/sfx-picks';
 import type { MotionScript } from '../script/motion-script';
 import { composeTemplate, wordTime } from './compose-template';
 import type { MotionTimeline, SceneWords } from './motion-timeline';
@@ -44,6 +45,7 @@ describe('composeTemplate', () => {
       script,
       timeline,
       words,
+      testSfxPicks(),
     );
     expect(html).toContain('data-start="4" data-duration="2.5"');
     expect(html).toContain('id="vo-hook" src="assets/audio/vo-hook.wav" data-start="0.25" data-duration="1"');
@@ -51,10 +53,18 @@ describe('composeTemplate', () => {
     expect(html).not.toContain('sfx-whoosh-drop');
     expect(html).not.toContain('sfx-whoosh-hook');
     expect(html).toContain('|6.75|0.6|Tema · CC BY 4.0|9');
+    expect(html).toContain('id="sfx-whoosh-end" src="assets/sfx-bank/whoosh-1.mp3" data-start="6.22" data-duration="0.6"');
+  });
+
+  it('fills the riser and impact of the drop from the picked bank variants, with the riser ending on the drop', () => {
+    const picks = { ...testSfxPicks(), accents: { ...testSfxPicks().accents, riser: { ...testSfxPicks().accents.riser, durationSec: 2 } } };
+    const html = composeTemplate('{{sfx_src:riser}}|{{sfx_dur:riser}}|{{sfx:riser}}|{{sfx_src:impact}}|{{sfx_dur:impact}}', script, timeline, words, picks);
+
+    expect(html).toBe('assets/sfx-bank/riser-1.mp3|2|2|assets/sfx-bank/impact-2.mp3|2');
   });
 
   it('embeds the timeline, words and automation as JSON', () => {
-    const html = composeTemplate("{{timeline_json}}\n{{words_json}}\n'{{music_automation}}'", script, timeline, words);
+    const html = composeTemplate("{{timeline_json}}\n{{words_json}}\n'{{music_automation}}'", script, timeline, words, testSfxPicks());
     const [tl = '', w = ''] = html.split('\n');
     expect(JSON.parse(tl).scenes).toHaveLength(3);
     expect(JSON.parse(tl).scenes[1]).toMatchObject({ id: 'drop', vo: 'Display Ads' });
@@ -62,12 +72,12 @@ describe('composeTemplate', () => {
   });
 
   it('fails on a placeholder without value', () => {
-    expect(() => composeTemplate('{{start:missing}}', script, timeline, words)).toThrow('{{start:missing}}');
+    expect(() => composeTemplate('{{start:missing}}', script, timeline, words, testSfxPicks())).toThrow('{{start:missing}}');
   });
 
   it('fails when a sfx word is not spoken', () => {
     const broken = { ...script, sfx: [{ id: 'x', scene: 'end', word: 'hola', offset: 0 }] };
-    expect(() => composeTemplate('', broken, timeline, words)).toThrow('word "hola" not found');
+    expect(() => composeTemplate('', broken, timeline, words, testSfxPicks())).toThrow('word "hola" not found');
   });
 });
 

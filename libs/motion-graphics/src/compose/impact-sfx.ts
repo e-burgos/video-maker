@@ -17,6 +17,6 @@ const impactAutomation = {
   }],
 };
 
-export function impactTrack(startPlaceholder: string, assetDir: string): string {
-  return `<audio id="sfx-impact" src="${assetDir}/sfx/impact-bass-1.mp3" data-start="${startPlaceholder}" data-duration="${IMPACT_DURATION_SEC}" data-track-index="13" data-volume="${IMPACT_TRACK_VOLUME}" data-automation='${JSON.stringify(impactAutomation)}'></audio>`;
+export function impactTrack(startPlaceholder: string): string {
+  return `<audio id="sfx-impact" src="{{sfx_src:impact}}" data-start="${startPlaceholder}" data-duration="{{sfx_dur:impact}}" data-track-index="13" data-volume="${IMPACT_TRACK_VOLUME}" data-automation='${JSON.stringify(impactAutomation)}'></audio>`;
 }
