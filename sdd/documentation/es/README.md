@@ -51,11 +51,11 @@ Antes de escribir código, un equipo de **agentes especializados** revisa la esp
 ```
 sdd/
 ├── README.md                          ← Índice de la documentación (es/en)
-├── documentation/                     ← Este documento + HOW-TO + INSTALL, en es/ y en/
+├── documentation/                     ← Este documento + HOW-TO + INSTALL + TUCU-UI, en es/ y en/
 ├── global.json                        ← Estado central del proyecto (módulos, stack)
 ├── tasks.json                         ← ÍNDICE de tasks (generado — el detalle vive en cada ciclo)
 ├── schemas/                           ← JSON Schemas estrictos de TODOS los registros (fuente de máquina)
-│   └── tools.schema.json              ← Forma de sdd/tools.json (interruptor de rtk)
+│   └── tools.schema.json              ← Forma de sdd/tools.json (interruptores de rtk, claude_mod y tucu_ui)
 ├── schema.json                        ← Esquema de base de datos (actualizado por Arquitecto)
 ├── api.json                           ← Contratos de API implementados
 ├── components.json                    ← Componentes frontend creados
@@ -107,7 +107,8 @@ sdd/
 │       └── YYYY-MM-DD-[spec-id]-cycle-XX.md
 │
 ├── pricing.json                       ← Tarifas del dashboard de Costos (hora tradicional + $/MTok por tier)
-├── tools.json                         ← Interruptor de rtk (dato del usuario — update sdd no lo toca)
+├── tools.json                         ← Interruptores de rtk, claude_mod y tucu_ui (dato del usuario — update sdd no lo toca)
+├── integrations/                      ← Skill de tucu-ui instalada (dato del proyecto, se crea al primer enable; update sdd no lo toca)
 │
 ├── agents/                            ← Definiciones de agentes SDD (centralizadas)
 │   ├── sdd-orchestrator.agent.md
@@ -124,11 +125,18 @@ sdd/
 │   ├── setup-agents.ps1               ← Script PowerShell (Windows)
 │   ├── validate-sdd.mjs               ← Validador de registros (pnpm sdd:validate)
 │   ├── spec-gate.mjs                  ← Responde el SPEC GATE A y B (pnpm sdd:gate)
+│   ├── sdd-use.mjs                    ← Ata esta sesión a un ciclo o fix (pnpm sdd:use)
+│   ├── sdd-release.mjs                ← Libera reservas de archivo y avisa (pnpm sdd:release)
+│   ├── sdd-branch.mjs                 ← Rama del ciclo según perfil (pnpm sdd:branch)
+│   ├── sdd-pr.mjs                     ← PR del ciclo con el resumen del reviewer (pnpm sdd:pr)
 │   ├── rebuild-tasks-index.mjs        ← Regenera el índice de tasks (pnpm sdd:rebuild-tasks-index)
 │   ├── rebuild-catalog.mjs            ← Regenera el manifest del visor (pnpm sdd:rebuild-catalog)
 │   ├── setup-rtk.mjs                  ← Instala/mergea los hooks de rtk (pnpm sdd:rtk)
 │   ├── rtk-hook.mjs                   ← Puente que llaman los hooks; si falla, pasa el comando sin tocar
 │   ├── rtk-common.mjs                 ← Helpers de rtk (versión fijada, resolución del binario)
+│   ├── sdd-tucu.mjs                   ← Interruptor de tucu-ui (pnpm sdd:tucu)
+│   ├── tucu-ui-common.mjs             ← Helpers de tucu-ui (versión fijada, enlaces de skill)
+│   ├── mcp-config.mjs                 ← Merge de entradas MCP en los tres archivos de los arneses
 │   └── rule-zero-hook.mjs             ← Hook SessionStart (Claude Code): reinyecta la regla cero (modelo/esfuerzo/contexto)
 │
 ├── templates/                         ← Blueprints de scaffolding (NO son proyectos Nx)
@@ -177,6 +185,7 @@ sdd/
     ├── generate-springboot-api/
     ├── generate-api-contract/
     ├── generate-react-component/
+    ├── crafted-motion/                ← Graphic motion para frontends React/Next
     ├── generate-nestjs-module/
     └── generate-prisma-schema/
 ```
@@ -341,6 +350,27 @@ de `draft` a `in-progress`. Solo el reviewer lo pasa después a `status: "comple
 | B5  | `constitution.md` de cada subproyecto en `cycle.json → apps[]`                                       |
 
 **`BLOCKED` → cero líneas de código** hasta completar lo que el script señala.
+
+**Sesiones paralelas.** Varias specs pueden tener un ciclo `in-progress` a la vez (A3: uno por
+spec). Cada sesión se ata a una unidad —ciclo o fix— con la línea `SDD-BIND` que imprime el GATE B
+`APPROVED` (corrélo en la sesión que implementa), con `pnpm sdd:use <spec> cycle-XX` /
+`pnpm sdd:use <FIX-id>`, o sola si hay una única unidad abierta o la rama nombra la spec. Con el
+mod de Claude Code prendido, la franja muestra «esta sesión / otras» y, sin atadura y con varias
+unidades abiertas, la edición de código se rechaza listando las unidades. El registro es local
+(`<git-common-dir>/sdd-sessions/`, fuera de git); con el mod apagado nada cambia. Studio muestra
+todas las unidades en curso.
+Con el mod prendido, cada archivo de código que una sesión edita queda **reservado** a su nombre
+(`locks/` en el mismo registro): otra sesión en la misma carpeta no lo edita (desde otro worktree,
+solo un aviso), le deja un pedido en el **buzón** de la dueña y esta lo ve en su próxima acción.
+`pnpm sdd:release <archivo…>` libera y avisa; `--list` muestra las reservas. Studio muestra los
+archivos reservados de cada unidad y quién los pide.
+
+**GitHub.** `harness github connect` crea el repo con tu `gh` (privado por defecto), sube el CI del
+kit (`.github/workflows/sdd-validate.yml`) y, solo si lo pedís (`--protect` o
+`harness github protect`), exige `sdd:validate` como check requerido. Con rama por ciclo (perfil
+`team`, o `github.branch_per_cycle` en `global.json`), `pnpm sdd:branch <spec> cycle-XX` crea
+`feat/<slug>-cycle-XX` al abrir y `pnpm sdd:pr <spec> cycle-XX` arma el PR al cerrar (con `--yes`
+pushea y lo abre). `harness github status` muestra el estado.
 
 ### Flow del ciclo — full · reduced · lite
 
@@ -762,6 +792,7 @@ Skills son micro-agentes especializados invocados con `/skill [nombre]`.
 | `generate-springboot-api`  | Genera módulo Spring Boot completo (controller/service/repo/tests) |
 | `generate-api-contract`    | Genera contratos OpenAPI, DTOs y mappers                           |
 | `generate-react-component` | Genera componente React con props tipadas y tests                  |
+| `crafted-motion`           | Graphic motion en React/Next: capas CSS / framer-motion / GSAP / WebGL, tokens, recetas, wizards y QA |
 | `generate-nestjs-module`   | Genera módulo NestJS (reservado para futuros proyectos)            |
 | `generate-prisma-schema`   | Genera schema Prisma (reservado para futuros proyectos)            |
 
@@ -1094,6 +1125,24 @@ acción del dev.
   máquina**, así que el ahorro es el de quien corre el visor.
 - **Números**: `rtk gain --project`, o `pnpm sdd:docs` → Costos → pestaña **RTK**. Son
   estimaciones (bytes ÷ 4), no facturación.
+
+### 8. tucu-ui — skill de diseño y MCP (opcional, apagado por defecto)
+
+Para repos con un frontend React o Next. `pnpm sdd:tucu -- --enable` instala la skill
+`tucu-ui-design` en `sdd/integrations/skills/tucu-ui-design/`, la enlaza en `.claude/skills`,
+`.github/skills` y `.agents/skills`, y agrega el MCP `tucu-ui` (versión fijada) a `.mcp.json`,
+`.vscode/mcp.json` y `.gemini/settings.json` **sin pisar** servidores ni entradas propias.
+
+- **Interruptor**: `tucu_ui` en `sdd/tools.json` (`enabled`, `skill`, `mcp`, `version`). Es dato del
+  proyecto: `harness update sdd` no lo pisa, y tampoco toca `sdd/integrations/`.
+- **Quién decide**: el dev. El agente no lo prende ni lo apaga por su cuenta; el sdd-steward lo
+  opera a pedido.
+- **Comandos**: `pnpm sdd:tucu -- --status | --enable | --disable` (`--parts`, `--force`, `--purge`).
+  Solo `--enable` sin la skill instalada necesita red.
+- **Desde la CLI**: `harness init --tucu-ui | --no-tucu-ui`. `harness configure sdd --tucu-ui` es solo para repos sin kit (si `sdd/` existe pide reiniciarlo entero); con el kit instalado usá `pnpm sdd:tucu -- --enable`.
+- **Validador**: `pnpm sdd:validate` avisa (nunca falla) de enlaces o entradas MCP faltantes.
+
+Detalle completo, mapa por arnés y nota de Windows: [TUCU-UI.md](TUCU-UI.md).
 
 ---
 

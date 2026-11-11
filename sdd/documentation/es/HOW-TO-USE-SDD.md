@@ -127,6 +127,14 @@ antes de que el agente la lea: 60–90% menos texto, sin tocar la lectura de arc
 está, el comando corre igual, sin comprimir. El ahorro se ve con `rtk gain --project` o en
 `pnpm sdd:docs` → Costos → pestaña **RTK** (números por máquina y estimados).
 
+### tucu-ui — skill de diseño y MCP (opcional, apagado por defecto)
+
+Para repos con un frontend React o Next. `pnpm sdd:tucu -- --enable` instala la skill
+`tucu-ui-design` y el MCP `tucu-ui` en los cuatro arneses, sin pisar tus archivos MCP;
+`--status` informa el estado sin red y `--disable` limpia solo lo que escribió el kit. Prenderlo
+o apagarlo es decisión del dev (también `harness init --tucu-ui` al generar el proyecto; `harness configure sdd
+--tucu-ui` es solo para repos sin kit y reinicia `sdd/` si existe). Detalle en [TUCU-UI.md](TUCU-UI.md).
+
 ### sdd-mod — el SDD dentro de Claude Code (opcional, apagado por defecto)
 
 Solo para quien usa Claude Code. `sdd/skills/sdd-mod/` es un mod que Claude Code carga solo
@@ -147,6 +155,22 @@ pnpm sdd:mod -- --disable      # apagarlo
 Copilot, Gemini y el resto de los agentes no lo ven y no cambian: siguen las mismas reglas desde
 `AGENTS.md`/`GEMINI.md`/`copilot-instructions.md`, y `pnpm sdd:validate` sigue siendo la red de
 seguridad común en CI. El gate del mod no cubre comandos de shell.
+
+**Sesiones paralelas.** Podés tener varias specs en curso, una por sesión de Claude Code. La franja
+muestra «esta sesión: <spec> · <cycle> …» y «otras: …». La sesión se ata sola al correr el GATE B
+(`pnpm sdd:gate <spec> cycle-XX`, que imprime `SDD-BIND`), cuando hay una sola unidad abierta o cuando
+la rama nombra la spec; a mano: `pnpm sdd:use <spec> cycle-XX` o `pnpm sdd:use <FIX-id>`. Sin
+atadura y con varias unidades abiertas, el gate rechaza la edición y las lista. Las ataduras
+viven en `<git-common-dir>/sdd-sessions/` (local, fuera de git) y vencen a los 30 min sin actividad.
+Si dos sesiones van por el mismo archivo, la primera que lo edita lo reserva y la otra, en la misma
+carpeta, recibe `SDD reserva: …` con el nombre de la dueña (desde otro worktree solo un aviso); la
+dueña ve el pedido en su próxima acción y libera con `pnpm sdd:release <archivo>`. Las reservas
+vencen a los 30 min sin edición y se liberan al cerrar la sesión.
+
+**Proyecto en GitHub.** Con `gh` instalado y autenticado, `harness github connect` crea el repo,
+sube el CI del kit y deja `origin`; `--protect` (o `harness github protect`) exige `sdd:validate`.
+En perfil `team` cada ciclo abre su rama con `pnpm sdd:branch <spec> cycle-XX` y cierra con
+`pnpm sdd:pr <spec> cycle-XX` (sin `--yes` muestra el plan; con `--yes` pushea y abre el PR).
 
 ---
 
@@ -666,6 +690,8 @@ Y si el punto 4 es NO, hay un error: los base solo los toca la consolidación (v
 - **rtk viene activo** y comprime la salida de los comandos: no lo prefijes a mano, usá
   `rtk proxy <cmd>` si necesitás la salida cruda y no lo apagues por tu cuenta
   (`pnpm sdd:rtk -- --disable` es decisión del dev).
+- **tucu-ui es opcional** (`pnpm sdd:tucu`): prenderlo o apagarlo es decisión del dev; no lo
+  cambies por tu cuenta.
 - **Invariantes del workspace** (los garantiza la skill `init-nx-workspace`, y romperlos falla en
   silencio): pnpm es el único package manager; los proyectos viven en `apps/`, `libs/` y `tools/`
   —nunca en `packages/`—; si el repo usa el TS solution setup, `customConditions` de
