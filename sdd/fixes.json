@@ -5472,6 +5472,52 @@
           }
         ]
       }
+    },
+    {
+      "id": "FIX-e-burgos-063",
+      "author": "e-burgos",
+      "spec_id": null,
+      "fix_document": "sdd/fixes/fix-e-burgos-063.md",
+      "type": "IMPROVEMENT",
+      "severity": "low",
+      "created_at": "2026-11-11",
+      "resolved_at": "2026-11-11",
+      "validated_at": null,
+      "title": "La mezcla de SFX sigue el contrato de motion: semilla de bumpers.style y cues explícitos con id del banco",
+      "estimation_hours": 0.25,
+      "description": "resolveBumperSfx elige la variante con bumpers.style.seed (timeline.id si no hay), acepta en los cues explícitos un assetId que sea id del banco (whoosh-2) además de un asset de la timeline, y saltea un tipo que el banco no tenga en vez de tumbar el render.",
+      "justification": "Alinear FIX-060 con los detalles del contrato de FIX-057 que motion mandó después.",
+      "related_modules": [
+        "production-quality"
+      ],
+      "affected_files": [
+        "apps/render-api/src/sfx/resolve-bumper-sfx.ts"
+      ],
+      "test_reference": "nx test/lint de render-api en verde (2291), con tests de id del banco, semilla del estilo y tipo faltante.",
+      "status": "implemented",
+      "cycle": null,
+      "process_note": "gainDb se mantiene como dB por debajo del target de voz; motion ofreció ajustar sus valores si hace falta.",
+      "usage": {
+        "provider_model": "claude/opus",
+        "effort": "low",
+        "tokens_in": 120000,
+        "tokens_out": 6000,
+        "approx": true,
+        "source": "declared-estimate",
+        "recorded_at": "2026-11-11",
+        "by_agent": [
+          {
+            "agent": "orchestrator",
+            "provider_model": "claude/opus",
+            "effort": "low",
+            "tokens_in": 120000,
+            "tokens_out": 6000,
+            "approx": true,
+            "source": "declared-estimate",
+            "recorded_at": "2026-11-11"
+          }
+        ]
+      }
     }
   ]
 }

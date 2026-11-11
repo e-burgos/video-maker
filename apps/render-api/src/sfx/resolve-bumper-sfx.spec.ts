@@ -73,4 +73,33 @@ describe('resolveBumperSfx', () => {
     expect(cues).toEqual([{ path: '/project/raw/audio/boom.wav', atMs: 100, gainDb: -6, durationMs: 900, fadeInMs: 10 }]);
     expect(used).toEqual([]);
   });
+
+  it('reads an explicit cue whose assetId is a bank id from the bank and credits it', () => {
+    const { cues, used } = resolveBumperSfx(
+      timelineWith({ intro: { enabled: true, sfx: [{ atMs: 50, assetId: 'impact-2', gainDb: -10, fadeOutMs: 200 }] } }),
+      BANK,
+      '/assets',
+    );
+
+    expect(cues).toEqual([{ path: '/assets/sfx-bank/impact-2.mp3', atMs: 50, gainDb: -10, durationMs: 1660, fadeOutMs: 200 }]);
+    expect(used.map((entry) => entry.id)).toEqual(['impact-2']);
+  });
+
+  it('picks the variant from the bumper style seed, not from the timeline id', () => {
+    const bumpers = { intro: { enabled: true, reveal: 'wipe', background: 'gradient' }, outro: { enabled: false }, style: { rotate: true, seed: 77 } };
+    const first = resolveBumperSfx(timelineWith(bumpers), BANK, '/assets').cues[0]?.path;
+    const renamed = resolveBumperSfx({ ...timelineWith(bumpers), id: 'another-video' } as Timeline, BANK, '/assets').cues[0]?.path;
+
+    expect(renamed).toBe(first);
+  });
+
+  it('skips an automatic cue whose kind the bank does not have instead of failing the render', () => {
+    const { cues } = resolveBumperSfx(
+      timelineWith({ intro: { enabled: true, sfxKind: 'shimmer' }, outro: { enabled: true, sfxKind: 'whoosh' }, style: { rotate: true } }),
+      BANK,
+      '/assets',
+    );
+
+    expect(cues.map((cue) => cue.path.split('/').at(-1)?.split('-')[0])).toEqual(['whoosh']);
+  });
 });
