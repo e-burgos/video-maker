@@ -1,6 +1,7 @@
+import { BUMPER_REVEAL_ENTER_MS } from '@video-maker/timeline-core';
 import type { Fps, LogoBumperReveal } from '@video-maker/timeline-core';
 
-export const LOGO_BUMPER_ENTER_MS = 600;
+export const LOGO_BUMPER_ENTER_MS = BUMPER_REVEAL_ENTER_MS;
 export const LOGO_BUMPER_EXIT_MS = 300;
 export const LOGO_BUMPER_ZOOM_FROM = 0.8;
 export const LOGO_BUMPER_SLIDE_FROM_PERCENT = 12;

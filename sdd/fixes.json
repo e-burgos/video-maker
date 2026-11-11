@@ -5263,6 +5263,56 @@
           }
         ]
       }
+    },
+    {
+      "id": "FIX-e-burgos-058",
+      "author": "e-burgos",
+      "spec_id": null,
+      "fix_document": "sdd/fixes/fix-e-burgos-058.md",
+      "type": "IMPROVEMENT",
+      "severity": "low",
+      "created_at": "2026-11-11",
+      "resolved_at": "2026-11-11",
+      "validated_at": null,
+      "title": "Selector de sonido de los bumpers en el editor web y entrada del logo sincronizada con el contrato",
+      "estimation_hours": 1.5,
+      "description": "El editor de bumpers permite elegir el efecto (automático, whoosh, golpe, brillo, clicks o sin sonido) y la composición toma el tiempo de entrada del logo del contrato de SFX.",
+      "justification": "Parte de la tarea de efectos de sonido pedida por el dev vía la sesión orquestadora.",
+      "related_modules": [
+        "production-quality"
+      ],
+      "affected_files": [
+        "apps/web/src/components/logo-bumper-editor.tsx",
+        "apps/web/src/api/timeline-edit/logo-bumpers.ts",
+        "apps/web/src/i18n/messages-es.ts",
+        "apps/web/src/i18n/messages-en.ts",
+        "libs/composition-remotion/src/helpers/logo-bumper-style.ts",
+        "libs/composition-remotion/src/components/logo-bumper-scene.tsx"
+      ],
+      "test_reference": "nx test/lint/build en verde: composition-remotion 379, web 1653.",
+      "status": "implemented",
+      "cycle": null,
+      "usage": {
+        "provider_model": "claude/opus",
+        "effort": "medium",
+        "tokens_in": 120000,
+        "tokens_out": 8000,
+        "approx": true,
+        "source": "declared-estimate",
+        "recorded_at": "2026-11-11",
+        "by_agent": [
+          {
+            "agent": "orchestrator",
+            "provider_model": "claude/opus",
+            "effort": "medium",
+            "tokens_in": 120000,
+            "tokens_out": 8000,
+            "approx": true,
+            "source": "declared-estimate",
+            "recorded_at": "2026-11-11"
+          }
+        ]
+      }
     }
   ]
 }
