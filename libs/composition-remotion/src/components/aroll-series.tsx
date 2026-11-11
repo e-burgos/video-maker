@@ -1,5 +1,5 @@
 import { Fragment } from 'react';
-import { Img } from 'remotion';
+import { Img, useVideoConfig } from 'remotion';
 import { TransitionSeries } from '@remotion/transitions';
 import type { TransitionPresentation } from '@remotion/transitions';
 import type { Fps, TimelineTransition } from '@video-maker/timeline-core';
@@ -52,6 +52,8 @@ function ArollScene({ scene }: { scene: VideoSequenceProps }) {
 }
 
 export function ArollSeries({ scenes, transitions, fps }: ArollSeriesProps) {
+  const { width, height } = useVideoConfig();
+
   return (
     <TransitionSeries>
       {scenes.map((scene, index) => {
@@ -66,7 +68,7 @@ export function ArollSeries({ scenes, transitions, fps }: ArollSeriesProps) {
             </TransitionSeries.Sequence>
             {transition === undefined ? null : (
               <TransitionSeries.Transition
-                presentation={widenPresentation(presentationFor(transition.kind, transition.direction))}
+                presentation={widenPresentation(presentationFor(transition.kind, transition.direction, { width, height }))}
                 timing={transitionTiming(toTimelineTransition(transition), fps)}
               />
             )}

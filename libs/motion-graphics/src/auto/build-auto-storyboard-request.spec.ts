@@ -41,6 +41,7 @@ describe('buildAutoStoryboardRequest', () => {
   it('states the hard rules of the contract', () => {
     expect(request.systemPrompt).toMatch(/ONLY a JSON object/u);
     expect(request.systemPrompt).toMatch(/number.*as words/u);
+    expect(request.systemPrompt).toMatch(/never put two scenes of the same `kind` in a row/u);
     expect(request.systemPrompt).toMatch(/never the first words of a line/u);
     expect(request.systemPrompt).toMatch(/hook.*cta/u);
     expect(request.systemPrompt).toMatch(/anchor: "drop"/u);

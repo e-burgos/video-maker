@@ -43,7 +43,7 @@ pnpm nx run motion-studio:cli -- render  .motion-work/presentacion --out .motion
 ## Storyboard y catálogo de escenas
 
 `storyboard.json`: `{version: 1, title, brand, format: "16:9"|"9:16", beatSync, music: {track}|null,
-voice?, scenes[]}`. Cada escena: `{id, kind, vo, chapter?, minBars?, anchor?: "drop"|segundos, props}`.
+voice?, scenes[]}`. Cada escena: `{id, kind, vo, chapter?, minBars?, anchor?: "drop"|segundos, exit?, props}`.
 El contrato completo (con descripciones para la IA) sale de `motionStoryboardJsonSchema()`; los ejemplos
 reales están en `libs/motion-graphics/assets/storyboards/displayads/`.
 
@@ -66,6 +66,18 @@ reales están en `libs/motion-graphics/assets/storyboards/displayads/`.
 | `ui-walkthrough` | Una captura de la interfaz (marco browser, phone o ninguno) con cursor, clics, tipeo, resaltados, globos y zoom; hasta 8 pasos con coordenadas 0–1 sobre la imagen |
 | `do-dont` | Lo que no y lo que sí |
 | `cta` | Cierre con logo, botón y web |
+
+### Variedad: nunca dos cortes iguales (FIX-e-burgos-041)
+
+- **Salida:** `exit` es `blur-up` | `slide-left` | `scale-down` | `drop` | `wipe` | `iris`. Dejalo afuera y el
+  compositor la rota con una semilla de marca + título, sin repetir la anterior. Antes de un `chapter`
+  nuevo usa un corte fuerte (`wipe`, `iris` o `slide-left`). La última escena siempre se funde.
+- **Entrada:** cada `kind` entra con su propia animación, así que nunca pongas dos escenas seguidas del
+  mismo `kind`.
+- **Entre videos:** dos videos de la misma lista no repiten título, así que tampoco repiten la secuencia
+  de salidas. Al editar un storyboard, no fijes la misma `exit` en dos escenas seguidas ni copies la
+  secuencia de `kind` del video anterior de la lista: cambiá el orden o el tipo de al menos el gancho y
+  una escena del medio.
 
 `cue` en cualquier elemento = la palabra de la voz en que aparece (prefijo; sin tilde importa poco).
 Imágenes: `images/foto.jpg` (se copian desde la carpeta del storyboard) o `brand:<clave>` del manifiesto.

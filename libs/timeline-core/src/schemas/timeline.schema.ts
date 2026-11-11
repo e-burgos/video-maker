@@ -10,7 +10,7 @@ import { DbSchema, FrameSchema, IdSchema, MsSchema } from './primitives';
 type IssueCtx = z.core.$RefinementCtx<unknown>;
 
 export const ClipFitSchema = z.enum(['cover', 'contain', 'pip']);
-export const TimelineTransitionKindSchema = z.enum(['fade', 'slide', 'whip-pan', 'light-leak']);
+export const TimelineTransitionKindSchema = z.enum(['fade', 'slide', 'whip-pan', 'light-leak', 'wipe', 'flip', 'clock-wipe', 'iris']);
 export const TimelineTransitionDirectionSchema = z.enum([
   'from-left',
   'from-right',

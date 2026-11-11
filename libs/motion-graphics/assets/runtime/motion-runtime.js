@@ -277,6 +277,15 @@ window.createMotionRuntime = function createMotionRuntime(T, W, compositionId) {
 
   tl.fromTo('#mg-bug', { opacity: 0, y: -10 }, { opacity: 1, y: 0, duration: 0.5, ease: 'power3.out' }, 0.3);
 
+  const SCENE_EXITS = {
+    'blur-up': (inner, end) => tl.to(inner, { opacity: 0, y: -24, filter: 'blur(8px)', duration: 0.35, ease: 'power2.in' }, end - 0.35),
+    'slide-left': (inner, end) => tl.to(inner, { opacity: 0, x: -140, duration: 0.4, ease: 'power3.in' }, end - 0.4),
+    'scale-down': (inner, end) => tl.to(inner, { opacity: 0, scale: 0.9, duration: 0.38, ease: 'power2.in' }, end - 0.38),
+    drop: (inner, end) => tl.to(inner, { opacity: 0, y: 70, duration: 0.36, ease: 'power2.in' }, end - 0.36),
+    wipe: (inner, end) => tl.fromTo(inner, { clipPath: 'inset(0% 0% 0% 0%)' }, { clipPath: 'inset(0% 100% 0% 0%)', duration: 0.5, ease: 'power3.inOut', immediateRender: false }, end - 0.5),
+    iris: (inner, end) => tl.fromTo(inner, { clipPath: 'circle(80% at 50% 50%)' }, { clipPath: 'circle(0% at 50% 50%)', duration: 0.5, ease: 'power2.in', immediateRender: false }, end - 0.5),
+  };
+
   document.querySelectorAll('[data-scene]').forEach((section) => {
     const id = section.dataset.scene;
     let order = 0;
@@ -293,7 +302,7 @@ window.createMotionRuntime = function createMotionRuntime(T, W, compositionId) {
     const inner = section.querySelector('.scene-in');
     const isLast = T.scenes[T.scenes.length - 1].id === id;
     if (isLast) tl.to(inner, { opacity: 0, duration: 1.1, ease: 'power2.in' }, E(id) - 1.2);
-    else tl.to(inner, { opacity: 0, y: -24, filter: 'blur(8px)', duration: 0.35, ease: 'power2.in' }, E(id) - 0.35);
+    else (SCENE_EXITS[section.dataset.exit] || SCENE_EXITS['blur-up'])(inner, E(id));
   });
   tl.to('#mg-hud', { opacity: 0, duration: 1 }, T.duration - 1.2);
 

@@ -277,7 +277,7 @@ export async function autoMontage(
     voiceScriptTrack?.lineWindows ?? [],
   );
   const duckDecisions = planDuckRanges(alignedTranscription.words, keeps, preset, fps);
-  const transitions = planTransitions(keeps, preset, fps);
+  const transitions = planTransitions(keeps, preset, fps, options.seed);
 
   const edl = assertValidEditDecisionList(
     buildEditDecisionList({

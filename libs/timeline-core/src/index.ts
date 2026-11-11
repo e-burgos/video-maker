@@ -382,3 +382,10 @@ export type {
   CaptionGeometryId,
   CaptionRect,
 } from './captions/caption-geometry';
+export {
+  createSeededRandom,
+  hashStringToSeed,
+  pickAvoidingPrevious,
+  pickFromPool,
+} from './random/seeded-random';
+export type { RandomGenerator } from './random/seeded-random';

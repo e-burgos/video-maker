@@ -4315,6 +4315,176 @@
       }
     },
     {
+      "id": "FIX-e-burgos-039",
+      "author": "e-burgos",
+      "spec_id": null,
+      "fix_document": "sdd/fixes/fix-e-burgos-039.md",
+      "type": "IMPROVEMENT",
+      "severity": "medium",
+      "created_at": "2026-11-11",
+      "resolved_at": "2026-11-11",
+      "validated_at": null,
+      "title": "Motion graphics etapa 0: salidas de escena rotativas (modo B), transiciones con semilla (modo A) y light-leak real",
+      "estimation_hours": 6,
+      "description": "Las escenas del modo B salían todas igual y los presets del modo A alternaban siempre los mismos dos tipos; con seed 0 dos videos del mismo preset quedaban idénticos y light-leak era un fade. Se agrega un generador con semilla en timeline-core, rotación sin repetir en planTransitions, pools de tres tipos por preset, una presentación light-leak propia en CSS y data-exit por escena en motion-graphics con plan por semilla de marca + título.",
+      "justification": "Etapa 0 aprobada por el dev del informe docs/research/2026-11-10-motion-graphics-productor.md; sin dependencias nuevas y el campo exit es opcional.",
+      "related_modules": [
+        "production-quality"
+      ],
+      "affected_files": [
+        "libs/timeline-core/src/random/seeded-random.ts",
+        "libs/timeline-core/src/punch-in/plan-punch-ins.ts",
+        "libs/timeline-core/src/index.ts",
+        "libs/auto-montage/src/montage/plan-transitions.ts",
+        "libs/auto-montage/src/auto-montage.ts",
+        "libs/auto-montage/src/presets/software-demo.preset.ts",
+        "libs/auto-montage/src/presets/educational.preset.ts",
+        "libs/auto-montage/src/presets/hardware.preset.ts",
+        "libs/auto-montage/src/presets/recipe.preset.ts",
+        "libs/composition-remotion/src/transitions/light-leak.tsx",
+        "libs/composition-remotion/src/transitions/light-leak-style.ts",
+        "libs/composition-remotion/src/transitions/presentation-for.ts",
+        "libs/motion-graphics/src/storyboard/motion-storyboard.schema.ts",
+        "libs/motion-graphics/src/compose/plan-scene-exits.ts",
+        "libs/motion-graphics/src/compose/compose-storyboard.ts",
+        "libs/motion-graphics/assets/runtime/motion-runtime.js"
+      ],
+      "test_reference": "nx test/lint/build en verde: timeline-core 452, auto-montage 375, composition-remotion 366, motion-graphics 318.",
+      "status": "implemented",
+      "cycle": null,
+      "process_note": "lightLeak() de Remotion no está instalado; se implementó en CSS para no sumar dependencias en la etapa 0.",
+      "usage": {
+        "provider_model": "claude/opus",
+        "effort": "medium",
+        "tokens_in": 900000,
+        "tokens_out": 60000,
+        "approx": true,
+        "source": "declared-estimate",
+        "recorded_at": "2026-11-11",
+        "by_agent": [
+          {
+            "agent": "orchestrator",
+            "provider_model": "claude/opus",
+            "effort": "medium",
+            "tokens_in": 900000,
+            "tokens_out": 60000,
+            "approx": true,
+            "source": "declared-estimate",
+            "recorded_at": "2026-11-11"
+          }
+        ]
+      }
+    },
+    {
+      "id": "FIX-e-burgos-040",
+      "author": "e-burgos",
+      "spec_id": null,
+      "fix_document": "sdd/fixes/fix-e-burgos-040.md",
+      "type": "IMPROVEMENT",
+      "severity": "medium",
+      "created_at": "2026-11-11",
+      "resolved_at": "2026-11-11",
+      "validated_at": null,
+      "title": "Motion graphics etapa 1: transiciones wipe, flip, clock-wipe e iris de @remotion/transitions en el modo A",
+      "estimation_hours": 3,
+      "description": "El enum de transiciones del Timeline y del EDL suma wipe, flip, clock-wipe e iris; presentationFor las arma con @remotion/transitions 4.0.522 (ya instalado), con dirección para wipe/flip y el tamaño del cuadro para clock-wipe/iris. Cada preset rota un pool de cinco tipos. zoomBlur, zoomInOut y filmBurn quedan fuera: son HTML-in-Canvas y exigen Chrome 148 con un flag experimental.",
+      "justification": "Etapa 1 aprobada por el dev del informe docs/research/2026-11-10-motion-graphics-productor.md; amplía un enum con valores nuevos, compatible hacia atrás con las timelines existentes.",
+      "related_modules": [
+        "production-quality"
+      ],
+      "affected_files": [
+        "libs/timeline-core/src/schemas/timeline.schema.ts",
+        "libs/timeline-core/src/schemas/edit-decision-list.schema.ts",
+        "libs/timeline-core/schemas/timeline.schema.json",
+        "libs/timeline-core/schemas/edit-decision-list.schema.json",
+        "libs/auto-montage/src/presets/montage-preset.ts",
+        "libs/auto-montage/src/montage/plan-transitions.ts",
+        "libs/auto-montage/src/presets/software-demo.preset.ts",
+        "libs/auto-montage/src/presets/educational.preset.ts",
+        "libs/auto-montage/src/presets/hardware.preset.ts",
+        "libs/auto-montage/src/presets/recipe.preset.ts",
+        "libs/composition-remotion/src/transitions/presentation-for.ts",
+        "libs/composition-remotion/src/components/aroll-series.tsx",
+        "libs/producer-tools/src/prompt/build-producer-prompt.ts"
+      ],
+      "test_reference": "nx test/lint/build en verde: timeline-core 452, auto-montage 375, composition-remotion 368, motion-graphics 318, producer-tools 448, render-api 2260, web 1646 (settings-page.spec falla solo bajo carga y pasa aislado; no toca transiciones).",
+      "status": "implemented",
+      "cycle": null,
+      "process_note": "El paquete instalado trae además book-flip, dissolve, ripple y otras; las que dependen de HTML-in-Canvas tiran error sin el flag de Chrome, así que no se habilitan.",
+      "usage": {
+        "provider_model": "claude/opus",
+        "effort": "medium",
+        "tokens_in": 400000,
+        "tokens_out": 25000,
+        "approx": true,
+        "source": "declared-estimate",
+        "recorded_at": "2026-11-11",
+        "by_agent": [
+          {
+            "agent": "orchestrator",
+            "provider_model": "claude/opus",
+            "effort": "medium",
+            "tokens_in": 400000,
+            "tokens_out": 25000,
+            "approx": true,
+            "source": "declared-estimate",
+            "recorded_at": "2026-11-11"
+          }
+        ]
+      }
+    },
+    {
+      "id": "FIX-e-burgos-041",
+      "author": "e-burgos",
+      "spec_id": null,
+      "fix_document": "sdd/fixes/fix-e-burgos-041.md",
+      "type": "IMPROVEMENT",
+      "severity": "medium",
+      "created_at": "2026-11-11",
+      "resolved_at": "2026-11-11",
+      "validated_at": null,
+      "title": "Motion graphics etapa 7: regla de variedad del productor y semilla de montaje derivada del video",
+      "estimation_hours": 2,
+      "description": "Las recetas mandaban seed 0 y ninguna skill pedía variedad. render-api deriva la semilla del slug cuando el montaje no la trae; el prompt del productor, el prompt del storyboard automático y las skills motion-studio y video-producer prohíben repetir kind, exit o transición seguidas y piden no fijar seed para que cada video rote distinto.",
+      "justification": "Etapa 7 aprobada por el dev del informe docs/research/2026-11-10-motion-graphics-productor.md; cambia solo el default de un parámetro opcional del job montage.",
+      "related_modules": [
+        "production-quality"
+      ],
+      "affected_files": [
+        "apps/render-api/src/jobs/montage-job-params.ts",
+        "apps/render-api/src/http/handlers/jobs-handler.ts",
+        "libs/producer-tools/src/prompt/build-producer-prompt.ts",
+        "libs/motion-graphics/src/auto/build-auto-storyboard-request.ts",
+        "sdd/skills/motion-studio/SKILL.md",
+        "sdd/skills/video-producer/SKILL.md"
+      ],
+      "test_reference": "nx test/lint en verde: producer-tools 448, render-api 2260, motion-graphics 318.",
+      "status": "implemented",
+      "cycle": null,
+      "process_note": "El productor no ve el video anterior de la lista (sus tools son por proyecto), por eso la variedad entre videos se garantiza en código (semilla por slug, salidas por marca + título) y no solo en el prompt.",
+      "usage": {
+        "provider_model": "claude/opus",
+        "effort": "medium",
+        "tokens_in": 350000,
+        "tokens_out": 20000,
+        "approx": true,
+        "source": "declared-estimate",
+        "recorded_at": "2026-11-11",
+        "by_agent": [
+          {
+            "agent": "orchestrator",
+            "provider_model": "claude/opus",
+            "effort": "medium",
+            "tokens_in": 350000,
+            "tokens_out": 20000,
+            "approx": true,
+            "source": "declared-estimate",
+            "recorded_at": "2026-11-11"
+          }
+        ]
+      }
+    },
+    {
       "id": "FIX-e-burgos-042",
       "author": "e-burgos",
       "spec_id": null,

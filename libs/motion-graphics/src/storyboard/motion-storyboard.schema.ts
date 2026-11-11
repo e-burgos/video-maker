@@ -195,6 +195,9 @@ const UiWalkthroughProps = z.strictObject({
   steps: z.array(WalkthroughStep).min(1).max(8),
 });
 
+export const SCENE_EXITS = ['blur-up', 'slide-left', 'scale-down', 'wipe', 'iris', 'drop'] as const;
+export const SceneExitSchema = z.enum(SCENE_EXITS);
+
 const sceneBase = {
   id: z.string().regex(/^[a-z][a-z0-9-]*$/u, 'kebab-case id'),
   chapter: Text.optional(),
@@ -203,6 +206,7 @@ const sceneBase = {
   minSec: z.number().positive().max(60).describe('Minimum scene length in seconds, kept with or without beat sync and never cutting the voice; use it for scenes that carry several visual steps').optional(),
   anchor: z.union([z.literal('drop'), z.number().nonnegative()]).optional(),
   direction: VoiceDirectionSchema.describe('How this voice-over line is delivered: pace, energy, pause after the line and words to stress. Omit it for the voice default').optional(),
+  exit: SceneExitSchema.describe('How the scene leaves the frame. Never repeat the exit of the previous scene; use wipe, iris or slide-left before a new chapter. Omit it and the studio rotates exits on its own; the last scene always fades out').optional(),
 };
 
 const scene = <K extends string, P extends z.ZodTypeAny>(kind: K, props: P) =>
