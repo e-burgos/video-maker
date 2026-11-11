@@ -193,6 +193,68 @@ export const TimelineBumpersSchema = z.strictObject({
   style: BumperStyleSchema.optional(),
 });
 
+export const TEXT_OVERLAY_KINDS = ['lower-third', 'chapter-title', 'kinetic-text'] as const;
+export const TextOverlayKindSchema = z.enum(TEXT_OVERLAY_KINDS);
+
+export const TEXT_OVERLAY_VARIANTS = {
+  'lower-third': ['slide-underline', 'accent-bar', 'plate-wipe'],
+  'chapter-title': ['blur-rise', 'mask-wipe', 'word-stagger'],
+  'kinetic-text': ['word-rise', 'word-pop', 'word-blur'],
+} as const satisfies Record<(typeof TEXT_OVERLAY_KINDS)[number], readonly [string, ...string[]]>;
+
+export const ALL_TEXT_OVERLAY_VARIANTS = [
+  ...TEXT_OVERLAY_VARIANTS['lower-third'],
+  ...TEXT_OVERLAY_VARIANTS['chapter-title'],
+  ...TEXT_OVERLAY_VARIANTS['kinetic-text'],
+] as const;
+export const TextOverlayVariantSchema = z.enum(ALL_TEXT_OVERLAY_VARIANTS);
+
+export const TEXT_OVERLAY_PLACEMENTS = [
+  'bottom-left',
+  'bottom-right',
+  'top-left',
+  'top-right',
+  'top-center',
+  'bottom-center',
+] as const;
+export const TextOverlayPlacementSchema = z.enum(TEXT_OVERLAY_PLACEMENTS);
+
+export const MIN_TEXT_OVERLAY_DURATION_MS = 1200;
+export const MAX_TEXT_OVERLAY_DURATION_MS = 10000;
+export const MAX_TEXT_OVERLAY_TEXT_LENGTH = 70;
+export const MAX_TEXT_OVERLAY_EYEBROW_LENGTH = 12;
+export const MAX_TEXT_OVERLAYS = 40;
+
+export const TextOverlaySchema = z.strictObject({
+  id: IdSchema,
+  kind: TextOverlayKindSchema.describe(
+    'lower-third: a name or topic with a short line under it; chapter-title: the title of a new section, with an optional number; kinetic-text: one short phrase that enters word by word.',
+  ),
+  startMs: MsSchema.describe('Start on the final timeline, in ms from the first frame after the intro bumper.'),
+  durationMs: z.number().int().min(MIN_TEXT_OVERLAY_DURATION_MS).max(MAX_TEXT_OVERLAY_DURATION_MS),
+  text: z.string().trim().min(1).max(MAX_TEXT_OVERLAY_TEXT_LENGTH),
+  subtitle: z
+    .string()
+    .trim()
+    .min(1)
+    .max(MAX_TEXT_OVERLAY_TEXT_LENGTH)
+    .describe('Second line of a lower-third or chapter-title; ignored by kinetic-text.')
+    .optional(),
+  eyebrow: z
+    .string()
+    .trim()
+    .min(1)
+    .max(MAX_TEXT_OVERLAY_EYEBROW_LENGTH)
+    .describe('Small label over a chapter-title, such as its number ("01"); ignored by the other kinds.')
+    .optional(),
+  variant: TextOverlayVariantSchema.describe(
+    'Leave it out: the studio rotates the animation so two overlays of the same kind never enter alike. Set it only when the user asks for a specific look.',
+  ).optional(),
+  placement: TextOverlayPlacementSchema.describe(
+    'Leave it out: each kind goes to a screen margin that keeps the recorded interface visible.',
+  ).optional(),
+});
+
 export const TimelineTracksSchema = z.strictObject({
   aroll: z.array(VideoClipSchema),
   broll: z.array(VideoClipSchema),
@@ -222,6 +284,55 @@ function validateUniqueClipIds(tracks: z.infer<typeof TimelineTracksSchema>, ctx
   });
 }
 
+function textOverlayVariantFitsKind(overlay: z.infer<typeof TextOverlaySchema>): boolean {
+  const variants: readonly string[] = TEXT_OVERLAY_VARIANTS[overlay.kind];
+  return overlay.variant === undefined || variants.includes(overlay.variant);
+}
+
+function timelineDurationMs(timeline: { durationFrames: number; format: { fps: number } }): number {
+  return Math.round((timeline.durationFrames / timeline.format.fps) * 1000);
+}
+
+function validateTextOverlays(
+  timeline: { durationFrames: number; format: { fps: number }; textOverlays?: z.infer<typeof TextOverlaySchema>[] | undefined },
+  ctx: IssueCtx,
+): void {
+  const overlays = timeline.textOverlays ?? [];
+  const durationMs = timelineDurationMs(timeline);
+  const seenIds = new Set<string>();
+  const ordered = overlays.map((overlay, index) => ({ overlay, index })).sort((a, b) => a.overlay.startMs - b.overlay.startMs);
+  overlays.forEach((overlay, index) => {
+    if (seenIds.has(overlay.id)) {
+      ctx.addIssue({ code: 'custom', path: ['textOverlays', index, 'id'], message: `El id de texto "${overlay.id}" está repetido.` });
+    }
+    seenIds.add(overlay.id);
+    if (!textOverlayVariantFitsKind(overlay)) {
+      ctx.addIssue({
+        code: 'custom',
+        path: ['textOverlays', index, 'variant'],
+        message: `La variante "${overlay.variant}" no es de ${overlay.kind}: usá ${TEXT_OVERLAY_VARIANTS[overlay.kind].join(', ')}.`,
+      });
+    }
+    if (overlay.startMs + overlay.durationMs > durationMs) {
+      ctx.addIssue({
+        code: 'custom',
+        path: ['textOverlays', index, 'startMs'],
+        message: `El texto "${overlay.id}" termina en ${overlay.startMs + overlay.durationMs} ms y la timeline dura ${durationMs} ms.`,
+      });
+    }
+  });
+  ordered.slice(1).forEach(({ overlay, index }, position) => {
+    const previous = ordered[position]?.overlay;
+    if (previous !== undefined && overlay.startMs < previous.startMs + previous.durationMs) {
+      ctx.addIssue({
+        code: 'custom',
+        path: ['textOverlays', index, 'startMs'],
+        message: `El texto "${overlay.id}" se pisa con "${previous.id}": dos textos no pueden estar en pantalla a la vez.`,
+      });
+    }
+  });
+}
+
 export const DELIVERY_KINDS = ['tutorial', 'motion', 'short'] as const;
 
 export const DeliveryContractSchema = z.strictObject({
@@ -248,9 +359,11 @@ export const TimelineSchema = z
     captionStyle: CaptionStyleSchema.optional(),
     captionTheme: CaptionThemeSchema.optional(),
     delivery: DeliveryContractSchema.optional(),
+    textOverlays: z.array(TextOverlaySchema).max(MAX_TEXT_OVERLAYS).optional(),
   })
   .superRefine((timeline, ctx) => {
     validateUniqueClipIds(timeline.tracks, ctx);
+    validateTextOverlays(timeline, ctx);
     if (timeline.captionStyle === 'brand' && timeline.captionTheme === undefined) {
       ctx.addIssue({
         code: 'custom',
@@ -285,3 +398,7 @@ export type LogoBumperSfxChoice = z.infer<typeof LogoBumperSfxChoiceSchema>;
 export type BumperSfxCue = z.infer<typeof BumperSfxCueSchema>;
 export type TimelineTracks = z.infer<typeof TimelineTracksSchema>;
 export type Timeline = z.infer<typeof TimelineSchema>;
+export type TextOverlayKind = z.infer<typeof TextOverlayKindSchema>;
+export type TextOverlayVariant = z.infer<typeof TextOverlayVariantSchema>;
+export type TextOverlayPlacement = z.infer<typeof TextOverlayPlacementSchema>;
+export type TextOverlay = z.infer<typeof TextOverlaySchema>;

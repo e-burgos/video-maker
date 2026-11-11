@@ -6151,6 +6151,67 @@
           }
         ]
       }
+    },
+    {
+      "id": "FIX-e-burgos-076",
+      "author": "e-burgos",
+      "spec_id": null,
+      "fix_document": "sdd/fixes/fix-e-burgos-076.md",
+      "type": "IMPROVEMENT",
+      "severity": "medium",
+      "created_at": "2026-11-11",
+      "resolved_at": "2026-11-11",
+      "validated_at": null,
+      "title": "Modo A: pista de textos en pantalla (lower third, título de capítulo y texto cinético) con rotación por semilla",
+      "estimation_hours": 6,
+      "description": "Etapa 5 del informe de motion graphics. Tres piezas adaptadas de Onda (MIT, aviso conservado) en composition-remotion, con 3 variantes cada una que rotan por video sin repetir la anterior del mismo tipo, tokens de la marca (captionTheme) y márgenes seguros que esquivan la banda de subtítulos. La timeline suma textOverlays; patch_timeline la acepta, el prompt del productor explica cuándo usarla y el editor de la web permite agregarlos, editarlos y quitarlos.",
+      "justification": "El dev eligió las etapas 5 y 3 del informe docs/research/2026-11-10-motion-graphics-productor.md.",
+      "related_modules": [
+        "production-quality"
+      ],
+      "affected_files": [
+        "libs/timeline-core/src/schemas/timeline.schema.ts",
+        "libs/timeline-core/src/timeline/resolve-text-overlays.ts",
+        "libs/timeline-core/schemas/timeline.schema.json",
+        "libs/composition-remotion/src/components/text-overlays/",
+        "libs/composition-remotion/src/helpers/text-overlay-motion.ts",
+        "libs/composition-remotion/src/helpers/text-overlay-layout.ts",
+        "libs/composition-remotion/src/components/timeline-composition.tsx",
+        "libs/producer-tools/src/contract/tool-schemas.ts",
+        "libs/producer-tools/src/handlers/studio-tool-handlers.ts",
+        "libs/producer-tools/src/prompt/build-producer-prompt.ts",
+        "apps/web/src/api/timeline-edit/text-overlays.ts",
+        "apps/web/src/api/timeline-edit/timeline-edit-state.ts",
+        "apps/web/src/api/timeline-edit/timeline-document.ts",
+        "apps/web/src/components/text-overlay-editor.tsx",
+        "apps/web/src/pages/project-preview-page.tsx",
+        "apps/web/src/i18n/messages-es.ts",
+        "apps/web/src/i18n/messages-en.ts"
+      ],
+      "test_reference": "nx test/lint/build en verde: timeline-core 478, composition-remotion 394, producer-tools 452, web 1664. Render de prueba media/prueba-titulos-a revisado cuadro a cuadro.",
+      "status": "implemented",
+      "cycle": null,
+      "usage": {
+        "provider_model": "claude/opus",
+        "effort": "medium",
+        "tokens_in": 900000,
+        "tokens_out": 60000,
+        "approx": true,
+        "source": "declared-estimate",
+        "recorded_at": "2026-11-11",
+        "by_agent": [
+          {
+            "agent": "orchestrator",
+            "provider_model": "claude/opus",
+            "effort": "medium",
+            "tokens_in": 900000,
+            "tokens_out": 60000,
+            "approx": true,
+            "source": "declared-estimate",
+            "recorded_at": "2026-11-11"
+          }
+        ]
+      }
     }
   ]
 }

@@ -78,6 +78,19 @@ export {
   TimelineSchema,
   TimelineTransitionSchema,
   VideoClipSchema,
+  ALL_TEXT_OVERLAY_VARIANTS,
+  MAX_TEXT_OVERLAYS,
+  MAX_TEXT_OVERLAY_DURATION_MS,
+  MAX_TEXT_OVERLAY_EYEBROW_LENGTH,
+  MAX_TEXT_OVERLAY_TEXT_LENGTH,
+  MIN_TEXT_OVERLAY_DURATION_MS,
+  TEXT_OVERLAY_KINDS,
+  TEXT_OVERLAY_PLACEMENTS,
+  TEXT_OVERLAY_VARIANTS,
+  TextOverlayKindSchema,
+  TextOverlayPlacementSchema,
+  TextOverlaySchema,
+  TextOverlayVariantSchema,
 } from './schemas/timeline.schema';
 export type {
   AudioClip,
@@ -99,6 +112,10 @@ export type {
   TimelineBumpers,
   TimelineTransition,
   VideoClip,
+  TextOverlay,
+  TextOverlayKind,
+  TextOverlayPlacement,
+  TextOverlayVariant,
 } from './schemas/timeline.schema';
 
 export {
@@ -409,5 +426,12 @@ export {
 export type { RandomGenerator } from './random/seeded-random';
 export { resolveBumperLook } from './timeline/resolve-bumper-look';
 export type { BumperEdge, BumperLook } from './timeline/resolve-bumper-look';
+export {
+  DEFAULT_TEXT_OVERLAY_PLACEMENTS,
+  DEFAULT_TEXT_OVERLAY_THEME,
+  resolveTextOverlayTheme,
+  resolveTextOverlays,
+} from './timeline/resolve-text-overlays';
+export type { ResolvedTextOverlay, TextOverlayTheme } from './timeline/resolve-text-overlays';
 export { BUMPER_REVEAL_ENTER_MS, MAX_BUMPER_CAPTION_CLICKS, planBumperSfx } from './timeline/plan-bumper-sfx';
 export type { BumperSfxAssetCue, BumperSfxAutoCue, BumperSfxPlanItem } from './timeline/plan-bumper-sfx';

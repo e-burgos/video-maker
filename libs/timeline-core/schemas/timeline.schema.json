@@ -985,6 +985,91 @@
         "kind"
       ],
       "additionalProperties": false
+    },
+    "textOverlays": {
+      "maxItems": 40,
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "minLength": 1
+          },
+          "kind": {
+            "type": "string",
+            "enum": [
+              "lower-third",
+              "chapter-title",
+              "kinetic-text"
+            ],
+            "description": "lower-third: a name or topic with a short line under it; chapter-title: the title of a new section, with an optional number; kinetic-text: one short phrase that enters word by word."
+          },
+          "startMs": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991,
+            "description": "Start on the final timeline, in ms from the first frame after the intro bumper."
+          },
+          "durationMs": {
+            "type": "integer",
+            "minimum": 1200,
+            "maximum": 10000
+          },
+          "text": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 70
+          },
+          "subtitle": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 70,
+            "description": "Second line of a lower-third or chapter-title; ignored by kinetic-text."
+          },
+          "eyebrow": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 12,
+            "description": "Small label over a chapter-title, such as its number (\"01\"); ignored by the other kinds."
+          },
+          "variant": {
+            "type": "string",
+            "enum": [
+              "slide-underline",
+              "accent-bar",
+              "plate-wipe",
+              "blur-rise",
+              "mask-wipe",
+              "word-stagger",
+              "word-rise",
+              "word-pop",
+              "word-blur"
+            ],
+            "description": "Leave it out: the studio rotates the animation so two overlays of the same kind never enter alike. Set it only when the user asks for a specific look."
+          },
+          "placement": {
+            "type": "string",
+            "enum": [
+              "bottom-left",
+              "bottom-right",
+              "top-left",
+              "top-right",
+              "top-center",
+              "bottom-center"
+            ],
+            "description": "Leave it out: each kind goes to a screen margin that keeps the recorded interface visible."
+          }
+        },
+        "required": [
+          "id",
+          "kind",
+          "startMs",
+          "durationMs",
+          "text"
+        ],
+        "additionalProperties": false
+      }
     }
   },
   "required": [

@@ -464,6 +464,7 @@ export function createStudioToolHandlers(
         ...(input.captionStyle !== undefined ? { captionStyle: input.captionStyle ?? undefined } : {}),
         ...(input.safeZone !== undefined ? { safeZone: input.safeZone ?? undefined } : {}),
         ...(input.music !== undefined ? { tracks: { ...current.tracks, music: input.music } } : {}),
+        ...(input.textOverlays !== undefined ? { textOverlays: input.textOverlays ?? undefined } : {}),
       };
 
       const validated = TimelineSchema.safeParse(patched);

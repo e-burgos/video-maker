@@ -6,6 +6,7 @@ import type {
   MediaAsset,
   OutputPreset,
   Timeline,
+  TextOverlayKind,
   TimelineIssue,
 } from '@video-maker/timeline-core';
 import { timelineWarnings, validateTimeline } from '@video-maker/timeline-core';
@@ -17,6 +18,8 @@ import { issueSeverity } from './issue-severity';
 import { clearTimelineLogo, setTimelineLogo, setTimelineLogoStyle } from './logo-overlay';
 import { setTimelineBumperEnabled, setTimelineBumperStyle } from './logo-bumpers';
 import type { BumperEdge, BumperStyle } from './logo-bumpers';
+import { addTextOverlay, removeTextOverlay, updateTextOverlay } from './text-overlays';
+import type { TextOverlayPatch } from './text-overlays';
 import { setTimelineCaptionStyle } from './caption-style';
 import { rescaleMusicAutomation } from './rescale-music-automation';
 import {
@@ -43,6 +46,9 @@ export type TimelineEditAction =
   | { type: 'bumper-enabled'; edge: BumperEdge; enabled: boolean; defaultBackgroundColor?: string }
   | { type: 'bumper-style'; edge: BumperEdge; style: BumperStyle }
   | { type: 'caption-style'; captionStyle: CaptionStyle; captionTheme?: CaptionTheme }
+  | { type: 'text-overlay-add'; kind: TextOverlayKind; text: string }
+  | { type: 'text-overlay-update'; id: string; patch: TextOverlayPatch }
+  | { type: 'text-overlay-remove'; id: string }
 
   | { type: 'saved'; timeline: Timeline }
   | { type: 'reset' };
@@ -272,6 +278,15 @@ export function timelineEditReducer(state: TimelineEditState, action: TimelineEd
 
     case 'caption-style':
       return settle(state.saved, setTimelineCaptionStyle(state.draft, action.captionStyle, action.captionTheme), null);
+
+    case 'text-overlay-add':
+      return settle(state.saved, addTextOverlay(state.draft, action.kind, action.text), null);
+
+    case 'text-overlay-update':
+      return settle(state.saved, updateTextOverlay(state.draft, action.id, action.patch), null);
+
+    case 'text-overlay-remove':
+      return settle(state.saved, removeTextOverlay(state.draft, action.id), null);
   }
 }
 

@@ -10,6 +10,8 @@ import {
   ReferenceBriefSchema,
   ReviewReportSchema,
   SafeZoneSchema,
+  MAX_TEXT_OVERLAYS,
+  TextOverlaySchema,
   TimelineBumpersSchema,
   TimelineSchema,
   VisualReviewDraftSchema,
@@ -414,7 +416,7 @@ const PutTimelineOutputSchema = z.strictObject({
   saved: z.literal(true),
 });
 
-export const PATCH_TIMELINE_SECTIONS = ['logo', 'bumpers', 'audioMix', 'captionStyle', 'safeZone', 'music'] as const;
+export const PATCH_TIMELINE_SECTIONS = ['logo', 'bumpers', 'audioMix', 'captionStyle', 'safeZone', 'music', 'textOverlays'] as const;
 export type PatchTimelineSection = (typeof PATCH_TIMELINE_SECTIONS)[number];
 const PatchTimelineSectionSchema = z.enum(PATCH_TIMELINE_SECTIONS);
 
@@ -426,6 +428,12 @@ const PatchTimelineInputSchema = z
     captionStyle: TimelineCaptionStyleSchema.nullable().optional(),
     safeZone: SafeZoneSchema.nullable().optional(),
     music: z.array(AudioClipSchema).optional(),
+    textOverlays: z
+      .array(TextOverlaySchema)
+      .max(MAX_TEXT_OVERLAYS)
+      .nullable()
+      .describe('The whole list of on-screen texts (lower thirds, chapter titles, kinetic phrases); null removes them all.')
+      .optional(),
   })
   .refine(
     (value) => PATCH_TIMELINE_SECTIONS.some((section) => value[section] !== undefined),
@@ -838,9 +846,10 @@ export const STUDIO_TOOLS: Readonly<Record<StudioToolName, StudioToolDefinition>
   patch_timeline: {
     description:
       'Replace only the given sections of the already saved timeline — logo, bumpers, audioMix, ' +
-      'captionStyle, safeZone and/or the music track — without touching captions, voice or any other word. ' +
+      'captionStyle, safeZone, the music track and/or the textOverlays (lower thirds, chapter titles, kinetic ' +
+      'phrases) — without touching captions, voice or any other word. ' +
       'Reads the current timeline, replaces just those sections, validates the result and saves it. Use this ' +
-      'for a logo, an intro/outro plate, the music level or the caption style instead of put_timeline, which ' +
+      'for a logo, an intro/outro plate, the music level, the caption style or on-screen titles instead of put_timeline, which ' +
       'forces you to re-send every caption word. Fails if the project has no timeline yet.',
     input: PatchTimelineInputSchema,
     output: PatchTimelineOutputSchema,

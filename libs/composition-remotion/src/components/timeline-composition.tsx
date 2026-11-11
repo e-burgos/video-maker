@@ -17,6 +17,7 @@ import type { PreviewSfxCue } from './bumper-sfx-track';
 import { KineticCaptions } from './kinetic-captions';
 import { LogoBumperScene } from './logo-bumper-scene';
 import { LogoOverlay } from './logo-overlay';
+import { TextOverlayTrack } from './text-overlays/text-overlay-track';
 
 export type TimelineAudioMode = 'mix' | 'muted';
 
@@ -88,6 +89,12 @@ export const TimelineComposition: FC<TimelineCompositionProps> = ({
         theme={timeline.captionTheme}
       />
     ),
+    <TextOverlayTrack
+      key="text-overlays"
+      timeline={timeline}
+      safeZone={safeZone}
+      reserveCaptionBand={resolvedCaptionPreset !== null && plan.captions.length > 0}
+    />,
   ];
 
   const sfx =

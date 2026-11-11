@@ -56,9 +56,9 @@ const TOOL_DESCRIPTIONS: Readonly<Record<StudioToolName, string>> = {
     'differ from what is saved unless editCaptions is true — use patch_timeline instead for anything that ' +
     'never touches a caption word.',
   patch_timeline:
-    'replace only the logo, bumpers, audioMix, captionStyle, safeZone and/or music sections of the already ' +
-    'saved timeline, leaving captions and voice untouched. Use this for a logo, an intro/outro plate, the ' +
-    'music level or the caption style — never put_timeline, which forces you to re-send every caption word.',
+    'replace only the logo, bumpers, audioMix, captionStyle, safeZone, music and/or textOverlays sections of the ' +
+    'already saved timeline, leaving captions and voice untouched. Use this for a logo, an intro/outro plate, the ' +
+    'music level, the caption style or on-screen titles — never put_timeline, which forces you to re-send every caption word.',
   search_free_music: 'search for freely licensed music by mood and get back candidates.',
   import_music: "bring a searched result into the project; its credit is recorded automatically.",
   search_free_media:
@@ -445,6 +445,21 @@ function buildProducerCraftSection(): string {
     '"with their sound", is not asking for a specific one: they already sound, so leave',
     '`sfxKind` out. Set it only when the user names the sound (a whoosh, an impact, a',
     'shimmer, clicks).',
+    '',
+    '## On-screen titles in a montage',
+    '',
+    'A montage (tutorial or screen recording) can carry `textOverlays`: a `chapter-title` when',
+    'a new section starts (`eyebrow` with its number, "01"), a `lower-third` to name the screen',
+    'or feature being shown (`subtitle` with one short line) and, at most once or twice per',
+    'video, a `kinetic-text` with a short punch phrase. Read the timeline with get_timeline,',
+    'place each text on the final timeline (ms after the intro bumper) where the voice starts',
+    'that section, keep 1500–4000 ms per text and never two on screen at once. Send the whole',
+    'list with patch_timeline; it replaces the list saved before. Leave `variant` and',
+    '`placement` out: the studio rotates the animation so two texts of the same kind never',
+    'enter alike, and puts each kind in a screen margin that keeps the recorded interface',
+    'visible and clears the captions. Keep texts short (a few words): they never wrap over',
+    'the interface. Add them only when the user asks for titles, chapters or lower thirds, or',
+    'the brief calls for them.',
     '',
     '## Failures',
     '',
