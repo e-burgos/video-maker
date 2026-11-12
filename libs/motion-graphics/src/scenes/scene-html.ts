@@ -1,6 +1,6 @@
 import { brandIsotipo } from '../brand/brand-manifest';
 import type { BrandManifest } from '../brand/brand-manifest';
-import { animationVisual } from './animations';
+import { animationVisual, isMockupAnimation } from './animations';
 import { screenHomography } from './screen-perspective';
 import { MotionStudioError } from '../errors/motion-studio-error';
 import type { IconName, MotionChip, MotionScreen, MotionVisual } from '../storyboard/motion-storyboard.schema';
@@ -217,7 +217,7 @@ export function visual(v: MotionVisual, ctx: SceneContext): string {
     case 'devices':
       return devicesVisual(v.images, v.scroll === true, ctx);
     case 'animation':
-      return animationVisual(v.name, v.cue);
+      return `<div class="mg-anim-fit${isMockupAnimation(v.name) ? ' mockup' : ''}">${animationVisual(v.name, v.cue)}</div>`;
     case 'icon':
       return `<div class="mg-big-icon"${animAttrs({ anim: 'pop' })}>${icon(v.icon)}</div>`;
     case 'countdown': {

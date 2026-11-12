@@ -69,7 +69,7 @@ const schedule: Renderer<'schedule'> = ({ props }) => {
     .map((h) => `<div class="mg-hour" style="left:${pct(h)}%"><span>${String(Math.floor(h)).padStart(2, '0')}:00</span></div>`)
     .join('');
   const blocks = props.blocks
-    .map((b) => `<div class="mg-block ${toneClass(b.tone)}" style="left:${pct(b.start)}%;width:calc(${(((b.end - b.start) / span) * 100).toFixed(2)}% - 6px);top:${b.row === 1 ? 118 : 0}px;transform-origin:0 50%"${animAttrs({ anim: 'wipe', cue: b.cue })}><b>${esc(b.label)}</b><i>${String(b.start).padStart(2, '0')}–${String(b.end).padStart(2, '0')}</i></div>`)
+    .map((b) => `<div class="mg-block ${toneClass(b.tone)}${b.row === 1 ? ' row-1' : ''}" style="left:${pct(b.start)}%;width:calc(${(((b.end - b.start) / span) * 100).toFixed(2)}% - 6px);transform-origin:0 50%"${animAttrs({ anim: 'wipe', cue: b.cue })}><b>${esc(b.label)}</b><i>${String(b.start).padStart(2, '0')}–${String(b.end).padStart(2, '0')}</i></div>`)
     .join('');
   const days = props.days
     ? `<div class="mg-days">${['LUN', 'MAR', 'MIÉ', 'JUE', 'VIE', 'SÁB', 'DOM']

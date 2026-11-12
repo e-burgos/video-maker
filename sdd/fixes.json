@@ -6265,6 +6265,394 @@
           }
         ]
       }
+    },
+    {
+      "id": "FIX-e-burgos-078",
+      "author": "e-burgos",
+      "spec_id": null,
+      "fix_document": "sdd/fixes/fix-e-burgos-078.md",
+      "type": "IMPROVEMENT",
+      "severity": "medium",
+      "created_at": "2026-11-12",
+      "resolved_at": "2026-11-12",
+      "validated_at": null,
+      "title": "Studio descubrible desde otro repo: ~/.video-maker/studio.<source>.json, versión en /health y GET /capabilities",
+      "estimation_hours": 4,
+      "description": "F1 del plan. render-api escribe al escuchar ~/.video-maker/studio.desktop.json o studio.dev.json (0600) con apiUrl, token, version, source, pid y startedAt, y lo borra al cerrar si el pid es suyo. /health suma version. GET /capabilities describe presets, formatos, modos, bumpers, SFX, transiciones, titleStyle, textos en pantalla, voces y jobs desde las constantes reales (lib nueva studio-capabilities).",
+      "justification": "Plan aprobado por el dev el 2026-11-12: docs/plans/2026-11-12-plugin-video-maker.md (plugin Video Maker para cualquier proyecto).",
+      "related_modules": [
+        "producer-tools"
+      ],
+      "affected_files": [
+        "apps/render-api/src/discovery/",
+        "apps/render-api/src/main.ts",
+        "apps/render-api/src/http/health-handler.ts",
+        "apps/render-api/src/http/handlers/capabilities-handler.ts",
+        "apps/render-api/src/http/routes.ts",
+        "apps/desktop/src/main/render-api-env.ts",
+        "apps/desktop/src/main/main.ts",
+        "libs/studio-capabilities/"
+      ],
+      "test_reference": "nx lint/test en verde: render-api 2301, desktop 122, studio-capabilities. Smoke con render-api scratch en 4520.",
+      "status": "implemented",
+      "cycle": null,
+      "usage": {
+        "provider_model": "claude/sonnet",
+        "effort": "medium",
+        "tokens_in": 250000,
+        "tokens_out": 45000,
+        "approx": true,
+        "source": "declared-estimate",
+        "recorded_at": "2026-11-12",
+        "by_agent": [
+          {
+            "agent": "implementor-back",
+            "provider_model": "claude/sonnet",
+            "effort": "medium",
+            "tokens_in": 250000,
+            "tokens_out": 45000,
+            "approx": true,
+            "source": "declared-estimate",
+            "recorded_at": "2026-11-12"
+          },
+          {
+            "agent": "orchestrator",
+            "provider_model": "claude/opus",
+            "effort": "medium",
+            "tokens_in": 60000,
+            "tokens_out": 8000,
+            "approx": true,
+            "source": "declared-estimate",
+            "recorded_at": "2026-11-12"
+          }
+        ]
+      }
+    },
+    {
+      "id": "FIX-e-burgos-079",
+      "author": "e-burgos",
+      "spec_id": null,
+      "fix_document": "sdd/fixes/fix-e-burgos-079.md",
+      "type": "IMPROVEMENT",
+      "severity": "medium",
+      "created_at": "2026-11-12",
+      "resolved_at": "2026-11-12",
+      "validated_at": null,
+      "title": "MCP externo con slug por tool, alta de proyectos, material y marcas, sin publicar ni borrar; paquete npm",
+      "estimation_hours": 4,
+      "description": "F2 del plan. El MCP resuelve el studio por --api-url, VIDEO_MAKER_API_URL/TOKEN o el archivo de descubrimiento. En modo externo las tools llevan slug y se suman studio_status, get_capabilities, list_projects, create_project, upload_asset, list_brands, get_brand, create_brand, update_brand y upload_brand_file; quedan afuera queue_publication, draft_publication y todo borrado. El modo interno del productor no cambia. Target producer-tools:pack-mcp arma dist/packages/video-maker-mcp (sin publicar).",
+      "justification": "Plan aprobado por el dev el 2026-11-12: docs/plans/2026-11-12-plugin-video-maker.md (plugin Video Maker para cualquier proyecto).",
+      "related_modules": [
+        "producer-tools"
+      ],
+      "affected_files": [
+        "libs/producer-tools/src/external/",
+        "libs/producer-tools/src/mcp/",
+        "libs/producer-tools/src/client/",
+        "libs/producer-tools/src/handlers/studio-tool-handlers.ts",
+        "libs/producer-tools/npm/",
+        "scripts/build-mcp-package.mjs",
+        "libs/producer-tools/project.json"
+      ],
+      "test_reference": "nx lint/test en verde: producer-tools 473. Smoke MCP externo por stdio: status, capabilities, create_project, upload_asset, marcas.",
+      "status": "implemented",
+      "cycle": null,
+      "usage": {
+        "provider_model": "claude/sonnet",
+        "effort": "medium",
+        "tokens_in": 55000,
+        "tokens_out": 12000,
+        "approx": true,
+        "source": "declared-estimate",
+        "recorded_at": "2026-11-12",
+        "by_agent": [
+          {
+            "agent": "implementor-back",
+            "provider_model": "claude/sonnet",
+            "effort": "medium",
+            "tokens_in": 55000,
+            "tokens_out": 12000,
+            "approx": true,
+            "source": "declared-estimate",
+            "recorded_at": "2026-11-12"
+          },
+          {
+            "agent": "orchestrator",
+            "provider_model": "claude/opus",
+            "effort": "medium",
+            "tokens_in": 60000,
+            "tokens_out": 8000,
+            "approx": true,
+            "source": "declared-estimate",
+            "recorded_at": "2026-11-12"
+          }
+        ]
+      }
+    },
+    {
+      "id": "FIX-e-burgos-080",
+      "author": "e-burgos",
+      "spec_id": null,
+      "fix_document": "sdd/fixes/fix-e-burgos-080.md",
+      "type": "IMPROVEMENT",
+      "severity": "medium",
+      "created_at": "2026-11-12",
+      "resolved_at": "2026-11-12",
+      "validated_at": null,
+      "title": "Referencias del plugin generadas desde los schemas reales y test de atraso de las skills",
+      "estimation_hours": 3,
+      "description": "F4 del plan. Proyecto tools/plugin-references genera timeline.md, motion-storyboard.md, motion-brief.md, brand.md, capabilities.md y los JSON Schema en plugins/video-maker/skills/video-maker/references/. El test falla si lo generado no coincide con lo commiteado o si un SKILL.md nombra un campo que no existe en ningún schema ni en known-terms.txt.",
+      "justification": "Plan aprobado por el dev el 2026-11-12: docs/plans/2026-11-12-plugin-video-maker.md (plugin Video Maker para cualquier proyecto).",
+      "related_modules": [
+        "producer-tools"
+      ],
+      "affected_files": [
+        "tools/plugin-references/",
+        "plugins/video-maker/skills/video-maker/references/",
+        "plugins/video-maker/skills/known-terms.txt",
+        "tsconfig.base.json",
+        "eslint.config.mjs"
+      ],
+      "test_reference": "nx lint/test plugin-references en verde (13 tests, incluye fixture con campo falso que falla).",
+      "status": "implemented",
+      "cycle": null,
+      "usage": {
+        "provider_model": "claude/sonnet",
+        "effort": "medium",
+        "tokens_in": 131000,
+        "tokens_out": 15000,
+        "approx": true,
+        "source": "declared-estimate",
+        "recorded_at": "2026-11-12",
+        "by_agent": [
+          {
+            "agent": "implementor-back",
+            "provider_model": "claude/sonnet",
+            "effort": "medium",
+            "tokens_in": 131000,
+            "tokens_out": 15000,
+            "approx": true,
+            "source": "declared-estimate",
+            "recorded_at": "2026-11-12"
+          },
+          {
+            "agent": "orchestrator",
+            "provider_model": "claude/opus",
+            "effort": "medium",
+            "tokens_in": 60000,
+            "tokens_out": 8000,
+            "approx": true,
+            "source": "declared-estimate",
+            "recorded_at": "2026-11-12"
+          }
+        ]
+      }
+    },
+    {
+      "id": "FIX-e-burgos-081",
+      "author": "e-burgos",
+      "spec_id": null,
+      "fix_document": "sdd/fixes/fix-e-burgos-081.md",
+      "type": "IMPROVEMENT",
+      "severity": "medium",
+      "created_at": "2026-11-12",
+      "resolved_at": "2026-11-12",
+      "validated_at": null,
+      "title": "Plugin video-maker: cinco skills genéricas para cualquier repo, marketplace y manifiestos",
+      "description": "F3 y F5 del plan. plugins/video-maker con las skills video-maker (entrada), video-maker-brand, video-maker-motion-brief, video-maker-screen-capture (grabador Playwright genérico) y video-maker-raw-material; .claude-plugin/marketplace.json en la raíz, plugin.json 0.1.0 alineado con el paquete npm y .mcp.json con npx @e-burgos/video-maker-mcp. Se borran las skills viejas motion-video-brief, screen-recording-tutorial y video-maker-material-contract de sdd/skills (el kit no deja nombrar el proyecto ahí y display-ads migra al plugin).",
+      "justification": "Plan aprobado por el dev el 2026-11-12: docs/plans/2026-11-12-plugin-video-maker.md.",
+      "related_modules": [
+        "producer-tools"
+      ],
+      "affected_files": [
+        ".claude-plugin/marketplace.json",
+        "plugins/video-maker/",
+        "tools/plugin-references/src/plugin-manifest.spec.ts",
+        "sdd/skills/ (3 skills borradas)"
+      ],
+      "test_reference": "plugin-references lint/test 16/16; claude plugin validate en la raíz y en plugins/video-maker.",
+      "status": "implemented",
+      "cycle": null,
+      "usage": {
+        "provider_model": "claude/opus",
+        "effort": "medium",
+        "tokens_in": 260000,
+        "tokens_out": 45000,
+        "approx": true,
+        "source": "declared-estimate",
+        "recorded_at": "2026-11-12",
+        "by_agent": [
+          {
+            "agent": "implementor-front",
+            "provider_model": "claude/opus",
+            "effort": "medium",
+            "tokens_in": 260000,
+            "tokens_out": 45000,
+            "approx": true,
+            "source": "declared-estimate",
+            "recorded_at": "2026-11-12"
+          }
+        ]
+      },
+      "estimation_hours": 4
+    },
+    {
+      "id": "FIX-e-burgos-082",
+      "author": "e-burgos",
+      "spec_id": null,
+      "fix_document": "sdd/fixes/fix-e-burgos-082.md",
+      "type": "IMPROVEMENT",
+      "severity": "medium",
+      "created_at": "2026-11-12",
+      "resolved_at": "2026-11-12",
+      "validated_at": null,
+      "title": "Plugin video-maker: ajustes tras la prueba en dos repos vacíos e import de música a nivel marca",
+      "estimation_hours": 3,
+      "description": "F7a del plan. Pruebas headless desde una librería sin UI (motion) y una web chica (tutorial grabado) llegaron a storyboard y propuesta. Ajustes: POST /brands/:id/music/import y tool import_brand_music (musicFrom solo para submarcas del mismo dueño); propose_production en ambos modos; nombre hablado contra tokens en pantalla; 9:16 para todo lo que se ve en el celular; orden de instalación de Playwright; fuera el campo inexistente tone; saltear review_material si solo está el logo; flows en .video-maker/flows y grabaciones fuera del repo.",
+      "justification": "Plan aprobado por el dev el 2026-11-12: docs/plans/2026-11-12-plugin-video-maker.md.",
+      "related_modules": [
+        "producer-tools"
+      ],
+      "affected_files": [
+        "plugins/video-maker/skills/",
+        "apps/render-api/src/http/handlers/music-handler.ts",
+        "apps/render-api/src/http/routes.ts",
+        "libs/producer-tools/src/external/",
+        "tools/plugin-references/"
+      ],
+      "test_reference": "lint/test en verde: render-api 2300, producer-tools 474, plugin-references; claude plugin validate.",
+      "status": "implemented",
+      "cycle": null,
+      "usage": {
+        "provider_model": "claude/sonnet",
+        "effort": "medium",
+        "tokens_in": 180000,
+        "tokens_out": 30000,
+        "approx": true,
+        "source": "declared-estimate",
+        "recorded_at": "2026-11-12",
+        "by_agent": [
+          {
+            "agent": "implementor-back",
+            "provider_model": "claude/sonnet",
+            "effort": "medium",
+            "tokens_in": 180000,
+            "tokens_out": 30000,
+            "approx": true,
+            "source": "declared-estimate",
+            "recorded_at": "2026-11-12"
+          }
+        ]
+      }
+    },
+    {
+      "id": "FIX-e-burgos-083",
+      "author": "e-burgos",
+      "spec_id": null,
+      "fix_document": "sdd/fixes/fix-e-burgos-083.md",
+      "type": "BUGFIX",
+      "severity": "medium",
+      "created_at": "2026-11-12",
+      "resolved_at": "2026-11-12",
+      "validated_at": null,
+      "title": "Motion 9:16 sin huecos, scramble y orden de ítems, beatSync corto, review pendiente y skills tras la prueba de oro",
+      "estimation_hours": 3,
+      "description": "Hallazgos de la prueba de oro en display-ads. Motor: en 9:16 el visual ocupa el alto libre (hook, feature, product, ai-generate), schedule centrado con rótulos en dos líneas y fila por clase, galerías 2/3/4 sin huecos; scramble oculto hasta que arranca; ítems sin cue salen después del hermano anterior; minBars por defecto 2 en 9:16. Studio: get_render_review espera siempre la review en curso. Skills: brand:<key>, galería 2-4, costo de beatSync, revisar cada vo contra el guion, guardar antes de renderizar, aprobación que no llegó. Descartados: la caída fue el panel de vista previa (SIGTERM) y la aprobación llegó 1 min 44 s después; la galería de 5 sí se rechazó al guardar.",
+      "justification": "Pedido del dev: «Entonces reparemos todos estos bugs, por favor.» (2026-11-12), tras la prueba de aceptación del plugin.",
+      "related_modules": [
+        "motion-graphics",
+        "producer-tools"
+      ],
+      "affected_files": [
+        "libs/motion-graphics/assets/runtime/scenes.css",
+        "libs/motion-graphics/assets/runtime/motion-runtime.js",
+        "libs/motion-graphics/src/scenes/render-scene.ts",
+        "libs/motion-graphics/src/compose/compose-storyboard.ts",
+        "libs/producer-tools/src/handlers/studio-tool-handlers.ts",
+        "plugins/video-maker/skills/video-maker-motion-brief/SKILL.md"
+      ],
+      "test_reference": "motion-graphics 350 y producer-tools 475 tests, lint, plugin-references; render real 9:16 del proyecto prueba-fix-083-vertical revisado frame a frame.",
+      "status": "implemented",
+      "cycle": null,
+      "usage": {
+        "provider_model": "claude/opus",
+        "effort": "medium",
+        "tokens_in": 420000,
+        "tokens_out": 25000,
+        "approx": true,
+        "source": "declared-estimate",
+        "recorded_at": "2026-11-12",
+        "by_agent": [
+          {
+            "agent": "implementor-back",
+            "provider_model": "claude/opus",
+            "effort": "medium",
+            "tokens_in": 320000,
+            "tokens_out": 20000,
+            "approx": true,
+            "source": "declared-estimate",
+            "recorded_at": "2026-11-12"
+          },
+          {
+            "agent": "custom",
+            "provider_model": "claude/sonnet",
+            "effort": "medium",
+            "tokens_in": 100000,
+            "tokens_out": 5000,
+            "approx": true,
+            "source": "declared-estimate",
+            "recorded_at": "2026-11-12"
+          }
+        ]
+      }
+    },
+    {
+      "id": "FIX-e-burgos-084",
+      "author": "e-burgos",
+      "spec_id": null,
+      "fix_document": "sdd/fixes/fix-e-burgos-084.md",
+      "type": "BUGFIX",
+      "severity": "low",
+      "created_at": "2026-11-12",
+      "resolved_at": "2026-11-12",
+      "validated_at": null,
+      "title": "Maquetas animadas (editor y navegador) llenan el alto del visual en 9:16",
+      "estimation_hours": 0.5,
+      "description": "En 9:16 las animaciones publish y domain se escalaban 1.38 y dejaban ~350 px vacíos en el área visual. Ahora llevan la clase mockup: sin escala, ocupan todo el alto, el bloque principal crece y textos y botones son más grandes. Las animaciones SVG siguen escaladas.",
+      "justification": "Pedido del dev: «Ok, perfecto. Arreglar el código. El video lo dejamos como está.» (2026-11-12), sobre el pendiente del panel «Listo para usar».",
+      "related_modules": [
+        "motion-graphics"
+      ],
+      "affected_files": [
+        "libs/motion-graphics/assets/runtime/scenes.css",
+        "libs/motion-graphics/src/scenes/animations.ts",
+        "libs/motion-graphics/src/scenes/scene-html.ts",
+        "libs/motion-graphics/src/scenes/animations.spec.ts"
+      ],
+      "test_reference": "motion-graphics test, lint y build; escena feature-setup medida en el laboratorio de escenas (editor y navegador ocupan 737–1730 px del área visual).",
+      "status": "implemented",
+      "cycle": null,
+      "usage": {
+        "provider_model": "claude/opus",
+        "effort": "medium",
+        "tokens_in": 120000,
+        "tokens_out": 8000,
+        "approx": true,
+        "source": "declared-estimate",
+        "recorded_at": "2026-11-12",
+        "by_agent": [
+          {
+            "agent": "implementor-back",
+            "provider_model": "claude/opus",
+            "effort": "medium",
+            "tokens_in": 120000,
+            "tokens_out": 8000,
+            "approx": true,
+            "source": "declared-estimate",
+            "recorded_at": "2026-11-12"
+          }
+        ]
+      }
     }
   ]
 }

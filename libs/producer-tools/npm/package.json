@@ -1,0 +1,27 @@
+{
+  "name": "@e-burgos/video-maker-mcp",
+  "version": "0.1.0",
+  "description": "MCP server that lets any Claude Code project drive a local Video Maker studio: create projects and brands, upload material, write briefs and storyboards, run jobs and review renders.",
+  "license": "MIT",
+  "type": "commonjs",
+  "bin": {
+    "video-maker-mcp": "bin/video-maker-mcp.js"
+  },
+  "files": [
+    "bin/video-maker-mcp.js",
+    "README.md",
+    "LICENSE"
+  ],
+  "engines": {
+    "node": ">=22"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/e-burgos/video-maker.git",
+    "directory": "libs/producer-tools"
+  },
+  "keywords": ["mcp", "model-context-protocol", "video", "claude-code"],
+  "publishConfig": {
+    "access": "public"
+  }
+}

@@ -25,6 +25,9 @@ export default defineConfig({
       '@video-maker/motion-graphics': fileURLToPath(
         new URL('../../libs/motion-graphics/src/index.ts', import.meta.url),
       ),
+      '@video-maker/studio-capabilities': fileURLToPath(
+        new URL('../../libs/studio-capabilities/src/index.ts', import.meta.url),
+      ),
       '@video-maker/producer-tools': fileURLToPath(
         new URL('../../libs/producer-tools/src/index.ts', import.meta.url),
       ),

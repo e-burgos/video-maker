@@ -1,0 +1,383 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "properties": {
+    "id": {
+      "type": "string",
+      "pattern": "^[a-z][a-z0-9-]*$"
+    },
+    "name": {
+      "type": "string",
+      "minLength": 1
+    },
+    "spokenName": {
+      "type": "string",
+      "minLength": 1,
+      "description": "How the voice must write the brand name to pronounce it right"
+    },
+    "tagline": {
+      "type": "string",
+      "minLength": 1
+    },
+    "taglineAccent": {
+      "type": "string",
+      "minLength": 1
+    },
+    "url": {
+      "type": "string",
+      "minLength": 1
+    },
+    "logo": {
+      "type": "string",
+      "minLength": 1
+    },
+    "isotipo": {
+      "type": "string",
+      "minLength": 1
+    },
+    "css": {
+      "type": "string",
+      "minLength": 1
+    },
+    "palette": {
+      "type": "object",
+      "properties": {
+        "background": {
+          "type": "string",
+          "pattern": "^#[0-9a-fA-F]{6}$"
+        },
+        "accent": {
+          "type": "string",
+          "pattern": "^#[0-9a-fA-F]{6}$"
+        },
+        "accent2": {
+          "type": "string",
+          "pattern": "^#[0-9a-fA-F]{6}$"
+        },
+        "text": {
+          "type": "string",
+          "pattern": "^#[0-9a-fA-F]{6}$"
+        }
+      },
+      "required": [
+        "background",
+        "accent",
+        "accent2",
+        "text"
+      ],
+      "additionalProperties": false
+    },
+    "tokens": {
+      "type": "object",
+      "propertyNames": {
+        "type": "string",
+        "pattern": "^--mg-[a-z0-9-]+$"
+      },
+      "additionalProperties": {
+        "type": "string",
+        "minLength": 1
+      }
+    },
+    "typography": {
+      "type": "object",
+      "properties": {
+        "display": {
+          "type": "string",
+          "minLength": 1
+        },
+        "body": {
+          "type": "string",
+          "minLength": 1
+        },
+        "mono": {
+          "type": "string",
+          "minLength": 1
+        }
+      },
+      "required": [
+        "display",
+        "body"
+      ],
+      "additionalProperties": false
+    },
+    "fonts": {
+      "minItems": 1,
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "family": {
+            "type": "string",
+            "minLength": 1
+          },
+          "file": {
+            "type": "string",
+            "minLength": 1
+          },
+          "weight": {
+            "type": "string",
+            "minLength": 1
+          },
+          "unicodeRange": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "required": [
+          "family",
+          "file"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "devices": {
+      "type": "object",
+      "propertyNames": {
+        "type": "string"
+      },
+      "additionalProperties": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "minLength": 1
+          },
+          "image": {
+            "type": "string",
+            "minLength": 1
+          },
+          "kind": {
+            "type": "string",
+            "enum": [
+              "counter",
+              "box",
+              "screen"
+            ]
+          },
+          "screen": {
+            "type": "object",
+            "properties": {
+              "polygon": {
+                "minItems": 4,
+                "maxItems": 4,
+                "type": "array",
+                "items": {
+                  "type": "array",
+                  "prefixItems": [
+                    {
+                      "type": "number",
+                      "minimum": 0,
+                      "maximum": 100
+                    },
+                    {
+                      "type": "number",
+                      "minimum": 0,
+                      "maximum": 100
+                    }
+                  ],
+                  "items": false,
+                  "minItems": 2,
+                  "maxItems": 2
+                }
+              },
+              "skew": {
+                "type": "number"
+              },
+              "rotate": {
+                "type": "number"
+              },
+              "aspect": {
+                "type": "number",
+                "exclusiveMinimum": 0
+              }
+            },
+            "required": [
+              "polygon"
+            ],
+            "additionalProperties": false
+          },
+          "retired": {
+            "type": "boolean"
+          },
+          "plate": {
+            "type": "boolean"
+          },
+          "spokenName": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "required": [
+          "name",
+          "image",
+          "kind"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "images": {
+      "type": "object",
+      "propertyNames": {
+        "type": "string"
+      },
+      "additionalProperties": {
+        "anyOf": [
+          {
+            "type": "string",
+            "minLength": 1
+          },
+          {
+            "type": "object",
+            "properties": {
+              "file": {
+                "type": "string",
+                "minLength": 1
+              },
+              "caption": {
+                "type": "string",
+                "minLength": 1
+              }
+            },
+            "required": [
+              "file",
+              "caption"
+            ],
+            "additionalProperties": false
+          }
+        ]
+      }
+    },
+    "music": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "file": {
+            "type": "string",
+            "minLength": 1
+          },
+          "credit": {
+            "type": "string",
+            "minLength": 1
+          },
+          "bpm": {
+            "type": "number",
+            "exclusiveMinimum": 0
+          },
+          "mood": {
+            "type": "string",
+            "minLength": 1
+          },
+          "drop": {
+            "type": "number",
+            "minimum": 0
+          },
+          "videoTypes": {
+            "minItems": 1,
+            "type": "array",
+            "items": {
+              "type": "string",
+              "enum": [
+                "tutorial",
+                "product",
+                "vertical",
+                "institutional"
+              ]
+            }
+          }
+        },
+        "required": [
+          "id",
+          "file",
+          "credit",
+          "bpm",
+          "mood"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "bumpers": {
+      "type": "object",
+      "properties": {
+        "backgrounds": {
+          "minItems": 1,
+          "type": "array",
+          "items": {
+            "type": "string",
+            "enum": [
+              "solid",
+              "gradient",
+              "noise",
+              "shapes",
+              "glow"
+            ]
+          },
+          "description": "Animated backgrounds the intro and outro rotate between"
+        },
+        "reveals": {
+          "minItems": 1,
+          "type": "array",
+          "items": {
+            "type": "string",
+            "enum": [
+              "fade",
+              "zoom",
+              "slide-up",
+              "wipe",
+              "blur-in",
+              "pop"
+            ]
+          },
+          "description": "Logo reveals the intro and outro rotate between"
+        },
+        "outroCaption": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 60,
+          "description": "Text typed under the outro logo; defaults to the brand url"
+        }
+      },
+      "additionalProperties": false
+    },
+    "musicFrom": {
+      "type": "string",
+      "pattern": "^[a-z][a-z0-9-]*$",
+      "description": "Brand whose music bank this brand also uses; only a sub-brand of the same owner, never the bank of an unrelated company"
+    },
+    "voice": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "lengthScale": {
+          "type": "number",
+          "minimum": 0.7,
+          "maximum": 1.4
+        }
+      },
+      "required": [
+        "id",
+        "lengthScale"
+      ],
+      "additionalProperties": false
+    }
+  },
+  "required": [
+    "id",
+    "name",
+    "spokenName",
+    "tagline",
+    "logo",
+    "fonts",
+    "devices",
+    "images",
+    "music",
+    "voice"
+  ],
+  "additionalProperties": false
+}

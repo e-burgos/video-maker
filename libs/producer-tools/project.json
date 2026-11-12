@@ -38,6 +38,14 @@
       "options": {
         "command": "node scripts/esbuild-node-bundle.mjs libs/producer-tools/src/mcp/main.ts dist/libs/producer-tools/mcp/main.js"
       }
+    },
+    "pack-mcp": {
+      "executor": "nx:run-commands",
+      "dependsOn": ["bundle"],
+      "outputs": ["{workspaceRoot}/dist/packages/video-maker-mcp"],
+      "options": {
+        "command": "node scripts/build-mcp-package.mjs"
+      }
     }
   }
 }

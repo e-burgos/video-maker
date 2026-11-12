@@ -148,7 +148,7 @@ describe('handleHealth', () => {
     expect(byName.get('whisperModel')).toBe(false);
   });
 
-  it('serializes exactly the nine top-level HealthBody keys', async () => {
+  it('serializes exactly the ten top-level HealthBody keys', async () => {
     const callLog = createCallLog();
     const deps = createFakeRenderApiDependencies(callLog, {
       probeMediaBinaries: async () => ALL_BINARIES_RESOLVED,
@@ -168,7 +168,19 @@ describe('handleHealth', () => {
       'status',
       'store',
       'time',
+      'version',
     ]);
+  });
+
+  it('reports the app version from the environment', async () => {
+    const deps = createFakeRenderApiDependencies(createCallLog(), { probeMediaBinaries: async () => ALL_BINARIES_RESOLVED });
+    process.env['VIDEO_MAKER_APP_VERSION'] = '9.9.9';
+    try {
+      const body = (await handleHealth(deps, STORE, emptyRuntime())).body as HealthBody;
+      expect(body.version).toBe('9.9.9');
+    } finally {
+      delete process.env['VIDEO_MAKER_APP_VERSION'];
+    }
   });
 
   describe('store info', () => {

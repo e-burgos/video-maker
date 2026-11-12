@@ -347,6 +347,7 @@ async function startStudio(input: {
     projectsFolder: input.projectsFolder,
     isPackaged: app.isPackaged,
     parentPid: process.pid,
+    appVersion: app.getVersion(),
   });
   const launchCommand = buildLaunchCommand({
     isPackaged: app.isPackaged,

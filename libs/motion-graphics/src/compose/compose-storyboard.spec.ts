@@ -87,6 +87,11 @@ describe('composeStoryboard', () => {
     expect(musicSource).toBe('music/Beat Song.mp3');
   });
 
+  it('uses shorter default bars in 9:16 so short reels keep their planned length', () => {
+    const { script } = composeStoryboard({ ...base, format: '9:16' }, testBrand);
+    expect(script.scenes.map((s) => s.minBars)).toEqual([2, 2, 3, 3]);
+  });
+
   it('carries minSec into the script only on the scenes that set it', () => {
     const timed = { ...base, scenes: base.scenes.map((scene, index) => (index === 0 ? { ...scene, minSec: 5 } : scene)) };
     const { script } = composeStoryboard(timed, testBrand);

@@ -89,6 +89,16 @@ describe('buildRenderApiEnv', () => {
     expect(env.CLAUDE_CLI_PATH).toBe('/opt/homebrew/bin/claude');
   });
 
+  it('marks the studio as desktop and passes the app version for the discovery file', async () => {
+    const deps = { readLoginShellPath: vi.fn().mockResolvedValue(null), resolveClaudeCli: vi.fn().mockResolvedValue(null) };
+    const env = await buildRenderApiEnv(
+      { paths: PATHS, host: '127.0.0.1', port: 4310, token: 't', projectsFolder: '/p', isPackaged: true, parentPid: 1, appVersion: '0.4.3' },
+      deps,
+    );
+    expect(env.VIDEO_MAKER_STUDIO_SOURCE).toBe('desktop');
+    expect(env.VIDEO_MAKER_APP_VERSION).toBe('0.4.3');
+  });
+
   it('adds the web root and MCP entry only when packaged', async () => {
     const deps = {
       readLoginShellPath: vi.fn().mockResolvedValue(null),

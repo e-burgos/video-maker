@@ -2,6 +2,7 @@ import { VOICE_PREVIEW_ROUTE_PATTERN } from '../voice/voice-preview-url';
 
 export const ROUTES = [
   { id: 'health', method: 'GET', pattern: '/health' },
+  { id: 'capabilities', method: 'GET', pattern: '/capabilities' },
   { id: 'voices.list', method: 'GET', pattern: '/voices' },
   { id: 'voices.preview', method: 'GET', pattern: VOICE_PREVIEW_ROUTE_PATTERN },
   { id: 'projects.list', method: 'GET', pattern: '/projects' },
@@ -21,6 +22,7 @@ export const ROUTES = [
   { id: 'brands.preview.create', method: 'POST', pattern: '/brands/:id/preview' },
   { id: 'brands.preview.get', method: 'GET', pattern: '/brands/:id/preview/*path' },
   { id: 'brands.fonts.add', method: 'POST', pattern: '/brands/:id/fonts' },
+  { id: 'brands.music.import', method: 'POST', pattern: '/brands/:id/music/import' },
   { id: 'folders.list', method: 'GET', pattern: '/folders' },
   { id: 'folders.create', method: 'POST', pattern: '/folders' },
   { id: 'folders.rename', method: 'PUT', pattern: '/folders/:folderId' },

@@ -77,6 +77,15 @@ function mapRenderApiErrorCode(code: string, context: ErrorContext): StudioToolE
   if (code === 'TIMELINE_NOT_FOUND') {
     return 'FILE_NOT_FOUND';
   }
+  if (code === 'ASSET_ALREADY_EXISTS') {
+    return 'ASSET_EXISTS';
+  }
+  if (code === 'PROJECT_NOT_FOUND') {
+    return 'FILE_NOT_FOUND';
+  }
+  if (code === 'PROJECT_ALREADY_EXISTS' || code === 'PROJECT_SLUG_INVALID' || code === 'BRAND_FILE_INVALID' || code === 'BRAND_MANIFEST_INVALID') {
+    return 'INVALID_INPUT';
+  }
   if (code === 'RENDER_JOB_NOT_FOUND') {
     return 'JOB_NOT_FOUND';
   }
@@ -117,6 +126,12 @@ function extractErrorPayload(body: unknown): RenderApiErrorPayloadShape | null {
   }
   const error = (body as Record<string, unknown>).error;
   return typeof error === 'object' && error !== null ? (error as RenderApiErrorPayloadShape) : null;
+}
+
+export function studioErrorFromResponse(status: number, body: unknown, context: ErrorContext = 'default'): StudioToolRuntimeError {
+  const payload = extractErrorPayload(body);
+  const code = mapRenderApiErrorCode(typeof payload?.code === 'string' ? payload.code : 'UNKNOWN', context);
+  return new StudioToolRuntimeError(code, redactAbsolutePaths(describeErrorPayload(payload, status)));
 }
 
 function joinProjectPath(basePath: string): string {
@@ -171,10 +186,7 @@ export function createHttpRenderApiClient(options: HttpRenderApiClientOptions): 
     }
 
     if (!response.ok) {
-      const payload = extractErrorPayload(json);
-      const code = mapRenderApiErrorCode(typeof payload?.code === 'string' ? payload.code : 'UNKNOWN', context);
-      const rawHint = describeErrorPayload(payload, response.status);
-      throw new StudioToolRuntimeError(code, redactAbsolutePaths(rawHint));
+      throw studioErrorFromResponse(response.status, json, context);
     }
 
     return { response, json };

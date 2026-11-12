@@ -22,6 +22,8 @@
       "@video-maker/composition-remotion/render": ["./libs/composition-remotion/src/render.ts"],
       "@video-maker/producer-tools": ["./libs/producer-tools/src/index.ts"],
       "@video-maker/local-store": ["./libs/local-store/src/index.ts"],
+      "@video-maker/studio-capabilities": ["./libs/studio-capabilities/src/index.ts"],
+      "@video-maker/studio-capabilities/constants": ["./libs/studio-capabilities/src/constants.ts"],
       "@video-maker/motion-graphics": ["./libs/motion-graphics/src/index.ts"]
     }
   },

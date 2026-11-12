@@ -18,7 +18,7 @@ import { handleProbeMedia } from './handlers/probe-handler';
 import { handleExtractFrames } from './handlers/frames-handler';
 import { handlePreviewImages } from './handlers/image-preview-handler';
 import { handleGetProjectText, handlePutProjectText } from './handlers/project-text-handler';
-import { handleImportMusic, handleSearchFreeMusic } from './handlers/music-handler';
+import { handleImportBrandMusic, handleImportMusic, handleSearchFreeMusic } from './handlers/music-handler';
 import { handleImportMedia, handleSearchFreeMedia } from './handlers/free-media-handler';
 import {
   handleCancelRenderJob,
@@ -125,6 +125,7 @@ import {
 import { handleGetReference, handleListReferences } from './handlers/references-handler';
 import { handleGetRenderReviews } from './handlers/reviews-handler';
 import { handlePutVisualReview } from './handlers/visual-review-handler';
+import { handleGetCapabilities } from './handlers/capabilities-handler';
 import { handleHealth } from './health-handler';
 import { JSON_CONTENT_TYPE } from './http-message';
 import type { HttpRequestLine, HttpResponse } from './http-message';
@@ -248,6 +249,8 @@ async function dispatchRoute(
   switch (id) {
       case 'health':
         return await handleHealth(deps, store, runtime);
+      case 'capabilities':
+        return await handleGetCapabilities(deps, store);
       case 'voices.list':
         return await handleListVoices(deps);
       case 'voices.preview':
@@ -322,6 +325,8 @@ async function dispatchRoute(
         return await handlePutProjectText(deps, store, params, request);
       case 'projects.music.search':
         return await handleSearchFreeMusic(deps, store, params, request, runtime);
+      case 'brands.music.import':
+        return await handleImportBrandMusic(deps, store, params, request, runtime);
       case 'projects.music.import':
         return await handleImportMusic(deps, store, params, request, runtime);
       case 'projects.media.search':

@@ -1,0 +1,21 @@
+# One allowed term per line: tool names, CLI flags and file names that SKILL.md files may put in backticks next to the word "field"
+flow.mjs
+brief.json
+brand.json
+record.mjs
+flow.example.mjs
+script.txt
+milestones.json
+contrast.mjs
+shelves.mp4
+screen-01.mp4
+IMG_2041.jpg
+shop-window.jpg
+brief
+write_motion_brief
+BRIEF_INVALID
+theme_color
+background_color
+track.id
+get_brand
+update_brand

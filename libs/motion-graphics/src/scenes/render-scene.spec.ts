@@ -96,8 +96,9 @@ describe('renderScene', () => {
 
   it('schedule places blocks on the hour axis', () => {
     const out = html('schedule');
-    expect(out).toContain('left:0.00%;width:calc(23.53% - 6px);top:0px');
-    expect(out).toContain('top:118px');
+    expect(out).toContain('left:0.00%;width:calc(23.53% - 6px);transform-origin');
+    expect(out).toContain('mg-block tone-');
+    expect(out).toMatch(/class="mg-block [^"]* row-1"/u);
     expect(out).toContain('data-anim="select" data-cue="día"');
     expect(html('schedule-min')).not.toContain('mg-days');
   });

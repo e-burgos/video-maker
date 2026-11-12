@@ -116,7 +116,7 @@ export type StudioToolHandler = (input: unknown) => Promise<StudioToolHandlerRes
 
 export interface StudioToolHandlersOptions {
   readonly client: RenderApiClient;
-  readonly model: string;
+  readonly model?: string;
   readonly clock?: () => number;
   readonly sleep?: (ms: number) => Promise<void>;
   readonly pollIntervalMs?: number;
@@ -394,7 +394,7 @@ export function createStudioToolHandlers(
         await assertProposalApproved(client);
       }
       const requestBody = withoutSkipProposal(jobInput);
-      const body: Record<string, unknown> = JOB_KINDS_THAT_TAKE_MODEL.has(jobInput.kind)
+      const body: Record<string, unknown> = JOB_KINDS_THAT_TAKE_MODEL.has(jobInput.kind) && model !== undefined
         ? { ...requestBody, model }
         : requestBody;
       const job = await client.createJob(body);
@@ -519,10 +519,8 @@ export function createStudioToolHandlers(
 
     get_render_review: async (rawInput) => {
       const input = parseInput<{ file?: string }>(STUDIO_TOOLS.get_render_review.input, rawInput);
-      let review = await client.getRenderReview(input.file);
-      if (review === null && (await waitForPendingReview())) {
-        review = await client.getRenderReview(input.file);
-      }
+      await waitForPendingReview();
+      const review = await client.getRenderReview(input.file);
       if (review === null) {
         throw new StudioToolRuntimeError(
           'FILE_NOT_FOUND',
