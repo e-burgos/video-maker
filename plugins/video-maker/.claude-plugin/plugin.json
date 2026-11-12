@@ -1,0 +1,12 @@
+{
+  "name": "video-maker",
+  "version": "0.1.0",
+  "description": "Make tutorials, promos, sales videos, explainers and reels of the project you are working on: the skills read the repo, set up the brand, write the brief or record the UI, and drive the local Video Maker studio through its MCP server until a render passes review.",
+  "author": {
+    "name": "e-burgos"
+  },
+  "homepage": "https://video.estebanburgos.com.ar",
+  "repository": "https://github.com/e-burgos/video-maker",
+  "license": "MIT",
+  "keywords": ["video", "tutorial", "motion-graphics", "screen-recording", "mcp"]
+}

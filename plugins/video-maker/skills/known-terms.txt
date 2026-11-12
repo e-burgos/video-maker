@@ -2,3 +2,15 @@
 flow.mjs
 brief.json
 brand.json
+record.mjs
+flow.example.mjs
+script.txt
+milestones.json
+contrast.mjs
+shelves.mp4
+screen-01.mp4
+IMG_2041.jpg
+shop-window.jpg
+brief
+write_motion_brief
+BRIEF_INVALID

@@ -1,0 +1,24 @@
+{
+  "$schema": "https://anthropic.com/claude-code/marketplace.schema.json",
+  "name": "video-maker",
+  "description": "Video Maker for Claude Code: turn any project into a finished, reviewed video with the local Video Maker studio.",
+  "owner": {
+    "name": "e-burgos"
+  },
+  "plugins": [
+    {
+      "name": "video-maker",
+      "source": "./plugins/video-maker",
+      "description": "Skills and MCP server to make tutorials, promos, sales videos, explainers and reels of the project you are working on, with the local Video Maker studio.",
+      "version": "0.1.0",
+      "author": {
+        "name": "e-burgos"
+      },
+      "homepage": "https://video.estebanburgos.com.ar",
+      "repository": "https://github.com/e-burgos/video-maker",
+      "license": "MIT",
+      "keywords": ["video", "tutorial", "motion-graphics", "screen-recording", "mcp"],
+      "category": "productivity"
+    }
+  ]
+}

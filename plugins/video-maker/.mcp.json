@@ -1,0 +1,8 @@
+{
+  "mcpServers": {
+    "video-maker": {
+      "command": "npx",
+      "args": ["-y", "${VIDEO_MAKER_MCP_PACKAGE:-@e-burgos/video-maker-mcp}"]
+    }
+  }
+}
