@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import { parseStudioMcpCliArgs } from './studio-mcp-cli-args';
+import { isHelpRequest, parseStudioMcpCliArgs } from './studio-mcp-cli-args';
 
 describe('parseStudioMcpCliArgs', () => {
   it('parses the three required flags', () => {
@@ -17,10 +17,26 @@ describe('parseStudioMcpCliArgs', () => {
 
   it.each([
     ['--project', 'pitch-deck', '--model', 'sonnet'],
-    ['--api-url', 'http://127.0.0.1:4599', '--model', 'sonnet'],
+    ['--model', 'sonnet', '--project', 'pitch-deck'],
     ['--api-url', 'http://127.0.0.1:4599', '--project', 'pitch-deck'],
-    [],
-  ])('throws when a required flag is missing (%s)', (...argv) => {
+  ])('throws when --project lacks its companions (%s)', (...argv) => {
     expect(() => parseStudioMcpCliArgs(argv)).toThrow(/usage:/);
+  });
+
+  it('runs in external mode without any flag', () => {
+    expect(parseStudioMcpCliArgs([])).toEqual({ apiUrl: null, project: null, model: null });
+  });
+
+  it('keeps an explicit api url and model in external mode', () => {
+    expect(parseStudioMcpCliArgs(['--api-url', 'http://127.0.0.1:4599', '--model', 'sonnet'])).toEqual({
+      apiUrl: 'http://127.0.0.1:4599',
+      project: null,
+      model: 'sonnet',
+    });
+  });
+
+  it('recognises a help request', () => {
+    expect(isHelpRequest(['--help'])).toBe(true);
+    expect(isHelpRequest(['--api-url', 'x'])).toBe(false);
   });
 });

@@ -1,5 +1,6 @@
 import { basename, isAbsolute, relative } from 'node:path/posix';
 
+import { resolveAppVersion } from '../discovery/studio-discovery-file';
 import type { StoreConfig } from '../config/store-config';
 import type { RenderApiDependencies } from '../deps/render-api-dependencies';
 import type { EngineModuleStatus } from '../engine/engine-modules';
@@ -22,6 +23,7 @@ export interface HealthBody {
   readonly status: 'ok' | 'degraded';
   readonly service: 'render-api';
   readonly cycle: number;
+  readonly version: string;
   readonly time: string;
   readonly engine: readonly EngineModuleStatus[];
   readonly binaries: readonly BinaryStatus[];
@@ -69,6 +71,7 @@ export async function handleHealth(
     status,
     service: SERVICE_NAME,
     cycle: SERVICE_CYCLE,
+    version: resolveAppVersion(process.env),
     time: deps.clock.nowIso(),
     engine,
     binaries,

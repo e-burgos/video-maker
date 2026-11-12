@@ -125,6 +125,7 @@ import {
 import { handleGetReference, handleListReferences } from './handlers/references-handler';
 import { handleGetRenderReviews } from './handlers/reviews-handler';
 import { handlePutVisualReview } from './handlers/visual-review-handler';
+import { handleGetCapabilities } from './handlers/capabilities-handler';
 import { handleHealth } from './health-handler';
 import { JSON_CONTENT_TYPE } from './http-message';
 import type { HttpRequestLine, HttpResponse } from './http-message';
@@ -248,6 +249,8 @@ async function dispatchRoute(
   switch (id) {
       case 'health':
         return await handleHealth(deps, store, runtime);
+      case 'capabilities':
+        return await handleGetCapabilities(deps, store);
       case 'voices.list':
         return await handleListVoices(deps);
       case 'voices.preview':

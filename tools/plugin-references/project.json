@@ -1,0 +1,26 @@
+{
+  "name": "plugin-references",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "tools/plugin-references/src",
+  "projectType": "application",
+  "tags": ["scope:engine", "type:tool"],
+  "targets": {
+    "lint": {
+      "executor": "@nx/eslint:lint"
+    },
+    "test": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "vitest run --passWithNoTests",
+        "cwd": "tools/plugin-references"
+      }
+    },
+    "plugin-references": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "node -r @swc-node/register ./tools/plugin-references/src/generate.ts",
+        "env": { "SWC_NODE_PROJECT": "tsconfig.base.json" }
+      }
+    }
+  }
+}

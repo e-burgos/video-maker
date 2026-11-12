@@ -6,6 +6,9 @@ export default defineConfig({
   cacheDir: '../../node_modules/.vite/producer-tools',
   resolve: {
     alias: {
+      '@video-maker/studio-capabilities/constants': fileURLToPath(
+        new URL('../studio-capabilities/src/constants.ts', import.meta.url),
+      ),
       '@video-maker/timeline-core': fileURLToPath(
         new URL('../timeline-core/src/index.ts', import.meta.url),
       ),

@@ -1,6 +1,8 @@
-export const ASSET_ROLES = ['aroll', 'broll', 'image', 'audio', 'voice', 'logo', 'reference'] as const;
+import { ASSET_ROLES } from '@video-maker/studio-capabilities';
+import type { AssetRole } from '@video-maker/studio-capabilities';
 
-export type AssetRole = (typeof ASSET_ROLES)[number];
+export { ASSET_ROLES };
+export type { AssetRole };
 
 export const SERVABLE_ROOTS = ['raw', 'work', 'out'] as const;
 

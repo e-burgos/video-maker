@@ -18,7 +18,7 @@ export default [
             { sourceTag: 'type:domain', onlyDependOnLibsWithTags: [] },
             { sourceTag: 'type:util', onlyDependOnLibsWithTags: ['type:domain'] },
             { sourceTag: 'type:ui', onlyDependOnLibsWithTags: ['type:domain'] },
-            { sourceTag: 'type:feature', onlyDependOnLibsWithTags: ['type:domain', 'type:util'] },
+            { sourceTag: 'type:feature', onlyDependOnLibsWithTags: ['type:domain', 'type:util', 'type:capabilities'] },
             { sourceTag: '*', onlyDependOnLibsWithTags: ['*'] },
           ],
         },

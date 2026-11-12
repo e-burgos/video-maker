@@ -1,3 +1,4 @@
+import type { z } from 'zod';
 import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import type { CallToolResult, ContentBlock } from '@modelcontextprotocol/sdk/types.js';
 
@@ -42,24 +43,29 @@ function toErrorResult(cause: unknown): CallToolResult {
   };
 }
 
-export function createStudioMcpServer(handlers: Readonly<Record<StudioToolName, StudioToolHandler>>): McpServer {
+export interface McpToolRegistration {
+  readonly name: string;
+  readonly description: string;
+  readonly input: z.ZodObject;
+  readonly output: z.ZodTypeAny | undefined;
+  readonly handler: StudioToolHandler;
+}
+
+export function createMcpServerFromRegistrations(registrations: readonly McpToolRegistration[]): McpServer {
   const server = new McpServer(
     { name: STUDIO_MCP_SERVER_NAME, version: STUDIO_MCP_SERVER_VERSION },
     { capabilities: { tools: {} } },
   );
 
-  for (const name of STUDIO_TOOL_NAMES) {
-    const definition = STUDIO_TOOLS[name];
-    const handler = handlers[name];
-
+  for (const registration of registrations) {
     server.registerTool(
-      name,
-      TOOLS_WITHOUT_OUTPUT_SCHEMA.has(name)
-        ? { description: definition.description, inputSchema: definition.input }
-        : { description: definition.description, inputSchema: definition.input, outputSchema: definition.output },
+      registration.name,
+      registration.output === undefined
+        ? { description: registration.description, inputSchema: registration.input }
+        : { description: registration.description, inputSchema: registration.input, outputSchema: registration.output },
       async (args: unknown) => {
         try {
-          const result = await handler(args);
+          const result = await registration.handler(args);
           return toCallToolResult(result.data, result.images);
         } catch (cause) {
           return toErrorResult(cause);
@@ -69,4 +75,20 @@ export function createStudioMcpServer(handlers: Readonly<Record<StudioToolName, 
   }
 
   return server;
+}
+
+export function createStudioMcpServer(handlers: Readonly<Record<StudioToolName, StudioToolHandler>>): McpServer {
+  return createMcpServerFromRegistrations(
+    STUDIO_TOOL_NAMES.map((name) => ({
+      name,
+      description: STUDIO_TOOLS[name].description,
+      input: STUDIO_TOOLS[name].input as z.ZodObject,
+      output: TOOLS_WITHOUT_OUTPUT_SCHEMA.has(name) ? undefined : STUDIO_TOOLS[name].output,
+      handler: handlers[name],
+    })),
+  );
+}
+
+export function hasOutputSchema(name: StudioToolName): boolean {
+  return !TOOLS_WITHOUT_OUTPUT_SCHEMA.has(name);
 }

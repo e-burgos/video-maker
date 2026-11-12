@@ -116,7 +116,7 @@ export type StudioToolHandler = (input: unknown) => Promise<StudioToolHandlerRes
 
 export interface StudioToolHandlersOptions {
   readonly client: RenderApiClient;
-  readonly model: string;
+  readonly model?: string;
   readonly clock?: () => number;
   readonly sleep?: (ms: number) => Promise<void>;
   readonly pollIntervalMs?: number;
@@ -394,7 +394,7 @@ export function createStudioToolHandlers(
         await assertProposalApproved(client);
       }
       const requestBody = withoutSkipProposal(jobInput);
-      const body: Record<string, unknown> = JOB_KINDS_THAT_TAKE_MODEL.has(jobInput.kind)
+      const body: Record<string, unknown> = JOB_KINDS_THAT_TAKE_MODEL.has(jobInput.kind) && model !== undefined
         ? { ...requestBody, model }
         : requestBody;
       const job = await client.createJob(body);

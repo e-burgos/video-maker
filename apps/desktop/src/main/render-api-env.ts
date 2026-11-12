@@ -32,6 +32,7 @@ export interface BuildRenderApiEnvInput {
   readonly projectsFolder: string;
   readonly isPackaged: boolean;
   readonly parentPid: number;
+  readonly appVersion?: string;
   readonly parentEnv?: NodeJS.ProcessEnv;
 }
 
@@ -63,10 +64,14 @@ export async function buildRenderApiEnv(
     VIDEO_MAKER_MODELS_DIR: input.paths.modelsDir,
     VIDEO_MAKER_PARENT_PID: String(input.parentPid),
     RENDER_API_ACCESS_TOKEN: input.token,
+    VIDEO_MAKER_STUDIO_SOURCE: 'desktop',
     REMOTION_BROWSER_EXECUTABLE: input.paths.chromeHeadlessShellPath,
     MOTION_GRAPHICS_ASSETS: join(input.paths.resourcesDir, input.isPackaged ? PACKAGED_MOTION_ASSETS_RELATIVE : DEV_MOTION_ASSETS_RELATIVE),
   };
 
+  if (input.appVersion !== undefined) {
+    env.VIDEO_MAKER_APP_VERSION = input.appVersion;
+  }
   if (claudeCliPath !== null) {
     env.CLAUDE_CLI_PATH = claudeCliPath;
   }

@@ -1,5 +1,7 @@
 import { effectiveBrandTokens, isMotionStudioError, parseBrandManifest } from '@video-maker/motion-graphics';
 import type { BrandManifest, BrandPalette } from '@video-maker/motion-graphics';
+import { BRAND_FILE_KINDS } from '@video-maker/studio-capabilities';
+import type { BrandFileKind } from '@video-maker/studio-capabilities';
 import { join } from 'node:path/posix';
 
 import type { StoreConfig } from '../config/store-config';
@@ -9,8 +11,8 @@ import type { RenderApiErrorCode } from '../errors/render-api-error';
 import { brandPaletteFromTokens, DEFAULT_BRAND_PALETTE } from './brand-palette';
 import { wordmarkSvg } from './wordmark-svg';
 
-export const BRAND_FILE_KINDS = ['logo', 'image', 'font', 'music', 'device'] as const;
-export type BrandFileKind = (typeof BRAND_FILE_KINDS)[number];
+export { BRAND_FILE_KINDS };
+export type { BrandFileKind };
 
 export interface BrandListItem {
   readonly id: string;

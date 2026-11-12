@@ -7,6 +7,7 @@ import { readStoreConfig } from './config/store-config';
 import { createNodeRenderApiDependencies } from './deps/node-render-api-dependencies';
 import { toErrorPayload } from './errors/to-error-payload';
 import { isRenderApiError } from './errors/render-api-error';
+import { publishStudioDiscovery } from './discovery/publish-studio-discovery';
 import { createRenderApiServer } from './http/create-render-api-server';
 import { killOrphanableChromeChildren } from './process/kill-orphan-chrome';
 import { killProcessGroup } from './process/kill-process-group';
@@ -42,9 +43,21 @@ async function main(): Promise<void> {
 
   process.stdout.write(`${JSON.stringify({ event: 'listening', host: address.host, port: address.port })}\n`);
 
+  const withdrawDiscovery = await publishStudioDiscovery({
+    env: process.env,
+    apiUrl: `http://${config.host}:${address.port}${config.webRoot === null ? '' : '/api'}`,
+    token: config.accessToken,
+    pid: process.pid,
+    now: () => new Date(),
+  }).catch((cause: unknown) => {
+    process.stderr.write(`${JSON.stringify({ event: 'discovery-file-failed', error: toErrorPayload(cause) })}\n`);
+    return async () => undefined;
+  });
+
   const remotion = readRemotionConfig(process.env);
 
   async function shutDownAfterParentGone(): Promise<void> {
+    await withdrawDiscovery();
     await killOrphanableChromeChildren({
       parentPid: process.pid,
       browserExecutablePath: remotion.browserExecutable,
@@ -60,9 +73,11 @@ async function main(): Promise<void> {
   for (const signal of SHUTDOWN_SIGNALS) {
     process.once(signal, () => {
       stopWatchdog();
-      void server.close().then(() => {
-        process.exitCode = 0;
-      });
+      void withdrawDiscovery()
+        .then(() => server.close())
+        .then(() => {
+          process.exitCode = 0;
+        });
     });
   }
 }
