@@ -6605,6 +6605,54 @@
           }
         ]
       }
+    },
+    {
+      "id": "FIX-e-burgos-084",
+      "author": "e-burgos",
+      "spec_id": null,
+      "fix_document": "sdd/fixes/fix-e-burgos-084.md",
+      "type": "BUGFIX",
+      "severity": "low",
+      "created_at": "2026-11-12",
+      "resolved_at": "2026-11-12",
+      "validated_at": null,
+      "title": "Maquetas animadas (editor y navegador) llenan el alto del visual en 9:16",
+      "estimation_hours": 0.5,
+      "description": "En 9:16 las animaciones publish y domain se escalaban 1.38 y dejaban ~350 px vacíos en el área visual. Ahora llevan la clase mockup: sin escala, ocupan todo el alto, el bloque principal crece y textos y botones son más grandes. Las animaciones SVG siguen escaladas.",
+      "justification": "Pedido del dev: «Ok, perfecto. Arreglar el código. El video lo dejamos como está.» (2026-11-12), sobre el pendiente del panel «Listo para usar».",
+      "related_modules": [
+        "motion-graphics"
+      ],
+      "affected_files": [
+        "libs/motion-graphics/assets/runtime/scenes.css",
+        "libs/motion-graphics/src/scenes/animations.ts",
+        "libs/motion-graphics/src/scenes/scene-html.ts",
+        "libs/motion-graphics/src/scenes/animations.spec.ts"
+      ],
+      "test_reference": "motion-graphics test, lint y build; escena feature-setup medida en el laboratorio de escenas (editor y navegador ocupan 737–1730 px del área visual).",
+      "status": "implemented",
+      "cycle": null,
+      "usage": {
+        "provider_model": "claude/opus",
+        "effort": "medium",
+        "tokens_in": 120000,
+        "tokens_out": 8000,
+        "approx": true,
+        "source": "declared-estimate",
+        "recorded_at": "2026-11-12",
+        "by_agent": [
+          {
+            "agent": "implementor-back",
+            "provider_model": "claude/opus",
+            "effort": "medium",
+            "tokens_in": 120000,
+            "tokens_out": 8000,
+            "approx": true,
+            "source": "declared-estimate",
+            "recorded_at": "2026-11-12"
+          }
+        ]
+      }
     }
   ]
 }

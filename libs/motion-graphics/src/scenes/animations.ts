@@ -67,6 +67,12 @@ const RENDERERS: Record<AnimationName, (at: Timing) => string> = {
   publish,
 };
 
+const MOCKUP_ANIMATIONS: ReadonlySet<AnimationName> = new Set<AnimationName>(['domain', 'publish']);
+
+export function isMockupAnimation(name: AnimationName): boolean {
+  return MOCKUP_ANIMATIONS.has(name);
+}
+
 export function animationVisual(name: AnimationName, cue: string | undefined): string {
   return `<div class="mg-anim ${name}"${animAttrs({ anim: 'pop', cue, at: cue ? undefined : 0.2 })}>${RENDERERS[name](timingFrom(cue))}</div>`;
 }

@@ -28,6 +28,11 @@ describe('animation visuals', () => {
     expect(animationVisual('domain', undefined)).toContain('data-text="www.tunegocio.com.ar"');
     expect(animationVisual('orders', 'pedidos')).toContain('data-anim="advance" data-cue="pedidos" data-after="0.4" data-parallel="1" data-step="200"');
   });
+  it('marks the screen mockups so a vertical frame stretches them instead of scaling', () => {
+    expect(visual({ kind: 'animation', name: 'publish' }, ctx)).toContain('class="mg-anim-fit mockup"');
+    expect(visual({ kind: 'animation', name: 'domain' }, ctx)).toContain('class="mg-anim-fit mockup"');
+    expect(visual({ kind: 'animation', name: 'delivery' }, ctx)).toContain('class="mg-anim-fit"');
+  });
 });
 
 describe('scrolling captures', () => {

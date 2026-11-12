@@ -348,6 +348,16 @@ body { margin: 0; background: var(--mg-bg); color: var(--mg-text); font-family: 
 .mg-anim { width: 100%; max-width: 900px; margin: 0 auto; }
 .mg-anim-fit { width: 100%; }
 .fmt-9x16 .mg-anim-fit { width: 72%; transform: scale(1.38); }
+.fmt-9x16 .mg-anim-fit.mockup { width: 100%; height: 100%; transform: none; display: flex; }
+.fmt-9x16 .mg-anim-fit.mockup > .mg-anim { max-width: none; height: 100%; display: flex; flex-direction: column; }
+.fmt-9x16 .mg-anim-fit.mockup .mg-anim-editor, .fmt-9x16 .mg-anim-fit.mockup .mg-anim-browser { flex: 1; display: flex; flex-direction: column; }
+.fmt-9x16 .mg-anim-fit.mockup .mg-anim-page { flex: 1; }
+.fmt-9x16 .mg-anim-fit.mockup .mg-anim-page, .fmt-9x16 .mg-anim-fit.mockup .mg-anim-editor { gap: 30px; padding: 48px; }
+.fmt-9x16 .mg-anim-fit.mockup .mg-anim-page span, .fmt-9x16 .mg-anim-fit.mockup .mg-anim-editor .block { height: 52px; flex: 0 0 auto; }
+.fmt-9x16 .mg-anim-fit.mockup .mg-anim-page .hero, .fmt-9x16 .mg-anim-fit.mockup .mg-anim-editor .block.hero { flex: 1 1 auto; height: auto; min-height: 260px; }
+.fmt-9x16 .mg-anim-fit.mockup .mg-anim-editor .pill { font-size: 36px; padding: 14px 30px; }
+.fmt-9x16 .mg-anim-fit.mockup .mg-anim-editor .mg-btn { font-size: 38px; }
+.fmt-9x16 .mg-anim-fit.mockup .mg-anim-bar .url { font-size: 38px; }
 .mg-anim-svg { width: 100%; height: auto; overflow: visible; }
 .mg-anim .road { stroke: var(--mg-border-strong); stroke-width: 4; stroke-dasharray: 18 14; }
 .mg-anim .store rect { fill: rgba(255,255,255,0.06); stroke: var(--mg-border-strong); stroke-width: 3; }
