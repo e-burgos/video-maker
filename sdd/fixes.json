@@ -6544,6 +6544,67 @@
           }
         ]
       }
+    },
+    {
+      "id": "FIX-e-burgos-083",
+      "author": "e-burgos",
+      "spec_id": null,
+      "fix_document": "sdd/fixes/fix-e-burgos-083.md",
+      "type": "BUGFIX",
+      "severity": "medium",
+      "created_at": "2026-11-12",
+      "resolved_at": "2026-11-12",
+      "validated_at": null,
+      "title": "Motion 9:16 sin huecos, scramble y orden de ítems, beatSync corto, review pendiente y skills tras la prueba de oro",
+      "estimation_hours": 3,
+      "description": "Hallazgos de la prueba de oro en display-ads. Motor: en 9:16 el visual ocupa el alto libre (hook, feature, product, ai-generate), schedule centrado con rótulos en dos líneas y fila por clase, galerías 2/3/4 sin huecos; scramble oculto hasta que arranca; ítems sin cue salen después del hermano anterior; minBars por defecto 2 en 9:16. Studio: get_render_review espera siempre la review en curso. Skills: brand:<key>, galería 2-4, costo de beatSync, revisar cada vo contra el guion, guardar antes de renderizar, aprobación que no llegó. Descartados: la caída fue el panel de vista previa (SIGTERM) y la aprobación llegó 1 min 44 s después; la galería de 5 sí se rechazó al guardar.",
+      "justification": "Pedido del dev: «Entonces reparemos todos estos bugs, por favor.» (2026-11-12), tras la prueba de aceptación del plugin.",
+      "related_modules": [
+        "motion-graphics",
+        "producer-tools"
+      ],
+      "affected_files": [
+        "libs/motion-graphics/assets/runtime/scenes.css",
+        "libs/motion-graphics/assets/runtime/motion-runtime.js",
+        "libs/motion-graphics/src/scenes/render-scene.ts",
+        "libs/motion-graphics/src/compose/compose-storyboard.ts",
+        "libs/producer-tools/src/handlers/studio-tool-handlers.ts",
+        "plugins/video-maker/skills/video-maker-motion-brief/SKILL.md"
+      ],
+      "test_reference": "motion-graphics 350 y producer-tools 475 tests, lint, plugin-references; render real 9:16 del proyecto prueba-fix-083-vertical revisado frame a frame.",
+      "status": "implemented",
+      "cycle": null,
+      "usage": {
+        "provider_model": "claude/opus",
+        "effort": "medium",
+        "tokens_in": 420000,
+        "tokens_out": 25000,
+        "approx": true,
+        "source": "declared-estimate",
+        "recorded_at": "2026-11-12",
+        "by_agent": [
+          {
+            "agent": "implementor-back",
+            "provider_model": "claude/opus",
+            "effort": "medium",
+            "tokens_in": 320000,
+            "tokens_out": 20000,
+            "approx": true,
+            "source": "declared-estimate",
+            "recorded_at": "2026-11-12"
+          },
+          {
+            "agent": "custom",
+            "provider_model": "claude/sonnet",
+            "effort": "medium",
+            "tokens_in": 100000,
+            "tokens_out": 5000,
+            "approx": true,
+            "source": "declared-estimate",
+            "recorded_at": "2026-11-12"
+          }
+        ]
+      }
     }
   ]
 }

@@ -381,7 +381,7 @@ describe('createStudioToolHandlers', () => {
     };
 
     it('returns the summary of the review the client found', async () => {
-      const { handlers, client } = handlersWith({ getRenderReview: async () => review });
+      const { handlers, client } = handlersWith({ listRecentJobs: async () => [], getRenderReview: async () => review });
 
       const result = await handlers.get_render_review({ file: 'out/video.mp4' });
 
@@ -402,7 +402,7 @@ describe('createStudioToolHandlers', () => {
         ],
         visualReviewState: 'not-applicable',
       });
-      expect(client.calls).toEqual([{ method: 'getRenderReview', args: ['out/video.mp4'] }]);
+      expect(client.calls).toContainEqual({ method: 'getRenderReview', args: ['out/video.mp4'] });
     });
 
     const sceneFrames = [
@@ -410,7 +410,7 @@ describe('createStudioToolHandlers', () => {
     ];
 
     it('lists the scene frames and says the visual review is pending (US-023-603)', async () => {
-      const { handlers } = handlersWith({ getRenderReview: async () => ({ ...review, sceneFrames }) });
+      const { handlers } = handlersWith({ listRecentJobs: async () => [], getRenderReview: async () => ({ ...review, sceneFrames }) });
 
       const result = await handlers.get_render_review({});
 
@@ -419,7 +419,7 @@ describe('createStudioToolHandlers', () => {
 
     it('reports a recorded visual review', async () => {
       const visualReview = { recordedAt: '2026-10-12T11:00:00.000Z', scenes: [{ sceneId: 'hook', shows: 'Título', matchesVoice: true, legible: true, couldBeOtherProduct: false, verdict: 'ok' as const, note: '' }] };
-      const { handlers } = handlersWith({ getRenderReview: async () => ({ ...review, sceneFrames, visualReview }) });
+      const { handlers } = handlersWith({ listRecentJobs: async () => [], getRenderReview: async () => ({ ...review, sceneFrames, visualReview }) });
 
       const result = await handlers.get_render_review({});
 
@@ -428,7 +428,7 @@ describe('createStudioToolHandlers', () => {
 
     it('reports a stored review that carries version and delivery like the studio writes it', async () => {
       const stored = { ...review, version: 1, delivery: { kind: 'motion' } } as unknown as typeof review;
-      const { handlers } = handlersWith({ getRenderReview: async () => stored });
+      const { handlers } = handlersWith({ listRecentJobs: async () => [], getRenderReview: async () => stored });
 
       const result = await handlers.get_render_review({ file: 'out/video.mp4' });
 
@@ -437,11 +437,11 @@ describe('createStudioToolHandlers', () => {
     });
 
     it('asks for the latest review when no file is given', async () => {
-      const { handlers, client } = handlersWith({ getRenderReview: async () => review });
+      const { handlers, client } = handlersWith({ listRecentJobs: async () => [], getRenderReview: async () => review });
 
       await handlers.get_render_review({});
 
-      expect(client.calls).toEqual([{ method: 'getRenderReview', args: [undefined] }]);
+      expect(client.calls).toContainEqual({ method: 'getRenderReview', args: [undefined] });
     });
 
     it('says nothing was reviewed when the client finds no review and no review job is pending', async () => {
@@ -465,6 +465,25 @@ describe('createStudioToolHandlers', () => {
       const result = await handlers.get_render_review({ file: 'out/video.mp4' });
 
       expect(result.data).toMatchObject({ file: 'out/video.mp4', status: 'fail' });
+    });
+
+    it('waits for a running review job even when an older review is stored, so it never returns the previous render', async () => {
+      const previous = { ...review, createdAt: '2026-10-12T21:00:00.000Z' };
+      const fresh = { ...review, createdAt: '2026-10-12T21:22:00.000Z' };
+      let reviewDone = false;
+      const client = createFakeRenderApiClient({
+        getRenderReview: async () => (reviewDone ? fresh : previous),
+        listRecentJobs: async () => [{ id: 'job-review', kind: 'review', state: 'running', createdAt: '2026-10-12T21:21:00.000Z' }],
+        getJob: async () => {
+          reviewDone = true;
+          return { id: 'job-review', kind: 'review', state: 'succeeded' } as Awaited<ReturnType<typeof client.getJob>>;
+        },
+      });
+      const handlers = createStudioToolHandlers({ client, model: 'sonnet', sleep: async () => undefined });
+
+      const result = await handlers.get_render_review({ file: 'out/video.mp4' });
+
+      expect(result.data).toMatchObject({ createdAt: '2026-10-12T21:22:00.000Z' });
     });
 
     it('rejects a file outside out/ before calling the client', async () => {

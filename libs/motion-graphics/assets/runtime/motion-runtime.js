@@ -83,12 +83,14 @@ window.createMotionRuntime = function createMotionRuntime(T, W, compositionId) {
       chars.forEach((c, i) => {
         const reveal = (i + 1) / chars.length;
         const shown = state.p >= reveal;
-        const scrambling = !shown && state.p > reveal - 0.45;
+        const scrambling = !shown && state.p > 0 && state.p > reveal - 0.45;
         c.textContent = shown ? finals[i] : scrambleGlyph(i, step);
         c.style.opacity = shown || scrambling ? '1' : '0';
       });
     };
-    paint();
+    chars.forEach((c) => {
+      c.style.opacity = '0';
+    });
     return gsap.to(state, { p: 1, duration, ease: 'none', onUpdate: paint, onComplete: paint });
   };
 
@@ -341,9 +343,13 @@ window.createMotionRuntime = function createMotionRuntime(T, W, compositionId) {
   document.querySelectorAll('[data-scene]').forEach((section) => {
     const id = section.dataset.scene;
     let order = 0;
+    const lastSiblingTime = new Map();
     section.querySelectorAll('[data-anim]').forEach((el) => {
       const timed = el.dataset.cue || el.dataset.at || el.dataset.beat || el.dataset.slot;
-      const t = timeFor(el, id, timed ? 0 : order) + Number(el.dataset.after || 0);
+      const natural = timeFor(el, id, timed ? 0 : order) + Number(el.dataset.after || 0);
+      const previousSibling = lastSiblingTime.get(el.parentElement);
+      const t = !timed && previousSibling !== undefined ? Math.max(natural, previousSibling + L / 2) : natural;
+      if (!el.dataset.parallel) lastSiblingTime.set(el.parentElement, t);
       if (!timed && !el.dataset.parallel) order += 1;
       animNamesFor(el, section.dataset.titleStyle).forEach((name) => ANIMS[name] && ANIMS[name](el, t, id));
     });

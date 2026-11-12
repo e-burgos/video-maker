@@ -80,6 +80,10 @@ Code on screen: one short line per scene, taken literally from the README or doc
   `images[].boxes` (name + x, y, w, h as 0–1 fractions); boxes you measured yourself carry
   `source: "measured"`. Scenes then point highlights and clicks at those boxes by name.
 - Upload each one with `upload_asset` (role `image`, absolute `filePath`, ASCII lowercase filename).
+- The brand's own photos (`get_brand` lists them with their captions) are used as `brand:<key>` in the
+  storyboard, with no upload. Never upload a copy of a brand photo as a project image: the AI may pick
+  both and the same photo shows twice.
+- A gallery scene takes 2 to 4 images; a storyboard with more is rejected.
 
 ## 4. The brief
 
@@ -104,6 +108,9 @@ Code on screen: one short line per scene, taken literally from the README or doc
   `import_brand_music`, or tracks the user owns). `musicFrom` is only for sub-brands of the same owner,
   never to borrow another company's bank.
 - `beatSync: true` cuts scenes on the beat; `false` follows the voice (better for calm explainers).
+  On the beat every scene lasts at least 2 bars in 9:16 and 3 in 16:9 (the call to action and galleries
+  longer): about 4 and 6 s at 120 BPM. Estimate scenes × that before choosing it; for a reel under 40 s
+  with more than 7 scenes use `false`.
 - Save it with `write_motion_brief` (`brief` = the object). Invalid → the hint names the field; fix it
   and call again.
 
@@ -111,10 +118,15 @@ Code on screen: one short line per scene, taken literally from the README or doc
 
 1. `start_job` with `{"kind":"motion","phase":"storyboard"}`; `wait_for_job` (3–6 minutes).
 2. `read_motion_storyboard`. Check, scene by scene:
-   - it follows the script order and every `scenes[].vo` says only what the script says;
+   - it follows the script order and every `scenes[].vo` says only what the script says. Read each
+     `vo` next to its script line: the AI paraphrases and adds claims ("attracts customers", "no
+     technician needed"), reads URLs, emails or phone numbers aloud (they go on screen only) and puts
+     the spoken form of a name on screen. Fix every one before showing the storyboard;
    - no scene invents a feature, number, price or customer;
    - images land where their caption fits; device and UI scenes show the right product;
    - the last scene is the call to action and the brand appears with context.
+   - on-screen labels stay short: in 9:16 a schedule block wraps to two lines at most (about 24
+     characters), chips and bullets fit one line.
 3. Show it to the user as a numbered list in words and ask for changes. **This is the cheap moment to
    fix things.**
 4. Small changes: edit the storyboard JSON minimally and save it with `write_motion_storyboard` (the
@@ -131,7 +143,8 @@ Code on screen: one short line per scene, taken literally from the README or doc
    this approach"). If the user cannot answer (headless), stop here and report.
 2. `start_job` `{"kind":"motion","phase":"video","output":"video.mp4"}`; `wait_for_job` in steps of up to
    600 s (about 30 s per voiced line plus ~2.5 min per minute of video). After storyboard edits, add
-   `overwrite: true`.
+   `overwrite: true`, and start the job only after `write_motion_storyboard` answered OK: the render reads
+   the storyboard saved at that moment.
 3. `get_render_review` with `file` `out/video.mp4`: fix critical findings. Then look at every frame in
    `sceneFrames` with `view_images` and send `record_visual_review` (per scene: what it shows, matches
    the voice, legible, could be another product, verdict, note). Any scene marked fix → change the
@@ -149,5 +162,5 @@ Code on screen: one short line per scene, taken literally from the README or doc
 | `BRIEF_MISSING` / `STORYBOARD_MISSING` | run the previous step first |
 | `STORYBOARD_ALREADY_EXISTS` | send `overwrite: true` to redo it |
 | `STORYBOARD_INVALID` | the AI could not produce a valid storyboard; show the message and retry once |
-| `PROPOSAL_NOT_APPROVED` | the user has not approved a proposal in the studio yet |
+| `PROPOSAL_NOT_APPROVED` | the user has not approved a proposal in the studio yet; if they say they did, ask them to check that the card now shows the approved concept, then try once more |
 | `AI_AGENT_*` | the studio's AI is unavailable (session, usage limit): show the literal message, retry later |

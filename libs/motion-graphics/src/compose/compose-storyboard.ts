@@ -17,6 +17,11 @@ export const BRAND_ASSET_DIR = 'assets/brand';
 export const RUNTIME_ASSET_DIR = 'assets/runtime';
 
 const DEFAULT_MIN_BARS: Partial<Record<MotionStoryboardScene['kind'], number>> = { cta: 5, 'brand-reveal': 3, gallery: 4 };
+const DEFAULT_MIN_BARS_VERTICAL: Partial<Record<MotionStoryboardScene['kind'], number>> = { cta: 3, 'brand-reveal': 2, gallery: 3 };
+
+function defaultMinBarsFor(kind: MotionStoryboardScene['kind'], format: MotionStoryboard['format']): number {
+  return format === '9:16' ? (DEFAULT_MIN_BARS_VERTICAL[kind] ?? 2) : (DEFAULT_MIN_BARS[kind] ?? 3);
+}
 
 export interface ScriptDocument {
   voice: string;
@@ -204,7 +209,7 @@ export function composeStoryboard(storyboard: MotionStoryboard, brand: BrandMani
       return {
         id: scene.id,
         vo: scene.vo,
-        minBars: scene.minBars ?? DEFAULT_MIN_BARS[scene.kind] ?? 3,
+        minBars: scene.minBars ?? defaultMinBarsFor(scene.kind, storyboard.format),
         ...(scene.minSec === undefined ? {} : { minSec: scene.minSec }),
         ...(anchor === undefined || !storyboard.beatSync ? {} : { anchor }),
         ...(scene.direction === undefined ? {} : { direction: scene.direction }),

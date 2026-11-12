@@ -519,10 +519,8 @@ export function createStudioToolHandlers(
 
     get_render_review: async (rawInput) => {
       const input = parseInput<{ file?: string }>(STUDIO_TOOLS.get_render_review.input, rawInput);
-      let review = await client.getRenderReview(input.file);
-      if (review === null && (await waitForPendingReview())) {
-        review = await client.getRenderReview(input.file);
-      }
+      await waitForPendingReview();
+      const review = await client.getRenderReview(input.file);
       if (review === null) {
         throw new StudioToolRuntimeError(
           'FILE_NOT_FOUND',

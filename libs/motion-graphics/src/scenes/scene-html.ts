@@ -217,7 +217,7 @@ export function visual(v: MotionVisual, ctx: SceneContext): string {
     case 'devices':
       return devicesVisual(v.images, v.scroll === true, ctx);
     case 'animation':
-      return animationVisual(v.name, v.cue);
+      return `<div class="mg-anim-fit">${animationVisual(v.name, v.cue)}</div>`;
     case 'icon':
       return `<div class="mg-big-icon"${animAttrs({ anim: 'pop' })}>${icon(v.icon)}</div>`;
     case 'countdown': {
