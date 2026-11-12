@@ -53,6 +53,7 @@ export interface StudioApiClient {
   createBrand(body: Readonly<Record<string, unknown>>): Promise<unknown>;
   updateBrand(id: string, manifest: Readonly<Record<string, unknown>>): Promise<unknown>;
   uploadBrandFile(id: string, kind: string, upload: StudioFileUpload): Promise<unknown>;
+  importBrandMusic(id: string, body: Readonly<Record<string, unknown>>): Promise<unknown>;
 }
 
 export function contentTypeForFile(filePath: string): string {
@@ -139,5 +140,6 @@ export function createStudioApiClient(options: StudioApiClientOptions): StudioAp
     updateBrand: (id, manifest) => sendJson('PUT', `/brands/${encodeURIComponent(id)}`, manifest),
     uploadBrandFile: (id, kind, upload) =>
       putFile(`/brands/${encodeURIComponent(id)}/files/${encodeURIComponent(kind)}/${encodeURIComponent(upload.fileName ?? basename(upload.filePath))}`, upload),
+    importBrandMusic: (id, body) => sendJson('POST', `/brands/${encodeURIComponent(id)}/music/import`, body),
   };
 }

@@ -51,6 +51,9 @@ From `get_capabilities` → `motion`:
   `../video-maker/guides/sales-video.md`.
 - The brand name always with context and never at the very start or end of a line; numbers written as
   they are said; no URLs, versions or acronyms spelled out in the narration (they go on screen).
+- Narrate the pronounceable form (the brand's `spokenName`, "dot com" omitted, a package said as people
+  say it). The exact token (package name, command, URL) goes in the scene's on-screen text, never only in
+  the voice, so the viewer can copy it.
 - Accents and special letters stay in the script; only file names are ASCII.
 
 ### Projects without a UI
@@ -96,8 +99,10 @@ Code on screen: one short line per scene, taken literally from the README or doc
 ```
 
 - `music`: `"auto"` lets the AI pick from the brand's music bank by the script's mood, a track id
-  (`get_motion_brands` lists them), or `null` for no music. A new brand without tracks has no bank: see
-  the brand sub-skill (`musicFrom` or uploaded tracks).
+  (`get_motion_brands` lists them), or `null` for no music. It only takes ids of the project brand's own
+  bank. A new brand has an empty bank: fill it first with the brand sub-skill (`search_free_music` then
+  `import_brand_music`, or tracks the user owns). `musicFrom` is only for sub-brands of the same owner,
+  never to borrow another company's bank.
 - `beatSync: true` cuts scenes on the beat; `false` follows the voice (better for calm explainers).
 - Save it with `write_motion_brief` (`brief` = the object). Invalid → the hint names the field; fix it
   and call again.
@@ -120,8 +125,10 @@ Code on screen: one short line per scene, taken literally from the README or doc
 
 ## 6. Approval, render, review
 
-1. `view_images` on every project image, `review_material`, then `propose_production` with 2–3 concepts
-   (delivery kind `motion`). The user approves one in the studio ("Approve this approach").
+1. `view_images` on every project image and `review_material` (skip both when the only image is the
+   logo), then, once the user has approved the storyboard, `propose_production` with 2–3 concepts
+   (delivery kind `motion`). It unlocks the full render: the user approves one in the studio ("Approve
+   this approach"). If the user cannot answer (headless), stop here and report.
 2. `start_job` `{"kind":"motion","phase":"video","output":"video.mp4"}`; `wait_for_job` in steps of up to
    600 s (about 30 s per voiced line plus ~2.5 min per minute of video). After storyboard edits, add
    `overwrite: true`.

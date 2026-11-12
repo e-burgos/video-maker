@@ -65,7 +65,8 @@ never by asking the user to install an editor.
 - Nothing with real customer data, emails, credentials, license plates or other companies' brands. Ask
   before using photos with recognizable people.
 - Before proposing the video, `view_images` on every image and `review_material` with an honest verdict
-  per file (fits, doubtful, unfit) and the gaps; the proposal carries those warnings to the user.
+  per file (fits, doubtful, unfit) and the gaps; the proposal carries those warnings to the user. Skip
+  both when the only image is the logo.
 
 ## 5. Free media
 

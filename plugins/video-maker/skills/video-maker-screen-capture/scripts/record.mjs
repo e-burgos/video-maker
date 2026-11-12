@@ -287,6 +287,15 @@ export function writeTimedScript({ milestones, narration, file }) {
   return file;
 }
 
+function assertOutsideRepo(outDir) {
+  const root = resolve(process.cwd());
+  const target = resolve(outDir);
+  const insideRepo = existsSync(join(root, '.git')) && (target === root || target.startsWith(`${root}/`));
+  if (insideRepo) {
+    throw new Error(`recordings must live outside the host repo: use ~/.video-maker/recordings/<slug> (got ${target})`);
+  }
+}
+
 function defaultOutDir(slug, rehearsal) {
   return rehearsal ? join(tmpdir(), 'video-maker-rehearsal', slug) : join(homedir(), '.video-maker', 'recordings', slug);
 }
@@ -472,11 +481,12 @@ function parseArgs(argv) {
 async function main() {
   const { flow, outDir, rehearsal } = parseArgs(process.argv.slice(2));
   if (!flow) {
-    process.stderr.write('usage: node record.mjs <path/to/flow.mjs> [--rehearsal] [--out <dir>]\n');
+    process.stderr.write('usage: node record.mjs <.video-maker/flows/slug.mjs> [--rehearsal] [--out <dir>]\n');
     process.exit(2);
   }
   const flowPath = isAbsolute(flow) ? flow : resolve(process.cwd(), flow);
   const flowModule = await import(pathToFileURL(flowPath).href);
+  if (outDir) assertOutsideRepo(outDir);
   const summary = await recordFlow(flowModule, { outDir, rehearsal });
   process.stdout.write(`${JSON.stringify(summary, null, 2)}\n`);
   process.exitCode = summary.result.ok && (summary.verification?.ok ?? true) ? 0 : 1;

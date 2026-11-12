@@ -24,29 +24,37 @@ save", never as selectors, flags or file paths.
    variables, typically a seeded demo user). Never write them in the flow, the chat or the script.
 6. **Presentable data:** no real customer names, emails, keys or other companies' brands on screen. Use
    seed or demo data, and blur leftovers with the `mask` list of the flow config (CSS selectors).
-7. **Format:** tutorials 16:9 (`youtube-16x9`, default). A reel or short is a **separate vertical
-   recording** (`reels-9x16`, `tiktok-9x16` or `shorts-9x16`: phone viewport at 2x), never a crop.
+7. **Format:** tutorials for a desktop audience are 16:9 (`youtube-16x9`, default). Anything watched
+   mainly on a phone (WhatsApp, Instagram, TikTok, Shorts, stories, mobile ads, tutorials sent by
+   messaging apps) is a **separate vertical recording** (`reels-9x16`, `tiktok-9x16` or `shorts-9x16`),
+   never a crop. For vertical the recording viewport is a mobile one: 540×960 at device scale 2, which
+   records 1080×1920 (the formats already set this; keep it unless the app needs another phone width).
 
 ## 2. Install once
 
 The recorder is `scripts/record.mjs` in this skill (no dependencies besides Playwright and ffmpeg).
 
-- Playwright: if the host project already has `playwright` or `@playwright/test`, nothing to install.
-  Otherwise install it **outside** the repo, so the project is not touched:
+- Playwright, in this order, stopping at the first that works:
+  1. the host project already has `playwright` or `@playwright/test`: nothing to install;
+  2. `VIDEO_MAKER_PLAYWRIGHT_DIR` already points at a folder that has it;
+  3. install it **outside** the repo, so the project is not touched:
 
-  ```bash
-  npm install --prefix ~/.video-maker/recorder playwright
-  export VIDEO_MAKER_PLAYWRIGHT_DIR=~/.video-maker/recorder
-  npx playwright install chromium
-  ```
+     ```bash
+     npm install --prefix ~/.video-maker/recorder playwright
+     export VIDEO_MAKER_PLAYWRIGHT_DIR=~/.video-maker/recorder
+     npx playwright install chromium
+     ```
 
-  `PLAYWRIGHT_CHROMIUM_PATH` points at an already installed Chromium instead.
+  If the permission system blocks an install, do not hunt npm caches or other workarounds: ask the user
+  to run those exact commands once, then continue. `PLAYWRIGHT_CHROMIUM_PATH` points at an already
+  installed Chromium instead.
 - ffmpeg on the PATH (or `FFMPEG_PATH` / `FFPROBE_PATH`). Without it the raw `.webm` is kept untrimmed.
 
 ## 3. Write the flow
 
-Copy `scripts/flow.example.mjs` to a scratch folder outside the repo (for example
-`~/.video-maker/flows/<slug>.mjs`) and adapt it. A flow file exports:
+Copy `scripts/flow.example.mjs` to `.video-maker/flows/<slug>.mjs` inside the host repo (never
+`flow.mjs` at the repo root) and adapt it. The flow is reusable and tells how the video was made, so the
+user may commit it: say so. Recordings and takes never go inside the repo. A flow file exports:
 
 | Export | What it is |
 | --- | --- |
@@ -74,13 +82,14 @@ Rules:
 ## 4. Rehearse once, then record
 
 ```bash
-node <this skill>/scripts/record.mjs ~/.video-maker/flows/<slug>.mjs --rehearsal
-node <this skill>/scripts/record.mjs ~/.video-maker/flows/<slug>.mjs
+node <this skill>/scripts/record.mjs .video-maker/flows/<slug>.mjs --rehearsal
+node <this skill>/scripts/record.mjs .video-maker/flows/<slug>.mjs
 ```
 
 - `--rehearsal` runs the whole flow without recording and prints the milestones and the result. Fix
   selectors until it passes **in one go**; do not rehearse step by step.
-- The take writes to `~/.video-maker/recordings/<slug>/` (or `--out <dir>`): `<slug>.mp4` (1920×1080 or
+- The take writes to `~/.video-maker/recordings/<slug>/`, outside the repo (an `--out` inside the repo
+  is refused; keep it that way, no `recordings/` folder in the host project): `<slug>.mp4` (1920×1080 or
   1080×1920, 30 fps, H.264 yuv420p, silent, trimmed to start just before the first milestone),
   `script.txt` (one `[m:ss] sentence` per line), `milestones.json` and `images/` (snapshots).
 - The command prints a JSON summary with absolute paths and a `verification` block (orientation, pixel

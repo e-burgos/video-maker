@@ -15,7 +15,7 @@ If none answers, tools fail with a message asking to open the Video Maker app or
 
 ## Tools
 
-Global: `studio_status`, `get_capabilities`, `list_projects`, `create_project`, `list_brands`, `get_brand`, `create_brand`, `update_brand`, `upload_brand_file`, `list_voices`, `get_motion_brands`.
+Global: `studio_status`, `get_capabilities`, `list_projects`, `create_project`, `list_brands`, `get_brand`, `create_brand`, `update_brand`, `upload_brand_file`, `import_brand_music`, `list_voices`, `get_motion_brands`.
 
 Per project (all take a required `slug`): `upload_asset`, `get_project_overview`, `start_job`, `wait_for_job`, the brief, storyboard, timeline, music, review and voice tools.
 

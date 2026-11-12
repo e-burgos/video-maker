@@ -1,6 +1,6 @@
 ---
 name: video-maker-brand
-description: Create or reuse the Video Maker brand of the project open in this session — name, spoken name for the voice, tagline, a 4-color palette with measured contrast, logo with transparency, fonts, tone, voice and music — derived from the repository's own files (README, landing copy, CSS, Tailwind or theme config, web manifest, logo assets). Use it before producing any video with Video Maker, or when the user asks to set up, fix or change the brand, colors, logo or voice of their videos.
+description: Create or reuse the Video Maker brand of the project open in this session — name, spoken name for the voice, tagline, a 4-color palette with measured contrast, logo with transparency, fonts, voice and music — derived from the repository's own files (README, landing copy, CSS, Tailwind or theme config, web manifest, logo assets). Use it before producing any video with Video Maker, or when the user asks to set up, fix or change the brand, colors, logo or voice of their videos.
 ---
 
 # Video Maker brand
@@ -29,7 +29,7 @@ Collect each item with the file it came from:
 | Manifest field | Where it comes from |
 | --- | --- |
 | `name` | product name as the README, manifest or landing page writes it |
-| `spokenName` | the same name written the way a voice must say it ("Acme Pay" for "AcmePay", "Jey Ess Kit" for "JSKit" only if that is how people say it); ask the user when unsure |
+| `spokenName` | the same name written the way a voice must say it ("Acme Pay" for "AcmePay", "Jey Ess Kit" for "JSKit" only if that is how people say it); ask the user when unsure. Exact tokens (package names, commands, URLs) are never spoken: they go on screen, see the motion-brief skill |
 | `tagline` | the landing hero line or the package description, ≤ 8 words |
 | `url` | the public site of the product (homepage in the package manifest, landing page); it is the default outro caption |
 | `palette.background`, `palette.accent`, `palette.accent2`, `palette.text` | CSS variables, Tailwind theme, design tokens, web manifest `theme_color` / `background_color` |
@@ -60,14 +60,24 @@ not. Prefer, in this order: an SVG wordmark, a PNG with alpha ≥ 800 px wide, a
 manifest. Never pick one without alpha silently: offer to go without a logo or ask for a transparent file.
 Horizontal wordmarks work better than square icons; keep the square one as the optional `isotipo`.
 
-### Tone, voice and music
+### Voice and music
 
-- Tone: one line describing how the product talks ("close and direct, no jargon"); it guides scripts.
+- The brand manifest has no tone field. How the product talks ("close and direct, no jargon") belongs to
+  the brief and the script of each video, not to the brand.
 - Voice: `list_voices`; describe two candidates to the user in words (gender, accent, energy).
   `voice.lengthScale` 1.0 is normal speed, 1.08 slightly calmer.
-- Music: a new brand starts without tracks. Either set `musicFrom` to the id of a brand whose music bank
-  fits, upload tracks the user owns with `upload_brand_file` kind `music`, or let each video pick free
-  music (`search_free_music` in the project). Any track needs its credit in `music[].credit`.
+- Music: a new brand starts with an empty bank, and the brief `music` field only takes ids of the
+  brand's own bank. Ways to fill it:
+  - `musicFrom` (id of another brand) only for a sub-brand of the same owner that shares its parent's
+    music. Never use it to borrow another company's bank.
+  - Tracks the user owns: `upload_brand_file` kind `music`, then `update_brand` adding the entry.
+  - Free tracks, with no download on your side: in a project of this brand run `search_free_music`
+    (each result shows title, author, license and page URL), pick one whose license is not share-alike,
+    then call `import_brand_music` with the project slug, the `resultId`, the brand `id`, an estimated
+    `bpm`, a short `mood` and optionally `videoTypes`. The studio downloads the file (mp3, wav or m4a),
+    stores it in the brand and appends the track with its `credit` (title, author, license). Use the
+    answered `track.id` in the brief.
+  - Any entry needs `id`, `file`, `credit`, `bpm` and `mood`; `drop` and `videoTypes` are optional.
 
 ## 3. Propose, then create
 
@@ -76,7 +86,7 @@ Show the summary and wait for the OK. Then:
 1. `create_brand` with `name` (and `id`, kebab-case starting with a letter). The studio creates a starter
    manifest with default fonts and a generated wordmark.
 2. `upload_brand_file` for each file: kind `logo` (svg, png, webp, jpg), `font` (woff2, ttf, otf),
-   `music` (mp3, wav, m4a), `image` (photos the scenes can use), `device` (product hardware). Each upload
+   `music` (mp3, wav, m4a; a free track goes through `import_brand_music` instead), `image` (photos the scenes can use), `device` (product hardware). Each upload
    answers the stored relative path; use exactly that path in the manifest.
 3. `get_brand`, change only what you derived, and send the **whole** manifest with `update_brand`. The
    studio validates it and names the offending field when invalid: fix that field and send again.

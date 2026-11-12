@@ -62,6 +62,11 @@ describe('SKILL.md field tokens (checked: backticked dot-paths, and any backtick
     expect(findUnknownFieldTokens(markdown, known, new Set())).toEqual(['bogusFieldName', 'scenes[].notARealField']);
   });
 
+  it('rejects a backticked token named next to the brand manifest that the schema does not have', () => {
+    const markdown = 'Mood goes in the manifest as `bogusMood`.\n';
+    expect(findUnknownFieldTokens(markdown, known, new Set())).toEqual(['bogusMood']);
+  });
+
   it('honors the allowlist for tool names, flags and file names', () => {
     const markdown = 'The field `render_project` is a tool.\n';
     expect(findUnknownFieldTokens(markdown, known, new Set(['render_project']))).toEqual([]);

@@ -1,6 +1,6 @@
 const INLINE_CODE = /`([^`\n]+)`/gu;
 const FIELD_PATH = /^[a-zA-Z_][\w-]*(\[\])?(\.[a-zA-Z_*][\w-]*(\[\])?)*$/u;
-const FIELD_CONTEXT = /\b(fields?|campos?)\b/iu;
+const FIELD_CONTEXT = /\b(fields?|campos?)\b|\bmanifest\b|\bbrand\.json\b/iu;
 
 function normalize(token: string): string {
   return token.replace(/\.\*/gu, '.*');

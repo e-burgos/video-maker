@@ -14,3 +14,8 @@ shop-window.jpg
 brief
 write_motion_brief
 BRIEF_INVALID
+theme_color
+background_color
+track.id
+get_brand
+update_brand

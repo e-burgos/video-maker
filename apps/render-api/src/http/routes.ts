@@ -22,6 +22,7 @@ export const ROUTES = [
   { id: 'brands.preview.create', method: 'POST', pattern: '/brands/:id/preview' },
   { id: 'brands.preview.get', method: 'GET', pattern: '/brands/:id/preview/*path' },
   { id: 'brands.fonts.add', method: 'POST', pattern: '/brands/:id/fonts' },
+  { id: 'brands.music.import', method: 'POST', pattern: '/brands/:id/music/import' },
   { id: 'folders.list', method: 'GET', pattern: '/folders' },
   { id: 'folders.create', method: 'POST', pattern: '/folders' },
   { id: 'folders.rename', method: 'PUT', pattern: '/folders/:folderId' },

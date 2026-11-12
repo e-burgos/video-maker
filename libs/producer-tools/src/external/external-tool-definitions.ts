@@ -15,6 +15,7 @@ export const EXTERNAL_ONLY_TOOL_NAMES = [
   'create_brand',
   'update_brand',
   'upload_brand_file',
+  'import_brand_music',
 ] as const;
 
 export type ExternalOnlyToolName = (typeof EXTERNAL_ONLY_TOOL_NAMES)[number];
@@ -117,6 +118,20 @@ export const EXTERNAL_ONLY_TOOLS: Readonly<Record<ExternalOnlyToolName, External
       kind: z.enum(EXTERNAL_BRAND_FILE_KINDS),
       filePath: LocalFilePathSchema,
       name: FileNameSchema.describe('Name to store it under; defaults to the local file name'),
+    }),
+    output: AnyObject,
+  },
+  import_brand_music: {
+    description:
+      'Add a free-licensed track found with search_free_music to the music bank of a user brand, without downloading anything yourself: the studio downloads it (mp3, wav or m4a only), stores it in the brand and appends the track to the manifest with its credit and license. `slug` is the project whose search_free_music call returned `resultId` (valid for one hour); `bpm` and `mood` are yours to estimate. Afterwards the track id works in the brief `music` field.',
+    input: z.strictObject({
+      id: BrandIdSchema,
+      slug: ProjectSlugSchema,
+      resultId: z.string().min(1).describe('resultId from a search_free_music result (not a brand bank one)'),
+      bpm: z.number().positive().describe('Tempo of the track in beats per minute'),
+      mood: z.string().min(1).describe('A few words describing the track, used to match it to a video'),
+      trackId: z.string().regex(/^[a-z0-9]+(-[a-z0-9]+)*$/u).optional().describe('Id for the track in the brand bank; defaults to a slug of its title'),
+      videoTypes: z.array(z.enum(['tutorial', 'product', 'vertical', 'institutional'])).min(1).optional().describe('Video types the track suits'),
     }),
     output: AnyObject,
   },

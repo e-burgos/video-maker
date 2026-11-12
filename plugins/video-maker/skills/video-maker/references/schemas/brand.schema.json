@@ -345,7 +345,7 @@
     "musicFrom": {
       "type": "string",
       "pattern": "^[a-z][a-z0-9-]*$",
-      "description": "Brand whose music bank this brand also uses"
+      "description": "Brand whose music bank this brand also uses; only a sub-brand of the same owner, never the bank of an unrelated company"
     },
     "voice": {
       "type": "object",

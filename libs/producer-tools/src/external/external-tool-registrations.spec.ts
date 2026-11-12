@@ -187,6 +187,21 @@ describe('external tool registrations', () => {
     expect(requests[0]?.headers['content-type']).toBe('image/svg+xml');
   });
 
+  it('imports a searched track into a brand bank through the brand music route', async () => {
+    const requests: RecordedRequest[] = [];
+    const client = await connect(recordingFetch(requests, () => ({ status: 200, body: { track: { id: 'calm-piano' } } })));
+
+    const result = await client.callTool({
+      name: 'import_brand_music',
+      arguments: { id: 'acme', slug: 'demo', resultId: 'r1', bpm: 90, mood: 'calm piano' },
+    });
+
+    expect(result.isError).toBeFalsy();
+    expect(requests[0]?.method).toBe('POST');
+    expect(requests[0]?.url).toBe('http://127.0.0.1:4520/brands/acme/music/import');
+    expect(JSON.parse(String(requests[0]?.body))).toEqual({ slug: 'demo', resultId: 'r1', bpm: 90, mood: 'calm piano' });
+  });
+
   it('creates a project and answers list_projects and studio_status', async () => {
     const requests: RecordedRequest[] = [];
     const client = await connect(

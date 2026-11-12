@@ -111,6 +111,10 @@ function createExternalOnlyHandlers(
       });
       return { data: asRecord(uploaded) };
     },
+    import_brand_music: async (raw) => {
+      const { id, ...body } = input<{ id: string } & Record<string, unknown>>('import_brand_music', raw);
+      return { data: asRecord(await (await studioFor()).client.importBrandMusic(id, body)) };
+    },
   };
 }
 

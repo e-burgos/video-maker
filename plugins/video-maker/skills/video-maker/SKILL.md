@@ -15,6 +15,7 @@ confirms decisions and, at the end, publishes from the studio.
   a job kind, a flag, a preset id, a format id, a tool name, a JSON key or a file path as something to
   decide. Translate both ways: "for YouTube" → `youtube-16x9`; "voice with AI" → a voice job; "subtitles
   like Netflix" → `subtle-lower`. Give a path only when the user asks for it.
+- **Narration uses the pronounceable form** (the brand's `spokenName`, numbers as they are said). Exact tokens such as package names, commands and URLs go in on-screen text, never only in the voice.
 - **Never invent facts.** Every claim in a script (features, numbers, prices, customers, results, dates)
   must come from this repository or from the user. If it is not there, ask or leave it out.
 - **One round of questions**, with a concrete recommendation for each, so the user can just say "yes".
@@ -52,9 +53,9 @@ found each item:
 | Features and their real names | docs, route names, menu labels, i18n message files |
 | Proof points: numbers, customers, integrations, testimonials | only what is written in the repo (landing copy, case studies, docs) |
 | Plans and prices | pricing page or config; quote them only if the user wants prices in the video |
-| Brand: name, logo files, colors, fonts, tone | `public/`, `assets/`, favicon and manifest files, CSS variables, Tailwind or theme config, design tokens |
+| Brand: name, logo files, colors, fonts | `public/`, `assets/`, favicon and manifest files, CSS variables, Tailwind or theme config, design tokens |
 | Is there a web UI that can be recorded, and how to run it | package scripts, docker compose, `.env.example`, a staging URL in the docs |
-| Language of the product and its audience | UI strings, README language |
+| Language of the product, its audience and its tone of voice (for the script, not for the brand) | UI strings, README and landing copy |
 
 Detailed checklist and search patterns: `guides/reading-the-project.md`.
 
@@ -78,7 +79,7 @@ Ask everything in one message, each item with your recommendation already filled
 
 | Question | Recommend |
 | --- | --- |
-| Where it will be published | YouTube or web → horizontal 16:9. Reels, TikTok, Shorts, stories → vertical 9:16. One format per video; the other one is a second video. |
+| Where it will be published | YouTube or web → horizontal 16:9. Anything watched mainly on a phone → vertical 9:16: WhatsApp, Instagram, TikTok, Shorts, stories, mobile ads, and also tutorials sent by messaging apps. One format per video; the other one is a second video. A vertical tutorial is recorded with a mobile viewport (540×960 at device scale 2 gives 1080×1920). |
 | Length | promo or sales 45–75 s · reel 25–40 s · tutorial 60–180 s · team instructions up to ~2 min |
 | Audience and goal | from what you read: who watches and what they should do after |
 | Tone | from the product's own copy (formal, close, playful) |
@@ -121,10 +122,13 @@ user if it does not. Then summarize the plan in three lines in their words and w
 **Both modes, before the full render:**
 
 1. `view_images` on every image of the project, then `review_material` (one entry per image; `gaps` lists
-   what the idea needs and the material lacks).
-2. `propose_production`: 2 or 3 concepts (title, angle, format, duration, scenes, delivery kind), the
-   recommended one first. Tell the user to open the project in the studio and click **Approve this
-   approach** on the one they want. A full render is refused until then.
+   what the idea needs and the material lacks). Skip both when the only image is the logo (the generated
+   wordmark or an uploaded one): there is nothing to review.
+2. `propose_production`, in **both** modes: 2 or 3 concepts (title, angle, format, duration, scenes,
+   delivery kind), the recommended one first. It is what unlocks the full render: the studio refuses it
+   until the user opens the project and clicks **Approve this approach** on the concept they want. In
+   motion mode the order is storyboard OK first, then `propose_production`. If the user cannot answer
+   (headless session), stop there and report what is ready and what is waiting for the approval.
 3. Optional and never blocked: a preview of the first 8–20 seconds with `sample: {"seconds": 15}` on the
    render or motion job, to show the look before approving.
 

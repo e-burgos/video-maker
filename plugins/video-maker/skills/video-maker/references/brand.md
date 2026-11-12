@@ -57,7 +57,7 @@ Machine-readable schema: `schemas/brand.schema.json`.
 | `bumpers.backgrounds` | enum[] (minItems 1) | no | `solid`, `gradient`, `noise`, `shapes`, `glow` |  |  | Animated backgrounds the intro and outro rotate between |
 | `bumpers.reveals` | enum[] (minItems 1) | no | `fade`, `zoom`, `slide-up`, `wipe`, `blur-in`, `pop` |  |  | Logo reveals the intro and outro rotate between |
 | `bumpers.outroCaption` | string (maxLength 60) | no |  |  |  | Text typed under the outro logo; defaults to the brand url |
-| `musicFrom` | string (pattern ^[a-z][a-z0-9-]*$) | no |  |  |  | Brand whose music bank this brand also uses |
+| `musicFrom` | string (pattern ^[a-z][a-z0-9-]*$) | no |  |  |  | Brand whose music bank this brand also uses; only a sub-brand of the same owner, never the bank of an unrelated company |
 | `voice` | object | yes |  |  |  |  |
 | `voice.id` | string | yes |  |  |  |  |
 | `voice.lengthScale` | number (min 0.7, max 1.4) | yes |  |  |  |  |

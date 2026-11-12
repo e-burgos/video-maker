@@ -9,7 +9,7 @@ import { createFakeRenderApiDependencies } from '../../__fixtures__/fake-render-
 import { requestLine } from '../../__fixtures__/http-request';
 import type { StoreConfig } from '../../config/store-config';
 import { createRenderApiRuntime } from '../render-api-runtime';
-import { handleImportMusic, handleSearchFreeMusic } from './music-handler';
+import { handleImportBrandMusic, handleImportMusic, handleSearchFreeMusic } from './music-handler';
 
 const STORE: StoreConfig = { mediaRoot: '/media', dbPath: '/media/.studio/studio.db', maxUploadBytes: 2_147_483_648, objectStore: 'fs', motionAssetsRoot: '/repo/libs/motion-graphics/assets', brandsRoot: '/brands' };
 const PROJECT_ROOT = `${STORE.mediaRoot}/pitch-deck`;
@@ -346,5 +346,98 @@ describe('the brand music bank in search_free_music and import_music', () => {
     expect(results.map((result) => result.source)).toEqual(['brand-bank', 'brand-bank', 'brand-bank', 'openverse', 'commons']);
     expect(response.body).toMatchObject({ path: 'raw/audio/Calm Morning.mp3', credit: { title: 'Calm Morning', author: 'Ana Ruiz', license: 'CC BY 3.0', sourceUrl: 'https://www.jamendo.com/track/1' } });
     expect(await storage.readTextFile(`${PROJECT_ROOT}/raw/audio/Calm Morning.mp3`)).toBe('jamendo');
+  });
+});
+
+describe('handleImportBrandMusic', () => {
+  const BRAND_MANIFEST = {
+    id: 'mine',
+    name: 'Mine',
+    spokenName: 'Mine',
+    tagline: 'Hecho a mano.',
+    logo: 'img/logo.svg',
+    palette: { background: '#101820', accent: '#ff5500', accent2: '#00aaff', text: '#ffffff' },
+    fonts: [{ family: 'Outfit', file: 'fonts/outfit.woff2' }],
+    devices: {},
+    images: {},
+    music: [],
+    voice: { id: 'es_AR-daniela-high', lengthScale: 1.08 },
+  };
+
+  function audioFetch() {
+    const audioBytes = textBodyChunks('audio-bytes');
+    return createFakeFetchRemote(({ url }) => {
+      const search = searchAnswer(url);
+      if (search !== null) {
+        return search;
+      }
+      return { status: 200, headers: { 'content-length': String(audioBytes[0]?.byteLength ?? 0) }, bodyChunks: audioBytes };
+    }).fetchRemote;
+  }
+
+  function brandRequest(payload: unknown): ReturnType<typeof requestLine> {
+    return requestLine({ method: 'POST', path: '/brands/mine/music/import', body: toChunks([JSON.stringify(payload)]) });
+  }
+
+  async function searchedSetup() {
+    const callLog = createCallLog();
+    const storage = createFakeObjectStorage(callLog, {
+      directories: [PROJECT_ROOT, '/brands/mine'],
+      files: [
+        { path: '/brands/mine/brand.json', contents: JSON.stringify(BRAND_MANIFEST) },
+        { path: '/brands/mine/img/logo.svg', contents: '<svg/>' },
+      ],
+    });
+    const deps = createFakeRenderApiDependencies(callLog, { storage, fetchRemote: audioFetch() });
+    const runtime = createRenderApiRuntime(deps);
+    const search = await handleSearchFreeMusic(deps, STORE, { slug: 'pitch-deck' }, searchRequest('pitch-deck', 'mood=calm&maxResults=5'), runtime);
+    const resultId = (search.body as { results: readonly { resultId: string }[] }).results[0]?.resultId;
+    return { deps, storage, runtime, resultId };
+  }
+
+  it('stores the searched track in the brand music folder and appends it to the manifest with its credit', async () => {
+    const { deps, storage, runtime, resultId } = await searchedSetup();
+
+    const response = await handleImportBrandMusic(
+      deps,
+      STORE,
+      { id: 'mine' },
+      brandRequest({ slug: 'pitch-deck', resultId, bpm: 90, mood: 'calm piano', videoTypes: ['tutorial'] }),
+      runtime,
+    );
+
+    expect(response.status).toBe(200);
+    const manifest = JSON.parse(await storage.readTextFile('/brands/mine/brand.json')) as { music: readonly Record<string, unknown>[] };
+    expect(manifest.music).toEqual([
+      {
+        id: 'calm-piano',
+        file: 'music/Calm_Piano.mp3',
+        credit: '"Calm Piano.mp3" Jane Doe \u00B7 CC BY 3.0',
+        bpm: 90,
+        mood: 'calm piano',
+        videoTypes: ['tutorial'],
+      },
+    ]);
+    expect((await storage.stat('/brands/mine/music/Calm_Piano.mp3'))?.kind).toBe('file');
+  });
+
+  it('rejects an unknown resultId and a missing bpm', async () => {
+    const { deps, runtime, resultId } = await searchedSetup();
+
+    await expect(
+      handleImportBrandMusic(deps, STORE, { id: 'mine' }, brandRequest({ slug: 'pitch-deck', resultId: 'nope', bpm: 90, mood: 'x' }), runtime),
+    ).rejects.toMatchObject({ code: 'MUSIC_RESULT_UNKNOWN' });
+    await expect(
+      handleImportBrandMusic(deps, STORE, { id: 'mine' }, brandRequest({ slug: 'pitch-deck', resultId, mood: 'x' }), runtime),
+    ).rejects.toMatchObject({ code: 'INVALID_INPUT' });
+  });
+
+  it('rejects a duplicated track id', async () => {
+    const { deps, runtime, resultId } = await searchedSetup();
+    const payload = { slug: 'pitch-deck', resultId, bpm: 90, mood: 'calm' };
+
+    await handleImportBrandMusic(deps, STORE, { id: 'mine' }, brandRequest(payload), runtime);
+
+    await expect(handleImportBrandMusic(deps, STORE, { id: 'mine' }, brandRequest(payload), runtime)).rejects.toMatchObject({ code: 'INVALID_INPUT' });
   });
 });
