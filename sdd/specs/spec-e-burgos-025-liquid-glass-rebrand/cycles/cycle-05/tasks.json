@@ -1,0 +1,105 @@
+{
+  "$schema": "../../../../schemas/cycle-tasks.schema.json",
+  "spec": "spec-e-burgos-025-liquid-glass-rebrand",
+  "cycle": 5,
+  "module": "liquid-glass-rebrand",
+  "apps": [
+    "apps/web",
+    "apps/docs-site"
+  ],
+  "flow": "lite",
+  "user_stories_generated": true,
+  "prerequisites": {
+    "tasks_generated": true
+  },
+  "tasks": [
+    {
+      "id": "TASK-001",
+      "title": "Publicación, revisión de render y diálogo de YouTube migrados",
+      "user_stories": [
+        "US-025-501"
+      ],
+      "estimation_hours": 4,
+      "story_points": 5,
+      "depends_on": [],
+      "status": "pending",
+      "files": [
+        "apps/web/src/pages/publish-queue-page.tsx",
+        "apps/web/src/components/render-review-panel.tsx",
+        "apps/web/src/components/youtube-publish-dialog.tsx"
+      ]
+    },
+    {
+      "id": "TASK-002",
+      "title": "Ajustes en pestañas con Apariencia y guía migrados",
+      "user_stories": [
+        "US-025-502",
+        "US-025-503"
+      ],
+      "estimation_hours": 4,
+      "story_points": 5,
+      "depends_on": [],
+      "status": "pending",
+      "files": [
+        "apps/web/src/pages/settings-page.tsx",
+        "apps/web/src/pages/guide-page.tsx"
+      ]
+    },
+    {
+      "id": "TASK-003",
+      "title": "Modales, estados y retiro del modo heredado",
+      "user_stories": [
+        "US-025-504"
+      ],
+      "estimation_hours": 3,
+      "story_points": 3,
+      "depends_on": [],
+      "status": "pending",
+      "files": [
+        "apps/web/src/components/shell/shell-content.tsx",
+        "apps/web/src/components/shell/legacy-surface.tsx",
+        "apps/web/src/components/error-notice.tsx"
+      ]
+    },
+    {
+      "id": "TASK-004",
+      "title": "Capturas del studio nuevo para la web pública",
+      "user_stories": [
+        "US-025-505"
+      ],
+      "estimation_hours": 2,
+      "story_points": 2,
+      "depends_on": [
+        "TASK-001",
+        "TASK-002",
+        "TASK-003"
+      ],
+      "status": "pending",
+      "files": [
+        "apps/docs-site/scripts/capture-screenshots.mjs",
+        "apps/docs-site/public/screenshots/"
+      ]
+    },
+    {
+      "id": "TASK-005",
+      "title": "Verificación del ciclo 05",
+      "user_stories": [
+        "US-025-501",
+        "US-025-502",
+        "US-025-503",
+        "US-025-504",
+        "US-025-505"
+      ],
+      "estimation_hours": 1,
+      "story_points": 2,
+      "depends_on": [
+        "TASK-001",
+        "TASK-002",
+        "TASK-003",
+        "TASK-004"
+      ],
+      "status": "pending",
+      "files": []
+    }
+  ]
+}
