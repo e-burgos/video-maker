@@ -46,3 +46,10 @@
 - Licencias: sección «Fonts (app interface)» (SIL OFL 1.1) en `THIRD_PARTY_NOTICES.md`, que se genera desde `apps/desktop/scripts/vendor-binaries.mjs`; la plantilla del script se actualizó igual. El test de `docs-site` no exigió tocar su inventario.
 - `Scene` (`apps/web/src/theme/scene.tsx`): aurora estática con dos orbes, `aria-hidden`, sin textos.
 
+## Tema y materiales (TASK-003, commit 921d9d9)
+- Lógica en `apps/web/src/theme/` (fuera del escáner de textos literales): `theme-preferences.ts` (claves `vm-theme` y `vm-material`, resolución, localStorage con try/catch, `applyThemeToDocument`), `theme-context.tsx` (`ThemeProvider` y `useThemePreferences`, sigue `prefers-color-scheme`) y `theme-switch.tsx` (dos `SegmentedControl`: Sistema/Claro/Oscuro y Vidrio/Sólidos). El selector todavía no está montado en ninguna pantalla.
+- Sin destello: script inline en `index.html` con la misma lógica de resolución; un spec lo ejecuta y lo compara contra `applyThemeToDocument`.
+- Verificado en el studio real: en oscuro y en claro el `<html>` recibe `dark`/`data-theme`, sin errores de consola, y las pantallas actuales conservan fondo y fuente.
+- El contexto no sabe de `prefers-reduced-transparency` ni de contraste: viven solo en el CSS de TASK-002.
+- Consecuencia para TASK-004: en modo claro las pantallas viejas (texto claro sobre fondo oscuro fijo) quedarían ilegibles sobre la escena clara, así que el shell las envuelve en una superficie oscura opaca hasta que migren.
+
