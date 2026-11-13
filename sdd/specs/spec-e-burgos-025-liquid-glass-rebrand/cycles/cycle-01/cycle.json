@@ -45,8 +45,8 @@
   ],
   "metrics": {
     "tasks_total": 7,
-    "tasks_completed": 5,
-    "story_points": 28,
+    "tasks_completed": 6,
+    "story_points": 33,
     "files_created": [
       "apps/web/src/theme/tucu-mount.spec.tsx",
       "apps/web/src/components/ui/brand-mark.tsx",
@@ -74,7 +74,9 @@
       "apps/web/src/components/shell/toolbar-action-context.ts",
       "apps/web/src/components/shell/toolbar-action-provider.tsx",
       "apps/web/src/components/shell/use-toolbar-action.ts",
-      "apps/web/src/components/shell/use-toolbar-action.spec.tsx"
+      "apps/web/src/components/shell/use-toolbar-action.spec.tsx",
+      "apps/desktop/src/main/window-options.ts",
+      "apps/desktop/src/main/window-options.spec.ts"
     ],
     "files_modified": [
       "package.json",
@@ -90,12 +92,17 @@
       "apps/web/src/components/service-health-badge.tsx",
       "apps/web/src/components/language-switch.tsx",
       "apps/web/src/components/project-brand-control.tsx",
-      "apps/web/src/components/studio-layout.spec.tsx"
+      "apps/web/src/components/studio-layout.spec.tsx",
+      "apps/desktop/src/main/main.ts",
+      "apps/desktop/src/setup/setup.html",
+      "apps/desktop/electron-builder.yml",
+      "apps/web/src/theme/theme-context.spec.tsx",
+      "apps/web/src/components/shell/shell-sidebar.tsx"
     ],
     "files_deleted": [],
     "usage": {
-      "tokens_in": 600000,
-      "tokens_out": 95000,
+      "tokens_in": 695000,
+      "tokens_out": 111000,
       "by_agent": [
         {
           "agent": "implementor-front",
@@ -153,6 +160,18 @@
           "tokens_in": 120000,
           "tokens_out": 22000,
           "tokens_total": 142000,
+          "approx": true,
+          "source": "declared-estimate",
+          "recorded_at": "2026-11-13"
+        },
+        {
+          "agent": "implementor-front",
+          "label": "TASK-005",
+          "provider_model": "claude/sonnet",
+          "effort": "medium",
+          "tokens_in": 95000,
+          "tokens_out": 16000,
+          "tokens_total": 111000,
           "approx": true,
           "source": "declared-estimate",
           "recorded_at": "2026-11-13"

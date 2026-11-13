@@ -41,6 +41,7 @@ extraResources:
 asar: true
 
 mac:
+  icon: apps/desktop/build/icon.icns
   target:
     - target: dmg
       arch:

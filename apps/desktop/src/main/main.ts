@@ -1,7 +1,7 @@
 import { randomBytes } from 'node:crypto';
 import { existsSync, mkdirSync, readFileSync } from 'node:fs';
 import { dirname, join, resolve as resolvePath } from 'node:path';
-import { app, BrowserWindow, dialog, ipcMain, Menu, shell } from 'electron';
+import { app, BrowserWindow, dialog, ipcMain, Menu, nativeTheme, shell } from 'electron';
 import type { MenuItemConstructorOptions } from 'electron';
 
 import { appDirectoriesToCreate, resolveAppPaths } from './app-paths';
@@ -27,6 +27,7 @@ import { buildRenderApiEnv } from './render-api-env';
 import { killOrphanableChromeChildren } from './kill-orphan-chrome';
 import { DEFAULT_LOCALE, menuStrings } from './menu-strings';
 import { resolvePreferredPort } from './preferred-port';
+import { mainWindowOptions, setupWindowOptions, windowTheme } from './window-options';
 import {
   loadSetupState,
   recordModelInstalled,
@@ -41,10 +42,6 @@ import type { SetupState } from './setup-state';
 const REPO_ROOT_MARKER = 'nx.json';
 const RENDER_API_HOST = '127.0.0.1';
 const STUDIO_TOKEN_HEADER = 'x-studio-token';
-const WINDOW_WIDTH = 1280;
-const WINDOW_HEIGHT = 800;
-const SETUP_WINDOW_WIDTH = 640;
-const SETUP_WINDOW_HEIGHT = 760;
 const CLAUDE_INSTALL_DOCS_URL = 'https://docs.claude.com/en/docs/claude-code/setup';
 
 const userDataOverride = process.env.VIDEO_MAKER_USER_DATA;
@@ -224,17 +221,10 @@ function runSetupWindow(input: SetupSessionInput): Promise<{ projectsFolder: str
     let state = input.initialState;
     const plan = buildDownloadPlan(input.models, input.paths.modelsDir);
 
-    const setupWindow = new BrowserWindow({
-      width: SETUP_WINDOW_WIDTH,
-      height: SETUP_WINDOW_HEIGHT,
-      resizable: false,
-      webPreferences: {
-        contextIsolation: true,
-        nodeIntegration: false,
-        sandbox: true,
-        preload: input.preloadPath,
-      },
-    });
+    const setupWindow = new BrowserWindow(
+      setupWindowOptions(currentWindowTheme(), input.preloadPath),
+    );
+    showWhenReady(setupWindow);
 
     function removeHandlers(): void {
       for (const channel of Object.values(SETUP_CHANNELS)) {
@@ -405,15 +395,8 @@ async function startStudio(input: {
   });
 
   if (mainWindow === null) {
-    const window = new BrowserWindow({
-      width: WINDOW_WIDTH,
-      height: WINDOW_HEIGHT,
-      webPreferences: {
-        contextIsolation: true,
-        nodeIntegration: false,
-        sandbox: true,
-      },
-    });
+    const window = new BrowserWindow(mainWindowOptions(currentWindowTheme()));
+    showWhenReady(window);
     mainWindow = window;
     routeExternalNavigationToSystemBrowser(window, new URL(target).origin);
     window.on('closed', () => {
@@ -427,6 +410,14 @@ async function startStudio(input: {
   } else {
     await mainWindow.loadURL(target);
   }
+}
+
+function currentWindowTheme() {
+  return windowTheme(nativeTheme.shouldUseDarkColors);
+}
+
+function showWhenReady(window: BrowserWindow): void {
+  window.once('ready-to-show', () => window.show());
 }
 
 function routeExternalNavigationToSystemBrowser(window: BrowserWindow, appOrigin: string): void {

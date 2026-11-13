@@ -39,7 +39,10 @@ export function ShellSidebar({ videoBlock }: ShellSidebarProps) {
       data-testid="shell-sidebar"
       className="glass relative z-30 m-3 mr-0 flex w-[236px] shrink-0 flex-col gap-0.5 rounded-[20px] px-3 py-4 shadow-[var(--tucu-shadow-panel)] max-[1099px]:w-[72px] max-[1099px]:px-2"
     >
-      <div className="flex items-center gap-2.5 px-2 pb-3.5 pt-1 text-[var(--cl-ink)] max-[1099px]:justify-center max-[1099px]:px-0">
+      <div
+        data-testid="shell-sidebar-brand"
+        className="flex items-center gap-2.5 px-2 pb-3.5 pt-1 text-[var(--cl-ink)] max-[1099px]:justify-center max-[1099px]:px-0"
+      >
         <BrandMark label={t('brand.name')} size={28} />
         <BrandWordmark
           label={t('brand.nameWithSignature')}

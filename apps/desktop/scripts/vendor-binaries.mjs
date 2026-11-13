@@ -476,7 +476,7 @@ ${voiceEntries}
 
 ## Fonts (app interface)
 
-- Inter 5.3.0 and JetBrains Mono 5.3.0 (`@fontsource-variable/inter`, `@fontsource-variable/jetbrains-mono`) — SIL Open Font License 1.1, bundled with the app.
+- Inter 5.3.0 and JetBrains Mono 5.3.0 (\`@fontsource-variable/inter\`, \`@fontsource-variable/jetbrains-mono\`) — SIL Open Font License 1.1, bundled with the app.
 
 ## Music (motion graphics brand kit)
 

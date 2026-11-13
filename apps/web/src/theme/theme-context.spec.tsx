@@ -163,6 +163,20 @@ describe('boot script in index.html', () => {
     expect(fromScript).toEqual(rootSnapshot());
   });
 
+  it.each([
+    ['Mozilla/5.0 (Macintosh) AppleWebKit/537.36 Chrome/130.0 Electron/33.0.0 Safari/537.36', 'electron'],
+    ['Mozilla/5.0 (Macintosh) AppleWebKit/537.36 Chrome/130.0 Safari/537.36', null],
+  ])('marks data-shell only for Electron user agents (%s)', (userAgent, expected) => {
+    mockColorScheme(false);
+    root.removeAttribute('data-shell');
+    vi.spyOn(navigator, 'userAgent', 'get').mockReturnValue(userAgent);
+
+    runBootScript();
+
+    expect(root.getAttribute('data-shell')).toBe(expected);
+    root.removeAttribute('data-shell');
+  });
+
   it('does not throw when localStorage throws', () => {
     mockColorScheme(true);
     vi.spyOn(Storage.prototype, 'getItem').mockImplementation(() => {

@@ -237,3 +237,15 @@ html[data-material='solid'] .glass-thick {
     border: 1px solid currentColor;
   }
 }
+
+html[data-shell='electron'] [data-testid='shell-sidebar-brand'] {
+  padding-top: 36px;
+}
+
+html[data-shell='electron'] [data-testid='shell-toolbar'] {
+  -webkit-app-region: drag;
+}
+
+html[data-shell='electron'] [data-testid='shell-toolbar'] :is(button, a, input, select, textarea, [role='button']) {
+  -webkit-app-region: no-drag;
+}

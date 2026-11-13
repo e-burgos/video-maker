@@ -22,6 +22,7 @@
         root.classList.toggle('dark', dark);
         root.setAttribute('data-theme', dark ? 'dark' : 'light');
         if (material === 'solid') root.setAttribute('data-material', 'solid');
+        if (/Electron\//.test(navigator.userAgent)) root.setAttribute('data-shell', 'electron');
       })();
     </script>
   </head>

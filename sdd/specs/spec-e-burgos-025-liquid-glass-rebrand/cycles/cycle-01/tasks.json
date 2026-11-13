@@ -167,14 +167,29 @@
         "TASK-004",
         "TASK-007"
       ],
-      "status": "pending",
+      "status": "done",
       "files": [
-        "apps/desktop/src/main/main.ts",
         "apps/desktop/src/main/window-options.ts",
         "apps/desktop/src/main/window-options.spec.ts",
+        "apps/desktop/src/main/main.ts",
         "apps/desktop/src/setup/setup.html",
-        "apps/desktop/electron-builder.yml"
-      ]
+        "apps/desktop/electron-builder.yml",
+        "apps/web/index.html",
+        "apps/web/src/index.css",
+        "apps/web/src/theme/theme-context.spec.tsx",
+        "apps/web/src/components/shell/shell-sidebar.tsx",
+        "apps/desktop/scripts/vendor-binaries.mjs"
+      ],
+      "usage": {
+        "tokens_in": 95000,
+        "tokens_out": 16000,
+        "provider_model": "claude/sonnet",
+        "effort": "medium",
+        "agent": "implementor-front",
+        "approx": true,
+        "source": "declared-estimate",
+        "recorded_at": "2026-11-13"
+      }
     },
     {
       "id": "TASK-007",
