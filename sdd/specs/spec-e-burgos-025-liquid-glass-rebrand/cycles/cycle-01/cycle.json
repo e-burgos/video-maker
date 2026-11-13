@@ -12,9 +12,9 @@
   "objectives": [
     "Base visual Cristal Líquido sobre tucu-ui, tema sistema/claro/oscuro y shell nuevo con sidebar y toolbar de una acción, dentro de la ventana de Electron"
   ],
-  "status": "in-progress",
+  "status": "completed",
   "started_at": "2026-11-13",
-  "completed_at": null,
+  "completed_at": "2026-11-13",
   "documents": {
     "plan": "sdd/specs/spec-e-burgos-025-liquid-glass-rebrand/cycles/cycle-01/plan.md",
     "tasks": "sdd/specs/spec-e-burgos-025-liquid-glass-rebrand/cycles/cycle-01/tasks.json"
@@ -177,8 +177,8 @@
     ],
     "files_deleted": [],
     "usage": {
-      "tokens_in": 885000,
-      "tokens_out": 145000,
+      "tokens_in": 1145000,
+      "tokens_out": 185000,
       "by_agent": [
         {
           "agent": "implementor-front",
@@ -275,6 +275,18 @@
           "approx": true,
           "source": "declared-estimate",
           "recorded_at": "2026-11-13"
+        },
+        {
+          "agent": "orchestrator",
+          "label": "apertura, revisión con el dev en Electron y cierre como reviewer",
+          "provider_model": "claude/opus",
+          "effort": "high",
+          "tokens_in": 260000,
+          "tokens_out": 40000,
+          "tokens_total": 300000,
+          "approx": true,
+          "source": "declared-estimate",
+          "recorded_at": "2026-11-13"
         }
       ]
     }
@@ -282,6 +294,33 @@
   "tables_created": [],
   "endpoints_implemented": [],
   "components_created": [],
-  "issues_found": [],
-  "reviewer_report": null
+  "issues_found": [
+    "Ventana de configuración inicial sin probar en la app real (dispararía descargas de modelos).",
+    "Costo del backdrop-filter medido solo en Chromium headless por software (52 contra 116 cuadros por segundo con sólidos); falta medir con GPU real.",
+    "Las pantallas viejas siguen en superficie heredada oscura hasta su ciclo; en modo claro conviven ambos estilos."
+  ],
+  "reviewer_report": {
+    "approved": true,
+    "date": "2026-11-13",
+    "ca_results": {
+      "US-025-101": "PASS — tucu-ui 3.10.1 montado; lint/test/build de web en verde (1722 tests); pantallas no migradas sin cambios visuales medidos (fuentes y fondo)",
+      "US-025-102": "PASS — tema sistema/claro/oscuro y materiales persistidos; prefers-reduced-transparency y data-material=solid apagan el blur; prefers-contrast:more pasa el borde a 1 px (task006-verificacion.json)",
+      "US-025-103": "PASS — sidebar con secciones, aria-current, bloque del video solo en /projects/:slug, riel bajo 1100 px; contraste AA ≥ 4,5:1 medido en claro y oscuro",
+      "US-025-104": "PASS — useToolbarAction declara una acción por página y se limpia al desmontar (specs del shell)",
+      "US-025-105": "PASS — verificado en ventana real de Electron: mínimo 960×640, fondo por tema, botones de ventana ajustados con el dev; ícono declarado (empaquetado sin probar)",
+      "US-025-106": "PASS — logo aprobado por el dev; SVG, PNG, .icns y favicon generados por build-logo.mjs"
+    },
+    "tests": {
+      "sdd:validate": "OK",
+      "web": "177/177 archivos, 1722/1722 tests",
+      "desktop": "15/15 archivos, 132/132 tests",
+      "docs-site": "63/63 tests"
+    },
+    "notes": "Ciclo lite de un solo actor con implementación delegada a subagentes sonnet/medium. La revisión del dev en la app real encontró cuatro defectos de composición que se corrigieron en el ciclo (botones de ventana, desborde del SegmentedControl, panel flotante de estado reemplazado por modal, alturas del pie).",
+    "follow_ups": [
+      "Ciclo 02: migrar Mis videos y el espacio de trabajo (chat del productor) y alimentar el estado de los pasos del video.",
+      "Ciclo 05: pasar Apariencia del pie de la sidebar a Ajustes.",
+      "Probar la ventana de configuración inicial y el blur con GPU real en el próximo .dmg."
+    ]
+  }
 }
