@@ -6,6 +6,8 @@ import { RenderApiProvider } from '../api/render-api-context';
 import { RenderApiError } from '../api/render-api-error';
 import { initialTimelineEditState } from '../api/timeline-edit/timeline-edit-state';
 import { RenderTrigger } from './render-trigger';
+import { ShellToolbar } from './shell/shell-toolbar';
+import { ToolbarActionProvider } from './shell/toolbar-action-provider';
 import type { RenderApiClient } from '../api/render-api-client';
 import type { RenderJob } from '../api/render-api-types';
 import type { TimelineEditState } from '../api/timeline-edit/timeline-edit-state';
@@ -17,7 +19,10 @@ function renderTrigger(
 ) {
   render(
     <RenderApiProvider client={{ createRenderJob } as unknown as RenderApiClient}>
-      <RenderTrigger slug="smoke-ingest" state={state} onCreated={onCreated} />
+      <ToolbarActionProvider>
+        <ShellToolbar title="Preview" subtitle={null} />
+        <RenderTrigger slug="smoke-ingest" state={state} onCreated={onCreated} />
+      </ToolbarActionProvider>
     </RenderApiProvider>,
   );
   return onCreated;
@@ -78,6 +83,20 @@ describe('RenderTrigger', () => {
     renderTrigger(state, vi.fn());
 
     expect(screen.getByRole('button', { name: 'Render' }).hasAttribute('disabled')).toBe(false);
+  });
+
+  it('declares «Render» as the toolbar action, enabled only when the timeline can render', () => {
+    renderTrigger(initialTimelineEditState(editableTimelineFixture()), vi.fn());
+
+    const action = screen.getByTestId('toolbar-action');
+    expect(action.textContent).toBe('Render');
+    expect(action.hasAttribute('disabled')).toBe(false);
+  });
+
+  it('disables the toolbar action while the timeline has unsaved changes', () => {
+    renderTrigger({ ...initialTimelineEditState(editableTimelineFixture()), dirty: true }, vi.fn());
+
+    expect(screen.getByTestId('toolbar-action').hasAttribute('disabled')).toBe(true);
   });
 
   it('emits the POST once, shows the job id on the 202 without a reload, and reports it upward', async () => {

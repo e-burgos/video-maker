@@ -21,7 +21,7 @@ export function ProjectModeGate({ slug, footage, motion }: ProjectModeGateProps)
   );
 
   if (project.status === 'loading') {
-    return <p className="text-sm text-ink-faint">{t('projectMode.loading')}</p>;
+    return <p className="m-0 text-sm text-[var(--cl-ink-2)]">{t('projectMode.loading')}</p>;
   }
 
   return project.data !== null && projectModeOf(project.data) === 'motion' ? motion : footage;

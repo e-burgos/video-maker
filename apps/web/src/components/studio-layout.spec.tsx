@@ -103,6 +103,7 @@ describe('StudioLayout project nav', () => {
               <Route path="/projects/:slug/storyboard" element={<p>storyboard</p>} />
               <Route path="/projects/:slug/voice" element={<p>voice</p>} />
               <Route path="/projects/:slug/preview" element={<p>preview</p>} />
+              <Route path="/publish-queue" element={<p>queue</p>} />
             </Route>
           </Routes>
         </MemoryRouter>
@@ -192,7 +193,7 @@ describe('StudioLayout project nav', () => {
   });
 
   it('keeps the routes not migrated yet on the legacy surface', () => {
-    renderAt('/projects/smoke-ingest/preview');
+    renderAt('/publish-queue');
 
     expect(screen.getByTestId('shell-content').getAttribute('data-surface')).toBe('legacy');
   });

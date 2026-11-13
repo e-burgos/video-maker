@@ -7,9 +7,9 @@ export type TimelineIssueListProps = {
 };
 
 const SEVERITY_STYLES: Record<TimelineIssueSeverity, string> = {
-  'save-blocking': 'border-rose-500/40 bg-rose-500/10 text-rose-100',
-  'render-blocking': 'border-amber-500/40 bg-amber-500/10 text-amber-100',
-  warning: 'border-sky-500/40 bg-sky-500/10 text-sky-100',
+  'save-blocking': 'border-[var(--tucu-state-red-line)] bg-[var(--tucu-state-red-soft)]',
+  'render-blocking': 'border-[var(--tucu-state-orange-line)] bg-[var(--tucu-state-orange-soft)]',
+  warning: 'border-[var(--tucu-state-teal-line)] bg-[var(--tucu-state-teal-soft)]',
 };
 
 export function TimelineIssueList({ issues }: TimelineIssueListProps) {
@@ -18,7 +18,7 @@ export function TimelineIssueList({ issues }: TimelineIssueListProps) {
   }
 
   return (
-    <ul className="space-y-2">
+    <ul className="m-0 flex list-none flex-col gap-2 p-0">
       {issues.map((issue, index) => {
         const severity = issueSeverity(issue.code);
 
@@ -27,11 +27,11 @@ export function TimelineIssueList({ issues }: TimelineIssueListProps) {
             key={`${issue.code}-${issue.path}-${index}`}
             role="status"
             data-severity={severity}
-            className={`rounded-lg border p-3 ${SEVERITY_STYLES[severity]}`}
+            className={`rounded-[12px] border p-3 text-[var(--cl-ink)] ${SEVERITY_STYLES[severity]}`}
           >
-            <p className="font-mono text-sm font-semibold">{issue.code}</p>
-            <p className="mt-1 font-mono text-xs opacity-80">{issue.path}</p>
-            <p className="mt-1 text-sm">{issue.message}</p>
+            <p className="font-data m-0 text-sm font-semibold">{issue.code}</p>
+            <p className="font-data m-0 mt-1 text-xs text-[var(--cl-ink-2)]">{issue.path}</p>
+            <p className="m-0 mt-1 text-sm">{issue.message}</p>
           </li>
         );
       })}

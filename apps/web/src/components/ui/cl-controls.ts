@@ -25,3 +25,8 @@ export const FIELD_LABEL_CLASS = 'text-xs font-medium text-[var(--cl-ink-2)]';
 export const MUTED_TEXT_CLASS = 'text-[var(--cl-ink-2)]';
 export const TEXTAREA_CLASS =
   'focus-cl glass-sub min-w-0 rounded-[10px] px-3 py-2 text-sm text-[var(--cl-ink)] placeholder:text-[var(--cl-ink-3)]';
+export const CHECKBOX_CLASS = 'size-4 shrink-0 accent-[var(--cl-action-fill)]';
+export const INLINE_LABEL_CLASS = 'flex items-center gap-2 text-xs text-[var(--cl-ink-2)]';
+export const CHECK_LABEL_CLASS = 'flex items-center gap-2 text-sm text-[var(--cl-ink)]';
+export const ROW_CLASS = 'glass-sub flex flex-wrap items-center gap-2 rounded-[12px] p-2.5';
+export const WARNING_LIST_CLASS = 'font-data m-0 flex list-none flex-col gap-0.5 p-0 text-xs text-[var(--tucu-state-orange-ink)]';
