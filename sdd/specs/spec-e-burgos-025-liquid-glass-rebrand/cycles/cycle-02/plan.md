@@ -20,3 +20,11 @@
 - Sin cambios de `schema.json`, `api.json` ni `components.json`: el ciclo solo consume endpoints existentes.
 - Los medios (miniaturas, video de la vista previa, imágenes del material) van sobre superficie opaca; el vidrio solo enmarca. Listas y grillas que scrollean no llevan blur: el panel lo tiene, las tarjetas son `glass-sub` sin blur.
 - La implementación va en subagentes sonnet/medium en serie (comparten los catálogos i18n); orquestación, verificación y cierre en el hilo principal.
+
+## Resultado TASK-001 y TASK-002 (commits 33a2e40 y ea266f0)
+- `useVideoStepStatuses(slug, refreshKey)` deriva el estado de los pasos (Material por rol principal del modo, Storyboard y Voz por existencia con el 404 silenciado, Vista previa por render o timeline) y se refresca por `pathname`; sin video abierto no pide nada.
+- Mis videos migrado: toolbar con «Nuevo video», buscador, chips de carpeta con conteo, tarjetas `glass-sub` con una acción principal y menú ⋮. Tonos de estado del video fijados para todo el studio: publicado verde, video listo teal, sin material naranja, montaje listo púrpura, material cargado y archivado neutros.
+- Patrón nuevo `surface="glass"` en `Modal`, `ErrorNotice` y `BrandPicker`: por defecto siguen con el estilo heredado (si se cambiaban globalmente, las pantallas viejas oscuras quedaban ilegibles en claro) y las pantallas migradas piden la superficie de vidrio. `Modal` se monta con portal al `body` porque un panel con blur atrapa el `position: fixed`. Al terminar la migración (ciclo 05) se quita el modo heredado.
+- Sin API para renombrar videos: «Renombrar» queda solo en el ⋮ de las carpetas.
+- Defecto visto en la revisión: cada tarjeta muestra dos «Abrir» (el botón y el enlace a la publicación); se corrige en TASK-003.
+
