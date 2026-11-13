@@ -1,0 +1,81 @@
+{
+  "$schema": "../../../../schemas/cycle-tasks.schema.json",
+  "spec": "spec-e-burgos-025-liquid-glass-rebrand",
+  "cycle": 3,
+  "module": "liquid-glass-rebrand",
+  "apps": [
+    "apps/web"
+  ],
+  "flow": "lite",
+  "user_stories_generated": true,
+  "prerequisites": {
+    "tasks_generated": true
+  },
+  "tasks": [
+    {
+      "id": "TASK-001",
+      "title": "web: biblioteca de material migrada (resumen por rol, filtro, grilla opaca, selección múltiple con barra pegajosa) y visor ampliado con comparación y teclado",
+      "user_stories": [
+        "US-025-301",
+        "US-025-302"
+      ],
+      "estimation_hours": 8,
+      "story_points": 8,
+      "depends_on": [],
+      "status": "pending",
+      "files": [
+        "apps/web/src/pages/asset-library-page.tsx",
+        "apps/web/src/components/media-viewer"
+      ]
+    },
+    {
+      "id": "TASK-002",
+      "title": "web: storyboard migrado (lista de escenas con estado, editor, barra de guardado pegajosa, hoja de prompts)",
+      "user_stories": [
+        "US-025-303"
+      ],
+      "estimation_hours": 5,
+      "story_points": 5,
+      "depends_on": [
+        "TASK-001"
+      ],
+      "status": "pending",
+      "files": [
+        "apps/web/src/pages/storyboard-page.tsx"
+      ]
+    },
+    {
+      "id": "TASK-003",
+      "title": "web: voz migrada (voces en tarjetas, dirección de voz, tomas por escena)",
+      "user_stories": [
+        "US-025-304"
+      ],
+      "estimation_hours": 4,
+      "story_points": 5,
+      "depends_on": [
+        "TASK-002"
+      ],
+      "status": "pending",
+      "files": [
+        "apps/web/src/pages/voice-page.tsx"
+      ]
+    },
+    {
+      "id": "TASK-004",
+      "title": "verificación del ciclo: auditoría de contraste y desborde, capturas y visor por teclado",
+      "user_stories": [
+        "US-025-301",
+        "US-025-302",
+        "US-025-303",
+        "US-025-304"
+      ],
+      "estimation_hours": 2,
+      "story_points": 2,
+      "depends_on": [
+        "TASK-003"
+      ],
+      "status": "pending",
+      "files": []
+    }
+  ]
+}
