@@ -510,7 +510,7 @@ export const TECH_ITEMS = [
     url: 'https://nx.dev',
     usedBy: ['apps/desktop', 'apps/web', 'apps/render-api', 'apps/motion-editor', 'apps/docs-site'],
     what: { es: 'Sistema de build para monorepos, con pnpm como único gestor de paquetes.', en: 'Monorepo build system, with pnpm as the only package manager.' },
-    why: { es: 'Orquesta lint, test y build de los 15 subproyectos.', en: 'Orchestrates lint, test and build for the 15 subprojects.' },
+    why: { es: 'Orquesta lint, test y build de los 17 subproyectos.', en: 'Orchestrates lint, test and build for the 17 subprojects.' },
   },
   {
     id: 'typescript',
@@ -581,9 +581,11 @@ export const MONOREPO_PROJECTS = [
   { path: 'libs/motion-graphics', what: { es: 'Motor de motion graphics: grilla de golpes, catálogo de escenas, kits de marca y runtime de animación.', en: 'Motion graphics engine: beat grid, scene catalog, brand kits and animation runtime.' } },
   { path: 'libs/producer-tools', what: { es: 'Herramientas del productor, servidor MCP y prompt del productor.', en: 'Producer tools, MCP server and the producer prompt.' } },
   { path: 'libs/local-store', what: { es: 'Base SQLite del estudio con migraciones versionadas.', en: 'The studio’s SQLite database with versioned migrations.' } },
+  { path: 'libs/studio-capabilities', what: { es: 'Catálogo de lo que el estudio sabe hacer (formatos, escenas, voces, roles de material), compartido por la API, el MCP y las referencias del plugin.', en: 'Catalog of what the studio can do (formats, scenes, voices, material roles), shared by the API, the MCP and the plugin references.' } },
   { path: 'libs/shared-utils', what: { es: 'Lugar reservado para utilidades compartidas (hoy vacía).', en: 'Reserved place for shared utilities (empty today).' } },
   { path: 'tools/render-cli', what: { es: 'CLI headless: de una carpeta de material a un MP4, con la misma mezcla que el estudio.', en: 'Headless CLI: from a folder of material to an MP4, with the same mix as the studio.' } },
   { path: 'tools/motion-studio', what: { es: 'CLI de motion graphics sobre HyperFrames: plantillas de marca, voz, golpes y ducking.', en: 'Motion graphics CLI on HyperFrames: brand templates, voice, beats and ducking.' } },
+  { path: 'tools/plugin-references', what: { es: 'Genera las referencias del plugin Video Maker desde los schemas reales y falla si quedan atrasadas.', en: 'Generates the Video Maker plugin references from the real schemas and fails when they fall behind.' } },
 ];
 
 export function itemsInCategory(categoryId) {

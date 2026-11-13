@@ -6653,6 +6653,51 @@
           }
         ]
       }
+    },
+    {
+      "id": "FIX-e-burgos-085",
+      "author": "e-burgos",
+      "spec_id": null,
+      "fix_document": "sdd/fixes/fix-e-burgos-085.md",
+      "type": "BUGFIX",
+      "severity": "low",
+      "created_at": "2026-11-13",
+      "resolved_at": "2026-11-13",
+      "validated_at": null,
+      "title": "Inventario técnico de docs-site con studio-capabilities y plugin-references",
+      "estimation_hours": 0.2,
+      "description": "La #56 sumó libs/studio-capabilities y tools/plugin-references pero el inventario de la web pública seguía con 15 subproyectos, y su test falló en ci:local. Se agregan las dos entradas y el conteo pasa a 17.",
+      "justification": "Pedido del dev: «me voy todo a main» (2026-11-13); ci:local de main falló en docs-site:test.",
+      "related_modules": [
+        "docs-site"
+      ],
+      "affected_files": [
+        "apps/docs-site/src/tech-inventory.mjs"
+      ],
+      "test_reference": "docs-site test (63) y build.",
+      "status": "implemented",
+      "cycle": null,
+      "usage": {
+        "provider_model": "claude/opus",
+        "effort": "low",
+        "tokens_in": 30000,
+        "tokens_out": 2000,
+        "approx": true,
+        "source": "declared-estimate",
+        "recorded_at": "2026-11-13",
+        "by_agent": [
+          {
+            "agent": "implementor-front",
+            "provider_model": "claude/opus",
+            "effort": "low",
+            "tokens_in": 30000,
+            "tokens_out": 2000,
+            "approx": true,
+            "source": "declared-estimate",
+            "recorded_at": "2026-11-13"
+          }
+        ]
+      }
     }
   ]
 }
