@@ -28,7 +28,10 @@ describe('shell navigation helpers', () => {
     expect(isMigratedRoute('/projects/demo/voice/')).toBe(true);
     expect(isMigratedRoute('/projects/demo/preview')).toBe(true);
     expect(isMigratedRoute('/projects/demo/motion/')).toBe(true);
-    expect(['/brands', '/settings', '/publish-queue'].some(isMigratedRoute)).toBe(false);
+    expect(isMigratedRoute('/brands')).toBe(true);
+    expect(isMigratedRoute('/brands/acme')).toBe(true);
+    expect(isMigratedRoute('/brands/acme/')).toBe(true);
+    expect(['/settings', '/publish-queue'].some(isMigratedRoute)).toBe(false);
   });
 
   it('keeps the motion step only for motion videos', () => {

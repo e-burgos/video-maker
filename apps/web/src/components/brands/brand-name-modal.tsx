@@ -1,11 +1,12 @@
 import { useState } from 'react';
 
-import { RenderApiError, serviceUnreachable } from '../api/render-api-error';
-import { useT } from '../i18n/language-context';
-import { BRAND_INPUT_CLASS, BrandField } from './brand-field';
-import { ErrorNotice } from './error-notice';
-import { Modal } from './modal';
-import { Button } from './ui/button';
+import { RenderApiError, serviceUnreachable } from '../../api/render-api-error';
+import { useT } from '../../i18n/language-context';
+import { ErrorNotice } from '../error-notice';
+import { Modal } from '../modal';
+import { PRIMARY_BUTTON_SMALL_CLASS, SECONDARY_BUTTON_SMALL_CLASS } from '../ui/cl-controls';
+import { BRAND_INPUT_CLASS } from './brand-controls';
+import { BrandField } from './brand-field';
 
 export type BrandNameModalProps = {
   title: string;
@@ -47,22 +48,30 @@ export function BrandNameModal({
 
   return (
     <Modal
+      surface="glass"
       testId={testId}
       title={title}
       onClose={onClose}
       footer={
         <>
-          <Button data-testid={`${testId}-cancel`} disabled={pending} onClick={onClose}>
+          <button
+            type="button"
+            data-testid={`${testId}-cancel`}
+            disabled={pending}
+            onClick={onClose}
+            className={SECONDARY_BUTTON_SMALL_CLASS}
+          >
             {t('brands.cancel')}
-          </Button>
-          <Button
-            variant="primary"
+          </button>
+          <button
+            type="button"
             data-testid={`${testId}-submit`}
             disabled={pending || name.trim() === ''}
             onClick={() => void submit()}
+            className={PRIMARY_BUTTON_SMALL_CLASS}
           >
             {submitLabel}
-          </Button>
+          </button>
         </>
       }
     >
@@ -83,7 +92,7 @@ export function BrandNameModal({
           />
         </BrandField>
       </form>
-      {error !== null && <ErrorNotice error={error} />}
+      {error !== null && <ErrorNotice error={error} surface="glass" />}
     </Modal>
   );
 }

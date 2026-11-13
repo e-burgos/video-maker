@@ -5,11 +5,12 @@ import type { BrandSummary } from '../api/brand-types';
 import { useRenderApi } from '../api/render-api-context';
 import { useAsyncResource } from '../hooks/use-async-resource';
 import { useT } from '../i18n/language-context';
-import { BrandCard } from '../components/brand-card';
-import { BrandDeleteModal } from '../components/brand-delete-modal';
-import { BrandNameModal } from '../components/brand-name-modal';
+import { BrandDeleteModal } from '../components/brands/brand-delete-modal';
+import { BrandGroup, NewBrandTile } from '../components/brands/brand-groups';
+import { BrandNameModal } from '../components/brands/brand-name-modal';
 import { ErrorNotice } from '../components/error-notice';
-import { Button } from '../components/ui/button';
+import { useToolbarAction } from '../components/shell/use-toolbar-action';
+import { PANEL_CLASS } from '../components/ui/cl-controls';
 
 type Dialog =
   | { kind: 'create' }
@@ -24,6 +25,9 @@ export function BrandsPage() {
   const brands = useAsyncResource(useCallback(() => client.listBrands(), [client]), 'brands');
   const [dialog, setDialog] = useState<Dialog>(null);
 
+  const openCreate = useCallback(() => setDialog({ kind: 'create' }), []);
+  useToolbarAction({ label: t('brands.create'), onClick: openCreate });
+
   async function createBrand(name: string, duplicateFrom?: string): Promise<void> {
     const created = await client.createBrand(
       duplicateFrom === undefined ? { name } : { name, duplicateFrom },
@@ -33,67 +37,40 @@ export function BrandsPage() {
 
   const builtIn = brands.data?.filter((brand) => brand.source === 'built-in') ?? [];
   const user = brands.data?.filter((brand) => brand.source === 'user') ?? [];
+  const duplicate = (brand: BrandSummary) => setDialog({ kind: 'duplicate', brand });
+  const remove = (brand: BrandSummary) => setDialog({ kind: 'delete', brand });
 
   return (
-    <section className="space-y-6">
-      <header className="flex flex-wrap items-center justify-between gap-3">
-        <div className="space-y-1">
-          <h1 className="text-xl font-semibold text-ink">{t('brands.title')}</h1>
-          <p className="text-sm text-ink-muted">{t('brands.subtitle')}</p>
-        </div>
-        <Button variant="primary" data-testid="brand-create" onClick={() => setDialog({ kind: 'create' })}>
-          {t('brands.create')}
-        </Button>
-      </header>
-
+    <section data-testid="brands-panel" className={`${PANEL_CLASS} gap-5 shadow-[var(--tucu-shadow-panel)]`}>
       {brands.status === 'loading' && (
-        <p data-testid="brands-loading" className="text-sm text-ink-faint">
+        <p data-testid="brands-loading" className="m-0 text-sm text-[var(--cl-ink-2)]">
           {t('brands.loading')}
         </p>
       )}
       {brands.status === 'error' && brands.error !== null && (
-        <ErrorNotice error={brands.error} onRetry={brands.reload} />
+        <ErrorNotice error={brands.error} onRetry={brands.reload} surface="glass" />
       )}
 
       {brands.data !== null && brands.data.length === 0 && (
-        <p data-testid="brands-empty" className="text-sm text-ink-faint">
-          {t('brands.empty')}
-        </p>
+        <div data-testid="brands-empty" className="flex flex-col gap-1">
+          <p className="m-0 text-sm font-bold text-[var(--cl-ink)]">{t('brands.empty')}</p>
+          <p className="m-0 text-sm text-[var(--cl-ink-2)]">{t('brands.empty.hint')}</p>
+        </div>
       )}
 
       {user.length > 0 && (
-        <div data-testid="brands-user" className="space-y-3">
-          <h2 className="text-xs font-medium tracking-wide text-ink-faint">{t('brands.group.user')}</h2>
-          <ul className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-            {user.map((brand) => (
-              <li key={brand.id}>
-                <BrandCard
-                  brand={brand}
-                  onDuplicate={(target) => setDialog({ kind: 'duplicate', brand: target })}
-                  onDelete={(target) => setDialog({ kind: 'delete', brand: target })}
-                />
-              </li>
-            ))}
-          </ul>
-        </div>
+        <BrandGroup testId="brands-user" headingKey="brands.group.user" brands={user} onDuplicate={duplicate} onDelete={remove} />
       )}
-
       {builtIn.length > 0 && (
-        <div data-testid="brands-built-in" className="space-y-3">
-          <h2 className="text-xs font-medium tracking-wide text-ink-faint">{t('brands.group.builtIn')}</h2>
-          <ul className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-            {builtIn.map((brand) => (
-              <li key={brand.id}>
-                <BrandCard
-                  brand={brand}
-                  onDuplicate={(target) => setDialog({ kind: 'duplicate', brand: target })}
-                  onDelete={(target) => setDialog({ kind: 'delete', brand: target })}
-                />
-              </li>
-            ))}
-          </ul>
-        </div>
+        <BrandGroup
+          testId="brands-built-in"
+          headingKey="brands.group.builtIn"
+          brands={builtIn}
+          onDuplicate={duplicate}
+          onDelete={remove}
+        />
       )}
+      {brands.data !== null && <NewBrandTile onClick={openCreate} />}
 
       {dialog?.kind === 'create' && (
         <BrandNameModal

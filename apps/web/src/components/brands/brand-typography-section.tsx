@@ -1,21 +1,21 @@
 import { useState } from 'react';
 
-import { fontFamilies } from '../api/brand-manifest-edit';
-import { GOOGLE_FONT_FAMILIES } from '../api/google-font-families';
-import type { BrandTypography } from '../api/brand-types';
-import { useRenderApi } from '../api/render-api-context';
-import { RenderApiError, serviceUnreachable } from '../api/render-api-error';
-import { brandFontFamilyName, useBrandFontFaces } from '../hooks/use-brand-font-faces';
-import { useBrandUpload } from '../hooks/use-brand-upload';
-import { useSectionDraft } from '../hooks/use-section-draft';
-import type { BrandEditor } from '../hooks/use-brand-editor';
-import { useT } from '../i18n/language-context';
-import type { TranslationKey } from '../i18n/messages-en';
-import { BRAND_INPUT_CLASS, BrandField } from './brand-field';
+import { fontFamilies } from '../../api/brand-manifest-edit';
+import { GOOGLE_FONT_FAMILIES } from '../../api/google-font-families';
+import { useRenderApi } from '../../api/render-api-context';
+import { RenderApiError, serviceUnreachable } from '../../api/render-api-error';
+import { brandFontFamilyName, useBrandFontFaces } from '../../hooks/use-brand-font-faces';
+import { useBrandUpload } from '../../hooks/use-brand-upload';
+import type { BrandEditor } from '../../hooks/use-brand-editor';
+import type { SectionDraft } from '../../hooks/use-section-draft';
+import { useT } from '../../i18n/language-context';
+import type { TranslationKey } from '../../i18n/messages-en';
+import { ErrorNotice } from '../error-notice';
+import { SECONDARY_BUTTON_CLASS } from '../ui/cl-controls';
+import { BRAND_INPUT_CLASS, BRAND_ITEM_CLASS, BRAND_ITEM_HEADING_CLASS, BRAND_SMALL_HINT_CLASS } from './brand-controls';
+import type { TypographyDraft } from './brand-draft';
+import { BrandField } from './brand-field';
 import { BrandFileInput } from './brand-file-input';
-import { BrandSaveBar } from './brand-save-bar';
-import { ErrorNotice } from './error-notice';
-import { Button } from './ui/button';
 
 const ROLES = ['display', 'body', 'mono'] as const;
 
@@ -26,8 +26,6 @@ const ROLE_LABEL: Readonly<Record<(typeof ROLES)[number], TranslationKey>> = {
 };
 
 const FONT_ACCEPT = '.woff2,.ttf,.otf';
-
-type TypographyDraft = { display: string; body: string; mono: string };
 
 function GoogleFontAdder({ editor, brandId }: { editor: BrandEditor; brandId: string }) {
   const t = useT();
@@ -55,9 +53,9 @@ function GoogleFontAdder({ editor, brandId }: { editor: BrandEditor; brandId: st
   }
 
   return (
-    <div data-testid="brand-google-font" className="space-y-2 rounded-lg border border-border-subtle p-4">
-      <h3 className="text-sm font-medium text-ink">{t('brands.typography.google')}</h3>
-      <p className="text-xs text-ink-faint">{t('brands.typography.googleHint')}</p>
+    <div data-testid="brand-google-font" className={BRAND_ITEM_CLASS}>
+      <h3 className={BRAND_ITEM_HEADING_CLASS}>{t('brands.typography.google')}</h3>
+      <p className={BRAND_SMALL_HINT_CLASS}>{t('brands.typography.googleHint')}</p>
       <div className="flex flex-wrap items-center gap-2">
         <input
           list="brand-google-families"
@@ -67,23 +65,24 @@ function GoogleFontAdder({ editor, brandId }: { editor: BrandEditor; brandId: st
           disabled={editor.readOnly || pending}
           onChange={(event) => setFamily(event.target.value)}
           placeholder={t('brands.typography.googlePlaceholder')}
-          className={`${BRAND_INPUT_CLASS} max-w-xs`}
+          className={`${BRAND_INPUT_CLASS} max-w-xs flex-1`}
         />
         <datalist id="brand-google-families">
           {GOOGLE_FONT_FAMILIES.map((name) => (
             <option key={name} value={name} />
           ))}
         </datalist>
-        <Button
-          variant="primary"
+        <button
+          type="button"
           data-testid="brand-google-font-add"
           disabled={editor.readOnly || pending || family.trim() === ''}
           onClick={() => void add()}
+          className={SECONDARY_BUTTON_CLASS}
         >
           {pending ? t('brands.typography.googleAdding') : t('brands.typography.googleAdd')}
-        </Button>
+        </button>
       </div>
-      {error !== null && <ErrorNotice error={error} />}
+      {error !== null && <ErrorNotice error={error} surface="glass" />}
     </div>
   );
 }
@@ -109,8 +108,8 @@ function FontUploader({ editor, brandId }: { editor: BrandEditor; brandId: strin
   }
 
   return (
-    <div data-testid="brand-font-upload" className="space-y-2 rounded-lg border border-border-subtle p-4">
-      <h3 className="text-sm font-medium text-ink">{t('brands.typography.upload')}</h3>
+    <div data-testid="brand-font-upload" className={BRAND_ITEM_CLASS}>
+      <h3 className={BRAND_ITEM_HEADING_CLASS}>{t('brands.typography.upload')}</h3>
       <BrandField label={t('brands.typography.uploadFamily')} hint={t('brands.typography.uploadHint')}>
         <input
           data-testid="brand-font-upload-family"
@@ -128,39 +127,27 @@ function FontUploader({ editor, brandId }: { editor: BrandEditor; brandId: strin
         disabled={editor.readOnly || family.trim() === ''}
         onFile={(file) => void onFile(file)}
       />
-      {error !== null && <ErrorNotice error={error} />}
+      {error !== null && <ErrorNotice error={error} surface="glass" />}
     </div>
   );
 }
 
-export function BrandTypographySection({ editor }: { editor: BrandEditor }) {
+export type BrandTypographySectionProps = { editor: BrandEditor; draft: SectionDraft<TypographyDraft> };
+
+export function BrandTypographySection({ editor, draft: { draft, setDraft } }: BrandTypographySectionProps) {
   const t = useT();
   const manifest = editor.manifest;
   const families = manifest === null ? [] : fontFamilies(manifest);
-  const saved: TypographyDraft = {
-    display: manifest?.typography?.display ?? families[0] ?? '',
-    body: manifest?.typography?.body ?? families[0] ?? '',
-    mono: manifest?.typography?.mono ?? '',
-  };
-  const { draft, setDraft, dirty } = useSectionDraft(saved);
   const ready = useBrandFontFaces(manifest?.id ?? '', manifest?.fonts ?? []);
 
   if (manifest === null) {
     return null;
   }
 
-  function save(): void {
-    const typography: BrandTypography =
-      draft.mono === ''
-        ? { display: draft.display, body: draft.body }
-        : { display: draft.display, body: draft.body, mono: draft.mono };
-    void editor.update((current) => ({ ...current, typography }));
-  }
-
   return (
-    <div data-testid="brand-section-typography" className="space-y-4">
+    <div data-testid="brand-section-typography" className="flex flex-col gap-4">
       {ROLES.map((role) => (
-        <div key={role} className="space-y-1">
+        <div key={role} className="flex flex-col gap-1.5">
           <BrandField label={t(ROLE_LABEL[role])}>
             <select
               data-testid={`brand-typography-${role}`}
@@ -185,14 +172,13 @@ export function BrandTypographySection({ editor }: { editor: BrandEditor }) {
                   ? `"${brandFontFamilyName(manifest.id, draft[role])}", sans-serif`
                   : undefined,
               }}
-              className="text-lg text-ink"
+              className="m-0 text-lg text-[var(--cl-ink)]"
             >
               {t('brands.typography.sample')}
             </p>
           )}
         </div>
       ))}
-      <BrandSaveBar editor={editor} dirty={dirty} onSave={save} testId="brand-typography-save" />
       <GoogleFontAdder editor={editor} brandId={manifest.id} />
       <FontUploader editor={editor} brandId={manifest.id} />
     </div>

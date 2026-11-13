@@ -1,10 +1,11 @@
 import { useRef, useState } from 'react';
 
-import { percentPoint } from '../api/brand-files';
-import type { BrandScreenPoint } from '../api/brand-types';
-import { useT } from '../i18n/language-context';
-import type { TranslationKey } from '../i18n/messages-en';
-import { Button } from './ui/button';
+import { percentPoint } from '../../api/brand-files';
+import type { BrandScreenPoint } from '../../api/brand-types';
+import { useT } from '../../i18n/language-context';
+import type { TranslationKey } from '../../i18n/messages-en';
+import { OPAQUE_MEDIA_FRAME_CLASS, SECONDARY_BUTTON_SMALL_CLASS } from '../ui/cl-controls';
+import { BRAND_SMALL_HINT_CLASS } from './brand-controls';
 
 const CORNER_LABEL: readonly TranslationKey[] = [
   'brands.devices.corner.topLeft',
@@ -12,6 +13,8 @@ const CORNER_LABEL: readonly TranslationKey[] = [
   'brands.devices.corner.bottomRight',
   'brands.devices.corner.bottomLeft',
 ];
+
+const POLYGON_FILL = 'color-mix(in srgb, var(--cl-action-fill) 28%, transparent)';
 
 export type BrandCornerPickerProps = {
   imageUrl: string;
@@ -51,8 +54,8 @@ export function BrandCornerPicker({ imageUrl, imageAlt, polygon, disabled, onPic
   const nextLabel = complete ? t('brands.devices.cornersDone') : t(CORNER_LABEL[points.length] as TranslationKey);
 
   return (
-    <div data-testid="brand-corner-picker" className="space-y-2">
-      <p data-testid="brand-corner-next" className="text-xs text-ink-muted">
+    <div data-testid="brand-corner-picker" className="flex flex-col gap-2">
+      <p data-testid="brand-corner-next" className={BRAND_SMALL_HINT_CLASS}>
         {nextLabel}
       </p>
       <div
@@ -60,7 +63,7 @@ export function BrandCornerPicker({ imageUrl, imageAlt, polygon, disabled, onPic
         role="presentation"
         data-testid="brand-corner-surface"
         onClick={pick}
-        className={`relative inline-block max-w-full overflow-hidden rounded-md border border-border-strong ${
+        className={`${OPAQUE_MEDIA_FRAME_CLASS} relative inline-block max-w-full self-start ${
           disabled || complete ? '' : 'cursor-crosshair'
         }`}
       >
@@ -75,8 +78,7 @@ export function BrandCornerPicker({ imageUrl, imageAlt, polygon, disabled, onPic
             <polygon
               data-testid="brand-corner-polygon"
               points={points.map(([x, y]) => `${x},${y}`).join(' ')}
-              fill={complete ? 'rgba(56,189,248,0.25)' : 'none'}
-              stroke="rgb(56,189,248)"
+              style={{ fill: complete ? POLYGON_FILL : 'none', stroke: 'var(--cl-action-fill)' }}
               strokeWidth={0.6}
               vectorEffect="non-scaling-stroke"
             />
@@ -86,7 +88,7 @@ export function BrandCornerPicker({ imageUrl, imageAlt, polygon, disabled, onPic
           <span
             key={`${x}-${y}-${CORNER_LABEL[index]}`}
             data-testid={`brand-corner-point-${index}`}
-            className="pointer-events-none absolute flex h-5 w-5 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full bg-sky-500 text-xs font-semibold text-white"
+            className="font-data pointer-events-none absolute flex size-5 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full bg-[var(--cl-action-fill)] text-xs font-semibold text-white"
             style={{ left: `${x}%`, top: `${y}%` }}
           >
             {index + 1}
@@ -95,9 +97,15 @@ export function BrandCornerPicker({ imageUrl, imageAlt, polygon, disabled, onPic
       </div>
       {!disabled && (
         <div>
-          <Button data-testid="brand-corner-reset" disabled={points.length === 0} onClick={reset}>
+          <button
+            type="button"
+            data-testid="brand-corner-reset"
+            disabled={points.length === 0}
+            onClick={reset}
+            className={SECONDARY_BUTTON_SMALL_CLASS}
+          >
             {t('brands.devices.cornersReset')}
-          </Button>
+          </button>
         </div>
       )}
     </div>

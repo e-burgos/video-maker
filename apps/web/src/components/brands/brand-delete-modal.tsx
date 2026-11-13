@@ -1,12 +1,12 @@
 import { useState } from 'react';
 
-import type { BrandSummary } from '../api/brand-types';
-import { useRenderApi } from '../api/render-api-context';
-import { RenderApiError, serviceUnreachable } from '../api/render-api-error';
-import { useT } from '../i18n/language-context';
-import { ErrorNotice } from './error-notice';
-import { Modal } from './modal';
-import { Button } from './ui/button';
+import type { BrandSummary } from '../../api/brand-types';
+import { useRenderApi } from '../../api/render-api-context';
+import { RenderApiError, serviceUnreachable } from '../../api/render-api-error';
+import { useT } from '../../i18n/language-context';
+import { ErrorNotice } from '../error-notice';
+import { Modal } from '../modal';
+import { DANGER_BUTTON_SMALL_CLASS, SECONDARY_BUTTON_SMALL_CLASS } from '../ui/cl-controls';
 
 export type BrandDeleteModalProps = {
   brand: BrandSummary;
@@ -34,27 +34,35 @@ export function BrandDeleteModal({ brand, onClose, onDeleted }: BrandDeleteModal
 
   return (
     <Modal
+      surface="glass"
       testId="brand-delete-modal"
       title={t('brands.delete.title', { name: brand.name })}
       onClose={onClose}
       footer={
         <>
-          <Button data-testid="brand-delete-cancel" disabled={pending} onClick={onClose}>
+          <button
+            type="button"
+            data-testid="brand-delete-cancel"
+            disabled={pending}
+            onClick={onClose}
+            className={SECONDARY_BUTTON_SMALL_CLASS}
+          >
             {t('brands.cancel')}
-          </Button>
-          <Button
-            variant="primary"
+          </button>
+          <button
+            type="button"
             data-testid="brand-delete-confirm"
             disabled={pending}
             onClick={() => void confirm()}
+            className={DANGER_BUTTON_SMALL_CLASS}
           >
             {t('brands.delete.confirm')}
-          </Button>
+          </button>
         </>
       }
     >
       <p>{t('brands.delete.explanation')}</p>
-      {error !== null && <ErrorNotice error={error} />}
+      {error !== null && <ErrorNotice error={error} surface="glass" />}
     </Modal>
   );
 }

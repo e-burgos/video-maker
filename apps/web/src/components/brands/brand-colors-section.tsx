@@ -1,15 +1,13 @@
 import { useEffect, useState } from 'react';
 
-import { PALETTE_KEYS, effectivePalette, isHexColor } from '../api/brand-files';
-import { withPaletteColor, withTokenOverride, withoutTokenOverride } from '../api/brand-manifest-edit';
-import type { BrandPalette } from '../api/brand-types';
-import type { BrandEditor } from '../hooks/use-brand-editor';
-import { useT } from '../i18n/language-context';
-import type { TranslationKey } from '../i18n/messages-en';
-import { BRAND_INPUT_CLASS } from './brand-field';
-import { BrandSaveStatus } from './brand-save-bar';
-import { ErrorNotice } from './error-notice';
-import { Button } from './ui/button';
+import { PALETTE_KEYS, effectivePalette, isHexColor } from '../../api/brand-files';
+import { withPaletteColor, withTokenOverride, withoutTokenOverride } from '../../api/brand-manifest-edit';
+import type { BrandPalette } from '../../api/brand-types';
+import type { BrandEditor } from '../../hooks/use-brand-editor';
+import { useT } from '../../i18n/language-context';
+import type { TranslationKey } from '../../i18n/messages-en';
+import { FIELD_LABEL_CLASS, FIELD_SMALL_CLASS, SECONDARY_BUTTON_SMALL_CLASS } from '../ui/cl-controls';
+import { BRAND_HINT_CLASS, BRAND_INPUT_CLASS, BRAND_SMALL_HINT_CLASS } from './brand-controls';
 
 const PALETTE_LABEL: Readonly<Record<keyof BrandPalette, TranslationKey>> = {
   background: 'brands.colors.background',
@@ -17,6 +15,9 @@ const PALETTE_LABEL: Readonly<Record<keyof BrandPalette, TranslationKey>> = {
   accent2: 'brands.colors.accent2',
   text: 'brands.colors.text',
 };
+
+const SWATCH_INPUT_CLASS =
+  'focus-cl h-10 w-12 shrink-0 cursor-pointer rounded-[10px] border border-[var(--tucu-glass-sub-line)] bg-transparent p-1 disabled:opacity-50';
 
 type ColorFieldProps = {
   paletteKey: keyof BrandPalette;
@@ -41,9 +42,9 @@ function ColorField({ paletteKey, label, value, disabled, onChange }: ColorField
   }
 
   return (
-    <div className="space-y-1">
-      <span className="text-xs font-medium text-ink-muted">{label}</span>
-      <div className="flex items-center gap-2">
+    <div className="flex min-w-0 flex-col gap-1">
+      <span className={FIELD_LABEL_CLASS}>{label}</span>
+      <div className="flex min-w-0 items-center gap-2">
         <input
           type="color"
           aria-label={label}
@@ -51,7 +52,7 @@ function ColorField({ paletteKey, label, value, disabled, onChange }: ColorField
           value={isHexColor(value) ? value : '#000000'}
           disabled={disabled}
           onChange={(event) => commit(event.target.value)}
-          className="h-9 w-12 cursor-pointer rounded-control border border-border-strong bg-surface disabled:opacity-50"
+          className={SWATCH_INPUT_CLASS}
         />
         <input
           aria-label={`${label} hex`}
@@ -59,7 +60,7 @@ function ColorField({ paletteKey, label, value, disabled, onChange }: ColorField
           value={text}
           disabled={disabled}
           onChange={(event) => commit(event.target.value)}
-          className={`${BRAND_INPUT_CLASS} max-w-28 font-mono`}
+          className={`${BRAND_INPUT_CLASS} font-data min-w-0`}
         />
       </div>
     </div>
@@ -90,8 +91,8 @@ function TokenRow({ name, value, overridden, disabled, onCommit, onReset }: Toke
   }
 
   return (
-    <li data-testid={`brand-token-${name}`} className="flex items-center gap-2">
-      <code className="w-48 shrink-0 truncate text-xs text-ink-muted" title={name}>
+    <li data-testid={`brand-token-${name}`} className="flex min-w-0 flex-wrap items-center gap-2">
+      <code className="font-data w-44 shrink-0 truncate text-xs text-[var(--cl-ink-2)]" title={name}>
         {name}
       </code>
       <input
@@ -105,12 +106,17 @@ function TokenRow({ name, value, overridden, disabled, onCommit, onReset }: Toke
             commit();
           }
         }}
-        className={`${BRAND_INPUT_CLASS} font-mono text-xs`}
+        className={`${FIELD_SMALL_CLASS} font-data min-w-0 flex-1`}
       />
       {overridden && !disabled && (
-        <Button data-testid={`brand-token-reset-${name}`} onClick={onReset}>
+        <button
+          type="button"
+          data-testid={`brand-token-reset-${name}`}
+          className={SECONDARY_BUTTON_SMALL_CLASS}
+          onClick={onReset}
+        >
           {t('brands.colors.resetToken')}
-        </Button>
+        </button>
       )}
     </li>
   );
@@ -128,8 +134,8 @@ export function BrandColorsSection({ editor }: { editor: BrandEditor }) {
   const tokenNames = Object.keys(detail.tokens).sort();
 
   return (
-    <div data-testid="brand-section-colors" className="space-y-4">
-      <p className="text-sm text-ink-muted">{t('brands.colors.hint')}</p>
+    <div data-testid="brand-section-colors" className="flex flex-col gap-4">
+      <p className={BRAND_HINT_CLASS}>{t('brands.colors.hint')}</p>
       <div className="grid gap-4 sm:grid-cols-2">
         {PALETTE_KEYS.map((key) => (
           <ColorField
@@ -144,13 +150,13 @@ export function BrandColorsSection({ editor }: { editor: BrandEditor }) {
           />
         ))}
       </div>
-      <BrandSaveStatus editor={editor} />
-      {editor.saveError !== null && <ErrorNotice error={editor.saveError} />}
 
-      <details data-testid="brand-colors-advanced" className="rounded-lg border border-border-subtle p-3">
-        <summary className="cursor-pointer text-sm text-ink-muted">{t('brands.colors.advanced')}</summary>
-        <p className="mt-2 text-xs text-ink-faint">{t('brands.colors.advancedHint')}</p>
-        <ul className="mt-3 space-y-2">
+      <details data-testid="brand-colors-advanced" className="glass-sub rounded-[14px] p-3.5">
+        <summary className="focus-cl cursor-pointer text-sm font-semibold text-[var(--cl-ink)]">
+          {t('brands.colors.advanced')}
+        </summary>
+        <p className={`${BRAND_SMALL_HINT_CLASS} mt-2`}>{t('brands.colors.advancedHint')}</p>
+        <ul className="m-0 mt-3 flex list-none flex-col gap-2 p-0">
           {tokenNames.map((name) => (
             <TokenRow
               key={name}

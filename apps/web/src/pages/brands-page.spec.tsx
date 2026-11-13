@@ -6,6 +6,8 @@ import { brandDetail, brandSummary } from '../api/__fixtures__/brand';
 import { RenderApiProvider } from '../api/render-api-context';
 import { RenderApiError } from '../api/render-api-error';
 import type { RenderApiClient } from '../api/render-api-client';
+import { ShellToolbar } from '../components/shell/shell-toolbar';
+import { ToolbarActionProvider } from '../components/shell/toolbar-action-provider';
 import { BrandsPage } from './brands-page';
 
 const BUILT_IN = brandSummary({ id: 'displayads', name: 'DisplayAds', source: 'built-in' });
@@ -19,12 +21,15 @@ function renderPage(client: Partial<RenderApiClient>) {
 
   render(
     <RenderApiProvider client={withDefaults as RenderApiClient}>
-      <MemoryRouter initialEntries={['/brands']}>
-        <Routes>
-          <Route path="/brands" element={<BrandsPage />} />
-          <Route path="/brands/:id" element={<p data-testid="editor-route">editor</p>} />
-        </Routes>
-      </MemoryRouter>
+      <ToolbarActionProvider>
+        <ShellToolbar title="Brands" subtitle={null} />
+        <MemoryRouter initialEntries={['/brands']}>
+          <Routes>
+            <Route path="/brands" element={<BrandsPage />} />
+            <Route path="/brands/:id" element={<p data-testid="editor-route">editor</p>} />
+          </Routes>
+        </MemoryRouter>
+      </ToolbarActionProvider>
     </RenderApiProvider>,
   );
 
@@ -47,8 +52,20 @@ describe('BrandsPage', () => {
     renderPage({});
 
     await waitFor(() => expect(screen.getByTestId('brand-card-mine')).toBeTruthy());
+    expect(screen.queryByTestId('brand-delete-mine')).toBeNull();
+    fireEvent.click(screen.getByTestId('brand-menu-mine'));
     expect(screen.getByTestId('brand-delete-mine')).toBeTruthy();
+    expect(screen.queryByTestId('brand-menu-displayads')).toBeNull();
     expect(screen.queryByTestId('brand-delete-displayads')).toBeNull();
+  });
+
+  it('declares the new brand action in the toolbar', async () => {
+    renderPage({});
+
+    await waitFor(() => expect(screen.getByTestId('toolbar-action').textContent).toBe('New brand'));
+    fireEvent.click(screen.getByTestId('toolbar-action'));
+
+    expect(screen.getByTestId('brand-create-modal')).toBeTruthy();
   });
 
   it('creates a brand from a name and opens its editor', async () => {
@@ -95,7 +112,8 @@ describe('BrandsPage', () => {
     const listBrands = vi.fn().mockResolvedValue([BUILT_IN, MINE]);
     renderPage({ deleteBrand, listBrands });
 
-    await waitFor(() => expect(screen.getByTestId('brand-delete-mine')).toBeTruthy());
+    await waitFor(() => expect(screen.getByTestId('brand-menu-mine')).toBeTruthy());
+    fireEvent.click(screen.getByTestId('brand-menu-mine'));
     fireEvent.click(screen.getByTestId('brand-delete-mine'));
     expect(screen.getByTestId('brand-delete-modal').textContent).toContain('brands/.trash');
     expect(deleteBrand).not.toHaveBeenCalled();
@@ -119,5 +137,13 @@ describe('BrandsPage', () => {
     renderPage({ listBrands: vi.fn().mockResolvedValue([]) });
 
     await waitFor(() => expect(screen.getByTestId('brands-empty')).toBeTruthy());
+    expect(screen.getByTestId('brand-create')).toBeTruthy();
+  });
+
+  it('shows the card logo on an opaque surface', async () => {
+    renderPage({});
+
+    await waitFor(() => expect(screen.getByTestId('brand-card-mine')).toBeTruthy());
+    expect(screen.getByAltText('Logo of Mine').parentElement?.className).toContain('bg-[#0b0d14]');
   });
 });

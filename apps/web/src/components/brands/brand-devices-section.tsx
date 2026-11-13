@@ -1,17 +1,17 @@
-import { brandFileUrl, fileStemSlug, uniqueKey } from '../api/brand-files';
-import { withOptionalFlag, withOptionalSpokenName, withoutKey } from '../api/brand-manifest-edit';
-import type { BrandDevice, BrandDeviceKind, BrandDevices } from '../api/brand-types';
-import { useBrandUpload } from '../hooks/use-brand-upload';
-import { useSectionDraft } from '../hooks/use-section-draft';
-import type { BrandEditor } from '../hooks/use-brand-editor';
-import { useT } from '../i18n/language-context';
-import type { TranslationKey } from '../i18n/messages-en';
-import { BRAND_INPUT_CLASS, BrandField } from './brand-field';
+import { brandFileUrl, fileStemSlug, uniqueKey } from '../../api/brand-files';
+import { withOptionalFlag, withOptionalSpokenName, withoutKey } from '../../api/brand-manifest-edit';
+import type { BrandDevice, BrandDeviceKind, BrandDevices } from '../../api/brand-types';
+import { useBrandUpload } from '../../hooks/use-brand-upload';
+import type { BrandEditor } from '../../hooks/use-brand-editor';
+import type { SectionDraft } from '../../hooks/use-section-draft';
+import { useT } from '../../i18n/language-context';
+import type { TranslationKey } from '../../i18n/messages-en';
+import { ErrorNotice } from '../error-notice';
+import { CHECK_LABEL_CLASS, CHECKBOX_CLASS, OPAQUE_MEDIA_FRAME_CLASS, SECONDARY_BUTTON_SMALL_CLASS } from '../ui/cl-controls';
+import { BRAND_FILE_NAME_CLASS, BRAND_HINT_CLASS, BRAND_INPUT_CLASS, BRAND_ITEM_CLASS } from './brand-controls';
 import { BrandCornerPicker } from './brand-corner-picker';
+import { BrandField } from './brand-field';
 import { BrandFileInput } from './brand-file-input';
-import { BrandSaveBar } from './brand-save-bar';
-import { ErrorNotice } from './error-notice';
-import { Button } from './ui/button';
 
 const DEVICE_ACCEPT = '.jpg,.jpeg,.png,.webp,.svg';
 
@@ -44,16 +44,18 @@ function DeviceCard({ deviceKey, device, brandId, readOnly, onChange, onRemove }
   }
 
   return (
-    <li
-      data-testid={`brand-device-${deviceKey}`}
-      className="space-y-3 rounded-lg border border-border-subtle p-4"
-    >
+    <li data-testid={`brand-device-${deviceKey}`} className={BRAND_ITEM_CLASS}>
       <div className="flex items-center justify-between gap-3">
-        <span className="font-mono text-xs text-ink-muted">{deviceKey}</span>
+        <span className={BRAND_FILE_NAME_CLASS}>{deviceKey}</span>
         {!readOnly && (
-          <Button data-testid={`brand-device-remove-${deviceKey}`} onClick={onRemove}>
+          <button
+            type="button"
+            data-testid={`brand-device-remove-${deviceKey}`}
+            className={SECONDARY_BUTTON_SMALL_CLASS}
+            onClick={onRemove}
+          >
             {t('brands.remove')}
-          </Button>
+          </button>
         )}
       </div>
       <div className="grid gap-3 sm:grid-cols-2">
@@ -90,23 +92,25 @@ function DeviceCard({ deviceKey, device, brandId, readOnly, onChange, onRemove }
             ))}
           </select>
         </BrandField>
-        <div className="flex items-end gap-4 pb-1.5 text-sm text-ink-muted">
-          <label className="flex items-center gap-2">
+        <div className="flex flex-wrap items-end gap-4 pb-2">
+          <label className={CHECK_LABEL_CLASS}>
             <input
               type="checkbox"
               data-testid={`brand-device-plate-${deviceKey}`}
               checked={device.plate === true}
               disabled={readOnly}
+              className={CHECKBOX_CLASS}
               onChange={(event) => onChange(withOptionalFlag(device, 'plate', event.target.checked))}
             />
             {t('brands.devices.plate')}
           </label>
-          <label className="flex items-center gap-2">
+          <label className={CHECK_LABEL_CLASS}>
             <input
               type="checkbox"
               data-testid={`brand-device-retired-${deviceKey}`}
               checked={device.retired === true}
               disabled={readOnly}
+              className={CHECKBOX_CLASS}
               onChange={(event) => onChange(withOptionalFlag(device, 'retired', event.target.checked))}
             />
             {t('brands.devices.retired')}
@@ -122,7 +126,7 @@ function DeviceCard({ deviceKey, device, brandId, readOnly, onChange, onRemove }
           onFile={(file) => void replacePhoto(file)}
         />
       )}
-      {error !== null && <ErrorNotice error={error} />}
+      {error !== null && <ErrorNotice error={error} surface="glass" />}
       {device.kind === 'screen' ? (
         <BrandCornerPicker
           imageUrl={brandFileUrl(brandId, device.image)}
@@ -133,21 +137,19 @@ function DeviceCard({ deviceKey, device, brandId, readOnly, onChange, onRemove }
           onReset={() => onChange(withoutKey(device, 'screen'))}
         />
       ) : (
-        <img
-          src={brandFileUrl(brandId, device.image)}
-          alt={device.name}
-          className="max-h-48 rounded-md border border-border-subtle"
-        />
+        <div className={`${OPAQUE_MEDIA_FRAME_CLASS} self-start`}>
+          <img src={brandFileUrl(brandId, device.image)} alt={device.name} className="block max-h-48 max-w-full" />
+        </div>
       )}
     </li>
   );
 }
 
-export function BrandDevicesSection({ editor }: { editor: BrandEditor }) {
+export type BrandDevicesSectionProps = { editor: BrandEditor; draft: SectionDraft<BrandDevices> };
+
+export function BrandDevicesSection({ editor, draft: { draft, setDraft } }: BrandDevicesSectionProps) {
   const t = useT();
   const manifest = editor.manifest;
-  const savedDevices: BrandDevices = manifest?.devices ?? {};
-  const { draft, setDraft, dirty } = useSectionDraft(savedDevices);
   const { uploading, error, upload } = useBrandUpload(manifest?.id ?? '');
 
   if (manifest === null) {
@@ -165,21 +167,11 @@ export function BrandDevicesSection({ editor }: { editor: BrandEditor }) {
     }
   }
 
-  const incomplete = Object.values(draft).some((device) => device.name.trim() === '');
-  const missingScreen = Object.values(draft).some(
-    (device) => device.kind === 'screen' && device.screen === undefined,
-  );
-  const invalid = incomplete
-    ? t('brands.devices.nameRequired')
-    : missingScreen
-      ? t('brands.devices.screenRequired')
-      : null;
-
   return (
-    <div data-testid="brand-section-devices" className="space-y-4">
-      <p className="text-sm text-ink-muted">{t('brands.devices.hint')}</p>
-      {Object.keys(draft).length === 0 && <p className="text-sm text-ink-faint">{t('brands.devices.empty')}</p>}
-      <ul className="space-y-4">
+    <div data-testid="brand-section-devices" className="flex flex-col gap-4">
+      <p className={BRAND_HINT_CLASS}>{t('brands.devices.hint')}</p>
+      {Object.keys(draft).length === 0 && <p className={BRAND_HINT_CLASS}>{t('brands.devices.empty')}</p>}
+      <ul className="m-0 flex list-none flex-col gap-4 p-0">
         {Object.entries(draft).map(([key, device]) => (
           <DeviceCard
             key={key}
@@ -201,14 +193,7 @@ export function BrandDevicesSection({ editor }: { editor: BrandEditor }) {
           onFile={(file) => void onFile(file)}
         />
       )}
-      {error !== null && <ErrorNotice error={error} />}
-      <BrandSaveBar
-        editor={editor}
-        dirty={dirty}
-        testId="brand-devices-save"
-        invalidMessage={invalid}
-        onSave={() => void editor.update((current) => ({ ...current, devices: draft }), 'silent')}
-      />
+      {error !== null && <ErrorNotice error={error} surface="glass" />}
     </div>
   );
 }

@@ -1,37 +1,22 @@
+import { StateBadge } from '@e-burgos/tucu-ui';
 import { useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 
-import { useBrandEditor } from '../hooks/use-brand-editor';
 import { useRenderApi } from '../api/render-api-context';
+import { useBrandEditor } from '../hooks/use-brand-editor';
 import { useT } from '../i18n/language-context';
-import type { TranslationKey } from '../i18n/messages-en';
-import { BrandColorsSection } from '../components/brand-colors-section';
-import { BrandDevicesSection } from '../components/brand-devices-section';
-import { BrandIdentitySection } from '../components/brand-identity-section';
-import { BrandLogoSection } from '../components/brand-logo-section';
-import { BrandMusicSection } from '../components/brand-music-section';
-import { BrandNameModal } from '../components/brand-name-modal';
-import { BrandPhotosSection } from '../components/brand-photos-section';
-import { BrandPreviewPane } from '../components/brand-preview-pane';
-import { BrandTypographySection } from '../components/brand-typography-section';
-import { BrandVoiceSection } from '../components/brand-voice-section';
+import { BrandEditorNav } from '../components/brands/brand-editor-nav';
+import { BrandNameModal } from '../components/brands/brand-name-modal';
+import { BrandPreviewPane } from '../components/brands/brand-preview-pane';
+import { BrandSaveBar } from '../components/brands/brand-save-bar';
+import { BrandSectionBody } from '../components/brands/brand-section-body';
+import { BRAND_SECTIONS, sectionLabelKey } from '../components/brands/brand-sections';
+import type { BrandSectionId } from '../components/brands/brand-sections';
+import { useBrandDraft } from '../components/brands/use-brand-draft';
 import { ErrorNotice } from '../components/error-notice';
-import { Button } from '../components/ui/button';
-import type { BrandEditor } from '../hooks/use-brand-editor';
-import type { ComponentType } from 'react';
+import { PANEL_CLASS, PANEL_HEADING_CLASS, SECONDARY_BUTTON_CLASS } from '../components/ui/cl-controls';
 
-type SectionId = 'identity' | 'logo' | 'colors' | 'typography' | 'voice' | 'music' | 'photos' | 'devices';
-
-const SECTIONS: readonly { id: SectionId; labelKey: TranslationKey; Component: ComponentType<{ editor: BrandEditor }> }[] = [
-  { id: 'identity', labelKey: 'brands.section.identity', Component: BrandIdentitySection },
-  { id: 'logo', labelKey: 'brands.section.logo', Component: BrandLogoSection },
-  { id: 'colors', labelKey: 'brands.section.colors', Component: BrandColorsSection },
-  { id: 'typography', labelKey: 'brands.section.typography', Component: BrandTypographySection },
-  { id: 'voice', labelKey: 'brands.section.voice', Component: BrandVoiceSection },
-  { id: 'music', labelKey: 'brands.section.music', Component: BrandMusicSection },
-  { id: 'photos', labelKey: 'brands.section.photos', Component: BrandPhotosSection },
-  { id: 'devices', labelKey: 'brands.section.devices', Component: BrandDevicesSection },
-];
+const BACK_LINK_CLASS = 'focus-cl rounded text-sm text-[var(--cl-action-text)] underline hover:text-[var(--cl-action-hover)]';
 
 export function BrandEditorPage() {
   const { id = '' } = useParams<{ id: string }>();
@@ -39,13 +24,14 @@ export function BrandEditorPage() {
   const client = useRenderApi();
   const navigate = useNavigate();
   const editor = useBrandEditor(id);
-  const [section, setSection] = useState<SectionId>('identity');
+  const draft = useBrandDraft(editor);
+  const [section, setSection] = useState<BrandSectionId>('identity');
   const [duplicating, setDuplicating] = useState(false);
-  const active = SECTIONS.find((candidate) => candidate.id === section) ?? SECTIONS[0];
+  const active = BRAND_SECTIONS.find((candidate) => candidate.id === section) ?? BRAND_SECTIONS[0];
 
   if (editor.status === 'loading') {
     return (
-      <p data-testid="brand-editor-loading" className="text-sm text-ink-faint">
+      <p data-testid="brand-editor-loading" className="text-sm text-[var(--cl-ink-2)]">
         {t('brands.loading')}
       </p>
     );
@@ -53,66 +39,54 @@ export function BrandEditorPage() {
 
   if (editor.status === 'error' || editor.manifest === null || editor.detail === null || active === undefined) {
     return (
-      <div className="space-y-3">
-        <Link to="/brands" className="text-sm text-accent-strong underline">
+      <div className="flex flex-col items-start gap-3">
+        <Link to="/brands" className={BACK_LINK_CLASS}>
           {t('brands.back')}
         </Link>
-        {editor.loadError !== null && <ErrorNotice error={editor.loadError} onRetry={editor.reload} />}
+        {editor.loadError !== null && <ErrorNotice error={editor.loadError} onRetry={editor.reload} surface="glass" />}
       </div>
     );
   }
 
-  const ActiveSection = active.Component;
-
   return (
-    <section data-testid="brand-editor" className="space-y-5">
-      <header className="space-y-2">
-        <Link to="/brands" className="text-sm text-accent-strong underline">
-          {t('brands.back')}
-        </Link>
-        <h1 className="text-xl font-semibold text-ink">{editor.manifest.name}</h1>
+    <section data-testid="brand-editor" className="flex min-h-full min-w-0 flex-col gap-3">
+      <header className="glass flex min-w-0 flex-wrap items-center justify-between gap-3 rounded-[20px] p-4">
+        <div className="flex min-w-0 flex-wrap items-center gap-3">
+          <Link to="/brands" className={BACK_LINK_CLASS}>
+            {t('brands.back')}
+          </Link>
+          <h2 className="m-0 min-w-0 truncate text-lg font-bold text-[var(--cl-ink)]">{editor.manifest.name}</h2>
+          <StateBadge tone={editor.readOnly ? 'neutral' : 'teal'} size="sm">
+            {editor.readOnly ? t('brands.source.builtIn') : t('brands.source.user')}
+          </StateBadge>
+        </div>
+        {editor.readOnly && (
+          <div data-testid="brand-readonly-banner" className="flex flex-wrap items-center gap-3">
+            <p className="m-0 text-sm text-[var(--tucu-state-orange-ink)]">{t('brands.readonly')}</p>
+            <button
+              type="button"
+              data-testid="brand-readonly-duplicate"
+              className={SECONDARY_BUTTON_CLASS}
+              onClick={() => setDuplicating(true)}
+            >
+              {t('brands.duplicate')}
+            </button>
+          </div>
+        )}
       </header>
 
-      {editor.readOnly && (
-        <div
-          data-testid="brand-readonly-banner"
-          className="flex flex-wrap items-center justify-between gap-3 rounded-lg border border-warning/40 bg-warning/10 p-3"
-        >
-          <p className="text-sm text-warning">{t('brands.readonly')}</p>
-          <Button data-testid="brand-readonly-duplicate" onClick={() => setDuplicating(true)}>
-            {t('brands.duplicate')}
-          </Button>
-        </div>
-      )}
-
-      <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_minmax(0,26rem)]">
-        <div className="flex min-w-0 gap-5">
-          <nav aria-label={t('brands.sections')} className="flex w-32 shrink-0 flex-col gap-1">
-            {SECTIONS.map((candidate) => (
-              <button
-                key={candidate.id}
-                type="button"
-                data-testid={`brand-nav-${candidate.id}`}
-                aria-current={candidate.id === section ? 'page' : undefined}
-                onClick={() => setSection(candidate.id)}
-                className={`rounded-control border px-3 py-1.5 text-left text-sm ${
-                  candidate.id === section
-                    ? 'border-sky-500/60 bg-sky-500/10 text-sky-100'
-                    : 'border-border-subtle text-ink-muted hover:border-border-strong'
-                }`}
-              >
-                {t(candidate.labelKey)}
-              </button>
-            ))}
-          </nav>
-          <div className="min-w-0 flex-1">
-            <ActiveSection editor={editor} />
-          </div>
-        </div>
-        <aside className="lg:sticky lg:top-0 lg:self-start">
+      <div className="grid min-w-0 flex-1 grid-cols-1 items-start gap-3 min-[1280px]:grid-cols-[176px_minmax(0,1fr)_340px]">
+        <BrandEditorNav active={section} dirtyBySection={draft.dirtyBySection} onSelect={setSection} />
+        <section className={`${PANEL_CLASS} gap-4`}>
+          <h2 className={PANEL_HEADING_CLASS}>{t(sectionLabelKey(active.id))}</h2>
+          <BrandSectionBody id={active.id} editor={editor} draft={draft} />
+        </section>
+        <aside className="min-w-0 min-[1280px]:sticky min-[1280px]:top-0">
           <BrandPreviewPane brandId={id} signal={editor.previewSignal} />
         </aside>
       </div>
+
+      {!editor.readOnly && <BrandSaveBar editor={editor} draft={draft} />}
 
       {duplicating && (
         <BrandNameModal

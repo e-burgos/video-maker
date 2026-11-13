@@ -1,13 +1,14 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 
-import { brandPreviewUrl } from '../api/brand-files';
-import type { BrandPreview } from '../api/brand-types';
-import { useRenderApi } from '../api/render-api-context';
-import { RenderApiError, serviceUnreachable } from '../api/render-api-error';
-import type { BrandPreviewSignal } from '../hooks/use-brand-editor';
-import { useT } from '../i18n/language-context';
-import { ErrorNotice } from './error-notice';
-import { Button } from './ui/button';
+import { brandPreviewUrl } from '../../api/brand-files';
+import type { BrandPreview } from '../../api/brand-types';
+import { useRenderApi } from '../../api/render-api-context';
+import { RenderApiError, serviceUnreachable } from '../../api/render-api-error';
+import type { BrandPreviewSignal } from '../../hooks/use-brand-editor';
+import { useT } from '../../i18n/language-context';
+import { ErrorNotice } from '../error-notice';
+import { OPAQUE_MEDIA_FRAME_CLASS, PANEL_CLASS, PANEL_HEADING_CLASS, SECONDARY_BUTTON_SMALL_CLASS } from '../ui/cl-controls';
+import { BRAND_SMALL_HINT_CLASS } from './brand-controls';
 
 export const BRAND_TOKENS_MESSAGE = 'mg-brand-tokens';
 export const LIVE_RECOMPOSE_DELAY_MS = 1500;
@@ -71,8 +72,20 @@ export function BrandPreviewPane({ brandId, signal }: BrandPreviewPaneProps) {
   }, [signal.tokensToken, signal.tokens, postTokens, compose]);
 
   return (
-    <div data-testid="brand-preview-pane" className="space-y-3">
-      <div className="aspect-video w-full overflow-hidden rounded-lg border border-border-strong bg-slate-950">
+    <section data-testid="brand-preview-pane" className={PANEL_CLASS}>
+      <div className="flex items-center justify-between gap-3">
+        <h2 className={PANEL_HEADING_CLASS}>{t('brands.preview.title')}</h2>
+        <button
+          type="button"
+          data-testid="brand-preview-refresh"
+          disabled={composing}
+          onClick={() => void compose()}
+          className={SECONDARY_BUTTON_SMALL_CLASS}
+        >
+          {composing && preview !== null ? t('brands.preview.composing') : t('brands.preview.refresh')}
+        </button>
+      </div>
+      <div className={`${OPAQUE_MEDIA_FRAME_CLASS} aspect-video w-full border border-[var(--tucu-glass-sub-line)]`}>
         {preview !== null && (
           <iframe
             ref={frame}
@@ -80,22 +93,17 @@ export function BrandPreviewPane({ brandId, signal }: BrandPreviewPaneProps) {
             data-testid="brand-preview-frame"
             src={`${brandPreviewUrl(preview.url)}?t=${encodeURIComponent(preview.composedAt)}`}
             onLoad={() => postTokens(latestTokens.current)}
-            className="h-full w-full border-0"
+            className="h-full w-full border-0 bg-[#0b0d14]"
           />
         )}
         {preview === null && (
-          <div className="flex h-full items-center justify-center text-sm text-ink-faint">
+          <div className="flex h-full items-center justify-center px-3 text-center text-sm text-white/70">
             {composing ? t('brands.preview.composing') : t('brands.preview.unavailable')}
           </div>
         )}
       </div>
-      <div className="flex items-center gap-3">
-        <Button data-testid="brand-preview-refresh" disabled={composing} onClick={() => void compose()}>
-          {composing && preview !== null ? t('brands.preview.composing') : t('brands.preview.refresh')}
-        </Button>
-        <span className="text-xs text-ink-faint">{t('brands.preview.hint')}</span>
-      </div>
-      {error !== null && <ErrorNotice error={error} onRetry={() => void compose()} />}
-    </div>
+      <p className={BRAND_SMALL_HINT_CLASS}>{t('brands.preview.hint')}</p>
+      {error !== null && <ErrorNotice error={error} onRetry={() => void compose()} surface="glass" />}
+    </section>
   );
 }
