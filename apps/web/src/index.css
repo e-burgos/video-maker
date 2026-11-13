@@ -265,3 +265,7 @@ html[data-shell='electron'] [data-testid='shell-toolbar'] :is(button, a, input, 
   background-color: color-mix(in srgb, var(--cl-action) 55%, transparent);
 }
 
+
+:root {
+  --tucu-segmented-fg: var(--cl-ink-2);
+}

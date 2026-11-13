@@ -11,9 +11,9 @@
   "objectives": [
     "Mis videos y el espacio de trabajo del video migrados al Cristal Líquido, con los pasos del video mostrando su estado real"
   ],
-  "status": "in-progress",
+  "status": "completed",
   "started_at": "2026-11-13",
-  "completed_at": null,
+  "completed_at": "2026-11-13",
   "documents": {
     "plan": "sdd/specs/spec-e-burgos-025-liquid-glass-rebrand/cycles/cycle-02/plan.md",
     "tasks": "sdd/specs/spec-e-burgos-025-liquid-glass-rebrand/cycles/cycle-02/tasks.json"
@@ -54,12 +54,13 @@
     "sdd/specs/spec-e-burgos-025-liquid-glass-rebrand/cycles/cycle-02/artifacts/task003-vacio-dark-1440.png",
     "sdd/specs/spec-e-burgos-025-liquid-glass-rebrand/cycles/cycle-02/artifacts/task003-vacio-dark-900.png",
     "sdd/specs/spec-e-burgos-025-liquid-glass-rebrand/cycles/cycle-02/artifacts/task003-vacio-light-1440.png",
-    "sdd/specs/spec-e-burgos-025-liquid-glass-rebrand/cycles/cycle-02/artifacts/task003-vacio-light-900.png"
+    "sdd/specs/spec-e-burgos-025-liquid-glass-rebrand/cycles/cycle-02/artifacts/task003-vacio-light-900.png",
+    "sdd/specs/spec-e-burgos-025-liquid-glass-rebrand/cycles/cycle-02/artifacts/contrast-audit.json"
   ],
   "metrics": {
     "tasks_total": 4,
-    "tasks_completed": 3,
-    "story_points": 16,
+    "tasks_completed": 4,
+    "story_points": 18,
     "files_created": [
       "apps/web/src/components/shell/use-video-step-statuses.ts",
       "apps/web/src/components/shell/use-video-step-statuses.spec.tsx",
@@ -80,7 +81,8 @@
       "apps/web/src/components/shell/toolbar-status.tsx",
       "apps/web/src/components/workspace/workspace-deliveries-tab.tsx",
       "apps/web/src/components/workspace/workspace-material-tab.tsx",
-      "apps/web/src/components/workspace/workspace-preview.tsx"
+      "apps/web/src/components/workspace/workspace-preview.tsx",
+      "design/rebranding/contrast-audit.mjs"
     ],
     "files_modified": [
       "apps/web/src/components/studio-layout.tsx",
@@ -137,8 +139,8 @@
     ],
     "files_deleted": [],
     "usage": {
-      "tokens_in": 560000,
-      "tokens_out": 100000,
+      "tokens_in": 630000,
+      "tokens_out": 112000,
       "by_agent": [
         {
           "agent": "orchestrator",
@@ -187,6 +189,18 @@
           "approx": true,
           "source": "declared-estimate",
           "recorded_at": "2026-11-13"
+        },
+        {
+          "agent": "orchestrator",
+          "label": "TASK-004 verificación y cierre como reviewer",
+          "provider_model": "claude/opus",
+          "effort": "high",
+          "tokens_in": 70000,
+          "tokens_out": 12000,
+          "tokens_total": 82000,
+          "approx": true,
+          "source": "declared-estimate",
+          "recorded_at": "2026-11-13"
         }
       ]
     }
@@ -194,6 +208,29 @@
   "tables_created": [],
   "endpoints_implemented": [],
   "components_created": [],
-  "issues_found": [],
-  "reviewer_report": null
+  "issues_found": [
+    "El render-api del studio en marcha desde las 12:14 devuelve 500 en /health tras las reinstalaciones de dependencias; una instancia nueva responde ok. Hay que reiniciar el studio (no se hizo: lo usa otra sesión).",
+    "Envío real, cancelación y adjuntos del productor sin probar en vivo por la salud rota del studio (cubiertos por tests unitarios).",
+    "Revisión en Electron de desarrollo pospuesta: la Mac tiene la memoria casi llena y otra sesión estaba grabando."
+  ],
+  "reviewer_report": {
+    "approved": true,
+    "date": "2026-11-13",
+    "ca_results": {
+      "US-025-201": "PASS — useVideoStepStatuses con specs; estados derivados de proyecto, material por rol, storyboard, voz y render; sin pedidos sin video abierto",
+      "US-025-202": "PASS — Mis videos con toolbar, buscador, chips, tarjetas glass-sub con una acción y menú; un solo «Abrir» por tarjeta; capturas claro/oscuro 1440 y 900",
+      "US-025-203": "PASS — espacio de trabajo con chat, primer uso, vista previa opaca, Material y Entregas, estado y acción de la propuesta en el toolbar; contraste AA medido en 1.232 textos sin fallas y sin desborde horizontal"
+    },
+    "tests": {
+      "sdd:validate": "OK",
+      "web": "181/181 archivos, 1758/1758 tests",
+      "contrast-audit": "0 fallas en 4 pantallas × claro/oscuro"
+    },
+    "notes": "Implementación en dos subagentes sonnet/medium en serie; la verificación corrigió el texto inactivo de los segmentados de tucu-ui (3,95:1) con un token global. Se agregó una auditoría de contraste reutilizable para los ciclos siguientes.",
+    "follow_ups": [
+      "Reiniciar el studio para recuperar /health y probar el productor en vivo.",
+      "Ciclo 05: retirar el modo heredado de surface y migrar RenderReviewPanel y YouTubePublishDialog.",
+      "Revisión en Electron de desarrollo al final de la spec."
+    ]
+  }
 }
