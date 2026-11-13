@@ -31,8 +31,8 @@
   `@remotion/player`. Desde spec-018 suma modo motion, marcas, YouTube y su cola, revisión de renders, propuesta,
   muestras, referencias y dirección de voz (ver `constitution.md` §5). Desde spec-025 todas las rutas viven en el
   shell **Cristal Líquido** (sidebar de vidrio con bloque del video y pasos, toolbar de una acción, pie con estado en
-  modal, idioma y apariencia; tucu-ui 3.10.1); las pantallas no migradas siguen en superficie heredada
-  (`isMigratedRoute`). Configuración suma «Voces de ElevenLabs».
+  modal, idioma y apariencia; tucu-ui 3.10.1); ya migradas Mis videos y el espacio de trabajo del video (subrutas aún
+  heredadas, `isMigratedRoute`); los pasos de la sidebar muestran estado real. Configuración suma «Voces de ElevenLabs».
 - **Descopado a propósito:** la **edición del EDL (`EP-009`/`EP-010`)**, porque `buildTimeline` sólo
   se invoca desde `libs/auto-montage` y guardar un EDL editado escribiría `work/edl.json` sin efecto
   observable ni en el Player ni en un render. La edición de la Timeline cubre

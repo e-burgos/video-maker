@@ -1,6 +1,6 @@
 # Constitución — apps/web
 
-> Versión 3.1 | Última actualización: consolidación de fragmentos | Fecha: 2026-11-13
+> Versión 3.2 | Última actualización: consolidación de fragmentos | Fecha: 2026-11-13
 
 ## 1. Propósito
 
@@ -22,8 +22,12 @@
   dentro del shell Cristal Líquido** (spec-025): sidebar de vidrio con logo y firma, bloque «este
   video» con sus pasos, toolbar con una sola acción por página (`useToolbarAction`) y pie con estado
   del servicio (modal), switch de idioma y apariencia (sistema/claro/oscuro); las pantallas aún no
-  migradas se muestran en una superficie heredada oscura y opaca (`isMigratedRoute`, hoy `false`
-  para todas). **Toda la interfaz está
+  migradas se muestran en una superficie heredada oscura y opaca (`isMigratedRoute`; ya migradas: Mis
+  videos `/` y el espacio de trabajo `/projects/:slug` exacto, con las subrutas del video aún heredadas; los pasos
+  del video en la sidebar muestran estado real con `useVideoStepStatuses`). En el espacio de trabajo el chat del
+  productor y el primer uso van a la izquierda; la vista previa queda siempre visible sobre escenario opaco, con
+  Material | Entregas a la derecha; el estado de la propuesta vive en el slot de estado del toolbar y «Aprobar el
+  enfoque recomendado» es la acción solo con propuesta pendiente. **Toda la interfaz está
   en español (default) e inglés** (`src/i18n/`), con una ruta `/guide` que la explica en los dos
   idiomas.
 - **No tiene lógica de motor ni toca el filesystem.** Todo lo que muestra y todo lo que escribe
@@ -85,7 +89,7 @@ src/
   components/   shell/ (sidebar de vidrio, navegación, pasos del video, toolbar + contexto +
                 `useToolbarAction({ label, onClick, disabled, loading })`, contenido con superficie
                 heredada, pie con `footer-control-style.ts` → `FOOTER_CONTROL_CLASS`, modal de estado
-                del servicio) · service-health-badge · error-notice · elevenlabs-settings-section · create-project-form ·
+                del servicio, `use-video-step-statuses` · `toolbar-status` + `toolbar-status-context`) · service-health-badge · error-notice · elevenlabs-settings-section · create-project-form ·
                 voice-picker ·
                 asset-card · asset-delete-control · asset-preview · asset-uploader ·
                 generated-files-panel · timeline-player ·
@@ -102,7 +106,8 @@ src/
                 folder-heading (renombrado inline) · openrouter-model-picker ·
                 workspace-side-panel · producer-conversation-panel · chat-drop-zone ·
                 asset-proposal-card · video-card · home-drop-hint · create-project-by-drop ·
-                ui/{button,card,badge,tabs,brand-mark} (`brand-mark.tsx` lo genera
+                videos/ (Mis videos) · workspace/ (vista previa, Material, Entregas) ·
+                ui/{button,card,badge,tabs,overflow-menu,cl-controls,brand-mark} (`brand-mark.tsx` lo genera
                 `design/rebranding/logo/build-logo.mjs`, etiquetas por prop desde el catálogo;
                 tokens en `index.css` bajo `@theme`)
   pages/        projects-page · asset-library-page · project-workspace-page · storyboard-page ·
@@ -452,11 +457,22 @@ Todos bajo `src/` de la app; copy `es`/`en` en `src/i18n/`; el contrato de cada 
   imágenes) nunca bajo vidrio ni blur; (4) texto activo con `--cl-action-text` y rótulos con `--cl-ink-3` para cumplir
   AA (medido); (5) `SegmentedControl` dentro de paneles angostos con `size="xs"` y `fullWidth`; (6) todos los
   controles del pie usan `FOOTER_CONTROL_CLASS` (40 × 192 px); (7) cada pantalla migrada declara su única acción con
-  `useToolbarAction` y se suma a `isMigratedRoute`.
+  `useToolbarAction` y se suma a `isMigratedRoute`; (8) `Modal`, `ErrorNotice` y `BrandPicker` llevan
+  `surface="glass"`: por defecto conservan el estilo heredado para las pantallas viejas y las migradas piden vidrio
+  (`Modal` va por portal al `body`: un ancestro con `backdrop-filter` atrapa el `position: fixed`);
+  `TimelinePlayer` tiene modo `fit`; (9) tokens `--cl-action-fill` y `--cl-action-fill-hover` (relleno de botones
+  primarios y burbuja del usuario con texto blanco; en oscuro `#1f6feb`, ≈ 4,6:1) y
+  `--tucu-segmented-fg: var(--cl-ink-2)` (texto inactivo de los segmentados de tucu-ui, antes 3,95:1); (10) tonos de
+  estado del video para todo el studio: publicado verde, video listo teal, sin material naranja, montaje listo
+  púrpura, material cargado y archivado neutros; (11) la auditoría reutilizable
+  `design/rebranding/contrast-audit.mjs <dir> <rutas…>` mide cada texto visible contra el fondo renderizado y el
+  desborde horizontal; `api/video-filter` filtra Mis videos.
 - **Tests**: `settings-page.spec.tsx` espera hasta 5 s (con 7 proyectos en paralelo el timeout de 1 s era intermitente).
 - **Pendientes vigentes**: copy propio para el uploader de imágenes en la página Motion (hoy usa el del modo crudo);
   el reporte de la fase storyboard trae `path`/`durationSec` null; la bandeja de arrastrar y soltar no propone el
-  rol `reference`; migrar las pantallas al shell nuevo (ciclos 02 a 05 de spec-025: ampliar `isMigratedRoute`,
-  declarar la acción del toolbar y alimentar el estado de los pasos), mover el selector de apariencia a Ajustes
+  rol `reference`; migrar las pantallas restantes al shell nuevo (ciclos 03 a 05 de spec-025: ampliar `isMigratedRoute`
+  y declarar la acción del toolbar), limpiar `RenderReviewPanel` (en Entregas, envuelto en una isla oscura) y
+  `YouTubePublishDialog` junto con el modo heredado de `surface` (ciclo 05), no hay API para renombrar videos (solo
+  se renombran carpetas), mover el selector de apariencia a Ajustes
   (ciclo 05) y la paridad con la web (ciclo 06). Una ventana de Electron abierta durante muchas recargas en caliente
   de los catálogos i18n puede mostrar claves sin traducir: recargar la ventana; no es un defecto.
