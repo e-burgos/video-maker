@@ -55,12 +55,12 @@ export function ServiceHealthBadge() {
   const detail = health.data;
 
   return (
-    <div className="relative flex items-center gap-2">
+    <div className="relative flex flex-wrap items-center gap-2">
       <button
         type="button"
         onClick={health.reload}
         title={t('health.recheck')}
-        className="flex items-center gap-2 rounded-full border border-slate-700 bg-slate-900/80 px-3 py-1.5 text-xs text-slate-300 hover:border-slate-500"
+        className="focus-cl flex min-w-0 items-center gap-2 rounded-full border border-[var(--tucu-glass-sub-line)] bg-[var(--tucu-glass-sub-bg)] px-3 py-1.5 text-left text-xs text-[var(--cl-ink-2)] hover:border-[var(--cl-ink-3)]"
       >
         <span
           aria-hidden="true"
@@ -69,13 +69,13 @@ export function ServiceHealthBadge() {
         <span data-testid="service-health-label">{label}</span>
       </button>
 
-      <details className="text-xs text-slate-400">
-        <summary className="cursor-pointer list-none rounded-full border border-slate-700 px-2 py-1 hover:border-slate-500">
+      <details className="text-xs">
+        <summary className="focus-cl cursor-pointer list-none rounded-full border border-[var(--tucu-glass-sub-line)] px-2 py-1 text-[var(--cl-ink-3)] hover:border-[var(--cl-ink-3)]">
           {t('health.details')}
         </summary>
         <div
           data-testid="service-health-details"
-          className="absolute right-0 z-10 mt-2 w-80 space-y-3 rounded-lg border border-slate-700 bg-slate-950 p-3 text-left"
+          className="absolute bottom-full left-0 z-20 mb-2 w-72 space-y-3 rounded-lg border border-slate-700 bg-slate-950 p-3 text-left text-slate-300"
         >
           {detail === null ? (
             <p className="text-slate-400">{t('health.empty')}</p>

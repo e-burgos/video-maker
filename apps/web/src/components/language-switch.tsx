@@ -10,7 +10,7 @@ export function LanguageSwitch() {
       role="group"
       data-testid="language-switch"
       aria-label={t('language.switchLabel')}
-      className="flex items-center gap-1 rounded-full border border-slate-700 bg-slate-900/80 p-0.5"
+      className="flex items-center gap-1 rounded-full border border-[var(--tucu-glass-sub-line)] bg-[var(--tucu-glass-sub-bg)] p-0.5"
     >
       {LANGUAGES.map((candidate) => (
         <button
@@ -23,8 +23,8 @@ export function LanguageSwitch() {
           onClick={() => setLanguage(candidate)}
           className={`rounded-full px-2 py-1 font-mono text-xs uppercase ${
             candidate === language
-              ? 'bg-slate-200 text-slate-900'
-              : 'text-slate-400 hover:text-slate-200'
+              ? 'bg-[var(--cl-ink)] text-[var(--cl-canvas)]'
+              : 'text-[var(--cl-ink-3)] hover:text-[var(--cl-ink)]'
           }`}
         >
           {candidate}

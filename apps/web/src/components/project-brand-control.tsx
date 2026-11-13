@@ -65,7 +65,7 @@ export function ProjectBrandControl({ slug, project, onChanged }: ProjectBrandCo
   }
 
   return (
-    <div data-testid="project-brand" className="relative flex items-center gap-2 font-sans text-xs">
+    <div data-testid="project-brand" className="relative flex flex-wrap items-center gap-x-2 gap-y-1.5 font-sans text-xs">
       <span className="text-ink-faint">{t('projectBrand.label')}</span>
       <CurrentBrand brandId={brandId} brand={current} missing={project.brandMissing === true} />
       {isMotion ? (
@@ -89,7 +89,7 @@ export function ProjectBrandControl({ slug, project, onChanged }: ProjectBrandCo
       {!isMotion && open && brands.data !== null && (
         <div
           data-testid="project-brand-picker"
-          className="absolute right-0 top-full z-20 mt-2 w-[28rem] max-w-[90vw] space-y-2 rounded-panel border border-border-strong bg-slate-900 p-3 shadow-lg"
+          className="absolute left-0 top-full z-20 mt-2 w-[28rem] max-w-[90vw] space-y-2 rounded-panel border border-border-strong bg-slate-900 p-3 shadow-lg"
         >
           <BrandPicker
             brands={brands.data}

@@ -1,50 +1,21 @@
 import { useCallback } from 'react';
-import { NavLink, Outlet, useLocation } from 'react-router-dom';
+import { Outlet, useLocation } from 'react-router-dom';
 
 import { projectModeOf } from '../api/project-mode';
+import { projectDisplayName } from '../api/humanize-slug';
 import { useRenderApi } from '../api/render-api-context';
 import { useAsyncResource } from '../hooks/use-async-resource';
 import { useT } from '../i18n/language-context';
-import type { TranslationKey } from '../i18n/messages-en';
-import { LanguageSwitch } from './language-switch';
+import { Scene } from '../theme/scene';
 import { ProjectBrandControl } from './project-brand-control';
-import { ServiceHealthBadge } from './service-health-badge';
+import { ShellContent } from './shell/shell-content';
+import { projectSlugFromPathname, toolbarHeadingFor } from './shell/shell-navigation';
+import { ShellSidebar } from './shell/shell-sidebar';
+import { ShellToolbar } from './shell/shell-toolbar';
+import { ToolbarActionProvider } from './shell/toolbar-action-provider';
+import { VideoStepsNav } from './shell/video-steps-nav';
 
-type ProjectSection = {
-  path: string;
-  labelKey: TranslationKey;
-  end?: boolean;
-  motionOnly?: boolean;
-};
-
-const PROJECT_SECTIONS: readonly ProjectSection[] = [
-  { path: '', labelKey: 'nav.productor', end: true },
-  { path: '/motion', labelKey: 'nav.motion', motionOnly: true },
-  { path: '/library', labelKey: 'nav.library' },
-  { path: '/storyboard', labelKey: 'nav.storyboard' },
-  { path: '/voice', labelKey: 'nav.voice' },
-  { path: '/preview', labelKey: 'nav.preview' },
-];
-
-const HEADER_LINKS = [
-  { to: '/brands', testId: 'brands-nav', labelKey: 'nav.brands' },
-  { to: '/publish-queue', testId: 'publish-queue-nav', labelKey: 'nav.publishQueue' },
-  { to: '/settings', testId: 'settings-nav', labelKey: 'nav.settings' },
-  { to: '/guide', testId: 'guide-nav', labelKey: 'nav.guide' },
-] as const satisfies readonly { to: string; testId: string; labelKey: TranslationKey }[];
-
-function navLinkClass({ isActive }: { isActive: boolean }): string {
-  return `rounded-md border px-3 py-1.5 text-sm font-medium capitalize ${
-    isActive
-      ? 'border-sky-500/60 bg-sky-500/10 text-sky-100'
-      : 'border-slate-800 text-slate-400 hover:border-slate-600'
-  }`;
-}
-
-export function projectSlugFromPathname(pathname: string): string | null {
-  const match = /^\/projects\/([^/]+)(?:\/|$)/.exec(pathname);
-  return match === null ? null : decodeURIComponent(match[1] as string);
-}
+export { projectSlugFromPathname };
 
 export function StudioLayout() {
   const { pathname } = useLocation();
@@ -55,62 +26,37 @@ export function StudioLayout() {
     useCallback(async () => (slug === null ? null : client.getProject(slug)), [client, slug]),
     `layout-project:${slug ?? ''}`,
   );
-  const isMotion = project.data !== null && projectModeOf(project.data) === 'motion';
-  const sections = PROJECT_SECTIONS.filter((section) => isMotion || section.motionOnly !== true);
+  const heading = toolbarHeadingFor(pathname);
+  const videoTitle = slug === null ? null : project.data === null ? projectDisplayName({ slug }) : projectDisplayName(project.data);
+  const subtitle = heading.subtitleKey === null ? videoTitle : t(heading.subtitleKey);
+
+  const videoBlock =
+    slug === null || videoTitle === null ? null : (
+      <VideoStepsNav
+        slug={slug}
+        title={videoTitle}
+        isMotion={project.data !== null && projectModeOf(project.data) === 'motion'}
+        footer={
+          project.data === null ? undefined : (
+            <ProjectBrandControl slug={slug} project={project.data} onChanged={project.reload} />
+          )
+        }
+      />
+    );
 
   return (
-    <div className="flex h-screen flex-col bg-slate-950 text-slate-100">
-      <header className="shrink-0 border-b border-slate-800 bg-slate-900/60">
-        <div className="mx-auto flex max-w-6xl items-center justify-between gap-4 px-6 py-4">
-          <div className="flex items-baseline gap-3">
-            <NavLink to="/" className="text-lg font-semibold tracking-tight">
-              {t('layout.title')}
-            </NavLink>
-            <span className="text-xs text-slate-500">{t('layout.subtitle')}</span>
-          </div>
-          <div className="flex items-center gap-3">
-            {HEADER_LINKS.map((link) => (
-              <NavLink key={link.to} to={link.to} data-testid={link.testId} className={navLinkClass}>
-                {t(link.labelKey)}
-              </NavLink>
-            ))}
-            <ServiceHealthBadge />
-            <LanguageSwitch />
+    <ToolbarActionProvider>
+      <Scene>
+        <div className="flex h-dvh text-[var(--cl-ink)]">
+          <ShellSidebar videoBlock={videoBlock} />
+          <div className="flex min-w-0 flex-1 flex-col gap-3 p-3">
+            <ShellToolbar title={t(heading.titleKey)} subtitle={subtitle} />
+            <ShellContent pathname={pathname}>
+              <Outlet />
+            </ShellContent>
           </div>
         </div>
-
-        {slug !== null && (
-          <nav
-            data-testid="project-nav"
-            className="mx-auto flex max-w-6xl items-center gap-3 px-6 pb-3 font-mono text-xs"
-          >
-            {sections.map((section) => (
-              <NavLink
-                key={section.labelKey}
-                to={`/projects/${encodeURIComponent(slug)}${section.path}`}
-                end={section.end}
-                className={({ isActive }) =>
-                  `rounded-md border px-2 py-1 ${
-                    isActive
-                      ? 'border-sky-500/60 bg-sky-500/10 text-sky-100'
-                      : 'border-slate-800 text-slate-400 hover:border-slate-600'
-                  }`
-                }
-              >
-                {t(section.labelKey)}
-              </NavLink>
-            ))}
-            {project.data !== null && (
-              <div className="ml-auto">
-                <ProjectBrandControl slug={slug} project={project.data} onChanged={project.reload} />
-              </div>
-            )}
-          </nav>
-        )}
-      </header>
-      <main className="mx-auto min-h-0 w-full max-w-6xl flex-1 overflow-y-auto px-6 py-8">
-        <Outlet />
-      </main>
-    </div>
+      </Scene>
+    </ToolbarActionProvider>
   );
 }

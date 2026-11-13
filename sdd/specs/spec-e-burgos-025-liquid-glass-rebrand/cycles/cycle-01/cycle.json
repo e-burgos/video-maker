@@ -21,12 +21,32 @@
   },
   "artifacts": [
     "sdd/specs/spec-e-burgos-025-liquid-glass-rebrand/cycles/cycle-01/artifacts/task002-escena-light.png",
-    "sdd/specs/spec-e-burgos-025-liquid-glass-rebrand/cycles/cycle-01/artifacts/task002-escena-dark.png"
+    "sdd/specs/spec-e-burgos-025-liquid-glass-rebrand/cycles/cycle-01/artifacts/task002-escena-dark.png",
+    "sdd/specs/spec-e-burgos-025-liquid-glass-rebrand/cycles/cycle-01/artifacts/task004-videos-light-1440.png",
+    "sdd/specs/spec-e-burgos-025-liquid-glass-rebrand/cycles/cycle-01/artifacts/task004-videos-light-900.png",
+    "sdd/specs/spec-e-burgos-025-liquid-glass-rebrand/cycles/cycle-01/artifacts/task004-videos-dark-1440.png",
+    "sdd/specs/spec-e-burgos-025-liquid-glass-rebrand/cycles/cycle-01/artifacts/task004-videos-dark-900.png",
+    "sdd/specs/spec-e-burgos-025-liquid-glass-rebrand/cycles/cycle-01/artifacts/task004-brands-light-1440.png",
+    "sdd/specs/spec-e-burgos-025-liquid-glass-rebrand/cycles/cycle-01/artifacts/task004-brands-light-900.png",
+    "sdd/specs/spec-e-burgos-025-liquid-glass-rebrand/cycles/cycle-01/artifacts/task004-brands-dark-1440.png",
+    "sdd/specs/spec-e-burgos-025-liquid-glass-rebrand/cycles/cycle-01/artifacts/task004-brands-dark-900.png",
+    "sdd/specs/spec-e-burgos-025-liquid-glass-rebrand/cycles/cycle-01/artifacts/task004-settings-light-1440.png",
+    "sdd/specs/spec-e-burgos-025-liquid-glass-rebrand/cycles/cycle-01/artifacts/task004-settings-light-900.png",
+    "sdd/specs/spec-e-burgos-025-liquid-glass-rebrand/cycles/cycle-01/artifacts/task004-settings-dark-1440.png",
+    "sdd/specs/spec-e-burgos-025-liquid-glass-rebrand/cycles/cycle-01/artifacts/task004-settings-dark-900.png",
+    "sdd/specs/spec-e-burgos-025-liquid-glass-rebrand/cycles/cycle-01/artifacts/task004-project-light-1440.png",
+    "sdd/specs/spec-e-burgos-025-liquid-glass-rebrand/cycles/cycle-01/artifacts/task004-project-light-900.png",
+    "sdd/specs/spec-e-burgos-025-liquid-glass-rebrand/cycles/cycle-01/artifacts/task004-project-dark-1440.png",
+    "sdd/specs/spec-e-burgos-025-liquid-glass-rebrand/cycles/cycle-01/artifacts/task004-project-dark-900.png",
+    "sdd/specs/spec-e-burgos-025-liquid-glass-rebrand/cycles/cycle-01/artifacts/task004-motion-light-1440.png",
+    "sdd/specs/spec-e-burgos-025-liquid-glass-rebrand/cycles/cycle-01/artifacts/task004-motion-light-900.png",
+    "sdd/specs/spec-e-burgos-025-liquid-glass-rebrand/cycles/cycle-01/artifacts/task004-motion-dark-1440.png",
+    "sdd/specs/spec-e-burgos-025-liquid-glass-rebrand/cycles/cycle-01/artifacts/task004-motion-dark-900.png"
   ],
   "metrics": {
     "tasks_total": 7,
-    "tasks_completed": 4,
-    "story_points": 20,
+    "tasks_completed": 5,
+    "story_points": 28,
     "files_created": [
       "apps/web/src/theme/tucu-mount.spec.tsx",
       "apps/web/src/components/ui/brand-mark.tsx",
@@ -41,7 +61,20 @@
       "apps/web/src/theme/theme-context.tsx",
       "apps/web/src/theme/theme-context.spec.tsx",
       "apps/web/src/theme/theme-switch.tsx",
-      "apps/web/src/theme/theme-switch.spec.tsx"
+      "apps/web/src/theme/theme-switch.spec.tsx",
+      "apps/web/src/components/shell/shell-navigation.ts",
+      "apps/web/src/components/shell/shell-navigation.spec.ts",
+      "apps/web/src/components/shell/shell-sidebar.tsx",
+      "apps/web/src/components/shell/shell-sidebar.spec.tsx",
+      "apps/web/src/components/shell/sidebar-footer.tsx",
+      "apps/web/src/components/shell/video-steps-nav.tsx",
+      "apps/web/src/components/shell/video-steps-nav.spec.tsx",
+      "apps/web/src/components/shell/shell-toolbar.tsx",
+      "apps/web/src/components/shell/shell-content.tsx",
+      "apps/web/src/components/shell/toolbar-action-context.ts",
+      "apps/web/src/components/shell/toolbar-action-provider.tsx",
+      "apps/web/src/components/shell/use-toolbar-action.ts",
+      "apps/web/src/components/shell/use-toolbar-action.spec.tsx"
     ],
     "files_modified": [
       "package.json",
@@ -52,12 +85,17 @@
       "apps/web/src/i18n/messages-es.ts",
       "apps/desktop/vendor/THIRD_PARTY_NOTICES.md",
       "apps/desktop/scripts/vendor-binaries.mjs",
-      "apps/web/src/main.tsx"
+      "apps/web/src/main.tsx",
+      "apps/web/src/components/studio-layout.tsx",
+      "apps/web/src/components/service-health-badge.tsx",
+      "apps/web/src/components/language-switch.tsx",
+      "apps/web/src/components/project-brand-control.tsx",
+      "apps/web/src/components/studio-layout.spec.tsx"
     ],
     "files_deleted": [],
     "usage": {
-      "tokens_in": 480000,
-      "tokens_out": 73000,
+      "tokens_in": 600000,
+      "tokens_out": 95000,
       "by_agent": [
         {
           "agent": "implementor-front",
@@ -103,6 +141,18 @@
           "tokens_in": 60000,
           "tokens_out": 9000,
           "tokens_total": 69000,
+          "approx": true,
+          "source": "declared-estimate",
+          "recorded_at": "2026-11-13"
+        },
+        {
+          "agent": "implementor-front",
+          "label": "TASK-004",
+          "provider_model": "claude/sonnet",
+          "effort": "medium",
+          "tokens_in": 120000,
+          "tokens_out": 22000,
+          "tokens_total": 142000,
           "approx": true,
           "source": "declared-estimate",
           "recorded_at": "2026-11-13"

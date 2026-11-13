@@ -1,7 +1,8 @@
-import { render, screen, waitFor } from '@testing-library/react';
+import { render, screen, waitFor, within } from '@testing-library/react';
 import { MemoryRouter, Route, Routes } from 'react-router-dom';
 import { describe, expect, it, vi } from 'vitest';
 
+import { ThemeProvider } from '../theme/theme-context';
 import { RenderApiProvider, useRenderApi } from '../api/render-api-context';
 import { StudioLayout, projectSlugFromPathname } from './studio-layout';
 import type { RenderApiClient } from '../api/render-api-client';
@@ -12,7 +13,7 @@ function ClientProbe() {
 }
 
 describe('StudioLayout', () => {
-  it('frames the routed page with the studio header and the health badge', async () => {
+  it('frames the routed page with the shell and the health badge', async () => {
     const client = {
       getHealth: vi.fn().mockResolvedValue({
         status: 'ok',
@@ -27,6 +28,7 @@ describe('StudioLayout', () => {
     } as unknown as RenderApiClient;
 
     render(
+      <ThemeProvider>
       <RenderApiProvider client={client}>
         <MemoryRouter initialEntries={['/']}>
           <Routes>
@@ -35,13 +37,16 @@ describe('StudioLayout', () => {
             </Route>
           </Routes>
         </MemoryRouter>
-      </RenderApiProvider>,
+      </RenderApiProvider>
+      </ThemeProvider>,
     );
 
-    expect(screen.getByRole('link', { name: 'Video Maker Studio' })).toBeTruthy();
+    expect(screen.getByRole('img', { name: 'Video Maker by Esteban Burgos' })).toBeTruthy();
+    expect(screen.getByRole('heading', { level: 1, name: 'My videos' })).toBeTruthy();
     expect(screen.getByTestId('settings-nav').getAttribute('href')).toBe('/settings');
     expect(screen.getByTestId('brands-nav').getAttribute('href')).toBe('/brands');
     expect(screen.getByText('routed page')).toBeTruthy();
+    expect(screen.getByTestId('shell-content').getAttribute('data-surface')).toBe('legacy');
     await waitFor(() =>
       expect(screen.getByTestId('service-health-label').textContent).toBe('Ready'),
     );
@@ -86,6 +91,7 @@ describe('StudioLayout project nav', () => {
     } as unknown as RenderApiClient;
 
     render(
+      <ThemeProvider>
       <RenderApiProvider client={client}>
         <MemoryRouter initialEntries={[pathname]}>
           <Routes>
@@ -100,7 +106,8 @@ describe('StudioLayout project nav', () => {
             </Route>
           </Routes>
         </MemoryRouter>
-      </RenderApiProvider>,
+      </RenderApiProvider>
+      </ThemeProvider>,
     );
 
     return client;
@@ -112,10 +119,11 @@ describe('StudioLayout project nav', () => {
     );
   }
 
-  it('shows no project nav outside a project and never loads a project', () => {
+  it('shows no video block outside a project and never loads a project', () => {
     const client = renderAt('/');
 
     expect(screen.queryByTestId('project-nav')).toBeNull();
+    expect(screen.queryByTestId('video-block')).toBeNull();
     expect(client.getProject).not.toHaveBeenCalled();
   });
 
@@ -167,5 +175,25 @@ describe('StudioLayout project nav', () => {
 
     const link = await screen.findByRole('link', { name: 'motion' });
     expect(link.getAttribute('aria-current')).toBe('page');
+  });
+
+  it('shows the humanized video title and the step as toolbar heading inside a project', async () => {
+    renderAt('/projects/smoke-ingest/voice');
+
+    expect(await screen.findByRole('heading', { level: 1, name: 'Voice' })).toBeTruthy();
+    expect(within(screen.getByTestId('video-block')).getByText('Smoke ingest')).toBeTruthy();
+    expect(within(screen.getByTestId('shell-toolbar')).getByText('Smoke ingest')).toBeTruthy();
+  });
+
+  it('keeps the toolbar action out of the way until a page declares one', () => {
+    renderAt('/');
+
+    expect(screen.queryByTestId('toolbar-action')).toBeNull();
+  });
+
+  it('wraps every route in the legacy surface while none is migrated', () => {
+    renderAt('/projects/smoke-ingest/library');
+
+    expect(screen.getByTestId('shell-content').getAttribute('data-surface')).toBe('legacy');
   });
 });

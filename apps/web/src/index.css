@@ -61,6 +61,9 @@ body {
   --cl-ambient: linear-gradient(150deg, #c7d4ee 0%, #e2d5ea 45%, #f2ded3 100%);
   --cl-orb-a: rgba(100, 150, 255, 0.3);
   --cl-orb-b: rgba(255, 160, 120, 0.24);
+  --cl-ink: #1d1d1f;
+  --cl-ink-2: #48484a;
+  --cl-ink-3: #6e6e73;
   --cl-action: #0a6cff;
   --cl-action-hover: #0353c9;
   --cl-action-ring: rgba(10, 108, 255, 0.3);
@@ -98,6 +101,9 @@ body {
   --cl-ambient: linear-gradient(160deg, #101322 0%, #1d1730 60%, #231b26 100%);
   --cl-orb-a: rgba(90, 120, 255, 0.25);
   --cl-orb-b: rgba(255, 150, 120, 0.12);
+  --cl-ink: #f5f5f7;
+  --cl-ink-2: rgba(235, 235, 245, 0.72);
+  --cl-ink-3: rgba(235, 235, 245, 0.62);
   --cl-action: #409cff;
   --cl-action-hover: #70b3ff;
   --cl-action-ring: rgba(64, 156, 255, 0.4);
