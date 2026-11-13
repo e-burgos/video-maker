@@ -252,7 +252,7 @@ async function main() {
     const voiceHeading = await page
       .locator('[data-testid="voice-trigger"] h2')
       .textContent();
-    assert(voiceHeading.trim() === 'locución', `the voice section is titled in spanish (${voiceHeading})`);
+    assert(voiceHeading.trim() === 'Locución', `the voice section is titled in spanish (${voiceHeading})`);
     await page.screenshot({ path: join(ARTIFACTS_DIR, 'i18n-smoke-03-voice-es.png') });
 
     log('8', 'the guide explains every section, in spanish');

@@ -1,3 +1,4 @@
+import { StateBadge } from '@e-burgos/tucu-ui';
 import { useCallback, useState } from 'react';
 
 import { useRenderApi } from '../api/render-api-context';
@@ -9,6 +10,9 @@ import { useAsyncResource } from '../hooks/use-async-resource';
 import { useProjectBrandVoice } from '../hooks/use-project-brand-voice';
 import type { ServiceHealth, VoiceJob, VoiceListing } from '../api/render-api-types';
 import { ErrorNotice } from './error-notice';
+import { ToolbarStatus } from './shell/toolbar-status';
+import { useToolbarAction } from './shell/use-toolbar-action';
+import { DANGER_BUTTON_SMALL_CLASS, SECONDARY_BUTTON_SMALL_CLASS } from './ui/cl-controls';
 import { VoicePicker } from './voice-picker';
 
 export const VOICE_ALREADY_EXISTS = 'VOICE_ALREADY_EXISTS';
@@ -17,6 +21,7 @@ export type VoiceTriggerProps = {
   slug: string;
   onCreated: (job: VoiceJob) => void;
   scriptPath?: string;
+  hasVoice?: boolean;
 };
 
 export function defaultVoiceId(listing: VoiceListing | null): string | null {
@@ -33,7 +38,7 @@ export function brandVoiceIdIn(listing: VoiceListing | null, brandVoiceId: strin
   return listing.voices.some((voice) => voice.id === brandVoiceId) ? brandVoiceId : null;
 }
 
-export function VoiceTrigger({ slug, onCreated, scriptPath }: VoiceTriggerProps) {
+export function VoiceTrigger({ slug, onCreated, scriptPath, hasVoice = false }: VoiceTriggerProps) {
   const client = useRenderApi();
   const loadHealth = useCallback(() => client.getHealth(), [client]);
   const loadVoices = useCallback(() => client.listVoices(), [client]);
@@ -71,21 +76,39 @@ export function VoiceTrigger({ slug, onCreated, scriptPath }: VoiceTriggerProps)
     createAction.error === null ? null : voiceFailureKey(createAction.error.code);
   const catalogueErrorKey =
     voices.error === null ? null : voiceFailureKey(voices.error.code);
+  const pending = createAction.status === 'pending';
   const disabled =
     blockers.length > 0 ||
     selectedVoiceId === null ||
-    createAction.status === 'pending' ||
+    pending ||
     voices.status === 'loading';
+  const regenerates = scriptPath !== undefined || hasVoice;
+  const selectedVoice = voices.data?.voices.find((voice) => voice.id === selectedVoiceId);
+
+  useToolbarAction({
+    label: pending
+      ? scriptPath === undefined
+        ? t('voice.generating')
+        : t('voice.script.regenerating')
+      : regenerates
+        ? t('voice.script.regenerate')
+        : t('voice.generate'),
+    onClick: () => void generate(false),
+    disabled,
+    loading: pending,
+  });
 
   return (
-    <div
-      data-testid="voice-trigger"
-      className="space-y-3 rounded-lg border border-slate-800 bg-slate-900/40 p-4"
-    >
-      <h2 className="font-mono text-sm uppercase tracking-wide text-slate-400">
-        {t('voice.heading')}
-      </h2>
-      <p className="text-sm text-slate-400">
+    <section data-testid="voice-trigger" className="glass flex flex-col gap-3 rounded-[20px] p-4">
+      {selectedVoice !== undefined && (
+        <ToolbarStatus>
+          <StateBadge tone="green" dot size="sm" data-testid="voice-toolbar-selected">
+            {selectedVoice.label}
+          </StateBadge>
+        </ToolbarStatus>
+      )}
+      <h2 className="m-0 text-base font-bold text-[var(--cl-ink)]">{t('voice.heading')}</h2>
+      <p className="m-0 text-sm text-[var(--cl-ink-2)]">
         {scriptPath === undefined ? t('voice.triggerDescription') : t('voice.script.rerunNotice')}
       </p>
 
@@ -94,48 +117,37 @@ export function VoiceTrigger({ slug, onCreated, scriptPath }: VoiceTriggerProps)
           voices={voices.data.voices}
           selectedId={selectedVoiceId}
           onSelect={setPicked}
-          disabled={createAction.status === 'pending'}
+          disabled={pending}
         />
       )}
 
-      <div className="flex flex-wrap items-center gap-3">
-        <button
-          type="button"
-          disabled={disabled}
-          onClick={() => void generate(false)}
-          className="rounded-md border border-sky-500/50 bg-sky-500/10 px-3 py-1.5 text-sm text-sky-100 disabled:opacity-40"
-        >
-          {scriptPath === undefined
-            ? createAction.status === 'pending'
-              ? t('voice.generating')
-              : t('voice.generate')
-            : createAction.status === 'pending'
-              ? t('voice.script.regenerating')
-              : t('voice.script.regenerate')}
-        </button>
-      </div>
-
       {voices.status === 'loading' && (
-        <p className="text-xs text-slate-500">{t('voice.loadingCatalogue')}</p>
+        <p className="m-0 text-xs text-[var(--cl-ink-2)]">{t('voice.loadingCatalogue')}</p>
       )}
 
       {catalogueEmpty && (
-        <p data-testid="voice-catalogue-empty" className="font-mono text-xs text-amber-300">
+        <p
+          data-testid="voice-catalogue-empty"
+          className="font-data m-0 text-xs text-[var(--tucu-state-orange-ink)]"
+        >
           {t('voice.catalogueEmpty')}
         </p>
       )}
 
       {voices.status === 'error' && voices.error !== null && (
-        <div data-testid="voice-catalogue-error" className="space-y-2">
-          <ErrorNotice error={voices.error} onRetry={voices.reload} />
+        <div data-testid="voice-catalogue-error" className="flex flex-col gap-2">
+          <ErrorNotice surface="glass" error={voices.error} onRetry={voices.reload} />
           {catalogueErrorKey !== null && (
-            <p className="text-sm text-amber-100">{t(catalogueErrorKey)}</p>
+            <p className="m-0 text-sm text-[var(--tucu-state-orange-ink)]">{t(catalogueErrorKey)}</p>
           )}
         </div>
       )}
 
       {blockers.length > 0 && (
-        <ul data-testid="voice-blockers" className="space-y-0.5 font-mono text-xs text-amber-300">
+        <ul
+          data-testid="voice-blockers"
+          className="font-data m-0 list-none flex flex-col gap-0.5 p-0 text-xs text-[var(--tucu-state-orange-ink)]"
+        >
           {blockers.map((blocker) => (
             <li key={blockerId(blocker)}>{t(blocker.key, blocker.params)}</li>
           ))}
@@ -146,22 +158,22 @@ export function VoiceTrigger({ slug, onCreated, scriptPath }: VoiceTriggerProps)
         <div
           role="alertdialog"
           aria-label={t('voice.overwriteTitle')}
-          className="space-y-2 rounded-md border border-amber-500/40 bg-amber-500/10 p-3"
+          className="flex flex-col gap-2 rounded-[12px] border border-[var(--tucu-state-orange-line)] bg-[var(--tucu-state-orange-soft)] p-3"
         >
-          <p className="text-sm text-amber-100">{t('voice.overwriteWarning')}</p>
-          <div className="flex gap-2">
+          <p className="m-0 text-sm text-[var(--cl-ink)]">{t('voice.overwriteWarning')}</p>
+          <div className="flex flex-wrap gap-2">
             <button
               type="button"
               onClick={() => void generate(true)}
-              disabled={createAction.status === 'pending'}
-              className="rounded-md border border-amber-400/60 px-3 py-1 text-xs text-amber-100 disabled:opacity-40"
+              disabled={pending}
+              className={DANGER_BUTTON_SMALL_CLASS}
             >
               {t('voice.overwriteConfirm')}
             </button>
             <button
               type="button"
               onClick={createAction.reset}
-              className="rounded-md border border-slate-700 px-3 py-1 text-xs text-slate-300"
+              className={SECONDARY_BUTTON_SMALL_CLASS}
             >
               {t('voice.overwriteKeep')}
             </button>
@@ -170,15 +182,18 @@ export function VoiceTrigger({ slug, onCreated, scriptPath }: VoiceTriggerProps)
       )}
 
       {createAction.error !== null && !needsConfirmation && (
-        <div className="space-y-2">
-          <ErrorNotice error={createAction.error} />
+        <div className="flex flex-col gap-2">
+          <ErrorNotice surface="glass" error={createAction.error} />
           {explanationKey !== null && (
-            <p data-testid="voice-failure-explanation" className="text-sm text-amber-100">
+            <p
+              data-testid="voice-failure-explanation"
+              className="m-0 text-sm text-[var(--tucu-state-orange-ink)]"
+            >
               {t(explanationKey)}
             </p>
           )}
         </div>
       )}
-    </div>
+    </section>
   );
 }

@@ -15,6 +15,7 @@ import {
 } from '../api/voice-direction';
 import { ENERGY_KEYS, PACE_KEYS } from '../api/voice-direction-i18n';
 import { useT } from '../i18n/language-context';
+import { FIELD_LABEL_CLASS, FIELD_SMALL_CLASS, SECONDARY_BUTTON_SMALL_CLASS } from './ui/cl-controls';
 
 export type VoiceDirectionEditorProps = {
   target: string;
@@ -23,8 +24,7 @@ export type VoiceDirectionEditorProps = {
   onChange: (next: VoiceDirection | undefined) => void;
 };
 
-const FIELD_CLASS =
-  'rounded-md border border-slate-700 bg-slate-900 px-2 py-1 text-xs text-slate-200';
+const LABEL_CLASS = `flex flex-col gap-1 ${FIELD_LABEL_CLASS}`;
 
 export function VoiceDirectionEditor({ target, text, direction, onChange }: VoiceDirectionEditorProps) {
   const t = useT();
@@ -32,15 +32,15 @@ export function VoiceDirectionEditor({ target, text, direction, onChange }: Voic
   const full = emphasisIsFull(direction);
 
   return (
-    <div data-testid="voice-direction-editor" className="space-y-2">
+    <div data-testid="voice-direction-editor" className="flex flex-col gap-2">
       <div className="flex flex-wrap items-end gap-3">
-        <label className="flex flex-col gap-1 text-xs text-slate-400">
+        <label className={LABEL_CLASS}>
           {t('voiceDirection.pace', { target })}
           <select
             aria-label={t('voiceDirection.pace', { target })}
             value={direction?.pace ?? 'normal'}
             onChange={(event) => onChange(withPace(direction, event.target.value as VoicePace))}
-            className={FIELD_CLASS}
+            className={FIELD_SMALL_CLASS}
           >
             {VOICE_PACES.map((pace) => (
               <option key={pace} value={pace}>
@@ -50,13 +50,13 @@ export function VoiceDirectionEditor({ target, text, direction, onChange }: Voic
           </select>
         </label>
 
-        <label className="flex flex-col gap-1 text-xs text-slate-400">
+        <label className={LABEL_CLASS}>
           {t('voiceDirection.energy', { target })}
           <select
             aria-label={t('voiceDirection.energy', { target })}
             value={direction?.energy ?? 'neutral'}
             onChange={(event) => onChange(withEnergy(direction, event.target.value as VoiceEnergy))}
-            className={FIELD_CLASS}
+            className={FIELD_SMALL_CLASS}
           >
             {VOICE_ENERGIES.map((energy) => (
               <option key={energy} value={energy}>
@@ -66,7 +66,7 @@ export function VoiceDirectionEditor({ target, text, direction, onChange }: Voic
           </select>
         </label>
 
-        <label className="flex flex-col gap-1 text-xs text-slate-400">
+        <label className={LABEL_CLASS}>
           {t('voiceDirection.pause', { target })}
           <input
             type="number"
@@ -76,7 +76,7 @@ export function VoiceDirectionEditor({ target, text, direction, onChange }: Voic
             step={PAUSE_STEP_MS}
             value={direction?.pauseAfterMs ?? 0}
             onChange={(event) => onChange(withPauseAfterMs(direction, Number(event.target.value)))}
-            className={`${FIELD_CLASS} w-24 font-mono`}
+            className={`${FIELD_SMALL_CLASS} font-data w-24`}
           />
         </label>
 
@@ -84,19 +84,19 @@ export function VoiceDirectionEditor({ target, text, direction, onChange }: Voic
           <button
             type="button"
             onClick={() => onChange(undefined)}
-            className="rounded-md border border-slate-700 px-2 py-1 text-xs text-slate-300 hover:border-slate-500"
+            className={SECONDARY_BUTTON_SMALL_CLASS}
           >
             {t('voiceDirection.clear', { target })}
           </button>
         )}
       </div>
 
-      <div role="group" aria-label={t('voiceDirection.emphasis', { target })} className="space-y-1">
-        <p className="text-xs text-slate-400">{t('voiceDirection.emphasis', { target })}</p>
+      <div role="group" aria-label={t('voiceDirection.emphasis', { target })} className="flex flex-col gap-1">
+        <p className="m-0 text-xs font-medium text-[var(--cl-ink-2)]">{t('voiceDirection.emphasis', { target })}</p>
         {words.length === 0 ? (
-          <p className="text-xs text-slate-500">{t('voiceDirection.emphasisNone')}</p>
+          <p className="m-0 text-xs text-[var(--cl-ink-2)]">{t('voiceDirection.emphasisNone')}</p>
         ) : (
-          <ul className="flex flex-wrap gap-1">
+          <ul className="m-0 flex list-none flex-wrap gap-1 p-0">
             {words.map((word) => {
               const pressed = isEmphasized(direction, word);
               return (
@@ -106,10 +106,10 @@ export function VoiceDirectionEditor({ target, text, direction, onChange }: Voic
                     aria-pressed={pressed}
                     disabled={full && !pressed}
                     onClick={() => onChange(toggleEmphasis(direction, word))}
-                    className={`rounded-full border px-2 py-0.5 text-xs disabled:opacity-40 ${
+                    className={`focus-cl rounded-full border px-2.5 py-1 text-xs font-medium disabled:cursor-not-allowed disabled:opacity-50 ${
                       pressed
-                        ? 'border-sky-400/70 bg-sky-500/20 text-sky-100'
-                        : 'border-slate-700 text-slate-300 hover:border-slate-500'
+                        ? 'border-[var(--cl-action)] bg-[color-mix(in_srgb,var(--cl-action)_18%,transparent)] text-[var(--cl-action-text)]'
+                        : 'glass-sub text-[var(--cl-ink)] hover:border-[var(--cl-ink-3)]'
                     }`}
                   >
                     {word}
@@ -120,7 +120,7 @@ export function VoiceDirectionEditor({ target, text, direction, onChange }: Voic
           </ul>
         )}
         {full && (
-          <p className="text-xs text-amber-300">
+          <p className="m-0 text-xs text-[var(--tucu-state-orange-ink)]">
             {t('voiceDirection.emphasisFull', { max: MAX_EMPHASIS_WORDS })}
           </p>
         )}

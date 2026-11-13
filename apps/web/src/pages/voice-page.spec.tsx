@@ -15,6 +15,8 @@ import {
 } from '../api/__fixtures__/voice';
 import { RenderApiError } from '../api/render-api-error';
 import { RenderApiProvider } from '../api/render-api-context';
+import { ShellToolbar } from '../components/shell/shell-toolbar';
+import { ToolbarActionProvider } from '../components/shell/toolbar-action-provider';
 import { VoicePage, recordedTakes } from './voice-page';
 import type { RenderApiClient } from '../api/render-api-client';
 import type { AssetListing } from '../api/render-api-types';
@@ -50,9 +52,12 @@ function renderPage(client: Partial<RenderApiClient>) {
   render(
     <RenderApiProvider client={withDefaults as RenderApiClient}>
       <MemoryRouter initialEntries={['/projects/smoke-ingest/voice']}>
-        <Routes>
-          <Route path="/projects/:slug/voice" element={<VoicePage />} />
-        </Routes>
+        <ToolbarActionProvider>
+          <ShellToolbar title="Voice" subtitle={null} />
+          <Routes>
+            <Route path="/projects/:slug/voice" element={<VoicePage />} />
+          </Routes>
+        </ToolbarActionProvider>
       </MemoryRouter>
     </RenderApiProvider>,
   );
@@ -101,6 +106,27 @@ describe('VoicePage', () => {
     expect(screen.getByText('Hay tres comandos que te devuelven una hora por semana.')).toBeDefined();
     expect(screen.getByTestId('voice-duration-scene-01').textContent).toContain('estimated 4.20 s');
     expect(screen.getByTestId('voice-duration-scene-01').textContent).toContain('real 3.10 s');
+  });
+
+  it('declares Regenerate with the selected voice as the toolbar action and marks the chosen voice as a card', async () => {
+    renderPage({ getVoice: vi.fn().mockResolvedValue(voiceDocument()) });
+
+    await waitFor(() => expect(screen.getByTestId('voice-scene-scene-01')).toBeDefined());
+    await waitFor(() =>
+      expect(screen.getByTestId('toolbar-action').textContent).toBe('Regenerate with the selected voice'),
+    );
+    await waitFor(() => expect(screen.getAllByTestId('voice-card').length).toBeGreaterThan(0));
+    expect(
+      screen.getAllByTestId('voice-card').filter((card) => card.getAttribute('data-selected') === 'true'),
+    ).toHaveLength(1);
+  });
+
+  it('puts the Narration changed badge on the stale take only', async () => {
+    renderPage({ getVoice: vi.fn().mockResolvedValue(voiceDocument()) });
+
+    await waitFor(() => expect(screen.getByTestId('voice-stale-badge-scene-02')).toBeDefined());
+    expect(screen.getByTestId('voice-stale-badge-scene-02').textContent).toBe('Narration changed');
+    expect(screen.queryByTestId('voice-stale-badge-scene-01')).toBeNull();
   });
 
   it('still plays the tracks when the storyboard cannot be read, without an estimate', async () => {
@@ -305,7 +331,7 @@ describe('VoicePage — modo guion (FIX-009-003)', () => {
       getProjectFile: vi.fn().mockResolvedValue(VOICE_SCRIPT_MANIFEST_JSON),
     });
 
-    await waitFor(() => expect(screen.getByText(/tracks/u)).toBeTruthy());
+    await waitFor(() => expect(screen.getByText('Takes per scene')).toBeTruthy());
     expect(screen.queryByTestId('voice-script-panel')).toBeNull();
   });
 });
@@ -324,6 +350,7 @@ describe('voice page in a motion project', () => {
     });
 
     expect(await screen.findByTestId('motion-voice-view')).toBeTruthy();
+    expect(screen.getByTestId('legacy-surface').contains(screen.getByTestId('motion-voice-view'))).toBe(true);
     expect(classicLoaders.getStoryboard).not.toHaveBeenCalled();
     expect(classicLoaders.getVoice).not.toHaveBeenCalled();
     expect(classicLoaders.getTimeline).not.toHaveBeenCalled();

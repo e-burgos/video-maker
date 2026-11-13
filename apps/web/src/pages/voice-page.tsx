@@ -1,3 +1,4 @@
+import { StateBadge } from '@e-burgos/tucu-ui';
 import { useCallback, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import type { StoryboardDocument, VoiceScriptManifest } from '@video-maker/timeline-core';
@@ -16,6 +17,8 @@ import { parseVoiceScriptManifest } from '../api/parse-voice-script';
 import type { AssetListing, VoiceDocument, VoiceTrack } from '../api/render-api-types';
 import { MotionVoiceView } from '../components/motion-voice-view';
 import { ProjectModeGate } from '../components/project-mode-gate';
+import { LegacySurface } from '../components/shell/legacy-surface';
+import { PRIMARY_BUTTON_SMALL_CLASS } from '../components/ui/cl-controls';
 
 export const VOICE_NOT_FOUND = 'VOICE_NOT_FOUND';
 
@@ -34,16 +37,10 @@ function VoiceEmptyState({ slug }: { slug: string }) {
   const t = useT();
 
   return (
-    <div
-      data-testid="voice-empty-state"
-      className="space-y-2 rounded-lg border border-slate-800 bg-slate-900/40 p-4"
-    >
-      <p className="text-sm text-slate-300">{t('voice.emptyTitle', { slug })}</p>
-      <p className="text-sm text-slate-400">{t('voice.emptyBody')}</p>
-      <Link
-        to={`/projects/${slug}`}
-        className="inline-block rounded-md border border-sky-500/50 bg-sky-500/10 px-3 py-1.5 text-sm text-sky-100"
-      >
+    <div data-testid="voice-empty-state" className="glass flex flex-col gap-2 rounded-[20px] p-4">
+      <p className="m-0 text-sm font-semibold text-[var(--cl-ink)]">{t('voice.emptyTitle', { slug })}</p>
+      <p className="m-0 text-sm text-[var(--cl-ink-2)]">{t('voice.emptyBody')}</p>
+      <Link to={`/projects/${slug}`} className={`${PRIMARY_BUTTON_SMALL_CLASS} no-underline`}>
         {t('voice.emptyProducer')}
       </Link>
     </div>
@@ -101,35 +98,33 @@ function ClassicVoicePage() {
   const missing = !scriptMode && voice.status === 'error' && voice.error?.code === VOICE_NOT_FOUND;
 
   return (
-    <section className="space-y-6">
-      <div>
-        <Link to={`/projects/${slug}/library`} className="text-xs text-slate-500 hover:text-slate-300">
-          {t('voice.backToLibrary')}
+    <section data-testid="voice-page" className="flex flex-col gap-4">
+      <p className="m-0 text-sm text-[var(--cl-ink-2)]">
+        {t('voice.descriptionBefore')}{' '}
+        <Link
+          to={`/projects/${slug}/storyboard`}
+          className="font-semibold text-[var(--cl-action-text)] underline"
+        >
+          {t('voice.descriptionLink')}
         </Link>
-        <h1 className="mt-2 font-mono text-2xl font-semibold tracking-tight">
-          {t('voice.title', { slug })}
-        </h1>
-        <p className="mt-1 text-sm text-slate-400">
-          {t('voice.descriptionBefore')}{' '}
-          <Link to={`/projects/${slug}/storyboard`} className="text-sky-300 hover:text-sky-200">
-            {t('voice.descriptionLink')}
-          </Link>
-          {t('voice.descriptionAfter')}
-        </p>
-      </div>
+        {t('voice.descriptionAfter')}
+      </p>
 
       <VoiceTrigger
         slug={slug}
+        hasVoice={document !== null}
         onCreated={(job) => setJobId(job.id)}
         {...(scriptMode ? { scriptPath: PRODUCER_SCRIPT_PATH } : {})}
       />
 
       <VoiceJobPanel jobId={jobId} onSucceeded={reload} onRetried={(job) => setJobId(job.id)} />
 
-      {regenerateAction.error !== null && <ErrorNotice error={regenerateAction.error} />}
+      {regenerateAction.error !== null && (
+        <ErrorNotice surface="glass" error={regenerateAction.error} />
+      )}
 
       {voice.status === 'loading' && (
-        <p className="text-sm text-slate-500">{t('voice.loading')}</p>
+        <p className="m-0 text-sm text-[var(--cl-ink-2)]">{t('voice.loading')}</p>
       )}
 
       {missing && <VoiceEmptyState slug={slug} />}
@@ -139,16 +134,18 @@ function ClassicVoicePage() {
       )}
 
       {voice.status === 'error' && voice.error !== null && !missing && (
-        <ErrorNotice error={voice.error} onRetry={voice.reload} />
+        <ErrorNotice surface="glass" error={voice.error} onRetry={voice.reload} />
       )}
 
       {document !== null && !scriptMode && (
-        <div className="space-y-3">
-          <h2 className="font-mono text-sm uppercase tracking-wide text-slate-400">
-            {t('voice.tracksHeading')}{' '}
-            <span className="text-slate-600">({document.scenes.length})</span>
+        <section data-testid="voice-takes" className="glass flex flex-col gap-3 rounded-[20px] p-4">
+          <h2 className="m-0 flex items-center gap-2 text-base font-bold text-[var(--cl-ink)]">
+            {t('voice.tracksHeading')}
+            <StateBadge tone="neutral" size="sm">
+              {document.scenes.length}
+            </StateBadge>
           </h2>
-          <ul className="space-y-3">
+          <ul className="m-0 grid list-none gap-3 p-0 min-[1100px]:grid-cols-2">
             {document.scenes.map((status) => {
               const track = trackOf(status.sceneId);
               if (track === undefined) {
@@ -174,7 +171,7 @@ function ClassicVoicePage() {
               );
             })}
           </ul>
-        </div>
+        </section>
       )}
     </section>
   );
@@ -187,7 +184,11 @@ export function VoicePage() {
     <ProjectModeGate
       slug={slug}
       footage={<ClassicVoicePage />}
-      motion={<MotionVoiceView slug={slug} />}
+      motion={
+        <LegacySurface>
+          <MotionVoiceView slug={slug} />
+        </LegacySurface>
+      }
     />
   );
 }
