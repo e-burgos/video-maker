@@ -1,4 +1,4 @@
-import { useCallback, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 
 import { useRenderApi } from '../api/render-api-context';
 import { storyboardBlockers, storyboardFailureKey } from '../api/storyboard-capability';
@@ -8,6 +8,12 @@ import { useApiAction } from '../hooks/use-api-action';
 import { useAsyncResource } from '../hooks/use-async-resource';
 import type { ServiceHealth, StoryboardJob } from '../api/render-api-types';
 import { ErrorNotice } from './error-notice';
+import { useToolbarAction } from './shell/use-toolbar-action';
+import {
+  DANGER_BUTTON_SMALL_CLASS,
+  SECONDARY_BUTTON_SMALL_CLASS,
+  TEXTAREA_CLASS,
+} from './ui/cl-controls';
 
 export const STORYBOARD_ALREADY_EXISTS = 'STORYBOARD_ALREADY_EXISTS';
 
@@ -16,16 +22,26 @@ export type StoryboardInputMode = 'brief' | 'script';
 export type StoryboardTriggerProps = {
   slug: string;
   onCreated: (job: StoryboardJob) => void;
+  hasStoryboard?: boolean;
 };
 
-export function StoryboardTrigger({ slug, onCreated }: StoryboardTriggerProps) {
+export function StoryboardTrigger({ slug, onCreated, hasStoryboard = false }: StoryboardTriggerProps) {
   const client = useRenderApi();
   const loadHealth = useCallback(() => client.getHealth(), [client]);
   const health = useAsyncResource<ServiceHealth>(loadHealth, 'health');
 
   const [mode, setMode] = useState<StoryboardInputMode>('brief');
   const [text, setText] = useState('');
+  const [forcedOpen, setForcedOpen] = useState<boolean | null>(null);
+  const [focusRequests, setFocusRequests] = useState(0);
+  const textarea = useRef<HTMLTextAreaElement>(null);
   const t = useT();
+
+  useEffect(() => {
+    if (focusRequests > 0) {
+      textarea.current?.focus();
+    }
+  }, [focusRequests]);
 
   const createAction = useApiAction((overwrite: boolean) =>
     client.createStoryboardJob(
@@ -52,86 +68,111 @@ export function StoryboardTrigger({ slug, onCreated }: StoryboardTriggerProps) {
 
   const blockers = storyboardBlockers(health.data);
   const textFilled = text.trim().length > 0;
+  const pending = createAction.status === 'pending';
   const needsConfirmation = createAction.error?.code === STORYBOARD_ALREADY_EXISTS;
   const explanationKey =
     createAction.error === null ? null : storyboardFailureKey(createAction.error.code);
-  const disabled = blockers.length > 0 || !textFilled || createAction.status === 'pending';
+  const open = forcedOpen ?? !hasStoryboard;
+
+  function proposeFromToolbar() {
+    if (!textFilled) {
+      setForcedOpen(true);
+      setFocusRequests((requests) => requests + 1);
+      return;
+    }
+    void propose(false);
+  }
+
+  useToolbarAction({
+    label: pending ? t('storyboard.proposing') : t('storyboard.propose'),
+    onClick: proposeFromToolbar,
+    disabled: blockers.length > 0,
+    loading: pending,
+  });
 
   return (
-    <div
-      data-testid="storyboard-trigger"
-      className="space-y-3 rounded-lg border border-slate-800 bg-slate-900/40 p-4"
-    >
-      <h2 className="font-mono text-sm uppercase tracking-wide text-slate-400">
-        {t('storyboard.heading')}
-      </h2>
-      <p className="text-sm text-slate-400">{t('storyboard.triggerDescription')}</p>
+    <section data-testid="storyboard-trigger" className="glass flex flex-col gap-3 rounded-[20px] p-4">
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <h2 className="m-0 text-sm font-bold text-[var(--cl-ink)]">{t('storyboard.heading')}</h2>
+        {hasStoryboard && (
+          <button
+            type="button"
+            aria-expanded={open}
+            aria-controls="storyboard-trigger-body"
+            onClick={() => setForcedOpen(!open)}
+            className={SECONDARY_BUTTON_SMALL_CLASS}
+          >
+            {t('storyboard.triggerToggle')}
+          </button>
+        )}
+      </div>
 
-      <div className="flex flex-wrap items-center gap-4">
-        {(['brief', 'script'] as const).map((candidate) => (
-          <label key={candidate} className="flex items-center gap-2 text-xs text-slate-300">
+      <div id="storyboard-trigger-body" hidden={!open} className="flex flex-col gap-3">
+        <p className="m-0 text-sm text-[var(--cl-ink-2)]">{t('storyboard.triggerDescription')}</p>
+
+        <div className="flex flex-wrap items-center gap-4">
+          {(['brief', 'script'] as const).map((candidate) => (
+            <label key={candidate} className="flex items-center gap-2 text-xs text-[var(--cl-ink)]">
+              <input
+                type="radio"
+                name="storyboard-input-mode"
+                value={candidate}
+                checked={mode === candidate}
+                onChange={() => setMode(candidate)}
+                className="accent-[var(--cl-action-fill)]"
+              />
+              {candidate === 'brief' ? t('storyboard.modeBrief') : t('storyboard.modeScript')}
+            </label>
+          ))}
+
+          <label className="flex items-center gap-2 text-xs text-[var(--cl-ink-2)]">
+            <span>{t('storyboard.uploadScript')}</span>
             <input
-              type="radio"
-              name="storyboard-input-mode"
-              value={candidate}
-              checked={mode === candidate}
-              onChange={() => setMode(candidate)}
+              type="file"
+              accept=".txt,.md,text/plain,text/markdown"
+              aria-label={t('storyboard.uploadScriptLabel')}
+              onChange={(event) => {
+                const file = event.target.files?.[0];
+                if (file !== undefined) {
+                  readScriptFile(file);
+                }
+              }}
+              className="focus-cl max-w-full text-xs text-[var(--cl-ink-2)] file:mr-2 file:h-8 file:cursor-pointer file:rounded-[10px] file:border-0 file:bg-[var(--cl-action-fill)] file:px-3 file:text-xs file:font-semibold file:text-white"
             />
-            {candidate === 'brief' ? t('storyboard.modeBrief') : t('storyboard.modeScript')}
           </label>
-        ))}
+        </div>
 
-        <label className="flex items-center gap-2 text-xs text-slate-400">
-          <span>{t('storyboard.uploadScript')}</span>
-          <input
-            type="file"
-            accept=".txt,.md,text/plain,text/markdown"
-            aria-label={t('storyboard.uploadScriptLabel')}
-            onChange={(event) => {
-              const file = event.target.files?.[0];
-              if (file !== undefined) {
-                readScriptFile(file);
-              }
-            }}
-            className="text-xs text-slate-400 file:mr-2 file:rounded-md file:border file:border-slate-700 file:bg-slate-900 file:px-2 file:py-1 file:text-xs file:text-slate-200"
+        <label className="flex flex-col gap-1 text-xs font-medium text-[var(--cl-ink-2)]">
+          {mode === 'brief' ? t('storyboard.briefLabel') : t('storyboard.scriptLabel')}
+          <textarea
+            ref={textarea}
+            aria-label={mode === 'brief' ? t('storyboard.briefLabel') : t('storyboard.scriptLabel')}
+            rows={mode === 'brief' ? 4 : 10}
+            value={text}
+            onChange={(event) => setText(event.target.value)}
+            placeholder={
+              mode === 'brief'
+                ? t('storyboard.briefPlaceholder')
+                : t('storyboard.scriptPlaceholder')
+            }
+            className={TEXTAREA_CLASS}
           />
         </label>
+
+        <p className="m-0 text-xs text-[var(--cl-ink-2)]">{t('storyboard.proposeHint')}</p>
       </div>
 
-      <label className="flex flex-col gap-1 text-xs text-slate-400">
-        {mode === 'brief' ? t('storyboard.briefLabel') : t('storyboard.scriptLabel')}
-        <textarea
-          aria-label={mode === 'brief' ? t('storyboard.briefLabel') : t('storyboard.scriptLabel')}
-          rows={mode === 'brief' ? 4 : 10}
-          value={text}
-          onChange={(event) => setText(event.target.value)}
-          placeholder={
-            mode === 'brief'
-              ? t('storyboard.briefPlaceholder')
-              : t('storyboard.scriptPlaceholder')
-          }
-          className="rounded-md border border-slate-700 bg-slate-900 px-3 py-2 text-sm text-slate-100"
-        />
-      </label>
-
-      <div className="flex flex-wrap items-center gap-3">
-        <button
-          type="button"
-          disabled={disabled}
-          onClick={() => void propose(false)}
-          className="rounded-md border border-sky-500/50 bg-sky-500/10 px-3 py-1.5 text-sm text-sky-100 disabled:opacity-40"
-        >
-          {createAction.status === 'pending' ? t('storyboard.proposing') : t('storyboard.propose')}
-        </button>
-        <span className="text-xs text-slate-500">{t('storyboard.proposeHint')}</span>
-      </div>
-
-      {!textFilled && (
-        <p className="font-mono text-xs text-amber-300">{t('storyboard.needsText')}</p>
+      {open && !textFilled && (
+        <p className="font-data m-0 text-xs text-[var(--tucu-state-orange-ink)]">
+          {t('storyboard.needsText')}
+        </p>
       )}
 
       {blockers.length > 0 && (
-        <ul data-testid="storyboard-blockers" className="space-y-0.5 font-mono text-xs text-amber-300">
+        <ul
+          data-testid="storyboard-blockers"
+          className="font-data m-0 list-none flex flex-col gap-0.5 p-0 text-xs text-[var(--tucu-state-orange-ink)]"
+        >
           {blockers.map((blocker) => (
             <li key={blockerId(blocker)}>{t(blocker.key, blocker.params)}</li>
           ))}
@@ -142,22 +183,22 @@ export function StoryboardTrigger({ slug, onCreated }: StoryboardTriggerProps) {
         <div
           role="alertdialog"
           aria-label={t('storyboard.overwriteTitle')}
-          className="space-y-2 rounded-md border border-amber-500/40 bg-amber-500/10 p-3"
+          className="flex flex-col gap-2 rounded-[12px] border border-[var(--tucu-state-orange-line)] bg-[var(--tucu-state-orange-soft)] p-3"
         >
-          <p className="text-sm text-amber-100">{t('storyboard.overwriteWarning')}</p>
-          <div className="flex gap-2">
+          <p className="m-0 text-sm text-[var(--cl-ink)]">{t('storyboard.overwriteWarning')}</p>
+          <div className="flex flex-wrap gap-2">
             <button
               type="button"
               onClick={() => void propose(true)}
-              disabled={createAction.status === 'pending'}
-              className="rounded-md border border-amber-400/60 px-3 py-1 text-xs text-amber-100 disabled:opacity-40"
+              disabled={pending}
+              className={DANGER_BUTTON_SMALL_CLASS}
             >
               {t('storyboard.overwriteConfirm')}
             </button>
             <button
               type="button"
               onClick={createAction.reset}
-              className="rounded-md border border-slate-700 px-3 py-1 text-xs text-slate-300"
+              className={SECONDARY_BUTTON_SMALL_CLASS}
             >
               {t('storyboard.overwriteKeep')}
             </button>
@@ -166,15 +207,18 @@ export function StoryboardTrigger({ slug, onCreated }: StoryboardTriggerProps) {
       )}
 
       {createAction.error !== null && !needsConfirmation && (
-        <div className="space-y-2">
-          <ErrorNotice error={createAction.error} />
+        <div className="flex flex-col gap-2">
+          <ErrorNotice surface="glass" error={createAction.error} />
           {explanationKey !== null && (
-            <p data-testid="storyboard-failure-explanation" className="text-sm text-amber-100">
+            <p
+              data-testid="storyboard-failure-explanation"
+              className="m-0 text-sm text-[var(--tucu-state-orange-ink)]"
+            >
               {t(explanationKey)}
             </p>
           )}
         </div>
       )}
-    </div>
+    </section>
   );
 }

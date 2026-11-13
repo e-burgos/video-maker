@@ -18,4 +18,12 @@ describe('ProducerScriptPanel (FIX-009-003)', () => {
     expect(screen.getByText('Producer script')).toBeTruthy();
     expect(screen.getByText(/no storyboard/u)).toBeTruthy();
   });
+
+  it('arranca plegado cuando el proyecto ya tiene storyboard y no repite que falta', () => {
+    render(<ProducerScriptPanel script={SCRIPT} defaultOpen={false} explainsMissingStoryboard={false} />);
+
+    expect((screen.getByTestId('producer-script-panel') as HTMLDetailsElement).open).toBe(false);
+    expect(screen.queryByText(/no storyboard/u)).toBeNull();
+    expect(screen.getByTestId('producer-script-text').textContent).toBe(SCRIPT);
+  });
 });

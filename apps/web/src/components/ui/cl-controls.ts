@@ -23,3 +23,5 @@ export const FIELD_SMALL_CLASS =
   'focus-cl glass-sub h-8 min-w-0 rounded-[10px] px-2.5 text-xs text-[var(--cl-ink)] placeholder:text-[var(--cl-ink-3)]';
 export const FIELD_LABEL_CLASS = 'text-xs font-medium text-[var(--cl-ink-2)]';
 export const MUTED_TEXT_CLASS = 'text-[var(--cl-ink-2)]';
+export const TEXTAREA_CLASS =
+  'focus-cl glass-sub min-w-0 rounded-[10px] px-3 py-2 text-sm text-[var(--cl-ink)] placeholder:text-[var(--cl-ink-3)]';

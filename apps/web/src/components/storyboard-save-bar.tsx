@@ -1,3 +1,4 @@
+import { StateBadge } from '@e-burgos/tucu-ui';
 import type { StoryboardDocument } from '@video-maker/timeline-core';
 
 import { useRenderApi } from '../api/render-api-context';
@@ -5,15 +6,17 @@ import { storyboardIssues } from '../api/storyboard-edit/storyboard-document';
 import { useApiAction } from '../hooks/use-api-action';
 import { useT } from '../i18n/language-context';
 import { ErrorNotice } from './error-notice';
+import { PRIMARY_BUTTON_CLASS, SECONDARY_BUTTON_CLASS } from './ui/cl-controls';
 
 export type StoryboardSaveBarProps = {
   slug: string;
   storyboard: StoryboardDocument;
   dirty: boolean;
   onSaved: (saved: StoryboardDocument) => void;
+  onDiscard?: () => void;
 };
 
-export function StoryboardSaveBar({ slug, storyboard, dirty, onSaved }: StoryboardSaveBarProps) {
+export function StoryboardSaveBar({ slug, storyboard, dirty, onSaved, onDiscard }: StoryboardSaveBarProps) {
   const client = useRenderApi();
   const saveAction = useApiAction(() => client.putStoryboard(slug, storyboard));
   const t = useT();
@@ -26,30 +29,49 @@ export function StoryboardSaveBar({ slug, storyboard, dirty, onSaved }: Storyboa
   }
 
   const issues = storyboardIssues(storyboard);
-  const disabled = issues.length > 0 || !dirty || saveAction.status === 'pending';
+  const pending = saveAction.status === 'pending';
+  const disabled = issues.length > 0 || !dirty || pending;
 
   return (
     <div
+      role="region"
+      aria-label={t('storyboardSave.label')}
       data-testid="storyboard-save-bar"
       data-storyboard-dirty={dirty}
-      className="space-y-2 rounded-lg border border-slate-800 bg-slate-900/40 p-4"
+      className="glass-thick sticky bottom-0 z-20 mt-auto flex flex-col gap-2 rounded-[16px] px-4 py-3"
     >
-      <div className="flex items-center gap-3">
-        <button
-          type="button"
-          disabled={disabled}
-          onClick={() => void save()}
-          className="rounded-md border border-emerald-500/50 bg-emerald-500/10 px-3 py-1.5 text-sm text-emerald-100 disabled:opacity-40"
-        >
-          {saveAction.status === 'pending' ? t('storyboardSave.saving') : t('storyboardSave.save')}
-        </button>
-        <span className="text-sm text-slate-400">
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <StateBadge tone={dirty ? 'orange' : 'green'} dot size="sm">
           {dirty ? t('edit.unsaved') : t('edit.saved')}
-        </span>
+        </StateBadge>
+        <div className="flex flex-wrap items-center gap-2">
+          {onDiscard !== undefined && (
+            <button
+              type="button"
+              data-testid="storyboard-discard"
+              disabled={!dirty || pending}
+              onClick={onDiscard}
+              className={SECONDARY_BUTTON_CLASS}
+            >
+              {t('storyboardSave.discard')}
+            </button>
+          )}
+          <button
+            type="button"
+            disabled={disabled}
+            onClick={() => void save()}
+            className={PRIMARY_BUTTON_CLASS}
+          >
+            {pending ? t('storyboardSave.saving') : t('storyboardSave.save')}
+          </button>
+        </div>
       </div>
 
       {issues.length > 0 && (
-        <ul data-testid="storyboard-issues" className="space-y-0.5 font-mono text-xs text-amber-300">
+        <ul
+          data-testid="storyboard-issues"
+          className="font-data m-0 list-none flex flex-col gap-0.5 p-0 text-xs text-[var(--tucu-state-orange-ink)]"
+        >
           {issues.map((issue) => (
             <li key={`${issue.path}:${issue.message}`}>
               {issue.path} — {issue.message}
@@ -58,7 +80,7 @@ export function StoryboardSaveBar({ slug, storyboard, dirty, onSaved }: Storyboa
         </ul>
       )}
 
-      {saveAction.error !== null && <ErrorNotice error={saveAction.error} />}
+      {saveAction.error !== null && <ErrorNotice surface="glass" error={saveAction.error} />}
     </div>
   );
 }

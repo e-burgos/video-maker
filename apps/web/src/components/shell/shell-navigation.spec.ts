@@ -24,7 +24,9 @@ describe('shell navigation helpers', () => {
     expect(isMigratedRoute('/projects/demo')).toBe(true);
     expect(isMigratedRoute('/projects/demo/')).toBe(true);
     expect(isMigratedRoute('/projects/demo/library')).toBe(true);
-    expect(['/brands', '/settings', '/projects/demo/voice', '/projects/demo/motion'].some(isMigratedRoute)).toBe(false);
+    expect(isMigratedRoute('/projects/demo/storyboard')).toBe(true);
+    expect(isMigratedRoute('/projects/demo/voice/')).toBe(true);
+    expect(['/brands', '/settings', '/projects/demo/preview', '/projects/demo/motion'].some(isMigratedRoute)).toBe(false);
   });
 
   it('keeps the motion step only for motion videos', () => {

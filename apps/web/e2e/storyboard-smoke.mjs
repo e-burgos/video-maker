@@ -205,7 +205,7 @@ async function main() {
 
     log('6', 'the studio renders the storyboard the agent just produced');
     await page.waitForSelector('[data-testid="storyboard-header-editor"]', { timeout: 30000 });
-    const sceneCount = await page.locator('[data-testid^="storyboard-scene-"]').count();
+    const sceneCount = await page.locator('[data-testid^="storyboard-scene-row-"]').count();
     const title = await page.getByLabel('Title', { exact: true }).inputValue();
     const language = await page.getByLabel('Language', { exact: true }).inputValue();
     log('6', `on screen: title="${title}" language=${language} scenes=${sceneCount}`);

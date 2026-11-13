@@ -192,7 +192,7 @@ describe('StudioLayout project nav', () => {
   });
 
   it('keeps the routes not migrated yet on the legacy surface', () => {
-    renderAt('/projects/smoke-ingest/storyboard');
+    renderAt('/projects/smoke-ingest/preview');
 
     expect(screen.getByTestId('shell-content').getAttribute('data-surface')).toBe('legacy');
   });
