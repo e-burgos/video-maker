@@ -1,6 +1,6 @@
 # Constitución — apps/web
 
-> Versión 3.0 | Última actualización: consolidación de fragmentos | Fecha: 2026-10-13
+> Versión 3.1 | Última actualización: consolidación de fragmentos | Fecha: 2026-11-13
 
 ## 1. Propósito
 
@@ -18,7 +18,12 @@
   estilo elegible, música, preset de salida, logo con tamaño/opacidad y bumpers de inicio/fin) y
   disparo, seguimiento, **reintento** y descarga de renders locales. El inicio (`/`) lista videos
   en tarjetas con miniatura y una zona para crear uno soltando un archivo; `/settings` (perezosa)
-  configura el motor del productor (Claude Code u OpenRouter) y su modelo. **Toda la interfaz está
+  configura el motor del productor (Claude Code u OpenRouter) y su modelo. **Todas las rutas viven
+  dentro del shell Cristal Líquido** (spec-025): sidebar de vidrio con logo y firma, bloque «este
+  video» con sus pasos, toolbar con una sola acción por página (`useToolbarAction`) y pie con estado
+  del servicio (modal), switch de idioma y apariencia (sistema/claro/oscuro); las pantallas aún no
+  migradas se muestran en una superficie heredada oscura y opaca (`isMigratedRoute`, hoy `false`
+  para todas). **Toda la interfaz está
   en español (default) e inglés** (`src/i18n/`), con una ruta `/guide` que la explica en los dos
   idiomas.
 - **No tiene lógica de motor ni toca el filesystem.** Todo lo que muestra y todo lo que escribe
@@ -28,6 +33,10 @@
 ## 2. Stack tecnológico
 
 - React 19 + `react-router-dom` 7 + Tailwind CSS 4 (`@tailwindcss/vite`), Vite 8
+- **`@e-burgos/tucu-ui` 3.10.1** con Tailwind propio (nunca importar `@e-burgos/tucu-ui/styles`: doble
+  Tailwind), tokens `--tucu-*` y `--cl-*` (claro y oscuro) y las fuentes empaquetadas
+  `@fontsource-variable/inter` 5.3.0 y `@fontsource-variable/jetbrains-mono` 5.3.0; las tres, con
+  versión exacta en el `package.json` raíz.
 - Vitest 4 + jsdom + `@testing-library/react` / `@testing-library/dom`, cobertura `@vitest/coverage-v8`
 - **`@testing-library/user-event` NO está instalado**: los tests de interacción usan `fireEvent`.
   No agregarlo sin un motivo que `fireEvent` no cubra.
@@ -66,11 +75,17 @@ src/
   i18n/         messages-en (fuente de verdad tipada) · messages-es (lazy) · translate ·
                 language-context · language (`DEFAULT_LANGUAGE = 'es'`) · literal-copy-scan
   guide/        guide-content-en · guide-content-es · guide-content (selector por idioma)
+  theme/        scene (aurora estática) · theme-preferences · theme-context (`ThemeProvider`,
+                `useThemePreferences`) · theme-switch; un script inline en `index.html` aplica tema,
+                material (vidrio/sólido) y `data-shell="electron"` antes del primer render
   hooks/        useAsyncResource (único primitivo de estado de servidor) · use-api-action ·
                 use-render-job-poll · use-producer-turn-poll · use-producer-conversation ·
                 use-inbox-uploads · use-stick-to-bottom · use-auto-switching-tab ·
                 use-video-card-thumbnail
-  components/   studio-layout · service-health-badge · error-notice · create-project-form ·
+  components/   shell/ (sidebar de vidrio, navegación, pasos del video, toolbar + contexto +
+                `useToolbarAction({ label, onClick, disabled, loading })`, contenido con superficie
+                heredada, pie con `footer-control-style.ts` → `FOOTER_CONTROL_CLASS`, modal de estado
+                del servicio) · service-health-badge · error-notice · elevenlabs-settings-section · create-project-form ·
                 voice-picker ·
                 asset-card · asset-delete-control · asset-preview · asset-uploader ·
                 generated-files-panel · timeline-player ·
@@ -87,7 +102,9 @@ src/
                 folder-heading (renombrado inline) · openrouter-model-picker ·
                 workspace-side-panel · producer-conversation-panel · chat-drop-zone ·
                 asset-proposal-card · video-card · home-drop-hint · create-project-by-drop ·
-                ui/{button,card,badge,tabs} (+ tokens en `index.css` bajo `@theme`)
+                ui/{button,card,badge,tabs,brand-mark} (`brand-mark.tsx` lo genera
+                `design/rebranding/logo/build-logo.mjs`, etiquetas por prop desde el catálogo;
+                tokens en `index.css` bajo `@theme`)
   pages/        projects-page · asset-library-page · project-workspace-page · storyboard-page ·
                 voice-page · project-preview-page · settings-page · guide-page (rutas perezosas)
   app/app.tsx   router (`/`, `/guide`, `/settings`, `/projects/:slug` [workspace de chat],
@@ -379,9 +396,9 @@ e2e/            smoke-helpers.mjs (compartido) · studio-smoke.mjs · montage-sm
 
 Todos bajo `src/` de la app; copy `es`/`en` en `src/i18n/`; el contrato de cada endpoint está en `sdd/api.json`.
 
-- **Barra única del proyecto** (`StudioLayout` carga el modo): productor · motion (sólo motion) · biblioteca ·
-  storyboard · voz · vista previa; ya no hay "Edición avanzada" ni "Abrir Motion graphics". Las páginas clásicas son
-  `Classic…Page` detrás de `components/project-mode-gate.tsx`.
+- **Pasos únicos del video** (en el bloque «este video» de la sidebar del shell, que carga el modo): productor ·
+  motion (sólo motion) · biblioteca · storyboard · voz · vista previa; ya no hay "Edición avanzada" ni "Abrir Motion
+  graphics". Las páginas clásicas son `Classic…Page` detrás de `components/project-mode-gate.tsx`.
 - **Modo motion**: al crear un proyecto se elige "Motion graphics" o "Material crudo" (radiogroup, default crudo); la
   tarjeta lleva insignia y va a `/projects/:slug/motion`. `pages/motion-page.tsx` (brief: marca, formato, música,
   golpes, título, objetivo, público, guion, imágenes de `raw/images`; "Armar storyboard"; "Hacer video" con progreso
@@ -408,8 +425,10 @@ Todos bajo `src/` de la app; copy `es`/`en` en `src/i18n/`; el contrato de cada 
   al publicar público, progreso por bytes, enlace, reintento, «Agregar a la cola» con aviso de ya publicado); panel de
   publicaciones e insignia en la tarjeta. `components/youtube-*.tsx`, `publications-panel.tsx`, hooks
   `use-youtube-integration`, `use-youtube-connect-flow`, `use-polled-resource`; `api/youtube-*.ts`,
-  `publication-status.ts`. Página `/publish-queue` («Publicación» en el header, polling de 10 s):
+  `publication-status.ts`. Página `/publish-queue` («Publicación» en la sidebar, polling de 10 s):
   `pages/publish-queue-page.tsx`, `api/{publish-queue-types,parse-publish-queue,publish-queue-view}.ts`.
+- **ElevenLabs**: Configuración › «Voces de ElevenLabs» (`elevenlabs-settings-section.tsx`: key, plan, lista de voces);
+  el selector de voz marca «ElevenLabs · usa créditos» y los parsers de voz llevan `engine`.
 - **Calidad de producción**: panel "Revisión" por MP4 en Biblioteca › Entregables y en la vista previa motion
   (`render-review-panel.tsx`, `api/review-{types,format}.ts`, `parse-review.ts`); el diálogo de publicar alerta los
   críticos y exige "Publicar igual" para mandar `ignoreReview` (`publish-review-notice.tsx`); `review` es un kind de
@@ -426,7 +445,18 @@ Todos bajo `src/` de la app; copy `es`/`en` en `src/i18n/`; el contrato de cada 
 - **Layout del workspace**: grid `grid-cols-[minmax(0,3fr)_minmax(0,2fr)]` y `min-w-0` en el panel de conversación y en
   la actividad del turno (con `fr` a secas el mínimo automático dejaba crecer la columna del chat); eventos del turno y
   bloques de código de los mensajes con `whitespace-pre-wrap break-words [overflow-wrap:anywhere]`.
+- **Reglas del shell Cristal Líquido (spec-025)**: (1) el escáner `no-literal-copy.spec.ts` recorre
+  `{app,components,pages}/*.tsx` sin recursión y confunde genéricos de TypeScript seguidos de texto con JSX: los
+  componentes nuevos van en subcarpetas (`components/shell/`, `components/ui/`) o con la lógica en `.ts`; (2) la
+  información de apoyo se muestra en modales de tucu-ui, no en paneles flotantes absolutos; (3) medios (video e
+  imágenes) nunca bajo vidrio ni blur; (4) texto activo con `--cl-action-text` y rótulos con `--cl-ink-3` para cumplir
+  AA (medido); (5) `SegmentedControl` dentro de paneles angostos con `size="xs"` y `fullWidth`; (6) todos los
+  controles del pie usan `FOOTER_CONTROL_CLASS` (40 × 192 px); (7) cada pantalla migrada declara su única acción con
+  `useToolbarAction` y se suma a `isMigratedRoute`.
 - **Tests**: `settings-page.spec.tsx` espera hasta 5 s (con 7 proyectos en paralelo el timeout de 1 s era intermitente).
 - **Pendientes vigentes**: copy propio para el uploader de imágenes en la página Motion (hoy usa el del modo crudo);
   el reporte de la fase storyboard trae `path`/`durationSec` null; la bandeja de arrastrar y soltar no propone el
-  rol `reference`.
+  rol `reference`; migrar las pantallas al shell nuevo (ciclos 02 a 05 de spec-025: ampliar `isMigratedRoute`,
+  declarar la acción del toolbar y alimentar el estado de los pasos), mover el selector de apariencia a Ajustes
+  (ciclo 05) y la paridad con la web (ciclo 06). Una ventana de Electron abierta durante muchas recargas en caliente
+  de los catálogos i18n puede mostrar claves sin traducir: recargar la ventana; no es un defecto.
