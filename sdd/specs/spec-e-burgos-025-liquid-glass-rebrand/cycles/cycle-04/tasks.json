@@ -1,0 +1,78 @@
+{
+  "$schema": "../../../../schemas/cycle-tasks.schema.json",
+  "spec": "spec-e-burgos-025-liquid-glass-rebrand",
+  "cycle": 4,
+  "module": "liquid-glass-rebrand",
+  "apps": [
+    "apps/web"
+  ],
+  "flow": "lite",
+  "user_stories_generated": true,
+  "prerequisites": {
+    "tasks_generated": true
+  },
+  "tasks": [
+    {
+      "id": "TASK-001",
+      "title": "Vista previa y render migrados con ajustes plegables",
+      "user_stories": [
+        "US-025-401"
+      ],
+      "estimation_hours": 4,
+      "story_points": 5,
+      "depends_on": [],
+      "status": "pending",
+      "files": [
+        "apps/web/src/pages/project-preview-page.tsx"
+      ]
+    },
+    {
+      "id": "TASK-002",
+      "title": "Motion migrado y retiro de LegacySurface",
+      "user_stories": [
+        "US-025-402"
+      ],
+      "estimation_hours": 4,
+      "story_points": 5,
+      "depends_on": [],
+      "status": "pending",
+      "files": [
+        "apps/web/src/pages/motion-page.tsx",
+        "apps/web/src/components/shell/legacy-surface.tsx"
+      ]
+    },
+    {
+      "id": "TASK-003",
+      "title": "Marcas: listado y editor con guardado único",
+      "user_stories": [
+        "US-025-403"
+      ],
+      "estimation_hours": 5,
+      "story_points": 5,
+      "depends_on": [],
+      "status": "pending",
+      "files": [
+        "apps/web/src/pages/brands-page.tsx",
+        "apps/web/src/pages/brand-editor-page.tsx"
+      ]
+    },
+    {
+      "id": "TASK-004",
+      "title": "Verificación del ciclo 04",
+      "user_stories": [
+        "US-025-401",
+        "US-025-402",
+        "US-025-403"
+      ],
+      "estimation_hours": 1,
+      "story_points": 2,
+      "depends_on": [
+        "TASK-001",
+        "TASK-002",
+        "TASK-003"
+      ],
+      "status": "pending",
+      "files": []
+    }
+  ]
+}
