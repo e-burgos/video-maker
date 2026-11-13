@@ -33,3 +33,9 @@
 - El layout Tahoe no sirve tal cual: `rightButton` es un único nodo estático, el panel y el fondo son fijos y la sidebar no admite un bloque anidado. Decisión para TASK-004: shell y sidebar propios (`MacOSSidebar` suelto admite `header`, `footer` y `sections`) y toolbar con `MacOSToolbarTahoe` (`title`, `leading`, `center`, `trailing`) alimentado por un contexto de acción que cada página declara con un hook.
 - El tema cambiaba `font-sans` a Inter, `font-mono` a JetBrains Mono y activaba `antialiased`; se neutralizó en `index.css` (fuentes fijas a los stacks anteriores) para que las pantallas no migradas no cambien. TASK-002 reemplaza esos valores por las fuentes nuevas cuando estén empaquetadas.
 - Los tokens propios `--color-accent`, `--color-warning` y `--color-success` pisan a los de tucu-ui porque el `@theme` propio va después del import.
+
+## Logo (TASK-007)
+- Elegido con el dev: concepto E «V dentro de la lente» en paleta coral a violeta (`#ff5470` a `#7c5cff`), con la firma «by Esteban Burgos» en los lockups (nunca en el ícono ni en el favicon). Nombre en Outfit 600/400 convertido a trazos.
+- Generador reproducible: `design/rebranding/logo/build-logo.mjs` produce `final/` (marca, glifo monocromo, ícono de app, lockups horizontal y vertical en claro y oscuro, PNG y `.icns`), el favicon del studio, `apps/desktop/build/icon.icns` y `icon.png`, y el componente `apps/web/src/components/ui/brand-mark.tsx`.
+- El componente vive en `components/ui/` porque el escáner de textos literales (`no-literal-copy.spec.ts`) confunde los genéricos de TypeScript con texto JSX en `components/*.tsx`; las etiquetas llegan por prop desde el catálogo (`brand.name`, `brand.nameWithSignature`).
+- Pendiente: cableado de `icon` en `electron-builder.yml` (TASK-005) y uso de `BrandMark`/`BrandWordmark` en la sidebar (TASK-004). La adopción en la web pública sigue pendiente de decisión del dev (D-15).

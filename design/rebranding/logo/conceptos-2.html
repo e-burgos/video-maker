@@ -1,0 +1,59 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<title>Video Maker · logo · ronda 2</title>
+<style>
+@font-face{font-family:'Outfit';font-weight:400;src:url('../../../apps/docs-site/public/fonts/outfit-400.woff2') format('woff2')}
+@font-face{font-family:'Outfit';font-weight:600;src:url('../../../apps/docs-site/public/fonts/outfit-600.woff2') format('woff2')}
+@font-face{font-family:'Outfit';font-weight:700;src:url('../../../apps/docs-site/public/fonts/outfit-700.woff2') format('woff2')}
+*{box-sizing:border-box;margin:0}
+body{font:13px/1.4 Inter,-apple-system,system-ui,sans-serif;background:#e8eaf0;color:#1d1d1f;padding:28px}
+h1{font-size:18px;margin-bottom:4px}p.sub{color:#6e6e73;margin-bottom:20px}
+.pal{font:600 10.5px "JetBrains Mono",monospace;letter-spacing:.08em;text-transform:uppercase;color:#6e6e73;margin:22px 0 10px}
+.row{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+.cell{background:rgba(255,255,255,.7);border:.5px solid rgba(255,255,255,.9);border-radius:18px;padding:16px;display:flex;flex-direction:column;gap:12px;box-shadow:0 6px 24px rgba(31,38,74,.1)}
+.cell h2{font-size:14px}
+.big{display:flex;justify-content:center;padding:6px 0}
+.sizes{display:flex;gap:14px;align-items:flex-end;padding:10px;border-radius:12px}
+.sizes.l{background:#fff}.sizes.d{background:#101322}
+.lock{display:flex;align-items:center;gap:12px;padding:12px 14px;border-radius:12px;font-family:Outfit,sans-serif}
+.lock.l{background:#fff;color:#1d1d1f}.lock.d{background:#101322;color:#f5f5f7}
+.lock .n{font-size:21px;font-weight:600;letter-spacing:-.4px;line-height:1}
+.lock .n i{font-style:normal;font-weight:400;opacity:.78}
+.lock .by{font-size:10.5px;font-weight:400;letter-spacing:.06em;opacity:.62;margin-top:4px}
+.vert{display:flex;flex-direction:column;align-items:center;gap:8px;padding:18px;border-radius:12px;font-family:Outfit,sans-serif}
+.vert.l{background:#fff;color:#1d1d1f}.vert.d{background:#101322;color:#f5f5f7}
+.vert .n{font-size:24px;font-weight:600;letter-spacing:-.5px;line-height:1}.vert .n i{font-style:normal;font-weight:400;opacity:.78}.vert .by{font-size:11px;letter-spacing:.08em;opacity:.62}
+</style>
+</head>
+<body>
+<h1>Video Maker · logo · ronda 2</h1>
+<p class="sub">Tres híbridos entre la gota de cristal (C) y la V de capas (D), con la firma «by Esteban Burgos». Tamaños 120, 48, 28 y 16 px; lockup horizontal y vertical, en claro y oscuro.</p>
+<div id="root"></div>
+<script>
+let uid=0;
+const tile=(g1,g2,rx,inner)=>{const id='g'+(uid++);return(s)=>`<svg width="${s}" height="${s}" viewBox="0 0 128 128" xmlns="http://www.w3.org/2000/svg"><defs><linearGradient id="${id}" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="${g1}"/><stop offset="1" stop-color="${g2}"/></linearGradient><linearGradient id="${id}h" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fff" stop-opacity=".4"/><stop offset=".55" stop-color="#fff" stop-opacity="0"/></linearGradient><filter id="${id}s" x="-20%" y="-20%" width="140%" height="150%"><feDropShadow dx="0" dy="3" stdDeviation="3" flood-color="#2a1a6e" flood-opacity=".35"/></filter></defs><rect width="128" height="128" rx="${rx}" fill="url(#${id})"/><rect width="128" height="128" rx="${rx}" fill="url(#${id}h)"/><rect x=".75" y=".75" width="126.5" height="126.5" rx="${rx-.5}" fill="none" stroke="#fff" stroke-opacity=".6" stroke-width="1.5"/>${inner.replace(/FILTER/g,id+'s')}</svg>`};
+const arms=(w,a,b,top,bot,x1,x2)=>`<g stroke-linecap="round" fill="none" stroke-width="${w}"><path d="M${x1} ${top} 64 ${bot}" stroke="#fff" stroke-opacity="${a}"/><path d="M${x2} ${top} 64 ${bot}" stroke="#fff" stroke-opacity="${b}"/></g>`;
+const concepts=[
+ ['E · V dentro de la lente',29,`<circle cx="64" cy="64" r="43" fill="#fff" fill-opacity=".18" stroke="#fff" stroke-opacity=".8" stroke-width="2"/><path d="M30 56a36 36 0 0 1 26-24" fill="none" stroke="#fff" stroke-opacity=".9" stroke-width="5" stroke-linecap="round"/><g filter="url(#FILTER)">${arms(13,.95,.55,47,86,46,82)}</g>`],
+ ['F · V con play en la muesca',29,`<g filter="url(#FILTER)">${arms(15,.95,.55,32,94,36,92)}<path d="M58 43v18l15-9z" fill="#fff" stroke="#fff" stroke-width="4" stroke-linejoin="round"/></g>`],
+ ['G · V de cristal en burbuja',42,`<rect x="8" y="8" width="112" height="112" rx="35" fill="none" stroke="#fff" stroke-opacity=".28" stroke-width="2"/><path d="M24 40a44 44 0 0 1 36-20" fill="none" stroke="#fff" stroke-opacity=".7" stroke-width="5" stroke-linecap="round"/><g filter="url(#FILTER)">${arms(17,.95,.5,36,92,38,90)}</g>`]
+];
+const pals=[['Herencia de la web: coral → violeta','#ff5470','#7c5cff'],['Liquid Glass: azul de acción → violeta','#0a6cff','#7a5cff']];
+let html='';
+for(const [pn,g1,g2] of pals){
+ html+=`<div class="pal">${pn}</div><div class="row">`;
+ for(const [name,rx,inner] of concepts){
+  const t=tile(g1,g2,rx,inner);
+  const sz=c=>`<div class="sizes ${c}">${[48,28,16].map(s=>t(s)).join('')}</div>`;
+  const lk=c=>`<div class="lock ${c}">${t(40)}<div><div class="n">Video <i>Maker</i></div><div class="by">by Esteban Burgos</div></div></div>`;
+  const vt=c=>`<div class="vert ${c}">${t(64)}<div class="n">Video <i>Maker</i></div><div class="by">by Esteban Burgos</div></div>`;
+  html+=`<div class="cell"><h2>${name}</h2><div class="big">${t(120)}</div>${sz('l')}${sz('d')}${lk('l')}${lk('d')}<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">${vt('l')}${vt('d')}</div></div>`;
+ }
+ html+='</div>';
+}
+document.getElementById('root').innerHTML=html;
+</script>
+</body>
+</html>

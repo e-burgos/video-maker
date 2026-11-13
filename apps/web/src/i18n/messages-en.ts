@@ -3,6 +3,9 @@ export const MESSAGES_EN = {
   'language.name.en': 'English',
   'language.name.es': 'Spanish',
 
+  'brand.name': 'Video Maker',
+  'brand.nameWithSignature': 'Video Maker by Esteban Burgos',
+
   'layout.title': 'Video Maker Studio',
   'layout.subtitle': 'Your video studio',
   'nav.productor': 'producer',

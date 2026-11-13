@@ -136,10 +136,15 @@
       "estimation_hours": 4,
       "story_points": 5,
       "depends_on": [],
-      "status": "pending",
+      "status": "in-progress",
       "files": [
-        "design/rebranding/logo",
-        "apps/web/src/components/brand-mark.tsx",
+        "design/rebranding/logo/build-logo.mjs",
+        "design/rebranding/logo/final",
+        "apps/web/src/components/ui/brand-mark.tsx",
+        "apps/web/src/components/ui/brand-mark.spec.tsx",
+        "apps/web/src/i18n/messages-en.ts",
+        "apps/web/src/i18n/messages-es.ts",
+        "apps/web/index.html",
         "apps/web/public/favicon.svg",
         "apps/desktop/build/icon.icns",
         "apps/desktop/build/icon.png"
