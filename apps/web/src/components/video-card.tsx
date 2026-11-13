@@ -107,9 +107,10 @@ export function VideoCard({ video, placement, folders, onChanged }: VideoCardPro
                 href={publication.url}
                 target="_blank"
                 rel="noreferrer noopener"
-                className="focus-cl rounded text-[11px] text-[var(--cl-action-text)] underline hover:text-[var(--cl-action-hover)]"
+                className="focus-cl inline-flex items-center gap-1 rounded text-[11px] text-[var(--cl-action-text)] underline hover:text-[var(--cl-action-hover)]"
               >
-                {t('publications.open')}
+                {t('publications.viewOnYoutube')}
+                <LucideIcons.ExternalLink size={11} aria-hidden="true" />
               </a>
             )}
           </span>

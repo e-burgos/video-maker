@@ -63,7 +63,10 @@ describe('VideoCard', () => {
 
     const badge = screen.getByTestId('video-card-publication');
     expect(badge.textContent).toContain('Published');
-    expect(within(badge).getByRole('link').getAttribute('href')).toBe('https://youtu.be/abc123');
+    const link = within(badge).getByRole('link');
+    expect(link.getAttribute('href')).toBe('https://youtu.be/abc123');
+    expect(link.textContent).toBe('View on YouTube');
+    expect(screen.getAllByText('Open')).toHaveLength(1);
   });
 
   it('badges a scheduled video and hides the badge of a failed or missing publication', () => {

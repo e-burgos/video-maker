@@ -7,7 +7,7 @@ const SIZE_SM = 'h-8 px-3 text-xs';
 const SECONDARY_TONE =
   'glass-sub text-[var(--cl-ink)] hover:border-[var(--cl-ink-3)]';
 const PRIMARY_TONE =
-  'border border-transparent bg-[var(--cl-action)] text-white shadow-[0_2px_12px_var(--cl-action-ring)] hover:bg-[var(--cl-action-hover)]';
+  'border border-transparent bg-[var(--cl-action-fill)] text-white shadow-[0_2px_12px_var(--cl-action-ring)] hover:bg-[var(--cl-action-fill-hover)]';
 const DANGER_TONE =
   'border border-[var(--tucu-state-red-line)] bg-[var(--tucu-state-red-soft)] text-[var(--tucu-state-red-ink)] hover:border-[var(--tucu-state-red-ink)]';
 

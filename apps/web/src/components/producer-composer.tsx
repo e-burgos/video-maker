@@ -1,4 +1,4 @@
-import type { Ref } from 'react';
+import type { ReactNode, Ref } from 'react';
 import { Link } from 'react-router-dom';
 
 import type { ProducerEngineId, ProducerModelOption } from '../api/render-api-types';
@@ -7,6 +7,7 @@ import { blockerId } from '../api/blockers';
 import { translateProducerModel } from '../api/producer-model-i18n';
 import { producerEngineActiveLabel } from '../api/producer-engine-i18n';
 import { useT } from '../i18n/language-context';
+import { FIELD_SMALL_CLASS, PRIMARY_BUTTON_SMALL_CLASS } from './ui/cl-controls';
 
 export type ProducerComposerProps = {
   value: string;
@@ -21,6 +22,7 @@ export type ProducerComposerProps = {
   activeEngine?: ProducerEngineId | null;
   placeholder?: string;
   textareaRef?: Ref<HTMLTextAreaElement>;
+  attachment?: ReactNode;
 };
 
 export function ProducerComposer({
@@ -36,6 +38,7 @@ export function ProducerComposer({
   activeEngine = null,
   placeholder,
   textareaRef,
+  attachment,
 }: ProducerComposerProps) {
   const t = useT();
   const blocked = blockers.length > 0;
@@ -48,13 +51,13 @@ export function ProducerComposer({
   return (
     <div
       data-testid="producer-composer"
-      className="space-y-2 rounded-lg border border-slate-800 bg-slate-900/40 p-4"
+      className="glass-sub space-y-2 rounded-[14px] p-3 focus-within:outline focus-within:outline-[3px] focus-within:outline-[var(--cl-action-ring)]"
     >
       <textarea
         ref={textareaRef}
         aria-label={t('producer.composerLabel')}
         value={value}
-        rows={3}
+        rows={2}
         disabled={blocked}
         placeholder={placeholder ?? t('producer.composerPlaceholder')}
         onChange={(event) => onChange(event.target.value)}
@@ -67,49 +70,44 @@ export function ProducerComposer({
             onSend();
           }
         }}
-        className="w-full resize-y rounded-md border border-slate-700 bg-slate-950 px-3 py-2 text-sm text-slate-100 disabled:opacity-40"
+        className="w-full resize-none bg-transparent px-1 text-sm text-[var(--cl-ink)] outline-none placeholder:text-[var(--cl-ink-3)] disabled:opacity-40"
       />
 
-      <div className="flex flex-wrap items-center justify-between gap-3">
-        <div className="flex items-center gap-2">
-          <label htmlFor="producer-model" className="text-xs font-medium text-ink-faint">
-            {t('producer.modelLabel')}
-          </label>
-          <select
-            id="producer-model"
-            data-testid="producer-model-picker"
-            value={model}
-            disabled={blocked || pending || busy}
-            title={chosen?.description ?? ''}
-            onChange={(event) => onModelChange(event.target.value)}
-            className="rounded-md border border-slate-700 bg-slate-950 px-2 py-1 text-xs text-slate-100 disabled:opacity-40"
-          >
-            {translatedModels.map((option) => (
-              <option key={option.id} value={option.id} title={option.description}>
-                {option.label}
-              </option>
-            ))}
-          </select>
-          {chosen !== null && (
-            <span data-testid="producer-model-help" className="text-xs text-ink-faint">
-              {chosen.label} — {chosen.description}
-              {activeEngine !== null && ` · ${producerEngineActiveLabel(t, activeEngine)}`}
-            </span>
-          )}
-        </div>
-        <p className="text-xs text-ink-faint">{t('producer.sendHint')}</p>
-        <button
-          type="button"
-          disabled={disabled}
-          onClick={onSend}
-          className="rounded-md border border-sky-500/50 bg-sky-500/10 px-3 py-1.5 text-sm text-sky-100 disabled:opacity-40"
+      <div className="flex flex-wrap items-center gap-x-3 gap-y-2">
+        <label htmlFor="producer-model" className="sr-only">
+          {t('producer.modelLabel')}
+        </label>
+        <select
+          id="producer-model"
+          data-testid="producer-model-picker"
+          value={model}
+          disabled={blocked || pending || busy}
+          title={chosen?.description ?? ''}
+          onChange={(event) => onModelChange(event.target.value)}
+          className={`${FIELD_SMALL_CLASS} font-semibold disabled:opacity-40`}
         >
+          {translatedModels.map((option) => (
+            <option key={option.id} value={option.id} title={option.description}>
+              {option.label}
+            </option>
+          ))}
+        </select>
+        <p className="min-w-0 flex-1 text-xs text-[var(--cl-ink-3)]">{t('producer.sendHint')}</p>
+        {attachment}
+        <button type="button" disabled={disabled} onClick={onSend} className={PRIMARY_BUTTON_SMALL_CLASS}>
           {pending ? t('producer.sending') : busy ? t('producer.queue') : t('producer.send')}
         </button>
       </div>
 
+      {chosen !== null && (
+        <p data-testid="producer-model-help" className="text-[11px] text-[var(--cl-ink-3)]">
+          {chosen.label} — {chosen.description}
+          {activeEngine !== null && ` · ${producerEngineActiveLabel(t, activeEngine)}`}
+        </p>
+      )}
+
       {blocked && (
-        <ul data-testid="producer-blockers" className="space-y-0.5 font-mono text-xs text-amber-300">
+        <ul data-testid="producer-blockers" className="font-data space-y-0.5 text-xs text-[var(--tucu-state-orange-ink)]">
           {blockers.map((blocker) => (
             <li key={blockerId(blocker)}>{t(blocker.key, blocker.params)}</li>
           ))}
@@ -120,7 +118,7 @@ export function ProducerComposer({
         <Link
           to="/settings"
           data-testid="producer-composer-settings-link"
-          className="inline-block text-xs text-sky-300 underline hover:text-sky-200"
+          className="focus-cl inline-block rounded text-xs text-[var(--cl-action-text)] underline hover:text-[var(--cl-action-hover)]"
         >
           {t('producer.blocker.goToSettings')}
         </Link>

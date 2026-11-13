@@ -55,6 +55,7 @@ export function ProducerConversationPanel({ producer, pinned = false, mode = 'fo
   const pendingAssets = inbox.pending.data?.assets ?? [];
   const visibleUploads = inbox.uploads.filter((entry) => entry.status !== 'done');
 
+  const firstUse = conversation.data !== null && messages.length === 0;
   const [dragActive, setDragActive] = useState(false);
   const dragDepth = useRef(0);
   const composerRef = useRef<HTMLTextAreaElement>(null);
@@ -94,6 +95,10 @@ export function ProducerConversationPanel({ producer, pinned = false, mode = 'fo
     }
   }
 
+  function uploadDroppedFiles(files: FileList) {
+    void inbox.uploadFiles(files);
+  }
+
   function pickReply(text: string) {
     setDraft(text);
     composerRef.current?.focus();
@@ -107,7 +112,7 @@ export function ProducerConversationPanel({ producer, pinned = false, mode = 'fo
   return (
     <div
       data-testid="producer-conversation-panel"
-      className={`relative min-w-0 ${pinned ? 'flex h-full min-h-0 flex-col' : 'space-y-4'}`}
+      className={`glass relative min-w-0 rounded-[20px] p-4 ${pinned ? 'flex h-full min-h-0 flex-col gap-3' : 'space-y-4'}`}
       onDragEnter={onDragEnter}
       onDragOver={onDragOver}
       onDragLeave={onDragLeave}
@@ -116,7 +121,7 @@ export function ProducerConversationPanel({ producer, pinned = false, mode = 'fo
       {dragActive && (
         <div
           data-testid="chat-drop-overlay"
-          className="absolute inset-0 z-20 flex items-center justify-center rounded-panel border-2 border-dashed border-accent bg-surface/90 text-sm font-medium text-accent-strong"
+          className="absolute inset-0 z-20 flex items-center justify-center rounded-[20px] border-2 border-dashed border-[var(--cl-action)] bg-[var(--tucu-glass-thick-bg)] text-sm font-semibold text-[var(--cl-action-text)]"
         >
           {t('workspace.dropOverlay')}
         </div>
@@ -125,18 +130,18 @@ export function ProducerConversationPanel({ producer, pinned = false, mode = 'fo
       <div
         ref={scrollRef}
         onScroll={onScroll}
-        className={pinned ? 'min-h-0 flex-1 overflow-y-auto pr-1' : ''}
+        className={pinned ? 'relative min-h-0 flex-1 overflow-y-auto pr-1' : 'relative'}
       >
         <div ref={contentRef} className="space-y-4">
           {conversation.status === 'loading' && (
-            <p className="text-sm text-ink-faint">{t('producer.loading')}</p>
+            <p className="text-sm text-[var(--cl-ink-2)]">{t('producer.loading')}</p>
           )}
 
           {conversation.status === 'error' && conversation.error !== null && (
-            <ErrorNotice error={conversation.error} onRetry={conversation.reload} />
+            <ErrorNotice surface="glass" error={conversation.error} onRetry={conversation.reload} />
           )}
 
-          {conversation.data !== null && messages.length === 0 && (
+          {firstUse && (
             <ProducerWelcome
               slug={slug}
               assets={assets.data}
@@ -167,7 +172,7 @@ export function ProducerConversationPanel({ producer, pinned = false, mode = 'fo
         </div>
       </div>
 
-      <div className={pinned ? 'shrink-0 space-y-2 pt-3' : 'space-y-2'}>
+      <div className={pinned ? 'shrink-0 space-y-2' : 'space-y-2'}>
         {pendingAssets.length > 0 && (
           <div
             data-testid="asset-proposal-list"
@@ -194,13 +199,13 @@ export function ProducerConversationPanel({ producer, pinned = false, mode = 'fo
                 key={entry.id}
                 data-testid="inbox-upload-entry"
                 data-status={entry.status}
-                className="flex items-center justify-between gap-2 rounded-control border border-border-subtle px-2 py-1 text-xs text-ink-faint"
+                className="glass-sub flex items-center justify-between gap-2 rounded-[10px] px-2.5 py-1.5 text-xs text-[var(--cl-ink-2)]"
               >
                 {entry.status === 'uploading' && (
                   <span>{t('inbox.upload.uploading', { fileName: entry.fileName })}</span>
                 )}
                 {entry.status === 'error' && (
-                  <span className="text-danger">
+                  <span className="text-[var(--tucu-state-red-ink)]">
                     {entry.errorCode === 'UNSUPPORTED_MEDIA_TYPE'
                       ? t('inbox.upload.unsupported', { fileName: entry.fileName })
                       : t('inbox.upload.failed', { fileName: entry.fileName, code: entry.errorCode ?? '' })}
@@ -210,7 +215,7 @@ export function ProducerConversationPanel({ producer, pinned = false, mode = 'fo
                   <button
                     type="button"
                     onClick={() => inbox.dismissUpload(entry.id)}
-                    className="shrink-0 text-ink-faint underline"
+                    className="focus-cl shrink-0 rounded text-[var(--cl-ink-2)] underline"
                   >
                     {t('inbox.upload.dismiss')}
                   </button>
@@ -220,24 +225,24 @@ export function ProducerConversationPanel({ producer, pinned = false, mode = 'fo
           </ul>
         )}
 
-        <ChatDropZone onFiles={(files) => void inbox.uploadFiles(files)} />
-
         {queuedMessage !== null && (
           <div
             data-testid="producer-queued-message"
-            className="space-y-1 rounded-control border border-warning/50 bg-warning/10 p-2 text-xs"
+            className="space-y-1 rounded-[12px] border border-[var(--tucu-state-orange-line)] bg-[var(--tucu-state-orange-soft)] p-2.5 text-xs"
           >
-            <p className="text-warning">{t('producer.queued.notice')}</p>
-            {queuedMessage.replaced && <p className="text-ink-muted">{t('producer.queued.replaced')}</p>}
-            <p className="whitespace-pre-wrap text-ink">
+            <p className="text-[var(--tucu-state-orange-ink)]">{t('producer.queued.notice')}</p>
+            {queuedMessage.replaced && <p className="text-[var(--cl-ink-2)]">{t('producer.queued.replaced')}</p>}
+            <p className="whitespace-pre-wrap text-[var(--cl-ink)]">
               <span className="font-medium">{t('producer.queued.label')}: </span>
               {queuedMessage.text}
             </p>
-            <button type="button" onClick={cancelQueued} className="text-ink-faint underline">
+            <button type="button" onClick={cancelQueued} className="focus-cl rounded text-[var(--cl-ink-2)] underline">
               {t('producer.queued.cancel')}
             </button>
           </div>
         )}
+
+        {firstUse && <ChatDropZone onFiles={uploadDroppedFiles} />}
 
         <ProducerComposer
           value={draft}
@@ -252,16 +257,17 @@ export function ProducerConversationPanel({ producer, pinned = false, mode = 'fo
           onModelChange={setModel}
           activeEngine={effectiveEngine}
           placeholder={mode === 'motion' ? t('producer.composerPlaceholderMotion') : undefined}
+          attachment={firstUse ? undefined : <ChatDropZone compact onFiles={uploadDroppedFiles} />}
         />
 
         {sendFailure !== null && (
           <div data-testid="producer-send-failure" className="space-y-2">
-            <ErrorNotice error={sendFailure} />
-            {sendFailureKey !== null && <p className="text-sm text-warning">{t(sendFailureKey)}</p>}
+            <ErrorNotice surface="glass" error={sendFailure} />
+            {sendFailureKey !== null && <p className="text-sm text-[var(--tucu-state-orange-ink)]">{t(sendFailureKey)}</p>}
           </div>
         )}
 
-        {cancelFailure !== null && <ErrorNotice error={cancelFailure} />}
+        {cancelFailure !== null && <ErrorNotice surface="glass" error={cancelFailure} />}
       </div>
     </div>
   );

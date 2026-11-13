@@ -73,9 +73,13 @@ export function projectSlugFromPathname(pathname: string): string | null {
 }
 
 const MIGRATED_ROUTE_PREFIXES: readonly string[] = ['/'];
+const MIGRATED_EXACT_ROUTES: readonly RegExp[] = [/^\/projects\/[^/]+\/?$/];
 
 export function isMigratedRoute(pathname: string): boolean {
-  return MIGRATED_ROUTE_PREFIXES.some((prefix) => pathname === prefix || pathname.startsWith(`${prefix}/`));
+  return (
+    MIGRATED_ROUTE_PREFIXES.some((prefix) => pathname === prefix || pathname.startsWith(`${prefix}/`)) ||
+    MIGRATED_EXACT_ROUTES.some((route) => route.test(pathname))
+  );
 }
 
 export type ToolbarHeading = { titleKey: TranslationKey; subtitleKey: TranslationKey | null };

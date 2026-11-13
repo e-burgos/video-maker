@@ -1,12 +1,12 @@
+import { StateBadge } from '@e-burgos/tucu-ui';
 import { useCallback } from 'react';
 
 import { formatDateTime } from '../api/format-updated-at';
-import { PUBLICATION_STATUS_LABEL, PUBLICATION_STATUS_TONE } from '../api/publication-status';
+import { PUBLICATION_STATE_TONE, PUBLICATION_STATUS_LABEL } from '../api/publication-status';
 import { useRenderApi } from '../api/render-api-context';
 import { useAsyncResource } from '../hooks/use-async-resource';
 import { useLanguage, useT } from '../i18n/language-context';
 import { ErrorNotice } from './error-notice';
-import { Badge } from './ui/badge';
 import type { Publication } from '../api/youtube-types';
 
 export type PublicationsPanelProps = {
@@ -27,14 +27,14 @@ export function PublicationsPanel({ slug, refreshToken }: PublicationsPanelProps
   const publications = useAsyncResource<Publication[]>(load, `publications:${slug}:${refreshToken}`);
 
   if (publications.status === 'error' && publications.error !== null) {
-    return <ErrorNotice error={publications.error} onRetry={publications.reload} />;
+    return <ErrorNotice surface="glass" error={publications.error} onRetry={publications.reload} />;
   }
 
   const rows = publications.data ?? [];
 
   if (rows.length === 0) {
     return publications.status === 'loading' ? null : (
-      <p data-testid="publications-empty" className="text-xs text-ink-faint">
+      <p data-testid="publications-empty" className="text-xs text-[var(--cl-ink-2)]">
         {t('publications.empty')}
       </p>
     );
@@ -42,34 +42,34 @@ export function PublicationsPanel({ slug, refreshToken }: PublicationsPanelProps
 
   return (
     <div data-testid="publications-panel" className="space-y-2">
-      <h3 className="text-xs font-medium text-ink-muted">{t('publications.heading')}</h3>
+      <h3 className="text-xs font-semibold text-[var(--cl-ink-2)]">{t('publications.heading')}</h3>
       <ul className="space-y-2">
         {rows.map((publication) => (
           <li
             key={publication.id}
             data-testid="publication-row"
-            className="flex flex-wrap items-center justify-between gap-2 rounded-panel border border-border-subtle bg-surface-raised/40 p-2 text-xs"
+            className="glass-sub flex flex-wrap items-center justify-between gap-2 rounded-[14px] p-2.5 text-xs"
           >
             <div className="min-w-0 space-y-0.5">
-              <p className="truncate text-sm text-ink">{publication.title}</p>
-              <p className="text-ink-faint">
+              <p className="truncate text-sm font-semibold text-[var(--cl-ink)]">{publication.title}</p>
+              <p className="font-data text-[11px] text-[var(--cl-ink-3)]">
                 {Number.isNaN(publicationMoment(publication))
                   ? publication.file
                   : formatDateTime(publicationMoment(publication), language)}
               </p>
             </div>
             <div className="flex items-center gap-2">
-              <Badge tone={PUBLICATION_STATUS_TONE[publication.status]}>
+              <StateBadge tone={PUBLICATION_STATE_TONE[publication.status]} dot size="sm">
                 {t(PUBLICATION_STATUS_LABEL[publication.status])}
-              </Badge>
+              </StateBadge>
               {publication.url !== null && (
                 <a
                   href={publication.url}
                   target="_blank"
                   rel="noreferrer noopener"
-                  className="text-accent underline hover:text-accent-strong"
+                  className="focus-cl rounded text-[var(--cl-action-text)] underline hover:text-[var(--cl-action-hover)]"
                 >
-                  {t('publications.open')}
+                  {t('publications.viewOnYoutube')}
                 </a>
               )}
             </div>

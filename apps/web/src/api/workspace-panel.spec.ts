@@ -5,6 +5,8 @@ import {
   renderDeliveriesNewestFirst,
   groupAssetsByRole,
   latestSucceededJobOfKind,
+  materialSummary,
+  primaryAssetRole,
   succeededJobsOfKindNewestFirst,
   tabForNewlySucceededJob,
 } from './workspace-panel';
@@ -25,6 +27,28 @@ describe('groupAssetsByRole', () => {
     expect(groups.map((group) => group.role)).toEqual(['aroll', 'logo']);
     expect(groups[0]?.assets).toEqual([aroll1, aroll2]);
     expect(groups[1]?.assets).toEqual([logo]);
+  });
+});
+
+describe('materialSummary', () => {
+  const groups = groupAssetsByRole(
+    assetListing([assetEntry({ path: 'raw/aroll/a.mp4', role: 'aroll' }), assetEntry({ path: 'raw/audio/m.mp3', role: 'audio' })]),
+  );
+
+  it('marks every present role as complete', () => {
+    expect(materialSummary(groups, 'aroll')).toEqual([
+      { role: 'aroll', count: 1, tone: 'green' },
+      { role: 'audio', count: 1, tone: 'green' },
+    ]);
+  });
+
+  it('puts the missing main role first as a warning', () => {
+    expect(materialSummary(groups, 'image')[0]).toEqual({ role: 'image', count: 0, tone: 'orange' });
+  });
+
+  it('expects images for motion videos and footage otherwise', () => {
+    expect(primaryAssetRole(true)).toBe('image');
+    expect(primaryAssetRole(false)).toBe('aroll');
   });
 });
 
@@ -89,11 +113,11 @@ describe('tabForNewlySucceededJob', () => {
     expect(tabForNewlySucceededJob(previous, current)).toBe('deliveries');
   });
 
-  it('switches to preview when a montage job newly succeeds', () => {
+  it('keeps the current tab when a montage job newly succeeds because the preview is always visible', () => {
     const previous = jobListing([pendingJob('montage', 'job-1')]);
     const current = jobListing([succeededJob('montage', 'job-1', '2026-09-10T10:00:00.000Z')]);
 
-    expect(tabForNewlySucceededJob(previous, current)).toBe('preview');
+    expect(tabForNewlySucceededJob(previous, current)).toBeNull();
   });
 
   it('ignores job kinds that have no tab, like storyboard or voice', () => {

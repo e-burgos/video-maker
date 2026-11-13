@@ -28,7 +28,9 @@ function renderPanel(options: {
   client?: Partial<RenderApiClient>;
   assets?: AsyncResource<AssetListing>;
   jobs?: AsyncResource<RenderJobListing>;
-  activeTab?: 'preview' | 'material' | 'deliveries';
+  activeTab?: 'material' | 'deliveries';
+  primaryRole?: 'aroll' | 'image';
+  reviewPending?: boolean;
   generated?: GeneratedListing;
 } = {}) {
   const client = {
@@ -45,11 +47,13 @@ function renderPanel(options: {
       <MemoryRouter>
         <WorkspaceSidePanel
           slug="demo-01"
-          activeTab={options.activeTab ?? 'preview'}
+          activeTab={options.activeTab ?? 'material'}
           onTabChange={onTabChange}
           assets={options.assets ?? readyResource(assetListing([]))}
           jobs={options.jobs ?? readyResource(jobListing([]))}
           generated={options.generated ?? null}
+          primaryRole={options.primaryRole}
+          reviewPending={options.reviewPending}
         />
       </MemoryRouter>
     </RenderApiProvider>,
@@ -62,9 +66,17 @@ describe('WorkspaceSidePanel', () => {
   it('switches the visible panel when a tab is clicked', () => {
     const { onTabChange } = renderPanel();
 
-    fireEvent.click(screen.getByTestId('workspace-tab-material'));
+    fireEvent.click(screen.getByTestId('workspace-tab-deliveries'));
 
-    expect(onTabChange).toHaveBeenCalledWith('material');
+    expect(onTabChange).toHaveBeenCalledWith('deliveries');
+  });
+
+  it('offers only Material and Deliveries as tabs and keeps the preview visible on both', () => {
+    renderPanel({ activeTab: 'deliveries' });
+
+    expect(screen.getAllByRole('tab').map((tab) => tab.textContent)).toEqual(['Material', 'Deliveries']);
+    expect(screen.getByTestId('workspace-preview')).toBeTruthy();
+    expect(screen.getByRole('tabpanel').getAttribute('aria-labelledby')).toBeTruthy();
   });
 
   it('shows the latest succeeded render instead of the timeline in the preview tab', async () => {
@@ -116,6 +128,27 @@ describe('WorkspaceSidePanel', () => {
     expect(screen.getByRole('link', { name: /Open full library/u }).getAttribute('href')).toBe(
       '/projects/demo-01/library',
     );
+  });
+
+  it('summarizes the material by role and flags a missing main role and a pending review', () => {
+    renderPanel({
+      reviewPending: true,
+      assets: readyResource(assetListing([assetEntry({ path: 'raw/audio/m.mp3', role: 'audio' })])),
+    });
+
+    const summary = screen.getByTestId('workspace-material-summary');
+    expect(summary.querySelector('[data-role="aroll"]')?.getAttribute('data-tone')).toBe('orange');
+    expect(summary.querySelector('[data-role="audio"]')?.getAttribute('data-tone')).toBe('green');
+    expect(screen.getByTestId('workspace-material-review')).toBeTruthy();
+  });
+
+  it('expects images as the main role of a motion video', () => {
+    renderPanel({
+      primaryRole: 'image',
+      assets: readyResource(assetListing([assetEntry({ path: 'raw/images/i.png', role: 'image' })])),
+    });
+
+    expect(screen.getByTestId('workspace-material-summary').querySelector('[data-tone="orange"]')).toBeNull();
   });
 
   it('shows an empty state in material when the project has no assets yet', () => {

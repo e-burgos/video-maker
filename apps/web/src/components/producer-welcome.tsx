@@ -1,3 +1,4 @@
+import { StateBadge } from '@e-burgos/tucu-ui';
 import { Link } from 'react-router-dom';
 
 import { assetRoleCopy, isKnownAssetRole } from '../api/asset-roles';
@@ -46,19 +47,15 @@ function MotionWelcome({ onDraft }: { onDraft: (text: string) => void }) {
   const t = useT();
 
   return (
-    <div
-      data-testid="producer-welcome"
-      data-mode="motion"
-      className="space-y-3 rounded-lg border border-slate-800 bg-slate-900/40 p-5"
-    >
-      <p className="text-sm font-medium text-ink">{t('motion.workspace.intro')}</p>
+    <div data-testid="producer-welcome" data-mode="motion" className="glass-sub space-y-3 rounded-[14px] p-4">
+      <p className="text-sm font-semibold text-[var(--cl-ink)]">{t('motion.workspace.intro')}</p>
       <ul data-testid="motion-examples" className="flex flex-wrap gap-2">
         {MOTION_EXAMPLE_KEYS.map((key) => (
           <li key={key}>
             <button
               type="button"
               onClick={() => onDraft(t(key))}
-              className="rounded-full border border-sky-500/50 bg-sky-500/10 px-3 py-1 text-xs text-sky-100"
+              className="focus-cl glass-thin rounded-full px-3 py-1.5 text-xs font-medium text-[var(--cl-ink)] hover:border-[var(--cl-ink-3)]"
             >
               {t(key)}
             </button>
@@ -123,9 +120,9 @@ export function ProducerWelcome({
       <div
         data-testid="producer-welcome"
         data-compact="true"
-        className="space-y-2 rounded-lg border border-slate-800 bg-slate-900/40 p-3"
+        className="glass-sub space-y-2 rounded-[14px] p-3"
       >
-        <p className="text-sm font-medium text-ink">{t('producer.welcomeTitle')}</p>
+        <p className="text-sm font-semibold text-[var(--cl-ink)]">{t('producer.welcomeTitle')}</p>
         <ul data-testid="producer-recipes" className="flex flex-wrap gap-2">
           {PRODUCER_RECIPES.map((recipe) => (
             <li key={recipe.id}>
@@ -134,7 +131,7 @@ export function ProducerWelcome({
                 data-recipe={recipe.id}
                 title={t(recipe.descriptionKey)}
                 onClick={() => void draftRecipe(recipe.id)}
-                className="rounded-full border border-emerald-400/60 bg-emerald-400/10 px-3 py-1 text-xs font-semibold text-emerald-100"
+                className="focus-cl rounded-full border border-[var(--tucu-state-teal-line)] bg-[var(--tucu-state-teal-soft)] px-3 py-1 text-xs font-semibold text-[var(--tucu-state-teal-ink)]"
               >
                 {t(recipe.labelKey)}
               </button>
@@ -148,35 +145,33 @@ export function ProducerWelcome({
   return (
     <div
       data-testid="producer-welcome"
-      className="space-y-4 rounded-lg border border-slate-800 bg-slate-900/40 p-5"
+      className="space-y-5"
     >
       <div>
-        <h2 className="text-lg font-semibold tracking-tight text-slate-100">
-          {t('producer.welcomeTitle')}
-        </h2>
-        <p className="mt-1 text-sm text-slate-400">{t('producer.welcomeBody', { slug })}</p>
+        <h2 className="text-xl font-bold tracking-tight text-[var(--cl-ink)]">{t('producer.welcomeTitle')}</h2>
+        <p className="mt-1 text-sm text-[var(--cl-ink-2)]">{t('producer.welcomeBody', { slug })}</p>
       </div>
 
       <div data-testid="producer-inventory" className="space-y-2">
-        <p className="text-xs font-medium text-ink-faint">{t('producer.inventoryHeading')}</p>
+        <p className="font-data text-[11px] font-semibold uppercase tracking-wide text-[var(--cl-ink-3)]">
+          {t('producer.inventoryHeading')}
+        </p>
         {hasMaterial ? (
           <ul className="flex flex-wrap gap-2">
             {inventory.map((entry) => (
-              <li
-                key={entry.role}
-                data-role={entry.role}
-                className="rounded-md border border-slate-700 px-2 py-1 text-xs text-slate-300"
-              >
-                {inventoryLabel(entry.role, t)} · {tn('workspace.material.fileCount', entry.count)}
+              <li key={entry.role} data-role={entry.role}>
+                <StateBadge tone="green" dot size="sm">
+                  {inventoryLabel(entry.role, t)} · {tn('workspace.material.fileCount', entry.count)}
+                </StateBadge>
               </li>
             ))}
           </ul>
         ) : (
-          <p className="text-sm text-amber-200">
+          <p className="text-sm text-[var(--tucu-state-orange-ink)]">
             {t('producer.noMaterialBefore')}{' '}
             <Link
               to={`/projects/${encodeURIComponent(slug)}/library`}
-              className="text-sky-300 underline hover:text-sky-200"
+              className="focus-cl rounded text-[var(--cl-action-text)] underline hover:text-[var(--cl-action-hover)]"
             >
               {t('producer.noMaterialLink')}
             </Link>{' '}
@@ -186,30 +181,30 @@ export function ProducerWelcome({
       </div>
 
       <div className="space-y-2">
-        <p className="text-xs font-medium text-ink-faint">
+        <p className="font-data text-[11px] font-semibold uppercase tracking-wide text-[var(--cl-ink-3)]">
           {t('producer.recipesHeading')}
         </p>
         <ul data-testid="producer-recipes" className="grid gap-2 sm:grid-cols-3">
           {PRODUCER_RECIPES.map((recipe) => (
             <li
               key={recipe.id}
-              className="space-y-1.5 rounded-lg border border-emerald-400/30 bg-emerald-400/5 p-2.5"
+              className="glass-sub flex flex-col items-start gap-1.5 rounded-[14px] p-3"
             >
               <button
                 type="button"
                 data-recipe={recipe.id}
                 title={t(recipe.descriptionKey)}
                 onClick={() => void draftRecipe(recipe.id)}
-                className="rounded-full border border-emerald-400/60 bg-emerald-400/10 px-3 py-1 text-xs font-semibold text-emerald-100"
+                className="focus-cl rounded-full border border-[var(--tucu-state-teal-line)] bg-[var(--tucu-state-teal-soft)] px-3 py-1 text-xs font-semibold text-[var(--tucu-state-teal-ink)]"
               >
                 {t(recipe.labelKey)}
               </button>
               <details className="group">
                 <summary className="cursor-pointer list-none">
-                  <p className="line-clamp-1 text-xs text-slate-500 group-open:line-clamp-none">
+                  <p className="line-clamp-2 text-xs text-[var(--cl-ink-2)] group-open:line-clamp-none">
                     {t(recipe.descriptionKey)}
                   </p>
-                  <span className="text-[11px] font-medium text-sky-300">
+                  <span className="text-[11px] font-semibold text-[var(--cl-action-text)]">
                     {t('workspace.recipes.toggle')}
                   </span>
                 </summary>
@@ -220,7 +215,7 @@ export function ProducerWelcome({
       </div>
 
       <div className="space-y-2">
-        <p className="text-xs font-medium text-ink-faint">
+        <p className="font-data text-[11px] font-semibold uppercase tracking-wide text-[var(--cl-ink-3)]">
           {t('producer.startersHeading')}
         </p>
         <ul data-testid="producer-starters" className="flex flex-wrap gap-2">
@@ -231,7 +226,7 @@ export function ProducerWelcome({
                 <button
                   type="button"
                   onClick={() => onDraft(suggestion)}
-                  className="rounded-full border border-sky-500/50 bg-sky-500/10 px-3 py-1 text-xs text-sky-100"
+                  className="focus-cl glass-thin rounded-full px-3 py-1.5 text-xs font-medium text-[var(--cl-ink)] hover:border-[var(--cl-ink-3)]"
                 >
                   {suggestion.trim()}
                   {suggestion.endsWith(' ') ? '…' : ''}
@@ -240,9 +235,9 @@ export function ProducerWelcome({
             );
           })}
         </ul>
-        <p className="text-xs text-slate-500">
+        <p className="text-xs text-[var(--cl-ink-3)]">
           {t('producer.startersHint')}{' '}
-          <Link to="/guide" className="text-sky-300 underline hover:text-sky-200">
+          <Link to="/guide" className="focus-cl rounded text-[var(--cl-action-text)] underline hover:text-[var(--cl-action-hover)]">
             {t('guide.howDoesThisWork')}
           </Link>
         </p>

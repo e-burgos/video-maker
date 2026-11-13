@@ -21,7 +21,9 @@ describe('toolbarHeadingFor', () => {
 describe('shell navigation helpers', () => {
   it('treats only the migrated routes as off the legacy surface', () => {
     expect(isMigratedRoute('/')).toBe(true);
-    expect(['/brands', '/settings', '/projects/demo'].some(isMigratedRoute)).toBe(false);
+    expect(isMigratedRoute('/projects/demo')).toBe(true);
+    expect(isMigratedRoute('/projects/demo/')).toBe(true);
+    expect(['/brands', '/settings', '/projects/demo/library', '/projects/demo/voice', '/projects/demo/motion'].some(isMigratedRoute)).toBe(false);
   });
 
   it('keeps the motion step only for motion videos', () => {

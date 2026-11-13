@@ -67,6 +67,8 @@ body {
   --cl-action: #0a6cff;
   --cl-action-hover: #0353c9;
   --cl-action-text: #0353c9;
+  --cl-action-fill: #0a6cff;
+  --cl-action-fill-hover: #0353c9;
   --cl-action-ring: rgba(10, 108, 255, 0.3);
   --tucu-state-green-soft: rgba(40, 167, 69, 0.16);
   --tucu-state-green-ink: #0b6623;
@@ -108,6 +110,8 @@ body {
   --cl-action: #409cff;
   --cl-action-hover: #70b3ff;
   --cl-action-text: #8cc2ff;
+  --cl-action-fill: #1f6feb;
+  --cl-action-fill-hover: #1a5fd0;
   --cl-action-ring: rgba(64, 156, 255, 0.4);
   --tucu-state-green-soft: rgba(48, 209, 88, 0.18);
   --tucu-state-green-ink: #7ee59a;

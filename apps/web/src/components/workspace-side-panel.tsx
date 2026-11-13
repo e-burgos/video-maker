@@ -1,32 +1,12 @@
-import { useCallback } from 'react';
-import { Link } from 'react-router-dom';
-import type { Timeline } from '@video-maker/timeline-core';
+import { SegmentedControl, segmentedControlPanelId, segmentedControlTabId } from '@e-burgos/tucu-ui';
 
-import { artifactUrl } from '../api/artifact-url';
-import { assetMediaKind, formatDuration } from '../api/asset-media-kind';
-import { assetRoleCopy } from '../api/asset-roles';
-import { parseTimelineDocument } from '../api/parse-timeline';
-import { playerTimeline } from '../api/player-timeline';
-import { previewFormat, previewPresetFor } from '../api/preview-format';
-import { useRenderApi } from '../api/render-api-context';
-import {
-  renderDeliveriesNewestFirst,
-  groupAssetsByRole,
-  latestSucceededJobOfKind,
-} from '../api/workspace-panel';
 import type { WorkspaceTabId } from '../api/workspace-panel';
-import { useAsyncResource } from '../hooks/use-async-resource';
 import type { AsyncResource } from '../hooks/use-async-resource';
-import { useT, useTn } from '../i18n/language-context';
-import { ErrorNotice } from './error-notice';
-import { RenderReviewPanel } from './render-review-panel';
-import { TimelinePlayer } from './timeline-player';
-import { YouTubePublishSection } from './youtube-publish-section';
-import { Badge } from './ui/badge';
-import { Card } from './ui/card';
-import { TabPanel, Tabs } from './ui/tabs';
-import type { TabItem } from './ui/tabs';
-import type { AssetListing, GeneratedListing, ProjectDetail, RenderJobListing } from '../api/render-api-types';
+import { useT } from '../i18n/language-context';
+import { WorkspaceDeliveriesTab } from './workspace/workspace-deliveries-tab';
+import { WorkspaceMaterialTab } from './workspace/workspace-material-tab';
+import { WorkspacePreview } from './workspace/workspace-preview';
+import type { AssetListing, AssetRole, GeneratedListing, RenderJobListing } from '../api/render-api-types';
 
 export type WorkspaceSidePanelProps = {
   slug: string;
@@ -35,226 +15,11 @@ export type WorkspaceSidePanelProps = {
   assets: AsyncResource<AssetListing>;
   jobs: AsyncResource<RenderJobListing>;
   generated?: GeneratedListing | null;
+  primaryRole?: AssetRole;
+  reviewPending?: boolean;
 };
 
-function MaterialThumbnail({ slug, path }: { slug: string; path: string }) {
-  const src = artifactUrl(slug, path);
-  const kind = assetMediaKind(path);
-
-  if (kind === 'video') {
-    return (
-      <video
-        src={src}
-        muted
-        preload="metadata"
-        className="h-16 w-24 rounded-control bg-black object-cover"
-      />
-    );
-  }
-
-  if (kind === 'image') {
-    return <img src={src} alt={path} className="h-16 w-24 rounded-control bg-black object-cover" />;
-  }
-
-  return (
-    <div className="flex h-16 w-24 items-center justify-center rounded-control border border-border-subtle text-[10px] text-ink-faint">
-      {kind}
-    </div>
-  );
-}
-
-function PreviewTab({
-  slug,
-  jobs,
-  generated,
-}: {
-  slug: string;
-  jobs: AsyncResource<RenderJobListing>;
-  generated: GeneratedListing | null;
-}) {
-  const client = useRenderApi();
-  const t = useT();
-  const latestRender = renderDeliveriesNewestFirst(jobs.data, generated)[0] ?? null;
-  const latestMontage = latestSucceededJobOfKind(jobs.data, 'montage');
-
-  const project = useAsyncResource<ProjectDetail>(
-    useCallback(() => client.getProject(slug), [client, slug]),
-    `project-detail:${slug}`,
-  );
-  const timelineExists = project.data?.layout.timeline ?? null;
-
-  const loadTimeline = useCallback(async () => {
-    if (timelineExists !== true) {
-      return null;
-    }
-    return parseTimelineDocument(await client.getTimeline(slug));
-  }, [client, slug, timelineExists]);
-  const timeline = useAsyncResource<Timeline | null>(
-    loadTimeline,
-    `workspace-timeline:${slug}:${latestMontage?.id ?? 'none'}:${timelineExists}`,
-  );
-
-  if (latestRender !== null) {
-    return (
-      <div className="space-y-2">
-        <video
-          data-testid="workspace-preview-video"
-          src={artifactUrl(slug, latestRender.path)}
-          controls
-          preload="metadata"
-          className="aspect-video w-full rounded-panel bg-black"
-        />
-        <p className="text-xs text-ink-faint">
-          {t('workspace.preview.latestRender')} · {latestRender.finishedAt}
-        </p>
-      </div>
-    );
-  }
-
-  if (project.status === 'loading' || timeline.status === 'loading') {
-    return <p className="text-sm text-ink-faint">{t('preview.loading')}</p>;
-  }
-
-  if (timeline.status === 'error') {
-    if (timeline.error?.code === 'TIMELINE_NOT_FOUND') {
-      return (
-        <p data-testid="workspace-preview-empty" className="text-sm text-ink-faint">
-          {t('workspace.preview.empty')}
-        </p>
-      );
-    }
-    return timeline.error !== null ? <ErrorNotice error={timeline.error} onRetry={timeline.reload} /> : null;
-  }
-
-  if (timeline.data === null) {
-    return (
-      <p data-testid="workspace-preview-empty" className="text-sm text-ink-faint">
-        {t('workspace.preview.empty')}
-      </p>
-    );
-  }
-
-  const withUrls = playerTimeline(timeline.data, slug, window.location.origin);
-  const playable = previewFormat(withUrls, previewPresetFor(withUrls));
-
-  return <TimelinePlayer timeline={playable} />;
-}
-
-function MaterialTab({ slug, assets }: { slug: string; assets: AsyncResource<AssetListing> }) {
-  const t = useT();
-  const tn = useTn();
-
-  if (assets.status === 'loading') {
-    return <p className="text-sm text-ink-faint">{t('library.loading')}</p>;
-  }
-
-  if (assets.status === 'error' && assets.error !== null) {
-    return <ErrorNotice error={assets.error} onRetry={assets.reload} />;
-  }
-
-  const groups = groupAssetsByRole(assets.data);
-
-  if (groups.length === 0) {
-    return (
-      <p data-testid="workspace-material-empty" className="text-sm text-ink-faint">
-        {t('workspace.material.empty')}
-      </p>
-    );
-  }
-
-  return (
-    <div data-testid="workspace-material" className="space-y-4">
-      {groups.map((group) => (
-        <div key={group.role} className="space-y-2">
-          <div className="flex items-center gap-2">
-            <p className="text-xs font-medium text-ink-muted">
-              {t(assetRoleCopy(group.role).shortNameKey)}
-            </p>
-            <Badge>{tn('workspace.material.fileCount', group.assets.length)}</Badge>
-          </div>
-          <div className="flex gap-2 overflow-x-auto pb-1">
-            {group.assets.map((asset) => (
-              <div key={asset.path} title={asset.path} className="shrink-0 space-y-1">
-                <MaterialThumbnail slug={slug} path={asset.path} />
-                {asset.media !== null && asset.media.kind !== 'image' && (
-                  <p className="text-[10px] text-ink-faint">{formatDuration(asset.media.durationMs)}</p>
-                )}
-              </div>
-            ))}
-          </div>
-        </div>
-      ))}
-
-      <Link
-        to={`/projects/${encodeURIComponent(slug)}/library`}
-        className="inline-block text-xs text-accent underline hover:text-accent-strong"
-      >
-        {t('workspace.material.openLibrary')}
-      </Link>
-    </div>
-  );
-}
-
-function DeliveriesTab({
-  slug,
-  jobs,
-  generated,
-}: {
-  slug: string;
-  jobs: AsyncResource<RenderJobListing>;
-  generated: GeneratedListing | null;
-}) {
-  const t = useT();
-
-  if (jobs.status === 'loading') {
-    return <p className="text-sm text-ink-faint">{t('renderJobs.loading')}</p>;
-  }
-
-  if (jobs.status === 'error' && jobs.error !== null) {
-    return <ErrorNotice error={jobs.error} onRetry={jobs.reload} />;
-  }
-
-  const deliveries = renderDeliveriesNewestFirst(jobs.data, generated);
-
-  if (deliveries.length === 0) {
-    return (
-      <div className="space-y-4">
-        <p data-testid="workspace-deliveries-empty" className="text-sm text-ink-faint">
-          {t('workspace.deliveries.empty')}
-        </p>
-        <YouTubePublishSection slug={slug} />
-      </div>
-    );
-  }
-
-  return (
-    <div className="space-y-4">
-    <ul data-testid="workspace-deliveries" className="space-y-3">
-      {deliveries.map((delivery) => (
-        <li key={delivery.path} className="space-y-2 rounded-panel border border-border-subtle bg-surface-raised/40 p-3">
-          <video
-            src={artifactUrl(slug, delivery.path)}
-            controls
-            preload="metadata"
-            className="aspect-video w-full rounded-control bg-black"
-          />
-          <div className="flex flex-wrap items-center justify-between gap-2 text-xs text-ink-faint">
-            <span>{t('workspace.deliveries.finishedAt', { date: delivery.finishedAt })}</span>
-            <a
-              href={artifactUrl(slug, delivery.path)}
-              className="text-accent underline hover:text-accent-strong"
-            >
-              {t('renderJob.download')}
-            </a>
-          </div>
-          {delivery.job === null && <RenderReviewPanel slug={slug} file={delivery.path} />}
-        </li>
-      ))}
-    </ul>
-    <YouTubePublishSection slug={slug} />
-    </div>
-  );
-}
+const TABS_ID_BASE = 'workspace';
 
 export function WorkspaceSidePanel({
   slug,
@@ -263,27 +28,45 @@ export function WorkspaceSidePanel({
   assets,
   jobs,
   generated = null,
+  primaryRole = 'aroll',
+  reviewPending = false,
 }: WorkspaceSidePanelProps) {
   const t = useT();
-  const tabs: readonly TabItem<WorkspaceTabId>[] = [
-    { id: 'preview', label: t('workspace.tab.preview') },
-    { id: 'material', label: t('workspace.tab.material') },
-    { id: 'deliveries', label: t('workspace.tab.deliveries') },
+  const options = [
+    { value: 'material', label: t('workspace.tab.material'), 'data-testid': 'workspace-tab-material' },
+    { value: 'deliveries', label: t('workspace.tab.deliveries'), 'data-testid': 'workspace-tab-deliveries' },
   ];
 
   return (
-    <Card data-testid="workspace-side-panel" className="flex flex-col gap-3 p-4">
-      <Tabs tabs={tabs} value={activeTab} onChange={onTabChange} idPrefix="workspace" />
+    <div data-testid="workspace-side-panel" className="flex h-full min-h-0 flex-col gap-3">
+      <WorkspacePreview slug={slug} jobs={jobs} generated={generated} />
 
-      <TabPanel id="preview" value={activeTab} idPrefix="workspace">
-        <PreviewTab slug={slug} jobs={jobs} generated={generated} />
-      </TabPanel>
-      <TabPanel id="material" value={activeTab} idPrefix="workspace">
-        <MaterialTab slug={slug} assets={assets} />
-      </TabPanel>
-      <TabPanel id="deliveries" value={activeTab} idPrefix="workspace">
-        <DeliveriesTab slug={slug} jobs={jobs} generated={generated} />
-      </TabPanel>
-    </Card>
+      <section className="glass flex min-h-0 flex-1 flex-col gap-3 rounded-[20px] p-4">
+        <div className="glass-thin self-start rounded-[10px] p-[3px]">
+          <SegmentedControl
+            semantics="tabs"
+            idBase={TABS_ID_BASE}
+            aria-label={t('workspace.tabs.label')}
+            size="sm"
+            options={options}
+            value={activeTab}
+            onChange={(next) => onTabChange(next as WorkspaceTabId)}
+          />
+        </div>
+
+        <div
+          role="tabpanel"
+          id={segmentedControlPanelId(TABS_ID_BASE, activeTab)}
+          aria-labelledby={segmentedControlTabId(TABS_ID_BASE, activeTab)}
+          className="min-h-0 flex-1 overflow-y-auto"
+        >
+          {activeTab === 'material' ? (
+            <WorkspaceMaterialTab slug={slug} assets={assets} primaryRole={primaryRole} reviewPending={reviewPending} />
+          ) : (
+            <WorkspaceDeliveriesTab slug={slug} jobs={jobs} generated={generated} />
+          )}
+        </div>
+      </section>
+    </div>
   );
 }
