@@ -27,6 +27,7 @@
 | O-4 | Biblioteca de imágenes con selección múltiple, visor ampliado con comparación (teclado), storyboard y voz con barra de guardado pegajosa | cycle-03 |
 | O-5 | Vista previa y render con ajustes plegables, motion (brief) y marcas (listado y editor con guardado único) | cycle-04 |
 | O-6 | Publicación, ajustes (pestañas Productor, Voz, YouTube, Apariencia), guía, modales y estados vacío/carga/error; capturas del productor nuevo para la web | cycle-05 |
+| O-8 | Rediseño del logo de Video Maker (marca, wordmark, ícono de la app de escritorio y favicon), trabajado con el dev y aplicado en el studio y en Electron; **obligatorio** | cycle-01 |
 | O-7 | Paridad con la web: Aprender (guía interactiva con pasos, pipeline, tutorial desde R2, galería, FAQ), Acerca de (versión, buscar actualizaciones manual, licencias e inventario, código abierto, privacidad), Conectar agentes, búsqueda de material libre y chequeo de requisitos | cycle-06 |
 
 ## Decisiones de la spec
@@ -46,6 +47,7 @@
 | D-11 | `apps/docs-site` solo suma capturas nuevas en `public/screenshots/`; sin cambios de diseño, tokens ni textos | Decisión del dev (2026-11-13) |
 | D-12 | `apps/motion-editor` queda fuera | Alcance acordado |
 | D-13 | Sin comentarios en el código; nombres declarativos y componentes chicos | Regla del repo |
+| D-15 | El logo nuevo es parte obligatoria de la spec; se diseña con el dev en el cycle-01 (conceptos, elección y refinamiento) y se entrega como SVG, PNG y `.icns`. Su adopción en la web pública (favicon y marca del header) queda **pendiente de decisión del dev**: hasta entonces `apps/docs-site` no se toca | Pedido del dev (2026-11-13); la web no se rediseña |
 | D-14 | Solo commits locales en `feat/rebranding-liquid-glass`; sin push ni PR hasta que el dev lo pida | Directiva del dev |
 
 ## Dependencias

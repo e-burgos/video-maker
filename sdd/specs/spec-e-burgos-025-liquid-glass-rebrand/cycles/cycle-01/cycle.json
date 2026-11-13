@@ -3,7 +3,10 @@
   "cycle": 1,
   "module": "liquid-glass-rebrand",
   "spec": "spec-e-burgos-025-liquid-glass-rebrand",
-  "apps": ["apps/web", "apps/desktop"],
+  "apps": [
+    "apps/web",
+    "apps/desktop"
+  ],
   "phase": "visual-base-shell",
   "flow": "lite",
   "objectives": [
@@ -18,13 +21,36 @@
   },
   "artifacts": [],
   "metrics": {
-    "tasks_total": 0,
-    "tasks_completed": 0,
-    "story_points": 0,
-    "files_created": [],
-    "files_modified": [],
+    "tasks_total": 7,
+    "tasks_completed": 1,
+    "story_points": 5,
+    "files_created": [
+      "apps/web/src/theme/tucu-mount.spec.tsx"
+    ],
+    "files_modified": [
+      "package.json",
+      "pnpm-lock.yaml",
+      "apps/web/src/index.css"
+    ],
     "files_deleted": [],
-    "usage": { "tokens_in": 0, "tokens_out": 0, "by_agent": [] }
+    "usage": {
+      "tokens_in": 150000,
+      "tokens_out": 14000,
+      "by_agent": [
+        {
+          "agent": "implementor-front",
+          "label": "TASK-001",
+          "provider_model": "claude/sonnet",
+          "effort": "medium",
+          "tokens_in": 150000,
+          "tokens_out": 14000,
+          "tokens_total": 164000,
+          "approx": true,
+          "source": "declared-estimate",
+          "recorded_at": "2026-11-13"
+        }
+      ]
+    }
   },
   "tables_created": [],
   "endpoints_implemented": [],
