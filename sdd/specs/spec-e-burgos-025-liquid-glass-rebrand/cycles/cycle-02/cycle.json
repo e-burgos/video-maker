@@ -1,0 +1,53 @@
+{
+  "$schema": "../../../../schemas/cycle.schema.json",
+  "cycle": 2,
+  "module": "liquid-glass-rebrand",
+  "spec": "spec-e-burgos-025-liquid-glass-rebrand",
+  "apps": [
+    "apps/web"
+  ],
+  "phase": "workspace-and-videos",
+  "flow": "lite",
+  "objectives": [
+    "Mis videos y el espacio de trabajo del video migrados al Cristal Líquido, con los pasos del video mostrando su estado real"
+  ],
+  "status": "in-progress",
+  "started_at": "2026-11-13",
+  "completed_at": null,
+  "documents": {
+    "plan": "sdd/specs/spec-e-burgos-025-liquid-glass-rebrand/cycles/cycle-02/plan.md",
+    "tasks": "sdd/specs/spec-e-burgos-025-liquid-glass-rebrand/cycles/cycle-02/tasks.json"
+  },
+  "artifacts": [],
+  "metrics": {
+    "tasks_total": 4,
+    "tasks_completed": 0,
+    "story_points": 0,
+    "files_created": [],
+    "files_modified": [],
+    "files_deleted": [],
+    "usage": {
+      "tokens_in": 120000,
+      "tokens_out": 4000,
+      "by_agent": [
+        {
+          "agent": "orchestrator",
+          "label": "consolidación del contexto de apps/web al abrir el ciclo",
+          "provider_model": "claude/sonnet",
+          "effort": "low",
+          "tokens_in": 120000,
+          "tokens_out": 4000,
+          "tokens_total": 124000,
+          "approx": true,
+          "source": "agent-usage-notification",
+          "recorded_at": "2026-11-13"
+        }
+      ]
+    }
+  },
+  "tables_created": [],
+  "endpoints_implemented": [],
+  "components_created": [],
+  "issues_found": [],
+  "reviewer_report": null
+}
