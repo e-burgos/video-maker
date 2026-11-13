@@ -21,14 +21,20 @@
   "artifacts": [],
   "metrics": {
     "tasks_total": 4,
-    "tasks_completed": 0,
-    "story_points": 0,
-    "files_created": [],
-    "files_modified": [],
+    "tasks_completed": 1,
+    "story_points": 3,
+    "files_created": [
+      "apps/web/src/components/shell/use-video-step-statuses.ts",
+      "apps/web/src/components/shell/use-video-step-statuses.spec.tsx"
+    ],
+    "files_modified": [
+      "apps/web/src/components/studio-layout.tsx",
+      "apps/web/src/components/shell/shell-sidebar.spec.tsx"
+    ],
     "files_deleted": [],
     "usage": {
-      "tokens_in": 120000,
-      "tokens_out": 4000,
+      "tokens_in": 180000,
+      "tokens_out": 16000,
       "by_agent": [
         {
           "agent": "orchestrator",
@@ -40,6 +46,18 @@
           "tokens_total": 124000,
           "approx": true,
           "source": "agent-usage-notification",
+          "recorded_at": "2026-11-13"
+        },
+        {
+          "agent": "implementor-front",
+          "label": "TASK-001",
+          "provider_model": "claude/sonnet",
+          "effort": "medium",
+          "tokens_in": 60000,
+          "tokens_out": 12000,
+          "tokens_total": 72000,
+          "approx": true,
+          "source": "declared-estimate",
           "recorded_at": "2026-11-13"
         }
       ]

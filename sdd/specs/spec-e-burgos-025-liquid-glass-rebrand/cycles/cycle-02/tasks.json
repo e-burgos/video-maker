@@ -21,12 +21,23 @@
       "estimation_hours": 3,
       "story_points": 3,
       "depends_on": [],
-      "status": "pending",
+      "status": "done",
       "files": [
         "apps/web/src/components/shell/use-video-step-statuses.ts",
-        "apps/web/src/components/shell/video-steps-nav.tsx",
-        "apps/web/src/components/shell/shell-sidebar.tsx"
-      ]
+        "apps/web/src/components/shell/use-video-step-statuses.spec.tsx",
+        "apps/web/src/components/studio-layout.tsx",
+        "apps/web/src/components/shell/shell-sidebar.spec.tsx"
+      ],
+      "usage": {
+        "tokens_in": 60000,
+        "tokens_out": 12000,
+        "provider_model": "claude/sonnet",
+        "effort": "medium",
+        "agent": "implementor-front",
+        "approx": true,
+        "source": "declared-estimate",
+        "recorded_at": "2026-11-13"
+      }
     },
     {
       "id": "TASK-002",

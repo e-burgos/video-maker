@@ -13,6 +13,7 @@ import { projectSlugFromPathname, toolbarHeadingFor } from './shell/shell-naviga
 import { ShellSidebar } from './shell/shell-sidebar';
 import { ShellToolbar } from './shell/shell-toolbar';
 import { ToolbarActionProvider } from './shell/toolbar-action-provider';
+import { useVideoStepStatuses } from './shell/use-video-step-statuses';
 import { VideoStepsNav } from './shell/video-steps-nav';
 
 export { projectSlugFromPathname };
@@ -26,6 +27,7 @@ export function StudioLayout() {
     useCallback(async () => (slug === null ? null : client.getProject(slug)), [client, slug]),
     `layout-project:${slug ?? ''}`,
   );
+  const stepStatuses = useVideoStepStatuses(slug, pathname);
   const heading = toolbarHeadingFor(pathname);
   const videoTitle = slug === null ? null : project.data === null ? projectDisplayName({ slug }) : projectDisplayName(project.data);
   const subtitle = heading.subtitleKey === null ? videoTitle : t(heading.subtitleKey);
@@ -36,6 +38,7 @@ export function StudioLayout() {
         slug={slug}
         title={videoTitle}
         isMotion={project.data !== null && projectModeOf(project.data) === 'motion'}
+        statusByPath={stepStatuses}
         footer={
           project.data === null ? undefined : (
             <ProjectBrandControl slug={slug} project={project.data} onChanged={project.reload} />

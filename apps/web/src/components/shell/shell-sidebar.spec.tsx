@@ -6,6 +6,7 @@ import { RenderApiProvider } from '../../api/render-api-context';
 import type { RenderApiClient } from '../../api/render-api-client';
 import { ThemeProvider } from '../../theme/theme-context';
 import { ShellSidebar } from './shell-sidebar';
+import { VideoStepsNav } from './video-steps-nav';
 
 function renderSidebar(pathname: string, videoBlock: React.ReactNode = null) {
   const client = { getHealth: vi.fn().mockRejectedValue(new Error('offline')) } as unknown as RenderApiClient;
@@ -67,5 +68,17 @@ describe('ShellSidebar', () => {
     expect(screen.getByRole('img', { name: 'Video Maker' })).toBeTruthy();
     expect(within(screen.getByTestId('sidebar-footer')).getByText('Appearance')).toBeTruthy();
     expect(screen.getByTestId('language-switch')).toBeTruthy();
+  });
+
+  it('shows the real state of each step of the open video inside the video block', () => {
+    renderSidebar(
+      '/projects/demo',
+      <VideoStepsNav slug="demo" title="Demo" isMotion={false} statusByPath={{ '/library': 'ok', '/voice': 'warn' }} />,
+    );
+    const nav = screen.getByTestId('project-nav');
+
+    expect(within(nav).getByRole('link', { name: 'library' }).getAttribute('data-status')).toBe('ok');
+    expect(within(nav).getByRole('link', { name: 'voice' }).getAttribute('data-status')).toBe('warn');
+    expect(within(nav).getByRole('link', { name: 'storyboard' }).getAttribute('data-status')).toBe('pending');
   });
 });
