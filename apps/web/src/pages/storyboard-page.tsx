@@ -13,7 +13,6 @@ import { ErrorNotice } from '../components/error-notice';
 import { ProducerScriptPanel } from '../components/producer-script-panel';
 import { MotionStoryboardView } from '../components/motion-storyboard-view';
 import { ProjectModeGate } from '../components/project-mode-gate';
-import { LegacySurface } from '../components/shell/legacy-surface';
 import { ToolbarStatus } from '../components/shell/toolbar-status';
 import { SceneList } from '../components/storyboard/scene-list';
 import { sceneStatuses, sceneTimings } from '../components/storyboard/storyboard-model';
@@ -190,11 +189,7 @@ export function StoryboardPage() {
     <ProjectModeGate
       slug={slug}
       footage={<ClassicStoryboardPage />}
-      motion={
-        <LegacySurface>
-          <MotionStoryboardView slug={slug} />
-        </LegacySurface>
-      }
+      motion={<MotionStoryboardView slug={slug} />}
     />
   );
 }

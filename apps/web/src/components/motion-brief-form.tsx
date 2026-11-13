@@ -1,55 +1,34 @@
-import { useId } from 'react';
+import { SegmentedControl } from '@e-burgos/tucu-ui';
 
-import { MUSIC_AUTO, MUSIC_NONE, imageFileName, musicAfterBrandChange } from '../api/motion-brief-form';
+import { MUSIC_AUTO, MUSIC_NONE, musicAfterBrandChange } from '../api/motion-brief-form';
 import type { BriefDraft } from '../api/motion-brief-form';
 import { MOTION_FORMATS } from '../api/motion-types';
 import type { MotionBrand } from '../api/motion-types';
-import type { AssetListEntry } from '../api/render-api-types';
 import { useT } from '../i18n/language-context';
-import { AssetUploader } from './asset-uploader';
+import { CHECKBOX_CLASS, FIELD_CLASS, FIELD_LABEL_CLASS, TEXTAREA_CLASS } from './ui/cl-controls';
 
-const FIELD_CLASS =
-  'w-full rounded-control border border-border-strong bg-surface px-3 py-1.5 text-sm text-ink';
-const LABEL_CLASS = 'block space-y-1 text-sm text-ink-faint';
+const LABEL_CLASS = `flex min-w-0 flex-col gap-1 ${FIELD_LABEL_CLASS}`;
 
 export type MotionBriefFormProps = {
-  slug: string;
   draft: BriefDraft;
   brands: readonly MotionBrand[];
-  imageAssets: readonly AssetListEntry[];
   scriptProblem: boolean;
   onChange: (draft: BriefDraft) => void;
-  onImageUploaded: () => void;
 };
 
-export function MotionBriefForm({
-  slug,
-  draft,
-  brands,
-  imageAssets,
-  scriptProblem,
-  onChange,
-  onImageUploaded,
-}: MotionBriefFormProps) {
+export function MotionBriefForm({ draft, brands, scriptProblem, onChange }: MotionBriefFormProps) {
   const t = useT();
-  const formatLabelId = useId();
   const brand = brands.find((candidate) => candidate.id === draft.brand);
   const formats = brand?.formats ?? MOTION_FORMATS;
   const musicTracks = brand?.music ?? [];
-  const files = imageAssets.map((asset) => imageFileName(asset.path));
 
   function patch(change: Partial<BriefDraft>): void {
     onChange({ ...draft, ...change });
   }
 
-  function patchImage(file: string, change: Partial<{ included: boolean; caption: string }>): void {
-    const current = draft.images[file] ?? { included: false, caption: '' };
-    patch({ images: { ...draft.images, [file]: { ...current, ...change } } });
-  }
-
   return (
-    <div className="space-y-4">
-      <div className="grid gap-3 sm:grid-cols-2">
+    <div className="flex flex-col gap-4">
+      <div className="grid gap-3 sm:grid-cols-2 min-[1280px]:grid-cols-3">
         <label className={LABEL_CLASS}>
           <span>{t('motion.brief.brand')}</span>
           <select
@@ -73,37 +52,24 @@ export function MotionBriefForm({
           </select>
         </label>
 
-        <div className="space-y-1">
-          <p id={formatLabelId} className="text-sm text-ink-faint">
+        <div className="flex min-w-0 flex-col gap-1">
+          <p className={`m-0 ${FIELD_LABEL_CLASS}`}>
             {t('motion.brief.format')}
           </p>
-          <div role="radiogroup" aria-labelledby={formatLabelId} className="flex gap-2">
-            {formats.map((format) => (
-              <label
-                key={format}
-                className="cursor-pointer rounded-control border border-border-strong px-3 py-1.5 text-sm text-ink has-[:checked]:border-accent"
-              >
-                <input
-                  type="radio"
-                  name="motion-format"
-                  value={format}
-                  checked={draft.format === format}
-                  onChange={() => patch({ format })}
-                  className="mr-2"
-                />
-                {format}
-              </label>
-            ))}
+          <div className="glass-thin h-10 w-fit rounded-[10px] p-[3px]">
+            <SegmentedControl
+              size="sm"
+              label={t('motion.brief.format')}
+              options={formats.map((format) => ({ value: format, label: format, 'data-testid': `motion-format-${format}` }))}
+              value={draft.format}
+              onChange={(format) => patch({ format })}
+            />
           </div>
         </div>
 
         <label className={LABEL_CLASS}>
           <span>{t('motion.brief.music')}</span>
-          <select
-            value={draft.music}
-            onChange={(event) => patch({ music: event.target.value })}
-            className={FIELD_CLASS}
-          >
+          <select value={draft.music} onChange={(event) => patch({ music: event.target.value })} className={FIELD_CLASS}>
             {musicTracks.length > 0 && <option value={MUSIC_AUTO}>{t('motion.brief.music.auto')}</option>}
             {musicTracks.map((track) => (
               <option key={track.id} value={track.id}>
@@ -113,41 +79,34 @@ export function MotionBriefForm({
             <option value={MUSIC_NONE}>{t('motion.brief.music.none')}</option>
           </select>
         </label>
-
-        <label className="flex items-center gap-2 self-end text-sm text-ink">
-          <input
-            type="checkbox"
-            checked={draft.beatSync}
-            onChange={(event) => patch({ beatSync: event.target.checked })}
-          />
-          {t('motion.brief.beatSync')}
-        </label>
       </div>
+
+      <label className="flex items-center gap-2 text-sm text-[var(--cl-ink)]">
+        <input
+          type="checkbox"
+          className={CHECKBOX_CLASS}
+          checked={draft.beatSync}
+          onChange={(event) => patch({ beatSync: event.target.checked })}
+        />
+        {t('motion.brief.beatSync')}
+      </label>
 
       <label className={LABEL_CLASS}>
         <span>{t('motion.brief.title')}</span>
-        <input
-          value={draft.title}
-          onChange={(event) => patch({ title: event.target.value })}
-          className={FIELD_CLASS}
-        />
+        <input value={draft.title} onChange={(event) => patch({ title: event.target.value })} className={`${FIELD_CLASS} w-full`} />
       </label>
 
       <div className="grid gap-3 sm:grid-cols-2">
         <label className={LABEL_CLASS}>
           <span>{t('motion.brief.goal')}</span>
-          <input
-            value={draft.goal}
-            onChange={(event) => patch({ goal: event.target.value })}
-            className={FIELD_CLASS}
-          />
+          <input value={draft.goal} onChange={(event) => patch({ goal: event.target.value })} className={`${FIELD_CLASS} w-full`} />
         </label>
         <label className={LABEL_CLASS}>
           <span>{t('motion.brief.audience')}</span>
           <input
             value={draft.audience}
             onChange={(event) => patch({ audience: event.target.value })}
-            className={FIELD_CLASS}
+            className={`${FIELD_CLASS} w-full`}
           />
         </label>
       </div>
@@ -157,54 +116,16 @@ export function MotionBriefForm({
         <textarea
           value={draft.script}
           onChange={(event) => patch({ script: event.target.value })}
-          rows={8}
+          rows={10}
           aria-invalid={scriptProblem}
-          className={FIELD_CLASS}
+          className={`${TEXTAREA_CLASS} w-full`}
         />
       </label>
       {scriptProblem && (
-        <p role="alert" className="text-sm text-warning">
+        <p role="alert" className="m-0 text-sm text-[var(--tucu-state-orange-ink)]">
           {t('motion.brief.scriptRequired')}
         </p>
       )}
-
-      <div className="space-y-2">
-        <h3 className="text-sm font-medium text-ink">{t('motion.brief.images')}</h3>
-        {files.length === 0 ? (
-          <p className="text-sm text-ink-faint">{t('motion.brief.imagesEmpty')}</p>
-        ) : (
-          <ul className="space-y-2">
-            {files.map((file) => {
-              const image = draft.images[file] ?? { included: false, caption: '' };
-              return (
-                <li key={file} className="flex flex-wrap items-center gap-3">
-                  <label className="flex items-center gap-2 text-sm text-ink">
-                    <input
-                      type="checkbox"
-                      aria-label={t('motion.brief.imageInclude', { file })}
-                      checked={image.included}
-                      onChange={(event) => patchImage(file, { included: event.target.checked })}
-                    />
-                    <span className="font-mono text-xs">{file}</span>
-                  </label>
-                  <input
-                    aria-label={t('motion.brief.imageCaption', { file })}
-                    value={image.caption}
-                    onChange={(event) => patchImage(file, { caption: event.target.value })}
-                    className={`${FIELD_CLASS} flex-1`}
-                  />
-                </li>
-              );
-            })}
-          </ul>
-        )}
-        <AssetUploader
-          slug={slug}
-          roles={['image']}
-          fileInputLabel={t('motion.brief.upload')}
-          onUploaded={onImageUploaded}
-        />
-      </div>
     </div>
   );
 }

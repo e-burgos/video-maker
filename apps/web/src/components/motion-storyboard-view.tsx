@@ -1,3 +1,4 @@
+import { StateBadge } from '@e-burgos/tucu-ui';
 import { useEffect, useRef, useState } from 'react';
 import type { VoiceDirection } from '@video-maker/timeline-core';
 
@@ -17,6 +18,8 @@ import { ErrorNotice } from './error-notice';
 import { MotionJobStatus } from './motion-job-status';
 import { MotionViewEmpty, MotionViewShell } from './motion-view-shell';
 import { MusicModeFields } from './music-mode-fields';
+import { useToolbarAction } from './shell/use-toolbar-action';
+import { OPAQUE_MEDIA_FRAME_CLASS, PANEL_CLASS, SECONDARY_BUTTON_SMALL_CLASS } from './ui/cl-controls';
 import { VoiceDirectionEditor } from './voice-direction-editor';
 
 export type MotionStoryboardViewProps = {
@@ -48,25 +51,27 @@ export function groupScenesByChapter(scenes: readonly MotionScene[]): ChapterGro
 function PropValue({ slug, value }: { slug: string; value: MotionPropValue }) {
   if (value.kind === 'image') {
     return (
-      <img
-        src={artifactUrl(slug, motionImagePath(value.file))}
-        alt={value.file}
-        loading="lazy"
-        className="h-16 w-24 rounded-control border border-border-subtle object-cover"
-      />
+      <span className={`${OPAQUE_MEDIA_FRAME_CLASS} h-16 w-24 shrink-0`}>
+        <img
+          src={artifactUrl(slug, motionImagePath(value.file))}
+          alt={value.file}
+          loading="lazy"
+          className="size-full bg-[#0b0d14] object-cover"
+        />
+      </span>
     );
   }
   if (value.kind === 'brand') {
     return (
       <span
         data-testid="motion-brand-chip"
-        className="rounded-full border border-border-strong px-2 py-0.5 font-mono text-xs text-ink-muted"
+        className="glass-thin font-data rounded-full px-2 py-0.5 text-xs text-[var(--cl-ink-2)]"
       >
         {value.ref}
       </span>
     );
   }
-  return <span className="text-sm text-ink">{value.text}</span>;
+  return <span className="text-sm text-[var(--cl-ink)]">{value.text}</span>;
 }
 
 function MeasuredBoxesList({ boxes }: { boxes: readonly MotionMeasuredBox[] }) {
@@ -74,11 +79,14 @@ function MeasuredBoxesList({ boxes }: { boxes: readonly MotionMeasuredBox[] }) {
   const { language } = useLanguage();
   if (boxes.length === 0) return null;
   return (
-    <section data-testid="motion-measured-boxes" className="space-y-1 rounded-panel border border-warning p-3">
-      <h3 className="text-sm font-medium text-ink">{t('motionStoryboard.measuredBoxes.heading')}</h3>
-      <ul className="space-y-1">
+    <section
+      data-testid="motion-measured-boxes"
+      className="flex flex-col gap-1 rounded-[14px] border border-[var(--tucu-state-orange-line)] bg-[var(--tucu-state-orange-soft)] p-3"
+    >
+      <h3 className="m-0 text-sm font-bold text-[var(--cl-ink)]">{t('motionStoryboard.measuredBoxes.heading')}</h3>
+      <ul className="m-0 flex list-none flex-col gap-1 p-0">
         {boxes.map((box) => (
-          <li key={`${box.image}-${box.name}`} className="text-xs text-ink-muted">
+          <li key={`${box.image}-${box.name}`} className="text-xs text-[var(--cl-ink-2)]">
             {t('motionStoryboard.measuredBoxes.item', {
               name: box.name,
               image: box.image,
@@ -113,17 +121,16 @@ function SceneCard({
   return (
     <li
       data-testid="motion-storyboard-scene"
-      className="space-y-2 rounded-panel border border-border-subtle bg-surface-raised/40 p-3"
+      className="glass-sub flex flex-col gap-2 rounded-[12px] p-3"
     >
-      <p className="flex flex-wrap items-center gap-2 font-mono text-xs text-ink-faint">
+      <p className="font-data m-0 flex flex-wrap items-center gap-2 text-xs text-[var(--cl-ink-3)]">
         <span>{index + 1}</span>
         <span>{scene.kind}</span>
         {hasDirection(direction) && (
-          <span
-            data-testid="motion-direction-badge"
-            className="rounded-full border border-accent px-2 py-0.5 text-accent-strong"
-          >
-            {t('voiceDirection.badge')}
+          <span data-testid="motion-direction-badge">
+            <StateBadge tone="purple" size="sm">
+              {t('voiceDirection.badge')}
+            </StateBadge>
           </span>
         )}
         {timing !== undefined && (
@@ -134,13 +141,13 @@ function SceneCard({
           </span>
         )}
       </p>
-      <p className="text-sm text-ink">{scene.vo}</p>
+      <p className="m-0 text-sm text-[var(--cl-ink)]">{scene.vo}</p>
       {entries.length > 0 && (
-        <dl className="space-y-1">
+        <dl className="m-0 flex flex-col gap-1">
           {entries.map((entry) => (
             <div key={entry.name} className="flex flex-wrap items-center gap-2">
-              <dt className="font-mono text-xs text-ink-faint">{entry.name}</dt>
-              <dd className="flex flex-wrap items-center gap-2">
+              <dt className="font-data text-xs text-[var(--cl-ink-3)]">{entry.name}</dt>
+              <dd className="m-0 flex flex-wrap items-center gap-2">
                 {entry.values.map((value, position) => (
                   <PropValue key={position} slug={slug} value={value} />
                 ))}
@@ -169,12 +176,9 @@ function StoryboardHeader({
   const t = useT();
 
   return (
-    <div
-      data-testid="motion-storyboard-header"
-      className="space-y-1 rounded-panel border border-border-subtle p-4"
-    >
-      <h2 className="text-lg font-medium text-ink">{storyboard.title}</h2>
-      <p className="flex flex-wrap gap-x-4 gap-y-1 font-mono text-xs text-ink-faint">
+    <div data-testid="motion-storyboard-header" className={PANEL_CLASS}>
+      <h2 className="m-0 text-base font-bold text-[var(--cl-ink)]">{storyboard.title}</h2>
+      <p className="font-data m-0 flex flex-wrap gap-x-4 gap-y-1 text-xs text-[var(--cl-ink-2)]">
         <span>{t('motionStoryboard.brand', { brand: storyboard.brand })}</span>
         <span>{t('motionStoryboard.format', { format: storyboard.format })}</span>
         <span>
@@ -215,11 +219,22 @@ export function MotionStoryboardView({ slug }: MotionStoryboardViewProps) {
     draft.saveAction.status === 'pending' ||
     draft.regenerateAction.status === 'pending' ||
     (jobId !== null && (poll.polling || job === null));
+  const regenerating = draft.regenerateAction.status === 'pending';
+
+  useToolbarAction(
+    storyboard === null
+      ? null
+      : {
+          label: regenerating ? t('motionDirection.regenerating') : t('motionDirection.regenerate'),
+          onClick: () => void draft.regenerate(),
+          disabled: !draft.valid || busy,
+          loading: regenerating,
+        },
+  );
 
   return (
     <MotionViewShell
       slug={slug}
-      title={t('motionStoryboard.title')}
       testId="motion-storyboard-view"
       loading={overview.status === 'loading'}
       error={overview.error}
@@ -243,8 +258,9 @@ export function MotionStoryboardView({ slug }: MotionStoryboardViewProps) {
           />
 
           {draft.music !== null && (
-            <div className="rounded-panel border border-border-subtle p-4">
+            <div className={PANEL_CLASS}>
               <MusicModeFields
+                surface="glass"
                 mode={draft.music.mode}
                 floorText={draft.music.floorText}
                 onModeChange={draft.setMusicMode}
@@ -253,11 +269,8 @@ export function MotionStoryboardView({ slug }: MotionStoryboardViewProps) {
             </div>
           )}
 
-          <div
-            data-testid="motion-direction-bar"
-            className="flex flex-wrap items-center gap-3 rounded-panel border border-border-subtle p-3"
-          >
-            <span data-testid="motion-direction-count" className="font-mono text-xs text-ink-faint">
+          <div data-testid="motion-direction-bar" className="glass flex flex-wrap items-center gap-3 rounded-[20px] p-4">
+            <span data-testid="motion-direction-count" className="font-data text-xs text-[var(--cl-ink-2)]">
               {t('motionDirection.directedCount', {
                 count: directedSceneCount(storyboard, draft.edits),
               })}
@@ -266,59 +279,55 @@ export function MotionStoryboardView({ slug }: MotionStoryboardViewProps) {
               type="button"
               disabled={!draft.dirty || !draft.valid || busy}
               onClick={() => void draft.save()}
-              className="rounded-control border border-border-strong px-3 py-1.5 text-sm text-ink disabled:opacity-40"
+              className={SECONDARY_BUTTON_SMALL_CLASS}
             >
               {draft.saveAction.status === 'pending'
                 ? t('motionDirection.saving')
                 : t('motionDirection.save')}
             </button>
-            <button
-              type="button"
-              disabled={!draft.valid || busy}
-              onClick={() => void draft.regenerate()}
-              className="rounded-control border border-accent px-3 py-1.5 text-sm text-ink disabled:opacity-40"
-            >
-              {draft.regenerateAction.status === 'pending'
-                ? t('motionDirection.regenerating')
-                : t('motionDirection.regenerate')}
-            </button>
             {draft.dirty && (
-              <span className="text-xs text-warning">{t('motionDirection.dirty')}</span>
+              <StateBadge tone="orange" dot size="sm">
+                {t('motionDirection.dirty')}
+              </StateBadge>
             )}
             {draft.saved && !draft.dirty && (
-              <span role="status" className="text-xs text-success">
-                {t('motionDirection.saved')}
+              <span role="status">
+                <StateBadge tone="green" dot size="sm">
+                  {t('motionDirection.saved')}
+                </StateBadge>
               </span>
             )}
           </div>
 
-          {draft.saveAction.error !== null && <ErrorNotice error={draft.saveAction.error} />}
-          {draft.regenerateAction.error !== null && <ErrorNotice error={draft.regenerateAction.error} />}
+          {draft.saveAction.error !== null && <ErrorNotice surface="glass" error={draft.saveAction.error} />}
+          {draft.regenerateAction.error !== null && <ErrorNotice surface="glass" error={draft.regenerateAction.error} />}
           {job !== null && <MotionJobStatus job={job} onRetried={(retried) => setJobId(retried.id)} />}
-          {poll.error !== null && job === null && <ErrorNotice error={poll.error} />}
+          {poll.error !== null && job === null && <ErrorNotice surface="glass" error={poll.error} />}
 
-          {groupScenesByChapter(storyboard.scenes).map((group, position) => (
-            <div key={`${group.chapter ?? 'none'}-${position}`} className="space-y-2">
-              {group.chapter !== null && (
-                <h3 data-testid="motion-storyboard-chapter" className="text-sm font-medium text-ink">
-                  {group.chapter}
-                </h3>
-              )}
-              <ol className="space-y-2">
-                {group.scenes.map(({ scene, index }) => (
-                  <SceneCard
-                    key={scene.id}
-                    slug={slug}
-                    scene={scene}
-                    index={index}
-                    timing={timings.get(scene.id)}
-                    direction={draft.directionOf(scene)}
-                    onDirectionChange={(next) => draft.setDirection(scene.id, next)}
-                  />
-                ))}
-              </ol>
-            </div>
-          ))}
+          <section className={PANEL_CLASS}>
+            {groupScenesByChapter(storyboard.scenes).map((group, position) => (
+              <div key={`${group.chapter ?? 'none'}-${position}`} className="flex flex-col gap-2">
+                {group.chapter !== null && (
+                  <h3 data-testid="motion-storyboard-chapter" className="m-0 text-sm font-bold text-[var(--cl-ink)]">
+                    {group.chapter}
+                  </h3>
+                )}
+                <ol className="m-0 flex list-none flex-col gap-2 p-0">
+                  {group.scenes.map(({ scene, index }) => (
+                    <SceneCard
+                      key={scene.id}
+                      slug={slug}
+                      scene={scene}
+                      index={index}
+                      timing={timings.get(scene.id)}
+                      direction={draft.directionOf(scene)}
+                      onDirectionChange={(next) => draft.setDirection(scene.id, next)}
+                    />
+                  ))}
+                </ol>
+              </div>
+            ))}
+          </section>
         </>
       )}
     </MotionViewShell>

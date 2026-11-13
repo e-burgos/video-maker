@@ -17,7 +17,6 @@ import { parseVoiceScriptManifest } from '../api/parse-voice-script';
 import type { AssetListing, VoiceDocument, VoiceTrack } from '../api/render-api-types';
 import { MotionVoiceView } from '../components/motion-voice-view';
 import { ProjectModeGate } from '../components/project-mode-gate';
-import { LegacySurface } from '../components/shell/legacy-surface';
 import { PRIMARY_BUTTON_SMALL_CLASS } from '../components/ui/cl-controls';
 
 export const VOICE_NOT_FOUND = 'VOICE_NOT_FOUND';
@@ -184,11 +183,7 @@ export function VoicePage() {
     <ProjectModeGate
       slug={slug}
       footage={<ClassicVoicePage />}
-      motion={
-        <LegacySurface>
-          <MotionVoiceView slug={slug} />
-        </LegacySurface>
-      }
+      motion={<MotionVoiceView slug={slug} />}
     />
   );
 }

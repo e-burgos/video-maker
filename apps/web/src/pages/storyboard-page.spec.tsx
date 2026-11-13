@@ -322,7 +322,7 @@ describe('storyboard page in a motion project', () => {
     });
 
     expect(await screen.findByTestId('motion-storyboard-view')).toBeTruthy();
-    expect(screen.getByTestId('legacy-surface').contains(screen.getByTestId('motion-storyboard-view'))).toBe(true);
+    expect(screen.queryByTestId('legacy-surface')).toBeNull();
     expect(classicLoaders.getStoryboard).not.toHaveBeenCalled();
     expect(classicLoaders.getVoice).not.toHaveBeenCalled();
     expect(classicLoaders.getTimeline).not.toHaveBeenCalled();

@@ -30,3 +30,8 @@ export const INLINE_LABEL_CLASS = 'flex items-center gap-2 text-xs text-[var(--c
 export const CHECK_LABEL_CLASS = 'flex items-center gap-2 text-sm text-[var(--cl-ink)]';
 export const ROW_CLASS = 'glass-sub flex flex-wrap items-center gap-2 rounded-[12px] p-2.5';
 export const WARNING_LIST_CLASS = 'font-data m-0 flex list-none flex-col gap-0.5 p-0 text-xs text-[var(--tucu-state-orange-ink)]';
+export const TOOLBAR_SECONDARY_BUTTON_CLASS =
+  'focus-cl glass-sub whitespace-nowrap rounded-[10px] px-4 py-2 text-sm font-semibold text-[var(--cl-ink)] hover:border-[var(--cl-ink-3)] disabled:cursor-not-allowed disabled:opacity-50';
+export const PANEL_CLASS = 'glass flex min-w-0 flex-col gap-3 rounded-[20px] p-4';
+export const PANEL_HEADING_CLASS = 'm-0 text-[15px] font-bold text-[var(--cl-ink)]';
+export const OPAQUE_MEDIA_FRAME_CLASS = 'overflow-hidden rounded-[12px] bg-[#0b0d14]';
