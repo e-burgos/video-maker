@@ -1,134 +1,17 @@
-import { useCallback } from 'react';
+import { useState } from 'react';
 
-import { dedupeHealthCategoryKeys } from '../api/health-categories';
-import { useRenderApi } from '../api/render-api-context';
-import { useAsyncResource } from '../hooks/use-async-resource';
-import { useT } from '../i18n/language-context';
-import type { TranslateFn } from '../i18n/language-context';
-import type { ServiceHealth } from '../api/render-api-types';
-
-const DOT_CLASS_BY_STATE: Readonly<Record<string, string>> = {
-  ok: 'bg-emerald-400',
-  degraded: 'bg-amber-400',
-  unreachable: 'bg-rose-500',
-  loading: 'bg-slate-500',
-};
-
-function missingParts(health: ServiceHealth): string[] {
-  return [
-    ...health.engine.filter((module) => !module.loaded).map((module) => module.name),
-    ...health.binaries.filter((binary) => !binary.resolved).map((binary) => binary.name),
-  ];
-}
-
-function healthLabel(
-  state: string,
-  health: { data: ServiceHealth | null; error: { code: string } | null },
-  t: TranslateFn,
-): string {
-  if (state === 'loading') {
-    return t('health.checking');
-  }
-  if (state === 'unreachable') {
-    return t('health.unreachable', { code: health.error?.code ?? 'UNKNOWN' });
-  }
-  if (state === 'degraded') {
-    const categories = dedupeHealthCategoryKeys(missingParts(health.data as ServiceHealth));
-    return t('health.degraded', {
-      parts: categories.map((key) => t(key)).join(', '),
-    });
-  }
-  return t('health.ok');
-}
+import { ServiceHealthModal } from './shell/service-health-modal';
+import { ServiceHealthTrigger } from './shell/service-health-trigger';
+import { useServiceHealth } from './shell/use-service-health';
 
 export function ServiceHealthBadge() {
-  const client = useRenderApi();
-  const load = useCallback(() => client.getHealth(), [client]);
-  const health = useAsyncResource(load, 'health');
-  const t = useT();
-
-  const state =
-    health.status === 'loading' ? 'loading' : health.status === 'error' ? 'unreachable' : (health.data?.status ?? 'unreachable');
-
-  const label = healthLabel(state, health, t);
-
-  const detail = health.data;
+  const { state, label, detail, reload } = useServiceHealth();
+  const [isOpen, setIsOpen] = useState(false);
 
   return (
-    <div className="relative flex flex-wrap items-center gap-2">
-      <button
-        type="button"
-        onClick={health.reload}
-        title={t('health.recheck')}
-        className="focus-cl flex min-w-0 items-center gap-2 rounded-full border border-[var(--tucu-glass-sub-line)] bg-[var(--tucu-glass-sub-bg)] px-3 py-1.5 text-left text-xs text-[var(--cl-ink-2)] hover:border-[var(--cl-ink-3)]"
-      >
-        <span
-          aria-hidden="true"
-          className={`size-2 rounded-full ${DOT_CLASS_BY_STATE[state] ?? DOT_CLASS_BY_STATE['loading']}`}
-        />
-        <span data-testid="service-health-label">{label}</span>
-      </button>
-
-      <details className="text-xs">
-        <summary className="focus-cl cursor-pointer list-none rounded-full border border-[var(--tucu-glass-sub-line)] px-2 py-1 text-[var(--cl-ink-3)] hover:border-[var(--cl-ink-3)]">
-          {t('health.details')}
-        </summary>
-        <div
-          data-testid="service-health-details"
-          className="absolute bottom-full left-0 z-20 mb-2 w-72 space-y-3 rounded-lg border border-slate-700 bg-slate-950 p-3 text-left text-slate-300"
-        >
-          {detail === null ? (
-            <p className="text-slate-400">{t('health.empty')}</p>
-          ) : (
-            <>
-              <div className="space-y-1">
-                <p className="font-mono uppercase tracking-wide text-slate-500">{t('health.engine')}</p>
-                <ul className="space-y-0.5 font-mono">
-                  {detail.engine.map((module) => (
-                    <li key={module.name} className={module.loaded ? 'text-slate-300' : 'text-rose-300'}>
-                      {module.name} · {module.loaded ? t('health.loaded') : t('health.notLoaded')}
-                    </li>
-                  ))}
-                </ul>
-              </div>
-
-              <div className="space-y-1">
-                <p className="font-mono uppercase tracking-wide text-slate-500">
-                  {t('health.binaries')}
-                </p>
-                <ul data-testid="service-health-binaries" className="space-y-0.5 font-mono">
-                  {detail.binaries.map((binary) => (
-                    <li
-                      key={binary.name}
-                      className={binary.resolved ? 'text-slate-300' : 'text-rose-300'}
-                    >
-                      {binary.name} · {binary.envVar} ·{' '}
-                      {binary.resolved ? t('health.resolved') : t('health.missing')}
-                    </li>
-                  ))}
-                </ul>
-              </div>
-
-              <div className="space-y-1">
-                <p className="font-mono uppercase tracking-wide text-slate-500">
-                  {t('health.capabilities')}
-                </p>
-                <ul data-testid="service-health-capabilities" className="space-y-0.5 font-mono">
-                  {Object.entries(detail.capabilities).map(([capability, enabled]) => (
-                    <li key={capability} className={enabled ? 'text-slate-300' : 'text-amber-300'}>
-                      {capability} · {enabled ? t('health.on') : t('health.off')}
-                    </li>
-                  ))}
-                </ul>
-              </div>
-
-              <p className="font-mono text-slate-500">
-                {t('health.jobs', { running: detail.jobs.running, queued: detail.jobs.queued })}
-              </p>
-            </>
-          )}
-        </div>
-      </details>
-    </div>
+    <>
+      <ServiceHealthTrigger state={state} label={label} onOpen={() => setIsOpen(true)} />
+      <ServiceHealthModal isOpen={isOpen} setIsOpen={setIsOpen} detail={detail} reload={reload} />
+    </>
   );
 }

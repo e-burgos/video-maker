@@ -1,4 +1,4 @@
-import { fireEvent, render, screen, waitFor } from '@testing-library/react';
+import { fireEvent, render, screen, waitFor, within } from '@testing-library/react';
 import { describe, expect, it, vi } from 'vitest';
 
 import { RenderApiProvider } from '../api/render-api-context';
@@ -57,6 +57,10 @@ function renderBadge(client: RenderApiClient) {
   );
 }
 
+function openDetails(): void {
+  fireEvent.click(screen.getByTestId('service-health-trigger'));
+}
+
 describe('ServiceHealthBadge', () => {
   it('reports the healthy service as ready', async () => {
     renderBadge(clientWith(() => Promise.resolve(health())));
@@ -100,7 +104,7 @@ describe('ServiceHealthBadge', () => {
     );
   });
 
-  it('re-checks the service when the badge is clicked', async () => {
+  it('re-checks the service from the modal footer', async () => {
     const getHealth = vi
       .fn()
       .mockResolvedValueOnce(health({ status: 'degraded', engine: [{ name: 'ffmpeg', loaded: false }], binaries: [] }))
@@ -110,7 +114,8 @@ describe('ServiceHealthBadge', () => {
     await waitFor(() =>
       expect(screen.getByTestId('service-health-label').textContent).toContain('Missing'),
     );
-    fireEvent.click(screen.getByTitle('Re-check the render service'));
+    openDetails();
+    fireEvent.click(within(screen.getByTestId('service-health-modal')).getByTitle('Re-check the render service'));
     await waitFor(() =>
       expect(screen.getByTestId('service-health-label').textContent).toBe('Ready'),
     );
@@ -119,6 +124,8 @@ describe('ServiceHealthBadge', () => {
   it('lists the six media binaries with their env var and resolution state (US-2-007, US-09-012)', async () => {
     renderBadge(clientWith(() => Promise.resolve(health())));
 
+    await waitFor(() => expect(screen.getByTestId('service-health-label').textContent).not.toBe('checking service'));
+    openDetails();
     await waitFor(() => expect(screen.getByTestId('service-health-binaries')).toBeTruthy());
     const rows = Array.from(screen.getByTestId('service-health-binaries').children).map(
       (row) => row.textContent,
@@ -137,6 +144,8 @@ describe('ServiceHealthBadge', () => {
   it('reports every queue among the capabilities (US-2-007, US-08-010, US-09-012)', async () => {
     renderBadge(clientWith(() => Promise.resolve(health())));
 
+    await waitFor(() => expect(screen.getByTestId('service-health-label').textContent).not.toBe('checking service'));
+    openDetails();
     await waitFor(() => expect(screen.getByTestId('service-health-capabilities')).toBeTruthy());
     const rows = Array.from(screen.getByTestId('service-health-capabilities').children).map(
       (row) => row.textContent,
@@ -167,6 +176,8 @@ describe('ServiceHealthBadge', () => {
       ),
     );
 
+    await waitFor(() => expect(screen.getByTestId('service-health-label').textContent).not.toBe('checking service'));
+    openDetails();
     await waitFor(() => expect(screen.getByTestId('service-health-binaries')).toBeTruthy());
     const rows = Array.from(screen.getByTestId('service-health-binaries').children).map(
       (row) => row.textContent,
@@ -199,6 +210,8 @@ describe('ServiceHealthBadge', () => {
       ),
     );
 
+    await waitFor(() => expect(screen.getByTestId('service-health-label').textContent).not.toBe('checking service'));
+    openDetails();
     await waitFor(() => expect(screen.getByTestId('service-health-binaries')).toBeTruthy());
     expect(screen.getByTestId('service-health-binaries').textContent).toBe(
       'whisperModel · WHISPER_MODEL_PATH · missing',
@@ -216,9 +229,48 @@ describe('ServiceHealthBadge', () => {
     );
 
     await waitFor(() =>
-      expect(screen.getByTestId('service-health-details').textContent).toBe(
-        'No health document read yet.',
-      ),
+      expect(screen.getByTestId('service-health-label').textContent).toContain('unreachable'),
     );
+    openDetails();
+    expect(screen.getByTestId('service-health-details').textContent).toBe(
+      'No health document read yet.',
+    );
+  });
+
+  it('keeps the modal closed until the status control is used, then closes with Escape', async () => {
+    renderBadge(clientWith(() => Promise.resolve(health())));
+
+    await waitFor(() => expect(screen.getByTestId('service-health-label').textContent).toBe('Ready'));
+    expect(screen.queryByTestId('service-health-details')).toBeNull();
+
+    openDetails();
+    expect(screen.getByRole('dialog').textContent).toContain('Service status');
+
+    fireEvent.keyDown(screen.getByRole('dialog'), { key: 'Escape' });
+    await waitFor(() => expect(screen.queryByTestId('service-health-details')).toBeNull());
+  });
+
+  it('shows the four sections and names the control after its state plus the details', async () => {
+    renderBadge(clientWith(() => Promise.resolve(health())));
+
+    await waitFor(() => expect(screen.getByTestId('service-health-label').textContent).toBe('Ready'));
+    expect(screen.getByTestId('service-health-trigger').getAttribute('aria-label')).toBe('Ready, details');
+    openDetails();
+
+    const details = within(screen.getByTestId('service-health-details'));
+    ['engines', 'binaries', 'capabilities', 'jobs'].forEach((title) => {
+      expect(details.getByRole('heading', { name: title })).toBeTruthy();
+    });
+    expect(details.getByText('0 running · 0 queued')).toBeTruthy();
+  });
+
+  it('closes from the footer button', async () => {
+    renderBadge(clientWith(() => Promise.resolve(health())));
+
+    await waitFor(() => expect(screen.getByTestId('service-health-label').textContent).toBe('Ready'));
+    openDetails();
+    fireEvent.click(screen.getByTestId('service-health-close'));
+
+    await waitFor(() => expect(screen.queryByTestId('service-health-details')).toBeNull());
   });
 });
