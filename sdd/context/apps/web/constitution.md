@@ -1,6 +1,6 @@
 # Constitución — apps/web
 
-> Versión 3.2 | Última actualización: consolidación de fragmentos | Fecha: 2026-11-13
+> Versión 3.3 | Última actualización: spec-025 cycle-03 (biblioteca, visor, storyboard y voz) | Fecha: 2026-11-13
 
 ## 1. Propósito
 
@@ -23,7 +23,8 @@
   video» con sus pasos, toolbar con una sola acción por página (`useToolbarAction`) y pie con estado
   del servicio (modal), switch de idioma y apariencia (sistema/claro/oscuro); las pantallas aún no
   migradas se muestran en una superficie heredada oscura y opaca (`isMigratedRoute`; ya migradas: Mis
-  videos `/` y el espacio de trabajo `/projects/:slug` exacto, con las subrutas del video aún heredadas; los pasos
+  videos `/`, el espacio de trabajo `/projects/:slug` exacto, `/library`, `/storyboard` y `/voice`; vista previa y motion aún heredadas
+  vía `components/shell/legacy-surface.tsx`, que se retira al migrar motion; los pasos
   del video en la sidebar muestran estado real con `useVideoStepStatuses`). En el espacio de trabajo el chat del
   productor y el primer uso van a la izquierda; la vista previa queda siempre visible sobre escenario opaco, con
   Material | Entregas a la derecha; el estado de la propuesta vive en el slot de estado del toolbar y «Aprobar el
@@ -91,7 +92,10 @@ src/
                 heredada, pie con `footer-control-style.ts` → `FOOTER_CONTROL_CLASS`, modal de estado
                 del servicio, `use-video-step-statuses` · `toolbar-status` + `toolbar-status-context`) · service-health-badge · error-notice · elevenlabs-settings-section · create-project-form ·
                 voice-picker ·
-                asset-card · asset-delete-control · asset-preview · asset-uploader ·
+                library/ (grilla de tiles opacos, filtro y resumen por rol, barra de selección, diálogo de borrado
+                múltiple) · media-viewer/ (visor `role="dialog"` en portal z-70, modelo, escenario, tira de miniaturas,
+                detalle, foco atrapado, teclado y comparación lado a lado) · storyboard/ (lista de escenas y modelo,
+                `storyboard-save-bar.tsx` pegajosa) · asset-uploader ·
                 generated-files-panel · timeline-player ·
                 clip-track-editor · caption-editor · caption-style-selector · music-mix-editor ·
                 output-preset-selector ·
@@ -107,7 +111,7 @@ src/
                 workspace-side-panel · producer-conversation-panel · chat-drop-zone ·
                 asset-proposal-card · video-card · home-drop-hint · create-project-by-drop ·
                 videos/ (Mis videos) · workspace/ (vista previa, Material, Entregas) ·
-                ui/{button,card,badge,tabs,overflow-menu,cl-controls,brand-mark} (`brand-mark.tsx` lo genera
+                ui/{button,card,badge,tabs,overflow-menu,cl-controls (suma `TEXTAREA_CLASS`),brand-mark} (`brand-mark.tsx` lo genera
                 `design/rebranding/logo/build-logo.mjs`, etiquetas por prop desde el catálogo;
                 tokens en `index.css` bajo `@theme`)
   pages/        projects-page · asset-library-page · project-workspace-page · storyboard-page ·
@@ -242,13 +246,10 @@ e2e/            smoke-helpers.mjs (compartido) · studio-smoke.mjs · montage-sm
   `numberedOptions`, todo puro. La lista de bloques salió de mirar lo que el agente **realmente**
   contesta, no de un subset teórico de CommonMark.
 - **`media/` nunca se copia a `apps/web/public`** (D-6): todo asset se lee por `EP-011`.
-- **El borrado de assets es una máquina de tres pasos en la propia tarjeta**
-  (`asset-delete-control.tsx`: `closed` → `confirm` → `in-use`), no un modal: si el servicio
-  contesta `409 ASSET_IN_USE` la confirmación pasa a mostrar los usos reportados y ofrece **Delete
-  anyway** (reintento con `force=true`); al confirmar se recarga el listado. `AssetCard` sólo
-  expone `onDeleted` y `data-testid="asset-card"` + `data-asset-path` para que el E2E ubique una
-  tarjeta concreta. No hay borrado múltiple ni deshacer: un borrado con `force` puede romper la
-  timeline y la UI sólo avisa.
+- **El borrado de assets vive en la biblioteca** (`components/library/`): selección múltiple con barra de
+  selección y diálogo de borrado múltiple; si el servicio contesta `409 ASSET_IN_USE` el diálogo muestra los
+  usos reportados y ofrece reintento con `force=true`; al confirmar se recarga el listado. No hay deshacer: un
+  borrado con `force` puede romper la timeline y la UI sólo avisa.
 - **La sección "Generated" de la biblioteca** (`generated-files-panel.tsx`) lee las rutas conocidas
   del motor (`work/voice/voice.wav`, `work/producer/script.txt`, `work/voice/script-manifest.json`
   y los `out/*.mp4`) vía `listGenerated` (`EP-028`) y `getProjectFile` (`EP-011`, que arma la URL
@@ -383,7 +384,7 @@ e2e/            smoke-helpers.mjs (compartido) · studio-smoke.mjs · montage-sm
   `asset-role-required` y `asset-role-hint`. Los de `cycle-02` de `spec-016` (i18n y guía) suman
   `language-switch` (con `data-language` por botón), `guide-nav`, `guide`, `guide-index`,
   `guide-section` (con `data-guide-section` y `data-guide-language`) y `error-technical-detail`.
-  `FIX-005-001` suma `asset-card` (con `data-asset-path`) para el borrado. Si se renombran, hay
+  `asset-card` y `data-asset-path` ya no existen: la biblioteca migrada reemplazó la tarjeta. Si se renombran, hay
   que actualizar los guiones.
 - **Cada ciclo cierra con al menos una captura real de Playwright** de la UI contra un `render-api`
   real, en `cycles/cycle-XX/artifacts/` (D-10, RNF-5). `lint`/`test`/`build` verdes no prueban que
