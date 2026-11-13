@@ -14,7 +14,7 @@ const CANVAS_BACKGROUND: Record<WindowTheme, string> = {
   light: '#e8eaf0',
 };
 
-const TRAFFIC_LIGHT_POSITION = { x: 16, y: 16 };
+const TRAFFIC_LIGHT_POSITION = { x: 26, y: 28 };
 
 export function windowTheme(shouldUseDarkColors: boolean): WindowTheme {
   return shouldUseDarkColors ? 'dark' : 'light';

@@ -22,12 +22,16 @@ export function ThemeSwitch() {
     <div className="flex flex-col gap-3">
       <SegmentedControl
         label={t('theme.label')}
+        size="xs"
+        fullWidth
         options={themeOptions}
         value={theme}
         onChange={(next) => setTheme(next as ThemePreference)}
       />
       <SegmentedControl
         label={t('material.label')}
+        size="xs"
+        fullWidth
         options={materialOptions}
         value={material}
         onChange={(next) => setMaterial(next as MaterialPreference)}

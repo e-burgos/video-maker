@@ -30,7 +30,7 @@ describe('mainWindowOptions', () => {
 
   it('hides the native title bar and places the traffic lights over the sidebar', () => {
     expect(options.titleBarStyle).toBe('hiddenInset');
-    expect(options.trafficLightPosition).toEqual({ x: 16, y: 16 });
+    expect(options.trafficLightPosition).toEqual({ x: 26, y: 28 });
   });
 
   it('stays opaque, themed and hidden until ready to avoid a flash', () => {

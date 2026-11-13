@@ -75,3 +75,8 @@
 - Costo del blur, orientativo (Chromium headless con render por software, scroll de 3 s en Mis videos con 87 videos): 52 cuadros por segundo con vidrio contra 116 con materiales sólidos. En GPU real debería ser menor la diferencia, pero no se pudo medir; por eso el interruptor «Materiales sólidos» queda como válvula de escape y hay que medir en la app real.
 - Los 56 errores de consola de la corrida son 404 de la API por datos que ese video no tiene (voz, storyboard, revisiones, vista previa de marca sin generar); ya existían y no vienen del shell.
 
+## Revisión en la app real (Electron de desarrollo, con el dev)
+- Botones de ventana: en (16, 16) quedaban pegados a la esquina redondeada de la sidebar; pasaron a (26, 28) y el espacio reservado arriba del logo bajó de 36 a 32 px. Confirmado por el dev en la ventana real.
+- Controles de apariencia: el SegmentedControl con tamaño por defecto se salía del pie de 192 px (el «Dark» quedaba cortado). Ahora van con size xs y fullWidth; medido en es/en y claro/oscuro: 192 px de ancho, sin scroll horizontal, terminan dentro del pie. Es el mismo componente en la web y en Electron.
+- Pendiente de esta revisión: el panel flotante de «detalles» del estado del servicio pisa la sidebar y el contenido; pasa a un modal de tucu-ui y el pie se reorganiza (estado, detalles e idioma).
+

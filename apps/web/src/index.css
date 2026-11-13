@@ -241,7 +241,7 @@ html[data-material='solid'] .glass-thick {
 }
 
 html[data-shell='electron'] [data-testid='shell-sidebar-brand'] {
-  padding-top: 36px;
+  padding-top: 32px;
 }
 
 html[data-shell='electron'] [data-testid='shell-toolbar'] {
