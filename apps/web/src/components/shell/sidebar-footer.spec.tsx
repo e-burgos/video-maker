@@ -35,7 +35,9 @@ describe('SidebarFooter', () => {
   it('keeps the language switch as two pressed-aware options inside the footer', () => {
     renderFooter();
 
-    const options = within(screen.getByTestId('language-switch')).getAllByRole('button');
+    const options = within(screen.getByTestId('language-switch'))
+      .getAllByRole('button')
+      .filter((option) => option.hasAttribute('data-language'));
     expect(options.map((option) => option.getAttribute('data-language'))).toEqual(['en', 'es']);
     expect(options.filter((option) => option.getAttribute('aria-pressed') === 'true')).toHaveLength(1);
   });

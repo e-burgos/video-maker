@@ -251,3 +251,13 @@ html[data-shell='electron'] [data-testid='shell-toolbar'] {
 html[data-shell='electron'] [data-testid='shell-toolbar'] :is(button, a, input, select, textarea, [role='button']) {
   -webkit-app-region: no-drag;
 }
+
+[data-testid='language-switch'] [data-tucu='switch-control'] {
+  background-color: color-mix(in srgb, var(--cl-ink) 16%, transparent);
+  border: 0.5px solid var(--tucu-glass-sub-line);
+}
+
+[data-testid='language-switch'] [data-tucu='switch-control'][aria-checked='true'] {
+  background-color: color-mix(in srgb, var(--cl-action) 55%, transparent);
+}
+
