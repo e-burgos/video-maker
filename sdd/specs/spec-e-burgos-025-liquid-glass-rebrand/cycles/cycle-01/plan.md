@@ -61,3 +61,17 @@
 - Provisorio: el `ThemeSwitch` vive en un `Collapse` «Apariencia» del pie de la sidebar hasta que el ciclo 05 lo pase a Ajustes; en el riel (< 1100 px) ese pie solo muestra el idioma.
 - Los testids de los e2e (`project-nav`, `brands-nav`, `publish-queue-nav`, `settings-nav`, `guide-nav`, `language-switch`) se mantuvieron.
 
+## Electron (TASK-005, commit c8b1fab)
+- `apps/desktop/src/main/window-options.ts`: funciones puras `mainWindowOptions(theme)` y `setupWindowOptions(theme, preload)`; ventana principal 1280×800 con mínimo 960×640, `titleBarStyle: 'hiddenInset'`, botones en (16, 16), `backgroundColor` `#101322`/`#e8eaf0` según `nativeTheme`, `show: false` y `show()` en `ready-to-show`, sin `transparent` ni `vibrancy`. La ventana de configuración inicial (640×760 fija) usa el mismo lenguaje: aurora, tarjeta de vidrio, acción azul y marca con la firma.
+- Ícono: `mac.icon: apps/desktop/build/icon.icns` explícito, porque electron-builder se invoca desde la raíz del repo y el `build/` por defecto no se resolvía.
+- Web: `html[data-shell='electron']` (por el user agent `Electron/`) reserva 36 px arriba del logo para los botones de ventana y vuelve zona de arrastre al toolbar, con botones, links e inputs en `no-drag`.
+- Corrección de paso: `desktop:lint` estaba roto desde TASK-002 (backticks sin escapar en la plantilla de `THIRD_PARTY_NOTICES.md`, `vendor-binaries.mjs`).
+- **Sin verificar en la app real**: no se lanzó Electron. Queda por probar a mano la altura de los botones de ventana contra la sidebar, que los botones del toolbar sigan clicables con la zona de arrastre, el destello de apertura, el ícono empaquetado y el `backdrop-filter` de la ventana de configuración. Si el usuario eligió un tema distinto al del sistema, el fondo inicial puede diferir un instante (el main no lee el `localStorage`).
+
+## Verificación del ciclo (TASK-006)
+- Script reproducible `design/rebranding/verify-cycle.mjs`; resultados en `artifacts/task006-verificacion.json` y 48 capturas (12 pantallas × claro/oscuro × 1440/900 px).
+- Contraste AA medido sobre el fondo real renderizado (texto transparente + muestreo de píxeles): salieron cinco por debajo de 4,5:1 (rótulo de sección en claro 4,34 e ítem/paso activo 3,76 en claro y 3,8 en oscuro). Corregido con `--cl-ink-3` (`#5c5c61`) y el token nuevo `--cl-action-text` (`#0353c9` claro, `#8cc2ff` oscuro) para el texto activo; ahora todo ≥ 4,5:1.
+- `prefers-reduced-transparency` apaga el blur (`backdrop-filter: none`), `prefers-contrast: more` pasa el borde a 1 px y `data-material="solid"` también apaga el blur; `prefers-reduced-motion` se respeta (el contexto y las pantallas no animan nada en loop).
+- Costo del blur, orientativo (Chromium headless con render por software, scroll de 3 s en Mis videos con 87 videos): 52 cuadros por segundo con vidrio contra 116 con materiales sólidos. En GPU real debería ser menor la diferencia, pero no se pudo medir; por eso el interruptor «Materiales sólidos» queda como válvula de escape y hay que medir en la app real.
+- Los 56 errores de consola de la corrida son 404 de la API por datos que ese video no tiene (voz, storyboard, revisiones, vista previa de marca sin generar); ya existían y no vienen del shell.
+

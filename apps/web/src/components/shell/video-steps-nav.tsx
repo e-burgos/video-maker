@@ -21,7 +21,7 @@ const DOT_CLASS: Readonly<Record<StepStatus, string>> = {
 
 function stepClass({ isActive }: { isActive: boolean }): string {
   const tone = isActive
-    ? 'bg-[color-mix(in_srgb,var(--cl-action)_12%,transparent)] font-semibold text-[var(--cl-action)]'
+    ? 'bg-[color-mix(in_srgb,var(--cl-action)_12%,transparent)] font-semibold text-[var(--cl-action-text)]'
     : 'text-[var(--cl-ink-2)] hover:bg-[color-mix(in_srgb,var(--cl-ink)_6%,transparent)]';
   return `focus-cl flex items-center gap-2 rounded-[9px] px-2 py-1 text-[12.5px] ${tone}`;
 }

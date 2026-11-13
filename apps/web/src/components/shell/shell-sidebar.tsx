@@ -14,7 +14,7 @@ export type ShellSidebarProps = {
 
 function itemClass({ isActive }: { isActive: boolean }): string {
   const tone = isActive
-    ? 'bg-[color-mix(in_srgb,var(--cl-action)_12%,transparent)] font-semibold text-[var(--cl-action)]'
+    ? 'bg-[color-mix(in_srgb,var(--cl-action)_12%,transparent)] font-semibold text-[var(--cl-action-text)]'
     : 'font-medium text-[var(--cl-ink-2)] hover:bg-[color-mix(in_srgb,var(--cl-ink)_6%,transparent)]';
   return `focus-cl flex items-center gap-2.5 rounded-[10px] px-2.5 py-2 text-[13.5px] first-letter:uppercase max-[1099px]:justify-center max-[1099px]:px-0 ${tone}`;
 }

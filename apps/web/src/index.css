@@ -63,9 +63,10 @@ body {
   --cl-orb-b: rgba(255, 160, 120, 0.24);
   --cl-ink: #1d1d1f;
   --cl-ink-2: #48484a;
-  --cl-ink-3: #6e6e73;
+  --cl-ink-3: #5c5c61;
   --cl-action: #0a6cff;
   --cl-action-hover: #0353c9;
+  --cl-action-text: #0353c9;
   --cl-action-ring: rgba(10, 108, 255, 0.3);
   --tucu-state-green-soft: rgba(40, 167, 69, 0.16);
   --tucu-state-green-ink: #0b6623;
@@ -106,6 +107,7 @@ body {
   --cl-ink-3: rgba(235, 235, 245, 0.62);
   --cl-action: #409cff;
   --cl-action-hover: #70b3ff;
+  --cl-action-text: #8cc2ff;
   --cl-action-ring: rgba(64, 156, 255, 0.4);
   --tucu-state-green-soft: rgba(48, 209, 88, 0.18);
   --tucu-state-green-ink: #7ee59a;
