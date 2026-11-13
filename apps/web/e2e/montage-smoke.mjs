@@ -141,10 +141,10 @@ async function main() {
     log('4', `asset listing source: ${assetSource}`);
     assert(assetSource === 'raw-scan', 'the library lists the raw material by scanning raw/, with no catalog yet');
 
-    const arollCards = await page.locator('[data-testid="role-aroll"] li').count();
-    const brollCards = await page.locator('[data-testid="role-broll"] li').count();
-    const imageCards = await page.locator('[data-testid="role-image"] li').count();
-    const audioCards = await page.locator('[data-testid="role-audio"] li').count();
+    const arollCards = await page.locator('[data-testid="asset-card"][data-role="aroll"]').count();
+    const brollCards = await page.locator('[data-testid="asset-card"][data-role="broll"]').count();
+    const imageCards = await page.locator('[data-testid="asset-card"][data-role="image"]').count();
+    const audioCards = await page.locator('[data-testid="asset-card"][data-role="audio"]').count();
     log('4', `asset cards visible: aroll=${arollCards} broll=${brollCards} image=${imageCards} audio=${audioCards}`);
     assert(arollCards > 0, 'the a-roll material is visible in the library before any montage exists');
     await page.screenshot({ path: join(ARTIFACTS_DIR, 'montage-smoke-01-raw-library.png') });

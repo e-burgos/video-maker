@@ -23,7 +23,8 @@ describe('shell navigation helpers', () => {
     expect(isMigratedRoute('/')).toBe(true);
     expect(isMigratedRoute('/projects/demo')).toBe(true);
     expect(isMigratedRoute('/projects/demo/')).toBe(true);
-    expect(['/brands', '/settings', '/projects/demo/library', '/projects/demo/voice', '/projects/demo/motion'].some(isMigratedRoute)).toBe(false);
+    expect(isMigratedRoute('/projects/demo/library')).toBe(true);
+    expect(['/brands', '/settings', '/projects/demo/voice', '/projects/demo/motion'].some(isMigratedRoute)).toBe(false);
   });
 
   it('keeps the motion step only for motion videos', () => {

@@ -269,3 +269,12 @@ html[data-shell='electron'] [data-testid='shell-toolbar'] :is(button, a, input, 
 :root {
   --tucu-segmented-fg: var(--cl-ink-2);
 }
+
+@keyframes viewer-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}

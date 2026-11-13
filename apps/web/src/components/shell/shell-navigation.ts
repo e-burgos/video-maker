@@ -73,7 +73,7 @@ export function projectSlugFromPathname(pathname: string): string | null {
 }
 
 const MIGRATED_ROUTE_PREFIXES: readonly string[] = ['/'];
-const MIGRATED_EXACT_ROUTES: readonly RegExp[] = [/^\/projects\/[^/]+\/?$/];
+const MIGRATED_EXACT_ROUTES: readonly RegExp[] = [/^\/projects\/[^/]+\/?$/, /^\/projects\/[^/]+\/library\/?$/];
 
 export function isMigratedRoute(pathname: string): boolean {
   return (

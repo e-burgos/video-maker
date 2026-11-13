@@ -1,6 +1,10 @@
 import { useId, useRef, useState } from 'react';
 
-import { BROLL_MATCHING_HINT_KEY, assetRoleCopy, orderedAssetRoles } from '../api/asset-roles';
+import {
+  BROLL_MATCHING_HINT_KEY,
+  assetRoleCopy,
+  orderedAssetRoles,
+} from '../api/asset-roles';
 import { ASSET_ROLES } from '../api/render-api-types';
 import { assetContentType } from '../api/asset-media-kind';
 import { useRenderApi } from '../api/render-api-context';
@@ -17,7 +21,13 @@ export type AssetUploaderProps = {
   roleHint?: string;
 };
 
-export function AssetUploader({ slug, onUploaded, roles, fileInputLabel, roleHint }: AssetUploaderProps) {
+export function AssetUploader({
+  slug,
+  onUploaded,
+  roles,
+  fileInputLabel,
+  roleHint,
+}: AssetUploaderProps) {
   const client = useRenderApi();
   const inputRef = useRef<HTMLInputElement>(null);
   const fieldId = useId();
@@ -43,7 +53,9 @@ export function AssetUploader({ slug, onUploaded, roles, fileInputLabel, roleHin
       setUploaded(entry.path);
       onUploaded(entry);
     } catch (cause) {
-      setError(cause instanceof RenderApiError ? cause : serviceUnreachable(cause));
+      setError(
+        cause instanceof RenderApiError ? cause : serviceUnreachable(cause),
+      );
     } finally {
       setUploading(false);
       if (inputRef.current !== null) {
@@ -53,35 +65,70 @@ export function AssetUploader({ slug, onUploaded, roles, fileInputLabel, roleHin
   }
 
   const choices = orderedAssetRoles(offered);
-  const showsBrollHint = choices.some((choice) => choice.role === 'broll' || choice.role === 'image');
+  const showsBrollHint = choices.some(
+    (choice) => choice.role === 'broll' || choice.role === 'image',
+  );
+  const [dragging, setDragging] = useState(false);
 
   return (
-    <div className="space-y-3 rounded-lg border border-slate-800 bg-slate-900/40 p-4">
+    <div
+      data-testid="asset-uploader"
+      data-dragging={dragging}
+      onDragOver={(event) => {
+        event.preventDefault();
+        setDragging(true);
+      }}
+      onDragLeave={() => setDragging(false)}
+      onDrop={(event) => {
+        event.preventDefault();
+        setDragging(false);
+        const file = event.dataTransfer.files[0];
+        if (file !== undefined && !uploading) {
+          void upload(file);
+        }
+      }}
+      className={`glass space-y-3 rounded-[20px] border-dashed p-4 ${dragging ? 'ring-2 ring-[var(--cl-action)]' : ''}`}
+    >
+      <h2 className="m-0 text-sm font-bold text-[var(--cl-ink)]">
+        {t('library.upload.action')}
+      </h2>
+      <p className="m-0 text-xs text-[var(--cl-ink-2)]">
+        {t('library.upload.dropHint')}
+      </p>
       {offered.length === 1 ? (
         <div className="flex flex-wrap items-center gap-3">
-          <label htmlFor={`${fieldId}-role`} className="text-sm text-slate-400">
+          <label
+            htmlFor={`${fieldId}-role`}
+            className="text-sm text-[var(--cl-ink-2)]"
+          >
             {t('assetRole.legend')}
           </label>
-          <span id={`${fieldId}-role`} className="font-mono text-sm text-slate-100">
+          <span
+            id={`${fieldId}-role`}
+            className="font-data text-sm text-[var(--cl-ink)]"
+          >
             {role}
           </span>
-          <span className="text-xs text-slate-500">{roleHint ?? t(assetRoleCopy(role).impactKey)}</span>
+          <span className="text-xs text-[var(--cl-ink-2)]">
+            {roleHint ?? t(assetRoleCopy(role).impactKey)}
+          </span>
         </div>
       ) : (
-        <fieldset data-testid="asset-role-choices" className="space-y-2">
-          <legend className="text-sm text-slate-400">{t('assetRole.legend')}</legend>
-          <ul className="grid gap-2 sm:grid-cols-2">
+        <fieldset
+          data-testid="asset-role-choices"
+          className="m-0 space-y-2 border-0 p-0"
+        >
+          <legend className="text-sm text-[var(--cl-ink-2)]">
+            {t('assetRole.legend')}
+          </legend>
+          <ul className="m-0 grid list-none gap-2 p-0 sm:grid-cols-2">
             {choices.map((choice) => (
               <li
                 key={choice.role}
                 data-testid="asset-role-choice"
                 data-role={choice.role}
                 data-selected={choice.role === role ? 'true' : 'false'}
-                className={`rounded-lg border p-3 ${
-                  choice.role === role
-                    ? 'border-sky-500/60 bg-sky-500/10'
-                    : 'border-slate-800 bg-slate-900/40'
-                }`}
+                className={`glass-sub rounded-[12px] p-3 ${choice.role === role ? 'ring-2 ring-[var(--cl-action)]' : ''}`}
               >
                 <label className="flex items-start gap-2">
                   <input
@@ -90,33 +137,40 @@ export function AssetUploader({ slug, onUploaded, roles, fileInputLabel, roleHin
                     value={choice.role}
                     checked={choice.role === role}
                     disabled={uploading}
-                    aria-label={t('assetRole.chooseAria', { name: t(choice.nameKey) })}
+                    aria-label={t('assetRole.chooseAria', {
+                      name: t(choice.nameKey),
+                    })}
                     onChange={() => setRole(choice.role)}
-                    className="mt-1"
+                    className="mt-1 accent-[var(--cl-action-fill)]"
                   />
                   <span className="space-y-0.5">
-                    <span className="block text-sm font-semibold text-slate-100">
+                    <span className="block text-sm font-semibold text-[var(--cl-ink)]">
                       {t(choice.nameKey)}
                       {choice.required && (
                         <span
                           data-testid="asset-role-required"
-                          className="ml-2 rounded-sm border border-amber-500/50 px-1 font-mono text-[10px] uppercase text-amber-300"
+                          className="font-data ml-2 rounded-md border border-[var(--tucu-state-orange-line)] bg-[var(--tucu-state-orange-soft)] px-1 text-[10px] uppercase text-[var(--tucu-state-orange-ink)]"
                         >
                           {t('assetRole.required')}
                         </span>
                       )}
                     </span>
-                    <span className="block font-mono text-[11px] text-slate-500">
+                    <span className="font-data block text-[11px] text-[var(--cl-ink-3)]">
                       {t('assetRole.directory', { role: choice.role })}
                     </span>
-                    <span className="block text-xs text-slate-400">{t(choice.impactKey)}</span>
+                    <span className="block text-xs text-[var(--cl-ink-2)]">
+                      {t(choice.impactKey)}
+                    </span>
                   </span>
                 </label>
               </li>
             ))}
           </ul>
           {showsBrollHint && (
-            <p data-testid="asset-role-hint" className="text-xs text-slate-500">
+            <p
+              data-testid="asset-role-hint"
+              className="m-0 text-xs text-[var(--cl-ink-2)]"
+            >
               {t(BROLL_MATCHING_HINT_KEY)}
             </p>
           )}
@@ -135,16 +189,23 @@ export function AssetUploader({ slug, onUploaded, roles, fileInputLabel, roleHin
               void upload(file);
             }
           }}
-          className="text-sm text-slate-400 file:mr-3 file:rounded-md file:border-0 file:bg-slate-800 file:px-3 file:py-1.5 file:text-sm file:text-slate-200"
+          className="focus-cl max-w-full text-sm text-[var(--cl-ink-2)] file:mr-3 file:h-8 file:cursor-pointer file:rounded-[10px] file:border-0 file:bg-[var(--cl-action-fill)] file:px-3 file:text-xs file:font-semibold file:text-white"
         />
-        {uploading && <span className="text-sm text-slate-400">{t('assetUploader.uploading')}</span>}
+        {uploading && (
+          <span className="text-sm text-[var(--cl-ink-2)]">
+            {t('assetUploader.uploading')}
+          </span>
+        )}
       </div>
       {uploaded !== null && (
-        <p role="status" className="font-mono text-xs text-emerald-300">
+        <p
+          role="status"
+          className="font-data m-0 text-xs text-[var(--tucu-state-green-ink)]"
+        >
           {t('assetUploader.stored', { path: uploaded })}
         </p>
       )}
-      {error !== null && <ErrorNotice error={error} />}
+      {error !== null && <ErrorNotice surface="glass" error={error} />}
     </div>
   );
 }
