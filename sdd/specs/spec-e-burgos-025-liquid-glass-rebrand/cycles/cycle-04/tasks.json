@@ -21,10 +21,23 @@
       "estimation_hours": 4,
       "story_points": 5,
       "depends_on": [],
-      "status": "pending",
+      "status": "done",
       "files": [
-        "apps/web/src/pages/project-preview-page.tsx"
-      ]
+        "apps/web/src/pages/project-preview-page.tsx",
+        "apps/web/src/components/preview/",
+        "apps/web/src/components/render-trigger.tsx",
+        "apps/web/src/components/ui/cl-controls.ts"
+      ],
+      "usage": {
+        "tokens_in": 170000,
+        "tokens_out": 12500,
+        "provider_model": "claude/sonnet",
+        "effort": "medium",
+        "agent": "implementor-front",
+        "approx": true,
+        "source": "agent-usage-notification",
+        "recorded_at": "2026-11-13"
+      }
     },
     {
       "id": "TASK-002",
@@ -35,11 +48,23 @@
       "estimation_hours": 4,
       "story_points": 5,
       "depends_on": [],
-      "status": "pending",
+      "status": "done",
       "files": [
         "apps/web/src/pages/motion-page.tsx",
-        "apps/web/src/components/shell/legacy-surface.tsx"
-      ]
+        "apps/web/src/components/motion/",
+        "apps/web/src/components/motion-storyboard-view.tsx",
+        "apps/web/src/components/motion-preview-view.tsx"
+      ],
+      "usage": {
+        "tokens_in": 170000,
+        "tokens_out": 12529,
+        "provider_model": "claude/sonnet",
+        "effort": "medium",
+        "agent": "implementor-front",
+        "approx": true,
+        "source": "agent-usage-notification",
+        "recorded_at": "2026-11-13"
+      }
     },
     {
       "id": "TASK-003",
@@ -50,11 +75,23 @@
       "estimation_hours": 5,
       "story_points": 5,
       "depends_on": [],
-      "status": "pending",
+      "status": "done",
       "files": [
         "apps/web/src/pages/brands-page.tsx",
-        "apps/web/src/pages/brand-editor-page.tsx"
-      ]
+        "apps/web/src/pages/brand-editor-page.tsx",
+        "apps/web/src/components/brands/",
+        "apps/web/src/hooks/use-section-draft.ts"
+      ],
+      "usage": {
+        "tokens_in": 250000,
+        "tokens_out": 19027,
+        "provider_model": "claude/sonnet",
+        "effort": "medium",
+        "agent": "implementor-front",
+        "approx": true,
+        "source": "agent-usage-notification",
+        "recorded_at": "2026-11-13"
+      }
     },
     {
       "id": "TASK-004",
@@ -71,8 +108,21 @@
         "TASK-002",
         "TASK-003"
       ],
-      "status": "pending",
-      "files": []
+      "status": "done",
+      "files": [
+        "apps/web/src/components/timeline-player.tsx",
+        "design/rebranding/contrast-audit.mjs"
+      ],
+      "usage": {
+        "tokens_in": 50000,
+        "tokens_out": 7000,
+        "provider_model": "claude/opus",
+        "effort": "low",
+        "agent": "orchestrator",
+        "approx": true,
+        "source": "declared-estimate",
+        "recorded_at": "2026-11-13"
+      }
     }
   ]
 }

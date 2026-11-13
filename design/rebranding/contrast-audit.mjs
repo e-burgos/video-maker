@@ -46,7 +46,7 @@ async function collectTextTargets(page) {
       const style = getComputedStyle(element);
       const rect = element.getBoundingClientRect();
       if (style.visibility === 'hidden' || style.display === 'none' || Number(style.opacity) === 0) continue;
-      if (rect.width < 4 || rect.height < 4 || rect.bottom < 0 || rect.top > innerHeight || rect.right < 0 || rect.left > innerWidth) continue;
+      if (rect.width < 4 || rect.height < 4 || rect.top < 0 || rect.bottom > innerHeight || rect.left < 0 || rect.right > innerWidth) continue;
       if (insideMedia(element) || element.closest('[aria-hidden=true]')) continue;
       const color = parse(style.color);
       if (!color) continue;
