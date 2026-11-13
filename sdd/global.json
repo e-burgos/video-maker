@@ -272,7 +272,7 @@
         "apps/render-api",
         "apps/docs-site"
       ],
-      "cycles_completed": 2,
+      "cycles_completed": 3,
       "description": "Rediseño Cristal Líquido (tucu-ui) del estudio y de la app de escritorio, y paridad de funciones con la web pública: guía interactiva, acerca de, licencias, actualizaciones manuales y conexión de agentes de IA"
     }
   ],

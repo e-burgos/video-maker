@@ -11,24 +11,39 @@
   "objectives": [
     "Biblioteca de material con visor ampliado y comparación, storyboard y voz migrados al Cristal Líquido"
   ],
-  "status": "in-progress",
+  "status": "completed",
   "started_at": "2026-11-13",
-  "completed_at": null,
+  "completed_at": "2026-11-13",
   "documents": {
     "plan": "sdd/specs/spec-e-burgos-025-liquid-glass-rebrand/cycles/cycle-03/plan.md",
     "tasks": "sdd/specs/spec-e-burgos-025-liquid-glass-rebrand/cycles/cycle-03/tasks.json"
   },
-  "artifacts": [],
+  "artifacts": [
+    "sdd/specs/spec-e-burgos-025-liquid-glass-rebrand/cycles/cycle-03/artifacts/contrast-audit.json"
+  ],
   "metrics": {
     "tasks_total": 4,
-    "tasks_completed": 0,
-    "story_points": 0,
-    "files_created": [],
-    "files_modified": [],
+    "tasks_completed": 4,
+    "story_points": 20,
+    "files_created": [
+      "apps/web/src/components/library/",
+      "apps/web/src/components/media-viewer/",
+      "apps/web/src/components/storyboard/",
+      "apps/web/src/components/shell/legacy-surface.tsx",
+      "apps/web/src/components/storyboard-save-bar.tsx"
+    ],
+    "files_modified": [
+      "apps/web/src/pages/asset-library-page.tsx",
+      "apps/web/src/pages/storyboard-page.tsx",
+      "apps/web/src/pages/voice-page.tsx",
+      "apps/web/src/i18n/messages-es.ts",
+      "apps/web/src/i18n/messages-en.ts",
+      "apps/web/src/components/shell/shell-navigation.ts"
+    ],
     "files_deleted": [],
     "usage": {
-      "tokens_in": 104000,
-      "tokens_out": 3000,
+      "tokens_in": 724000,
+      "tokens_out": 61399,
       "by_agent": [
         {
           "agent": "orchestrator",
@@ -41,6 +56,42 @@
           "approx": true,
           "source": "agent-usage-notification",
           "recorded_at": "2026-11-13"
+        },
+        {
+          "agent": "implementor-front",
+          "label": "TASK-001 biblioteca y visor",
+          "provider_model": "claude/sonnet",
+          "effort": "medium",
+          "tokens_in": 250000,
+          "tokens_out": 21249,
+          "tokens_total": 271249,
+          "approx": true,
+          "source": "agent-usage-notification",
+          "recorded_at": "2026-11-13"
+        },
+        {
+          "agent": "implementor-front",
+          "label": "TASK-002 y TASK-003 storyboard y voz",
+          "provider_model": "claude/sonnet",
+          "effort": "medium",
+          "tokens_in": 310000,
+          "tokens_out": 29150,
+          "tokens_total": 339150,
+          "approx": true,
+          "source": "agent-usage-notification",
+          "recorded_at": "2026-11-13"
+        },
+        {
+          "agent": "orchestrator",
+          "label": "TASK-004 verificación y cierre como reviewer",
+          "provider_model": "claude/opus",
+          "effort": "low",
+          "tokens_in": 60000,
+          "tokens_out": 8000,
+          "tokens_total": 68000,
+          "approx": true,
+          "source": "declared-estimate",
+          "recorded_at": "2026-11-13"
         }
       ]
     }
@@ -48,6 +99,32 @@
   "tables_created": [],
   "endpoints_implemented": [],
   "components_created": [],
-  "issues_found": [],
-  "reviewer_report": null
+  "issues_found": [
+    "Asignar rol desde la selección queda fuera: la API no permite cambiar el rol de un asset.",
+    "Ningún proyecto real tiene storyboard ni voz clásicos: sus capturas usan datos simulados; el modo guion se capturó con un proyecto real.",
+    "El modo motion de storyboard y voz queda envuelto en LegacySurface (oscuro) hasta migrarlo en el ciclo 04.",
+    "La etiqueta de algunas voces repite la región («español (Argentina) (Argentina)»): viene del catálogo de voces de la API, previo al ciclo.",
+    "Los e2e de borrar material, montaje, storyboard e i18n cambiaron de selectores y no se corrieron."
+  ],
+  "reviewer_report": {
+    "approved": true,
+    "date": "2026-11-13",
+    "ca_results": {
+      "US-025-301": "PASS con desvío — subida como acción del toolbar, resumen y filtro por rol, grilla opaca con chip de rol, selección múltiple con comparar y borrar (borrado múltiple con 409 y «borrar igual»); asignar rol omitido por falta de API",
+      "US-025-302": "PASS — visor opaco con ← → Esc y C, comparación lado a lado, tira de miniaturas, detalle y foco atrapado y devuelto; íconos del header ajustados a 16px en la verificación",
+      "US-025-303": "PASS — «Proponer storyboard» en el toolbar, lista de escenas con estado y editor, barra pegajosa con cambios sin guardar, hoja de prompts y guion plegable; motion intacto en LegacySurface",
+      "US-025-304": "PASS — «Regenerar con la voz elegida» en el toolbar, voces glass-sub con reproducción, tomas por escena con marca de narración cambiada; motion intacto"
+    },
+    "tests": {
+      "sdd:validate": "OK",
+      "web": "183/183 archivos, 1787/1787 tests; lint 0 errores; build ok",
+      "contrast-audit": "0 fallas y 0 desborde en biblioteca, storyboard y voz × claro/oscuro (5 rutas)"
+    },
+    "notes": "Tres tasks en dos subagentes sonnet/medium en serie; la verificación corrigió el tamaño de los íconos del visor. Los builds corrieron con --parallel=1 por el CI de otra sesión.",
+    "follow_ups": [
+      "Ciclo 04: migrar el modo motion y retirar LegacySurface.",
+      "Correr los e2e con selectores nuevos cuando haya studio libre.",
+      "Corregir la etiqueta duplicada de región en el catálogo de voces (fix aparte)."
+    ]
+  }
 }

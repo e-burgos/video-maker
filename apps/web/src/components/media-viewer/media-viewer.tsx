@@ -189,7 +189,12 @@ export function MediaViewer({
               onClick={() => step(-1)}
               className={`${HEADER_BUTTON_CLASS} w-8 px-0`}
             >
-              <LucideIcons.ChevronLeft aria-hidden size={16} />
+              <LucideIcons.ChevronLeft
+                aria-hidden
+                size={16}
+                className="h-4 w-4 shrink-0"
+                strokeWidth={2.25}
+              />
             </button>
             <button
               type="button"
@@ -198,7 +203,12 @@ export function MediaViewer({
               onClick={() => step(1)}
               className={`${HEADER_BUTTON_CLASS} w-8 px-0`}
             >
-              <LucideIcons.ChevronRight aria-hidden size={16} />
+              <LucideIcons.ChevronRight
+                aria-hidden
+                size={16}
+                className="h-4 w-4 shrink-0"
+                strokeWidth={2.25}
+              />
             </button>
             <button
               type="button"
@@ -217,7 +227,12 @@ export function MediaViewer({
               onClick={onClose}
               className={`${HEADER_BUTTON_CLASS} w-8 px-0`}
             >
-              <LucideIcons.X aria-hidden size={16} />
+              <LucideIcons.X
+                aria-hidden
+                size={16}
+                className="h-4 w-4 shrink-0"
+                strokeWidth={2.25}
+              />
             </button>
           </div>
         </header>
