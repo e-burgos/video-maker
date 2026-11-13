@@ -189,6 +189,8 @@ importers:
 
   libs/producer-tools: {}
 
+  libs/studio-capabilities: {}
+
 packages:
 
   '@acemir/cssom@0.9.31':
