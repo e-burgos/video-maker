@@ -39,3 +39,10 @@
 - Generador reproducible: `design/rebranding/logo/build-logo.mjs` produce `final/` (marca, glifo monocromo, ícono de app, lockups horizontal y vertical en claro y oscuro, PNG y `.icns`), el favicon del studio, `apps/desktop/build/icon.icns` y `icon.png`, y el componente `apps/web/src/components/ui/brand-mark.tsx`.
 - El componente vive en `components/ui/` porque el escáner de textos literales (`no-literal-copy.spec.ts`) confunde los genéricos de TypeScript con texto JSX en `components/*.tsx`; las etiquetas llegan por prop desde el catálogo (`brand.name`, `brand.nameWithSignature`).
 - Pendiente: cableado de `icon` en `electron-builder.yml` (TASK-005) y uso de `BrandMark`/`BrandWordmark` en la sidebar (TASK-004). La adopción en la web pública sigue pendiente de decisión del dev (D-15).
+
+## Tokens, escena y fuentes (TASK-002, commit 6cfe3a9)
+- Fuentes: `@fontsource-variable/inter` y `@fontsource-variable/jetbrains-mono` 5.3.0 exactas, importadas en `index.css` y empaquetadas (la app corre offline). Familias `'Inter Variable'` y `'JetBrains Mono Variable'`, expuestas como `--font-ui` / `--font-data` y las utilidades `font-ui` / `font-data` (tabular-nums). No reemplazan `--font-sans` / `--font-mono`: las pantallas nuevas las usan explícitamente y se pasa a reemplazar los `--font-*` cuando migren las viejas.
+- Tintas de estado: light del contrato y dark de las maquetas; purple (`#d8a8ff`) y neutral en dark los definió la implementación porque las maquetas no los traían. Variables agregadas fuera del contrato original: `--cl-action-hover` y `--tucu-glass-sub-line`.
+- Licencias: sección «Fonts (app interface)» (SIL OFL 1.1) en `THIRD_PARTY_NOTICES.md`, que se genera desde `apps/desktop/scripts/vendor-binaries.mjs`; la plantilla del script se actualizó igual. El test de `docs-site` no exigió tocar su inventario.
+- `Scene` (`apps/web/src/theme/scene.tsx`): aurora estática con dos orbes, `aria-hidden`, sin textos.
+
