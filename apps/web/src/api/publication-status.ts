@@ -1,3 +1,5 @@
+import type { StateBadgeTone } from '@e-burgos/tucu-ui';
+
 import type { BadgeTone } from '../components/ui/badge';
 import type { TranslationKey } from '../i18n/messages-en';
 import type { PublicationStatus } from './render-api-types';
@@ -14,4 +16,11 @@ export const PUBLICATION_STATUS_TONE: Readonly<Record<PublicationStatus, BadgeTo
   published: 'success',
   scheduled: 'accent',
   failed: 'danger',
+};
+
+export const PUBLICATION_STATE_TONE: Readonly<Record<PublicationStatus, StateBadgeTone>> = {
+  uploading: 'orange',
+  published: 'green',
+  scheduled: 'purple',
+  failed: 'red',
 };

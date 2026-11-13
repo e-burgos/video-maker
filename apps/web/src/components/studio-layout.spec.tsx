@@ -46,7 +46,7 @@ describe('StudioLayout', () => {
     expect(screen.getByTestId('settings-nav').getAttribute('href')).toBe('/settings');
     expect(screen.getByTestId('brands-nav').getAttribute('href')).toBe('/brands');
     expect(screen.getByText('routed page')).toBeTruthy();
-    expect(screen.getByTestId('shell-content').getAttribute('data-surface')).toBe('legacy');
+    expect(screen.getByTestId('shell-content').getAttribute('data-surface')).toBeNull();
     await waitFor(() =>
       expect(screen.getByTestId('service-health-label').textContent).toBe('Ready'),
     );
@@ -191,7 +191,7 @@ describe('StudioLayout project nav', () => {
     expect(screen.queryByTestId('toolbar-action')).toBeNull();
   });
 
-  it('wraps every route in the legacy surface while none is migrated', () => {
+  it('keeps the routes not migrated yet on the legacy surface', () => {
     renderAt('/projects/smoke-ingest/library');
 
     expect(screen.getByTestId('shell-content').getAttribute('data-surface')).toBe('legacy');

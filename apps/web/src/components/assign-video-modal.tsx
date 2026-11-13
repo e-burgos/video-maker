@@ -6,6 +6,7 @@ import type { VideoFolder, VideoPlacement } from '../api/render-api-types';
 import { useT } from '../i18n/language-context';
 import { ErrorNotice } from './error-notice';
 import { Modal } from './modal';
+import { FIELD_LABEL_CLASS, FIELD_SMALL_CLASS, PRIMARY_BUTTON_SMALL_CLASS, SECONDARY_BUTTON_SMALL_CLASS } from './ui/cl-controls';
 
 export type AssignVideoModalProps = {
   slug: string;
@@ -52,6 +53,7 @@ export function AssignVideoModal({
 
   return (
     <Modal
+      surface="glass"
       testId="assign-video-modal"
       title={t('videoMenu.assignTitle', { slug })}
       onClose={onClose}
@@ -62,7 +64,7 @@ export function AssignVideoModal({
             data-testid="assign-video-cancel"
             disabled={pending}
             onClick={onClose}
-            className="rounded-md border border-slate-700 px-3 py-1.5 text-xs text-slate-300 hover:border-slate-500 disabled:opacity-50"
+            className={SECONDARY_BUTTON_SMALL_CLASS}
           >
             {t('videoMenu.cancel')}
           </button>
@@ -73,7 +75,7 @@ export function AssignVideoModal({
             onClick={() => {
               void submit();
             }}
-            className="rounded-md bg-emerald-500/90 px-3 py-1.5 text-xs font-medium text-slate-950 hover:bg-emerald-400 disabled:opacity-50"
+            className={PRIMARY_BUTTON_SMALL_CLASS}
           >
             {pending ? t('videoMenu.saving') : t('videoMenu.assignSubmit')}
           </button>
@@ -81,7 +83,7 @@ export function AssignVideoModal({
       }
     >
       <label className="block space-y-1">
-        <span className="text-xs text-slate-400">{t('videoMenu.folderLabel')}</span>
+        <span className={FIELD_LABEL_CLASS}>{t('videoMenu.folderLabel')}</span>
         <select
           data-testid="assign-video-folder"
           aria-label={t('videoMenu.folderLabel')}
@@ -90,7 +92,7 @@ export function AssignVideoModal({
             setFolderId(event.target.value);
             setCategoryId(NO_FOLDER);
           }}
-          className="w-full rounded-md border border-slate-700 bg-slate-900 px-2 py-1.5 text-sm text-slate-100"
+          className={`${FIELD_SMALL_CLASS} h-9 w-full text-sm`}
         >
           <option value={NO_FOLDER}>{t('projects.unassigned')}</option>
           {folders.map((folder) => (
@@ -102,14 +104,14 @@ export function AssignVideoModal({
       </label>
 
       <label className="block space-y-1">
-        <span className="text-xs text-slate-400">{t('videoMenu.categoryLabel')}</span>
+        <span className={FIELD_LABEL_CLASS}>{t('videoMenu.categoryLabel')}</span>
         <select
           data-testid="assign-video-category"
           aria-label={t('videoMenu.categoryLabel')}
           value={categoryId}
           disabled={selectedFolder === null || selectedFolder.categories.length === 0}
           onChange={(event) => setCategoryId(event.target.value)}
-          className="w-full rounded-md border border-slate-700 bg-slate-900 px-2 py-1.5 text-sm text-slate-100 disabled:opacity-50"
+          className={`${FIELD_SMALL_CLASS} h-9 w-full text-sm disabled:opacity-50`}
         >
           <option value={NO_FOLDER}>{t('videoMenu.noCategory')}</option>
           {(selectedFolder?.categories ?? []).map((category) => (
@@ -121,18 +123,18 @@ export function AssignVideoModal({
       </label>
 
       {selectedFolder !== null && selectedFolder.categories.length === 0 && (
-        <p data-testid="assign-video-no-categories" className="text-xs text-slate-500">
+        <p data-testid="assign-video-no-categories" className="text-xs text-[var(--cl-ink-3)]">
           {t('videoMenu.noCategoriesHint')}
         </p>
       )}
 
       {folders.length === 0 && (
-        <p data-testid="assign-video-no-folders" className="text-xs text-amber-300">
+        <p data-testid="assign-video-no-folders" className="text-xs text-[var(--tucu-state-orange-ink)]">
           {t('videoMenu.noFoldersHint')}
         </p>
       )}
 
-      {error !== null && <ErrorNotice error={error} />}
+      {error !== null && <ErrorNotice error={error} surface="glass" />}
     </Modal>
   );
 }

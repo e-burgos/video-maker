@@ -50,12 +50,54 @@
       "depends_on": [
         "TASK-001"
       ],
-      "status": "pending",
+      "status": "done",
       "files": [
-        "apps/web/src/pages/projects-page.tsx",
+        "apps/web/src/api/video-filter.spec.ts",
+        "apps/web/src/api/video-filter.ts",
+        "apps/web/src/components/ui/cl-controls.ts",
+        "apps/web/src/components/ui/overflow-menu.spec.tsx",
+        "apps/web/src/components/ui/overflow-menu.tsx",
+        "apps/web/src/components/videos/create-folder-modal.tsx",
+        "apps/web/src/components/videos/create-video-modal.tsx",
+        "apps/web/src/components/videos/video-folder-chips.tsx",
+        "apps/web/src/components/videos/video-groups.tsx",
+        "apps/web/src/components/videos/video-search-bar.tsx",
+        "apps/web/src/components/videos/videos-skeleton.tsx",
+        "apps/web/src/api/project-status.ts",
+        "apps/web/src/api/publication-status.ts",
+        "apps/web/src/components/archive-video-modal.tsx",
+        "apps/web/src/components/assign-video-modal.tsx",
+        "apps/web/src/components/brand-picker.tsx",
+        "apps/web/src/components/collapse-toggle.tsx",
+        "apps/web/src/components/create-folder-form.tsx",
+        "apps/web/src/components/create-project-by-drop.tsx",
+        "apps/web/src/components/create-project-form.tsx",
+        "apps/web/src/components/delete-video-modal.tsx",
+        "apps/web/src/components/error-notice.tsx",
+        "apps/web/src/components/folder-heading.spec.tsx",
+        "apps/web/src/components/folder-heading.tsx",
+        "apps/web/src/components/home-drop-hint.tsx",
+        "apps/web/src/components/modal.tsx",
+        "apps/web/src/components/shell/shell-navigation.spec.ts",
+        "apps/web/src/components/shell/shell-navigation.ts",
+        "apps/web/src/components/studio-layout.spec.tsx",
+        "apps/web/src/components/video-card.spec.tsx",
         "apps/web/src/components/video-card.tsx",
-        "apps/web/src/components/folder-heading.tsx"
-      ]
+        "apps/web/src/i18n/messages-en.ts",
+        "apps/web/src/i18n/messages-es.ts",
+        "apps/web/src/pages/projects-page.spec.tsx",
+        "apps/web/src/pages/projects-page.tsx"
+      ],
+      "usage": {
+        "tokens_in": 190000,
+        "tokens_out": 42000,
+        "provider_model": "claude/sonnet",
+        "effort": "medium",
+        "agent": "implementor-front",
+        "approx": true,
+        "source": "declared-estimate",
+        "recorded_at": "2026-11-13"
+      }
     },
     {
       "id": "TASK-003",

@@ -27,6 +27,11 @@ function renderHeading(
   return onChanged;
 }
 
+function chooseFolderAction(testId: string): void {
+  fireEvent.click(screen.getByTestId('folder-menu-open'));
+  fireEvent.click(screen.getByTestId(testId));
+}
+
 describe('FolderHeading', () => {
   it('names the folder and counts its videos', () => {
     renderHeading({});
@@ -39,6 +44,7 @@ describe('FolderHeading', () => {
     renderHeading({}, null);
 
     expect(screen.getByText('No folder')).toBeTruthy();
+    expect(screen.queryByTestId('folder-menu-open')).toBeNull();
     expect(screen.queryByTestId('folder-rename-open')).toBeNull();
     expect(screen.queryByTestId('folder-add-category-open')).toBeNull();
     expect(screen.queryByTestId('folder-delete')).toBeNull();
@@ -48,7 +54,7 @@ describe('FolderHeading', () => {
     const renameFolder = vi.fn().mockResolvedValue({ id: 'display-ads', name: 'DA Q1', categories: [] });
     const onChanged = renderHeading({ renameFolder });
 
-    fireEvent.click(screen.getByTestId('folder-rename-open'));
+    chooseFolderAction('folder-rename-open');
     expect((screen.getByTestId('folder-rename-name') as HTMLInputElement).value).toBe('Display Ads');
 
     fireEvent.change(screen.getByTestId('folder-rename-name'), { target: { value: 'DA Q1' } });
@@ -63,7 +69,7 @@ describe('FolderHeading', () => {
     const renameFolder = vi.fn();
     renderHeading({ renameFolder });
 
-    fireEvent.click(screen.getByTestId('folder-rename-open'));
+    chooseFolderAction('folder-rename-open');
     expect((screen.getByTestId('folder-rename-submit') as HTMLButtonElement).disabled).toBe(true);
 
     fireEvent.change(screen.getByTestId('folder-rename-name'), { target: { value: '   ' } });
@@ -78,7 +84,7 @@ describe('FolderHeading', () => {
     const renameFolder = vi.fn();
     renderHeading({ renameFolder });
 
-    fireEvent.click(screen.getByTestId('folder-rename-open'));
+    chooseFolderAction('folder-rename-open');
     fireEvent.change(screen.getByTestId('folder-rename-name'), { target: { value: 'DA Q1' } });
     fireEvent.click(screen.getByTestId('folder-rename-cancel'));
 
@@ -92,7 +98,7 @@ describe('FolderHeading', () => {
       .mockRejectedValue(new RenderApiError('FOLDER_NAME_TAKEN', 'taken', null, null));
     renderHeading({ renameFolder });
 
-    fireEvent.click(screen.getByTestId('folder-rename-open'));
+    chooseFolderAction('folder-rename-open');
     fireEvent.change(screen.getByTestId('folder-rename-name'), { target: { value: 'DA Q1' } });
     fireEvent.click(screen.getByTestId('folder-rename-submit'));
 
@@ -103,7 +109,7 @@ describe('FolderHeading', () => {
     const createCategory = vi.fn().mockResolvedValue({ id: 'reportes', name: 'Reportes' });
     const onChanged = renderHeading({ createCategory });
 
-    fireEvent.click(screen.getByTestId('folder-add-category-open'));
+    chooseFolderAction('folder-add-category-open');
     fireEvent.change(screen.getByTestId('folder-category-name'), { target: { value: 'Reportes' } });
     fireEvent.click(screen.getByTestId('folder-category-submit'));
 
@@ -115,7 +121,7 @@ describe('FolderHeading', () => {
     const createCategory = vi.fn();
     renderHeading({ createCategory });
 
-    fireEvent.click(screen.getByTestId('folder-add-category-open'));
+    chooseFolderAction('folder-add-category-open');
     fireEvent.click(screen.getByTestId('folder-category-submit'));
 
     expect(createCategory).not.toHaveBeenCalled();
@@ -135,7 +141,7 @@ describe('FolderHeading', () => {
   it('asks before deleting the folder and says the videos survive', () => {
     renderHeading({});
 
-    fireEvent.click(screen.getByTestId('folder-delete'));
+    chooseFolderAction('folder-delete');
 
     expect(screen.getByTestId('folder-delete-confirm').textContent).toContain(
       'none of them is deleted',
@@ -146,7 +152,7 @@ describe('FolderHeading', () => {
     const deleteFolder = vi.fn().mockResolvedValue({ folders: [], videos: {} });
     const onChanged = renderHeading({ deleteFolder });
 
-    fireEvent.click(screen.getByTestId('folder-delete'));
+    chooseFolderAction('folder-delete');
     expect(deleteFolder).not.toHaveBeenCalled();
 
     fireEvent.click(screen.getByTestId('folder-delete-accept'));
@@ -161,7 +167,7 @@ describe('FolderHeading', () => {
       .mockRejectedValue(new RenderApiError('FOLDER_NOT_FOUND', 'gone', null, null));
     renderHeading({ deleteFolder });
 
-    fireEvent.click(screen.getByTestId('folder-delete'));
+    chooseFolderAction('folder-delete');
     fireEvent.click(screen.getByTestId('folder-delete-accept'));
 
     await waitFor(() => expect(screen.getByRole('alert').textContent).toContain('FOLDER_NOT_FOUND'));

@@ -17,7 +17,7 @@ export function CollapseToggle({ name, collapsed, onToggle, testId }: CollapseTo
       aria-expanded={!collapsed}
       aria-label={t(collapsed ? 'section.expand' : 'section.collapse', { name })}
       onClick={onToggle}
-      className="inline-flex h-5 w-5 items-center justify-center rounded text-slate-400 hover:bg-slate-800 hover:text-slate-100"
+      className="focus-cl inline-flex size-6 items-center justify-center rounded-md text-[var(--cl-ink-2)] hover:bg-[color-mix(in_srgb,var(--cl-ink)_8%,transparent)] hover:text-[var(--cl-ink)]"
     >
       <svg
         viewBox="0 0 16 16"

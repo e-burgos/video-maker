@@ -208,6 +208,22 @@ describe('VideoCard', () => {
   });
 });
 
+describe('VideoCard presentation', () => {
+  it('keeps one primary action, Open, and badges an archived video as archived', () => {
+    renderCard({}, { folderId: null, categoryId: null, archived: true });
+
+    expect(screen.getAllByRole('link')).toHaveLength(1);
+    expect(screen.getByRole('link', { name: 'Open editar-campana' })).toBeTruthy();
+    expect(screen.getByTestId('video-card-archived-badge').textContent).toBe('Archived');
+  });
+
+  it('puts the thumbnail on an opaque surface', () => {
+    renderCard({});
+
+    expect(screen.getByTestId('video-card-thumbnail-placeholder').parentElement?.className).toContain('bg-[#0b0d14]');
+  });
+});
+
 describe('assign modal', () => {
   it('writes the folder and the category the user picked, and reports the change', async () => {
     const putVideoPlacement = vi.fn().mockResolvedValue({ slug: VIDEO.slug, placement: UNPLACED });

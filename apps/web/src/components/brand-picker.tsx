@@ -13,10 +13,25 @@ export type BrandPickerProps = {
   disabled?: boolean;
   name?: string;
   labelledBy?: string;
+  surface?: 'legacy' | 'glass';
 };
 
-const OPTION_CLASS =
-  'flex cursor-pointer items-center gap-3 rounded-panel border border-border-subtle bg-surface p-2.5 text-sm has-[:checked]:border-accent has-[:disabled]:cursor-not-allowed has-[:disabled]:opacity-60';
+const OPTION_BASE = 'flex cursor-pointer items-center gap-3 p-2.5 text-sm has-[:disabled]:cursor-not-allowed has-[:disabled]:opacity-60';
+
+const SURFACE_STYLE = {
+  legacy: {
+    option: `${OPTION_BASE} rounded-panel border border-border-subtle bg-surface has-[:checked]:border-accent`,
+    name: 'text-ink',
+    faint: 'text-ink-faint',
+    link: 'text-accent-strong',
+  },
+  glass: {
+    option: `${OPTION_BASE} glass-sub rounded-[12px] has-[:checked]:border-[var(--cl-action)] has-[:checked]:bg-[color-mix(in_srgb,var(--cl-action)_10%,transparent)]`,
+    name: 'text-[var(--cl-ink)]',
+    faint: 'text-[var(--cl-ink-3)]',
+    link: 'text-[var(--cl-action-text)]',
+  },
+} as const;
 
 function BrandThumbnail({ brand }: { brand: BrandSummary }) {
   const t = useT();
@@ -62,8 +77,10 @@ export function BrandPicker({
   disabled = false,
   name,
   labelledBy,
+  surface = 'legacy',
 }: BrandPickerProps) {
   const t = useT();
+  const style = SURFACE_STYLE[surface];
   const groupName = useId();
   const radioName = name ?? groupName;
 
@@ -71,7 +88,7 @@ export function BrandPicker({
     <div className="space-y-2" data-testid="brand-picker">
       <div role="radiogroup" aria-labelledby={labelledBy} className="grid gap-2 sm:grid-cols-2">
         {allowNone && (
-          <label className={OPTION_CLASS}>
+          <label className={style.option}>
             <input
               type="radio"
               name={radioName}
@@ -80,11 +97,11 @@ export function BrandPicker({
               onChange={() => onChange(null)}
               aria-label={t('brandPicker.none')}
             />
-            <span className="text-ink">{t('brandPicker.none')}</span>
+            <span className={style.name}>{t('brandPicker.none')}</span>
           </label>
         )}
         {brands.map((brand) => (
-          <label key={brand.id} className={OPTION_CLASS} data-testid={`brand-picker-option-${brand.id}`}>
+          <label key={brand.id} className={style.option} data-testid={`brand-picker-option-${brand.id}`}>
             <input
               type="radio"
               name={radioName}
@@ -95,14 +112,14 @@ export function BrandPicker({
             />
             <BrandThumbnail brand={brand} />
             <span className="min-w-0 flex-1 space-y-1">
-              <span className="block truncate font-medium text-ink">{brand.name}</span>
+              <span className={`block truncate font-medium ${style.name}`}>{brand.name}</span>
               <BrandSwatches brand={brand} />
             </span>
           </label>
         ))}
       </div>
-      {brands.length === 0 && <p className="text-xs text-ink-faint">{t('brandPicker.empty')}</p>}
-      <Link to="/brands" data-testid="brand-picker-manage" className="inline-block text-xs text-accent-strong hover:underline">
+      {brands.length === 0 && <p className={`text-xs ${style.faint}`}>{t('brandPicker.empty')}</p>}
+      <Link to="/brands" data-testid="brand-picker-manage" className={`inline-block text-xs hover:underline ${style.link}`}>
         {t('brandPicker.manage')}
       </Link>
     </div>

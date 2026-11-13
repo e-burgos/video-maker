@@ -6,6 +6,7 @@ import type { VideoPlacement } from '../api/render-api-types';
 import { useT } from '../i18n/language-context';
 import { ErrorNotice } from './error-notice';
 import { Modal } from './modal';
+import { PRIMARY_BUTTON_SMALL_CLASS, SECONDARY_BUTTON_SMALL_CLASS } from './ui/cl-controls';
 
 export type ArchiveVideoModalProps = {
   slug: string;
@@ -36,6 +37,7 @@ export function ArchiveVideoModal({ slug, placement, onClose, onArchived }: Arch
 
   return (
     <Modal
+      surface="glass"
       testId="archive-video-modal"
       title={restoring ? t('videoMenu.restoreTitle', { slug }) : t('videoMenu.archiveTitle', { slug })}
       onClose={onClose}
@@ -46,7 +48,7 @@ export function ArchiveVideoModal({ slug, placement, onClose, onArchived }: Arch
             data-testid="archive-video-cancel"
             disabled={pending}
             onClick={onClose}
-            className="rounded-md border border-slate-700 px-3 py-1.5 text-xs text-slate-300 hover:border-slate-500 disabled:opacity-50"
+            className={SECONDARY_BUTTON_SMALL_CLASS}
           >
             {t('videoMenu.cancel')}
           </button>
@@ -57,7 +59,7 @@ export function ArchiveVideoModal({ slug, placement, onClose, onArchived }: Arch
             onClick={() => {
               void submit();
             }}
-            className="rounded-md border border-slate-600 bg-slate-800 px-3 py-1.5 text-xs font-medium text-slate-100 hover:border-slate-400 disabled:opacity-50"
+            className={PRIMARY_BUTTON_SMALL_CLASS}
           >
             {pending
               ? t('videoMenu.saving')
@@ -69,7 +71,7 @@ export function ArchiveVideoModal({ slug, placement, onClose, onArchived }: Arch
       }
     >
       <p>{restoring ? t('videoMenu.restoreExplanation') : t('videoMenu.archiveExplanation')}</p>
-      {error !== null && <ErrorNotice error={error} />}
+      {error !== null && <ErrorNotice error={error} surface="glass" />}
     </Modal>
   );
 }

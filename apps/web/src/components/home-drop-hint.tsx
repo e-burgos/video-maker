@@ -1,3 +1,5 @@
+import { LucideIcons } from '@e-burgos/tucu-ui';
+
 import { useT } from '../i18n/language-context';
 
 export type HomeDropHintProps = {
@@ -12,12 +14,10 @@ export function HomeDropHint({ hero = false }: HomeDropHintProps) {
       <div
         data-testid="home-drop-hint"
         data-hero="true"
-        className="flex flex-col items-center justify-center gap-3 rounded-panel border-2 border-dashed border-border-strong px-6 py-16 text-center"
+        className="flex flex-col items-center justify-center gap-3 rounded-[16px] border-2 border-dashed border-[var(--tucu-glass-sub-line)] px-6 py-14 text-center"
       >
-        <span aria-hidden="true" className="text-3xl">
-          🎬
-        </span>
-        <p className="text-base font-medium text-ink-muted">{t('projects.dropHint')}</p>
+        <LucideIcons.Film aria-hidden size={30} className="text-[var(--cl-ink-3)]" />
+        <p className="text-base font-medium text-[var(--cl-ink-2)]">{t('projects.dropHint')}</p>
       </div>
     );
   }
@@ -26,9 +26,9 @@ export function HomeDropHint({ hero = false }: HomeDropHintProps) {
     <div
       data-testid="home-drop-hint"
       data-hero="false"
-      className="flex items-center gap-2 rounded-panel border border-dashed border-border-strong px-4 py-3 text-sm text-ink-faint"
+      className="flex items-center gap-2 text-xs text-[var(--cl-ink-3)]"
     >
-      <span aria-hidden="true">↓</span>
+      <LucideIcons.ArrowDownToLine aria-hidden size={14} />
       <p>{t('projects.dropHint')}</p>
     </div>
   );

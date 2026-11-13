@@ -6,6 +6,13 @@ import type { VideoFolder } from '../api/render-api-types';
 import { useT } from '../i18n/language-context';
 import { CollapseToggle } from './collapse-toggle';
 import { ErrorNotice } from './error-notice';
+import {
+  DANGER_BUTTON_SMALL_CLASS,
+  FIELD_SMALL_CLASS,
+  PRIMARY_BUTTON_SMALL_CLASS,
+  SECONDARY_BUTTON_SMALL_CLASS,
+} from './ui/cl-controls';
+import { OverflowMenu } from './ui/overflow-menu';
 
 export type FolderHeadingProps = {
   folder: VideoFolder | null;
@@ -49,8 +56,8 @@ export function FolderHeading({
 
   return (
     <div className="space-y-2">
-      <div className="flex flex-wrap items-center justify-between gap-2">
-        <div className="flex items-center gap-1.5">
+      <div className="flex items-center justify-between gap-2">
+        <div className="flex min-w-0 items-center gap-1.5">
           {onToggleCollapsed !== undefined && (
             <CollapseToggle
               name={title}
@@ -59,44 +66,44 @@ export function FolderHeading({
               testId="folder-collapse-toggle"
             />
           )}
-          <h3 className="text-sm font-semibold text-slate-100">
+          <h3 className="truncate text-[15px] font-bold text-[var(--cl-ink)]">
             {title}{' '}
-            <span data-testid="folder-count" className="font-normal text-slate-500">
+            <span data-testid="folder-count" className="font-data text-xs font-normal text-[var(--cl-ink-3)]">
               ({total})
             </span>
           </h3>
         </div>
 
         {folder !== null && (
-          <div className="flex flex-wrap items-center gap-2">
-            <button
-              type="button"
-              data-testid="folder-rename-open"
-              onClick={() => {
-                setRenameValue(folder.name);
-                setRenaming((open) => !open);
-              }}
-              className="rounded-md border border-slate-700 px-2 py-1 text-xs text-slate-300 hover:border-slate-500"
-            >
-              {t('folder.rename')}
-            </button>
-            <button
-              type="button"
-              data-testid="folder-add-category-open"
-              onClick={() => setAdding((open) => !open)}
-              className="rounded-md border border-slate-700 px-2 py-1 text-xs text-slate-300 hover:border-slate-500"
-            >
-              {t('folder.addCategory')}
-            </button>
-            <button
-              type="button"
-              data-testid="folder-delete"
-              onClick={() => setConfirmingDelete(true)}
-              className="rounded-md border border-slate-700 px-2 py-1 text-xs text-slate-400 hover:border-rose-500/60 hover:text-rose-200"
-            >
-              {t('folder.delete')}
-            </button>
-          </div>
+          <OverflowMenu
+            triggerLabel={t('folder.menuAria', { name: folder.name })}
+            triggerTestId="folder-menu-open"
+            menuTestId="folder-menu"
+            items={[
+              {
+                id: 'rename',
+                label: t('folder.rename'),
+                testId: 'folder-rename-open',
+                onSelect: () => {
+                  setRenameValue(folder.name);
+                  setRenaming(true);
+                },
+              },
+              {
+                id: 'category',
+                label: t('folder.addCategory'),
+                testId: 'folder-add-category-open',
+                onSelect: () => setAdding(true),
+              },
+              {
+                id: 'delete',
+                label: t('folder.delete'),
+                testId: 'folder-delete',
+                tone: 'danger',
+                onSelect: () => setConfirmingDelete(true),
+              },
+            ]}
+          />
         )}
       </div>
 
@@ -121,13 +128,13 @@ export function FolderHeading({
             aria-label={t('folder.renameNameLabel')}
             value={renameValue}
             onChange={(event) => setRenameValue(event.target.value)}
-            className="w-48 rounded-md border border-slate-700 bg-slate-900 px-2 py-1 text-xs text-slate-100"
+            className={`${FIELD_SMALL_CLASS} w-48`}
           />
           <button
             type="submit"
             data-testid="folder-rename-submit"
             disabled={pending || renameValue.trim() === '' || renameValue.trim() === folder.name}
-            className="rounded-md border border-slate-600 px-2 py-1 text-xs text-slate-200 hover:border-slate-400 disabled:opacity-50"
+            className={PRIMARY_BUTTON_SMALL_CLASS}
           >
             {t('folder.renameSubmit')}
           </button>
@@ -136,7 +143,7 @@ export function FolderHeading({
             data-testid="folder-rename-cancel"
             disabled={pending}
             onClick={() => setRenaming(false)}
-            className="rounded-md border border-slate-700 px-2 py-1 text-xs text-slate-300 hover:border-slate-500 disabled:opacity-50"
+            className={SECONDARY_BUTTON_SMALL_CLASS}
           >
             {t('folder.renameCancel')}
           </button>
@@ -165,13 +172,13 @@ export function FolderHeading({
             value={categoryName}
             onChange={(event) => setCategoryName(event.target.value)}
             placeholder={t('folder.categoryPlaceholder')}
-            className="w-48 rounded-md border border-slate-700 bg-slate-900 px-2 py-1 text-xs text-slate-100 placeholder:text-slate-600"
+            className={`${FIELD_SMALL_CLASS} w-48`}
           />
           <button
             type="submit"
             data-testid="folder-category-submit"
             disabled={pending}
-            className="rounded-md border border-slate-600 px-2 py-1 text-xs text-slate-200 hover:border-slate-400 disabled:opacity-50"
+            className={PRIMARY_BUTTON_SMALL_CLASS}
           >
             {t('folder.categorySubmit')}
           </button>
@@ -182,9 +189,9 @@ export function FolderHeading({
         <div
           data-testid="folder-delete-confirm"
           role="group"
-          className="flex flex-wrap items-center gap-2 rounded-md border border-rose-500/40 bg-rose-500/10 p-2"
+          className="flex flex-wrap items-center gap-2 rounded-[12px] border border-[var(--tucu-state-red-line)] bg-[var(--tucu-state-red-soft)] p-2.5"
         >
-          <p className="text-xs text-rose-100">{t('folder.deleteQuestion', { name: folder.name })}</p>
+          <p className="text-xs text-[var(--cl-ink)]">{t('folder.deleteQuestion', { name: folder.name })}</p>
           <button
             type="button"
             data-testid="folder-delete-accept"
@@ -195,7 +202,7 @@ export function FolderHeading({
                 setConfirmingDelete(false);
               });
             }}
-            className="rounded-md border border-rose-400/60 px-2 py-1 text-xs text-rose-100 hover:bg-rose-500/20 disabled:opacity-50"
+            className={DANGER_BUTTON_SMALL_CLASS}
           >
             {t('folder.deleteAccept')}
           </button>
@@ -204,7 +211,7 @@ export function FolderHeading({
             data-testid="folder-delete-cancel"
             disabled={pending}
             onClick={() => setConfirmingDelete(false)}
-            className="rounded-md border border-slate-700 px-2 py-1 text-xs text-slate-300 hover:border-slate-500 disabled:opacity-50"
+            className={SECONDARY_BUTTON_SMALL_CLASS}
           >
             {t('folder.deleteCancel')}
           </button>
@@ -214,8 +221,8 @@ export function FolderHeading({
       {folder !== null && !collapsed && folder.categories.length > 0 && (
         <ul data-testid="folder-categories" className="flex flex-wrap gap-1.5">
           {folder.categories.map((category) => (
-            <li key={category.id} className="flex items-center gap-1 rounded border border-slate-700 px-1.5 py-0.5">
-              <span className="text-[11px] text-slate-400">{category.name}</span>
+            <li key={category.id} className="glass-sub flex items-center gap-1 rounded-full px-2.5 py-1">
+              <span className="text-[11px] text-[var(--cl-ink-2)]">{category.name}</span>
               <button
                 type="button"
                 data-testid="folder-category-delete"
@@ -224,7 +231,7 @@ export function FolderHeading({
                 onClick={() => {
                   void run(() => client.deleteCategory(folder.id, category.id));
                 }}
-                className="text-[11px] leading-none text-slate-600 hover:text-rose-300 disabled:opacity-50"
+                className="focus-cl rounded text-[11px] leading-none text-[var(--cl-ink-3)] hover:text-[var(--tucu-state-red-ink)] disabled:opacity-50"
               >
                 ×
               </button>
@@ -233,7 +240,7 @@ export function FolderHeading({
         </ul>
       )}
 
-      {error !== null && <ErrorNotice error={error} />}
+      {error !== null && <ErrorNotice error={error} surface="glass" />}
     </div>
   );
 }

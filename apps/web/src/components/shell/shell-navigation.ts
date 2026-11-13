@@ -72,7 +72,7 @@ export function projectSlugFromPathname(pathname: string): string | null {
   return match === null ? null : decodeURIComponent(match[1] as string);
 }
 
-const MIGRATED_ROUTE_PREFIXES: readonly string[] = [];
+const MIGRATED_ROUTE_PREFIXES: readonly string[] = ['/'];
 
 export function isMigratedRoute(pathname: string): boolean {
   return MIGRATED_ROUTE_PREFIXES.some((prefix) => pathname === prefix || pathname.startsWith(`${prefix}/`));
