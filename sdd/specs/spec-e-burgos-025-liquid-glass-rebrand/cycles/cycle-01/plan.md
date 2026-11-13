@@ -53,3 +53,11 @@
 - El contexto no sabe de `prefers-reduced-transparency` ni de contraste: viven solo en el CSS de TASK-002.
 - Consecuencia para TASK-004: en modo claro las pantallas viejas (texto claro sobre fondo oscuro fijo) quedarían ilegibles sobre la escena clara, así que el shell las envuelve en una superficie oscura opaca hasta que migren.
 
+## Shell (TASK-004, commit d3409ca)
+- `StudioLayout` nuevo sobre la `Scene`: sidebar `glass` de 236 px (riel de 72 px bajo 1100 px), toolbar `glass-thick` con título por ruta y una acción declarada por cada página con `useToolbarAction({ label, onClick, disabled, loading })`, y bloque «este video» con pasos y `ProjectBrandControl` en su pie. Componentes nuevos en `apps/web/src/components/shell/` (fuera del escáner de textos literales); `studio-layout.tsx` se queda en `components/` porque el test lo exige.
+- `isMigratedRoute(pathname)` devuelve `false` para todo: las pantallas actuales van dentro de una superficie heredada oscura y opaca (`data-surface="legacy"`, sin blur). Los ciclos 02 a 05 la van ampliando pantalla por pantalla.
+- Los pasos usan las claves `nav.*`; la mayúscula inicial se aplica con un `span` (`first-letter:uppercase` no funciona sobre texto suelto dentro de un contenedor flex). El título del toolbar para library es «Biblioteca». Las claves `layout.title` y `layout.subtitle` quedaron sin uso.
+- Sin estado real en los pasos todavía: el prop `status` existe (default `pending`) y el layout no tiene datos; el ciclo 02 lo alimenta. El slot `status` del toolbar existe y está sin usar.
+- Provisorio: el `ThemeSwitch` vive en un `Collapse` «Apariencia» del pie de la sidebar hasta que el ciclo 05 lo pase a Ajustes; en el riel (< 1100 px) ese pie solo muestra el idioma.
+- Los testids de los e2e (`project-nav`, `brands-nav`, `publish-queue-nav`, `settings-nav`, `guide-nav`, `language-switch`) se mantuvieron.
+

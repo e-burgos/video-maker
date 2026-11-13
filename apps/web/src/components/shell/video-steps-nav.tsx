@@ -23,7 +23,7 @@ function stepClass({ isActive }: { isActive: boolean }): string {
   const tone = isActive
     ? 'bg-[color-mix(in_srgb,var(--cl-action)_12%,transparent)] font-semibold text-[var(--cl-action)]'
     : 'text-[var(--cl-ink-2)] hover:bg-[color-mix(in_srgb,var(--cl-ink)_6%,transparent)]';
-  return `focus-cl flex items-center gap-2 rounded-[9px] px-2 py-1 text-[12.5px] first-letter:uppercase ${tone}`;
+  return `focus-cl flex items-center gap-2 rounded-[9px] px-2 py-1 text-[12.5px] ${tone}`;
 }
 
 export function VideoStepsNav({ slug, title, isMotion, statusByPath = {}, footer }: VideoStepsNavProps) {
@@ -46,7 +46,7 @@ export function VideoStepsNav({ slug, title, isMotion, statusByPath = {}, footer
               className={stepClass}
             >
               <span aria-hidden data-step-dot className={`size-[7px] shrink-0 rounded-full ${DOT_CLASS[status]}`} />
-              {t(step.labelKey)}
+              <span className="first-letter:uppercase">{t(step.labelKey)}</span>
             </NavLink>
           );
         })}
