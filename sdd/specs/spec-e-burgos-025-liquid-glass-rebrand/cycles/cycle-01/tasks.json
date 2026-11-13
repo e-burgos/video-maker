@@ -53,13 +53,26 @@
       "depends_on": [
         "TASK-001"
       ],
-      "status": "pending",
+      "status": "done",
       "files": [
+        "package.json",
+        "pnpm-lock.yaml",
         "apps/web/src/index.css",
         "apps/web/src/theme/scene.tsx",
-        "apps/web/index.html",
-        "apps/desktop/vendor/THIRD_PARTY_NOTICES.md"
-      ]
+        "apps/web/src/theme/scene.spec.tsx",
+        "apps/desktop/vendor/THIRD_PARTY_NOTICES.md",
+        "apps/desktop/scripts/vendor-binaries.mjs"
+      ],
+      "usage": {
+        "tokens_in": 90000,
+        "tokens_out": 12000,
+        "provider_model": "claude/sonnet",
+        "effort": "medium",
+        "agent": "implementor-front",
+        "approx": true,
+        "source": "declared-estimate",
+        "recorded_at": "2026-11-13"
+      }
     },
     {
       "id": "TASK-003",

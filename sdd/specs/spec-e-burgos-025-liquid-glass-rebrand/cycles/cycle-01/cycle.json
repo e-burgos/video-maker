@@ -19,11 +19,14 @@
     "plan": "sdd/specs/spec-e-burgos-025-liquid-glass-rebrand/cycles/cycle-01/plan.md",
     "tasks": "sdd/specs/spec-e-burgos-025-liquid-glass-rebrand/cycles/cycle-01/tasks.json"
   },
-  "artifacts": [],
+  "artifacts": [
+    "sdd/specs/spec-e-burgos-025-liquid-glass-rebrand/cycles/cycle-01/artifacts/task002-escena-light.png",
+    "sdd/specs/spec-e-burgos-025-liquid-glass-rebrand/cycles/cycle-01/artifacts/task002-escena-dark.png"
+  ],
   "metrics": {
     "tasks_total": 7,
-    "tasks_completed": 2,
-    "story_points": 10,
+    "tasks_completed": 3,
+    "story_points": 15,
     "files_created": [
       "apps/web/src/theme/tucu-mount.spec.tsx",
       "apps/web/src/components/ui/brand-mark.tsx",
@@ -31,7 +34,9 @@
       "apps/web/public/favicon.svg",
       "apps/desktop/build/icon.icns",
       "apps/desktop/build/icon.png",
-      "design/rebranding/logo/build-logo.mjs"
+      "design/rebranding/logo/build-logo.mjs",
+      "apps/web/src/theme/scene.tsx",
+      "apps/web/src/theme/scene.spec.tsx"
     ],
     "files_modified": [
       "package.json",
@@ -39,12 +44,14 @@
       "apps/web/src/index.css",
       "apps/web/index.html",
       "apps/web/src/i18n/messages-en.ts",
-      "apps/web/src/i18n/messages-es.ts"
+      "apps/web/src/i18n/messages-es.ts",
+      "apps/desktop/vendor/THIRD_PARTY_NOTICES.md",
+      "apps/desktop/scripts/vendor-binaries.mjs"
     ],
     "files_deleted": [],
     "usage": {
-      "tokens_in": 330000,
-      "tokens_out": 52000,
+      "tokens_in": 420000,
+      "tokens_out": 64000,
       "by_agent": [
         {
           "agent": "implementor-front",
@@ -54,6 +61,18 @@
           "tokens_in": 150000,
           "tokens_out": 14000,
           "tokens_total": 164000,
+          "approx": true,
+          "source": "declared-estimate",
+          "recorded_at": "2026-11-13"
+        },
+        {
+          "agent": "implementor-front",
+          "label": "TASK-002",
+          "provider_model": "claude/sonnet",
+          "effort": "medium",
+          "tokens_in": 90000,
+          "tokens_out": 12000,
+          "tokens_total": 102000,
           "approx": true,
           "source": "declared-estimate",
           "recorded_at": "2026-11-13"
