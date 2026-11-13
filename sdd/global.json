@@ -262,7 +262,20 @@
       "completed_at": "2026-10-25"
     }
   ],
-  "in_progress_modules": [],
+  "in_progress_modules": [
+    {
+      "module": "liquid-glass-rebrand",
+      "spec": "spec-e-burgos-025-liquid-glass-rebrand",
+      "apps": [
+        "apps/web",
+        "apps/desktop",
+        "apps/render-api",
+        "apps/docs-site"
+      ],
+      "cycles_completed": 0,
+      "description": "Rediseño Cristal Líquido (tucu-ui) del estudio y de la app de escritorio, y paridad de funciones con la web pública: guía interactiva, acerca de, licencias, actualizaciones manuales y conexión de agentes de IA"
+    }
+  ],
   "pending_modules": [
     {
       "module": "scene-assembly",

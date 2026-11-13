@@ -1,0 +1,245 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Video Maker · Cristal Líquido · propuesta</title>
+<style>
+:root{
+  --glass-thin:rgba(255,255,255,.5);--glass-regular:rgba(255,255,255,.58);--glass-thick:rgba(255,255,255,.7);--glass-sub:rgba(255,255,255,.6);
+  --glass-border:rgba(255,255,255,.75);--line:rgba(0,0,0,.1);
+  --ink:#1d1d1f;--ink2:#48484a;--ink3:#6e6e73;
+  --action:#0a6cff;--action-ring:rgba(10,108,255,.3);--action-soft:rgba(10,108,255,.12);
+  --canvas:#e8eaf0;--ambient:linear-gradient(150deg,#c7d4ee 0%,#e2d5ea 45%,#f2ded3 100%);
+  --orb-a:rgba(100,150,255,.3);--orb-b:rgba(255,160,120,.24);
+  --shadow-card:0 6px 24px rgba(31,38,74,.1);--shadow-panel:0 10px 32px rgba(31,38,74,.13);
+  --stage:#0b0d14;--tile:#fff;
+  --ok-soft:rgba(40,167,69,.16);--ok-ink:#0b6623;--warn-soft:rgba(232,137,12,.18);--warn-ink:#8a5200;--teal-soft:rgba(0,168,181,.16);--teal-ink:#00646e;
+}
+:root[data-theme=dark]{
+  --glass-thin:rgba(60,60,67,.5);--glass-regular:rgba(44,44,52,.55);--glass-thick:rgba(44,44,50,.6);--glass-sub:rgba(0,0,0,.3);
+  --glass-border:rgba(255,255,255,.12);--line:rgba(255,255,255,.15);
+  --ink:#f5f5f7;--ink2:rgba(235,235,245,.72);--ink3:rgba(235,235,245,.62);
+  --action:#409cff;--action-ring:rgba(64,156,255,.35);--action-soft:rgba(64,156,255,.18);
+  --canvas:#101322;--ambient:linear-gradient(160deg,#101322 0%,#1d1730 60%,#231b26 100%);
+  --orb-a:rgba(90,120,255,.25);--orb-b:rgba(255,150,120,.12);
+  --shadow-card:0 6px 24px rgba(0,0,0,.3);--shadow-panel:0 10px 32px rgba(0,0,0,.35);
+  --tile:#1a1d29;
+  --ok-soft:rgba(48,209,88,.18);--ok-ink:#7ee59a;--warn-soft:rgba(255,159,10,.2);--warn-ink:#ffc266;--teal-soft:rgba(64,200,224,.18);--teal-ink:#7fe3f0;
+}
+*{box-sizing:border-box;margin:0}
+body{font:13.5px/1.5 Inter,-apple-system,system-ui,sans-serif;color:var(--ink);background:var(--canvas)}
+.mono{font-family:"JetBrains Mono",ui-monospace,Menlo,monospace;font-variant-numeric:tabular-nums}
+.bar{position:static;display:flex;gap:12px;align-items:center;padding:10px 20px;background:var(--glass-thick);backdrop-filter:blur(34px) saturate(1.7);border-bottom:.5px solid var(--glass-border)}
+.bar b{font-size:13px}.bar button{font:inherit;cursor:pointer;border:.5px solid var(--glass-border);background:var(--glass-thin);color:var(--ink);padding:6px 12px;border-radius:10px}
+.bar button[aria-pressed=true]{background:var(--action);color:#fff;border-color:transparent}
+.scene{position:relative;isolate:isolate;overflow:hidden;margin:20px;border-radius:20px;border:.5px solid var(--glass-border);height:960px}
+.scene>.bg{position:absolute;inset:0;background:var(--ambient),var(--canvas)}
+.scene>.bg i{position:absolute;border-radius:50%;filter:blur(90px)}
+.scene>.bg i:nth-child(1){width:300px;height:300px;top:-80px;left:35%;background:var(--orb-a)}
+.scene>.bg i:nth-child(2){width:280px;height:280px;bottom:-90px;right:5%;background:var(--orb-b)}
+.label{margin:22px 20px 0;font:600 10.5px/1 "JetBrains Mono",monospace;letter-spacing:.08em;text-transform:uppercase;color:var(--ink3)}
+.app{position:relative;display:grid;grid-template-columns:236px 1fr;height:100%}
+.glass{background:var(--glass-regular);backdrop-filter:blur(26px) saturate(1.6);border:.5px solid var(--glass-border)}
+.thick{background:var(--glass-thick);backdrop-filter:blur(34px) saturate(1.7);border:.5px solid var(--glass-border)}
+.thin{background:var(--glass-thin);backdrop-filter:blur(16px);border:.5px solid var(--glass-border)}
+.sub{background:var(--glass-sub);border:.5px solid var(--line)}
+.side{margin:12px 0 12px 12px;border-radius:20px;padding:16px 12px;display:flex;flex-direction:column;gap:4px;box-shadow:var(--shadow-panel)}
+.brand{display:flex;gap:10px;align-items:center;padding:4px 8px 14px;font-weight:700;font-size:15px;letter-spacing:-.2px}
+.brand span{width:28px;height:28px;border-radius:9px;background:linear-gradient(135deg,var(--action),#7a5cff);display:grid;place-items:center;color:#fff;font-size:13px}
+.nav a{display:flex;gap:10px;align-items:center;padding:9px 10px;border-radius:10px;color:var(--ink2);text-decoration:none;font-weight:500}
+.nav a.on{background:var(--action-soft);color:var(--action);font-weight:600}
+.nav .cap{font:600 10.5px/1 "JetBrains Mono",monospace;letter-spacing:.08em;text-transform:uppercase;color:var(--ink3);padding:14px 10px 6px}
+.dot{width:6px;height:6px;border-radius:50%;background:currentColor}
+.sp{flex:1}
+.foot{display:flex;gap:8px;align-items:center;justify-content:space-between;padding:8px}
+.pill{display:inline-flex;gap:6px;align-items:center;border-radius:999px;padding:3px 10px;font-size:10.5px;font-weight:600;border:.5px solid var(--glass-border)}
+.ok{background:var(--ok-soft);color:var(--ok-ink)}.warn{background:var(--warn-soft);color:var(--warn-ink)}.teal{background:var(--teal-soft);color:var(--teal-ink)}
+.main{padding:12px 16px 12px 14px;display:flex;flex-direction:column;gap:12px;min-width:0}
+.tb{display:flex;align-items:center;gap:12px;border-radius:16px;padding:8px 10px 8px 16px;min-height:52px;box-shadow:var(--shadow-card)}
+.tb h1{font-size:17px;letter-spacing:-.3px;line-height:1.2;font-weight:700}.tb small{color:var(--ink3)}.tb .tl{color:var(--ink3);font-size:18px}
+.vid{margin:2px 0 6px 10px;padding:6px;border-radius:14px;display:flex;flex-direction:column;gap:2px}
+.vid .vt{font-weight:600;font-size:12px;padding:4px 8px 6px;color:var(--ink)}
+.vid a{padding:6px 8px;font-size:12.5px;gap:8px}
+.vid .n{width:7px;height:7px;border-radius:50%;background:var(--ink3);opacity:.5}.vid .n.ok{background:#28a745;opacity:1}.vid .n.w{background:#e8890c;opacity:1}
+.vid a.on .n{background:var(--action);opacity:1}
+.head{display:flex;align-items:center;gap:14px;border-radius:16px;padding:12px 16px;box-shadow:var(--shadow-card)}
+.head h1{font-size:19px;letter-spacing:-.4px;line-height:1.2}.head small{color:var(--ink3)}
+.btn{font:inherit;font-weight:600;border:0;border-radius:10px;padding:8px 16px;cursor:pointer;color:#fff;background:var(--action);box-shadow:0 2px 12px rgba(10,108,255,.35)}
+.btn.sec{background:var(--glass-thin);color:var(--ink);border:.5px solid var(--glass-border);box-shadow:none}
+.steps{display:flex;gap:3px;padding:3px;border-radius:12px}
+.steps a{display:flex;gap:6px;align-items:center;padding:6px 12px;border-radius:9px;color:var(--ink2);font-weight:500;font-size:12.5px;text-decoration:none}
+.steps a.on{background:var(--action);color:#fff;box-shadow:0 2px 12px rgba(10,108,255,.35)}
+.steps .n{width:6px;height:6px;border-radius:50%;background:#28a745}.steps .n.w{background:#e8890c}.steps .n.g{background:var(--ink3);opacity:.5}
+.work{display:grid;grid-template-columns:minmax(300px,.9fr) 1.25fr;gap:12px;flex:1;min-height:0}
+.panel{border-radius:20px;padding:16px;box-shadow:var(--shadow-panel);display:flex;flex-direction:column;gap:12px;min-height:0}
+.panel h2{font-size:15px;font-weight:600}
+.msg{border-radius:14px;padding:10px 12px;max-width:92%}
+.msg.ai{background:var(--glass-sub);border:.5px solid var(--line)}
+.msg.me{align-self:flex-end;background:var(--action);color:#fff}
+.chips{display:flex;gap:6px;flex-wrap:wrap}
+.chip{border-radius:999px;padding:5px 11px;font-size:12px;font-weight:500;color:var(--ink)}
+.composer{margin-top:auto;border-radius:14px;padding:10px 12px;display:flex;flex-direction:column;gap:8px}
+.composer .row{display:flex;justify-content:space-between;align-items:center;color:var(--ink3);font-size:11.5px}
+.stage{background:var(--stage);border-radius:14px;aspect-ratio:16/9;display:grid;place-items:center;position:relative;overflow:hidden;border:.5px solid var(--line)}
+.stage .play{width:54px;height:54px;border-radius:50%;background:rgba(255,255,255,.14);display:grid;place-items:center;color:#fff;font-size:20px}
+.stage .ctl{position:absolute;left:0;right:0;bottom:0;padding:10px 14px;display:flex;gap:10px;color:#fff;font-size:11px;background:linear-gradient(transparent,rgba(0,0,0,.7))}
+.stage .ctl i{flex:1;height:3px;border-radius:2px;background:rgba(255,255,255,.3);align-self:center}
+.stage .ctl i b{display:block;width:22%;height:100%;background:#fff;border-radius:2px}
+.seg{display:inline-flex;gap:2px;padding:3px;border-radius:12px;align-self:flex-start}
+.seg span{padding:5px 14px;border-radius:9px;font-weight:500;font-size:12.5px;color:var(--ink2)}
+.seg span.on{background:var(--action);color:#fff;box-shadow:0 2px 12px rgba(10,108,255,.35)}
+.mats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.mat{border-radius:12px;padding:10px 12px;display:flex;flex-direction:column;gap:3px}
+.mat b{font-size:12.5px}.mat small{color:var(--ink3);font-size:11px}
+.grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
+.tile{background:var(--tile);border-radius:10px;aspect-ratio:4/3;border:.5px solid var(--line);display:grid;place-items:center;font-size:11px;color:var(--ink3);position:relative}
+.tile em{position:absolute;left:6px;bottom:6px;font-style:normal;font:600 9.5px "JetBrains Mono",monospace;background:var(--glass-thick);padding:2px 6px;border-radius:6px;color:var(--ink)}
+.tile.add{border-style:dashed;background:transparent;color:var(--action)}
+.note{font-size:11.5px;color:var(--ink3)}
+.right{display:flex;flex-direction:column;gap:12px;min-height:0}
+@media (prefers-reduced-transparency:reduce){.glass,.thick,.thin,.bar{backdrop-filter:none}}
+</style>
+</head>
+<body>
+<div class="bar">
+  <b>Video Maker · propuesta Cristal Líquido</b>
+  <span class="sp"></span>
+  <button id="light" aria-pressed="true">Light</button>
+  <button id="dark" aria-pressed="false">Dark</button>
+</div>
+
+<div class="label">Pantalla 1 · Shell + Mis videos</div>
+<div class="scene">
+  <div class="bg" aria-hidden="true"><i></i><i></i></div>
+  <div class="app">
+    <aside class="glass side">
+      <div class="brand"><span>▶</span>Video Maker</div>
+      <nav class="nav">
+        <div class="cap">Producir</div>
+        <a class="on" href="#"><span>▦</span>Mis videos</a>
+        <a href="#"><span>◐</span>Marcas</a>
+        <div class="cap">Salida</div>
+        <a href="#"><span>↑</span>Publicación<span class="sp"></span><span class="pill warn">2</span></a>
+        <div class="cap">Sistema</div>
+        <a href="#"><span>⚙</span>Ajustes</a>
+        <a href="#"><span>?</span>Guía</a>
+      </nav>
+      <div class="sp"></div>
+      <div class="foot thin" style="border-radius:12px"><span class="pill ok"><i class="dot"></i>Listo</span><span class="pill thin">ES · EN</span></div>
+    </aside>
+    <main class="main">
+      <div class="tb thick">
+        <h1>Mis videos</h1>
+        <small>87 videos · 6 carpetas</small>
+        <span class="sp"></span>
+        <button class="btn">+ Nuevo video</button>
+      </div>
+      <div style="display:flex;gap:8px;align-items:center">
+        <div class="sub" style="border-radius:10px;padding:8px 12px;flex:1;max-width:340px;color:var(--ink3)">⌕ Buscar video o carpeta</div>
+        <button class="btn sec">Nueva carpeta</button>
+      </div>
+      <div class="chips">
+        <span class="chip thin" style="background:var(--ink);color:var(--canvas)">Todos</span>
+        <span class="chip thin">Display Ads <span class="mono">40</span></span>
+        <span class="chip thin">Webs para negocios <span class="mono">33</span></span>
+        <span class="chip thin">Video Maker <span class="mono">2</span></span>
+        <span class="chip thin">Esteban Burgos <span class="mono">4</span></span>
+      </div>
+      <div class="panel glass" style="flex:1">
+        <h2>Display Ads · Campañas <span class="mono" style="color:var(--ink3);font-weight:400">10</span></h2>
+        <div class="grid" style="grid-template-columns:repeat(4,1fr);gap:12px">
+          <div class="mat sub" style="padding:8px"><div class="tile" style="aspect-ratio:16/9">miniatura</div><b>Crear campaña display ads</b><small class="mono">crear-campana-display-ads</small><span class="pill ok" style="align-self:flex-start"><i class="dot"></i>Publicado</span></div>
+          <div class="mat sub" style="padding:8px"><div class="tile" style="aspect-ratio:16/9">miniatura</div><b>Asignar campaña</b><small class="mono">display-ads-asignar-campana</small><span class="pill ok" style="align-self:flex-start"><i class="dot"></i>Publicado</span></div>
+          <div class="mat sub" style="padding:8px"><div class="tile" style="aspect-ratio:16/9">miniatura</div><b>Contenido de campaña</b><small class="mono">display-ads-contenido</small><span class="pill teal" style="align-self:flex-start"><i class="dot"></i>Listo para publicar</span></div>
+          <div class="mat sub" style="padding:8px"><div class="tile" style="aspect-ratio:16/9">miniatura</div><b>Planificador de LinkedIn</b><small class="mono">li-planificador</small><span class="pill warn" style="align-self:flex-start"><i class="dot"></i>Falta material</span></div>
+        </div>
+        <p class="note">El panel es el vidrio; las tarjetas son filas transparentes y las miniaturas van sobre superficie opaca. Acciones por tarjeta: una sola principal (Abrir) y el resto en el menú ⋮.</p>
+      </div>
+    </main>
+  </div>
+</div>
+
+<div class="label">Pantalla 2 · Espacio de trabajo de un video</div>
+<div class="scene">
+  <div class="bg" aria-hidden="true"><i></i><i></i></div>
+  <div class="app">
+    <aside class="glass side">
+      <div class="brand"><span>▶</span>Video Maker</div>
+      <nav class="nav">
+        <div class="cap">Producir</div>
+        <a href="#"><span>▦</span>Mis videos</a>
+        <div class="vid thin">
+          <div class="vt">Crear campaña display ads</div>
+          <a class="on" href="#"><i class="n"></i>Productor</a>
+          <a href="#"><i class="n ok"></i>Material</a>
+          <a href="#"><i class="n ok"></i>Storyboard</a>
+          <a href="#"><i class="n ok"></i>Voz</a>
+          <a href="#"><i class="n w"></i>Vista previa</a>
+        </div>
+        <a href="#"><span>◐</span>Marcas</a>
+        <div class="cap">Salida</div>
+        <a href="#"><span>↑</span>Publicación</a>
+        <div class="cap">Sistema</div>
+        <a href="#"><span>⚙</span>Ajustes</a>
+        <a href="#"><span>?</span>Guía</a>
+      </nav>
+      <div class="sp"></div>
+      <div class="foot thin" style="border-radius:12px"><span class="pill ok"><i class="dot"></i>Listo</span><span class="pill thin">ES · EN</span></div>
+    </aside>
+    <main class="main">
+      <div class="tb thick">
+        <span class="tl">‹</span>
+        <h1>Productor</h1>
+        <small>Crear campaña display ads</small>
+        <span class="sp"></span>
+        <span class="pill ok"><i class="dot"></i>Video listo</span>
+        <button class="btn">Renderizar</button>
+      </div>
+      <div class="work">
+        <section class="panel glass">
+          <h2>Productor</h2>
+          <div class="msg ai">Trabajo con el material de este video, acuerdo el guion con vos y después edito, locuto y renderizo. ¿Qué querés hacer?</div>
+          <div class="chips">
+            <span class="chip thin">Proponeme un guion con el material</span>
+            <span class="chip thin">Tutorial vertical</span>
+            <span class="chip thin">Publicidad 9:16</span>
+          </div>
+          <div class="msg me">Hacelo en 45 segundos, tono cercano.</div>
+          <div class="msg ai">Listo. Armé 7 escenas con la voz Malena. ¿Querés ver el storyboard?</div>
+          <div class="composer sub">
+            <span style="color:var(--ink3)">Contale al productor qué querés y qué material tenés…</span>
+            <div class="row"><span>Sonnet · con Claude</span><span style="display:flex;gap:8px;align-items:center"><span>Adjuntar</span><button class="btn" style="padding:6px 14px">Enviar</button></span></div>
+          </div>
+        </section>
+        <div class="right">
+          <section class="panel glass">
+            <div style="display:flex;align-items:center;gap:10px"><h2>Vista previa</h2><span class="pill thin">◐ Display Ads ▾</span><span class="sp"></span><div class="seg thin"><span class="on">16:9</span><span>9:16</span></div></div>
+            <div class="stage"><div class="play">▶</div><div class="ctl"><span class="mono">0:00 / 1:34</span><i><b></b></i><span>⛶</span></div></div>
+            <div class="note mono">1920×1080 · 30 fps · 2724 frames · 1 voz · 1 música · 30 captions · último render 15 oct</div>
+          </section>
+          <section class="panel glass" style="flex:1">
+            <div style="display:flex;align-items:center;gap:10px"><div class="seg thin"><span class="on">Material</span><span>Entregas</span></div><span class="sp"></span><button class="btn sec">+ Agregar material</button></div>
+            <div class="mats">
+              <div class="mat sub"><b>A-roll</b><small>1 archivo</small><span class="pill ok" style="align-self:flex-start"><i class="dot"></i>Completo</span></div>
+              <div class="mat sub"><b>Música</b><small>1 archivo</small><span class="pill ok" style="align-self:flex-start"><i class="dot"></i>Completo</span></div>
+              <div class="mat sub"><b>Logo</b><small>2 archivos</small><span class="pill warn" style="align-self:flex-start"><i class="dot"></i>Revisar</span></div>
+            </div>
+            <div class="grid">
+              <div class="tile">img 01<em>A-ROLL</em></div><div class="tile">img 02<em>LOGO</em></div><div class="tile">img 03<em>LOGO</em></div><div class="tile add">+ Soltar acá</div>
+            </div>
+            <p class="note">Las imágenes y el video van siempre sobre superficie opaca; el vidrio solo los enmarca. Clic en una miniatura abre el visor ampliado (comparación lado a lado con la tecla C).</p>
+          </section>
+        </div>
+      </div>
+    </main>
+  </div>
+</div>
+<script>
+const r=document.documentElement,l=document.getElementById('light'),d=document.getElementById('dark');
+function set(t){if(t==='dark')r.setAttribute('data-theme','dark');else r.removeAttribute('data-theme');l.setAttribute('aria-pressed',t!=='dark');d.setAttribute('aria-pressed',t==='dark')}
+l.onclick=()=>set('light');d.onclick=()=>set('dark');
+if(location.hash==='#dark')set('dark');
+</script>
+</body>
+</html>

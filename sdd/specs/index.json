@@ -406,6 +406,23 @@
       "depends_on": [
         "spec-e-burgos-017-desktop-app"
       ]
+    },
+    {
+      "id": "spec-e-burgos-025-liquid-glass-rebrand",
+      "author": "e-burgos",
+      "slug": "liquid-glass-rebrand",
+      "folder": "sdd/specs/spec-e-burgos-025-liquid-glass-rebrand",
+      "file": "sdd/specs/spec-e-burgos-025-liquid-glass-rebrand/spec-e-burgos-025-liquid-glass-rebrand.spec.md",
+      "module": "liquid-glass-rebrand",
+      "app": "apps/web",
+      "status": "in-progress",
+      "title": "Rediseño Cristal Líquido del estudio y paridad de funciones con la web",
+      "created_at": "2026-11-13",
+      "completed_at": null,
+      "depends_on": [
+        "spec-e-burgos-017-desktop-app",
+        "spec-e-burgos-024-docs-site-redesign"
+      ]
     }
   ]
 }
