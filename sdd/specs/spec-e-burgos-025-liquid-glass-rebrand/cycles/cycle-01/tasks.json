@@ -3,35 +3,56 @@
   "spec": "spec-e-burgos-025-liquid-glass-rebrand",
   "cycle": 1,
   "module": "liquid-glass-rebrand",
-  "apps": ["apps/web", "apps/desktop"],
+  "apps": [
+    "apps/web",
+    "apps/desktop"
+  ],
   "flow": "lite",
   "user_stories_generated": true,
-  "prerequisites": { "tasks_generated": true },
+  "prerequisites": {
+    "tasks_generated": true
+  },
   "tasks": [
     {
       "id": "TASK-001",
       "title": "web: spike y montaje de tucu-ui (dependencia 3.10.1, tema con Tailwind propio, GlassPanel/SegmentedControl/StateBadge/Button/Modal/Collapse con y sin ThemeProvider, slot de acción del toolbar y bloque anidado de la sidebar)",
-      "user_stories": ["US-025-101", "US-025-104"],
+      "user_stories": [
+        "US-025-101",
+        "US-025-104"
+      ],
       "estimation_hours": 4,
       "story_points": 5,
       "depends_on": [],
-      "status": "pending",
+      "status": "done",
       "files": [
         "package.json",
         "pnpm-lock.yaml",
         "apps/web/src/index.css",
-        "apps/web/src/main.tsx",
-        "apps/web/src/app/app.tsx",
         "apps/web/src/theme/tucu-mount.spec.tsx"
-      ]
+      ],
+      "usage": {
+        "tokens_in": 150000,
+        "tokens_out": 14000,
+        "provider_model": "claude/sonnet",
+        "effort": "medium",
+        "agent": "implementor-front",
+        "approx": true,
+        "source": "declared-estimate",
+        "recorded_at": "2026-11-13"
+      }
     },
     {
       "id": "TASK-002",
       "title": "web: tokens --tucu-* y --cl-*, utilidades de vidrio, escena aurora estática y fuentes Inter y JetBrains Mono empaquetadas con su aviso de licencia",
-      "user_stories": ["US-025-101", "US-025-102"],
+      "user_stories": [
+        "US-025-101",
+        "US-025-102"
+      ],
       "estimation_hours": 4,
       "story_points": 5,
-      "depends_on": ["TASK-001"],
+      "depends_on": [
+        "TASK-001"
+      ],
       "status": "pending",
       "files": [
         "apps/web/src/index.css",
@@ -43,10 +64,14 @@
     {
       "id": "TASK-003",
       "title": "web: contexto de tema sistema/claro/oscuro y materiales vidrio/sólidos, selector, persistencia y reglas de prefers-reduced-transparency y prefers-contrast sin destello inicial",
-      "user_stories": ["US-025-102"],
+      "user_stories": [
+        "US-025-102"
+      ],
       "estimation_hours": 4,
       "story_points": 5,
-      "depends_on": ["TASK-002"],
+      "depends_on": [
+        "TASK-002"
+      ],
       "status": "pending",
       "files": [
         "apps/web/src/theme/theme-context.tsx",
@@ -59,10 +84,15 @@
     {
       "id": "TASK-004",
       "title": "web: StudioLayout nuevo (sidebar de vidrio, bloque del video con pasos y estado, toolbar con título y acción por ruta mediante hook, pie con servicio e idioma, colapso responsive) conviviendo con las páginas actuales",
-      "user_stories": ["US-025-103", "US-025-104"],
+      "user_stories": [
+        "US-025-103",
+        "US-025-104"
+      ],
       "estimation_hours": 8,
       "story_points": 8,
-      "depends_on": ["TASK-003"],
+      "depends_on": [
+        "TASK-003"
+      ],
       "status": "pending",
       "files": [
         "apps/web/src/components/studio-layout.tsx",
@@ -78,11 +108,16 @@
     },
     {
       "id": "TASK-005",
-      "title": "desktop: ventana con minWidth/minHeight, barra de título con los botones sobre la sidebar, zona de arrastre, backgroundColor según tema, ícono y ventana de configuración inicial con el mismo fondo",
-      "user_stories": ["US-025-105"],
+      "title": "desktop: ventana con minWidth/minHeight, barra de título con los botones sobre la sidebar, zona de arrastre, backgroundColor según tema, ícono nuevo (de TASK-007) y ventana de configuración inicial con el mismo fondo",
+      "user_stories": [
+        "US-025-105"
+      ],
       "estimation_hours": 4,
       "story_points": 5,
-      "depends_on": ["TASK-004"],
+      "depends_on": [
+        "TASK-004",
+        "TASK-007"
+      ],
       "status": "pending",
       "files": [
         "apps/desktop/src/main/main.ts",
@@ -93,12 +128,38 @@
       ]
     },
     {
+      "id": "TASK-007",
+      "title": "identidad: logo nuevo de Video Maker trabajado con el dev (conceptos, elección y refinamiento), entregables SVG, PNG, .icns y favicon, y componente BrandMark en el studio",
+      "user_stories": [
+        "US-025-106"
+      ],
+      "estimation_hours": 4,
+      "story_points": 5,
+      "depends_on": [],
+      "status": "pending",
+      "files": [
+        "design/rebranding/logo",
+        "apps/web/src/components/brand-mark.tsx",
+        "apps/web/public/favicon.svg",
+        "apps/desktop/build/icon.icns",
+        "apps/desktop/build/icon.png"
+      ]
+    },
+    {
       "id": "TASK-006",
       "title": "verificación del ciclo: capturas antes y después de todas las pantallas en el shell nuevo (light y dark), contraste AA medido, prefers-reduced-* emulados y costo de blur en Mis videos",
-      "user_stories": ["US-025-101", "US-025-102", "US-025-103", "US-025-105"],
+      "user_stories": [
+        "US-025-101",
+        "US-025-102",
+        "US-025-103",
+        "US-025-105"
+      ],
       "estimation_hours": 3,
       "story_points": 3,
-      "depends_on": ["TASK-005"],
+      "depends_on": [
+        "TASK-005",
+        "TASK-007"
+      ],
       "status": "pending",
       "files": []
     }

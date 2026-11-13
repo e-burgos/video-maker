@@ -1,4 +1,6 @@
 @import 'tailwindcss';
+@import '@e-burgos/tucu-ui/theme';
+@source '../../../node_modules/@e-burgos/tucu-ui/**/*.mjs';
 
 @theme {
   --color-surface: var(--color-slate-950);
@@ -17,6 +19,15 @@
   --color-success: var(--color-emerald-400);
   --radius-panel: 0.75rem;
   --radius-control: 0.5rem;
+  --font-sans: -apple-system, 'system-ui', 'Segoe UI', Roboto, 'Helvetica Neue', 'Noto Sans', Arial,
+    sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
+  --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono',
+    'Courier New', monospace;
+}
+
+html:root {
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: auto;
 }
 
 html,
