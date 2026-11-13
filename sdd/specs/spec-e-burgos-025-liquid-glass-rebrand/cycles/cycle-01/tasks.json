@@ -136,7 +136,7 @@
       "estimation_hours": 4,
       "story_points": 5,
       "depends_on": [],
-      "status": "in-progress",
+      "status": "done",
       "files": [
         "design/rebranding/logo/build-logo.mjs",
         "design/rebranding/logo/final",
@@ -148,7 +148,17 @@
         "apps/web/public/favicon.svg",
         "apps/desktop/build/icon.icns",
         "apps/desktop/build/icon.png"
-      ]
+      ],
+      "usage": {
+        "tokens_in": 180000,
+        "tokens_out": 38000,
+        "provider_model": "claude/sonnet",
+        "effort": "high",
+        "agent": "orchestrator",
+        "approx": true,
+        "source": "declared-estimate",
+        "recorded_at": "2026-11-13"
+      }
     },
     {
       "id": "TASK-006",

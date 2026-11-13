@@ -22,20 +22,29 @@
   "artifacts": [],
   "metrics": {
     "tasks_total": 7,
-    "tasks_completed": 1,
-    "story_points": 5,
+    "tasks_completed": 2,
+    "story_points": 10,
     "files_created": [
-      "apps/web/src/theme/tucu-mount.spec.tsx"
+      "apps/web/src/theme/tucu-mount.spec.tsx",
+      "apps/web/src/components/ui/brand-mark.tsx",
+      "apps/web/src/components/ui/brand-mark.spec.tsx",
+      "apps/web/public/favicon.svg",
+      "apps/desktop/build/icon.icns",
+      "apps/desktop/build/icon.png",
+      "design/rebranding/logo/build-logo.mjs"
     ],
     "files_modified": [
       "package.json",
       "pnpm-lock.yaml",
-      "apps/web/src/index.css"
+      "apps/web/src/index.css",
+      "apps/web/index.html",
+      "apps/web/src/i18n/messages-en.ts",
+      "apps/web/src/i18n/messages-es.ts"
     ],
     "files_deleted": [],
     "usage": {
-      "tokens_in": 150000,
-      "tokens_out": 14000,
+      "tokens_in": 330000,
+      "tokens_out": 52000,
       "by_agent": [
         {
           "agent": "implementor-front",
@@ -45,6 +54,18 @@
           "tokens_in": 150000,
           "tokens_out": 14000,
           "tokens_total": 164000,
+          "approx": true,
+          "source": "declared-estimate",
+          "recorded_at": "2026-11-13"
+        },
+        {
+          "agent": "orchestrator",
+          "label": "TASK-007 logo con el dev",
+          "provider_model": "claude/sonnet",
+          "effort": "high",
+          "tokens_in": 180000,
+          "tokens_out": 38000,
+          "tokens_total": 218000,
           "approx": true,
           "source": "declared-estimate",
           "recorded_at": "2026-11-13"
