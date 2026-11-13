@@ -1,6 +1,6 @@
 # Constitución — apps/web
 
-> Versión 3.3 | Última actualización: spec-025 cycle-03 (biblioteca, visor, storyboard y voz) | Fecha: 2026-11-13
+> Versión 3.4 | Última actualización: spec-025 cycle-04 (vista previa, motion y marcas) | Fecha: 2026-11-13
 
 ## 1. Propósito
 
@@ -23,8 +23,9 @@
   video» con sus pasos, toolbar con una sola acción por página (`useToolbarAction`) y pie con estado
   del servicio (modal), switch de idioma y apariencia (sistema/claro/oscuro); las pantallas aún no
   migradas se muestran en una superficie heredada oscura y opaca (`isMigratedRoute`; ya migradas: Mis
-  videos `/`, el espacio de trabajo `/projects/:slug` exacto, `/library`, `/storyboard` y `/voice`; vista previa y motion aún heredadas
-  vía `components/shell/legacy-surface.tsx`, que se retira al migrar motion; los pasos
+  videos `/`, el espacio de trabajo `/projects/:slug` exacto, `/library`, `/storyboard`, `/voice`, `/preview`,
+  `/motion`, `/brands` y `/brands/:id`; `LegacySurface` ya no se usa y su archivo
+  `components/shell/legacy-surface.tsx` espera a borrarse; los pasos
   del video en la sidebar muestran estado real con `useVideoStepStatuses`). En el espacio de trabajo el chat del
   productor y el primer uso van a la izquierda; la vista previa queda siempre visible sobre escenario opaco, con
   Material | Entregas a la derecha; el estado de la propuesta vive en el slot de estado del toolbar y «Aprobar el
@@ -419,8 +420,10 @@ Todos bajo `src/` de la app; copy `es`/`en` en `src/i18n/`; el contrato de cada 
 - **Marcas**: `/brands` (propias e incluidas, nueva, duplicar, borrar) y `/brands/:id` (identidad, logo, colores —4 base
   + avanzado por variable; cambiar un color base recalcula todos y descarta retoques—, tipografías, voz, música, fotos
   y productos) con vista previa en vivo en un iframe (colores por `postMessage` `mg-brand-tokens` + recompuesta
-  diferida). Una incluida es de sólo lectura con "Duplicar". `pages/brands-page.tsx`, `brand-editor-page.tsx`, 17
-  `components/brand-*.tsx`, hooks `use-brand-editor`, `use-section-draft`, `use-brand-upload`, `use-brand-font-faces`,
+  diferida). Una incluida es de sólo lectura con "Duplicar". `pages/brands-page.tsx`, `brand-editor-page.tsx`,
+  `components/brands/` (tarjetas, secciones del editor, vista previa y barra de guardado única: los borradores de
+  sección viven en la página con `use-brand-draft`/`brand-draft.ts` y un solo `putBrand` aplica las secciones
+  cambiadas; colores, variables avanzadas y archivos se aplican al instante), hooks `use-brand-editor`, `use-section-draft`, `use-brand-upload`, `use-brand-font-faces`,
   `use-project-brand-voice`; `api/brand-*.ts`, `google-font-families.ts`. `components/brand-picker.tsx` en el alta
   (crudo: opcional; motion: obligatoria) y `project-brand-control.tsx` en la barra (en motion la marca se cambia en el
   brief; una marca sin música sólo ofrece "Sin música"). El selector de subtítulos ofrece "De la marca" y la página Voz
@@ -467,12 +470,19 @@ Todos bajo `src/` de la app; copy `es`/`en` en `src/i18n/`; el contrato de cada 
   estado del video para todo el studio: publicado verde, video listo teal, sin material naranja, montaje listo
   púrpura, material cargado y archivado neutros; (11) la auditoría reutilizable
   `design/rebranding/contrast-audit.mjs <dir> <rutas…>` mide cada texto visible contra el fondo renderizado y el
-  desborde horizontal; `api/video-filter` filtra Mis videos.
+  desborde horizontal; `api/video-filter` filtra Mis videos; (12) `components/ui/cl-controls.ts` exporta `PANEL_CLASS`,
+  `PANEL_HEADING_CLASS`, `OPAQUE_MEDIA_FRAME_CLASS`, `TOOLBAR_SECONDARY_BUTTON_CLASS`, `CHECKBOX_CLASS` y
+  `ROW_CLASS`; (13) `timeline-player` lleva `data-media` y la auditoría de contraste ignora sus controles;
+  `hooks/use-section-draft.ts` se reinicia en el mismo render (sin parpadeo de «sin guardar»); los ajustes de render
+  de `components/preview/` van en secciones plegables (`Collapse` unstyled, una abierta a la vez) con resumen,
+  acción de render e historial (`renderJobTone`); `components/motion/` agrupa las piezas del brief y del video
+  entregado.
 - **Tests**: `settings-page.spec.tsx` espera hasta 5 s (con 7 proyectos en paralelo el timeout de 1 s era intermitente).
 - **Pendientes vigentes**: copy propio para el uploader de imágenes en la página Motion (hoy usa el del modo crudo);
   el reporte de la fase storyboard trae `path`/`durationSec` null; la bandeja de arrastrar y soltar no propone el
-  rol `reference`; migrar las pantallas restantes al shell nuevo (ciclos 03 a 05 de spec-025: ampliar `isMigratedRoute`
-  y declarar la acción del toolbar), limpiar `RenderReviewPanel` (en Entregas, envuelto en una isla oscura) y
+  rol `reference`; migrar las pantallas restantes al shell nuevo (ciclo 05 de spec-025: publicación, ajustes y guía;
+  ampliar `isMigratedRoute` y declarar la acción del toolbar; `studio-layout.spec` usa `/publish-queue` como ruta no
+  migrada), limpiar `RenderReviewPanel` (en Entregas, envuelto en una isla oscura) y
   `YouTubePublishDialog` junto con el modo heredado de `surface` (ciclo 05), no hay API para renombrar videos (solo
   se renombran carpetas), mover el selector de apariencia a Ajustes
   (ciclo 05) y la paridad con la web (ciclo 06). Una ventana de Electron abierta durante muchas recargas en caliente
