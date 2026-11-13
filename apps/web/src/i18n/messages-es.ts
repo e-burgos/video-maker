@@ -5,6 +5,15 @@ export const MESSAGES_ES: Messages = {
   'language.name.en': 'Inglés',
   'language.name.es': 'Español',
 
+  'theme.label': 'Tema de la interfaz',
+  'theme.system': 'Sistema',
+  'theme.light': 'Claro',
+  'theme.dark': 'Oscuro',
+  'material.label': 'Material de las superficies',
+  'material.glass': 'Vidrio',
+  'material.solid': 'Sólidos',
+  'material.hint': 'Los sólidos reemplazan al vidrio translúcido.',
+
   'brand.name': 'Video Maker',
   'brand.nameWithSignature': 'Video Maker by Esteban Burgos',
 

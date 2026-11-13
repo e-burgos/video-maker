@@ -5,6 +5,25 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Video Maker Studio</title>
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <script>
+      (function () {
+        var root = document.documentElement;
+        var theme = 'system';
+        var material = 'glass';
+        try {
+          theme = localStorage.getItem('vm-theme') || theme;
+          material = localStorage.getItem('vm-material') || material;
+        } catch (error) {}
+        var dark =
+          theme === 'dark' ||
+          (theme !== 'light' &&
+            typeof matchMedia === 'function' &&
+            matchMedia('(prefers-color-scheme: dark)').matches);
+        root.classList.toggle('dark', dark);
+        root.setAttribute('data-theme', dark ? 'dark' : 'light');
+        if (material === 'solid') root.setAttribute('data-material', 'solid');
+      })();
+    </script>
   </head>
   <body>
     <div id="root"></div>

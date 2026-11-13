@@ -3,6 +3,15 @@ export const MESSAGES_EN = {
   'language.name.en': 'English',
   'language.name.es': 'Spanish',
 
+  'theme.label': 'Interface theme',
+  'theme.system': 'System',
+  'theme.light': 'Light',
+  'theme.dark': 'Dark',
+  'material.label': 'Surface material',
+  'material.glass': 'Glass',
+  'material.solid': 'Solid',
+  'material.hint': 'Solid surfaces replace the translucent glass.',
+
   'brand.name': 'Video Maker',
   'brand.nameWithSignature': 'Video Maker by Esteban Burgos',
 

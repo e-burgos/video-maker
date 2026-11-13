@@ -25,8 +25,8 @@
   ],
   "metrics": {
     "tasks_total": 7,
-    "tasks_completed": 3,
-    "story_points": 15,
+    "tasks_completed": 4,
+    "story_points": 20,
     "files_created": [
       "apps/web/src/theme/tucu-mount.spec.tsx",
       "apps/web/src/components/ui/brand-mark.tsx",
@@ -36,7 +36,12 @@
       "apps/desktop/build/icon.png",
       "design/rebranding/logo/build-logo.mjs",
       "apps/web/src/theme/scene.tsx",
-      "apps/web/src/theme/scene.spec.tsx"
+      "apps/web/src/theme/scene.spec.tsx",
+      "apps/web/src/theme/theme-preferences.ts",
+      "apps/web/src/theme/theme-context.tsx",
+      "apps/web/src/theme/theme-context.spec.tsx",
+      "apps/web/src/theme/theme-switch.tsx",
+      "apps/web/src/theme/theme-switch.spec.tsx"
     ],
     "files_modified": [
       "package.json",
@@ -46,12 +51,13 @@
       "apps/web/src/i18n/messages-en.ts",
       "apps/web/src/i18n/messages-es.ts",
       "apps/desktop/vendor/THIRD_PARTY_NOTICES.md",
-      "apps/desktop/scripts/vendor-binaries.mjs"
+      "apps/desktop/scripts/vendor-binaries.mjs",
+      "apps/web/src/main.tsx"
     ],
     "files_deleted": [],
     "usage": {
-      "tokens_in": 420000,
-      "tokens_out": 64000,
+      "tokens_in": 480000,
+      "tokens_out": 73000,
       "by_agent": [
         {
           "agent": "implementor-front",
@@ -85,6 +91,18 @@
           "tokens_in": 180000,
           "tokens_out": 38000,
           "tokens_total": 218000,
+          "approx": true,
+          "source": "declared-estimate",
+          "recorded_at": "2026-11-13"
+        },
+        {
+          "agent": "implementor-front",
+          "label": "TASK-003",
+          "provider_model": "claude/sonnet",
+          "effort": "medium",
+          "tokens_in": 60000,
+          "tokens_out": 9000,
+          "tokens_total": 69000,
           "approx": true,
           "source": "declared-estimate",
           "recorded_at": "2026-11-13"

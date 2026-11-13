@@ -85,14 +85,28 @@
       "depends_on": [
         "TASK-002"
       ],
-      "status": "pending",
+      "status": "done",
       "files": [
+        "apps/web/src/theme/theme-preferences.ts",
         "apps/web/src/theme/theme-context.tsx",
         "apps/web/src/theme/theme-context.spec.tsx",
         "apps/web/src/theme/theme-switch.tsx",
         "apps/web/src/theme/theme-switch.spec.tsx",
-        "apps/web/index.html"
-      ]
+        "apps/web/index.html",
+        "apps/web/src/main.tsx",
+        "apps/web/src/i18n/messages-en.ts",
+        "apps/web/src/i18n/messages-es.ts"
+      ],
+      "usage": {
+        "tokens_in": 60000,
+        "tokens_out": 9000,
+        "provider_model": "claude/sonnet",
+        "effort": "medium",
+        "agent": "implementor-front",
+        "approx": true,
+        "source": "declared-estimate",
+        "recorded_at": "2026-11-13"
+      }
     },
     {
       "id": "TASK-004",
