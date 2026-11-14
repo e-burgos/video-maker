@@ -33,6 +33,16 @@ function timelineNotFound(): Promise<never> {
   return Promise.reject(new StudioToolRuntimeError('FILE_NOT_FOUND', 'this project has no timeline yet'));
 }
 
+function withLogoAsset(timeline: Timeline): Timeline {
+  return {
+    ...timeline,
+    assets: [
+      ...timeline.assets,
+      { id: 'logo-asset', kind: 'image', path: 'raw/logo/logo.png', durationMs: 0, width: 512, height: 512, probedAt: '2026-09-07T00:00:00.000Z' },
+    ],
+  };
+}
+
 describe('createStudioToolHandlers', () => {
   it('get_project_overview composes detail, assets, recent jobs and script state', async () => {
     const { handlers } = handlersWith({
@@ -811,7 +821,7 @@ describe('createStudioToolHandlers', () => {
 
   describe('patch_timeline', () => {
     it('replaces only the requested sections and leaves captions untouched byte-for-byte', async () => {
-      const current = withCaptionWords(buildMinimalTimeline(), ['quién', 'ahí', 'elegís']);
+      const current = withLogoAsset(withCaptionWords(buildMinimalTimeline(), ['quién', 'ahí', 'elegís']));
       let saved: unknown = null;
       const { handlers, client } = handlersWith({
         getTimeline: async () => current,
@@ -827,6 +837,27 @@ describe('createStudioToolHandlers', () => {
       expect(client.calls.map((call) => call.method)).toEqual(['getTimeline', 'putTimeline']);
       expect((saved as Timeline).logo).toEqual(logo);
       expect((saved as Timeline).tracks.captions).toEqual(current.tracks.captions);
+    });
+
+    it('rejects a logo whose asset is not in timeline.assets and saves nothing', async () => {
+      const { handlers, client } = handlersWith({ getTimeline: async () => buildMinimalTimeline() });
+      const logo = { assetId: 'raw/logo/isotipo.png', position: 'bottom-left' as const, widthRatio: 0.4, marginRatio: 0.035, opacity: 1 };
+
+      await expect(handlers.patch_timeline({ logo })).rejects.toMatchObject({
+        code: 'INVALID_INPUT',
+        hint: expect.stringContaining('LOGO_ASSET_NOT_FOUND'),
+      });
+      expect(client.calls.map((call) => call.method)).toEqual(['getTimeline']);
+    });
+
+    it('rejects a bumper logo whose asset is not in timeline.assets', async () => {
+      const { handlers } = handlersWith({ getTimeline: async () => buildMinimalTimeline() });
+      const intro = { enabled: true, durationMs: 2000, backgroundColor: '#ffffff', animation: 'zoom' as const, logoWidthRatio: 0.4, logoAssetId: 'missing-logo' };
+
+      await expect(handlers.patch_timeline({ bumpers: { intro } })).rejects.toMatchObject({
+        code: 'INVALID_INPUT',
+        hint: expect.stringContaining('BUMPER_LOGO_ASSET_NOT_FOUND'),
+      });
     });
 
     it('keeps the rotating bumper style when the patch only brings intro and outro', async () => {

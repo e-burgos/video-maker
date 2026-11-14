@@ -1,6 +1,6 @@
 import { z } from 'zod';
 
-import { TimelineSchema, canonicalMaterialPath } from '@video-maker/timeline-core';
+import { TimelineSchema, assetReferenceIssues, canonicalMaterialPath } from '@video-maker/timeline-core';
 import type { MaterialReview, SceneVisualReview, Timeline, TimelineBumpers } from '@video-maker/timeline-core';
 import type { RenderApiQueuePublicationRequest, RenderApiRenderReview } from '../client/render-api-client';
 
@@ -470,6 +470,16 @@ export function createStudioToolHandlers(
       const validated = TimelineSchema.safeParse(patched);
       if (!validated.success) {
         throw new StudioToolRuntimeError('INVALID_INPUT', z.prettifyError(validated.error));
+      }
+
+      const referenceIssues = assetReferenceIssues(validated.data);
+      if (referenceIssues.length > 0) {
+        throw new StudioToolRuntimeError(
+          'INVALID_INPUT',
+          `patch_timeline would leave the timeline invalid: ${referenceIssues
+            .map((issue) => `${issue.code} (${issue.path}): ${issue.message}`)
+            .join(' ')} Add the asset to the project first (upload_asset or import_media) and rebuild the timeline so it lists it in assets.`,
+        );
       }
 
       await client.putTimeline(validated.data);
