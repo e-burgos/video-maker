@@ -6847,6 +6847,54 @@
           }
         ]
       }
+    },
+    {
+      "id": "FIX-e-burgos-089",
+      "author": "e-burgos",
+      "spec_id": null,
+      "fix_document": "sdd/fixes/fix-e-burgos-089.md",
+      "type": "IMPROVEMENT",
+      "severity": "low",
+      "created_at": "2026-11-14",
+      "resolved_at": "2026-11-14",
+      "validated_at": null,
+      "title": "Videos demostrativos en la web del studio",
+      "estimation_hours": 0.5,
+      "description": "El inicio de la web suma dos videos producidos por el studio con el productor en Fable: un explicativo en motion graphics y una demo conversando con el productor. La función de /tutoriales/ sirve los dos archivos nuevos desde R2.",
+      "justification": "Pedido del dev: mostrar en la web lo que Video Maker puede hacer (2026-11-14).",
+      "related_modules": [
+        "docs-site"
+      ],
+      "affected_files": [
+        "apps/docs-site/src/content/home.mjs",
+        "apps/docs-site/src/styles.css",
+        "apps/docs-site/functions/tutoriales/[[path]].js",
+        "apps/docs-site/functions/tutoriales/[[path]].spec.mjs"
+      ],
+      "test_reference": "apps/docs-site/functions/tutoriales/[[path]].spec.mjs",
+      "status": "implemented",
+      "cycle": null,
+      "usage": {
+        "provider_model": "claude/opus",
+        "effort": "medium",
+        "tokens_in": 40000,
+        "tokens_out": 4000,
+        "approx": true,
+        "source": "declared-estimate",
+        "recorded_at": "2026-11-14",
+        "by_agent": [
+          {
+            "provider_model": "claude/opus",
+            "effort": "medium",
+            "tokens_in": 40000,
+            "tokens_out": 4000,
+            "approx": true,
+            "source": "declared-estimate",
+            "recorded_at": "2026-11-14",
+            "agent": "implementor-front"
+          }
+        ]
+      }
     }
   ]
 }

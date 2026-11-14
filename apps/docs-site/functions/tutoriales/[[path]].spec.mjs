@@ -38,7 +38,10 @@ describe('keyFromParams', () => {
 describe('isTutorialKey', () => {
   it('accepts only the tutorial file', () => {
     expect(isTutorialKey('Tutorial-Video-Maker.mp4')).toBe(true);
+    expect(isTutorialKey('Video-Maker-en-90-segundos.mp4')).toBe(true);
+    expect(isTutorialKey('Video-Maker-del-chat-al-video.mp4')).toBe(true);
     expect(isTutorialKey('Video-Maker-arm64.dmg')).toBe(false);
+    expect(isTutorialKey('Otro-video.mp4')).toBe(false);
     expect(isTutorialKey('../Tutorial-Video-Maker.mp4')).toBe(false);
     expect(isTutorialKey('')).toBe(false);
   });

@@ -6,7 +6,9 @@ import { downloadButton, escapeHtml, githubButton, infoTable, screenshotFigure, 
 import { featureGrid, pipelineDiagram } from '../components.mjs';
 import { pipelineStages } from './journeys.mjs';
 
-const TUTORIAL_VIDEO_PATH = '/tutoriales/Tutorial-Video-Maker.mp4';
+const VIDEOS_BASE_PATH = '/tutoriales/';
+const TUTORIAL_VIDEO_PATH = `${VIDEOS_BASE_PATH}Tutorial-Video-Maker.mp4`;
+const VILKAS_WHOOSH_URL = 'https://freesound.org/people/Vilkas_Sound/sounds/460476';
 
 const COPY = {
   es: {
@@ -27,6 +29,27 @@ const COPY = {
     tutorialLede: 'Un recorrido real por el estudio: se crea una marca, se adjuntan las fotos, el productor arma el video y se publica. Las esperas del productor van aceleradas.',
     tutorialLabel: 'Video tutorial de Video Maker de punta a punta',
     tutorialNote: 'Voz: Malena · Música:',
+    demosEyebrow: 'Hechos con Video Maker',
+    demosTitle: 'Dos videos que armó el productor',
+    demosLede: 'Los dos los produjo el estudio conversando con el productor, sin editor de video: uno en motion graphics y otro con material grabado.',
+    demos: [
+      {
+        file: 'Video-Maker-en-90-segundos.mp4',
+        poster: 'demo-explicativo-poster.jpg',
+        title: 'Video Maker en 90 segundos',
+        text: 'Motion graphics: todo lo que hace el estudio, de la marca a la publicación.',
+        label: 'Video explicativo de Video Maker en motion graphics',
+        creditsHtml: `Voz: Malena · Música: «Inspiring Technology», Soundrider/Dope (jamendo.com), CC BY 3.0 · Efecto: <a href="${VILKAS_WHOOSH_URL}" rel="noopener">«VS_Short Whoosh 5»</a>, Vilkas_Sound, CC BY 4.0`,
+      },
+      {
+        file: 'Video-Maker-del-chat-al-video.mp4',
+        poster: 'demo-productor-poster.jpg',
+        title: 'Del chat al video',
+        text: 'Una sesión real: se crea la marca Video Maker y el productor arma y renderiza el video de al lado. Las esperas van aceleradas.',
+        label: 'Demo de Video Maker conversando con el productor',
+        creditsHtml: 'Voz: Malena · Música: «Upbeat Lounge Background», Soundrider/Dope (jamendo.com), CC BY 3.0',
+      },
+    ],
     pathsEyebrow: 'Dos caminos',
     pathsTitle: 'Elegí cómo nace tu video',
     pathsLede: 'Los dos terminan en un MP4 listo para publicar, con voz, música y subtítulos.',
@@ -99,6 +122,27 @@ const COPY = {
     tutorialLede: 'A real walkthrough of the studio: create a brand, attach the photos, let the producer build the video and publish it. The long waits for the producer are sped up; narrated and captioned in Spanish.',
     tutorialLabel: 'Video Maker end-to-end tutorial video',
     tutorialNote: 'Voice: Malena · Music:',
+    demosEyebrow: 'Made with Video Maker',
+    demosTitle: 'Two videos the producer built',
+    demosLede: 'The studio produced both by chatting with the producer, with no video editor: one in motion graphics and one from recorded footage. Narrated and captioned in Spanish.',
+    demos: [
+      {
+        file: 'Video-Maker-en-90-segundos.mp4',
+        poster: 'demo-explicativo-poster.jpg',
+        title: 'Video Maker in 90 seconds',
+        text: 'Motion graphics: everything the studio does, from the brand to publishing.',
+        label: 'Video Maker explainer in motion graphics',
+        creditsHtml: `Voice: Malena · Music: “Inspiring Technology”, Soundrider/Dope (jamendo.com), CC BY 3.0 · Sound effect: <a href="${VILKAS_WHOOSH_URL}" rel="noopener">“VS_Short Whoosh 5”</a>, Vilkas_Sound, CC BY 4.0`,
+      },
+      {
+        file: 'Video-Maker-del-chat-al-video.mp4',
+        poster: 'demo-productor-poster.jpg',
+        title: 'From chat to video',
+        text: 'A real session: the Video Maker brand is created and the producer builds and renders the video next to this one. Waits are sped up.',
+        label: 'Video Maker demo chatting with the producer',
+        creditsHtml: 'Voice: Malena · Music: “Upbeat Lounge Background”, Soundrider/Dope (jamendo.com), CC BY 3.0',
+      },
+    ],
     pathsEyebrow: 'Two paths',
     pathsTitle: 'Choose how your video is born',
     pathsLede: 'Both end in an MP4 ready to publish, with voice, music and captions.',
@@ -218,7 +262,32 @@ ${sectionHeader({ eyebrow: copy.tutorialEyebrow, title: copy.tutorialTitle, lede
 </section>`;
 }
 
-function pathCard(ctx, { title, text, points, file, alt, iconName, anchor }) {
+function demoVideoCard(ctx, demo) {
+  const poster = assetHref(ctx, `assets/screenshots/${demo.poster}`);
+  return `<figure class="demo-video reveal">
+<video controls preload="none" playsinline poster="${poster}" aria-label="${escapeHtml(demo.label)}" width="1920" height="1080">
+<source src="${VIDEOS_BASE_PATH}${demo.file}" type="video/mp4" />
+</video>
+<figcaption>
+<h3 class="demo-video__title">${escapeHtml(demo.title)}</h3>
+<p>${escapeHtml(demo.text)}</p>
+<p class="demo-video__credits">${demo.creditsHtml}</p>
+</figcaption>
+</figure>`;
+}
+
+function demosSection(ctx, copy) {
+  return `<section class="section" aria-labelledby="home-demos">
+<div class="container">
+${sectionHeader({ eyebrow: copy.demosEyebrow, title: copy.demosTitle, lede: escapeHtml(copy.demosLede), id: 'home-demos' })}
+<div class="demo-videos">
+${copy.demos.map((demo) => demoVideoCard(ctx, demo)).join('\n')}
+</div>
+</div>
+</section>`;
+}
+
+function pathCard(ctx,{ title, text, points, file, alt, iconName, anchor }) {
   const items = points.map((point) => `<li>${icon('arrowRight', 'icon icon--bullet')}${escapeHtml(point)}</li>`).join('');
   return `<article class="path-card reveal">
 ${screenshotFigure(ctx, file, alt, { className: 'path-card__shot' })}
@@ -321,6 +390,7 @@ export function renderPage(ctx) {
   const bodyHtml = [
     hero(ctx, copy),
     tutorialSection(ctx, copy),
+    demosSection(ctx, copy),
     pathsSection(ctx, copy),
     pipelineSection(ctx, copy),
     featuresSection(copy),
