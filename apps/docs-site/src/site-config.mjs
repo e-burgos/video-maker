@@ -48,6 +48,7 @@ export const PAGES = [
   { id: 'first-run', group: 'guide', slugs: { es: 'primer-arranque', en: 'first-run' } },
   { id: 'connect-ai', group: 'guide', slugs: { es: 'conectar-ia', en: 'connect-ai' } },
   { id: 'using-studio', group: 'guide', slugs: { es: 'usar-el-estudio', en: 'using-the-studio' } },
+  { id: 'app-tour', group: 'guide', slugs: { es: 'recorrido-de-la-app', en: 'app-tour' } },
   { id: 'faq', group: 'guide', slugs: { es: 'preguntas-frecuentes', en: 'faq' } },
   { id: 'licenses', group: 'guide', slugs: { es: 'licencias', en: 'licenses' } },
   { id: 'privacy', group: 'guide', slugs: { es: 'privacidad', en: 'privacy' } },

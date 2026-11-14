@@ -6895,6 +6895,55 @@
           }
         ]
       }
+    },
+    {
+      "id": "FIX-e-burgos-090",
+      "author": "e-burgos",
+      "spec_id": null,
+      "fix_document": "sdd/fixes/fix-e-burgos-090.md",
+      "type": "IMPROVEMENT",
+      "severity": "low",
+      "created_at": "2026-11-14",
+      "resolved_at": "2026-11-14",
+      "validated_at": null,
+      "title": "Recorrido por la app en la web, con capturas de cada pantalla",
+      "estimation_hours": 1.5,
+      "description": "La guía de la web suma la página «Recorrido por la app» con una sección por pantalla del studio (videos, productor, biblioteca, motion graphics, marcas, publicación, configuración, ayuda) y 18 capturas reales del diseño nuevo.",
+      "justification": "Pedido del dev: documentar en la web cada módulo de la app con su captura (2026-11-14).",
+      "related_modules": [
+        "docs-site"
+      ],
+      "affected_files": [
+        "apps/docs-site/src/content/app-tour.mjs",
+        "apps/docs-site/src/site-config.mjs",
+        "apps/docs-site/src/i18n.mjs",
+        "apps/docs-site/scripts/build.mjs",
+        "apps/docs-site/src/content/home.mjs"
+      ],
+      "test_reference": "apps/docs-site/src/site.spec.mjs",
+      "status": "implemented",
+      "cycle": null,
+      "usage": {
+        "provider_model": "claude/opus",
+        "effort": "medium",
+        "tokens_in": 120000,
+        "tokens_out": 14000,
+        "approx": true,
+        "source": "declared-estimate",
+        "recorded_at": "2026-11-14",
+        "by_agent": [
+          {
+            "provider_model": "claude/opus",
+            "effort": "medium",
+            "tokens_in": 120000,
+            "tokens_out": 14000,
+            "approx": true,
+            "source": "declared-estimate",
+            "recorded_at": "2026-11-14",
+            "agent": "implementor-front"
+          }
+        ]
+      }
     }
   ]
 }

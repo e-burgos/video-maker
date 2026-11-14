@@ -78,6 +78,7 @@ const COPY = {
     ],
     galleryEyebrow: 'Así se ve',
     galleryTitle: 'Capturas reales de la app',
+    galleryCta: 'Ver todas las pantallas, explicadas una por una',
     gallery: [
       ['home-projects.png', 'Mis videos: lista de proyectos agrupados por carpeta, con miniaturas reales y su estado'],
       ['motion-video.png', 'Un video de motion graphics terminado, con el crédito de la música para la descripción'],
@@ -171,6 +172,7 @@ const COPY = {
     ],
     galleryEyebrow: 'See it',
     galleryTitle: 'Real screenshots of the app',
+    galleryCta: 'See every screen, explained one by one',
     gallery: [
       ['home-projects.png', 'My videos: project list grouped by folder, with real thumbnails and their status'],
       ['motion-video.png', 'A finished motion graphics video, with the music credit for the description'],
@@ -338,6 +340,7 @@ function gallerySection(ctx, copy) {
 <div class="container">
 ${sectionHeader({ eyebrow: copy.galleryEyebrow, title: copy.galleryTitle, id: 'home-gallery' })}
 <div class="screenshot-grid">${shots}</div>
+<p class="gallery-cta"><a class="text-link" href="${pageHref(ctx, 'app-tour')}">${escapeHtml(copy.galleryCta)} ${icon('arrowRight', 'icon icon--inline')}</a></p>
 </div>
 </section>`;
 }

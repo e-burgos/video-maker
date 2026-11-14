@@ -18,6 +18,7 @@ import { renderPage as renderInstallation } from '../src/content/installation.mj
 import { renderPage as renderFirstRun } from '../src/content/first-run.mjs';
 import { renderPage as renderConnectAi } from '../src/content/connect-ai.mjs';
 import { renderPage as renderUsingStudio } from '../src/content/using-studio.mjs';
+import { renderPage as renderAppTour } from '../src/content/app-tour.mjs';
 import { renderPage as renderFaq } from '../src/content/faq.mjs';
 import { renderPage as renderLicenses } from '../src/content/licenses.mjs';
 import { renderPage as renderPrivacy } from '../src/content/privacy.mjs';
@@ -36,6 +37,7 @@ export const PAGE_RENDERERS = {
   'first-run': renderFirstRun,
   'connect-ai': renderConnectAi,
   'using-studio': renderUsingStudio,
+  'app-tour': renderAppTour,
   faq: renderFaq,
   licenses: renderLicenses,
   privacy: renderPrivacy,

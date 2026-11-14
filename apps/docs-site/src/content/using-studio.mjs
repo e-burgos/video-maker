@@ -1,10 +1,12 @@
 import { screenshotFigure } from '../render.mjs';
+import { pageHref } from '../routes.mjs';
 
 function bodyEs(ctx) {
   return `
 <h1>Usar el estudio</h1>
 <p class="lede">
 Cada video vive en su propio proyecto, con su material y su conversación con el productor.
+Para ver cada pantalla de la app con su captura, mirá el <a href="${pageHref(ctx, 'app-tour')}">recorrido por la app</a>.
 </p>
 
 <h2>Dos caminos: motion graphics o material crudo</h2>
@@ -145,6 +147,7 @@ function bodyEn(ctx) {
 <p class="lede">
 Every video lives in its own project, with its material and its conversation with the producer.
 Screenshots show the app with its Spanish interface; the app also has an English mode.
+For every screen of the app with its screenshot, see the <a href="${pageHref(ctx, 'app-tour')}">app tour</a>.
 </p>
 
 <h2>Two paths: motion graphics or raw footage</h2>

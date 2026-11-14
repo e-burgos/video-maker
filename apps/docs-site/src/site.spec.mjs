@@ -87,6 +87,17 @@ describe('page shell', () => {
     expect(english).toContain('href="../../usar-el-estudio/" hreflang="es" lang="es" data-locale-switch="es"');
   });
 
+  it('walks through every app screen with an indexed screenshot in both locales', () => {
+    for (const locale of LOCALES) {
+      const html = render(locale, 'app-tour');
+      const screenshots = html.match(/assets\/screenshots\/tour-[a-z-]+\.jpg/g) ?? [];
+      expect(screenshots.length).toBeGreaterThanOrEqual(18);
+      for (const anchor of html.match(/<h3 id="[a-z-]+"/g)) {
+        expect(html).toContain(`href="#${anchor.slice(8, -1)}"`);
+      }
+    }
+  });
+
   it('shows the repository in the header, hero and footer', () => {
     const home = render('es', 'home');
     const header = home.slice(home.indexOf('<header'), home.indexOf('</header>'));
