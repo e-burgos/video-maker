@@ -141,4 +141,13 @@ describe('translateEngineError', () => {
     const defaulted = translateEngineError(cause, 'prepare', 'work/renders/r1');
     expect(defaulted.code).toBe('INTERNAL_ERROR');
   });
+
+  it('carries the validateTimeline issues of INVALID_TIMELINE into the details and expectation', () => {
+    const issues = [{ code: 'LOGO_ASSET_NOT_FOUND', path: 'logo.assetId', message: 'missing' }];
+    const result = translateEngineError({ code: 'INVALID_TIMELINE', issues }, 'render', 'work/renders/r1');
+
+    expect(result.code).toBe('INVALID_TIMELINE');
+    expect(result.details).toEqual({ issues });
+    expect(result.expected).toContain('LOGO_ASSET_NOT_FOUND at logo.assetId');
+  });
 });

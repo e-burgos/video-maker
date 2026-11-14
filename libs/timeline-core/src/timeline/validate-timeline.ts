@@ -382,6 +382,11 @@ export function timelineWarnings(timeline: Timeline): TimelineWarning[] {
   }));
 }
 
+export function assetReferenceIssues(timeline: Timeline): TimelineIssue[] {
+  const assetsById = new Map(timeline.assets.map((asset) => [asset.id, asset] as const));
+  return [...collectLogoIssues(timeline, assetsById), ...collectBumperLogoIssues(timeline, assetsById)];
+}
+
 export function validateTimeline(timeline: Timeline): TimelineValidationResult {
   const parsed = TimelineSchema.safeParse(timeline);
   if (!parsed.success) {

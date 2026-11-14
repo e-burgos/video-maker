@@ -226,6 +226,7 @@ const PUBLIC_VALUE_EXPORTS = [
   'ProductionProposalSchema',
   'ProposalConceptSchema',
   'approveProposalConcept',
+  'assetReferenceIssues',
   'pendingProposalFrom',
   'MATERIAL_REVIEW_SOURCES',
   'MATERIAL_REVIEW_VERSION',
