@@ -1,13 +1,13 @@
 import { useEffect, useRef, useState } from 'react';
 
-import { stripSuggestionsFence } from '../api/producer-suggestions-fence';
+import { translateProducerEvent, translateProducerTurnStatus } from '../api/producer-event-i18n';
 import { producerFailureKey } from '../api/producer-capability';
 import { useT } from '../i18n/language-context';
 import { ErrorNotice } from './error-notice';
 import { ProducerMarkdown } from './producer-message-list';
 import { SECONDARY_BUTTON_SMALL_CLASS } from './ui/cl-controls';
 import type { RenderApiError } from '../api/render-api-error';
-import type { ProducerEvent, ProducerTurn } from '../api/render-api-types';
+import type { ProducerTurn } from '../api/render-api-types';
 
 export type ProducerTurnActivityProps = {
   turn: ProducerTurn | null;
@@ -27,16 +27,6 @@ export function formatElapsed(startedAt: string, now: number): string {
 
   const seconds = Math.max(0, Math.floor((now - started) / 1000));
   return `${Math.floor(seconds / 60)}:${String(seconds % 60).padStart(2, '0')}`;
-}
-
-export function eventLabel(event: ProducerEvent): string {
-  if (event.type === 'text') {
-    return stripSuggestionsFence(event.text);
-  }
-  if (event.type === 'tool') {
-    return `${event.name} · ${event.summary}`;
-  }
-  return event.status;
 }
 
 function Spinner() {
@@ -111,7 +101,7 @@ export function ProducerTurnActivity({
       <div className="flex items-center justify-between gap-3">
         <p className="flex items-center gap-2 text-xs font-semibold text-[var(--cl-ink-2)]">
           {running && <Spinner />}
-          {running ? t('producer.working') : t('producer.turnStatus', { status })}
+          {running ? t('producer.working') : translateProducerTurnStatus(t, status)}
           {turn !== null && (
             <span data-testid="producer-turn-elapsed" className="font-data font-normal text-[var(--cl-ink-3)]">
               {formatElapsed(turn.startedAt, now)}
@@ -138,7 +128,11 @@ export function ProducerTurnActivity({
           >
             <StepMarker current={running && index === events.length - 1} />
             <span className="min-w-0 flex-1">
-              {event.type === 'text' ? <ProducerMarkdown text={eventLabel(event)} /> : eventLabel(event)}
+              {event.type === 'text' ? (
+                <ProducerMarkdown text={translateProducerEvent(t, event)} />
+              ) : (
+                translateProducerEvent(t, event)
+              )}
             </span>
           </li>
         ))}
