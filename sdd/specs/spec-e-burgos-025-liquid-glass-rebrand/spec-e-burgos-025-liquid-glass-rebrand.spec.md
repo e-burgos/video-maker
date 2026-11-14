@@ -1,6 +1,6 @@
 # SPEC-e-burgos-025: Rediseño Cristal Líquido del estudio y paridad de funciones con la web
 
-> Estado: **in-progress** — registrada el 2026-11-13, flow **lite** (perfil `solo`, confirmado por el dev).
+> Estado: **completed** (2026-11-13, seis ciclos) — registrada el 2026-11-13, flow **lite** (perfil `solo`, confirmado por el dev).
 > Pedido del dev: rebranding visual completo del estudio (`apps/web`, que también es la UI de la app de escritorio) con
 > Liquid Glass sobre tucu-ui, y traer a la app las funciones que hoy solo maneja la web pública. La web pública no se
 > rediseña: solo suma capturas del productor nuevo al final.

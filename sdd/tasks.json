@@ -809,9 +809,9 @@
             "apps/render-api",
             "apps/desktop"
           ],
-          "status": "in-progress",
+          "status": "completed",
           "tasks_total": 4,
-          "tasks_done": 0
+          "tasks_done": 4
         }
       }
     }

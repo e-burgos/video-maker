@@ -23,11 +23,24 @@
       "estimation_hours": 5,
       "story_points": 5,
       "depends_on": [],
-      "status": "pending",
+      "status": "done",
       "files": [
         "apps/web/src/pages/learn-page.tsx",
-        "apps/web/src/content/"
-      ]
+        "apps/web/src/components/learn/",
+        "apps/web/src/content/learn/",
+        "apps/web/public/gallery/",
+        "apps/web/public/learn/tutorial-poster.jpg"
+      ],
+      "usage": {
+        "tokens_in": 175000,
+        "tokens_out": 20788,
+        "provider_model": "claude/sonnet",
+        "effort": "medium",
+        "agent": "implementor-front",
+        "approx": true,
+        "source": "agent-usage-notification",
+        "recorded_at": "2026-11-13"
+      }
     },
     {
       "id": "TASK-002",
@@ -39,12 +52,26 @@
       "estimation_hours": 6,
       "story_points": 8,
       "depends_on": [],
-      "status": "pending",
+      "status": "done",
       "files": [
         "apps/web/src/pages/about-page.tsx",
+        "apps/web/src/components/about/",
+        "apps/web/src/content/about/",
         "apps/render-api/src/http/handlers/app-update-handler.ts",
-        "apps/desktop/scripts/release-desktop.mjs"
-      ]
+        "apps/render-api/src/app-update/compare-versions.ts",
+        "apps/desktop/scripts/release-desktop.mjs",
+        "sdd/api.json"
+      ],
+      "usage": {
+        "tokens_in": 240000,
+        "tokens_out": 32809,
+        "provider_model": "claude/sonnet",
+        "effort": "medium",
+        "agent": "implementor-front",
+        "approx": true,
+        "source": "agent-usage-notification",
+        "recorded_at": "2026-11-13"
+      }
     },
     {
       "id": "TASK-003",
@@ -56,11 +83,24 @@
       "estimation_hours": 5,
       "story_points": 5,
       "depends_on": [],
-      "status": "pending",
+      "status": "done",
       "files": [
-        "apps/web/src/components/settings/",
-        "apps/web/src/components/library/"
-      ]
+        "apps/web/src/components/agents/",
+        "apps/web/src/content/agents/",
+        "apps/web/src/components/library/free-media/",
+        "apps/web/src/components/shell/capability-rows.ts",
+        "apps/web/src/api/render-api-client.ts"
+      ],
+      "usage": {
+        "tokens_in": 200000,
+        "tokens_out": 23250,
+        "provider_model": "claude/sonnet",
+        "effort": "medium",
+        "agent": "implementor-front",
+        "approx": true,
+        "source": "agent-usage-notification",
+        "recorded_at": "2026-11-13"
+      }
     },
     {
       "id": "TASK-004",
@@ -79,8 +119,20 @@
         "TASK-002",
         "TASK-003"
       ],
-      "status": "pending",
-      "files": []
+      "status": "done",
+      "files": [
+        "apps/web/src/index.css"
+      ],
+      "usage": {
+        "tokens_in": 80000,
+        "tokens_out": 12000,
+        "provider_model": "claude/opus",
+        "effort": "low",
+        "agent": "orchestrator",
+        "approx": true,
+        "source": "declared-estimate",
+        "recorded_at": "2026-11-13"
+      }
     }
   ]
 }

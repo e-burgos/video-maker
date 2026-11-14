@@ -1,0 +1,150 @@
+{
+  "baseUrl": "http://localhost:4200",
+  "audited": [
+    {
+      "scheme": "light",
+      "path": "/learn?tab=guide",
+      "textsChecked": 71,
+      "horizontalOverflowPx": 0
+    },
+    {
+      "scheme": "light",
+      "path": "/learn?tab=how-it-works",
+      "textsChecked": 47,
+      "horizontalOverflowPx": 0
+    },
+    {
+      "scheme": "light",
+      "path": "/learn?tab=tutorial",
+      "textsChecked": 23,
+      "horizontalOverflowPx": 0
+    },
+    {
+      "scheme": "light",
+      "path": "/learn?tab=faq",
+      "textsChecked": 49,
+      "horizontalOverflowPx": 0
+    },
+    {
+      "scheme": "light",
+      "path": "/learn?tab=gallery",
+      "textsChecked": 24,
+      "horizontalOverflowPx": 0
+    },
+    {
+      "scheme": "light",
+      "path": "/about?tab=version",
+      "textsChecked": 25,
+      "horizontalOverflowPx": 0
+    },
+    {
+      "scheme": "light",
+      "path": "/about?tab=requirements",
+      "textsChecked": 54,
+      "horizontalOverflowPx": 0
+    },
+    {
+      "scheme": "light",
+      "path": "/about?tab=licenses",
+      "textsChecked": 66,
+      "horizontalOverflowPx": 0
+    },
+    {
+      "scheme": "light",
+      "path": "/about?tab=open-source",
+      "textsChecked": 51,
+      "horizontalOverflowPx": 0
+    },
+    {
+      "scheme": "light",
+      "path": "/about?tab=privacy",
+      "textsChecked": 45,
+      "horizontalOverflowPx": 0
+    },
+    {
+      "scheme": "light",
+      "path": "/settings?tab=agents",
+      "textsChecked": 50,
+      "horizontalOverflowPx": 0
+    },
+    {
+      "scheme": "light",
+      "path": "/projects/display-ads-asignar-campana/library",
+      "textsChecked": 87,
+      "horizontalOverflowPx": 0
+    },
+    {
+      "scheme": "dark",
+      "path": "/learn?tab=guide",
+      "textsChecked": 71,
+      "horizontalOverflowPx": 0
+    },
+    {
+      "scheme": "dark",
+      "path": "/learn?tab=how-it-works",
+      "textsChecked": 47,
+      "horizontalOverflowPx": 0
+    },
+    {
+      "scheme": "dark",
+      "path": "/learn?tab=tutorial",
+      "textsChecked": 23,
+      "horizontalOverflowPx": 0
+    },
+    {
+      "scheme": "dark",
+      "path": "/learn?tab=faq",
+      "textsChecked": 49,
+      "horizontalOverflowPx": 0
+    },
+    {
+      "scheme": "dark",
+      "path": "/learn?tab=gallery",
+      "textsChecked": 24,
+      "horizontalOverflowPx": 0
+    },
+    {
+      "scheme": "dark",
+      "path": "/about?tab=version",
+      "textsChecked": 25,
+      "horizontalOverflowPx": 0
+    },
+    {
+      "scheme": "dark",
+      "path": "/about?tab=requirements",
+      "textsChecked": 54,
+      "horizontalOverflowPx": 0
+    },
+    {
+      "scheme": "dark",
+      "path": "/about?tab=licenses",
+      "textsChecked": 66,
+      "horizontalOverflowPx": 0
+    },
+    {
+      "scheme": "dark",
+      "path": "/about?tab=open-source",
+      "textsChecked": 51,
+      "horizontalOverflowPx": 0
+    },
+    {
+      "scheme": "dark",
+      "path": "/about?tab=privacy",
+      "textsChecked": 45,
+      "horizontalOverflowPx": 0
+    },
+    {
+      "scheme": "dark",
+      "path": "/settings?tab=agents",
+      "textsChecked": 50,
+      "horizontalOverflowPx": 0
+    },
+    {
+      "scheme": "dark",
+      "path": "/projects/display-ads-asignar-campana/library",
+      "textsChecked": 87,
+      "horizontalOverflowPx": 0
+    }
+  ],
+  "failures": []
+}

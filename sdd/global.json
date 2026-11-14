@@ -260,9 +260,7 @@
       "description": "Rediseño visual de la web pública con identidad propia, acceso al repositorio de código abierto, página de tecnología con inventario y licencias verificadas, y guía interactiva del pipeline y de los dos caminos",
       "cycles_completed": 1,
       "completed_at": "2026-10-25"
-    }
-  ],
-  "in_progress_modules": [
+    },
     {
       "module": "liquid-glass-rebrand",
       "spec": "spec-e-burgos-025-liquid-glass-rebrand",
@@ -272,10 +270,12 @@
         "apps/render-api",
         "apps/docs-site"
       ],
-      "cycles_completed": 5,
-      "description": "Rediseño Cristal Líquido (tucu-ui) del estudio y de la app de escritorio, y paridad de funciones con la web pública: guía interactiva, acerca de, licencias, actualizaciones manuales y conexión de agentes de IA"
+      "cycles_completed": 6,
+      "description": "Rediseño Cristal Líquido (tucu-ui) del estudio y de la app de escritorio, y paridad de funciones con la web pública: guía interactiva, acerca de, licencias, actualizaciones manuales y conexión de agentes de IA",
+      "completed_at": "2026-11-13"
     }
   ],
+  "in_progress_modules": [],
   "pending_modules": [
     {
       "module": "scene-assembly",
