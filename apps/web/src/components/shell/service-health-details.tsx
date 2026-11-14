@@ -1,5 +1,6 @@
 import { useT } from '../../i18n/language-context';
 import type { ServiceHealth } from '../../api/render-api-types';
+import { capabilityRows } from './capability-rows';
 
 const OK_ROW = 'text-[var(--tucu-state-green-ink)]';
 const MISSING_ROW = 'text-[var(--tucu-state-red-ink)]';
@@ -49,9 +50,9 @@ export function ServiceHealthDetails({ detail }: { detail: ServiceHealth | null 
       </HealthSection>
 
       <HealthSection title={t('health.capabilities')} listTestId="service-health-capabilities">
-        {Object.entries(detail.capabilities).map(([capability, enabled]) => (
-          <li key={capability} className={enabled ? OK_ROW : OFF_ROW}>
-            {capability} · {enabled ? t('health.on') : t('health.off')}
+        {capabilityRows(detail.capabilities).map(({ name, enabled }) => (
+          <li key={name} className={enabled ? OK_ROW : OFF_ROW}>
+            {name} · {enabled ? t('health.on') : t('health.off')}
           </li>
         ))}
       </HealthSection>

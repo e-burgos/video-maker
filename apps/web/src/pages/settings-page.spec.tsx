@@ -17,6 +17,7 @@ function renderPage(client: Partial<RenderApiClient>, tab = 'producer') {
     getOpenRouterModels: vi.fn().mockResolvedValue(openRouterModelsResult()),
     getElevenLabsSettings: vi.fn().mockResolvedValue({ keyConfigured: false, voices: [] }),
     getYouTubeIntegration: vi.fn().mockResolvedValue({ clientConfigured: false, connected: false, channel: null }),
+    getHealth: vi.fn().mockRejectedValue(new Error('health not stubbed')),
     ...client,
   };
 
@@ -272,6 +273,7 @@ describe('SettingsPage', () => {
     it.each([
       ['voice', 'settings-panel-voice'],
       ['youtube', 'settings-panel-youtube'],
+      ['agents', 'settings-panel-agents'],
       ['appearance', 'settings-panel-appearance'],
     ])('opens only the %s panel when the url says ?tab=%s', async (tab, panel) => {
       renderPage({}, tab);

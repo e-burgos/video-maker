@@ -4,6 +4,7 @@ import { useCallback } from 'react';
 import { useRenderApi } from '../api/render-api-context';
 import { useAsyncResource } from '../hooks/use-async-resource';
 import { useT } from '../i18n/language-context';
+import { AgentsTab } from '../components/agents/agents-tab';
 import { AppearanceSection } from '../components/settings/appearance-section';
 import { ElevenLabsSettingsSection } from '../components/elevenlabs-settings-section';
 import { ErrorNotice } from '../components/error-notice';
@@ -64,6 +65,10 @@ export function SettingsPage() {
 
         <SettingsTabPanel tab="youtube" active={tab}>
           <YouTubeSettingsSection />
+        </SettingsTabPanel>
+
+        <SettingsTabPanel tab="agents" active={tab}>
+          {tab === 'agents' && <AgentsTab />}
         </SettingsTabPanel>
 
         <SettingsTabPanel tab="appearance" active={tab}>

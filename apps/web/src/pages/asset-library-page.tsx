@@ -13,6 +13,8 @@ import { ErrorNotice } from '../components/error-notice';
 import { GeneratedFilesPanel } from '../components/generated-files-panel';
 import { AssetDeleteDialog } from '../components/library/asset-delete-dialog';
 import { LibraryFilterBar } from '../components/library/library-filter-bar';
+import { FreeMediaPanel } from '../components/library/free-media/free-media-panel';
+import { tabsForMode } from '../components/library/free-media/free-media-model';
 import { LibraryGrid } from '../components/library/library-grid';
 import {
   filterAssets,
@@ -32,8 +34,9 @@ import { viewerItemOf } from '../components/media-viewer/viewer-model';
 import { MontageJobPanel } from '../components/montage-job-panel';
 import { MontageTrigger } from '../components/montage-trigger';
 import { ReferenceAnalysis } from '../components/reference-analysis';
+import { ToolbarStatus } from '../components/shell/toolbar-status';
 import { useToolbarAction } from '../components/shell/use-toolbar-action';
-import { SECONDARY_BUTTON_SMALL_CLASS } from '../components/ui/cl-controls';
+import { SECONDARY_BUTTON_SMALL_CLASS, TOOLBAR_SECONDARY_BUTTON_CLASS } from '../components/ui/cl-controls';
 import type { TranslationKey } from '../i18n/messages-en';
 import type { DeleteTarget } from '../components/library/asset-delete-dialog';
 import type {
@@ -85,6 +88,7 @@ function AssetLibraryContent({ mode }: { mode: ProjectMode }) {
   const [size, setSize] = useState<ThumbnailSize>('m');
   const [selected, setSelected] = useState<string[]>([]);
   const [viewer, setViewer] = useState<ViewerRequest | null>(null);
+  const [freeMediaOpen, setFreeMediaOpen] = useState(false);
   const [deleteTargets, setDeleteTargets] = useState<
     readonly DeleteTarget[] | null
   >(null);
@@ -102,6 +106,8 @@ function AssetLibraryContent({ mode }: { mode: ProjectMode }) {
     label: t('library.upload.action'),
     onClick: focusUploader,
   });
+
+  const closeFreeMedia = useCallback(() => setFreeMediaOpen(false), []);
 
   const allAssets = useMemo(
     () => orderAssetsByRole(listing.data?.assets ?? [], roles),
@@ -165,6 +171,16 @@ function AssetLibraryContent({ mode }: { mode: ProjectMode }) {
 
   return (
     <section data-testid="asset-library" className="flex flex-col gap-4">
+      <ToolbarStatus>
+        <button
+          type="button"
+          data-testid="library-free-media-open"
+          onClick={() => setFreeMediaOpen(true)}
+          className={`${TOOLBAR_SECONDARY_BUTTON_CLASS} ml-2`}
+        >
+          {t('library.freeMedia.open')}
+        </button>
+      </ToolbarStatus>
       <div className="flex flex-wrap items-center gap-2">
         {STEP_LINKS.map((link) => (
           <Link
@@ -329,6 +345,15 @@ function AssetLibraryContent({ mode }: { mode: ProjectMode }) {
           review={reviewItems}
           trigger={viewer.trigger}
           onClose={() => setViewer(null)}
+        />
+      )}
+
+      {freeMediaOpen && (
+        <FreeMediaPanel
+          slug={slug}
+          tabs={tabsForMode(isMotion)}
+          onImported={listing.reload}
+          onClose={closeFreeMedia}
         />
       )}
 

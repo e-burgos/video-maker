@@ -234,6 +234,36 @@ describe('ServiceHealthBadge', () => {
     );
   });
 
+  it('lists the producer engines as readable rows, never as an object', async () => {
+    renderBadge(
+      clientWith(() =>
+        Promise.resolve(
+          health({
+            capabilities: {
+              renderPipeline: true,
+              assetStore: true,
+              jobQueue: true,
+              montageQueue: true,
+              storyboardQueue: true,
+              voiceQueue: true,
+              producer: true,
+              producerEngines: { claudeCli: true, openrouter: false },
+            },
+          }),
+        ),
+      ),
+    );
+
+    await waitFor(() => expect(screen.getByTestId('service-health-label').textContent).not.toBe('checking service'));
+    openDetails();
+    await waitFor(() => expect(screen.getByTestId('service-health-capabilities')).toBeTruthy());
+    const text = screen.getByTestId('service-health-capabilities').textContent ?? '';
+
+    expect(text).toContain('producerEngines.claudeCli · on');
+    expect(text).toContain('producerEngines.openrouter · off');
+    expect(text).not.toContain('[object Object]');
+  });
+
   it('says so when no health document could be read', async () => {
     renderBadge(
       clientWith(() =>

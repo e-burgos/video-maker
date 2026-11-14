@@ -49,6 +49,9 @@ import type {
   AssetDeletion,
   AssetListEntry,
   AssetListing,
+  FreeMediaImport,
+  FreeMediaResult,
+  FreeMusicResult,
   GeneratedListing,
   AssetRole,
   GetOpenRouterModelsQuery,
@@ -58,6 +61,8 @@ import type {
   Job,
   MontageJob,
   MontagePresetName,
+  SearchFreeMediaInput,
+  SearchFreeMusicInput,
   ElevenLabsKeyResult,
   ElevenLabsVoiceEntry,
   ElevenLabsVoicesSettings,
@@ -190,6 +195,10 @@ export type RenderApiClient = {
   putVideoPlacement: (slug: string, placement: VideoPlacement) => Promise<VideoPlacementResult>;
   deleteVideo: (slug: string) => Promise<VideoDeletion>;
   listAssets: (slug: string) => Promise<AssetListing>;
+  searchFreeMedia: (input: SearchFreeMediaInput) => Promise<FreeMediaResult[]>;
+  importFreeMedia: (slug: string, resultId: string) => Promise<FreeMediaImport>;
+  searchFreeMusic: (input: SearchFreeMusicInput) => Promise<FreeMusicResult[]>;
+  importFreeMusic: (slug: string, resultId: string) => Promise<FreeMediaImport>;
   listGenerated: (slug: string) => Promise<GeneratedListing>;
   getProjectFile: (slug: string, path: string) => Promise<string>;
   getTimeline: (slug: string) => Promise<Timeline>;
@@ -552,6 +561,63 @@ export function createRenderApiClient(fetchImpl: FetchLike): RenderApiClient {
         (value) => isRecord(value) && Array.isArray(value['assets']),
       );
       return body as AssetListing;
+    },
+
+    async searchFreeMedia(input: SearchFreeMediaInput): Promise<FreeMediaResult[]> {
+      const params = new URLSearchParams({
+        query: input.query,
+        kind: input.kind,
+        maxResults: String(input.maxResults),
+      });
+      const body = await requestJson(
+        `/projects/${encodeURIComponent(input.slug)}/media/search?${params.toString()}`,
+        undefined,
+        'a free media result list',
+        (value) => isRecord(value) && Array.isArray(value['results']),
+      );
+      return (body as { results: FreeMediaResult[] }).results;
+    },
+
+    async importFreeMedia(slug: string, resultId: string): Promise<FreeMediaImport> {
+      const body = await requestJson(
+        `/projects/${encodeURIComponent(slug)}/media/import`,
+        {
+          method: 'POST',
+          headers: { 'content-type': 'application/json' },
+          body: JSON.stringify({ resultId }),
+        },
+        'an imported media path',
+        (value) => isRecord(value) && typeof value['path'] === 'string',
+      );
+      return body as FreeMediaImport;
+    },
+
+    async searchFreeMusic(input: SearchFreeMusicInput): Promise<FreeMusicResult[]> {
+      const params = new URLSearchParams({
+        mood: input.mood,
+        maxResults: String(input.maxResults),
+      });
+      const body = await requestJson(
+        `/projects/${encodeURIComponent(input.slug)}/music/search?${params.toString()}`,
+        undefined,
+        'a free music result list',
+        (value) => isRecord(value) && Array.isArray(value['results']),
+      );
+      return (body as { results: FreeMusicResult[] }).results;
+    },
+
+    async importFreeMusic(slug: string, resultId: string): Promise<FreeMediaImport> {
+      const body = await requestJson(
+        `/projects/${encodeURIComponent(slug)}/music/import`,
+        {
+          method: 'POST',
+          headers: { 'content-type': 'application/json' },
+          body: JSON.stringify({ resultId }),
+        },
+        'an imported music path',
+        (value) => isRecord(value) && typeof value['path'] === 'string',
+      );
+      return body as FreeMediaImport;
     },
 
     async listGenerated(slug: string): Promise<GeneratedListing> {
