@@ -1,0 +1,86 @@
+{
+  "$schema": "../../../../schemas/cycle-tasks.schema.json",
+  "spec": "spec-e-burgos-025-liquid-glass-rebrand",
+  "cycle": 6,
+  "module": "liquid-glass-rebrand",
+  "apps": [
+    "apps/web",
+    "apps/render-api",
+    "apps/desktop"
+  ],
+  "flow": "lite",
+  "user_stories_generated": true,
+  "prerequisites": {
+    "tasks_generated": true
+  },
+  "tasks": [
+    {
+      "id": "TASK-001",
+      "title": "Aprender: guía, cómo funciona, tutorial, FAQ y galería",
+      "user_stories": [
+        "US-025-601"
+      ],
+      "estimation_hours": 5,
+      "story_points": 5,
+      "depends_on": [],
+      "status": "pending",
+      "files": [
+        "apps/web/src/pages/learn-page.tsx",
+        "apps/web/src/content/"
+      ]
+    },
+    {
+      "id": "TASK-002",
+      "title": "Acerca de, buscar actualizaciones y requisitos",
+      "user_stories": [
+        "US-025-602",
+        "US-025-603"
+      ],
+      "estimation_hours": 6,
+      "story_points": 8,
+      "depends_on": [],
+      "status": "pending",
+      "files": [
+        "apps/web/src/pages/about-page.tsx",
+        "apps/render-api/src/http/handlers/app-update-handler.ts",
+        "apps/desktop/scripts/release-desktop.mjs"
+      ]
+    },
+    {
+      "id": "TASK-003",
+      "title": "Conectar agentes y material libre en la biblioteca",
+      "user_stories": [
+        "US-025-604",
+        "US-025-605"
+      ],
+      "estimation_hours": 5,
+      "story_points": 5,
+      "depends_on": [],
+      "status": "pending",
+      "files": [
+        "apps/web/src/components/settings/",
+        "apps/web/src/components/library/"
+      ]
+    },
+    {
+      "id": "TASK-004",
+      "title": "Verificación del ciclo 06 y cierre de la spec",
+      "user_stories": [
+        "US-025-601",
+        "US-025-602",
+        "US-025-603",
+        "US-025-604",
+        "US-025-605"
+      ],
+      "estimation_hours": 2,
+      "story_points": 2,
+      "depends_on": [
+        "TASK-001",
+        "TASK-002",
+        "TASK-003"
+      ],
+      "status": "pending",
+      "files": []
+    }
+  ]
+}

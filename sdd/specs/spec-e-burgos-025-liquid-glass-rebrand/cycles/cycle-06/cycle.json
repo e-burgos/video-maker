@@ -1,0 +1,42 @@
+{
+  "$schema": "../../../../schemas/cycle.schema.json",
+  "cycle": 6,
+  "module": "liquid-glass-rebrand",
+  "spec": "spec-e-burgos-025-liquid-glass-rebrand",
+  "apps": [
+    "apps/web",
+    "apps/render-api",
+    "apps/desktop"
+  ],
+  "phase": "web-parity",
+  "flow": "lite",
+  "objectives": [
+    "Paridad del studio con la web: Aprender, Acerca de con actualizaciones y requisitos, Conectar agentes y material libre"
+  ],
+  "status": "in-progress",
+  "started_at": "2026-11-13",
+  "completed_at": null,
+  "documents": {
+    "plan": "sdd/specs/spec-e-burgos-025-liquid-glass-rebrand/cycles/cycle-06/plan.md",
+    "tasks": "sdd/specs/spec-e-burgos-025-liquid-glass-rebrand/cycles/cycle-06/tasks.json"
+  },
+  "artifacts": [],
+  "metrics": {
+    "tasks_total": 4,
+    "tasks_completed": 0,
+    "story_points": 0,
+    "files_created": [],
+    "files_modified": [],
+    "files_deleted": [],
+    "usage": {
+      "tokens_in": 0,
+      "tokens_out": 0,
+      "by_agent": []
+    }
+  },
+  "tables_created": [],
+  "endpoints_implemented": [],
+  "components_created": [],
+  "issues_found": [],
+  "reviewer_report": null
+}
