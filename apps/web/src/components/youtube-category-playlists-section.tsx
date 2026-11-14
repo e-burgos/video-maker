@@ -5,7 +5,11 @@ import { useApiAction } from '../hooks/use-api-action';
 import { useAsyncResource } from '../hooks/use-async-resource';
 import { useT } from '../i18n/language-context';
 import { ErrorNotice } from './error-notice';
-import { Button } from './ui/button';
+import { SettingsPanel } from './settings/settings-panel';
+import { useSettingsDraft } from './settings/settings-drafts-context';
+import { sameCategoryPlaylists } from './settings/category-playlists-draft';
+import { FIELD_CLASS, FIELD_LABEL_CLASS, HINT_TEXT_CLASS, SECONDARY_BUTTON_CLASS } from './ui/cl-controls';
+import { StateBadge } from '@e-burgos/tucu-ui';
 import type { CategoryPlaylists } from '../api/publish-queue-types';
 import type { VideoFolder } from '../api/render-api-types';
 import type { YouTubePlaylist } from '../api/youtube-types';
@@ -15,9 +19,6 @@ type Loaded = {
   playlists: YouTubePlaylist[];
   mapping: CategoryPlaylists;
 };
-
-const SELECT_CLASS =
-  'w-full max-w-sm rounded-md border border-slate-700 bg-slate-950 px-3 py-1.5 text-sm text-slate-100 disabled:opacity-50';
 
 function PlaylistSelect({
   id,
@@ -37,8 +38,8 @@ function PlaylistSelect({
   const t = useT();
 
   return (
-    <div className="space-y-1">
-      <label htmlFor={id} className="block text-sm text-slate-400">
+    <div className="flex flex-col gap-1.5">
+      <label htmlFor={id} className={FIELD_LABEL_CLASS}>
         {label}
       </label>
       <select
@@ -46,7 +47,7 @@ function PlaylistSelect({
         value={value ?? ''}
         disabled={disabled}
         onChange={(event) => onChange(event.target.value === '' ? null : event.target.value)}
-        className={SELECT_CLASS}
+        className={`${FIELD_CLASS} w-full`}
       >
         <option value="">{t('youtube.categoryPlaylists.none')}</option>
         {playlists.map((playlist) => (
@@ -72,16 +73,20 @@ export function YouTubeCategoryPlaylistsSection() {
   }, [client]);
   const resource = useAsyncResource<Loaded>(load, 'youtube-category-playlists');
   const [draft, setDraft] = useState<CategoryPlaylists | null>(null);
+  const [saved, setSaved] = useState<CategoryPlaylists | null>(null);
   const [justSaved, setJustSaved] = useState(false);
   const save = useApiAction((input: CategoryPlaylists) => client.putCategoryPlaylists(input));
 
   useEffect(() => {
     if (resource.data !== null) {
       setDraft(resource.data.mapping);
+      setSaved(resource.data.mapping);
     }
   }, [resource.data]);
 
   const data = resource.data;
+  const dirty = draft !== null && saved !== null && !sameCategoryPlaylists(draft, saved);
+  const saving = save.status === 'pending';
 
   function changeCategory(categoryId: string, playlistId: string | null): void {
     setJustSaved(false);
@@ -99,47 +104,47 @@ export function YouTubeCategoryPlaylistsSection() {
     const result = await save.run(draft);
     if (result !== null) {
       setDraft(result);
+      setSaved(result);
       setJustSaved(true);
     }
   }
 
+  useSettingsDraft('youtube-category-playlists', { tab: 'youtube', dirty, saving, save: submit });
+
   const hasCategories = data !== null && data.folders.some((folder) => folder.categories.length > 0);
 
   return (
-    <div data-testid="youtube-category-playlists" className="space-y-3 border-t border-slate-800 pt-3">
-      <h3 className="text-base font-semibold text-slate-100">{t('youtube.categoryPlaylists.heading')}</h3>
-      <p className="text-sm text-slate-400">{t('youtube.categoryPlaylists.description')}</p>
-
-      {resource.status === 'loading' && (
-        <p className="text-sm text-slate-500">{t('youtube.categoryPlaylists.loading')}</p>
-      )}
+    <SettingsPanel
+      testId="youtube-category-playlists"
+      heading={t('youtube.categoryPlaylists.heading')}
+      description={t('youtube.categoryPlaylists.description')}
+    >
+      {resource.status === 'loading' && <p className={HINT_TEXT_CLASS}>{t('youtube.categoryPlaylists.loading')}</p>}
       {resource.status === 'error' && resource.error !== null && (
-        <ErrorNotice error={resource.error} onRetry={resource.reload} />
+        <ErrorNotice error={resource.error} onRetry={resource.reload} surface="glass" />
       )}
 
       {data !== null && draft !== null && (
-        <div className="space-y-4">
+        <div className="flex flex-col gap-4">
           <PlaylistSelect
             id="youtube-general-playlist"
             label={t('youtube.categoryPlaylists.general')}
             value={draft.generalPlaylistId}
             playlists={data.playlists}
-            disabled={save.status === 'pending'}
+            disabled={saving}
             onChange={(playlistId) => {
               setJustSaved(false);
               setDraft({ ...draft, generalPlaylistId: playlistId });
             }}
           />
 
-          {!hasCategories && (
-            <p className="text-xs text-slate-500">{t('youtube.categoryPlaylists.noCategories')}</p>
-          )}
+          {!hasCategories && <p className={HINT_TEXT_CLASS}>{t('youtube.categoryPlaylists.noCategories')}</p>}
 
           {data.folders
             .filter((folder) => folder.categories.length > 0)
             .map((folder) => (
-              <fieldset key={folder.id} className="space-y-2">
-                <legend className="text-sm font-medium text-slate-200">{folder.name}</legend>
+              <fieldset key={folder.id} className="m-0 flex min-w-0 flex-col gap-2 border-0 p-0">
+                <legend className="mb-1 p-0 text-sm font-semibold text-[var(--cl-ink)]">{folder.name}</legend>
                 {folder.categories.map((category) => (
                   <PlaylistSelect
                     key={category.id}
@@ -147,26 +152,36 @@ export function YouTubeCategoryPlaylistsSection() {
                     label={`${folder.name} › ${category.name}`}
                     value={draft.categoryPlaylists[category.id] ?? null}
                     playlists={data.playlists}
-                    disabled={save.status === 'pending'}
+                    disabled={saving}
                     onChange={(playlistId) => changeCategory(category.id, playlistId)}
                   />
                 ))}
               </fieldset>
             ))}
 
-          <div className="flex items-center gap-3">
-            <Button variant="primary" disabled={save.status === 'pending'} onClick={() => void submit()}>
-              {save.status === 'pending' ? t('settings.saving') : t('youtube.categoryPlaylists.save')}
-            </Button>
-            {justSaved && (
-              <span role="status" className="text-xs text-emerald-300">
+          <div className="flex flex-wrap items-center gap-3">
+            <button
+              type="button"
+              disabled={!dirty || saving}
+              onClick={() => void submit()}
+              className={SECONDARY_BUTTON_CLASS}
+            >
+              {saving ? t('settings.saving') : t('youtube.categoryPlaylists.save')}
+            </button>
+            {dirty && (
+              <StateBadge tone="orange" dot size="sm" data-testid="youtube-category-playlists-unsaved">
+                {t('edit.unsaved')}
+              </StateBadge>
+            )}
+            {justSaved && !dirty && (
+              <StateBadge tone="green" dot size="sm" role="status">
                 {t('youtube.categoryPlaylists.saved')}
-              </span>
+              </StateBadge>
             )}
           </div>
-          {save.error !== null && <ErrorNotice error={save.error} />}
+          {save.error !== null && <ErrorNotice error={save.error} surface="glass" />}
         </div>
       )}
-    </div>
+    </SettingsPanel>
   );
 }

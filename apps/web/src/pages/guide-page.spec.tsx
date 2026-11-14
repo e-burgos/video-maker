@@ -1,4 +1,4 @@
-import { render, screen, waitFor } from '@testing-library/react';
+import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
 import { afterEach, describe, expect, it } from 'vitest';
 
@@ -86,5 +86,43 @@ describe('GuidePage', () => {
 
     expect(library?.textContent).toContain('raw/aroll/');
     expect(library?.textContent).toContain('at least three times');
+  });
+
+  it('numbers every index entry and marks the first section as the current one', async () => {
+    window.localStorage.setItem(LANGUAGE_STORAGE_KEY, 'en');
+    renderGuide();
+
+    await waitFor(() => expect(screen.getByTestId('guide-index')).toBeTruthy());
+    const links = Array.from(screen.getByTestId('guide-index').querySelectorAll('a'));
+
+    expect(links[0]?.textContent).toBe(`1${GUIDE_EN.sections[0]?.title}`);
+    expect(links.map((link) => link.getAttribute('aria-current'))).toEqual(
+      links.map((_, index) => (index === 0 ? 'location' : null)),
+    );
+    expect(screen.getByRole('navigation', { name: 'In this guide' })).toBe(screen.getByTestId('guide-index'));
+  });
+
+  it('moves the current mark to the section picked in the index', async () => {
+    renderGuide();
+
+    await waitFor(() => expect(screen.getByTestId('guide-index')).toBeTruthy());
+    const links = Array.from(screen.getByTestId('guide-index').querySelectorAll('a'));
+    fireEvent.click(links[2] as HTMLElement);
+
+    expect(links[2]?.getAttribute('aria-current')).toBe('location');
+    expect(links[0]?.getAttribute('aria-current')).toBeNull();
+  });
+
+  it('labels each section with its position in the guide', async () => {
+    window.localStorage.setItem(LANGUAGE_STORAGE_KEY, 'en');
+    renderGuide();
+
+    await waitFor(() => expect(screen.getByTestId('guide')).toBeTruthy());
+    const sections = screen.getAllByTestId('guide-section');
+
+    expect(sections[0]?.textContent).toContain(`Step 1 of ${GUIDE_EN.sections.length}`);
+    expect(sections[sections.length - 1]?.textContent).toContain(
+      `Step ${GUIDE_EN.sections.length} of ${GUIDE_EN.sections.length}`,
+    );
   });
 });

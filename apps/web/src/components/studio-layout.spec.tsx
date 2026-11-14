@@ -193,9 +193,12 @@ describe('StudioLayout project nav', () => {
     expect(screen.queryByTestId('toolbar-action')).toBeNull();
   });
 
-  it('keeps the routes not migrated yet on the legacy surface', () => {
-    renderAt('/settings');
+  it.each(['/', '/projects/smoke-ingest', '/publish-queue', '/settings'])(
+    'keeps every route off the legacy surface (%s)',
+    (pathname) => {
+      renderAt(pathname);
 
-    expect(screen.getByTestId('shell-content').getAttribute('data-surface')).toBe('legacy');
-  });
+      expect(screen.getByTestId('shell-content').getAttribute('data-surface')).toBeNull();
+    },
+  );
 });

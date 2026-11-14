@@ -35,3 +35,8 @@ export const TOOLBAR_SECONDARY_BUTTON_CLASS =
 export const PANEL_CLASS = 'glass flex min-w-0 flex-col gap-3 rounded-[20px] p-4';
 export const PANEL_HEADING_CLASS = 'm-0 text-[15px] font-bold text-[var(--cl-ink)]';
 export const OPAQUE_MEDIA_FRAME_CLASS = 'overflow-hidden rounded-[12px] bg-[#0b0d14]';
+export const LINK_CLASS = 'focus-cl text-[var(--cl-action-text)] underline hover:opacity-80';
+export const DANGER_NOTICE_CLASS =
+  'flex flex-col gap-2 rounded-[12px] border border-[var(--tucu-state-red-line)] bg-[var(--tucu-state-red-soft)] p-3';
+export const HINT_TEXT_CLASS = 'm-0 text-xs text-[var(--cl-ink-3)]';
+export const WARNING_TEXT_CLASS = 'm-0 text-xs text-[var(--tucu-state-orange-ink)]';

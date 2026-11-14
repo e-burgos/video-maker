@@ -1,8 +1,10 @@
 import { fireEvent, render, screen, waitFor, within } from '@testing-library/react';
+import { MemoryRouter } from 'react-router-dom';
 import { describe, expect, it, vi } from 'vitest';
 
 import { RenderApiProvider } from '../../api/render-api-context';
 import { ThemeProvider } from '../../theme/theme-context';
+import { FOOTER_CONTROL_CLASS } from './footer-control-style';
 import { SidebarFooter } from './sidebar-footer';
 import type { RenderApiClient } from '../../api/render-api-client';
 
@@ -11,7 +13,9 @@ function renderFooter() {
   return render(
     <ThemeProvider>
       <RenderApiProvider client={client}>
-        <SidebarFooter />
+        <MemoryRouter>
+          <SidebarFooter />
+        </MemoryRouter>
       </RenderApiProvider>
     </ThemeProvider>,
   );
@@ -49,5 +53,17 @@ describe('SidebarFooter', () => {
     expect(trigger.getAttribute('title')).not.toBeNull();
     expect(trigger.className).toContain('max-[1099px]:size-8');
     expect(screen.getByTestId('service-health-label').className).toContain('max-[1099px]:hidden');
+  });
+
+  it('links the appearance entry straight to the appearance tab of the settings, with the height of the status control', () => {
+    renderFooter();
+    const link = screen.getByTestId('appearance-link');
+
+    expect(link.getAttribute('href')).toBe('/settings?tab=appearance');
+    expect(link.className).toContain(FOOTER_CONTROL_CLASS);
+    expect(screen.getByTestId('service-health-trigger').className).toContain(FOOTER_CONTROL_CLASS);
+    expect(link.className).toContain('py-2');
+    expect(screen.queryByTestId('appearance-toggle')).toBeNull();
+    expect(screen.queryByRole('radio')).toBeNull();
   });
 });

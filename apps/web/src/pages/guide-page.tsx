@@ -1,14 +1,20 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 
-import { ProducerMarkdown } from '../components/producer-message-list';
+import { GuideIndex } from '../components/guide/guide-index';
+import { GuideSectionCard } from '../components/guide/guide-section-card';
+import { useActiveGuideSection } from '../components/guide/use-active-guide-section';
 import { loadGuideContent } from '../guide/guide-content';
 import type { GuideContent } from '../guide/guide-content';
 import { useLanguage, useT } from '../i18n/language-context';
+
+const NO_SECTION_IDS: readonly string[] = [];
 
 export function GuidePage() {
   const { language } = useLanguage();
   const t = useT();
   const [content, setContent] = useState<GuideContent | null>(null);
+  const sectionIds = useMemo(() => content?.sections.map((section) => section.id) ?? NO_SECTION_IDS, [content]);
+  const [activeId, setActiveId] = useActiveGuideSection(sectionIds);
 
   useEffect(() => {
     let subscribed = true;
@@ -29,41 +35,24 @@ export function GuidePage() {
   }, [content]);
 
   if (content === null) {
-    return <p className="text-sm text-slate-500">{t('app.loading.guide')}</p>;
+    return <p className="m-0 text-sm text-[var(--cl-ink-2)]">{t('app.loading.guide')}</p>;
   }
 
   return (
-    <section data-testid="guide" data-guide-language={language} className="space-y-8">
-      <div>
-        <h1 className="text-2xl font-semibold tracking-tight">{content.title}</h1>
-        <p className="mt-2 max-w-3xl text-sm text-slate-400">{content.intro}</p>
+    <section data-testid="guide" data-guide-language={language} className="flex flex-col gap-4">
+      <div className="px-1">
+        <h1 className="m-0 text-2xl font-bold tracking-tight text-[var(--cl-ink)]">{content.title}</h1>
+        <p className="mt-2 max-w-3xl text-sm text-[var(--cl-ink-2)]">{content.intro}</p>
       </div>
 
-      <nav data-testid="guide-index" className="flex flex-wrap gap-2">
-        {content.sections.map((section) => (
-          <a
-            key={section.id}
-            href={`#${section.id}`}
-            data-guide-link={section.id}
-            className="rounded-full border border-slate-700 px-3 py-1 text-xs text-slate-300 hover:border-slate-500"
-          >
-            {section.title}
-          </a>
-        ))}
-      </nav>
-
-      {content.sections.map((section) => (
-        <article
-          key={section.id}
-          id={section.id}
-          data-testid="guide-section"
-          data-guide-section={section.id}
-          className="space-y-3 rounded-lg border border-slate-800 bg-slate-900/40 p-5"
-        >
-          <h2 className="text-lg font-semibold tracking-tight text-slate-100">{section.title}</h2>
-          <ProducerMarkdown text={section.body} />
-        </article>
-      ))}
+      <div className="grid items-start gap-3 min-[1100px]:grid-cols-[15rem_minmax(0,1fr)]">
+        <GuideIndex sections={content.sections} activeId={activeId} onSelect={setActiveId} />
+        <div className="flex min-w-0 flex-col gap-3">
+          {content.sections.map((section, index) => (
+            <GuideSectionCard key={section.id} section={section} position={index + 1} total={content.sections.length} />
+          ))}
+        </div>
+      </div>
     </section>
   );
 }

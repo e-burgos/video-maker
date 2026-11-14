@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import { isMigratedRoute, projectSlugFromPathname, stepsForMode, toolbarHeadingFor } from './shell-navigation';
+import { SIDEBAR_SECTIONS, isMigratedRoute, projectSlugFromPathname, stepsForMode, toolbarHeadingFor } from './shell-navigation';
 
 describe('toolbarHeadingFor', () => {
   it('maps each top level route to its own title', () => {
@@ -19,7 +19,7 @@ describe('toolbarHeadingFor', () => {
 });
 
 describe('shell navigation helpers', () => {
-  it('treats only the migrated routes as off the legacy surface', () => {
+  it('treats every route of the studio as off the legacy surface', () => {
     expect(isMigratedRoute('/')).toBe(true);
     expect(isMigratedRoute('/projects/demo')).toBe(true);
     expect(isMigratedRoute('/projects/demo/')).toBe(true);
@@ -33,7 +33,11 @@ describe('shell navigation helpers', () => {
     expect(isMigratedRoute('/brands/acme/')).toBe(true);
     expect(isMigratedRoute('/publish-queue')).toBe(true);
     expect(isMigratedRoute('/publish-queue/')).toBe(true);
-    expect(['/settings', '/guide'].some(isMigratedRoute)).toBe(false);
+    expect(SIDEBAR_SECTIONS.flatMap((section) => section.items.map((item) => item.to)).every(isMigratedRoute)).toBe(true);
+    expect(isMigratedRoute('/settings')).toBe(true);
+    expect(isMigratedRoute('/settings/')).toBe(true);
+    expect(isMigratedRoute('/guide')).toBe(true);
+    expect(isMigratedRoute('/guide/')).toBe(true);
   });
 
   it('keeps the motion step only for motion videos', () => {

@@ -7,7 +7,7 @@ import type { MaterialPreference, ThemePreference } from './theme-preferences';
 const SEGMENTED_FRAME_CLASS =
   'h-10 rounded-[10px] border border-[var(--tucu-glass-sub-line)] bg-[var(--tucu-glass-sub-bg)] p-[3px] [&_[data-tucu=segmented-control]]:h-full [&_[data-tucu=segmented-control-track]]:h-full [&_[data-tucu=segmented-control-track]]:w-full [&_[data-tucu=segmented-control-track]]:border-0 [&_[data-tucu=segmented-control-track]]:bg-transparent [&_[data-tucu=segmented-control-track]]:p-0 [&_[role=radio]]:h-full';
 
-export function ThemeSwitch() {
+export function ThemeSwitch({ headings = false }: { headings?: boolean }) {
   const t = useT();
   const { theme, material, setTheme, setMaterial } = useThemePreferences();
 
@@ -23,6 +23,7 @@ export function ThemeSwitch() {
 
   return (
     <div className="flex flex-col gap-2">
+      {headings && <p className="m-0 text-xs font-medium text-[var(--cl-ink-2)]">{t('settings.appearance.theme')}</p>}
       <div className={SEGMENTED_FRAME_CLASS}>
         <SegmentedControl
           label={t('theme.label')}
@@ -33,6 +34,7 @@ export function ThemeSwitch() {
           onChange={(next) => setTheme(next as ThemePreference)}
         />
       </div>
+      {headings && <p className="m-0 text-xs font-medium text-[var(--cl-ink-2)]">{t('settings.appearance.material')}</p>}
       <div className={SEGMENTED_FRAME_CLASS}>
         <SegmentedControl
           label={t('material.label')}
