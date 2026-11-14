@@ -6944,6 +6944,55 @@
           }
         ]
       }
+    },
+    {
+      "id": "FIX-e-burgos-091",
+      "author": "e-burgos",
+      "spec_id": null,
+      "fix_document": "sdd/fixes/fix-e-burgos-091.md",
+      "type": "IMPROVEMENT",
+      "severity": "low",
+      "created_at": "2026-11-14",
+      "resolved_at": "2026-11-14",
+      "validated_at": null,
+      "title": "La web usa el logo nuevo, íconos para cada plataforma y SEO completo",
+      "estimation_hours": 1.5,
+      "description": "El header, el footer y el favicon del sitio pasan al logo nuevo (V dentro de la lente). Suma favicon.ico, apple-touch-icon, íconos 192/512 y maskable con site.webmanifest, una imagen para compartir 1200×630 por idioma con el logo y datos estructurados schema.org (WebSite y SoftwareApplication). Además: descripciones de hasta 160 caracteres, datos VideoObject del tutorial y los dos demos, FAQPage en preguntas frecuentes, BreadcrumbList en las páginas internas y una 404 bilingüe con noindex para que las URL inexistentes no devuelvan el inicio.",
+      "justification": "Pedido del dev: la web seguía con el logo viejo; revisar branding, favicon y SEO (2026-11-14).",
+      "related_modules": [
+        "docs-site"
+      ],
+      "affected_files": [
+        "apps/docs-site/src/icons.mjs",
+        "apps/docs-site/src/render.mjs",
+        "apps/docs-site/src/site-files.mjs",
+        "apps/docs-site/scripts/build.mjs",
+        "apps/docs-site/src/content/home.mjs"
+      ],
+      "test_reference": "apps/docs-site/src/site.spec.mjs",
+      "status": "implemented",
+      "cycle": null,
+      "usage": {
+        "provider_model": "claude/opus",
+        "effort": "low",
+        "tokens_in": 110000,
+        "tokens_out": 17000,
+        "approx": true,
+        "source": "declared-estimate",
+        "recorded_at": "2026-11-14",
+        "by_agent": [
+          {
+            "provider_model": "claude/opus",
+            "effort": "low",
+            "tokens_in": 110000,
+            "tokens_out": 17000,
+            "approx": true,
+            "source": "declared-estimate",
+            "recorded_at": "2026-11-14",
+            "agent": "implementor-front"
+          }
+        ]
+      }
     }
   ]
 }

@@ -1,20 +1,26 @@
-import { APPROX_DMG_SIZE_LABEL, APP_DISPLAY_NAME, REPO_URL, TUTORIAL_MUSIC_SOURCE_URL } from '../site-config.mjs';
+import { APPROX_DMG_SIZE_LABEL, APP_DISPLAY_NAME, REPO_URL, SITE_URL, TUTORIAL_MUSIC_SOURCE_URL } from '../site-config.mjs';
 import { pick, t } from '../i18n.mjs';
 import { icon } from '../icons.mjs';
-import { assetHref, pageHref } from '../routes.mjs';
+import { absoluteUrl, assetHref, pageHref } from '../routes.mjs';
 import { downloadButton, escapeHtml, githubButton, infoTable, screenshotFigure, sectionHeader } from '../render.mjs';
 import { featureGrid, pipelineDiagram } from '../components.mjs';
 import { pipelineStages } from './journeys.mjs';
 
 const VIDEOS_BASE_PATH = '/tutoriales/';
-const TUTORIAL_VIDEO_PATH = `${VIDEOS_BASE_PATH}Tutorial-Video-Maker.mp4`;
+const TUTORIAL_VIDEO_FILE = 'Tutorial-Video-Maker.mp4';
+const TUTORIAL_VIDEO_PATH = `${VIDEOS_BASE_PATH}${TUTORIAL_VIDEO_FILE}`;
+const PUBLISHED_VIDEO_FACTS = {
+  [TUTORIAL_VIDEO_FILE]: { duration: 'PT2M20S', uploadDate: '2026-10-28', poster: 'tutorial-poster.jpg' },
+  'Video-Maker-en-90-segundos.mp4': { duration: 'PT1M29S', uploadDate: '2026-11-14', poster: 'demo-explicativo-poster.jpg' },
+  'Video-Maker-del-chat-al-video.mp4': { duration: 'PT3M27S', uploadDate: '2026-11-14', poster: 'demo-productor-poster.jpg' },
+};
 const VILKAS_WHOOSH_URL = 'https://freesound.org/people/Vilkas_Sound/sounds/460476';
 
 const COPY = {
   es: {
     title: 'Inicio',
     description:
-      'Video Maker: un estudio de video con un productor de IA que corre en tu Mac. Motion graphics o material crudo, voz en español, música y render local. Código abierto.',
+      'Estudio de video con un productor de IA en tu Mac: motion graphics o material crudo, voz en español, música y render local. Gratis y de código abierto.',
     eyebrow: 'Código abierto · macOS Apple Silicon',
     titleLead: 'Del guion al video,',
     titleAccent: 'en tu Mac.',
@@ -108,7 +114,7 @@ const COPY = {
   en: {
     title: 'Home',
     description:
-      'Video Maker: a video studio with an AI producer that runs on your Mac. Motion graphics or raw footage, Spanish voices, music and local rendering. Open source.',
+      'A video studio with an AI producer that runs on your Mac: motion graphics or raw footage, Spanish voices, music and local rendering. Free and open source.',
     eyebrow: 'Open source · macOS Apple Silicon',
     titleLead: 'From script to video,',
     titleAccent: 'on your Mac.',
@@ -247,6 +253,26 @@ ${chips}
 </div>
 </div>
 </section>`;
+}
+
+function videoObject({ file, name, description }) {
+  const facts = PUBLISHED_VIDEO_FACTS[file];
+  return {
+    '@type': 'VideoObject',
+    name,
+    description,
+    thumbnailUrl: absoluteUrl(`assets/screenshots/${facts.poster}`),
+    contentUrl: `${SITE_URL}${VIDEOS_BASE_PATH}${file}`,
+    uploadDate: facts.uploadDate,
+    duration: facts.duration,
+  };
+}
+
+function publishedVideosStructuredData(copy) {
+  return [
+    videoObject({ file: TUTORIAL_VIDEO_FILE, name: copy.tutorialTitle, description: copy.tutorialLede }),
+    ...copy.demos.map((demo) => videoObject({ file: demo.file, name: `${demo.title} · Video Maker`, description: demo.text })),
+  ];
 }
 
 function tutorialSection(ctx, copy) {
@@ -402,5 +428,5 @@ export function renderPage(ctx) {
     requirementsSection(ctx, copy),
     finalCta(ctx, copy),
   ].join('\n');
-  return { title: copy.title, description: copy.description, bodyHtml };
+  return { title: copy.title, description: copy.description, bodyHtml, structuredData: publishedVideosStructuredData(copy) };
 }

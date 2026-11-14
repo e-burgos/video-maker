@@ -37,7 +37,11 @@ export const DEFAULT_LOCALE = 'es';
 
 export const LOCALE_PATH_PREFIX = { es: '', en: 'en/' };
 
-export const OG_IMAGE_PATH = 'assets/screenshots/motion-video.png';
+export const OG_IMAGE_PATHS = { es: 'assets/screenshots/og-es.jpg', en: 'assets/screenshots/og-en.jpg' };
+
+export const OG_IMAGE_SIZE = { width: 1200, height: 630 };
+
+export const BRAND_THEME_COLOR = '#7c5cff';
 
 export const PAGES = [
   { id: 'home', group: 'main', slugs: { es: '', en: '' } },

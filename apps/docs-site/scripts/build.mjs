@@ -1,12 +1,14 @@
 import { cpSync, existsSync, mkdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { join, resolve } from 'node:path';
 
-import { pageLayout } from '../src/render.mjs';
+import { notFoundPage, pageLayout } from '../src/render.mjs';
 import { allPageContexts } from '../src/routes.mjs';
 import {
   CLIENT_SCRIPT_FILES,
   buildRobotsTxt,
+  SITE_ICON_FILES,
   buildSitemapXml,
+  buildWebManifest,
   publishedClientScriptName,
   rewriteClientImports,
 } from '../src/site-files.mjs';
@@ -52,8 +54,8 @@ export function renderSitePage(ctx, noticesMarkdown) {
   if (renderer === undefined) {
     throw new Error(`no content module registered for page "${ctx.pageId}"`);
   }
-  const { title, description, bodyHtml } = renderer(ctx, noticesMarkdown);
-  return pageLayout({ ctx, title, description, bodyHtml });
+  const { title, description, bodyHtml, structuredData } = renderer(ctx, noticesMarkdown);
+  return pageLayout({ ctx, title, description, bodyHtml, structuredData });
 }
 
 function renderAllPages(noticesMarkdown) {
@@ -81,11 +83,15 @@ function copyStaticAssets() {
   cpSync(join(DOCS_SITE_ROOT, 'src', 'styles.css'), join(assetsDir, 'style.css'));
   cpSync(join(DOCS_SITE_ROOT, 'public', 'screenshots'), join(assetsDir, 'screenshots'), { recursive: true });
   cpSync(join(DOCS_SITE_ROOT, 'public', 'fonts'), join(assetsDir, 'fonts'), { recursive: true });
-  cpSync(join(DOCS_SITE_ROOT, 'public', 'favicon.svg'), join(DIST_DIR, 'favicon.svg'));
+  for (const iconFile of SITE_ICON_FILES) {
+    cpSync(join(DOCS_SITE_ROOT, 'public', iconFile), join(DIST_DIR, iconFile));
+  }
+  writeFileSync(join(DIST_DIR, 'site.webmanifest'), buildWebManifest());
+  writeFileSync(join(DIST_DIR, '404.html'), notFoundPage());
   copyClientScripts(join(assetsDir, 'js'));
   writeFileSync(join(DIST_DIR, 'sitemap.xml'), buildSitemapXml());
   writeFileSync(join(DIST_DIR, 'robots.txt'), buildRobotsTxt());
-  log('copied styles, screenshots, fonts, favicon and scripts; wrote sitemap.xml and robots.txt');
+  log('copied styles, screenshots, fonts, icons and scripts; wrote sitemap.xml, robots.txt and site.webmanifest');
 }
 
 function main() {

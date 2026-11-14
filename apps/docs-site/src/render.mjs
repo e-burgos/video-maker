@@ -2,13 +2,18 @@ import {
   APP_DISPLAY_NAME,
   COPYRIGHT_HOLDER,
   COPYRIGHT_YEAR,
+  DEFAULT_LOCALE,
   DOWNLOAD_URL,
-  OG_IMAGE_PATH,
+  LOCALES,
+  LOCALE_PATH_PREFIX,
+  OG_IMAGE_PATHS,
+  OG_IMAGE_SIZE,
+  SITE_URL,
   REPO_ISSUES_URL,
   REPO_LICENSE_URL,
   REPO_URL,
 } from './site-config.mjs';
-import { BRAND_MARK_SVG, icon } from './icons.mjs';
+import { brandMarkSvg, icon } from './icons.mjs';
 import { t } from './i18n.mjs';
 import {
   absoluteUrl,
@@ -110,7 +115,7 @@ export function githubLink(ctx, className = 'icon-button') {
 function headerMarkup(ctx) {
   return `<header class="site-header" data-site-header>
 <div class="site-header__bar">
-<a class="brand" href="${pageHref(ctx, 'home')}">${BRAND_MARK_SVG}<span class="brand__name">${escapeHtml(APP_DISPLAY_NAME)}</span></a>
+<a class="brand" href="${pageHref(ctx, 'home')}">${brandMarkSvg('header')}<span class="brand__name">${escapeHtml(APP_DISPLAY_NAME)}</span></a>
 <button type="button" class="icon-button menu-toggle" data-menu-toggle aria-controls="site-nav" aria-expanded="false" hidden>${icon('menu')}<span class="sr-only">${escapeHtml(t(ctx.locale, 'nav.menu'))}</span></button>
 ${mainNavMarkup(ctx)}
 <div class="site-header__actions">
@@ -162,7 +167,7 @@ function footerMarkup(ctx) {
   return `<footer class="site-footer">
 <div class="site-footer__inner">
 <div class="footer-brand">
-<a class="brand" href="${pageHref(ctx, 'home')}">${BRAND_MARK_SVG}<span class="brand__name">${escapeHtml(APP_DISPLAY_NAME)}</span></a>
+<a class="brand" href="${pageHref(ctx, 'home')}">${brandMarkSvg('footer')}<span class="brand__name">${escapeHtml(APP_DISPLAY_NAME)}</span></a>
 <p>${escapeHtml(t(locale, 'brand.tagline'))}</p>
 <div class="footer-brand__actions">${githubLink(ctx, 'button button--ghost button--small')}${localeSwitchLink(ctx, 'button button--ghost button--small')}</div>
 </div>
@@ -174,11 +179,76 @@ ${openSource}
 </footer>`;
 }
 
-function headMarkup(ctx, fullTitle, description) {
+function websiteNode(ctx) {
+  return { '@type': 'WebSite', name: APP_DISPLAY_NAME, url: `${SITE_URL}/`, inLanguage: ctx.locale };
+}
+
+function softwareApplicationNode(ctx, description) {
+  return {
+    '@type': 'SoftwareApplication',
+    name: APP_DISPLAY_NAME,
+    description,
+    url: canonicalUrl(ctx.locale, ctx.pageId),
+    image: absoluteUrl(OG_IMAGE_PATHS[ctx.locale]),
+    applicationCategory: 'MultimediaApplication',
+    operatingSystem: 'macOS',
+    downloadUrl: DOWNLOAD_URL,
+    license: REPO_LICENSE_URL,
+    codeRepository: REPO_URL,
+    author: { '@type': 'Person', name: COPYRIGHT_HOLDER },
+    offers: { '@type': 'Offer', price: '0', priceCurrency: 'USD' },
+  };
+}
+
+function breadcrumbNode(ctx, title) {
+  const items = [
+    { name: t(ctx.locale, 'nav.home'), url: canonicalUrl(ctx.locale, 'home') },
+    { name: title, url: canonicalUrl(ctx.locale, ctx.pageId) },
+  ];
+  return {
+    '@type': 'BreadcrumbList',
+    itemListElement: items.map((item, index) => ({ '@type': 'ListItem', position: index + 1, name: item.name, item: item.url })),
+  };
+}
+
+function plainText(html) {
+  return html
+    .replace(/<[^>]+>/g, '')
+    .replace(/&quot;/g, '"')
+    .replace(/&lt;/g, '<')
+    .replace(/&gt;/g, '>')
+    .replace(/&amp;/g, '&')
+    .replace(/\s+/g, ' ')
+    .trim();
+}
+
+export function faqPageNode(bodyHtml) {
+  const pattern = /<summary class="faq-item__question">([\s\S]*?)<\/summary>\s*<div class="faq-item__answer">([\s\S]*?)<\/div>\s*<\/details>/g;
+  const questions = [...bodyHtml.matchAll(pattern)].map(([, question, answer]) => ({
+    '@type': 'Question',
+    name: plainText(question),
+    acceptedAnswer: { '@type': 'Answer', text: plainText(answer) },
+  }));
+  return questions.length === 0 ? null : { '@type': 'FAQPage', mainEntity: questions };
+}
+
+function structuredDataNodes({ ctx, title, description, bodyHtml, structuredData }) {
+  const pageNodes =
+    ctx.pageId === 'home' ? [softwareApplicationNode(ctx, description)] : [breadcrumbNode(ctx, title)];
+  return [websiteNode(ctx), ...pageNodes, faqPageNode(bodyHtml), ...(structuredData ?? [])].filter(Boolean);
+}
+
+function structuredDataScript(page) {
+  const json = JSON.stringify({ '@context': 'https://schema.org', '@graph': structuredDataNodes(page) }).replace(/</g, '\\u003c');
+  return `<script type="application/ld+json">${json}</script>`;
+}
+
+function headMarkup(page, fullTitle) {
+  const { ctx, description } = page;
   const alternates = alternateLinks(ctx.pageId)
     .map((alternate) => `<link rel="alternate" hreflang="${alternate.hreflang}" href="${alternate.href}" />`)
     .join('\n');
-  const ogImage = absoluteUrl(OG_IMAGE_PATH);
+  const ogImage = absoluteUrl(OG_IMAGE_PATHS[ctx.locale]);
   const ogAlternateLocale = t(otherLocale(ctx.locale), 'meta.ogLocale');
   return `<meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -195,19 +265,31 @@ ${alternates}
 <meta property="og:description" content="${escapeHtml(description)}" />
 <meta property="og:url" content="${canonicalUrl(ctx.locale, ctx.pageId)}" />
 <meta property="og:image" content="${ogImage}" />
-<meta property="og:image:width" content="1440" />
-<meta property="og:image:height" content="900" />
+<meta property="og:image:width" content="${OG_IMAGE_SIZE.width}" />
+<meta property="og:image:height" content="${OG_IMAGE_SIZE.height}" />
+<meta property="og:image:alt" content="${escapeHtml(`${APP_DISPLAY_NAME} — ${t(ctx.locale, 'brand.tagline')}`)}" />
 <meta property="og:locale" content="${t(ctx.locale, 'meta.ogLocale')}" />
 <meta property="og:locale:alternate" content="${ogAlternateLocale}" />
 <meta name="twitter:card" content="summary_large_image" />
+<meta name="twitter:title" content="${escapeHtml(fullTitle)}" />
+<meta name="twitter:description" content="${escapeHtml(description)}" />
+<meta name="twitter:image" content="${ogImage}" />
+<meta name="application-name" content="${escapeHtml(APP_DISPLAY_NAME)}" />
+<meta name="apple-mobile-web-app-title" content="${escapeHtml(APP_DISPLAY_NAME)}" />
+<meta name="author" content="${escapeHtml(COPYRIGHT_HOLDER)}" />
+<link rel="icon" href="${assetHref(ctx, 'favicon.ico')}" sizes="48x48" />
 <link rel="icon" href="${assetHref(ctx, 'favicon.svg')}" type="image/svg+xml" />
+<link rel="apple-touch-icon" href="${assetHref(ctx, 'apple-touch-icon.png')}" />
+<link rel="manifest" href="${assetHref(ctx, 'site.webmanifest')}" />
+${structuredDataScript(page)}
 <link rel="preload" href="${assetHref(ctx, 'assets/fonts/outfit-700.woff2')}" as="font" type="font/woff2" crossorigin />
 <link rel="stylesheet" href="${assetHref(ctx, 'assets/style.css')}" />
 <script>${headBootstrapScript()}</script>
 <script type="module" src="${assetHref(ctx, 'assets/js/site.js')}"></script>`;
 }
 
-export function pageLayout({ ctx, title, description, bodyHtml }) {
+export function pageLayout(page) {
+  const { ctx, title, bodyHtml } = page;
   const fullTitle = ctx.pageId === 'home' ? `${APP_DISPLAY_NAME} — ${t(ctx.locale, 'brand.tagline')}` : `${title} · ${APP_DISPLAY_NAME}`;
   const main = isGuidePage(ctx.pageId)
     ? `<div class="guide-layout">${guideNavMarkup(ctx)}<article class="guide-article prose">${bodyHtml}</article></div>`
@@ -215,7 +297,7 @@ export function pageLayout({ ctx, title, description, bodyHtml }) {
   return `<!doctype html>
 <html lang="${ctx.locale}" data-page="${ctx.pageId}">
 <head>
-${headMarkup(ctx, fullTitle, description)}
+${headMarkup(page, fullTitle)}
 </head>
 <body>
 <a class="skip-link" href="#contenido">${escapeHtml(t(ctx.locale, 'skip.toContent'))}</a>
@@ -287,4 +369,39 @@ export function sectionHeader({ eyebrow = null, title, lede = null, headingLevel
 
 export function pageHero({ eyebrow, title, lede }) {
   return `<section class="page-hero"><div class="container">${sectionHeader({ eyebrow, title, lede, headingLevel: 1 })}</div></section>`;
+}
+
+function notFoundSection(locale) {
+  const homePath = `/${LOCALE_PATH_PREFIX[locale]}`;
+  return `<section class="section" lang="${locale}">
+<div class="container container--narrow">
+<p class="eyebrow">404</p>
+<h${locale === DEFAULT_LOCALE ? 1 : 2}>${escapeHtml(t(locale, 'notFound.title'))}</h${locale === DEFAULT_LOCALE ? 1 : 2}>
+<p>${escapeHtml(t(locale, 'notFound.text'))}</p>
+<p><a class="button button--primary" href="${homePath}">${escapeHtml(t(locale, 'notFound.cta'))}</a></p>
+</div>
+</section>`;
+}
+
+export function notFoundPage() {
+  return `<!doctype html>
+<html lang="${DEFAULT_LOCALE}" data-page="not-found">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>404 · ${escapeHtml(APP_DISPLAY_NAME)}</title>
+<meta name="robots" content="noindex" />
+<meta name="color-scheme" content="light dark" />
+<link rel="icon" href="/favicon.ico" sizes="48x48" />
+<link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+<link rel="stylesheet" href="/assets/style.css" />
+</head>
+<body>
+<header class="site-header"><div class="site-header__bar"><a class="brand" href="/">${brandMarkSvg('not-found')}<span class="brand__name">${escapeHtml(APP_DISPLAY_NAME)}</span></a></div></header>
+<main id="contenido" class="site-main">
+${LOCALES.map(notFoundSection).join('\n')}
+</main>
+</body>
+</html>
+`;
 }
