@@ -22,8 +22,8 @@ const ARTIFACTS_DIR = join(
   'sdd/specs/spec-e-burgos-006-web-studio/cycles/cycle-03/artifacts',
 );
 
-const RENDER_API_PORT = 4399;
-const WEB_PORT = 4207;
+const RENDER_API_PORT = 4472;
+const WEB_PORT = 4473;
 const SLUG = 'smoke-ingest';
 
 async function main() {

@@ -15,7 +15,7 @@ export const MEDIA_ENV_VARS = [
   'WHISPER_MODEL_PATH',
 ];
 
-export const VOICE_ENV_VARS = [...MEDIA_ENV_VARS, 'PIPER_PATH', 'PIPER_MODEL_PATH'];
+export const VOICE_ENV_VARS = [...MEDIA_ENV_VARS, 'TTS_CLI_PATH', 'TTS_VOICES_DIR'];
 
 export const MIN_FREE_MEMORY_RATIO = 0.35;
 

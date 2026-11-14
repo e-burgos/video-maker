@@ -25,12 +25,15 @@ const WEB_PORT = 4416;
 const SLUG = 'i18n-smoke';
 const GUIDE_SECTIONS = [
   'projects',
+  'motion',
+  'brands',
   'library',
   'producer',
   'storyboard',
   'voice',
   'preview',
   'presets',
+  'youtube',
   'flows',
 ];
 
@@ -121,6 +124,11 @@ async function main() {
     const { chromium } = await resolvePlaywright();
     browser = await chromium.launch({ channel: 'chrome' });
     const context = await browser.newContext({ viewport: { width: 1280, height: 1800 } });
+    await context.addInitScript(() => {
+      if (window.localStorage.getItem('video-maker.language') === null) {
+        window.localStorage.setItem('video-maker.language', 'en');
+      }
+    });
     const page = await context.newPage();
     page.on('console', (message) => {
       if (message.type() === 'error') {
@@ -140,8 +148,8 @@ async function main() {
     const englishNav = await navTexts(page);
     log('3', `nav in english: ${englishNav.join(' · ')}`);
     assert(
-      englishNav.join(',') === 'library,storyboard,voice,preview',
-      'the studio opens in english, with the four advanced-editing sections of the project',
+      englishNav.join(',') === 'producer,library,storyboard,voice,preview',
+      'the studio opens in english, with the producer and the four advanced-editing sections of the project',
     );
 
     log('4', 'switching the header to spanish');
@@ -149,7 +157,7 @@ async function main() {
     const spanishNav = await navTexts(page);
     log('4', `nav in spanish: ${spanishNav.join(' · ')}`);
     assert(
-      spanishNav.join(',') === 'biblioteca,storyboard,voz,vista previa',
+      spanishNav.join(',') === 'productor,biblioteca,storyboard,voz,vista previa',
       'the whole nav changed language at once, with no reload',
     );
 
@@ -163,8 +171,8 @@ async function main() {
       log('4', `role card: ${role.role} → ${role.text}`);
     }
     assert(
-      roles.length === 6 && roles.every((role) => role.text.length > 60),
-      'the six upload roles are still explained after the switch',
+      roles.length === 7 && roles.every((role) => role.text.length > 60),
+      'the seven upload roles are still explained after the switch',
     );
     assert(
       roles[0].text.includes('Las tomas en las que hablás') && roles[0].text.includes('obligatorio'),
@@ -194,7 +202,7 @@ async function main() {
     );
     const reloadedNav = await navTexts(page);
     assert(
-      reloadedNav.join(',') === 'biblioteca,storyboard,voz,vista previa',
+      reloadedNav.join(',') === 'productor,biblioteca,storyboard,voz,vista previa',
       'the nav comes back in spanish after the reload',
     );
 
@@ -242,12 +250,19 @@ async function main() {
       'the preview button is named in spanish for a screen reader',
     );
     assert(
-      cards.every((card) => card.text.includes(card.id.split('-')[0].replace('_', '-'))),
+      cards
+        .filter((card) => !card.id.startsWith('elevenlabs:'))
+        .every((card) => card.text.includes(card.id.split('-')[0].replace('_', '-'))),
       'the technical language tag of every voice is shown untranslated next to its spanish quality',
     );
+    const localCards = cards.filter((card) => !card.id.startsWith('elevenlabs:'));
     assert(
-      cards.every((card) => card.text.includes('Neural voice trained on the')),
-      'the label and the description that GET /voices publishes stay as the service wrote them: they are catalog data, not ui copy',
+      localCards.every((card) => card.text.includes(' · Spanish (')),
+      'the label that GET /voices publishes stays as the service wrote it: it is catalog data, not ui copy',
+    );
+    assert(
+      localCards.every((card) => card.text.includes('Voz neuronal')),
+      'the description of a local voice is translated into spanish by the studio',
     );
     const voiceHeading = await page
       .locator('[data-testid="voice-trigger"] h2')
