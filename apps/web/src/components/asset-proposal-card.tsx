@@ -112,7 +112,7 @@ export function AssetProposalCard({
         <p className="truncate text-sm font-semibold text-[var(--cl-ink)]" title={asset.fileName}>
           {asset.fileName}
         </p>
-        <p className="text-xs text-[var(--cl-ink-2)]">{t(inboxReasonKey(asset.proposalReason))}</p>
+        <p data-testid="asset-proposal-reason" className="text-xs text-[var(--cl-ink-2)]">{t(inboxReasonKey(asset.proposalReason))}</p>
 
         <div className="flex flex-wrap items-center gap-2">
           <label htmlFor={`asset-proposal-role-${asset.id}`} className="text-xs font-medium text-[var(--cl-ink-2)]">

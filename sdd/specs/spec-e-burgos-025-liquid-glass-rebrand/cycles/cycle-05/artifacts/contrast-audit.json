@@ -1,0 +1,126 @@
+{
+  "baseUrl": "http://localhost:4200",
+  "audited": [
+    {
+      "scheme": "light",
+      "path": "/",
+      "textsChecked": 92,
+      "horizontalOverflowPx": 0
+    },
+    {
+      "scheme": "light",
+      "path": "/projects/display-ads-asignar-campana",
+      "textsChecked": 78,
+      "horizontalOverflowPx": 0
+    },
+    {
+      "scheme": "light",
+      "path": "/projects/display-ads-asignar-campana/library",
+      "textsChecked": 85,
+      "horizontalOverflowPx": 0
+    },
+    {
+      "scheme": "light",
+      "path": "/publish-queue",
+      "textsChecked": 37,
+      "horizontalOverflowPx": 0
+    },
+    {
+      "scheme": "light",
+      "path": "/settings?tab=producer",
+      "textsChecked": 53,
+      "horizontalOverflowPx": 0
+    },
+    {
+      "scheme": "light",
+      "path": "/settings?tab=voice",
+      "textsChecked": 30,
+      "horizontalOverflowPx": 0
+    },
+    {
+      "scheme": "light",
+      "path": "/settings?tab=youtube",
+      "textsChecked": 37,
+      "horizontalOverflowPx": 0
+    },
+    {
+      "scheme": "light",
+      "path": "/settings?tab=appearance",
+      "textsChecked": 29,
+      "horizontalOverflowPx": 0
+    },
+    {
+      "scheme": "light",
+      "path": "/guide",
+      "textsChecked": 70,
+      "horizontalOverflowPx": 0
+    },
+    {
+      "scheme": "light",
+      "path": "/brands",
+      "textsChecked": 36,
+      "horizontalOverflowPx": 0
+    },
+    {
+      "scheme": "dark",
+      "path": "/",
+      "textsChecked": 92,
+      "horizontalOverflowPx": 0
+    },
+    {
+      "scheme": "dark",
+      "path": "/projects/display-ads-asignar-campana",
+      "textsChecked": 78,
+      "horizontalOverflowPx": 0
+    },
+    {
+      "scheme": "dark",
+      "path": "/projects/display-ads-asignar-campana/library",
+      "textsChecked": 85,
+      "horizontalOverflowPx": 0
+    },
+    {
+      "scheme": "dark",
+      "path": "/publish-queue",
+      "textsChecked": 37,
+      "horizontalOverflowPx": 0
+    },
+    {
+      "scheme": "dark",
+      "path": "/settings?tab=producer",
+      "textsChecked": 53,
+      "horizontalOverflowPx": 0
+    },
+    {
+      "scheme": "dark",
+      "path": "/settings?tab=voice",
+      "textsChecked": 30,
+      "horizontalOverflowPx": 0
+    },
+    {
+      "scheme": "dark",
+      "path": "/settings?tab=youtube",
+      "textsChecked": 37,
+      "horizontalOverflowPx": 0
+    },
+    {
+      "scheme": "dark",
+      "path": "/settings?tab=appearance",
+      "textsChecked": 29,
+      "horizontalOverflowPx": 0
+    },
+    {
+      "scheme": "dark",
+      "path": "/guide",
+      "textsChecked": 70,
+      "horizontalOverflowPx": 0
+    },
+    {
+      "scheme": "dark",
+      "path": "/brands",
+      "textsChecked": 36,
+      "horizontalOverflowPx": 0
+    }
+  ],
+  "failures": []
+}

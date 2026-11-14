@@ -22,12 +22,24 @@
       "estimation_hours": 4,
       "story_points": 5,
       "depends_on": [],
-      "status": "pending",
+      "status": "done",
       "files": [
         "apps/web/src/pages/publish-queue-page.tsx",
+        "apps/web/src/components/publish/",
+        "apps/web/src/api/publish-queue-view.ts",
         "apps/web/src/components/render-review-panel.tsx",
         "apps/web/src/components/youtube-publish-dialog.tsx"
-      ]
+      ],
+      "usage": {
+        "tokens_in": 230000,
+        "tokens_out": 24598,
+        "provider_model": "claude/sonnet",
+        "effort": "medium",
+        "agent": "implementor-front",
+        "approx": true,
+        "source": "agent-usage-notification",
+        "recorded_at": "2026-11-13"
+      }
     },
     {
       "id": "TASK-002",
@@ -39,11 +51,25 @@
       "estimation_hours": 4,
       "story_points": 5,
       "depends_on": [],
-      "status": "pending",
+      "status": "done",
       "files": [
         "apps/web/src/pages/settings-page.tsx",
-        "apps/web/src/pages/guide-page.tsx"
-      ]
+        "apps/web/src/components/settings/",
+        "apps/web/src/pages/guide-page.tsx",
+        "apps/web/src/components/guide/",
+        "apps/web/src/components/shell/sidebar-footer.tsx",
+        "apps/web/src/theme/theme-switch.tsx"
+      ],
+      "usage": {
+        "tokens_in": 255000,
+        "tokens_out": 30850,
+        "provider_model": "claude/sonnet",
+        "effort": "medium",
+        "agent": "implementor-front",
+        "approx": true,
+        "source": "agent-usage-notification",
+        "recorded_at": "2026-11-13"
+      }
     },
     {
       "id": "TASK-003",
@@ -54,12 +80,25 @@
       "estimation_hours": 3,
       "story_points": 3,
       "depends_on": [],
-      "status": "pending",
+      "status": "done",
       "files": [
         "apps/web/src/components/shell/shell-content.tsx",
-        "apps/web/src/components/shell/legacy-surface.tsx",
-        "apps/web/src/components/error-notice.tsx"
-      ]
+        "apps/web/src/components/ui/modal.tsx",
+        "apps/web/src/components/ui/status-states.tsx",
+        "apps/web/src/components/error-notice.tsx",
+        "apps/web/src/index.css",
+        "apps/web/src/components/shell/legacy-surface.tsx"
+      ],
+      "usage": {
+        "tokens_in": 150000,
+        "tokens_out": 23840,
+        "provider_model": "claude/sonnet",
+        "effort": "medium",
+        "agent": "implementor-front",
+        "approx": true,
+        "source": "agent-usage-notification",
+        "recorded_at": "2026-11-13"
+      }
     },
     {
       "id": "TASK-004",
@@ -74,11 +113,23 @@
         "TASK-002",
         "TASK-003"
       ],
-      "status": "pending",
+      "status": "done",
       "files": [
-        "apps/docs-site/scripts/capture-screenshots.mjs",
-        "apps/docs-site/public/screenshots/"
-      ]
+        "apps/docs-site/scripts/capture-studio-screenshots.mjs",
+        "apps/docs-site/public/screenshots/",
+        "apps/docs-site/src/content/home.mjs",
+        "apps/docs-site/src/content/journeys.mjs"
+      ],
+      "usage": {
+        "tokens_in": 175000,
+        "tokens_out": 15967,
+        "provider_model": "claude/sonnet",
+        "effort": "medium",
+        "agent": "implementor-front",
+        "approx": true,
+        "source": "agent-usage-notification",
+        "recorded_at": "2026-11-13"
+      }
     },
     {
       "id": "TASK-005",
@@ -98,8 +149,22 @@
         "TASK-003",
         "TASK-004"
       ],
-      "status": "pending",
-      "files": []
+      "status": "done",
+      "files": [
+        "apps/web/src/index.css",
+        "apps/web/src/components/asset-proposal-card.tsx",
+        "apps/web/e2e/workspace-smoke.mjs"
+      ],
+      "usage": {
+        "tokens_in": 60000,
+        "tokens_out": 8000,
+        "provider_model": "claude/opus",
+        "effort": "low",
+        "agent": "orchestrator",
+        "approx": true,
+        "source": "declared-estimate",
+        "recorded_at": "2026-11-13"
+      }
     }
   ]
 }
