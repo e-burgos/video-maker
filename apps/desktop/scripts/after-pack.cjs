@@ -2,6 +2,12 @@ const { execFileSync } = require('node:child_process');
 const { cpSync, existsSync, rmSync } = require('node:fs');
 const { join } = require('node:path');
 
+const BUILD_ONLY_FILE_PATTERN = /\.(map|d\.ts|d\.mts|d\.cts)$/;
+
+function isNeededAtRuntime(sourcePath) {
+  return !BUILD_ONLY_FILE_PATTERN.test(sourcePath);
+}
+
 module.exports = async function afterPack(context) {
   const appPath = join(context.appOutDir, `${context.packager.appInfo.productFilename}.app`);
   const resourcesDir = join(appPath, 'Contents', 'Resources');
@@ -13,7 +19,7 @@ module.exports = async function afterPack(context) {
   }
 
   rmSync(destination, { recursive: true, force: true });
-  cpSync(stagingNodeModules, destination, { recursive: true, dereference: true });
+  cpSync(stagingNodeModules, destination, { recursive: true, dereference: true, filter: isNeededAtRuntime });
 
   execFileSync('/usr/bin/codesign', ['--deep', '--force', '--sign', '-', appPath], { stdio: 'inherit' });
 };

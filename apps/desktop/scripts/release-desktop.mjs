@@ -1,6 +1,6 @@
 import { createHash } from 'node:crypto';
 import { execFileSync } from 'node:child_process';
-import { copyFileSync, existsSync, readFileSync, statSync, writeFileSync } from 'node:fs';
+import { copyFileSync, existsSync, readFileSync, renameSync, rmSync, statSync, writeFileSync } from 'node:fs';
 import { join, resolve } from 'node:path';
 import { pathToFileURL } from 'node:url';
 
@@ -15,6 +15,7 @@ export const DOWNLOADS_DOMAIN = 'https://video.estebanburgos.com.ar';
 export const DMG_CONTENT_TYPE = 'application/x-apple-diskimage';
 export const JSON_CONTENT_TYPE = 'application/json';
 export const UPDATE_MANIFEST_KEY = 'latest.json';
+export const R2_SINGLE_UPLOAD_LIMIT_BYTES = 300 * 1048576;
 
 export function log(message) {
   process.stdout.write(`[release-desktop] ${message}\n`);
@@ -101,6 +102,33 @@ function runDesktopBuild() {
   execFileSync('node', [BUILD_DESKTOP_SCRIPT], { cwd: REPO_ROOT, stdio: 'inherit' });
 }
 
+export function buildHdiutilLzmaConvertArgs({ sourcePath, outputPath }) {
+  return ['convert', sourcePath, '-format', 'ULMO', '-o', outputPath];
+}
+
+export function exceedsR2UploadLimit(sizeInBytes) {
+  return sizeInBytes > R2_SINGLE_UPLOAD_LIMIT_BYTES;
+}
+
+function recompressDmgWithLzma(dmgPath) {
+  const lzmaPath = dmgPath.replace(/\.dmg$/, '.lzma.dmg');
+  rmSync(lzmaPath, { force: true });
+  log(`recompressing ${dmgPath} with LZMA (ULMO)`);
+  execFileSync('/usr/bin/hdiutil', buildHdiutilLzmaConvertArgs({ sourcePath: dmgPath, outputPath: lzmaPath }), {
+    stdio: 'inherit',
+  });
+  renameSync(lzmaPath, dmgPath);
+  rmSync(`${dmgPath}.blockmap`, { force: true });
+  log(`LZMA dmg size: ${(statSync(dmgPath).size / 1048576).toFixed(1)} MiB`);
+}
+
+function ensureFitsR2UploadLimit(dmgPath) {
+  const size = statSync(dmgPath).size;
+  if (exceedsR2UploadLimit(size)) {
+    throw new Error(`${dmgPath} is ${(size / 1048576).toFixed(1)} MiB, above the 300 MiB wrangler R2 upload limit`);
+  }
+}
+
 function ensureWranglerLoggedIn() {
   let output;
   try {
@@ -154,6 +182,9 @@ async function main() {
   if (!existsSync(versionedDmgPath)) {
     throw new Error(`expected the build to produce ${versionedDmgPath}, but it is missing`);
   }
+
+  recompressDmgWithLzma(versionedDmgPath);
+  ensureFitsR2UploadLimit(versionedDmgPath);
 
   log(`copying ${versionedDmgName} to the stable download name ${stableDmgName}`);
   copyFileSync(versionedDmgPath, stableDmgPath);

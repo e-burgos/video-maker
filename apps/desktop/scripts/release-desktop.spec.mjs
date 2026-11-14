@@ -3,8 +3,11 @@ import { describe, expect, it } from 'vitest';
 import {
   DEFAULT_DOWNLOADS_BUCKET,
   DOWNLOADS_DOMAIN,
+  R2_SINGLE_UPLOAD_LIMIT_BYTES,
   UPDATE_MANIFEST_KEY,
+  buildHdiutilLzmaConvertArgs,
   buildUpdateManifest,
+  exceedsR2UploadLimit,
   buildWranglerR2PutArgs,
   downloadUrlFor,
   extractChangelogSection,
@@ -157,5 +160,28 @@ describe('formatPnpmCommand', () => {
 
   it('leaves plain arguments unquoted', () => {
     expect(formatPnpmCommand(['dlx', 'wrangler@4', 'whoami'])).toBe('pnpm dlx wrangler@4 whoami');
+  });
+});
+
+describe('buildHdiutilLzmaConvertArgs', () => {
+  it('converts the dmg to ULMO at the output path', () => {
+    expect(buildHdiutilLzmaConvertArgs({ sourcePath: '/d/a.dmg', outputPath: '/d/a.lzma.dmg' })).toEqual([
+      'convert',
+      '/d/a.dmg',
+      '-format',
+      'ULMO',
+      '-o',
+      '/d/a.lzma.dmg',
+    ]);
+  });
+});
+
+describe('exceedsR2UploadLimit', () => {
+  it('accepts a file exactly at the 300 MiB limit', () => {
+    expect(exceedsR2UploadLimit(R2_SINGLE_UPLOAD_LIMIT_BYTES)).toBe(false);
+  });
+
+  it('rejects a file one byte above the limit', () => {
+    expect(exceedsR2UploadLimit(R2_SINGLE_UPLOAD_LIMIT_BYTES + 1)).toBe(true);
   });
 });
