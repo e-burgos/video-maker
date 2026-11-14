@@ -1,3 +1,4 @@
+import { ReactRouterNavigationProvider } from '@e-burgos/tucu-ui';
 import { Suspense, lazy } from 'react';
 import { BrowserRouter, Navigate, Route, Routes, useParams } from 'react-router-dom';
 
@@ -70,6 +71,7 @@ function ProducerRouteRedirect() {
 export function App() {
   return (
     <BrowserRouter basename={import.meta.env.BASE_URL}>
+      <ReactRouterNavigationProvider>
       <LanguageProvider>
         <RenderApiProvider>
           <Routes>
@@ -177,6 +179,7 @@ export function App() {
           </Routes>
         </RenderApiProvider>
       </LanguageProvider>
+      </ReactRouterNavigationProvider>
     </BrowserRouter>
   );
 }
