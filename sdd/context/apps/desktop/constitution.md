@@ -1,6 +1,6 @@
 # Constitución — apps/desktop
 
-> Versión 1.1 | Última actualización: consolidación de fragmentos | Fecha: 2026-10-13
+> Versión 1.2 | Última actualización: consolidación de fragmentos | Fecha: 2026-11-13
 
 ## 1. Propósito
 
@@ -54,6 +54,13 @@
 
 > Las actualizaciones por ciclo/fix van como fragmentos aditivos en `updates/` —
 > este archivo base solo lo modifica la consolidación (ver `sdd/context/context_prompt.md` sección 6).
+
+## Ventanas y marca (spec-025 cycle-01)
+
+- Ventana principal 1280×800, mínimo 960×640, `titleBarStyle: 'hiddenInset'` con botones en (26, 28), `backgroundColor` `#101322`/`#e8eaf0` según `nativeTheme`, `show()` en `ready-to-show`, sin `transparent` ni `vibrancy`. Opciones en `src/main/window-options.ts` (`mainWindowOptions(theme)`, `setupWindowOptions(theme, preload)`, testeadas). La web detecta Electron por user agent (`data-shell="electron"`).
+- La ventana de configuración inicial usa el mismo lenguaje de vidrio.
+- Ícono `build/icon.icns`/`build/icon.png` en `mac.icon` (ruta desde la raíz del repo). `THIRD_PARTY_NOTICES.md` incluye Inter y JetBrains Mono (SIL OFL 1.1).
+- Pendiente: probar la ventana de configuración inicial y el costo de `backdrop-filter` con el próximo `.dmg`. Probar la app de desarrollo: `VIDEO_MAKER_USER_DATA` a carpeta temporal con copia de `setup.json` y `WEB_DEV_URL` al studio.
 
 ## Lecciones específicas
 
