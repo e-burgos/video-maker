@@ -1,6 +1,8 @@
 import { Modal } from '@e-burgos/tucu-ui';
+import { Link } from 'react-router-dom';
 
 import { useT } from '../../i18n/language-context';
+import { REQUIREMENTS_PATH } from '../about/about-tabs';
 import { ServiceHealthDetails } from './service-health-details';
 import type { ServiceHealth } from '../../api/render-api-types';
 
@@ -31,6 +33,14 @@ export function ServiceHealthModal({ isOpen, setIsOpen, detail, reload }: Servic
         <ServiceHealthDetails detail={detail} />
       </div>
       <div className="mt-5 flex flex-wrap items-center justify-end gap-2">
+        <Link
+          to={REQUIREMENTS_PATH}
+          data-testid="service-health-requirements"
+          onClick={() => setIsOpen(false)}
+          className={`${FOOTER_BUTTON} mr-auto`}
+        >
+          {t('health.viewRequirements')}
+        </Link>
         <button
           type="button"
           data-testid="service-health-recheck"

@@ -13,6 +13,8 @@ const CHANGELOG_PATH = join(DESKTOP_ROOT, 'CHANGELOG.md');
 export const DEFAULT_DOWNLOADS_BUCKET = 'video-maker-downloads';
 export const DOWNLOADS_DOMAIN = 'https://video.estebanburgos.com.ar';
 export const DMG_CONTENT_TYPE = 'application/x-apple-diskimage';
+export const JSON_CONTENT_TYPE = 'application/json';
+export const UPDATE_MANIFEST_KEY = 'latest.json';
 
 export function log(message) {
   process.stdout.write(`[release-desktop] ${message}\n`);
@@ -65,7 +67,11 @@ export function downloadUrlFor(key) {
   return `${DOWNLOADS_DOMAIN}/descargas/${key}`;
 }
 
-export function buildWranglerR2PutArgs({ bucket, key, filePath }) {
+export function buildUpdateManifest({ version, stableDmgName, sha256, publishedAt }) {
+  return { version, url: downloadUrlFor(stableDmgName), sha256, publishedAt };
+}
+
+export function buildWranglerR2PutArgs({ bucket, key, filePath, contentType = DMG_CONTENT_TYPE }) {
   return [
     'dlx',
     'wrangler@4',
@@ -76,7 +82,7 @@ export function buildWranglerR2PutArgs({ bucket, key, filePath }) {
     '--file',
     filePath,
     '--content-type',
-    DMG_CONTENT_TYPE,
+    contentType,
     '--remote',
   ];
 }
@@ -165,13 +171,24 @@ async function main() {
   writeFileSync(notesFilePath, `${body}\n`);
   log(`release notes for "${title}" written to ${notesFilePath}`);
 
+  const manifestPath = join(DIST_DESKTOP_DIR, UPDATE_MANIFEST_KEY);
+  const manifest = buildUpdateManifest({
+    version,
+    stableDmgName,
+    sha256: stableSha256,
+    publishedAt: new Date().toISOString(),
+  });
+  writeFileSync(manifestPath, `${JSON.stringify(manifest, null, 2)}\n`);
+  log(`update manifest written to ${manifestPath}`);
+
   const uploads = [
     { key: versionedDmgName, filePath: versionedDmgPath },
     { key: stableDmgName, filePath: stableDmgPath },
+    { key: UPDATE_MANIFEST_KEY, filePath: manifestPath, contentType: JSON_CONTENT_TYPE },
   ];
 
   for (const upload of uploads) {
-    const args = buildWranglerR2PutArgs({ bucket, key: upload.key, filePath: upload.filePath });
+    const args = buildWranglerR2PutArgs({ bucket, ...upload });
     log(`this is the command that would upload ${upload.key}:\n  ${formatPnpmCommand(args)}`);
   }
 
@@ -184,13 +201,13 @@ async function main() {
   ensureWranglerLoggedIn();
 
   for (const upload of uploads) {
-    const args = buildWranglerR2PutArgs({ bucket, key: upload.key, filePath: upload.filePath });
+    const args = buildWranglerR2PutArgs({ bucket, ...upload });
     log(`uploading ${upload.key}...`);
     execFileSync('pnpm', args, { cwd: REPO_ROOT, stdio: 'inherit' });
   }
   log('uploaded.');
 
-  for (const upload of uploads) {
+  for (const upload of uploads.filter((entry) => entry.key !== UPDATE_MANIFEST_KEY)) {
     await verifyDownload(upload);
   }
 }

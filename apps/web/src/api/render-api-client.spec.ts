@@ -92,6 +92,17 @@ describe('createRenderApiClient', () => {
     expect(result.capabilities.assetStore).toBe(true);
   });
 
+  it('reads the update status from EP-074', async () => {
+    const update = { status: 'available', installedVersion: '0.3.2', latestVersion: '0.4.0', downloadUrl: 'https://x.test/a.dmg' };
+    const { fetchImpl, calls } = recordingFetch(() => jsonResponse(update));
+
+    const result = await createRenderApiClient(fetchImpl).getAppUpdate();
+
+    expect(calls[0]?.url).toBe('/api/app/update');
+    expect(result.status).toBe('available');
+    expect(result.latestVersion).toBe('0.4.0');
+  });
+
   it('lists projects from EP-002', async () => {
     const projects = [{ slug: 'smoke-ingest', layout: { raw: true, catalog: true, timeline: true, edl: true, out: true } }];
     const { fetchImpl, calls } = recordingFetch(() => jsonResponse(projects));

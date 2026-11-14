@@ -73,6 +73,7 @@ import type {
   VideoCategory,
   RenderJob,
   RenderJobListing,
+  AppUpdate,
   ServiceHealth,
   StoryboardJob,
   VideoDeletion,
@@ -175,6 +176,7 @@ export type CreateVoiceJobInput = {
 
 export type RenderApiClient = {
   getHealth: () => Promise<ServiceHealth>;
+  getAppUpdate: () => Promise<AppUpdate>;
   listProjects: () => Promise<ProjectSummary[]>;
   createProject: (input: CreateProjectInput) => Promise<ProjectDetail>;
   getProject: (slug: string) => Promise<ProjectDetail>;
@@ -395,6 +397,13 @@ export function createRenderApiClient(fetchImpl: FetchLike): RenderApiClient {
         isRecord(value) && typeof value['status'] === 'string',
       );
       return body as ServiceHealth;
+    },
+
+    async getAppUpdate(): Promise<AppUpdate> {
+      const body = await requestJson('/app/update', undefined, 'an update status', (value) =>
+        isRecord(value) && typeof value['status'] === 'string' && typeof value['installedVersion'] === 'string',
+      );
+      return body as AppUpdate;
     },
 
     async listProjects(): Promise<ProjectSummary[]> {

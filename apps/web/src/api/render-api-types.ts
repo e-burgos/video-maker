@@ -32,6 +32,12 @@ export type ServiceCapabilities = {
   storyboardQueue: boolean;
   voiceQueue: boolean;
   producer: boolean;
+  producerEngines?: ProducerEnginesAvailability;
+};
+
+export type ProducerEnginesAvailability = {
+  claudeCli: boolean;
+  openrouter: boolean;
 };
 
 export type ServiceJobCounters = {
@@ -43,11 +49,22 @@ export type ServiceHealth = {
   status: ServiceStatus;
   service: string;
   cycle: number;
+  version?: string;
   time: string;
   engine: EngineModuleHealth[];
   binaries: MediaBinaryHealth[];
   capabilities: ServiceCapabilities;
   jobs: ServiceJobCounters;
+};
+
+export type AppUpdateStatus = 'up-to-date' | 'available' | 'unknown';
+
+export type AppUpdate = {
+  status: AppUpdateStatus;
+  installedVersion: string;
+  latestVersion?: string;
+  downloadUrl?: string;
+  publishedAt?: string;
 };
 
 export type ProjectLayout = {

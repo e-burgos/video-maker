@@ -3,6 +3,8 @@ import { describe, expect, it } from 'vitest';
 import {
   DEFAULT_DOWNLOADS_BUCKET,
   DOWNLOADS_DOMAIN,
+  UPDATE_MANIFEST_KEY,
+  buildUpdateManifest,
   buildWranglerR2PutArgs,
   downloadUrlFor,
   extractChangelogSection,
@@ -109,6 +111,42 @@ describe('buildWranglerR2PutArgs', () => {
       'application/x-apple-diskimage',
       '--remote',
     ]);
+  });
+});
+
+describe('buildWranglerR2PutArgs with a content type', () => {
+  it('uploads the update manifest as JSON', () => {
+    const args = buildWranglerR2PutArgs({
+      bucket: DEFAULT_DOWNLOADS_BUCKET,
+      key: UPDATE_MANIFEST_KEY,
+      filePath: '/tmp/latest.json',
+      contentType: 'application/json',
+    });
+
+    expect(args).toContain(`${DEFAULT_DOWNLOADS_BUCKET}/latest.json`);
+    expect(args[args.indexOf('--content-type') + 1]).toBe('application/json');
+  });
+});
+
+describe('buildUpdateManifest', () => {
+  it('points at the stable dmg and carries version, hash and date', () => {
+    expect(
+      buildUpdateManifest({
+        version: '0.4.0',
+        stableDmgName: 'Video-Maker-arm64.dmg',
+        sha256: 'abc123',
+        publishedAt: '2026-11-13T12:00:00.000Z',
+      }),
+    ).toEqual({
+      version: '0.4.0',
+      url: `${DOWNLOADS_DOMAIN}/descargas/Video-Maker-arm64.dmg`,
+      sha256: 'abc123',
+      publishedAt: '2026-11-13T12:00:00.000Z',
+    });
+  });
+
+  it('publishes the manifest under descargas/latest.json', () => {
+    expect(downloadUrlFor(UPDATE_MANIFEST_KEY)).toBe(`${DOWNLOADS_DOMAIN}/descargas/latest.json`);
   });
 });
 

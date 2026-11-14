@@ -25,6 +25,10 @@ const LearnPage = lazy(async () => ({
   default: (await import('../pages/learn-page')).LearnPage,
 }));
 
+const AboutPage = lazy(async () => ({
+  default: (await import('../pages/about-page')).AboutPage,
+}));
+
 const ProjectWorkspacePage = lazy(async () => ({
   default: (await import('../pages/project-workspace-page')).ProjectWorkspacePage,
 }));
@@ -77,6 +81,14 @@ export function App() {
                 element={
                   <Suspense fallback={<RouteFallback messageKey="app.loading.learn" />}>
                     <LearnPage />
+                  </Suspense>
+                }
+              />
+              <Route
+                path="/about"
+                element={
+                  <Suspense fallback={<RouteFallback messageKey="app.loading.about" />}>
+                    <AboutPage />
                   </Suspense>
                 }
               />

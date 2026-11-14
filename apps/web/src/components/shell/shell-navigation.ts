@@ -1,6 +1,6 @@
 import type { TranslationKey } from '../../i18n/messages-en';
 
-export type SidebarIcon = 'Film' | 'Palette' | 'Send' | 'Settings' | 'BookOpen';
+export type SidebarIcon = 'Film' | 'Palette' | 'Send' | 'Settings' | 'BookOpen' | 'Info';
 
 export type SidebarItem = {
   to: string;
@@ -36,6 +36,7 @@ export const SIDEBAR_SECTIONS: readonly SidebarSection[] = [
     items: [
       { to: '/settings', testId: 'settings-nav', labelKey: 'nav.settings', icon: 'Settings' },
       { to: '/learn', testId: 'guide-nav', labelKey: 'nav.learn', icon: 'BookOpen' },
+      { to: '/about', testId: 'about-nav', labelKey: 'nav.about', icon: 'Info' },
     ],
   },
 ];
@@ -79,6 +80,7 @@ const TOP_LEVEL_HEADINGS: readonly { prefix: string; heading: ToolbarHeading }[]
   { prefix: '/publish-queue', heading: { titleKey: 'toolbar.title.publishQueue', subtitleKey: 'toolbar.subtitle.publishQueue' } },
   { prefix: '/settings', heading: { titleKey: 'toolbar.title.settings', subtitleKey: 'toolbar.subtitle.settings' } },
   { prefix: '/learn', heading: { titleKey: 'toolbar.title.learn', subtitleKey: 'toolbar.subtitle.learn' } },
+  { prefix: '/about', heading: { titleKey: 'toolbar.title.about', subtitleKey: 'toolbar.subtitle.about' } },
   { prefix: '/guide', heading: { titleKey: 'toolbar.title.learn', subtitleKey: 'toolbar.subtitle.learn' } },
 ];
 

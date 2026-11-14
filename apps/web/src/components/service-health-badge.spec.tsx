@@ -1,4 +1,5 @@
 import { fireEvent, render, screen, waitFor, within } from '@testing-library/react';
+import { MemoryRouter } from 'react-router-dom';
 import { describe, expect, it, vi } from 'vitest';
 
 import { RenderApiProvider } from '../api/render-api-context';
@@ -51,9 +52,11 @@ function clientWith(getHealth: RenderApiClient['getHealth']): RenderApiClient {
 
 function renderBadge(client: RenderApiClient) {
   return render(
-    <RenderApiProvider client={client}>
-      <ServiceHealthBadge />
-    </RenderApiProvider>,
+    <MemoryRouter>
+      <RenderApiProvider client={client}>
+        <ServiceHealthBadge />
+      </RenderApiProvider>
+    </MemoryRouter>,
   );
 }
 
@@ -119,6 +122,16 @@ describe('ServiceHealthBadge', () => {
     await waitFor(() =>
       expect(screen.getByTestId('service-health-label').textContent).toBe('Ready'),
     );
+  });
+
+  it('links the modal to the requirements tab of About and closes on click', async () => {
+    renderBadge(clientWith(() => Promise.resolve(health())));
+
+    await waitFor(() => expect(screen.getByTestId('service-health-label').textContent).toBe('Ready'));
+    openDetails();
+    const link = await screen.findByTestId('service-health-requirements');
+
+    expect(link.getAttribute('href')).toBe('/about?tab=requirements');
   });
 
   it('lists the six media binaries with their env var and resolution state (US-2-007, US-09-012)', async () => {
