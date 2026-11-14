@@ -93,6 +93,7 @@ const MESSAGE_BY_CODE: Readonly<Record<RenderApiErrorCode, string>> = {
   PRODUCER_TURN_ACTIVE: 'The project already has a producer turn in progress.',
   PRODUCER_TURN_FAILED: 'The producer agent ended the turn without an answer.',
   PRODUCER_RATE_LIMITED: 'The producer agent refused the turn because the account plan limit was reached.',
+  PRODUCER_CLI_OUTDATED: 'The installed Claude Code CLI is too old for the selected model.',
   PRODUCER_TURN_NOT_FOUND: 'The requested producer turn does not exist.',
   PRODUCER_TURN_NOT_CANCELABLE: 'The producer turn already reached a terminal state.',
   PRODUCER_MESSAGE_INVALID: 'The producer message must carry a non-empty text field.',

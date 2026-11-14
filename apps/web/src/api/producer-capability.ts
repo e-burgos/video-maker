@@ -21,6 +21,7 @@ export function canTalkToProducer(health: ServiceHealth | null): boolean {
 const PRODUCER_FAILURE_CODES = [
   'PRODUCER_UNAVAILABLE',
   'PRODUCER_RATE_LIMITED',
+  'PRODUCER_CLI_OUTDATED',
   'PRODUCER_TURN_FAILED',
   'PRODUCER_TURN_ACTIVE',
   'PRODUCER_TURN_NOT_FOUND',

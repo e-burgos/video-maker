@@ -110,7 +110,7 @@ describe('ProducerComposer', () => {
 
     expect(modelPicker().value).toBe('opus');
     expect(screen.getByTestId('producer-model-help').textContent).toBe(
-      'Opus — Most capable, slower and costlier',
+      'Opus — Very capable, though slower and costlier',
     );
   });
 

@@ -672,7 +672,7 @@ describe('handleCreateRenderJob', () => {
           jsonBodyRequest('smoke-ingest', { kind: 'storyboard', brief: 'idea', model: 'gpt-5' }),
           runtime,
         ),
-      ).rejects.toMatchObject({ code: 'JOB_MODEL_INVALID', expected: 'one of sonnet, opus, haiku' });
+      ).rejects.toMatchObject({ code: 'JOB_MODEL_INVALID', expected: 'one of sonnet, fable, opus, haiku' });
       expect(runtime.jobs.listBySlug('smoke-ingest')).toEqual([]);
     });
 

@@ -15,6 +15,16 @@ describe('translateProducerModel', () => {
     });
   });
 
+  it('translates Fable, the newest Claude family', () => {
+    const t = (key: Parameters<typeof translate>[1]) => translate(MESSAGES_ES, key);
+
+    expect(translateProducerModel(t, { id: 'fable', label: 'Fable', description: 'x' })).toEqual({
+      id: 'fable',
+      label: 'Fable',
+      description: 'El más nuevo y el más capaz, el más lento y costoso',
+    });
+  });
+
   it('falls back to the service text for an id the studio does not know', () => {
     const t = (key: Parameters<typeof translate>[1]) => translate(MESSAGES_ES, key);
     const unknown = { id: 'gpt-5-mini', label: 'GPT-5 mini', description: 'Model alias configured for this server' };

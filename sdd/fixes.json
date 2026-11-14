@@ -6749,6 +6749,56 @@
           }
         ]
       }
+    },
+    {
+      "id": "FIX-e-burgos-087",
+      "author": "e-burgos",
+      "spec_id": null,
+      "fix_document": "sdd/fixes/fix-e-burgos-087.md",
+      "type": "IMPROVEMENT",
+      "severity": "medium",
+      "created_at": "2026-11-14",
+      "resolved_at": "2026-11-14",
+      "validated_at": null,
+      "title": "El productor ofrece Fable y avisa cuando el CLI de Claude Code es viejo para el modelo",
+      "estimation_hours": 1,
+      "description": "La lista de modelos del productor solo tenía sonnet, opus y haiku. Ahora incluye fable (Fable 5.2). Un CLI claude viejo rechaza los modelos nuevos con claude_code_version_too_old y el turno fallaba como PRODUCER_TURN_FAILED; ahora sale como PRODUCER_CLI_OUTDATED con un mensaje que pide actualizar.",
+      "justification": "Pedido del dev (2026-11-14): producir los videos demostrativos con Fable y listar todos los modelos de Claude.",
+      "related_modules": [
+        "render-api",
+        "web"
+      ],
+      "affected_files": [
+        "apps/render-api/src/config/producer-config.ts",
+        "apps/render-api/src/errors/translate-producer-error.ts",
+        "apps/render-api/src/producer/run-producer-turn.ts",
+        "apps/web/src/api/producer-model-i18n.ts",
+        "apps/web/src/api/producer-capability.ts"
+      ],
+      "test_reference": "producer-config.spec, translate-producer-error.spec, producer-handler.spec, jobs-handler.spec, producer-model-i18n.spec, producer-composer.spec.",
+      "status": "implemented",
+      "cycle": null,
+      "usage": {
+        "provider_model": "claude/opus",
+        "effort": "medium",
+        "tokens_in": 180000,
+        "tokens_out": 9000,
+        "approx": true,
+        "source": "declared-estimate",
+        "recorded_at": "2026-11-14",
+        "by_agent": [
+          {
+            "provider_model": "claude/opus",
+            "effort": "medium",
+            "tokens_in": 180000,
+            "tokens_out": 9000,
+            "approx": true,
+            "source": "declared-estimate",
+            "recorded_at": "2026-11-14",
+            "agent": "implementor-back"
+          }
+        ]
+      }
     }
   ]
 }
