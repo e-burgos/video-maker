@@ -172,10 +172,10 @@ export function VoiceScriptSection({ slug, manifest, onJobCreated }: VoiceScript
         </div>
 
         {document.status === 'error' && document.error !== null && (
-          <ErrorNotice surface="glass" error={document.error} onRetry={document.reload} />
+          <ErrorNotice error={document.error} onRetry={document.reload} />
         )}
-        {saveAction.error !== null && <ErrorNotice surface="glass" error={saveAction.error} />}
-        {regenerateAction.error !== null && <ErrorNotice surface="glass" error={regenerateAction.error} />}
+        {saveAction.error !== null && <ErrorNotice error={saveAction.error} />}
+        {regenerateAction.error !== null && <ErrorNotice error={regenerateAction.error} />}
       </section>
 
       <VoiceScriptPanel

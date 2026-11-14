@@ -10,6 +10,7 @@ import { ErrorNotice } from './error-notice';
 import { JobRetryButton } from './job-retry-button';
 import { ToolbarStatus } from './shell/toolbar-status';
 import type { Job } from '../api/render-api-types';
+import { LoadingState } from './ui/status-states';
 
 const STAGE_KEYS: Readonly<Record<string, TranslationKey>> = {
   collect: 'storyboardJob.stage.collect',
@@ -58,9 +59,9 @@ export function StoryboardJobPanel({ jobId, onSucceeded, onRetried }: Storyboard
 
   if (job === null) {
     return poll.error !== null ? (
-      <ErrorNotice surface="glass" error={poll.error} />
+      <ErrorNotice error={poll.error} />
     ) : (
-      <p className="m-0 text-sm text-[var(--cl-ink-2)]">{t('storyboardJob.loading')}</p>
+      <LoadingState message={t('storyboardJob.loading')} />
     );
   }
 
@@ -127,7 +128,7 @@ export function StoryboardJobPanel({ jobId, onSucceeded, onRetried }: Storyboard
         </div>
       )}
 
-      <JobRetryButton surface="glass" job={job} onRetried={onRetried} />
+      <JobRetryButton job={job} onRetried={onRetried} />
     </div>
     </>
   );

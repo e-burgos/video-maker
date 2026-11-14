@@ -79,7 +79,6 @@ export function AssetDeleteDialog({
 
   return (
     <Modal
-      surface="glass"
       title={title}
       testId="asset-delete-confirm"
       onClose={onClose}
@@ -133,7 +132,7 @@ export function AssetDeleteDialog({
       )}
       {pending && <p className="m-0 text-xs">{t('assetDelete.pending')}</p>}
       {error !== null && step !== 'in-use' && (
-        <ErrorNotice surface="glass" error={error} />
+        <ErrorNotice error={error} />
       )}
     </Modal>
   );

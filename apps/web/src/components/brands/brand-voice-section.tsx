@@ -25,7 +25,7 @@ export function BrandVoiceSection({ editor, draft: { draft, setDraft } }: BrandV
     <div data-testid="brand-section-voice" className="flex flex-col gap-4">
       <p className={BRAND_HINT_CLASS}>{t('brands.voice.hint')}</p>
       {voices.status === 'error' && voices.error !== null && (
-        <ErrorNotice error={voices.error} onRetry={voices.reload} surface="glass" />
+        <ErrorNotice error={voices.error} onRetry={voices.reload} />
       )}
       {voices.data !== null && (
         <VoicePicker

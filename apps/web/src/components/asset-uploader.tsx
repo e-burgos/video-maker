@@ -205,7 +205,7 @@ export function AssetUploader({
           {t('assetUploader.stored', { path: uploaded })}
         </p>
       )}
-      {error !== null && <ErrorNotice surface="glass" error={error} />}
+      {error !== null && <ErrorNotice error={error} />}
     </div>
   );
 }

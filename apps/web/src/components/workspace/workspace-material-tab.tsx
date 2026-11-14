@@ -10,6 +10,7 @@ import { useT, useTn } from '../../i18n/language-context';
 import { ErrorNotice } from '../error-notice';
 import { SECONDARY_BUTTON_SMALL_CLASS } from '../ui/cl-controls';
 import type { AssetListing, AssetRole } from '../../api/render-api-types';
+import { LoadingState } from '../ui/status-states';
 
 export type WorkspaceMaterialTabProps = {
   slug: string;
@@ -42,11 +43,11 @@ export function WorkspaceMaterialTab({ slug, assets, primaryRole, reviewPending 
   const tn = useTn();
 
   if (assets.status === 'loading') {
-    return <p className="text-sm text-[var(--cl-ink-2)]">{t('library.loading')}</p>;
+    return <LoadingState message={t('library.loading')} />;
   }
 
   if (assets.status === 'error' && assets.error !== null) {
-    return <ErrorNotice surface="glass" error={assets.error} onRetry={assets.reload} />;
+    return <ErrorNotice error={assets.error} onRetry={assets.reload} />;
   }
 
   const groups = groupAssetsByRole(assets.data);

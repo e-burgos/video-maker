@@ -112,17 +112,15 @@ export function ReferenceAnalysis({ slug, assetPath }: ReferenceAnalysisProps) {
       )}
       {brief.status === 'error' && brief.error !== null && (
         <ErrorNotice
-          surface="glass"
           error={brief.error}
           onRetry={brief.reload}
         />
       )}
       {start.error !== null && (
-        <ErrorNotice surface="glass" error={start.error} />
+        <ErrorNotice error={start.error} />
       )}
       {failedJob !== null && failedJob.error !== null && (
         <ErrorNotice
-          surface="glass"
           error={
             new RenderApiError(
               failedJob.error.code,

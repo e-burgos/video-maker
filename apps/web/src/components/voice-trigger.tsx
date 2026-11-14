@@ -136,7 +136,7 @@ export function VoiceTrigger({ slug, onCreated, scriptPath, hasVoice = false }: 
 
       {voices.status === 'error' && voices.error !== null && (
         <div data-testid="voice-catalogue-error" className="flex flex-col gap-2">
-          <ErrorNotice surface="glass" error={voices.error} onRetry={voices.reload} />
+          <ErrorNotice error={voices.error} onRetry={voices.reload} />
           {catalogueErrorKey !== null && (
             <p className="m-0 text-sm text-[var(--tucu-state-orange-ink)]">{t(catalogueErrorKey)}</p>
           )}
@@ -183,7 +183,7 @@ export function VoiceTrigger({ slug, onCreated, scriptPath, hasVoice = false }: 
 
       {createAction.error !== null && !needsConfirmation && (
         <div className="flex flex-col gap-2">
-          <ErrorNotice surface="glass" error={createAction.error} />
+          <ErrorNotice error={createAction.error} />
           {explanationKey !== null && (
             <p
               data-testid="voice-failure-explanation"

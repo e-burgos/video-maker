@@ -80,7 +80,7 @@ export function StoryboardSaveBar({ slug, storyboard, dirty, onSaved, onDiscard 
         </ul>
       )}
 
-      {saveAction.error !== null && <ErrorNotice surface="glass" error={saveAction.error} />}
+      {saveAction.error !== null && <ErrorNotice error={saveAction.error} />}
     </div>
   );
 }

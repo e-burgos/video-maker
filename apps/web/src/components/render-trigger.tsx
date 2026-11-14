@@ -69,7 +69,7 @@ export function RenderTrigger({ slug, state, onCreated }: RenderTriggerProps) {
         </p>
       )}
 
-      {createAction.error !== null && <ErrorNotice surface="glass" error={createAction.error} />}
+      {createAction.error !== null && <ErrorNotice error={createAction.error} />}
     </div>
   );
 }

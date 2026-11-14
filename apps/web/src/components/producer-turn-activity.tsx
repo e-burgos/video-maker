@@ -163,7 +163,7 @@ export function ProducerTurnActivity({
         </div>
       )}
 
-      {error !== null && <ErrorNotice surface="glass" error={error} />}
+      {error !== null && <ErrorNotice error={error} />}
     </div>
   );
 }

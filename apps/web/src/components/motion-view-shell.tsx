@@ -5,6 +5,7 @@ import type { RenderApiError } from '../api/render-api-error';
 import { useT } from '../i18n/language-context';
 import { ErrorNotice } from './error-notice';
 import { PANEL_CLASS, SECONDARY_BUTTON_SMALL_CLASS } from './ui/cl-controls';
+import { LoadingState } from './ui/status-states';
 
 export type MotionViewShellProps = {
   slug: string;
@@ -29,8 +30,8 @@ export function MotionViewShell({ slug, testId, loading, error, onRetry, childre
           {t('motion.adjust.link')}
         </Link>
       </div>
-      {loading && <p className="m-0 text-sm text-[var(--cl-ink-2)]">{t('motionView.loading')}</p>}
-      {error !== null && <ErrorNotice surface="glass" error={error} onRetry={onRetry} />}
+      {loading && <LoadingState message={t('motionView.loading')} />}
+      {error !== null && <ErrorNotice error={error} onRetry={onRetry} />}
       {children}
     </section>
   );

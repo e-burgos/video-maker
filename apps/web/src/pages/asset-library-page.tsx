@@ -196,7 +196,6 @@ function AssetLibraryContent({ mode }: { mode: ProjectMode }) {
       )}
       {listing.status === 'error' && listing.error !== null && (
         <ErrorNotice
-          surface="glass"
           error={listing.error}
           onRetry={listing.reload}
         />

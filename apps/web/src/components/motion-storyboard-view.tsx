@@ -260,7 +260,6 @@ export function MotionStoryboardView({ slug }: MotionStoryboardViewProps) {
           {draft.music !== null && (
             <div className={PANEL_CLASS}>
               <MusicModeFields
-                surface="glass"
                 mode={draft.music.mode}
                 floorText={draft.music.floorText}
                 onModeChange={draft.setMusicMode}
@@ -299,10 +298,10 @@ export function MotionStoryboardView({ slug }: MotionStoryboardViewProps) {
             )}
           </div>
 
-          {draft.saveAction.error !== null && <ErrorNotice surface="glass" error={draft.saveAction.error} />}
-          {draft.regenerateAction.error !== null && <ErrorNotice surface="glass" error={draft.regenerateAction.error} />}
+          {draft.saveAction.error !== null && <ErrorNotice error={draft.saveAction.error} />}
+          {draft.regenerateAction.error !== null && <ErrorNotice error={draft.regenerateAction.error} />}
           {job !== null && <MotionJobStatus job={job} onRetried={(retried) => setJobId(retried.id)} />}
-          {poll.error !== null && job === null && <ErrorNotice surface="glass" error={poll.error} />}
+          {poll.error !== null && job === null && <ErrorNotice error={poll.error} />}
 
           <section className={PANEL_CLASS}>
             {groupScenesByChapter(storyboard.scenes).map((group, position) => (

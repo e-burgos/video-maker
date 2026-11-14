@@ -126,7 +126,7 @@ export function BrandMusicSection({ editor, draft: { draft, setDraft } }: BrandM
           onFile={(file) => void onFile(file)}
         />
       )}
-      {error !== null && <ErrorNotice error={error} surface="glass" />}
+      {error !== null && <ErrorNotice error={error} />}
     </div>
   );
 }

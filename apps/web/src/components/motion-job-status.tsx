@@ -53,7 +53,7 @@ export function MotionJobStatus({ job, onRetried }: MotionJobStatusProps) {
           {t('motion.job.failed', { code: job.error.code, message: job.error.message })}
         </p>
       )}
-      <JobRetryButton surface="glass" job={job} onRetried={onRetried} />
+      <JobRetryButton job={job} onRetried={onRetried} />
     </div>
   );
 }

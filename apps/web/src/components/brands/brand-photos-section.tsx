@@ -94,7 +94,7 @@ export function BrandPhotosSection({ editor, draft: { draft, setDraft } }: Brand
           onFile={(file) => void onFile(file)}
         />
       )}
-      {error !== null && <ErrorNotice error={error} surface="glass" />}
+      {error !== null && <ErrorNotice error={error} />}
     </div>
   );
 }

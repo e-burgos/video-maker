@@ -6,6 +6,7 @@ import { LanguageProvider, useT } from '../i18n/language-context';
 import type { TranslationKey } from '../i18n/messages-en';
 import { StudioLayout } from '../components/studio-layout';
 import { ProjectsPage } from '../pages/projects-page';
+import { LoadingState } from '../components/ui/status-states';
 
 const AssetLibraryPage = lazy(async () => ({
   default: (await import('../pages/asset-library-page')).AssetLibraryPage,
@@ -53,7 +54,7 @@ const VoicePage = lazy(async () => ({
 
 function RouteFallback({ messageKey }: { messageKey: TranslationKey }) {
   const t = useT();
-  return <p className="text-sm text-slate-500">{t(messageKey)}</p>;
+  return <LoadingState message={t(messageKey)} />;
 }
 
 function ProducerRouteRedirect() {

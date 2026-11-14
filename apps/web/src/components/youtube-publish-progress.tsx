@@ -94,7 +94,7 @@ export function YouTubePublishProgress({ jobId, onRetried, onSucceeded }: YouTub
 
   if (job === null) {
     return poll.error !== null ? (
-      <ErrorNotice surface="glass" error={poll.error} />
+      <ErrorNotice error={poll.error} />
     ) : (
       <p role="status" className="m-0 text-sm text-[var(--cl-ink-2)]">
         {t('youtube.publish.starting')}
@@ -132,12 +132,12 @@ export function YouTubePublishProgress({ jobId, onRetried, onSucceeded }: YouTub
 
       {job.state === 'canceled' && <p className="m-0 text-sm text-[var(--tucu-state-orange-ink)]">{t('youtube.publish.canceled')}</p>}
 
-      {failure !== null && <ErrorNotice surface="glass" error={failure} />}
+      {failure !== null && <ErrorNotice error={failure} />}
 
-      <JobRetryButton surface="glass" job={job} onRetried={onRetried} />
+      <JobRetryButton job={job} onRetried={onRetried} />
 
-      {cancel.error !== null && <ErrorNotice surface="glass" error={cancel.error} />}
-      {poll.error !== null && <ErrorNotice surface="glass" error={poll.error} />}
+      {cancel.error !== null && <ErrorNotice error={cancel.error} />}
+      {poll.error !== null && <ErrorNotice error={poll.error} />}
     </div>
   );
 }

@@ -140,7 +140,6 @@ export function MontageTrigger({ slug, onCreated }: MontageTriggerProps) {
       </div>
 
       <MusicModeFields
-        surface="glass"
         mode={musicMode}
         floorText={floorText}
         onModeChange={setMusicMode}
@@ -204,7 +203,7 @@ export function MontageTrigger({ slug, onCreated }: MontageTriggerProps) {
       )}
 
       {createAction.error !== null && !needsConfirmation && (
-        <ErrorNotice surface="glass" error={createAction.error} />
+        <ErrorNotice error={createAction.error} />
       )}
     </div>
   );

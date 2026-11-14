@@ -56,7 +56,7 @@ export function MontageJobPanel({
 
   if (job === null) {
     return poll.error !== null ? (
-      <ErrorNotice surface="glass" error={poll.error} />
+      <ErrorNotice error={poll.error} />
     ) : (
       <p className="m-0 text-sm text-[var(--cl-ink-2)]">
         {t('montageJob.loading')}
@@ -150,7 +150,7 @@ export function MontageJobPanel({
             </p>
           )}
 
-        <JobRetryButton surface="glass" job={job} onRetried={onRetried} />
+        <JobRetryButton job={job} onRetried={onRetried} />
       </div>
     </>
   );

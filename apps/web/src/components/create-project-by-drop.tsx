@@ -99,7 +99,7 @@ export function CreateProjectByDrop({ existingSlugs, children }: CreateProjectBy
         </p>
       )}
 
-      {error !== null && <ErrorNotice error={error} surface="glass" />}
+      {error !== null && <ErrorNotice error={error} />}
 
       {children}
     </div>

@@ -9,6 +9,7 @@ import type { TranslateFn } from '../i18n/language-context';
 import type { RenderJobSummary } from '../api/render-api-types';
 import { ErrorNotice } from './error-notice';
 import { SECONDARY_BUTTON_SMALL_CLASS } from './ui/cl-controls';
+import { EmptyState, LoadingState } from './ui/status-states';
 
 export type RenderJobListProps = {
   slug: string;
@@ -79,11 +80,11 @@ export function RenderJobList({ slug, onSelect }: RenderJobListProps) {
   const t = useT();
 
   if (listing.status === 'loading') {
-    return <p className="m-0 text-sm text-[var(--cl-ink-2)]">{t('renderJobs.loading')}</p>;
+    return <LoadingState message={t('renderJobs.loading')} />;
   }
 
   if (listing.status === 'error' && listing.error !== null) {
-    return <ErrorNotice surface="glass" error={listing.error} onRetry={listing.reload} />;
+    return <ErrorNotice error={listing.error} onRetry={listing.reload} />;
   }
 
   const jobs = listing.data?.jobs ?? [];
@@ -102,7 +103,7 @@ export function RenderJobList({ slug, onSelect }: RenderJobListProps) {
       </div>
 
       {jobs.length === 0 ? (
-        <p className="m-0 text-sm text-[var(--cl-ink-2)]">{t('renderJobs.empty')}</p>
+        <EmptyState message={t('renderJobs.empty')} />
       ) : (
         <ul data-testid="render-job-list" className="m-0 flex list-none flex-col gap-2 p-0">
           {jobs.map((job) => (

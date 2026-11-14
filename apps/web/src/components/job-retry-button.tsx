@@ -10,14 +10,9 @@ const RETRYABLE_JOB_STATES = ['failed', 'canceled'] as const;
 export type JobRetryButtonProps = {
   job: Job;
   onRetried: (job: Job) => void;
-  surface?: 'legacy' | 'glass';
 };
 
-export function JobRetryButton({
-  job,
-  onRetried,
-  surface = 'legacy',
-}: JobRetryButtonProps) {
+export function JobRetryButton({ job, onRetried }: JobRetryButtonProps) {
   const client = useRenderApi();
   const retryAction = useApiAction((jobId: string) => client.retryJob(jobId));
   const t = useT();
@@ -40,11 +35,7 @@ export function JobRetryButton({
         onClick={() => void retry()}
         disabled={retryAction.status === 'pending'}
         aria-label={t('job.retry')}
-        className={
-          surface === 'glass'
-            ? SECONDARY_BUTTON_SMALL_CLASS
-            : 'rounded-md border border-sky-500/50 bg-sky-500/10 px-3 py-1 text-xs text-sky-100 disabled:opacity-40'
-        }
+        className={SECONDARY_BUTTON_SMALL_CLASS}
       >
         {retryAction.status === 'pending'
           ? t('job.retry.pending')
@@ -52,7 +43,7 @@ export function JobRetryButton({
       </button>
 
       {retryAction.error !== null && (
-        <ErrorNotice surface={surface} error={retryAction.error} />
+        <ErrorNotice error={retryAction.error} />
       )}
     </div>
   );

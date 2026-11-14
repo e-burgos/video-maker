@@ -19,6 +19,7 @@ import { VideoFolderChips } from '../components/videos/video-folder-chips';
 import { VideoSearchBar } from '../components/videos/video-search-bar';
 import { VideosSkeleton } from '../components/videos/videos-skeleton';
 import type { ProjectSummary, VideoOrganization } from '../api/render-api-types';
+import { EmptyState } from '../components/ui/status-states';
 
 type ReadyProjectsProps = {
   videos: readonly ProjectSummary[];
@@ -91,7 +92,7 @@ function EmptyVideos({ onCreate }: { onCreate: () => void }) {
     <div className="space-y-4">
       <HomeDropHint hero />
       <div className="flex flex-wrap items-center gap-3">
-        <p className="text-sm text-[var(--cl-ink-2)]">{t('projects.empty')}</p>
+        <EmptyState message={t('projects.empty')} />
         <button type="button" data-testid="empty-new-video" className={PRIMARY_BUTTON_CLASS} onClick={onCreate}>
           {t('projects.newVideoCta')}
         </button>
@@ -157,10 +158,10 @@ export function ProjectsPage() {
       <section data-testid="videos-panel" className="glass flex-1 space-y-4 rounded-[20px] p-4 shadow-[var(--tucu-shadow-panel)]">
         {isLoading && <VideosSkeleton />}
         {videos.status === 'error' && videos.error !== null && (
-          <ErrorNotice error={videos.error} onRetry={reloadAll} surface="glass" />
+          <ErrorNotice error={videos.error} onRetry={reloadAll} />
         )}
         {organization.status === 'error' && organization.error !== null && (
-          <ErrorNotice error={organization.error} onRetry={reloadAll} surface="glass" />
+          <ErrorNotice error={organization.error} onRetry={reloadAll} />
         )}
 
         {isEmpty && <EmptyVideos onCreate={openCreateVideo} />}

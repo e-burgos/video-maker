@@ -72,28 +72,6 @@ export function projectSlugFromPathname(pathname: string): string | null {
   return match === null ? null : decodeURIComponent(match[1] as string);
 }
 
-const MIGRATED_ROUTE_PREFIXES: readonly string[] = ['/'];
-const MIGRATED_EXACT_ROUTES: readonly RegExp[] = [
-  /^\/projects\/[^/]+\/?$/,
-  /^\/projects\/[^/]+\/library\/?$/,
-  /^\/projects\/[^/]+\/storyboard\/?$/,
-  /^\/projects\/[^/]+\/voice\/?$/,
-  /^\/projects\/[^/]+\/preview\/?$/,
-  /^\/projects\/[^/]+\/motion\/?$/,
-  /^\/brands\/?$/,
-  /^\/brands\/[^/]+\/?$/,
-  /^\/publish-queue\/?$/,
-  /^\/settings\/?$/,
-  /^\/guide\/?$/,
-];
-
-export function isMigratedRoute(pathname: string): boolean {
-  return (
-    MIGRATED_ROUTE_PREFIXES.some((prefix) => pathname === prefix || pathname.startsWith(`${prefix}/`)) ||
-    MIGRATED_EXACT_ROUTES.some((route) => route.test(pathname))
-  );
-}
-
 export type ToolbarHeading = { titleKey: TranslationKey; subtitleKey: TranslationKey | null };
 
 const TOP_LEVEL_HEADINGS: readonly { prefix: string; heading: ToolbarHeading }[] = [

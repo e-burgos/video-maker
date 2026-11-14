@@ -82,7 +82,7 @@ function GoogleFontAdder({ editor, brandId }: { editor: BrandEditor; brandId: st
           {pending ? t('brands.typography.googleAdding') : t('brands.typography.googleAdd')}
         </button>
       </div>
-      {error !== null && <ErrorNotice error={error} surface="glass" />}
+      {error !== null && <ErrorNotice error={error} />}
     </div>
   );
 }
@@ -127,7 +127,7 @@ function FontUploader({ editor, brandId }: { editor: BrandEditor; brandId: strin
         disabled={editor.readOnly || family.trim() === ''}
         onFile={(file) => void onFile(file)}
       />
-      {error !== null && <ErrorNotice error={error} surface="glass" />}
+      {error !== null && <ErrorNotice error={error} />}
     </div>
   );
 }

@@ -9,6 +9,7 @@ import { RenderReviewPanel } from '../render-review-panel';
 import { SECONDARY_BUTTON_SMALL_CLASS } from '../ui/cl-controls';
 import { YouTubePublishSection } from '../youtube-publish-section';
 import type { GeneratedListing, RenderJobListing } from '../../api/render-api-types';
+import { LoadingState } from '../ui/status-states';
 
 export type WorkspaceDeliveriesTabProps = {
   slug: string;
@@ -20,11 +21,11 @@ export function WorkspaceDeliveriesTab({ slug, jobs, generated }: WorkspaceDeliv
   const t = useT();
 
   if (jobs.status === 'loading') {
-    return <p className="text-sm text-[var(--cl-ink-2)]">{t('renderJobs.loading')}</p>;
+    return <LoadingState message={t('renderJobs.loading')} />;
   }
 
   if (jobs.status === 'error' && jobs.error !== null) {
-    return <ErrorNotice surface="glass" error={jobs.error} onRetry={jobs.reload} />;
+    return <ErrorNotice error={jobs.error} onRetry={jobs.reload} />;
   }
 
   const deliveries = renderDeliveriesNewestFirst(jobs.data, generated);

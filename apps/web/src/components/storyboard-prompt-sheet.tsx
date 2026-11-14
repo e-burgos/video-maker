@@ -72,7 +72,7 @@ export function StoryboardPromptSheet({ slug, dirty }: StoryboardPromptSheetProp
         <p className="m-0 text-xs text-[var(--tucu-state-orange-ink)]">{t('storyboardPrompts.dirty')}</p>
       )}
 
-      {loadAction.error !== null && <ErrorNotice surface="glass" error={loadAction.error} />}
+      {loadAction.error !== null && <ErrorNotice error={loadAction.error} />}
 
       {sheet !== null && (
         <pre

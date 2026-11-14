@@ -121,7 +121,7 @@ export function YouTubeCategoryPlaylistsSection() {
     >
       {resource.status === 'loading' && <p className={HINT_TEXT_CLASS}>{t('youtube.categoryPlaylists.loading')}</p>}
       {resource.status === 'error' && resource.error !== null && (
-        <ErrorNotice error={resource.error} onRetry={resource.reload} surface="glass" />
+        <ErrorNotice error={resource.error} onRetry={resource.reload} />
       )}
 
       {data !== null && draft !== null && (
@@ -179,7 +179,7 @@ export function YouTubeCategoryPlaylistsSection() {
               </StateBadge>
             )}
           </div>
-          {save.error !== null && <ErrorNotice error={save.error} surface="glass" />}
+          {save.error !== null && <ErrorNotice error={save.error} />}
         </div>
       )}
     </SettingsPanel>

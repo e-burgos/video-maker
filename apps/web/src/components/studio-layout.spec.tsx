@@ -46,7 +46,6 @@ describe('StudioLayout', () => {
     expect(screen.getByTestId('settings-nav').getAttribute('href')).toBe('/settings');
     expect(screen.getByTestId('brands-nav').getAttribute('href')).toBe('/brands');
     expect(screen.getByText('routed page')).toBeTruthy();
-    expect(screen.getByTestId('shell-content').getAttribute('data-surface')).toBeNull();
     await waitFor(() =>
       expect(screen.getByTestId('service-health-label').textContent).toBe('Ready'),
     );
@@ -192,13 +191,4 @@ describe('StudioLayout project nav', () => {
 
     expect(screen.queryByTestId('toolbar-action')).toBeNull();
   });
-
-  it.each(['/', '/projects/smoke-ingest', '/publish-queue', '/settings'])(
-    'keeps every route off the legacy surface (%s)',
-    (pathname) => {
-      renderAt(pathname);
-
-      expect(screen.getByTestId('shell-content').getAttribute('data-surface')).toBeNull();
-    },
-  );
 });

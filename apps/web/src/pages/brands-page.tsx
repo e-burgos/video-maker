@@ -11,6 +11,7 @@ import { BrandNameModal } from '../components/brands/brand-name-modal';
 import { ErrorNotice } from '../components/error-notice';
 import { useToolbarAction } from '../components/shell/use-toolbar-action';
 import { PANEL_CLASS } from '../components/ui/cl-controls';
+import { EmptyState } from '../components/ui/status-states';
 
 type Dialog =
   | { kind: 'create' }
@@ -48,13 +49,12 @@ export function BrandsPage() {
         </p>
       )}
       {brands.status === 'error' && brands.error !== null && (
-        <ErrorNotice error={brands.error} onRetry={brands.reload} surface="glass" />
+        <ErrorNotice error={brands.error} onRetry={brands.reload} />
       )}
 
       {brands.data !== null && brands.data.length === 0 && (
-        <div data-testid="brands-empty" className="flex flex-col gap-1">
-          <p className="m-0 text-sm font-bold text-[var(--cl-ink)]">{t('brands.empty')}</p>
-          <p className="m-0 text-sm text-[var(--cl-ink-2)]">{t('brands.empty.hint')}</p>
+        <div data-testid="brands-empty">
+          <EmptyState title={t('brands.empty')} message={t('brands.empty.hint')} />
         </div>
       )}
 

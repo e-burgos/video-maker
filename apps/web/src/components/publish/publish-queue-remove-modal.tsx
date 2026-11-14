@@ -15,7 +15,6 @@ export function PublishQueueRemoveModal({ item, pending, onCancel, onConfirm }: 
 
   return (
     <Modal
-      surface="glass"
       title={t('publishQueue.removeTitle')}
       testId="publish-queue-remove-modal"
       onClose={onCancel}

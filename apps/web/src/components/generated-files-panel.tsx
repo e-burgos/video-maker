@@ -126,7 +126,6 @@ export function GeneratedFilesPanel({
 
       {generated.status === 'error' && generated.error !== null && (
         <ErrorNotice
-          surface="glass"
           error={generated.error}
           onRetry={generated.reload}
         />

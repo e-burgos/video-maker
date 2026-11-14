@@ -48,7 +48,6 @@ export function BrandNameModal({
 
   return (
     <Modal
-      surface="glass"
       testId={testId}
       title={title}
       onClose={onClose}
@@ -92,7 +91,7 @@ export function BrandNameModal({
           />
         </BrandField>
       </form>
-      {error !== null && <ErrorNotice error={error} surface="glass" />}
+      {error !== null && <ErrorNotice error={error} />}
     </Modal>
   );
 }

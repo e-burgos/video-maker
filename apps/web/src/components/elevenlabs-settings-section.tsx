@@ -98,7 +98,7 @@ export function ElevenLabsSettingsSection() {
     >
       {settings.status === 'loading' && <p className={HINT_TEXT_CLASS}>{t('settings.eleven.loading')}</p>}
       {settings.status === 'error' && settings.error !== null && (
-        <ErrorNotice error={settings.error} onRetry={settings.reload} surface="glass" />
+        <ErrorNotice error={settings.error} onRetry={settings.reload} />
       )}
 
       {data !== null && (
@@ -163,8 +163,8 @@ export function ElevenLabsSettingsSection() {
             </form>
           )}
 
-          {saveKey.error !== null && <ErrorNotice error={saveKey.error} surface="glass" />}
-          {removeKey.error !== null && <ErrorNotice error={removeKey.error} surface="glass" />}
+          {saveKey.error !== null && <ErrorNotice error={saveKey.error} />}
+          {removeKey.error !== null && <ErrorNotice error={removeKey.error} />}
 
           <div className="flex flex-col gap-2">
             <h3 className="m-0 text-sm font-semibold text-[var(--cl-ink)]">{t('settings.eleven.voicesHeading')}</h3>
@@ -214,7 +214,7 @@ export function ElevenLabsSettingsSection() {
                 {t('settings.eleven.voiceAdd')}
               </button>
             </form>
-            {saveVoices.error !== null && <ErrorNotice error={saveVoices.error} surface="glass" />}
+            {saveVoices.error !== null && <ErrorNotice error={saveVoices.error} />}
           </div>
         </>
       )}

@@ -53,7 +53,6 @@ export function AssignVideoModal({
 
   return (
     <Modal
-      surface="glass"
       testId="assign-video-modal"
       title={t('videoMenu.assignTitle', { slug })}
       onClose={onClose}
@@ -134,7 +133,7 @@ export function AssignVideoModal({
         </p>
       )}
 
-      {error !== null && <ErrorNotice error={error} surface="glass" />}
+      {error !== null && <ErrorNotice error={error} />}
     </Modal>
   );
 }

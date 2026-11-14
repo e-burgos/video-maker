@@ -37,7 +37,6 @@ export function ArchiveVideoModal({ slug, placement, onClose, onArchived }: Arch
 
   return (
     <Modal
-      surface="glass"
       testId="archive-video-modal"
       title={restoring ? t('videoMenu.restoreTitle', { slug }) : t('videoMenu.archiveTitle', { slug })}
       onClose={onClose}
@@ -71,7 +70,7 @@ export function ArchiveVideoModal({ slug, placement, onClose, onArchived }: Arch
       }
     >
       <p>{restoring ? t('videoMenu.restoreExplanation') : t('videoMenu.archiveExplanation')}</p>
-      {error !== null && <ErrorNotice error={error} surface="glass" />}
+      {error !== null && <ErrorNotice error={error} />}
     </Modal>
   );
 }

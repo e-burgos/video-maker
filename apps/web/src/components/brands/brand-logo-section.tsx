@@ -77,7 +77,7 @@ function LogoSlot({ slot, brandId, path, editor }: LogoSlotProps) {
           )}
         </div>
       )}
-      {error !== null && <ErrorNotice error={error} surface="glass" />}
+      {error !== null && <ErrorNotice error={error} />}
     </div>
   );
 }

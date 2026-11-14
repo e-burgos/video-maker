@@ -240,7 +240,7 @@ export function FolderHeading({
         </ul>
       )}
 
-      {error !== null && <ErrorNotice error={error} surface="glass" />}
+      {error !== null && <ErrorNotice error={error} />}
     </div>
   );
 }

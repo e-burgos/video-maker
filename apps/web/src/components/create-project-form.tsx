@@ -130,7 +130,6 @@ export function CreateProjectForm({ existingSlugs, onCreated, onCancel }: Create
           name="project-brand"
           labelledBy={brandLabelId}
           onChange={setChosenBrand}
-          surface="glass"
         />
       </div>
       {localProblem && (
@@ -138,7 +137,7 @@ export function CreateProjectForm({ existingSlugs, onCreated, onCancel }: Create
           {t('createProject.nameRequired')}
         </p>
       )}
-      {serviceError !== null && <ErrorNotice error={serviceError} surface="glass" />}
+      {serviceError !== null && <ErrorNotice error={serviceError} />}
     </form>
   );
 }

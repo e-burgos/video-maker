@@ -208,7 +208,7 @@ export function StoryboardTrigger({ slug, onCreated, hasStoryboard = false }: St
 
       {createAction.error !== null && !needsConfirmation && (
         <div className="flex flex-col gap-2">
-          <ErrorNotice surface="glass" error={createAction.error} />
+          <ErrorNotice error={createAction.error} />
           {explanationKey !== null && (
             <p
               data-testid="storyboard-failure-explanation"

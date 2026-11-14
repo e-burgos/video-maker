@@ -23,6 +23,7 @@ import { StoryboardPromptSheet } from '../components/storyboard-prompt-sheet';
 import { StoryboardSaveBar } from '../components/storyboard-save-bar';
 import { StoryboardSceneEditor } from '../components/storyboard-scene-editor';
 import { StoryboardTrigger } from '../components/storyboard-trigger';
+import { LoadingState } from '../components/ui/status-states';
 
 export const STORYBOARD_NOT_FOUND = 'STORYBOARD_NOT_FOUND';
 
@@ -103,7 +104,7 @@ function ClassicStoryboardPage() {
       <StoryboardJobPanel jobId={jobId} onSucceeded={reload} onRetried={(job) => setJobId(job.id)} />
 
       {stored.status === 'loading' && (
-        <p className="m-0 text-sm text-[var(--cl-ink-2)]">{t('storyboard.loading')}</p>
+        <LoadingState message={t('storyboard.loading')} />
       )}
 
       {missing && script !== null && <ProducerScriptPanel script={script} />}
@@ -111,7 +112,7 @@ function ClassicStoryboardPage() {
       {missing && script === null && <StoryboardEmptyState slug={slug} />}
 
       {stored.status === 'error' && stored.error !== null && !missing && (
-        <ErrorNotice surface="glass" error={stored.error} onRetry={reload} />
+        <ErrorNotice error={stored.error} onRetry={reload} />
       )}
 
       {storyboard !== null && selectedScene !== undefined && (

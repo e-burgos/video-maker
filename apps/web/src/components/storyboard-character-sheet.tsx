@@ -3,6 +3,7 @@ import type { StoryboardDocument } from '@video-maker/timeline-core';
 import { setCharacterField } from '../api/storyboard-edit/storyboard-document';
 import { useT } from '../i18n/language-context';
 import { FIELD_CLASS, FIELD_LABEL_CLASS, TEXTAREA_CLASS } from './ui/cl-controls';
+import { EmptyState } from './ui/status-states';
 
 export type StoryboardCharacterSheetProps = {
   storyboard: StoryboardDocument;
@@ -24,7 +25,7 @@ export function StoryboardCharacterSheet({ storyboard, onChange }: StoryboardCha
       <p className="m-0 text-sm text-[var(--cl-ink-2)]">{t('storyboardCharacters.note')}</p>
 
       {storyboard.characters.length === 0 ? (
-        <p className="m-0 text-sm text-[var(--cl-ink-2)]">{t('storyboardCharacters.empty')}</p>
+        <EmptyState message={t('storyboardCharacters.empty')} />
       ) : (
         <ul className="m-0 list-none flex flex-col gap-3 p-0">
           {storyboard.characters.map((character) => (

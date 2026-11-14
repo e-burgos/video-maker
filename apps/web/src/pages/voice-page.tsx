@@ -18,6 +18,7 @@ import type { AssetListing, VoiceDocument, VoiceTrack } from '../api/render-api-
 import { MotionVoiceView } from '../components/motion-voice-view';
 import { ProjectModeGate } from '../components/project-mode-gate';
 import { PRIMARY_BUTTON_SMALL_CLASS } from '../components/ui/cl-controls';
+import { LoadingState } from '../components/ui/status-states';
 
 export const VOICE_NOT_FOUND = 'VOICE_NOT_FOUND';
 
@@ -119,11 +120,11 @@ function ClassicVoicePage() {
       <VoiceJobPanel jobId={jobId} onSucceeded={reload} onRetried={(job) => setJobId(job.id)} />
 
       {regenerateAction.error !== null && (
-        <ErrorNotice surface="glass" error={regenerateAction.error} />
+        <ErrorNotice error={regenerateAction.error} />
       )}
 
       {voice.status === 'loading' && (
-        <p className="m-0 text-sm text-[var(--cl-ink-2)]">{t('voice.loading')}</p>
+        <LoadingState message={t('voice.loading')} />
       )}
 
       {missing && <VoiceEmptyState slug={slug} />}
@@ -133,7 +134,7 @@ function ClassicVoicePage() {
       )}
 
       {voice.status === 'error' && voice.error !== null && !missing && (
-        <ErrorNotice surface="glass" error={voice.error} onRetry={voice.reload} />
+        <ErrorNotice error={voice.error} onRetry={voice.reload} />
       )}
 
       {document !== null && !scriptMode && (

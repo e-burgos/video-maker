@@ -44,7 +44,7 @@ export function SettingsPage() {
         <SettingsTabPanel tab="producer" active={tab}>
           {settings.status === 'loading' && <p className={HINT_TEXT_CLASS}>{t('settings.loading')}</p>}
           {settings.status === 'error' && settings.error !== null && (
-            <ErrorNotice error={settings.error} onRetry={settings.reload} surface="glass" />
+            <ErrorNotice error={settings.error} onRetry={settings.reload} />
           )}
           {data !== null && (
             <>

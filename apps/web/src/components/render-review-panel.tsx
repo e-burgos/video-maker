@@ -177,8 +177,8 @@ export function RenderReviewPanel({ slug, file }: RenderReviewPanelProps) {
       </div>
 
       {report.status === 'loading' && <p className="m-0 text-xs text-[var(--cl-ink-3)]">{t('review.loading')}</p>}
-      {report.status === 'error' && report.error !== null && <ErrorNotice surface="glass" error={report.error} onRetry={report.reload} />}
-      {start.error !== null && <ErrorNotice surface="glass" error={start.error} />}
+      {report.status === 'error' && report.error !== null && <ErrorNotice error={report.error} onRetry={report.reload} />}
+      {start.error !== null && <ErrorNotice error={start.error} />}
       {failedJob !== null && failedJob.error !== null && (
         <p role="alert" className="m-0 text-xs text-[var(--tucu-state-red-ink)]">
           {failedJob.error.code}: {failedJob.error.message}

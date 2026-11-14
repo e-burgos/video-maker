@@ -14,6 +14,7 @@ import { ProducerTurnActivity } from './producer-turn-activity';
 import { ProducerWelcome } from './producer-welcome';
 import { ProposalCard } from './proposal-card';
 import type { AssetRole } from '../api/render-api-types';
+import { LoadingState } from './ui/status-states';
 
 export type ProducerConversationPanelProps = {
   producer: UseProducerConversationResult;
@@ -134,11 +135,11 @@ export function ProducerConversationPanel({ producer, pinned = false, mode = 'fo
       >
         <div ref={contentRef} className="space-y-4">
           {conversation.status === 'loading' && (
-            <p className="text-sm text-[var(--cl-ink-2)]">{t('producer.loading')}</p>
+            <LoadingState message={t('producer.loading')} />
           )}
 
           {conversation.status === 'error' && conversation.error !== null && (
-            <ErrorNotice surface="glass" error={conversation.error} onRetry={conversation.reload} />
+            <ErrorNotice error={conversation.error} onRetry={conversation.reload} />
           )}
 
           {firstUse && (
@@ -262,12 +263,12 @@ export function ProducerConversationPanel({ producer, pinned = false, mode = 'fo
 
         {sendFailure !== null && (
           <div data-testid="producer-send-failure" className="space-y-2">
-            <ErrorNotice surface="glass" error={sendFailure} />
+            <ErrorNotice error={sendFailure} />
             {sendFailureKey !== null && <p className="text-sm text-[var(--tucu-state-orange-ink)]">{t(sendFailureKey)}</p>}
           </div>
         )}
 
-        {cancelFailure !== null && <ErrorNotice surface="glass" error={cancelFailure} />}
+        {cancelFailure !== null && <ErrorNotice error={cancelFailure} />}
       </div>
     </div>
   );

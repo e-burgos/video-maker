@@ -199,7 +199,7 @@ export function VoiceSceneCard({
 
           {attachAction.error !== null && (
             <div className="flex flex-col gap-1">
-              <ErrorNotice surface="glass" error={attachAction.error} />
+              <ErrorNotice error={attachAction.error} />
               {explanationKey !== null && (
                 <p
                   data-testid={`voice-attach-explanation-${status.sceneId}`}

@@ -44,7 +44,7 @@ export function TimelineSaveBar({ slug, state, dispatch }: TimelineSaveBarProps)
           {saveAction.status === 'pending' ? t('render.saving') : t('render.save')}
         </button>
       </div>
-      {saveAction.error !== null && <ErrorNotice surface="glass" error={saveAction.error} />}
+      {saveAction.error !== null && <ErrorNotice error={saveAction.error} />}
     </div>
   );
 }

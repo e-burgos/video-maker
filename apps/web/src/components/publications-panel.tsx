@@ -27,7 +27,7 @@ export function PublicationsPanel({ slug, refreshToken }: PublicationsPanelProps
   const publications = useAsyncResource<Publication[]>(load, `publications:${slug}:${refreshToken}`);
 
   if (publications.status === 'error' && publications.error !== null) {
-    return <ErrorNotice surface="glass" error={publications.error} onRetry={publications.reload} />;
+    return <ErrorNotice error={publications.error} onRetry={publications.reload} />;
   }
 
   const rows = publications.data ?? [];

@@ -28,6 +28,7 @@ import { useApiAction } from '../hooks/use-api-action';
 import { useAsyncResource } from '../hooks/use-async-resource';
 import { useRenderJobPoll } from '../hooks/use-render-job-poll';
 import { useT } from '../i18n/language-context';
+import { LoadingState } from '../components/ui/status-states';
 
 const BRIEF_NOT_FOUND = 'BRIEF_NOT_FOUND';
 const STORYBOARD_NOT_FOUND = 'STORYBOARD_NOT_FOUND';
@@ -211,8 +212,8 @@ export function MotionPage() {
         </ToolbarStatus>
       )}
 
-      {loading && <p className="m-0 text-sm text-[var(--cl-ink-2)]">{t('motion.loading')}</p>}
-      {loadError !== null && <ErrorNotice surface="glass" error={loadError} />}
+      {loading && <LoadingState message={t('motion.loading')} />}
+      {loadError !== null && <ErrorNotice error={loadError} />}
 
       {draft !== null && brands.data !== null && (
         <div className="grid items-start gap-4 min-[1100px]:grid-cols-[minmax(0,1fr)_340px]">
@@ -233,7 +234,7 @@ export function MotionPage() {
               scriptProblem={scriptProblem}
               onChange={changeDraft}
             />
-            {saveAction.error !== null && <ErrorNotice surface="glass" error={saveAction.error} />}
+            {saveAction.error !== null && <ErrorNotice error={saveAction.error} />}
             <div className="flex flex-wrap items-center gap-3">
               <button
                 type="button"
@@ -265,9 +266,9 @@ export function MotionPage() {
         </div>
       )}
 
-      {jobAction.error !== null && <ErrorNotice surface="glass" error={jobAction.error} />}
+      {jobAction.error !== null && <ErrorNotice error={jobAction.error} />}
       {job !== null && <MotionJobStatus job={job} onRetried={adoptRetried} />}
-      {poll.error !== null && job === null && <ErrorNotice surface="glass" error={poll.error} />}
+      {poll.error !== null && job === null && <ErrorNotice error={poll.error} />}
 
       {shownVideo !== null && <MotionDeliveredVideo slug={slug} video={shownVideo} />}
     </section>

@@ -224,7 +224,7 @@ export function OpenRouterModelPicker({ value, onChange, recommendedIds }: OpenR
       )}
 
       {resource.status === 'error' && resource.error !== null && (
-        <ErrorNotice error={resource.error} onRetry={resource.reload} surface="glass" />
+        <ErrorNotice error={resource.error} onRetry={resource.reload} />
       )}
 
       {resource.data !== null && resource.data.stale && (

@@ -82,7 +82,7 @@ export function ProjectWorkspacePage() {
         <ProposalStatusBadge proposal={proposal} />
       </ToolbarStatus>
 
-      {approval.error !== null && <ErrorNotice surface="glass" error={approval.error} />}
+      {approval.error !== null && <ErrorNotice error={approval.error} />}
 
       {isMotion ? (
         <div className={isWide ? 'min-h-0 flex-1' : ''}>

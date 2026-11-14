@@ -94,7 +94,7 @@ export function YouTubeSettingsSection() {
         {integration.status === 'loading' && <p className={HINT_TEXT_CLASS}>{t('youtube.settings.loading')}</p>}
 
         {integration.status === 'error' && integration.error !== null && (
-          <ErrorNotice error={integration.error} onRetry={integration.reload} surface="glass" />
+          <ErrorNotice error={integration.error} onRetry={integration.reload} />
         )}
 
         {showClientForm && (
@@ -193,7 +193,7 @@ export function YouTubeSettingsSection() {
                 {t('youtube.settings.timedOut')}
               </p>
             )}
-            {connectFlow.error !== null && <ErrorNotice error={connectFlow.error} surface="glass" />}
+            {connectFlow.error !== null && <ErrorNotice error={connectFlow.error} />}
           </div>
         )}
 
@@ -211,14 +211,13 @@ export function YouTubeSettingsSection() {
           </div>
         )}
 
-        {saveClient.error !== null && <ErrorNotice error={saveClient.error} surface="glass" />}
-        {disconnect.error !== null && <ErrorNotice error={disconnect.error} surface="glass" />}
+        {saveClient.error !== null && <ErrorNotice error={saveClient.error} />}
+        {disconnect.error !== null && <ErrorNotice error={disconnect.error} />}
 
         {confirmingDisconnect && (
           <Modal
             title={t('youtube.settings.disconnectTitle')}
             testId="youtube-disconnect-modal"
-            surface="glass"
             onClose={() => setConfirmingDisconnect(false)}
             footer={
               <>

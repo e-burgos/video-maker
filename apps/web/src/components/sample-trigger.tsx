@@ -57,7 +57,7 @@ function RenderSampleStatus({ job, onRetried }: { job: Job; onRetried: (job: Job
           {t('sample.failed', { code: job.error.code, message: job.error.message })}
         </p>
       )}
-      <JobRetryButton surface="glass" job={job} onRetried={onRetried} />
+      <JobRetryButton job={job} onRetried={onRetried} />
     </div>
   );
 }
@@ -101,8 +101,8 @@ export function SampleTrigger({ slug, kind, disabled = false }: SampleTriggerPro
         <p className="m-0 text-xs text-[var(--cl-ink-2)]">{t('sample.hint')}</p>
       </div>
 
-      {createAction.error !== null && <ErrorNotice surface="glass" error={createAction.error} />}
-      {poll.error !== null && job === null && <ErrorNotice surface="glass" error={poll.error} />}
+      {createAction.error !== null && <ErrorNotice error={createAction.error} />}
+      {poll.error !== null && job === null && <ErrorNotice error={poll.error} />}
 
       {job !== null && job.kind === 'motion' && <MotionJobStatus job={job} onRetried={(next) => setJobId(next.id)} />}
       {job !== null && job.kind !== 'motion' && (

@@ -126,7 +126,7 @@ function DeviceCard({ deviceKey, device, brandId, readOnly, onChange, onRemove }
           onFile={(file) => void replacePhoto(file)}
         />
       )}
-      {error !== null && <ErrorNotice error={error} surface="glass" />}
+      {error !== null && <ErrorNotice error={error} />}
       {device.kind === 'screen' ? (
         <BrandCornerPicker
           imageUrl={brandFileUrl(brandId, device.image)}
@@ -193,7 +193,7 @@ export function BrandDevicesSection({ editor, draft: { draft, setDraft } }: Bran
           onFile={(file) => void onFile(file)}
         />
       )}
-      {error !== null && <ErrorNotice error={error} surface="glass" />}
+      {error !== null && <ErrorNotice error={error} />}
     </div>
   );
 }

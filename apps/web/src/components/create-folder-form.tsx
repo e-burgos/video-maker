@@ -54,7 +54,7 @@ export function CreateFolderForm({ onCreated }: CreateFolderFormProps) {
           {submitting ? t('createFolder.submitting') : t('createFolder.submit')}
         </button>
       </div>
-      {error !== null && <ErrorNotice error={error} surface="glass" />}
+      {error !== null && <ErrorNotice error={error} />}
     </form>
   );
 }

@@ -34,7 +34,6 @@ export function BrandDeleteModal({ brand, onClose, onDeleted }: BrandDeleteModal
 
   return (
     <Modal
-      surface="glass"
       testId="brand-delete-modal"
       title={t('brands.delete.title', { name: brand.name })}
       onClose={onClose}
@@ -62,7 +61,7 @@ export function BrandDeleteModal({ brand, onClose, onDeleted }: BrandDeleteModal
       }
     >
       <p>{t('brands.delete.explanation')}</p>
-      {error !== null && <ErrorNotice error={error} surface="glass" />}
+      {error !== null && <ErrorNotice error={error} />}
     </Modal>
   );
 }

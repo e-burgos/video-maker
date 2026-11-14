@@ -4,6 +4,7 @@ import type { AssetListEntry } from '../../api/render-api-types';
 import { useT } from '../../i18n/language-context';
 import { AssetUploader } from '../asset-uploader';
 import { CHECKBOX_CLASS, FIELD_SMALL_CLASS, PANEL_HEADING_CLASS } from '../ui/cl-controls';
+import { EmptyState } from '../ui/status-states';
 
 export type MotionBriefImagesProps = {
   slug: string;
@@ -26,7 +27,7 @@ export function MotionBriefImages({ slug, draft, imageAssets, onChange, onImageU
     <div data-testid="motion-brief-images" className="flex flex-col gap-3">
       <h2 className={PANEL_HEADING_CLASS}>{t('motion.brief.images')}</h2>
       {files.length === 0 ? (
-        <p className="m-0 text-sm text-[var(--cl-ink-2)]">{t('motion.brief.imagesEmpty')}</p>
+        <EmptyState message={t('motion.brief.imagesEmpty')} />
       ) : (
         <ul className="m-0 flex list-none flex-col gap-2 p-0">
           {files.map((file) => {

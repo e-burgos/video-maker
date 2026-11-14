@@ -51,7 +51,7 @@ export function VideoStepsNav({ slug, title, isMotion, statusByPath = {}, footer
           );
         })}
       </nav>
-      {footer !== undefined && <div className="mt-1 border-t border-[var(--tucu-glass-sub-line)] px-1 pt-1.5 [&_.text-ink]:text-[var(--cl-ink)] [&_.text-ink-faint]:text-[var(--cl-ink-3)] [&_.text-ink-muted]:text-[var(--cl-ink-2)]">{footer}</div>}
+      {footer !== undefined && <div className="mt-1 border-t border-[var(--tucu-glass-sub-line)] px-1 pt-1.5">{footer}</div>}
     </div>
   );
 }

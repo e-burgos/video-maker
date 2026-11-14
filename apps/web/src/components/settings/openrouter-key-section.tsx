@@ -145,8 +145,8 @@ export function OpenRouterKeySection({ keyPresent, keyHint, onChanged }: OpenRou
         </form>
       )}
 
-      {saveKey.error !== null && <ErrorNotice error={saveKey.error} surface="glass" />}
-      {removeKey.error !== null && <ErrorNotice error={removeKey.error} surface="glass" />}
+      {saveKey.error !== null && <ErrorNotice error={saveKey.error} />}
+      {removeKey.error !== null && <ErrorNotice error={removeKey.error} />}
     </SettingsPanel>
   );
 }

@@ -258,7 +258,6 @@ export function YouTubePublishDialog({ slug, onClose, onPublished }: YouTubePubl
 
   return (
     <Modal
-      surface="glass"
       title={t('youtube.publish.dialogTitle')}
       testId="youtube-publish-dialog"
       onClose={close}
@@ -268,7 +267,7 @@ export function YouTubePublishDialog({ slug, onClose, onPublished }: YouTubePubl
       {loading && <p className="m-0 text-[var(--cl-ink-2)]">{t('youtube.publish.loading')}</p>}
 
       {!loading && loadError !== null && (
-        <ErrorNotice surface="glass" error={loadError} onRetry={reloadAll} />
+        <ErrorNotice error={loadError} onRetry={reloadAll} />
       )}
 
       {!loading && loadError === null && integration.data !== null && !connected && <NotConnectedNotice />}
@@ -332,7 +331,7 @@ export function YouTubePublishDialog({ slug, onClose, onPublished }: YouTubePubl
                     {t('youtube.publish.draftingNote')}
                   </p>
                 )}
-                {draft.error !== null && <ErrorNotice surface="glass" error={draft.error} />}
+                {draft.error !== null && <ErrorNotice error={draft.error} />}
               </div>
 
               <YouTubeMetadataFields values={values} disabled={formDisabled} onChange={patch} />
@@ -387,8 +386,8 @@ export function YouTubePublishDialog({ slug, onClose, onPublished }: YouTubePubl
                 </ul>
               )}
 
-              {publish.error !== null && <ErrorNotice surface="glass" error={publish.error} />}
-              {enqueue.error !== null && <ErrorNotice surface="glass" error={enqueue.error} />}
+              {publish.error !== null && <ErrorNotice error={publish.error} />}
+              {enqueue.error !== null && <ErrorNotice error={enqueue.error} />}
             </>
           )}
         </div>
@@ -399,7 +398,7 @@ export function YouTubePublishDialog({ slug, onClose, onPublished }: YouTubePubl
           <p data-testid="youtube-publish-confirm-text" className="m-0 text-[var(--cl-ink)]">
             {confirmationText()}
           </p>
-          {publish.error !== null && <ErrorNotice surface="glass" error={publish.error} />}
+          {publish.error !== null && <ErrorNotice error={publish.error} />}
         </div>
       )}
 

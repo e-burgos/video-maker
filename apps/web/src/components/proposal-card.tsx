@@ -185,7 +185,7 @@ export function ProposalCard({ slug, proposal, materialReview }: ProposalCardPro
           />
         ))}
       </ul>
-      {approveAction.error !== null && <ErrorNotice surface="glass" error={approveAction.error} />}
+      {approveAction.error !== null && <ErrorNotice error={approveAction.error} />}
     </section>
   );
 }

@@ -43,7 +43,7 @@ export function BrandEditorPage() {
         <Link to="/brands" className={BACK_LINK_CLASS}>
           {t('brands.back')}
         </Link>
-        {editor.loadError !== null && <ErrorNotice error={editor.loadError} onRetry={editor.reload} surface="glass" />}
+        {editor.loadError !== null && <ErrorNotice error={editor.loadError} onRetry={editor.reload} />}
       </div>
     );
   }

@@ -54,7 +54,7 @@ export function StudioLayout() {
           <ShellSidebar videoBlock={videoBlock} />
           <div className="flex min-w-0 flex-1 flex-col gap-3 p-3">
             <ShellToolbar title={t(heading.titleKey)} subtitle={subtitle} />
-            <ShellContent pathname={pathname}>
+            <ShellContent>
               <Outlet />
             </ShellContent>
           </div>

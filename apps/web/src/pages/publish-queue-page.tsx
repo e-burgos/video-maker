@@ -13,6 +13,7 @@ import { useApiAction } from '../hooks/use-api-action';
 import { usePolledResource } from '../hooks/use-polled-resource';
 import { useLanguage, useT } from '../i18n/language-context';
 import type { PublishQueue, PublishQueueItem } from '../api/publish-queue-types';
+import { LoadingState } from '../components/ui/status-states';
 
 export function PublishQueuePage() {
   const client = useRenderApi();
@@ -73,14 +74,14 @@ export function PublishQueuePage() {
   return (
     <section data-testid="publish-queue-page" className="flex flex-col gap-3">
       {queue.status === 'loading' && queue.data === null && (
-        <p className="m-0 text-sm text-[var(--cl-ink-2)]">{t('publishQueue.loading')}</p>
+        <LoadingState message={t('publishQueue.loading')} />
       )}
 
       {queue.status === 'error' && queue.error !== null && (
-        <ErrorNotice surface="glass" error={queue.error} onRetry={queue.reload} />
+        <ErrorNotice error={queue.error} onRetry={queue.reload} />
       )}
 
-      {actionError !== null && <ErrorNotice surface="glass" error={actionError} />}
+      {actionError !== null && <ErrorNotice error={actionError} />}
 
       {queue.data !== null && (
         <>

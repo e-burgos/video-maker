@@ -39,7 +39,6 @@ export function DeleteVideoModal({ slug, placement, onClose, onDeleted }: Delete
 
   return (
     <Modal
-      surface="glass"
       testId="delete-video-modal"
       title={t('videoMenu.deleteTitle', { slug })}
       onClose={onClose}
@@ -93,7 +92,7 @@ export function DeleteVideoModal({ slug, placement, onClose, onDeleted }: Delete
         />
       </label>
 
-      {error !== null && <ErrorNotice error={error} surface="glass" />}
+      {error !== null && <ErrorNotice error={error} />}
     </Modal>
   );
 }

@@ -19,7 +19,6 @@ export type MusicModeFieldsProps = {
   floorText: string;
   onModeChange: (mode: MusicMode) => void;
   onFloorTextChange: (floorText: string) => void;
-  surface?: 'legacy' | 'glass';
 };
 
 export function MusicModeFields({
@@ -27,32 +26,20 @@ export function MusicModeFields({
   floorText,
   onModeChange,
   onFloorTextChange,
-  surface = 'legacy',
 }: MusicModeFieldsProps) {
   const t = useT();
-  const glass = surface === 'glass';
   const invalid = mode === 'segments' && floorDbIssue(floorText);
 
   return (
     <div data-testid="music-mode-fields" className="space-y-1">
       <div className="flex flex-wrap items-end gap-3">
-        <label
-          className={
-            glass
-              ? `flex flex-col gap-1 ${FIELD_LABEL_CLASS}`
-              : 'flex flex-col gap-1 text-xs text-slate-400'
-          }
-        >
+        <label className={`flex flex-col gap-1 ${FIELD_LABEL_CLASS}`}>
           {t('musicMode.label')}
           <select
             aria-label={t('musicMode.label')}
             value={mode}
             onChange={(event) => onModeChange(event.target.value as MusicMode)}
-            className={
-              glass
-                ? FIELD_SMALL_CLASS
-                : 'rounded-md border border-slate-700 bg-slate-900 px-2 py-1 text-xs text-slate-200'
-            }
+            className={FIELD_SMALL_CLASS}
           >
             {MUSIC_MODES.map((candidate) => (
               <option key={candidate} value={candidate}>
@@ -63,13 +50,7 @@ export function MusicModeFields({
         </label>
 
         {mode === 'segments' && (
-          <label
-            className={
-              glass
-                ? `flex flex-col gap-1 ${FIELD_LABEL_CLASS}`
-                : 'flex flex-col gap-1 text-xs text-slate-400'
-            }
-          >
+          <label className={`flex flex-col gap-1 ${FIELD_LABEL_CLASS}`}>
             {t('musicMode.floor')}
             <input
               type="text"
@@ -77,37 +58,20 @@ export function MusicModeFields({
               aria-label={t('musicMode.floor')}
               value={floorText}
               onChange={(event) => onFloorTextChange(event.target.value)}
-              className={
-                glass
-                  ? `${FIELD_SMALL_CLASS} font-data w-24`
-                  : 'w-24 rounded-md border border-slate-700 bg-slate-900 px-2 py-1 font-mono text-xs text-slate-200'
-              }
+              className={`${FIELD_SMALL_CLASS} font-data w-24`}
             />
           </label>
         )}
       </div>
 
-      <p
-        className={
-          glass
-            ? 'm-0 text-xs text-[var(--cl-ink-2)]'
-            : 'text-xs text-slate-500'
-        }
-      >
+      <p className="m-0 text-xs text-[var(--cl-ink-2)]">
         {mode === 'segments'
           ? t('musicMode.segmentsHint')
           : t('musicMode.bedHint')}
       </p>
 
       {invalid && (
-        <p
-          role="alert"
-          className={
-            glass
-              ? 'font-data text-xs text-[var(--tucu-state-orange-ink)]'
-              : 'font-mono text-xs text-amber-300'
-          }
-        >
+        <p role="alert" className="font-data text-xs text-[var(--tucu-state-orange-ink)]">
           {t('musicMode.floorInvalid', {
             min: MUSIC_FLOOR_DB_MIN,
             max: MUSIC_FLOOR_DB_MAX,

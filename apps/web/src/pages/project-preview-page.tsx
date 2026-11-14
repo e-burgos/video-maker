@@ -24,6 +24,7 @@ import { PRIMARY_BUTTON_SMALL_CLASS, SECONDARY_BUTTON_SMALL_CLASS } from '../com
 import { YouTubePublishSection } from '../components/youtube-publish-section';
 import { MotionPreviewView } from '../components/motion-preview-view';
 import { ProjectModeGate } from '../components/project-mode-gate';
+import { LoadingState } from '../components/ui/status-states';
 
 function captureFrameFromLocation(search: string): number | null {
   const frameParam = new URLSearchParams(search).get('frame');
@@ -171,14 +172,14 @@ function ClassicProjectPreviewPage() {
   return (
     <section data-testid="project-preview-page" className="flex min-h-full flex-col gap-4">
       {timeline.status === 'loading' && (
-        <p className="m-0 text-sm text-[var(--cl-ink-2)]">{t('preview.loading')}</p>
+        <LoadingState message={t('preview.loading')} />
       )}
       {timeline.status === 'error' &&
         timeline.error !== null &&
         (timeline.error.code === TIMELINE_NOT_FOUND ? (
           <TimelineEmptyState slug={slug} onRetry={timeline.reload} />
         ) : (
-          <ErrorNotice surface="glass" error={timeline.error} onRetry={timeline.reload} />
+          <ErrorNotice error={timeline.error} onRetry={timeline.reload} />
         ))}
 
       {timeline.data !== null && <StudioView key={slug} slug={slug} initialTimeline={timeline.data} />}

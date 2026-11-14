@@ -134,7 +134,7 @@ export function ProducerEngineSection({ settings, onSaved }: ProducerEngineSecti
         )}
       </div>
 
-      {save.error !== null && <ErrorNotice error={save.error} surface="glass" />}
+      {save.error !== null && <ErrorNotice error={save.error} />}
     </SettingsPanel>
   );
 }

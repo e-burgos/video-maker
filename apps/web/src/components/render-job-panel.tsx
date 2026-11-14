@@ -46,7 +46,7 @@ export function RenderJobPanel({ slug, jobId, onRetried }: RenderJobPanelProps) 
 
   if (poll.job === null) {
     return poll.error !== null ? (
-      <ErrorNotice surface="glass" error={poll.error} />
+      <ErrorNotice error={poll.error} />
     ) : (
       <p className={MUTED_LINE}>{t('renderJob.loading')}</p>
     );
@@ -115,7 +115,7 @@ export function RenderJobPanel({ slug, jobId, onRetried }: RenderJobPanelProps) 
       )}
 
       <div className="flex flex-wrap items-center gap-2">
-        <JobRetryButton surface="glass" job={job} onRetried={onRetried} />
+        <JobRetryButton job={job} onRetried={onRetried} />
 
         {job.kind === 'render' && job.state === 'succeeded' && (
           <a
@@ -142,7 +142,7 @@ export function RenderJobPanel({ slug, jobId, onRetried }: RenderJobPanelProps) 
         )}
       </div>
 
-      {cancelAction.error !== null && <ErrorNotice surface="glass" error={cancelAction.error} />}
+      {cancelAction.error !== null && <ErrorNotice error={cancelAction.error} />}
     </div>
   );
 }

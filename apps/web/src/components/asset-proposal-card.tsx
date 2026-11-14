@@ -171,7 +171,7 @@ export function AssetProposalCard({
           </div>
         )}
 
-        {error !== null && <ErrorNotice surface="glass" error={error} />}
+        {error !== null && <ErrorNotice error={error} />}
       </div>
     </div>
   );

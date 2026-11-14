@@ -6,6 +6,7 @@ import { useActiveGuideSection } from '../components/guide/use-active-guide-sect
 import { loadGuideContent } from '../guide/guide-content';
 import type { GuideContent } from '../guide/guide-content';
 import { useLanguage, useT } from '../i18n/language-context';
+import { LoadingState } from '../components/ui/status-states';
 
 const NO_SECTION_IDS: readonly string[] = [];
 
@@ -35,7 +36,7 @@ export function GuidePage() {
   }, [content]);
 
   if (content === null) {
-    return <p className="m-0 text-sm text-[var(--cl-ink-2)]">{t('app.loading.guide')}</p>;
+    return <LoadingState message={t('app.loading.guide')} />;
   }
 
   return (

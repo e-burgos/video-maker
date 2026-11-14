@@ -103,7 +103,7 @@ export function BrandPreviewPane({ brandId, signal }: BrandPreviewPaneProps) {
         )}
       </div>
       <p className={BRAND_SMALL_HINT_CLASS}>{t('brands.preview.hint')}</p>
-      {error !== null && <ErrorNotice error={error} onRetry={() => void compose()} surface="glass" />}
+      {error !== null && <ErrorNotice error={error} onRetry={() => void compose()} />}
     </section>
   );
 }

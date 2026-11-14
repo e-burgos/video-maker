@@ -98,7 +98,7 @@ function PreviewContent({ slug, jobs, generated }: WorkspacePreviewProps) {
   }
 
   if (timeline.status === 'error' && timeline.error?.code !== 'TIMELINE_NOT_FOUND') {
-    return timeline.error !== null ? <ErrorNotice surface="glass" error={timeline.error} onRetry={timeline.reload} /> : null;
+    return timeline.error !== null ? <ErrorNotice error={timeline.error} onRetry={timeline.reload} /> : null;
   }
 
   if (timeline.data === null) {

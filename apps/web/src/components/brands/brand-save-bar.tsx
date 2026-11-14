@@ -81,7 +81,7 @@ export function BrandSaveBar({ editor, draft }: BrandSaveBarProps) {
         </div>
       </div>
       <p className="m-0 text-xs text-[var(--cl-ink-3)]">{t('brands.save.immediateNote')}</p>
-      {editor.saveError !== null && <ErrorNotice error={editor.saveError} surface="glass" />}
+      {editor.saveError !== null && <ErrorNotice error={editor.saveError} />}
     </div>
   );
 }

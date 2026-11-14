@@ -11,6 +11,7 @@ import { ErrorNotice } from './error-notice';
 import { JobRetryButton } from './job-retry-button';
 import { ToolbarStatus } from './shell/toolbar-status';
 import type { Job } from '../api/render-api-types';
+import { LoadingState } from './ui/status-states';
 
 const STAGE_KEYS: Readonly<Record<string, TranslationKey>> = {
   synthesize: 'voiceJob.stage.synthesize',
@@ -59,9 +60,9 @@ export function VoiceJobPanel({ jobId, onSucceeded, onRetried }: VoiceJobPanelPr
 
   if (job === null) {
     return poll.error !== null ? (
-      <ErrorNotice surface="glass" error={poll.error} />
+      <ErrorNotice error={poll.error} />
     ) : (
-      <p className="m-0 text-sm text-[var(--cl-ink-2)]">{t('voiceJob.loading')}</p>
+      <LoadingState message={t('voiceJob.loading')} />
     );
   }
 
@@ -137,7 +138,7 @@ export function VoiceJobPanel({ jobId, onSucceeded, onRetried }: VoiceJobPanelPr
         </div>
       )}
 
-      <JobRetryButton surface="glass" job={job} onRetried={onRetried} />
+      <JobRetryButton job={job} onRetried={onRetried} />
     </div>
     </>
   );

@@ -10,7 +10,7 @@ import { useAsyncResource } from '../hooks/use-async-resource';
 import { useT } from '../i18n/language-context';
 import { BrandPicker } from './brand-picker';
 import { ErrorNotice } from './error-notice';
-import { Button } from './ui/button';
+import { SECONDARY_BUTTON_SMALL_CLASS } from './ui/cl-controls';
 
 export type ProjectBrandControlProps = {
   slug: string;
@@ -21,7 +21,7 @@ export type ProjectBrandControlProps = {
 function CurrentBrand({ brandId, brand, missing }: { brandId: string | null; brand: BrandSummary | undefined; missing: boolean }) {
   const t = useT();
   if (brandId === null) {
-    return <span className="text-ink-faint">{t('projectBrand.none')}</span>;
+    return <span className="text-[var(--cl-ink-3)]">{t('projectBrand.none')}</span>;
   }
   return (
     <span className="flex items-center gap-1.5">
@@ -29,12 +29,12 @@ function CurrentBrand({ brandId, brand, missing }: { brandId: string | null; bra
         <img
           src={brandFileUrl(brand.id, brand.logo)}
           alt={t('brandPicker.logoAlt', { name: brand.name })}
-          className="h-5 w-8 rounded bg-slate-950 object-contain"
+          className="h-5 w-8 rounded bg-[#0b0d14] object-contain"
         />
       )}
-      <span className="text-ink">{brand?.name ?? brandId}</span>
+      <span className="text-[var(--cl-ink)]">{brand?.name ?? brandId}</span>
       {missing && (
-        <span data-testid="project-brand-missing" className="text-warning">
+        <span data-testid="project-brand-missing" className="text-[var(--tucu-state-orange-ink)]">
           {t('projectBrand.missing')}
         </span>
       )}
@@ -65,31 +65,33 @@ export function ProjectBrandControl({ slug, project, onChanged }: ProjectBrandCo
   }
 
   return (
-    <div data-testid="project-brand" className="relative flex flex-wrap items-center gap-x-2 gap-y-1.5 font-sans text-xs">
-      <span className="text-ink-faint">{t('projectBrand.label')}</span>
+    <div data-testid="project-brand" className="relative flex flex-wrap items-center gap-x-2 gap-y-1.5 font-ui text-xs">
+      <span className="text-[var(--cl-ink-3)]">{t('projectBrand.label')}</span>
       <CurrentBrand brandId={brandId} brand={current} missing={project.brandMissing === true} />
       {isMotion ? (
         <Link
           data-testid="project-brand-motion-link"
           to={`/projects/${slug}/motion`}
-          className="rounded-md border border-border px-2 py-1 text-ink-muted hover:text-ink"
+          className={`${SECONDARY_BUTTON_SMALL_CLASS} no-underline`}
         >
           {t('projectBrand.changeInBrief')}
         </Link>
       ) : (
-      <Button
-        data-testid="project-brand-change"
-        aria-expanded={open}
-        disabled={brands.status !== 'ready'}
-        onClick={() => setOpen((value) => !value)}
-      >
-        {t('projectBrand.change')}
-      </Button>
+        <button
+          type="button"
+          data-testid="project-brand-change"
+          aria-expanded={open}
+          disabled={brands.status !== 'ready'}
+          onClick={() => setOpen((value) => !value)}
+          className={SECONDARY_BUTTON_SMALL_CLASS}
+        >
+          {t('projectBrand.change')}
+        </button>
       )}
       {!isMotion && open && brands.data !== null && (
         <div
           data-testid="project-brand-picker"
-          className="absolute left-0 top-full z-20 mt-2 w-[28rem] max-w-[90vw] space-y-2 rounded-panel border border-border-strong bg-slate-900 p-3 shadow-lg"
+          className="absolute left-0 top-full z-20 mt-2 w-[28rem] max-w-[90vw] space-y-2 glass-thick rounded-[16px] p-3 shadow-[var(--tucu-shadow-float)]"
         >
           <BrandPicker
             brands={brands.data}
