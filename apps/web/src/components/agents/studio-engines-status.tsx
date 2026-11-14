@@ -8,7 +8,7 @@ import { useT } from '../../i18n/language-context';
 import { ErrorNotice } from '../error-notice';
 import { PANEL_CLASS, PANEL_HEADING_CLASS } from '../ui/cl-controls';
 import { LoadingState } from '../ui/status-states';
-import { ENGINE_LABEL, ENGINE_STATE_LABEL, ENGINE_STATE_TONE, engineStatuses, studioPort } from './engines-model';
+import { ENGINE_LABEL, ENGINE_STATE_LABEL, ENGINE_STATE_TONE, engineStatuses, apiBaseUrl } from './engines-model';
 
 export function StudioEnginesStatus() {
   const client = useRenderApi();
@@ -26,7 +26,7 @@ export function StudioEnginesStatus() {
       {health.status === 'ready' && health.data !== null && (
         <div className="flex flex-wrap items-center gap-x-6 gap-y-2">
           <p data-testid="agents-studio" className="m-0 text-sm text-[var(--cl-ink)]">
-            {t('agents.status.studio', { port: studioPort(window.location) })}
+            {t('agents.status.studio', { url: apiBaseUrl(window.location) })}
           </p>
           <ul aria-label={t('agents.status.engines')} className="m-0 flex list-none flex-wrap items-center gap-2 p-0">
             {engineStatuses(health.data).map((engine) => (

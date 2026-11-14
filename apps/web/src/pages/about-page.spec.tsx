@@ -179,14 +179,14 @@ describe('AboutPage', () => {
   });
 
   describe('requirements', () => {
-    it('lists every requirement with its state and a way to fix it', async () => {
+    it('lists every requirement with its state and hides the fix for the ones that are met', async () => {
       renderAbout('/about?tab=requirements', {});
 
       await waitFor(() => expect(screen.getAllByTestId('about-requirement')).toHaveLength(10));
       const ffmpeg = screen.getAllByTestId('about-requirement').find((row) => row.dataset['requirementId'] === 'ffmpeg');
       expect(ffmpeg?.dataset['state']).toBe('ok');
       expect(ffmpeg?.textContent).toContain('ffmpeg_PATH');
-      expect(ffmpeg?.textContent).toContain('How to fix it');
+      expect(ffmpeg?.textContent).not.toContain('How to fix it');
       expect(screen.getByTestId('about-requirements-summary').textContent).toContain('meets every requirement');
     });
 
@@ -199,6 +199,7 @@ describe('AboutPage', () => {
       await waitFor(() => expect(screen.getAllByTestId('about-requirement')).toHaveLength(10));
       const model = screen.getAllByTestId('about-requirement').find((row) => row.dataset['requirementId'] === 'whisperModel');
       expect(model?.dataset['state']).toBe('missing');
+      expect(model?.textContent).toContain('How to fix it');
       expect(screen.getByTestId('about-requirements-summary').textContent).toContain('Missing requirements: 1.');
     });
 

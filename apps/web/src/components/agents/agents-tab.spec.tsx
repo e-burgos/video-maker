@@ -69,12 +69,12 @@ describe('AgentsTab', () => {
     expect(screen.getByTestId('agent-block-other-command').textContent).toContain('npx -y @e-burgos/video-maker-mcp');
   });
 
-  it('reports the studio port and each producer engine', async () => {
+  it('reports the API address and each producer engine', async () => {
     renderTab(async () => health({ claudeCli: true, openrouter: false }));
 
     await waitFor(() => expect(screen.getByTestId('agents-engine-claudeCli')).toBeTruthy());
 
-    expect(screen.getByTestId('agents-studio').textContent).toMatch(/Studio reachable on port \d+/);
+    expect(screen.getByTestId('agents-studio').textContent).toMatch(/Studio API reachable at .+\/api$/);
     expect(screen.getByTestId('agents-engine-claudeCli').dataset['state']).toBe('ready');
     expect(screen.getByTestId('agents-engine-openrouter').dataset['state']).toBe('missing');
   });

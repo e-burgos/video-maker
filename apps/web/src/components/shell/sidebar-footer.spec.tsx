@@ -62,7 +62,7 @@ describe('SidebarFooter', () => {
     expect(link.getAttribute('href')).toBe('/settings?tab=appearance');
     expect(link.className).toContain(FOOTER_CONTROL_CLASS);
     expect(screen.getByTestId('service-health-trigger').className).toContain(FOOTER_CONTROL_CLASS);
-    expect(link.className).toContain('py-2');
+    expect(link.className).toContain('py-1.5');
     expect(screen.queryByTestId('appearance-toggle')).toBeNull();
     expect(screen.queryByRole('radio')).toBeNull();
   });

@@ -14,6 +14,7 @@ import { ShellSidebar } from './shell/shell-sidebar';
 import { ShellToolbar } from './shell/shell-toolbar';
 import { ToolbarActionProvider } from './shell/toolbar-action-provider';
 import { useVideoStepStatuses } from './shell/use-video-step-statuses';
+import { VideoStepsRail } from './shell/video-steps-rail';
 import { VideoStepsNav } from './shell/video-steps-nav';
 
 export { projectSlugFromPathname };
@@ -47,11 +48,21 @@ export function StudioLayout() {
       />
     );
 
+  const videoRail =
+    slug === null || videoTitle === null ? null : (
+      <VideoStepsRail
+        slug={slug}
+        title={videoTitle}
+        isMotion={project.data !== null && projectModeOf(project.data) === 'motion'}
+        statusByPath={stepStatuses}
+      />
+    );
+
   return (
     <ToolbarActionProvider>
       <Scene>
         <div className="flex h-dvh text-[var(--cl-ink)]">
-          <ShellSidebar videoBlock={videoBlock} />
+          <ShellSidebar videoBlock={videoBlock} videoRail={videoRail} />
           <div className="flex min-w-0 flex-1 flex-col gap-3 p-3">
             <ShellToolbar title={t(heading.titleKey)} subtitle={subtitle} />
             <ShellContent>

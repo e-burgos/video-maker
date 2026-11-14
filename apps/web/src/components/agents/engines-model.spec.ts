@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 
 import type { ServiceHealth } from '../../api/render-api-types';
-import { engineStatuses, studioPort } from './engines-model';
+import { engineStatuses, apiBaseUrl } from './engines-model';
 
 function healthWith(producerEngines: { claudeCli: boolean; openrouter: boolean } | undefined): ServiceHealth {
   return {
@@ -38,13 +38,8 @@ describe('engineStatuses', () => {
   });
 });
 
-describe('studioPort', () => {
-  it('uses the explicit port', () => {
-    expect(studioPort({ port: '4200', protocol: 'http:' })).toBe('4200');
-  });
-
-  it('falls back to the protocol default', () => {
-    expect(studioPort({ port: '', protocol: 'https:' })).toBe('443');
-    expect(studioPort({ port: '', protocol: 'http:' })).toBe('80');
+describe('apiBaseUrl', () => {
+  it('joins the studio origin with the API base path the client uses', () => {
+    expect(apiBaseUrl({ origin: 'http://127.0.0.1:4200' })).toBe('http://127.0.0.1:4200/api');
   });
 });

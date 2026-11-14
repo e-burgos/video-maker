@@ -232,6 +232,18 @@ html[data-shell='electron'] [data-testid='shell-sidebar-brand'] {
   padding-top: 32px;
 }
 
+html[data-shell='electron'] [data-testid='shell-sidebar']::before {
+  content: '';
+  position: absolute;
+  inset: 0 0 auto 0;
+  height: 44px;
+  -webkit-app-region: drag;
+}
+
+html[data-shell='electron'] [data-testid='shell-sidebar'] :is(button, a, input, select, textarea, [role='button']) {
+  -webkit-app-region: no-drag;
+}
+
 html[data-shell='electron'] [data-testid='shell-toolbar'] {
   -webkit-app-region: drag;
 }

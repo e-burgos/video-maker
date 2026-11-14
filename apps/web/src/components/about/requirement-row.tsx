@@ -30,10 +30,12 @@ export function RequirementRow({ item, copy }: RequirementRowProps) {
         </StateBadge>
       </div>
       <p className="m-0 text-xs text-[var(--cl-ink-2)]">{copy.purpose}</p>
-      <p className="m-0 text-xs text-[var(--cl-ink-2)]">
-        <span className="font-semibold text-[var(--cl-ink)]">{t('about.requirements.howToFix')}: </span>
-        {copy.fix}
-      </p>
+      {item.state !== 'ok' && (
+        <p data-testid="about-requirement-fix" className="m-0 text-xs text-[var(--cl-ink-2)]">
+          <span className="font-semibold text-[var(--cl-ink)]">{t('about.requirements.howToFix')}: </span>
+          {copy.fix}
+        </p>
+      )}
     </li>
   );
 }

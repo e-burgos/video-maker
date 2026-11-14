@@ -26,6 +26,8 @@ export const MUTED_TEXT_CLASS = 'text-[var(--cl-ink-2)]';
 export const TEXTAREA_CLASS =
   'focus-cl glass-sub min-w-0 rounded-[10px] px-3 py-2 text-sm text-[var(--cl-ink)] placeholder:text-[var(--cl-ink-3)]';
 export const CHECKBOX_CLASS = 'size-4 shrink-0 accent-[var(--cl-action-fill)]';
+export const RADIO_CLASS =
+  'focus-cl size-4 shrink-0 appearance-none rounded-full border border-[var(--cl-ink-3)] bg-transparent checked:border-[var(--cl-action-fill)] checked:bg-[radial-gradient(circle,var(--cl-action-fill)_0_38%,transparent_42%)]';
 export const INLINE_LABEL_CLASS = 'flex items-center gap-2 text-xs text-[var(--cl-ink-2)]';
 export const CHECK_LABEL_CLASS = 'flex items-center gap-2 text-sm text-[var(--cl-ink)]';
 export const ROW_CLASS = 'glass-sub flex flex-wrap items-center gap-2 rounded-[12px] p-2.5';

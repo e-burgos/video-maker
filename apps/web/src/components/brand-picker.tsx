@@ -4,6 +4,7 @@ import { Link } from 'react-router-dom';
 import { PALETTE_KEYS, brandFileUrl } from '../api/brand-files';
 import type { BrandSummary } from '../api/brand-types';
 import { useT } from '../i18n/language-context';
+import { RADIO_CLASS } from './ui/cl-controls';
 
 export type BrandPickerProps = {
   brands: readonly BrandSummary[];
@@ -80,6 +81,7 @@ export function BrandPicker({
           <label className={STYLE.option}>
             <input
               type="radio"
+              className={RADIO_CLASS}
               name={radioName}
               checked={value === null}
               disabled={disabled}
@@ -93,6 +95,7 @@ export function BrandPicker({
           <label key={brand.id} className={STYLE.option} data-testid={`brand-picker-option-${brand.id}`}>
             <input
               type="radio"
+              className={RADIO_CLASS}
               name={radioName}
               checked={value === brand.id}
               disabled={disabled}

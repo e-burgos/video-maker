@@ -8,13 +8,13 @@ import { ThemeProvider } from '../../theme/theme-context';
 import { ShellSidebar } from './shell-sidebar';
 import { VideoStepsNav } from './video-steps-nav';
 
-function renderSidebar(pathname: string, videoBlock: React.ReactNode = null) {
+function renderSidebar(pathname: string, videoBlock: React.ReactNode = null, videoRail: React.ReactNode = null) {
   const client = { getHealth: vi.fn().mockRejectedValue(new Error('offline')) } as unknown as RenderApiClient;
   return render(
     <ThemeProvider>
       <RenderApiProvider client={client}>
         <MemoryRouter initialEntries={[pathname]}>
-          <ShellSidebar videoBlock={videoBlock} />
+          <ShellSidebar videoBlock={videoBlock} videoRail={videoRail} />
         </MemoryRouter>
       </RenderApiProvider>
     </ThemeProvider>,
@@ -80,5 +80,23 @@ describe('ShellSidebar', () => {
     expect(within(nav).getByRole('link', { name: 'library' }).getAttribute('data-status')).toBe('ok');
     expect(within(nav).getByRole('link', { name: 'voice' }).getAttribute('data-status')).toBe('warn');
     expect(within(nav).getByRole('link', { name: 'storyboard' }).getAttribute('data-status')).toBe('pending');
+  });
+
+  it('lets the navigation scroll while the footer stays outside it and never shrinks', () => {
+    renderSidebar('/projects/a', <div>block</div>);
+    const nav = screen.getByRole('navigation', { name: 'Main navigation' });
+    const footer = screen.getByTestId('sidebar-footer');
+
+    expect(nav.className).toContain('overflow-y-auto');
+    expect(nav.className).toContain('min-h-0');
+    expect(nav.contains(footer)).toBe(false);
+    expect(footer.className).toContain('shrink-0');
+    expect(screen.getByTestId('shell-sidebar-brand').className).toContain('shrink-0');
+  });
+
+  it('renders the rail variant of the video steps after My videos', () => {
+    renderSidebar('/projects/a', null, <div data-testid="rail">rail</div>);
+
+    expect(screen.getByTestId('videos-nav').parentElement?.contains(screen.getByTestId('rail'))).toBe(true);
   });
 });

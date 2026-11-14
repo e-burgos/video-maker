@@ -7,7 +7,7 @@ import { RenderApiError, serviceUnreachable } from '../api/render-api-error';
 import { useAsyncResource } from '../hooks/use-async-resource';
 import { useT } from '../i18n/language-context';
 import { BrandPicker } from './brand-picker';
-import { FIELD_CLASS, FIELD_LABEL_CLASS, PRIMARY_BUTTON_CLASS, SECONDARY_BUTTON_CLASS } from './ui/cl-controls';
+import { FIELD_CLASS, FIELD_LABEL_CLASS, PRIMARY_BUTTON_CLASS, RADIO_CLASS, SECONDARY_BUTTON_CLASS } from './ui/cl-controls';
 import { ErrorNotice } from './error-notice';
 
 const MODE_OPTIONS = [
@@ -109,7 +109,7 @@ export function CreateProjectForm({ existingSlugs, onCreated, onCancel }: Create
                 value={option.value}
                 checked={mode === option.value}
                 onChange={() => setMode(option.value)}
-                className="mt-1"
+                className={`${RADIO_CLASS} mt-1`}
               />
               <span>
                 <span className="block font-medium text-[var(--cl-ink)]">{t(option.titleKey)}</span>

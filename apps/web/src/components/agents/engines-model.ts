@@ -1,3 +1,4 @@
+import { RENDER_API_BASE_PATH } from '../../api/artifact-url';
 import type { ServiceHealth } from '../../api/render-api-types';
 import type { TranslationKey } from '../../i18n/messages-en';
 
@@ -35,9 +36,6 @@ export function engineStatuses(health: ServiceHealth): EngineStatus[] {
   });
 }
 
-export function studioPort(location: Pick<Location, 'port' | 'protocol'>): string {
-  if (location.port !== '') {
-    return location.port;
-  }
-  return location.protocol === 'https:' ? '443' : '80';
+export function apiBaseUrl(location: Pick<Location, 'origin'>): string {
+  return `${location.origin}${RENDER_API_BASE_PATH}`;
 }
