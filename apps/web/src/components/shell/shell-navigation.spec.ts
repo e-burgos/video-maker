@@ -8,7 +8,8 @@ describe('toolbarHeadingFor', () => {
     expect(toolbarHeadingFor('/brands/acme').titleKey).toBe('toolbar.title.brands');
     expect(toolbarHeadingFor('/publish-queue').titleKey).toBe('toolbar.title.publishQueue');
     expect(toolbarHeadingFor('/settings').titleKey).toBe('toolbar.title.settings');
-    expect(toolbarHeadingFor('/guide').titleKey).toBe('toolbar.title.guide');
+    expect(toolbarHeadingFor('/learn').titleKey).toBe('toolbar.title.learn');
+    expect(toolbarHeadingFor('/guide').titleKey).toBe('toolbar.title.learn');
   });
 
   it('titles a video route with its step and leaves the subtitle to the video name', () => {

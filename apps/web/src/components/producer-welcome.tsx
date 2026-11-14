@@ -237,7 +237,7 @@ export function ProducerWelcome({
         </ul>
         <p className="text-xs text-[var(--cl-ink-3)]">
           {t('producer.startersHint')}{' '}
-          <Link to="/guide" className="focus-cl rounded text-[var(--cl-action-text)] underline hover:text-[var(--cl-action-hover)]">
+          <Link to="/learn?tab=guide" className="focus-cl rounded text-[var(--cl-action-text)] underline hover:text-[var(--cl-action-hover)]">
             {t('guide.howDoesThisWork')}
           </Link>
         </p>

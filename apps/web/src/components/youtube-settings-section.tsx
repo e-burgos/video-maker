@@ -105,7 +105,7 @@ export function YouTubeSettingsSection() {
                 {t('youtube.settings.cloudConsole')}
               </a>{' '}
               ·{' '}
-              <Link to="/guide#youtube" className={LINK_CLASS}>
+              <Link to="/learn?tab=guide#youtube" className={LINK_CLASS}>
                 {t('youtube.settings.guideLink')}
               </Link>
             </p>

@@ -27,7 +27,7 @@ describe('ShellSidebar', () => {
     const nav = screen.getByRole('navigation', { name: 'Main navigation' });
 
     const hrefs = within(nav).getAllByRole('link').map((link) => link.getAttribute('href'));
-    expect(hrefs).toEqual(['/', '/brands', '/publish-queue', '/settings', '/guide']);
+    expect(hrefs).toEqual(['/', '/brands', '/publish-queue', '/settings', '/learn']);
     expect(within(nav).getByText('Produce')).toBeTruthy();
     expect(within(nav).getByText('Output')).toBeTruthy();
     expect(within(nav).getByText('System')).toBeTruthy();

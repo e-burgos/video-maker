@@ -35,7 +35,7 @@ export const SIDEBAR_SECTIONS: readonly SidebarSection[] = [
     labelKey: 'nav.section.system',
     items: [
       { to: '/settings', testId: 'settings-nav', labelKey: 'nav.settings', icon: 'Settings' },
-      { to: '/guide', testId: 'guide-nav', labelKey: 'nav.guide', icon: 'BookOpen' },
+      { to: '/learn', testId: 'guide-nav', labelKey: 'nav.learn', icon: 'BookOpen' },
     ],
   },
 ];
@@ -78,7 +78,8 @@ const TOP_LEVEL_HEADINGS: readonly { prefix: string; heading: ToolbarHeading }[]
   { prefix: '/brands', heading: { titleKey: 'toolbar.title.brands', subtitleKey: 'toolbar.subtitle.brands' } },
   { prefix: '/publish-queue', heading: { titleKey: 'toolbar.title.publishQueue', subtitleKey: 'toolbar.subtitle.publishQueue' } },
   { prefix: '/settings', heading: { titleKey: 'toolbar.title.settings', subtitleKey: 'toolbar.subtitle.settings' } },
-  { prefix: '/guide', heading: { titleKey: 'toolbar.title.guide', subtitleKey: 'toolbar.subtitle.guide' } },
+  { prefix: '/learn', heading: { titleKey: 'toolbar.title.learn', subtitleKey: 'toolbar.subtitle.learn' } },
+  { prefix: '/guide', heading: { titleKey: 'toolbar.title.learn', subtitleKey: 'toolbar.subtitle.learn' } },
 ];
 
 const VIDEOS_HEADING: ToolbarHeading = { titleKey: 'toolbar.title.videos', subtitleKey: 'toolbar.subtitle.videos' };

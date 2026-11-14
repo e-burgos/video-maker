@@ -4,6 +4,7 @@ import { BrowserRouter, Navigate, Route, Routes, useParams } from 'react-router-
 import { RenderApiProvider } from '../api/render-api-context';
 import { LanguageProvider, useT } from '../i18n/language-context';
 import type { TranslationKey } from '../i18n/messages-en';
+import { GuideRouteRedirect } from '../components/learn/guide-route-redirect';
 import { StudioLayout } from '../components/studio-layout';
 import { ProjectsPage } from '../pages/projects-page';
 import { LoadingState } from '../components/ui/status-states';
@@ -20,8 +21,8 @@ const BrandEditorPage = lazy(async () => ({
   default: (await import('../pages/brand-editor-page')).BrandEditorPage,
 }));
 
-const GuidePage = lazy(async () => ({
-  default: (await import('../pages/guide-page')).GuidePage,
+const LearnPage = lazy(async () => ({
+  default: (await import('../pages/learn-page')).LearnPage,
 }));
 
 const ProjectWorkspacePage = lazy(async () => ({
@@ -70,11 +71,12 @@ export function App() {
           <Routes>
             <Route element={<StudioLayout />}>
               <Route path="/" element={<ProjectsPage />} />
+              <Route path="/guide" element={<GuideRouteRedirect />} />
               <Route
-                path="/guide"
+                path="/learn"
                 element={
-                  <Suspense fallback={<RouteFallback messageKey="app.loading.guide" />}>
-                    <GuidePage />
+                  <Suspense fallback={<RouteFallback messageKey="app.loading.learn" />}>
+                    <LearnPage />
                   </Suspense>
                 }
               />
