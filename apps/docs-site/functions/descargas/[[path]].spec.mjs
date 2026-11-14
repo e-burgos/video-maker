@@ -42,6 +42,10 @@ describe('isDownloadableKey', () => {
     expect(isDownloadableKey('Video-Maker-0.1.0-arm64.dmg')).toBe(true);
   });
 
+  it('accepts the update manifest', () => {
+    expect(isDownloadableKey('latest.json')).toBe(true);
+  });
+
   it('rejects anything else', () => {
     expect(isDownloadableKey('Video-Maker-arm64.dmg.bak')).toBe(false);
     expect(isDownloadableKey('../secrets.txt')).toBe(false);
@@ -112,6 +116,21 @@ describe('onRequestGet', () => {
     });
 
     expect(response.headers.get('cache-control')).toBe('public, max-age=31536000, immutable');
+  });
+
+  it('serves the update manifest as uncached JSON without an attachment disposition', async () => {
+    const object = makeR2Object({ size: 150, httpEtag: '"m"' });
+    const env = makeEnv({ getResult: object });
+    const response = await onRequestGet({
+      params: { path: ['latest.json'] },
+      request: new Request('https://video.estebanburgos.com.ar/descargas/latest.json'),
+      env,
+    });
+
+    expect(response.status).toBe(200);
+    expect(response.headers.get('content-type')).toBe('application/json; charset=utf-8');
+    expect(response.headers.get('content-disposition')).toBeNull();
+    expect(response.headers.get('cache-control')).toBe('no-cache');
   });
 
   it('forwards a Range request to R2 and returns 206 with content-range', async () => {
