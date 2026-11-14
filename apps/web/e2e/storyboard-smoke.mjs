@@ -3,6 +3,8 @@ import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 
 import {
+  FIXTURES_ROOT,
+  forceEnglishInterface,
   REPO_ROOT,
   assert,
   log,
@@ -53,7 +55,7 @@ async function main() {
   const tempMediaRoot = await mkdtemp(join(tmpdir(), 'storyboard-smoke-'));
   const projectRoot = join(tempMediaRoot, SLUG);
   await mkdir(projectRoot, { recursive: true });
-  await cp(join(REPO_ROOT, 'media', SLUG, 'raw'), join(projectRoot, 'raw'), { recursive: true });
+  await cp(join(FIXTURES_ROOT, SLUG, 'raw'), join(projectRoot, 'raw'), { recursive: true });
   const storyboardPath = join(projectRoot, 'work', 'storyboard.json');
   log('1', `temp media root: ${tempMediaRoot} (no work/, no storyboard yet)`);
 
@@ -92,6 +94,7 @@ async function main() {
   const { chromium } = await resolvePlaywright();
   const browser = await chromium.launch({ channel: 'chrome' });
   const context = await browser.newContext({ viewport: { width: 1280, height: 2400 } });
+  await forceEnglishInterface(context);
   await context.grantPermissions(['clipboard-read', 'clipboard-write'], {
     origin: `http://localhost:${WEB_PORT}`,
   });
@@ -221,7 +224,8 @@ async function main() {
     log('7', 'editing the narration of the first scene and saving it with a full PUT (EP-017)');
     const onDisk = JSON.parse(await readFile(storyboardPath, 'utf8'));
     const firstSceneId = onDisk.scenes[0].id;
-    const editedNarration = 'Narración editada desde el Web Studio para verificar el PUT.';
+    const emphasizedWords = onDisk.scenes[0].direction?.emphasis ?? [];
+    const editedNarration = ['Narración editada desde el Web Studio para verificar el PUT.', ...emphasizedWords].join(' ');
     await page.getByLabel(`Narration for ${firstSceneId}`, { exact: true }).fill(editedNarration);
     await page.waitForFunction(
       () =>
@@ -286,6 +290,10 @@ async function main() {
     );
 
     log('9', 'proposing a second storyboard: the service must answer 409 and the UI must confirm');
+    const briefToggle = page.locator('[data-testid="storyboard-trigger"] button[aria-expanded]').first();
+    if ((await briefToggle.getAttribute('aria-expanded')) !== 'true') {
+      await briefToggle.click();
+    }
     await page.getByLabel('Brief', { exact: true }).fill(BRIEF);
     const [conflictResponse] = await Promise.all([
       page.waitForResponse(

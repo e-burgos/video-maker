@@ -4,6 +4,8 @@ import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 
 import {
+  FIXTURES_ROOT,
+  forceEnglishInterface,
   MEDIA_ENV_VARS,
   REPO_ROOT,
   assert,
@@ -42,7 +44,7 @@ async function readCatalog(projectRoot) {
 
 async function seedProject(mediaRoot) {
   const projectRoot = join(mediaRoot, SLUG);
-  const source = join(REPO_ROOT, 'media/smoke-ingest');
+  const source = join(FIXTURES_ROOT, 'smoke-ingest');
 
   await mkdir(join(projectRoot, 'work'), { recursive: true });
   await cp(join(source, 'raw'), join(projectRoot, 'raw'), { recursive: true });
@@ -131,6 +133,7 @@ async function main() {
     const { chromium } = await resolvePlaywright();
     browser = await chromium.launch({ channel: 'chrome' });
     const context = await browser.newContext({ viewport: { width: 1280, height: 1600 } });
+    await forceEnglishInterface(context);
     const page = await context.newPage();
     page.on('console', (message) => {
       if (message.type() === 'error') {

@@ -8,6 +8,8 @@ const HERE = dirname(fileURLToPath(import.meta.url));
 
 export const REPO_ROOT = join(HERE, '..', '..', '..');
 
+export const FIXTURES_ROOT = process.env.E2E_FIXTURES_ROOT ?? join(REPO_ROOT, 'media');
+
 export const MEDIA_ENV_VARS = [
   'FFMPEG_PATH',
   'FFPROBE_PATH',
@@ -18,6 +20,21 @@ export const MEDIA_ENV_VARS = [
 export const VOICE_ENV_VARS = [...MEDIA_ENV_VARS, 'TTS_CLI_PATH', 'TTS_VOICES_DIR'];
 
 export const MIN_FREE_MEMORY_RATIO = 0.35;
+
+export async function forceEnglishInterface(context) {
+  await context.addInitScript(() => {
+    if (window.localStorage.getItem('video-maker.language') === null) {
+      window.localStorage.setItem('video-maker.language', 'en');
+    }
+  });
+}
+
+export async function openPreviewSection(page, id) {
+  const header = page.locator(`[data-testid="preview-section-${id}"] button`).first();
+  if ((await header.getAttribute('aria-expanded')) !== 'true') {
+    await header.click();
+  }
+}
 
 export function log(step, message) {
   console.log(`[${step}] ${message}`);

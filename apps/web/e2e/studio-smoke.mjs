@@ -5,6 +5,9 @@ import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 
 import {
+  FIXTURES_ROOT,
+  forceEnglishInterface,
+  openPreviewSection,
   REPO_ROOT,
   assert,
   log,
@@ -31,7 +34,7 @@ async function main() {
 
   log('1', 'copying media/smoke-ingest into a temporary media root (never media/ itself)');
   const tempMediaRoot = await mkdtemp(join(tmpdir(), 'studio-smoke-'));
-  await cp(join(REPO_ROOT, 'media', SLUG), join(tempMediaRoot, SLUG), { recursive: true });
+  await cp(join(FIXTURES_ROOT, SLUG), join(tempMediaRoot, SLUG), { recursive: true });
   log('1', `temp media root: ${tempMediaRoot}`);
 
   const initialTimelinePath = join(tempMediaRoot, SLUG, 'work', 'timeline.json');
@@ -72,11 +75,15 @@ async function main() {
 
   const { chromium } = await resolvePlaywright();
   const browser = await chromium.launch({ channel: 'chrome' });
-  const page = await browser.newPage({ viewport: { width: 1280, height: 2200 } });
+  const context = await browser.newContext({ viewport: { width: 1280, height: 2200 } });
+  await forceEnglishInterface(context);
+  const page = await context.newPage();
 
   const badResponses = [];
   page.on('response', (response) => {
-    if (response.status() >= 400) {
+    const stepStatusProbe =
+      response.status() === 404 && /\/api\/projects\/[^/]+\/(storyboard|voice)$/.test(response.url());
+    if (response.status() >= 400 && !stepStatusProbe) {
       badResponses.push(`${response.status()} ${response.url()}`);
     }
   });
@@ -92,7 +99,8 @@ async function main() {
   try {
     log('4', 'opening the projects list (EP-002)');
     await page.goto(`http://localhost:${WEB_PORT}/`, { waitUntil: 'networkidle' });
-    await page.getByText(SLUG, { exact: true }).click();
+    await page.getByRole('link', { name: new RegExp(SLUG) }).first().click();
+    await page.goto(`http://localhost:${WEB_PORT}/projects/${SLUG}/library`, { waitUntil: 'networkidle' });
 
     log('4', 'opening the asset library (EP-004/EP-005)');
     await page.waitForSelector('[data-testid="asset-source"]');
@@ -105,6 +113,7 @@ async function main() {
     await page.screenshot({ path: join(ARTIFACTS_DIR, 'studio-smoke-02-preview-loaded.png') });
 
     log('5a', 'US-3-001: shortening the first a-roll clip');
+    await openPreviewSection(page, 'aroll');
     const trimInput = page.getByLabel('Duration for aroll-0001');
     const currentDuration = Number(await trimInput.inputValue());
     const newDuration = Math.max(1, Math.floor(currentDuration / 2));
@@ -113,6 +122,7 @@ async function main() {
     log('5a', `aroll-0001.durationFrames ${currentDuration} -> ${newDuration}`);
 
     log('5b', 'US-3-002: correcting one transcribed caption word');
+    await openPreviewSection(page, 'captions');
     const wordInput = page.getByLabel('Word 1 of caption-0001');
     const originalWord = await wordInput.inputValue();
     const correctedWord = 'Ahora';
@@ -121,6 +131,7 @@ async function main() {
     log('5b', `captions[0].words[0].text "${originalWord}" -> "${correctedWord}"`);
 
     log('5c', 'US-3-003: changing the persisted music levels');
+    await openPreviewSection(page, 'music');
     await page.getByLabel('Base level (dB)').fill('-6');
     await page.getByLabel('Base level (dB)').blur();
     await page.getByLabel('Ducked level (dB)').fill('-30');
@@ -128,6 +139,7 @@ async function main() {
     log('5c', 'audioMix.music.baseGainDb -> -6, duckedGainDb -> -30');
 
     log('5d', 'US-3-004: changing the persisted output preset to a same-aspect-ratio preset');
+    await openPreviewSection(page, 'output');
     await page.getByLabel('Output preset').selectOption('tiktok-9x16');
     log('5d', 'format.preset -> tiktok-9x16 (same 9:16 aspect as reels-9x16, avoids caption safe-zone risk)');
 
@@ -189,6 +201,7 @@ async function main() {
       ['aroll-0005', 20],
       ['aroll-0006', 25],
     ];
+    await openPreviewSection(page, 'aroll');
     for (const [clipId, targetDuration] of remainingArollTargets) {
       const clipDurationInput = page.getByLabel(`Duration for ${clipId}`);
       const before = Number(await clipDurationInput.inputValue());
