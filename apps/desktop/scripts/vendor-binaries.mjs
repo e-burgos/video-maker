@@ -474,6 +474,10 @@ ${voiceEntries}
 
 - Outfit, Geist and Geist Mono — SIL Open Font License 1.1, via Fontsource.
 
+## Fonts (app interface)
+
+- Inter 5.3.0 and JetBrains Mono 5.3.0 (\`@fontsource-variable/inter\`, \`@fontsource-variable/jetbrains-mono\`) — SIL Open Font License 1.1, bundled with the app.
+
 ## Music (motion graphics brand kit)
 
 - "Voxel Revolution" and "Newer Wave" — Kevin MacLeod (incompetech.com), CC BY 4.0

@@ -2,6 +2,7 @@ import type { VideoClip } from '@video-maker/timeline-core';
 
 import type { TimelineEditAction } from '../api/timeline-edit/timeline-edit-state';
 import { useT } from '../i18n/language-context';
+import { FIELD_SMALL_CLASS, INLINE_LABEL_CLASS, ROW_CLASS, SECONDARY_BUTTON_SMALL_CLASS } from './ui/cl-controls';
 
 export type ClipTrackEditorProps = {
   track: 'aroll' | 'broll';
@@ -17,11 +18,11 @@ export function ClipTrackEditor({ track, clips, dispatch }: ClipTrackEditorProps
       {clips.map((clip, index) => (
         <li
           key={clip.id}
-          className="flex flex-wrap items-center gap-3 rounded-lg border border-slate-800 bg-slate-900/40 p-3"
+          className={ROW_CLASS}
         >
-          <span className="font-mono text-xs text-slate-500">{clip.id}</span>
+          <span className="font-data w-full text-xs text-[var(--cl-ink-3)]">{clip.id}</span>
 
-          <label className="flex items-center gap-2 text-sm text-slate-400">
+          <label className={INLINE_LABEL_CLASS}>
             {t('clip.trimStart')}
             <input
               type="number"
@@ -35,11 +36,11 @@ export function ClipTrackEditor({ track, clips, dispatch }: ClipTrackEditorProps
                   trimStartMs: Number(event.target.value),
                 })
               }
-              className="w-24 rounded-md border border-slate-700 bg-slate-900 px-2 py-1 font-mono text-sm text-slate-100"
+              className={`${FIELD_SMALL_CLASS} font-data w-24`}
             />
           </label>
 
-          <label className="flex items-center gap-2 text-sm text-slate-400">
+          <label className={INLINE_LABEL_CLASS}>
             {t('clip.duration')}
             <input
               type="number"
@@ -53,7 +54,7 @@ export function ClipTrackEditor({ track, clips, dispatch }: ClipTrackEditorProps
                   durationFrames: Number(event.target.value),
                 })
               }
-              className="w-24 rounded-md border border-slate-700 bg-slate-900 px-2 py-1 font-mono text-sm text-slate-100"
+              className={`${FIELD_SMALL_CLASS} font-data w-24`}
             />
           </label>
 
@@ -64,7 +65,7 @@ export function ClipTrackEditor({ track, clips, dispatch }: ClipTrackEditorProps
                 aria-label={t('clip.moveUpFor', { clipId: clip.id })}
                 disabled={index === 0}
                 onClick={() => dispatch({ type: 'aroll-move', clipId: clip.id, toIndex: index - 1 })}
-                className="rounded-md border border-slate-700 px-2 py-1 text-xs text-slate-300 disabled:opacity-40"
+                className={SECONDARY_BUTTON_SMALL_CLASS}
               >
                 {t('clip.moveUp')}
               </button>
@@ -73,7 +74,7 @@ export function ClipTrackEditor({ track, clips, dispatch }: ClipTrackEditorProps
                 aria-label={t('clip.moveDownFor', { clipId: clip.id })}
                 disabled={index === clips.length - 1}
                 onClick={() => dispatch({ type: 'aroll-move', clipId: clip.id, toIndex: index + 1 })}
-                className="rounded-md border border-slate-700 px-2 py-1 text-xs text-slate-300 disabled:opacity-40"
+                className={SECONDARY_BUTTON_SMALL_CLASS}
               >
                 {t('clip.moveDown')}
               </button>

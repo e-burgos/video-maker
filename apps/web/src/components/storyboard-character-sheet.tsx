@@ -2,6 +2,8 @@ import type { StoryboardDocument } from '@video-maker/timeline-core';
 
 import { setCharacterField } from '../api/storyboard-edit/storyboard-document';
 import { useT } from '../i18n/language-context';
+import { FIELD_CLASS, FIELD_LABEL_CLASS, TEXTAREA_CLASS } from './ui/cl-controls';
+import { EmptyState } from './ui/status-states';
 
 export type StoryboardCharacterSheetProps = {
   storyboard: StoryboardDocument;
@@ -12,33 +14,33 @@ export function StoryboardCharacterSheet({ storyboard, onChange }: StoryboardCha
   const t = useT();
 
   return (
-    <div
+    <section
       data-testid="storyboard-character-sheet"
-      className="space-y-3 rounded-lg border border-slate-800 bg-slate-900/40 p-4"
+      className="glass flex flex-col gap-3 rounded-[20px] p-4"
     >
-      <h2 className="font-mono text-sm uppercase tracking-wide text-slate-400">
+      <h2 className="m-0 text-sm font-bold text-[var(--cl-ink)]">
         {t('storyboardCharacters.heading')}{' '}
-        <span className="text-slate-600">({storyboard.characters.length})</span>
+        <span className="font-data font-normal text-[var(--cl-ink-3)]">({storyboard.characters.length})</span>
       </h2>
-      <p className="text-sm text-slate-400">{t('storyboardCharacters.note')}</p>
+      <p className="m-0 text-sm text-[var(--cl-ink-2)]">{t('storyboardCharacters.note')}</p>
 
       {storyboard.characters.length === 0 ? (
-        <p className="text-sm text-slate-600">{t('storyboardCharacters.empty')}</p>
+        <EmptyState message={t('storyboardCharacters.empty')} />
       ) : (
-        <ul className="space-y-3">
+        <ul className="m-0 list-none flex flex-col gap-3 p-0">
           {storyboard.characters.map((character) => (
-            <li key={character.id} className="grid gap-2 sm:grid-cols-[12rem_1fr]">
-              <label className="flex flex-col gap-1 text-xs text-slate-400">
+            <li key={character.id} className="grid gap-2 sm:grid-cols-[12rem_minmax(0,1fr)]">
+              <label className={`flex flex-col gap-1 ${FIELD_LABEL_CLASS}`}>
                 {t('storyboardCharacters.name', { sceneId: character.id })}
                 <input
                   value={character.name}
                   onChange={(event) =>
                     onChange(setCharacterField(storyboard, character.id, 'name', event.target.value))
                   }
-                  className="rounded-md border border-slate-700 bg-slate-900 px-2 py-1 text-sm text-slate-100"
+                  className={FIELD_CLASS}
                 />
               </label>
-              <label className="flex flex-col gap-1 text-xs text-slate-400">
+              <label className={`flex flex-col gap-1 ${FIELD_LABEL_CLASS}`}>
                 {t('storyboardCharacters.visual', { sceneId: character.id })}
                 <textarea
                   aria-label={t('storyboardCharacters.visual', { sceneId: character.id })}
@@ -54,13 +56,13 @@ export function StoryboardCharacterSheet({ storyboard, onChange }: StoryboardCha
                       ),
                     )
                   }
-                  className="rounded-md border border-slate-700 bg-slate-900 px-2 py-1 text-sm text-slate-100"
+                  className={TEXTAREA_CLASS}
                 />
               </label>
             </li>
           ))}
         </ul>
       )}
-    </div>
+    </section>
   );
 }

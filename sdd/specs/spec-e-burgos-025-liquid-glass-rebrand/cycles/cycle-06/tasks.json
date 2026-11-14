@@ -1,0 +1,138 @@
+{
+  "$schema": "../../../../schemas/cycle-tasks.schema.json",
+  "spec": "spec-e-burgos-025-liquid-glass-rebrand",
+  "cycle": 6,
+  "module": "liquid-glass-rebrand",
+  "apps": [
+    "apps/web",
+    "apps/render-api",
+    "apps/desktop"
+  ],
+  "flow": "lite",
+  "user_stories_generated": true,
+  "prerequisites": {
+    "tasks_generated": true
+  },
+  "tasks": [
+    {
+      "id": "TASK-001",
+      "title": "Aprender: guía, cómo funciona, tutorial, FAQ y galería",
+      "user_stories": [
+        "US-025-601"
+      ],
+      "estimation_hours": 5,
+      "story_points": 5,
+      "depends_on": [],
+      "status": "done",
+      "files": [
+        "apps/web/src/pages/learn-page.tsx",
+        "apps/web/src/components/learn/",
+        "apps/web/src/content/learn/",
+        "apps/web/public/gallery/",
+        "apps/web/public/learn/tutorial-poster.jpg"
+      ],
+      "usage": {
+        "tokens_in": 175000,
+        "tokens_out": 20788,
+        "provider_model": "claude/sonnet",
+        "effort": "medium",
+        "agent": "implementor-front",
+        "approx": true,
+        "source": "agent-usage-notification",
+        "recorded_at": "2026-11-13"
+      }
+    },
+    {
+      "id": "TASK-002",
+      "title": "Acerca de, buscar actualizaciones y requisitos",
+      "user_stories": [
+        "US-025-602",
+        "US-025-603"
+      ],
+      "estimation_hours": 6,
+      "story_points": 8,
+      "depends_on": [],
+      "status": "done",
+      "files": [
+        "apps/web/src/pages/about-page.tsx",
+        "apps/web/src/components/about/",
+        "apps/web/src/content/about/",
+        "apps/render-api/src/http/handlers/app-update-handler.ts",
+        "apps/render-api/src/app-update/compare-versions.ts",
+        "apps/desktop/scripts/release-desktop.mjs",
+        "sdd/api.json"
+      ],
+      "usage": {
+        "tokens_in": 240000,
+        "tokens_out": 32809,
+        "provider_model": "claude/sonnet",
+        "effort": "medium",
+        "agent": "implementor-front",
+        "approx": true,
+        "source": "agent-usage-notification",
+        "recorded_at": "2026-11-13"
+      }
+    },
+    {
+      "id": "TASK-003",
+      "title": "Conectar agentes y material libre en la biblioteca",
+      "user_stories": [
+        "US-025-604",
+        "US-025-605"
+      ],
+      "estimation_hours": 5,
+      "story_points": 5,
+      "depends_on": [],
+      "status": "done",
+      "files": [
+        "apps/web/src/components/agents/",
+        "apps/web/src/content/agents/",
+        "apps/web/src/components/library/free-media/",
+        "apps/web/src/components/shell/capability-rows.ts",
+        "apps/web/src/api/render-api-client.ts"
+      ],
+      "usage": {
+        "tokens_in": 200000,
+        "tokens_out": 23250,
+        "provider_model": "claude/sonnet",
+        "effort": "medium",
+        "agent": "implementor-front",
+        "approx": true,
+        "source": "agent-usage-notification",
+        "recorded_at": "2026-11-13"
+      }
+    },
+    {
+      "id": "TASK-004",
+      "title": "Verificación del ciclo 06 y cierre de la spec",
+      "user_stories": [
+        "US-025-601",
+        "US-025-602",
+        "US-025-603",
+        "US-025-604",
+        "US-025-605"
+      ],
+      "estimation_hours": 2,
+      "story_points": 2,
+      "depends_on": [
+        "TASK-001",
+        "TASK-002",
+        "TASK-003"
+      ],
+      "status": "done",
+      "files": [
+        "apps/web/src/index.css"
+      ],
+      "usage": {
+        "tokens_in": 80000,
+        "tokens_out": 12000,
+        "provider_model": "claude/opus",
+        "effort": "low",
+        "agent": "orchestrator",
+        "approx": true,
+        "source": "declared-estimate",
+        "recorded_at": "2026-11-13"
+      }
+    }
+  ]
+}

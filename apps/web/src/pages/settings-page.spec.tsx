@@ -5,24 +5,33 @@ import { describe, expect, it, vi } from 'vitest';
 import { openRouterModelsResult, producerSettings } from '../api/__fixtures__/producer';
 import { RenderApiProvider } from '../api/render-api-context';
 import { RenderApiError } from '../api/render-api-error';
+import { ShellToolbar } from '../components/shell/shell-toolbar';
+import { ToolbarActionProvider } from '../components/shell/toolbar-action-provider';
+import { ThemeProvider } from '../theme/theme-context';
 import { SettingsPage } from './settings-page';
 import type { RenderApiClient } from '../api/render-api-client';
 
-function renderPage(client: Partial<RenderApiClient>) {
+function renderPage(client: Partial<RenderApiClient>, tab = 'producer') {
   const withDefaults: Partial<RenderApiClient> = {
     getProducerSettings: vi.fn().mockResolvedValue(producerSettings()),
     getOpenRouterModels: vi.fn().mockResolvedValue(openRouterModelsResult()),
     getElevenLabsSettings: vi.fn().mockResolvedValue({ keyConfigured: false, voices: [] }),
     getYouTubeIntegration: vi.fn().mockResolvedValue({ clientConfigured: false, connected: false, channel: null }),
+    getHealth: vi.fn().mockRejectedValue(new Error('health not stubbed')),
     ...client,
   };
 
   render(
-    <RenderApiProvider client={withDefaults as RenderApiClient}>
-      <MemoryRouter>
-        <SettingsPage />
-      </MemoryRouter>
-    </RenderApiProvider>,
+    <ThemeProvider>
+      <RenderApiProvider client={withDefaults as RenderApiClient}>
+        <MemoryRouter initialEntries={[`/settings?tab=${tab}`]}>
+          <ToolbarActionProvider>
+            <ShellToolbar title="Settings" subtitle={null} />
+            <SettingsPage />
+          </ToolbarActionProvider>
+        </MemoryRouter>
+      </RenderApiProvider>
+    </ThemeProvider>,
   );
 
   return withDefaults;
@@ -184,7 +193,7 @@ describe('SettingsPage', () => {
         .fn()
         .mockResolvedValueOnce({ keyConfigured: false, voices: [] })
         .mockResolvedValue({ keyConfigured: true, voices: [] });
-      renderPage({ putElevenLabsKey, getElevenLabsSettings });
+      renderPage({ putElevenLabsKey, getElevenLabsSettings }, 'voice');
 
       await waitFor(() => expect(screen.getByTestId('settings-elevenlabs-key-form')).toBeTruthy());
       const input = screen.getByLabelText('ElevenLabs API key') as HTMLInputElement;
@@ -203,7 +212,7 @@ describe('SettingsPage', () => {
       const putElevenLabsKey = vi
         .fn()
         .mockRejectedValue(new RenderApiError('VOICE_ENGINE_NOT_CONFIGURED', 'la key no es válida', 401, null));
-      renderPage({ putElevenLabsKey });
+      renderPage({ putElevenLabsKey }, 'voice');
 
       await waitFor(() => expect(screen.getByTestId('settings-elevenlabs-key-form')).toBeTruthy());
       fireEvent.change(screen.getByLabelText('ElevenLabs API key'), { target: { value: 'bad' } });
@@ -217,7 +226,7 @@ describe('SettingsPage', () => {
 
     it('adds a voice by id and name and saves the whole list', async () => {
       const putElevenLabsVoices = vi.fn().mockResolvedValue([lucia]);
-      renderPage({ putElevenLabsVoices });
+      renderPage({ putElevenLabsVoices }, 'voice');
 
       await waitFor(() => expect(screen.getByLabelText('Voice ID')).toBeTruthy());
       fireEvent.change(screen.getByLabelText('Voice ID'), { target: { value: 'abc123' } });
@@ -231,15 +240,127 @@ describe('SettingsPage', () => {
 
     it('removes a voice and saves the remaining list', async () => {
       const putElevenLabsVoices = vi.fn().mockResolvedValue([]);
-      renderPage({
-        putElevenLabsVoices,
-        getElevenLabsSettings: vi.fn().mockResolvedValue({ keyConfigured: true, voices: [lucia] }),
-      });
+      renderPage(
+        {
+          putElevenLabsVoices,
+          getElevenLabsSettings: vi.fn().mockResolvedValue({ keyConfigured: true, voices: [lucia] }),
+        },
+        'voice',
+      );
 
       await waitFor(() => expect(screen.getByTestId('settings-elevenlabs-voices').textContent).toContain('abc123'));
       fireEvent.click(screen.getByRole('button', { name: 'Remove Lucia' }));
 
       await waitFor(() => expect(putElevenLabsVoices).toHaveBeenCalledWith([]));
+    });
+  });
+  describe('tabs in the url', () => {
+    function visiblePanels(): string[] {
+      return screen
+        .getAllByRole('tabpanel', { hidden: true })
+        .filter((panel) => !panel.hasAttribute('hidden'))
+        .map((panel) => panel.getAttribute('data-testid') ?? '');
+    }
+
+    it('opens the producer tab when the url names no tab', async () => {
+      renderPage({}, '');
+
+      await waitFor(() => expect(screen.getByTestId('settings-producer-section')).toBeTruthy());
+      expect(visiblePanels()).toEqual(['settings-panel-producer']);
+      expect(screen.getByRole('tab', { name: 'Producer' }).getAttribute('aria-selected')).toBe('true');
+    });
+
+    it.each([
+      ['voice', 'settings-panel-voice'],
+      ['youtube', 'settings-panel-youtube'],
+      ['agents', 'settings-panel-agents'],
+      ['appearance', 'settings-panel-appearance'],
+    ])('opens only the %s panel when the url says ?tab=%s', async (tab, panel) => {
+      renderPage({}, tab);
+
+      await waitFor(() => expect(visiblePanels()).toEqual([panel]));
+    });
+
+    it('falls back to the producer tab for an unknown tab', async () => {
+      renderPage({}, 'nope');
+
+      await waitFor(() => expect(visiblePanels()).toEqual(['settings-panel-producer']));
+    });
+
+    it('switches panel when another tab is picked', async () => {
+      renderPage({});
+
+      await waitFor(() => expect(screen.getByTestId('settings-producer-section')).toBeTruthy());
+      fireEvent.click(screen.getByRole('tab', { name: 'Appearance' }));
+
+      await waitFor(() => expect(visiblePanels()).toEqual(['settings-panel-appearance']));
+      expect(screen.getByRole('radio', { name: 'Dark' })).toBeTruthy();
+      expect(screen.getByRole('radio', { name: 'Solid' })).toBeTruthy();
+    });
+  });
+
+  describe('unsaved changes', () => {
+    it('marks the producer tab and enables the toolbar action only while its draft differs from the saved one', async () => {
+      const updateProducerSettings = vi.fn().mockResolvedValue(producerSettings({ engine: 'claude-cli' }));
+      renderPage({ updateProducerSettings });
+
+      await waitFor(() => expect(screen.getByTestId('settings-producer-section')).toBeTruthy());
+      const toolbarSave = screen.getByTestId('toolbar-action') as HTMLButtonElement;
+      expect(toolbarSave.textContent).toBe('Save changes');
+      expect(toolbarSave.disabled).toBe(true);
+      expect(screen.getByTestId('settings-tab-producer').getAttribute('data-changed')).toBeNull();
+
+      fireEvent.change(screen.getByLabelText('Engine'), { target: { value: 'claude-cli' } });
+
+      await waitFor(() => expect((screen.getByTestId('toolbar-action') as HTMLButtonElement).disabled).toBe(false));
+      expect(screen.getByTestId('settings-producer-unsaved')).toBeTruthy();
+      expect(screen.getByTestId('settings-tab-producer').textContent).toContain('Unsaved changes in this tab');
+      expect(screen.getByTestId('settings-tab-youtube').textContent).not.toContain('Unsaved');
+    });
+
+    it('saves the pending draft from the toolbar action and clears the marks', async () => {
+      const updateProducerSettings = vi.fn().mockResolvedValue(producerSettings({ engine: 'claude-cli' }));
+      const getProducerSettings = vi
+        .fn()
+        .mockResolvedValueOnce(producerSettings())
+        .mockResolvedValue(producerSettings({ engine: 'claude-cli' }));
+      renderPage({ updateProducerSettings, getProducerSettings });
+
+      await waitFor(() => expect(screen.getByTestId('settings-producer-section')).toBeTruthy());
+      fireEvent.change(screen.getByLabelText('Engine'), { target: { value: 'claude-cli' } });
+      await waitFor(() => expect((screen.getByTestId('toolbar-action') as HTMLButtonElement).disabled).toBe(false));
+      fireEvent.click(screen.getByTestId('toolbar-action'));
+
+      await waitFor(() => expect(updateProducerSettings).toHaveBeenCalledTimes(1));
+      await waitFor(() => expect(screen.getByTestId('settings-producer-saved')).toBeTruthy());
+      expect(screen.queryByTestId('settings-producer-unsaved')).toBeNull();
+      expect((screen.getByTestId('toolbar-action') as HTMLButtonElement).disabled).toBe(true);
+    });
+
+    it('marks the YouTube tab when a playlist mapping is edited and not saved', async () => {
+      renderPage(
+        {
+          getYouTubeIntegration: vi.fn().mockResolvedValue({
+            clientConfigured: true,
+            connected: true,
+            channel: { id: 'UC1', title: 'My Channel', thumbnailUrl: null },
+          }),
+          getOrganization: vi.fn().mockResolvedValue({ folders: [], videos: {} }),
+          listYouTubePlaylists: vi.fn().mockResolvedValue([{ id: 'PL1', title: 'List one' }]),
+          getCategoryPlaylists: vi.fn().mockResolvedValue({ categoryPlaylists: {}, generalPlaylistId: null }),
+        },
+        'youtube',
+      );
+
+      await waitFor(() => expect(screen.getByLabelText('General playlist')).toBeTruthy());
+      expect(screen.getByTestId('settings-tab-youtube').textContent).not.toContain('Unsaved');
+
+      fireEvent.change(screen.getByLabelText('General playlist'), { target: { value: 'PL1' } });
+
+      await waitFor(() =>
+        expect(screen.getByTestId('settings-tab-youtube').textContent).toContain('Unsaved changes in this tab'),
+      );
+      expect(screen.getByTestId('youtube-category-playlists-unsaved')).toBeTruthy();
     });
   });
 });

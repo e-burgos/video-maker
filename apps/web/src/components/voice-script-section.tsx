@@ -1,3 +1,4 @@
+import { StateBadge } from '@e-burgos/tucu-ui';
 import { useCallback, useState } from 'react';
 import type {
   VoiceDirection,
@@ -23,6 +24,7 @@ import { useApiAction } from '../hooks/use-api-action';
 import { useAsyncResource } from '../hooks/use-async-resource';
 import { useT } from '../i18n/language-context';
 import { ErrorNotice } from './error-notice';
+import { SECONDARY_BUTTON_SMALL_CLASS } from './ui/cl-controls';
 import { VoiceDirectionEditor } from './voice-direction-editor';
 import { VoiceScriptPanel } from './voice-script-panel';
 
@@ -94,18 +96,15 @@ export function VoiceScriptSection({ slug, manifest, onJobCreated }: VoiceScript
       !dirty && !sameDirection(directionOfLine(stored, line.index), emphasisInLine(line.direction, line.text));
 
     return (
-      <div className="space-y-2 border-t border-slate-800 pt-2">
+      <div className="flex flex-col gap-2 border-t border-[var(--tucu-glass-sub-line)] pt-2">
         <div className="flex flex-wrap items-center gap-2">
           {hasDirection(direction) && (
-            <span
-              data-testid="voice-direction-badge"
-              className="rounded-full border border-sky-400/60 px-2 py-0.5 text-xs text-sky-100"
-            >
+            <StateBadge tone="teal" dot size="sm" data-testid="voice-direction-badge">
               {t('voiceDirection.badge')}
-            </span>
+            </StateBadge>
           )}
           {unapplied && (
-            <span data-testid="voice-direction-unapplied" className="text-xs text-amber-300">
+            <span data-testid="voice-direction-unapplied" className="text-xs text-[var(--tucu-state-orange-ink)]">
               {t('voiceDirection.unapplied')}
             </span>
           )}
@@ -124,29 +123,29 @@ export function VoiceScriptSection({ slug, manifest, onJobCreated }: VoiceScript
   const ready = document.status === 'ready' && document.data !== null;
 
   return (
-    <div className="space-y-4">
-      <div
+    <div className="grid items-start gap-4 min-[1100px]:grid-cols-[minmax(0,2fr)_minmax(0,3fr)]">
+      <section
         data-testid="voice-direction-bar"
-        className="space-y-3 rounded-lg border border-slate-800 bg-slate-900/40 p-4"
+        className="glass min-w-0 flex flex-col gap-3 rounded-[20px] p-4"
       >
-        <h2 className="font-mono text-sm uppercase tracking-wide text-slate-400">
+        <h2 className="m-0 text-base font-bold text-[var(--cl-ink)]">
           {t('voiceDirection.heading')}{' '}
-          <span data-testid="voice-direction-count" className="text-slate-600">
+          <span data-testid="voice-direction-count" className="font-data text-xs font-normal text-[var(--cl-ink-3)]">
             ({t('voiceDirection.directedCount', { count: directedLineCount(current) })})
           </span>
         </h2>
-        <p className="text-sm text-slate-400">{t('voiceDirection.description')}</p>
+        <p className="m-0 text-sm text-[var(--cl-ink-2)]">{t('voiceDirection.description')}</p>
 
         {document.status === 'loading' && (
-          <p className="text-xs text-slate-500">{t('voiceDirection.loading')}</p>
+          <p className="m-0 text-xs text-[var(--cl-ink-2)]">{t('voiceDirection.loading')}</p>
         )}
 
-        <div className="flex flex-wrap items-center gap-3">
+        <div className="flex flex-wrap items-center gap-2">
           <button
             type="button"
             disabled={!ready || !dirty || busy}
             onClick={() => void persist()}
-            className="rounded-md border border-slate-600 px-3 py-1.5 text-sm text-slate-100 disabled:opacity-40"
+            className={SECONDARY_BUTTON_SMALL_CLASS}
           >
             {saveAction.status === 'pending' ? t('voiceDirection.saving') : t('voiceDirection.save')}
           </button>
@@ -154,15 +153,19 @@ export function VoiceScriptSection({ slug, manifest, onJobCreated }: VoiceScript
             type="button"
             disabled={!ready || busy}
             onClick={() => void regenerate()}
-            className="rounded-md border border-sky-500/50 bg-sky-500/10 px-3 py-1.5 text-sm text-sky-100 disabled:opacity-40"
+            className={SECONDARY_BUTTON_SMALL_CLASS}
           >
             {regenerateAction.status === 'pending'
               ? t('voiceDirection.regenerating')
               : t('voiceDirection.regenerate')}
           </button>
-          {dirty && <span className="text-xs text-amber-300">{t('voiceDirection.dirty')}</span>}
+          {dirty && (
+            <StateBadge tone="orange" dot size="sm">
+              {t('voiceDirection.dirty')}
+            </StateBadge>
+          )}
           {saved && !dirty && (
-            <span role="status" className="text-xs text-emerald-300">
+            <span role="status" className="text-xs text-[var(--tucu-state-green-ink)]">
               {t('voiceDirection.saved')}
             </span>
           )}
@@ -173,7 +176,7 @@ export function VoiceScriptSection({ slug, manifest, onJobCreated }: VoiceScript
         )}
         {saveAction.error !== null && <ErrorNotice error={saveAction.error} />}
         {regenerateAction.error !== null && <ErrorNotice error={regenerateAction.error} />}
-      </div>
+      </section>
 
       <VoiceScriptPanel
         slug={slug}

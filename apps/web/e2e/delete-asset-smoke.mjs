@@ -4,6 +4,8 @@ import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 
 import {
+  FIXTURES_ROOT,
+  forceEnglishInterface,
   MEDIA_ENV_VARS,
   REPO_ROOT,
   assert,
@@ -42,7 +44,7 @@ async function readCatalog(projectRoot) {
 
 async function seedProject(mediaRoot) {
   const projectRoot = join(mediaRoot, SLUG);
-  const source = join(REPO_ROOT, 'media/smoke-ingest');
+  const source = join(FIXTURES_ROOT, 'smoke-ingest');
 
   await mkdir(join(projectRoot, 'work'), { recursive: true });
   await cp(join(source, 'raw'), join(projectRoot, 'raw'), { recursive: true });
@@ -131,6 +133,7 @@ async function main() {
     const { chromium } = await resolvePlaywright();
     browser = await chromium.launch({ channel: 'chrome' });
     const context = await browser.newContext({ viewport: { width: 1280, height: 1600 } });
+    await forceEnglishInterface(context);
     const page = await context.newPage();
     page.on('console', (message) => {
       if (message.type() === 'error') {
@@ -162,8 +165,9 @@ async function main() {
 
     log('5', 'deleting the uploaded file from the library');
     const uploadedCard = page.locator(`[data-asset-path="${UPLOADED_ASSET_ID}"]`);
+    await uploadedCard.locator('[data-testid="asset-menu"]').click();
     await uploadedCard.locator('[data-testid="asset-delete-open"]').click();
-    const confirmation = await uploadedCard
+    const confirmation = await page
       .locator('[data-testid="asset-delete-confirm"]')
       .evaluate((node) => (node.textContent ?? '').replace(/\s+/g, ' ').trim());
     log('5', `confirmation: ${confirmation}`);
@@ -173,7 +177,7 @@ async function main() {
     );
     await page.screenshot({ path: join(ARTIFACTS_DIR, 'delete-asset-02-confirm.png') });
 
-    await uploadedCard.locator('[data-testid="asset-delete-accept"]').click();
+    await page.locator('[data-testid="asset-delete-accept"]').click();
     await page.waitForSelector(`[data-asset-path="${UPLOADED_ASSET_ID}"]`, {
       state: 'detached',
       timeout: 20000,
@@ -198,11 +202,12 @@ async function main() {
 
     log('6', 'trying to delete the A-roll the stored timeline uses');
     const arollCard = page.locator(`[data-asset-path="${AROLL_ASSET_ID}"]`);
+    await arollCard.locator('[data-testid="asset-menu"]').click();
     await arollCard.locator('[data-testid="asset-delete-open"]').click();
-    await arollCard.locator('[data-testid="asset-delete-accept"]').click();
-    await arollCard.locator('[data-testid="asset-delete-in-use"]').waitFor({ timeout: 20000 });
+    await page.locator('[data-testid="asset-delete-accept"]').click();
+    await page.locator('[data-testid="asset-delete-in-use"]').waitFor({ timeout: 20000 });
 
-    const inUse = await arollCard
+    const inUse = await page
       .locator('[data-testid="asset-delete-in-use"]')
       .evaluate((node) => (node.textContent ?? '').replace(/\s+/g, ' ').trim());
     log('6', `in-use warning: ${inUse}`);
@@ -221,7 +226,7 @@ async function main() {
     await page.screenshot({ path: join(ARTIFACTS_DIR, 'delete-asset-04-in-use.png') });
 
     log('7', 'deleting the referenced A-roll anyway');
-    await arollCard.locator('[data-testid="asset-delete-force"]').click();
+    await page.locator('[data-testid="asset-delete-force"]').click();
     await page.waitForSelector(`[data-asset-path="${AROLL_ASSET_ID}"]`, {
       state: 'detached',
       timeout: 20000,

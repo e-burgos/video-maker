@@ -9,6 +9,7 @@ import { useLanguage, useT } from '../i18n/language-context';
 import { formatDateTime } from '../api/format-updated-at';
 import { ErrorNotice } from './error-notice';
 import { JobRetryButton } from './job-retry-button';
+import { SECONDARY_BUTTON_SMALL_CLASS } from './ui/cl-controls';
 import type { Job } from '../api/render-api-types';
 import type { PublishJob } from '../api/youtube-types';
 
@@ -22,22 +23,22 @@ function ProgressBar({ percent }: { percent: number | null }) {
   const t = useT();
 
   return (
-    <div className="space-y-1">
+    <div className="flex flex-col gap-1">
       <div
         role="progressbar"
         aria-label={t('youtube.publish.progress')}
         aria-valuemin={0}
         aria-valuemax={100}
         {...(percent === null ? {} : { 'aria-valuenow': percent })}
-        className="h-2 w-full overflow-hidden rounded-full bg-slate-800"
+        className="h-2 w-full overflow-hidden rounded-full bg-[color-mix(in_srgb,var(--cl-ink)_14%,transparent)]"
       >
         <div
-          className="h-full bg-sky-400 transition-[width]"
+          className="h-full bg-[var(--cl-action-fill)] transition-[width]"
           style={{ width: `${percent ?? 0}%` }}
         />
       </div>
       {percent !== null && (
-        <p data-testid="youtube-publish-percent" className="font-mono text-xs text-slate-400">
+        <p data-testid="youtube-publish-percent" className="font-data m-0 text-xs text-[var(--cl-ink-2)]">
           {percent}%
         </p>
       )}
@@ -57,18 +58,18 @@ function SuccessSummary({ job }: { job: PublishJob }) {
   const scheduledFor = report.publishAt === null ? null : Date.parse(report.publishAt);
 
   return (
-    <div data-testid="youtube-publish-success" className="space-y-2">
-      <p className="text-sm text-emerald-300">
+    <div data-testid="youtube-publish-success" className="flex flex-col gap-2">
+      <p className="m-0 text-sm text-[var(--tucu-state-green-ink)]">
         {scheduledFor === null || Number.isNaN(scheduledFor)
           ? t('youtube.publish.succeeded')
           : t('youtube.publish.succeededScheduled', { date: formatDateTime(scheduledFor, language) })}
       </p>
-      <p className="break-all font-mono text-xs text-slate-300">{report.url}</p>
+      <p className="font-data m-0 break-all text-xs text-[var(--cl-ink-2)]">{report.url}</p>
       <a
         href={report.url}
         target="_blank"
         rel="noreferrer noopener"
-        className="inline-block rounded-md border border-emerald-500/50 px-3 py-1.5 text-sm text-emerald-100 hover:bg-emerald-500/10"
+        className={SECONDARY_BUTTON_SMALL_CLASS}
       >
         {t('youtube.publish.openOnYouTube')}
       </a>
@@ -95,7 +96,7 @@ export function YouTubePublishProgress({ jobId, onRetried, onSucceeded }: YouTub
     return poll.error !== null ? (
       <ErrorNotice error={poll.error} />
     ) : (
-      <p role="status" className="text-sm text-slate-400">
+      <p role="status" className="m-0 text-sm text-[var(--cl-ink-2)]">
         {t('youtube.publish.starting')}
       </p>
     );
@@ -109,10 +110,10 @@ export function YouTubePublishProgress({ jobId, onRetried, onSucceeded }: YouTub
       : null;
 
   return (
-    <div data-testid="youtube-publish-job" data-job-state={job.state} className="space-y-3">
+    <div data-testid="youtube-publish-job" data-job-state={job.state} className="flex flex-col gap-3">
       {running && (
-        <div role="status" className="space-y-2">
-          <p className="text-sm text-slate-300">
+        <div role="status" className="flex flex-col gap-2">
+          <p className="m-0 text-sm text-[var(--cl-ink)]">
             {job.state === 'canceling' ? t('youtube.publish.canceling') : t('youtube.publish.uploading')}
           </p>
           <ProgressBar percent={percent} />
@@ -120,7 +121,7 @@ export function YouTubePublishProgress({ jobId, onRetried, onSucceeded }: YouTub
             type="button"
             disabled={job.state === 'canceling' || cancel.status === 'pending'}
             onClick={() => void cancel.run(job.id)}
-            className="rounded-md border border-slate-700 px-3 py-1 text-xs text-slate-300 hover:border-slate-500 disabled:opacity-40"
+            className={SECONDARY_BUTTON_SMALL_CLASS}
           >
             {t('youtube.publish.cancelUpload')}
           </button>
@@ -129,7 +130,7 @@ export function YouTubePublishProgress({ jobId, onRetried, onSucceeded }: YouTub
 
       {job.state === 'succeeded' && job.kind === 'publish' && <SuccessSummary job={job} />}
 
-      {job.state === 'canceled' && <p className="text-sm text-amber-300">{t('youtube.publish.canceled')}</p>}
+      {job.state === 'canceled' && <p className="m-0 text-sm text-[var(--tucu-state-orange-ink)]">{t('youtube.publish.canceled')}</p>}
 
       {failure !== null && <ErrorNotice error={failure} />}
 

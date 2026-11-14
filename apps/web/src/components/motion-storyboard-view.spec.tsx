@@ -7,6 +7,8 @@ import type { MotionOverview } from '../api/motion-types';
 import type { RenderApiClient } from '../api/render-api-client';
 import { RenderApiProvider } from '../api/render-api-context';
 import { MotionStoryboardView, groupScenesByChapter } from './motion-storyboard-view';
+import { ShellToolbar } from './shell/shell-toolbar';
+import { ToolbarActionProvider } from './shell/toolbar-action-provider';
 
 function renderView(overview: MotionOverview, extra: Partial<RenderApiClient> = {}) {
   const client = {
@@ -16,7 +18,10 @@ function renderView(overview: MotionOverview, extra: Partial<RenderApiClient> = 
   render(
     <RenderApiProvider client={client}>
       <MemoryRouter>
-        <MotionStoryboardView slug="promo" />
+        <ToolbarActionProvider>
+          <ShellToolbar title="Storyboard" subtitle={null} />
+          <MotionStoryboardView slug="promo" />
+        </ToolbarActionProvider>
       </MemoryRouter>
     </RenderApiProvider>,
   );

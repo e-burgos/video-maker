@@ -92,6 +92,55 @@ describe('createRenderApiClient', () => {
     expect(result.capabilities.assetStore).toBe(true);
   });
 
+  it('reads the update status from EP-074', async () => {
+    const update = { status: 'available', installedVersion: '0.3.2', latestVersion: '0.4.0', downloadUrl: 'https://x.test/a.dmg' };
+    const { fetchImpl, calls } = recordingFetch(() => jsonResponse(update));
+
+    const result = await createRenderApiClient(fetchImpl).getAppUpdate();
+
+    expect(calls[0]?.url).toBe('/api/app/update');
+    expect(result.status).toBe('available');
+    expect(result.latestVersion).toBe('0.4.0');
+  });
+
+  it('searches free media with the kind and the result cap', async () => {
+    const { fetchImpl, calls } = recordingFetch(() => jsonResponse({ results: [{ resultId: 'r1' }] }));
+
+    const result = await createRenderApiClient(fetchImpl).searchFreeMedia({
+      slug: 'demo',
+      query: 'solar eclipse',
+      kind: 'video',
+      maxResults: 6,
+    });
+
+    expect(calls[0]?.url).toBe('/api/projects/demo/media/search?query=solar+eclipse&kind=video&maxResults=6');
+    expect(result).toHaveLength(1);
+  });
+
+  it('imports a free media result by its id', async () => {
+    const { fetchImpl, calls } = recordingFetch(() => jsonResponse({ path: 'raw/broll/a.mp4', credit: {} }));
+
+    const result = await createRenderApiClient(fetchImpl).importFreeMedia('demo', 'r1');
+
+    expect(calls[0]?.url).toBe('/api/projects/demo/media/import');
+    expect(calls[0]?.init?.method).toBe('POST');
+    expect(calls[0]?.init?.body).toBe('{"resultId":"r1"}');
+    expect(result.path).toBe('raw/broll/a.mp4');
+  });
+
+  it('searches and imports free music', async () => {
+    const bodies = [{ results: [] }, { path: 'raw/audio/a.mp3', credit: {} }];
+    const { fetchImpl, calls } = recordingFetch(() => jsonResponse(bodies.shift()));
+    const client = createRenderApiClient(fetchImpl);
+
+    await client.searchFreeMusic({ slug: 'demo', mood: 'calm', maxResults: 4 });
+    const imported = await client.importFreeMusic('demo', 'm1');
+
+    expect(calls[0]?.url).toBe('/api/projects/demo/music/search?mood=calm&maxResults=4');
+    expect(calls[1]?.url).toBe('/api/projects/demo/music/import');
+    expect(imported.path).toBe('raw/audio/a.mp3');
+  });
+
   it('lists projects from EP-002', async () => {
     const projects = [{ slug: 'smoke-ingest', layout: { raw: true, catalog: true, timeline: true, edl: true, out: true } }];
     const { fetchImpl, calls } = recordingFetch(() => jsonResponse(projects));

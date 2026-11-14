@@ -32,6 +32,12 @@ export type ServiceCapabilities = {
   storyboardQueue: boolean;
   voiceQueue: boolean;
   producer: boolean;
+  producerEngines?: ProducerEnginesAvailability;
+};
+
+export type ProducerEnginesAvailability = {
+  claudeCli: boolean;
+  openrouter: boolean;
 };
 
 export type ServiceJobCounters = {
@@ -43,11 +49,81 @@ export type ServiceHealth = {
   status: ServiceStatus;
   service: string;
   cycle: number;
+  version?: string;
   time: string;
   engine: EngineModuleHealth[];
   binaries: MediaBinaryHealth[];
   capabilities: ServiceCapabilities;
   jobs: ServiceJobCounters;
+};
+
+export type AppUpdateStatus = 'up-to-date' | 'available' | 'unknown';
+
+export type AppUpdate = {
+  status: AppUpdateStatus;
+  installedVersion: string;
+  latestVersion?: string;
+  downloadUrl?: string;
+  publishedAt?: string;
+};
+
+export const FREE_MEDIA_KINDS = ['image', 'video'] as const;
+
+export type FreeMediaKind = (typeof FREE_MEDIA_KINDS)[number];
+
+export type FreeMediaSource = 'commons' | 'nasa';
+
+export type FreeMediaResult = {
+  resultId: string;
+  source: FreeMediaSource;
+  kind: FreeMediaKind;
+  title: string;
+  license: string;
+  author: string;
+  pageUrl: string;
+  durationMs: number | null;
+  width: number | null;
+  height: number | null;
+};
+
+export type FreeMusicSource = 'brand-bank' | 'openverse' | 'commons';
+
+export type FreeMusicResult = {
+  resultId: string;
+  source: FreeMusicSource;
+  title: string;
+  license: string;
+  author: string;
+  pageUrl: string;
+  durationMs: number | null;
+};
+
+export type FreeMediaCredit = {
+  kind: string;
+  path: string;
+  title: string;
+  author: string;
+  license: string;
+  sourceUrl: string;
+  importedAt: string;
+};
+
+export type FreeMediaImport = {
+  path: string;
+  credit: FreeMediaCredit;
+};
+
+export type SearchFreeMediaInput = {
+  slug: string;
+  query: string;
+  kind: FreeMediaKind;
+  maxResults: number;
+};
+
+export type SearchFreeMusicInput = {
+  slug: string;
+  mood: string;
+  maxResults: number;
 };
 
 export type ProjectLayout = {

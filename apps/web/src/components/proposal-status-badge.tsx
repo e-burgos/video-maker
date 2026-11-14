@@ -1,7 +1,7 @@
+import { StateBadge } from '@e-burgos/tucu-ui';
 import type { ProductionProposal } from '@video-maker/timeline-core';
 
 import { useT } from '../i18n/language-context';
-import { Badge } from './ui/badge';
 
 export type ProposalStatusBadgeProps = {
   proposal: ProductionProposal | null;
@@ -17,8 +17,8 @@ export function ProposalStatusBadge({ proposal }: ProposalStatusBadgeProps) {
   const approved = proposal.status === 'approved';
 
   return (
-    <Badge data-testid="proposal-status" data-status={proposal.status} tone={approved ? 'success' : 'warning'}>
+    <StateBadge data-testid="proposal-status" data-status={proposal.status} tone={approved ? 'green' : 'orange'} dot>
       {approved ? t('proposal.statusApproved') : t('proposal.statusPending')}
-    </Badge>
+    </StateBadge>
   );
 }

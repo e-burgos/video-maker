@@ -1,5 +1,6 @@
-import { useCallback, useState } from 'react';
-import { Link, useParams } from 'react-router-dom';
+import { StateBadge } from '@e-burgos/tucu-ui';
+import { useCallback, useMemo, useState } from 'react';
+import { useParams } from 'react-router-dom';
 import type { StoryboardDocument, StoryboardScene } from '@video-maker/timeline-core';
 
 import { copyToClipboard } from '../api/clipboard';
@@ -7,11 +8,14 @@ import { PRODUCER_SCRIPT_PATH } from '../api/generated-files';
 import { parseStoryboardDocument } from '../api/parse-storyboard';
 import { useRenderApi } from '../api/render-api-context';
 import { useAsyncResource } from '../hooks/use-async-resource';
-import { useT } from '../i18n/language-context';
+import { useT, useTn } from '../i18n/language-context';
 import { ErrorNotice } from '../components/error-notice';
 import { ProducerScriptPanel } from '../components/producer-script-panel';
 import { MotionStoryboardView } from '../components/motion-storyboard-view';
 import { ProjectModeGate } from '../components/project-mode-gate';
+import { ToolbarStatus } from '../components/shell/toolbar-status';
+import { SceneList } from '../components/storyboard/scene-list';
+import { sceneStatuses, sceneTimings } from '../components/storyboard/storyboard-model';
 import { StoryboardCharacterSheet } from '../components/storyboard-character-sheet';
 import { StoryboardHeaderEditor } from '../components/storyboard-header-editor';
 import { StoryboardJobPanel } from '../components/storyboard-job-panel';
@@ -19,6 +23,7 @@ import { StoryboardPromptSheet } from '../components/storyboard-prompt-sheet';
 import { StoryboardSaveBar } from '../components/storyboard-save-bar';
 import { StoryboardSceneEditor } from '../components/storyboard-scene-editor';
 import { StoryboardTrigger } from '../components/storyboard-trigger';
+import { LoadingState } from '../components/ui/status-states';
 
 export const STORYBOARD_NOT_FOUND = 'STORYBOARD_NOT_FOUND';
 
@@ -30,12 +35,11 @@ function StoryboardEmptyState({ slug }: StoryboardEmptyStateProps) {
   const t = useT();
 
   return (
-    <div
-      data-testid="storyboard-empty-state"
-      className="space-y-2 rounded-lg border border-slate-800 bg-slate-900/40 p-4"
-    >
-      <p className="text-sm text-slate-300">{t('storyboard.emptyTitle', { slug })}</p>
-      <p className="text-sm text-slate-400">{t('storyboard.emptyBody')}</p>
+    <div data-testid="storyboard-empty-state" className="glass flex flex-col gap-2 rounded-[20px] p-4">
+      <p className="m-0 text-sm font-semibold text-[var(--cl-ink)]">
+        {t('storyboard.emptyTitle', { slug })}
+      </p>
+      <p className="m-0 text-sm text-[var(--cl-ink-2)]">{t('storyboard.emptyBody')}</p>
     </div>
   );
 }
@@ -58,7 +62,9 @@ function ClassicStoryboardPage() {
   const [draft, setDraft] = useState<StoryboardDocument | null>(null);
   const [saved, setSaved] = useState<StoryboardDocument | null>(null);
   const [copiedSceneId, setCopiedSceneId] = useState<string | null>(null);
+  const [selectedSceneId, setSelectedSceneId] = useState<string | null>(null);
   const t = useT();
+  const tn = useTn();
 
   const baseline = saved ?? stored.data;
   const storyboard = draft ?? baseline;
@@ -75,41 +81,92 @@ function ClassicStoryboardPage() {
     setCopiedSceneId(copied ? scene.id : null);
   }
 
+  const timings = useMemo(() => sceneTimings(storyboard?.scenes ?? []), [storyboard]);
+  const statuses = useMemo(
+    () => (storyboard === null ? new Map() : sceneStatuses(storyboard, baseline)),
+    [storyboard, baseline],
+  );
+  const selectedScene =
+    storyboard?.scenes.find((scene) => scene.id === selectedSceneId) ?? storyboard?.scenes[0];
+
   const missing =
     stored.status === 'error' && stored.error?.code === STORYBOARD_NOT_FOUND && saved === null;
+  const script = producerScript.data;
 
   return (
-    <section className="space-y-6">
-      <div>
-        <Link to={`/projects/${slug}/library`} className="text-xs text-slate-500 hover:text-slate-300">
-          {t('storyboard.backToLibrary')}
-        </Link>
-        <h1 className="mt-2 font-mono text-2xl font-semibold tracking-tight">
-          {t('storyboard.title', { slug })}
-        </h1>
-        <p className="mt-1 text-sm text-slate-400">{t('storyboard.description')}</p>
-      </div>
-
-      <StoryboardTrigger slug={slug} onCreated={(job) => setJobId(job.id)} />
+    <section data-testid="storyboard-page" className="flex min-h-full flex-col gap-4">
+      <StoryboardTrigger
+        slug={slug}
+        hasStoryboard={storyboard !== null}
+        onCreated={(job) => setJobId(job.id)}
+      />
 
       <StoryboardJobPanel jobId={jobId} onSucceeded={reload} onRetried={(job) => setJobId(job.id)} />
 
       {stored.status === 'loading' && (
-        <p className="text-sm text-slate-500">{t('storyboard.loading')}</p>
+        <LoadingState message={t('storyboard.loading')} />
       )}
 
-      {missing && producerScript.data !== null && (
-        <ProducerScriptPanel script={producerScript.data} />
-      )}
+      {missing && script !== null && <ProducerScriptPanel script={script} />}
 
-      {missing && producerScript.data === null && <StoryboardEmptyState slug={slug} />}
+      {missing && script === null && <StoryboardEmptyState slug={slug} />}
 
       {stored.status === 'error' && stored.error !== null && !missing && (
         <ErrorNotice error={stored.error} onRetry={reload} />
       )}
 
-      {storyboard !== null && (
+      {storyboard !== null && selectedScene !== undefined && (
         <>
+          <ToolbarStatus>
+            <StateBadge tone="teal" dot size="sm" data-testid="storyboard-scene-count">
+              {tn('storyboard.sceneCount', storyboard.scenes.length)}
+            </StateBadge>
+          </ToolbarStatus>
+
+          <div className="grid items-start gap-4 min-[1100px]:grid-cols-[17rem_minmax(0,1fr)]">
+            <SceneList
+              scenes={storyboard.scenes}
+              selectedId={selectedScene.id}
+              statuses={statuses}
+              timings={timings}
+              onSelect={setSelectedSceneId}
+            />
+
+            <div className="flex min-w-0 flex-col gap-4">
+              <StoryboardSceneEditor
+                key={selectedScene.id}
+                storyboard={storyboard}
+                scene={selectedScene}
+                {...(timings.has(selectedScene.id) ? { timing: timings.get(selectedScene.id) } : {})}
+                onChange={setDraft}
+                onCopyPrompt={(target) => void copyScenePrompt(target)}
+              />
+
+              {copiedSceneId !== null && (
+                <p
+                  data-testid="storyboard-scene-copied"
+                  className="m-0 text-xs text-[var(--tucu-state-green-ink)]"
+                >
+                  {t('storyboard.promptCopied', { sceneId: copiedSceneId })}
+                </p>
+              )}
+
+              <StoryboardHeaderEditor storyboard={storyboard} onChange={setDraft} />
+
+              <StoryboardCharacterSheet storyboard={storyboard} onChange={setDraft} />
+
+              {script !== null && (
+                <ProducerScriptPanel
+                  script={script}
+                  defaultOpen={false}
+                  explainsMissingStoryboard={false}
+                />
+              )}
+
+              <StoryboardPromptSheet slug={slug} dirty={dirty} />
+            </div>
+          </div>
+
           <StoryboardSaveBar
             slug={slug}
             storyboard={storyboard}
@@ -118,36 +175,8 @@ function ClassicStoryboardPage() {
               setSaved(next);
               setDraft(null);
             }}
+            onDiscard={() => setDraft(null)}
           />
-
-          <StoryboardHeaderEditor storyboard={storyboard} onChange={setDraft} />
-
-          <StoryboardCharacterSheet storyboard={storyboard} onChange={setDraft} />
-
-          <div className="space-y-3">
-            <h2 className="font-mono text-sm uppercase tracking-wide text-slate-400">
-              {t('storyboard.scenesHeading')}{' '}
-              <span className="text-slate-600">({storyboard.scenes.length})</span>
-            </h2>
-            {copiedSceneId !== null && (
-              <p data-testid="storyboard-scene-copied" className="text-xs text-emerald-300">
-                {t('storyboard.promptCopied', { sceneId: copiedSceneId })}
-              </p>
-            )}
-            <ul className="space-y-3">
-              {storyboard.scenes.map((scene) => (
-                <StoryboardSceneEditor
-                  key={scene.id}
-                  storyboard={storyboard}
-                  scene={scene}
-                  onChange={setDraft}
-                  onCopyPrompt={(target) => void copyScenePrompt(target)}
-                />
-              ))}
-            </ul>
-          </div>
-
-          <StoryboardPromptSheet slug={slug} dirty={dirty} />
         </>
       )}
     </section>

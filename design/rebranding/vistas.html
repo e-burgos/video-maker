@@ -1,0 +1,322 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Video Maker · Cristal Líquido · todas las vistas</title>
+<style>
+:root{
+  --glass-thin:rgba(255,255,255,.5);--glass-regular:rgba(255,255,255,.58);--glass-thick:rgba(255,255,255,.7);--glass-sub:rgba(255,255,255,.6);
+  --glass-border:rgba(255,255,255,.75);--line:rgba(0,0,0,.1);
+  --ink:#1d1d1f;--ink2:#48484a;--ink3:#6e6e73;
+  --action:#0a6cff;--action-soft:rgba(10,108,255,.12);
+  --canvas:#e8eaf0;--ambient:linear-gradient(150deg,#c7d4ee 0%,#e2d5ea 45%,#f2ded3 100%);
+  --orb-a:rgba(100,150,255,.3);--orb-b:rgba(255,160,120,.24);
+  --shadow-card:0 6px 24px rgba(31,38,74,.1);--shadow-panel:0 10px 32px rgba(31,38,74,.13);
+  --stage:#0b0d14;--tile:#fff;--viewer:#0a0c14;
+  --ok-soft:rgba(40,167,69,.16);--ok-ink:#0b6623;--warn-soft:rgba(232,137,12,.18);--warn-ink:#8a5200;--teal-soft:rgba(0,168,181,.16);--teal-ink:#00646e;--red-soft:rgba(229,55,46,.14);--red-ink:#c42b22;
+}
+:root[data-theme=dark]{
+  --glass-thin:rgba(60,60,67,.5);--glass-regular:rgba(44,44,52,.55);--glass-thick:rgba(44,44,50,.6);--glass-sub:rgba(0,0,0,.3);
+  --glass-border:rgba(255,255,255,.12);--line:rgba(255,255,255,.15);
+  --ink:#f5f5f7;--ink2:rgba(235,235,245,.72);--ink3:rgba(235,235,245,.62);
+  --action:#409cff;--action-soft:rgba(64,156,255,.18);
+  --canvas:#101322;--ambient:linear-gradient(160deg,#101322 0%,#1d1730 60%,#231b26 100%);
+  --orb-a:rgba(90,120,255,.25);--orb-b:rgba(255,150,120,.12);
+  --shadow-card:0 6px 24px rgba(0,0,0,.3);--shadow-panel:0 10px 32px rgba(0,0,0,.35);
+  --tile:#1a1d29;
+  --ok-soft:rgba(48,209,88,.18);--ok-ink:#7ee59a;--warn-soft:rgba(255,159,10,.2);--warn-ink:#ffc266;--teal-soft:rgba(64,200,224,.18);--teal-ink:#7fe3f0;--red-soft:rgba(255,69,58,.18);--red-ink:#ff8a80;
+}
+*{box-sizing:border-box;margin:0}
+body{font:13.5px/1.5 Inter,-apple-system,system-ui,sans-serif;color:var(--ink);background:var(--canvas)}
+.mono{font-family:"JetBrains Mono",ui-monospace,Menlo,monospace;font-variant-numeric:tabular-nums}
+.bar{display:flex;gap:12px;align-items:center;padding:10px 20px;background:var(--glass-thick);border-bottom:.5px solid var(--glass-border)}
+.bar button{font:inherit;cursor:pointer;border:.5px solid var(--glass-border);background:var(--glass-thin);color:var(--ink);padding:6px 12px;border-radius:10px}
+.bar button[aria-pressed=true]{background:var(--action);color:#fff;border-color:transparent}
+.sp{flex:1}
+.label{margin:22px 20px 0;font:600 10.5px/1 "JetBrains Mono",monospace;letter-spacing:.08em;text-transform:uppercase;color:var(--ink3)}
+.scene{position:relative;overflow:hidden;margin:20px;border-radius:20px;border:.5px solid var(--glass-border);height:900px;isolation:isolate}
+.scene>.bg{position:absolute;inset:0;background:var(--ambient),var(--canvas);z-index:-1}
+.scene>.bg i{position:absolute;border-radius:50%;filter:blur(90px)}
+.scene>.bg i:nth-child(1){width:300px;height:300px;top:-80px;left:35%;background:var(--orb-a)}
+.scene>.bg i:nth-child(2){width:280px;height:280px;bottom:-90px;right:5%;background:var(--orb-b)}
+.app{position:relative;display:grid;grid-template-columns:236px 1fr;height:100%}
+.glass{background:var(--glass-regular);backdrop-filter:blur(26px) saturate(1.6);border:.5px solid var(--glass-border)}
+.thick{background:var(--glass-thick);backdrop-filter:blur(34px) saturate(1.7);border:.5px solid var(--glass-border)}
+.thin{background:var(--glass-thin);backdrop-filter:blur(16px);border:.5px solid var(--glass-border)}
+.sub{background:var(--glass-sub);border:.5px solid var(--line)}
+.side{margin:12px 0 12px 12px;border-radius:20px;padding:16px 12px;display:flex;flex-direction:column;gap:2px;box-shadow:var(--shadow-panel)}
+.brand{display:flex;gap:10px;align-items:center;padding:4px 8px 14px;font-weight:700;font-size:15px;letter-spacing:-.2px}
+.brand span{width:28px;height:28px;border-radius:9px;background:linear-gradient(135deg,var(--action),#7a5cff);display:grid;place-items:center;color:#fff;font-size:13px}
+.nav a{display:flex;gap:10px;align-items:center;padding:8px 10px;border-radius:10px;color:var(--ink2);font-weight:500}
+.nav a.on{background:var(--action-soft);color:var(--action);font-weight:600}
+.cap{font:600 10.5px/1 "JetBrains Mono",monospace;letter-spacing:.08em;text-transform:uppercase;color:var(--ink3);padding:14px 10px 6px}
+.vid{margin:2px 0 6px 10px;padding:6px;border-radius:14px;display:flex;flex-direction:column;gap:2px}
+.vid .vt{font-weight:600;font-size:12px;padding:4px 8px 6px}
+.vid a{padding:5px 8px;font-size:12.5px;gap:8px;display:flex;align-items:center;border-radius:9px;color:var(--ink2)}
+.vid a.on{background:var(--action-soft);color:var(--action);font-weight:600}
+.n{width:7px;height:7px;border-radius:50%;background:var(--ink3);opacity:.5;display:inline-block}.n.ok{background:#28a745;opacity:1}.n.w{background:#e8890c;opacity:1}
+.foot{display:flex;align-items:center;justify-content:space-between;padding:8px;border-radius:12px}
+.pill{display:inline-flex;gap:6px;align-items:center;border-radius:999px;padding:3px 10px;font-size:10.5px;font-weight:600;border:.5px solid var(--glass-border);white-space:nowrap}
+.pill i{width:6px;height:6px;border-radius:50%;background:currentColor}
+.ok{background:var(--ok-soft);color:var(--ok-ink)}.warn{background:var(--warn-soft);color:var(--warn-ink)}.teal{background:var(--teal-soft);color:var(--teal-ink)}.red{background:var(--red-soft);color:var(--red-ink)}
+.main{padding:12px 16px 12px 14px;display:flex;flex-direction:column;gap:12px;min-width:0;min-height:0}
+.tb{display:flex;align-items:center;gap:12px;border-radius:16px;padding:8px 10px 8px 16px;min-height:52px;box-shadow:var(--shadow-card)}
+.tb h1{font-size:17px;letter-spacing:-.3px;line-height:1.2;font-weight:700}.tb small{color:var(--ink3)}
+.btn{font:inherit;font-weight:600;border:0;border-radius:10px;padding:8px 16px;color:#fff;background:var(--action);box-shadow:0 2px 12px rgba(10,108,255,.35);white-space:nowrap}
+.btn.sec{background:var(--glass-thin);color:var(--ink);border:.5px solid var(--glass-border);box-shadow:none}
+.btn.red{background:var(--red-soft);color:var(--red-ink);box-shadow:none}
+.btn.sm{padding:5px 11px;font-size:12px}
+.panel{border-radius:20px;padding:16px;box-shadow:var(--shadow-panel);display:flex;flex-direction:column;gap:12px;min-height:0}
+.panel h2{font-size:15px;font-weight:600}
+.h2row{display:flex;align-items:center;gap:10px}
+.note{font-size:11.5px;color:var(--ink3)}
+.seg{display:inline-flex;gap:2px;padding:3px;border-radius:12px;align-self:flex-start}
+.seg span{padding:5px 14px;border-radius:9px;font-weight:500;font-size:12.5px;color:var(--ink2)}
+.seg span.on{background:var(--action);color:#fff;box-shadow:0 2px 12px rgba(10,108,255,.35)}
+.chips{display:flex;gap:6px;flex-wrap:wrap}
+.chip{border-radius:999px;padding:5px 11px;font-size:12px;font-weight:500}
+.chip.on{background:var(--ink);color:var(--canvas)}
+.field{display:flex;flex-direction:column;gap:5px}
+.field>b{font-size:12px;font-weight:600;color:var(--ink2)}
+.in{border-radius:10px;padding:9px 12px;color:var(--ink);min-height:38px}
+.in.ph{color:var(--ink3)}
+.grid{display:grid;gap:10px}
+.g2{grid-template-columns:1fr 1fr}.g3{grid-template-columns:repeat(3,1fr)}.g4{grid-template-columns:repeat(4,1fr)}.g6{grid-template-columns:repeat(6,1fr)}
+.tile{background:var(--tile);border-radius:10px;border:.5px solid var(--line);display:grid;place-items:center;font-size:11px;color:var(--ink3);position:relative;aspect-ratio:4/3;overflow:hidden}
+.tile em{position:absolute;left:6px;bottom:6px;font-style:normal;font:600 9.5px "JetBrains Mono",monospace;background:var(--stage);color:#fff;padding:2px 6px;border-radius:6px}
+.tile.sel{outline:2px solid var(--action);outline-offset:-2px}
+.tile .ck{position:absolute;right:6px;top:6px;width:18px;height:18px;border-radius:50%;background:var(--action);color:#fff;display:grid;place-items:center;font-size:11px}
+.tile.add{border-style:dashed;background:transparent;color:var(--action)}
+.stage{background:var(--stage);border-radius:14px;display:grid;place-items:center;position:relative;overflow:hidden;border:.5px solid var(--line);color:#8a90a6}
+.stage .play{width:54px;height:54px;border-radius:50%;background:rgba(255,255,255,.14);display:grid;place-items:center;color:#fff;font-size:20px}
+.stage .ctl{position:absolute;left:0;right:0;bottom:0;padding:10px 14px;display:flex;gap:10px;color:#fff;font-size:11px;background:linear-gradient(transparent,rgba(0,0,0,.7))}
+.stage .ctl i{flex:1;height:3px;border-radius:2px;background:rgba(255,255,255,.3);align-self:center}.stage .ctl i b{display:block;width:22%;height:100%;background:#fff;border-radius:2px}
+.row{display:flex;align-items:center;gap:12px;padding:10px 4px;border-bottom:.5px solid var(--line)}
+.row:last-child{border-bottom:0}
+.sw{width:22px;height:22px;border-radius:7px;border:.5px solid var(--line)}
+.savebar{display:flex;align-items:center;gap:10px;border-radius:16px;padding:8px 10px 8px 16px;box-shadow:var(--shadow-card)}
+.card{border-radius:16px;padding:14px;display:flex;flex-direction:column;gap:8px}
+.vlist{display:flex;flex-direction:column}
+.radio{width:16px;height:16px;border-radius:50%;border:1.5px solid var(--ink3);display:inline-block;flex:none}.radio.on{border:5px solid var(--action)}
+.wave{height:22px;flex:1;border-radius:6px;background:repeating-linear-gradient(90deg,var(--action-soft) 0 2px,transparent 2px 5px)}
+.track{display:flex;align-items:center;gap:8px;height:26px}.track span{width:62px;font:600 10px "JetBrains Mono",monospace;color:var(--ink3);text-transform:uppercase}
+.track i{height:20px;border-radius:6px;background:var(--action-soft);border:.5px solid var(--action)}
+.viewer{position:absolute;inset:0;background:var(--viewer);display:grid;grid-template-columns:1fr 280px;z-index:5;color:#f5f5f7}
+.viewer .vm{padding:18px;display:flex;flex-direction:column;gap:12px;min-height:0}
+.viewer .vs{background:#141824;border-left:.5px solid rgba(255,255,255,.12);padding:18px;display:flex;flex-direction:column;gap:12px}
+.viewer .pane{background:#05070c;border-radius:12px;display:grid;place-items:center;color:#8a90a6;font-size:12px;position:relative;border:.5px solid rgba(255,255,255,.1)}
+.viewer .pane em{position:absolute;left:10px;top:10px;font-style:normal;font:600 10px "JetBrains Mono",monospace;background:#fff;color:#111;border-radius:6px;padding:2px 7px}
+.viewer .kb{display:inline-flex;gap:6px;align-items:center;font-size:11.5px;color:#aab0c4}.viewer .kb b{border:.5px solid rgba(255,255,255,.3);border-radius:5px;padding:1px 6px;font:600 10px "JetBrains Mono",monospace;color:#fff}
+.tls{display:flex;gap:8px;padding:2px 8px 12px}.tls i{width:12px;height:12px;border-radius:50%;display:block}
+.bub .tile{aspect-ratio:16/9}
+.turn{display:flex;flex-direction:column;gap:8px}
+.act{border-radius:14px;padding:10px 12px;display:flex;flex-direction:column;gap:6px}
+.act .st{display:flex;gap:8px;align-items:center;font-size:12.5px;color:var(--ink2)}
+.act .st b{color:var(--ink);font-weight:600}
+.spin{width:12px;height:12px;border-radius:50%;border:2px solid var(--action-soft);border-top-color:var(--action);display:inline-block}
+.bub{border-radius:14px;padding:10px 12px;max-width:88%}.bub.me{align-self:flex-end;background:var(--action);color:#fff}
+.att{display:inline-flex;gap:6px;align-items:center;border-radius:8px;padding:3px 8px;font-size:11px;background:rgba(255,255,255,.22)}
+.doc h3{font-size:22px;letter-spacing:-.4px;margin-bottom:6px}.doc h4{font-size:15px;margin:16px 0 6px}.doc p{color:var(--ink2);max-width:680px;margin-bottom:8px}
+.doc kbd{font:600 11px "JetBrains Mono",monospace;border:.5px solid var(--line);border-radius:5px;padding:1px 6px;background:var(--glass-sub)}
+.hero{position:relative;padding:40px 8% 0;display:flex;flex-direction:column;gap:22px}
+.hero h1{font-size:54px;line-height:1.02;letter-spacing:-1.8px;font-weight:800;max-width:760px}
+.hero p{font-size:17px;color:var(--ink2);max-width:560px;line-height:1.5}
+.web{position:relative;height:100%;overflow:hidden;display:flex;flex-direction:column}
+.webnav{margin:14px 6%;border-radius:999px;padding:8px 10px 8px 18px;display:flex;align-items:center;gap:22px;box-shadow:var(--shadow-card)}
+.webnav a{color:var(--ink2);font-weight:500}
+@media (prefers-reduced-transparency:reduce){.glass,.thick,.thin{backdrop-filter:none}}
+</style>
+</head>
+<body>
+<div class="bar"><b>Video Maker · Cristal Líquido · todas las vistas</b><span class="sp"></span><button id="light" aria-pressed="true">Light</button><button id="dark" aria-pressed="false">Dark</button></div>
+<div id="root"></div>
+<script>
+const pill=(t,x)=>`<span class="pill ${t}"><i></i>${x}</span>`;
+const tile=(l,r,x='')=>`<div class="tile ${x}">${l}${r?`<em>${r}</em>`:''}${x.includes('sel')?'<span class="ck">✓</span>':''}</div>`;
+const field=(l,v,ph)=>`<div class="field"><b>${l}</b><div class="in sub ${ph?'ph':''}">${v}</div></div>`;
+const nav=(on,video,step,win)=>{
+  const steps=['Productor','Material','Storyboard','Voz','Vista previa'],st=['','ok','ok','ok','w'];
+  const vblock=video?`<div class="vid thin"><div class="vt">${video}</div>${steps.map((s,i)=>`<a class="${s===step?'on':''}"><i class="n ${st[i]}"></i>${s}</a>`).join('')}</div>`:'';
+  const it=(k,i,t,extra='')=>`<a class="${on===k?'on':''}"><span>${i}</span>${t}${extra}</a>`;
+  return `<aside class="glass side">${win?'<div class="tls"><i style="background:#ff5f57"></i><i style="background:#febc2e"></i><i style="background:#28c840"></i></div>':''}<div class="brand"><span>▶</span>Video Maker</div><nav class="nav">
+    <div class="cap">Producir</div>${it('videos','▦','Mis videos')}${vblock}${it('marcas','◐','Marcas')}
+    <div class="cap">Salida</div>${it('pub','↑','Publicación','<span class="sp"></span>'+pill('warn','2'))}
+    <div class="cap">Sistema</div>${it('ajustes','⚙','Ajustes')}${it('guia','?','Guía')}</nav><div class="sp"></div>
+    <div class="foot thin"><span class="pill ok"><i></i>Listo</span><span class="pill thin">ES · EN</span></div></aside>`;
+};
+const tb=(t,sub,status,act,sec='')=>`<div class="tb thick"><h1>${t}</h1><small>${sub||''}</small><span class="sp"></span>${status||''}${sec}${act?`<button class="btn">${act}</button>`:''}</div>`;
+const shell=(id,title,on,video,step,toolbar,content,over='',win=false)=>`<div class="label">${title}</div><div class="scene" id="${id}"><div class="bg"><i></i><i></i></div><div class="app">${nav(on,video,step,win)}<main class="main">${toolbar}${content}</main></div>${over}</div>`;
+const V='Crear campaña display ads';
+const S=[];
+
+S.push(shell('marcas','Marcas · listado','marcas','','',
+ tb('Marcas','5 marcas · 2 integradas','', '+ Crear marca'),
+ `<div class="grid g3" style="gap:12px">${[['Display Ads','Integrada','#0ea5e9','#14b8a6','#09090b'],['Esteban Burgos','Propia','#6d4aff','#e11d48','#101322'],['Café Aroma','Propia','#c2410c','#f59e0b','#1c1410'],['Webs para negocios','Propia','#0a6cff','#00a8b5','#0b1020'],['Siochana Vision','Propia','#16a34a','#84cc16','#0a140d']].map(b=>
+ `<div class="panel glass" style="gap:10px"><div class="stage" style="aspect-ratio:16/9;background:${b[4]}"><b style="color:#fff;font-size:15px">${b[0]}</b></div>
+ <div class="h2row"><h2>${b[0]}</h2><span class="sp"></span><span class="pill ${b[1]==='Propia'?'teal':'thin'}">${b[1]}</span></div>
+ <div style="display:flex;gap:6px"><i class="sw" style="background:${b[2]}"></i><i class="sw" style="background:${b[3]}"></i><i class="sw" style="background:${b[4]}"></i><span class="sp"></span><span class="note mono">Outfit · Inter</span></div>
+ <div style="display:flex;gap:8px"><button class="btn sm">${b[1]==='Propia'?'Editar':'Ver'}</button><button class="btn sec sm">Duplicar</button><span class="sp"></span><span class="note">⋮</span></div></div>`).join('')}
+ <div class="panel" style="border:1.5px dashed var(--line);align-items:center;justify-content:center;color:var(--action);font-weight:600">+ Nueva marca desde un logo</div></div>
+ <p class="note">Una acción principal por tarjeta; borrar solo existe en el menú ⋮ y nunca en marcas integradas. La paleta se ve sin abrir la marca.</p>`));
+
+S.push(shell('marca-editor','Marcas · editor','marcas','','',
+ tb('Display Ads','Marca integrada','<span class="pill warn"><i></i>Solo lectura</span>','Duplicar para editar'),
+ `<div style="display:grid;grid-template-columns:190px 1fr 380px;gap:12px;flex:1;min-height:0">
+  <section class="panel glass" style="padding:10px;gap:2px">${['Identidad','Logo','Colores','Tipografías','Voz','Música','Fotos','Productos'].map((s,i)=>`<div class="row" style="border:0;padding:9px 10px;border-radius:10px;${i===0?'background:var(--action-soft);color:var(--action);font-weight:600':'color:var(--ink2)'}">${s}<span class="sp"></span>${i===2?'<i class="n ok"></i>':''}</div>`).join('')}</section>
+  <section class="panel glass"><h2>Identidad</h2>
+   ${field('Nombre','Display Ads')}${field('Nombre hablado','Display Ads')}<p class="note" style="margin-top:-6px">Cómo lo pronuncia la voz. Escribilo como suena.</p>
+   ${field('Eslogan','Tus pantallas, bajo control.')}${field('Dirección web','displayads.com.ar')}
+   <h2 style="margin-top:6px">Colores</h2>
+   <div class="grid g4">${[['Fondo','#09090B'],['Acento','#0EA5E9'],['Acento 2','#14B8A6'],['Texto','#FAFAFA']].map(c=>`<div class="field"><b>${c[0]}</b><div class="in sub" style="display:flex;gap:8px;align-items:center"><i class="sw" style="background:${c[1]}"></i><span class="mono">${c[1]}</span></div></div>`).join('')}</div></section>
+  <section class="panel glass"><div class="h2row"><h2>Vista previa</h2><span class="sp"></span><button class="btn sec sm">Actualizar</button></div>
+   <div class="stage" style="aspect-ratio:16/9;background:#09090b"><b style="color:#fff;font-size:18px">Display Ads</b></div>
+   <p class="note">Los colores se actualizan al instante; el logo y las tipografías recomponen. La vista previa va sobre escenario opaco.</p>
+   <div class="grid g3">${tile('9:16','','')}${tile('1:1','','')}${tile('16:9','','')}</div></section></div>
+  <div class="savebar thick"><span class="note">Cambios sin guardar: ninguno</span><span class="sp"></span><button class="btn sec">Descartar</button><button class="btn">Guardar marca</button></div>`));
+
+S.push(shell('ajustes','Ajustes','ajustes','','',
+ tb('Ajustes','Productor, voz, YouTube y apariencia','', 'Guardar cambios'),
+ `<div class="seg thick"><span class="on">Productor</span><span>Voz</span><span>YouTube</span><span>Apariencia</span></div>
+  <div class="grid g2" style="gap:12px;flex:1;min-height:0;align-content:start">
+  <section class="panel glass"><h2>Motor del productor</h2>
+   <div class="seg thin"><span class="on">Claude (suscripción)</span><span>OpenRouter</span></div>
+   ${field('Modelo','Sonnet · Equilibrado, rápido y económico')}
+   <p class="note">Con la suscripción de Claude no hace falta ninguna clave: el agente corre en esta máquina.</p></section>
+  <section class="panel glass"><h2>Clave de OpenRouter</h2>${pill('ok','Guardada')}
+   ${field('Clave','sk-or-••••••••••••••••8f2a')}
+   <div style="display:flex;gap:8px"><button class="btn sec sm">Reemplazar</button><button class="btn red sm">Quitar</button><span class="sp"></span><a class="note" style="color:var(--action)">Obtener una clave ↗</a></div></section>
+  <section class="panel glass"><h2>Apariencia</h2>
+   <div class="field"><b>Tema</b><div class="seg thin"><span>Sistema</span><span class="on">Claro</span><span>Oscuro</span></div></div>
+   <div class="field"><b>Materiales</b><div class="seg thin"><span class="on">Vidrio</span><span>Sólidos</span></div></div>
+   <p class="note">«Sólidos» quita el desenfoque en equipos lentos. Se activa solo con «reducir transparencia» del sistema.</p>
+   <div class="field"><b>Idioma</b><div class="seg thin"><span class="on">Español</span><span>English</span></div></div></section>
+  <section class="panel glass"><h2>ElevenLabs y YouTube</h2>
+   <div class="row" style="padding-top:0"><div><b>Voz Malena</b><div class="note">ElevenLabs · usa créditos</div></div><span class="sp"></span>${pill('ok','Conectada')}</div>
+   <div class="row"><div><b>Canal Display Ads</b><div class="note">Cuenta de YouTube</div></div><span class="sp"></span>${pill('ok','Conectado')}<button class="btn sec sm">Cambiar</button></div>
+   <div class="row"><div><b>Límite diario de publicación</b><div class="note">Pausa la cola al llegar</div></div><span class="sp"></span><div class="in sub mono" style="min-height:32px;padding:5px 12px">50</div></div></section></div>`));
+
+S.push(shell('biblioteca','Material · biblioteca de imágenes','videos',V,'Material',
+ tb('Material',V,'<span class="pill warn"><i></i>Logo: revisar</span>','Subir material','<button class="btn sec" style="margin-right:6px">Generar montaje</button>'),
+ `<div class="grid g4" style="gap:10px">${[['A-roll','1 archivo','ok'],['B-roll','0 archivos','warn'],['Música','1 archivo','ok'],['Logo','2 archivos','warn']].map(r=>`<div class="card sub"><b>${r[0]}</b><small class="note">${r[1]}</small>${pill(r[2],r[2]==='ok'?'Completo':'Falta o revisar')}</div>`).join('')}</div>
+  <section class="panel glass" style="flex:1"><div class="h2row"><div class="seg thin"><span class="on">Todo <b class="mono">7</b></span><span>A-roll</span><span>Logo</span><span>Fotos</span></div><span class="sp"></span><span class="note">Tamaño</span><div class="seg thin"><span class="on">M</span><span>L</span></div></div>
+   <div class="grid g6">${tile('img 01','A-ROLL','sel')}${tile('img 02','LOGO','sel')}${tile('img 03','LOGO')}${tile('img 04','FOTO')}${tile('img 05','FOTO')}${tile('img 06','FOTO')}${tile('img 07','FOTO')}${tile('img 08','FOTO')}${tile('img 09','FOTO')}${tile('img 10','FOTO')}${tile('img 11','FOTO')}${tile('+ Soltar','','add')}</div>
+   <p class="note">Clic abre el visor; ✓ para seleccionar. Las miniaturas van sobre superficie opaca con el rol en un chip sólido.</p></section>
+  <div class="savebar thick"><b>2 seleccionadas</b><span class="sp"></span><button class="btn sec sm">Asignar rol ▾</button><button class="btn sec sm">Comparar</button><button class="btn red sm">Borrar</button></div>`));
+
+S.push(shell('visor','Visor ampliado con comparación','videos',V,'Material',
+ tb('Material',V,'', 'Subir material'),'<div style="flex:1"></div>',
+ `<div class="viewer"><div class="vm"><div class="h2row"><b style="font-size:15px">Comparar · img 01 y img 02</b><span class="sp"></span><span class="kb"><b>←</b><b>→</b> navegar</span><span class="kb"><b>C</b> comparar</span><span class="kb"><b>Esc</b> cerrar</span></div>
+   <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;flex:1"><div class="pane"><em>A-ROLL</em>img 01 · 1920×1080</div><div class="pane"><em>LOGO</em>img 02 · 1024×1024</div></div>
+   <div class="grid g6" style="grid-template-columns:repeat(8,1fr)">${[1,2,3,4,5,6,7,8].map(i=>`<div class="pane" style="aspect-ratio:4/3;${i<3?'outline:2px solid #409cff':''}">${i}</div>`).join('')}</div></div>
+  <aside class="vs"><b style="font-size:15px">Detalle</b>
+   <div class="note" style="color:#aab0c4">Archivo<div class="mono" style="color:#fff">raw/aroll/img-01.png</div></div>
+   <div class="note" style="color:#aab0c4">Peso<div class="mono" style="color:#fff">1,8 MB</div></div>
+   <div class="note" style="color:#aab0c4">Rol<div style="color:#fff">A-roll</div></div>
+   <div class="note" style="color:#aab0c4">Revisión del productor<div style="color:#fff">Nítida, texto legible.</div></div><span class="sp"></span>
+   <button class="btn">Cambiar rol</button><button class="btn sec" style="color:#fff;background:rgba(255,255,255,.1)">Descargar</button></aside></div>`));
+
+S.push(shell('storyboard','Storyboard','videos',V,'Storyboard',
+ tb('Storyboard',V,pill('teal','7 escenas'),'Proponer storyboard'),
+ `<div style="display:grid;grid-template-columns:260px 1fr;gap:12px;flex:1;min-height:0">
+  <section class="panel glass" style="padding:10px;gap:0">${[1,2,3,4,5,6,7].map(i=>`<div class="row" style="padding:8px;${i===2?'background:var(--action-soft);border-radius:10px;border:0':''}"><span class="mono" style="color:var(--ink3)">${String(i).padStart(2,'0')}</span><div><b>Escena ${i}</b><div class="note mono">0:${String(i*6).padStart(2,'0')} · ${i%3?'9 s':'6 s'}</div></div><span class="sp"></span>${i===4?'<i class="n w"></i>':'<i class="n ok"></i>'}</div>`).join('')}</section>
+  <section class="panel glass"><div class="h2row"><h2>Escena 2</h2><span class="sp"></span><span class="note mono">0:12 – 0:21</span></div>
+   <div class="grid g2" style="grid-template-columns:260px 1fr">${tile('imagen de la escena','','')}<div style="display:flex;flex-direction:column;gap:10px">${field('Narración','Primero el nombre y desde cuándo corre la campaña.')}${field('Prompt de imagen','Pantalla de calendario con campañas superpuestas…','1')}</div></div>
+   <div class="h2row"><button class="btn sec sm">Copiar prompt</button><button class="btn sec sm">Regenerar narración</button></div>
+   <h2 style="margin-top:6px">Guion del productor</h2><div class="in sub mono" style="font-size:12px;line-height:1.7">[0:01] Las campañas viven en este módulo…<br>[0:11] Creamos una nueva. Son cinco pasos…</div></section></div>
+  <div class="savebar thick">${pill('warn','Cambios sin guardar')}<span class="sp"></span><button class="btn sec">Descartar</button><button class="btn">Guardar storyboard</button></div>`));
+
+S.push(shell('voz','Voz','videos',V,'Voz',
+ tb('Voz',V,pill('ok','Malena · 1:28'),'Regenerar con la voz elegida'),
+ `<section class="panel glass"><h2>Locución</h2><div class="grid g2">${[['Daniela','es-AR · calidad alta',0],['Davefx','es-ES · calidad media',0],['Claude','es-MX · calidad alta',0],['Malena','es · ElevenLabs · usa créditos',1]].map(v=>`<div class="card sub" style="flex-direction:row;align-items:center;gap:10px"><i class="radio ${v[2]?'on':''}"></i><div><b>${v[0]}</b><div class="note">${v[1]}</div></div><span class="sp"></span><button class="btn sec sm">▶ Reproducir</button></div>`).join('')}</div></section>
+  <div class="grid g2" style="flex:1;min-height:0;gap:12px;align-content:start">
+  <section class="panel glass"><div class="h2row"><h2>Dirección de voz</h2><span class="note mono">0 líneas</span></div><p class="note">Ritmo, energía y pausas por línea. Al regenerar se aplican.</p>
+   ${field('Línea 3','Primero el nombre y desde cuándo corre.')}<div class="seg thin"><span>Lento</span><span class="on">Normal</span><span>Rápido</span></div>
+   <div style="display:flex;gap:8px"><button class="btn sec sm">Guardar dirección</button><button class="btn sm">Regenerar con dirección</button></div></section>
+  <section class="panel glass"><h2>Tomas por escena</h2>${[1,2,3,4].map(i=>`<div class="row"><span class="mono" style="color:var(--ink3)">0${i}</span><div class="wave"></div><span class="note mono">${i*4+2} s</span>${i===3?pill('warn','Narración cambió'):''}<button class="btn sec sm">▶</button></div>`).join('')}</section></div>`));
+
+S.push(shell('render','Vista previa y render','videos',V,'Vista previa',
+ tb('Vista previa',V,pill('warn','1 aviso'),'Renderizar','<button class="btn sec" style="margin-right:6px">Muestra</button>'),
+ `<div style="display:grid;grid-template-columns:1fr 320px;gap:12px;flex:1;min-height:0">
+  <div style="display:flex;flex-direction:column;gap:12px;min-height:0">
+   <section class="panel glass"><div class="h2row"><h2>Vista previa</h2><span class="sp"></span><div class="seg thin"><span class="on">16:9</span><span>9:16</span></div></div>
+    <div class="stage" style="aspect-ratio:16/9;max-height:430px;margin:0 auto;width:100%"><div class="play">▶</div><div class="ctl"><span class="mono">0:00 / 1:34</span><i><b></b></i><span>⛶</span></div></div>
+    <div class="note mono">1920×1080 · 30 fps · 2724 frames · 1 voz · 1 música · 30 captions</div></section>
+   <section class="panel glass" style="flex:1"><h2>Línea de tiempo</h2>
+    <div class="track"><span>A-roll</span><i style="width:70%"></i></div><div class="track"><span>Voz</span><i style="width:62%;margin-left:4%"></i></div><div class="track"><span>Música</span><i style="width:96%"></i></div><div class="track"><span>Captions</span><i style="width:60%;margin-left:5%"></i></div>
+    <div style="background:var(--stage);border-radius:8px;height:8px;position:relative"><b style="position:absolute;left:22%;top:-4px;width:2px;height:16px;background:#fff"></b></div></section></div>
+  <section class="panel glass" style="gap:8px"><h2>Ajustes del render</h2>
+   ${['Salida · YouTube 16:9','Logo · esquina inferior izquierda','Música · atenuada bajo la voz','Captions · estilo claro','Texto superpuesto · 0'].map((s,i)=>`<div class="card sub" style="flex-direction:row;align-items:center"><b>${s.split(' · ')[0]}</b><span class="note">${s.split(' · ')[1]}</span><span class="sp"></span><span class="note">${i===0?'▾':'›'}</span></div>`).join('')}
+   <p class="note">Secciones plegadas: se abre una a la vez. El formato se elige una sola vez, en la vista previa.</p></section></div>
+  <div class="savebar thick"><span class="note">Línea de tiempo guardada</span><span class="sp"></span><button class="btn sec">Publicar…</button></div>`));
+
+S.push(shell('motion','Motion graphics · brief','videos','Video Maker desde cualquier agente','Productor',
+ tb('Brief','Motion graphics',pill('ok','Guardado'),'Hacer video','<button class="btn sec" style="margin-right:6px">Hacer storyboard</button>'),
+ `<div style="display:grid;grid-template-columns:1fr 360px;gap:12px;flex:1;min-height:0">
+  <section class="panel glass"><div class="grid g3">${field('Marca','Esteban Burgos (propia)')}<div class="field"><b>Formato</b><div class="seg thin"><span class="on">16:9</span><span>9:16</span></div></div>${field('Música','Automática')}</div>
+   ${field('Título','Video Maker desde cualquier agente')}<div class="grid g2">${field('Objetivo','Que desarrolladores entiendan que Video Maker…')}${field('Público','Equipos técnicos que usan agentes de IA')}</div>
+   <div class="field" style="flex:1"><b>Guion</b><div class="in sub" style="flex:1;line-height:1.7">¿Cuántas horas te lleva editar un video corto de tu producto?<br>Video Maker es el estudio de video local y gratuito…<br>Escribís un guion y armás escenas animadas con tu marca.</div></div></section>
+  <section class="panel glass"><h2>Imágenes</h2>${[1,2,3].map(i=>`<div class="row"><div class="tile" style="width:64px;aspect-ratio:4/3">img ${i}</div><div class="in sub ph" style="flex:1;font-size:12px">Describí qué se ve…</div></div>`).join('')}<div class="tile add" style="aspect-ratio:auto;height:48px">+ Agregar imagen</div>
+   <h2>Escenas</h2><div class="note">Aparecen al hacer el storyboard.</div></section></div>`));
+
+S.push(shell('publicacion','Cola de publicación','pub','','',
+ tb('Publicación','Se sube a YouTube de a un video, sin pasar el límite diario',pill('warn','Pausada'),'Reanudar'),
+ `<div class="grid g3" style="gap:10px"><div class="card glass"><b class="mono" style="font-size:22px">1 / 50</b><span class="note">últimas 24 h</span></div><div class="card glass"><b class="mono" style="font-size:22px">33</b><span class="note">en cola</span></div><div class="card glass"><b class="mono" style="font-size:22px">0</b><span class="note">con error</span></div></div>
+  <section class="panel glass" style="flex:1"><div class="seg thin"><span class="on">Cola</span><span>Publicados</span><span>Con error</span></div>
+   ${[['Cómo usar el chat de IA en Display Ads','Publicado','ok'],['Cómo usar las sugerencias de IA','Publicado','ok'],['Cómo generar una imagen con IA','Listo para subir','teal'],['Cómo analizar a tus competidores','En cola','warn'],['Tu perfil y los datos de tu organización','Falló · reintentar','red']].map((q,i)=>`<div class="row"><span class="mono" style="color:var(--ink3)">⋮⋮</span><span class="mono" style="color:var(--ink3)">${i+1}</span><div><b>${q[0]}</b><div class="note mono">display-ads-${i} · out/9b78016f.mp4</div></div><span class="sp"></span>${pill(q[2],q[1])}${i===4?'<button class="btn sec sm">Reintentar</button>':''}<span class="note">⋮</span></div>`).join('')}
+   <p class="note">Se reordena arrastrando (↑↓ con teclado). «Quitar» vive en el menú ⋮ y pide confirmación.</p></section>`));
+
+S.push(shell('guia','Guía','guia','','',
+ tb('Guía','Cómo usar Video Maker','<div class="in sub" style="min-height:32px;padding:5px 12px;color:var(--ink3);min-width:220px">⌕ Buscar en la guía</div>',''),
+ `<div style="display:grid;grid-template-columns:240px 1fr;gap:12px;flex:1;min-height:0">
+  <section class="panel glass" style="padding:10px;gap:0"><div class="cap" style="padding:6px 10px">En esta guía</div>${['Empezar en dos minutos','Crear un video con el productor','Material y roles','Storyboard y voz','Vista previa y render','Publicar en YouTube','Preguntas frecuentes'].map((s,i)=>`<div class="row" style="border:0;padding:9px 10px;border-radius:10px;${i===1?'background:var(--action-soft);color:var(--action);font-weight:600':'color:var(--ink2)'}"><span class="mono" style="color:var(--ink3);font-size:11px">${i+1}</span>${s}</div>`).join('')}</section>
+  <section class="panel glass doc" style="padding:26px 32px;overflow:hidden"><div class="note mono" style="text-transform:uppercase;letter-spacing:.08em">Paso 2 de 7</div>
+   <h3>Crear un video con el productor</h3>
+   <p>El productor es el asistente que trabaja con vos dentro de cada video. Le contás qué querés, él propone un guion, vos lo aprobás y después edita, locuta y renderiza.</p>
+   <h4>1. Abrí o creá un video</h4><p>Desde <b>Mis videos</b> tocá <kbd>Nuevo video</kbd> o arrastrá tus archivos a la ventana: se crea uno con ese material.</p>
+   <div class="card sub" style="max-width:680px;flex-direction:row;gap:12px;align-items:flex-start"><span class="pill teal"><i></i>Tip</span><span style="color:var(--ink2)">Si no sabés por dónde empezar, tocá una de las recetas que aparecen en el chat: ya traen el formato y el tono listos.</span></div>
+   <h4>2. Contale qué querés</h4><p>Escribí en el chat qué video necesitás y para qué plataforma. Con <kbd>Enter</kbd> se envía y con <kbd>Shift</kbd> + <kbd>Enter</kbd> agregás una línea.</p>
+   <h4>3. Aprobá el guion</h4><p>Cuando estés conforme, aprobá la propuesta. Podés pedir cambios las veces que quieras antes de pasar a la voz.</p>
+   <div style="display:flex;gap:10px;margin-top:10px"><button class="btn sec sm">‹ Anterior</button><button class="btn sm">Siguiente: Material y roles ›</button></div></section></div>`));
+
+const chatRight=`<div style="display:flex;flex-direction:column;gap:12px;min-height:0">
+ <section class="panel glass"><div class="h2row"><h2>Vista previa</h2><span class="sp"></span><span class="pill thin">◐ Display Ads ▾</span></div>
+  <div class="stage" style="aspect-ratio:16/9"><div class="play">▶</div><div class="ctl"><span class="mono">0:00 / 1:34</span><i><b></b></i></div></div></section>
+ <section class="panel glass" style="flex:1"><div class="seg thin"><span class="on">Material</span><span>Entregas</span></div>
+  <div class="grid g3">${tile('A-roll','','')}${tile('Música','','')}${tile('Logo','','')}</div>
+  <div class="row"><div><b>video-1080p.mp4</b><div class="note mono">out/9b78016f · 1:34</div></div><span class="sp"></span>${pill('ok','Listo')}<button class="btn sec sm">Abrir</button></div></section></div>`;
+
+S.push(shell('chat','Productor · conversación','videos',V,'Productor',
+ tb('Productor',V,pill('teal','Esperando tu aprobación'),'Aprobar guion y seguir','<button class="btn sec" style="margin-right:6px">Pedir cambios</button>'),
+ `<div style="display:grid;grid-template-columns:1.45fr 1fr;gap:12px;flex:1;min-height:0">
+  <section class="panel glass" style="gap:12px"><div class="turn" style="flex:1;overflow:hidden;gap:12px">
+   <div class="bub me">Hacé un tutorial vertical de 45 segundos con las capturas que subí. Tono cercano.<div style="margin-top:6px;display:flex;gap:6px"><span class="att">▣ captura-01.png</span><span class="att">▣ captura-02.png</span></div></div>
+   <div class="act sub"><div class="st"><i class="n ok"></i><b>Leyó el material</b> · 4 archivos</div><div class="st"><i class="n ok"></i><b>Revisó las imágenes</b> · nítidas, 2 con texto legible</div><div class="st"><i class="n ok"></i><b>Escribió el guion</b> · 12 líneas, 44 s</div><div class="st"><span class="spin"></span><b>Generando la voz con Malena</b> · escena 4 de 7</div><div class="note mono">Trabajó 38 s · Sonnet</div></div>
+   <div class="bub sub" style="max-width:94%"><b>Armé una propuesta de 7 escenas.</b> Abre con la pregunta del problema y cierra con el llamado a descargar. ¿La aprobás o querés cambios?
+    <div class="grid g3" style="margin-top:10px;gap:8px">${tile('1 · Gancho','0:00','')}${tile('2 · Problema','0:06','')}${tile('3 · Solución','0:14','')}</div>
+    <div style="display:flex;gap:8px;margin-top:10px"><button class="btn sm">Aprobar y seguir</button><button class="btn sec sm">Pedir cambios</button><button class="btn sec sm">Ver storyboard</button></div></div>
+   <div class="bub sub" style="max-width:94%"><b>Material sugerido</b> <span class="note">· 3 imágenes que faltan para las escenas 5 a 7</span>
+    <div class="grid g4" style="margin-top:8px;gap:8px">${tile('img A','','')}${tile('img B','','')}${tile('img C','','')}<div class="tile add">+ Subir</div></div></div></div>
+   <div class="chips">${['Más corto, 30 segundos','Cambiá el tono a formal','Sumá una escena de cierre'].map(c=>`<span class="chip thin">${c}</span>`).join('')}</div>
+   <div class="card sub" style="gap:10px"><span style="color:var(--ink3)">Pedile cambios al productor o contale qué sigue…</span><div class="h2row"><span class="pill thin">Sonnet ▾</span><span class="note">Enter envía · Shift+Enter agrega una línea</span><span class="sp"></span><span class="note">Adjuntar</span><button class="btn sm">Enviar</button></div></div></section>
+  ${chatRight}</div>`,'',true));
+
+S.push(shell('chat-inicio','Productor · primer uso de un video','videos',V,'Productor',
+ tb('Productor',V,pill('thin','Sin guion todavía'),''),
+ `<div style="display:grid;grid-template-columns:1.45fr 1fr;gap:12px;flex:1;min-height:0">
+  <section class="panel glass" style="gap:14px"><div><h2 style="font-size:20px;letter-spacing:-.4px">¿Qué video querés hacer?</h2><p class="note" style="margin-top:4px;font-size:13px">El productor trabaja con el material de este video, acuerda el guion con vos y después edita, locuta y renderiza en tu Mac.</p></div>
+   <div><div class="cap" style="padding:0 0 6px">Material en este video</div><div class="chips">${pill('ok','A-roll · 1 archivo')}${pill('ok','Música · 1 archivo')}${pill('warn','Logo · 2 archivos, revisar')}${pill('thin','+ Agregar material')}</div></div>
+   <div><div class="cap" style="padding:0 0 6px">Recetas que ya salieron bien</div><div class="grid g3">${[['Tutorial','Software o pantalla, con voz y captions'],['Tutorial vertical','La misma receta en 9:16'],['Publicidad','Aviso vertical de 45 s con tu marca']].map(r=>`<div class="card sub"><span class="pill teal" style="align-self:flex-start"><i></i>${r[0]}</span><span class="note">${r[1]}</span><b style="color:var(--action);font-size:12px">Usar receta ›</b></div>`).join('')}</div></div>
+   <div><div class="cap" style="padding:0 0 6px">O empezá con alguna de estas</div><div class="chips">${['Contame qué video querés y para qué plataforma','Proponeme un guion con el material que subí','Revisá mis imágenes antes de empezar'].map(c=>`<span class="chip thin">${c}</span>`).join('')}</div></div>
+   <div class="sp"></div>
+   <div class="card sub" style="border-style:dashed;flex-direction:row;align-items:center"><span class="note">↳ Arrastrá tu material acá</span><span class="sp"></span><button class="btn sec sm">Adjuntar archivos</button></div>
+   <div class="card sub" style="gap:10px"><span style="color:var(--ink3)">Contale al productor qué querés y qué material tenés…</span><div class="h2row"><span class="pill thin">Sonnet ▾</span><span class="note">Con tu suscripción de Claude · sin API key</span><span class="sp"></span><button class="btn sm">Enviar</button></div></div></section>
+  <div style="display:flex;flex-direction:column;gap:12px"><section class="panel glass" style="flex:1;align-items:center;justify-content:center;text-align:center;gap:6px"><div class="stage" style="width:100%;aspect-ratio:16/9"><span>Todavía no hay video</span></div><b>Tu video va a aparecer acá</b><span class="note">Cuando el productor renderice, lo ves y lo ajustás sin salir de esta pantalla.</span></section></div></div>`,'',true));
+
+document.getElementById('root').innerHTML=S.join('');
+const r=document.documentElement,l=document.getElementById('light'),d=document.getElementById('dark');
+function set(t){if(t==='dark')r.setAttribute('data-theme','dark');else r.removeAttribute('data-theme');l.setAttribute('aria-pressed',t!=='dark');d.setAttribute('aria-pressed',t==='dark')}
+l.onclick=()=>set('light');d.onclick=()=>set('dark');if(location.hash==='#dark')set('dark');
+</script>
+</body>
+</html>

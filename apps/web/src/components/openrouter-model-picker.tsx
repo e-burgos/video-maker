@@ -1,9 +1,17 @@
+import { SegmentedControl, StateBadge } from '@e-burgos/tucu-ui';
 import { useCallback, useMemo, useState } from 'react';
 
 import { useRenderApi } from '../api/render-api-context';
 import { useAsyncResource } from '../hooks/use-async-resource';
 import { useT } from '../i18n/language-context';
 import { ErrorNotice } from './error-notice';
+import {
+  FIELD_SMALL_CLASS,
+  HINT_TEXT_CLASS,
+  LINK_CLASS,
+  SECONDARY_BUTTON_SMALL_CLASS,
+  WARNING_TEXT_CLASS,
+} from './ui/cl-controls';
 import type { OpenRouterCatalogModel, OpenRouterModelSort, OpenRouterModelTier } from '../api/render-api-types';
 import type { TranslateFn } from '../i18n/language-context';
 
@@ -47,25 +55,25 @@ function ModelCard({
   return (
     <li
       data-testid="openrouter-model-card"
-      className={`space-y-1 rounded-md border p-3 ${selected ? 'border-sky-400/70 bg-sky-500/10' : 'border-slate-700 bg-slate-950'}`}
+      className={`glass-sub flex flex-col gap-1 rounded-[12px] p-3 ${selected ? 'border-[var(--cl-action-ring)]' : ''}`}
     >
       <div className="flex flex-wrap items-center justify-between gap-2">
-        <span className="text-sm font-medium text-slate-100">{model.name}</span>
+        <span className="text-sm font-semibold text-[var(--cl-ink)]">{model.name}</span>
         {model.recommendation !== null && (
-          <span className="rounded-full border border-slate-600 px-2 py-0.5 font-mono text-[10px] uppercase text-slate-300">
+          <StateBadge tone="neutral" size="sm">
             {t(tierLabelKey(model.recommendation.tier))}
-          </span>
+          </StateBadge>
         )}
       </div>
-      <p className="font-mono text-[11px] text-slate-500">{model.id}</p>
-      <p className="text-xs text-slate-400">{priceText(t, model)}</p>
-      <p className="text-xs text-slate-500">
+      <p className="font-data m-0 break-all text-[11px] text-[var(--cl-ink-3)]">{model.id}</p>
+      <p className="m-0 text-xs text-[var(--cl-ink-2)]">{priceText(t, model)}</p>
+      <p className={HINT_TEXT_CLASS}>
         {t(model.supportsImages ? 'settings.openrouterModels.images.yes' : 'settings.openrouterModels.images.no')}
         {' · '}
         {t('settings.openrouterModels.context', { tokens: model.contextLength.toLocaleString('en-US') })}
       </p>
       {model.recommendation !== null && model.recommendation.bench !== null && (
-        <p data-testid="openrouter-model-bench" className="text-[11px] text-slate-500">
+        <p data-testid="openrouter-model-bench" className={`${HINT_TEXT_CLASS} font-data text-[11px]`}>
           {t('settings.openrouterModels.bench', {
             successRate: Math.round(model.recommendation.bench.successRate * 100),
             avgSteps: model.recommendation.bench.avgSteps,
@@ -78,7 +86,7 @@ function ModelCard({
         type="button"
         onClick={onSelect}
         disabled={selected}
-        className="mt-1 rounded-md border border-sky-500/50 bg-sky-500/10 px-2 py-1 text-xs text-sky-100 disabled:opacity-50"
+        className={`${SECONDARY_BUTTON_SMALL_CLASS} mt-1 self-start`}
       >
         {t(selected ? 'settings.openrouterModels.selected' : 'settings.openrouterModels.select')}
       </button>
@@ -100,17 +108,17 @@ function ModelRow({
   return (
     <li
       data-testid="openrouter-model-row"
-      className={`flex flex-wrap items-center justify-between gap-2 rounded-md border px-3 py-2 ${selected ? 'border-sky-400/70 bg-sky-500/10' : 'border-slate-800'}`}
+      className={`glass-sub flex flex-wrap items-center justify-between gap-2 rounded-[12px] px-3 py-2 ${selected ? 'border-[var(--cl-action-ring)]' : ''}`}
     >
       <div className="min-w-0">
-        <p className="truncate text-sm text-slate-100">{model.name}</p>
-        <p className="truncate font-mono text-[11px] text-slate-500">{model.id}</p>
+        <p className="m-0 truncate text-sm font-semibold text-[var(--cl-ink)]">{model.name}</p>
+        <p className="font-data m-0 truncate text-[11px] text-[var(--cl-ink-3)]">{model.id}</p>
       </div>
-      <div className="flex items-center gap-2 text-xs text-slate-400">
+      <div className="flex flex-wrap items-center gap-2 text-xs text-[var(--cl-ink-2)]">
         {model.isFree && (
-          <span className="rounded-full border border-emerald-500/50 px-2 py-0.5 text-emerald-300">
+          <StateBadge tone="green" size="sm">
             {t('settings.openrouterModels.price.free')}
-          </span>
+          </StateBadge>
         )}
         <span>{priceText(t, model)}</span>
         <span>{t('settings.openrouterModels.context', { tokens: model.contextLength.toLocaleString('en-US') })}</span>
@@ -118,7 +126,7 @@ function ModelRow({
           type="button"
           onClick={onSelect}
           disabled={selected}
-          className="rounded-md border border-sky-500/50 bg-sky-500/10 px-2 py-1 text-sky-100 disabled:opacity-50"
+          className={SECONDARY_BUTTON_SMALL_CLASS}
         >
           {t(selected ? 'settings.openrouterModels.selected' : 'settings.openrouterModels.select')}
         </button>
@@ -167,24 +175,22 @@ export function OpenRouterModelPicker({ value, onChange, recommendedIds }: OpenR
   }
 
   return (
-    <div data-testid="openrouter-model-picker" className="space-y-3">
-      <div className="flex flex-wrap gap-2">
-        <button
-          type="button"
-          data-testid="openrouter-models-tab-recommended"
-          onClick={() => changeView('recommended')}
-          className={`rounded-md border px-2 py-1 text-xs ${view === 'recommended' ? 'border-sky-400/70 bg-sky-500/10 text-sky-100' : 'border-slate-700 text-slate-300'}`}
-        >
-          {t('settings.openrouterModels.tab.recommended')}
-        </button>
-        <button
-          type="button"
-          data-testid="openrouter-models-tab-all"
-          onClick={() => changeView('all')}
-          className={`rounded-md border px-2 py-1 text-xs ${view === 'all' ? 'border-sky-400/70 bg-sky-500/10 text-sky-100' : 'border-slate-700 text-slate-300'}`}
-        >
-          {t('settings.openrouterModels.tab.all')}
-        </button>
+    <div data-testid="openrouter-model-picker" className="flex flex-col gap-3">
+      <div className="glass-thin max-w-full self-start overflow-x-auto rounded-[10px] p-[3px]">
+        <SegmentedControl
+          size="xs"
+          aria-label={t('settings.openrouterModels.viewLabel')}
+          options={[
+            {
+              value: 'recommended',
+              label: t('settings.openrouterModels.tab.recommended'),
+              'data-testid': 'openrouter-models-tab-recommended',
+            },
+            { value: 'all', label: t('settings.openrouterModels.tab.all'), 'data-testid': 'openrouter-models-tab-all' },
+          ]}
+          value={view}
+          onChange={(next) => changeView(next as OpenRouterModelView)}
+        />
       </div>
 
       {view === 'all' && (
@@ -195,16 +201,16 @@ export function OpenRouterModelPicker({ value, onChange, recommendedIds }: OpenR
             onChange={(event) => changeQuery(event.target.value)}
             placeholder={t('settings.openrouterModels.searchPlaceholder')}
             aria-label={t('settings.openrouterModels.searchPlaceholder')}
-            className="w-56 rounded-md border border-slate-700 bg-slate-950 px-2 py-1 text-xs text-slate-100"
+            className={`${FIELD_SMALL_CLASS} w-56 max-w-full`}
           />
-          <label htmlFor="openrouter-models-sort" className="text-xs text-slate-500">
+          <label htmlFor="openrouter-models-sort" className="text-xs text-[var(--cl-ink-2)]">
             {t('settings.openrouterModels.sortLabel')}
           </label>
           <select
             id="openrouter-models-sort"
             value={sortChoice}
             onChange={(event) => changeSort(event.target.value as OpenRouterModelSortChoice)}
-            className="rounded-md border border-slate-700 bg-slate-950 px-2 py-1 text-xs text-slate-100"
+            className={FIELD_SMALL_CLASS}
           >
             <option value="default">{t('settings.openrouterModels.sort.default')}</option>
             <option value="price">{t('settings.openrouterModels.sort.price')}</option>
@@ -214,21 +220,23 @@ export function OpenRouterModelPicker({ value, onChange, recommendedIds }: OpenR
       )}
 
       {resource.status === 'loading' && (
-        <p className="text-xs text-slate-500">{t('settings.openrouterModels.loading')}</p>
+        <p className={HINT_TEXT_CLASS}>{t('settings.openrouterModels.loading')}</p>
       )}
 
-      {resource.status === 'error' && resource.error !== null && <ErrorNotice error={resource.error} onRetry={resource.reload} />}
+      {resource.status === 'error' && resource.error !== null && (
+        <ErrorNotice error={resource.error} onRetry={resource.reload} />
+      )}
 
       {resource.data !== null && resource.data.stale && (
-        <p className="text-xs text-amber-300">{t('settings.openrouterModels.stale')}</p>
+        <p className={WARNING_TEXT_CLASS}>{t('settings.openrouterModels.stale')}</p>
       )}
 
       {resource.data !== null && models.length === 0 && (
-        <p className="text-xs text-slate-500">{t('settings.openrouterModels.empty')}</p>
+        <p className={HINT_TEXT_CLASS}>{t('settings.openrouterModels.empty')}</p>
       )}
 
       {resource.data !== null && models.length > 0 && view === 'recommended' && (
-        <ul className="grid gap-2 sm:grid-cols-2">
+        <ul className="m-0 grid list-none gap-2 p-0 sm:grid-cols-2">
           {visibleModels.map((model) => (
             <ModelCard key={model.id} model={model} selected={model.id === value} onSelect={() => onChange(model.id)} t={t} />
           ))}
@@ -236,7 +244,7 @@ export function OpenRouterModelPicker({ value, onChange, recommendedIds }: OpenR
       )}
 
       {resource.data !== null && models.length > 0 && view === 'all' && (
-        <ul className="max-h-80 space-y-1 overflow-y-auto">
+        <ul className="m-0 flex max-h-80 list-none flex-col gap-2 overflow-y-auto p-0">
           {visibleModels.map((model) => (
             <ModelRow key={model.id} model={model} selected={model.id === value} onSelect={() => onChange(model.id)} t={t} />
           ))}
@@ -247,25 +255,25 @@ export function OpenRouterModelPicker({ value, onChange, recommendedIds }: OpenR
         <button
           type="button"
           onClick={() => setVisibleCount((count) => count + PAGE_SIZE)}
-          className="rounded-md border border-slate-700 px-2 py-1 text-xs text-slate-300 hover:border-slate-500"
+          className={`${SECONDARY_BUTTON_SMALL_CLASS} self-start`}
         >
           {t('settings.openrouterModels.showMore')}
         </button>
       )}
 
       {!selectedIsRecommended && (
-        <p data-testid="openrouter-model-warning" className="text-xs text-amber-300">
+        <p data-testid="openrouter-model-warning" className={WARNING_TEXT_CLASS}>
           {t('settings.openrouterModels.warning')}
         </p>
       )}
 
-      <p className="text-[11px] text-slate-500">
+      <p className={`${HINT_TEXT_CLASS} text-[11px]`}>
         {t('settings.openrouterModels.freeNote')}{' '}
         <a
           href={OPENROUTER_PRIVACY_URL}
           target="_blank"
           rel="noreferrer noopener"
-          className="text-sky-300 underline hover:text-sky-200"
+          className={LINK_CLASS}
         >
           {t('settings.openrouterModels.freeNoteLink')}
         </a>

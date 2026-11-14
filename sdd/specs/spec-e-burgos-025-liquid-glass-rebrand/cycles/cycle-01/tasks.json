@@ -1,0 +1,261 @@
+{
+  "$schema": "../../../../schemas/cycle-tasks.schema.json",
+  "spec": "spec-e-burgos-025-liquid-glass-rebrand",
+  "cycle": 1,
+  "module": "liquid-glass-rebrand",
+  "apps": [
+    "apps/web",
+    "apps/desktop"
+  ],
+  "flow": "lite",
+  "user_stories_generated": true,
+  "prerequisites": {
+    "tasks_generated": true
+  },
+  "tasks": [
+    {
+      "id": "TASK-001",
+      "title": "web: spike y montaje de tucu-ui (dependencia 3.10.1, tema con Tailwind propio, GlassPanel/SegmentedControl/StateBadge/Button/Modal/Collapse con y sin ThemeProvider, slot de acción del toolbar y bloque anidado de la sidebar)",
+      "user_stories": [
+        "US-025-101",
+        "US-025-104"
+      ],
+      "estimation_hours": 4,
+      "story_points": 5,
+      "depends_on": [],
+      "status": "done",
+      "files": [
+        "package.json",
+        "pnpm-lock.yaml",
+        "apps/web/src/index.css",
+        "apps/web/src/theme/tucu-mount.spec.tsx"
+      ],
+      "usage": {
+        "tokens_in": 150000,
+        "tokens_out": 14000,
+        "provider_model": "claude/sonnet",
+        "effort": "medium",
+        "agent": "implementor-front",
+        "approx": true,
+        "source": "declared-estimate",
+        "recorded_at": "2026-11-13"
+      }
+    },
+    {
+      "id": "TASK-002",
+      "title": "web: tokens --tucu-* y --cl-*, utilidades de vidrio, escena aurora estática y fuentes Inter y JetBrains Mono empaquetadas con su aviso de licencia",
+      "user_stories": [
+        "US-025-101",
+        "US-025-102"
+      ],
+      "estimation_hours": 4,
+      "story_points": 5,
+      "depends_on": [
+        "TASK-001"
+      ],
+      "status": "done",
+      "files": [
+        "package.json",
+        "pnpm-lock.yaml",
+        "apps/web/src/index.css",
+        "apps/web/src/theme/scene.tsx",
+        "apps/web/src/theme/scene.spec.tsx",
+        "apps/desktop/vendor/THIRD_PARTY_NOTICES.md",
+        "apps/desktop/scripts/vendor-binaries.mjs"
+      ],
+      "usage": {
+        "tokens_in": 90000,
+        "tokens_out": 12000,
+        "provider_model": "claude/sonnet",
+        "effort": "medium",
+        "agent": "implementor-front",
+        "approx": true,
+        "source": "declared-estimate",
+        "recorded_at": "2026-11-13"
+      }
+    },
+    {
+      "id": "TASK-003",
+      "title": "web: contexto de tema sistema/claro/oscuro y materiales vidrio/sólidos, selector, persistencia y reglas de prefers-reduced-transparency y prefers-contrast sin destello inicial",
+      "user_stories": [
+        "US-025-102"
+      ],
+      "estimation_hours": 4,
+      "story_points": 5,
+      "depends_on": [
+        "TASK-002"
+      ],
+      "status": "done",
+      "files": [
+        "apps/web/src/theme/theme-preferences.ts",
+        "apps/web/src/theme/theme-context.tsx",
+        "apps/web/src/theme/theme-context.spec.tsx",
+        "apps/web/src/theme/theme-switch.tsx",
+        "apps/web/src/theme/theme-switch.spec.tsx",
+        "apps/web/index.html",
+        "apps/web/src/main.tsx",
+        "apps/web/src/i18n/messages-en.ts",
+        "apps/web/src/i18n/messages-es.ts"
+      ],
+      "usage": {
+        "tokens_in": 60000,
+        "tokens_out": 9000,
+        "provider_model": "claude/sonnet",
+        "effort": "medium",
+        "agent": "implementor-front",
+        "approx": true,
+        "source": "declared-estimate",
+        "recorded_at": "2026-11-13"
+      }
+    },
+    {
+      "id": "TASK-004",
+      "title": "web: StudioLayout nuevo (sidebar de vidrio, bloque del video con pasos y estado, toolbar con título y acción por ruta mediante hook, pie con servicio e idioma, colapso responsive) conviviendo con las páginas actuales",
+      "user_stories": [
+        "US-025-103",
+        "US-025-104"
+      ],
+      "estimation_hours": 8,
+      "story_points": 8,
+      "depends_on": [
+        "TASK-003"
+      ],
+      "status": "done",
+      "files": [
+        "apps/web/src/components/studio-layout.tsx",
+        "apps/web/src/components/studio-layout.spec.tsx",
+        "apps/web/src/components/shell/shell-navigation.ts",
+        "apps/web/src/components/shell/shell-navigation.spec.ts",
+        "apps/web/src/components/shell/shell-sidebar.tsx",
+        "apps/web/src/components/shell/shell-sidebar.spec.tsx",
+        "apps/web/src/components/shell/sidebar-footer.tsx",
+        "apps/web/src/components/shell/video-steps-nav.tsx",
+        "apps/web/src/components/shell/video-steps-nav.spec.tsx",
+        "apps/web/src/components/shell/shell-toolbar.tsx",
+        "apps/web/src/components/shell/shell-content.tsx",
+        "apps/web/src/components/shell/toolbar-action-context.ts",
+        "apps/web/src/components/shell/toolbar-action-provider.tsx",
+        "apps/web/src/components/shell/use-toolbar-action.ts",
+        "apps/web/src/components/shell/use-toolbar-action.spec.tsx",
+        "apps/web/src/components/service-health-badge.tsx",
+        "apps/web/src/components/language-switch.tsx",
+        "apps/web/src/components/project-brand-control.tsx",
+        "apps/web/src/index.css",
+        "apps/web/src/i18n/messages-es.ts",
+        "apps/web/src/i18n/messages-en.ts"
+      ],
+      "usage": {
+        "tokens_in": 120000,
+        "tokens_out": 22000,
+        "provider_model": "claude/sonnet",
+        "effort": "medium",
+        "agent": "implementor-front",
+        "approx": true,
+        "source": "declared-estimate",
+        "recorded_at": "2026-11-13"
+      }
+    },
+    {
+      "id": "TASK-005",
+      "title": "desktop: ventana con minWidth/minHeight, barra de título con los botones sobre la sidebar, zona de arrastre, backgroundColor según tema, ícono nuevo (de TASK-007) y ventana de configuración inicial con el mismo fondo",
+      "user_stories": [
+        "US-025-105"
+      ],
+      "estimation_hours": 4,
+      "story_points": 5,
+      "depends_on": [
+        "TASK-004",
+        "TASK-007"
+      ],
+      "status": "done",
+      "files": [
+        "apps/desktop/src/main/window-options.ts",
+        "apps/desktop/src/main/window-options.spec.ts",
+        "apps/desktop/src/main/main.ts",
+        "apps/desktop/src/setup/setup.html",
+        "apps/desktop/electron-builder.yml",
+        "apps/web/index.html",
+        "apps/web/src/index.css",
+        "apps/web/src/theme/theme-context.spec.tsx",
+        "apps/web/src/components/shell/shell-sidebar.tsx",
+        "apps/desktop/scripts/vendor-binaries.mjs"
+      ],
+      "usage": {
+        "tokens_in": 95000,
+        "tokens_out": 16000,
+        "provider_model": "claude/sonnet",
+        "effort": "medium",
+        "agent": "implementor-front",
+        "approx": true,
+        "source": "declared-estimate",
+        "recorded_at": "2026-11-13"
+      }
+    },
+    {
+      "id": "TASK-007",
+      "title": "identidad: logo nuevo de Video Maker trabajado con el dev (conceptos, elección y refinamiento), entregables SVG, PNG, .icns y favicon, y componente BrandMark en el studio",
+      "user_stories": [
+        "US-025-106"
+      ],
+      "estimation_hours": 4,
+      "story_points": 5,
+      "depends_on": [],
+      "status": "done",
+      "files": [
+        "design/rebranding/logo/build-logo.mjs",
+        "design/rebranding/logo/final",
+        "apps/web/src/components/ui/brand-mark.tsx",
+        "apps/web/src/components/ui/brand-mark.spec.tsx",
+        "apps/web/src/i18n/messages-en.ts",
+        "apps/web/src/i18n/messages-es.ts",
+        "apps/web/index.html",
+        "apps/web/public/favicon.svg",
+        "apps/desktop/build/icon.icns",
+        "apps/desktop/build/icon.png"
+      ],
+      "usage": {
+        "tokens_in": 180000,
+        "tokens_out": 38000,
+        "provider_model": "claude/sonnet",
+        "effort": "high",
+        "agent": "orchestrator",
+        "approx": true,
+        "source": "declared-estimate",
+        "recorded_at": "2026-11-13"
+      }
+    },
+    {
+      "id": "TASK-006",
+      "title": "verificación del ciclo: capturas antes y después de todas las pantallas en el shell nuevo (light y dark), contraste AA medido, prefers-reduced-* emulados y costo de blur en Mis videos",
+      "user_stories": [
+        "US-025-101",
+        "US-025-102",
+        "US-025-103",
+        "US-025-105"
+      ],
+      "estimation_hours": 3,
+      "story_points": 3,
+      "depends_on": [
+        "TASK-005",
+        "TASK-007"
+      ],
+      "status": "done",
+      "files": [
+        "design/rebranding/verify-cycle.mjs",
+        "apps/web/src/index.css",
+        "apps/web/src/components/shell/shell-sidebar.tsx",
+        "apps/web/src/components/shell/video-steps-nav.tsx"
+      ],
+      "usage": {
+        "tokens_in": 95000,
+        "tokens_out": 20000,
+        "provider_model": "claude/sonnet",
+        "effort": "high",
+        "agent": "orchestrator",
+        "approx": true,
+        "source": "declared-estimate",
+        "recorded_at": "2026-11-13"
+      }
+    }
+  ]
+}

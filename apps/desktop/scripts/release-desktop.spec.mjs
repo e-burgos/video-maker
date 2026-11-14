@@ -3,6 +3,11 @@ import { describe, expect, it } from 'vitest';
 import {
   DEFAULT_DOWNLOADS_BUCKET,
   DOWNLOADS_DOMAIN,
+  R2_SINGLE_UPLOAD_LIMIT_BYTES,
+  UPDATE_MANIFEST_KEY,
+  buildHdiutilLzmaConvertArgs,
+  buildUpdateManifest,
+  exceedsR2UploadLimit,
   buildWranglerR2PutArgs,
   downloadUrlFor,
   extractChangelogSection,
@@ -112,6 +117,42 @@ describe('buildWranglerR2PutArgs', () => {
   });
 });
 
+describe('buildWranglerR2PutArgs with a content type', () => {
+  it('uploads the update manifest as JSON', () => {
+    const args = buildWranglerR2PutArgs({
+      bucket: DEFAULT_DOWNLOADS_BUCKET,
+      key: UPDATE_MANIFEST_KEY,
+      filePath: '/tmp/latest.json',
+      contentType: 'application/json',
+    });
+
+    expect(args).toContain(`${DEFAULT_DOWNLOADS_BUCKET}/latest.json`);
+    expect(args[args.indexOf('--content-type') + 1]).toBe('application/json');
+  });
+});
+
+describe('buildUpdateManifest', () => {
+  it('points at the stable dmg and carries version, hash and date', () => {
+    expect(
+      buildUpdateManifest({
+        version: '0.4.0',
+        stableDmgName: 'Video-Maker-arm64.dmg',
+        sha256: 'abc123',
+        publishedAt: '2026-11-13T12:00:00.000Z',
+      }),
+    ).toEqual({
+      version: '0.4.0',
+      url: `${DOWNLOADS_DOMAIN}/descargas/Video-Maker-arm64.dmg`,
+      sha256: 'abc123',
+      publishedAt: '2026-11-13T12:00:00.000Z',
+    });
+  });
+
+  it('publishes the manifest under descargas/latest.json', () => {
+    expect(downloadUrlFor(UPDATE_MANIFEST_KEY)).toBe(`${DOWNLOADS_DOMAIN}/descargas/latest.json`);
+  });
+});
+
 describe('formatPnpmCommand', () => {
   it('quotes arguments that contain whitespace', () => {
     expect(formatPnpmCommand(['dlx', 'wrangler@4', '--help', 'a b'])).toBe('pnpm dlx wrangler@4 --help "a b"');
@@ -119,5 +160,28 @@ describe('formatPnpmCommand', () => {
 
   it('leaves plain arguments unquoted', () => {
     expect(formatPnpmCommand(['dlx', 'wrangler@4', 'whoami'])).toBe('pnpm dlx wrangler@4 whoami');
+  });
+});
+
+describe('buildHdiutilLzmaConvertArgs', () => {
+  it('converts the dmg to ULMO at the output path', () => {
+    expect(buildHdiutilLzmaConvertArgs({ sourcePath: '/d/a.dmg', outputPath: '/d/a.lzma.dmg' })).toEqual([
+      'convert',
+      '/d/a.dmg',
+      '-format',
+      'ULMO',
+      '-o',
+      '/d/a.lzma.dmg',
+    ]);
+  });
+});
+
+describe('exceedsR2UploadLimit', () => {
+  it('accepts a file exactly at the 300 MiB limit', () => {
+    expect(exceedsR2UploadLimit(R2_SINGLE_UPLOAD_LIMIT_BYTES)).toBe(false);
+  });
+
+  it('rejects a file one byte above the limit', () => {
+    expect(exceedsR2UploadLimit(R2_SINGLE_UPLOAD_LIMIT_BYTES + 1)).toBe(true);
   });
 });

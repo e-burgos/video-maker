@@ -78,6 +78,7 @@ export function CreateProjectByDrop({ existingSlugs, children }: CreateProjectBy
   return (
     <div
       data-testid="create-project-drop-zone"
+      className="flex min-h-full flex-col gap-3"
       onDragEnter={onDragEnter}
       onDragOver={onDragOver}
       onDragLeave={onDragLeave}
@@ -86,14 +87,14 @@ export function CreateProjectByDrop({ existingSlugs, children }: CreateProjectBy
       {dragActive && (
         <div
           data-testid="create-project-overlay"
-          className="fixed inset-0 z-30 flex items-center justify-center border-4 border-dashed border-accent bg-surface/90 text-lg font-medium text-accent-strong"
+          className="glass-thick fixed inset-0 z-30 flex items-center justify-center border-4 border-dashed border-[var(--cl-action)] text-lg font-semibold text-[var(--cl-action-text)]"
         >
           {t('projects.dropToCreate')}
         </div>
       )}
 
       {creating && (
-        <p data-testid="create-project-progress" className="text-sm text-ink-faint">
+        <p data-testid="create-project-progress" className="text-sm text-[var(--cl-ink-3)]">
           {t('projects.creatingFromFile')}
         </p>
       )}

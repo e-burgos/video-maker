@@ -3,6 +3,7 @@ import { VOICE_PREVIEW_ROUTE_PATTERN } from '../voice/voice-preview-url';
 export const ROUTES = [
   { id: 'health', method: 'GET', pattern: '/health' },
   { id: 'capabilities', method: 'GET', pattern: '/capabilities' },
+  { id: 'app.update', method: 'GET', pattern: '/app/update' },
   { id: 'voices.list', method: 'GET', pattern: '/voices' },
   { id: 'voices.preview', method: 'GET', pattern: VOICE_PREVIEW_ROUTE_PATTERN },
   { id: 'projects.list', method: 'GET', pattern: '/projects' },

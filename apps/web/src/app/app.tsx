@@ -1,11 +1,14 @@
+import { ReactRouterNavigationProvider } from '@e-burgos/tucu-ui';
 import { Suspense, lazy } from 'react';
 import { BrowserRouter, Navigate, Route, Routes, useParams } from 'react-router-dom';
 
 import { RenderApiProvider } from '../api/render-api-context';
 import { LanguageProvider, useT } from '../i18n/language-context';
 import type { TranslationKey } from '../i18n/messages-en';
+import { GuideRouteRedirect } from '../components/learn/guide-route-redirect';
 import { StudioLayout } from '../components/studio-layout';
 import { ProjectsPage } from '../pages/projects-page';
+import { LoadingState } from '../components/ui/status-states';
 
 const AssetLibraryPage = lazy(async () => ({
   default: (await import('../pages/asset-library-page')).AssetLibraryPage,
@@ -19,8 +22,12 @@ const BrandEditorPage = lazy(async () => ({
   default: (await import('../pages/brand-editor-page')).BrandEditorPage,
 }));
 
-const GuidePage = lazy(async () => ({
-  default: (await import('../pages/guide-page')).GuidePage,
+const LearnPage = lazy(async () => ({
+  default: (await import('../pages/learn-page')).LearnPage,
+}));
+
+const AboutPage = lazy(async () => ({
+  default: (await import('../pages/about-page')).AboutPage,
 }));
 
 const ProjectWorkspacePage = lazy(async () => ({
@@ -53,7 +60,7 @@ const VoicePage = lazy(async () => ({
 
 function RouteFallback({ messageKey }: { messageKey: TranslationKey }) {
   const t = useT();
-  return <p className="text-sm text-slate-500">{t(messageKey)}</p>;
+  return <LoadingState message={t(messageKey)} />;
 }
 
 function ProducerRouteRedirect() {
@@ -64,16 +71,26 @@ function ProducerRouteRedirect() {
 export function App() {
   return (
     <BrowserRouter basename={import.meta.env.BASE_URL}>
+      <ReactRouterNavigationProvider>
       <LanguageProvider>
         <RenderApiProvider>
           <Routes>
             <Route element={<StudioLayout />}>
               <Route path="/" element={<ProjectsPage />} />
+              <Route path="/guide" element={<GuideRouteRedirect />} />
               <Route
-                path="/guide"
+                path="/learn"
                 element={
-                  <Suspense fallback={<RouteFallback messageKey="app.loading.guide" />}>
-                    <GuidePage />
+                  <Suspense fallback={<RouteFallback messageKey="app.loading.learn" />}>
+                    <LearnPage />
+                  </Suspense>
+                }
+              />
+              <Route
+                path="/about"
+                element={
+                  <Suspense fallback={<RouteFallback messageKey="app.loading.about" />}>
+                    <AboutPage />
                   </Suspense>
                 }
               />
@@ -162,6 +179,7 @@ export function App() {
           </Routes>
         </RenderApiProvider>
       </LanguageProvider>
+      </ReactRouterNavigationProvider>
     </BrowserRouter>
   );
 }

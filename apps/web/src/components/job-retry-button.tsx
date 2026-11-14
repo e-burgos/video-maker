@@ -2,6 +2,7 @@ import { useRenderApi } from '../api/render-api-context';
 import { useApiAction } from '../hooks/use-api-action';
 import { useT } from '../i18n/language-context';
 import { ErrorNotice } from './error-notice';
+import { SECONDARY_BUTTON_SMALL_CLASS } from './ui/cl-controls';
 import type { Job } from '../api/render-api-types';
 
 const RETRYABLE_JOB_STATES = ['failed', 'canceled'] as const;
@@ -34,12 +35,16 @@ export function JobRetryButton({ job, onRetried }: JobRetryButtonProps) {
         onClick={() => void retry()}
         disabled={retryAction.status === 'pending'}
         aria-label={t('job.retry')}
-        className="rounded-md border border-sky-500/50 bg-sky-500/10 px-3 py-1 text-xs text-sky-100 disabled:opacity-40"
+        className={SECONDARY_BUTTON_SMALL_CLASS}
       >
-        {retryAction.status === 'pending' ? t('job.retry.pending') : t('job.retry')}
+        {retryAction.status === 'pending'
+          ? t('job.retry.pending')
+          : t('job.retry')}
       </button>
 
-      {retryAction.error !== null && <ErrorNotice error={retryAction.error} />}
+      {retryAction.error !== null && (
+        <ErrorNotice error={retryAction.error} />
+      )}
     </div>
   );
 }

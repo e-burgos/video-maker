@@ -56,7 +56,7 @@ const COPY = {
     galleryEyebrow: 'Así se ve',
     galleryTitle: 'Capturas reales de la app',
     gallery: [
-      ['home-projects.png', 'Tus videos: lista de proyectos con miniaturas reales y su estado'],
+      ['home-projects.png', 'Mis videos: lista de proyectos agrupados por carpeta, con miniaturas reales y su estado'],
       ['motion-video.png', 'Un video de motion graphics terminado, con el crédito de la música para la descripción'],
       ['workspace-preview.png', 'Conversación con el productor y la vista previa de un render terminado'],
       ['proposal-card.png', 'Al soltar un archivo, el productor propone un rol para confirmar o descartar'],
@@ -128,7 +128,7 @@ const COPY = {
     galleryEyebrow: 'See it',
     galleryTitle: 'Real screenshots of the app',
     gallery: [
-      ['home-projects.png', 'Your videos: project list with real thumbnails and their status'],
+      ['home-projects.png', 'My videos: project list grouped by folder, with real thumbnails and their status'],
       ['motion-video.png', 'A finished motion graphics video, with the music credit for the description'],
       ['workspace-preview.png', 'Conversation with the producer and the preview of a finished render'],
       ['proposal-card.png', 'When you drop a file, the producer suggests a role to confirm or discard'],

@@ -2396,6 +2396,31 @@
             "change": "Created in spec-e-burgos-022-youtube-publishing cycle-02."
           }
         ]
+      },
+      {
+        "id": "EP-074",
+        "method": "GET",
+        "path": "/app/update",
+        "module": "liquid-glass-rebrand",
+        "spec": "sdd/specs/spec-e-burgos-025-liquid-glass-rebrand",
+        "status": "implemented",
+        "created_in_cycle": 6,
+        "updated_in_cycle": null,
+        "description": "Checks for a newer desktop release. Reads the manifest https://video.estebanburgos.com.ar/descargas/latest.json (overridable with VIDEO_MAKER_UPDATE_MANIFEST_URL), with a 4 s timeout and no cache, and compares its version with the installed one (VIDEO_MAKER_APP_VERSION). Network failure, a 404 or an invalid manifest never produce an error: the answer is status 'unknown'.",
+        "path_params": [],
+        "required_headers": [],
+        "request_body": {},
+        "responses": {
+          "200": "application/json: { status: 'up-to-date' | 'available' | 'unknown', installedVersion: string, latestVersion?: string, downloadUrl?: string (only when available), publishedAt?: ISO-8601 string }",
+          "405": "application/json: METHOD_NOT_ALLOWED for any method other than GET."
+        },
+        "changelog": [
+          {
+            "cycle": 6,
+            "date": "2026-11-13",
+            "change": "Created in spec-e-burgos-025-liquid-glass-rebrand cycle-06 TASK-002."
+          }
+        ]
       }
     ]
   }

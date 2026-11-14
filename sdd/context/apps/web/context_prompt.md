@@ -2,7 +2,7 @@
 
 > Entry point para agentes que trabajen sobre `apps/web`.
 > Leer junto con `constitution.md` de este directorio **+ `updates/*.md` en orden de nombre, si los hay**.
-> Última actualización: consolidación de fragmentos | Fecha: 2026-10-13
+> Última actualización: consolidación de fragmentos | Fecha: 2026-11-13
 
 - **Tipo:** app React 19 (SPA local sobre `apps/render-api`)
 - **Estado:** **producto completo de punta a punta, en español (default) e inglés.** La pantalla por
@@ -29,7 +29,9 @@
   `EP-011`..`EP-026`, `EP-028` y `EP-036`. Suite con cobertura piso 80 % (`coverage.include` sin
   recortar; no remedida en esta consolidación). Cero dependencias npm propias además de
   `@remotion/player`. Desde spec-018 suma modo motion, marcas, YouTube y su cola, revisión de renders, propuesta,
-  muestras, referencias y dirección de voz (ver `constitution.md` §5).
+  muestras, referencias y dirección de voz (ver `constitution.md` §5). Desde spec-025 todas las rutas viven en el
+  shell **Cristal Líquido** (sidebar de vidrio con bloque del video y pasos, toolbar de una acción, pie con estado en
+  modal, idioma y apariencia; tucu-ui 3.10.1); todas las rutas migradas, incluidas publicación, ajustes (pestañas) y guía; modo heredado retirado; visor ampliado propio con teclado y comparación; los pasos de la sidebar muestran estado real. Configuración suma «Voces de ElevenLabs».
 - **Descopado a propósito:** la **edición del EDL (`EP-009`/`EP-010`)**, porque `buildTimeline` sólo
   se invoca desde `libs/auto-montage` y guardar un EDL editado escribiría `work/edl.json` sin efecto
   observable ni en el Player ni en un render. La edición de la Timeline cubre
@@ -44,7 +46,8 @@
   reintento de jobs interrumpidos; `cycle-03`: español default, carpetas, i18n de modelos;
   `cycle-04`: `/settings` y motor OpenRouter; `cycle-05`: workspace centrado en el chat) ·
   `spec-018-producer-free-tier` · `spec-020-motion-mode` · `spec-021-brand-kit` · `spec-022-youtube-publishing` ·
-  `spec-023-production-quality`.
+  `spec-023-production-quality` · `spec-025-liquid-glass-rebrand` (`cycle-01`: shell, tema y logo; ciclos 02 a 05
+  migran pantalla por pantalla (el 04 cerró vista previa, motion y marcas), ciclo 06 paridad con la web).
 - **Backend único:** `apps/render-api` (ver `sdd/context/apps/render-api/`), por el
   proxy `/api` del dev-server. `sdd/api.json` es el contrato.
 - **Cómo correr y testear:** `pnpm nx test web` (jsdom + cobertura), `pnpm nx lint web`,
@@ -127,5 +130,7 @@
   de una ruta o un `await import()` perezoso) probablemente lo vuelve a disparar.
 - **El switch de idioma no ofrece un tercer idioma listo para usar**: agregar uno implica sumar el
   módulo de catálogo, sumarlo a `LANGUAGES` y resolver cada clave que `tsc` señale como faltante.
+- **Una ventana de Electron abierta durante muchas recargas en caliente de los catálogos i18n puede mostrar claves sin
+  traducir**: recargar la ventana; no es un defecto.
 - **Quedan superficies de Edición avanzada en inglés o con 404 esperables** tras el rediseño del
   workspace (`cycle-05`): el input de archivos del storyboard y otros documentos todavía no creados.

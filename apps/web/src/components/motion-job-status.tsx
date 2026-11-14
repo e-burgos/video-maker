@@ -1,3 +1,5 @@
+import { StateBadge } from '@e-burgos/tucu-ui';
+
 import type { Job } from '../api/render-api-types';
 import { useT } from '../i18n/language-context';
 import type { TranslationKey } from '../i18n/messages-en';
@@ -33,15 +35,21 @@ export function MotionJobStatus({ job, onRetried }: MotionJobStatusProps) {
   }
 
   return (
-    <div data-testid="motion-job-status" data-job-state={job.state} className="space-y-2">
+    <div data-testid="motion-job-status" data-job-state={job.state} className="flex flex-wrap items-center gap-2">
       {running && (
-        <p data-testid="motion-job-stage" role="status" className="text-sm text-ink-muted">
-          {stageLabel()}
-        </p>
+        <StateBadge tone="purple" dot size="sm">
+          <span data-testid="motion-job-stage" role="status">
+            {stageLabel()}
+          </span>
+        </StateBadge>
       )}
-      {job.state === 'succeeded' && <p className="text-sm text-success">{t('motion.job.succeeded')}</p>}
+      {job.state === 'succeeded' && (
+        <StateBadge tone="green" dot size="sm">
+          {t('motion.job.succeeded')}
+        </StateBadge>
+      )}
       {job.state === 'failed' && job.error !== null && (
-        <p role="alert" className="font-mono text-sm text-danger">
+        <p role="alert" className="font-data m-0 text-sm text-[var(--tucu-state-red-ink)]">
           {t('motion.job.failed', { code: job.error.code, message: job.error.message })}
         </p>
       )}

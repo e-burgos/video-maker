@@ -1,3 +1,4 @@
+import { StateBadge } from '@e-burgos/tucu-ui';
 import { useCallback, useEffect, useRef, useState } from 'react';
 
 import { useRenderApi } from '../api/render-api-context';
@@ -16,7 +17,7 @@ import { useAsyncResource } from '../hooks/use-async-resource';
 import { useRenderJobPoll } from '../hooks/use-render-job-poll';
 import { useT } from '../i18n/language-context';
 import { ErrorNotice } from './error-notice';
-import { Badge } from './ui/badge';
+import { SECONDARY_BUTTON_SMALL_CLASS } from './ui/cl-controls';
 import { VisualReviewSection } from './visual-review-section';
 import type { ReviewFinding, ReviewReport, ReviewSeverity } from '../api/review-types';
 
@@ -26,24 +27,24 @@ export type RenderReviewPanelProps = {
 };
 
 const SEVERITY_TEXT_CLASS: Readonly<Record<ReviewSeverity, string>> = {
-  critical: 'text-rose-300',
-  suggestion: 'text-amber-300',
-  nitpick: 'text-slate-400',
+  critical: 'text-[var(--tucu-state-red-ink)]',
+  suggestion: 'text-[var(--tucu-state-orange-ink)]',
+  nitpick: 'text-[var(--cl-ink-3)]',
 };
 
 function FindingItem({ finding }: { finding: ReviewFinding }) {
   const t = useT();
 
   return (
-    <li data-testid="review-finding" data-severity={finding.severity} className="space-y-0.5 text-sm">
-      <p className="text-slate-200">
+    <li data-testid="review-finding" data-severity={finding.severity} className="flex flex-col gap-0.5 text-sm">
+      <p className="m-0 text-[var(--cl-ink)]">
         {finding.message}
         {finding.timeRange !== undefined && (
-          <span className="ml-2 font-mono text-xs text-slate-500">{formatFindingRange(finding.timeRange)}</span>
+          <span className="font-data ml-2 text-xs text-[var(--cl-ink-3)]">{formatFindingRange(finding.timeRange)}</span>
         )}
       </p>
       {finding.proposedFix !== undefined && (
-        <p className="text-xs text-slate-400">
+        <p className="m-0 text-xs text-[var(--cl-ink-2)]">
           {t('review.proposedFix')} {finding.proposedFix}
         </p>
       )}
@@ -60,11 +61,11 @@ function SeverityGroup({ report, severity }: { report: ReviewReport; severity: R
   }
 
   return (
-    <div data-testid={`review-group-${severity}`} className="space-y-1">
-      <h4 className={`text-xs font-semibold uppercase tracking-wide ${SEVERITY_TEXT_CLASS[severity]}`}>
+    <div data-testid={`review-group-${severity}`} className="flex flex-col gap-1">
+      <h4 className={`m-0 text-xs font-semibold uppercase tracking-wide ${SEVERITY_TEXT_CLASS[severity]}`}>
         {t(REVIEW_SEVERITY_LABEL[severity])} ({findings.length})
       </h4>
-      <ul className="space-y-1.5">
+      <ul className="m-0 list-none flex flex-col gap-1.5 p-0">
         {findings.map((finding) => (
           <FindingItem key={finding.id} finding={finding} />
         ))}
@@ -82,11 +83,11 @@ function KeyMetrics({ report }: { report: ReviewReport }) {
   ];
 
   return (
-    <dl className="grid gap-2 sm:grid-cols-3">
+    <dl className="m-0 grid gap-2 sm:grid-cols-3">
       {entries.map((entry) => (
-        <div key={entry.testId} className="rounded-md border border-slate-800 px-2 py-1">
-          <dt className="text-[11px] text-slate-500">{entry.label}</dt>
-          <dd data-testid={entry.testId} className="font-mono text-sm text-slate-200">
+        <div key={entry.testId} className="rounded-[10px] border border-[var(--tucu-glass-sub-line)] px-2 py-1">
+          <dt className="text-[11px] text-[var(--cl-ink-3)]">{entry.label}</dt>
+          <dd data-testid={entry.testId} className="font-data m-0 text-sm text-[var(--cl-ink)]">
             {entry.value ?? t('review.metric.unavailable')}
           </dd>
         </div>
@@ -100,8 +101,8 @@ function ReportBody({ slug, report }: { slug: string; report: ReviewReport }) {
   const counts = reviewCounts(report);
 
   return (
-    <div className="space-y-3">
-      <p data-testid="review-counts" className="text-xs text-slate-400">
+    <div className="flex flex-col gap-3">
+      <p data-testid="review-counts" className="m-0 text-xs text-[var(--cl-ink-2)]">
         {REVIEW_SEVERITY_ORDER.map((severity) =>
           t('review.count', { count: String(counts[severity]), severity: t(REVIEW_SEVERITY_LABEL[severity]) }),
         ).join(' · ')}
@@ -111,7 +112,7 @@ function ReportBody({ slug, report }: { slug: string; report: ReviewReport }) {
       {REVIEW_SEVERITY_ORDER.map((severity) => (
         <SeverityGroup key={severity} report={report} severity={severity} />
       ))}
-      {report.findings.length === 0 && <p className="text-sm text-emerald-300">{t('review.noFindings')}</p>}
+      {report.findings.length === 0 && <p className="m-0 text-sm text-[var(--tucu-state-green-ink)]">{t('review.noFindings')}</p>}
     </div>
   );
 }
@@ -145,32 +146,41 @@ export function RenderReviewPanel({ slug, file }: RenderReviewPanelProps) {
   const failedJob = poll.job !== null && poll.job.state === 'failed' ? poll.job : null;
 
   return (
-    <section data-testid="render-review" data-file={file} className="space-y-3 rounded-md border border-slate-800 p-3">
+    <section data-testid="render-review" data-file={file} className="glass-sub flex flex-col gap-3 rounded-[14px] p-3">
       <div className="flex flex-wrap items-center gap-2">
-        <h3 className="text-sm font-medium text-slate-200">{t('review.heading')}</h3>
+        <h3 className="m-0 text-sm font-bold text-[var(--cl-ink)]">{t('review.heading')}</h3>
         {report.data !== null ? (
-          <Badge data-testid="review-status" tone={REVIEW_STATUS_TONE[report.data.status]}>
+          <StateBadge
+            data-testid="review-status"
+            tone={REVIEW_STATUS_TONE[report.data.status]}
+            dot
+            size="sm"
+          >
             {t(REVIEW_STATUS_LABEL[report.data.status])}
-          </Badge>
+          </StateBadge>
         ) : (
-          report.status === 'ready' && <Badge data-testid="review-status">{t('review.status.none')}</Badge>
+          report.status === 'ready' && (
+            <StateBadge data-testid="review-status" tone="neutral" size="sm">
+              {t('review.status.none')}
+            </StateBadge>
+          )
         )}
         <button
           type="button"
           data-testid="review-run"
           disabled={reviewing}
           onClick={() => void runReview()}
-          className="ml-auto rounded-md border border-slate-700 px-2 py-1 text-xs text-slate-300 hover:border-slate-500 disabled:opacity-40"
+          className={`${SECONDARY_BUTTON_SMALL_CLASS} ml-auto`}
         >
           {reviewing ? t('review.running') : report.data === null ? t('review.run') : t('review.rerun')}
         </button>
       </div>
 
-      {report.status === 'loading' && <p className="text-xs text-slate-500">{t('review.loading')}</p>}
+      {report.status === 'loading' && <p className="m-0 text-xs text-[var(--cl-ink-3)]">{t('review.loading')}</p>}
       {report.status === 'error' && report.error !== null && <ErrorNotice error={report.error} onRetry={report.reload} />}
       {start.error !== null && <ErrorNotice error={start.error} />}
       {failedJob !== null && failedJob.error !== null && (
-        <p role="alert" className="text-xs text-rose-300">
+        <p role="alert" className="m-0 text-xs text-[var(--tucu-state-red-ink)]">
           {failedJob.error.code}: {failedJob.error.message}
         </p>
       )}

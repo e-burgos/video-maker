@@ -2,6 +2,7 @@ import type { CaptionClip } from '@video-maker/timeline-core';
 
 import type { TimelineEditAction } from '../api/timeline-edit/timeline-edit-state';
 import { useT } from '../i18n/language-context';
+import { FIELD_SMALL_CLASS, ROW_CLASS } from './ui/cl-controls';
 
 export type CaptionEditorProps = {
   captions: readonly CaptionClip[];
@@ -16,9 +17,9 @@ export function CaptionEditor({ captions, dispatch }: CaptionEditorProps) {
       {captions.map((caption) => (
         <li
           key={caption.id}
-          className="flex flex-wrap items-center gap-2 rounded-lg border border-slate-800 bg-slate-900/40 p-3"
+          className={ROW_CLASS}
         >
-          <span className="font-mono text-xs text-slate-500">{caption.id}</span>
+          <span className="font-data w-full text-xs text-[var(--cl-ink-3)]">{caption.id}</span>
           {caption.words.map((word, wordIndex) => (
             <input
               key={wordIndex}
@@ -33,7 +34,7 @@ export function CaptionEditor({ captions, dispatch }: CaptionEditorProps) {
                   text: event.target.value,
                 })
               }
-              className="w-28 rounded-md border border-slate-700 bg-slate-900 px-2 py-1 text-sm text-slate-100"
+              className={`${FIELD_SMALL_CLASS} w-24`}
             />
           ))}
         </li>

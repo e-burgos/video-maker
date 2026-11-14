@@ -16,7 +16,7 @@ function Inlines({ inlines }: { inlines: readonly ProducerInline[] }) {
       {inlines.map((inline, index) => {
         if (inline.kind === 'bold') {
           return (
-            <strong key={index} className="font-semibold text-slate-50">
+            <strong key={index} className="font-semibold">
               {inline.text}
             </strong>
           );
@@ -25,7 +25,7 @@ function Inlines({ inlines }: { inlines: readonly ProducerInline[] }) {
           return (
             <code
               key={index}
-              className="rounded bg-slate-800 px-1 py-0.5 font-mono text-[0.85em] text-sky-200"
+              className="font-data rounded bg-[color-mix(in_srgb,currentColor_12%,transparent)] px-1 py-0.5 text-[0.85em]"
             >
               {inline.text}
             </code>
@@ -44,12 +44,12 @@ function Cells({ row, header }: { row: ProducerTableRow; header: boolean }) {
         header ? (
           <th
             key={index}
-            className="border-b border-slate-700 px-2 py-1 text-left font-mono text-[11px] uppercase tracking-wide text-slate-400"
+            className="border-b border-[var(--tucu-glass-sub-line)] px-2 py-1 text-left font-data text-[11px] uppercase tracking-wide opacity-75"
           >
             <Inlines inlines={cell} />
           </th>
         ) : (
-          <td key={index} className="border-b border-slate-800/60 px-2 py-1 align-top">
+          <td key={index} className="border-b border-[var(--tucu-glass-sub-line)] px-2 py-1 align-top">
             <Inlines inlines={cell} />
           </td>
         ),
@@ -59,8 +59,8 @@ function Cells({ row, header }: { row: ProducerTableRow; header: boolean }) {
 }
 
 const HEADING_CLASS: Readonly<Record<number, string>> = {
-  1: 'text-base font-semibold text-slate-50',
-  2: 'text-sm font-semibold text-slate-50',
+  1: 'text-base font-semibold',
+  2: 'text-sm font-semibold',
 };
 
 function Block({ block }: { block: ProducerBlock }) {
@@ -69,7 +69,7 @@ function Block({ block }: { block: ProducerBlock }) {
       <p
         role="heading"
         aria-level={block.level}
-        className={`pt-1 ${HEADING_CLASS[block.level] ?? 'text-sm font-semibold text-slate-200'}`}
+        className={`pt-1 ${HEADING_CLASS[block.level] ?? 'text-sm font-semibold'}`}
       >
         <Inlines inlines={block.inlines} />
       </p>
@@ -77,14 +77,14 @@ function Block({ block }: { block: ProducerBlock }) {
   }
 
   if (block.kind === 'rule') {
-    return <hr className="border-slate-800" />;
+    return <hr className="border-[var(--tucu-glass-sub-line)]" />;
   }
 
   if (block.kind === 'code') {
     return (
       <pre
         data-language={block.language}
-        className="whitespace-pre-wrap break-words rounded-md border border-slate-800 bg-slate-950 p-3 font-mono text-xs text-slate-300 [overflow-wrap:anywhere]"
+        className="whitespace-pre-wrap break-words font-data rounded-[10px] bg-[color-mix(in_srgb,currentColor_10%,transparent)] p-3 text-xs [overflow-wrap:anywhere]"
       >
         {block.text}
       </pre>
@@ -94,7 +94,7 @@ function Block({ block }: { block: ProducerBlock }) {
   if (block.kind === 'table') {
     return (
       <div className="overflow-x-auto">
-        <table className="w-full border-collapse text-sm text-slate-200">
+        <table className="w-full border-collapse text-sm">
           <thead>
             <Cells row={block.header} header />
           </thead>
@@ -110,14 +110,14 @@ function Block({ block }: { block: ProducerBlock }) {
 
   if (block.kind === 'paragraph') {
     return (
-      <p className="text-sm leading-relaxed text-slate-200">
+      <p className="text-sm leading-relaxed">
         <Inlines inlines={block.inlines} />
       </p>
     );
   }
 
   const items = block.items.map((item, index) => (
-    <li key={index} className="text-sm leading-relaxed text-slate-200">
+    <li key={index} className="text-sm leading-relaxed">
       <Inlines inlines={item} />
     </li>
   ));
@@ -158,7 +158,7 @@ export function ProducerMessageList({
   const quickReplies = last !== null && last.role === 'assistant' ? quickRepliesOf(last) : [];
 
   return (
-    <ol data-testid="producer-message-list" className="space-y-4">
+    <ol data-testid="producer-message-list" className="space-y-3">
       {messages.map((message) => (
         <li
           key={message.id}
@@ -166,26 +166,26 @@ export function ProducerMessageList({
           data-role={message.role}
           className={
             message.role === 'user'
-              ? 'ml-auto max-w-[85%] rounded-lg border border-sky-500/40 bg-sky-500/10 p-3'
-              : 'max-w-[95%] rounded-lg border border-slate-800 bg-slate-900/60 p-3'
+              ? 'ml-auto w-fit max-w-[85%] rounded-[14px] bg-[var(--cl-action-fill)] px-3 py-2.5 text-white'
+              : 'glass-sub max-w-[95%] rounded-[14px] px-3 py-2.5 text-[var(--cl-ink)]'
           }
         >
-          <p className="mb-1 flex items-center gap-2 font-mono text-[10px] uppercase tracking-wide text-slate-500">
-            {message.role === 'user' ? t('producer.roleUser') : t('producer.roleAssistant')}
-            {message.model !== undefined && (
+          <p className="sr-only">{message.role === 'user' ? t('producer.roleUser') : t('producer.roleAssistant')}</p>
+          {message.model !== undefined && (
+            <p className="mb-1">
               <span
                 data-testid={`producer-message-model-${message.id}`}
-                className="rounded-full border border-slate-700 px-1.5 py-0.5 text-[9px] text-slate-400"
+                className="font-data rounded-full border border-[var(--tucu-glass-sub-line)] px-1.5 py-0.5 text-[10px] text-[var(--cl-ink-3)]"
               >
                 {message.model}
               </span>
-            )}
-          </p>
+            </p>
+          )}
           <ProducerMarkdown text={message.text} />
           {message.usage?.costUsd !== undefined && message.usage.costUsd !== null && (
             <p
               data-testid={`producer-message-cost-${message.id}`}
-              className="mt-1 font-mono text-[10px] text-slate-500"
+              className="font-data mt-1 text-[10px] text-[var(--cl-ink-3)]"
             >
               {producerCostLabel(t, language, message.usage.costUsd)}
             </p>
@@ -194,14 +194,14 @@ export function ProducerMessageList({
       ))}
 
       {quickReplies.length > 0 && (
-        <li data-testid="producer-suggestions" className="flex flex-wrap gap-2">
+        <li data-testid="producer-suggestions" className="flex flex-wrap gap-2 pt-1">
           {quickReplies.map((reply) => (
             <button
               key={reply}
               type="button"
               disabled={quickRepliesDisabled}
               onClick={() => onPickReply(reply)}
-              className="rounded-full border border-sky-500/50 bg-sky-500/10 px-3 py-1 text-xs text-sky-100 disabled:opacity-40"
+              className="focus-cl glass-thin rounded-full px-3 py-1.5 text-xs font-medium text-[var(--cl-ink)] hover:border-[var(--cl-ink-3)] disabled:opacity-40"
             >
               {reply}
             </button>

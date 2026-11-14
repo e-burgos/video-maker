@@ -1,0 +1,204 @@
+{
+  "baseUrl": "http://localhost:4200",
+  "capturedAt": "2026-11-13T18:55:57.376Z",
+  "screens": [
+    "videos",
+    "guia",
+    "marcas",
+    "marca-editor",
+    "publicacion",
+    "ajustes",
+    "productor",
+    "biblioteca",
+    "storyboard",
+    "voz",
+    "vista-previa",
+    "motion"
+  ],
+  "contrast": [
+    {
+      "name": "sidebar · rótulo de sección",
+      "scheme": "light",
+      "ratio": 5.69,
+      "fontSize": 10.5,
+      "color": "rgb(92, 92, 97)"
+    },
+    {
+      "name": "sidebar · ítem",
+      "scheme": "light",
+      "ratio": 7.83,
+      "fontSize": 13.5,
+      "color": "rgb(72, 72, 74)"
+    },
+    {
+      "name": "sidebar · ítem activo",
+      "scheme": "light",
+      "ratio": 5.6,
+      "fontSize": 12.5,
+      "color": "rgb(3, 83, 201)"
+    },
+    {
+      "name": "bloque del video · título",
+      "scheme": "light",
+      "ratio": 16.3,
+      "fontSize": 12,
+      "color": "rgb(29, 29, 31)"
+    },
+    {
+      "name": "bloque del video · paso",
+      "scheme": "light",
+      "ratio": 8.83,
+      "fontSize": 12.5,
+      "color": "rgb(72, 72, 74)"
+    },
+    {
+      "name": "bloque del video · paso activo",
+      "scheme": "light",
+      "ratio": 5.6,
+      "fontSize": 12.5,
+      "color": "rgb(3, 83, 201)"
+    },
+    {
+      "name": "toolbar · título",
+      "scheme": "light",
+      "ratio": 15.13,
+      "fontSize": 17,
+      "color": "rgb(29, 29, 31)"
+    },
+    {
+      "name": "toolbar · subtítulo",
+      "scheme": "light",
+      "ratio": 5.98,
+      "fontSize": 12,
+      "color": "rgb(92, 92, 97)"
+    },
+    {
+      "name": "sidebar · rótulo de sección",
+      "scheme": "dark",
+      "ratio": 6,
+      "fontSize": 10.5,
+      "color": "rgba(235, 235, 245, 0.62)"
+    },
+    {
+      "name": "sidebar · ítem",
+      "scheme": "dark",
+      "ratio": 7.58,
+      "fontSize": 13.5,
+      "color": "rgba(235, 235, 245, 0.72)"
+    },
+    {
+      "name": "sidebar · ítem activo",
+      "scheme": "dark",
+      "ratio": 5.78,
+      "fontSize": 12.5,
+      "color": "rgb(140, 194, 255)"
+    },
+    {
+      "name": "bloque del video · título",
+      "scheme": "dark",
+      "ratio": 11.79,
+      "fontSize": 12,
+      "color": "rgb(245, 245, 247)"
+    },
+    {
+      "name": "bloque del video · paso",
+      "scheme": "dark",
+      "ratio": 6.45,
+      "fontSize": 12.5,
+      "color": "rgba(235, 235, 245, 0.72)"
+    },
+    {
+      "name": "bloque del video · paso activo",
+      "scheme": "dark",
+      "ratio": 5.78,
+      "fontSize": 12.5,
+      "color": "rgb(140, 194, 255)"
+    },
+    {
+      "name": "toolbar · título",
+      "scheme": "dark",
+      "ratio": 14.29,
+      "fontSize": 17,
+      "color": "rgb(245, 245, 247)"
+    },
+    {
+      "name": "toolbar · subtítulo",
+      "scheme": "dark",
+      "ratio": 5.93,
+      "fontSize": 12,
+      "color": "rgba(235, 235, 245, 0.62)"
+    }
+  ],
+  "reducedMotion": true,
+  "solidMaterial": {
+    "glassBackdrop": "blur(26px) saturate(1.6)",
+    "solidBackdrop": "none"
+  },
+  "frameRate": {
+    "glass": 52,
+    "solid": 116.3
+  },
+  "consoleErrors": [
+    "light/1440: Failed to load resource: the server responded with a status of 404 (Not Found)",
+    "light/1440: Failed to load resource: the server responded with a status of 404 (Not Found)",
+    "light/1440: Failed to load resource: the server responded with a status of 404 (Not Found)",
+    "light/1440: Failed to load resource: the server responded with a status of 404 (Not Found)",
+    "light/1440: Failed to load resource: the server responded with a status of 404 (Not Found)",
+    "light/1440: Failed to load resource: the server responded with a status of 404 (Not Found)",
+    "light/1440: Failed to load resource: the server responded with a status of 404 (Not Found)",
+    "light/1440: Failed to load resource: the server responded with a status of 404 (Not Found)",
+    "light/1440: Failed to load resource: the server responded with a status of 404 (Not Found)",
+    "light/1440: Failed to load resource: the server responded with a status of 404 (Not Found)",
+    "light/1440: Failed to load resource: the server responded with a status of 404 (Not Found)",
+    "light/1440: Failed to load resource: the server responded with a status of 404 (Not Found)",
+    "light/1440: Failed to load resource: the server responded with a status of 404 (Not Found)",
+    "light/1440: Failed to load resource: the server responded with a status of 404 (Not Found)",
+    "light/900: Failed to load resource: the server responded with a status of 404 (Not Found)",
+    "light/900: Failed to load resource: the server responded with a status of 404 (Not Found)",
+    "light/900: Failed to load resource: the server responded with a status of 404 (Not Found)",
+    "light/900: Failed to load resource: the server responded with a status of 404 (Not Found)",
+    "light/900: Failed to load resource: the server responded with a status of 404 (Not Found)",
+    "light/900: Failed to load resource: the server responded with a status of 404 (Not Found)",
+    "light/900: Failed to load resource: the server responded with a status of 404 (Not Found)",
+    "light/900: Failed to load resource: the server responded with a status of 404 (Not Found)",
+    "light/900: Failed to load resource: the server responded with a status of 404 (Not Found)",
+    "light/900: Failed to load resource: the server responded with a status of 404 (Not Found)",
+    "light/900: Failed to load resource: the server responded with a status of 404 (Not Found)",
+    "light/900: Failed to load resource: the server responded with a status of 404 (Not Found)",
+    "light/900: Failed to load resource: the server responded with a status of 404 (Not Found)",
+    "light/900: Failed to load resource: the server responded with a status of 404 (Not Found)",
+    "dark/1440: Failed to load resource: the server responded with a status of 404 (Not Found)",
+    "dark/1440: Failed to load resource: the server responded with a status of 404 (Not Found)",
+    "dark/1440: Failed to load resource: the server responded with a status of 404 (Not Found)",
+    "dark/1440: Failed to load resource: the server responded with a status of 404 (Not Found)",
+    "dark/1440: Failed to load resource: the server responded with a status of 404 (Not Found)",
+    "dark/1440: Failed to load resource: the server responded with a status of 404 (Not Found)",
+    "dark/1440: Failed to load resource: the server responded with a status of 404 (Not Found)",
+    "dark/1440: Failed to load resource: the server responded with a status of 404 (Not Found)",
+    "dark/1440: Failed to load resource: the server responded with a status of 404 (Not Found)",
+    "dark/1440: Failed to load resource: the server responded with a status of 404 (Not Found)",
+    "dark/1440: Failed to load resource: the server responded with a status of 404 (Not Found)",
+    "dark/1440: Failed to load resource: the server responded with a status of 404 (Not Found)",
+    "dark/1440: Failed to load resource: the server responded with a status of 404 (Not Found)",
+    "dark/1440: Failed to load resource: the server responded with a status of 404 (Not Found)",
+    "dark/900: Failed to load resource: the server responded with a status of 404 (Not Found)",
+    "dark/900: Failed to load resource: the server responded with a status of 404 (Not Found)",
+    "dark/900: Failed to load resource: the server responded with a status of 404 (Not Found)",
+    "dark/900: Failed to load resource: the server responded with a status of 404 (Not Found)",
+    "dark/900: Failed to load resource: the server responded with a status of 404 (Not Found)",
+    "dark/900: Failed to load resource: the server responded with a status of 404 (Not Found)",
+    "dark/900: Failed to load resource: the server responded with a status of 404 (Not Found)",
+    "dark/900: Failed to load resource: the server responded with a status of 404 (Not Found)",
+    "dark/900: Failed to load resource: the server responded with a status of 404 (Not Found)",
+    "dark/900: Failed to load resource: the server responded with a status of 404 (Not Found)",
+    "dark/900: Failed to load resource: the server responded with a status of 404 (Not Found)",
+    "dark/900: Failed to load resource: the server responded with a status of 404 (Not Found)",
+    "dark/900: Failed to load resource: the server responded with a status of 404 (Not Found)",
+    "dark/900: Failed to load resource: the server responded with a status of 404 (Not Found)"
+  ],
+  "reducedTransparency": {
+    "matches": true,
+    "sidebarBackdrop": "none"
+  },
+  "contrastMore": "1px"
+}

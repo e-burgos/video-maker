@@ -160,6 +160,11 @@ async function main() {
     const { chromium } = await resolvePlaywright();
     browser = await chromium.launch({ channel: 'chrome' });
     const context = await browser.newContext({ viewport: { width: 1280, height: 1800 } });
+    await context.addInitScript(() => {
+      if (window.localStorage.getItem('video-maker.language') === null) {
+        window.localStorage.setItem('video-maker.language', 'en');
+      }
+    });
     const page = await context.newPage();
     page.on('console', (message) => {
       if (message.type() === 'error') {
@@ -182,8 +187,8 @@ async function main() {
       log('5', `role card: ${role.role} → ${role.text}`);
     }
     assert(
-      roles.map((role) => role.role).join(',') === 'aroll,broll,image,audio,voice,logo',
-      'the six roles are offered ordered by importance, A-roll first',
+      roles.map((role) => role.role).join(',') === 'aroll,broll,image,audio,voice,logo,reference',
+      'the seven roles are offered ordered by importance, A-roll first',
     );
     assert(
       roles.every((role) => role.text.length > 60),

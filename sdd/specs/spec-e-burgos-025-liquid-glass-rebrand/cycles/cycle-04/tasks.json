@@ -1,0 +1,128 @@
+{
+  "$schema": "../../../../schemas/cycle-tasks.schema.json",
+  "spec": "spec-e-burgos-025-liquid-glass-rebrand",
+  "cycle": 4,
+  "module": "liquid-glass-rebrand",
+  "apps": [
+    "apps/web"
+  ],
+  "flow": "lite",
+  "user_stories_generated": true,
+  "prerequisites": {
+    "tasks_generated": true
+  },
+  "tasks": [
+    {
+      "id": "TASK-001",
+      "title": "Vista previa y render migrados con ajustes plegables",
+      "user_stories": [
+        "US-025-401"
+      ],
+      "estimation_hours": 4,
+      "story_points": 5,
+      "depends_on": [],
+      "status": "done",
+      "files": [
+        "apps/web/src/pages/project-preview-page.tsx",
+        "apps/web/src/components/preview/",
+        "apps/web/src/components/render-trigger.tsx",
+        "apps/web/src/components/ui/cl-controls.ts"
+      ],
+      "usage": {
+        "tokens_in": 170000,
+        "tokens_out": 12500,
+        "provider_model": "claude/sonnet",
+        "effort": "medium",
+        "agent": "implementor-front",
+        "approx": true,
+        "source": "agent-usage-notification",
+        "recorded_at": "2026-11-13"
+      }
+    },
+    {
+      "id": "TASK-002",
+      "title": "Motion migrado y retiro de LegacySurface",
+      "user_stories": [
+        "US-025-402"
+      ],
+      "estimation_hours": 4,
+      "story_points": 5,
+      "depends_on": [],
+      "status": "done",
+      "files": [
+        "apps/web/src/pages/motion-page.tsx",
+        "apps/web/src/components/motion/",
+        "apps/web/src/components/motion-storyboard-view.tsx",
+        "apps/web/src/components/motion-preview-view.tsx"
+      ],
+      "usage": {
+        "tokens_in": 170000,
+        "tokens_out": 12529,
+        "provider_model": "claude/sonnet",
+        "effort": "medium",
+        "agent": "implementor-front",
+        "approx": true,
+        "source": "agent-usage-notification",
+        "recorded_at": "2026-11-13"
+      }
+    },
+    {
+      "id": "TASK-003",
+      "title": "Marcas: listado y editor con guardado único",
+      "user_stories": [
+        "US-025-403"
+      ],
+      "estimation_hours": 5,
+      "story_points": 5,
+      "depends_on": [],
+      "status": "done",
+      "files": [
+        "apps/web/src/pages/brands-page.tsx",
+        "apps/web/src/pages/brand-editor-page.tsx",
+        "apps/web/src/components/brands/",
+        "apps/web/src/hooks/use-section-draft.ts"
+      ],
+      "usage": {
+        "tokens_in": 250000,
+        "tokens_out": 19027,
+        "provider_model": "claude/sonnet",
+        "effort": "medium",
+        "agent": "implementor-front",
+        "approx": true,
+        "source": "agent-usage-notification",
+        "recorded_at": "2026-11-13"
+      }
+    },
+    {
+      "id": "TASK-004",
+      "title": "Verificación del ciclo 04",
+      "user_stories": [
+        "US-025-401",
+        "US-025-402",
+        "US-025-403"
+      ],
+      "estimation_hours": 1,
+      "story_points": 2,
+      "depends_on": [
+        "TASK-001",
+        "TASK-002",
+        "TASK-003"
+      ],
+      "status": "done",
+      "files": [
+        "apps/web/src/components/timeline-player.tsx",
+        "design/rebranding/contrast-audit.mjs"
+      ],
+      "usage": {
+        "tokens_in": 50000,
+        "tokens_out": 7000,
+        "provider_model": "claude/opus",
+        "effort": "low",
+        "agent": "orchestrator",
+        "approx": true,
+        "source": "declared-estimate",
+        "recorded_at": "2026-11-13"
+      }
+    }
+  ]
+}

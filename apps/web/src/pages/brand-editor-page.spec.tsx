@@ -62,13 +62,13 @@ describe('BrandEditorPage', () => {
     const client = renderEditor({});
 
     await waitFor(() => expect(screen.getByTestId('brand-section-identity')).toBeTruthy());
-    expect((screen.getByTestId('brand-identity-save') as HTMLButtonElement).disabled).toBe(true);
+    expect((screen.getByTestId('brand-save') as HTMLButtonElement).disabled).toBe(true);
     fireEvent.change(screen.getByLabelText('Spoken name'), { target: { value: 'Mine Pay' } });
-    fireEvent.click(screen.getByTestId('brand-identity-save'));
+    fireEvent.click(screen.getByTestId('brand-save'));
 
     await waitFor(() => expect(client.putBrand).toHaveBeenCalledTimes(1));
     expect(lastPut(client)).toMatchObject({ id: 'mine', spokenName: 'Mine Pay', logo: 'img/logo.svg' });
-    await waitFor(() => expect(screen.getByTestId('brand-save-status').textContent).toBe('Saved'));
+    await waitFor(() => expect(screen.getByTestId('brand-save-state').textContent).toBe('Saved'));
   });
 
   it('recomposes the preview after saving the identity', async () => {
@@ -76,7 +76,7 @@ describe('BrandEditorPage', () => {
 
     await waitFor(() => expect(client.composeBrandPreview).toHaveBeenCalledTimes(1));
     fireEvent.change(screen.getByLabelText('Tagline'), { target: { value: 'Otro eslogan' } });
-    fireEvent.click(screen.getByTestId('brand-identity-save'));
+    fireEvent.click(screen.getByTestId('brand-save'));
 
     await waitFor(() => expect(client.composeBrandPreview).toHaveBeenCalledTimes(2));
   });
@@ -87,7 +87,7 @@ describe('BrandEditorPage', () => {
     await waitFor(() => expect(screen.getByTestId('brand-section-identity')).toBeTruthy());
     fireEvent.change(screen.getByLabelText('Name'), { target: { value: '  ' } });
 
-    expect((screen.getByTestId('brand-identity-save') as HTMLButtonElement).disabled).toBe(true);
+    expect((screen.getByTestId('brand-save') as HTMLButtonElement).disabled).toBe(true);
   });
 
   it('puts a color change debounced and posts the returned tokens to the preview without recomposing', async () => {
@@ -210,7 +210,7 @@ describe('BrandEditorPage', () => {
     await openSection('typography');
 
     fireEvent.change(screen.getByTestId('brand-typography-body'), { target: { value: 'Geist' } });
-    fireEvent.click(screen.getByTestId('brand-typography-save'));
+    fireEvent.click(screen.getByTestId('brand-save'));
 
     await waitFor(() => expect(client.putBrand).toHaveBeenCalledTimes(1));
     expect(lastPut(client).typography).toEqual({ display: 'Outfit', body: 'Geist' });
@@ -236,11 +236,10 @@ describe('BrandEditorPage', () => {
     await openSection('voice');
 
     fireEvent.change(screen.getByTestId('brand-voice-speed'), { target: { value: '1.2' } });
-    fireEvent.click(screen.getByTestId('brand-voice-save'));
+    fireEvent.click(screen.getByTestId('brand-save'));
 
     await waitFor(() => expect(client.putBrand).toHaveBeenCalledTimes(1));
     expect(lastPut(client).voice).toEqual({ id: 'es_AR-daniela-high', lengthScale: 1.2 });
-    expect(client.composeBrandPreview).toHaveBeenCalledTimes(1);
   });
 
   it('uploads a track, requires its credit and then saves it', async () => {
@@ -252,13 +251,13 @@ describe('BrandEditorPage', () => {
 
     await waitFor(() => expect(screen.getByTestId('brand-track-tema-uno')).toBeTruthy());
     expect(uploadBrandFile).toHaveBeenCalledWith(expect.objectContaining({ kind: 'music', filename: 'tema-uno.mp3' }));
-    expect((screen.getByTestId('brand-music-save') as HTMLButtonElement).disabled).toBe(true);
+    expect((screen.getByTestId('brand-save') as HTMLButtonElement).disabled).toBe(true);
 
     fireEvent.change(screen.getByTestId('brand-track-credit-tema-uno'), { target: { value: 'Autor - CC BY 4.0' } });
     fireEvent.change(screen.getByTestId('brand-track-mood-tema-uno'), { target: { value: 'upbeat' } });
     fireEvent.change(screen.getByTestId('brand-track-bpm-tema-uno'), { target: { value: '128' } });
     fireEvent.change(screen.getByTestId('brand-track-drop-tema-uno'), { target: { value: '8.5' } });
-    fireEvent.click(screen.getByTestId('brand-music-save'));
+    fireEvent.click(screen.getByTestId('brand-save'));
 
     await waitFor(() => expect(client.putBrand).toHaveBeenCalledTimes(1));
     expect(lastPut(client).music).toEqual([
@@ -275,7 +274,7 @@ describe('BrandEditorPage', () => {
 
     expect(document.querySelector('audio')?.getAttribute('src')).toBe('/api/brands/mine/files/music/a.mp3');
     fireEvent.click(screen.getByTestId('brand-track-remove-a'));
-    fireEvent.click(screen.getByTestId('brand-music-save'));
+    fireEvent.click(screen.getByTestId('brand-save'));
 
     await waitFor(() => expect(client.putBrand).toHaveBeenCalledTimes(1));
     expect(lastPut(client).music).toEqual([]);
@@ -290,10 +289,10 @@ describe('BrandEditorPage', () => {
 
     await waitFor(() => expect(screen.getByTestId('brand-photo-cafe-1')).toBeTruthy());
     expect(uploadBrandFile).toHaveBeenCalledWith(expect.objectContaining({ kind: 'image', filename: 'cafe-1.jpg' }));
-    expect((screen.getByTestId('brand-photos-save') as HTMLButtonElement).disabled).toBe(true);
+    expect((screen.getByTestId('brand-save') as HTMLButtonElement).disabled).toBe(true);
 
     fireEvent.change(screen.getByTestId('brand-photo-caption-cafe-1'), { target: { value: 'Una cafetería con mesas' } });
-    fireEvent.click(screen.getByTestId('brand-photos-save'));
+    fireEvent.click(screen.getByTestId('brand-save'));
 
     await waitFor(() => expect(client.putBrand).toHaveBeenCalledTimes(1));
     expect(lastPut(client).images).toEqual({
@@ -308,7 +307,7 @@ describe('BrandEditorPage', () => {
 
     fireEvent.change(screen.getByTestId('brand-device-upload'), { target: { files: [file('pos.png', 'image/png')] } });
     await waitFor(() => expect(screen.getByTestId('brand-device-pos')).toBeTruthy());
-    expect((screen.getByTestId('brand-devices-save') as HTMLButtonElement).disabled).toBe(true);
+    expect((screen.getByTestId('brand-save') as HTMLButtonElement).disabled).toBe(true);
 
     const surface = screen.getByTestId('brand-corner-surface');
     surface.getBoundingClientRect = () =>
@@ -319,7 +318,7 @@ describe('BrandEditorPage', () => {
 
     await waitFor(() => expect(screen.getByTestId('brand-corner-point-3')).toBeTruthy());
     fireEvent.change(screen.getByTestId('brand-device-name-pos'), { target: { value: 'POS' } });
-    fireEvent.click(screen.getByTestId('brand-devices-save'));
+    fireEvent.click(screen.getByTestId('brand-save'));
 
     await waitFor(() => expect(client.putBrand).toHaveBeenCalledTimes(1));
     expect(lastPut(client).devices['pos']).toEqual({
@@ -348,7 +347,7 @@ describe('BrandEditorPage', () => {
     fireEvent.click(screen.getByTestId('brand-corner-reset'));
 
     expect(screen.queryByTestId('brand-corner-point-0')).toBeNull();
-    expect((screen.getByTestId('brand-devices-save') as HTMLButtonElement).disabled).toBe(true);
+    expect((screen.getByTestId('brand-save') as HTMLButtonElement).disabled).toBe(true);
   });
 
   it('shows an included brand read-only with a banner and a duplicate action', async () => {
@@ -360,7 +359,7 @@ describe('BrandEditorPage', () => {
 
     await waitFor(() => expect(screen.getByTestId('brand-readonly-banner')).toBeTruthy());
     expect((screen.getByLabelText('Name') as HTMLInputElement).disabled).toBe(true);
-    expect((screen.getByTestId('brand-identity-save') as HTMLButtonElement).disabled).toBe(true);
+    expect(screen.queryByTestId('brand-save-bar')).toBeNull();
     await openSection('colors');
     expect((screen.getByTestId('brand-color-accent-hex') as HTMLInputElement).disabled).toBe(true);
     expect(screen.queryByTestId('brand-logo-upload')).toBeNull();
@@ -386,13 +385,87 @@ describe('BrandEditorPage', () => {
     await waitFor(() => expect(client.composeBrandPreview).toHaveBeenCalledTimes(2));
   });
 
+  it('saves every changed section with one PUT of the merged manifest', async () => {
+    const manifest = brandManifest({
+      fonts: [
+        { family: 'Outfit', file: 'fonts/outfit.woff2' },
+        { family: 'Geist', file: 'fonts/geist.woff2' },
+      ],
+    });
+    const client = renderEditor({ getBrand: vi.fn().mockResolvedValue(brandDetail({ manifest })) });
+
+    await waitFor(() => expect(screen.getByTestId('brand-section-identity')).toBeTruthy());
+    fireEvent.change(screen.getByLabelText('Tagline'), { target: { value: 'Nuevo eslogan' } });
+    await openSection('typography');
+    fireEvent.change(screen.getByTestId('brand-typography-body'), { target: { value: 'Geist' } });
+    await openSection('voice');
+    fireEvent.change(screen.getByTestId('brand-voice-speed'), { target: { value: '1.3' } });
+
+    expect(screen.getByTestId('brand-changed-sections').textContent).toBe('Changed: Identity, Fonts, Voice');
+    expect(screen.getByTestId('brand-nav-typography').getAttribute('data-changed')).toBe('true');
+    expect(screen.getByTestId('brand-nav-music').getAttribute('data-changed')).toBe('false');
+    fireEvent.click(screen.getByTestId('brand-save'));
+
+    await waitFor(() => expect(client.putBrand).toHaveBeenCalledTimes(1));
+    expect(lastPut(client)).toMatchObject({
+      tagline: 'Nuevo eslogan',
+      typography: { display: 'Outfit', body: 'Geist' },
+      voice: { id: 'es_AR-daniela-high', lengthScale: 1.3 },
+    });
+    await waitFor(() => expect(screen.getByTestId('brand-save-state').textContent).toBe('Saved'));
+    expect(screen.queryByTestId('brand-changed-sections')).toBeNull();
+  });
+
+  it('shows the unsaved changes state until the draft is saved or discarded', async () => {
+    const client = renderEditor({});
+
+    await waitFor(() => expect(screen.getByTestId('brand-save-bar')).toBeTruthy());
+    expect(screen.getByTestId('brand-save-state').textContent).toBe('Saved');
+    expect(screen.getByTestId('brand-save-bar').getAttribute('data-brand-dirty')).toBe('false');
+    expect((screen.getByTestId('brand-discard') as HTMLButtonElement).disabled).toBe(true);
+
+    fireEvent.change(screen.getByLabelText('Tagline'), { target: { value: 'Otro' } });
+    expect(screen.getByTestId('brand-save-state').textContent).toBe('Unsaved changes');
+    expect(screen.getByTestId('brand-save-bar').getAttribute('data-brand-dirty')).toBe('true');
+
+    fireEvent.click(screen.getByTestId('brand-discard'));
+    expect((screen.getByLabelText('Tagline') as HTMLInputElement).value).toBe('Tu mensaje, en video.');
+    expect(screen.getByTestId('brand-save-state').textContent).toBe('Saved');
+    expect(client.putBrand).not.toHaveBeenCalled();
+  });
+
+  it('keeps the draft when switching sections and when a live color save lands', async () => {
+    const client = renderEditor({});
+
+    await waitFor(() => expect(screen.getByTestId('brand-section-identity')).toBeTruthy());
+    fireEvent.change(screen.getByLabelText('Tagline'), { target: { value: 'Pendiente' } });
+    await openSection('colors');
+    fireEvent.change(screen.getByTestId('brand-color-accent-hex'), { target: { value: '#ff0000' } });
+    await waitFor(() => expect(client.putBrand).toHaveBeenCalledTimes(1), { timeout: 2000 });
+    expect(lastPut(client).tagline).toBe('Tu mensaje, en video.');
+
+    await openSection('identity');
+    expect((screen.getByLabelText('Tagline') as HTMLInputElement).value).toBe('Pendiente');
+    expect(screen.getByTestId('brand-save-state').textContent).toBe('Unsaved changes');
+  });
+
+  it('disables saving and explains why while a changed section is invalid', async () => {
+    renderEditor({});
+
+    await waitFor(() => expect(screen.getByTestId('brand-section-identity')).toBeTruthy());
+    fireEvent.change(screen.getByLabelText('Name'), { target: { value: ' ' } });
+
+    expect((screen.getByTestId('brand-save') as HTMLButtonElement).disabled).toBe(true);
+    expect(screen.getByTestId('brand-save-invalid').textContent).toContain('required');
+  });
+
   it('shows the save failure with its code', async () => {
     const putBrand = vi.fn().mockRejectedValue(new RenderApiError('BRAND_MANIFEST_INVALID', 'bad', 422, null));
     renderEditor({ putBrand });
 
     await waitFor(() => expect(screen.getByTestId('brand-section-identity')).toBeTruthy());
     fireEvent.change(screen.getByLabelText('Tagline'), { target: { value: 'x' } });
-    fireEvent.click(screen.getByTestId('brand-identity-save'));
+    fireEvent.click(screen.getByTestId('brand-save'));
 
     await waitFor(() => expect(screen.getByRole('alert').textContent).toContain('BRAND_MANIFEST_INVALID'));
     expect(screen.getByTestId('brand-save-status').textContent).toBe('Could not save');

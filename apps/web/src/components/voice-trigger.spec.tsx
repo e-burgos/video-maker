@@ -4,6 +4,8 @@ import { describe, expect, it, vi } from 'vitest';
 import { VOICE_MODELS, healthyVoiceService, voiceJob } from '../api/__fixtures__/voice';
 import { RenderApiProvider } from '../api/render-api-context';
 import { RenderApiError } from '../api/render-api-error';
+import { ShellToolbar } from './shell/shell-toolbar';
+import { ToolbarActionProvider } from './shell/toolbar-action-provider';
 import { VoiceTrigger, defaultVoiceId } from './voice-trigger';
 import type { RenderApiClient } from '../api/render-api-client';
 import type { ServiceHealth, VoiceListing, VoiceModel } from '../api/render-api-types';
@@ -14,6 +16,8 @@ function renderTrigger(
     health?: ServiceHealth;
     voices?: () => Promise<VoiceListing>;
     brandVoiceId?: string;
+    hasVoice?: boolean;
+    scriptPath?: string;
   } = {},
 ) {
   const onCreated = vi.fn();
@@ -32,7 +36,15 @@ function renderTrigger(
     <RenderApiProvider
       client={{ createVoiceJob, getHealth, listVoices, ...brandClient } as unknown as RenderApiClient}
     >
-      <VoiceTrigger slug="smoke-ingest" onCreated={onCreated} />
+      <ToolbarActionProvider>
+        <ShellToolbar title="Voice" subtitle={null} />
+        <VoiceTrigger
+          slug="smoke-ingest"
+          onCreated={onCreated}
+          {...(options.hasVoice === undefined ? {} : { hasVoice: options.hasVoice })}
+          {...(options.scriptPath === undefined ? {} : { scriptPath: options.scriptPath })}
+        />
+      </ToolbarActionProvider>
     </RenderApiProvider>,
   );
 
@@ -40,8 +52,36 @@ function renderTrigger(
 }
 
 function generateButton(): HTMLButtonElement {
-  return screen.getByRole('button', { name: /Generate voice-over|Sending/ }) as HTMLButtonElement;
+  return screen.getByTestId('toolbar-action') as HTMLButtonElement;
 }
+
+describe('VoiceTrigger toolbar action', () => {
+  it('offers to generate the voice-over while the project has none', () => {
+    renderTrigger(vi.fn());
+
+    expect(generateButton().textContent).toBe('Generate voice-over');
+  });
+
+  it('turns into Regenerate with the selected voice once the project has a voice-over', () => {
+    renderTrigger(vi.fn(), { hasVoice: true });
+
+    expect(generateButton().textContent).toBe('Regenerate with the selected voice');
+  });
+
+  it('keeps the same label in script mode, where the voice is always regenerated', () => {
+    renderTrigger(vi.fn(), { scriptPath: 'work/producer/script.txt' });
+
+    expect(generateButton().textContent).toBe('Regenerate with the selected voice');
+  });
+
+  it('names the selected voice next to the action', async () => {
+    renderTrigger(vi.fn());
+
+    await waitFor(() =>
+      expect(screen.getByTestId('voice-toolbar-selected').textContent).toContain('Daniela'),
+    );
+  });
+});
 
 describe('defaultVoiceId', () => {
   it('prefers the model PIPER_MODEL_PATH points at', () => {
@@ -91,6 +131,7 @@ describe('VoiceTrigger', () => {
         screen.getAllByTestId('voice-card').find((card) => card.dataset['selected'] === 'true')?.dataset['voiceId'],
       ).toBe('es_ES-carlfm-x-low'),
     );
+    await waitFor(() => expect(generateButton().disabled).toBe(false));
     fireEvent.click(generateButton());
 
     await waitFor(() =>

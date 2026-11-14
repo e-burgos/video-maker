@@ -1,0 +1,164 @@
+{
+  "$schema": "../../../../schemas/cycle.schema.json",
+  "cycle": 6,
+  "module": "liquid-glass-rebrand",
+  "spec": "spec-e-burgos-025-liquid-glass-rebrand",
+  "apps": [
+    "apps/web",
+    "apps/render-api",
+    "apps/desktop"
+  ],
+  "phase": "web-parity",
+  "flow": "lite",
+  "objectives": [
+    "Paridad del studio con la web: Aprender, Acerca de con actualizaciones y requisitos, Conectar agentes y material libre"
+  ],
+  "status": "completed",
+  "started_at": "2026-11-13",
+  "completed_at": "2026-11-13",
+  "documents": {
+    "plan": "sdd/specs/spec-e-burgos-025-liquid-glass-rebrand/cycles/cycle-06/plan.md",
+    "tasks": "sdd/specs/spec-e-burgos-025-liquid-glass-rebrand/cycles/cycle-06/tasks.json"
+  },
+  "artifacts": [
+    "sdd/specs/spec-e-burgos-025-liquid-glass-rebrand/cycles/cycle-06/artifacts/contrast-audit.json"
+  ],
+  "metrics": {
+    "tasks_total": 4,
+    "tasks_completed": 4,
+    "story_points": 20,
+    "files_created": [
+      "apps/web/src/components/learn/",
+      "apps/web/src/components/about/",
+      "apps/web/src/components/agents/",
+      "apps/web/src/components/library/free-media/",
+      "apps/web/src/content/",
+      "apps/render-api/src/http/handlers/app-update-handler.ts"
+    ],
+    "files_modified": [
+      "apps/web/src/components/shell/shell-navigation.ts",
+      "apps/web/src/i18n/messages-es.ts",
+      "apps/web/src/i18n/messages-en.ts",
+      "apps/web/src/index.css",
+      "apps/render-api/src/http/routes.ts",
+      "apps/desktop/scripts/release-desktop.mjs",
+      "sdd/api.json"
+    ],
+    "files_deleted": [],
+    "usage": {
+      "tokens_in": 913000,
+      "tokens_out": 102199,
+      "by_agent": [
+        {
+          "agent": "custom",
+          "label": "Relevamiento de paridad web y studio (solo lectura)",
+          "provider_model": "claude/haiku",
+          "effort": "low",
+          "tokens_in": 115000,
+          "tokens_out": 6758,
+          "tokens_total": 121758,
+          "approx": true,
+          "source": "agent-usage-notification",
+          "recorded_at": "2026-11-13"
+        },
+        {
+          "agent": "custom",
+          "label": "Consolidación del contexto de web, render-api y desktop",
+          "provider_model": "claude/sonnet",
+          "effort": "low",
+          "tokens_in": 103000,
+          "tokens_out": 6594,
+          "tokens_total": 109594,
+          "approx": true,
+          "source": "agent-usage-notification",
+          "recorded_at": "2026-11-13"
+        },
+        {
+          "agent": "implementor-front",
+          "label": "TASK-001 Aprender",
+          "provider_model": "claude/sonnet",
+          "effort": "medium",
+          "tokens_in": 175000,
+          "tokens_out": 20788,
+          "tokens_total": 195788,
+          "approx": true,
+          "source": "agent-usage-notification",
+          "recorded_at": "2026-11-13"
+        },
+        {
+          "agent": "implementor-front",
+          "label": "TASK-002 Acerca de, actualizaciones y requisitos",
+          "provider_model": "claude/sonnet",
+          "effort": "medium",
+          "tokens_in": 240000,
+          "tokens_out": 32809,
+          "tokens_total": 272809,
+          "approx": true,
+          "source": "agent-usage-notification",
+          "recorded_at": "2026-11-13"
+        },
+        {
+          "agent": "implementor-front",
+          "label": "TASK-003 agentes y material libre",
+          "provider_model": "claude/sonnet",
+          "effort": "medium",
+          "tokens_in": 200000,
+          "tokens_out": 23250,
+          "tokens_total": 223250,
+          "approx": true,
+          "source": "agent-usage-notification",
+          "recorded_at": "2026-11-13"
+        },
+        {
+          "agent": "orchestrator",
+          "label": "TASK-004 verificación, cierre del ciclo y de la spec",
+          "provider_model": "claude/opus",
+          "effort": "low",
+          "tokens_in": 80000,
+          "tokens_out": 12000,
+          "tokens_total": 92000,
+          "approx": true,
+          "source": "declared-estimate",
+          "recorded_at": "2026-11-13"
+        }
+      ]
+    }
+  },
+  "tables_created": [],
+  "endpoints_implemented": [],
+  "components_created": [],
+  "issues_found": [
+    "Buscar actualizaciones responde «unknown» hasta que el próximo release suba descargas/latest.json a R2; en desarrollo la versión es 0.0.0-dev.",
+    "GET /api/app/update no se probó contra el studio en marcha (corre código anterior); lo cubren specs del handler y las capturas lo simularon.",
+    "Material libre: la API no recibe rol ni devuelve URL de miniatura o audio; el rol lo fija el tipo, las tarjetas no tienen miniatura y la música no se reproduce en la app.",
+    "Las capturas de la galería de Aprender muestran la interfaz en español también en inglés.",
+    "e2e de web de los ciclos 03 a 06 sin correr (escriben datos y el studio es compartido).",
+    "Sin revisión en Electron de desarrollo del ciclo 06."
+  ],
+  "reviewer_report": {
+    "approved": true,
+    "date": "2026-11-13",
+    "ca_results": {
+      "US-025-601": "PASS — /learn con Guía, Cómo funciona, Tutorial (R2 con aviso sin conexión), Preguntas frecuentes y Galería; /guide redirige; contenido propio es/en",
+      "US-025-602": "PASS — /about con versión, buscar actualizaciones manual (up-to-date/available/unknown, nunca 500), licencias e inventario alineado por spec con la web, código abierto y privacidad; release sube latest.json",
+      "US-025-603": "PASS — requisitos desde /api/health con estado y cómo resolverlo; acceso desde el modal de estado",
+      "US-025-604": "PASS — pestaña Agentes con Claude Code, Copilot, Gemini y cliente MCP genérico, configuraciones copiables y estado de motores; el modal de estado ya no muestra producerEngines como objeto",
+      "US-025-605": "PASS con desvío — búsqueda e importación de imágenes, video y música libres desde la biblioteca con fuente, licencia y atribución; sin selector de rol, miniatura ni reproducción por límites de la API"
+    },
+    "tests": {
+      "sdd:validate": "OK",
+      "web": "199/199 archivos, 1891/1891 tests; lint 0 errores; build ok",
+      "render-api": "2312/2312 tests",
+      "desktop": "135/135 tests",
+      "docs-site": "63/63 tests; build ok",
+      "contrast-audit": "0 fallas en 1.184 textos y 0 desborde en Aprender, Acerca de, ajustes Agentes y biblioteca × claro/oscuro (se oscureció el verde de estado en claro)"
+    },
+    "notes": "Tres tasks en subagentes sonnet/medium en serie, con relevamiento previo en haiku. La verificación corrigió el contraste del verde de estado. Cierra la spec-025: seis ciclos completos.",
+    "follow_ups": [
+      "Correr los e2e de web contra un studio libre o aislado antes de la PR.",
+      "Revisión en Electron de desarrollo de las pantallas nuevas.",
+      "Sacar un release para publicar latest.json y probar Buscar actualizaciones de punta a punta.",
+      "Si se quiere selector de rol, miniaturas o audio en material libre, ampliar la API de media/music search (fix o spec aparte)."
+    ]
+  }
+}

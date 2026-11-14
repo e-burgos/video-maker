@@ -746,6 +746,74 @@
           "tasks_done": 7
         }
       }
+    },
+    "spec-e-burgos-025-liquid-glass-rebrand": {
+      "cycles": {
+        "cycle-01": {
+          "file": "sdd/specs/spec-e-burgos-025-liquid-glass-rebrand/cycles/cycle-01/tasks.json",
+          "module": "liquid-glass-rebrand",
+          "apps": [
+            "apps/web",
+            "apps/desktop"
+          ],
+          "status": "completed",
+          "tasks_total": 7,
+          "tasks_done": 7
+        },
+        "cycle-02": {
+          "file": "sdd/specs/spec-e-burgos-025-liquid-glass-rebrand/cycles/cycle-02/tasks.json",
+          "module": "liquid-glass-rebrand",
+          "apps": [
+            "apps/web"
+          ],
+          "status": "completed",
+          "tasks_total": 4,
+          "tasks_done": 4
+        },
+        "cycle-03": {
+          "file": "sdd/specs/spec-e-burgos-025-liquid-glass-rebrand/cycles/cycle-03/tasks.json",
+          "module": "liquid-glass-rebrand",
+          "apps": [
+            "apps/web"
+          ],
+          "status": "completed",
+          "tasks_total": 4,
+          "tasks_done": 4
+        },
+        "cycle-04": {
+          "file": "sdd/specs/spec-e-burgos-025-liquid-glass-rebrand/cycles/cycle-04/tasks.json",
+          "module": "liquid-glass-rebrand",
+          "apps": [
+            "apps/web"
+          ],
+          "status": "completed",
+          "tasks_total": 4,
+          "tasks_done": 4
+        },
+        "cycle-05": {
+          "file": "sdd/specs/spec-e-burgos-025-liquid-glass-rebrand/cycles/cycle-05/tasks.json",
+          "module": "liquid-glass-rebrand",
+          "apps": [
+            "apps/web",
+            "apps/docs-site"
+          ],
+          "status": "completed",
+          "tasks_total": 5,
+          "tasks_done": 5
+        },
+        "cycle-06": {
+          "file": "sdd/specs/spec-e-burgos-025-liquid-glass-rebrand/cycles/cycle-06/tasks.json",
+          "module": "liquid-glass-rebrand",
+          "apps": [
+            "apps/web",
+            "apps/render-api",
+            "apps/desktop"
+          ],
+          "status": "completed",
+          "tasks_total": 4,
+          "tasks_done": 4
+        }
+      }
     }
   }
 }

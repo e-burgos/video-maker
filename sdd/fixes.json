@@ -6698,6 +6698,57 @@
           }
         ]
       }
+    },
+    {
+      "id": "FIX-e-burgos-086",
+      "author": "e-burgos",
+      "spec_id": null,
+      "fix_document": "sdd/fixes/fix-e-burgos-086.md",
+      "type": "BUGFIX",
+      "severity": "medium",
+      "created_at": "2026-11-13",
+      "resolved_at": "2026-11-13",
+      "validated_at": null,
+      "title": "patch_timeline y PUT timeline validan referencias de asset; el error de render lleva el detalle",
+      "estimation_hours": 1,
+      "description": "patch_timeline y el PUT del render-api persistían un logo cuyo asset no estaba en timeline.assets; el render fallaba al final con INVALID_TIMELINE sin detalle. Ahora ambos rechazan con los códigos de validateTimeline y el error del render propaga las issues.",
+      "justification": "Reporte de otra sesión del dev produciendo videos (2026-11-13).",
+      "related_modules": [
+        "timeline-core",
+        "producer-tools",
+        "render-api"
+      ],
+      "affected_files": [
+        "libs/timeline-core/src/timeline/validate-timeline.ts",
+        "libs/producer-tools/src/handlers/studio-tool-handlers.ts",
+        "apps/render-api/src/http/handlers/montage-handler.ts",
+        "apps/render-api/src/errors/translate-engine-error.ts",
+        "apps/render-api/src/errors/render-api-error.ts"
+      ],
+      "test_reference": "validate-timeline.spec, studio-tool-handlers.spec, montage-handler.spec, translate-engine-error.spec.",
+      "status": "implemented",
+      "cycle": null,
+      "usage": {
+        "provider_model": "claude/sonnet",
+        "effort": "medium",
+        "tokens_in": 150000,
+        "tokens_out": 8000,
+        "approx": true,
+        "source": "declared-estimate",
+        "recorded_at": "2026-11-13",
+        "by_agent": [
+          {
+            "agent": "implementor-back",
+            "provider_model": "claude/sonnet",
+            "effort": "medium",
+            "tokens_in": 150000,
+            "tokens_out": 8000,
+            "approx": true,
+            "source": "declared-estimate",
+            "recorded_at": "2026-11-13"
+          }
+        ]
+      }
     }
   ]
 }

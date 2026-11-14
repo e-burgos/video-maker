@@ -1,0 +1,54 @@
+{
+  "baseUrl": "http://localhost:4200",
+  "audited": [
+    {
+      "scheme": "light",
+      "path": "/",
+      "textsChecked": 94,
+      "horizontalOverflowPx": 0
+    },
+    {
+      "scheme": "light",
+      "path": "/projects/display-ads-asignar-campana",
+      "textsChecked": 78,
+      "horizontalOverflowPx": 0
+    },
+    {
+      "scheme": "light",
+      "path": "/projects/opticagestion-impuestos-ficha",
+      "textsChecked": 56,
+      "horizontalOverflowPx": 0
+    },
+    {
+      "scheme": "light",
+      "path": "/projects/li-video-maker-agentes",
+      "textsChecked": 80,
+      "horizontalOverflowPx": 0
+    },
+    {
+      "scheme": "dark",
+      "path": "/",
+      "textsChecked": 94,
+      "horizontalOverflowPx": 0
+    },
+    {
+      "scheme": "dark",
+      "path": "/projects/display-ads-asignar-campana",
+      "textsChecked": 78,
+      "horizontalOverflowPx": 0
+    },
+    {
+      "scheme": "dark",
+      "path": "/projects/opticagestion-impuestos-ficha",
+      "textsChecked": 56,
+      "horizontalOverflowPx": 0
+    },
+    {
+      "scheme": "dark",
+      "path": "/projects/li-video-maker-agentes",
+      "textsChecked": 80,
+      "horizontalOverflowPx": 0
+    }
+  ],
+  "failures": []
+}

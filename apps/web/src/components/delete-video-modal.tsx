@@ -6,6 +6,7 @@ import type { VideoPlacement } from '../api/render-api-types';
 import { useT } from '../i18n/language-context';
 import { ErrorNotice } from './error-notice';
 import { Modal } from './modal';
+import { DANGER_BUTTON_SMALL_CLASS, FIELD_SMALL_CLASS, SECONDARY_BUTTON_SMALL_CLASS } from './ui/cl-controls';
 
 export type DeleteVideoModalProps = {
   slug: string;
@@ -48,7 +49,7 @@ export function DeleteVideoModal({ slug, placement, onClose, onDeleted }: Delete
             data-testid="delete-video-cancel"
             disabled={pending}
             onClick={onClose}
-            className="rounded-md border border-slate-700 px-3 py-1.5 text-xs text-slate-300 hover:border-slate-500 disabled:opacity-50"
+            className={SECONDARY_BUTTON_SMALL_CLASS}
           >
             {t('videoMenu.cancel')}
           </button>
@@ -59,35 +60,35 @@ export function DeleteVideoModal({ slug, placement, onClose, onDeleted }: Delete
             onClick={() => {
               void submit();
             }}
-            className="rounded-md border border-rose-400/60 bg-rose-500/20 px-3 py-1.5 text-xs font-medium text-rose-100 hover:bg-rose-500/30 disabled:opacity-40"
+            className={DANGER_BUTTON_SMALL_CLASS}
           >
             {pending ? t('videoMenu.deleting') : t('videoMenu.deleteSubmit')}
           </button>
         </>
       }
     >
-      <p className="text-rose-200">{t('videoMenu.deleteWarning')}</p>
+      <p className="text-[var(--tucu-state-red-ink)]">{t('videoMenu.deleteWarning')}</p>
 
-      <ul className="space-y-1 rounded-md border border-rose-500/40 bg-rose-500/10 p-3 font-mono text-xs text-rose-100/90">
+      <ul className="font-data space-y-1 rounded-[10px] border border-[var(--tucu-state-red-line)] bg-[var(--tucu-state-red-soft)] p-3 text-xs text-[var(--tucu-state-red-ink)]">
         <li>{t('videoMenu.deleteRaw')}</li>
         <li>{t('videoMenu.deleteWork')}</li>
         <li>{t('videoMenu.deleteOut')}</li>
       </ul>
 
       {placement.archived && (
-        <p data-testid="delete-video-archived-note" className="text-xs text-slate-400">
+        <p data-testid="delete-video-archived-note" className="text-xs text-[var(--cl-ink-2)]">
           {t('videoMenu.deleteArchivedNote')}
         </p>
       )}
 
       <label className="block space-y-1">
-        <span className="text-xs text-slate-400">{t('videoMenu.deleteConfirmLabel', { slug })}</span>
+        <span className="text-xs text-[var(--cl-ink-2)]">{t('videoMenu.deleteConfirmLabel', { slug })}</span>
         <input
           data-testid="delete-video-confirmation"
           aria-label={t('videoMenu.deleteConfirmLabel', { slug })}
           value={confirmation}
           onChange={(event) => setConfirmation(event.target.value)}
-          className="w-full rounded-md border border-slate-700 bg-slate-900 px-2 py-1.5 font-mono text-sm text-slate-100"
+          className={`${FIELD_SMALL_CLASS} font-data h-9 w-full text-sm`}
         />
       </label>
 

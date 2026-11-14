@@ -1,3 +1,4 @@
+import { StateBadge } from '@e-burgos/tucu-ui';
 import { useEffect, useRef } from 'react';
 
 import { useRenderApi } from '../api/render-api-context';
@@ -7,7 +8,9 @@ import { useT } from '../i18n/language-context';
 import type { TranslationKey } from '../i18n/messages-en';
 import { ErrorNotice } from './error-notice';
 import { JobRetryButton } from './job-retry-button';
+import { ToolbarStatus } from './shell/toolbar-status';
 import type { Job } from '../api/render-api-types';
+import { LoadingState } from './ui/status-states';
 
 const STAGE_KEYS: Readonly<Record<string, TranslationKey>> = {
   collect: 'storyboardJob.stage.collect',
@@ -48,7 +51,7 @@ export function StoryboardJobPanel({ jobId, onSucceeded, onRetried }: Storyboard
 
   if (poll.stopReason === 'not-found' && poll.error !== null) {
     return (
-      <p role="alert" className="text-sm text-rose-300">
+      <p role="alert" className="m-0 text-sm text-[var(--tucu-state-red-ink)]">
         {t('storyboardJob.lost', { code: poll.error.code })}
       </p>
     );
@@ -58,33 +61,43 @@ export function StoryboardJobPanel({ jobId, onSucceeded, onRetried }: Storyboard
     return poll.error !== null ? (
       <ErrorNotice error={poll.error} />
     ) : (
-      <p className="text-sm text-slate-400">{t('storyboardJob.loading')}</p>
+      <LoadingState message={t('storyboardJob.loading')} />
     );
   }
 
   const explanationKey = job.error === null ? null : storyboardFailureKey(job.error.code);
   const stageKey = job.progress === null ? null : (STAGE_KEYS[job.progress.stage] ?? null);
 
+  const inProgress = job.state === 'queued' || job.state === 'running';
+
   return (
+    <>
+      {inProgress && (
+        <ToolbarStatus>
+          <StateBadge tone="purple" dot size="sm" data-testid="storyboard-toolbar-status">
+            {t('storyboard.proposing')}
+          </StateBadge>
+        </ToolbarStatus>
+      )}
     <div
       data-testid="storyboard-job-panel"
       data-storyboard-state={job.state}
-      className="space-y-2 rounded-lg border border-slate-800 bg-slate-900/40 p-4"
+      className="glass flex flex-col gap-2 rounded-[20px] p-4"
     >
-      <p className="font-mono text-sm text-slate-100">{job.id}</p>
-      <p className="text-sm text-slate-300">{t('job.state', { state: job.state })}</p>
+      <p className="font-data m-0 text-sm font-semibold text-[var(--cl-ink)]">{job.id}</p>
+      <p className="m-0 text-sm text-[var(--cl-ink-2)]">{t('job.state', { state: job.state })}</p>
 
       {job.progress !== null && (
         <>
-          <p data-testid="storyboard-stage" className="text-sm text-slate-400">
+          <p data-testid="storyboard-stage" className="m-0 text-sm text-[var(--cl-ink-2)]">
             {t('job.stage', { stage: job.progress.stage })}
           </p>
-          <p className="text-sm text-slate-400">{stageKey === null ? '' : t(stageKey)}</p>
+          <p className="m-0 text-sm text-[var(--cl-ink-2)]">{stageKey === null ? '' : t(stageKey)}</p>
         </>
       )}
 
       {job.kind === 'storyboard' && job.state === 'succeeded' && job.report !== null && (
-        <p className="font-mono text-xs text-emerald-200">
+        <p className="font-data m-0 text-xs text-[var(--tucu-state-green-ink)]">
           {t('storyboardJob.report', {
             path: job.report.storyboardPath,
             scenes: job.report.sceneCount,
@@ -95,22 +108,20 @@ export function StoryboardJobPanel({ jobId, onSucceeded, onRetried }: Storyboard
       )}
 
       {job.state === 'failed' && job.error !== null && (
-        <div className="space-y-1">
+        <div className="flex flex-col gap-1">
           {job.error.code === 'JOB_INTERRUPTED' ? (
-            <p
-              role="status"
-              data-testid="job-interrupted-badge"
-              className="inline-block rounded-md border border-amber-500/40 bg-amber-500/10 px-2 py-0.5 text-xs font-medium text-amber-200"
-            >
-              {t('job.interrupted')}
-            </p>
+            <div role="status" data-testid="job-interrupted-badge">
+              <StateBadge tone="orange" dot size="sm">
+                {t('job.interrupted')}
+              </StateBadge>
+            </div>
           ) : (
-            <p role="alert" className="font-mono text-sm text-rose-300">
+            <p role="alert" className="font-data m-0 text-sm text-[var(--tucu-state-red-ink)]">
               {t('job.failed', { code: job.error.code, message: job.error.message })}
             </p>
           )}
           {explanationKey !== null && (
-            <p data-testid="storyboard-failure-explanation" className="text-sm text-amber-100">
+            <p data-testid="storyboard-failure-explanation" className="m-0 text-sm text-[var(--tucu-state-orange-ink)]">
               {t(explanationKey)}
             </p>
           )}
@@ -119,5 +130,6 @@ export function StoryboardJobPanel({ jobId, onSucceeded, onRetried }: Storyboard
 
       <JobRetryButton job={job} onRetried={onRetried} />
     </div>
+    </>
   );
 }

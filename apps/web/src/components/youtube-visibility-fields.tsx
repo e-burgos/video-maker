@@ -1,6 +1,7 @@
 import { localDateTimeValue } from '../api/youtube-publish-form';
 import { YOUTUBE_PRIVACIES } from '../api/youtube-types';
 import { useT } from '../i18n/language-context';
+import { CHECKBOX_CLASS, CHECK_LABEL_CLASS, FIELD_CLASS, FIELD_LABEL_CLASS } from './ui/cl-controls';
 import type { TranslationKey } from '../i18n/messages-en';
 import type { YouTubePublishFormValues } from '../api/youtube-publish-form';
 import type { YouTubePrivacy } from '../api/youtube-types';
@@ -21,14 +22,15 @@ export function YouTubeVisibilityFields({ values, disabled, onChange }: YouTubeV
   const t = useT();
 
   return (
-    <div className="space-y-3">
-      <fieldset className="space-y-1" disabled={disabled}>
-        <legend className="text-sm text-slate-400">{t('youtube.publish.privacy')}</legend>
+    <div className="flex flex-col gap-3">
+      <fieldset className="m-0 flex flex-col gap-1 border-0 p-0" disabled={disabled}>
+        <legend className={`${FIELD_LABEL_CLASS} p-0`}>{t('youtube.publish.privacy')}</legend>
         <div className="flex flex-wrap gap-4">
           {YOUTUBE_PRIVACIES.map((privacy) => (
-            <label key={privacy} className="flex items-center gap-1.5 text-sm text-slate-200">
+            <label key={privacy} className={CHECK_LABEL_CLASS}>
               <input
                 type="radio"
+                className={CHECKBOX_CLASS}
                 name="youtube-privacy"
                 value={privacy}
                 checked={values.privacy === privacy}
@@ -40,10 +42,11 @@ export function YouTubeVisibilityFields({ values, disabled, onChange }: YouTubeV
         </div>
       </fieldset>
 
-      <div className="space-y-1">
-        <label className="flex items-center gap-1.5 text-sm text-slate-200">
+      <div className="flex flex-col gap-1">
+        <label className={CHECK_LABEL_CLASS}>
           <input
             type="checkbox"
+            className={CHECKBOX_CLASS}
             checked={values.scheduled}
             disabled={disabled}
             onChange={(event) => onChange({ scheduled: event.target.checked })}
@@ -51,7 +54,7 @@ export function YouTubeVisibilityFields({ values, disabled, onChange }: YouTubeV
           {t('youtube.publish.schedule')}
         </label>
         {values.scheduled && (
-          <div className="space-y-1">
+          <div className="flex flex-col gap-1">
             <input
               type="datetime-local"
               aria-label={t('youtube.publish.scheduleAt')}
@@ -59,9 +62,9 @@ export function YouTubeVisibilityFields({ values, disabled, onChange }: YouTubeV
               value={values.publishAtLocal}
               disabled={disabled}
               onChange={(event) => onChange({ publishAtLocal: event.target.value })}
-              className="rounded-md border border-slate-700 bg-slate-950 px-3 py-1.5 text-sm text-slate-100"
+              className={`${FIELD_CLASS} font-data`}
             />
-            <p className="text-xs text-slate-500">{t('youtube.publish.scheduleNote')}</p>
+            <p className="m-0 text-xs text-[var(--cl-ink-3)]">{t('youtube.publish.scheduleNote')}</p>
           </div>
         )}
       </div>

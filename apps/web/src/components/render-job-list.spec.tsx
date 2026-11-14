@@ -8,12 +8,14 @@ import type { RenderJobListing, RenderJobSummary } from '../api/render-api-types
 
 function summary(overrides: Partial<RenderJobSummary> & Pick<RenderJobSummary, 'id'>): RenderJobSummary {
   return {
+    kind: 'render',
     state: 'queued',
     stage: null,
     errorCode: null,
     createdAt: '2026-09-09T10:00:00.000Z',
     startedAt: null,
     finishedAt: null,
+    sample: false,
     ...overrides,
   };
 }
@@ -51,6 +53,26 @@ describe('RenderJobList', () => {
 
     fireEvent.click(screen.getByText('job-0001'));
     expect(onSelect).toHaveBeenCalledWith('job-0001');
+  });
+
+  it('offers the download only for succeeded render jobs, pointing at the sample file when it is one', async () => {
+    const listing: RenderJobListing = {
+      slug: 'smoke-ingest',
+      jobs: [
+        summary({ id: 'job-0001', state: 'succeeded' }),
+        summary({ id: 'job-0002', state: 'succeeded', sample: true }),
+        summary({ id: 'job-0003', state: 'running' }),
+        summary({ id: 'job-0004', kind: 'montage', state: 'succeeded' }),
+      ],
+    };
+    renderList(vi.fn().mockResolvedValue(listing) as unknown as RenderApiClient['listRenderJobs']);
+
+    await waitFor(() => expect(screen.getAllByTestId('render-job-row')).toHaveLength(4));
+    const links = screen.getAllByTestId('render-job-download').map((link) => link.getAttribute('href'));
+    expect(links).toEqual([
+      '/api/projects/smoke-ingest/files/out/job-0001.mp4',
+      '/api/projects/smoke-ingest/files/out/job-0002.sample.mp4',
+    ]);
   });
 
   it('shows the friendly interrupted text in the error column instead of the raw JOB_INTERRUPTED code', async () => {

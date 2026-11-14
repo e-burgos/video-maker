@@ -1,0 +1,196 @@
+{
+  "$schema": "../../../../schemas/cycle-tasks.schema.json",
+  "spec": "spec-e-burgos-025-liquid-glass-rebrand",
+  "cycle": 2,
+  "module": "liquid-glass-rebrand",
+  "apps": [
+    "apps/web"
+  ],
+  "flow": "lite",
+  "user_stories_generated": true,
+  "prerequisites": {
+    "tasks_generated": true
+  },
+  "tasks": [
+    {
+      "id": "TASK-001",
+      "title": "web: estado real de los pasos del video en la sidebar con useVideoStepStatuses (proyecto, material por rol, storyboard, voz y render)",
+      "user_stories": [
+        "US-025-201"
+      ],
+      "estimation_hours": 3,
+      "story_points": 3,
+      "depends_on": [],
+      "status": "done",
+      "files": [
+        "apps/web/src/components/shell/use-video-step-statuses.ts",
+        "apps/web/src/components/shell/use-video-step-statuses.spec.tsx",
+        "apps/web/src/components/studio-layout.tsx",
+        "apps/web/src/components/shell/shell-sidebar.spec.tsx"
+      ],
+      "usage": {
+        "tokens_in": 60000,
+        "tokens_out": 12000,
+        "provider_model": "claude/sonnet",
+        "effort": "medium",
+        "agent": "implementor-front",
+        "approx": true,
+        "source": "declared-estimate",
+        "recorded_at": "2026-11-13"
+      }
+    },
+    {
+      "id": "TASK-002",
+      "title": "web: Mis videos migrado (toolbar con Nuevo video, buscador, carpetas como chips, tarjetas con una acción y miniaturas opacas, estados de carga/vacío/error)",
+      "user_stories": [
+        "US-025-202"
+      ],
+      "estimation_hours": 6,
+      "story_points": 5,
+      "depends_on": [
+        "TASK-001"
+      ],
+      "status": "done",
+      "files": [
+        "apps/web/src/api/video-filter.spec.ts",
+        "apps/web/src/api/video-filter.ts",
+        "apps/web/src/components/ui/cl-controls.ts",
+        "apps/web/src/components/ui/overflow-menu.spec.tsx",
+        "apps/web/src/components/ui/overflow-menu.tsx",
+        "apps/web/src/components/videos/create-folder-modal.tsx",
+        "apps/web/src/components/videos/create-video-modal.tsx",
+        "apps/web/src/components/videos/video-folder-chips.tsx",
+        "apps/web/src/components/videos/video-groups.tsx",
+        "apps/web/src/components/videos/video-search-bar.tsx",
+        "apps/web/src/components/videos/videos-skeleton.tsx",
+        "apps/web/src/api/project-status.ts",
+        "apps/web/src/api/publication-status.ts",
+        "apps/web/src/components/archive-video-modal.tsx",
+        "apps/web/src/components/assign-video-modal.tsx",
+        "apps/web/src/components/brand-picker.tsx",
+        "apps/web/src/components/collapse-toggle.tsx",
+        "apps/web/src/components/create-folder-form.tsx",
+        "apps/web/src/components/create-project-by-drop.tsx",
+        "apps/web/src/components/create-project-form.tsx",
+        "apps/web/src/components/delete-video-modal.tsx",
+        "apps/web/src/components/error-notice.tsx",
+        "apps/web/src/components/folder-heading.spec.tsx",
+        "apps/web/src/components/folder-heading.tsx",
+        "apps/web/src/components/home-drop-hint.tsx",
+        "apps/web/src/components/modal.tsx",
+        "apps/web/src/components/shell/shell-navigation.spec.ts",
+        "apps/web/src/components/shell/shell-navigation.ts",
+        "apps/web/src/components/studio-layout.spec.tsx",
+        "apps/web/src/components/video-card.spec.tsx",
+        "apps/web/src/components/video-card.tsx",
+        "apps/web/src/i18n/messages-en.ts",
+        "apps/web/src/i18n/messages-es.ts",
+        "apps/web/src/pages/projects-page.spec.tsx",
+        "apps/web/src/pages/projects-page.tsx"
+      ],
+      "usage": {
+        "tokens_in": 190000,
+        "tokens_out": 42000,
+        "provider_model": "claude/sonnet",
+        "effort": "medium",
+        "agent": "implementor-front",
+        "approx": true,
+        "source": "declared-estimate",
+        "recorded_at": "2026-11-13"
+      }
+    },
+    {
+      "id": "TASK-003",
+      "title": "web: espacio de trabajo migrado (chat del productor y primer uso, vista previa opaca siempre visible, Material y Entregas, estado de la propuesta en el toolbar)",
+      "user_stories": [
+        "US-025-203"
+      ],
+      "estimation_hours": 8,
+      "story_points": 8,
+      "depends_on": [
+        "TASK-002"
+      ],
+      "status": "done",
+      "files": [
+        "apps/web/src/api/proposal-approval.spec.ts",
+        "apps/web/src/api/proposal-approval.ts",
+        "apps/web/src/api/workspace-panel.spec.ts",
+        "apps/web/src/api/workspace-panel.ts",
+        "apps/web/src/components/asset-proposal-card.tsx",
+        "apps/web/src/components/chat-drop-zone.tsx",
+        "apps/web/src/components/material-review-block.tsx",
+        "apps/web/src/components/producer-composer.tsx",
+        "apps/web/src/components/producer-conversation-panel.tsx",
+        "apps/web/src/components/producer-message-list.tsx",
+        "apps/web/src/components/producer-turn-activity.tsx",
+        "apps/web/src/components/producer-welcome.tsx",
+        "apps/web/src/components/proposal-card.spec.tsx",
+        "apps/web/src/components/proposal-card.tsx",
+        "apps/web/src/components/proposal-status-badge.tsx",
+        "apps/web/src/components/publications-panel.tsx",
+        "apps/web/src/components/shell/shell-navigation.spec.ts",
+        "apps/web/src/components/shell/shell-navigation.ts",
+        "apps/web/src/components/shell/shell-toolbar.tsx",
+        "apps/web/src/components/shell/toolbar-action-provider.tsx",
+        "apps/web/src/components/shell/toolbar-status-context.ts",
+        "apps/web/src/components/shell/toolbar-status.tsx",
+        "apps/web/src/components/timeline-player.tsx",
+        "apps/web/src/components/ui/cl-controls.ts",
+        "apps/web/src/components/video-card.spec.tsx",
+        "apps/web/src/components/video-card.tsx",
+        "apps/web/src/components/workspace-side-panel.spec.tsx",
+        "apps/web/src/components/workspace-side-panel.tsx",
+        "apps/web/src/components/workspace/workspace-deliveries-tab.tsx",
+        "apps/web/src/components/workspace/workspace-material-tab.tsx",
+        "apps/web/src/components/workspace/workspace-preview.tsx",
+        "apps/web/src/components/youtube-publish-section.tsx",
+        "apps/web/src/hooks/use-auto-switching-tab.spec.ts",
+        "apps/web/src/hooks/use-auto-switching-tab.ts",
+        "apps/web/src/i18n/messages-en.ts",
+        "apps/web/src/i18n/messages-es.ts",
+        "apps/web/src/index.css",
+        "apps/web/src/pages/project-workspace-page.spec.tsx",
+        "apps/web/src/pages/project-workspace-page.tsx"
+      ],
+      "usage": {
+        "tokens_in": 190000,
+        "tokens_out": 42000,
+        "provider_model": "claude/sonnet",
+        "effort": "medium",
+        "agent": "implementor-front",
+        "approx": true,
+        "source": "declared-estimate",
+        "recorded_at": "2026-11-13"
+      }
+    },
+    {
+      "id": "TASK-004",
+      "title": "verificación del ciclo: desbordes medidos, contraste AA, prefers-reduced-*, capturas claro/oscuro 1440 y 900 y revisión en Electron de desarrollo",
+      "user_stories": [
+        "US-025-201",
+        "US-025-202",
+        "US-025-203"
+      ],
+      "estimation_hours": 2,
+      "story_points": 2,
+      "depends_on": [
+        "TASK-003"
+      ],
+      "status": "done",
+      "files": [
+        "design/rebranding/contrast-audit.mjs",
+        "apps/web/src/index.css"
+      ],
+      "usage": {
+        "tokens_in": 70000,
+        "tokens_out": 12000,
+        "provider_model": "claude/opus",
+        "effort": "high",
+        "agent": "orchestrator",
+        "approx": true,
+        "source": "declared-estimate",
+        "recorded_at": "2026-11-13"
+      }
+    }
+  ]
+}

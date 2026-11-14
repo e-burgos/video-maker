@@ -1,3 +1,4 @@
+import { StateBadge } from '@e-burgos/tucu-ui';
 import { useEffect, useRef } from 'react';
 
 import { showsAssetProgress } from '../api/parse-render-job';
@@ -6,6 +7,7 @@ import { useRenderJobPoll } from '../hooks/use-render-job-poll';
 import { useT } from '../i18n/language-context';
 import { ErrorNotice } from './error-notice';
 import { JobRetryButton } from './job-retry-button';
+import { ToolbarStatus } from './shell/toolbar-status';
 import type { Job } from '../api/render-api-types';
 
 export type MontageJobPanelProps = {
@@ -14,7 +16,11 @@ export type MontageJobPanelProps = {
   onRetried: (job: Job) => void;
 };
 
-export function MontageJobPanel({ jobId, onSucceeded, onRetried }: MontageJobPanelProps) {
+export function MontageJobPanel({
+  jobId,
+  onSucceeded,
+  onRetried,
+}: MontageJobPanelProps) {
   const client = useRenderApi();
   const poll = useRenderJobPoll(jobId, (id) => client.getRenderJob(id));
   const t = useT();
@@ -24,7 +30,8 @@ export function MontageJobPanel({ jobId, onSucceeded, onRetried }: MontageJobPan
   onSucceededRef.current = onSucceeded;
 
   const job = poll.job;
-  const succeededJobId = job !== null && job.state === 'succeeded' ? job.id : null;
+  const succeededJobId =
+    job !== null && job.state === 'succeeded' ? job.id : null;
 
   useEffect(() => {
     if (succeededJobId === null || succeededJobRef.current === succeededJobId) {
@@ -41,7 +48,7 @@ export function MontageJobPanel({ jobId, onSucceeded, onRetried }: MontageJobPan
 
   if (poll.stopReason === 'not-found' && poll.error !== null) {
     return (
-      <p role="alert" className="text-sm text-rose-300">
+      <p role="alert" className="m-0 text-sm text-[var(--tucu-state-red-ink)]">
         {t('montageJob.lost', { code: poll.error.code })}
       </p>
     );
@@ -51,62 +58,100 @@ export function MontageJobPanel({ jobId, onSucceeded, onRetried }: MontageJobPan
     return poll.error !== null ? (
       <ErrorNotice error={poll.error} />
     ) : (
-      <p className="text-sm text-slate-400">{t('montageJob.loading')}</p>
+      <p className="m-0 text-sm text-[var(--cl-ink-2)]">
+        {t('montageJob.loading')}
+      </p>
     );
   }
 
+  const inProgress = job.state === 'queued' || job.state === 'running';
+
   return (
-    <div
-      data-testid="montage-job-panel"
-      data-montage-state={job.state}
-      className="space-y-2 rounded-lg border border-slate-800 bg-slate-900/40 p-4"
-    >
-      <p className="font-mono text-sm text-slate-100">{job.id}</p>
-      <p className="text-sm text-slate-300">{t('job.state', { state: job.state })}</p>
-
-      {job.progress !== null && (
-        <p data-testid="montage-stage" className="text-sm text-slate-400">
-          {t('job.stage', { stage: job.progress.stage })}
-        </p>
+    <>
+      {inProgress && (
+        <ToolbarStatus>
+          <StateBadge
+            tone="purple"
+            dot
+            size="sm"
+            data-testid="montage-toolbar-status"
+          >
+            {t('library.montage.running')}
+          </StateBadge>
+        </ToolbarStatus>
       )}
-
-      {job.kind === 'montage' && showsAssetProgress(job.progress) && (
-        <p data-testid="montage-asset-progress" className="font-mono text-xs text-slate-400">
-          {t('montageJob.assets', {
-            processed: job.progress.processedAssets ?? '—',
-            total: job.progress.totalAssets ?? '—',
-            percent: job.progress.percent ?? '—',
-          })}
+      <div
+        data-testid="montage-job-panel"
+        data-montage-state={job.state}
+        className="glass space-y-2 rounded-[20px] p-4"
+      >
+        <p className="font-data m-0 text-sm font-semibold text-[var(--cl-ink)]">
+          {job.id}
         </p>
-      )}
-
-      {job.kind === 'montage' && job.state === 'succeeded' && job.report !== null && (
-        <p className="font-mono text-xs text-emerald-200">
-          {t('montageJob.report', {
-            path: job.report.timelinePath,
-            preset: job.report.preset,
-            seed: job.report.seed,
-          })}
+        <p className="m-0 text-sm text-[var(--cl-ink-2)]">
+          {t('job.state', { state: job.state })}
         </p>
-      )}
 
-      {job.state === 'failed' && job.error !== null && job.error.code === 'JOB_INTERRUPTED' && (
-        <p
-          role="status"
-          data-testid="job-interrupted-badge"
-          className="inline-block rounded-md border border-amber-500/40 bg-amber-500/10 px-2 py-0.5 text-xs font-medium text-amber-200"
-        >
-          {t('job.interrupted')}
-        </p>
-      )}
+        {job.progress !== null && (
+          <p
+            data-testid="montage-stage"
+            className="m-0 text-sm text-[var(--cl-ink-2)]"
+          >
+            {t('job.stage', { stage: job.progress.stage })}
+          </p>
+        )}
 
-      {job.state === 'failed' && job.error !== null && job.error.code !== 'JOB_INTERRUPTED' && (
-        <p role="alert" className="font-mono text-sm text-rose-300">
-          {t('job.failed', { code: job.error.code, message: job.error.message })}
-        </p>
-      )}
+        {job.kind === 'montage' && showsAssetProgress(job.progress) && (
+          <p
+            data-testid="montage-asset-progress"
+            className="font-data m-0 text-xs text-[var(--cl-ink-2)]"
+          >
+            {t('montageJob.assets', {
+              processed: job.progress.processedAssets ?? '—',
+              total: job.progress.totalAssets ?? '—',
+              percent: job.progress.percent ?? '—',
+            })}
+          </p>
+        )}
 
-      <JobRetryButton job={job} onRetried={onRetried} />
-    </div>
+        {job.kind === 'montage' &&
+          job.state === 'succeeded' &&
+          job.report !== null && (
+            <p className="font-data m-0 text-xs text-[var(--tucu-state-green-ink)]">
+              {t('montageJob.report', {
+                path: job.report.timelinePath,
+                preset: job.report.preset,
+                seed: job.report.seed,
+              })}
+            </p>
+          )}
+
+        {job.state === 'failed' &&
+          job.error !== null &&
+          job.error.code === 'JOB_INTERRUPTED' && (
+            <div role="status" data-testid="job-interrupted-badge">
+              <StateBadge tone="orange" dot size="sm">
+                {t('job.interrupted')}
+              </StateBadge>
+            </div>
+          )}
+
+        {job.state === 'failed' &&
+          job.error !== null &&
+          job.error.code !== 'JOB_INTERRUPTED' && (
+            <p
+              role="alert"
+              className="font-data m-0 text-sm text-[var(--tucu-state-red-ink)]"
+            >
+              {t('job.failed', {
+                code: job.error.code,
+                message: job.error.message,
+              })}
+            </p>
+          )}
+
+        <JobRetryButton job={job} onRetried={onRetried} />
+      </div>
+    </>
   );
 }

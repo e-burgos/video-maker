@@ -7,6 +7,8 @@ import { previewTimelineFixture } from '../api/__fixtures__/timeline';
 import { RenderApiError } from '../api/render-api-error';
 import { RenderApiProvider } from '../api/render-api-context';
 import type { RenderApiClient } from '../api/render-api-client';
+import { ShellToolbar } from '../components/shell/shell-toolbar';
+import { ToolbarActionProvider } from '../components/shell/toolbar-action-provider';
 
 vi.mock('../components/timeline-player', async () => {
   const { createElement } = await import('react');
@@ -55,9 +57,12 @@ function renderPage(client: Partial<RenderApiClient>) {
   render(
     <RenderApiProvider client={merged as RenderApiClient}>
       <MemoryRouter initialEntries={['/projects/smoke-ingest/preview']}>
-        <Routes>
-          <Route path="/projects/:slug/preview" element={<ProjectPreviewPage />} />
-        </Routes>
+        <ToolbarActionProvider>
+          <ShellToolbar title="Preview" subtitle={null} />
+          <Routes>
+            <Route path="/projects/:slug/preview" element={<ProjectPreviewPage />} />
+          </Routes>
+        </ToolbarActionProvider>
       </MemoryRouter>
     </RenderApiProvider>,
   );
@@ -100,7 +105,7 @@ describe('ProjectPreviewPage', () => {
     await waitFor(() => expect(screen.getByTestId('timeline-player')).toBeTruthy());
     expect(screen.getByTestId('timeline-player').getAttribute('data-safe-top')).toBe('220');
 
-    fireEvent.click(screen.getByRole('button', { name: '16:9' }));
+    fireEvent.click(screen.getByRole('radio', { name: '16:9' }));
 
     await waitFor(() =>
       expect(screen.getByTestId('timeline-player').getAttribute('data-preset')).toBe(
@@ -109,7 +114,7 @@ describe('ProjectPreviewPage', () => {
     );
     expect(screen.getByTestId('timeline-player').getAttribute('data-canvas')).toBe('1920x1080');
     expect(screen.getByTestId('timeline-player').getAttribute('data-safe-top')).toBe('60');
-    expect(screen.getByRole('button', { name: '16:9' }).getAttribute('aria-pressed')).toBe('true');
+    expect(screen.getByRole('radio', { name: '16:9' }).getAttribute('aria-checked')).toBe('true');
     expect(getTimeline).toHaveBeenCalledTimes(1);
   });
 
@@ -307,7 +312,7 @@ describe('ProjectPreviewPage', () => {
 
     await waitFor(() => expect(screen.getByTestId('timeline-player')).toBeTruthy());
 
-    fireEvent.click(screen.getByRole('button', { name: 'Render' }));
+    fireEvent.click(screen.getByTestId('toolbar-action'));
 
     await waitFor(() => expect(screen.getByTestId('render-job-panel')).toBeTruthy());
     expect(screen.getByTestId('render-job-panel').textContent).toContain('job-0001');
@@ -330,7 +335,7 @@ describe('ProjectPreviewPage', () => {
       await waitFor(() => expect(screen.getByTestId('timeline-player')).toBeTruthy());
       await waitFor(() => expect(screen.getByText('No render jobs yet.')).toBeTruthy());
 
-      fireEvent.click(screen.getByRole('button', { name: 'Render' }));
+      fireEvent.click(screen.getByTestId('toolbar-action'));
 
       await waitFor(() => expect(screen.getAllByText(code).length).toBeGreaterThan(0));
       expect(screen.queryByRole('table')).toBeNull();

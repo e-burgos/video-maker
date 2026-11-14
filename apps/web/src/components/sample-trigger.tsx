@@ -1,3 +1,4 @@
+import { StateBadge } from '@e-burgos/tucu-ui';
 import { useState } from 'react';
 
 import { artifactUrl } from '../api/artifact-url';
@@ -12,8 +13,7 @@ import { useT } from '../i18n/language-context';
 import { ErrorNotice } from './error-notice';
 import { JobRetryButton } from './job-retry-button';
 import { MotionJobStatus } from './motion-job-status';
-import { Badge } from './ui/badge';
-import { Button } from './ui/button';
+import { SECONDARY_BUTTON_SMALL_CLASS } from './ui/cl-controls';
 
 export type SampleTriggerProps = {
   slug: string;
@@ -37,14 +37,14 @@ function RenderSampleStatus({ job, onRetried }: { job: Job; onRetried: (job: Job
   const progress = job.kind === 'render' ? job.progress : null;
 
   return (
-    <div data-testid="sample-job-status" data-job-state={job.state} className="space-y-1">
+    <div data-testid="sample-job-status" data-job-state={job.state} className="flex flex-col gap-1">
       {running && (
-        <p role="status" className="text-sm text-ink-muted">
+        <p role="status" className="m-0 text-sm text-[var(--cl-ink-2)]">
           {t('sample.running')}
         </p>
       )}
       {running && progress !== null && showsFrameProgress(progress) && (
-        <p className="font-mono text-xs text-ink-faint">
+        <p className="font-data m-0 text-xs text-[var(--cl-ink-2)]">
           {t('renderJob.frames', {
             rendered: progress.renderedFrames ?? '—',
             total: progress.totalFrames ?? '—',
@@ -53,7 +53,7 @@ function RenderSampleStatus({ job, onRetried }: { job: Job; onRetried: (job: Job
         </p>
       )}
       {job.state === 'failed' && job.error !== null && (
-        <p role="alert" className="font-mono text-sm text-danger">
+        <p role="alert" className="font-data m-0 text-sm text-[var(--tucu-state-red-ink)]">
           {t('sample.failed', { code: job.error.code, message: job.error.message })}
         </p>
       )}
@@ -86,13 +86,20 @@ export function SampleTrigger({ slug, kind, disabled = false }: SampleTriggerPro
   }
 
   return (
-    <div data-testid="sample-trigger" className="space-y-2">
-      <Button disabled={disabled || busy} onClick={() => void start()}>
-        {createAction.status === 'pending'
-          ? t('sample.starting')
-          : t('sample.start', { seconds: SAMPLE_SECONDS })}
-      </Button>
-      <p className="text-xs text-ink-faint">{t('sample.hint')}</p>
+    <div data-testid="sample-trigger" className="flex flex-col gap-2">
+      <div className="flex flex-wrap items-center gap-3">
+        <button
+          type="button"
+          disabled={disabled || busy}
+          onClick={() => void start()}
+          className={SECONDARY_BUTTON_SMALL_CLASS}
+        >
+          {createAction.status === 'pending'
+            ? t('sample.starting')
+            : t('sample.start', { seconds: SAMPLE_SECONDS })}
+        </button>
+        <p className="m-0 text-xs text-[var(--cl-ink-2)]">{t('sample.hint')}</p>
+      </div>
 
       {createAction.error !== null && <ErrorNotice error={createAction.error} />}
       {poll.error !== null && job === null && <ErrorNotice error={poll.error} />}
@@ -103,19 +110,25 @@ export function SampleTrigger({ slug, kind, disabled = false }: SampleTriggerPro
       )}
 
       {videoUrl !== null && (
-        <div data-testid="sample-result" className="space-y-1">
+        <div data-testid="sample-result" className="flex flex-col gap-2">
           <div className="flex items-center gap-2">
-            <Badge tone="accent">{t('sample.badge')}</Badge>
-            <span className="text-xs text-success">{t('sample.ready')}</span>
+            <StateBadge tone="teal" size="sm">
+              {t('sample.badge')}
+            </StateBadge>
+            <StateBadge tone="green" dot size="sm">
+              {t('sample.ready')}
+            </StateBadge>
           </div>
-          <video
-            data-testid="sample-video"
-            aria-label={t('sample.videoLabel')}
-            src={videoUrl}
-            controls
-            preload="metadata"
-            className="w-full max-w-3xl rounded-control bg-black"
-          />
+          <div className="aspect-video w-full max-w-3xl overflow-hidden rounded-[12px] bg-[#0b0d14]">
+            <video
+              data-testid="sample-video"
+              aria-label={t('sample.videoLabel')}
+              src={videoUrl}
+              controls
+              preload="metadata"
+              className="size-full bg-[#0b0d14] object-contain"
+            />
+          </div>
         </div>
       )}
     </div>

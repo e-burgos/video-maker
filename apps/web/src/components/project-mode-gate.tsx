@@ -5,6 +5,7 @@ import { projectModeOf } from '../api/project-mode';
 import { useRenderApi } from '../api/render-api-context';
 import { useAsyncResource } from '../hooks/use-async-resource';
 import { useT } from '../i18n/language-context';
+import { LoadingState } from './ui/status-states';
 
 export type ProjectModeGateProps = {
   slug: string;
@@ -21,7 +22,7 @@ export function ProjectModeGate({ slug, footage, motion }: ProjectModeGateProps)
   );
 
   if (project.status === 'loading') {
-    return <p className="text-sm text-ink-faint">{t('projectMode.loading')}</p>;
+    return <LoadingState message={t('projectMode.loading')} />;
   }
 
   return project.data !== null && projectModeOf(project.data) === 'motion' ? motion : footage;
