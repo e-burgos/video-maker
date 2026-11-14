@@ -110,7 +110,7 @@ describe('MotionPage', () => {
     renderPage({});
 
     await screen.findByLabelText('Script');
-    expect(screen.getByTestId('toolbar-action').textContent).toBe('Make video');
+    expect((await screen.findByTestId('toolbar-action')).textContent).toBe('Make video');
     expect(within(screen.getByTestId('toolbar-status')).getByRole('button', { name: 'Build storyboard' })).toBeTruthy();
   });
 

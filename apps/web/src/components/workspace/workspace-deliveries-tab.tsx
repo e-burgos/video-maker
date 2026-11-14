@@ -61,9 +61,7 @@ export function WorkspaceDeliveriesTab({ slug, jobs, generated }: WorkspaceDeliv
                 </a>
               </div>
               {delivery.job === null && (
-                <div className="rounded-[10px] bg-[var(--color-surface)] p-2 text-slate-100">
-                  <RenderReviewPanel slug={slug} file={delivery.path} />
-                </div>
+                <RenderReviewPanel slug={slug} file={delivery.path} />
               )}
             </li>
           ))}

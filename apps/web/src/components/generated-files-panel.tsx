@@ -222,11 +222,7 @@ export function GeneratedFilesPanel({
                   </a>
                   <FileMeta file={file} />
                 </div>
-                {!file.sample && (
-                  <div className="rounded-[10px] bg-[var(--color-surface)] p-2 text-slate-100">
-                    <RenderReviewPanel slug={slug} file={file.path} />
-                  </div>
-                )}
+                {!file.sample && <RenderReviewPanel slug={slug} file={file.path} />}
               </li>
             ))}
           </ul>

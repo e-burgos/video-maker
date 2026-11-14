@@ -82,6 +82,7 @@ const MIGRATED_EXACT_ROUTES: readonly RegExp[] = [
   /^\/projects\/[^/]+\/motion\/?$/,
   /^\/brands\/?$/,
   /^\/brands\/[^/]+\/?$/,
+  /^\/publish-queue\/?$/,
 ];
 
 export function isMigratedRoute(pathname: string): boolean {

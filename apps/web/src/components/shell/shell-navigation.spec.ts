@@ -31,7 +31,9 @@ describe('shell navigation helpers', () => {
     expect(isMigratedRoute('/brands')).toBe(true);
     expect(isMigratedRoute('/brands/acme')).toBe(true);
     expect(isMigratedRoute('/brands/acme/')).toBe(true);
-    expect(['/settings', '/publish-queue'].some(isMigratedRoute)).toBe(false);
+    expect(isMigratedRoute('/publish-queue')).toBe(true);
+    expect(isMigratedRoute('/publish-queue/')).toBe(true);
+    expect(['/settings', '/guide'].some(isMigratedRoute)).toBe(false);
   });
 
   it('keeps the motion step only for motion videos', () => {

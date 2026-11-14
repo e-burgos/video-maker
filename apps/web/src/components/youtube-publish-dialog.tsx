@@ -17,9 +17,11 @@ import { useAsyncResource } from '../hooks/use-async-resource';
 import { useYouTubeIntegration } from '../hooks/use-youtube-integration';
 import { useLanguage, useT } from '../i18n/language-context';
 import type { TranslationKey } from '../i18n/messages-en';
+import { StateBadge } from '@e-burgos/tucu-ui';
+
 import { ErrorNotice } from './error-notice';
 import { Modal } from './modal';
-import { Badge } from './ui/badge';
+import { FIELD_CLASS, FIELD_LABEL_CLASS, PRIMARY_BUTTON_CLASS, SECONDARY_BUTTON_CLASS } from './ui/cl-controls';
 import { PublishReviewNotice } from './publish-review-notice';
 import { YouTubeMetadataFields } from './youtube-metadata-fields';
 import { YouTubePublishProgress } from './youtube-publish-progress';
@@ -47,22 +49,17 @@ const ISSUE_MESSAGE: Readonly<Record<YouTubePublishIssue, TranslationKey>> = {
   scheduleNotFuture: 'youtube.publish.issue.scheduleNotFuture',
 };
 
-const SELECT_CLASS =
-  'w-full rounded-md border border-slate-700 bg-slate-950 px-3 py-1.5 text-sm text-slate-100 disabled:opacity-50';
+const SELECT_CLASS = `${FIELD_CLASS} w-full disabled:opacity-50`;
 
-const SECONDARY_BUTTON_CLASS =
-  'rounded-md border border-slate-700 px-3 py-1.5 text-sm text-slate-300 hover:border-slate-500 disabled:opacity-40';
-
-const PRIMARY_BUTTON_CLASS =
-  'rounded-md border border-sky-500/50 bg-sky-500/10 px-3 py-1.5 text-sm text-sky-100 disabled:opacity-40';
+const LINK_CLASS = 'focus-cl rounded text-[var(--cl-action-text)] underline hover:text-[var(--cl-action-hover)]';
 
 function NotConnectedNotice() {
   const t = useT();
 
   return (
-    <div data-testid="youtube-not-connected" className="space-y-2">
+    <div data-testid="youtube-not-connected" className="flex flex-col gap-2">
       <p>{t('youtube.publish.notConnected')}</p>
-      <Link to="/settings" className="text-sky-300 underline hover:text-sky-200">
+      <Link to="/settings" className={LINK_CLASS}>
         {t('youtube.publish.goToSettings')}
       </Link>
     </div>
@@ -78,13 +75,17 @@ function SelectedFileSummary({ options, path }: { options: YouTubePublishOptions
   }
 
   return (
-    <p data-testid="youtube-file-summary" className="flex flex-wrap items-center gap-2 text-xs text-slate-400">
+    <p data-testid="youtube-file-summary" className="font-data m-0 flex flex-wrap items-center gap-2 text-xs text-[var(--cl-ink-2)]">
       <span>{formatPublishDuration(file.durationSec)}</span>
       <span>
         {file.width}×{file.height}
       </span>
       <span>{formatFileSize(file.sizeBytes)}</span>
-      {file.isShort && <Badge tone="accent">{t('youtube.publish.short')}</Badge>}
+      {file.isShort && (
+        <StateBadge tone="teal" size="sm">
+          {t('youtube.publish.short')}
+        </StateBadge>
+      )}
     </p>
   );
 }
@@ -256,27 +257,34 @@ export function YouTubePublishDialog({ slug, onClose, onPublished }: YouTubePubl
   }
 
   return (
-    <Modal title={t('youtube.publish.dialogTitle')} testId="youtube-publish-dialog" onClose={close} footer={footer} wide>
-      {loading && <p className="text-slate-400">{t('youtube.publish.loading')}</p>}
+    <Modal
+      surface="glass"
+      title={t('youtube.publish.dialogTitle')}
+      testId="youtube-publish-dialog"
+      onClose={close}
+      footer={footer}
+      wide
+    >
+      {loading && <p className="m-0 text-[var(--cl-ink-2)]">{t('youtube.publish.loading')}</p>}
 
       {!loading && loadError !== null && (
-        <ErrorNotice error={loadError} onRetry={reloadAll} />
+        <ErrorNotice surface="glass" error={loadError} onRetry={reloadAll} />
       )}
 
       {!loading && loadError === null && integration.data !== null && !connected && <NotConnectedNotice />}
 
       {!loading && connected && optionsData !== null && phase === 'form' && (
-        <div className="space-y-4">
+        <div className="flex flex-col gap-4">
           {noFiles ? (
-            <p data-testid="youtube-no-files" className="text-amber-300">
+            <p data-testid="youtube-no-files" className="m-0 text-[var(--tucu-state-orange-ink)]">
               {t('youtube.publish.noFiles')}
             </p>
           ) : (
             <>
-              <p className="text-xs text-slate-400">{t('youtube.publish.channel', { channel: channelTitle })}</p>
+              <p className="m-0 text-xs text-[var(--cl-ink-2)]">{t('youtube.publish.channel', { channel: channelTitle })}</p>
 
-              <div className="space-y-1">
-                <label htmlFor="youtube-file" className="text-sm text-slate-400">
+              <div className="flex flex-col gap-1">
+                <label htmlFor="youtube-file" className={FIELD_LABEL_CLASS}>
                   {t('youtube.publish.file')}
                 </label>
                 <select
@@ -309,7 +317,7 @@ export function YouTubePublishDialog({ slug, onClose, onPublished }: YouTubePubl
                 />
               )}
 
-              <div className="space-y-2">
+              <div className="flex flex-col gap-2">
                 <button
                   type="button"
                   data-testid="youtube-draft"
@@ -320,19 +328,19 @@ export function YouTubePublishDialog({ slug, onClose, onPublished }: YouTubePubl
                   {draft.status === 'pending' ? t('youtube.publish.drafting') : t('youtube.publish.draft')}
                 </button>
                 {draft.status === 'pending' && (
-                  <p role="status" className="text-xs text-slate-400">
+                  <p role="status" className="m-0 text-xs text-[var(--cl-ink-2)]">
                     {t('youtube.publish.draftingNote')}
                   </p>
                 )}
-                {draft.error !== null && <ErrorNotice error={draft.error} />}
+                {draft.error !== null && <ErrorNotice surface="glass" error={draft.error} />}
               </div>
 
               <YouTubeMetadataFields values={values} disabled={formDisabled} onChange={patch} />
               <YouTubeVisibilityFields values={values} disabled={formDisabled} onChange={patch} />
 
               <div className="grid gap-3 sm:grid-cols-2">
-                <div className="space-y-1">
-                  <label htmlFor="youtube-playlist" className="text-sm text-slate-400">
+                <div className="flex flex-col gap-1">
+                  <label htmlFor="youtube-playlist" className={FIELD_LABEL_CLASS}>
                     {t('youtube.publish.playlist')}
                   </label>
                   <select
@@ -350,8 +358,8 @@ export function YouTubePublishDialog({ slug, onClose, onPublished }: YouTubePubl
                     ))}
                   </select>
                 </div>
-                <div className="space-y-1">
-                  <label htmlFor="youtube-thumbnail" className="text-sm text-slate-400">
+                <div className="flex flex-col gap-1">
+                  <label htmlFor="youtube-thumbnail" className={FIELD_LABEL_CLASS}>
                     {t('youtube.publish.thumbnail')}
                   </label>
                   <select
@@ -372,34 +380,34 @@ export function YouTubePublishDialog({ slug, onClose, onPublished }: YouTubePubl
               </div>
 
               {visibleIssues.length > 0 && (
-                <ul data-testid="youtube-publish-issues" className="space-y-0.5 text-xs text-amber-300">
+                <ul data-testid="youtube-publish-issues" className="m-0 list-none flex flex-col gap-0.5 p-0 text-xs text-[var(--tucu-state-orange-ink)]">
                   {visibleIssues.map((issue) => (
                     <li key={issue}>{t(ISSUE_MESSAGE[issue])}</li>
                   ))}
                 </ul>
               )}
 
-              {publish.error !== null && <ErrorNotice error={publish.error} />}
-              {enqueue.error !== null && <ErrorNotice error={enqueue.error} />}
+              {publish.error !== null && <ErrorNotice surface="glass" error={publish.error} />}
+              {enqueue.error !== null && <ErrorNotice surface="glass" error={enqueue.error} />}
             </>
           )}
         </div>
       )}
 
       {phase === 'confirm' && (
-        <div className="space-y-3">
-          <p data-testid="youtube-publish-confirm-text" className="text-slate-100">
+        <div className="flex flex-col gap-3">
+          <p data-testid="youtube-publish-confirm-text" className="m-0 text-[var(--cl-ink)]">
             {confirmationText()}
           </p>
-          {publish.error !== null && <ErrorNotice error={publish.error} />}
+          {publish.error !== null && <ErrorNotice surface="glass" error={publish.error} />}
         </div>
       )}
 
       {phase === 'queued' && queued !== null && (
-        <div data-testid="youtube-queued" className="space-y-3">
-          <p className="text-slate-100">{t('youtube.publish.queued')}</p>
+        <div data-testid="youtube-queued" className="flex flex-col gap-3">
+          <p className="m-0 text-[var(--cl-ink)]">{t('youtube.publish.queued')}</p>
           {queued.alreadyPublished !== null && (
-            <p data-testid="youtube-queued-already-published" role="alert" className="text-amber-300">
+            <p data-testid="youtube-queued-already-published" role="alert" className="m-0 text-[var(--tucu-state-orange-ink)]">
               {queued.alreadyPublished.url === null ? (
                 t('youtube.publish.queuedAlreadyPublishedNoLink')
               ) : (
@@ -409,7 +417,7 @@ export function YouTubePublishDialog({ slug, onClose, onPublished }: YouTubePubl
                     href={queued.alreadyPublished.url}
                     target="_blank"
                     rel="noreferrer noopener"
-                    className="underline hover:text-amber-200"
+                    className="break-all underline"
                   >
                     {queued.alreadyPublished.url}
                   </a>
@@ -417,15 +425,15 @@ export function YouTubePublishDialog({ slug, onClose, onPublished }: YouTubePubl
               )}
             </p>
           )}
-          <Link to="/publish-queue" className="text-sky-300 underline hover:text-sky-200">
+          <Link to="/publish-queue" className={LINK_CLASS}>
             {t('youtube.publish.goToQueue')}
           </Link>
         </div>
       )}
 
       {phase === 'job' && jobId !== null && (
-        <div className="space-y-3">
-          <p className="text-xs text-slate-400">{t('youtube.publish.canClose')}</p>
+        <div className="flex flex-col gap-3">
+          <p className="m-0 text-xs text-[var(--cl-ink-2)]">{t('youtube.publish.canClose')}</p>
           <YouTubePublishProgress
             key={attempt}
             jobId={jobId}

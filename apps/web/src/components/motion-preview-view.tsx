@@ -115,7 +115,9 @@ export function MotionPreviewView({ slug }: MotionPreviewViewProps) {
             )}
           </section>
 
-          <RenderReviewPanel slug={slug} file={video.path} />
+          <section className={PANEL_CLASS}>
+            <RenderReviewPanel slug={slug} file={video.path} />
+          </section>
 
           <section className={PANEL_CLASS}>
             <h2 className={PANEL_HEADING_CLASS}>{t('youtube.publish.section')}</h2>
