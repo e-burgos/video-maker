@@ -2,7 +2,7 @@
 
 > Entry point para agentes que trabajen sobre `apps/web`.
 > Leer junto con `constitution.md` de este directorio **+ `updates/*.md` en orden de nombre, si los hay**.
-> Última actualización: spec-025 cycle-04 (vista previa, motion y marcas) | Fecha: 2026-11-13
+> Última actualización: consolidación de fragmentos | Fecha: 2026-11-13
 
 - **Tipo:** app React 19 (SPA local sobre `apps/render-api`)
 - **Estado:** **producto completo de punta a punta, en español (default) e inglés.** La pantalla por
@@ -31,8 +31,7 @@
   `@remotion/player`. Desde spec-018 suma modo motion, marcas, YouTube y su cola, revisión de renders, propuesta,
   muestras, referencias y dirección de voz (ver `constitution.md` §5). Desde spec-025 todas las rutas viven en el
   shell **Cristal Líquido** (sidebar de vidrio con bloque del video y pasos, toolbar de una acción, pie con estado en
-  modal, idioma y apariencia; tucu-ui 3.10.1); ya migradas Mis videos, el espacio de trabajo, biblioteca, storyboard, voz, vista previa, motion y marcas (quedan
-  publicación, ajustes y guía; `isMigratedRoute`); visor ampliado propio con teclado y comparación; los pasos de la sidebar muestran estado real. Configuración suma «Voces de ElevenLabs».
+  modal, idioma y apariencia; tucu-ui 3.10.1); todas las rutas migradas, incluidas publicación, ajustes (pestañas) y guía; modo heredado retirado; visor ampliado propio con teclado y comparación; los pasos de la sidebar muestran estado real. Configuración suma «Voces de ElevenLabs».
 - **Descopado a propósito:** la **edición del EDL (`EP-009`/`EP-010`)**, porque `buildTimeline` sólo
   se invoca desde `libs/auto-montage` y guardar un EDL editado escribiría `work/edl.json` sin efecto
   observable ni en el Player ni en un render. La edición de la Timeline cubre

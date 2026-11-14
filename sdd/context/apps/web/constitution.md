@@ -1,6 +1,6 @@
 # Constitución — apps/web
 
-> Versión 3.4 | Última actualización: spec-025 cycle-04 (vista previa, motion y marcas) | Fecha: 2026-11-13
+> Versión 3.5 | Última actualización: consolidación de fragmentos | Fecha: 2026-11-13
 
 ## 1. Propósito
 
@@ -21,11 +21,9 @@
   configura el motor del productor (Claude Code u OpenRouter) y su modelo. **Todas las rutas viven
   dentro del shell Cristal Líquido** (spec-025): sidebar de vidrio con logo y firma, bloque «este
   video» con sus pasos, toolbar con una sola acción por página (`useToolbarAction`) y pie con estado
-  del servicio (modal), switch de idioma y apariencia (sistema/claro/oscuro); las pantallas aún no
-  migradas se muestran en una superficie heredada oscura y opaca (`isMigratedRoute`; ya migradas: Mis
-  videos `/`, el espacio de trabajo `/projects/:slug` exacto, `/library`, `/storyboard`, `/voice`, `/preview`,
-  `/motion`, `/brands` y `/brands/:id`; `LegacySurface` ya no se usa y su archivo
-  `components/shell/legacy-surface.tsx` espera a borrarse; los pasos
+  del servicio (modal), switch de idioma y apariencia (sistema/claro/oscuro); todas las rutas
+  (incluidas publicación, ajustes y guía) usan el Cristal Líquido; el modo heredado se retiró (no existen
+  `isMigratedRoute`, `LegacySurface` ni la prop `surface`); los pasos
   del video en la sidebar muestran estado real con `useVideoStepStatuses`). En el espacio de trabajo el chat del
   productor y el primer uso van a la izquierda; la vista previa queda siempre visible sobre escenario opaco, con
   Material | Entregas a la derecha; el estado de la propuesta vive en el slot de estado del toolbar y «Aprobar el
@@ -460,10 +458,9 @@ Todos bajo `src/` de la app; copy `es`/`en` en `src/i18n/`; el contrato de cada 
   información de apoyo se muestra en modales de tucu-ui, no en paneles flotantes absolutos; (3) medios (video e
   imágenes) nunca bajo vidrio ni blur; (4) texto activo con `--cl-action-text` y rótulos con `--cl-ink-3` para cumplir
   AA (medido); (5) `SegmentedControl` dentro de paneles angostos con `size="xs"` y `fullWidth`; (6) todos los
-  controles del pie usan `FOOTER_CONTROL_CLASS` (40 × 192 px); (7) cada pantalla migrada declara su única acción con
-  `useToolbarAction` y se suma a `isMigratedRoute`; (8) `Modal`, `ErrorNotice` y `BrandPicker` llevan
-  `surface="glass"`: por defecto conservan el estilo heredado para las pantallas viejas y las migradas piden vidrio
-  (`Modal` va por portal al `body`: un ancestro con `backdrop-filter` atrapa el `position: fixed`);
+  controles del pie usan `FOOTER_CONTROL_CLASS` (40 × 192 px); (7) cada pantalla declara su única acción con
+  `useToolbarAction`; (8) `Modal`, `ErrorNotice`, `JobRetryButton`, `BrandPicker` y `MusicModeFields` son solo
+  vidrio, sin prop `surface` (`Modal` tiene cabecera y pie fijos y cuerpo con scroll `<testId>-body`; va por portal al `body`: un ancestro con `backdrop-filter` atrapa el `position: fixed`);
   `TimelinePlayer` tiene modo `fit`; (9) tokens `--cl-action-fill` y `--cl-action-fill-hover` (relleno de botones
   primarios y burbuja del usuario con texto blanco; en oscuro `#1f6feb`, ≈ 4,6:1) y
   `--tucu-segmented-fg: var(--cl-ink-2)` (texto inactivo de los segmentados de tucu-ui, antes 3,95:1); (10) tonos de
@@ -480,10 +477,15 @@ Todos bajo `src/` de la app; copy `es`/`en` en `src/i18n/`; el contrato de cada 
 - **Tests**: `settings-page.spec.tsx` espera hasta 5 s (con 7 proyectos en paralelo el timeout de 1 s era intermitente).
 - **Pendientes vigentes**: copy propio para el uploader de imágenes en la página Motion (hoy usa el del modo crudo);
   el reporte de la fase storyboard trae `path`/`durationSec` null; la bandeja de arrastrar y soltar no propone el
-  rol `reference`; migrar las pantallas restantes al shell nuevo (ciclo 05 de spec-025: publicación, ajustes y guía;
-  ampliar `isMigratedRoute` y declarar la acción del toolbar; `studio-layout.spec` usa `/publish-queue` como ruta no
-  migrada), limpiar `RenderReviewPanel` (en Entregas, envuelto en una isla oscura) y
-  `YouTubePublishDialog` junto con el modo heredado de `surface` (ciclo 05), no hay API para renombrar videos (solo
-  se renombran carpetas), mover el selector de apariencia a Ajustes
-  (ciclo 05) y la paridad con la web (ciclo 06). Una ventana de Electron abierta durante muchas recargas en caliente
+  rol `reference`; la paridad con la web (ciclo 06 de spec-025: Aprender, Acerca de, Conectar agentes, material libre,
+  requisitos) y correr los e2e contra un studio libre antes de la PR; no hay API para renombrar videos (solo
+  se renombran carpetas). Una ventana de Electron abierta durante muchas recargas en caliente
   de los catálogos i18n puede mostrar claves sin traducir: recargar la ventana; no es un defecto.
+
+## 6. Estado tras spec-025 cycle-05
+
+- `components/publish/` + `api/publish-queue-view.ts`: cola con métricas, pestañas Cola/Publicados/Con error, filas con menú ⋮; pausar/reanudar en el toolbar.
+- `components/settings/`: pestañas Productor, Voz, YouTube y Apariencia con `?tab=` (`useTabParam`, `SegmentedControl semantics="tabs"`), montadas y ocultas para no perder borradores; «Guardar cambios» en el toolbar guarda todos. Apariencia también es un `Link` a `/settings?tab=appearance` en el pie de la sidebar.
+- `components/guide/`: índice pegajoso con sección activa (IntersectionObserver) y pasos en tarjetas.
+- `components/ui/status-states.tsx`: `LoadingState` y `EmptyState`.
+- Borrados: `ui/badge`, `ui/card`, `ui/tabs`, `ui/button`, `PUBLICATION_STATUS_TONE`; `index.css` sin tokens `--color-*` heredados. `--tucu-state-red-ink` en claro es `#a8231b` (AA).
