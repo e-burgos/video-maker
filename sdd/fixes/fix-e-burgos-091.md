@@ -14,3 +14,4 @@
 - Descripciones de hasta 160 caracteres (inicio y tecnología se cortaban), con test que lo exige en todas las páginas.
 - Datos estructurados `VideoObject` del tutorial y los dos demos (duración, fecha, miniatura, URL), `FAQPage` armado desde los ítems de preguntas frecuentes y `BreadcrumbList` en las páginas internas.
 - `404.html` bilingüe con `noindex` y rutas absolutas: sin ella Cloudflare Pages devolvía el inicio con 200 para cualquier URL inexistente.
+- Tamaño de descarga actualizado a «≈270 MB» (instalador 0.5.0; decía ≈311 MB de la 0.4.2).

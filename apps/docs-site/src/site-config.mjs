@@ -23,7 +23,7 @@ export const TUTORIAL_MUSIC_SOURCE_URL =
 
 export const APP_DISPLAY_NAME = 'Video Maker';
 
-export const APPROX_DMG_SIZE_LABEL = '≈311 MB';
+export const APPROX_DMG_SIZE_LABEL = '≈270 MB';
 
 export const APPROX_INSTALLED_SIZE_LABEL = '≈920 MB';
 
