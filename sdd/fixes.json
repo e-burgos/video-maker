@@ -7234,6 +7234,52 @@
           }
         ]
       }
+    },
+    {
+      "id": "FIX-e-burgos-097",
+      "author": "e-burgos",
+      "spec_id": null,
+      "fix_document": "sdd/fixes/fix-e-burgos-097.md",
+      "type": "IMPROVEMENT",
+      "severity": "low",
+      "created_at": "2026-11-16",
+      "resolved_at": "2026-11-16",
+      "validated_at": null,
+      "title": "Release de escritorio 0.5.1",
+      "estimation_hours": 0.5,
+      "description": "Sube la app de escritorio a 0.5.1 con su sección de CHANGELOG: orden de YouTube (FIX-092), base compartida con el studio web (FIX-093), confirmación al borrar categorías (FIX-095), Fable y aviso de CLI viejo (FIX-087), actividad del productor en el idioma de la interfaz (FIX-088) y logos inexistentes rechazados (FIX-086).",
+      "justification": "Pedido del dev (2026-11-16): cerrar Video Maker con todas las mejoras publicadas, todo en la PR 57.",
+      "related_modules": [
+        "desktop"
+      ],
+      "affected_files": [
+        "apps/desktop/package.json",
+        "apps/desktop/CHANGELOG.md"
+      ],
+      "test_reference": "apps/desktop/scripts/release-desktop.mjs",
+      "status": "implemented",
+      "cycle": null,
+      "usage": {
+        "provider_model": "claude/opus",
+        "effort": "low",
+        "tokens_in": 20000,
+        "tokens_out": 3000,
+        "approx": true,
+        "source": "declared-estimate",
+        "recorded_at": "2026-11-16",
+        "by_agent": [
+          {
+            "provider_model": "claude/opus",
+            "effort": "low",
+            "tokens_in": 20000,
+            "tokens_out": 3000,
+            "approx": true,
+            "source": "declared-estimate",
+            "recorded_at": "2026-11-16",
+            "agent": "implementor-back"
+          }
+        ]
+      }
     }
   ]
 }
