@@ -127,15 +127,39 @@ describe('FolderHeading', () => {
     expect(createCategory).not.toHaveBeenCalled();
   });
 
-  it('lists the categories with a control to remove each one', async () => {
+  it('asks in a modal before deleting a category and says its videos stay in the folder', async () => {
     const deleteCategory = vi.fn().mockResolvedValue({ folders: [], videos: {} });
-    const onChanged = renderHeading({ deleteCategory });
+    const onChanged = vi.fn();
+    render(
+      <RenderApiProvider client={{ deleteCategory } as unknown as RenderApiClient}>
+        <FolderHeading folder={FOLDER} total={3} onChanged={onChanged} videoCountByCategory={{ campanas: 2 }} />
+      </RenderApiProvider>,
+    );
 
-    expect(screen.getByTestId('folder-categories').textContent).toContain('Campañas');
     fireEvent.click(screen.getByLabelText('Delete the category Campañas'));
+    expect(deleteCategory).not.toHaveBeenCalled();
+    expect(screen.getByTestId('delete-category-modal').textContent).toContain('It has 2 videos');
 
+    fireEvent.click(screen.getByTestId('delete-category-cancel'));
+    expect(screen.queryByTestId('delete-category-modal')).toBeNull();
+    expect(deleteCategory).not.toHaveBeenCalled();
+
+    fireEvent.click(screen.getByLabelText('Delete the category Campañas'));
+    fireEvent.click(screen.getByTestId('delete-category-submit'));
     await waitFor(() => expect(onChanged).toHaveBeenCalled());
     expect(deleteCategory).toHaveBeenCalledWith('display-ads', 'campanas');
+  });
+
+  it('takes the viewer to a category when its name is tapped', () => {
+    const onShowCategory = vi.fn();
+    render(
+      <RenderApiProvider client={{} as RenderApiClient}>
+        <FolderHeading folder={FOLDER} total={3} onChanged={vi.fn()} onShowCategory={onShowCategory} />
+      </RenderApiProvider>,
+    );
+
+    fireEvent.click(screen.getByLabelText('Go to the category Campañas'));
+    expect(onShowCategory).toHaveBeenCalledWith('campanas');
   });
 
   it('asks before deleting the folder and says the videos survive', () => {

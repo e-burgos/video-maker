@@ -1,3 +1,4 @@
+import { useReloadWhenVisible } from '../hooks/use-reload-when-visible';
 import { useCallback, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 
@@ -123,6 +124,7 @@ export function ProjectsPage() {
     reloadVideos();
     reloadOrganization();
   }, [reloadOrganization, reloadVideos]);
+  useReloadWhenVisible(reloadAll);
 
   const openCreateVideo = useCallback(() => setCreateVideoOpen(true), []);
   useToolbarAction({ label: t('projects.newVideoCta'), onClick: openCreateVideo });

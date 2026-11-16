@@ -2,9 +2,10 @@ import { useState } from 'react';
 
 import { useRenderApi } from '../api/render-api-context';
 import { RenderApiError, serviceUnreachable } from '../api/render-api-error';
-import type { VideoFolder } from '../api/render-api-types';
+import type { VideoCategory, VideoFolder } from '../api/render-api-types';
 import { useT } from '../i18n/language-context';
 import { CollapseToggle } from './collapse-toggle';
+import { DeleteCategoryModal } from './delete-category-modal';
 import { ErrorNotice } from './error-notice';
 import {
   DANGER_BUTTON_SMALL_CLASS,
@@ -20,6 +21,8 @@ export type FolderHeadingProps = {
   onChanged: () => void;
   collapsed?: boolean;
   onToggleCollapsed?: () => void;
+  videoCountByCategory?: Readonly<Record<string, number>>;
+  onShowCategory?: (categoryId: string) => void;
 };
 
 export function FolderHeading({
@@ -28,6 +31,8 @@ export function FolderHeading({
   onChanged,
   collapsed = false,
   onToggleCollapsed,
+  videoCountByCategory = {},
+  onShowCategory,
 }: FolderHeadingProps) {
   const client = useRenderApi();
   const t = useT();
@@ -38,6 +43,7 @@ export function FolderHeading({
   const [renameValue, setRenameValue] = useState('');
   const [error, setError] = useState<RenderApiError | null>(null);
   const [pending, setPending] = useState(false);
+  const [categoryToDelete, setCategoryToDelete] = useState<VideoCategory | null>(null);
 
   async function run(action: () => Promise<unknown>): Promise<void> {
     setPending(true);
@@ -222,15 +228,21 @@ export function FolderHeading({
         <ul data-testid="folder-categories" className="flex flex-wrap gap-1.5">
           {folder.categories.map((category) => (
             <li key={category.id} className="glass-sub flex items-center gap-1 rounded-full px-2.5 py-1">
-              <span className="text-[11px] text-[var(--cl-ink-2)]">{category.name}</span>
+              <button
+                type="button"
+                data-testid="folder-category-show"
+                aria-label={t('folder.showCategoryAria', { name: category.name })}
+                onClick={() => onShowCategory?.(category.id)}
+                className="focus-cl rounded text-[11px] text-[var(--cl-ink-2)] hover:text-[var(--cl-ink)]"
+              >
+                {category.name}
+              </button>
               <button
                 type="button"
                 data-testid="folder-category-delete"
                 aria-label={t('folder.deleteCategoryAria', { name: category.name })}
                 disabled={pending}
-                onClick={() => {
-                  void run(() => client.deleteCategory(folder.id, category.id));
-                }}
+                onClick={() => setCategoryToDelete(category)}
                 className="focus-cl rounded text-[11px] leading-none text-[var(--cl-ink-3)] hover:text-[var(--tucu-state-red-ink)] disabled:opacity-50"
               >
                 ×
@@ -238,6 +250,20 @@ export function FolderHeading({
             </li>
           ))}
         </ul>
+      )}
+
+      {folder !== null && categoryToDelete !== null && (
+        <DeleteCategoryModal
+          folderId={folder.id}
+          folderName={folder.name}
+          category={categoryToDelete}
+          videoCount={videoCountByCategory[categoryToDelete.id] ?? 0}
+          onClose={() => setCategoryToDelete(null)}
+          onDeleted={() => {
+            setCategoryToDelete(null);
+            onChanged();
+          }}
+        />
       )}
 
       {error !== null && <ErrorNotice error={error} />}

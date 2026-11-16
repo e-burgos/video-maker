@@ -31,6 +31,10 @@ export function VideoGrid({ videos, organization, onChanged }: VideoGridProps) {
   );
 }
 
+export function categoryAnchorId(folderId: string, categoryId: string): string {
+  return `category-${folderId}-${categoryId}`;
+}
+
 export type FolderSectionProps = {
   group: VideoGroup;
   organization: VideoOrganization;
@@ -44,6 +48,19 @@ export function FolderSection({ group, organization, onChanged, isCollapsed, tog
   const folderId = folderIdOf(group);
   const folderKey = folderSectionKey(folderId);
   const folderCollapsed = isCollapsed(folderKey);
+  const videoCountByCategory = Object.fromEntries(
+    group.buckets.flatMap((bucket) => (bucket.category === null ? [] : [[bucket.category.id, bucket.videos.length]])),
+  );
+
+  function showCategory(categoryId: string): void {
+    const key = categorySectionKey(folderId, categoryId);
+    if (isCollapsed(key)) {
+      toggle(key);
+    }
+    requestAnimationFrame(() => {
+      document.getElementById(categoryAnchorId(folderId, categoryId))?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    });
+  }
 
   return (
     <section data-testid="folder-section" data-folder={folderId} data-collapsed={folderCollapsed} className="space-y-3 border-t border-[var(--tucu-glass-sub-line)] pt-4 first:border-t-0 first:pt-0">
@@ -53,6 +70,8 @@ export function FolderSection({ group, organization, onChanged, isCollapsed, tog
         onChanged={onChanged}
         collapsed={folderCollapsed}
         onToggleCollapsed={() => toggle(folderKey)}
+        videoCountByCategory={videoCountByCategory}
+        onShowCategory={showCategory}
       />
 
       {folderCollapsed ? null : group.total === 0 ? (
@@ -70,10 +89,11 @@ export function FolderSection({ group, organization, onChanged, isCollapsed, tog
             return (
               <div
                 key={categoryId}
+                id={categoryAnchorId(folderId, categoryId)}
                 data-testid="category-bucket"
                 data-category={categoryId}
                 data-collapsed={categoryCollapsed}
-                className="space-y-2"
+                className="scroll-mt-4 space-y-2"
               >
                 <div className="flex items-center gap-1">
                   <CollapseToggle

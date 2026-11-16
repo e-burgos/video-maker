@@ -7140,6 +7140,55 @@
           }
         ]
       }
+    },
+    {
+      "id": "FIX-e-burgos-095",
+      "author": "e-burgos",
+      "spec_id": null,
+      "fix_document": "sdd/fixes/fix-e-burgos-095.md",
+      "type": "BUGFIX",
+      "severity": "medium",
+      "created_at": "2026-11-16",
+      "resolved_at": "2026-11-16",
+      "validated_at": null,
+      "title": "Las categorías piden confirmación para borrarse y llevan a su sección; Mis videos se actualiza solo",
+      "estimation_hours": 1,
+      "description": "La × de una categoría la borraba al instante y sus videos quedaban sin categoría. Ahora abre un modal que dice cuántos videos quedan en la carpeta sin categoría. Tocar el nombre de la categoría lleva (con scroll) a su sección y la despliega si estaba plegada. Mis videos vuelve a leer videos y organización al volver a la ventana y cada 20 s, así la app y el studio web, que comparten la base, se ven igual.",
+      "justification": "Pedido del dev (2026-11-16): borró dos categorías sin querer con la × y los videos quedaron huérfanos.",
+      "related_modules": [
+        "web"
+      ],
+      "affected_files": [
+        "apps/web/src/components/folder-heading.tsx",
+        "apps/web/src/components/delete-category-modal.tsx",
+        "apps/web/src/components/videos/video-groups.tsx",
+        "apps/web/src/hooks/use-reload-when-visible.ts",
+        "apps/web/src/pages/projects-page.tsx"
+      ],
+      "test_reference": "apps/web/src/components/folder-heading.spec.tsx",
+      "status": "implemented",
+      "cycle": null,
+      "usage": {
+        "provider_model": "claude/opus",
+        "effort": "medium",
+        "tokens_in": 70000,
+        "tokens_out": 9000,
+        "approx": true,
+        "source": "declared-estimate",
+        "recorded_at": "2026-11-16",
+        "by_agent": [
+          {
+            "provider_model": "claude/opus",
+            "effort": "medium",
+            "tokens_in": 70000,
+            "tokens_out": 9000,
+            "approx": true,
+            "source": "declared-estimate",
+            "recorded_at": "2026-11-16",
+            "agent": "implementor-front"
+          }
+        ]
+      }
     }
   ]
 }
