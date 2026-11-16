@@ -1,4 +1,4 @@
-import { APPROX_DMG_SIZE_LABEL, APP_DISPLAY_NAME, REPO_URL, SITE_URL, TUTORIAL_MUSIC_SOURCE_URL } from '../site-config.mjs';
+import { APPROX_DMG_SIZE_LABEL, APP_DISPLAY_NAME, REPO_URL, SITE_URL } from '../site-config.mjs';
 import { pick, t } from '../i18n.mjs';
 import { icon } from '../icons.mjs';
 import { absoluteUrl, assetHref, pageHref } from '../routes.mjs';
@@ -7,10 +7,7 @@ import { featureGrid, pipelineDiagram } from '../components.mjs';
 import { pipelineStages } from './journeys.mjs';
 
 const VIDEOS_BASE_PATH = '/tutoriales/';
-const TUTORIAL_VIDEO_FILE = 'Tutorial-Video-Maker.mp4';
-const TUTORIAL_VIDEO_PATH = `${VIDEOS_BASE_PATH}${TUTORIAL_VIDEO_FILE}`;
 const PUBLISHED_VIDEO_FACTS = {
-  [TUTORIAL_VIDEO_FILE]: { duration: 'PT2M20S', uploadDate: '2026-10-28', poster: 'tutorial-poster.jpg' },
   'Video-Maker-en-90-segundos.mp4': { duration: 'PT1M29S', uploadDate: '2026-11-14', poster: 'demo-explicativo-poster.jpg' },
   'Video-Maker-del-chat-al-video.mp4': { duration: 'PT3M27S', uploadDate: '2026-11-14', poster: 'demo-productor-poster.jpg' },
 };
@@ -30,11 +27,6 @@ const COPY = {
     heroAlt: 'Un video de motion graphics terminado dentro de Video Maker',
     tracks: ['Voz', 'Escenas', 'Música', 'Texto'],
     chips: ['Voz es_AR · local', '−14 LUFS', '16:9 · 9:16', 'Render en tu Mac'],
-    tutorialEyebrow: 'Mirá cómo funciona',
-    tutorialTitle: 'De la marca al video, en poco más de dos minutos',
-    tutorialLede: 'Un recorrido real por el estudio: se crea una marca, se adjuntan las fotos, el productor arma el video y se publica. Las esperas del productor van aceleradas.',
-    tutorialLabel: 'Video tutorial de Video Maker de punta a punta',
-    tutorialNote: 'Voz: Malena · Música:',
     demosEyebrow: 'Hechos con Video Maker',
     demosTitle: 'Dos videos que armó el productor',
     demosLede: 'Los dos los produjo el estudio conversando con el productor, sin editor de video: uno en motion graphics y otro con material grabado.',
@@ -124,11 +116,6 @@ const COPY = {
     heroAlt: 'A finished motion graphics video inside Video Maker',
     tracks: ['Voice', 'Scenes', 'Music', 'Text'],
     chips: ['es_AR voice · local', '−14 LUFS', '16:9 · 9:16', 'Rendered on your Mac'],
-    tutorialEyebrow: 'See how it works',
-    tutorialTitle: 'From brand to finished video, in a little over two minutes',
-    tutorialLede: 'A real walkthrough of the studio: create a brand, attach the photos, let the producer build the video and publish it. The long waits for the producer are sped up; narrated and captioned in Spanish.',
-    tutorialLabel: 'Video Maker end-to-end tutorial video',
-    tutorialNote: 'Voice: Malena · Music:',
     demosEyebrow: 'Made with Video Maker',
     demosTitle: 'Two videos the producer built',
     demosLede: 'The studio produced both by chatting with the producer, with no video editor: one in motion graphics and one from recorded footage. Narrated and captioned in Spanish.',
@@ -270,24 +257,8 @@ function videoObject({ file, name, description }) {
 
 function publishedVideosStructuredData(copy) {
   return [
-    videoObject({ file: TUTORIAL_VIDEO_FILE, name: copy.tutorialTitle, description: copy.tutorialLede }),
     ...copy.demos.map((demo) => videoObject({ file: demo.file, name: `${demo.title} · Video Maker`, description: demo.text })),
   ];
-}
-
-function tutorialSection(ctx, copy) {
-  const poster = assetHref(ctx, 'assets/screenshots/tutorial-poster.jpg');
-  return `<section class="section section--tinted" aria-labelledby="home-tutorial">
-<div class="container container--narrow">
-${sectionHeader({ eyebrow: copy.tutorialEyebrow, title: copy.tutorialTitle, lede: escapeHtml(copy.tutorialLede), id: 'home-tutorial' })}
-<figure class="tutorial-video reveal">
-<video controls preload="none" playsinline poster="${poster}" aria-label="${escapeHtml(copy.tutorialLabel)}" width="1920" height="1080">
-<source src="${TUTORIAL_VIDEO_PATH}" type="video/mp4" />
-</video>
-<figcaption>${escapeHtml(copy.tutorialNote)} <a href="${TUTORIAL_MUSIC_SOURCE_URL}" rel="noopener">Inspiring Advertising - Upbeat Summer Corporate</a>, Rafael Krux, CC BY 4.0</figcaption>
-</figure>
-</div>
-</section>`;
 }
 
 function demoVideoCard(ctx, demo) {
@@ -418,7 +389,6 @@ export function renderPage(ctx) {
   const copy = pick(ctx.locale, COPY);
   const bodyHtml = [
     hero(ctx, copy),
-    tutorialSection(ctx, copy),
     demosSection(ctx, copy),
     pathsSection(ctx, copy),
     pipelineSection(ctx, copy),

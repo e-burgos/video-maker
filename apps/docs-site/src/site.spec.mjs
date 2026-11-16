@@ -117,7 +117,8 @@ describe('page shell', () => {
       JSON.parse(render(locale, pageId).match(/<script type="application\/ld\+json">(.*?)<\/script>/)[1])['@graph'];
     for (const locale of LOCALES) {
       const videos = graphOf(locale, 'home').filter((node) => node['@type'] === 'VideoObject');
-      expect(videos).toHaveLength(3);
+      expect(videos).toHaveLength(2);
+      expect(JSON.stringify(videos)).not.toContain('Tutorial-Video-Maker');
       for (const video of videos) {
         expect(video.contentUrl).toMatch(/^https:\/\/.+\/tutoriales\/.+\.mp4$/);
         expect(video.duration).toMatch(/^PT\dM\d+S$/);

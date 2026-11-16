@@ -7092,6 +7092,54 @@
           }
         ]
       }
+    },
+    {
+      "id": "FIX-e-burgos-094",
+      "author": "e-burgos",
+      "spec_id": null,
+      "fix_document": "sdd/fixes/fix-e-burgos-094.md",
+      "type": "IMPROVEMENT",
+      "severity": "low",
+      "created_at": "2026-11-16",
+      "resolved_at": "2026-11-16",
+      "validated_at": null,
+      "title": "La landing deja de mostrar el tutorial de la versión vieja",
+      "estimation_hours": 0.3,
+      "description": "Se quita la sección «Mirá cómo funciona» del inicio (es y en): el video Tutorial-Video-Maker.mp4 mostraba la interfaz anterior al rebranding. Se van con ella su VideoObject, su póster, sus estilos y la constante de la música.",
+      "justification": "Pedido del dev (2026-11-16): el video es de la versión vieja y no puede estar en la web.",
+      "related_modules": [
+        "docs-site"
+      ],
+      "affected_files": [
+        "apps/docs-site/src/content/home.mjs",
+        "apps/docs-site/src/site-config.mjs",
+        "apps/docs-site/src/styles.css",
+        "apps/docs-site/src/site.spec.mjs"
+      ],
+      "test_reference": "apps/docs-site/src/site.spec.mjs",
+      "status": "implemented",
+      "cycle": null,
+      "usage": {
+        "provider_model": "claude/opus",
+        "effort": "low",
+        "tokens_in": 30000,
+        "tokens_out": 3000,
+        "approx": true,
+        "source": "declared-estimate",
+        "recorded_at": "2026-11-16",
+        "by_agent": [
+          {
+            "provider_model": "claude/opus",
+            "effort": "low",
+            "tokens_in": 30000,
+            "tokens_out": 3000,
+            "approx": true,
+            "source": "declared-estimate",
+            "recorded_at": "2026-11-16",
+            "agent": "implementor-front"
+          }
+        ]
+      }
     }
   ]
 }
