@@ -4182,7 +4182,7 @@
         "scripts/stop-studio.mjs"
       ],
       "test_reference": "nx test render-api (2258), producer-tools y motion-graphics (313) en verde; sonda contra el CLI real: con el esquema saneado devuelve structured_output.",
-      "status": "in-progress",
+      "status": "implemented",
       "cycle": null,
       "process_note": "Causa aislada probando cada variante de escena contra el CLI real: fallan las 4 que usan prefixItems/format/default. El esquema se sanea sólo en el pedido al agente; la validación con zod no cambia.",
       "usage": {
