@@ -76,6 +76,8 @@ export function YouTubeCategoryPlaylistsSection() {
   const [saved, setSaved] = useState<CategoryPlaylists | null>(null);
   const [justSaved, setJustSaved] = useState(false);
   const save = useApiAction((input: CategoryPlaylists) => client.putCategoryPlaylists(input));
+  const order = useApiAction(() => client.orderCategoriesByPlaylists());
+  const [orderedCategories, setOrderedCategories] = useState<number | null>(null);
 
   useEffect(() => {
     if (resource.data !== null) {
@@ -95,6 +97,11 @@ export function YouTubeCategoryPlaylistsSection() {
         ? current
         : { ...current, categoryPlaylists: { ...current.categoryPlaylists, [categoryId]: playlistId } },
     );
+  }
+
+  async function orderLikeYouTube() {
+    setOrderedCategories(null);
+    setOrderedCategories(await order.run());
   }
 
   async function submit() {
@@ -180,6 +187,26 @@ export function YouTubeCategoryPlaylistsSection() {
             )}
           </div>
           {save.error !== null && <ErrorNotice error={save.error} />}
+
+          <div className="flex flex-col gap-2">
+            <p className={HINT_TEXT_CLASS}>{t('youtube.categoryPlaylists.orderHint')}</p>
+            <div className="flex flex-wrap items-center gap-3">
+              <button
+                type="button"
+                disabled={dirty || saving || order.status === 'pending'}
+                onClick={() => void orderLikeYouTube()}
+                className={SECONDARY_BUTTON_CLASS}
+              >
+                {order.status === 'pending' ? t('youtube.categoryPlaylists.ordering') : t('youtube.categoryPlaylists.order')}
+              </button>
+              {orderedCategories !== null && (
+                <StateBadge tone="green" dot size="sm" role="status">
+                  {t('youtube.categoryPlaylists.ordered', { count: orderedCategories })}
+                </StateBadge>
+              )}
+            </div>
+            {order.error !== null && <ErrorNotice error={order.error} />}
+          </div>
         </div>
       )}
     </SettingsPanel>

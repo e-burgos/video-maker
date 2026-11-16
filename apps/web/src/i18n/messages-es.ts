@@ -1509,6 +1509,11 @@ export const MESSAGES_ES: Messages = {
   'youtube.categoryPlaylists.none': 'Ninguna',
   'youtube.categoryPlaylists.save': 'Guardar listas',
   'youtube.categoryPlaylists.saved': 'Guardado.',
+  'youtube.categoryPlaylists.orderHint':
+    'Mis videos muestra cada categoría en el orden de su lista de YouTube. Si reordenaste una lista en YouTube, traé el orden de nuevo.',
+  'youtube.categoryPlaylists.order': 'Ordenar como en YouTube',
+  'youtube.categoryPlaylists.ordering': 'Leyendo las listas…',
+  'youtube.categoryPlaylists.ordered': 'Listo: {count} categorías ordenadas.',
   'youtube.categoryPlaylists.loading': 'Cargando las listas…',
   'youtube.categoryPlaylists.noCategories': 'Todavía no tenés carpetas con categorías.',
   'publications.heading': 'Publicaciones',

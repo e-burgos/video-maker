@@ -57,6 +57,7 @@ export interface YoutubeClient {
   readonly queryUploadStatus: (sessionUri: string, totalBytes: number) => Promise<UploadProgress>;
   readonly setThumbnail: (videoId: string, bytes: Uint8Array, contentType: string) => Promise<void>;
   readonly addToPlaylist: (playlistId: string, videoId: string) => Promise<void>;
+  readonly listPlaylistVideoIds: (playlistId: string) => Promise<readonly string[]>;
 }
 
 function videoResource(metadata: YoutubeVideoMetadata): unknown {
@@ -133,23 +134,26 @@ export function createYoutubeClient(deps: RenderApiDependencies, oauth: YoutubeO
     return result.text;
   }
 
-  async function listPlaylists(): Promise<readonly YoutubePlaylist[]> {
-    const playlists: YoutubePlaylist[] = [];
+  async function collectPages<Item>(
+    pageUrl: (pageSuffix: string) => string,
+    readItem: (item: unknown) => Item | null,
+  ): Promise<readonly Item[]> {
+    const collected: Item[] = [];
     let pageToken: string | null = null;
     for (let page = 0; page < PLAYLIST_MAX_PAGES; page += 1) {
       const suffix: string = pageToken === null ? '' : `&pageToken=${encodeURIComponent(pageToken)}`;
       const text = await expectOk(
         await authorized((token) => ({
-          url: `${YOUTUBE_API_URL}/playlists?part=snippet&mine=true&maxResults=${String(PLAYLIST_PAGE_SIZE)}${suffix}`,
+          url: pageUrl(suffix),
           headers: { authorization: `Bearer ${token}` },
           timeoutMs: GOOGLE_API_TIMEOUT_MS,
         })),
       );
       const body = parseJsonObject(text);
       for (const item of Array.isArray(body?.items) ? (body.items as unknown[]) : []) {
-        const record = item as { id?: unknown; snippet?: { title?: unknown } };
-        if (typeof record.id === 'string' && typeof record.snippet?.title === 'string') {
-          playlists.push({ id: record.id, title: record.snippet.title });
+        const read = readItem(item);
+        if (read !== null) {
+          collected.push(read);
         }
       }
       pageToken = typeof body?.nextPageToken === 'string' ? body.nextPageToken : null;
@@ -157,7 +161,30 @@ export function createYoutubeClient(deps: RenderApiDependencies, oauth: YoutubeO
         break;
       }
     }
-    return playlists;
+    return collected;
+  }
+
+  function listPlaylists(): Promise<readonly YoutubePlaylist[]> {
+    return collectPages(
+      (suffix) => `${YOUTUBE_API_URL}/playlists?part=snippet&mine=true&maxResults=${String(PLAYLIST_PAGE_SIZE)}${suffix}`,
+      (item) => {
+        const record = item as { id?: unknown; snippet?: { title?: unknown } };
+        return typeof record.id === 'string' && typeof record.snippet?.title === 'string'
+          ? { id: record.id, title: record.snippet.title }
+          : null;
+      },
+    );
+  }
+
+  function listPlaylistVideoIds(playlistId: string): Promise<readonly string[]> {
+    return collectPages(
+      (suffix) =>
+        `${YOUTUBE_API_URL}/playlistItems?part=contentDetails&playlistId=${encodeURIComponent(playlistId)}&maxResults=${String(PLAYLIST_PAGE_SIZE)}${suffix}`,
+      (item) => {
+        const videoId = (item as { contentDetails?: { videoId?: unknown } }).contentDetails?.videoId;
+        return typeof videoId === 'string' ? videoId : null;
+      },
+    );
   }
 
   async function createPlaylist(draft: YoutubePlaylistDraft): Promise<YoutubePlaylist> {
@@ -270,5 +297,14 @@ export function createYoutubeClient(deps: RenderApiDependencies, oauth: YoutubeO
     );
   }
 
-  return { listPlaylists, createPlaylist, initiateUpload, uploadChunk, queryUploadStatus, setThumbnail, addToPlaylist };
+  return {
+    listPlaylists,
+    createPlaylist,
+    initiateUpload,
+    uploadChunk,
+    queryUploadStatus,
+    setThumbnail,
+    addToPlaylist,
+    listPlaylistVideoIds,
+  };
 }

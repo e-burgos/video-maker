@@ -1513,6 +1513,11 @@ export const MESSAGES_EN = {
   'youtube.categoryPlaylists.none': 'None',
   'youtube.categoryPlaylists.save': 'Save playlists',
   'youtube.categoryPlaylists.saved': 'Saved.',
+  'youtube.categoryPlaylists.orderHint':
+    'My videos shows each category in the order of its YouTube playlist. If you reordered a playlist on YouTube, bring the order again.',
+  'youtube.categoryPlaylists.order': 'Order like YouTube',
+  'youtube.categoryPlaylists.ordering': 'Reading the playlists…',
+  'youtube.categoryPlaylists.ordered': 'Done: {count} categories ordered.',
   'youtube.categoryPlaylists.loading': 'Loading playlists…',
   'youtube.categoryPlaylists.noCategories': 'You have no folders with categories yet.',
   'publications.heading': 'Publications',

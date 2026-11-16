@@ -275,6 +275,7 @@ export type RenderApiClient = {
   updatePublishQueueSettings: (patch: PublishQueueSettingsPatch) => Promise<PublishQueueSettings>;
   getCategoryPlaylists: () => Promise<CategoryPlaylists>;
   putCategoryPlaylists: (input: CategoryPlaylists) => Promise<CategoryPlaylists>;
+  orderCategoriesByPlaylists: () => Promise<number>;
   getRenderReview: (slug: string, file: string) => Promise<ReviewReport | null>;
   createReviewJob: (slug: string, file: string) => Promise<ReviewJob>;
   listReferences: (slug: string) => Promise<ReferenceSummary[]>;
@@ -1492,6 +1493,16 @@ export function createRenderApiClient(fetchImpl: FetchLike): RenderApiClient {
         (value) => isRecord(value),
       );
       return parseCategoryPlaylists(body);
+    },
+
+    async orderCategoriesByPlaylists(): Promise<number> {
+      const body = await requestJson(
+        '/integrations/youtube/category-playlists/order',
+        { method: 'POST' },
+        'a category order report',
+        (value) => isRecord(value) && Array.isArray(value.categories),
+      );
+      return (body as { categories: unknown[] }).categories.length;
     },
 
     async getRenderReview(slug: string, file: string): Promise<ReviewReport | null> {

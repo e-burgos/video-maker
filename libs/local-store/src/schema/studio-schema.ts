@@ -34,6 +34,7 @@ export const placements = sqliteTable('placements', {
   folderId: text('folder_id').references(() => folders.id, { onDelete: 'set null' }),
   categoryId: text('category_id').references(() => categories.id, { onDelete: 'set null' }),
   archived: integer('archived', { mode: 'boolean' }).notNull().default(false),
+  position: integer('position'),
 });
 
 export const producerSessions = sqliteTable('producer_sessions', {

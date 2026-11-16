@@ -1,3 +1,4 @@
+import { handleOrderCategoriesByPlaylists } from './handlers/category-playlist-order-handler';
 import type { ServerConfig } from '../config/server-config';
 import type { StoreConfig } from '../config/store-config';
 import type { RenderApiDependencies } from '../deps/render-api-dependencies';
@@ -430,6 +431,8 @@ async function dispatchRoute(
         return handleGetCategoryPlaylists(deps);
       case 'integrations.youtube.categoryPlaylists.put':
         return await handlePutCategoryPlaylists(deps, request);
+      case 'integrations.youtube.categoryPlaylists.order':
+        return await handleOrderCategoriesByPlaylists(deps, runtime);
       case 'publishQueue.get':
         return handleGetPublishQueue(deps);
       case 'publishQueue.items.create':

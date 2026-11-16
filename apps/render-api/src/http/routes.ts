@@ -100,6 +100,11 @@ export const ROUTES = [
   },
   { id: 'integrations.youtube.categoryPlaylists.get', method: 'GET', pattern: '/integrations/youtube/category-playlists' },
   { id: 'integrations.youtube.categoryPlaylists.put', method: 'PUT', pattern: '/integrations/youtube/category-playlists' },
+  {
+    id: 'integrations.youtube.categoryPlaylists.order',
+    method: 'POST',
+    pattern: '/integrations/youtube/category-playlists/order',
+  },
   { id: 'publishQueue.get', method: 'GET', pattern: '/publish-queue' },
   { id: 'publishQueue.items.create', method: 'POST', pattern: '/publish-queue/items' },
   { id: 'publishQueue.items.update', method: 'PATCH', pattern: '/publish-queue/items/:itemId' },

@@ -117,4 +117,17 @@ describe('archivedVideos', () => {
       'optica-siochana',
     ]);
   });
+
+  it('orders a category by the saved position and leaves the videos without one at the end', () => {
+    const videos = ['a', 'b', 'c'].map((slug) => ({ slug }) as ProjectSummary);
+    const organization = {
+      folders: [{ id: 'f', name: 'F', categories: [{ id: 'c', name: 'C' }] }],
+      videos: {
+        a: { folderId: 'f', categoryId: 'c', archived: false },
+        b: { folderId: 'f', categoryId: 'c', archived: false, position: 1 },
+        c: { folderId: 'f', categoryId: 'c', archived: false, position: 0 },
+      },
+    };
+    expect(groupVideos(videos, organization)[0]?.buckets[1]?.videos.map((video) => video.slug)).toEqual(['c', 'b', 'a']);
+  });
 });

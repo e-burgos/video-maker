@@ -175,6 +175,7 @@ export type VideoPlacement = {
   folderId: string | null;
   categoryId: string | null;
   archived: boolean;
+  position?: number;
 };
 
 export type VideoOrganization = {

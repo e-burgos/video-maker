@@ -34,6 +34,14 @@ export function archivedVideos(
   return videos.filter((video) => placementFor(organization, video.slug).archived);
 }
 
+function byCategoryPosition(organization: VideoOrganization) {
+  return (left: ProjectSummary, right: ProjectSummary): number => {
+    const leftPosition = placementFor(organization, left.slug).position ?? Number.POSITIVE_INFINITY;
+    const rightPosition = placementFor(organization, right.slug).position ?? Number.POSITIVE_INFINITY;
+    return leftPosition === rightPosition ? 0 : leftPosition - rightPosition;
+  };
+}
+
 function bucketsFor(
   folder: VideoFolder | null,
   videos: readonly ProjectSummary[],
@@ -48,7 +56,9 @@ function bucketsFor(
 
   const categorized = (folder?.categories ?? []).map((category) => ({
     category,
-    videos: inFolder.filter((video) => placementFor(organization, video.slug).categoryId === category.id),
+    videos: inFolder
+      .filter((video) => placementFor(organization, video.slug).categoryId === category.id)
+      .sort(byCategoryPosition(organization)),
   }));
 
   return [{ category: null, videos: uncategorized }, ...categorized];

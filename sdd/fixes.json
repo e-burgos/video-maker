@@ -6993,6 +6993,57 @@
           }
         ]
       }
+    },
+    {
+      "id": "FIX-e-burgos-092",
+      "author": "e-burgos",
+      "spec_id": null,
+      "fix_document": "sdd/fixes/fix-e-burgos-092.md",
+      "type": "IMPROVEMENT",
+      "severity": "low",
+      "created_at": "2026-11-16",
+      "resolved_at": "2026-11-16",
+      "validated_at": null,
+      "title": "Los videos de cada categoría siguen el orden de su lista de YouTube",
+      "estimation_hours": 2,
+      "description": "Mis videos ordenaba los videos de cada categoría por slug. La ubicación de cada video guarda ahora una posición, y una acción toma el orden de la lista de YouTube asociada a cada categoría (Configuración › YouTube). Los videos que no están en la lista quedan al final.",
+      "justification": "Pedido del dev (2026-11-16): en la app los videos no aparecen en el orden de las listas de YouTube.",
+      "related_modules": [
+        "local-store",
+        "render-api",
+        "web"
+      ],
+      "affected_files": [
+        "libs/local-store/src/repositories/organization-repository.ts",
+        "apps/render-api/src/youtube/youtube-client.ts",
+        "apps/render-api/src/http/handlers/category-playlist-order-handler.ts",
+        "apps/web/src/api/video-grouping.ts",
+        "apps/web/src/components/youtube-category-playlists-section.tsx"
+      ],
+      "test_reference": "libs/local-store/src/repositories/organization-repository.spec.ts",
+      "status": "implemented",
+      "cycle": null,
+      "usage": {
+        "provider_model": "claude/opus",
+        "effort": "medium",
+        "tokens_in": 160000,
+        "tokens_out": 22000,
+        "approx": true,
+        "source": "declared-estimate",
+        "recorded_at": "2026-11-16",
+        "by_agent": [
+          {
+            "provider_model": "claude/opus",
+            "effort": "medium",
+            "tokens_in": 160000,
+            "tokens_out": 22000,
+            "approx": true,
+            "source": "declared-estimate",
+            "recorded_at": "2026-11-16",
+            "agent": "implementor-back"
+          }
+        ]
+      }
     }
   ]
 }
