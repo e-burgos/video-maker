@@ -40,7 +40,7 @@ describe('resolveAppPaths', () => {
     expect(paths.modelsDir).toBe('/Users/friend/Library/Application Support/Video Maker/models');
     expect(paths.defaultProjectsDir).toBe('/Users/friend/Library/Application Support/Video Maker/projects');
     expect(paths.logsDir).toBe('/Users/friend/Library/Application Support/Video Maker/logs');
-    expect(paths.dbPath).toBe('/Users/friend/Library/Application Support/Video Maker/studio.db');
+    expect(paths.legacyDbPath).toBe('/Users/friend/Library/Application Support/Video Maker/studio.db');
     expect(paths.chromeHeadlessShellPath).toBe(
       '/Users/friend/Library/Application Support/Video Maker/models/chrome-headless-shell/chrome-headless-shell',
     );

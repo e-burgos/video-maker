@@ -2,6 +2,7 @@ import { dirname, join } from 'node:path';
 
 import type { AppPaths } from './app-paths';
 import { mergePathWithDefault, readLoginShellPath, resolveClaudeCli } from './login-shell-path';
+import { studioDatabasePath } from './studio-database-location';
 
 const PACKAGED_MOTION_ASSETS_RELATIVE = 'motion-assets';
 const DEV_MOTION_ASSETS_RELATIVE = 'libs/motion-graphics/assets';
@@ -59,7 +60,7 @@ export async function buildRenderApiEnv(
     RENDER_API_PORT: String(input.port),
     RENDER_API_MEDIA_ROOT: input.projectsFolder,
     BRANDS_ROOT: join(dirname(input.projectsFolder), 'brands'),
-    RENDER_API_DB_PATH: input.paths.dbPath,
+    RENDER_API_DB_PATH: studioDatabasePath(input.projectsFolder),
     VIDEO_MAKER_BIN_DIR: input.paths.vendorBinDir,
     VIDEO_MAKER_MODELS_DIR: input.paths.modelsDir,
     VIDEO_MAKER_PARENT_PID: String(input.parentPid),

@@ -7044,6 +7044,54 @@
           }
         ]
       }
+    },
+    {
+      "id": "FIX-e-burgos-093",
+      "author": "e-burgos",
+      "spec_id": null,
+      "fix_document": "sdd/fixes/fix-e-burgos-093.md",
+      "type": "BUGFIX",
+      "severity": "medium",
+      "created_at": "2026-11-16",
+      "resolved_at": "2026-11-16",
+      "validated_at": null,
+      "title": "La app de escritorio usa la base de la carpeta de proyectos, igual que el studio web",
+      "estimation_hours": 1,
+      "description": "La app guardaba studio.db en su carpeta de datos y el studio web en <carpeta de proyectos>/.studio, así que la misma carpeta tenía dos catálogos distintos (carpetas, categorías, publicaciones). La app pasa a usar <carpeta de proyectos>/.studio/studio.db; si esa carpeta todavía no tiene base, copia la que tenía en su carpeta de datos.",
+      "justification": "Pedido del dev (2026-11-16): la app no mostraba los videos organizados como el studio web.",
+      "related_modules": [
+        "desktop"
+      ],
+      "affected_files": [
+        "apps/desktop/src/main/app-paths.ts",
+        "apps/desktop/src/main/render-api-env.ts",
+        "apps/desktop/src/main/studio-database-location.ts",
+        "apps/desktop/src/main/main.ts"
+      ],
+      "test_reference": "apps/desktop/src/main/studio-database-location.spec.ts",
+      "status": "implemented",
+      "cycle": null,
+      "usage": {
+        "provider_model": "claude/opus",
+        "effort": "medium",
+        "tokens_in": 90000,
+        "tokens_out": 9000,
+        "approx": true,
+        "source": "declared-estimate",
+        "recorded_at": "2026-11-16",
+        "by_agent": [
+          {
+            "provider_model": "claude/opus",
+            "effort": "medium",
+            "tokens_in": 90000,
+            "tokens_out": 9000,
+            "approx": true,
+            "source": "declared-estimate",
+            "recorded_at": "2026-11-16",
+            "agent": "implementor-back"
+          }
+        ]
+      }
     }
   ]
 }

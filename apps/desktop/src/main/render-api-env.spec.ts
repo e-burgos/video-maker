@@ -8,7 +8,7 @@ const PATHS: AppPaths = {
   modelsDir: '/user-data/models',
   defaultProjectsDir: '/user-data/projects',
   logsDir: '/user-data/logs',
-  dbPath: '/user-data/studio.db',
+  legacyDbPath: '/user-data/studio.db',
   resourcesDir: '/resources',
   vendorBinDir: '/resources/bin',
   remotionServeUrl: null,

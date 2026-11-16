@@ -24,6 +24,7 @@ import {
   writeRenderApiPidFile,
 } from './render-api-pid-guard';
 import { buildRenderApiEnv } from './render-api-env';
+import { adoptLegacyStudioDatabase } from './studio-database-location';
 import { killOrphanableChromeChildren } from './kill-orphan-chrome';
 import { DEFAULT_LOCALE, menuStrings } from './menu-strings';
 import { resolvePreferredPort } from './preferred-port';
@@ -327,6 +328,7 @@ async function startStudio(input: {
   }
   currentShuttingDown = false;
 
+  adoptLegacyStudioDatabase({ legacyPath: input.paths.legacyDbPath, projectsFolder: input.projectsFolder });
   const port = input.port;
   const token = randomBytes(32).toString('hex');
   const env = await buildRenderApiEnv({
