@@ -1,6 +1,6 @@
 # Constitución — apps/desktop
 
-> Versión 1.2 | Última actualización: consolidación de fragmentos | Fecha: 2026-11-13
+> Versión 1.3 | Última actualización: consolidación de spec-025 cycle-06 y FIX-093 | Fecha: 2026-11-16
 
 ## 1. Propósito
 
@@ -30,7 +30,12 @@
   el preload no puede importar archivos del proyecto (solo `electron` y builtins).
 - `scripts/`: `vendor-binaries.mjs`, `build-desktop.mjs`, `after-pack.cjs` (copia los `node_modules` que
   electron-builder descarta a `extraResources` y firma ad hoc: con `identity: null` no firma nada),
-  `release-desktop.mjs`.
+  `release-desktop.mjs` (además de los dmg genera y sube `descargas/latest.json` —`version`, `url`, `sha256`,
+  `publishedAt`— que consume «Buscar actualizaciones» vía `GET /api/app/update`; sin `autoUpdater`).
+- Base de datos: `studio-database-location.ts` fija `RENDER_API_DB_PATH = <projectsFolder>/.studio/studio.db`, la
+  misma que usa `pnpm studio` sobre esa carpeta (FIX-093). Si la carpeta no tiene base, al arrancar copia la vieja de
+  la carpeta de datos (`userData/studio.db`, con `-wal`/`-shm`). No correr la app y `pnpm studio` a la vez sobre la
+  misma carpeta.
 - `e2e/packaged-app-smoke.mjs` (`--engine=openrouter`; espera `waitForTurnRunning` antes de esperar el fin del turno).
 - `render-api` empaquetado lleva `hyperframes@0.8.139` (y sus nativos `sharp`, `onnxruntime-node`) en
   `resources/render-api/node_modules` y `libs/motion-graphics/assets` como `motion-assets`.

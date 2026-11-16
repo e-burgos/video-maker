@@ -1,6 +1,6 @@
 # Constitución — apps/docs-site
 
-> Versión 1.2 | Última actualización: consolidación del fragmento de spec-024 cycle-01 | Fecha: 2026-11-13
+> Versión 1.3 | Última actualización: consolidación de spec-025 cycle-05 | Fecha: 2026-11-16
 
 ## 1. Propósito
 
@@ -38,6 +38,9 @@
   (`--pages --locales --themes --viewports --full-page --out`, informa overflow horizontal) y
   `scripts/smoke-interactions.mjs` (Playwright: sin JS, tabs, stepper, tema, idioma, menú móvil). Playwright es
   instalación global; no hay dependencias npm propias.
+- Capturas del studio: `scripts/capture-studio-screenshots.mjs` captura el studio en solo lectura contra `STUDIO_URL`
+  (`--out`, `--theme`, `--only`; simula estados con `page.route` y aborta toda escritura). Las de
+  `public/screenshots/` muestran el diseño Cristal Líquido.
 - `functions/descargas/[[path]].js` sirve el `.dmg` desde el binding R2 `DOWNLOADS` con soporte de Range;
   `wrangler.toml` (Pages + binding al bucket `video-maker-downloads`).
 - Publicado en https://video.estebanburgos.com.ar (Cloudflare Pages, proyecto `video-maker`, subdominio
