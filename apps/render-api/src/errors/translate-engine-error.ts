@@ -3,7 +3,7 @@ import type { RenderTimelineErrorCode } from '@video-maker/composition-remotion/
 
 import { PipelineStageError } from './pipeline-stage-error';
 import { isRenderApiError } from './render-api-error';
-import type { RenderApiError, RenderApiErrorCode, RenderPipelineStage } from './render-api-error';
+import type { RenderApiError, RenderApiErrorCode, RenderApiErrorIssue, RenderPipelineStage } from './render-api-error';
 
 const HANDLED_MEDIA_LOCAL_CODES = [
   'BINARY_NOT_FOUND',
@@ -26,6 +26,27 @@ type HandledRenderCode = (typeof HANDLED_RENDER_CODES)[number];
 interface EngineErrorShape {
   readonly code: string;
   readonly stream?: string;
+}
+
+function timelineIssuesOf(cause: unknown): RenderApiErrorIssue[] {
+  const issues = (cause as { issues?: unknown }).issues;
+  if (!Array.isArray(issues)) {
+    return [];
+  }
+  return issues.flatMap((issue): RenderApiErrorIssue[] => {
+    const candidate = issue as Partial<RenderApiErrorIssue> | null;
+    return typeof candidate?.code === 'string' &&
+      typeof candidate.path === 'string' &&
+      typeof candidate.message === 'string'
+      ? [{ code: candidate.code, path: candidate.path, message: candidate.message }]
+      : [];
+  });
+}
+
+export function timelineIssuesExpectation(issues: readonly RenderApiErrorIssue[]): string {
+  return issues.length === 0
+    ? 'a timeline accepted by validateTimeline'
+    : `a timeline accepted by validateTimeline: ${issues.map((issue) => `${issue.code} at ${issue.path}`).join('; ')}`;
 }
 
 function asEngineError(value: unknown): EngineErrorShape | null {
@@ -78,13 +99,13 @@ export function translateEngineError(
   const engineError = asEngineError(cause);
 
   if (engineError !== null && isHandledRenderCode(engineError.code)) {
+    const issues = engineError.code === 'INVALID_TIMELINE' ? timelineIssuesOf(cause) : [];
     return new PipelineStageError({
       code: RENDER_CODE_MAP[engineError.code],
       stage,
       resource,
-      ...(engineError.code === 'INVALID_TIMELINE'
-        ? { expected: 'a timeline accepted by validateTimeline' }
-        : {}),
+      ...(engineError.code === 'INVALID_TIMELINE' ? { expected: timelineIssuesExpectation(issues) } : {}),
+      ...(issues.length > 0 ? { details: { issues } } : {}),
       cause,
     });
   }

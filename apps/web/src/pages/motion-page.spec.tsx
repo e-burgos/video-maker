@@ -1,4 +1,4 @@
-import { fireEvent, render, screen, waitFor } from '@testing-library/react';
+import { fireEvent, render, screen, waitFor, within } from '@testing-library/react';
 import { MemoryRouter, Route, Routes } from 'react-router-dom';
 import { describe, expect, it, vi } from 'vitest';
 
@@ -7,6 +7,8 @@ import { RenderApiProvider } from '../api/render-api-context';
 import { RenderApiError } from '../api/render-api-error';
 import type { RenderApiClient } from '../api/render-api-client';
 import type { MotionBrief, MotionJob } from '../api/motion-types';
+import { ShellToolbar } from '../components/shell/shell-toolbar';
+import { ToolbarActionProvider } from '../components/shell/toolbar-action-provider';
 
 const BRANDS = [
   {
@@ -79,9 +81,12 @@ function renderPage(client: Partial<RenderApiClient>) {
   render(
     <RenderApiProvider client={defaults as RenderApiClient}>
       <MemoryRouter initialEntries={['/projects/promo/motion']}>
-        <Routes>
-          <Route path="/projects/:slug/motion" element={<MotionPage />} />
-        </Routes>
+        <ToolbarActionProvider>
+          <ShellToolbar title="Motion" subtitle={null} />
+          <Routes>
+            <Route path="/projects/:slug/motion" element={<MotionPage />} />
+          </Routes>
+        </ToolbarActionProvider>
       </MemoryRouter>
     </RenderApiProvider>,
   );
@@ -101,11 +106,40 @@ describe('MotionPage', () => {
     expect(link.textContent).toBe('Adjust with the producer');
   });
 
+  it('declares «Make video» as the toolbar action and keeps «Build storyboard» beside it', async () => {
+    renderPage({});
+
+    await screen.findByLabelText('Script');
+    expect((await screen.findByTestId('toolbar-action')).textContent).toBe('Make video');
+    expect(within(screen.getByTestId('toolbar-status')).getByRole('button', { name: 'Build storyboard' })).toBeTruthy();
+  });
+
+  it('shows the brief as saved when one exists and as unsaved once the form changes', async () => {
+    renderPage({
+      getMotionBrief: vi.fn().mockResolvedValue({
+        version: 1,
+        brand: 'other',
+        format: '16:9',
+        beatSync: false,
+        music: null,
+        title: 'Saved title',
+        script: 'Saved script',
+        images: [],
+      }),
+    });
+
+    await screen.findByLabelText('Script');
+    expect(screen.getByTestId('motion-brief-state').textContent).toBe('Brief saved.');
+
+    fireEvent.change(screen.getByLabelText('Title'), { target: { value: 'Changed' } });
+    expect(screen.getByTestId('motion-brief-state').textContent).toBe('Unsaved changes');
+  });
+
   it('starts from defaults when no brief exists', async () => {
     renderPage({});
 
     expect(((await screen.findByLabelText('Brand')) as HTMLSelectElement).value).toBe('displayads');
-    expect((screen.getByRole('radio', { name: '16:9' }) as HTMLInputElement).checked).toBe(true);
+    expect(screen.getByRole('radio', { name: '16:9' }).getAttribute('aria-checked')).toBe('true');
     expect((screen.getByLabelText('Music') as HTMLSelectElement).value).toBe('auto');
     expect((screen.getByLabelText('Sync scenes to the beat') as HTMLInputElement).checked).toBe(true);
   });

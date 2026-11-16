@@ -5,7 +5,7 @@ import { ca013Edl } from '../__fixtures__/edl';
 import type { CaptionClip, Timeline, TimelineTransition, VideoClip } from '../schemas/timeline.schema';
 import { buildTimeline } from './build-timeline';
 import type { TimelineIssueCode } from './validate-timeline';
-import { validateTimeline } from './validate-timeline';
+import { assetReferenceIssues, validateTimeline } from './validate-timeline';
 
 function referenceTimeline(): Timeline {
   return buildTimeline(ca013Edl, ca013Assets);
@@ -263,6 +263,20 @@ describe('validateTimeline — logo propio de los bumpers (FIX-e-burgos-011)', (
     };
 
     expect(validateTimeline(timeline)).toEqual({ ok: true });
+  });
+
+  it('assetReferenceIssues sólo informa referencias de logo y bumper rotas', () => {
+    const timeline: Timeline = {
+      ...referenceTimeline(),
+      logo: { assetId: 'logo-inexistente', position: 'bottom-right', widthRatio: 0.32, marginRatio: 0.035, opacity: 1 },
+      bumpers: { outro: { ...bumper, logoAssetId: 'otro-inexistente' } },
+    };
+
+    expect(assetReferenceIssues(timeline).map((issue) => issue.code)).toEqual([
+      'LOGO_ASSET_NOT_FOUND',
+      'BUMPER_LOGO_ASSET_NOT_FOUND',
+    ]);
+    expect(assetReferenceIssues(referenceTimeline())).toEqual([]);
   });
 
   it('BUMPER_LOGO_ASSET_NOT_FOUND cuando el asset no está en assets', () => {

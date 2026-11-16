@@ -6,7 +6,9 @@ import { ReferenceSceneStrip } from './reference-scene-strip';
 
 describe('ReferenceSceneStrip', () => {
   it('renders one card per scene with keyframe, time range and duration', () => {
-    render(<ReferenceSceneStrip slug="demo-01" scenes={referenceBrief().scenes} />);
+    render(
+      <ReferenceSceneStrip slug="demo-01" scenes={referenceBrief().scenes} />,
+    );
 
     const scenes = screen.getAllByTestId('reference-scene');
     expect(scenes).toHaveLength(2);
@@ -14,15 +16,21 @@ describe('ReferenceSceneStrip', () => {
     expect(second.getByRole('img').getAttribute('src')).toBe(
       '/api/projects/demo-01/files/work/reference/demo/scene-01.jpg',
     );
-    expect(second.getByRole('img').getAttribute('alt')).toBe('Key frame of scene 2');
+    expect(second.getByRole('img').getAttribute('alt')).toBe(
+      'Key frame of scene 2',
+    );
     expect(second.getByText('Scene 2')).toBeTruthy();
     expect(second.getByText('0:03–0:09')).toBeTruthy();
     expect(second.getByText('6.5 s')).toBeTruthy();
   });
 
   it('scrolls the strip horizontally inside its own container', () => {
-    render(<ReferenceSceneStrip slug="demo-01" scenes={referenceBrief().scenes} />);
+    render(
+      <ReferenceSceneStrip slug="demo-01" scenes={referenceBrief().scenes} />,
+    );
 
-    expect(screen.getByTestId('reference-scene-strip').className).toContain('overflow-x-auto');
+    expect(screen.getByTestId('reference-scene-strip').className).toContain(
+      'overflow-x-auto',
+    );
   });
 });

@@ -134,7 +134,6 @@ describe('ProposalCard', () => {
     expect(within(first).getByText('Approved')).toBeTruthy();
     expect(within(first).queryByRole('button')).toBeNull();
     expect(within(second).getByRole('button', { name: /Approve this approach/u })).toBeTruthy();
-    expect(screen.getAllByText('Proposal approved').length).toBeGreaterThan(0);
   });
 
   it('surfaces an approve failure', async () => {

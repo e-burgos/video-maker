@@ -1,4 +1,4 @@
-import { readFileSync } from 'node:fs';
+import { existsSync, readFileSync } from 'node:fs';
 import { join, resolve } from 'node:path';
 
 import { describe, expect, it } from 'vitest';
@@ -7,8 +7,8 @@ import { PAGE_RENDERERS, renderSitePage } from '../scripts/build.mjs';
 import { LOCALES, PAGES, REPO_URL, SITE_URL } from './site-config.mjs';
 import { UI_STRINGS, t } from './i18n.mjs';
 import { allPageContexts, createPageContext, pagePath } from './routes.mjs';
-import { CLIENT_SCRIPT_FILES, buildRobotsTxt, buildSitemapXml, rewriteClientImports } from './site-files.mjs';
-import { headBootstrapScript } from './render.mjs';
+import { CLIENT_SCRIPT_FILES, SITE_ICON_FILES, buildRobotsTxt, buildSitemapXml, buildWebManifest, rewriteClientImports } from './site-files.mjs';
+import { headBootstrapScript, notFoundPage } from './render.mjs';
 
 const REPO_ROOT = resolve(import.meta.dirname, '..', '..', '..');
 const NOTICES = readFileSync(join(REPO_ROOT, 'apps/desktop/vendor/THIRD_PARTY_NOTICES.md'), 'utf8');
@@ -85,6 +85,69 @@ describe('page shell', () => {
     expect(html).toContain('href="../en/using-the-studio/" hreflang="en" lang="en" data-locale-switch="en"');
     const english = render('en', 'using-studio');
     expect(english).toContain('href="../../usar-el-estudio/" hreflang="es" lang="es" data-locale-switch="es"');
+  });
+
+  it('ships the new brand icons, a share image per locale and structured data', () => {
+    for (const locale of LOCALES) {
+      const html = render(locale, 'home');
+      expect(html).toContain(`content="${SITE_URL}/assets/screenshots/og-${locale}.jpg"`);
+      expect(html).toContain('<meta property="og:image:width" content="1200" />');
+      expect(html).toMatch(/<link rel="apple-touch-icon" href="[./]*apple-touch-icon\.png" \/>/);
+      expect(html).toMatch(/<link rel="manifest" href="[./]*site\.webmanifest" \/>/);
+      expect(html).toContain('<svg class="brand-mark" viewBox="0 0 128 128"');
+      const jsonLd = JSON.parse(html.match(/<script type="application\/ld\+json">(.*?)<\/script>/)[1]);
+      expect(jsonLd['@graph'][1]).toMatchObject({ '@type': 'SoftwareApplication', operatingSystem: 'macOS' });
+    }
+    for (const iconFile of SITE_ICON_FILES) {
+      expect(existsSync(join(import.meta.dirname, '..', 'public', iconFile)), iconFile).toBe(true);
+    }
+    const manifest = JSON.parse(buildWebManifest());
+    expect(manifest.icons.map((entry) => entry.sizes)).toEqual(['192x192', '512x512', '512x512']);
+  });
+
+  it('keeps every meta description within what search engines show', () => {
+    for (const ctx of allPageContexts()) {
+      const description = renderSitePage(ctx, NOTICES).match(/<meta name="description" content="([^"]*)"/)[1];
+      expect(description.length, ctx.path).toBeLessThanOrEqual(160);
+    }
+  });
+
+  it('describes the videos, the FAQ and the breadcrumbs as structured data', () => {
+    const graphOf = (locale, pageId) =>
+      JSON.parse(render(locale, pageId).match(/<script type="application\/ld\+json">(.*?)<\/script>/)[1])['@graph'];
+    for (const locale of LOCALES) {
+      const videos = graphOf(locale, 'home').filter((node) => node['@type'] === 'VideoObject');
+      expect(videos).toHaveLength(2);
+      expect(JSON.stringify(videos)).not.toContain('Tutorial-Video-Maker');
+      for (const video of videos) {
+        expect(video.contentUrl).toMatch(/^https:\/\/.+\/tutoriales\/.+\.mp4$/);
+        expect(video.duration).toMatch(/^PT\dM\d+S$/);
+      }
+      const faq = graphOf(locale, 'faq').find((node) => node['@type'] === 'FAQPage');
+      expect(faq.mainEntity.length).toBeGreaterThan(3);
+      expect(faq.mainEntity[0].acceptedAnswer.text).not.toMatch(/<|&quot;/);
+      const breadcrumb = graphOf(locale, 'app-tour').find((node) => node['@type'] === 'BreadcrumbList');
+      expect(breadcrumb.itemListElement).toHaveLength(2);
+    }
+  });
+
+  it('answers unknown URLs with a bilingual, non-indexed 404 page', () => {
+    const html = notFoundPage();
+    expect(html).toContain('<meta name="robots" content="noindex" />');
+    expect(html).toContain('href="/assets/style.css"');
+    expect(countOf(html, /<h1[\s>]/g)).toBe(1);
+    expect(html).toContain('href="/en/"');
+  });
+
+  it('walks through every app screen with an indexed screenshot in both locales', () => {
+    for (const locale of LOCALES) {
+      const html = render(locale, 'app-tour');
+      const screenshots = html.match(/assets\/screenshots\/tour-[a-z-]+\.jpg/g) ?? [];
+      expect(screenshots.length).toBeGreaterThanOrEqual(18);
+      for (const anchor of html.match(/<h3 id="[a-z-]+"/g)) {
+        expect(html).toContain(`href="#${anchor.slice(8, -1)}"`);
+      }
+    }
   });
 
   it('shows the repository in the header, hero and footer', () => {

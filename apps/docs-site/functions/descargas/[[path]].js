@@ -1,6 +1,12 @@
 const DOWNLOAD_KEY_PATTERN = /^Video-Maker(-\d+\.\d+\.\d+)?-arm64\.dmg$/;
 const DMG_CONTENT_TYPE = 'application/x-apple-diskimage';
 const STABLE_FILE_NAME = 'Video-Maker-arm64.dmg';
+const UPDATE_MANIFEST_KEY = 'latest.json';
+const JSON_CONTENT_TYPE = 'application/json; charset=utf-8';
+
+function isUpdateManifestKey(key) {
+  return key === UPDATE_MANIFEST_KEY;
+}
 
 export function keyFromParams(params) {
   const segments = params.path;
@@ -11,10 +17,13 @@ export function keyFromParams(params) {
 }
 
 export function isDownloadableKey(key) {
-  return DOWNLOAD_KEY_PATTERN.test(key);
+  return DOWNLOAD_KEY_PATTERN.test(key) || isUpdateManifestKey(key);
 }
 
 export function cacheControlFor(key) {
+  if (isUpdateManifestKey(key)) {
+    return 'no-cache';
+  }
   return key === STABLE_FILE_NAME ? 'public, max-age=300' : 'public, max-age=31536000, immutable';
 }
 
@@ -25,8 +34,12 @@ function notFound(withBody) {
 function baseHeaders(object, key) {
   const headers = new Headers();
   object.writeHttpMetadata(headers);
-  headers.set('content-type', DMG_CONTENT_TYPE);
-  headers.set('content-disposition', `attachment; filename="${key}"`);
+  if (isUpdateManifestKey(key)) {
+    headers.set('content-type', JSON_CONTENT_TYPE);
+  } else {
+    headers.set('content-type', DMG_CONTENT_TYPE);
+    headers.set('content-disposition', `attachment; filename="${key}"`);
+  }
   headers.set('cache-control', cacheControlFor(key));
   headers.set('etag', object.httpEtag);
   headers.set('accept-ranges', 'bytes');

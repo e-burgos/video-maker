@@ -1,16 +1,16 @@
+import { StateBadge } from '@e-burgos/tucu-ui';
+import type { StateBadgeTone } from '@e-burgos/tucu-ui';
 import { canonicalMaterialPath, hasMaterialWarnings } from '@video-maker/timeline-core';
 import type { MaterialReview, MaterialReviewItem, MaterialVerdict, MaterialWarnings } from '@video-maker/timeline-core';
 
 import { artifactUrl } from '../api/artifact-url';
 import { useT } from '../i18n/language-context';
 import type { TranslationKey } from '../i18n/messages-en';
-import { Badge } from './ui/badge';
-import type { BadgeTone } from './ui/badge';
 
-const VERDICT_TONE: Readonly<Record<MaterialVerdict, BadgeTone>> = {
-  fits: 'success',
-  doubtful: 'warning',
-  unfit: 'danger',
+const VERDICT_TONE: Readonly<Record<MaterialVerdict, StateBadgeTone>> = {
+  fits: 'green',
+  doubtful: 'orange',
+  unfit: 'red',
 };
 
 const BRAND_PREFIX = 'brand:';
@@ -19,9 +19,9 @@ function VerdictChip({ verdict }: { verdict: MaterialVerdict }) {
   const t = useT();
 
   return (
-    <Badge tone={VERDICT_TONE[verdict]} data-verdict={verdict}>
+    <StateBadge tone={VERDICT_TONE[verdict]} dot size="sm" data-verdict={verdict}>
       {t(`proposal.material.${verdict}` as TranslationKey)}
-    </Badge>
+    </StateBadge>
   );
 }
 
@@ -30,7 +30,7 @@ function MaterialThumb({ slug, item }: { slug: string; item: MaterialReviewItem 
 
   if (item.source === 'brand') {
     return (
-      <span className="rounded-control border border-border-subtle px-2 py-1 font-mono text-[11px] text-ink-muted">
+      <span className="glass-sub rounded-[10px] px-2 py-1 font-data text-[11px] text-[var(--cl-ink-2)]">
         {t('proposal.material.brandImage', { key: item.file.slice(BRAND_PREFIX.length) })}
       </span>
     );
@@ -41,7 +41,7 @@ function MaterialThumb({ slug, item }: { slug: string; item: MaterialReviewItem 
       src={artifactUrl(slug, canonicalMaterialPath(item.file))}
       alt={item.file}
       loading="lazy"
-      className="h-16 w-24 shrink-0 rounded-control border border-border-subtle object-cover"
+      className="h-16 w-24 shrink-0 rounded-[10px] bg-[#0b0d14] object-cover"
     />
   );
 }
@@ -57,11 +57,11 @@ export function MaterialWarningsBlock({ slug, warnings }: { slug: string; warnin
     <section
       data-testid="material-warnings"
       role="alert"
-      className="space-y-3 rounded-panel border border-warning/60 bg-warning/10 p-3"
+      className="space-y-3 rounded-[12px] border border-[var(--tucu-state-orange-line)] bg-[var(--tucu-state-orange-soft)] p-3"
     >
       <div className="space-y-1">
-        <h3 className="text-sm font-semibold text-warning">{t('proposal.material.heading')}</h3>
-        <p className="text-xs text-ink-muted">{t('proposal.material.intro')}</p>
+        <h3 className="text-sm font-semibold text-[var(--tucu-state-orange-ink)]">{t('proposal.material.heading')}</h3>
+        <p className="text-xs text-[var(--cl-ink-2)]">{t('proposal.material.intro')}</p>
       </div>
       {warnings.items.length > 0 && (
         <ul className="space-y-2">
@@ -71,10 +71,10 @@ export function MaterialWarningsBlock({ slug, warnings }: { slug: string; warnin
               <div className="min-w-0 space-y-0.5 text-xs">
                 <div className="flex flex-wrap items-center gap-2">
                   <VerdictChip verdict={item.verdict} />
-                  <span className="break-all font-mono text-ink-faint">{item.file}</span>
+                  <span className="break-all font-data text-[var(--cl-ink-3)]">{item.file}</span>
                 </div>
-                <p className="text-ink">{t('proposal.material.shows', { shows: item.shows })}</p>
-                <p className="text-ink-muted">{item.reason}</p>
+                <p className="text-[var(--cl-ink)]">{t('proposal.material.shows', { shows: item.shows })}</p>
+                <p className="text-[var(--cl-ink-2)]">{item.reason}</p>
               </div>
             </li>
           ))}
@@ -82,8 +82,8 @@ export function MaterialWarningsBlock({ slug, warnings }: { slug: string; warnin
       )}
       {warnings.gaps.length > 0 && (
         <div className="space-y-1">
-          <h4 className="text-xs font-medium text-ink">{t('proposal.material.gapsHeading')}</h4>
-          <ul className="list-disc space-y-0.5 pl-4 text-xs text-ink-muted">
+          <h4 className="text-xs font-medium text-[var(--cl-ink)]">{t('proposal.material.gapsHeading')}</h4>
+          <ul className="list-disc space-y-0.5 pl-4 text-xs text-[var(--cl-ink-2)]">
             {warnings.gaps.map((gap) => (
               <li key={gap.need} data-testid="material-gap">
                 {t('proposal.material.gap', { need: gap.need, note: gap.note })}
@@ -104,13 +104,13 @@ export function MaterialReviewTable({ review }: { review: MaterialReview }) {
   }
 
   return (
-    <details data-testid="material-review-table" className="rounded-panel border border-border-subtle p-2">
-      <summary className="cursor-pointer text-xs text-ink-muted">
+    <details data-testid="material-review-table" className="rounded-[12px] border border-[var(--tucu-glass-sub-line)] p-2">
+      <summary className="cursor-pointer text-xs text-[var(--cl-ink-2)]">
         {t('proposal.material.tableSummary', { count: review.items.length })}
       </summary>
       <div className="mt-2 overflow-x-auto">
         <table className="w-full text-left text-xs">
-          <thead className="text-ink-faint">
+          <thead className="text-[var(--cl-ink-3)]">
             <tr>
               <th className="pb-1 pr-2 font-medium">{t('proposal.material.col.file')}</th>
               <th className="pb-1 pr-2 font-medium">{t('proposal.material.col.shows')}</th>
@@ -121,12 +121,12 @@ export function MaterialReviewTable({ review }: { review: MaterialReview }) {
           <tbody>
             {review.items.map((item) => (
               <tr key={item.file} data-testid="material-review-row" className="align-top">
-                <td className="break-all py-1 pr-2 font-mono text-ink-faint">{item.file}</td>
-                <td className="py-1 pr-2 text-ink">{item.shows}</td>
+                <td className="break-all py-1 pr-2 font-data text-[var(--cl-ink-3)]">{item.file}</td>
+                <td className="py-1 pr-2 text-[var(--cl-ink)]">{item.shows}</td>
                 <td className="py-1 pr-2">
                   <VerdictChip verdict={item.verdict} />
                 </td>
-                <td className="py-1 text-ink-muted">{item.useFor ?? ''}</td>
+                <td className="py-1 text-[var(--cl-ink-2)]">{item.useFor ?? ''}</td>
               </tr>
             ))}
           </tbody>
@@ -140,7 +140,7 @@ export function MaterialNotReviewedNote() {
   const t = useT();
 
   return (
-    <p data-testid="material-not-reviewed" className="text-xs text-ink-faint">
+    <p data-testid="material-not-reviewed" className="text-xs text-[var(--cl-ink-3)]">
       {t('proposal.material.notReviewed')}
     </p>
   );

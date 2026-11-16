@@ -6,6 +6,8 @@ import { motionOverviewFixture } from '../api/__fixtures__/motion-overview';
 import { storyboardFixture } from '../api/__fixtures__/storyboard';
 import { RenderApiError } from '../api/render-api-error';
 import { RenderApiProvider } from '../api/render-api-context';
+import { ShellToolbar } from '../components/shell/shell-toolbar';
+import { ToolbarActionProvider } from '../components/shell/toolbar-action-provider';
 import { StoryboardPage } from './storyboard-page';
 import type { RenderApiClient } from '../api/render-api-client';
 import type { StoryboardJob } from '../api/render-api-types';
@@ -73,9 +75,12 @@ function renderPage(client: Partial<RenderApiClient>) {
   render(
     <RenderApiProvider client={withDefaults as RenderApiClient}>
       <MemoryRouter initialEntries={['/projects/smoke-ingest/storyboard']}>
-        <Routes>
-          <Route path="/projects/:slug/storyboard" element={<StoryboardPage />} />
-        </Routes>
+        <ToolbarActionProvider>
+          <ShellToolbar title="Storyboard" subtitle={null} />
+          <Routes>
+            <Route path="/projects/:slug/storyboard" element={<StoryboardPage />} />
+          </Routes>
+        </ToolbarActionProvider>
       </MemoryRouter>
     </RenderApiProvider>,
   );
@@ -105,14 +110,59 @@ describe('StoryboardPage', () => {
     expect(screen.queryByTestId('storyboard-empty-state')).toBeNull();
   });
 
-  it('renders the stored storyboard: header, character sheet and every scene', async () => {
+  it('renders the stored storyboard: header, character sheet, the scene list and the first scene', async () => {
     renderPage({ getStoryboard: vi.fn().mockResolvedValue(storyboardFixture()) });
 
     await waitFor(() => expect(screen.getByTestId('storyboard-header-editor')).toBeTruthy());
     expect(screen.getByTestId('storyboard-character-sheet')).toBeTruthy();
+    expect(screen.getByTestId('storyboard-scene-row-scene-01')).toBeTruthy();
+    expect(screen.getByTestId('storyboard-scene-row-scene-03')).toBeTruthy();
     expect(screen.getByTestId('storyboard-scene-scene-01')).toBeTruthy();
-    expect(screen.getByTestId('storyboard-scene-scene-03')).toBeTruthy();
+    expect(screen.queryByTestId('storyboard-scene-scene-03')).toBeNull();
     expect(screen.getByTestId('storyboard-prompt-sheet')).toBeTruthy();
+    expect(screen.getByTestId('storyboard-scene-count').textContent).toBe('3 scenes');
+  });
+
+  it('opens the scene the user picks in the list and marks it as the current one', async () => {
+    renderPage({ getStoryboard: vi.fn().mockResolvedValue(storyboardFixture()) });
+
+    await waitFor(() => expect(screen.getByTestId('storyboard-scene-row-scene-03')).toBeTruthy());
+    expect(screen.getByTestId('storyboard-scene-row-scene-01').getAttribute('aria-current')).toBe('true');
+
+    fireEvent.click(screen.getByTestId('storyboard-scene-row-scene-03'));
+
+    expect(screen.getByTestId('storyboard-scene-scene-03')).toBeTruthy();
+    expect(screen.queryByTestId('storyboard-scene-scene-01')).toBeNull();
+    expect(screen.getByTestId('storyboard-scene-row-scene-03').getAttribute('aria-current')).toBe('true');
+  });
+
+  it('flags the scene that has unsaved edits in the list', async () => {
+    renderPage({ getStoryboard: vi.fn().mockResolvedValue(storyboardFixture()) });
+
+    await waitFor(() => expect(screen.getByLabelText('Narration for scene-01')).toBeTruthy());
+    expect(screen.getByTestId('storyboard-scene-row-scene-01').getAttribute('data-scene-status')).toBe('ready');
+
+    fireEvent.change(screen.getByLabelText('Narration for scene-01'), { target: { value: 'Otra.' } });
+
+    await waitFor(() =>
+      expect(screen.getByTestId('storyboard-scene-row-scene-01').getAttribute('data-scene-status')).toBe('edited'),
+    );
+    expect(screen.getByTestId('storyboard-scene-row-scene-02').getAttribute('data-scene-status')).toBe('ready');
+  });
+
+  it('shows the unsaved changes state in the save bar and drops the draft on discard', async () => {
+    renderPage({ getStoryboard: vi.fn().mockResolvedValue(storyboardFixture()) });
+
+    await waitFor(() => expect(screen.getByLabelText('Title')).toBeTruthy());
+    expect(screen.getByText('Saved')).toBeTruthy();
+
+    fireEvent.change(screen.getByLabelText('Title'), { target: { value: 'Otro' } });
+    await waitFor(() => expect(screen.getByText('Unsaved changes')).toBeTruthy());
+
+    fireEvent.click(screen.getByRole('button', { name: 'Discard' }));
+
+    await waitFor(() => expect(screen.getByText('Saved')).toBeTruthy());
+    expect((screen.getByLabelText('Title') as HTMLInputElement).value).toBe(storyboardFixture().title);
   });
 
   it('turns dirty on the first edit and clean again after the PUT', async () => {
@@ -239,11 +289,19 @@ describe('StoryboardPage — guion del productor (FIX-009-003)', () => {
     expect(screen.queryByTestId('producer-script-panel')).toBeNull();
   });
 
-  it('con storyboard no muestra el guion del productor', async () => {
+  it('con storyboard deja el guion del productor plegado y a mano', async () => {
     renderPage({
       getStoryboard: vi.fn().mockResolvedValue(storyboardFixture()),
       getProjectFile: vi.fn().mockResolvedValue(SCRIPT),
     });
+
+    const panel = await screen.findByTestId('producer-script-panel');
+    expect((panel as HTMLDetailsElement).open).toBe(false);
+    expect(screen.getByTestId('producer-script-text').textContent).toBe(SCRIPT);
+  });
+
+  it('con storyboard y sin guion no muestra el panel del guion', async () => {
+    renderPage({ getStoryboard: vi.fn().mockResolvedValue(storyboardFixture()) });
 
     await waitFor(() => expect(screen.getByTestId('storyboard-save-bar')).toBeTruthy());
     expect(screen.queryByTestId('producer-script-panel')).toBeNull();

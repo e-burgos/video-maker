@@ -3,6 +3,8 @@ import { describe, expect, it, vi } from 'vitest';
 
 import { RenderApiProvider } from '../api/render-api-context';
 import { RenderApiError } from '../api/render-api-error';
+import { ShellToolbar } from './shell/shell-toolbar';
+import { ToolbarActionProvider } from './shell/toolbar-action-provider';
 import { StoryboardTrigger } from './storyboard-trigger';
 import type { RenderApiClient } from '../api/render-api-client';
 import type { ServiceHealth, StoryboardJob } from '../api/render-api-types';
@@ -45,13 +47,17 @@ function storyboardJob(): StoryboardJob {
 function renderTrigger(
   createStoryboardJob: RenderApiClient['createStoryboardJob'],
   health: ServiceHealth = healthyService(),
+  hasStoryboard = false,
 ) {
   const onCreated = vi.fn();
   const getHealth = vi.fn().mockResolvedValue(health);
 
   render(
     <RenderApiProvider client={{ createStoryboardJob, getHealth } as unknown as RenderApiClient}>
-      <StoryboardTrigger slug="smoke-ingest" onCreated={onCreated} />
+      <ToolbarActionProvider>
+        <ShellToolbar title="Storyboard" subtitle={null} />
+        <StoryboardTrigger slug="smoke-ingest" onCreated={onCreated} hasStoryboard={hasStoryboard} />
+      </ToolbarActionProvider>
     </RenderApiProvider>,
   );
 
@@ -59,7 +65,7 @@ function renderTrigger(
 }
 
 function proposeButton(): HTMLButtonElement {
-  return screen.getByRole('button', { name: /Propose storyboard|Asking the agent/ }) as HTMLButtonElement;
+  return screen.getByTestId('toolbar-action') as HTMLButtonElement;
 }
 
 function typeBrief(value: string): void {
@@ -67,11 +73,44 @@ function typeBrief(value: string): void {
 }
 
 describe('StoryboardTrigger', () => {
-  it('refuses to propose while the brief is empty, and says why', async () => {
+  it('declares Propose storyboard as the toolbar action', () => {
     renderTrigger(vi.fn());
 
-    await waitFor(() => expect(proposeButton().disabled).toBe(true));
+    expect(proposeButton().textContent).toBe('Propose storyboard');
+  });
+
+  it('refuses to propose while the brief is empty, says why and moves the focus to the brief', async () => {
+    const createStoryboardJob = vi.fn();
+    renderTrigger(createStoryboardJob);
+
+    await waitFor(() => expect(proposeButton().disabled).toBe(false));
+    fireEvent.click(proposeButton());
+
+    await waitFor(() => expect(document.activeElement).toBe(screen.getByLabelText('Brief')));
+    expect(createStoryboardJob).not.toHaveBeenCalled();
     expect(screen.getByText(/Write a brief or paste a script/)).toBeTruthy();
+  });
+
+  it('folds the form away once the project has a storyboard and opens it from the toolbar action', async () => {
+    renderTrigger(vi.fn(), healthyService(), true);
+
+    const body = document.getElementById('storyboard-trigger-body') as HTMLElement;
+    expect(body.hidden).toBe(true);
+
+    await waitFor(() => expect(proposeButton().disabled).toBe(false));
+    fireEvent.click(proposeButton());
+
+    await waitFor(() => expect(body.hidden).toBe(false));
+  });
+
+  it('lets the user fold and unfold the form by hand', () => {
+    renderTrigger(vi.fn(), healthyService(), true);
+    const toggle = screen.getByRole('button', { name: 'Brief or script' });
+
+    expect(toggle.getAttribute('aria-expanded')).toBe('false');
+    fireEvent.click(toggle);
+
+    expect(toggle.getAttribute('aria-expanded')).toBe('true');
   });
 
   it('warns in the panel itself that the propose stage takes more than a minute', () => {

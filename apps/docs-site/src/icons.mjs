@@ -30,6 +30,10 @@ export function icon(name, className = 'icon') {
   return `<svg class="${className}" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">${paths}</svg>`;
 }
 
-export const BRAND_MARK_SVG =
-  '<svg class="brand-mark" viewBox="0 0 32 32" width="32" height="32" aria-hidden="true" focusable="false"><defs><linearGradient id="vm-mark" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#ff5470"/><stop offset="1" stop-color="#7c5cff"/></linearGradient></defs><rect width="32" height="32" rx="9" fill="url(#vm-mark)"/><path d="M12.5 9.5v13l10-6.5z" fill="#fff"/></svg>';
+export function brandMarkSvg(idSuffix) {
+  const fill = `vm-mark-fill-${idSuffix}`;
+  const sheen = `vm-mark-sheen-${idSuffix}`;
+  const shadow = `vm-mark-shadow-${idSuffix}`;
+  return `<svg class="brand-mark" viewBox="0 0 128 128" width="32" height="32" aria-hidden="true" focusable="false"><defs><linearGradient id="${fill}" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#ff5470"/><stop offset="1" stop-color="#7c5cff"/></linearGradient><linearGradient id="${sheen}" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fff" stop-opacity=".4"/><stop offset=".55" stop-color="#fff" stop-opacity="0"/></linearGradient><filter id="${shadow}" x="-20%" y="-20%" width="140%" height="150%"><feDropShadow dx="0" dy="3" stdDeviation="3" flood-color="#2a1a6e" flood-opacity=".35"/></filter></defs><rect width="128" height="128" rx="29" fill="url(#${fill})"/><rect width="128" height="128" rx="29" fill="url(#${sheen})"/><rect x=".75" y=".75" width="126.5" height="126.5" rx="28.5" fill="none" stroke="#fff" stroke-opacity=".6" stroke-width="1.5"/><circle cx="64" cy="64" r="44" fill="#fff" fill-opacity=".2" stroke="#fff" stroke-opacity=".85" stroke-width="2.5"/><path d="M27.4 50.7A39 39 0 0 1 47.5 28.7" fill="none" stroke="#fff" stroke-opacity=".9" stroke-width="5" stroke-linecap="round"/><g filter="url(#${shadow})" stroke-linecap="round" fill="none" stroke-width="14"><path d="M45 45 64 88" stroke="#fff" stroke-opacity=".95"/><path d="M83 45 64 88" stroke="#fff" stroke-opacity=".55"/></g></svg>`;
+}
 

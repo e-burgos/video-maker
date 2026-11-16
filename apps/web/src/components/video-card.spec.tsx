@@ -63,7 +63,10 @@ describe('VideoCard', () => {
 
     const badge = screen.getByTestId('video-card-publication');
     expect(badge.textContent).toContain('Published');
-    expect(within(badge).getByRole('link').getAttribute('href')).toBe('https://youtu.be/abc123');
+    const link = within(badge).getByRole('link');
+    expect(link.getAttribute('href')).toBe('https://youtu.be/abc123');
+    expect(link.textContent).toBe('View on YouTube');
+    expect(screen.getAllByText('Open')).toHaveLength(1);
   });
 
   it('badges a scheduled video and hides the badge of a failed or missing publication', () => {
@@ -205,6 +208,22 @@ describe('VideoCard', () => {
     expect(thumbnail.src).toContain('/files/out/final.mp4');
     expect(thumbnail.src).toContain('#t=0.5');
     expect(screen.getByTestId('video-card-updated-at').textContent).toContain('24');
+  });
+});
+
+describe('VideoCard presentation', () => {
+  it('keeps one primary action, Open, and badges an archived video as archived', () => {
+    renderCard({}, { folderId: null, categoryId: null, archived: true });
+
+    expect(screen.getAllByRole('link')).toHaveLength(1);
+    expect(screen.getByRole('link', { name: 'Open editar-campana' })).toBeTruthy();
+    expect(screen.getByTestId('video-card-archived-badge').textContent).toBe('Archived');
+  });
+
+  it('puts the thumbnail on an opaque surface', () => {
+    renderCard({});
+
+    expect(screen.getByTestId('video-card-thumbnail-placeholder').parentElement?.className).toContain('bg-[#0b0d14]');
   });
 });
 

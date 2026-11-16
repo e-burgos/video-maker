@@ -9,6 +9,8 @@ import type { RenderJob } from '../api/render-api-types';
 import { useT } from '../i18n/language-context';
 import type { TranslateFn } from '../i18n/language-context';
 import { ErrorNotice } from './error-notice';
+import { useToolbarAction } from './shell/use-toolbar-action';
+import { WARNING_LIST_CLASS } from './ui/cl-controls';
 
 export type RenderTriggerProps = {
   slug: string;
@@ -42,21 +44,19 @@ export function RenderTrigger({ slug, state, onCreated }: RenderTriggerProps) {
   }
 
   const reasons = blockingReasons(state, t);
-  const disabled = !canStartRender(state) || createAction.status === 'pending';
+  const pending = createAction.status === 'pending';
+
+  useToolbarAction({
+    label: pending ? t('render.starting') : t('render.start'),
+    onClick: () => void trigger(),
+    disabled: !canStartRender(state) || pending,
+    loading: pending,
+  });
 
   return (
-    <div className="space-y-2">
-      <button
-        type="button"
-        disabled={disabled}
-        onClick={() => void trigger()}
-        className="rounded-md border border-sky-500/50 bg-sky-500/10 px-3 py-1.5 text-sm text-sky-100 disabled:opacity-40"
-      >
-        {createAction.status === 'pending' ? t('render.starting') : t('render.start')}
-      </button>
-
+    <div className="flex flex-col gap-2">
       {reasons.length > 0 && (
-        <ul className="space-y-0.5 font-mono text-xs text-amber-300">
+        <ul data-testid="render-blockers" className={WARNING_LIST_CLASS}>
           {reasons.map((reason) => (
             <li key={reason}>{reason}</li>
           ))}
@@ -64,7 +64,7 @@ export function RenderTrigger({ slug, state, onCreated }: RenderTriggerProps) {
       )}
 
       {lastJobId !== null && (
-        <p role="status" className="text-sm text-slate-400">
+        <p role="status" className="m-0 text-sm text-[var(--cl-ink-2)]">
           {t('render.started', { jobId: lastJobId })}
         </p>
       )}

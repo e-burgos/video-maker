@@ -103,10 +103,9 @@ export function latestSucceededJobOfKind(
   return succeededJobsOfKindNewestFirst(listing, kind)[0] ?? null;
 }
 
-export type WorkspaceTabId = 'preview' | 'material' | 'deliveries';
+export type WorkspaceTabId = 'material' | 'deliveries';
 
 const TAB_BY_JOB_KIND: Readonly<Partial<Record<JobKind, WorkspaceTabId>>> = {
-  montage: 'preview',
   render: 'deliveries',
 };
 
@@ -127,4 +126,24 @@ export function tabForNewlySucceededJob(
   }
 
   return null;
+}
+
+export type MaterialSummaryEntry = {
+  role: AssetRole;
+  count: number;
+  tone: 'green' | 'orange';
+};
+
+export function primaryAssetRole(isMotion: boolean): AssetRole {
+  return isMotion ? 'image' : 'aroll';
+}
+
+export function materialSummary(groups: readonly AssetRoleGroup[], primaryRole: AssetRole): MaterialSummaryEntry[] {
+  const present: MaterialSummaryEntry[] = groups.map((group) => ({
+    role: group.role,
+    count: group.assets.length,
+    tone: 'green',
+  }));
+  const primaryMissing = !groups.some((group) => group.role === primaryRole);
+  return primaryMissing ? [{ role: primaryRole, count: 0, tone: 'orange' }, ...present] : present;
 }

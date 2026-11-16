@@ -1,0 +1,169 @@
+{
+  "$schema": "../../../../schemas/cycle.schema.json",
+  "cycle": 5,
+  "module": "liquid-glass-rebrand",
+  "spec": "spec-e-burgos-025-liquid-glass-rebrand",
+  "apps": [
+    "apps/web",
+    "apps/docs-site"
+  ],
+  "phase": "publish-settings-guide-states",
+  "flow": "lite",
+  "objectives": [
+    "Publicación, ajustes en pestañas, guía, modales y estados migrados; retiro del modo heredado; capturas nuevas para la web"
+  ],
+  "status": "completed",
+  "started_at": "2026-11-13",
+  "completed_at": "2026-11-13",
+  "documents": {
+    "plan": "sdd/specs/spec-e-burgos-025-liquid-glass-rebrand/cycles/cycle-05/plan.md",
+    "tasks": "sdd/specs/spec-e-burgos-025-liquid-glass-rebrand/cycles/cycle-05/tasks.json"
+  },
+  "artifacts": [
+    "sdd/specs/spec-e-burgos-025-liquid-glass-rebrand/cycles/cycle-05/artifacts/contrast-audit.json"
+  ],
+  "metrics": {
+    "tasks_total": 5,
+    "tasks_completed": 5,
+    "story_points": 17,
+    "files_created": [
+      "apps/web/src/components/publish/",
+      "apps/web/src/components/settings/",
+      "apps/web/src/components/guide/",
+      "apps/web/src/components/ui/status-states.tsx",
+      "apps/docs-site/scripts/capture-studio-screenshots.mjs"
+    ],
+    "files_modified": [
+      "apps/web/src/pages/publish-queue-page.tsx",
+      "apps/web/src/pages/settings-page.tsx",
+      "apps/web/src/pages/guide-page.tsx",
+      "apps/web/src/components/ui/modal.tsx",
+      "apps/web/src/components/shell/shell-content.tsx",
+      "apps/web/src/index.css",
+      "apps/docs-site/public/screenshots/"
+    ],
+    "files_deleted": [],
+    "usage": {
+      "tokens_in": 1055000,
+      "tokens_out": 115511,
+      "by_agent": [
+        {
+          "agent": "custom",
+          "label": "Consolidación del contexto de apps/web (cycle-04)",
+          "provider_model": "claude/sonnet",
+          "effort": "low",
+          "tokens_in": 95000,
+          "tokens_out": 6419,
+          "tokens_total": 101419,
+          "approx": true,
+          "source": "agent-usage-notification",
+          "recorded_at": "2026-11-13"
+        },
+        {
+          "agent": "custom",
+          "label": "Consolidación del contexto de apps/docs-site (spec-024)",
+          "provider_model": "claude/sonnet",
+          "effort": "low",
+          "tokens_in": 90000,
+          "tokens_out": 5837,
+          "tokens_total": 95837,
+          "approx": true,
+          "source": "agent-usage-notification",
+          "recorded_at": "2026-11-13"
+        },
+        {
+          "agent": "implementor-front",
+          "label": "TASK-001 publicación",
+          "provider_model": "claude/sonnet",
+          "effort": "medium",
+          "tokens_in": 230000,
+          "tokens_out": 24598,
+          "tokens_total": 254598,
+          "approx": true,
+          "source": "agent-usage-notification",
+          "recorded_at": "2026-11-13"
+        },
+        {
+          "agent": "implementor-front",
+          "label": "TASK-002 ajustes y guía",
+          "provider_model": "claude/sonnet",
+          "effort": "medium",
+          "tokens_in": 255000,
+          "tokens_out": 30850,
+          "tokens_total": 285850,
+          "approx": true,
+          "source": "agent-usage-notification",
+          "recorded_at": "2026-11-13"
+        },
+        {
+          "agent": "implementor-front",
+          "label": "TASK-003 modales, estados y retiro del modo heredado",
+          "provider_model": "claude/sonnet",
+          "effort": "medium",
+          "tokens_in": 150000,
+          "tokens_out": 23840,
+          "tokens_total": 173840,
+          "approx": true,
+          "source": "agent-usage-notification",
+          "recorded_at": "2026-11-13"
+        },
+        {
+          "agent": "implementor-front",
+          "label": "TASK-004 capturas de la web",
+          "provider_model": "claude/sonnet",
+          "effort": "medium",
+          "tokens_in": 175000,
+          "tokens_out": 15967,
+          "tokens_total": 190967,
+          "approx": true,
+          "source": "agent-usage-notification",
+          "recorded_at": "2026-11-13"
+        },
+        {
+          "agent": "orchestrator",
+          "label": "TASK-005 verificación y cierre como reviewer",
+          "provider_model": "claude/opus",
+          "effort": "low",
+          "tokens_in": 60000,
+          "tokens_out": 8000,
+          "tokens_total": 68000,
+          "approx": true,
+          "source": "declared-estimate",
+          "recorded_at": "2026-11-13"
+        }
+      ]
+    }
+  },
+  "tables_created": [],
+  "endpoints_implemented": [],
+  "components_created": [],
+  "issues_found": [
+    "e2e de los ciclos 03 a 05 sin correr: escriben datos y el studio en 4200/4399 lo comparten otras sesiones. Se actualizó el selector obsoleto de workspace-smoke (motivo de la propuesta con testid estable).",
+    "Las capturas de publicación, del diálogo de YouTube y de la tarjeta de propuesta usan datos simulados con page.route; no se publicó ni escribió nada real.",
+    "Las capturas nuevas de la web pública están en tema claro (las viejas eran oscuras); el script nuevo regenera en oscuro con --theme dark.",
+    "En Voz, quitar una voz sigue siendo inmediato sin confirmación (comportamiento previo).",
+    "El Modal con cuerpo scrolleable y footer fijo no se vio en un diálogo largo real; lo cubre su spec."
+  ],
+  "reviewer_report": {
+    "approved": true,
+    "date": "2026-11-13",
+    "ca_results": {
+      "US-025-501": "PASS — cola con estado y pausar/reanudar en el toolbar, métricas, pestañas, filas con StateBadge y miniatura opaca, quitar con confirmación; RenderReviewPanel y YouTubePublishDialog en vidrio",
+      "US-025-502": "PASS — ajustes en pestañas con ?tab=, marca de cambios sin guardar, guardado global en el toolbar; Apariencia en ajustes con acceso directo desde el pie",
+      "US-025-503": "PASS — guía con índice pegajoso y sección activa, pasos en tarjetas; sin choque con los semáforos en Electron (medido a 1440)",
+      "US-025-504": "PASS — vidrio como único modo de Modal, ErrorNotice y demás; isMigratedRoute, la superficie heredada, LegacySurface y los ui sin uso borrados; LoadingState/EmptyState comunes; modal con cuerpo scrolleable",
+      "US-025-505": "PASS — nueve capturas del studio regeneradas para la web con script de solo lectura; textos alternativos corregidos; clave enmascarada"
+    },
+    "tests": {
+      "sdd:validate": "OK",
+      "web": "187/187 archivos, 1808/1808 tests; lint 0 errores; build ok",
+      "docs-site": "test y build ok; check-links ok",
+      "contrast-audit": "0 fallas en 1.094 textos y 0 desborde en inicio, espacio de trabajo, biblioteca, publicación, cuatro pestañas de ajustes, guía y marcas × claro/oscuro (se oscureció el rojo de estado en claro)"
+    },
+    "notes": "Cuatro tasks en subagentes sonnet/medium en serie; la verificación corrigió el contraste del rojo de estado (4,37 a AA) y el selector obsoleto de un e2e.",
+    "follow_ups": [
+      "Correr los e2e de web contra un studio libre antes de la PR.",
+      "Ciclo 06: paridad con la web (Aprender, Acerca de, Conectar agentes, material libre, requisitos)."
+    ]
+  }
+}

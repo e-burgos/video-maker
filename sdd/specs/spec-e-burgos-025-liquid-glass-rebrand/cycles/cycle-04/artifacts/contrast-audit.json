@@ -1,0 +1,78 @@
+{
+  "baseUrl": "http://localhost:4200",
+  "audited": [
+    {
+      "scheme": "light",
+      "path": "/projects/display-ads-crear-grupo/preview",
+      "textsChecked": 62,
+      "horizontalOverflowPx": 0
+    },
+    {
+      "scheme": "light",
+      "path": "/projects/display-ads-ia-promo/motion",
+      "textsChecked": 54,
+      "horizontalOverflowPx": 0
+    },
+    {
+      "scheme": "light",
+      "path": "/projects/display-ads-ia-promo/storyboard",
+      "textsChecked": 85,
+      "horizontalOverflowPx": 0
+    },
+    {
+      "scheme": "light",
+      "path": "/projects/display-ads-ia-promo/voice",
+      "textsChecked": 46,
+      "horizontalOverflowPx": 0
+    },
+    {
+      "scheme": "light",
+      "path": "/brands",
+      "textsChecked": 36,
+      "horizontalOverflowPx": 0
+    },
+    {
+      "scheme": "light",
+      "path": "/brands/cafe-aroma",
+      "textsChecked": 38,
+      "horizontalOverflowPx": 0
+    },
+    {
+      "scheme": "dark",
+      "path": "/projects/display-ads-crear-grupo/preview",
+      "textsChecked": 62,
+      "horizontalOverflowPx": 0
+    },
+    {
+      "scheme": "dark",
+      "path": "/projects/display-ads-ia-promo/motion",
+      "textsChecked": 54,
+      "horizontalOverflowPx": 0
+    },
+    {
+      "scheme": "dark",
+      "path": "/projects/display-ads-ia-promo/storyboard",
+      "textsChecked": 85,
+      "horizontalOverflowPx": 0
+    },
+    {
+      "scheme": "dark",
+      "path": "/projects/display-ads-ia-promo/voice",
+      "textsChecked": 46,
+      "horizontalOverflowPx": 0
+    },
+    {
+      "scheme": "dark",
+      "path": "/brands",
+      "textsChecked": 36,
+      "horizontalOverflowPx": 0
+    },
+    {
+      "scheme": "dark",
+      "path": "/brands/cafe-aroma",
+      "textsChecked": 38,
+      "horizontalOverflowPx": 0
+    }
+  ],
+  "failures": []
+}

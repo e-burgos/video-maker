@@ -28,7 +28,7 @@ describe('LanguageSwitch', () => {
     renderSwitch();
 
     const group = screen.getByRole('group', { name: 'Interface language' });
-    const buttons = Array.from(group.querySelectorAll('button'));
+    const buttons = Array.from(group.querySelectorAll<HTMLButtonElement>('button[data-language]'));
 
     expect(buttons.map((button) => button.dataset['language'])).toEqual(['en', 'es']);
     expect(screen.getByRole('button', { name: 'English' }).tagName).toBe('BUTTON');

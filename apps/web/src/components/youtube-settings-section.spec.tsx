@@ -57,7 +57,7 @@ describe('YouTubeSettingsSection', () => {
 
     await waitFor(() => expect(screen.getByTestId('youtube-client-form')).toBeTruthy());
     expect(screen.getByRole('link', { name: 'Step by step in the guide' }).getAttribute('href')).toBe(
-      '/guide#youtube',
+      '/learn?tab=guide#youtube',
     );
     expect(screen.getByRole('link', { name: 'Open Google Cloud credentials' }).getAttribute('target')).toBe(
       '_blank',

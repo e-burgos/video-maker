@@ -1,18 +1,23 @@
-import { APPROX_DMG_SIZE_LABEL, APP_DISPLAY_NAME, REPO_URL, TUTORIAL_MUSIC_SOURCE_URL } from '../site-config.mjs';
+import { APPROX_DMG_SIZE_LABEL, APP_DISPLAY_NAME, REPO_URL, SITE_URL } from '../site-config.mjs';
 import { pick, t } from '../i18n.mjs';
 import { icon } from '../icons.mjs';
-import { assetHref, pageHref } from '../routes.mjs';
+import { absoluteUrl, assetHref, pageHref } from '../routes.mjs';
 import { downloadButton, escapeHtml, githubButton, infoTable, screenshotFigure, sectionHeader } from '../render.mjs';
 import { featureGrid, pipelineDiagram } from '../components.mjs';
 import { pipelineStages } from './journeys.mjs';
 
-const TUTORIAL_VIDEO_PATH = '/tutoriales/Tutorial-Video-Maker.mp4';
+const VIDEOS_BASE_PATH = '/tutoriales/';
+const PUBLISHED_VIDEO_FACTS = {
+  'Video-Maker-en-90-segundos.mp4': { duration: 'PT1M29S', uploadDate: '2026-11-14', poster: 'demo-explicativo-poster.jpg' },
+  'Video-Maker-del-chat-al-video.mp4': { duration: 'PT3M27S', uploadDate: '2026-11-14', poster: 'demo-productor-poster.jpg' },
+};
+const VILKAS_WHOOSH_URL = 'https://freesound.org/people/Vilkas_Sound/sounds/460476';
 
 const COPY = {
   es: {
     title: 'Inicio',
     description:
-      'Video Maker: un estudio de video con un productor de IA que corre en tu Mac. Motion graphics o material crudo, voz en español, música y render local. Código abierto.',
+      'Estudio de video con un productor de IA en tu Mac: motion graphics o material crudo, voz en español, música y render local. Gratis y de código abierto.',
     eyebrow: 'Código abierto · macOS Apple Silicon',
     titleLead: 'Del guion al video,',
     titleAccent: 'en tu Mac.',
@@ -22,11 +27,27 @@ const COPY = {
     heroAlt: 'Un video de motion graphics terminado dentro de Video Maker',
     tracks: ['Voz', 'Escenas', 'Música', 'Texto'],
     chips: ['Voz es_AR · local', '−14 LUFS', '16:9 · 9:16', 'Render en tu Mac'],
-    tutorialEyebrow: 'Mirá cómo funciona',
-    tutorialTitle: 'De la marca al video, en poco más de dos minutos',
-    tutorialLede: 'Un recorrido real por el estudio: se crea una marca, se adjuntan las fotos, el productor arma el video y se publica. Las esperas del productor van aceleradas.',
-    tutorialLabel: 'Video tutorial de Video Maker de punta a punta',
-    tutorialNote: 'Voz: Malena · Música:',
+    demosEyebrow: 'Hechos con Video Maker',
+    demosTitle: 'Dos videos que armó el productor',
+    demosLede: 'Los dos los produjo el estudio conversando con el productor, sin editor de video: uno en motion graphics y otro con material grabado.',
+    demos: [
+      {
+        file: 'Video-Maker-en-90-segundos.mp4',
+        poster: 'demo-explicativo-poster.jpg',
+        title: 'Video Maker en 90 segundos',
+        text: 'Motion graphics: todo lo que hace el estudio, de la marca a la publicación.',
+        label: 'Video explicativo de Video Maker en motion graphics',
+        creditsHtml: `Voz: Malena · Música: «Inspiring Technology», Soundrider/Dope (jamendo.com), CC BY 3.0 · Efecto: <a href="${VILKAS_WHOOSH_URL}" rel="noopener">«VS_Short Whoosh 5»</a>, Vilkas_Sound, CC BY 4.0`,
+      },
+      {
+        file: 'Video-Maker-del-chat-al-video.mp4',
+        poster: 'demo-productor-poster.jpg',
+        title: 'Del chat al video',
+        text: 'Una sesión real: se crea la marca Video Maker y el productor arma y renderiza el video de al lado. Las esperas van aceleradas.',
+        label: 'Demo de Video Maker conversando con el productor',
+        creditsHtml: 'Voz: Malena · Música: «Upbeat Lounge Background», Soundrider/Dope (jamendo.com), CC BY 3.0',
+      },
+    ],
     pathsEyebrow: 'Dos caminos',
     pathsTitle: 'Elegí cómo nace tu video',
     pathsLede: 'Los dos terminan en un MP4 listo para publicar, con voz, música y subtítulos.',
@@ -55,8 +76,9 @@ const COPY = {
     ],
     galleryEyebrow: 'Así se ve',
     galleryTitle: 'Capturas reales de la app',
+    galleryCta: 'Ver todas las pantallas, explicadas una por una',
     gallery: [
-      ['home-projects.png', 'Tus videos: lista de proyectos con miniaturas reales y su estado'],
+      ['home-projects.png', 'Mis videos: lista de proyectos agrupados por carpeta, con miniaturas reales y su estado'],
       ['motion-video.png', 'Un video de motion graphics terminado, con el crédito de la música para la descripción'],
       ['workspace-preview.png', 'Conversación con el productor y la vista previa de un render terminado'],
       ['proposal-card.png', 'Al soltar un archivo, el productor propone un rol para confirmar o descartar'],
@@ -84,7 +106,7 @@ const COPY = {
   en: {
     title: 'Home',
     description:
-      'Video Maker: a video studio with an AI producer that runs on your Mac. Motion graphics or raw footage, Spanish voices, music and local rendering. Open source.',
+      'A video studio with an AI producer that runs on your Mac: motion graphics or raw footage, Spanish voices, music and local rendering. Free and open source.',
     eyebrow: 'Open source · macOS Apple Silicon',
     titleLead: 'From script to video,',
     titleAccent: 'on your Mac.',
@@ -94,11 +116,27 @@ const COPY = {
     heroAlt: 'A finished motion graphics video inside Video Maker',
     tracks: ['Voice', 'Scenes', 'Music', 'Text'],
     chips: ['es_AR voice · local', '−14 LUFS', '16:9 · 9:16', 'Rendered on your Mac'],
-    tutorialEyebrow: 'See how it works',
-    tutorialTitle: 'From brand to finished video, in a little over two minutes',
-    tutorialLede: 'A real walkthrough of the studio: create a brand, attach the photos, let the producer build the video and publish it. The long waits for the producer are sped up; narrated and captioned in Spanish.',
-    tutorialLabel: 'Video Maker end-to-end tutorial video',
-    tutorialNote: 'Voice: Malena · Music:',
+    demosEyebrow: 'Made with Video Maker',
+    demosTitle: 'Two videos the producer built',
+    demosLede: 'The studio produced both by chatting with the producer, with no video editor: one in motion graphics and one from recorded footage. Narrated and captioned in Spanish.',
+    demos: [
+      {
+        file: 'Video-Maker-en-90-segundos.mp4',
+        poster: 'demo-explicativo-poster.jpg',
+        title: 'Video Maker in 90 seconds',
+        text: 'Motion graphics: everything the studio does, from the brand to publishing.',
+        label: 'Video Maker explainer in motion graphics',
+        creditsHtml: `Voice: Malena · Music: “Inspiring Technology”, Soundrider/Dope (jamendo.com), CC BY 3.0 · Sound effect: <a href="${VILKAS_WHOOSH_URL}" rel="noopener">“VS_Short Whoosh 5”</a>, Vilkas_Sound, CC BY 4.0`,
+      },
+      {
+        file: 'Video-Maker-del-chat-al-video.mp4',
+        poster: 'demo-productor-poster.jpg',
+        title: 'From chat to video',
+        text: 'A real session: the Video Maker brand is created and the producer builds and renders the video next to this one. Waits are sped up.',
+        label: 'Video Maker demo chatting with the producer',
+        creditsHtml: 'Voice: Malena · Music: “Upbeat Lounge Background”, Soundrider/Dope (jamendo.com), CC BY 3.0',
+      },
+    ],
     pathsEyebrow: 'Two paths',
     pathsTitle: 'Choose how your video is born',
     pathsLede: 'Both end in an MP4 ready to publish, with voice, music and captions.',
@@ -127,8 +165,9 @@ const COPY = {
     ],
     galleryEyebrow: 'See it',
     galleryTitle: 'Real screenshots of the app',
+    galleryCta: 'See every screen, explained one by one',
     gallery: [
-      ['home-projects.png', 'Your videos: project list with real thumbnails and their status'],
+      ['home-projects.png', 'My videos: project list grouped by folder, with real thumbnails and their status'],
       ['motion-video.png', 'A finished motion graphics video, with the music credit for the description'],
       ['workspace-preview.png', 'Conversation with the producer and the preview of a finished render'],
       ['proposal-card.png', 'When you drop a file, the producer suggests a role to confirm or discard'],
@@ -203,22 +242,51 @@ ${chips}
 </section>`;
 }
 
-function tutorialSection(ctx, copy) {
-  const poster = assetHref(ctx, 'assets/screenshots/tutorial-poster.jpg');
-  return `<section class="section section--tinted" aria-labelledby="home-tutorial">
-<div class="container container--narrow">
-${sectionHeader({ eyebrow: copy.tutorialEyebrow, title: copy.tutorialTitle, lede: escapeHtml(copy.tutorialLede), id: 'home-tutorial' })}
-<figure class="tutorial-video reveal">
-<video controls preload="none" playsinline poster="${poster}" aria-label="${escapeHtml(copy.tutorialLabel)}" width="1920" height="1080">
-<source src="${TUTORIAL_VIDEO_PATH}" type="video/mp4" />
+function videoObject({ file, name, description }) {
+  const facts = PUBLISHED_VIDEO_FACTS[file];
+  return {
+    '@type': 'VideoObject',
+    name,
+    description,
+    thumbnailUrl: absoluteUrl(`assets/screenshots/${facts.poster}`),
+    contentUrl: `${SITE_URL}${VIDEOS_BASE_PATH}${file}`,
+    uploadDate: facts.uploadDate,
+    duration: facts.duration,
+  };
+}
+
+function publishedVideosStructuredData(copy) {
+  return [
+    ...copy.demos.map((demo) => videoObject({ file: demo.file, name: `${demo.title} · Video Maker`, description: demo.text })),
+  ];
+}
+
+function demoVideoCard(ctx, demo) {
+  const poster = assetHref(ctx, `assets/screenshots/${demo.poster}`);
+  return `<figure class="demo-video reveal">
+<video controls preload="none" playsinline poster="${poster}" aria-label="${escapeHtml(demo.label)}" width="1920" height="1080">
+<source src="${VIDEOS_BASE_PATH}${demo.file}" type="video/mp4" />
 </video>
-<figcaption>${escapeHtml(copy.tutorialNote)} <a href="${TUTORIAL_MUSIC_SOURCE_URL}" rel="noopener">Inspiring Advertising - Upbeat Summer Corporate</a>, Rafael Krux, CC BY 4.0</figcaption>
-</figure>
+<figcaption>
+<h3 class="demo-video__title">${escapeHtml(demo.title)}</h3>
+<p>${escapeHtml(demo.text)}</p>
+<p class="demo-video__credits">${demo.creditsHtml}</p>
+</figcaption>
+</figure>`;
+}
+
+function demosSection(ctx, copy) {
+  return `<section class="section" aria-labelledby="home-demos">
+<div class="container">
+${sectionHeader({ eyebrow: copy.demosEyebrow, title: copy.demosTitle, lede: escapeHtml(copy.demosLede), id: 'home-demos' })}
+<div class="demo-videos">
+${copy.demos.map((demo) => demoVideoCard(ctx, demo)).join('\n')}
+</div>
 </div>
 </section>`;
 }
 
-function pathCard(ctx, { title, text, points, file, alt, iconName, anchor }) {
+function pathCard(ctx,{ title, text, points, file, alt, iconName, anchor }) {
   const items = points.map((point) => `<li>${icon('arrowRight', 'icon icon--bullet')}${escapeHtml(point)}</li>`).join('');
   return `<article class="path-card reveal">
 ${screenshotFigure(ctx, file, alt, { className: 'path-card__shot' })}
@@ -269,6 +337,7 @@ function gallerySection(ctx, copy) {
 <div class="container">
 ${sectionHeader({ eyebrow: copy.galleryEyebrow, title: copy.galleryTitle, id: 'home-gallery' })}
 <div class="screenshot-grid">${shots}</div>
+<p class="gallery-cta"><a class="text-link" href="${pageHref(ctx, 'app-tour')}">${escapeHtml(copy.galleryCta)} ${icon('arrowRight', 'icon icon--inline')}</a></p>
 </div>
 </section>`;
 }
@@ -320,7 +389,7 @@ export function renderPage(ctx) {
   const copy = pick(ctx.locale, COPY);
   const bodyHtml = [
     hero(ctx, copy),
-    tutorialSection(ctx, copy),
+    demosSection(ctx, copy),
     pathsSection(ctx, copy),
     pipelineSection(ctx, copy),
     featuresSection(copy),
@@ -329,5 +398,5 @@ export function renderPage(ctx) {
     requirementsSection(ctx, copy),
     finalCta(ctx, copy),
   ].join('\n');
-  return { title: copy.title, description: copy.description, bodyHtml };
+  return { title: copy.title, description: copy.description, bodyHtml, structuredData: publishedVideosStructuredData(copy) };
 }

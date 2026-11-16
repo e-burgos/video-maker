@@ -4,6 +4,7 @@ import { useRenderApi } from '../api/render-api-context';
 import { findingsOfSeverity } from '../api/review-format';
 import { useAsyncResource } from '../hooks/use-async-resource';
 import { useT } from '../i18n/language-context';
+import { CHECKBOX_CLASS, CHECK_LABEL_CLASS } from './ui/cl-controls';
 import type { ReviewReport, ReviewStatus } from '../api/review-types';
 
 export type PublishReviewNoticeProps = {
@@ -30,7 +31,7 @@ export function PublishReviewNotice({
 
   if (status === 'warn') {
     return (
-      <p data-testid="youtube-review-warn" role="note" className="text-xs text-amber-300">
+      <p data-testid="youtube-review-warn" role="note" className="m-0 text-xs text-[var(--tucu-state-orange-ink)]">
         {t('youtube.publish.review.warn')}
       </p>
     );
@@ -42,19 +43,20 @@ export function PublishReviewNotice({
     <div
       data-testid="youtube-review-fail"
       role="alert"
-      className="space-y-2 rounded-md border border-rose-500/40 bg-rose-500/10 p-3"
+      className="flex flex-col gap-2 rounded-[12px] border border-[var(--tucu-state-red-line)] bg-[var(--tucu-state-red-soft)] p-3"
     >
-      <p className="text-sm text-rose-200">{t('youtube.publish.review.fail')}</p>
+      <p className="m-0 text-sm text-[var(--tucu-state-red-ink)]">{t('youtube.publish.review.fail')}</p>
       {criticals.length > 0 && (
-        <ul className="list-disc space-y-1 pl-5 text-xs text-rose-100">
+        <ul className="m-0 list-disc flex flex-col gap-1 pl-5 text-xs text-[var(--cl-ink)]">
           {criticals.map((finding) => (
             <li key={finding.id}>{finding.message}</li>
           ))}
         </ul>
       )}
-      <label className="flex items-center gap-2 text-sm text-slate-200">
+      <label className={CHECK_LABEL_CLASS}>
         <input
           type="checkbox"
+          className={CHECKBOX_CLASS}
           data-testid="youtube-ignore-review"
           checked={ignoreReview}
           disabled={disabled}

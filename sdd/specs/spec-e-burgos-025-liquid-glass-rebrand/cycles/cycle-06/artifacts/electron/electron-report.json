@@ -1,0 +1,1770 @@
+[
+ {
+  "file": "light-1280x800-01-mis-videos.jpg",
+  "theme": "light",
+  "m": {
+   "vw": 1280,
+   "vh": 800,
+   "docOverflowX": 0,
+   "bodyOverflowX": 0,
+   "offenders": [],
+   "innerScroll": [],
+   "trafficLightHits": [],
+   "dragRegions": [
+    "HEADER.glass-thick flex min-h-[52px] shrink-0 i h=55",
+    "DIV.min-w-0 flex-1 h=37",
+    "H1.truncate text-[17px] font-bold leading-t h=21",
+    "P.truncate text-xs text-[var(--cl-ink-3)] h=16",
+    "DIV.flex shrink-0 items-center h=0"
+   ],
+   "draggedInteractives": [],
+   "shell": 210
+  }
+ },
+ {
+  "file": "light-1280x800-03-workspace.jpg",
+  "theme": "light",
+  "m": {
+   "vw": 1280,
+   "vh": 800,
+   "docOverflowX": 0,
+   "bodyOverflowX": 0,
+   "offenders": [],
+   "innerScroll": [],
+   "trafficLightHits": [],
+   "dragRegions": [
+    "HEADER.glass-thick flex min-h-[52px] shrink-0 i h=55",
+    "DIV.min-w-0 flex-1 h=37",
+    "H1.truncate text-[17px] font-bold leading-t h=21",
+    "P.truncate text-xs text-[var(--cl-ink-3)] h=16",
+    "DIV.flex shrink-0 items-center h=0"
+   ],
+   "draggedInteractives": [],
+   "shell": 210
+  }
+ },
+ {
+  "file": "light-1280x800-04-biblioteca.jpg",
+  "theme": "light",
+  "m": {
+   "vw": 1280,
+   "vh": 800,
+   "docOverflowX": 0,
+   "bodyOverflowX": 0,
+   "offenders": [],
+   "innerScroll": [],
+   "trafficLightHits": [],
+   "dragRegions": [
+    "HEADER.glass-thick flex min-h-[52px] shrink-0 i h=56",
+    "DIV.min-w-0 flex-1 h=37",
+    "H1.truncate text-[17px] font-bold leading-t h=21",
+    "P.truncate text-xs text-[var(--cl-ink-3)] h=16",
+    "DIV.flex shrink-0 items-center h=38"
+   ],
+   "draggedInteractives": [],
+   "shell": 210
+  }
+ },
+ {
+  "file": "light-1280x800-05-marcas.jpg",
+  "theme": "light",
+  "m": {
+   "vw": 1280,
+   "vh": 800,
+   "docOverflowX": 0,
+   "bodyOverflowX": 0,
+   "offenders": [],
+   "innerScroll": [],
+   "trafficLightHits": [],
+   "dragRegions": [
+    "HEADER.glass-thick flex min-h-[52px] shrink-0 i h=55",
+    "DIV.min-w-0 flex-1 h=37",
+    "H1.truncate text-[17px] font-bold leading-t h=21",
+    "P.truncate text-xs text-[var(--cl-ink-3)] h=16",
+    "DIV.flex shrink-0 items-center h=0"
+   ],
+   "draggedInteractives": [],
+   "shell": 210
+  }
+ },
+ {
+  "file": "light-1280x800-06-publicacion.jpg",
+  "theme": "light",
+  "m": {
+   "vw": 1280,
+   "vh": 800,
+   "docOverflowX": 0,
+   "bodyOverflowX": 0,
+   "offenders": [],
+   "innerScroll": [],
+   "trafficLightHits": [],
+   "dragRegions": [
+    "HEADER.glass-thick flex min-h-[52px] shrink-0 i h=55",
+    "DIV.min-w-0 flex-1 h=37",
+    "H1.truncate text-[17px] font-bold leading-t h=21",
+    "P.truncate text-xs text-[var(--cl-ink-3)] h=16",
+    "DIV.flex shrink-0 items-center h=26",
+    "SPAN.inline-flex items-center justify-center  h=26",
+    "SPAN.h-1.5 w-1.5 shrink-0 rounded-full bg-cur h=6"
+   ],
+   "draggedInteractives": [],
+   "shell": 210
+  }
+ },
+ {
+  "file": "light-1280x800-07-ajustes-1-producer.jpg",
+  "theme": "light",
+  "m": {
+   "vw": 1280,
+   "vh": 800,
+   "docOverflowX": 0,
+   "bodyOverflowX": 0,
+   "offenders": [],
+   "innerScroll": [],
+   "trafficLightHits": [],
+   "dragRegions": [
+    "HEADER.glass-thick flex min-h-[52px] shrink-0 i h=55",
+    "DIV.min-w-0 flex-1 h=37",
+    "H1.truncate text-[17px] font-bold leading-t h=21",
+    "P.truncate text-xs text-[var(--cl-ink-3)] h=16",
+    "DIV.flex shrink-0 items-center h=0"
+   ],
+   "draggedInteractives": [],
+   "shell": 210
+  }
+ },
+ {
+  "file": "light-1280x800-07-ajustes-2-voice.jpg",
+  "theme": "light",
+  "m": {
+   "vw": 1280,
+   "vh": 800,
+   "docOverflowX": 0,
+   "bodyOverflowX": 0,
+   "offenders": [],
+   "innerScroll": [],
+   "trafficLightHits": [],
+   "dragRegions": [
+    "HEADER.glass-thick flex min-h-[52px] shrink-0 i h=55",
+    "DIV.min-w-0 flex-1 h=37",
+    "H1.truncate text-[17px] font-bold leading-t h=21",
+    "P.truncate text-xs text-[var(--cl-ink-3)] h=16",
+    "DIV.flex shrink-0 items-center h=0"
+   ],
+   "draggedInteractives": [],
+   "shell": 210
+  }
+ },
+ {
+  "file": "light-1280x800-07-ajustes-3-youtube.jpg",
+  "theme": "light",
+  "m": {
+   "vw": 1280,
+   "vh": 800,
+   "docOverflowX": 0,
+   "bodyOverflowX": 0,
+   "offenders": [],
+   "innerScroll": [],
+   "trafficLightHits": [],
+   "dragRegions": [
+    "HEADER.glass-thick flex min-h-[52px] shrink-0 i h=55",
+    "DIV.min-w-0 flex-1 h=37",
+    "H1.truncate text-[17px] font-bold leading-t h=21",
+    "P.truncate text-xs text-[var(--cl-ink-3)] h=16",
+    "DIV.flex shrink-0 items-center h=0"
+   ],
+   "draggedInteractives": [],
+   "shell": 210
+  }
+ },
+ {
+  "file": "light-1280x800-07-ajustes-4-agents.jpg",
+  "theme": "light",
+  "m": {
+   "vw": 1280,
+   "vh": 800,
+   "docOverflowX": 0,
+   "bodyOverflowX": 0,
+   "offenders": [],
+   "innerScroll": [],
+   "trafficLightHits": [],
+   "dragRegions": [
+    "HEADER.glass-thick flex min-h-[52px] shrink-0 i h=55",
+    "DIV.min-w-0 flex-1 h=37",
+    "H1.truncate text-[17px] font-bold leading-t h=21",
+    "P.truncate text-xs text-[var(--cl-ink-3)] h=16",
+    "DIV.flex shrink-0 items-center h=0"
+   ],
+   "draggedInteractives": [],
+   "shell": 210
+  }
+ },
+ {
+  "file": "light-1280x800-07-ajustes-5-appearance.jpg",
+  "theme": "light",
+  "m": {
+   "vw": 1280,
+   "vh": 800,
+   "docOverflowX": 0,
+   "bodyOverflowX": 0,
+   "offenders": [],
+   "innerScroll": [],
+   "trafficLightHits": [],
+   "dragRegions": [
+    "HEADER.glass-thick flex min-h-[52px] shrink-0 i h=55",
+    "DIV.min-w-0 flex-1 h=37",
+    "H1.truncate text-[17px] font-bold leading-t h=21",
+    "P.truncate text-xs text-[var(--cl-ink-3)] h=16",
+    "DIV.flex shrink-0 items-center h=0"
+   ],
+   "draggedInteractives": [],
+   "shell": 210
+  }
+ },
+ {
+  "file": "light-1280x800-08-aprender-1-guide.jpg",
+  "theme": "light",
+  "m": {
+   "vw": 1280,
+   "vh": 800,
+   "docOverflowX": 0,
+   "bodyOverflowX": 0,
+   "offenders": [],
+   "innerScroll": [],
+   "trafficLightHits": [],
+   "dragRegions": [
+    "HEADER.glass-thick flex min-h-[52px] shrink-0 i h=55",
+    "DIV.min-w-0 flex-1 h=37",
+    "H1.truncate text-[17px] font-bold leading-t h=21",
+    "P.truncate text-xs text-[var(--cl-ink-3)] h=16",
+    "DIV.flex shrink-0 items-center h=0"
+   ],
+   "draggedInteractives": [],
+   "shell": 210
+  }
+ },
+ {
+  "file": "light-1280x800-08-aprender-2-how-it-works.jpg",
+  "theme": "light",
+  "m": {
+   "vw": 1280,
+   "vh": 800,
+   "docOverflowX": 0,
+   "bodyOverflowX": 0,
+   "offenders": [],
+   "innerScroll": [],
+   "trafficLightHits": [],
+   "dragRegions": [
+    "HEADER.glass-thick flex min-h-[52px] shrink-0 i h=55",
+    "DIV.min-w-0 flex-1 h=37",
+    "H1.truncate text-[17px] font-bold leading-t h=21",
+    "P.truncate text-xs text-[var(--cl-ink-3)] h=16",
+    "DIV.flex shrink-0 items-center h=0"
+   ],
+   "draggedInteractives": [],
+   "shell": 210
+  }
+ },
+ {
+  "file": "light-1280x800-08-aprender-3-tutorial.jpg",
+  "theme": "light",
+  "m": {
+   "vw": 1280,
+   "vh": 800,
+   "docOverflowX": 0,
+   "bodyOverflowX": 0,
+   "offenders": [],
+   "innerScroll": [],
+   "trafficLightHits": [],
+   "dragRegions": [
+    "HEADER.glass-thick flex min-h-[52px] shrink-0 i h=55",
+    "DIV.min-w-0 flex-1 h=37",
+    "H1.truncate text-[17px] font-bold leading-t h=21",
+    "P.truncate text-xs text-[var(--cl-ink-3)] h=16",
+    "DIV.flex shrink-0 items-center h=0"
+   ],
+   "draggedInteractives": [],
+   "shell": 210
+  }
+ },
+ {
+  "file": "light-1280x800-08-aprender-4-faq.jpg",
+  "theme": "light",
+  "m": {
+   "vw": 1280,
+   "vh": 800,
+   "docOverflowX": 0,
+   "bodyOverflowX": 0,
+   "offenders": [],
+   "innerScroll": [],
+   "trafficLightHits": [],
+   "dragRegions": [
+    "HEADER.glass-thick flex min-h-[52px] shrink-0 i h=55",
+    "DIV.min-w-0 flex-1 h=37",
+    "H1.truncate text-[17px] font-bold leading-t h=21",
+    "P.truncate text-xs text-[var(--cl-ink-3)] h=16",
+    "DIV.flex shrink-0 items-center h=0"
+   ],
+   "draggedInteractives": [],
+   "shell": 210
+  }
+ },
+ {
+  "file": "light-1280x800-08-aprender-5-gallery.jpg",
+  "theme": "light",
+  "m": {
+   "vw": 1280,
+   "vh": 800,
+   "docOverflowX": 0,
+   "bodyOverflowX": 0,
+   "offenders": [],
+   "innerScroll": [],
+   "trafficLightHits": [],
+   "dragRegions": [
+    "HEADER.glass-thick flex min-h-[52px] shrink-0 i h=55",
+    "DIV.min-w-0 flex-1 h=37",
+    "H1.truncate text-[17px] font-bold leading-t h=21",
+    "P.truncate text-xs text-[var(--cl-ink-3)] h=16",
+    "DIV.flex shrink-0 items-center h=0"
+   ],
+   "draggedInteractives": [],
+   "shell": 210
+  }
+ },
+ {
+  "file": "light-1280x800-09-acerca-1-version.jpg",
+  "theme": "light",
+  "m": {
+   "vw": 1280,
+   "vh": 800,
+   "docOverflowX": 0,
+   "bodyOverflowX": 0,
+   "offenders": [],
+   "innerScroll": [],
+   "trafficLightHits": [],
+   "dragRegions": [
+    "HEADER.glass-thick flex min-h-[52px] shrink-0 i h=55",
+    "DIV.min-w-0 flex-1 h=37",
+    "H1.truncate text-[17px] font-bold leading-t h=21",
+    "P.truncate text-xs text-[var(--cl-ink-3)] h=16",
+    "DIV.flex shrink-0 items-center h=0"
+   ],
+   "draggedInteractives": [],
+   "shell": 210
+  }
+ },
+ {
+  "file": "light-1280x800-09-acerca-2-requirements.jpg",
+  "theme": "light",
+  "m": {
+   "vw": 1280,
+   "vh": 800,
+   "docOverflowX": 0,
+   "bodyOverflowX": 0,
+   "offenders": [],
+   "innerScroll": [],
+   "trafficLightHits": [],
+   "dragRegions": [
+    "HEADER.glass-thick flex min-h-[52px] shrink-0 i h=55",
+    "DIV.min-w-0 flex-1 h=37",
+    "H1.truncate text-[17px] font-bold leading-t h=21",
+    "P.truncate text-xs text-[var(--cl-ink-3)] h=16",
+    "DIV.flex shrink-0 items-center h=0"
+   ],
+   "draggedInteractives": [],
+   "shell": 210
+  }
+ },
+ {
+  "file": "light-1280x800-09-acerca-3-licenses.jpg",
+  "theme": "light",
+  "m": {
+   "vw": 1280,
+   "vh": 800,
+   "docOverflowX": 0,
+   "bodyOverflowX": 0,
+   "offenders": [],
+   "innerScroll": [],
+   "trafficLightHits": [],
+   "dragRegions": [
+    "HEADER.glass-thick flex min-h-[52px] shrink-0 i h=55",
+    "DIV.min-w-0 flex-1 h=37",
+    "H1.truncate text-[17px] font-bold leading-t h=21",
+    "P.truncate text-xs text-[var(--cl-ink-3)] h=16",
+    "DIV.flex shrink-0 items-center h=0"
+   ],
+   "draggedInteractives": [],
+   "shell": 210
+  }
+ },
+ {
+  "file": "light-1280x800-09-acerca-4-open-source.jpg",
+  "theme": "light",
+  "m": {
+   "vw": 1280,
+   "vh": 800,
+   "docOverflowX": 0,
+   "bodyOverflowX": 0,
+   "offenders": [],
+   "innerScroll": [],
+   "trafficLightHits": [],
+   "dragRegions": [
+    "HEADER.glass-thick flex min-h-[52px] shrink-0 i h=55",
+    "DIV.min-w-0 flex-1 h=37",
+    "H1.truncate text-[17px] font-bold leading-t h=21",
+    "P.truncate text-xs text-[var(--cl-ink-3)] h=16",
+    "DIV.flex shrink-0 items-center h=0"
+   ],
+   "draggedInteractives": [],
+   "shell": 210
+  }
+ },
+ {
+  "file": "light-1280x800-09-acerca-5-privacy.jpg",
+  "theme": "light",
+  "m": {
+   "vw": 1280,
+   "vh": 800,
+   "docOverflowX": 0,
+   "bodyOverflowX": 0,
+   "offenders": [],
+   "innerScroll": [],
+   "trafficLightHits": [],
+   "dragRegions": [
+    "HEADER.glass-thick flex min-h-[52px] shrink-0 i h=55",
+    "DIV.min-w-0 flex-1 h=37",
+    "H1.truncate text-[17px] font-bold leading-t h=21",
+    "P.truncate text-xs text-[var(--cl-ink-3)] h=16",
+    "DIV.flex shrink-0 items-center h=0"
+   ],
+   "draggedInteractives": [],
+   "shell": 210
+  }
+ },
+ {
+  "file": "light-960x640-01-mis-videos.jpg",
+  "theme": "light",
+  "m": {
+   "vw": 960,
+   "vh": 640,
+   "docOverflowX": 0,
+   "bodyOverflowX": 0,
+   "offenders": [],
+   "innerScroll": [],
+   "trafficLightHits": [],
+   "dragRegions": [
+    "HEADER.glass-thick flex min-h-[52px] shrink-0 i h=55",
+    "DIV.min-w-0 flex-1 h=37",
+    "H1.truncate text-[17px] font-bold leading-t h=21",
+    "P.truncate text-xs text-[var(--cl-ink-3)] h=16",
+    "DIV.flex shrink-0 items-center h=0"
+   ],
+   "draggedInteractives": [],
+   "shell": 54
+  }
+ },
+ {
+  "file": "light-960x640-03-workspace.jpg",
+  "theme": "light",
+  "m": {
+   "vw": 960,
+   "vh": 640,
+   "docOverflowX": 0,
+   "bodyOverflowX": 0,
+   "offenders": [],
+   "innerScroll": [],
+   "trafficLightHits": [],
+   "dragRegions": [
+    "HEADER.glass-thick flex min-h-[52px] shrink-0 i h=55",
+    "DIV.min-w-0 flex-1 h=37",
+    "H1.truncate text-[17px] font-bold leading-t h=21",
+    "P.truncate text-xs text-[var(--cl-ink-3)] h=16",
+    "DIV.flex shrink-0 items-center h=0"
+   ],
+   "draggedInteractives": [],
+   "shell": 54
+  }
+ },
+ {
+  "file": "light-960x640-04-biblioteca.jpg",
+  "theme": "light",
+  "m": {
+   "vw": 960,
+   "vh": 640,
+   "docOverflowX": 0,
+   "bodyOverflowX": 0,
+   "offenders": [],
+   "innerScroll": [],
+   "trafficLightHits": [],
+   "dragRegions": [
+    "HEADER.glass-thick flex min-h-[52px] shrink-0 i h=56",
+    "DIV.min-w-0 flex-1 h=37",
+    "H1.truncate text-[17px] font-bold leading-t h=21",
+    "P.truncate text-xs text-[var(--cl-ink-3)] h=16",
+    "DIV.flex shrink-0 items-center h=38"
+   ],
+   "draggedInteractives": [],
+   "shell": 54
+  }
+ },
+ {
+  "file": "light-960x640-05-marcas.jpg",
+  "theme": "light",
+  "m": {
+   "vw": 960,
+   "vh": 640,
+   "docOverflowX": 0,
+   "bodyOverflowX": 0,
+   "offenders": [],
+   "innerScroll": [],
+   "trafficLightHits": [],
+   "dragRegions": [
+    "HEADER.glass-thick flex min-h-[52px] shrink-0 i h=55",
+    "DIV.min-w-0 flex-1 h=37",
+    "H1.truncate text-[17px] font-bold leading-t h=21",
+    "P.truncate text-xs text-[var(--cl-ink-3)] h=16",
+    "DIV.flex shrink-0 items-center h=0"
+   ],
+   "draggedInteractives": [],
+   "shell": 54
+  }
+ },
+ {
+  "file": "light-960x640-06-publicacion.jpg",
+  "theme": "light",
+  "m": {
+   "vw": 960,
+   "vh": 640,
+   "docOverflowX": 0,
+   "bodyOverflowX": 0,
+   "offenders": [],
+   "innerScroll": [],
+   "trafficLightHits": [],
+   "dragRegions": [
+    "HEADER.glass-thick flex min-h-[52px] shrink-0 i h=55",
+    "DIV.min-w-0 flex-1 h=37",
+    "H1.truncate text-[17px] font-bold leading-t h=21",
+    "P.truncate text-xs text-[var(--cl-ink-3)] h=16",
+    "DIV.flex shrink-0 items-center h=26",
+    "SPAN.inline-flex items-center justify-center  h=26",
+    "SPAN.h-1.5 w-1.5 shrink-0 rounded-full bg-cur h=6"
+   ],
+   "draggedInteractives": [],
+   "shell": 54
+  }
+ },
+ {
+  "file": "light-960x640-07-ajustes-1-producer.jpg",
+  "theme": "light",
+  "m": {
+   "vw": 960,
+   "vh": 640,
+   "docOverflowX": 0,
+   "bodyOverflowX": 0,
+   "offenders": [],
+   "innerScroll": [],
+   "trafficLightHits": [],
+   "dragRegions": [
+    "HEADER.glass-thick flex min-h-[52px] shrink-0 i h=55",
+    "DIV.min-w-0 flex-1 h=37",
+    "H1.truncate text-[17px] font-bold leading-t h=21",
+    "P.truncate text-xs text-[var(--cl-ink-3)] h=16",
+    "DIV.flex shrink-0 items-center h=0"
+   ],
+   "draggedInteractives": [],
+   "shell": 54
+  }
+ },
+ {
+  "file": "light-960x640-07-ajustes-2-voice.jpg",
+  "theme": "light",
+  "m": {
+   "vw": 960,
+   "vh": 640,
+   "docOverflowX": 0,
+   "bodyOverflowX": 0,
+   "offenders": [],
+   "innerScroll": [],
+   "trafficLightHits": [],
+   "dragRegions": [
+    "HEADER.glass-thick flex min-h-[52px] shrink-0 i h=55",
+    "DIV.min-w-0 flex-1 h=37",
+    "H1.truncate text-[17px] font-bold leading-t h=21",
+    "P.truncate text-xs text-[var(--cl-ink-3)] h=16",
+    "DIV.flex shrink-0 items-center h=0"
+   ],
+   "draggedInteractives": [],
+   "shell": 54
+  }
+ },
+ {
+  "file": "light-960x640-07-ajustes-3-youtube.jpg",
+  "theme": "light",
+  "m": {
+   "vw": 960,
+   "vh": 640,
+   "docOverflowX": 0,
+   "bodyOverflowX": 0,
+   "offenders": [],
+   "innerScroll": [],
+   "trafficLightHits": [],
+   "dragRegions": [
+    "HEADER.glass-thick flex min-h-[52px] shrink-0 i h=55",
+    "DIV.min-w-0 flex-1 h=37",
+    "H1.truncate text-[17px] font-bold leading-t h=21",
+    "P.truncate text-xs text-[var(--cl-ink-3)] h=16",
+    "DIV.flex shrink-0 items-center h=0"
+   ],
+   "draggedInteractives": [],
+   "shell": 54
+  }
+ },
+ {
+  "file": "light-960x640-07-ajustes-4-agents.jpg",
+  "theme": "light",
+  "m": {
+   "vw": 960,
+   "vh": 640,
+   "docOverflowX": 0,
+   "bodyOverflowX": 0,
+   "offenders": [],
+   "innerScroll": [],
+   "trafficLightHits": [],
+   "dragRegions": [
+    "HEADER.glass-thick flex min-h-[52px] shrink-0 i h=55",
+    "DIV.min-w-0 flex-1 h=37",
+    "H1.truncate text-[17px] font-bold leading-t h=21",
+    "P.truncate text-xs text-[var(--cl-ink-3)] h=16",
+    "DIV.flex shrink-0 items-center h=0"
+   ],
+   "draggedInteractives": [],
+   "shell": 54
+  }
+ },
+ {
+  "file": "light-960x640-07-ajustes-5-appearance.jpg",
+  "theme": "light",
+  "m": {
+   "vw": 960,
+   "vh": 640,
+   "docOverflowX": 0,
+   "bodyOverflowX": 0,
+   "offenders": [],
+   "innerScroll": [],
+   "trafficLightHits": [],
+   "dragRegions": [
+    "HEADER.glass-thick flex min-h-[52px] shrink-0 i h=55",
+    "DIV.min-w-0 flex-1 h=37",
+    "H1.truncate text-[17px] font-bold leading-t h=21",
+    "P.truncate text-xs text-[var(--cl-ink-3)] h=16",
+    "DIV.flex shrink-0 items-center h=0"
+   ],
+   "draggedInteractives": [],
+   "shell": 54
+  }
+ },
+ {
+  "file": "light-960x640-08-aprender-1-guide.jpg",
+  "theme": "light",
+  "m": {
+   "vw": 960,
+   "vh": 640,
+   "docOverflowX": 0,
+   "bodyOverflowX": 0,
+   "offenders": [],
+   "innerScroll": [],
+   "trafficLightHits": [],
+   "dragRegions": [
+    "HEADER.glass-thick flex min-h-[52px] shrink-0 i h=55",
+    "DIV.min-w-0 flex-1 h=37",
+    "H1.truncate text-[17px] font-bold leading-t h=21",
+    "P.truncate text-xs text-[var(--cl-ink-3)] h=16",
+    "DIV.flex shrink-0 items-center h=0"
+   ],
+   "draggedInteractives": [],
+   "shell": 54
+  }
+ },
+ {
+  "file": "light-960x640-08-aprender-2-how-it-works.jpg",
+  "theme": "light",
+  "m": {
+   "vw": 960,
+   "vh": 640,
+   "docOverflowX": 0,
+   "bodyOverflowX": 0,
+   "offenders": [],
+   "innerScroll": [],
+   "trafficLightHits": [],
+   "dragRegions": [
+    "HEADER.glass-thick flex min-h-[52px] shrink-0 i h=55",
+    "DIV.min-w-0 flex-1 h=37",
+    "H1.truncate text-[17px] font-bold leading-t h=21",
+    "P.truncate text-xs text-[var(--cl-ink-3)] h=16",
+    "DIV.flex shrink-0 items-center h=0"
+   ],
+   "draggedInteractives": [],
+   "shell": 54
+  }
+ },
+ {
+  "file": "light-960x640-08-aprender-3-tutorial.jpg",
+  "theme": "light",
+  "m": {
+   "vw": 960,
+   "vh": 640,
+   "docOverflowX": 0,
+   "bodyOverflowX": 0,
+   "offenders": [],
+   "innerScroll": [],
+   "trafficLightHits": [],
+   "dragRegions": [
+    "HEADER.glass-thick flex min-h-[52px] shrink-0 i h=55",
+    "DIV.min-w-0 flex-1 h=37",
+    "H1.truncate text-[17px] font-bold leading-t h=21",
+    "P.truncate text-xs text-[var(--cl-ink-3)] h=16",
+    "DIV.flex shrink-0 items-center h=0"
+   ],
+   "draggedInteractives": [],
+   "shell": 54
+  }
+ },
+ {
+  "file": "light-960x640-08-aprender-4-faq.jpg",
+  "theme": "light",
+  "m": {
+   "vw": 960,
+   "vh": 640,
+   "docOverflowX": 0,
+   "bodyOverflowX": 0,
+   "offenders": [],
+   "innerScroll": [],
+   "trafficLightHits": [],
+   "dragRegions": [
+    "HEADER.glass-thick flex min-h-[52px] shrink-0 i h=55",
+    "DIV.min-w-0 flex-1 h=37",
+    "H1.truncate text-[17px] font-bold leading-t h=21",
+    "P.truncate text-xs text-[var(--cl-ink-3)] h=16",
+    "DIV.flex shrink-0 items-center h=0"
+   ],
+   "draggedInteractives": [],
+   "shell": 54
+  }
+ },
+ {
+  "file": "light-960x640-08-aprender-5-gallery.jpg",
+  "theme": "light",
+  "m": {
+   "vw": 960,
+   "vh": 640,
+   "docOverflowX": 0,
+   "bodyOverflowX": 0,
+   "offenders": [],
+   "innerScroll": [],
+   "trafficLightHits": [],
+   "dragRegions": [
+    "HEADER.glass-thick flex min-h-[52px] shrink-0 i h=55",
+    "DIV.min-w-0 flex-1 h=37",
+    "H1.truncate text-[17px] font-bold leading-t h=21",
+    "P.truncate text-xs text-[var(--cl-ink-3)] h=16",
+    "DIV.flex shrink-0 items-center h=0"
+   ],
+   "draggedInteractives": [],
+   "shell": 54
+  }
+ },
+ {
+  "file": "light-960x640-09-acerca-1-version.jpg",
+  "theme": "light",
+  "m": {
+   "vw": 960,
+   "vh": 640,
+   "docOverflowX": 0,
+   "bodyOverflowX": 0,
+   "offenders": [],
+   "innerScroll": [],
+   "trafficLightHits": [],
+   "dragRegions": [
+    "HEADER.glass-thick flex min-h-[52px] shrink-0 i h=55",
+    "DIV.min-w-0 flex-1 h=37",
+    "H1.truncate text-[17px] font-bold leading-t h=21",
+    "P.truncate text-xs text-[var(--cl-ink-3)] h=16",
+    "DIV.flex shrink-0 items-center h=0"
+   ],
+   "draggedInteractives": [],
+   "shell": 54
+  }
+ },
+ {
+  "file": "light-960x640-09-acerca-2-requirements.jpg",
+  "theme": "light",
+  "m": {
+   "vw": 960,
+   "vh": 640,
+   "docOverflowX": 0,
+   "bodyOverflowX": 0,
+   "offenders": [],
+   "innerScroll": [],
+   "trafficLightHits": [],
+   "dragRegions": [
+    "HEADER.glass-thick flex min-h-[52px] shrink-0 i h=55",
+    "DIV.min-w-0 flex-1 h=37",
+    "H1.truncate text-[17px] font-bold leading-t h=21",
+    "P.truncate text-xs text-[var(--cl-ink-3)] h=16",
+    "DIV.flex shrink-0 items-center h=0"
+   ],
+   "draggedInteractives": [],
+   "shell": 54
+  }
+ },
+ {
+  "file": "light-960x640-09-acerca-3-licenses.jpg",
+  "theme": "light",
+  "m": {
+   "vw": 960,
+   "vh": 640,
+   "docOverflowX": 0,
+   "bodyOverflowX": 0,
+   "offenders": [],
+   "innerScroll": [],
+   "trafficLightHits": [],
+   "dragRegions": [
+    "HEADER.glass-thick flex min-h-[52px] shrink-0 i h=55",
+    "DIV.min-w-0 flex-1 h=37",
+    "H1.truncate text-[17px] font-bold leading-t h=21",
+    "P.truncate text-xs text-[var(--cl-ink-3)] h=16",
+    "DIV.flex shrink-0 items-center h=0"
+   ],
+   "draggedInteractives": [],
+   "shell": 54
+  }
+ },
+ {
+  "file": "light-960x640-09-acerca-4-open-source.jpg",
+  "theme": "light",
+  "m": {
+   "vw": 960,
+   "vh": 640,
+   "docOverflowX": 0,
+   "bodyOverflowX": 0,
+   "offenders": [],
+   "innerScroll": [],
+   "trafficLightHits": [],
+   "dragRegions": [
+    "HEADER.glass-thick flex min-h-[52px] shrink-0 i h=55",
+    "DIV.min-w-0 flex-1 h=37",
+    "H1.truncate text-[17px] font-bold leading-t h=21",
+    "P.truncate text-xs text-[var(--cl-ink-3)] h=16",
+    "DIV.flex shrink-0 items-center h=0"
+   ],
+   "draggedInteractives": [],
+   "shell": 54
+  }
+ },
+ {
+  "file": "light-960x640-09-acerca-5-privacy.jpg",
+  "theme": "light",
+  "m": {
+   "vw": 960,
+   "vh": 640,
+   "docOverflowX": 0,
+   "bodyOverflowX": 0,
+   "offenders": [],
+   "innerScroll": [],
+   "trafficLightHits": [],
+   "dragRegions": [
+    "HEADER.glass-thick flex min-h-[52px] shrink-0 i h=55",
+    "DIV.min-w-0 flex-1 h=37",
+    "H1.truncate text-[17px] font-bold leading-t h=21",
+    "P.truncate text-xs text-[var(--cl-ink-3)] h=16",
+    "DIV.flex shrink-0 items-center h=0"
+   ],
+   "draggedInteractives": [],
+   "shell": 54
+  }
+ },
+ {
+  "file": "dark-1280x800-01-mis-videos.jpg",
+  "theme": "dark",
+  "m": {
+   "vw": 1280,
+   "vh": 800,
+   "docOverflowX": 0,
+   "bodyOverflowX": 0,
+   "offenders": [],
+   "innerScroll": [],
+   "trafficLightHits": [],
+   "dragRegions": [
+    "HEADER.glass-thick flex min-h-[52px] shrink-0 i h=55",
+    "DIV.min-w-0 flex-1 h=37",
+    "H1.truncate text-[17px] font-bold leading-t h=21",
+    "P.truncate text-xs text-[var(--cl-ink-3)] h=16",
+    "DIV.flex shrink-0 items-center h=0"
+   ],
+   "draggedInteractives": [],
+   "shell": 210
+  }
+ },
+ {
+  "file": "dark-1280x800-03-workspace.jpg",
+  "theme": "dark",
+  "m": {
+   "vw": 1280,
+   "vh": 800,
+   "docOverflowX": 0,
+   "bodyOverflowX": 0,
+   "offenders": [],
+   "innerScroll": [],
+   "trafficLightHits": [],
+   "dragRegions": [
+    "HEADER.glass-thick flex min-h-[52px] shrink-0 i h=55",
+    "DIV.min-w-0 flex-1 h=37",
+    "H1.truncate text-[17px] font-bold leading-t h=21",
+    "P.truncate text-xs text-[var(--cl-ink-3)] h=16",
+    "DIV.flex shrink-0 items-center h=0"
+   ],
+   "draggedInteractives": [],
+   "shell": 210
+  }
+ },
+ {
+  "file": "dark-1280x800-04-biblioteca.jpg",
+  "theme": "dark",
+  "m": {
+   "vw": 1280,
+   "vh": 800,
+   "docOverflowX": 0,
+   "bodyOverflowX": 0,
+   "offenders": [],
+   "innerScroll": [],
+   "trafficLightHits": [],
+   "dragRegions": [
+    "HEADER.glass-thick flex min-h-[52px] shrink-0 i h=56",
+    "DIV.min-w-0 flex-1 h=37",
+    "H1.truncate text-[17px] font-bold leading-t h=21",
+    "P.truncate text-xs text-[var(--cl-ink-3)] h=16",
+    "DIV.flex shrink-0 items-center h=38"
+   ],
+   "draggedInteractives": [],
+   "shell": 210
+  }
+ },
+ {
+  "file": "dark-1280x800-05-marcas.jpg",
+  "theme": "dark",
+  "m": {
+   "vw": 1280,
+   "vh": 800,
+   "docOverflowX": 0,
+   "bodyOverflowX": 0,
+   "offenders": [],
+   "innerScroll": [],
+   "trafficLightHits": [],
+   "dragRegions": [
+    "HEADER.glass-thick flex min-h-[52px] shrink-0 i h=55",
+    "DIV.min-w-0 flex-1 h=37",
+    "H1.truncate text-[17px] font-bold leading-t h=21",
+    "P.truncate text-xs text-[var(--cl-ink-3)] h=16",
+    "DIV.flex shrink-0 items-center h=0"
+   ],
+   "draggedInteractives": [],
+   "shell": 210
+  }
+ },
+ {
+  "file": "dark-1280x800-06-publicacion.jpg",
+  "theme": "dark",
+  "m": {
+   "vw": 1280,
+   "vh": 800,
+   "docOverflowX": 0,
+   "bodyOverflowX": 0,
+   "offenders": [],
+   "innerScroll": [],
+   "trafficLightHits": [],
+   "dragRegions": [
+    "HEADER.glass-thick flex min-h-[52px] shrink-0 i h=55",
+    "DIV.min-w-0 flex-1 h=37",
+    "H1.truncate text-[17px] font-bold leading-t h=21",
+    "P.truncate text-xs text-[var(--cl-ink-3)] h=16",
+    "DIV.flex shrink-0 items-center h=26",
+    "SPAN.inline-flex items-center justify-center  h=26",
+    "SPAN.h-1.5 w-1.5 shrink-0 rounded-full bg-cur h=6"
+   ],
+   "draggedInteractives": [],
+   "shell": 210
+  }
+ },
+ {
+  "file": "dark-1280x800-07-ajustes-1-producer.jpg",
+  "theme": "dark",
+  "m": {
+   "vw": 1280,
+   "vh": 800,
+   "docOverflowX": 0,
+   "bodyOverflowX": 0,
+   "offenders": [],
+   "innerScroll": [],
+   "trafficLightHits": [],
+   "dragRegions": [
+    "HEADER.glass-thick flex min-h-[52px] shrink-0 i h=55",
+    "DIV.min-w-0 flex-1 h=37",
+    "H1.truncate text-[17px] font-bold leading-t h=21",
+    "P.truncate text-xs text-[var(--cl-ink-3)] h=16",
+    "DIV.flex shrink-0 items-center h=0"
+   ],
+   "draggedInteractives": [],
+   "shell": 210
+  }
+ },
+ {
+  "file": "dark-1280x800-07-ajustes-2-voice.jpg",
+  "theme": "dark",
+  "m": {
+   "vw": 1280,
+   "vh": 800,
+   "docOverflowX": 0,
+   "bodyOverflowX": 0,
+   "offenders": [],
+   "innerScroll": [],
+   "trafficLightHits": [],
+   "dragRegions": [
+    "HEADER.glass-thick flex min-h-[52px] shrink-0 i h=55",
+    "DIV.min-w-0 flex-1 h=37",
+    "H1.truncate text-[17px] font-bold leading-t h=21",
+    "P.truncate text-xs text-[var(--cl-ink-3)] h=16",
+    "DIV.flex shrink-0 items-center h=0"
+   ],
+   "draggedInteractives": [],
+   "shell": 210
+  }
+ },
+ {
+  "file": "dark-1280x800-07-ajustes-3-youtube.jpg",
+  "theme": "dark",
+  "m": {
+   "vw": 1280,
+   "vh": 800,
+   "docOverflowX": 0,
+   "bodyOverflowX": 0,
+   "offenders": [],
+   "innerScroll": [],
+   "trafficLightHits": [],
+   "dragRegions": [
+    "HEADER.glass-thick flex min-h-[52px] shrink-0 i h=55",
+    "DIV.min-w-0 flex-1 h=37",
+    "H1.truncate text-[17px] font-bold leading-t h=21",
+    "P.truncate text-xs text-[var(--cl-ink-3)] h=16",
+    "DIV.flex shrink-0 items-center h=0"
+   ],
+   "draggedInteractives": [],
+   "shell": 210
+  }
+ },
+ {
+  "file": "dark-1280x800-07-ajustes-4-agents.jpg",
+  "theme": "dark",
+  "m": {
+   "vw": 1280,
+   "vh": 800,
+   "docOverflowX": 0,
+   "bodyOverflowX": 0,
+   "offenders": [],
+   "innerScroll": [],
+   "trafficLightHits": [],
+   "dragRegions": [
+    "HEADER.glass-thick flex min-h-[52px] shrink-0 i h=55",
+    "DIV.min-w-0 flex-1 h=37",
+    "H1.truncate text-[17px] font-bold leading-t h=21",
+    "P.truncate text-xs text-[var(--cl-ink-3)] h=16",
+    "DIV.flex shrink-0 items-center h=0"
+   ],
+   "draggedInteractives": [],
+   "shell": 210
+  }
+ },
+ {
+  "file": "dark-1280x800-07-ajustes-5-appearance.jpg",
+  "theme": "dark",
+  "m": {
+   "vw": 1280,
+   "vh": 800,
+   "docOverflowX": 0,
+   "bodyOverflowX": 0,
+   "offenders": [],
+   "innerScroll": [],
+   "trafficLightHits": [],
+   "dragRegions": [
+    "HEADER.glass-thick flex min-h-[52px] shrink-0 i h=55",
+    "DIV.min-w-0 flex-1 h=37",
+    "H1.truncate text-[17px] font-bold leading-t h=21",
+    "P.truncate text-xs text-[var(--cl-ink-3)] h=16",
+    "DIV.flex shrink-0 items-center h=0"
+   ],
+   "draggedInteractives": [],
+   "shell": 210
+  }
+ },
+ {
+  "file": "dark-1280x800-08-aprender-1-guide.jpg",
+  "theme": "dark",
+  "m": {
+   "vw": 1280,
+   "vh": 800,
+   "docOverflowX": 0,
+   "bodyOverflowX": 0,
+   "offenders": [],
+   "innerScroll": [],
+   "trafficLightHits": [],
+   "dragRegions": [
+    "HEADER.glass-thick flex min-h-[52px] shrink-0 i h=55",
+    "DIV.min-w-0 flex-1 h=37",
+    "H1.truncate text-[17px] font-bold leading-t h=21",
+    "P.truncate text-xs text-[var(--cl-ink-3)] h=16",
+    "DIV.flex shrink-0 items-center h=0"
+   ],
+   "draggedInteractives": [],
+   "shell": 210
+  }
+ },
+ {
+  "file": "dark-1280x800-08-aprender-2-how-it-works.jpg",
+  "theme": "dark",
+  "m": {
+   "vw": 1280,
+   "vh": 800,
+   "docOverflowX": 0,
+   "bodyOverflowX": 0,
+   "offenders": [],
+   "innerScroll": [],
+   "trafficLightHits": [],
+   "dragRegions": [
+    "HEADER.glass-thick flex min-h-[52px] shrink-0 i h=55",
+    "DIV.min-w-0 flex-1 h=37",
+    "H1.truncate text-[17px] font-bold leading-t h=21",
+    "P.truncate text-xs text-[var(--cl-ink-3)] h=16",
+    "DIV.flex shrink-0 items-center h=0"
+   ],
+   "draggedInteractives": [],
+   "shell": 210
+  }
+ },
+ {
+  "file": "dark-1280x800-08-aprender-3-tutorial.jpg",
+  "theme": "dark",
+  "m": {
+   "vw": 1280,
+   "vh": 800,
+   "docOverflowX": 0,
+   "bodyOverflowX": 0,
+   "offenders": [],
+   "innerScroll": [],
+   "trafficLightHits": [],
+   "dragRegions": [
+    "HEADER.glass-thick flex min-h-[52px] shrink-0 i h=55",
+    "DIV.min-w-0 flex-1 h=37",
+    "H1.truncate text-[17px] font-bold leading-t h=21",
+    "P.truncate text-xs text-[var(--cl-ink-3)] h=16",
+    "DIV.flex shrink-0 items-center h=0"
+   ],
+   "draggedInteractives": [],
+   "shell": 210
+  }
+ },
+ {
+  "file": "dark-1280x800-08-aprender-4-faq.jpg",
+  "theme": "dark",
+  "m": {
+   "vw": 1280,
+   "vh": 800,
+   "docOverflowX": 0,
+   "bodyOverflowX": 0,
+   "offenders": [],
+   "innerScroll": [],
+   "trafficLightHits": [],
+   "dragRegions": [
+    "HEADER.glass-thick flex min-h-[52px] shrink-0 i h=55",
+    "DIV.min-w-0 flex-1 h=37",
+    "H1.truncate text-[17px] font-bold leading-t h=21",
+    "P.truncate text-xs text-[var(--cl-ink-3)] h=16",
+    "DIV.flex shrink-0 items-center h=0"
+   ],
+   "draggedInteractives": [],
+   "shell": 210
+  }
+ },
+ {
+  "file": "dark-1280x800-08-aprender-5-gallery.jpg",
+  "theme": "dark",
+  "m": {
+   "vw": 1280,
+   "vh": 800,
+   "docOverflowX": 0,
+   "bodyOverflowX": 0,
+   "offenders": [],
+   "innerScroll": [],
+   "trafficLightHits": [],
+   "dragRegions": [
+    "HEADER.glass-thick flex min-h-[52px] shrink-0 i h=55",
+    "DIV.min-w-0 flex-1 h=37",
+    "H1.truncate text-[17px] font-bold leading-t h=21",
+    "P.truncate text-xs text-[var(--cl-ink-3)] h=16",
+    "DIV.flex shrink-0 items-center h=0"
+   ],
+   "draggedInteractives": [],
+   "shell": 210
+  }
+ },
+ {
+  "file": "dark-1280x800-09-acerca-1-version.jpg",
+  "theme": "dark",
+  "m": {
+   "vw": 1280,
+   "vh": 800,
+   "docOverflowX": 0,
+   "bodyOverflowX": 0,
+   "offenders": [],
+   "innerScroll": [],
+   "trafficLightHits": [],
+   "dragRegions": [
+    "HEADER.glass-thick flex min-h-[52px] shrink-0 i h=55",
+    "DIV.min-w-0 flex-1 h=37",
+    "H1.truncate text-[17px] font-bold leading-t h=21",
+    "P.truncate text-xs text-[var(--cl-ink-3)] h=16",
+    "DIV.flex shrink-0 items-center h=0"
+   ],
+   "draggedInteractives": [],
+   "shell": 210
+  }
+ },
+ {
+  "file": "dark-1280x800-09-acerca-2-requirements.jpg",
+  "theme": "dark",
+  "m": {
+   "vw": 1280,
+   "vh": 800,
+   "docOverflowX": 0,
+   "bodyOverflowX": 0,
+   "offenders": [],
+   "innerScroll": [],
+   "trafficLightHits": [],
+   "dragRegions": [
+    "HEADER.glass-thick flex min-h-[52px] shrink-0 i h=55",
+    "DIV.min-w-0 flex-1 h=37",
+    "H1.truncate text-[17px] font-bold leading-t h=21",
+    "P.truncate text-xs text-[var(--cl-ink-3)] h=16",
+    "DIV.flex shrink-0 items-center h=0"
+   ],
+   "draggedInteractives": [],
+   "shell": 210
+  }
+ },
+ {
+  "file": "dark-1280x800-09-acerca-3-licenses.jpg",
+  "theme": "dark",
+  "m": {
+   "vw": 1280,
+   "vh": 800,
+   "docOverflowX": 0,
+   "bodyOverflowX": 0,
+   "offenders": [],
+   "innerScroll": [],
+   "trafficLightHits": [],
+   "dragRegions": [
+    "HEADER.glass-thick flex min-h-[52px] shrink-0 i h=55",
+    "DIV.min-w-0 flex-1 h=37",
+    "H1.truncate text-[17px] font-bold leading-t h=21",
+    "P.truncate text-xs text-[var(--cl-ink-3)] h=16",
+    "DIV.flex shrink-0 items-center h=0"
+   ],
+   "draggedInteractives": [],
+   "shell": 210
+  }
+ },
+ {
+  "file": "dark-1280x800-09-acerca-4-open-source.jpg",
+  "theme": "dark",
+  "m": {
+   "vw": 1280,
+   "vh": 800,
+   "docOverflowX": 0,
+   "bodyOverflowX": 0,
+   "offenders": [],
+   "innerScroll": [],
+   "trafficLightHits": [],
+   "dragRegions": [
+    "HEADER.glass-thick flex min-h-[52px] shrink-0 i h=55",
+    "DIV.min-w-0 flex-1 h=37",
+    "H1.truncate text-[17px] font-bold leading-t h=21",
+    "P.truncate text-xs text-[var(--cl-ink-3)] h=16",
+    "DIV.flex shrink-0 items-center h=0"
+   ],
+   "draggedInteractives": [],
+   "shell": 210
+  }
+ },
+ {
+  "file": "dark-1280x800-09-acerca-5-privacy.jpg",
+  "theme": "dark",
+  "m": {
+   "vw": 1280,
+   "vh": 800,
+   "docOverflowX": 0,
+   "bodyOverflowX": 0,
+   "offenders": [],
+   "innerScroll": [],
+   "trafficLightHits": [],
+   "dragRegions": [
+    "HEADER.glass-thick flex min-h-[52px] shrink-0 i h=55",
+    "DIV.min-w-0 flex-1 h=37",
+    "H1.truncate text-[17px] font-bold leading-t h=21",
+    "P.truncate text-xs text-[var(--cl-ink-3)] h=16",
+    "DIV.flex shrink-0 items-center h=0"
+   ],
+   "draggedInteractives": [],
+   "shell": 210
+  }
+ },
+ {
+  "file": "dark-960x640-01-mis-videos.jpg",
+  "theme": "dark",
+  "m": {
+   "vw": 960,
+   "vh": 640,
+   "docOverflowX": 0,
+   "bodyOverflowX": 0,
+   "offenders": [],
+   "innerScroll": [],
+   "trafficLightHits": [],
+   "dragRegions": [
+    "HEADER.glass-thick flex min-h-[52px] shrink-0 i h=55",
+    "DIV.min-w-0 flex-1 h=37",
+    "H1.truncate text-[17px] font-bold leading-t h=21",
+    "P.truncate text-xs text-[var(--cl-ink-3)] h=16",
+    "DIV.flex shrink-0 items-center h=0"
+   ],
+   "draggedInteractives": [],
+   "shell": 54
+  }
+ },
+ {
+  "file": "dark-960x640-03-workspace.jpg",
+  "theme": "dark",
+  "m": {
+   "vw": 960,
+   "vh": 640,
+   "docOverflowX": 0,
+   "bodyOverflowX": 0,
+   "offenders": [],
+   "innerScroll": [],
+   "trafficLightHits": [],
+   "dragRegions": [
+    "HEADER.glass-thick flex min-h-[52px] shrink-0 i h=55",
+    "DIV.min-w-0 flex-1 h=37",
+    "H1.truncate text-[17px] font-bold leading-t h=21",
+    "P.truncate text-xs text-[var(--cl-ink-3)] h=16",
+    "DIV.flex shrink-0 items-center h=0"
+   ],
+   "draggedInteractives": [],
+   "shell": 54
+  }
+ },
+ {
+  "file": "dark-960x640-04-biblioteca.jpg",
+  "theme": "dark",
+  "m": {
+   "vw": 960,
+   "vh": 640,
+   "docOverflowX": 0,
+   "bodyOverflowX": 0,
+   "offenders": [],
+   "innerScroll": [],
+   "trafficLightHits": [],
+   "dragRegions": [
+    "HEADER.glass-thick flex min-h-[52px] shrink-0 i h=56",
+    "DIV.min-w-0 flex-1 h=37",
+    "H1.truncate text-[17px] font-bold leading-t h=21",
+    "P.truncate text-xs text-[var(--cl-ink-3)] h=16",
+    "DIV.flex shrink-0 items-center h=38"
+   ],
+   "draggedInteractives": [],
+   "shell": 54
+  }
+ },
+ {
+  "file": "dark-960x640-05-marcas.jpg",
+  "theme": "dark",
+  "m": {
+   "vw": 960,
+   "vh": 640,
+   "docOverflowX": 0,
+   "bodyOverflowX": 0,
+   "offenders": [],
+   "innerScroll": [],
+   "trafficLightHits": [],
+   "dragRegions": [
+    "HEADER.glass-thick flex min-h-[52px] shrink-0 i h=55",
+    "DIV.min-w-0 flex-1 h=37",
+    "H1.truncate text-[17px] font-bold leading-t h=21",
+    "P.truncate text-xs text-[var(--cl-ink-3)] h=16",
+    "DIV.flex shrink-0 items-center h=0"
+   ],
+   "draggedInteractives": [],
+   "shell": 54
+  }
+ },
+ {
+  "file": "dark-960x640-06-publicacion.jpg",
+  "theme": "dark",
+  "m": {
+   "vw": 960,
+   "vh": 640,
+   "docOverflowX": 0,
+   "bodyOverflowX": 0,
+   "offenders": [],
+   "innerScroll": [],
+   "trafficLightHits": [],
+   "dragRegions": [
+    "HEADER.glass-thick flex min-h-[52px] shrink-0 i h=55",
+    "DIV.min-w-0 flex-1 h=37",
+    "H1.truncate text-[17px] font-bold leading-t h=21",
+    "P.truncate text-xs text-[var(--cl-ink-3)] h=16",
+    "DIV.flex shrink-0 items-center h=26",
+    "SPAN.inline-flex items-center justify-center  h=26",
+    "SPAN.h-1.5 w-1.5 shrink-0 rounded-full bg-cur h=6"
+   ],
+   "draggedInteractives": [],
+   "shell": 54
+  }
+ },
+ {
+  "file": "dark-960x640-07-ajustes-1-producer.jpg",
+  "theme": "dark",
+  "m": {
+   "vw": 960,
+   "vh": 640,
+   "docOverflowX": 0,
+   "bodyOverflowX": 0,
+   "offenders": [],
+   "innerScroll": [],
+   "trafficLightHits": [],
+   "dragRegions": [
+    "HEADER.glass-thick flex min-h-[52px] shrink-0 i h=55",
+    "DIV.min-w-0 flex-1 h=37",
+    "H1.truncate text-[17px] font-bold leading-t h=21",
+    "P.truncate text-xs text-[var(--cl-ink-3)] h=16",
+    "DIV.flex shrink-0 items-center h=0"
+   ],
+   "draggedInteractives": [],
+   "shell": 54
+  }
+ },
+ {
+  "file": "dark-960x640-07-ajustes-2-voice.jpg",
+  "theme": "dark",
+  "m": {
+   "vw": 960,
+   "vh": 640,
+   "docOverflowX": 0,
+   "bodyOverflowX": 0,
+   "offenders": [],
+   "innerScroll": [],
+   "trafficLightHits": [],
+   "dragRegions": [
+    "HEADER.glass-thick flex min-h-[52px] shrink-0 i h=55",
+    "DIV.min-w-0 flex-1 h=37",
+    "H1.truncate text-[17px] font-bold leading-t h=21",
+    "P.truncate text-xs text-[var(--cl-ink-3)] h=16",
+    "DIV.flex shrink-0 items-center h=0"
+   ],
+   "draggedInteractives": [],
+   "shell": 54
+  }
+ },
+ {
+  "file": "dark-960x640-07-ajustes-3-youtube.jpg",
+  "theme": "dark",
+  "m": {
+   "vw": 960,
+   "vh": 640,
+   "docOverflowX": 0,
+   "bodyOverflowX": 0,
+   "offenders": [],
+   "innerScroll": [],
+   "trafficLightHits": [],
+   "dragRegions": [
+    "HEADER.glass-thick flex min-h-[52px] shrink-0 i h=55",
+    "DIV.min-w-0 flex-1 h=37",
+    "H1.truncate text-[17px] font-bold leading-t h=21",
+    "P.truncate text-xs text-[var(--cl-ink-3)] h=16",
+    "DIV.flex shrink-0 items-center h=0"
+   ],
+   "draggedInteractives": [],
+   "shell": 54
+  }
+ },
+ {
+  "file": "dark-960x640-07-ajustes-4-agents.jpg",
+  "theme": "dark",
+  "m": {
+   "vw": 960,
+   "vh": 640,
+   "docOverflowX": 0,
+   "bodyOverflowX": 0,
+   "offenders": [],
+   "innerScroll": [],
+   "trafficLightHits": [],
+   "dragRegions": [
+    "HEADER.glass-thick flex min-h-[52px] shrink-0 i h=55",
+    "DIV.min-w-0 flex-1 h=37",
+    "H1.truncate text-[17px] font-bold leading-t h=21",
+    "P.truncate text-xs text-[var(--cl-ink-3)] h=16",
+    "DIV.flex shrink-0 items-center h=0"
+   ],
+   "draggedInteractives": [],
+   "shell": 54
+  }
+ },
+ {
+  "file": "dark-960x640-07-ajustes-5-appearance.jpg",
+  "theme": "dark",
+  "m": {
+   "vw": 960,
+   "vh": 640,
+   "docOverflowX": 0,
+   "bodyOverflowX": 0,
+   "offenders": [],
+   "innerScroll": [],
+   "trafficLightHits": [],
+   "dragRegions": [
+    "HEADER.glass-thick flex min-h-[52px] shrink-0 i h=55",
+    "DIV.min-w-0 flex-1 h=37",
+    "H1.truncate text-[17px] font-bold leading-t h=21",
+    "P.truncate text-xs text-[var(--cl-ink-3)] h=16",
+    "DIV.flex shrink-0 items-center h=0"
+   ],
+   "draggedInteractives": [],
+   "shell": 54
+  }
+ },
+ {
+  "file": "dark-960x640-08-aprender-1-guide.jpg",
+  "theme": "dark",
+  "m": {
+   "vw": 960,
+   "vh": 640,
+   "docOverflowX": 0,
+   "bodyOverflowX": 0,
+   "offenders": [],
+   "innerScroll": [],
+   "trafficLightHits": [],
+   "dragRegions": [
+    "HEADER.glass-thick flex min-h-[52px] shrink-0 i h=55",
+    "DIV.min-w-0 flex-1 h=37",
+    "H1.truncate text-[17px] font-bold leading-t h=21",
+    "P.truncate text-xs text-[var(--cl-ink-3)] h=16",
+    "DIV.flex shrink-0 items-center h=0"
+   ],
+   "draggedInteractives": [],
+   "shell": 54
+  }
+ },
+ {
+  "file": "dark-960x640-08-aprender-2-how-it-works.jpg",
+  "theme": "dark",
+  "m": {
+   "vw": 960,
+   "vh": 640,
+   "docOverflowX": 0,
+   "bodyOverflowX": 0,
+   "offenders": [],
+   "innerScroll": [],
+   "trafficLightHits": [],
+   "dragRegions": [
+    "HEADER.glass-thick flex min-h-[52px] shrink-0 i h=55",
+    "DIV.min-w-0 flex-1 h=37",
+    "H1.truncate text-[17px] font-bold leading-t h=21",
+    "P.truncate text-xs text-[var(--cl-ink-3)] h=16",
+    "DIV.flex shrink-0 items-center h=0"
+   ],
+   "draggedInteractives": [],
+   "shell": 54
+  }
+ },
+ {
+  "file": "dark-960x640-08-aprender-3-tutorial.jpg",
+  "theme": "dark",
+  "m": {
+   "vw": 960,
+   "vh": 640,
+   "docOverflowX": 0,
+   "bodyOverflowX": 0,
+   "offenders": [],
+   "innerScroll": [],
+   "trafficLightHits": [],
+   "dragRegions": [
+    "HEADER.glass-thick flex min-h-[52px] shrink-0 i h=55",
+    "DIV.min-w-0 flex-1 h=37",
+    "H1.truncate text-[17px] font-bold leading-t h=21",
+    "P.truncate text-xs text-[var(--cl-ink-3)] h=16",
+    "DIV.flex shrink-0 items-center h=0"
+   ],
+   "draggedInteractives": [],
+   "shell": 54
+  }
+ },
+ {
+  "file": "dark-960x640-08-aprender-4-faq.jpg",
+  "theme": "dark",
+  "m": {
+   "vw": 960,
+   "vh": 640,
+   "docOverflowX": 0,
+   "bodyOverflowX": 0,
+   "offenders": [],
+   "innerScroll": [],
+   "trafficLightHits": [],
+   "dragRegions": [
+    "HEADER.glass-thick flex min-h-[52px] shrink-0 i h=55",
+    "DIV.min-w-0 flex-1 h=37",
+    "H1.truncate text-[17px] font-bold leading-t h=21",
+    "P.truncate text-xs text-[var(--cl-ink-3)] h=16",
+    "DIV.flex shrink-0 items-center h=0"
+   ],
+   "draggedInteractives": [],
+   "shell": 54
+  }
+ },
+ {
+  "file": "dark-960x640-08-aprender-5-gallery.jpg",
+  "theme": "dark",
+  "m": {
+   "vw": 960,
+   "vh": 640,
+   "docOverflowX": 0,
+   "bodyOverflowX": 0,
+   "offenders": [],
+   "innerScroll": [],
+   "trafficLightHits": [],
+   "dragRegions": [
+    "HEADER.glass-thick flex min-h-[52px] shrink-0 i h=55",
+    "DIV.min-w-0 flex-1 h=37",
+    "H1.truncate text-[17px] font-bold leading-t h=21",
+    "P.truncate text-xs text-[var(--cl-ink-3)] h=16",
+    "DIV.flex shrink-0 items-center h=0"
+   ],
+   "draggedInteractives": [],
+   "shell": 54
+  }
+ },
+ {
+  "file": "dark-960x640-09-acerca-1-version.jpg",
+  "theme": "dark",
+  "m": {
+   "vw": 960,
+   "vh": 640,
+   "docOverflowX": 0,
+   "bodyOverflowX": 0,
+   "offenders": [],
+   "innerScroll": [],
+   "trafficLightHits": [],
+   "dragRegions": [
+    "HEADER.glass-thick flex min-h-[52px] shrink-0 i h=55",
+    "DIV.min-w-0 flex-1 h=37",
+    "H1.truncate text-[17px] font-bold leading-t h=21",
+    "P.truncate text-xs text-[var(--cl-ink-3)] h=16",
+    "DIV.flex shrink-0 items-center h=0"
+   ],
+   "draggedInteractives": [],
+   "shell": 54
+  }
+ },
+ {
+  "file": "dark-960x640-09-acerca-2-requirements.jpg",
+  "theme": "dark",
+  "m": {
+   "vw": 960,
+   "vh": 640,
+   "docOverflowX": 0,
+   "bodyOverflowX": 0,
+   "offenders": [],
+   "innerScroll": [],
+   "trafficLightHits": [],
+   "dragRegions": [
+    "HEADER.glass-thick flex min-h-[52px] shrink-0 i h=55",
+    "DIV.min-w-0 flex-1 h=37",
+    "H1.truncate text-[17px] font-bold leading-t h=21",
+    "P.truncate text-xs text-[var(--cl-ink-3)] h=16",
+    "DIV.flex shrink-0 items-center h=0"
+   ],
+   "draggedInteractives": [],
+   "shell": 54
+  }
+ },
+ {
+  "file": "dark-960x640-09-acerca-3-licenses.jpg",
+  "theme": "dark",
+  "m": {
+   "vw": 960,
+   "vh": 640,
+   "docOverflowX": 0,
+   "bodyOverflowX": 0,
+   "offenders": [],
+   "innerScroll": [],
+   "trafficLightHits": [],
+   "dragRegions": [
+    "HEADER.glass-thick flex min-h-[52px] shrink-0 i h=55",
+    "DIV.min-w-0 flex-1 h=37",
+    "H1.truncate text-[17px] font-bold leading-t h=21",
+    "P.truncate text-xs text-[var(--cl-ink-3)] h=16",
+    "DIV.flex shrink-0 items-center h=0"
+   ],
+   "draggedInteractives": [],
+   "shell": 54
+  }
+ },
+ {
+  "file": "dark-960x640-09-acerca-4-open-source.jpg",
+  "theme": "dark",
+  "m": {
+   "vw": 960,
+   "vh": 640,
+   "docOverflowX": 0,
+   "bodyOverflowX": 0,
+   "offenders": [],
+   "innerScroll": [],
+   "trafficLightHits": [],
+   "dragRegions": [
+    "HEADER.glass-thick flex min-h-[52px] shrink-0 i h=55",
+    "DIV.min-w-0 flex-1 h=37",
+    "H1.truncate text-[17px] font-bold leading-t h=21",
+    "P.truncate text-xs text-[var(--cl-ink-3)] h=16",
+    "DIV.flex shrink-0 items-center h=0"
+   ],
+   "draggedInteractives": [],
+   "shell": 54
+  }
+ },
+ {
+  "file": "dark-960x640-09-acerca-5-privacy.jpg",
+  "theme": "dark",
+  "m": {
+   "vw": 960,
+   "vh": 640,
+   "docOverflowX": 0,
+   "bodyOverflowX": 0,
+   "offenders": [],
+   "innerScroll": [],
+   "trafficLightHits": [],
+   "dragRegions": [
+    "HEADER.glass-thick flex min-h-[52px] shrink-0 i h=55",
+    "DIV.min-w-0 flex-1 h=37",
+    "H1.truncate text-[17px] font-bold leading-t h=21",
+    "P.truncate text-xs text-[var(--cl-ink-3)] h=16",
+    "DIV.flex shrink-0 items-center h=0"
+   ],
+   "draggedInteractives": [],
+   "shell": 54
+  }
+ }
+]

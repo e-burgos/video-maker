@@ -4,6 +4,7 @@ import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 
 import {
+  FIXTURES_ROOT,
   REPO_ROOT,
   VOICE_ENV_VARS,
   assert,
@@ -20,7 +21,7 @@ import {
 
 const RENDER_API_PORT = 4430;
 const SLUG = 'script-word-timing-smoke';
-const SOURCE_PROJECT = join(REPO_ROOT, 'media/display-ads');
+const SOURCE_PROJECT = join(FIXTURES_ROOT, 'display-ads');
 const ARTIFACTS_DIR = join(
   REPO_ROOT,
   'sdd/specs/spec-e-burgos-002-auto-montage-pipeline/fixes/artifacts',

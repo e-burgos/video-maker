@@ -105,6 +105,7 @@ export const RENDER_API_ERROR_CODES = [
   'PRODUCER_TURN_ACTIVE',
   'PRODUCER_TURN_FAILED',
   'PRODUCER_RATE_LIMITED',
+  'PRODUCER_CLI_OUTDATED',
   'PRODUCER_TURN_NOT_FOUND',
   'PRODUCER_TURN_NOT_CANCELABLE',
   'PRODUCER_MESSAGE_INVALID',
@@ -172,7 +173,14 @@ export const RENDER_API_ERROR_CODES = [
 
 export type RenderApiErrorCode = (typeof RENDER_API_ERROR_CODES)[number];
 
+export interface RenderApiErrorIssue {
+  readonly code: string;
+  readonly path: string;
+  readonly message: string;
+}
+
 export interface RenderApiErrorDetails {
+  readonly issues?: readonly RenderApiErrorIssue[];
   readonly assetPersisted?: boolean;
   readonly catalogUpdated?: boolean;
   readonly subtype?: string;
@@ -186,6 +194,7 @@ export interface RenderApiErrorPayload {
   readonly resource?: string;
   readonly expected?: string;
   readonly hint?: string;
+  readonly issues?: readonly RenderApiErrorIssue[];
   readonly assetPersisted?: boolean;
   readonly catalogUpdated?: boolean;
   readonly subtype?: string;

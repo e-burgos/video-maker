@@ -1,3 +1,4 @@
+import { StateBadge } from '@e-burgos/tucu-ui';
 import type { ProposalConcept } from '@video-maker/timeline-core';
 
 import { outputPresetDetail } from '../api/output-presets';
@@ -17,9 +18,7 @@ import type { TranslationKey } from '../i18n/messages-en';
 import type { MaterialReviewDocument } from '../api/material-review-types';
 import { ErrorNotice } from './error-notice';
 import { MaterialNotReviewedNote, MaterialReviewTable, MaterialWarningsBlock } from './material-review-block';
-import { Badge } from './ui/badge';
-import { Button } from './ui/button';
-import { Card } from './ui/card';
+import { PRIMARY_BUTTON_SMALL_CLASS, SECONDARY_BUTTON_SMALL_CLASS } from './ui/cl-controls';
 
 export type ProposalCardProps = {
   slug: string;
@@ -32,13 +31,13 @@ function EstimateLines({ estimate }: { estimate: ProposalEstimate | undefined })
   const tn = useTn();
 
   if (estimate === undefined) {
-    return <p className="text-xs text-ink-faint">{t('proposal.estimate.none')}</p>;
+    return <p className="text-xs text-[var(--cl-ink-3)]">{t('proposal.estimate.none')}</p>;
   }
 
   const samples = estimateBasisSamples(estimate);
 
   return (
-    <ul data-testid="proposal-estimate" className="space-y-0.5 text-xs text-ink-muted">
+    <ul data-testid="proposal-estimate" className="space-y-0.5 text-xs text-[var(--cl-ink-2)]">
       <li>{t('proposal.estimate.render', { minutes: formatMinutes(estimate.renderMinutes) })}</li>
       <li>{t('proposal.estimate.voice', { minutes: formatMinutes(estimate.voiceMinutes) })}</li>
       {estimate.producerTokens !== null && (
@@ -50,13 +49,13 @@ function EstimateLines({ estimate }: { estimate: ProposalEstimate | undefined })
         </li>
       )}
       {estimate.usd !== null && <li>{t('proposal.estimate.usd', { usd: formatUsd(estimate.usd) })}</li>}
-      <li className="text-ink-faint">
+      <li className="text-[var(--cl-ink-3)]">
         {samples === null
           ? t('proposal.estimate.basis.default')
           : tn('proposal.estimate.basis.samples', samples)}
       </li>
       {estimate.basis.render.rough && (
-        <li data-testid="proposal-estimate-rough" className="text-warning">
+        <li data-testid="proposal-estimate-rough" className="text-[var(--tucu-state-orange-ink)]">
           <span className="font-medium">{t('proposal.estimate.rough')}</span>{' '}
           {t(samples === null ? 'proposal.estimate.rough.default' : 'proposal.estimate.rough.studio')}
         </li>
@@ -82,8 +81,8 @@ function ConceptFields({ concept }: { concept: ProposalConcept }) {
     <dl className="grid grid-cols-2 gap-x-3 gap-y-1 text-xs">
       {rows.map(([labelKey, value]) => (
         <div key={labelKey}>
-          <dt className="text-ink-faint">{t(labelKey)}</dt>
-          <dd className="text-ink">{value}</dd>
+          <dt className="text-[var(--cl-ink-3)]">{t(labelKey)}</dt>
+          <dd className="text-[var(--cl-ink)]">{value}</dd>
         </div>
       ))}
     </dl>
@@ -107,26 +106,35 @@ function ConceptItem({ concept, estimate, recommended, approved, approving, onAp
       data-testid="proposal-concept"
       data-concept-id={concept.id}
       data-approved={approved}
-      className={`space-y-2 rounded-panel border p-3 ${approved ? 'border-success/60' : 'border-border-subtle'}`}
+      className={`flex flex-col gap-2 rounded-[12px] border p-3 ${approved ? 'border-[var(--tucu-state-green-line)]' : 'border-[var(--tucu-glass-sub-line)]'}`}
     >
       <div className="flex flex-wrap items-center gap-2">
-        <h3 className="text-sm font-medium text-ink">{concept.title}</h3>
-        {recommended && <Badge tone="accent">{t('proposal.recommended')}</Badge>}
-        {approved && <Badge tone="success">{t('proposal.approved')}</Badge>}
+        <h3 className="text-sm font-semibold text-[var(--cl-ink)]">{concept.title}</h3>
+        {recommended && (
+          <StateBadge tone="teal" size="sm">
+            {t('proposal.recommended')}
+          </StateBadge>
+        )}
+        {approved && (
+          <StateBadge tone="green" dot size="sm">
+            {t('proposal.approved')}
+          </StateBadge>
+        )}
       </div>
-      <p className="text-sm text-ink-muted">{concept.angle}</p>
+      <p className="text-sm text-[var(--cl-ink-2)]">{concept.angle}</p>
       <ConceptFields concept={concept} />
       <EstimateLines estimate={estimate} />
-      {concept.notes !== undefined && <p className="text-xs text-ink-faint">{concept.notes}</p>}
+      {concept.notes !== undefined && <p className="text-xs text-[var(--cl-ink-3)]">{concept.notes}</p>}
       {!approved && (
-        <Button
-          variant={recommended ? 'primary' : 'secondary'}
+        <button
+          type="button"
+          className={`${recommended ? PRIMARY_BUTTON_SMALL_CLASS : SECONDARY_BUTTON_SMALL_CLASS} self-start`}
           disabled={approving}
           aria-label={`${t('proposal.approve')}: ${concept.title}`}
           onClick={() => onApprove(concept.id)}
         >
           {approving ? t('proposal.approving') : t('proposal.approve')}
-        </Button>
+        </button>
       )}
     </li>
   );
@@ -154,16 +162,13 @@ export function ProposalCard({ slug, proposal, materialReview }: ProposalCardPro
   const reviewMissing = materialReview?.data != null && review === null && document.materialWarnings === undefined;
 
   return (
-    <Card data-testid="proposal-card" className="space-y-3 p-4">
+    <section data-testid="proposal-card" className="glass-sub space-y-3 rounded-[14px] p-3.5">
       {warnings !== null && <MaterialWarningsBlock slug={slug} warnings={warnings} />}
       <div className="space-y-1">
         <div className="flex flex-wrap items-center gap-2">
-          <h2 className="text-sm font-medium text-ink">{t('proposal.heading')}</h2>
-          <Badge tone={document.status === 'approved' ? 'success' : 'warning'}>
-            {document.status === 'approved' ? t('proposal.statusApproved') : t('proposal.statusPending')}
-          </Badge>
+          <h2 className="text-sm font-bold text-[var(--cl-ink)]">{t('proposal.heading')}</h2>
         </div>
-        <p className="text-xs text-ink-faint">{t('proposal.hint')}</p>
+        <p className="text-xs text-[var(--cl-ink-3)]">{t('proposal.hint')}</p>
       </div>
       {review !== null && <MaterialReviewTable review={review} />}
       {reviewMissing && <MaterialNotReviewedNote />}
@@ -181,6 +186,6 @@ export function ProposalCard({ slug, proposal, materialReview }: ProposalCardPro
         ))}
       </ul>
       {approveAction.error !== null && <ErrorNotice error={approveAction.error} />}
-    </Card>
+    </section>
   );
 }

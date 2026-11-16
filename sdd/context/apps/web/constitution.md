@@ -1,6 +1,6 @@
 # Constitución — apps/web
 
-> Versión 3.0 | Última actualización: consolidación de fragmentos | Fecha: 2026-10-13
+> Versión 3.5 | Última actualización: consolidación de fragmentos | Fecha: 2026-11-13
 
 ## 1. Propósito
 
@@ -18,7 +18,16 @@
   estilo elegible, música, preset de salida, logo con tamaño/opacidad y bumpers de inicio/fin) y
   disparo, seguimiento, **reintento** y descarga de renders locales. El inicio (`/`) lista videos
   en tarjetas con miniatura y una zona para crear uno soltando un archivo; `/settings` (perezosa)
-  configura el motor del productor (Claude Code u OpenRouter) y su modelo. **Toda la interfaz está
+  configura el motor del productor (Claude Code u OpenRouter) y su modelo. **Todas las rutas viven
+  dentro del shell Cristal Líquido** (spec-025): sidebar de vidrio con logo y firma, bloque «este
+  video» con sus pasos, toolbar con una sola acción por página (`useToolbarAction`) y pie con estado
+  del servicio (modal), switch de idioma y apariencia (sistema/claro/oscuro); todas las rutas
+  (incluidas publicación, ajustes y guía) usan el Cristal Líquido; el modo heredado se retiró (no existen
+  `isMigratedRoute`, `LegacySurface` ni la prop `surface`); los pasos
+  del video en la sidebar muestran estado real con `useVideoStepStatuses`). En el espacio de trabajo el chat del
+  productor y el primer uso van a la izquierda; la vista previa queda siempre visible sobre escenario opaco, con
+  Material | Entregas a la derecha; el estado de la propuesta vive en el slot de estado del toolbar y «Aprobar el
+  enfoque recomendado» es la acción solo con propuesta pendiente. **Toda la interfaz está
   en español (default) e inglés** (`src/i18n/`), con una ruta `/guide` que la explica en los dos
   idiomas.
 - **No tiene lógica de motor ni toca el filesystem.** Todo lo que muestra y todo lo que escribe
@@ -28,6 +37,10 @@
 ## 2. Stack tecnológico
 
 - React 19 + `react-router-dom` 7 + Tailwind CSS 4 (`@tailwindcss/vite`), Vite 8
+- **`@e-burgos/tucu-ui` 3.10.1** con Tailwind propio (nunca importar `@e-burgos/tucu-ui/styles`: doble
+  Tailwind), tokens `--tucu-*` y `--cl-*` (claro y oscuro) y las fuentes empaquetadas
+  `@fontsource-variable/inter` 5.3.0 y `@fontsource-variable/jetbrains-mono` 5.3.0; las tres, con
+  versión exacta en el `package.json` raíz.
 - Vitest 4 + jsdom + `@testing-library/react` / `@testing-library/dom`, cobertura `@vitest/coverage-v8`
 - **`@testing-library/user-event` NO está instalado**: los tests de interacción usan `fireEvent`.
   No agregarlo sin un motivo que `fireEvent` no cubra.
@@ -66,13 +79,22 @@ src/
   i18n/         messages-en (fuente de verdad tipada) · messages-es (lazy) · translate ·
                 language-context · language (`DEFAULT_LANGUAGE = 'es'`) · literal-copy-scan
   guide/        guide-content-en · guide-content-es · guide-content (selector por idioma)
+  theme/        scene (aurora estática) · theme-preferences · theme-context (`ThemeProvider`,
+                `useThemePreferences`) · theme-switch; un script inline en `index.html` aplica tema,
+                material (vidrio/sólido) y `data-shell="electron"` antes del primer render
   hooks/        useAsyncResource (único primitivo de estado de servidor) · use-api-action ·
                 use-render-job-poll · use-producer-turn-poll · use-producer-conversation ·
                 use-inbox-uploads · use-stick-to-bottom · use-auto-switching-tab ·
                 use-video-card-thumbnail
-  components/   studio-layout · service-health-badge · error-notice · create-project-form ·
+  components/   shell/ (sidebar de vidrio, navegación, pasos del video, toolbar + contexto +
+                `useToolbarAction({ label, onClick, disabled, loading })`, contenido con superficie
+                heredada, pie con `footer-control-style.ts` → `FOOTER_CONTROL_CLASS`, modal de estado
+                del servicio, `use-video-step-statuses` · `toolbar-status` + `toolbar-status-context`) · service-health-badge · error-notice · elevenlabs-settings-section · create-project-form ·
                 voice-picker ·
-                asset-card · asset-delete-control · asset-preview · asset-uploader ·
+                library/ (grilla de tiles opacos, filtro y resumen por rol, barra de selección, diálogo de borrado
+                múltiple) · media-viewer/ (visor `role="dialog"` en portal z-70, modelo, escenario, tira de miniaturas,
+                detalle, foco atrapado, teclado y comparación lado a lado) · storyboard/ (lista de escenas y modelo,
+                `storyboard-save-bar.tsx` pegajosa) · asset-uploader ·
                 generated-files-panel · timeline-player ·
                 clip-track-editor · caption-editor · caption-style-selector · music-mix-editor ·
                 output-preset-selector ·
@@ -87,7 +109,10 @@ src/
                 folder-heading (renombrado inline) · openrouter-model-picker ·
                 workspace-side-panel · producer-conversation-panel · chat-drop-zone ·
                 asset-proposal-card · video-card · home-drop-hint · create-project-by-drop ·
-                ui/{button,card,badge,tabs} (+ tokens en `index.css` bajo `@theme`)
+                videos/ (Mis videos) · workspace/ (vista previa, Material, Entregas) ·
+                ui/{button,card,badge,tabs,overflow-menu,cl-controls (suma `TEXTAREA_CLASS`),brand-mark} (`brand-mark.tsx` lo genera
+                `design/rebranding/logo/build-logo.mjs`, etiquetas por prop desde el catálogo;
+                tokens en `index.css` bajo `@theme`)
   pages/        projects-page · asset-library-page · project-workspace-page · storyboard-page ·
                 voice-page · project-preview-page · settings-page · guide-page (rutas perezosas)
   app/app.tsx   router (`/`, `/guide`, `/settings`, `/projects/:slug` [workspace de chat],
@@ -220,13 +245,10 @@ e2e/            smoke-helpers.mjs (compartido) · studio-smoke.mjs · montage-sm
   `numberedOptions`, todo puro. La lista de bloques salió de mirar lo que el agente **realmente**
   contesta, no de un subset teórico de CommonMark.
 - **`media/` nunca se copia a `apps/web/public`** (D-6): todo asset se lee por `EP-011`.
-- **El borrado de assets es una máquina de tres pasos en la propia tarjeta**
-  (`asset-delete-control.tsx`: `closed` → `confirm` → `in-use`), no un modal: si el servicio
-  contesta `409 ASSET_IN_USE` la confirmación pasa a mostrar los usos reportados y ofrece **Delete
-  anyway** (reintento con `force=true`); al confirmar se recarga el listado. `AssetCard` sólo
-  expone `onDeleted` y `data-testid="asset-card"` + `data-asset-path` para que el E2E ubique una
-  tarjeta concreta. No hay borrado múltiple ni deshacer: un borrado con `force` puede romper la
-  timeline y la UI sólo avisa.
+- **El borrado de assets vive en la biblioteca** (`components/library/`): selección múltiple con barra de
+  selección y diálogo de borrado múltiple; si el servicio contesta `409 ASSET_IN_USE` el diálogo muestra los
+  usos reportados y ofrece reintento con `force=true`; al confirmar se recarga el listado. No hay deshacer: un
+  borrado con `force` puede romper la timeline y la UI sólo avisa.
 - **La sección "Generated" de la biblioteca** (`generated-files-panel.tsx`) lee las rutas conocidas
   del motor (`work/voice/voice.wav`, `work/producer/script.txt`, `work/voice/script-manifest.json`
   y los `out/*.mp4`) vía `listGenerated` (`EP-028`) y `getProjectFile` (`EP-011`, que arma la URL
@@ -361,7 +383,7 @@ e2e/            smoke-helpers.mjs (compartido) · studio-smoke.mjs · montage-sm
   `asset-role-required` y `asset-role-hint`. Los de `cycle-02` de `spec-016` (i18n y guía) suman
   `language-switch` (con `data-language` por botón), `guide-nav`, `guide`, `guide-index`,
   `guide-section` (con `data-guide-section` y `data-guide-language`) y `error-technical-detail`.
-  `FIX-005-001` suma `asset-card` (con `data-asset-path`) para el borrado. Si se renombran, hay
+  `asset-card` y `data-asset-path` ya no existen: la biblioteca migrada reemplazó la tarjeta. Si se renombran, hay
   que actualizar los guiones.
 - **Cada ciclo cierra con al menos una captura real de Playwright** de la UI contra un `render-api`
   real, en `cycles/cycle-XX/artifacts/` (D-10, RNF-5). `lint`/`test`/`build` verdes no prueban que
@@ -379,9 +401,9 @@ e2e/            smoke-helpers.mjs (compartido) · studio-smoke.mjs · montage-sm
 
 Todos bajo `src/` de la app; copy `es`/`en` en `src/i18n/`; el contrato de cada endpoint está en `sdd/api.json`.
 
-- **Barra única del proyecto** (`StudioLayout` carga el modo): productor · motion (sólo motion) · biblioteca ·
-  storyboard · voz · vista previa; ya no hay "Edición avanzada" ni "Abrir Motion graphics". Las páginas clásicas son
-  `Classic…Page` detrás de `components/project-mode-gate.tsx`.
+- **Pasos únicos del video** (en el bloque «este video» de la sidebar del shell, que carga el modo): productor ·
+  motion (sólo motion) · biblioteca · storyboard · voz · vista previa; ya no hay "Edición avanzada" ni "Abrir Motion
+  graphics". Las páginas clásicas son `Classic…Page` detrás de `components/project-mode-gate.tsx`.
 - **Modo motion**: al crear un proyecto se elige "Motion graphics" o "Material crudo" (radiogroup, default crudo); la
   tarjeta lleva insignia y va a `/projects/:slug/motion`. `pages/motion-page.tsx` (brief: marca, formato, música,
   golpes, título, objetivo, público, guion, imágenes de `raw/images`; "Armar storyboard"; "Hacer video" con progreso
@@ -396,8 +418,10 @@ Todos bajo `src/` de la app; copy `es`/`en` en `src/i18n/`; el contrato de cada 
 - **Marcas**: `/brands` (propias e incluidas, nueva, duplicar, borrar) y `/brands/:id` (identidad, logo, colores —4 base
   + avanzado por variable; cambiar un color base recalcula todos y descarta retoques—, tipografías, voz, música, fotos
   y productos) con vista previa en vivo en un iframe (colores por `postMessage` `mg-brand-tokens` + recompuesta
-  diferida). Una incluida es de sólo lectura con "Duplicar". `pages/brands-page.tsx`, `brand-editor-page.tsx`, 17
-  `components/brand-*.tsx`, hooks `use-brand-editor`, `use-section-draft`, `use-brand-upload`, `use-brand-font-faces`,
+  diferida). Una incluida es de sólo lectura con "Duplicar". `pages/brands-page.tsx`, `brand-editor-page.tsx`,
+  `components/brands/` (tarjetas, secciones del editor, vista previa y barra de guardado única: los borradores de
+  sección viven en la página con `use-brand-draft`/`brand-draft.ts` y un solo `putBrand` aplica las secciones
+  cambiadas; colores, variables avanzadas y archivos se aplican al instante), hooks `use-brand-editor`, `use-section-draft`, `use-brand-upload`, `use-brand-font-faces`,
   `use-project-brand-voice`; `api/brand-*.ts`, `google-font-families.ts`. `components/brand-picker.tsx` en el alta
   (crudo: opcional; motion: obligatoria) y `project-brand-control.tsx` en la barra (en motion la marca se cambia en el
   brief; una marca sin música sólo ofrece "Sin música"). El selector de subtítulos ofrece "De la marca" y la página Voz
@@ -408,8 +432,10 @@ Todos bajo `src/` de la app; copy `es`/`en` en `src/i18n/`; el contrato de cada 
   al publicar público, progreso por bytes, enlace, reintento, «Agregar a la cola» con aviso de ya publicado); panel de
   publicaciones e insignia en la tarjeta. `components/youtube-*.tsx`, `publications-panel.tsx`, hooks
   `use-youtube-integration`, `use-youtube-connect-flow`, `use-polled-resource`; `api/youtube-*.ts`,
-  `publication-status.ts`. Página `/publish-queue` («Publicación» en el header, polling de 10 s):
+  `publication-status.ts`. Página `/publish-queue` («Publicación» en la sidebar, polling de 10 s):
   `pages/publish-queue-page.tsx`, `api/{publish-queue-types,parse-publish-queue,publish-queue-view}.ts`.
+- **ElevenLabs**: Configuración › «Voces de ElevenLabs» (`elevenlabs-settings-section.tsx`: key, plan, lista de voces);
+  el selector de voz marca «ElevenLabs · usa créditos» y los parsers de voz llevan `engine`.
 - **Calidad de producción**: panel "Revisión" por MP4 en Biblioteca › Entregables y en la vista previa motion
   (`render-review-panel.tsx`, `api/review-{types,format}.ts`, `parse-review.ts`); el diálogo de publicar alerta los
   críticos y exige "Publicar igual" para mandar `ignoreReview` (`publish-review-notice.tsx`); `review` es un kind de
@@ -426,7 +452,40 @@ Todos bajo `src/` de la app; copy `es`/`en` en `src/i18n/`; el contrato de cada 
 - **Layout del workspace**: grid `grid-cols-[minmax(0,3fr)_minmax(0,2fr)]` y `min-w-0` en el panel de conversación y en
   la actividad del turno (con `fr` a secas el mínimo automático dejaba crecer la columna del chat); eventos del turno y
   bloques de código de los mensajes con `whitespace-pre-wrap break-words [overflow-wrap:anywhere]`.
+- **Reglas del shell Cristal Líquido (spec-025)**: (1) el escáner `no-literal-copy.spec.ts` recorre
+  `{app,components,pages}/*.tsx` sin recursión y confunde genéricos de TypeScript seguidos de texto con JSX: los
+  componentes nuevos van en subcarpetas (`components/shell/`, `components/ui/`) o con la lógica en `.ts`; (2) la
+  información de apoyo se muestra en modales de tucu-ui, no en paneles flotantes absolutos; (3) medios (video e
+  imágenes) nunca bajo vidrio ni blur; (4) texto activo con `--cl-action-text` y rótulos con `--cl-ink-3` para cumplir
+  AA (medido); (5) `SegmentedControl` dentro de paneles angostos con `size="xs"` y `fullWidth`; (6) todos los
+  controles del pie usan `FOOTER_CONTROL_CLASS` (40 × 192 px); (7) cada pantalla declara su única acción con
+  `useToolbarAction`; (8) `Modal`, `ErrorNotice`, `JobRetryButton`, `BrandPicker` y `MusicModeFields` son solo
+  vidrio, sin prop `surface` (`Modal` tiene cabecera y pie fijos y cuerpo con scroll `<testId>-body`; va por portal al `body`: un ancestro con `backdrop-filter` atrapa el `position: fixed`);
+  `TimelinePlayer` tiene modo `fit`; (9) tokens `--cl-action-fill` y `--cl-action-fill-hover` (relleno de botones
+  primarios y burbuja del usuario con texto blanco; en oscuro `#1f6feb`, ≈ 4,6:1) y
+  `--tucu-segmented-fg: var(--cl-ink-2)` (texto inactivo de los segmentados de tucu-ui, antes 3,95:1); (10) tonos de
+  estado del video para todo el studio: publicado verde, video listo teal, sin material naranja, montaje listo
+  púrpura, material cargado y archivado neutros; (11) la auditoría reutilizable
+  `design/rebranding/contrast-audit.mjs <dir> <rutas…>` mide cada texto visible contra el fondo renderizado y el
+  desborde horizontal; `api/video-filter` filtra Mis videos; (12) `components/ui/cl-controls.ts` exporta `PANEL_CLASS`,
+  `PANEL_HEADING_CLASS`, `OPAQUE_MEDIA_FRAME_CLASS`, `TOOLBAR_SECONDARY_BUTTON_CLASS`, `CHECKBOX_CLASS` y
+  `ROW_CLASS`; (13) `timeline-player` lleva `data-media` y la auditoría de contraste ignora sus controles;
+  `hooks/use-section-draft.ts` se reinicia en el mismo render (sin parpadeo de «sin guardar»); los ajustes de render
+  de `components/preview/` van en secciones plegables (`Collapse` unstyled, una abierta a la vez) con resumen,
+  acción de render e historial (`renderJobTone`); `components/motion/` agrupa las piezas del brief y del video
+  entregado.
 - **Tests**: `settings-page.spec.tsx` espera hasta 5 s (con 7 proyectos en paralelo el timeout de 1 s era intermitente).
 - **Pendientes vigentes**: copy propio para el uploader de imágenes en la página Motion (hoy usa el del modo crudo);
   el reporte de la fase storyboard trae `path`/`durationSec` null; la bandeja de arrastrar y soltar no propone el
-  rol `reference`.
+  rol `reference`; la paridad con la web (ciclo 06 de spec-025: Aprender, Acerca de, Conectar agentes, material libre,
+  requisitos) y correr los e2e contra un studio libre antes de la PR; no hay API para renombrar videos (solo
+  se renombran carpetas). Una ventana de Electron abierta durante muchas recargas en caliente
+  de los catálogos i18n puede mostrar claves sin traducir: recargar la ventana; no es un defecto.
+
+## 6. Estado tras spec-025 cycle-05
+
+- `components/publish/` + `api/publish-queue-view.ts`: cola con métricas, pestañas Cola/Publicados/Con error, filas con menú ⋮; pausar/reanudar en el toolbar.
+- `components/settings/`: pestañas Productor, Voz, YouTube y Apariencia con `?tab=` (`useTabParam`, `SegmentedControl semantics="tabs"`), montadas y ocultas para no perder borradores; «Guardar cambios» en el toolbar guarda todos. Apariencia también es un `Link` a `/settings?tab=appearance` en el pie de la sidebar.
+- `components/guide/`: índice pegajoso con sección activa (IntersectionObserver) y pasos en tarjetas.
+- `components/ui/status-states.tsx`: `LoadingState` y `EmptyState`.
+- Borrados: `ui/badge`, `ui/card`, `ui/tabs`, `ui/button`, `PUBLICATION_STATUS_TONE`; `index.css` sin tokens `--color-*` heredados. `--tucu-state-red-ink` en claro es `#a8231b` (AA).

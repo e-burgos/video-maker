@@ -14,24 +14,25 @@ function renderScene(sceneId: string, storyboard: StoryboardDocument = storyboar
   }
 
   render(
-    <ul>
-      <StoryboardSceneEditor
-        storyboard={storyboard}
-        scene={scene}
-        onChange={onChange}
-        onCopyPrompt={onCopyPrompt}
-      />
-    </ul>,
+    <StoryboardSceneEditor
+      storyboard={storyboard}
+      scene={scene}
+      timing={{ startMs: 0, endMs: 4200 }}
+      onChange={onChange}
+      onCopyPrompt={onCopyPrompt}
+    />,
   );
 
   return { onChange, onCopyPrompt, scene };
 }
 
 describe('StoryboardSceneEditor', () => {
-  it('numbers the scene from 01 so it matches the exported prompt sheet', () => {
+  it('titles the scene by its number and shows its id and time window', () => {
     renderScene('scene-01');
 
-    expect(screen.getByText('01 · scene-01')).toBeTruthy();
+    expect(screen.getByRole('heading', { name: 'Scene 1' })).toBeTruthy();
+    expect(screen.getByText('scene-01')).toBeTruthy();
+    expect(screen.getByText('0:00 – 0:04')).toBeTruthy();
   });
 
   it('edits the narration and the visual prompt of the scene', () => {
@@ -156,7 +157,7 @@ describe('StoryboardSceneEditor', () => {
   it('asks its parent to copy the prompt of this scene alone', () => {
     const { onCopyPrompt, scene } = renderScene('scene-01');
 
-    fireEvent.click(screen.getByRole('button', { name: 'copy prompt' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Copy prompt' }));
 
     expect(onCopyPrompt).toHaveBeenCalledWith(scene);
   });

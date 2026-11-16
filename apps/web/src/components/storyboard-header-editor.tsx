@@ -7,6 +7,7 @@ import {
   setStoryboardMusicTags,
 } from '../api/storyboard-edit/storyboard-document';
 import { useT } from '../i18n/language-context';
+import { FIELD_CLASS, FIELD_LABEL_CLASS } from './ui/cl-controls';
 
 export type StoryboardHeaderEditorProps = {
   storyboard: StoryboardDocument;
@@ -17,31 +18,34 @@ export function StoryboardHeaderEditor({ storyboard, onChange }: StoryboardHeade
   const t = useT();
 
   return (
-    <div
+    <section
       data-testid="storyboard-header-editor"
-      className="grid gap-3 rounded-lg border border-slate-800 bg-slate-900/40 p-4 sm:grid-cols-2"
+      className="glass grid gap-3 rounded-[20px] p-4 sm:grid-cols-2"
     >
-      <label className="flex flex-col gap-1 text-xs text-slate-400 sm:col-span-2">
+      <h2 className="m-0 text-sm font-bold text-[var(--cl-ink)] sm:col-span-2">
+        {t('storyboardHeader.heading')}
+      </h2>
+      <label className={`flex flex-col gap-1 sm:col-span-2 ${FIELD_LABEL_CLASS}`}>
         {t('storyboardHeader.title')}
         <input
           value={storyboard.title}
           onChange={(event) => onChange(setStoryboardHeader(storyboard, 'title', event.target.value))}
-          className="rounded-md border border-slate-700 bg-slate-900 px-2 py-1 text-sm text-slate-100"
+          className={FIELD_CLASS}
         />
       </label>
 
-      <label className="flex flex-col gap-1 text-xs text-slate-400">
+      <label className={`flex flex-col gap-1 ${FIELD_LABEL_CLASS}`}>
         {t('storyboardHeader.language')}
         <input
           value={storyboard.language}
           onChange={(event) =>
             onChange(setStoryboardHeader(storyboard, 'language', event.target.value))
           }
-          className="rounded-md border border-slate-700 bg-slate-900 px-2 py-1 font-mono text-sm text-slate-100"
+          className={`${FIELD_CLASS} font-data`}
         />
       </label>
 
-      <label className="flex flex-col gap-1 text-xs text-slate-400">
+      <label className={`flex flex-col gap-1 ${FIELD_LABEL_CLASS}`}>
         {t('storyboardHeader.format')}
         <select
           aria-label={t('storyboardHeader.format')}
@@ -49,7 +53,7 @@ export function StoryboardHeaderEditor({ storyboard, onChange }: StoryboardHeade
           onChange={(event) =>
             onChange(setStoryboardHeader(storyboard, 'format', event.target.value as StoryboardFormat))
           }
-          className="rounded-md border border-slate-700 bg-slate-900 px-2 py-1 font-mono text-sm text-slate-100"
+          className={`${FIELD_CLASS} font-data`}
         >
           {STORYBOARD_FORMATS.map((format) => (
             <option key={format} value={format}>
@@ -59,27 +63,27 @@ export function StoryboardHeaderEditor({ storyboard, onChange }: StoryboardHeade
         </select>
       </label>
 
-      <label className="flex flex-col gap-1 text-xs text-slate-400">
+      <label className={`flex flex-col gap-1 ${FIELD_LABEL_CLASS}`}>
         {t('storyboardHeader.captionStyle')}
         <input
           value={storyboard.captionsStyle}
           onChange={(event) =>
             onChange(setStoryboardHeader(storyboard, 'captionsStyle', event.target.value))
           }
-          className="rounded-md border border-slate-700 bg-slate-900 px-2 py-1 text-sm text-slate-100"
+          className={FIELD_CLASS}
         />
       </label>
 
-      <label className="flex flex-col gap-1 text-xs text-slate-400">
+      <label className={`flex flex-col gap-1 ${FIELD_LABEL_CLASS}`}>
         {t('storyboardHeader.musicTags')}
         <input
           value={formatTags(storyboard.musicTags)}
           onChange={(event) => onChange(setStoryboardMusicTags(storyboard, event.target.value))}
-          className="rounded-md border border-slate-700 bg-slate-900 px-2 py-1 font-mono text-sm text-slate-100"
+          className={`${FIELD_CLASS} font-data`}
         />
       </label>
 
-      <p className="text-xs text-slate-500 sm:col-span-2">{t('storyboardHeader.note')}</p>
-    </div>
+      <p className="m-0 text-xs text-[var(--cl-ink-2)] sm:col-span-2">{t('storyboardHeader.note')}</p>
+    </section>
   );
 }

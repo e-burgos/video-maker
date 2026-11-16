@@ -21,7 +21,7 @@ export interface AppPaths {
   readonly modelsDir: string;
   readonly defaultProjectsDir: string;
   readonly logsDir: string;
-  readonly dbPath: string;
+  readonly legacyDbPath: string;
   readonly resourcesDir: string;
   readonly vendorBinDir: string;
   readonly remotionServeUrl: string | null;
@@ -40,7 +40,7 @@ export function resolveAppPaths(input: AppPathsInput): AppPaths {
     modelsDir,
     defaultProjectsDir: join(input.userDataDir, PROJECTS_DIR_NAME),
     logsDir: join(input.userDataDir, LOGS_DIR_NAME),
-    dbPath: join(input.userDataDir, DB_FILE_NAME),
+    legacyDbPath: join(input.userDataDir, DB_FILE_NAME),
     resourcesDir,
     vendorBinDir,
     remotionServeUrl: input.isPackaged ? join(resourcesDir, PACKAGED_REMOTION_BUNDLE_RELATIVE) : null,

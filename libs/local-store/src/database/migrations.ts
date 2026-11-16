@@ -150,6 +150,10 @@ export const MIGRATIONS: readonly Migration[] = [
     version: 8,
     statements: [`ALTER TABLE projects ADD COLUMN title TEXT`],
   },
+  {
+    version: 9,
+    statements: [`ALTER TABLE placements ADD COLUMN position INTEGER`],
+  },
 ];
 
 export function currentUserVersion(sqlite: Database.Database): number {

@@ -380,6 +380,7 @@ export async function startProducerTurn(
       result,
       rateLimited,
       hasAnswer: answerText !== null && answerText !== '',
+      answerText,
     });
 
     if (outcome.kind !== 'succeeded') {

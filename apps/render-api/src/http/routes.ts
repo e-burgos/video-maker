@@ -3,6 +3,7 @@ import { VOICE_PREVIEW_ROUTE_PATTERN } from '../voice/voice-preview-url';
 export const ROUTES = [
   { id: 'health', method: 'GET', pattern: '/health' },
   { id: 'capabilities', method: 'GET', pattern: '/capabilities' },
+  { id: 'app.update', method: 'GET', pattern: '/app/update' },
   { id: 'voices.list', method: 'GET', pattern: '/voices' },
   { id: 'voices.preview', method: 'GET', pattern: VOICE_PREVIEW_ROUTE_PATTERN },
   { id: 'projects.list', method: 'GET', pattern: '/projects' },
@@ -99,6 +100,11 @@ export const ROUTES = [
   },
   { id: 'integrations.youtube.categoryPlaylists.get', method: 'GET', pattern: '/integrations/youtube/category-playlists' },
   { id: 'integrations.youtube.categoryPlaylists.put', method: 'PUT', pattern: '/integrations/youtube/category-playlists' },
+  {
+    id: 'integrations.youtube.categoryPlaylists.order',
+    method: 'POST',
+    pattern: '/integrations/youtube/category-playlists/order',
+  },
   { id: 'publishQueue.get', method: 'GET', pattern: '/publish-queue' },
   { id: 'publishQueue.items.create', method: 'POST', pattern: '/publish-queue/items' },
   { id: 'publishQueue.items.update', method: 'PATCH', pattern: '/publish-queue/items/:itemId' },

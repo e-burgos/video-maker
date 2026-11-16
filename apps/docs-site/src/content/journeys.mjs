@@ -80,7 +80,7 @@ const PATHS = {
         {
           kicker: 'Paso 1',
           title: 'Nuevo video → Motion graphics',
-          bodyHtml: '<p>Desde "Tus videos" tocás "Nuevo video" y elegís el camino de motion graphics.</p>',
+          bodyHtml: '<p>Desde "Mis videos" tocás "Nuevo video" y elegís el camino de motion graphics.</p>',
           screenshot: { file: 'create-mode.png', alt: 'Diálogo Nuevo video con las opciones Motion graphics y Material crudo' },
         },
         {
@@ -146,7 +146,7 @@ const PATHS = {
           title: 'Entregas y publicación',
           bodyHtml:
             '<p>Cada render confirmado queda en "Entregas" sin pisar los anteriores, listo para abrir en Finder o publicar en YouTube. Tus proyectos aparecen con su miniatura real.</p>',
-          screenshot: { file: 'home-projects.png', alt: 'Tus videos: lista de proyectos con miniaturas reales y su estado' },
+          screenshot: { file: 'home-projects.png', alt: 'Mis videos: lista de proyectos agrupados por carpeta, con miniaturas reales y su estado' },
         },
       ],
     },
@@ -163,7 +163,7 @@ const PATHS = {
         {
           kicker: 'Step 1',
           title: 'New video → Motion graphics',
-          bodyHtml: '<p>From "Your videos" you tap "New video" and pick the motion graphics path.</p>',
+          bodyHtml: '<p>From "My videos" you tap "New video" and pick the motion graphics path.</p>',
           screenshot: { file: 'create-mode.png', alt: 'New video dialog with the Motion graphics and Raw footage options' },
         },
         {
@@ -229,7 +229,7 @@ const PATHS = {
           title: 'Deliveries and publishing',
           bodyHtml:
             '<p>Every confirmed render lands in "Deliveries" without overwriting the previous ones, ready to open in Finder or publish to YouTube. Your projects show up with their real thumbnails.</p>',
-          screenshot: { file: 'home-projects.png', alt: 'Your videos: project list with real thumbnails and their status' },
+          screenshot: { file: 'home-projects.png', alt: 'My videos: project list grouped by folder, with real thumbnails and their status' },
         },
       ],
     },

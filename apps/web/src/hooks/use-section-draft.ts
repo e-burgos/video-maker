@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useCallback, useState } from 'react';
 import type { Dispatch, SetStateAction } from 'react';
 
 export type SectionDraft<T> = {
@@ -7,17 +7,24 @@ export type SectionDraft<T> = {
   dirty: boolean;
 };
 
+type DraftState<T> = { savedKey: string; draft: T };
+
 export function useSectionDraft<T>(saved: T): SectionDraft<T> {
   const savedKey = JSON.stringify(saved);
-  const [draft, setDraft] = useState<T>(saved);
-  const previousKey = useRef(savedKey);
+  const [state, setState] = useState<DraftState<T>>({ savedKey, draft: saved });
 
-  useEffect(() => {
-    if (previousKey.current !== savedKey) {
-      previousKey.current = savedKey;
-      setDraft(saved);
-    }
-  }, [savedKey, saved]);
+  let current = state;
+  if (state.savedKey !== savedKey) {
+    current = { savedKey, draft: saved };
+    setState(current);
+  }
 
-  return { draft, setDraft, dirty: JSON.stringify(draft) !== savedKey };
+  const setDraft = useCallback<Dispatch<SetStateAction<T>>>((next) => {
+    setState((previous) => ({
+      savedKey: previous.savedKey,
+      draft: typeof next === 'function' ? (next as (value: T) => T)(previous.draft) : next,
+    }));
+  }, []);
+
+  return { draft: current.draft, setDraft, dirty: JSON.stringify(current.draft) !== savedKey };
 }

@@ -7,7 +7,7 @@ import { referenceSuggestionReasonKey, suggestReferenceReason } from '../api/ref
 import { RenderApiError, serviceUnreachable } from '../api/render-api-error';
 import { useT } from '../i18n/language-context';
 import { ErrorNotice } from './error-notice';
-import { Button } from './ui/button';
+import { FIELD_SMALL_CLASS, PRIMARY_BUTTON_SMALL_CLASS, SECONDARY_BUTTON_SMALL_CLASS } from './ui/cl-controls';
 import type { AssetRole, InboxAsset, ProjectMode } from '../api/render-api-types';
 
 export type AssetProposalCardProps = {
@@ -27,7 +27,7 @@ function ProposalThumbnail({ slug, asset }: { slug: string; asset: InboxAsset })
       <img
         src={src}
         alt={asset.fileName}
-        className="h-16 w-24 shrink-0 rounded-control bg-black object-cover"
+        className="h-16 w-24 shrink-0 rounded-[10px] bg-[#0b0d14] object-cover"
       />
     );
   }
@@ -39,7 +39,7 @@ function ProposalThumbnail({ slug, asset }: { slug: string; asset: InboxAsset })
         src={`${src}#t=0.5`}
         muted
         preload="metadata"
-        className="h-16 w-24 shrink-0 rounded-control bg-black object-cover"
+        className="h-16 w-24 shrink-0 rounded-[10px] bg-[#0b0d14] object-cover"
       />
     );
   }
@@ -47,7 +47,7 @@ function ProposalThumbnail({ slug, asset }: { slug: string; asset: InboxAsset })
   return (
     <div
       data-testid="asset-proposal-audio-icon"
-      className="flex h-16 w-24 shrink-0 items-center justify-center rounded-control border border-border-subtle text-[10px] uppercase text-ink-faint"
+      className="flex h-16 w-24 shrink-0 items-center justify-center rounded-[10px] bg-[#0b0d14] text-[10px] uppercase text-white/70"
     >
       {asset.probe.kind}
     </div>
@@ -104,18 +104,18 @@ export function AssetProposalCard({
     <div
       data-testid="asset-proposal-card"
       data-asset-id={asset.id}
-      className="flex gap-3 rounded-panel border border-border-subtle bg-surface-raised/60 p-3"
+      className="glass-sub flex gap-3 rounded-[14px] p-3"
     >
       <ProposalThumbnail slug={slug} asset={asset} />
 
       <div className="min-w-0 flex-1 space-y-2">
-        <p className="truncate text-sm text-ink" title={asset.fileName}>
+        <p className="truncate text-sm font-semibold text-[var(--cl-ink)]" title={asset.fileName}>
           {asset.fileName}
         </p>
-        <p className="text-xs text-ink-faint">{t(inboxReasonKey(asset.proposalReason))}</p>
+        <p data-testid="asset-proposal-reason" className="text-xs text-[var(--cl-ink-2)]">{t(inboxReasonKey(asset.proposalReason))}</p>
 
         <div className="flex flex-wrap items-center gap-2">
-          <label htmlFor={`asset-proposal-role-${asset.id}`} className="text-xs text-ink-faint">
+          <label htmlFor={`asset-proposal-role-${asset.id}`} className="text-xs font-medium text-[var(--cl-ink-2)]">
             {t('inbox.card.role')}
           </label>
           <select
@@ -124,7 +124,7 @@ export function AssetProposalCard({
             value={role}
             disabled={busy}
             onChange={(event) => setRole(event.target.value as AssetRole)}
-            className="rounded-control border border-border-strong bg-surface px-2 py-1 text-xs text-ink"
+            className={FIELD_SMALL_CLASS}
           >
             {orderedAssetRoles()
               .filter((choice) => choice.role !== 'reference' || isVideo)
@@ -135,22 +135,24 @@ export function AssetProposalCard({
             ))}
           </select>
 
-          <Button
+          <button
+            type="button"
             data-testid="asset-proposal-confirm"
-            variant="primary"
+            className={PRIMARY_BUTTON_SMALL_CLASS}
             disabled={busy}
             onClick={() => void confirm()}
           >
             {confirming ? t('inbox.card.confirming') : t('inbox.card.confirm')}
-          </Button>
-          <Button
+          </button>
+          <button
+            type="button"
             data-testid="asset-proposal-discard"
-            variant="secondary"
+            className={SECONDARY_BUTTON_SMALL_CLASS}
             disabled={busy}
             onClick={() => void discard()}
           >
             {discarding ? t('inbox.card.discarding') : t('inbox.card.discard')}
-          </Button>
+          </button>
         </div>
 
         {isVideo && role === 'reference' && (
@@ -158,14 +160,14 @@ export function AssetProposalCard({
             {suggestedReason !== null && (
               <p
                 data-testid="asset-proposal-reference-suggestion"
-                className="text-xs font-medium text-accent-strong"
+                className="text-xs font-semibold text-[var(--cl-action-text)]"
               >
                 {t('assetRole.reference.suggested', {
                   reason: t(referenceSuggestionReasonKey(suggestedReason)),
                 })}
               </p>
             )}
-            <p className="text-xs text-ink-faint">{t('assetRole.reference.explain')}</p>
+            <p className="text-xs text-[var(--cl-ink-2)]">{t('assetRole.reference.explain')}</p>
           </div>
         )}
 

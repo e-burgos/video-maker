@@ -15,6 +15,7 @@ export type TimelinePlayerProps = {
   timeline: Timeline;
   initialFrame?: number;
   controls?: boolean;
+  fit?: boolean;
 };
 
 const PlayerComposition: FC<TimelineCompositionProps> = (props) => (
@@ -29,15 +30,35 @@ function useLastValidTimeline(timeline: Timeline): Timeline | null {
   return lastValid.current;
 }
 
-export function TimelinePlayer({ timeline, initialFrame, controls = true }: TimelinePlayerProps) {
+export function TimelinePlayer({
+  timeline,
+  initialFrame,
+  controls = true,
+  fit = false,
+}: TimelinePlayerProps) {
   const playable = useLastValidTimeline(timeline);
-  return playable === null ? null : <ValidTimelinePlayer timeline={playable} initialFrame={initialFrame} controls={controls} />;
+  return playable === null ? null : (
+    <ValidTimelinePlayer
+      timeline={playable}
+      initialFrame={initialFrame}
+      controls={controls}
+      fit={fit}
+    />
+  );
 }
 
-function ValidTimelinePlayer({ timeline, initialFrame, controls }: TimelinePlayerProps) {
+function ValidTimelinePlayer({
+  timeline,
+  initialFrame,
+  controls,
+  fit,
+}: TimelinePlayerProps) {
   const metadata = useMemo(() => computeTimelineMetadata(timeline), [timeline]);
   const inputProps = useMemo<TimelineCompositionProps>(
-    () => ({ timeline: metadata.timeline, bumperSfx: bundledPreviewBumperSfx(metadata.timeline) }),
+    () => ({
+      timeline: metadata.timeline,
+      bumperSfx: bundledPreviewBumperSfx(metadata.timeline),
+    }),
     [metadata],
   );
 
@@ -46,9 +67,14 @@ function ValidTimelinePlayer({ timeline, initialFrame, controls }: TimelinePlaye
       data-testid="timeline-player"
       data-duration-in-frames={metadata.durationInFrames}
       data-fps={metadata.fps}
+      data-media=""
       data-composition-width={metadata.width}
       data-composition-height={metadata.height}
-      className="mx-auto w-full max-w-md overflow-hidden rounded-xl border border-slate-800 bg-black"
+      className={
+        fit === true
+          ? 'size-full overflow-hidden bg-[#0b0d14]'
+          : 'mx-auto w-full max-w-md overflow-hidden rounded-xl border border-slate-800 bg-black'
+      }
     >
       <Player
         component={PlayerComposition}
@@ -57,7 +83,9 @@ function ValidTimelinePlayer({ timeline, initialFrame, controls }: TimelinePlaye
         fps={metadata.fps}
         compositionWidth={metadata.width}
         compositionHeight={metadata.height}
-        style={{ width: '100%' }}
+        style={
+          fit === true ? { width: '100%', height: '100%' } : { width: '100%' }
+        }
         controls={controls}
         acknowledgeRemotionLicense
         {...(initialFrame !== undefined ? { initialFrame } : {})}

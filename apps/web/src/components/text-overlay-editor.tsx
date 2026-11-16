@@ -9,6 +9,7 @@ import {
 } from '../api/timeline-edit/text-overlays';
 import type { TimelineEditAction } from '../api/timeline-edit/timeline-edit-state';
 import { useT } from '../i18n/language-context';
+import { FIELD_SMALL_CLASS, INLINE_LABEL_CLASS, ROW_CLASS, SECONDARY_BUTTON_SMALL_CLASS } from './ui/cl-controls';
 import type { TranslateFn } from '../i18n/language-context';
 
 export type TextOverlayEditorProps = {
@@ -17,7 +18,7 @@ export type TextOverlayEditorProps = {
   dispatch: (action: TimelineEditAction) => void;
 };
 
-const INPUT_CLASS = 'rounded-md border border-slate-700 bg-slate-900 px-2 py-1 text-sm text-slate-100';
+const INPUT_CLASS = FIELD_SMALL_CLASS;
 
 function secondsOf(ms: number): number {
   return Math.round(ms / 100) / 10;
@@ -33,15 +34,15 @@ function optionalText(value: string): string | undefined {
 
 function OverlayRow({ overlay, dispatch, t }: { overlay: TextOverlay; dispatch: TextOverlayEditorProps['dispatch']; t: TranslateFn }) {
   return (
-    <li className="flex flex-wrap items-center gap-2 rounded-lg border border-slate-800 bg-slate-900/40 p-3">
-      <span className="font-mono text-xs text-slate-400">{t(`textOverlay.kind.${overlay.kind}`)}</span>
+    <li className={ROW_CLASS}>
+      <span className="font-data w-full text-xs text-[var(--cl-ink-2)]">{t(`textOverlay.kind.${overlay.kind}`)}</span>
       <input
         type="text"
         aria-label={t('textOverlay.text', { id: overlay.id })}
         value={overlay.text}
         maxLength={MAX_TEXT_OVERLAY_TEXT_LENGTH}
         onChange={(event) => dispatch({ type: 'text-overlay-update', id: overlay.id, patch: { text: event.target.value } })}
-        className={`w-56 ${INPUT_CLASS}`}
+        className={`w-full ${INPUT_CLASS}`}
       />
       {overlay.kind === 'kinetic-text' ? null : (
         <input
@@ -53,7 +54,7 @@ function OverlayRow({ overlay, dispatch, t }: { overlay: TextOverlay; dispatch: 
           onChange={(event) =>
             dispatch({ type: 'text-overlay-update', id: overlay.id, patch: { subtitle: optionalText(event.target.value) } })
           }
-          className={`w-48 ${INPUT_CLASS}`}
+          className={`w-full ${INPUT_CLASS}`}
         />
       )}
       {overlay.kind === 'chapter-title' ? (
@@ -69,7 +70,7 @@ function OverlayRow({ overlay, dispatch, t }: { overlay: TextOverlay; dispatch: 
           className={`w-16 ${INPUT_CLASS}`}
         />
       ) : null}
-      <label className="flex items-center gap-1 text-xs text-slate-400">
+      <label className={`${INLINE_LABEL_CLASS} gap-1`}>
         {t('textOverlay.start')}
         <input
           type="number"
@@ -80,7 +81,7 @@ function OverlayRow({ overlay, dispatch, t }: { overlay: TextOverlay; dispatch: 
           className={`w-20 ${INPUT_CLASS}`}
         />
       </label>
-      <label className="flex items-center gap-1 text-xs text-slate-400">
+      <label className={`${INLINE_LABEL_CLASS} gap-1`}>
         {t('textOverlay.duration')}
         <input
           type="number"
@@ -109,7 +110,7 @@ function OverlayRow({ overlay, dispatch, t }: { overlay: TextOverlay; dispatch: 
       <button
         type="button"
         onClick={() => dispatch({ type: 'text-overlay-remove', id: overlay.id })}
-        className="rounded-md border border-slate-700 px-2 py-1 text-xs text-slate-300 hover:bg-slate-800"
+        className={SECONDARY_BUTTON_SMALL_CLASS}
       >
         {t('textOverlay.remove')}
       </button>
@@ -122,8 +123,8 @@ export function TextOverlayEditor({ overlays, canAdd, dispatch }: TextOverlayEdi
   const add = (kind: TextOverlayKind) => dispatch({ type: 'text-overlay-add', kind, text: t(`textOverlay.defaultText.${kind}`) });
 
   return (
-    <div className="space-y-2">
-      <ol className="space-y-2">
+    <div className="flex flex-col gap-2">
+      <ol className="m-0 flex list-none flex-col gap-2 p-0">
         {(overlays ?? []).map((overlay) => (
           <OverlayRow key={overlay.id} overlay={overlay} dispatch={dispatch} t={t} />
         ))}
@@ -135,7 +136,7 @@ export function TextOverlayEditor({ overlays, canAdd, dispatch }: TextOverlayEdi
             type="button"
             disabled={!canAdd}
             onClick={() => add(kind)}
-            className="rounded-md border border-slate-700 px-2 py-1 text-xs text-slate-200 hover:bg-slate-800 disabled:opacity-40"
+            className={SECONDARY_BUTTON_SMALL_CLASS}
           >
             {t('textOverlay.add', { kind: t(`textOverlay.kind.${kind}`) })}
           </button>

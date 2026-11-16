@@ -1,4 +1,8 @@
-const TUTORIAL_KEY = 'Tutorial-Video-Maker.mp4';
+const SERVED_VIDEO_KEYS = new Set([
+  'Tutorial-Video-Maker.mp4',
+  'Video-Maker-en-90-segundos.mp4',
+  'Video-Maker-del-chat-al-video.mp4',
+]);
 const VIDEO_CONTENT_TYPE = 'video/mp4';
 const CACHE_CONTROL = 'public, max-age=86400';
 
@@ -11,7 +15,7 @@ export function keyFromParams(params) {
 }
 
 export function isTutorialKey(key) {
-  return key === TUTORIAL_KEY;
+  return SERVED_VIDEO_KEYS.has(key);
 }
 
 function notFound(withBody) {

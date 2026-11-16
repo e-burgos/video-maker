@@ -4,43 +4,27 @@ import type { Timeline } from '@video-maker/timeline-core';
 
 import { parseTimelineDocument } from '../api/parse-timeline';
 import { playerTimeline } from '../api/player-timeline';
-import { PREVIEW_PRESETS, previewFormat, previewPresetFor } from '../api/preview-format';
+import { previewFormat, previewPresetFor } from '../api/preview-format';
 import type { PreviewPreset } from '../api/preview-format';
 import { useRenderApi } from '../api/render-api-context';
 import { BUMPER_EDGES, bumperSeconds } from '../api/timeline-edit/logo-bumpers';
-import { canAddTextOverlay } from '../api/timeline-edit/text-overlays';
-import {
-  canStartRender,
-  initialTimelineEditState,
-  timelineEditReducer,
-} from '../api/timeline-edit/timeline-edit-state';
+import { initialTimelineEditState, timelineEditReducer } from '../api/timeline-edit/timeline-edit-state';
 import type { TimelineEditAction } from '../api/timeline-edit/timeline-edit-state';
 import { useAsyncResource } from '../hooks/use-async-resource';
 import { useT } from '../i18n/language-context';
 import type { TranslateFn } from '../i18n/language-context';
-import { CaptionEditor } from '../components/caption-editor';
-import { CaptionStyleSelector } from '../components/caption-style-selector';
-import { ClipTrackEditor } from '../components/clip-track-editor';
 import { ErrorNotice } from '../components/error-notice';
-import { LogoOverlayEditor } from '../components/logo-overlay-editor';
-import { MusicMixEditor } from '../components/music-mix-editor';
-import { OutputPresetSelector } from '../components/output-preset-selector';
-import { RenderJobList } from '../components/render-job-list';
-import { RenderJobPanel } from '../components/render-job-panel';
-import { RenderTrigger } from '../components/render-trigger';
-import { SampleTrigger } from '../components/sample-trigger';
+import { PreviewSettingsPanel } from '../components/preview/preview-settings-panel';
+import { PreviewStagePanel } from '../components/preview/preview-stage-panel';
+import { PreviewToolbarStatus } from '../components/preview/preview-toolbar-status';
+import { RenderHistoryPanel } from '../components/preview/render-history-panel';
 import { TimelineIssueList } from '../components/timeline-issue-list';
-import { TimelinePlayer } from '../components/timeline-player';
 import { TimelineSaveBar } from '../components/timeline-save-bar';
-import { TextOverlayEditor } from '../components/text-overlay-editor';
+import { PRIMARY_BUTTON_SMALL_CLASS, SECONDARY_BUTTON_SMALL_CLASS } from '../components/ui/cl-controls';
 import { YouTubePublishSection } from '../components/youtube-publish-section';
 import { MotionPreviewView } from '../components/motion-preview-view';
 import { ProjectModeGate } from '../components/project-mode-gate';
-
-const PRESET_LABELS: Record<PreviewPreset, string> = {
-  'reels-9x16': '9:16',
-  'youtube-16x9': '16:9',
-};
+import { LoadingState } from '../components/ui/status-states';
 
 function captureFrameFromLocation(search: string): number | null {
   const frameParam = new URLSearchParams(search).get('frame');
@@ -82,24 +66,14 @@ function TimelineEmptyState({ slug, onRetry }: TimelineEmptyStateProps) {
   const t = useT();
 
   return (
-    <div
-      data-testid="timeline-empty-state"
-      className="space-y-3 rounded-lg border border-slate-700 bg-slate-900/40 p-6"
-    >
-      <p className="text-sm font-medium text-slate-200">{t('preview.emptyTitle')}</p>
-      <p className="text-sm text-slate-400">{t('preview.emptyBody')}</p>
+    <div data-testid="timeline-empty-state" className="glass flex flex-col gap-3 rounded-[20px] p-5">
+      <p className="m-0 text-sm font-semibold text-[var(--cl-ink)]">{t('preview.emptyTitle')}</p>
+      <p className="m-0 text-sm text-[var(--cl-ink-2)]">{t('preview.emptyBody')}</p>
       <div className="flex flex-wrap gap-2">
-        <Link
-          to={`/projects/${slug}/library`}
-          className="rounded-md border border-sky-500/50 bg-sky-500/10 px-3 py-1.5 text-sm text-sky-100"
-        >
+        <Link to={`/projects/${slug}/library`} className={`${PRIMARY_BUTTON_SMALL_CLASS} no-underline`}>
           {t('preview.generateMontage')}
         </Link>
-        <button
-          type="button"
-          onClick={onRetry}
-          className="rounded-md border border-slate-700 px-3 py-1.5 text-sm text-slate-300"
-        >
+        <button type="button" onClick={onRetry} className={SECONDARY_BUTTON_SMALL_CLASS}>
           {t('error.retry')}
         </button>
       </div>
@@ -119,7 +93,6 @@ function StudioView({ slug, initialTimeline }: StudioViewProps) {
     initialTimelineEditState,
   );
   const [preset, setPreset] = useState<PreviewPreset | null>(null);
-  const [selectedJobId, setSelectedJobId] = useState<string | null>(null);
   const captureFrame = captureFrameFromLocation(window.location.search);
   const t = useT();
 
@@ -147,146 +120,42 @@ function StudioView({ slug, initialTimeline }: StudioViewProps) {
   );
 
   return (
-    <>
-      <div className="flex flex-wrap items-center gap-3">
-        <span className="font-mono text-xs uppercase tracking-wide text-slate-500">
-          {t('preview.formatLabel')}
-        </span>
-        {PREVIEW_PRESETS.map((candidate) => (
-          <button
-            key={candidate}
-            type="button"
-            aria-pressed={playable.format.preset === candidate}
-            onClick={() => setPreset(candidate)}
-            className={
-              playable.format.preset === candidate
-                ? 'rounded-md bg-slate-200 px-3 py-1 font-mono text-xs text-slate-900'
-                : 'rounded-md border border-slate-700 px-3 py-1 font-mono text-xs text-slate-300 hover:border-slate-500'
-            }
-          >
-            {PRESET_LABELS[candidate]}
-          </button>
-        ))}
-        <span className="text-xs text-slate-600">{t('preview.formatNote')}</span>
-      </div>
+    <div data-testid="preview-page" className="flex min-h-full flex-col gap-4">
+      <PreviewToolbarStatus state={editState} />
+      <div className="grid items-start gap-4 min-[1100px]:grid-cols-[minmax(0,1fr)_360px]">
+        <div className="flex min-w-0 flex-col gap-4">
+          <PreviewStagePanel
+            playable={playable}
+            captureFrame={captureFrame}
+            onPresetChange={setPreset}
+            summary={{
+              canvas: `${playable.format.width}×${playable.format.height} @ ${playable.format.fps} fps`,
+              duration: durationSummary(editState.draft, playable, t),
+              tracks: trackSummary(editState.draft, t),
+            }}
+          />
 
-      <OutputPresetSelector preset={editState.draft.format.preset} dispatch={dispatchAction} />
+          <TimelineIssueList issues={editState.issues} />
+          <TimelineIssueList issues={editState.warnings} />
 
-      <TimelinePlayer
-        timeline={playable}
-        {...(captureFrame !== null ? { initialFrame: captureFrame, controls: false } : {})}
-      />
+          <RenderHistoryPanel slug={slug} state={editState} />
 
-      <dl className="grid gap-2 text-sm text-slate-400 sm:grid-cols-3">
-        <div>
-          <dt className="font-mono text-xs uppercase tracking-wide text-slate-600">
-            {t('preview.canvas')}
-          </dt>
-          <dd data-testid="preview-canvas">
-            {playable.format.width}×{playable.format.height} @ {playable.format.fps} fps
-          </dd>
+          <section className="glass flex min-w-0 flex-col gap-3 rounded-[20px] p-4">
+            <h2 className="m-0 text-[15px] font-bold text-[var(--cl-ink)]">{t('youtube.publish.section')}</h2>
+            <YouTubePublishSection slug={slug} />
+          </section>
         </div>
-        <div>
-          <dt className="font-mono text-xs uppercase tracking-wide text-slate-600">
-            {t('preview.duration')}
-          </dt>
-          <dd data-testid="preview-duration">
-            {durationSummary(editState.draft, playable, t)}
-          </dd>
-        </div>
-        <div>
-          <dt className="font-mono text-xs uppercase tracking-wide text-slate-600">
-            {t('preview.tracks')}
-          </dt>
-          <dd data-testid="preview-tracks">{trackSummary(editState.draft, t)}</dd>
-        </div>
-      </dl>
 
-      <TimelineIssueList issues={editState.issues} />
-      <TimelineIssueList issues={editState.warnings} />
-
-      <TimelineSaveBar slug={slug} state={editState} dispatch={dispatchAction} />
-
-      <div className="space-y-2">
-        <h2 className="font-mono text-xs uppercase tracking-wide text-slate-500">
-          {t('preview.section.logo')}
-        </h2>
-        <LogoOverlayEditor
+        <PreviewSettingsPanel
           slug={slug}
-          {...(editState.draft.logo === undefined ? {} : { logo: editState.draft.logo })}
-          {...(editState.draft.bumpers === undefined ? {} : { bumpers: editState.draft.bumpers })}
-          dispatch={dispatchAction}
-        />
-      </div>
-
-      <div className="space-y-2">
-        <h2 className="font-mono text-xs uppercase tracking-wide text-slate-500">
-          {t('preview.section.music')}
-        </h2>
-        <MusicMixEditor music={editState.draft.audioMix.music} dispatch={dispatchAction} />
-      </div>
-
-      <div className="space-y-2">
-        <h2 className="font-mono text-xs uppercase tracking-wide text-slate-500">
-          {t('preview.section.aroll')}
-        </h2>
-        <ClipTrackEditor track="aroll" clips={editState.draft.tracks.aroll} dispatch={dispatchAction} />
-      </div>
-
-      <div className="space-y-2">
-        <h2 className="font-mono text-xs uppercase tracking-wide text-slate-500">
-          {t('preview.section.broll')}
-        </h2>
-        <ClipTrackEditor track="broll" clips={editState.draft.tracks.broll} dispatch={dispatchAction} />
-      </div>
-
-      <div className="space-y-2">
-        <h2 className="font-mono text-xs uppercase tracking-wide text-slate-500">
-          {t('preview.section.captions')}
-        </h2>
-        <CaptionStyleSelector
-          {...(editState.draft.captionStyle === undefined
-            ? {}
-            : { captionStyle: editState.draft.captionStyle })}
-          {...(editState.draft.captionTheme === undefined ? {} : { captionTheme: editState.draft.captionTheme })}
+          draft={editState.draft}
           brandTheme={brandTheme}
           dispatch={dispatchAction}
         />
-        <CaptionEditor captions={editState.draft.tracks.captions} dispatch={dispatchAction} />
       </div>
 
-      <div className="space-y-2">
-        <h2 className="font-mono text-xs uppercase tracking-wide text-slate-500">
-          {t('preview.section.textOverlays')}
-        </h2>
-        <TextOverlayEditor
-          {...(editState.draft.textOverlays === undefined ? {} : { overlays: editState.draft.textOverlays })}
-          canAdd={canAddTextOverlay(editState.draft)}
-          dispatch={dispatchAction}
-        />
-      </div>
-
-      <div className="space-y-2">
-        <h2 className="font-mono text-xs uppercase tracking-wide text-slate-500">
-          {t('preview.section.render')}
-        </h2>
-        <RenderTrigger slug={slug} state={editState} onCreated={(job) => setSelectedJobId(job.id)} />
-        <SampleTrigger slug={slug} kind="render" disabled={!canStartRender(editState)} />
-        <RenderJobList slug={slug} onSelect={setSelectedJobId} />
-        <RenderJobPanel
-          slug={slug}
-          jobId={selectedJobId}
-          onRetried={(job) => setSelectedJobId(job.id)}
-        />
-      </div>
-
-      <div className="space-y-2">
-        <h2 className="font-mono text-xs uppercase tracking-wide text-slate-500">
-          {t('youtube.publish.section')}
-        </h2>
-        <YouTubePublishSection slug={slug} />
-      </div>
-    </>
+      <TimelineSaveBar slug={slug} state={editState} dispatch={dispatchAction} />
+    </div>
   );
 }
 
@@ -301,19 +170,9 @@ function ClassicProjectPreviewPage() {
   const t = useT();
 
   return (
-    <section className="space-y-6">
-      <div>
-        <Link to={`/projects/${slug}/library`} className="text-xs text-slate-500 hover:text-slate-300">
-          {t('preview.backToLibrary')}
-        </Link>
-        <h1 className="mt-2 font-mono text-2xl font-semibold tracking-tight">
-          {t('preview.title', { slug })}
-        </h1>
-        <p className="mt-1 text-sm text-slate-400">{t('preview.description')}</p>
-      </div>
-
+    <section data-testid="project-preview-page" className="flex min-h-full flex-col gap-4">
       {timeline.status === 'loading' && (
-        <p className="text-sm text-slate-500">{t('preview.loading')}</p>
+        <LoadingState message={t('preview.loading')} />
       )}
       {timeline.status === 'error' &&
         timeline.error !== null &&
@@ -323,9 +182,7 @@ function ClassicProjectPreviewPage() {
           <ErrorNotice error={timeline.error} onRetry={timeline.reload} />
         ))}
 
-      {timeline.data !== null && (
-        <StudioView key={slug} slug={slug} initialTimeline={timeline.data} />
-      )}
+      {timeline.data !== null && <StudioView key={slug} slug={slug} initialTimeline={timeline.data} />}
     </section>
   );
 }

@@ -4,6 +4,8 @@ import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 
 import {
+  FIXTURES_ROOT,
+  forceEnglishInterface,
   REPO_ROOT,
   VOICE_ENV_VARS,
   assert,
@@ -30,7 +32,7 @@ const RENDER_API_PORT = 4398;
 const WEB_PORT = 4210;
 const SLUG = 'smoke-ingest';
 const NON_TERMINAL_STATES = new Set(['queued', 'running', 'canceling']);
-const EDITED_NARRATION = 'Narración reescrita para que esta escena quede desactualizada.';
+const EDITED_NARRATION_BASE = 'Narración reescrita para que esta escena quede desactualizada.';
 const STALE_SCENE = 'scene-02';
 const UPLOAD_SCENE = 'scene-03';
 
@@ -70,11 +72,15 @@ async function main() {
   const tempMediaRoot = await mkdtemp(join(tmpdir(), 'voice-smoke-'));
   const projectRoot = join(tempMediaRoot, SLUG);
   await mkdir(join(projectRoot, 'work'), { recursive: true });
-  await cp(join(REPO_ROOT, 'media', SLUG, 'raw'), join(projectRoot, 'raw'), { recursive: true });
+  await cp(join(FIXTURES_ROOT, SLUG, 'raw'), join(projectRoot, 'raw'), { recursive: true });
   const storyboardPath = join(projectRoot, 'work', 'storyboard.json');
   await copyFile(SEED_STORYBOARD, storyboardPath);
   const seeded = JSON.parse(await readFile(storyboardPath, 'utf8'));
   const sceneIds = seeded.scenes.map((scene) => scene.id);
+  const EDITED_NARRATION = [
+    EDITED_NARRATION_BASE,
+    ...(seeded.scenes.find((scene) => scene.id === STALE_SCENE)?.direction?.emphasis ?? []),
+  ].join(' ');
   log('1', `temp media root: ${tempMediaRoot} — ${sceneIds.length} scenes, no work/voice/ yet`);
   assert(sceneIds.length === 5, `the seeded storyboard has five scenes (got ${sceneIds.length})`);
 
@@ -99,11 +105,11 @@ async function main() {
     health.capabilities.voiceQueue === true,
     'the service under test exposes capabilities.voiceQueue, so this is the build of cycle-01 and not a stale server',
   );
-  const piper = health.binaries.filter((binary) => binary.name.startsWith('piper'));
-  log('2', `piper binaries: ${JSON.stringify(piper)}`);
+  const voiceEngine = health.binaries.filter((binary) => binary.name.startsWith('tts'));
+  log('2', `voice engine binaries: ${JSON.stringify(voiceEngine)}`);
   assert(
-    piper.length === 2 && piper.every((binary) => binary.resolved),
-    'piperCli and piperModel resolve, so the studio can actually synthesize',
+    voiceEngine.length === 2 && voiceEngine.every((binary) => binary.resolved),
+    'ttsCli and ttsVoicesDir resolve, so the studio can actually synthesize',
   );
 
   log('3', 'starting apps/web with its proxy pointed at render-api');
@@ -118,6 +124,7 @@ async function main() {
   const { chromium } = await resolvePlaywright();
   const browser = await chromium.launch({ channel: 'chrome' });
   const context = await browser.newContext({ viewport: { width: 1280, height: 2400 } });
+  await forceEnglishInterface(context);
   const page = await context.newPage();
 
   page.on('console', (message) => {
@@ -153,13 +160,13 @@ async function main() {
     log('4', `voice cards: selected=${selectedVoice} offered=${JSON.stringify(offered)}`);
     assert(
       selectedVoice !== null && offered.includes(selectedVoice),
-      'the picker marks which voice PIPER_MODEL_PATH points at',
+      'the picker marks which voice the studio will use',
     );
     await page.screenshot({ path: join(ARTIFACTS_DIR, 'voice-smoke-01-empty-state.png') });
 
     log('5', 'generating the voice-over of the whole storyboard (EP-012 kind: voice)');
     const generateButton = page.getByRole('button', { name: 'Generate voice-over' });
-    assert(await generateButton.isEnabled(), 'Generate voice-over is enabled with Piper resolved');
+    assert(await generateButton.isEnabled(), 'Generate voice-over is enabled with the voice engine resolved');
 
     const uiPoller = setInterval(() => {
       page
@@ -221,14 +228,14 @@ async function main() {
     await page.waitForSelector('[data-testid="voice-scene-scene-01"]', { timeout: 30000 });
     await page.waitForFunction(
       () =>
-        Array.from(document.querySelectorAll('audio')).length === 5 &&
-        Array.from(document.querySelectorAll('audio')).every(
+        Array.from(document.querySelectorAll('audio[data-testid^="voice-audio-"]')).length === 5 &&
+        Array.from(document.querySelectorAll('audio[data-testid^="voice-audio-"]')).every(
           (element) => element.readyState >= 1 && element.duration > 0,
         ),
       undefined,
       { timeout: 30000 },
     );
-    const players = await page.$$eval('audio', (elements) =>
+    const players = await page.$$eval('audio[data-testid^="voice-audio-"]', (elements) =>
       elements.map((element) => ({
         label: element.getAttribute('aria-label'),
         src: element.getAttribute('src'),
@@ -254,6 +261,7 @@ async function main() {
     log('7', `editing the narration of ${STALE_SCENE} on the storyboard page and saving it`);
     await page.getByRole('link', { name: 'storyboard', exact: true }).click();
     await page.waitForSelector('[data-testid="storyboard-header-editor"]');
+    await page.getByTestId(`storyboard-scene-row-${STALE_SCENE}`).click();
     await page.getByLabel(`Narration for ${STALE_SCENE}`, { exact: true }).fill(EDITED_NARRATION);
     const [putResponse] = await Promise.all([
       page.waitForResponse(
@@ -342,7 +350,7 @@ async function main() {
     const attached = await attachResponse.json();
     log('9', `attached track: ${JSON.stringify(attached.track)}`);
     assert(attached.track.source === 'uploaded', `the stored track is source: uploaded (got ${attached.track.source})`);
-    assert(attached.track.voiceId === null, 'an uploaded track declares no Piper voice');
+    assert(attached.track.voiceId === null, 'an uploaded track declares no synthesized voice');
 
     await page.waitForFunction(
       (scene) =>

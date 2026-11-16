@@ -125,7 +125,7 @@ async function proposalCard(page, fileName) {
 async function readCardState(card) {
   return card.evaluate((node) => ({
     role: node.querySelector('[data-testid="asset-proposal-role"]').value,
-    reason: node.querySelector('p.text-xs.text-ink-faint')?.textContent ?? '',
+    reason: node.querySelector('[data-testid="asset-proposal-reason"]')?.textContent ?? '',
   }));
 }
 

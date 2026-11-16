@@ -1,4 +1,4 @@
-import { asc, eq } from 'drizzle-orm';
+import { and, asc, eq } from 'drizzle-orm';
 import type { BetterSQLite3Database } from 'drizzle-orm/better-sqlite3';
 
 import { categories, folders, placements } from '../schema/studio-schema';
@@ -19,6 +19,7 @@ export interface VideoPlacement {
   readonly folderId: string | null;
   readonly categoryId: string | null;
   readonly archived: boolean;
+  readonly position?: number;
 }
 
 export interface Organization {
@@ -58,6 +59,7 @@ export function createOrganizationRepository(db: BetterSQLite3Database<typeof sc
         folderId: row.folderId,
         categoryId: row.categoryId,
         archived: row.archived,
+        ...(row.position === null ? {} : { position: row.position }),
       };
       if (!isDefaultPlacement(placement)) {
         videos[row.slug] = placement;
@@ -99,6 +101,10 @@ export function createOrganizationRepository(db: BetterSQLite3Database<typeof sc
       return;
     }
 
+    const current = db.select().from(placements).where(eq(placements.slug, slug)).get();
+    const keepsCategory = current !== undefined && current.categoryId === placement.categoryId;
+    const position = keepsCategory ? current.position : null;
+
     db
       .insert(placements)
       .values({
@@ -106,6 +112,7 @@ export function createOrganizationRepository(db: BetterSQLite3Database<typeof sc
         folderId: placement.folderId,
         categoryId: placement.categoryId,
         archived: placement.archived,
+        position,
       })
       .onConflictDoUpdate({
         target: placements.slug,
@@ -113,9 +120,22 @@ export function createOrganizationRepository(db: BetterSQLite3Database<typeof sc
           folderId: placement.folderId,
           categoryId: placement.categoryId,
           archived: placement.archived,
+          position,
         },
       })
       .run();
+  }
+
+  function setCategoryOrder(categoryId: string, orderedSlugs: readonly string[]): void {
+    db.transaction((tx) => {
+      orderedSlugs.forEach((slug, position) => {
+        tx
+          .update(placements)
+          .set({ position })
+          .where(and(eq(placements.slug, slug), eq(placements.categoryId, categoryId)))
+          .run();
+      });
+    });
   }
 
   return {
@@ -126,6 +146,7 @@ export function createOrganizationRepository(db: BetterSQLite3Database<typeof sc
     createCategory,
     deleteCategory,
     setPlacement,
+    setCategoryOrder,
   };
 }
 

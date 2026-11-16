@@ -3,6 +3,8 @@ import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 
 import {
+  FIXTURES_ROOT,
+  forceEnglishInterface,
   MEDIA_ENV_VARS,
   REPO_ROOT,
   assert,
@@ -22,7 +24,7 @@ const ARTIFACTS_DIR = join(
 const RENDER_API_PORT = 4450;
 const WEB_PORT = 4451;
 const SLUG = 'producer-recipes-smoke';
-const SOURCE_PROJECT = join(REPO_ROOT, 'media/display-ads');
+const SOURCE_PROJECT = join(FIXTURES_ROOT, 'display-ads');
 
 async function seedProject(mediaRoot) {
   const projectRoot = join(mediaRoot, SLUG);
@@ -106,6 +108,7 @@ async function main() {
     const { chromium } = await resolvePlaywright();
     browser = await chromium.launch({ channel: 'chrome' });
     const context = await browser.newContext({ viewport: { width: 1280, height: 1400 } });
+    await forceEnglishInterface(context);
     const page = await context.newPage();
     page.on('console', (message) => {
       if (message.type() === 'error') {
@@ -128,7 +131,7 @@ async function main() {
       .locator('[data-testid="producer-inventory"]')
       .evaluate((node) => (node.textContent ?? '').replace(/\s+/g, ' ').trim());
     log('3', `inventory: ${inventory}`);
-    assert(inventory.includes('aroll'), 'the copied raw/ of display-ads is the material on screen');
+    assert(/a-?roll/i.test(inventory), 'the copied raw/ of display-ads is the material on screen');
 
     const spanishChips = await recipeChips(page);
     for (const chip of spanishChips) {

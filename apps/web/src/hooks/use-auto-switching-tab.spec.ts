@@ -6,24 +6,24 @@ import { useAutoSwitchingTab } from './use-auto-switching-tab';
 import type { RenderJobListing } from '../api/render-api-types';
 
 describe('useAutoSwitchingTab', () => {
-  it('starts on the preview tab', () => {
+  it('starts on the material tab', () => {
     const { result } = renderHook(() => useAutoSwitchingTab(null));
 
-    expect(result.current[0]).toBe('preview');
+    expect(result.current[0]).toBe('material');
   });
 
   it('does not switch on the first snapshot, even if it already has succeeded jobs', () => {
     const jobs = jobListing([succeededJob('render', 'job-1', '2026-09-10T10:00:00.000Z')]);
     const { result } = renderHook(() => useAutoSwitchingTab(jobs));
 
-    expect(result.current[0]).toBe('preview');
+    expect(result.current[0]).toBe('material');
   });
 
   it('switches to deliveries once a render job succeeds after the baseline', () => {
     let jobs: RenderJobListing | null = jobListing([pendingJob('render', 'job-1')]);
     const { result, rerender } = renderHook(() => useAutoSwitchingTab(jobs));
 
-    expect(result.current[0]).toBe('preview');
+    expect(result.current[0]).toBe('material');
 
     jobs = jobListing([succeededJob('render', 'job-1', '2026-09-10T10:00:00.000Z')]);
     act(() => rerender());
@@ -34,8 +34,8 @@ describe('useAutoSwitchingTab', () => {
   it('lets the caller change the tab manually', () => {
     const { result } = renderHook(() => useAutoSwitchingTab(null));
 
-    act(() => result.current[1]('material'));
+    act(() => result.current[1]('deliveries'));
 
-    expect(result.current[0]).toBe('material');
+    expect(result.current[0]).toBe('deliveries');
   });
 });

@@ -25,6 +25,9 @@ extraResources:
     to: mcp
   - from: dist/libs/composition-remotion/bundle
     to: remotion-bundle
+    filter:
+      - "**/*"
+      - "!**/*.map"
   - from: libs/motion-graphics/assets
     to: motion-assets
   - from: apps/desktop/vendor/darwin-arm64/bin
@@ -41,6 +44,7 @@ extraResources:
 asar: true
 
 mac:
+  icon: apps/desktop/build/icon.icns
   target:
     - target: dmg
       arch:

@@ -7,7 +7,7 @@ import { RenderApiError, serviceUnreachable } from '../api/render-api-error';
 import { useAsyncResource } from '../hooks/use-async-resource';
 import { useT } from '../i18n/language-context';
 import { BrandPicker } from './brand-picker';
-import { Button } from './ui/button';
+import { FIELD_CLASS, FIELD_LABEL_CLASS, PRIMARY_BUTTON_CLASS, RADIO_CLASS, SECONDARY_BUTTON_CLASS } from './ui/cl-controls';
 import { ErrorNotice } from './error-notice';
 
 const MODE_OPTIONS = [
@@ -72,9 +72,9 @@ export function CreateProjectForm({ existingSlugs, onCreated, onCancel }: Create
   }
 
   return (
-    <form onSubmit={submit} className="space-y-3">
+    <form onSubmit={submit} className="space-y-4 text-[var(--cl-ink)]">
       <div className="flex flex-wrap items-center gap-3">
-        <label htmlFor="project-name" className="text-sm text-ink-faint">
+        <label htmlFor="project-name" className={FIELD_LABEL_CLASS}>
           {t('createProject.label')}
         </label>
         <input
@@ -82,26 +82,26 @@ export function CreateProjectForm({ existingSlugs, onCreated, onCancel }: Create
           value={name}
           onChange={(event) => setName(event.target.value)}
           placeholder={t('createProject.placeholder')}
-          className="w-64 rounded-control border border-border-strong bg-surface px-3 py-1.5 text-sm text-ink placeholder:text-ink-faint"
+          className={`${FIELD_CLASS} w-64 max-w-full`}
         />
-        <Button type="submit" variant="primary" disabled={submitting}>
+        <button type="submit" className={PRIMARY_BUTTON_CLASS} disabled={submitting}>
           {submitting ? t('createProject.submitting') : t('createProject.submit')}
-        </Button>
+        </button>
         {onCancel !== undefined && (
-          <Button type="button" variant="ghost" onClick={onCancel}>
+          <button type="button" className={SECONDARY_BUTTON_CLASS} onClick={onCancel}>
             {t('createProject.cancel')}
-          </Button>
+          </button>
         )}
       </div>
       <div className="space-y-2">
-        <p id={modeLabelId} className="text-sm text-ink-faint">
+        <p id={modeLabelId} className={FIELD_LABEL_CLASS}>
           {t('createProject.mode.label')}
         </p>
         <div role="radiogroup" aria-labelledby={modeLabelId} className="grid gap-2 sm:grid-cols-2">
           {MODE_OPTIONS.map((option) => (
             <label
               key={option.value}
-              className="flex cursor-pointer items-start gap-2 rounded-panel border border-border-subtle bg-surface p-3 text-sm has-[:checked]:border-accent"
+              className="glass-sub flex cursor-pointer items-start gap-2 rounded-[12px] p-3 text-sm has-[:checked]:border-[var(--cl-action)] has-[:checked]:bg-[color-mix(in_srgb,var(--cl-action)_10%,transparent)]"
             >
               <input
                 type="radio"
@@ -109,18 +109,18 @@ export function CreateProjectForm({ existingSlugs, onCreated, onCancel }: Create
                 value={option.value}
                 checked={mode === option.value}
                 onChange={() => setMode(option.value)}
-                className="mt-1"
+                className={`${RADIO_CLASS} mt-1`}
               />
               <span>
-                <span className="block font-medium text-ink">{t(option.titleKey)}</span>
-                <span className="block text-xs text-ink-faint">{t(option.hintKey)}</span>
+                <span className="block font-medium text-[var(--cl-ink)]">{t(option.titleKey)}</span>
+                <span className="block text-xs text-[var(--cl-ink-3)]">{t(option.hintKey)}</span>
               </span>
             </label>
           ))}
         </div>
       </div>
       <div className="space-y-2">
-        <p id={brandLabelId} className="text-sm text-ink-faint">
+        <p id={brandLabelId} className={FIELD_LABEL_CLASS}>
           {t('createProject.brand.label')}
         </p>
         <BrandPicker
@@ -133,7 +133,7 @@ export function CreateProjectForm({ existingSlugs, onCreated, onCancel }: Create
         />
       </div>
       {localProblem && (
-        <p role="alert" className="text-sm text-warning">
+        <p role="alert" className="text-sm text-[var(--tucu-state-orange-ink)]">
           {t('createProject.nameRequired')}
         </p>
       )}

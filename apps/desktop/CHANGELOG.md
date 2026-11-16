@@ -4,6 +4,33 @@ Historial de versiones de la app de escritorio, en español, pensado para los am
 instalan. `apps/desktop/scripts/release-desktop.mjs` toma la sección de la versión que publica
 y la usa como notas del release.
 
+## 0.5.1 — Videos ordenados como en YouTube y una sola biblioteca con el studio web
+
+- **Mis videos** muestra cada categoría en el orden de su lista de YouTube. En Configuración › YouTube, «Ordenar
+  como en YouTube» trae el orden de nuevo si reordenaste una lista.
+- La app usa **la misma base que el studio web** sobre la carpeta de proyectos: las carpetas, categorías y
+  publicaciones son las mismas en los dos, y Mis videos se actualiza solo al volver a la ventana.
+- Borrar una categoría **pide confirmación** y avisa cuántos videos quedan sin categoría; tocar su nombre te lleva a
+  esa sección.
+- **Fable** aparece en la lista de modelos del productor, con un aviso si el CLI de Claude Code es demasiado viejo.
+- La actividad del productor se lee **en el idioma de la interfaz**.
+- El productor ya no puede dejar en la línea de tiempo un logo que no existe: el render explica qué falta.
+
+## 0.5.0 — Diseño nuevo, logo nuevo y todo lo de la web dentro de la app
+
+- **Diseño Cristal Líquido** en todas las pantallas, en claro y oscuro (o el del sistema), con un modo sólido para
+  equipos lentos. La ventana de la app tiene los botones integrados y el **logo nuevo** de Video Maker.
+- La barra lateral muestra **los pasos del video** (productor, biblioteca, storyboard, voz y vista previa) con su
+  estado, y cada pantalla tiene **una sola acción principal** arriba.
+- **Biblioteca** con grilla de miniaturas, visor ampliado con teclado y comparación lado a lado, y búsqueda de
+  **imágenes, video y música libres** para importar al video.
+- **Marcas** con un único botón de guardar; **ajustes en pestañas** (Productor, Voz, YouTube, Agentes y Apariencia);
+  **cola de publicación** más clara.
+- **Aprender**: guía, cómo funciona, el tutorial en video, preguntas frecuentes y capturas.
+- **Acerca de**: versión, **buscar actualizaciones**, requisitos del equipo con cómo resolver lo que falte, licencias,
+  código abierto y privacidad.
+- **Conectar agentes**: la configuración lista para copiar en Claude Code, Copilot, Gemini u otro cliente MCP.
+
 ## 0.4.3 — Storyboard de motion graphics que funciona y mejor español
 
 - **Motion graphics**: el storyboard fallaba con las versiones nuevas del CLI de Claude y el productor se quedaba sin

@@ -20,6 +20,19 @@ function codeOf(outcome: ReturnType<typeof classify>): string {
 }
 
 describe('classifyProducerTurn', () => {
+  it('un CLI de Claude Code viejo para el modelo elegido sale como PRODUCER_CLI_OUTDATED', () => {
+    const answerText =
+      'API Error: 400 {"error":{"message":"Claude Code 2.1.123 does not support this model","details":{"error_code":"claude_code_version_too_old"}}}';
+    const outcome = classifyProducerTurn({ result: { ...OK, exitCode: 1 }, rateLimited: false, hasAnswer: true, answerText });
+    expect(codeOf(outcome)).toBe('PRODUCER_CLI_OUTDATED');
+  });
+
+  it('una respuesta normal no se confunde con un CLI viejo', () => {
+    expect(classifyProducerTurn({ result: OK, rateLimited: false, hasAnswer: true, answerText: 'listo' })).toEqual({
+      kind: 'succeeded',
+    });
+  });
+
   it('un turno con respuesta y exit 0 es éxito', () => {
     expect(classify({})).toEqual({ kind: 'succeeded' });
   });

@@ -19,6 +19,7 @@ import { useT } from '../i18n/language-context';
 import { blockerId } from '../api/blockers';
 import { AssetUploader } from './asset-uploader';
 import { LogoBumperEditor } from './logo-bumper-editor';
+import { CHECKBOX_CLASS, CHECK_LABEL_CLASS, FIELD_SMALL_CLASS, INLINE_LABEL_CLASS, WARNING_LIST_CLASS } from './ui/cl-controls';
 import type { AssetListing } from '../api/render-api-types';
 
 export type LogoOverlayEditorProps = {
@@ -74,15 +75,16 @@ export function LogoOverlayEditor({ slug, logo, bumpers, dispatch }: LogoOverlay
     <div
       data-testid="logo-overlay-editor"
       data-logo-shown={shown}
-      className="space-y-3 rounded-lg border border-slate-800 bg-slate-900/40 p-4"
+      className="flex flex-col gap-3"
     >
-      <div className="flex flex-wrap items-center gap-4">
+      <div className="flex flex-col gap-3">
         <label
-          className="flex items-center gap-2 text-sm text-slate-300"
+          className={CHECK_LABEL_CLASS}
           title={blockers[0] === undefined ? '' : t(blockers[0].key, blockers[0].params)}
         >
           <input
             type="checkbox"
+            className={CHECKBOX_CLASS}
             aria-label={t('logo.show')}
             checked={shown}
             disabled={asset === undefined}
@@ -91,14 +93,14 @@ export function LogoOverlayEditor({ slug, logo, bumpers, dispatch }: LogoOverlay
           {t('logo.show')}
         </label>
 
-        <label className="flex items-center gap-2 text-xs text-slate-400">
+        <label className={`${INLINE_LABEL_CLASS} justify-between`}>
           {t('logo.position')}
           <select
             aria-label={t('logo.position')}
             value={position}
             disabled={asset === undefined}
             onChange={(event) => move(event.target.value as LogoPosition)}
-            className="rounded-md border border-slate-700 bg-slate-900 px-2 py-1 font-mono text-xs text-slate-200 disabled:opacity-40"
+            className={`${FIELD_SMALL_CLASS} font-data disabled:opacity-50`}
           >
             {LOGO_POSITIONS.map((candidate) => (
               <option key={candidate} value={candidate}>
@@ -108,14 +110,14 @@ export function LogoOverlayEditor({ slug, logo, bumpers, dispatch }: LogoOverlay
           </select>
         </label>
 
-        <label className="flex items-center gap-2 text-xs text-slate-400">
+        <label className={`${INLINE_LABEL_CLASS} justify-between`}>
           {t('logo.size')}
           <select
             aria-label={t('logo.size')}
             value={logo === undefined ? 'medium' : logoSizeOf(logo.widthRatio)}
             disabled={!shown}
             onChange={(event) => resize(event.target.value as LogoSize)}
-            className="rounded-md border border-slate-700 bg-slate-900 px-2 py-1 font-mono text-xs text-slate-200 disabled:opacity-40"
+            className={`${FIELD_SMALL_CLASS} font-data disabled:opacity-50`}
           >
             {LOGO_SIZES.map((size) => (
               <option key={size} value={size}>
@@ -125,7 +127,7 @@ export function LogoOverlayEditor({ slug, logo, bumpers, dispatch }: LogoOverlay
           </select>
         </label>
 
-        <label className="flex items-center gap-2 text-xs text-slate-400">
+        <label className={`${INLINE_LABEL_CLASS} justify-between`}>
           {t('logo.opacity')}
           <input
             type="range"
@@ -136,22 +138,22 @@ export function LogoOverlayEditor({ slug, logo, bumpers, dispatch }: LogoOverlay
             value={Math.round((logo?.opacity ?? 1) * 100)}
             disabled={!shown}
             onChange={(event) => fade(Number(event.target.value) / 100)}
-            className="disabled:opacity-40"
+            className="accent-[var(--cl-action-fill)] disabled:opacity-50"
           />
-          <span data-testid="logo-opacity-value" className="font-mono text-xs text-slate-500">
+          <span data-testid="logo-opacity-value" className="font-data w-8 text-right text-xs text-[var(--cl-ink-2)]">
             {Math.round((logo?.opacity ?? 1) * 100)}
           </span>
         </label>
 
         {asset !== undefined && (
-          <span data-testid="logo-asset" className="font-mono text-xs text-slate-500">
+          <span data-testid="logo-asset" className="font-data truncate text-xs text-[var(--cl-ink-3)]">
             {asset.path}
           </span>
         )}
       </div>
 
       {opaqueLogos.length > 0 && (
-        <ul data-testid="logo-no-alpha" className="space-y-0.5 font-mono text-xs text-amber-300">
+        <ul data-testid="logo-no-alpha" className={WARNING_LIST_CLASS}>
           {opaqueLogos.map((path) => (
             <li key={path}>
               {path} — {t('logo.noAlpha')}
@@ -161,7 +163,7 @@ export function LogoOverlayEditor({ slug, logo, bumpers, dispatch }: LogoOverlay
       )}
 
       {blockers.length > 0 && (
-        <ul data-testid="logo-blockers" className="space-y-0.5 font-mono text-xs text-amber-300">
+        <ul data-testid="logo-blockers" className={WARNING_LIST_CLASS}>
           {blockers.map((blocker) => (
             <li key={blockerId(blocker)}>{t(blocker.key, blocker.params)}</li>
           ))}

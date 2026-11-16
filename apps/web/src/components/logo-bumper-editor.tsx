@@ -24,6 +24,7 @@ import type { BumperEdge, BumperLogoSize, BumperStyle } from '../api/timeline-ed
 import type { TimelineEditAction } from '../api/timeline-edit/timeline-edit-state';
 import { useT } from '../i18n/language-context';
 import type { TranslateFn } from '../i18n/language-context';
+import { CHECKBOX_CLASS, CHECK_LABEL_CLASS, FIELD_SMALL_CLASS, INLINE_LABEL_CLASS, WARNING_LIST_CLASS } from './ui/cl-controls';
 
 export type LogoBumperEditorProps = {
   bumpers?: TimelineBumpers;
@@ -43,7 +44,8 @@ function durationLabel(durationMs: number, t: TranslateFn): string {
   return t('bumper.durationOption', { seconds: (durationMs / 1000).toFixed(1) });
 }
 
-const SELECT_CLASS = 'rounded-md border border-slate-700 bg-slate-900 px-2 py-1 font-mono text-xs text-slate-200';
+const SELECT_CLASS = `${FIELD_SMALL_CLASS} font-data`;
+const BUMPER_LABEL_CLASS = `${INLINE_LABEL_CLASS} justify-between`;
 
 function BumperSettings({ edge, bumper, rotating, dispatch, t }: BumperSettingsProps) {
   function restyle(style: BumperStyle) {
@@ -53,16 +55,16 @@ function BumperSettings({ edge, bumper, rotating, dispatch, t }: BumperSettingsP
   return (
     <div
       data-testid={`bumper-settings-${edge}`}
-      className="flex flex-wrap items-center gap-4 border-l border-slate-800 pl-4"
+      className="glass-sub flex flex-col gap-2 rounded-[12px] p-2.5"
     >
-      <label className="flex items-center gap-2 text-xs text-slate-400">
+      <label className={BUMPER_LABEL_CLASS}>
         {t('bumper.background')}
         <input
           type="color"
           aria-label={t(`bumper.background.${edge}`)}
           value={bumper.backgroundColor}
           onChange={(event) => restyle({ backgroundColor: event.target.value })}
-          className="h-7 w-10 rounded border border-slate-700 bg-slate-900"
+          className="h-8 w-10 rounded-[8px] border border-[var(--tucu-glass-sub-line)] bg-transparent"
         />
         <input
           type="text"
@@ -74,17 +76,17 @@ function BumperSettings({ edge, bumper, rotating, dispatch, t }: BumperSettingsP
               restyle({ backgroundColor: next });
             }
           }}
-          className="w-24 rounded-md border border-slate-700 bg-slate-900 px-2 py-1 font-mono text-xs text-slate-200"
+          className={`${FIELD_SMALL_CLASS} font-data w-24`}
         />
       </label>
 
-      <label className="flex items-center gap-2 text-xs text-slate-400">
+      <label className={BUMPER_LABEL_CLASS}>
         {t('bumper.duration')}
         <select
           aria-label={t(`bumper.duration.${edge}`)}
           value={bumper.durationMs}
           onChange={(event) => restyle({ durationMs: Number(event.target.value) })}
-          className="rounded-md border border-slate-700 bg-slate-900 px-2 py-1 font-mono text-xs text-slate-200"
+          className={SELECT_CLASS}
         >
           {BUMPER_DURATIONS_MS.map((durationMs) => (
             <option key={durationMs} value={durationMs}>
@@ -94,7 +96,7 @@ function BumperSettings({ edge, bumper, rotating, dispatch, t }: BumperSettingsP
         </select>
       </label>
 
-      <label className="flex items-center gap-2 text-xs text-slate-400">
+      <label className={BUMPER_LABEL_CLASS}>
         {t('bumper.animation')}
         <select
           aria-label={t(`bumper.animation.${edge}`)}
@@ -111,7 +113,7 @@ function BumperSettings({ edge, bumper, rotating, dispatch, t }: BumperSettingsP
         </select>
       </label>
 
-      <label className="flex items-center gap-2 text-xs text-slate-400">
+      <label className={BUMPER_LABEL_CLASS}>
         {t('bumper.backdrop')}
         <select
           aria-label={t(`bumper.backdrop.${edge}`)}
@@ -128,7 +130,7 @@ function BumperSettings({ edge, bumper, rotating, dispatch, t }: BumperSettingsP
         </select>
       </label>
 
-      <label className="flex items-center gap-2 text-xs text-slate-400">
+      <label className={BUMPER_LABEL_CLASS}>
         {t('bumper.sfx')}
         <select
           aria-label={t(`bumper.sfx.${edge}`)}
@@ -145,7 +147,7 @@ function BumperSettings({ edge, bumper, rotating, dispatch, t }: BumperSettingsP
         </select>
       </label>
 
-      <label className="flex items-center gap-2 text-xs text-slate-400">
+      <label className={BUMPER_LABEL_CLASS}>
         {t('bumper.caption')}
         <input
           type="text"
@@ -154,11 +156,11 @@ function BumperSettings({ edge, bumper, rotating, dispatch, t }: BumperSettingsP
           maxLength={MAX_BUMPER_CAPTION_LENGTH}
           placeholder={t('bumper.captionPlaceholder')}
           onChange={(event) => restyle(styleForCaption(event.target.value))}
-          className="w-44 rounded-md border border-slate-700 bg-slate-900 px-2 py-1 text-xs text-slate-200"
+          className={`${FIELD_SMALL_CLASS} w-40`}
         />
       </label>
 
-      <label className="flex items-center gap-2 text-xs text-slate-400">
+      <label className={BUMPER_LABEL_CLASS}>
         {t('bumper.logoSize')}
         <select
           aria-label={t(`bumper.logoSize.${edge}`)}
@@ -168,7 +170,7 @@ function BumperSettings({ edge, bumper, rotating, dispatch, t }: BumperSettingsP
               logoWidthRatio: BUMPER_LOGO_WIDTH_RATIO_BY_SIZE[event.target.value as BumperLogoSize],
             })
           }
-          className="rounded-md border border-slate-700 bg-slate-900 px-2 py-1 font-mono text-xs text-slate-200"
+          className={SELECT_CLASS}
         >
           {BUMPER_LOGO_SIZES.map((size) => (
             <option key={size} value={size}>
@@ -193,11 +195,12 @@ export function LogoBumperEditor({ bumpers, logoAvailable, dispatch }: LogoBumpe
         return (
           <div key={edge} className="space-y-2">
             <label
-              className="flex items-center gap-2 text-sm text-slate-300"
+              className={CHECK_LABEL_CLASS}
               title={logoAvailable ? '' : t('bumper.needsLogo')}
             >
               <input
                 type="checkbox"
+                className={CHECKBOX_CLASS}
                 aria-label={t(`bumper.enable.${edge}`)}
                 checked={enabled}
                 disabled={!logoAvailable}
@@ -220,7 +223,7 @@ export function LogoBumperEditor({ bumpers, logoAvailable, dispatch }: LogoBumpe
       })}
 
       {!logoAvailable && (
-        <p data-testid="bumper-needs-logo" className="font-mono text-xs text-amber-300">
+        <p data-testid="bumper-needs-logo" className={WARNING_LIST_CLASS}>
           {t('bumper.needsLogo')}
         </p>
       )}

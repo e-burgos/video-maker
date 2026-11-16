@@ -1,3 +1,5 @@
+import type { StateBadgeTone } from '@e-burgos/tucu-ui';
+
 import type { ProjectLayout } from './render-api-types';
 
 export type ProjectStatusKey =
@@ -18,3 +20,10 @@ export function projectStatusKey(layout: ProjectLayout): ProjectStatusKey {
   }
   return 'projects.status.noMaterial';
 }
+
+export const PROJECT_STATUS_TONE: Readonly<Record<ProjectStatusKey, StateBadgeTone>> = {
+  'projects.status.noMaterial': 'orange',
+  'projects.status.materialLoaded': 'neutral',
+  'projects.status.montageReady': 'purple',
+  'projects.status.videoReady': 'teal',
+};

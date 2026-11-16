@@ -108,6 +108,22 @@ describe('VoicePicker (US-016-003)', () => {
     expect(onSelect).toHaveBeenCalledWith(DAVEFX.id);
   });
 
+  it('draws every voice as a glass-sub card and rings only the chosen one', () => {
+    render(<VoicePicker voices={VOICES} selectedId={DAVEFX.id} onSelect={() => undefined} />);
+
+    expect(cardOf(DANIELA.id).className).toContain('glass-sub');
+    expect(cardOf(DAVEFX.id).className).toContain('glass-sub');
+    expect(cardOf(DAVEFX.id).className).toContain('ring-2');
+    expect(cardOf(DANIELA.id).className).not.toContain('ring-2');
+  });
+
+  it('gives each card its own play button, named after the voice', () => {
+    render(<VoicePicker voices={VOICES} selectedId={DANIELA.id} onSelect={() => undefined} />);
+
+    expect(screen.getByRole('button', { name: `Preview ${DANIELA.label}` })).toBeTruthy();
+    expect(screen.getByRole('button', { name: `Preview ${DAVEFX.label}` })).toBeTruthy();
+  });
+
   it('points every preview at the endpoint of that voice through the service proxy', () => {
     render(<VoicePicker voices={VOICES} selectedId={null} onSelect={() => undefined} />);
 

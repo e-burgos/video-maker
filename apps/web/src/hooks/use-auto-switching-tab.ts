@@ -7,7 +7,7 @@ import type { RenderJobListing } from '../api/render-api-types';
 export function useAutoSwitchingTab(
   jobs: RenderJobListing | null,
 ): [WorkspaceTabId, (tab: WorkspaceTabId) => void] {
-  const [activeTab, setActiveTab] = useState<WorkspaceTabId>('preview');
+  const [activeTab, setActiveTab] = useState<WorkspaceTabId>('material');
   const previousJobsRef = useRef<RenderJobListing | null>(null);
   const hasBaselineRef = useRef(false);
 

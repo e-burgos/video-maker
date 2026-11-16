@@ -15,7 +15,7 @@ import {
 const COPY = {
   es: {
     title: 'Tecnología',
-    description: 'Todo lo que usa Video Maker, para qué lo usa y con qué licencia: Electron, React, Remotion, HyperFrames, FFmpeg, whisper.cpp, voces Piper, Claude Code, OpenRouter y el monorepo.',
+    description: 'Qué usa Video Maker, para qué y con qué licencia: Electron, React, Remotion, HyperFrames, FFmpeg, whisper.cpp, voces Piper, Claude Code y OpenRouter.',
     eyebrow: 'Inventario verificado',
     heading: 'La tecnología detrás de Video Maker',
     lede: 'Cada componente, para qué lo usa la herramienta y su licencia. La lista se contrasta en cada build de tests con el código del monorepo y con el mismo <code>THIRD_PARTY_NOTICES.md</code> que muestra la app.',
@@ -39,7 +39,7 @@ const COPY = {
   },
   en: {
     title: 'Technology',
-    description: 'Everything Video Maker uses, what for and under which license: Electron, React, Remotion, HyperFrames, FFmpeg, whisper.cpp, Piper voices, Claude Code, OpenRouter and the monorepo.',
+    description: 'What Video Maker uses, what for and under which license: Electron, React, Remotion, HyperFrames, FFmpeg, whisper.cpp, Piper voices, Claude Code and OpenRouter.',
     eyebrow: 'Verified inventory',
     heading: 'The technology behind Video Maker',
     lede: 'Every component, what the tool uses it for and its license. The list is checked in every test run against the monorepo code and against the same <code>THIRD_PARTY_NOTICES.md</code> the app shows.',

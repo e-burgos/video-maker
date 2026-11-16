@@ -310,7 +310,8 @@ describe('handleGetProducer', () => {
         default: 'sonnet',
         allowed: [
           { id: 'sonnet', label: 'Sonnet', description: 'Balanced · faster, cheaper' },
-          { id: 'opus', label: 'Opus', description: 'Most capable · slower, costlier' },
+          { id: 'fable', label: 'Fable', description: 'Newest and most capable · slowest, costliest' },
+          { id: 'opus', label: 'Opus', description: 'Very capable · slower, costlier' },
           { id: 'haiku', label: 'Haiku', description: 'Fastest · lightest' },
         ],
       },

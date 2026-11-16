@@ -2,7 +2,7 @@
 
 > Entry point para agentes que trabajen sobre `apps/render-api`.
 > Leer junto con `constitution.md` de este directorio **+ `updates/*.md` en orden de nombre**.
-> Última actualización: consolidación de fragmentos | Fecha: 2026-10-13
+> Última actualización: consolidación de fragmentos | Fecha: 2026-11-13
 
 - **Tipo:** app Node (servicio HTTP local, headless, mono-usuario)
 - **Estado:** **completo.** Rutas `EP-001`..`EP-073`. Verificado contra
@@ -60,7 +60,7 @@ src/
                                run-photo-aroll-pipeline (Ken Burns + mux)
   storyboard/                  documento, inventario, prompt y export numerado de prompts
   voice/                       rutas, formatos, catálogo/preview de voces, store del manifest,
-                               transcribe-voice-script-lines (por línea)
+                               transcribe-voice-script-lines (por línea); motor ElevenLabs (ver constitution §3)
   producer/                    conversación persistida, prompt del sistema, mapeo del stream-json,
                                puerto ProducerAgent + adaptadores Claude Code/OpenRouter, registro de
                                turnos, producer-mcp-config, openrouter-model-catalog, producer-history

@@ -5,6 +5,7 @@ import { useRenderApi } from '../api/render-api-context';
 import { useApiAction } from '../hooks/use-api-action';
 import { useT } from '../i18n/language-context';
 import { ErrorNotice } from './error-notice';
+import { SECONDARY_BUTTON_SMALL_CLASS } from './ui/cl-controls';
 
 export type StoryboardPromptSheetProps = {
   slug: string;
@@ -33,21 +34,21 @@ export function StoryboardPromptSheet({ slug, dirty }: StoryboardPromptSheetProp
   }
 
   return (
-    <div
+    <section
       data-testid="storyboard-prompt-sheet"
-      className="space-y-3 rounded-lg border border-slate-800 bg-slate-900/40 p-4"
+      className="glass flex flex-col gap-3 rounded-[20px] p-4"
     >
-      <h2 className="font-mono text-sm uppercase tracking-wide text-slate-400">
+      <h2 className="m-0 text-sm font-bold text-[var(--cl-ink)]">
         {t('storyboardPrompts.heading')}
       </h2>
-      <p className="text-sm text-slate-400">{t('storyboardPrompts.description')}</p>
+      <p className="m-0 text-sm text-[var(--cl-ink-2)]">{t('storyboardPrompts.description')}</p>
 
       <div className="flex flex-wrap items-center gap-3">
         <button
           type="button"
           disabled={loadAction.status === 'pending'}
           onClick={() => void copySheet()}
-          className="rounded-md border border-sky-500/50 bg-sky-500/10 px-3 py-1.5 text-sm text-sky-100 disabled:opacity-40"
+          className={SECONDARY_BUTTON_SMALL_CLASS}
         >
           {t('storyboardPrompts.copy')}
         </button>
@@ -55,20 +56,20 @@ export function StoryboardPromptSheet({ slug, dirty }: StoryboardPromptSheetProp
           type="button"
           disabled={loadAction.status === 'pending'}
           onClick={() => void load()}
-          className="rounded-md border border-slate-700 px-3 py-1.5 text-sm text-slate-300 disabled:opacity-40"
+          className={SECONDARY_BUTTON_SMALL_CLASS}
         >
           {t('storyboardPrompts.show')}
         </button>
         {copied === true && (
-          <span className="text-xs text-emerald-300">{t('storyboardPrompts.copied')}</span>
+          <span className="text-xs text-[var(--tucu-state-green-ink)]">{t('storyboardPrompts.copied')}</span>
         )}
         {copied === false && (
-          <span className="text-xs text-amber-300">{t('storyboardPrompts.clipboardRefused')}</span>
+          <span className="text-xs text-[var(--tucu-state-orange-ink)]">{t('storyboardPrompts.clipboardRefused')}</span>
         )}
       </div>
 
       {dirty && (
-        <p className="text-xs text-amber-300">{t('storyboardPrompts.dirty')}</p>
+        <p className="m-0 text-xs text-[var(--tucu-state-orange-ink)]">{t('storyboardPrompts.dirty')}</p>
       )}
 
       {loadAction.error !== null && <ErrorNotice error={loadAction.error} />}
@@ -76,11 +77,11 @@ export function StoryboardPromptSheet({ slug, dirty }: StoryboardPromptSheetProp
       {sheet !== null && (
         <pre
           data-testid="storyboard-prompt-text"
-          className="max-h-96 overflow-auto rounded-md border border-slate-800 bg-slate-950 p-3 font-mono text-xs whitespace-pre-wrap text-slate-300"
+          className="font-data glass-sub m-0 max-h-96 overflow-auto rounded-[12px] p-3 text-xs whitespace-pre-wrap text-[var(--cl-ink)]"
         >
           {sheet}
         </pre>
       )}
-    </div>
+    </section>
   );
 }

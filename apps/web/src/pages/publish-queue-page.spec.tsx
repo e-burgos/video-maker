@@ -4,6 +4,8 @@ import { describe, expect, it, vi } from 'vitest';
 
 import { publishQueue, queueItem } from '../api/__fixtures__/publish-queue';
 import { RenderApiProvider } from '../api/render-api-context';
+import { ShellToolbar } from '../components/shell/shell-toolbar';
+import { ToolbarActionProvider } from '../components/shell/toolbar-action-provider';
 import { PublishQueuePage } from './publish-queue-page';
 import type { RenderApiClient } from '../api/render-api-client';
 import type { PublishQueue } from '../api/publish-queue-types';
@@ -18,9 +20,12 @@ function renderPage(queue: PublishQueue, overrides: Partial<RenderApiClient> = {
   };
   render(
     <RenderApiProvider client={client as RenderApiClient}>
-      <MemoryRouter>
-        <PublishQueuePage />
-      </MemoryRouter>
+      <ToolbarActionProvider>
+        <MemoryRouter>
+          <ShellToolbar title="Publishing" subtitle={null} />
+          <PublishQueuePage />
+        </MemoryRouter>
+      </ToolbarActionProvider>
     </RenderApiProvider>,
   );
   return client;
@@ -73,13 +78,21 @@ describe('PublishQueuePage', () => {
   it('lists every state with its chip, link and error', async () => {
     renderPage(publishQueue(ALL_STATES, { nextAttemptAt: '2026-10-13T15:30:00.000Z' }));
 
-    await waitFor(() => expect(screen.getAllByTestId('publish-queue-row')).toHaveLength(6));
+    await waitFor(() => expect(screen.getAllByTestId('publish-queue-row')).toHaveLength(4));
     expect(screen.getByTestId('publish-queue-state').textContent).toBe('Active');
-    expect(screen.getByText('Published in the last 24 h: 3 of 10')).toBeTruthy();
+    expect(screen.getByTestId('publish-queue-stat-last24h').textContent).toBe('3 / 10last 24 h');
+    expect(screen.getByTestId('publish-queue-stat-queued').textContent).toBe('3in queue');
+    expect(screen.getByTestId('publish-queue-stat-failed').textContent).toBe('1with errors');
     expect(screen.getByTestId('publish-queue-next-attempt').textContent).toContain('Next attempt at');
     expect(within(rowOf('First')).getByText('Queued')).toBeTruthy();
     expect(within(rowOf('Second')).getByText(/^retries at \d\d:\d\d$/u)).toBeTruthy();
     expect(within(rowOf('Third')).getByText('Publishing')).toBeTruthy();
+    expect(within(rowOf('Sixth')).getByText('upload exploded')).toBeTruthy();
+    expect(within(rowOf('Sixth')).getByRole('button', { name: 'Retry' })).toBeTruthy();
+    expect(within(rowOf('First')).queryByRole('button', { name: 'Retry' })).toBeNull();
+
+    fireEvent.click(screen.getByTestId('publish-queue-filter-published'));
+    await waitFor(() => expect(screen.getAllByTestId('publish-queue-row')).toHaveLength(2));
     expect(within(rowOf('Fourth')).getByText('Published')).toBeTruthy();
     expect(within(rowOf('Fourth')).getByRole('link', { name: 'Open on YouTube' }).getAttribute('href')).toBe(
       'https://youtu.be/pub',
@@ -88,9 +101,6 @@ describe('PublishQueuePage', () => {
     expect(within(rowOf('Fifth')).getByRole('link', { name: 'Open on YouTube' }).getAttribute('href')).toBe(
       'https://youtu.be/dup',
     );
-    expect(within(rowOf('Sixth')).getByText('upload exploded')).toBeTruthy();
-    expect(within(rowOf('Sixth')).getByRole('button', { name: 'Retry' })).toBeTruthy();
-    expect(within(rowOf('First')).queryByRole('button', { name: 'Retry' })).toBeNull();
   });
 
   it('pauses and resumes the queue', async () => {
@@ -102,11 +112,57 @@ describe('PublishQueuePage', () => {
     await waitFor(() => expect(client.updatePublishQueueSettings).toHaveBeenCalledWith({ paused: true }));
   });
 
+  it('declares pause as the toolbar action and shows the queue state next to it', async () => {
+    renderPage(publishQueue([queueItem()]));
+
+    await waitFor(() => expect(screen.getByTestId('toolbar-action').textContent).toBe('Pause'));
+    expect(within(screen.getByTestId('shell-toolbar')).getByTestId('publish-queue-state').textContent).toBe('Active');
+    expect(screen.getAllByRole('button', { name: 'Pause' })).toHaveLength(1);
+  });
+
+  it('keeps the removal inside the row menu', async () => {
+    renderPage(publishQueue([queueItem()]));
+
+    await waitFor(() => expect(screen.getAllByTestId('publish-queue-row')).toHaveLength(1));
+    expect(within(rowOf('Demo title')).queryByRole('button', { name: 'Remove' })).toBeNull();
+    fireEvent.click(within(rowOf('Demo title')).getByTestId('publish-queue-menu'));
+
+    expect(screen.getByTestId('publish-queue-menu-list')).toBeTruthy();
+  });
+
+  it('tells an empty filter apart from an empty queue', async () => {
+    renderPage(publishQueue([queueItem()]));
+
+    await waitFor(() => expect(screen.getAllByTestId('publish-queue-row')).toHaveLength(1));
+    fireEvent.click(screen.getByTestId('publish-queue-filter-published'));
+
+    expect(screen.getByTestId('publish-queue-empty-filter')).toBeTruthy();
+    expect(screen.queryByTestId('publish-queue-empty')).toBeNull();
+  });
+
+  it('shows the thumbnail only on an opaque frame', async () => {
+    renderPage(
+      publishQueue([
+        queueItem({
+          metadata: { title: 'Covered', description: '', tags: [], privacy: 'public', thumbnail: 'assets/cover.png' },
+        }),
+      ]),
+    );
+
+    await waitFor(() => expect(screen.getByTestId('publish-queue-thumbnail')).toBeTruthy());
+    expect(screen.getByTestId('publish-queue-thumbnail').className).toContain('bg-[#0b0d14]');
+    expect(screen.getByAltText('Thumbnail of “Covered”').getAttribute('src')).toBe(
+      '/api/projects/demo/files/assets/cover.png',
+    );
+  });
+
   it('offers Resume when paused and saves the daily limit', async () => {
     const client = renderPage(publishQueue([], { settings: { paused: true, dailyLimit: 10 } }));
 
     await waitFor(() => expect(screen.getByRole('button', { name: 'Resume' })).toBeTruthy());
     expect(screen.getByTestId('publish-queue-state').textContent).toBe('Paused');
+    fireEvent.click(screen.getByRole('button', { name: 'Resume' }));
+    await waitFor(() => expect(client.updatePublishQueueSettings).toHaveBeenCalledWith({ paused: false }));
     fireEvent.change(screen.getByLabelText('Daily limit'), { target: { value: '4' } });
     fireEvent.click(screen.getByRole('button', { name: 'Save limit' }));
 
@@ -136,7 +192,8 @@ describe('PublishQueuePage', () => {
     const client = renderPage(publishQueue(ALL_STATES.slice(0, 2)));
 
     await waitFor(() => expect(screen.getAllByTestId('publish-queue-row')).toHaveLength(2));
-    fireEvent.click(within(rowOf('Second')).getByRole('button', { name: 'Remove' }));
+    fireEvent.click(within(rowOf('Second')).getByTestId('publish-queue-menu'));
+    fireEvent.click(screen.getByTestId('publish-queue-remove'));
     expect(client.removePublishQueueItem).not.toHaveBeenCalled();
     fireEvent.click(screen.getByTestId('publish-queue-remove-accept'));
 

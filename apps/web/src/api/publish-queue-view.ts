@@ -1,7 +1,7 @@
 import type { Language } from '../i18n/language';
 import type { TranslationKey } from '../i18n/messages-en';
-import type { BadgeTone } from '../components/ui/badge';
-import type { PublishQueueStatus } from './publish-queue-types';
+import type { StateBadgeTone } from '@e-burgos/tucu-ui';
+import type { PublishQueueItem, PublishQueueStatus } from './publish-queue-types';
 
 export const PUBLISH_QUEUE_POLL_INTERVAL_MS = 10_000;
 
@@ -13,13 +13,27 @@ export const PUBLISH_QUEUE_STATUS_LABEL: Readonly<Record<PublishQueueStatus, Tra
   failed: 'publishQueue.status.failed',
 };
 
-export const PUBLISH_QUEUE_STATUS_TONE: Readonly<Record<PublishQueueStatus, BadgeTone>> = {
-  queued: 'neutral',
-  publishing: 'warning',
-  published: 'success',
-  'already-published': 'accent',
-  failed: 'danger',
+export const PUBLISH_QUEUE_STATUS_TONE: Readonly<Record<PublishQueueStatus, StateBadgeTone>> = {
+  queued: 'orange',
+  publishing: 'teal',
+  published: 'green',
+  'already-published': 'purple',
+  failed: 'red',
 };
+
+export const PUBLISH_QUEUE_FILTERS = ['queue', 'published', 'failed'] as const;
+
+export type PublishQueueFilter = (typeof PUBLISH_QUEUE_FILTERS)[number];
+
+const STATUSES_BY_FILTER: Readonly<Record<PublishQueueFilter, readonly PublishQueueStatus[]>> = {
+  queue: ['queued', 'publishing', 'failed'],
+  published: ['published', 'already-published'],
+  failed: ['failed'],
+};
+
+export function filterQueueItems(items: readonly PublishQueueItem[], filter: PublishQueueFilter): PublishQueueItem[] {
+  return items.filter((item) => STATUSES_BY_FILTER[filter].includes(item.status));
+}
 
 const LOCALE_BY_LANGUAGE: Readonly<Record<Language, string>> = { en: 'en-US', es: 'es-AR' };
 

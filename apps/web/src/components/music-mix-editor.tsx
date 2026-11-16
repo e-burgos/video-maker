@@ -2,6 +2,7 @@ import type { MusicMixSettings } from '@video-maker/timeline-core';
 
 import type { TimelineEditAction } from '../api/timeline-edit/timeline-edit-state';
 import { useT } from '../i18n/language-context';
+import { FIELD_SMALL_CLASS, INLINE_LABEL_CLASS } from './ui/cl-controls';
 
 export type MusicMixEditorProps = {
   music: MusicMixSettings;
@@ -12,8 +13,8 @@ export function MusicMixEditor({ music, dispatch }: MusicMixEditorProps) {
   const t = useT();
 
   return (
-    <div className="flex flex-wrap items-center gap-4 rounded-lg border border-slate-800 bg-slate-900/40 p-3">
-      <label className="flex items-center gap-2 text-sm text-slate-400">
+    <div className="flex flex-wrap items-center gap-4">
+      <label className={INLINE_LABEL_CLASS}>
         {t('music.baseLevel')}
         <input
           type="number"
@@ -26,11 +27,11 @@ export function MusicMixEditor({ music, dispatch }: MusicMixEditorProps) {
               duckedGainDb: music.duckedGainDb,
             })
           }
-          className="w-20 rounded-md border border-slate-700 bg-slate-900 px-2 py-1 font-mono text-sm text-slate-100"
+          className={`${FIELD_SMALL_CLASS} font-data w-20`}
         />
       </label>
 
-      <label className="flex items-center gap-2 text-sm text-slate-400">
+      <label className={INLINE_LABEL_CLASS}>
         {t('music.duckedLevel')}
         <input
           type="number"
@@ -43,7 +44,7 @@ export function MusicMixEditor({ music, dispatch }: MusicMixEditorProps) {
               duckedGainDb: Number(event.target.value),
             })
           }
-          className="w-20 rounded-md border border-slate-700 bg-slate-900 px-2 py-1 font-mono text-sm text-slate-100"
+          className={`${FIELD_SMALL_CLASS} font-data w-20`}
         />
       </label>
     </div>

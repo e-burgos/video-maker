@@ -3,6 +3,8 @@ import { MemoryRouter } from 'react-router-dom';
 import { describe, expect, it, vi } from 'vitest';
 
 import { ProjectsPage } from './projects-page';
+import { ShellToolbar } from '../components/shell/shell-toolbar';
+import { ToolbarActionProvider } from '../components/shell/toolbar-action-provider';
 import { RenderApiError } from '../api/render-api-error';
 import { RenderApiProvider } from '../api/render-api-context';
 import type { ProjectSummary, VideoOrganization } from '../api/render-api-types';
@@ -32,7 +34,10 @@ function renderPage(client: Partial<RenderApiClient>) {
   render(
     <RenderApiProvider client={withBrands as RenderApiClient}>
       <MemoryRouter>
-        <ProjectsPage />
+        <ToolbarActionProvider>
+          <ShellToolbar title="My videos" subtitle={null} />
+          <ProjectsPage />
+        </ToolbarActionProvider>
       </MemoryRouter>
     </RenderApiProvider>,
   );
@@ -165,7 +170,7 @@ describe('ProjectsPage', () => {
     });
 
     await waitFor(() => expect(screen.getByText(/No videos yet/u)).toBeTruthy());
-    fireEvent.click(screen.getByTestId('new-video-cta'));
+    fireEvent.click(screen.getByTestId('toolbar-action'));
     fireEvent.change(screen.getByLabelText('Video name'), { target: { value: 'fresh-one' } });
     fireEvent.click(screen.getByRole('button', { name: 'Create video' }));
 
@@ -187,10 +192,58 @@ describe('ProjectsPage', () => {
     });
 
     await waitFor(() => expect(screen.getByText('suelto')).toBeTruthy());
+    fireEvent.click(screen.getByTestId('new-folder-open'));
     fireEvent.change(screen.getByTestId('create-folder-name'), { target: { value: 'Display Ads' } });
     fireEvent.click(screen.getByTestId('create-folder-submit'));
 
-    await waitFor(() => expect(screen.getByText('Display Ads')).toBeTruthy());
+    await waitFor(() => expect(section('display-ads')).toBeTruthy());
     expect(createFolder).toHaveBeenCalledWith('Display Ads');
+  });
+
+  it('filters the videos by title or slug and offers to clear a search without matches', async () => {
+    renderPage({
+      listProjects: vi.fn().mockResolvedValue([project('crear-campana'), project('planificador')]),
+      getOrganization: vi.fn().mockResolvedValue(EMPTY_ORGANIZATION),
+    });
+
+    await waitFor(() => expect(screen.getByText('crear-campana')).toBeTruthy());
+    fireEvent.change(screen.getByTestId('video-search'), { target: { value: 'PLANIF' } });
+    expect(screen.queryByText('crear-campana')).toBeNull();
+    expect(screen.getByText('planificador')).toBeTruthy();
+
+    fireEvent.change(screen.getByTestId('video-search'), { target: { value: 'zzz' } });
+    expect(screen.getByTestId('videos-no-results')).toBeTruthy();
+    fireEvent.click(screen.getByRole('button', { name: 'Clear search' }));
+    expect(screen.getByText('crear-campana')).toBeTruthy();
+  });
+
+  it('narrows the listing to the folder chip that is pressed and counts the videos of each folder', async () => {
+    renderPage({
+      listProjects: vi
+        .fn()
+        .mockResolvedValue([project('editar-campana'), project('linea-de-tiempo'), project('suelto')]),
+      getOrganization: vi.fn().mockResolvedValue(DISPLAY_ADS),
+    });
+
+    await waitFor(() => expect(screen.getByText('suelto')).toBeTruthy());
+    const chips = screen.getAllByTestId('folder-chip');
+    expect(chips.map((chip) => chip.textContent)).toEqual(['All3', 'Display Ads2', 'No folder1']);
+
+    fireEvent.click(chips[1] as HTMLElement);
+    expect(screen.queryByText('suelto')).toBeNull();
+    expect(screen.getByText('editar-campana')).toBeTruthy();
+    expect((screen.getAllByTestId('folder-chip')[1] as HTMLElement).getAttribute('aria-pressed')).toBe('true');
+  });
+
+  it('shows a loading skeleton until the listing arrives and offers a new video from the empty state', async () => {
+    renderPage({
+      listProjects: vi.fn().mockResolvedValue([]),
+      getOrganization: vi.fn().mockResolvedValue(EMPTY_ORGANIZATION),
+    });
+
+    expect(screen.getByTestId('videos-skeleton')).toBeTruthy();
+    await waitFor(() => expect(screen.getByTestId('empty-new-video')).toBeTruthy());
+    fireEvent.click(screen.getByTestId('empty-new-video'));
+    expect(screen.getByLabelText('Video name')).toBeTruthy();
   });
 });

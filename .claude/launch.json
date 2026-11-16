@@ -1,6 +1,7 @@
 {
   "version": "0.0.1",
   "configurations": [
-    { "name": "studio", "runtimeExecutable": "pnpm", "runtimeArgs": ["studio"], "port": 4200 }
+    { "name": "studio", "runtimeExecutable": "pnpm", "runtimeArgs": ["studio"], "port": 4200 },
+    { "name": "docs-site-dist", "runtimeExecutable": "python3", "runtimeArgs": ["-m", "http.server", "4610", "-d", "dist/apps/docs-site"], "port": 4610 }
   ]
 }

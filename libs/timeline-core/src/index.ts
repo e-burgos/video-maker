@@ -156,7 +156,7 @@ export {
 } from './timeline/logo-defaults';
 export type { LogoInput, MusicInput, TimelineBuildErrorCode, VoiceInput } from './timeline/build-timeline';
 
-export { timelineWarnings, validateTimeline } from './timeline/validate-timeline';
+export { assetReferenceIssues, timelineWarnings, validateTimeline } from './timeline/validate-timeline';
 export type {
   TimelineIssue,
   TimelineIssueCode,

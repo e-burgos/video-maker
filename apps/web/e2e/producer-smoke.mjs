@@ -4,6 +4,9 @@ import { tmpdir } from 'node:os';
 import { basename, join } from 'node:path';
 
 import {
+  FIXTURES_ROOT,
+  forceEnglishInterface,
+  openPreviewSection,
   REPO_ROOT,
   VOICE_ENV_VARS,
   assert,
@@ -27,9 +30,11 @@ const WEB_PORT = 4210;
 const SLUG = 'demo-01';
 
 const TURN_ONE_TEXT =
-  'Contame qué material hay y proponeme un video de 30 segundos, sin nombrar la marca.';
-const TURN_TWO_FALLBACK = 'Dale, avanzá con esa propuesta y entregame el MP4.';
-const TURN_THREE_TEXT = 'Escribime un título alternativo para el video.';
+  'Contame qué material hay y proponeme un video de 30 segundos armado con el material grabado que ya hay (montaje, no animado), sin nombrar la marca. El material es sintético, de prueba técnica: no lo juzgues, usalo tal cual.';
+const TURN_TWO_FALLBACK =
+  'Dale, avanzá con esa propuesta usando el material de prueba tal cual y entregame el MP4.';
+const TURN_THREE_TEXT =
+  'Escribime diez títulos alternativos para el video, de a uno, explicando con detalle por qué funciona cada uno.';
 const MODEL_TURN_TEXT = 'Respondeme solamente con la palabra LISTO, sin tocar ningún archivo.';
 const MODEL_TURN_DEADLINE_MS = 300_000;
 
@@ -138,9 +143,9 @@ async function main() {
   const tempMediaRoot = await mkdtemp(join(tmpdir(), 'producer-smoke-'));
   const projectRoot = join(tempMediaRoot, SLUG);
   await mkdir(join(projectRoot, 'work'), { recursive: true });
-  await cp(join(REPO_ROOT, 'media', SLUG, 'raw'), join(projectRoot, 'raw'), { recursive: true });
+  await cp(join(FIXTURES_ROOT, SLUG, 'raw'), join(projectRoot, 'raw'), { recursive: true });
   await cp(
-    join(REPO_ROOT, 'media', SLUG, 'work', 'producer'),
+    join(FIXTURES_ROOT, SLUG, 'work', 'producer'),
     join(projectRoot, 'work', 'producer'),
     {
       recursive: true,
@@ -189,6 +194,7 @@ async function main() {
     const playwright = await resolvePlaywright();
     browser = await playwright.chromium.launch({ channel: 'chrome' });
     const context = await browser.newContext({ viewport: { width: 1280, height: 2000 } });
+    await forceEnglishInterface(context);
     const page = await context.newPage();
     page.on('pageerror', (error) => log('pageerror', error.stack ?? error.message));
     page.on('console', (message) => {
@@ -208,8 +214,8 @@ async function main() {
 
     const inventory = (await page.getByTestId('producer-inventory').textContent()) ?? '';
     record('4', `inventory on screen: ${inventory.replace(/\s+/g, ' ').trim()}`);
-    assert(inventory.includes('aroll'), 'the empty state lists the real material of the project');
-    assert(inventory.includes('logo'), 'the logo of raw/logo/ is part of the inventory');
+    assert(/a-?roll/i.test(inventory), 'the empty state lists the real material of the project');
+    assert(/logo/i.test(inventory), 'the logo of raw/logo/ is part of the inventory');
     await page.screenshot({ path: join(ARTIFACTS_DIR, 'producer-smoke-01-empty-state.png'), fullPage: true });
 
     record('M', 'model picker: the catalog of EP-022 and the select of the composer say the same thing');
@@ -256,15 +262,14 @@ async function main() {
     );
     assert(modelTurn.turn.status === 'succeeded', `the haiku turn succeeded (got ${modelTurn.turn.status})`);
 
-    const sessionOnDisk = JSON.parse(
-      await readFile(join(projectRoot, 'work', 'producer', 'session.json'), 'utf8'),
-    );
-    record('M', `work/producer/session.json on disk: ${JSON.stringify(sessionOnDisk)}`);
+    const storedSession = (await apiJson(`/projects/${SLUG}/producer`)).body.session;
+    record('M', `stored producer session: ${JSON.stringify(storedSession)}`);
     assert(
-      sessionOnDisk.model === 'haiku',
-      `the model in effect reached session.json on disk, not just the screen (got ${sessionOnDisk.model})`,
+      storedSession?.model === 'haiku',
+      `the model in effect reached the stored session, not just the screen (got ${storedSession?.model})`,
     );
 
+    await page.waitForSelector('[data-testid^="producer-message-model-"]', { timeout: 15000 });
     const badges = await page.locator('[data-testid^="producer-message-model-"]').allTextContents();
     record('M', `model badges on screen: ${JSON.stringify(badges)}`);
     assert(badges.at(-1) === 'haiku', 'the answer of the producer shows the model that wrote it');
@@ -359,6 +364,8 @@ async function main() {
     await page.screenshot({ path: join(ARTIFACTS_DIR, 'producer-smoke-05-preview.png'), fullPage: true });
 
     record('9', 'logo: driving timeline.logo from the preview and saving it');
+    await page.waitForSelector('[data-testid="preview-section-logo"]');
+    await openPreviewSection(page, 'logo');
     await page.waitForSelector('[data-testid="logo-overlay-editor"]');
     const logoCheckbox = page.getByLabel('Show logo');
     assert(

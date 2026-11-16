@@ -1,25 +1,276 @@
 @import 'tailwindcss';
+@import '@e-burgos/tucu-ui/theme';
+@import '@fontsource-variable/inter';
+@import '@fontsource-variable/jetbrains-mono';
+@source '../../../node_modules/@e-burgos/tucu-ui/**/*.mjs';
 
 @theme {
-  --color-surface: var(--color-slate-950);
-  --color-surface-raised: var(--color-slate-900);
-  --color-surface-muted: var(--color-slate-800);
-  --color-border-subtle: var(--color-slate-800);
-  --color-border-strong: var(--color-slate-700);
-  --color-ink: var(--color-slate-100);
-  --color-ink-muted: var(--color-slate-400);
-  --color-ink-faint: var(--color-slate-500);
-  --color-accent: var(--color-sky-400);
-  --color-accent-strong: var(--color-sky-300);
-  --color-accent-soft: var(--color-sky-500);
-  --color-warning: var(--color-amber-300);
-  --color-danger: var(--color-rose-400);
-  --color-success: var(--color-emerald-400);
-  --radius-panel: 0.75rem;
-  --radius-control: 0.5rem;
+  --font-sans: -apple-system, 'system-ui', 'Segoe UI', Roboto, 'Helvetica Neue', 'Noto Sans', Arial,
+    sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
+  --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono',
+    'Courier New', monospace;
+}
+
+html:root {
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: auto;
 }
 
 html,
 body {
-  background-color: var(--color-surface);
+  background-color: var(--cl-canvas);
+}
+
+:root {
+  --font-ui: 'Inter Variable', -apple-system, 'system-ui', 'Segoe UI', Roboto, sans-serif;
+  --font-data: 'JetBrains Mono Variable', ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas,
+    monospace;
+  --tucu-glass-thin-bg: rgba(255, 255, 255, 0.5);
+  --tucu-glass-regular-bg: rgba(255, 255, 255, 0.58);
+  --tucu-glass-thick-bg: rgba(255, 255, 255, 0.7);
+  --tucu-glass-sub-bg: rgba(255, 255, 255, 0.6);
+  --tucu-glass-border: rgba(255, 255, 255, 0.75);
+  --tucu-glass-sub-line: rgba(0, 0, 0, 0.12);
+  --tucu-glass-blur-thin: 16px;
+  --tucu-glass-blur-regular: 26px;
+  --tucu-glass-blur-thick: 34px;
+  --tucu-radius-control: 10px;
+  --tucu-radius-card: 16px;
+  --tucu-radius-panel: 20px;
+  --tucu-shadow-card: 0 6px 24px rgba(31, 38, 74, 0.1);
+  --tucu-shadow-panel: 0 10px 32px rgba(31, 38, 74, 0.13);
+  --tucu-shadow-float: 0 12px 40px rgba(31, 38, 74, 0.15);
+  --cl-glass-saturate: 1.6;
+  --cl-canvas: #e8eaf0;
+  --cl-ambient: linear-gradient(150deg, #c7d4ee 0%, #e2d5ea 45%, #f2ded3 100%);
+  --cl-orb-a: rgba(100, 150, 255, 0.3);
+  --cl-orb-b: rgba(255, 160, 120, 0.24);
+  --cl-ink: #1d1d1f;
+  --cl-ink-2: #48484a;
+  --cl-ink-3: #5c5c61;
+  --cl-action: #0a6cff;
+  --cl-action-hover: #0353c9;
+  --cl-action-text: #0353c9;
+  --cl-action-fill: #0a6cff;
+  --cl-action-fill-hover: #0353c9;
+  --cl-action-ring: rgba(10, 108, 255, 0.3);
+  --tucu-state-green-soft: rgba(40, 167, 69, 0.16);
+  --tucu-state-green-ink: #085a1e;
+  --tucu-state-green-line: rgba(40, 167, 69, 0.35);
+  --tucu-state-orange-soft: rgba(232, 137, 12, 0.18);
+  --tucu-state-orange-ink: #8a5200;
+  --tucu-state-orange-line: rgba(232, 137, 12, 0.35);
+  --tucu-state-red-soft: rgba(229, 55, 46, 0.14);
+  --tucu-state-red-ink: #a8231b;
+  --tucu-state-red-line: rgba(229, 55, 46, 0.35);
+  --tucu-state-teal-soft: rgba(0, 168, 181, 0.16);
+  --tucu-state-teal-ink: #00646e;
+  --tucu-state-teal-line: rgba(0, 168, 181, 0.35);
+  --tucu-state-purple-soft: rgba(130, 80, 223, 0.16);
+  --tucu-state-purple-ink: #5a2fb0;
+  --tucu-state-purple-line: rgba(130, 80, 223, 0.35);
+  --tucu-state-neutral-soft: rgba(0, 0, 0, 0.06);
+  --tucu-state-neutral-ink: #48484a;
+  --tucu-state-neutral-line: rgba(0, 0, 0, 0.12);
+}
+
+.dark {
+  --tucu-glass-thin-bg: rgba(60, 60, 67, 0.5);
+  --tucu-glass-regular-bg: rgba(44, 44, 52, 0.55);
+  --tucu-glass-thick-bg: rgba(44, 44, 50, 0.6);
+  --tucu-glass-sub-bg: rgba(0, 0, 0, 0.3);
+  --tucu-glass-border: rgba(255, 255, 255, 0.12);
+  --tucu-glass-sub-line: rgba(255, 255, 255, 0.15);
+  --tucu-shadow-card: 0 6px 24px rgba(0, 0, 0, 0.3);
+  --tucu-shadow-panel: 0 10px 32px rgba(0, 0, 0, 0.35);
+  --tucu-shadow-float: 0 12px 40px rgba(0, 0, 0, 0.4);
+  --cl-canvas: #101322;
+  --cl-ambient: linear-gradient(160deg, #101322 0%, #1d1730 60%, #231b26 100%);
+  --cl-orb-a: rgba(90, 120, 255, 0.25);
+  --cl-orb-b: rgba(255, 150, 120, 0.12);
+  --cl-ink: #f5f5f7;
+  --cl-ink-2: rgba(235, 235, 245, 0.72);
+  --cl-ink-3: rgba(235, 235, 245, 0.62);
+  --cl-action: #409cff;
+  --cl-action-hover: #70b3ff;
+  --cl-action-text: #8cc2ff;
+  --cl-action-fill: #1f6feb;
+  --cl-action-fill-hover: #1a5fd0;
+  --cl-action-ring: rgba(64, 156, 255, 0.4);
+  --tucu-state-green-soft: rgba(48, 209, 88, 0.18);
+  --tucu-state-green-ink: #7ee59a;
+  --tucu-state-green-line: rgba(48, 209, 88, 0.4);
+  --tucu-state-orange-soft: rgba(255, 159, 10, 0.2);
+  --tucu-state-orange-ink: #ffc266;
+  --tucu-state-orange-line: rgba(255, 159, 10, 0.4);
+  --tucu-state-red-soft: rgba(255, 69, 58, 0.18);
+  --tucu-state-red-ink: #ff8a80;
+  --tucu-state-red-line: rgba(255, 69, 58, 0.4);
+  --tucu-state-teal-soft: rgba(64, 200, 224, 0.18);
+  --tucu-state-teal-ink: #7fe3f0;
+  --tucu-state-teal-line: rgba(64, 200, 224, 0.4);
+  --tucu-state-purple-soft: rgba(191, 90, 242, 0.2);
+  --tucu-state-purple-ink: #d8a8ff;
+  --tucu-state-purple-line: rgba(191, 90, 242, 0.4);
+  --tucu-state-neutral-soft: rgba(235, 235, 245, 0.12);
+  --tucu-state-neutral-ink: rgba(235, 235, 245, 0.72);
+  --tucu-state-neutral-line: rgba(255, 255, 255, 0.15);
+}
+
+[data-tucu='glass-panel'] {
+  border-width: 0.5px;
+  contain: paint;
+  backdrop-filter: blur(var(--tucu-glass-blur)) saturate(var(--cl-glass-saturate));
+  -webkit-backdrop-filter: blur(var(--tucu-glass-blur)) saturate(var(--cl-glass-saturate));
+}
+
+[data-tucu='glass-panel'][data-material='thin'] {
+  --cl-glass-saturate: 1;
+}
+
+[data-tucu='glass-panel'][data-material='thick'] {
+  --cl-glass-saturate: 1.7;
+}
+
+@utility glass-thin {
+  background: var(--tucu-glass-thin-bg);
+  backdrop-filter: blur(var(--tucu-glass-blur-thin));
+  -webkit-backdrop-filter: blur(var(--tucu-glass-blur-thin));
+  border: 0.5px solid var(--tucu-glass-border);
+}
+
+@utility glass {
+  background: var(--tucu-glass-regular-bg);
+  backdrop-filter: blur(var(--tucu-glass-blur-regular)) saturate(1.6);
+  -webkit-backdrop-filter: blur(var(--tucu-glass-blur-regular)) saturate(1.6);
+  border: 0.5px solid var(--tucu-glass-border);
+}
+
+@utility glass-thick {
+  background: var(--tucu-glass-thick-bg);
+  backdrop-filter: blur(var(--tucu-glass-blur-thick)) saturate(1.7);
+  -webkit-backdrop-filter: blur(var(--tucu-glass-blur-thick)) saturate(1.7);
+  border: 0.5px solid var(--tucu-glass-border);
+}
+
+@utility glass-sub {
+  background: var(--tucu-glass-sub-bg);
+  border: 0.5px solid var(--tucu-glass-sub-line);
+}
+
+@utility focus-cl {
+  &:focus-visible {
+    outline: 3px solid var(--cl-action-ring);
+    outline-offset: 0;
+    border-color: var(--cl-action);
+  }
+}
+
+@utility font-ui {
+  font-family: var(--font-ui);
+}
+
+@utility font-data {
+  font-family: var(--font-data);
+  font-variant-numeric: tabular-nums;
+}
+
+@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+  :root {
+    --tucu-glass-thin-bg: rgba(255, 255, 255, 0.92);
+    --tucu-glass-regular-bg: rgba(255, 255, 255, 0.94);
+    --tucu-glass-thick-bg: rgba(255, 255, 255, 0.97);
+  }
+
+  .dark {
+    --tucu-glass-thin-bg: rgba(50, 50, 58, 0.94);
+    --tucu-glass-regular-bg: rgba(44, 44, 52, 0.96);
+    --tucu-glass-thick-bg: rgba(40, 40, 48, 0.97);
+  }
+}
+
+html[data-material='solid'] {
+  --tucu-glass-thin-bg: rgba(255, 255, 255, 0.92);
+  --tucu-glass-regular-bg: rgba(255, 255, 255, 0.94);
+  --tucu-glass-thick-bg: rgba(255, 255, 255, 0.97);
+}
+
+html[data-material='solid'].dark {
+  --tucu-glass-thin-bg: rgba(50, 50, 58, 0.94);
+  --tucu-glass-regular-bg: rgba(44, 44, 52, 0.96);
+  --tucu-glass-thick-bg: rgba(40, 40, 48, 0.97);
+}
+
+html[data-material='solid'] [data-tucu='glass-panel'],
+html[data-material='solid'] .glass,
+html[data-material='solid'] .glass-thin,
+html[data-material='solid'] .glass-thick {
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+}
+
+@media (prefers-reduced-transparency: reduce) {
+  [data-tucu='glass-panel'],
+  .glass,
+  .glass-thin,
+  .glass-thick {
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+  }
+}
+
+@media (prefers-contrast: more) {
+  [data-tucu='glass-panel'],
+  .glass,
+  .glass-thin,
+  .glass-thick {
+    border: 1px solid currentColor;
+  }
+}
+
+html[data-shell='electron'] [data-testid='shell-sidebar-brand'] {
+  padding-top: 32px;
+}
+
+html[data-shell='electron'] [data-testid='shell-sidebar']::before {
+  content: '';
+  position: absolute;
+  inset: 0 0 auto 0;
+  height: 44px;
+  -webkit-app-region: drag;
+}
+
+html[data-shell='electron'] [data-testid='shell-sidebar'] :is(button, a, input, select, textarea, [role='button']) {
+  -webkit-app-region: no-drag;
+}
+
+html[data-shell='electron'] [data-testid='shell-toolbar'] {
+  -webkit-app-region: drag;
+}
+
+html[data-shell='electron'] [data-testid='shell-toolbar'] :is(button, a, input, select, textarea, [role='button']) {
+  -webkit-app-region: no-drag;
+}
+
+[data-testid='language-switch'] [data-tucu='switch-control'] {
+  background-color: color-mix(in srgb, var(--cl-ink) 16%, transparent);
+  border: 0.5px solid var(--tucu-glass-sub-line);
+}
+
+[data-testid='language-switch'] [data-tucu='switch-control'][aria-checked='true'] {
+  background-color: color-mix(in srgb, var(--cl-action) 55%, transparent);
+}
+
+
+:root {
+  --tucu-segmented-fg: var(--cl-ink-2);
+}
+
+@keyframes viewer-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
 }

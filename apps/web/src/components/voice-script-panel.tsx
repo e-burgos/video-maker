@@ -21,18 +21,18 @@ export function VoiceScriptPanel({ slug, manifest, renderLineExtra }: VoiceScrip
   const t = useT();
 
   return (
-    <section data-testid="voice-script-panel" className="space-y-3">
-      <div className="space-y-1">
-        <h2 className="font-mono text-sm uppercase tracking-wide text-slate-400">
+    <section data-testid="voice-script-panel" className="glass min-w-0 flex flex-col gap-3 rounded-[20px] p-4">
+      <div className="flex flex-col gap-1">
+        <h2 className="m-0 text-base font-bold text-[var(--cl-ink)]">
           {t('voice.script.heading')}{' '}
-          <span className="text-slate-600">
+          <span className="font-data text-xs font-normal text-[var(--cl-ink-3)]">
             ({t('voice.script.lineCount', { count: manifest.lines.length })})
           </span>
         </h2>
-        <p className="text-sm text-slate-400">{t('voice.script.description')}</p>
+        <p className="m-0 text-sm text-[var(--cl-ink-2)]">{t('voice.script.description')}</p>
       </div>
 
-      <div className="space-y-1 rounded-lg border border-slate-800 bg-slate-900/40 p-3">
+      <div className="glass-sub flex flex-col gap-1 rounded-[14px] p-3">
         <audio
           data-testid="voice-script-audio"
           src={artifactUrl(slug, manifest.path)}
@@ -40,36 +40,39 @@ export function VoiceScriptPanel({ slug, manifest, renderLineExtra }: VoiceScrip
           preload="metadata"
           className="w-full"
         />
-        <p className="font-mono text-xs text-slate-500">
+        <p className="font-data m-0 text-xs text-[var(--cl-ink-2)]">
           {t('voice.script.voice', { voiceId: manifest.voiceId })} ·{' '}
           {t('voice.script.duration', { seconds: totalDurationSeconds(manifest) })}
         </p>
       </div>
 
-      <ul data-testid="voice-script-lines" className="space-y-2">
+      <ul data-testid="voice-script-lines" className="m-0 list-none flex flex-col gap-2 p-0">
         {manifest.lines.map((line) => (
           <li
             key={line.index}
             data-testid="voice-script-line"
             data-line-index={line.index}
-            className="space-y-1 rounded-lg border border-slate-800 bg-slate-900/40 p-3"
+            className="glass-sub flex flex-col gap-1 rounded-[14px] p-3"
           >
-            <p className="font-mono text-xs text-slate-500">
+            <p className="font-data m-0 text-xs text-[var(--cl-ink-2)]">
               {t('voice.script.window', {
                 start: formatTimecode(line.startMs),
                 end: formatTimecode(lineEndMs(line)),
               })}
               {requestedStartOf(line) !== null && (
-                <span className="ml-2 text-slate-600">
+                <span className="ml-2 text-[var(--cl-ink-3)]">
                   {t('voice.script.requested', {
                     start: formatTimecode(requestedStartOf(line) as number),
                   })}
                 </span>
               )}
             </p>
-            <p className="text-sm text-slate-200">{line.text}</p>
+            <p className="m-0 text-sm text-[var(--cl-ink)]">{line.text}</p>
             {overflowOf(line) > 0 && (
-              <p data-testid="voice-script-overflow" className="font-mono text-xs text-amber-300">
+              <p
+                data-testid="voice-script-overflow"
+                className="font-data m-0 text-xs text-[var(--tucu-state-orange-ink)]"
+              >
                 {t('voice.script.overflow', { ms: overflowOf(line) })}
               </p>
             )}

@@ -1,6 +1,7 @@
+import type { StateBadgeTone } from '@e-burgos/tucu-ui';
+
 import type { ReviewCounts, ReviewFinding, ReviewReport, ReviewSeverity, ReviewStatus } from './review-types';
 import type { TranslationKey } from '../i18n/messages-en';
-import type { BadgeTone } from '../components/ui/badge';
 
 export const REVIEW_SEVERITY_ORDER: readonly ReviewSeverity[] = ['critical', 'suggestion', 'nitpick'];
 
@@ -16,10 +17,10 @@ export const REVIEW_STATUS_LABEL: Readonly<Record<ReviewStatus, TranslationKey>>
   fail: 'review.status.fail',
 };
 
-export const REVIEW_STATUS_TONE: Readonly<Record<ReviewStatus, BadgeTone>> = {
-  pass: 'success',
-  warn: 'warning',
-  fail: 'danger',
+export const REVIEW_STATUS_TONE: Readonly<Record<ReviewStatus, StateBadgeTone>> = {
+  pass: 'green',
+  warn: 'orange',
+  fail: 'red',
 };
 
 export function reviewCounts(report: ReviewReport): ReviewCounts {

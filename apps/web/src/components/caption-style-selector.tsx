@@ -7,6 +7,7 @@ import {
 } from '../api/timeline-edit/caption-style';
 import type { TimelineEditAction } from '../api/timeline-edit/timeline-edit-state';
 import { useT } from '../i18n/language-context';
+import { FIELD_CLASS, INLINE_LABEL_CLASS } from './ui/cl-controls';
 
 export type CaptionStyleSelectorProps = {
   captionStyle?: CaptionStyle;
@@ -23,9 +24,9 @@ export function CaptionStyleSelector({ captionStyle, captionTheme, brandTheme = 
     <div
       data-testid="caption-style-selector"
       data-caption-style={captionStyle ?? ''}
-      className="space-y-2 rounded-lg border border-slate-800 bg-slate-900/40 p-4"
+      className="flex flex-col gap-2"
     >
-      <label className="flex flex-wrap items-center gap-2 text-sm text-slate-300">
+      <label className={`${INLINE_LABEL_CLASS} flex-col items-stretch gap-1`}>
         {t('captionStyle.label')}
         <select
           aria-label={t('captionStyle.label')}
@@ -38,7 +39,7 @@ export function CaptionStyleSelector({ captionStyle, captionTheme, brandTheme = 
                 : { type: 'caption-style', captionStyle: style },
             );
           }}
-          className="rounded-md border border-slate-700 bg-slate-900 px-2 py-1 text-xs text-slate-200"
+          className={FIELD_CLASS}
         >
           {captionStyleOptions(themeToApply !== undefined || captionStyle === 'brand').map((style) => (
             <option key={style} value={style}>
@@ -47,7 +48,7 @@ export function CaptionStyleSelector({ captionStyle, captionTheme, brandTheme = 
           ))}
         </select>
       </label>
-      <p className="text-xs text-slate-500">{t('captionStyle.hint')}</p>
+      <p className="m-0 text-xs text-[var(--cl-ink-2)]">{t('captionStyle.hint')}</p>
     </div>
   );
 }

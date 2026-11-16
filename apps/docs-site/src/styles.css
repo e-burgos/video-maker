@@ -2163,11 +2163,22 @@ ul.plain {
   }
 }
 
-.tutorial-video {
+.demo-videos {
+  display: grid;
+  gap: 2rem;
+}
+
+@media (min-width: 860px) {
+  .demo-videos {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+.demo-video {
   margin: 0;
 }
 
-.tutorial-video video {
+.demo-video video {
   display: block;
   width: 100%;
   height: auto;
@@ -2177,8 +2188,21 @@ ul.plain {
   background: #05040a;
 }
 
-.tutorial-video figcaption {
-  margin-top: 0.75rem;
-  font-size: 0.85rem;
+.demo-video__title {
+  margin: 1rem 0 0.35rem;
+  font-size: 1.15rem;
+}
+
+.demo-video figcaption p {
+  margin: 0 0 0.5rem;
   color: var(--text-muted);
+}
+
+.demo-video .demo-video__credits {
+  font-size: 0.8rem;
+}
+
+.gallery-cta {
+  margin-top: 1.5rem;
+  text-align: center;
 }

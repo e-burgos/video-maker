@@ -1,3 +1,4 @@
+import { handleOrderCategoriesByPlaylists } from './handlers/category-playlist-order-handler';
 import type { ServerConfig } from '../config/server-config';
 import type { StoreConfig } from '../config/store-config';
 import type { RenderApiDependencies } from '../deps/render-api-dependencies';
@@ -125,6 +126,7 @@ import {
 import { handleGetReference, handleListReferences } from './handlers/references-handler';
 import { handleGetRenderReviews } from './handlers/reviews-handler';
 import { handlePutVisualReview } from './handlers/visual-review-handler';
+import { handleGetAppUpdate } from './handlers/app-update-handler';
 import { handleGetCapabilities } from './handlers/capabilities-handler';
 import { handleHealth } from './health-handler';
 import { JSON_CONTENT_TYPE } from './http-message';
@@ -249,6 +251,8 @@ async function dispatchRoute(
   switch (id) {
       case 'health':
         return await handleHealth(deps, store, runtime);
+      case 'app.update':
+        return await handleGetAppUpdate();
       case 'capabilities':
         return await handleGetCapabilities(deps, store);
       case 'voices.list':
@@ -427,6 +431,8 @@ async function dispatchRoute(
         return handleGetCategoryPlaylists(deps);
       case 'integrations.youtube.categoryPlaylists.put':
         return await handlePutCategoryPlaylists(deps, request);
+      case 'integrations.youtube.categoryPlaylists.order':
+        return await handleOrderCategoriesByPlaylists(deps, runtime);
       case 'publishQueue.get':
         return handleGetPublishQueue(deps);
       case 'publishQueue.items.create':

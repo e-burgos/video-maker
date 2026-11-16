@@ -15,10 +15,27 @@ export type ProducerTurnOutcome =
   | { readonly kind: 'canceled' }
   | { readonly kind: 'failed'; readonly error: PipelineStageError };
 
+const CLI_OUTDATED_MARKER = 'claude_code_version_too_old';
+const CLI_OUTDATED_HINT = 'update Claude Code with `claude update` (or update the Claude app), or pick another model';
+
 export interface ProducerTurnClassification {
   readonly result: ProducerTurnResult;
   readonly rateLimited: boolean;
   readonly hasAnswer: boolean;
+  readonly answerText?: string | null;
+}
+
+export function reportsOutdatedClaudeCli(answerText: string | null | undefined): boolean {
+  return typeof answerText === 'string' && answerText.includes(CLI_OUTDATED_MARKER);
+}
+
+export function producerCliOutdated(): PipelineStageError {
+  return new PipelineStageError({
+    code: 'PRODUCER_CLI_OUTDATED',
+    stage: null,
+    resource: PRODUCER_RESOURCE,
+    hint: CLI_OUTDATED_HINT,
+  });
 }
 
 export function producerUnavailable(cause?: unknown): PipelineStageError {
@@ -67,6 +84,9 @@ export function classifyProducerTurn(input: ProducerTurnClassification): Produce
   }
   if (input.rateLimited) {
     return { kind: 'failed', error: producerRateLimited() };
+  }
+  if (reportsOutdatedClaudeCli(input.answerText)) {
+    return { kind: 'failed', error: producerCliOutdated() };
   }
   if (input.result.timedOut) {
     return { kind: 'failed', error: producerTurnFailed(TIMED_OUT_HINT) };

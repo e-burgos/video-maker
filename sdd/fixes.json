@@ -4182,7 +4182,7 @@
         "scripts/stop-studio.mjs"
       ],
       "test_reference": "nx test render-api (2258), producer-tools y motion-graphics (313) en verde; sonda contra el CLI real: con el esquema saneado devuelve structured_output.",
-      "status": "in-progress",
+      "status": "implemented",
       "cycle": null,
       "process_note": "Causa aislada probando cada variante de escena contra el CLI real: fallan las 4 que usan prefixItems/format/default. El esquema se sanea sólo en el pedido al agente; la validación con zod no cambia.",
       "usage": {
@@ -6695,6 +6695,588 @@
             "approx": true,
             "source": "declared-estimate",
             "recorded_at": "2026-11-13"
+          }
+        ]
+      }
+    },
+    {
+      "id": "FIX-e-burgos-086",
+      "author": "e-burgos",
+      "spec_id": null,
+      "fix_document": "sdd/fixes/fix-e-burgos-086.md",
+      "type": "BUGFIX",
+      "severity": "medium",
+      "created_at": "2026-11-13",
+      "resolved_at": "2026-11-13",
+      "validated_at": null,
+      "title": "patch_timeline y PUT timeline validan referencias de asset; el error de render lleva el detalle",
+      "estimation_hours": 1,
+      "description": "patch_timeline y el PUT del render-api persistían un logo cuyo asset no estaba en timeline.assets; el render fallaba al final con INVALID_TIMELINE sin detalle. Ahora ambos rechazan con los códigos de validateTimeline y el error del render propaga las issues.",
+      "justification": "Reporte de otra sesión del dev produciendo videos (2026-11-13).",
+      "related_modules": [
+        "timeline-core",
+        "producer-tools",
+        "render-api"
+      ],
+      "affected_files": [
+        "libs/timeline-core/src/timeline/validate-timeline.ts",
+        "libs/producer-tools/src/handlers/studio-tool-handlers.ts",
+        "apps/render-api/src/http/handlers/montage-handler.ts",
+        "apps/render-api/src/errors/translate-engine-error.ts",
+        "apps/render-api/src/errors/render-api-error.ts"
+      ],
+      "test_reference": "validate-timeline.spec, studio-tool-handlers.spec, montage-handler.spec, translate-engine-error.spec.",
+      "status": "implemented",
+      "cycle": null,
+      "usage": {
+        "provider_model": "claude/sonnet",
+        "effort": "medium",
+        "tokens_in": 150000,
+        "tokens_out": 8000,
+        "approx": true,
+        "source": "declared-estimate",
+        "recorded_at": "2026-11-13",
+        "by_agent": [
+          {
+            "agent": "implementor-back",
+            "provider_model": "claude/sonnet",
+            "effort": "medium",
+            "tokens_in": 150000,
+            "tokens_out": 8000,
+            "approx": true,
+            "source": "declared-estimate",
+            "recorded_at": "2026-11-13"
+          }
+        ]
+      }
+    },
+    {
+      "id": "FIX-e-burgos-087",
+      "author": "e-burgos",
+      "spec_id": null,
+      "fix_document": "sdd/fixes/fix-e-burgos-087.md",
+      "type": "IMPROVEMENT",
+      "severity": "medium",
+      "created_at": "2026-11-14",
+      "resolved_at": "2026-11-14",
+      "validated_at": null,
+      "title": "El productor ofrece Fable y avisa cuando el CLI de Claude Code es viejo para el modelo",
+      "estimation_hours": 1,
+      "description": "La lista de modelos del productor solo tenía sonnet, opus y haiku. Ahora incluye fable (Fable 5.2). Un CLI claude viejo rechaza los modelos nuevos con claude_code_version_too_old y el turno fallaba como PRODUCER_TURN_FAILED; ahora sale como PRODUCER_CLI_OUTDATED con un mensaje que pide actualizar.",
+      "justification": "Pedido del dev (2026-11-14): producir los videos demostrativos con Fable y listar todos los modelos de Claude.",
+      "related_modules": [
+        "render-api",
+        "web"
+      ],
+      "affected_files": [
+        "apps/render-api/src/config/producer-config.ts",
+        "apps/render-api/src/errors/translate-producer-error.ts",
+        "apps/render-api/src/producer/run-producer-turn.ts",
+        "apps/web/src/api/producer-model-i18n.ts",
+        "apps/web/src/api/producer-capability.ts"
+      ],
+      "test_reference": "producer-config.spec, translate-producer-error.spec, producer-handler.spec, jobs-handler.spec, producer-model-i18n.spec, producer-composer.spec.",
+      "status": "implemented",
+      "cycle": null,
+      "usage": {
+        "provider_model": "claude/opus",
+        "effort": "medium",
+        "tokens_in": 180000,
+        "tokens_out": 9000,
+        "approx": true,
+        "source": "declared-estimate",
+        "recorded_at": "2026-11-14",
+        "by_agent": [
+          {
+            "provider_model": "claude/opus",
+            "effort": "medium",
+            "tokens_in": 180000,
+            "tokens_out": 9000,
+            "approx": true,
+            "source": "declared-estimate",
+            "recorded_at": "2026-11-14",
+            "agent": "implementor-back"
+          }
+        ]
+      }
+    },
+    {
+      "id": "FIX-e-burgos-088",
+      "author": "e-burgos",
+      "spec_id": null,
+      "fix_document": "sdd/fixes/fix-e-burgos-088.md",
+      "type": "IMPROVEMENT",
+      "severity": "low",
+      "created_at": "2026-11-14",
+      "resolved_at": "2026-11-14",
+      "validated_at": null,
+      "title": "La actividad del productor se lee en el idioma de la interfaz",
+      "estimation_hours": 0.5,
+      "description": "El panel de actividad mostraba el nombre crudo de la herramienta MCP con un resumen en inglés (mcp__studio__get_project_overview · Checking the project) y el estado del turno sin traducir (turno succeeded). Ahora cada herramienta del studio tiene su etiqueta en español e inglés y el estado se dice en palabras.",
+      "justification": "Visto al grabar el video demo del productor (2026-11-14).",
+      "related_modules": [
+        "web"
+      ],
+      "affected_files": [
+        "apps/web/src/api/producer-event-i18n.ts",
+        "apps/web/src/components/producer-turn-activity.tsx",
+        "apps/web/src/i18n/messages-es.ts",
+        "apps/web/src/i18n/messages-en.ts"
+      ],
+      "test_reference": "producer-event-i18n.spec.",
+      "status": "implemented",
+      "cycle": null,
+      "usage": {
+        "provider_model": "claude/opus",
+        "effort": "medium",
+        "tokens_in": 60000,
+        "tokens_out": 5000,
+        "approx": true,
+        "source": "declared-estimate",
+        "recorded_at": "2026-11-14",
+        "by_agent": [
+          {
+            "provider_model": "claude/opus",
+            "effort": "medium",
+            "tokens_in": 60000,
+            "tokens_out": 5000,
+            "approx": true,
+            "source": "declared-estimate",
+            "recorded_at": "2026-11-14",
+            "agent": "implementor-front"
+          }
+        ]
+      }
+    },
+    {
+      "id": "FIX-e-burgos-089",
+      "author": "e-burgos",
+      "spec_id": null,
+      "fix_document": "sdd/fixes/fix-e-burgos-089.md",
+      "type": "IMPROVEMENT",
+      "severity": "low",
+      "created_at": "2026-11-14",
+      "resolved_at": "2026-11-14",
+      "validated_at": null,
+      "title": "Videos demostrativos en la web del studio",
+      "estimation_hours": 0.5,
+      "description": "El inicio de la web suma dos videos producidos por el studio con el productor en Fable: un explicativo en motion graphics y una demo conversando con el productor. La función de /tutoriales/ sirve los dos archivos nuevos desde R2.",
+      "justification": "Pedido del dev: mostrar en la web lo que Video Maker puede hacer (2026-11-14).",
+      "related_modules": [
+        "docs-site"
+      ],
+      "affected_files": [
+        "apps/docs-site/src/content/home.mjs",
+        "apps/docs-site/src/styles.css",
+        "apps/docs-site/functions/tutoriales/[[path]].js",
+        "apps/docs-site/functions/tutoriales/[[path]].spec.mjs"
+      ],
+      "test_reference": "apps/docs-site/functions/tutoriales/[[path]].spec.mjs",
+      "status": "implemented",
+      "cycle": null,
+      "usage": {
+        "provider_model": "claude/opus",
+        "effort": "medium",
+        "tokens_in": 40000,
+        "tokens_out": 4000,
+        "approx": true,
+        "source": "declared-estimate",
+        "recorded_at": "2026-11-14",
+        "by_agent": [
+          {
+            "provider_model": "claude/opus",
+            "effort": "medium",
+            "tokens_in": 40000,
+            "tokens_out": 4000,
+            "approx": true,
+            "source": "declared-estimate",
+            "recorded_at": "2026-11-14",
+            "agent": "implementor-front"
+          }
+        ]
+      }
+    },
+    {
+      "id": "FIX-e-burgos-090",
+      "author": "e-burgos",
+      "spec_id": null,
+      "fix_document": "sdd/fixes/fix-e-burgos-090.md",
+      "type": "IMPROVEMENT",
+      "severity": "low",
+      "created_at": "2026-11-14",
+      "resolved_at": "2026-11-14",
+      "validated_at": null,
+      "title": "Recorrido por la app en la web, con capturas de cada pantalla",
+      "estimation_hours": 1.5,
+      "description": "La guía de la web suma la página «Recorrido por la app» con una sección por pantalla del studio (videos, productor, biblioteca, motion graphics, marcas, publicación, configuración, ayuda) y 18 capturas reales del diseño nuevo.",
+      "justification": "Pedido del dev: documentar en la web cada módulo de la app con su captura (2026-11-14).",
+      "related_modules": [
+        "docs-site"
+      ],
+      "affected_files": [
+        "apps/docs-site/src/content/app-tour.mjs",
+        "apps/docs-site/src/site-config.mjs",
+        "apps/docs-site/src/i18n.mjs",
+        "apps/docs-site/scripts/build.mjs",
+        "apps/docs-site/src/content/home.mjs"
+      ],
+      "test_reference": "apps/docs-site/src/site.spec.mjs",
+      "status": "implemented",
+      "cycle": null,
+      "usage": {
+        "provider_model": "claude/opus",
+        "effort": "medium",
+        "tokens_in": 120000,
+        "tokens_out": 14000,
+        "approx": true,
+        "source": "declared-estimate",
+        "recorded_at": "2026-11-14",
+        "by_agent": [
+          {
+            "provider_model": "claude/opus",
+            "effort": "medium",
+            "tokens_in": 120000,
+            "tokens_out": 14000,
+            "approx": true,
+            "source": "declared-estimate",
+            "recorded_at": "2026-11-14",
+            "agent": "implementor-front"
+          }
+        ]
+      }
+    },
+    {
+      "id": "FIX-e-burgos-091",
+      "author": "e-burgos",
+      "spec_id": null,
+      "fix_document": "sdd/fixes/fix-e-burgos-091.md",
+      "type": "IMPROVEMENT",
+      "severity": "low",
+      "created_at": "2026-11-14",
+      "resolved_at": "2026-11-14",
+      "validated_at": null,
+      "title": "La web usa el logo nuevo, íconos para cada plataforma y SEO completo",
+      "estimation_hours": 1.5,
+      "description": "El header, el footer y el favicon del sitio pasan al logo nuevo (V dentro de la lente). Suma favicon.ico, apple-touch-icon, íconos 192/512 y maskable con site.webmanifest, una imagen para compartir 1200×630 por idioma con el logo y datos estructurados schema.org (WebSite y SoftwareApplication). Además: descripciones de hasta 160 caracteres, datos VideoObject del tutorial y los dos demos, FAQPage en preguntas frecuentes, BreadcrumbList en las páginas internas y una 404 bilingüe con noindex para que las URL inexistentes no devuelvan el inicio.",
+      "justification": "Pedido del dev: la web seguía con el logo viejo; revisar branding, favicon y SEO (2026-11-14).",
+      "related_modules": [
+        "docs-site"
+      ],
+      "affected_files": [
+        "apps/docs-site/src/icons.mjs",
+        "apps/docs-site/src/render.mjs",
+        "apps/docs-site/src/site-files.mjs",
+        "apps/docs-site/scripts/build.mjs",
+        "apps/docs-site/src/content/home.mjs"
+      ],
+      "test_reference": "apps/docs-site/src/site.spec.mjs",
+      "status": "implemented",
+      "cycle": null,
+      "usage": {
+        "provider_model": "claude/opus",
+        "effort": "low",
+        "tokens_in": 110000,
+        "tokens_out": 17000,
+        "approx": true,
+        "source": "declared-estimate",
+        "recorded_at": "2026-11-14",
+        "by_agent": [
+          {
+            "provider_model": "claude/opus",
+            "effort": "low",
+            "tokens_in": 110000,
+            "tokens_out": 17000,
+            "approx": true,
+            "source": "declared-estimate",
+            "recorded_at": "2026-11-14",
+            "agent": "implementor-front"
+          }
+        ]
+      }
+    },
+    {
+      "id": "FIX-e-burgos-092",
+      "author": "e-burgos",
+      "spec_id": null,
+      "fix_document": "sdd/fixes/fix-e-burgos-092.md",
+      "type": "IMPROVEMENT",
+      "severity": "low",
+      "created_at": "2026-11-16",
+      "resolved_at": "2026-11-16",
+      "validated_at": null,
+      "title": "Los videos de cada categoría siguen el orden de su lista de YouTube",
+      "estimation_hours": 2,
+      "description": "Mis videos ordenaba los videos de cada categoría por slug. La ubicación de cada video guarda ahora una posición, y una acción toma el orden de la lista de YouTube asociada a cada categoría (Configuración › YouTube). Los videos que no están en la lista quedan al final.",
+      "justification": "Pedido del dev (2026-11-16): en la app los videos no aparecen en el orden de las listas de YouTube.",
+      "related_modules": [
+        "local-store",
+        "render-api",
+        "web"
+      ],
+      "affected_files": [
+        "libs/local-store/src/repositories/organization-repository.ts",
+        "apps/render-api/src/youtube/youtube-client.ts",
+        "apps/render-api/src/http/handlers/category-playlist-order-handler.ts",
+        "apps/web/src/api/video-grouping.ts",
+        "apps/web/src/components/youtube-category-playlists-section.tsx"
+      ],
+      "test_reference": "libs/local-store/src/repositories/organization-repository.spec.ts",
+      "status": "implemented",
+      "cycle": null,
+      "usage": {
+        "provider_model": "claude/opus",
+        "effort": "medium",
+        "tokens_in": 160000,
+        "tokens_out": 22000,
+        "approx": true,
+        "source": "declared-estimate",
+        "recorded_at": "2026-11-16",
+        "by_agent": [
+          {
+            "provider_model": "claude/opus",
+            "effort": "medium",
+            "tokens_in": 160000,
+            "tokens_out": 22000,
+            "approx": true,
+            "source": "declared-estimate",
+            "recorded_at": "2026-11-16",
+            "agent": "implementor-back"
+          }
+        ]
+      }
+    },
+    {
+      "id": "FIX-e-burgos-093",
+      "author": "e-burgos",
+      "spec_id": null,
+      "fix_document": "sdd/fixes/fix-e-burgos-093.md",
+      "type": "BUGFIX",
+      "severity": "medium",
+      "created_at": "2026-11-16",
+      "resolved_at": "2026-11-16",
+      "validated_at": null,
+      "title": "La app de escritorio usa la base de la carpeta de proyectos, igual que el studio web",
+      "estimation_hours": 1,
+      "description": "La app guardaba studio.db en su carpeta de datos y el studio web en <carpeta de proyectos>/.studio, así que la misma carpeta tenía dos catálogos distintos (carpetas, categorías, publicaciones). La app pasa a usar <carpeta de proyectos>/.studio/studio.db; si esa carpeta todavía no tiene base, copia la que tenía en su carpeta de datos.",
+      "justification": "Pedido del dev (2026-11-16): la app no mostraba los videos organizados como el studio web.",
+      "related_modules": [
+        "desktop"
+      ],
+      "affected_files": [
+        "apps/desktop/src/main/app-paths.ts",
+        "apps/desktop/src/main/render-api-env.ts",
+        "apps/desktop/src/main/studio-database-location.ts",
+        "apps/desktop/src/main/main.ts"
+      ],
+      "test_reference": "apps/desktop/src/main/studio-database-location.spec.ts",
+      "status": "implemented",
+      "cycle": null,
+      "usage": {
+        "provider_model": "claude/opus",
+        "effort": "medium",
+        "tokens_in": 90000,
+        "tokens_out": 9000,
+        "approx": true,
+        "source": "declared-estimate",
+        "recorded_at": "2026-11-16",
+        "by_agent": [
+          {
+            "provider_model": "claude/opus",
+            "effort": "medium",
+            "tokens_in": 90000,
+            "tokens_out": 9000,
+            "approx": true,
+            "source": "declared-estimate",
+            "recorded_at": "2026-11-16",
+            "agent": "implementor-back"
+          }
+        ]
+      }
+    },
+    {
+      "id": "FIX-e-burgos-094",
+      "author": "e-burgos",
+      "spec_id": null,
+      "fix_document": "sdd/fixes/fix-e-burgos-094.md",
+      "type": "IMPROVEMENT",
+      "severity": "low",
+      "created_at": "2026-11-16",
+      "resolved_at": "2026-11-16",
+      "validated_at": null,
+      "title": "La landing deja de mostrar el tutorial de la versión vieja",
+      "estimation_hours": 0.3,
+      "description": "Se quita la sección «Mirá cómo funciona» del inicio (es y en): el video Tutorial-Video-Maker.mp4 mostraba la interfaz anterior al rebranding. Se van con ella su VideoObject, su póster, sus estilos y la constante de la música.",
+      "justification": "Pedido del dev (2026-11-16): el video es de la versión vieja y no puede estar en la web.",
+      "related_modules": [
+        "docs-site"
+      ],
+      "affected_files": [
+        "apps/docs-site/src/content/home.mjs",
+        "apps/docs-site/src/site-config.mjs",
+        "apps/docs-site/src/styles.css",
+        "apps/docs-site/src/site.spec.mjs"
+      ],
+      "test_reference": "apps/docs-site/src/site.spec.mjs",
+      "status": "implemented",
+      "cycle": null,
+      "usage": {
+        "provider_model": "claude/opus",
+        "effort": "low",
+        "tokens_in": 30000,
+        "tokens_out": 3000,
+        "approx": true,
+        "source": "declared-estimate",
+        "recorded_at": "2026-11-16",
+        "by_agent": [
+          {
+            "provider_model": "claude/opus",
+            "effort": "low",
+            "tokens_in": 30000,
+            "tokens_out": 3000,
+            "approx": true,
+            "source": "declared-estimate",
+            "recorded_at": "2026-11-16",
+            "agent": "implementor-front"
+          }
+        ]
+      }
+    },
+    {
+      "id": "FIX-e-burgos-095",
+      "author": "e-burgos",
+      "spec_id": null,
+      "fix_document": "sdd/fixes/fix-e-burgos-095.md",
+      "type": "BUGFIX",
+      "severity": "medium",
+      "created_at": "2026-11-16",
+      "resolved_at": "2026-11-16",
+      "validated_at": null,
+      "title": "Las categorías piden confirmación para borrarse y llevan a su sección; Mis videos se actualiza solo",
+      "estimation_hours": 1,
+      "description": "La × de una categoría la borraba al instante y sus videos quedaban sin categoría. Ahora abre un modal que dice cuántos videos quedan en la carpeta sin categoría. Tocar el nombre de la categoría lleva (con scroll) a su sección y la despliega si estaba plegada. Mis videos vuelve a leer videos y organización al volver a la ventana y cada 20 s, así la app y el studio web, que comparten la base, se ven igual.",
+      "justification": "Pedido del dev (2026-11-16): borró dos categorías sin querer con la × y los videos quedaron huérfanos.",
+      "related_modules": [
+        "web"
+      ],
+      "affected_files": [
+        "apps/web/src/components/folder-heading.tsx",
+        "apps/web/src/components/delete-category-modal.tsx",
+        "apps/web/src/components/videos/video-groups.tsx",
+        "apps/web/src/hooks/use-reload-when-visible.ts",
+        "apps/web/src/pages/projects-page.tsx"
+      ],
+      "test_reference": "apps/web/src/components/folder-heading.spec.tsx",
+      "status": "implemented",
+      "cycle": null,
+      "usage": {
+        "provider_model": "claude/opus",
+        "effort": "medium",
+        "tokens_in": 70000,
+        "tokens_out": 9000,
+        "approx": true,
+        "source": "declared-estimate",
+        "recorded_at": "2026-11-16",
+        "by_agent": [
+          {
+            "provider_model": "claude/opus",
+            "effort": "medium",
+            "tokens_in": 70000,
+            "tokens_out": 9000,
+            "approx": true,
+            "source": "declared-estimate",
+            "recorded_at": "2026-11-16",
+            "agent": "implementor-front"
+          }
+        ]
+      }
+    },
+    {
+      "id": "FIX-e-burgos-096",
+      "author": "e-burgos",
+      "spec_id": null,
+      "fix_document": "sdd/fixes/fix-e-burgos-096.md",
+      "type": "BUGFIX",
+      "severity": "medium",
+      "created_at": "2026-11-16",
+      "resolved_at": "2026-11-16",
+      "validated_at": null,
+      "title": "El test de marcas del plugin no depende de la carpeta brands/ local",
+      "estimation_hours": 0.2,
+      "description": "tools/plugin-references/src/brands.spec.ts leía brands/ (gitignoreada) y en CI fallaba con ENOENT, dejando en rojo «lint · test · build» de la PR 57. Ahora valida las marcas incluidas en libs/motion-graphics/assets/brands y suma las de brands/ solo si la carpeta existe.",
+      "justification": "CI de la PR 57 en rojo desde 4576442c por ese test.",
+      "related_modules": [
+        "plugin-references"
+      ],
+      "affected_files": [
+        "tools/plugin-references/src/brands.spec.ts"
+      ],
+      "test_reference": "tools/plugin-references/src/brands.spec.ts",
+      "status": "implemented",
+      "cycle": null,
+      "usage": {
+        "provider_model": "claude/opus",
+        "effort": "low",
+        "tokens_in": 15000,
+        "tokens_out": 2000,
+        "approx": true,
+        "source": "declared-estimate",
+        "recorded_at": "2026-11-16",
+        "by_agent": [
+          {
+            "provider_model": "claude/opus",
+            "effort": "low",
+            "tokens_in": 15000,
+            "tokens_out": 2000,
+            "approx": true,
+            "source": "declared-estimate",
+            "recorded_at": "2026-11-16",
+            "agent": "implementor-back"
+          }
+        ]
+      }
+    },
+    {
+      "id": "FIX-e-burgos-097",
+      "author": "e-burgos",
+      "spec_id": null,
+      "fix_document": "sdd/fixes/fix-e-burgos-097.md",
+      "type": "IMPROVEMENT",
+      "severity": "low",
+      "created_at": "2026-11-16",
+      "resolved_at": "2026-11-16",
+      "validated_at": null,
+      "title": "Release de escritorio 0.5.1",
+      "estimation_hours": 0.5,
+      "description": "Sube la app de escritorio a 0.5.1 con su sección de CHANGELOG: orden de YouTube (FIX-092), base compartida con el studio web (FIX-093), confirmación al borrar categorías (FIX-095), Fable y aviso de CLI viejo (FIX-087), actividad del productor en el idioma de la interfaz (FIX-088) y logos inexistentes rechazados (FIX-086).",
+      "justification": "Pedido del dev (2026-11-16): cerrar Video Maker con todas las mejoras publicadas, todo en la PR 57.",
+      "related_modules": [
+        "desktop"
+      ],
+      "affected_files": [
+        "apps/desktop/package.json",
+        "apps/desktop/CHANGELOG.md"
+      ],
+      "test_reference": "apps/desktop/scripts/release-desktop.mjs",
+      "status": "implemented",
+      "cycle": null,
+      "usage": {
+        "provider_model": "claude/opus",
+        "effort": "low",
+        "tokens_in": 20000,
+        "tokens_out": 3000,
+        "approx": true,
+        "source": "declared-estimate",
+        "recorded_at": "2026-11-16",
+        "by_agent": [
+          {
+            "provider_model": "claude/opus",
+            "effort": "low",
+            "tokens_in": 20000,
+            "tokens_out": 3000,
+            "approx": true,
+            "source": "declared-estimate",
+            "recorded_at": "2026-11-16",
+            "agent": "implementor-back"
           }
         ]
       }

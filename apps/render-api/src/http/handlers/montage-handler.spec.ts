@@ -89,6 +89,24 @@ describe('handlePutTimeline', () => {
     expect(callLog.ports()).not.toContain('ensureDirectory');
   });
 
+  it('answers 422 INVALID_TIMELINE with the validation issues when the logo asset is not in assets', async () => {
+    const callLog = createCallLog();
+    const storage = createFakeObjectStorage(callLog, { directories: [`${STORE.mediaRoot}/smoke-ingest`] });
+    const deps = createFakeRenderApiDependencies(callLog, { storage });
+    const timeline = {
+      ...buildMinimalTimeline(),
+      logo: { assetId: 'raw/logo/isotipo.png', position: 'bottom-right', widthRatio: 0.3, marginRatio: 0.035, opacity: 1 },
+    };
+    const request = requestLine({ method: 'PUT', path: '/projects/smoke-ingest/timeline', body: jsonBody(timeline) });
+
+    const payload = await caughtErrorPayload(handlePutTimeline(deps, STORE, { slug: 'smoke-ingest' }, request));
+
+    expect(payload.code).toBe('INVALID_TIMELINE');
+    expect(payload.issues).toEqual([expect.objectContaining({ code: 'LOGO_ASSET_NOT_FOUND', path: 'logo.assetId' })]);
+    expect(payload.expected).toContain('LOGO_ASSET_NOT_FOUND');
+    expect(callLog.ports()).not.toContain('writeTextFile');
+  });
+
   it('answers the exact same error for an empty body as for a syntactically invalid one', async () => {
     const callLog = createCallLog();
     const storage = createFakeObjectStorage(callLog, { directories: [`${STORE.mediaRoot}/smoke-ingest`] });

@@ -113,4 +113,27 @@ describe('createOrganizationRepository', () => {
     const organization = repository.getOrganization();
     expect(organization.videos['video-a']).toEqual({ folderId: 'clients', categoryId: null, archived: false });
   });
+
+  it('keeps the category order until a video moves to another category', () => {
+    const repository = createOrganizationRepository(db);
+    repository.createFolder('clients', 'Clients');
+    repository.createCategory('cat-a', 'clients', 'Category A');
+    repository.createCategory('cat-b', 'clients', 'Category B');
+    repository.setPlacement('video-a', { folderId: 'clients', categoryId: 'cat-a', archived: false });
+    repository.setPlacement('video-b', { folderId: 'clients', categoryId: 'cat-a', archived: false });
+
+    repository.setCategoryOrder('cat-a', ['video-b', 'video-a']);
+    repository.setPlacement('video-b', { folderId: 'clients', categoryId: 'cat-a', archived: true });
+    expect(repository.getOrganization().videos).toEqual({
+      'video-a': { folderId: 'clients', categoryId: 'cat-a', archived: false, position: 1 },
+      'video-b': { folderId: 'clients', categoryId: 'cat-a', archived: true, position: 0 },
+    });
+
+    repository.setPlacement('video-a', { folderId: 'clients', categoryId: 'cat-b', archived: false });
+    expect(repository.getOrganization().videos['video-a']).toEqual({
+      folderId: 'clients',
+      categoryId: 'cat-b',
+      archived: false,
+    });
+  });
 });

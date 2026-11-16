@@ -5,11 +5,12 @@ import {
   writeEditDecisionList,
   writeTimeline,
 } from '@video-maker/auto-montage';
-import { EditDecisionListSchema, TimelineSchema } from '@video-maker/timeline-core';
+import { EditDecisionListSchema, TimelineSchema, assetReferenceIssues } from '@video-maker/timeline-core';
 
 import type { StoreConfig } from '../../config/store-config';
 import type { RenderApiDependencies } from '../../deps/render-api-dependencies';
 import { PipelineStageError } from '../../errors/pipeline-stage-error';
+import { timelineIssuesExpectation } from '../../errors/translate-engine-error';
 import type { RenderApiErrorCode } from '../../errors/render-api-error';
 import { assertValidProjectSlug, readStoredTimeline, resolveExistingProject } from '../../store/project-scope';
 import { JSON_CONTENT_TYPE } from '../http-message';
@@ -110,6 +111,17 @@ export async function handlePutTimeline(
       stage: null,
       resource: timelinePath(),
       expected: 'a document accepted by TimelineSchema',
+    });
+  }
+
+  const referenceIssues = assetReferenceIssues(parsed.data);
+  if (referenceIssues.length > 0) {
+    throw new PipelineStageError({
+      code: 'INVALID_TIMELINE',
+      stage: null,
+      resource: timelinePath(),
+      expected: timelineIssuesExpectation(referenceIssues),
+      details: { issues: referenceIssues },
     });
   }
 

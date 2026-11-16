@@ -1,30 +1,22 @@
-import { useEffect, useRef, useState } from 'react';
+import { LucideIcons, StateBadge } from '@e-burgos/tucu-ui';
+import { useState } from 'react';
 import { Link } from 'react-router-dom';
 
 import { formatUpdatedAt } from '../api/format-updated-at';
 import { projectDisplayName } from '../api/humanize-slug';
 import { projectHref, projectModeOf } from '../api/project-mode';
-import { projectStatusKey } from '../api/project-status';
-import { PUBLICATION_STATUS_LABEL, PUBLICATION_STATUS_TONE } from '../api/publication-status';
-import type { ProjectStatusKey } from '../api/project-status';
+import { PROJECT_STATUS_TONE, projectStatusKey } from '../api/project-status';
+import { PUBLICATION_STATE_TONE, PUBLICATION_STATUS_LABEL } from '../api/publication-status';
 import type { ProjectSummary, VideoFolder, VideoPlacement } from '../api/render-api-types';
 import { useVideoCardThumbnail } from '../hooks/use-video-card-thumbnail';
 import { artifactUrl } from '../api/artifact-url';
 import { useLanguage, useT } from '../i18n/language-context';
 import { ArchiveVideoModal } from './archive-video-modal';
 import { AssignVideoModal } from './assign-video-modal';
-import { Badge } from './ui/badge';
-import type { BadgeTone } from './ui/badge';
 import { DeleteVideoModal } from './delete-video-modal';
+import { OverflowMenu } from './ui/overflow-menu';
 
 type OpenModal = 'none' | 'assign' | 'archive' | 'delete';
-
-const STATUS_TONE: Readonly<Record<ProjectStatusKey, BadgeTone>> = {
-  'projects.status.noMaterial': 'neutral',
-  'projects.status.materialLoaded': 'accent',
-  'projects.status.montageReady': 'warning',
-  'projects.status.videoReady': 'success',
-};
 
 function VideoCardMedia({ slug }: { slug: string }) {
   const t = useT();
@@ -33,25 +25,27 @@ function VideoCardMedia({ slug }: { slug: string }) {
 
   return (
     <div className="space-y-1.5">
-      {status === 'ready' && source !== null ? (
-        <video
-          data-testid="video-card-thumbnail"
-          src={`${artifactUrl(slug, source.path)}#t=0.5`}
-          muted
-          preload="metadata"
-          className="aspect-video w-full rounded-control bg-black object-cover"
-        />
-      ) : (
-        <div
-          data-testid="video-card-thumbnail-placeholder"
-          aria-hidden="true"
-          className="flex aspect-video w-full items-center justify-center rounded-control border border-border-subtle bg-surface text-2xl text-ink-faint"
-        >
-          🎬
-        </div>
-      )}
+      <div className="aspect-video w-full overflow-hidden rounded-[10px] bg-[#0b0d14]">
+        {status === 'ready' && source !== null ? (
+          <video
+            data-testid="video-card-thumbnail"
+            src={`${artifactUrl(slug, source.path)}#t=0.5`}
+            muted
+            preload="metadata"
+            className="size-full bg-[#0b0d14] object-cover"
+          />
+        ) : (
+          <div
+            data-testid="video-card-thumbnail-placeholder"
+            aria-hidden="true"
+            className="grid size-full place-items-center text-white/40"
+          >
+            <LucideIcons.Film size={26} />
+          </div>
+        )}
+      </div>
       {source !== null && (
-        <p data-testid="video-card-updated-at" className="text-[11px] text-ink-faint">
+        <p data-testid="video-card-updated-at" className="font-data text-[11px] text-[var(--cl-ink-3)]">
           {t('projects.updatedAt', { date: formatUpdatedAt(source.modifiedAtMs, language) })}
         </p>
       )}
@@ -68,29 +62,9 @@ export type VideoCardProps = {
 
 export function VideoCard({ video, placement, folders, onChanged }: VideoCardProps) {
   const t = useT();
-  const [menuOpen, setMenuOpen] = useState(false);
   const [modal, setModal] = useState<OpenModal>('none');
-  const container = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    if (!menuOpen) {
-      return;
-    }
-    function onPointerDown(event: MouseEvent): void {
-      if (container.current !== null && !container.current.contains(event.target as Node)) {
-        setMenuOpen(false);
-      }
-    }
-    window.addEventListener('mousedown', onPointerDown);
-    return () => {
-      window.removeEventListener('mousedown', onPointerDown);
-    };
-  }, [menuOpen]);
-
-  function openModal(next: OpenModal): void {
-    setMenuOpen(false);
-    setModal(next);
-  }
+  const statusKey = projectStatusKey(video.layout);
+  const publication = video.lastPublication;
 
   function afterChange(): void {
     setModal('none');
@@ -99,104 +73,74 @@ export function VideoCard({ video, placement, folders, onChanged }: VideoCardPro
 
   return (
     <div
-      ref={container}
       data-testid="video-card"
       data-video={video.slug}
       data-archived={placement.archived}
-      className="relative rounded-panel border border-border-subtle bg-surface-raised/60 hover:border-border-strong data-[archived=true]:opacity-60"
+      className="glass-sub relative flex h-full flex-col gap-2.5 rounded-[14px] p-2.5 hover:border-[var(--cl-ink-3)]"
     >
-      <Link
-        to={projectHref(video)}
-        className="block space-y-3 p-4 pr-10"
-      >
-        <VideoCardMedia slug={video.slug} />
-        <div>
-          <p className="truncate text-sm font-medium text-ink">{projectDisplayName(video)}</p>
-          <p className="truncate font-mono text-[11px] text-ink-faint">{video.slug}</p>
-        </div>
-        <div className="flex flex-wrap gap-1.5">
-          <Badge tone={STATUS_TONE[projectStatusKey(video.layout)]}>
-            {t(projectStatusKey(video.layout))}
-          </Badge>
-          {projectModeOf(video) === 'motion' && (
-            <Badge tone="accent" data-testid="video-card-mode-badge">
-              {t('projects.mode.motion')}
-            </Badge>
-          )}
-        </div>
-      </Link>
+      <VideoCardMedia slug={video.slug} />
+      <div className="min-w-0">
+        <p className="truncate text-[13px] font-semibold text-[var(--cl-ink)]">{projectDisplayName(video)}</p>
+        <p className="font-data truncate text-[11px] text-[var(--cl-ink-3)]">{video.slug}</p>
+      </div>
+      <div className="flex flex-wrap items-center gap-1.5">
+        <StateBadge tone={PROJECT_STATUS_TONE[statusKey]} dot size="sm">
+          {t(statusKey)}
+        </StateBadge>
+        {placement.archived && (
+          <StateBadge tone="neutral" size="sm" data-testid="video-card-archived-badge">
+            {t('projects.status.archived')}
+          </StateBadge>
+        )}
+        {projectModeOf(video) === 'motion' && (
+          <StateBadge tone="neutral" size="sm" data-testid="video-card-mode-badge">
+            {t('projects.mode.motion')}
+          </StateBadge>
+        )}
+        {publication != null && publication.status !== 'failed' && (
+          <span data-testid="video-card-publication" className="relative z-10 inline-flex items-center gap-1.5">
+            <StateBadge tone={PUBLICATION_STATE_TONE[publication.status]} dot size="sm">
+              {t(PUBLICATION_STATUS_LABEL[publication.status])}
+            </StateBadge>
+            {publication.url !== null && (
+              <a
+                href={publication.url}
+                target="_blank"
+                rel="noreferrer noopener"
+                className="focus-cl inline-flex items-center gap-1 rounded text-[11px] text-[var(--cl-action-text)] underline hover:text-[var(--cl-action-hover)]"
+              >
+                {t('publications.viewOnYoutube')}
+                <LucideIcons.ExternalLink size={11} aria-hidden="true" />
+              </a>
+            )}
+          </span>
+        )}
+      </div>
 
-      {video.lastPublication != null && video.lastPublication.status !== 'failed' && (
-        <div data-testid="video-card-publication" className="flex items-center gap-2 px-4 pb-3">
-          <Badge tone={PUBLICATION_STATUS_TONE[video.lastPublication.status]}>
-            {t(PUBLICATION_STATUS_LABEL[video.lastPublication.status])}
-          </Badge>
-          {video.lastPublication.url !== null && (
-            <a
-              href={video.lastPublication.url}
-              target="_blank"
-              rel="noreferrer noopener"
-              className="text-[11px] text-accent underline hover:text-accent-strong"
-            >
-              {t('publications.open')}
-            </a>
-          )}
-        </div>
-      )}
-
-      <button
-        type="button"
-        data-testid="video-card-menu-open"
-        aria-label={t('videoMenu.openAria', { slug: video.slug })}
-        aria-haspopup="menu"
-        aria-expanded={menuOpen}
-        onClick={() => setMenuOpen((open) => !open)}
-        className="absolute right-2 top-2 rounded-control border border-transparent px-2 py-1 text-sm leading-none text-ink-faint hover:border-border-strong hover:text-ink"
-      >
-        ⋮
-      </button>
-
-      {menuOpen && (
-        <ul
-          data-testid="video-card-menu"
-          role="menu"
-          className="absolute right-2 top-9 z-10 w-56 overflow-hidden rounded-panel border border-border-subtle bg-surface py-1 shadow-lg"
+      <div className="mt-auto flex items-center gap-1.5">
+        <Link
+          to={projectHref(video)}
+          aria-label={t('videoCard.openAria', { slug: video.slug })}
+          className="focus-cl inline-flex h-8 flex-1 items-center justify-center rounded-[10px] bg-[color-mix(in_srgb,var(--cl-action)_12%,transparent)] text-xs font-semibold text-[var(--cl-action-text)] after:absolute after:inset-0 after:rounded-[14px] hover:bg-[color-mix(in_srgb,var(--cl-action)_20%,transparent)]"
         >
-          <li role="none">
-            <button
-              type="button"
-              role="menuitem"
-              data-testid="video-card-menu-assign"
-              onClick={() => openModal('assign')}
-              className="block w-full px-3 py-1.5 text-left text-xs text-ink-muted hover:bg-surface-muted"
-            >
-              {t('videoMenu.assign')}
-            </button>
-          </li>
-          <li role="none">
-            <button
-              type="button"
-              role="menuitem"
-              data-testid="video-card-menu-archive"
-              onClick={() => openModal('archive')}
-              className="block w-full px-3 py-1.5 text-left text-xs text-ink-muted hover:bg-surface-muted"
-            >
-              {placement.archived ? t('videoMenu.restore') : t('videoMenu.archive')}
-            </button>
-          </li>
-          <li role="none">
-            <button
-              type="button"
-              role="menuitem"
-              data-testid="video-card-menu-delete"
-              onClick={() => openModal('delete')}
-              className="block w-full px-3 py-1.5 text-left text-xs text-danger hover:bg-danger/10"
-            >
-              {t('videoMenu.delete')}
-            </button>
-          </li>
-        </ul>
-      )}
+          {t('videoCard.open')}
+        </Link>
+        <OverflowMenu
+          triggerLabel={t('videoMenu.openAria', { slug: video.slug })}
+          triggerTestId="video-card-menu-open"
+          menuTestId="video-card-menu"
+          items={[
+            { id: 'assign', label: t('videoMenu.assign'), testId: 'video-card-menu-assign', onSelect: () => setModal('assign') },
+            {
+              id: 'archive',
+              label: placement.archived ? t('videoMenu.restore') : t('videoMenu.archive'),
+              testId: 'video-card-menu-archive',
+              onSelect: () => setModal('archive'),
+            },
+            { id: 'delete', label: t('videoMenu.delete'), testId: 'video-card-menu-delete', tone: 'danger', onSelect: () => setModal('delete') },
+          ]}
+        />
+      </div>
 
       {modal === 'assign' && (
         <AssignVideoModal

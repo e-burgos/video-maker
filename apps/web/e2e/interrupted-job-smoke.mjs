@@ -181,7 +181,13 @@ async function main() {
 
     const { chromium } = await resolvePlaywright();
     browser = await chromium.launch({ channel: 'chrome' });
-    const page = await browser.newPage({ viewport: { width: 1280, height: 1800 } });
+    const context = await browser.newContext({ viewport: { width: 1280, height: 1800 } });
+    await context.addInitScript(() => {
+      if (window.localStorage.getItem('video-maker.language') === null) {
+        window.localStorage.setItem('video-maker.language', 'en');
+      }
+    });
+    const page = await context.newPage();
     page.on('console', (message) => {
       if (message.type() === 'error') {
         log('console-error', message.text());

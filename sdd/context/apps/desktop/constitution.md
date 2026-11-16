@@ -1,6 +1,6 @@
 # Constitución — apps/desktop
 
-> Versión 1.1 | Última actualización: consolidación de fragmentos | Fecha: 2026-10-13
+> Versión 1.3 | Última actualización: consolidación de spec-025 cycle-06 y FIX-093 | Fecha: 2026-11-16
 
 ## 1. Propósito
 
@@ -30,7 +30,12 @@
   el preload no puede importar archivos del proyecto (solo `electron` y builtins).
 - `scripts/`: `vendor-binaries.mjs`, `build-desktop.mjs`, `after-pack.cjs` (copia los `node_modules` que
   electron-builder descarta a `extraResources` y firma ad hoc: con `identity: null` no firma nada),
-  `release-desktop.mjs`.
+  `release-desktop.mjs` (además de los dmg genera y sube `descargas/latest.json` —`version`, `url`, `sha256`,
+  `publishedAt`— que consume «Buscar actualizaciones» vía `GET /api/app/update`; sin `autoUpdater`).
+- Base de datos: `studio-database-location.ts` fija `RENDER_API_DB_PATH = <projectsFolder>/.studio/studio.db`, la
+  misma que usa `pnpm studio` sobre esa carpeta (FIX-093). Si la carpeta no tiene base, al arrancar copia la vieja de
+  la carpeta de datos (`userData/studio.db`, con `-wal`/`-shm`). No correr la app y `pnpm studio` a la vez sobre la
+  misma carpeta.
 - `e2e/packaged-app-smoke.mjs` (`--engine=openrouter`; espera `waitForTurnRunning` antes de esperar el fin del turno).
 - `render-api` empaquetado lleva `hyperframes@0.8.139` (y sus nativos `sharp`, `onnxruntime-node`) en
   `resources/render-api/node_modules` y `libs/motion-graphics/assets` como `motion-assets`.
@@ -54,6 +59,13 @@
 
 > Las actualizaciones por ciclo/fix van como fragmentos aditivos en `updates/` —
 > este archivo base solo lo modifica la consolidación (ver `sdd/context/context_prompt.md` sección 6).
+
+## Ventanas y marca (spec-025 cycle-01)
+
+- Ventana principal 1280×800, mínimo 960×640, `titleBarStyle: 'hiddenInset'` con botones en (26, 28), `backgroundColor` `#101322`/`#e8eaf0` según `nativeTheme`, `show()` en `ready-to-show`, sin `transparent` ni `vibrancy`. Opciones en `src/main/window-options.ts` (`mainWindowOptions(theme)`, `setupWindowOptions(theme, preload)`, testeadas). La web detecta Electron por user agent (`data-shell="electron"`).
+- La ventana de configuración inicial usa el mismo lenguaje de vidrio.
+- Ícono `build/icon.icns`/`build/icon.png` en `mac.icon` (ruta desde la raíz del repo). `THIRD_PARTY_NOTICES.md` incluye Inter y JetBrains Mono (SIL OFL 1.1).
+- Pendiente: probar la ventana de configuración inicial y el costo de `backdrop-filter` con el próximo `.dmg`. Probar la app de desarrollo: `VIDEO_MAKER_USER_DATA` a carpeta temporal con copia de `setup.json` y `WEB_DEV_URL` al studio.
 
 ## Lecciones específicas
 

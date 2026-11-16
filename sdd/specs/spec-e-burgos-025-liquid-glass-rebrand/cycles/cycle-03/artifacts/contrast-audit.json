@@ -1,0 +1,66 @@
+{
+  "baseUrl": "http://localhost:4200",
+  "audited": [
+    {
+      "scheme": "light",
+      "path": "/projects/crear-campana-display-ads/library",
+      "textsChecked": 87,
+      "horizontalOverflowPx": 0
+    },
+    {
+      "scheme": "light",
+      "path": "/projects/crear-campana-display-ads/storyboard",
+      "textsChecked": 35,
+      "horizontalOverflowPx": 0
+    },
+    {
+      "scheme": "light",
+      "path": "/projects/crear-campana-display-ads/voice",
+      "textsChecked": 77,
+      "horizontalOverflowPx": 0
+    },
+    {
+      "scheme": "light",
+      "path": "/projects/display-ads-generar-contenido-ia/storyboard",
+      "textsChecked": 35,
+      "horizontalOverflowPx": 0
+    },
+    {
+      "scheme": "light",
+      "path": "/projects/display-ads-generar-contenido-ia/voice",
+      "textsChecked": 77,
+      "horizontalOverflowPx": 0
+    },
+    {
+      "scheme": "dark",
+      "path": "/projects/crear-campana-display-ads/library",
+      "textsChecked": 87,
+      "horizontalOverflowPx": 0
+    },
+    {
+      "scheme": "dark",
+      "path": "/projects/crear-campana-display-ads/storyboard",
+      "textsChecked": 35,
+      "horizontalOverflowPx": 0
+    },
+    {
+      "scheme": "dark",
+      "path": "/projects/crear-campana-display-ads/voice",
+      "textsChecked": 77,
+      "horizontalOverflowPx": 0
+    },
+    {
+      "scheme": "dark",
+      "path": "/projects/display-ads-generar-contenido-ia/storyboard",
+      "textsChecked": 35,
+      "horizontalOverflowPx": 0
+    },
+    {
+      "scheme": "dark",
+      "path": "/projects/display-ads-generar-contenido-ia/voice",
+      "textsChecked": 77,
+      "horizontalOverflowPx": 0
+    }
+  ],
+  "failures": []
+}

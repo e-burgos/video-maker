@@ -3,6 +3,9 @@ import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 
 import {
+  FIXTURES_ROOT,
+  forceEnglishInterface,
+  openPreviewSection,
   MEDIA_ENV_VARS,
   REPO_ROOT,
   assert,
@@ -38,7 +41,7 @@ async function writeTimeline(projectRoot, timeline) {
 
 async function seedProject(mediaRoot) {
   const projectRoot = join(mediaRoot, SLUG);
-  const source = join(REPO_ROOT, 'media/smoke-ingest');
+  const source = join(FIXTURES_ROOT, 'smoke-ingest');
 
   await mkdir(join(projectRoot, 'work'), { recursive: true });
   await cp(join(source, 'raw'), join(projectRoot, 'raw'), { recursive: true });
@@ -61,6 +64,7 @@ async function seedProject(mediaRoot) {
   );
 
   const timeline = await readTimeline(projectRoot);
+  delete timeline.bumpers;
   timeline.assets.push(logoAsset);
   timeline.logo = {
     assetId: LOGO_ASSET_ID,
@@ -139,6 +143,7 @@ async function main() {
     const { chromium } = await resolvePlaywright();
     browser = await chromium.launch({ channel: 'chrome' });
     const context = await browser.newContext({ viewport: { width: 1280, height: 1600 } });
+    await forceEnglishInterface(context);
     const page = await context.newPage();
     page.on('console', (message) => {
       if (message.type() === 'error') {
@@ -156,6 +161,8 @@ async function main() {
     await page.goto(`http://localhost:${WEB_PORT}/projects/${SLUG}/preview`, {
       waitUntil: 'networkidle',
     });
+    await page.waitForSelector('[data-testid="preview-section-logo"]', { timeout: 20000 });
+    await openPreviewSection(page, 'logo');
     await page.waitForSelector('[data-testid="logo-bumper-editor"]', { timeout: 20000 });
 
     const playerFramesBefore = Number(

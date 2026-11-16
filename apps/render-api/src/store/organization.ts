@@ -13,6 +13,7 @@ export interface VideoPlacement {
   readonly folderId: string | null;
   readonly categoryId: string | null;
   readonly archived: boolean;
+  readonly position?: number;
 }
 
 export interface Organization {

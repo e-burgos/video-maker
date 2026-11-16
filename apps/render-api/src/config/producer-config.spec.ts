@@ -144,7 +144,12 @@ describe('readProducerConfig', () => {
       label: 'Sonnet',
       description: 'Balanced · faster, cheaper',
     });
-    expect(describeProducerModel('opus').description).toBe('Most capable · slower, costlier');
+    expect(describeProducerModel('opus').description).toBe('Very capable · slower, costlier');
+    expect(describeProducerModel('fable')).toEqual({
+      id: 'fable',
+      label: 'Fable',
+      description: 'Newest and most capable · slowest, costliest',
+    });
     expect(describeProducerModel('haiku').description).toBe('Fastest · lightest');
     expect(describeProducerModel('claude-3-5-haiku-20241022').label).toBe('claude-3-5-haiku-20241022');
   });
@@ -158,5 +163,11 @@ describe('readProducerConfig', () => {
         expect(isRenderApiError(error) ? error.code : null).toBe('SERVER_CONFIG_INVALID');
       }
     }
+  });
+});
+
+describe('DEFAULT_PRODUCER_MODELS', () => {
+  it('lista las cuatro familias de Claude, Fable incluida', () => {
+    expect([...DEFAULT_PRODUCER_MODELS]).toEqual(['sonnet', 'fable', 'opus', 'haiku']);
   });
 });

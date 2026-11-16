@@ -3,6 +3,9 @@ import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 
 import {
+  FIXTURES_ROOT,
+  forceEnglishInterface,
+  openPreviewSection,
   REPO_ROOT,
   VOICE_ENV_VARS,
   assert,
@@ -18,7 +21,7 @@ import {
 const RENDER_API_PORT = 4421;
 const WEB_PORT = 4211;
 const SLUG = 'script-mode-smoke';
-const SOURCE_PROJECT = join(REPO_ROOT, 'media/display-ads');
+const SOURCE_PROJECT = join(FIXTURES_ROOT, 'display-ads');
 const EXPECTED_SCRIPT_LINES = 10;
 
 const ARTIFACTS = {
@@ -177,6 +180,7 @@ async function main() {
     const playwright = await resolvePlaywright();
     browser = await playwright.chromium.launch({ channel: 'chrome' });
     const context = await browser.newContext({ viewport: { width: 1280, height: 2200 } });
+    await forceEnglishInterface(context);
     const page = await context.newPage();
     page.on('pageerror', (error) => log('pageerror', error.stack ?? error.message));
 
@@ -253,6 +257,8 @@ async function main() {
 
     log('9', 'preview: pick the lower subtitle and save it with the full PUT');
     await page.goto(`${webUrl}/projects/${SLUG}/preview`, { waitUntil: 'networkidle' });
+    await page.waitForSelector('[data-testid="preview-section-captions"]');
+    await openPreviewSection(page, 'captions');
     await page.waitForSelector('[data-testid="caption-style-selector"]');
     const offered = await page
       .locator('[data-testid="caption-style-selector"] option')

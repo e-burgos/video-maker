@@ -3,7 +3,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { producerTurn, succeededTurn } from '../api/__fixtures__/producer';
 import { RenderApiError } from '../api/render-api-error';
-import { ProducerTurnActivity, eventLabel, formatElapsed } from './producer-turn-activity';
+import { ProducerTurnActivity, formatElapsed } from './producer-turn-activity';
 
 function renderActivity(overrides: Partial<Parameters<typeof ProducerTurnActivity>[0]> = {}) {
   const onCancel = vi.fn();
@@ -37,19 +37,6 @@ describe('formatElapsed', () => {
 
   it('does not crash on a timestamp it cannot read', () => {
     expect(formatElapsed('not a date', Date.now())).toBe('—');
-  });
-});
-
-describe('eventLabel', () => {
-  it('shows the summary of a tool next to its name and the text of a message as written', () => {
-    expect(eventLabel({ type: 'tool', name: 'Bash', summary: 'ffprobe raw/aroll/clip01.mp4' })).toBe(
-      'Bash · ffprobe raw/aroll/clip01.mp4',
-    );
-    expect(eventLabel({ type: 'text', text: 'reviso el material' })).toBe('reviso el material');
-    expect(
-      eventLabel({ type: 'text', text: 'Listo.\n```suggestions\n["Dale"]\n```\n' }),
-    ).toBe('Listo.');
-    expect(eventLabel({ type: 'status', status: 'tool failed' })).toBe('tool failed');
   });
 });
 

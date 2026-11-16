@@ -1,0 +1,130 @@
+{
+  "$schema": "../../../../schemas/cycle.schema.json",
+  "cycle": 4,
+  "module": "liquid-glass-rebrand",
+  "spec": "spec-e-burgos-025-liquid-glass-rebrand",
+  "apps": [
+    "apps/web"
+  ],
+  "phase": "preview-motion-brands",
+  "flow": "lite",
+  "objectives": [
+    "Vista previa y render, motion y marcas migrados al Cristal Líquido; retiro de LegacySurface"
+  ],
+  "status": "completed",
+  "started_at": "2026-11-13",
+  "completed_at": "2026-11-13",
+  "documents": {
+    "plan": "sdd/specs/spec-e-burgos-025-liquid-glass-rebrand/cycles/cycle-04/plan.md",
+    "tasks": "sdd/specs/spec-e-burgos-025-liquid-glass-rebrand/cycles/cycle-04/tasks.json"
+  },
+  "artifacts": [
+    "sdd/specs/spec-e-burgos-025-liquid-glass-rebrand/cycles/cycle-04/artifacts/contrast-audit.json"
+  ],
+  "metrics": {
+    "tasks_total": 4,
+    "tasks_completed": 4,
+    "story_points": 17,
+    "files_created": [
+      "apps/web/src/components/preview/",
+      "apps/web/src/components/motion/",
+      "apps/web/src/components/brands/"
+    ],
+    "files_modified": [
+      "apps/web/src/pages/project-preview-page.tsx",
+      "apps/web/src/pages/motion-page.tsx",
+      "apps/web/src/pages/brands-page.tsx",
+      "apps/web/src/pages/brand-editor-page.tsx",
+      "apps/web/src/components/ui/cl-controls.ts",
+      "apps/web/src/hooks/use-section-draft.ts",
+      "apps/web/src/components/timeline-player.tsx",
+      "design/rebranding/contrast-audit.mjs"
+    ],
+    "files_deleted": [],
+    "usage": {
+      "tokens_in": 733000,
+      "tokens_out": 57684,
+      "by_agent": [
+        {
+          "agent": "custom",
+          "label": "Consolidación del contexto de apps/web (cycle-03)",
+          "provider_model": "claude/sonnet",
+          "effort": "low",
+          "tokens_in": 93000,
+          "tokens_out": 6628,
+          "tokens_total": 99628,
+          "approx": true,
+          "source": "agent-usage-notification",
+          "recorded_at": "2026-11-13"
+        },
+        {
+          "agent": "implementor-front",
+          "label": "TASK-001 y TASK-002 vista previa, render y motion",
+          "provider_model": "claude/sonnet",
+          "effort": "medium",
+          "tokens_in": 340000,
+          "tokens_out": 25029,
+          "tokens_total": 365029,
+          "approx": true,
+          "source": "agent-usage-notification",
+          "recorded_at": "2026-11-13"
+        },
+        {
+          "agent": "implementor-front",
+          "label": "TASK-003 marcas con guardado único",
+          "provider_model": "claude/sonnet",
+          "effort": "medium",
+          "tokens_in": 250000,
+          "tokens_out": 19027,
+          "tokens_total": 269027,
+          "approx": true,
+          "source": "agent-usage-notification",
+          "recorded_at": "2026-11-13"
+        },
+        {
+          "agent": "orchestrator",
+          "label": "TASK-004 verificación y cierre como reviewer",
+          "provider_model": "claude/opus",
+          "effort": "low",
+          "tokens_in": 50000,
+          "tokens_out": 7000,
+          "tokens_total": 57000,
+          "approx": true,
+          "source": "declared-estimate",
+          "recorded_at": "2026-11-13"
+        }
+      ]
+    }
+  },
+  "tables_created": [],
+  "endpoints_implemented": [],
+  "components_created": [],
+  "issues_found": [
+    "apps/web/src/components/shell/legacy-surface.tsx quedó sin usos pero sin borrar: el chequeo de permisos bloqueó el borrado al subagente; el dev decide si lo quita.",
+    "Al armar los commits de TASK-001/002 el subagente sacó archivos del árbol unos segundos; el studio en 4200 pudo ver el árbol roto. Regla agregada a los briefs: nunca mover archivos para armar un commit.",
+    "Colores, variables avanzadas y archivos de marca se aplican al instante fuera del guardado único (vista previa en vivo); la barra lo avisa.",
+    "Las tarjetas de marca no muestran tipografía ni voz: BrandSummary no las trae y no se cambió la API.",
+    "Test de motion-page («declares Make video as the toolbar action») falló una vez bajo carga y pasa aislado y en la corrida completa de verificación.",
+    "e2e con selectores nuevos de los ciclos 03 y 04 sin correr contra un studio libre."
+  ],
+  "reviewer_report": {
+    "approved": true,
+    "date": "2026-11-13",
+    "ca_results": {
+      "US-025-401": "PASS — «Renderizar» en el toolbar con estado; reproductor opaco grande; 7 secciones plegables con resumen; historial con StateBadge y descarga",
+      "US-025-402": "PASS — brief, storyboard, voz y vista previa motion migrados con acción en el toolbar; LegacySurface sin usos",
+      "US-025-403": "PASS con desvío — listado glass-sub con logo opaco y «Nueva marca» en el toolbar; editor con secciones y barra pegajosa de guardado único (un solo putBrand); colores y archivos siguen aplicándose al instante"
+    },
+    "tests": {
+      "sdd:validate": "OK",
+      "web": "186/186 archivos, 1791/1791 tests; lint 0 errores; build ok",
+      "contrast-audit": "0 fallas en 642 textos y 0 desborde en vista previa, motion, storyboard y voz motion, marcas y editor × claro/oscuro"
+    },
+    "notes": "Tres tasks en dos subagentes sonnet/medium en serie. La verificación marcó el reproductor como medio (sus controles van sobre el cuadro del video) y corrigió la auditoría para ignorar textos cortados por el borde de la ventana.",
+    "follow_ups": [
+      "Borrar legacy-surface.tsx (decisión del dev).",
+      "Ciclo 05: publicación, ajustes, guía, RenderReviewPanel, YouTubePublishDialog y retiro del modo heredado de surface.",
+      "Correr los e2e de los ciclos 03 y 04 con un studio libre."
+    ]
+  }
+}

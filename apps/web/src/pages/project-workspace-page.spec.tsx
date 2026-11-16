@@ -6,6 +6,8 @@ import { producerConversation, producerSettings } from '../api/__fixtures__/prod
 import { productionProposal, proposalDocument, proposalEstimate } from '../api/__fixtures__/proposal';
 import { RenderApiProvider } from '../api/render-api-context';
 import { RenderApiError } from '../api/render-api-error';
+import { ShellToolbar } from '../components/shell/shell-toolbar';
+import { ToolbarActionProvider } from '../components/shell/toolbar-action-provider';
 import { ProjectWorkspacePage } from './project-workspace-page';
 import type { RenderApiClient } from '../api/render-api-client';
 import type { AssetListing, ServiceHealth } from '../api/render-api-types';
@@ -69,11 +71,14 @@ function renderWorkspace(client: Partial<RenderApiClient> = {}) {
 
   render(
     <RenderApiProvider client={withDefaults as RenderApiClient}>
-      <MemoryRouter initialEntries={['/projects/demo-01']}>
-        <Routes>
-          <Route path="/projects/:slug" element={<ProjectWorkspacePage />} />
-        </Routes>
-      </MemoryRouter>
+      <ToolbarActionProvider>
+        <ShellToolbar title="Producer" subtitle="Demo 01" />
+        <MemoryRouter initialEntries={['/projects/demo-01']}>
+          <Routes>
+            <Route path="/projects/:slug" element={<ProjectWorkspacePage />} />
+          </Routes>
+        </MemoryRouter>
+      </ToolbarActionProvider>
     </RenderApiProvider>,
   );
 
@@ -85,12 +90,14 @@ afterEach(() => {
 });
 
 describe('ProjectWorkspacePage', () => {
-  it('shows a human title with the raw slug small underneath, and no duplicate health badge', async () => {
+  it('has no header of its own: the toolbar owns the title and the sidebar the way back', async () => {
     stubMatchMedia(true);
     renderWorkspace();
 
-    expect(screen.getByRole('heading', { name: 'Demo 01' })).toBeTruthy();
-    expect(screen.getByText('demo-01')).toBeTruthy();
+    await waitFor(() => expect(screen.getByTestId('producer-conversation-panel')).toBeTruthy());
+    expect(screen.getAllByRole('heading', { level: 1 })).toHaveLength(1);
+    expect(screen.queryByText('demo-01')).toBeNull();
+    expect(screen.queryByText('← projects')).toBeNull();
     expect(screen.queryByTestId('service-health-label')).toBeNull();
   });
 
@@ -142,7 +149,7 @@ describe('ProjectWorkspacePage', () => {
     stubMatchMedia(true);
     renderWorkspace();
 
-    await screen.findByRole('heading', { name: 'Demo 01' });
+    await screen.findByTestId('producer-conversation-panel');
     expect(screen.queryByTestId('workspace-advanced-menu')).toBeNull();
     expect(screen.queryByTestId('workspace-motion-link')).toBeNull();
   });
@@ -170,7 +177,7 @@ describe('ProjectWorkspacePage', () => {
     expect(screen.getByTestId('workspace-side-panel')).toBeTruthy();
   });
 
-  it('shows the Proposal card and a pending status in the header when the producer proposed', async () => {
+  it('shows the Proposal card and puts its pending status in the toolbar when the producer proposed', async () => {
     stubMatchMedia(true);
     renderWorkspace({
       getProposal: vi
@@ -179,15 +186,40 @@ describe('ProjectWorkspacePage', () => {
     });
 
     expect(await screen.findByTestId('proposal-card')).toBeTruthy();
-    expect((await screen.findByTestId('proposal-status')).getAttribute('data-status')).toBe('pending');
+    const status = await screen.findByTestId('proposal-status');
+    expect(status.getAttribute('data-status')).toBe('pending');
+    expect(screen.getByTestId('toolbar-status').contains(status)).toBe(true);
     expect(screen.getAllByRole('button', { name: /Approve this approach/u })).toHaveLength(2);
+  });
+
+  it('declares the approval of the recommended approach as the toolbar action and runs it', async () => {
+    stubMatchMedia(true);
+    const approveProposal = vi.fn().mockResolvedValue(undefined);
+    renderWorkspace({
+      approveProposal,
+      getProposal: vi
+        .fn()
+        .mockResolvedValue(proposalDocument(productionProposal(), { directo: proposalEstimate() })),
+    });
+
+    fireEvent.click(await screen.findByTestId('toolbar-action'));
+
+    await waitFor(() => expect(approveProposal).toHaveBeenCalledWith('demo-01', 'directo'));
+  });
+
+  it('declares no toolbar action when there is nothing to approve', async () => {
+    stubMatchMedia(true);
+    renderWorkspace();
+
+    await screen.findByTestId('producer-conversation-panel');
+    expect(screen.queryByTestId('toolbar-action')).toBeNull();
   });
 
   it('shows neither the card nor the status when there is no proposal', async () => {
     stubMatchMedia(true);
     renderWorkspace();
 
-    await screen.findByRole('heading', { name: 'Demo 01' });
+    await screen.findByTestId('producer-conversation-panel');
     expect(screen.queryByTestId('proposal-card')).toBeNull();
     expect(screen.queryByTestId('proposal-status')).toBeNull();
   });

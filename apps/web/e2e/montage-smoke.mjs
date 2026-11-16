@@ -4,8 +4,12 @@ import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 
 import {
+  FIXTURES_ROOT,
+  forceEnglishInterface,
+  openPreviewSection,
   REPO_ROOT,
   assert,
+  VOICE_ENV_VARS,
   assertMediaEnvResolvable,
   loadRootEnv,
   log,
@@ -70,19 +74,19 @@ async function pollJobUntilTerminal(jobId, deadlineMs, onSnapshot) {
 
 async function main() {
   await memoryGate();
-  await loadRootEnv();
-  assertMediaEnvResolvable();
+  await loadRootEnv(VOICE_ENV_VARS);
+  assertMediaEnvResolvable(VOICE_ENV_VARS);
 
   log('1', 'copying ONLY raw/ from media/smoke-ingest into a temporary media root');
   const tempMediaRoot = await mkdtemp(join(tmpdir(), 'montage-smoke-'));
   const projectRoot = join(tempMediaRoot, SLUG);
   await mkdir(projectRoot, { recursive: true });
-  await cp(join(REPO_ROOT, 'media', SLUG, 'raw'), join(projectRoot, 'raw'), { recursive: true });
+  await cp(join(FIXTURES_ROOT, SLUG, 'raw'), join(projectRoot, 'raw'), { recursive: true });
   log('1', `temp media root: ${tempMediaRoot} (no work/, no out/ — the studio has to produce them)`);
 
-  const cliCatalogSha = await sha256OfFile(join(REPO_ROOT, 'media', SLUG, 'work', 'catalog.json'));
-  const cliTimelineSha = await sha256OfFile(join(REPO_ROOT, 'media', SLUG, 'work', 'timeline.json'));
-  const cliEdlSha = await sha256OfFile(join(REPO_ROOT, 'media', SLUG, 'work', 'edl.json'));
+  const cliCatalogSha = await sha256OfFile(join(FIXTURES_ROOT, SLUG, 'work', 'catalog.json'));
+  const cliTimelineSha = await sha256OfFile(join(FIXTURES_ROOT, SLUG, 'work', 'timeline.json'));
+  const cliEdlSha = await sha256OfFile(join(FIXTURES_ROOT, SLUG, 'work', 'edl.json'));
   log('1', `CLI baselines — catalog ${cliCatalogSha.slice(0, 12)}… timeline ${cliTimelineSha.slice(0, 12)}… edl ${cliEdlSha.slice(0, 12)}…`);
 
   await mkdir(ARTIFACTS_DIR, { recursive: true });
@@ -104,8 +108,8 @@ async function main() {
   log('2', `render-api health: status=${health.status} capabilities=${JSON.stringify(health.capabilities)}`);
   assert(health.capabilities.montageQueue === true, 'the service exposes capabilities.montageQueue');
   assert(
-    health.binaries.length === 4 && health.binaries.every((binary) => binary.resolved),
-    `the four media binaries resolve (${health.binaries.map((b) => `${b.name}:${b.resolved}`).join(' ')})`,
+    health.binaries.length === VOICE_ENV_VARS.length && health.binaries.every((binary) => binary.resolved),
+    `the six media and voice binaries resolve (${health.binaries.map((b) => `${b.name}:${b.resolved}`).join(' ')})`,
   );
 
   log('3', 'starting apps/web with its proxy pointed at render-api');
@@ -119,7 +123,9 @@ async function main() {
 
   const { chromium } = await resolvePlaywright();
   const browser = await chromium.launch({ channel: 'chrome' });
-  const page = await browser.newPage({ viewport: { width: 1280, height: 2200 } });
+  const context = await browser.newContext({ viewport: { width: 1280, height: 2200 } });
+  await forceEnglishInterface(context);
+  const page = await context.newPage();
 
   const observedMontageStages = [];
   page.on('console', (message) => {
@@ -134,17 +140,18 @@ async function main() {
   try {
     log('4', 'opening the projects list and the asset library of a project that has ONLY raw/');
     await page.goto(`http://localhost:${WEB_PORT}/`, { waitUntil: 'networkidle' });
-    await page.getByText(SLUG, { exact: true }).click();
+    await page.getByRole('link', { name: new RegExp(SLUG) }).first().click();
+    await page.goto(`http://localhost:${WEB_PORT}/projects/${SLUG}/library`, { waitUntil: 'networkidle' });
     await page.waitForSelector('[data-testid="asset-source"]');
 
     const assetSource = await page.getByTestId('asset-source').textContent();
     log('4', `asset listing source: ${assetSource}`);
     assert(assetSource === 'raw-scan', 'the library lists the raw material by scanning raw/, with no catalog yet');
 
-    const arollCards = await page.locator('[data-testid="role-aroll"] li').count();
-    const brollCards = await page.locator('[data-testid="role-broll"] li').count();
-    const imageCards = await page.locator('[data-testid="role-image"] li').count();
-    const audioCards = await page.locator('[data-testid="role-audio"] li').count();
+    const arollCards = await page.locator('[data-testid="asset-card"][data-role="aroll"]').count();
+    const brollCards = await page.locator('[data-testid="asset-card"][data-role="broll"]').count();
+    const imageCards = await page.locator('[data-testid="asset-card"][data-role="image"]').count();
+    const audioCards = await page.locator('[data-testid="asset-card"][data-role="audio"]').count();
     log('4', `asset cards visible: aroll=${arollCards} broll=${brollCards} image=${imageCards} audio=${audioCards}`);
     assert(arollCards > 0, 'the a-roll material is visible in the library before any montage exists');
     await page.screenshot({ path: join(ARTIFACTS_DIR, 'montage-smoke-01-raw-library.png') });
@@ -167,6 +174,7 @@ async function main() {
     }, 150);
 
     log('6', 'clicking Generate montage (EP-012 kind: montage, preset software-demo, seed 0)');
+    await page.getByLabel('Seed').fill('0');
     const montageStartedAt = Date.now();
     const [createResponse] = await Promise.all([
       page.waitForResponse(
@@ -219,7 +227,7 @@ async function main() {
     log('7', `web-produced sha256 — catalog ${webCatalogSha.slice(0, 12)}… timeline ${webTimelineSha.slice(0, 12)}… edl ${webEdlSha.slice(0, 12)}…`);
     assert(webEdlSha === cliEdlSha, 'work/edl.json produced from the studio is byte-identical to the CLI baseline');
 
-    const cliRoot = join(REPO_ROOT, 'media', SLUG, 'work');
+    const cliRoot = join(FIXTURES_ROOT, SLUG, 'work');
     const webRoot = join(projectRoot, 'work');
     assert(
       (await stableShapeOf(join(webRoot, 'timeline.json'))) ===
@@ -237,7 +245,7 @@ async function main() {
     );
 
     log('8', 'going back to the library and asking for a second montage: the service must answer 409');
-    await page.getByRole('link', { name: '← asset library' }).click();
+    await page.getByTestId('project-nav').getByRole('link', { name: /library/ }).click();
     await page.waitForSelector('[data-testid="montage-trigger"]');
     const [conflictResponse] = await Promise.all([
       page.waitForResponse(
@@ -276,6 +284,7 @@ async function main() {
       ['aroll-0005', 20],
       ['aroll-0006', 25],
     ];
+    await openPreviewSection(page, 'aroll');
     for (const [clipId, targetDuration] of shortenTargets) {
       const input = page.getByLabel(`Duration for ${clipId}`);
       const before = Number(await input.inputValue());

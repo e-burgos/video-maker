@@ -1,18 +1,11 @@
+import { StateBadge } from '@e-burgos/tucu-ui';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 
-import { artifactUrl } from '../api/artifact-url';
-import { humanizeSlug } from '../api/humanize-slug';
 import { draftFromBrief, draftToBrief, emptyBriefDraft, imageFileName } from '../api/motion-brief-form';
 import type { BriefDraft } from '../api/motion-brief-form';
-import type {
-  MotionBrief,
-  MotionJobReport,
-  MotionPhase,
-  MotionStoryboard,
-  MotionStoryboardReport,
-} from '../api/motion-types';
-import type { RenderApiClient } from '../api/render-api-client';
+import { deliveredVideoOf, storedVideoOf } from '../api/motion-delivered-video';
+import type { MotionBrief, MotionPhase, MotionStoryboard, MotionStoryboardReport } from '../api/motion-types';
 import { useRenderApi } from '../api/render-api-context';
 import { nullWhenMissing } from '../api/null-when-missing';
 import type { Job } from '../api/render-api-types';
@@ -20,38 +13,26 @@ import { ErrorNotice } from '../components/error-notice';
 import { MotionBriefForm } from '../components/motion-brief-form';
 import { MotionJobStatus } from '../components/motion-job-status';
 import { MotionSceneList } from '../components/motion-scene-list';
-import { Button } from '../components/ui/button';
+import { MotionBriefImages } from '../components/motion/motion-brief-images';
+import { MotionDeliveredVideo } from '../components/motion/motion-delivered-video';
+import type { DeliveredVideo } from '../components/motion/motion-delivered-video';
+import { ToolbarStatus } from '../components/shell/toolbar-status';
+import { useToolbarAction } from '../components/shell/use-toolbar-action';
+import {
+  PANEL_CLASS,
+  PANEL_HEADING_CLASS,
+  SECONDARY_BUTTON_SMALL_CLASS,
+  TOOLBAR_SECONDARY_BUTTON_CLASS,
+} from '../components/ui/cl-controls';
 import { useApiAction } from '../hooks/use-api-action';
 import { useAsyncResource } from '../hooks/use-async-resource';
 import { useRenderJobPoll } from '../hooks/use-render-job-poll';
 import { useT } from '../i18n/language-context';
+import { LoadingState } from '../components/ui/status-states';
 
 const BRIEF_NOT_FOUND = 'BRIEF_NOT_FOUND';
 const STORYBOARD_NOT_FOUND = 'STORYBOARD_NOT_FOUND';
 const OUTPUT_FILE = 'video.mp4';
-
-type DeliveredVideo = { path: string; durationSec: number | null; musicCredit: string | null };
-
-const OUTPUT_PREFIX = 'out/';
-const VIDEO_EXTENSION = '.mp4';
-const CREDITS_EXTENSION = '.credits.txt';
-const CREDIT_LABEL = /^Música:\s*/u;
-
-async function storedVideoOf(client: RenderApiClient, slug: string): Promise<DeliveredVideo | null> {
-  const listing = await client.listGenerated(slug);
-  const newest = listing.files
-    .filter((file) => file.path.startsWith(OUTPUT_PREFIX) && file.path.endsWith(VIDEO_EXTENSION))
-    .sort((a, b) => b.modifiedAtMs - a.modifiedAtMs)[0];
-  if (newest === undefined) return null;
-  const creditsPath = `${newest.path.slice(0, -VIDEO_EXTENSION.length)}${CREDITS_EXTENSION}`;
-  const hasCredits = listing.files.some((file) => file.path === creditsPath);
-  const musicCredit = hasCredits ? (await client.getProjectFile(slug, creditsPath)).trim().replace(CREDIT_LABEL, '') : null;
-  return { path: newest.path, durationSec: null, musicCredit };
-}
-
-function deliveredVideoOf(report: MotionJobReport | null): DeliveredVideo | null {
-  return report !== null && report.path !== null ? { path: report.path, durationSec: report.durationSec, musicCredit: report.musicCredit ?? null } : null;
-}
 
 export function MotionPage() {
   const client = useRenderApi();
@@ -85,6 +66,7 @@ export function MotionPage() {
   const [draft, setDraft] = useState<BriefDraft | null>(null);
   const [scriptProblem, setScriptProblem] = useState(false);
   const [saved, setSaved] = useState(false);
+  const [edited, setEdited] = useState(false);
   const [jobId, setJobId] = useState<string | null>(null);
   const [stats, setStats] = useState<MotionStoryboardReport | null>(null);
   const [delivery, setDelivery] = useState<DeliveredVideo | null>(null);
@@ -162,6 +144,9 @@ export function MotionPage() {
     setScriptProblem(false);
     const result = await saveAction.run(draft);
     setSaved(result !== null);
+    if (result !== null) {
+      setEdited(false);
+    }
     return result !== null;
   }
 
@@ -176,6 +161,12 @@ export function MotionPage() {
     }
   }
 
+  function changeDraft(next: BriefDraft) {
+    setSaved(false);
+    setEdited(true);
+    setDraft(next);
+  }
+
   function adoptRetried(retried: Job) {
     setJobId(retried.id);
   }
@@ -184,61 +175,94 @@ export function MotionPage() {
   const loading =
     draft === null && (brands.status === 'loading' || brief.status === 'loading' || project.status === 'loading');
   const loadError = brands.error ?? (brief.status === 'error' ? brief.error : null);
+  const saving = saveAction.status === 'pending';
+  const briefReady = draft !== null && brands.data !== null;
+  const briefState = edited ? 'unsaved' : saved || brief.data !== null ? 'saved' : null;
+
+  useToolbarAction(
+    briefReady
+      ? {
+          label: t('motion.video.make'),
+          onClick: () => void start(videoPhase),
+          disabled: busy,
+          loading: busy,
+        }
+      : null,
+  );
 
   return (
-    <section data-testid="motion-page" className="space-y-6">
-      <header className="space-y-2">
-        <Link to="/" className="text-xs text-ink-faint hover:text-ink-muted">
-          {t('motion.back')}
-        </Link>
-        <h1 className="text-2xl font-semibold tracking-tight text-ink">{t('motion.page.title')}</h1>
-        <p className="font-mono text-xs text-ink-faint">{humanizeSlug(slug)}</p>
-        <Link
-          to={`/projects/${encodeURIComponent(slug)}`}
-          data-testid="motion-adjust-link"
-          className="inline-block rounded-control border border-accent px-4 py-2 text-sm font-medium text-ink hover:bg-surface-muted"
-        >
-          {t('motion.adjust.link')}
-        </Link>
-      </header>
+    <section data-testid="motion-page" className="flex flex-col gap-4">
+      {briefReady && (
+        <ToolbarStatus>
+          {briefState !== null && (
+            <span role="status" data-testid="motion-brief-state">
+              <StateBadge tone={briefState === 'saved' ? 'green' : 'orange'} dot size="sm">
+                {briefState === 'saved' ? t('motion.brief.saved') : t('edit.unsaved')}
+              </StateBadge>
+            </span>
+          )}
+          <button
+            type="button"
+            disabled={busy}
+            onClick={() => void start('storyboard')}
+            className={`${TOOLBAR_SECONDARY_BUTTON_CLASS} ml-2`}
+          >
+            {t('motion.storyboard.make')}
+          </button>
+        </ToolbarStatus>
+      )}
 
-      {loading && <p className="text-sm text-ink-faint">{t('motion.loading')}</p>}
+      {loading && <LoadingState message={t('motion.loading')} />}
       {loadError !== null && <ErrorNotice error={loadError} />}
 
       {draft !== null && brands.data !== null && (
-        <div className="space-y-4">
-          <h2 className="text-sm font-medium text-ink">{t('motion.brief.heading')}</h2>
-          <MotionBriefForm
-            slug={slug}
-            draft={draft}
-            brands={brands.data}
-            imageAssets={imageAssets}
-            scriptProblem={scriptProblem}
-            onChange={(next) => {
-              setSaved(false);
-              setDraft(next);
-            }}
-            onImageUploaded={assets.reload}
-          />
+        <div className="grid items-start gap-4 min-[1100px]:grid-cols-[minmax(0,1fr)_340px]">
+          <section className={PANEL_CLASS}>
+            <div className="flex flex-wrap items-center justify-between gap-2">
+              <h2 className={PANEL_HEADING_CLASS}>{t('motion.brief.heading')}</h2>
+              <Link
+                to={`/projects/${encodeURIComponent(slug)}`}
+                data-testid="motion-adjust-link"
+                className={`${SECONDARY_BUTTON_SMALL_CLASS} no-underline`}
+              >
+                {t('motion.adjust.link')}
+              </Link>
+            </div>
+            <MotionBriefForm
+              draft={draft}
+              brands={brands.data}
+              scriptProblem={scriptProblem}
+              onChange={changeDraft}
+            />
+            {saveAction.error !== null && <ErrorNotice error={saveAction.error} />}
+            <div className="flex flex-wrap items-center gap-3">
+              <button
+                type="button"
+                disabled={busy || saving}
+                onClick={() => void save()}
+                className={SECONDARY_BUTTON_SMALL_CLASS}
+              >
+                {saving ? t('motion.brief.saving') : t('motion.brief.save')}
+              </button>
+            </div>
+          </section>
 
-          {saveAction.error !== null && <ErrorNotice error={saveAction.error} />}
-          {saved && (
-            <p role="status" className="text-sm text-success">
-              {t('motion.brief.saved')}
-            </p>
-          )}
-
-          <div className="flex flex-wrap gap-3">
-            <Button disabled={busy || saveAction.status === 'pending'} onClick={() => void save()}>
-              {saveAction.status === 'pending' ? t('motion.brief.saving') : t('motion.brief.save')}
-            </Button>
-            <Button disabled={busy} onClick={() => void start('storyboard')}>
-              {t('motion.storyboard.make')}
-            </Button>
-            <Button variant="primary" disabled={busy} onClick={() => void start(videoPhase)}>
-              {t('motion.video.make')}
-            </Button>
-          </div>
+          <aside className="flex min-w-0 flex-col gap-4">
+            <section className={PANEL_CLASS}>
+              <MotionBriefImages
+                slug={slug}
+                draft={draft}
+                imageAssets={imageAssets}
+                onChange={changeDraft}
+                onImageUploaded={assets.reload}
+              />
+            </section>
+            {storyboard.data !== null && (
+              <section className={PANEL_CLASS}>
+                <MotionSceneList storyboard={storyboard.data} stats={stats} />
+              </section>
+            )}
+          </aside>
         </div>
       )}
 
@@ -246,27 +270,7 @@ export function MotionPage() {
       {job !== null && <MotionJobStatus job={job} onRetried={adoptRetried} />}
       {poll.error !== null && job === null && <ErrorNotice error={poll.error} />}
 
-      {storyboard.data !== null && <MotionSceneList storyboard={storyboard.data} stats={stats} />}
-
-      {shownVideo !== null && (
-        <div data-testid="motion-video" className="space-y-2">
-          <h2 className="text-sm font-medium text-ink">{t('motion.video.heading')}</h2>
-          <video
-            src={artifactUrl(slug, shownVideo.path)}
-            controls
-            preload="metadata"
-            className="w-full max-w-3xl rounded-control bg-black"
-          />
-          <p className="font-mono text-xs text-ink-faint">
-            {shownVideo.durationSec === null ? shownVideo.path : t('motion.video.path', { path: shownVideo.path, duration: shownVideo.durationSec })}
-          </p>
-          {shownVideo.musicCredit !== null && (
-            <p data-testid="motion-music-credit" className="text-xs text-ink-muted">
-              {t('motion.video.credit', { credit: shownVideo.musicCredit })}
-            </p>
-          )}
-        </div>
-      )}
+      {shownVideo !== null && <MotionDeliveredVideo slug={slug} video={shownVideo} />}
     </section>
   );
 }

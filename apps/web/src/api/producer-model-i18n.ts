@@ -2,7 +2,7 @@ import type { TranslateFn } from '../i18n/language-context';
 import type { TranslationKey } from '../i18n/messages-en';
 import type { ProducerModelOption } from './render-api-types';
 
-const KNOWN_MODEL_IDS = ['sonnet', 'opus', 'haiku'] as const;
+const KNOWN_MODEL_IDS = ['sonnet', 'fable', 'opus', 'haiku'] as const;
 
 type KnownModelId = (typeof KNOWN_MODEL_IDS)[number];
 

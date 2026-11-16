@@ -1,6 +1,6 @@
 # Constitución — apps/render-api
 
-> Versión 4.0 | Última actualización: consolidación de fragmentos | Fecha: 2026-10-13
+> Versión 4.2 | Última actualización: consolidación de spec-025 cycle-06 | Fecha: 2026-11-16
 
 ## 1. Propósito
 
@@ -279,6 +279,19 @@
 - **Sin comentarios** en el código; nombres declarativos, funciones cortas.
 - **El guion copiable de verificación real vive en `apps/render-api/README.md`**, nunca sólo en un
   `architect.md`.
+
+- **Motor de voz ElevenLabs (FIX-030):** voces `elevenlabs:<id>` despachadas en `deps.synthesizeVoice` por prefijo
+  (`src/voice/`: `elevenlabs-voice`, `elevenlabs-api`, `elevenlabs-tts`, `node-elevenlabs-synthesizer`,
+  `synthesize-voice-dispatch`; `config/voice-synthesis-cache-config.ts`; `http/handlers/elevenlabs-settings-handler.ts`).
+  Key en el llavero (secret `elevenlabs`, invocado `detached` sin terminal); caché
+  `~/.cache/video-maker/elevenlabs/<sha>.v1.wav` (`VOICE_SYNTH_CACHE_DIR`); rutas `GET /settings/voice/elevenlabs`,
+  `PUT|DELETE /settings/voice/elevenlabs-key`, `PUT /settings/voice/elevenlabs-voices`; errores
+  `VOICE_ENGINE_NOT_CONFIGURED` (409) y `VOICE_ENGINE_QUOTA_EXCEEDED` (402). HTTP saliente solo a `api.elevenlabs.io`.
+  El ajuste de líneas con marca de tiempo hace dos pasadas; los guiones con marca deben respetar ~2,6 palabras/s para Malena.
+- Actualizaciones de la app: `GET /api/app/update` (EP-074, `http/handlers/app-update-handler.ts` +
+  `app-update/compare-versions.ts`) lee `latest.json` de `VIDEO_MAKER_UPDATE_MANIFEST_URL` (default
+  `https://video.estebanburgos.com.ar/descargas/latest.json`, timeout 4 s, `no-store`) y responde `up-to-date`,
+  `available` o `unknown` con 200, nunca 500.
 
 ## 4. Trampas de operación
 

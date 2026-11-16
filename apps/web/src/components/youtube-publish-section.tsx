@@ -2,7 +2,7 @@ import { useState } from 'react';
 
 import { useT } from '../i18n/language-context';
 import { PublicationsPanel } from './publications-panel';
-import { Button } from './ui/button';
+import { PRIMARY_BUTTON_SMALL_CLASS } from './ui/cl-controls';
 import { YouTubePublishDialog } from './youtube-publish-dialog';
 
 export type YouTubePublishSectionProps = {
@@ -15,10 +15,15 @@ export function YouTubePublishSection({ slug }: YouTubePublishSectionProps) {
   const [refreshToken, setRefreshToken] = useState(0);
 
   return (
-    <div data-testid="youtube-publish-section" className="space-y-3">
-      <Button variant="primary" data-testid="youtube-publish-open" onClick={() => setOpen(true)}>
+    <div data-testid="youtube-publish-section" className="flex flex-col gap-3">
+      <button
+        type="button"
+        data-testid="youtube-publish-open"
+        onClick={() => setOpen(true)}
+        className={`${PRIMARY_BUTTON_SMALL_CLASS} self-start`}
+      >
         {t('youtube.publish.open')}
-      </Button>
+      </button>
       <PublicationsPanel slug={slug} refreshToken={refreshToken} />
       {open && (
         <YouTubePublishDialog

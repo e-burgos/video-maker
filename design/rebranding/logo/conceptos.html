@@ -1,0 +1,51 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<title>Video Maker · logo · ronda 1</title>
+<style>
+*{box-sizing:border-box;margin:0}
+body{font:13px/1.4 Inter,-apple-system,system-ui,sans-serif;background:#e8eaf0;color:#1d1d1f;padding:28px}
+h1{font-size:18px;margin-bottom:4px}p.sub{color:#6e6e73;margin-bottom:20px}
+.pal{font:600 10.5px "JetBrains Mono",monospace;letter-spacing:.08em;text-transform:uppercase;color:#6e6e73;margin:22px 0 10px}
+.row{display:grid;grid-template-columns:repeat(4,1fr);gap:14px}
+.cell{background:rgba(255,255,255,.7);border:.5px solid rgba(255,255,255,.9);border-radius:18px;padding:16px;display:flex;flex-direction:column;gap:12px;box-shadow:0 6px 24px rgba(31,38,74,.1)}
+.cell h2{font-size:14px}.cell small{color:#6e6e73}
+.big{display:flex;justify-content:center;padding:6px 0}
+.sizes{display:flex;gap:14px;align-items:flex-end;padding:10px;border-radius:12px}
+.sizes.l{background:#fff}.sizes.d{background:#101322}
+.lock{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:12px;font-size:15px;letter-spacing:-.3px}
+.lock.l{background:#fff;color:#1d1d1f}.lock.d{background:#101322;color:#f5f5f7}
+.lock b{font-weight:700}.lock span{font-weight:500;opacity:.8}
+</style>
+</head>
+<body>
+<h1>Video Maker · logo · ronda 1</h1>
+<p class="sub">Cuatro conceptos en dos paletas. Cada uno se ve a 120, 48, 28 y 16 px (tamaños del ícono de la app, la sidebar y la pestaña), en claro y oscuro, y con el nombre al lado.</p>
+<div id="root"></div>
+<script>
+let uid=0;
+const tile=(g1,g2,inner)=>{const id='g'+(uid++);return(s)=>`<svg width="${s}" height="${s}" viewBox="0 0 128 128" xmlns="http://www.w3.org/2000/svg"><defs><linearGradient id="${id}" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="${g1}"/><stop offset="1" stop-color="${g2}"/></linearGradient><linearGradient id="${id}h" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fff" stop-opacity=".38"/><stop offset=".55" stop-color="#fff" stop-opacity="0"/></linearGradient></defs><rect width="128" height="128" rx="29" fill="url(#${id})"/><rect width="128" height="128" rx="29" fill="url(#${id}h)"/><rect x=".75" y=".75" width="126.5" height="126.5" rx="28.5" fill="none" stroke="#fff" stroke-opacity=".6" stroke-width="1.5"/>${inner}</svg>`};
+const concepts={
+ 'A · Pista (timeline que hace play)':`<g fill="#fff">${[[20,0],[38,1],[56,2],[38,3],[20,4]].map(([w,i])=>`<rect x="40" y="${31+i*14}" width="${w}" height="9" rx="4.5" fill-opacity="${[.7,.85,1,.85,.7][i]}"/>`).join('')}</g>`,
+ 'B · Fotograma':`<g fill="none" stroke="#fff" stroke-width="6" stroke-linejoin="round"><rect x="28" y="32" width="72" height="64" rx="12"/></g><g fill="#fff" fill-opacity=".85">${[44,60,76].map(y=>`<rect x="35" y="${y}" width="6" height="6" rx="1.5"/><rect x="87" y="${y}" width="6" height="6" rx="1.5"/>`).join('')}</g><path d="M55 50v28l24-14z" fill="#fff" stroke="#fff" stroke-width="5" stroke-linejoin="round"/>`,
+ 'C · Gota de cristal':`<circle cx="64" cy="64" r="38" fill="#fff" fill-opacity=".2" stroke="#fff" stroke-opacity=".75" stroke-width="2"/><path d="M38 52a30 30 0 0 1 22-18" fill="none" stroke="#fff" stroke-opacity=".9" stroke-width="5" stroke-linecap="round"/><path d="M57 48v32l27-16z" fill="#fff" stroke="#fff" stroke-width="6" stroke-linejoin="round"/>`,
+ 'D · V de capas':`<g stroke-linecap="round" fill="none" stroke-width="17"><path d="M38 38 64 92" stroke="#fff" stroke-opacity=".95"/><path d="M90 38 64 92" stroke="#fff" stroke-opacity=".55"/></g>`
+};
+const pals=[['Herencia de la web: coral → violeta','#ff5470','#7c5cff'],['Liquid Glass: azul de acción → violeta','#0a6cff','#7a5cff']];
+const mk=(g1,g2,inner)=>tile(g1,g2,inner);
+let html='';
+for(const [pn,g1,g2] of pals){
+ html+=`<div class="pal">${pn}</div><div class="row">`;
+ for(const [name,inner] of Object.entries(concepts)){
+  const t=mk(g1,g2,inner);
+  const sz=(c)=>`<div class="sizes ${c}">${[48,28,16].map(s=>t(s)).join('')}</div>`;
+  const lk=(c)=>`<div class="lock ${c}">${t(28)}<div><b>Video</b> <span>Maker</span></div></div>`;
+  html+=`<div class="cell"><h2>${name}</h2><div class="big">${t(120)}</div>${sz('l')}${sz('d')}${lk('l')}${lk('d')}</div>`;
+ }
+ html+='</div>';
+}
+document.getElementById('root').innerHTML=html;
+</script>
+</body>
+</html>
