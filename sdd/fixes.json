@@ -7189,6 +7189,51 @@
           }
         ]
       }
+    },
+    {
+      "id": "FIX-e-burgos-096",
+      "author": "e-burgos",
+      "spec_id": null,
+      "fix_document": "sdd/fixes/fix-e-burgos-096.md",
+      "type": "BUGFIX",
+      "severity": "medium",
+      "created_at": "2026-11-16",
+      "resolved_at": "2026-11-16",
+      "validated_at": null,
+      "title": "El test de marcas del plugin no depende de la carpeta brands/ local",
+      "estimation_hours": 0.2,
+      "description": "tools/plugin-references/src/brands.spec.ts leía brands/ (gitignoreada) y en CI fallaba con ENOENT, dejando en rojo «lint · test · build» de la PR 57. Ahora valida las marcas incluidas en libs/motion-graphics/assets/brands y suma las de brands/ solo si la carpeta existe.",
+      "justification": "CI de la PR 57 en rojo desde 4576442c por ese test.",
+      "related_modules": [
+        "plugin-references"
+      ],
+      "affected_files": [
+        "tools/plugin-references/src/brands.spec.ts"
+      ],
+      "test_reference": "tools/plugin-references/src/brands.spec.ts",
+      "status": "implemented",
+      "cycle": null,
+      "usage": {
+        "provider_model": "claude/opus",
+        "effort": "low",
+        "tokens_in": 15000,
+        "tokens_out": 2000,
+        "approx": true,
+        "source": "declared-estimate",
+        "recorded_at": "2026-11-16",
+        "by_agent": [
+          {
+            "provider_model": "claude/opus",
+            "effort": "low",
+            "tokens_in": 15000,
+            "tokens_out": 2000,
+            "approx": true,
+            "source": "declared-estimate",
+            "recorded_at": "2026-11-16",
+            "agent": "implementor-back"
+          }
+        ]
+      }
     }
   ]
 }
