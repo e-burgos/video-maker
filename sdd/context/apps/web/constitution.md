@@ -1,6 +1,6 @@
 # Constitución — apps/web
 
-> Versión 3.5 | Última actualización: consolidación de fragmentos | Fecha: 2026-11-13
+> Versión 3.6 | Última actualización: consolidación de spec-025 cycle-06 | Fecha: 2026-11-25
 
 ## 1. Propósito
 
@@ -489,3 +489,21 @@ Todos bajo `src/` de la app; copy `es`/`en` en `src/i18n/`; el contrato de cada 
 - `components/guide/`: índice pegajoso con sección activa (IntersectionObserver) y pasos en tarjetas.
 - `components/ui/status-states.tsx`: `LoadingState` y `EmptyState`.
 - Borrados: `ui/badge`, `ui/card`, `ui/tabs`, `ui/button`, `PUBLICATION_STATUS_TONE`; `index.css` sin tokens `--color-*` heredados. `--tucu-state-red-ink` en claro es `#a8231b` (AA).
+
+## 7. Estado tras spec-025 cycle-06 y fixes posteriores
+
+- Paridad con la web pública: `/learn` (Guía, Cómo funciona, Tutorial desde R2, Preguntas frecuentes, Galería; `/guide`
+  redirige), `/about` (Versión con «Buscar actualizaciones», Requisitos, Licencias e inventario, Código abierto,
+  Privacidad), pestaña `agents` en ajustes y búsqueda de material libre en la biblioteca. Sidebar SISTEMA: Configuración,
+  Aprender, Acerca de.
+- `content/{learn,about,agents}/`: contenido es/en como datos tipados. `content/about/tech-inventory.ts` se genera desde
+  `apps/docs-site/src/tech-inventory.mjs` y `tech-inventory-alignment.spec.ts` lo compara (`@vitest-environment node`).
+- `components/learn/` (visor `image-lightbox`), `components/about/` (`requirements-model`, `update-check-model`),
+  `components/agents/` (bloques copiables), `components/library/free-media/` (imágenes, video y música libres; rol fijado
+  por tipo). `components/shell/capability-rows.ts` muestra los motores del productor y enlaza a `/about?tab=requirements`.
+- Cliente: `getAppUpdate`, `searchFreeMedia`, `importFreeMedia`, `searchFreeMusic`, `importFreeMusic`,
+  `orderCategoriesByPlaylists`. `--tucu-state-green-ink` en claro es `#085a1e` (AA).
+- Mis videos (FIX-092/095): cada categoría se ordena por `placement.position` (empates en el orden de llegada);
+  «Ordenar como en YouTube» en Configuración › YouTube. La × de una categoría abre `DeleteCategoryModal`; el nombre hace
+  scroll a su sección (`categoryAnchorId`). `useReloadWhenVisible` relee videos y organización al volver a la ventana y
+  cada 20 s, porque la app de escritorio y el studio web comparten la base.
