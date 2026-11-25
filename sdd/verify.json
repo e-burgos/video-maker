@@ -1,0 +1,103 @@
+{
+  "$schema": "./schemas/verify.schema.json",
+  "_description": "Comandos de verificación quick (por task) y full (por bloque) de cada subproyecto, que corre pnpm sdd:verify; es dato del proyecto y el update del kit nunca lo pisa.",
+  "apps/web": {
+    "quick": [
+      "pnpm nx run-many -t lint test -p web"
+    ],
+    "full": [
+      "pnpm nx run-many -t lint test build -p web"
+    ],
+    "full_exclusive": true
+  },
+  "apps/render-api": {
+    "quick": [
+      "pnpm nx run-many -t lint test -p render-api"
+    ],
+    "full": [
+      "pnpm nx run-many -t lint test build -p render-api"
+    ],
+    "full_exclusive": true
+  },
+  "apps/desktop": {
+    "quick": [
+      "pnpm nx run-many -t lint test -p desktop"
+    ],
+    "full": [
+      "pnpm nx run-many -t lint test build -p desktop"
+    ],
+    "full_exclusive": true
+  },
+  "apps/docs-site": {
+    "quick": [
+      "pnpm nx run-many -t lint test -p docs-site"
+    ],
+    "full": [
+      "pnpm nx run-many -t lint test build -p docs-site"
+    ],
+    "full_exclusive": true
+  },
+  "libs/shared-utils": {
+    "quick": [
+      "pnpm nx run-many -t lint test -p shared-utils"
+    ],
+    "full": [
+      "pnpm nx run-many -t lint test build -p shared-utils"
+    ],
+    "full_exclusive": true
+  },
+  "libs/timeline-core": {
+    "quick": [
+      "pnpm nx run-many -t lint test -p timeline-core"
+    ],
+    "full": [
+      "pnpm nx run-many -t lint test build -p timeline-core"
+    ],
+    "full_exclusive": true
+  },
+  "libs/media-local": {
+    "quick": [
+      "pnpm nx run-many -t lint test -p media-local"
+    ],
+    "full": [
+      "pnpm nx run-many -t lint test build -p media-local"
+    ],
+    "full_exclusive": true
+  },
+  "libs/composition-remotion": {
+    "quick": [
+      "pnpm nx run-many -t lint test -p composition-remotion"
+    ],
+    "full": [
+      "pnpm nx run-many -t lint test build -p composition-remotion"
+    ],
+    "full_exclusive": true
+  },
+  "libs/auto-montage": {
+    "quick": [
+      "pnpm nx run-many -t lint test -p auto-montage"
+    ],
+    "full": [
+      "pnpm nx run-many -t lint test build -p auto-montage"
+    ],
+    "full_exclusive": true
+  },
+  "libs/producer-tools": {
+    "quick": [
+      "pnpm nx run-many -t lint test -p producer-tools"
+    ],
+    "full": [
+      "pnpm nx run-many -t lint test build -p producer-tools"
+    ],
+    "full_exclusive": true
+  },
+  "libs/local-store": {
+    "quick": [
+      "pnpm nx run-many -t lint test -p local-store"
+    ],
+    "full": [
+      "pnpm nx run-many -t lint test build -p local-store"
+    ],
+    "full_exclusive": true
+  }
+}

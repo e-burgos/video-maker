@@ -65,6 +65,10 @@
       "file": "SKILL.md"
     },
     {
+      "dir": "nx-migration",
+      "file": "SKILL.md"
+    },
+    {
       "dir": "scaffold-nx",
       "file": "SKILL.md"
     },
@@ -171,6 +175,9 @@
       "file": "global.schema.json"
     },
     {
+      "file": "packs.schema.json"
+    },
+    {
       "file": "pricing.schema.json"
     },
     {
@@ -187,6 +194,9 @@
     },
     {
       "file": "tools.schema.json"
+    },
+    {
+      "file": "verify.schema.json"
     }
   ],
   "memory": [

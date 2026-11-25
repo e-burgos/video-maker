@@ -1,6 +1,6 @@
 # Constitución — libs/motion-graphics
 
-> Versión 1.1 | Última actualización: consolidación de fragmentos | Fecha: 2026-10-13
+> Versión 1.2 | Última actualización: consolidación de FIX-030 y FIX-031 | Fecha: 2026-11-25
 
 ## 1. Propósito
 
@@ -63,6 +63,10 @@ TypeScript estricto, `zod` 4 (contratos), Vitest 4. Runtime de navegador en `ass
   rechaza dos composiciones raíz).
 - **Dirección y música**: `scenes[].direction` se aplica en el paso voice (re-síntesis si cambia) y el storyboard
   automático la propone; `music.mode`/`floorDb` con `timeline/build-segmented-automation.ts` (`buildSegmentedAutomation`).
+  Niveles (`timeline/music-levels.ts`, puerto `measureLoudness`): música sola a −27 LUFS y, bajo la voz, 18 dB por
+  debajo del nivel medido de las voces; el ducking nunca sube dentro de una voz. En la revelación de marca la voz
+  arranca 0,8 s después del golpe (`voLeadIn` por escena) y el impacto se atenúa (`compose/impact-sfx.ts`).
+- **Marca incluida Display Ads**: voz Malena (`elevenlabs:p7AwDmKvTdoHTBuueGvP`, `lengthScale` 1).
 - **Escena `ui-walkthrough`**: captura de UI en marco browser/phone/none con hasta 8 pasos (move, click, type,
   highlight, callout, zoom) en coordenadas 0–1 sobre la imagen, anclados a cues de la voz o a `at`; pasos con
   `box: <nombre>` resueltos desde `props.boxes`; `minSec` por escena con o sin golpes. Overlays por porcentaje sobre el
